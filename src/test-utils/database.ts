@@ -1,7 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 
-// Create a test instance of Prisma Client
-export const testPrisma = new PrismaClient();
+// Create a test instance of Prisma Client with test database
+export const testPrisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL || 'file:./test.db',
+    },
+  },
+});
 
 // Test database utilities
 export const setupTestDatabase = async () => {
@@ -22,10 +28,14 @@ export const setupTestDatabase = async () => {
 
 export const cleanupTestDatabase = async () => {
   try {
-    // Clean up all data
-    await testPrisma.analysis.deleteMany();
-    await testPrisma.chatMessage.deleteMany();
+    // Clean up all data in correct order (respect foreign key constraints)
+    await testPrisma.aIInteraction.deleteMany();
+    await testPrisma.argument.deleteMany();
+    await testPrisma.legalReference.deleteMany();
+    await testPrisma.debateRound.deleteMany();
+    await testPrisma.debate.deleteMany();
     await testPrisma.document.deleteMany();
+    await testPrisma.case.deleteMany();
     await testPrisma.session.deleteMany();
     await testPrisma.account.deleteMany();
     await testPrisma.user.deleteMany();
@@ -52,10 +62,35 @@ export const globalTeardown = async () => {
 // Individual test database reset
 export const resetDatabase = async () => {
   // Delete all data in correct order (respect foreign key constraints)
-  await testPrisma.analysis.deleteMany();
-  await testPrisma.chatMessage.deleteMany();
+  await testPrisma.aIInteraction.deleteMany();
+  await testPrisma.argument.deleteMany();
+  await testPrisma.legalReference.deleteMany();
+  await testPrisma.debateRound.deleteMany();
+  await testPrisma.debate.deleteMany();
   await testPrisma.document.deleteMany();
+  await testPrisma.case.deleteMany();
   await testPrisma.session.deleteMany();
   await testPrisma.account.deleteMany();
   await testPrisma.user.deleteMany();
+};
+
+// Test database isolation utilities
+export const createTestDatabase = async () => {
+  // For SQLite, ensure we have a fresh test database
+  const testDbPath = './test.db';
+  try {
+    // Remove existing test database file if it exists
+    const fs = await import('fs/promises');
+    try {
+      await fs.unlink(testDbPath);
+    } catch (error) {
+      // File doesn't exist, that's fine
+    }
+    
+    await setupTestDatabase();
+    console.log('Fresh test database created');
+  } catch (error) {
+    console.error('Failed to create test database:', error);
+    throw error;
+  }
 };
