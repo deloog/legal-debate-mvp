@@ -1,0 +1,369 @@
+// Prisma Schema for Legal Debate MVP
+// 基于AI评审意见重构的完整数据模型
+// 版本: v2.0
+// 更新时间: 2024-12-18
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// 用户和认证模型
+// =============================================================================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String?
+  name      String?
+  role      UserRole @default(USER)
+  
+  // 权限和组织
+  permissions Json?    // JSONB: 灵活的权限配置
+  organizationId String?
+  
+  // 系统字段
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime? // 软删除
+  
+  // Relations
+  accounts    Account[]
+  sessions    Session[]
+  cases       Case[]
+  documents   Document[]
+  debates     Debate[]
+  
+  @@map("users")
+  @@index([email])
+  @@index([organizationId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// =============================================================================
+// 案件管理模型
+// =============================================================================
+
+model Case {
+  id          String     @id @default(cuid())
+  userId      String
+  
+  // 基础信息
+  title       String
+  description String     @db.Text
+  type        CaseType
+  status      CaseStatus @default(DRAFT)
+  
+  // 扩展字段 (JSONB)
+  metadata    Json?      // 存储灵活业务数据：当事人、案由、标的额等
+  
+  // 系统字段
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?  // 软删除
+  
+  // Relations
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents      Document[]
+  debates        Debate[]
+  legalReferences LegalReference[]
+  
+  @@map("cases")
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// =============================================================================
+// 文档管理模型
+// =============================================================================
+
+model Document {
+  id          String         @id @default(cuid())
+  caseId      String
+  userId      String
+  
+  // 文档信息
+  filename    String
+  filePath    String         // 文件存储路径
+  fileType    String         // PDF, DOCX, etc.
+  fileSize    Int
+  mimeType    String
+  
+  // 解析结果 (JSONB)
+  extractedData Json?        // 提取的结构化数据
+  analysisStatus AnalysisStatus @default(PENDING)
+  analysisResult Json?        // AI解析结果
+  analysisError  String?
+  
+  // 系统字段
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  deletedAt   DateTime?      // 软删除
+  
+  // Relations
+  case Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("documents")
+  @@index([caseId])
+  @@index([userId])
+  @@index([analysisStatus])
+}
+
+// =============================================================================
+// 辩论系统模型 (核心特色功能)
+// =============================================================================
+
+model Debate {
+  id          String       @id @default(cuid())
+  caseId      String
+  userId      String
+  
+  // 辩论信息
+  title       String
+  status      DebateStatus @default(DRAFT)
+  currentRound Int         @default(0)
+  
+  // 配置信息 (JSONB)
+  debateConfig Json?       // 辩论模式、参数、AI配置等
+  
+  // 系统字段
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?    // 软删除
+  
+  // Relations
+  case  Case  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rounds DebateRound[]
+  
+  @@map("debates")
+  @@index([caseId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model DebateRound {
+  id          String           @id @default(cuid())
+  debateId    String
+  
+  // 轮次信息
+  roundNumber Int
+  status      RoundStatus      @default(PENDING)
+  
+  // 时间记录
+  startedAt   DateTime?
+  completedAt DateTime?
+  
+  // 系统字段
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  
+  // Relations
+  debate    Debate     @relation(fields: [debateId], references: [id], onDelete: Cascade)
+  arguments Argument[]
+  
+  @@unique([debateId, roundNumber])
+  @@map("debate_rounds")
+  @@index([debateId])
+  @@index([status])
+}
+
+model Argument {
+  id          String         @id @default(cuid())
+  roundId     String
+  
+  // 论点信息
+  side        ArgumentSide   // PLAINTIFF (原告) or DEFENDANT (被告)
+  content     String         @db.Text
+  type        ArgumentType   @default(MAIN_POINT)
+  
+  // AI信息
+  aiProvider  String?        // zhipu, deepseek, etc.
+  generationTime Int?        // 生成耗时(ms)
+  confidence  Float?         // AI置信度
+  
+  // 系统字段
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  
+  // Relations
+  round DebateRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  
+  @@map("arguments")
+  @@index([roundId])
+  @@index([side])
+}
+
+// =============================================================================
+// 法律依据模型
+// =============================================================================
+
+model LegalReference {
+  id          String   @id @default(cuid())
+  caseId      String?
+  
+  // 法条信息
+  source      String   // 法律名称
+  content     String   @db.Text
+  lawType     String?  // 民法、刑法等
+  articleNumber String? // 条款号
+  
+  // 检索信息
+  retrievalQuery String? // 检索关键词
+  relevanceScore Float?  // 相关性评分
+  
+  // 元数据 (JSONB)
+  metadata    Json?    // 额外信息：生效日期、修订版本等
+  
+  // 系统字段
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  case Case? @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  
+  @@map("legal_references")
+  @@index([caseId])
+  @@index([lawType])
+  @@index([relevanceScore])
+}
+
+// =============================================================================
+// AI交互记录模型
+// =============================================================================
+
+model AIInteraction {
+  id          String   @id @default(cuid())
+  
+  // 交互信息
+  type        String   // document_analysis, debate_generation, legal_search, etc.
+  provider    String   // zhipu, deepseek, lawstar, etc.
+  model       String?  // 具体模型名称
+  
+  // 请求和响应
+  request     Json     // 请求数据
+  response    Json?    // AI响应
+  
+  // 性能指标
+  tokensUsed  Int?
+  duration    Int?     // 响应时间(ms)
+  cost        Float?   // 成本(元)
+  
+  // 状态
+  success     Boolean
+  error       String?
+  
+  // 系统字段
+  createdAt   DateTime @default(now())
+  
+  @@map("ai_interactions")
+  @@index([type])
+  @@index([provider])
+  @@index([success])
+  @@index([createdAt])
+}
+
+// =============================================================================
+// 枚举类型定义
+// =============================================================================
+
+enum UserRole {
+  USER          // 普通用户
+  LAWYER        // 律师
+  ADMIN         // 管理员
+  SUPER_ADMIN   // 超级管理员
+}
+
+enum CaseType {
+  CIVIL         // 民事
+  CRIMINAL      // 刑事
+  ADMINISTRATIVE // 行政
+  COMMERCIAL    // 商事
+  LABOR         // 劳动
+  INTELLECTUAL  // 知识产权
+  OTHER         // 其他
+}
+
+enum CaseStatus {
+  DRAFT         // 草稿
+  ACTIVE        // 进行中
+  COMPLETED     // 已完成
+  ARCHIVED      // 已归档
+  DELETED       // 已删除
+}
+
+enum AnalysisStatus {
+  PENDING       // 待处理
+  PROCESSING    // 处理中
+  COMPLETED     // 已完成
+  FAILED        // 失败
+}
+
+enum DebateStatus {
+  DRAFT         // 草稿
+  IN_PROGRESS   // 进行中
+  PAUSED        // 暂停
+  COMPLETED     // 已完成
+  ARCHIVED      // 已归档
+}
+
+enum RoundStatus {
+  PENDING       // 待开始
+  IN_PROGRESS   // 进行中
+  COMPLETED     // 已完成
+  FAILED        // 失败
+}
+
+enum ArgumentSide {
+  PLAINTIFF     // 原告方
+  DEFENDANT     // 被告方
+  NEUTRAL       // 中立观点
+}
+
+enum ArgumentType {
+  MAIN_POINT    // 主要论点
+  SUPPORTING    // 支持论据
+  REBUTTAL      // 反驳论点
+  EVIDENCE      // 证据引用
+  LEGAL_BASIS   // 法律依据
+  CONCLUSION    // 结论
+}

@@ -1,0 +1,285 @@
+#!/usr/bin/env node
+
+/**
+ * 代码风格检查脚本
+ * 检查代码是否符合.clinerules中定义的代码风格要求
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+// 配置选项
+const config = {
+  targetDirectories: ['src', 'scripts'],
+  fileExtensions: ['.ts', '.tsx', '.js', '.jsx'],
+  excludePatterns: ['node_modules', '.next', 'dist', 'build'],
+  rules: {
+    checkDefaultExports: true,
+    checkNamingConventions: true,
+    checkHardcodedValues: true,
+    checkFileLength: true,
+    maxFileLines: 200
+  }
+};
+
+/**
+ * 检查文件是否使用默认导出
+ */
+function checkDefaultExports(filePath, content) {
+  // 跳过Next.js页面组件（app目录）
+  if (filePath.includes('src/app/')) {
+    return { passed: true, message: 'Next.js页面组件允许使用默认导出' };
+  }
+  
+  const defaultExportRegex = /export\s+default\s+(function|class|const|let|var|async\s+function)/g;
+  const matches = content.match(defaultExportRegex);
+  
+  if (matches && matches.length > 0) {
+    return { 
+      passed: false, 
+      message: `发现默认导出: ${matches.join(', ')}` 
+    };
+  }
+  
+  return { passed: true, message: '未发现不当的默认导出' };
+}
+
+/**
+ * 检查命名约定
+ */
+function checkNamingConventions(filePath, content) {
+  const issues = [];
+  
+  // 检查匿名函数
+  const anonymousFunctionRegex = /export\s+(const|let|var)\s+\w+\s*=\s*(function|async\s+function)\s*\(/g;
+  const anonymousMatches = content.match(anonymousFunctionRegex);
+  
+  if (anonymousMatches) {
+    issues.push('发现匿名函数导出，建议使用命名函数');
+  }
+  
+  // 检查命名约定
+  const camelCaseRegex = /(?:const|let|var)\s+([a-z][a-zA-Z0-9]*)\s*=/;
+  const snakeCaseVars = [];
+  let match;
+  while ((match = camelCaseRegex.exec(content)) !== null) {
+    if (match[1].includes('_') && match[1] !== match[1].toUpperCase()) {
+      snakeCaseVars.push(match[1]);
+    }
+  }
+  
+  if (snakeCaseVars.length > 0) {
+    issues.push(`发现snake_case变量名，建议使用camelCase: ${snakeCaseVars.slice(0, 3).join(', ')}`);
+  }
+  
+  return {
+    passed: issues.length === 0,
+    message: issues.length === 0 ? '命名约定检查通过' : issues.join('; ')
+  };
+}
+
+/**
+ * 检查硬编码值
+ */
+function checkHardcodedValues(filePath, content) {
+  const issues = [];
+  
+  // 检查硬编码的密码、token等
+  const sensitivePatterns = [
+    /password\s*[:=]\s*['"]\w+['"]/gi,
+    /secret\s*[:=]\s*['"]\w+['"]/gi,
+    /token\s*[:=]\s*['"]\w+['"]/gi,
+    /api_key\s*[:=]\s*['"]\w+['"]/gi
+  ];
+  
+  for (const pattern of sensitivePatterns) {
+    const matches = content.match(pattern);
+    if (matches) {
+      issues.push(`发现可能的硬编码敏感信息: ${matches[0]}`);
+    }
+  }
+  
+  // 检查硬编码的URL
+  const urlPattern = /https?:\/\/[^\s'"]+/gi;
+  const urls = content.match(urlPattern);
+  if (urls && urls.length > 0) {
+    // 排除一些常见的开发URL
+    const allowedUrls = ['localhost', '127.0.0.1', 'example.com'];
+    const suspiciousUrls = urls.filter(url => !allowedUrls.some(allowed => url.includes(allowed)));
+    
+    if (suspiciousUrls.length > 0) {
+      issues.push(`发现硬编码URL，建议使用环境变量: ${suspiciousUrls.slice(0, 2).join(', ')}`);
+    }
+  }
+  
+  return {
+    passed: issues.length === 0,
+    message: issues.length === 0 ? '未发现硬编码敏感值' : issues.join('; ')
+  };
+}
+
+/**
+ * 检查文件长度
+ */
+function checkFileLength(filePath, content) {
+  const lines = content.split('\n').length;
+  
+  if (lines > config.rules.maxFileLines) {
+    return {
+      passed: false,
+      message: `文件过长 (${lines}行)，超过限制 (${config.rules.maxFileLines}行)，建议拆分`
+    };
+  }
+  
+  return {
+    passed: true,
+    message: `文件长度检查通过 (${lines}行)`
+  };
+}
+
+/**
+ * 检查单个文件
+ */
+function checkFile(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    const results = [];
+    
+    if (config.rules.checkDefaultExports) {
+      results.push(checkDefaultExports(filePath, content));
+    }
+    
+    if (config.rules.checkNamingConventions) {
+      results.push(checkNamingConventions(filePath, content));
+    }
+    
+    if (config.rules.checkHardcodedValues) {
+      results.push(checkHardcodedValues(filePath, content));
+    }
+    
+    if (config.rules.checkFileLength) {
+      results.push(checkFileLength(filePath, content));
+    }
+    
+    const failed = results.filter(r => !r.passed);
+    
+    return {
+      file: filePath,
+      passed: failed.length === 0,
+      results: results
+    };
+    
+  } catch (error) {
+    return {
+      file: filePath,
+      passed: false,
+      error: error.message
+    };
+  }
+}
+
+/**
+ * 递归获取所有目标文件
+ */
+function getAllFiles(dir) {
+  const files = [];
+  
+  function traverse(currentDir) {
+    const items = fs.readdirSync(currentDir);
+    
+    for (const item of items) {
+      const fullPath = path.join(currentDir, item);
+      const stat = fs.statSync(fullPath);
+      
+      if (stat.isDirectory()) {
+        // 跳过排除的目录
+        if (!config.excludePatterns.some(pattern => item.includes(pattern))) {
+          traverse(fullPath);
+        }
+      } else {
+        // 检查文件扩展名
+        const ext = path.extname(item);
+        if (config.fileExtensions.includes(ext)) {
+          files.push(fullPath);
+        }
+      }
+    }
+  }
+  
+  traverse(dir);
+  return files;
+}
+
+/**
+ * 主函数
+ */
+function main() {
+  console.log('🔍 开始代码风格检查...\n');
+  
+  const allFiles = [];
+  for (const dir of config.targetDirectories) {
+    if (fs.existsSync(dir)) {
+      allFiles.push(...getAllFiles(dir));
+    }
+  }
+  
+  if (allFiles.length === 0) {
+    console.log('⚠️  未找到需要检查的文件');
+    process.exit(0);
+  }
+  
+  console.log(`📁 找到 ${allFiles.length} 个文件需要检查\n`);
+  
+  const results = [];
+  let passedCount = 0;
+  let checkedCount = 0;
+  
+  // 简化检查：只检查关键规则，提高速度
+  console.log('🚀 开始快速检查（仅检查关键问题）...\n');
+  
+  for (const file of allFiles) {
+    checkedCount++;
+    
+    // 显示进度
+    if (checkedCount % 5 === 0 || checkedCount === allFiles.length) {
+      console.log(`⏳ 进度: ${checkedCount}/${allFiles.length} (${Math.round(checkedCount/allFiles.length*100)}%)`);
+    }
+    
+    const result = checkFile(file);
+    results.push(result);
+    
+    if (result.passed) {
+      passedCount++;
+    } else {
+      // 只显示有问题的文件，减少输出
+      console.log(`❌ ${file}`);
+      if (result.error) {
+        console.log(`   错误: ${result.error}`);
+      } else {
+        for (const checkResult of result.results) {
+          if (!checkResult.passed) {
+            console.log(`   ⚠️  ${checkResult.message}`);
+          }
+        }
+      }
+    }
+  }
+  
+  console.log(`\n📊 检查完成: ${passedCount}/${allFiles.length} 个文件通过`);
+  
+  if (passedCount === allFiles.length) {
+    console.log('🎉 所有文件都符合代码风格要求！');
+    process.exit(0);
+  } else {
+    console.log('💡 请修复上述问题后重新运行检查');
+    console.log('💡 使用 npm run code-style:fix 自动修复格式问题');
+    process.exit(1);
+  }
+}
+
+// 如果直接运行此脚本
+if (require.main === module) {
+  main();
+}
+
+module.exports = { checkFile, getAllFiles, config };
