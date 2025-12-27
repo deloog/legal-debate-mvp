@@ -1,8 +1,8 @@
-import { render, RenderOptions } from '@testing-library/react';
-import { ReactElement, ReactNode } from 'react';
+import { render, RenderOptions } from "@testing-library/react";
+import { ReactElement, ReactNode } from "react";
 
 // Custom render function with providers
-interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
+interface CustomRenderOptions extends Omit<RenderOptions, "wrapper"> {
   withProviders?: boolean;
 }
 
@@ -13,16 +13,16 @@ const AllTheProviders = ({ children }: { children: ReactNode }) => {
 
 const customRender = (
   ui: ReactElement,
-  { ...renderOptions }: CustomRenderOptions = {}
+  { ...renderOptions }: CustomRenderOptions = {},
 ) => {
   return render(<AllTheProviders>{ui}</AllTheProviders>, renderOptions);
 };
 
 // Re-export everything from testing-library/react
-export * from '@testing-library/react';
+export * from "@testing-library/react";
 
 // Override render method
 export { customRender as render };
 
 // Export user event for interactions
-export { userEvent } from '@testing-library/user-event';
+export { userEvent } from "@testing-library/user-event";

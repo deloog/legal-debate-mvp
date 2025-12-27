@@ -41,10 +41,10 @@ src/test-utils/
 Use the factory functions to create mock data:
 
 ```typescript
-import { createUser, createDocument, createAnalysis } from '@/test-utils';
+import { createUser, createDocument, createAnalysis } from "@/test-utils";
 
-const user = createUser({ email: 'custom@example.com' });
-const document = createDocument({ title: 'Custom Document' });
+const user = createUser({ email: "custom@example.com" });
+const document = createDocument({ title: "Custom Document" });
 const analysis = createAnalysis({ type: AnalysisType.LEGAL_STRUCTURE });
 ```
 
@@ -64,7 +64,11 @@ expect(screen.getByText('Hello')).toBeInTheDocument();
 Test database utilities are available but currently use local type definitions:
 
 ```typescript
-import { setupTestDatabase, cleanupTestDatabase, testPrisma } from '@/test-utils';
+import {
+  setupTestDatabase,
+  cleanupTestDatabase,
+  testPrisma,
+} from "@/test-utils";
 
 // Setup before tests
 beforeAll(async () => {
@@ -82,18 +86,18 @@ afterAll(async () => {
 Additional helper functions:
 
 ```typescript
-import { 
-  waitFor, 
-  createMockResponse, 
+import {
+  waitFor,
+  createMockResponse,
   createMockErrorResponse,
-  createMockLocalStorage 
-} from '@/test-utils';
+  createMockLocalStorage,
+} from "@/test-utils";
 
 // Wait for async operations
 await waitFor(1000);
 
 // Create mock API responses
-const mockResponse = createMockResponse({ data: 'success' });
+const mockResponse = createMockResponse({ data: "success" });
 
 // Mock browser storage
 const mockStorage = createMockLocalStorage();
@@ -108,6 +112,7 @@ Coverage reports are generated in the `coverage/` directory:
 - Text Summary: Console output
 
 Coverage thresholds are set to 70% for:
+
 - Statements
 - Branches
 - Functions
@@ -135,21 +140,25 @@ DATABASE_URL_TEST="file:./test.db"
 ## 🚀 Running Tests
 
 ### All Tests
+
 ```bash
 npm run test:all
 ```
 
 ### Unit Tests Only
+
 ```bash
 npm run test
 ```
 
 ### E2E Tests Only
+
 ```bash
 npm run test:e2e
 ```
 
 ### Coverage Report
+
 ```bash
 npm run test:coverage
 ```
@@ -157,12 +166,14 @@ npm run test:coverage
 ## 🐛 Debugging
 
 ### Jest Debugging
+
 ```bash
 # Run tests in debug mode
 node --inspect-brk node_modules/.bin/jest --runInBand
 ```
 
 ### Playwright Debugging
+
 ```bash
 # Run with UI and debug mode
 npm run test:e2e:debug

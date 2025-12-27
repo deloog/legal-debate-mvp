@@ -11,6 +11,7 @@
 **文件位置**: `src/lib/db/prisma.ts`
 
 **功能特性**:
+
 - 单例模式的Prisma客户端
 - 开发环境日志配置
 - 数据库连接健康检查
@@ -19,8 +20,9 @@
 - 支持SQLite和PostgreSQL
 
 **使用方法**:
+
 ```typescript
-import { prisma, checkDatabaseConnection } from '@/lib/db/prisma';
+import { prisma, checkDatabaseConnection } from "@/lib/db/prisma";
 
 // 使用客户端
 const users = await prisma.user.findMany();
@@ -31,18 +33,21 @@ const isHealthy = await checkDatabaseConnection();
 
 ### 2. 数据库迁移脚本 ✅
 
-**文件位置**: 
+**文件位置**:
+
 - Schema: `prisma/schema.prisma`
 - 配置: `prisma.config.ts`
 - 种子数据: `prisma/seed.ts`
 
 **功能特性**:
+
 - 支持PostgreSQL和SQLite
 - 自动迁移管理
 - 种子数据创建
 - 环境特定配置
 
 **使用方法**:
+
 ```bash
 # 生成客户端
 npm run db:generate
@@ -65,12 +70,14 @@ npm run db:studio
 **文件位置**: `prisma/seed.ts`
 
 **包含数据**:
+
 - 测试用户 (test@example.com, admin@example.com)
 - 示例文档和分析
 - 聊天记录和AI交互
 - OAuth账户和会话示例
 
 **使用方法**:
+
 ```bash
 # 运行种子数据
 npm run db:seed
@@ -81,6 +88,7 @@ npm run db:seed
 **文件位置**: `src/lib/db/connection-pool.ts`
 
 **功能特性**:
+
 - 连接池配置管理
 - 实时连接监控
 - 连接池预热
@@ -88,19 +96,21 @@ npm run db:seed
 - 健康检查和警告
 
 **配置参数**:
+
 ```env
 DATABASE_POOL_MIN=2      # 最小连接数
 DATABASE_POOL_MAX=10     # 最大连接数
 ```
 
 **使用方法**:
+
 ```typescript
-import { 
-  getPoolStats, 
-  checkPoolHealth, 
-  warmupConnectionPool, 
-  poolMonitor 
-} from '@/lib/db/connection-pool';
+import {
+  getPoolStats,
+  checkPoolHealth,
+  warmupConnectionPool,
+  poolMonitor,
+} from "@/lib/db/connection-pool";
 
 // 获取连接池统计
 const stats = await getPoolStats();
@@ -117,6 +127,7 @@ poolMonitor.start();
 **文件位置**: `scripts/backup-database.ts`
 
 **功能特性**:
+
 - 自动备份创建
 - 备份验证
 - 过期备份清理
@@ -124,6 +135,7 @@ poolMonitor.start();
 - 备份历史管理
 
 **配置参数**:
+
 ```env
 BACKUP_DIR=./backups                    # 备份目录
 BACKUP_RETENTION_DAYS=7               # 保留天数
@@ -131,6 +143,7 @@ BACKUP_COMPRESSION_ENABLED=true         # 启用压缩
 ```
 
 **使用方法**:
+
 ```bash
 # 手动备份
 npm run db:backup
@@ -194,15 +207,15 @@ npm run db:seed
 
 ```typescript
 // 在应用启动时
-import { poolMonitor } from '@/lib/db/connection-pool';
+import { poolMonitor } from "@/lib/db/connection-pool";
 
 // 启动监控（开发环境）
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   poolMonitor.start();
 }
 
 // 在应用关闭时
-process.on('SIGINT', async () => {
+process.on("SIGINT", async () => {
   poolMonitor.stop();
   await gracefulShutdown();
 });
@@ -220,17 +233,17 @@ process.on('SIGINT', async () => {
 ### 健康检查
 
 ```typescript
-import { checkDatabaseConnection, checkPoolHealth } from '@/lib/db/prisma';
-import { checkPoolHealth } from '@/lib/db/connection-pool';
+import { checkDatabaseConnection, checkPoolHealth } from "@/lib/db/prisma";
+import { checkPoolHealth } from "@/lib/db/connection-pool";
 
 // 定期健康检查
 setInterval(async () => {
   const dbHealthy = await checkDatabaseConnection();
   const poolHealthy = await checkPoolHealth();
-  
+
   if (!dbHealthy || !poolHealthy) {
     // 发送告警
-    console.error('数据库健康检查失败');
+    console.error("数据库健康检查失败");
   }
 }, 60000); // 每分钟检查一次
 ```
@@ -286,6 +299,7 @@ npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma
 ## 🔄 下一步
 
 数据库基础设施已完成，建议下一步：
+
 1. 设置Redis缓存基础设施
 2. 完善AI客户端类型定义
 3. 开始核心功能开发

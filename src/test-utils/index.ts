@@ -1,12 +1,12 @@
 // Re-export all test utilities
-export * from './setup';
-export * from './render';
-export * from './factories';
-export * from './database';
+export * from "./setup";
+export * from "./render";
+export * from "./factories";
+export * from "./database";
 
 // Common test utilities
 export const waitFor = (ms: number) =>
-  new Promise(resolve => setTimeout(resolve, ms));
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 export const createMockResponse = <T>(data: T) =>
   ({
@@ -27,7 +27,7 @@ export const createMockErrorResponse = (status: number, message: string) =>
 
 // Test helpers for async operations
 export const flushPromises = () =>
-  new Promise(resolve => setImmediate(resolve));
+  new Promise((resolve) => setImmediate(resolve));
 
 // Mock localStorage
 export const createMockLocalStorage = () => {

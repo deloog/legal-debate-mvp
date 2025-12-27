@@ -1,15 +1,14 @@
-import { ZhipuAI } from 'zhipuai';
-import DeepSeekAPI from 'deepseek-api';
+import OpenAI from "openai";
 
 // AI Models Configuration
 export const AI_MODELS = {
   ZHIPU: {
-    CHAT: 'glm-4',
-    EMBEDDING: 'text-embedding-ada-002',
+    CHAT: "glm-4.6",
+    EMBEDDING: "text-embedding-ada-002",
   },
   DEEPSEEK: {
-    CHAT: 'deepseek-chat',
-    CODING: 'deepseek-coder',
+    CHAT: "deepseek-chat",
+    CODING: "deepseek-coder",
   },
 } as const;
 
@@ -24,7 +23,7 @@ export interface AIConfig {
 
 // Message interface for AI chat
 export interface AIMessage {
-  role: 'system' | 'user' | 'assistant';
+  role: "system" | "user" | "assistant";
   content: string;
 }
 
@@ -42,14 +41,18 @@ export interface AIClient {
   healthCheck(): Promise<boolean>;
 }
 
-// Zhipu AI Client
+// Zhipu AI Client - 使用OpenAI兼容格式
 export class ZhipuClient implements AIClient {
-  private client: ZhipuAI;
+  private client: OpenAI;
   private config: AIConfig;
 
   constructor(config: AIConfig) {
     this.config = config;
-    this.client = new ZhipuAI({ apiKey: config.apiKey });
+    this.client = new OpenAI({
+      apiKey: config.apiKey,
+      baseURL: "https://open.bigmodel.cn/api/paas/v4/",
+      timeout: config.timeout || 30000,
+    });
   }
 
   async chat(messages: AIMessage[], options: ChatOptions = {}) {
@@ -62,9 +65,9 @@ export class ZhipuClient implements AIClient {
         ...options,
       });
 
-      return response.choices[0]?.message?.content || '';
+      return response.choices[0]?.message?.content || "";
     } catch (error) {
-      console.error('Zhipu AI Chat Error:', error);
+      console.error("Zhipu AI Chat Error:", error);
       throw new Error(`Zhipu AI chat failed: ${error}`);
     }
   }
@@ -78,7 +81,7 @@ export class ZhipuClient implements AIClient {
 
       return response.data[0]?.embedding || [];
     } catch (error) {
-      console.error('Zhipu AI Embedding Error:', error);
+      console.error("Zhipu AI Embedding Error:", error);
       throw new Error(`Zhipu AI embedding failed: ${error}`);
     }
   }
@@ -87,7 +90,7 @@ export class ZhipuClient implements AIClient {
     try {
       await this.client.chat.completions.create({
         model: this.config.model,
-        messages: [{ role: 'user', content: 'test' }],
+        messages: [{ role: "user", content: "test" }],
         max_tokens: 1,
       });
       return true;
@@ -97,14 +100,18 @@ export class ZhipuClient implements AIClient {
   }
 }
 
-// DeepSeek AI Client
+// DeepSeek AI Client - 使用OpenAI兼容格式
 export class DeepSeekClient implements AIClient {
-  private client: DeepSeekAPI;
+  private client: OpenAI;
   private config: AIConfig;
 
   constructor(config: AIConfig) {
     this.config = config;
-    this.client = new DeepSeekAPI({ apiKey: config.apiKey });
+    this.client = new OpenAI({
+      apiKey: config.apiKey,
+      baseURL: "https://api.deepseek.com/v1",
+      timeout: config.timeout || 30000,
+    });
   }
 
   async chat(messages: AIMessage[], options: ChatOptions = {}) {
@@ -117,23 +124,23 @@ export class DeepSeekClient implements AIClient {
         ...options,
       });
 
-      return response.choices[0]?.message?.content || '';
+      return response.choices[0]?.message?.content || "";
     } catch (error) {
-      console.error('DeepSeek AI Chat Error:', error);
+      console.error("DeepSeek AI Chat Error:", error);
       throw new Error(`DeepSeek AI chat failed: ${error}`);
     }
   }
 
   async embedding(): Promise<number[]> {
     // DeepSeek might not have embedding API, using placeholder
-    throw new Error('DeepSeek embedding not implemented');
+    throw new Error("DeepSeek embedding not implemented");
   }
 
   async healthCheck(): Promise<boolean> {
     try {
       await this.client.chat.completions.create({
         model: this.config.model,
-        messages: [{ role: 'user', content: 'test' }],
+        messages: [{ role: "user", content: "test" }],
         max_tokens: 1,
       });
       return true;
@@ -152,7 +159,7 @@ export class AIClientFactory {
     if (!this.zhipuClient) {
       const apiKey = process.env.ZHIPU_API_KEY;
       if (!apiKey) {
-        throw new Error('ZHIPU_API_KEY not configured');
+        throw new Error("ZHIPU_API_KEY not configured");
       }
 
       this.zhipuClient = new ZhipuClient({
@@ -171,26 +178,26 @@ export class AIClientFactory {
     if (!this.deepSeekClient) {
       const apiKey = process.env.DEEPSEEK_API_KEY;
       if (!apiKey) {
-        throw new Error('DEEPSEEK_API_KEY not configured');
+        throw new Error("DEEPSEEK_API_KEY not configured");
       }
 
       this.deepSeekClient = new DeepSeekClient({
         apiKey,
         model: AI_MODELS.DEEPSEEK.CHAT,
         temperature: 0.7,
-        maxTokens: 2000,
-        timeout: 30000,
+        maxTokens: 1500, // 减少token数量优化响应时间
+        timeout: 60000, // 增加超时时间
       });
     }
 
     return this.deepSeekClient;
   }
 
-  static getClient(provider: 'zhipu' | 'deepseek'): AIClient {
+  static getClient(provider: "zhipu" | "deepseek"): AIClient {
     switch (provider) {
-      case 'zhipu':
+      case "zhipu":
         return this.getZhipuClient();
-      case 'deepseek':
+      case "deepseek":
         return this.getDeepSeekClient();
       default:
         throw new Error(`Unknown AI provider: ${provider}`);
@@ -222,7 +229,7 @@ export class AIService {
   static async analyzeDocument(
     content: string,
     analysisType: string,
-    provider: 'zhipu' | 'deepseek' = 'zhipu'
+    provider: "zhipu" | "deepseek" = "zhipu",
   ): Promise<AIResponse> {
     const startTime = Date.now();
     const client = AIClientFactory.getClient(provider);
@@ -231,12 +238,12 @@ export class AIService {
       const prompt = this.getAnalysisPrompt(analysisType, content);
       const response = await client.chat([
         {
-          role: 'system',
+          role: "system",
           content:
-            '你是一个专业的法律文档分析助手，请提供准确、详细的分析结果。',
+            "你是一个专业的法律文档分析助手，请提供准确、详细的分析结果。",
         },
         {
-          role: 'user',
+          role: "user",
           content: prompt,
         },
       ]);
@@ -249,7 +256,7 @@ export class AIService {
       };
     } catch (error) {
       return {
-        content: '',
+        content: "",
         model: provider,
         duration: Date.now() - startTime,
         success: false,

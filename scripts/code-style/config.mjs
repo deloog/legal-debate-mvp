@@ -11,16 +11,16 @@ export const BATCH_SIZE = 10;
 
 // 配置选项
 export const config = {
-  targetDirectories: ['src', 'scripts'],
-  fileExtensions: ['.ts', '.tsx', '.js', '.jsx', '.mjs'],
-  excludePatterns: ['node_modules', '.next', 'dist', 'build'],
+  targetDirectories: ["src", "scripts"],
+  fileExtensions: [".ts", ".tsx", ".js", ".jsx", ".mjs"],
+  excludePatterns: ["node_modules", ".next", "dist", "build"],
   rules: {
     checkDefaultExports: true,
     checkNamingConventions: true,
     checkHardcodedValues: true,
     checkFileLength: true,
-    maxFileLines: MAX_FILE_LINES
-  }
+    maxFileLines: MAX_FILE_LINES,
+  },
 };
 
 /**
@@ -28,16 +28,16 @@ export const config = {
  */
 export function validateConfig() {
   if (MAX_FILE_LINES > 200) {
-    console.warn('⚠️  警告：MAX_FILE_LINES 超过了项目规范的200行限制');
+    console.warn("⚠️  警告：MAX_FILE_LINES 超过了项目规范的200行限制");
   }
-  
+
   if (config.targetDirectories.length === 0) {
-    throw new Error('至少需要指定一个目标目录');
+    throw new Error("至少需要指定一个目标目录");
   }
-  
+
   if (config.fileExtensions.length === 0) {
-    throw new Error('至少需要指定一个文件扩展名');
+    throw new Error("至少需要指定一个文件扩展名");
   }
-  
+
   return true;
 }

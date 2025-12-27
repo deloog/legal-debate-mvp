@@ -7,59 +7,67 @@
 ### 1. 代码格式化
 
 #### 字符串和引号
+
 - **使用单引号**：所有字符串字面量使用单引号 `'string'`
 - **JSX属性**：同样使用单引号 `<div className='container'>`
 - **例外**：JSON文件必须使用双引号
 
 #### 缩进
+
 - **使用2空格缩进**，不使用制表符
 - **不使用4空格**
 
 #### 行长度
+
 - **每行最大80字符**，超出时合理换行
 
 ### 2. 导出规范
 
 #### 避免默认导出
+
 ```typescript
 // ❌ 不推荐
-export default function UserService() { }
+export default function UserService() {}
 
 // ✅ 推荐
-export function UserService() { }
-export const userService = { };
+export function UserService() {}
+export const userService = {};
 ```
 
 #### 例外情况
+
 - **Next.js页面组件**：`src/app/` 目录下的页面组件可以使用默认导出
 - **React组件库**：某些特殊情况下可以使用默认导出
 
 ### 3. 命名约定
 
 #### 变量和函数
+
 ```typescript
 // ✅ 推荐：camelCase
-const userName = 'john';
-const getUserInfo = () => { };
+const userName = "john";
+const getUserInfo = () => {};
 const apiClient = axios.create();
 
 // ❌ 不推荐：snake_case
-const user_name = 'john';
-const get_user_info = () => { };
+const user_name = "john";
+const get_user_info = () => {};
 ```
 
 #### 常量
+
 ```typescript
 // ✅ 推荐：UPPER_SNAKE_CASE
-const API_BASE_URL = 'https://api.example.com';
+const API_BASE_URL = "https://api.example.com";
 const MAX_RETRY_COUNT = 3;
 
 // ❌ 不推荐
-const apiUrl = 'https://api.example.com';
+const apiUrl = "https://api.example.com";
 const maxRetryCount = 3;
 ```
 
 #### 文件名
+
 - **组件文件**：PascalCase (`UserProfile.tsx`)
 - **工具函数**：camelCase (`apiClient.ts`)
 - **常量文件**：camelCase (`config.ts`)
@@ -67,6 +75,7 @@ const maxRetryCount = 3;
 ### 4. 函数和类
 
 #### 使用命名函数
+
 ```typescript
 // ✅ 推荐
 export function calculateTotal(price: number, tax: number): number {
@@ -74,17 +83,18 @@ export function calculateTotal(price: number, tax: number): number {
 }
 
 // ❌ 不推荐：匿名函数导出
-export const calculateTotal = function(price: number, tax: number): number {
+export const calculateTotal = function (price: number, tax: number): number {
   return price + tax;
 };
 ```
 
 #### 类定义
+
 ```typescript
 // ✅ 推荐
 export class DatabaseService {
   private connection: Connection;
-  
+
   constructor(connection: Connection) {
     this.connection = connection;
   }
@@ -99,6 +109,7 @@ export default class {
 ### 5. 类型定义
 
 #### 优先使用TypeScript类型
+
 ```typescript
 // ✅ 推荐：TypeScript类型
 interface User {
@@ -123,32 +134,36 @@ function createUser(userData: User): User {
 ### 6. 安全性
 
 #### 避免硬编码敏感信息
+
 ```typescript
 // ✅ 推荐：使用环境变量
 const apiKey = process.env.API_KEY;
 const dbPassword = process.env.DB_PASSWORD;
 
 // ❌ 不推荐：硬编码
-const apiKey = 'hardcoded-api-key';
-const dbPassword = 'hardcoded-password';
+const apiKey = "hardcoded-api-key";
+const dbPassword = "hardcoded-password";
 ```
 
 #### URL和配置
+
 ```typescript
 // ✅ 推荐：配置文件或环境变量
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
 // ❌ 不推荐：硬编码生产URL
-const API_BASE_URL = 'https://production-api.example.com';
+const API_BASE_URL = "https://production-api.example.com";
 ```
 
 ### 7. 文件组织
 
 #### 文件长度限制
+
 - **最大200行**：单个文件不超过200行
 - **超长文件拆分**：超过200行的功能应拆分为多个模块
 
 #### 目录结构
+
 ```
 src/
 ├── app/           # Next.js页面（可使用默认导出）
@@ -162,17 +177,21 @@ src/
 ## 🔧 工具和配置
 
 ### 现有工具
+
 - **Prettier**：自动代码格式化（配置位于 `config/.prettierrc`）
 - **ESLint**：代码质量检查
 - **Husky + lint-staged**：预提交钩子
 
 ### 自定义检查脚本
+
 运行以下命令检查代码风格：
+
 ```bash
 npm run code-style:check
 ```
 
 修复代码风格问题：
+
 ```bash
 npm run code-style:fix
 ```
@@ -180,6 +199,7 @@ npm run code-style:fix
 ## 📝 AI开发指南
 
 ### 生成代码时的检查清单
+
 - [ ] 使用单引号而非双引号
 - [ ] 使用2空格缩进
 - [ ] 避免不必要的默认导出
@@ -190,6 +210,7 @@ npm run code-style:fix
 - [ ] 使用TypeScript类型定义
 
 ### 特殊情况处理
+
 1. **Next.js页面**：可以使用默认导出，但仍需遵循其他规范
 2. **配置文件**：JSON文件使用双引号，保持原有格式
 3. **第三方库集成**：遵循库的推荐用法，同时保持项目一致性
@@ -204,6 +225,7 @@ npm run code-style:fix
 ## 🔍 验证方法
 
 ### 自动化检查
+
 ```bash
 # 检查代码风格
 npm run code-style:check
@@ -218,6 +240,7 @@ npm run type-check
 ```
 
 ### 手动检查要点
+
 - 查看生成的代码是否使用单引号
 - 确认缩进是否为2空格
 - 检查是否有不必要的默认导出

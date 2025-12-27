@@ -1,6 +1,6 @@
 /**
  * 法律之星API类型定义
- * 
+ *
  * 提供两个核心服务：
  * 1. 法规查询接口（专业版）- 基于关键词的法条检索
  * 2. 向量库查询接口 - 基于语义的智能检索
@@ -235,7 +235,13 @@ export interface LawStarError {
   /** 错误消息 */
   message: string;
   /** 错误类型 */
-  type: 'authentication' | 'rate_limit' | 'network' | 'validation' | 'server' | 'unknown';
+  type:
+    | "authentication"
+    | "rate_limit"
+    | "network"
+    | "validation"
+    | "server"
+    | "unknown";
   /** 是否可重试 */
   retryable: boolean;
   /** 原始错误 */

@@ -1,6 +1,12 @@
-import { redis, getRedisInfo, checkRedisConnection } from './redis';
-import { CacheManager } from './manager';
-import { CacheStats, CacheHealth, CacheEventListener, CacheEvent, CacheNamespace } from './types';
+import { redis, getRedisInfo, checkRedisConnection } from "./redis";
+import { CacheManager } from "./manager";
+import {
+  CacheStats,
+  CacheHealth,
+  CacheEventListener,
+  CacheEvent,
+  CacheNamespace,
+} from "./types";
 
 // 缓存监控器类
 export class CacheMonitor {
@@ -26,11 +32,11 @@ export class CacheMonitor {
   // 处理缓存事件
   private handleCacheEvent(event: CacheEvent): void {
     // 通知所有外部监听器
-    this.eventListeners.forEach(listener => {
+    this.eventListeners.forEach((listener) => {
       try {
         listener(event);
       } catch (error) {
-        console.error('缓存监控事件监听器执行失败:', error);
+        console.error("缓存监控事件监听器执行失败:", error);
       }
     });
   }
@@ -41,7 +47,7 @@ export class CacheMonitor {
     metricsInterval?: number; // 指标收集间隔（毫秒）
   }): void {
     if (this.isMonitoring) {
-      console.warn('缓存监控器已经在运行');
+      console.warn("缓存监控器已经在运行");
       return;
     }
 
@@ -51,7 +57,7 @@ export class CacheMonitor {
     } = options || {};
 
     this.isMonitoring = true;
-    console.log('启动缓存监控器');
+    console.log("启动缓存监控器");
 
     // 启动健康检查
     this.healthCheckInterval = setInterval(async () => {
@@ -71,12 +77,12 @@ export class CacheMonitor {
   // 停止监控
   stop(): void {
     if (!this.isMonitoring) {
-      console.warn('缓存监控器未在运行');
+      console.warn("缓存监控器未在运行");
       return;
     }
 
     this.isMonitoring = false;
-    console.log('停止缓存监控器');
+    console.log("停止缓存监控器");
 
     if (this.healthCheckInterval) {
       clearInterval(this.healthCheckInterval);
@@ -97,26 +103,27 @@ export class CacheMonitor {
   // 执行健康检查
   private async performHealthCheck(): Promise<CacheHealth> {
     const startTime = Date.now();
-    
+
     try {
       const isConnected = await checkRedisConnection();
       const responseTime = Date.now() - startTime;
-      
+
       let memoryUsage = 0;
       let keyCount = 0;
-      
+
       if (isConnected) {
         try {
           const redisInfo = await getRedisInfo();
           if (redisInfo && redisInfo.memory) {
-            memoryUsage = parseInt(redisInfo.memory.used_memory || '0', 10);
+            memoryUsage = parseInt(redisInfo.memory.used_memory || "0", 10);
           }
           if (redisInfo && redisInfo.stats) {
-            keyCount = parseInt(redisInfo.stats.keyspace_hits || '0', 10) + 
-                      parseInt(redisInfo.stats.keyspace_misses || '0', 10);
+            keyCount =
+              parseInt(redisInfo.stats.keyspace_hits || "0", 10) +
+              parseInt(redisInfo.stats.keyspace_misses || "0", 10);
           }
         } catch (error) {
-          console.error('获取Redis信息失败:', error);
+          console.error("获取Redis信息失败:", error);
         }
       }
 
@@ -145,7 +152,7 @@ export class CacheMonitor {
       };
 
       this.addToHealthHistory(health);
-      console.error('缓存健康检查失败:', error);
+      console.error("缓存健康检查失败:", error);
 
       return health;
     }
@@ -154,7 +161,7 @@ export class CacheMonitor {
   // 添加健康检查历史记录
   private addToHealthHistory(health: CacheHealth): void {
     this.healthHistory.push(health);
-    
+
     // 保持历史记录大小
     if (this.healthHistory.length > this.maxHistorySize) {
       this.healthHistory.shift();
@@ -164,25 +171,39 @@ export class CacheMonitor {
   // 检查健康阈值
   private checkHealthThresholds(health: CacheHealth): void {
     if (!health.connected) {
-      console.error('缓存连接中断！');
-      this.triggerAlert('DISCONNECTED', '缓存连接中断', health);
+      console.error("缓存连接中断！");
+      this.triggerAlert("DISCONNECTED", "缓存连接中断", health);
       return;
     }
 
-    if (health.responseTime > 1000) { // 响应时间超过1秒
+    if (health.responseTime > 1000) {
+      // 响应时间超过1秒
       console.warn(`缓存响应时间过慢: ${health.responseTime}ms`);
-      this.triggerAlert('SLOW_RESPONSE', `缓存响应时间过慢: ${health.responseTime}ms`, health);
+      this.triggerAlert(
+        "SLOW_RESPONSE",
+        `缓存响应时间过慢: ${health.responseTime}ms`,
+        health,
+      );
     }
 
     const memoryMB = health.memoryUsage / (1024 * 1024);
-    if (memoryMB > 1000) { // 内存使用超过1GB
+    if (memoryMB > 1000) {
+      // 内存使用超过1GB
       console.warn(`缓存内存使用过高: ${memoryMB.toFixed(2)}MB`);
-      this.triggerAlert('HIGH_MEMORY', `缓存内存使用过高: ${memoryMB.toFixed(2)}MB`, health);
+      this.triggerAlert(
+        "HIGH_MEMORY",
+        `缓存内存使用过高: ${memoryMB.toFixed(2)}MB`,
+        health,
+      );
     }
   }
 
   // 触发告警
-  private triggerAlert(type: string, message: string, health: CacheHealth): void {
+  private triggerAlert(
+    type: string,
+    message: string,
+    health: CacheHealth,
+  ): void {
     const alert = {
       type,
       message,
@@ -190,8 +211,8 @@ export class CacheMonitor {
       health,
     };
 
-    console.error('缓存告警:', alert);
-    
+    console.error("缓存告警:", alert);
+
     // 这里可以集成外部告警系统（如邮件、短信、Slack等）
     // this.sendAlert(alert);
   }
@@ -201,7 +222,7 @@ export class CacheMonitor {
     try {
       const stats = this.cacheManager.getStats();
       const redisInfo = await getRedisInfo();
-      
+
       const metrics = {
         timestamp: new Date(),
         cacheStats: stats,
@@ -210,17 +231,17 @@ export class CacheMonitor {
       };
 
       // 记录指标日志
-      console.log('缓存指标:', {
+      console.log("缓存指标:", {
         hitRate: `${stats.hitRate.toFixed(2)}%`,
         totalRequests: stats.totalRequests,
-        memoryUsage: redisInfo?.memory?.used_memory || '0',
-        connectedKeys: redisInfo?.stats?.keyspace_hits || '0',
+        memoryUsage: redisInfo?.memory?.used_memory || "0",
+        connectedKeys: redisInfo?.stats?.keyspace_hits || "0",
       });
 
       // 这里可以发送指标到监控系统（如Prometheus、InfluxDB等）
       // this.sendMetrics(metrics);
     } catch (error) {
-      console.error('收集缓存指标失败:', error);
+      console.error("收集缓存指标失败:", error);
     }
   }
 
@@ -287,17 +308,21 @@ export class CacheMonitor {
       };
     }
 
-    const responseTimes = this.healthHistory.map(h => h.responseTime);
-    const avgResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
+    const responseTimes = this.healthHistory.map((h) => h.responseTime);
+    const avgResponseTime =
+      responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
     const maxResponseTime = Math.max(...responseTimes);
-    
+
     // 计算运行时间（基于第一次健康检查时间）
-    const uptime = this.healthHistory.length > 1 
-      ? Date.now() - this.healthHistory[0].lastCheck.getTime()
-      : 0;
+    const uptime =
+      this.healthHistory.length > 1
+        ? Date.now() - this.healthHistory[0].lastCheck.getTime()
+        : 0;
 
     // 计算告警次数
-    const alertCount = this.healthHistory.filter(h => !h.connected || h.responseTime > 1000).length;
+    const alertCount = this.healthHistory.filter(
+      (h) => !h.connected || h.responseTime > 1000,
+    ).length;
 
     // 获取命中率趋势（最近10次）
     const stats = this.cacheManager.getStats();
@@ -316,7 +341,7 @@ export class CacheMonitor {
   reset(): void {
     this.healthHistory = [];
     this.cacheManager.resetStats();
-    console.log('缓存监控数据已重置');
+    console.log("缓存监控数据已重置");
   }
 
   // 清理资源
@@ -324,7 +349,7 @@ export class CacheMonitor {
     this.stop();
     this.eventListeners = [];
     this.healthHistory = [];
-    console.log('缓存监控器已清理');
+    console.log("缓存监控器已清理");
   }
 }
 
@@ -340,11 +365,11 @@ export const getCacheMonitor = (cacheManager: CacheManager): CacheMonitor => {
 };
 
 // 创建缓存监控器的便捷函数
-import { cacheManager } from './manager';
+import { cacheManager } from "./manager";
 export const cacheMonitorInstance = getCacheMonitor(cacheManager);
 
 // 自动启动监控（仅在开发环境）
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   // 开发环境下自动启动监控
   setTimeout(() => {
     cacheMonitorInstance.start({
@@ -366,7 +391,7 @@ export const cacheMonitoringUtils = {
     try {
       const pattern = `legal_debate:${namespace}:*`;
       const keys = await redis.keys(pattern);
-      
+
       if (keys.length === 0) {
         return {
           namespace,
@@ -377,11 +402,12 @@ export const cacheMonitoringUtils = {
       }
 
       // 获取所有键的TTL
-      const ttls = await Promise.all(keys.map(key => redis.ttl(key)));
-      const validTtls = ttls.filter(ttl => ttl > 0);
-      const avgTtl = validTtls.length > 0 
-        ? validTtls.reduce((sum, ttl) => sum + ttl, 0) / validTtls.length 
-        : 0;
+      const ttls = await Promise.all(keys.map((key) => redis.ttl(key)));
+      const validTtls = ttls.filter((ttl) => ttl > 0);
+      const avgTtl =
+        validTtls.length > 0
+          ? validTtls.reduce((sum, ttl) => sum + ttl, 0) / validTtls.length
+          : 0;
 
       // 估算内存使用（简化计算）
       const memoryUsage = keys.length * 100; // 假设每个键平均占用100字节
@@ -404,10 +430,12 @@ export const cacheMonitoringUtils = {
   },
 
   // 获取热点键
-  async getHotKeys(limit: number = 10): Promise<Array<{ key: string; accessCount: number }>> {
+  async getHotKeys(
+    limit: number = 10,
+  ): Promise<Array<{ key: string; accessCount: number }>> {
     // 这里需要实现基于访问频率的热点键统计
     // 由于Redis本身不直接提供访问计数，需要在应用层实现
-    console.warn('热点键统计功能需要在应用层实现访问计数');
+    console.warn("热点键统计功能需要在应用层实现访问计数");
     return [];
   },
 
@@ -415,10 +443,10 @@ export const cacheMonitoringUtils = {
   async cleanupExpiredKeys(): Promise<number> {
     try {
       // Redis会自动清理过期键，这里只是记录日志
-      console.log('Redis自动清理过期键中...');
+      console.log("Redis自动清理过期键中...");
       return 0;
     } catch (error) {
-      console.error('清理过期键失败:', error);
+      console.error("清理过期键失败:", error);
       return 0;
     }
   },
@@ -427,16 +455,16 @@ export const cacheMonitoringUtils = {
   async generateReport(): Promise<string> {
     const status = await cacheMonitorInstance.getDetailedStatus();
     const performanceReport = cacheMonitorInstance.getPerformanceReport();
-    
+
     const report = `
 # 缓存系统监控报告
 
 ## 基本信息
 - 生成时间: ${new Date().toISOString()}
-- 监控状态: ${status.isMonitoring ? '运行中' : '已停止'}
+- 监控状态: ${status.isMonitoring ? "运行中" : "已停止"}
 
 ## 连接状态
-- 连接状态: ${status.health.connected ? '正常' : '断开'}
+- 连接状态: ${status.health.connected ? "正常" : "断开"}
 - 响应时间: ${status.health.responseTime}ms
 - 内存使用: ${(status.health.memoryUsage / (1024 * 1024)).toFixed(2)}MB
 - 键数量: ${status.health.keyCount}

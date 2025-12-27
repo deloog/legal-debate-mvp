@@ -5,13 +5,13 @@
 // =============================================================================
 
 // AI服务提供商
-export type AIProvider = 'zhipu' | 'deepseek' | 'openai' | 'anthropic';
+export type AIProvider = "zhipu" | "deepseek" | "openai" | "anthropic";
 
 // AI模型类型
-export type AIModelType = 'chat' | 'embedding' | 'completion' | 'coding';
+export type AIModelType = "chat" | "embedding" | "completion" | "coding";
 
 // 消息角色
-export type MessageRole = 'system' | 'user' | 'assistant' | 'function';
+export type MessageRole = "system" | "user" | "assistant" | "function";
 
 // =============================================================================
 // 请求和响应类型
@@ -45,7 +45,7 @@ export interface AIRequestConfig {
   stop?: string | string[];
   stream?: boolean;
   functions?: FunctionDefinition[];
-  functionCall?: 'auto' | 'none' | { name: string };
+  functionCall?: "auto" | "none" | { name: string };
   user?: string;
   timeout?: number;
   retryAttempts?: number;
@@ -58,7 +58,7 @@ export interface FunctionDefinition {
   name: string;
   description?: string;
   parameters: {
-    type: 'object';
+    type: "object";
     properties: Record<string, unknown>;
     required?: string[];
   };
@@ -82,7 +82,7 @@ export interface AIResponse {
 export interface AIChoice {
   index: number;
   message: AIMessage;
-  finishReason: 'stop' | 'length' | 'function_call' | 'content_filter';
+  finishReason: "stop" | "length" | "function_call" | "content_filter";
   logprobs?: null;
 }
 
@@ -95,7 +95,7 @@ export interface TokenUsage {
 
 // 嵌入响应
 export interface EmbeddingResponse {
-  object: 'list';
+  object: "list";
   data: EmbeddingData[];
   model: string;
   usage: TokenUsage;
@@ -105,7 +105,7 @@ export interface EmbeddingResponse {
 
 // 嵌入数据
 export interface EmbeddingData {
-  object: 'embedding';
+  object: "embedding";
   embedding: number[];
   index: number;
 }
@@ -128,19 +128,19 @@ export interface AIError {
 }
 
 // AI错误类型枚举
-export type AIErrorType = 
-  | 'authentication_error'
-  | 'permission_error'
-  | 'not_found_error'
-  | 'rate_limit_error'
-  | 'api_error'
-  | 'timeout_error'
-  | 'network_error'
-  | 'validation_error'
-  | 'insufficient_quota'
-  | 'model_not_available'
-  | 'content_filter'
-  | 'unknown_error';
+export type AIErrorType =
+  | "authentication_error"
+  | "permission_error"
+  | "not_found_error"
+  | "rate_limit_error"
+  | "api_error"
+  | "timeout_error"
+  | "network_error"
+  | "validation_error"
+  | "insufficient_quota"
+  | "model_not_available"
+  | "content_filter"
+  | "unknown_error";
 
 // 重试策略
 export interface RetryStrategy {
@@ -195,19 +195,19 @@ export interface LoadBalancerConfig {
 }
 
 // 负载均衡策略
-export type LoadBalancingStrategy = 
-  | 'round_robin'
-  | 'weighted_round_robin'
-  | 'least_connections'
-  | 'least_response_time'
-  | 'random'
-  | 'provider_priority';
+export type LoadBalancingStrategy =
+  | "round_robin"
+  | "weighted_round_robin"
+  | "least_connections"
+  | "least_response_time"
+  | "random"
+  | "provider_priority";
 
 // 监控配置
 export interface MonitorConfig {
   enabled: boolean;
   metricsInterval: number;
-  logLevel: 'debug' | 'info' | 'warn' | 'error';
+  logLevel: "debug" | "info" | "warn" | "error";
   persistMetrics: boolean;
   alertThresholds?: AlertThresholds;
 }
@@ -248,21 +248,21 @@ export interface FallbackStrategy {
 }
 
 // 降级条件
-export type FallbackCondition = 
-  | 'provider_error'
-  | 'rate_limit'
-  | 'timeout'
-  | 'high_latency'
-  | 'manual_trigger'
-  | 'all_providers_down';
+export type FallbackCondition =
+  | "provider_error"
+  | "rate_limit"
+  | "timeout"
+  | "high_latency"
+  | "manual_trigger"
+  | "all_providers_down";
 
 // 降级行动
-export type FallbackAction = 
-  | 'switch_provider'
-  | 'use_cache'
-  | 'simplified_request'
-  | 'local_processing'
-  | 'return_error';
+export type FallbackAction =
+  | "switch_provider"
+  | "use_cache"
+  | "simplified_request"
+  | "local_processing"
+  | "return_error";
 
 // =============================================================================
 // 监控和指标类型
@@ -326,21 +326,21 @@ export interface MonitorEvent {
 }
 
 // 监控事件类型
-export type MonitorEventType = 
-  | 'request_start'
-  | 'request_complete'
-  | 'request_error'
-  | 'provider_switch'
-  | 'fallback_activated'
-  | 'health_check'
-  | 'rate_limit_hit'
-  | 'cache_hit'
-  | 'cache_miss'
-  | 'monitor_start'
-  | 'monitor_stop'
-  | 'health_change'
-  | 'alert'
-  | 'metrics_collected';
+export type MonitorEventType =
+  | "request_start"
+  | "request_complete"
+  | "request_error"
+  | "provider_switch"
+  | "fallback_activated"
+  | "health_check"
+  | "rate_limit_hit"
+  | "cache_hit"
+  | "cache_miss"
+  | "monitor_start"
+  | "monitor_stop"
+  | "health_change"
+  | "alert"
+  | "metrics_collected";
 
 // =============================================================================
 // 服务管理类型
@@ -378,7 +378,8 @@ export interface ServiceStatus {
 export type ResponseContent = string | FunctionCall;
 
 // 提取函数参数类型
-export type ExtractFunctionParams<T extends FunctionDefinition> = T['parameters']['properties'];
+export type ExtractFunctionParams<T extends FunctionDefinition> =
+  T["parameters"]["properties"];
 
 // 条件类型：如果T是数组，返回T[number]，否则返回T
 export type ArrayElement<T> = T extends (infer U)[] ? U : T;

@@ -1,0 +1,297 @@
+{
+  "metadata": {
+    "timestamp": "2025-12-20T04:23:21.748Z",
+    "validationDuration": 455,
+    "environment": "development"
+  },
+  "summary": {
+    "totalCases": 18,
+    "totalUsers": 3,
+    "totalDocuments": 18,
+    "totalDebates": 18,
+    "totalArguments": 90,
+    "totalLegalReferences": 78,
+    "estimatedCost": 0.4955000000000002,
+    "cacheHitRate": 2.5833,
+    "validationStatus": "FAILED"
+  },
+  "details": {
+    "cases": [
+      {
+        "id": "cmjcq163t0003kxbu5ipgan71",
+        "title": "示例民事纠纷案件",
+        "type": "CIVIL",
+        "status": "DRAFT",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 0,
+        "legalReferenceCount": 1
+      },
+      {
+        "id": "cmjdr2hzq0003lu75qtgi5hwa",
+        "title": "示例民事纠纷案件",
+        "type": "CIVIL",
+        "status": "DRAFT",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 0,
+        "legalReferenceCount": 1
+      },
+      {
+        "id": "cmjdr8bwj00032gywulmcu2y5",
+        "title": "示例民事纠纷案件",
+        "type": "CIVIL",
+        "status": "DRAFT",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 0,
+        "legalReferenceCount": 1
+      },
+      {
+        "id": "cmjdsk13j0002juhc1xxq7nqr",
+        "title": "某科技公司著作权侵权纠纷案",
+        "type": "INTELLECTUAL",
+        "status": "ACTIVE",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 6,
+        "legalReferenceCount": 5
+      },
+      {
+        "id": "cmjdsk1570004juhcx6jd7hnp",
+        "title": "某品牌商标权侵权纠纷案",
+        "type": "INTELLECTUAL",
+        "status": "ACTIVE",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 6,
+        "legalReferenceCount": 5
+      },
+      {
+        "id": "cmjdsk15e0006juhcl1xzoabz",
+        "title": "网络平台不正当竞争纠纷案",
+        "type": "INTELLECTUAL",
+        "status": "ACTIVE",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 6,
+        "legalReferenceCount": 5
+      },
+      {
+        "id": "cmjdsk15g0008juhcosybmz2u",
+        "title": "设备买卖合同违约纠纷案",
+        "type": "COMMERCIAL",
+        "status": "ACTIVE",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 6,
+        "legalReferenceCount": 5
+      },
+      {
+        "id": "cmjdsk15p000ajuhcyms1v7sg",
+        "title": "商业店铺租赁合同纠纷案",
+        "type": "COMMERCIAL",
+        "status": "ACTIVE",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 6,
+        "legalReferenceCount": 5
+      },
+      {
+        "id": "cmjdsk15s000cjuhc8si2koig",
+        "title": "软件开发服务合同纠纷案",
+        "type": "COMMERCIAL",
+        "status": "ACTIVE",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 6,
+        "legalReferenceCount": 5
+      },
+      {
+        "id": "cmjdsk167000ejuhcqzun26tu",
+        "title": "邻里噪音污染侵权纠纷案",
+        "type": "CIVIL",
+        "status": "ACTIVE",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 6,
+        "legalReferenceCount": 5
+      },
+      {
+        "id": "cmjdsk169000gjuhceedudj7o",
+        "title": "离婚财产分割纠纷案",
+        "type": "CIVIL",
+        "status": "ACTIVE",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 6,
+        "legalReferenceCount": 5
+      },
+      {
+        "id": "cmjdsk16b000ijuhc1jqapccc",
+        "title": "加班工资支付纠纷案",
+        "type": "LABOR",
+        "status": "ACTIVE",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 6,
+        "legalReferenceCount": 5
+      },
+      {
+        "id": "cmjdsk16d000kjuhczgqjsafr",
+        "title": "工伤赔偿纠纷案",
+        "type": "LABOR",
+        "status": "ACTIVE",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 6,
+        "legalReferenceCount": 5
+      },
+      {
+        "id": "cmjdsk16f000mjuhcaqq290hf",
+        "title": "商业秘密盗窃案",
+        "type": "CRIMINAL",
+        "status": "ACTIVE",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 6,
+        "legalReferenceCount": 5
+      },
+      {
+        "id": "cmjdsk16i000ojuhccftmshot",
+        "title": "合同诈骗案",
+        "type": "CRIMINAL",
+        "status": "ACTIVE",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 6,
+        "legalReferenceCount": 5
+      },
+      {
+        "id": "cmjdsk16k000qjuhcdtbobmty",
+        "title": "行政处罚撤销纠纷案",
+        "type": "ADMINISTRATIVE",
+        "status": "ACTIVE",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 6,
+        "legalReferenceCount": 5
+      },
+      {
+        "id": "cmjdsk16n000sjuhcvm6oly94",
+        "title": "行政许可申请驳回纠纷案",
+        "type": "ADMINISTRATIVE",
+        "status": "ACTIVE",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 6,
+        "legalReferenceCount": 5
+      },
+      {
+        "id": "cmjdsk16t000ujuhcq0qb6pfy",
+        "title": "网络服务合同纠纷案",
+        "type": "OTHER",
+        "status": "ACTIVE",
+        "hasDocuments": true,
+        "hasDebates": true,
+        "hasLegalReferences": true,
+        "documentCount": 1,
+        "debateCount": 1,
+        "argumentCount": 6,
+        "legalReferenceCount": 5
+      }
+    ],
+    "users": [
+      {
+        "id": "cmjcq163h0000kxbu9fei62td",
+        "email": "test@example.com",
+        "role": "USER",
+        "caseCount": 3
+      },
+      {
+        "id": "cmjcq163p0001kxbu4ih5ymxv",
+        "email": "admin@example.com",
+        "role": "USER",
+        "caseCount": 0
+      },
+      {
+        "id": "cmjdsk0xk0000juhcpnp1qwum",
+        "email": "demo.lawyer@example.com",
+        "role": "LAWYER",
+        "caseCount": 15
+      }
+    ]
+  },
+  "validation": {
+    "passedChecks": [
+      "✅ 至少存在1个用户",
+      "✅ 所有案件类型都已覆盖",
+      "✅ 所有案件都有文档",
+      "✅ 所有案件都有辩论",
+      "✅ 所有案件都有法条引用",
+      "✅ 论点数量充足",
+      "✅ 法条引用数量充足",
+      "✅ AI交互记录与论点数量匹配",
+      "✅ AI成本估算: ¥0.4955",
+      "✅ 缓存命中率: 258.33%"
+    ],
+    "failedChecks": [
+      "❌ 案件数量错误，期望15个，实际18个"
+    ],
+    "warnings": [],
+    "criticalIssues": [
+      "案件数量不符合预期"
+    ]
+  }
+}
