@@ -3,13 +3,13 @@
  * 目标：关键事实识别准确
  */
 
-import { getUnifiedAIService } from '@/lib/ai/unified-service';
+import { getUnifiedAIService } from "@/lib/ai/unified-service";
 import type {
   KeyFact,
   FactCategory,
   FactType,
-  ExtractedData
-} from '../core/types';
+  ExtractedData,
+} from "../core/types";
 
 // =============================================================================
 // 接口定义
@@ -60,7 +60,7 @@ export class KeyFactExtractor {
   async extractFromText(
     text: string,
     extractedData?: ExtractedData,
-    options: KeyFactExtractionOptions = {}
+    options: KeyFactExtractionOptions = {},
   ): Promise<KeyFactExtractionOutput> {
     let aiExtracted: KeyFact[] = [];
     let ruleExtracted: KeyFact[] = [];
@@ -90,19 +90,28 @@ export class KeyFactExtractor {
 
     // 过滤推断结果
     if (options.includeInferred === false) {
-      mergedFacts = mergedFacts.filter(f => f.factType !== 'INFERRED');
+      mergedFacts = mergedFacts.filter((f) => f.factType !== "INFERRED");
     }
 
     // 过滤低置信度和低重要性结果
     if (options.minConfidence !== undefined) {
-      mergedFacts = mergedFacts.filter(f => f.confidence >= options.minConfidence);
+      mergedFacts = mergedFacts.filter(
+        (f) => f.confidence >= options.minConfidence,
+      );
     }
 
     if (options.minImportance !== undefined) {
-      mergedFacts = mergedFacts.filter(f => f.importance >= options.minImportance);
+      mergedFacts = mergedFacts.filter(
+        (f) => f.importance >= options.minImportance,
+      );
     }
 
-    const summary = this.generateSummary(mergedFacts, aiExtracted, ruleExtracted, aiReviewed);
+    const summary = this.generateSummary(
+      mergedFacts,
+      aiExtracted,
+      ruleExtracted,
+      aiReviewed,
+    );
 
     return { facts: mergedFacts, summary };
   }
@@ -116,37 +125,40 @@ export class KeyFactExtractor {
    */
   private async aiExtractLayer(
     text: string,
-    extractedData?: ExtractedData
+    extractedData?: ExtractedData,
   ): Promise<KeyFact[]> {
     try {
       const unifiedService = await getUnifiedAIService();
-      
+
       const prompt = this.buildAIExtractionPrompt(text, extractedData);
-      
+
       const response = await unifiedService.chatCompletion({
-        model: 'deepseek-chat',
-        provider: 'deepseek',
+        model: "deepseek-chat",
+        provider: "deepseek",
         messages: [
           {
-            role: 'system',
-            content: '你是一个专业的法律关键事实识别专家。请从法律文档中准确提取关键事实。'
+            role: "system",
+            content:
+              "你是一个专业的法律关键事实识别专家。请从法律文档中准确提取关键事实。",
           },
           {
-            role: 'user',
-            content: prompt
-          }
+            role: "user",
+            content: prompt,
+          },
         ],
         temperature: 0.1,
-        maxTokens: 2000
+        maxTokens: 2000,
       });
 
       if (response.choices && response.choices.length > 0) {
-        return this.parseAIExtractionResponse(response.choices[0].message.content || '');
+        return this.parseAIExtractionResponse(
+          response.choices[0].message.content || "",
+        );
       }
 
       return [];
     } catch (error) {
-      console.error('AI识别层失败:', error);
+      console.error("AI识别层失败:", error);
       return [];
     }
   }
@@ -156,12 +168,12 @@ export class KeyFactExtractor {
    */
   private buildAIExtractionPrompt(
     text: string,
-    extractedData?: ExtractedData
+    extractedData?: ExtractedData,
   ): string {
-    let contextInfo = '';
-    
+    let contextInfo = "";
+
     if (extractedData?.timeline && extractedData.timeline.length > 0) {
-      contextInfo += `\n时间线信息：\n${extractedData.timeline.map(t => `${t.date}: ${t.event}`).join('\n')}`;
+      contextInfo += `\n时间线信息：\n${extractedData.timeline.map((t) => `${t.date}: ${t.event}`).join("\n")}`;
     }
 
     return `请从以下法律文档中准确提取关键事实。
@@ -214,16 +226,20 @@ ${contextInfo}
   private parseAIExtractionResponse(aiResponse: string): KeyFact[] {
     try {
       let cleanedResponse = aiResponse.trim();
-      
-      if (cleanedResponse.includes('```json')) {
-        cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+
+      if (cleanedResponse.includes("```json")) {
+        cleanedResponse = cleanedResponse
+          .replace(/```json\s*/, "")
+          .replace(/```\s*$/, "");
       }
-      if (cleanedResponse.includes('```')) {
-        cleanedResponse = cleanedResponse.replace(/```\s*/, '').replace(/```\s*$/, '');
+      if (cleanedResponse.includes("```")) {
+        cleanedResponse = cleanedResponse
+          .replace(/```\s*/, "")
+          .replace(/```\s*$/, "");
       }
-      
+
       const parsed = JSON.parse(cleanedResponse);
-      
+
       if (!parsed.keyFacts || !Array.isArray(parsed.keyFacts)) {
         return [];
       }
@@ -231,17 +247,17 @@ ${contextInfo}
       return parsed.keyFacts.map((item: any, index: number) => ({
         id: `ai_fact_${index}`,
         category: item.category,
-        description: item.description || '',
-        details: item.details || item.description || '',
+        description: item.description || "",
+        details: item.details || item.description || "",
         importance: Math.min(10, Math.max(1, Math.round(item.importance || 5))),
         confidence: Math.min(1, Math.max(0, item.confidence || 0.8)),
         evidence: item.evidence || [],
         relatedTimeline: [],
         relatedDisputes: [],
-        factType: item.factType || 'EXPLICIT'
+        factType: item.factType || "EXPLICIT",
       }));
     } catch (error) {
-      console.error('解析AI识别响应失败:', error);
+      console.error("解析AI识别响应失败:", error);
       return [];
     }
   }
@@ -256,7 +272,7 @@ ${contextInfo}
   private ruleMatchLayer(
     text: string,
     extractedData?: ExtractedData,
-    aiExtracted?: KeyFact[]
+    aiExtracted?: KeyFact[],
   ): KeyFact[] {
     const facts: KeyFact[] = [];
     let idCounter = aiExtracted ? aiExtracted.length : 0;
@@ -266,18 +282,13 @@ ${contextInfo}
         const matches = text.matchAll(pattern);
         for (const match of matches) {
           // 检查是否已被AI提取层覆盖
-          const isAlreadyExtracted = aiExtracted?.some(
-            aiFact => this.isSimilarFact(aiFact, match[0], category)
+          const isAlreadyExtracted = aiExtracted?.some((aiFact) =>
+            this.isSimilarFact(aiFact, match[0], category),
           );
-          
+
           if (!isAlreadyExtracted) {
             const id = `rule_fact_${idCounter++}`;
-            const fact = this.buildRuleBasedFact(
-              id,
-              category,
-              match,
-              text
-            );
+            const fact = this.buildRuleBasedFact(id, category, match, text);
             if (fact) facts.push(fact);
           }
         }
@@ -293,15 +304,17 @@ ${contextInfo}
   private isSimilarFact(
     aiFact: KeyFact,
     matchedText: string,
-    category: FactCategory
+    category: FactCategory,
   ): boolean {
     if (aiFact.category !== category) return false;
-    
+
     const aiDesc = aiFact.description.toLowerCase();
     const matchedLower = matchedText.toLowerCase();
-    
-    return aiDesc.includes(matchedLower.substring(0, 10)) ||
-           matchedLower.includes(aiDesc.substring(0, 10));
+
+    return (
+      aiDesc.includes(matchedLower.substring(0, 10)) ||
+      matchedLower.includes(aiDesc.substring(0, 10))
+    );
   }
 
   /**
@@ -311,7 +324,7 @@ ${contextInfo}
     id: string,
     category: FactCategory,
     match: RegExpMatchArray,
-    fullText: string
+    fullText: string,
   ): KeyFact | null {
     const matchedText = match[0];
     const description = this.extractDescription(matchedText);
@@ -331,7 +344,7 @@ ${contextInfo}
       evidence,
       relatedTimeline: [],
       relatedDisputes: [],
-      factType
+      factType,
     };
   }
 
@@ -340,11 +353,11 @@ ${contextInfo}
    */
   private extractDescription(matchedText: string): string {
     const cleaned = matchedText
-      .replace(/^(根据|依据|按照)\s*/g, '')
-      .replace(/证据\d+[:：]\s*/g, '')
+      .replace(/^(根据|依据|按照)\s*/g, "")
+      .replace(/证据\d+[:：]\s*/g, "")
       .trim();
 
-    return cleaned.length > 50 ? cleaned.substring(0, 50) + '...' : cleaned;
+    return cleaned.length > 50 ? cleaned.substring(0, 50) + "..." : cleaned;
   }
 
   /**
@@ -355,7 +368,10 @@ ${contextInfo}
     if (index === -1) return matchedText;
 
     const contextStart = Math.max(0, index - 50);
-    const contextEnd = Math.min(fullText.length, index + matchedText.length + 100);
+    const contextEnd = Math.min(
+      fullText.length,
+      index + matchedText.length + 100,
+    );
     const context = fullText.substring(contextStart, contextEnd);
 
     return context.trim();
@@ -372,13 +388,16 @@ ${contextInfo}
         }
       }
     }
-    return 'EXPLICIT';
+    return "EXPLICIT";
   }
 
   /**
    * 计算重要性评分
    */
-  private calculateImportance(matchedText: string, category: FactCategory): number {
+  private calculateImportance(
+    matchedText: string,
+    category: FactCategory,
+  ): number {
     let score = 5;
 
     const categoryWeights: Record<FactCategory, number> = {
@@ -387,16 +406,26 @@ ${contextInfo}
       BREACH_BEHAVIOR: 9,
       DAMAGE_OCCURRENCE: 7,
       LEGAL_RELATION: 5,
-      OTHER: 5
+      OTHER: 5,
     };
     score = (score + categoryWeights[category]) / 2;
 
     const highImportanceKeywords = [
-      '违约', '未履行', '逾期', '损失', '赔偿', '违约金',
-      '本金', '利息', '签订', '履行', '拒绝', '停止'
+      "违约",
+      "未履行",
+      "逾期",
+      "损失",
+      "赔偿",
+      "违约金",
+      "本金",
+      "利息",
+      "签订",
+      "履行",
+      "拒绝",
+      "停止",
     ];
-    const hasKeyword = highImportanceKeywords.some(kw =>
-      matchedText.toLowerCase().includes(kw)
+    const hasKeyword = highImportanceKeywords.some((kw) =>
+      matchedText.toLowerCase().includes(kw),
     );
     if (hasKeyword) score += 1;
 
@@ -438,7 +467,7 @@ ${contextInfo}
       /根据\s*《([^》]+)》/gi,
       /依据\s*([^。，]+)/gi,
       /合同\s*第.*?款/gi,
-      /协议\s*第.*?条/gi
+      /协议\s*第.*?条/gi,
     ];
 
     for (const pattern of patterns) {
@@ -455,7 +484,7 @@ ${contextInfo}
       const contextStart = Math.max(0, index - 100);
       const contextEnd = Math.min(
         fullText.length,
-        index + matchedText.length + 100
+        index + matchedText.length + 100,
       );
       const context = fullText.substring(contextStart, contextEnd);
 
@@ -481,7 +510,7 @@ ${contextInfo}
    */
   private mergeAndDeduplicate(
     aiFacts: KeyFact[],
-    ruleFacts: KeyFact[]
+    ruleFacts: KeyFact[],
   ): KeyFact[] {
     const seen = new Set<string>();
     const unique: KeyFact[] = [];
@@ -516,37 +545,41 @@ ${contextInfo}
    */
   private async aiReviewLayer(
     facts: KeyFact[],
-    originalText: string
+    originalText: string,
   ): Promise<KeyFact[]> {
     try {
       const unifiedService = await getUnifiedAIService();
-      
+
       const prompt = this.buildAIReviewPrompt(facts, originalText);
-      
+
       const response = await unifiedService.chatCompletion({
-        model: 'deepseek-chat',
-        provider: 'deepseek',
+        model: "deepseek-chat",
+        provider: "deepseek",
         messages: [
           {
-            role: 'system',
-            content: '你是一个专业的法律关键事实审查专家。请审查和修正关键事实识别结果。'
+            role: "system",
+            content:
+              "你是一个专业的法律关键事实审查专家。请审查和修正关键事实识别结果。",
           },
           {
-            role: 'user',
-            content: prompt
-          }
+            role: "user",
+            content: prompt,
+          },
         ],
         temperature: 0.1,
-        maxTokens: 2000
+        maxTokens: 2000,
       });
 
       if (response.choices && response.choices.length > 0) {
-        return this.parseAIReviewResponse(response.choices[0].message.content || '', facts);
+        return this.parseAIReviewResponse(
+          response.choices[0].message.content || "",
+          facts,
+        );
       }
 
       return facts;
     } catch (error) {
-      console.error('AI审查层失败:', error);
+      console.error("AI审查层失败:", error);
       return facts;
     }
   }
@@ -555,13 +588,16 @@ ${contextInfo}
    * 构建AI审查提示词
    */
   private buildAIReviewPrompt(facts: KeyFact[], originalText: string): string {
-    const factList = facts.map((f, index) => 
-      `${index + 1}. [${f.category}] ${f.description}
+    const factList = facts
+      .map(
+        (f, index) =>
+          `${index + 1}. [${f.category}] ${f.description}
    - 详细信息: ${f.details.substring(0, 30)}...
    - 重要性: ${f.importance}
    - 置信度: ${f.confidence}
-   - 事实类型: ${f.factType}`
-    ).join('\n');
+   - 事实类型: ${f.factType}`,
+      )
+      .join("\n");
 
     return `请审查以下从法律文档中识别的关键事实列表，确保其准确性和完整性。
 
@@ -607,46 +643,58 @@ ${factList}
   /**
    * 解析AI审查响应
    */
-  private parseAIReviewResponse(aiResponse: string, originalFacts: KeyFact[]): KeyFact[] {
+  private parseAIReviewResponse(
+    aiResponse: string,
+    originalFacts: KeyFact[],
+  ): KeyFact[] {
     try {
       let cleanedResponse = aiResponse.trim();
-      
+
       // 尝试从响应中提取JSON
-      let jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+      const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         cleanedResponse = jsonMatch[0];
       }
-      
-      if (cleanedResponse.includes('```json')) {
-        cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+
+      if (cleanedResponse.includes("```json")) {
+        cleanedResponse = cleanedResponse
+          .replace(/```json\s*/, "")
+          .replace(/```\s*$/, "");
       }
-      if (cleanedResponse.includes('```')) {
-        cleanedResponse = cleanedResponse.replace(/```\s*/, '').replace(/```\s*$/, '');
+      if (cleanedResponse.includes("```")) {
+        cleanedResponse = cleanedResponse
+          .replace(/```\s*/, "")
+          .replace(/```\s*$/, "");
       }
-      
+
       const parsed = JSON.parse(cleanedResponse);
-      
+
       const invalidIds = new Set(parsed.invalidIds || []);
       const reviewedItems = parsed.reviewedFacts || [];
 
-      return reviewedItems.map((item: any) => {
-        const original = originalFacts.find(f => f.id === item.id);
-        
-        return {
-          id: item.id,
-          category: item.category,
-          description: item.description || original?.description || '',
-          details: item.details || original?.details || '',
-          importance: Math.min(10, Math.max(1, Math.round(item.importance || 5))),
-          confidence: Math.min(1, Math.max(0, item.confidence || 0.8)),
-          evidence: item.evidence || original?.evidence || [],
-          relatedTimeline: original?.relatedTimeline || [],
-          relatedDisputes: original?.relatedDisputes || [],
-          factType: item.factType || original?.factType || 'EXPLICIT'
-        };
-      }).filter(item => !invalidIds.has(item.id));
+      return reviewedItems
+        .map((item: any) => {
+          const original = originalFacts.find((f) => f.id === item.id);
+
+          return {
+            id: item.id,
+            category: item.category,
+            description: item.description || original?.description || "",
+            details: item.details || original?.details || "",
+            importance: Math.min(
+              10,
+              Math.max(1, Math.round(item.importance || 5)),
+            ),
+            confidence: Math.min(1, Math.max(0, item.confidence || 0.8)),
+            evidence: item.evidence || original?.evidence || [],
+            relatedTimeline: original?.relatedTimeline || [],
+            relatedDisputes: original?.relatedDisputes || [],
+            factType: item.factType || original?.factType || "EXPLICIT",
+          };
+        })
+        .filter((item) => !invalidIds.has(item.id));
     } catch (error) {
-      console.error('解析AI审查响应失败:', error);
+      console.error("解析AI审查响应失败:", error);
       return originalFacts;
     }
   }
@@ -661,14 +709,14 @@ ${factList}
   private associateFacts(
     facts: KeyFact[],
     extractedData: ExtractedData,
-    text: string
+    text: string,
   ): void {
     for (const fact of facts) {
       if (extractedData.timeline) {
         for (const event of extractedData.timeline) {
           if (this.isFactRelatedToEvent(fact, event, text)) {
-            if (!fact.relatedTimeline.includes(event.id || '')) {
-              fact.relatedTimeline.push(event.id || '');
+            if (!fact.relatedTimeline.includes(event.id || "")) {
+              fact.relatedTimeline.push(event.id || "");
             }
           }
         }
@@ -692,13 +740,15 @@ ${factList}
   private isFactRelatedToEvent(
     fact: KeyFact,
     event: any,
-    text: string
+    text: string,
   ): boolean {
-    const factKeywords = fact.description.split(/[，。；\s]/).map(k => k.trim());
-    const eventKeywords = event.event.split(/[，。；\s]/).map(k => k.trim());
+    const factKeywords = fact.description
+      .split(/[，。；\s]/)
+      .map((k) => k.trim());
+    const eventKeywords = event.event.split(/[，。；\s]/).map((k) => k.trim());
 
-    return factKeywords.some(fk =>
-      eventKeywords.some(ek => ek.includes(fk) || fk.includes(ek))
+    return factKeywords.some((fk) =>
+      eventKeywords.some((ek) => ek.includes(fk) || fk.includes(ek)),
     );
   }
 
@@ -708,13 +758,17 @@ ${factList}
   private isFactRelatedToFocus(
     fact: KeyFact,
     focus: any,
-    text: string
+    text: string,
   ): boolean {
-    const factKeywords = fact.description.split(/[，。；\s]/).map(k => k.trim());
-    const focusKeywords = focus.description.split(/[，。；\s]/).map(k => k.trim());
+    const factKeywords = fact.description
+      .split(/[，。；\s]/)
+      .map((k) => k.trim());
+    const focusKeywords = focus.description
+      .split(/[，。；\s]/)
+      .map((k) => k.trim());
 
-    return factKeywords.some(fk =>
-      focusKeywords.some(fok => fok.includes(fk) || fk.includes(fok))
+    return factKeywords.some((fk) =>
+      focusKeywords.some((fok) => fok.includes(fk) || fk.includes(fok)),
     );
   }
 
@@ -725,7 +779,7 @@ ${factList}
     facts: KeyFact[],
     aiExtracted: KeyFact[],
     ruleExtracted: KeyFact[],
-    aiReviewed: KeyFact[]
+    aiReviewed: KeyFact[],
   ): {
     total: number;
     byCategory: Record<FactCategory, number>;
@@ -737,47 +791,61 @@ ${factList}
     ruleExtractedCount: number;
     aiReviewedCount: number;
   } {
-    const byCategory: Record<FactCategory, number> = {} as Record<FactCategory, number>;
+    const byCategory: Record<FactCategory, number> = {} as Record<
+      FactCategory,
+      number
+    >;
     const byType: Record<FactType, number> = {} as Record<FactType, number>;
     let totalImportance = 0;
     let totalConfidence = 0;
     let inferredCount = 0;
 
     const allCategories: FactCategory[] = [
-      'CONTRACT_TERM',
-      'PERFORMANCE_ACT',
-      'BREACH_BEHAVIOR',
-      'DAMAGE_OCCURRENCE',
-      'LEGAL_RELATION',
-      'OTHER'
+      "CONTRACT_TERM",
+      "PERFORMANCE_ACT",
+      "BREACH_BEHAVIOR",
+      "DAMAGE_OCCURRENCE",
+      "LEGAL_RELATION",
+      "OTHER",
     ];
 
     for (const category of allCategories) {
-      byCategory[category] = facts.filter(f => f.category === category).length;
+      byCategory[category] = facts.filter(
+        (f) => f.category === category,
+      ).length;
     }
 
-    const allTypes: FactType[] = ['EXPLICIT', 'INFERRED', 'ADMITTED', 'DISPUTED'];
+    const allTypes: FactType[] = [
+      "EXPLICIT",
+      "INFERRED",
+      "ADMITTED",
+      "DISPUTED",
+    ];
 
     for (const type of allTypes) {
-      byType[type] = facts.filter(f => f.factType === type).length;
+      byType[type] = facts.filter((f) => f.factType === type).length;
     }
 
     for (const fact of facts) {
       totalImportance += fact.importance;
       totalConfidence += fact.confidence;
-      if (fact.factType === 'INFERRED') inferredCount++;
+      if (fact.factType === "INFERRED") inferredCount++;
     }
 
     return {
       total: facts.length,
       byCategory,
       byType,
-      avgImportance: facts.length > 0 ? Math.round(totalImportance / facts.length) : 0,
-      avgConfidence: facts.length > 0 ? Math.round(totalConfidence / facts.length * 100) / 100 : 0,
+      avgImportance:
+        facts.length > 0 ? Math.round(totalImportance / facts.length) : 0,
+      avgConfidence:
+        facts.length > 0
+          ? Math.round((totalConfidence / facts.length) * 100) / 100
+          : 0,
       inferredCount,
       aiExtractedCount: aiExtracted.length,
       ruleExtractedCount: ruleExtracted.length,
-      aiReviewedCount: aiReviewed.length
+      aiReviewedCount: aiReviewed.length,
     };
   }
 
@@ -787,42 +855,42 @@ ${factList}
   private initializeFactPatterns(): Map<FactCategory, RegExp[]> {
     const patterns = new Map<FactCategory, RegExp[]>();
 
-    patterns.set('CONTRACT_TERM', [
+    patterns.set("CONTRACT_TERM", [
       /合同.*约定|协议.*约定|双方.*约定/gi,
       /合同第.*?款|协议第.*?条/gi,
       /约定.*履行|约定.*支付/gi,
-      /合同期限|协议期限|履行期限/gi
+      /合同期限|协议期限|履行期限/gi,
     ]);
 
-    patterns.set('PERFORMANCE_ACT', [
+    patterns.set("PERFORMANCE_ACT", [
       /已履行.*义务|已完成.*交付|已支付.*款项/gi,
       /履行情况|交付情况|支付情况/gi,
-      /原告.*履行|被告.*履行/gi
+      /原告.*履行|被告.*履行/gi,
     ]);
 
-    patterns.set('BREACH_BEHAVIOR', [
+    patterns.set("BREACH_BEHAVIOR", [
       /未履行.*义务|未.*交付|未.*支付/gi,
       /逾期.*履行|逾期.*交付|逾期.*支付/gi,
       /拒绝.*履行|拒绝.*交付|拒绝.*支付/gi,
       /停止.*履行|终止.*履行/gi,
-      /违约.*行为|违约.*事实/gi
+      /违约.*行为|违约.*事实/gi,
     ]);
 
-    patterns.set('DAMAGE_OCCURRENCE', [
+    patterns.set("DAMAGE_OCCURRENCE", [
       /造成.*损失|产生.*损失|导致.*损失/gi,
       /损失.*数额|损失.*金额/gi,
-      /损害.*结果|损害.*程度/gi
+      /损害.*结果|损害.*程度/gi,
     ]);
 
-    patterns.set('LEGAL_RELATION', [
+    patterns.set("LEGAL_RELATION", [
       /双方.*关系|建立.*关系|形成.*关系/gi,
       /合同关系|买卖关系|借贷关系|服务关系/gi,
-      /法律关系|权利义务/gi
+      /法律关系|权利义务/gi,
     ]);
 
-    patterns.set('OTHER', [
+    patterns.set("OTHER", [
       /事实\s*[:：]|情况\s*[:：]/gi,
-      /根据.*证据|依据.*证明/gi
+      /根据.*证据|依据.*证明/gi,
     ]);
 
     return patterns;
@@ -834,10 +902,13 @@ ${factList}
   private initializeFactTypePatterns(): Map<FactType, RegExp[]> {
     const patterns = new Map<FactType, RegExp[]>();
 
-    patterns.set('EXPLICIT', [/根据.*证据|依据.*证明/gi, /合同.*约定|协议.*约定/gi]);
-    patterns.set('INFERRED', [/推断|推测|判断/gi]);
-    patterns.set('ADMITTED', [/承认|认可|确认/gi]);
-    patterns.set('DISPUTED', [/争议|分歧|否认|反驳/gi]);
+    patterns.set("EXPLICIT", [
+      /根据.*证据|依据.*证明/gi,
+      /合同.*约定|协议.*约定/gi,
+    ]);
+    patterns.set("INFERRED", [/推断|推测|判断/gi]);
+    patterns.set("ADMITTED", [/承认|认可|确认/gi]);
+    patterns.set("DISPUTED", [/争议|分歧|否认|反驳/gi]);
 
     return patterns;
   }
@@ -860,7 +931,7 @@ export function createKeyFactExtractor(): KeyFactExtractor {
 export async function extractKeyFactsFromText(
   text: string,
   extractedData?: ExtractedData,
-  options?: KeyFactExtractionOptions
+  options?: KeyFactExtractionOptions,
 ): Promise<KeyFact[]> {
   const extractor = createKeyFactExtractor();
   const result = await extractor.extractFromText(text, extractedData, options);

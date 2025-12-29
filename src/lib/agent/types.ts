@@ -11,16 +11,12 @@ import type {
   AgentStats,
   AgentMetrics,
   AgentEvent,
-  AgentEventType
-} from '../../types/agent';
+  AgentEventType,
+} from "../../types/agent";
 
-import {
-  AgentType,
-  AgentStatus,
-  TaskPriority
-} from '../../types/agent';
+import { AgentType, AgentStatus, TaskPriority } from "../../types/agent";
 
-import * as crypto from 'crypto';
+import * as crypto from "crypto";
 
 // =============================================================================
 // 内部工具类型
@@ -47,10 +43,10 @@ export interface AgentCacheConfig {
 
 // Agent日志级别
 export enum AgentLogLevel {
-  DEBUG = 'debug',
-  INFO = 'info',
-  WARN = 'warn',
-  ERROR = 'error'
+  DEBUG = "debug",
+  INFO = "info",
+  WARN = "warn",
+  ERROR = "error",
 }
 
 // Agent日志条目
@@ -74,10 +70,10 @@ export interface AgentSystemConfig {
   maxConcurrentExecutions: number;
   enableMetrics: boolean;
   enableCaching: boolean;
-  
+
   // 缓存配置
   cache: AgentCacheConfig;
-  
+
   // 重试配置
   retry: {
     maxAttempts: number;
@@ -85,14 +81,14 @@ export interface AgentSystemConfig {
     maxDelay: number;
     backoffMultiplier: number;
   };
-  
+
   // 监控配置
   monitoring: {
     enabled: boolean;
     metricsInterval: number;
     retentionDays: number;
   };
-  
+
   // 日志配置
   logging: {
     level: AgentLogLevel;
@@ -113,7 +109,7 @@ export function createAgentError(
   type: AgentErrorType,
   agentName: string,
   retryable: boolean = false,
-  details?: Record<string, any>
+  details?: Record<string, any>,
 ): AgentError {
   return {
     code,
@@ -123,7 +119,7 @@ export function createAgentError(
     timestamp: Date.now(),
     retryable,
     details,
-    stack: new Error().stack
+    stack: new Error().stack,
   };
 }
 
@@ -143,7 +139,7 @@ export function createAgentResult(
     cached?: boolean;
     cacheKey?: string;
     error?: AgentError;
-  } = {}
+  } = {},
 ): AgentResult {
   return {
     success: options.success !== false,
@@ -158,7 +154,7 @@ export function createAgentResult(
     context: options.context,
     cached: options.cached,
     cacheKey: options.cacheKey,
-    error: options.error
+    error: options.error,
   };
 }
 
@@ -169,41 +165,41 @@ export function validateAgentContext(context: AgentContext): {
 } {
   const errors: string[] = [];
 
-  if (!context.task || typeof context.task !== 'string') {
-    errors.push('Task is required and must be a string');
+  if (!context.task || typeof context.task !== "string") {
+    errors.push("Task is required and must be a string");
   }
 
-  if (!context.data || typeof context.data !== 'object') {
-    errors.push('Data is required and must be an object');
+  if (!context.data || typeof context.data !== "object") {
+    errors.push("Data is required and must be an object");
   }
 
   if (!Object.values(TaskPriority).includes(context.priority)) {
-    errors.push('Priority must be a valid TaskPriority value');
+    errors.push("Priority must be a valid TaskPriority value");
   }
 
-  if (context.options && typeof context.options !== 'object') {
-    errors.push('Options must be an object if provided');
+  if (context.options && typeof context.options !== "object") {
+    errors.push("Options must be an object if provided");
   }
 
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
 // 生成缓存键
 export function generateCacheKey(context: AgentContext): string {
   const keyData = {
-    agentName: context.taskType || 'unknown',
+    agentName: context.taskType || "unknown",
     task: context.task,
     data: context.data,
-    options: context.options
+    options: context.options,
   };
-  
+
   return crypto
-    .createHash('sha256')
+    .createHash("sha256")
     .update(JSON.stringify(keyData))
-    .digest('hex');
+    .digest("hex");
 }
 
 // 计算执行统计
@@ -211,22 +207,26 @@ export function calculateExecutionStats(
   startTime: number,
   endTime: number,
   success: boolean,
-  previousStats?: AgentStats
+  previousStats?: AgentStats,
 ): Partial<AgentStats> {
   const executionTime = endTime - startTime;
   const totalExecutions = (previousStats?.totalExecutions || 0) + 1;
-  const successfulExecutions = (previousStats?.successfulExecutions || 0) + (success ? 1 : 0);
-  const failedExecutions = (previousStats?.failedExecutions || 0) + (success ? 0 : 1);
-  
+  const successfulExecutions =
+    (previousStats?.successfulExecutions || 0) + (success ? 1 : 0);
+  const failedExecutions =
+    (previousStats?.failedExecutions || 0) + (success ? 0 : 1);
+
   return {
     totalExecutions,
     successfulExecutions,
     failedExecutions,
-    averageExecutionTime: previousStats 
-      ? (previousStats.averageExecutionTime * (totalExecutions - 1) + executionTime) / totalExecutions
+    averageExecutionTime: previousStats
+      ? (previousStats.averageExecutionTime * (totalExecutions - 1) +
+          executionTime) /
+        totalExecutions
       : executionTime,
     lastExecutionTime: endTime,
-    errorRate: totalExecutions > 0 ? failedExecutions / totalExecutions : 0
+    errorRate: totalExecutions > 0 ? failedExecutions / totalExecutions : 0,
   };
 }
 
@@ -248,13 +248,13 @@ export interface AgentEventManager {
 export function createAgentEvent(
   type: AgentEventType,
   agentName: string,
-  data?: any
+  data?: any,
 ): AgentEvent {
   return {
     type,
     timestamp: Date.now(),
     agentName,
-    data
+    data,
   };
 }
 
@@ -273,19 +273,23 @@ export function isValidAgentStatus(status: string): status is AgentStatus {
 }
 
 // 检查是否为有效的TaskPriority
-export function isValidTaskPriority(priority: string): priority is TaskPriority {
+export function isValidTaskPriority(
+  priority: string,
+): priority is TaskPriority {
   return Object.values(TaskPriority).includes(priority as TaskPriority);
 }
 
 // 检查是否为有效的Agent实例
 export function isValidAgent(obj: any): obj is Agent {
-  return obj &&
-    typeof obj === 'object' &&
-    typeof obj.name === 'string' &&
-    typeof obj.type === 'string' &&
-    typeof obj.version === 'string' &&
-    typeof obj.description === 'string' &&
-    typeof obj.execute === 'function';
+  return (
+    obj &&
+    typeof obj === "object" &&
+    typeof obj.name === "string" &&
+    typeof obj.type === "string" &&
+    typeof obj.version === "string" &&
+    typeof obj.description === "string" &&
+    typeof obj.execute === "function"
+  );
 }
 
 // =============================================================================
@@ -301,22 +305,22 @@ export const DEFAULT_AGENT_CONFIG: AgentSystemConfig = {
     enabled: true,
     ttl: 300000, // 5分钟
     maxSize: 1000,
-    keyPrefix: 'agent_'
+    keyPrefix: "agent_",
   },
   retry: {
     maxAttempts: 3,
     baseDelay: 1000,
     maxDelay: 10000,
-    backoffMultiplier: 2
+    backoffMultiplier: 2,
   },
   monitoring: {
     enabled: true,
     metricsInterval: 60000, // 1分钟
-    retentionDays: 7
+    retentionDays: 7,
   },
   logging: {
     level: AgentLogLevel.INFO,
     enableConsole: true,
-    enableFile: false
-  }
+    enableFile: false,
+  },
 };

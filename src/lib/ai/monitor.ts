@@ -591,7 +591,7 @@ export class AIMonitor {
     model?: string,
     timeWindow?: number,
   ): PerformanceMetrics[] {
-    let metrics: PerformanceMetrics[] = [];
+    const metrics: PerformanceMetrics[] = [];
 
     this.metrics.forEach((metricsList, key) => {
       const [keyProvider, keyModel] = key.split(":");

@@ -1,6 +1,6 @@
-import { PrismaClient, LawCategory, LawType, LawStatus } from '@prisma/client';
-import * as fs from 'fs';
-import * as path from 'path';
+import { PrismaClient, LawCategory, LawType, LawStatus } from "@prisma/client";
+import * as fs from "fs";
+import * as path from "path";
 
 const prisma = new PrismaClient();
 
@@ -34,24 +34,24 @@ interface LawArticleFile {
 
 // 法律类别映射
 const CATEGORY_MAP: Record<string, LawCategory> = {
-  CIVIL: 'CIVIL',
-  CRIMINAL: 'CRIMINAL',
-  ADMINISTRATIVE: 'ADMINISTRATIVE',
-  COMMERCIAL: 'COMMERCIAL',
-  LABOR: 'LABOR',
-  PROCEDURAL: 'PROCEDURE',
-  INTELLECTUAL: 'INTELLECTUAL_PROPERTY',
+  CIVIL: "CIVIL",
+  CRIMINAL: "CRIMINAL",
+  ADMINISTRATIVE: "ADMINISTRATIVE",
+  COMMERCIAL: "COMMERCIAL",
+  LABOR: "LABOR",
+  PROCEDURAL: "PROCEDURE",
+  INTELLECTUAL: "INTELLECTUAL_PROPERTY",
 };
 
 // 法律类型映射
 const LAWTYPE_MAP: Record<string, LawType> = {
-  LAW: 'LAW',
-  CONSTITUTION: 'CONSTITUTION',
-  ADMINISTRATIVE_REGULATION: 'ADMINISTRATIVE_REGULATION',
-  LOCAL_REGULATION: 'LOCAL_REGULATION',
-  JUDICIAL_INTERPRETATION: 'JUDICIAL_INTERPRETATION',
-  DEPARTMENTAL_RULE: 'DEPARTMENTAL_RULE',
-  OTHER: 'OTHER',
+  LAW: "LAW",
+  CONSTITUTION: "CONSTITUTION",
+  ADMINISTRATIVE_REGULATION: "ADMINISTRATIVE_REGULATION",
+  LOCAL_REGULATION: "LOCAL_REGULATION",
+  JUDICIAL_INTERPRETATION: "JUDICIAL_INTERPRETATION",
+  DEPARTMENTAL_RULE: "DEPARTMENTAL_RULE",
+  OTHER: "OTHER",
 };
 
 /**
@@ -59,11 +59,11 @@ const LAWTYPE_MAP: Record<string, LawType> = {
  */
 function validateArticleData(article: LawArticleData): boolean {
   const requiredFields = [
-    'lawName',
-    'articleNumber',
-    'fullText',
-    'category',
-    'subCategory',
+    "lawName",
+    "articleNumber",
+    "fullText",
+    "category",
+    "subCategory",
   ];
 
   for (const field of requiredFields) {
@@ -87,7 +87,7 @@ function validateArticleData(article: LawArticleData): boolean {
 function loadArticlesFromFile(filePath: string): LawArticleData[] {
   try {
     const fullPath = path.join(process.cwd(), filePath);
-    const fileContent = fs.readFileSync(fullPath, 'utf-8');
+    const fileContent = fs.readFileSync(fullPath, "utf-8");
     const data: LawArticleFile = JSON.parse(fileContent);
     return data.data;
   } catch (error) {
@@ -122,7 +122,8 @@ async function importArticle(article: LawArticleData): Promise<boolean> {
           tags: article.tags,
           keywords: article.keywords,
           effectiveDate: new Date(article.effectiveDate),
-          status: article.status === 'VALID' ? LawStatus.VALID : LawStatus.DRAFT,
+          status:
+            article.status === "VALID" ? LawStatus.VALID : LawStatus.DRAFT,
           jurisdiction: article.jurisdiction,
           searchableText: article.searchableText,
         },
@@ -141,7 +142,8 @@ async function importArticle(article: LawArticleData): Promise<boolean> {
           keywords: article.keywords,
           version: article.version,
           effectiveDate: new Date(article.effectiveDate),
-          status: article.status === 'VALID' ? LawStatus.VALID : LawStatus.DRAFT,
+          status:
+            article.status === "VALID" ? LawStatus.VALID : LawStatus.DRAFT,
           issuingAuthority: article.issuingAuthority,
           jurisdiction: article.jurisdiction,
           searchableText: article.searchableText,
@@ -153,7 +155,10 @@ async function importArticle(article: LawArticleData): Promise<boolean> {
 
     return true;
   } catch (error) {
-    console.error(`导入法条失败: ${article.lawName} ${article.articleNumber}`, error);
+    console.error(
+      `导入法条失败: ${article.lawName} ${article.articleNumber}`,
+      error,
+    );
     return false;
   }
 }
@@ -163,7 +168,7 @@ async function importArticle(article: LawArticleData): Promise<boolean> {
  */
 async function createIndexes(): Promise<void> {
   try {
-    console.log('创建法条索引...');
+    console.log("创建法条索引...");
 
     // 简单索引（不需要pg_trgm扩展）
     await prisma.$executeRaw`
@@ -193,12 +198,12 @@ async function createIndexes(): Promise<void> {
         ON "law_articles" USING gin ("tags")
       `;
     } catch (ginError) {
-      console.warn('GIN索引创建失败（需要pg_trgm扩展）:', ginError);
+      console.warn("GIN索引创建失败（需要pg_trgm扩展）:", ginError);
     }
 
-    console.log('法条索引创建完成');
+    console.log("法条索引创建完成");
   } catch (error) {
-    console.error('创建索引失败:', error);
+    console.error("创建索引失败:", error);
   }
 }
 
@@ -206,16 +211,16 @@ async function createIndexes(): Promise<void> {
  * 主导入流程
  */
 async function main() {
-  console.log('开始导入法条数据...\n');
+  console.log("开始导入法条数据...\n");
 
   const dataFiles = [
-    'data/law-articles-civil-contract.json',
-    'data/law-articles-criminal.json',
-    'data/law-articles-administrative.json',
-    'data/law-articles-commercial.json',
-    'data/law-articles-labor.json',
-    'data/law-articles-procedural.json',
-    'data/law-articles-intellectual.json',
+    "data/law-articles-civil-contract.json",
+    "data/law-articles-criminal.json",
+    "data/law-articles-administrative.json",
+    "data/law-articles-commercial.json",
+    "data/law-articles-labor.json",
+    "data/law-articles-procedural.json",
+    "data/law-articles-intellectual.json",
   ];
 
   let totalArticles = 0;
@@ -251,20 +256,20 @@ async function main() {
   await createIndexes();
 
   // 统计结果
-  console.log('\n导入完成！');
-  console.log('====================');
+  console.log("\n导入完成！");
+  console.log("====================");
   console.log(`总法条数: ${totalArticles}`);
   console.log(`成功导入: ${successCount}`);
   console.log(`导入失败: ${failCount}`);
-  console.log('====================\n');
+  console.log("====================\n");
 
   // 验证导入结果
   const countByCategory = await prisma.lawArticle.groupBy({
-    by: ['category'],
+    by: ["category"],
     _count: true,
   });
 
-  console.log('按类别统计导入结果：');
+  console.log("按类别统计导入结果：");
   for (const item of countByCategory) {
     console.log(`  ${item.category}: ${item._count} 条`);
   }
@@ -272,7 +277,7 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error('导入失败:', e);
+    console.error("导入失败:", e);
     process.exit(1);
   })
   .finally(async () => {

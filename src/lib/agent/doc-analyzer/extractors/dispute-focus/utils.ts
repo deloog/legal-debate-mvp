@@ -3,14 +3,14 @@
  * 包含合并、去重、摘要生成等功能
  */
 
-import type { DisputeFocus, DisputeFocusCategory } from '../../core/types';
+import type { DisputeFocus, DisputeFocusCategory } from "../../core/types";
 
 /**
  * 合并AI和规则匹配结果，去重
  */
 export function mergeAndDeduplicate(
   aiFocuses: DisputeFocus[],
-  ruleFocuses: DisputeFocus[]
+  ruleFocuses: DisputeFocus[],
 ): DisputeFocus[] {
   const seen = new Set<string>();
   const unique: DisputeFocus[] = [];
@@ -43,7 +43,7 @@ export function generateSummary(
   finalFocuses: DisputeFocus[],
   aiExtracted: DisputeFocus[],
   ruleExtracted: DisputeFocus[],
-  aiReviewed: DisputeFocus[]
+  aiReviewed: DisputeFocus[],
 ): {
   total: number;
   byCategory: Record<DisputeFocusCategory, number>;
@@ -54,23 +54,28 @@ export function generateSummary(
   ruleExtractedCount: number;
   aiReviewedCount: number;
 } {
-  const byCategory: Record<DisputeFocusCategory, number> = {} as Record<DisputeFocusCategory, number>;
+  const byCategory: Record<DisputeFocusCategory, number> = {} as Record<
+    DisputeFocusCategory,
+    number
+  >;
   let totalImportance = 0;
   let totalConfidence = 0;
   let inferredCount = 0;
 
   const allCategories: DisputeFocusCategory[] = [
-    'CONTRACT_BREACH',
-    'PAYMENT_DISPUTE',
-    'LIABILITY_ISSUE',
-    'DAMAGES_CALCULATION',
-    'PERFORMANCE_DISPUTE',
-    'VALIDITY_ISSUE',
-    'OTHER'
+    "CONTRACT_BREACH",
+    "PAYMENT_DISPUTE",
+    "LIABILITY_ISSUE",
+    "DAMAGES_CALCULATION",
+    "PERFORMANCE_DISPUTE",
+    "VALIDITY_ISSUE",
+    "OTHER",
   ];
 
   for (const category of allCategories) {
-    byCategory[category] = finalFocuses.filter(f => f.category === category).length;
+    byCategory[category] = finalFocuses.filter(
+      (f) => f.category === category,
+    ).length;
   }
 
   for (const focus of finalFocuses) {
@@ -82,11 +87,17 @@ export function generateSummary(
   return {
     total: finalFocuses.length,
     byCategory,
-    avgImportance: finalFocuses.length > 0 ? Math.round(totalImportance / finalFocuses.length) : 0,
-    avgConfidence: finalFocuses.length > 0 ? Math.round(totalConfidence / finalFocuses.length * 100) / 100 : 0,
+    avgImportance:
+      finalFocuses.length > 0
+        ? Math.round(totalImportance / finalFocuses.length)
+        : 0,
+    avgConfidence:
+      finalFocuses.length > 0
+        ? Math.round((totalConfidence / finalFocuses.length) * 100) / 100
+        : 0,
     inferredCount,
     aiExtractedCount: aiExtracted.length,
     ruleExtractedCount: ruleExtracted.length,
-    aiReviewedCount: aiReviewed.length
+    aiReviewedCount: aiReviewed.length,
   };
 }

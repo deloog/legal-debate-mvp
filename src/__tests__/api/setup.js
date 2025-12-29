@@ -7,7 +7,7 @@
 global.Headers = class Headers {
   constructor(init = {}) {
     this.headers = new Map();
-    if (typeof init === 'object') {
+    if (typeof init === "object") {
       if (init instanceof Map) {
         this.headers = new Map(init);
       } else if (init instanceof Headers) {
@@ -71,10 +71,10 @@ global.Headers = class Headers {
 // 然后定义Request类
 global.Request = class Request {
   constructor(input, init = {}) {
-    this.url = typeof input === 'string' ? input : input.toString();
-    this.method = init.method || 'GET';
+    this.url = typeof input === "string" ? input : input.toString();
+    this.method = init.method || "GET";
     this.headers = new Map();
-    
+
     if (init.headers) {
       if (init.headers instanceof Map) {
         this.headers = init.headers;
@@ -84,36 +84,42 @@ global.Request = class Request {
         });
       }
     }
-    
+
     this.body = init.body;
     this.signal = init.signal;
-    this.credentials = init.credentials || 'same-origin';
-    this.cache = init.cache || 'default';
-    this.redirect = init.redirect || 'follow';
+    this.credentials = init.credentials || "same-origin";
+    this.cache = init.cache || "default";
+    this.redirect = init.redirect || "follow";
     this.referrer = init.referrer;
-    this.referrerPolicy = init.referrerPolicy || '';
-    this.integrity = init.integrity || '';
+    this.referrerPolicy = init.referrerPolicy || "";
+    this.integrity = init.integrity || "";
     this.keepalive = init.keepalive || false;
-    this.mode = init.mode || 'cors';
+    this.mode = init.mode || "cors";
   }
 
   async json() {
     if (this.body) {
       try {
-        return JSON.parse(typeof this.body === 'string' ? this.body : this.body.toString());
+        return JSON.parse(
+          typeof this.body === "string" ? this.body : this.body.toString(),
+        );
       } catch {
-        throw new Error('Invalid JSON');
+        throw new Error("Invalid JSON");
       }
     }
     return {};
   }
 
   async text() {
-    return this.body ? (typeof this.body === 'string' ? this.body : this.body.toString()) : '';
+    return this.body
+      ? typeof this.body === "string"
+        ? this.body
+        : this.body.toString()
+      : "";
   }
 
   async blob() {
-    return new Blob([this.body || '']);
+    return new Blob([this.body || ""]);
   }
 
   async arrayBuffer() {
@@ -125,7 +131,7 @@ global.Request = class Request {
       method: this.method,
       headers: Object.fromEntries(this.headers),
       body: this.body,
-      ...this
+      ...this,
     });
   }
 };
@@ -133,18 +139,18 @@ global.Request = class Request {
 global.Response = class Response {
   constructor(body, init = {}) {
     init = init || {};
-    
+
     this.body = body;
     this.status = init.status || 200;
-    this.statusText = init.statusText || 'OK';
-    this.url = init.url || '';
+    this.statusText = init.statusText || "OK";
+    this.url = init.url || "";
     this.ok = this.status >= 200 && this.status < 300;
     this.redirected = init.redirected || false;
-    this.type = init.type || 'basic';
-    
+    this.type = init.type || "basic";
+
     // 创建Headers对象而不是Map
     this.headers = new global.Headers();
-    
+
     // 先设置init中的headers
     if (init.headers) {
       if (init.headers instanceof Map) {
@@ -161,16 +167,18 @@ global.Response = class Response {
         });
       }
     }
-    
+
     // 只有在没有显式设置Content-Type时才自动设置
     // 并且只对非ArrayBuffer、非Blob、非ReadableStream的对象设置
-    if (typeof body === 'object' && 
-        body !== null && 
-        !(body instanceof ArrayBuffer) && 
-        !(body instanceof Blob) && 
-        !(body instanceof ReadableStream) &&
-        !this.headers.has('Content-Type')) {
-      this.headers.set('Content-Type', 'application/json');
+    if (
+      typeof body === "object" &&
+      body !== null &&
+      !(body instanceof ArrayBuffer) &&
+      !(body instanceof Blob) &&
+      !(body instanceof ReadableStream) &&
+      !this.headers.has("Content-Type")
+    ) {
+      this.headers.set("Content-Type", "application/json");
     }
   }
 
@@ -178,21 +186,24 @@ global.Response = class Response {
     return new Response(JSON.stringify(data), {
       ...init,
       headers: {
-        'Content-Type': 'application/json',
-        ...init.headers
-      }
+        "Content-Type": "application/json",
+        ...init.headers,
+      },
     });
   }
 
   static redirect(url, status = 302) {
     return new Response(null, {
       status,
-      headers: { Location: url }
+      headers: { Location: url },
     });
   }
 
   static error() {
-    return new Response(null, { status: 500, statusText: 'Internal Server Error' });
+    return new Response(null, {
+      status: 500,
+      statusText: "Internal Server Error",
+    });
   }
 
   async json() {
@@ -205,11 +216,15 @@ global.Response = class Response {
   }
 
   async text() {
-    return this.body ? (typeof this.body === 'string' ? this.body : this.body.toString()) : '';
+    return this.body
+      ? typeof this.body === "string"
+        ? this.body
+        : this.body.toString()
+      : "";
   }
 
   async blob() {
-    return new Blob([this.body || '']);
+    return new Blob([this.body || ""]);
   }
 
   async arrayBuffer() {
@@ -221,20 +236,20 @@ global.Response = class Response {
       status: this.status,
       statusText: this.statusText,
       headers: Object.fromEntries(this.headers),
-      url: this.url
+      url: this.url,
     });
   }
 };
 
 // 立即模拟Next.js模块
-jest.mock('next/server', () => {
+jest.mock("next/server", () => {
   const MockHeaders = global.Headers;
   const MockRequest = global.Request;
   const MockResponse = global.Response;
 
   // Add static methods to NextResponse
   MockResponse.next = jest.fn(() => new MockResponse(null));
-  
+
   return {
     NextRequest: MockRequest,
     NextResponse: MockResponse,
@@ -242,7 +257,7 @@ jest.mock('next/server', () => {
 });
 
 // 设置基本的Web API polyfills
-const util = require('util');
+const util = require("util");
 
 if (!global.TextEncoder) {
   global.TextEncoder = util.TextEncoder;
@@ -252,14 +267,14 @@ if (!global.TextDecoder) {
 }
 
 // 模拟fetch
-global.fetch = jest.fn(() => 
+global.fetch = jest.fn(() =>
   Promise.resolve({
     status: 200,
-    statusText: 'OK',
+    statusText: "OK",
     headers: new Headers(),
     json: () => Promise.resolve({}),
-    text: () => Promise.resolve('{}'),
-  })
+    text: () => Promise.resolve("{}"),
+  }),
 );
 
 // 模拟localStorage和sessionStorage
@@ -288,7 +303,7 @@ if (!global.sessionStorage) {
 // 设置Web Crypto API
 if (!global.crypto) {
   global.crypto = {
-    randomUUID: () => '123e4567-e89b-12d3-a456-426614174000',
+    randomUUID: () => "123e4567-e89b-12d3-a456-426614174000",
     getRandomValues: (arr) => {
       for (let i = 0; i < arr.length; i++) {
         arr[i] = Math.floor(Math.random() * 256);
@@ -344,5 +359,5 @@ global.ReadableStream = class ReadableStream {
 
 // 设置环境变量
 if (!process.env.NODE_ENV) {
-  process.env.NODE_ENV = 'test';
+  process.env.NODE_ENV = "test";
 }

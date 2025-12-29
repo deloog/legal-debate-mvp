@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest } from "next/server";
 
 /**
  * 创建模拟的NextRequest对象
@@ -9,9 +9,9 @@ export function createMockRequest(
     method?: string;
     body?: any;
     headers?: Record<string, string>;
-  } = {}
+  } = {},
 ): NextRequest {
-  const { method = 'GET', body, headers = {} } = options;
+  const { method = "GET", body, headers = {} } = options;
 
   const requestInit: RequestInit = {
     method,
@@ -21,11 +21,11 @@ export function createMockRequest(
   };
 
   // 只有当有body时才设置Content-Type头部
-  if (body && method !== 'GET') {
+  if (body && method !== "GET") {
     requestInit.body = JSON.stringify(body);
     // 如果没有明确设置Content-Type，则设置为application/json
-    if (!requestInit.headers!['Content-Type']) {
-      requestInit.headers!['Content-Type'] = 'application/json';
+    if (!requestInit.headers!["Content-Type"]) {
+      requestInit.headers!["Content-Type"] = "application/json";
     }
   }
 
@@ -42,7 +42,7 @@ export function createAuthenticatedRequest(
     method?: string;
     body?: any;
     headers?: Record<string, string>;
-  } = {}
+  } = {},
 ): NextRequest {
   return createMockRequest(url, {
     ...options,
@@ -58,7 +58,7 @@ export function createAuthenticatedRequest(
  */
 export async function parseResponse(response: Response) {
   const text = await response.text();
-  
+
   try {
     return JSON.parse(text);
   } catch {
@@ -81,9 +81,11 @@ export interface TestResponse {
 /**
  * 创建测试响应对象
  */
-export async function createTestResponse(response: Response): Promise<TestResponse> {
+export async function createTestResponse(
+  response: Response,
+): Promise<TestResponse> {
   const data = await parseResponse(response);
-  
+
   return {
     status: response.status,
     headers: response.headers,
@@ -139,7 +141,7 @@ export const assertions = {
    */
   assertValidationError: (response: TestResponse) => {
     assertions.assertError(response, 400);
-    expect(response.error?.code).toBe('VALIDATION_ERROR');
+    expect(response.error?.code).toBe("VALIDATION_ERROR");
   },
 
   /**
@@ -147,7 +149,7 @@ export const assertions = {
    */
   assertNotFound: (response: TestResponse) => {
     assertions.assertError(response, 404);
-    expect(response.error?.code).toBe('NOT_FOUND');
+    expect(response.error?.code).toBe("NOT_FOUND");
   },
 
   /**
@@ -155,7 +157,7 @@ export const assertions = {
    */
   assertUnauthorized: (response: TestResponse) => {
     assertions.assertError(response, 401);
-    expect(response.error?.code).toBe('UNAUTHORIZED');
+    expect(response.error?.code).toBe("UNAUTHORIZED");
   },
 
   /**
@@ -163,7 +165,7 @@ export const assertions = {
    */
   assertForbidden: (response: TestResponse) => {
     assertions.assertError(response, 403);
-    expect(response.error?.code).toBe('FORBIDDEN');
+    expect(response.error?.code).toBe("FORBIDDEN");
   },
 
   /**
@@ -183,17 +185,17 @@ export const mockData = {
   /**
    * 生成UUID
    */
-  uuid: () => '123e4567-e89b-12d3-a456-426614174000',
+  uuid: () => "123e4567-e89b-12d3-a456-426614174000",
 
   /**
    * 生成案件数据
    */
   case: (overrides: Partial<any> = {}) => ({
     id: mockData.uuid(),
-    title: '测试案件',
-    description: '这是一个测试案件',
-    type: 'civil',
-    status: 'draft',
+    title: "测试案件",
+    description: "这是一个测试案件",
+    type: "civil",
+    status: "draft",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...overrides,
@@ -204,9 +206,9 @@ export const mockData = {
    */
   user: (overrides: Partial<any> = {}) => ({
     id: mockData.uuid(),
-    email: 'test@example.com',
-    username: 'testuser',
-    role: 'lawyer',
+    email: "test@example.com",
+    username: "testuser",
+    role: "lawyer",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...overrides,
@@ -217,14 +219,14 @@ export const mockData = {
    */
   debate: (overrides: Partial<any> = {}) => ({
     id: mockData.uuid(),
-    title: '测试辩论',
+    title: "测试辩论",
     caseId: mockData.uuid(),
-    status: 'active',
+    status: "active",
     config: {
       maxRounds: 3,
       timePerRound: 30,
       allowNewEvidence: true,
-      debateMode: 'standard',
+      debateMode: "standard",
     },
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -237,11 +239,11 @@ export const mockData = {
  */
 export function mockEnv(vars: Record<string, string>) {
   const originalEnv = process.env;
-  
+
   beforeEach(() => {
     process.env = { ...originalEnv, ...vars };
   });
-  
+
   afterEach(() => {
     process.env = originalEnv;
   });

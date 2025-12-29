@@ -5,7 +5,7 @@ export interface DebateConfig {
   maxRounds?: number;
   timePerRound?: number; // 分钟
   allowNewEvidence?: boolean;
-  debateMode?: 'standard' | 'fast' | 'detailed';
+  debateMode?: "standard" | "fast" | "detailed";
   aiProvider?: string;
   autoGenerate?: boolean;
   language?: string;
@@ -18,10 +18,10 @@ export const DEFAULT_DEBATE_CONFIG: DebateConfig = {
   maxRounds: 3,
   timePerRound: 30, // 30分钟
   allowNewEvidence: true,
-  debateMode: 'standard',
-  aiProvider: 'deepseek',
+  debateMode: "standard",
+  aiProvider: "deepseek",
   autoGenerate: true,
-  language: 'zh-CN',
+  language: "zh-CN",
 };
 
 /**
@@ -39,24 +39,24 @@ const CONFIG_RULES = {
     required: false,
   },
   allowNewEvidence: {
-    type: 'boolean',
+    type: "boolean",
     required: false,
   },
   debateMode: {
-    type: 'enum',
-    values: ['standard', 'fast', 'detailed'],
+    type: "enum",
+    values: ["standard", "fast", "detailed"],
     required: false,
   },
   aiProvider: {
-    type: 'string',
+    type: "string",
     required: false,
   },
   autoGenerate: {
-    type: 'boolean',
+    type: "boolean",
     required: false,
   },
   language: {
-    type: 'string',
+    type: "string",
     pattern: /^[a-z]{2}-[A-Z]{2}$/,
     required: false,
   },
@@ -68,7 +68,7 @@ const CONFIG_RULES = {
 function validateConfigField(
   key: string,
   value: any,
-  rule: any
+  rule: any,
 ): { valid: boolean; error?: string } {
   // 检查必填项
   if (rule.required && (value === undefined || value === null)) {
@@ -82,21 +82,21 @@ function validateConfigField(
 
   // 类型验证
   switch (rule.type) {
-    case 'boolean':
-      if (typeof value !== 'boolean') {
+    case "boolean":
+      if (typeof value !== "boolean") {
         return { valid: false, error: `${key} 必须是布尔值` };
       }
       break;
-    case 'string':
-      if (typeof value !== 'string') {
+    case "string":
+      if (typeof value !== "string") {
         return { valid: false, error: `${key} 必须是字符串` };
       }
       break;
-    case 'enum':
+    case "enum":
       if (!rule.values.includes(value)) {
-        return { 
-          valid: false, 
-          error: `${key} 必须是以下值之一: ${rule.values.join(', ')}` 
+        return {
+          valid: false,
+          error: `${key} 必须是以下值之一: ${rule.values.join(", ")}`,
         };
       }
       break;
@@ -112,9 +112,9 @@ function validateConfigField(
 
   // 正则验证
   if (rule.pattern && !rule.pattern.test(value)) {
-    return { 
-      valid: false, 
-      error: `${key} 格式不正确` 
+    return {
+      valid: false,
+      error: `${key} 格式不正确`,
     };
   }
 
@@ -124,9 +124,11 @@ function validateConfigField(
 /**
  * 验证辩论配置
  */
-export function validateDebateConfig(
-  config: DebateConfig
-): { valid: boolean; errors: string[]; warnings: string[] } {
+export function validateDebateConfig(config: DebateConfig): {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+} {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -134,7 +136,7 @@ export function validateDebateConfig(
   for (const [key, rule] of Object.entries(CONFIG_RULES)) {
     const value = config[key as keyof DebateConfig];
     const result = validateConfigField(key, value, rule);
-    
+
     if (!result.valid) {
       errors.push(result.error!);
     }
@@ -143,31 +145,32 @@ export function validateDebateConfig(
   // 业务逻辑验证
   if (config.maxRounds && config.timePerRound) {
     const totalTime = config.maxRounds * config.timePerRound;
-    if (totalTime > 480) { // 8小时
-      warnings.push('总辩论时间超过8小时，建议减少轮次或每轮时间');
+    if (totalTime > 480) {
+      // 8小时
+      warnings.push("总辩论时间超过8小时，建议减少轮次或每轮时间");
     }
   }
 
   // 模式特定验证
-  if (config.debateMode === 'fast') {
+  if (config.debateMode === "fast") {
     if (config.maxRounds && config.maxRounds > 5) {
-      warnings.push('快速模式下建议轮次不超过5轮');
+      warnings.push("快速模式下建议轮次不超过5轮");
     }
     if (config.timePerRound && config.timePerRound > 20) {
-      warnings.push('快速模式下建议每轮时间不超过20分钟');
+      warnings.push("快速模式下建议每轮时间不超过20分钟");
     }
-  } else if (config.debateMode === 'detailed') {
+  } else if (config.debateMode === "detailed") {
     if (config.maxRounds && config.maxRounds < 3) {
-      warnings.push('详细模式下建议至少3轮辩论');
+      warnings.push("详细模式下建议至少3轮辩论");
     }
     if (config.timePerRound && config.timePerRound < 45) {
-      warnings.push('详细模式下建议每轮时间至少45分钟');
+      warnings.push("详细模式下建议每轮时间至少45分钟");
     }
   }
 
   // AI服务验证
   if (config.autoGenerate && !config.aiProvider) {
-    errors.push('启用自动生成时必须指定AI服务提供商');
+    errors.push("启用自动生成时必须指定AI服务提供商");
   }
 
   return {
@@ -181,7 +184,7 @@ export function validateDebateConfig(
  * 标准化配置（填充默认值）
  */
 export function normalizeDebateConfig(
-  config?: Partial<DebateConfig>
+  config?: Partial<DebateConfig>,
 ): DebateConfig {
   const normalized = { ...DEFAULT_DEBATE_CONFIG };
 
@@ -191,11 +194,11 @@ export function normalizeDebateConfig(
 
   // 根据模式调整默认值
   switch (normalized.debateMode) {
-    case 'fast':
+    case "fast":
       normalized.maxRounds = normalized.maxRounds || 3;
       normalized.timePerRound = normalized.timePerRound || 15;
       break;
-    case 'detailed':
+    case "detailed":
       normalized.maxRounds = normalized.maxRounds || 5;
       normalized.timePerRound = normalized.timePerRound || 60;
       break;
@@ -215,22 +218,22 @@ export function generateConfigSummary(config: DebateConfig): string {
 
   parts.push(`${config.maxRounds}轮辩论`);
   parts.push(`每轮${config.timePerRound}分钟`);
-  
+
   if (config.allowNewEvidence) {
-    parts.push('允许新证据');
+    parts.push("允许新证据");
   } else {
-    parts.push('不允许新证据');
+    parts.push("不允许新证据");
   }
 
   parts.push(`${config.debateMode}模式`);
-  
+
   if (config.autoGenerate) {
     parts.push(`使用${config.aiProvider}自动生成`);
   }
 
   parts.push(`语言: ${config.language}`);
 
-  return parts.join(' | ');
+  return parts.join(" | ");
 }
 
 /**
@@ -239,10 +242,12 @@ export function generateConfigSummary(config: DebateConfig): string {
 export function validateRoundStart(
   debateConfig: DebateConfig,
   currentRound: number,
-  lastRoundStatus?: string
+  lastRoundStatus?: string,
 ): { valid: boolean; reason?: string } {
   // 检查最大轮次限制
-  if (currentRound > (debateConfig.maxRounds || DEFAULT_DEBATE_CONFIG.maxRounds)) {
+  if (
+    currentRound > (debateConfig.maxRounds || DEFAULT_DEBATE_CONFIG.maxRounds)
+  ) {
     return {
       valid: false,
       reason: `已达到最大轮次限制 ${debateConfig.maxRounds}`,
@@ -251,10 +256,10 @@ export function validateRoundStart(
 
   // 检查前一轮次状态
   if (currentRound > 1) {
-    if (lastRoundStatus !== 'COMPLETED') {
+    if (lastRoundStatus !== "COMPLETED") {
       return {
         valid: false,
-        reason: '前一轮次尚未完成',
+        reason: "前一轮次尚未完成",
       };
     }
   }
@@ -268,12 +273,13 @@ export function validateRoundStart(
 export function calculateEstimatedCompletion(
   config: DebateConfig,
   currentRound: number,
-  startedAt?: Date
+  startedAt?: Date,
 ): { estimatedEnd: Date; remaining: number } {
   const totalRounds = config.maxRounds || DEFAULT_DEBATE_CONFIG.maxRounds;
-  const roundTime = (config.timePerRound || DEFAULT_DEBATE_CONFIG.timePerRound) * 60 * 1000; // 转换为毫秒
+  const roundTime =
+    (config.timePerRound || DEFAULT_DEBATE_CONFIG.timePerRound) * 60 * 1000; // 转换为毫秒
   const remainingRounds = totalRounds - currentRound + 1; // 包括当前轮次
-  
+
   const now = startedAt || new Date();
   const estimatedEnd = new Date(now.getTime() + remainingRounds * roundTime);
   const remaining = estimatedEnd.getTime() - now.getTime();
@@ -289,44 +295,44 @@ export function calculateEstimatedCompletion(
  */
 export const DEBATE_PRESETS = {
   quick: {
-    name: '快速辩论',
-    description: '适用于简单案件的快速辩论',
+    name: "快速辩论",
+    description: "适用于简单案件的快速辩论",
     config: {
       maxRounds: 2,
       timePerRound: 15,
       allowNewEvidence: false,
-      debateMode: 'fast' as const,
+      debateMode: "fast" as const,
       autoGenerate: true,
-      language: 'zh-CN',
+      language: "zh-CN",
     },
   },
   standard: {
-    name: '标准辩论',
-    description: '适用于一般案件的标准辩论',
+    name: "标准辩论",
+    description: "适用于一般案件的标准辩论",
     config: {
       maxRounds: 3,
       timePerRound: 30,
       allowNewEvidence: true,
-      debateMode: 'standard' as const,
+      debateMode: "standard" as const,
       autoGenerate: true,
-      language: 'zh-CN',
+      language: "zh-CN",
     },
   },
   detailed: {
-    name: '详细辩论',
-    description: '适用于复杂案件的详细辩论',
+    name: "详细辩论",
+    description: "适用于复杂案件的详细辩论",
     config: {
       maxRounds: 5,
       timePerRound: 60,
       allowNewEvidence: true,
-      debateMode: 'detailed' as const,
+      debateMode: "detailed" as const,
       autoGenerate: true,
-      language: 'zh-CN',
+      language: "zh-CN",
     },
   },
   custom: {
-    name: '自定义',
-    description: '完全自定义的辩论配置',
+    name: "自定义",
+    description: "完全自定义的辩论配置",
     config: DEFAULT_DEBATE_CONFIG,
   },
 };
@@ -334,7 +340,9 @@ export const DEBATE_PRESETS = {
 /**
  * 获取预设配置
  */
-export function getPresetConfig(presetName: keyof typeof DEBATE_PRESETS): DebateConfig {
+export function getPresetConfig(
+  presetName: keyof typeof DEBATE_PRESETS,
+): DebateConfig {
   return DEBATE_PRESETS[presetName]?.config || DEFAULT_DEBATE_CONFIG;
 }
 

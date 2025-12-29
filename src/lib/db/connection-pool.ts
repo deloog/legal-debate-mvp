@@ -16,10 +16,10 @@ export interface ConnectionPoolConfig {
 
 // 连接池状态枚举
 export enum ConnectionStatus {
-  IDLE = 'idle',
-  ACTIVE = 'active',
-  WAITING = 'waiting',
-  ERROR = 'error'
+  IDLE = "idle",
+  ACTIVE = "active",
+  WAITING = "waiting",
+  ERROR = "error",
 }
 
 // 连接池统计接口增强
@@ -44,12 +44,11 @@ const defaultPoolConfig: ConnectionPoolConfig = {
   idleTimeoutMillis: 30000,
   maxLifetimeHours: 24,
   acquireTimeoutMillis: 30000, // 连接获取超时
-  createTimeoutMillis: 5000,    // 连接创建超时
-  destroyTimeoutMillis: 5000,   // 连接销毁超时
-  reapIntervalMillis: 1000,    // 连接回收检查间隔
+  createTimeoutMillis: 5000, // 连接创建超时
+  destroyTimeoutMillis: 5000, // 连接销毁超时
+  reapIntervalMillis: 1000, // 连接回收检查间隔
   createRetryIntervalMillis: 200, // 创建重试间隔
 };
-
 
 // 获取连接池统计信息
 export const getPoolStats = async (): Promise<PoolStats | null> => {

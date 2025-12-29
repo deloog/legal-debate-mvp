@@ -64,7 +64,10 @@ export class AIRequestExecutor {
   /**
    * 执行智谱清言请求
    */
-  private async executeZhipuRequest(client: any, request: AIRequestConfig): Promise<any> {
+  private async executeZhipuRequest(
+    client: any,
+    request: AIRequestConfig,
+  ): Promise<any> {
     return await client.chat.completions.create({
       model: request.model,
       messages: request.messages,
@@ -79,7 +82,10 @@ export class AIRequestExecutor {
   /**
    * 执行DeepSeek请求
    */
-  private async executeDeepSeekRequest(client: any, request: AIRequestConfig): Promise<any> {
+  private async executeDeepSeekRequest(
+    client: any,
+    request: AIRequestConfig,
+  ): Promise<any> {
     return await client.chat.completions.create({
       model: request.model,
       messages: request.messages,
@@ -94,7 +100,10 @@ export class AIRequestExecutor {
   /**
    * 执行OpenAI请求
    */
-  private async executeOpenAIRequest(client: any, request: AIRequestConfig): Promise<any> {
+  private async executeOpenAIRequest(
+    client: any,
+    request: AIRequestConfig,
+  ): Promise<any> {
     return await client.chat.completions.create({
       model: request.model,
       messages: request.messages,
@@ -109,7 +118,10 @@ export class AIRequestExecutor {
   /**
    * 执行Anthropic请求
    */
-  private async executeAnthropicRequest(client: any, request: AIRequestConfig): Promise<any> {
+  private async executeAnthropicRequest(
+    client: any,
+    request: AIRequestConfig,
+  ): Promise<any> {
     const response = await client.messages.create({
       model: request.model,
       messages: request.messages.map((m) => ({

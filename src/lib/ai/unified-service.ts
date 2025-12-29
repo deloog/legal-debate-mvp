@@ -197,8 +197,8 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
         { role: "user", content: prompt },
       ],
       temperature: 0.5, // 降低随机性，提高一致性
-      maxTokens: 2000,  // 减少输出长度，优化响应时间
-      topP: 0.9,        // 添加topP参数控制生成质量
+      maxTokens: 2000, // 减少输出长度，优化响应时间
+      topP: 0.9, // 添加topP参数控制生成质量
     });
 
     // 2. 缓存响应结果

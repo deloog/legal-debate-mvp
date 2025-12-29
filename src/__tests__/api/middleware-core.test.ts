@@ -98,7 +98,11 @@ describe("Middleware Core", () => {
 
         const result = await stack.execute(mockRequest, context);
 
-        expect(mockMiddleware).toHaveBeenCalledWith(mockRequest, context, expect.any(NextResponse));
+        expect(mockMiddleware).toHaveBeenCalledWith(
+          mockRequest,
+          context,
+          expect.any(NextResponse),
+        );
         expect(result).toBe(mockResponse);
       });
 
@@ -106,38 +110,54 @@ describe("Middleware Core", () => {
         const stack = new MiddlewareStack();
         const executionOrder: number[] = [];
 
-        const middleware1 = jest.fn().mockImplementation(async (req, ctx, response) => {
-          executionOrder.push(1);
-          // Don't return response to continue to next
-        });
+        const middleware1 = jest
+          .fn()
+          .mockImplementation(async (req, ctx, response) => {
+            executionOrder.push(1);
+            // Don't return response to continue to next
+          });
 
-        const middleware2 = jest.fn().mockImplementation(async (req, ctx, response) => {
-          executionOrder.push(2);
-          return NextResponse.json({ middleware: 2 });
-        });
+        const middleware2 = jest
+          .fn()
+          .mockImplementation(async (req, ctx, response) => {
+            executionOrder.push(2);
+            return NextResponse.json({ middleware: 2 });
+          });
 
         stack.use(middleware1).use(middleware2);
 
         const result = await stack.execute(mockRequest, context);
 
         expect(executionOrder).toEqual([1, 2]);
-        expect(middleware1).toHaveBeenCalledWith(mockRequest, context, expect.any(NextResponse));
-        expect(middleware2).toHaveBeenCalledWith(mockRequest, context, expect.any(NextResponse));
+        expect(middleware1).toHaveBeenCalledWith(
+          mockRequest,
+          context,
+          expect.any(NextResponse),
+        );
+        expect(middleware2).toHaveBeenCalledWith(
+          mockRequest,
+          context,
+          expect.any(NextResponse),
+        );
       });
 
       it("should pass updated context through middleware chain", async () => {
         const stack = new MiddlewareStack();
         let contextReceived: RequestContext | null = null;
 
-        const middleware1 = jest.fn().mockImplementation(async (req, ctx, response) => {
-          ctx.userId = "user123";
-          contextReceived = { ...ctx };
-        });
+        const middleware1 = jest
+          .fn()
+          .mockImplementation(async (req, ctx, response) => {
+            ctx.userId = "user123";
+            contextReceived = { ...ctx };
+          });
 
-        const middleware2 = jest.fn().mockImplementation(async (req, ctx, response) => {
-          expect(ctx.userId).toBe("user123");
-          return NextResponse.json({ userId: ctx.userId });
-        });
+        const middleware2 = jest
+          .fn()
+          .mockImplementation(async (req, ctx, response) => {
+            expect(ctx.userId).toBe("user123");
+            return NextResponse.json({ userId: ctx.userId });
+          });
 
         stack.use(middleware1).use(middleware2);
 
@@ -148,7 +168,7 @@ describe("Middleware Core", () => {
           expect.objectContaining({
             userId: "user123",
           }),
-          expect.any(NextResponse)
+          expect.any(NextResponse),
         );
       });
 
@@ -228,7 +248,7 @@ describe("Middleware Core", () => {
         const apiError = new ApiError(
           422,
           "UNPROCESSABLE_ENTITY",
-          "Cannot process"
+          "Cannot process",
         );
 
         const mockMiddleware = jest.fn().mockRejectedValue(apiError);
@@ -263,7 +283,7 @@ describe("Middleware Core", () => {
             url: "http://localhost:3000/api/test",
             method: "GET",
             timestamp: expect.any(String),
-          })
+          }),
         );
 
         consoleSpy.mockRestore();
@@ -293,18 +313,22 @@ describe("Middleware Core", () => {
 
       it("should maintain correct execution context", async () => {
         const stack = new MiddlewareStack();
-        let middlewareContexts: RequestContext[] = [];
+        const middlewareContexts: RequestContext[] = [];
 
-        const middleware1 = jest.fn().mockImplementation(async (req, ctx, response) => {
-          middlewareContexts.push({ ...ctx });
-          ctx.userId = "user1";
-        });
+        const middleware1 = jest
+          .fn()
+          .mockImplementation(async (req, ctx, response) => {
+            middlewareContexts.push({ ...ctx });
+            ctx.userId = "user1";
+          });
 
-        const middleware2 = jest.fn().mockImplementation(async (req, ctx, response) => {
-          middlewareContexts.push({ ...ctx });
-          ctx.userId = "user2";
-          return NextResponse.json({ finalUserId: ctx.userId });
-        });
+        const middleware2 = jest
+          .fn()
+          .mockImplementation(async (req, ctx, response) => {
+            middlewareContexts.push({ ...ctx });
+            ctx.userId = "user2";
+            return NextResponse.json({ finalUserId: ctx.userId });
+          });
 
         stack.use(middleware1).use(middleware2);
 
@@ -320,15 +344,19 @@ describe("Middleware Core", () => {
       it("should handle asynchronous middleware operations", async () => {
         const stack = new MiddlewareStack();
 
-        const middleware1 = jest.fn().mockImplementation(async (req, ctx, response) => {
-          await new Promise((resolve) => setTimeout(resolve, 10));
-          ctx.asyncOperation = "completed";
-        });
+        const middleware1 = jest
+          .fn()
+          .mockImplementation(async (req, ctx, response) => {
+            await new Promise((resolve) => setTimeout(resolve, 10));
+            ctx.asyncOperation = "completed";
+          });
 
-        const middleware2 = jest.fn().mockImplementation(async (req, ctx, response) => {
-          expect(ctx.asyncOperation).toBe("completed");
-          return NextResponse.json({ async: true });
-        });
+        const middleware2 = jest
+          .fn()
+          .mockImplementation(async (req, ctx, response) => {
+            expect(ctx.asyncOperation).toBe("completed");
+            return NextResponse.json({ async: true });
+          });
 
         stack.use(middleware1).use(middleware2);
 
@@ -352,10 +380,12 @@ describe("Middleware Core", () => {
       const testContext = createRequestContext(testRequest);
 
       // Authentication middleware
-      const authMiddleware = jest.fn().mockImplementation(async (req, ctx, response) => {
-        ctx.userId = "user123";
-        ctx.role = "user";
-      });
+      const authMiddleware = jest
+        .fn()
+        .mockImplementation(async (req, ctx, response) => {
+          ctx.userId = "user123";
+          ctx.role = "user";
+        });
 
       // Logging middleware
       const loggingMiddleware = jest

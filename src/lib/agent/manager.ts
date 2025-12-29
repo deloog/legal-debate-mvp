@@ -7,29 +7,26 @@ import type {
   AgentWorkflowConfig,
   AgentStatus,
   AgentEvent,
-  AgentEventType
-} from '../../types/agent';
+  AgentEventType,
+} from "../../types/agent";
 
 import {
   AgentError,
   AgentErrorType,
   AgentMetrics,
-  TaskPriority
-} from '../../types/agent';
+  TaskPriority,
+} from "../../types/agent";
 
-import {
-  agentRegistry,
-  AgentDiscoveryOptions
-} from './registry';
+import { agentRegistry, AgentDiscoveryOptions } from "./registry";
 
 import {
   createAgentResult,
   createAgentError,
   AgentExecutionState,
-  AgentLogLevel
-} from './types';
+  AgentLogLevel,
+} from "./types";
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 // =============================================================================
 // Agent管理器配置接口
@@ -38,19 +35,19 @@ import { EventEmitter } from 'events';
 export interface AgentManagerConfig {
   // 并发控制
   maxConcurrentExecutions: number;
-  
+
   // 超时配置
   defaultTimeout: number;
-  
+
   // 重试配置
   maxRetryAttempts: number;
   retryBaseDelay: number;
   retryMaxDelay: number;
-  
+
   // 缓存配置
   enableResultCache: boolean;
   cacheTTL: number;
-  
+
   // 监控配置
   enableMetrics: boolean;
   metricsInterval: number;
@@ -63,7 +60,7 @@ export interface AgentManagerConfig {
 export interface ExecutionStatus {
   executionId: string;
   agentName: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
   startTime: number;
   endTime?: number;
   result?: AgentResult;
@@ -81,19 +78,19 @@ export interface AgentManagerStats {
   successfulExecutions: number;
   failedExecutions: number;
   cancelledExecutions: number;
-  
+
   // 性能统计
   averageExecutionTime: number;
   totalExecutionTime: number;
-  
+
   // 并发统计
   currentConcurrentExecutions: number;
   maxConcurrentExecutions: number;
-  
+
   // 缓存统计
   cacheHits: number;
   cacheMisses: number;
-  
+
   // 时间信息
   lastExecutionTime: number;
   uptime: number;
@@ -135,7 +132,7 @@ export class AgentManager extends EventEmitter {
 
   constructor(config: Partial<AgentManagerConfig> = {}) {
     super();
-    
+
     this.config = {
       maxConcurrentExecutions: 5,
       defaultTimeout: 30000,
@@ -146,7 +143,7 @@ export class AgentManager extends EventEmitter {
       cacheTTL: 300000, // 5分钟
       enableMetrics: true,
       metricsInterval: 60000, // 1分钟
-      ...config
+      ...config,
     };
 
     this.stats = {
@@ -161,7 +158,7 @@ export class AgentManager extends EventEmitter {
       cacheHits: 0,
       cacheMisses: 0,
       lastExecutionTime: 0,
-      uptime: 0
+      uptime: 0,
     };
 
     this.startTime = Date.now();
@@ -188,7 +185,7 @@ export class AgentManager extends EventEmitter {
       enableCache?: boolean;
       retryAttempts?: number;
       metadata?: Record<string, any>;
-    } = {}
+    } = {},
   ): Promise<AgentResult> {
     const executionId = this.generateExecutionId();
     const priority = options.priority || TaskPriority.MEDIUM;
@@ -200,16 +197,20 @@ export class AgentManager extends EventEmitter {
       priority,
       requestId: executionId,
       options: {
-        timeout: options.timeout
+        timeout: options.timeout,
       },
-      metadata: options.metadata
+      metadata: options.metadata,
     };
 
     // 检查缓存
     if (this.config.enableResultCache && options.enableCache !== false) {
       const cachedResult = this.getCachedResult(agentName, context);
       if (cachedResult) {
-        this.emit('execution_cached', { executionId, agentName, result: cachedResult });
+        this.emit("execution_cached", {
+          executionId,
+          agentName,
+          result: cachedResult,
+        });
         return cachedResult;
       }
     }
@@ -223,7 +224,7 @@ export class AgentManager extends EventEmitter {
         priority,
         resolve,
         reject,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       this.addToQueue(queueItem);
@@ -244,22 +245,24 @@ export class AgentManager extends EventEmitter {
         timeout?: number;
         enableCache?: boolean;
       };
-    }>
+    }>,
   ): Promise<AgentResult[]> {
     const promises = tasks.map(({ agentName, task, data, options }) =>
-      this.execute(agentName, task, data || {}, options)
+      this.execute(agentName, task, data || {}, options),
     );
 
     const results = await Promise.allSettled(promises);
-    
+
     // 检查是否有失败的执行
-    const failures = results.filter(result => result.status === 'rejected');
+    const failures = results.filter((result) => result.status === "rejected");
     if (failures.length > 0) {
       const error = failures[0];
-      throw error?.reason || new Error('Batch execution failed');
+      throw error?.reason || new Error("Batch execution failed");
     }
 
-    return results.map(result => (result as PromiseFulfilledResult<AgentResult>).value);
+    return results.map(
+      (result) => (result as PromiseFulfilledResult<AgentResult>).value,
+    );
   }
 
   /**
@@ -267,12 +270,12 @@ export class AgentManager extends EventEmitter {
    */
   public async executeWorkflow(
     workflow: AgentWorkflowConfig,
-    context: AgentContext
+    context: AgentContext,
   ): Promise<AgentResult[]> {
     const results: AgentResult[] = [];
-    
+
     // 根据工作流配置执行Agent
-    if (workflow.executionMode === 'sequential') {
+    if (workflow.executionMode === "sequential") {
       // 顺序执行
       for (const agentType of workflow.agents) {
         const agents = agentRegistry.getAgentsByType(agentType);
@@ -285,16 +288,18 @@ export class AgentManager extends EventEmitter {
         const result = await this.execute(
           bestAgent.name,
           context.task,
-          context.data
+          context.data,
         );
         results.push(result);
 
         // 如果执行失败且配置为停止，则中断工作流
-        if (!result.success && workflow.errorHandling === 'stop') {
-          throw new Error(`Workflow stopped due to failure in agent: ${bestAgent.name}`);
+        if (!result.success && workflow.errorHandling === "stop") {
+          throw new Error(
+            `Workflow stopped due to failure in agent: ${bestAgent.name}`,
+          );
         }
       }
-    } else if (workflow.executionMode === 'parallel') {
+    } else if (workflow.executionMode === "parallel") {
       // 并行执行
       const promises = workflow.agents.map(async (agentType) => {
         const agents = agentRegistry.getAgentsByType(agentType);
@@ -308,19 +313,21 @@ export class AgentManager extends EventEmitter {
 
       const parallelResults = await Promise.allSettled(promises);
       parallelResults.forEach((result) => {
-        if (result.status === 'fulfilled') {
+        if (result.status === "fulfilled") {
           results.push(result.value);
         } else {
           // 创建错误结果
-          results.push(createAgentResult('workflow', undefined, {
-            success: false,
-            error: createAgentError(
-              'WORKFLOW_ERROR',
-              result.reason?.message || 'Unknown workflow error',
-              AgentErrorType.EXECUTION_ERROR,
-              'workflow'
-            )
-          }));
+          results.push(
+            createAgentResult("workflow", undefined, {
+              success: false,
+              error: createAgentError(
+                "WORKFLOW_ERROR",
+                result.reason?.message || "Unknown workflow error",
+                AgentErrorType.EXECUTION_ERROR,
+                "workflow",
+              ),
+            }),
+          );
         }
       });
     }
@@ -344,16 +351,23 @@ export class AgentManager extends EventEmitter {
    */
   public cancelExecution(executionId: string): boolean {
     const status = this.runningExecutions.get(executionId);
-    if (!status || status.status === 'completed' || status.status === 'cancelled') {
+    if (
+      !status ||
+      status.status === "completed" ||
+      status.status === "cancelled"
+    ) {
       return false;
     }
 
-    status.status = 'cancelled';
+    status.status = "cancelled";
     status.endTime = Date.now();
 
-    this.updateStats('cancelled', Date.now() - status.startTime);
+    this.updateStats("cancelled", Date.now() - status.startTime);
 
-    this.emit('execution_cancelled', { executionId, agentName: status.agentName });
+    this.emit("execution_cancelled", {
+      executionId,
+      agentName: status.agentName,
+    });
     return true;
   }
 
@@ -374,7 +388,7 @@ export class AgentManager extends EventEmitter {
   public getStatistics(): AgentManagerStats {
     this.stats.currentConcurrentExecutions = this.runningExecutions.size;
     this.stats.uptime = Date.now() - this.startTime;
-    
+
     return { ...this.stats };
   }
 
@@ -394,7 +408,7 @@ export class AgentManager extends EventEmitter {
       cacheHits: 0,
       cacheMisses: 0,
       lastExecutionTime: 0,
-      uptime: Date.now() - this.startTime
+      uptime: Date.now() - this.startTime,
     };
   }
 
@@ -408,7 +422,7 @@ export class AgentManager extends EventEmitter {
   public async cleanup(): Promise<void> {
     // 取消所有正在运行的执行
     for (const [executionId, status] of this.runningExecutions.entries()) {
-      if (status.status === 'running') {
+      if (status.status === "running") {
         this.cancelExecution(executionId);
       }
     }
@@ -435,9 +449,11 @@ export class AgentManager extends EventEmitter {
   private addToQueue(item: QueueItem): void {
     // 按优先级插入（高优先级在前）
     let insertIndex = this.executionQueue.length;
-    
+
     for (let i = 0; i < this.executionQueue.length; i++) {
-      if (this.comparePriority(item.priority, this.executionQueue[i].priority) > 0) {
+      if (
+        this.comparePriority(item.priority, this.executionQueue[i].priority) > 0
+      ) {
         insertIndex = i;
         break;
       }
@@ -466,26 +482,26 @@ export class AgentManager extends EventEmitter {
    */
   private async executeQueueItem(item: QueueItem): Promise<void> {
     const { executionId, agentName, context, resolve, reject } = item;
-    
+
     // 创建执行状态
     const status: ExecutionStatus = {
       executionId,
       agentName,
-      status: 'running',
-      startTime: Date.now()
+      status: "running",
+      startTime: Date.now(),
     };
-    
+
     this.runningExecutions.set(executionId, status);
     this.stats.currentConcurrentExecutions = Math.max(
       this.stats.currentConcurrentExecutions,
-      this.runningExecutions.size
+      this.runningExecutions.size,
     );
 
-    this.emit('execution_started', { executionId, agentName });
+    this.emit("execution_started", { executionId, agentName });
 
     try {
       // 检查是否已被取消
-      if (status.status === 'cancelled') {
+      if (status.status === "cancelled") {
         throw new Error(`Execution ${executionId} was cancelled`);
       }
 
@@ -499,12 +515,12 @@ export class AgentManager extends EventEmitter {
       const result = await this.executeWithTimeout(
         agent,
         context,
-        item.timestamp
+        item.timestamp,
       );
 
       // 再次检查是否已被取消
       const currentStatus = this.runningExecutions.get(executionId);
-      if (currentStatus && currentStatus.status === 'cancelled') {
+      if (currentStatus && currentStatus.status === "cancelled") {
         throw new Error(`Execution ${executionId} was cancelled`);
       }
 
@@ -514,36 +530,40 @@ export class AgentManager extends EventEmitter {
       }
 
       // 更新状态
-      status.status = 'completed';
+      status.status = "completed";
       status.endTime = Date.now();
       status.result = result;
 
-      this.updateStats('completed', status.endTime - status.startTime);
-      this.emit('execution_completed', { executionId, agentName, result });
+      this.updateStats("completed", status.endTime - status.startTime);
+      this.emit("execution_completed", { executionId, agentName, result });
 
       resolve(result);
     } catch (error) {
       // 检查是否为取消导致的错误
-      if (status.status === 'cancelled') {
-        this.updateStats('cancelled', Date.now() - status.startTime);
-        this.emit('execution_cancelled', { executionId, agentName });
+      if (status.status === "cancelled") {
+        this.updateStats("cancelled", Date.now() - status.startTime);
+        this.emit("execution_cancelled", { executionId, agentName });
         reject(new Error(`Execution ${executionId} was cancelled`));
         return;
       }
 
       // 更新状态
-      status.status = 'failed';
+      status.status = "failed";
       status.endTime = Date.now();
       status.error = this.createErrorFromException(error);
 
-      this.updateStats('failed', status.endTime - status.startTime);
-      this.emit('execution_failed', { executionId, agentName, error: status.error });
+      this.updateStats("failed", status.endTime - status.startTime);
+      this.emit("execution_failed", {
+        executionId,
+        agentName,
+        error: status.error,
+      });
 
       reject(error as Error);
     } finally {
       // 清理执行状态
       this.runningExecutions.delete(executionId);
-      
+
       // 继续处理队列
       this.processQueue();
     }
@@ -555,18 +575,18 @@ export class AgentManager extends EventEmitter {
   private async executeWithTimeout(
     agent: Agent,
     context: AgentContext,
-    queueTime: number
+    queueTime: number,
   ): Promise<AgentResult> {
     const timeout = context.options?.timeout || this.config.defaultTimeout;
-    
+
     const executionPromise = agent.execute(context);
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => {
         const timeoutError = createAgentError(
-          'TIMEOUT',
+          "TIMEOUT",
           `Execution timeout after ${timeout}ms`,
           AgentErrorType.TIMEOUT_ERROR,
-          agent.name
+          agent.name,
         );
         reject(timeoutError);
       }, timeout);
@@ -582,15 +602,18 @@ export class AgentManager extends EventEmitter {
   /**
    * 获取缓存结果
    */
-  private getCachedResult(agentName: string, context: AgentContext): AgentResult | undefined {
+  private getCachedResult(
+    agentName: string,
+    context: AgentContext,
+  ): AgentResult | undefined {
     const cacheKey = this.generateCacheKey(agentName, context);
     const cached = this.resultCache.get(cacheKey);
-    
-    if (cached && (Date.now() - cached.cacheTime) < this.config.cacheTTL) {
+
+    if (cached && Date.now() - cached.cacheTime < this.config.cacheTTL) {
       this.stats.cacheHits++;
       return { ...cached.result, cached: true, cacheKey };
     }
-    
+
     this.stats.cacheMisses++;
     return undefined;
   }
@@ -598,11 +621,15 @@ export class AgentManager extends EventEmitter {
   /**
    * 缓存结果
    */
-  private cacheResult(agentName: string, context: AgentContext, result: AgentResult): void {
+  private cacheResult(
+    agentName: string,
+    context: AgentContext,
+    result: AgentResult,
+  ): void {
     const cacheKey = this.generateCacheKey(agentName, context);
     this.resultCache.set(cacheKey, {
       result,
-      cacheTime: Date.now()
+      cacheTime: Date.now(),
     });
   }
 
@@ -613,7 +640,7 @@ export class AgentManager extends EventEmitter {
     return `${agentName}:${JSON.stringify({
       task: context.task,
       data: context.data,
-      priority: context.priority
+      priority: context.priority,
     })}`;
   }
 
@@ -631,12 +658,15 @@ export class AgentManager extends EventEmitter {
   /**
    * 比较优先级
    */
-  private comparePriority(priority1: TaskPriority, priority2: TaskPriority): number {
+  private comparePriority(
+    priority1: TaskPriority,
+    priority2: TaskPriority,
+  ): number {
     const priorityOrder = {
       [TaskPriority.URGENT]: 4,
       [TaskPriority.HIGH]: 3,
       [TaskPriority.MEDIUM]: 2,
-      [TaskPriority.LOW]: 1
+      [TaskPriority.LOW]: 1,
     };
 
     return priorityOrder[priority1] - priorityOrder[priority2];
@@ -646,21 +676,21 @@ export class AgentManager extends EventEmitter {
    * 从异常创建错误
    */
   private createErrorFromException(error: any): AgentError {
-    if (error && typeof error === 'object' && 'code' in error) {
+    if (error && typeof error === "object" && "code" in error) {
       return createAgentError(
         error.code as string,
-        error.message || 'Unknown error',
+        error.message || "Unknown error",
         this.mapErrorType(error.code as string),
-        'agent-manager',
-        this.isRetryableError(error.code as string)
+        "agent-manager",
+        this.isRetryableError(error.code as string),
       );
     }
 
     return createAgentError(
-      'EXECUTION_ERROR',
-      error?.message || 'Unknown execution error',
+      "EXECUTION_ERROR",
+      error?.message || "Unknown execution error",
       AgentErrorType.EXECUTION_ERROR,
-      'agent-manager'
+      "agent-manager",
     );
   }
 
@@ -669,13 +699,16 @@ export class AgentManager extends EventEmitter {
    */
   private mapErrorType(code: string): AgentErrorType {
     const codeLower = code.toLowerCase();
-    
-    if (codeLower.includes('timeout')) return AgentErrorType.TIMEOUT_ERROR;
-    if (codeLower.includes('network')) return AgentErrorType.NETWORK_ERROR;
-    if (codeLower.includes('rate_limit')) return AgentErrorType.RATE_LIMIT_ERROR;
-    if (codeLower.includes('permission')) return AgentErrorType.PERMISSION_ERROR;
-    if (codeLower.includes('validation')) return AgentErrorType.VALIDATION_ERROR;
-    
+
+    if (codeLower.includes("timeout")) return AgentErrorType.TIMEOUT_ERROR;
+    if (codeLower.includes("network")) return AgentErrorType.NETWORK_ERROR;
+    if (codeLower.includes("rate_limit"))
+      return AgentErrorType.RATE_LIMIT_ERROR;
+    if (codeLower.includes("permission"))
+      return AgentErrorType.PERMISSION_ERROR;
+    if (codeLower.includes("validation"))
+      return AgentErrorType.VALIDATION_ERROR;
+
     return AgentErrorType.EXECUTION_ERROR;
   }
 
@@ -684,34 +717,40 @@ export class AgentManager extends EventEmitter {
    */
   private isRetryableError(code: string): boolean {
     const retryableCodes = [
-      'TIMEOUT_ERROR',
-      'NETWORK_ERROR',
-      'RATE_LIMIT_ERROR',
-      'AI_SERVICE_ERROR'
+      "TIMEOUT_ERROR",
+      "NETWORK_ERROR",
+      "RATE_LIMIT_ERROR",
+      "AI_SERVICE_ERROR",
     ];
-    return retryableCodes.some(rc => code.toLowerCase().includes(rc.toLowerCase()));
+    return retryableCodes.some((rc) =>
+      code.toLowerCase().includes(rc.toLowerCase()),
+    );
   }
 
   /**
    * 更新统计信息
    */
-  private updateStats(type: 'completed' | 'failed' | 'cancelled', executionTime: number): void {
+  private updateStats(
+    type: "completed" | "failed" | "cancelled",
+    executionTime: number,
+  ): void {
     this.stats.totalExecutions++;
     this.stats.totalExecutionTime += executionTime;
     this.stats.lastExecutionTime = Date.now();
 
     if (this.stats.totalExecutions > 0) {
-      this.stats.averageExecutionTime = this.stats.totalExecutionTime / this.stats.totalExecutions;
+      this.stats.averageExecutionTime =
+        this.stats.totalExecutionTime / this.stats.totalExecutions;
     }
 
     switch (type) {
-      case 'completed':
+      case "completed":
         this.stats.successfulExecutions++;
         break;
-      case 'failed':
+      case "failed":
         this.stats.failedExecutions++;
         break;
-      case 'cancelled':
+      case "cancelled":
         this.stats.cancelledExecutions++;
         break;
     }
@@ -722,9 +761,9 @@ export class AgentManager extends EventEmitter {
    */
   private startMetricsCollection(): void {
     this.metricsTimer = setInterval(() => {
-      this.emit('metrics', {
+      this.emit("metrics", {
         timestamp: Date.now(),
-        stats: this.getStatistics()
+        stats: this.getStatistics(),
       });
     }, this.config.metricsInterval);
   }
@@ -743,5 +782,5 @@ export const DEFAULT_AGENT_MANAGER_CONFIG: AgentManagerConfig = {
   enableResultCache: true,
   cacheTTL: 300000,
   enableMetrics: true,
-  metricsInterval: 60000
+  metricsInterval: 60000,
 };

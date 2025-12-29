@@ -1,15 +1,15 @@
 /**
  * 风险评估器
- * 
+ *
  * 计算风险等级和置信度
  */
 
 import type {
   AIStrategyResponse,
   RiskAssessment,
-  RiskAssessmentConfig
-} from './types';
-import { logger } from '../security/logger';
+  RiskAssessmentConfig,
+} from "./types";
+import { logger } from "../security/logger";
 
 // =============================================================================
 // 风险评估器类
@@ -24,7 +24,7 @@ export class RiskAssessor {
       highRiskThreshold: 0.7,
       mediumRiskThreshold: 0.4,
       enableDetailedAnalysis: true,
-      ...config
+      ...config,
     };
   }
 
@@ -32,8 +32,8 @@ export class RiskAssessor {
    * 评估风险
    */
   assessRisks(aiResponse: AIStrategyResponse): RiskAssessment {
-    logger.info('开始风险评估', {
-      risksCount: aiResponse.risks.length
+    logger.info("开始风险评估", {
+      risksCount: aiResponse.risks.length,
     });
 
     // 计算整体风险等级
@@ -45,31 +45,31 @@ export class RiskAssessor {
     // 生成详细的风险因素分析
     const riskFactors = this.analyzeRiskFactors(aiResponse.risks);
 
-    logger.info('风险评估完成', {
+    logger.info("风险评估完成", {
       overallRisk,
       confidence,
-      riskFactorsCount: riskFactors.length
+      riskFactorsCount: riskFactors.length,
     });
 
     return {
       overallRisk,
       confidence,
-      riskFactors
+      riskFactors,
     };
   }
 
   /**
    * 计算整体风险等级
    */
-  private calculateOverallRisk(risks: any[]): 'low' | 'medium' | 'high' {
+  private calculateOverallRisk(risks: any[]): "low" | "medium" | "high" {
     if (risks.length === 0) {
-      return 'low';
+      return "low";
     }
 
     // 计算加权风险分数
-    const highImpactRisks = risks.filter((r: any) => r.impact === 'high');
-    const mediumImpactRisks = risks.filter((r: any) => r.impact === 'medium');
-    const lowImpactRisks = risks.filter((r: any) => r.impact === 'low');
+    const highImpactRisks = risks.filter((r: any) => r.impact === "high");
+    const mediumImpactRisks = risks.filter((r: any) => r.impact === "medium");
+    const lowImpactRisks = risks.filter((r: any) => r.impact === "low");
 
     // 计算平均影响权重
     const highWeight = highImpactRisks.length * 3;
@@ -83,11 +83,11 @@ export class RiskAssessor {
 
     // 根据阈值确定风险等级
     if (riskScore >= this.config.highRiskThreshold) {
-      return 'high';
+      return "high";
     } else if (riskScore >= this.config.mediumRiskThreshold) {
-      return 'medium';
+      return "medium";
     } else {
-      return 'low';
+      return "low";
     }
   }
 
@@ -102,9 +102,10 @@ export class RiskAssessor {
       aiResponse.swotAnalysis.strengths.length,
       aiResponse.swotAnalysis.weaknesses.length,
       aiResponse.swotAnalysis.opportunities.length,
-      aiResponse.swotAnalysis.threats.length
+      aiResponse.swotAnalysis.threats.length,
     ];
-    const avgSWOTItems = swotItems.reduce((a, b) => a + b, 0) / swotItems.length;
+    const avgSWOTItems =
+      swotItems.reduce((a, b) => a + b, 0) / swotItems.length;
     factors.push(Math.min(avgSWOTItems / 5, 1)); // 5个为满分
 
     // 策略建议完整性因子
@@ -115,16 +116,16 @@ export class RiskAssessor {
 
     // 实施步骤质量因子
     const validSteps = aiResponse.strategies.filter(
-      (s: any) => s.implementationSteps && s.implementationSteps.length >= 3
+      (s: any) => s.implementationSteps && s.implementationSteps.length >= 3,
     );
     factors.push(Math.min(validSteps.length / aiResponse.strategies.length, 1));
 
     // 计算综合置信度
     const confidence = factors.reduce((a, b) => a + b, 0) / factors.length;
 
-    logger.debug('置信度计算', {
+    logger.debug("置信度计算", {
       factors,
-      averageConfidence: confidence
+      averageConfidence: confidence,
     });
 
     return confidence;
@@ -135,15 +136,15 @@ export class RiskAssessor {
    */
   private analyzeRiskFactors(risks: any[]): Array<{
     factor: string;
-    impact: 'low' | 'medium' | 'high';
+    impact: "low" | "medium" | "high";
     probability: number;
     mitigation: string;
   }> {
     return risks.map((risk: any, index: number) => ({
-      factor: risk.factor || '',
-      impact: risk.impact || 'medium',
+      factor: risk.factor || "",
+      impact: risk.impact || "medium",
       probability: this.normalizeProbability(risk.probability),
-      mitigation: risk.mitigation || ''
+      mitigation: risk.mitigation || "",
     }));
   }
 
@@ -151,7 +152,7 @@ export class RiskAssessor {
    * 标准化概率值
    */
   private normalizeProbability(probability: number): number {
-    if (typeof probability !== 'number') {
+    if (typeof probability !== "number") {
       return 0.5; // 默认中等概率
     }
 
@@ -178,9 +179,9 @@ export class RiskAssessor {
     summary += `- 识别风险因素：${riskFactors.length}个\n\n`;
 
     // 按影响级别分类
-    const highRisks = riskFactors.filter((r) => r.impact === 'high');
-    const mediumRisks = riskFactors.filter((r) => r.impact === 'medium');
-    const lowRisks = riskFactors.filter((r) => r.impact === 'low');
+    const highRisks = riskFactors.filter((r) => r.impact === "high");
+    const mediumRisks = riskFactors.filter((r) => r.impact === "medium");
+    const lowRisks = riskFactors.filter((r) => r.impact === "low");
 
     if (highRisks.length > 0) {
       summary += `高影响风险（${highRisks.length}个）：\n`;
@@ -211,9 +212,9 @@ export class RiskAssessor {
    */
   private getRiskLabel(risk: string): string {
     const labels: Record<string, string> = {
-      low: '低风险',
-      medium: '中风险',
-      high: '高风险'
+      low: "低风险",
+      medium: "中风险",
+      high: "高风险",
     };
     return labels[risk] || risk;
   }
@@ -223,7 +224,7 @@ export class RiskAssessor {
    */
   configure(config: Partial<RiskAssessmentConfig>): void {
     this.config = { ...this.config, ...config };
-    logger.info('RiskAssessor配置已更新', { config: this.config });
+    logger.info("RiskAssessor配置已更新", { config: this.config });
   }
 
   /**

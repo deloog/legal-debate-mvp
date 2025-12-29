@@ -3,12 +3,12 @@
  * 目标：时间线提取完整
  */
 
-import { getUnifiedAIService } from '@/lib/ai/unified-service';
+import { getUnifiedAIService } from "@/lib/ai/unified-service";
 import type {
   TimelineEvent,
   TimelineEventType,
-  ExtractedData
-} from '../core/types';
+  ExtractedData,
+} from "../core/types";
 
 // =============================================================================
 // 接口定义
@@ -71,7 +71,7 @@ export class TimelineExtractor {
   async extractFromText(
     text: string,
     extractedData?: ExtractedData,
-    options: TimelineExtractionOptions = {}
+    options: TimelineExtractionOptions = {},
   ): Promise<TimelineExtractionOutput> {
     let aiExtracted: TimelineEvent[] = [];
     let ruleExtracted: TimelineEvent[] = [];
@@ -96,24 +96,27 @@ export class TimelineExtractor {
 
     // 过滤推断结果
     if (options.includeInferred === false) {
-      mergedEvents = mergedEvents.filter(e => e.source !== 'inferred');
+      mergedEvents = mergedEvents.filter((e) => e.source !== "inferred");
     }
 
     // 过滤低重要性事件
     if (options.minImportance !== undefined) {
-      mergedEvents = mergedEvents.filter(e =>
-        (e.importance || 1) >= options.minImportance
+      mergedEvents = mergedEvents.filter(
+        (e) => (e.importance || 1) >= options.minImportance,
       );
     }
 
     // 排序事件
-    mergedEvents = this.sortEvents(mergedEvents, options.sortAscending !== false);
+    mergedEvents = this.sortEvents(
+      mergedEvents,
+      options.sortAscending !== false,
+    );
 
     // 填充时间线空缺
     const gapInfo = this.detectAndFillGaps(
       mergedEvents,
       text,
-      options.fillGaps !== false
+      options.fillGaps !== false,
     );
     if (gapInfo.inferredEvents.length > 0) {
       mergedEvents = [...mergedEvents, ...gapInfo.inferredEvents];
@@ -124,7 +127,13 @@ export class TimelineExtractor {
       this.enrichEventsWithExtractedData(mergedEvents, extractedData, text);
     }
 
-    const summary = this.generateSummary(mergedEvents, gapInfo, aiExtracted, ruleExtracted, aiReviewed);
+    const summary = this.generateSummary(
+      mergedEvents,
+      gapInfo,
+      aiExtracted,
+      ruleExtracted,
+      aiReviewed,
+    );
 
     return { events: mergedEvents, summary, gapInfo };
   }
@@ -138,37 +147,40 @@ export class TimelineExtractor {
    */
   private async aiExtractLayer(
     text: string,
-    extractedData?: ExtractedData
+    extractedData?: ExtractedData,
   ): Promise<TimelineEvent[]> {
     try {
       const unifiedService = await getUnifiedAIService();
-      
+
       const prompt = this.buildAIExtractionPrompt(text, extractedData);
-      
+
       const response = await unifiedService.chatCompletion({
-        model: 'deepseek-chat',
-        provider: 'deepseek',
+        model: "deepseek-chat",
+        provider: "deepseek",
         messages: [
           {
-            role: 'system',
-            content: '你是一个专业的法律事件时间线识别专家。请从法律文档中准确提取事件时间线。'
+            role: "system",
+            content:
+              "你是一个专业的法律事件时间线识别专家。请从法律文档中准确提取事件时间线。",
           },
           {
-            role: 'user',
-            content: prompt
-          }
+            role: "user",
+            content: prompt,
+          },
         ],
         temperature: 0.1,
-        maxTokens: 2000
+        maxTokens: 2000,
       });
 
       if (response.choices && response.choices.length > 0) {
-        return this.parseAIExtractionResponse(response.choices[0].message.content || '');
+        return this.parseAIExtractionResponse(
+          response.choices[0].message.content || "",
+        );
       }
 
       return [];
     } catch (error) {
-      console.error('AI识别层失败:', error);
+      console.error("AI识别层失败:", error);
       return [];
     }
   }
@@ -179,12 +191,15 @@ export class TimelineExtractor {
    */
   private buildAIExtractionPrompt(
     text: string,
-    extractedData?: ExtractedData
+    extractedData?: ExtractedData,
   ): string {
-    let contextInfo = '';
-    
-    if (extractedData?.disputeFocuses && extractedData.disputeFocuses.length > 0) {
-      contextInfo += `\n争议焦点信息：\n${extractedData.disputeFocuses.map(d => d.description).join('\n')}`;
+    let contextInfo = "";
+
+    if (
+      extractedData?.disputeFocuses &&
+      extractedData.disputeFocuses.length > 0
+    ) {
+      contextInfo += `\n争议焦点信息：\n${extractedData.disputeFocuses.map((d) => d.description).join("\n")}`;
     }
 
     return `请从以下法律文档中准确提取事件时间线，并严格按照指定的JSON格式返回结果。
@@ -248,22 +263,25 @@ ${contextInfo}
   private parseAIExtractionResponse(aiResponse: string): TimelineEvent[] {
     try {
       let cleanedResponse = aiResponse.trim();
-      
+
       // 记录原始响应的前1000字符用于调试
       const responsePreview = cleanedResponse.substring(0, 1000);
-      console.log('[AI响应解析] 原始响应预览:', responsePreview);
-      
+      console.log("[AI响应解析] 原始响应预览:", responsePreview);
+
       // Level 1: 尝试标准JSON解析（带代码块）
       cleanedResponse = this.extractJSONFromText(cleanedResponse);
-      
+
       // Level 2: 尝试清理和修复JSON
       cleanedResponse = this.cleanJSONString(cleanedResponse);
-      
+
       const parsed = JSON.parse(cleanedResponse);
-      console.log('[AI响应解析] JSON解析成功，字段数:', Object.keys(parsed).length);
-      
+      console.log(
+        "[AI响应解析] JSON解析成功，字段数:",
+        Object.keys(parsed).length,
+      );
+
       if (!parsed.timelineEvents || !Array.isArray(parsed.timelineEvents)) {
-        console.warn('[AI响应解析] timelineEvents字段缺失或类型错误');
+        console.warn("[AI响应解析] timelineEvents字段缺失或类型错误");
         return [];
       }
 
@@ -272,28 +290,31 @@ ${contextInfo}
         if (!item.date && !item.event) {
           console.warn(`[AI响应解析] 事件${index}缺少必需字段`, item);
         }
-        
+
         return {
           id: `ai_event_${index}`,
-          date: item.date || '',
-          event: item.event || '',
+          date: item.date || "",
+          event: item.event || "",
           eventType: item.eventType,
-          importance: Math.min(5, Math.max(1, Math.round(item.importance || 3))),
+          importance: Math.min(
+            5,
+            Math.max(1, Math.round(item.importance || 3)),
+          ),
           evidence: Array.isArray(item.evidence) ? item.evidence : [],
-          source: 'explicit'
+          source: "explicit",
         };
       });
 
-      console.log('[AI响应解析] 成功解析事件数:', events.length);
+      console.log("[AI响应解析] 成功解析事件数:", events.length);
       return events;
     } catch (error) {
-      console.error('[AI响应解析] 完整解析失败:', {
+      console.error("[AI响应解析] 完整解析失败:", {
         error: error instanceof Error ? error.message : String(error),
-        responsePreview: aiResponse.substring(0, 500)
+        responsePreview: aiResponse.substring(0, 500),
       });
-      
+
       // Level 3: 尝试部分解析
-      console.log('[AI响应解析] 尝试部分解析...');
+      console.log("[AI响应解析] 尝试部分解析...");
       return this.parsePartialAIExtraction(aiResponse);
     }
   }
@@ -308,7 +329,7 @@ ${contextInfo}
   private ruleMatchLayer(
     text: string,
     extractedData?: ExtractedData,
-    aiExtracted?: TimelineEvent[]
+    aiExtracted?: TimelineEvent[],
   ): TimelineEvent[] {
     const events: TimelineEvent[] = [];
     let idCounter = aiExtracted ? aiExtracted.length : 0;
@@ -319,18 +340,13 @@ ${contextInfo}
     // 构建事件对象
     for (const { date, eventText } of dateEventPairs) {
       // 检查是否已被AI提取层覆盖
-      const isAlreadyExtracted = aiExtracted?.some(
-        aiEvent => this.isSimilarEvent(aiEvent, eventText, date)
+      const isAlreadyExtracted = aiExtracted?.some((aiEvent) =>
+        this.isSimilarEvent(aiEvent, eventText, date),
       );
-      
+
       if (!isAlreadyExtracted) {
         const id = `rule_event_${idCounter++}`;
-        const event = this.buildRuleBasedEvent(
-          id,
-          date,
-          eventText,
-          text
-        );
+        const event = this.buildRuleBasedEvent(id, date, eventText, text);
         if (event) events.push(event);
       }
     }
@@ -344,15 +360,17 @@ ${contextInfo}
   private isSimilarEvent(
     aiEvent: TimelineEvent,
     eventText: string,
-    date: string
+    date: string,
   ): boolean {
     if (aiEvent.date !== date) return false;
-    
+
     const aiDesc = aiEvent.event.toLowerCase();
     const matchedLower = eventText.toLowerCase();
-    
-    return aiDesc.includes(matchedLower.substring(0, 5)) ||
-           matchedLower.includes(aiDesc.substring(0, 5));
+
+    return (
+      aiDesc.includes(matchedLower.substring(0, 5)) ||
+      matchedLower.includes(aiDesc.substring(0, 5))
+    );
   }
 
   /**
@@ -362,7 +380,7 @@ ${contextInfo}
     id: string,
     date: string,
     eventText: string,
-    fullText: string
+    fullText: string,
   ): TimelineEvent | null {
     const eventType = this.determineEventType(eventText, fullText);
     const importance = this.calculateImportance(eventText, eventType);
@@ -375,7 +393,7 @@ ${contextInfo}
       eventType,
       importance,
       evidence,
-      source: 'explicit'
+      source: "explicit",
     };
   }
 
@@ -390,7 +408,7 @@ ${contextInfo}
     const pairs: Array<{ date: string; eventText: string }> = [];
 
     // 分割句子，按分隔符和逗号分割以支持连续日期
-    const segments = text.split(/[。！？；，\n]/).filter(s => s.trim());
+    const segments = text.split(/[。！？；，\n]/).filter((s) => s.trim());
 
     for (const segment of segments) {
       // 尝试提取日期
@@ -403,7 +421,7 @@ ${contextInfo}
       if (eventText) {
         pairs.push({
           date: dateMatch.date,
-          eventText
+          eventText,
         });
       }
     }
@@ -420,11 +438,11 @@ ${contextInfo}
       if (match) {
         return {
           date: this.normalizeDate(match[0]),
-          matched: true
+          matched: true,
         };
       }
     }
-    return { date: '', matched: false };
+    return { date: "", matched: false };
   }
 
   /**
@@ -432,24 +450,24 @@ ${contextInfo}
    */
   private extractEventText(sentence: string, date: string): string | null {
     // 尝试移除日期
-    let eventText = sentence.replace(date, '').trim();
-    
+    let eventText = sentence.replace(date, "").trim();
+
     // 如果标准化日期无法匹配（如"2024年"被标准化为"2024-01-01"），尝试使用正则移除日期
     if (eventText === sentence) {
       eventText = sentence
-        .replace(/\d{4}年\d{1,2}月\d{1,2}日?/g, '')
-        .replace(/\d{4}-\d{1,2}-\d{1,2}/g, '')
-        .replace(/\d{4}\/\d{1,2}\/\d{1,2}/g, '')
-        .replace(/\d{4}\.\d{1,2}\.\d{1,2}/g, '')
-        .replace(/\d{4}年\d{1,2}月/g, '')
-        .replace(/\d{4}年/g, '')
-        .replace(/\d{1,2}月\d{1,2}日/g, '')
+        .replace(/\d{4}年\d{1,2}月\d{1,2}日?/g, "")
+        .replace(/\d{4}-\d{1,2}-\d{1,2}/g, "")
+        .replace(/\d{4}\/\d{1,2}\/\d{1,2}/g, "")
+        .replace(/\d{4}\.\d{1,2}\.\d{1,2}/g, "")
+        .replace(/\d{4}年\d{1,2}月/g, "")
+        .replace(/\d{4}年/g, "")
+        .replace(/\d{1,2}月\d{1,2}日/g, "")
         .trim();
     }
-    
+
     eventText = eventText
-      .replace(/^(于|在|自|从|至|到)\s*/g, '')
-      .replace(/^(发生|进行|完成|签署|签订|履行|违约|起诉)/g, '')
+      .replace(/^(于|在|自|从|至|到)\s*/g, "")
+      .replace(/^(发生|进行|完成|签署|签订|履行|违约|起诉)/g, "")
       .trim();
 
     if (eventText.length < 2 || /^上述|该|此|其$/.test(eventText)) {
@@ -464,7 +482,7 @@ ${contextInfo}
    */
   private determineEventType(
     eventText: string,
-    fullText: string
+    fullText: string,
   ): TimelineEventType | undefined {
     for (const [type, patterns] of this.eventTypePatterns) {
       for (const pattern of patterns) {
@@ -473,7 +491,7 @@ ${contextInfo}
         }
       }
     }
-    return 'OTHER';
+    return "OTHER";
   }
 
   /**
@@ -481,7 +499,7 @@ ${contextInfo}
    */
   private calculateImportance(
     eventText: string,
-    eventType?: TimelineEventType
+    eventType?: TimelineEventType,
   ): number {
     let score = 2;
 
@@ -491,12 +509,19 @@ ${contextInfo}
       BREACH_OCCURRED: 5,
       DEMAND_SENT: 3,
       LAWSUIT_FILED: 4,
-      OTHER: 2
+      OTHER: 2,
     };
-    score += typeWeights[eventType || 'OTHER'];
+    score += typeWeights[eventType || "OTHER"];
 
-    const highImportanceKeywords = ['签订', '履行', '违约', '起诉', '判决', '终止'];
-    if (highImportanceKeywords.some(kw => eventText.includes(kw))) {
+    const highImportanceKeywords = [
+      "签订",
+      "履行",
+      "违约",
+      "起诉",
+      "判决",
+      "终止",
+    ];
+    if (highImportanceKeywords.some((kw) => eventText.includes(kw))) {
       score += 1;
     }
 
@@ -515,7 +540,7 @@ ${contextInfo}
     const patterns = [
       /根据\s*《([^》]+)》/gi,
       /依据\s*([^。，]+)/gi,
-      /证据\s*([^。，]+)/gi
+      /证据\s*([^。，]+)/gi,
     ];
 
     for (const pattern of patterns) {
@@ -539,7 +564,7 @@ ${contextInfo}
    */
   private mergeAndDeduplicate(
     aiEvents: TimelineEvent[],
-    ruleEvents: TimelineEvent[]
+    ruleEvents: TimelineEvent[],
   ): TimelineEvent[] {
     const seen = new Set<string>();
     const unique: TimelineEvent[] = [];
@@ -572,37 +597,41 @@ ${contextInfo}
    */
   private async aiReviewLayer(
     events: TimelineEvent[],
-    originalText: string
+    originalText: string,
   ): Promise<TimelineEvent[]> {
     try {
       const unifiedService = await getUnifiedAIService();
-      
+
       const prompt = this.buildAIReviewPrompt(events, originalText);
-      
+
       const response = await unifiedService.chatCompletion({
-        model: 'deepseek-chat',
-        provider: 'deepseek',
+        model: "deepseek-chat",
+        provider: "deepseek",
         messages: [
           {
-            role: 'system',
-            content: '你是一个专业的法律时间线审查专家。请审查和修正时间线事件识别结果。'
+            role: "system",
+            content:
+              "你是一个专业的法律时间线审查专家。请审查和修正时间线事件识别结果。",
           },
           {
-            role: 'user',
-            content: prompt
-          }
+            role: "user",
+            content: prompt,
+          },
         ],
         temperature: 0.1,
-        maxTokens: 2000
+        maxTokens: 2000,
       });
 
       if (response.choices && response.choices.length > 0) {
-        return this.parseAIReviewResponse(response.choices[0].message.content || '', events);
+        return this.parseAIReviewResponse(
+          response.choices[0].message.content || "",
+          events,
+        );
       }
 
       return events;
     } catch (error) {
-      console.error('AI审查层失败:', error);
+      console.error("AI审查层失败:", error);
       return events;
     }
   }
@@ -610,11 +639,17 @@ ${contextInfo}
   /**
    * 构建AI审查提示词
    */
-  private buildAIReviewPrompt(events: TimelineEvent[], originalText: string): string {
-    const eventList = events.map((e, index) => 
-      `${index + 1}. ${e.date} - ${e.event} [${e.eventType}]
-   - 重要性: ${e.importance}`
-    ).join('\n');
+  private buildAIReviewPrompt(
+    events: TimelineEvent[],
+    originalText: string,
+  ): string {
+    const eventList = events
+      .map(
+        (e, index) =>
+          `${index + 1}. ${e.date} - ${e.event} [${e.eventType}]
+   - 重要性: ${e.importance}`,
+      )
+      .join("\n");
 
     return `请审查以下从法律文档中识别的时间线事件列表，确保其准确性和完整性。
 
@@ -659,51 +694,60 @@ ${eventList}
    */
   private parseAIReviewResponse(
     aiResponse: string,
-    originalEvents: TimelineEvent[]
+    originalEvents: TimelineEvent[],
   ): TimelineEvent[] {
     try {
       let cleanedResponse = aiResponse.trim();
-      
+
       // 记录原始响应的前1000字符用于调试
       const responsePreview = cleanedResponse.substring(0, 1000);
-      console.log('[AI审查响应解析] 原始响应预览:', responsePreview);
-      
+      console.log("[AI审查响应解析] 原始响应预览:", responsePreview);
+
       // Level 1: 尝试标准JSON解析（带代码块）
       cleanedResponse = this.extractJSONFromText(cleanedResponse);
-      
+
       // Level 2: 尝试清理和修复JSON
       cleanedResponse = this.cleanJSONString(cleanedResponse);
-      
+
       const parsed = JSON.parse(cleanedResponse);
-      console.log('[AI审查响应解析] JSON解析成功');
-      
+      console.log("[AI审查响应解析] JSON解析成功");
+
       const invalidIds = new Set(parsed.invalidIds || []);
       const reviewedItems = parsed.reviewedEvents || [];
 
-      const result = reviewedItems.map((item: any) => {
-        const original = originalEvents.find(e => e.id === item.id);
-        
-        return {
-          id: item.id,
-          date: item.date || original?.date || '',
-          event: item.event || original?.event || '',
-          eventType: item.eventType || original?.eventType,
-          importance: Math.min(5, Math.max(1, Math.round(item.importance || 3))),
-          evidence: Array.isArray(item.evidence) ? item.evidence : original?.evidence || [],
-          source: original?.source || 'explicit'
-        };
-      }).filter(item => !invalidIds.has(item.id));
-      
-      console.log(`[AI审查响应解析] 成功解析${result.length}个事件，删除${invalidIds.size}个无效事件`);
+      const result = reviewedItems
+        .map((item: any) => {
+          const original = originalEvents.find((e) => e.id === item.id);
+
+          return {
+            id: item.id,
+            date: item.date || original?.date || "",
+            event: item.event || original?.event || "",
+            eventType: item.eventType || original?.eventType,
+            importance: Math.min(
+              5,
+              Math.max(1, Math.round(item.importance || 3)),
+            ),
+            evidence: Array.isArray(item.evidence)
+              ? item.evidence
+              : original?.evidence || [],
+            source: original?.source || "explicit",
+          };
+        })
+        .filter((item) => !invalidIds.has(item.id));
+
+      console.log(
+        `[AI审查响应解析] 成功解析${result.length}个事件，删除${invalidIds.size}个无效事件`,
+      );
       return result;
     } catch (error) {
-      console.error('[AI审查响应解析] 完整解析失败:', {
+      console.error("[AI审查响应解析] 完整解析失败:", {
         error: error instanceof Error ? error.message : String(error),
-        responsePreview: aiResponse.substring(0, 500)
+        responsePreview: aiResponse.substring(0, 500),
       });
-      
+
       // 审查失败时返回原始事件
-      console.log('[AI审查响应解析] 使用原始事件');
+      console.log("[AI审查响应解析] 使用原始事件");
       return originalEvents;
     }
   }
@@ -717,20 +761,20 @@ ${eventList}
    */
   private extractJSONFromText(text: string): string {
     let extracted = text.trim();
-    
+
     // 移除markdown代码块标记
-    if (extracted.includes('```json')) {
-      extracted = extracted.replace(/```json\s*/g, '').replace(/```\s*$/g, '');
-    } else if (extracted.includes('```')) {
-      extracted = extracted.replace(/```\s*/g, '').replace(/```\s*$/g, '');
+    if (extracted.includes("```json")) {
+      extracted = extracted.replace(/```json\s*/g, "").replace(/```\s*$/g, "");
+    } else if (extracted.includes("```")) {
+      extracted = extracted.replace(/```\s*/g, "").replace(/```\s*$/g, "");
     }
-    
+
     // 尝试提取第一个完整的JSON对象
     const objectMatch = extracted.match(/\{[\s\S]*\}/);
     if (objectMatch) {
       extracted = objectMatch[0];
     }
-    
+
     return extracted.trim();
   }
 
@@ -739,24 +783,24 @@ ${eventList}
    */
   private cleanJSONString(jsonStr: string): string {
     let cleaned = jsonStr.trim();
-    
+
     // 移除多余的逗号
-    cleaned = cleaned.replace(/,\s*}/g, '}');
-    cleaned = cleaned.replace(/,\s*\]/g, ']');
-    
+    cleaned = cleaned.replace(/,\s*}/g, "}");
+    cleaned = cleaned.replace(/,\s*\]/g, "]");
+
     // 修复单引号为双引号
     cleaned = cleaned.replace(/'([^']*)'/g, '"$1"');
-    
+
     // 移除注释（如果存在）
-    cleaned = cleaned.replace(/\/\/.*$/gm, '');
-    cleaned = cleaned.replace(/\/\*[\s\S]*?\*\//g, '');
-    
+    cleaned = cleaned.replace(/\/\/.*$/gm, "");
+    cleaned = cleaned.replace(/\/\*[\s\S]*?\*\//g, "");
+
     // 统一换行符
-    cleaned = cleaned.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    
+    cleaned = cleaned.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
     // 移除不必要的空白
-    cleaned = cleaned.replace(/\n\s*\n/g, '\n');
-    
+    cleaned = cleaned.replace(/\n\s*\n/g, "\n");
+
     return cleaned.trim();
   }
 
@@ -764,54 +808,63 @@ ${eventList}
    * 部分解析AI提取响应（容错机制）
    */
   private parsePartialAIExtraction(aiResponse: string): TimelineEvent[] {
-    console.log('[AI响应解析] 部分解析模式启动');
+    console.log("[AI响应解析] 部分解析模式启动");
     const events: TimelineEvent[] = [];
-    
+
     try {
       // 尝试使用正则表达式提取关键信息
-      const dateMatches = Array.from(aiResponse.matchAll(/"date"\s*:\s*"([^"]+)"/gi));
-      const eventMatches = Array.from(aiResponse.matchAll(/"event"\s*:\s*"([^"]+)"/gi));
-      const typeMatches = Array.from(aiResponse.matchAll(/"eventType"\s*:\s*"([^"]+)"/gi));
-      const importanceMatches = Array.from(aiResponse.matchAll(/"importance"\s*:\s*(\d+)/gi));
-      
+      const dateMatches = Array.from(
+        aiResponse.matchAll(/"date"\s*:\s*"([^"]+)"/gi),
+      );
+      const eventMatches = Array.from(
+        aiResponse.matchAll(/"event"\s*:\s*"([^"]+)"/gi),
+      );
+      const typeMatches = Array.from(
+        aiResponse.matchAll(/"eventType"\s*:\s*"([^"]+)"/gi),
+      );
+      const importanceMatches = Array.from(
+        aiResponse.matchAll(/"importance"\s*:\s*(\d+)/gi),
+      );
+
       if (dateMatches.length > 0 && eventMatches.length > 0) {
         const count = Math.min(
           dateMatches.length,
           eventMatches.length,
           typeMatches.length,
-          importanceMatches.length
+          importanceMatches.length,
         );
-        
+
         for (let i = 0; i < count; i++) {
           const date = this.normalizeDate(dateMatches[i][1]);
           const event = eventMatches[i][1];
           const eventType = typeMatches[i]?.[1] as TimelineEventType;
-          const importance = importanceMatches[i]?.[1] 
+          const importance = importanceMatches[i]?.[1]
             ? Math.min(5, Math.max(1, parseInt(importanceMatches[i][1])))
             : 3;
-          
+
           // 验证提取的信息是否有效
           if (date && event && event.length > 2) {
             events.push({
               id: `ai_partial_${i}`,
               date,
               event,
-              eventType: eventType || this.determineEventType(event, aiResponse),
+              eventType:
+                eventType || this.determineEventType(event, aiResponse),
               importance,
               evidence: [],
-              source: 'explicit'
+              source: "explicit",
             });
           }
         }
-        
+
         console.log(`[AI响应解析] 部分解析成功，提取${events.length}个事件`);
       } else {
-        console.warn('[AI响应解析] 部分解析失败，未找到有效的事件数据');
+        console.warn("[AI响应解析] 部分解析失败，未找到有效的事件数据");
       }
     } catch (error) {
-      console.error('[AI响应解析] 部分解析异常:', error);
+      console.error("[AI响应解析] 部分解析异常:", error);
     }
-    
+
     return events;
   }
 
@@ -825,7 +878,7 @@ ${eventList}
   private enrichEventsWithExtractedData(
     events: TimelineEvent[],
     extractedData: ExtractedData,
-    text: string
+    text: string,
   ): void {
     if (!extractedData.disputeFocuses) return;
 
@@ -843,7 +896,10 @@ ${eventList}
         for (const claim of extractedData.claims) {
           if (this.isEventRelatedToClaim(event.event, claim.content, text)) {
             if (!event.evidence) event.evidence = [];
-            if (claim.legalBasis && !event.evidence.includes(claim.legalBasis)) {
+            if (
+              claim.legalBasis &&
+              !event.evidence.includes(claim.legalBasis)
+            ) {
               event.evidence.push(claim.legalBasis);
             }
           }
@@ -858,13 +914,15 @@ ${eventList}
   private isEventRelatedToFocus(
     eventText: string,
     focusDescription: string,
-    fullText: string
+    fullText: string,
   ): boolean {
-    const eventKeywords = eventText.split(/[，。；\s]/).map(k => k.trim());
-    const focusKeywords = focusDescription.split(/[，。；\s]/).map(k => k.trim());
+    const eventKeywords = eventText.split(/[，。；\s]/).map((k) => k.trim());
+    const focusKeywords = focusDescription
+      .split(/[，。；\s]/)
+      .map((k) => k.trim());
 
-    return eventKeywords.some(ek =>
-      focusKeywords.some(fk => fk.includes(ek) || ek.includes(fk))
+    return eventKeywords.some((ek) =>
+      focusKeywords.some((fk) => fk.includes(ek) || ek.includes(fk)),
     );
   }
 
@@ -874,13 +932,13 @@ ${eventList}
   private isEventRelatedToClaim(
     eventText: string,
     claimContent: string,
-    fullText: string
+    fullText: string,
   ): boolean {
-    const eventKeywords = eventText.split(/[，。；\s]/).map(k => k.trim());
-    const claimKeywords = claimContent.split(/[，。；\s]/).map(k => k.trim());
+    const eventKeywords = eventText.split(/[，。；\s]/).map((k) => k.trim());
+    const claimKeywords = claimContent.split(/[，。；\s]/).map((k) => k.trim());
 
-    return eventKeywords.some(ek =>
-      claimKeywords.some(ck => ck.includes(ek) || ek.includes(ck))
+    return eventKeywords.some((ek) =>
+      claimKeywords.some((ck) => ck.includes(ek) || ek.includes(ck)),
     );
   }
 
@@ -889,7 +947,7 @@ ${eventList}
    */
   private sortEvents(
     events: TimelineEvent[],
-    ascending: boolean = true
+    ascending: boolean = true,
   ): TimelineEvent[] {
     return [...events].sort((a, b) => {
       const dateA = this.parseDate(a.date);
@@ -910,7 +968,7 @@ ${eventList}
   private detectAndFillGaps(
     events: TimelineEvent[],
     text: string,
-    fill: boolean
+    fill: boolean,
   ): GapInfo {
     if (events.length === 0) {
       return {
@@ -918,7 +976,7 @@ ${eventList}
         endDate: undefined,
         missingTypes: [],
         inferredEvents: [],
-        hasGaps: false
+        hasGaps: false,
       };
     }
 
@@ -927,55 +985,66 @@ ${eventList}
     const latestDate = sorted[sorted.length - 1]?.date;
 
     const presentTypes = new Set(
-      events.map(e => e.eventType).filter(t => t !== undefined) as TimelineEventType[]
+      events
+        .map((e) => e.eventType)
+        .filter((t) => t !== undefined) as TimelineEventType[],
     );
     const requiredTypes: TimelineEventType[] = [
-      'CONTRACT_SIGNED',
-      'PERFORMANCE_START',
-      'BREACH_OCCURRED',
-      'DEMAND_SENT',
-      'LAWSUIT_FILED'
+      "CONTRACT_SIGNED",
+      "PERFORMANCE_START",
+      "BREACH_OCCURRED",
+      "DEMAND_SENT",
+      "LAWSUIT_FILED",
     ];
-    const missingTypes = requiredTypes.filter(t => !presentTypes.has(t));
+    const missingTypes = requiredTypes.filter((t) => !presentTypes.has(t));
 
     const inferredEvents: TimelineEvent[] = [];
 
     if (fill && missingTypes.length > 0) {
       let idCounter = 1000;
 
-      if (!presentTypes.has('CONTRACT_SIGNED') && /合同|协议|约定/gi.test(text)) {
+      if (
+        !presentTypes.has("CONTRACT_SIGNED") &&
+        /合同|协议|约定/gi.test(text)
+      ) {
         inferredEvents.push({
           id: `event_inferred_${idCounter++}`,
           date: this.inferEarliestDate(earliestDate),
-          event: '签订合同（推断）',
-          eventType: 'CONTRACT_SIGNED',
+          event: "签订合同（推断）",
+          eventType: "CONTRACT_SIGNED",
           importance: 3,
-          source: 'inferred'
+          source: "inferred",
         });
       }
 
-      if (!presentTypes.has('PERFORMANCE_START') && /履行|执行|开始/gi.test(text)) {
+      if (
+        !presentTypes.has("PERFORMANCE_START") &&
+        /履行|执行|开始/gi.test(text)
+      ) {
         inferredEvents.push({
           id: `event_inferred_${idCounter++}`,
           date: this.inferDateBetween(
             earliestDate,
-            presentTypes.has('BREACH_OCCURRED') ? latestDate : undefined
+            presentTypes.has("BREACH_OCCURRED") ? latestDate : undefined,
           ),
-          event: '开始履行（推断）',
-          eventType: 'PERFORMANCE_START',
+          event: "开始履行（推断）",
+          eventType: "PERFORMANCE_START",
           importance: 4,
-          source: 'inferred'
+          source: "inferred",
         });
       }
 
-      if (!presentTypes.has('BREACH_OCCURRED') && /违约|未履行|逾期/gi.test(text)) {
+      if (
+        !presentTypes.has("BREACH_OCCURRED") &&
+        /违约|未履行|逾期/gi.test(text)
+      ) {
         inferredEvents.push({
           id: `event_inferred_${idCounter++}`,
           date: this.inferDateAfter(earliestDate),
-          event: '发生违约（推断）',
-          eventType: 'BREACH_OCCURRED',
+          event: "发生违约（推断）",
+          eventType: "BREACH_OCCURRED",
           importance: 5,
-          source: 'inferred'
+          source: "inferred",
         });
       }
     }
@@ -985,7 +1054,7 @@ ${eventList}
       endDate: latestDate,
       missingTypes,
       inferredEvents,
-      hasGaps: missingTypes.length > 0 || inferredEvents.length > 0
+      hasGaps: missingTypes.length > 0 || inferredEvents.length > 0,
     };
   }
 
@@ -1003,28 +1072,28 @@ ${eventList}
       const formats = [
         {
           pattern: /(\d{4})[-年](\d{1,2})[-月](\d{1,2})日?/,
-          groupMap: { year: 1, month: 2, day: 3 }
+          groupMap: { year: 1, month: 2, day: 3 },
         },
         {
           pattern: /(\d{4})[-/](\d{1,2})[-/](\d{1,2})/,
-          groupMap: { year: 1, month: 2, day: 3 }
+          groupMap: { year: 1, month: 2, day: 3 },
         },
         {
           pattern: /(\d{4})年(\d{1,2})月(\d{1,2})日?/,
-          groupMap: { year: 1, month: 2, day: 3 }
+          groupMap: { year: 1, month: 2, day: 3 },
         },
         {
           pattern: /(\d{4})年(\d{1,2})月/,
           groupMap: { year: 1, month: 2, day: null },
-          requiresDay: false
+          requiresDay: false,
         },
         // 添加只匹配年份的模式（如"2024年"）
         {
           pattern: /(\d{4})年/,
           groupMap: { year: 1, month: null, day: null },
           requiresDay: false,
-          requiresMonth: false
-        }
+          requiresMonth: false,
+        },
       ];
 
       for (const format of formats) {
@@ -1070,8 +1139,8 @@ ${eventList}
     if (parsed && !isNaN(parsed.getTime())) {
       // 使用本地日期格式化，避免toISOString()导致的时区转换
       const year = parsed.getFullYear();
-      const month = String(parsed.getMonth() + 1).padStart(2, '0');
-      const day = String(parsed.getDate()).padStart(2, '0');
+      const month = String(parsed.getMonth() + 1).padStart(2, "0");
+      const day = String(parsed.getDate()).padStart(2, "0");
       return `${year}-${month}-${day}`;
     }
 
@@ -1087,9 +1156,9 @@ ${eventList}
       const threeMonthsAgo = new Date(
         now.getFullYear(),
         now.getMonth() - 3,
-        now.getDate()
+        now.getDate(),
       );
-      return threeMonthsAgo.toISOString().split('T')[0];
+      return threeMonthsAgo.toISOString().split("T")[0];
     }
 
     return earliestDate;
@@ -1100,39 +1169,37 @@ ${eventList}
    */
   private inferDateBetween(startDate?: string, endDate?: string): string {
     if (!startDate || !endDate) {
-      return startDate || endDate || '';
+      return startDate || endDate || "";
     }
 
     const start = this.parseDate(startDate);
     const end = this.parseDate(endDate);
 
     if (start && end) {
-      const midTime = new Date(
-        (start.getTime() + end.getTime()) / 2
-      );
-      return midTime.toISOString().split('T')[0];
+      const midTime = new Date((start.getTime() + end.getTime()) / 2);
+      return midTime.toISOString().split("T")[0];
     }
 
-    return startDate || endDate || '';
+    return startDate || endDate || "";
   }
 
   /**
    * 推断最早日期之后的时间
    */
   private inferDateAfter(startDate?: string): string {
-    if (!startDate) return '';
+    if (!startDate) return "";
 
     const start = this.parseDate(startDate);
     if (start) {
       const oneMonthLater = new Date(
         start.getFullYear(),
         start.getMonth() + 1,
-        start.getDate()
+        start.getDate(),
       );
-      return oneMonthLater.toISOString().split('T')[0];
+      return oneMonthLater.toISOString().split("T")[0];
     }
 
-    return '';
+    return "";
   }
 
   /**
@@ -1143,7 +1210,7 @@ ${eventList}
     gapInfo: GapInfo,
     aiExtracted: TimelineEvent[],
     ruleExtracted: TimelineEvent[],
-    aiReviewed: TimelineEvent[]
+    aiReviewed: TimelineEvent[],
   ): {
     total: number;
     explicitCount: number;
@@ -1157,27 +1224,30 @@ ${eventList}
     ruleExtractedCount: number;
     aiReviewedCount: number;
   } {
-    const byType: Record<TimelineEventType, number> = {} as Record<TimelineEventType, number>;
+    const byType: Record<TimelineEventType, number> = {} as Record<
+      TimelineEventType,
+      number
+    >;
     let explicitCount = 0;
     let inferredCount = 0;
     let totalImportance = 0;
 
     const allTypes: TimelineEventType[] = [
-      'CONTRACT_SIGNED',
-      'PERFORMANCE_START',
-      'BREACH_OCCURRED',
-      'DEMAND_SENT',
-      'LAWSUIT_FILED',
-      'OTHER'
+      "CONTRACT_SIGNED",
+      "PERFORMANCE_START",
+      "BREACH_OCCURRED",
+      "DEMAND_SENT",
+      "LAWSUIT_FILED",
+      "OTHER",
     ];
 
     for (const type of allTypes) {
-      byType[type] = events.filter(e => e.eventType === type).length;
+      byType[type] = events.filter((e) => e.eventType === type).length;
     }
 
     for (const event of events) {
-      if (event.source === 'explicit') explicitCount++;
-      if (event.source === 'inferred') inferredCount++;
+      if (event.source === "explicit") explicitCount++;
+      if (event.source === "inferred") inferredCount++;
       totalImportance += event.importance || 0;
     }
 
@@ -1186,13 +1256,14 @@ ${eventList}
       explicitCount,
       inferredCount,
       byType,
-      avgImportance: events.length > 0 ? Math.round(totalImportance / events.length) : 0,
+      avgImportance:
+        events.length > 0 ? Math.round(totalImportance / events.length) : 0,
       earliestDate: gapInfo.startDate,
       latestDate: gapInfo.endDate,
       hasGaps: gapInfo.hasGaps,
       aiExtractedCount: aiExtracted.length,
       ruleExtractedCount: ruleExtracted.length,
-      aiReviewedCount: aiReviewed.length
+      aiReviewedCount: aiReviewed.length,
     };
   }
 
@@ -1206,9 +1277,9 @@ ${eventList}
       /(\d{4})年(\d{1,2})月(\d{1,2})日?/g,
       /(\d{1,2})月(\d{1,2})日/g,
       /(\d{4})年(\d{1,2})月/g,
-      /(\d{4})年/g,  // 添加只匹配年份的模式
+      /(\d{4})年/g, // 添加只匹配年份的模式
       // 添加YYYY.MM.DD格式支持
-      /(\d{4})[.](\d{1,2})[.](\d{1,2})/g
+      /(\d{4})[.](\d{1,2})[.](\d{1,2})/g,
     ];
   }
 
@@ -1218,13 +1289,15 @@ ${eventList}
   private initializeEventTypePatterns(): Map<TimelineEventType, RegExp[]> {
     const patterns = new Map<TimelineEventType, RegExp[]>();
 
-    patterns.set('CONTRACT_SIGNED', [/签订|签署|订立|达成|协议|合同/gi]);
-    patterns.set('PERFORMANCE_START', [/开始.*履行|履行.*义务|执行.*合同/gi]);
-    patterns.set('BREACH_OCCURRED', [/违约|未履行|逾期|停止.*履行|拒绝.*履行/gi]);
-    patterns.set('DEMAND_SENT', [/催告|发函|通知|要求.*支付|要求.*履行/gi]);
+    patterns.set("CONTRACT_SIGNED", [/签订|签署|订立|达成|协议|合同/gi]);
+    patterns.set("PERFORMANCE_START", [/开始.*履行|履行.*义务|执行.*合同/gi]);
+    patterns.set("BREACH_OCCURRED", [
+      /违约|未履行|逾期|停止.*履行|拒绝.*履行/gi,
+    ]);
+    patterns.set("DEMAND_SENT", [/催告|发函|通知|要求.*支付|要求.*履行/gi]);
     // 增强LAWSUIT_FILED模式，添加更多匹配关键词
-    patterns.set('LAWSUIT_FILED', [
-      /起诉|提起.*诉讼|向法院.*起诉|申请.*仲裁|提起诉讼|起诉至法院|诉至法院/gi
+    patterns.set("LAWSUIT_FILED", [
+      /起诉|提起.*诉讼|向法院.*起诉|申请.*仲裁|提起诉讼|起诉至法院|诉至法院/gi,
     ]);
 
     return patterns;
@@ -1248,7 +1321,7 @@ export function createTimelineExtractor(): TimelineExtractor {
 export async function extractTimelineFromText(
   text: string,
   extractedData?: ExtractedData,
-  options?: TimelineExtractionOptions
+  options?: TimelineExtractionOptions,
 ): Promise<TimelineEvent[]> {
   const extractor = createTimelineExtractor();
   const result = await extractor.extractFromText(text, extractedData, options);

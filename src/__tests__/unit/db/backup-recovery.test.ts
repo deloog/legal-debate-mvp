@@ -1,5 +1,11 @@
-import { DatabaseBackupManager, createBackupManager } from "../../../../scripts/backup-database";
-import { DatabaseRestoreManager, createRestoreManager } from "../../../../scripts/restore-database";
+import {
+  DatabaseBackupManager,
+  createBackupManager,
+} from "../../../../scripts/backup-database";
+import {
+  DatabaseRestoreManager,
+  createRestoreManager,
+} from "../../../../scripts/restore-database";
 
 // Mock exec functions to avoid actual database operations
 jest.mock("child_process", () => ({
@@ -28,13 +34,13 @@ describe("备份恢复功能测试", () => {
       };
 
       const backupManager = new DatabaseBackupManager(mockConfig);
-      
+
       expect(backupManager).toBeDefined();
     });
 
     it("应该创建默认备份管理器", () => {
       const backupManager = createBackupManager();
-      
+
       expect(backupManager).toBeDefined();
     });
   });
@@ -47,13 +53,13 @@ describe("备份恢复功能测试", () => {
       };
 
       const restoreManager = new DatabaseRestoreManager(mockConfig);
-      
+
       expect(restoreManager).toBeDefined();
     });
 
     it("应该创建默认恢复管理器", () => {
       const restoreManager = createRestoreManager();
-      
+
       expect(restoreManager).toBeDefined();
     });
   });
@@ -128,7 +134,8 @@ describe("备份恢复功能测试", () => {
         listAvailableBackups: jest.fn(),
       } as any;
 
-      const isValid = await mockRestoreManager.validateRestoredDatabase("test_db");
+      const isValid =
+        await mockRestoreManager.validateRestoredDatabase("test_db");
 
       expect(isValid).toBe(true);
     });
@@ -233,20 +240,28 @@ describe("备份恢复功能测试", () => {
       const mockRestoreManager = {
         restoreDatabase: jest.fn().mockResolvedValue(mockRestoreInfo),
         validateRestoredDatabase: jest.fn().mockResolvedValue(true),
-        listAvailableBackups: jest.fn().mockResolvedValue(["integration_test_backup.sql"]),
+        listAvailableBackups: jest
+          .fn()
+          .mockResolvedValue(["integration_test_backup.sql"]),
       } as any;
 
       // 执行完整流程
       const backupResult = await mockBackupManager.createBackup();
       expect(backupResult.success).toBe(true);
 
-      const isValidBackup = await mockBackupManager.verifyBackup(backupResult.filename);
+      const isValidBackup = await mockBackupManager.verifyBackup(
+        backupResult.filename,
+      );
       expect(isValidBackup).toBe(true);
 
-      const restoreResult = await mockRestoreManager.restoreDatabase(backupResult.filename);
+      const restoreResult = await mockRestoreManager.restoreDatabase(
+        backupResult.filename,
+      );
       expect(restoreResult.success).toBe(true);
 
-      const isValidRestore = await mockRestoreManager.validateRestoredDatabase(restoreResult.targetDatabase);
+      const isValidRestore = await mockRestoreManager.validateRestoredDatabase(
+        restoreResult.targetDatabase,
+      );
       expect(isValidRestore).toBe(true);
     });
   });
@@ -291,7 +306,8 @@ describe("备份恢复功能测试", () => {
         listAvailableBackups: jest.fn(),
       } as any;
 
-      const result = await mockRestoreManager.restoreDatabase("perf_restore.sql");
+      const result =
+        await mockRestoreManager.restoreDatabase("perf_restore.sql");
 
       expect(result.success).toBe(true);
       expect(result.duration).toBeLessThan(10000); // 应该少于10秒
@@ -306,7 +322,9 @@ describe("备份恢复功能测试", () => {
         cleanupOldBackups: jest.fn(),
       } as any;
 
-      const isValid = await mockBackupManager.verifyBackup("consistent_backup.sql");
+      const isValid = await mockBackupManager.verifyBackup(
+        "consistent_backup.sql",
+      );
       expect(isValid).toBe(true);
     });
 
@@ -317,7 +335,9 @@ describe("备份恢复功能测试", () => {
         listAvailableBackups: jest.fn(),
       } as any;
 
-      const isValid = await mockRestoreManager.validateRestoredDatabase("consistent_restored");
+      const isValid = await mockRestoreManager.validateRestoredDatabase(
+        "consistent_restored",
+      );
       expect(isValid).toBe(true);
     });
   });

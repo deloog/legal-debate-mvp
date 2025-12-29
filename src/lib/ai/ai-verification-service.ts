@@ -1,5 +1,5 @@
-import { getUnifiedAIService } from './unified-service';
-import { AIProvider } from '../../types/ai-service';
+import { getUnifiedAIService } from "./unified-service";
+import { AIProvider } from "../../types/ai-service";
 
 // =============================================================================
 // AI验证服务 - 使用AI来验证AI的输出质量
@@ -51,8 +51,8 @@ export interface VerificationResult {
 }
 
 export class AIVerificationService {
-  private provider: AIProvider = 'zhipu';
-  private model: string = 'glm-4-flash';
+  private provider: AIProvider = "zhipu";
+  private model: string = "glm-4-flash";
 
   constructor() {
     // 可以配置使用不同的AI提供商进行交叉验证
@@ -61,18 +61,20 @@ export class AIVerificationService {
   /**
    * 使用AI验证文档解析结果的准确性
    */
-  async verifyExtraction(request: VerificationRequest): Promise<VerificationResult> {
+  async verifyExtraction(
+    request: VerificationRequest,
+  ): Promise<VerificationResult> {
     try {
       const unifiedService = await getUnifiedAIService();
-      
+
       const verificationPrompt = this.buildVerificationPrompt(request);
-      
+
       const response = await unifiedService.chatCompletion({
         model: this.model,
         provider: this.provider,
         messages: [
           {
-            role: 'system',
+            role: "system",
             content: `你是一个专业的法律文档验证专家。你的任务是客观、准确地评估AI从法律文档中提取信息的质量。
 
 请从以下维度进行评估：
@@ -80,26 +82,25 @@ export class AIVerificationService {
 2. 诉讼请求完整性 - 检查遗漏的请求、错误的分类
 3. 整体质量评估 - 完整性、一致性、清晰度
 
-请严格按照JSON格式返回评估结果，不要包含任何说明文字。`
+请严格按照JSON格式返回评估结果，不要包含任何说明文字。`,
           },
           {
-            role: 'user',
-            content: verificationPrompt
-          }
+            role: "user",
+            content: verificationPrompt,
+          },
         ],
         temperature: 0.1, // 使用低温度确保一致性
-        maxTokens: 3000
+        maxTokens: 3000,
       });
 
       if (!response.choices || response.choices.length === 0) {
-        throw new Error('AI验证服务返回空响应');
+        throw new Error("AI验证服务返回空响应");
       }
 
       const aiResponse = response.choices[0].message.content;
       return this.parseVerificationResponse(aiResponse);
-
     } catch (error) {
-      console.error('AI验证失败:', error);
+      console.error("AI验证失败:", error);
       // 降级到基础验证
       return this.fallbackVerification(request);
     }
@@ -184,25 +185,30 @@ AI提取结果：
   private parseVerificationResponse(response: string): VerificationResult {
     try {
       let cleanedResponse = response.trim();
-      
+
       // 移除代码块标记
-      if (cleanedResponse.includes('```json')) {
-        cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+      if (cleanedResponse.includes("```json")) {
+        cleanedResponse = cleanedResponse
+          .replace(/```json\s*/, "")
+          .replace(/```\s*$/, "");
       }
-      if (cleanedResponse.includes('```')) {
-        cleanedResponse = cleanedResponse.replace(/```\s*/, '').replace(/```\s*$/, '');
+      if (cleanedResponse.includes("```")) {
+        cleanedResponse = cleanedResponse
+          .replace(/```\s*/, "")
+          .replace(/```\s*$/, "");
       }
 
       const parsed = JSON.parse(cleanedResponse);
-      
+
       // 验证必要字段
       this.validateVerificationResult(parsed);
-      
-      return parsed as VerificationResult;
 
+      return parsed as VerificationResult;
     } catch (error) {
-      console.error('解析AI验证响应失败:', error);
-      throw new Error(`AI验证响应解析失败: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("解析AI验证响应失败:", error);
+      throw new Error(
+        `AI验证响应解析失败: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -211,12 +217,12 @@ AI提取结果：
    */
   private validateVerificationResult(result: any): void {
     const requiredFields = [
-      'overallAccuracy',
-      'partiesAccuracy',
-      'claimsAccuracy',
-      'qualityAssessment',
-      'detailedAnalysis',
-      'confidence'
+      "overallAccuracy",
+      "partiesAccuracy",
+      "claimsAccuracy",
+      "qualityAssessment",
+      "detailedAnalysis",
+      "confidence",
     ];
 
     for (const field of requiredFields) {
@@ -227,80 +233,87 @@ AI提取结果：
 
     // 验证数值范围
     if (result.overallAccuracy < 0 || result.overallAccuracy > 100) {
-      throw new Error('overallAccuracy必须在0-100之间');
+      throw new Error("overallAccuracy必须在0-100之间");
     }
 
     if (result.confidence < 0 || result.confidence > 1) {
-      throw new Error('confidence必须在0-1之间');
+      throw new Error("confidence必须在0-1之间");
     }
   }
 
   /**
    * 降级验证机制（当AI验证失败时）
    */
-  private fallbackVerification(request: VerificationRequest): VerificationResult {
-    console.warn('使用降级验证机制');
-    
+  private fallbackVerification(
+    request: VerificationRequest,
+  ): VerificationResult {
+    console.warn("使用降级验证机制");
+
     const { extractedData } = request;
-    
+
     // 基础逻辑检查
     const duplicates = this.findDuplicates(extractedData.parties);
     const issues: string[] = [];
-    
+
     // 检查重复
     if (duplicates.length > 0) {
-      issues.push(`发现重复当事人: ${duplicates.map(d => d.name).join(', ')}`);
+      issues.push(
+        `发现重复当事人: ${duplicates.map((d) => d.name).join(", ")}`,
+      );
     }
 
     // 基础评分
     let partiesScore = 100;
     let claimsScore = 100;
-    
+
     if (duplicates.length > 0) {
       partiesScore -= duplicates.length * 20; // 每个重复扣20分
     }
-    
+
     if (extractedData.claims.length === 0) {
       claimsScore = 0;
-      issues.push('未识别到任何诉讼请求');
+      issues.push("未识别到任何诉讼请求");
     }
 
     return {
       overallAccuracy: Math.round((partiesScore + claimsScore) / 2),
       partiesAccuracy: {
         score: partiesScore,
-        issues: issues.filter(i => i.includes('当事人')),
+        issues: issues.filter((i) => i.includes("当事人")),
         correctCount: extractedData.parties.length - duplicates.length,
         totalCount: extractedData.parties.length,
-        duplicates
+        duplicates,
       },
       claimsAccuracy: {
         score: claimsScore,
-        issues: issues.filter(i => i.includes('诉讼请求')),
+        issues: issues.filter((i) => i.includes("诉讼请求")),
         correctCount: extractedData.claims.length,
         totalCount: extractedData.claims.length,
-        missingClaims: []
+        missingClaims: [],
       },
       qualityAssessment: {
         completeness: 70,
         consistency: Math.max(50, 100 - duplicates.length * 25),
-        clarity: 70
+        clarity: 70,
       },
-      detailedAnalysis: '使用降级验证机制，结果可能不够准确。建议使用完整AI验证。',
-      confidence: 0.3
+      detailedAnalysis:
+        "使用降级验证机制，结果可能不够准确。建议使用完整AI验证。",
+      confidence: 0.3,
     };
   }
 
   /**
    * 查找重复的当事人
    */
-  private findDuplicates(parties: any[]): Array<{name: string; occurrences: number; roles: string[]}> {
-    const nameMap = new Map<string, {count: number; roles: string[]}>();
-    
-    parties.forEach(party => {
+  private findDuplicates(
+    parties: any[],
+  ): Array<{ name: string; occurrences: number; roles: string[] }> {
+    const nameMap = new Map<string, { count: number; roles: string[] }>();
+
+    parties.forEach((party) => {
       const name = party.name;
       if (!name) return;
-      
+
       const existing = nameMap.get(name);
       if (existing) {
         existing.count++;
@@ -310,7 +323,7 @@ AI提取结果：
       } else {
         nameMap.set(name, {
           count: 1,
-          roles: party.type ? [party.type] : []
+          roles: party.type ? [party.type] : [],
         });
       }
     });
@@ -320,7 +333,7 @@ AI提取结果：
       .map(([name, data]) => ({
         name,
         occurrences: data.count,
-        roles: data.roles
+        roles: data.roles,
       }));
   }
 

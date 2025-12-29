@@ -1,19 +1,22 @@
-import { testPrisma } from '../../../test-utils/database';
-import { setupTestDatabase, cleanupTestDatabase } from '../../../test-utils/database';
+import { testPrisma } from "../../../test-utils/database";
+import {
+  setupTestDatabase,
+  cleanupTestDatabase,
+} from "../../../test-utils/database";
 
-describe('Debate Flow Performance and Validation', () => {
+describe("Debate Flow Performance and Validation", () => {
   let testUser: any;
   let testCase: any;
 
   beforeAll(async () => {
     await setupTestDatabase();
-    
+
     // 创建测试用户
     testUser = await testPrisma.user.create({
       data: {
-        email: 'test-perf@example.com',
-        name: '性能测试用户',
-        role: 'USER',
+        email: "test-perf@example.com",
+        name: "性能测试用户",
+        role: "USER",
       },
     });
 
@@ -21,12 +24,12 @@ describe('Debate Flow Performance and Validation', () => {
     testCase = await testPrisma.case.create({
       data: {
         userId: testUser.id,
-        title: '性能测试案件',
-        description: '这是一个用于测试辩论性能和一致性的案件',
-        type: 'CIVIL',
-        status: 'ACTIVE',
-        plaintiffName: '张三',
-        defendantName: '李四',
+        title: "性能测试案件",
+        description: "这是一个用于测试辩论性能和一致性的案件",
+        type: "CIVIL",
+        status: "ACTIVE",
+        plaintiffName: "张三",
+        defendantName: "李四",
       },
     });
   });
@@ -35,18 +38,18 @@ describe('Debate Flow Performance and Validation', () => {
     await cleanupTestDatabase();
   });
 
-  describe('Data Consistency Validation', () => {
-    it('should maintain data consistency throughout flow', async () => {
+  describe("Data Consistency Validation", () => {
+    it("should maintain data consistency throughout flow", async () => {
       const debate = await testPrisma.debate.create({
         data: {
           case: {
-            connect: { id: testCase.id }
+            connect: { id: testCase.id },
           },
           user: {
-            connect: { id: testUser.id }
+            connect: { id: testUser.id },
           },
-          title: '一致性测试辩论',
-          status: 'IN_PROGRESS' as const,
+          title: "一致性测试辩论",
+          status: "IN_PROGRESS" as const,
           currentRound: 1,
         },
       });
@@ -54,10 +57,10 @@ describe('Debate Flow Performance and Validation', () => {
       const round = await testPrisma.debateRound.create({
         data: {
           debate: {
-            connect: { id: debate.id }
+            connect: { id: debate.id },
           },
           roundNumber: 1,
-          status: 'IN_PROGRESS' as const,
+          status: "IN_PROGRESS" as const,
           startedAt: new Date(),
         },
       });
@@ -66,12 +69,12 @@ describe('Debate Flow Performance and Validation', () => {
       const argument = await testPrisma.argument.create({
         data: {
           round: {
-            connect: { id: round.id }
+            connect: { id: round.id },
           },
-          side: 'PLAINTIFF' as const,
-          content: '一致性测试论点',
-          type: 'MAIN_POINT' as const,
-          aiProvider: 'test-provider',
+          side: "PLAINTIFF" as const,
+          content: "一致性测试论点",
+          type: "MAIN_POINT" as const,
+          aiProvider: "test-provider",
           generationTime: 1000,
           confidence: 0.95,
         },
@@ -91,24 +94,24 @@ describe('Debate Flow Performance and Validation', () => {
 
       expect(validationQuery?.round.id).toBe(round.id);
       expect(validationQuery?.round.debate.id).toBe(debate.id);
-      expect(validationQuery?.aiProvider).toBe('test-provider');
+      expect(validationQuery?.aiProvider).toBe("test-provider");
       expect(validationQuery?.generationTime).toBe(1000);
       expect(validationQuery?.confidence).toBe(0.95);
     });
   });
 
-  describe('Concurrent Operations', () => {
-    it('should handle concurrent argument creation', async () => {
+  describe("Concurrent Operations", () => {
+    it("should handle concurrent argument creation", async () => {
       const debate = await testPrisma.debate.create({
         data: {
           case: {
-            connect: { id: testCase.id }
+            connect: { id: testCase.id },
           },
           user: {
-            connect: { id: testUser.id }
+            connect: { id: testUser.id },
           },
-          title: '并发测试辩论',
-          status: 'IN_PROGRESS' as const,
+          title: "并发测试辩论",
+          status: "IN_PROGRESS" as const,
           currentRound: 1,
         },
       });
@@ -116,10 +119,10 @@ describe('Debate Flow Performance and Validation', () => {
       const round = await testPrisma.debateRound.create({
         data: {
           debate: {
-            connect: { id: debate.id }
+            connect: { id: debate.id },
           },
           roundNumber: 1,
-          status: 'IN_PROGRESS' as const,
+          status: "IN_PROGRESS" as const,
           startedAt: new Date(),
         },
       });
@@ -131,20 +134,21 @@ describe('Debate Flow Performance and Validation', () => {
           testPrisma.argument.create({
             data: {
               round: {
-                connect: { id: round.id }
+                connect: { id: round.id },
               },
-              side: i % 2 === 0 ? 'DEFENDANT' as const : 'PLAINTIFF' as const,
+              side:
+                i % 2 === 0 ? ("DEFENDANT" as const) : ("PLAINTIFF" as const),
               content: `并发论点${i}`,
-              type: 'MAIN_POINT' as const,
+              type: "MAIN_POINT" as const,
             },
-          })
+          }),
         );
       }
 
       const createdArguments = await Promise.all(argumentPromises);
 
       expect(createdArguments).toHaveLength(5);
-      
+
       // 验证所有论点都被正确创建
       const finalArguments = await testPrisma.argument.findMany({
         where: { roundId: round.id },
@@ -154,34 +158,34 @@ describe('Debate Flow Performance and Validation', () => {
     });
   });
 
-  describe('Performance Benchmarks', () => {
-    it('should handle large debate creation efficiently', async () => {
+  describe("Performance Benchmarks", () => {
+    it("should handle large debate creation efficiently", async () => {
       const startTime = Date.now();
 
       // 创建包含多轮的复杂辩论
       const debate = await testPrisma.debate.create({
         data: {
           case: {
-            connect: { id: testCase.id }
+            connect: { id: testCase.id },
           },
           user: {
-            connect: { id: testUser.id }
+            connect: { id: testUser.id },
           },
-          title: '性能基准测试辩论',
-          status: 'DRAFT' as const,
+          title: "性能基准测试辩论",
+          status: "DRAFT" as const,
           currentRound: 0,
           debateConfig: {
-            mode: 'adversarial',
+            mode: "adversarial",
             maxRounds: 5,
             aiConfig: {
               plaintiff: {
-                provider: 'deepseek',
-                model: 'deepseek-chat',
+                provider: "deepseek",
+                model: "deepseek-chat",
                 temperature: 0.7,
               },
               defendant: {
-                provider: 'zhipu',
-                model: 'glm-4-flash',
+                provider: "zhipu",
+                model: "glm-4-flash",
                 temperature: 0.7,
               },
             },
@@ -195,10 +199,10 @@ describe('Debate Flow Performance and Validation', () => {
         const round = await testPrisma.debateRound.create({
           data: {
             debate: {
-              connect: { id: debate.id }
+              connect: { id: debate.id },
             },
             roundNumber: i,
-            status: i === 1 ? 'IN_PROGRESS' as const : 'PENDING' as const,
+            status: i === 1 ? ("IN_PROGRESS" as const) : ("PENDING" as const),
             startedAt: i === 1 ? new Date() : undefined,
           },
         });
@@ -214,31 +218,31 @@ describe('Debate Flow Performance and Validation', () => {
 
       // 清理测试数据
       await testPrisma.argument.deleteMany({
-        where: { round: { debateId: debate.id } }
+        where: { round: { debateId: debate.id } },
       });
       await testPrisma.debateRound.deleteMany({
-        where: { debateId: debate.id }
+        where: { debateId: debate.id },
       });
       await testPrisma.debate.delete({
-        where: { id: debate.id }
+        where: { id: debate.id },
       });
     });
   });
 
-  describe('Data Integrity Validation', () => {
-    it('should enforce foreign key constraints', async () => {
+  describe("Data Integrity Validation", () => {
+    it("should enforce foreign key constraints", async () => {
       // 测试不存在的轮次ID
       await expect(
         testPrisma.argument.create({
           data: {
             round: {
-              connect: { id: 'non-existent-round-id' }
+              connect: { id: "non-existent-round-id" },
             },
-            side: 'PLAINTIFF' as const,
-            content: '测试论点',
-            type: 'MAIN_POINT' as const,
+            side: "PLAINTIFF" as const,
+            content: "测试论点",
+            type: "MAIN_POINT" as const,
           },
-        })
+        }),
       ).rejects.toThrow();
 
       // 测试不存在的辩论ID
@@ -246,27 +250,27 @@ describe('Debate Flow Performance and Validation', () => {
         testPrisma.debateRound.create({
           data: {
             debate: {
-              connect: { id: 'non-existent-debate-id' }
+              connect: { id: "non-existent-debate-id" },
             },
             roundNumber: 1,
-            status: 'IN_PROGRESS' as const,
+            status: "IN_PROGRESS" as const,
             startedAt: new Date(),
           },
-        })
+        }),
       ).rejects.toThrow();
     });
 
-    it('should validate enum constraints', async () => {
+    it("should validate enum constraints", async () => {
       const debate = await testPrisma.debate.create({
         data: {
           case: {
-            connect: { id: testCase.id }
+            connect: { id: testCase.id },
           },
           user: {
-            connect: { id: testUser.id }
+            connect: { id: testUser.id },
           },
-          title: '约束验证测试辩论',
-          status: 'IN_PROGRESS' as const,
+          title: "约束验证测试辩论",
+          status: "IN_PROGRESS" as const,
           currentRound: 1,
         },
       });
@@ -274,10 +278,10 @@ describe('Debate Flow Performance and Validation', () => {
       const round = await testPrisma.debateRound.create({
         data: {
           debate: {
-            connect: { id: debate.id }
+            connect: { id: debate.id },
           },
           roundNumber: 1,
-          status: 'IN_PROGRESS' as const,
+          status: "IN_PROGRESS" as const,
           startedAt: new Date(),
         },
       });
@@ -287,13 +291,13 @@ describe('Debate Flow Performance and Validation', () => {
         testPrisma.argument.create({
           data: {
             round: {
-              connect: { id: round.id }
+              connect: { id: round.id },
             },
-            side: 'INVALID_SIDE' as any,
-            content: '测试论点',
-            type: 'MAIN_POINT' as const,
+            side: "INVALID_SIDE" as any,
+            content: "测试论点",
+            type: "MAIN_POINT" as const,
           },
-        })
+        }),
       ).rejects.toThrow();
     });
   });

@@ -45,16 +45,16 @@ const DEBATE_TEST_CASES = [
 // =============================================================================
 
 interface DebateQuality {
-  clarity: number;      // 逻辑清晰度 (1-10)
-  balance: number;      // 正反方平衡度 (1-10)
-  accuracy: number;     // 法律依据准确性 (1-10)
-  completeness: number;  // 论点完整性 (1-10)
-  overall: number;      // 总体评分 (1-10)
-  analysis: string;     // 详细分析
+  clarity: number; // 逻辑清晰度 (1-10)
+  balance: number; // 正反方平衡度 (1-10)
+  accuracy: number; // 法律依据准确性 (1-10)
+  completeness: number; // 论点完整性 (1-10)
+  overall: number; // 总体评分 (1-10)
+  analysis: string; // 详细分析
 }
 
 interface TestResult {
-  testCase: typeof DEBATE_TEST_CASES[0];
+  testCase: (typeof DEBATE_TEST_CASES)[0];
   response: any;
   quality: DebateQuality;
   duration: number;
@@ -67,16 +67,20 @@ interface TestResult {
 function evaluateDebateQuality(
   title: string,
   description: string,
-  debateContent: string
+  debateContent: string,
 ): DebateQuality {
   // 简单的启发式评估
-  let clarity = 7;    // 默认清晰度
-  let balance = 7;    // 默认平衡度
-  let accuracy = 7;   // 默认准确性
+  let clarity = 7; // 默认清晰度
+  let balance = 7; // 默认平衡度
+  let accuracy = 7; // 默认准确性
   let completeness = 7; // 默认完整性
 
   // 评估逻辑清晰度
-  if (debateContent.includes("首先") || debateContent.includes("其次") || debateContent.includes("最后")) {
+  if (
+    debateContent.includes("首先") ||
+    debateContent.includes("其次") ||
+    debateContent.includes("最后")
+  ) {
     clarity += 1;
   }
   if (debateContent.length > 200) {
@@ -84,8 +88,14 @@ function evaluateDebateQuality(
   }
 
   // 评估正反方平衡度
-  const hasPlaintiff = debateContent.includes("原告") || debateContent.includes("买方") || debateContent.includes("员工");
-  const hasDefendant = debateContent.includes("被告") || debateContent.includes("卖方") || debateContent.includes("公司");
+  const hasPlaintiff =
+    debateContent.includes("原告") ||
+    debateContent.includes("买方") ||
+    debateContent.includes("员工");
+  const hasDefendant =
+    debateContent.includes("被告") ||
+    debateContent.includes("卖方") ||
+    debateContent.includes("公司");
   if (hasPlaintiff && hasDefendant) {
     balance += 2;
   } else if (hasPlaintiff || hasDefendant) {
@@ -93,14 +103,32 @@ function evaluateDebateQuality(
   }
 
   // 评估法律依据准确性
-  const legalTerms = ["民法典", "合同法", "劳动法", "道路交通安全法", "条款", "规定", "依法"];
-  const legalTermCount = legalTerms.filter(term => debateContent.includes(term)).length;
+  const legalTerms = [
+    "民法典",
+    "合同法",
+    "劳动法",
+    "道路交通安全法",
+    "条款",
+    "规定",
+    "依法",
+  ];
+  const legalTermCount = legalTerms.filter((term) =>
+    debateContent.includes(term),
+  ).length;
   accuracy += Math.min(legalTermCount, 3);
 
   // 评估论点完整性
-  if (debateContent.includes("事实") && debateContent.includes("理由") && debateContent.includes("请求")) {
+  if (
+    debateContent.includes("事实") &&
+    debateContent.includes("理由") &&
+    debateContent.includes("请求")
+  ) {
     completeness += 2;
-  } else if (debateContent.includes("事实") || debateContent.includes("理由") || debateContent.includes("请求")) {
+  } else if (
+    debateContent.includes("事实") ||
+    debateContent.includes("理由") ||
+    debateContent.includes("请求")
+  ) {
     completeness += 1;
   }
 
@@ -120,10 +148,10 @@ function generateQualityAnalysis(
   clarity: number,
   balance: number,
   accuracy: number,
-  completeness: number
+  completeness: number,
 ): string {
   const analysis = [];
-  
+
   if (clarity >= 8) {
     analysis.push("✅ 论点逻辑清晰，结构合理");
   } else if (clarity >= 6) {
@@ -174,55 +202,56 @@ async function testDeepSeekDebate(): Promise<void> {
     console.log(`\n📋 测试案例: ${testCase.title}`);
     console.log(`   类型: ${testCase.category}`);
     console.log(`   描述: ${testCase.description}`);
-    
+
     const startTime = Date.now();
-    
+
     try {
       const response = await aiService.generateDebate({
         title: testCase.title,
         description: testCase.description,
         legalReferences: testCase.legalReferences,
       });
-      
+
       const duration = Date.now() - startTime;
       const debateContent = response.choices[0]?.message?.content || "";
-      
+
       console.log(`✅ 辩论生成成功，响应时间: ${duration}ms`);
       console.log(`   内容长度: ${debateContent.length} 字符`);
       console.log(`   Token使用: ${response.usage?.totalTokens || 0}`);
-      
+
       // 评估质量
       const quality = evaluateDebateQuality(
         testCase.title,
         testCase.description,
-        debateContent
+        debateContent,
       );
-      
+
       results.push({
         testCase,
         response,
         quality,
         duration,
       });
-      
+
       console.log(`   质量评分: ${quality.overall.toFixed(1)}/10`);
       console.log(`   - 逻辑清晰度: ${quality.clarity}/10`);
       console.log(`   - 正反方平衡: ${quality.balance}/10`);
       console.log(`   - 法律依据准确性: ${quality.accuracy}/10`);
       console.log(`   - 论点完整性: ${quality.completeness}/10`);
-      
+
       console.log(`\n📝 生成的辩论内容:`);
       console.log("─".repeat(50));
       console.log(debateContent);
       console.log("─".repeat(50));
-      
+
       console.log(`\n🔍 质量分析:`);
       console.log(quality.analysis);
-      
     } catch (error) {
       const duration = Date.now() - startTime;
-      console.log(`❌ 辩论生成失败: ${error instanceof Error ? error.message : JSON.stringify(error)}`);
-      
+      console.log(
+        `❌ 辩论生成失败: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
+      );
+
       results.push({
         testCase,
         response: null,
@@ -237,10 +266,10 @@ async function testDeepSeekDebate(): Promise<void> {
         duration,
       });
     }
-    
+
     console.log("\n" + "─".repeat(60));
   }
-  
+
   // 生成总结报告
   generateSummaryReport(results);
 }
@@ -249,30 +278,44 @@ function generateSummaryReport(results: TestResult[]): void {
   console.log("\n" + "=".repeat(60));
   console.log("📊 DeepSeek辩论生成测试总结报告");
   console.log("=".repeat(60));
-  
-  const successfulTests = results.filter(r => r.response !== null);
-  const failedTests = results.filter(r => r.response === null);
-  
+
+  const successfulTests = results.filter((r) => r.response !== null);
+  const failedTests = results.filter((r) => r.response === null);
+
   console.log(`\n📈 总体统计:`);
   console.log(`   总测试数: ${results.length}`);
   console.log(`   成功数: ${successfulTests.length}`);
   console.log(`   失败数: ${failedTests.length}`);
-  console.log(`   成功率: ${((successfulTests.length / results.length) * 100).toFixed(1)}%`);
-  
+  console.log(
+    `   成功率: ${((successfulTests.length / results.length) * 100).toFixed(1)}%`,
+  );
+
   let avgOverall = 0;
   let avgClarity = 0;
   let avgBalance = 0;
   let avgAccuracy = 0;
   let avgCompleteness = 0;
-  
+
   if (successfulTests.length > 0) {
-    const avgDuration = successfulTests.reduce((sum, r) => sum + r.duration, 0) / successfulTests.length;
-    avgClarity = successfulTests.reduce((sum, r) => sum + r.quality.clarity, 0) / successfulTests.length;
-    avgBalance = successfulTests.reduce((sum, r) => sum + r.quality.balance, 0) / successfulTests.length;
-    avgAccuracy = successfulTests.reduce((sum, r) => sum + r.quality.accuracy, 0) / successfulTests.length;
-    avgCompleteness = successfulTests.reduce((sum, r) => sum + r.quality.completeness, 0) / successfulTests.length;
-    avgOverall = successfulTests.reduce((sum, r) => sum + r.quality.overall, 0) / successfulTests.length;
-    
+    const avgDuration =
+      successfulTests.reduce((sum, r) => sum + r.duration, 0) /
+      successfulTests.length;
+    avgClarity =
+      successfulTests.reduce((sum, r) => sum + r.quality.clarity, 0) /
+      successfulTests.length;
+    avgBalance =
+      successfulTests.reduce((sum, r) => sum + r.quality.balance, 0) /
+      successfulTests.length;
+    avgAccuracy =
+      successfulTests.reduce((sum, r) => sum + r.quality.accuracy, 0) /
+      successfulTests.length;
+    avgCompleteness =
+      successfulTests.reduce((sum, r) => sum + r.quality.completeness, 0) /
+      successfulTests.length;
+    avgOverall =
+      successfulTests.reduce((sum, r) => sum + r.quality.overall, 0) /
+      successfulTests.length;
+
     console.log(`   平均响应时间: ${avgDuration.toFixed(0)}ms`);
     console.log(`   平均质量评分: ${avgOverall.toFixed(1)}/10`);
     console.log(`   平均逻辑清晰度: ${avgClarity.toFixed(1)}/10`);
@@ -280,49 +323,67 @@ function generateSummaryReport(results: TestResult[]): void {
     console.log(`   平均法律依据准确性: ${avgAccuracy.toFixed(1)}/10`);
     console.log(`   平均论点完整性: ${avgCompleteness.toFixed(1)}/10`);
   }
-  
+
   console.log(`\n📋 详细结果:`);
   results.forEach((result, index) => {
     const status = result.response ? "✅" : "❌";
-    console.log(`   ${index + 1}. ${status} ${result.testCase.title} - 质量: ${result.quality.overall.toFixed(1)}/10 - ${result.duration}ms`);
+    console.log(
+      `   ${index + 1}. ${status} ${result.testCase.title} - 质量: ${result.quality.overall.toFixed(1)}/10 - ${result.duration}ms`,
+    );
   });
-  
+
   // 验收标准检查
   console.log(`\n🎯 验收标准检查:`);
-  
+
   let standardsMet = 0;
   const totalStandards = 3;
-  
+
   if (avgOverall >= 7.0) {
-    console.log(`   ✅ 辩论论点逻辑清晰: 通过 (平均${avgOverall.toFixed(1)}/10 ≥ 7.0)`);
+    console.log(
+      `   ✅ 辩论论点逻辑清晰: 通过 (平均${avgOverall.toFixed(1)}/10 ≥ 7.0)`,
+    );
     standardsMet++;
   } else {
-    console.log(`   ❌ 辩论论点逻辑清晰: 未通过 (平均${avgOverall.toFixed(1)}/10 < 7.0)`);
+    console.log(
+      `   ❌ 辩论论点逻辑清晰: 未通过 (平均${avgOverall.toFixed(1)}/10 < 7.0)`,
+    );
   }
-  
+
   if (avgBalance >= 7.0) {
-    console.log(`   ✅ 正反方论点平衡: 通过 (平均${avgBalance.toFixed(1)}/10 ≥ 7.0)`);
+    console.log(
+      `   ✅ 正反方论点平衡: 通过 (平均${avgBalance.toFixed(1)}/10 ≥ 7.0)`,
+    );
     standardsMet++;
   } else {
-    console.log(`   ❌ 正反方论点平衡: 未通过 (平均${avgBalance.toFixed(1)}/10 < 7.0)`);
+    console.log(
+      `   ❌ 正反方论点平衡: 未通过 (平均${avgBalance.toFixed(1)}/10 < 7.0)`,
+    );
   }
-  
+
   if (avgAccuracy >= 7.0) {
-    console.log(`   ✅ 法律依据准确: 通过 (平均${avgAccuracy.toFixed(1)}/10 ≥ 7.0)`);
+    console.log(
+      `   ✅ 法律依据准确: 通过 (平均${avgAccuracy.toFixed(1)}/10 ≥ 7.0)`,
+    );
     standardsMet++;
   } else {
-    console.log(`   ❌ 法律依据准确: 未通过 (平均${avgAccuracy.toFixed(1)}/10 < 7.0)`);
+    console.log(
+      `   ❌ 法律依据准确: 未通过 (平均${avgAccuracy.toFixed(1)}/10 < 7.0)`,
+    );
   }
-  
+
   console.log(`\n🏆 最终结论:`);
   if (standardsMet >= totalStandards) {
-    console.log(`   ✅ DeepSeek POC验证通过 (${standardsMet}/${totalStandards} 项验收标准满足)`);
+    console.log(
+      `   ✅ DeepSeek POC验证通过 (${standardsMet}/${totalStandards} 项验收标准满足)`,
+    );
     console.log(`   💡 建议：可以进入生产环境集成阶段`);
   } else {
-    console.log(`   ⚠️ DeepSeek POC验证部分通过 (${standardsMet}/${totalStandards} 项验收标准满足)`);
+    console.log(
+      `   ⚠️ DeepSeek POC验证部分通过 (${standardsMet}/${totalStandards} 项验收标准满足)`,
+    );
     console.log(`   💡 建议：需要进一步优化或考虑其他提供商`);
   }
-  
+
   // 保存报告
   const reportPath = "./deepseek-debate-test-report.json";
   const fs = require("fs");
@@ -333,8 +394,11 @@ function generateSummaryReport(results: TestResult[]): void {
       successCount: successfulTests.length,
       failureCount: failedTests.length,
       successRate: (successfulTests.length / results.length) * 100,
-      averageDuration: successfulTests.length > 0 ? 
-        successfulTests.reduce((sum, r) => sum + r.duration, 0) / successfulTests.length : 0,
+      averageDuration:
+        successfulTests.length > 0
+          ? successfulTests.reduce((sum, r) => sum + r.duration, 0) /
+            successfulTests.length
+          : 0,
       averageQuality: {
         overall: avgOverall,
         clarity: avgClarity,
@@ -348,7 +412,7 @@ function generateSummaryReport(results: TestResult[]): void {
       total: totalStandards,
       passed: standardsMet >= totalStandards,
     },
-    details: results.map(r => ({
+    details: results.map((r) => ({
       testCase: r.testCase,
       success: r.response !== null,
       duration: r.duration,
@@ -356,7 +420,7 @@ function generateSummaryReport(results: TestResult[]): void {
       response: r.response?.choices[0]?.message?.content || null,
     })),
   };
-  
+
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
   console.log(`\n📄 详细报告已保存到: ${reportPath}`);
 }

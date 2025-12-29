@@ -48,21 +48,23 @@ export class DatabaseRestoreManager {
   // 验证备份文件存在且可读
   private async validateBackupFile(filename: string): Promise<void> {
     const filepath = path.join(this.config.backupDir, filename);
-    
+
     try {
       const stats = await fs.stat(filepath);
-      
+
       if (stats.size === 0) {
         throw new Error(`备份文件为空: ${filename}`);
       }
-      
+
       // 检查文件是否为有效的备份格式
       const listCommand = this.buildListCommand(filepath);
       await execAsync(listCommand);
-      
+
       console.log(`✅ 备份文件验证通过: ${filename}`);
     } catch (error) {
-      throw new Error(`备份文件验证失败 ${filename}: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `备份文件验证失败 ${filename}: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -77,16 +79,18 @@ export class DatabaseRestoreManager {
     try {
       const connectionInfo = this.extractConnectionInfo();
       const pgpassPath = path.join(process.cwd(), "config", ".pgpass");
-      
+
       // 连接到postgres数据库创建新数据库
       const createDbCommand = `set PGPASSFILE="${pgpassPath}" && psql "${connectionInfo}/postgres" -c "CREATE DATABASE ${databaseName};"`;
-      
+
       console.log(`创建目标数据库: ${databaseName}`);
       await execAsync(createDbCommand);
-      
+
       console.log(`✅ 数据库创建成功: ${databaseName}`);
     } catch (error) {
-      throw new Error(`创建数据库失败 ${databaseName}: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `创建数据库失败 ${databaseName}: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -95,23 +99,25 @@ export class DatabaseRestoreManager {
     try {
       const connectionInfo = this.extractConnectionInfo();
       const pgpassPath = path.join(process.cwd(), "config", ".pgpass");
-      
+
       // 终止现有连接并删除数据库
       const killConnectionsCommand = `set PGPASSFILE="${pgpassPath}" && psql "${connectionInfo}/postgres" -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${databaseName}';"`;
       const dropDbCommand = `set PGPASSFILE="${pgpassPath}" && psql "${connectionInfo}/postgres" -c "DROP DATABASE IF EXISTS ${databaseName};"`;
-      
+
       console.log(`终止现有数据库连接: ${databaseName}`);
       await execAsync(killConnectionsCommand).catch(() => {
         // 忽略终止连接失败
         console.log(`⚠️ 无法终止连接，继续删除数据库`);
       });
-      
+
       console.log(`删除现有数据库: ${databaseName}`);
       await execAsync(dropDbCommand);
-      
+
       console.log(`✅ 数据库删除成功: ${databaseName}`);
     } catch (error) {
-      throw new Error(`删除数据库失败 ${databaseName}: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `删除数据库失败 ${databaseName}: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -119,7 +125,8 @@ export class DatabaseRestoreManager {
   async restoreDatabase(filename: string): Promise<RestoreInfo> {
     const restoreId = `restore_${Date.now()}`;
     const startTime = Date.now();
-    const targetDatabase = this.config.targetDatabase || this.extractDatabaseName();
+    const targetDatabase =
+      this.config.targetDatabase || this.extractDatabaseName();
 
     console.log(`开始数据库恢复: ${restoreId}`);
     console.log(`备份文件: ${filename}`);
@@ -136,7 +143,10 @@ export class DatabaseRestoreManager {
         try {
           await this.createTargetDatabase(targetDatabase);
         } catch (error) {
-          if ((error as Error).message.includes("already exists") && this.config.dropExistingDb) {
+          if (
+            (error as Error).message.includes("already exists") &&
+            this.config.dropExistingDb
+          ) {
             console.log(`数据库已存在，删除后重新创建: ${targetDatabase}`);
             await this.dropExistingDatabase(targetDatabase);
             await this.createTargetDatabase(targetDatabase);
@@ -154,7 +164,7 @@ export class DatabaseRestoreManager {
 
       // 执行恢复
       const { stdout } = await execAsync(restoreCommand);
-      
+
       // 解析恢复结果
       const tablesRestored = this.parseRestoreOutput(stdout);
 
@@ -196,10 +206,13 @@ export class DatabaseRestoreManager {
   }
 
   // 构建恢复命令
-  private buildRestoreCommand(filepath: string, targetDatabase: string): string {
+  private buildRestoreCommand(
+    filepath: string,
+    targetDatabase: string,
+  ): string {
     const pgpassPath = path.join(process.cwd(), "config", ".pgpass");
     const connectionInfo = this.extractConnectionInfo();
-    
+
     return `set PGPASSFILE="${pgpassPath}" && pg_restore --verbose --clean --if-exists --no-owner --no-privileges --dbname="${connectionInfo}/${targetDatabase}" "${filepath}"`;
   }
 
@@ -215,18 +228,18 @@ export class DatabaseRestoreManager {
     try {
       const connectionInfo = this.extractConnectionInfo();
       const pgpassPath = path.join(process.cwd(), "config", ".pgpass");
-      
+
       // 检查数据库是否存在
       const checkDbCommand = `set PGPASSFILE="${pgpassPath}" && psql "${connectionInfo}/${databaseName}" -c "SELECT 1;"`;
       await execAsync(checkDbCommand);
-      
+
       // 获取表列表
       const listTablesCommand = `set PGPASSFILE="${pgpassPath}" && psql "${connectionInfo}/${databaseName}" -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';"`;
       const { stdout } = await execAsync(listTablesCommand);
-      
-      const tableCount = parseInt(stdout.trim().split('\n')[2]);
+
+      const tableCount = parseInt(stdout.trim().split("\n")[2]);
       console.log(`✅ 数据库验证成功: ${databaseName} (${tableCount}个表)`);
-      
+
       return tableCount > 0;
     } catch (error) {
       console.error(`数据库验证失败 ${databaseName}:`, error);
@@ -238,19 +251,19 @@ export class DatabaseRestoreManager {
   async listAvailableBackups(): Promise<string[]> {
     try {
       const files = await fs.readdir(this.config.backupDir);
-      const backupFiles = files.filter(file => file.endsWith('.sql'));
-      
+      const backupFiles = files.filter((file) => file.endsWith(".sql"));
+
       return backupFiles.sort((a, b) => {
         // 按时间戳排序，最新的在前
         const aMatch = a.match(/backup_(.+)\.sql$/);
         const bMatch = b.match(/backup_(.+)\.sql$/);
-        
+
         if (aMatch && bMatch) {
-          const aTime = new Date(aMatch[1].replace(/-/g, ':')).getTime();
-          const bTime = new Date(bMatch[1].replace(/-/g, ':')).getTime();
+          const aTime = new Date(aMatch[1].replace(/-/g, ":")).getTime();
+          const bTime = new Date(bMatch[1].replace(/-/g, ":")).getTime();
           return bTime - aTime;
         }
-        
+
         return b.localeCompare(a);
       });
     } catch (error) {
@@ -277,27 +290,27 @@ export const runInteractiveRestore = async (): Promise<void> => {
   const restoreManager = createRestoreManager();
 
   console.log("=== 数据库恢复工具 ===");
-  
+
   // 列出可用备份
   const backups = await restoreManager.listAvailableBackups();
-  
+
   if (backups.length === 0) {
     console.log("❌ 没有找到可用的备份文件");
     process.exit(1);
   }
-  
+
   console.log("\n可用的备份文件:");
   backups.forEach((backup, index) => {
     console.log(`${index + 1}. ${backup}`);
   });
-  
+
   // 这里应该有用户交互，但在脚本中我们使用最新的备份
   const latestBackup = backups[0];
   console.log(`\n使用最新备份: ${latestBackup}`);
-  
+
   // 执行恢复
   const restoreInfo = await restoreManager.restoreDatabase(latestBackup);
-  
+
   if (restoreInfo.success) {
     console.log("✅ 恢复成功!");
     console.log(`恢复详情:`);
@@ -305,9 +318,11 @@ export const runInteractiveRestore = async (): Promise<void> => {
     console.log(`  目标数据库: ${restoreInfo.targetDatabase}`);
     console.log(`  恢复表数: ${restoreInfo.tablesRestored}`);
     console.log(`  耗时: ${restoreInfo.duration}ms`);
-    
+
     // 验证恢复结果
-    const isValid = await restoreManager.validateRestoredDatabase(restoreInfo.targetDatabase);
+    const isValid = await restoreManager.validateRestoredDatabase(
+      restoreInfo.targetDatabase,
+    );
     if (isValid) {
       console.log("✅ 数据库验证通过");
     } else {

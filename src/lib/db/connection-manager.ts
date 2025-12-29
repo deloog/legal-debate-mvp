@@ -1,10 +1,10 @@
-import { prisma } from './prisma';
-import { 
-  ConnectionPoolConfig, 
-  PoolStats, 
+import { prisma } from "./prisma";
+import {
+  ConnectionPoolConfig,
+  PoolStats,
   ConnectionStatus,
-  connectionPoolConfig 
-} from './connection-pool';
+  connectionPoolConfig,
+} from "./connection-pool";
 
 // 连接管理器接口
 export interface IConnectionManager {
@@ -12,7 +12,7 @@ export interface IConnectionManager {
   releaseConnection(connection: any): Promise<void>;
   executeWithRetry<T>(
     operation: (connection: any) => Promise<T>,
-    maxRetries?: number
+    maxRetries?: number,
   ): Promise<T>;
 }
 
@@ -21,10 +21,10 @@ export class ConnectionPoolError extends Error {
   constructor(
     message: string,
     public readonly code: string,
-    public readonly retryable: boolean = false
+    public readonly retryable: boolean = false,
   ) {
     super(message);
-    this.name = 'ConnectionPoolError';
+    this.name = "ConnectionPoolError";
   }
 }
 
@@ -63,15 +63,15 @@ export class ConnectionManager implements IConnectionManager {
     } catch (error) {
       this.connectionErrors++;
       this.lastError = error instanceof Error ? error.message : String(error);
-      
+
       if (this.isRetryableError(error)) {
         return this.retryConnection();
       }
-      
+
       throw new ConnectionPoolError(
         `无法获取数据库连接: ${this.lastError}`,
-        'CONNECTION_FAILED',
-        false
+        "CONNECTION_FAILED",
+        false,
       );
     }
   }
@@ -81,16 +81,14 @@ export class ConnectionManager implements IConnectionManager {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         const index = this.connectionQueue.findIndex(
-          item => item.resolve === resolve
+          (item) => item.resolve === resolve,
         );
         if (index !== -1) {
           this.connectionQueue.splice(index, 1);
         }
-        reject(new ConnectionPoolError(
-          '连接获取超时',
-          'ACQUIRE_TIMEOUT',
-          true
-        ));
+        reject(
+          new ConnectionPoolError("连接获取超时", "ACQUIRE_TIMEOUT", true),
+        );
       }, this.config.acquireTimeoutMillis);
 
       this.connectionQueue.push({
@@ -104,7 +102,7 @@ export class ConnectionManager implements IConnectionManager {
           clearTimeout(timeout);
           reject(error);
         },
-        timestamp: startTime
+        timestamp: startTime,
       });
     });
   }
@@ -113,11 +111,7 @@ export class ConnectionManager implements IConnectionManager {
   private async createConnection(): Promise<any> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new ConnectionPoolError(
-          '连接创建超时',
-          'CREATE_TIMEOUT',
-          true
-        ));
+        reject(new ConnectionPoolError("连接创建超时", "CREATE_TIMEOUT", true));
       }, this.config.createTimeoutMillis);
 
       // 验证连接可用性
@@ -141,10 +135,13 @@ export class ConnectionManager implements IConnectionManager {
 
     while (attempts < maxRetries) {
       try {
-        await new Promise(resolve => 
-          setTimeout(resolve, this.config.createRetryIntervalMillis * (attempts + 1))
+        await new Promise((resolve) =>
+          setTimeout(
+            resolve,
+            this.config.createRetryIntervalMillis * (attempts + 1),
+          ),
         );
-        
+
         const connection = await this.createConnection();
         this.activeConnections++;
         return connection;
@@ -152,29 +149,25 @@ export class ConnectionManager implements IConnectionManager {
         attempts++;
         this.connectionErrors++;
         this.lastError = error instanceof Error ? error.message : String(error);
-        
+
         if (attempts >= maxRetries) {
           throw new ConnectionPoolError(
             `连接重试失败，已尝试${maxRetries}次: ${this.lastError}`,
-            'RETRY_EXHAUSTED',
-            false
+            "RETRY_EXHAUSTED",
+            false,
           );
         }
       }
     }
 
-    throw new ConnectionPoolError(
-      '重试连接失败',
-      'RETRY_FAILED',
-      false
-    );
+    throw new ConnectionPoolError("重试连接失败", "RETRY_FAILED", false);
   }
 
   // 释放连接
   async releaseConnection(connection: any): Promise<void> {
     try {
       this.activeConnections = Math.max(0, this.activeConnections - 1);
-      
+
       // 处理等待队列
       if (this.connectionQueue.length > 0) {
         const next = this.connectionQueue.shift();
@@ -186,21 +179,21 @@ export class ConnectionManager implements IConnectionManager {
     } catch (error) {
       this.connectionErrors++;
       this.lastError = error instanceof Error ? error.message : String(error);
-      console.error('释放连接时出错:', error);
+      console.error("释放连接时出错:", error);
     }
   }
 
   // 带重试的执行操作
   async executeWithRetry<T>(
     operation: (connection: any) => Promise<T>,
-    maxRetries: number = 3
+    maxRetries: number = 3,
   ): Promise<T> {
     let attempts = 0;
     let lastError: Error | null = null;
 
     while (attempts <= maxRetries) {
       const connection = await this.getConnection();
-      
+
       try {
         const result = await operation(connection);
         await this.releaseConnection(connection);
@@ -208,46 +201,53 @@ export class ConnectionManager implements IConnectionManager {
       } catch (error) {
         await this.releaseConnection(connection);
         lastError = error instanceof Error ? error : new Error(String(error));
-        
+
         if (this.isRetryableError(lastError) && attempts < maxRetries) {
           attempts++;
-          const delay = this.config.createRetryIntervalMillis * Math.pow(2, attempts);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          const delay =
+            this.config.createRetryIntervalMillis * Math.pow(2, attempts);
+          await new Promise((resolve) => setTimeout(resolve, delay));
           continue;
         }
-        
+
         throw lastError;
       }
     }
 
-    throw lastError || new Error('操作执行失败');
+    throw lastError || new Error("操作执行失败");
   }
 
   // 判断错误是否可重试
   private isRetryableError(error: any): boolean {
-    const errorMessage = error instanceof Error ? error.message.toLowerCase() : String(error);
+    const errorMessage =
+      error instanceof Error ? error.message.toLowerCase() : String(error);
     const retryablePatterns = [
-      'timeout',
-      'connection',
-      'network',
-      'temporary',
-      'deadlock',
-      'lock wait timeout'
+      "timeout",
+      "connection",
+      "network",
+      "temporary",
+      "deadlock",
+      "lock wait timeout",
     ];
-    
-    return retryablePatterns.some(pattern => errorMessage.includes(pattern));
+
+    return retryablePatterns.some((pattern) => errorMessage.includes(pattern));
   }
 
   // 获取连接管理器统计信息
   getStats(): PoolStats {
     const maxConnections = this.config.maxConnections;
     const connectionUtilization = this.totalConnections / maxConnections;
-    const averageWaitTime = this.connectionQueue.length > 0 ? 
-      this.totalWaitTime / this.connectionQueue.length : 0;
+    const averageWaitTime =
+      this.connectionQueue.length > 0
+        ? this.totalWaitTime / this.connectionQueue.length
+        : 0;
 
     return {
       activeConnections: this.activeConnections,
-      idleConnections: Math.max(0, this.totalConnections - this.activeConnections),
+      idleConnections: Math.max(
+        0,
+        this.totalConnections - this.activeConnections,
+      ),
       totalConnections: this.totalConnections,
       waitingClients: this.connectionQueue.length,
       maxConnections,
@@ -255,7 +255,7 @@ export class ConnectionManager implements IConnectionManager {
       averageWaitTime,
       totalWaitTime: this.totalWaitTime,
       connectionErrors: this.connectionErrors,
-      lastError: this.lastError
+      lastError: this.lastError,
     };
   }
 
@@ -267,7 +267,7 @@ export class ConnectionManager implements IConnectionManager {
       });
       return true;
     } catch (error) {
-      console.error('连接管理器健康检查失败:', error);
+      console.error("连接管理器健康检查失败:", error);
       return false;
     }
   }
@@ -284,22 +284,20 @@ export class ConnectionManager implements IConnectionManager {
     try {
       // 清空等待队列
       this.connectionQueue.forEach(({ reject }) => {
-        reject(new ConnectionPoolError(
-          '连接管理器正在关闭',
-          'SHUTDOWN',
-          false
-        ));
+        reject(
+          new ConnectionPoolError("连接管理器正在关闭", "SHUTDOWN", false),
+        );
       });
       this.connectionQueue = [];
 
       // 等待所有活跃连接完成
       while (this.activeConnections > 0) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
-      console.log('连接管理器已优雅关闭');
+      console.log("连接管理器已优雅关闭");
     } catch (error) {
-      console.error('关闭连接管理器时出错:', error);
+      console.error("关闭连接管理器时出错:", error);
       throw error;
     }
   }
@@ -311,7 +309,7 @@ export const connectionManager = new ConnectionManager();
 // 导出便捷函数
 export const executeWithRetry = <T>(
   operation: (connection: any) => Promise<T>,
-  maxRetries?: number
+  maxRetries?: number,
 ): Promise<T> => {
   return connectionManager.executeWithRetry(operation, maxRetries);
 };

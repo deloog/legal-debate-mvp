@@ -1,5 +1,5 @@
-import type { Prisma } from '@prisma/client';
-import type { SearchQuery } from './types';
+import type { Prisma } from "@prisma/client";
+import type { SearchQuery } from "./types";
 
 /**
  * 法条检索查询构建器
@@ -17,9 +17,9 @@ export class SearchQueryBuilder {
       const keyword = query.keyword.trim();
       conditions.push({
         OR: [
-          { fullText: { contains: keyword, mode: 'insensitive' } },
-          { searchableText: { contains: keyword, mode: 'insensitive' } },
-          { lawName: { contains: keyword, mode: 'insensitive' } },
+          { fullText: { contains: keyword, mode: "insensitive" } },
+          { searchableText: { contains: keyword, mode: "insensitive" } },
+          { lawName: { contains: keyword, mode: "insensitive" } },
         ],
       });
     }
@@ -47,7 +47,7 @@ export class SearchQueryBuilder {
     // 法律名称（模糊匹配）
     if (query.lawName && query.lawName.trim()) {
       conditions.push({
-        lawName: { contains: query.lawName.trim(), mode: 'insensitive' },
+        lawName: { contains: query.lawName.trim(), mode: "insensitive" },
       });
     }
 
@@ -57,7 +57,7 @@ export class SearchQueryBuilder {
       conditions.push({
         OR: [
           { articleNumber: { equals: articleNumber } },
-          { articleNumber: { contains: articleNumber, mode: 'insensitive' } },
+          { articleNumber: { contains: articleNumber, mode: "insensitive" } },
         ],
       });
     }
@@ -74,11 +74,13 @@ export class SearchQueryBuilder {
   /**
    * 构建排序条件
    */
-  static buildOrderByClause(query: SearchQuery): Prisma.LawArticleOrderByWithRelationInput[] {
-    const sortConfig = query.sort || { field: 'relevance', order: 'desc' };
+  static buildOrderByClause(
+    query: SearchQuery,
+  ): Prisma.LawArticleOrderByWithRelationInput[] {
+    const sortConfig = query.sort || { field: "relevance", order: "desc" };
 
     // 如果是按相关性排序，返回空（相关性在内存中计算）
-    if (sortConfig.field === 'relevance') {
+    if (sortConfig.field === "relevance") {
       return [];
     }
 
@@ -166,26 +168,29 @@ export class SearchQueryBuilder {
   /**
    * 验证查询参数
    */
-  static validateQuery(query: SearchQuery): { valid: boolean; errors: string[] } {
+  static validateQuery(query: SearchQuery): {
+    valid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     // 验证分页参数
     if (query.pagination) {
       if (query.pagination.page && query.pagination.page < 1) {
-        errors.push('页码必须大于0');
+        errors.push("页码必须大于0");
       }
       if (query.pagination.pageSize && query.pagination.pageSize < 1) {
-        errors.push('每页数量必须大于0');
+        errors.push("每页数量必须大于0");
       }
       if (query.pagination.pageSize && query.pagination.pageSize > 100) {
-        errors.push('每页数量不能超过100');
+        errors.push("每页数量不能超过100");
       }
     }
 
     // 验证最小相关性得分
     if (query.minRelevanceScore !== undefined) {
       if (query.minRelevanceScore < 0 || query.minRelevanceScore > 1) {
-        errors.push('最小相关性得分必须在0-1之间');
+        errors.push("最小相关性得分必须在0-1之间");
       }
     }
 
@@ -218,12 +223,16 @@ export class SearchQueryBuilder {
 
     // 标签
     if (query.tags && query.tags.length > 0) {
-      sanitized.tags = query.tags.filter((tag) => tag.trim()).map((tag) => tag.trim());
+      sanitized.tags = query.tags
+        .filter((tag) => tag.trim())
+        .map((tag) => tag.trim());
     }
 
     // 关键词
     if (query.keywords && query.keywords.length > 0) {
-      sanitized.keywords = query.keywords.filter((kw) => kw.trim()).map((kw) => kw.trim());
+      sanitized.keywords = query.keywords
+        .filter((kw) => kw.trim())
+        .map((kw) => kw.trim());
     }
 
     // 法律名称

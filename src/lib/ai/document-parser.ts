@@ -1,12 +1,12 @@
-import { getUnifiedAIService } from './unified-service';
-import type { AIServiceConfig } from '../../types/ai-service';
-import { AIProvider } from '../../types/ai-service';
+import { getUnifiedAIService } from "./unified-service";
+import type { AIServiceConfig } from "../../types/ai-service";
+import { AIProvider } from "../../types/ai-service";
 
 // 定义模型类型枚举
 export enum AIModelType {
-  GLM4_FLASH = 'glm-4-flash',
-  GLM4 = 'glm-4',
-  DEEPSEEK_CHAT = 'deepseek-chat',
+  GLM4_FLASH = "glm-4-flash",
+  GLM4 = "glm-4",
+  DEEPSEEK_CHAT = "deepseek-chat",
 }
 
 // =============================================================================
@@ -30,7 +30,7 @@ export interface DocumentParseResponse {
   data?: {
     extractedData: {
       parties: Array<{
-        type: 'plaintiff' | 'defendant' | 'other';
+        type: "plaintiff" | "defendant" | "other";
         name: string;
         role?: string;
         contact?: string;
@@ -49,7 +49,14 @@ export interface DocumentParseResponse {
         description?: string;
       }>;
       summary?: string;
-      caseType?: 'civil' | 'criminal' | 'administrative' | 'commercial' | 'labor' | 'intellectual' | 'other';
+      caseType?:
+        | "civil"
+        | "criminal"
+        | "administrative"
+        | "commercial"
+        | "labor"
+        | "intellectual"
+        | "other";
       keyFacts?: string[];
     };
     confidence: number;
@@ -64,8 +71,8 @@ export interface DocumentParseResponse {
 }
 
 export class DocumentParser {
-  private aiProvider: AIProvider = 'zhipu';
-  private aiModel: string = 'glm-4-flash';
+  private aiProvider: AIProvider = "zhipu";
+  private aiModel: string = "glm-4-flash";
 
   constructor() {
     // 默认配置
@@ -78,33 +85,35 @@ export class DocumentParser {
   async analyzeWithAI(prompt: string): Promise<string> {
     try {
       const unifiedService = await getUnifiedAIService();
-      
+
       const response = await unifiedService.chatCompletion({
         model: this.aiModel,
         provider: this.aiProvider,
         messages: [
           {
-            role: 'system',
-            content: '你是一个专业的法律文档分析专家，专门从法律文档中提取结构化信息。'
+            role: "system",
+            content:
+              "你是一个专业的法律文档分析专家，专门从法律文档中提取结构化信息。",
           },
           {
-            role: 'user',
-            content: prompt
-          }
+            role: "user",
+            content: prompt,
+          },
         ],
         temperature: 0.1,
-        maxTokens: 4000
+        maxTokens: 4000,
       });
 
       if (response.choices && response.choices.length > 0) {
         return response.choices[0].message.content;
       } else {
-        throw new Error('AI服务返回了空响应');
+        throw new Error("AI服务返回了空响应");
       }
-
     } catch (error) {
-      console.error('DocumentParser AI分析失败:', error);
-      throw new Error(`AI分析失败: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("DocumentParser AI分析失败:", error);
+      throw new Error(
+        `AI分析失败: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -112,14 +121,16 @@ export class DocumentParser {
   // 文档解析方法
   // =============================================================================
 
-  async parseDocument(request: DocumentParseRequest): Promise<DocumentParseResponse> {
+  async parseDocument(
+    request: DocumentParseRequest,
+  ): Promise<DocumentParseResponse> {
     const startTime = Date.now();
 
     try {
       // 构建分析提示词
       const prompt = this.buildDocumentAnalysisPrompt(
         request.textContent,
-        request.extractOptions
+        request.extractOptions,
       );
 
       // 调用AI服务
@@ -136,21 +147,20 @@ export class DocumentParser {
         metadata: {
           model: this.aiModel,
           responseTime,
-          textLength: request.textContent.length
-        }
+          textLength: request.textContent.length,
+        },
       };
-
     } catch (error) {
       const responseTime = Date.now() - startTime;
-      
+
       return {
         success: false,
         error: error instanceof Error ? error.message : String(error),
         metadata: {
           model: this.aiModel,
           responseTime,
-          textLength: request.textContent.length
-        }
+          textLength: request.textContent.length,
+        },
       };
     }
   }
@@ -161,29 +171,29 @@ export class DocumentParser {
 
   private buildDocumentAnalysisPrompt(
     textContent: string,
-    options?: DocumentParseRequest['extractOptions']
+    options?: DocumentParseRequest["extractOptions"],
   ): string {
     const analysisTasks = [];
-    
+
     if (options?.extractParties !== false) {
-      analysisTasks.push('当事人信息提取');
+      analysisTasks.push("当事人信息提取");
     }
-    
+
     if (options?.extractClaims !== false) {
-      analysisTasks.push('诉讼请求识别');
+      analysisTasks.push("诉讼请求识别");
     }
-    
+
     if (options?.extractTimeline !== false) {
-      analysisTasks.push('时间线整理');
+      analysisTasks.push("时间线整理");
     }
-    
+
     if (options?.generateSummary === true) {
-      analysisTasks.push('案件摘要生成');
+      analysisTasks.push("案件摘要生成");
     }
 
     return `你是一个专业的法律文档分析专家。请对以下法律文档进行分析，完成以下任务：
 
-分析任务：${analysisTasks.join('、')}
+分析任务：${analysisTasks.join("、")}
 
 文档内容：
 ${textContent}
@@ -237,28 +247,32 @@ ${textContent}
   // =============================================================================
 
   private parseAIResponse(aiResponse: string): {
-    extractedData: DocumentParseResponse['data']['extractedData'];
+    extractedData: DocumentParseResponse["data"]["extractedData"];
     confidence: number;
     tokenUsed: number;
   } {
     try {
       // 清理AI响应中的代码块标记
       let cleanedResponse = aiResponse.trim();
-      
+
       // 移除可能的代码块标记
-      if (cleanedResponse.includes('```json')) {
-        cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+      if (cleanedResponse.includes("```json")) {
+        cleanedResponse = cleanedResponse
+          .replace(/```json\s*/, "")
+          .replace(/```\s*$/, "");
       }
-      if (cleanedResponse.includes('```')) {
-        cleanedResponse = cleanedResponse.replace(/```\s*/, '').replace(/```\s*$/, '');
+      if (cleanedResponse.includes("```")) {
+        cleanedResponse = cleanedResponse
+          .replace(/```\s*/, "")
+          .replace(/```\s*$/, "");
       }
-      
+
       // 尝试解析JSON响应
       const parsed = JSON.parse(cleanedResponse);
-      
+
       // 验证响应结构
       if (!parsed.extractedData) {
-        throw new Error('AI响应格式不正确：缺少extractedData字段');
+        throw new Error("AI响应格式不正确：缺少extractedData字段");
       }
 
       return {
@@ -268,12 +282,11 @@ ${textContent}
           timeline: parsed.extractedData.timeline || [],
           summary: parsed.extractedData.summary,
           caseType: parsed.extractedData.caseType,
-          keyFacts: parsed.extractedData.keyFacts || []
+          keyFacts: parsed.extractedData.keyFacts || [],
         },
         confidence: parsed.confidence || 0.8,
-        tokenUsed: this.estimateTokenUsage(aiResponse)
+        tokenUsed: this.estimateTokenUsage(aiResponse),
       };
-      
     } catch (error) {
       // JSON解析失败时的降级处理
       return {
@@ -281,11 +294,11 @@ ${textContent}
           parties: [],
           claims: [],
           timeline: [],
-          summary: 'AI响应解析失败，请手动分析',
-          keyFacts: []
+          summary: "AI响应解析失败，请手动分析",
+          keyFacts: [],
         },
         confidence: 0.3,
-        tokenUsed: this.estimateTokenUsage(aiResponse)
+        tokenUsed: this.estimateTokenUsage(aiResponse),
       };
     }
   }
@@ -317,7 +330,7 @@ ${textContent}
   getConfig(): { provider: AIProvider; model: string } {
     return {
       provider: this.aiProvider,
-      model: this.aiModel
+      model: this.aiModel,
     };
   }
 }

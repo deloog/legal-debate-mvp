@@ -1,11 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
-import { createSuccessResponse, createPaginatedResponse, createCreatedResponse } from '@/app/api/lib/responses/api-response';
-import { validateQueryParams, validateRequestBody } from '@/app/api/lib/validation/validator';
-import { createDebateSchema, paginationSchema } from '@/app/api/lib/validation/schemas';
-import { buildPaginationOptions } from '@/app/api/lib/responses/pagination';
-import { prisma } from '@/lib/db/prisma';
-import { DebateStatus } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { withErrorHandler } from "@/app/api/lib/errors/error-handler";
+import {
+  createSuccessResponse,
+  createPaginatedResponse,
+  createCreatedResponse,
+} from "@/app/api/lib/responses/api-response";
+import {
+  validateQueryParams,
+  validateRequestBody,
+} from "@/app/api/lib/validation/validator";
+import {
+  createDebateSchema,
+  paginationSchema,
+} from "@/app/api/lib/validation/schemas";
+import { buildPaginationOptions } from "@/app/api/lib/responses/pagination";
+import { prisma } from "@/lib/db/prisma";
+import { DebateStatus } from "@prisma/client";
 
 /**
  * GET /api/v1/debates
@@ -18,14 +28,18 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
 
   // 构建查询选项
   const options = buildPaginationOptions(query);
-  
+
   // 构建搜索条件
-  const whereCondition = search ? {
-    OR: [
-      { title: { contains: search, mode: 'insensitive' as const } },
-      { case: { title: { contains: search, mode: 'insensitive' as const } } },
-    ],
-  } : {};
+  const whereCondition = search
+    ? {
+        OR: [
+          { title: { contains: search, mode: "insensitive" as const } },
+          {
+            case: { title: { contains: search, mode: "insensitive" as const } },
+          },
+        ],
+      }
+    : {};
 
   // 并行执行数据查询和总数统计
   const [debates, total] = await Promise.all([
@@ -39,21 +53,21 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
             type: true,
           },
         },
-        user: { 
-          select: { 
-            id: true, 
-            username: true, 
-            name: true 
-          } 
+        user: {
+          select: {
+            id: true,
+            username: true,
+            name: true,
+          },
         },
-        _count: { 
-          select: { 
-            rounds: true 
-          } 
+        _count: {
+          select: {
+            rounds: true,
+          },
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
       ...options,
     }),
@@ -94,27 +108,27 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       {
         success: false,
         error: {
-          code: 'CASE_NOT_FOUND',
-          message: '指定的案件不存在',
+          code: "CASE_NOT_FOUND",
+          message: "指定的案件不存在",
         },
       },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
   // TODO: 从认证中获取实际用户ID，这里临时使用第一个用户
   const userId = (await prisma.user.findFirst({ select: { id: true } }))?.id;
-  
+
   if (!userId) {
     return NextResponse.json(
       {
         success: false,
         error: {
-          code: 'USER_NOT_FOUND',
-          message: '系统用户不存在',
+          code: "USER_NOT_FOUND",
+          message: "系统用户不存在",
         },
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -136,12 +150,12 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
           type: true,
         },
       },
-      user: { 
-        select: { 
-          id: true, 
-          username: true, 
-          name: true 
-        } 
+      user: {
+        select: {
+          id: true,
+          username: true,
+          name: true,
+        },
       },
     },
   });
@@ -157,10 +171,10 @@ export const OPTIONS = withErrorHandler(async (request: NextRequest) => {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Max-Age': '86400',
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Max-Age": "86400",
     },
   });
 });

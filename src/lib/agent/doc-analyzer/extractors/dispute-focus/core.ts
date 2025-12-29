@@ -6,8 +6,8 @@
 import type {
   DisputeFocus,
   DisputeFocusCategory,
-  ExtractedData
-} from '../../core/types';
+  ExtractedData,
+} from "../../core/types";
 
 // =============================================================================
 // 接口定义
@@ -50,7 +50,7 @@ export class DisputeFocusExtractor {
    */
   private initializeDefaultPatterns(): Map<DisputeFocusCategory, RegExp[]> {
     // 动态导入以避免循环依赖
-    const { initializeRulePatterns } = require('./rule-layer');
+    const { initializeRulePatterns } = require("./rule-layer");
     return initializeRulePatterns();
   }
 
@@ -63,12 +63,12 @@ export class DisputeFocusExtractor {
   async extractFromText(
     text: string,
     extractedData?: ExtractedData,
-    options: DisputeFocusExtractionOptions = {}
+    options: DisputeFocusExtractionOptions = {},
   ): Promise<DisputeFocusExtractionOutput> {
-    const { aiExtractLayer } = await import('./ai-layer');
-    const { ruleMatchLayer } = await import('./rule-layer');
-    const { mergeAndDeduplicate } = await import('./utils');
-    const { aiReviewLayer } = await import('./review-layer');
+    const { aiExtractLayer } = await import("./ai-layer");
+    const { ruleMatchLayer } = await import("./rule-layer");
+    const { mergeAndDeduplicate } = await import("./utils");
+    const { aiReviewLayer } = await import("./review-layer");
 
     let aiExtracted: DisputeFocus[] = [];
     let ruleExtracted: DisputeFocus[] = [];
@@ -76,11 +76,20 @@ export class DisputeFocusExtractor {
 
     // 第一层：AI识别（如果启用）
     if (options.useAIExtraction !== false) {
-      aiExtracted = await aiExtractLayer(text, extractedData, this.rulePatterns);
+      aiExtracted = await aiExtractLayer(
+        text,
+        extractedData,
+        this.rulePatterns,
+      );
     }
 
     // 第二层：规则匹配兜底
-    ruleExtracted = ruleMatchLayer(text, extractedData, aiExtracted, this.rulePatterns);
+    ruleExtracted = ruleMatchLayer(
+      text,
+      extractedData,
+      aiExtracted,
+      this.rulePatterns,
+    );
 
     // 合并第一层和第二层的结果，去重
     let mergedFocuses = mergeAndDeduplicate(aiExtracted, ruleExtracted);
@@ -93,20 +102,22 @@ export class DisputeFocusExtractor {
 
     // 过滤推断结果
     if (options.includeInferred === false) {
-      mergedFocuses = mergedFocuses.filter(f => !f._inferred);
+      mergedFocuses = mergedFocuses.filter((f) => !f._inferred);
     }
 
     // 过滤低置信度结果
     if (options.minConfidence !== undefined) {
-      mergedFocuses = mergedFocuses.filter(f => f.confidence >= options.minConfidence);
+      mergedFocuses = mergedFocuses.filter(
+        (f) => f.confidence >= options.minConfidence,
+      );
     }
 
-    const { generateSummary } = await import('./utils');
+    const { generateSummary } = await import("./utils");
     const summary = generateSummary(
       mergedFocuses,
       aiExtracted,
       ruleExtracted,
-      aiReviewed
+      aiReviewed,
     );
 
     return { disputeFocuses: mergedFocuses, summary };
@@ -130,7 +141,7 @@ export function createDisputeFocusExtractor(): DisputeFocusExtractor {
 export async function extractDisputeFocusesFromText(
   text: string,
   extractedData?: ExtractedData,
-  options?: DisputeFocusExtractionOptions
+  options?: DisputeFocusExtractionOptions,
 ): Promise<DisputeFocus[]> {
   const extractor = createDisputeFocusExtractor();
   const result = await extractor.extractFromText(text, extractedData, options);

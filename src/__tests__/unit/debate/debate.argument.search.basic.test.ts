@@ -126,7 +126,7 @@ describe("Argument Basic Search and Filtering", () => {
         (arg) =>
           arg.content.includes("合同") &&
           arg.content.includes("违约") &&
-          arg.content.includes("赔偿")
+          arg.content.includes("赔偿"),
       );
       expect(foundArg).toBeDefined();
     });

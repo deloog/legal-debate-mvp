@@ -1,14 +1,14 @@
-import { prisma } from '../db/prisma';
-import { SearchQueryBuilder } from './search-query-builder';
-import { RelevanceScorer } from './relevance-scorer';
-import { SearchCacheManager } from './search-cache';
+import { prisma } from "../db/prisma";
+import { SearchQueryBuilder } from "./search-query-builder";
+import { RelevanceScorer } from "./relevance-scorer";
+import { SearchCacheManager } from "./search-cache";
 import type {
   SearchQuery,
   SearchResult,
   SearchResponse,
   SimilarArticle,
   RelevanceWeightConfig,
-} from './types';
+} from "./types";
 
 /**
  * 法条检索服务
@@ -27,11 +27,13 @@ export class LawArticleSearchService {
       const validation = SearchQueryBuilder.validateQuery(sanitizedQuery);
 
       if (!validation.valid) {
-        throw new Error(`查询参数验证失败: ${validation.errors.join(', ')}`);
+        throw new Error(`查询参数验证失败: ${validation.errors.join(", ")}`);
       }
 
       // 构建缓存键
-      const cacheKey: Parameters<typeof SearchCacheManager.generateCacheKey>[0] = {
+      const cacheKey: Parameters<
+        typeof SearchCacheManager.generateCacheKey
+      >[0] = {
         keyword: sanitizedQuery.keyword,
         category: sanitizedQuery.category,
         subCategory: sanitizedQuery.subCategory,
@@ -85,9 +87,9 @@ export class LawArticleSearchService {
         if (sanitizedQuery.keyword) {
           const keyword = sanitizedQuery.keyword.trim().toLowerCase();
           const searchableText = [
-            article.fullText?.toLowerCase() || '',
-            article.searchableText?.toLowerCase() || '',
-            article.lawName?.toLowerCase() || '',
+            article.fullText?.toLowerCase() || "",
+            article.searchableText?.toLowerCase() || "",
+            article.lawName?.toLowerCase() || "",
           ];
 
           if (searchableText.some((text) => text.includes(keyword))) {
@@ -109,10 +111,12 @@ export class LawArticleSearchService {
       });
 
       // 如果需要按相关性排序
-      if (sanitizedQuery.sort?.field === 'relevance') {
-        const order = sanitizedQuery.sort.order || 'desc';
+      if (sanitizedQuery.sort?.field === "relevance") {
+        const order = sanitizedQuery.sort.order || "desc";
         results.sort((a, b) => {
-          return order === 'desc' ? b.relevanceScore - a.relevanceScore : a.relevanceScore - b.relevanceScore;
+          return order === "desc"
+            ? b.relevanceScore - a.relevanceScore
+            : a.relevanceScore - b.relevanceScore;
         });
       }
 
@@ -153,7 +157,7 @@ export class LawArticleSearchService {
         cached: false,
       };
     } catch (error) {
-      console.error('法条检索失败:', error);
+      console.error("法条检索失败:", error);
       throw error;
     }
   }
@@ -178,7 +182,7 @@ export class LawArticleSearchService {
 
       return article;
     } catch (error) {
-      console.error('获取法条详情失败:', error);
+      console.error("获取法条详情失败:", error);
       throw error;
     }
   }
@@ -210,7 +214,7 @@ export class LawArticleSearchService {
 
       return article;
     } catch (error) {
-      console.error('获取法条详情失败:', error);
+      console.error("获取法条详情失败:", error);
       throw error;
     }
   }
@@ -250,14 +254,14 @@ export class LawArticleSearchService {
 
           const reasons: string[] = [];
           if (targetArticle.category === article.category) {
-            reasons.push('同一法律分类');
+            reasons.push("同一法律分类");
           }
 
           const commonTags = (targetArticle.tags || []).filter((tag) =>
             (article.tags || []).includes(tag),
           );
           if (commonTags.length > 0) {
-            reasons.push(`共有标签: ${commonTags.join(', ')}`);
+            reasons.push(`共有标签: ${commonTags.join(", ")}`);
           }
 
           return {
@@ -272,7 +276,7 @@ export class LawArticleSearchService {
 
       return similarArticles;
     } catch (error) {
-      console.error('查找相似法条失败:', error);
+      console.error("查找相似法条失败:", error);
       throw error;
     }
   }
@@ -280,23 +284,17 @@ export class LawArticleSearchService {
   /**
    * 获取热门法条（按浏览次数排序）
    */
-  static async getPopularArticles(
-    category?: any,
-    limit: number = 10,
-  ) {
+  static async getPopularArticles(category?: any, limit: number = 10) {
     try {
       const where = category ? { category: category as any } : {};
 
       return await prisma.lawArticle.findMany({
         where,
-        orderBy: [
-          { viewCount: 'desc' },
-          { referenceCount: 'desc' },
-        ],
+        orderBy: [{ viewCount: "desc" }, { referenceCount: "desc" }],
         take: limit,
       });
     } catch (error) {
-      console.error('获取热门法条失败:', error);
+      console.error("获取热门法条失败:", error);
       throw error;
     }
   }
@@ -307,13 +305,13 @@ export class LawArticleSearchService {
   static async getCategoryStats() {
     try {
       const stats = await prisma.lawArticle.groupBy({
-        by: ['category'],
+        by: ["category"],
         _count: {
           id: true,
         },
         orderBy: {
           _count: {
-            id: 'desc',
+            id: "desc",
           },
         },
       });
@@ -323,7 +321,7 @@ export class LawArticleSearchService {
         count: item._count.id,
       }));
     } catch (error) {
-      console.error('获取分类统计失败:', error);
+      console.error("获取分类统计失败:", error);
       throw error;
     }
   }
@@ -339,7 +337,7 @@ export class LawArticleSearchService {
         },
       });
     } catch (error) {
-      console.error('批量获取法条失败:', error);
+      console.error("批量获取法条失败:", error);
       throw error;
     }
   }
@@ -356,7 +354,7 @@ export class LawArticleSearchService {
       const where: any = {
         lawName: {
           contains: prefix,
-          mode: 'insensitive',
+          mode: "insensitive",
         },
       };
 
@@ -374,7 +372,7 @@ export class LawArticleSearchService {
         },
         take: limit,
         orderBy: {
-          viewCount: 'desc',
+          viewCount: "desc",
         },
       });
 
@@ -385,7 +383,7 @@ export class LawArticleSearchService {
         category: article.category,
       }));
     } catch (error) {
-      console.error('获取搜索建议失败:', error);
+      console.error("获取搜索建议失败:", error);
       throw error;
     }
   }
@@ -400,7 +398,9 @@ export class LawArticleSearchService {
   /**
    * 归一化权重配置
    */
-  static normalizeWeights(weights: RelevanceWeightConfig): RelevanceWeightConfig {
+  static normalizeWeights(
+    weights: RelevanceWeightConfig,
+  ): RelevanceWeightConfig {
     return RelevanceScorer.normalizeWeights(weights);
   }
 }

@@ -4,7 +4,7 @@
 export function createCursor<T>(
   items: T[],
   key: keyof T,
-  limit: number
+  limit: number,
 ): {
   data: T[];
   nextCursor?: string;
@@ -41,8 +41,8 @@ export function createCursor<T>(
   }
 
   const nextCursor = Buffer.from(
-    JSON.stringify({ [key]: nextItem[key] })
-  ).toString('base64');
+    JSON.stringify({ [key]: nextItem[key] }),
+  ).toString("base64");
 
   return {
     data: items.slice(0, limit),
@@ -60,7 +60,7 @@ export function parseCursor(cursor?: string): Record<string, unknown> | null {
   }
 
   try {
-    return JSON.parse(Buffer.from(cursor, 'base64').toString());
+    return JSON.parse(Buffer.from(cursor, "base64").toString());
   } catch {
     return null;
   }
@@ -71,7 +71,7 @@ export function parseCursor(cursor?: string): Record<string, unknown> | null {
  */
 export function buildCursorOptions<T>(
   cursor?: string,
-  limit: number = 20
+  limit: number = 20,
 ): {
   cursor?: Record<string, unknown>;
   take: number;
@@ -89,7 +89,7 @@ export function buildCursorOptions<T>(
  */
 export async function estimateTotalCount<T>(
   countFunction: () => Promise<number>,
-  totalCount?: number
+  totalCount?: number,
 ): Promise<number> {
   if (totalCount !== undefined) {
     return totalCount;
@@ -109,7 +109,7 @@ export function createPaginationLinks(
     hasNext: boolean;
     hasPrev: boolean;
   },
-  queryParams: Record<string, string> = {}
+  queryParams: Record<string, string> = {},
 ): {
   first: string;
   prev: string | null;
@@ -121,37 +121,40 @@ export function createPaginationLinks(
   // 按照字母顺序添加查询参数以确保一致性
   const sortedKeys = Object.keys(queryParams).sort();
   for (const key of sortedKeys) {
-    if (key !== 'page') { // 排除page参数，我们会单独设置
+    if (key !== "page") {
+      // 排除page参数，我们会单独设置
       searchParams.set(key, queryParams[key]);
     }
   }
 
   const buildUrl = (page: number) => {
     const params = new URLSearchParams(searchParams);
-    params.set('page', page.toString());
-    
+    params.set("page", page.toString());
+
     // 按照固定顺序构建查询字符串：page, sort, filter, others
     const orderedParams: string[] = [];
-    
+
     // 首先添加page参数
     orderedParams.push(`page=${page.toString()}`);
-    
+
     // 然后按照特定顺序添加其他参数
-    const paramOrder = ['sort', 'filter'];
+    const paramOrder = ["sort", "filter"];
     for (const param of paramOrder) {
       if (queryParams[param]) {
-        orderedParams.push(`${param}=${encodeURIComponent(queryParams[param])}`);
+        orderedParams.push(
+          `${param}=${encodeURIComponent(queryParams[param])}`,
+        );
       }
     }
-    
+
     // 最后添加其他参数
     for (const [key, value] of params.entries()) {
-      if (key !== 'page' && !paramOrder.includes(key)) {
+      if (key !== "page" && !paramOrder.includes(key)) {
         orderedParams.push(`${key}=${encodeURIComponent(value)}`);
       }
     }
-    
-    return `${baseUrl}?${orderedParams.join('&')}`;
+
+    return `${baseUrl}?${orderedParams.join("&")}`;
   };
 
   return {
@@ -168,7 +171,7 @@ export function createPaginationLinks(
 export function calculatePaginationStats(
   currentPage: number,
   pageSize: number,
-  totalItems: number
+  totalItems: number,
 ): {
   currentPage: number;
   pageSize: number;

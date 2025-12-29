@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 /**
  * 请求上下文接口
@@ -18,7 +18,7 @@ export interface RequestContext {
 export type Middleware = (
   request: NextRequest,
   context: RequestContext,
-  response: NextResponse
+  response: NextResponse,
 ) => Promise<void | NextResponse>;
 
 /**
@@ -38,25 +38,28 @@ export class MiddlewareStack {
   /**
    * 执行中间件栈
    */
-  async execute(request: NextRequest, context: RequestContext): Promise<NextResponse> {
+  async execute(
+    request: NextRequest,
+    context: RequestContext,
+  ): Promise<NextResponse> {
     // 1. 创建单一response实例，贯穿所有中间件
     const finalResponse = NextResponse.next();
-    
+
     // 2. 依次执行中间件，共享同一个response
     for (const middleware of this.middlewares) {
       try {
         const result = await middleware(request, context, finalResponse);
-        
+
         // 如果中间件返回了NextResponse，使用它并停止执行链
         if (result) {
           return result;
         }
       } catch (error) {
-        const { handleApiError } = await import('../errors/error-handler');
+        const { handleApiError } = await import("../errors/error-handler");
         return handleApiError(error, request);
       }
     }
-    
+
     return finalResponse;
   }
 }
@@ -67,7 +70,7 @@ export class MiddlewareStack {
 export function createRequestContext(request: NextRequest): RequestContext {
   const timestamp = Date.now();
   const randomStr = Math.random().toString(36).substr(2, 9);
-  
+
   return {
     request,
     startTime: timestamp,

@@ -1,5 +1,5 @@
-import { PrismaClient, LegalReferenceStatus } from '@prisma/client';
-import { beforeEach, describe, expect, it, afterEach } from '@jest/globals';
+import { PrismaClient, LegalReferenceStatus } from "@prisma/client";
+import { beforeEach, describe, expect, it, afterEach } from "@jest/globals";
 
 const prisma = new PrismaClient({
   datasources: {
@@ -9,7 +9,7 @@ const prisma = new PrismaClient({
   },
 });
 
-describe('Legal Reference CRUD Operations', () => {
+describe("Legal Reference CRUD Operations", () => {
   let testRefId: string;
   let testUserId: string;
 
@@ -17,10 +17,10 @@ describe('Legal Reference CRUD Operations', () => {
     // 创建测试用户
     const user = await prisma.user.create({
       data: {
-        email: 'test-user@example.com',
-        username: 'testuser',
-        name: 'Test User',
-        role: 'USER',
+        email: "test-user@example.com",
+        username: "testuser",
+        name: "Test User",
+        role: "USER",
       },
     });
     testUserId = user.id;
@@ -29,7 +29,7 @@ describe('Legal Reference CRUD Operations', () => {
     await prisma.legalReference.deleteMany({
       where: {
         source: {
-          contains: 'test-',
+          contains: "test-",
         },
       },
     });
@@ -43,7 +43,7 @@ describe('Legal Reference CRUD Operations', () => {
           id: testRefId,
         },
       });
-      testRefId = '';
+      testRefId = "";
     }
 
     if (testUserId) {
@@ -52,17 +52,18 @@ describe('Legal Reference CRUD Operations', () => {
           id: testUserId,
         },
       });
-      testUserId = '';
+      testUserId = "";
     }
   });
 
-  describe('Basic Legal Reference Creation', () => {
-    it('should create a legal reference with basic fields', async () => {
+  describe("Basic Legal Reference Creation", () => {
+    it("should create a legal reference with basic fields", async () => {
       const refData = {
-        source: '《中华人民共和国民法典》',
-        content: '民事主体从事民事活动，应当遵循自愿、公平、等价有偿、诚实信用的原则。',
-        lawType: '民法',
-        articleNumber: '第5条',
+        source: "《中华人民共和国民法典》",
+        content:
+          "民事主体从事民事活动，应当遵循自愿、公平、等价有偿、诚实信用的原则。",
+        lawType: "民法",
+        articleNumber: "第5条",
       };
 
       const legalRef = await prisma.legalReference.create({
@@ -76,18 +77,18 @@ describe('Legal Reference CRUD Operations', () => {
       expect(legalRef.content).toBe(refData.content);
       expect(legalRef.lawType).toBe(refData.lawType);
       expect(legalRef.articleNumber).toBe(refData.articleNumber);
-      expect(legalRef.status).toBe('VALID');
+      expect(legalRef.status).toBe("VALID");
       expect(legalRef.createdAt).toBeDefined();
       expect(legalRef.updatedAt).toBeDefined();
     });
 
-    it('should create a legal reference with retrieval information', async () => {
+    it("should create a legal reference with retrieval information", async () => {
       const refData = {
-        source: '《中华人民共和国合同法》',
-        content: '当事人订立合同，应当具有相应的民事权利能力和民事行为能力。',
-        lawType: '民法',
-        articleNumber: '第9条',
-        retrievalQuery: '合同 订立 民事权利',
+        source: "《中华人民共和国合同法》",
+        content: "当事人订立合同，应当具有相应的民事权利能力和民事行为能力。",
+        lawType: "民法",
+        articleNumber: "第9条",
+        retrievalQuery: "合同 订立 民事权利",
         relevanceScore: 0.95,
       };
 
@@ -101,21 +102,21 @@ describe('Legal Reference CRUD Operations', () => {
       expect(legalRef.relevanceScore).toBe(refData.relevanceScore);
     });
 
-    it('should create a legal reference with applicability analysis', async () => {
+    it("should create a legal reference with applicability analysis", async () => {
       const analysisTime = new Date();
       const refData = {
-        source: '《中华人民共和国侵权责任法》',
-        content: '行为人因过错侵害他人民事权益，应当承担侵权责任。',
-        lawType: '民法',
-        articleNumber: '第6条',
+        source: "《中华人民共和国侵权责任法》",
+        content: "行为人因过错侵害他人民事权益，应当承担侵权责任。",
+        lawType: "民法",
+        articleNumber: "第6条",
         applicabilityScore: 0.88,
-        applicabilityReason: '适用于一般侵权纠纷案件',
+        applicabilityReason: "适用于一般侵权纠纷案件",
         analysisResult: {
-          keywords: ['侵权', '过错', '民事权益'],
-          applicableScenarios: ['人身损害', '财产损害'],
-          limitations: ['不适用特殊侵权情形'],
+          keywords: ["侵权", "过错", "民事权益"],
+          applicableScenarios: ["人身损害", "财产损害"],
+          limitations: ["不适用特殊侵权情形"],
         } as any,
-        analyzedBy: 'AI-ANALYZER',
+        analyzedBy: "AI-ANALYZER",
         analyzedAt: analysisTime,
       };
 
@@ -133,17 +134,17 @@ describe('Legal Reference CRUD Operations', () => {
     });
   });
 
-  describe('Cache Management', () => {
-    it('should create a legal reference with cache information', async () => {
+  describe("Cache Management", () => {
+    it("should create a legal reference with cache information", async () => {
       const now = new Date();
       const expiryTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24小时后过期
 
       const refData = {
-        source: '《中华人民共和国物权法》',
-        content: '国家对不动产实行统一登记制度。',
-        lawType: '民法',
-        articleNumber: '第9条',
-        cacheSource: 'local',
+        source: "《中华人民共和国物权法》",
+        content: "国家对不动产实行统一登记制度。",
+        lawType: "民法",
+        articleNumber: "第9条",
+        cacheSource: "local",
         cacheExpiry: expiryTime,
         hitCount: 0,
         lastAccessed: now,
@@ -161,13 +162,13 @@ describe('Legal Reference CRUD Operations', () => {
       expect(legalRef.lastAccessed).toEqual(now);
     });
 
-    it('should update cache hit count and last accessed', async () => {
+    it("should update cache hit count and last accessed", async () => {
       const legalRef = await prisma.legalReference.create({
         data: {
-          source: '《中华人民共和国担保法》',
-          content: '担保方式包括保证、抵押、质押、留置和定金。',
-          lawType: '民法',
-          articleNumber: '第2条',
+          source: "《中华人民共和国担保法》",
+          content: "担保方式包括保证、抵押、质押、留置和定金。",
+          lawType: "民法",
+          articleNumber: "第2条",
           hitCount: 5,
         },
       });
@@ -190,15 +191,15 @@ describe('Legal Reference CRUD Operations', () => {
     });
   });
 
-  describe('Classification and Tags', () => {
-    it('should create a legal reference with category and tags', async () => {
+  describe("Classification and Tags", () => {
+    it("should create a legal reference with category and tags", async () => {
       const refData = {
-        source: '《中华人民共和国公司法》',
-        content: '有限责任公司股东会是公司的权力机构，依照本法行使职权。',
-        lawType: '商法',
-        articleNumber: '第36条',
-        category: '公司治理',
-        tags: ['股东会', '权力机构', '职权'],
+        source: "《中华人民共和国公司法》",
+        content: "有限责任公司股东会是公司的权力机构，依照本法行使职权。",
+        lawType: "商法",
+        articleNumber: "第36条",
+        category: "公司治理",
+        tags: ["股东会", "权力机构", "职权"],
       };
 
       const legalRef = await prisma.legalReference.create({
@@ -212,24 +213,24 @@ describe('Legal Reference CRUD Operations', () => {
     });
   });
 
-  describe('Version Management', () => {
-    it('should create a legal reference with version information', async () => {
-      const effectiveDate = new Date('2020-01-01');
-      const expiryDate = new Date('2025-01-01');
+  describe("Version Management", () => {
+    it("should create a legal reference with version information", async () => {
+      const effectiveDate = new Date("2020-01-01");
+      const expiryDate = new Date("2025-01-01");
 
       const refData = {
-        source: '《中华人民共和国民法典》',
-        content: '离婚后，不满两周岁的子女，由母亲直接抚养。',
-        lawType: '民法',
-        articleNumber: '第1084条',
-        version: '2020版',
+        source: "《中华人民共和国民法典》",
+        content: "离婚后，不满两周岁的子女，由母亲直接抚养。",
+        lawType: "民法",
+        articleNumber: "第1084条",
+        version: "2020版",
         effectiveDate: effectiveDate,
         expiryDate: expiryDate,
         amendmentHistory: {
           amendments: [
             {
-              date: '2020-05-28',
-              content: '新增条款关于子女抚养权的规定',
+              date: "2020-05-28",
+              content: "新增条款关于子女抚养权的规定",
             },
           ],
         } as any,
@@ -248,13 +249,13 @@ describe('Legal Reference CRUD Operations', () => {
     });
   });
 
-  describe('Status Management', () => {
-    it('should create legal reference with specific status', async () => {
+  describe("Status Management", () => {
+    it("should create legal reference with specific status", async () => {
       const refData = {
-        source: '《中华人民共和国经济合同法》（已废止）',
-        content: '本法已由民法典替代。',
-        lawType: '商法',
-        articleNumber: '第1条',
+        source: "《中华人民共和国经济合同法》（已废止）",
+        content: "本法已由民法典替代。",
+        lawType: "商法",
+        articleNumber: "第1条",
         status: LegalReferenceStatus.REPEALED,
       };
 
@@ -264,16 +265,16 @@ describe('Legal Reference CRUD Operations', () => {
 
       testRefId = legalRef.id;
 
-      expect(legalRef.status).toBe('REPEALED');
+      expect(legalRef.status).toBe("REPEALED");
     });
 
-    it('should update legal reference status', async () => {
+    it("should update legal reference status", async () => {
       const legalRef = await prisma.legalReference.create({
         data: {
-          source: '《中华人民共和国民事诉讼法》',
-          content: '人民法院审理民事案件，应当以事实为根据，以法律为准绳。',
-          lawType: '诉讼法',
-          articleNumber: '第7条',
+          source: "《中华人民共和国民事诉讼法》",
+          content: "人民法院审理民事案件，应当以事实为根据，以法律为准绳。",
+          lawType: "诉讼法",
+          articleNumber: "第7条",
         },
       });
 
@@ -284,36 +285,37 @@ describe('Legal Reference CRUD Operations', () => {
         data: { status: LegalReferenceStatus.AMENDED },
       });
 
-      expect(updatedRef.status).toBe('AMENDED');
+      expect(updatedRef.status).toBe("AMENDED");
     });
   });
 
-  describe('Query Operations', () => {
+  describe("Query Operations", () => {
     beforeEach(async () => {
       // 清理所有测试数据
       await prisma.legalReference.deleteMany({});
-      
+
       // 创建测试数据
       await prisma.legalReference.createMany({
         data: [
           {
-            source: '《中华人民共和国宪法》',
-            content: '中华人民共和国是工人阶级领导的、以工农联盟为基础的人民民主专政的社会主义国家。',
-            lawType: '宪法',
+            source: "《中华人民共和国宪法》",
+            content:
+              "中华人民共和国是工人阶级领导的、以工农联盟为基础的人民民主专政的社会主义国家。",
+            lawType: "宪法",
             status: LegalReferenceStatus.VALID,
             relevanceScore: 1.0,
           },
           {
-            source: '《中华人民共和国刑法》',
-            content: '法律明文规定为犯罪行为的，依照法律定罪处刑。',
-            lawType: '刑法',
+            source: "《中华人民共和国刑法》",
+            content: "法律明文规定为犯罪行为的，依照法律定罪处刑。",
+            lawType: "刑法",
             status: LegalReferenceStatus.VALID,
             relevanceScore: 0.9,
           },
           {
-            source: '《中华人民共和国民法通则》（已废止）',
-            content: '本法通则已由民法典替代。',
-            lawType: '民法',
+            source: "《中华人民共和国民法通则》（已废止）",
+            content: "本法通则已由民法典替代。",
+            lawType: "民法",
             status: LegalReferenceStatus.REPEALED,
             relevanceScore: 0.3,
           },
@@ -325,31 +327,31 @@ describe('Legal Reference CRUD Operations', () => {
       await prisma.legalReference.deleteMany({
         where: {
           lawType: {
-            in: ['宪法', '刑法', '民法'],
+            in: ["宪法", "刑法", "民法"],
           },
         },
       });
     });
 
-    it('should filter legal references by status', async () => {
+    it("should filter legal references by status", async () => {
       const validRefs = await prisma.legalReference.findMany({
         where: { status: LegalReferenceStatus.VALID },
       });
 
       expect(validRefs).toHaveLength(2);
-      expect(validRefs.every(ref => ref.status === 'VALID')).toBe(true);
+      expect(validRefs.every((ref) => ref.status === "VALID")).toBe(true);
     });
 
-    it('should filter legal references by law type', async () => {
+    it("should filter legal references by law type", async () => {
       const criminalRefs = await prisma.legalReference.findMany({
-        where: { lawType: '刑法' },
+        where: { lawType: "刑法" },
       });
 
       expect(criminalRefs).toHaveLength(1);
-      expect(criminalRefs[0].lawType).toBe('刑法');
+      expect(criminalRefs[0].lawType).toBe("刑法");
     });
 
-    it('should filter by relevance score', async () => {
+    it("should filter by relevance score", async () => {
       const highRelevanceRefs = await prisma.legalReference.findMany({
         where: {
           relevanceScore: {
@@ -357,20 +359,22 @@ describe('Legal Reference CRUD Operations', () => {
           },
         },
         orderBy: {
-          relevanceScore: 'desc',
+          relevanceScore: "desc",
         },
       });
 
       expect(highRelevanceRefs).toHaveLength(2);
-      expect(highRelevanceRefs.every(ref => ref.relevanceScore! >= 0.8)).toBe(true);
+      expect(highRelevanceRefs.every((ref) => ref.relevanceScore! >= 0.8)).toBe(
+        true,
+      );
     });
 
-    it('should filter by applicability score', async () => {
+    it("should filter by applicability score", async () => {
       await prisma.legalReference.create({
         data: {
-          source: '测试法条',
-          content: '测试内容',
-          lawType: '测试法',
+          source: "测试法条",
+          content: "测试内容",
+          lawType: "测试法",
           applicabilityScore: 0.75,
         },
       });
@@ -382,32 +386,34 @@ describe('Legal Reference CRUD Operations', () => {
           },
         },
         orderBy: {
-          applicabilityScore: 'desc',
+          applicabilityScore: "desc",
         },
       });
 
       expect(highApplicabilityRefs.length).toBeGreaterThanOrEqual(1);
-      expect(highApplicabilityRefs.every(ref => ref.applicabilityScore! >= 0.7)).toBe(true);
+      expect(
+        highApplicabilityRefs.every((ref) => ref.applicabilityScore! >= 0.7),
+      ).toBe(true);
     });
   });
 
-  describe('Case Association', () => {
-    it('should create legal reference associated with case', async () => {
+  describe("Case Association", () => {
+    it("should create legal reference associated with case", async () => {
       // 创建测试案件
       const testCase = await prisma.case.create({
         data: {
           userId: testUserId,
-          title: '测试案件',
-          description: '测试案件描述',
-          type: 'CIVIL',
+          title: "测试案件",
+          description: "测试案件描述",
+          type: "CIVIL",
         },
       });
 
       const refData = {
-        source: '《中华人民共和国民法典》',
-        content: '合同是民事主体之间设立、变更、终止民事法律关系的协议。',
-        lawType: '民法',
-        articleNumber: '第464条',
+        source: "《中华人民共和国民法典》",
+        content: "合同是民事主体之间设立、变更、终止民事法律关系的协议。",
+        lawType: "民法",
+        articleNumber: "第464条",
         caseId: testCase.id,
       };
 

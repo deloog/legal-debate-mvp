@@ -2,7 +2,7 @@
 
 /**
  * 优化后的DeepSeek辩论生成测试
- * 
+ *
  * 测试优化措施的效果：
  * - 缩短超时时间
  * - 优化请求参数
@@ -53,7 +53,7 @@ const OPTIMIZED_TEST_CASES = [
 // =============================================================================
 
 interface OptimizedTestResult {
-  testCase: typeof OPTIMIZED_TEST_CASES[0];
+  testCase: (typeof OPTIMIZED_TEST_CASES)[0];
   response: any;
   duration: number;
   cached: boolean;
@@ -89,7 +89,11 @@ class PerformanceMonitor {
     quality: number;
   }> = [];
 
-  public recordMetric(duration: number, cached: boolean, quality: number): void {
+  public recordMetric(
+    duration: number,
+    cached: boolean,
+    quality: number,
+  ): void {
     this.metrics.push({
       timestamp: Date.now(),
       duration,
@@ -97,7 +101,9 @@ class PerformanceMonitor {
       quality,
     });
 
-    console.log(`📊 Performance Metric: ${duration}ms, Cached: ${cached}, Quality: ${quality.toFixed(1)}`);
+    console.log(
+      `📊 Performance Metric: ${duration}ms, Cached: ${cached}, Quality: ${quality.toFixed(1)}`,
+    );
   }
 
   public getMetrics(): OptimizationMetrics {
@@ -116,15 +122,18 @@ class PerformanceMonitor {
     const totalTests = this.metrics.length;
     const totalDuration = this.metrics.reduce((sum, m) => sum + m.duration, 0);
     const averageDuration = totalDuration / totalTests;
-    const cachedResponses = this.metrics.filter(m => m.cached).length;
+    const cachedResponses = this.metrics.filter((m) => m.cached).length;
     const cacheHitRate = (cachedResponses / totalTests) * 100;
-    const averageQuality = this.metrics.reduce((sum, m) => sum + m.quality, 0) / totalTests;
-    
+    const averageQuality =
+      this.metrics.reduce((sum, m) => sum + m.quality, 0) / totalTests;
+
     // 与基准测试对比（原始平均21.2秒，质量8.7）
     const baselineDuration = 21200;
     const baselineQuality = 8.7;
-    const performanceGain = ((baselineDuration - averageDuration) / baselineDuration) * 100;
-    const qualityImprovement = ((averageQuality - baselineQuality) / baselineQuality) * 100;
+    const performanceGain =
+      ((baselineDuration - averageDuration) / baselineDuration) * 100;
+    const qualityImprovement =
+      ((averageQuality - baselineQuality) / baselineQuality) * 100;
 
     return {
       totalTests,
@@ -145,35 +154,63 @@ class PerformanceMonitor {
 function evaluateDebateQuality(
   title: string,
   description: string,
-  debateContent: string
-): OptimizedTestResult['quality'] {
+  debateContent: string,
+): OptimizedTestResult["quality"] {
   let clarity = 7;
   let balance = 7;
   let accuracy = 7;
   let completeness = 7;
 
-  if (debateContent.includes("首先") || debateContent.includes("其次") || debateContent.includes("最后")) {
+  if (
+    debateContent.includes("首先") ||
+    debateContent.includes("其次") ||
+    debateContent.includes("最后")
+  ) {
     clarity += 1;
   }
   if (debateContent.length > 200) {
     clarity += 1;
   }
 
-  const hasPlaintiff = debateContent.includes("原告") || debateContent.includes("买方") || debateContent.includes("员工");
-  const hasDefendant = debateContent.includes("被告") || debateContent.includes("卖方") || debateContent.includes("公司");
+  const hasPlaintiff =
+    debateContent.includes("原告") ||
+    debateContent.includes("买方") ||
+    debateContent.includes("员工");
+  const hasDefendant =
+    debateContent.includes("被告") ||
+    debateContent.includes("卖方") ||
+    debateContent.includes("公司");
   if (hasPlaintiff && hasDefendant) {
     balance += 2;
   } else if (hasPlaintiff || hasDefendant) {
     balance += 1;
   }
 
-  const legalTerms = ["民法典", "合同法", "劳动法", "道路交通安全法", "条款", "规定", "依法"];
-  const legalTermCount = legalTerms.filter(term => debateContent.includes(term)).length;
+  const legalTerms = [
+    "民法典",
+    "合同法",
+    "劳动法",
+    "道路交通安全法",
+    "条款",
+    "规定",
+    "依法",
+  ];
+  const legalTermCount = legalTerms.filter((term) =>
+    debateContent.includes(term),
+  ).length;
   accuracy += Math.min(legalTermCount, 3);
 
-  if (debateContent.includes("事实") && debateContent.includes("理由") && debateContent.includes("请求")) {
+  if (
+    debateContent.includes("事实") &&
+    debateContent.includes("理由") &&
+    debateContent.includes("请求")
+  ) {
     completeness += 2;
-  } else if (debateContent.includes("事实") || debateContent.includes("理由") || debateContent.includes("请求")) {
+  } else if (
+    debateContent.includes("事实") ||
+    debateContent.includes("理由") ||
+    debateContent.includes("请求")
+  ) {
     completeness += 1;
   }
 
@@ -193,10 +230,10 @@ function generateQualityAnalysis(
   clarity: number,
   balance: number,
   accuracy: number,
-  completeness: number
+  completeness: number,
 ): string {
   const analysis = [];
-  
+
   if (clarity >= 8) {
     analysis.push("✅ 论点逻辑清晰，结构合理");
   } else if (clarity >= 6) {
@@ -248,33 +285,33 @@ async function testOptimizedDeepSeek(): Promise<void> {
     console.log(`\n📋 测试案例: ${testCase.title}`);
     console.log(`   类型: ${testCase.category}`);
     console.log(`   描述: ${testCase.description}`);
-    
+
     const startTime = Date.now();
     let cached = false;
-    
+
     try {
       const response = await aiService.generateDebate({
         title: testCase.title,
         description: testCase.description,
         legalReferences: testCase.legalReferences,
       });
-      
+
       const duration = Date.now() - startTime;
       const debateContent = response.choices[0]?.message?.content || "";
       cached = response.cached || false;
-      
+
       console.log(`✅ 辩论生成成功，响应时间: ${duration}ms`);
       console.log(`   缓存状态: ${cached ? "🎯 命中缓存" : "🔄 生成新内容"}`);
       console.log(`   内容长度: ${debateContent.length} 字符`);
       console.log(`   Token使用: ${response.usage?.totalTokens || 0}`);
-      
+
       // 评估质量
       const quality = evaluateDebateQuality(
         testCase.title,
         testCase.description,
-        debateContent
+        debateContent,
       );
-      
+
       results.push({
         testCase,
         response,
@@ -282,24 +319,25 @@ async function testOptimizedDeepSeek(): Promise<void> {
         cached,
         quality,
       });
-      
+
       // 记录性能指标
       performanceMonitor.recordMetric(duration, cached, quality.overall);
-      
+
       console.log(`   质量评分: ${quality.overall.toFixed(1)}/10`);
       console.log(`   - 逻辑清晰度: ${quality.clarity}/10`);
       console.log(`   - 正反方平衡: ${quality.balance}/10`);
       console.log(`   - 法律依据准确性: ${quality.accuracy}/10`);
       console.log(`   - 论点完整性: ${quality.completeness}/10`);
-      
+
       if (duration > 15000) {
         console.log(`⚠️ 响应时间仍较长: ${duration}ms`);
       }
-      
     } catch (error) {
       const duration = Date.now() - startTime;
-      console.log(`❌ 辩论生成失败: ${error instanceof Error ? error.message : JSON.stringify(error)}`);
-      
+      console.log(
+        `❌ 辩论生成失败: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
+      );
+
       results.push({
         testCase,
         response: null,
@@ -315,104 +353,136 @@ async function testOptimizedDeepSeek(): Promise<void> {
         },
       });
     }
-    
+
     console.log("\n" + "─".repeat(60));
   }
-  
+
   // 生成优化效果报告
   generateOptimizationReport(results, performanceMonitor);
 }
 
 function generateOptimizationReport(
   results: OptimizedTestResult[],
-  performanceMonitor: PerformanceMonitor
+  performanceMonitor: PerformanceMonitor,
 ): void {
   console.log("\n" + "=".repeat(60));
   console.log("📊 优化效果分析报告");
   console.log("=".repeat(60));
-  
+
   const metrics = performanceMonitor.getMetrics();
-  const successfulTests = results.filter(r => r.response !== null);
-  
+  const successfulTests = results.filter((r) => r.response !== null);
+
   console.log(`\n📈 性能指标:`);
   console.log(`   总测试数: ${metrics.totalTests}`);
   console.log(`   成功数: ${successfulTests.length}`);
   console.log(`   缓存命中数: ${metrics.cachedResponses}`);
-  console.log(`   成功率: ${((successfulTests.length / metrics.totalTests) * 100).toFixed(1)}%`);
+  console.log(
+    `   成功率: ${((successfulTests.length / metrics.totalTests) * 100).toFixed(1)}%`,
+  );
   console.log(`   缓存命中率: ${metrics.cacheHitRate.toFixed(1)}%`);
-  
+
   console.log(`\n⏱️ 响应时间分析:`);
-  console.log(`   平均响应时间: ${metrics.averageDuration.toFixed(0)}ms (${(metrics.averageDuration/1000).toFixed(1)}秒)`);
+  console.log(
+    `   平均响应时间: ${metrics.averageDuration.toFixed(0)}ms (${(metrics.averageDuration / 1000).toFixed(1)}秒)`,
+  );
   console.log(`   性能提升: ${metrics.performanceGain.toFixed(1)}%`);
-  
+
   // 响应时间分布
-  const durations = successfulTests.map(r => r.duration);
+  const durations = successfulTests.map((r) => r.duration);
   const minDuration = Math.min(...durations);
   const maxDuration = Math.max(...durations);
-  const medianDuration = durations.sort((a, b) => a - b)[Math.floor(durations.length / 2)];
-  
+  const medianDuration = durations.sort((a, b) => a - b)[
+    Math.floor(durations.length / 2)
+  ];
+
   console.log(`   最快响应: ${minDuration}ms`);
   console.log(`   最慢响应: ${maxDuration}ms`);
   console.log(`   中位数响应: ${medianDuration}ms`);
-  
+
   console.log(`\n🎯 质量评估:`);
   if (successfulTests.length > 0) {
-    const avgQuality = successfulTests.reduce((sum, r) => sum + r.quality.overall, 0) / successfulTests.length;
-    const avgClarity = successfulTests.reduce((sum, r) => sum + r.quality.clarity, 0) / successfulTests.length;
-    const avgBalance = successfulTests.reduce((sum, r) => sum + r.quality.balance, 0) / successfulTests.length;
-    const avgAccuracy = successfulTests.reduce((sum, r) => sum + r.quality.accuracy, 0) / successfulTests.length;
-    
+    const avgQuality =
+      successfulTests.reduce((sum, r) => sum + r.quality.overall, 0) /
+      successfulTests.length;
+    const avgClarity =
+      successfulTests.reduce((sum, r) => sum + r.quality.clarity, 0) /
+      successfulTests.length;
+    const avgBalance =
+      successfulTests.reduce((sum, r) => sum + r.quality.balance, 0) /
+      successfulTests.length;
+    const avgAccuracy =
+      successfulTests.reduce((sum, r) => sum + r.quality.accuracy, 0) /
+      successfulTests.length;
+
     console.log(`   平均质量评分: ${avgQuality.toFixed(1)}/10`);
     console.log(`   质量提升: ${metrics.qualityImprovement.toFixed(1)}%`);
     console.log(`   平均逻辑清晰度: ${avgClarity.toFixed(1)}/10`);
     console.log(`   平均正反方平衡: ${avgBalance.toFixed(1)}/10`);
     console.log(`   平均法律依据准确性: ${avgAccuracy.toFixed(1)}/10`);
   }
-  
+
   console.log(`\n🎯 优化目标达成情况:`);
-  
+
   // 响应时间目标：<15秒
   if (metrics.averageDuration < 15000) {
-    console.log(`   ✅ 响应时间目标达成: ${metrics.averageDuration.toFixed(0)}ms < 15000ms`);
+    console.log(
+      `   ✅ 响应时间目标达成: ${metrics.averageDuration.toFixed(0)}ms < 15000ms`,
+    );
   } else {
-    console.log(`   ❌ 响应时间目标未达成: ${metrics.averageDuration.toFixed(0)}ms >= 15000ms`);
+    console.log(
+      `   ❌ 响应时间目标未达成: ${metrics.averageDuration.toFixed(0)}ms >= 15000ms`,
+    );
   }
-  
+
   // 缓存命中率目标：>30%
   if (metrics.cacheHitRate > 30) {
-    console.log(`   ✅ 缓存命中率目标达成: ${metrics.cacheHitRate.toFixed(1)}% > 30%`);
+    console.log(
+      `   ✅ 缓存命中率目标达成: ${metrics.cacheHitRate.toFixed(1)}% > 30%`,
+    );
   } else {
-    console.log(`   ⚠️ 缓存命中率目标部分达成: ${metrics.cacheHitRate.toFixed(1)}% (目标 >30%)`);
+    console.log(
+      `   ⚠️ 缓存命中率目标部分达成: ${metrics.cacheHitRate.toFixed(1)}% (目标 >30%)`,
+    );
   }
-  
+
   // 质量保持目标：>8.0
   if (successfulTests.length > 0) {
-    const avgQuality = successfulTests.reduce((sum, r) => sum + r.quality.overall, 0) / successfulTests.length;
+    const avgQuality =
+      successfulTests.reduce((sum, r) => sum + r.quality.overall, 0) /
+      successfulTests.length;
     if (avgQuality >= 8.0) {
       console.log(`   ✅ 质量保持目标达成: ${avgQuality.toFixed(1)}/10 >= 8.0`);
     } else {
-      console.log(`   ⚠️ 质量保持目标部分达成: ${avgQuality.toFixed(1)}/10 (目标 >=8.0)`);
+      console.log(
+        `   ⚠️ 质量保持目标部分达成: ${avgQuality.toFixed(1)}/10 (目标 >=8.0)`,
+      );
     }
   }
-  
+
   console.log(`\n🏆 总体评价:`);
   if (metrics.performanceGain > 50 && metrics.cacheHitRate > 20) {
-    console.log(`   🎉 优化效果显著！性能提升${metrics.performanceGain.toFixed(1)}%，缓存命中率${metrics.cacheHitRate.toFixed(1)}%`);
+    console.log(
+      `   🎉 优化效果显著！性能提升${metrics.performanceGain.toFixed(1)}%，缓存命中率${metrics.cacheHitRate.toFixed(1)}%`,
+    );
   } else if (metrics.performanceGain > 30) {
-    console.log(`   👍 优化效果良好！性能提升${metrics.performanceGain.toFixed(1)}%，建议进一步优化缓存策略`);
+    console.log(
+      `   👍 优化效果良好！性能提升${metrics.performanceGain.toFixed(1)}%，建议进一步优化缓存策略`,
+    );
   } else if (metrics.performanceGain > 10) {
-    console.log(`   👌 优化效果一般，性能提升${metrics.performanceGain.toFixed(1)}%，需要继续优化`);
+    console.log(
+      `   👌 优化效果一般，性能提升${metrics.performanceGain.toFixed(1)}%，需要继续优化`,
+    );
   } else {
     console.log(`   😐 优化效果有限，需要重新评估优化策略`);
   }
-  
+
   // 保存详细报告
   const reportPath = "./deepseek-optimization-report.json";
   const fs = require("fs");
   const report = {
     timestamp: new Date().toISOString(),
     summary: metrics,
-    details: results.map(r => ({
+    details: results.map((r) => ({
       testCase: r.testCase,
       success: r.response !== null,
       duration: r.duration,
@@ -420,7 +490,7 @@ function generateOptimizationReport(
       quality: r.quality,
     })),
   };
-  
+
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
   console.log(`\n📄 详细报告已保存到: ${reportPath}`);
 }
@@ -445,4 +515,8 @@ if (require.main === module) {
   });
 }
 
-export { testOptimizedDeepSeek, type OptimizedTestResult, type OptimizationMetrics };
+export {
+  testOptimizedDeepSeek,
+  type OptimizedTestResult,
+  type OptimizationMetrics,
+};

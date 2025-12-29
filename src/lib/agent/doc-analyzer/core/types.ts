@@ -1,6 +1,6 @@
 /**
  * DocAnalyzer核心类型定义
- * 
+ *
  * 文档分析智能体的输入输出类型定义
  */
 
@@ -11,7 +11,7 @@
 export interface DocumentAnalysisInput {
   documentId: string;
   filePath: string;
-  fileType: 'PDF' | 'DOCX' | 'DOC' | 'TXT' | 'IMAGE';
+  fileType: "PDF" | "DOCX" | "DOC" | "TXT" | "IMAGE";
   options?: {
     extractParties?: boolean;
     extractClaims?: boolean;
@@ -53,7 +53,7 @@ export interface ExtractedData {
 }
 
 export interface Party {
-  type: 'plaintiff' | 'defendant' | 'other';
+  type: "plaintiff" | "defendant" | "other";
   name: string;
   role?: string;
   contact?: string;
@@ -72,14 +72,14 @@ export interface Claim {
 }
 
 export type ClaimType =
-  | 'PAY_PRINCIPAL'
-  | 'PAY_INTEREST'
-  | 'PAY_PENALTY'
-  | 'PAY_DAMAGES'
-  | 'LITIGATION_COST'
-  | 'PERFORMANCE'
-  | 'TERMINATION'
-  | 'OTHER';
+  | "PAY_PRINCIPAL"
+  | "PAY_INTEREST"
+  | "PAY_PENALTY"
+  | "PAY_DAMAGES"
+  | "LITIGATION_COST"
+  | "PERFORMANCE"
+  | "TERMINATION"
+  | "OTHER";
 
 export interface TimelineEvent {
   id?: string; // 唯一标识
@@ -89,25 +89,25 @@ export interface TimelineEvent {
   eventType?: TimelineEventType;
   importance?: number; // 1-5，5最重要
   evidence?: string[];
-  source?: 'explicit' | 'inferred'; // 明确提到或推断的
+  source?: "explicit" | "inferred"; // 明确提到或推断的
 }
 
 export type TimelineEventType =
-  | 'CONTRACT_SIGNED'
-  | 'PERFORMANCE_START'
-  | 'BREACH_OCCURRED'
-  | 'DEMAND_SENT'
-  | 'LAWSUIT_FILED'
-  | 'OTHER';
+  | "CONTRACT_SIGNED"
+  | "PERFORMANCE_START"
+  | "BREACH_OCCURRED"
+  | "DEMAND_SENT"
+  | "LAWSUIT_FILED"
+  | "OTHER";
 
 export type CaseType =
-  | 'civil'
-  | 'criminal'
-  | 'administrative'
-  | 'commercial'
-  | 'labor'
-  | 'intellectual'
-  | 'other';
+  | "civil"
+  | "criminal"
+  | "administrative"
+  | "commercial"
+  | "labor"
+  | "intellectual"
+  | "other";
 
 // =============================================================================
 // 争议焦点类型
@@ -130,13 +130,13 @@ export interface DisputeFocus {
 }
 
 export type DisputeFocusCategory =
-  | 'CONTRACT_BREACH'
-  | 'PAYMENT_DISPUTE'
-  | 'LIABILITY_ISSUE'
-  | 'DAMAGES_CALCULATION'
-  | 'PERFORMANCE_DISPUTE'
-  | 'VALIDITY_ISSUE'
-  | 'OTHER';
+  | "CONTRACT_BREACH"
+  | "PAYMENT_DISPUTE"
+  | "LIABILITY_ISSUE"
+  | "DAMAGES_CALCULATION"
+  | "PERFORMANCE_DISPUTE"
+  | "VALIDITY_ISSUE"
+  | "OTHER";
 
 // =============================================================================
 // 关键事实类型
@@ -157,21 +157,21 @@ export interface KeyFact {
 }
 
 export type FactCategory =
-  | 'CONTRACT_TERM'
-  | 'PERFORMANCE_ACT'
-  | 'BREACH_BEHAVIOR'
-  | 'DAMAGE_OCCURRENCE'
-  | 'LEGAL_RELATION'
-  | 'OTHER';
+  | "CONTRACT_TERM"
+  | "PERFORMANCE_ACT"
+  | "BREACH_BEHAVIOR"
+  | "DAMAGE_OCCURRENCE"
+  | "LEGAL_RELATION"
+  | "OTHER";
 
 export type FactType =
-  | 'EXPLICIT' // 明确提到的事实
-  | 'INFERRED' // 推断得到的事实
-  | 'ADMITTED' // 承认的事实
-  | 'DISPUTED'; // 争议的事实
+  | "EXPLICIT" // 明确提到的事实
+  | "INFERRED" // 推断得到的事实
+  | "ADMITTED" // 承认的事实
+  | "DISPUTED"; // 争议的事实
 
 export interface FactVerification {
-  status: 'VERIFIED' | 'CONTROVERSIAL' | 'UNVERIFIED';
+  status: "VERIFIED" | "CONTROVERSIAL" | "UNVERIFIED";
   sources: string[];
   reliability: number; // 可靠性评分 0-1
 }
@@ -198,7 +198,7 @@ export interface PostProcessingResult {
 }
 
 export interface Correction {
-  type: 'ADD_CLAIM' | 'ADD_PARTY' | 'FIX_AMOUNT' | 'FIX_ROLE' | 'OTHER';
+  type: "ADD_CLAIM" | "ADD_PARTY" | "FIX_AMOUNT" | "FIX_ROLE" | "OTHER";
   description: string;
   originalValue?: any;
   correctedValue?: any;
@@ -218,7 +218,7 @@ export interface ReviewResult {
 }
 
 export interface ReviewIssue {
-  severity: 'ERROR' | 'WARNING' | 'INFO';
+  severity: "ERROR" | "WARNING" | "INFO";
   category: string;
   message: string;
   suggestion?: string;

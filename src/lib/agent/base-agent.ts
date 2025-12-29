@@ -6,15 +6,15 @@ import type {
   AgentResult,
   AgentOptions,
   AgentMetadata,
-  ValidationResult
-} from '../../types/agent';
+  ValidationResult,
+} from "../../types/agent";
 
 import {
   AgentType,
   AgentStatus,
   AgentErrorType,
-  AgentError
-} from '../../types/agent';
+  AgentError,
+} from "../../types/agent";
 
 import {
   AgentExecutionState,
@@ -24,8 +24,8 @@ import {
   createAgentResult,
   validateAgentContext,
   generateCacheKey,
-  DEFAULT_AGENT_CONFIG
-} from './types';
+  DEFAULT_AGENT_CONFIG,
+} from "./types";
 
 // =============================================================================
 // BaseAgent抽象类
@@ -51,12 +51,12 @@ export abstract class BaseAgent implements Agent {
     failedExecutions: 0,
     totalExecutionTime: 0,
     totalTokensUsed: 0,
-    totalCost: 0
+    totalCost: 0,
   };
 
   constructor(
     logger?: (entry: AgentLogEntry) => void,
-    initialConfig?: Record<string, any>
+    initialConfig?: Record<string, any>,
   ) {
     this.logger = logger || this.defaultLogger;
     this.config = { ...initialConfig };
@@ -79,10 +79,10 @@ export abstract class BaseAgent implements Agent {
    * Agent初始化
    */
   async initialize(): Promise<void> {
-    this.log(AgentLogLevel.INFO, 'Agent initialized', { 
+    this.log(AgentLogLevel.INFO, "Agent initialized", {
       name: this.name,
       type: this.type,
-      version: this.version 
+      version: this.version,
     });
   }
 
@@ -90,7 +90,7 @@ export abstract class BaseAgent implements Agent {
    * Agent清理
    */
   async cleanup(): Promise<void> {
-    this.log(AgentLogLevel.INFO, 'Agent cleaned up', { name: this.name });
+    this.log(AgentLogLevel.INFO, "Agent cleaned up", { name: this.name });
     this.status = AgentStatus.IDLE;
   }
 
@@ -106,9 +106,9 @@ export abstract class BaseAgent implements Agent {
    */
   async configure(config: Record<string, any>): Promise<void> {
     this.config = { ...this.config, ...config };
-    this.log(AgentLogLevel.INFO, 'Agent configuration updated', { 
+    this.log(AgentLogLevel.INFO, "Agent configuration updated", {
       name: this.name,
-      config: this.config 
+      config: this.config,
     });
   }
 
@@ -121,22 +121,22 @@ export abstract class BaseAgent implements Agent {
    */
   async execute(context: AgentContext): Promise<AgentResult> {
     const startTime = Date.now();
-    
+
     try {
       // 验证上下文
       const validation = validateAgentContext(context);
       if (!validation.valid) {
         const error = createAgentError(
-          'INVALID_CONTEXT',
-          `Invalid agent context: ${validation.errors.join(', ')}`,
+          "INVALID_CONTEXT",
+          `Invalid agent context: ${validation.errors.join(", ")}`,
           AgentErrorType.VALIDATION_ERROR,
           this.name,
-          false
+          false,
         );
         return createAgentResult(this.name, undefined, {
           success: false,
           executionTime: Date.now() - startTime,
-          error: error
+          error: error,
         });
       }
 
@@ -146,12 +146,12 @@ export abstract class BaseAgent implements Agent {
         agentName: this.name,
         status: this.status,
         startTime,
-        context
+        context,
       };
 
-      this.log(AgentLogLevel.INFO, 'Agent execution started', {
+      this.log(AgentLogLevel.INFO, "Agent execution started", {
         task: context.task,
-        priority: context.priority
+        priority: context.priority,
       });
 
       // 执行逻辑
@@ -168,31 +168,30 @@ export abstract class BaseAgent implements Agent {
         output: result.output, // 传递output字段
         context: {
           inputSummary: this.summarizeInput(context),
-          processingSteps: this.getProcessingSteps()
-        }
+          processingSteps: this.getProcessingSteps(),
+        },
       });
 
       this.status = AgentStatus.IDLE;
-      this.log(AgentLogLevel.INFO, 'Agent execution completed', {
+      this.log(AgentLogLevel.INFO, "Agent execution completed", {
         executionTime,
-        tokensUsed: agentResult.tokensUsed
+        tokensUsed: agentResult.tokensUsed,
       });
 
       return agentResult;
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      
+
       // 更新统计
       this.updateStats(executionTime, false);
 
       // 创建错误
       const agentError = this.createErrorFromException(error);
-      
+
       this.status = AgentStatus.ERROR;
-      this.log(AgentLogLevel.ERROR, 'Agent execution failed', {
+      this.log(AgentLogLevel.ERROR, "Agent execution failed", {
         error: agentError.message,
-        executionTime
+        executionTime,
       });
 
       // 抛出异常而不是返回错误结果
@@ -207,14 +206,19 @@ export abstract class BaseAgent implements Agent {
   /**
    * 记录日志
    */
-  protected log(level: AgentLogLevel, message: string, data?: any, error?: Error): void {
+  protected log(
+    level: AgentLogLevel,
+    message: string,
+    data?: any,
+    error?: Error,
+  ): void {
     const entry: AgentLogEntry = {
       level,
       timestamp: Date.now(),
       agentName: this.name,
       message,
       data,
-      error
+      error,
     };
     this.logger(entry);
   }
@@ -223,24 +227,24 @@ export abstract class BaseAgent implements Agent {
    * 从异常创建Agent错误
    */
   protected createErrorFromException(error: any): AgentError {
-    if (error && typeof error === 'object' && 'code' in error) {
+    if (error && typeof error === "object" && "code" in error) {
       return createAgentError(
         error.code as string,
-        error.message || 'Unknown error',
+        error.message || "Unknown error",
         this.mapErrorType(error.code as string),
         this.name,
         this.isRetryableError(error.code as string),
-        { originalError: error }
+        { originalError: error },
       );
     }
 
     return createAgentError(
-      'EXECUTION_ERROR',
-      error?.message || 'Unknown execution error',
+      "EXECUTION_ERROR",
+      error?.message || "Unknown execution error",
       AgentErrorType.EXECUTION_ERROR,
       this.name,
       true,
-      { originalError: error }
+      { originalError: error },
     );
   }
 
@@ -249,13 +253,16 @@ export abstract class BaseAgent implements Agent {
    */
   protected mapErrorType(code: string): AgentErrorType {
     const codeLower = code.toLowerCase();
-    
-    if (codeLower.includes('timeout')) return AgentErrorType.TIMEOUT_ERROR;
-    if (codeLower.includes('network')) return AgentErrorType.NETWORK_ERROR;
-    if (codeLower.includes('rate_limit')) return AgentErrorType.RATE_LIMIT_ERROR;
-    if (codeLower.includes('permission')) return AgentErrorType.PERMISSION_ERROR;
-    if (codeLower.includes('validation')) return AgentErrorType.VALIDATION_ERROR;
-    
+
+    if (codeLower.includes("timeout")) return AgentErrorType.TIMEOUT_ERROR;
+    if (codeLower.includes("network")) return AgentErrorType.NETWORK_ERROR;
+    if (codeLower.includes("rate_limit"))
+      return AgentErrorType.RATE_LIMIT_ERROR;
+    if (codeLower.includes("permission"))
+      return AgentErrorType.PERMISSION_ERROR;
+    if (codeLower.includes("validation"))
+      return AgentErrorType.VALIDATION_ERROR;
+
     return AgentErrorType.EXECUTION_ERROR;
   }
 
@@ -264,12 +271,14 @@ export abstract class BaseAgent implements Agent {
    */
   protected isRetryableError(code: string): boolean {
     const retryableCodes = [
-      'TIMEOUT_ERROR',
-      'NETWORK_ERROR',
-      'RATE_LIMIT_ERROR',
-      'AI_SERVICE_ERROR'
+      "TIMEOUT_ERROR",
+      "NETWORK_ERROR",
+      "RATE_LIMIT_ERROR",
+      "AI_SERVICE_ERROR",
     ];
-    return retryableCodes.some(rc => code.toLowerCase().includes(rc.toLowerCase()));
+    return retryableCodes.some((rc) =>
+      code.toLowerCase().includes(rc.toLowerCase()),
+    );
   }
 
   /**
@@ -278,7 +287,7 @@ export abstract class BaseAgent implements Agent {
   protected updateStats(executionTime: number, success: boolean): void {
     this.stats.totalExecutions++;
     this.stats.totalExecutionTime += executionTime;
-    
+
     if (success) {
       this.stats.successfulExecutions++;
     } else {
@@ -292,19 +301,17 @@ export abstract class BaseAgent implements Agent {
   protected summarizeInput(context: AgentContext): string {
     const data = context.data;
     const dataStr = JSON.stringify(data);
-    if (typeof data === 'string') {
-      return dataStr.length > 100 ? dataStr.substring(0, 100) + '...' : dataStr;
+    if (typeof data === "string") {
+      return dataStr.length > 100 ? dataStr.substring(0, 100) + "..." : dataStr;
     }
-    return dataStr.length > 100 
-      ? dataStr.substring(0, 100) + '...'
-      : dataStr;
+    return dataStr.length > 100 ? dataStr.substring(0, 100) + "..." : dataStr;
   }
 
   /**
    * 获取处理步骤（由子类重写）
    */
   protected getProcessingSteps(): string[] {
-    return ['Input validation', 'Core logic execution', 'Result formatting'];
+    return ["Input validation", "Core logic execution", "Result formatting"];
   }
 
   /**
@@ -314,18 +321,18 @@ export abstract class BaseAgent implements Agent {
     const level = entry.level.toUpperCase();
     const timestamp = new Date(entry.timestamp).toISOString();
     const message = `[${timestamp}] [${level}] [${entry.agentName}] ${entry.message}`;
-    
+
     if (DEFAULT_AGENT_CONFIG.logging.enableConsole) {
       switch (entry.level) {
         case AgentLogLevel.DEBUG:
         case AgentLogLevel.INFO:
-          console.log(message, entry.data || '');
+          console.log(message, entry.data || "");
           break;
         case AgentLogLevel.WARN:
-          console.warn(message, entry.data || '');
+          console.warn(message, entry.data || "");
           break;
         case AgentLogLevel.ERROR:
-          console.error(message, entry.error || entry.data || '');
+          console.error(message, entry.error || entry.data || "");
           break;
       }
     }
@@ -347,17 +354,19 @@ export abstract class BaseAgent implements Agent {
       capabilities: this.getCapabilities(),
       supportedTasks: this.getSupportedTasks(),
       dependencies: this.getDependencies(),
-      averageExecutionTime: this.stats.totalExecutions > 0 
-        ? this.stats.totalExecutionTime / this.stats.totalExecutions 
-        : 0,
-      successRate: this.stats.totalExecutions > 0 
-        ? this.stats.successfulExecutions / this.stats.totalExecutions 
-        : 0,
+      averageExecutionTime:
+        this.stats.totalExecutions > 0
+          ? this.stats.totalExecutionTime / this.stats.totalExecutions
+          : 0,
+      successRate:
+        this.stats.totalExecutions > 0
+          ? this.stats.successfulExecutions / this.stats.totalExecutions
+          : 0,
       requiredConfig: this.getRequiredConfig(),
       optionalConfig: this.getOptionalConfig(),
       status: this.status,
       lastUsed: this.currentState?.startTime,
-      totalExecutions: this.stats.totalExecutions
+      totalExecutions: this.stats.totalExecutions,
     };
   }
 

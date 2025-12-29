@@ -1,32 +1,38 @@
-import { NextRequest } from 'next/server';
-import { ZodSchema, ZodError } from 'zod';
-import { ValidationError } from '../errors/api-error';
+import { NextRequest } from "next/server";
+import { ZodSchema, ZodError } from "zod";
+import { ValidationError } from "../errors/api-error";
 
 /**
  * 验证请求体
  */
-export async function validateRequestBody<T>(request: NextRequest, schema: ZodSchema<T>): Promise<T> {
+export async function validateRequestBody<T>(
+  request: NextRequest,
+  schema: ZodSchema<T>,
+): Promise<T> {
   try {
     const body = await request.json();
     return schema.parse(body);
   } catch (error) {
     if (error instanceof ZodError) {
-      throw new ValidationError('Request body validation failed', {
+      throw new ValidationError("Request body validation failed", {
         validationErrors: error.issues,
       });
     }
-    throw new ValidationError('Invalid JSON in request body');
+    throw new ValidationError("Invalid JSON in request body");
   }
 }
 
 /**
  * 验证查询参数
  */
-export function validateQueryParams<T>(request: NextRequest, schema: ZodSchema<T>): T {
+export function validateQueryParams<T>(
+  request: NextRequest,
+  schema: ZodSchema<T>,
+): T {
   try {
     const { searchParams } = new URL(request.url);
     const params: Record<string, string | string[]> = {};
-    
+
     // 将查询参数转换为对象
     searchParams.forEach((value, key) => {
       if (params[key]) {
@@ -44,27 +50,30 @@ export function validateQueryParams<T>(request: NextRequest, schema: ZodSchema<T
     return schema.parse(params);
   } catch (error) {
     if (error instanceof ZodError) {
-      throw new ValidationError('Query parameters validation failed', {
+      throw new ValidationError("Query parameters validation failed", {
         validationErrors: error.issues,
       });
     }
-    throw new ValidationError('Invalid query parameters');
+    throw new ValidationError("Invalid query parameters");
   }
 }
 
 /**
  * 验证路径参数
  */
-export function validatePathParams<T>(params: Record<string, unknown>, schema: ZodSchema<T>): T {
+export function validatePathParams<T>(
+  params: Record<string, unknown>,
+  schema: ZodSchema<T>,
+): T {
   try {
     return schema.parse(params);
   } catch (error) {
     if (error instanceof ZodError) {
-      throw new ValidationError('Path parameters validation failed', {
+      throw new ValidationError("Path parameters validation failed", {
         validationErrors: error.issues,
       });
     }
-    throw new ValidationError('Invalid path parameters');
+    throw new ValidationError("Invalid path parameters");
   }
 }
 
@@ -76,19 +85,26 @@ export function validatePathParam<T>(param: unknown, schema: ZodSchema<T>): T {
     return schema.parse(param);
   } catch (error) {
     if (error instanceof ZodError) {
-      throw new ValidationError('Path parameter validation failed', {
+      throw new ValidationError("Path parameter validation failed", {
         validationErrors: error.issues,
       });
     }
-    throw new ValidationError('Invalid path parameter');
+    throw new ValidationError("Invalid path parameter");
   }
 }
 
 /**
  * 验证中间件工厂函数
  */
-export function validateRequest(bodySchema?: ZodSchema, querySchema?: ZodSchema, pathSchema?: ZodSchema) {
-  return async (request: NextRequest, context?: { params?: Record<string, string> }) => {
+export function validateRequest(
+  bodySchema?: ZodSchema,
+  querySchema?: ZodSchema,
+  pathSchema?: ZodSchema,
+) {
+  return async (
+    request: NextRequest,
+    context?: { params?: Record<string, string> },
+  ) => {
     const result: {
       body?: any;
       query?: any;

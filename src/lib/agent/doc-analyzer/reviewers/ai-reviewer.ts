@@ -1,6 +1,6 @@
 /**
  * AI审查器 - 使用AI进行质量审查
- * 
+ *
  * 核心功能：
  * - 调用AI进行二次验证
  * - 检查数据一致性
@@ -13,15 +13,15 @@ import type {
   ReviewResult,
   ReviewIssue,
   ReviewerConfig,
-  Correction
-} from '../core/types';
-import { logger } from '../../../agent/security/logger';
+  Correction,
+} from "../core/types";
+import { logger } from "../../../agent/security/logger";
 
 /**
  * AI审查器
  */
 export class AIReviewer {
-  public readonly name = 'AIReviewer';
+  public readonly name = "AIReviewer";
   private aiService: any | null = null;
   private initialized = false;
 
@@ -31,7 +31,7 @@ export class AIReviewer {
   public async initialize(aiService: any): Promise<void> {
     this.aiService = aiService;
     this.initialized = true;
-    logger.info('AIReviewer初始化完成');
+    logger.info("AIReviewer初始化完成");
   }
 
   /**
@@ -40,29 +40,29 @@ export class AIReviewer {
   public async review(
     data: ExtractedData,
     fullText: string,
-    config: ReviewerConfig
+    config: ReviewerConfig,
   ): Promise<ReviewResult> {
-    logger.debug('AIReviewer开始审查');
+    logger.debug("AIReviewer开始审查");
 
     const issues: ReviewIssue[] = [];
     const corrections: Correction[] = [];
 
     // 如果AI服务未初始化，跳过AI审查
     if (!this.initialized || !this.aiService) {
-      logger.warn('AI服务未初始化，跳过AI审查');
+      logger.warn("AI服务未初始化，跳过AI审查");
       return {
         passed: true,
         score: 1.0,
         issues: [
           {
-            severity: 'WARNING',
-            category: 'AI',
-            message: 'AI服务未初始化，跳过AI审查',
-            suggestion: '检查AI服务配置'
-          }
+            severity: "WARNING",
+            category: "AI",
+            message: "AI服务未初始化，跳过AI审查",
+            suggestion: "检查AI服务配置",
+          },
         ],
         corrections: [],
-        reviewer: this.name
+        reviewer: this.name,
       };
     }
 
@@ -76,15 +76,16 @@ export class AIReviewer {
       // 解析AI审查结果
       this.parseAIResponse(reviewResult, issues, corrections);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       logger.error(`AI审查失败: ${errorMessage}`);
 
       // AI审查失败不阻断流程，记录问题
       issues.push({
-        severity: 'WARNING',
-        category: 'AI',
+        severity: "WARNING",
+        category: "AI",
         message: `AI审查失败：${errorMessage}`,
-        suggestion: '后续手动审查'
+        suggestion: "后续手动审查",
       });
     }
 
@@ -92,11 +93,11 @@ export class AIReviewer {
     const score = this.calculateScore(issues);
     const passed = score >= config.threshold;
 
-    logger.debug('AIReviewer审查完成', {
+    logger.debug("AIReviewer审查完成", {
       score,
       passed,
       issues: issues.length,
-      threshold: config.threshold
+      threshold: config.threshold,
     });
 
     return {
@@ -104,17 +105,14 @@ export class AIReviewer {
       score,
       issues,
       corrections,
-      reviewer: this.name
+      reviewer: this.name,
     };
   }
 
   /**
    * 构建审查提示词
    */
-  private buildReviewPrompt(
-    data: ExtractedData,
-    fullText: string
-  ): string {
+  private buildReviewPrompt(data: ExtractedData, fullText: string): string {
     const dataSummary = `
 **文档原文（前2000字）：**
 ${fullText.substring(0, 2000)}
@@ -165,24 +163,24 @@ ${dataSummary}
   private async callAIReview(prompt: string): Promise<any> {
     try {
       const response = await this.aiService.chatCompletion({
-        model: 'zhipu-pro',
+        model: "zhipu-pro",
         messages: [
           {
-            role: 'system',
+            role: "system",
             content:
-              '你是一个专业的法律文档审查专家，负责审查文档分析结果的准确性。'
+              "你是一个专业的法律文档审查专家，负责审查文档分析结果的准确性。",
           },
           {
-            role: 'user',
-            content: prompt
-          }
+            role: "user",
+            content: prompt,
+          },
         ],
         temperature: 0.3,
         maxTokens: 1000,
-        timeout: 10000
+        timeout: 10000,
       });
 
-      const content = response.choices[0]?.message?.content || '';
+      const content = response.choices[0]?.message?.content || "";
       return this.parseJSONResponse(content);
     } catch (error) {
       const errorMessage =
@@ -206,7 +204,7 @@ ${dataSummary}
       // 如果没有找到JSON，返回空结果
       return { issues: [], corrections: [] };
     } catch (error) {
-      logger.warn('解析AI响应JSON失败', { content });
+      logger.warn("解析AI响应JSON失败", { content });
       return { issues: [], corrections: [] };
     }
   }
@@ -217,17 +215,21 @@ ${dataSummary}
   private parseAIResponse(
     aiResult: any,
     issues: ReviewIssue[],
-    corrections: Correction[]
+    corrections: Correction[],
   ): void {
     // 解析问题
     if (aiResult.issues && Array.isArray(aiResult.issues)) {
       aiResult.issues.forEach((issue: any) => {
-        if (this.isValidSeverity(issue.severity) && issue.category && issue.message) {
+        if (
+          this.isValidSeverity(issue.severity) &&
+          issue.category &&
+          issue.message
+        ) {
           issues.push({
             severity: issue.severity,
             category: issue.category,
             message: issue.message,
-            suggestion: issue.suggestion
+            suggestion: issue.suggestion,
           });
         }
       });
@@ -236,11 +238,14 @@ ${dataSummary}
     // 解析修正建议
     if (aiResult.corrections && Array.isArray(aiResult.corrections)) {
       aiResult.corrections.forEach((correction: any) => {
-        if (this.isValidCorrectionType(correction.type) && correction.description) {
+        if (
+          this.isValidCorrectionType(correction.type) &&
+          correction.description
+        ) {
           corrections.push({
             type: correction.type,
             description: correction.description,
-            rule: correction.rule || 'AI_RECOMMENDATION'
+            rule: correction.rule || "AI_RECOMMENDATION",
           });
         }
       });
@@ -251,7 +256,7 @@ ${dataSummary}
    * 验证严重性级别
    */
   private isValidSeverity(severity: string): boolean {
-    return ['ERROR', 'WARNING', 'INFO'].includes(severity);
+    return ["ERROR", "WARNING", "INFO"].includes(severity);
   }
 
   /**
@@ -259,11 +264,11 @@ ${dataSummary}
    */
   private isValidCorrectionType(type: string): boolean {
     return [
-      'ADD_CLAIM',
-      'ADD_PARTY',
-      'FIX_AMOUNT',
-      'FIX_ROLE',
-      'OTHER'
+      "ADD_CLAIM",
+      "ADD_PARTY",
+      "FIX_AMOUNT",
+      "FIX_ROLE",
+      "OTHER",
     ].includes(type);
   }
 
@@ -275,8 +280,8 @@ ${dataSummary}
       return 1.0;
     }
 
-    const errorCount = issues.filter(i => i.severity === 'ERROR').length;
-    const warningCount = issues.filter(i => i.severity === 'WARNING').length;
+    const errorCount = issues.filter((i) => i.severity === "ERROR").length;
+    const warningCount = issues.filter((i) => i.severity === "WARNING").length;
 
     // AI审查的权重更严格：ERROR=4, WARNING=2
     const penalty = errorCount * 4 + warningCount * 2;

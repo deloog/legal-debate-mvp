@@ -35,20 +35,20 @@ class MockRequest {
   public method: string;
   public headers: Map<string, string>;
   public body: any;
-  public cache: string = 'default';
-  public credentials: string = 'same-origin';
-  public destination: string = '';
-  public integrity: string = '';
+  public cache: string = "default";
+  public credentials: string = "same-origin";
+  public destination: string = "";
+  public integrity: string = "";
   public keepalive: boolean = false;
-  public mode: string = 'cors';
-  public redirect: string = 'follow';
-  public referrer: string = '';
-  public referrerPolicy: string = '';
+  public mode: string = "cors";
+  public redirect: string = "follow";
+  public referrer: string = "";
+  public referrerPolicy: string = "";
   public signal: AbortSignal = new AbortController().signal;
 
   constructor(url: string | RequestInfo, init: MockRequestInit = {}) {
-    this.url = typeof url === 'string' ? url : url.toString();
-    this.method = init.method || 'GET';
+    this.url = typeof url === "string" ? url : url.toString();
+    this.method = init.method || "GET";
     this.headers = new Map();
     this.body = init.body;
 
@@ -60,11 +60,13 @@ class MockRequest {
   }
 
   async json(): Promise<any> {
-    return typeof this.body === 'string' ? JSON.parse(this.body) : this.body;
+    return typeof this.body === "string" ? JSON.parse(this.body) : this.body;
   }
 
   async text(): Promise<string> {
-    return typeof this.body === 'string' ? this.body : JSON.stringify(this.body);
+    return typeof this.body === "string"
+      ? this.body
+      : JSON.stringify(this.body);
   }
 
   clone(): MockRequest {
@@ -83,10 +85,10 @@ class MockResponse {
   public headers: Map<string, string>;
   public ok: boolean;
   public redirected: boolean = false;
-  public statusText: string = '';
+  public statusText: string = "";
   public trailer: Promise<Record<string, string>> = Promise.resolve({});
-  public type: string = 'default';
-  public url: string = '';
+  public type: string = "default";
+  public url: string = "";
 
   constructor(body: any = null, init: MockResponseInit = {}) {
     this.body = body;
@@ -105,7 +107,7 @@ class MockResponse {
     return new MockResponse(JSON.stringify(data), {
       ...init,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...init.headers,
       },
     });
@@ -123,11 +125,13 @@ class MockResponse {
   }
 
   async json(): Promise<any> {
-    return typeof this.body === 'string' ? JSON.parse(this.body) : this.body;
+    return typeof this.body === "string" ? JSON.parse(this.body) : this.body;
   }
 
   async text(): Promise<string> {
-    return typeof this.body === 'string' ? this.body : JSON.stringify(this.body);
+    return typeof this.body === "string"
+      ? this.body
+      : JSON.stringify(this.body);
   }
 
   get header(): MockHeadersData {
@@ -201,7 +205,7 @@ class MockHeaders implements MockHeadersData {
   getSetCookie(): string[] {
     const cookies: string[] = [];
     this.data.forEach((value, key) => {
-      if (key.toLowerCase() === 'set-cookie') {
+      if (key.toLowerCase() === "set-cookie") {
         cookies.push(value);
       }
     });
@@ -235,12 +239,12 @@ class MockNextResponse extends MockResponse {
     const response = new MockResponse(null, { status: 200 });
     return response;
   }
-  
+
   static json(data: any, init: MockResponseInit = {}): MockResponse {
     const response = new MockResponse(JSON.stringify(data), {
       ...init,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...init.headers,
       },
     });
@@ -275,29 +279,29 @@ afterEach(() => {
 });
 
 // 基本测试以确保mocks工作正常
-describe('Mock Objects', () => {
-  it('should create MockRequest correctly', () => {
-    const request = new MockRequest('http://localhost:3000/test', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
+describe("Mock Objects", () => {
+  it("should create MockRequest correctly", () => {
+    const request = new MockRequest("http://localhost:3000/test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
     });
-    
-    expect(request.url).toBe('http://localhost:3000/test');
-    expect(request.method).toBe('POST');
-    expect(request.headers.get('content-type')).toBe('application/json');
+
+    expect(request.url).toBe("http://localhost:3000/test");
+    expect(request.method).toBe("POST");
+    expect(request.headers.get("content-type")).toBe("application/json");
   });
 
-  it('should create MockResponse correctly', () => {
-    const response = new MockResponse('test data', { status: 200 });
-    
-    expect(response.body).toBe('test data');
+  it("should create MockResponse correctly", () => {
+    const response = new MockResponse("test data", { status: 200 });
+
+    expect(response.body).toBe("test data");
     expect(response.status).toBe(200);
     expect(response.ok).toBe(true);
   });
 
-  it('should create MockNextResponse.next() correctly', () => {
+  it("should create MockNextResponse.next() correctly", () => {
     const response = MockNextResponse.next();
-    
+
     expect(response.status).toBe(200);
     expect(response.ok).toBe(true);
   });
@@ -312,8 +316,4 @@ export {
   originalConsole,
 };
 
-export type {
-  MockRequestInit,
-  MockResponseInit,
-  MockHeadersData,
-};
+export type { MockRequestInit, MockResponseInit, MockHeadersData };

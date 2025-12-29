@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
-import type { PaginationMeta } from './pagination';
+import type { PaginationMeta } from "./pagination";
 
 /**
  * 成功响应接口
@@ -21,14 +21,14 @@ export interface SuccessResponse<T = any> {
  */
 export function createSuccessResponse<T>(
   data: T,
-  meta?: Omit<SuccessResponse<T>['meta'], 'timestamp' | 'version'>
+  meta?: Omit<SuccessResponse<T>["meta"], "timestamp" | "version">,
 ): NextResponse {
   const responseBody = {
     success: true as const,
     data,
     meta: {
       timestamp: new Date().toISOString(),
-      version: 'v1',
+      version: "v1",
       ...meta,
     },
   };
@@ -36,10 +36,10 @@ export function createSuccessResponse<T>(
   // 使用NextResponse.json的第二个参数显式设置headers
   const response = NextResponse.json(responseBody, {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
   });
-  
+
   return response;
 }
 
@@ -48,7 +48,7 @@ export function createSuccessResponse<T>(
  */
 export function createPaginatedResponse<T>(
   data: T[],
-  pagination: PaginationMeta
+  pagination: PaginationMeta,
 ): NextResponse {
   return createSuccessResponse(data, {
     pagination,
@@ -60,7 +60,7 @@ export function createPaginatedResponse<T>(
  */
 export function createCreatedResponse<T>(
   data: T,
-  meta?: Omit<SuccessResponse<T>['meta'], 'timestamp' | 'version'>
+  meta?: Omit<SuccessResponse<T>["meta"], "timestamp" | "version">,
 ): NextResponse {
   const response = createSuccessResponse(data, meta);
   return new NextResponse(response.body, {
@@ -73,7 +73,7 @@ export function createCreatedResponse<T>(
  * 创建无内容响应（204状态码）
  */
 export function createNoContentResponse(): NextResponse {
-  const response = new NextResponse(null, { 
+  const response = new NextResponse(null, {
     status: 204,
   });
   // 204响应不应该有Content-Type头部
@@ -85,7 +85,7 @@ export function createNoContentResponse(): NextResponse {
  */
 export function createPartialResponse<T>(
   data: T,
-  meta?: Omit<SuccessResponse<T>['meta'], 'timestamp' | 'version'>
+  meta?: Omit<SuccessResponse<T>["meta"], "timestamp" | "version">,
 ): NextResponse {
   const response = createSuccessResponse(data, meta);
   return new NextResponse(response.body, {

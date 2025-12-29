@@ -4,14 +4,14 @@ import type {
   FallbackStrategy,
   ErrorHandlingResult,
   ErrorHandlingStrategy,
-  WorkflowStep
-} from './types';
+  WorkflowStep,
+} from "./types";
 
-import type { AgentType } from '../../../types/agent';
+import type { AgentType } from "../../../types/agent";
 
-import { ErrorHandlingStrategy as EHStrategy } from './types';
+import { ErrorHandlingStrategy as EHStrategy } from "./types";
 
-import type { StepExecution } from './types';
+import type { StepExecution } from "./types";
 
 // =============================================================================
 // 错误处理器
@@ -25,7 +25,7 @@ export class ErrorHandler {
     step: WorkflowStep,
     error: Error,
     stepExecution: StepExecution,
-    fallbackStrategy?: FallbackStrategy
+    fallbackStrategy?: FallbackStrategy,
   ): Promise<ErrorHandlingResult> {
     // 如果步骤不是必须的，可以选择跳过
     if (!step.required) {
@@ -34,7 +34,7 @@ export class ErrorHandler {
           handled: true,
           strategy: EHStrategy.CONTINUE,
           shouldRetry: false,
-          message: '非必须步骤，跳过执行'
+          message: "非必须步骤，跳过执行",
         };
       }
     }
@@ -45,22 +45,22 @@ export class ErrorHandler {
         handled: false,
         strategy: EHStrategy.ABORT,
         shouldRetry: false,
-        message: '没有配置回退策略，中止执行'
+        message: "没有配置回退策略，中止执行",
       };
     }
 
     // 根据策略类型处理
     switch (fallbackStrategy.type) {
-      case 'retry':
+      case "retry":
         return this.handleRetry(stepExecution, error, fallbackStrategy);
 
-      case 'alternate':
+      case "alternate":
         return this.handleAlternate(step, error, fallbackStrategy);
 
-      case 'skip':
+      case "skip":
         return this.handleSkip(step, error, fallbackStrategy);
 
-      case 'abort':
+      case "abort":
         return this.handleAbort(step, error, fallbackStrategy);
 
       default:
@@ -68,7 +68,7 @@ export class ErrorHandler {
           handled: false,
           strategy: EHStrategy.ABORT,
           shouldRetry: false,
-          message: `未知的回退策略类型: ${fallbackStrategy.type}`
+          message: `未知的回退策略类型: ${fallbackStrategy.type}`,
         };
     }
   }
@@ -79,7 +79,7 @@ export class ErrorHandler {
   private handleRetry(
     stepExecution: StepExecution,
     error: Error,
-    strategy: FallbackStrategy
+    strategy: FallbackStrategy,
   ): ErrorHandlingResult {
     const maxAttempts = strategy.maxAttempts || 3;
     const currentAttempt = stepExecution.retryCount;
@@ -89,8 +89,9 @@ export class ErrorHandler {
         handled: true,
         strategy: EHStrategy.RETRY,
         shouldRetry: true,
-        message: `执行失败，将在${strategy.retryDelay || 1000}ms后重试` +
-                 ` (${currentAttempt + 1}/${maxAttempts})`
+        message:
+          `执行失败，将在${strategy.retryDelay || 1000}ms后重试` +
+          ` (${currentAttempt + 1}/${maxAttempts})`,
       };
     }
 
@@ -98,7 +99,7 @@ export class ErrorHandler {
       handled: false,
       strategy: EHStrategy.ABORT,
       shouldRetry: false,
-      message: `已达到最大重试次数(${maxAttempts})，中止执行`
+      message: `已达到最大重试次数(${maxAttempts})，中止执行`,
     };
   }
 
@@ -108,7 +109,7 @@ export class ErrorHandler {
   private handleAlternate(
     step: WorkflowStep,
     error: Error,
-    strategy: FallbackStrategy
+    strategy: FallbackStrategy,
   ): ErrorHandlingResult {
     // 检查是否需要替代步骤或替代Agent
     if (strategy.alternateStepId) {
@@ -117,7 +118,7 @@ export class ErrorHandler {
         strategy: EHStrategy.FALLBACK,
         shouldRetry: false,
         fallbackStepId: strategy.alternateStepId,
-        message: `执行失败，使用替代步骤: ${strategy.alternateStepId}`
+        message: `执行失败，使用替代步骤: ${strategy.alternateStepId}`,
       };
     }
 
@@ -128,7 +129,7 @@ export class ErrorHandler {
         handled: true,
         strategy: EHStrategy.FALLBACK,
         shouldRetry: false,
-        message: `执行失败，使用替代Agent: ${strategy.alternateAgentType}`
+        message: `执行失败，使用替代Agent: ${strategy.alternateAgentType}`,
       };
     }
 
@@ -136,7 +137,7 @@ export class ErrorHandler {
       handled: false,
       strategy: EHStrategy.ABORT,
       shouldRetry: false,
-      message: 'alternate回退策略需要指定alternateStepId或alternateAgentType'
+      message: "alternate回退策略需要指定alternateStepId或alternateAgentType",
     };
   }
 
@@ -146,14 +147,14 @@ export class ErrorHandler {
   private handleSkip(
     step: WorkflowStep,
     error: Error,
-    strategy: FallbackStrategy
+    strategy: FallbackStrategy,
   ): ErrorHandlingResult {
     if (strategy.allowSkip) {
       return {
         handled: true,
         strategy: EHStrategy.CONTINUE,
         shouldRetry: false,
-        message: '跳过当前步骤，继续执行'
+        message: "跳过当前步骤，继续执行",
       };
     }
 
@@ -161,7 +162,7 @@ export class ErrorHandler {
       handled: false,
       strategy: EHStrategy.ABORT,
       shouldRetry: false,
-      message: '不允许跳过步骤，中止执行'
+      message: "不允许跳过步骤，中止执行",
     };
   }
 
@@ -171,13 +172,13 @@ export class ErrorHandler {
   private handleAbort(
     step: WorkflowStep,
     error: Error,
-    strategy: FallbackStrategy
+    strategy: FallbackStrategy,
   ): ErrorHandlingResult {
     return {
       handled: false,
       strategy: EHStrategy.ABORT,
       shouldRetry: false,
-      message: strategy.description || '执行失败，中止工作流'
+      message: strategy.description || "执行失败，中止工作流",
     };
   }
 
@@ -192,11 +193,11 @@ export class ErrorHandler {
       /ETIMEDOUT/i,
       /EAI_AGAIN/i,
       /rate.?limit/i,
-      /5\d{2}/ // 5xx错误
+      /5\d{2}/, // 5xx错误
     ];
 
-    const errorMessage = error.message || '';
-    return retryablePatterns.some(pattern => pattern.test(errorMessage));
+    const errorMessage = error.message || "";
+    return retryablePatterns.some((pattern) => pattern.test(errorMessage));
   }
 
   /**
@@ -209,17 +210,17 @@ export class ErrorHandler {
       /authorization/i,
       /invalid.?config/i,
       /missing.?required/i,
-      /4\d{2}/ // 4xx错误（除404外）
+      /4\d{2}/, // 4xx错误（除404外）
     ];
 
-    const errorMessage = error.message || '';
-    
+    const errorMessage = error.message || "";
+
     // 404错误通常不应该中止工作流
     if (/404/.test(errorMessage)) {
       return false;
     }
 
-    return abortPatterns.some(pattern => pattern.test(errorMessage));
+    return abortPatterns.some((pattern) => pattern.test(errorMessage));
   }
 }
 
@@ -229,8 +230,8 @@ export class ErrorHandler {
 
 export class FallbackStrategyBuilder {
   private strategy: Partial<FallbackStrategy> = {
-    type: 'abort',
-    allowSkip: false
+    type: "abort",
+    allowSkip: false,
   };
 
   /**
@@ -245,7 +246,7 @@ export class FallbackStrategyBuilder {
    * 设置为重试策略
    */
   public retry(maxAttempts: number, retryDelay: number): this {
-    this.strategy.type = 'retry';
+    this.strategy.type = "retry";
     this.strategy.maxAttempts = maxAttempts;
     this.strategy.retryDelay = retryDelay;
     return this;
@@ -254,8 +255,11 @@ export class FallbackStrategyBuilder {
   /**
    * 设置为替代策略
    */
-  public alternate(alternateStepId?: string, alternateAgentType?: AgentType): this {
-    this.strategy.type = 'alternate';
+  public alternate(
+    alternateStepId?: string,
+    alternateAgentType?: AgentType,
+  ): this {
+    this.strategy.type = "alternate";
     this.strategy.alternateStepId = alternateStepId;
     this.strategy.alternateAgentType = alternateAgentType;
     return this;
@@ -265,7 +269,7 @@ export class FallbackStrategyBuilder {
    * 设置为跳过策略
    */
   public skip(): this {
-    this.strategy.type = 'skip';
+    this.strategy.type = "skip";
     this.strategy.allowSkip = true;
     return this;
   }
@@ -274,7 +278,7 @@ export class FallbackStrategyBuilder {
    * 设置为中止策略
    */
   public abort(): this {
-    this.strategy.type = 'abort';
+    this.strategy.type = "abort";
     this.strategy.allowSkip = false;
     return this;
   }
@@ -292,7 +296,7 @@ export class FallbackStrategyBuilder {
    */
   public build(): FallbackStrategy {
     if (!this.strategy.strategyId) {
-      throw new Error('回退策略必须设置strategyId');
+      throw new Error("回退策略必须设置strategyId");
     }
 
     return this.strategy as FallbackStrategy;
@@ -303,8 +307,8 @@ export class FallbackStrategyBuilder {
    */
   public reset(): void {
     this.strategy = {
-      type: 'abort',
-      allowSkip: false
+      type: "abort",
+      allowSkip: false,
     };
   }
 }

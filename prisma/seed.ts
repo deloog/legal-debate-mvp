@@ -143,8 +143,8 @@ async function main() {
     where: {
       provider_providerAccountId: {
         provider: "google",
-        providerAccountId: "123456789"
-      }
+        providerAccountId: "123456789",
+      },
     },
     update: {
       access_token: "sample_access_token",
@@ -170,7 +170,9 @@ async function main() {
 
   // 创建会话示例
   await prisma.session.upsert({
-    where: { sessionToken: "sample_session_token_" + Math.random().toString(36) },
+    where: {
+      sessionToken: "sample_session_token_" + Math.random().toString(36),
+    },
     update: {},
     create: {
       userId: testUser.id,

@@ -10,9 +10,11 @@ declare global {
 }
 
 // Extend Jest mock types to accept any parameter
-declare module 'jest' {
-  function fn<T extends any[] = any[], R = any>(implementation?: (...args: any) => any): any;
-  
+declare module "jest" {
+  function fn<T extends any[] = any[], R = any>(
+    implementation?: (...args: any) => any,
+  ): any;
+
   interface Mock<T extends any[], R> {
     (...args: any): any;
     mockResolvedValue(value: any): any;
@@ -31,5 +33,7 @@ declare global {
 global.jest.fn = (implementation?: any) => ({
   mockResolvedValue: (value: any) => ({ __mockResolvedValue: value }),
   mockRejectedValue: (value: any) => ({ __mockRejectedValue: value }),
-  mockImplementation: (implementation: any) => ({ __mockImplementation: implementation })
+  mockImplementation: (implementation: any) => ({
+    __mockImplementation: implementation,
+  }),
 });

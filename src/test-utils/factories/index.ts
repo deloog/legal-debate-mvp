@@ -248,7 +248,7 @@ export const createLegalReference = (
   articleNumber: "第四十四条",
   retrievalQuery: "加班费计算标准",
   relevanceScore: 0.95,
-  status: 'ACTIVE' as any,
+  status: "ACTIVE" as any,
   analysisResult: {},
   amendmentHistory: [],
   analyzedAt: new Date(),

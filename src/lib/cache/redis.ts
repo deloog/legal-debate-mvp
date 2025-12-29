@@ -32,7 +32,7 @@ const defaultRedisConfig: RedisConfig = {
 // 全局变量，用于存储Redis客户端实例
 declare global {
   // 允许在开发热重载时保持单一实例
-  // eslint-disable-next-line no-var
+
   var __redis: Redis | undefined;
 }
 

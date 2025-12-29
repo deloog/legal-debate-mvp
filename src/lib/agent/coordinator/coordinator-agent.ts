@@ -1,28 +1,31 @@
 // Coordinator Agent - 工作流编排Agent
 
-import type { Agent, AgentContext, AgentResult, AgentMetadata } from '../../../types/agent';
-
-import { AgentType } from '../../../types/agent';
-
 import type {
-  WorkflowDefinition,
-  WorkflowExecutionResult
-} from './types';
+  Agent,
+  AgentContext,
+  AgentResult,
+  AgentMetadata,
+} from "../../../types/agent";
 
-import { WorkflowExecutor } from './workflow-executor';
-import { ErrorHandler } from './error-handler';
-import { circuitBreakerManager } from './circuit-breaker';
-import type { CircuitBreakerConfig } from './types';
+import { AgentType } from "../../../types/agent";
+
+import type { WorkflowDefinition, WorkflowExecutionResult } from "./types";
+
+import { WorkflowExecutor } from "./workflow-executor";
+import { ErrorHandler } from "./error-handler";
+import { circuitBreakerManager } from "./circuit-breaker";
+import type { CircuitBreakerConfig } from "./types";
 
 // =============================================================================
 // Coordinator Agent
 // =============================================================================
 
 export class CoordinatorAgent implements Agent {
-  readonly name: string = 'coordinator';
+  readonly name: string = "coordinator";
   readonly type: AgentType = AgentType.COORDINATOR;
-  readonly version: string = '1.0.0';
-  readonly description: string = 'Agent工作流编排器，支持串行和并行执行、动态路由、容错和回退';
+  readonly version: string = "1.0.0";
+  readonly description: string =
+    "Agent工作流编排器，支持串行和并行执行、动态路由、容错和回退";
 
   private errorHandler: ErrorHandler;
 
@@ -35,7 +38,7 @@ export class CoordinatorAgent implements Agent {
    */
   public async initialize(): Promise<void> {
     // CoordinatorAgent初始化逻辑
-    console.log('Coordinator Agent initialized');
+    console.log("Coordinator Agent initialized");
   }
 
   /**
@@ -44,7 +47,7 @@ export class CoordinatorAgent implements Agent {
   public async cleanup(): Promise<void> {
     // 清理熔断器状态
     circuitBreakerManager.clear();
-    console.log('Coordinator Agent cleaned up');
+    console.log("Coordinator Agent cleaned up");
   }
 
   /**
@@ -69,17 +72,18 @@ export class CoordinatorAgent implements Agent {
       // 检查是否启用熔断器
       if (workflowDefinition.enableCircuitBreaker) {
         const circuitBreakerKey = `workflow_${workflowDefinition.workflowId}`;
-        const circuitBreaker = circuitBreakerManager.getOrCreate(circuitBreakerKey);
+        const circuitBreaker =
+          circuitBreakerManager.getOrCreate(circuitBreakerKey);
 
         if (!circuitBreaker.canExecute()) {
-          throw new Error('工作流熔断器已打开，拒绝执行');
+          throw new Error("工作流熔断器已打开，拒绝执行");
         }
       }
 
       // 执行工作流
       const workflowResult = await this.executeWorkflowWithRetry(
         executor,
-        workflowDefinition
+        workflowDefinition,
       );
 
       // 检查是否启用熔断器并记录结果
@@ -87,7 +91,7 @@ export class CoordinatorAgent implements Agent {
         const circuitBreakerKey = `workflow_${workflowDefinition.workflowId}`;
         const circuitBreaker = circuitBreakerManager.get(circuitBreakerKey);
 
-        if (workflowResult.status === 'completed') {
+        if (workflowResult.status === "completed") {
           circuitBreaker?.recordSuccess();
         } else {
           circuitBreaker?.recordFailure();
@@ -96,7 +100,7 @@ export class CoordinatorAgent implements Agent {
 
       // 返回Agent结果
       return {
-        success: workflowResult.status === 'completed',
+        success: workflowResult.status === "completed",
         agentName: this.name,
         executionTime: Date.now() - startTime,
         data: {
@@ -105,7 +109,7 @@ export class CoordinatorAgent implements Agent {
           stepResults: workflowResult.stepResults,
           outputData: workflowResult.outputData,
           stats: workflowResult.stats,
-          errors: workflowResult.errors
+          errors: workflowResult.errors,
         },
         context: {
           inputSummary: this.summarizeInput(context),
@@ -113,9 +117,9 @@ export class CoordinatorAgent implements Agent {
             `验证工作流定义`,
             `初始化执行器`,
             `执行工作流（${workflowDefinition.executionMode}模式）`,
-            `收集执行结果`
-          ]
-        }
+            `收集执行结果`,
+          ],
+        },
       };
     } catch (error) {
       return {
@@ -123,13 +127,13 @@ export class CoordinatorAgent implements Agent {
         agentName: this.name,
         executionTime: Date.now() - startTime,
         error: {
-          code: 'WORKFLOW_EXECUTION_ERROR',
+          code: "WORKFLOW_EXECUTION_ERROR",
           message: (error as Error).message,
-          type: 'execution_error' as any,
+          type: "execution_error" as any,
           agentName: this.name,
           timestamp: Date.now(),
-          retryable: this.errorHandler.isRetryableError(error as Error)
-        }
+          retryable: this.errorHandler.isRetryableError(error as Error),
+        },
       };
     }
   }
@@ -137,24 +141,26 @@ export class CoordinatorAgent implements Agent {
   /**
    * 提取工作流定义
    */
-  private extractWorkflowDefinition(data: Record<string, any>): WorkflowDefinition {
+  private extractWorkflowDefinition(
+    data: Record<string, any>,
+  ): WorkflowDefinition {
     if (!data.workflowDefinition) {
-      throw new Error('输入数据中缺少workflowDefinition');
+      throw new Error("输入数据中缺少workflowDefinition");
     }
 
     const workflow = data.workflowDefinition;
 
     // 简单验证必填字段
     if (!workflow.workflowId) {
-      throw new Error('workflowDefinition缺少workflowId');
+      throw new Error("workflowDefinition缺少workflowId");
     }
 
     if (!workflow.name) {
-      throw new Error('workflowDefinition缺少name');
+      throw new Error("workflowDefinition缺少name");
     }
 
     if (!workflow.steps || workflow.steps.length === 0) {
-      throw new Error('workflowDefinition缺少steps或steps为空');
+      throw new Error("workflowDefinition缺少steps或steps为空");
     }
 
     return workflow;
@@ -165,25 +171,25 @@ export class CoordinatorAgent implements Agent {
    */
   private validateWorkflow(workflow: WorkflowDefinition): void {
     // 验证工作流ID
-    if (!workflow.workflowId || workflow.workflowId.trim() === '') {
-      throw new Error('workflowId不能为空');
+    if (!workflow.workflowId || workflow.workflowId.trim() === "") {
+      throw new Error("workflowId不能为空");
     }
 
     // 验证名称
-    if (!workflow.name || workflow.name.trim() === '') {
-      throw new Error('name不能为空');
+    if (!workflow.name || workflow.name.trim() === "") {
+      throw new Error("name不能为空");
     }
 
     // 验证步骤
     if (!workflow.steps || workflow.steps.length === 0) {
-      throw new Error('steps不能为空');
+      throw new Error("steps不能为空");
     }
 
     // 验证步骤ID唯一性
     const stepIds = new Set<string>();
     for (const step of workflow.steps) {
       if (!step.stepId) {
-        throw new Error('步骤缺少stepId');
+        throw new Error("步骤缺少stepId");
       }
 
       if (stepIds.has(step.stepId)) {
@@ -202,7 +208,7 @@ export class CoordinatorAgent implements Agent {
     }
 
     // 验证执行模式
-    const validModes = ['sequential', 'parallel', 'mixed'];
+    const validModes = ["sequential", "parallel", "mixed"];
     if (!validModes.includes(workflow.executionMode)) {
       throw new Error(`不支持的执行模式: ${workflow.executionMode}`);
     }
@@ -213,11 +219,11 @@ export class CoordinatorAgent implements Agent {
    */
   private async executeWorkflowWithRetry(
     executor: WorkflowExecutor,
-    workflow: WorkflowDefinition
+    workflow: WorkflowDefinition,
   ): Promise<WorkflowExecutionResult> {
     const fallbackStrategy = workflow.fallbackStrategy;
 
-    if (!fallbackStrategy || fallbackStrategy.type !== 'retry') {
+    if (!fallbackStrategy || fallbackStrategy.type !== "retry") {
       return executor.execute();
     }
 
@@ -248,7 +254,7 @@ export class CoordinatorAgent implements Agent {
     }
 
     // 所有重试都失败，抛出最后一个错误
-    throw lastError || new Error('工作流执行失败');
+    throw lastError || new Error("工作流执行失败");
   }
 
   /**
@@ -274,22 +280,22 @@ export class CoordinatorAgent implements Agent {
       version: this.version,
       description: this.description,
       capabilities: [
-        'workflow_orchestration',
-        'sequential_execution',
-        'parallel_execution',
-        'dynamic_routing',
-        'error_handling',
-        'circuit_breaker',
-        'retry_mechanism'
+        "workflow_orchestration",
+        "sequential_execution",
+        "parallel_execution",
+        "dynamic_routing",
+        "error_handling",
+        "circuit_breaker",
+        "retry_mechanism",
       ],
       supportedTasks: [
-        'execute_workflow',
-        'validate_workflow',
-        'monitor_workflow'
+        "execute_workflow",
+        "validate_workflow",
+        "monitor_workflow",
       ],
-      status: 'idle' as any,
+      status: "idle" as any,
       averageExecutionTime: 1000,
-      successRate: 0.95
+      successRate: 0.95,
     };
   }
 
@@ -298,14 +304,14 @@ export class CoordinatorAgent implements Agent {
    */
   private summarizeInput(context: AgentContext): string {
     const keys = Object.keys(context.data);
-    return `输入字段: ${keys.join(', ')}`;
+    return `输入字段: ${keys.join(", ")}`;
   }
 
   /**
    * 睡眠指定毫秒
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -313,7 +319,7 @@ export class CoordinatorAgent implements Agent {
    */
   public configureCircuitBreaker(
     key: string,
-    config: CircuitBreakerConfig
+    config: CircuitBreakerConfig,
   ): void {
     const breaker = circuitBreakerManager.getOrCreate(key, config);
     breaker.updateConfig(config);

@@ -361,8 +361,10 @@ export class AIService {
   }
 
   public isProviderAvailable(provider: AIProvider): boolean {
-    return this.requestExecutor.isProviderAvailable(provider) &&
-           this.loadBalancer.isHealthy(provider);
+    return (
+      this.requestExecutor.isProviderAvailable(provider) &&
+      this.loadBalancer.isHealthy(provider)
+    );
   }
 
   public getProviderStats(): any {

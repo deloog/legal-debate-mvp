@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import { PrismaClient, LawType, LawCategory, LawStatus } from '@prisma/client';
+import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
+import { PrismaClient, LawType, LawCategory, LawStatus } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-describe('LawArticle索引性能测试', () => {
+describe("LawArticle索引性能测试", () => {
   const TOTAL_ARTICLES = 1000;
   const testArticleIds: string[] = [];
 
@@ -12,8 +12,16 @@ describe('LawArticle索引性能测试', () => {
     await prisma.lawArticle.deleteMany({});
 
     // 准备测试数据
-    const lawTypes = [LawType.LAW, LawType.ADMINISTRATIVE_REGULATION, LawType.JUDICIAL_INTERPRETATION];
-    const categories = [LawCategory.CIVIL, LawCategory.CRIMINAL, LawCategory.ADMINISTRATIVE];
+    const lawTypes = [
+      LawType.LAW,
+      LawType.ADMINISTRATIVE_REGULATION,
+      LawType.JUDICIAL_INTERPRETATION,
+    ];
+    const categories = [
+      LawCategory.CIVIL,
+      LawCategory.CRIMINAL,
+      LawCategory.ADMINISTRATIVE,
+    ];
     const statuses = [LawStatus.VALID, LawStatus.AMENDED, LawStatus.EXPIRED];
 
     // 批量创建测试数据
@@ -28,31 +36,35 @@ describe('LawArticle索引性能测试', () => {
           fullText: `这是第${index}条法条的完整内容，用于测试索引性能。`,
           lawType: lawTypes[index % lawTypes.length],
           category: categories[index % categories.length],
-          subCategory: index % 10 === 0 ? `子分类_${Math.floor(index / 10)}` : null,
-          tags: index % 5 === 0 ? [`标签_${index % 10}`, `标签_${(index + 1) % 10}`] : [],
+          subCategory:
+            index % 10 === 0 ? `子分类_${Math.floor(index / 10)}` : null,
+          tags:
+            index % 5 === 0
+              ? [`标签_${index % 10}`, `标签_${(index + 1) % 10}`]
+              : [],
           keywords: index % 3 === 0 ? [`关键词_${index % 20}`] : [],
           version: `${Math.floor(index / 100) + 1}.0`,
           effectiveDate: new Date(2020 + (index % 5), index % 12, 1),
           status: statuses[index % statuses.length],
-          issuingAuthority: '测试机构',
+          issuingAuthority: "测试机构",
           searchableText: `法条${index}内容用于测试搜索性能`,
           level: index % 3,
         });
       }
 
       const created = await prisma.lawArticle.createMany({ data: articles });
-      
+
       // 获取创建的ID用于后续测试
       const createdArticles = await prisma.lawArticle.findMany({
         where: {
           articleNumber: {
-            in: articles.slice(0, created.count).map(a => a.articleNumber),
+            in: articles.slice(0, created.count).map((a) => a.articleNumber),
           },
         },
         select: { id: true },
-        orderBy: { articleNumber: 'asc' },
+        orderBy: { articleNumber: "asc" },
       });
-      testArticleIds.push(...createdArticles.map(a => a.id));
+      testArticleIds.push(...createdArticles.map((a) => a.id));
     }
 
     console.log(`已创建 ${TOTAL_ARTICLES} 条测试数据`);
@@ -64,8 +76,8 @@ describe('LawArticle索引性能测试', () => {
     await prisma.$disconnect();
   });
 
-  describe('基础索引测试', () => {
-    it('应该通过lawType索引快速查询', async () => {
+  describe("基础索引测试", () => {
+    it("应该通过lawType索引快速查询", async () => {
       const startTime = Date.now();
       const results = await prisma.lawArticle.findMany({
         where: { lawType: LawType.LAW },
@@ -75,10 +87,12 @@ describe('LawArticle索引性能测试', () => {
 
       expect(results.length).toBeGreaterThan(0);
       expect(duration).toBeLessThan(100); // 查询应在100ms内完成
-      console.log(`lawType索引查询耗时: ${duration}ms, 返回${results.length}条记录`);
+      console.log(
+        `lawType索引查询耗时: ${duration}ms, 返回${results.length}条记录`,
+      );
     });
 
-    it('应该通过category索引快速查询', async () => {
+    it("应该通过category索引快速查询", async () => {
       const startTime = Date.now();
       const results = await prisma.lawArticle.findMany({
         where: { category: LawCategory.CIVIL },
@@ -88,10 +102,12 @@ describe('LawArticle索引性能测试', () => {
 
       expect(results.length).toBeGreaterThan(0);
       expect(duration).toBeLessThan(100);
-      console.log(`category索引查询耗时: ${duration}ms, 返回${results.length}条记录`);
+      console.log(
+        `category索引查询耗时: ${duration}ms, 返回${results.length}条记录`,
+      );
     });
 
-    it('应该通过status索引快速查询', async () => {
+    it("应该通过status索引快速查询", async () => {
       const startTime = Date.now();
       const results = await prisma.lawArticle.findMany({
         where: { status: LawStatus.VALID },
@@ -101,12 +117,14 @@ describe('LawArticle索引性能测试', () => {
 
       expect(results.length).toBeGreaterThan(0);
       expect(duration).toBeLessThan(100);
-      console.log(`status索引查询耗时: ${duration}ms, 返回${results.length}条记录`);
+      console.log(
+        `status索引查询耗时: ${duration}ms, 返回${results.length}条记录`,
+      );
     });
 
-    it('应该通过effectiveDate索引快速查询', async () => {
-      const startDate = new Date('2022-01-01');
-      const endDate = new Date('2023-12-31');
+    it("应该通过effectiveDate索引快速查询", async () => {
+      const startDate = new Date("2022-01-01");
+      const endDate = new Date("2023-12-31");
 
       const startTime = Date.now();
       const results = await prisma.lawArticle.findMany({
@@ -122,12 +140,14 @@ describe('LawArticle索引性能测试', () => {
 
       expect(results.length).toBeGreaterThan(0);
       expect(duration).toBeLessThan(100);
-      console.log(`effectiveDate索引查询耗时: ${duration}ms, 返回${results.length}条记录`);
+      console.log(
+        `effectiveDate索引查询耗时: ${duration}ms, 返回${results.length}条记录`,
+      );
     });
   });
 
-  describe('复合查询性能测试', () => {
-    it('应该高效执行多条件查询', async () => {
+  describe("复合查询性能测试", () => {
+    it("应该高效执行多条件查询", async () => {
       const startTime = Date.now();
       const results = await prisma.lawArticle.findMany({
         where: {
@@ -142,14 +162,16 @@ describe('LawArticle索引性能测试', () => {
 
       expect(results.length).toBeGreaterThan(0);
       expect(duration).toBeLessThan(100);
-      console.log(`复合条件查询耗时: ${duration}ms, 返回${results.length}条记录`);
+      console.log(
+        `复合条件查询耗时: ${duration}ms, 返回${results.length}条记录`,
+      );
     });
 
-    it('应该支持带排序的查询', async () => {
+    it("应该支持带排序的查询", async () => {
       const startTime = Date.now();
       const results = await prisma.lawArticle.findMany({
         where: { category: LawCategory.CIVIL },
-        orderBy: { effectiveDate: 'desc' },
+        orderBy: { effectiveDate: "desc" },
         take: 100,
         select: { id: true, effectiveDate: true },
       });
@@ -167,22 +189,27 @@ describe('LawArticle索引性能测试', () => {
     });
   });
 
-  describe('统计查询性能测试', () => {
-    it('应该快速统计各类型法条数量', async () => {
+  describe("统计查询性能测试", () => {
+    it("应该快速统计各类型法条数量", async () => {
       const startTime = Date.now();
       const lawTypeCounts = await prisma.lawArticle.groupBy({
-        by: ['lawType'],
+        by: ["lawType"],
         _count: { id: true },
       });
       const duration = Date.now() - startTime;
 
       expect(lawTypeCounts.length).toBeGreaterThan(0);
       expect(duration).toBeLessThan(200);
-      console.log(`分组统计查询耗时: ${duration}ms, 返回${lawTypeCounts.length}个分组`);
-      console.log('各类型法条数量:', lawTypeCounts.map(g => `${g.lawType}: ${g._count.id}`));
+      console.log(
+        `分组统计查询耗时: ${duration}ms, 返回${lawTypeCounts.length}个分组`,
+      );
+      console.log(
+        "各类型法条数量:",
+        lawTypeCounts.map((g) => `${g.lawType}: ${g._count.id}`),
+      );
     });
 
-    it('应该快速计算总数', async () => {
+    it("应该快速计算总数", async () => {
       const startTime = Date.now();
       const totalCount = await prisma.lawArticle.count();
       const duration = Date.now() - startTime;
@@ -192,7 +219,7 @@ describe('LawArticle索引性能测试', () => {
       console.log(`总数查询耗时: ${duration}ms, 总数: ${totalCount}`);
     });
 
-    it('应该快速计算条件过滤后的数量', async () => {
+    it("应该快速计算条件过滤后的数量", async () => {
       const startTime = Date.now();
       const filteredCount = await prisma.lawArticle.count({
         where: {
@@ -208,9 +235,9 @@ describe('LawArticle索引性能测试', () => {
     });
   });
 
-  describe('搜索性能测试', () => {
-    it('应该通过articleNumber索引快速查找', async () => {
-      const targetNumber = '第100条';
+  describe("搜索性能测试", () => {
+    it("应该通过articleNumber索引快速查找", async () => {
+      const targetNumber = "第100条";
       const startTime = Date.now();
       const result = await prisma.lawArticle.findFirst({
         where: { articleNumber: targetNumber },
@@ -224,8 +251,8 @@ describe('LawArticle索引性能测试', () => {
       console.log(`articleNumber精确查询耗时: ${duration}ms`);
     });
 
-    it('应该通过lawName索引快速查询', async () => {
-      const targetLawName = '测试法律_0';
+    it("应该通过lawName索引快速查询", async () => {
+      const targetLawName = "测试法律_0";
       const startTime = Date.now();
       const results = await prisma.lawArticle.findMany({
         where: { lawName: targetLawName },
@@ -237,11 +264,13 @@ describe('LawArticle索引性能测试', () => {
       expect(results.length).toBeGreaterThan(0);
       expect(results[0].lawName).toBe(targetLawName);
       expect(duration).toBeLessThan(100);
-      console.log(`lawName查询耗时: ${duration}ms, 返回${results.length}条记录`);
+      console.log(
+        `lawName查询耗时: ${duration}ms, 返回${results.length}条记录`,
+      );
     });
 
-    it('应该通过tags索引快速筛选', async () => {
-      const targetTag = '标签_0';
+    it("应该通过tags索引快速筛选", async () => {
+      const targetTag = "标签_0";
       const startTime = Date.now();
       const results = await prisma.lawArticle.findMany({
         where: { tags: { has: targetTag } },
@@ -253,12 +282,14 @@ describe('LawArticle索引性能测试', () => {
       expect(results.length).toBeGreaterThan(0);
       expect(results[0].tags).toContain(targetTag);
       expect(duration).toBeLessThan(100);
-      console.log(`tags数组查询耗时: ${duration}ms, 返回${results.length}条记录`);
+      console.log(
+        `tags数组查询耗时: ${duration}ms, 返回${results.length}条记录`,
+      );
     });
   });
 
-  describe('分页查询性能测试', () => {
-    it('应该高效执行分页查询', async () => {
+  describe("分页查询性能测试", () => {
+    it("应该高效执行分页查询", async () => {
       const pageSize = 50;
       const page = 5;
       const skip = (page - 1) * pageSize;
@@ -268,17 +299,19 @@ describe('LawArticle索引性能测试', () => {
         where: { category: LawCategory.CIVIL },
         skip,
         take: pageSize,
-        orderBy: { createdAt: 'asc' },
+        orderBy: { createdAt: "asc" },
         select: { id: true, createdAt: true },
       });
       const duration = Date.now() - startTime;
 
       expect(results.length).toBeLessThanOrEqual(pageSize);
       expect(duration).toBeLessThan(100);
-      console.log(`分页查询耗时: ${duration}ms, 第${page}页, 返回${results.length}条记录`);
+      console.log(
+        `分页查询耗时: ${duration}ms, 第${page}页, 返回${results.length}条记录`,
+      );
     });
 
-    it('应该高效执行游标分页查询', async () => {
+    it("应该高效执行游标分页查询", async () => {
       const pageSize = 50;
       const cursorId = testArticleIds[99]; // 使用第100条记录的ID作为游标
 
@@ -293,12 +326,14 @@ describe('LawArticle索引性能测试', () => {
 
       expect(results.length).toBeLessThanOrEqual(pageSize);
       expect(duration).toBeLessThan(100);
-      console.log(`游标分页查询耗时: ${duration}ms, 返回${results.length}条记录`);
+      console.log(
+        `游标分页查询耗时: ${duration}ms, 返回${results.length}条记录`,
+      );
     });
   });
 
-  describe('更新和删除性能测试', () => {
-    it('应该通过索引快速更新单条记录', async () => {
+  describe("更新和删除性能测试", () => {
+    it("应该通过索引快速更新单条记录", async () => {
       const targetId = testArticleIds[0];
       const startTime = Date.now();
       const updated = await prisma.lawArticle.update({
@@ -313,10 +348,10 @@ describe('LawArticle索引性能测试', () => {
       console.log(`单条记录更新耗时: ${duration}ms`);
     });
 
-    it('应该高效执行批量更新', async () => {
+    it("应该高效执行批量更新", async () => {
       const targetIds = testArticleIds.slice(0, 100);
       const startTime = Date.now();
-      
+
       // 分批更新避免单次事务过大
       const batchSize = 10;
       for (let i = 0; i < targetIds.length; i += batchSize) {
@@ -330,23 +365,25 @@ describe('LawArticle索引性能测试', () => {
       const duration = Date.now() - startTime;
 
       expect(duration).toBeLessThan(500); // 100条记录应在500ms内更新完成
-      console.log(`批量更新耗时: ${duration}ms, 更新了${targetIds.length}条记录`);
+      console.log(
+        `批量更新耗时: ${duration}ms, 更新了${targetIds.length}条记录`,
+      );
     });
 
-    it('应该通过索引快速删除单条记录', async () => {
+    it("应该通过索引快速删除单条记录", async () => {
       // 创建一条临时记录用于删除测试
       const tempArticle = await prisma.lawArticle.create({
         data: {
-          lawName: '临时测试法律',
-          articleNumber: '临时条',
-          fullText: '临时内容',
+          lawName: "临时测试法律",
+          articleNumber: "临时条",
+          fullText: "临时内容",
           lawType: LawType.LAW,
           category: LawCategory.CIVIL,
-          tags: ['临时'],
-          keywords: ['临时'],
+          tags: ["临时"],
+          keywords: ["临时"],
           effectiveDate: new Date(),
-          issuingAuthority: '测试机构',
-          searchableText: '临时内容',
+          issuingAuthority: "测试机构",
+          searchableText: "临时内容",
         },
       });
 

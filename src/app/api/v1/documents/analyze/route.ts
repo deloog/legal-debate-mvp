@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { DocAnalyzerAgentAdapter } from '../../../../../lib/agent/doc-analyzer/adapter';
-import { AgentContext, TaskPriority } from '../../../../../types/agent';
-import { join } from 'path';
-import { existsSync } from 'fs';
+import { NextRequest, NextResponse } from "next/server";
+import { DocAnalyzerAgentAdapter } from "../../../../../lib/agent/doc-analyzer/adapter";
+import { AgentContext, TaskPriority } from "../../../../../types/agent";
+import { join } from "path";
+import { existsSync } from "fs";
 
 // =============================================================================
 // API处理函数
@@ -12,43 +12,46 @@ export async function POST(request: NextRequest) {
   try {
     // 解析请求体
     const body = await request.json();
-    
+
     const { documentId, filePath, fileType, options } = body;
 
     // 验证必需参数
     if (!documentId || !filePath || !fileType) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          error: '缺少必需参数: documentId, filePath, fileType'
+          error: "缺少必需参数: documentId, filePath, fileType",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // 验证文件类型
-    const supportedTypes = ['PDF', 'DOCX', 'DOC', 'TXT', 'IMAGE'];
+    const supportedTypes = ["PDF", "DOCX", "DOC", "TXT", "IMAGE"];
     if (!supportedTypes.includes(fileType)) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          error: `不支持的文件类型: ${fileType}，支持的类型: ${supportedTypes.join(', ')}`
+          error: `不支持的文件类型: ${fileType}，支持的类型: ${supportedTypes.join(", ")}`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // 构建完整文件路径
-    const fullFilePath = join(process.cwd(), filePath.startsWith('/') ? filePath.substring(1) : filePath);
-    
+    const fullFilePath = join(
+      process.cwd(),
+      filePath.startsWith("/") ? filePath.substring(1) : filePath,
+    );
+
     // 检查文件是否存在
     if (!existsSync(fullFilePath)) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          error: `文件不存在: ${fullFilePath}`
+          error: `文件不存在: ${fullFilePath}`,
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -58,29 +61,29 @@ export async function POST(request: NextRequest) {
 
     // 构建Agent执行上下文
     const context: AgentContext = {
-      task: 'document_analysis',
-      taskType: 'document_parse',
+      task: "document_analysis",
+      taskType: "document_parse",
       priority: TaskPriority.MEDIUM,
       data: {
         documentId,
         filePath: fullFilePath,
-        fileType: fileType as 'PDF' | 'DOCX' | 'DOC' | 'TXT' | 'IMAGE',
+        fileType: fileType as "PDF" | "DOCX" | "DOC" | "TXT" | "IMAGE",
         options: {
           extractParties: options?.extractParties !== false,
           extractClaims: options?.extractClaims !== false,
           extractTimeline: options?.extractTimeline !== false,
-          generateSummary: options?.generateSummary === true
-        }
+          generateSummary: options?.generateSummary === true,
+        },
       },
       metadata: {
         documentId,
         fileType,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       options: {
         timeout: 60000, // 60秒超时
-        retryAttempts: 2
-      }
+        retryAttempts: 2,
+      },
     };
 
     // 执行文档分析
@@ -103,36 +106,35 @@ export async function POST(request: NextRequest) {
           metadata: {
             executionTime: result.executionTime,
             tokensUsed: result.tokensUsed,
-            confidence: result.data?.confidence || 0
-          }
-        }
+            confidence: result.data?.confidence || 0,
+          },
+        },
       });
     } else {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          error: result.error?.message || '文档分析失败',
+          error: result.error?.message || "文档分析失败",
           details: {
             documentId,
             processingTime,
-            error: result.error
-          }
+            error: result.error,
+          },
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
-
   } catch (error) {
-    console.error('文档分析API错误:', error);
+    console.error("文档分析API错误:", error);
     return NextResponse.json(
-      { 
+      {
         success: false,
-        error: `服务器内部错误: ${error instanceof Error ? error.message : '未知错误'}`,
+        error: `服务器内部错误: ${error instanceof Error ? error.message : "未知错误"}`,
         details: {
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -143,15 +145,15 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const documentId = searchParams.get('documentId');
+  const documentId = searchParams.get("documentId");
 
   if (!documentId) {
     return NextResponse.json(
-      { 
+      {
         success: false,
-        error: '缺少documentId参数'
+        error: "缺少documentId参数",
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -161,11 +163,11 @@ export async function GET(request: NextRequest) {
     success: true,
     data: {
       documentId,
-      status: 'ready',
-      message: '文档分析服务已就绪，请使用POST方法提交分析请求',
-      supportedFormats: ['PDF', 'DOCX', 'DOC', 'TXT'],
-      ocrSupported: false // 暂时不支持图片OCR
-    }
+      status: "ready",
+      message: "文档分析服务已就绪，请使用POST方法提交分析请求",
+      supportedFormats: ["PDF", "DOCX", "DOC", "TXT"],
+      ocrSupported: false, // 暂时不支持图片OCR
+    },
   });
 }
 
@@ -177,10 +179,10 @@ export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Max-Age': '86400',
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Max-Age": "86400",
     },
   });
 }

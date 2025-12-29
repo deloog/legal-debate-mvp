@@ -6,10 +6,10 @@
 export {
   DisputeFocusExtractor,
   createDisputeFocusExtractor,
-  extractDisputeFocusesFromText
-} from './core';
+  extractDisputeFocusesFromText,
+} from "./core";
 
 export type {
   DisputeFocusExtractionOptions,
-  DisputeFocusExtractionOutput
-} from './core';
+  DisputeFocusExtractionOutput,
+} from "./core";

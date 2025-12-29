@@ -7,15 +7,15 @@ import type {
   WorkflowStep,
   StepExecution,
   WorkflowStatus,
-  StepStatus
-} from './types';
+  StepStatus,
+} from "./types";
 
-import { WorkflowStatus as WFStatus } from './types';
-import { StepStatus as SStatus } from './types';
+import { WorkflowStatus as WFStatus } from "./types";
+import { StepStatus as SStatus } from "./types";
 
-import { agentRegistry } from '../registry';
-import type { Agent, AgentContext, AgentResult } from '../../../types/agent';
-import type { TaskPriority } from '../../../types/agent';
+import { agentRegistry } from "../registry";
+import type { Agent, AgentContext, AgentResult } from "../../../types/agent";
+import type { TaskPriority } from "../../../types/agent";
 
 // =============================================================================
 // 工作流执行器类
@@ -40,9 +40,9 @@ export class WorkflowExecutor {
         totalSteps: definition.steps.length,
         completedSteps: 0,
         failedSteps: 0,
-        skippedSteps: 0
+        skippedSteps: 0,
       },
-      errors: []
+      errors: [],
     };
   }
 
@@ -56,11 +56,11 @@ export class WorkflowExecutor {
       const definition = this.context.workflow;
 
       // 根据执行模式执行
-      if (definition.executionMode === 'sequential') {
+      if (definition.executionMode === "sequential") {
         await this.executeSequential();
-      } else if (definition.executionMode === 'parallel') {
+      } else if (definition.executionMode === "parallel") {
         await this.executeParallel();
-      } else if (definition.executionMode === 'mixed') {
+      } else if (definition.executionMode === "mixed") {
         await this.executeMixed();
       } else {
         throw new Error(`不支持的执行模式: ${definition.executionMode}`);
@@ -77,9 +77,9 @@ export class WorkflowExecutor {
     } catch (error) {
       this.context.status = WFStatus.FAILED;
       this.context.errors.push({
-        stepId: 'workflow',
+        stepId: "workflow",
         error: error as Error,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     } finally {
       this.context.stats.endTime = Date.now();
@@ -145,14 +145,17 @@ export class WorkflowExecutor {
       this.checkCancelled();
 
       // 并行执行当前组的所有步骤
-      const promises = group.map(step => this.executeStep(step));
+      const promises = group.map((step) => this.executeStep(step));
 
       try {
         await Promise.all(promises);
       } catch (error) {
         // 检查是否有必须步骤失败
-        const requiredFailed = group.some(step => 
-          step.required && this.context.stepResults.get(step.stepId)?.status === SStatus.FAILED
+        const requiredFailed = group.some(
+          (step) =>
+            step.required &&
+            this.context.stepResults.get(step.stepId)?.status ===
+              SStatus.FAILED,
         );
 
         if (requiredFailed) {
@@ -195,13 +198,16 @@ export class WorkflowExecutor {
         }
       } else {
         // 无依赖关系，并行执行
-        const promises = group.map(step => this.executeStep(step));
+        const promises = group.map((step) => this.executeStep(step));
 
         try {
           await Promise.all(promises);
         } catch (error) {
-          const requiredFailed = group.some(step =>
-            step.required && this.context.stepResults.get(step.stepId)?.status === SStatus.FAILED
+          const requiredFailed = group.some(
+            (step) =>
+              step.required &&
+              this.context.stepResults.get(step.stepId)?.status ===
+                SStatus.FAILED,
           );
 
           if (requiredFailed) {
@@ -230,7 +236,7 @@ export class WorkflowExecutor {
       stepId: step.stepId,
       status: SStatus.RUNNING,
       startTime: Date.now(),
-      retryCount: 0
+      retryCount: 0,
     };
 
     this.context.stepResults.set(step.stepId, stepExecution);
@@ -294,7 +300,10 @@ export class WorkflowExecutor {
       }
 
       // 如果依赖还在运行，等待完成
-      while (depResult.status === SStatus.RUNNING || depResult.status === SStatus.PENDING) {
+      while (
+        depResult.status === SStatus.RUNNING ||
+        depResult.status === SStatus.PENDING
+      ) {
         await this.sleep(100);
       }
     }
@@ -330,8 +339,8 @@ export class WorkflowExecutor {
       requestId: `workflow_${this.context.workflow.workflowId}_${step.stepId}`,
       metadata: {
         workflowId: this.context.workflow.workflowId,
-        stepId: step.stepId
-      }
+        stepId: step.stepId,
+      },
     };
   }
 
@@ -350,7 +359,7 @@ export class WorkflowExecutor {
     this.context.errors.push({
       stepId: step.stepId,
       error,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     const stepExecution = this.context.stepResults.get(step.stepId);
@@ -383,7 +392,7 @@ export class WorkflowExecutor {
 
       // 先执行依赖
       for (const depId of step.dependsOn || []) {
-        const depStep = steps.find(s => s.stepId === depId);
+        const depStep = steps.find((s) => s.stepId === depId);
         if (depStep) {
           visit(depStep);
         }
@@ -413,7 +422,7 @@ export class WorkflowExecutor {
 
     const canAddToGroup = (step: WorkflowStep): boolean => {
       const deps = step.dependsOn || [];
-      return deps.every(depId => visited.has(depId));
+      return deps.every((depId) => visited.has(depId));
     };
 
     while (visited.size < steps.length) {
@@ -426,7 +435,7 @@ export class WorkflowExecutor {
       }
 
       if (group.length === 0) {
-        throw new Error('无法解析步骤依赖关系');
+        throw new Error("无法解析步骤依赖关系");
       }
 
       groups.push(group);
@@ -455,14 +464,14 @@ export class WorkflowExecutor {
 
     // 按优先级排序并返回
     const sortedPriorities = Array.from(groupsMap.keys()).sort((a, b) => a - b);
-    return sortedPriorities.map(priority => groupsMap.get(priority)!);
+    return sortedPriorities.map((priority) => groupsMap.get(priority)!);
   }
 
   /**
    * 检查组内是否有依赖关系
    */
   private groupHasDependencies(steps: WorkflowStep[]): boolean {
-    const stepIds = new Set(steps.map(s => s.stepId));
+    const stepIds = new Set(steps.map((s) => s.stepId));
 
     for (const step of steps) {
       for (const depId of step.dependsOn || []) {
@@ -480,7 +489,7 @@ export class WorkflowExecutor {
    */
   private checkCancelled(): void {
     if (this.cancelled) {
-      throw new Error('工作流执行已取消');
+      throw new Error("工作流执行已取消");
     }
   }
 
@@ -488,19 +497,19 @@ export class WorkflowExecutor {
    * 映射优先级
    */
   private mapPriority(priority?: number): TaskPriority {
-    if (!priority) return 'medium' as TaskPriority;
+    if (!priority) return "medium" as TaskPriority;
 
-    if (priority >= 3) return 'urgent' as TaskPriority;
-    if (priority === 2) return 'high' as TaskPriority;
-    if (priority === 1) return 'medium' as TaskPriority;
-    return 'low' as TaskPriority;
+    if (priority >= 3) return "urgent" as TaskPriority;
+    if (priority === 2) return "high" as TaskPriority;
+    if (priority === 1) return "medium" as TaskPriority;
+    return "low" as TaskPriority;
   }
 
   /**
    * 睡眠指定毫秒
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -521,7 +530,8 @@ export class WorkflowExecutor {
       }
     }
 
-    const averageStepTime = completedStepCount > 0 ? totalStepTime / completedStepCount : 0;
+    const averageStepTime =
+      completedStepCount > 0 ? totalStepTime / completedStepCount : 0;
 
     // 构建输出数据
     const outputData: Record<string, any> = {};
@@ -540,15 +550,15 @@ export class WorkflowExecutor {
         failedSteps: this.context.stats.failedSteps,
         skippedSteps: this.context.stats.skippedSteps,
         totalExecutionTime: executionTime,
-        averageStepTime
+        averageStepTime,
       },
-      errors: this.context.errors.map(e => ({
+      errors: this.context.errors.map((e) => ({
         stepId: e.stepId,
-        error: e.error
+        error: e.error,
       })),
       startTime: this.context.stats.startTime,
       endTime,
-      executionTime
+      executionTime,
     };
   }
 }

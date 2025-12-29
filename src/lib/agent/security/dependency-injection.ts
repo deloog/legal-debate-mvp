@@ -1,5 +1,5 @@
-import { DocumentParser } from '../../ai/document-parser';
-import { PrecisionAmountExtractor } from '../../extraction/amount-extractor-precision';
+import { DocumentParser } from "../../ai/document-parser";
+import { PrecisionAmountExtractor } from "../../extraction/amount-extractor-precision";
 
 // =============================================================================
 // 依赖注入容器
@@ -65,44 +65,46 @@ export class ServiceContainer {
     const container = ServiceContainer.getInstance();
 
     // 注册文档解析器
-    container.register<IDocumentParser>('documentParser', () => {
+    container.register<IDocumentParser>("documentParser", () => {
       return new DocumentParser();
     });
 
     // 注册金额提取器
-    container.register<IAmountExtractor>('amountExtractor', () => {
+    container.register<IAmountExtractor>("amountExtractor", () => {
       return new PrecisionAmountExtractor();
     });
 
     // 注册配置
-    container.register('config', () => ({
+    container.register("config", () => ({
       maxConcurrentDocuments: 3,
       defaultTimeout: 30000,
-      enableDebugLogging: process.env.NODE_ENV !== 'production',
+      enableDebugLogging: process.env.NODE_ENV !== "production",
       security: {
         maxFileSize: 50 * 1024 * 1024, // 50MB
         allowedPaths: [
           process.cwd(),
-          process.cwd() + '/temp',
-          process.cwd() + '/uploads',
-          process.cwd() + '/test-data'
-        ]
-      }
+          process.cwd() + "/temp",
+          process.cwd() + "/uploads",
+          process.cwd() + "/test-data",
+        ],
+      },
     }));
   }
 }
 
 // 便捷的服务访问函数
 export function getDocumentParser(): IDocumentParser {
-  return ServiceContainer.getInstance().get<IDocumentParser>('documentParser');
+  return ServiceContainer.getInstance().get<IDocumentParser>("documentParser");
 }
 
 export function getAmountExtractor(): IAmountExtractor {
-  return ServiceContainer.getInstance().get<IAmountExtractor>('amountExtractor');
+  return ServiceContainer.getInstance().get<IAmountExtractor>(
+    "amountExtractor",
+  );
 }
 
 export function getConfig(): any {
-  return ServiceContainer.getInstance().get('config');
+  return ServiceContainer.getInstance().get("config");
 }
 
 // 初始化默认服务

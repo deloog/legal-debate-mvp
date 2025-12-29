@@ -48,7 +48,7 @@ describe("Connection Pool Tests", () => {
       expect(stats?.idleConnections).toBe(5);
       expect(stats?.maxConnections).toBe(connectionPoolConfig.maxConnections);
       expect(stats?.connectionUtilization).toBe(
-        10 / connectionPoolConfig.maxConnections
+        10 / connectionPoolConfig.maxConnections,
       );
     });
 
@@ -86,10 +86,7 @@ describe("Connection Pool Tests", () => {
       const isHealthy = await checkPoolHealth();
 
       expect(isHealthy).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "连接池使用率过高:",
-        0.85
-      );
+      expect(consoleSpy).toHaveBeenCalledWith("连接池使用率过高:", 0.85);
 
       consoleSpy.mockRestore();
     });
@@ -111,10 +108,10 @@ describe("Connection Pool Tests", () => {
       await warmupConnectionPool();
 
       expect(mockPrisma.$queryRaw).toHaveBeenCalledTimes(
-        connectionPoolConfig.minConnections
+        connectionPoolConfig.minConnections,
       );
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("连接池预热完成")
+        expect.stringContaining("连接池预热完成"),
       );
 
       consoleSpy.mockRestore();
@@ -128,7 +125,7 @@ describe("Connection Pool Tests", () => {
 
       expect(consoleSpy).toHaveBeenCalledWith(
         "连接池预热失败:",
-        expect.any(Error)
+        expect.any(Error),
       );
 
       consoleSpy.mockRestore();
@@ -162,7 +159,9 @@ describe("Connection Pool Tests", () => {
 
     beforeEach(() => {
       monitor = new ConnectionPoolMonitor();
-      setIntervalSpy = jest.spyOn(global, "setInterval").mockImplementation(() => 123 as any);
+      setIntervalSpy = jest
+        .spyOn(global, "setInterval")
+        .mockImplementation(() => 123 as any);
       clearIntervalSpy = jest
         .spyOn(global, "clearInterval")
         .mockImplementation();
@@ -221,9 +220,9 @@ describe("Connection Pool Tests", () => {
         const connection = await connectionManager.getConnection();
 
         expect(connection).toBeDefined();
-        expect(mockPrisma.$queryRaw).toHaveBeenCalledWith(
-          ["SELECT 1 as connection_test"]
-        );
+        expect(mockPrisma.$queryRaw).toHaveBeenCalledWith([
+          "SELECT 1 as connection_test",
+        ]);
       });
 
       it("连接获取超时应该抛出错误", async () => {
@@ -233,7 +232,10 @@ describe("Connection Pool Tests", () => {
         });
 
         mockPrisma.$queryRaw.mockImplementation(
-          () => new Promise((resolve) => setTimeout(() => resolve([{ connection_test: 1 }]), 200))
+          () =>
+            new Promise((resolve) =>
+              setTimeout(() => resolve([{ connection_test: 1 }]), 200),
+            ),
         );
 
         // 先获取一个连接填满连接池
@@ -243,7 +245,7 @@ describe("Connection Pool Tests", () => {
           expect.objectContaining({
             name: "ConnectionPoolError",
             code: "ACQUIRE_TIMEOUT",
-          })
+          }),
         );
       });
     });
@@ -253,7 +255,7 @@ describe("Connection Pool Tests", () => {
         mockPrisma.$queryRaw.mockResolvedValue([{ test: 1 }]);
 
         const result = await connectionManager.executeWithRetry(
-          async (conn) => conn.$queryRaw`SELECT 1 as test`
+          async (conn) => conn.$queryRaw`SELECT 1 as test`,
         );
 
         expect(result).toEqual([{ test: 1 }]);
@@ -267,7 +269,7 @@ describe("Connection Pool Tests", () => {
 
         const result = await connectionManager.executeWithRetry(
           async (conn) => conn.$queryRaw`SELECT 1 as test`,
-          3
+          3,
         );
 
         expect(result).toEqual([{ test: 1 }]);
@@ -280,8 +282,8 @@ describe("Connection Pool Tests", () => {
         await expect(
           connectionManager.executeWithRetry(
             async (conn) => conn.$queryRaw`SELECT 1 as test`,
-            2
-          )
+            2,
+          ),
         ).rejects.toThrow("Persistent error");
 
         expect(mockPrisma.$queryRaw).toHaveBeenCalledTimes(1); // 只调用1次，因为错误不可重试
@@ -314,7 +316,7 @@ describe("Connection Pool Tests", () => {
 
       it("不健康时应该返回false", async () => {
         mockPrisma.$queryRaw.mockRejectedValue(
-          new Error("Health check failed")
+          new Error("Health check failed"),
         );
 
         const isHealthy = await connectionManager.healthCheck();
@@ -355,7 +357,7 @@ describe("Connection Pool Tests", () => {
 
       const concurrentRequests = 10;
       const promises = Array.from({ length: concurrentRequests }, () =>
-        connectionManager.getConnection()
+        connectionManager.getConnection(),
       );
 
       const connections = await Promise.all(promises);
@@ -399,7 +401,7 @@ describe("Connection Pool Tests", () => {
       await Promise.all(promises);
 
       // 等待一小段时间确保所有连接释放完成
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       const stats = connectionManager.getStats();
       expect(stats.activeConnections).toBeLessThanOrEqual(1); // 允许1个连接因为可能的时序问题

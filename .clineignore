@@ -1,0 +1,57 @@
+# .clineignore - 优化 Cline 上下文加载，减少卡顿概率
+# 基于 .gitignore 并针对 AI 助手场景优化
+
+# === 核心排除项（必需） ===
+# 依赖目录（占用最大空间）
+node_modules/
+
+# Next.js 构建产物
+.next/
+out/
+
+# 其他构建产物
+dist/
+build/
+
+# 版本控制
+.git/
+
+# IDE 配置
+.vscode/
+.history/
+
+# === 测试和覆盖率 ===
+coverage/
+coverage-final/
+test-data/
+
+# === 日志和临时文件 ===
+# 日志文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+output.log
+
+# 临时和报告文件
+temp-*.txt
+*-report.json
+*-report.txt
+validate-result.json
+test-output.txt
+coverage-api-report.txt
+
+# === 备份和数据 ===
+backups/
+data/dev.db*
+*.db
+*.db-journal
+%APPDATA%/
+
+# === 构建产物 ===
+*.tsbuildinfo
+next-env.d.ts
+
+# === Vercel ===
+.vercel

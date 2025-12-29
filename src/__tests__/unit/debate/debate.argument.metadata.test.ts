@@ -1,7 +1,10 @@
-import { testPrisma } from '../../../test-utils/database';
-import { setupTestDatabase, cleanupTestDatabase } from '../../../test-utils/database';
+import { testPrisma } from "../../../test-utils/database";
+import {
+  setupTestDatabase,
+  cleanupTestDatabase,
+} from "../../../test-utils/database";
 
-describe('Argument AI Metadata Handling', () => {
+describe("Argument AI Metadata Handling", () => {
   let testUser: any;
   let testCase: any;
   let testDebate: any;
@@ -9,13 +12,13 @@ describe('Argument AI Metadata Handling', () => {
 
   beforeAll(async () => {
     await setupTestDatabase();
-    
+
     // 创建测试用户
     testUser = await testPrisma.user.create({
       data: {
-        email: 'test-argument-metadata@example.com',
-        name: '测试用户',
-        role: 'USER',
+        email: "test-argument-metadata@example.com",
+        name: "测试用户",
+        role: "USER",
       },
     });
 
@@ -23,12 +26,12 @@ describe('Argument AI Metadata Handling', () => {
     testCase = await testPrisma.case.create({
       data: {
         userId: testUser.id,
-        title: '论点元数据测试案件',
-        description: '这是一个用于测试论点AI元数据的案件',
-        type: 'CIVIL',
-        status: 'ACTIVE',
-        plaintiffName: '张三',
-        defendantName: '李四',
+        title: "论点元数据测试案件",
+        description: "这是一个用于测试论点AI元数据的案件",
+        type: "CIVIL",
+        status: "ACTIVE",
+        plaintiffName: "张三",
+        defendantName: "李四",
       },
     });
 
@@ -36,13 +39,13 @@ describe('Argument AI Metadata Handling', () => {
     testDebate = await testPrisma.debate.create({
       data: {
         case: {
-          connect: { id: testCase.id }
+          connect: { id: testCase.id },
         },
         user: {
-          connect: { id: testUser.id }
+          connect: { id: testUser.id },
         },
-        title: '论点元数据测试辩论',
-        status: 'IN_PROGRESS' as const,
+        title: "论点元数据测试辩论",
+        status: "IN_PROGRESS" as const,
         currentRound: 1,
       },
     });
@@ -51,10 +54,10 @@ describe('Argument AI Metadata Handling', () => {
     testRound = await testPrisma.debateRound.create({
       data: {
         debate: {
-          connect: { id: testDebate.id }
+          connect: { id: testDebate.id },
         },
         roundNumber: 1,
-        status: 'IN_PROGRESS' as const,
+        status: "IN_PROGRESS" as const,
         startedAt: new Date(),
       },
     });
@@ -64,17 +67,23 @@ describe('Argument AI Metadata Handling', () => {
     await cleanupTestDatabase();
   });
 
-  describe('AI Provider Storage', () => {
-    it('should store AI provider correctly', async () => {
-      const providers = ['deepseek', 'zhipu', 'openai', 'claude', 'custom-model'];
-      
+  describe("AI Provider Storage", () => {
+    it("should store AI provider correctly", async () => {
+      const providers = [
+        "deepseek",
+        "zhipu",
+        "openai",
+        "claude",
+        "custom-model",
+      ];
+
       for (const provider of providers) {
         const argument = await testPrisma.argument.create({
           data: {
             round: {
-              connect: { id: testRound.id }
+              connect: { id: testRound.id },
             },
-            side: 'PLAINTIFF' as const,
+            side: "PLAINTIFF" as const,
             content: `使用${provider}生成的论点`,
             aiProvider: provider,
           },
@@ -85,17 +94,17 @@ describe('Argument AI Metadata Handling', () => {
     });
   });
 
-  describe('Generation Time Storage', () => {
-    it('should store generation time correctly', async () => {
+  describe("Generation Time Storage", () => {
+    it("should store generation time correctly", async () => {
       const generationTimes = [500, 1000, 1500, 2000, 5000];
-      
+
       for (const time of generationTimes) {
         const argument = await testPrisma.argument.create({
           data: {
             round: {
-              connect: { id: testRound.id }
+              connect: { id: testRound.id },
             },
-            side: 'DEFENDANT' as const,
+            side: "DEFENDANT" as const,
             content: `生成时间${time}ms的论点`,
             generationTime: time,
           },
@@ -106,17 +115,17 @@ describe('Argument AI Metadata Handling', () => {
     });
   });
 
-  describe('Confidence Score Storage', () => {
-    it('should store confidence score correctly', async () => {
+  describe("Confidence Score Storage", () => {
+    it("should store confidence score correctly", async () => {
       const confidenceScores = [0.1, 0.5, 0.8, 0.95, 1.0];
-      
+
       for (const confidence of confidenceScores) {
         const argument = await testPrisma.argument.create({
           data: {
             round: {
-              connect: { id: testRound.id }
+              connect: { id: testRound.id },
             },
-            side: 'NEUTRAL' as const,
+            side: "NEUTRAL" as const,
             content: `置信度${confidence}的论点`,
             confidence,
           },
@@ -127,10 +136,10 @@ describe('Argument AI Metadata Handling', () => {
     });
   });
 
-  describe('Complete AI Metadata', () => {
-    it('should handle complete AI metadata', async () => {
+  describe("Complete AI Metadata", () => {
+    it("should handle complete AI metadata", async () => {
       const aiMetadata = {
-        aiProvider: 'advanced-ai-model',
+        aiProvider: "advanced-ai-model",
         generationTime: 3456,
         confidence: 0.8765,
       };
@@ -138,10 +147,10 @@ describe('Argument AI Metadata Handling', () => {
       const argument = await testPrisma.argument.create({
         data: {
           round: {
-            connect: { id: testRound.id }
+            connect: { id: testRound.id },
           },
-          side: 'PLAINTIFF' as const,
-          content: '具有完整AI元数据的论点',
+          side: "PLAINTIFF" as const,
+          content: "具有完整AI元数据的论点",
           ...aiMetadata,
         },
       });
@@ -152,15 +161,15 @@ describe('Argument AI Metadata Handling', () => {
     });
   });
 
-  describe('Null AI Metadata', () => {
-    it('should allow null AI metadata', async () => {
+  describe("Null AI Metadata", () => {
+    it("should allow null AI metadata", async () => {
       const argument = await testPrisma.argument.create({
         data: {
           round: {
-            connect: { id: testRound.id }
+            connect: { id: testRound.id },
           },
-          side: 'DEFENDANT' as const,
-          content: '没有AI元数据的论点',
+          side: "DEFENDANT" as const,
+          content: "没有AI元数据的论点",
         },
       });
 
@@ -170,20 +179,20 @@ describe('Argument AI Metadata Handling', () => {
     });
   });
 
-  describe('Partial AI Metadata', () => {
-    it('should allow partial AI metadata', async () => {
+  describe("Partial AI Metadata", () => {
+    it("should allow partial AI metadata", async () => {
       // 只有provider
       const arg1 = await testPrisma.argument.create({
         data: {
           round: {
-            connect: { id: testRound.id }
+            connect: { id: testRound.id },
           },
-          side: 'NEUTRAL' as const,
-          content: '只有provider的论点',
-          aiProvider: 'partial-model',
+          side: "NEUTRAL" as const,
+          content: "只有provider的论点",
+          aiProvider: "partial-model",
         },
       });
-      expect(arg1.aiProvider).toBe('partial-model');
+      expect(arg1.aiProvider).toBe("partial-model");
       expect(arg1.generationTime).toBeNull();
       expect(arg1.confidence).toBeNull();
 
@@ -191,10 +200,10 @@ describe('Argument AI Metadata Handling', () => {
       const arg2 = await testPrisma.argument.create({
         data: {
           round: {
-            connect: { id: testRound.id }
+            connect: { id: testRound.id },
           },
-          side: 'PLAINTIFF' as const,
-          content: '只有generationTime的论点',
+          side: "PLAINTIFF" as const,
+          content: "只有generationTime的论点",
           generationTime: 2000,
         },
       });
@@ -206,10 +215,10 @@ describe('Argument AI Metadata Handling', () => {
       const arg3 = await testPrisma.argument.create({
         data: {
           round: {
-            connect: { id: testRound.id }
+            connect: { id: testRound.id },
           },
-          side: 'DEFENDANT' as const,
-          content: '只有confidence的论点',
+          side: "DEFENDANT" as const,
+          content: "只有confidence的论点",
           confidence: 0.75,
         },
       });

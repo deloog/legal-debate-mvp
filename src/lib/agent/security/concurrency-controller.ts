@@ -38,7 +38,7 @@ export class Semaphore {
         const index = this.waitQueue.indexOf(waitItem);
         if (index > -1) {
           this.waitQueue.splice(index, 1);
-          reject(new Error('等待并发许可超时'));
+          reject(new Error("等待并发许可超时"));
         }
       }, queueTimeout);
 
@@ -92,12 +92,12 @@ export class ConcurrencyController {
     key: string,
     maxConcurrent: number,
     fn: () => Promise<T>,
-    options?: ConcurrencyOptions
+    options?: ConcurrencyOptions,
   ): Promise<T> {
     const semaphore = this.getSemaphore(key, maxConcurrent);
-    
+
     await semaphore.acquire(options);
-    
+
     try {
       return await fn();
     } finally {
@@ -106,18 +106,20 @@ export class ConcurrencyController {
   }
 
   getStats(): Record<string, { available: number; queueLength: number }> {
-    const stats: Record<string, { available: number; queueLength: number }> = {};
-    
+    const stats: Record<string, { available: number; queueLength: number }> =
+      {};
+
     for (const [key, semaphore] of this.semaphores.entries()) {
       stats[key] = {
         available: semaphore.getAvailablePermits(),
-        queueLength: semaphore.getQueueLength()
+        queueLength: semaphore.getQueueLength(),
       };
     }
-    
+
     return stats;
   }
 }
 
 // 默认的文档处理并发控制器
-export const documentConcurrencyController = ConcurrencyController.getInstance();
+export const documentConcurrencyController =
+  ConcurrencyController.getInstance();

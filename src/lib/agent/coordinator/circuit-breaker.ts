@@ -1,11 +1,8 @@
 // 熔断器 - 防止级联故障
 
-import type {
-  CircuitBreakerConfig,
-  CircuitBreakerStateInfo
-} from './types';
+import type { CircuitBreakerConfig, CircuitBreakerStateInfo } from "./types";
 
-import { CircuitBreakerState } from './types';
+import { CircuitBreakerState } from "./types";
 
 // =============================================================================
 // 熔断器类
@@ -112,7 +109,7 @@ export class CircuitBreaker {
       failureCount: this.failureCount,
       successCount: this.successCount,
       lastFailureTime: this.lastFailureTime,
-      lastStateChange: this.lastStateChange
+      lastStateChange: this.lastStateChange,
     };
   }
 
@@ -189,13 +186,14 @@ export class CircuitBreakerManager {
   /**
    * 创建或获取熔断器
    */
-  public getOrCreate(key: string, config?: CircuitBreakerConfig): CircuitBreaker {
+  public getOrCreate(
+    key: string,
+    config?: CircuitBreakerConfig,
+  ): CircuitBreaker {
     let breaker = this.breakers.get(key);
 
     if (!breaker) {
-      breaker = new CircuitBreaker(
-        config || this.getDefaultConfig()
-      );
+      breaker = new CircuitBreaker(config || this.getDefaultConfig());
       this.breakers.set(key, breaker);
     }
 
@@ -246,7 +244,7 @@ export class CircuitBreakerManager {
       failureThreshold: 5,
       successThreshold: 3,
       timeout: 30000,
-      resetTimeout: 60000
+      resetTimeout: 60000,
     };
   }
 
@@ -308,7 +306,7 @@ export class CircuitBreakerManager {
       totalBreakers: this.breakers.size,
       openCount,
       halfOpenCount,
-      closedCount
+      closedCount,
     };
   }
 }

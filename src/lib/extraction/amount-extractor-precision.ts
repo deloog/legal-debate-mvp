@@ -429,7 +429,7 @@ export class PrecisionAmountExtractor {
     }
     // 检查是否包含特殊表达式（按长度降序排序，确保长匹配优先）
     const sortedSpecials = Object.entries(specials).sort(
-      (a, b) => b[0].length - a[0].length
+      (a, b) => b[0].length - a[0].length,
     );
     for (const [pattern, value] of sortedSpecials) {
       if (
@@ -649,7 +649,7 @@ export class PrecisionAmountExtractor {
    * 合并和去重（改进版）
    */
   private mergeAndDeduplicate(
-    matches: AmountExtractionResult[]
+    matches: AmountExtractionResult[],
   ): AmountExtractionResult[] {
     const seen = new Set<string>();
     const filtered1: AmountExtractionResult[] = [];
@@ -673,7 +673,7 @@ export class PrecisionAmountExtractor {
         if (
           this.areAmountsSimilar(
             match.normalizedAmount,
-            parseFloat(processedKey.split("_")[0])
+            parseFloat(processedKey.split("_")[0]),
           )
         ) {
           hasSimilar = true;
@@ -717,7 +717,7 @@ export class PrecisionAmountExtractor {
    * 验证和标准化
    */
   private validateAndNormalize(
-    match: AmountExtractionResult
+    match: AmountExtractionResult,
   ): AmountExtractionResult | null {
     if (match.normalizedAmount <= 0) {
       match.processingNotes.push("金额必须大于0");
@@ -748,7 +748,7 @@ export class PrecisionAmountExtractor {
     if (match.currency === "CNY" && match.extractionMethod === "regex") {
       const hasWan = match.originalText.includes("万");
       const hasChineseDigits = /[零壹贰叁肆伍陆柒捌玖]/.test(
-        match.originalText
+        match.originalText,
       );
 
       // 只有纯阿拉伯数字的"万元"需要转换
@@ -771,7 +771,7 @@ export class PrecisionAmountExtractor {
    */
   private contextualValidation(
     results: AmountExtractionResult[],
-    fullText: string
+    fullText: string,
   ): AmountExtractionResult[] {
     const validatedResults: AmountExtractionResult[] = [];
 
@@ -835,7 +835,7 @@ export class PrecisionAmountExtractor {
    * 验证金额一致性
    */
   validateAmountConsistency(
-    amounts: AmountExtractionResult[]
+    amounts: AmountExtractionResult[],
   ): AmountValidationResult {
     const inconsistencies: string[] = [];
     const suggestions: string[] = [];
@@ -871,7 +871,7 @@ export class PrecisionAmountExtractor {
     const currencies = new Set(amounts.map((a) => a.currency));
     if (currencies.size > 1) {
       inconsistencies.push(
-        `多种货币单位: ${Array.from(currencies).join(", ")}`
+        `多种货币单位: ${Array.from(currencies).join(", ")}`,
       );
       suggestions.push("统一货币单位或进行汇率转换");
     }
@@ -891,7 +891,7 @@ export class PrecisionAmountExtractor {
    */
   private calculateRiskLevel(
     inconsistencies: string[],
-    totalAmounts: number
+    totalAmounts: number,
   ): "low" | "medium" | "high" {
     const inconsistencyRatio =
       inconsistencies.length / Math.max(totalAmounts, 1);
@@ -905,7 +905,7 @@ export class PrecisionAmountExtractor {
    * 获取最佳金额提取结果
    */
   getBestExtraction(
-    results: AmountExtractionResult[]
+    results: AmountExtractionResult[],
   ): AmountExtractionResult | null {
     if (results.length === 0) return null;
 

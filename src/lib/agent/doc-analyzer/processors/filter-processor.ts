@@ -165,7 +165,7 @@ export class FilterProcessor {
     // 检查文本长度
     if (text.length < this.config.minWordCount) {
       warnings.push(
-        `文本长度过短：${text.length}字符（最低要求${this.config.minWordCount}）`
+        `文本长度过短：${text.length}字符（最低要求${this.config.minWordCount}）`,
       );
       score -= 0.5; // 提高扣分权重
     }
@@ -174,7 +174,7 @@ export class FilterProcessor {
     const chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length;
     if (chineseChars < this.config.minChineseChars) {
       warnings.push(
-        `中文字符过少：${chineseChars}个（最低要求${this.config.minChineseChars}）`
+        `中文字符过少：${chineseChars}个（最低要求${this.config.minChineseChars}）`,
       );
       score -= 0.5; // 提高扣分权重，确保中文字符过少时会fail
     }
@@ -184,7 +184,7 @@ export class FilterProcessor {
     const garbageRatio = garbageChars / text.length;
     if (garbageRatio > this.config.maxGarbageRatio) {
       warnings.push(
-        `乱码比例过高：${(garbageRatio * 100).toFixed(1)}%（最高允许${(this.config.maxGarbageRatio * 100).toFixed(1)}%）`
+        `乱码比例过高：${(garbageRatio * 100).toFixed(1)}%（最高允许${(this.config.maxGarbageRatio * 100).toFixed(1)}%）`,
       );
       score -= 0.4 * (garbageRatio / this.config.maxGarbageRatio);
     }
@@ -243,7 +243,7 @@ export class FilterProcessor {
 
     // 计算每种类型的匹配得分
     for (const [type, patterns] of Object.entries(
-      this.DOCUMENT_TYPE_PATTERNS
+      this.DOCUMENT_TYPE_PATTERNS,
     )) {
       for (const pattern of patterns) {
         const matches = text.match(pattern);
@@ -281,7 +281,7 @@ export class FilterProcessor {
    */
   private validateFormat(
     text: string,
-    docType: CaseType
+    docType: CaseType,
   ): {
     valid: boolean;
     warnings: string[];
@@ -319,7 +319,7 @@ export class FilterProcessor {
     const specialCharRatio = this.countGarbageChars(text) / text.length;
     if (specialCharRatio > this.config.maxGarbageRatio) {
       warnings.push(
-        `特殊字符比例过高：${(specialCharRatio * 100).toFixed(1)}%`
+        `特殊字符比例过高：${(specialCharRatio * 100).toFixed(1)}%`,
       );
     }
 
@@ -379,7 +379,7 @@ export class FilterProcessor {
  * 创建默认FilterProcessor实例
  */
 export function createFilterProcessor(
-  config?: Partial<FilterConfig>
+  config?: Partial<FilterConfig>,
 ): FilterProcessor {
   return new FilterProcessor(config);
 }

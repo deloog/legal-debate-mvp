@@ -1,12 +1,12 @@
 /**
  * AI策略生成器
- * 
+ *
  * 使用DeepSeek API生成SWOT分析和策略建议
  */
 
-import type { AIStrategyResponse } from './types';
-import { logger } from '../security/logger';
-import type { AIService } from '../../ai/service';
+import type { AIStrategyResponse } from "./types";
+import { logger } from "../security/logger";
+import type { AIService } from "../../ai/service";
 
 // =============================================================================
 // AI策略生成器类
@@ -24,7 +24,7 @@ export class AIStrategyGenerator {
     this.config = {
       temperature: 0.7,
       maxTokens: 2000,
-      timeout: 30000
+      timeout: 30000,
     };
   }
 
@@ -33,9 +33,9 @@ export class AIStrategyGenerator {
    */
   async initialize(aiService: AIService): Promise<void> {
     this.aiService = aiService;
-    logger.info('AIStrategyGenerator初始化成功', {
+    logger.info("AIStrategyGenerator初始化成功", {
       temperature: this.config.temperature,
-      maxTokens: this.config.maxTokens
+      maxTokens: this.config.maxTokens,
     });
   }
 
@@ -45,46 +45,46 @@ export class AIStrategyGenerator {
   async generateStrategy(
     caseInfo: string,
     legalAnalysis: string,
-    context?: string
+    context?: string,
   ): Promise<AIStrategyResponse> {
     if (!this.aiService) {
-      throw new Error('AI服务未初始化，请先调用initialize()方法');
+      throw new Error("AI服务未初始化，请先调用initialize()方法");
     }
 
     const prompt = this.buildPrompt(caseInfo, legalAnalysis, context);
     const startTime = Date.now();
 
     try {
-      logger.info('开始AI策略生成', {
-        promptLength: prompt.length
+      logger.info("开始AI策略生成", {
+        promptLength: prompt.length,
       });
 
       const response = await this.aiService.chatCompletion({
-        model: 'deepseek-chat',
+        model: "deepseek-chat",
         messages: [
           {
-            role: 'system',
-            content: this.getSystemPrompt()
+            role: "system",
+            content: this.getSystemPrompt(),
           },
           {
-            role: 'user',
-            content: prompt
-          }
+            role: "user",
+            content: prompt,
+          },
         ],
         temperature: this.config.temperature,
         maxTokens: this.config.maxTokens,
-        timeout: this.config.timeout
+        timeout: this.config.timeout,
       });
 
       const processingTime = Date.now() - startTime;
-      logger.info('AI策略生成完成', { processingTime });
+      logger.info("AI策略生成完成", { processingTime });
 
       // 解析响应
       return this.parseResponse(response);
     } catch (error) {
-      logger.error('AI策略生成失败', error);
+      logger.error("AI策略生成失败", error);
       throw new Error(
-        `AI策略生成失败: ${error instanceof Error ? error.message : String(error)}`
+        `AI策略生成失败: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -95,7 +95,7 @@ export class AIStrategyGenerator {
   private buildPrompt(
     caseInfo: string,
     legalAnalysis: string,
-    context?: string
+    context?: string,
   ): string {
     let prompt = `请基于以下案件信息和法条分析结果，生成详细的诉讼策略：
 
@@ -171,12 +171,12 @@ ${legalAnalysis}
    */
   private parseResponse(response: any): AIStrategyResponse {
     try {
-      const content = response?.output || response?.content || '';
+      const content = response?.output || response?.content || "";
 
       // 尝试提取JSON内容
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
-        throw new Error('响应中未找到有效的JSON格式');
+        throw new Error("响应中未找到有效的JSON格式");
       }
 
       const jsonResponse = JSON.parse(jsonMatch[0]);
@@ -186,9 +186,9 @@ ${legalAnalysis}
 
       return jsonResponse;
     } catch (error) {
-      logger.error('AI响应解析失败', error);
+      logger.error("AI响应解析失败", error);
       throw new Error(
-        `AI响应解析失败: ${error instanceof Error ? error.message : String(error)}`
+        `AI响应解析失败: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -201,34 +201,34 @@ ${legalAnalysis}
 
     // 验证SWOT分析
     if (!response.swotAnalysis) {
-      errors.push('缺少swotAnalysis字段');
+      errors.push("缺少swotAnalysis字段");
     } else {
       if (!Array.isArray(response.swotAnalysis.strengths)) {
-        errors.push('swotAnalysis.strengths必须是数组');
+        errors.push("swotAnalysis.strengths必须是数组");
       }
       if (!Array.isArray(response.swotAnalysis.weaknesses)) {
-        errors.push('swotAnalysis.weaknesses必须是数组');
+        errors.push("swotAnalysis.weaknesses必须是数组");
       }
       if (!Array.isArray(response.swotAnalysis.opportunities)) {
-        errors.push('swotAnalysis.opportunities必须是数组');
+        errors.push("swotAnalysis.opportunities必须是数组");
       }
       if (!Array.isArray(response.swotAnalysis.threats)) {
-        errors.push('swotAnalysis.threats必须是数组');
+        errors.push("swotAnalysis.threats必须是数组");
       }
     }
 
     // 验证策略建议
     if (!Array.isArray(response.strategies)) {
-      errors.push('strategies必须是数组');
+      errors.push("strategies必须是数组");
     }
 
     // 验证风险评估
     if (!Array.isArray(response.risks)) {
-      errors.push('risks必须是数组');
+      errors.push("risks必须是数组");
     }
 
     if (errors.length > 0) {
-      throw new Error(`响应结构验证失败: ${errors.join(', ')}`);
+      throw new Error(`响应结构验证失败: ${errors.join(", ")}`);
     }
   }
 
@@ -237,6 +237,6 @@ ${legalAnalysis}
    */
   configure(config: Partial<typeof this.config>): void {
     this.config = { ...this.config, ...config };
-    logger.info('AIStrategyGenerator配置已更新', { config: this.config });
+    logger.info("AIStrategyGenerator配置已更新", { config: this.config });
   }
 }

@@ -14,10 +14,7 @@
       "testCase": {
         "title": "房屋买卖合同纠纷",
         "description": "买方支付定金后卖方违约不办理过户，要求解除合同并赔偿损失",
-        "legalReferences": [
-          "《民法典》第577条",
-          "《民法典》第587条"
-        ],
+        "legalReferences": ["《民法典》第577条", "《民法典》第587条"],
         "category": "民事纠纷"
       },
       "success": true,
@@ -36,10 +33,7 @@
       "testCase": {
         "title": "劳动合同争议",
         "description": "员工因公司未按时支付工资而被迫离职，要求支付经济补偿",
-        "legalReferences": [
-          "《劳动合同法》第38条",
-          "《劳动合同法》第46条"
-        ],
+        "legalReferences": ["《劳动合同法》第38条", "《劳动合同法》第46条"],
         "category": "劳动纠纷"
       },
       "success": true,
@@ -58,10 +52,7 @@
       "testCase": {
         "title": "交通事故赔偿",
         "description": "机动车交通事故造成人身损害，要求赔偿医疗费和误工费",
-        "legalReferences": [
-          "《道路交通安全法》第76条",
-          "《民法典》第1179条"
-        ],
+        "legalReferences": ["《道路交通安全法》第76条", "《民法典》第1179条"],
         "category": "侵权纠纷"
       },
       "success": true,
@@ -80,10 +71,7 @@
       "testCase": {
         "title": "商品房买卖纠纷",
         "description": "购房人支付首付款后开发商不交房，要求退款并赔偿",
-        "legalReferences": [
-          "《民法典》第577条",
-          "《民法典》第584条"
-        ],
+        "legalReferences": ["《民法典》第577条", "《民法典》第584条"],
         "category": "民事纠纷"
       },
       "success": true,

@@ -3,9 +3,9 @@
  * 避开端到端Agent流程的输入验证问题，直接测试核心提取器
  */
 
-import { AmountExtractor } from '../src/lib/agent/doc-analyzer/extractors/amount-extractor';
-import { ClaimExtractor } from '../src/lib/agent/doc-analyzer/extractors/claim-extractor';
-import { LegalRepresentativeFilter } from '../src/lib/agent/doc-analyzer/processors/legal-representative-filter';
+import { AmountExtractor } from "../src/lib/agent/doc-analyzer/extractors/amount-extractor";
+import { ClaimExtractor } from "../src/lib/agent/doc-analyzer/extractors/claim-extractor";
+import { LegalRepresentativeFilter } from "../src/lib/agent/doc-analyzer/processors/legal-representative-filter";
 
 // =============================================================================
 // 测试用例定义
@@ -28,8 +28,8 @@ interface TestCase {
 
 const testCases: TestCase[] = [
   {
-    id: 'T001',
-    name: '简单民事起诉状',
+    id: "T001",
+    name: "简单民事起诉状",
     document: `民事起诉状
 
 原告：上海华诚科技有限公司
@@ -53,16 +53,16 @@ const testCases: TestCase[] = [
 2023年10月15日`,
     expected: {
       parties: {
-        plaintiffs: ['上海华诚科技有限公司'],
-        defendants: ['北京长城贸易有限公司']
+        plaintiffs: ["上海华诚科技有限公司"],
+        defendants: ["北京长城贸易有限公司"],
       },
-      claims: ['支付货款'],
-      amounts: [1000000]
-    }
+      claims: ["支付货款"],
+      amounts: [1000000],
+    },
   },
   {
-    id: 'T002',
-    name: '复杂诉讼请求',
+    id: "T002",
+    name: "复杂诉讼请求",
     document: `民事起诉状
 
 原告：张大伟，男，1988年7月12日出生，汉族，住上海市徐汇区淮海中路200号
@@ -84,16 +84,16 @@ const testCases: TestCase[] = [
 2023年11月20日`,
     expected: {
       parties: {
-        plaintiffs: ['张大伟'],
-        defendants: ['李芳']
+        plaintiffs: ["张大伟"],
+        defendants: ["李芳"],
       },
-      claims: ['偿还借款本金', '支付利息', '支付违约金'],
-      amounts: [500000, 50000, 20000]
-    }
+      claims: ["偿还借款本金", "支付利息", "支付违约金"],
+      amounts: [500000, 50000, 20000],
+    },
   },
   {
-    id: 'T003',
-    name: '多个当事人',
+    id: "T003",
+    name: "多个当事人",
     document: `民事起诉状
 
 原告：上海华诚科技有限公司
@@ -117,17 +117,17 @@ const testCases: TestCase[] = [
 2023年12月1日`,
     expected: {
       parties: {
-        plaintiffs: ['上海华诚科技有限公司', '王明'],
-        defendants: ['北京长城贸易有限公司', '南京创新科技股份公司'],
-        thirdParties: ['苏州协作企业集团']
+        plaintiffs: ["上海华诚科技有限公司", "王明"],
+        defendants: ["北京长城贸易有限公司", "南京创新科技股份公司"],
+        thirdParties: ["苏州协作企业集团"],
       },
-      claims: ['支付货款', '支付利息'],
-      amounts: [800000, 40000]
-    }
+      claims: ["支付货款", "支付利息"],
+      amounts: [800000, 40000],
+    },
   },
   {
-    id: 'T004',
-    name: '大写金额',
+    id: "T004",
+    name: "大写金额",
     document: `民事起诉状
 
 原告：张三
@@ -147,16 +147,16 @@ const testCases: TestCase[] = [
 2023年12月5日`,
     expected: {
       parties: {
-        plaintiffs: ['张三'],
-        defendants: ['李四']
+        plaintiffs: ["张三"],
+        defendants: ["李四"],
       },
-      claims: ['赔偿损失'],
-      amounts: [1000000]
-    }
+      claims: ["赔偿损失"],
+      amounts: [1000000],
+    },
   },
   {
-    id: 'T005',
-    name: '混合金额格式',
+    id: "T005",
+    name: "混合金额格式",
     document: `民事起诉状
 
 原告：A公司
@@ -177,13 +177,13 @@ const testCases: TestCase[] = [
 2023年12月10日`,
     expected: {
       parties: {
-        plaintiffs: ['A公司'],
-        defendants: ['B公司']
+        plaintiffs: ["A公司"],
+        defendants: ["B公司"],
       },
-      claims: ['支付货款', '支付利息'],
-      amounts: [2000000, 100000]
-    }
-  }
+      claims: ["支付货款", "支付利息"],
+      amounts: [2000000, 100000],
+    },
+  },
 ];
 
 // =============================================================================
@@ -219,31 +219,35 @@ class DirectAccuracyEvaluator {
    * 评估金额识别精度
    */
   async evaluateAmountAccuracy(): Promise<AccuracyResult> {
-    console.log('\n========================================');
-    console.log('评估金额识别精度');
-    console.log('========================================\n');
+    console.log("\n========================================");
+    console.log("评估金额识别精度");
+    console.log("========================================\n");
 
     const result: AccuracyResult = {
       total: 0,
       correct: 0,
       incorrect: 0,
-      details: []
+      details: [],
     };
 
-    const amountTestCases = testCases.filter(tc => tc.expected.amounts);
+    const amountTestCases = testCases.filter((tc) => tc.expected.amounts);
     result.total = amountTestCases.length;
 
     for (const testCase of amountTestCases) {
       try {
         // 直接调用AmountExtractor
-        const extractedResult = await this.amountExtractor.extractFromText(testCase.document);
-        
+        const extractedResult = await this.amountExtractor.extractFromText(
+          testCase.document,
+        );
+
         // 提取实际金额
-        const actualAmounts = extractedResult.amounts.map(a => a.normalizedAmount);
+        const actualAmounts = extractedResult.amounts.map(
+          (a) => a.normalizedAmount,
+        );
 
         // 检查是否匹配
-        const isCorrect = testCase.expected.amounts!.every(expectedAmount =>
-          actualAmounts.includes(expectedAmount)
+        const isCorrect = testCase.expected.amounts!.every((expectedAmount) =>
+          actualAmounts.includes(expectedAmount),
         );
 
         if (isCorrect) {
@@ -252,8 +256,8 @@ class DirectAccuracyEvaluator {
         } else {
           result.incorrect++;
           console.log(`❌ ${testCase.id}: ${testCase.name} - 金额识别不完整`);
-          console.log(`   期望: ${testCase.expected.amounts?.join(', ')}`);
-          console.log(`   实际: ${actualAmounts.join(', ')}`);
+          console.log(`   期望: ${testCase.expected.amounts?.join(", ")}`);
+          console.log(`   实际: ${actualAmounts.join(", ")}`);
         }
 
         result.details.push({
@@ -261,7 +265,7 @@ class DirectAccuracyEvaluator {
           testName: testCase.name,
           expected: testCase.expected.amounts,
           actual: actualAmounts,
-          isCorrect
+          isCorrect,
         });
       } catch (error) {
         result.incorrect++;
@@ -272,7 +276,7 @@ class DirectAccuracyEvaluator {
           expected: testCase.expected.amounts,
           actual: null,
           isCorrect: false,
-          error: String(error)
+          error: String(error),
         });
       }
     }
@@ -284,18 +288,18 @@ class DirectAccuracyEvaluator {
    * 评估诉讼请求准确率
    */
   async evaluateClaimAccuracy(): Promise<AccuracyResult> {
-    console.log('\n========================================');
-    console.log('评估诉讼请求准确率');
-    console.log('========================================\n');
+    console.log("\n========================================");
+    console.log("评估诉讼请求准确率");
+    console.log("========================================\n");
 
     const result: AccuracyResult = {
       total: 0,
       correct: 0,
       incorrect: 0,
-      details: []
+      details: [],
     };
 
-    const claimTestCases = testCases.filter(tc => tc.expected.claims);
+    const claimTestCases = testCases.filter((tc) => tc.expected.claims);
     result.total = claimTestCases.length;
 
     for (const testCase of claimTestCases) {
@@ -303,13 +307,15 @@ class DirectAccuracyEvaluator {
         // 暂时跳过ClaimExtractor测试（需要查看API）
         // TODO: 需要查看ClaimExtractor的API
         result.correct++;
-        console.log(`⚠️ ${testCase.id}: ${testCase.name} - 诉讼请求跳过（需要查看API）`);
+        console.log(
+          `⚠️ ${testCase.id}: ${testCase.name} - 诉讼请求跳过（需要查看API）`,
+        );
         result.details.push({
           testCaseId: testCase.id,
           testName: testCase.name,
           expected: testCase.expected.claims,
-          actual: ['跳过'],
-          isCorrect: true
+          actual: ["跳过"],
+          isCorrect: true,
         });
       } catch (error) {
         result.incorrect++;
@@ -320,7 +326,7 @@ class DirectAccuracyEvaluator {
           expected: testCase.expected.claims,
           actual: null,
           isCorrect: false,
-          error: String(error)
+          error: String(error),
         });
       }
     }
@@ -332,56 +338,64 @@ class DirectAccuracyEvaluator {
    * 评估法定代表人过滤准确率
    */
   async evaluateLegalRepFilterAccuracy(): Promise<AccuracyResult> {
-    console.log('\n========================================');
-    console.log('评估法定代表人过滤准确率');
-    console.log('========================================\n');
+    console.log("\n========================================");
+    console.log("评估法定代表人过滤准确率");
+    console.log("========================================\n");
 
     const result: AccuracyResult = {
       total: testCases.length,
       correct: 0,
       incorrect: 0,
-      details: []
+      details: [],
     };
 
     for (const testCase of testCases) {
       try {
         // 模拟提取的当事人列表（包含法定代表人）
         const mockParties = this.extractMockParties(testCase.document);
-        
+
         // 应用法定代表人过滤
         const filterResult = await this.legalRepFilter.applyToExtractedData(
           testCase.document,
           {
             parties: mockParties,
             claims: [],
-            caseType: 'civil' as const,
-            keyFacts: []
-          }
+            caseType: "civil" as const,
+            keyFacts: [],
+          },
         );
-        
+
         const filteredParties = filterResult.parties;
 
         // 检查法定代表人是否被过滤
-        const hasLegalRep = mockParties.some(p => p.name.includes('法定代表人'));
-        const hasLegalRepAfterFilter = filteredParties.some(p => p.name.includes('法定代表人'));
-        
+        const hasLegalRep = mockParties.some((p) =>
+          p.name.includes("法定代表人"),
+        );
+        const hasLegalRepAfterFilter = filteredParties.some((p) =>
+          p.name.includes("法定代表人"),
+        );
+
         // 应该过滤掉法定代表人
         const isCorrect = !hasLegalRepAfterFilter;
 
         if (isCorrect) {
           result.correct++;
-          console.log(`✅ ${testCase.id}: ${testCase.name} - 法定代表人过滤正确`);
+          console.log(
+            `✅ ${testCase.id}: ${testCase.name} - 法定代表人过滤正确`,
+          );
         } else {
           result.incorrect++;
-          console.log(`❌ ${testCase.id}: ${testCase.name} - 法定代表人过滤失败`);
+          console.log(
+            `❌ ${testCase.id}: ${testCase.name} - 法定代表人过滤失败`,
+          );
         }
 
         result.details.push({
           testCaseId: testCase.id,
           testName: testCase.name,
-          expected: hasLegalRep ? '过滤掉' : '无需过滤',
-          actual: hasLegalRepAfterFilter ? '仍包含' : '已过滤',
-          isCorrect
+          expected: hasLegalRep ? "过滤掉" : "无需过滤",
+          actual: hasLegalRepAfterFilter ? "仍包含" : "已过滤",
+          isCorrect,
         });
       } catch (error) {
         result.incorrect++;
@@ -389,10 +403,10 @@ class DirectAccuracyEvaluator {
         result.details.push({
           testCaseId: testCase.id,
           testName: testCase.name,
-          expected: '过滤掉',
+          expected: "过滤掉",
           actual: null,
           isCorrect: false,
-          error: String(error)
+          error: String(error),
         });
       }
     }
@@ -405,35 +419,35 @@ class DirectAccuracyEvaluator {
    */
   private extractMockParties(text: string): any[] {
     const parties: any[] = [];
-    
+
     // 提取原告
     const plaintiffMatch = text.match(/原告[：:]\s*(.+?)(?=\n)/);
     if (plaintiffMatch) {
       parties.push({
-        type: 'plaintiff',
-        name: plaintiffMatch[1].trim()
+        type: "plaintiff",
+        name: plaintiffMatch[1].trim(),
       });
-      
+
       // 检查是否包含法定代表人
       const legalRepMatch = text.match(/法定代表人[：:]\s*(.+?)(?=，|,|\\s)/);
       if (legalRepMatch) {
         parties.push({
-          type: 'plaintiff',
+          type: "plaintiff",
           name: `法定代表人：${legalRepMatch[1].trim()}`,
-          _inferred: true
+          _inferred: true,
         });
       }
     }
-    
+
     // 提取被告
     const defendantMatch = text.match(/被告[：:]\s*(.+?)(?=\n)/);
     if (defendantMatch) {
       parties.push({
-        type: 'defendant',
-        name: defendantMatch[1].trim()
+        type: "defendant",
+        name: defendantMatch[1].trim(),
       });
     }
-    
+
     return parties;
   }
 
@@ -443,57 +457,66 @@ class DirectAccuracyEvaluator {
   generateReport(
     amountResult: AccuracyResult,
     claimResult: AccuracyResult,
-    legalRepResult: AccuracyResult
+    legalRepResult: AccuracyResult,
   ): void {
-    console.log('\n========================================');
-    console.log('DocAnalyzer准确率评估报告(直接测试)');
-    console.log('========================================\n');
+    console.log("\n========================================");
+    console.log("DocAnalyzer准确率评估报告(直接测试)");
+    console.log("========================================\n");
 
     const amountAccuracy = (amountResult.correct / amountResult.total) * 100;
     const claimAccuracy = (claimResult.correct / claimResult.total) * 100;
-    const legalRepAccuracy = (legalRepResult.correct / legalRepResult.total) * 100;
+    const legalRepAccuracy =
+      (legalRepResult.correct / legalRepResult.total) * 100;
 
     // 设计指标
     const targets = {
       amount: 99,
       claim: 95,
-      party: 98
+      party: 98,
     };
 
-    console.log('一、金额识别精度');
-    console.log('-------------------');
+    console.log("一、金额识别精度");
+    console.log("-------------------");
     console.log(`目标: ≥${targets.amount}%`);
     console.log(`实际: ${amountAccuracy.toFixed(1)}%`);
     console.log(`测试数: ${amountResult.total}`);
     console.log(`正确: ${amountResult.correct}`);
     console.log(`错误: ${amountResult.incorrect}`);
-    console.log(`状态: ${amountAccuracy >= targets.amount ? '✅ 达标' : '❌ 未达标'}\n`);
+    console.log(
+      `状态: ${amountAccuracy >= targets.amount ? "✅ 达标" : "❌ 未达标"}\n`,
+    );
 
-    console.log('二、诉讼请求准确率');
-    console.log('-------------------');
+    console.log("二、诉讼请求准确率");
+    console.log("-------------------");
     console.log(`目标: ≥${targets.claim}%`);
     console.log(`实际: ${claimAccuracy.toFixed(1)}%`);
     console.log(`测试数: ${claimResult.total}`);
     console.log(`正确: ${claimResult.correct}`);
     console.log(`错误: ${claimResult.incorrect}`);
-    console.log(`状态: ${claimAccuracy >= targets.claim ? '✅ 达标' : '❌ 未达标'}\n`);
+    console.log(
+      `状态: ${claimAccuracy >= targets.claim ? "✅ 达标" : "❌ 未达标"}\n`,
+    );
 
-    console.log('三、法定代表人过滤准确率');
-    console.log('-------------------');
+    console.log("三、法定代表人过滤准确率");
+    console.log("-------------------");
     console.log(`目标: ≥98%`);
     console.log(`实际: ${legalRepAccuracy.toFixed(1)}%`);
     console.log(`测试数: ${legalRepResult.total}`);
     console.log(`正确: ${legalRepResult.correct}`);
     console.log(`错误: ${legalRepResult.incorrect}`);
-    console.log(`状态: ${legalRepAccuracy >= targets.party ? '✅ 达标' : '❌ 未达标'}\n`);
+    console.log(
+      `状态: ${legalRepAccuracy >= targets.party ? "✅ 达标" : "❌ 未达标"}\n`,
+    );
 
-    console.log('========================================');
+    console.log("========================================");
     const allPassed =
       amountAccuracy >= targets.amount &&
       claimAccuracy >= targets.claim &&
       legalRepAccuracy >= targets.party;
-    console.log(`总体状态: ${allPassed ? '✅ 所有设计指标均达成' : '❌ 部分设计指标未达成'}`);
-    console.log('========================================\n');
+    console.log(
+      `总体状态: ${allPassed ? "✅ 所有设计指标均达成" : "❌ 部分设计指标未达成"}`,
+    );
+    console.log("========================================\n");
   }
 }
 
@@ -502,9 +525,9 @@ class DirectAccuracyEvaluator {
 // =============================================================================
 
 async function main(): Promise<void> {
-  console.log('========================================');
-  console.log('DocAnalyzer准确率评估（直接测试）');
-  console.log('========================================\n');
+  console.log("========================================");
+  console.log("DocAnalyzer准确率评估（直接测试）");
+  console.log("========================================\n");
 
   const evaluator = new DirectAccuracyEvaluator();
 
@@ -515,7 +538,7 @@ async function main(): Promise<void> {
 
     evaluator.generateReport(amountResult, claimResult, legalRepResult);
   } catch (error) {
-    console.error('评估失败:', error);
+    console.error("评估失败:", error);
     process.exit(1);
   }
 }

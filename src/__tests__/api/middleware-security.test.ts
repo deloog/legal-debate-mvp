@@ -24,16 +24,16 @@ describe("Security Middleware", () => {
       const result = await corsMiddleware(request, context, response);
 
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
-        "http://localhost:3000"
+        "http://localhost:3000",
       );
       expect(response.headers.get("Access-Control-Allow-Methods")).toBe(
-        "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+        "GET, POST, PUT, DELETE, PATCH, OPTIONS",
       );
       expect(response.headers.get("Access-Control-Allow-Headers")).toBe(
-        "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+        "Content-Type, Authorization, X-Requested-With, Accept, Origin",
       );
       expect(response.headers.get("Access-Control-Allow-Credentials")).toBe(
-        "true"
+        "true",
       );
       expect(response.headers.get("Access-Control-Max-Age")).toBe("86400");
       expect(result).toBeUndefined(); // CORS middleware returns void
@@ -50,9 +50,9 @@ describe("Security Middleware", () => {
       const response = NextResponse.next();
 
       await corsMiddleware(request, context, response);
-      
+
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
-        "http://localhost:3000"
+        "http://localhost:3000",
       );
     });
 
@@ -67,12 +67,12 @@ describe("Security Middleware", () => {
       const response = NextResponse.next();
 
       await corsMiddleware(request, context, response);
-      
+
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
-        "http://localhost:3000"
+        "http://localhost:3000",
       );
       expect(response.headers.get("Access-Control-Allow-Credentials")).toBe(
-        "true"
+        "true",
       );
     });
 
@@ -84,9 +84,9 @@ describe("Security Middleware", () => {
       const response = NextResponse.next();
 
       await corsMiddleware(request, context, response);
-      
+
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
-        "http://localhost:3000"
+        "http://localhost:3000",
       );
     });
   });
@@ -98,15 +98,15 @@ describe("Security Middleware", () => {
       const response = NextResponse.next();
 
       await securityMiddleware(request, context, response);
-      
+
       expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
       expect(response.headers.get("X-Frame-Options")).toBe("DENY");
       expect(response.headers.get("X-XSS-Protection")).toBe("1; mode=block");
       expect(response.headers.get("Referrer-Policy")).toBe(
-        "strict-origin-when-cross-origin"
+        "strict-origin-when-cross-origin",
       );
       expect(response.headers.get("Permissions-Policy")).toBe(
-        "camera=(), microphone=(), geolocation=()"
+        "camera=(), microphone=(), geolocation=()",
       );
       expect(response.headers.get("X-API-Version")).toBe("v1");
     });
@@ -115,7 +115,7 @@ describe("Security Middleware", () => {
       const originalEnv = process.env.NODE_ENV;
       const originalEnvDescriptor = Object.getOwnPropertyDescriptor(
         process,
-        "NODE_ENV"
+        "NODE_ENV",
       );
       Object.defineProperty(process, "NODE_ENV", {
         value: "test",
@@ -128,7 +128,7 @@ describe("Security Middleware", () => {
       const response = NextResponse.next();
 
       await securityMiddleware(request, context, response);
-      
+
       expect(response.headers.get("X-Node-Environment")).toBe("test");
 
       // Restore original environment
@@ -148,7 +148,7 @@ describe("Security Middleware", () => {
       const response = NextResponse.next();
 
       await securityMiddleware(request, context, response);
-      
+
       // Should include some environment header (value depends on test environment)
       const envHeader = response.headers.get("X-Node-Environment");
       expect(envHeader).toBeDefined();
@@ -172,11 +172,11 @@ describe("Security Middleware", () => {
       const response = NextResponse.next();
 
       await rateLimitMiddleware(request, context, response);
-      
+
       expect(response.headers.get("X-RateLimit-Limit")).toBe("100");
       expect(response.headers.get("X-RateLimit-Remaining")).toBe("98"); // 100 - 1 - 1 (current)
       expect(response.headers.get("X-RateLimit-Reset")).toMatch(
-        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
       );
     });
 
@@ -190,7 +190,7 @@ describe("Security Middleware", () => {
       const response = NextResponse.next();
 
       await rateLimitMiddleware(request, context, response);
-      
+
       expect(response.headers.get("X-RateLimit-Remaining")).toBe("98");
     });
 
@@ -200,7 +200,7 @@ describe("Security Middleware", () => {
       const response = NextResponse.next();
 
       await rateLimitMiddleware(request, context, response);
-      
+
       expect(response.headers.get("X-RateLimit-Remaining")).toBe("98");
     });
 
@@ -213,7 +213,7 @@ describe("Security Middleware", () => {
       const context = createRequestContext(request);
 
       // Import fresh rateLimiter for this test
-      const { rateLimitMiddleware: freshRateLimitMiddleware } = 
+      const { rateLimitMiddleware: freshRateLimitMiddleware } =
         await import("@/app/api/lib/middleware/security");
 
       // Make 101 requests to exceed limit
@@ -225,7 +225,9 @@ describe("Security Middleware", () => {
           // Expected for the last request
           if (i === 100) {
             expect(error).toBeInstanceOf(Error);
-            expect(error.message).toBe("Too many requests, please try again later");
+            expect(error.message).toBe(
+              "Too many requests, please try again later",
+            );
             expect((error as any).statusCode).toBe(429);
           } else {
             throw error;
@@ -243,7 +245,7 @@ describe("Security Middleware", () => {
       const context = createRequestContext(request);
 
       // Import fresh rateLimiter for this test
-      const { rateLimitMiddleware: freshRateLimitMiddleware } = 
+      const { rateLimitMiddleware: freshRateLimitMiddleware } =
         await import("@/app/api/lib/middleware/security");
 
       // Make 101 requests to trigger rate limit
@@ -287,10 +289,10 @@ describe("Security Middleware", () => {
 
       // CORS headers
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
-        "http://localhost:3000"
+        "http://localhost:3000",
       );
       expect(response.headers.get("Access-Control-Allow-Credentials")).toBe(
-        "true"
+        "true",
       );
 
       // Security headers

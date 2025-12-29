@@ -5,10 +5,10 @@ import type {
   WorkflowRoute,
   WorkflowCondition,
   RoutingDecision,
-  ConditionEvaluationContext
-} from './types';
+  ConditionEvaluationContext,
+} from "./types";
 
-import type { StepExecution } from './types';
+import type { StepExecution } from "./types";
 
 // =============================================================================
 // 条件评估器
@@ -20,7 +20,7 @@ export class ConditionEvaluator {
    */
   public evaluate(
     condition: WorkflowCondition,
-    context: ConditionEvaluationContext
+    context: ConditionEvaluationContext,
   ): boolean {
     try {
       const expression = this.parseExpression(condition.expression);
@@ -38,15 +38,21 @@ export class ConditionEvaluator {
     try {
       // 简单的表达式解析，支持常见操作符
       // 实际项目中可以使用更强大的表达式引擎（如expr-eval）
-      
+
       // 替换步骤结果引用
       const parsed = expression
-        .replace(/\$\{step:([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_]+)\}/g, 
-          (match, stepId, field) => `__STEP_RESULT_${stepId}.${field}`)
-        .replace(/\$\{shared:([a-zA-Z0-9_]+)\}/g,
-          (match, key) => `__SHARED_DATA.${key}`)
-        .replace(/\$\{input:([a-zA-Z0-9_]+)\}/g,
-          (match, key) => `__INPUT_DATA.${key}`);
+        .replace(
+          /\$\{step:([a-zA-Z0-9_-]+)\.([a-zA-Z0-9_]+)\}/g,
+          (match, stepId, field) => `__STEP_RESULT_${stepId}.${field}`,
+        )
+        .replace(
+          /\$\{shared:([a-zA-Z0-9_]+)\}/g,
+          (match, key) => `__SHARED_DATA.${key}`,
+        )
+        .replace(
+          /\$\{input:([a-zA-Z0-9_]+)\}/g,
+          (match, key) => `__INPUT_DATA.${key}`,
+        );
 
       return parsed;
     } catch (error) {
@@ -59,7 +65,7 @@ export class ConditionEvaluator {
    */
   private evaluateExpression(
     expression: string,
-    context: ConditionEvaluationContext
+    context: ConditionEvaluationContext,
   ): boolean {
     // 构建评估环境
     const env = this.buildEvaluationEnv(context);
@@ -75,10 +81,12 @@ export class ConditionEvaluator {
   /**
    * 构建评估环境
    */
-  private buildEvaluationEnv(context: ConditionEvaluationContext): Record<string, any> {
+  private buildEvaluationEnv(
+    context: ConditionEvaluationContext,
+  ): Record<string, any> {
     const env: Record<string, any> = {
       __INPUT_DATA: context.inputData,
-      __SHARED_DATA: {}
+      __SHARED_DATA: {},
     };
 
     // 转换共享数据Map为对象
@@ -99,13 +107,14 @@ export class ConditionEvaluator {
    */
   private evaluateSimpleCondition(
     expression: string,
-    env: Record<string, any>
+    env: Record<string, any>,
   ): boolean {
     // 简单的条件评估实现
     // 支持格式: field === value, field > value, field < value, field != value
     // field in [value1, value2], field contains value
-    
-    const comparisonRegex = /^([\w.$]+)\s*(===|==|!=|!==|>|<|>=|<=|in|contains)\s*(.+)$/;
+
+    const comparisonRegex =
+      /^([\w.$]+)\s*(===|==|!=|!==|>|<|>=|<=|in|contains)\s*(.+)$/;
     const match = expression.match(comparisonRegex);
 
     if (!match) {
@@ -120,24 +129,24 @@ export class ConditionEvaluator {
 
     // 执行比较
     switch (operator) {
-      case '===':
-      case '==':
+      case "===":
+      case "==":
         return fieldValue === value;
-      case '!==':
-      case '!=':
+      case "!==":
+      case "!=":
         return fieldValue !== value;
-      case '>':
+      case ">":
         return fieldValue > value;
-      case '<':
+      case "<":
         return fieldValue < value;
-      case '>=':
+      case ">=":
         return fieldValue >= value;
-      case '<=':
+      case "<=":
         return fieldValue <= value;
-      case 'in':
+      case "in":
         return Array.isArray(value) && value.includes(fieldValue);
-      case 'contains':
-        return Array.isArray(fieldValue) 
+      case "contains":
+        return Array.isArray(fieldValue)
           ? fieldValue.includes(value)
           : String(fieldValue).includes(String(value));
       default:
@@ -149,7 +158,7 @@ export class ConditionEvaluator {
    * 获取字段值
    */
   private getFieldValue(path: string, env: Record<string, any>): any {
-    const parts = path.split('.');
+    const parts = path.split(".");
     let value = env;
 
     for (const part of parts) {
@@ -177,18 +186,20 @@ export class ConditionEvaluator {
     }
 
     // 布尔值
-    if (valueStr === 'true') return true;
-    if (valueStr === 'false') return false;
-    if (valueStr === 'null') return null;
+    if (valueStr === "true") return true;
+    if (valueStr === "false") return false;
+    if (valueStr === "null") return null;
 
     // 字符串（带引号）
-    if ((valueStr.startsWith('"') && valueStr.endsWith('"')) ||
-        (valueStr.startsWith("'") && valueStr.endsWith("'"))) {
+    if (
+      (valueStr.startsWith('"') && valueStr.endsWith('"')) ||
+      (valueStr.startsWith("'") && valueStr.endsWith("'"))
+    ) {
       return valueStr.slice(1, -1);
     }
 
     // 数组
-    if (valueStr.startsWith('[') && valueStr.endsWith(']')) {
+    if (valueStr.startsWith("[") && valueStr.endsWith("]")) {
       try {
         return JSON.parse(valueStr);
       } catch {
@@ -220,7 +231,7 @@ export class DynamicRouter {
     workflow: WorkflowDefinition,
     stepResults: Map<string, StepExecution>,
     sharedData: Map<string, any>,
-    inputData: Record<string, any>
+    inputData: Record<string, any>,
   ): RoutingDecision {
     // 如果没有路由规则，返回默认路由
     if (!workflow.routes || workflow.routes.length === 0) {
@@ -232,7 +243,7 @@ export class DynamicRouter {
       stepResults,
       sharedData,
       currentStepId,
-      inputData
+      inputData,
     };
 
     // 查找匹配的路由
@@ -246,7 +257,9 @@ export class DynamicRouter {
       if (route.conditionId) {
         const condition = this.findCondition(route.conditionId, workflow);
         if (!condition) {
-          console.warn(`路由${route.routeId}引用的条件${route.conditionId}不存在`);
+          console.warn(
+            `路由${route.routeId}引用的条件${route.conditionId}不存在`,
+          );
           continue;
         }
 
@@ -254,19 +267,19 @@ export class DynamicRouter {
           return {
             targetStepId: route.targetStepId,
             routeId: route.routeId,
-            reason: `条件${route.conditionId}匹配成功`
+            reason: `条件${route.conditionId}匹配成功`,
           };
         }
       }
     }
 
     // 查找默认路由
-    const defaultRoute = workflow.routes.find(r => r.isDefault);
+    const defaultRoute = workflow.routes.find((r) => r.isDefault);
     if (defaultRoute) {
       return {
         targetStepId: defaultRoute.targetStepId,
         routeId: defaultRoute.routeId,
-        reason: '使用默认路由'
+        reason: "使用默认路由",
       };
     }
 
@@ -277,8 +290,13 @@ export class DynamicRouter {
   /**
    * 查找下一个步骤
    */
-  private findNextStep(currentStepId: string, workflow: WorkflowDefinition): RoutingDecision {
-    const currentIndex = workflow.steps.findIndex(s => s.stepId === currentStepId);
+  private findNextStep(
+    currentStepId: string,
+    workflow: WorkflowDefinition,
+  ): RoutingDecision {
+    const currentIndex = workflow.steps.findIndex(
+      (s) => s.stepId === currentStepId,
+    );
 
     if (currentIndex === -1) {
       throw new Error(`步骤${currentStepId}不存在`);
@@ -288,16 +306,16 @@ export class DynamicRouter {
     if (currentIndex + 1 < workflow.steps.length) {
       return {
         targetStepId: workflow.steps[currentIndex + 1].stepId,
-        routeId: 'sequential',
-        reason: '顺序执行下一个步骤'
+        routeId: "sequential",
+        reason: "顺序执行下一个步骤",
       };
     }
 
     // 没有下一个步骤了
     return {
-      targetStepId: '',
-      routeId: 'end',
-      reason: '工作流结束'
+      targetStepId: "",
+      routeId: "end",
+      reason: "工作流结束",
     };
   }
 
@@ -306,9 +324,9 @@ export class DynamicRouter {
    */
   private findCondition(
     conditionId: string,
-    workflow: WorkflowDefinition
+    workflow: WorkflowDefinition,
   ): WorkflowCondition | undefined {
-    return workflow.conditions?.find(c => c.conditionId === conditionId);
+    return workflow.conditions?.find((c) => c.conditionId === conditionId);
   }
 
   /**
@@ -317,22 +335,26 @@ export class DynamicRouter {
   public getRoutableSteps(
     currentStepId: string,
     workflow: WorkflowDefinition,
-    context: ConditionEvaluationContext
+    context: ConditionEvaluationContext,
   ): string[] {
     const routable: string[] = [];
 
     // 当前步骤之后的步骤
-    const currentIndex = workflow.steps.findIndex(s => s.stepId === currentStepId);
+    const currentIndex = workflow.steps.findIndex(
+      (s) => s.stepId === currentStepId,
+    );
 
     for (let i = currentIndex + 1; i < workflow.steps.length; i++) {
       const step = workflow.steps[i];
       const deps = step.dependsOn || [];
 
       // 检查依赖是否都已完成
-      const allDepsCompleted = deps.every(depId => {
+      const allDepsCompleted = deps.every((depId) => {
         const depResult = context.stepResults.get(depId);
-        return depResult && 
-          (depResult.status === 'completed' || depResult.status === 'skipped');
+        return (
+          depResult &&
+          (depResult.status === "completed" || depResult.status === "skipped")
+        );
       });
 
       if (allDepsCompleted) {
@@ -367,7 +389,7 @@ export class WorkflowRouteBuilder {
   public addConditionalRoute(
     conditionExpression: string,
     targetStepId: string,
-    description?: string
+    description?: string,
   ): this {
     const conditionId = `condition_${++this.conditionCounter}`;
     const routeId = `route_${++this.routeCounter}`;
@@ -375,13 +397,13 @@ export class WorkflowRouteBuilder {
     this.conditions.push({
       conditionId,
       expression: conditionExpression,
-      description
+      description,
     });
 
     this.routes.push({
       routeId,
       conditionId,
-      targetStepId
+      targetStepId,
     });
 
     return this;
@@ -396,7 +418,7 @@ export class WorkflowRouteBuilder {
     this.routes.push({
       routeId,
       targetStepId,
-      isDefault: true
+      isDefault: true,
     });
 
     return this;
@@ -408,7 +430,7 @@ export class WorkflowRouteBuilder {
   public build(): { routes: WorkflowRoute[]; conditions: WorkflowCondition[] } {
     return {
       routes: this.routes,
-      conditions: this.conditions
+      conditions: this.conditions,
     };
   }
 

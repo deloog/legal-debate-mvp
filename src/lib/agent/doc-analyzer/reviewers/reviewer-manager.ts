@@ -1,6 +1,6 @@
 /**
  * 审查管理器 - 负责协调多个审查器的执行
- * 
+ *
  * 核心功能：
  * - 管理审查器的注册和执行
  * - 协调审查流程顺序
@@ -12,10 +12,10 @@ import type {
   ExtractedData,
   ReviewResult,
   ReviewerConfig,
-  Correction
-} from '../core/types';
-import { logger } from '../../../agent/security/logger';
-import { DEFAULT_CONFIG } from '../core/constants';
+  Correction,
+} from "../core/types";
+import { logger } from "../../../agent/security/logger";
+import { DEFAULT_CONFIG } from "../core/constants";
 
 /**
  * 审查器接口
@@ -25,7 +25,7 @@ export interface IReviewer {
   review(
     data: ExtractedData,
     fullText: string,
-    config: ReviewerConfig
+    config: ReviewerConfig,
   ): Promise<ReviewResult>;
 }
 
@@ -36,7 +36,7 @@ export class ReviewerManager {
   private reviewers: Map<string, IReviewer> = new Map();
 
   constructor() {
-    logger.info('ReviewerManager初始化');
+    logger.info("ReviewerManager初始化");
   }
 
   /**
@@ -44,7 +44,7 @@ export class ReviewerManager {
    */
   public registerReviewer(reviewer: IReviewer): void {
     this.reviewers.set(reviewer.name, reviewer);
-    logger.info('审查器已注册', { reviewer: reviewer.name });
+    logger.info("审查器已注册", { reviewer: reviewer.name });
   }
 
   /**
@@ -52,7 +52,7 @@ export class ReviewerManager {
    */
   public unregisterReviewer(name: string): void {
     this.reviewers.delete(name);
-    logger.info('审查器已注销', { reviewer: name });
+    logger.info("审查器已注销", { reviewer: name });
   }
 
   /**
@@ -61,7 +61,7 @@ export class ReviewerManager {
   public async review(
     data: ExtractedData,
     fullText: string,
-    config?: Partial<ReviewerConfig>
+    config?: Partial<ReviewerConfig>,
   ): Promise<{
     passed: boolean;
     score: number;
@@ -71,22 +71,22 @@ export class ReviewerManager {
   }> {
     const mergedConfig = {
       ...DEFAULT_CONFIG.reviewers.ruleReviewer,
-      ...config
+      ...config,
     };
 
-    logger.info('开始审查流程', {
+    logger.info("开始审查流程", {
       reviewerCount: this.reviewers.size,
-      enabled: mergedConfig.enabled
+      enabled: mergedConfig.enabled,
     });
 
     if (!mergedConfig.enabled || this.reviewers.size === 0) {
-      logger.info('审查流程跳过（未启用或无审查器）');
+      logger.info("审查流程跳过（未启用或无审查器）");
       return {
         passed: true,
         score: 1.0,
         issues: [],
         corrections: [],
-        details: []
+        details: [],
       };
     }
 
@@ -97,21 +97,22 @@ export class ReviewerManager {
     // 顺序执行所有注册的审查器
     for (const [name, reviewer] of this.reviewers) {
       try {
-        logger.debug('执行审查器', { reviewer: name });
+        logger.debug("执行审查器", { reviewer: name });
         const result = await reviewer.review(data, fullText, mergedConfig);
         results.push({ reviewer: name, result });
 
         allIssues.push(...result.issues);
         allCorrections.push(...result.corrections);
 
-        logger.debug('审查器执行完成', {
+        logger.debug("审查器执行完成", {
           reviewer: name,
           passed: result.passed,
           score: result.score,
-          issues: result.issues.length
+          issues: result.issues.length,
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         logger.error(`审查器执行失败: ${name} - ${errorMessage}`);
         // 继续执行其他审查器
       }
@@ -123,12 +124,12 @@ export class ReviewerManager {
     // 判断是否通过阈值
     const passed = overallScore >= mergedConfig.threshold;
 
-    logger.info('审查流程完成', {
+    logger.info("审查流程完成", {
       passed,
       score: overallScore,
       threshold: mergedConfig.threshold,
       issues: allIssues.length,
-      corrections: allCorrections.length
+      corrections: allCorrections.length,
     });
 
     return {
@@ -136,7 +137,7 @@ export class ReviewerManager {
       score: overallScore,
       issues: allIssues,
       corrections: allCorrections,
-      details: results
+      details: results,
     };
   }
 
@@ -144,7 +145,7 @@ export class ReviewerManager {
    * 计算综合评分
    */
   private calculateOverallScore(
-    results: Array<{ reviewer: string; result: ReviewResult }>
+    results: Array<{ reviewer: string; result: ReviewResult }>,
   ): number {
     if (results.length === 0) {
       return 1.0;
@@ -153,7 +154,7 @@ export class ReviewerManager {
     // 使用平均分作为综合评分
     const totalScore = results.reduce(
       (sum, { result }) => sum + result.score,
-      0
+      0,
     );
 
     return totalScore / results.length;

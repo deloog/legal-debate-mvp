@@ -1,10 +1,10 @@
 /**
  * StrategistAgent - 类型定义
- * 
+ *
  * 定义策略生成相关的所有类型和接口
  */
 
-import type { AgentContext } from '../../../types/agent';
+import type { AgentContext } from "../../../types/agent";
 
 // =============================================================================
 // 策略生成输入类型
@@ -15,7 +15,7 @@ import type { AgentContext } from '../../../types/agent';
  */
 export interface PartyInfo {
   name: string;
-  role: 'plaintiff' | 'defendant';
+  role: "plaintiff" | "defendant";
   representative?: string;
 }
 
@@ -52,7 +52,7 @@ export interface LegalAnalysis {
 export interface CaseContext {
   jurisdiction: string;
   courtLevel: string;
-  complexity: 'simple' | 'medium' | 'complex';
+  complexity: "simple" | "medium" | "complex";
   estimatedDuration?: string;
 }
 
@@ -87,7 +87,7 @@ export interface StrategyRecommendation {
   rationale: string;
   implementationSteps: string[];
   expectedOutcome: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: "high" | "medium" | "low";
 }
 
 /**
@@ -95,7 +95,7 @@ export interface StrategyRecommendation {
  */
 export interface RiskFactor {
   factor: string;
-  impact: 'low' | 'medium' | 'high';
+  impact: "low" | "medium" | "high";
   probability: number;
   mitigation: string;
 }
@@ -104,7 +104,7 @@ export interface RiskFactor {
  * 风险评估
  */
 export interface RiskAssessment {
-  overallRisk: 'low' | 'medium' | 'high';
+  overallRisk: "low" | "medium" | "high";
   confidence: number;
   riskFactors: RiskFactor[];
 }
@@ -143,7 +143,7 @@ export interface AIStrategyResponse {
   }>;
   risks: Array<{
     factor: string;
-    impact: 'low' | 'medium' | 'high';
+    impact: "low" | "medium" | "high";
     probability: number;
     mitigation: string;
   }>;

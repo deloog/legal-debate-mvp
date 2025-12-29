@@ -33,7 +33,7 @@ export class AIClientFactory {
     try {
       // 使用OpenAI兼容格式调用智谱清言API
       const { OpenAI } = await import("openai");
-      
+
       return new OpenAI({
         apiKey: config.apiKey,
         baseURL: config.baseURL || "https://open.bigmodel.cn/api/paas/v4/",
@@ -51,7 +51,9 @@ export class AIClientFactory {
   /**
    * 创建DeepSeek客户端
    */
-  private static async createDeepSeekClient(config: AIClientConfig): Promise<any> {
+  private static async createDeepSeekClient(
+    config: AIClientConfig,
+  ): Promise<any> {
     try {
       // DeepSeek API兼容OpenAI格式，直接使用OpenAI客户端
       const { OpenAI } = await import("openai");
@@ -73,7 +75,9 @@ export class AIClientFactory {
   /**
    * 创建OpenAI客户端
    */
-  private static async createOpenAIClient(config: AIClientConfig): Promise<any> {
+  private static async createOpenAIClient(
+    config: AIClientConfig,
+  ): Promise<any> {
     try {
       const { OpenAI } = await import("openai");
 
@@ -94,7 +98,9 @@ export class AIClientFactory {
   /**
    * 创建Anthropic客户端
    */
-  private static async createAnthropicClient(config: AIClientConfig): Promise<any> {
+  private static async createAnthropicClient(
+    config: AIClientConfig,
+  ): Promise<any> {
     try {
       const Anthropic = await import("@anthropic-ai/sdk");
 
@@ -120,10 +126,14 @@ export class AIClientFactory {
       chat: {
         completions: {
           create: async (params: any) => {
-            const userMessage = params.messages[params.messages.length - 1]?.content || "";
-            
+            const userMessage =
+              params.messages[params.messages.length - 1]?.content || "";
+
             // 检查是否是文档分析请求
-            if (userMessage.includes("你是专业法律文档分析专家") || userMessage.includes("extractedData")) {
+            if (
+              userMessage.includes("你是专业法律文档分析专家") ||
+              userMessage.includes("extractedData")
+            ) {
               // 返回JSON格式的模拟文档分析结果
               return {
                 id: `${provider}_mock_${Date.now()}`,
@@ -138,31 +148,77 @@ export class AIClientFactory {
                       content: JSON.stringify({
                         extractedData: {
                           parties: [
-                            { type: "plaintiff", name: "王小红", role: "原告", contact: "18600186000", address: "上海市浦东新区陆家嘴环路100号" },
-                            { type: "defendant", name: "张大伟", role: "被告", contact: "18700187000", address: "上海市徐汇区淮海中路200号" },
-                            { type: "other", name: "赵明", role: "第三人", contact: "18800188000", address: "上海市静安区南京西路300号" }
+                            {
+                              type: "plaintiff",
+                              name: "王小红",
+                              role: "原告",
+                              contact: "18600186000",
+                              address: "上海市浦东新区陆家嘴环路100号",
+                            },
+                            {
+                              type: "defendant",
+                              name: "张大伟",
+                              role: "被告",
+                              contact: "18700187000",
+                              address: "上海市徐汇区淮海中路200号",
+                            },
+                            {
+                              type: "other",
+                              name: "赵明",
+                              role: "第三人",
+                              contact: "18800188000",
+                              address: "上海市静安区南京西路300号",
+                            },
                           ],
                           claims: [
-                            { type: "PAY_PRINCIPAL", content: "支付拖欠货款人民币800,000元", amount: 800000, currency: "CNY" },
-                            { type: "PAY_PENALTY", content: "支付违约金（以800,000元为基数，自2023年5月1日起至实际付清之日止，按年利率8%计算）", currency: "CNY" },
-                            { type: "LITIGATION_COST", content: "承担本案全部诉讼费用" },
-                            { type: "PAY_DAMAGES", content: "赔偿原告因追讨欠款产生的律师费50,000元", amount: 50000, currency: "CNY" }
+                            {
+                              type: "PAY_PRINCIPAL",
+                              content: "支付拖欠货款人民币800,000元",
+                              amount: 800000,
+                              currency: "CNY",
+                            },
+                            {
+                              type: "PAY_PENALTY",
+                              content:
+                                "支付违约金（以800,000元为基数，自2023年5月1日起至实际付清之日止，按年利率8%计算）",
+                              currency: "CNY",
+                            },
+                            {
+                              type: "LITIGATION_COST",
+                              content: "承担本案全部诉讼费用",
+                            },
+                            {
+                              type: "PAY_DAMAGES",
+                              content: "赔偿原告因追讨欠款产生的律师费50,000元",
+                              amount: 50000,
+                              currency: "CNY",
+                            },
                           ],
                           timeline: [],
-                          summary: "民事借款合同纠纷案，原告王小红诉被告张大伟拖欠货款800,000元，要求支付违约金和律师费。",
+                          summary:
+                            "民事借款合同纠纷案，原告王小红诉被告张大伟拖欠货款800,000元，要求支付违约金和律师费。",
                           caseType: "civil",
-                          keyFacts: []
+                          keyFacts: [],
                         },
                         confidence: 0.85,
                         analysisProcess: {
                           ocrErrors: [],
-                          entitiesListed: { persons: ["王小红", "张大伟", "赵明"], companies: [], amounts: ["800,000", "50,000"] },
+                          entitiesListed: {
+                            persons: ["王小红", "张大伟", "赵明"],
+                            companies: [],
+                            amounts: ["800,000", "50,000"],
+                          },
                           roleReasoning: "根据'原告：'和'被告：'关键词识别",
                           claimDecomposition: "复合请求拆解完成",
                           amountNormalization: "已标准化",
-                          validationResults: { duplicatesFound: [], roleConflicts: [], missingClaims: [], amountInconsistencies: [] }
-                        }
-                      })
+                          validationResults: {
+                            duplicatesFound: [],
+                            roleConflicts: [],
+                            missingClaims: [],
+                            amountInconsistencies: [],
+                          },
+                        },
+                      }),
                     },
                     finish_reason: "stop",
                     logprobs: null,
@@ -175,7 +231,7 @@ export class AIClientFactory {
                 },
               };
             }
-            
+
             // 默认文本响应
             return {
               id: `${provider}_mock_${Date.now()}`,

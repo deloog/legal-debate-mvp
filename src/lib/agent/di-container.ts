@@ -1,7 +1,7 @@
 // Agent依赖注入容器
 
-import type { Agent } from '../../types/agent';
-import { AgentType } from '../../types/agent';
+import type { Agent } from "../../types/agent";
+import { AgentType } from "../../types/agent";
 
 // =============================================================================
 // 依赖注入容器接口
@@ -25,17 +25,17 @@ interface DependencyRegistration {
 export interface AgentCreationConfig {
   // 依赖注入
   dependencies?: Record<string, any>;
-  
+
   // 构造函数参数
   constructorArgs?: any[];
-  
+
   // 配置选项
   options?: Record<string, any>;
-  
+
   // 生命周期管理
   initialize?: boolean;
   cleanup?: boolean;
-  
+
   // 注册者信息
   updatedBy?: string;
 }
@@ -66,31 +66,42 @@ export class AgentDIContainer {
   /**
    * 注册依赖
    */
-  public register<T>(token: string, provider: DependencyProvider<T>, singleton: boolean = true): void {
+  public register<T>(
+    token: string,
+    provider: DependencyProvider<T>,
+    singleton: boolean = true,
+  ): void {
     this.dependencies.set(token, {
       provider,
       singleton,
       instance: undefined,
-      factory: undefined
+      factory: undefined,
     });
   }
 
   /**
    * 注册工厂函数
    */
-  public registerFactory<T>(token: string, factory: DependencyFactory<T>, singleton: boolean = false): void {
+  public registerFactory<T>(
+    token: string,
+    factory: DependencyFactory<T>,
+    singleton: boolean = false,
+  ): void {
     this.dependencies.set(token, {
       provider: undefined,
       singleton,
       instance: undefined,
-      factory
+      factory,
     });
   }
 
   /**
    * 注册Agent配置
    */
-  public registerAgentConfig(agentName: string, config: AgentCreationConfig): void {
+  public registerAgentConfig(
+    agentName: string,
+    config: AgentCreationConfig,
+  ): void {
     this.agentConfigs.set(agentName, config);
   }
 
@@ -110,13 +121,14 @@ export class AgentDIContainer {
 
     // 创建实例
     let instance: T;
-    
+
     if (registration.factory) {
       instance = registration.factory();
     } else if (registration.provider) {
-      instance = typeof registration.provider === 'function' 
-        ? (registration.provider as () => T)()
-        : registration.provider;
+      instance =
+        typeof registration.provider === "function"
+          ? (registration.provider as () => T)()
+          : registration.provider;
     } else {
       throw new Error(`Invalid provider for dependency '${token}'`);
     }
@@ -152,7 +164,10 @@ export class AgentDIContainer {
    */
   public remove(token: string): boolean {
     const registration = this.dependencies.get(token);
-    if (registration?.instance && typeof registration.instance.cleanup === 'function') {
+    if (
+      registration?.instance &&
+      typeof registration.instance.cleanup === "function"
+    ) {
       registration.instance.cleanup();
     }
     return this.dependencies.delete(token);
@@ -174,25 +189,28 @@ export class AgentDIContainer {
    */
   public createAgent<T extends Agent>(
     agentClass: new (...args: any[]) => T,
-    agentName: string
+    agentName: string,
   ): T {
     const config = this.getAgentConfig(agentName) || {};
-    
+
     // 准备构造函数参数 - agentName始终是第一个参数
     const constructorArgs = [agentName, ...this.prepareConstructorArgs(config)];
-    
+
     // 创建实例
     const instance = new agentClass(...constructorArgs);
-    
+
     // 注入配置
     if (config.options) {
-      if (typeof instance.configure === 'function') {
+      if (typeof instance.configure === "function") {
         instance.configure(config.options);
       }
     }
 
     // 初始化
-    if (config.initialize !== false && typeof instance.initialize === 'function') {
+    if (
+      config.initialize !== false &&
+      typeof instance.initialize === "function"
+    ) {
       instance.initialize();
     }
 
@@ -204,20 +222,22 @@ export class AgentDIContainer {
    */
   private prepareConstructorArgs(config: AgentCreationConfig): any[] {
     const args: any[] = [];
-    
+
     // 使用预定义的构造函数参数
     if (config.constructorArgs) {
       args.push(...config.constructorArgs);
     }
-    
+
     // 使用依赖注入
     if (config.dependencies) {
-      for (const [paramName, dependencyToken] of Object.entries(config.dependencies)) {
+      for (const [paramName, dependencyToken] of Object.entries(
+        config.dependencies,
+      )) {
         const dependency = this.resolve(dependencyToken);
         args.push(dependency);
       }
     }
-    
+
     return args;
   }
 
@@ -230,7 +250,7 @@ export class AgentDIContainer {
    */
   public createAgents<T extends Agent>(
     agentClass: new (...args: any[]) => T,
-    agentNames: string[]
+    agentNames: string[],
   ): T[] {
     const agents: T[] = [];
     const errors: string[] = [];
@@ -245,7 +265,7 @@ export class AgentDIContainer {
     }
 
     if (errors.length > 0) {
-      console.warn('Batch agent creation errors:', errors);
+      console.warn("Batch agent creation errors:", errors);
     }
 
     return agents;
@@ -258,7 +278,7 @@ export class AgentDIContainer {
     // 清理所有单例实例
     for (const [token, registration] of this.dependencies.entries()) {
       if (registration.singleton && registration.instance) {
-        if (typeof registration.instance.cleanup === 'function') {
+        if (typeof registration.instance.cleanup === "function") {
           registration.instance.cleanup();
         }
       }
@@ -277,25 +297,38 @@ export class AgentDIContainer {
    */
   public getDiagnostics(): {
     timestamp: number;
-    dependencies: Array<{ token: string; singleton: boolean; hasInstance: boolean }>;
-    agentConfigs: Array<{ agentName: string; hasDependencies: boolean; hasOptions: boolean }>;
+    dependencies: Array<{
+      token: string;
+      singleton: boolean;
+      hasInstance: boolean;
+    }>;
+    agentConfigs: Array<{
+      agentName: string;
+      hasDependencies: boolean;
+      hasOptions: boolean;
+    }>;
   } {
-    const dependencies = Array.from(this.dependencies.entries()).map(([token, registration]) => ({
-      token,
-      singleton: registration.singleton,
-      hasInstance: registration.instance !== undefined
-    }));
+    const dependencies = Array.from(this.dependencies.entries()).map(
+      ([token, registration]) => ({
+        token,
+        singleton: registration.singleton,
+        hasInstance: registration.instance !== undefined,
+      }),
+    );
 
-    const agentConfigs = Array.from(this.agentConfigs.entries()).map(([agentName, config]) => ({
-      agentName,
-      hasDependencies: config.dependencies && Object.keys(config.dependencies).length > 0,
-      hasOptions: config.options && Object.keys(config.options).length > 0
-    }));
+    const agentConfigs = Array.from(this.agentConfigs.entries()).map(
+      ([agentName, config]) => ({
+        agentName,
+        hasDependencies:
+          config.dependencies && Object.keys(config.dependencies).length > 0,
+        hasOptions: config.options && Object.keys(config.options).length > 0,
+      }),
+    );
 
     return {
       timestamp: Date.now(),
       dependencies,
-      agentConfigs
+      agentConfigs,
     };
   }
 
@@ -308,7 +341,7 @@ export class AgentDIContainer {
     agentConfigs: number;
   } {
     let singletonCount = 0;
-    
+
     for (const registration of this.dependencies.values()) {
       if (registration.singleton) {
         singletonCount++;
@@ -318,7 +351,7 @@ export class AgentDIContainer {
     return {
       totalDependencies: this.dependencies.size,
       singletonDependencies: singletonCount,
-      agentConfigs: this.agentConfigs.size
+      agentConfigs: this.agentConfigs.size,
     };
   }
 }
@@ -335,22 +368,22 @@ export const diContainer = AgentDIContainer.getInstance();
 
 export const DEPENDENCY_TOKENS = {
   // 数据库相关
-  DATABASE: 'database',
-  CACHE: 'cache',
-  LOGGER: 'logger',
-  
+  DATABASE: "database",
+  CACHE: "cache",
+  LOGGER: "logger",
+
   // AI服务相关
-  AI_SERVICE: 'aiService',
-  AI_CLIENT: 'aiClient',
-  
+  AI_SERVICE: "aiService",
+  AI_CLIENT: "aiClient",
+
   // 配置相关
-  CONFIG: 'config',
-  ENVIRONMENT: 'environment',
-  
+  CONFIG: "config",
+  ENVIRONMENT: "environment",
+
   // 工具相关
-  METRICS: 'metrics',
-  MONITOR: 'monitor',
-  
+  METRICS: "metrics",
+  MONITOR: "monitor",
+
   // Agent相关
-  AGENT_REGISTRY: 'agentRegistry'
+  AGENT_REGISTRY: "agentRegistry",
 } as const;

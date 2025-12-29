@@ -5,8 +5,8 @@ import type {
   WorkflowStep,
   WorkflowCondition,
   WorkflowRoute,
-  FallbackStrategy
-} from './types';
+  FallbackStrategy,
+} from "./types";
 
 // =============================================================================
 // 工作流定义类
@@ -15,9 +15,9 @@ import type {
 export class WorkflowDefinitionBuilder {
   private definition: Partial<WorkflowDefinition> = {
     steps: [],
-    executionMode: 'sequential',
+    executionMode: "sequential",
     enableCircuitBreaker: true,
-    version: '1.0.0'
+    version: "1.0.0",
   };
 
   /**
@@ -39,7 +39,7 @@ export class WorkflowDefinitionBuilder {
   /**
    * 设置执行模式
    */
-  setExecutionMode(mode: 'sequential' | 'parallel' | 'mixed'): this {
+  setExecutionMode(mode: "sequential" | "parallel" | "mixed"): this {
     this.definition.executionMode = mode;
     return this;
   }
@@ -135,15 +135,15 @@ export class WorkflowDefinitionBuilder {
 
     // 验证必填字段
     if (!this.definition.workflowId) {
-      errors.push('工作流ID不能为空');
+      errors.push("工作流ID不能为空");
     }
 
     if (!this.definition.name) {
-      errors.push('工作流名称不能为空');
+      errors.push("工作流名称不能为空");
     }
 
     if (!this.definition.steps || this.definition.steps.length === 0) {
-      errors.push('工作流至少需要一个步骤');
+      errors.push("工作流至少需要一个步骤");
     }
 
     // 验证步骤ID唯一性
@@ -190,7 +190,9 @@ export class WorkflowDefinitionBuilder {
     for (const route of this.definition.routes || []) {
       // 验证目标步骤存在
       if (!stepIds.has(route.targetStepId)) {
-        errors.push(`路由${route.routeId}指向的步骤${route.targetStepId}不存在`);
+        errors.push(
+          `路由${route.routeId}指向的步骤${route.targetStepId}不存在`,
+        );
       }
 
       // 验证条件存在
@@ -201,11 +203,14 @@ export class WorkflowDefinitionBuilder {
 
     // 验证回退策略
     if (this.definition.fallbackStrategy) {
-      const { type, alternateStepId, alternateAgentType } = this.definition.fallbackStrategy;
+      const { type, alternateStepId, alternateAgentType } =
+        this.definition.fallbackStrategy;
 
-      if (type === 'alternate') {
+      if (type === "alternate") {
         if (!alternateStepId && !alternateAgentType) {
-          errors.push('alternate回退策略需要指定alternateStepId或alternateAgentType');
+          errors.push(
+            "alternate回退策略需要指定alternateStepId或alternateAgentType",
+          );
         }
 
         if (alternateStepId && !stepIds.has(alternateStepId)) {
@@ -213,8 +218,8 @@ export class WorkflowDefinitionBuilder {
         }
       }
 
-      if (type === 'retry' && !this.definition.fallbackStrategy.maxAttempts) {
-        errors.push('retry回退策略需要指定maxAttempts');
+      if (type === "retry" && !this.definition.fallbackStrategy.maxAttempts) {
+        errors.push("retry回退策略需要指定maxAttempts");
       }
     }
 
@@ -223,15 +228,24 @@ export class WorkflowDefinitionBuilder {
     const visiting = new Set<string>();
 
     for (const step of this.definition.steps || []) {
-      if (!this.detectCycle(step.stepId, visited, visiting, this.definition.steps || [])) {
-        errors.push(`工作流存在循环依赖，涉及步骤: ${Array.from(visiting).join(', ')}`);
+      if (
+        !this.detectCycle(
+          step.stepId,
+          visited,
+          visiting,
+          this.definition.steps || [],
+        )
+      ) {
+        errors.push(
+          `工作流存在循环依赖，涉及步骤: ${Array.from(visiting).join(", ")}`,
+        );
         break;
       }
     }
 
     // 如果有错误，抛出异常
     if (errors.length > 0) {
-      throw new Error(`工作流定义验证失败:\n${errors.join('\n')}`);
+      throw new Error(`工作流定义验证失败:\n${errors.join("\n")}`);
     }
 
     return this.definition;
@@ -244,7 +258,7 @@ export class WorkflowDefinitionBuilder {
     stepId: string,
     visited: Set<string>,
     visiting: Set<string>,
-    steps: WorkflowStep[]
+    steps: WorkflowStep[],
   ): boolean {
     if (visiting.has(stepId)) {
       return false; // 检测到循环
@@ -256,7 +270,7 @@ export class WorkflowDefinitionBuilder {
 
     visiting.add(stepId);
 
-    const step = steps.find(s => s.stepId === stepId);
+    const step = steps.find((s) => s.stepId === stepId);
     if (step && step.dependsOn) {
       for (const depId of step.dependsOn) {
         if (!this.detectCycle(depId, visited, visiting, steps)) {
@@ -283,8 +297,8 @@ export class WorkflowDefinitionBuilder {
    */
   clone(): WorkflowDefinitionBuilder {
     const clone = new WorkflowDefinitionBuilder(
-      this.definition.workflowId || '',
-      this.definition.name || ''
+      this.definition.workflowId || "",
+      this.definition.name || "",
     );
     clone.definition = JSON.parse(JSON.stringify(this.definition));
     return clone;
@@ -300,48 +314,48 @@ export class WorkflowDefinitionBuilder {
  */
 export function createDocumentAnalysisWorkflow(): WorkflowDefinition {
   return new WorkflowDefinitionBuilder(
-    'doc-analysis-workflow',
-    '文档分析工作流'
+    "doc-analysis-workflow",
+    "文档分析工作流",
   )
-    .setDescription('完整的文档分析流程，包括文本提取、AI识别、规则处理和审查')
-    .setExecutionMode('sequential')
+    .setDescription("完整的文档分析流程，包括文本提取、AI识别、规则处理和审查")
+    .setExecutionMode("sequential")
     .setTimeout(120000) // 2分钟
     .setEnableCircuitBreaker(true)
-    .setVersion('1.0.0')
+    .setVersion("1.0.0")
     .addStep({
-      stepId: 'text-extraction',
-      agentType: 'doc_analyzer' as any,
-      name: '文本提取',
-      description: '从文档中提取文本内容',
+      stepId: "text-extraction",
+      agentType: "doc_analyzer" as any,
+      name: "文本提取",
+      description: "从文档中提取文本内容",
       required: true,
-      outputKey: 'extractedText'
+      outputKey: "extractedText",
     })
     .addStep({
-      stepId: 'ai-recognition',
-      agentType: 'doc_analyzer' as any,
-      name: 'AI识别',
-      description: '使用AI识别关键信息',
-      dependsOn: ['text-extraction'],
+      stepId: "ai-recognition",
+      agentType: "doc_analyzer" as any,
+      name: "AI识别",
+      description: "使用AI识别关键信息",
+      dependsOn: ["text-extraction"],
       required: true,
-      outputKey: 'aiResult'
+      outputKey: "aiResult",
     })
     .addStep({
-      stepId: 'rule-processing',
-      agentType: 'doc_analyzer' as any,
-      name: '规则处理',
-      description: '使用规则增强AI识别结果',
-      dependsOn: ['ai-recognition'],
+      stepId: "rule-processing",
+      agentType: "doc_analyzer" as any,
+      name: "规则处理",
+      description: "使用规则增强AI识别结果",
+      dependsOn: ["ai-recognition"],
       required: true,
-      outputKey: 'enhancedResult'
+      outputKey: "enhancedResult",
     })
     .addStep({
-      stepId: 'review',
-      agentType: 'doc_analyzer' as any,
-      name: '质量审查',
-      description: '审查解析结果质量',
-      dependsOn: ['rule-processing'],
+      stepId: "review",
+      agentType: "doc_analyzer" as any,
+      name: "质量审查",
+      description: "审查解析结果质量",
+      dependsOn: ["rule-processing"],
       required: true,
-      outputKey: 'reviewResult'
+      outputKey: "reviewResult",
     })
     .build();
 }
@@ -351,46 +365,46 @@ export function createDocumentAnalysisWorkflow(): WorkflowDefinition {
  */
 export function createStrategyWorkflow(): WorkflowDefinition {
   return new WorkflowDefinitionBuilder(
-    'strategy-workflow',
-    '诉讼策略生成工作流'
+    "strategy-workflow",
+    "诉讼策略生成工作流",
   )
-    .setDescription('基于案件信息和法条分析生成诉讼策略')
-    .setExecutionMode('sequential')
+    .setDescription("基于案件信息和法条分析生成诉讼策略")
+    .setExecutionMode("sequential")
     .setTimeout(90000) // 1.5分钟
     .setEnableCircuitBreaker(true)
     .setFallbackStrategy({
-      strategyId: 'strategy-fallback',
-      type: 'retry',
+      strategyId: "strategy-fallback",
+      type: "retry",
       maxAttempts: 3,
       retryDelay: 2000,
-      description: '策略生成失败时重试'
+      description: "策略生成失败时重试",
     })
-    .setVersion('1.0.0')
+    .setVersion("1.0.0")
     .addStep({
-      stepId: 'case-analysis',
-      agentType: 'strategist' as any,
-      name: '案件分析',
-      description: '分析案件基本信息和事实',
+      stepId: "case-analysis",
+      agentType: "strategist" as any,
+      name: "案件分析",
+      description: "分析案件基本信息和事实",
       required: true,
-      outputKey: 'caseAnalysis'
-    })
-    .addStep({
-      stepId: 'swot-analysis',
-      agentType: 'strategist' as any,
-      name: 'SWOT分析',
-      description: '生成SWOT分析',
-      dependsOn: ['case-analysis'],
-      required: true,
-      outputKey: 'swotAnalysis'
+      outputKey: "caseAnalysis",
     })
     .addStep({
-      stepId: 'risk-assessment',
-      agentType: 'strategist' as any,
-      name: '风险评估',
-      description: '评估案件风险',
-      dependsOn: ['swot-analysis'],
+      stepId: "swot-analysis",
+      agentType: "strategist" as any,
+      name: "SWOT分析",
+      description: "生成SWOT分析",
+      dependsOn: ["case-analysis"],
       required: true,
-      outputKey: 'riskAssessment'
+      outputKey: "swotAnalysis",
+    })
+    .addStep({
+      stepId: "risk-assessment",
+      agentType: "strategist" as any,
+      name: "风险评估",
+      description: "评估案件风险",
+      dependsOn: ["swot-analysis"],
+      required: true,
+      outputKey: "riskAssessment",
     })
     .build();
 }
@@ -399,49 +413,48 @@ export function createStrategyWorkflow(): WorkflowDefinition {
  * 创建完整案件处理工作流（混合模式）
  */
 export function createCaseProcessingWorkflow(): WorkflowDefinition {
-  return new WorkflowDefinitionBuilder(
-    'case-processing-workflow',
-    '案件处理工作流'
-  )
-    .setDescription('完整的案件处理流程，包括文档分析和策略生成')
-    .setExecutionMode('mixed')
-    .setTimeout(180000) // 3分钟
-    .setEnableCircuitBreaker(true)
-    .addTag('case-processing')
-    .addTag('full-workflow')
-    .setVersion('1.0.0')
-    // 串行阶段1：文档分析
-    .addStep({
-      stepId: 'doc-analysis',
-      agentType: 'doc_analyzer' as any,
-      name: '文档分析',
-      description: '分析上传的法律文档',
-      required: true,
-      priority: 1,
-      outputKey: 'documentAnalysis'
-    })
-    // 串行阶段2：并行策略生成
-    .addStep({
-      stepId: 'swot-analysis',
-      agentType: 'strategist' as any,
-      name: 'SWOT分析',
-      description: '生成SWOT分析',
-      dependsOn: ['doc-analysis'],
-      required: true,
-      priority: 2,
-      outputKey: 'swotAnalysis'
-    })
-    .addStep({
-      stepId: 'risk-assessment',
-      agentType: 'strategist' as any,
-      name: '风险评估',
-      description: '评估案件风险',
-      dependsOn: ['doc-analysis'],
-      required: true,
-      priority: 2,
-      outputKey: 'riskAssessment'
-    })
-    .build();
+  return (
+    new WorkflowDefinitionBuilder("case-processing-workflow", "案件处理工作流")
+      .setDescription("完整的案件处理流程，包括文档分析和策略生成")
+      .setExecutionMode("mixed")
+      .setTimeout(180000) // 3分钟
+      .setEnableCircuitBreaker(true)
+      .addTag("case-processing")
+      .addTag("full-workflow")
+      .setVersion("1.0.0")
+      // 串行阶段1：文档分析
+      .addStep({
+        stepId: "doc-analysis",
+        agentType: "doc_analyzer" as any,
+        name: "文档分析",
+        description: "分析上传的法律文档",
+        required: true,
+        priority: 1,
+        outputKey: "documentAnalysis",
+      })
+      // 串行阶段2：并行策略生成
+      .addStep({
+        stepId: "swot-analysis",
+        agentType: "strategist" as any,
+        name: "SWOT分析",
+        description: "生成SWOT分析",
+        dependsOn: ["doc-analysis"],
+        required: true,
+        priority: 2,
+        outputKey: "swotAnalysis",
+      })
+      .addStep({
+        stepId: "risk-assessment",
+        agentType: "strategist" as any,
+        name: "风险评估",
+        description: "评估案件风险",
+        dependsOn: ["doc-analysis"],
+        required: true,
+        priority: 2,
+        outputKey: "riskAssessment",
+      })
+      .build()
+  );
 }
 
 // =============================================================================
@@ -459,22 +472,22 @@ export function validateWorkflowDefinition(definition: WorkflowDefinition): {
 
   // 验证必填字段
   if (!definition.workflowId) {
-    errors.push('workflowId不能为空');
+    errors.push("workflowId不能为空");
   }
 
   if (!definition.name) {
-    errors.push('name不能为空');
+    errors.push("name不能为空");
   }
 
   if (!definition.steps || definition.steps.length === 0) {
-    errors.push('steps不能为空');
+    errors.push("steps不能为空");
   }
 
   // 验证步骤
   const stepIds = new Set<string>();
   for (const step of definition.steps || []) {
     if (!step.stepId) {
-      errors.push('步骤缺少stepId');
+      errors.push("步骤缺少stepId");
       continue;
     }
 
@@ -496,11 +509,11 @@ export function validateWorkflowDefinition(definition: WorkflowDefinition): {
   // 验证路由
   for (const route of definition.routes || []) {
     if (!route.routeId) {
-      errors.push('路由缺少routeId');
+      errors.push("路由缺少routeId");
     }
 
     if (!route.targetStepId) {
-      errors.push('路由缺少targetStepId');
+      errors.push("路由缺少targetStepId");
     }
 
     if (!stepIds.has(route.targetStepId)) {
@@ -511,7 +524,7 @@ export function validateWorkflowDefinition(definition: WorkflowDefinition): {
   // 验证条件
   for (const cond of definition.conditions || []) {
     if (!cond.conditionId) {
-      errors.push('条件缺少conditionId');
+      errors.push("条件缺少conditionId");
     }
 
     if (!cond.expression) {
@@ -521,14 +534,16 @@ export function validateWorkflowDefinition(definition: WorkflowDefinition): {
 
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
 /**
  * 获取工作流步骤图
  */
-export function getWorkflowStepGraph(definition: WorkflowDefinition): Map<string, string[]> {
+export function getWorkflowStepGraph(
+  definition: WorkflowDefinition,
+): Map<string, string[]> {
   const graph = new Map<string, string[]>();
 
   for (const step of definition.steps || []) {
@@ -542,7 +557,9 @@ export function getWorkflowStepGraph(definition: WorkflowDefinition): Map<string
 /**
  * 获取工作流的拓扑排序
  */
-export function getWorkflowTopologicalOrder(definition: WorkflowDefinition): string[] {
+export function getWorkflowTopologicalOrder(
+  definition: WorkflowDefinition,
+): string[] {
   const graph = getWorkflowStepGraph(definition);
   const visited = new Set<string>();
   const result: string[] = [];

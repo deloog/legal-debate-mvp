@@ -4,8 +4,11 @@
 // 目标：金额识别精度≥99%
 // =============================================================================
 
-import type { Claim } from '../core/types';
-import { PrecisionAmountExtractor, type AmountExtractionResult } from '../../../extraction/amount-extractor-precision';
+import type { Claim } from "../core/types";
+import {
+  PrecisionAmountExtractor,
+  type AmountExtractionResult,
+} from "../../../extraction/amount-extractor-precision";
 
 // =============================================================================
 // 接口定义
@@ -35,7 +38,7 @@ export interface AmountExtractionOutput {
   validation: {
     isValid: boolean;
     issues: string[];
-    riskLevel: 'low' | 'medium' | 'high';
+    riskLevel: "low" | "medium" | "high";
   };
 }
 
@@ -55,14 +58,15 @@ export class AmountExtractor {
    */
   async extractFromText(
     text: string,
-    options: AmountExtractionOptions = {}
+    options: AmountExtractionOptions = {},
   ): Promise<AmountExtractionOutput> {
-    const extractionResults = await this.precisionExtractor.extractWithPrecision(text);
+    const extractionResults =
+      await this.precisionExtractor.extractWithPrecision(text);
 
     // 过滤和处理结果
     const processedAmounts = this.processExtractionResults(
       extractionResults,
-      options
+      options,
     );
 
     // 生成摘要
@@ -74,7 +78,7 @@ export class AmountExtractor {
     return {
       amounts: processedAmounts,
       summary,
-      validation
+      validation,
     };
   }
 
@@ -101,16 +105,16 @@ export class AmountExtractor {
    */
   private async extractAmountFromClaim(claim: Claim): Promise<Claim> {
     // 如果已经有金额且是数字，直接返回
-    if (typeof claim.amount === 'number' && claim.amount > 0) {
+    if (typeof claim.amount === "number" && claim.amount > 0) {
       return claim;
     }
 
     // 如果有金额字符串，尝试解析
-    if (typeof claim.amount === 'string') {
+    if (typeof claim.amount === "string") {
       const result = await this.normalizeAmountString(claim.amount);
       return {
         ...claim,
-        amount: result
+        amount: result,
       };
     }
 
@@ -122,7 +126,7 @@ export class AmountExtractor {
         return {
           ...claim,
           amount: best.normalizedAmount,
-          currency: best.currency
+          currency: best.currency,
         };
       }
     }
@@ -135,7 +139,7 @@ export class AmountExtractor {
    */
   private processExtractionResults(
     results: AmountExtractionResult[],
-    options: AmountExtractionOptions
+    options: AmountExtractionOptions,
   ): Array<{
     originalText: string;
     normalizedAmount: number;
@@ -144,7 +148,7 @@ export class AmountExtractor {
     context?: string;
   }> {
     const processed = results
-      .filter(result => {
+      .filter((result) => {
         // 过滤无意义的原始文本（如纯单位）
         if (result.originalText.length < 2) {
           return false;
@@ -157,12 +161,12 @@ export class AmountExtractor {
 
         return result.normalizedAmount > 0;
       })
-      .map(result => ({
+      .map((result) => ({
         originalText: result.originalText,
         normalizedAmount: result.normalizedAmount,
         currency: result.currency,
         confidence: result.confidence,
-        context: options.context
+        context: options.context,
       }));
 
     // 去重
@@ -179,7 +183,7 @@ export class AmountExtractor {
       currency: string;
       confidence: number;
       context?: string;
-    }>
+    }>,
   ): Array<{
     originalText: string;
     normalizedAmount: number;
@@ -217,10 +221,10 @@ export class AmountExtractor {
       currency: string;
       confidence: number;
       context?: string;
-    }>
+    }>,
   ): { total: number; count: number; average: number; currency: string } {
     if (amounts.length === 0) {
-      return { total: 0, count: 0, average: 0, currency: 'CNY' };
+      return { total: 0, count: 0, average: 0, currency: "CNY" };
     }
 
     const total = amounts.reduce((sum, a) => sum + a.normalizedAmount, 0);
@@ -241,8 +245,12 @@ export class AmountExtractor {
       currency: string;
       confidence: number;
       context?: string;
-    }>
-  ): { isValid: boolean; issues: string[]; riskLevel: 'low' | 'medium' | 'high' } {
+    }>,
+  ): {
+    isValid: boolean;
+    issues: string[];
+    riskLevel: "low" | "medium" | "high";
+  } {
     const issues: string[] = [];
 
     // 检查金额范围
@@ -257,9 +265,9 @@ export class AmountExtractor {
     }
 
     // 检查货币一致性
-    const currencies = new Set(amounts.map(a => a.currency));
+    const currencies = new Set(amounts.map((a) => a.currency));
     if (currencies.size > 1) {
-      issues.push(`多种货币单位: ${Array.from(currencies).join(', ')}`);
+      issues.push(`多种货币单位: ${Array.from(currencies).join(", ")}`);
     }
 
     // 计算风险等级
@@ -268,7 +276,7 @@ export class AmountExtractor {
     return {
       isValid: issues.length === 0,
       issues,
-      riskLevel
+      riskLevel,
     };
   }
 
@@ -277,20 +285,21 @@ export class AmountExtractor {
    */
   private calculateRiskLevel(
     issues: string[],
-    total: number
-  ): 'low' | 'medium' | 'high' {
+    total: number,
+  ): "low" | "medium" | "high" {
     const ratio = issues.length / Math.max(total, 1);
 
-    if (ratio === 0) return 'low';
-    if (ratio <= 0.3) return 'medium';
-    return 'high';
+    if (ratio === 0) return "low";
+    if (ratio <= 0.3) return "medium";
+    return "high";
   }
 
   /**
    * 标准化金额字符串
    */
   private async normalizeAmountString(amountStr: string): Promise<number> {
-    const results = await this.precisionExtractor.extractWithPrecision(amountStr);
+    const results =
+      await this.precisionExtractor.extractWithPrecision(amountStr);
     const best = this.precisionExtractor.getBestExtraction(results);
 
     return best?.normalizedAmount || 0;
@@ -306,7 +315,7 @@ export class AmountExtractor {
       currency: string;
       confidence: number;
       context?: string;
-    }>
+    }>,
   ): {
     originalText: string;
     normalizedAmount: number;
@@ -315,7 +324,7 @@ export class AmountExtractor {
     context?: string;
   } {
     if (amounts.length === 0) {
-      throw new Error('没有可用的金额');
+      throw new Error("没有可用的金额");
     }
 
     return amounts.sort((a, b) => b.confidence - a.confidence)[0];
@@ -338,7 +347,7 @@ export class AmountExtractor {
   /**
    * 检查金额是否合理
    */
-  isAmountReasonable(amount: number, currency: string = 'CNY'): boolean {
+  isAmountReasonable(amount: number, currency: string = "CNY"): boolean {
     // 金额必须大于0
     if (amount <= 0) return false;
 
@@ -347,7 +356,7 @@ export class AmountExtractor {
       CNY: 100000000, // 1亿人民币
       USD: 10000000, // 1千万美元
       EUR: 10000000, // 1千万欧元
-      HKD: 100000000 // 1亿港币
+      HKD: 100000000, // 1亿港币
     };
 
     const max = maxAmounts[currency] || maxAmounts.CNY;
@@ -357,18 +366,18 @@ export class AmountExtractor {
   /**
    * 格式化金额用于显示
    */
-  formatAmount(amount: number, currency: string = 'CNY'): string {
-    const formatted = amount.toLocaleString('zh-CN', {
+  formatAmount(amount: number, currency: string = "CNY"): string {
+    const formatted = amount.toLocaleString("zh-CN", {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     });
 
     const currencySymbols: { [key: string]: string } = {
-      CNY: '¥',
-      USD: '$',
-      EUR: '€',
-      GBP: '£',
-      HKD: 'HK$'
+      CNY: "¥",
+      USD: "$",
+      EUR: "€",
+      GBP: "£",
+      HKD: "HK$",
     };
 
     const symbol = currencySymbols[currency] || currency;
@@ -392,7 +401,7 @@ export function createAmountExtractor(): AmountExtractor {
  */
 export async function extractBestAmount(
   text: string,
-  currency?: string
+  currency?: string,
 ): Promise<{ amount: number; currency: string; confidence: number } | null> {
   const extractor = createAmountExtractor();
   const result = await extractor.extractFromText(text, { currency });
@@ -406,6 +415,6 @@ export async function extractBestAmount(
   return {
     amount: best.normalizedAmount,
     currency: best.currency,
-    confidence: best.confidence
+    confidence: best.confidence,
   };
 }

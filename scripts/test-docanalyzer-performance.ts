@@ -3,11 +3,11 @@
  * 测试各处理层的处理时间
  */
 
-import { DocAnalyzerAgent } from '../src/lib/agent/doc-analyzer/doc-analyzer-agent';
-import { FilterProcessor } from '../src/lib/agent/doc-analyzer/processors/filter-processor';
-import { LegalRepresentativeFilter } from '../src/lib/agent/doc-analyzer/processors/legal-representative-filter';
-import { AmountExtractor } from '../src/lib/agent/doc-analyzer/extractors/amount-extractor';
-import type { Party } from '../src/lib/agent/doc-analyzer/core/types';
+import { DocAnalyzerAgent } from "../src/lib/agent/doc-analyzer/doc-analyzer-agent";
+import { FilterProcessor } from "../src/lib/agent/doc-analyzer/processors/filter-processor";
+import { LegalRepresentativeFilter } from "../src/lib/agent/doc-analyzer/processors/legal-representative-filter";
+import { AmountExtractor } from "../src/lib/agent/doc-analyzer/extractors/amount-extractor";
+import type { Party } from "../src/lib/agent/doc-analyzer/core/types";
 
 // =============================================================================
 // 测试文档样本
@@ -15,7 +15,7 @@ import type { Party } from '../src/lib/agent/doc-analyzer/core/types';
 
 const testDocuments = [
   {
-    name: '民事起诉状-简单',
+    name: "民事起诉状-简单",
     content: `民事起诉状
 
 原告：上海华诚科技有限公司
@@ -36,10 +36,10 @@ const testDocuments = [
 
 具状人：上海华诚科技有限公司
 法定代表人：王明
-2023年10月15日`
+2023年10月15日`,
   },
   {
-    name: '民事起诉状-复杂',
+    name: "民事起诉状-复杂",
     content: `民事起诉状
 
 原告：张大伟，男，1988年7月12日出生，汉族，住上海市徐汇区淮海中路200号
@@ -64,8 +64,8 @@ const testDocuments = [
 上海市浦东新区人民法院
 
 具状人：张大伟
-2023年10月15日`
-  }
+2023年10月15日`,
+  },
 ];
 
 // =============================================================================
@@ -73,9 +73,9 @@ const testDocuments = [
 // =============================================================================
 
 async function testFilterProcessor() {
-  console.log('\n========================================');
-  console.log('FilterProcessor性能测试');
-  console.log('========================================');
+  console.log("\n========================================");
+  console.log("FilterProcessor性能测试");
+  console.log("========================================");
 
   const filterProcessor = new FilterProcessor();
   const times: number[] = [];
@@ -97,42 +97,42 @@ async function testFilterProcessor() {
   console.log(`  最大: ${maxTime}ms`);
   console.log(`  最小: ${minTime}ms`);
   console.log(`  目标: <10ms`);
-  console.log(`  状态: ${avgTime < 10 ? '✅ 达标' : '❌ 未达标'}`);
+  console.log(`  状态: ${avgTime < 10 ? "✅ 达标" : "❌ 未达标"}`);
 }
 
 async function testLegalRepFilter() {
-  console.log('\n========================================');
-  console.log('LegalRepresentativeFilter性能测试');
-  console.log('========================================');
+  console.log("\n========================================");
+  console.log("LegalRepresentativeFilter性能测试");
+  console.log("========================================");
 
   const filter = new LegalRepresentativeFilter();
   const times: number[] = [];
 
   const testParties: Party[] = [
     {
-      type: 'plaintiff',
-      name: '上海华诚科技有限公司',
-      role: '原告',
-      contact: '13900139000'
+      type: "plaintiff",
+      name: "上海华诚科技有限公司",
+      role: "原告",
+      contact: "13900139000",
     },
     {
-      type: 'plaintiff',
-      name: '王明',
-      role: '法定代表人',
-      contact: '13900139000'
+      type: "plaintiff",
+      name: "王明",
+      role: "法定代表人",
+      contact: "13900139000",
     },
     {
-      type: 'defendant',
-      name: '北京长城贸易有限公司',
-      role: '被告',
-      contact: '13800138000'
+      type: "defendant",
+      name: "北京长城贸易有限公司",
+      role: "被告",
+      contact: "13800138000",
     },
     {
-      type: 'defendant',
-      name: '李华',
-      role: '法定代表人',
-      contact: '13800138000'
-    }
+      type: "defendant",
+      name: "李华",
+      role: "法定代表人",
+      contact: "13800138000",
+    },
   ];
 
   for (const doc of testDocuments) {
@@ -152,13 +152,13 @@ async function testLegalRepFilter() {
   console.log(`  最大: ${maxTime}ms`);
   console.log(`  最小: ${minTime}ms`);
   console.log(`  目标: <5ms`);
-  console.log(`  状态: ${avgTime < 5 ? '✅ 达标' : '❌ 未达标'}`);
+  console.log(`  状态: ${avgTime < 5 ? "✅ 达标" : "❌ 未达标"}`);
 }
 
 async function testAmountExtractor() {
-  console.log('\n========================================');
-  console.log('AmountExtractor性能测试');
-  console.log('========================================');
+  console.log("\n========================================");
+  console.log("AmountExtractor性能测试");
+  console.log("========================================");
 
   const extractor = new AmountExtractor();
   const times: number[] = [];
@@ -180,7 +180,7 @@ async function testAmountExtractor() {
   console.log(`  最大: ${maxTime}ms`);
   console.log(`  最小: ${minTime}ms`);
   console.log(`  目标: <20ms`);
-  console.log(`  状态: ${avgTime < 20 ? '✅ 达标' : '❌ 未达标'}`);
+  console.log(`  状态: ${avgTime < 20 ? "✅ 达标" : "❌ 未达标"}`);
 }
 
 // =============================================================================
@@ -188,18 +188,18 @@ async function testAmountExtractor() {
 // =============================================================================
 
 async function runAllTests(): Promise<void> {
-  console.log('========================================');
-  console.log('DocAnalyzer性能测试');
-  console.log('========================================');
+  console.log("========================================");
+  console.log("DocAnalyzer性能测试");
+  console.log("========================================");
   console.log(`测试文档数量: ${testDocuments.length}`);
 
   await testFilterProcessor();
   await testLegalRepFilter();
   await testAmountExtractor();
 
-  console.log('\n========================================');
-  console.log('测试完成');
-  console.log('========================================');
+  console.log("\n========================================");
+  console.log("测试完成");
+  console.log("========================================");
 }
 
 // 运行测试

@@ -1,6 +1,6 @@
 /**
  * AI处理器 - 负责AI文档分析
- * 
+ *
  * 核心功能：
  * - 构建优化的分析提示词
  * - 调用AI服务并处理响应
@@ -12,11 +12,11 @@ import type {
   AIAnalysisResponse,
   ExtractedData,
   TextChunk,
-  DocumentAnalysisOptions
-} from '../core/types';
-import { DEFAULT_CONFIG, ERROR_MESSAGES } from '../core/constants';
-import { DocumentParser } from '../../../ai/document-parser';
-import { logger } from '../../../agent/security/logger';
+  DocumentAnalysisOptions,
+} from "../core/types";
+import { DEFAULT_CONFIG, ERROR_MESSAGES } from "../core/constants";
+import { DocumentParser } from "../../../ai/document-parser";
+import { logger } from "../../../agent/security/logger";
 
 export class AIProcessor {
   private config: typeof DEFAULT_CONFIG;
@@ -31,7 +31,7 @@ export class AIProcessor {
    * 获取AI服务实例（用于Reviewer初始化）
    */
   public async getAIService(): Promise<any> {
-    const { getUnifiedAIService } = await import('../../../ai/unified-service');
+    const { getUnifiedAIService } = await import("../../../ai/unified-service");
     return getUnifiedAIService();
   }
 
@@ -40,14 +40,12 @@ export class AIProcessor {
    */
   public async process(
     text: string,
-    options?: DocumentAnalysisOptions
+    options?: DocumentAnalysisOptions,
   ): Promise<AIAnalysisResponse> {
     if (text.length > this.config.maxTextChunkSize) {
       return await this.processLargeDocument(text, options);
     }
-    return await this.processWithTimeout(
-      this.analyzeDocument(text, options)
-    );
+    return await this.processWithTimeout(this.analyzeDocument(text, options));
   }
 
   /**
@@ -55,7 +53,7 @@ export class AIProcessor {
    */
   private async analyzeDocument(
     text: string,
-    options?: DocumentAnalysisOptions
+    options?: DocumentAnalysisOptions,
   ): Promise<AIAnalysisResponse> {
     const prompt = this.buildPrompt(text, options);
     const aiResponse = await this.parser.analyzeWithAI(prompt);
@@ -67,10 +65,10 @@ export class AIProcessor {
    */
   private buildPrompt(text: string, options?: DocumentAnalysisOptions): string {
     const tasks = [];
-    if (options?.extractParties !== false) tasks.push('当事人信息提取');
-    if (options?.extractClaims !== false) tasks.push('诉讼请求识别');
-    if (options?.extractTimeline !== false) tasks.push('时间线整理');
-    if (options?.generateSummary === true) tasks.push('案件摘要生成');
+    if (options?.extractParties !== false) tasks.push("当事人信息提取");
+    if (options?.extractClaims !== false) tasks.push("诉讼请求识别");
+    if (options?.extractTimeline !== false) tasks.push("时间线整理");
+    if (options?.generateSummary === true) tasks.push("案件摘要生成");
 
     return `你是专业法律文档分析专家。请对以下文档进行深入分析。
 
@@ -102,7 +100,7 @@ export class AIProcessor {
    - 整理时间线（签订合同→履行→违约→起诉）
    - 识别法律关系（合同关系、侵权关系等）
 
-分析任务：${tasks.join('、')}
+分析任务：${tasks.join("、")}
 
 文档内容：
 ${text}
@@ -164,7 +162,10 @@ ${text}
    */
   private parseResponse(response: string): AIAnalysisResponse {
     try {
-      let cleaned = response.trim().replace(/```json\s*/, '').replace(/```\s*$/, '');
+      const cleaned = response
+        .trim()
+        .replace(/```json\s*/, "")
+        .replace(/```\s*$/, "");
       const parsed = JSON.parse(cleaned);
 
       if (!parsed.extractedData) {
@@ -175,10 +176,10 @@ ${text}
         extractedData: this.normalizeData(parsed.extractedData),
         confidence: parsed.confidence || 0.8,
         tokenUsed: this.estimateTokens(response),
-        analysisProcess: parsed.analysisProcess
+        analysisProcess: parsed.analysisProcess,
       };
     } catch (error) {
-      logger.error('AI响应解析失败', error);
+      logger.error("AI响应解析失败", error);
       return this.getErrorResponse();
     }
   }
@@ -188,12 +189,15 @@ ${text}
    */
   private normalizeData(data: ExtractedData): ExtractedData {
     return {
-      parties: data.parties?.map(p => ({ ...p, type: p.type || 'other' })) || [],
-      claims: data.claims?.map(c => ({ ...c, currency: c.currency || 'CNY' })) || [],
+      parties:
+        data.parties?.map((p) => ({ ...p, type: p.type || "other" })) || [],
+      claims:
+        data.claims?.map((c) => ({ ...c, currency: c.currency || "CNY" })) ||
+        [],
       timeline: data.timeline || [],
-      summary: data.summary || '',
-      caseType: data.caseType || 'civil',
-      keyFacts: data.keyFacts || []
+      summary: data.summary || "",
+      caseType: data.caseType || "civil",
+      keyFacts: data.keyFacts || [],
     };
   }
 
@@ -202,7 +206,7 @@ ${text}
    */
   private async processLargeDocument(
     text: string,
-    options?: DocumentAnalysisOptions
+    options?: DocumentAnalysisOptions,
   ): Promise<AIAnalysisResponse> {
     const chunks = this.splitText(text, this.config.maxTextChunkSize);
     const results = [];
@@ -210,7 +214,7 @@ ${text}
     for (let i = 0; i < chunks.length; i++) {
       logger.info(`处理分块 ${i + 1}/${chunks.length}`);
       const result = await this.processWithTimeout(
-        this.analyzeDocument(chunks[i].text, options)
+        this.analyzeDocument(chunks[i].text, options),
       );
       results.push(result);
     }
@@ -251,7 +255,7 @@ ${text}
     let totalConfidence = 0;
     let totalTokens = 0;
 
-    results.forEach(r => {
+    results.forEach((r) => {
       r.extractedData.parties?.forEach((p: any) => {
         const key = `${p.name}_${p.type}`;
         if (!partyMap.has(key)) partyMap.set(key, p);
@@ -266,20 +270,25 @@ ${text}
         parties: Array.from(partyMap.values()),
         claims: this.deduplicate(claims),
         timeline: [],
-        summary: '分块合并结果',
-        caseType: 'civil',
-        keyFacts: []
+        summary: "分块合并结果",
+        caseType: "civil",
+        keyFacts: [],
       },
       confidence: totalConfidence / results.length,
       tokenUsed: totalTokens,
       analysisProcess: {
         ocrErrors: [],
         entitiesListed: { persons: [], companies: [], amounts: [] },
-        roleReasoning: '分块处理',
-        claimDecomposition: '多分块合并',
-        amountNormalization: '已标准化',
-        validationResults: { duplicatesFound: [], roleConflicts: [], missingClaims: [], amountInconsistencies: [] }
-      }
+        roleReasoning: "分块处理",
+        claimDecomposition: "多分块合并",
+        amountNormalization: "已标准化",
+        validationResults: {
+          duplicatesFound: [],
+          roleConflicts: [],
+          missingClaims: [],
+          amountInconsistencies: [],
+        },
+      },
     };
   }
 
@@ -288,7 +297,7 @@ ${text}
    */
   private deduplicate(items: any[]): any[] {
     const seen = new Set<string>();
-    return items.filter(item => {
+    return items.filter((item) => {
       const key = JSON.stringify(item);
       if (!seen.has(key)) {
         seen.add(key);
@@ -305,8 +314,11 @@ ${text}
     return Promise.race([
       promise,
       new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error(ERROR_MESSAGES.AI_TIMEOUT)), this.config.aiTimeout)
-      )
+        setTimeout(
+          () => reject(new Error(ERROR_MESSAGES.AI_TIMEOUT)),
+          this.config.aiTimeout,
+        ),
+      ),
     ]);
   }
 
@@ -324,17 +336,28 @@ ${text}
    */
   private getErrorResponse(): AIAnalysisResponse {
     return {
-      extractedData: { parties: [], claims: [], timeline: [], summary: '', keyFacts: [] },
+      extractedData: {
+        parties: [],
+        claims: [],
+        timeline: [],
+        summary: "",
+        keyFacts: [],
+      },
       confidence: 0.3,
       tokenUsed: 0,
       analysisProcess: {
-        ocrErrors: ['JSON解析失败'],
+        ocrErrors: ["JSON解析失败"],
         entitiesListed: { persons: [], companies: [], amounts: [] },
-        roleReasoning: '解析失败',
-        claimDecomposition: '无法进行',
-        amountNormalization: '无法进行',
-        validationResults: { duplicatesFound: [], roleConflicts: [], missingClaims: [], amountInconsistencies: [] }
-      }
+        roleReasoning: "解析失败",
+        claimDecomposition: "无法进行",
+        amountNormalization: "无法进行",
+        validationResults: {
+          duplicatesFound: [],
+          roleConflicts: [],
+          missingClaims: [],
+          amountInconsistencies: [],
+        },
+      },
     };
   }
 }

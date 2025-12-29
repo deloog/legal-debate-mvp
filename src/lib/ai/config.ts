@@ -43,15 +43,11 @@ export const DEFAULT_AI_SERVICE_CONFIG: AIServiceConfig = {
       timeout: 15000, // 缩短超时时间，快速失败
       retryStrategy: {
         maxAttempts: 2, // 减少重试次数，避免长时间等待
-        baseDelay: 800,  // 缩短基础延迟
-        maxDelay: 4000,  // 缩短最大延迟
+        baseDelay: 800, // 缩短基础延迟
+        maxDelay: 4000, // 缩短最大延迟
         backoffMultiplier: 1.5, // 降低退避倍数
         jitter: true,
-        retryableErrors: [
-          "timeout_error",
-          "network_error",
-          "rate_limit_error",
-        ],
+        retryableErrors: ["timeout_error", "network_error", "rate_limit_error"],
       },
       rateLimits: {
         requestsPerSecond: 5,

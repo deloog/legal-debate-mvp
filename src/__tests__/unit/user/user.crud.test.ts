@@ -1,5 +1,5 @@
-import { PrismaClient, UserRole, UserStatus } from '@prisma/client';
-import { beforeEach, describe, expect, it, afterEach } from '@jest/globals';
+import { PrismaClient, UserRole, UserStatus } from "@prisma/client";
+import { beforeEach, describe, expect, it, afterEach } from "@jest/globals";
 
 const prisma = new PrismaClient({
   datasources: {
@@ -9,7 +9,7 @@ const prisma = new PrismaClient({
   },
 });
 
-describe('User CRUD Operations', () => {
+describe("User CRUD Operations", () => {
   let testUserId: string;
 
   beforeEach(async () => {
@@ -17,7 +17,7 @@ describe('User CRUD Operations', () => {
     await prisma.user.deleteMany({
       where: {
         email: {
-          contains: 'test-',
+          contains: "test-",
         },
       },
     });
@@ -31,16 +31,16 @@ describe('User CRUD Operations', () => {
           id: testUserId,
         },
       });
-      testUserId = '';
+      testUserId = "";
     }
   });
 
-  describe('Basic User Creation', () => {
-    it('should create a user with basic fields', async () => {
+  describe("Basic User Creation", () => {
+    it("should create a user with basic fields", async () => {
       const userData = {
-        email: 'test-basic@example.com',
-        username: 'testuser',
-        name: 'Test User',
+        email: "test-basic@example.com",
+        username: "testuser",
+        name: "Test User",
         role: UserRole.USER,
       };
 
@@ -55,22 +55,22 @@ describe('User CRUD Operations', () => {
       expect(user.username).toBe(userData.username);
       expect(user.name).toBe(userData.name);
       expect(user.role).toBe(userData.role);
-      expect(user.status).toBe('ACTIVE');
+      expect(user.status).toBe("ACTIVE");
       expect(user.loginCount).toBe(0);
       expect(user.createdAt).toBeDefined();
       expect(user.updatedAt).toBeDefined();
     });
 
-    it('should create a user with profile information', async () => {
+    it("should create a user with profile information", async () => {
       const userData = {
-        email: 'test-profile@example.com',
-        username: 'testprofile',
-        name: 'Profile Test User',
+        email: "test-profile@example.com",
+        username: "testprofile",
+        name: "Profile Test User",
         role: UserRole.LAWYER,
-        avatar: 'https://example.com/avatar.jpg',
-        phone: '+1234567890',
-        address: '123 Test Street, Test City',
-        bio: 'Test user bio',
+        avatar: "https://example.com/avatar.jpg",
+        phone: "+1234567890",
+        address: "123 Test Street, Test City",
+        bio: "Test user bio",
       };
 
       const user = await prisma.user.create({
@@ -86,10 +86,10 @@ describe('User CRUD Operations', () => {
       expect(user.role).toBe(userData.role);
     });
 
-    it('should create a user with preferences', async () => {
+    it("should create a user with preferences", async () => {
       const preferences = {
-        language: 'zh-CN',
-        timezone: 'Asia/Shanghai',
+        language: "zh-CN",
+        timezone: "Asia/Shanghai",
         notifications: {
           email: true,
           sms: false,
@@ -97,9 +97,9 @@ describe('User CRUD Operations', () => {
       };
 
       const userData = {
-        email: 'test-prefs@example.com',
-        username: 'testprefs',
-        name: 'Preferences Test User',
+        email: "test-prefs@example.com",
+        username: "testprefs",
+        name: "Preferences Test User",
         role: UserRole.USER,
         preferences: preferences as any,
       };
@@ -114,12 +114,12 @@ describe('User CRUD Operations', () => {
     });
   });
 
-  describe('User Status Management', () => {
-    it('should create user with specific status', async () => {
+  describe("User Status Management", () => {
+    it("should create user with specific status", async () => {
       const userData = {
-        email: 'test-suspended@example.com',
-        username: 'testsuspended',
-        name: 'Suspended User',
+        email: "test-suspended@example.com",
+        username: "testsuspended",
+        name: "Suspended User",
         role: UserRole.USER,
         status: UserStatus.SUSPENDED,
       };
@@ -130,15 +130,15 @@ describe('User CRUD Operations', () => {
 
       testUserId = user.id;
 
-      expect(user.status).toBe('SUSPENDED');
+      expect(user.status).toBe("SUSPENDED");
     });
 
-    it('should update user status', async () => {
+    it("should update user status", async () => {
       const user = await prisma.user.create({
         data: {
-          email: 'test-status@example.com',
-          username: 'teststatus',
-          name: 'Status Test User',
+          email: "test-status@example.com",
+          username: "teststatus",
+          name: "Status Test User",
           role: UserRole.USER,
         },
       });
@@ -150,18 +150,18 @@ describe('User CRUD Operations', () => {
         data: { status: UserStatus.BANNED },
       });
 
-      expect(updatedUser.status).toBe('BANNED');
+      expect(updatedUser.status).toBe("BANNED");
     });
   });
 
-  describe('User Authentication Fields', () => {
-    it('should set email verification timestamp', async () => {
+  describe("User Authentication Fields", () => {
+    it("should set email verification timestamp", async () => {
       const verificationTime = new Date();
 
       const userData = {
-        email: 'test-verified@example.com',
-        username: 'testverified',
-        name: 'Verified User',
+        email: "test-verified@example.com",
+        username: "testverified",
+        name: "Verified User",
         role: UserRole.USER,
         emailVerified: verificationTime,
       };
@@ -175,14 +175,14 @@ describe('User CRUD Operations', () => {
       expect(user.emailVerified).toEqual(verificationTime);
     });
 
-    it('should handle password reset fields', async () => {
-      const resetToken = 'reset-token-123';
+    it("should handle password reset fields", async () => {
+      const resetToken = "reset-token-123";
       const resetExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24小时后过期
 
       const userData = {
-        email: 'test-reset@example.com',
-        username: 'testreset',
-        name: 'Reset Test User',
+        email: "test-reset@example.com",
+        username: "testreset",
+        name: "Reset Test User",
         role: UserRole.USER,
         passwordResetToken: resetToken,
         passwordResetExpires: resetExpires,
@@ -199,15 +199,15 @@ describe('User CRUD Operations', () => {
     });
   });
 
-  describe('User Query Operations', () => {
+  describe("User Query Operations", () => {
     beforeEach(async () => {
       // 清理所有测试相关的用户数据
       await prisma.user.deleteMany({
         where: {
           OR: [
-            { email: { contains: 'user' } },
-            { email: { contains: 'test-' } }
-          ]
+            { email: { contains: "user" } },
+            { email: { contains: "test-" } },
+          ],
         },
       });
 
@@ -215,23 +215,23 @@ describe('User CRUD Operations', () => {
       await prisma.user.createMany({
         data: [
           {
-            email: 'user1@example.com',
-            username: 'user1',
-            name: 'User One',
+            email: "user1@example.com",
+            username: "user1",
+            name: "User One",
             role: UserRole.USER,
             status: UserStatus.ACTIVE,
           },
           {
-            email: 'user2@example.com',
-            username: 'user2',
-            name: 'User Two',
+            email: "user2@example.com",
+            username: "user2",
+            name: "User Two",
             role: UserRole.LAWYER,
             status: UserStatus.SUSPENDED,
           },
           {
-            email: 'user3@example.com',
-            username: 'user3',
-            name: 'User Three',
+            email: "user3@example.com",
+            username: "user3",
+            name: "User Three",
             role: UserRole.ADMIN,
             status: UserStatus.ACTIVE,
           },
@@ -243,28 +243,28 @@ describe('User CRUD Operations', () => {
       await prisma.user.deleteMany({
         where: {
           email: {
-            in: ['user1@example.com', 'user2@example.com', 'user3@example.com'],
+            in: ["user1@example.com", "user2@example.com", "user3@example.com"],
           },
         },
       });
     });
 
-    it('should filter users by status', async () => {
+    it("should filter users by status", async () => {
       const activeUsers = await prisma.user.findMany({
         where: { status: UserStatus.ACTIVE },
       });
 
       expect(activeUsers.length).toBeGreaterThan(0);
-      expect(activeUsers.every(user => user.status === 'ACTIVE')).toBe(true);
+      expect(activeUsers.every((user) => user.status === "ACTIVE")).toBe(true);
     });
 
-    it('should filter users by role', async () => {
+    it("should filter users by role", async () => {
       const lawyers = await prisma.user.findMany({
-        where: { 
+        where: {
           AND: [
             { role: UserRole.LAWYER },
-            { email: { contains: 'user' } } // 只查找测试用户
-          ]
+            { email: { contains: "user" } }, // 只查找测试用户
+          ],
         },
       });
 
@@ -272,23 +272,23 @@ describe('User CRUD Operations', () => {
       expect(lawyers[0].role).toBe(UserRole.LAWYER);
     });
 
-    it('should find user by username', async () => {
+    it("should find user by username", async () => {
       const user = await prisma.user.findFirst({
-        where: { username: 'user1' },
+        where: { username: "user1" },
       });
 
       expect(user).toBeDefined();
-      expect(user?.username).toBe('user1');
+      expect(user?.username).toBe("user1");
     });
   });
 
-  describe('Login Statistics', () => {
-    it('should track login count', async () => {
+  describe("Login Statistics", () => {
+    it("should track login count", async () => {
       const user = await prisma.user.create({
         data: {
-          email: 'test-login@example.com',
-          username: 'testlogin',
-          name: 'Login Test User',
+          email: "test-login@example.com",
+          username: "testlogin",
+          name: "Login Test User",
           role: UserRole.USER,
         },
       });
@@ -311,19 +311,19 @@ describe('User CRUD Operations', () => {
     });
   });
 
-  describe('Permissions Handling', () => {
-    it('should store permissions as JSON', async () => {
+  describe("Permissions Handling", () => {
+    it("should store permissions as JSON", async () => {
       const permissions = {
-        cases: ['read', 'create'],
-        debates: ['read', 'create', 'update'],
+        cases: ["read", "create"],
+        debates: ["read", "create", "update"],
         admin: [],
       };
 
       const user = await prisma.user.create({
         data: {
-          email: 'test-permissions@example.com',
-          username: 'testperms',
-          name: 'Permissions Test User',
+          email: "test-permissions@example.com",
+          username: "testperms",
+          name: "Permissions Test User",
           role: UserRole.USER,
           permissions: permissions as any,
         },

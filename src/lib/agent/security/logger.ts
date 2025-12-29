@@ -4,7 +4,7 @@
 
 export interface LogEntry {
   timestamp: string;
-  level: 'debug' | 'info' | 'warn' | 'error';
+  level: "debug" | "info" | "warn" | "error";
   message: string;
   context?: Record<string, any>;
   error?: Error;
@@ -41,19 +41,19 @@ export class StructuredLogger {
       successCount: 0,
       errorCount: 0,
       averageProcessingTime: 0,
-      averageConfidence: 0
+      averageConfidence: 0,
     },
     performance: {
       averageResponseTime: 0,
       p95ResponseTime: 0,
-      throughputPerMinute: 0
+      throughputPerMinute: 0,
     },
     errors: {
       securityErrors: 0,
       validationErrors: 0,
       analysisErrors: 0,
-      otherErrors: 0
-    }
+      otherErrors: 0,
+    },
   };
   private responseTimes: number[] = [];
 
@@ -65,51 +65,51 @@ export class StructuredLogger {
   }
 
   private createLogEntry(
-    level: LogEntry['level'],
+    level: LogEntry["level"],
     message: string,
     context?: Record<string, any>,
-    error?: Error
+    error?: Error,
   ): LogEntry {
     return {
       timestamp: new Date().toISOString(),
       level,
       message,
       context,
-      error
+      error,
     };
   }
 
   debug(message: string, context?: Record<string, any>): void {
-    const entry = this.createLogEntry('debug', message, context);
+    const entry = this.createLogEntry("debug", message, context);
     this.addLog(entry);
   }
 
   info(message: string, context?: Record<string, any>): void {
-    const entry = this.createLogEntry('info', message, context);
+    const entry = this.createLogEntry("info", message, context);
     this.addLog(entry);
   }
 
   warn(message: string, context?: Record<string, any>): void {
-    const entry = this.createLogEntry('warn', message, context);
+    const entry = this.createLogEntry("warn", message, context);
     this.addLog(entry);
   }
 
   error(message: string, error?: Error, context?: Record<string, any>): void {
-    const entry = this.createLogEntry('error', message, context, error);
+    const entry = this.createLogEntry("error", message, context, error);
     this.addLog(entry);
     this.updateErrorMetrics(error);
   }
 
   private addLog(entry: LogEntry): void {
     this.logs.push(entry);
-    
+
     // 保持日志大小在限制内
     if (this.logs.length > this.maxLogSize) {
       this.logs = this.logs.slice(-this.maxLogSize);
     }
 
     // 在开发环境中也输出到控制台
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV !== "production") {
       const logMessage = `[${entry.timestamp}] [${entry.level.toUpperCase()}] ${entry.message}`;
       if (entry.context) {
         console.log(logMessage, entry.context);
@@ -125,11 +125,11 @@ export class StructuredLogger {
   private updateErrorMetrics(error?: Error): void {
     if (!error) return;
 
-    if (error.name === 'SecurityError') {
+    if (error.name === "SecurityError") {
       this.metrics.errors.securityErrors++;
-    } else if (error.name === 'ValidationError') {
+    } else if (error.name === "ValidationError") {
       this.metrics.errors.validationErrors++;
-    } else if (error.name === 'AnalysisError') {
+    } else if (error.name === "AnalysisError") {
       this.metrics.errors.analysisErrors++;
     } else {
       this.metrics.errors.otherErrors++;
@@ -139,10 +139,10 @@ export class StructuredLogger {
   recordDocumentProcessing(
     success: boolean,
     processingTime: number,
-    confidence: number
+    confidence: number,
   ): void {
     this.metrics.documentProcessing.totalProcessed++;
-    
+
     if (success) {
       this.metrics.documentProcessing.successCount++;
     } else {
@@ -152,12 +152,14 @@ export class StructuredLogger {
     // 更新平均处理时间
     const total = this.metrics.documentProcessing.totalProcessed;
     const currentAvg = this.metrics.documentProcessing.averageProcessingTime;
-    this.metrics.documentProcessing.averageProcessingTime = 
+    this.metrics.documentProcessing.averageProcessingTime =
       (currentAvg * (total - 1) + processingTime) / total;
 
     // 更新平均置信度
-    this.metrics.documentProcessing.averageConfidence = 
-      (this.metrics.documentProcessing.averageConfidence * (total - 1) + confidence) / total;
+    this.metrics.documentProcessing.averageConfidence =
+      (this.metrics.documentProcessing.averageConfidence * (total - 1) +
+        confidence) /
+      total;
 
     // 记录响应时间用于计算百分位数
     this.responseTimes.push(processingTime);
@@ -173,7 +175,8 @@ export class StructuredLogger {
 
     // 计算平均响应时间
     const sum = this.responseTimes.reduce((a, b) => a + b, 0);
-    this.metrics.performance.averageResponseTime = sum / this.responseTimes.length;
+    this.metrics.performance.averageResponseTime =
+      sum / this.responseTimes.length;
 
     // 计算P95响应时间
     const sorted = [...this.responseTimes].sort((a, b) => a - b);
@@ -183,18 +186,19 @@ export class StructuredLogger {
     // 计算吞吐量（每分钟处理的文档数）
     const now = Date.now();
     const oneMinuteAgo = now - 60000;
-    const recentLogs = this.logs.filter(log => 
-      log.timestamp >= new Date(oneMinuteAgo).toISOString()
+    const recentLogs = this.logs.filter(
+      (log) => log.timestamp >= new Date(oneMinuteAgo).toISOString(),
     );
-    this.metrics.performance.throughputPerMinute = 
-      recentLogs.filter(log => log.message.includes('文档分析完成')).length;
+    this.metrics.performance.throughputPerMinute = recentLogs.filter((log) =>
+      log.message.includes("文档分析完成"),
+    ).length;
   }
 
-  getLogs(level?: LogEntry['level'], limit?: number): LogEntry[] {
+  getLogs(level?: LogEntry["level"], limit?: number): LogEntry[] {
     let filteredLogs = this.logs;
-    
+
     if (level) {
-      filteredLogs = filteredLogs.filter(log => log.level === level);
+      filteredLogs = filteredLogs.filter((log) => log.level === level);
     }
 
     if (limit) {
@@ -209,11 +213,15 @@ export class StructuredLogger {
   }
 
   exportLogs(): string {
-    return JSON.stringify({
-      logs: this.logs,
-      metrics: this.metrics,
-      exportTime: new Date().toISOString()
-    }, null, 2);
+    return JSON.stringify(
+      {
+        logs: this.logs,
+        metrics: this.metrics,
+        exportTime: new Date().toISOString(),
+      },
+      null,
+      2,
+    );
   }
 
   clearLogs(): void {
@@ -224,19 +232,19 @@ export class StructuredLogger {
         successCount: 0,
         errorCount: 0,
         averageProcessingTime: 0,
-        averageConfidence: 0
+        averageConfidence: 0,
       },
       performance: {
         averageResponseTime: 0,
         p95ResponseTime: 0,
-        throughputPerMinute: 0
+        throughputPerMinute: 0,
       },
       errors: {
         securityErrors: 0,
         validationErrors: 0,
         analysisErrors: 0,
-        otherErrors: 0
-      }
+        otherErrors: 0,
+      },
     };
     this.responseTimes = [];
   }

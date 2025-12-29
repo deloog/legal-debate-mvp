@@ -3,12 +3,12 @@
  * 目标：争议焦点识别准确率>90%
  */
 
-import { getUnifiedAIService } from '@/lib/ai/unified-service';
+import { getUnifiedAIService } from "@/lib/ai/unified-service";
 import type {
   DisputeFocus,
   DisputeFocusCategory,
-  ExtractedData
-} from '../core/types';
+  ExtractedData,
+} from "../core/types";
 
 // =============================================================================
 // 接口定义
@@ -55,7 +55,7 @@ export class DisputeFocusExtractor {
   async extractFromText(
     text: string,
     extractedData?: ExtractedData,
-    options: DisputeFocusExtractionOptions = {}
+    options: DisputeFocusExtractionOptions = {},
   ): Promise<DisputeFocusExtractionOutput> {
     let aiExtracted: DisputeFocus[] = [];
     let ruleExtracted: DisputeFocus[] = [];
@@ -80,19 +80,21 @@ export class DisputeFocusExtractor {
 
     // 过滤推断结果
     if (options.includeInferred === false) {
-      mergedFocuses = mergedFocuses.filter(f => !f._inferred);
+      mergedFocuses = mergedFocuses.filter((f) => !f._inferred);
     }
 
     // 过滤低置信度结果
     if (options.minConfidence !== undefined) {
-      mergedFocuses = mergedFocuses.filter(f => f.confidence >= options.minConfidence);
+      mergedFocuses = mergedFocuses.filter(
+        (f) => f.confidence >= options.minConfidence,
+      );
     }
 
     const summary = this.generateSummary(
       mergedFocuses,
       aiExtracted,
       ruleExtracted,
-      aiReviewed
+      aiReviewed,
     );
 
     return { disputeFocuses: mergedFocuses, summary };
@@ -107,37 +109,40 @@ export class DisputeFocusExtractor {
    */
   private async aiExtractLayer(
     text: string,
-    extractedData?: ExtractedData
+    extractedData?: ExtractedData,
   ): Promise<DisputeFocus[]> {
     try {
       const unifiedService = await getUnifiedAIService();
-      
+
       const prompt = this.buildAIExtractionPrompt(text, extractedData);
-      
+
       const response = await unifiedService.chatCompletion({
-        model: 'deepseek-chat',
-        provider: 'deepseek',
+        model: "deepseek-chat",
+        provider: "deepseek",
         messages: [
           {
-            role: 'system',
-            content: '你是一个专业的法律争议焦点识别专家。请从法律文档中准确识别争议焦点。'
+            role: "system",
+            content:
+              "你是一个专业的法律争议焦点识别专家。请从法律文档中准确识别争议焦点。",
           },
           {
-            role: 'user',
-            content: prompt
-          }
+            role: "user",
+            content: prompt,
+          },
         ],
         temperature: 0.1,
-        maxTokens: 2000
+        maxTokens: 2000,
       });
 
       if (response.choices && response.choices.length > 0) {
-        return this.parseAIExtractionResponse(response.choices[0].message.content || '');
+        return this.parseAIExtractionResponse(
+          response.choices[0].message.content || "",
+        );
       }
 
       return [];
     } catch (error) {
-      console.error('AI识别层失败:', error);
+      console.error("AI识别层失败:", error);
       // AI失败时返回空数组，不影响规则匹配层
       return [];
     }
@@ -148,12 +153,12 @@ export class DisputeFocusExtractor {
    */
   private buildAIExtractionPrompt(
     text: string,
-    extractedData?: ExtractedData
+    extractedData?: ExtractedData,
   ): string {
-    let contextInfo = '';
-    
+    let contextInfo = "";
+
     if (extractedData?.claims && extractedData.claims.length > 0) {
-      contextInfo += `\n诉讼请求信息：\n${extractedData.claims.map(c => `${c.type}: ${c.content}`).join('\n')}`;
+      contextInfo += `\n诉讼请求信息：\n${extractedData.claims.map((c) => `${c.type}: ${c.content}`).join("\n")}`;
     }
 
     return `请从以下法律文档中准确识别争议焦点。
@@ -203,17 +208,21 @@ ${contextInfo}
   private parseAIExtractionResponse(aiResponse: string): DisputeFocus[] {
     try {
       let cleanedResponse = aiResponse.trim();
-      
+
       // 移除代码块标记
-      if (cleanedResponse.includes('```json')) {
-        cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+      if (cleanedResponse.includes("```json")) {
+        cleanedResponse = cleanedResponse
+          .replace(/```json\s*/, "")
+          .replace(/```\s*$/, "");
       }
-      if (cleanedResponse.includes('```')) {
-        cleanedResponse = cleanedResponse.replace(/```\s*/, '').replace(/```\s*$/, '');
+      if (cleanedResponse.includes("```")) {
+        cleanedResponse = cleanedResponse
+          .replace(/```\s*/, "")
+          .replace(/```\s*$/, "");
       }
-      
+
       const parsed = JSON.parse(cleanedResponse);
-      
+
       if (!parsed.disputeFocuses || !Array.isArray(parsed.disputeFocuses)) {
         return [];
       }
@@ -221,20 +230,21 @@ ${contextInfo}
       return parsed.disputeFocuses.map((item: any, index: number) => ({
         id: `ai_focus_${index}`,
         category: item.category,
-        description: item.description || '',
-        positionA: item.positionA || '未明确',
-        positionB: item.positionB || '未明确',
-        coreIssue: item.coreIssue || item.description?.split(/[，。；；]/)[0] || '',
+        description: item.description || "",
+        positionA: item.positionA || "未明确",
+        positionB: item.positionB || "未明确",
+        coreIssue:
+          item.coreIssue || item.description?.split(/[，。；；]/)[0] || "",
         importance: Math.min(10, Math.max(1, Math.round(item.importance || 5))),
         confidence: Math.min(1, Math.max(0, item.confidence || 0.7)),
         relatedClaims: [],
         relatedFacts: [],
         evidence: item.evidence || [],
         legalBasis: item.legalBasis,
-        _inferred: (item.confidence || 0.7) < 0.8
+        _inferred: (item.confidence || 0.7) < 0.8,
       }));
     } catch (error) {
-      console.error('解析AI识别响应失败:', error);
+      console.error("解析AI识别响应失败:", error);
       return [];
     }
   }
@@ -249,7 +259,7 @@ ${contextInfo}
   private ruleMatchLayer(
     text: string,
     extractedData?: ExtractedData,
-    aiExtracted?: DisputeFocus[]
+    aiExtracted?: DisputeFocus[],
   ): DisputeFocus[] {
     const focuses: DisputeFocus[] = [];
     let idCounter = aiExtracted ? aiExtracted.length : 0;
@@ -259,10 +269,10 @@ ${contextInfo}
         const matches = text.matchAll(pattern);
         for (const match of matches) {
           // 检查是否已被AI提取层覆盖
-          const isAlreadyExtracted = aiExtracted?.some(
-            aiFocus => this.isSimilarFocus(aiFocus, match[0], category)
+          const isAlreadyExtracted = aiExtracted?.some((aiFocus) =>
+            this.isSimilarFocus(aiFocus, match[0], category),
           );
-          
+
           if (!isAlreadyExtracted) {
             const id = `rule_focus_${idCounter++}`;
             const focus = this.buildRuleBasedFocus(
@@ -270,7 +280,7 @@ ${contextInfo}
               category,
               match,
               text,
-              extractedData
+              extractedData,
             );
             if (focus) focuses.push(focus);
           }
@@ -287,16 +297,18 @@ ${contextInfo}
   private isSimilarFocus(
     aiFocus: DisputeFocus,
     matchedText: string,
-    category: DisputeFocusCategory
+    category: DisputeFocusCategory,
   ): boolean {
     if (aiFocus.category !== category) return false;
-    
+
     // 检查描述相似度（简单包含判断）
     const aiDesc = aiFocus.description.toLowerCase();
     const matchedLower = matchedText.toLowerCase();
-    
-    return aiDesc.includes(matchedLower.substring(0, 10)) ||
-           matchedLower.includes(aiDesc.substring(0, 10));
+
+    return (
+      aiDesc.includes(matchedLower.substring(0, 10)) ||
+      matchedLower.includes(aiDesc.substring(0, 10))
+    );
   }
 
   /**
@@ -307,7 +319,7 @@ ${contextInfo}
     category: DisputeFocusCategory,
     match: RegExpMatchArray,
     text: string,
-    extractedData?: ExtractedData
+    extractedData?: ExtractedData,
   ): DisputeFocus | null {
     const matchedText = match[0];
     const matchIndex = match.index || 0;
@@ -315,7 +327,11 @@ ${contextInfo}
     const positionB = this.extractPositionB(text, matchedText, matchIndex);
     const coreIssue = this.extractCoreIssue(matchedText);
     const importance = this.calculateImportance(matchedText, category);
-    const confidence = this.calculateConfidence(matchedText, positionA, positionB);
+    const confidence = this.calculateConfidence(
+      matchedText,
+      positionA,
+      positionB,
+    );
 
     const relatedClaims = this.extractRelatedClaims(matchedText, extractedData);
 
@@ -332,18 +348,22 @@ ${contextInfo}
       relatedFacts: [],
       evidence: [],
       legalBasis: this.extractLegalBasis(matchedText, text, matchIndex),
-      _inferred: confidence < 0.7
+      _inferred: confidence < 0.7,
     };
   }
 
   /**
    * 提取原告观点
    */
-  private extractPositionA(text: string, matchedText: string, matchIndex: number): string {
+  private extractPositionA(
+    text: string,
+    matchedText: string,
+    matchIndex: number,
+  ): string {
     const patterns = [
       /原告认为|原告主张|原告称/gi,
       /原告方面/gi,
-      /起诉方认为/gi
+      /起诉方认为/gi,
     ];
 
     for (const pattern of patterns) {
@@ -355,30 +375,37 @@ ${contextInfo}
       }
     }
 
-    return '未明确';
+    return "未明确";
   }
 
   /**
    * 提取被告观点
    */
-  private extractPositionB(text: string, matchedText: string, matchIndex: number): string {
+  private extractPositionB(
+    text: string,
+    matchedText: string,
+    matchIndex: number,
+  ): string {
     const patterns = [
       /被告认为|被告主张|被告称/gi,
       /被告方面/gi,
       /答辩方认为/gi,
-      /被告答辩|被告反驳/gi
+      /被告答辩|被告反驳/gi,
     ];
 
     for (const pattern of patterns) {
       const contextStart = matchIndex;
-      const contextEnd = Math.min(text.length, contextStart + matchedText.length + 100);
+      const contextEnd = Math.min(
+        text.length,
+        contextStart + matchedText.length + 100,
+      );
       const context = text.substring(contextStart, contextEnd);
 
       const match = context.match(pattern);
       if (match) return match[0];
     }
 
-    return '未明确';
+    return "未明确";
   }
 
   /**
@@ -391,7 +418,7 @@ ${contextInfo}
       /是否\s*赔偿/gi,
       /是否\s*支付/gi,
       /是否\s*履行/gi,
-      /争议.*焦点/gi
+      /争议.*焦点/gi,
     ];
 
     for (const pattern of patterns) {
@@ -407,15 +434,21 @@ ${contextInfo}
    */
   private calculateImportance(
     text: string,
-    category: DisputeFocusCategory
+    category: DisputeFocusCategory,
   ): number {
     let score = 5;
 
     const highImportanceKeywords = [
-      '本金', '利息', '违约金', '赔偿', '损失', '履行', '解除'
+      "本金",
+      "利息",
+      "违约金",
+      "赔偿",
+      "损失",
+      "履行",
+      "解除",
     ];
-    const hasKeyword = highImportanceKeywords.some(kw =>
-      text.toLowerCase().includes(kw)
+    const hasKeyword = highImportanceKeywords.some((kw) =>
+      text.toLowerCase().includes(kw),
     );
     if (hasKeyword) score += 2;
 
@@ -426,7 +459,7 @@ ${contextInfo}
       DAMAGES_CALCULATION: 6,
       PERFORMANCE_DISPUTE: 7,
       VALIDITY_ISSUE: 5,
-      OTHER: 5
+      OTHER: 5,
     };
     score = (score + categoryWeights[category]) / 2;
 
@@ -442,11 +475,11 @@ ${contextInfo}
   private calculateConfidence(
     matchedText: string,
     positionA: string,
-    positionB: string
+    positionB: string,
   ): number {
     let confidence = 0.5; // 规则匹配的基础置信度较低
 
-    if (positionA !== '未明确' && positionB !== '未明确') {
+    if (positionA !== "未明确" && positionB !== "未明确") {
       confidence += 0.2;
     }
 
@@ -466,7 +499,7 @@ ${contextInfo}
    */
   private extractRelatedClaims(
     text: string,
-    extractedData?: ExtractedData
+    extractedData?: ExtractedData,
   ): string[] {
     const related: string[] = [];
 
@@ -485,24 +518,30 @@ ${contextInfo}
    * 判断是否与诉讼请求相关
    */
   private isRelatedToClaim(text: string, claimContent: string): boolean {
-    const textKeywords = text.split(/[，。；；\s]/).map(k => k.trim());
-    const claimKeywords = claimContent.split(/[，。；；\s]/).map(k => k.trim());
+    const textKeywords = text.split(/[，。；；\s]/).map((k) => k.trim());
+    const claimKeywords = claimContent
+      .split(/[，。；；\s]/)
+      .map((k) => k.trim());
 
-    return textKeywords.some(tk =>
-      claimKeywords.some(ck => tk.includes(ck) || ck.includes(tk))
+    return textKeywords.some((tk) =>
+      claimKeywords.some((ck) => tk.includes(ck) || ck.includes(tk)),
     );
   }
 
   /**
    * 提取法律依据
    */
-  private extractLegalBasis(matchedText: string, fullText: string, matchIndex: number): string | undefined {
+  private extractLegalBasis(
+    matchedText: string,
+    fullText: string,
+    matchIndex: number,
+  ): string | undefined {
     const patterns = [
       /依据\s*《[^》]+》/gi,
       /根据\s*《[^》]+》/gi,
       /按照\s*《[^》]+》/gi,
       /违反\s*第.*?条/gi,
-      /不符合\s*第.*?款/gi
+      /不符合\s*第.*?款/gi,
     ];
 
     for (const pattern of patterns) {
@@ -531,7 +570,7 @@ ${contextInfo}
    */
   private mergeAndDeduplicate(
     aiFocuses: DisputeFocus[],
-    ruleFocuses: DisputeFocus[]
+    ruleFocuses: DisputeFocus[],
   ): DisputeFocus[] {
     const seen = new Set<string>();
     const unique: DisputeFocus[] = [];
@@ -566,37 +605,41 @@ ${contextInfo}
    */
   private async aiReviewLayer(
     focuses: DisputeFocus[],
-    originalText: string
+    originalText: string,
   ): Promise<DisputeFocus[]> {
     try {
       const unifiedService = await getUnifiedAIService();
-      
+
       const prompt = this.buildAIReviewPrompt(focuses, originalText);
-      
+
       const response = await unifiedService.chatCompletion({
-        model: 'deepseek-chat',
-        provider: 'deepseek',
+        model: "deepseek-chat",
+        provider: "deepseek",
         messages: [
           {
-            role: 'system',
-            content: '你是一个专业的法律争议焦点审查专家。请审查和修正争议焦点识别结果。'
+            role: "system",
+            content:
+              "你是一个专业的法律争议焦点审查专家。请审查和修正争议焦点识别结果。",
           },
           {
-            role: 'user',
-            content: prompt
-          }
+            role: "user",
+            content: prompt,
+          },
         ],
         temperature: 0.1,
-        maxTokens: 2000
+        maxTokens: 2000,
       });
 
       if (response.choices && response.choices.length > 0) {
-        return this.parseAIReviewResponse(response.choices[0].message.content || '', focuses);
+        return this.parseAIReviewResponse(
+          response.choices[0].message.content || "",
+          focuses,
+        );
       }
 
       return focuses;
     } catch (error) {
-      console.error('AI审查层失败:', error);
+      console.error("AI审查层失败:", error);
       // 审查失败时返回原始结果
       return focuses;
     }
@@ -605,15 +648,21 @@ ${contextInfo}
   /**
    * 构建AI审查提示词
    */
-  private buildAIReviewPrompt(focuses: DisputeFocus[], originalText: string): string {
-    const focusList = focuses.map((f, index) => 
-      `${index + 1}. [${f.category}] ${f.description}
+  private buildAIReviewPrompt(
+    focuses: DisputeFocus[],
+    originalText: string,
+  ): string {
+    const focusList = focuses
+      .map(
+        (f, index) =>
+          `${index + 1}. [${f.category}] ${f.description}
    - 原告观点: ${f.positionA}
    - 被告观点: ${f.positionB}
    - 核心争议: ${f.coreIssue}
    - 重要性: ${f.importance}
-   - 置信度: ${f.confidence}`
-    ).join('\n');
+   - 置信度: ${f.confidence}`,
+      )
+      .join("\n");
 
     return `请审查以下从法律文档中识别的争议焦点列表，确保其准确性和完整性。
 
@@ -660,44 +709,56 @@ ${focusList}
   /**
    * 解析AI审查响应
    */
-  private parseAIReviewResponse(aiResponse: string, originalFocuses: DisputeFocus[]): DisputeFocus[] {
+  private parseAIReviewResponse(
+    aiResponse: string,
+    originalFocuses: DisputeFocus[],
+  ): DisputeFocus[] {
     try {
       let cleanedResponse = aiResponse.trim();
-      
-      if (cleanedResponse.includes('```json')) {
-        cleanedResponse = cleanedResponse.replace(/```json\s*/, '').replace(/```\s*$/, '');
+
+      if (cleanedResponse.includes("```json")) {
+        cleanedResponse = cleanedResponse
+          .replace(/```json\s*/, "")
+          .replace(/```\s*$/, "");
       }
-      if (cleanedResponse.includes('```')) {
-        cleanedResponse = cleanedResponse.replace(/```\s*/, '').replace(/```\s*$/, '');
+      if (cleanedResponse.includes("```")) {
+        cleanedResponse = cleanedResponse
+          .replace(/```\s*/, "")
+          .replace(/```\s*$/, "");
       }
-      
+
       const parsed = JSON.parse(cleanedResponse);
-      
+
       const invalidIds = new Set(parsed.invalidIds || []);
       const reviewedItems = parsed.reviewedFocuses || [];
 
-      return reviewedItems.map((item: any) => {
-        // 查找原始焦点，继承其属性
-        const original = originalFocuses.find(f => f.id === item.id);
-        
-        return {
-          id: item.id,
-          category: item.category,
-          description: item.description || original?.description || '',
-          positionA: item.positionA || original?.positionA || '未明确',
-          positionB: item.positionB || original?.positionB || '未明确',
-          coreIssue: item.coreIssue || original?.coreIssue || '',
-          importance: Math.min(10, Math.max(1, Math.round(item.importance || 5))),
-          confidence: Math.min(1, Math.max(0, item.confidence || 0.8)),
-          relatedClaims: original?.relatedClaims || [],
-          relatedFacts: original?.relatedFacts || [],
-          evidence: item.evidence || original?.evidence || [],
-          legalBasis: item.legalBasis || original?.legalBasis,
-          _inferred: (item.confidence || 0.8) < 0.9
-        };
-      }).filter(item => !invalidIds.has(item.id));
+      return reviewedItems
+        .map((item: any) => {
+          // 查找原始焦点，继承其属性
+          const original = originalFocuses.find((f) => f.id === item.id);
+
+          return {
+            id: item.id,
+            category: item.category,
+            description: item.description || original?.description || "",
+            positionA: item.positionA || original?.positionA || "未明确",
+            positionB: item.positionB || original?.positionB || "未明确",
+            coreIssue: item.coreIssue || original?.coreIssue || "",
+            importance: Math.min(
+              10,
+              Math.max(1, Math.round(item.importance || 5)),
+            ),
+            confidence: Math.min(1, Math.max(0, item.confidence || 0.8)),
+            relatedClaims: original?.relatedClaims || [],
+            relatedFacts: original?.relatedFacts || [],
+            evidence: item.evidence || original?.evidence || [],
+            legalBasis: item.legalBasis || original?.legalBasis,
+            _inferred: (item.confidence || 0.8) < 0.9,
+          };
+        })
+        .filter((item) => !invalidIds.has(item.id));
     } catch (error) {
-      console.error('解析AI审查响应失败:', error);
+      console.error("解析AI审查响应失败:", error);
       return originalFocuses;
     }
   }
@@ -712,66 +773,66 @@ ${focusList}
   private initializeRulePatterns(): Map<DisputeFocusCategory, RegExp[]> {
     const patterns = new Map<DisputeFocusCategory, RegExp[]>();
 
-    patterns.set('CONTRACT_BREACH', [
+    patterns.set("CONTRACT_BREACH", [
       /违约/gi,
       /未履行\s*(合同|义务)/gi,
       /解除\s*合同/gi,
       /终止\s*合同/gi,
       /违反\s*合同/gi,
       /履行\s*合同/gi,
-      /未\s*按.*履行/gi
+      /未\s*按.*履行/gi,
     ]);
 
-    patterns.set('PAYMENT_DISPUTE', [
+    patterns.set("PAYMENT_DISPUTE", [
       /支付\s*本金/gi,
       /偿还\s*欠款/gi,
       /金额.*争议/gi,
       /支付\s*数额/gi,
       /支付\s*金额/gi,
       /本金.*数额/gi,
-      /数额.*争议/gi
+      /数额.*争议/gi,
     ]);
 
-    patterns.set('LIABILITY_ISSUE', [
+    patterns.set("LIABILITY_ISSUE", [
       /承担\s*责任/gi,
       /责任\s*认定/gi,
       /责任\s*划分/gi,
       /责任.*分歧/gi,
       /责任.*争议/gi,
-      /承担.*责任/gi
+      /承担.*责任/gi,
     ]);
 
-    patterns.set('DAMAGES_CALCULATION', [
+    patterns.set("DAMAGES_CALCULATION", [
       /损失.*计算/gi,
       /赔偿\s*数额/gi,
       /违约金.*计算/gi,
       /损害.*赔偿/gi,
       /赔偿.*方式/gi,
-      /计算方式.*意见不一/gi
+      /计算方式.*意见不一/gi,
     ]);
 
-    patterns.set('PERFORMANCE_DISPUTE', [
+    patterns.set("PERFORMANCE_DISPUTE", [
       /继续\s*履行/gi,
       /履行\s*义务/gi,
       /是否\s*履行/gi,
-      /履行.*争议/gi
+      /履行.*争议/gi,
     ]);
 
-    patterns.set('VALIDITY_ISSUE', [
+    patterns.set("VALIDITY_ISSUE", [
       /合同\s*效力/gi,
       /是否\s*有效/gi,
       /是否\s*成立/gi,
       /是否\s*变更/gi,
       /合同.*有效/gi,
-      /合同.*成立/gi
+      /合同.*成立/gi,
     ]);
 
-    patterns.set('OTHER', [
+    patterns.set("OTHER", [
       /争议\s*焦点/gi,
       /核心.*问题/gi,
       /主要.*分歧/gi,
       /存在分歧/gi,
-      /意见不一/gi
+      /意见不一/gi,
     ]);
 
     return patterns;
@@ -788,7 +849,7 @@ ${focusList}
     finalFocuses: DisputeFocus[],
     aiExtracted: DisputeFocus[],
     ruleExtracted: DisputeFocus[],
-    aiReviewed: DisputeFocus[]
+    aiReviewed: DisputeFocus[],
   ): {
     total: number;
     byCategory: Record<DisputeFocusCategory, number>;
@@ -799,23 +860,28 @@ ${focusList}
     ruleExtractedCount: number;
     aiReviewedCount: number;
   } {
-    const byCategory: Record<DisputeFocusCategory, number> = {} as Record<DisputeFocusCategory, number>;
+    const byCategory: Record<DisputeFocusCategory, number> = {} as Record<
+      DisputeFocusCategory,
+      number
+    >;
     let totalImportance = 0;
     let totalConfidence = 0;
     let inferredCount = 0;
 
     const allCategories: DisputeFocusCategory[] = [
-      'CONTRACT_BREACH',
-      'PAYMENT_DISPUTE',
-      'LIABILITY_ISSUE',
-      'DAMAGES_CALCULATION',
-      'PERFORMANCE_DISPUTE',
-      'VALIDITY_ISSUE',
-      'OTHER'
+      "CONTRACT_BREACH",
+      "PAYMENT_DISPUTE",
+      "LIABILITY_ISSUE",
+      "DAMAGES_CALCULATION",
+      "PERFORMANCE_DISPUTE",
+      "VALIDITY_ISSUE",
+      "OTHER",
     ];
 
     for (const category of allCategories) {
-      byCategory[category] = finalFocuses.filter(f => f.category === category).length;
+      byCategory[category] = finalFocuses.filter(
+        (f) => f.category === category,
+      ).length;
     }
 
     for (const focus of finalFocuses) {
@@ -827,12 +893,18 @@ ${focusList}
     return {
       total: finalFocuses.length,
       byCategory,
-      avgImportance: finalFocuses.length > 0 ? Math.round(totalImportance / finalFocuses.length) : 0,
-      avgConfidence: finalFocuses.length > 0 ? Math.round(totalConfidence / finalFocuses.length * 100) / 100 : 0,
+      avgImportance:
+        finalFocuses.length > 0
+          ? Math.round(totalImportance / finalFocuses.length)
+          : 0,
+      avgConfidence:
+        finalFocuses.length > 0
+          ? Math.round((totalConfidence / finalFocuses.length) * 100) / 100
+          : 0,
       inferredCount,
       aiExtractedCount: aiExtracted.length,
       ruleExtractedCount: ruleExtracted.length,
-      aiReviewedCount: aiReviewed.length
+      aiReviewedCount: aiReviewed.length,
     };
   }
 }
@@ -854,7 +926,7 @@ export function createDisputeFocusExtractor(): DisputeFocusExtractor {
 export async function extractDisputeFocusesFromText(
   text: string,
   extractedData?: ExtractedData,
-  options?: DisputeFocusExtractionOptions
+  options?: DisputeFocusExtractionOptions,
 ): Promise<DisputeFocus[]> {
   const extractor = createDisputeFocusExtractor();
   const result = await extractor.extractFromText(text, extractedData, options);

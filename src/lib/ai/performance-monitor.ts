@@ -1,6 +1,6 @@
 /**
  * AI服务性能监控模块
- * 
+ *
  * 提供详细的性能指标收集、分析和报告功能
  */
 
@@ -111,17 +111,23 @@ export class PerformanceMonitor {
     // 检查告警
     this.checkAlerts(fullMetric);
 
-    console.log(`📊 Performance: ${metric.provider}/${metric.model} - ${metric.operation}: ${metric.duration}ms (${metric.cached ? "cached" : "generated"})`);
-    
+    console.log(
+      `📊 Performance: ${metric.provider}/${metric.model} - ${metric.operation}: ${metric.duration}ms (${metric.cached ? "cached" : "generated"})`,
+    );
+
     return requestId;
   }
 
   /**
    * 记录请求开始
    */
-  public startRequest(provider: string, model: string, operation: string): string {
+  public startRequest(
+    provider: string,
+    model: string,
+    operation: string,
+  ): string {
     const requestId = this.generateRequestId();
-    
+
     // 记录开始时间到临时存储
     (this as any).pendingRequests = (this as any).pendingRequests || new Map();
     (this as any).pendingRequests.set(requestId, {
@@ -142,18 +148,19 @@ export class PerformanceMonitor {
     success: boolean,
     tokenCount?: number,
     cached: boolean = false,
-    errorType?: string
+    errorType?: string,
   ): void {
-    const pendingRequests = (this as any).pendingRequests as Map<string, any> || new Map();
+    const pendingRequests =
+      ((this as any).pendingRequests as Map<string, any>) || new Map();
     const pending = pendingRequests.get(requestId);
-    
+
     if (!pending) {
       console.warn(`No pending request found for ID: ${requestId}`);
       return;
     }
 
     const duration = Date.now() - pending.startTime;
-    
+
     const metric: PerformanceMetric = {
       timestamp: Date.now(),
       provider: pending.provider,
@@ -173,7 +180,9 @@ export class PerformanceMonitor {
     // 检查告警
     this.checkAlerts(metric);
 
-    console.log(`📊 Performance Complete: ${pending.provider}/${pending.model} - ${pending.operation}: ${duration}ms (${cached ? "cached" : "generated"})`);
+    console.log(
+      `📊 Performance Complete: ${pending.provider}/${pending.model} - ${pending.operation}: ${duration}ms (${cached ? "cached" : "generated"})`,
+    );
   }
 
   // =============================================================================
@@ -183,7 +192,9 @@ export class PerformanceMonitor {
   /**
    * 更新告警阈值
    */
-  public updateAlertThresholds(thresholds: Partial<typeof this.alertThresholds>): void {
+  public updateAlertThresholds(
+    thresholds: Partial<typeof this.alertThresholds>,
+  ): void {
     this.alertThresholds = { ...this.alertThresholds, ...thresholds };
   }
 
@@ -197,7 +208,10 @@ export class PerformanceMonitor {
     if (metric.duration > this.alertThresholds.responseTime) {
       alerts.push({
         type: "response_time",
-        severity: metric.duration > this.alertThresholds.responseTime * 2 ? "critical" : "high",
+        severity:
+          metric.duration > this.alertThresholds.responseTime * 2
+            ? "critical"
+            : "high",
         message: `响应时间过长: ${metric.duration}ms`,
         threshold: this.alertThresholds.responseTime,
         actualValue: metric.duration,
@@ -218,7 +232,7 @@ export class PerformanceMonitor {
     }
 
     this.alerts.push(...alerts);
-    
+
     // 限制告警数量
     if (this.alerts.length > 1000) {
       this.alerts = this.alerts.slice(-1000);
@@ -234,15 +248,17 @@ export class PerformanceMonitor {
    */
   public getSummary(timeWindow?: number): PerformanceSummary {
     const cutoffTime = timeWindow ? Date.now() - timeWindow : 0;
-    const relevantMetrics = this.metrics.filter(m => m.timestamp > cutoffTime);
+    const relevantMetrics = this.metrics.filter(
+      (m) => m.timestamp > cutoffTime,
+    );
 
     if (relevantMetrics.length === 0) {
       return this.getEmptySummary();
     }
 
-    const successfulMetrics = relevantMetrics.filter(m => m.success);
-    const failedMetrics = relevantMetrics.filter(m => !m.success);
-    const durations = successfulMetrics.map(m => m.duration);
+    const successfulMetrics = relevantMetrics.filter((m) => m.success);
+    const failedMetrics = relevantMetrics.filter((m) => !m.success);
+    const durations = successfulMetrics.map((m) => m.duration);
 
     // 基础统计
     const totalRequests = relevantMetrics.length;
@@ -252,22 +268,30 @@ export class PerformanceMonitor {
     const errorRate = (failedRequests / totalRequests) * 100;
 
     // 响应时间统计
-    const averageResponseTime = durations.reduce((sum, d) => sum + d, 0) / durations.length;
+    const averageResponseTime =
+      durations.reduce((sum, d) => sum + d, 0) / durations.length;
     const minResponseTime = Math.min(...durations);
     const maxResponseTime = Math.max(...durations);
     const sortedDurations = durations.sort((a, b) => a - b);
-    const medianResponseTime = sortedDurations[Math.floor(sortedDurations.length / 2)];
-    const p95ResponseTime = sortedDurations[Math.floor(sortedDurations.length * 0.95)];
-    const p99ResponseTime = sortedDurations[Math.floor(sortedDurations.length * 0.99)];
+    const medianResponseTime =
+      sortedDurations[Math.floor(sortedDurations.length / 2)];
+    const p95ResponseTime =
+      sortedDurations[Math.floor(sortedDurations.length * 0.95)];
+    const p99ResponseTime =
+      sortedDurations[Math.floor(sortedDurations.length * 0.99)];
 
     // 缓存统计
-    const cachedRequests = relevantMetrics.filter(m => m.cached).length;
+    const cachedRequests = relevantMetrics.filter((m) => m.cached).length;
     const cacheHitRate = (cachedRequests / totalRequests) * 100;
 
     // Token效率统计
-    const totalTokens = successfulMetrics.reduce((sum, m) => sum + (m.tokenCount || 0), 0);
+    const totalTokens = successfulMetrics.reduce(
+      (sum, m) => sum + (m.tokenCount || 0),
+      0,
+    );
     const totalTime = successfulMetrics.reduce((sum, m) => sum + m.duration, 0);
-    const tokenEfficiency = totalTime > 0 ? totalTokens / (totalTime / 1000) : 0; // tokens/second
+    const tokenEfficiency =
+      totalTime > 0 ? totalTokens / (totalTime / 1000) : 0; // tokens/second
 
     // 提供商统计
     const providerStats = this.calculateProviderStats(relevantMetrics);
@@ -297,34 +321,45 @@ export class PerformanceMonitor {
   /**
    * 计算提供商统计
    */
-  private calculateProviderStats(metrics: PerformanceMetric[]): Record<string, ProviderStats> {
+  private calculateProviderStats(
+    metrics: PerformanceMetric[],
+  ): Record<string, ProviderStats> {
     const stats: Record<string, ProviderStats> = {};
 
     // 按提供商分组
-    const grouped = metrics.reduce((acc, metric) => {
-      const key = metric.provider;
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(metric);
-      return acc;
-    }, {} as Record<string, PerformanceMetric[]>);
+    const grouped = metrics.reduce(
+      (acc, metric) => {
+        const key = metric.provider;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(metric);
+        return acc;
+      },
+      {} as Record<string, PerformanceMetric[]>,
+    );
 
     // 计算每个提供商的统计
     Object.entries(grouped).forEach(([provider, providerMetrics]) => {
-      const successful = providerMetrics.filter(m => m.success);
-      const durations = successful.map(m => m.duration);
-      const cached = providerMetrics.filter(m => m.cached).length;
+      const successful = providerMetrics.filter((m) => m.success);
+      const durations = successful.map((m) => m.duration);
+      const cached = providerMetrics.filter((m) => m.cached).length;
 
       const errorDistribution = providerMetrics
-        .filter(m => !m.success)
-        .reduce((acc, m) => {
-          const errorType = m.errorType || "unknown";
-          acc[errorType] = (acc[errorType] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
+        .filter((m) => !m.success)
+        .reduce(
+          (acc, m) => {
+            const errorType = m.errorType || "unknown";
+            acc[errorType] = (acc[errorType] || 0) + 1;
+            return acc;
+          },
+          {} as Record<string, number>,
+        );
 
       stats[provider] = {
         totalRequests: providerMetrics.length,
-        averageResponseTime: durations.length > 0 ? durations.reduce((sum, d) => sum + d, 0) / durations.length : 0,
+        averageResponseTime:
+          durations.length > 0
+            ? durations.reduce((sum, d) => sum + d, 0) / durations.length
+            : 0,
         successRate: (successful.length / providerMetrics.length) * 100,
         cacheHitRate: (cached / providerMetrics.length) * 100,
         errorDistribution,
@@ -337,26 +372,34 @@ export class PerformanceMonitor {
   /**
    * 计算操作统计
    */
-  private calculateOperationStats(metrics: PerformanceMetric[]): Record<string, OperationStats> {
+  private calculateOperationStats(
+    metrics: PerformanceMetric[],
+  ): Record<string, OperationStats> {
     const stats: Record<string, OperationStats> = {};
 
     // 按操作分组
-    const grouped = metrics.reduce((acc, metric) => {
-      const key = metric.operation;
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(metric);
-      return acc;
-    }, {} as Record<string, PerformanceMetric[]>);
+    const grouped = metrics.reduce(
+      (acc, metric) => {
+        const key = metric.operation;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(metric);
+        return acc;
+      },
+      {} as Record<string, PerformanceMetric[]>,
+    );
 
     // 计算每个操作的统计
     Object.entries(grouped).forEach(([operation, operationMetrics]) => {
-      const successful = operationMetrics.filter(m => m.success);
-      const durations = successful.map(m => m.duration);
-      const cached = operationMetrics.filter(m => m.cached).length;
+      const successful = operationMetrics.filter((m) => m.success);
+      const durations = successful.map((m) => m.duration);
+      const cached = operationMetrics.filter((m) => m.cached).length;
 
       stats[operation] = {
         totalRequests: operationMetrics.length,
-        averageResponseTime: durations.length > 0 ? durations.reduce((sum, d) => sum + d, 0) / durations.length : 0,
+        averageResponseTime:
+          durations.length > 0
+            ? durations.reduce((sum, d) => sum + d, 0) / durations.length
+            : 0,
         successRate: (successful.length / operationMetrics.length) * 100,
         cacheHitRate: (cached / operationMetrics.length) * 100,
       };
@@ -397,7 +440,7 @@ export class PerformanceMonitor {
    */
   public getActiveAlerts(timeWindow?: number): PerformanceAlert[] {
     const cutoffTime = timeWindow ? Date.now() - timeWindow : 0;
-    return this.alerts.filter(alert => alert.timestamp > cutoffTime);
+    return this.alerts.filter((alert) => alert.timestamp > cutoffTime);
   }
 
   /**
@@ -416,7 +459,7 @@ export class PerformanceMonitor {
    */
   public exportMetrics(timeWindow?: number): PerformanceMetric[] {
     const cutoffTime = timeWindow ? Date.now() - timeWindow : 0;
-    return this.metrics.filter(m => m.timestamp > cutoffTime);
+    return this.metrics.filter((m) => m.timestamp > cutoffTime);
   }
 
   /**
@@ -443,7 +486,7 @@ ${timeWindow ? `最近 ${(timeWindow / 60000).toFixed(1)} 分钟` : "全部时�
 - 错误率: ${summary.errorRate.toFixed(2)}%
 
 ## 响应时间分析
-- 平均响应时间: ${summary.averageResponseTime.toFixed(0)}ms (${(summary.averageResponseTime/1000).toFixed(1)}秒)
+- 平均响应时间: ${summary.averageResponseTime.toFixed(0)}ms (${(summary.averageResponseTime / 1000).toFixed(1)}秒)
 - 最小响应时间: ${summary.minResponseTime}ms
 - 最大响应时间: ${summary.maxResponseTime}ms
 - 中位数响应时间: ${summary.medianResponseTime}ms
@@ -455,32 +498,50 @@ ${timeWindow ? `最近 ${(timeWindow / 60000).toFixed(1)} 分钟` : "全部时�
 - Token效率: ${summary.tokenEfficiency.toFixed(1)} tokens/秒
 
 ## 提供商性能
-${Object.entries(summary.providerStats).map(([provider, stats]) => `
+${Object.entries(summary.providerStats)
+  .map(
+    ([provider, stats]) => `
 ### ${provider}
 - 请求数: ${stats.totalRequests}
 - 平均响应时间: ${stats.averageResponseTime.toFixed(0)}ms
 - 成功率: ${stats.successRate.toFixed(2)}%
 - 缓存命中率: ${stats.cacheHitRate.toFixed(2)}%
-- 错误分布: ${Object.entries(stats.errorDistribution).map(([error, count]) => `${error}(${count})`).join(", ")}
-`).join("\n")}
+- 错误分布: ${Object.entries(stats.errorDistribution)
+      .map(([error, count]) => `${error}(${count})`)
+      .join(", ")}
+`,
+  )
+  .join("\n")}
 
 ## 操作性能
-${Object.entries(summary.operationStats).map(([operation, stats]) => `
+${Object.entries(summary.operationStats)
+  .map(
+    ([operation, stats]) => `
 ### ${operation}
 - 请求数: ${stats.totalRequests}
 - 平均响应时间: ${stats.averageResponseTime.toFixed(0)}ms
 - 成功率: ${stats.successRate.toFixed(2)}%
 - 缓存命中率: ${stats.cacheHitRate.toFixed(2)}%
-`).join("\n")}
+`,
+  )
+  .join("\n")}
 
 ## 活跃告警
-${activeAlerts.length > 0 ? activeAlerts.map(alert => `
+${
+  activeAlerts.length > 0
+    ? activeAlerts
+        .map(
+          (alert) => `
 ### ${alert.type} - ${alert.severity}
 - 消息: ${alert.message}
 - 阈值: ${alert.threshold}
 - 实际值: ${alert.actualValue}
 - 时间: ${new Date(alert.timestamp).toISOString()}
-`).join("\n") : "无活跃告警"}
+`,
+        )
+        .join("\n")
+    : "无活跃告警"
+}
 `;
 
     return report;
@@ -503,9 +564,9 @@ ${activeAlerts.length > 0 ? activeAlerts.map(alert => `
   public clearOldMetrics(maxAge: number): void {
     const cutoffTime = Date.now() - maxAge;
     const originalLength = this.metrics.length;
-    this.metrics = this.metrics.filter(m => m.timestamp > cutoffTime);
+    this.metrics = this.metrics.filter((m) => m.timestamp > cutoffTime);
     const cleared = originalLength - this.metrics.length;
-    
+
     if (cleared > 0) {
       console.log(`Cleared ${cleared} old performance metrics`);
     }
