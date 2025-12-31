@@ -394,7 +394,130 @@ const TEST_USERS: Array<{
     role: UserRole.LAWYER,
     name: "E2E Test User - Performance",
   },
+  {
+    id: "test-e2e-concurrent",
+    email: "e2e-concurrent@test.com",
+    username: "e2e-concurrent",
+    role: UserRole.LAWYER,
+    name: "E2E Test User - Concurrent",
+  },
+  // 这些是测试文件直接使用的用户ID（不带-user-前缀）
+  // 注意：email需要与带-user-前缀的用户不同以避免冲突
+  {
+    id: "test-e2e-data-consistency",
+    email: "e2e-data-consistency-direct@test.com",
+    username: "e2e-data-consistency",
+    role: UserRole.LAWYER,
+    name: "E2E Test User - Data Consistency (Direct)",
+  },
+  {
+    id: "test-e2e-error-handling",
+    email: "e2e-error-handling-direct@test.com",
+    username: "e2e-error-handling",
+    role: UserRole.LAWYER,
+    name: "E2E Test User - Error Handling (Direct)",
+  },
+  {
+    id: "test-e2e-performance",
+    email: "e2e-performance-direct@test.com",
+    username: "e2e-performance-2",
+    role: UserRole.LAWYER,
+    name: "E2E Test User - Performance (Direct)",
+  },
+  {
+    id: "test-e2e-single-round",
+    email: "e2e-single-round-direct@test.com",
+    username: "e2e-single-round-2",
+    role: UserRole.LAWYER,
+    name: "E2E Test User - Single Round (Direct)",
+  },
+  {
+    id: "test-e2e-multi-round",
+    email: "e2e-multi-round-direct@test.com",
+    username: "e2e-multi-round-2",
+    role: UserRole.LAWYER,
+    name: "E2E Test User - Multi Round (Direct)",
+  },
 ];
+
+// 生成所有并发测试用户ID
+const generateConcurrentUsers = () => {
+  const users: Array<{
+    id: string;
+    email: string;
+    username: string;
+    role: UserRole;
+    name: string;
+  }> = [];
+
+  for (let i = 0; i < 10; i++) {
+    users.push({
+      id: `test-e2e-concurrent-user-${i}`,
+      email: `e2e-concurrent-user-${i}@test.com`,
+      username: `e2e-concurrent-user-${i}`,
+      role: UserRole.LAWYER,
+      name: `E2E Test User - Concurrent User ${i}`,
+    });
+  }
+
+  for (let i = 0; i < 5; i++) {
+    users.push({
+      id: `test-e2e-concurrent-debate-${i}`,
+      email: `e2e-concurrent-debate-${i}@test.com`,
+      username: `e2e-concurrent-debate-${i}`,
+      role: UserRole.LAWYER,
+      name: `E2E Test User - Concurrent Debate ${i}`,
+    });
+  }
+
+  for (let i = 0; i < 10; i++) {
+    users.push({
+      id: `test-e2e-concurrent-mixed-${i}`,
+      email: `e2e-concurrent-mixed-${i}@test.com`,
+      username: `e2e-concurrent-mixed-${i}`,
+      role: UserRole.LAWYER,
+      name: `E2E Test User - Concurrent Mixed ${i}`,
+    });
+  }
+
+  for (let i = 0; i < 5; i++) {
+    users.push({
+      id: `test-e2e-concurrent-upload-${i}`,
+      email: `e2e-concurrent-upload-${i}@test.com`,
+      username: `e2e-concurrent-upload-${i}`,
+      role: UserRole.LAWYER,
+      name: `E2E Test User - Concurrent Upload ${i}`,
+    });
+  }
+
+  for (let i = 0; i < 10; i++) {
+    users.push({
+      id: `test-e2e-concurrent-high-${i}`,
+      email: `e2e-concurrent-high-${i}@test.com`,
+      username: `e2e-concurrent-high-${i}`,
+      role: UserRole.LAWYER,
+      name: `E2E Test User - Concurrent High ${i}`,
+    });
+  }
+
+  users.push({
+    id: "test-e2e-concurrent-conflict",
+    email: "e2e-concurrent-conflict@test.com",
+    username: "e2e-concurrent-conflict",
+    role: UserRole.LAWYER,
+    name: "E2E Test User - Concurrent Conflict",
+  });
+
+  users.push({
+    id: "test-e2e-concurrent-memory-0",
+    email: "e2e-concurrent-memory@test.com",
+    username: "e2e-concurrent-memory",
+    role: UserRole.LAWYER,
+    name: "E2E Test User - Concurrent Memory",
+  });
+
+  return users;
+};
 
 /**
  * 初始化测试数据
@@ -405,7 +528,8 @@ async function initTestData(): Promise<void> {
   try {
     // 1. 创建或更新测试用户
     console.log("\n1. 创建测试用户...");
-    for (const user of TEST_USERS) {
+    const allUsers = [...TEST_USERS, ...generateConcurrentUsers()];
+    for (const user of allUsers) {
       await prisma.user.upsert({
         where: { id: user.id },
         update: {

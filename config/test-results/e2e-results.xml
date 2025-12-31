@@ -1,2 +1,1663 @@
-<testsuites id="" name="" tests="0" failures="0" skipped="0" errors="0" time="46.973036">
+<testsuites id="" name="" tests="58" failures="48" skipped="0" errors="0" time="233.46365">
+<testsuite name="basic.spec.ts" timestamp="2025-12-31T02:23:58.963Z" hostname="chromium" tests="3" failures="0" skipped="0" time="3.441" errors="0">
+<testcase name="Basic E2E Tests › should load home page" classname="basic.spec.ts" time="1.812">
+</testcase>
+<testcase name="Basic E2E Tests › should have proper meta tags" classname="basic.spec.ts" time="1.008">
+</testcase>
+<testcase name="Basic E2E Tests › should be responsive" classname="basic.spec.ts" time="0.621">
+</testcase>
+</testsuite>
+<testsuite name="debate-flow\data-consistency.spec.ts" timestamp="2025-12-31T02:23:58.963Z" hostname="chromium" tests="11" failures="11" skipped="0" time="0.762" errors="0">
+<testcase name="数据一致性测试 › 验证文档解析结果与案件关联正确" classname="debate-flow\data-consistency.spec.ts" time="0.28">
+<failure message="data-consistency.spec.ts:39:7 验证文档解析结果与案件关联正确" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:39:7 › 数据一致性测试 › 验证文档解析结果与案件关联正确 ───────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:40:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-data-consistency'[39m, title: [32m'测试案件_1767147844229'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="数据一致性测试 › 验证法条检索结果与辩论引用一致" classname="debate-flow\data-consistency.spec.ts" time="0.045">
+<failure message="data-consistency.spec.ts:65:7 验证法条检索结果与辩论引用一致" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:65:7 › 数据一致性测试 › 验证法条检索结果与辩论引用一致 ───────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:66:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-data-consistency'[39m, title: [32m'测试案件_1767147845702'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="数据一致性测试 › 验证辩论轮次与论点关联正确" classname="debate-flow\data-consistency.spec.ts" time="0.047">
+<failure message="data-consistency.spec.ts:98:7 验证辩论轮次与论点关联正确" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:98:7 › 数据一致性测试 › 验证辩论轮次与论点关联正确 ─────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:99:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-data-consistency'[39m, title: [32m'测试案件_1767147846852'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="数据一致性测试 › 验证缓存数据与数据库数据一致" classname="debate-flow\data-consistency.spec.ts" time="0.048">
+<failure message="data-consistency.spec.ts:123:7 验证缓存数据与数据库数据一致" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:123:7 › 数据一致性测试 › 验证缓存数据与数据库数据一致 ───────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:124:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-data-consistency'[39m, title: [32m'测试案件_1767147848010'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="数据一致性测试 › 验证AI交互记录完整" classname="debate-flow\data-consistency.spec.ts" time="0.05">
+<failure message="data-consistency.spec.ts:145:7 验证AI交互记录完整" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:145:7 › 数据一致性测试 › 验证AI交互记录完整 ───────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:146:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-data-consistency'[39m, title: [32m'测试案件_1767147849188'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="数据一致性测试 › 验证用户操作日志完整" classname="debate-flow\data-consistency.spec.ts" time="0.054">
+<failure message="data-consistency.spec.ts:181:7 验证用户操作日志完整" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:181:7 › 数据一致性测试 › 验证用户操作日志完整 ───────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:182:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-data-consistency'[39m, title: [32m'测试案件_1767147850326'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="数据一致性测试 › 验证多轮辩论上下文继承正确" classname="debate-flow\data-consistency.spec.ts" time="0.05">
+<failure message="data-consistency.spec.ts:210:7 验证多轮辩论上下文继承正确" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:210:7 › 数据一致性测试 › 验证多轮辩论上下文继承正确 ────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:211:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-data-consistency'[39m, title: [32m'测试案件_1767147851621'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="数据一致性测试 › 验证软删除不影响数据统计" classname="debate-flow\data-consistency.spec.ts" time="0.046">
+<failure message="data-consistency.spec.ts:249:7 验证软删除不影响数据统计" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:249:7 › 数据一致性测试 › 验证软删除不影响数据统计 ─────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:250:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-data-consistency'[39m, title: [32m'测试案件_1767147852783'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="数据一致性测试 › 验证法条适用性分析结果存储正确" classname="debate-flow\data-consistency.spec.ts" time="0.046">
+<failure message="data-consistency.spec.ts:292:7 验证法条适用性分析结果存储正确" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:292:7 › 数据一致性测试 › 验证法条适用性分析结果存储正确 ──────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:293:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-data-consistency'[39m, title: [32m'测试案件_1767147853933'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="数据一致性测试 › 验证增量分析不重复处理旧数据" classname="debate-flow\data-consistency.spec.ts" time="0.047">
+<failure message="data-consistency.spec.ts:328:7 验证增量分析不重复处理旧数据" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:328:7 › 数据一致性测试 › 验证增量分析不重复处理旧数据 ───────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:329:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-data-consistency'[39m, title: [32m'测试案件_1767147855081'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="数据一致性测试 › 验证多轮辩论数据完整性" classname="debate-flow\data-consistency.spec.ts" time="0.049">
+<failure message="data-consistency.spec.ts:362:7 验证多轮辩论数据完整性" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:362:7 › 数据一致性测试 › 验证多轮辩论数据完整性 ──────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:363:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-data-consistency'[39m, title: [32m'测试案件_1767147856287'[39m }
+}
+]]>
+</system-err>
+</testcase>
+</testsuite>
+<testsuite name="debate-flow\error-handling.spec.ts" timestamp="2025-12-31T02:23:58.963Z" hostname="chromium" tests="11" failures="11" skipped="0" time="13.952" errors="0">
+<testcase name="异常处理流程 › 文档解析失败：无效文档格式" classname="debate-flow\error-handling.spec.ts" time="0.048">
+<failure message="error-handling.spec.ts:48:7 文档解析失败：无效文档格式" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:48:7 › 异常处理流程 › 文档解析失败：无效文档格式 ────────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:49:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-error-handling'[39m, title: [32m'测试案件_1767147857439'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="异常处理流程 › 文档解析失败：超大文件" classname="debate-flow\error-handling.spec.ts" time="0.053">
+<failure message="error-handling.spec.ts:73:7 文档解析失败：超大文件" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:73:7 › 异常处理流程 › 文档解析失败：超大文件 ──────────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:74:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-error-handling'[39m, title: [32m'测试案件_1767147858620'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="异常处理流程 › 法条检索无结果：关键词过于冷门" classname="debate-flow\error-handling.spec.ts" time="0.254">
+<failure message="error-handling.spec.ts:99:7 法条检索无结果：关键词过于冷门" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:99:7 › 异常处理流程 › 法条检索无结果：关键词过于冷门 ──────────────────
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: undefined
+
+      106 |     // 验证返回空结果
+      107 |     expect(results).toBeDefined();
+    > 108 |     expect(results.length).toBe(0);
+          |                            ^
+      109 |   });
+      110 |
+      111 |   test("法条检索失败：非法分类", async () => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:108:28
+]]>
+</failure>
+</testcase>
+<testcase name="异常处理流程 › 法条检索失败：非法分类" classname="debate-flow\error-handling.spec.ts" time="0.098">
+<failure message="error-handling.spec.ts:111:7 法条检索失败：非法分类" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:111:7 › 异常处理流程 › 法条检索失败：非法分类 ─────────────────────
+
+    Error: 法条检索失败: 500
+
+       at debate-flow\helpers.ts:191
+
+      189 |
+      190 |   if (!response.ok()) {
+    > 191 |     throw new Error(`法条检索失败: ${response.status()}`);
+          |           ^
+      192 |   }
+      193 |
+      194 |   const result = await response.json();
+        at searchLawArticles (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:191:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:112:21
+]]>
+</failure>
+</testcase>
+<testcase name="异常处理流程 › AI服务超时：模拟超时响应" classname="debate-flow\error-handling.spec.ts" time="0.334">
+<failure message="error-handling.spec.ts:122:7 AI服务超时：模拟超时响应" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:122:7 › 异常处理流程 › AI服务超时：模拟超时响应 ───────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:130:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\..\test-results\debate-flow-error-handling-异常处理流程-AI服务超时：模拟超时响应-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\..\test-results\debate-flow-error-handling-异常处理流程-AI服务超时：模拟超时响应-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-AI服务超时：模拟超时响应-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-AI服务超时：模拟超时响应-chromium\video.webm]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-error-handling'[39m, title: [32m'测试案件_1767147862640'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="异常处理流程 › AI服务错误：模拟500错误" classname="debate-flow\error-handling.spec.ts" time="0.365">
+<failure message="error-handling.spec.ts:149:7 AI服务错误：模拟500错误" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:149:7 › 异常处理流程 › AI服务错误：模拟500错误 ──────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:163:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\..\test-results\debate-flow-error-handling-异常处理流程-AI服务错误：模拟500错误-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\..\test-results\debate-flow-error-handling-异常处理流程-AI服务错误：模拟500错误-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-AI服务错误：模拟500错误-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-AI服务错误：模拟500错误-chromium\video.webm]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-error-handling'[39m, title: [32m'测试案件_1767147864242'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="异常处理流程 › SSE连接中断：断线重连机制" classname="debate-flow\error-handling.spec.ts" time="0.346">
+<failure message="error-handling.spec.ts:189:7 SSE连接中断：断线重连机制" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:189:7 › 异常处理流程 › SSE连接中断：断线重连机制 ──────────────────
+
+    Error: page.evaluate: SyntaxError: Failed to construct 'EventSource': Cannot open an EventSource to '/api/v1/debates/test/stream'. The URL is invalid.
+        at eval (eval at evaluate (:290:30), <anonymous>:2:27)
+        at UtilityScript.evaluate (<anonymous>:292:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:290:30), <anonymous>:2:27)
+        at UtilityScript.evaluate (<anonymous>:292:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:225:10
+
+    Error: page.waitForTimeout: Test ended.
+
+      241 |
+      242 |     // 验证连接尝试次数
+    > 243 |     await page.waitForTimeout(5000);
+          |                ^
+      244 |
+      245 |     expect(connectionCount).toBeGreaterThan(1);
+      246 |   });
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:243:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\..\test-results\debate-flow-error-handling-异常处理流程-SSE连接中断：断线重连机制-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\..\test-results\debate-flow-error-handling-异常处理流程-SSE连接中断：断线重连机制-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-SSE连接中断：断线重连机制-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-SSE连接中断：断线重连机制-chromium\video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="异常处理流程 › 数据库操作失败：并发请求冲突" classname="debate-flow\error-handling.spec.ts" time="0.057">
+<failure message="error-handling.spec.ts:248:7 数据库操作失败：并发请求冲突" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:248:7 › 异常处理流程 › 数据库操作失败：并发请求冲突 ──────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:249:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-error-handling'[39m, title: [32m'测试案件_1767147867360'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="异常处理流程 › 验证友好的错误提示信息" classname="debate-flow\error-handling.spec.ts" time="12.239">
+<failure message="error-handling.spec.ts:277:7 验证友好的错误提示信息" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:277:7 › 异常处理流程 › 验证友好的错误提示信息 ─────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('[data-testid="error-message"]')
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 10000ms
+      - waiting for locator('[data-testid="error-message"]')
+
+
+      297 |     // 验证错误提示显示
+      298 |     const errorMessage = page.locator('[data-testid="error-message"]');
+    > 299 |     await expect(errorMessage).toBeVisible();
+          |                                ^
+      300 |     await expect(errorMessage).toHaveText(/数据库连接失败/);
+      301 |
+      302 |     // 验证重试按钮存在
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:299:32
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\..\test-results\debate-flow-error-handling-异常处理流程-验证友好的错误提示信息-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\..\test-results\debate-flow-error-handling-异常处理流程-验证友好的错误提示信息-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\..\test-results\debate-flow-error-handling-异常处理流程-验证友好的错误提示信息-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-验证友好的错误提示信息-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-验证友好的错误提示信息-chromium\video.webm]]
+
+[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-验证友好的错误提示信息-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="异常处理流程 › 验证系统状态可恢复：错误后继续操作" classname="debate-flow\error-handling.spec.ts" time="0.106">
+<failure message="error-handling.spec.ts:307:7 验证系统状态可恢复：错误后继续操作" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:307:7 › 异常处理流程 › 验证系统状态可恢复：错误后继续操作 ───────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:308:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-error-handling'[39m, title: [32m'测试案件_1767147882202'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="异常处理流程 › 验证数据不丢失：失败操作不影响已有数据" classname="debate-flow\error-handling.spec.ts" time="0.052">
+<failure message="error-handling.spec.ts:337:7 验证数据不丢失：失败操作不影响已有数据" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:337:7 › 异常处理流程 › 验证数据不丢失：失败操作不影响已有数据 ─────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:338:22
+]]>
+</failure>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-error-handling'[39m, title: [32m'测试案件_1767147883441'[39m }
+}
+]]>
+</system-err>
+</testcase>
+</testsuite>
+<testsuite name="debate-flow\multi-round.spec.ts" timestamp="2025-12-31T02:23:58.963Z" hostname="chromium" tests="5" failures="5" skipped="0" time="30.353" errors="0">
+<testcase name="多轮辩论流程 › 两轮辩论流程：上下文继承和论点递进" classname="debate-flow\multi-round.spec.ts" time="30.002">
+<failure message="multi-round.spec.ts:43:7 两轮辩论流程：上下文继承和论点递进" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\multi-round.spec.ts:43:7 › 多轮辩论流程 › 两轮辩论流程：上下文继承和论点递进 ───────────────────
+
+    Test timeout of 30000ms exceeded.
+]]>
+</failure>
+<system-out>
+<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
+[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
+]]>
+</system-out>
+</testcase>
+<testcase name="多轮辩论流程 › 验证上下文继承：第二轮引用第一轮论点" classname="debate-flow\multi-round.spec.ts" time="0.103">
+<failure message="multi-round.spec.ts:161:7 验证上下文继承：第二轮引用第一轮论点" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\multi-round.spec.ts:161:7 › 多轮辩论流程 › 验证上下文继承：第二轮引用第一轮论点 ─────────────────
+
+    Error: 创建辩论失败: 400
+
+       at debate-flow\helpers.ts:248
+
+      246 |
+      247 |   if (!response.ok()) {
+    > 248 |     throw new Error(`创建辩论失败: ${response.status()}`);
+          |           ^
+      249 |   }
+      250 |
+      251 |   const result = await response.json();
+        at createDebate (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:248:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\multi-round.spec.ts:165:20
+]]>
+</failure>
+<system-out>
+<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
+[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
+]]>
+</system-out>
+</testcase>
+<testcase name="多轮辩论流程 › 验证论点递进：观点逐步深化" classname="debate-flow\multi-round.spec.ts" time="0.086">
+<failure message="multi-round.spec.ts:201:7 验证论点递进：观点逐步深化" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\multi-round.spec.ts:201:7 › 多轮辩论流程 › 验证论点递进：观点逐步深化 ──────────────────────
+
+    Error: 创建辩论失败: 400
+
+       at debate-flow\helpers.ts:248
+
+      246 |
+      247 |   if (!response.ok()) {
+    > 248 |     throw new Error(`创建辩论失败: ${response.status()}`);
+          |           ^
+      249 |   }
+      250 |
+      251 |   const result = await response.json();
+        at createDebate (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:248:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\multi-round.spec.ts:205:20
+]]>
+</failure>
+<system-out>
+<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
+[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
+]]>
+</system-out>
+</testcase>
+<testcase name="多轮辩论流程 › 验证增量分析：只分析新增数据" classname="debate-flow\multi-round.spec.ts" time="0.079">
+<failure message="multi-round.spec.ts:261:7 验证增量分析：只分析新增数据" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\multi-round.spec.ts:261:7 › 多轮辩论流程 › 验证增量分析：只分析新增数据 ─────────────────────
+
+    Error: 创建辩论失败: 400
+
+       at debate-flow\helpers.ts:248
+
+      246 |
+      247 |   if (!response.ok()) {
+    > 248 |     throw new Error(`创建辩论失败: ${response.status()}`);
+          |           ^
+      249 |   }
+      250 |
+      251 |   const result = await response.json();
+        at createDebate (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:248:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\multi-round.spec.ts:265:20
+]]>
+</failure>
+<system-out>
+<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
+[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
+]]>
+</system-out>
+</testcase>
+<testcase name="多轮辩论流程 › 验证三轮辩论：完整的多轮支持" classname="debate-flow\multi-round.spec.ts" time="0.083">
+<failure message="multi-round.spec.ts:299:7 验证三轮辩论：完整的多轮支持" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\multi-round.spec.ts:299:7 › 多轮辩论流程 › 验证三轮辩论：完整的多轮支持 ─────────────────────
+
+    Error: 创建辩论失败: 400
+
+       at debate-flow\helpers.ts:248
+
+      246 |
+      247 |   if (!response.ok()) {
+    > 248 |     throw new Error(`创建辩论失败: ${response.status()}`);
+          |           ^
+      249 |   }
+      250 |
+      251 |   const result = await response.json();
+        at createDebate (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:248:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\multi-round.spec.ts:303:20
+]]>
+</failure>
+<system-out>
+<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
+[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="debate-flow\single-round.spec.ts" timestamp="2025-12-31T02:23:58.963Z" hostname="chromium" tests="6" failures="5" skipped="0" time="90.424" errors="0">
+<testcase name="单轮辩论完整流程 › 完整流程测试：文档上传→解析→检索→分析→辩论" classname="debate-flow\single-round.spec.ts" time="30.016">
+<failure message="single-round.spec.ts:42:7 完整流程测试：文档上传→解析→检索→分析→辩论" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\single-round.spec.ts:42:7 › 单轮辩论完整流程 › 完整流程测试：文档上传→解析→检索→分析→辩论 ──────────
+
+    Test timeout of 30000ms exceeded.
+]]>
+</failure>
+<system-out>
+<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
+[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
+]]>
+</system-out>
+</testcase>
+<testcase name="单轮辩论完整流程 › 验证文档解析结果数据结构" classname="debate-flow\single-round.spec.ts" time="30.007">
+<failure message="single-round.spec.ts:154:7 验证文档解析结果数据结构" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\single-round.spec.ts:154:7 › 单轮辩论完整流程 › 验证文档解析结果数据结构 ────────────────────
+
+    Test timeout of 30000ms exceeded.
+]]>
+</failure>
+<system-out>
+<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
+[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
+]]>
+</system-out>
+</testcase>
+<testcase name="单轮辩论完整流程 › 验证法条检索结果相关性" classname="debate-flow\single-round.spec.ts" time="0.094">
+<failure message="single-round.spec.ts:185:7 验证法条检索结果相关性" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\single-round.spec.ts:185:7 › 单轮辩论完整流程 › 验证法条检索结果相关性 ─────────────────────
+
+    Error: expect(received).toHaveProperty(path)
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      194 |
+      195 |     // 验证结果包含相关性信息
+    > 196 |     expect(searchResults[0]).toHaveProperty("relevanceScore");
+          |                              ^
+      197 |     expect(searchResults[0].relevanceScore).toBeGreaterThan(0);
+      198 |     expect(searchResults[0].relevanceScore).toBeLessThanOrEqual(1);
+      199 |
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\single-round.spec.ts:196:30
+]]>
+</failure>
+<system-out>
+<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
+[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
+]]>
+</system-out>
+</testcase>
+<testcase name="单轮辩论完整流程 › 验证法条适用性分析准确性" classname="debate-flow\single-round.spec.ts" time="0.224">
+</testcase>
+<testcase name="单轮辩论完整流程 › 验证辩论论点质量和平衡性" classname="debate-flow\single-round.spec.ts" time="0.068">
+<failure message="single-round.spec.ts:233:7 验证辩论论点质量和平衡性" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\single-round.spec.ts:233:7 › 单轮辩论完整流程 › 验证辩论论点质量和平衡性 ────────────────────
+
+    Error: 创建辩论失败: 400
+
+       at debate-flow\helpers.ts:248
+
+      246 |
+      247 |   if (!response.ok()) {
+    > 248 |     throw new Error(`创建辩论失败: ${response.status()}`);
+          |           ^
+      249 |   }
+      250 |
+      251 |   const result = await response.json();
+        at createDebate (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:248:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\single-round.spec.ts:237:20
+]]>
+</failure>
+<system-out>
+<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
+[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
+]]>
+</system-out>
+</testcase>
+<testcase name="单轮辩论完整流程 › 验证数据库数据一致性" classname="debate-flow\single-round.spec.ts" time="30.015">
+<failure message="single-round.spec.ts:272:7 验证数据库数据一致性" type="FAILURE">
+<![CDATA[  [chromium] › debate-flow\single-round.spec.ts:272:7 › 单轮辩论完整流程 › 验证数据库数据一致性 ──────────────────────
+
+    Test timeout of 30000ms exceeded.
+]]>
+</failure>
+<system-out>
+<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
+[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="performance\concurrent-users.spec.ts" timestamp="2025-12-31T02:23:58.963Z" hostname="chromium" tests="10" failures="8" skipped="0" time="5.978" errors="0">
+<testcase name="并发用户性能测试 › 并发创建案件：10个用户同时创建" classname="performance\concurrent-users.spec.ts" time="0.101">
+<failure message="concurrent-users.spec.ts:35:7 并发创建案件：10个用户同时创建" type="FAILURE">
+<![CDATA[  [chromium] › performance\concurrent-users.spec.ts:35:7 › 并发用户性能测试 › 并发创建案件：10个用户同时创建 ─────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\concurrent-users.spec.ts:43:21
+]]>
+</failure>
+<system-out>
+<![CDATA[=== 并发用户性能报告 ===
+{}
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-concurrent-user-1'[39m, title: [32m'测试案件_1767148017437'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="并发用户性能测试 › 并发查询案件列表：10个用户同时查询" classname="performance\concurrent-users.spec.ts" time="0.304">
+<failure message="concurrent-users.spec.ts:60:7 并发查询案件列表：10个用户同时查询" type="FAILURE">
+<![CDATA[  [chromium] › performance\concurrent-users.spec.ts:60:7 › 并发用户性能测试 › 并发查询案件列表：10个用户同时查询 ───────────
+
+    Error: expect(received).toBeGreaterThan(expected)
+
+    Expected: > 1
+    Received:   0.9578544061302682
+
+      86 |     console.log(`并发加速比: ${speedup.toFixed(2)}x`);
+      87 |
+    > 88 |     expect(speedup).toBeGreaterThan(1);
+         |                     ^
+      89 |   });
+      90 |
+      91 |   test("并发创建辩论：5个用户同时创建", async () => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\concurrent-users.spec.ts:88:21
+]]>
+</failure>
+<system-out>
+<![CDATA[10个用户并发查询案件耗时: 261ms
+并发加速比: 0.96x
+=== 并发用户性能报告 ===
+{
+  "并发查询案件": {
+    "min": 261,
+    "max": 261,
+    "avg": 261,
+    "count": 1
+  }
+}
+]]>
+</system-out>
+</testcase>
+<testcase name="并发用户性能测试 › 并发创建辩论：5个用户同时创建" classname="performance\concurrent-users.spec.ts" time="0.055">
+<failure message="concurrent-users.spec.ts:91:7 并发创建辩论：5个用户同时创建" type="FAILURE">
+<![CDATA[  [chromium] › performance\concurrent-users.spec.ts:91:7 › 并发用户性能测试 › 并发创建辩论：5个用户同时创建 ──────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\concurrent-users.spec.ts:97:24
+]]>
+</failure>
+<system-out>
+<![CDATA[=== 并发用户性能报告 ===
+{}
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: {
+    userId: [32m'test-e2e-concurrent-debate-0'[39m,
+    title: [32m'测试案件_1767148020366'[39m
+  }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="并发用户性能测试 › 并发用户不同操作：混合场景" classname="performance\concurrent-users.spec.ts" time="0.062">
+<failure message="concurrent-users.spec.ts:127:7 并发用户不同操作：混合场景" type="FAILURE">
+<![CDATA[  [chromium] › performance\concurrent-users.spec.ts:127:7 › 并发用户性能测试 › 并发用户不同操作：混合场景 ───────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\concurrent-users.spec.ts:133:24
+]]>
+</failure>
+<system-out>
+<![CDATA[=== 并发用户性能报告 ===
+{}
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: {
+    userId: [32m'test-e2e-concurrent-mixed-0'[39m,
+    title: [32m'测试案件_1767148021571'[39m
+  }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="并发用户性能测试 › 并发上传文档：5个用户同时上传" classname="performance\concurrent-users.spec.ts" time="0.052">
+<failure message="concurrent-users.spec.ts:190:7 并发上传文档：5个用户同时上传" type="FAILURE">
+<![CDATA[  [chromium] › performance\concurrent-users.spec.ts:190:7 › 并发用户性能测试 › 并发上传文档：5个用户同时上传 ─────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\concurrent-users.spec.ts:196:24
+]]>
+</failure>
+<system-out>
+<![CDATA[=== 并发用户性能报告 ===
+{}
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: {
+    userId: [32m'test-e2e-concurrent-upload-0'[39m,
+    title: [32m'测试案件_1767148022774'[39m
+  }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="并发用户性能测试 › 高并发场景：50个请求同时访问" classname="performance\concurrent-users.spec.ts" time="1.209">
+<failure message="concurrent-users.spec.ts:232:7 高并发场景：50个请求同时访问" type="FAILURE">
+<![CDATA[  [chromium] › performance\concurrent-users.spec.ts:232:7 › 并发用户性能测试 › 高并发场景：50个请求同时访问 ─────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\concurrent-users.spec.ts:255:21
+]]>
+</failure>
+<system-out>
+<![CDATA[=== 并发用户性能报告 ===
+{}
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-concurrent-high-0'[39m, title: [32m'测试案件_1767148024036'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="并发用户性能测试 › 并发冲突场景：同时更新同一资源" classname="performance\concurrent-users.spec.ts" time="0.052">
+<failure message="concurrent-users.spec.ts:287:7 并发冲突场景：同时更新同一资源" type="FAILURE">
+<![CDATA[  [chromium] › performance\concurrent-users.spec.ts:287:7 › 并发用户性能测试 › 并发冲突场景：同时更新同一资源 ─────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\concurrent-users.spec.ts:288:22
+]]>
+</failure>
+<system-out>
+<![CDATA[=== 并发用户性能报告 ===
+{}
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: {
+    userId: [32m'test-e2e-concurrent-conflict'[39m,
+    title: [32m'测试案件_1767148026381'[39m
+  }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="并发用户性能测试 › 并发性能指标：响应时间分布" classname="performance\concurrent-users.spec.ts" time="0.562">
+<system-out>
+<![CDATA[并发请求响应时间分布: { min: [33m22[39m, max: [33m58[39m, avg: [33m27.85[39m, p50: [33m25[39m, p95: [33m58[39m, p99: [33m58[39m }
+]]>
+</system-out>
+</testcase>
+<testcase name="并发用户性能测试 › 持续并发压力：100个请求分批发送" classname="performance\concurrent-users.spec.ts" time="3.552">
+<system-out>
+<![CDATA[100个请求分10批处理
+平均批次耗时: 245.40ms
+最大批次耗时: 264ms
+性能退化比: 1.03x
+]]>
+</system-out>
+</testcase>
+<testcase name="并发用户性能测试 › 系统资源监控：内存泄漏检查" classname="performance\concurrent-users.spec.ts" time="0.029">
+<failure message="concurrent-users.spec.ts:408:7 系统资源监控：内存泄漏检查" type="FAILURE">
+<![CDATA[  [chromium] › performance\concurrent-users.spec.ts:408:7 › 并发用户性能测试 › 系统资源监控：内存泄漏检查 ───────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\concurrent-users.spec.ts:417:24
+]]>
+</failure>
+<system-out>
+<![CDATA[=== 并发用户性能报告 ===
+{
+  "并发响应_min": {
+    "min": 22,
+    "max": 22,
+    "avg": 22,
+    "count": 1
+  },
+  "并发响应_max": {
+    "min": 58,
+    "max": 58,
+    "avg": 58,
+    "count": 1
+  },
+  "并发响应_avg": {
+    "min": 27.85,
+    "max": 27.85,
+    "avg": 27.85,
+    "count": 1
+  },
+  "并发响应_p95": {
+    "min": 58,
+    "max": 58,
+    "avg": 58,
+    "count": 1
+  },
+  "并发响应_p99": {
+    "min": 58,
+    "max": 58,
+    "avg": 58,
+    "count": 1
+  },
+  "持续并发_平均批次": {
+    "min": 245.4,
+    "max": 245.4,
+    "avg": 245.4,
+    "count": 1
+  },
+  "持续并发_最大批次": {
+    "min": 264,
+    "max": 264,
+    "avg": 264,
+    "count": 1
+  }
+}
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: {
+    userId: [32m'test-e2e-concurrent-memory-0'[39m,
+    title: [32m'测试案件_1767148031735'[39m
+  }
+}
+]]>
+</system-err>
+</testcase>
+</testsuite>
+<testsuite name="performance\response-time.spec.ts" timestamp="2025-12-31T02:23:58.963Z" hostname="chromium" tests="12" failures="8" skipped="0" time="1.174" errors="0">
+<testcase name="响应时间性能测试 › 文档上传响应时间 &lt; 3秒" classname="performance\response-time.spec.ts" time="0.049">
+<failure message="response-time.spec.ts:45:7 文档上传响应时间 &lt; 3秒" type="FAILURE">
+<![CDATA[  [chromium] › performance\response-time.spec.ts:45:7 › 响应时间性能测试 › 文档上传响应时间 < 3秒 ───────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\response-time.spec.ts:46:22
+]]>
+</failure>
+<system-out>
+<![CDATA[=== 响应时间性能报告 ===
+{}
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-performance'[39m, title: [32m'测试案件_1767148032970'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="响应时间性能测试 › 文档解析时间 &lt; 20秒" classname="performance\response-time.spec.ts" time="0.049">
+<failure message="response-time.spec.ts:63:7 文档解析时间 &lt; 20秒" type="FAILURE">
+<![CDATA[  [chromium] › performance\response-time.spec.ts:63:7 › 响应时间性能测试 › 文档解析时间 < 20秒 ────────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\response-time.spec.ts:64:22
+]]>
+</failure>
+<system-out>
+<![CDATA[=== 响应时间性能报告 ===
+{}
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-performance'[39m, title: [32m'测试案件_1767148034210'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="响应时间性能测试 › 法条检索响应时间 &lt; 1秒" classname="performance\response-time.spec.ts" time="0.165">
+</testcase>
+<testcase name="响应时间性能测试 › 法条适用性分析 &lt; 2秒" classname="performance\response-time.spec.ts" time="0.044">
+<failure message="response-time.spec.ts:111:7 法条适用性分析 &lt; 2秒" type="FAILURE">
+<![CDATA[  [chromium] › performance\response-time.spec.ts:111:7 › 响应时间性能测试 › 法条适用性分析 < 2秒 ───────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\response-time.spec.ts:116:24
+]]>
+</failure>
+<system-out>
+<![CDATA[=== 响应时间性能报告 ===
+{
+  "法条检索_0": {
+    "min": 49,
+    "max": 49,
+    "avg": 49,
+    "count": 1
+  },
+  "法条检索_1": {
+    "min": 28,
+    "max": 28,
+    "avg": 28,
+    "count": 1
+  },
+  "法条检索_2": {
+    "min": 26,
+    "max": 26,
+    "avg": 26,
+    "count": 1
+  },
+  "法条检索_3": {
+    "min": 28,
+    "max": 28,
+    "avg": 28,
+    "count": 1
+  },
+  "法条检索_4": {
+    "min": 27,
+    "max": 27,
+    "avg": 27,
+    "count": 1
+  },
+  "法条检索_平均": {
+    "min": 31.6,
+    "max": 31.6,
+    "avg": 31.6,
+    "count": 1
+  }
+}
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-performance'[39m, title: [32m'测试案件_1767148035606'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="响应时间性能测试 › 辩论生成时间 &lt; 30秒" classname="performance\response-time.spec.ts" time="0.05">
+<failure message="response-time.spec.ts:139:7 辩论生成时间 &lt; 30秒" type="FAILURE">
+<![CDATA[  [chromium] › performance\response-time.spec.ts:139:7 › 响应时间性能测试 › 辩论生成时间 < 30秒 ───────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\response-time.spec.ts:144:24
+]]>
+</failure>
+<system-out>
+<![CDATA[=== 响应时间性能报告 ===
+{}
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-performance'[39m, title: [32m'测试案件_1767148036757'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="响应时间性能测试 › 完整单轮辩论流程 &lt; 60秒" classname="performance\response-time.spec.ts" time="0.05">
+<failure message="response-time.spec.ts:172:7 完整单轮辩论流程 &lt; 60秒" type="FAILURE">
+<![CDATA[  [chromium] › performance\response-time.spec.ts:172:7 › 响应时间性能测试 › 完整单轮辩论流程 < 60秒 ─────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\response-time.spec.ts:177:24
+]]>
+</failure>
+<system-out>
+<![CDATA[=== 响应时间性能报告 ===
+{}
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-performance'[39m, title: [32m'测试案件_1767148037951'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="响应时间性能测试 › 数据库查询性能 &lt; 100ms（平均值）" classname="performance\response-time.spec.ts" time="0.353">
+</testcase>
+<testcase name="响应时间性能测试 › 案件列表分页查询性能" classname="performance\response-time.spec.ts" time="0.027">
+<failure message="response-time.spec.ts:246:7 案件列表分页查询性能" type="FAILURE">
+<![CDATA[  [chromium] › performance\response-time.spec.ts:246:7 › 响应时间性能测试 › 案件列表分页查询性能 ─────────────────────
+
+    TypeError: Cannot read properties of undefined (reading 'length')
+
+      263 |       expect(result.ok()).toBe(true);
+      264 |       const data = await result.json();
+    > 265 |       expect(data.data.items.length).toBeLessThanOrEqual(pageSize);
+          |                              ^
+      266 |     }
+      267 |
+      268 |     console.log("分页性能结果:", results);
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\response-time.spec.ts:265:30
+]]>
+</failure>
+<system-out>
+<![CDATA[=== 响应时间性能报告 ===
+{
+  "数据库查询_0": {
+    "min": 47,
+    "max": 47,
+    "avg": 47,
+    "count": 1
+  },
+  "数据库查询_1": {
+    "min": 39,
+    "max": 39,
+    "avg": 39,
+    "count": 1
+  },
+  "数据库查询_2": {
+    "min": 31,
+    "max": 31,
+    "avg": 31,
+    "count": 1
+  },
+  "数据库查询_3": {
+    "min": 26,
+    "max": 26,
+    "avg": 26,
+    "count": 1
+  },
+  "数据库查询_4": {
+    "min": 39,
+    "max": 39,
+    "avg": 39,
+    "count": 1
+  },
+  "数据库查询_5": {
+    "min": 22,
+    "max": 22,
+    "avg": 22,
+    "count": 1
+  },
+  "数据库查询_6": {
+    "min": 64,
+    "max": 64,
+    "avg": 64,
+    "count": 1
+  },
+  "数据库查询_7": {
+    "min": 30,
+    "max": 30,
+    "avg": 30,
+    "count": 1
+  },
+  "数据库查询_8": {
+    "min": 26,
+    "max": 26,
+    "avg": 26,
+    "count": 1
+  },
+  "数据库查询_9": {
+    "min": 24,
+    "max": 24,
+    "avg": 24,
+    "count": 1
+  },
+  "数据库查询_平均": {
+    "min": 34.8,
+    "max": 34.8,
+    "avg": 34.8,
+    "count": 1
+  },
+  "案件列表_分页_10": {
+    "min": 23,
+    "max": 23,
+    "avg": 23,
+    "count": 1
+  }
+}
+]]>
+</system-out>
+</testcase>
+<testcase name="响应时间性能测试 › 缓存命中性能 &lt; 50ms" classname="performance\response-time.spec.ts" time="0.106">
+<system-out>
+<![CDATA[缓存未命中: 64ms, 缓存命中: 35ms
+]]>
+</system-out>
+</testcase>
+<testcase name="响应时间性能测试 › 文档上传大文件性能" classname="performance\response-time.spec.ts" time="0.037">
+<failure message="response-time.spec.ts:294:7 文档上传大文件性能" type="FAILURE">
+<![CDATA[  [chromium] › performance\response-time.spec.ts:294:7 › 响应时间性能测试 › 文档上传大文件性能 ──────────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\response-time.spec.ts:304:24
+]]>
+</failure>
+<system-out>
+<![CDATA[=== 响应时间性能报告 ===
+{
+  "缓存未命中": {
+    "min": 64,
+    "max": 64,
+    "avg": 64,
+    "count": 1
+  },
+  "缓存命中": {
+    "min": 35,
+    "max": 35,
+    "avg": 35,
+    "count": 1
+  }
+}
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-performance'[39m, title: [32m'测试案件_1767148040798'[39m }
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="响应时间性能测试 › API冷启动与热启动性能对比" classname="performance\response-time.spec.ts" time="0.216">
+<system-out>
+<![CDATA[冷启动: 44ms, 热启动平均: 33.2ms
+]]>
+</system-out>
+</testcase>
+<testcase name="响应时间性能测试 › 多轮辩论性能对比" classname="performance\response-time.spec.ts" time="0.028">
+<failure message="response-time.spec.ts:358:7 多轮辩论性能对比" type="FAILURE">
+<![CDATA[  [chromium] › performance\response-time.spec.ts:358:7 › 响应时间性能测试 › 多轮辩论性能对比 ───────────────────────
+
+    Error: 创建案件失败: 404
+
+       at debate-flow\helpers.ts:98
+
+       96 |       },
+       97 |     });
+    >  98 |     throw new Error(`创建案件失败: ${response.status()}`);
+          |           ^
+       99 |   }
+      100 |
+      101 |   const result = await response.json();
+        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:98:11)
+        at D:\legal_debate_mvp\src\__tests__\e2e\performance\response-time.spec.ts:359:22
+]]>
+</failure>
+<system-out>
+<![CDATA[=== 响应时间性能报告 ===
+{
+  "冷启动": {
+    "min": 44,
+    "max": 44,
+    "avg": 44,
+    "count": 1
+  },
+  "热启动_平均": {
+    "min": 33.2,
+    "max": 33.2,
+    "avg": 33.2,
+    "count": 1
+  }
+}
+]]>
+</system-out>
+<system-err>
+<![CDATA[创建案件失败详情: {
+  status: [33m404[39m,
+  statusText: [32m'Not Found'[39m,
+  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
+  request: { userId: [32m'test-e2e-performance'[39m, title: [32m'测试案件_1767148042194'[39m }
+}
+]]>
+</system-err>
+</testcase>
+</testsuite>
 </testsuites>
