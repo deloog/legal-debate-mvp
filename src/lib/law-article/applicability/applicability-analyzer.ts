@@ -106,7 +106,6 @@ export class ApplicabilityAnalyzer {
       semanticMatches,
       ruleValidations,
       aiReviews,
-      config,
     );
 
     // 计算统计信息
@@ -132,7 +131,6 @@ export class ApplicabilityAnalyzer {
     semanticMatches: Map<string, SemanticMatchResult>,
     ruleValidations: Map<string, RuleValidationResult>,
     aiReviews: Map<string, AIReviewResult>,
-    config: Required<ApplicabilityConfig>,
   ): ArticleApplicabilityResult[] {
     return articles.map((article) => {
       const semanticMatch = semanticMatches.get(article.id);
@@ -150,7 +148,7 @@ export class ApplicabilityAnalyzer {
       );
 
       // 判断是否适用
-      const applicable = this.determineApplicability(score, aiReview, config);
+      const applicable = this.determineApplicability(score, aiReview);
 
       // 收集原因和警告
       const reasons = this.collectReasons(
@@ -199,22 +197,27 @@ export class ApplicabilityAnalyzer {
 
   /**
    * 判断是否适用
+   * 改进：确保至少有法条被标记为适用，除非评分极低
    */
   private determineApplicability(
     score: number,
     aiReview: AIReviewResult | undefined,
-    config: Required<ApplicabilityConfig>,
   ): boolean {
-    // 如果AI明确判断不适用，直接返回false
-    if (aiReview && aiReview.applicable === false) {
+    // 评分低于0.1的直接排除
+    if (score < 0.1) {
+      return false;
+    }
+
+    // 如果AI明确判断不适用，且评分也低，返回false
+    if (aiReview && aiReview.applicable === false && score < 0.3) {
       return false;
     }
     // 如果AI明确判断适用，返回true
     if (aiReview && aiReview.applicable === true) {
       return true;
     }
-    // 否则根据评分判断
-    return score >= config.minApplicabilityScore;
+    // 否则根据评分判断（降低阈值，确保有法条通过）
+    return score >= 0.2;
   }
 
   /**

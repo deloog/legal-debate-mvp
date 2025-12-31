@@ -1,9 +1,24 @@
 import { z } from "zod";
 
 /**
- * 通用UUID验证
+ * 通用ID验证 - 支持UUID和CUID格式
+ * UUID格式: 8-4-4-4-12 (如: 123e4567-e89b-12d3-a456-426614174000)
+ * CUID格式: 25位字符 (如: cmjtg7np100axc0zgwiwpwt9a)
  */
-export const uuidSchema = z.string().uuid("Invalid UUID format");
+export const uuidSchema = z
+  .string()
+  .min(1, "ID is required")
+  .refine(
+    (val) => {
+      // 尝试UUID格式
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      // Prisma CUID格式 (25位小写字母和数字)
+      const cuidRegex = /^[a-z0-9]{25}$/;
+      return uuidRegex.test(val) || cuidRegex.test(val);
+    },
+    { message: "Invalid ID format (expected UUID or CUID)" },
+  );
 
 /**
  * 分页参数验证

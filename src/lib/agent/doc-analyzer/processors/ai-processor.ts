@@ -13,6 +13,8 @@ import type {
   ExtractedData,
   TextChunk,
   DocumentAnalysisOptions,
+  Party,
+  Claim,
 } from "../core/types";
 import { DEFAULT_CONFIG, ERROR_MESSAGES } from "../core/constants";
 import { DocumentParser } from "../../../ai/document-parser";
@@ -22,15 +24,18 @@ export class AIProcessor {
   private config: typeof DEFAULT_CONFIG;
   private parser: DocumentParser;
 
-  constructor(config?: Partial<typeof DEFAULT_CONFIG>) {
+  constructor(
+    config?: Partial<typeof DEFAULT_CONFIG>,
+    useMock: boolean = false,
+  ) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    this.parser = new DocumentParser();
+    this.parser = new DocumentParser(useMock);
   }
 
   /**
    * 获取AI服务实例（用于Reviewer初始化）
    */
-  public async getAIService(): Promise<any> {
+  public async getAIService(): Promise<unknown> {
     const { getUnifiedAIService } = await import("../../../ai/unified-service");
     return getUnifiedAIService();
   }
@@ -250,13 +255,13 @@ ${text}
    * 合并结果
    */
   private mergeResults(results: AIAnalysisResponse[]): AIAnalysisResponse {
-    const partyMap = new Map<string, any>();
-    const claims: any[] = [];
+    const partyMap = new Map<string, Party>();
+    const claims: Claim[] = [];
     let totalConfidence = 0;
     let totalTokens = 0;
 
     results.forEach((r) => {
-      r.extractedData.parties?.forEach((p: any) => {
+      r.extractedData.parties?.forEach((p: Party) => {
         const key = `${p.name}_${p.type}`;
         if (!partyMap.has(key)) partyMap.set(key, p);
       });
@@ -295,7 +300,7 @@ ${text}
   /**
    * 去重
    */
-  private deduplicate(items: any[]): any[] {
+  private deduplicate<T>(items: T[]): T[] {
     const seen = new Set<string>();
     return items.filter((item) => {
       const key = JSON.stringify(item);

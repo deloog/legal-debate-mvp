@@ -12,16 +12,25 @@ export class SearchQueryBuilder {
   static buildWhereClause(query: SearchQuery): Prisma.LawArticleWhereInput {
     const conditions: Prisma.LawArticleWhereInput[] = [];
 
-    // 关键词搜索（模糊匹配）
+    // 关键词搜索（模糊匹配）- 支持多个空格分隔的关键词
     if (query.keyword && query.keyword.trim()) {
-      const keyword = query.keyword.trim();
-      conditions.push({
-        OR: [
-          { fullText: { contains: keyword, mode: "insensitive" } },
-          { searchableText: { contains: keyword, mode: "insensitive" } },
-          { lawName: { contains: keyword, mode: "insensitive" } },
-        ],
-      });
+      const keywords = query.keyword
+        .trim()
+        .split(/\s+/)
+        .filter((k) => k.length > 0);
+
+      if (keywords.length > 0) {
+        // 为每个关键词分别构建搜索条件（OR关系）
+        const keywordConditions = keywords.map((keyword) => ({
+          OR: [
+            { fullText: { contains: keyword, mode: "insensitive" } },
+            { searchableText: { contains: keyword, mode: "insensitive" } },
+            { lawName: { contains: keyword, mode: "insensitive" } },
+          ],
+        })) as Prisma.LawArticleWhereInput[];
+
+        conditions.push({ OR: keywordConditions });
+      }
     }
 
     // 法律分类筛选
@@ -120,7 +129,7 @@ export class SearchQueryBuilder {
   /**
    * 构建选择字段（优化查询性能）
    */
-  static buildSelectClause(query: SearchQuery): Prisma.LawArticleSelect | null {
+  static buildSelectClause(): Prisma.LawArticleSelect | null {
     // 默认返回所有字段，可以根据需要优化
     return null;
   }
@@ -133,7 +142,7 @@ export class SearchQueryBuilder {
     const orderBy = this.buildOrderByClause(query);
     const { skip, take, page, pageSize } = this.buildPaginationParams(query);
     const include = this.buildIncludeClause(query);
-    const select = this.buildSelectClause(query);
+    const select = this.buildSelectClause();
 
     return {
       where,

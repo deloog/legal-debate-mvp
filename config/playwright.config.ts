@@ -2,16 +2,16 @@ import { defineConfig, devices } from '@playwright/test';
 import { config as dotenvConfig } from 'dotenv';
 import { resolve } from 'path';
 
-// Load environment variables
+// Load environment variables - prioritize root .env for AI keys
+dotenvConfig({ path: resolve(__dirname, '../.env') });
 dotenvConfig({ path: resolve(__dirname, '../.env.development') });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './src/__tests__/e2e',
-  testMatch: '**/*.spec.ts',
-  testIgnore: '**/node_modules/**',
+  testDir: resolve(__dirname, '../src/__tests__/e2e'),
+  testMatch: ['*.spec.ts', 'debate-flow/*.spec.ts', 'performance/*.spec.ts'],
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -57,9 +57,9 @@ export default defineConfig({
     timeout: 120 * 1000,
   },
 
-  /* Test timeout */
-  timeout: 30 * 1000,
+  /* Test timeout - increased for AI service calls and Mock mode */
+  timeout: 120 * 1000,
   expect: {
-    timeout: 10 * 1000,
+    timeout: 30 * 1000,
   },
 });

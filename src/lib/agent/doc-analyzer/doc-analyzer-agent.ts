@@ -9,7 +9,7 @@ import { AgentType, AgentContext } from "../../../types/agent";
 import {
   DocumentAnalysisOutput,
   DocumentAnalysisInput,
-  DocAnalyzerConfig,
+  AnalysisProcess,
 } from "./core/types";
 import { DEFAULT_CONFIG } from "./core/constants";
 import { TextExtractor } from "./extractors/text-extractor";
@@ -34,12 +34,14 @@ export class DocAnalyzerAgent extends BaseAgent {
   private reviewerManager: ReviewerManager;
   private aiReviewer: AIReviewer | null = null;
   private ruleReviewer: RuleReviewer | null = null;
+  private useMock: boolean;
 
-  constructor() {
+  constructor(useMock: boolean = false) {
     super();
+    this.useMock = useMock;
     this.textExtractor = new TextExtractor();
     this.filterProcessor = new FilterProcessor();
-    this.aiProcessor = new AIProcessor(DEFAULT_CONFIG);
+    this.aiProcessor = new AIProcessor(DEFAULT_CONFIG, useMock);
     this.ruleProcessor = new RuleProcessor();
     this.legalRepFilter = new LegalRepresentativeFilter();
     this.cacheProcessor = new CacheProcessor({
@@ -258,7 +260,7 @@ export class DocAnalyzerAgent extends BaseAgent {
             documentType,
             filterQualityScore: filterResult.qualityScore,
             filterWarnings: filterResult.warnings,
-          } as any,
+          } as AnalysisProcess,
         },
       };
 

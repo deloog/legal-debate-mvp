@@ -9,11 +9,16 @@ import { join } from "path";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
   try {
+    // Next.js 15+ 需要await params
+    const resolvedParams = await params;
+    const documentId = resolvedParams.id;
+
+    console.log(`查询文档详情 [${documentId}]`);
     const document = await prisma.document.findUnique({
-      where: { id: params.id },
+      where: { id: documentId },
       include: {
         case: {
           select: {
@@ -23,6 +28,8 @@ export async function GET(
         },
       },
     });
+
+    console.log(`查询文档结果:`, document?.id, document?.analysisStatus);
 
     if (!document) {
       return NextResponse.json(
@@ -34,17 +41,53 @@ export async function GET(
     // 格式化分析结果以符合E2E测试期望
     let analysisResult: Record<string, unknown> | null = null;
     if (document.analysisResult && document.analysisStatus === "COMPLETED") {
-      const result = document.analysisResult as {
-        extractedData?: Record<string, unknown>;
-      } | null;
-      analysisResult = {
-        parties: result?.extractedData?.parties || [],
-        claims: result?.extractedData?.claims || [],
-        facts: result?.extractedData?.keyFacts || [],
-        disputeFocuses: result?.extractedData?.disputeFocuses || [],
-        timeline: result?.extractedData?.timeline || [],
-        summary: result?.extractedData?.summary || null,
-      };
+      try {
+        console.log(
+          "处理文档分析结果:",
+          JSON.stringify(document.analysisResult, null, 2),
+        );
+
+        const result = document.analysisResult as {
+          extractedData?: Record<string, unknown>;
+        } | null;
+
+        // 安全访问嵌套属性，避免运行时错误
+        const extractedData = result?.extractedData;
+
+        analysisResult = {
+          extractedData: {
+            parties: Array.isArray(extractedData?.parties)
+              ? extractedData.parties
+              : [],
+            claims: Array.isArray(extractedData?.claims)
+              ? extractedData.claims
+              : [],
+            keyFacts: Array.isArray(extractedData?.keyFacts)
+              ? extractedData.keyFacts
+              : [],
+            disputeFocuses: Array.isArray(extractedData?.disputeFocuses)
+              ? extractedData.disputeFocuses
+              : [],
+            timeline: Array.isArray(extractedData?.timeline)
+              ? extractedData.timeline
+              : [],
+            summary: extractedData?.summary || null,
+          },
+        } as Record<string, unknown>;
+
+        console.log(
+          "格式化后的analysisResult:",
+          JSON.stringify(analysisResult, null, 2),
+        );
+      } catch (error) {
+        console.error("处理analysisResult时出错:", error);
+        console.error(
+          "错误详情:",
+          error instanceof Error ? error.message : String(error),
+        );
+        // 发生错误时设置为null，而不是让整个请求失败
+        analysisResult = null;
+      }
     }
 
     return NextResponse.json({
@@ -82,11 +125,15 @@ export async function GET(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
   try {
+    // Next.js 15+ 需要await params
+    const resolvedParams = await params;
+    const documentId = resolvedParams.id;
+
     const document = await prisma.document.findUnique({
-      where: { id: params.id },
+      where: { id: documentId },
     });
 
     if (!document) {
@@ -106,7 +153,7 @@ export async function DELETE(
 
     // 删除数据库记录
     await prisma.document.delete({
-      where: { id: params.id },
+      where: { id: documentId },
     });
 
     return NextResponse.json({

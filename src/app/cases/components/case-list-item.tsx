@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import {
   Calendar,
@@ -180,3 +181,6 @@ export function CaseListItem({
     </div>
   );
 }
+
+// 使用React.memo避免不必要的重渲染
+export default memo(CaseListItem);

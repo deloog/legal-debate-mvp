@@ -4,13 +4,56 @@ import { createSuccessResponse } from "@/app/api/lib/responses/api-response";
 import { LawArticleSearchService } from "@/lib/law-article/search-service";
 import type { SearchQuery } from "@/lib/law-article/types";
 import { LawCategory, LawStatus } from "@prisma/client";
+import { cache } from "@/lib/cache/manager";
+import { measurePerformance } from "@/lib/middleware/performance-monitor";
+
+/**
+ * 缓存响应数据类型
+ */
+interface CachedResponseData {
+  articles: Array<{
+    id: string;
+    lawName: string;
+    articleNumber: string;
+    fullText: string;
+    category: LawCategory;
+    lawType: string;
+    relevanceScore: number;
+    matchedKeywords: string[];
+  }>;
+  total: number;
+  relevanceScores: number[];
+}
+
+/**
+ * 缓存元数据类型
+ */
+interface CachedResponseMeta {
+  pagination: {
+    page: number;
+    limit: number;
+    hasMore: boolean;
+  };
+}
+
+/**
+ * 缓存响应类型
+ */
+interface CachedResponse {
+  data: CachedResponseData;
+  meta: CachedResponseMeta;
+}
 
 /**
  * POST /api/v1/law-articles/search
- * 法条检索API
+ * 法条检索API - 优化版本
  */
 export const POST = withErrorHandler(async (request: NextRequest) => {
+  const startTime = Date.now();
   const body = await request.json();
+
+  // 生成缓存键
+  const cacheKey = `law-articles:${JSON.stringify(body)}`;
 
   // 参数验证
   if (
@@ -30,13 +73,20 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     );
   }
 
-  const keywords: string[] = body.keywords;
-  const keyword = keywords.join(" ");
+  const keywords: string[] = body.keywords || [];
+
+  console.log("法条搜索请求参数:", {
+    keywords,
+    category: body.category,
+    tags: body.tags,
+    page: body.page,
+    limit: body.limit,
+  });
 
   // 构建查询参数
+  // 注意：keywords作为全文搜索关键词数组，不作为标签筛选
   const query: SearchQuery = {
-    keyword,
-    keywords,
+    keyword: keywords.join(" "), // 用空格连接关键词进行全文搜索
     category: body.category ? (body.category as LawCategory) : undefined,
     tags: body.tags,
     status: body.status ? (body.status as LawStatus) : LawStatus.VALID,
@@ -49,6 +99,21 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       order: body.sortOrder || "desc",
     },
   };
+
+  // 尝试从缓存获取结果
+  const cachedResponse = await cache.get<CachedResponse>(cacheKey, {
+    ttl: 900, // 15分钟缓存
+  });
+
+  if (cachedResponse) {
+    const response = createSuccessResponse(
+      cachedResponse.data,
+      cachedResponse.meta,
+    );
+    response.headers.set("X-Cache", "HIT");
+    await measurePerformance(request, response, startTime, { enabled: true });
+    return response;
+  }
 
   // 调用检索服务
   const response = await LawArticleSearchService.search(query);
@@ -65,20 +130,38 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     matchedKeywords: result.matchedKeywords,
   }));
 
-  return createSuccessResponse(
-    {
-      articles,
-      total: response.pagination.total,
-      relevanceScores: articles.map((a) => a.relevanceScore),
+  const responseData = {
+    articles,
+    total: response.pagination.total,
+    relevanceScores: articles.map((a) => a.relevanceScore),
+  };
+
+  const responseMeta = {
+    pagination: {
+      page: response.pagination.page,
+      limit: response.pagination.pageSize,
+      hasMore: response.pagination.hasNext,
     },
-    {
-      pagination: {
-        page: response.pagination.page,
-        limit: response.pagination.pageSize,
-        hasMore: response.pagination.hasNext,
+  };
+
+  // 缓存结果（仅缓存第一页，避免缓存过多数据）
+  if (query.pagination.page === 1) {
+    await cache.set(
+      cacheKey,
+      {
+        data: responseData,
+        meta: responseMeta,
       },
-    },
-  );
+      {
+        ttl: 900,
+      },
+    );
+  }
+
+  const apiResponse = createSuccessResponse(responseData, responseMeta);
+  apiResponse.headers.set("X-Cache", "MISS");
+  await measurePerformance(request, apiResponse, startTime, { enabled: true });
+  return apiResponse;
 });
 
 /**

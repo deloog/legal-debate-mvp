@@ -15,10 +15,13 @@ interface DocumentAnalysisResult {
 
 interface LawArticle {
   id: string;
-  title: string;
-  content: string;
+  lawName: string;
+  articleNumber: string;
+  fullText: string;
   category: string;
+  lawType: string;
   relevanceScore: number;
+  matchedKeywords: string[];
   [key: string]: unknown;
 }
 
@@ -28,9 +31,10 @@ interface ApplicabilityResult {
 }
 
 interface DebateConfig {
-  mode: string;
   maxRounds: number;
-  [key: string]: unknown;
+  timePerRound: number;
+  allowNewEvidence: boolean;
+  debateMode: "standard" | "fast" | "detailed";
 }
 
 interface ArgumentsResult {
@@ -144,13 +148,16 @@ export async function uploadTestDocument(
 
 /**
  * 等待文档解析完成
+ * 使用指数退避轮询策略，优化等待时间
  */
 export async function waitForDocumentParsing(
   apiContext: APIRequestContext,
   documentId: string,
-  timeout: number = 30000,
+  timeout: number = 120000,
 ): Promise<DocumentAnalysisResult> {
   const startTime = Date.now();
+  let pollInterval = 1000; // 初始间隔1秒
+  const maxPollInterval = 10000; // 最大间隔10秒
 
   while (Date.now() - startTime < timeout) {
     const response = await apiContext.get(`/api/v1/documents/${documentId}`);
@@ -159,16 +166,72 @@ export async function waitForDocumentParsing(
       const result = await response.json();
 
       if (result.data.analysisStatus === "COMPLETED") {
-        return result.data.analysisResult;
+        const elapsed = Date.now() - startTime;
+        console.log(`文档解析完成 [${documentId}]: ${elapsed}ms`);
+        const rawResult = result.data.analysisResult as {
+          extractedData?: {
+            parties?: Array<{
+              name?: string;
+              role?: string;
+              type?: string;
+              description?: string;
+            }>;
+            claims?: Array<{
+              content?: string;
+              type?: string;
+              amount?: number;
+            }>;
+            keyFacts?: string[];
+          };
+        } | null;
+
+        // 转换数据结构以适配测试期望
+        return {
+          claims:
+            rawResult?.extractedData?.claims?.map((c) => ({
+              text:
+                (c as { content?: string; text?: string }).content ||
+                (c as { text?: string }).text ||
+                "",
+              type: c.type,
+              amount: c.amount,
+              description:
+                (c as { content?: string; text?: string }).content || "",
+            })) || [],
+          parties:
+            rawResult?.extractedData?.parties?.map((p) => ({
+              name: p.name || "",
+              role: p.role || "",
+              type: p.type,
+              description: p.description,
+            })) || [],
+          facts: rawResult?.extractedData?.keyFacts || [],
+        } as DocumentAnalysisResult;
       } else if (result.data.analysisStatus === "FAILED") {
-        throw new Error(`文档解析失败: ${result.data.analysisError}`);
+        const errorDetails = result.data.analysisError || "未知错误";
+        console.error(`文档解析失败 [${documentId}]: ${errorDetails}`);
+        throw new Error(`文档解析失败: ${errorDetails}`);
+      } else if (result.data.analysisStatus === "PROCESSING") {
+        const elapsed = Date.now() - startTime;
+        console.log(
+          `文档解析中 [${documentId}]: ${elapsed}ms, 状态: PROCESSING`,
+        );
+      } else {
+        console.log(`文档状态 [${documentId}]: ${result.data.analysisStatus}`);
       }
+    } else {
+      console.warn(`查询文档失败 [${documentId}]: ${response.status()}`);
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // 指数退避轮询
+    await new Promise((resolve) => setTimeout(resolve, pollInterval));
+    pollInterval = Math.min(pollInterval * 2, maxPollInterval);
   }
 
-  throw new Error(`文档解析超时: 超过${timeout}ms`);
+  const elapsed = Date.now() - startTime;
+  throw new Error(
+    `文档解析超时 [${documentId}]: ${elapsed}ms, 超过${timeout}ms`,
+  );
 }
 
 /**
@@ -188,11 +251,35 @@ export async function searchLawArticles(
   });
 
   if (!response.ok()) {
+    const errorBody = await response
+      .json()
+      .catch(() => ({ error: "Unknown error" }));
+    console.error("法条检索失败详情:", {
+      status: response.status(),
+      statusText: response.statusText(),
+      body: errorBody,
+      request: {
+        keywords,
+        category,
+        limit: 20,
+      },
+    });
     throw new Error(`法条检索失败: ${response.status()}`);
   }
 
   const result = await response.json();
-  return result.data;
+  console.log("法条检索API响应:", JSON.stringify(result, null, 2));
+
+  if (
+    !result.data ||
+    !result.data.articles ||
+    result.data.articles.length === 0
+  ) {
+    console.warn("法条检索结果为空:", result);
+    throw new Error("法条检索未返回结果");
+  }
+
+  return result.data.articles;
 }
 
 /**
@@ -245,6 +332,26 @@ export async function createDebate(
   });
 
   if (!response.ok()) {
+    const errorBody = await response
+      .json()
+      .catch(() => ({ error: "Unknown error" }));
+    console.error("创建辩论失败详情:", {
+      status: response.status(),
+      statusText: response.statusText(),
+      body: errorBody,
+      request: {
+        caseId,
+        title: "测试辩论",
+        status: "IN_PROGRESS",
+        config: {
+          debateMode: "standard",
+          maxRounds: 3,
+          timePerRound: 30,
+          allowNewEvidence: true,
+          ...config,
+        },
+      },
+    });
     throw new Error(`创建辩论失败: ${response.status()}`);
   }
 
@@ -273,6 +380,18 @@ export async function generateArguments(
   );
 
   if (!response.ok()) {
+    const errorBody = await response
+      .json()
+      .catch(() => ({ error: "Unknown error" }));
+    console.error("生成论点失败详情:", {
+      status: response.status(),
+      statusText: response.statusText(),
+      body: errorBody,
+      request: {
+        roundId,
+        applicableArticles,
+      },
+    });
     throw new Error(`生成论点失败: ${response.status()}`);
   }
 

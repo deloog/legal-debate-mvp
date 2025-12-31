@@ -50,3 +50,11 @@ data/dev.db*
 backups/
 test-data/
 ai-poc-validation-report.json
+
+# Test artifacts
+playwright-report/data/
+public/uploads/
+
+# Temporary files
+temp-*.ts
+temp-*.txt

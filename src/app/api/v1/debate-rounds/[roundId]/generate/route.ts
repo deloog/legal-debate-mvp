@@ -131,6 +131,7 @@ export const POST = withErrorHandler(
       keyFacts,
       articles,
       roundNumber: round.roundNumber,
+      roundId,
     });
 
     const defendantArguments = generateSideArguments({
@@ -140,6 +141,7 @@ export const POST = withErrorHandler(
       keyFacts,
       articles,
       roundNumber: round.roundNumber,
+      roundId,
     });
 
     // 保存论点到数据库
@@ -187,8 +189,6 @@ export const POST = withErrorHandler(
           id: arg.id,
           type: arg.type,
           content: arg.content,
-          references: arg.references || [],
-          legalBasis: arg.legalBasis || [],
         })),
       },
       defendant: {
@@ -196,8 +196,6 @@ export const POST = withErrorHandler(
           id: arg.id,
           type: arg.type,
           content: arg.content,
-          references: arg.references || [],
-          legalBasis: arg.legalBasis || [],
         })),
       },
       roundId,
@@ -238,10 +236,11 @@ interface GenerateSideArgumentsInput {
     articleNumber: string;
   }>;
   roundNumber: number;
+  roundId: string; // 添加 roundId 参数
 }
 
 function generateSideArguments(input: GenerateSideArgumentsInput) {
-  const { side, claims, parties, keyFacts, articles, roundNumber } = input;
+  const { side, claims, parties, keyFacts, articles, roundId } = input;
 
   // 获取原告或被告名称
   const sideName = side === "PLAINTIFF" ? "原告" : "被告";
@@ -258,8 +257,6 @@ function generateSideArguments(input: GenerateSideArgumentsInput) {
     type: ArgumentType;
     aiProvider: string;
     confidence: number;
-    references?: Array<{ roundNumber: number }>;
-    legalBasis?: Array<{ articleId: string }>;
   }> = [];
 
   // 为每个法条生成法律依据论点
@@ -268,50 +265,42 @@ function generateSideArguments(input: GenerateSideArgumentsInput) {
 
     arguments_.push({
       id: `arg-${side}-${Date.now()}-${arguments_.length}`,
-      roundId: "", // 会被覆盖
+      roundId,
       side: side as ArgumentSide,
       content,
       type: ArgumentType.LEGAL_BASIS,
       aiProvider: "DEEPSEEK",
       confidence: 0.8,
-      legalBasis: [{ articleId: article.id }],
-      references: [{ roundNumber }],
     });
   });
 
-  // 生成主要论点
-  if ((claims as Array<{ content: string }[]>).length > 0) {
-    const claim = (claims as Array<{ content: string }>)[0];
-    const mainContent = `${sideName}（${partyName}）的核心主张：${claim.content || "根据案件事实，${sideName}的请求具有充分的事实和法律依据"}。${side === "PLAINTIFF" ? "请求法院依法支持原告的全部诉讼请求。" : "请求法院依法驳回原告的全部诉讼请求。"}`;
+  // 生成主要论点（确保至少有一条论点）
+  const claimContent = (claims as Array<{ content: string }>)[0]?.content;
+  const mainContent = `${sideName}（${partyName}）的核心主张：${claimContent || "根据案件事实，${sideName}的请求具有充分的事实和法律依据"}。${side === "PLAINTIFF" ? "请求法院依法支持原告的全部诉讼请求。" : "请求法院依法驳回原告的全部诉讼请求。"}`;
 
-    arguments_.push({
-      id: `arg-${side}-${Date.now()}-${arguments_.length}`,
-      roundId: "",
-      side: side as ArgumentSide,
-      content: mainContent,
-      type: ArgumentType.MAIN_POINT,
-      aiProvider: "DEEPSEEK",
-      confidence: 0.85,
-      references: [{ roundNumber }],
-    });
-  }
+  arguments_.push({
+    id: `arg-${side}-${Date.now()}-${arguments_.length}`,
+    roundId,
+    side: side as ArgumentSide,
+    content: mainContent,
+    type: ArgumentType.MAIN_POINT,
+    aiProvider: "DEEPSEEK",
+    confidence: 0.85,
+  });
 
-  // 生成支持论点
-  if ((keyFacts as unknown[]).length > 0) {
-    const fact = (keyFacts as { description?: string }[])[0];
-    const supportContent = `${sideName}（${partyName}）的事实依据：${fact?.description || "根据本案查明的事实，能够充分支持${sideName}的主张"}。该事实与本案的争议焦点密切相关，具有重要的证明作用。`;
+  // 生成支持论点（确保至少有两条论点）
+  const factContent = (keyFacts as { description?: string }[])[0]?.description;
+  const supportContent = `${sideName}（${partyName}）的事实依据：${factContent || "根据本案查明的事实，能够充分支持${sideName}的主张"}。该事实与本案的争议焦点密切相关，具有重要的证明作用。`;
 
-    arguments_.push({
-      id: `arg-${side}-${Date.now()}-${arguments_.length}`,
-      roundId: "",
-      side: side as ArgumentSide,
-      content: supportContent,
-      type: ArgumentType.SUPPORTING,
-      aiProvider: "DEEPSEEK",
-      confidence: 0.75,
-      references: [{ roundNumber }],
-    });
-  }
+  arguments_.push({
+    id: `arg-${side}-${Date.now()}-${arguments_.length}`,
+    roundId,
+    side: side as ArgumentSide,
+    content: supportContent,
+    type: ArgumentType.SUPPORTING,
+    aiProvider: "DEEPSEEK",
+    confidence: 0.75,
+  });
 
   return arguments_;
 }

@@ -55,8 +55,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 创建DocAnalyzer Agent实例
-    const agent = new DocAnalyzerAgentAdapter();
+    // 创建DocAnalyzer Agent实例（测试环境使用Mock）
+    const useMock =
+      process.env.NODE_ENV === "test" || process.env.USE_MOCK_AI === "true";
+    const agent = new DocAnalyzerAgentAdapter(useMock);
     await agent.initialize();
 
     // 构建Agent执行上下文

@@ -2,14 +2,14 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Basic E2E Tests", () => {
   test("should load home page", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("http://localhost:3000/");
 
     // Check if the page loads successfully
     await expect(page).toHaveTitle(/Legal Debate MVP/);
   });
 
   test("should have proper meta tags", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("http://localhost:3000/");
 
     // Check for meta description
     const metaDescription = await page.locator('meta[name="description"]');
@@ -17,7 +17,7 @@ test.describe("Basic E2E Tests", () => {
   });
 
   test("should be responsive", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("http://localhost:3000/");
 
     // Test mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });

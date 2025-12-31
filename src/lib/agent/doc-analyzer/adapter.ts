@@ -6,16 +6,13 @@
 
 import { DocAnalyzerAgent } from "./doc-analyzer-agent";
 import type { AgentContext } from "../../../types/agent";
-import type {
-  DocumentAnalysisOutput,
-  DocumentAnalysisInput,
-} from "./core/types";
+import type { DocumentAnalysisOutput } from "./core/types";
 
 export class DocAnalyzerAgentAdapter {
   private agent: DocAnalyzerAgent;
 
-  constructor() {
-    this.agent = new DocAnalyzerAgent();
+  constructor(useMock: boolean = false) {
+    this.agent = new DocAnalyzerAgent(useMock);
   }
 
   /**

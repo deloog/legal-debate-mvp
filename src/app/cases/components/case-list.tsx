@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCases, CaseFilters } from "@/lib/hooks/use-cases";
 import { CaseListItem } from "./case-list-item";
@@ -19,56 +19,65 @@ export function CaseList() {
   );
 
   /**
-   * 处理搜索变化
+   * 处理搜索变化（使用useCallback避免子组件重渲染）
    */
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-    // 搜索变化时重置到第一页
-    goToPage(1);
-  };
+  const handleSearchChange = useCallback(
+    (query: string) => {
+      setSearchQuery(query);
+      // 搜索变化时重置到第一页
+      goToPage(1);
+    },
+    [goToPage],
+  );
 
   /**
-   * 处理页面变化
+   * 处理页面变化（使用useCallback避免子组件重渲染）
    */
-  const handlePageChange = (newPage: number) => {
-    goToPage(newPage);
-  };
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      goToPage(newPage);
+    },
+    [goToPage],
+  );
 
   /**
-   * 开始辩论
+   * 开始辩论（使用useCallback避免子组件重渲染）
    */
-  const handleStartDebate = (caseId: string) => {
+  const handleStartDebate = useCallback((caseId: string) => {
     // TODO: 实现跳转到辩论创建页面
     console.log("开始辩论:", caseId);
     // 暂时跳转到案件详情页
     window.location.href = `/cases/${caseId}/debates`;
-  };
+  }, []);
 
   /**
-   * 删除案件
+   * 删除案件（使用useCallback避免子组件重渲染）
    */
-  const handleDeleteCase = async (caseId: string) => {
-    if (!confirm("确定要删除这个案件吗？此操作不可撤销。")) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/v1/cases/${caseId}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        // 刷新列表
-        refetch();
-      } else {
-        const data = await response.json();
-        alert(data.error || "删除失败");
+  const handleDeleteCase = useCallback(
+    async (caseId: string) => {
+      if (!confirm("确定要删除这个案件吗？此操作不可撤销。")) {
+        return;
       }
-    } catch (error) {
-      console.error("删除案件失败:", error);
-      alert("删除失败，请重试");
-    }
-  };
+
+      try {
+        const response = await fetch(`/api/v1/cases/${caseId}`, {
+          method: "DELETE",
+        });
+
+        if (response.ok) {
+          // 刷新列表
+          refetch();
+        } else {
+          const data = await response.json();
+          alert(data.error || "删除失败");
+        }
+      } catch (error) {
+        console.error("删除案件失败:", error);
+        alert("删除失败，请重试");
+      }
+    },
+    [refetch],
+  );
 
   /**
    * 渲染分页按钮
