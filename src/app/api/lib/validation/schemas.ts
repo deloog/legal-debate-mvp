@@ -20,6 +20,7 @@ export const paginationSchema = z.object({
  * 案件相关验证模式
  */
 export const createCaseSchema = z.object({
+  userId: z.string().min(1, "User ID is required"),
   title: z.string().min(1, "Title is required").max(200, "Title too long"),
   description: z
     .string()
@@ -31,10 +32,36 @@ export const createCaseSchema = z.object({
     "administrative",
     "labor",
     "commercial",
-    "intellectual_property",
+    "intellectual",
     "other",
   ]),
-  status: z.enum(["draft", "active", "closed", "archived"]).default("draft"),
+  status: z.enum(["draft", "active", "completed", "archived"]).default("draft"),
+  amount: z.number().optional(),
+  caseNumber: z.string().optional(),
+  cause: z.string().optional(),
+  court: z.string().optional(),
+  plaintiffName: z.string().optional(),
+  defendantName: z.string().optional(),
+  metadata: z.any().optional(),
+});
+
+/**
+ * 案件查询参数验证
+ */
+export const caseQuerySchema = paginationSchema.extend({
+  userId: z.string().optional(),
+  type: z
+    .enum([
+      "civil",
+      "criminal",
+      "administrative",
+      "labor",
+      "commercial",
+      "intellectual",
+      "other",
+    ])
+    .optional(),
+  status: z.enum(["draft", "active", "completed", "archived"]).optional(),
 });
 
 export const updateCaseSchema = createCaseSchema.partial();
@@ -55,6 +82,9 @@ export const uploadDocumentSchema = z.object({
 export const createDebateSchema = z.object({
   caseId: uuidSchema,
   title: z.string().min(1, "Title is required").max(200, "Title too long"),
+  status: z
+    .enum(["DRAFT", "IN_PROGRESS", "PAUSED", "COMPLETED", "ARCHIVED"])
+    .optional(),
   config: z
     .object({
       maxRounds: z.number().int().min(1).max(10).default(3),

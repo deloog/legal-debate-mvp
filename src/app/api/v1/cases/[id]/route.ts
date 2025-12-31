@@ -3,6 +3,8 @@ import { withErrorHandler } from "@/app/api/lib/errors/error-handler";
 import { createSuccessResponse } from "@/app/api/lib/responses/api-response";
 import { validatePathParam } from "@/app/api/lib/validation/validator";
 import { uuidSchema } from "@/app/api/lib/validation/schemas";
+import { prisma } from "@/lib/db/prisma";
+import { Prisma } from "@prisma/client";
 
 /**
  * GET /api/v1/cases/[id]
@@ -13,27 +15,31 @@ export const GET = withErrorHandler(
     // 验证路径参数
     const id = validatePathParam(params.id, uuidSchema);
 
-    // 这里应该调用实际的数据库查询
-    // const caseItem = await prisma.case.findUnique({
-    //   where: { id },
-    //   include: {
-    //     documents: true,
-    //     debates: true,
-    //   },
-    // });
-
-    // 模拟数据
-    const caseItem = {
-      id,
-      title: "合同纠纷案件",
-      description: "涉及买卖合同违约的纠纷案件",
-      type: "civil",
-      status: "active",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      documents: [],
-      debates: [],
-    };
+    // 调用实际的数据库查询
+    const caseItem = await prisma.case.findUnique({
+      where: { id },
+      include: {
+        documents: {
+          orderBy: { createdAt: "desc" },
+        },
+        debates: {
+          include: {
+            rounds: {
+              orderBy: { roundNumber: "asc" },
+            },
+          },
+          orderBy: { createdAt: "desc" },
+        },
+        user: {
+          select: {
+            id: true,
+            username: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
 
     if (!caseItem) {
       const { NotFoundError } = await import("@/app/api/lib/errors/api-error");
@@ -71,21 +77,58 @@ export const PUT = withErrorHandler(
       const body = await request.json();
       const validatedData = updateCaseSchema.parse(body);
 
-      // 这里应该调用实际的数据库操作
-      // const updatedCase = await prisma.case.update({
-      //   where: { id },
-      //   data: {
-      //     ...validatedData,
-      //     updatedAt: new Date(),
-      //   },
-      // });
-
-      // 模拟更新
-      const updatedCase = {
-        id,
-        ...validatedData,
-        updatedAt: new Date().toISOString(),
+      // 转换类型枚举值
+      const typeMap: Record<
+        string,
+        | "CIVIL"
+        | "CRIMINAL"
+        | "ADMINISTRATIVE"
+        | "COMMERCIAL"
+        | "LABOR"
+        | "INTELLECTUAL"
+        | "OTHER"
+      > = {
+        civil: "CIVIL",
+        criminal: "CRIMINAL",
+        administrative: "ADMINISTRATIVE",
+        commercial: "COMMERCIAL",
+        labor: "LABOR",
+        intellectual: "INTELLECTUAL",
+        other: "OTHER",
       };
+
+      const statusMap: Record<
+        string,
+        "DRAFT" | "ACTIVE" | "COMPLETED" | "ARCHIVED"
+      > = {
+        draft: "DRAFT",
+        active: "ACTIVE",
+        completed: "COMPLETED",
+        archived: "ARCHIVED",
+      };
+
+      // 调用实际的数据库操作
+      const updatedCase = await prisma.case.update({
+        where: { id },
+        data: {
+          title: validatedData.title,
+          description: validatedData.description,
+          type: validatedData.type ? typeMap[validatedData.type] : undefined,
+          status: validatedData.status
+            ? statusMap[validatedData.status]
+            : undefined,
+          amount: validatedData.amount
+            ? new Prisma.Decimal(validatedData.amount)
+            : undefined,
+          caseNumber: validatedData.caseNumber,
+          cause: validatedData.cause,
+          court: validatedData.court,
+          plaintiffName: validatedData.plaintiffName,
+          defendantName: validatedData.defendantName,
+          metadata: validatedData.metadata,
+          updatedAt: new Date(),
+        },
+      });
 
       return createSuccessResponse(updatedCase);
     } catch (error) {
@@ -105,20 +148,20 @@ export const PUT = withErrorHandler(
 
 /**
  * DELETE /api/v1/cases/[id]
- * 删除案件
+ * 删除案件（软删除）
  */
 export const DELETE = withErrorHandler(
   async (request: NextRequest, { params }: { params: { id: string } }) => {
     // 验证路径参数
     const id = validatePathParam(params.id, uuidSchema);
 
-    // 这里应该调用实际的数据库操作
-    // await prisma.case.delete({
-    //   where: { id },
-    // });
-
-    // 模拟删除
-    console.log(`Deleting case with id: ${id}`);
+    // 调用实际的数据库操作（软删除）
+    await prisma.case.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
 
     return new NextResponse(null, { status: 204 });
   },
@@ -128,7 +171,7 @@ export const DELETE = withErrorHandler(
  * OPTIONS /api/v1/cases/[id]
  * CORS预检请求
  */
-export const OPTIONS = withErrorHandler(async (request: NextRequest) => {
+export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {

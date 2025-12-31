@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Basic E2E Tests", () => {
-  test("should load the home page", async ({ page }) => {
+  test("should load home page", async ({ page }) => {
     await page.goto("/");
 
     // Check if the page loads successfully

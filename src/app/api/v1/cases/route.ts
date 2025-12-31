@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withErrorHandler } from "@/app/api/lib/errors/error-handler";
 import {
-  createSuccessResponse,
   createPaginatedResponse,
   createCreatedResponse,
 } from "@/app/api/lib/responses/api-response";
@@ -11,9 +10,11 @@ import {
 } from "@/app/api/lib/validation/validator";
 import {
   createCaseSchema,
-  paginationSchema,
+  caseQuerySchema,
 } from "@/app/api/lib/validation/schemas";
 import { buildPaginationOptions } from "@/app/api/lib/responses/pagination";
+import { prisma } from "@/lib/db/prisma";
+import { Prisma } from "@prisma/client";
 
 /**
  * GET /api/v1/cases
@@ -21,57 +22,39 @@ import { buildPaginationOptions } from "@/app/api/lib/responses/pagination";
  */
 export const GET = withErrorHandler(async (request: NextRequest) => {
   // 验证查询参数
-  const query = validateQueryParams(request, paginationSchema);
-  const { search, page, limit } = query;
+  const query = validateQueryParams(request, caseQuerySchema);
+  const { search, userId, page, limit } = query;
 
   // 构建查询选项
   const options = buildPaginationOptions(query);
 
-  // 这里应该调用实际的数据库查询
-  // const [cases, total] = await Promise.all([
-  //   prisma.case.findMany({
-  //     where: search ? {
-  //       OR: [
-  //         { title: { contains: search, mode: 'insensitive' } },
-  //         { description: { contains: search, mode: 'insensitive' } },
-  //       ],
-  //     } : {},
-  //     ...options,
-  //   }),
-  //   prisma.case.count({
-  //     where: search ? {
-  //       OR: [
-  //         { title: { contains: search, mode: 'insensitive' } },
-  //         { description: { contains: search, mode: 'insensitive' } },
-  //       ],
-  //     } : {},
-  //   }),
-  // ]);
+  // 构建查询条件
+  const where: Prisma.CaseWhereInput = {
+    deletedAt: null,
+  };
 
-  // 模拟数据
-  const mockCases = [
-    {
-      id: "123e4567-e89b-12d3-a456-426614174000",
-      title: "合同纠纷案件",
-      description: "涉及买卖合同违约的纠纷案件",
-      type: "civil",
-      status: "active",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    {
-      id: "123e4567-e89b-12d3-a456-426614174001",
-      title: "劳动争议案件",
-      description: "员工与公司之间的劳动纠纷",
-      type: "labor",
-      status: "draft",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  ];
+  // 如果提供了用户ID，只查询该用户的案件
+  if (userId) {
+    where.userId = userId;
+  }
 
-  const cases = mockCases;
-  const total = mockCases.length;
+  // 如果提供了搜索关键词
+  if (search) {
+    where.OR = [
+      { title: { contains: search, mode: "insensitive" } },
+      { description: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
+  // 执行数据库查询
+  const [cases, total] = await Promise.all([
+    prisma.case.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      ...options,
+    }),
+    prisma.case.count({ where }),
+  ]);
 
   // 计算分页信息
   const pagination = {
@@ -94,23 +77,65 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   // 验证请求体
   const body = await validateRequestBody(request, createCaseSchema);
 
-  // 这里应该调用实际的数据库操作
-  // const newCase = await prisma.case.create({
-  //   data: {
-  //     ...body,
-  //     id: generateUUID(),
-  //     createdAt: new Date(),
-  //     updatedAt: new Date(),
-  //   },
-  // });
+  // 验证用户是否存在
+  const user = await prisma.user.findUnique({
+    where: { id: body.userId },
+  });
 
-  // 模拟创建的案例
-  const newCase = {
-    id: "123e4567-e89b-12d3-a456-426614174002",
-    ...body,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+  if (!user) {
+    return NextResponse.json(
+      { success: false, error: "用户不存在" },
+      { status: 404 },
+    );
+  }
+
+  // 转换类型枚举值
+  const typeMap: Record<
+    string,
+    | "CIVIL"
+    | "CRIMINAL"
+    | "ADMINISTRATIVE"
+    | "COMMERCIAL"
+    | "LABOR"
+    | "INTELLECTUAL"
+    | "OTHER"
+  > = {
+    civil: "CIVIL",
+    criminal: "CRIMINAL",
+    administrative: "ADMINISTRATIVE",
+    commercial: "COMMERCIAL",
+    labor: "LABOR",
+    intellectual: "INTELLECTUAL",
+    other: "OTHER",
   };
+
+  const statusMap: Record<
+    string,
+    "DRAFT" | "ACTIVE" | "COMPLETED" | "ARCHIVED"
+  > = {
+    draft: "DRAFT",
+    active: "ACTIVE",
+    completed: "COMPLETED",
+    archived: "ARCHIVED",
+  };
+
+  // 创建案件
+  const newCase = await prisma.case.create({
+    data: {
+      userId: body.userId,
+      title: body.title,
+      description: body.description,
+      type: typeMap[body.type] || "CIVIL",
+      status: statusMap[body.status] || "DRAFT",
+      amount: body.amount ? new Prisma.Decimal(body.amount) : undefined,
+      caseNumber: body.caseNumber,
+      cause: body.cause,
+      court: body.court,
+      plaintiffName: body.plaintiffName,
+      defendantName: body.defendantName,
+      metadata: body.metadata,
+    },
+  });
 
   return createCreatedResponse(newCase);
 });
@@ -119,7 +144,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
  * OPTIONS /api/v1/cases
  * CORS预检请求
  */
-export const OPTIONS = withErrorHandler(async (request: NextRequest) => {
+export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {

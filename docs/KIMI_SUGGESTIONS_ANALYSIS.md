@@ -358,7 +358,7 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
 
     // 模式2：混合格式 "100万元（壹佰万元整）"
     const mixedMatch = normalized.match(
-      /(\d+\.?\d*)\s*万?元?.*[壹贰叁肆伍陆柒捌玖]/
+      /(\d+\.?\d*)\s*万?元?.*[壹贰叁肆伍陆柒捌玖]/,
     );
     if (mixedMatch) {
       return parseFloat(mixedMatch[1]) * 10000;
@@ -455,7 +455,7 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
   private cacheManager = getCacheManager();
 
   protected async executeLogic(
-    context: AgentContext
+    context: AgentContext,
   ): Promise<DocumentAnalysisOutput> {
     const input = context.data as DocumentAnalysisInput;
     const startTime = Date.now();
@@ -485,11 +485,11 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
             });
             analysisResult = await this.analyzeLargeDocument(
               extractedText,
-              input.options
+              input.options,
             );
           } else {
             analysisResult = await this.callAIWithTimeout(
-              this.analyzeDocumentWithOptimizedAI(extractedText, input.options)
+              this.analyzeDocumentWithOptimizedAI(extractedText, input.options),
             );
           }
 
@@ -518,7 +518,7 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
 
           // 原有的重试逻辑...
         }
-      }
+      },
     );
   }
 
@@ -527,7 +527,7 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
    */
   private async analyzeLargeDocument(
     text: string,
-    options?: any
+    options?: any,
   ): Promise<any> {
     const chunks = this.splitTextSmart(text, 8000); // 按句子边界分割
     const chunkResults = [];
@@ -535,7 +535,7 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
     for (let i = 0; i < chunks.length; i++) {
       logger.info(`处理文档分块 ${i + 1}/${chunks.length}`);
       const chunkResult = await this.callAIWithTimeout(
-        this.analyzeDocumentWithOptimizedAI(chunks[i].text, options)
+        this.analyzeDocumentWithOptimizedAI(chunks[i].text, options),
       );
       chunkResults.push(chunkResult);
     }
@@ -552,7 +552,7 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
     return Promise.race([
       promise,
       new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("AI调用超时")), timeoutMs)
+        setTimeout(() => reject(new Error("AI调用超时")), timeoutMs),
       ),
     ]);
   }
@@ -723,7 +723,7 @@ badCases.forEach((testCase, idx) => {
 
     // 验证后处理效果
     const hasAllTypes = testCase.expectedTypes.every((t) =>
-      result.extractedData.claims.some((c) => c.type === t)
+      result.extractedData.claims.some((c) => c.type === t),
     );
 
     expect(hasAllTypes).toBe(true);

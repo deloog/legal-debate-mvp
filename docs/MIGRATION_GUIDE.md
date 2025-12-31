@@ -105,7 +105,7 @@ SELECT tablename FROM pg_tables WHERE schemaname = 'public';
 SELECT indexname FROM pg_indexes WHERE schemaname = 'public';
 
 -- 检查外键约束
-SELECT constraint_name FROM information_schema.table_constraints 
+SELECT constraint_name FROM information_schema.table_constraints
 WHERE constraint_type = 'FOREIGN KEY' AND table_schema = 'public';
 
 -- 检查枚举类型
@@ -121,6 +121,7 @@ SELECT typname FROM pg_type WHERE typtype = 'e';
 **错误**: `Migration failed with error`
 
 **解决方案**:
+
 ```bash
 # 检查数据库连接
 npx prisma db pull
@@ -135,6 +136,7 @@ npx prisma migrate deploy
 **错误**: `EPERM: operation not permitted`
 
 **解决方案**:
+
 ```bash
 # 清理缓存
 npx prisma generate --schema=./prisma/schema.prisma
@@ -149,6 +151,7 @@ npx prisma generate
 **错误**: `Unique constraint failed`
 
 **解决方案**:
+
 - 种子数据脚本已使用 `upsert` 操作避免冲突
 - 如仍有问题，可重置数据库后重新运行种子数据
 
@@ -203,6 +206,7 @@ npx prisma generate
 ### 迁移权限
 
 生产环境迁移需要以下数据库权限：
+
 - `CREATE TABLE`
 - `ALTER TABLE`
 - `CREATE INDEX`
@@ -212,6 +216,7 @@ npx prisma generate
 ### 数据保护
 
 1. **迁移前备份**
+
    ```bash
    pg_dump dbname > backup_$(date +%Y%m%d_%H%M%S).sql
    ```
@@ -223,12 +228,12 @@ npx prisma generate
 
 ## 📝 迁移历史
 
-| 迁移ID | 描述 | 创建时间 | 状态 |
-|---------|------|----------|------|
-| 20251218093212 | 辩论系统完整模型 | 2025-12-18 | ✅ |
-| 20251219044717 | 添加文档分析器字段 | 2025-12-19 | ✅ |
-| 20251219084435 | 添加论点检查 | 2025-12-19 | ✅ |
-| 20251219092351 | 增强用户和法律参考表 | 2025-12-19 | ✅ |
+| 迁移ID         | 描述                 | 创建时间   | 状态 |
+| -------------- | -------------------- | ---------- | ---- |
+| 20251218093212 | 辩论系统完整模型     | 2025-12-18 | ✅   |
+| 20251219044717 | 添加文档分析器字段   | 2025-12-19 | ✅   |
+| 20251219084435 | 添加论点检查         | 2025-12-19 | ✅   |
+| 20251219092351 | 增强用户和法律参考表 | 2025-12-19 | ✅   |
 
 ## 🧪 测试覆盖
 

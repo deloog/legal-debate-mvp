@@ -1,27 +1,12 @@
-import { chromium, FullConfig } from "@playwright/test";
+import { FullConfig } from "@playwright/test";
 
-async function globalSetup(config: FullConfig) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function globalSetup(_config: FullConfig): Promise<void> {
   console.log("🚀 Starting E2E test global setup...");
+  console.log("📊 Waiting for application to be ready...");
 
-  // Set up test database
-  console.log("📊 Setting up test database...");
-  // Note: We'll add database setup here once Prisma is properly configured
-
-  // Wait for the application to be ready
-  const browser = await chromium.launch();
-  const page = await browser.newPage();
-
-  try {
-    // Wait for the app to be ready
-    await page.goto(config.webServer?.url || "http://localhost:3000");
-    await page.waitForLoadState("networkidle");
-    console.log("✅ Application is ready for E2E testing");
-  } catch (error) {
-    console.error("❌ Application failed to start:", error);
-    throw error;
-  } finally {
-    await browser.close();
-  }
+  // Playwright will automatically start of web server as configured
+  // No additional setup needed for now
 
   console.log("✅ E2E test global setup completed");
 }

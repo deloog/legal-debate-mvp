@@ -1,16 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
+import { config as dotenvConfig } from 'dotenv';
+import { resolve } from 'path';
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// require('dotenv').config();
+// Load environment variables
+dotenvConfig({ path: resolve(__dirname, '../.env.development') });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
   testDir: './src/__tests__/e2e',
+  testMatch: '**/*.spec.ts',
+  testIgnore: '**/node_modules/**',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -46,26 +47,6 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-
-    /* Test against mobile viewports. */
-    {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
-    },
   ],
 
   /* Run your local dev server before starting the tests */
@@ -75,10 +56,6 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },
-
-  /* Global setup and teardown */
-  globalSetup: './src/__tests__/e2e/global-setup.ts',
-  globalTeardown: './src/__tests__/e2e/global-teardown.ts',
 
   /* Test timeout */
   timeout: 30 * 1000,

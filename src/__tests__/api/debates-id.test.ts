@@ -6,7 +6,6 @@ import {
   afterEach,
   jest,
 } from "@jest/globals";
-import { NextRequest } from "next/server";
 /// <reference path="./test-types.d.ts" />
 
 // Mock Prisma with any type to avoid complex typing issues
@@ -36,9 +35,11 @@ jest.mock("@/lib/ai/unified-service", () => ({
 import { prisma } from "@/lib/db/prisma";
 
 // Type assertion for mocked prisma
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockedPrisma = prisma as any;
 
 describe("Debates ID API", () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockReq: any;
 
   beforeEach(() => {
@@ -47,6 +48,7 @@ describe("Debates ID API", () => {
       url: "http://localhost:3000/api/v1/debates/123e4567-e89b-12d3-a456-426614174000",
       json: jest.fn(),
       headers: new Headers(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
   });
 
@@ -106,7 +108,7 @@ describe("Debates ID API", () => {
 
       const { GET } = await import("@/app/api/v1/debates/[id]/route");
       const response = await GET(mockReq, {
-        params: { id: "123e4567-e89b-12d3-a456-426614174000" },
+        params: Promise.resolve({ id: "123e4567-e89b-12d3-a456-426614174000" }),
       });
       const data = await response.json();
 
@@ -124,7 +126,7 @@ describe("Debates ID API", () => {
 
       const { GET } = await import("@/app/api/v1/debates/[id]/route");
       const response = await GET(mockReq, {
-        params: { id: "123e4567-e89b-12d3-a456-426614174000" },
+        params: Promise.resolve({ id: "123e4567-e89b-12d3-a456-426614174000" }),
       });
 
       expect(response.status).toBe(404);
@@ -137,7 +139,7 @@ describe("Debates ID API", () => {
           ...mockReq,
           url: "http://localhost:3000/api/v1/debates/invalid-uuid",
         },
-        { params: { id: "invalid-uuid" } },
+        { params: Promise.resolve({ id: "invalid-uuid" }) },
       );
 
       expect(response.status).toBe(400);
@@ -167,14 +169,14 @@ describe("Debates ID API", () => {
         updatedAt: new Date(),
       };
 
-      // @ts-ignore
+      // @ts-expect-error - testing purpose
       mockReq.json = jest.fn().mockResolvedValue(updateData);
       mockedPrisma.debate.findUnique.mockResolvedValue(existingDebate);
       mockedPrisma.debate.update.mockResolvedValue(updatedDebate);
 
       const { PUT } = await import("@/app/api/v1/debates/[id]/route");
       const response = await PUT(mockReq, {
-        params: { id: "123e4567-e89b-12d3-a456-426614174000" },
+        params: Promise.resolve({ id: "123e4567-e89b-12d3-a456-426614174000" }),
       });
       const data = await response.json();
 
@@ -186,13 +188,13 @@ describe("Debates ID API", () => {
 
     it("should return 404 when updating non-existent debate", async () => {
       const updateData = { title: "更新的标题" };
-      // @ts-ignore
+      // @ts-expect-error - testing purpose
       mockReq.json = jest.fn().mockResolvedValue(updateData);
       mockedPrisma.debate.findUnique.mockResolvedValue(null);
 
       const { PUT } = await import("@/app/api/v1/debates/[id]/route");
       const response = await PUT(mockReq, {
-        params: { id: "123e4567-e89b-12d3-a456-426614174000" },
+        params: Promise.resolve({ id: "123e4567-e89b-12d3-a456-426614174000" }),
       });
 
       expect(response.status).toBe(404);
@@ -204,13 +206,14 @@ describe("Debates ID API", () => {
         status: "invalid-status",
       };
 
-      // @ts-ignore
+      // @ts-expect-error - testing purpose
       mockReq.json = jest.fn().mockResolvedValue(invalidData);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockedPrisma.debate.findUnique.mockResolvedValue({ id: "123" } as any);
 
       const { PUT } = await import("@/app/api/v1/debates/[id]/route");
       const response = await PUT(mockReq, {
-        params: { id: "123e4567-e89b-12d3-a456-426614174000" },
+        params: Promise.resolve({ id: "123e4567-e89b-12d3-a456-426614174000" }),
       });
 
       expect(response.status).toBe(400);
@@ -229,12 +232,12 @@ describe("Debates ID API", () => {
 
       const { DELETE } = await import("@/app/api/v1/debates/[id]/route");
       const response = await DELETE(mockReq, {
-        params: { id: "123e4567-e89b-12d3-a456-426614174000" },
+        params: Promise.resolve({ id: "123e4567-e89b-12d3-a456-426614174000" }),
       });
       let data;
       try {
         data = await response.json();
-      } catch (error) {
+      } catch {
         // 如果无法解析JSON，data保持为undefined
       }
 
@@ -255,13 +258,14 @@ describe("Debates ID API", () => {
 
       const { DELETE } = await import("@/app/api/v1/debates/[id]/route");
       const response = await DELETE(mockReq, {
-        params: { id: "123e4567-e89b-12d3-a456-426614174000" },
+        params: Promise.resolve({ id: "123e4567-e89b-12d3-a456-426614174000" }),
       });
 
       expect(response.status).toBe(404);
     });
 
     it("should handle database errors during deletion", async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockedPrisma.debate.findUnique.mockResolvedValue({ id: "123" } as any);
       mockedPrisma.debate.delete.mockRejectedValue(
         new Error("Database connection failed"),
@@ -269,7 +273,7 @@ describe("Debates ID API", () => {
 
       const { DELETE } = await import("@/app/api/v1/debates/[id]/route");
       const response = await DELETE(mockReq, {
-        params: { id: "123e4567-e89b-12d3-a456-426614174000" },
+        params: Promise.resolve({ id: "123e4567-e89b-12d3-a456-426614174000" }),
       });
 
       expect(response.status).toBe(500);

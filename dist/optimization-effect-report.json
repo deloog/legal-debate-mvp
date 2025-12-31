@@ -39,9 +39,7 @@
         "未识别到预期请求类型: PAY_INTEREST",
         "未识别到预期请求类型: LITIGATION_COST"
       ],
-      "improvements": [
-        "金额识别精度达到≥99%目标"
-      ]
+      "improvements": ["金额识别精度达到≥99%目标"]
     },
     {
       "documentId": "legal-rep-001",

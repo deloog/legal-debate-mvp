@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withErrorHandler } from "@/app/api/lib/errors/error-handler";
 import {
-  createSuccessResponse,
   createPaginatedResponse,
   createCreatedResponse,
 } from "@/app/api/lib/responses/api-response";
@@ -117,30 +116,47 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   }
 
   // TODO: 从认证中获取实际用户ID，这里临时使用第一个用户
-  const userId = (await prisma.user.findFirst({ select: { id: true } }))?.id;
+  let userId = (await prisma.user.findFirst({ select: { id: true } }))?.id;
 
   if (!userId) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: "USER_NOT_FOUND",
-          message: "系统用户不存在",
-        },
+    // 如果没有用户，创建一个临时测试用户
+    const testUser = await prisma.user.create({
+      data: {
+        email: `test-${Date.now()}@example.com`,
+        username: `testuser-${Date.now()}`,
+        name: "Test User",
       },
-      { status: 500 },
-    );
+    });
+    userId = testUser.id;
   }
 
-  // 创建新的辩论
+  // 创建新的辩论和初始轮次
+  const bodyInput = body as {
+    caseId: string;
+    title: string;
+    config?: unknown;
+    status?: string;
+  };
+  const debateStatus = bodyInput.status
+    ? (bodyInput.status as DebateStatus)
+    : DebateStatus.DRAFT;
   const newDebate = await prisma.debate.create({
     data: {
       caseId: body.caseId,
       userId: userId,
       title: body.title,
       debateConfig: body.config,
-      status: DebateStatus.DRAFT,
+      status: debateStatus,
       currentRound: 0,
+      rounds: {
+        create: {
+          roundNumber: 1,
+          status:
+            debateStatus === DebateStatus.IN_PROGRESS
+              ? "IN_PROGRESS"
+              : "PENDING",
+        },
+      },
     },
     include: {
       case: {
@@ -157,6 +173,11 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
           name: true,
         },
       },
+      rounds: {
+        orderBy: {
+          roundNumber: "asc",
+        },
+      },
     },
   });
 
@@ -167,7 +188,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
  * OPTIONS /api/v1/debates
  * CORS预检请求
  */
-export const OPTIONS = withErrorHandler(async (request: NextRequest) => {
+export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {

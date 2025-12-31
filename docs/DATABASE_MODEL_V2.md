@@ -311,35 +311,35 @@ AIInteraction (AI交互记录) - 独立表
 
 **字段说明**:
 
-| 字段             | 类型          | 说明                                  | 索引  |
-| ---------------- | ------------- | ------------------------------------- | ----- |
-| id               | String (CUID) | 主键                                  | PK    |
-| lawName          | String        | 法律名称                              | Index |
-| articleNumber    | String        | 条款号                                | Index |
-| fullText         | Text          | 法条全文                              | -     |
-| lawType          | LawType       | 法律类型（枚举）                       | Index |
-| category         | LawCategory   | 法律分类（枚举）                       | Index |
-| subCategory      | String?       | 子分类                                | -     |
-| tags             | String[]      | 标签数组                              | Index |
-| keywords         | String[]      | 关键词数组                            | -     |
-| version          | String        | 版本号（默认1.0）                     | -     |
-| effectiveDate    | DateTime      | 生效日期                              | Index |
-| expiryDate       | DateTime?     | 失效日期                              | -     |
-| status           | LawStatus     | 法律状态（枚举）                       | Index |
-| amendmentHistory | Json?         | 修订历史（JSONB）                      | -     |
-| parentId         | String?       | 父法条ID（层级关系）                  | -     |
-| chapterNumber    | String?       | 章号                                  | -     |
-| sectionNumber    | String?       | 节号                                  | -     |
-| level            | Int           | 层级深度（默认0）                      | -     |
-| issuingAuthority | String        | 制定机关                              | -     |
-| jurisdiction    | String?       | 管辖范围                              | -     |
-| relatedArticles  | String[]      | 关联法条ID数组                        | -     |
-| legalBasis      | String?       | 法律依据                              | -     |
-| searchableText   | Text          | 搜索文本                              | -     |
-| viewCount        | Int           | 浏览次数（默认0）                      | Index |
-| referenceCount   | Int           | 引用次数（默认0）                      | Index |
-| createdAt        | DateTime      | 创建时间                              | -     |
-| updatedAt        | DateTime      | 更新时间                              | -     |
+| 字段             | 类型          | 说明                 | 索引  |
+| ---------------- | ------------- | -------------------- | ----- |
+| id               | String (CUID) | 主键                 | PK    |
+| lawName          | String        | 法律名称             | Index |
+| articleNumber    | String        | 条款号               | Index |
+| fullText         | Text          | 法条全文             | -     |
+| lawType          | LawType       | 法律类型（枚举）     | Index |
+| category         | LawCategory   | 法律分类（枚举）     | Index |
+| subCategory      | String?       | 子分类               | -     |
+| tags             | String[]      | 标签数组             | Index |
+| keywords         | String[]      | 关键词数组           | -     |
+| version          | String        | 版本号（默认1.0）    | -     |
+| effectiveDate    | DateTime      | 生效日期             | Index |
+| expiryDate       | DateTime?     | 失效日期             | -     |
+| status           | LawStatus     | 法律状态（枚举）     | Index |
+| amendmentHistory | Json?         | 修订历史（JSONB）    | -     |
+| parentId         | String?       | 父法条ID（层级关系） | -     |
+| chapterNumber    | String?       | 章号                 | -     |
+| sectionNumber    | String?       | 节号                 | -     |
+| level            | Int           | 层级深度（默认0）    | -     |
+| issuingAuthority | String        | 制定机关             | -     |
+| jurisdiction     | String?       | 管辖范围             | -     |
+| relatedArticles  | String[]      | 关联法条ID数组       | -     |
+| legalBasis       | String?       | 法律依据             | -     |
+| searchableText   | Text          | 搜索文本             | -     |
+| viewCount        | Int           | 浏览次数（默认0）    | Index |
+| referenceCount   | Int           | 引用次数（默认0）    | Index |
+| createdAt        | DateTime      | 创建时间             | -     |
+| updatedAt        | DateTime      | 更新时间             | -     |
 
 **枚举类型**:
 
@@ -420,24 +420,22 @@ enum LawStatus {
    - amendmentHistory字段：追溯历史变更
 
 4. **检索示例**：
+
 ```typescript
 // 案情：房屋买卖合同纠纷
 const articles = await prisma.lawArticle.findMany({
   where: {
     OR: [
-      { searchableText: { contains: '合同' } },
-      { tags: { has: '违约责任' } },
-      { tags: { has: '买卖合同' } }
+      { searchableText: { contains: "合同" } },
+      { tags: { has: "违约责任" } },
+      { tags: { has: "买卖合同" } },
     ],
     category: LawCategory.CIVIL,
     status: LawStatus.VALID,
-    effectiveDate: { lte: new Date() }
+    effectiveDate: { lte: new Date() },
   },
-  orderBy: [
-    { referenceCount: 'desc' },
-    { viewCount: 'desc' }
-  ],
-  take: 20
+  orderBy: [{ referenceCount: "desc" }, { viewCount: "desc" }],
+  take: 20,
 });
 ```
 
@@ -759,50 +757,50 @@ await prisma.argument.create({
 ### 创建法条
 
 ```typescript
-import { prisma } from '@/lib/db/prisma';
-import { LawType, LawCategory, LawStatus } from '@prisma/client';
+import { prisma } from "@/lib/db/prisma";
+import { LawType, LawCategory, LawStatus } from "@prisma/client";
 
 // 创建法条
 const article = await prisma.lawArticle.create({
   data: {
-    lawName: '中华人民共和国民法典',
-    articleNumber: '第一百八十八条',
-    fullText: '民事主体从事民事活动，应当遵循诚信原则，秉持诚实，恪守承诺。',
+    lawName: "中华人民共和国民法典",
+    articleNumber: "第一百八十八条",
+    fullText: "民事主体从事民事活动，应当遵循诚信原则，秉持诚实，恪守承诺。",
     lawType: LawType.LAW,
     category: LawCategory.CIVIL,
-    subCategory: '总则编',
-    tags: ['诚信原则', '民事活动'],
-    keywords: ['诚信', '承诺', '诚实'],
-    version: '1.0',
-    effectiveDate: new Date('2021-01-01'),
+    subCategory: "总则编",
+    tags: ["诚信原则", "民事活动"],
+    keywords: ["诚信", "承诺", "诚实"],
+    version: "1.0",
+    effectiveDate: new Date("2021-01-01"),
     status: LawStatus.VALID,
-    issuingAuthority: '全国人民代表大会',
-    jurisdiction: '全国',
-    chapterNumber: '第一章',
-    sectionNumber: '第一节',
+    issuingAuthority: "全国人民代表大会",
+    jurisdiction: "全国",
+    chapterNumber: "第一章",
+    sectionNumber: "第一节",
     level: 0,
-    searchableText: '民事主体从事民事活动应当遵循诚信原则秉持诚实恪守承诺'
-  }
+    searchableText: "民事主体从事民事活动应当遵循诚信原则秉持诚实恪守承诺",
+  },
 });
 
 // 创建子法条
 const childArticle = await prisma.lawArticle.create({
   data: {
-    lawName: '中华人民共和国民法典',
-    articleNumber: '第一百八十九条',
-    fullText: '本条第一款所称重大过失，是指行为人因疏忽大意...',
+    lawName: "中华人民共和国民法典",
+    articleNumber: "第一百八十九条",
+    fullText: "本条第一款所称重大过失，是指行为人因疏忽大意...",
     lawType: LawType.LAW,
     category: LawCategory.CIVIL,
-    tags: ['重大过失'],
-    keywords: ['重大过失', '疏忽大意'],
-    version: '1.0',
-    effectiveDate: new Date('2021-01-01'),
+    tags: ["重大过失"],
+    keywords: ["重大过失", "疏忽大意"],
+    version: "1.0",
+    effectiveDate: new Date("2021-01-01"),
     status: LawStatus.VALID,
-    issuingAuthority: '全国人民代表大会',
+    issuingAuthority: "全国人民代表大会",
     parentId: article.id,
     level: 1,
-    searchableText: '本条第一款所称重大过失是指行为人因疏忽大意'
-  }
+    searchableText: "本条第一款所称重大过失是指行为人因疏忽大意",
+  },
 });
 
 // 查询法条
@@ -811,10 +809,10 @@ const articles = await prisma.lawArticle.findMany({
     lawType: LawType.LAW,
     category: LawCategory.CIVIL,
     status: LawStatus.VALID,
-    tags: { has: '诚信原则' }
+    tags: { has: "诚信原则" },
   },
-  orderBy: { effectiveDate: 'desc' },
-  take: 50
+  orderBy: { effectiveDate: "desc" },
+  take: 50,
 });
 ```
 
