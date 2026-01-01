@@ -1,25 +1,34 @@
-# 律伴助手数据模型设计文档 v2.0
+# 律伴助手数据模型设计文档 v3.0
 
 ## 📋 文档信息
 
-- **版本**: v2.0
+- **版本**: v3.0
 - **创建日期**: 2024-12-18
-- **基于**: AI评审意见重构
-- **迁移名称**: `20251218093212_debate_system_complete_model`
+- **最后更新**: 2026-01-01
+- **基于**: Manus智能体架构增强
+- **迁移名称**: `20260101000000_manus_enhancement`
 
 ## 🎯 设计目标
 
-基于AI架构师的评审意见，本次数据模型重构的核心目标：
+### v2.0 核心目标（已完成）
 
-1. **完整的辩论系统支持** - 添加debates、debate_rounds、arguments等核心表
-2. **灵活的扩展性** - 使用JSONB字段存储灵活业务数据
-3. **软删除支持** - 所有核心表支持deletedAt软删除
-4. **性能优化** - 合理的索引设计
-5. **数据完整性** - 完善的外键约束和级联删除
+1. **完整的辩论系统支持** - 添加debates、debate_rounds、arguments等核心表 ✅
+2. **灵活的扩展性** - 使用JSONB字段存储灵活业务数据 ✅
+3. **软删除支持** - 所有核心表支持deletedAt软删除 ✅
+4. **性能优化** - 合理的索引设计 ✅
+5. **数据完整性** - 完善的外键约束和级联删除 ✅
+
+### v3.0 新增目标（Manus增强）
+
+6. **三层记忆架构** - 支持Working/Hot/Cold Memory管理
+7. **统一验证层** - 实现事实准确性、逻辑一致性、任务完成度三重验证
+8. **错误学习机制** - 保留错误记录，支持AI从错误中学习
+9. **Agent行动空间** - 定义核心原子函数，支持分层行动空间
+10. **准确性提升** - 数据模型支持准确率从88分提升到95分+的目标
 
 ## 📊 数据模型概览
 
-### 核心实体关系
+### 核心实体关系（v3.0更新）
 
 ```
 User (用户)
@@ -30,10 +39,44 @@ User (用户)
   │   │       └── Argument (论点) 1:N
   │   └── LegalReference (法律依据) 1:N
   ├── Account (第三方账号) 1:N
-  └── Session (会话) 1:N
+  ├── Session (会话) 1:N
+  └── AgentMemory (Agent记忆) 1:N  ⭐ 新增
 
 AIInteraction (AI交互记录) - 独立表
+ErrorLog (错误日志) - 独立表  ⭐ 新增
+VerificationResult (验证结果) - 独立表  ⭐ 新增
+AgentAction (Agent行动) - 独立表  ⭐ 新增
 ```
+
+### Manus架构映射
+
+**PEV三层架构在数据模型中的体现**：
+
+1. **Planning Layer（规划层）**
+   - 数据支持：AgentAction表记录规划决策
+   - 关联表：Case、Debate（存储规划目标）
+
+2. **Execution Layer（执行层）**
+   - 数据支持：AIInteraction表记录执行过程
+   - 关联表：Document、Argument、LegalReference（存储执行结果）
+
+3. **Verification Layer（验证层）**
+   - 数据支持：VerificationResult表记录验证结果 ⭐ 新增
+   - 关联表：所有核心业务表（支持质量验证）
+
+**三层记忆架构在数据模型中的体现**：
+
+1. **Working Memory（工作记忆）**
+   - 存储：AgentMemory表（memoryType = 'WORKING'）
+   - 特点：高频访问，短期保留（TTL: 1小时）
+
+2. **Hot Memory（热记忆）**
+   - 存储：AgentMemory表（memoryType = 'HOT'）
+   - 特点：中频访问，中期保留（TTL: 7天）
+
+3. **Cold Memory（冷记忆）**
+   - 存储：AgentMemory表（memoryType = 'COLD'）
+   - 特点：低频访问，长期保留（永久）
 
 ## 📁 数据表详细设计
 
@@ -650,7 +693,435 @@ EXPLAIN ANALYZE SELECT * FROM debates WHERE userId = 'xxx' AND status = 'IN_PROG
 
 ---
 
+---
+
+## 🆕 Manus增强模块（v3.0新增）
+
+### 7. Agent记忆管理模块 ⭐ 核心增强
+
+#### 7.1 AgentMemory (Agent记忆表)
+
+**表名**: `agent_memories`
+
+**用途**: 实现Manus的三层记忆架构（Working/Hot/Cold Memory）
+
+**字段说明**:
+
+| 字段             | 类型          | 说明                         | 索引  |
+| ---------------- | ------------- | ---------------------------- | ----- |
+| id               | String (CUID) | 主键                         | PK    |
+| userId           | String        | 用户ID                       | Index |
+| caseId           | String?       | 案件ID（可选）               | Index |
+| debateId         | String?       | 辩论ID（可选）               | Index |
+| memoryType       | MemoryType    | 记忆类型（WORKING/HOT/COLD） | Index |
+| agentName        | String        | Agent名称                    | Index |
+| memoryKey        | String        | 记忆键（唯一标识）           | Index |
+| memoryValue      | Json          | 记忆内容（JSONB）            | -     |
+| importance       | Float         | 重要性评分（0-1）            | Index |
+| accessCount      | Int           | 访问次数（默认0）            | Index |
+| lastAccessedAt   | DateTime?     | 最后访问时间                 | Index |
+| expiresAt        | DateTime?     | 过期时间                     | Index |
+| compressed       | Boolean       | 是否已压缩（默认false）      | -     |
+| compressionRatio | Float?        | 压缩比例                     | -     |
+| metadata         | Json?         | 元数据（JSONB）              | -     |
+| createdAt        | DateTime      | 创建时间                     | -     |
+| updatedAt        | DateTime      | 更新时间                     | -     |
+
+**MemoryType枚举**:
+
+```prisma
+enum MemoryType {
+  WORKING  // 工作记忆：当前任务上下文，TTL 1小时
+  HOT      // 热记忆：近期任务经验，TTL 7天
+  COLD     // 冷记忆：长期知识库，永久保留
+}
+```
+
+**memoryValue字段示例**:
+
+```json
+{
+  "type": "case_analysis",
+  "content": {
+    "parties": ["张三", "李四"],
+    "claims": ["支付货款100000元"],
+    "keyFacts": ["2024年1月签订合同"],
+    "legalIssues": ["违约责任"]
+  },
+  "context": {
+    "taskId": "task_123",
+    "stepNumber": 3,
+    "dependencies": ["task_121", "task_122"]
+  },
+  "compressed": false
+}
+```
+
+**metadata字段示例**:
+
+```json
+{
+  "source": "DocAnalyzer",
+  "confidence": 0.92,
+  "relatedMemories": ["mem_456", "mem_789"],
+  "compressionHistory": [
+    {
+      "timestamp": "2026-01-01T10:00:00Z",
+      "originalSize": 5000,
+      "compressedSize": 1000,
+      "method": "summarization"
+    }
+  ]
+}
+```
+
+**设计亮点**:
+
+- ✅ 支持三层记忆架构（Working/Hot/Cold）
+- ✅ 自动过期机制（expiresAt字段）
+- ✅ 访问频率追踪（accessCount、lastAccessedAt）
+- ✅ 重要性评分（importance字段）
+- ✅ 压缩支持（compressed、compressionRatio）
+- ✅ 灵活的关联（caseId、debateId可选）
+
+**索引策略**:
+
+```sql
+CREATE INDEX idx_memories_user ON agent_memories(userId);
+CREATE INDEX idx_memories_case ON agent_memories(caseId);
+CREATE INDEX idx_memories_debate ON agent_memories(debateId);
+CREATE INDEX idx_memories_type ON agent_memories(memoryType);
+CREATE INDEX idx_memories_agent ON agent_memories(agentName);
+CREATE INDEX idx_memories_key ON agent_memories(memoryKey);
+CREATE INDEX idx_memories_importance ON agent_memories(importance);
+CREATE INDEX idx_memories_access_count ON agent_memories(accessCount);
+CREATE INDEX idx_memories_last_accessed ON agent_memories(lastAccessedAt);
+CREATE INDEX idx_memories_expires ON agent_memories(expiresAt);
+```
+
+---
+
+### 8. 验证层模块 ⭐ 核心增强
+
+#### 8.1 VerificationResult (验证结果表)
+
+**表名**: `verification_results`
+
+**用途**: 实现Manus的三重验证机制（事实准确性+逻辑一致性+任务完成度）
+
+**字段说明**:
+
+| 字段               | 类型             | 说明                                   | 索引  |
+| ------------------ | ---------------- | -------------------------------------- | ----- |
+| id                 | String (CUID)    | 主键                                   | PK    |
+| entityType         | String           | 实体类型（Document/Argument/Debate等） | Index |
+| entityId           | String           | 实体ID                                 | Index |
+| verificationType   | VerificationType | 验证类型                               | Index |
+| overallScore       | Float            | 综合评分（0-1）                        | Index |
+| factualAccuracy    | Float?           | 事实准确性评分（0-1）                  | -     |
+| logicalConsistency | Float?           | 逻辑一致性评分（0-1）                  | -     |
+| taskCompleteness   | Float?           | 任务完成度评分（0-1）                  | -     |
+| passed             | Boolean          | 是否通过验证                           | Index |
+| issues             | Json?            | 发现的问题（JSONB数组）                | -     |
+| suggestions        | Json?            | 改进建议（JSONB数组）                  | -     |
+| verifiedBy         | String           | 验证者（AI/RULE/HUMAN）                | -     |
+| verificationTime   | Int              | 验证耗时（ms）                         | -     |
+| metadata           | Json?            | 元数据（JSONB）                        | -     |
+| createdAt          | DateTime         | 创建时间                               | Index |
+| updatedAt          | DateTime         | 更新时间                               | -     |
+
+**VerificationType枚举**:
+
+```prisma
+enum VerificationType {
+  FACTUAL      // 事实准确性验证
+  LOGICAL      // 逻辑一致性验证
+  COMPLETENESS // 任务完成度验证
+  COMPREHENSIVE // 综合验证（三重验证）
+}
+```
+
+**issues字段示例**:
+
+```json
+[
+  {
+    "type": "factual_error",
+    "severity": "high",
+    "description": "当事人姓名与文档不一致",
+    "location": "parties.plaintiff",
+    "expected": "张三",
+    "actual": "张四"
+  },
+  {
+    "type": "logical_inconsistency",
+    "severity": "medium",
+    "description": "诉讼请求与事实理由不匹配",
+    "details": "请求支付违约金，但未提及违约事实"
+  }
+]
+```
+
+**suggestions字段示例**:
+
+```json
+[
+  {
+    "priority": "high",
+    "action": "correct_party_name",
+    "description": "修正原告姓名为'张三'",
+    "estimatedImpact": 0.15
+  },
+  {
+    "priority": "medium",
+    "action": "add_breach_facts",
+    "description": "补充违约事实描述",
+    "estimatedImpact": 0.1
+  }
+]
+```
+
+**设计亮点**:
+
+- ✅ 支持三重验证机制（Manus核心特性）
+- ✅ 详细的问题追踪（issues数组）
+- ✅ 可执行的改进建议（suggestions数组）
+- ✅ 多维度评分（事实、逻辑、完成度）
+- ✅ 验证者追踪（AI/规则/人工）
+- ✅ 性能指标（verificationTime）
+
+---
+
+### 9. 错误学习模块 ⭐ 核心增强
+
+#### 9.1 ErrorLog (错误日志表)
+
+**表名**: `error_logs`
+
+**用途**: 实现Manus的错误学习机制，保留错误内容供AI学习
+
+**字段说明**:
+
+| 字段             | 类型          | 说明                    | 索引  |
+| ---------------- | ------------- | ----------------------- | ----- |
+| id               | String (CUID) | 主键                    | PK    |
+| userId           | String?       | 用户ID（可选）          | Index |
+| caseId           | String?       | 案件ID（可选）          | Index |
+| errorType        | ErrorType     | 错误类型                | Index |
+| errorCode        | String        | 错误代码                | Index |
+| errorMessage     | Text          | 错误信息                | -     |
+| stackTrace       | Text?         | 堆栈跟踪                | -     |
+| context          | Json          | 错误上下文（JSONB）     | -     |
+| attemptedAction  | Json?         | 尝试的操作（JSONB）     | -     |
+| recoveryAttempts | Int           | 恢复尝试次数（默认0）   | -     |
+| recovered        | Boolean       | 是否已恢复（默认false） | Index |
+| recoveryMethod   | String?       | 恢复方法                | -     |
+| recoveryTime     | Int?          | 恢复耗时（ms）          | -     |
+| learned          | Boolean       | 是否已学习（默认false） | Index |
+| learningNotes    | Text?         | 学习笔记                | -     |
+| severity         | ErrorSeverity | 严重程度                | Index |
+| metadata         | Json?         | 元数据（JSONB）         | -     |
+| createdAt        | DateTime      | 创建时间                | Index |
+| updatedAt        | DateTime      | 更新时间                | -     |
+
+**ErrorType枚举**:
+
+```prisma
+enum ErrorType {
+  AI_SERVICE_ERROR      // AI服务错误
+  PARSING_ERROR         // 解析错误
+  VALIDATION_ERROR      // 验证错误
+  LOGIC_ERROR          // 逻辑错误
+  DATA_INCONSISTENCY   // 数据不一致
+  TIMEOUT_ERROR        // 超时错误
+  NETWORK_ERROR        // 网络错误
+  UNKNOWN_ERROR        // 未知错误
+}
+
+enum ErrorSeverity {
+  LOW      // 低：不影响核心功能
+  MEDIUM   // 中：影响部分功能
+  HIGH     // 高：影响核心功能
+  CRITICAL // 严重：系统无法运行
+}
+```
+
+**context字段示例**:
+
+```json
+{
+  "agentName": "DocAnalyzer",
+  "taskId": "task_123",
+  "inputData": {
+    "documentId": "doc_456",
+    "filename": "contract.pdf"
+  },
+  "expectedOutput": "structured_case_data",
+  "actualOutput": null,
+  "timestamp": "2026-01-01T10:30:00Z"
+}
+```
+
+**attemptedAction字段示例**:
+
+```json
+{
+  "action": "parse_document",
+  "parameters": {
+    "documentId": "doc_456",
+    "extractionMode": "full"
+  },
+  "aiProvider": "zhipu",
+  "model": "glm-4-flash",
+  "retryCount": 2
+}
+```
+
+**设计亮点**:
+
+- ✅ 保留完整错误信息（Manus核心理念）
+- ✅ 恢复尝试追踪（recoveryAttempts、recovered）
+- ✅ 学习状态标记（learned、learningNotes）
+- ✅ 严重程度分级（severity）
+- ✅ 详细的上下文记录（context、attemptedAction）
+- ✅ 支持错误模式分析（通过errorType、errorCode聚合）
+
+---
+
+### 10. Agent行动空间模块 ⭐ 核心增强
+
+#### 10.1 AgentAction (Agent行动表)
+
+**表名**: `agent_actions`
+
+**用途**: 实现Manus的分层行动空间设计，记录Agent执行的所有操作
+
+**字段说明**:
+
+| 字段           | 类型          | 说明                   | 索引  |
+| -------------- | ------------- | ---------------------- | ----- |
+| id             | String (CUID) | 主键                   | PK    |
+| userId         | String?       | 用户ID（可选）         | Index |
+| caseId         | String?       | 案件ID（可选）         | Index |
+| debateId       | String?       | 辩论ID（可选）         | Index |
+| agentName      | String        | Agent名称              | Index |
+| actionType     | ActionType    | 行动类型               | Index |
+| actionName     | String        | 行动名称               | Index |
+| actionLayer    | ActionLayer   | 行动层级               | Index |
+| parameters     | Json          | 行动参数（JSONB）      | -     |
+| result         | Json?         | 执行结果（JSONB）      | -     |
+| status         | ActionStatus  | 执行状态               | Index |
+| executionTime  | Int?          | 执行耗时（ms）         | -     |
+| retryCount     | Int           | 重试次数（默认0）      | -     |
+| parentActionId | String?       | 父行动ID（支持行动链） | Index |
+| childActions   | String[]      | 子行动ID数组           | -     |
+| metadata       | Json?         | 元数据（JSONB）        | -     |
+| createdAt      | DateTime      | 创建时间               | Index |
+| updatedAt      | DateTime      | 更新时间               | -     |
+
+**ActionType枚举**:
+
+```prisma
+enum ActionType {
+  ANALYZE      // 分析类操作
+  RETRIEVE     // 检索类操作
+  GENERATE     // 生成类操作
+  VERIFY       // 验证类操作
+  TRANSFORM    // 转换类操作
+  COMMUNICATE  // 通信类操作
+}
+
+enum ActionLayer {
+  CORE         // 核心原子函数层（<20个基础操作）
+  UTILITY      // 沙盒实用程序层（组合操作）
+  SCRIPT       // 脚本与API层（复杂计算）
+}
+
+enum ActionStatus {
+  PENDING      // 待执行
+  RUNNING      // 执行中
+  COMPLETED    // 已完成
+  FAILED       // 失败
+  RETRYING     // 重试中
+  CANCELLED    // 已取消
+}
+```
+
+**parameters字段示例**:
+
+```json
+{
+  "documentId": "doc_456",
+  "extractionMode": "full",
+  "aiConfig": {
+    "provider": "zhipu",
+    "model": "glm-4-flash",
+    "temperature": 0.1
+  }
+}
+```
+
+**result字段示例**:
+
+```json
+{
+  "success": true,
+  "data": {
+    "parties": ["张三", "李四"],
+    "claims": ["支付货款100000元"],
+    "confidence": 0.92
+  },
+  "metrics": {
+    "tokensUsed": 1500,
+    "cost": 0.003,
+    "accuracy": 0.92
+  }
+}
+```
+
+**设计亮点**:
+
+- ✅ 支持分层行动空间（Core/Utility/Script）
+- ✅ 行动链追踪（parentActionId、childActions）
+- ✅ 重试机制支持（retryCount、status）
+- ✅ 性能指标记录（executionTime）
+- ✅ 详细的参数和结果记录
+- ✅ 支持行动模式分析（通过actionType、actionName聚合）
+
+---
+
 ## 🔄 迁移历史
+
+### v3.0 (2026-01-01) ⭐ Manus增强
+
+**迁移名称**: `20260101000000_manus_enhancement`
+
+**主要变更**:
+
+1. ✅ 新增agent_memories表（三层记忆架构）
+2. ✅ 新增verification_results表（统一验证层）
+3. ✅ 新增error_logs表（错误学习机制）
+4. ✅ 新增agent_actions表（行动空间管理）
+5. ✅ 新增枚举类型：MemoryType、VerificationType、ErrorType、ErrorSeverity、ActionType、ActionLayer、ActionStatus
+6. ✅ 优化索引策略（新增40+个索引）
+7. ✅ 支持准确性提升目标（88分→95分+）
+
+**设计理念**:
+
+- 借鉴Manus的PEV三层架构
+- 实现三层记忆管理（Working/Hot/Cold）
+- 建立统一验证层（事实+逻辑+完成度）
+- 支持错误学习和自动恢复
+- 定义分层行动空间
+
+**预期效果**:
+
+- 准确性提升：88分 → 95分+
+- 错误恢复率：0% → 90%+
+- AI成本降低：40-60%
+- 系统稳定性提升：30%+
+
+---
 
 ### v2.1 (2024-12-27)
 
@@ -818,15 +1289,171 @@ const articles = await prisma.lawArticle.findMany({
 
 ---
 
-## 🎯 下一步计划
+## 🔍 v3.0 新增索引策略
 
-1. **性能测试** - 使用大数据量测试查询性能
-2. **备份策略** - 实施定期备份和恢复测试
-3. **监控告警** - 设置数据库性能监控
-4. **数据归档** - 实施历史数据归档策略
+### Manus增强模块索引
+
+```sql
+-- Agent记忆相关
+CREATE INDEX idx_memories_user ON agent_memories(userId);
+CREATE INDEX idx_memories_case ON agent_memories(caseId);
+CREATE INDEX idx_memories_debate ON agent_memories(debateId);
+CREATE INDEX idx_memories_type ON agent_memories(memoryType);
+CREATE INDEX idx_memories_agent ON agent_memories(agentName);
+CREATE INDEX idx_memories_key ON agent_memories(memoryKey);
+CREATE INDEX idx_memories_importance ON agent_memories(importance);
+CREATE INDEX idx_memories_access_count ON agent_memories(accessCount);
+CREATE INDEX idx_memories_last_accessed ON agent_memories(lastAccessedAt);
+CREATE INDEX idx_memories_expires ON agent_memories(expiresAt);
+
+-- 验证结果相关
+CREATE INDEX idx_verification_entity_type ON verification_results(entityType);
+CREATE INDEX idx_verification_entity_id ON verification_results(entityId);
+CREATE INDEX idx_verification_type ON verification_results(verificationType);
+CREATE INDEX idx_verification_score ON verification_results(overallScore);
+CREATE INDEX idx_verification_passed ON verification_results(passed);
+CREATE INDEX idx_verification_created ON verification_results(createdAt);
+
+-- 错误日志相关
+CREATE INDEX idx_errors_user ON error_logs(userId);
+CREATE INDEX idx_errors_case ON error_logs(caseId);
+CREATE INDEX idx_errors_type ON error_logs(errorType);
+CREATE INDEX idx_errors_code ON error_logs(errorCode);
+CREATE INDEX idx_errors_recovered ON error_logs(recovered);
+CREATE INDEX idx_errors_learned ON error_logs(learned);
+CREATE INDEX idx_errors_severity ON error_logs(severity);
+CREATE INDEX idx_errors_created ON error_logs(createdAt);
+
+-- Agent行动相关
+CREATE INDEX idx_actions_user ON agent_actions(userId);
+CREATE INDEX idx_actions_case ON agent_actions(caseId);
+CREATE INDEX idx_actions_debate ON agent_actions(debateId);
+CREATE INDEX idx_actions_agent ON agent_actions(agentName);
+CREATE INDEX idx_actions_type ON agent_actions(actionType);
+CREATE INDEX idx_actions_name ON agent_actions(actionName);
+CREATE INDEX idx_actions_layer ON agent_actions(actionLayer);
+CREATE INDEX idx_actions_status ON agent_actions(status);
+CREATE INDEX idx_actions_parent ON agent_actions(parentActionId);
+CREATE INDEX idx_actions_created ON agent_actions(createdAt);
+```
 
 ---
 
-_文档版本: v2.1_
-_最后更新: 2024-12-27_
-_维护者: 开发团队_
+## 📚 v3.0 使用示例
+
+### 记忆管理示例
+
+```typescript
+import { prisma } from "@/lib/db/prisma";
+import { MemoryType } from "@prisma/client";
+
+// 创建工作记忆
+const workingMemory = await prisma.agentMemory.create({
+  data: {
+    userId: "user_123",
+    caseId: "case_456",
+    memoryType: MemoryType.WORKING,
+    agentName: "AnalysisAgent",
+    memoryKey: "current_case_analysis",
+    memoryValue: {
+      parties: ["张三", "李四"],
+      claims: ["支付货款100000元"],
+      status: "in_progress",
+    },
+    importance: 0.9,
+    expiresAt: new Date(Date.now() + 3600000), // 1小时后过期
+  },
+});
+
+// 压缩并转移到热记忆
+const hotMemory = await prisma.agentMemory.create({
+  data: {
+    userId: "user_123",
+    caseId: "case_456",
+    memoryType: MemoryType.HOT,
+    agentName: "AnalysisAgent",
+    memoryKey: "case_analysis_summary",
+    memoryValue: {
+      summary: "合同纠纷案件，涉及违约责任",
+      keyPoints: ["违约", "赔偿"],
+      originalMemoryId: workingMemory.id,
+    },
+    importance: 0.7,
+    compressed: true,
+    compressionRatio: 0.2,
+    expiresAt: new Date(Date.now() + 7 * 24 * 3600000), // 7天后过期
+  },
+});
+```
+
+### 验证结果示例
+
+```typescript
+import { VerificationType } from "@prisma/client";
+
+// 创建综合验证结果
+const verification = await prisma.verificationResult.create({
+  data: {
+    entityType: "Document",
+    entityId: "doc_456",
+    verificationType: VerificationType.COMPREHENSIVE,
+    overallScore: 0.88,
+    factualAccuracy: 0.92,
+    logicalConsistency: 0.85,
+    taskCompleteness: 0.87,
+    passed: false, // 低于0.9阈值
+    issues: [
+      {
+        type: "logical_inconsistency",
+        severity: "medium",
+        description: "诉讼请求与事实理由不完全匹配",
+      },
+    ],
+    suggestions: [
+      {
+        priority: "high",
+        action: "enhance_fact_description",
+        description: "补充违约事实的详细描述",
+        estimatedImpact: 0.1,
+      },
+    ],
+    verifiedBy: "AI",
+    verificationTime: 1200,
+  },
+});
+```
+
+### 错误学习示例
+
+```typescript
+import { ErrorType, ErrorSeverity } from '@prisma/client';
+
+// 记录错误并尝试恢复
+const errorLog = await prisma.errorLog.create({
+  data: {
+    userId: 'user_123',
+    caseId: 'case_456',
+    errorType: ErrorType.AI_SERVICE_ERROR,
+    errorCode: 'AI_TIMEOUT',
+    errorMessage: 'AI服务响应超时',
+    context: {
+      agentName: 'DocAnalyzer',
+      taskId: 'task_123',
+      inputData: { documentId: 'doc_456' }
+    },
+    attemptedAction: {
+      action: 'parse_document',
+      parameters: { documentId: 'doc_456' }
+    },
+    recoveryAttempts: 0,
+    severity: ErrorSeverity.MEDIUM
+  }
+});
+
+// 更新恢复状态
+await prisma.errorLog.update({
+  where: { id: errorLog.id },
+  data: {
+    recovered: true,
+    recov
+```
