@@ -212,6 +212,7 @@ export class RuleValidator {
    * 计算法条层级评分
    */
   private calculateLevelScore(article: LawArticle): number {
+    // 1. 计算法条类型评分（权重80%）
     const levelScores: Record<LawType, number> = {
       CONSTITUTION: 0.9, // 宪法
       LAW: 1.0, // 法律（最高层级，最高分）
@@ -222,7 +223,38 @@ export class RuleValidator {
       OTHER: 0.5, // 其他
     };
 
-    return levelScores[article.lawType] || 0.5;
+    const typeScore = levelScores[article.lawType] || 0.5;
+
+    // 2. 计算热度评分（权重20%）
+    const hotnessScore = this.calculateHotnessScore(article);
+
+    // 3. 综合评分：类型权重80%，热度权重20%
+    const finalScore = typeScore * 0.8 + hotnessScore * 0.2;
+
+    return Math.min(finalScore, 1);
+  }
+
+  /**
+   * 计算法条热度评分
+   */
+  private calculateHotnessScore(article: LawArticle): number {
+    // 获取最大值用于归一化
+    const maxViewCount = 10000; // 假设最大浏览量为10000
+    const maxReferenceCount = 5000; // 假设最大引用量为5000
+
+    // 归一化浏览量评分
+    const viewScore = Math.min(article.viewCount / maxViewCount, 1);
+
+    // 归一化引用量评分
+    const referenceScore = Math.min(
+      article.referenceCount / maxReferenceCount,
+      1,
+    );
+
+    // 热度评分：浏览量权重60%，引用量权重40%
+    const hotnessScore = viewScore * 0.6 + referenceScore * 0.4;
+
+    return hotnessScore;
   }
 
   /**

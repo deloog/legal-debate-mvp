@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+
 import {
   describe,
   it,
@@ -6,6 +9,13 @@ import {
   afterEach,
   jest,
 } from "@jest/globals";
+
+// Mock TextDecoder for Node.js environment
+import { TextDecoder } from "util";
+if (typeof global.TextDecoder === "undefined") {
+  global.TextDecoder = TextDecoder as any;
+}
+
 /// <reference path="./test-types.d.ts" />
 
 // Mock Prisma
@@ -72,6 +82,8 @@ describe("Debates Stream API - AI Service Error Handling", () => {
   describe("AI Service Error Scenarios", () => {
     it("should handle AI service returning empty content", async () => {
       // Mock AI service to return empty content
+      // @ts-ignore
+      // @ts-ignore
       mockGetUnifiedAIService.mockResolvedValue({
         // @ts-ignore
         generateDebate: jest.fn().mockResolvedValue({
@@ -80,7 +92,7 @@ describe("Debates Stream API - AI Service Error Handling", () => {
               message: { content: "" },
             },
           ],
-        }),
+        } as any) as any,
       });
 
       mockedPrisma.debate.findUnique.mockResolvedValue({
@@ -92,9 +104,10 @@ describe("Debates Stream API - AI Service Error Handling", () => {
         case: { title: "测试案件", description: "案件描述" },
         rounds: [],
         _count: { rounds: 0, arguments: 0 },
-      });
+      } as any);
 
       mockedPrisma.debateRound.findMany.mockResolvedValue([]);
+      // @ts-ignore
       mockedPrisma.$transaction.mockImplementation(async (callback: any) => {
         // @ts-ignore
         return await callback({
@@ -129,15 +142,14 @@ describe("Debates Stream API - AI Service Error Handling", () => {
     it("should handle AI service timeout", async () => {
       // Mock AI service to timeout
       mockGetUnifiedAIService.mockResolvedValue({
-        // @ts-ignore
         generateDebate: jest
           .fn()
           .mockImplementation(
             () =>
-              new Promise((_, reject) =>
+              new Promise((resolve, reject) =>
                 setTimeout(() => reject(new Error("AI service timeout")), 100),
               ),
-          ),
+          ) as any,
       });
 
       mockedPrisma.debate.findUnique.mockResolvedValue({
@@ -149,7 +161,7 @@ describe("Debates Stream API - AI Service Error Handling", () => {
         case: { title: "测试案件", description: "案件描述" },
         rounds: [],
         _count: { rounds: 0, arguments: 0 },
-      });
+      } as any);
 
       mockedPrisma.debateRound.findMany.mockResolvedValue([]);
 
@@ -184,11 +196,13 @@ describe("Debates Stream API - AI Service Error Handling", () => {
 
     it("should handle AI service returning malformed response", async () => {
       // Mock AI service to return malformed response
+      // @ts-ignore
+      // @ts-ignore
       mockGetUnifiedAIService.mockResolvedValue({
         // @ts-ignore
         generateDebate: jest.fn().mockResolvedValue({
           choices: null, // Malformed response
-        }),
+        } as any) as any,
       });
 
       mockedPrisma.debate.findUnique.mockResolvedValue({
@@ -200,10 +214,13 @@ describe("Debates Stream API - AI Service Error Handling", () => {
         case: { title: "测试案件", description: "案件描述" },
         rounds: [],
         _count: { rounds: 0, arguments: 0 },
-      });
+      } as any);
 
       mockedPrisma.debateRound.findMany.mockResolvedValue([]);
+      // @ts-ignore
       mockedPrisma.$transaction.mockImplementation(async (callback: any) => {
+        // @ts-ignore
+        // @ts-ignore
         const tx: any = {
           debateRound: {
             // @ts-ignore
@@ -224,6 +241,7 @@ describe("Debates Stream API - AI Service Error Handling", () => {
             update: jest.fn().mockResolvedValue({} as any),
           },
         };
+        // @ts-ignore
         return await callback(tx as any);
       });
 
@@ -237,8 +255,9 @@ describe("Debates Stream API - AI Service Error Handling", () => {
     it("should handle AI service network errors", async () => {
       // Mock AI service network error
       mockGetUnifiedAIService.mockResolvedValue({
-        // @ts-ignore
-        generateDebate: jest.fn().mockRejectedValue(new Error("Network error")),
+        generateDebate: jest.fn().mockImplementation(() => {
+          throw new Error("Network error");
+        }),
       });
 
       mockedPrisma.debate.findUnique.mockResolvedValue({
@@ -250,7 +269,7 @@ describe("Debates Stream API - AI Service Error Handling", () => {
         case: { title: "测试案件", description: "案件描述" },
         rounds: [],
         _count: { rounds: 0, arguments: 0 },
-      });
+      } as any);
 
       mockedPrisma.debateRound.findMany.mockResolvedValue([]);
 
@@ -264,10 +283,9 @@ describe("Debates Stream API - AI Service Error Handling", () => {
     it("should handle AI service rate limiting", async () => {
       // Mock AI service rate limiting
       mockGetUnifiedAIService.mockResolvedValue({
-        // @ts-ignore
-        generateDebate: jest
-          .fn()
-          .mockRejectedValue(new Error("Rate limit exceeded")),
+        generateDebate: jest.fn().mockImplementation(() => {
+          throw new Error("Rate limit exceeded");
+        }) as any,
       });
 
       mockedPrisma.debate.findUnique.mockResolvedValue({
@@ -279,7 +297,7 @@ describe("Debates Stream API - AI Service Error Handling", () => {
         case: { title: "测试案件", description: "案件描述" },
         rounds: [],
         _count: { rounds: 0, arguments: 0 },
-      });
+      } as any);
 
       mockedPrisma.debateRound.findMany.mockResolvedValue([]);
 

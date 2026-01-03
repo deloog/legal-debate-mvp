@@ -1,4 +1,4 @@
-import { DocAnalyzerAgentOptimized as DocAnalyzerAgent } from "../src/lib/agent/doc-analyzer-optimized";
+import { DocAnalyzerAgent } from "../src/lib/agent/doc-analyzer";
 import { AgentContext, TaskPriority } from "../src/types/agent";
 import { join } from "path";
 
@@ -6,6 +6,30 @@ import { join } from "path";
 // AI泛化能力测试脚本
 // 验证文档解析不是硬编码，而是真正的AI能力
 // =============================================================================
+
+interface ExtractedParty {
+  type: string;
+  name: string;
+  role: string;
+  contact: string;
+}
+
+interface ExtractedClaim {
+  type: string;
+  content: string;
+  amount?: number;
+}
+
+interface VariationResult {
+  success: boolean;
+  documentId: string;
+  extracted: {
+    parties: ExtractedParty[];
+    claims: ExtractedClaim[];
+  };
+  confidence: number;
+  processingTime: number;
+}
 
 class AIGeneralizationTester {
   public agent: DocAnalyzerAgent;
@@ -80,7 +104,7 @@ class AIGeneralizationTester {
     };
   }
 
-  private printVariationResults(docId: string, result: any) {
+  private printVariationResults(docId: string, result: VariationResult) {
     console.log(`📊 ${docId} 变体测试结果:`);
     console.log(`  测试成功: ${result.success ? "✅" : "❌"}`);
 
@@ -90,23 +114,29 @@ class AIGeneralizationTester {
 
       console.log("\n🔍 详细提取结果:");
       console.log("  提取的当事人:");
-      result.extracted.parties.forEach((party: any, index: number) => {
-        console.log(
-          `    ${index + 1}. ${party.type}: ${party.name} (${party.role}) - ${party.contact}`,
-        );
-      });
+      result.extracted.parties.forEach(
+        (party: ExtractedParty, index: number) => {
+          console.log(
+            `    ${index + 1}. ${party.type}: ${party.name} (${party.role}) - ${party.contact}`,
+          );
+        },
+      );
 
       console.log("\n  提取的诉讼请求:");
-      result.extracted.claims.forEach((claim: any, index: number) => {
-        const amount = claim.amount ? ` ¥${claim.amount.toLocaleString()}` : "";
-        console.log(
-          `    ${index + 1}. ${claim.type}: ${claim.content.substring(0, 50)}...${amount}`,
-        );
-      });
+      result.extracted.claims.forEach(
+        (claim: ExtractedClaim, index: number) => {
+          const amount = claim.amount
+            ? ` ¥${claim.amount.toLocaleString()}`
+            : "";
+          console.log(
+            `    ${index + 1}. ${claim.type}: ${claim.content.substring(0, 50)}...${amount}`,
+          );
+        },
+      );
     }
   }
 
-  private generateGeneralizationReport(results: any[]) {
+  private generateGeneralizationReport(results: VariationResult[]) {
     console.log("\n🎯 AI泛化能力验证报告:");
 
     const successfulTests = results.filter((r) => r.success);

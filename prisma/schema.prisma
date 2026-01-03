@@ -309,6 +309,138 @@ model AIInteraction {
   @@map("ai_interactions")
 }
 
+// === v3.0 Manus增强表 ===
+
+// 7. Agent记忆管理模块 - 三层记忆架构
+model AgentMemory {
+  id               String     @id @default(cuid())
+  userId           String
+  caseId           String?
+  debateId         String?
+  memoryType       MemoryType
+  agentName        String
+  memoryKey        String
+  memoryValue      Json
+  importance       Float      @default(0.5)
+  accessCount      Int        @default(0)
+  lastAccessedAt   DateTime?
+  expiresAt        DateTime?
+  compressed       Boolean    @default(false)
+  compressionRatio Float?
+  metadata         Json?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  @@unique([agentName, memoryKey])
+  @@index([userId])
+  @@index([caseId])
+  @@index([debateId])
+  @@index([memoryType])
+  @@index([agentName])
+  @@index([memoryKey])
+  @@index([importance])
+  @@index([accessCount])
+  @@index([lastAccessedAt])
+  @@index([expiresAt])
+  @@map("agent_memories")
+}
+
+// 8. 验证层模块 - 三重验证机制
+model VerificationResult {
+  id                 String           @id @default(cuid())
+  entityType         String
+  entityId           String
+  verificationType   VerificationType
+  overallScore       Float
+  factualAccuracy    Float?
+  logicalConsistency Float?
+  taskCompleteness   Float?
+  passed             Boolean
+  issues             Json?
+  suggestions        Json?
+  verifiedBy         String
+  verificationTime   Int
+  metadata           Json?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@unique([entityType, entityId])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([verificationType])
+  @@index([overallScore])
+  @@index([passed])
+  @@index([createdAt])
+  @@map("verification_results")
+}
+
+// 9. 错误学习模块 - 错误学习机制
+model ErrorLog {
+  id               String       @id @default(cuid())
+  userId           String?
+  caseId           String?
+  errorType        ErrorType
+  errorCode        String
+  errorMessage     String       @db.Text
+  stackTrace       String?      @db.Text
+  context          Json
+  attemptedAction  Json?
+  recoveryAttempts Int          @default(0)
+  recovered        Boolean      @default(false)
+  recoveryMethod   String?
+  recoveryTime     Int?
+  learned          Boolean      @default(false)
+  learningNotes    String?      @db.Text
+  severity         ErrorSeverity
+  metadata         Json?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([caseId])
+  @@index([errorType])
+  @@index([errorCode])
+  @@index([recovered])
+  @@index([learned])
+  @@index([severity])
+  @@index([createdAt])
+  @@map("error_logs")
+}
+
+// 10. Agent行动空间模块 - 行动空间管理
+model AgentAction {
+  id              String       @id @default(cuid())
+  userId          String?
+  caseId          String?
+  debateId        String?
+  agentName       String
+  actionType      ActionType
+  actionName      String
+  actionLayer     ActionLayer
+  parameters      Json
+  result          Json?
+  status          ActionStatus @default(PENDING)
+  executionTime   Int?
+  retryCount      Int          @default(0)
+  parentActionId  String?
+  childActions    String[]
+  metadata        Json?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([caseId])
+  @@index([debateId])
+  @@index([agentName])
+  @@index([actionType])
+  @@index([actionName])
+  @@index([actionLayer])
+  @@index([status])
+  @@index([parentActionId])
+  @@index([createdAt])
+  @@map("agent_actions")
+}
+
 enum UserRole {
   USER
   LAWYER
@@ -414,4 +546,96 @@ enum LawStatus {
   AMENDED
   REPEALED
   EXPIRED
+}
+
+// === v3.0 Manus增强枚举类型 ===
+
+enum MemoryType {
+  WORKING  // 工作记忆：当前任务上下文，TTL 1小时
+  HOT      // 热记忆：近期任务经验，TTL 7天
+  COLD     // 冷记忆：长期知识库，永久保留
+}
+
+enum VerificationType {
+  FACTUAL        // 事实准确性验证
+  LOGICAL        // 逻辑一致性验证
+  COMPLETENESS   // 任务完成度验证
+  COMPREHENSIVE  // 综合验证（三重）
+}
+
+enum ErrorType {
+  // AI服务相关错误
+  AI_SERVICE_ERROR
+  AI_TIMEOUT
+  AI_RATE_LIMIT
+  AI_QUOTA_EXCEEDED
+
+  // 数据库相关错误
+  DATABASE_ERROR
+  DATABASE_CONNECTION_ERROR
+  DATABASE_QUERY_ERROR
+  DATABASE_CONSTRAINT_ERROR
+
+  // 验证相关错误
+  VALIDATION_ERROR
+  VALIDATION_REQUIRED_FIELD
+  VALIDATION_FORMAT_ERROR
+  VALIDATION_BUSINESS_RULE
+
+  // 网络相关错误
+  NETWORK_ERROR
+  NETWORK_TIMEOUT
+  NETWORK_CONNECTION_ERROR
+
+  // 文件相关错误
+  FILE_ERROR
+  FILE_NOT_FOUND
+  FILE_READ_ERROR
+  FILE_WRITE_ERROR
+
+  // Agent相关错误
+  AGENT_ERROR
+  AGENT_TIMEOUT
+  AGENT_NOT_FOUND
+
+  // 记忆相关错误
+  MEMORY_ERROR
+  MEMORY_NOT_FOUND
+  MEMORY_EXPIRED
+
+  // 其他错误
+  UNKNOWN_ERROR
+}
+
+enum ErrorSeverity {
+  LOW      // 低：不影响核心功能
+  MEDIUM   // 中：影响部分功能
+  HIGH     // 高：影响核心功能
+  CRITICAL // 严重：系统无法运行
+}
+
+enum ActionType {
+  ANALYZE
+  RETRIEVE
+  GENERATE
+  VERIFY
+  TRANSFORM
+  COMMUNICATE
+  MIGRATE_WORKING_TO_HOT
+  MIGRATE_HOT_TO_COLD
+}
+
+enum ActionLayer {
+  CORE     // 核心原子函数层（<20个基础操作）
+  UTILITY  // 实用程序层（组合操作）
+  SCRIPT   // 脚本层（复杂计算）
+}
+
+enum ActionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  RETRYING
+  CANCELLED
 }

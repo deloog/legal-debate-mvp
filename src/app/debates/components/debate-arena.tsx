@@ -5,6 +5,7 @@ import { DebateRound, Argument } from "@prisma/client";
 import { ArgumentColumn } from "./argument-column";
 import { RoundSelector } from "./round-selector";
 import { StreamingOutput } from "./streaming-output";
+import { LawArticleList } from "./law-article-list";
 import { useArgumentsByRound } from "@/lib/hooks/use-debate";
 
 export interface DebateArenaProps {
@@ -20,6 +21,7 @@ export interface DebateArenaProps {
  * 功能：展示完整的辩论界面，包括轮次选择、正反方论点列和流式输出
  */
 export function DebateArena({
+  debateId,
   rounds,
   currentRound,
   arguments: argumentsList,
@@ -75,6 +77,9 @@ export function DebateArena({
               />
             </div>
           )}
+
+          {/* 法条推荐列表 */}
+          <LawArticleList debateId={debateId} roundId={selectedRoundId} />
 
           {/* 论点展示区 */}
           <div className="grid gap-6 md:grid-cols-2">

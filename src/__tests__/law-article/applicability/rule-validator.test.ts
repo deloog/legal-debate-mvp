@@ -25,8 +25,9 @@ describe("RuleValidator", () => {
 
       expect(result.validity.passed).toBe(true);
       expect(result.scope.passed).toBe(true);
-      expect(result.levelScore).toBe(1.0);
-      expect(result.overallScore).toBeGreaterThan(0.9);
+      // 层级评分 = 类型评分(1.0) * 80% + 热度评分 * 20%
+      expect(result.levelScore).toBeCloseTo(0.8, 1);
+      expect(result.overallScore).toBeGreaterThan(0.7);
     });
 
     it("应该拒绝过期法条", () => {
@@ -57,7 +58,9 @@ describe("RuleValidator", () => {
       const result = validator.validateArticle(article, caseInfo);
 
       expect(result.validity.passed).toBe(true);
-      expect(result.levelScore).toBe(0.7); // LOCAL_REGULATION的评分
+      // 层级评分 = 类型评分(0.7) * 80% + 热度评分 * 20%
+      // 使用toBeCloseTo避免浮点数精度问题
+      expect(result.levelScore).toBeCloseTo(0.56, 1);
     });
   });
 
@@ -88,7 +91,9 @@ describe("RuleValidator", () => {
 
       const result = validator.validateArticle(article, caseInfo);
 
-      expect(result.levelScore).toBe(1.0);
+      // 层级评分 = 类型评分(1.0) * 80% + 热度评分 * 20%
+      // 使用toBeCloseTo避免浮点数精度问题
+      expect(result.levelScore).toBeCloseTo(0.8, 1);
     });
   });
 

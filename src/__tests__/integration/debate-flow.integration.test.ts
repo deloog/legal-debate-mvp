@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+
 import {
   describe,
   it,
@@ -12,7 +15,11 @@ import {
 } from "../helpers/mock-request";
 
 // Mock TextDecoder for Node.js environment
-global.TextDecoder = require("util").TextDecoder;
+import { TextDecoder } from "util";
+if (typeof global.TextDecoder === "undefined") {
+  // @ts-ignore
+  global.TextDecoder = TextDecoder;
+}
 
 // Mock Prisma
 jest.mock("@/lib/db/prisma", () => ({
@@ -94,7 +101,7 @@ describe("Debate Flow Integration Tests", () => {
 
       // 3. Mock AI服务
       mockGetUnifiedAIService.mockResolvedValue({
-        // @ts-ignore
+        // @ts-expect-error Jest mock type mismatch
         generateDebate: jest.fn().mockResolvedValue({
           choices: [
             {
@@ -114,10 +121,10 @@ describe("Debate Flow Integration Tests", () => {
       });
 
       // 5. Mock数据库事务
-      mockPrisma.$transaction.mockImplementation(async (callback: any) => {
-        const tx: any = {
+      mockPrisma.$transaction.mockImplementation(async (callback: unknown) => {
+        const tx = {
           debateRound: {
-            // @ts-ignore
+            // @ts-expect-error Jest mock type
             create: jest.fn().mockResolvedValue({
               id: "round-123",
               debateId: "123e4567-e89b-12d3-a456-426614174001",
@@ -127,15 +134,15 @@ describe("Debate Flow Integration Tests", () => {
             }),
           },
           argument: {
-            // @ts-ignore
+            // @ts-expect-error Jest mock type
             create: jest.fn().mockResolvedValue({}),
           },
           debate: {
-            // @ts-ignore
+            // @ts-expect-error Jest mock type
             update: jest.fn().mockResolvedValue({}),
           },
         };
-        return await callback(tx);
+        return await (callback as any)(tx);
       });
 
       // 测试创建辩论API
@@ -220,10 +227,9 @@ describe("Debate Flow Integration Tests", () => {
 
       // Mock AI服务错误
       mockGetUnifiedAIService.mockResolvedValue({
-        // @ts-ignore
-        generateDebate: jest
-          .fn()
-          .mockRejectedValue(new Error("AI service unavailable")),
+        generateDebate: jest.fn().mockImplementation(() => {
+          throw new Error("AI service unavailable");
+        }),
       });
 
       const { GET: streamDebate } =
@@ -334,7 +340,7 @@ describe("Debate Flow Integration Tests", () => {
 
       // Mock AI服务成功
       mockGetUnifiedAIService.mockResolvedValue({
-        // @ts-ignore
+        // @ts-expect-error Jest mock type mismatch
         generateDebate: jest.fn().mockResolvedValue({
           choices: [
             {
@@ -421,7 +427,7 @@ describe("Debate Flow Integration Tests", () => {
 
       mockPrisma.debate.findUnique.mockResolvedValue(mockDebate);
       mockGetUnifiedAIService.mockResolvedValue({
-        // @ts-ignore
+        // @ts-expect-error Jest mock type mismatch
         generateDebate: jest.fn().mockResolvedValue({
           choices: [
             {

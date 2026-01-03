@@ -1,6 +1,6 @@
-import { DocAnalyzerAgentOptimized as DocAnalyzerAgent } from "../src/lib/agent/doc-analyzer-optimized";
+import { DocAnalyzerAgent } from "../src/lib/agent/doc-analyzer";
 import { AgentContext, TaskPriority } from "../src/types/agent";
-import { readFileSync, writeFileSync } from "fs";
+import { writeFileSync } from "fs";
 import { join } from "path";
 
 // =============================================================================
@@ -13,20 +13,8 @@ interface TestDocument {
   filePath: string;
   fileType: "TXT" | "PDF" | "DOCX" | "DOC" | "IMAGE";
   expectedData: {
-    parties: Array<{
-      type: "plaintiff" | "defendant" | "other";
-      name: string;
-      role?: string;
-      contact?: string;
-      address?: string;
-    }>;
-    claims: Array<{
-      type: string;
-      content: string;
-      amount?: number;
-      evidence?: string[];
-      legalBasis?: string;
-    }>;
+    parties: Party[];
+    claims: Claim[];
     timeline?: Array<{
       date: string;
       event: string;
@@ -35,6 +23,22 @@ interface TestDocument {
     caseType?: string;
     keyFacts?: string[];
   };
+}
+
+interface Party {
+  type: "plaintiff" | "defendant" | "other";
+  name: string;
+  role?: string;
+  contact?: string;
+  address?: string;
+}
+
+interface Claim {
+  type: string;
+  content: string;
+  amount?: number;
+  evidence?: string[];
+  legalBasis?: string;
 }
 
 interface AccuracyMetrics {
@@ -253,8 +257,8 @@ class DocumentAccuracyTester {
   }
 
   private calculatePartiesAccuracy(
-    extracted: any[],
-    expected: any[],
+    extracted: Party[],
+    expected: Party[],
   ): { accuracy: number; correct: number } {
     let correct = 0;
 
@@ -311,8 +315,8 @@ class DocumentAccuracyTester {
   }
 
   private calculateClaimsRecall(
-    extracted: any[],
-    expected: any[],
+    extracted: Claim[],
+    expected: Claim[],
   ): { recall: number; correct: number } {
     let correct = 0;
 

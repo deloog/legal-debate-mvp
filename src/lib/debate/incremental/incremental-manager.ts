@@ -51,10 +51,7 @@ export class IncrementalManager {
     );
 
     // 3. 执行增量分析
-    const incrementalAnalysis = await this.incrementalAnalyzer.analyze(
-      diff,
-      input.historicalContext,
-    );
+    const incrementalAnalysis = await this.incrementalAnalyzer.analyze(diff);
 
     // 4. 合并上下文
     const mergeResult = this.contextMerger.merge(

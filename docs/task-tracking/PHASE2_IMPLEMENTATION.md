@@ -1103,7 +1103,7 @@ export const APPLICABILITY_CONFIG = {
 
 ---
 
-#### 任务 6.1.3：MemoryAgent实现（1天）
+#### 任务 6.1.3：MemoryAgent实现（1天）✅
 
 **业务需求**：实现Manus的三层记忆架构
 **输入**：agent_memories表结构
@@ -1148,7 +1148,7 @@ export const APPLICABILITY_CONFIG = {
 
 ---
 
-#### 任务 6.1.4：VerificationAgent增强（1天）
+#### 任务 6.1.4：VerificationAgent增强（1天）   ✅
 
 **业务需求**：实现Manus的三重验证机制
 **输入**：verification_results表结构
@@ -1193,7 +1193,7 @@ export const APPLICABILITY_CONFIG = {
 
 ### 6.2 错误学习与恢复机制（0.5-1天）
 
-#### 任务 6.2.1：ErrorLog系统实现（0.5天）
+#### 任务 6.2.1：ErrorLog系统实现（0.5天） ✅
 
 **业务需求**：实现Manus的错误学习机制
 **输入**：error_logs表结构

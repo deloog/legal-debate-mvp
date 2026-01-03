@@ -9,7 +9,7 @@ import {
   RuleValidationResult,
   AIReviewResult,
 } from "./types";
-import { LawArticle } from "@prisma/client";
+import { LawArticle, LawStatus } from "@prisma/client";
 import SemanticMatcher from "./semantic-matcher";
 import RuleValidator from "./rule-validator";
 import AIReviewer from "./ai-reviewer";
@@ -57,6 +57,13 @@ export class ApplicabilityAnalyzer {
       ...input.config,
     };
     const startTime = Date.now();
+
+    // 使用配置的阈值
+    const thresholds = {
+      minExclusionScore: config.minExclusionScore,
+      aiLowConfidenceThreshold: config.aiLowConfidenceThreshold,
+      defaultApplicabilityThreshold: config.defaultApplicabilityThreshold,
+    };
 
     // 记录各阶段耗时
     const timings = {
@@ -106,6 +113,7 @@ export class ApplicabilityAnalyzer {
       semanticMatches,
       ruleValidations,
       aiReviews,
+      thresholds,
     );
 
     // 计算统计信息
@@ -131,6 +139,11 @@ export class ApplicabilityAnalyzer {
     semanticMatches: Map<string, SemanticMatchResult>,
     ruleValidations: Map<string, RuleValidationResult>,
     aiReviews: Map<string, AIReviewResult>,
+    thresholds: {
+      minExclusionScore: number;
+      aiLowConfidenceThreshold: number;
+      defaultApplicabilityThreshold: number;
+    },
   ): ArticleApplicabilityResult[] {
     return articles.map((article) => {
       const semanticMatch = semanticMatches.get(article.id);
@@ -148,7 +161,14 @@ export class ApplicabilityAnalyzer {
       );
 
       // 判断是否适用
-      const applicable = this.determineApplicability(score, aiReview);
+      const applicable = this.determineApplicability(
+        score,
+        aiReview,
+        thresholds,
+      );
+
+      // 添加法条状态警告
+      const statusWarning = this.addStatusWarning(article);
 
       // 收集原因和警告
       const reasons = this.collectReasons(
@@ -173,10 +193,38 @@ export class ApplicabilityAnalyzer {
         aiConfidence: aiReview?.confidence,
         reasons,
         warnings,
+        statusWarning,
         semanticMatch,
         ruleValidation,
       };
     });
+  }
+
+  /**
+   * 添加法条状态警告
+   */
+  private addStatusWarning(
+    article: LawArticle,
+  ): { level: "error" | "warning" | "info"; message: string } | undefined {
+    if (article.status === LawStatus.REPEALED) {
+      return {
+        level: "error",
+        message: "⚠️ 已废止 - 该法条已失效，不建议引用",
+      };
+    }
+    if (article.status === LawStatus.AMENDED) {
+      return {
+        level: "warning",
+        message: "⚠️ 已修订 - 请确认使用最新版本",
+      };
+    }
+    if (article.status === LawStatus.EXPIRED) {
+      return {
+        level: "warning",
+        message: "⚠️ 已过期 - 法条已超过有效期",
+      };
+    }
+    return undefined;
   }
 
   /**
@@ -197,27 +245,38 @@ export class ApplicabilityAnalyzer {
 
   /**
    * 判断是否适用
-   * 改进：确保至少有法条被标记为适用，除非评分极低
+   * 使用配置的阈值
    */
   private determineApplicability(
     score: number,
     aiReview: AIReviewResult | undefined,
+    thresholds: {
+      minExclusionScore: number;
+      aiLowConfidenceThreshold: number;
+      defaultApplicabilityThreshold: number;
+    },
   ): boolean {
-    // 评分低于0.1的直接排除
-    if (score < 0.1) {
+    // 评分低于排除阈值的直接排除
+    if (score < thresholds.minExclusionScore) {
       return false;
     }
 
     // 如果AI明确判断不适用，且评分也低，返回false
-    if (aiReview && aiReview.applicable === false && score < 0.3) {
+    if (
+      aiReview &&
+      aiReview.applicable === false &&
+      score < thresholds.aiLowConfidenceThreshold
+    ) {
       return false;
     }
+
     // 如果AI明确判断适用，返回true
     if (aiReview && aiReview.applicable === true) {
       return true;
     }
-    // 否则根据评分判断（降低阈值，确保有法条通过）
-    return score >= 0.2;
+
+    // 否则根据配置的默认适用性阈值判断
+    return score >= thresholds.defaultApplicabilityThreshold;
   }
 
   /**

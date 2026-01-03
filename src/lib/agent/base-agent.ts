@@ -4,9 +4,7 @@ import type {
   Agent,
   AgentContext,
   AgentResult,
-  AgentOptions,
   AgentMetadata,
-  ValidationResult,
 } from "../../types/agent";
 
 import {
@@ -23,9 +21,15 @@ import {
   createAgentError,
   createAgentResult,
   validateAgentContext,
-  generateCacheKey,
   DEFAULT_AGENT_CONFIG,
 } from "./types";
+
+import {
+  FaultTolerantExecutor,
+  type AgentFaultToleranceConfig,
+} from "./fault-tolerance";
+import { ErrorLogger } from "../error/error-logger";
+import { CircuitBreakerManager } from "../error/circuit-breaker";
 
 // =============================================================================
 // BaseAgent抽象类
@@ -41,8 +45,12 @@ export abstract class BaseAgent implements Agent {
   // 内部状态
   protected status: AgentStatus = AgentStatus.IDLE;
   protected currentState?: AgentExecutionState;
-  protected config: Record<string, any> = {};
+  protected config: Record<string, unknown> = {};
   protected logger: (entry: AgentLogEntry) => void;
+
+  // 容错执行器（可选）
+  protected faultTolerantExecutor?: FaultTolerantExecutor;
+  protected faultToleranceEnabled: boolean = false;
 
   // 统计信息
   protected stats = {
@@ -56,10 +64,22 @@ export abstract class BaseAgent implements Agent {
 
   constructor(
     logger?: (entry: AgentLogEntry) => void,
-    initialConfig?: Record<string, any>,
+    initialConfig?: Record<string, unknown>,
+    faultToleranceConfig?: AgentFaultToleranceConfig,
   ) {
     this.logger = logger || this.defaultLogger;
     this.config = { ...initialConfig };
+
+    // 初始化容错执行器
+    if (faultToleranceConfig) {
+      const errorLogger = new ErrorLogger();
+      const circuitBreakerManager = new CircuitBreakerManager();
+      this.faultTolerantExecutor = new FaultTolerantExecutor(
+        errorLogger,
+        circuitBreakerManager,
+      );
+      this.faultToleranceEnabled = true;
+    }
   }
 
   // =============================================================================
@@ -69,7 +89,7 @@ export abstract class BaseAgent implements Agent {
   /**
    * 执行具体的Agent逻辑（由子类实现）
    */
-  protected abstract executeLogic(context: AgentContext): Promise<any>;
+  protected abstract executeLogic(context: AgentContext): Promise<unknown>;
 
   // =============================================================================
   // 生命周期方法
@@ -104,7 +124,7 @@ export abstract class BaseAgent implements Agent {
   /**
    * 配置更新
    */
-  async configure(config: Record<string, any>): Promise<void> {
+  async configure(config: Record<string, unknown>): Promise<void> {
     this.config = { ...this.config, ...config };
     this.log(AgentLogLevel.INFO, "Agent configuration updated", {
       name: this.name,
@@ -154,8 +174,31 @@ export abstract class BaseAgent implements Agent {
         priority: context.priority,
       });
 
-      // 执行逻辑
-      const result = await this.executeLogic(context);
+      // 执行逻辑（支持容错）
+      let result: unknown;
+      if (this.faultToleranceEnabled && this.faultTolerantExecutor) {
+        // 使用容错执行器包装executeLogic
+        const faultTolerantResult = await this.faultTolerantExecutor.execute(
+          this.name,
+          () => this.executeLogic(context),
+          this.getFaultToleranceConfig(),
+          context,
+        );
+
+        result = faultTolerantResult.result;
+
+        // 记录容错相关信息
+        if (faultTolerantResult.faultResult.fallbackUsed) {
+          this.log(AgentLogLevel.WARN, "Fallback strategy used", {
+            fallbackType: faultTolerantResult.faultResult.fallbackType,
+            attempts: faultTolerantResult.faultResult.totalAttempts,
+          });
+        }
+      } else {
+        // 直接执行逻辑（原有方式）
+        result = await this.executeLogic(context);
+      }
+
       const executionTime = Date.now() - startTime;
 
       // 更新统计
@@ -165,7 +208,10 @@ export abstract class BaseAgent implements Agent {
       const agentResult = createAgentResult(this.name, result, {
         success: true,
         executionTime,
-        output: result.output, // 传递output字段
+        output:
+          result && typeof result === "object" && "output" in result
+            ? String((result as { output: unknown }).output)
+            : undefined, // 传递output字段
         context: {
           inputSummary: this.summarizeInput(context),
           processingSteps: this.getProcessingSteps(),
@@ -209,7 +255,7 @@ export abstract class BaseAgent implements Agent {
   protected log(
     level: AgentLogLevel,
     message: string,
-    data?: any,
+    data?: unknown,
     error?: Error,
   ): void {
     const entry: AgentLogEntry = {
@@ -226,21 +272,27 @@ export abstract class BaseAgent implements Agent {
   /**
    * 从异常创建Agent错误
    */
-  protected createErrorFromException(error: any): AgentError {
+  protected createErrorFromException(error: unknown): AgentError {
     if (error && typeof error === "object" && "code" in error) {
+      const errorObj = error as { code: string; message?: string };
       return createAgentError(
-        error.code as string,
-        error.message || "Unknown error",
-        this.mapErrorType(error.code as string),
+        errorObj.code,
+        errorObj.message || "Unknown error",
+        this.mapErrorType(errorObj.code),
         this.name,
-        this.isRetryableError(error.code as string),
+        this.isRetryableError(errorObj.code),
         { originalError: error },
       );
     }
 
+    const errorMessage =
+      error && typeof error === "object" && "message" in error
+        ? (error as { message: string }).message
+        : "Unknown execution error";
+
     return createAgentError(
       "EXECUTION_ERROR",
-      error?.message || "Unknown execution error",
+      errorMessage,
       AgentErrorType.EXECUTION_ERROR,
       this.name,
       true,
@@ -311,7 +363,41 @@ export abstract class BaseAgent implements Agent {
    * 获取处理步骤（由子类重写）
    */
   protected getProcessingSteps(): string[] {
+    if (this.faultToleranceEnabled) {
+      return [
+        "Input validation",
+        "Circuit breaker check",
+        "Core logic execution with retry",
+        "Fallback if needed",
+        "Result formatting",
+      ];
+    }
     return ["Input validation", "Core logic execution", "Result formatting"];
+  }
+
+  /**
+   * 获取Agent特定的容错配置（由子类重写）
+   * 如果不重写，返回默认配置
+   */
+  protected getFaultToleranceConfig(): AgentFaultToleranceConfig {
+    // 默认配置：禁用容错（向后兼容）
+    return {
+      retry: {
+        maxRetries: 0,
+        backoffMs: [],
+        retryableErrors: [],
+      },
+      fallback: {
+        enabled: false,
+        fallbackType: "SIMPLE",
+      },
+      circuitBreaker: {
+        enabled: false,
+        failureThreshold: 5,
+        timeout: 60000,
+        halfOpenRequests: 3,
+      },
+    };
   }
 
   /**

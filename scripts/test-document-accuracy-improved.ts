@@ -1,4 +1,4 @@
-import { DocAnalyzerAgentOptimized as DocAnalyzerAgent } from "../src/lib/agent/doc-analyzer-optimized";
+import { DocAnalyzerAgent } from "../src/lib/agent/doc-analyzer";
 import { AIVerificationService } from "../src/lib/ai/ai-verification-service";
 import { AgentContext, TaskPriority } from "../src/types/agent";
 import { readFileSync, writeFileSync } from "fs";

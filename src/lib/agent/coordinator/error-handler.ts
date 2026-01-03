@@ -1,9 +1,9 @@
 // 错误处理器 - 支持重试、回退、熔断等容错机制
+// 集成ErrorLogSystem进行错误记录、恢复和分析
 
 import type {
   FallbackStrategy,
   ErrorHandlingResult,
-  ErrorHandlingStrategy,
   WorkflowStep,
 } from "./types";
 
@@ -13,11 +13,45 @@ import { ErrorHandlingStrategy as EHStrategy } from "./types";
 
 import type { StepExecution } from "./types";
 
+import { errorLogSystem } from "@/lib/error/error-log-system";
+import type { ErrorContext } from "@/lib/error/types";
+
 // =============================================================================
 // 错误处理器
 // =============================================================================
 
 export class ErrorHandler {
+  /**
+   * 记录错误到ErrorLogSystem
+   */
+  private async logError(
+    error: Error,
+    step: WorkflowStep,
+    stepExecution: StepExecution,
+  ): Promise<void> {
+    try {
+      const context: ErrorContext = {
+        agentName: step.agentType || step.stepId,
+        operation: step.name || step.stepId,
+        taskId: step.stepId,
+        taskType: step.agentType,
+        metadata: {
+          stepId: step.stepId,
+          retryCount: stepExecution.retryCount,
+          executionTime: stepExecution.endTime
+            ? stepExecution.endTime - stepExecution.startTime
+            : undefined,
+          stepStatus: stepExecution.status,
+        },
+      };
+
+      await errorLogSystem.handle(error, context);
+    } catch (logError) {
+      // 错误记录失败不应影响错误处理流程
+      console.error("Failed to log error:", logError);
+    }
+  }
+
   /**
    * 处理错误
    */
@@ -27,6 +61,9 @@ export class ErrorHandler {
     stepExecution: StepExecution,
     fallbackStrategy?: FallbackStrategy,
   ): Promise<ErrorHandlingResult> {
+    // 使用ErrorLogSystem记录错误
+    await this.logError(error, step, stepExecution);
+
     // 如果步骤不是必须的，可以选择跳过
     if (!step.required) {
       if (fallbackStrategy?.allowSkip) {

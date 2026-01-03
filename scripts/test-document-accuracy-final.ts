@@ -1,4 +1,4 @@
-import { DocAnalyzerAgentOptimized } from "../src/lib/agent/doc-analyzer-optimized";
+import { DocAnalyzerAgent } from "../src/lib/agent/doc-analyzer";
 import { AIVerificationService } from "../src/lib/ai/ai-verification-service";
 import { AgentContext, TaskPriority } from "../src/types/agent";
 import { readFileSync, writeFileSync } from "fs";
@@ -63,11 +63,11 @@ interface FinalAccuracyMetrics {
 }
 
 class FinalDocumentAccuracyTester {
-  private agent: DocAnalyzerAgentOptimized;
+  private agent: DocAnalyzerAgent;
   private verificationService: AIVerificationService;
 
   constructor() {
-    this.agent = new DocAnalyzerAgentOptimized();
+    this.agent = new DocAnalyzerAgent();
     this.verificationService = new AIVerificationService();
   }
 
@@ -221,7 +221,7 @@ class FinalDocumentAccuracyTester {
     const startTime = Date.now();
 
     try {
-      // 初始化优化版Agent
+      // 初始化Agent
       await this.agent.initialize();
 
       // 构建执行上下文

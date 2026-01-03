@@ -12,6 +12,13 @@ import {
   AnalysisProcess,
 } from "./core/types";
 import { DEFAULT_CONFIG } from "./core/constants";
+import {
+  createFaultToleranceConfig,
+  createRetryConfig,
+  createFallbackConfig,
+  createCircuitBreakerConfig,
+  type AgentFaultToleranceConfig,
+} from "../fault-tolerance/config";
 import { TextExtractor } from "./extractors/text-extractor";
 import { FilterProcessor } from "./processors/filter-processor";
 import { AIProcessor } from "./processors/ai-processor";
@@ -37,7 +44,33 @@ export class DocAnalyzerAgent extends BaseAgent {
   private useMock: boolean;
 
   constructor(useMock: boolean = false) {
-    super();
+    // 传递容错配置到父类（不使用this）
+    const faultToleranceConfig: AgentFaultToleranceConfig = {
+      retry: {
+        maxRetries: 3,
+        backoffMs: [1000, 2000, 4000],
+        retryableErrors: [
+          "TIMEOUT",
+          "AI_SERVICE_ERROR",
+          "NETWORK_ERROR",
+          "RATE_LIMIT_ERROR",
+          "ECONNREFUSED",
+          "ETIMEDOUT",
+        ],
+      },
+      fallback: {
+        enabled: true,
+        fallbackType: "SIMPLE",
+      },
+      circuitBreaker: {
+        enabled: true,
+        failureThreshold: 0.5,
+        timeout: 60000,
+        halfOpenRequests: 3,
+      },
+    };
+
+    super(undefined, undefined, faultToleranceConfig);
     this.useMock = useMock;
     this.textExtractor = new TextExtractor();
     this.filterProcessor = new FilterProcessor();
@@ -310,5 +343,85 @@ export class DocAnalyzerAgent extends BaseAgent {
    */
   getCacheProcessor(): CacheProcessor {
     return this.cacheProcessor;
+  }
+
+  /**
+   * 获取DocAnalyzerAgent特定的容错配置
+   */
+  protected getFaultToleranceConfig(): AgentFaultToleranceConfig {
+    return createFaultToleranceConfig({
+      retry: createRetryConfig({
+        maxRetries: 3,
+        backoffMs: [1000, 2000, 4000],
+        retryableErrors: [
+          "TIMEOUT",
+          "AI_SERVICE_ERROR",
+          "NETWORK_ERROR",
+          "RATE_LIMIT_ERROR",
+          "ECONNREFUSED",
+          "ETIMEDOUT",
+        ],
+      }),
+      fallback: createFallbackConfig({
+        enabled: true,
+        fallbackType: "SIMPLE",
+        fallbackFunction: this.createFallbackResult.bind(this),
+      }),
+      circuitBreaker: createCircuitBreakerConfig({
+        enabled: true,
+        failureThreshold: 0.5,
+        timeout: 60000,
+        halfOpenRequests: 3,
+      }),
+    });
+  }
+
+  /**
+   * 创建降级结果
+   * 当文档解析失败时返回降级结果
+   */
+  private async createFallbackResult(
+    error: unknown,
+    context: AgentContext,
+  ): Promise<DocumentAnalysisOutput> {
+    const input = context.data as DocumentAnalysisInput;
+
+    logger.warn("文档解析降级到简化结果", {
+      documentId: input.documentId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    // 返回简化结果，标记置信度为0
+    return {
+      success: true,
+      extractedData: {
+        parties: [],
+        claims: [],
+      },
+      confidence: 0.0,
+      processingTime: 0,
+      metadata: {
+        wordCount: 0,
+        analysisModel: "fallback-simple",
+        tokenUsed: 0,
+        analysisProcess: {
+          ocrErrors: [error instanceof Error ? error.message : "Unknown"],
+          entitiesListed: {
+            persons: [],
+            companies: [],
+            amounts: [],
+          },
+          roleReasoning: "Fallback - no analysis performed",
+          claimDecomposition: "Fallback - no analysis performed",
+          amountNormalization: "Fallback - no analysis performed",
+          validationResults: {
+            duplicatesFound: [],
+            roleConflicts: [],
+            missingClaims: [],
+            amountInconsistencies: [],
+          },
+        },
+      },
+    };
   }
 }

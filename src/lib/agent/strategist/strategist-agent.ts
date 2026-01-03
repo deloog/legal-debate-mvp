@@ -12,6 +12,13 @@ import { RuleValidator } from "./rule-validator";
 import { RiskAssessor } from "./risk-assessor";
 import { logger } from "../security/logger";
 import { AIServiceFactory } from "../../ai/service";
+import {
+  createFaultToleranceConfig,
+  createRetryConfig,
+  createFallbackConfig,
+  createCircuitBreakerConfig,
+  type AgentFaultToleranceConfig,
+} from "../fault-tolerance/config";
 
 // =============================================================================
 // StrategistAgent类
@@ -29,7 +36,26 @@ export class StrategistAgent extends BaseAgent {
   private riskAssessor: RiskAssessor;
 
   constructor() {
-    super();
+    // 传递容错配置到父类（不使用this）
+    const faultToleranceConfig: AgentFaultToleranceConfig = {
+      retry: {
+        maxRetries: 2,
+        backoffMs: [2000, 5000],
+        retryableErrors: ["TIMEOUT", "AI_SERVICE_ERROR", "RATE_LIMIT_ERROR"],
+      },
+      fallback: {
+        enabled: true,
+        fallbackType: "TEMPLATE",
+      },
+      circuitBreaker: {
+        enabled: true,
+        failureThreshold: 0.3,
+        timeout: 30000,
+        halfOpenRequests: 2,
+      },
+    };
+
+    super(undefined, undefined, faultToleranceConfig);
     this.aiGenerator = new AIStrategyGenerator();
     this.ruleValidator = new RuleValidator();
     this.riskAssessor = new RiskAssessor();
@@ -308,16 +334,18 @@ export class StrategistAgent extends BaseAgent {
   /**
    * 格式化案件信息
    */
-  private formatCaseInfo(caseInfo: any): string {
+  private formatCaseInfo(caseInfo: StrategyInput["caseInfo"]): string {
     let info = `案件类型：${caseInfo.caseType}\n\n`;
     info += `当事人：\n`;
-    caseInfo.parties.forEach((party: any) => {
-      info += `- ${party.role === "plaintiff" ? "原告" : "被告"}：${party.name}`;
-      if (party.representative) {
-        info += `（代理人：${party.representative}）`;
-      }
-      info += `\n`;
-    });
+    caseInfo.parties.forEach(
+      (party: { role: string; name: string; representative?: string }) => {
+        info += `- ${party.role === "plaintiff" ? "原告" : "被告"}：${party.name}`;
+        if (party.representative) {
+          info += `（代理人：${party.representative}）`;
+        }
+        info += `\n`;
+      },
+    );
     info += `\n诉讼请求：\n`;
     caseInfo.claims.forEach((claim: string, i: number) => {
       info += `${i + 1}. ${claim}\n`;
@@ -333,31 +361,43 @@ export class StrategistAgent extends BaseAgent {
   /**
    * 格式化法条分析
    */
-  private formatLegalAnalysis(legalAnalysis: any): string {
+  private formatLegalAnalysis(
+    legalAnalysis: StrategyInput["legalAnalysis"],
+  ): string {
     let info = `适用法条：\n`;
-    legalAnalysis.applicableLaws.forEach((law: any, i: number) => {
-      info += `${i + 1}. ${law.law}`;
-      if (law.relevance) {
-        info += `（相关性：${(law.relevance * 100).toFixed(0)}%）`;
-      }
-      if (law.article) {
-        info += `【${law.article}】`;
-      }
-      info += `\n`;
-    });
+    legalAnalysis.applicableLaws.forEach(
+      (
+        law: { law: string; relevance?: number; article?: string },
+        i: number,
+      ) => {
+        info += `${i + 1}. ${law.law}`;
+        if (law.relevance) {
+          info += `（相关性：${(law.relevance * 100).toFixed(0)}%）`;
+        }
+        if (law.article) {
+          info += `【${law.article}】`;
+        }
+        info += `\n`;
+      },
+    );
 
     if (legalAnalysis.precedents && legalAnalysis.precedents.length > 0) {
       info += `\n相似案例：\n`;
-      legalAnalysis.precedents.forEach((precedent: any, i: number) => {
-        info += `${i + 1}. ${precedent.case}`;
-        if (precedent.similarity) {
-          info += `（相似度：${(precedent.similarity * 100).toFixed(0)}%）`;
-        }
-        if (precedent.outcome) {
-          info += `【${precedent.outcome}】`;
-        }
-        info += `\n`;
-      });
+      legalAnalysis.precedents.forEach(
+        (
+          precedent: { case: string; similarity?: number; outcome?: string },
+          i: number,
+        ) => {
+          info += `${i + 1}. ${precedent.case}`;
+          if (precedent.similarity) {
+            info += `（相似度：${(precedent.similarity * 100).toFixed(0)}%）`;
+          }
+          if (precedent.outcome) {
+            info += `【${precedent.outcome}】`;
+          }
+          info += `\n`;
+        },
+      );
     }
 
     return info;
@@ -366,7 +406,12 @@ export class StrategistAgent extends BaseAgent {
   /**
    * 格式化上下文
    */
-  private formatContext(context?: any): string | undefined {
+  private formatContext(context?: {
+    jurisdiction?: string;
+    courtLevel?: string;
+    complexity?: string;
+    estimatedDuration?: string;
+  }): string | undefined {
     if (!context) {
       return undefined;
     }
@@ -384,5 +429,84 @@ export class StrategistAgent extends BaseAgent {
 
   async cleanup(): Promise<void> {
     logger.info("StrategistAgent清理");
+  }
+
+  /**
+   * 获取StrategistAgent特定的容错配置
+   */
+  protected getFaultToleranceConfig(): AgentFaultToleranceConfig {
+    return createFaultToleranceConfig({
+      retry: createRetryConfig({
+        maxRetries: 2,
+        backoffMs: [2000, 5000],
+        retryableErrors: ["TIMEOUT", "AI_SERVICE_ERROR", "RATE_LIMIT_ERROR"],
+      }),
+      fallback: createFallbackConfig({
+        enabled: true,
+        fallbackType: "TEMPLATE",
+        fallbackFunction: this.createFallbackResult.bind(this),
+      }),
+      circuitBreaker: createCircuitBreakerConfig({
+        enabled: true,
+        failureThreshold: 0.3,
+        timeout: 30000,
+        halfOpenRequests: 2,
+      }),
+    });
+  }
+
+  /**
+   * 创建降级结果
+   * 当策略生成失败时返回模板策略
+   */
+  private async createFallbackResult(
+    error: unknown,
+    context: AgentContext,
+  ): Promise<StrategyOutput> {
+    const input = context.data as StrategyInput;
+
+    logger.warn("策略生成降级到模板结果", {
+      caseType: input.caseInfo.caseType,
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    // 返回模板策略
+    return {
+      success: true,
+      swotAnalysis: {
+        strengths: ["案件法律依据明确", "事实证据较为充分"],
+        weaknesses: ["部分证据链可能存在薄弱环节", "法律适用存在一定争议"],
+        opportunities: ["可争取更有利的赔偿标准", "可通过调解方式快速结案"],
+        threats: ["对方可能提出有力的抗辩", "法律环境变化可能影响判决"],
+      },
+      strategyRecommendations: [
+        {
+          strategy: "积极主张权利",
+          rationale: "基于现有证据和法律依据，应积极主张合法权益",
+          implementationSteps: [
+            "整理并完善证据链",
+            "明确法律依据和诉讼请求",
+            "预判对方可能提出的抗辩",
+            "准备充分的庭审发言",
+          ],
+          expectedOutcome: "大概率胜诉，获得合理赔偿",
+          priority: "high",
+        },
+      ],
+      riskAssessment: {
+        overallRisk: "medium",
+        confidence: 0.5,
+        riskFactors: [
+          {
+            factor: "证据链完整性",
+            impact: "medium",
+            probability: 0.3,
+            mitigation: "补充完善证据材料",
+          },
+        ],
+      },
+      processingTime: 0,
+      confidence: 0.5,
+    };
   }
 }

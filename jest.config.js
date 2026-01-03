@@ -120,7 +120,9 @@ module.exports = {
     ],
   },
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "d.ts"],
-  transformIgnorePatterns: ["node_modules/(?!(.*\\.mjs$))"],
+  transformIgnorePatterns: [
+    "node_modules/(?!(uuid)/)",
+  ],
   // 禁用并行测试以避免数据竞争
   maxWorkers: 1,
   maxConcurrency: 1,

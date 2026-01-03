@@ -27,6 +27,12 @@ export interface ApplicabilityConfig {
   minSemanticRelevance?: number;
   /** 最终适用性评分最小阈值（默认：0.5） */
   minApplicabilityScore?: number;
+  /** 最低评分直接排除阈值（默认：0.1） */
+  minExclusionScore?: number;
+  /** AI不适用且评分低时的阈值（默认：0.3） */
+  aiLowConfidenceThreshold?: number;
+  /** 默认适用性阈值（默认：0.2） */
+  defaultApplicabilityThreshold?: number;
   /** 是否并行处理（默认：true） */
   parallel?: boolean;
   /** 是否使用缓存（默认：true） */
@@ -80,6 +86,16 @@ export interface AIReviewResult {
 }
 
 /**
+ * 法条状态警告接口
+ */
+export interface StatusWarning {
+  /** 警告级别 */
+  level: "info" | "warning" | "error";
+  /** 警告消息 */
+  message: string;
+}
+
+/**
  * 单条法条适用性结果接口
  */
 export interface ArticleApplicabilityResult {
@@ -103,6 +119,8 @@ export interface ArticleApplicabilityResult {
   reasons: string[];
   /** 警告信息列表 */
   warnings: string[];
+  /** 法条状态警告（废止/修订等） */
+  statusWarning?: StatusWarning;
   /** 语义匹配详情 */
   semanticMatch?: SemanticMatchResult;
   /** 规则验证详情 */
@@ -164,6 +182,9 @@ export const DEFAULT_APPLICABILITY_CONFIG: Required<ApplicabilityConfig> = {
   useAIReview: true,
   minSemanticRelevance: 0.3,
   minApplicabilityScore: 0.5,
+  minExclusionScore: 0.1,
+  aiLowConfidenceThreshold: 0.3,
+  defaultApplicabilityThreshold: 0.2,
   parallel: true,
   useCache: true,
 };
