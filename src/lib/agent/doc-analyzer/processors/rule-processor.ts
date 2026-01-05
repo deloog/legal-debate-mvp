@@ -9,7 +9,6 @@
  */
 
 import type { ExtractedData, Party, Claim, Correction } from "../core/types";
-import { POST_PROCESSING_RULES, CLAIM_TYPE_LABELS } from "../core/constants";
 import { logger } from "../../../agent/security/logger";
 import { ClaimRuleHandler } from "./rules/claim-rule-handler";
 import { DeduplicationHandler } from "./rules/deduplication-handler";
@@ -18,6 +17,7 @@ import { ClaimExtractor } from "../extractors/claim-extractor";
 import { DisputeFocusExtractor } from "../extractors/dispute-focus-extractor";
 import { TimelineExtractor } from "../extractors/timeline-extractor";
 import { KeyFactExtractor } from "../extractors/key-fact-extractor";
+import { PartyExtractor } from "../extractors/party-extractor";
 
 export class RuleProcessor {
   private claimHandler: ClaimRuleHandler;
@@ -27,6 +27,7 @@ export class RuleProcessor {
   private disputeFocusExtractor: DisputeFocusExtractor;
   private timelineExtractor: TimelineExtractor;
   private keyFactExtractor: KeyFactExtractor;
+  private partyExtractor: PartyExtractor;
 
   constructor() {
     this.claimHandler = new ClaimRuleHandler();
@@ -36,6 +37,7 @@ export class RuleProcessor {
     this.disputeFocusExtractor = new DisputeFocusExtractor();
     this.timelineExtractor = new TimelineExtractor();
     this.keyFactExtractor = new KeyFactExtractor();
+    this.partyExtractor = new PartyExtractor();
   }
 
   /**
@@ -52,6 +54,30 @@ export class RuleProcessor {
     const processedClaims = [...data.claims];
     const processedParties = [...data.parties];
 
+    // PartyExtractor算法兜底：补充和修正AI识别的当事人
+    const partyExtractionResult = await this.partyExtractor.extractFromText(
+      fullText,
+      processedParties,
+    );
+
+    if (partyExtractionResult.parties.length > processedParties.length) {
+      const addedCount =
+        partyExtractionResult.parties.length - processedParties.length;
+      corrections.push({
+        type: "ADD_PARTY",
+        description: `算法兜底补充${addedCount}个当事人`,
+        rule: "PARTY_EXTRACTION_FALLBACK",
+      });
+      logger.info("算法兜底补充当事人", {
+        addedCount,
+        total: partyExtractionResult.parties.length,
+      });
+    }
+
+    // 更新处理后的当事人列表
+    processedParties.length = 0;
+    processedParties.push(...partyExtractionResult.parties);
+
     // 使用AmountExtractor提取和标准化金额
     await this.enrichClaimsWithAmounts(processedClaims, corrections);
 
@@ -62,7 +88,7 @@ export class RuleProcessor {
     this.claimHandler.processClaims(processedClaims, fullText, corrections);
 
     // 验证当事人角色
-    this.validatePartyRoles(processedParties, processedClaims, corrections);
+    this.validatePartyRoles(processedParties, processedClaims);
 
     // 去重
     this.dedupHandler.deduplicateParties(processedParties, corrections);
@@ -92,83 +118,12 @@ export class RuleProcessor {
   /**
    * 验证当事人角色
    */
-  private validatePartyRoles(
-    parties: Party[],
-    claims: Claim[],
-    corrections: Correction[],
-  ): void {
-    const hasDefendant = parties.some((p) => p.type === "defendant");
-    if (!hasDefendant && claims.length > 0) {
-      const defendantName = this.inferDefendant(claims);
-      if (defendantName) {
-        parties.push({
-          type: "defendant",
-          name: defendantName,
-          role: "推断被告",
-          _inferred: true,
-        });
-        corrections.push({
-          type: "ADD_PARTY",
-          description: `从诉讼请求推断被告：${defendantName}`,
-          rule: "DEFENDANT_INFERENCE",
-        });
-        logger.info("从诉讼请求推断被告", { name: defendantName });
-      }
-    }
-
-    // 过滤法定代表人（不应作为独立当事人）
-    this.filterLegalRepresentatives(parties, corrections);
-  }
-
-  /**
-   * 过滤法定代表人（移除被识别为独立当事人的法定代表人）
-   */
-  private filterLegalRepresentatives(
-    parties: Party[],
-    corrections: Correction[],
-  ): void {
-    const companyNames = parties
-      .filter((p) => p.role?.includes("公司") || p.role?.includes("企业"))
-      .map((p) => p.name);
-
-    // 移除只出现在"法定代表人："或"法定代表："后面的人名
-    const filtered = parties.filter((party) => {
-      // 如果名称匹配公司模式，保留
-      if (this.isCompanyName(party.name)) {
-        return true;
-      }
-
-      // 检查是否是法定代表人（长度较短、无详细信息、只在法定代表人行出现）
-      const isLikelyLegalRep =
-        party.name.length <= 3 &&
-        party.role === undefined &&
-        !party.contact &&
-        !party.address;
-
-      // 如果是类似法定代表人的名称且公司已存在，过滤掉
-      if (isLikelyLegalRep && companyNames.length > 0) {
-        corrections.push({
-          type: "OTHER",
-          description: `移除可能的法定代表人：${party.name}`,
-          rule: "LEGAL_REP_FILTER",
-        });
-        logger.info("过滤法定代表人", { name: party.name });
-        return false;
-      }
-
-      return true;
+  private validatePartyRoles(parties: Party[], claims: Claim[]): void {
+    // 当事人验证逻辑已移至PartyExtractor，此处仅保留日志
+    logger.debug("当事人角色验证", {
+      partyCount: parties.length,
+      claimCount: claims.length,
     });
-
-    // 更新parties数组
-    parties.length = 0;
-    parties.push(...filtered);
-  }
-
-  /**
-   * 判断是否为公司名称
-   */
-  private isCompanyName(name: string): boolean {
-    return /(公司|企业|集团|有限责任|股份)/.test(name);
   }
 
   /**
@@ -415,21 +370,5 @@ export class RuleProcessor {
     } catch (error) {
       logger.warn("关键事实提取失败", { error });
     }
-  }
-
-  /**
-   * 推断被告
-   */
-  private inferDefendant(claims: Claim[]): string | null {
-    for (const claim of claims) {
-      const match = claim.content?.match(/判令(.+?)偿还|判令(.+?)支付/);
-      if (match) {
-        const name = match[1] || match[2];
-        if (name && name.length < 20 && !name.includes("等")) {
-          return name.trim();
-        }
-      }
-    }
-    return null;
   }
 }

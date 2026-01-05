@@ -264,15 +264,15 @@ export class WorkflowOrchestrator {
     // 按优先级排序
     const sortedTasks = [...tasks].sort((a, b) => {
       const priorityMap: Record<string, number> = {
-        URGENT: 0,
-        HIGH: 1,
-        MEDIUM: 2,
-        LOW: 3,
+        urgent: 0,
+        high: 1,
+        medium: 2,
+        low: 3,
       };
       return priorityMap[a.priority] - priorityMap[b.priority];
     });
 
-    // 分析可并行的任务组
+    // 分析可并行的任务组（传入排序后的任务列表）
     const parallelGroups = this.identifyParallelGroups(sortedTasks);
 
     // 为每个组生成步骤
@@ -309,14 +309,14 @@ export class WorkflowOrchestrator {
   }
 
   // 识别可并行执行的任务组
-  private identifyParallelGroups(tasks: SubTask[]): SubTask[][] {
+  private identifyParallelGroups(sortedTasks: SubTask[]): SubTask[][] {
     const groups: SubTask[][] = [];
-    const taskSet = new Set<string>(tasks.map((t) => t.id));
+    const taskSet = new Set<string>(sortedTasks.map((t) => t.id));
     const processed = new Set<string>();
 
     while (processed.size < taskSet.size) {
-      // 找到当前可执行的任务
-      const readyTasks = tasks.filter(
+      // 找到当前可执行的任务（保持排序后的顺序）
+      const readyTasks = sortedTasks.filter(
         (task) =>
           !processed.has(task.id) &&
           (!task.dependencies ||
@@ -324,8 +324,8 @@ export class WorkflowOrchestrator {
       );
 
       if (readyTasks.length === 0) {
-        // 循环依赖，按顺序添加
-        const remaining = tasks.filter((t) => !processed.has(t.id));
+        // 循环依赖，按排序顺序添加
+        const remaining = sortedTasks.filter((t) => !processed.has(t.id));
         groups.push([remaining[0]]);
         processed.add(remaining[0].id);
       } else {

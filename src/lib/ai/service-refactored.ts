@@ -5,16 +5,44 @@ import type {
   AIResponse,
   AIError,
   ServiceStatus,
-  AIClientConfig,
+  HealthStatus,
+  LoadBalancerStatus,
+  PerformanceMetrics,
 } from "../../types/ai-service";
 
 import { LoadBalancerFactory } from "./load-balancer";
 import { MonitorFactory } from "./monitor";
-import { FallbackManagerFactory } from "./fallback";
+import { FallbackManagerFactory, type FallbackStats } from "./fallback";
 import { AIClientFactory } from "./client-factory";
 import { AICacheManager } from "./cache-manager";
 import { AIRequestExecutor } from "./request-executor";
 import AIErrorSerializer from "./error-serializer";
+
+// =============================================================================
+// 类型定义
+// =============================================================================
+
+/**
+ * AI客户端接口（本地定义，全局类型中未包含）
+ */
+interface AIClient {
+  chatCompletion(request: AIRequestConfig): Promise<AIResponse>;
+  healthCheck(): Promise<boolean>;
+  shutdown?(): Promise<void>;
+}
+
+/**
+ * 错误摘要类型（基于 AIErrorSerializer.generateSummary 返回值）
+ */
+interface ErrorSummary {
+  totalErrors: number;
+  errorTypes: Record<string, number>;
+  providers: Record<string, number>;
+  mostCommonError: string;
+  mostProblematicProvider: string;
+  retryableErrors: number;
+  nonRetryableErrors: number;
+}
 
 // =============================================================================
 // 重构后的AI服务主类
@@ -29,7 +57,7 @@ export class AIService {
   >;
   private cacheManager: AICacheManager;
   private requestExecutor: AIRequestExecutor;
-  private clients: Map<AIProvider, any>;
+  private clients: Map<AIProvider, AIClient>;
   private initialized: boolean = false;
 
   constructor(config: AIServiceConfig) {
@@ -261,7 +289,7 @@ export class AIService {
           };
           return acc;
         },
-        {} as Record<AIProvider, any>,
+        {} as Record<AIProvider, HealthStatus>,
       ),
       lastUpdate: Date.now(),
     };
@@ -367,15 +395,15 @@ export class AIService {
     );
   }
 
-  public getProviderStats(): any {
+  public getProviderStats(): LoadBalancerStatus {
     return this.loadBalancer.getLoadBalancerStatus();
   }
 
-  public getMetrics(timeWindow?: number): any {
+  public getMetrics(timeWindow?: number): PerformanceMetrics[] {
     return this.monitor.getMetrics(undefined, undefined, timeWindow);
   }
 
-  public getFallbackStats(timeWindow?: number): any {
+  public getFallbackStats(timeWindow?: number): FallbackStats {
     return this.fallbackManager.getFallbackStats(timeWindow);
   }
 
@@ -388,7 +416,7 @@ export class AIService {
    */
   public serializeError(
     error: AIError | Error | unknown,
-    context?: any,
+    context?: Record<string, unknown>,
   ): string {
     return AIErrorSerializer.serializeToJson(error, context, {
       sanitizeSensitiveInfo: true,
@@ -413,7 +441,9 @@ export class AIService {
   /**
    * 生成错误摘要
    */
-  public generateErrorSummary(errors: (AIError | Error | unknown)[]): any {
+  public generateErrorSummary(
+    errors: (AIError | Error | unknown)[],
+  ): ErrorSummary {
     const serializedErrors = errors.map((error) =>
       AIErrorSerializer.serialize(error, undefined, {
         sanitizeSensitiveInfo: true,
@@ -433,14 +463,15 @@ export class AIServiceFactory {
   public static async getInstance(
     name: string = "default",
     config?: AIServiceConfig,
+    useRealAPI: boolean = false,
   ): Promise<AIService> {
     let instance = this.instances.get(name);
 
     if (!instance) {
       if (!config) {
-        throw new Error(
-          "Configuration is required for first instance creation",
-        );
+        // 如果没有提供配置，从getAIConfig获取
+        const { getAIConfig } = await import("./config");
+        config = getAIConfig(useRealAPI);
       }
 
       instance = new AIService(config);

@@ -1,0 +1,114 @@
+npm verbose cli C:\nodejs\node.exe C:\nodejs\node_modules\npm\bin\npm-cli.js
+npm info using npm@10.9.2
+npm info using node@v22.14.0
+npm verbose title npm test src/__tests__/agent/legal-agent/argument-generator.test.ts
+npm verbose argv "test" "src/__tests__/agent/legal-agent/argument-generator.test.ts" "--loglevel" "verbose"
+npm verbose logfile logs-max:10 dir:C:\Users\deloo\AppData\Local\npm-cache\_logs\2026-01-05T12_58_43_914Z-
+npm verbose logfile C:\Users\deloo\AppData\Local\npm-cache\_logs\2026-01-05T12_58_43_914Z-debug-0.log
+
+> legal_debate_mvp@0.1.0 test
+> jest src/__tests__/agent/legal-agent/argument-generator.test.ts
+
+FAIL src/__tests__/agent/legal-agent/argument-generator.test.ts
+  ArgumentGenerator
+    鍩虹鍔熻兘
+      鈭?搴旇鎴愬姛鍒涘缓ArgumentGenerator瀹炰緥 (3 ms)
+      鈭?搴旇鏈夐粯璁ら厤缃?(2 ms)
+    璁虹偣鐢熸垚
+      鈭?搴旇鑳藉鐢熸垚璁虹偣 (2 ms)
+      鈭?鐢熸垚鐨勮鐐瑰簲璇ュ寘鍚繀瑕佸瓧娈?(1 ms)
+      鈭?搴旇鐢熸垚鎸囧畾鏁伴噺鐨勮鐐?(1 ms)
+      鈭?搴旇璁板綍鐢熸垚鏃堕棿 (1 ms)
+      鈭?搴旇璁＄畻骞冲潎寮哄害 (1 ms)
+    涓昏鐐圭敓鎴?      鈭?搴旇鐢熸垚涓昏鐐?(1 ms)
+      鈭?涓昏鐐圭被鍨嬪簲璇ヤ负main (1 ms)
+      鈭?涓昏鐐瑰簲璇ユ湁娉曞緥渚濇嵁 (1 ms)
+      鈭?涓昏鐐瑰簲璇ユ湁浜嬪疄渚濇嵁 (1 ms)
+    鏀寔璁烘嵁鐢熸垚
+      鈭?搴旇鐢熸垚鏀寔璁烘嵁
+      鈭?鏀寔璁烘嵁绫诲瀷搴旇涓簊upporting
+      鈭?鏀寔璁烘嵁搴旇鏈夋硶寰嬩緷鎹?(1 ms)
+      鈭?鏀寔璁烘嵁搴旇鏈変簨瀹炰緷鎹?(1 ms)
+    娉曞緥寮曠敤鐢熸垚
+      鈭?搴旇鐢熸垚娉曞緥寮曠敤 (4 ms)
+      鈭?娉曞緥寮曠敤绫诲瀷搴旇涓簂egal_reference
+      鈭?娉曞緥寮曠敤搴旇鏈夋硶寰嬩緷鎹?      鈭?娉曞緥寮曠敤搴旇娌℃湁浜嬪疄渚濇嵁 (1 ms)
+      鈭?娉曞緥寮曠敤寮哄害搴旇涓?.0 (1 ms)
+    鍙嶉┏璁虹偣鐢熸垚
+      鈭?搴旇鑳藉鐢熸垚鍙嶉┏璁虹偣 (1 ms)
+      鈭?鍙嶉┏璁虹偣绫诲瀷搴旇涓簉ebuttal (1 ms)
+      鈭?鍙嶉┏璁虹偣鏂瑰悜搴旇涓庡師璁虹偣鐩稿弽 (1 ms)
+      鈭?鍙嶉┏璁虹偣鏁伴噺搴旇涓庡鏂硅鐐圭浉鍚?    璁虹偣寮哄害璁＄畻
+      鈭?瀹硶绾у埆鐨勬硶鏉″簲璇ユ湁鏇撮珮寮哄害 (1 ms)
+      鈭?鏅€氭硶鏉＄殑寮哄害搴旇鍚堢悊
+      鈭?鏇村浜嬪疄搴旇澧炲姞璁虹偣寮哄害 (1 ms)
+    璁虹偣鏂瑰悜
+      鈭?榛樿搴旇鐢熸垚鍘熷憡璁虹偣 (1 ms)
+      鈭?搴旇鑳藉鐢熸垚琚憡璁虹偣 (1 ms)
+    鎵归噺鐢熸垚
+      鈭?搴旇鑳藉鎵归噺鐢熸垚璁虹偣
+      鈭?鎵归噺鐢熸垚搴旇澶勭悊绌哄垪琛?      鈭?鎵归噺鐢熸垚搴旇搴旂敤鐩稿悓閰嶇疆 (1 ms)
+    杩囨护璁虹偣
+      鈭?搴旇鑳藉鎸夌被鍨嬭繃婊?      鈭?搴旇鑳藉鎸夋柟鍚戣繃婊?      鈭?搴旇鑳藉鎸夋渶灏忓己搴﹁繃婊?(1 ms)
+      鈭?搴旇鑳藉缁勫悎杩囨护鏉′欢 (1 ms)
+      鈭?绌鸿繃婊ゆ潯浠跺簲璇ヨ繑鍥炴墍鏈夎鐐?    鎺掑簭璁虹偣
+      鈭?搴旇鑳藉鎸夊己搴︽帓搴?(1 ms)
+      鈭?搴旇鑳藉鎸夊垱寤烘椂闂存帓搴?(1 ms)
+      鈭?鎺掑簭搴旇杩斿洖鏂版暟缁?    杈圭晫鏉′欢
+      脳 澶勭悊绌烘硶鏉″垪琛ㄥ簲璇ユ甯稿伐浣?      鈭?澶勭悊绌轰簨瀹炲垪琛ㄥ簲璇ユ甯稿伐浣?(1 ms)
+      鈭?澶勭悊澶ч噺娉曟潯搴旇姝ｅ父宸ヤ綔 (1 ms)
+      鈭?澶勭悊澶ч噺浜嬪疄搴旇姝ｅ父宸ヤ綔
+      脳 鏁伴噺涓?搴旇姝ｅ父宸ヤ綔 (2 ms)
+    鎬ц兘娴嬭瘯
+      鈭?鐢熸垚璁虹偣搴旇鍦ㄥ悎鐞嗘椂闂村唴瀹屾垚 (1 ms)
+      鈭?鎵归噺鐢熸垚搴旇鍦ㄥ悎鐞嗘椂闂村唴瀹屾垚 (1 ms)
+    ID鐢熸垚
+      鈭?姣忎釜璁虹偣搴旇鏈夊敮涓€ID
+      鈭?ID搴旇鏄浐瀹氶暱搴?(3 ms)
+    鍐呭鎴柇
+      鈭?搴旇鑳藉鎴柇杩囬暱鍐呭
+      鈭?鐭唴瀹逛笉搴旇琚埅鏂?(1 ms)
+      鈭?绌哄唴瀹瑰簲璇ユ甯稿鐞?
+  鈼?ArgumentGenerator 鈥?杈圭晫鏉′欢 鈥?澶勭悊绌烘硶鏉″垪琛ㄥ簲璇ユ甯稿伐浣?
+    TypeError: Cannot read properties of undefined (reading 'articleNumber')
+
+      171 |       const template = this.getRandomTemplate("supporting");
+      172 |       const content = template
+    > 173 |         .replace("{articleNumber}", article.articleNumber)
+          |                                             ^
+      174 |         .replace("{factIndex}", fact)
+      175 |         .replace("{content}", this.truncateContent(article.content, 20));
+      176 |
+
+      at ArgumentGenerator.generateSupportingArguments (src/lib/agent/legal-agent/argument-generator.ts:173:45)
+      at ArgumentGenerator.generate (src/lib/agent/legal-agent/argument-generator.ts:101:33)
+      at Object.<anonymous> (src/__tests__/agent/legal-agent/argument-generator.test.ts:474:38)
+
+  鈼?ArgumentGenerator 鈥?杈圭晫鏉′欢 鈥?鏁伴噺涓?搴旇姝ｅ父宸ヤ綔
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 2
+
+      527 |       });
+      528 |       expect(result.arguments).toBeDefined();
+    > 529 |       expect(result.mainArgumentCount).toBe(0);
+          |                                        ^
+      530 |       expect(result.supportingArgumentCount).toBe(0);
+      531 |       expect(result.legalReferenceCount).toBe(0);
+      532 |     });
+
+      at Object.<anonymous> (src/__tests__/agent/legal-agent/argument-generator.test.ts:529:40)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 50 passed, 52 total
+Snapshots:   0 total
+Time:        0.779 s, estimated 1 s
+Ran all test suites matching src/__tests__/agent/legal-agent/argument-generator.test.ts.
+npm verbose cwd D:\legal_debate_mvp
+npm verbose os Windows_NT 10.0.19045
+npm verbose node v22.14.0
+npm verbose npm  v10.9.2
+npm verbose exit 1
+npm verbose code 1

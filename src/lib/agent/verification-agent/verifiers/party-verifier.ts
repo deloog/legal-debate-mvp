@@ -35,6 +35,18 @@ interface DataToVerify {
  */
 export class PartyVerifier {
   /**
+   * 代理人关键词列表
+   */
+  private readonly AGENT_KEYWORDS = [
+    "代理人",
+    "律师",
+    "委托代理",
+    "诉讼代理",
+    "法定代理",
+    "指定代理",
+  ];
+
+  /**
    * 验证当事人信息
    */
   async verify(
@@ -58,6 +70,12 @@ export class PartyVerifier {
       if (!plaintiffName || plaintiffName.trim().length < 2) {
         details.plaintiffValid = false;
         issues.push("原告姓名无效或过短");
+      }
+
+      // 检查原告是否包含代理人关键词
+      if (this.isAgent(plaintiffName)) {
+        details.plaintiffValid = false;
+        issues.push(`"${plaintiffName}"包含代理人关键词，不应作为原告`);
       }
 
       // 与源数据对比
@@ -91,6 +109,12 @@ export class PartyVerifier {
         issues.push("被告姓名无效或过短");
       }
 
+      // 检查被告是否包含代理人关键词
+      if (this.isAgent(defendantName)) {
+        details.defendantValid = false;
+        issues.push(`"${defendantName}"包含代理人关键词，不应作为被告`);
+      }
+
       // 与源数据对比
       if (source?.parties?.defendant) {
         const sourceName =
@@ -114,7 +138,8 @@ export class PartyVerifier {
     if (
       typeof data.parties?.plaintiff === "string" &&
       typeof data.parties?.defendant === "string" &&
-      data.parties.plaintiff === data.parties.defendant
+      this.normalizeName(data.parties.plaintiff) ===
+        this.normalizeName(data.parties.defendant)
     ) {
       details.rolesMatch = false;
       issues.push("原告和被告不能是同一人");
@@ -128,6 +153,23 @@ export class PartyVerifier {
       details,
       issues,
     };
+  }
+
+  /**
+   * 检查是否为代理人
+   */
+  private isAgent(name: string): boolean {
+    return this.AGENT_KEYWORDS.some((keyword) => name.includes(keyword));
+  }
+
+  /**
+   * 标准化姓名（用于比较）
+   */
+  private normalizeName(name: string): string {
+    return name
+      .trim()
+      .replace(/\s+/g, "")
+      .replace(/[，。；；、,;]/g, "");
   }
 
   /**

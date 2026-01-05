@@ -6,9 +6,37 @@
 import { DocAnalyzerAgent } from "@/lib/agent/doc-analyzer/doc-analyzer-agent";
 import { TaskPriority } from "@/types/agent";
 
+interface Party {
+  type: "plaintiff" | "defendant" | "other" | "legal_rep";
+  name: string;
+  role?: string;
+  contact?: string;
+  address?: string;
+}
+
+interface ExtractedData {
+  parties?: Party[];
+  claims?: Array<{
+    type: string;
+    content: string;
+    amount?: number;
+  }>;
+  amount?: number;
+  [key: string]: unknown;
+}
+
+interface DocumentOutput {
+  extractedData?: ExtractedData;
+  [key: string]: unknown;
+}
+
 // 简化版的测试辅助函数
 async function extractParties(text: string) {
   const agent = new DocAnalyzerAgent();
+
+  // 禁用Mock模式以使用真实AI服务
+  agent.forceUseRealAI();
+  agent.disableCache();
 
   const result = await agent.execute({
     task: "INFO_EXTRACT",
@@ -30,13 +58,16 @@ async function extractParties(text: string) {
     throw new Error(`分析失败: ${result.error?.message}`);
   }
 
-  // 从structuredOutput或data中提取数据
-  const extractedData = result.structuredOutput || result.data;
-  if (!extractedData) {
-    throw new Error(`分析失败: 未提取到数据`);
+  // DocAnalyzerAgent.executeLogic返回DocumentAnalysisOutput，在result.data中
+  // DocumentAnalysisOutput包含extractedData字段
+  const documentOutput = result.data as DocumentOutput;
+  if (!documentOutput || !documentOutput.extractedData) {
+    throw new Error(
+      `分析失败: 未提取到数据，result.data=${JSON.stringify(documentOutput)}`,
+    );
   }
 
-  return { ...result, extractedData };
+  return { ...result, extractedData: documentOutput.extractedData };
 }
 
 describe("Bad Case: 当事人信息提取测试", () => {
@@ -51,8 +82,8 @@ describe("Bad Case: 当事人信息提取测试", () => {
       const result = await extractParties(text);
 
       expect(result.extractedData?.parties?.length).toBeGreaterThan(0);
-      const plaintiff = result.extractedData.parties.find(
-        (p: any) => p.type === "plaintiff",
+      const plaintiff = result.extractedData.parties?.find(
+        (p) => p.type === "plaintiff",
       );
       expect(plaintiff).toBeDefined();
       expect(plaintiff.name).toContain("张三");
@@ -68,8 +99,8 @@ describe("Bad Case: 当事人信息提取测试", () => {
 
       const result = await extractParties(text);
 
-      const plaintiff = result.extractedData.parties.find(
-        (p: any) => p.type === "plaintiff",
+      const plaintiff = result.extractedData.parties?.find(
+        (p) => p.type === "plaintiff",
       );
       expect(plaintiff).toBeDefined();
       expect(plaintiff.name).toContain("北京科技有限公司");
@@ -84,8 +115,8 @@ describe("Bad Case: 当事人信息提取测试", () => {
 
       const result = await extractParties(text);
 
-      const applicant = result.extractedData.parties.find(
-        (p: any) => p.type === "plaintiff" || p.role?.includes("申请人"),
+      const applicant = result.extractedData.parties?.find(
+        (p) => p.type === "plaintiff" || p.role?.includes("申请人"),
       );
       expect(applicant).toBeDefined();
       expect(applicant.name).toContain("某某有限公司");
@@ -101,10 +132,10 @@ describe("Bad Case: 当事人信息提取测试", () => {
 
       const result = await extractParties(text);
 
-      const plaintiffs = result.extractedData.parties.filter(
-        (p: any) => p.type === "plaintiff",
+      const plaintiffs = result.extractedData.parties?.filter(
+        (p) => p.type === "plaintiff",
       );
-      expect(plaintiffs.length).toBeGreaterThanOrEqual(2);
+      expect(plaintiffs?.length).toBeGreaterThanOrEqual(2);
     });
   });
 
@@ -118,8 +149,8 @@ describe("Bad Case: 当事人信息提取测试", () => {
 
       const result = await extractParties(text);
 
-      const defendant = result.extractedData.parties.find(
-        (p: any) => p.type === "defendant",
+      const defendant = result.extractedData.parties?.find(
+        (p) => p.type === "defendant",
       );
       expect(defendant).toBeDefined();
       expect(defendant.name).toContain("李四");
@@ -134,8 +165,8 @@ describe("Bad Case: 当事人信息提取测试", () => {
 
       const result = await extractParties(text);
 
-      const defendant = result.extractedData.parties.find(
-        (p: any) => p.type === "defendant",
+      const defendant = result.extractedData.parties?.find(
+        (p) => p.type === "defendant",
       );
       expect(defendant).toBeDefined();
       expect(defendant.name).toContain("广州某某有限公司");
@@ -149,8 +180,8 @@ describe("Bad Case: 当事人信息提取测试", () => {
 
       const result = await extractParties(text);
 
-      const defendant = result.extractedData.parties.find(
-        (p: any) => p.type === "defendant",
+      const defendant = result.extractedData.parties?.find(
+        (p) => p.type === "defendant",
       );
       expect(defendant).toBeDefined();
       expect(defendant.name).toContain("李四");
@@ -166,10 +197,10 @@ describe("Bad Case: 当事人信息提取测试", () => {
 
       const result = await extractParties(text);
 
-      const defendants = result.extractedData.parties.filter(
-        (p: any) => p.type === "defendant",
+      const defendants = result.extractedData.parties?.filter(
+        (p) => p.type === "defendant",
       );
-      expect(defendants.length).toBeGreaterThanOrEqual(2);
+      expect(defendants?.length).toBeGreaterThanOrEqual(2);
     });
   });
 
@@ -184,8 +215,8 @@ describe("Bad Case: 当事人信息提取测试", () => {
 
       const result = await extractParties(text);
 
-      const thirdParty = result.extractedData.parties.find(
-        (p: any) => p.type === "other" && p.role?.includes("第三人"),
+      const thirdParty = result.extractedData.parties?.find(
+        (p) => p.type === "other" && p.role?.includes("第三人"),
       );
       expect(thirdParty).toBeDefined();
       expect(thirdParty.name).toContain("王五");
@@ -204,8 +235,8 @@ describe("Bad Case: 当事人信息提取测试", () => {
       const result = await extractParties(text);
 
       // 检查张三是否作为独立当事人存在
-      const zhangsanAsParty = result.extractedData.parties.find(
-        (p: any) =>
+      const zhangsanAsParty = result.extractedData.parties?.find(
+        (p) =>
           p.name === "张三" && p.type !== "legal_rep" && p.type !== "other",
       );
       // 应该被过滤或标记为法定代表人
@@ -222,13 +253,13 @@ describe("Bad Case: 当事人信息提取测试", () => {
 
       const result = await extractParties(text);
 
-      const company = result.extractedData.parties.find((p: any) =>
+      const company = result.extractedData.parties?.find((p) =>
         p.name.includes("某某股份有限公司"),
       );
       expect(company).toBeDefined();
       // 检查李四是否被过滤
-      const lisiAsParty = result.extractedData.parties.find(
-        (p: any) =>
+      const lisiAsParty = result.extractedData.parties?.find(
+        (p) =>
           p.name === "李四" && p.type !== "legal_rep" && p.type !== "other",
       );
       expect(lisiAsParty).toBeUndefined();
@@ -246,14 +277,14 @@ describe("Bad Case: 当事人信息提取测试", () => {
 
       const result = await extractParties(text);
 
-      const plaintiff = result.extractedData.parties.find(
-        (p: any) => p.name === "张三",
+      const plaintiff = result.extractedData.parties?.find(
+        (p) => p.name === "张三",
       );
       expect(plaintiff).toBeDefined();
-      expect(plaintiff.type).toBe("plaintiff");
+      expect(plaintiff?.type).toBe("plaintiff");
 
       // 王律师不应作为独立当事人
-      const lawyerAsParty = result.extractedData.parties.find((p: any) =>
+      const lawyerAsParty = result.extractedData.parties?.find((p) =>
         p.name.includes("王律师"),
       );
       expect(lawyerAsParty).toBeUndefined();
@@ -270,11 +301,11 @@ describe("Bad Case: 当事人信息提取测试", () => {
 
       const result = await extractParties(text);
 
-      const plaintiff = result.extractedData.parties.find(
-        (p: any) => p.type === "plaintiff",
+      const plaintiff = result.extractedData.parties?.find(
+        (p) => p.type === "plaintiff",
       );
       expect(plaintiff).toBeDefined();
-      if (plaintiff.address) {
+      if (plaintiff?.address) {
         expect(plaintiff.address).toContain("北京市朝阳区");
       }
     });
@@ -291,11 +322,11 @@ describe("Bad Case: 当事人信息提取测试", () => {
 
       const result = await extractParties(text);
 
-      const plaintiffs = result.extractedData.parties.filter(
-        (p: any) => p.type === "plaintiff",
+      const plaintiffs = result.extractedData.parties?.filter(
+        (p) => p.type === "plaintiff",
       );
       // 应该只保留一个张三
-      const uniqueNames = new Set(plaintiffs.map((p: any) => p.name));
+      const uniqueNames = new Set(plaintiffs?.map((p) => p.name) || []);
       expect(uniqueNames.size).toBeLessThanOrEqual(1);
     });
   });
@@ -309,8 +340,8 @@ describe("Bad Case: 当事人信息提取测试", () => {
 
       const result = await extractParties(text);
 
-      const plaintiff = result.extractedData.parties.find(
-        (p: any) => p.type === "plaintiff",
+      const plaintiff = result.extractedData.parties?.find(
+        (p) => p.type === "plaintiff",
       );
       // 如果没有明确的原告，可能需要推断或标记警告
       if (!plaintiff) {
@@ -328,8 +359,8 @@ describe("Bad Case: 当事人信息提取测试", () => {
 
       const result = await extractParties(text);
 
-      const defendant = result.extractedData.parties.find(
-        (p: any) => p.type === "defendant",
+      const defendant = result.extractedData.parties?.find(
+        (p) => p.type === "defendant",
       );
       // 如果没有明确的被告，应该尝试从诉讼请求中推断
       if (!defendant) {
@@ -363,11 +394,11 @@ describe("Bad Case: 当事人信息提取测试", () => {
 
       const result = await extractParties(text);
 
-      const plaintiff = result.extractedData.parties.find(
-        (p: any) => p.type === "plaintiff",
+      const plaintiff = result.extractedData.parties?.find(
+        (p) => p.type === "plaintiff",
       );
       expect(plaintiff).toBeDefined();
-      expect(plaintiff.name).toContain("北京");
+      expect(plaintiff?.name).toContain("北京");
     });
 
     it("Bad Case 19: 应该识别上诉人和被上诉人", async () => {
@@ -380,14 +411,14 @@ describe("Bad Case: 当事人信息提取测试", () => {
       const result = await extractParties(text);
 
       // 上诉人对应原告角色
-      const appellant = result.extractedData.parties.find(
-        (p: any) => p.type === "plaintiff" || p.role?.includes("上诉人"),
+      const appellant = result.extractedData.parties?.find(
+        (p) => p.type === "plaintiff" || p.role?.includes("上诉人"),
       );
       expect(appellant).toBeDefined();
 
       // 被上诉人对应被告角色
-      const appellee = result.extractedData.parties.find(
-        (p: any) => p.type === "defendant" || p.role?.includes("被上诉人"),
+      const appellee = result.extractedData.parties?.find(
+        (p) => p.type === "defendant" || p.role?.includes("被上诉人"),
       );
       expect(appellee).toBeDefined();
     });

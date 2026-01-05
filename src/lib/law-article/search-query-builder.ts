@@ -60,14 +60,11 @@ export class SearchQueryBuilder {
       });
     }
 
-    // 法条编号（精确或模糊匹配）
+    // 法条编号（模糊匹配）
     if (query.articleNumber && query.articleNumber.trim()) {
       const articleNumber = query.articleNumber.trim();
       conditions.push({
-        OR: [
-          { articleNumber: { equals: articleNumber } },
-          { articleNumber: { contains: articleNumber, mode: "insensitive" } },
-        ],
+        articleNumber: { contains: articleNumber, mode: "insensitive" },
       });
     }
 
@@ -185,13 +182,19 @@ export class SearchQueryBuilder {
 
     // 验证分页参数
     if (query.pagination) {
-      if (query.pagination.page && query.pagination.page < 1) {
+      if (query.pagination.page !== undefined && query.pagination.page < 1) {
         errors.push("页码必须大于0");
       }
-      if (query.pagination.pageSize && query.pagination.pageSize < 1) {
+      if (
+        query.pagination.pageSize !== undefined &&
+        query.pagination.pageSize < 1
+      ) {
         errors.push("每页数量必须大于0");
       }
-      if (query.pagination.pageSize && query.pagination.pageSize > 100) {
+      if (
+        query.pagination.pageSize !== undefined &&
+        query.pagination.pageSize > 100
+      ) {
         errors.push("每页数量不能超过100");
       }
     }

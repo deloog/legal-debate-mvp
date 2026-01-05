@@ -170,7 +170,14 @@
       "category": "CRIMINAL",
       "subCategory": "贪污贿赂",
       "tags": ["受贿", "职务犯罪"],
-      "keywords": ["受贿", "职务便利", "索取财物", "收受财物", "回扣", "手续费"],
+      "keywords": [
+        "受贿",
+        "职务便利",
+        "索取财物",
+        "收受财物",
+        "回扣",
+        "手续费"
+      ],
       "version": "1.0",
       "effectiveDate": "2020-01-01T00:00:00Z",
       "status": "VALID",

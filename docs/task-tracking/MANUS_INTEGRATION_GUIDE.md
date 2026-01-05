@@ -609,7 +609,7 @@ interface SWOTResult {
 
 interface Workflow {
   workflowId: string;
-  executionMode: 'sequential' | 'parallel' | 'mixed';
+  executionMode: "sequential" | "parallel" | "mixed";
   tasks: WorkflowTask[];
 }
 
@@ -818,7 +818,7 @@ interface LawBasis {
 }
 
 interface ArgumentSide {
-  side: 'PLAINTIFF' | 'DEFENDANT' | 'NEUTRAL';
+  side: "PLAINTIFF" | "DEFENDANT" | "NEUTRAL";
 }
 
 interface Argument {
@@ -1035,7 +1035,7 @@ interface CompletenessResult {
 interface RiskAssessment {
   assessmentId: string;
   caseId: string;
-  overallRiskLevel: 'HIGH' | 'MEDIUM' | 'LOW';
+  overallRiskLevel: "HIGH" | "MEDIUM" | "LOW";
   riskFactors: RiskFactor[];
   mitigationStrategies: MitigationStrategy[];
   assessedAt: Date;
@@ -1044,7 +1044,7 @@ interface RiskAssessment {
 interface VerificationIssue {
   issueId: string;
   type: string;
-  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
   description: string;
   location?: string;
   affectedFields?: string[];
@@ -1052,7 +1052,7 @@ interface VerificationIssue {
 
 interface VerificationSuggestion {
   suggestionId: string;
-  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  priority: "HIGH" | "MEDIUM" | "LOW";
   action: string;
   description: string;
   estimatedImpact: number;
@@ -1085,7 +1085,10 @@ interface MemoryAgent {
   updateColdMemory(key: string, value: any): Promise<void>;
 
   // 记忆管理
-  compressMemory(memory: Memory, targetRatio?: number): Promise<CompressedMemory>;
+  compressMemory(
+    memory: Memory,
+    targetRatio?: number,
+  ): Promise<CompressedMemory>;
   migrateMemory(from: MemoryType, to: MemoryType): Promise<void>;
   getMemoriesByType(memoryType: MemoryType): Promise<Memory[]>;
 
@@ -1163,14 +1166,14 @@ interface PreventionMeasure {
   estimatedEffectiveness: number;
 }
 
-type MemoryType = 'WORKING' | 'HOT' | 'COLD';
+type MemoryType = "WORKING" | "HOT" | "COLD";
 
 type ErrorType =
-  | 'AI_SERVICE_ERROR'
-  | 'DATABASE_ERROR'
-  | 'VALIDATION_ERROR'
-  | 'NETWORK_ERROR'
-  | 'UNKNOWN_ERROR';
+  | "AI_SERVICE_ERROR"
+  | "DATABASE_ERROR"
+  | "VALIDATION_ERROR"
+  | "NETWORK_ERROR"
+  | "UNKNOWN_ERROR";
 
 interface ErrorContext {
   agentName: string;
@@ -1298,7 +1301,7 @@ interface AgentError {
   fallback?: any;
 }
 
-type ErrorSeverity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+type ErrorSeverity = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
 ```
 
 ---
@@ -1326,14 +1329,14 @@ class AgentCommunicator {
 // 使用示例
 const request: AgentRequest = {
   requestId: uuid(),
-  sourceAgent: 'PlanningAgent',
-  targetAgent: 'AnalysisAgent',
-  action: 'parseDocument',
-  payload: { documentId: 'doc123' },
+  sourceAgent: "PlanningAgent",
+  targetAgent: "AnalysisAgent",
+  action: "parseDocument",
+  payload: { documentId: "doc123" },
   context: executionContext,
   priority: 8,
   timeout: 30000,
-  timestamp: new Date()
+  timestamp: new Date(),
 };
 
 const response = await agentCommunicator.send(request);
@@ -1357,15 +1360,15 @@ class EventBus {
 }
 
 // 使用示例：AnalysisAgent完成后通知PlanningAgent
-eventBus.emit('document.analyzed', {
-  documentId: 'doc123',
+eventBus.emit("document.analyzed", {
+  documentId: "doc123",
   result: analysisResult,
-  nextSteps: ['search_laws', 'generate_arguments'],
-  emittedAt: new Date()
+  nextSteps: ["search_laws", "generate_arguments"],
+  emittedAt: new Date(),
 });
 
 // PlanningAgent监听事件
-eventBus.on('document.analyzed', async (event) => {
+eventBus.on("document.analyzed", async (event) => {
   await this.orchestrateNextSteps(event.nextSteps);
 });
 ```
@@ -1425,7 +1428,7 @@ class AgentCommunicator {
       // 2. 超时控制
       const response = await Promise.race([
         this.executeRequest(request),
-        this.timeout(request.timeout)
+        this.timeout(request.timeout),
       ]);
 
       // 3. 错误重试（指数退避）
@@ -1450,7 +1453,7 @@ class AgentCommunicator {
   private async retryWithBackoff(
     request: AgentRequest,
     error: AgentError,
-    maxRetries: number = 3
+    maxRetries: number = 3,
   ): Promise<AgentResponse> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -1487,18 +1490,18 @@ class ExecutionContext {
   constructor(
     private memoryAgent: MemoryAgent,
     private workflowId: string,
-    private caseType: string
+    private caseType: string,
   ) {}
 
   async loadContext(): Promise<ContextData> {
     // 1. 从Working Memory加载当前上下文
     const workingContext = await this.memoryAgent.getWorkingMemory(
-      `workflow_${this.workflowId}_context`
+      `workflow_${this.workflowId}_context`,
     );
 
     // 2. 从Hot Memory加载相关经验
     const relevantExperience = await this.memoryAgent.getHotMemory(
-      `case_pattern_${this.caseType}`
+      `case_pattern_${this.caseType}`,
     );
 
     // 3. 合并上下文
@@ -1506,7 +1509,7 @@ class ExecutionContext {
       ...workingContext,
       experience: relevantExperience,
       previousSteps: this.previousSteps,
-      loadedAt: new Date()
+      loadedAt: new Date(),
     };
   }
 
@@ -1514,7 +1517,7 @@ class ExecutionContext {
     // 保存到Working Memory
     await this.memoryAgent.storeWorkingMemory(
       `workflow_${this.workflowId}_context`,
-      data
+      data,
     );
   }
 }
@@ -1536,34 +1539,31 @@ await memoryAgent.storeWorkingMemory(
     legalBasis: searchResult,
     currentRound: 1,
     previousArguments: [],
-    storedAt: new Date()
+    storedAt: new Date(),
   },
-  3600 // 1小时TTL
+  3600, // 1小时TTL
 );
 
 // Hot Memory示例：近期案件经验
 await memoryAgent.storeHotMemory(
   `case_pattern_${caseType}`,
   {
-    successfulStrategies: ['strategy_1', 'strategy_2'],
-    commonPitfalls: ['pitfall_1'],
+    successfulStrategies: ["strategy_1", "strategy_2"],
+    commonPitfalls: ["pitfall_1"],
     referenceCount: 15,
-    lastUsed: new Date()
+    lastUsed: new Date(),
   },
-  0.8 // 重要性评分
+  0.8, // 重要性评分
 );
 
 // Cold Memory示例：长期知识库
-await memoryAgent.storeColdMemory(
-  `legal_knowledge_${lawCategory}`,
-  {
-    frequentArticles: ['article_1', 'article_2'],
-    applicabilityPatterns: {
-      'contract_dispute': ['articles_X', 'articles_Y']
-    },
-    precedents: ['case_1', 'case_2']
-  }
-);
+await memoryAgent.storeColdMemory(`legal_knowledge_${lawCategory}`, {
+  frequentArticles: ["article_1", "article_2"],
+  applicabilityPatterns: {
+    contract_dispute: ["articles_X", "articles_Y"],
+  },
+  precedents: ["case_1", "case_2"],
+});
 ```
 
 ---
@@ -1577,12 +1577,12 @@ await memoryAgent.storeColdMemory(
 class MemoryMigrator {
   constructor(private memoryAgent: MemoryAgent) {
     // 定时任务：每小时执行一次记忆迁移
-    cron.schedule('0 * * * *', async () => {
+    cron.schedule("0 * * * *", async () => {
       await this.migrateWorkingToHot();
     });
 
     // 定时任务：每天执行一次记忆压缩
-    cron.schedule('0 0 * * *', async () => {
+    cron.schedule("0 0 * * *", async () => {
       await this.compressHotToCold();
     });
   }
@@ -1592,7 +1592,8 @@ class MemoryMigrator {
    */
   private async migrateWorkingToHot(): Promise<void> {
     // 1. 获取即将过期的Working Memory
-    const expiringMemories = await this.memoryAgent.getMemoriesByType('WORKING');
+    const expiringMemories =
+      await this.memoryAgent.getMemoriesByType("WORKING");
 
     // 2. 压缩并迁移到Hot Memory
     for (const memory of expiringMemories) {
@@ -1601,7 +1602,7 @@ class MemoryMigrator {
       await this.memoryAgent.storeHotMemory(
         memory.memoryKey,
         compressed,
-        memory.importance
+        memory.importance,
       );
 
       // 3. 删除原Working Memory
@@ -1614,19 +1615,19 @@ class MemoryMigrator {
    */
   private async compressHotToCold(): Promise<void> {
     // 1. 获取低频访问的Hot Memory
-    const hotMemories = await this.memoryAgent.getMemoriesByType('HOT');
-    const lowAccessMemories = hotMemories.filter(m => m.accessCount < 5);
+    const hotMemories = await this.memoryAgent.getMemoriesByType("HOT");
+    const lowAccessMemories = hotMemories.filter((m) => m.accessCount < 5);
 
     // 2. 高度压缩并迁移到Cold Memory
     for (const memory of lowAccessMemories) {
       const highlyCompressed = await this.memoryAgent.compressMemory(
         memory,
-        0.1 // 10%压缩比例
+        0.1, // 10%压缩比例
       );
 
       await this.memoryAgent.storeColdMemory(
         memory.memoryKey,
-        highlyCompressed
+        highlyCompressed,
       );
     }
   }
@@ -1652,6 +1653,7 @@ class MemoryMigrator {
 **原因**：其他Agent依赖MemoryAgent，需优先实现
 
 **迁移步骤**：
+
 1. 创建目录结构：`src/lib/agent/memory-agent/`
 2. 实现核心类：
    - `memory-manager.ts` - 三层记忆管理（~180行）
@@ -1667,6 +1669,7 @@ class MemoryMigrator {
 4. 集成测试：验证三层记忆CRUD
 
 **验收标准**：
+
 - ✅ 三层记忆CRUD操作完整
 - ✅ 自动过期机制生效
 - ✅ 压缩算法准确率>90%
@@ -1679,6 +1682,7 @@ class MemoryMigrator {
 **原因**：VerificationAgent是质量保障核心，需尽早实现
 
 **迁移步骤**：
+
 1. 创建目录结构：`src/lib/agent/verification-agent/`
 2. 实现核心类：
    - `comprehensive-verifier.ts` - 综合验证入口（~150行）
@@ -1696,6 +1700,7 @@ class MemoryMigrator {
 5. 准确性验证测试（>85%）
 
 **验收标准**：
+
 - ✅ 三重验证全部实现
 - ✅ 综合评分算法准确
 - ✅ 问题识别准确率>85%
@@ -1706,6 +1711,7 @@ class MemoryMigrator {
 #### 阶段4：PlanningAgent整合（0.5天）
 
 **迁移步骤**：
+
 1. 创建目录结构：`src/lib/agent/planning-agent/`
 2. 实现核心类：
    - `task-decomposer.ts` - 任务分解（~150行）
@@ -1716,6 +1722,7 @@ class MemoryMigrator {
 3. 测试工作流编排功能
 
 **验收标准**：
+
 - ✅ 任务分解准确
 - ✅ 策略规划合理
 - ✅ 工作流编排正确
@@ -1725,6 +1732,7 @@ class MemoryMigrator {
 #### 阶段5：AnalysisAgent整合（0.5天）
 
 **迁移步骤**：
+
 1. 创建目录结构：`src/lib/agent/analysis-agent/`
 2. 保留现有实现：
    - `doc-analyzer/` - 保留五层架构（已验证88分）
@@ -1735,6 +1743,7 @@ class MemoryMigrator {
 3. 测试整合后的分析功能
 
 **验收标准**：
+
 - ✅ 文档解析准确率保持88分+
 - ✅ 证据分析功能完整
 - ✅ 时间线提取准确
@@ -1744,6 +1753,7 @@ class MemoryMigrator {
 #### 阶段6：LegalAgent整合（0.5天）
 
 **迁移步骤**：
+
 1. 创建目录结构：`src/lib/agent/legal-agent/`
 2. 整合现有实现：
    - `law-searcher.ts` - 整合LawRetriever（已完成）
@@ -1754,6 +1764,7 @@ class MemoryMigrator {
 3. 测试法律检索和论点生成
 
 **验收标准**：
+
 - ✅ 法条检索准确率>90%
 - ✅ 适用性分析准确率>80%
 - ✅ 论点生成质量评分>4/5
@@ -1763,6 +1774,7 @@ class MemoryMigrator {
 #### 阶段7：GenerationAgent整合（0.5天）
 
 **迁移步骤**：
+
 1. 创建目录结构：`src/lib/agent/generation-agent/`
 2. 保留现有实现：
    - `document-generator.ts` - 保留现有逻辑
@@ -1773,6 +1785,7 @@ class MemoryMigrator {
 3. 测试文书和辩论生成
 
 **验收标准**：
+
 - ✅ 文书生成准确
 - ✅ 辩论内容平衡
 - ✅ 流式输出正常
@@ -1782,6 +1795,7 @@ class MemoryMigrator {
 #### 阶段8：集成测试与验证（0.5天）
 
 **测试内容**：
+
 1. **完整辩论流程**（含Manus增强）
    - PlanningAgent分解任务
    - AnalysisAgent解析文档
@@ -1807,6 +1821,7 @@ class MemoryMigrator {
    - 错误学习
 
 **验收标准**：
+
 - ✅ 集成测试通过率>95%
 - ✅ 准确性提升验证（88分→95分+）
 - ✅ 错误恢复率>90%
@@ -1832,6 +1847,7 @@ Week 2 (2026-01-09 ~ 2026-01-15)
 ```
 
 **关键里程碑**：
+
 - ✅ M1：MemoryAgent实现完成（2026-01-04）
 - ✅ M2：VerificationAgent增强完成（2026-01-06）
 - ✅ M3：所有Agent整合完成（2026-01-09）
@@ -1845,6 +1861,7 @@ Week 2 (2026-01-09 ~ 2026-01-15)
 #### 风险1：代码迁移破坏现有功能
 
 **缓解措施**：
+
 - ✅ 保留现有五层文档解析架构（已验证88分）
 - ✅ 渐进式迁移，每完成一个Agent立即测试
 - ✅ 完整的单元测试和集成测试覆盖
@@ -1854,6 +1871,7 @@ Week 2 (2026-01-09 ~ 2026-01-15)
 #### 风险2：Agent间通信开销增加
 
 **缓解措施**：
+
 - ✅ 使用MemoryAgent减少重复计算
 - ✅ 实现智能缓存机制
 - ✅ 异步通信+事件驱动减少阻塞
@@ -1863,6 +1881,7 @@ Week 2 (2026-01-09 ~ 2026-01-15)
 #### 风险3：准确性提升目标未达成
 
 **缓解措施**：
+
 - ✅ 三重验证机制提供质量保障
 - ✅ 错误学习机制持续优化
 - ✅ 人工评估验证准确性
@@ -1872,6 +1891,7 @@ Week 2 (2026-01-09 ~ 2026-01-15)
 #### 风险4：开发时间超出预期
 
 **缓解措施**：
+
 - ✅ 质量优先，不限时间
 - ✅ 分阶段交付，及时调整计划
 - ✅ 充分利用现有实现，减少重复开发

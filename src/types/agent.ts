@@ -4,9 +4,22 @@
 // 基础类型定义
 // =============================================================================
 
-// Agent类型枚举 - 对应10大专业Agent
+// Agent类型枚举 - 对应6大核心Agent
 export enum AgentType {
+  /**
+   * @deprecated 使用ANALYSIS替代，保留用于向后兼容
+   */
   DOC_ANALYZER = "doc_analyzer",
+  /**
+   * 新AnalysisAgent - 分析层Agent，包含文档解析、证据分析、综合分析
+   */
+  ANALYSIS = "analysis",
+  PLANNING = "planning",
+  LEGAL = "legal",
+  GENERATION = "generation",
+  VERIFICATION = "verification",
+  MEMORY = "memory",
+  // 以下类型保留用于向后兼容
   EVIDENCE_ANALYZER = "evidence_analyzer",
   RESEARCHER = "researcher",
   STRATEGIST = "strategist",
@@ -46,7 +59,7 @@ export interface AgentContext {
   priority: TaskPriority;
 
   // 输入数据
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 
   // 上下文信息
   userId?: string;
@@ -54,7 +67,7 @@ export interface AgentContext {
   requestId?: string;
 
   // 元数据
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 
   // 历史结果（用于增量分析）
   previousResults?: AgentResult[];
@@ -70,7 +83,7 @@ export interface AgentOptions {
   retryDelay?: number;
   enableCache?: boolean;
   cacheTTL?: number;
-  customSettings?: Record<string, any>;
+  customSettings?: Record<string, unknown>;
 }
 
 // Agent执行结果
@@ -81,9 +94,9 @@ export interface AgentResult {
   executionTime: number;
 
   // 输出数据
-  data?: any;
+  data?: unknown;
   output?: string;
-  structuredOutput?: Record<string, any>;
+  structuredOutput?: Record<string, unknown>;
 
   // 元信息
   confidence?: number;
@@ -113,7 +126,7 @@ export interface AgentError {
   agentName: string;
   timestamp: number;
   retryable: boolean;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   stack?: string;
 }
 
@@ -136,7 +149,7 @@ export interface ValidationResult {
   valid: boolean;
   errors?: string[];
   warnings?: string[];
-  sanitizedData?: any;
+  sanitizedData?: unknown;
 }
 
 // =============================================================================
@@ -226,7 +239,7 @@ export interface Agent {
   execute(context: AgentContext): Promise<AgentResult>;
 
   // 验证方法（可选）
-  validateInput?(input: any): ValidationResult;
+  validateInput?(input: unknown): ValidationResult;
 
   // 初始化和清理方法
   initialize?(): Promise<void>;
@@ -236,7 +249,7 @@ export interface Agent {
   healthCheck?(): Promise<boolean>;
 
   // 配置管理
-  configure?(config: Record<string, any>): Promise<void>;
+  configure?(config: Record<string, unknown>): Promise<void>;
 
   // 元数据获取
   getMetadata?(): AgentMetadata;
@@ -246,7 +259,7 @@ export interface Agent {
 export interface AgentFactory {
   createAgent(
     agentType: AgentType,
-    config?: Record<string, any>,
+    config?: Record<string, unknown>,
   ): Promise<Agent>;
   getSupportedTypes(): AgentType[];
 }
@@ -271,7 +284,7 @@ export interface AgentEvent {
   type: AgentEventType;
   timestamp: number;
   agentName: string;
-  data?: any;
+  data?: unknown;
 }
 
 // Agent工作流配置

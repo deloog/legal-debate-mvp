@@ -1,7 +1,7 @@
 /** @type {import("jest").Config} **/
 module.exports = {
   preset: "ts-jest",
-  testEnvironment: "jsdom",
+  testEnvironment: "node", // 改为node环境以支持OpenAI客户端
   setupFiles: ["<rootDir>/jest.polyfill.js"],
   setupFilesAfterEnv: ["<rootDir>/src/test-utils/setup.ts"],
   moduleNameMapper: {
@@ -22,13 +22,19 @@ module.exports = {
     "<rootDir>/src/__tests__/e2e/",
   ],
   collectCoverageFrom: [
-    "src/**/*.{ts,tsx}",
+    // 核心库文件
+    "src/lib/**/*.{ts,tsx}",
+    // 排除规则
     "!src/**/*.d.ts",
+    "!src/**/*.{test,spec}.{ts,tsx}",
+    "!src/**/__tests__/**",
+    "!src/**/index.{ts,tsx}",
     "!src/test-utils/**",
     "!src/**/*.stories.{ts,tsx}",
-    "!src/**/__tests__/**",
-    "!src/**/*.{test,spec}.{ts,tsx}",
-    "!src/**/index.{ts,tsx}",
+    // 显式包含agent模块（确保覆盖）
+    "src/lib/agent/**/*.{ts,tsx}",
+    "!src/lib/agent/**/__tests__/**",
+    // 显式包含debate模块
     "src/lib/debate/**/*.{ts,tsx}",
     "!src/lib/debate/**/__tests__/**",
   ],
@@ -42,7 +48,15 @@ module.exports = {
     "\\.spec\\.(ts|tsx)$",
   ],
   coverageDirectory: "coverage",
-  coverageReporters: ["text", "lcov", "html", "json"],
+  coverageReporters: [
+    "text",
+    "text-summary",
+    "lcov",
+    "html",
+    "json",
+    "json-summary",
+  ],
+  coverageProvider: "v8",
   coverageThreshold: {
     // 全局最低要求
     global: {
@@ -86,6 +100,13 @@ module.exports = {
       functions: 85,
       lines: 85,
     },
+    // Planning Agent - 核心业务，要求较高
+    "./src/lib/agent/planning-agent/": {
+      statements: 85,
+      branches: 75,
+      functions: 85,
+      lines: 85,
+    },
     // 法条检索层 - 核心业务，要求较高
     "./src/lib/law-article/": {
       statements: 90,
@@ -118,11 +139,26 @@ module.exports = {
         },
       },
     ],
+    "^.+\\.(js|jsx)$": [
+      "ts-jest",
+      {
+        tsconfig: {
+          jsx: "react-jsx",
+          esModuleInterop: true,
+          allowJs: true,
+          baseUrl: ".",
+          paths: {
+            "@/*": ["./src/*"],
+          },
+        },
+        diagnostics: {
+          warnOnly: true,
+        },
+      },
+    ],
   },
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "d.ts"],
-  transformIgnorePatterns: [
-    "node_modules/(?!(uuid)/)",
-  ],
+  transformIgnorePatterns: ["node_modules/(?!(uuid|@prisma|@swc/core)/)"],
   // 禁用并行测试以避免数据竞争
   maxWorkers: 1,
   maxConcurrency: 1,

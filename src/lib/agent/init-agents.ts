@@ -1,37 +1,20 @@
 // Agent初始化 - 注册所有Agent到AgentRegistry
 
 import { agentRegistry } from "./registry";
-import { AgentStatus, AgentType } from "../../types/agent";
-import { CoordinatorAgent } from "./coordinator/coordinator-agent";
 import { DocAnalyzerAgent } from "./doc-analyzer/doc-analyzer-agent";
-import { StrategistAgent } from "./strategist/strategist-agent";
 
 /**
  * 初始化并注册所有Agent
  */
 export async function initAgents(): Promise<void> {
   try {
-    // 注册Coordinator Agent
-    const coordinatorAgent = new CoordinatorAgent();
-    coordinatorAgent.initialize();
-    agentRegistry.registerAgent(coordinatorAgent, "system-init");
-
-    // 注册DocAnalyzer Agent（如果已实现）
+    // 注册DocAnalyzer Agent
     try {
       const docAnalyzerAgent = new DocAnalyzerAgent();
       docAnalyzerAgent.initialize();
       agentRegistry.registerAgent(docAnalyzerAgent, "system-init");
     } catch (error) {
       console.warn("DocAnalyzer Agent初始化失败:", error);
-    }
-
-    // 注册Strategist Agent（如果已实现）
-    try {
-      const strategistAgent = new StrategistAgent();
-      strategistAgent.initialize();
-      agentRegistry.registerAgent(strategistAgent, "system-init");
-    } catch (error) {
-      console.warn("Strategist Agent初始化失败:", error);
     }
 
     // 输出注册统计信息
@@ -53,14 +36,14 @@ export async function initAgents(): Promise<void> {
 }
 
 /**
- * 获取已注册的Coordinator Agent
+ * 获取已注册的DocAnalyzer Agent
  */
-export function getCoordinatorAgent(): CoordinatorAgent {
-  const agent = agentRegistry.getAgent("coordinator");
+export function getDocAnalyzerAgent(): DocAnalyzerAgent {
+  const agent = agentRegistry.getAgent("docAnalyzer");
   if (!agent) {
-    throw new Error("Coordinator Agent未注册");
+    throw new Error("DocAnalyzer Agent未注册");
   }
-  return agent as CoordinatorAgent;
+  return agent as DocAnalyzerAgent;
 }
 
 /**

@@ -23,6 +23,7 @@ export class CacheProcessor {
     errors: number;
   };
   private namespace: string;
+  private disabled: boolean = false;
 
   constructor(config?: Partial<CacheConfig>) {
     this.cacheManager = new CacheManager();
@@ -49,7 +50,7 @@ export class CacheProcessor {
     fileType: string,
     text: string,
   ): Promise<DocumentAnalysisOutput | null> {
-    if (!this.config.enabled) {
+    if (!this.config.enabled || this.disabled) {
       return null;
     }
 
@@ -86,7 +87,7 @@ export class CacheProcessor {
     text: string,
     data: DocumentAnalysisOutput,
   ): Promise<boolean> {
-    if (!this.config.enabled) {
+    if (!this.config.enabled || this.disabled) {
       return false;
     }
 
@@ -156,6 +157,20 @@ export class CacheProcessor {
       writes: 0,
       errors: 0,
     };
+  }
+
+  /**
+   * 禁用缓存（用于测试）
+   */
+  public disable(): void {
+    this.disabled = true;
+  }
+
+  /**
+   * 启用缓存
+   */
+  public enable(): void {
+    this.disabled = false;
   }
 
   /**

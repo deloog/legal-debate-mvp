@@ -1148,7 +1148,7 @@ export const APPLICABILITY_CONFIG = {
 
 ---
 
-#### 任务 6.1.4：VerificationAgent增强（1天）   ✅
+#### 任务 6.1.4：VerificationAgent增强（1天） ✅
 
 **业务需求**：实现Manus的三重验证机制
 **输入**：verification_results表结构

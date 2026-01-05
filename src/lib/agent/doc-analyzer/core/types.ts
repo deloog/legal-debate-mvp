@@ -12,14 +12,13 @@ export interface DocumentAnalysisInput {
   documentId: string;
   filePath: string;
   fileType: "PDF" | "DOCX" | "DOC" | "TXT" | "IMAGE";
-  options?: {
-    extractParties?: boolean;
-    extractClaims?: boolean;
-    extractTimeline?: boolean;
-    generateSummary?: boolean;
-  };
-  content?: string; // 直接提供文本内容（用于测试）
+  options?: DocumentAnalysisOptions;
+  content?: string;
 }
+
+// =============================================================================
+// 输出类型
+// =============================================================================
 
 export interface DocumentAnalysisOptions {
   extractParties?: boolean;
@@ -28,11 +27,9 @@ export interface DocumentAnalysisOptions {
   extractDisputeFocus?: boolean;
   extractKeyFacts?: boolean;
   generateSummary?: boolean;
+  analyzeEvidence?: boolean;
+  comprehensiveAnalysis?: boolean;
 }
-
-// =============================================================================
-// 输出类型
-// =============================================================================
 
 export interface DocumentAnalysisOutput {
   success: boolean;
@@ -89,7 +86,20 @@ export interface TimelineEvent {
   eventType?: TimelineEventType;
   importance?: number; // 1-5，5最重要
   evidence?: string[];
-  source?: "explicit" | "inferred"; // 明确提到或推断的
+  source?: "explicit" | "inferred" | "TEXT_EXTRACTION" | "CASE_INFO"; // 证据来源
+  type?: TimelineEventType; // 兼容性字段
+}
+
+export interface TimelineReport {
+  events: TimelineEvent[];
+  totalEvents: number;
+  dateRange: {
+    start: string | null;
+    end: string | null;
+    duration: number | null;
+  };
+  averageInterval: number;
+  intervals: number[];
 }
 
 export type TimelineEventType =
@@ -98,6 +108,13 @@ export type TimelineEventType =
   | "BREACH_OCCURRED"
   | "DEMAND_SENT"
   | "LAWSUIT_FILED"
+  | "FILING" // 立案
+  | "HEARING" // 开庭
+  | "JUDGMENT" // 判决
+  | "EVIDENCE" // 证据
+  | "DEFENSE" // 答辩
+  | "MEDIATION" // 调解
+  | "SERVICE" // 送达
   | "OTHER";
 
 export type CaseType =
@@ -200,8 +217,8 @@ export interface PostProcessingResult {
 export interface Correction {
   type: "ADD_CLAIM" | "ADD_PARTY" | "FIX_AMOUNT" | "FIX_ROLE" | "OTHER";
   description: string;
-  originalValue?: any;
-  correctedValue?: any;
+  originalValue?: unknown;
+  correctedValue?: unknown;
   rule: string;
 }
 
@@ -278,7 +295,7 @@ export interface ProcessingStats {
 }
 
 // =============================================================================
-// 分析过程类型（新增）
+// 分析过程类型
 // =============================================================================
 
 export interface AnalysisMetadata {
@@ -289,6 +306,8 @@ export interface AnalysisMetadata {
   tokenUsed?: number;
   processingTime?: number;
   analysisProcess?: AnalysisProcess;
+  evidenceAnalysis?: EvidenceAnalysisResult;
+  comprehensiveAnalysis?: ComprehensiveAnalysisResult;
 }
 
 export interface AnalysisProcess {
@@ -312,4 +331,116 @@ export interface ValidationResults {
   timelineGaps?: string[];
   focusConflicts?: string[];
   factInconsistencies?: string[];
+}
+
+// =============================================================================
+// 证据分析类型（新增）
+// =============================================================================
+
+export type EvidenceType =
+  | "PHYSICAL_EVIDENCE" // 物证
+  | "DOCUMENTARY_EVIDENCE" // 书证
+  | "WITNESS_TESTIMONY" // 证人证言
+  | "EXPERT_OPINION" // 鉴定意见
+  | "AUDIO_VIDEO_EVIDENCE" // 视听资料
+  | "ELECTRONIC_EVIDENCE" // 电子数据
+  | "OTHER";
+
+export interface ClassifiedEvidence {
+  id: string;
+  type: EvidenceType;
+  content: string;
+  source: string; // 证据来源描述
+  strength: number; // 1-5，5最强
+  reliability: number; // 0-1
+  relatedTo: string[]; // 关联的当事人、诉讼请求等ID
+}
+
+export interface EvidenceRelation {
+  evidenceId: string;
+  relatedTo: string;
+  relationType: "SUPPORTS" | "CONTRADICTS" | "RELATES_TO";
+  strength: number; // 关联强度 0-1
+}
+
+export interface EvidenceStrengthReport {
+  totalEvidence: number;
+  strongEvidence: number; // strength >= 4
+  weakEvidence: number; // strength <= 2
+  averageStrength: number;
+  averageReliability: number;
+  byType: Record<EvidenceType, number>;
+}
+
+export interface EvidenceAnalysisResult {
+  classifiedEvidence: ClassifiedEvidence[];
+  evidenceRelations: EvidenceRelation[];
+  strengthReport: EvidenceStrengthReport;
+  completenessScore: number; // 0-1
+  confidence: number; // 0-1
+  missingEvidenceTypes: EvidenceType[];
+}
+
+// =============================================================================
+// 综合分析类型（新增）
+// =============================================================================
+
+export interface ConsistencyIssue {
+  type:
+    | "PARTY_CLAIM_MISMATCH"
+    | "TIMELINE_DISCREPANCY"
+    | "EVIDENCE_CONTRADICTION"
+    | "LOGIC_GAP";
+  severity: "ERROR" | "WARNING" | "INFO";
+  description: string;
+  affectedItems: string[]; // 相关的当事人ID、时间线事件ID等
+  suggestion?: string;
+}
+
+export interface ConsistencyReport {
+  isConsistent: boolean;
+  issues: ConsistencyIssue[];
+  score: number; // 0-1
+  partyClaimConsistency: number;
+  timelineConsistency: number;
+  evidenceConsistency: number;
+}
+
+export interface CompletenessCheck {
+  category: string;
+  isComplete: boolean;
+  missingItems: string[];
+  importance: "HIGH" | "MEDIUM" | "LOW";
+}
+
+export interface CompletenessReport {
+  overallComplete: boolean;
+  score: number; // 0-1
+  checks: CompletenessCheck[];
+  partyCompleteness: number;
+  timelineCompleteness: number;
+  evidenceChainCompleteness: number;
+  suggestions: string[];
+}
+
+export interface QualityScoreReport {
+  overallScore: number; // 0-100
+  accuracyScore: number; // 准确性
+  completenessScore: number; // 完整性
+  consistencyScore: number; // 一致性
+  relevanceScore: number; // 相关性
+  grade: "EXCELLENT" | "GOOD" | "SATISFACTORY" | "NEEDS_IMPROVEMENT" | "POOR";
+}
+
+export interface ComprehensiveAnalysisResult {
+  consistencyReport: ConsistencyReport;
+  completenessReport: CompletenessReport;
+  qualityScore: QualityScoreReport;
+  suggestions: string[];
+  overallConfidence: number; // 0-1
+  metadata: {
+    analyzedAt: number;
+    analysisDuration: number;
+    dataSources: string[];
+  };
 }

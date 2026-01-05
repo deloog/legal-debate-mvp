@@ -230,6 +230,98 @@ export const PRODUCTION_AI_CONFIG: AIServiceConfig = {
 };
 
 // =============================================================================
+// 准确性测试环境配置（使用真实API）
+// =============================================================================
+
+export const ACCURACY_TEST_AI_CONFIG: AIServiceConfig = {
+  ...DEFAULT_AI_SERVICE_CONFIG,
+  clients: [
+    {
+      provider: "deepseek",
+      apiKey: process.env.DEEPSEEK_API_KEY || "",
+      baseURL: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1",
+      timeout: 60000, // 准确性测试使用较长超时时间
+      retryStrategy: {
+        maxAttempts: 3,
+        baseDelay: 1000,
+        maxDelay: 10000,
+        backoffMultiplier: 2,
+        jitter: true,
+        retryableErrors: ["timeout_error", "network_error", "rate_limit_error"],
+      },
+    },
+    {
+      provider: "zhipu",
+      apiKey: process.env.ZHIPU_API_KEY || "",
+      baseURL:
+        process.env.ZHIPU_BASE_URL || "https://open.bigmodel.cn/api/paas/v4/",
+      timeout: 45000,
+      retryStrategy: {
+        maxAttempts: 3,
+        baseDelay: 1000,
+        maxDelay: 10000,
+        backoffMultiplier: 2,
+        jitter: true,
+        retryableErrors: [
+          "timeout_error",
+          "network_error",
+          "rate_limit_error",
+          "api_error",
+        ],
+      },
+    },
+  ],
+  loadBalancer: {
+    strategy: "weighted_round_robin",
+    healthCheckInterval: 60000, // 准确性测试降低检查频率
+    healthCheckTimeout: 10000,
+    failureThreshold: 5,
+    recoveryThreshold: 3,
+    weights: {
+      zhipu: 0.3,
+      deepseek: 0.7,
+      openai: 0.0,
+      anthropic: 0.0,
+    },
+    roundRobin: false,
+  },
+  monitor: {
+    enabled: true,
+    metricsInterval: 60000,
+    logLevel: "info",
+    persistMetrics: false,
+    alertThresholds: {
+      responseTime: 30000,
+      errorRate: 0.2,
+      rateLimitHits: 10,
+      queueLength: 100,
+    },
+  },
+  fallback: {
+    enabled: false, // 准确性测试禁用降级，确保使用真实API
+    strategies: [],
+    cacheFallback: {
+      enabled: false,
+      ttl: 300,
+      maxAge: 3600,
+    },
+    simplifiedMode: {
+      enabled: false,
+      maxTokens: 1000,
+      simplifiedPrompts: false,
+    },
+    localProcessing: {
+      enabled: false,
+      capabilities: [],
+    },
+  },
+  defaultProvider: "deepseek",
+  defaultModel: "deepseek-chat",
+  globalTimeout: 90000,
+  enableMetrics: false,
+};
+
+// =============================================================================
 // 测试环境配置
 // =============================================================================
 
@@ -299,8 +391,13 @@ export const TEST_AI_CONFIG: AIServiceConfig = {
 // 配置选择器
 // =============================================================================
 
-export function getAIConfig(): AIServiceConfig {
+export function getAIConfig(useRealAPI: boolean = false): AIServiceConfig {
   const nodeEnv = process.env.NODE_ENV || "development";
+
+  // 如果明确指定使用真实API（准确性测试）
+  if (useRealAPI) {
+    return ACCURACY_TEST_AI_CONFIG;
+  }
 
   switch (nodeEnv) {
     case "production":
@@ -475,7 +572,7 @@ export function validateModel(provider: AIProvider, model: string): boolean {
 // 默认导出
 // =============================================================================
 
-export default {
+const aiConfigExport = {
   DEFAULT_AI_SERVICE_CONFIG,
   DEVELOPMENT_AI_CONFIG,
   PRODUCTION_AI_CONFIG,
@@ -488,3 +585,5 @@ export default {
   isModelSupported,
   validateModel,
 };
+
+export default aiConfigExport;

@@ -73,15 +73,27 @@ export class DocumentParser {
   private aiProvider: AIProvider = "zhipu";
   private aiModel: string = "glm-4-flash";
   private useMock: boolean;
+  private forceRealAI: boolean = false;
 
   constructor(useMock: boolean = false) {
     this.useMock = useMock;
   }
 
   /**
+   * 强制使用真实AI服务（用于准确性测试）
+   */
+  public forceUseRealAI(): void {
+    this.forceRealAI = true;
+  }
+
+  /**
    * 检查是否使用Mock模式
    */
   private shouldUseMock(): boolean {
+    // 如果强制使用真实AI，返回false
+    if (this.forceRealAI) {
+      return false;
+    }
     // 检查环境变量
     if (process.env.USE_MOCK_AI === "true") {
       return true;
@@ -177,7 +189,10 @@ export class DocumentParser {
     }
 
     try {
-      const unifiedService = await getUnifiedAIService();
+      const unifiedService = await getUnifiedAIService(
+        undefined,
+        this.forceRealAI,
+      );
 
       const response = await unifiedService.chatCompletion({
         model: this.aiModel,

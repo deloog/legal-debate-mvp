@@ -1,0 +1,104 @@
+{
+  "testType": "PHASE3-ACCURACY-VERIFICATION",
+  "testDate": "2026-01-04T12:43:20.545Z",
+  "totalDocuments": 5,
+  "averageMetrics": {
+    "overallAccuracy": 77,
+    "partiesAccuracy": 81,
+    "claimsAccuracy": 74,
+    "confidence": 0.8,
+    "qualityAssessment": {
+      "completeness": 72,
+      "consistency": 82,
+      "clarity": 75
+    }
+  },
+  "byCaseType": {
+    "CIVIL": {
+      "count": 5,
+      "avgOverallAccuracy": 77,
+      "avgPartiesAccuracy": 81,
+      "avgClaimsAccuracy": 74
+    }
+  },
+  "individualResults": [
+    {
+      "documentId": "civil-1",
+      "caseType": "CIVIL",
+      "overallAccuracy": 80,
+      "partiesAccuracy": 70,
+      "claimsAccuracy": 80,
+      "confidence": 0.8,
+      "processingTime": 133739,
+      "issues": ["原告信息缺失", "遗漏诉讼请求类型", "错误分类"]
+    },
+    {
+      "documentId": "civil-2",
+      "caseType": "CIVIL",
+      "overallAccuracy": 75,
+      "partiesAccuracy": 80,
+      "claimsAccuracy": 60,
+      "confidence": 0.8,
+      "processingTime": 114657,
+      "issues": [
+        "重复识别了被告的联系电话",
+        "遗漏了诉讼费用请求",
+        "将诉讼请求分类错误"
+      ]
+    },
+    {
+      "documentId": "civil-3",
+      "caseType": "CIVIL",
+      "overallAccuracy": 80,
+      "partiesAccuracy": 90,
+      "claimsAccuracy": 70,
+      "confidence": 0.8,
+      "processingTime": 117283,
+      "issues": [
+        "原告性别信息错误",
+        "遗漏了诉讼请求中的利息、违约金和诉讼费用承担的具体金额",
+        "错误的分类（如将诉讼费用承担推断为请求）"
+      ]
+    },
+    {
+      "documentId": "civil-4",
+      "caseType": "CIVIL",
+      "overallAccuracy": 75,
+      "partiesAccuracy": 80,
+      "claimsAccuracy": 80,
+      "confidence": 0.8,
+      "processingTime": 137406,
+      "issues": [
+        "原告信息未识别",
+        "遗漏了诉讼请求类型LITIGATION_COST的金额",
+        "遗漏了诉讼请求类型OTHER的具体内容"
+      ]
+    },
+    {
+      "documentId": "civil-5",
+      "caseType": "CIVIL",
+      "overallAccuracy": 75,
+      "partiesAccuracy": 85,
+      "claimsAccuracy": 80,
+      "confidence": 0.8,
+      "processingTime": 135376,
+      "issues": [
+        "重复识别了被告的联系电话",
+        "遗漏了诉讼费用请求",
+        "将诉讼请求分类错误"
+      ]
+    }
+  ],
+  "summary": {
+    "partiesAccuracyMet": false,
+    "claimsAccuracyMet": false,
+    "overallAccuracyMet": false,
+    "verificationReliable": true
+  },
+  "recommendations": [
+    "⚠️ 综合准确率为77.00%，需进一步提升",
+    "📌 当事人识别准确率低于目标，建议优化实体识别逻辑",
+    "📌 诉讼请求提取准确率低于目标，建议改进语义理解",
+    "💡 持续监控准确率指标，定期进行准确性验证测试"
+  ]
+}

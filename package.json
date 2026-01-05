@@ -44,7 +44,12 @@
     "coverage:report": "npm run test:coverage && npm run coverage:check",
     "coverage:track": "npm run test:coverage && tsx scripts/track-coverage-history.ts",
     "code-style:check": "node scripts/check-code-style.mjs",
-    "code-style:fix": "prettier --write . && eslint . --fix"
+    "code-style:fix": "prettier --write . && eslint . --fix",
+    "coverage:planning-agent": "node scripts/get-planning-agent-coverage.mjs",
+    "coverage:analyze": "node scripts/analyze-existing-coverage.mjs",
+    "coverage:all": "node scripts/diagnose-all-coverage.mjs",
+    "coverage:agent": "jest --coverage --collectCoverageFrom=\"src/lib/agent/**/*.ts\"",
+    "coverage:detailed": "jest --coverage --verbose --coverageReporters=text --coverageReporters=html"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
