@@ -15,7 +15,13 @@ export class TextExtractor {
    */
   async extractText(filePath: string, fileType: string): Promise<string> {
     try {
-      switch (fileType) {
+      // 首先验证文件是否存在
+      SecureFileUtils.validateFilePath(filePath);
+
+      // 转换为大写以实现大小写不敏感的匹配
+      const fileTypeUpper = fileType.toUpperCase();
+
+      switch (fileTypeUpper) {
         case "PDF":
           return await this.extractPDFText(filePath);
 
@@ -53,10 +59,13 @@ export class TextExtractor {
     try {
       SecureFileUtils.validateFilePath(filePath);
 
-      const pdfParse = require("pdf-parse");
+      const pdfParseModule = await import("pdf-parse");
+      const pdfParse = pdfParseModule.default || pdfParseModule;
       const buffer = await SecureFileUtils.readFileSecurely(filePath);
 
-      const data = await pdfParse(buffer);
+      const data = await (
+        pdfParse as unknown as (buffer: Buffer) => Promise<{ text: string }>
+      )(buffer);
       return data.text;
     } catch (error) {
       throw new AnalysisError(
@@ -74,7 +83,8 @@ export class TextExtractor {
     try {
       SecureFileUtils.validateFilePath(filePath);
 
-      const mammoth = require("mammoth");
+      const mammothModule = await import("mammoth");
+      const mammoth = mammothModule.default || mammothModule;
       const buffer = await SecureFileUtils.readFileSecurely(filePath);
       const result = await mammoth.extractRawText({ buffer });
 
@@ -121,10 +131,19 @@ export class TextExtractor {
    */
   private async extractDOCWithTextract(filePath: string): Promise<string> {
     try {
-      const textract = require("textract");
+      // @ts-expect-error - textract lacks TypeScript definitions
+      const textractModule = await import("textract");
+      const textract = textractModule.default || textractModule;
 
       return new Promise((resolve, reject) => {
-        textract.fromFileWithPath(filePath, (error: any, text: string) => {
+        (
+          textract as unknown as {
+            fromFileWithPath: (
+              filePath: string,
+              callback: (error: Error | null, text: string) => void,
+            ) => void;
+          }
+        ).fromFileWithPath(filePath, (error: Error | null, text: string) => {
           if (error) {
             reject(new AnalysisError("Textract解析失败", error, { filePath }));
           } else {
@@ -161,7 +180,9 @@ export class TextExtractor {
    */
   private async extractImageText(filePath: string): Promise<string> {
     try {
-      const Tesseract = require("tesseract.js");
+      // @ts-expect-error - tesseract.js lacks TypeScript definitions
+      const tesseractModule = await import("tesseract.js");
+      const Tesseract = tesseractModule.default || tesseractModule;
 
       const {
         data: { text },

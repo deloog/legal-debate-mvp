@@ -56,6 +56,7 @@ const MOCK_EXTRACTED_DATA = {
 // =============================================================================
 
 // 必须在jest.mock之前声明mock函数
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockChatCompletion = jest.fn() as any;
 
 // Mock unified-service
@@ -65,7 +66,8 @@ jest.mock("@/lib/ai/unified-service", () => {
   ) as Record<string, unknown>;
   return {
     ...originalModule,
-    getUnifiedAIService: (jest.fn() as any).mockResolvedValue({
+    // @ts-expect-error - Jest mock 类型推断限制
+    getUnifiedAIService: jest.fn().mockResolvedValue({
       chatCompletion: mockChatCompletion,
     }),
   };
@@ -91,31 +93,25 @@ describe("DisputeFocusExtractor", () => {
 
   describe("extractFromText", () => {
     it("应该使用默认配置提取争议焦点", async () => {
-      // Mock AI响应
-      mockChatCompletion.mockResolvedValue({
+      // Mock AI响应 - 第一次调用是AI提取层
+      mockChatCompletion.mockResolvedValueOnce({
         choices: [
           {
             message: {
               role: "assistant",
-              content: JSON.stringify(
-                {
-                  disputeFocuses: [
-                    {
-                      category: "CONTRACT_BREACH",
-                      description: "被告是否违反合同约定",
-                      positionA:
-                        "原告认为被告未按照合同约定履行义务，已构成违约",
-                      positionB:
-                        "被告辩称已按照合同约定履行义务，不存在违约行为",
-                      coreIssue: "是否违约",
-                      importance: 9,
-                      confidence: 0.85,
-                    },
-                  ],
-                },
-                null,
-                2,
-              ),
+              content: JSON.stringify({
+                disputeFocuses: [
+                  {
+                    category: "CONTRACT_BREACH",
+                    description: "被告是否违反合同约定",
+                    positionA: "原告认为被告未按照合同约定履行义务，已构成违约",
+                    positionB: "被告辩称已按照合同约定履行义务，不存在违约行为",
+                    coreIssue: "是否违约",
+                    importance: 9,
+                    confidence: 0.85,
+                  },
+                ],
+              }),
             },
           },
         ],
@@ -133,7 +129,7 @@ describe("DisputeFocusExtractor", () => {
     });
 
     it("应该正确处理AI提取层", async () => {
-      mockChatCompletion.mockResolvedValue({
+      mockChatCompletion.mockResolvedValueOnce({
         choices: [
           {
             message: {
@@ -168,7 +164,7 @@ describe("DisputeFocusExtractor", () => {
 
     it("应该使用规则匹配作为兜底", async () => {
       // Mock AI返回空结果
-      mockChatCompletion.mockResolvedValue({
+      mockChatCompletion.mockResolvedValueOnce({
         choices: [
           {
             message: {
@@ -189,7 +185,7 @@ describe("DisputeFocusExtractor", () => {
     });
 
     it("应该合并AI和规则匹配的结果并去重", async () => {
-      mockChatCompletion.mockResolvedValue({
+      mockChatCompletion.mockResolvedValueOnce({
         choices: [
           {
             message: {
@@ -236,7 +232,7 @@ describe("DisputeFocusExtractor", () => {
     });
 
     it("应该正确过滤推断结果", async () => {
-      mockChatCompletion.mockResolvedValue({
+      mockChatCompletion.mockResolvedValueOnce({
         choices: [
           {
             message: {
@@ -281,7 +277,7 @@ describe("DisputeFocusExtractor", () => {
     });
 
     it("应该根据最小置信度过滤结果", async () => {
-      mockChatCompletion.mockResolvedValue({
+      mockChatCompletion.mockResolvedValueOnce({
         choices: [
           {
             message: {
@@ -326,7 +322,7 @@ describe("DisputeFocusExtractor", () => {
     });
 
     it("应该生成正确的摘要", async () => {
-      mockChatCompletion.mockResolvedValue({
+      mockChatCompletion.mockResolvedValueOnce({
         choices: [
           {
             message: {
@@ -380,7 +376,7 @@ describe("DisputeFocusExtractor", () => {
 
   describe("extractDisputeFocusesFromText", () => {
     it("应该快速提取争议焦点", async () => {
-      mockChatCompletion.mockResolvedValue({
+      mockChatCompletion.mockResolvedValueOnce({
         choices: [
           {
             message: {
@@ -450,7 +446,7 @@ describe("DisputeFocusExtractor", () => {
 
   describe("准确性验证", () => {
     it("应该识别CONTRACT_BREACH类别争议焦点", async () => {
-      mockChatCompletion.mockResolvedValue({
+      mockChatCompletion.mockResolvedValueOnce({
         choices: [
           {
             message: {
@@ -484,7 +480,7 @@ describe("DisputeFocusExtractor", () => {
     });
 
     it("应该识别PAYMENT_DISPUTE类别争议焦点", async () => {
-      mockChatCompletion.mockResolvedValue({
+      mockChatCompletion.mockResolvedValueOnce({
         choices: [
           {
             message: {
@@ -518,7 +514,7 @@ describe("DisputeFocusExtractor", () => {
     });
 
     it("应该识别LIABILITY_ISSUE类别争议焦点", async () => {
-      mockChatCompletion.mockResolvedValue({
+      mockChatCompletion.mockResolvedValueOnce({
         choices: [
           {
             message: {

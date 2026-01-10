@@ -134,10 +134,10 @@ export class DisputeFocusExtractor {
         maxTokens: 2000,
       });
 
-      if (response.choices && response.choices.length > 0) {
-        return this.parseAIExtractionResponse(
-          response.choices[0].message.content || "",
-        );
+      // 兼容多种响应格式
+      const content = response?.choices?.[0]?.message?.content || "";
+      if (content) {
+        return this.parseAIExtractionResponse(content);
       }
 
       return [];
@@ -227,22 +227,34 @@ ${contextInfo}
         return [];
       }
 
-      return parsed.disputeFocuses.map((item: any, index: number) => ({
-        id: `ai_focus_${index}`,
-        category: item.category,
-        description: item.description || "",
-        positionA: item.positionA || "未明确",
-        positionB: item.positionB || "未明确",
-        coreIssue:
-          item.coreIssue || item.description?.split(/[，。；；]/)[0] || "",
-        importance: Math.min(10, Math.max(1, Math.round(item.importance || 5))),
-        confidence: Math.min(1, Math.max(0, item.confidence || 0.7)),
-        relatedClaims: [],
-        relatedFacts: [],
-        evidence: item.evidence || [],
-        legalBasis: item.legalBasis,
-        _inferred: (item.confidence || 0.7) < 0.8,
-      }));
+      return parsed.disputeFocuses.map((item: unknown, index: number) => {
+        const disputeItem = item as Record<string, unknown>;
+        const description = (disputeItem.description as string) || "";
+        return {
+          id: `ai_focus_${index}`,
+          category: disputeItem.category as DisputeFocusCategory,
+          description,
+          positionA: (disputeItem.positionA as string) || "未明确",
+          positionB: (disputeItem.positionB as string) || "未明确",
+          coreIssue:
+            (disputeItem.coreIssue as string) ||
+            description.split(/[,。；]/)[0] ||
+            "",
+          importance: Math.min(
+            10,
+            Math.max(1, Math.round((disputeItem.importance as number) || 5)),
+          ),
+          confidence: Math.min(
+            1,
+            Math.max(0, (disputeItem.confidence as number) || 0.7),
+          ),
+          relatedClaims: [],
+          relatedFacts: [],
+          evidence: (disputeItem.evidence as string[]) || [],
+          legalBasis: disputeItem.legalBasis as string | undefined,
+          _inferred: ((disputeItem.confidence as number) || 0.7) < 0.8,
+        };
+      });
     } catch (error) {
       console.error("解析AI识别响应失败:", error);
       return [];
@@ -282,13 +294,109 @@ ${contextInfo}
               text,
               extractedData,
             );
-            if (focus) focuses.push(focus);
+            if (focus) {
+              focuses.push(focus);
+            }
           }
         }
       }
     }
 
+    // 如果规则匹配为空，尝试从文本中提取通用争议模式
+    if (focuses.length === 0) {
+      const genericFocuses = this.extractGenericDisputes(text);
+      genericFocuses.forEach((f, idx) => {
+        focuses.push({
+          ...f,
+          id: `generic_focus_${idx}`,
+        });
+      });
+    }
+
     return focuses;
+  }
+
+  /**
+   * 提取通用争议模式（当规则匹配为空时的兜底）
+   */
+  private extractGenericDisputes(text: string): DisputeFocus[] {
+    const disputes: DisputeFocus[] = [];
+
+    // 查找"争议焦点"开头的条目
+    const focusPattern = /争议焦点[：:]\s*([^\n]+)/g;
+    let match;
+    while ((match = focusPattern.exec(text)) !== null) {
+      const content = match[1].trim();
+      const items = content.split(/[；;]\s*/);
+      for (const item of items) {
+        if (item.trim()) {
+          disputes.push({
+            id: "",
+            category: this.classifyDisputeText(item),
+            description: item.trim(),
+            positionA: this.extractPositionFromText(text, "原告"),
+            positionB: this.extractPositionFromText(text, "被告"),
+            coreIssue: item.trim(),
+            importance: 7,
+            confidence: 0.6,
+            relatedClaims: [],
+            relatedFacts: [],
+            evidence: [],
+            legalBasis: undefined,
+            _inferred: true,
+          });
+        }
+      }
+    }
+
+    return disputes;
+  }
+
+  /**
+   * 从文本中提取原告/被告观点
+   */
+  private extractPositionFromText(text: string, side: "原告" | "被告"): string {
+    const patterns =
+      side === "原告"
+        ? [/原告认为([^。\n]+)/g, /原告主张([^。\n]+)/g, /原告称([^。\n]+)/g]
+        : [/被告认为([^。\n]+)/g, /被告主张([^。\n]+)/g, /被告辩称([^。\n]+)/g];
+
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      if (match) {
+        return match[1].trim();
+      }
+    }
+
+    return "未明确";
+  }
+
+  /**
+   * 根据文本内容分类争议
+   */
+  private classifyDisputeText(text: string): DisputeFocusCategory {
+    const lowerText = text.toLowerCase();
+
+    if (/违约|未履行|违反合同/gi.test(lowerText)) {
+      return "CONTRACT_BREACH";
+    }
+    if (/支付|本金|金额|数额|欠款/gi.test(lowerText)) {
+      return "PAYMENT_DISPUTE";
+    }
+    if (/责任|承担/gi.test(lowerText)) {
+      return "LIABILITY_ISSUE";
+    }
+    if (/损失|赔偿|违约金/gi.test(lowerText)) {
+      return "DAMAGES_CALCULATION";
+    }
+    if (/履行/gi.test(lowerText)) {
+      return "PERFORMANCE_DISPUTE";
+    }
+    if (/效力|有效|成立/gi.test(lowerText)) {
+      return "VALIDITY_ISSUE";
+    }
+
+    return "OTHER";
   }
 
   /**
@@ -733,27 +841,34 @@ ${focusList}
       const reviewedItems = parsed.reviewedFocuses || [];
 
       return reviewedItems
-        .map((item: any) => {
+        .map((item: Record<string, unknown>) => {
           // 查找原始焦点，继承其属性
           const original = originalFocuses.find((f) => f.id === item.id);
 
           return {
-            id: item.id,
-            category: item.category,
-            description: item.description || original?.description || "",
-            positionA: item.positionA || original?.positionA || "未明确",
-            positionB: item.positionB || original?.positionB || "未明确",
-            coreIssue: item.coreIssue || original?.coreIssue || "",
+            id: item.id as string,
+            category: item.category as DisputeFocusCategory,
+            description:
+              (item.description as string) || original?.description || "",
+            positionA:
+              (item.positionA as string) || original?.positionA || "未明确",
+            positionB:
+              (item.positionB as string) || original?.positionB || "未明确",
+            coreIssue: (item.coreIssue as string) || original?.coreIssue || "",
             importance: Math.min(
               10,
-              Math.max(1, Math.round(item.importance || 5)),
+              Math.max(1, Math.round((item.importance as number) || 5)),
             ),
-            confidence: Math.min(1, Math.max(0, item.confidence || 0.8)),
+            confidence: Math.min(
+              1,
+              Math.max(0, (item.confidence as number) || 0.8),
+            ),
             relatedClaims: original?.relatedClaims || [],
             relatedFacts: original?.relatedFacts || [],
-            evidence: item.evidence || original?.evidence || [],
-            legalBasis: item.legalBasis || original?.legalBasis,
-            _inferred: (item.confidence || 0.8) < 0.9,
+            evidence: (item.evidence as string[]) || original?.evidence || [],
+            legalBasis:
+              (item.legalBasis as string | undefined) || original?.legalBasis,
+            _inferred: ((item.confidence as number) || 0.8) < 0.9,
           };
         })
         .filter((item) => !invalidIds.has(item.id));

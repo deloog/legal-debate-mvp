@@ -1,6 +1,6 @@
 // 轮次管理器单元测试
 
-import { RoundManager } from "@/lib/debate/round";
+import { RoundManager } from "@/lib/debate/round/round-manager";
 import { prisma } from "@/lib/db/prisma";
 import {
   setupTestDatabase,

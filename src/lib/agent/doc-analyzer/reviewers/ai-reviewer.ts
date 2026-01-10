@@ -15,20 +15,43 @@ import type {
   ReviewerConfig,
   Correction,
 } from "../core/types";
+import type { AIRequestConfig, AIResponse } from "../../../../types/ai-service";
 import { logger } from "../../../agent/security/logger";
+
+interface AIReviewResponse {
+  issues: AIReviewIssue[];
+  corrections: AIReviewCorrection[];
+}
+
+interface AIReviewIssue {
+  severity: "ERROR" | "WARNING" | "INFO";
+  category: string;
+  message: string;
+  suggestion?: string;
+}
+
+interface AIReviewCorrection {
+  type: string;
+  description: string;
+  rule?: string;
+}
+
+interface AIServiceLike {
+  chatCompletion(config: AIRequestConfig): Promise<AIResponse>;
+}
 
 /**
  * AI审查器
  */
 export class AIReviewer {
   public readonly name = "AIReviewer";
-  private aiService: any | null = null;
+  private aiService: AIServiceLike | null = null;
   private initialized = false;
 
   /**
    * 初始化AI服务
    */
-  public async initialize(aiService: any): Promise<void> {
+  public async initialize(aiService: AIServiceLike): Promise<void> {
     this.aiService = aiService;
     this.initialized = true;
     logger.info("AIReviewer初始化完成");
@@ -40,7 +63,7 @@ export class AIReviewer {
   public async review(
     data: ExtractedData,
     fullText: string,
-    config: ReviewerConfig,
+    config?: Partial<ReviewerConfig>,
   ): Promise<ReviewResult> {
     logger.debug("AIReviewer开始审查");
 
@@ -91,13 +114,14 @@ export class AIReviewer {
 
     // 计算评分
     const score = this.calculateScore(issues);
-    const passed = score >= config.threshold;
+    const threshold = config?.threshold ?? 0.7;
+    const passed = score >= threshold;
 
     logger.debug("AIReviewer审查完成", {
       score,
       passed,
       issues: issues.length,
-      threshold: config.threshold,
+      threshold,
     });
 
     return {
@@ -160,7 +184,11 @@ ${dataSummary}
   /**
    * 调用AI进行审查
    */
-  private async callAIReview(prompt: string): Promise<any> {
+  private async callAIReview(prompt: string): Promise<AIReviewResponse> {
+    if (!this.aiService) {
+      throw new Error("AI service not initialized");
+    }
+
     try {
       const response = await this.aiService.chatCompletion({
         model: "zhipu-pro",
@@ -193,7 +221,7 @@ ${dataSummary}
   /**
    * 解析AI的JSON响应
    */
-  private parseJSONResponse(content: string): any {
+  private parseJSONResponse(content: string): AIReviewResponse {
     try {
       // 尝试提取JSON部分
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -203,7 +231,7 @@ ${dataSummary}
 
       // 如果没有找到JSON，返回空结果
       return { issues: [], corrections: [] };
-    } catch (error) {
+    } catch {
       logger.warn("解析AI响应JSON失败", { content });
       return { issues: [], corrections: [] };
     }
@@ -213,13 +241,13 @@ ${dataSummary}
    * 解析AI响应
    */
   private parseAIResponse(
-    aiResult: any,
+    aiResult: AIReviewResponse,
     issues: ReviewIssue[],
     corrections: Correction[],
   ): void {
     // 解析问题
     if (aiResult.issues && Array.isArray(aiResult.issues)) {
-      aiResult.issues.forEach((issue: any) => {
+      aiResult.issues.forEach((issue: AIReviewIssue) => {
         if (
           this.isValidSeverity(issue.severity) &&
           issue.category &&
@@ -237,13 +265,19 @@ ${dataSummary}
 
     // 解析修正建议
     if (aiResult.corrections && Array.isArray(aiResult.corrections)) {
-      aiResult.corrections.forEach((correction: any) => {
+      aiResult.corrections.forEach((correction: AIReviewCorrection) => {
+        const correctionType = correction.type as
+          | "ADD_CLAIM"
+          | "ADD_PARTY"
+          | "FIX_AMOUNT"
+          | "FIX_ROLE"
+          | "OTHER";
         if (
           this.isValidCorrectionType(correction.type) &&
           correction.description
         ) {
           corrections.push({
-            type: correction.type,
+            type: correctionType,
             description: correction.description,
             rule: correction.rule || "AI_RECOMMENDATION",
           });

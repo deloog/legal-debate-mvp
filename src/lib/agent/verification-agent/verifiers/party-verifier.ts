@@ -44,6 +44,35 @@ export class PartyVerifier {
     "诉讼代理",
     "法定代理",
     "指定代理",
+    "法律工作者",
+  ];
+
+  /**
+   * 法定代表人关键词列表
+   */
+  private readonly LEGAL_REP_KEYWORDS = [
+    "法定代表人",
+    "法人代表",
+    "总经理",
+    "执行董事",
+    "董事长",
+    "监事",
+    "董事",
+  ];
+
+  /**
+   * 常见排除词汇（非当事人）
+   */
+  private readonly EXCLUDE_KEYWORDS = [
+    "对方",
+    "被告方",
+    "原告方",
+    "被申请人",
+    "申请人",
+    "上诉人",
+    "被上诉人",
+    "涉案",
+    "本案",
   ];
 
   /**
@@ -76,6 +105,33 @@ export class PartyVerifier {
       if (this.isAgent(plaintiffName)) {
         details.plaintiffValid = false;
         issues.push(`"${plaintiffName}"包含代理人关键词，不应作为原告`);
+      }
+
+      // 检查原告是否包含法定代表人关键词
+      if (this.isLegalRep(plaintiffName)) {
+        details.plaintiffValid = false;
+        issues.push(`"${plaintiffName}"包含法定代表人关键词，不应作为原告`);
+      }
+
+      // 检查原告是否包含常见排除词汇
+      if (this.isExcludeWord(plaintiffName)) {
+        details.plaintiffValid = false;
+        issues.push(`"${plaintiffName}"包含常见排除词汇，不应作为原告`);
+      }
+
+      // 检查名称长度是否合理
+      if (plaintiffName.length < 2) {
+        details.plaintiffValid = false;
+        issues.push("原告姓名过短，可能为误识别");
+      }
+
+      // 检查是否为公司名称（公司名称应更严格）
+      if (
+        this.isCompany(plaintiffName) &&
+        !this.isValidCompanyName(plaintiffName)
+      ) {
+        details.plaintiffValid = false;
+        issues.push(`原告公司名称"${plaintiffName}"格式可能不正确`);
       }
 
       // 与源数据对比
@@ -113,6 +169,33 @@ export class PartyVerifier {
       if (this.isAgent(defendantName)) {
         details.defendantValid = false;
         issues.push(`"${defendantName}"包含代理人关键词，不应作为被告`);
+      }
+
+      // 检查被告是否包含法定代表人关键词
+      if (this.isLegalRep(defendantName)) {
+        details.defendantValid = false;
+        issues.push(`"${defendantName}"包含法定代表人关键词，不应作为被告`);
+      }
+
+      // 检查被告是否包含常见排除词汇
+      if (this.isExcludeWord(defendantName)) {
+        details.defendantValid = false;
+        issues.push(`"${defendantName}"包含常见排除词汇，不应作为被告`);
+      }
+
+      // 检查名称长度是否合理
+      if (defendantName.length < 2) {
+        details.defendantValid = false;
+        issues.push("被告姓名过短，可能为误识别");
+      }
+
+      // 检查是否为公司名称（公司名称应更严格）
+      if (
+        this.isCompany(defendantName) &&
+        !this.isValidCompanyName(defendantName)
+      ) {
+        details.defendantValid = false;
+        issues.push(`被告公司名称"${defendantName}"格式可能不正确`);
       }
 
       // 与源数据对比
@@ -160,6 +243,64 @@ export class PartyVerifier {
    */
   private isAgent(name: string): boolean {
     return this.AGENT_KEYWORDS.some((keyword) => name.includes(keyword));
+  }
+
+  /**
+   * 检查是否为法定代表人
+   */
+  private isLegalRep(name: string): boolean {
+    return this.LEGAL_REP_KEYWORDS.some((keyword) => name.includes(keyword));
+  }
+
+  /**
+   * 检查是否为常见排除词汇
+   */
+  private isExcludeWord(name: string): boolean {
+    return this.EXCLUDE_KEYWORDS.some((keyword) => name.includes(keyword));
+  }
+
+  /**
+   * 检查是否为公司名称
+   */
+  private isCompany(name: string): boolean {
+    const companyKeywords = [
+      "公司",
+      "企业",
+      "集团",
+      "有限",
+      "股份",
+      "责任",
+      "合伙",
+      "个体",
+      "厂",
+      "店",
+      "中心",
+      "工作室",
+    ];
+    return companyKeywords.some((keyword) => name.includes(keyword));
+  }
+
+  /**
+   * 检查是否为有效的公司名称
+   */
+  private isValidCompanyName(name: string): boolean {
+    // 公司名称至少包含"公司"或"企业"
+    if (!name.includes("公司") && !name.includes("企业")) {
+      return false;
+    }
+
+    // 公司名称长度应在3-50个字之间
+    if (name.length < 3 || name.length > 50) {
+      return false;
+    }
+
+    // 公司名称不应包含特殊字符（除标点符号外）
+    const specialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?]/;
+    if (specialChars.test(name)) {
+      return false;
+    }
+
+    return true;
   }
 
   /**

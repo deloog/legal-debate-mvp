@@ -215,6 +215,36 @@ export abstract class BaseAgent implements Agent {
         context: {
           inputSummary: this.summarizeInput(context),
           processingSteps: this.getProcessingSteps(),
+          // 从result中提取warnings（如果存在）- 增强调试
+          warnings: (() => {
+            console.log("[DEBUG] BaseAgent.execute 开始提取warnings", {
+              resultType: typeof result,
+              hasMetadata:
+                result && typeof result === "object" && "metadata" in result,
+            });
+
+            if (!result || typeof result !== "object") return [];
+            const res = result as Record<string, unknown>;
+
+            if (!res.metadata || typeof res.metadata !== "object") {
+              console.warn("[WARNING] metadata不存在或不是对象");
+              return [];
+            }
+
+            const metadata = res.metadata as Record<string, unknown>;
+            if (!Array.isArray(metadata.warnings)) {
+              console.warn("[WARNING] metadata.warnings不是数组", {
+                warnings: metadata.warnings,
+              });
+              return [];
+            }
+
+            console.log("[DEBUG] 提取到warnings", {
+              count: metadata.warnings.length,
+              warnings: metadata.warnings,
+            });
+            return metadata.warnings as string[];
+          })(),
         },
       });
 

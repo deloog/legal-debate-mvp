@@ -8,6 +8,7 @@ import {
   beforeEach,
   afterEach,
   jest,
+  afterAll,
 } from "@jest/globals";
 import {
   createMockRequest,
@@ -20,6 +21,9 @@ if (typeof global.TextDecoder === "undefined") {
   // @ts-ignore
   global.TextDecoder = TextDecoder;
 }
+
+// 设置Jest超时时间
+jest.setTimeout(30000);
 
 // Mock Prisma
 jest.mock("@/lib/db/prisma", () => ({
@@ -67,6 +71,10 @@ describe("Debate Flow Integration Tests", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    jest.clearAllTimers();
   });
 
   describe("Complete Debate Flow", () => {
@@ -178,6 +186,20 @@ describe("Debate Flow Integration Tests", () => {
       });
       expect(streamResponse.status).toBe(200);
       expect(streamResponse.body).toBeInstanceOf(ReadableStream);
+
+      // 关闭流以防止Jest无法退出
+      if (streamResponse.body) {
+        const reader = streamResponse.body.getReader();
+        try {
+          // 读取流直到结束，确保流被正确关闭
+          while (true) {
+            const { done } = await reader.read();
+            if (done) break;
+          }
+        } finally {
+          reader.releaseLock();
+        }
+      }
     });
 
     it("should handle debate not found error in stream", async () => {
@@ -267,6 +289,8 @@ describe("Debate Flow Integration Tests", () => {
         }
       } catch (error) {
         console.log("Stream reading error:", error);
+      } finally {
+        reader.releaseLock();
       }
 
       // 如果没有收到错误事件，至少验证错误被正确处理了
@@ -391,6 +415,8 @@ describe("Debate Flow Integration Tests", () => {
         }
       } catch (error) {
         console.log("Stream reading error:", error);
+      } finally {
+        reader.releaseLock();
       }
 
       // 如果没有收到错误事件，至少验证错误被正确处理了
@@ -470,6 +496,22 @@ describe("Debate Flow Integration Tests", () => {
       // 验证响应时间在合理范围内（应该小于5秒）
       const totalTime = endTime - startTime;
       expect(totalTime).toBeLessThan(5000);
+
+      // 关闭所有流以防止Jest无法退出
+      for (const response of responses) {
+        if (response.body) {
+          const reader = response.body.getReader();
+          try {
+            // 读取流直到结束，确保流被正确关闭
+            while (true) {
+              const { done } = await reader.read();
+              if (done) break;
+            }
+          } finally {
+            reader.releaseLock();
+          }
+        }
+      }
     });
   });
 });

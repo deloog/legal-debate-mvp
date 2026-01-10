@@ -188,41 +188,62 @@ export class DocumentParser {
       return this.generateMockResponse();
     }
 
-    try {
-      const unifiedService = await getUnifiedAIService(
-        undefined,
-        this.forceRealAI,
-      );
+    const maxRetries = 3;
+    let lastError: Error | null = null;
 
-      const response = await unifiedService.chatCompletion({
-        model: this.aiModel,
-        provider: this.aiProvider,
-        messages: [
-          {
-            role: "system",
-            content:
-              "你是一个专业的法律文档分析专家，专门从法律文档中提取结构化信息。",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        temperature: 0.1,
-        maxTokens: 4000,
-      });
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`🔄 [尝试 ${attempt}/${maxRetries}] 调用AI服务...`);
 
-      if (response.choices && response.choices.length > 0) {
-        return response.choices[0].message.content;
-      } else {
-        throw new Error("AI服务返回了空响应");
+        const unifiedService = await getUnifiedAIService(
+          undefined,
+          this.forceRealAI,
+        );
+
+        const response = await unifiedService.chatCompletion({
+          model: this.aiModel,
+          provider: this.aiProvider,
+          messages: [
+            {
+              role: "system",
+              content:
+                "你是一个专业的法律文档分析专家，专门从法律文档中提取结构化信息。",
+            },
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          temperature: 0.1,
+          maxTokens: 4000,
+        });
+
+        if (response.choices && response.choices.length > 0) {
+          console.log(`✅ [尝试 ${attempt}/${maxRetries}] AI调用成功`);
+          return response.choices[0].message.content;
+        } else {
+          throw new Error("AI服务返回了空响应");
+        }
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        console.error(
+          `❌ [尝试 ${attempt}/${maxRetries}] AI调用失败:`,
+          lastError.message,
+        );
+
+        // 如果不是最后一次尝试，等待后重试
+        if (attempt < maxRetries) {
+          const waitTime = attempt * 1000; // 递增等待时间：1秒、2秒、3秒
+          console.log(`⏳ 等待 ${waitTime}ms 后重试...`);
+          await new Promise((resolve) => setTimeout(resolve, waitTime));
+        }
       }
-    } catch (error) {
-      console.error("DocumentParser AI分析失败:", error);
-      // 在出错时也使用Mock数据作为降级方案
-      console.warn("AI服务调用失败，使用Mock数据作为降级方案");
-      return this.generateMockResponse();
     }
+
+    // 所有重试都失败，返回友好错误信息
+    throw new Error(
+      `AI分析当前繁忙，请稍后再试。技术详情：${lastError?.message || "未知错误"}`,
+    );
   }
 
   // =============================================================================
@@ -360,19 +381,22 @@ ${textContent}
     tokenUsed: number;
   } {
     try {
-      // 清理AI响应中的代码块标记
+      // 清理AI响应中的代码块标记（改进版）
       let cleanedResponse = aiResponse.trim();
 
-      // 移除可能的代码块标记
-      if (cleanedResponse.includes("```json")) {
-        cleanedResponse = cleanedResponse
-          .replace(/```json\s*/, "")
-          .replace(/```\s*$/, "");
-      }
-      if (cleanedResponse.includes("```")) {
-        cleanedResponse = cleanedResponse
-          .replace(/```\s*/, "")
-          .replace(/```\s*$/, "");
+      // 移除所有可能的代码块标记
+      cleanedResponse = cleanedResponse
+        .replace(/```json\s*\n?/gi, "")
+        .replace(/```text\s*\n?/gi, "")
+        .replace(/```javascript\s*\n?/gi, "")
+        .replace(/```js\s*\n?/gi, "")
+        .replace(/```\s*$/gi, "")
+        .trim();
+
+      // 提取完整的JSON对象（支持嵌套）
+      const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        cleanedResponse = jsonMatch[0];
       }
 
       // 尝试解析JSON响应
@@ -395,7 +419,10 @@ ${textContent}
         confidence: parsed.confidence || 0.8,
         tokenUsed: this.estimateTokenUsage(aiResponse),
       };
-    } catch {
+    } catch (error) {
+      console.error("AI响应解析失败:", error);
+      console.error("原始响应:", aiResponse);
+
       // JSON解析失败时的降级处理
       return {
         extractedData: {

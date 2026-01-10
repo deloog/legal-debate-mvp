@@ -30,7 +30,7 @@ export class RuleReviewer {
   public async review(
     data: ExtractedData,
     fullText: string,
-    config: ReviewerConfig,
+    config?: Partial<ReviewerConfig>,
   ): Promise<ReviewResult> {
     logger.debug("RuleReviewer开始审查");
 
@@ -48,13 +48,14 @@ export class RuleReviewer {
 
     // 质量评分
     const score = this.calculateScore(issues);
-    const passed = score >= config.threshold;
+    const threshold = config?.threshold ?? 0.7;
+    const passed = score >= threshold;
 
     logger.debug("RuleReviewer审查完成", {
       score,
       passed,
       issues: issues.length,
-      threshold: config.threshold,
+      threshold,
     });
 
     return {

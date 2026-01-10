@@ -7,7 +7,7 @@ import {
   IConnectionManager,
   connectionManager,
   executeWithRetry,
-} from "../../../lib/db/connection-manager";
+} from "@/lib/db/connection-manager";
 
 describe("ConnectionPoolError", () => {
   it("应该创建错误实例", () => {

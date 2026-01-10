@@ -11,6 +11,7 @@
 import type {
   ExtractedData,
   ReviewResult,
+  ReviewIssue,
   ReviewerConfig,
   Correction,
 } from "../core/types";
@@ -25,7 +26,7 @@ export interface IReviewer {
   review(
     data: ExtractedData,
     fullText: string,
-    config: ReviewerConfig,
+    config?: Partial<ReviewerConfig>,
   ): Promise<ReviewResult>;
 }
 
@@ -65,7 +66,7 @@ export class ReviewerManager {
   ): Promise<{
     passed: boolean;
     score: number;
-    issues: Array<any>;
+    issues: ReviewIssue[];
     corrections: Correction[];
     details: Array<{ reviewer: string; result: ReviewResult }>;
   }> {
@@ -91,7 +92,7 @@ export class ReviewerManager {
     }
 
     const results: Array<{ reviewer: string; result: ReviewResult }> = [];
-    const allIssues: Array<any> = [];
+    const allIssues: ReviewIssue[] = [];
     const allCorrections: Correction[] = [];
 
     // 顺序执行所有注册的审查器

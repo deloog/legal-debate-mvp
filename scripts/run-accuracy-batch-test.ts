@@ -1,6 +1,12 @@
 import { DocAnalyzerAgent } from "../src/lib/agent/doc-analyzer";
 import { AIVerificationService } from "../src/lib/ai/ai-verification-service";
 import { AgentContext, TaskPriority } from "../src/types/agent";
+import {
+  Party,
+  Claim,
+  DocumentAnalysisOutput,
+  ClaimType,
+} from "../src/lib/agent/doc-analyzer/core/types";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join } from "path";
 import type { TestDocument } from "./accuracy-test-data-manager";
@@ -159,6 +165,9 @@ class BatchAccuracyTester {
     try {
       await this.agent.initialize();
 
+      // 禁用缓存以确保使用最新的提示词逻辑
+      this.agent.disableCache();
+
       const context: AgentContext = {
         task: "document_analysis",
         taskType: "document_parse",
@@ -187,14 +196,28 @@ class BatchAccuracyTester {
         throw new Error(analysisResult.error?.message || "分析失败");
       }
 
-      const extractedData = analysisResult.data.extractedData;
+      const extractedData = (analysisResult.data as DocumentAnalysisOutput)
+        .extractedData;
       const originalText = readFileSync(testDoc.filePath, "utf-8");
 
       const verificationResult =
         await this.verificationService.verifyExtraction({
           originalText,
-          extractedData,
-          goldStandard: testDoc.goldStandard,
+          extractedData: {
+            parties: extractedData.parties,
+            claims: extractedData.claims,
+          },
+          goldStandard: {
+            parties: testDoc.goldStandard.parties as Party[],
+            claims: testDoc.goldStandard.claims.map(
+              (c) =>
+                ({
+                  ...c,
+                  type: c.type as ClaimType,
+                  currency: (c as Claim).currency || "CNY",
+                }) as Claim,
+            ),
+          },
         });
 
       const processingTime = Date.now() - startTime;

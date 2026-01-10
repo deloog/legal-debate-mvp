@@ -6,6 +6,7 @@ import type {
   MonitorEventType,
   HealthStatus,
   ServiceStatus,
+  AIErrorType,
 } from "../../types/ai-service";
 
 // =============================================================================
@@ -63,6 +64,14 @@ export class AIMonitor {
   }
 
   public start(): void {
+    // 测试环境不启动定时器，避免Jest异步清理错误
+    if (process.env.NODE_ENV === "test") {
+      this.logEvent("monitor_start", undefined, undefined, {
+        message: "AI Monitor started (test mode - no interval)",
+      });
+      return;
+    }
+
     if (this.metricsInterval) {
       clearInterval(this.metricsInterval);
     }
@@ -137,7 +146,7 @@ export class AIMonitor {
       responseTime,
       tokensUsed,
       success,
-      errorType: errorType as any,
+      errorType: errorType as AIErrorType | undefined,
       cacheHit,
     };
 
@@ -169,7 +178,7 @@ export class AIMonitor {
     });
 
     // 检查告警
-    this.checkAlerts(provider, metrics);
+    this.checkAlerts(provider);
   }
 
   public recordProviderSwitch(provider: AIProvider, reason: string): void {
@@ -298,7 +307,7 @@ export class AIMonitor {
   // 告警系统
   // =============================================================================
 
-  private checkAlerts(provider: AIProvider, metrics: PerformanceMetrics): void {
+  private checkAlerts(provider: AIProvider): void {
     const recentMetrics = this.getRecentMetrics(provider, 300000); // 最近5分钟
 
     if (recentMetrics.length === 0) return;
@@ -444,7 +453,6 @@ export class AIMonitor {
 
   private collectMetrics(): void {
     // 定期收集和聚合指标
-    const now = Date.now();
     const providers: AIProvider[] = [
       "zhipu",
       "deepseek",
@@ -565,7 +573,7 @@ export class AIMonitor {
       0,
     );
 
-    const providerStatus: Record<AIProvider, HealthStatus> = {} as any;
+    const providerStatus = {} as Record<AIProvider, HealthStatus>;
     this.healthStatus.forEach((health, provider) => {
       providerStatus[provider] = health;
     });
@@ -683,8 +691,19 @@ export class AIMonitor {
 
   private getProviderReport(
     metrics: PerformanceMetrics[],
-  ): Record<string, any> {
-    const providerStats: Record<string, any> = {};
+  ): Record<string, unknown> {
+    interface ProviderStat {
+      requests: number;
+      successful: number;
+      failed: number;
+      averageResponseTime: number;
+      totalTokens: number;
+      cacheHits: number;
+      healthy: boolean;
+      lastCheck: number;
+    }
+
+    const providerStats: Record<string, ProviderStat> = {};
 
     const providers = Array.from(new Set(metrics.map((m) => m.provider)));
 

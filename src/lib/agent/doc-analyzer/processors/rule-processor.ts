@@ -54,6 +54,9 @@ export class RuleProcessor {
     const processedClaims = [...data.claims];
     const processedParties = [...data.parties];
 
+    // 检查缺失当事人（添加警告）
+    this.checkMissingParties(processedParties, processedClaims, corrections);
+
     // PartyExtractor算法兜底：补充和修正AI识别的当事人
     const partyExtractionResult = await this.partyExtractor.extractFromText(
       fullText,
@@ -113,6 +116,94 @@ export class RuleProcessor {
       },
       corrections,
     };
+  }
+
+  /**
+   * 检查缺失当事人
+   */
+  private checkMissingParties(
+    parties: Party[],
+    claims: Claim[],
+    corrections: Correction[],
+  ): void {
+    const plaintiffs = parties.filter((p) => p.type === "plaintiff");
+    const defendants = parties.filter((p) => p.type === "defendant");
+
+    if (plaintiffs.length === 0) {
+      corrections.push({
+        type: "OTHER",
+        description: "⚠️ 缺少原告信息，请检查文档完整性",
+        rule: "MISSING_PLAINTIFF_CHECK",
+      });
+      logger.warn("检测到缺少原告", { partyCount: parties.length });
+    }
+
+    if (defendants.length === 0) {
+      // 尝试从诉讼请求中推断被告
+      const inferredDefendant = this.inferDefendantFromClaims(claims);
+      if (inferredDefendant) {
+        parties.push(inferredDefendant);
+        corrections.push({
+          type: "ADD_PARTY",
+          description: `📌 从诉讼请求推断被告：${inferredDefendant.name}`,
+          rule: "INFER_DEFENDANT_FROM_CLAIMS",
+        });
+        logger.info("从诉讼请求推断被告", { name: inferredDefendant.name });
+      } else {
+        corrections.push({
+          type: "OTHER",
+          description: "⚠️ 缺少被告信息，请检查文档完整性",
+          rule: "MISSING_DEFENDANT_CHECK",
+        });
+        logger.warn("检测到缺少被告", { partyCount: parties.length });
+      }
+    }
+  }
+
+  /**
+   * 从诉讼请求中推断被告
+   */
+  private inferDefendantFromClaims(claims: Claim[]): Party | null {
+    for (const claim of claims) {
+      // 匹配"判令XX偿还/支付/承担"等模式
+      const patterns = [
+        /判令\s*([^\s，]{2,10})\s*(?:偿还|支付|承担|履行)/,
+        /请求判令\s*([^\s，]{2,10})\s*(?:偿还|支付)/,
+      ];
+
+      for (const pattern of patterns) {
+        const match = claim.content.match(pattern);
+        if (match) {
+          const name = match[1].trim();
+          // 验证名称有效性
+          if (name.length >= 2 && !this.isCommonWords(name)) {
+            return {
+              type: "defendant",
+              name,
+              role: "推断被告",
+              _inferred: true,
+            };
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * 判断是否为常见词汇
+   */
+  private isCommonWords(text: string): boolean {
+    const commonWords = [
+      "对方",
+      "被告方",
+      "原告方",
+      "涉案",
+      "本案",
+      "被申请人",
+      "申请人",
+    ];
+    return commonWords.includes(text);
   }
 
   /**
@@ -211,11 +302,20 @@ export class RuleProcessor {
     corrections: Correction[],
   ): Promise<void> {
     try {
+      // 如果AI已经提取到诉讼请求，跳过算法兜底
+      // 避免过度推断导致的准确率下降
+      if (claims.length >= 1) {
+        logger.debug("AI已提取诉讼请求，跳过算法兜底", {
+          claimCount: claims.length,
+        });
+        return;
+      }
+
       const extractionResult = await this.claimExtractor.extractFromText(
         fullText,
         {
-          decomposeCompound: true,
-          addMissingTypes: true,
+          decomposeCompound: false, // 禁用复合请求拆解，避免过度推断
+          addMissingTypes: false, // 禁用自动添加缺失类型，避免重复
         },
       );
 
@@ -264,7 +364,16 @@ export class RuleProcessor {
     claims: Claim[],
     corrections: Correction[],
   ): void {
-    const typeMap: Record<string, string> = {
+    const typeMap: Record<
+      string,
+      | "PAY_PRINCIPAL"
+      | "PAY_INTEREST"
+      | "PAY_PENALTY"
+      | "PAY_DAMAGES"
+      | "LITIGATION_COST"
+      | "PERFORMANCE"
+      | "TERMINATION"
+    > = {
       偿还本金: "PAY_PRINCIPAL",
       支付利息: "PAY_INTEREST",
       违约金: "PAY_PENALTY",
@@ -278,7 +387,7 @@ export class RuleProcessor {
     claims.forEach((claim) => {
       const mappedType = typeMap[claim.type];
       if (mappedType && mappedType !== claim.type) {
-        claim.type = mappedType as any;
+        claim.type = mappedType;
         fixed++;
       }
     });

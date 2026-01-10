@@ -6,6 +6,9 @@
  * 2. 支持主论点、支持论据、法律引用、反驳论点
  * 3. 计算论点强度
  * 4. 批量生成论点
+ * 5. 生成推理链（新增）
+ * 6. 使用逻辑连接词（新增）
+ * 7. 识别因果关系（新增）
  */
 
 import { createHash } from "crypto";
@@ -17,6 +20,25 @@ import type {
   ArgumentType,
   LawArticle,
 } from "./types";
+import {
+  generateReasoningChain,
+  identifyCausalType,
+  type CausalType,
+} from "./reasoning-rules";
+
+// =============================================================================
+// 类型定义
+// =============================================================================
+
+/**
+ * 推理链信息
+ */
+export interface ReasoningChainInfo {
+  /** 推理步骤 */
+  steps: string[];
+  /** 推理类型 */
+  type: "deductive" | "inductive" | "analogical";
+}
 
 // =============================================================================
 // 类型定义
@@ -57,6 +79,8 @@ export class ArgumentGenerator {
         "根据法条{articleNumber}的规定，{content}，因此应当支持原告诉请。",
         "基于{lawName}第{articleNumber}条，{content}，被告应当承担相应责任。",
         "依据{articleNumber}条规定，{content}，原告的主张具有法律依据。",
+        "由于{articleNumber}条规定{content}，故而应当支持原告诉请。",
+        "鉴于{articleNumber}条明确规定{content}，所以原告的主张成立。",
       ],
     },
     supporting: {
@@ -123,7 +147,7 @@ export class ArgumentGenerator {
   }
 
   /**
-   * 生成主论点
+   * 生成主论点（增强版 - 包含推理链）
    */
   private generateMainArguments(
     legalBasis: LegalBasis,
@@ -144,19 +168,93 @@ export class ArgumentGenerator {
         .replace("{lawName}", article.lawName)
         .replace("{content}", this.truncateContent(article.content, 30));
 
+      // 生成推理链
+      const reasoningChain = this.generateEnhancedReasoningChain(
+        article,
+        legalBasis.facts,
+      );
+
+      // 识别因果关系
+      const causalType = identifyCausalType(content);
+
+      // 计算增强后的强度
+      const strength = this.calculateEnhancedStrength(
+        article,
+        legalBasis.facts,
+        reasoningChain,
+        causalType,
+      );
+
       args.push({
         id: this.generateId(),
         type: "main",
         content,
         legalBasis: [article],
         factBasis: legalBasis.facts,
-        strength: this.calculateStrength(article, legalBasis.facts),
+        strength,
         side: options.side || "PLAINTIFF",
         createdAt: Date.now(),
       });
     }
 
     return args;
+  }
+
+  /**
+   * 生成增强的推理链
+   */
+  private generateEnhancedReasoningChain(
+    article: LawArticle,
+    facts: string[],
+  ): ReasoningChainInfo {
+    // 前提：法条规定
+    const premise = `${article.lawName}第${article.articleNumber}条规定${article.content.substring(0, 20)}...`;
+
+    // 推理：事实适用
+    const reasoning =
+      facts.length > 0
+        ? `本案事实${facts[0].substring(0, 20)}...符合该条规定`
+        : `案件事实符合法条规定`;
+
+    // 结论：法律后果
+    const conclusion =
+      article.content.includes("应当") || article.content.includes("可以")
+        ? `应当承担相应法律责任`
+        : `该主张具有法律依据`;
+
+    const steps = generateReasoningChain(premise, reasoning, conclusion);
+
+    return {
+      steps,
+      type: "deductive",
+    };
+  }
+
+  /**
+   * 计算增强的论点强度
+   */
+  private calculateEnhancedStrength(
+    article: LawArticle,
+    facts: string[],
+    reasoningChain: ReasoningChainInfo,
+    causalType?: CausalType,
+  ): number {
+    // 基础强度
+    let strength = this.calculateStrength(article, facts);
+
+    // 推理链深度奖励（≥2步骤+0.05，≥3步骤+0.1）
+    if (reasoningChain.steps.length >= 3) {
+      strength += 0.1;
+    } else if (reasoningChain.steps.length >= 2) {
+      strength += 0.05;
+    }
+
+    // 因果关系奖励
+    if (causalType) {
+      strength += 0.1;
+    }
+
+    return Math.min(strength, 1.0);
   }
 
   /**

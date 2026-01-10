@@ -308,6 +308,7 @@ export interface AnalysisMetadata {
   analysisProcess?: AnalysisProcess;
   evidenceAnalysis?: EvidenceAnalysisResult;
   comprehensiveAnalysis?: ComprehensiveAnalysisResult;
+  warnings?: string[]; // 警告信息数组
 }
 
 export interface AnalysisProcess {

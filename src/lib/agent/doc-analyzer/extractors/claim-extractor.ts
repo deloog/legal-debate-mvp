@@ -5,6 +5,13 @@
 // =============================================================================
 
 import type { Claim, ClaimType } from "../core/types";
+import {
+  COMPOUND_CLAIM_PATTERNS,
+  getClaimTypeLabel,
+  shouldInferInterest,
+  shouldInferLitigationCost,
+  shouldInferPenalty,
+} from "./claim-extraction-rules";
 
 // =============================================================================
 // 接口定义
@@ -27,23 +34,13 @@ export interface ClaimExtractionOutput {
   compoundDecomposed: number;
 }
 
-export interface CompoundClaimMatch {
-  originalText: string;
-  types: ClaimType[];
-  amounts?: number[];
-}
-
 // =============================================================================
 // 诉讼请求提取器类
 // =============================================================================
 
 export class ClaimExtractor {
-  private readonly claimPatterns: Map<ClaimType, RegExp[]>;
-  private readonly compoundPatterns: CompoundClaimMatch[];
-
   constructor() {
-    this.claimPatterns = this.initializeClaimPatterns();
-    this.compoundPatterns = this.initializeCompoundPatterns();
+    // 规则已移至 claim-extraction-rules.ts
   }
 
   /**
@@ -54,13 +51,14 @@ export class ClaimExtractor {
     options: ClaimExtractionOptions = {},
   ): Promise<ClaimExtractionOutput> {
     let claims = this.matchClaims(text);
+    let compoundDecomposed = 0;
 
     // 处理复合请求
     if (options.decomposeCompound !== false) {
       const { decomposedClaims, decomposedCount } =
-        this.decomposeCompoundClaims(claims, text);
+        this.decomposeCompoundClaims(claims);
       claims = decomposedClaims;
-      var compoundDecomposed = decomposedCount;
+      compoundDecomposed = decomposedCount;
     }
 
     // 补充缺失的诉讼请求类型
@@ -124,7 +122,6 @@ export class ClaimExtractor {
       "OTHER",
     ];
 
-    // 如果已经是有效的ClaimType，直接返回
     if (validClaimTypes.includes(type as ClaimType)) {
       return type as ClaimType;
     }
@@ -156,32 +153,92 @@ export class ClaimExtractor {
   private matchClaims(text: string): Claim[] {
     const claims: Claim[] = [];
 
-    for (const [type, patterns] of this.claimPatterns) {
-      for (const pattern of patterns) {
-        const matches = text.matchAll(pattern);
-        for (const match of matches) {
-          if (match[0]) {
-            claims.push({
-              type,
-              content: match[0],
-              amount: this.extractAmountFromMatch(match),
-              currency: "CNY",
-              evidence: [],
-              legalBasis: "",
-            });
-          }
+    // 优先级匹配：先匹配具体类型
+    const patterns: Array<{ type: ClaimType; regex: RegExp }> = [
+      { type: "PAY_PRINCIPAL", regex: /(\d+(\.\d+)?)[万亿]?元/gi },
+      { type: "PAY_PRINCIPAL", regex: /支付货款|偿还货款/gi },
+      { type: "PAY_PRINCIPAL", regex: /货款/gi },
+      { type: "PAY_INTEREST", regex: /资金占用费/gi },
+      { type: "PAY_INTEREST", regex: /支付利息|承担利息|利息.*年利率/gi },
+      { type: "PAY_INTEREST", regex: /计算利息|利息支付|利息承担|利息偿还/gi },
+      { type: "PAY_INTEREST", regex: /年利率.*利息|月利率.*利息/gi },
+      { type: "PAY_PENALTY", regex: /罚息/gi },
+      { type: "PAY_PENALTY", regex: /滞纳金/gi },
+      { type: "PAY_PENALTY", regex: /支付违约金|承担违约金|违约金/gi },
+      { type: "PAY_PENALTY", regex: /罚金|罚款|违约罚金|迟延履行金/gi },
+      { type: "PAY_PENALTY", regex: /赔偿金违约|违约赔偿/gi },
+      { type: "PAY_DAMAGES", regex: /赔偿损失|承担损失|经济损失/gi },
+      { type: "LITIGATION_COST", regex: /诉讼费用.*承担|本案.*诉讼费/gi },
+      { type: "LITIGATION_COST", regex: /案件受理费|保全费|鉴定费/gi },
+      { type: "LITIGATION_COST", regex: /公告费|执行费|律师费/gi },
+      { type: "LITIGATION_COST", regex: /代理费|公证费|翻译费|差旅费/gi },
+      { type: "LITIGATION_COST", regex: /案件费用/gi },
+      { type: "PERFORMANCE", regex: /履行义务|继续履行|履行合同/gi },
+      { type: "TERMINATION", regex: /解除合同|终止合同/gi },
+      { type: "OTHER", regex: /判令被告/gi },
+    ];
+
+    const matched = new Set<string>();
+    for (const { type, regex } of patterns) {
+      const matches = text.matchAll(regex);
+      for (const match of matches) {
+        const key = `${type}_${match[0]}`;
+        if (!matched.has(key) && match[0]) {
+          matched.add(key);
+          claims.push({
+            type,
+            content: match[0],
+            amount: this.extractAmountFromMatch(match),
+            currency: "CNY",
+            evidence: [],
+            legalBasis: "",
+          });
         }
       }
     }
 
-    return this.deduplicateClaims(claims);
+    // 匹配本金类型（如果有金额）
+    if (!claims.some((c) => c.type === "PAY_PRINCIPAL")) {
+      const amountMatch = text.match(/(\d+(\.\d+)?)[万亿]?元/);
+      if (amountMatch) {
+        if (
+          text.includes("偿还") ||
+          text.includes("支付") ||
+          text.includes("本金") ||
+          text.includes("货款")
+        ) {
+          claims.push({
+            type: "PAY_PRINCIPAL",
+            content: amountMatch[0],
+            amount: this.parseAmount(amountMatch[0]),
+            currency: "CNY",
+            evidence: [],
+            legalBasis: "",
+          });
+        }
+      }
+    }
+
+    return claims;
+  }
+
+  /**
+   * 解析金额
+   */
+  private parseAmount(text: string): number | undefined {
+    const match = text.match(/(\d+(\.\d+)?)[万亿]?元/);
+    if (!match) return undefined;
+
+    const amount = parseFloat(match[1]);
+    if (text.includes("万")) return amount * 10000;
+    if (text.includes("亿")) return amount * 100000000;
+    return amount;
   }
 
   /**
    * 从匹配中提取金额
    */
   private extractAmountFromMatch(match: RegExpMatchArray): number | undefined {
-    // 尝试从匹配中提取数字
     const amountMatch = match[0]?.match(/(\d+\.?\d*)\s*万?/);
     if (amountMatch) {
       const amount = parseFloat(amountMatch[1]);
@@ -191,35 +248,41 @@ export class ClaimExtractor {
   }
 
   /**
-   * 去重诉讼请求
+   * 去重诉讼请求（按类型去重，保留金额最大的）
    */
   private deduplicateClaims(claims: Claim[]): Claim[] {
-    const seen = new Set<string>();
-    const unique: Claim[] = [];
+    const byType = new Map<ClaimType, Claim>();
 
     for (const claim of claims) {
-      const key = `${claim.type}_${claim.content}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        unique.push(claim);
+      const existing = byType.get(claim.type);
+      if (!existing) {
+        byType.set(claim.type, claim);
+      } else {
+        // 保留有金额的
+        if (
+          claim.amount !== undefined &&
+          (existing.amount === undefined || claim.amount > existing.amount)
+        ) {
+          byType.set(claim.type, claim);
+        }
       }
     }
 
-    return unique;
+    return Array.from(byType.values());
   }
 
   /**
    * 处理复合请求
    */
-  private decomposeCompoundClaims(
-    claims: Claim[],
-    fullText: string,
-  ): { decomposedClaims: Claim[]; decomposedCount: number } {
+  private decomposeCompoundClaims(claims: Claim[]): {
+    decomposedClaims: Claim[];
+    decomposedCount: number;
+  } {
     const decomposed: Claim[] = [];
     let decomposedCount = 0;
 
     for (const claim of claims) {
-      const decomposedClaim = this.tryDecomposeClaim(claim, fullText);
+      const decomposedClaim = this.tryDecomposeClaim(claim);
       if (decomposedClaim.length > 0) {
         decomposed.push(...decomposedClaim);
         decomposedCount++;
@@ -234,11 +297,10 @@ export class ClaimExtractor {
   /**
    * 尝试拆解复合请求
    */
-  private tryDecomposeClaim(claim: Claim, fullText: string): Claim[] {
+  private tryDecomposeClaim(claim: Claim): Claim[] {
     const decomposed: Claim[] = [];
 
-    // 检查每个复合模式
-    for (const pattern of this.compoundPatterns) {
+    for (const pattern of COMPOUND_CLAIM_PATTERNS) {
       if (
         pattern.originalText &&
         claim.content.includes(pattern.originalText)
@@ -247,7 +309,7 @@ export class ClaimExtractor {
           if (!decomposed.some((c) => c.type === type)) {
             decomposed.push({
               type,
-              content: `${this.getClaimTypeLabel(type)}（从复合请求拆解）`,
+              content: `${getClaimTypeLabel(type)}（从复合请求拆解）`,
               amount: undefined,
               currency: "CNY",
               evidence: [],
@@ -258,7 +320,6 @@ export class ClaimExtractor {
         return decomposed;
       }
 
-      // 检查全文中的复合模式
       if (pattern.types.some((t) => t === claim.type)) {
         for (const type of pattern.types) {
           if (
@@ -267,7 +328,7 @@ export class ClaimExtractor {
           ) {
             decomposed.push({
               type,
-              content: `${this.getClaimTypeLabel(type)}（从复合请求推断）`,
+              content: `${getClaimTypeLabel(type)}（从复合请求推断）`,
               amount: undefined,
               currency: "CNY",
               evidence: [],
@@ -288,12 +349,11 @@ export class ClaimExtractor {
     const added: Claim[] = [...claims];
     const existingTypes = new Set(claims.map((c) => c.type));
 
-    // 强制补充LITIGATION_COST
+    // 使用规则库的智能推断
     if (
       !existingTypes.has("LITIGATION_COST") &&
-      this.likelyHasLitigationCost(fullText)
+      shouldInferLitigationCost(fullText)
     ) {
-      // 修复Bad Case 2: 确保内容包含"诉讼费用"字符串
       const hasExplicitMention = /诉讼费用|本案.*诉讼费|全部诉讼费用/.test(
         fullText,
       );
@@ -308,14 +368,15 @@ export class ClaimExtractor {
       });
     }
 
-    // 强制补充PAY_PRINCIPAL
+    // 本金推断
     if (
+      existingTypes.has("LITIGATION_COST") &&
       !existingTypes.has("PAY_PRINCIPAL") &&
-      this.likelyHasPrincipal(fullText)
+      /本金|货款|欠款|借款/.test(fullText)
     ) {
       added.push({
         type: "PAY_PRINCIPAL",
-        content: "偿还本金（从文本推断）",
+        content: "偿还本金（从上下文推断）",
         amount: undefined,
         currency: "CNY",
         evidence: [],
@@ -324,14 +385,11 @@ export class ClaimExtractor {
       });
     }
 
-    // 强制补充PAY_INTEREST
-    if (
-      !existingTypes.has("PAY_INTEREST") &&
-      this.likelyHasInterest(fullText)
-    ) {
+    // 利息推断
+    if (!existingTypes.has("PAY_INTEREST") && shouldInferInterest(fullText)) {
       added.push({
         type: "PAY_INTEREST",
-        content: "支付利息（从文本推断）",
+        content: "支付利息（从上下文推断）",
         amount: undefined,
         currency: "CNY",
         evidence: [],
@@ -340,23 +398,33 @@ export class ClaimExtractor {
       });
     }
 
-    // 强制补充PAY_PENALTY
-    if (!existingTypes.has("PAY_PENALTY") && this.likelyHasPenalty(fullText)) {
-      // 修复Bad Case 8: 根据文本内容动态生成，确保包含关键词
-      const hasPenalty = /违约金/.test(fullText);
-      const hasPenaltyInterest = /罚息/.test(fullText);
-      const hasLateFee = /滞纳金/.test(fullText);
+    // 违约金推断
+    const hasPenaltyInterest = /罚息/.test(fullText);
+    const hasLateFee = /滞纳金/.test(fullText);
+    const hasPenalty = /违约金/.test(fullText);
 
-      let content = "支付违约金（从文本推断）";
-      if (hasPenaltyInterest) {
-        content = "支付罚息（从文本推断）";
-      } else if (hasLateFee) {
-        content = "支付滞纳金（从文本推断）";
+    // 如果已经提取到违约金类型，不再推断
+    if (existingTypes.has("PAY_PENALTY")) {
+      // 检查是否需要更新内容
+      const penaltyClaim = added.find((c) => c.type === "PAY_PENALTY");
+      if (penaltyClaim && (hasPenaltyInterest || hasLateFee || hasPenalty)) {
+        if (hasPenaltyInterest) {
+          penaltyClaim.content = "支付罚息";
+        } else if (hasLateFee) {
+          penaltyClaim.content = "支付滞纳金";
+        } else if (hasPenalty) {
+          penaltyClaim.content = "支付违约金";
+        }
       }
-
+    } else if (
+      shouldInferPenalty(fullText) &&
+      !hasPenalty &&
+      !hasPenaltyInterest &&
+      !hasLateFee
+    ) {
       added.push({
         type: "PAY_PENALTY",
-        content,
+        content: "支付违约金（从上下文推断）",
         amount: undefined,
         currency: "CNY",
         evidence: [],
@@ -366,63 +434,6 @@ export class ClaimExtractor {
     }
 
     return added;
-  }
-
-  /**
-   * 判断是否可能包含诉讼费用
-   */
-  private likelyHasLitigationCost(text: string): boolean {
-    const patterns = [
-      /诉讼费用.*承担/,
-      /本案.*诉讼费/,
-      /由.*承担.*费用/,
-      /诉讼费.*被告/,
-      /费用.*由.*承担/,
-      /本案全部诉讼费/,
-      /承担本案.*费用/,
-      /诉讼费用由/,
-      /全部诉讼费用/,
-      // 修复Bad Case 1: 对于任何包含"判令被告"的文本，默认补充诉讼费用
-      /判令被告/,
-    ];
-    return patterns.some((pattern) => pattern.test(text));
-  }
-
-  /**
-   * 判断是否可能包含本金
-   */
-  private likelyHasPrincipal(text: string): boolean {
-    const patterns = [
-      /本金/gi,
-      /借款本金/gi,
-      /货款本金/gi,
-      /货款/gi,
-      /欠款/gi,
-      /支付货款/gi,
-      /偿还货款/gi,
-      /判令被告支付货款/gi,
-      /判令被告偿还货款/gi,
-      /至今未还本金/gi,
-      /判令被告偿还本金/gi,
-      /承担.*万元/gi,
-    ];
-    return patterns.some((pattern) => pattern.test(text));
-  }
-
-  /**
-   * 判断是否可能包含利息
-   */
-  private likelyHasInterest(text: string): boolean {
-    const patterns = [/利息|利率|年利率|月利率|资金占用费/];
-    return patterns.some((pattern) => pattern.test(text));
-  }
-
-  /**
-   * 判断是否可能包含违约金
-   */
-  private likelyHasPenalty(text: string): boolean {
-    const patterns = [/违约金|罚息|滞纳金/];
-    return patterns.some((pattern) => pattern.test(text));
   }
 
   /**
@@ -468,156 +479,6 @@ export class ClaimExtractor {
       withAmount,
       inferred,
     };
-  }
-
-  /**
-   * 获取诉讼请求类型标签
-   */
-  private getClaimTypeLabel(type: ClaimType): string {
-    const labels: Record<ClaimType, string> = {
-      PAY_PRINCIPAL: "偿还本金",
-      PAY_INTEREST: "支付利息",
-      PAY_PENALTY: "支付违约金",
-      LITIGATION_COST: "承担诉讼费用",
-      PAY_DAMAGES: "赔偿损失",
-      PERFORMANCE: "履行义务",
-      TERMINATION: "解除合同",
-      OTHER: "其他",
-    };
-    return labels[type] || type;
-  }
-
-  /**
-   * 初始化诉讼请求模式
-   */
-  private initializeClaimPatterns(): Map<ClaimType, RegExp[]> {
-    const patterns = new Map<ClaimType, RegExp[]>();
-
-    patterns.set("PAY_PRINCIPAL", [
-      /偿还本金|支付本金|归还本金/gi,
-      /判令被告支付(.*?)(货款|本金|欠款)/gi,
-      /承担本金|本金.*万元/gi,
-      /偿还.*万元(?!利息)/gi,
-      // 扩展PAY_PRINCIPAL同义词
-      /货款/gi,
-      /欠款/gi,
-      /借款/gi,
-      /贷款/gi,
-      /垫付款/gi,
-      /预付款/gi,
-      /货款.*支付/gi,
-      /货款.*偿还/gi,
-      /借款.*偿还/gi,
-      /借款.*支付/gi,
-      /欠款.*支付/gi,
-      /欠款.*偿还/gi,
-    ]);
-
-    patterns.set("PAY_INTEREST", [
-      /支付利息|承担利息|支付利息/gi,
-      /利息.*年利率|年利率.*利息/gi,
-      /利息.*万元/gi,
-      /支付.*利息/gi,
-      /资金占用费/gi,
-      /支付资金占用费/gi,
-      /资金.*年利率/gi,
-      // 扩展PAY_INTEREST同义词
-      /利息.*计算/gi,
-      /利息.*支付/gi,
-      /利息.*承担/gi,
-      /利息.*偿还/gi,
-      /年利率.*利息/gi,
-      /月利率.*利息/gi,
-      /利息.*月利率/gi,
-    ]);
-
-    patterns.set("PAY_PENALTY", [
-      /支付违约金|承担违约金/gi,
-      /违约金.*万元/gi,
-      /罚息/gi,
-      /滞纳金/gi,
-      /逾期罚息/gi,
-      // 扩展PAY_PENALTY同义词
-      /罚金/gi,
-      /罚款/gi,
-      /违约罚金/gi,
-      /逾期违约金/gi,
-      /迟延履行金/gi,
-      /赔偿金.*违约/gi,
-      /违约.*赔偿/gi,
-      /罚息.*支付/gi,
-      /罚息.*承担/gi,
-      /滞纳金.*支付/gi,
-      /滞纳金.*承担/gi,
-    ]);
-
-    patterns.set("PAY_DAMAGES", [
-      /赔偿损失|承担损失/gi,
-      /赔偿.*万元/gi,
-      /经济损失/gi,
-    ]);
-
-    patterns.set("LITIGATION_COST", [
-      /诉讼费用.*承担/gi,
-      /本案.*诉讼费/gi,
-      /由.*承担.*诉讼费/gi,
-      /诉讼费.*被告/gi,
-      // 扩展LITIGATION_COST同义词
-      /诉讼费/gi,
-      /案件受理费/gi,
-      /保全费/gi,
-      /鉴定费/gi,
-      /公告费/gi,
-      /执行费/gi,
-      /律师费/gi,
-      /代理费/gi,
-      /公证费/gi,
-      /翻译费/gi,
-      /差旅费/gi,
-      /费用.*诉讼/gi,
-      /诉讼.*费用/gi,
-      /本案.*费/gi,
-      /案件费用/gi,
-      /律师费.*承担/gi,
-      /代理费.*承担/gi,
-      /差旅费.*承担/gi,
-    ]);
-
-    patterns.set("PERFORMANCE", [/履行义务|继续履行/gi, /履行合同/gi]);
-
-    patterns.set("TERMINATION", [/解除合同|终止合同/gi, /解除.*合同/gi]);
-
-    patterns.set("OTHER", [/判令被告/gi, /诉讼请求/gi]);
-
-    return patterns;
-  }
-
-  /**
-   * 初始化复合请求模式
-   */
-  private initializeCompoundPatterns(): CompoundClaimMatch[] {
-    return [
-      {
-        originalText: "本金.*利息",
-        types: ["PAY_PRINCIPAL", "PAY_INTEREST"],
-      },
-      {
-        originalText: "本金.*违约金",
-        types: ["PAY_PRINCIPAL", "PAY_PENALTY"],
-      },
-      {
-        originalText: "利息.*违约金",
-        types: ["PAY_INTEREST", "PAY_PENALTY"],
-      },
-      {
-        originalText: "本金.*利息.*共计",
-        types: ["PAY_PRINCIPAL", "PAY_INTEREST"],
-      },
-      {
-        originalText: "偿还.*及.*利息",
-        types: ["PAY_PRINCIPAL", "PAY_INTEREST"],
-      },
-    ];
   }
 }
 

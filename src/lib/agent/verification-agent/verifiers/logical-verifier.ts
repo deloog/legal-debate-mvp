@@ -1,6 +1,7 @@
 /**
  * 逻辑一致性验证器（Facade）
  * 集成4个检查器：诉讼请求匹配、推理链、法条引用、矛盾检测
+ * 增强功能：逻辑评分增强器
  */
 import {
   LogicalVerificationResult,
@@ -14,6 +15,7 @@ import { ClaimFactMatcher } from "./claim-fact-matcher";
 import { ReasoningChainChecker } from "./reasoning-chain-checker";
 import { LegalLogicChecker } from "./legal-logic-checker";
 import { ContradictionDetector } from "./contradiction-detector";
+import { LogicScoringEnhancer } from "./logic-scoring-enhancer";
 
 /**
  * 待验证数据接口
@@ -37,6 +39,7 @@ interface LogicalVerifierConfig {
   legalLogicCheckEnabled: boolean;
   contradictionCheckEnabled: boolean;
   aiAssistanceEnabled: boolean;
+  logicEnhancerEnabled: boolean; // 逻辑评分增强器开关
   thresholds: {
     claimFactMatchThreshold: number;
     reasoningChainThreshold: number;
@@ -54,6 +57,7 @@ const DEFAULT_CONFIG: LogicalVerifierConfig = {
   legalLogicCheckEnabled: true,
   contradictionCheckEnabled: true,
   aiAssistanceEnabled: true,
+  logicEnhancerEnabled: true, // 启用逻辑评分增强器
   thresholds: {
     claimFactMatchThreshold: 0.8,
     reasoningChainThreshold: 0.85,
@@ -71,6 +75,7 @@ export class LogicalVerifier {
   private reasoningChainChecker: ReasoningChainChecker;
   private legalLogicChecker: LegalLogicChecker;
   private contradictionDetector: ContradictionDetector;
+  private logicScoringEnhancer: LogicScoringEnhancer;
 
   constructor(config?: Partial<LogicalVerifierConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -78,10 +83,11 @@ export class LogicalVerifier {
     this.reasoningChainChecker = new ReasoningChainChecker();
     this.legalLogicChecker = new LegalLogicChecker();
     this.contradictionDetector = new ContradictionDetector();
+    this.logicScoringEnhancer = new LogicScoringEnhancer();
   }
 
   /**
-   * 执行完整的逻辑一致性验证
+   * 执行完整的逻辑一致性验证（增强版）
    */
   async verify(data: DataToVerify): Promise<LogicalVerificationResult> {
     const startTime = Date.now();
@@ -103,12 +109,13 @@ export class LogicalVerifier {
           : this.contradictionDetector.getEmptyResult(),
       ]);
 
-    // 计算综合评分
+    // 计算综合评分（增强版）
     const score = this.calculateLogicalScore(
       claimFactMatch,
       reasoningChain,
       legalLogic,
       contradictions,
+      data,
     );
 
     const passed =
@@ -131,7 +138,7 @@ export class LogicalVerifier {
   }
 
   /**
-   * 计算逻辑一致性综合评分
+   * 计算逻辑一致性综合评分（增强版）
    */
   private calculateLogicalScore(
     claimFactMatch: number,
@@ -141,14 +148,15 @@ export class LogicalVerifier {
       hasContradictions: boolean;
       contradictions: Contradiction[];
     },
+    data: DataToVerify,
   ): number {
     let score = 0;
 
-    // 诉讼请求与事实匹配度 (40%)
-    score += claimFactMatch * 0.4;
+    // 诉讼请求与事实匹配度 (35%)
+    score += claimFactMatch * 0.35;
 
-    // 推理链完整性 (30%)
-    score += reasoningChain.score * 0.3;
+    // 推理链完整性 (25%)
+    score += reasoningChain.score * 0.25;
 
     // 法条引用逻辑性 (20%)
     score += legalLogic.score * 0.2;
@@ -160,7 +168,41 @@ export class LogicalVerifier {
       score += 0.1;
     }
 
+    // 逻辑评分增强 (10%)
+    if (this.config.logicEnhancerEnabled) {
+      score += this.applyLogicEnhancement(data) * 0.1;
+    }
+
     return Math.max(0, Math.min(1, score));
+  }
+
+  /**
+   * 应用逻辑评分增强
+   */
+  private applyLogicEnhancement(data: DataToVerify): number {
+    let enhancementScore = 0;
+    let argumentCount = 0;
+
+    // 对每个论点应用逻辑评分增强
+    if (data.arguments && data.arguments.length > 0) {
+      for (const argument of data.arguments) {
+        const result = this.logicScoringEnhancer.enhanceScore(
+          0.5, // 基础评分
+          argument,
+          undefined,
+          data.arguments,
+        );
+        enhancementScore += result.finalScore;
+        argumentCount++;
+      }
+
+      // 计算平均增强评分
+      if (argumentCount > 0) {
+        enhancementScore = enhancementScore / argumentCount;
+      }
+    }
+
+    return enhancementScore;
   }
 
   /**

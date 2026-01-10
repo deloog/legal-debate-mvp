@@ -51,6 +51,7 @@ import {
   DocumentAnalysisOutput,
   DocumentAnalysisInput,
   AnalysisProcess,
+  Correction,
 } from "./core/types";
 import { DEFAULT_CONFIG } from "./core/constants";
 import {
@@ -133,6 +134,11 @@ export class DocAnalyzerAgent extends BaseAgent {
     });
     this.reviewerManager = new ReviewerManager();
     this.setupReviewers();
+
+    // 初始化三个分析器（修复extractTimeline未定义错误）
+    this.evidenceAnalyzer = new EvidenceAnalyzer();
+    this.timelineExtractor = new TimelineExtractor();
+    this.comprehensiveAnalyzer = new ComprehensiveAnalyzer();
   }
 
   get name(): string {
@@ -248,9 +254,9 @@ export class DocAnalyzerAgent extends BaseAgent {
     }
 
     try {
-      const unifiedService = await this.aiProcessor.getAIService();
-      if (unifiedService) {
-        await this.aiReviewer.initialize(unifiedService);
+      const aiService = await this.aiProcessor.getAIService();
+      if (aiService) {
+        await this.aiReviewer.initialize(aiService);
         logger.info("AIReviewer初始化成功");
       }
     } catch (error) {
@@ -315,10 +321,7 @@ export class DocAnalyzerAgent extends BaseAgent {
       const documentType = filterResult.documentType;
 
       // Layer 2: AI核心理解（当事人角色识别、诉讼请求分类、金额模糊识别）
-      const aiResult = await this.aiProcessor.process(
-        filteredText,
-        input.options,
-      );
+      const aiResult = await this.aiProcessor.process(filteredText);
 
       // Layer 3: 规则验证（算法兜底，使用AmountExtractor和ClaimExtractor）
       const ruleResult = await this.ruleProcessor.process(
@@ -361,12 +364,13 @@ export class DocAnalyzerAgent extends BaseAgent {
       }
 
       // Layer 4: Reviewer审查（AI + 规则，独立质量检查）
+      const reviewConfig = DEFAULT_CONFIG.reviewers.aiReviewer.enabled
+        ? DEFAULT_CONFIG.reviewers.aiReviewer
+        : { enabled: false, threshold: 0.7 };
       const reviewResult = await this.reviewerManager.review(
         legalRepFilterResult,
         filteredText,
-        DEFAULT_CONFIG.reviewers.aiReviewer.enabled
-          ? DEFAULT_CONFIG.reviewers.aiReviewer
-          : { enabled: false, threshold: 0.7, rules: [] },
+        reviewConfig,
       );
 
       // 应用审查结果修正
@@ -389,6 +393,27 @@ export class DocAnalyzerAgent extends BaseAgent {
         confidence = Math.min(confidence, reviewResult.score);
       }
 
+      // 收集所有警告信息
+      const warnings: string[] = [];
+
+      // 从过滤器添加警告
+      if (filterResult.warnings && filterResult.warnings.length > 0) {
+        warnings.push(...filterResult.warnings);
+      }
+
+      // 从规则处理器添加警告（基于corrections）
+      if (ruleResult.corrections && ruleResult.corrections.length > 0) {
+        ruleResult.corrections.forEach((correction: Correction) => {
+          if (
+            correction.type === "OTHER" ||
+            correction.description.includes("缺少") ||
+            correction.description.includes("推断")
+          ) {
+            warnings.push(correction.description);
+          }
+        });
+      }
+
       const output: DocumentAnalysisOutput = {
         success: true,
         extractedData: finalExtractedData,
@@ -406,6 +431,7 @@ export class DocAnalyzerAgent extends BaseAgent {
           } as AnalysisProcess,
           evidenceAnalysis,
           comprehensiveAnalysis,
+          warnings, // 添加警告信息到metadata
         },
       };
 

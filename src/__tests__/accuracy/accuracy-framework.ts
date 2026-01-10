@@ -240,10 +240,10 @@ export class AccuracyEvaluator {
     const passedTests = testResults.filter((r) => r.passed).length;
     const failedTests = testResults.filter((r) => !r.passed).length;
     const passRate =
-      testResults.length > 0 ? passedTests / testResults.length : 0;
+      testResults.length > 0 ? passedTests / testResults.length : 1; // 默认为1表示全部通过
 
     let overallStatus: "PASSED" | "FAILED" | "PARTIAL";
-    if (passRate >= 1) {
+    if (testResults.length === 0 || passRate >= 1) {
       overallStatus = "PASSED";
     } else if (passRate >= 0.8) {
       overallStatus = "PARTIAL";

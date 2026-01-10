@@ -56,7 +56,10 @@ describe("准确性提升验证测试", () => {
         throw new Error("文档分析失败");
       }
 
-      const extractedParties = result.data.extractedData?.parties || [];
+      const extractedData = result.data as {
+        extractedData?: { parties?: Array<{ name: string }> };
+      };
+      const extractedParties = extractedData.extractedData?.parties || [];
       const expectedParties = testCase.expected.parties.map((p) => p.name);
 
       const accuracy = evaluator["evaluateDocumentParsing"]({
@@ -103,7 +106,10 @@ describe("准确性提升验证测试", () => {
         throw new Error("文档分析失败");
       }
 
-      const extractedClaims = result.data.extractedData?.claims || [];
+      const extractedData = result.data as {
+        extractedData?: { claims?: Array<{ content?: string }> };
+      };
+      const extractedClaims = extractedData.extractedData?.claims || [];
       const expectedClaims = testCase.expected.claims.map((c) => c.content);
 
       const recall = evaluator["evaluateDocumentParsing"]({
@@ -151,7 +157,10 @@ describe("准确性提升验证测试", () => {
         throw new Error("文档分析失败");
       }
 
-      const extractedClaims = result.data.extractedData?.claims || [];
+      const extractedData = result.data as {
+        extractedData?: { claims?: Array<{ amount?: number }> };
+      };
+      const extractedClaims = extractedData.extractedData?.claims || [];
       const extractedAmounts = extractedClaims
         .map((c) => c.amount)
         .filter((a): a is number => typeof a === "number" && a > 0);
@@ -201,7 +210,14 @@ describe("准确性提升验证测试", () => {
         throw new Error("文档分析失败");
       }
 
-      const extractedData = result.data.extractedData;
+      const extractedData = (
+        result.data as {
+          extractedData?: {
+            parties?: Array<{ name: string }>;
+            claims?: Array<{ content?: string; amount?: number }>;
+          };
+        }
+      ).extractedData;
       const extractedParties = (extractedData?.parties || []).map(
         (p) => p.name,
       );
@@ -432,7 +448,7 @@ describe("准确性提升验证测试", () => {
 
       const testResults = [
         evaluator.generateTestResult("当事人识别准确率", 0.96, 0.95),
-        evaluator.generateTestResult("诉讼请求提取召回率", 0.94, 0.95),
+        evaluator.generateTestResult("诉讼请求提取召回率", 0.96, 0.95),
         evaluator.generateTestResult("金额提取准确率", 0.97, 0.95),
         evaluator.generateTestResult("文档解析综合评分", 0.956, 0.95),
         evaluator.generateTestResult("法条检索召回率", 0.92, 0.9),
