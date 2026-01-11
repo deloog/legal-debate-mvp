@@ -1,7 +1,5 @@
 import { DocAnalyzerAgent } from "../../lib/agent/doc-analyzer";
 import { AgentContext, TaskPriority } from "../../types/agent";
-import { writeFileSync } from "fs";
-import { join } from "path";
 
 // =============================================================================
 // 文档解析准确性测试脚本
@@ -80,7 +78,11 @@ class DocumentAccuracyTester {
         throw new Error(result.error?.message || "分析失败");
       }
 
-      const extractedData = result.data.extractedData;
+      const extractedData = (result.data as { extractedData: unknown })
+        .extractedData as {
+        parties: unknown[];
+        claims: unknown[];
+      };
 
       const partiesMetrics = this.calculatePartiesAccuracy(
         extractedData.parties,
@@ -131,7 +133,9 @@ class DocumentAccuracyTester {
   }
 
   private calculatePartiesAccuracy(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     extracted: any[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expected: any[],
   ): { accuracy: number; correct: number } {
     let correct = 0;
@@ -167,7 +171,9 @@ class DocumentAccuracyTester {
   }
 
   private calculateClaimsRecall(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     extracted: any[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expected: any[],
   ): { recall: number; correct: number } {
     let correct = 0;

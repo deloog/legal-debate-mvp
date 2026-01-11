@@ -182,7 +182,7 @@ describe("Debate Flow Integration Tests", () => {
       );
 
       const streamResponse = await streamDebate(mockStreamRequest, {
-        params: { id: "123e4567-e89b-12d3-a456-426614174001" },
+        params: Promise.resolve({ id: "123e4567-e89b-12d3-a456-426614174001" }),
       });
       expect(streamResponse.status).toBe(200);
       expect(streamResponse.body).toBeInstanceOf(ReadableStream);
@@ -215,7 +215,7 @@ describe("Debate Flow Integration Tests", () => {
       );
 
       const streamResponse = await streamDebate(mockRequest, {
-        params: { id: "123e4567-e89b-12d3-a456-426614174002" },
+        params: Promise.resolve({ id: "123e4567-e89b-12d3-a456-426614174002" }),
       });
 
       // 现在返回404 JSON而不是流
@@ -263,7 +263,7 @@ describe("Debate Flow Integration Tests", () => {
       );
 
       const streamResponse = await streamDebate(mockRequest, {
-        params: { id: "123e4567-e89b-12d3-a456-426614174003" },
+        params: Promise.resolve({ id: "123e4567-e89b-12d3-a456-426614174003" }),
       });
       expect(streamResponse.status).toBe(200);
 
@@ -332,7 +332,9 @@ describe("Debate Flow Integration Tests", () => {
       // 验证错误被正确处理
       await expect(
         streamDebate(mockRequest, {
-          params: { id: "123e4567-e89b-12d3-a456-426614174004" },
+          params: Promise.resolve({
+            id: "123e4567-e89b-12d3-a456-426614174004",
+          }),
         }),
       ).rejects.toThrow("Database connection failed");
 
@@ -389,7 +391,7 @@ describe("Debate Flow Integration Tests", () => {
       );
 
       const streamResponse = await streamDebate(mockRequest, {
-        params: { id: "123e4567-e89b-12d3-a456-426614174005" },
+        params: Promise.resolve({ id: "123e4567-e89b-12d3-a456-426614174005" }),
       });
       expect(streamResponse.status).toBe(200);
 
@@ -481,7 +483,9 @@ describe("Debate Flow Integration Tests", () => {
       const responses = await Promise.all(
         concurrentRequests.map((request) =>
           streamDebate(request, {
-            params: { id: "123e4567-e89b-12d3-a456-426614174006" },
+            params: Promise.resolve({
+              id: "123e4567-e89b-12d3-a456-426614174006",
+            }),
           }),
         ),
       );

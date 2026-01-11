@@ -1,0 +1,136 @@
+/**
+ * 用户注册 API
+ */
+
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+import { hashPassword, validatePassword } from "@/lib/auth/password";
+import { validateEmail, validateRegisterRequest } from "@/lib/auth/validation";
+import { generateToken } from "@/lib/auth/jwt";
+import type { AuthResponse, RegisterRequest } from "@/types/auth";
+import type { JwtPayload } from "@/types/auth";
+import { AuthErrorCode } from "@/types/auth";
+
+/**
+ * POST /api/auth/register
+ * 用户注册
+ */
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  try {
+    // 解析请求体
+    const body: RegisterRequest = await request.json();
+    const { email, password, username, name } = body;
+
+    // 验证输入数据
+    const validation = validateRegisterRequest(email, password, username);
+    if (!validation.valid) {
+      const response: AuthResponse = {
+        success: false,
+        message: "输入验证失败",
+        error: validation.errors.join("; "),
+      };
+      return NextResponse.json(response, { status: 400 });
+    }
+
+    // 验证邮箱格式
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.valid) {
+      const response: AuthResponse = {
+        success: false,
+        message: "邮箱格式不正确",
+        error: emailValidation.error,
+      };
+      return NextResponse.json(response, { status: 400 });
+    }
+
+    // 验证密码复杂度
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      const response: AuthResponse = {
+        success: false,
+        message: "密码不符合要求",
+        error: passwordValidation.errors.join("; "),
+      };
+      return NextResponse.json(response, { status: 400 });
+    }
+
+    // 检查邮箱是否已存在
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      const response: AuthResponse = {
+        success: false,
+        message: "邮箱已被注册",
+        error: AuthErrorCode.USER_EXISTS,
+      };
+      return NextResponse.json(response, { status: 409 });
+    }
+
+    // 加密密码
+    const hashedPassword = await hashPassword(password);
+
+    // 创建用户（使用原生 SQL 以支持 password 字段）
+    const users = await prisma.$queryRaw<
+      {
+        id: string;
+        email: string;
+        username: string | null;
+        name: string | null;
+        role: string;
+        createdAt: Date;
+      }[]
+    >`
+      INSERT INTO users (email, username, name, status, password, "createdAt", "updatedAt")
+      VALUES (${email}, ${username || null}, ${name || username || null}, 'ACTIVE', ${hashedPassword}, NOW(), NOW())
+      RETURNING id, email, username, name, role, "createdAt"
+    `;
+
+    const user = users[0];
+
+    // 生成 JWT Token
+    const payload: JwtPayload = {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    };
+    const token = generateToken(payload);
+
+    // 返回响应
+    const response: AuthResponse = {
+      success: true,
+      message: "注册成功，请使用邮箱登录",
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          name: user.name,
+          role: user.role,
+          createdAt: user.createdAt,
+        },
+        token,
+      },
+    };
+    return NextResponse.json(response, { status: 201 });
+  } catch (error) {
+    console.error("注册失败:", error);
+    const response: AuthResponse = {
+      success: false,
+      message: "注册失败，请稍后重试",
+      error: "SERVER_ERROR",
+    };
+    return NextResponse.json(response, { status: 500 });
+  }
+}
+
+/**
+ * 不支持其他 HTTP 方法
+ */
+export async function GET(): Promise<NextResponse> {
+  return NextResponse.json(
+    { success: false, message: "方法不允许" },
+    { status: 405 },
+  );
+}

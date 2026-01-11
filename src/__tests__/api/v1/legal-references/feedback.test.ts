@@ -59,7 +59,9 @@ describe("法条反馈API", () => {
         },
       );
 
-      const response = await PUT(request, { params: { id: "article-1" } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: "article-1" }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(200);
@@ -102,7 +104,9 @@ describe("法条反馈API", () => {
         },
       );
 
-      const response = await PUT(request, { params: { id: "article-1" } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: "article-1" }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(200);
@@ -150,7 +154,9 @@ describe("法条反馈API", () => {
         },
       );
 
-      const response = await PUT(request, { params: { id: "article-1" } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: "article-1" }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(200);
@@ -173,7 +179,9 @@ describe("法条反馈API", () => {
         },
       );
 
-      const response = await PUT(request, { params: { id: "article-1" } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: "article-1" }),
+      });
       const testResponse = await createTestResponse(response);
 
       assertions.assertError(testResponse, 400);
@@ -191,7 +199,9 @@ describe("法条反馈API", () => {
         },
       );
 
-      const response = await PUT(request, { params: { id: "article-1" } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: "article-1" }),
+      });
       const testResponse = await createTestResponse(response);
 
       assertions.assertError(testResponse, 400);
@@ -209,7 +219,9 @@ describe("法条反馈API", () => {
         },
       );
 
-      const response = await PUT(request, { params: { id: "article-1" } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: "article-1" }),
+      });
       const testResponse = await createTestResponse(response);
 
       assertions.assertError(testResponse, 400);
@@ -229,7 +241,9 @@ describe("法条反馈API", () => {
         },
       );
 
-      const response = await PUT(request, { params: { id: "article-1" } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: "article-1" }),
+      });
       const testResponse = await createTestResponse(response);
 
       assertions.assertError(testResponse, 400);
@@ -251,7 +265,9 @@ describe("法条反馈API", () => {
         },
       );
 
-      const response = await PUT(request, { params: { id: "nonexistent" } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: "nonexistent" }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(404);
@@ -293,7 +309,9 @@ describe("法条反馈API", () => {
         },
       );
 
-      const response = await PUT(request, { params: { id: "article-1" } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: "article-1" }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(200);

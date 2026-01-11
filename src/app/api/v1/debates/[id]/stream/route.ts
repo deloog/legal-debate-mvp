@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ApiError } from "@/app/api/lib/errors/api-error";
-import { createSuccessResponse } from "@/app/api/lib/responses/api-response";
 import { validatePathParam } from "@/app/api/lib/validation/validator";
 import { uuidSchema } from "@/app/api/lib/validation/schemas";
 import { prisma } from "@/lib/db/prisma";
@@ -13,7 +12,7 @@ import {
 } from "@prisma/client";
 
 // 确保在Node.js环境中可以使用Web Streams API
-const { ReadableStream } = globalThis as any;
+const { ReadableStream } = globalThis;
 
 /**
  * 从请求中提取关联ID
@@ -63,59 +62,12 @@ function createStreamError(
 }
 
 /**
- * 安全地发送流式事件
- */
-function safeEnqueue(
-  controller: ReadableStreamDefaultController,
-  data: string,
-): boolean {
-  try {
-    // 检查流状态，确保可以写入
-    if (controller.desiredSize === null || controller.desiredSize <= 0) {
-      console.warn("Stream is not writable, skipping event");
-      return false;
-    }
-
-    controller.enqueue(data);
-    return true;
-  } catch (error) {
-    console.warn("Failed to enqueue stream event:", error);
-    return false;
-  }
-}
-
-/**
- * 发送流式错误并关闭连接
- */
-function sendStreamError(
-  controller: ReadableStreamDefaultController,
-  error: string | Error | ApiError,
-  correlationId?: string,
-  statusCode: number = 500,
-  details?: Record<string, unknown>,
-): void {
-  const errorEvent = createStreamError(
-    error,
-    correlationId,
-    statusCode,
-    details,
-  );
-  safeEnqueue(controller, errorEvent);
-
-  try {
-    controller.close();
-  } catch (closeError) {
-    console.warn("Failed to close stream:", closeError);
-  }
-}
-
-/**
  * 解析AI生成的辩论论点
  * 这是一个简化的解析器，实际使用时需要根据AI服务的返回格式调整
  */
 function parseDebateArguments(
   content: string,
-  roundNumber: number,
+  // roundNumber: number,
 ): Array<{
   side: ArgumentSide;
   content: string;
@@ -177,10 +129,11 @@ function parseDebateArguments(
  */
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
   // 验证路径参数
-  const debateId = validatePathParam(context.params.id, uuidSchema);
+  const params = await context.params;
+  const debateId = validatePathParam(params.id, uuidSchema);
 
   // 预检：辩论是否存在 - 在流创建前检查
   const debate = await prisma.debate.findUnique({
@@ -245,7 +198,8 @@ export async function GET(
 
         // 确定当前轮次
         const currentRound = debate.currentRound;
-        const maxRounds = (debate.debateConfig as any)?.maxRounds || 3;
+        const maxRounds =
+          (debate.debateConfig as { maxRounds?: number })?.maxRounds || 3;
 
         // 生成论点并流式传输
         for (
@@ -277,10 +231,7 @@ export async function GET(
               debateResponse.choices?.[0]?.message?.content || "";
 
             // 解析AI生成的论点（这里需要根据实际AI返回格式调整）
-            const generatedArguments = parseDebateArguments(
-              debateContent,
-              roundIndex,
-            );
+            const generatedArguments = parseDebateArguments(debateContent);
 
             // 保存轮次到数据库
             const newRound = await prisma.$transaction(async (tx) => {
@@ -467,7 +418,7 @@ export async function GET(
  * OPTIONS /api/v1/debates/[id]/stream
  * CORS预检请求
  */
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {

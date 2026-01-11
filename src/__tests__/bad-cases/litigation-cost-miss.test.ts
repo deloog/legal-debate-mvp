@@ -108,10 +108,15 @@ describe("Bad Case测试库 - 诉讼费用遗漏案例", () => {
         });
 
         expect(result.success).toBe(true);
-        expect(result.data?.extractedData).toBeDefined();
-        expect(result.data?.extractedData.claims.length).toBeGreaterThan(0);
 
-        const actualTypes = result.data!.extractedData.claims.map(
+        const data = result.data as {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          extractedData: { parties: any[]; claims: any[] };
+        };
+        expect(data.extractedData).toBeDefined();
+        expect(data.extractedData.claims.length).toBeGreaterThan(0);
+
+        const actualTypes = data.extractedData.claims.map(
           (claim) => claim.type,
         );
         testCase.expectedTypes.forEach((expectedType) => {
@@ -120,7 +125,7 @@ describe("Bad Case测试库 - 诉讼费用遗漏案例", () => {
 
         // 验证法定代表人被过滤
         if (testCase.name.includes("法定代表人")) {
-          const actualPartyNames = result.data!.extractedData.parties.map(
+          const actualPartyNames = data.extractedData.parties.map(
             (p) => p.name,
           );
           // 验证没有法定代表人（如"王总"、"李经理"）被识别为独立当事人
@@ -147,7 +152,9 @@ describe("Bad Case测试库 - 诉讼费用遗漏案例", () => {
         },
       });
 
-      const litigationCostClaims = result.data!.extractedData.claims.filter(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data = result.data as { extractedData: { claims: any[] } };
+      const litigationCostClaims = data.extractedData.claims.filter(
         (claim) => claim.type === "LITIGATION_COST",
       );
 
@@ -168,10 +175,12 @@ describe("Bad Case测试库 - 诉讼费用遗漏案例", () => {
         },
       });
 
-      const hasPrincipal = result.data!.extractedData.claims.some(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data = result.data as { extractedData: { claims: any[] } };
+      const hasPrincipal = data.extractedData.claims.some(
         (claim) => claim.type === "PAY_PRINCIPAL",
       );
-      const hasInterest = result.data!.extractedData.claims.some(
+      const hasInterest = data.extractedData.claims.some(
         (claim) => claim.type === "PAY_INTEREST",
       );
 

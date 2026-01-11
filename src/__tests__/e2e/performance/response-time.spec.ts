@@ -162,7 +162,7 @@ test.describe("响应时间性能测试", () => {
       const debate = await createDebate(apiContext, testCase.caseId);
 
       const start = Date.now();
-      await generateArguments(apiContext, debate.roundId, []);
+      await generateArguments(apiContext, debate.debateId, debate.roundId, []);
       const duration = Date.now() - start;
 
       durations.push(duration);
@@ -214,7 +214,7 @@ test.describe("响应时间性能测试", () => {
       );
 
       const debate = await createDebate(apiContext, testCase.caseId);
-      await generateArguments(apiContext, debate.roundId, []);
+      await generateArguments(apiContext, debate.debateId, debate.roundId, []);
 
       const duration = Date.now() - startTime;
       durations.push(duration);
@@ -372,7 +372,7 @@ test.describe("响应时间性能测试", () => {
             ).data[i - 1].id;
 
       const start = Date.now();
-      await generateArguments(apiContext, roundId, []);
+      await generateArguments(apiContext, debate.debateId, roundId, []);
       const duration = Date.now() - start;
 
       roundDurations.push(duration);

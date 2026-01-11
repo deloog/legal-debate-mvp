@@ -15,9 +15,11 @@ interface FeedbackRequest {
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    // 获取路径参数
+    const resolvedParams = await params;
     // 获取当前用户（简化版，实际应从session获取）
     const userId = request.headers.get("x-user-id") || "default-user";
 
@@ -51,7 +53,7 @@ export async function PUT(
 
     // 查询法条是否存在
     const legalReference = await prisma.legalReference.findUnique({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
     });
 
     if (!legalReference) {
@@ -64,7 +66,7 @@ export async function PUT(
 
     // 更新律师反馈
     const updatedLegalReference = await prisma.legalReference.update({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
       data: {
         metadata: {
           ...existingMetadata,

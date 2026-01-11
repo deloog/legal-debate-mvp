@@ -20,34 +20,36 @@ import {
   RoundStatus,
   ArgumentSide,
   ArgumentType,
+  LegalReferenceStatus,
 } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
 
 // User factory
-export const createUser = (overrides: Partial<User> = {}): User => ({
-  id: "user-123",
-  email: "test@example.com",
-  username: "testuser",
-  name: "Test User",
-  role: UserRole.USER,
-  permissions: null,
-  organizationId: null,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  deletedAt: null,
-  address: null,
-  avatar: null,
-  bio: null,
-  emailVerified: null,
-  lastLoginAt: null,
-  loginCount: 0,
-  passwordResetToken: null,
-  passwordResetExpires: null,
-  phone: null,
-  preferences: null,
-  status: null as any,
-  ...overrides,
-});
+export const createUser = (overrides: Partial<User> = {}): User =>
+  ({
+    id: "user-123",
+    email: "test@example.com",
+    username: "testuser",
+    name: "Test User",
+    role: UserRole.USER,
+    permissions: null,
+    organizationId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    address: null,
+    avatar: null,
+    bio: null,
+    emailVerified: null,
+    lastLoginAt: null,
+    loginCount: 0,
+    passwordResetToken: null,
+    passwordResetExpires: null,
+    phone: null,
+    preferences: null,
+    status: "ACTIVE",
+    ...overrides,
+  }) as User;
 
 // Account factory
 export const createAccount = (overrides: Partial<Account> = {}): Account => ({
@@ -248,7 +250,7 @@ export const createLegalReference = (
   articleNumber: "第四十四条",
   retrievalQuery: "加班费计算标准",
   relevanceScore: 0.95,
-  status: "ACTIVE" as any,
+  status: LegalReferenceStatus.VALID,
   analysisResult: {},
   amendmentHistory: [],
   analyzedAt: new Date(),

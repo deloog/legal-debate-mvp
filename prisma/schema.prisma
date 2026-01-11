@@ -12,6 +12,7 @@ model User {
   email                String     @unique
   username             String?
   name                 String?
+  password             String?
   role                 UserRole   @default(USER)
   permissions          Json?
   organizationId       String?
@@ -34,6 +35,9 @@ model User {
   debates              Debate[]
   documents            Document[]
   sessions             Session[]
+  lawyerQualifications LawyerQualification[]
+  reviewedQualifications LawyerQualification[] @relation("QualificationReviews")
+  verificationCodes    VerificationCode[]
 
   @@index([email])
   @@index([username])
@@ -638,4 +642,65 @@ enum ActionStatus {
   FAILED
   RETRYING
   CANCELLED
+}
+
+// === 律师资格验证模块 ===
+
+model LawyerQualification {
+  id              String                 @id @default(cuid())
+  userId          String
+  licenseNumber   String                 // 17位执业证号
+  fullName        String                 // 律师姓名
+  idCardNumber    String                 // 身份证号
+  lawFirm         String                 // 执业律所
+  licensePhoto    String?                // 执业证照片路径
+  status          QualificationStatus    @default(PENDING)
+  submittedAt     DateTime               @default(now())
+  reviewedAt      DateTime?
+  reviewerId      String?                // 审核管理员ID
+  reviewNotes     String?
+  verificationData Json?                 // 验证数据（第三方API返回）
+  metadata        Json?
+  
+  user            User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewer        User?                  @relation("QualificationReviews", fields: [reviewerId], references: [id], onDelete: SetNull)
+  
+  @@unique([licenseNumber])
+  @@index([userId])
+  @@index([status])
+  @@index([submittedAt])
+  @@map("lawyer_qualifications")
+}
+
+enum QualificationStatus {
+  PENDING      // 待审核
+  UNDER_REVIEW // 审核中
+  APPROVED     // 已通过
+  REJECTED     // 已拒绝
+  EXPIRED      // 已过期
+}
+
+// === 验证码模块 ===
+
+model VerificationCode {
+  id        String                  @id @default(cuid())
+  userId    String
+  code      String                  // 6位数字验证码
+  type      VerificationCodeType     @default(PASSWORD_RESET)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime                @default(now())
+  
+  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, type])
+  @@index([code])
+  @@index([expiresAt])
+  @@map("verification_codes")
+}
+
+enum VerificationCodeType {
+  PASSWORD_RESET     // 密码重置验证码
+  EMAIL_VERIFICATION // 邮箱验证码
+  PHONE_VERIFICATION // 手机验证码
 }

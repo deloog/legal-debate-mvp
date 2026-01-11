@@ -31,7 +31,7 @@ jest.mock("@/lib/db/prisma", () => ({
 
 // Mock AI service
 const mockGetUnifiedAIService = jest.fn(() => ({
-  // @ts-ignore
+  // @ts-expect-error - Mocking generateDebate method
   generateDebate: jest.fn().mockResolvedValue({
     choices: [
       {
@@ -39,6 +39,7 @@ const mockGetUnifiedAIService = jest.fn(() => ({
       },
     ],
   }),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 })) as any;
 
 jest.mock("@/lib/ai/unified-service", () => ({
@@ -48,12 +49,16 @@ jest.mock("@/lib/ai/unified-service", () => ({
 import { prisma } from "@/lib/db/prisma";
 
 describe("Debates Stream API - Basic Tests", () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockReq: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockContext: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockedPrisma: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedPrisma = prisma as any;
 
     // 创建模拟的NextRequest对象
@@ -65,6 +70,7 @@ describe("Debates Stream API - Basic Tests", () => {
         removeEventListener: jest.fn(),
         aborted: false,
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
 
     // 创建模拟的context对象
@@ -183,7 +189,7 @@ describe("Debates Stream API - Basic Tests", () => {
       const { GET } = await import("@/app/api/v1/debates/[id]/stream/route");
 
       // 启动流
-      const response = await GET(mockReq, mockContext);
+      await GET(mockReq, mockContext);
 
       // 验证事件监听器被添加
       expect(mockAbortController.addEventListener).toHaveBeenCalledWith(
@@ -268,9 +274,12 @@ describe("Debates Stream API - Basic Tests", () => {
       mockedPrisma.debateRound.findMany.mockResolvedValue([]);
 
       // Mock transaction to avoid actual database operations
-      mockedPrisma.$transaction.mockImplementation(async (callback: any) => {
-        return await callback(mockedPrisma);
-      });
+      mockedPrisma.$transaction.mockImplementation(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        async (callback: any) => {
+          return await callback(mockedPrisma);
+        },
+      );
 
       const { GET } = await import("@/app/api/v1/debates/[id]/stream/route");
 
@@ -298,13 +307,14 @@ describe("Debates Stream API - Basic Tests", () => {
             break;
           }
         }
-      } catch (error) {
+      } catch {
         // 流结束或出错，这是正常的
       } finally {
         clearTimeout(timeout);
         try {
           reader.cancel();
-        } catch (e) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (_e) {
           // 忽略取消错误
         }
       }
@@ -337,9 +347,9 @@ describe("Debates Stream API - Basic Tests", () => {
 
         const response = await GET(mockReq, mockContext);
         expect(response.status).toBe(500);
-      } catch (error) {
+      } catch (_error) {
         // 如果抛出异常，验证是预期的错误类型
-        expect(error).toBeInstanceOf(Error);
+        expect(_error).toBeInstanceOf(Error);
       }
     });
   });
@@ -348,7 +358,7 @@ describe("Debates Stream API - Basic Tests", () => {
     it("should return correct CORS headers", async () => {
       const { OPTIONS } =
         await import("@/app/api/v1/debates/[id]/stream/route");
-      const response = await OPTIONS(mockReq);
+      const response = await OPTIONS();
 
       expect(response.status).toBe(200);
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
