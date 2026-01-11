@@ -39,12 +39,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // 验证文件大小（10MB）
+    // 验证文件大小（10MB）- 先验证大小，再验证类型
     const maxFileSize = 10 * 1024 * 1024;
     if (file.size > maxFileSize) {
       return NextResponse.json(
-        { success: false, error: `文件大小超过${maxFileSize / 1024 / 1024}MB` },
-        { status: 400 },
+        {
+          success: false,
+          error: `文件大小超过${maxFileSize / 1024 / 1024}MB限制`,
+          code: "PAYLOAD_TOO_LARGE",
+        },
+        { status: 413 }, // Payload Too Large
       );
     }
 
@@ -60,7 +64,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { success: false, error: `不支持的文件类型: ${file.type}` },
+        {
+          success: false,
+          error: `不支持的文件类型: ${file.type}`,
+          code: "UNSUPPORTED_FILE_TYPE",
+        },
         { status: 400 },
       );
     }

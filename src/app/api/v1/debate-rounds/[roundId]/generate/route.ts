@@ -19,7 +19,19 @@ export const POST = withErrorHandler(
     { params }: { params: Promise<{ roundId: string }> },
   ) => {
     const { roundId } = await params;
-    const body = await request.json();
+
+    // 安全解析请求体，处理空请求体或解析错误
+    let body: Record<string, unknown> = {};
+    try {
+      const parsedBody = await request.json();
+      body =
+        typeof parsedBody === "object" && parsedBody !== null
+          ? (parsedBody as Record<string, unknown>)
+          : {};
+    } catch {
+      // JSON解析失败时使用空对象
+      body = {};
+    }
 
     // 获取辩论轮次信息
     const round = await prisma.debateRound.findUnique({
@@ -73,8 +85,15 @@ export const POST = withErrorHandler(
       );
     }
 
-    // 获取适用法条
-    const articleIds = body.applicableArticles || [];
+    // 获取适用法条，确保类型安全
+    const articleIds =
+      Array.isArray(body.applicableArticles) &&
+      body.applicableArticles.every(
+        (item): item is string => typeof item === "string",
+      )
+        ? (body.applicableArticles as string[])
+        : [];
+
     const articles = await prisma.lawArticle.findMany({
       where: {
         id: { in: articleIds },
@@ -236,7 +255,7 @@ interface GenerateSideArgumentsInput {
     articleNumber: string;
   }>;
   roundNumber: number;
-  roundId: string; // 添加 roundId 参数
+  roundId: string;
 }
 
 function generateSideArguments(input: GenerateSideArgumentsInput) {

@@ -51,7 +51,8 @@
         "testing_rules": {
           "coverage_required": "测试覆盖率目标 > 80%",
           "unit_test_required": "核心功能必须有单元测试",
-          "test_file_location": "测试文件必须放在 src/__tests__/ 目录"
+          "test_file_location": "测试文件必须放在 src/__tests__/ 目录",
+          "e2e_ai_config": "E2E测试默认使用Mock AI服务（USE_REAL_AI=false）。启用真实AI服务需设置 USE_REAL_AI=true 环境变量。真实AI测试会产生API调用费用和延迟，仅在准确性测试或需要验证真实API行为时使用。开发/测试阶段建议使用Mock模式以提升速度并节省成本。"
         }
       },
       "consequences": "违反这些规则将导致代码风格不一致、测试不完整、错误难以追踪"

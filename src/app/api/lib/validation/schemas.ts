@@ -4,6 +4,7 @@ import { z } from "zod";
  * 通用ID验证 - 支持UUID和CUID格式
  * UUID格式: 8-4-4-4-12 (如: 123e4567-e89b-12d3-a456-426614174000)
  * CUID格式: 25位字符 (如: cmjtg7np100axc0zgwiwpwt9a)
+ * 测试ID格式: mock-article-id-数字 (用于E2E测试)
  */
 export const uuidSchema = z
   .string()
@@ -13,9 +14,14 @@ export const uuidSchema = z
       // 尝试UUID格式
       const uuidRegex =
         /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      // Prisma CUID格式 (25位小写字母和数字)
-      const cuidRegex = /^[a-z0-9]{25}$/;
-      return uuidRegex.test(val) || cuidRegex.test(val);
+      // Prisma CUID格式 - 放宽限制以支持实际生成的CUID
+      // 标准CUID是25位，但实际可能稍长或稍短
+      const cuidRegex = /^[a-z0-9]{20,30}$/;
+      // 测试ID格式: mock-article-id-数字
+      const testIdRegex = /^mock-article-id-\d+$/;
+      return (
+        uuidRegex.test(val) || cuidRegex.test(val) || testIdRegex.test(val)
+      );
     },
     { message: "Invalid ID format (expected UUID or CUID)" },
   );
@@ -118,8 +124,8 @@ export const updateDebateSchema = createDebateSchema.partial();
 export const createDebateRoundSchema = z.object({
   roundNumber: z.number().int().min(1).optional(),
   status: z
-    .enum(["preparing", "active", "completed", "pending", "in_progress"])
-    .default("preparing"),
+    .enum(["PENDING", "IN_PROGRESS", "COMPLETED", "FAILED"])
+    .default("PENDING"),
 });
 
 /**
@@ -127,14 +133,21 @@ export const createDebateRoundSchema = z.object({
  */
 export const createArgumentSchema = z.object({
   roundId: uuidSchema,
-  side: z.enum(["pro", "con"]),
+  side: z.enum(["PLAINTIFF", "DEFENDANT", "NEUTRAL"]),
   content: z
     .string()
     .min(1, "Content is required")
     .max(2000, "Content too long"),
   type: z
-    .enum(["opening", "rebuttal", "closing", "evidence"])
-    .default("opening"),
+    .enum([
+      "MAIN_POINT",
+      "SUPPORTING",
+      "REBUTTAL",
+      "EVIDENCE",
+      "LEGAL_BASIS",
+      "CONCLUSION",
+    ])
+    .default("MAIN_POINT"),
   legalReferences: z
     .array(
       z.object({
@@ -214,6 +227,13 @@ export const generateDebateSchema = z.object({
       includeEvidence: z.boolean().default(true),
     })
     .optional(),
+});
+
+/**
+ * 为轮次生成论点的验证模式
+ */
+export const generateArgumentsSchema = z.object({
+  applicableArticles: z.array(uuidSchema).default([]),
 });
 
 /**

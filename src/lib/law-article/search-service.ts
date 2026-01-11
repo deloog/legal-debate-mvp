@@ -2,6 +2,7 @@ import { prisma } from "../db/prisma";
 import { SearchQueryBuilder } from "./search-query-builder";
 import { RelevanceScorer } from "./relevance-scorer";
 import { SearchCacheManager } from "./search-cache";
+import { LawCategory } from "@prisma/client";
 import type {
   SearchQuery,
   SearchResult,
@@ -97,14 +98,25 @@ export class LawArticleSearchService {
           }
         }
 
+        // 确保relevanceScore是有效数字且在[0,1]范围内
+        const relevanceScore =
+          typeof score.totalScore === "number"
+            ? Math.max(0, Math.min(1, score.totalScore))
+            : 0;
+
         return {
           article,
-          relevanceScore: score.totalScore,
+          relevanceScore,
           matchDetails: {
-            keywordScore: score.keywordScore,
-            categoryScore: score.categoryScore,
-            tagScore: score.tagScore,
-            popularityScore: score.popularityScore,
+            keywordScore:
+              typeof score.keywordScore === "number" ? score.keywordScore : 0,
+            categoryScore:
+              typeof score.categoryScore === "number" ? score.categoryScore : 0,
+            tagScore: typeof score.tagScore === "number" ? score.tagScore : 0,
+            popularityScore:
+              typeof score.popularityScore === "number"
+                ? score.popularityScore
+                : 0,
           },
           matchedKeywords,
         };
@@ -284,9 +296,9 @@ export class LawArticleSearchService {
   /**
    * 获取热门法条（按浏览次数排序）
    */
-  static async getPopularArticles(category?: any, limit: number = 10) {
+  static async getPopularArticles(category?: LawCategory, limit: number = 10) {
     try {
-      const where = category ? { category: category as any } : {};
+      const where: { category?: LawCategory } = category ? { category } : {};
 
       return await prisma.lawArticle.findMany({
         where,
@@ -351,7 +363,7 @@ export class LawArticleSearchService {
     limit: number = 10,
   ) {
     try {
-      const where: any = {
+      const where: Record<string, unknown> = {
         lawName: {
           contains: prefix,
           mode: "insensitive",
@@ -359,7 +371,7 @@ export class LawArticleSearchService {
       };
 
       if (category) {
-        where.category = category;
+        (where as { category: string }).category = category;
       }
 
       const articles = await prisma.lawArticle.findMany({

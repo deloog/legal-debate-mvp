@@ -3,6 +3,7 @@ import { DocAnalyzerAgentAdapter } from "../../../../../lib/agent/doc-analyzer/a
 import { AgentContext, TaskPriority } from "../../../../../types/agent";
 import { join } from "path";
 import { existsSync } from "fs";
+import { retryDocAnalysis } from "../../../../../lib/ai/retry-handler";
 
 // =============================================================================
 // API处理函数
@@ -88,16 +89,31 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    // 执行文档分析
+    // 执行文档分析（带重试机制）
     const startTime = Date.now();
-    const result = await agent.execute(context);
+
+    // 使用重试机制执行文档分析
+    const retryResult = await retryDocAnalysis(async () => {
+      return await agent.execute(context);
+    });
+
     const processingTime = Date.now() - startTime;
 
     // 清理Agent资源
     await agent.cleanup();
 
+    // 记录重试和降级信息（如果适用）
+    if (retryResult.isFallback) {
+      console.warn(
+        `[文档分析API] 使用Mock降级，重试次数: ${retryResult.attempts}`,
+      );
+    } else if (retryResult.attempts > 1) {
+      console.log(`[文档分析API] 重试成功，总次数: ${retryResult.attempts}`);
+    }
+
     // 返回分析结果
-    if (result.success) {
+    if (retryResult.success) {
+      const result = retryResult.result;
       return NextResponse.json({
         success: true,
         data: {
@@ -108,7 +124,7 @@ export async function POST(request: NextRequest) {
           metadata: {
             executionTime: result.executionTime,
             tokensUsed: result.tokensUsed,
-            confidence: result.data?.confidence || 0,
+            confidence: result.data?.confidence ?? 0,
           },
         },
       });
@@ -116,11 +132,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: result.error?.message || "文档分析失败",
+          error: retryResult.error?.message || "文档分析失败",
           details: {
             documentId,
             processingTime,
-            error: result.error,
+            error: retryResult.error,
+            isFallback: retryResult.isFallback,
+            attempts: retryResult.attempts,
           },
         },
         { status: 500 },

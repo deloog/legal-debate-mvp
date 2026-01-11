@@ -21,11 +21,14 @@ export class SearchQueryBuilder {
 
       if (keywords.length > 0) {
         // 为每个关键词分别构建搜索条件（OR关系）
+        // 改进：使用更宽松的匹配策略，同时检查keywords字段
         const keywordConditions = keywords.map((keyword) => ({
           OR: [
             { fullText: { contains: keyword, mode: "insensitive" } },
             { searchableText: { contains: keyword, mode: "insensitive" } },
             { lawName: { contains: keyword, mode: "insensitive" } },
+            { articleNumber: { contains: keyword, mode: "insensitive" } },
+            { keywords: { hasSome: [keyword] } },
           ],
         })) as Prisma.LawArticleWhereInput[];
 

@@ -11,7 +11,13 @@ dotenvConfig({ path: resolve(__dirname, '../.env.development') });
  */
 export default defineConfig({
   testDir: resolve(__dirname, '../src/__tests__/e2e'),
-  testMatch: ['*.spec.ts', 'debate-flow/*.spec.ts', 'performance/*.spec.ts'],
+  testIgnore: [
+    '../src/__tests__/**/*.test.ts',
+    '../src/__tests__/**/*.test.tsx',
+    '../src/__tests__/unit/**',
+    '../src/__tests__/verification-agent.test.ts',
+    '../src/__tests__/**/*.test.*',
+  ],
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */

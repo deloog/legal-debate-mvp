@@ -394,8 +394,11 @@ export const TEST_AI_CONFIG: AIServiceConfig = {
 export function getAIConfig(useRealAPI: boolean = false): AIServiceConfig {
   const nodeEnv = process.env.NODE_ENV || "development";
 
-  // 如果明确指定使用真实API（准确性测试）
-  if (useRealAPI) {
+  // 检查环境变量 USE_REAL_AI 是否设置为 true
+  const useRealAIEnv = process.env.USE_REAL_AI === "true";
+
+  // 如果明确指定使用真实API（准确性测试）或通过环境变量设置
+  if (useRealAPI || useRealAIEnv) {
     return ACCURACY_TEST_AI_CONFIG;
   }
 

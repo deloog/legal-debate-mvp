@@ -81,11 +81,14 @@ export function useCases(filters: CaseFilters, searchQuery: string) {
 
       if (data.success) {
         setCases(data.data);
-        setPagination((prev) => ({
-          ...prev,
-          total: data.pagination.total,
-          totalPages: data.pagination.totalPages,
-        }));
+        // 安全检查pagination对象是否存在
+        if (data.pagination) {
+          setPagination((prev) => ({
+            ...prev,
+            total: data.pagination.total ?? prev.total,
+            totalPages: data.pagination.totalPages ?? prev.totalPages,
+          }));
+        }
       } else {
         throw new Error(data.error || "获取案件列表失败");
       }

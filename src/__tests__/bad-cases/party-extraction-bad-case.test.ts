@@ -372,7 +372,9 @@ describe("Bad Case: 当事人信息提取测试", () => {
       if (!plaintiff) {
         // 应该有推断的原告或质量问题
         // 检查 metadata 中的警告信息
-        const warnings = (result.data as { metadata?: { warnings?: string[] } })?.metadata?.warnings || [];
+        const warnings =
+          (result.data as { metadata?: { warnings?: string[] } })?.metadata
+            ?.warnings || [];
         // 如果既没有原告也没有警告，说明可能有问题
         expect(warnings.length).toBeGreaterThan(0);
       }
@@ -394,7 +396,9 @@ describe("Bad Case: 当事人信息提取测试", () => {
       if (!defendant) {
         // 应该有推断的被告或质量问题
         // 检查 metadata 中的警告信息
-        const warnings = (result.data as { metadata?: { warnings?: string[] } })?.metadata?.warnings || [];
+        const warnings =
+          (result.data as { metadata?: { warnings?: string[] } })?.metadata
+            ?.warnings || [];
         // 如果既没有被告也没有警告，说明可能有问题
         expect(warnings.length).toBeGreaterThan(0);
       }

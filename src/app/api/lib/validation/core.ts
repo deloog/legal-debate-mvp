@@ -82,9 +82,18 @@ export function validatePathParams<T>(
  */
 export function validatePathParam<T>(param: unknown, schema: ZodSchema<T>): T {
   try {
+    console.log("验证路径参数:", {
+      param,
+      paramType: typeof param,
+    });
     return schema.parse(param);
   } catch (error) {
     if (error instanceof ZodError) {
+      console.error("路径参数验证失败:", {
+        param,
+        paramType: typeof param,
+        schemaIssues: error.issues,
+      });
       throw new ValidationError("Path parameter validation failed", {
         validationErrors: error.issues,
       });
@@ -106,9 +115,9 @@ export function validateRequest(
     context?: { params?: Record<string, string> },
   ) => {
     const result: {
-      body?: any;
-      query?: any;
-      params?: any;
+      body?: unknown;
+      query?: unknown;
+      params?: unknown;
     } = {};
 
     // 验证请求体

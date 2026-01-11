@@ -8,6 +8,21 @@ import { cache } from "@/lib/cache/manager";
 import { measurePerformance } from "@/lib/middleware/performance-monitor";
 
 /**
+ * 有效的法条分类枚举值
+ */
+const VALID_CATEGORIES: LawCategory[] = [
+  "CIVIL",
+  "CRIMINAL",
+  "ADMINISTRATIVE",
+  "COMMERCIAL",
+  "ECONOMIC",
+  "LABOR",
+  "INTELLECTUAL_PROPERTY",
+  "PROCEDURE",
+  "OTHER",
+];
+
+/**
  * 缓存响应数据类型
  */
 interface CachedResponseData {
@@ -73,6 +88,20 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     );
   }
 
+  // 验证category参数（如果提供）
+  if (body.category && !VALID_CATEGORIES.includes(body.category)) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: "INVALID_CATEGORY",
+          message: `无效的法条分类: ${body.category}。有效值为: ${VALID_CATEGORIES.join(", ")}`,
+        },
+      },
+      { status: 400 },
+    );
+  }
+
   const keywords: string[] = body.keywords || [];
 
   console.log("法条搜索请求参数:", {
@@ -106,13 +135,25 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   });
 
   if (cachedResponse) {
-    const response = createSuccessResponse(
-      cachedResponse.data,
-      cachedResponse.meta,
+    // 验证缓存数据格式完整性
+    const isValid = cachedResponse.data.articles.every(
+      (article: { relevanceScore?: unknown }) =>
+        typeof article.relevanceScore === "number" &&
+        article.relevanceScore >= 0 &&
+        article.relevanceScore <= 1,
     );
-    response.headers.set("X-Cache", "HIT");
-    await measurePerformance(request, response, startTime, { enabled: true });
-    return response;
+
+    if (!isValid) {
+      console.warn("缓存数据格式不匹配，重新查询");
+    } else {
+      const response = createSuccessResponse(
+        cachedResponse.data,
+        cachedResponse.meta,
+      );
+      response.headers.set("X-Cache", "HIT");
+      await measurePerformance(request, response, startTime, { enabled: true });
+      return response;
+    }
   }
 
   // 调用检索服务
@@ -126,8 +167,11 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     fullText: result.article.fullText,
     category: result.article.category,
     lawType: result.article.lawType,
-    relevanceScore: result.relevanceScore,
-    matchedKeywords: result.matchedKeywords,
+    relevanceScore:
+      typeof result.relevanceScore === "number"
+        ? Math.max(0, Math.min(1, result.relevanceScore))
+        : 0,
+    matchedKeywords: result.matchedKeywords || [],
   }));
 
   const responseData = {
