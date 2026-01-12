@@ -91,11 +91,17 @@ export function generateRefreshToken(
   payload: JwtPayload,
   expiresIn?: string,
 ): string {
+  // 添加jti确保每次生成的token都不同（避免并发冲突）
+  const refreshTokenPayload: JwtPayload = {
+    ...payload,
+    jti: `${Date.now()}_${Math.random().toString(36).substring(2, 15)}`, // JWT ID，确保唯一性
+  };
+
   const options: jwt.SignOptions = {
     expiresIn: (expiresIn || "7d") as jwt.SignOptions["expiresIn"],
   };
 
-  return jwt.sign(payload, JWT_SECRET, options);
+  return jwt.sign(refreshTokenPayload, JWT_SECRET, options);
 }
 
 /**

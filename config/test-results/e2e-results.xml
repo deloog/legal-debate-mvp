@@ -1,1994 +1,715 @@
-<testsuites id="" name="" tests="57" failures="37" skipped="0" errors="0" time="525.5903000000001">
-<testsuite name="basic.spec.ts" timestamp="2026-01-10T17:06:05.390Z" hostname="chromium" tests="3" failures="0" skipped="0" time="2.8" errors="0">
-<testcase name="Basic E2E Tests › should load home page" classname="basic.spec.ts" time="1.431">
-</testcase>
-<testcase name="Basic E2E Tests › should have proper meta tags" classname="basic.spec.ts" time="0.639">
-</testcase>
-<testcase name="Basic E2E Tests › should be responsive" classname="basic.spec.ts" time="0.73">
-</testcase>
-</testsuite>
-<testsuite name="debate-flow\data-consistency.spec.ts" timestamp="2026-01-10T17:06:05.390Z" hostname="chromium" tests="11" failures="8" skipped="0" time="142.165" errors="0">
-<testcase name="数据一致性测试 › 验证文档解析结果与案件关联正确" classname="debate-flow\data-consistency.spec.ts" time="16.893">
-<failure message="data-consistency.spec.ts:39:7 验证文档解析结果与案件关联正确" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:39:7 › 数据一致性测试 › 验证文档解析结果与案件关联正确 ───────────────
-
-    Error: expect(received).toEqual(expected) // deep equality
-
-    - Expected  -  1
-    + Received  + 33
-
-    @@ -1,21 +1,35 @@
-      Object {
-    +   "confidence": 0.95,
-    +   "extractedData": Object {
-    +     "caseType": "civil",
-          "claims": Array [
-            Object {
-              "amount": 100000,
-    +         "content": "判令被告支付货款100000元",
-              "description": "判令被告支付货款100000元",
-    +         "evidence": Array [
-    +           "合同协议",
-    +           "付款凭证",
-    +         ],
-    +         "legalBasis": "民法典第579条",
-              "text": "判令被告支付货款100000元",
-              "type": "PAY_PRINCIPAL",
-            },
-            Object {
-              "amount": null,
-    +         "content": "判令被告支付利息（按年利率6%计算）",
-              "description": "判令被告支付利息（按年利率6%计算）",
-    +         "evidence": Array [
-    +           "合同约定",
-    +         ],
-    +         "legalBasis": "民法典第676条",
-              "text": "判令被告支付利息（按年利率6%计算）",
-              "type": "PAY_INTEREST",
-            },
-          ],
-    -   "facts": Array [
-    +     "keyFacts": Array [
-            Object {
-              "date": "2024-01-15",
-              "description": "双方签订服务合同",
-            },
-            Object {
-    @@ -27,18 +41,36 @@
-              "description": "原告多次催要无果",
-            },
-          ],
-          "parties": Array [
-            Object {
-    +         "address": "北京市朝阳区",
-    +         "contact": "13800138000",
-              "description": "原告为合同甲方，主张合同履行义务",
-              "name": "测试原告",
-              "role": "原告",
-              "type": "plaintiff",
-            },
-            Object {
-    +         "address": "上海市浦东新区",
-    +         "contact": "010-12345678",
-              "description": "被告为合同乙方，被指控未按时付款",
-              "name": "测试被告",
-              "role": "被告",
-              "type": "defendant",
-    +       },
-    +     ],
-    +     "summary": "本案为服务合同纠纷，原告请求被告支付货款及利息。",
-    +     "timeline": Array [
-    +       Object {
-    +         "date": "2024-01-15",
-    +         "description": "双方签订服务合同",
-    +         "event": "签订合同",
-            },
-    +       Object {
-    +         "date": "2024-06-20",
-    +         "description": "因合同履行问题产生纠纷",
-    +         "event": "发生争议",
-    +       },
-          ],
-    +   },
-      }
-
-      60 |     expect(dbDocument.caseId).toBe(caseId);
-      61 |     expect(dbDocument.analysisStatus).toBe("COMPLETED");
-    > 62 |     expect(dbDocument.analysisResult).toEqual(parseResult);
-         |                                       ^
-      63 |   });
-      64 |
-      65 |   test("验证法条检索结果与辩论引用一致", async () => {
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:62:39
-]]>
-</failure>
+<testsuites id="" name="" tests="35" failures="13" skipped="0" errors="0" time="74.884595">
+<testsuite name="auth.spec.ts" timestamp="2026-01-11T15:09:50.209Z" hostname="chromium" tests="35" failures="13" skipped="0" time="22.589" errors="0">
+<testcase name="用户注册与登录流程 › 应该成功注册新用户" classname="auth.spec.ts" time="1.609">
 <system-out>
-<![CDATA[文档解析完成 [cmk8k49nv0003109nu6tvhoy5]: 8439ms
-[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m SELECT "public"."documents"."id", "public"."documents"."caseId", "public"."documents"."userId", "public"."documents"."filename", "public"."documents"."filePath", "public"."documents"."fileType", "public"."documents"."fileSize", "public"."documents"."mimeType", "public"."documents"."extractedData", "public"."documents"."analysisStatus"::text, "public"."documents"."analysisResult", "public"."documents"."analysisError", "public"."documents"."createdAt", "public"."documents"."updatedAt", "public"."documents"."deletedAt" FROM "public"."documents" WHERE ("public"."documents"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-</testcase>
-<testcase name="数据一致性测试 › 验证法条检索结果与辩论引用一致" classname="debate-flow\data-consistency.spec.ts" time="0.096">
-<failure message="data-consistency.spec.ts:65:7 验证法条检索结果与辩论引用一致" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:65:7 › 数据一致性测试 › 验证法条检索结果与辩论引用一致 ───────────────
-
-    Error: 法条检索未返回结果
-
-       at debate-flow\helpers.ts:279
-
-      277 |   ) {
-      278 |     console.warn("法条检索结果为空:", result);
-    > 279 |     throw new Error("法条检索未返回结果");
-          |           ^
-      280 |   }
-      281 |
-      282 |   return result.data.articles;
-        at searchLawArticles (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:279:11)
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:69:27
-]]>
-</failure>
-<system-out>
-<![CDATA[法条检索API响应: {
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
   "success": true,
+  "message": "注册成功，请使用邮箱登录",
   "data": {
-    "articles": [],
-    "total": 0,
-    "relevanceScores": []
-  },
-  "meta": {
-    "timestamp": "2026-01-10T17:06:28.626Z",
-    "version": "v1",
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "hasMore": false
-    }
-  }
-}
-[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-<system-err>
-<![CDATA[法条检索结果为空: {
-  success: [33mtrue[39m,
-  data: { articles: [], total: [33m0[39m, relevanceScores: [] },
-  meta: {
-    timestamp: [32m'2026-01-10T17:06:28.626Z'[39m,
-    version: [32m'v1'[39m,
-    pagination: { page: [33m1[39m, limit: [33m20[39m, hasMore: [33mfalse[39m }
+    "user": {
+      "id": "cmk9veevz0000gc4xrlw08ksc",
+      "email": "test-1768144191418@example.com",
+      "username": "test191418",
+      "name": "TestUser191418",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:09:52.989Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVldnowMDAwZ2M0eHJsdzA4a3NjIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQxOTE0MThAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDE5MiwiZXhwIjoxNzY4NzQ4OTkyfQ.U-0proLcUnmhQbvBTzR0G504zw8n0-NQDHrjX-uP3RQ"
   }
 }
 ]]>
-</system-err>
-</testcase>
-<testcase name="数据一致性测试 › 验证辩论轮次与论点关联正确" classname="debate-flow\data-consistency.spec.ts" time="2.025">
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m SELECT "public"."debate_rounds"."id", "public"."debate_rounds"."debateId", "public"."debate_rounds"."roundNumber", "public"."debate_rounds"."status"::text, "public"."debate_rounds"."startedAt", "public"."debate_rounds"."completedAt", "public"."debate_rounds"."createdAt", "public"."debate_rounds"."updatedAt" FROM "public"."debate_rounds" WHERE ("public"."debate_rounds"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
-[34mprisma:query[39m SELECT "public"."arguments"."id", "public"."arguments"."roundId", "public"."arguments"."side"::text, "public"."arguments"."content", "public"."arguments"."type"::text, "public"."arguments"."aiProvider", "public"."arguments"."generationTime", "public"."arguments"."confidence", "public"."arguments"."createdAt", "public"."arguments"."updatedAt" FROM "public"."arguments" WHERE "public"."arguments"."roundId" IN ($1) OFFSET $2
-]]>
 </system-out>
 </testcase>
-<testcase name="数据一致性测试 › 验证缓存数据与数据库数据一致" classname="debate-flow\data-consistency.spec.ts" time="0.092">
-<failure message="data-consistency.spec.ts:123:7 验证缓存数据与数据库数据一致" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:123:7 › 数据一致性测试 › 验证缓存数据与数据库数据一致 ───────────────
-
-    Error: 法条检索未返回结果
-
-       at debate-flow\helpers.ts:279
-
-      277 |   ) {
-      278 |     console.warn("法条检索结果为空:", result);
-    > 279 |     throw new Error("法条检索未返回结果");
-          |           ^
-      280 |   }
-      281 |
-      282 |   return result.data.articles;
-        at searchLawArticles (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:279:11)
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:128:21
-]]>
-</failure>
-<system-out>
-<![CDATA[法条检索API响应: {
-  "success": true,
-  "data": {
-    "articles": [],
-    "total": 0,
-    "relevanceScores": []
-  },
-  "meta": {
-    "timestamp": "2026-01-10T17:06:32.249Z",
-    "version": "v1",
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "hasMore": false
-    }
-  }
-}
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-<system-err>
-<![CDATA[法条检索结果为空: {
-  success: [33mtrue[39m,
-  data: { articles: [], total: [33m0[39m, relevanceScores: [] },
-  meta: {
-    timestamp: [32m'2026-01-10T17:06:32.249Z'[39m,
-    version: [32m'v1'[39m,
-    pagination: { page: [33m1[39m, limit: [33m20[39m, hasMore: [33mfalse[39m }
-  }
-}
-]]>
-</system-err>
+<testcase name="用户注册与登录流程 › 注册时应该验证邮箱格式" classname="auth.spec.ts" time="0.025">
 </testcase>
-<testcase name="数据一致性测试 › 验证AI交互记录完整" classname="debate-flow\data-consistency.spec.ts" time="120.002">
-<failure message="data-consistency.spec.ts:145:7 验证AI交互记录完整" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:145:7 › 数据一致性测试 › 验证AI交互记录完整 ───────────────────
-
-    Test timeout of 120000ms exceeded.
-]]>
-</failure>
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-<system-err>
-<![CDATA[查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-]]>
-</system-err>
+<testcase name="用户注册与登录流程 › 注册时应该验证密码复杂度" classname="auth.spec.ts" time="0.021">
 </testcase>
-<testcase name="数据一致性测试 › 验证用户操作日志完整" classname="debate-flow\data-consistency.spec.ts" time="0.336">
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m SELECT "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName" FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
-]]>
-</system-out>
-</testcase>
-<testcase name="数据一致性测试 › 验证多轮辩论上下文继承正确" classname="debate-flow\data-consistency.spec.ts" time="1.558">
-<failure message="data-consistency.spec.ts:210:7 验证多轮辩论上下文继承正确" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:210:7 › 数据一致性测试 › 验证多轮辩论上下文继承正确 ────────────────
-
-    TypeError: Cannot read properties of undefined (reading 'id')
-
-      228 |     );
-      229 |
-    > 230 |     const round2Id = (await round2Response.json()).data.id;
-          |                                                         ^
-      231 |     await generateArguments(apiContext, round2Id, []);
-      232 |
-      233 |     // 验证历史轮次数据不被修改
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:230:57
-]]>
-</failure>
-<system-out>
-<![CDATA[[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-</testcase>
-<testcase name="数据一致性测试 › 验证软删除不影响数据统计" classname="debate-flow\data-consistency.spec.ts" time="0.149">
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m SELECT "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName" FROM "public"."cases" WHERE "public"."cases"."userId" = $1 OFFSET $2
-[34mprisma:query[39m UPDATE "public"."cases" SET "deletedAt" = $1, "updatedAt" = $2 WHERE ("public"."cases"."id" = $3 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m SELECT "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName" FROM "public"."cases" WHERE ("public"."cases"."userId" = $1 AND "public"."cases"."deletedAt" IS NULL) OFFSET $2
-[34mprisma:query[39m SELECT "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName" FROM "public"."cases" WHERE "public"."cases"."userId" = $1 OFFSET $2
-[34mprisma:query[39m UPDATE "public"."cases" SET "deletedAt" = $1, "updatedAt" = $2 WHERE ("public"."cases"."id" = $3 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-</testcase>
-<testcase name="数据一致性测试 › 验证法条适用性分析结果存储正确" classname="debate-flow\data-consistency.spec.ts" time="0.616">
-<failure message="data-consistency.spec.ts:292:7 验证法条适用性分析结果存储正确" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:292:7 › 数据一致性测试 › 验证法条适用性分析结果存储正确 ──────────────
-
-    Error: 适用性分析失败: 404
-
-       at debate-flow\helpers.ts:304
-
-      302 |
-      303 |   if (!response.ok()) {
-    > 304 |     throw new Error(`适用性分析失败: ${response.status()}`);
-          |           ^
-      305 |   }
-      306 |
-      307 |   const result = await response.json();
-        at analyzeApplicability (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:304:11)
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:296:33
-]]>
-</failure>
-<system-out>
-<![CDATA[[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-</testcase>
-<testcase name="数据一致性测试 › 验证增量分析不重复处理旧数据" classname="debate-flow\data-consistency.spec.ts" time="0.256">
-<failure message="data-consistency.spec.ts:328:7 验证增量分析不重复处理旧数据" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:328:7 › 数据一致性测试 › 验证增量分析不重复处理旧数据 ───────────────
-
-    TypeError: Cannot read properties of undefined (reading 'id')
-
-      348 |     );
-      349 |
-    > 350 |     const round2Id = (await round2Response.json()).data.id;
-          |                                                         ^
-      351 |     const round2Start = Date.now();
-      352 |     await generateArguments(apiContext, round2Id, []);
-      353 |     const round2Duration = Date.now() - round2Start;
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:350:57
-]]>
-</failure>
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-</testcase>
-<testcase name="数据一致性测试 › 验证多轮辩论数据完整性" classname="debate-flow\data-consistency.spec.ts" time="0.142">
-<failure message="data-consistency.spec.ts:362:7 验证多轮辩论数据完整性" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\data-consistency.spec.ts:362:7 › 数据一致性测试 › 验证多轮辩论数据完整性 ──────────────────
-
-    TypeError: Cannot read properties of undefined (reading 'id')
-
-      378 |       );
-      379 |
-    > 380 |       const roundId = (await roundResponse.json()).data.id;
-          |                                                         ^
-      381 |       await generateArguments(apiContext, roundId, []);
-      382 |     }
-      383 |
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\data-consistency.spec.ts:380:57
-]]>
-</failure>
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-</testcase>
-</testsuite>
-<testsuite name="debate-flow\error-handling.spec.ts" timestamp="2026-01-10T17:06:05.390Z" hostname="chromium" tests="11" failures="10" skipped="0" time="313.11" errors="0">
-<testcase name="异常处理流程 › 文档解析失败：无效文档格式" classname="debate-flow\error-handling.spec.ts" time="0.28">
-<failure message="error-handling.spec.ts:48:7 文档解析失败：无效文档格式" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:48:7 › 异常处理流程 › 文档解析失败：无效文档格式 ────────────────────
+<testcase name="用户注册与登录流程 › 应该拒绝重复注册的邮箱" classname="auth.spec.ts" time="0.3">
+<failure message="auth.spec.ts:242:7 应该拒绝重复注册的邮箱" type="FAILURE">
+<![CDATA[  [chromium] › auth.spec.ts:242:7 › 用户注册与登录流程 › 应该拒绝重复注册的邮箱 ────────────────────────────────────────
 
     Error: expect(received).toContain(expected) // indexOf
 
-    Expected substring: "格式"
-    Received string:    "缺少必要参数"
+    Expected substring: "已注册"
+    Received string:    "USER_EXISTS"
 
-      68 |     expect(result.success).toBe(false);
-      69 |     expect(result.error).toBeDefined();
-    > 70 |     expect(result.error).toContain("格式");
-         |                          ^
-      71 |   });
-      72 |
-      73 |   test("文档解析失败：超大文件", async () => {
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:70:26
+      255 |     expect(response.status()).toBe(409);
+      256 |     expect(data.success).toBe(false);
+    > 257 |     expect(data.error).toContain("已注册");
+          |                        ^
+      258 |   });
+      259 |
+      260 |   test("应该成功登录已注册用户", async ({ request }) => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:257:24
 ]]>
 </failure>
 <system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-</testcase>
-<testcase name="异常处理流程 › 文档解析失败：超大文件" classname="debate-flow\error-handling.spec.ts" time="0.463">
-<failure message="error-handling.spec.ts:73:7 文档解析失败：超大文件" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:73:7 › 异常处理流程 › 文档解析失败：超大文件 ──────────────────────
-
-    Error: expect(received).toBe(expected) // Object.is equality
-
-    Expected: 413
-    Received: 400
-
-      91 |
-      92 |     // 验证返回错误
-    > 93 |     expect(response.status()).toBe(413); // Payload Too Large
-         |                               ^
-      94 |
-      95 |     const result = await response.json();
-      96 |     expect(result.success).toBe(false);
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:93:31
-]]>
-</failure>
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-</testcase>
-<testcase name="异常处理流程 › 法条检索无结果：关键词过于冷门" classname="debate-flow\error-handling.spec.ts" time="0.055">
-<failure message="error-handling.spec.ts:99:7 法条检索无结果：关键词过于冷门" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:99:7 › 异常处理流程 › 法条检索无结果：关键词过于冷门 ──────────────────
-
-    Error: 法条检索未返回结果
-
-       at debate-flow\helpers.ts:279
-
-      277 |   ) {
-      278 |     console.warn("法条检索结果为空:", result);
-    > 279 |     throw new Error("法条检索未返回结果");
-          |           ^
-      280 |   }
-      281 |
-      282 |   return result.data.articles;
-        at searchLawArticles (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:279:11)
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:100:21
-]]>
-</failure>
-<system-out>
-<![CDATA[法条检索API响应: {
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
   "success": true,
+  "message": "注册成功，请使用邮箱登录",
   "data": {
-    "articles": [],
-    "total": 0,
-    "relevanceScores": []
-  },
-  "meta": {
-    "timestamp": "2026-01-10T17:08:46.622Z",
-    "version": "v1",
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "hasMore": false
-    }
+    "user": {
+      "id": "cmk9vef780001gc4x1xlb33ls",
+      "email": "test-1768144193135@example.com",
+      "username": "test193135",
+      "name": "TestUser193135",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:09:53.394Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVmNzgwMDAxZ2M0eDF4bGIzM2xzIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQxOTMxMzVAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDE5MywiZXhwIjoxNzY4NzQ4OTkzfQ.BKqzcILzQ3jsgrQ0GT2kPkZiUil6xmQbEyeaUmdrY8o"
   }
 }
 ]]>
 </system-out>
-<system-err>
-<![CDATA[法条检索结果为空: {
-  success: [33mtrue[39m,
-  data: { articles: [], total: [33m0[39m, relevanceScores: [] },
-  meta: {
-    timestamp: [32m'2026-01-10T17:08:46.622Z'[39m,
-    version: [32m'v1'[39m,
-    pagination: { page: [33m1[39m, limit: [33m20[39m, hasMore: [33mfalse[39m }
+</testcase>
+<testcase name="用户注册与登录流程 › 应该成功登录已注册用户" classname="auth.spec.ts" time="1.138">
+<system-out>
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
+  "success": true,
+  "message": "注册成功，请使用邮箱登录",
+  "data": {
+    "user": {
+      "id": "cmk9vegn00002gc4x1rigyzw6",
+      "email": "test-1768144194958@example.com",
+      "username": "test194958",
+      "name": "TestUser194958",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:09:55.259Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVnbjAwMDAyZ2M0eDFyaWd5enc2IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQxOTQ5NThAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDE5NSwiZXhwIjoxNzY4NzQ4OTk1fQ.qQfUpWKA2KojaGfj0QN_P6SejKZn7ZEQaWnqRn6ld28"
   }
 }
 ]]>
-</system-err>
+</system-out>
 </testcase>
-<testcase name="异常处理流程 › 法条检索失败：非法分类" classname="debate-flow\error-handling.spec.ts" time="0.113">
-<failure message="error-handling.spec.ts:111:7 法条检索失败：非法分类" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:111:7 › 异常处理流程 › 法条检索失败：非法分类 ─────────────────────
-
-    Error: 法条检索失败: 500
-
-       at debate-flow\helpers.ts:267
-
-      265 |       },
-      266 |     });
-    > 267 |     throw new Error(`法条检索失败: ${response.status()}`);
-          |           ^
-      268 |   }
-      269 |
-      270 |   const result = await response.json();
-        at searchLawArticles (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:267:11)
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:112:21
-]]>
-</failure>
-<system-err>
-<![CDATA[法条检索失败详情: {
-  status: [33m500[39m,
-  statusText: [32m'Internal Server Error'[39m,
-  body: {
-    success: [33mfalse[39m,
-    error: {
-      code: [32m'INTERNAL_SERVER_ERROR'[39m,
-      message: [32m'\n'[39m +
-        [32m'Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2f$prisma$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["prisma"].lawArticle.findMany()` invocation in\n'[39m +
-        [32m'D:\\legal_debate_mvp\\.next\\dev\\server\\chunks\\[root-of-the-server]__57e9c959._.js:2283:163\n'[39m +
-        [32m'\n'[39m +
-        [32m'  2280 const queryParams = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$law$2d$article$2f$search$2d$query$2d$builder$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["SearchQueryBuilder"].buildQueryParams(sanitizedQuery);\n'[39m +
-        [32m'  2281 // 查询法条\n'[39m +
-        [32m'  2282 const [articles, total] = await Promise.all([\n'[39m +
-        [32m'→ 2283     __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2f$prisma$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["prisma"].lawArticle.findMany({\n'[39m +
-        [32m'             where: {\n'[39m +
-        [32m'               AND: [\n'[39m +
-        [32m'                 {\n'[39m +
-        [32m'                   OR: [\n'[39m +
-        [32m'                     {\n'[39m +
-        [32m'                       OR: [\n'[39m +
-        [32m'                         {\n'[39m +
-        [32m'                           fullText: {\n'[39m +
-        [32m'                             contains: "合同",\n'[39m +
-        [32m'                             mode: "insensitive"\n'[39m +
-        [32m'                           }\n'[39m +
-        [32m'                         },\n'[39m +
-        [32m'                         {\n'[39m +
-        [32m'                           searchableText: {\n'[39m +
-        [32m'                             contains: "合同",\n'[39m +
-        [32m'                             mode: "insensitive"\n'[39m +
-        [32m'                           }\n'[39m +
-        [32m'                         },\n'[39m +
-        [32m'                         {\n'[39m +
-        [32m'                           lawName: {\n'[39m +
-        [32m'                             contains: "合同",\n'[39m +
-        [32m'                             mode: "insensitive"\n'[39m +
-        [32m'                           }\n'[39m +
-        [32m'                         }\n'[39m +
-        [32m'                       ]\n'[39m +
-        [32m'                     }\n'[39m +
-        [32m'                   ]\n'[39m +
-        [32m'                 },\n'[39m +
-        [32m'                 {\n'[39m +
-        [32m'                   category: "INVALID_CATEGORY"\n'[39m +
-        [32m'                 },\n'[39m +
-        [32m'                 {\n'[39m +
-        [32m'                   status: "VALID"\n'[39m +
-        [32m'                 }\n'[39m +
-        [32m'               ]\n'[39m +
-        [32m'             },\n'[39m +
-        [32m'             orderBy: [],\n'[39m +
-        [32m'             skip: 0,\n'[39m +
-        [32m'             take: 20,\n'[39m +
-        [32m'             include: {}\n'[39m +
-        [32m'           })\n'[39m +
-        [32m'\n'[39m +
-        [32m'Invalid value for argument `category`. Expected LawCategory.'[39m,
-      timestamp: [32m'2026-01-10T17:08:48.023Z'[39m
-    }
-  },
-  request: { keywords: [ [32m'合同'[39m ], category: [32m'INVALID_CATEGORY'[39m, limit: [33m20[39m }
+<testcase name="用户注册与登录流程 › 应该拒绝错误的密码" classname="auth.spec.ts" time="0.553">
+<system-out>
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
+  "success": true,
+  "message": "注册成功，请使用邮箱登录",
+  "data": {
+    "user": {
+      "id": "cmk9vehht0003gc4xsdekop3v",
+      "email": "test-1768144196104@example.com",
+      "username": "test196104",
+      "name": "TestUser196104",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:09:56.367Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVoaHQwMDAzZ2M0eHNkZWtvcDN2IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQxOTYxMDRAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDE5NiwiZXhwIjoxNzY4NzQ4OTk2fQ.7xkoL0r52U0Q9imXVnzOXijTHtFN57ZbjCteNFzucbc"
+  }
 }
 ]]>
-</system-err>
-</testcase>
-<testcase name="异常处理流程 › AI服务超时：模拟超时响应" classname="debate-flow\error-handling.spec.ts" time="28.054">
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
 </system-out>
-<system-err>
-<![CDATA[查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-]]>
-</system-err>
 </testcase>
-<testcase name="异常处理流程 › AI服务错误：模拟500错误" classname="debate-flow\error-handling.spec.ts" time="128.906">
-<failure message="error-handling.spec.ts:149:7 AI服务错误：模拟500错误" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:149:7 › 异常处理流程 › AI服务错误：模拟500错误 ──────────────────
+<testcase name="用户注册与登录流程 › 应该获取当前用户信息" classname="auth.spec.ts" time="1.118">
+<failure message="auth.spec.ts:287:7 应该获取当前用户信息" type="FAILURE">
+<![CDATA[  [chromium] › auth.spec.ts:287:7 › 用户注册与登录流程 › 应该获取当前用户信息 ─────────────────────────────────────────
 
-    Test timeout of 120000ms exceeded.
+    TypeError: Cannot read properties of undefined (reading 'email')
 
-    Error: 文档解析超时 [test-document.pdf]: 125772ms, 超过120000ms
-
-       at debate-flow\helpers.ts:232
-
-      230 |
-      231 |   const elapsed = Date.now() - startTime;
-    > 232 |   throw new Error(
-          |         ^
-      233 |     `文档解析超时 [${documentId}]: ${elapsed}ms, 超过${timeout}ms`,
-      234 |   );
-      235 | }
-        at waitForDocumentParsing (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:232:9)
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:173:25
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    ..\..\..\test-results\debate-flow-error-handling-异常处理流程-AI服务错误：模拟500错误-chromium\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ..\..\..\test-results\debate-flow-error-handling-异常处理流程-AI服务错误：模拟500错误-chromium\video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
+      302 |     expect(response.ok()).toBeTruthy();
+      303 |     expect(data.success).toBe(true);
+    > 304 |     expect(data.data?.user.email).toBe(testUser.email);
+          |                            ^
+      305 |     expect(data.data?.user.id).toBe(testUser.id);
+      306 |   });
+      307 |
+        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:304:28
 ]]>
 </failure>
 <system-out>
-<![CDATA[[34mprisma:query[39m SELECT 1
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-
-[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-AI服务错误：模拟500错误-chromium\test-failed-1.png]]
-
-[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-AI服务错误：模拟500错误-chromium\video.webm]]
-]]>
-</system-out>
-<system-err>
-<![CDATA[查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-]]>
-</system-err>
-</testcase>
-<testcase name="异常处理流程 › SSE连接中断：断线重连机制" classname="debate-flow\error-handling.spec.ts" time="0.354">
-<failure message="error-handling.spec.ts:189:7 SSE连接中断：断线重连机制" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:189:7 › 异常处理流程 › SSE连接中断：断线重连机制 ──────────────────
-
-    Error: page.evaluate: SyntaxError: Failed to construct 'EventSource': Cannot open an EventSource to '/api/v1/debates/test/stream'. The URL is invalid.
-        at eval (eval at evaluate (:290:30), <anonymous>:2:27)
-        at UtilityScript.evaluate (<anonymous>:292:16)
-        at UtilityScript.<anonymous> (<anonymous>:1:44)
-        at eval (eval at evaluate (:290:30), <anonymous>:2:27)
-        at UtilityScript.evaluate (<anonymous>:292:16)
-        at UtilityScript.<anonymous> (<anonymous>:1:44)
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:225:10
-
-    Error: page.waitForTimeout: Test ended.
-
-      241 |
-      242 |     // 验证连接尝试次数
-    > 243 |     await page.waitForTimeout(5000);
-          |                ^
-      244 |
-      245 |     expect(connectionCount).toBeGreaterThan(1);
-      246 |   });
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:243:16
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    ..\..\..\test-results\debate-flow-error-handling-异常处理流程-SSE连接中断：断线重连机制-chromium\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ..\..\..\test-results\debate-flow-error-handling-异常处理流程-SSE连接中断：断线重连机制-chromium\video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-]]>
-</failure>
-<system-out>
-<![CDATA[
-[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-SSE连接中断：断线重连机制-chromium\test-failed-1.png]]
-
-[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-SSE连接中断：断线重连机制-chromium\video.webm]]
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
+  "success": true,
+  "message": "注册成功，请使用邮箱登录",
+  "data": {
+    "user": {
+      "id": "cmk9vehyp0004gc4xea37l0mh",
+      "email": "test-1768144196685@example.com",
+      "username": "test196685",
+      "name": "TestUser196685",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:09:56.975Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVoeXAwMDA0Z2M0eGVhMzdsMG1oIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQxOTY2ODVAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDE5NiwiZXhwIjoxNzY4NzQ4OTk2fQ._rk1_WjgObTsJr0lIhQrCAVRDb-Ut45oWzPT2VyxoT0"
+  }
+}
 ]]>
 </system-out>
 </testcase>
-<testcase name="异常处理流程 › 数据库操作失败：并发请求冲突" classname="debate-flow\error-handling.spec.ts" time="1.457">
-<failure message="error-handling.spec.ts:248:7 数据库操作失败：并发请求冲突" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:248:7 › 异常处理流程 › 数据库操作失败：并发请求冲突 ──────────────────
+<testcase name="用户注册与登录流程 › 未认证用户应该无法获取当前用户信息" classname="auth.spec.ts" time="0.045">
+</testcase>
+<testcase name="用户会话管理 › 应该成功刷新访问令牌" classname="auth.spec.ts" time="1.136">
+<failure message="auth.spec.ts:320:7 应该成功刷新访问令牌" type="FAILURE">
+<![CDATA[  [chromium] › auth.spec.ts:320:7 › 用户会话管理 › 应该成功刷新访问令牌 ────────────────────────────────────────────
 
-    Error: expect(received).toBe(expected) // Object.is equality
+    Error: expect(received).toBeTruthy()
 
-    Expected: true
     Received: false
 
-      267 |     // 验证至少一个成功
-      268 |     const atLeastOneSuccess = result1.ok() || result2.ok();
-    > 269 |     expect(atLeastOneSuccess).toBe(true);
-          |                               ^
-      270 |
-      271 |     // 验证最终数据一致性
-      272 |     const finalResponse = await apiContext.get(`/api/v1/cases/${caseId}`);
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:269:31
-]]>
-</failure>
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-</testcase>
-<testcase name="异常处理流程 › 验证友好的错误提示信息" classname="debate-flow\error-handling.spec.ts" time="32.404">
-<failure message="error-handling.spec.ts:277:7 验证友好的错误提示信息" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:277:7 › 异常处理流程 › 验证友好的错误提示信息 ─────────────────────
-
-    Error: expect(locator).toBeVisible() failed
-
-    Locator: locator('[data-testid="error-message"]')
-    Expected: visible
-    Timeout: 30000ms
-    Error: element(s) not found
-
-    Call log:
-      - Expect "toBeVisible" with timeout 30000ms
-      - waiting for locator('[data-testid="error-message"]')
-
-
-      297 |     // 验证错误提示显示
-      298 |     const errorMessage = page.locator('[data-testid="error-message"]');
-    > 299 |     await expect(errorMessage).toBeVisible();
-          |                                ^
-      300 |     await expect(errorMessage).toHaveText(/数据库连接失败/);
-      301 |
-      302 |     // 验证重试按钮存在
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:299:32
-
-    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
-    ..\..\..\test-results\debate-flow-error-handling-异常处理流程-验证友好的错误提示信息-chromium\test-failed-1.png
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ..\..\..\test-results\debate-flow-error-handling-异常处理流程-验证友好的错误提示信息-chromium\video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: ..\..\..\test-results\debate-flow-error-handling-异常处理流程-验证友好的错误提示信息-chromium\error-context.md
-]]>
-</failure>
-<system-out>
-<![CDATA[
-[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-验证友好的错误提示信息-chromium\test-failed-1.png]]
-
-[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-验证友好的错误提示信息-chromium\video.webm]]
-
-[[ATTACHMENT|..\..\test-results\debate-flow-error-handling-异常处理流程-验证友好的错误提示信息-chromium\error-context.md]]
-]]>
-</system-out>
-</testcase>
-<testcase name="异常处理流程 › 验证系统状态可恢复：错误后继续操作" classname="debate-flow\error-handling.spec.ts" time="0.828">
-<failure message="error-handling.spec.ts:307:7 验证系统状态可恢复：错误后继续操作" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:307:7 › 异常处理流程 › 验证系统状态可恢复：错误后继续操作 ───────────────
-
-    Error: expect(received).toBe(expected) // Object.is equality
-
-    Expected: true
-    Received: false
-
-      330 |     });
-      331 |
-    > 332 |     expect(newResponse.ok()).toBe(true);
-          |                              ^
-      333 |     const result = await newResponse.json();
-      334 |     expect(result.data.id).toBeDefined();
-      335 |   });
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\error-handling.spec.ts:332:30
-]]>
-</failure>
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-</testcase>
-<testcase name="异常处理流程 › 验证数据不丢失：失败操作不影响已有数据" classname="debate-flow\error-handling.spec.ts" time="120.196">
-<failure message="error-handling.spec.ts:337:7 验证数据不丢失：失败操作不影响已有数据" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\error-handling.spec.ts:337:7 › 异常处理流程 › 验证数据不丢失：失败操作不影响已有数据 ─────────────
-
-    Test timeout of 120000ms exceeded.
-]]>
-</failure>
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-<system-err>
-<![CDATA[查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-查询文档失败 [test-document.pdf]: 404
-]]>
-</system-err>
-</testcase>
-</testsuite>
-<testsuite name="debate-flow\multi-round.spec.ts" timestamp="2026-01-10T17:06:05.390Z" hostname="chromium" tests="5" failures="5" skipped="0" time="1.65" errors="0">
-<testcase name="多轮辩论流程 › 两轮辩论流程：上下文继承和论点递进" classname="debate-flow\multi-round.spec.ts" time="0.445">
-<failure message="multi-round.spec.ts:43:7 两轮辩论流程：上下文继承和论点递进" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\multi-round.spec.ts:43:7 › 多轮辩论流程 › 两轮辩论流程：上下文继承和论点递进 ───────────────────
-
-    Error: 法条检索未返回结果
-
-       at debate-flow\helpers.ts:279
-
-      277 |   ) {
-      278 |     console.warn("法条检索结果为空:", result);
-    > 279 |     throw new Error("法条检索未返回结果");
-          |           ^
-      280 |   }
-      281 |
-      282 |   return result.data.articles;
-        at searchLawArticles (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:279:11)
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\multi-round.spec.ts:64:27
-]]>
-</failure>
-<system-out>
-<![CDATA[文档解析完成 [cmk8kedvx001z109nxf3ndtfo]: 78ms
-法条检索API响应: {
-  "success": true,
-  "data": {
-    "articles": [],
-    "total": 0,
-    "relevanceScores": []
-  },
-  "meta": {
-    "timestamp": "2026-01-10T17:14:10.058Z",
-    "version": "v1",
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "hasMore": false
-    }
-  }
-}
-[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-<system-err>
-<![CDATA[法条检索结果为空: {
-  success: [33mtrue[39m,
-  data: { articles: [], total: [33m0[39m, relevanceScores: [] },
-  meta: {
-    timestamp: [32m'2026-01-10T17:14:10.058Z'[39m,
-    version: [32m'v1'[39m,
-    pagination: { page: [33m1[39m, limit: [33m20[39m, hasMore: [33mfalse[39m }
-  }
-}
-]]>
-</system-err>
-</testcase>
-<testcase name="多轮辩论流程 › 验证上下文继承：第二轮引用第一轮论点" classname="debate-flow\multi-round.spec.ts" time="0.369">
-<failure message="multi-round.spec.ts:161:7 验证上下文继承：第二轮引用第一轮论点" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\multi-round.spec.ts:161:7 › 多轮辩论流程 › 验证上下文继承：第二轮引用第一轮论点 ─────────────────
-
-    TypeError: Cannot read properties of undefined (reading 'id')
-
-      181 |     );
-      182 |
-    > 183 |     const round2Id = (await round2Response.json()).data.id;
-          |                                                         ^
-      184 |     const args2 = await generateArguments(apiContext, round2Id, []);
-      185 |
-      186 |     // 验证第二轮论点引用第一轮
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\multi-round.spec.ts:183:57
-]]>
-</failure>
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-</testcase>
-<testcase name="多轮辩论流程 › 验证论点递进：观点逐步深化" classname="debate-flow\multi-round.spec.ts" time="0.381">
-<failure message="multi-round.spec.ts:201:7 验证论点递进：观点逐步深化" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\multi-round.spec.ts:201:7 › 多轮辩论流程 › 验证论点递进：观点逐步深化 ──────────────────────
-
-    TypeError: Cannot read properties of undefined (reading 'id')
-
-      220 |     );
-      221 |
-    > 222 |     const round2Id = (await round2Response.json()).data.id;
-          |                                                         ^
-      223 |     const args2 = await generateArguments(apiContext, round2Id, []);
-      224 |
-      225 |     // 验证第二轮论点更详细
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\multi-round.spec.ts:222:57
-]]>
-</failure>
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-</testcase>
-<testcase name="多轮辩论流程 › 验证增量分析：只分析新增数据" classname="debate-flow\multi-round.spec.ts" time="0.227">
-<failure message="multi-round.spec.ts:261:7 验证增量分析：只分析新增数据" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\multi-round.spec.ts:261:7 › 多轮辩论流程 › 验证增量分析：只分析新增数据 ─────────────────────
-
-    TypeError: Cannot read properties of undefined (reading 'id')
-
-      281 |     );
-      282 |
-    > 283 |     const round2Id = (await round2Response.json()).data.id;
-          |                                                         ^
-      284 |     const round2Start = Date.now();
-      285 |     const round2Duration = Date.now() - round2Start;
-      286 |     await generateArguments(apiContext, round2Id, []);
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\multi-round.spec.ts:283:57
-]]>
-</failure>
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-</testcase>
-<testcase name="多轮辩论流程 › 验证三轮辩论：完整的多轮支持" classname="debate-flow\multi-round.spec.ts" time="0.228">
-<failure message="multi-round.spec.ts:299:7 验证三轮辩论：完整的多轮支持" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\multi-round.spec.ts:299:7 › 多轮辩论流程 › 验证三轮辩论：完整的多轮支持 ─────────────────────
-
-    TypeError: Cannot read properties of undefined (reading 'id')
-
-      318 |     );
-      319 |
-    > 320 |     const round2Id = (await round2Response.json()).data.id;
-          |                                                         ^
-      321 |     const args2 = await generateArguments(apiContext, round2Id, []);
-      322 |
-      323 |     // 第三轮
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\multi-round.spec.ts:320:57
-]]>
-</failure>
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
-</system-out>
-</testcase>
-</testsuite>
-<testsuite name="debate-flow\single-round.spec.ts" timestamp="2026-01-10T17:06:05.390Z" hostname="chromium" tests="6" failures="3" skipped="0" time="6.307" errors="0">
-<testcase name="单轮辩论完整流程 › 完整流程测试：文档上传→解析→检索→分析→辩论" classname="debate-flow\single-round.spec.ts" time="5.516">
-<failure message="single-round.spec.ts:37:7 完整流程测试：文档上传→解析→检索→分析→辩论" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\single-round.spec.ts:37:7 › 单轮辩论完整流程 › 完整流程测试：文档上传→解析→检索→分析→辩论 ──────────
-
-    Error: 性能指标不达标: 适用性分析 = 5299ms, 期望<2000ms (容忍度1.5x)
-
-       at debate-flow\helpers.ts:563
-
-      561 |
-      562 |   if (actual > threshold) {
-    > 563 |     throw new Error(
-          |           ^
-      564 |       `性能指标不达标: ${metricName} = ${actual}ms, 期望<${target}ms (容忍度${tolerance}x)`,
-      565 |     );
-      566 |   }
-        at assertPerformance (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:563:11)
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\single-round.spec.ts:134:22
-]]>
-</failure>
-<system-out>
-<![CDATA[文档解析完成 [cmk8kek9p002v109naw6gbf35]: 57ms
-提取的关键词: [ [32m'判令被告支付货款100000元'[39m, [32m'判令被告支付利息（按年利率6%计算）'[39m ]
-最终使用的关键词: [ [32m'支付'[39m, [32m'货款'[39m, [32m'利息'[39m ]
-法条检索API响应: {
-  "success": true,
-  "data": {
-    "articles": [
-      {
-        "id": "mock-article-id-11",
-        "lawName": "中华人民共和国民法典",
-        "articleNumber": "第五百八十九条",
-        "fullText": "定作人未向承揽人支付报酬或者材料费等价款的，承揽人对完成的工作成果享有留置权或者有权拒绝交付。",
-        "category": "CIVIL",
-        "lawType": "LAW",
-        "relevanceScore": 0.3,
-        "matchedKeywords": []
-      },
-      {
-        "id": "mock-article-id-14",
-        "lawName": "中华人民共和国民法典",
-        "articleNumber": "第五百九十二条",
-        "fullText": "定作人未按照约定支付报酬的，承揽人对完成的工作成果享有留置权或者有权拒绝交付。",
-        "category": "CIVIL",
-        "lawType": "LAW",
-        "relevanceScore": 0.3,
-        "matchedKeywords": []
-      },
-      {
-        "id": "mock-article-id-2",
-        "lawName": "中华人民共和国民法典",
-        "articleNumber": "第五百零九条",
-        "fullText": "当事人一方未支付价款、报酬、租金、利息，或者不履行其他金钱债务的，对方可以请求其支付。",
-        "category": "CIVIL",
-        "lawType": "LAW",
-        "relevanceScore": 0.3,
-        "matchedKeywords": []
-      },
-      {
-        "id": "mock-article-id-3",
-        "lawName": "中华人民共和国民法典",
-        "articleNumber": "第五百六十六条",
-        "fullText": "定作人未向承揽人支付报酬或者材料费等价款的，承揽人对完成的工作成果享有留置权或者有权拒绝交付。",
-        "category": "CIVIL",
-        "lawType": "LAW",
-        "relevanceScore": 0.3,
-        "matchedKeywords": []
-      },
-      {
-        "id": "mock-article-id-4",
-        "lawName": "中华人民共和国民法典",
-        "articleNumber": "第五百七十七条",
-        "fullText": "定作人未向承揽人支付报酬或者材料费等价款的，承揽人对完成的工作成果享有留置权或者有权拒绝交付。",
-        "category": "CIVIL",
-        "lawType": "LAW",
-        "relevanceScore": 0.3,
-        "matchedKeywords": []
-      }
-    ],
-    "total": 5,
-    "relevanceScores": [
-      0.3,
-      0.3,
-      0.3,
-      0.3,
-      0.3
-    ]
-  },
-  "meta": {
-    "timestamp": "2026-01-10T17:14:18.133Z",
-    "version": "v1",
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "hasMore": false
-    }
-  }
-}
-]]>
-</system-out>
-</testcase>
-<testcase name="单轮辩论完整流程 › 验证文档解析结果数据结构" classname="debate-flow\single-round.spec.ts" time="0.185">
-<system-out>
-<![CDATA[文档解析完成 [cmk8kepex002z109nisxc69t5]: 54ms
-]]>
-</system-out>
-</testcase>
-<testcase name="单轮辩论完整流程 › 验证法条检索结果相关性" classname="debate-flow\single-round.spec.ts" time="0.088">
-<system-out>
-<![CDATA[法条检索API响应: {
-  "success": true,
-  "data": {
-    "articles": [
-      {
-        "id": "mock-article-id-1",
-        "lawName": "中华人民共和国民法典",
-        "articleNumber": "第一百一十二条",
-        "fullText": "当事人一方不履行合同义务或者履行合同义务不符合约定的，应当承担继续履行、采取补救措施或者赔偿损失等违约责任。",
-        "category": "CIVIL",
-        "lawType": "LAW",
-        "relevanceScore": 0.3,
-        "matchedKeywords": []
-      },
-      {
-        "id": "mock-article-id-13",
-        "lawName": "中华人民共和国民法典",
-        "articleNumber": "第五百九十一条",
-        "fullText": "承揽人交付的工作成果不符合质量要求的，定作人可以请求承揽人在合理期限内承担修理、重作、减少报酬、赔偿损失等违约责任。",
-        "category": "CIVIL",
-        "lawType": "LAW",
-        "relevanceScore": 0.3,
-        "matchedKeywords": []
-      },
-      {
-        "id": "mock-article-id-16",
-        "lawName": "中华人民共和国民法典",
-        "articleNumber": "第五百九十四条",
-        "fullText": "承揽人将其承揽的主要工作交由第三人完成的，应当就该第三人完成的工作成果向定作人负责；未经定作人同意的，定作人也可以解除合同。",
-        "category": "CIVIL",
-        "lawType": "LAW",
-        "relevanceScore": 0.3,
-        "matchedKeywords": []
-      },
-      {
-        "id": "mock-article-id-20",
-        "lawName": "中华人民共和国民法典",
-        "articleNumber": "第五百九十八条",
-        "fullText": "承揽人交付的工作成果不符合质量要求的，定作人可以请求承揽人在合理期限内承担修理、重作、减少报酬、赔偿损失等违约责任。",
-        "category": "CIVIL",
-        "lawType": "LAW",
-        "relevanceScore": 0.3,
-        "matchedKeywords": []
-      },
-      {
-        "id": "mock-article-id-5",
-        "lawName": "中华人民共和国民法典",
-        "articleNumber": "第五百七十八条",
-        "fullText": "承揽工作需要定作人协助的，定作人有协助的义务。定作人不履行协助义务致使承揽工作不能完成的，承揽可以催告定作人在合理期限内履行义务，并可以顺延履行期限；定作人在合理期限内未履行义务的，承揽可以解除合同。",
-        "category": "CIVIL",
-        "lawType": "LAW",
-        "relevanceScore": 0.3,
-        "matchedKeywords": []
-      },
-      {
-        "id": "mock-article-id-6",
-        "lawName": "中华人民共和国民法典",
-        "articleNumber": "第五百八十二条",
-        "fullText": "承揽人交付的工作成果不符合质量要求的，定作人可以合理选择请求承揽人承担修理、重作、减少报酬、赔偿损失等违约责任。",
-        "category": "CIVIL",
-        "lawType": "LAW",
-        "relevanceScore": 0.3,
-        "matchedKeywords": []
-      },
-      {
-        "id": "mock-article-id-8",
-        "lawName": "中华人民共和国民法典",
-        "articleNumber": "第五百八十六条",
-        "fullText": "承揽人将其承揽的主要工作交由第三人完成的，应当就该第三人完成的工作成果向定作人负责；未经定作人同意的，定作人也可以解除合同。",
-        "category": "CIVIL",
-        "lawType": "LAW",
-        "relevanceScore": 0.3,
-        "matchedKeywords": []
-      }
-    ],
-    "total": 7,
-    "relevanceScores": [
-      0.3,
-      0.3,
-      0.3,
-      0.3,
-      0.3,
-      0.3,
-      0.3
-    ]
-  },
-  "meta": {
-    "timestamp": "2026-01-10T17:14:24.858Z",
-    "version": "v1",
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "hasMore": false
-    }
-  }
-}
-]]>
-</system-out>
-</testcase>
-<testcase name="单轮辩论完整流程 › 验证法条适用性分析准确性" classname="debate-flow\single-round.spec.ts" time="0.072">
-<failure message="single-round.spec.ts:235:7 验证法条适用性分析准确性" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\single-round.spec.ts:235:7 › 单轮辩论完整流程 › 验证法条适用性分析准确性 ────────────────────
-
-    Error: 法条检索未返回结果
-
-       at debate-flow\helpers.ts:279
-
-      277 |   ) {
-      278 |     console.warn("法条检索结果为空:", result);
-    > 279 |     throw new Error("法条检索未返回结果");
-          |           ^
-      280 |   }
-      281 |
-      282 |   return result.data.articles;
-        at searchLawArticles (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:279:11)
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\single-round.spec.ts:239:27
-]]>
-</failure>
-<system-out>
-<![CDATA[法条检索API响应: {
-  "success": true,
-  "data": {
-    "articles": [],
-    "total": 0,
-    "relevanceScores": []
-  },
-  "meta": {
-    "timestamp": "2026-01-10T17:14:24.965Z",
-    "version": "v1",
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "hasMore": false
-    }
-  }
-}
-]]>
-</system-out>
-<system-err>
-<![CDATA[法条检索结果为空: {
-  success: [33mtrue[39m,
-  data: { articles: [], total: [33m0[39m, relevanceScores: [] },
-  meta: {
-    timestamp: [32m'2026-01-10T17:14:24.965Z'[39m,
-    version: [32m'v1'[39m,
-    pagination: { page: [33m1[39m, limit: [33m20[39m, hasMore: [33mfalse[39m }
-  }
-}
-]]>
-</system-err>
-</testcase>
-<testcase name="单轮辩论完整流程 › 验证辩论论点质量和平衡性" classname="debate-flow\single-round.spec.ts" time="0.103">
-<failure message="single-round.spec.ts:274:7 验证辩论论点质量和平衡性" type="FAILURE">
-<![CDATA[  [chromium] › debate-flow\single-round.spec.ts:274:7 › 单轮辩论完整流程 › 验证辩论论点质量和平衡性 ────────────────────
-
-    Error: 法条检索未返回结果
-
-       at debate-flow\helpers.ts:279
-
-      277 |   ) {
-      278 |     console.warn("法条检索结果为空:", result);
-    > 279 |     throw new Error("法条检索未返回结果");
-          |           ^
-      280 |   }
-      281 |
-      282 |   return result.data.articles;
-        at searchLawArticles (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:279:11)
-        at D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\single-round.spec.ts:278:27
-]]>
-</failure>
-<system-out>
-<![CDATA[法条检索API响应: {
-  "success": true,
-  "data": {
-    "articles": [],
-    "total": 0,
-    "relevanceScores": []
-  },
-  "meta": {
-    "timestamp": "2026-01-10T17:14:26.205Z",
-    "version": "v1",
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "hasMore": false
-    }
-  }
-}
-]]>
-</system-out>
-<system-err>
-<![CDATA[法条检索结果为空: {
-  success: [33mtrue[39m,
-  data: { articles: [], total: [33m0[39m, relevanceScores: [] },
-  meta: {
-    timestamp: [32m'2026-01-10T17:14:26.205Z'[39m,
-    version: [32m'v1'[39m,
-    pagination: { page: [33m1[39m, limit: [33m20[39m, hasMore: [33mfalse[39m }
-  }
-}
-]]>
-</system-err>
-</testcase>
-<testcase name="单轮辩论完整流程 › 验证数据库数据一致性" classname="debate-flow\single-round.spec.ts" time="0.343">
-<system-out>
-<![CDATA[文档解析完成 [cmk8kerh50039109nr2pmvnvz]: 66ms
-[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m SELECT "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName" FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
-[34mprisma:query[39m SELECT "public"."documents"."id", "public"."documents"."caseId", "public"."documents"."userId", "public"."documents"."filename", "public"."documents"."filePath", "public"."documents"."fileType", "public"."documents"."fileSize", "public"."documents"."mimeType", "public"."documents"."extractedData", "public"."documents"."analysisStatus"::text, "public"."documents"."analysisResult", "public"."documents"."analysisError", "public"."documents"."createdAt", "public"."documents"."updatedAt", "public"."documents"."deletedAt" FROM "public"."documents" WHERE "public"."documents"."caseId" IN ($1) OFFSET $2
-[34mprisma:query[39m SELECT "public"."debates"."id", "public"."debates"."caseId", "public"."debates"."userId", "public"."debates"."title", "public"."debates"."status"::text, "public"."debates"."currentRound", "public"."debates"."debateConfig", "public"."debates"."createdAt", "public"."debates"."updatedAt", "public"."debates"."deletedAt" FROM "public"."debates" WHERE "public"."debates"."caseId" IN ($1) OFFSET $2
-[34mprisma:query[39m SELECT "public"."debate_rounds"."id", "public"."debate_rounds"."debateId", "public"."debate_rounds"."roundNumber", "public"."debate_rounds"."status"::text, "public"."debate_rounds"."startedAt", "public"."debate_rounds"."completedAt", "public"."debate_rounds"."createdAt", "public"."debate_rounds"."updatedAt" FROM "public"."debate_rounds" WHERE "public"."debate_rounds"."debateId" IN ($1) OFFSET $2
-]]>
-</system-out>
-</testcase>
-</testsuite>
-<testsuite name="performance\concurrent-users.spec.ts" timestamp="2026-01-10T17:06:05.390Z" hostname="chromium" tests="10" failures="5" skipped="0" time="9.133" errors="0">
-<testcase name="并发用户性能测试 › 并发创建案件：10个用户同时创建" classname="performance\concurrent-users.spec.ts" time="0.602">
-<system-out>
-<![CDATA[[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-10个用户并发创建案件耗时: 367ms
-]]>
-</system-out>
-</testcase>
-<testcase name="并发用户性能测试 › 并发查询案件列表：10个用户同时查询" classname="performance\concurrent-users.spec.ts" time="0.327">
-<system-out>
-<![CDATA[10个用户并发查询案件耗时: 285ms
-并发加速比: 1.12x
-]]>
-</system-out>
-</testcase>
-<testcase name="并发用户性能测试 › 并发创建辩论：5个用户同时创建" classname="performance\concurrent-users.spec.ts" time="0.522">
-<system-out>
-<![CDATA[[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-5个用户并发创建辩论耗时: 220ms
-]]>
-</system-out>
-</testcase>
-<testcase name="并发用户性能测试 › 并发用户不同操作：混合场景" classname="performance\concurrent-users.spec.ts" time="0.663">
-<failure message="concurrent-users.spec.ts:127:7 并发用户不同操作：混合场景" type="FAILURE">
-<![CDATA[  [chromium] › performance\concurrent-users.spec.ts:127:7 › 并发用户性能测试 › 并发用户不同操作：混合场景 ───────────────
-
-    Error: expect(received).toBe(expected) // Object.is equality
-
-    Expected: true
-    Received: false
-
-      179 |     // 验证所有操作成功
-      180 |     results.forEach((response) => {
-    > 181 |       expect(response.ok()).toBe(true);
-          |                             ^
-      182 |     });
-      183 |
-      184 |     // 清理测试数据
-        at forEach (D:\legal_debate_mvp\src\__tests__\e2e\performance\concurrent-users.spec.ts:181:29)
-        at D:\legal_debate_mvp\src\__tests__\e2e\performance\concurrent-users.spec.ts:180:13
-]]>
-</failure>
-<system-out>
-<![CDATA[=== 并发用户性能报告 ===
-{
-  "并发创建案件": {
-    "min": 367,
-    "max": 367,
-    "avg": 367,
-    "count": 1
-  },
-  "并发查询案件": {
-    "min": 285,
-    "max": 285,
-    "avg": 285,
-    "count": 1
-  },
-  "并发创建辩论": {
-    "min": 220,
-    "max": 220,
-    "avg": 220,
-    "count": 1
-  },
-  "并发混合操作": {
-    "min": 347,
-    "max": 347,
-    "avg": 347,
-    "count": 1
-  }
-}
-]]>
-</system-out>
-</testcase>
-<testcase name="并发用户性能测试 › 并发上传文档：5个用户同时上传" classname="performance\concurrent-users.spec.ts" time="0.305">
-<failure message="concurrent-users.spec.ts:190:7 并发上传文档：5个用户同时上传" type="FAILURE">
-<![CDATA[  [chromium] › performance\concurrent-users.spec.ts:190:7 › 并发用户性能测试 › 并发上传文档：5个用户同时上传 ─────────────
-
-    Error: expect(received).toBe(expected) // Object.is equality
-
-    Expected: true
-    Received: false
-
-      221 |     // 验证所有上传成功
-      222 |     results.forEach((response) => {
-    > 223 |       expect(response.ok()).toBe(true);
-          |                             ^
-      224 |     });
-      225 |
-      226 |     // 清理测试数据
-        at forEach (D:\legal_debate_mvp\src\__tests__\e2e\performance\concurrent-users.spec.ts:223:29)
-        at D:\legal_debate_mvp\src\__tests__\e2e\performance\concurrent-users.spec.ts:222:13
-]]>
-</failure>
-<system-out>
-<![CDATA[=== 并发用户性能报告 ===
-{
-  "并发上传文档": {
-    "min": 104,
-    "max": 104,
-    "avg": 104,
-    "count": 1
-  }
-}
-]]>
-</system-out>
-</testcase>
-<testcase name="并发用户性能测试 › 高并发场景：50个请求同时访问" classname="performance\concurrent-users.spec.ts" time="1.488">
-<failure message="concurrent-users.spec.ts:232:7 高并发场景：50个请求同时访问" type="FAILURE">
-<![CDATA[  [chromium] › performance\concurrent-users.spec.ts:232:7 › 并发用户性能测试 › 高并发场景：50个请求同时访问 ─────────────
-
-    Error: expect(received).toBeGreaterThanOrEqual(expected)
-
-    Expected: >= 90
-    Received:    60
-
-      270 |
-      271 |     // 要求至少90%的请求成功
-    > 272 |     expect(successRate).toBeGreaterThanOrEqual(90);
+      192 |
+      193 |   const data: RefreshResponseData = await response.json();
+    > 194 |   expect(response.ok()).toBeTruthy();
           |                         ^
-      273 |
-      274 |     // 清理创建的测试案件
-      275 |     const createdCases = results
-        at D:\legal_debate_mvp\src\__tests__\e2e\performance\concurrent-users.spec.ts:272:25
+      195 |   expect(data.success).toBe(true);
+      196 |
+      197 |   return data.data?.token || "";
+        at refreshToken (D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:194:25)
+        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:332:22
 ]]>
 </failure>
 <system-out>
-<![CDATA[50个请求并发，成功率: 60%, 耗时: 1483ms
-=== 并发用户性能报告 ===
-{
-  "高并发场景": {
-    "min": 1483,
-    "max": 1483,
-    "avg": 1483,
-    "count": 1
-  }
-}
-]]>
-</system-out>
-</testcase>
-<testcase name="并发用户性能测试 › 并发冲突场景：同时更新同一资源" classname="performance\concurrent-users.spec.ts" time="0.523">
-<failure message="concurrent-users.spec.ts:287:7 并发冲突场景：同时更新同一资源" type="FAILURE">
-<![CDATA[  [chromium] › performance\concurrent-users.spec.ts:287:7 › 并发用户性能测试 › 并发冲突场景：同时更新同一资源 ─────────────
-
-    Error: expect(received).toBeGreaterThan(expected)
-
-    Expected: > 0
-    Received:   0
-
-      308 |     );
-      309 |
-    > 310 |     expect(successCount).toBeGreaterThan(0);
-          |                          ^
-      311 |
-      312 |     // 验证最终数据一致性
-      313 |     const finalResponse = await apiContext.get(`/api/v1/cases/${caseId}`);
-        at D:\legal_debate_mvp\src\__tests__\e2e\performance\concurrent-users.spec.ts:310:26
-]]>
-</failure>
-<system-out>
-<![CDATA[并发更新同一资源: 成功0个, 冲突0个
-=== 并发用户性能报告 ===
-{}
-]]>
-</system-out>
-</testcase>
-<testcase name="并发用户性能测试 › 并发性能指标：响应时间分布" classname="performance\concurrent-users.spec.ts" time="0.621">
-<system-out>
-<![CDATA[并发请求响应时间分布: { min: [33m27[39m, max: [33m58[39m, avg: [33m30.75[39m, p50: [33m30[39m, p95: [33m58[39m, p99: [33m58[39m }
-]]>
-</system-out>
-</testcase>
-<testcase name="并发用户性能测试 › 持续并发压力：100个请求分批发送" classname="performance\concurrent-users.spec.ts" time="4.008">
-<system-out>
-<![CDATA[100个请求分10批处理
-平均批次耗时: 293.40ms
-最大批次耗时: 332ms
-性能退化比: 1.00x
-]]>
-</system-out>
-</testcase>
-<testcase name="并发用户性能测试 › 系统资源监控：内存泄漏检查" classname="performance\concurrent-users.spec.ts" time="0.074">
-<failure message="concurrent-users.spec.ts:408:7 系统资源监控：内存泄漏检查" type="FAILURE">
-<![CDATA[  [chromium] › performance\concurrent-users.spec.ts:408:7 › 并发用户性能测试 › 系统资源监控：内存泄漏检查 ───────────────
-
-    Error: 创建案件失败: 404
-
-       at debate-flow\helpers.ts:102
-
-      100 |       },
-      101 |     });
-    > 102 |     throw new Error(`创建案件失败: ${response.status()}`);
-          |           ^
-      103 |   }
-      104 |
-      105 |   const result = await response.json();
-        at createTestCase (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:102:11)
-        at D:\legal_debate_mvp\src\__tests__\e2e\performance\concurrent-users.spec.ts:417:24
-]]>
-</failure>
-<system-out>
-<![CDATA[=== 并发用户性能报告 ===
-{
-  "并发响应_min": {
-    "min": 27,
-    "max": 27,
-    "avg": 27,
-    "count": 1
-  },
-  "并发响应_max": {
-    "min": 58,
-    "max": 58,
-    "avg": 58,
-    "count": 1
-  },
-  "并发响应_avg": {
-    "min": 30.75,
-    "max": 30.75,
-    "avg": 30.75,
-    "count": 1
-  },
-  "并发响应_p95": {
-    "min": 58,
-    "max": 58,
-    "avg": 58,
-    "count": 1
-  },
-  "并发响应_p99": {
-    "min": 58,
-    "max": 58,
-    "avg": 58,
-    "count": 1
-  },
-  "持续并发_平均批次": {
-    "min": 293.4,
-    "max": 293.4,
-    "avg": 293.4,
-    "count": 1
-  },
-  "持续并发_最大批次": {
-    "min": 332,
-    "max": 332,
-    "avg": 332,
-    "count": 1
-  }
-}
-]]>
-</system-out>
-<system-err>
-<![CDATA[创建案件失败详情: {
-  status: [33m404[39m,
-  statusText: [32m'Not Found'[39m,
-  body: { success: [33mfalse[39m, error: [32m'用户不存在'[39m },
-  request: {
-    userId: [32m'test-e2e-concurrent-memory-1'[39m,
-    title: [32m'测试案件_1768065281378'[39m
-  }
-}
-]]>
-</system-err>
-</testcase>
-</testsuite>
-<testsuite name="performance\response-time.spec.ts" timestamp="2026-01-10T17:06:05.390Z" hostname="chromium" tests="11" failures="6" skipped="0" time="2.02" errors="0">
-<testcase name="响应时间性能测试 › 文档上传响应时间 &lt; 3秒" classname="performance\response-time.spec.ts" time="0.139">
-</testcase>
-<testcase name="响应时间性能测试 › 文档解析时间 &lt; 20秒" classname="performance\response-time.spec.ts" time="0.126">
-<system-out>
-<![CDATA[文档解析完成 [cmk8kf3b9006h109n8p6pq03s]: 51ms
-]]>
-</system-out>
-</testcase>
-<testcase name="响应时间性能测试 › 法条检索响应时间 &lt; 1秒" classname="performance\response-time.spec.ts" time="0.039">
-<failure message="response-time.spec.ts:83:7 法条检索响应时间 &lt; 1秒" type="FAILURE">
-<![CDATA[  [chromium] › performance\response-time.spec.ts:83:7 › 响应时间性能测试 › 法条检索响应时间 < 1秒 ───────────────────
-
-    Error: 法条检索未返回结果
-
-       at debate-flow\helpers.ts:279
-
-      277 |   ) {
-      278 |     console.warn("法条检索结果为空:", result);
-    > 279 |     throw new Error("法条检索未返回结果");
-          |           ^
-      280 |   }
-      281 |
-      282 |   return result.data.articles;
-        at searchLawArticles (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:279:11)
-        at D:\legal_debate_mvp\src\__tests__\e2e\performance\response-time.spec.ts:89:7
-]]>
-</failure>
-<system-out>
-<![CDATA[法条检索API响应: {
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
   "success": true,
+  "message": "注册成功，请使用邮箱登录",
   "data": {
-    "articles": [],
-    "total": 0,
-    "relevanceScores": []
-  },
-  "meta": {
-    "timestamp": "2026-01-10T17:14:42.805Z",
-    "version": "v1",
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "hasMore": false
-    }
-  }
-}
-[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-=== 响应时间性能报告 ===
-{
-  "文档上传": {
-    "min": 46,
-    "max": 46,
-    "avg": 46,
-    "count": 1
-  },
-  "文档解析": {
-    "min": 53,
-    "max": 53,
-    "avg": 53,
-    "count": 1
+    "user": {
+      "id": "cmk9vejvv0005gc4xz9cvdig3",
+      "email": "test-1768144199110@example.com",
+      "username": "test199110",
+      "name": "TestUser199110",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:09:59.466Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVqdnYwMDA1Z2M0eHo5Y3ZkaWczIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQxOTkxMTBAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDE5OSwiZXhwIjoxNzY4NzQ4OTk5fQ.aipSa7BTsuLa8nZCBGaPyYTZ4NqDc8T9gXOvmyOsJ6E"
   }
 }
 ]]>
 </system-out>
-<system-err>
-<![CDATA[法条检索结果为空: {
-  success: [33mtrue[39m,
-  data: { articles: [], total: [33m0[39m, relevanceScores: [] },
-  meta: {
-    timestamp: [32m'2026-01-10T17:14:42.805Z'[39m,
-    version: [32m'v1'[39m,
-    pagination: { page: [33m1[39m, limit: [33m20[39m, hasMore: [33mfalse[39m }
-  }
-}
-]]>
-</system-err>
 </testcase>
-<testcase name="响应时间性能测试 › 法条适用性分析 &lt; 2秒" classname="performance\response-time.spec.ts" time="0.106">
-<failure message="response-time.spec.ts:111:7 法条适用性分析 &lt; 2秒" type="FAILURE">
-<![CDATA[  [chromium] › performance\response-time.spec.ts:111:7 › 响应时间性能测试 › 法条适用性分析 < 2秒 ───────────────────
-
-    Error: 法条检索未返回结果
-
-       at debate-flow\helpers.ts:279
-
-      277 |   ) {
-      278 |     console.warn("法条检索结果为空:", result);
-    > 279 |     throw new Error("法条检索未返回结果");
-          |           ^
-      280 |   }
-      281 |
-      282 |   return result.data.articles;
-        at searchLawArticles (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:279:11)
-        at D:\legal_debate_mvp\src\__tests__\e2e\performance\response-time.spec.ts:119:29
-]]>
-</failure>
+<testcase name="用户会话管理 › 应该支持登出当前设备" classname="auth.spec.ts" time="1.174">
 <system-out>
-<![CDATA[法条检索API响应: {
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
   "success": true,
+  "message": "注册成功，请使用邮箱登录",
   "data": {
-    "articles": [],
-    "total": 0,
-    "relevanceScores": []
-  },
-  "meta": {
-    "timestamp": "2026-01-10T17:14:44.180Z",
-    "version": "v1",
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "hasMore": false
-    }
-  }
-}
-=== 响应时间性能报告 ===
-{}
-]]>
-</system-out>
-<system-err>
-<![CDATA[法条检索结果为空: {
-  success: [33mtrue[39m,
-  data: { articles: [], total: [33m0[39m, relevanceScores: [] },
-  meta: {
-    timestamp: [32m'2026-01-10T17:14:44.180Z'[39m,
-    version: [32m'v1'[39m,
-    pagination: { page: [33m1[39m, limit: [33m20[39m, hasMore: [33mfalse[39m }
+    "user": {
+      "id": "cmk9velmp0006gc4xrahtt83w",
+      "email": "test-1768144201444@example.com",
+      "username": "test201444",
+      "name": "TestUser201444",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:01.728Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVsbXAwMDA2Z2M0eHJhaHR0ODN3IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDE0NDRAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwMSwiZXhwIjoxNzY4NzQ5MDAxfQ.hmf6aHgsBdMes3dPTfMzH0ZM5cCNJW5m4XskFJLOP3Y"
   }
 }
 ]]>
-</system-err>
-</testcase>
-<testcase name="响应时间性能测试 › 辩论生成时间 &lt; 30秒" classname="performance\response-time.spec.ts" time="0.634">
-<system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-]]>
 </system-out>
 </testcase>
-<testcase name="响应时间性能测试 › 完整单轮辩论流程 &lt; 60秒" classname="performance\response-time.spec.ts" time="0.163">
-<failure message="response-time.spec.ts:189:7 完整单轮辩论流程 &lt; 60秒" type="FAILURE">
-<![CDATA[  [chromium] › performance\response-time.spec.ts:189:7 › 响应时间性能测试 › 完整单轮辩论流程 < 60秒 ─────────────────
-
-    Error: 法条检索未返回结果
-
-       at debate-flow\helpers.ts:279
-
-      277 |   ) {
-      278 |     console.warn("法条检索结果为空:", result);
-    > 279 |     throw new Error("法条检索未返回结果");
-          |           ^
-      280 |   }
-      281 |
-      282 |   return result.data.articles;
-        at searchLawArticles (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:279:11)
-        at D:\legal_debate_mvp\src\__tests__\e2e\performance\response-time.spec.ts:204:29
-]]>
-</failure>
+<testcase name="用户会话管理 › 应该支持登出所有设备" classname="auth.spec.ts" time="0.52">
 <system-out>
-<![CDATA[文档解析完成 [cmk8kf5vj0078109nam8mwr3q]: 58ms
-法条检索API响应: {
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
   "success": true,
+  "message": "注册成功，请使用邮箱登录",
   "data": {
-    "articles": [],
-    "total": 0,
-    "relevanceScores": []
-  },
-  "meta": {
-    "timestamp": "2026-01-10T17:14:46.116Z",
-    "version": "v1",
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "hasMore": false
-    }
-  }
-}
-=== 响应时间性能报告 ===
-{
-  "辩论生成_0": {
-    "min": 67,
-    "max": 67,
-    "avg": 67,
-    "count": 1
-  },
-  "辩论生成_1": {
-    "min": 57,
-    "max": 57,
-    "avg": 57,
-    "count": 1
-  },
-  "辩论生成_2": {
-    "min": 45,
-    "max": 45,
-    "avg": 45,
-    "count": 1
-  },
-  "辩论生成_平均": {
-    "min": 56.333333333333336,
-    "max": 56.333333333333336,
-    "avg": 56.333333333333336,
-    "count": 1
+    "user": {
+      "id": "cmk9vemie0007gc4x3mfb3u5e",
+      "email": "test-1768144202627@example.com",
+      "username": "test202627",
+      "name": "TestUser202627",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:02.869Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVtaWUwMDA3Z2M0eDNtZmIzdTVlIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDI2MjdAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwMiwiZXhwIjoxNzY4NzQ5MDAyfQ.4XHPk9d9nyWezgCk9DxODn_8gWQRLcDox9faPzH9fRo"
   }
 }
 ]]>
 </system-out>
-<system-err>
-<![CDATA[法条检索结果为空: {
-  success: [33mtrue[39m,
-  data: { articles: [], total: [33m0[39m, relevanceScores: [] },
-  meta: {
-    timestamp: [32m'2026-01-10T17:14:46.116Z'[39m,
-    version: [32m'v1'[39m,
-    pagination: { page: [33m1[39m, limit: [33m20[39m, hasMore: [33mfalse[39m }
-  }
-}
-]]>
-</system-err>
 </testcase>
-<testcase name="响应时间性能测试 › 数据库查询性能 &lt; 100ms（平均值）" classname="performance\response-time.spec.ts" time="0.352">
+<testcase name="用户会话管理 › 过期的令牌应该被拒绝" classname="auth.spec.ts" time="0.014">
 </testcase>
-<testcase name="响应时间性能测试 › 案件列表分页查询性能" classname="performance\response-time.spec.ts" time="0.104">
+<testcase name="密码找回与重置 › 应该发送密码重置验证码" classname="auth.spec.ts" time="1.759">
 <system-out>
-<![CDATA[分页性能结果: { [32m'分页_10'[39m: [33m29[39m, [32m'分页_20'[39m: [33m29[39m, [32m'分页_50'[39m: [33m30[39m }
-]]>
-</system-out>
-</testcase>
-<testcase name="响应时间性能测试 › 缓存命中性能 &lt; 50ms" classname="performance\response-time.spec.ts" time="0.039">
-<failure message="response-time.spec.ts:292:7 缓存命中性能 &lt; 50ms" type="FAILURE">
-<![CDATA[  [chromium] › performance\response-time.spec.ts:292:7 › 响应时间性能测试 › 缓存命中性能 < 50ms ──────────────────
-
-    Error: 法条检索未返回结果
-
-       at debate-flow\helpers.ts:279
-
-      277 |   ) {
-      278 |     console.warn("法条检索结果为空:", result);
-    > 279 |     throw new Error("法条检索未返回结果");
-          |           ^
-      280 |   }
-      281 |
-      282 |   return result.data.articles;
-        at searchLawArticles (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:279:11)
-        at D:\legal_debate_mvp\src\__tests__\e2e\performance\response-time.spec.ts:295:5
-]]>
-</failure>
-<system-out>
-<![CDATA[法条检索API响应: {
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
   "success": true,
+  "message": "注册成功，请使用邮箱登录",
   "data": {
-    "articles": [],
-    "total": 0,
-    "relevanceScores": []
-  },
-  "meta": {
-    "timestamp": "2026-01-10T17:14:47.790Z",
-    "version": "v1",
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "hasMore": false
-    }
-  }
-}
-=== 响应时间性能报告 ===
-{
-  "数据库查询_0": {
-    "min": 65,
-    "max": 65,
-    "avg": 65,
-    "count": 1
-  },
-  "数据库查询_1": {
-    "min": 33,
-    "max": 33,
-    "avg": 33,
-    "count": 1
-  },
-  "数据库查询_2": {
-    "min": 31,
-    "max": 31,
-    "avg": 31,
-    "count": 1
-  },
-  "数据库查询_3": {
-    "min": 32,
-    "max": 32,
-    "avg": 32,
-    "count": 1
-  },
-  "数据库查询_4": {
-    "min": 30,
-    "max": 30,
-    "avg": 30,
-    "count": 1
-  },
-  "数据库查询_5": {
-    "min": 32,
-    "max": 32,
-    "avg": 32,
-    "count": 1
-  },
-  "数据库查询_6": {
-    "min": 29,
-    "max": 29,
-    "avg": 29,
-    "count": 1
-  },
-  "数据库查询_7": {
-    "min": 32,
-    "max": 32,
-    "avg": 32,
-    "count": 1
-  },
-  "数据库查询_8": {
-    "min": 32,
-    "max": 32,
-    "avg": 32,
-    "count": 1
-  },
-  "数据库查询_9": {
-    "min": 30,
-    "max": 30,
-    "avg": 30,
-    "count": 1
-  },
-  "数据库查询_平均": {
-    "min": 34.6,
-    "max": 34.6,
-    "avg": 34.6,
-    "count": 1
-  },
-  "案件列表_分页_10": {
-    "min": 29,
-    "max": 29,
-    "avg": 29,
-    "count": 1
-  },
-  "案件列表_分页_20": {
-    "min": 29,
-    "max": 29,
-    "avg": 29,
-    "count": 1
-  },
-  "案件列表_分页_50": {
-    "min": 30,
-    "max": 30,
-    "avg": 30,
-    "count": 1
+    "user": {
+      "id": "cmk9vemy40008gc4xtuhuyy1y",
+      "email": "test-1768144203195@example.com",
+      "username": "test203195",
+      "name": "TestUser203195",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:03.435Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVteTQwMDA4Z2M0eHR1aHV5eTF5IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDMxOTVAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwMywiZXhwIjoxNzY4NzQ5MDAzfQ.hS5SXWDY2ugw3nW5LlJ5Bg2at6aRqvijr6atlBPVhSI"
   }
 }
 ]]>
 </system-out>
-<system-err>
-<![CDATA[法条检索结果为空: {
-  success: [33mtrue[39m,
-  data: { articles: [], total: [33m0[39m, relevanceScores: [] },
-  meta: {
-    timestamp: [32m'2026-01-10T17:14:47.790Z'[39m,
-    version: [32m'v1'[39m,
-    pagination: { page: [33m1[39m, limit: [33m20[39m, hasMore: [33mfalse[39m }
-  }
-}
-]]>
-</system-err>
 </testcase>
-<testcase name="响应时间性能测试 › API冷启动与热启动性能对比" classname="performance\response-time.spec.ts" time="0.053">
-<failure message="response-time.spec.ts:320:7 API冷启动与热启动性能对比" type="FAILURE">
-<![CDATA[  [chromium] › performance\response-time.spec.ts:320:7 › 响应时间性能测试 › API冷启动与热启动性能对比 ─────────────────
-
-    Error: 法条检索未返回结果
-
-       at debate-flow\helpers.ts:279
-
-      277 |   ) {
-      278 |     console.warn("法条检索结果为空:", result);
-    > 279 |     throw new Error("法条检索未返回结果");
-          |           ^
-      280 |   }
-      281 |
-      282 |   return result.data.articles;
-        at searchLawArticles (D:\legal_debate_mvp\src\__tests__\e2e\debate-flow\helpers.ts:279:11)
-        at D:\legal_debate_mvp\src\__tests__\e2e\performance\response-time.spec.ts:323:5
-]]>
-</failure>
+<testcase name="密码找回与重置 › 应该防止邮箱枚举攻击（不存在的用户也返回成功）" classname="auth.spec.ts" time="0.016">
+</testcase>
+<testcase name="密码找回与重置 › 应该验证验证码格式" classname="auth.spec.ts" time="0.507">
 <system-out>
-<![CDATA[法条检索API响应: {
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
   "success": true,
+  "message": "注册成功，请使用邮箱登录",
   "data": {
-    "articles": [],
-    "total": 0,
-    "relevanceScores": []
-  },
-  "meta": {
-    "timestamp": "2026-01-10T17:14:48.903Z",
-    "version": "v1",
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "hasMore": false
-    }
+    "user": {
+      "id": "cmk9veocd000bgc4xtgq9ejpn",
+      "email": "test-1768144205004@example.com",
+      "username": "test205004",
+      "name": "TestUser205004",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:05.244Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVvY2QwMDBiZ2M0eHRncTllanBuIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDUwMDRAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwNSwiZXhwIjoxNzY4NzQ5MDA1fQ.Rs9DO4CFHVvVwd5Ivs14z9AR3gfueQZIE2BzpxbFDAw"
   }
 }
-=== 响应时间性能报告 ===
-{}
 ]]>
 </system-out>
-<system-err>
-<![CDATA[法条检索结果为空: {
-  success: [33mtrue[39m,
-  data: { articles: [], total: [33m0[39m, relevanceScores: [] },
-  meta: {
-    timestamp: [32m'2026-01-10T17:14:48.903Z'[39m,
-    version: [32m'v1'[39m,
-    pagination: { page: [33m1[39m, limit: [33m20[39m, hasMore: [33mfalse[39m }
+</testcase>
+<testcase name="密码找回与重置 › 应该拒绝无效的验证码" classname="auth.spec.ts" time="0.258">
+<system-out>
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
+  "success": true,
+  "message": "注册成功，请使用邮箱登录",
+  "data": {
+    "user": {
+      "id": "cmk9veoqr000cgc4x3o2e49g8",
+      "email": "test-1768144205523@example.com",
+      "username": "test205523",
+      "name": "TestUser205523",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:05.763Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVvcXIwMDBjZ2M0eDNvMmU0OWc4IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDU1MjNAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwNSwiZXhwIjoxNzY4NzQ5MDA1fQ.A9g_qMuN1eTPrEwqEQbjOA6fGmOZve-mEBrPI7RrBxI"
   }
 }
 ]]>
-</system-err>
+</system-out>
 </testcase>
-<testcase name="响应时间性能测试 › 多轮辩论性能对比" classname="performance\response-time.spec.ts" time="0.265">
-<failure message="response-time.spec.ts:346:7 多轮辩论性能对比" type="FAILURE">
-<![CDATA[  [chromium] › performance\response-time.spec.ts:346:7 › 响应时间性能测试 › 多轮辩论性能对比 ───────────────────────
+<testcase name="密码找回与重置 › 应该验证新密码复杂度" classname="auth.spec.ts" time="0.258">
+<system-out>
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
+  "success": true,
+  "message": "注册成功，请使用邮箱登录",
+  "data": {
+    "user": {
+      "id": "cmk9veoyd000dgc4xykfyl4ug",
+      "email": "test-1768144205795@example.com",
+      "username": "test205795",
+      "name": "TestUser205795",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:06.036Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVveWQwMDBkZ2M0eHlrZnlsNHVnIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDU3OTVAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwNiwiZXhwIjoxNzY4NzQ5MDA2fQ.UROhfSWJHzHsjQXwhMW7qt0LnKV6MuniFJ4-6WbG1LY"
+  }
+}
+]]>
+</system-out>
+</testcase>
+<testcase name="律师资格验证流程 › 应该提交律师资格申请" classname="auth.spec.ts" time="0.811">
+<failure message="auth.spec.ts:495:7 应该提交律师资格申请" type="FAILURE">
+<![CDATA[  [chromium] › auth.spec.ts:495:7 › 律师资格验证流程 › 应该提交律师资格申请 ──────────────────────────────────────────
 
-    TypeError: Cannot read properties of undefined (reading '1')
+    Error: expect(received).toBeTruthy()
 
-      370 |                 .get(`/api/v1/debates/${debate.debateId}/rounds`)
-      371 |                 .then((r) => r.json())
-    > 372 |             ).data[i - 1].id;
-          |                   ^
-      373 |
-      374 |       const start = Date.now();
-      375 |       await generateArguments(apiContext, roundId, []);
-        at D:\legal_debate_mvp\src\__tests__\e2e\performance\response-time.spec.ts:372:19
+    Received: false
+
+      517 |
+      518 |     const data: QualificationResponseData = await response.json();
+    > 519 |     expect(response.ok()).toBeTruthy();
+          |                           ^
+      520 |     expect(data.success).toBe(true);
+      521 |     expect(data.data?.qualification.status).toBe("PENDING");
+      522 |   });
+        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:519:27
 ]]>
 </failure>
 <system-out>
-<![CDATA[[36mprisma:info[39m Starting a postgresql pool with 13 connections.
-[34mprisma:query[39m DELETE FROM "public"."cases" WHERE ("public"."cases"."id" = $1 AND 1=1) RETURNING "public"."cases"."id", "public"."cases"."userId", "public"."cases"."title", "public"."cases"."description", "public"."cases"."type"::text, "public"."cases"."status"::text, "public"."cases"."metadata", "public"."cases"."createdAt", "public"."cases"."updatedAt", "public"."cases"."deletedAt", "public"."cases"."amount", "public"."cases"."caseNumber", "public"."cases"."cause", "public"."cases"."court", "public"."cases"."defendantName", "public"."cases"."plaintiffName"
-=== 响应时间性能报告 ===
-{
-  "第1轮辩论": {
-    "min": 74,
-    "max": 74,
-    "avg": 74,
-    "count": 1
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
+  "success": true,
+  "message": "注册成功，请使用邮箱登录",
+  "data": {
+    "user": {
+      "id": "cmk9vep5v000egc4x0vjfsuut",
+      "email": "test-1768144206067@example.com",
+      "username": "test206067",
+      "name": "TestUser206067",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:06.306Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVwNXYwMDBlZ2M0eDB2amZzdXV0IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDYwNjdAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwNiwiZXhwIjoxNzY4NzQ5MDA2fQ.ekq6Y_AnWqMbUAjPvQYJ5kABnWDnmLZuP4PD9ylZx7M"
   }
 }
 ]]>
 </system-out>
+</testcase>
+<testcase name="律师资格验证流程 › 应该验证执业证号格式" classname="auth.spec.ts" time="0.591">
+<failure message="auth.spec.ts:524:7 应该验证执业证号格式" type="FAILURE">
+<![CDATA[  [chromium] › auth.spec.ts:524:7 › 律师资格验证流程 › 应该验证执业证号格式 ──────────────────────────────────────────
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 401
+
+      545 |     );
+      546 |
+    > 547 |     expect(response.status()).toBe(400);
+          |                               ^
+      548 |   });
+      549 |
+      550 |   test("应该验证身份证号格式", async ({ request }) => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:547:31
+]]>
+</failure>
+<system-out>
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
+  "success": true,
+  "message": "注册成功，请使用邮箱登录",
+  "data": {
+    "user": {
+      "id": "cmk9veqlk000fgc4xxpy7u5nx",
+      "email": "test-1768144207866@example.com",
+      "username": "test207866",
+      "name": "TestUser207866",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:08.167Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVxbGswMDBmZ2M0eHhweTd1NW54IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDc4NjZAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwOCwiZXhwIjoxNzY4NzQ5MDA4fQ.ssDiPv11FY4-5BNNaCApPAq1mVfhxhHEDcoT0Gv-jSs"
+  }
+}
+]]>
+</system-out>
+</testcase>
+<testcase name="律师资格验证流程 › 应该验证身份证号格式" classname="auth.spec.ts" time="0.542">
+<failure message="auth.spec.ts:550:7 应该验证身份证号格式" type="FAILURE">
+<![CDATA[  [chromium] › auth.spec.ts:550:7 › 律师资格验证流程 › 应该验证身份证号格式 ──────────────────────────────────────────
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 401
+
+      571 |     );
+      572 |
+    > 573 |     expect(response.status()).toBe(400);
+          |                               ^
+      574 |   });
+      575 |
+      576 |   test("应该获取当前用户的资格状态", async ({ request }) => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:573:31
+]]>
+</failure>
+<system-out>
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
+  "success": true,
+  "message": "注册成功，请使用邮箱登录",
+  "data": {
+    "user": {
+      "id": "cmk9verql000ggc4x1xcd5wz0",
+      "email": "test-1768144209389@example.com",
+      "username": "test209389",
+      "name": "TestUser209389",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:09.644Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVycWwwMDBnZ2M0eDF4Y2Q1d3owIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDkzODlAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwOSwiZXhwIjoxNzY4NzQ5MDA5fQ.HysE_k0LVJAOFIRYSiZ4c7Nd8v5NsByUcgwE4BexVcc"
+  }
+}
+]]>
+</system-out>
+</testcase>
+<testcase name="律师资格验证流程 › 应该获取当前用户的资格状态" classname="auth.spec.ts" time="0.814">
+<failure message="auth.spec.ts:576:7 应该获取当前用户的资格状态" type="FAILURE">
+<![CDATA[  [chromium] › auth.spec.ts:576:7 › 律师资格验证流程 › 应该获取当前用户的资格状态 ───────────────────────────────────────
+
+    Error: expect(received).toBeTruthy()
+
+    Received: false
+
+      603 |
+      604 |     const data = await response.json();
+    > 605 |     expect(response.ok()).toBeTruthy();
+          |                           ^
+      606 |     expect(data.success).toBe(true);
+      607 |   });
+      608 |
+        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:605:27
+]]>
+</failure>
+<system-out>
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
+  "success": true,
+  "message": "注册成功，请使用邮箱登录",
+  "data": {
+    "user": {
+      "id": "cmk9vesx4000hgc4xgcmrzyah",
+      "email": "test-1768144210894@example.com",
+      "username": "test210894",
+      "name": "TestUser210894",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:11.175Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVzeDQwMDBoZ2M0eGdjbXJ6eWFoIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMTA4OTRAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIxMSwiZXhwIjoxNzY4NzQ5MDExfQ.0eQhfL-nRFfAxAV-R1MfhUkc9RBaKg62LAib-otgMLg"
+  }
+}
+]]>
+</system-out>
+</testcase>
+<testcase name="律师资格验证流程 › 管理员应该能够审核资格申请" classname="auth.spec.ts" time="1.648">
+<failure message="auth.spec.ts:609:7 管理员应该能够审核资格申请" type="FAILURE">
+<![CDATA[  [chromium] › auth.spec.ts:609:7 › 律师资格验证流程 › 管理员应该能够审核资格申请 ───────────────────────────────────────
+
+    Error: expect(received).toBeTruthy()
+
+    Received: false
+
+      661 |
+      662 |     const reviewData = await reviewResponse.json();
+    > 663 |     expect(reviewResponse.ok()).toBeTruthy();
+          |                                 ^
+      664 |     expect(reviewData.success).toBe(true);
+      665 |   });
+      666 | });
+        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:663:33
+]]>
+</failure>
+<system-out>
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
+  "success": true,
+  "message": "注册成功，请使用邮箱登录",
+  "data": {
+    "user": {
+      "id": "cmk9veug9000jgc4xafpn2zcv",
+      "email": "test-1768144212919@example.com",
+      "username": "test212919",
+      "name": "TestUser212919",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:13.160Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmV1ZzkwMDBqZ2M0eGFmcG4yemN2IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMTI5MTlAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIxMywiZXhwIjoxNzY4NzQ5MDEzfQ.zyoZpY0PfBZQWkPmH35sxmYXKdAZ2IFa88Gc9JB8NfY"
+  }
+}
+]]>
+</system-out>
+</testcase>
+<testcase name="企业认证流程 › 应该提交企业注册申请" classname="auth.spec.ts" time="0.7">
+<failure message="auth.spec.ts:673:7 应该提交企业注册申请" type="FAILURE">
+<![CDATA[  [chromium] › auth.spec.ts:673:7 › 企业认证流程 › 应该提交企业注册申请 ────────────────────────────────────────────
+
+    Error: expect(received).toBeTruthy()
+
+    Received: false
+
+      692 |
+      693 |     const data: EnterpriseResponseData = await response.json();
+    > 694 |     expect(response.ok()).toBeTruthy();
+          |                           ^
+      695 |     expect(data.success).toBe(true);
+      696 |     expect(data.data?.enterprise.status).toBe("PENDING");
+      697 |   });
+        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:694:27
+]]>
+</failure>
+<system-out>
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
+  "success": true,
+  "message": "注册成功，请使用邮箱登录",
+  "data": {
+    "user": {
+      "id": "cmk9vew8m000kgc4xwboa34v6",
+      "email": "test-1768144215221@example.com",
+      "username": "test215221",
+      "name": "TestUser215221",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:15.477Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmV3OG0wMDBrZ2M0eHdib2EzNHY2IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMTUyMjFAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIxNSwiZXhwIjoxNzY4NzQ5MDE1fQ.wRofRtVoyOWAMbkiFyQDUwaCgpFCZAeco4j4HrI77c4"
+  }
+}
+]]>
+</system-out>
+</testcase>
+<testcase name="企业认证流程 › 应该验证统一社会信用代码格式" classname="auth.spec.ts" time="0.543">
+<system-out>
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
+  "success": true,
+  "message": "注册成功，请使用邮箱登录",
+  "data": {
+    "user": {
+      "id": "cmk9vexia000lgc4xm06n25ia",
+      "email": "test-1768144216863@example.com",
+      "username": "test216863",
+      "name": "TestUser216863",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:17.116Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmV4aWEwMDBsZ2M0eG0wNm4yNWlhIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMTY4NjNAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIxNywiZXhwIjoxNzY4NzQ5MDE3fQ.e2nRJnE-QulsCt1gzM7dv7msziaI2BiKJwhRchrFaEs"
+  }
+}
+]]>
+</system-out>
+</testcase>
+<testcase name="企业认证流程 › 应该获取当前用户的企业信息" classname="auth.spec.ts" time="0.699">
+<failure message="auth.spec.ts:722:7 应该获取当前用户的企业信息" type="FAILURE">
+<![CDATA[  [chromium] › auth.spec.ts:722:7 › 企业认证流程 › 应该获取当前用户的企业信息 ─────────────────────────────────────────
+
+    Error: expect(received).toBeTruthy()
+
+    Received: false
+
+      749 |
+      750 |     const data = await response.json();
+    > 751 |     expect(response.ok()).toBeTruthy();
+          |                           ^
+      752 |     expect(data.success).toBe(true);
+      753 |   });
+      754 | });
+        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:751:27
+]]>
+</failure>
+<system-out>
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
+  "success": true,
+  "message": "注册成功，请使用邮箱登录",
+  "data": {
+    "user": {
+      "id": "cmk9vexx7000mgc4xw0he4mqh",
+      "email": "test-1768144217416@example.com",
+      "username": "test217416",
+      "name": "TestUser217416",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:17.654Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmV4eDcwMDBtZ2M0eHcwaGU0bXFoIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMTc0MTZAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIxNywiZXhwIjoxNzY4NzQ5MDE3fQ.aBbe08If3Tet_LjIjdqYNTSwFYl5FRmHkfpJI5pEe6c"
+  }
+}
+]]>
+</system-out>
+</testcase>
+<testcase name="第三方认证流程 › 应该支持微信OAuth授权流程" classname="auth.spec.ts" time="4.051">
+</testcase>
+<testcase name="第三方认证流程 › 应该支持QQ OAuth授权流程" classname="auth.spec.ts" time="0.253">
+</testcase>
+<testcase name="第三方认证流程 › 应该验证OAuth参数" classname="auth.spec.ts" time="0.054">
+<failure message="auth.spec.ts:783:7 应该验证OAuth参数" type="FAILURE">
+<![CDATA[  [chromium] › auth.spec.ts:783:7 › 第三方认证流程 › 应该验证OAuth参数 ──────────────────────────────────────────
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 500
+
+      785 |     const response = await request.get(`${BASE_URL}/api/auth/oauth/wechat`);
+      786 |
+    > 787 |     expect(response.status()).toBe(400);
+          |                               ^
+      788 |   });
+      789 | });
+      790 |
+        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:787:31
+]]>
+</failure>
+</testcase>
+<testcase name="综合测试 - 完整用户生命周期 › 完整用户生命周期：注册到激活" classname="auth.spec.ts" time="0.546">
+<failure message="auth.spec.ts:796:7 完整用户生命周期：注册到激活" type="FAILURE">
+<![CDATA[  [chromium] › auth.spec.ts:796:7 › 综合测试 - 完整用户生命周期 › 完整用户生命周期：注册到激活 ───────────────────────────────
+
+    TypeError: Cannot read properties of undefined (reading 'email')
+
+      833 |     const meData: CurrentUserResponseData = await meResponse.json();
+      834 |     expect(meResponse.ok()).toBeTruthy();
+    > 835 |     expect(meData.data?.user.email).toBe(email);
+          |                              ^
+      836 |
+      837 |     // 4. 刷新令牌
+      838 |     const newToken = await refreshToken(request, rt);
+        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:835:30
+]]>
+</failure>
+</testcase>
+<testcase name="安全和边界情况测试 › 应该拒绝无效的JWT令牌" classname="auth.spec.ts" time="0.043">
+</testcase>
+<testcase name="安全和边界情况测试 › 应该拒绝缺少Authorization头的请求" classname="auth.spec.ts" time="0.016">
+</testcase>
+<testcase name="安全和边界情况测试 › 应该拒绝格式错误的Authorization头" classname="auth.spec.ts" time="0.019">
+</testcase>
+<testcase name="安全和边界情况测试 › 应该处理过大的请求体" classname="auth.spec.ts" time="0.502">
+<failure message="auth.spec.ts:917:7 应该处理过大的请求体" type="FAILURE">
+<![CDATA[  [chromium] › auth.spec.ts:917:7 › 安全和边界情况测试 › 应该处理过大的请求体 ─────────────────────────────────────────
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Expected value: 200
+    Received array: [400, 413]
+
+      929 |
+      930 |     // 应该返回413 Payload Too Large或处理错误
+    > 931 |     expect([400, 413]).toContain(response.status());
+          |                        ^
+      932 |   });
+      933 |
+      934 |   test("应该处理缺失必填字段的请求", async ({ request }) => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:931:24
+]]>
+</failure>
+<system-out>
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
+  "success": true,
+  "message": "注册成功，请使用邮箱登录",
+  "data": {
+    "user": {
+      "id": "cmk9vf4ko000ogc4x5b64j8jv",
+      "email": "test-1768144226038@example.com",
+      "username": "test226038",
+      "name": "TestUser226038",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:26.275Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmY0a28wMDBvZ2M0eDViNjRqOGp2IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMjYwMzhAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIyNiwiZXhwIjoxNzY4NzQ5MDI2fQ.hvbZvQPSM1FEiZ5OxqwzNrAPaQu_SIsO8IWZVxV9Nu0"
+  }
+}
+]]>
+</system-out>
+</testcase>
+<testcase name="安全和边界情况测试 › 应该处理缺失必填字段的请求" classname="auth.spec.ts" time="0.292">
+<system-out>
+<![CDATA[[createTestUser] 注册响应状态: 201
+[createTestUser] 响应数据: {
+  "success": true,
+  "message": "注册成功，请使用邮箱登录",
+  "data": {
+    "user": {
+      "id": "cmk9vf5p0000pgc4x0cjj888l",
+      "email": "test-1768144227474@example.com",
+      "username": "test227474",
+      "name": "TestUser227474",
+      "role": "USER",
+      "createdAt": "2026-01-11T15:10:27.726Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmY1cDAwMDBwZ2M0eDBjamo4ODhsIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMjc0NzRAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIyNywiZXhwIjoxNzY4NzQ5MDI3fQ.3MiRotp38xqbR7XEi23R3XwK8BFhyn1Y-yNfot3grkc"
+  }
+}
+]]>
+</system-out>
+</testcase>
+<testcase name="安全和边界情况测试 › 应该处理空请求体" classname="auth.spec.ts" time="0.014">
 </testcase>
 </testsuite>
 </testsuites>

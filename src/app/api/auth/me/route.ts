@@ -53,7 +53,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       {
         success: true,
         message: "获取成功",
-        data: currentUser,
+        data: {
+          user: currentUser,
+        },
       },
       { status: 200 },
     );

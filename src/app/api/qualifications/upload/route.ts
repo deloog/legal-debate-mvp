@@ -4,8 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import { verifyToken } from "@/lib/auth/jwt";
+import { verifyToken, extractTokenFromHeader } from "@/lib/auth/jwt";
 import { validateBasicInfo } from "@/lib/qualification/validator";
 import {
   verifyLawyerQualification,
@@ -19,7 +18,7 @@ import {
 import type { QualificationUploadRequest } from "@/types/qualification";
 import type { Prisma } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/db/prisma";
 
 // TypeScript 重新加载触发点
 export async function POST(request: NextRequest) {
@@ -37,7 +36,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const tokenResult = verifyToken(authHeader);
+    // 从Authorization header中提取token
+    const token = extractTokenFromHeader(authHeader);
+    if (!token) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "未授权",
+          error: "无效的认证格式",
+        } as const,
+        { status: 401 },
+      );
+    }
+
+    const tokenResult = verifyToken(token);
     if (!tokenResult.valid || !tokenResult.payload) {
       return NextResponse.json(
         {

@@ -4,10 +4,15 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth/jwt";
+import { verifyToken, extractTokenFromHeader } from "@/lib/auth/jwt";
+import { prisma } from "@/lib/db/prisma";
 import type { ReviewRequest } from "@/types/qualification";
+import { QualificationStatus } from "@/types/qualification";
 
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     // 验证认证
     const authHeader = request.headers.get("authorization");
@@ -22,7 +27,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const tokenResult = verifyToken(authHeader);
+    // 从Authorization header中提取token
+    const token = extractTokenFromHeader(authHeader);
+    if (!token) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "未授权",
+          error: "无效的认证格式",
+        } as const,
+        { status: 401 },
+      );
+    }
+
+    const tokenResult = verifyToken(token);
     if (!tokenResult.valid || !tokenResult.payload) {
       return NextResponse.json(
         {
@@ -64,14 +82,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 获取资格ID
+    const { id: qualificationId } = await params;
+
     // 更新资格认证记录
-    // 注意：这里需要等待 Prisma generate 完成后才能使用
+    const qualification = await prisma.lawyerQualification.update({
+      where: { id: qualificationId },
+      data: {
+        status: approved
+          ? QualificationStatus.APPROVED
+          : QualificationStatus.REJECTED,
+        reviewedAt: new Date(),
+        reviewNotes,
+      },
+    });
+
+    // 如果审核通过，更新用户角色
+    if (approved) {
+      await prisma.user.update({
+        where: { id: qualification.userId },
+        data: { role: "LAWYER" },
+      });
+    }
 
     return NextResponse.json({
       success: true,
       message: approved ? "审核通过" : "审核拒绝",
       data: {
-        qualification: null,
+        qualification: {
+          id: qualification.id,
+          licenseNumber: qualification.licenseNumber,
+          fullName: qualification.fullName,
+          lawFirm: qualification.lawFirm,
+          status: qualification.status,
+          submittedAt: qualification.submittedAt,
+          reviewedAt: qualification.reviewedAt,
+          reviewNotes: qualification.reviewNotes,
+        },
       },
     } as const);
   } catch (error) {

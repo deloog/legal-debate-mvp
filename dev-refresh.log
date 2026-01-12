@@ -2,7 +2,7 @@
 > legal_debate_mvp@0.1.0 dev
 > next dev
 
- 鈿?Port 3000 is in use by process 8260, using available port 3001 instead.
+ 鈿?Port 3000 is in use by process 8788, using available port 3001 instead.
    鈻?Next.js 16.0.10 (Turbopack)
    - Local:         http://localhost:3001
    - Network:       http://172.29.0.1:3001

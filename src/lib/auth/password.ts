@@ -31,6 +31,15 @@ export async function verifyPassword(
 export function validatePassword(password: string): PasswordValidationError {
   const errors: string[] = [];
 
+  // 检查密码是否存在
+  if (!password || typeof password !== "string") {
+    errors.push("密码不能为空");
+    return {
+      valid: false,
+      errors,
+    };
+  }
+
   // 检查长度
   if (password.length < 6) {
     errors.push("密码长度必须至少6位");

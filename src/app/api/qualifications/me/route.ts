@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth/jwt";
+import { verifyToken, extractTokenFromHeader } from "@/lib/auth/jwt";
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,7 +21,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const tokenResult = verifyToken(authHeader);
+    // 从Authorization header中提取token
+    const token = extractTokenFromHeader(authHeader);
+    if (!token) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "未授权",
+          error: "无效的认证格式",
+        } as const,
+        { status: 401 },
+      );
+    }
+
+    const tokenResult = verifyToken(token);
     if (!tokenResult.valid || !tokenResult.payload) {
       return NextResponse.json(
         {

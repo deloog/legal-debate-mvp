@@ -15,6 +15,7 @@ export interface JwtPayload {
   role: string;
   iat?: number;
   exp?: number;
+  jti?: string; // JWT ID，用于标识令牌唯一性
 }
 
 /**
@@ -73,6 +74,8 @@ export interface AuthResponse {
       createdAt: Date;
     };
     token: string;
+    refreshToken?: string;
+    expiresIn?: number;
   };
   error?: string;
 }
@@ -156,6 +159,7 @@ export enum UserStatus {
 export enum UserRole {
   USER = "USER",
   LAWYER = "LAWYER",
+  ENTERPRISE = "ENTERPRISE",
   ADMIN = "ADMIN",
   SUPER_ADMIN = "SUPER_ADMIN",
 }

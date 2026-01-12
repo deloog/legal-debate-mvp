@@ -13,6 +13,10 @@ export async function POST(
 ): Promise<NextResponse<LogoutResponse>> {
   try {
     const user = await getAuthUser(request);
+    console.log("[LOGOUT] Auth user:", {
+      hasUser: !!user,
+      userId: user?.userId,
+    });
 
     if (!user) {
       return NextResponse.json(
@@ -26,32 +30,57 @@ export async function POST(
 
     const body = await request.json();
     const { allDevices = false } = body as { allDevices?: boolean };
+    console.log("[LOGOUT] Request body:", { allDevices });
 
     if (allDevices) {
       // 登出所有设备：删除用户的所有会话
-      await prisma.session.deleteMany({
+      const deleteResult = await prisma.session.deleteMany({
         where: { userId: user.userId },
       });
+      console.log("[LOGOUT] Deleted all sessions:", deleteResult.count);
     } else {
-      // 登出当前设备：从Authorization header获取token并删除对应会话
-      const authHeader = request.headers.get("authorization");
-      if (!authHeader) {
+      // 登出当前设备：从Cookie中获取refresh token并删除对应会话
+      const cookieHeader = request.headers.get("cookie");
+      console.log("[LOGOUT] Cookie header:", {
+        hasCookie: !!cookieHeader,
+        cookieValue: cookieHeader || "",
+      });
+
+      if (!cookieHeader) {
         return NextResponse.json(
           {
             success: false,
-            message: "缺少认证令牌",
+            message: "缺少会话令牌",
           },
           { status: 400 },
         );
       }
 
-      const token = authHeader.replace("Bearer ", "");
-      await prisma.session.deleteMany({
+      // 从cookie中解析refresh token
+      const refreshTokenMatch = cookieHeader.match(/refreshToken=([^;]+)/);
+      const refreshToken = refreshTokenMatch ? refreshTokenMatch[1] : null;
+      console.log("[LOGOUT] Parsed refresh token:", {
+        found: !!refreshToken,
+        tokenLength: refreshToken?.length || 0,
+      });
+
+      if (!refreshToken) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "无效的会话令牌",
+          },
+          { status: 400 },
+        );
+      }
+
+      const deleteResult = await prisma.session.deleteMany({
         where: {
           userId: user.userId,
-          sessionToken: token,
+          sessionToken: refreshToken,
         },
       });
+      console.log("[LOGOUT] Deleted session:", deleteResult.count);
     }
 
     return NextResponse.json(

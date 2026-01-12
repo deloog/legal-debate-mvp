@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { hashPassword, validatePassword } from "@/lib/auth/password";
 import { validateEmail, validateRegisterRequest } from "@/lib/auth/validation";
-import { generateToken } from "@/lib/auth/jwt";
+import { generateAccessToken, generateRefreshToken } from "@/lib/auth/jwt";
 import type { AuthResponse, RegisterRequest } from "@/types/auth";
 import type { JwtPayload } from "@/types/auth";
 import { AuthErrorCode } from "@/types/auth";
@@ -71,23 +71,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // 加密密码
     const hashedPassword = await hashPassword(password);
 
-    // 创建用户（使用原生 SQL 以支持 password 字段）
-    const users = await prisma.$queryRaw<
-      {
-        id: string;
-        email: string;
-        username: string | null;
-        name: string | null;
-        role: string;
-        createdAt: Date;
-      }[]
-    >`
-      INSERT INTO users (email, username, name, status, password, "createdAt", "updatedAt")
-      VALUES (${email}, ${username || null}, ${name || username || null}, 'ACTIVE', ${hashedPassword}, NOW(), NOW())
-      RETURNING id, email, username, name, role, "createdAt"
-    `;
-
-    const user = users[0];
+    // 创建用户（使用Prisma create方法）
+    const user = await prisma.user.create({
+      data: {
+        email,
+        username: username || null,
+        name: name || username || null,
+        status: "ACTIVE",
+        password: hashedPassword,
+        role: "USER",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        name: true,
+        role: true,
+        createdAt: true,
+      },
+    });
 
     // 生成 JWT Token
     const payload: JwtPayload = {
@@ -95,7 +99,32 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       email: user.email,
       role: user.role,
     };
-    const token = generateToken(payload);
+    const accessToken = generateAccessToken(payload);
+    const refreshToken = generateRefreshToken(payload);
+
+    console.log("[REGISTER] Generated tokens:", {
+      accessTokenLength: accessToken.length,
+      refreshTokenLength: refreshToken.length,
+      userId: user.id,
+    });
+
+    // 创建session记录
+    const sessionExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7天后过期
+    const session = await prisma.session.create({
+      data: {
+        userId: user.id,
+        sessionToken: refreshToken,
+        expires: sessionExpires,
+      },
+    });
+
+    console.log("[REGISTER] Created session:", {
+      sessionId: session.id,
+      tokenLength: session.sessionToken.length,
+      expires: session.expires,
+    });
+
+    const expiresIn = 15 * 60; // 15分钟
 
     // 返回响应
     const response: AuthResponse = {
@@ -110,7 +139,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           role: user.role,
           createdAt: user.createdAt,
         },
-        token,
+        token: accessToken,
+        refreshToken,
+        expiresIn,
       },
     };
     return NextResponse.json(response, { status: 201 });

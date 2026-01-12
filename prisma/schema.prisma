@@ -38,6 +38,8 @@ model User {
   lawyerQualifications LawyerQualification[]
   reviewedQualifications LawyerQualification[] @relation("QualificationReviews")
   verificationCodes    VerificationCode[]
+  enterpriseAccount    EnterpriseAccount?    @relation("UserEnterpriseAccount")
+  reviewedEnterpriseReviews EnterpriseReview[] @relation("EnterpriseReviews")
 
   @@index([email])
   @@index([username])
@@ -448,6 +450,7 @@ model AgentAction {
 enum UserRole {
   USER
   LAWYER
+  ENTERPRISE
   ADMIN
   SUPER_ADMIN
 }
@@ -661,10 +664,10 @@ model LawyerQualification {
   reviewNotes     String?
   verificationData Json?                 // 验证数据（第三方API返回）
   metadata        Json?
-  
+
   user            User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   reviewer        User?                  @relation("QualificationReviews", fields: [reviewerId], references: [id], onDelete: SetNull)
-  
+
   @@unique([licenseNumber])
   @@index([userId])
   @@index([status])
@@ -703,4 +706,105 @@ enum VerificationCodeType {
   PASSWORD_RESET     // 密码重置验证码
   EMAIL_VERIFICATION // 邮箱验证码
   PHONE_VERIFICATION // 手机验证码
+}
+
+// === 企业认证模块 ===
+
+model EnterpriseAccount {
+  id              String                   @id @default(cuid())
+  userId          String                   @unique
+  enterpriseName  String                   // 企业名称
+  creditCode      String                   @unique // 统一社会信用代码（18位）
+  legalPerson     String                   // 法人代表
+  industryType    String                   // 行业类型
+  businessLicense String?                  // 营业执照图片路径
+  status          EnterpriseStatus          @default(PENDING)
+  submittedAt     DateTime                 @default(now())
+  reviewedAt      DateTime?
+  reviewerId      String?                  // 审核管理员ID
+  reviewNotes     String?
+  verificationData Json?                    // 验证数据（OCR识别或第三方API返回）
+  expiresAt       DateTime?                 // 认证有效期
+  metadata        Json?
+
+  user            User                     @relation("UserEnterpriseAccount", fields: [userId], references: [id], onDelete: Cascade)
+  reviews         EnterpriseReview[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([submittedAt])
+  @@map("enterprise_accounts")
+}
+
+model EnterpriseReview {
+  id              String              @id @default(cuid())
+  enterpriseId    String
+  reviewerId      String
+  reviewAction    EnterpriseReviewAction
+  reviewNotes     String?
+  reviewData      Json?               // 审核相关数据
+  createdAt       DateTime            @default(now())
+
+  enterprise      EnterpriseAccount   @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
+  reviewer        User                @relation("EnterpriseReviews", fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@index([enterpriseId])
+  @@index([reviewerId])
+  @@map("enterprise_reviews")
+}
+
+enum EnterpriseStatus {
+  PENDING      // 待审核
+  UNDER_REVIEW // 审核中
+  APPROVED     // 已通过
+  REJECTED     // 已拒绝
+  EXPIRED      // 已过期
+  SUSPENDED    // 已暂停
+}
+
+enum EnterpriseReviewAction {
+  APPROVE  // 通过
+  REJECT   // 拒绝
+  SUSPEND  // 暂停
+  REACTIVATE // 重新激活
+}
+
+// === RBAC权限模型模块 ===
+
+model Role {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  description String?
+  isDefault   Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  description String?
+  resource    String         // 资源类型：user, case, debate, document, law, system等
+  action      String         // 操作类型：create, read, update, delete等
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  roles       RolePermission[]
+
+  @@index([resource, action])
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
 }

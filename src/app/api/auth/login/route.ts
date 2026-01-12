@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { verifyPassword } from "@/lib/auth/password";
 import { validateLoginRequest } from "@/lib/auth/validation";
-import { generateToken } from "@/lib/auth/jwt";
+import { generateAccessToken, generateRefreshToken } from "@/lib/auth/jwt";
 import type { AuthResponse, LoginRequest } from "@/types/auth";
 import type { JwtPayload } from "@/types/auth";
 import { AuthErrorCode } from "@/types/auth";
@@ -32,26 +32,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(response, { status: 400 });
     }
 
-    // 查找用户（使用原生 SQL 以包含 password 字段）
-    const users = await prisma.$queryRaw<
-      Array<{
-        id: string;
-        email: string;
-        username: string | null;
-        name: string | null;
-        role: string;
-        status: string;
-        password: string | null;
-        loginCount: number;
-        createdAt: Date;
-      }>
-    >`
-      SELECT id, email, username, name, role, status, password, "loginCount", "createdAt"
-      FROM users
-      WHERE email = ${email}
-      LIMIT 1
-    `;
-    const user = users[0] || null;
+    // 查找用户
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        name: true,
+        role: true,
+        status: true,
+        password: true,
+        loginCount: true,
+        createdAt: true,
+      },
+    });
 
     if (!user) {
       const response: AuthResponse = {
@@ -113,7 +108,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       email: user.email,
       role: user.role,
     };
-    const token = generateToken(payload);
+    const accessToken = generateAccessToken(payload);
+    const refreshToken = generateRefreshToken(payload);
+
+    // 创建session记录
+    await prisma.session.create({
+      data: {
+        userId: user.id,
+        sessionToken: refreshToken,
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7天后过期
+      },
+    });
+
+    // 设置refresh token到cookie（同时也在响应体中返回）
+    const expiresIn = 15 * 60; // 15分钟
 
     // 返回响应
     const response: AuthResponse = {
@@ -128,7 +136,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           role: user.role,
           createdAt: user.createdAt,
         },
-        token,
+        token: accessToken,
+        refreshToken,
+        expiresIn,
       },
     };
     return NextResponse.json(response, { status: 200 });

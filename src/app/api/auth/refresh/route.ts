@@ -20,6 +20,11 @@ export async function POST(
     const body = await request.json();
     const { refreshToken } = body as { refreshToken?: string };
 
+    console.log("[REFRESH] Request body:", {
+      hasRefreshToken: !!refreshToken,
+      tokenLength: refreshToken?.length,
+    });
+
     if (!refreshToken) {
       return NextResponse.json(
         {
@@ -33,6 +38,10 @@ export async function POST(
 
     // 验证刷新令牌
     const verificationResult = verifyToken(refreshToken);
+    console.log("[REFRESH] Token verification:", {
+      valid: verificationResult.valid,
+      error: verificationResult.error,
+    });
 
     if (!verificationResult.valid || !verificationResult.payload) {
       return NextResponse.json(
@@ -93,6 +102,13 @@ export async function POST(
       },
     });
 
+    console.log("[REFRESH] Session query result:", {
+      found: !!session,
+      userId: user.id,
+      expires: session?.expires,
+      now: new Date().toISOString(),
+    });
+
     if (!session) {
       return NextResponse.json(
         {
@@ -104,13 +120,19 @@ export async function POST(
       );
     }
 
-    // 生成新的访问令牌
-    const newAccessToken = generateAccessToken(payload);
+    // 生成新的访问令牌（添加随机盐值确保每次生成的token都不同）
+    const accessTokenPayload = {
+      userId: payload.userId,
+      email: payload.email,
+      role: payload.role,
+      r: Math.random().toString(36).substring(2), // 随机盐值
+    };
+    const newAccessToken = generateAccessToken(accessTokenPayload);
 
     // 生成新的刷新令牌（轮换策略）
-    const newRefreshToken = generateRefreshToken(payload);
+    const newRefreshToken = generateRefreshToken(accessTokenPayload);
 
-    // 更新数据库中的会话记录
+    // 更新session（不改变id，只更新token和过期时间）
     await prisma.session.update({
       where: { id: session.id },
       data: {
@@ -135,7 +157,11 @@ export async function POST(
       { status: 200 },
     );
   } catch (error) {
-    console.error("Token refresh error:", error);
+    console.error("[REFRESH] Token refresh error:", error);
+    if (error instanceof Error) {
+      console.error("[REFRESH] Error message:", error.message);
+      console.error("[REFRESH] Error stack:", error.stack);
+    }
 
     return NextResponse.json(
       {
