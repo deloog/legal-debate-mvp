@@ -34,6 +34,7 @@ jest.mock('next/dynamic', () => () => {
 });
 
 // Set up global Web API polyfills before any imports
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).Request = class Request {
   constructor(input: string | Request, init: RequestInit = {}) {
     this.url = typeof input === 'string' ? input : input.toString();
@@ -76,7 +77,7 @@ jest.mock('next/dynamic', () => () => {
   keepalive: boolean;
   mode: RequestMode;
 
-  async json(): Promise<any> {
+  async json(): Promise<unknown> {
     if (this.body) {
       try {
         return JSON.parse(
@@ -113,20 +114,32 @@ jest.mock('next/dynamic', () => () => {
       method: this.method,
       headers: Object.fromEntries(this.headers),
       body: this.body,
-      ...this,
+      signal: this.signal,
+      credentials: this.credentials,
+      cache: this.cache,
+      redirect: this.redirect,
+      referrer: this.referrer,
+      referrerPolicy: this.referrerPolicy,
+      integrity: this.integrity,
+      keepalive: this.keepalive,
+      mode: this.mode,
     });
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).Response = class Response {
   constructor(body?: BodyInit, init: ResponseInit = {}) {
     this.body = body;
     this.status = init.status || 200;
     this.statusText = init.statusText || 'OK';
     this.headers = new Map();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.url = (init as any).url || '';
     this.ok = this.status >= 200 && this.status < 300;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.redirected = (init as any).redirected || false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.type = (init as any).type || 'basic';
 
     if (init.headers) {
@@ -146,6 +159,7 @@ jest.mock('next/dynamic', () => () => {
     if (
       typeof body === 'object' &&
       body !== null &&
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       !(init.headers as any)?.get?.('Content-Type')
     ) {
       this.headers.set('Content-Type', 'application/json');
@@ -186,12 +200,13 @@ jest.mock('next/dynamic', () => () => {
     forEach(callback: (value: string, key: string) => void): void;
   };
 
-  static json(data: any, init: any = {}): Response {
+  static json(data: unknown, init: Record<string, unknown> = {}): Response {
+    const initRecord = init as Record<string, unknown>;
     return new Response(JSON.stringify(data), {
-      ...init,
+      ...initRecord,
       headers: {
         'Content-Type': 'application/json',
-        ...init.headers,
+        ...(initRecord.headers as Record<string, unknown>),
       },
     });
   }
@@ -210,7 +225,7 @@ jest.mock('next/dynamic', () => () => {
     });
   }
 
-  async json(): Promise<any> {
+  async json(): Promise<unknown> {
     const text = await this.text();
     try {
       return JSON.parse(text);
@@ -253,10 +268,12 @@ jest.mock('next/dynamic', () => () => {
       statusText: this.statusText,
       headers: Object.fromEntries(this.headers),
       url: this.url,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).Headers = class Headers {
   constructor(init: HeadersInit = {}) {
     this.headers = new Map();
@@ -323,7 +340,9 @@ jest.mock('next/dynamic', () => () => {
 
 // Mock Next.js server module
 jest.mock('next/server', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const MockRequest = (global as any).Request;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const MockResponse = (global as any).Response;
 
   // Add static methods to NextResponse

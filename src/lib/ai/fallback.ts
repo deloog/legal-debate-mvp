@@ -223,8 +223,11 @@ export class FallbackManager {
               message: {
                 role: 'assistant',
                 content:
-                  (cachedResponse as {content?: string}).content ||
-                  String(cachedResponse),
+                  (
+                    cachedResponse as {
+                      content?: string;
+                    }
+                  ).content || String(cachedResponse),
               },
               finishReason: 'stop',
               logprobs: null,
