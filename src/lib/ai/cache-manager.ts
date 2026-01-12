@@ -292,24 +292,16 @@ export class AICacheManager {
   /**
    * 清除缓存
    */
-  public async clearCache(pattern?: string): Promise<void> {
+  public async clearCache(): Promise<void> {
     if (!this.cacheManager) {
       return;
     }
 
     try {
-      if (pattern) {
-        // 清除指定模式的缓存 - 使用mdelete方法
-        const keys = await this.getCacheKeys(pattern);
-        if (keys.length > 0) {
-          await this.cacheManager.mdelete(keys);
-        }
-      } else {
-        // 清除所有AI相关缓存
-        const aiKeys = await this.getCacheKeys('ai_chat_*');
-        if (aiKeys.length > 0) {
-          await this.cacheManager.mdelete(aiKeys);
-        }
+      // 清除所有AI相关缓存
+      const aiKeys = await this.getCacheKeys();
+      if (aiKeys.length > 0) {
+        await this.cacheManager.mdelete(aiKeys);
       }
     } catch (error) {
       console.warn('Cache clear failed:', error);
@@ -319,7 +311,7 @@ export class AICacheManager {
   /**
    * 获取匹配模式的缓存键
    */
-  private async getCacheKeys(pattern: string): Promise<string[]> {
+  private async getCacheKeys(): Promise<string[]> {
     // 这里可以实现模式匹配逻辑
     // 暂时返回空数组，实际项目中需要根据Redis实现
     return [];

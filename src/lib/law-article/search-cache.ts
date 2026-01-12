@@ -154,7 +154,7 @@ export class SearchCacheManager {
   /**
    * 记录检索统计信息
    */
-  static async recordSearch(keyword?: string): Promise<void> {
+  static async recordSearch(): Promise<void> {
     try {
       const statsKey = `${this.CACHE_PREFIX}:stats`;
       const stats = await cacheManager.get<SearchStatistics>(statsKey);

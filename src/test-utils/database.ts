@@ -78,12 +78,13 @@ export const resetDatabase = async () => {
 export const createTestDatabase = async () => {
   // For SQLite, ensure we have a fresh test database
   const testDbPath = './test.db';
+
   try {
     // Remove existing test database file if it exists
     const fs = await import('fs/promises');
     try {
       await fs.unlink(testDbPath);
-    } catch (error) {
+    } catch {
       // File doesn't exist, that's fine
     }
 

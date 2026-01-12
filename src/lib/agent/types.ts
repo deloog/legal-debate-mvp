@@ -6,10 +6,7 @@ import type {
   AgentResult,
   AgentError,
   AgentErrorType,
-  AgentOptions,
-  AgentMetadata,
   AgentStats,
-  AgentMetrics,
   AgentEvent,
   AgentEventType,
 } from '../../types/agent';

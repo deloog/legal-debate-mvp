@@ -1,13 +1,11 @@
 import type {
+  AIError,
   AIProvider,
-  FallbackConfig,
-  FallbackStrategy,
-  FallbackCondition,
-  FallbackAction,
   AIRequestConfig,
   AIResponse,
-  AIError,
-  AIErrorType,
+  FallbackCondition,
+  FallbackConfig,
+  FallbackStrategy,
 } from '../../types/ai-service';
 
 // =============================================================================
@@ -59,8 +57,7 @@ export class FallbackManager {
 
   public async handleFailure(
     error: AIError,
-    originalRequest: AIRequestConfig,
-    providers: AIProvider[]
+    originalRequest: AIRequestConfig
   ): Promise<AIResponse | null> {
     const event: FallbackEvent = {
       timestamp: Date.now(),
@@ -83,11 +80,7 @@ export class FallbackManager {
         event.attemptedStrategies.push(strategy);
 
         try {
-          const result = await this.executeStrategy(
-            strategy,
-            originalRequest,
-            providers
-          );
+          const result = await this.executeStrategy(strategy, originalRequest);
 
           if (result) {
             event.success = true;
@@ -157,12 +150,11 @@ export class FallbackManager {
 
   private async executeStrategy(
     strategy: FallbackStrategy,
-    originalRequest: AIRequestConfig,
-    availableProviders: AIProvider[]
+    originalRequest: AIRequestConfig
   ): Promise<AIResponse | null> {
     switch (strategy.action) {
       case 'switch_provider':
-        return this.switchProvider(originalRequest, availableProviders);
+        return this.switchProvider();
 
       case 'use_cache':
         return this.useCache(originalRequest);
@@ -185,10 +177,7 @@ export class FallbackManager {
   // 具体降级行动实现
   // =============================================================================
 
-  private async switchProvider(
-    originalRequest: AIRequestConfig,
-    availableProviders: AIProvider[]
-  ): Promise<AIResponse | null> {
+  private async switchProvider(): Promise<AIResponse | null> {
     // 这个方法需要与负载均衡器配合
     // 这里只是模拟实现
     console.log('Switching to alternative provider...');

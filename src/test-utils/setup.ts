@@ -119,22 +119,24 @@ jest.mock('next/dynamic', () => () => {
 };
 
 (global as any).Response = class Response {
-  constructor(body?: BodyInit, init: any = {}) {
+  constructor(body?: BodyInit, init: ResponseInit = {}) {
     this.body = body;
     this.status = init.status || 200;
     this.statusText = init.statusText || 'OK';
     this.headers = new Map();
-    this.url = init.url || '';
+    this.url = (init as any).url || '';
     this.ok = this.status >= 200 && this.status < 300;
-    this.redirected = init.redirected || false;
-    this.type = init.type || 'basic';
+    this.redirected = (init as any).redirected || false;
+    this.type = (init as any).type || 'basic';
 
     if (init.headers) {
       if (init.headers instanceof Map) {
         this.headers = init.headers;
-      } else if (init.headers.get) {
-        this.headers = init.headers;
-      } else {
+      } else if (Array.isArray(init.headers)) {
+        init.headers.forEach(([key, value]) => {
+          this.headers.set(key, value);
+        });
+      } else if (typeof init.headers === 'object') {
         Object.entries(init.headers).forEach(([key, value]) => {
           this.headers.set(key, String(value));
         });
@@ -144,7 +146,7 @@ jest.mock('next/dynamic', () => () => {
     if (
       typeof body === 'object' &&
       body !== null &&
-      !init.headers?.get?.('Content-Type')
+      !(init.headers as any)?.get?.('Content-Type')
     ) {
       this.headers.set('Content-Type', 'application/json');
     }
@@ -251,7 +253,7 @@ jest.mock('next/dynamic', () => () => {
       statusText: this.statusText,
       headers: Object.fromEntries(this.headers),
       url: this.url,
-    });
+    } as any);
   }
 };
 
@@ -321,7 +323,6 @@ jest.mock('next/dynamic', () => () => {
 
 // Mock Next.js server module
 jest.mock('next/server', () => {
-  const MockHeaders = (global as any).Headers;
   const MockRequest = (global as any).Request;
   const MockResponse = (global as any).Response;
 

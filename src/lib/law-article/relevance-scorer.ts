@@ -1,4 +1,4 @@
-import type { LawArticle, LawCategory, LawStatus } from '@prisma/client';
+import type { LawArticle } from '@prisma/client';
 import type {
   RelevanceScore,
   RelevanceWeightConfig,
