@@ -12,13 +12,20 @@ import type {
 // AI降级策略实现
 // =============================================================================
 
+// 缓存管理器接口
+interface CacheManager {
+  get(key: string): Promise<unknown>;
+  set(key: string, value: unknown, ttl?: number): Promise<void>;
+  delete(key: string): Promise<void>;
+}
+
 export class FallbackManager {
   private config: FallbackConfig;
   private activeStrategies: Map<string, FallbackStrategy>;
   private fallbackHistory: FallbackEvent[];
-  private cacheManager: any; // 这里应该导入缓存管理器
+  private cacheManager?: CacheManager;
 
-  constructor(config: FallbackConfig, cacheManager?: any) {
+  constructor(config: FallbackConfig, cacheManager?: CacheManager) {
     this.config = config;
     this.activeStrategies = new Map();
     this.fallbackHistory = [];
@@ -201,7 +208,7 @@ export class FallbackManager {
       // 从缓存获取响应
       const cachedResponse = await this.cacheManager.get(cacheKey);
 
-      if (cachedResponse) {
+      if (cachedResponse && typeof cachedResponse === 'object') {
         console.log('Using cached response as fallback');
 
         // 转换为标准AI响应格式
@@ -215,7 +222,9 @@ export class FallbackManager {
               index: 0,
               message: {
                 role: 'assistant',
-                content: cachedResponse.content || cachedResponse,
+                content:
+                  (cachedResponse as {content?: string}).content ||
+                  String(cachedResponse),
               },
               finishReason: 'stop',
               logprobs: null,
@@ -258,7 +267,7 @@ export class FallbackManager {
       if (this.config.simplifiedMode.simplifiedPrompts) {
         simplifiedConfig.messages = this.simplifyMessages(
           originalRequest.messages
-        );
+        ) as AIRequestConfig['messages'];
       }
 
       // 返回null表示需要外部系统处理简化请求
@@ -378,7 +387,9 @@ export class FallbackManager {
     return `ai_fallback_${Buffer.from(JSON.stringify(keyData)).toString('base64')}`;
   }
 
-  private simplifyMessages(messages: any[]): any[] {
+  private simplifyMessages(
+    messages: AIRequestConfig['messages']
+  ): AIRequestConfig['messages'] {
     return messages.map(message => {
       if (message.role === 'system') {
         // 简化系统消息
@@ -577,7 +588,7 @@ export class FallbackManagerFactory {
   public static getInstance(
     name: string = 'default',
     config?: FallbackConfig,
-    cacheManager?: any
+    cacheManager?: CacheManager
   ): FallbackManager {
     let instance = this.instances.get(name);
 
@@ -638,7 +649,7 @@ export class FallbackManagerFactory {
   public static createCustomInstance(
     name: string,
     config: FallbackConfig,
-    cacheManager?: any
+    cacheManager?: CacheManager
   ): FallbackManager {
     const instance = new FallbackManager(config, cacheManager);
     this.instances.set(name, instance);

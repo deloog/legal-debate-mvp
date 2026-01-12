@@ -249,7 +249,7 @@ export class AICacheManager {
   /**
    * 查找相似辩论
    */
-  private async findSimilarDebates(similarKey: string): Promise<any[]> {
+  private async findSimilarDebates(similarKey: string): Promise<unknown[]> {
     try {
       // 从相似案件索引获取缓存键列表
       const cacheKeys = (await this.cacheManager.get(similarKey)) || [];

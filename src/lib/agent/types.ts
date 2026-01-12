@@ -52,7 +52,7 @@ export interface AgentLogEntry {
   timestamp: number;
   agentName: string;
   message: string;
-  data?: any;
+  data?: unknown;
   error?: Error;
 }
 
@@ -106,7 +106,7 @@ export function createAgentError(
   type: AgentErrorType,
   agentName: string,
   retryable: boolean = false,
-  details?: Record<string, any>
+  details?: Record<string, unknown>
 ): AgentError {
   return {
     code,
@@ -123,7 +123,7 @@ export function createAgentError(
 // 创建Agent结果
 export function createAgentResult(
   agentName: string,
-  data?: any,
+  data?: unknown,
   options: {
     success?: boolean;
     executionTime?: number;
@@ -131,8 +131,8 @@ export function createAgentResult(
     tokensUsed?: number;
     cost?: number;
     output?: string;
-    structuredOutput?: Record<string, any>;
-    context?: any;
+    structuredOutput?: Record<string, unknown>;
+    context?: unknown;
     cached?: boolean;
     cacheKey?: string;
     error?: AgentError;
@@ -245,7 +245,7 @@ export interface AgentEventManager {
 export function createAgentEvent(
   type: AgentEventType,
   agentName: string,
-  data?: any
+  data?: unknown
 ): AgentEvent {
   return {
     type,
@@ -277,15 +277,17 @@ export function isValidTaskPriority(
 }
 
 // 检查是否为有效的Agent实例
-export function isValidAgent(obj: any): obj is Agent {
+export function isValidAgent(obj: unknown): obj is Agent {
+  if (!obj || typeof obj !== 'object') {
+    return false;
+  }
+  const agent = obj as Record<string, unknown>;
   return (
-    obj &&
-    typeof obj === 'object' &&
-    typeof obj.name === 'string' &&
-    typeof obj.type === 'string' &&
-    typeof obj.version === 'string' &&
-    typeof obj.description === 'string' &&
-    typeof obj.execute === 'function'
+    typeof agent.name === 'string' &&
+    typeof agent.type === 'string' &&
+    typeof agent.version === 'string' &&
+    typeof agent.description === 'string' &&
+    typeof agent.execute === 'function'
   );
 }
 
