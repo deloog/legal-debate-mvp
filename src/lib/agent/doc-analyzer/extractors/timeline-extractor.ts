@@ -8,11 +8,11 @@ export type {
   TimelineExtractionOptions,
   TimelineExtractionOutput,
   GapInfo,
-} from "./timeline/timeline-types";
+} from './timeline/timeline-types';
 
 // 重新导出主要类和函数
 export {
   TimelineExtractor,
   createTimelineExtractor,
   extractTimelineFromText,
-} from "./timeline";
+} from './timeline';

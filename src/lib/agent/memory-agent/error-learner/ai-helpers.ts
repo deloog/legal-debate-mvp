@@ -3,10 +3,10 @@
  * 生成学习笔记、提取预防措施、生成建议操作
  */
 
-import { v4 as uuidv4 } from "uuid";
-import { AIService } from "@/lib/ai/service-refactored";
-import type { AIRequestConfig, AIResponse } from "@/types/ai-service";
-import type { ErrorPattern, PreventionMeasure } from "../types";
+import { v4 as uuidv4 } from 'uuid';
+import { AIService } from '@/lib/ai/service-refactored';
+import type { AIRequestConfig, AIResponse } from '@/types/ai-service';
+import type { ErrorPattern, PreventionMeasure } from '../types';
 
 /**
  * AI Helpers - AI辅助功能类
@@ -23,7 +23,7 @@ export class AIHelpers {
       errorCode: string;
       errorMessage: string;
     },
-    pattern: ErrorPattern,
+    pattern: ErrorPattern
   ): Promise<string> {
     const prompt = `请为以下错误生成学习笔记：
 
@@ -33,7 +33,7 @@ export class AIHelpers {
 根本原因：${pattern.rootCause}
 频率：${pattern.frequency}
 常见原因：
-${pattern.commonCauses.map((c, i) => `${i + 1}. ${c}`).join("\n")}
+${pattern.commonCauses.map((c, i) => `${i + 1}. ${c}`).join('\n')}
 
 要求：
 1. 笔记长度100-200字
@@ -42,14 +42,14 @@ ${pattern.commonCauses.map((c, i) => `${i + 1}. ${c}`).join("\n")}
 4. 使用简洁、易懂的语言`;
 
     const requestConfig: AIRequestConfig = {
-      model: "deepseek-chat",
+      model: 'deepseek-chat',
       messages: [
         {
-          role: "system",
-          content: "你是一个专业的错误学习助手，擅长生成简洁有用的学习笔记。",
+          role: 'system',
+          content: '你是一个专业的错误学习助手，擅长生成简洁有用的学习笔记。',
         },
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
@@ -60,14 +60,14 @@ ${pattern.commonCauses.map((c, i) => `${i + 1}. ${c}`).join("\n")}
     const response: AIResponse =
       await this.aiService.chatCompletion(requestConfig);
 
-    return response.choices[0]?.message?.content?.trim() || "";
+    return response.choices[0]?.message?.content?.trim() || '';
   }
 
   /**
    * 提取预防措施
    */
   async extractPreventionMeasures(
-    learningNotes: string,
+    learningNotes: string
   ): Promise<PreventionMeasure[]> {
     const prompt = `请从以下学习笔记中提取3-5个预防措施：
 
@@ -82,15 +82,15 @@ ${learningNotes}
 - estimatedEffectiveness: 预估效果（0-1）`;
 
     const requestConfig: AIRequestConfig = {
-      model: "deepseek-chat",
+      model: 'deepseek-chat',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content:
-            "你是一个专业的预防措施提取助手，擅长从学习笔记中提取可行的预防措施。",
+            '你是一个专业的预防措施提取助手，擅长从学习笔记中提取可行的预防措施。',
         },
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
@@ -102,13 +102,13 @@ ${learningNotes}
       await this.aiService.chatCompletion(requestConfig);
 
     // 解析AI返回的JSON
-    const content = response.choices[0]?.message?.content || "";
+    const content = response.choices[0]?.message?.content || '';
     const jsonMatch = content.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
       try {
         const measures = JSON.parse(jsonMatch[0]);
         return Array.isArray(measures)
-          ? measures.map((m) => ({
+          ? measures.map(m => ({
               ...m,
               measureId: m.measureId || uuidv4(),
               priority: m.priority || 3,
@@ -133,7 +133,7 @@ ${learningNotes}
       errorCode: string;
       errorMessage: string;
     },
-    pattern: ErrorPattern,
+    pattern: ErrorPattern
   ): Promise<string[]> {
     const prompt = `基于以下错误信息，生成3-5个建议操作：
 
@@ -145,14 +145,14 @@ ${learningNotes}
 要求：返回可操作的建议，每行一条`;
 
     const requestConfig: AIRequestConfig = {
-      model: "deepseek-chat",
+      model: 'deepseek-chat',
       messages: [
         {
-          role: "system",
-          content: "你是一个专业的错误处理助手，擅长生成可操作的解决建议。",
+          role: 'system',
+          content: '你是一个专业的错误处理助手，擅长生成可操作的解决建议。',
         },
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
@@ -163,11 +163,11 @@ ${learningNotes}
     const response: AIResponse =
       await this.aiService.chatCompletion(requestConfig);
 
-    const content = response.choices[0]?.message?.content || "";
+    const content = response.choices[0]?.message?.content || '';
     return content
-      .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0)
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
       .slice(0, 5);
   }
 }

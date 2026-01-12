@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 var __createBinding =
   (this && this.__createBinding) ||
   (Object.create
@@ -7,7 +7,7 @@ var __createBinding =
         var desc = Object.getOwnPropertyDescriptor(m, k);
         if (
           !desc ||
-          ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)
+          ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)
         ) {
           desc = {
             enumerable: true,
@@ -26,10 +26,10 @@ var __setModuleDefault =
   (this && this.__setModuleDefault) ||
   (Object.create
     ? function (o, v) {
-        Object.defineProperty(o, "default", { enumerable: true, value: v });
+        Object.defineProperty(o, 'default', { enumerable: true, value: v });
       }
     : function (o, v) {
-        o["default"] = v;
+        o['default'] = v;
       });
 var __importStar =
   (this && this.__importStar) ||
@@ -50,7 +50,7 @@ var __importStar =
       var result = {};
       if (mod != null)
         for (var k = ownKeys(mod), i = 0; i < k.length; i++)
-          if (k[i] !== "default") __createBinding(result, mod, k[i]);
+          if (k[i] !== 'default') __createBinding(result, mod, k[i]);
       __setModuleDefault(result, mod);
       return result;
     };
@@ -60,10 +60,10 @@ var __importDefault =
   function (mod) {
     return mod && mod.__esModule ? mod : { default: mod };
   };
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.AICacheManager = void 0;
-const manager_1 = __importDefault(require("../cache/manager"));
-const crypto = __importStar(require("crypto"));
+const manager_1 = __importDefault(require('../cache/manager'));
+const crypto = __importStar(require('crypto'));
 // =============================================================================
 // AI缓存管理器
 // =============================================================================
@@ -89,7 +89,7 @@ class AICacheManager {
       }
       return null;
     } catch (error) {
-      console.warn("Cache check failed:", error);
+      console.warn('Cache check failed:', error);
       return null;
     }
   }
@@ -105,7 +105,7 @@ class AICacheManager {
       const defaultTtl = ttl || 3600; // 默认1小时
       await this.cacheManager.set(cacheKey, response, { ttl: defaultTtl });
     } catch (error) {
-      console.warn("Cache storage failed:", error);
+      console.warn('Cache storage failed:', error);
     }
   }
   /**
@@ -114,7 +114,7 @@ class AICacheManager {
   generateCacheKey(request) {
     const keyData = {
       model: request.model,
-      messages: request.messages.map((m) => ({
+      messages: request.messages.map(m => ({
         role: m.role,
         content: m.content,
       })),
@@ -123,9 +123,9 @@ class AICacheManager {
     };
     // 使用SHA256哈希替代Base64编码，避免长文本导致的键长度问题
     const hash = crypto
-      .createHash("sha256")
+      .createHash('sha256')
       .update(JSON.stringify(keyData))
-      .digest("hex");
+      .digest('hex');
     return `ai_chat_${hash}`;
   }
   /**
@@ -136,18 +136,18 @@ class AICacheManager {
     const caseType = this.extractCaseType(caseInfo.title, caseInfo.description);
     const keyElements = this.extractKeyElements(
       caseInfo.title,
-      caseInfo.description,
+      caseInfo.description
     );
     // 生成基于案件类型和关键要素的模糊匹配键
     const keyData = {
       caseType,
       keyElements: keyElements.sort(), // 排序确保一致性
-      model: "deepseek-chat",
+      model: 'deepseek-chat',
     };
     const hash = crypto
-      .createHash("sha256")
+      .createHash('sha256')
       .update(JSON.stringify(keyData))
-      .digest("hex");
+      .digest('hex');
     return `debate_fuzzy_${hash}`;
   }
   /**
@@ -159,7 +159,7 @@ class AICacheManager {
       const exactKey = this.generateDebateCacheKey(caseInfo);
       const exactMatch = await this.cacheManager.get(exactKey);
       if (exactMatch) {
-        console.log("Found exact debate cache match");
+        console.log('Found exact debate cache match');
         return exactMatch;
       }
       // 2. 检查相似案件缓存
@@ -167,14 +167,14 @@ class AICacheManager {
       const similarMatches = await this.findSimilarDebates(similarKey);
       if (similarMatches.length > 0) {
         console.log(
-          `Found ${similarMatches.length} similar debate cache matches`,
+          `Found ${similarMatches.length} similar debate cache matches`
         );
         // 返回最相似的缓存结果
         return similarMatches[0];
       }
       return null;
     } catch (error) {
-      console.warn("Debate cache check failed:", error);
+      console.warn('Debate cache check failed:', error);
       return null;
     }
   }
@@ -190,48 +190,48 @@ class AICacheManager {
       const similarKey = this.generateSimilarCaseKey(caseInfo);
       await this.addToSimilarCaseIndex(similarKey, cacheKey);
     } catch (error) {
-      console.warn("Debate cache storage failed:", error);
+      console.warn('Debate cache storage failed:', error);
     }
   }
   /**
    * 提取案件类型
    */
   extractCaseType(title, description) {
-    const text = (title + " " + description).toLowerCase();
-    if (text.includes("合同") || text.includes("违约")) return "合同纠纷";
-    if (text.includes("劳动") || text.includes("工资")) return "劳动纠纷";
-    if (text.includes("交通") || text.includes("事故")) return "交通事故";
-    if (text.includes("侵权") || text.includes("赔偿")) return "侵权纠纷";
-    if (text.includes("婚姻") || text.includes("离婚")) return "婚姻家庭";
-    if (text.includes("房产") || text.includes("房屋")) return "房产纠纷";
-    return "其他纠纷";
+    const text = (title + ' ' + description).toLowerCase();
+    if (text.includes('合同') || text.includes('违约')) return '合同纠纷';
+    if (text.includes('劳动') || text.includes('工资')) return '劳动纠纷';
+    if (text.includes('交通') || text.includes('事故')) return '交通事故';
+    if (text.includes('侵权') || text.includes('赔偿')) return '侵权纠纷';
+    if (text.includes('婚姻') || text.includes('离婚')) return '婚姻家庭';
+    if (text.includes('房产') || text.includes('房屋')) return '房产纠纷';
+    return '其他纠纷';
   }
   /**
    * 提取案件关键要素
    */
   extractKeyElements(title, description) {
-    const text = (title + " " + description).toLowerCase();
+    const text = (title + ' ' + description).toLowerCase();
     const elements = [];
     // 常见法律关键词
     const legalKeywords = [
-      "违约",
-      "侵权",
-      "赔偿",
-      "解除",
-      "无效",
-      "撤销",
-      "定金",
-      "违约金",
-      "损失",
-      "医疗费",
-      "误工费",
-      "工资",
-      "经济补偿",
-      "解除合同",
-      "过户",
-      "交付",
+      '违约',
+      '侵权',
+      '赔偿',
+      '解除',
+      '无效',
+      '撤销',
+      '定金',
+      '违约金',
+      '损失',
+      '医疗费',
+      '误工费',
+      '工资',
+      '经济补偿',
+      '解除合同',
+      '过户',
+      '交付',
     ];
-    legalKeywords.forEach((keyword) => {
+    legalKeywords.forEach(keyword => {
       if (text.includes(keyword)) {
         elements.push(keyword);
       }
@@ -245,9 +245,9 @@ class AICacheManager {
     const caseType = this.extractCaseType(caseInfo.title, caseInfo.description);
     const keyElements = this.extractKeyElements(
       caseInfo.title,
-      caseInfo.description,
+      caseInfo.description
     );
-    return `similar_${caseType}_${keyElements.slice(0, 3).sort().join("_")}`;
+    return `similar_${caseType}_${keyElements.slice(0, 3).sort().join('_')}`;
   }
   /**
    * 查找相似辩论
@@ -259,13 +259,13 @@ class AICacheManager {
       // 确保cacheKeys是数组
       const keysArray = Array.isArray(cacheKeys) ? cacheKeys : [];
       // 批量获取缓存内容
-      const promises = keysArray.map((key) =>
-        this.cacheManager.get(key).catch(() => null),
+      const promises = keysArray.map(key =>
+        this.cacheManager.get(key).catch(() => null)
       );
       const results = await Promise.all(promises);
-      return results.filter((result) => result !== null);
+      return results.filter(result => result !== null);
     } catch (error) {
-      console.warn("Find similar debates failed:", error);
+      console.warn('Find similar debates failed:', error);
       return [];
     }
   }
@@ -280,7 +280,7 @@ class AICacheManager {
       const updatedKeys = [...keysArray, cacheKey].slice(-5); // 最多保留5个相似缓存
       await this.cacheManager.set(similarKey, updatedKeys, { ttl: 3600 }); // 索引缓存1小时
     } catch (error) {
-      console.warn("Add to similar case index failed:", error);
+      console.warn('Add to similar case index failed:', error);
     }
   }
   /**
@@ -299,13 +299,13 @@ class AICacheManager {
         }
       } else {
         // 清除所有AI相关缓存
-        const aiKeys = await this.getCacheKeys("ai_chat_*");
+        const aiKeys = await this.getCacheKeys('ai_chat_*');
         if (aiKeys.length > 0) {
           await this.cacheManager.mdelete(aiKeys);
         }
       }
     } catch (error) {
-      console.warn("Cache clear failed:", error);
+      console.warn('Cache clear failed:', error);
     }
   }
   /**

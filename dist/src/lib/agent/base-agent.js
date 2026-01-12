@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 // Agent基础抽象类
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.BaseAgent = void 0;
-const agent_1 = require("../../types/agent");
-const types_1 = require("./types");
+const agent_1 = require('../../types/agent');
+const types_1 = require('./types');
 // =============================================================================
 // BaseAgent抽象类
 // =============================================================================
@@ -24,7 +24,7 @@ class BaseAgent {
     /**
      * 默认日志记录器
      */
-    this.defaultLogger = (entry) => {
+    this.defaultLogger = entry => {
       const level = entry.level.toUpperCase();
       const timestamp = new Date(entry.timestamp).toISOString();
       const message = `[${timestamp}] [${level}] [${entry.agentName}] ${entry.message}`;
@@ -32,13 +32,13 @@ class BaseAgent {
         switch (entry.level) {
           case types_1.AgentLogLevel.DEBUG:
           case types_1.AgentLogLevel.INFO:
-            console.log(message, entry.data || "");
+            console.log(message, entry.data || '');
             break;
           case types_1.AgentLogLevel.WARN:
-            console.warn(message, entry.data || "");
+            console.warn(message, entry.data || '');
             break;
           case types_1.AgentLogLevel.ERROR:
-            console.error(message, entry.error || entry.data || "");
+            console.error(message, entry.error || entry.data || '');
             break;
         }
       }
@@ -53,7 +53,7 @@ class BaseAgent {
    * Agent初始化
    */
   async initialize() {
-    this.log(types_1.AgentLogLevel.INFO, "Agent initialized", {
+    this.log(types_1.AgentLogLevel.INFO, 'Agent initialized', {
       name: this.name,
       type: this.type,
       version: this.version,
@@ -63,7 +63,7 @@ class BaseAgent {
    * Agent清理
    */
   async cleanup() {
-    this.log(types_1.AgentLogLevel.INFO, "Agent cleaned up", {
+    this.log(types_1.AgentLogLevel.INFO, 'Agent cleaned up', {
       name: this.name,
     });
     this.status = agent_1.AgentStatus.IDLE;
@@ -79,7 +79,7 @@ class BaseAgent {
    */
   async configure(config) {
     this.config = { ...this.config, ...config };
-    this.log(types_1.AgentLogLevel.INFO, "Agent configuration updated", {
+    this.log(types_1.AgentLogLevel.INFO, 'Agent configuration updated', {
       name: this.name,
       config: this.config,
     });
@@ -97,11 +97,11 @@ class BaseAgent {
       const validation = (0, types_1.validateAgentContext)(context);
       if (!validation.valid) {
         const error = (0, types_1.createAgentError)(
-          "INVALID_CONTEXT",
-          `Invalid agent context: ${validation.errors.join(", ")}`,
+          'INVALID_CONTEXT',
+          `Invalid agent context: ${validation.errors.join(', ')}`,
           agent_1.AgentErrorType.VALIDATION_ERROR,
           this.name,
-          false,
+          false
         );
         return (0, types_1.createAgentResult)(this.name, undefined, {
           success: false,
@@ -117,7 +117,7 @@ class BaseAgent {
         startTime,
         context,
       };
-      this.log(types_1.AgentLogLevel.INFO, "Agent execution started", {
+      this.log(types_1.AgentLogLevel.INFO, 'Agent execution started', {
         task: context.task,
         priority: context.priority,
       });
@@ -137,7 +137,7 @@ class BaseAgent {
         },
       });
       this.status = agent_1.AgentStatus.IDLE;
-      this.log(types_1.AgentLogLevel.INFO, "Agent execution completed", {
+      this.log(types_1.AgentLogLevel.INFO, 'Agent execution completed', {
         executionTime,
         tokensUsed: agentResult.tokensUsed,
       });
@@ -149,7 +149,7 @@ class BaseAgent {
       // 创建错误
       const agentError = this.createErrorFromException(error);
       this.status = agent_1.AgentStatus.ERROR;
-      this.log(types_1.AgentLogLevel.ERROR, "Agent execution failed", {
+      this.log(types_1.AgentLogLevel.ERROR, 'Agent execution failed', {
         error: agentError.message,
         executionTime,
       });
@@ -178,23 +178,23 @@ class BaseAgent {
    * 从异常创建Agent错误
    */
   createErrorFromException(error) {
-    if (error && typeof error === "object" && "code" in error) {
+    if (error && typeof error === 'object' && 'code' in error) {
       return (0, types_1.createAgentError)(
         error.code,
-        error.message || "Unknown error",
+        error.message || 'Unknown error',
         this.mapErrorType(error.code),
         this.name,
         this.isRetryableError(error.code),
-        { originalError: error },
+        { originalError: error }
       );
     }
     return (0, types_1.createAgentError)(
-      "EXECUTION_ERROR",
-      error?.message || "Unknown execution error",
+      'EXECUTION_ERROR',
+      error?.message || 'Unknown execution error',
       agent_1.AgentErrorType.EXECUTION_ERROR,
       this.name,
       true,
-      { originalError: error },
+      { originalError: error }
     );
   }
   /**
@@ -202,15 +202,15 @@ class BaseAgent {
    */
   mapErrorType(code) {
     const codeLower = code.toLowerCase();
-    if (codeLower.includes("timeout"))
+    if (codeLower.includes('timeout'))
       return agent_1.AgentErrorType.TIMEOUT_ERROR;
-    if (codeLower.includes("network"))
+    if (codeLower.includes('network'))
       return agent_1.AgentErrorType.NETWORK_ERROR;
-    if (codeLower.includes("rate_limit"))
+    if (codeLower.includes('rate_limit'))
       return agent_1.AgentErrorType.RATE_LIMIT_ERROR;
-    if (codeLower.includes("permission"))
+    if (codeLower.includes('permission'))
       return agent_1.AgentErrorType.PERMISSION_ERROR;
-    if (codeLower.includes("validation"))
+    if (codeLower.includes('validation'))
       return agent_1.AgentErrorType.VALIDATION_ERROR;
     return agent_1.AgentErrorType.EXECUTION_ERROR;
   }
@@ -219,13 +219,13 @@ class BaseAgent {
    */
   isRetryableError(code) {
     const retryableCodes = [
-      "TIMEOUT_ERROR",
-      "NETWORK_ERROR",
-      "RATE_LIMIT_ERROR",
-      "AI_SERVICE_ERROR",
+      'TIMEOUT_ERROR',
+      'NETWORK_ERROR',
+      'RATE_LIMIT_ERROR',
+      'AI_SERVICE_ERROR',
     ];
-    return retryableCodes.some((rc) =>
-      code.toLowerCase().includes(rc.toLowerCase()),
+    return retryableCodes.some(rc =>
+      code.toLowerCase().includes(rc.toLowerCase())
     );
   }
   /**
@@ -246,16 +246,16 @@ class BaseAgent {
   summarizeInput(context) {
     const data = context.data;
     const dataStr = JSON.stringify(data);
-    if (typeof data === "string") {
-      return dataStr.length > 100 ? dataStr.substring(0, 100) + "..." : dataStr;
+    if (typeof data === 'string') {
+      return dataStr.length > 100 ? dataStr.substring(0, 100) + '...' : dataStr;
     }
-    return dataStr.length > 100 ? dataStr.substring(0, 100) + "..." : dataStr;
+    return dataStr.length > 100 ? dataStr.substring(0, 100) + '...' : dataStr;
   }
   /**
    * 获取处理步骤（由子类重写）
    */
   getProcessingSteps() {
-    return ["Input validation", "Core logic execution", "Result formatting"];
+    return ['Input validation', 'Core logic execution', 'Result formatting'];
   }
   // =============================================================================
   // 统计和元数据方法

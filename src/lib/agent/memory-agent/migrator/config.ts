@@ -7,8 +7,8 @@
  * 迁移配置
  */
 export const MIGRATION_CONFIG = {
-  WORKING_TO_HOT_CRON: "0 * * * *", // 每小时
-  HOT_TO_COLD_CRON: "0 0 * * *", // 每天
+  WORKING_TO_HOT_CRON: '0 * * * *', // 每小时
+  HOT_TO_COLD_CRON: '0 0 * * *', // 每天
   MAX_MIGRATION_COUNT: 1000, // 单次最大迁移数量
   MIN_ACCESS_COUNT: 3, // 最低访问次数才迁移
 } as const;

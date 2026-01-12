@@ -236,12 +236,12 @@ export interface LawStarError {
   message: string;
   /** 错误类型 */
   type:
-    | "authentication"
-    | "rate_limit"
-    | "network"
-    | "validation"
-    | "server"
-    | "unknown";
+    | 'authentication'
+    | 'rate_limit'
+    | 'network'
+    | 'validation'
+    | 'server'
+    | 'unknown';
   /** 是否可重试 */
   retryable: boolean;
   /** 原始错误 */

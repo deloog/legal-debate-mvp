@@ -3,8 +3,8 @@
  * 包含：缓存结果功能
  */
 
-import { MemoryManager } from "../memory-agent/memory-manager";
-import type { CacheResult } from "./types";
+import { MemoryManager } from '../memory-agent/memory-manager';
+import type { CacheResult } from './types';
 
 /**
  * cache_result - 结果缓存
@@ -15,7 +15,7 @@ export async function cache_result(
   key: string,
   value: unknown,
   ttl: number,
-  userId: string,
+  userId: string
 ): Promise<CacheResult> {
   try {
     await memoryManager.storeWorkingMemory(
@@ -24,7 +24,7 @@ export async function cache_result(
       userId,
       undefined,
       undefined,
-      ttl,
+      ttl
     );
     return { success: true, cached: true, hit: false, ttl };
   } catch {

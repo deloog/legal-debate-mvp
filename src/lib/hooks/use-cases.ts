@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { CaseWithMetadata } from "@/types/case";
+import { useState, useEffect, useCallback } from 'react';
+import { CaseWithMetadata } from '@/types/case';
 
 /**
  * 案件筛选参数接口
@@ -54,25 +54,25 @@ export function useCases(filters: CaseFilters, searchQuery: string) {
 
       // 添加搜索关键词
       if (searchQuery) {
-        params.append("search", searchQuery);
+        params.append('search', searchQuery);
       }
 
       // 添加案件类型筛选
       if (filters.types && filters.types.length > 0) {
-        params.append("types", filters.types.join(","));
+        params.append('types', filters.types.join(','));
       }
 
       // 添加案件状态筛选
       if (filters.statuses && filters.statuses.length > 0) {
-        params.append("statuses", filters.statuses.join(","));
+        params.append('statuses', filters.statuses.join(','));
       }
 
       // 添加日期范围筛选
       if (filters.dateFrom) {
-        params.append("dateFrom", filters.dateFrom.toISOString());
+        params.append('dateFrom', filters.dateFrom.toISOString());
       }
       if (filters.dateTo) {
-        params.append("dateTo", filters.dateTo.toISOString());
+        params.append('dateTo', filters.dateTo.toISOString());
       }
 
       // 调用API
@@ -83,18 +83,18 @@ export function useCases(filters: CaseFilters, searchQuery: string) {
         setCases(data.data);
         // 安全检查pagination对象是否存在
         if (data.pagination) {
-          setPagination((prev) => ({
+          setPagination(prev => ({
             ...prev,
             total: data.pagination.total ?? prev.total,
             totalPages: data.pagination.totalPages ?? prev.totalPages,
           }));
         }
       } else {
-        throw new Error(data.error || "获取案件列表失败");
+        throw new Error(data.error || '获取案件列表失败');
       }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("未知错误"));
-      console.error("获取案件列表失败:", err);
+      setError(err instanceof Error ? err : new Error('未知错误'));
+      console.error('获取案件列表失败:', err);
     } finally {
       setLoading(false);
     }
@@ -104,7 +104,7 @@ export function useCases(filters: CaseFilters, searchQuery: string) {
    * 切换页码
    */
   const goToPage = useCallback((page: number) => {
-    setPagination((prev) => ({ ...prev, page }));
+    setPagination(prev => ({ ...prev, page }));
   }, []);
 
   /**

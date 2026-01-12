@@ -1,33 +1,38 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withErrorHandler } from "@/app/api/lib/errors/error-handler";
-import { createSuccessResponse } from "@/app/api/lib/responses/api-response";
+import { NextRequest, NextResponse } from 'next/server';
+import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
+import { createSuccessResponse } from '@/app/api/lib/responses/api-response';
 import {
   validatePathParam,
   validateRequestBody,
-} from "@/app/api/lib/validation/validator";
+} from '@/app/api/lib/validation/validator';
 import {
   uuidSchema,
   updateDebateSchema,
-} from "@/app/api/lib/validation/schemas";
-import { prisma } from "@/lib/db/prisma";
-import { DebateStatus, RoundStatus } from "@prisma/client";
+} from '@/app/api/lib/validation/schemas';
+import { prisma } from '@/lib/db/prisma';
+import { getAuthUser } from '@/lib/middleware/auth';
+import {
+  checkResourceOwnership,
+  createPermissionErrorResponse,
+  ResourceType,
+} from '@/lib/middleware/resource-permission';
 
 /**
  * 创建404响应的辅助函数
  */
 function createNotFoundResponse(
-  message: string = "Resource not found",
+  message: string = 'Resource not found'
 ): NextResponse {
   return NextResponse.json(
     {
       success: false,
       error: {
-        code: "NOT_FOUND",
+        code: 'NOT_FOUND',
         message,
         timestamp: new Date().toISOString(),
       },
     },
-    { status: 404 },
+    { status: 404 }
   );
 }
 
@@ -39,6 +44,28 @@ export const GET = withErrorHandler(
   async (request: NextRequest, context: { params: { id: string } }) => {
     // 验证路径参数
     const id = validatePathParam(context.params.id, uuidSchema);
+
+    // 获取认证用户
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { error: '未认证', message: '请先登录' },
+        { status: 401 }
+      );
+    }
+
+    // 检查资源权限
+    const permissionResult = await checkResourceOwnership(
+      authUser.userId,
+      id,
+      ResourceType.DEBATE
+    );
+
+    if (!permissionResult.hasPermission) {
+      return createPermissionErrorResponse(
+        permissionResult.reason ?? '您无权访问此辩论'
+      );
+    }
 
     // 查询辩论详情
     const debate = await prisma.debate.findUnique({
@@ -65,21 +92,21 @@ export const GET = withErrorHandler(
         rounds: {
           include: {
             arguments: {
-              orderBy: { createdAt: "asc" },
+              orderBy: { createdAt: 'asc' },
             },
           },
-          orderBy: { roundNumber: "asc" },
+          orderBy: { roundNumber: 'asc' },
         },
       },
     });
 
     // 检查辩论是否存在
     if (!debate) {
-      return createNotFoundResponse("Debate not found");
+      return createNotFoundResponse('Debate not found');
     }
 
     return createSuccessResponse(debate);
-  },
+  }
 );
 
 /**
@@ -91,6 +118,28 @@ export const PUT = withErrorHandler(
     // 验证路径参数
     const id = validatePathParam(context.params.id, uuidSchema);
 
+    // 获取认证用户
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { error: '未认证', message: '请先登录' },
+        { status: 401 }
+      );
+    }
+
+    // 检查资源权限
+    const permissionResult = await checkResourceOwnership(
+      authUser.userId,
+      id,
+      ResourceType.DEBATE
+    );
+
+    if (!permissionResult.hasPermission) {
+      return createPermissionErrorResponse(
+        permissionResult.reason ?? '您无权修改此辩论'
+      );
+    }
+
     // 验证请求体
     const body = await validateRequestBody(request, updateDebateSchema);
 
@@ -101,7 +150,7 @@ export const PUT = withErrorHandler(
     });
 
     if (!existingDebate) {
-      return createNotFoundResponse("Debate not found");
+      return createNotFoundResponse('Debate not found');
     }
 
     // 更新辩论
@@ -130,7 +179,7 @@ export const PUT = withErrorHandler(
     });
 
     return createSuccessResponse(updatedDebate);
-  },
+  }
 );
 
 /**
@@ -142,6 +191,28 @@ export const DELETE = withErrorHandler(
     // 验证路径参数
     const id = validatePathParam(context.params.id, uuidSchema);
 
+    // 获取认证用户
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { error: '未认证', message: '请先登录' },
+        { status: 401 }
+      );
+    }
+
+    // 检查资源权限
+    const permissionResult = await checkResourceOwnership(
+      authUser.userId,
+      id,
+      ResourceType.DEBATE
+    );
+
+    if (!permissionResult.hasPermission) {
+      return createPermissionErrorResponse(
+        permissionResult.reason ?? '您无权删除此辩论'
+      );
+    }
+
     // 检查辩论是否存在
     const existingDebate = await prisma.debate.findUnique({
       where: { id },
@@ -149,30 +220,31 @@ export const DELETE = withErrorHandler(
     });
 
     if (!existingDebate) {
-      return createNotFoundResponse("Debate not found");
+      return createNotFoundResponse('Debate not found');
     }
 
-    // 删除辩论（级联删除相关的轮次和论点）
-    await prisma.debate.delete({
+    // 删除辩论（软删除）
+    await prisma.debate.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
 
-    return createSuccessResponse({ message: "Debate deleted successfully" });
-  },
+    return new NextResponse(null, { status: 204 });
+  }
 );
 
 /**
  * OPTIONS /api/v1/debates/[id]
  * CORS预检请求
  */
-export const OPTIONS = withErrorHandler(async (request: NextRequest) => {
+export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Access-Control-Max-Age": "86400",
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
     },
   });
 });

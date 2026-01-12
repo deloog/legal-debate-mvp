@@ -3,27 +3,27 @@
  * 统一导出所有检查器函数
  */
 
-import { checkDefaultExports } from "./default-export.mjs";
-import { checkNamingConventions } from "./naming-convention.mjs";
-import { checkHardcodedValues } from "./hardcoded-values.mjs";
-import { checkFileLength } from "./file-length.mjs";
-import { config } from "../config.mjs";
+import { checkDefaultExports } from './default-export.mjs';
+import { checkNamingConventions } from './naming-convention.mjs';
+import { checkHardcodedValues } from './hardcoded-values.mjs';
+import { checkFileLength } from './file-length.mjs';
+import { config } from '../config.mjs';
 
-import fs from "fs/promises";
+import fs from 'fs/promises';
 
 /**
  * 检查单个文件的所有规则
  */
 export async function checkFile(filePath) {
   try {
-    const content = await fs.readFile(filePath, "utf8");
+    const content = await fs.readFile(filePath, 'utf8');
 
     // 增加空值检查
     if (!content || content.trim().length === 0) {
       return {
         file: filePath,
         passed: false,
-        error: "文件为空或无法读取",
+        error: '文件为空或无法读取',
       };
     }
 
@@ -49,7 +49,7 @@ export async function checkFile(filePath) {
       results.push(result);
     }
 
-    const failed = results.filter((r) => !r.passed);
+    const failed = results.filter(r => !r.passed);
 
     return {
       file: filePath,

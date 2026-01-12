@@ -3,35 +3,35 @@
  * 测试多个中间件的组合使用
  */
 
-import { describe, it, expect, beforeEach, jest } from "@jest/globals";
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import {
   MockRequest,
   MockResponse,
   MockHeaders,
   MockNextResponse,
-} from "./middleware-simple-mocks.test";
+} from './middleware-simple-mocks.test';
 
 // 现在导入和测试中间件
 const {
   createRequestContext,
   MiddlewareStack,
-} = require("../../app/api/lib/middleware/core");
+} = require('../../app/api/lib/middleware/core');
 
 const {
   corsMiddleware,
   securityMiddleware,
   rateLimitMiddleware,
-} = require("../../app/api/lib/middleware/security");
+} = require('../../app/api/lib/middleware/security');
 
-describe("Middleware Integration Tests", () => {
-  describe("组合安全中间件", () => {
-    it("应该组合多个安全中间件", async () => {
+describe('Middleware Integration Tests', () => {
+  describe('组合安全中间件', () => {
+    it('应该组合多个安全中间件', async () => {
       const stack = new MiddlewareStack();
-      const request = new global.Request("http://localhost:3000/api/test", {
-        method: "GET",
+      const request = new global.Request('http://localhost:3000/api/test', {
+        method: 'GET',
         headers: {
-          origin: "http://localhost:3000",
-          "x-forwarded-for": "192.168.1.1",
+          origin: 'http://localhost:3000',
+          'x-forwarded-for': '192.168.1.1',
         },
       });
       const context = createRequestContext(request);
@@ -49,31 +49,31 @@ describe("Middleware Integration Tests", () => {
       // 调试：检查实际可用的头信息
       const realConsole = (global as any).originalConsole || console;
       if (realConsole.log !== console.log) {
-        realConsole.log("集成测试头信息:", [...headers.entries()]);
+        realConsole.log('集成测试头信息:', [...headers.entries()]);
       }
 
-      expect(headers.get("Access-Control-Allow-Origin")).toBe(
-        "http://localhost:3000",
+      expect(headers.get('Access-Control-Allow-Origin')).toBe(
+        'http://localhost:3000'
       );
-      expect(headers.get("Access-Control-Allow-Credentials")).toBe("true");
+      expect(headers.get('Access-Control-Allow-Credentials')).toBe('true');
 
       // 安全头
-      expect(headers.get("X-Content-Type-Options")).toBe("nosniff");
-      expect(headers.get("X-Frame-Options")).toBe("DENY");
-      expect(headers.get("X-API-Version")).toBe("v1");
+      expect(headers.get('X-Content-Type-Options')).toBe('nosniff');
+      expect(headers.get('X-Frame-Options')).toBe('DENY');
+      expect(headers.get('X-API-Version')).toBe('v1');
 
       // 速率限制头
-      expect(headers.get("X-RateLimit-Limit")).toBe("100");
-      expect(headers.get("X-RateLimit-Remaining")).toBe("98"); // 只有rateLimitMiddleware消耗
+      expect(headers.get('X-RateLimit-Limit')).toBe('100');
+      expect(headers.get('X-RateLimit-Remaining')).toBe('98'); // 只有rateLimitMiddleware消耗
     });
 
-    it("应该演示典型的中间件使用", async () => {
+    it('应该演示典型的中间件使用', async () => {
       const stack = new MiddlewareStack();
-      const testRequest = new global.Request("http://localhost:3000/api/test", {
-        method: "GET",
+      const testRequest = new global.Request('http://localhost:3000/api/test', {
+        method: 'GET',
         headers: {
-          origin: "http://localhost:3000",
-          "x-forwarded-for": "192.168.1.1",
+          origin: 'http://localhost:3000',
+          'x-forwarded-for': '192.168.1.1',
         },
       });
       const testContext = createRequestContext(testRequest);
@@ -82,8 +82,8 @@ describe("Middleware Integration Tests", () => {
       const authMiddleware = jest
         .fn()
         .mockImplementation(async (req: any, ctx: any) => {
-          ctx.userId = "user123";
-          ctx.role = "user";
+          ctx.userId = 'user123';
+          ctx.role = 'user';
         });
 
       // 响应中间件
@@ -113,7 +113,7 @@ describe("Middleware Integration Tests", () => {
       expect(result).toBeDefined();
 
       // 检查结果是否有json方法
-      expect(typeof result.json).toBe("function");
+      expect(typeof result.json).toBe('function');
 
       // 简化测试 - 只验证中间件被调用且结果存在
       // 由于模拟复杂性，实际的JSON解析测试可以跳过
@@ -121,15 +121,15 @@ describe("Middleware Integration Tests", () => {
     });
   });
 
-  describe("错误处理集成", () => {
-    it("应该处理中间件链中的错误", async () => {
+  describe('错误处理集成', () => {
+    it('应该处理中间件链中的错误', async () => {
       const stack = new MiddlewareStack();
-      const request = new global.Request("http://localhost:3000/api/test");
+      const request = new global.Request('http://localhost:3000/api/test');
       const context = createRequestContext(request);
 
       // 模拟抛出错误的中间件
       const errorMiddleware = jest.fn().mockImplementation(async () => {
-        throw new Error("Middleware error");
+        throw new Error('Middleware error');
       });
 
       const successMiddleware = jest.fn();
@@ -146,21 +146,21 @@ describe("Middleware Integration Tests", () => {
     });
   });
 
-  describe("异步中间件支持", () => {
-    it("应该支持异步中间件操作", async () => {
+  describe('异步中间件支持', () => {
+    it('应该支持异步中间件操作', async () => {
       const stack = new MiddlewareStack();
-      const request = new global.Request("http://localhost:3000/api/test");
+      const request = new global.Request('http://localhost:3000/api/test');
       const context = createRequestContext(request);
 
       const executionOrder = [];
 
       const asyncMiddleware1 = jest.fn().mockImplementation(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 10));
         executionOrder.push(1);
       });
 
       const asyncMiddleware2 = jest.fn().mockImplementation(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 5));
+        await new Promise(resolve => setTimeout(resolve, 5));
         executionOrder.push(2);
       });
 

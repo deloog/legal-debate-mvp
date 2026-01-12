@@ -3,16 +3,16 @@
  * 第一层：AI识别提取
  */
 
-import type { ExtractedData, TimelineEvent } from "../../core/types";
-import { getUnifiedAIService } from "@/lib/ai/unified-service";
-import { parseAIExtractionResponse } from "./timeline-parser";
+import type { ExtractedData, TimelineEvent } from '../../core/types';
+import { getUnifiedAIService } from '@/lib/ai/unified-service';
+import { parseAIExtractionResponse } from './timeline-parser';
 
 /**
  * AI识别层 - 使用DeepSeek进行智能识别
  */
 export async function aiExtractLayer(
   text: string,
-  extractedData?: ExtractedData,
+  extractedData?: ExtractedData
 ): Promise<TimelineEvent[]> {
   try {
     const unifiedService = await getUnifiedAIService();
@@ -20,16 +20,16 @@ export async function aiExtractLayer(
     const prompt = buildAIExtractionPrompt(text, extractedData);
 
     const response = await unifiedService.chatCompletion({
-      model: "deepseek-chat",
-      provider: "deepseek",
+      model: 'deepseek-chat',
+      provider: 'deepseek',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content:
-            "你是一个专业的法律事件时间线识别专家。请从法律文档中准确提取事件时间线。",
+            '你是一个专业的法律事件时间线识别专家。请从法律文档中准确提取事件时间线。',
         },
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
@@ -39,13 +39,13 @@ export async function aiExtractLayer(
 
     if (response.choices && response.choices.length > 0) {
       return parseAIExtractionResponse(
-        response.choices[0].message.content || "",
+        response.choices[0].message.content || ''
       );
     }
 
     return [];
   } catch (error) {
-    console.error("AI识别层失败:", error);
+    console.error('AI识别层失败:', error);
     return [];
   }
 }
@@ -56,15 +56,15 @@ export async function aiExtractLayer(
  */
 function buildAIExtractionPrompt(
   text: string,
-  extractedData?: ExtractedData,
+  extractedData?: ExtractedData
 ): string {
-  let contextInfo = "";
+  let contextInfo = '';
 
   if (
     extractedData?.disputeFocuses &&
     extractedData.disputeFocuses.length > 0
   ) {
-    contextInfo += `\n争议焦点信息：\n${extractedData.disputeFocuses.map((d) => d.description).join("\n")}`;
+    contextInfo += `\n争议焦点信息：\n${extractedData.disputeFocuses.map(d => d.description).join('\n')}`;
   }
 
   return `请从以下法律文档中准确提取事件时间线，并严格按照指定的JSON格式返回结果。

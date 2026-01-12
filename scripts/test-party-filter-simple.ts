@@ -3,8 +3,8 @@
  * 直接测试过滤逻辑，绕过AI调用
  */
 
-import { LegalRepresentativeFilter } from "../src/lib/agent/doc-analyzer/processors/legal-representative-filter";
-import type { Party } from "../src/lib/agent/doc-analyzer/core/types";
+import { LegalRepresentativeFilter } from '../src/lib/agent/doc-analyzer/processors/legal-representative-filter';
+import type { Party } from '../src/lib/agent/doc-analyzer/core/types';
 
 // =============================================================================
 // 测试用例定义
@@ -23,7 +23,7 @@ interface TestCase {
 const testCases: TestCase[] = [
   {
     id: 1,
-    name: "标准法定代表人表达",
+    name: '标准法定代表人表达',
     content: `民事起诉状
 
 原告：上海华诚科技有限公司
@@ -46,13 +46,13 @@ const testCases: TestCase[] = [
 法定代表人：王明
 2023年10月15日`,
     expectedParties: {
-      shouldKeep: ["上海华诚科技有限公司", "北京长城贸易有限公司"],
-      shouldFilter: ["王明", "李华"],
+      shouldKeep: ['上海华诚科技有限公司', '北京长城贸易有限公司'],
+      shouldFilter: ['王明', '李华'],
     },
   },
   {
     id: 2,
-    name: "法定代表（简称）",
+    name: '法定代表（简称）',
     content: `民事起诉状
 
 原告：杭州梦想软件有限公司
@@ -80,16 +80,16 @@ const testCases: TestCase[] = [
 2023年9月20日`,
     expectedParties: {
       shouldKeep: [
-        "杭州梦想软件有限公司",
-        "南京创新科技股份公司",
-        "苏州协作企业集团",
+        '杭州梦想软件有限公司',
+        '南京创新科技股份公司',
+        '苏州协作企业集团',
       ],
-      shouldFilter: ["张伟", "刘芳", "陈刚"],
+      shouldFilter: ['张伟', '刘芳', '陈刚'],
     },
   },
   {
     id: 3,
-    name: "法人代表（另一种表达）",
+    name: '法人代表（另一种表达）',
     content: `民事起诉状
 
 原告：深圳天际网络技术有限公司
@@ -112,13 +112,13 @@ const testCases: TestCase[] = [
 法人代表：赵云
 2023年11月1日`,
     expectedParties: {
-      shouldKeep: ["深圳天际网络技术有限公司", "广州星辰电子商务有限公司"],
-      shouldFilter: ["赵云", "孙丽"],
+      shouldKeep: ['深圳天际网络技术有限公司', '广州星辰电子商务有限公司'],
+      shouldFilter: ['赵云', '孙丽'],
     },
   },
   {
     id: 4,
-    name: "多个公司的法定代表人",
+    name: '多个公司的法定代表人',
     content: `民事起诉状
 
 原告：北京华信投资管理有限公司
@@ -146,16 +146,16 @@ const testCases: TestCase[] = [
 2023年8月5日`,
     expectedParties: {
       shouldKeep: [
-        "北京华信投资管理有限公司",
-        "上海金鼎实业发展股份有限公司",
-        "广州信达控股集团有限公司",
+        '北京华信投资管理有限公司',
+        '上海金鼎实业发展股份有限公司',
+        '广州信达控股集团有限公司',
       ],
-      shouldFilter: ["周涛", "吴强", "郑敏"],
+      shouldFilter: ['周涛', '吴强', '郑敏'],
     },
   },
   {
     id: 5,
-    name: "法定代表人同时也是独立当事人",
+    name: '法定代表人同时也是独立当事人',
     content: `民事起诉状
 
 原告：张大伟，男，1988年7月12日出生，汉族，住上海市徐汇区淮海中路200号，联系电话：18700187000，职业：企业总经理
@@ -179,13 +179,13 @@ const testCases: TestCase[] = [
 具状人：张大伟
 2023年10月30日`,
     expectedParties: {
-      shouldKeep: ["张大伟", "上海华诚科技有限公司", "北京长城贸易有限公司"],
-      shouldFilter: ["李华"],
+      shouldKeep: ['张大伟', '上海华诚科技有限公司', '北京长城贸易有限公司'],
+      shouldFilter: ['李华'],
     },
   },
   {
     id: 6,
-    name: "只有法定代表人，没有详细公司信息",
+    name: '只有法定代表人，没有详细公司信息',
     content: `民事起诉状
 
 原告：某某科技有限公司
@@ -203,13 +203,13 @@ const testCases: TestCase[] = [
 具状人：某某科技有限公司
 2023年12月1日`,
     expectedParties: {
-      shouldKeep: ["某某科技有限公司", "某某贸易有限公司"],
-      shouldFilter: ["王明", "李华"],
+      shouldKeep: ['某某科技有限公司', '某某贸易有限公司'],
+      shouldFilter: ['王明', '李华'],
     },
   },
   {
     id: 7,
-    name: "公司名称和法定代表人混在一起",
+    name: '公司名称和法定代表人混在一起',
     content: `民事起诉状
 
 原告：上海华诚科技有限公司（法定代表人：王明，身份证号：310101198005150001）
@@ -226,13 +226,13 @@ const testCases: TestCase[] = [
 具状人：上海华诚科技有限公司
 2023年11月15日`,
     expectedParties: {
-      shouldKeep: ["上海华诚科技有限公司", "北京长城贸易有限公司"],
-      shouldFilter: ["王明", "李华"],
+      shouldKeep: ['上海华诚科技有限公司', '北京长城贸易有限公司'],
+      shouldFilter: ['王明', '李华'],
     },
   },
   {
     id: 8,
-    name: "法定代表人的多种写法",
+    name: '法定代表人的多种写法',
     content: `民事起诉状
 
 原告：杭州梦想软件有限公司
@@ -256,16 +256,16 @@ const testCases: TestCase[] = [
 2023年10月25日`,
     expectedParties: {
       shouldKeep: [
-        "杭州梦想软件有限公司",
-        "南京创新科技股份公司",
-        "苏州协作企业集团",
+        '杭州梦想软件有限公司',
+        '南京创新科技股份公司',
+        '苏州协作企业集团',
       ],
-      shouldFilter: ["张伟", "刘芳", "陈刚"],
+      shouldFilter: ['张伟', '刘芳', '陈刚'],
     },
   },
   {
     id: 9,
-    name: "自然人当事人（无公司）",
+    name: '自然人当事人（无公司）',
     content: `民事起诉状
 
 原告：王小红，女，1990年3月8日出生，汉族，住上海市浦东新区陆家嘴环路100号，联系电话：18600186000，职业：财务主管
@@ -285,13 +285,13 @@ const testCases: TestCase[] = [
 具状人：王小红
 2023年9月10日`,
     expectedParties: {
-      shouldKeep: ["王小红", "张大伟"],
+      shouldKeep: ['王小红', '张大伟'],
       shouldFilter: [],
     },
   },
   {
     id: 10,
-    name: "混合公司和个人",
+    name: '混合公司和个人',
     content: `民事起诉状
 
 原告：李明，男，1985年5月10日出生，汉族，住广州市天河区天河路200号，联系电话：15900159000
@@ -315,12 +315,12 @@ const testCases: TestCase[] = [
 2023年11月20日`,
     expectedParties: {
       shouldKeep: [
-        "李明",
-        "深圳天际网络技术有限公司",
-        "王华",
-        "广州星辰电子商务有限公司",
+        '李明',
+        '深圳天际网络技术有限公司',
+        '王华',
+        '广州星辰电子商务有限公司',
       ],
-      shouldFilter: ["赵云", "孙丽"],
+      shouldFilter: ['赵云', '孙丽'],
     },
   },
 ];
@@ -338,13 +338,13 @@ function extractMockParties(content: string): Party[] {
 
   // 提取原告 - 提取第一个逗号或中文逗号之前的内容（姓名）
   const plaintiffMatches = content.matchAll(
-    /原告[：:]\s*([^，,\n]+?)(?=，|,|\n|$)/g,
+    /原告[：:]\s*([^，,\n]+?)(?=，|,|\n|$)/g
   );
   for (const match of plaintiffMatches) {
     const name = match[1].trim();
     if (name) {
       parties.push({
-        type: "plaintiff",
+        type: 'plaintiff',
         name: name,
       });
     }
@@ -352,13 +352,13 @@ function extractMockParties(content: string): Party[] {
 
   // 提取被告 - 提取第一个逗号或中文逗号之前的内容（姓名）
   const defendantMatches = content.matchAll(
-    /被告[：:]\s*([^，,\n]+?)(?=，|,|\n|$)/g,
+    /被告[：:]\s*([^，,\n]+?)(?=，|,|\n|$)/g
   );
   for (const match of defendantMatches) {
     const name = match[1].trim();
     if (name) {
       parties.push({
-        type: "defendant",
+        type: 'defendant',
         name: name,
       });
     }
@@ -366,13 +366,13 @@ function extractMockParties(content: string): Party[] {
 
   // 提取第三人 - 提取第一个逗号或中文逗号之前的内容（姓名）
   const thirdPartyMatches = content.matchAll(
-    /第三人[：:]\s*([^，,\n]+?)(?=，|,|\n|$)/g,
+    /第三人[：:]\s*([^，,\n]+?)(?=，|,|\n|$)/g
   );
   for (const match of thirdPartyMatches) {
     const name = match[1].trim();
     if (name) {
       parties.push({
-        type: "other",
+        type: 'other',
         name: name,
       });
     }
@@ -380,13 +380,13 @@ function extractMockParties(content: string): Party[] {
 
   // 添加法定代表人条目（模拟错误提取）
   const legalRepMatches = content.matchAll(
-    /法定代表人[：:]\s*(.+?)(?=，|,|\n|$)/g,
+    /法定代表人[：:]\s*(.+?)(?=，|,|\n|$)/g
   );
   for (const match of legalRepMatches) {
     const name = match[1].trim();
     if (name && name.length > 0) {
       parties.push({
-        type: "plaintiff",
+        type: 'plaintiff',
         name: `法定代表人：${name}`,
         _inferred: true,
       });
@@ -397,9 +397,9 @@ function extractMockParties(content: string): Party[] {
 }
 
 async function runTests(): Promise<void> {
-  console.log("========================================");
-  console.log("法定代表人过滤功能测试");
-  console.log("========================================");
+  console.log('========================================');
+  console.log('法定代表人过滤功能测试');
+  console.log('========================================');
   console.log(`测试用例数量: ${testCases.length}\n`);
 
   const filter = new LegalRepresentativeFilter();
@@ -415,7 +415,7 @@ async function runTests(): Promise<void> {
 
   for (const testCase of testCases) {
     console.log(`\n测试案例 ${testCase.id}: ${testCase.name}`);
-    console.log("---");
+    console.log('---');
 
     const startTime = Date.now();
 
@@ -427,32 +427,32 @@ async function runTests(): Promise<void> {
       // 过滤法定代表人
       const filterResult = await filter.filter(
         testCase.content,
-        extractedParties,
+        extractedParties
       );
       const filteredParties = filterResult.parties;
 
       const actualPartyNames = filteredParties.map((p: Party) => p.name);
       const allExtractedNames = extractedParties.map((p: Party) => p.name);
 
-      console.log(`提取的当事人: ${allExtractedNames.join(", ")}`);
-      console.log(`过滤后的当事人: ${actualPartyNames.join(", ")}`);
+      console.log(`提取的当事人: ${allExtractedNames.join(', ')}`);
+      console.log(`过滤后的当事人: ${actualPartyNames.join(', ')}`);
       console.log(`处理时间: ${processingTime}ms`);
 
       // 评估结果
-      const caseCorrectKept = testCase.expectedParties.shouldKeep.filter(
-        (name) => actualPartyNames.includes(name),
+      const caseCorrectKept = testCase.expectedParties.shouldKeep.filter(name =>
+        actualPartyNames.includes(name)
       );
 
       const caseIncorrectFiltered = testCase.expectedParties.shouldKeep.filter(
-        (name) => !actualPartyNames.includes(name),
+        name => !actualPartyNames.includes(name)
       );
 
       const caseCorrectFiltered = testCase.expectedParties.shouldFilter.filter(
-        (name) => !actualPartyNames.includes(name),
+        name => !actualPartyNames.includes(name)
       );
 
       const caseIncorrectKept = testCase.expectedParties.shouldFilter.filter(
-        (name) => actualPartyNames.includes(name),
+        name => actualPartyNames.includes(name)
       );
 
       const totalExpected =
@@ -462,10 +462,10 @@ async function runTests(): Promise<void> {
       const accuracy =
         totalExpected > 0 ? (caseCorrect / totalExpected) * 100 : 0;
 
-      console.log(`正确保留: ${caseCorrectKept.join(", ") || "无"}`);
-      console.log(`错误过滤: ${caseIncorrectFiltered.join(", ") || "无"}`);
-      console.log(`正确过滤: ${caseCorrectFiltered.join(", ") || "无"}`);
-      console.log(`错误保留: ${caseIncorrectKept.join(", ") || "无"}`);
+      console.log(`正确保留: ${caseCorrectKept.join(', ') || '无'}`);
+      console.log(`错误过滤: ${caseIncorrectFiltered.join(', ') || '无'}`);
+      console.log(`正确过滤: ${caseCorrectFiltered.join(', ') || '无'}`);
+      console.log(`错误保留: ${caseIncorrectKept.join(', ') || '无'}`);
       console.log(`准确率: ${accuracy.toFixed(2)}%`);
 
       // 累计统计
@@ -520,9 +520,9 @@ async function runTests(): Promise<void> {
       ? (correctFiltered / (correctFiltered + incorrectFiltered)) * 100
       : 0;
 
-  console.log("\n========================================");
-  console.log("测试汇总");
-  console.log("========================================");
+  console.log('\n========================================');
+  console.log('测试汇总');
+  console.log('========================================');
   console.log(`总测试案例: ${totalCases}`);
   console.log(`总当事人数量: ${totalParties}`);
   console.log(`\n准确率统计:`);
@@ -534,8 +534,8 @@ async function runTests(): Promise<void> {
   console.log(`  正确过滤: ${correctFiltered} 个`);
   console.log(`  错误过滤: ${incorrectFiltered} 个`);
   console.log(`  错误保留: ${incorrectKept} 个`);
-  console.log(`\n达标状态: ${overallAccuracy >= 90 ? "✅ 达标" : "❌ 未达标"}`);
-  console.log("========================================");
+  console.log(`\n达标状态: ${overallAccuracy >= 90 ? '✅ 达标' : '❌ 未达标'}`);
+  console.log('========================================');
 }
 
 // 运行测试

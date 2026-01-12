@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Debate, DebateRound, Argument } from "@prisma/client";
+import { useState, useEffect } from 'react';
+import { Debate, DebateRound, Argument } from '@prisma/client';
 
 /**
  * 辩论数据Hook
@@ -43,7 +43,7 @@ export function useDebate(debateId, refreshInterval = 5000): DebateData {
         ]);
 
         if (!debateRes.ok) {
-          throw new Error("获取辩论信息失败");
+          throw new Error('获取辩论信息失败');
         }
 
         const debateData: Debate = await debateRes.json();
@@ -54,9 +54,7 @@ export function useDebate(debateId, refreshInterval = 5000): DebateData {
           setRounds(roundsData);
 
           // 找到当前轮次（状态为IN_PROGRESS的最新轮次）
-          const activeRound = roundsData.find(
-            (r) => r.status === "IN_PROGRESS",
-          );
+          const activeRound = roundsData.find(r => r.status === 'IN_PROGRESS');
           setCurrentRound(activeRound || roundsData[roundsData.length - 1]);
         }
 
@@ -65,7 +63,7 @@ export function useDebate(debateId, refreshInterval = 5000): DebateData {
           setArgumentList(argsData);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "加载数据失败");
+        setError(err instanceof Error ? err.message : '加载数据失败');
       } finally {
         setIsLoading(false);
       }
@@ -101,13 +99,13 @@ export interface GroupedArguments {
 }
 
 export function useGroupedArguments(
-  argumentList: Argument[],
+  argumentList: Argument[]
 ): GroupedArguments {
   return argumentList.reduce<GroupedArguments>(
     (acc, arg) => {
-      if (arg.side === "PLAINTIFF") {
+      if (arg.side === 'PLAINTIFF') {
         acc.plaintiff.push(arg);
-      } else if (arg.side === "DEFENDANT") {
+      } else if (arg.side === 'DEFENDANT') {
         acc.defendant.push(arg);
       } else {
         // NEUTRAL或其他类型，默认分配给原告方
@@ -115,7 +113,7 @@ export function useGroupedArguments(
       }
       return acc;
     },
-    { plaintiff: [], defendant: [] },
+    { plaintiff: [], defendant: [] }
   );
 }
 
@@ -125,8 +123,8 @@ export function useGroupedArguments(
  */
 export function useArgumentsByRound(
   argumentList: Argument[],
-  roundId: string | null,
+  roundId: string | null
 ): Argument[] {
   if (!roundId) return [];
-  return argumentList.filter((arg) => arg.roundId === roundId);
+  return argumentList.filter(arg => arg.roundId === roundId);
 }

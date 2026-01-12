@@ -5,7 +5,7 @@
  * 防止级联失败，保护系统稳定性
  */
 
-import { CircuitState, CircuitBreakerConfig, RecoveryMethod } from "./types";
+import { CircuitState, CircuitBreakerConfig, RecoveryMethod } from './types';
 
 /**
  * 熔断器
@@ -43,8 +43,8 @@ export class CircuitBreaker {
     if (this.isOpen()) {
       throw new Error(
         `Circuit breaker is OPEN. Last failed at: ${new Date(
-          this.lastFailureTime,
-        ).toISOString()}`,
+          this.lastFailureTime
+        ).toISOString()}`
       );
     }
 
@@ -226,7 +226,7 @@ export class CircuitBreakerManager {
    */
   getBreaker(
     name: string,
-    config?: Partial<CircuitBreakerConfig>,
+    config?: Partial<CircuitBreakerConfig>
   ): CircuitBreaker {
     let breaker = this.breakers.get(name);
 

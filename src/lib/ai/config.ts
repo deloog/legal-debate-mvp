@@ -1,5 +1,5 @@
-import { config } from "dotenv";
-import type { AIServiceConfig, AIProvider } from "../../types/ai-service";
+import { config } from 'dotenv';
+import type { AIServiceConfig, AIProvider } from '../../types/ai-service';
 
 // 确保环境变量已加载
 config();
@@ -11,10 +11,10 @@ config();
 export const DEFAULT_AI_SERVICE_CONFIG: AIServiceConfig = {
   clients: [
     {
-      provider: "zhipu",
-      apiKey: process.env.ZHIPU_API_KEY || "",
+      provider: 'zhipu',
+      apiKey: process.env.ZHIPU_API_KEY || '',
       baseURL:
-        process.env.ZHIPU_BASE_URL || "https://open.bigmodel.cn/api/paas/v4/",
+        process.env.ZHIPU_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4/',
       timeout: 45000, // 增加到45秒，避免智谱清言API超时
       retryStrategy: {
         maxAttempts: 3,
@@ -23,10 +23,10 @@ export const DEFAULT_AI_SERVICE_CONFIG: AIServiceConfig = {
         backoffMultiplier: 2,
         jitter: true,
         retryableErrors: [
-          "timeout_error",
-          "network_error",
-          "rate_limit_error",
-          "api_error",
+          'timeout_error',
+          'network_error',
+          'rate_limit_error',
+          'api_error',
         ],
       },
       rateLimits: {
@@ -37,9 +37,9 @@ export const DEFAULT_AI_SERVICE_CONFIG: AIServiceConfig = {
       },
     },
     {
-      provider: "deepseek",
-      apiKey: process.env.DEEPSEEK_API_KEY || "",
-      baseURL: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1",
+      provider: 'deepseek',
+      apiKey: process.env.DEEPSEEK_API_KEY || '',
+      baseURL: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1',
       timeout: 15000, // 缩短超时时间，快速失败
       retryStrategy: {
         maxAttempts: 2, // 减少重试次数，避免长时间等待
@@ -47,7 +47,7 @@ export const DEFAULT_AI_SERVICE_CONFIG: AIServiceConfig = {
         maxDelay: 4000, // 缩短最大延迟
         backoffMultiplier: 1.5, // 降低退避倍数
         jitter: true,
-        retryableErrors: ["timeout_error", "network_error", "rate_limit_error"],
+        retryableErrors: ['timeout_error', 'network_error', 'rate_limit_error'],
       },
       rateLimits: {
         requestsPerSecond: 5,
@@ -58,7 +58,7 @@ export const DEFAULT_AI_SERVICE_CONFIG: AIServiceConfig = {
     },
   ],
   loadBalancer: {
-    strategy: "weighted_round_robin",
+    strategy: 'weighted_round_robin',
     healthCheckInterval: 30000, // 30秒
     healthCheckTimeout: 5000, // 5秒
     failureThreshold: 3,
@@ -74,7 +74,7 @@ export const DEFAULT_AI_SERVICE_CONFIG: AIServiceConfig = {
   monitor: {
     enabled: true,
     metricsInterval: 60000, // 1分钟
-    logLevel: "info",
+    logLevel: 'info',
     persistMetrics: true,
     alertThresholds: {
       responseTime: 8000, // 增加到8秒，适应智谱清言API的响应时间
@@ -88,28 +88,28 @@ export const DEFAULT_AI_SERVICE_CONFIG: AIServiceConfig = {
     strategies: [
       {
         priority: 1,
-        condition: "provider_error",
-        action: "switch_provider",
+        condition: 'provider_error',
+        action: 'switch_provider',
       },
       {
         priority: 2,
-        condition: "rate_limit",
-        action: "use_cache",
+        condition: 'rate_limit',
+        action: 'use_cache',
       },
       {
         priority: 3,
-        condition: "timeout",
-        action: "simplified_request",
+        condition: 'timeout',
+        action: 'simplified_request',
       },
       {
         priority: 4,
-        condition: "all_providers_down",
-        action: "local_processing",
+        condition: 'all_providers_down',
+        action: 'local_processing',
       },
       {
         priority: 5,
-        condition: "provider_error",
-        action: "return_error",
+        condition: 'provider_error',
+        action: 'return_error',
       },
     ],
     cacheFallback: {
@@ -124,11 +124,11 @@ export const DEFAULT_AI_SERVICE_CONFIG: AIServiceConfig = {
     },
     localProcessing: {
       enabled: true,
-      capabilities: ["text_generation", "template_response"],
+      capabilities: ['text_generation', 'template_response'],
     },
   },
-  defaultProvider: "zhipu",
-  defaultModel: "glm-4.6",
+  defaultProvider: 'zhipu',
+  defaultModel: 'glm-4.6',
   globalTimeout: 90000, // 增加到90秒，给更充足的处理时间
   enableMetrics: true,
 };
@@ -139,7 +139,7 @@ export const DEFAULT_AI_SERVICE_CONFIG: AIServiceConfig = {
 
 export const DEVELOPMENT_AI_CONFIG: AIServiceConfig = {
   ...DEFAULT_AI_SERVICE_CONFIG,
-  clients: DEFAULT_AI_SERVICE_CONFIG.clients.map((client) => ({
+  clients: DEFAULT_AI_SERVICE_CONFIG.clients.map(client => ({
     ...client,
     timeout: 30000, // 开发环境使用30秒超时
   })),
@@ -150,7 +150,7 @@ export const DEVELOPMENT_AI_CONFIG: AIServiceConfig = {
   },
   monitor: {
     ...DEFAULT_AI_SERVICE_CONFIG.monitor,
-    logLevel: "debug",
+    logLevel: 'debug',
     metricsInterval: 30000, // 30秒
   },
   fallback: {
@@ -168,7 +168,7 @@ export const DEVELOPMENT_AI_CONFIG: AIServiceConfig = {
 
 export const PRODUCTION_AI_CONFIG: AIServiceConfig = {
   ...DEFAULT_AI_SERVICE_CONFIG,
-  clients: DEFAULT_AI_SERVICE_CONFIG.clients.map((client) => ({
+  clients: DEFAULT_AI_SERVICE_CONFIG.clients.map(client => ({
     ...client,
     timeout: 60000, // 生产环境使用60秒超时
     retryStrategy: {
@@ -183,7 +183,7 @@ export const PRODUCTION_AI_CONFIG: AIServiceConfig = {
   },
   monitor: {
     ...DEFAULT_AI_SERVICE_CONFIG.monitor,
-    logLevel: "warn", // 生产环境只记录警告和错误
+    logLevel: 'warn', // 生产环境只记录警告和错误
     persistMetrics: true,
     alertThresholds: {
       ...DEFAULT_AI_SERVICE_CONFIG.monitor.alertThresholds!,
@@ -196,33 +196,33 @@ export const PRODUCTION_AI_CONFIG: AIServiceConfig = {
     strategies: [
       {
         priority: 1,
-        condition: "provider_error",
-        action: "switch_provider",
+        condition: 'provider_error',
+        action: 'switch_provider',
       },
       {
         priority: 2,
-        condition: "rate_limit",
-        action: "switch_provider",
+        condition: 'rate_limit',
+        action: 'switch_provider',
       },
       {
         priority: 3,
-        condition: "timeout",
-        action: "switch_provider",
+        condition: 'timeout',
+        action: 'switch_provider',
       },
       {
         priority: 4,
-        condition: "all_providers_down",
-        action: "use_cache",
+        condition: 'all_providers_down',
+        action: 'use_cache',
       },
       {
         priority: 5,
-        condition: "all_providers_down",
-        action: "local_processing",
+        condition: 'all_providers_down',
+        action: 'local_processing',
       },
       {
         priority: 6,
-        condition: "provider_error",
-        action: "return_error",
+        condition: 'provider_error',
+        action: 'return_error',
       },
     ],
   },
@@ -237,9 +237,9 @@ export const ACCURACY_TEST_AI_CONFIG: AIServiceConfig = {
   ...DEFAULT_AI_SERVICE_CONFIG,
   clients: [
     {
-      provider: "deepseek",
-      apiKey: process.env.DEEPSEEK_API_KEY || "",
-      baseURL: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1",
+      provider: 'deepseek',
+      apiKey: process.env.DEEPSEEK_API_KEY || '',
+      baseURL: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1',
       timeout: 60000, // 准确性测试使用较长超时时间
       retryStrategy: {
         maxAttempts: 3,
@@ -247,14 +247,14 @@ export const ACCURACY_TEST_AI_CONFIG: AIServiceConfig = {
         maxDelay: 10000,
         backoffMultiplier: 2,
         jitter: true,
-        retryableErrors: ["timeout_error", "network_error", "rate_limit_error"],
+        retryableErrors: ['timeout_error', 'network_error', 'rate_limit_error'],
       },
     },
     {
-      provider: "zhipu",
-      apiKey: process.env.ZHIPU_API_KEY || "",
+      provider: 'zhipu',
+      apiKey: process.env.ZHIPU_API_KEY || '',
       baseURL:
-        process.env.ZHIPU_BASE_URL || "https://open.bigmodel.cn/api/paas/v4/",
+        process.env.ZHIPU_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4/',
       timeout: 45000,
       retryStrategy: {
         maxAttempts: 3,
@@ -263,16 +263,16 @@ export const ACCURACY_TEST_AI_CONFIG: AIServiceConfig = {
         backoffMultiplier: 2,
         jitter: true,
         retryableErrors: [
-          "timeout_error",
-          "network_error",
-          "rate_limit_error",
-          "api_error",
+          'timeout_error',
+          'network_error',
+          'rate_limit_error',
+          'api_error',
         ],
       },
     },
   ],
   loadBalancer: {
-    strategy: "weighted_round_robin",
+    strategy: 'weighted_round_robin',
     healthCheckInterval: 60000, // 准确性测试降低检查频率
     healthCheckTimeout: 10000,
     failureThreshold: 5,
@@ -288,7 +288,7 @@ export const ACCURACY_TEST_AI_CONFIG: AIServiceConfig = {
   monitor: {
     enabled: true,
     metricsInterval: 60000,
-    logLevel: "info",
+    logLevel: 'info',
     persistMetrics: false,
     alertThresholds: {
       responseTime: 30000,
@@ -315,8 +315,8 @@ export const ACCURACY_TEST_AI_CONFIG: AIServiceConfig = {
       capabilities: [],
     },
   },
-  defaultProvider: "deepseek",
-  defaultModel: "deepseek-chat",
+  defaultProvider: 'deepseek',
+  defaultModel: 'deepseek-chat',
   globalTimeout: 90000,
   enableMetrics: false,
 };
@@ -329,9 +329,9 @@ export const TEST_AI_CONFIG: AIServiceConfig = {
   ...DEFAULT_AI_SERVICE_CONFIG,
   clients: [
     {
-      provider: "zhipu",
-      apiKey: "test-key",
-      baseURL: "http://localhost:3000/mock/zhipu",
+      provider: 'zhipu',
+      apiKey: 'test-key',
+      baseURL: 'http://localhost:3000/mock/zhipu',
       timeout: 5000,
       retryStrategy: {
         maxAttempts: 1,
@@ -344,7 +344,7 @@ export const TEST_AI_CONFIG: AIServiceConfig = {
     },
   ],
   loadBalancer: {
-    strategy: "round_robin",
+    strategy: 'round_robin',
     healthCheckInterval: 5000,
     healthCheckTimeout: 1000,
     failureThreshold: 1,
@@ -353,7 +353,7 @@ export const TEST_AI_CONFIG: AIServiceConfig = {
   },
   monitor: {
     enabled: false, // 测试时禁用监控
-    logLevel: "error",
+    logLevel: 'error',
     persistMetrics: false,
     metricsInterval: 60000, // 添加缺少的metricsInterval属性
   },
@@ -362,8 +362,8 @@ export const TEST_AI_CONFIG: AIServiceConfig = {
     strategies: [
       {
         priority: 1,
-        condition: "provider_error",
-        action: "local_processing",
+        condition: 'provider_error',
+        action: 'local_processing',
       },
     ],
     cacheFallback: {
@@ -378,11 +378,11 @@ export const TEST_AI_CONFIG: AIServiceConfig = {
     },
     localProcessing: {
       enabled: true,
-      capabilities: ["text_generation", "template_response"],
+      capabilities: ['text_generation', 'template_response'],
     },
   },
-  defaultProvider: "zhipu",
-  defaultModel: "test-model",
+  defaultProvider: 'zhipu',
+  defaultModel: 'test-model',
   globalTimeout: 10000,
   enableMetrics: false,
 };
@@ -392,10 +392,10 @@ export const TEST_AI_CONFIG: AIServiceConfig = {
 // =============================================================================
 
 export function getAIConfig(useRealAPI: boolean = false): AIServiceConfig {
-  const nodeEnv = process.env.NODE_ENV || "development";
+  const nodeEnv = process.env.NODE_ENV || 'development';
 
   // 检查环境变量 USE_REAL_AI 是否设置为 true
-  const useRealAIEnv = process.env.USE_REAL_AI === "true";
+  const useRealAIEnv = process.env.USE_REAL_AI === 'true';
 
   // 如果明确指定使用真实API（准确性测试）或通过环境变量设置
   if (useRealAPI || useRealAIEnv) {
@@ -403,11 +403,11 @@ export function getAIConfig(useRealAPI: boolean = false): AIServiceConfig {
   }
 
   switch (nodeEnv) {
-    case "production":
+    case 'production':
       return PRODUCTION_AI_CONFIG;
-    case "test":
+    case 'test':
       return TEST_AI_CONFIG;
-    case "development":
+    case 'development':
     default:
       return DEVELOPMENT_AI_CONFIG;
   }
@@ -432,23 +432,23 @@ export function validateAIConfig(): { valid: boolean; errors: string[] } {
   if (config.loadBalancer.weights) {
     const totalWeight = Object.values(config.loadBalancer.weights).reduce(
       (sum, weight) => sum + weight,
-      0,
+      0
     );
     if (Math.abs(totalWeight - 1.0) > 0.01) {
       errors.push(
-        `Load balancer weights must sum to 1.0, current sum: ${totalWeight}`,
+        `Load balancer weights must sum to 1.0, current sum: ${totalWeight}`
       );
     }
   }
 
   // 验证默认提供商
-  const availableProviders = config.clients.map((client) => client.provider);
+  const availableProviders = config.clients.map(client => client.provider);
   if (
     config.defaultProvider &&
     !availableProviders.includes(config.defaultProvider)
   ) {
     errors.push(
-      `Default provider ${config.defaultProvider} is not configured in clients`,
+      `Default provider ${config.defaultProvider} is not configured in clients`
     );
   }
 
@@ -465,15 +465,15 @@ export function validateAIConfig(): { valid: boolean; errors: string[] } {
 export const PROVIDER_CONFIGS = {
   zhipu: {
     defaultModels: {
-      chat: "glm-4-flash",
-      embedding: "embedding-2",
+      chat: 'glm-4-flash',
+      embedding: 'embedding-2',
     },
     supportedModels: [
-      "glm-4-flash",
-      "glm-4",
-      "glm-3-turbo",
-      "embedding-2",
-      "embedding-3",
+      'glm-4-flash',
+      'glm-4',
+      'glm-3-turbo',
+      'embedding-2',
+      'embedding-3',
     ],
     rateLimits: {
       requestsPerSecond: 10,
@@ -484,10 +484,10 @@ export const PROVIDER_CONFIGS = {
   },
   deepseek: {
     defaultModels: {
-      chat: "deepseek-chat",
-      embedding: "deepseek-chat",
+      chat: 'deepseek-chat',
+      embedding: 'deepseek-chat',
     },
-    supportedModels: ["deepseek-chat", "deepseek-coder"],
+    supportedModels: ['deepseek-chat', 'deepseek-coder'],
     rateLimits: {
       requestsPerSecond: 5,
       requestsPerMinute: 50,
@@ -497,16 +497,16 @@ export const PROVIDER_CONFIGS = {
   },
   openai: {
     defaultModels: {
-      chat: "gpt-3.5-turbo",
-      embedding: "text-embedding-ada-002",
+      chat: 'gpt-3.5-turbo',
+      embedding: 'text-embedding-ada-002',
     },
     supportedModels: [
-      "gpt-3.5-turbo",
-      "gpt-4",
-      "gpt-4-turbo",
-      "text-embedding-ada-002",
-      "text-embedding-3-small",
-      "text-embedding-3-large",
+      'gpt-3.5-turbo',
+      'gpt-4',
+      'gpt-4-turbo',
+      'text-embedding-ada-002',
+      'text-embedding-3-small',
+      'text-embedding-3-large',
     ],
     rateLimits: {
       requestsPerSecond: 3,
@@ -517,13 +517,13 @@ export const PROVIDER_CONFIGS = {
   },
   anthropic: {
     defaultModels: {
-      chat: "claude-3-haiku-20240307",
+      chat: 'claude-3-haiku-20240307',
       embedding: null, // Anthropic不支持嵌入
     },
     supportedModels: [
-      "claude-3-haiku-20240307",
-      "claude-3-sonnet-20240229",
-      "claude-3-opus-20240229",
+      'claude-3-haiku-20240307',
+      'claude-3-sonnet-20240229',
+      'claude-3-opus-20240229',
     ],
     rateLimits: {
       requestsPerSecond: 5,
@@ -539,14 +539,14 @@ export const PROVIDER_CONFIGS = {
 // =============================================================================
 
 export function getProviderConfig(
-  provider: AIProvider,
+  provider: AIProvider
 ): (typeof PROVIDER_CONFIGS)[AIProvider] {
   return PROVIDER_CONFIGS[provider];
 }
 
 export function getDefaultModel(
   provider: AIProvider,
-  type: "chat" | "embedding",
+  type: 'chat' | 'embedding'
 ): string {
   const config = getProviderConfig(provider);
   const model = config.defaultModels[type];

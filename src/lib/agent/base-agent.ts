@@ -5,14 +5,14 @@ import type {
   AgentContext,
   AgentResult,
   AgentMetadata,
-} from "../../types/agent";
+} from '../../types/agent';
 
 import {
   AgentType,
   AgentStatus,
   AgentErrorType,
   AgentError,
-} from "../../types/agent";
+} from '../../types/agent';
 
 import {
   AgentExecutionState,
@@ -22,14 +22,14 @@ import {
   createAgentResult,
   validateAgentContext,
   DEFAULT_AGENT_CONFIG,
-} from "./types";
+} from './types';
 
 import {
   FaultTolerantExecutor,
   type AgentFaultToleranceConfig,
-} from "./fault-tolerance";
-import { ErrorLogger } from "../error/error-logger";
-import { CircuitBreakerManager } from "../error/circuit-breaker";
+} from './fault-tolerance';
+import { ErrorLogger } from '../error/error-logger';
+import { CircuitBreakerManager } from '../error/circuit-breaker';
 
 // =============================================================================
 // BaseAgent抽象类
@@ -65,7 +65,7 @@ export abstract class BaseAgent implements Agent {
   constructor(
     logger?: (entry: AgentLogEntry) => void,
     initialConfig?: Record<string, unknown>,
-    faultToleranceConfig?: AgentFaultToleranceConfig,
+    faultToleranceConfig?: AgentFaultToleranceConfig
   ) {
     this.logger = logger || this.defaultLogger;
     this.config = { ...initialConfig };
@@ -76,7 +76,7 @@ export abstract class BaseAgent implements Agent {
       const circuitBreakerManager = new CircuitBreakerManager();
       this.faultTolerantExecutor = new FaultTolerantExecutor(
         errorLogger,
-        circuitBreakerManager,
+        circuitBreakerManager
       );
       this.faultToleranceEnabled = true;
     }
@@ -99,7 +99,7 @@ export abstract class BaseAgent implements Agent {
    * Agent初始化
    */
   async initialize(): Promise<void> {
-    this.log(AgentLogLevel.INFO, "Agent initialized", {
+    this.log(AgentLogLevel.INFO, 'Agent initialized', {
       name: this.name,
       type: this.type,
       version: this.version,
@@ -110,7 +110,7 @@ export abstract class BaseAgent implements Agent {
    * Agent清理
    */
   async cleanup(): Promise<void> {
-    this.log(AgentLogLevel.INFO, "Agent cleaned up", { name: this.name });
+    this.log(AgentLogLevel.INFO, 'Agent cleaned up', { name: this.name });
     this.status = AgentStatus.IDLE;
   }
 
@@ -126,7 +126,7 @@ export abstract class BaseAgent implements Agent {
    */
   async configure(config: Record<string, unknown>): Promise<void> {
     this.config = { ...this.config, ...config };
-    this.log(AgentLogLevel.INFO, "Agent configuration updated", {
+    this.log(AgentLogLevel.INFO, 'Agent configuration updated', {
       name: this.name,
       config: this.config,
     });
@@ -147,11 +147,11 @@ export abstract class BaseAgent implements Agent {
       const validation = validateAgentContext(context);
       if (!validation.valid) {
         const error = createAgentError(
-          "INVALID_CONTEXT",
-          `Invalid agent context: ${validation.errors.join(", ")}`,
+          'INVALID_CONTEXT',
+          `Invalid agent context: ${validation.errors.join(', ')}`,
           AgentErrorType.VALIDATION_ERROR,
           this.name,
-          false,
+          false
         );
         return createAgentResult(this.name, undefined, {
           success: false,
@@ -169,7 +169,7 @@ export abstract class BaseAgent implements Agent {
         context,
       };
 
-      this.log(AgentLogLevel.INFO, "Agent execution started", {
+      this.log(AgentLogLevel.INFO, 'Agent execution started', {
         task: context.task,
         priority: context.priority,
       });
@@ -182,14 +182,14 @@ export abstract class BaseAgent implements Agent {
           this.name,
           () => this.executeLogic(context),
           this.getFaultToleranceConfig(),
-          context,
+          context
         );
 
         result = faultTolerantResult.result;
 
         // 记录容错相关信息
         if (faultTolerantResult.faultResult.fallbackUsed) {
-          this.log(AgentLogLevel.WARN, "Fallback strategy used", {
+          this.log(AgentLogLevel.WARN, 'Fallback strategy used', {
             fallbackType: faultTolerantResult.faultResult.fallbackType,
             attempts: faultTolerantResult.faultResult.totalAttempts,
           });
@@ -209,7 +209,7 @@ export abstract class BaseAgent implements Agent {
         success: true,
         executionTime,
         output:
-          result && typeof result === "object" && "output" in result
+          result && typeof result === 'object' && 'output' in result
             ? String((result as { output: unknown }).output)
             : undefined, // 传递output字段
         context: {
@@ -217,29 +217,29 @@ export abstract class BaseAgent implements Agent {
           processingSteps: this.getProcessingSteps(),
           // 从result中提取warnings（如果存在）- 增强调试
           warnings: (() => {
-            console.log("[DEBUG] BaseAgent.execute 开始提取warnings", {
+            console.log('[DEBUG] BaseAgent.execute 开始提取warnings', {
               resultType: typeof result,
               hasMetadata:
-                result && typeof result === "object" && "metadata" in result,
+                result && typeof result === 'object' && 'metadata' in result,
             });
 
-            if (!result || typeof result !== "object") return [];
+            if (!result || typeof result !== 'object') return [];
             const res = result as Record<string, unknown>;
 
-            if (!res.metadata || typeof res.metadata !== "object") {
-              console.warn("[WARNING] metadata不存在或不是对象");
+            if (!res.metadata || typeof res.metadata !== 'object') {
+              console.warn('[WARNING] metadata不存在或不是对象');
               return [];
             }
 
             const metadata = res.metadata as Record<string, unknown>;
             if (!Array.isArray(metadata.warnings)) {
-              console.warn("[WARNING] metadata.warnings不是数组", {
+              console.warn('[WARNING] metadata.warnings不是数组', {
                 warnings: metadata.warnings,
               });
               return [];
             }
 
-            console.log("[DEBUG] 提取到warnings", {
+            console.log('[DEBUG] 提取到warnings', {
               count: metadata.warnings.length,
               warnings: metadata.warnings,
             });
@@ -249,7 +249,7 @@ export abstract class BaseAgent implements Agent {
       });
 
       this.status = AgentStatus.IDLE;
-      this.log(AgentLogLevel.INFO, "Agent execution completed", {
+      this.log(AgentLogLevel.INFO, 'Agent execution completed', {
         executionTime,
         tokensUsed: agentResult.tokensUsed,
       });
@@ -265,7 +265,7 @@ export abstract class BaseAgent implements Agent {
       const agentError = this.createErrorFromException(error);
 
       this.status = AgentStatus.ERROR;
-      this.log(AgentLogLevel.ERROR, "Agent execution failed", {
+      this.log(AgentLogLevel.ERROR, 'Agent execution failed', {
         error: agentError.message,
         executionTime,
       });
@@ -286,7 +286,7 @@ export abstract class BaseAgent implements Agent {
     level: AgentLogLevel,
     message: string,
     data?: unknown,
-    error?: Error,
+    error?: Error
   ): void {
     const entry: AgentLogEntry = {
       level,
@@ -303,30 +303,30 @@ export abstract class BaseAgent implements Agent {
    * 从异常创建Agent错误
    */
   protected createErrorFromException(error: unknown): AgentError {
-    if (error && typeof error === "object" && "code" in error) {
+    if (error && typeof error === 'object' && 'code' in error) {
       const errorObj = error as { code: string; message?: string };
       return createAgentError(
         errorObj.code,
-        errorObj.message || "Unknown error",
+        errorObj.message || 'Unknown error',
         this.mapErrorType(errorObj.code),
         this.name,
         this.isRetryableError(errorObj.code),
-        { originalError: error },
+        { originalError: error }
       );
     }
 
     const errorMessage =
-      error && typeof error === "object" && "message" in error
+      error && typeof error === 'object' && 'message' in error
         ? (error as { message: string }).message
-        : "Unknown execution error";
+        : 'Unknown execution error';
 
     return createAgentError(
-      "EXECUTION_ERROR",
+      'EXECUTION_ERROR',
       errorMessage,
       AgentErrorType.EXECUTION_ERROR,
       this.name,
       true,
-      { originalError: error },
+      { originalError: error }
     );
   }
 
@@ -336,13 +336,13 @@ export abstract class BaseAgent implements Agent {
   protected mapErrorType(code: string): AgentErrorType {
     const codeLower = code.toLowerCase();
 
-    if (codeLower.includes("timeout")) return AgentErrorType.TIMEOUT_ERROR;
-    if (codeLower.includes("network")) return AgentErrorType.NETWORK_ERROR;
-    if (codeLower.includes("rate_limit"))
+    if (codeLower.includes('timeout')) return AgentErrorType.TIMEOUT_ERROR;
+    if (codeLower.includes('network')) return AgentErrorType.NETWORK_ERROR;
+    if (codeLower.includes('rate_limit'))
       return AgentErrorType.RATE_LIMIT_ERROR;
-    if (codeLower.includes("permission"))
+    if (codeLower.includes('permission'))
       return AgentErrorType.PERMISSION_ERROR;
-    if (codeLower.includes("validation"))
+    if (codeLower.includes('validation'))
       return AgentErrorType.VALIDATION_ERROR;
 
     return AgentErrorType.EXECUTION_ERROR;
@@ -353,13 +353,13 @@ export abstract class BaseAgent implements Agent {
    */
   protected isRetryableError(code: string): boolean {
     const retryableCodes = [
-      "TIMEOUT_ERROR",
-      "NETWORK_ERROR",
-      "RATE_LIMIT_ERROR",
-      "AI_SERVICE_ERROR",
+      'TIMEOUT_ERROR',
+      'NETWORK_ERROR',
+      'RATE_LIMIT_ERROR',
+      'AI_SERVICE_ERROR',
     ];
-    return retryableCodes.some((rc) =>
-      code.toLowerCase().includes(rc.toLowerCase()),
+    return retryableCodes.some(rc =>
+      code.toLowerCase().includes(rc.toLowerCase())
     );
   }
 
@@ -383,10 +383,10 @@ export abstract class BaseAgent implements Agent {
   protected summarizeInput(context: AgentContext): string {
     const data = context.data;
     const dataStr = JSON.stringify(data);
-    if (typeof data === "string") {
-      return dataStr.length > 100 ? dataStr.substring(0, 100) + "..." : dataStr;
+    if (typeof data === 'string') {
+      return dataStr.length > 100 ? dataStr.substring(0, 100) + '...' : dataStr;
     }
-    return dataStr.length > 100 ? dataStr.substring(0, 100) + "..." : dataStr;
+    return dataStr.length > 100 ? dataStr.substring(0, 100) + '...' : dataStr;
   }
 
   /**
@@ -395,14 +395,14 @@ export abstract class BaseAgent implements Agent {
   protected getProcessingSteps(): string[] {
     if (this.faultToleranceEnabled) {
       return [
-        "Input validation",
-        "Circuit breaker check",
-        "Core logic execution with retry",
-        "Fallback if needed",
-        "Result formatting",
+        'Input validation',
+        'Circuit breaker check',
+        'Core logic execution with retry',
+        'Fallback if needed',
+        'Result formatting',
       ];
     }
-    return ["Input validation", "Core logic execution", "Result formatting"];
+    return ['Input validation', 'Core logic execution', 'Result formatting'];
   }
 
   /**
@@ -419,7 +419,7 @@ export abstract class BaseAgent implements Agent {
       },
       fallback: {
         enabled: false,
-        fallbackType: "SIMPLE",
+        fallbackType: 'SIMPLE',
       },
       circuitBreaker: {
         enabled: false,
@@ -442,13 +442,13 @@ export abstract class BaseAgent implements Agent {
       switch (entry.level) {
         case AgentLogLevel.DEBUG:
         case AgentLogLevel.INFO:
-          console.log(message, entry.data || "");
+          console.log(message, entry.data || '');
           break;
         case AgentLogLevel.WARN:
-          console.warn(message, entry.data || "");
+          console.warn(message, entry.data || '');
           break;
         case AgentLogLevel.ERROR:
-          console.error(message, entry.error || entry.data || "");
+          console.error(message, entry.error || entry.data || '');
           break;
       }
     }

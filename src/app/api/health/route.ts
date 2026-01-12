@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withErrorHandler } from "@/app/api/lib/errors/error-handler";
-import { createHealthResponse } from "@/app/api/lib/responses/api-response";
+import { NextRequest, NextResponse } from 'next/server';
+import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
+import { createHealthResponse } from '@/app/api/lib/responses/api-response';
 import {
   createDefaultMiddlewareStack,
   createRequestContext,
-} from "@/app/api/lib/middleware";
+} from '@/app/api/lib/middleware';
 
 // 创建中间件栈
 const middlewareStack = createDefaultMiddlewareStack();
@@ -19,7 +19,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const middlewareResponse = await middlewareStack.execute(request, context);
 
   // 2. 检查数据库连接状态
-  let dbStatus = "healthy";
+  let dbStatus = 'healthy';
   let dbResponseTime = 0;
 
   try {
@@ -28,20 +28,20 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     // await prisma.$queryRaw`SELECT 1`;
     dbResponseTime = Date.now() - startTime;
   } catch (error) {
-    dbStatus = "unhealthy";
+    dbStatus = 'unhealthy';
   }
 
   // 3. 检查AI服务状态
-  let aiStatus = "healthy";
+  let aiStatus = 'healthy';
   try {
     // 这里应该检查AI服务的连接状态
     // await aiService.checkHealth();
   } catch (error) {
-    aiStatus = "unhealthy";
+    aiStatus = 'unhealthy';
   }
 
   const overallStatus =
-    dbStatus === "healthy" && aiStatus === "healthy" ? "healthy" : "unhealthy";
+    dbStatus === 'healthy' && aiStatus === 'healthy' ? 'healthy' : 'unhealthy';
 
   // 4. 手动合并headers到新响应
   const healthData = {
@@ -75,13 +75,13 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     meta: {
       status: overallStatus,
       timestamp: new Date().toISOString(),
-      version: "v1",
+      version: 'v1',
     },
   };
 
   // 创建新的响应并手动复制所有中间件headers
   const response = NextResponse.json(healthData, {
-    status: overallStatus === "healthy" ? 200 : 503,
+    status: overallStatus === 'healthy' ? 200 : 503,
   });
 
   // 手动复制中间件headers
@@ -90,7 +90,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   });
 
   // 确保Content-Type正确设置
-  response.headers.set("Content-Type", "application/json");
+  response.headers.set('Content-Type', 'application/json');
 
   return response;
 });
@@ -109,7 +109,7 @@ export const HEAD = withErrorHandler(async (request: NextRequest) => {
 
   // 手动复制中间件headers，但排除Content-Type（HEAD请求不应该有Content-Type）
   middlewareResponse.headers.forEach((value, key) => {
-    if (key.toLowerCase() !== "content-type") {
+    if (key.toLowerCase() !== 'content-type') {
       response.headers.set(key, value);
     }
   });

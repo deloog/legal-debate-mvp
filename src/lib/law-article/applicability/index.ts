@@ -17,14 +17,14 @@ export type {
   ArticleApplicabilityResult,
   ApplicabilityAnalysisReport,
   AnalysisStatistics,
-} from "./types";
+} from './types';
 
-export { DEFAULT_APPLICABILITY_CONFIG } from "./types";
+export { DEFAULT_APPLICABILITY_CONFIG } from './types';
 
 // 导出分析器和各层组件
-export { ApplicabilityAnalyzer } from "./applicability-analyzer";
-export { SemanticMatcher } from "./semantic-matcher";
-export { RuleValidator } from "./rule-validator";
-export { AIReviewer } from "./ai-reviewer";
+export { ApplicabilityAnalyzer } from './applicability-analyzer';
+export { SemanticMatcher } from './semantic-matcher';
+export { RuleValidator } from './rule-validator';
+export { AIReviewer } from './ai-reviewer';
 
-export { default } from "./applicability-analyzer";
+export { default } from './applicability-analyzer';

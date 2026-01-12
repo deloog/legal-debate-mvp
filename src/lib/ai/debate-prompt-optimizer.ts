@@ -5,8 +5,8 @@
  * 使用Chain-of-Thought推理、Few-Shot示例和结构化提示
  */
 
-import type { AIService } from "@/lib/ai/service-refactored";
-import type { Argument, CaseInfo } from "@/types/debate";
+import type { AIService } from '@/lib/ai/service-refactored';
+import type { Argument, CaseInfo } from '@/types/debate';
 
 // =============================================================================
 // 类型定义
@@ -34,7 +34,7 @@ export interface OptimizationConfig {
   enableCoT: boolean;
   enableFewShot: boolean;
   maxExamples: number;
-  complexityLevel: "basic" | "intermediate" | "advanced";
+  complexityLevel: 'basic' | 'intermediate' | 'advanced';
 }
 
 // =============================================================================
@@ -52,7 +52,7 @@ export class DebatePromptOptimizer {
       enableCoT: true,
       enableFewShot: true,
       maxExamples: 2,
-      complexityLevel: "advanced",
+      complexityLevel: 'advanced',
       ...config,
     };
     this.successExamples = this.loadSuccessExamples();
@@ -65,25 +65,25 @@ export class DebatePromptOptimizer {
     return [
       {
         case: {
-          title: "合同纠纷案例",
+          title: '合同纠纷案例',
           description:
-            "原告张三与被告李四签订买卖合同，约定货款10万元，被告未按期付款",
-          type: "contract",
+            '原告张三与被告李四签订买卖合同，约定货款10万元，被告未按期付款',
+          type: 'contract',
         },
         plaintiff: {
-          side: "plaintiff",
+          side: 'plaintiff',
           content:
-            "根据《民法典》第509条，当事人应当按照约定全面履行自己的义务。被告未按期付款，构成违约，应承担继续履行、赔偿损失等违约责任。",
-          legalBasis: "民法典第509条",
-          reasoning: "合同约定了付款义务，被告违反约定构成违约行为",
+            '根据《民法典》第509条，当事人应当按照约定全面履行自己的义务。被告未按期付款，构成违约，应承担继续履行、赔偿损失等违约责任。',
+          legalBasis: '民法典第509条',
+          reasoning: '合同约定了付款义务，被告违反约定构成违约行为',
           score: 0.95,
         },
         defendant: {
-          side: "defendant",
+          side: 'defendant',
           content:
-            "双方已协商延期付款，原告予以同意，不构成违约。且货物存在质量问题，我方有权行使先履行抗辩权。",
-          legalBasis: "民法典第527条",
-          reasoning: "协商变更了履行期限，且货物质量存在瑕疵",
+            '双方已协商延期付款，原告予以同意，不构成违约。且货物存在质量问题，我方有权行使先履行抗辩权。',
+          legalBasis: '民法典第527条',
+          reasoning: '协商变更了履行期限，且货物质量存在瑕疵',
           score: 0.93,
         },
         evaluation: {
@@ -94,24 +94,24 @@ export class DebatePromptOptimizer {
       },
       {
         case: {
-          title: "劳动纠纷案例",
-          description: "员工王某因公司拖欠工资申请劳动仲裁",
-          type: "labor",
+          title: '劳动纠纷案例',
+          description: '员工王某因公司拖欠工资申请劳动仲裁',
+          type: 'labor',
         },
         plaintiff: {
-          side: "plaintiff",
+          side: 'plaintiff',
           content:
-            "根据《劳动合同法》第30条，用人单位应当按照劳动合同约定和国家规定，向劳动者及时足额支付劳动报酬。公司拖欠3个月工资，严重违法。",
-          legalBasis: "劳动合同法第30条",
-          reasoning: "公司未按时支付劳动报酬，违反法律规定",
+            '根据《劳动合同法》第30条，用人单位应当按照劳动合同约定和国家规定，向劳动者及时足额支付劳动报酬。公司拖欠3个月工资，严重违法。',
+          legalBasis: '劳动合同法第30条',
+          reasoning: '公司未按时支付劳动报酬，违反法律规定',
           score: 0.96,
         },
         defendant: {
-          side: "defendant",
+          side: 'defendant',
           content:
-            "员工未完成工作任务，公司有权暂缓支付工资。且员工擅自离职，给公司造成损失，应予赔偿。",
-          legalBasis: "劳动合同法第39条",
-          reasoning: "员工未完成任务且擅自离职，公司存在正当抗辩理由",
+            '员工未完成工作任务，公司有权暂缓支付工资。且员工擅自离职，给公司造成损失，应予赔偿。',
+          legalBasis: '劳动合同法第39条',
+          reasoning: '员工未完成任务且擅自离职，公司存在正当抗辩理由',
           score: 0.91,
         },
         evaluation: {
@@ -128,7 +128,7 @@ export class DebatePromptOptimizer {
    */
   public async generateOptimizedPrompt(
     caseInfo: CaseInfo,
-    legalReferences: string[] = [],
+    legalReferences: string[] = []
   ): Promise<OptimizedDebatePrompt> {
     const systemPrompt = this.buildSystemPrompt();
     const userPrompt = await this.buildUserPrompt(caseInfo, legalReferences);
@@ -148,7 +148,7 @@ export class DebatePromptOptimizer {
    */
   private buildSystemPrompt(): string {
     const basePrompt =
-      "你是一个专业的法律辩论助手，擅长生成逻辑清晰、法律依据准确的辩论论点。";
+      '你是一个专业的法律辩论助手，擅长生成逻辑清晰、法律依据准确的辩论论点。';
 
     const logicRequirements = `
 逻辑要求：
@@ -186,25 +186,25 @@ export class DebatePromptOptimizer {
    */
   private async buildUserPrompt(
     caseInfo: CaseInfo,
-    legalReferences: string[],
+    legalReferences: string[]
   ): Promise<string> {
-    let prompt = "";
+    let prompt = '';
 
     if (this.config.enableFewShot && this.successExamples.length > 0) {
       const examples = this.selectRelevantExamples();
-      prompt += "以下是一些高质量辩论论点示例：\n\n";
+      prompt += '以下是一些高质量辩论论点示例：\n\n';
       for (const example of examples) {
         prompt += this.formatExample(example);
-        prompt += "\n---\n";
+        prompt += '\n---\n';
       }
-      prompt += "\n";
+      prompt += '\n';
     }
 
     prompt += `当前案件：${caseInfo.title}\n`;
     prompt += `案情描述：${caseInfo.description}\n`;
 
     if (legalReferences.length > 0) {
-      prompt += `\n相关法条：${legalReferences.join("、")}\n`;
+      prompt += `\n相关法条：${legalReferences.join('、')}\n`;
     }
 
     if (this.config.enableCoT) {
@@ -251,12 +251,12 @@ ${example.defendant.content}
    */
   private buildReasoningSteps(): string[] {
     return [
-      "分析案件类型和争议焦点",
-      "提取关键事实信息",
-      "检索相关法律法规",
-      "匹配适用的法条",
-      "构建论证逻辑链",
-      "形成完整论点",
+      '分析案件类型和争议焦点',
+      '提取关键事实信息',
+      '检索相关法律法规',
+      '匹配适用的法条',
+      '构建论证逻辑链',
+      '形成完整论点',
     ];
   }
 
@@ -265,7 +265,7 @@ ${example.defendant.content}
    */
   public async verifyLogicalConsistency(
     argument: Argument,
-    caseInfo: CaseInfo,
+    caseInfo: CaseInfo
   ): Promise<{
     score: number;
     issues: string[];
@@ -277,8 +277,8 @@ ${example.defendant.content}
 案情：${caseInfo.description}
 
 论点：${argument.content}
-法律依据：${argument.legalBasis || "未提供"}
-推理过程：${argument.reasoning || "未提供"}
+法律依据：${argument.legalBasis || '未提供'}
+推理过程：${argument.reasoning || '未提供'}
 
 请从以下方面评估：
 1. 主张是否清晰明确
@@ -296,15 +296,15 @@ ${example.defendant.content}
 
     try {
       const response = await this.aiService.chatCompletion({
-        model: "deepseek-chat",
-        provider: "deepseek",
+        model: 'deepseek-chat',
+        provider: 'deepseek',
         messages: [
           {
-            role: "system",
+            role: 'system',
             content:
-              "你是法律论点逻辑性验证专家，擅长识别逻辑问题和提供改进建议。",
+              '你是法律论点逻辑性验证专家，擅长识别逻辑问题和提供改进建议。',
           },
-          { role: "user", content: prompt },
+          { role: 'user', content: prompt },
         ],
         temperature: 0.3,
         maxTokens: 1000,
@@ -319,15 +319,15 @@ ${example.defendant.content}
 
       return {
         score: 0.75,
-        issues: ["无法解析验证结果"],
-        suggestions: ["请确保论点结构完整"],
+        issues: ['无法解析验证结果'],
+        suggestions: ['请确保论点结构完整'],
       };
     } catch (error) {
-      console.error("论点验证失败:", error);
+      console.error('论点验证失败:', error);
       return {
         score: 0.7,
-        issues: ["验证服务不可用"],
-        suggestions: ["请检查论点格式"],
+        issues: ['验证服务不可用'],
+        suggestions: ['请检查论点格式'],
       };
     }
   }
@@ -351,7 +351,7 @@ ${example.defendant.content}
 
 export function createDebatePromptOptimizer(
   aiService: AIService,
-  config?: Partial<OptimizationConfig>,
+  config?: Partial<OptimizationConfig>
 ): DebatePromptOptimizer {
   return new DebatePromptOptimizer(aiService, config);
 }

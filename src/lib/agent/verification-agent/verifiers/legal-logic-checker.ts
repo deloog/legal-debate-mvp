@@ -2,7 +2,7 @@
  * 法条引用逻辑性检查器
  * 检查法条的有效性、相关性和层级
  */
-import { LegalLogicCheck } from "../types";
+import { LegalLogicCheck } from '../types';
 
 /**
  * 待验证数据接口
@@ -25,7 +25,7 @@ export class LegalLogicChecker {
       score: 0,
       valid: false,
       relevant: false,
-      hierarchy: "unknown",
+      hierarchy: 'unknown',
     };
 
     if (!data.legalBasis || data.legalBasis.length === 0) {
@@ -34,7 +34,7 @@ export class LegalLogicChecker {
 
     // 检查法条是否有效（简单检查格式）
     const validCount = data.legalBasis.filter(
-      (item) => item.lawName && item.articleNumber,
+      item => item.lawName && item.articleNumber
     ).length;
 
     result.valid = validCount === data.legalBasis.length;
@@ -89,10 +89,10 @@ export class LegalLogicChecker {
    */
   private checkLegalRelevance(
     legal: { lawName: string; articleNumber: string },
-    claims: string[],
+    claims: string[]
   ): number {
     const legalText = `${legal.lawName}${legal.articleNumber}`;
-    const claimsText = claims.join(" ");
+    const claimsText = claims.join(' ');
 
     const legalKeywords = this.extractKeywords(legalText);
     if (legalKeywords.length === 0) {
@@ -115,30 +115,30 @@ export class LegalLogicChecker {
   private extractKeywords(text: string): string[] {
     // 移除停用词和标点
     const stopWords = new Set([
-      "的",
-      "了",
-      "是",
-      "在",
-      "和",
-      "有",
-      "我",
-      "你",
-      "他",
-      "她",
-      "它",
-      "我们",
-      "你们",
-      "他们",
-      "这",
-      "那",
-      "这个",
-      "那个",
+      '的',
+      '了',
+      '是',
+      '在',
+      '和',
+      '有',
+      '我',
+      '你',
+      '他',
+      '她',
+      '它',
+      '我们',
+      '你们',
+      '他们',
+      '这',
+      '那',
+      '这个',
+      '那个',
     ]);
 
     const words = text
-      .replace(/[，。！？；：""''（）]/g, " ")
+      .replace(/[，。！？；：""''（）]/g, ' ')
       .split(/\s+/)
-      .filter((word) => word.length > 1 && !stopWords.has(word));
+      .filter(word => word.length > 1 && !stopWords.has(word));
 
     return [...new Set(words)].slice(0, 10); // 最多返回10个关键词
   }
@@ -149,13 +149,13 @@ export class LegalLogicChecker {
   private getHierarchyLabel(level: number): string {
     switch (level) {
       case 3:
-        return "law";
+        return 'law';
       case 2:
-        return "regulation";
+        return 'regulation';
       case 1:
-        return "rule";
+        return 'rule';
       default:
-        return "unknown";
+        return 'unknown';
     }
   }
 
@@ -167,7 +167,7 @@ export class LegalLogicChecker {
       score: 0,
       valid: false,
       relevant: false,
-      hierarchy: "unknown",
+      hierarchy: 'unknown',
     };
   }
 }

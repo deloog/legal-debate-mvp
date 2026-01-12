@@ -7,14 +7,14 @@
  * - 生成详细的评估报告
  */
 
-import fs from "fs";
-import path from "path";
-import { DocAnalyzerAgent } from "../src/lib/agent/doc-analyzer/doc-analyzer-agent";
+import fs from 'fs';
+import path from 'path';
+import { DocAnalyzerAgent } from '../src/lib/agent/doc-analyzer/doc-analyzer-agent';
 import type {
   DocumentAnalysisInput,
   Party,
-} from "../src/lib/agent/doc-analyzer/core/types";
-import { TaskPriority } from "../src/types/agent";
+} from '../src/lib/agent/doc-analyzer/core/types';
+import { TaskPriority } from '../src/types/agent';
 
 // =============================================================================
 // 类型定义
@@ -65,7 +65,7 @@ interface EvaluationSummary {
 const testCases: TestCase[] = [
   {
     id: 1,
-    name: "标准法定代表人表达",
+    name: '标准法定代表人表达',
     content: `民事起诉状
 
 原告：上海华诚科技有限公司
@@ -88,13 +88,13 @@ const testCases: TestCase[] = [
 法定代表人：王明
 2023年10月15日`,
     expectedParties: {
-      shouldKeep: ["上海华诚科技有限公司", "北京长城贸易有限公司"],
-      shouldFilter: ["王明", "李华"],
+      shouldKeep: ['上海华诚科技有限公司', '北京长城贸易有限公司'],
+      shouldFilter: ['王明', '李华'],
     },
   },
   {
     id: 2,
-    name: "法定代表（简称）",
+    name: '法定代表（简称）',
     content: `民事起诉状
 
 原告：杭州梦想软件有限公司
@@ -122,16 +122,16 @@ const testCases: TestCase[] = [
 2023年9月20日`,
     expectedParties: {
       shouldKeep: [
-        "杭州梦想软件有限公司",
-        "南京创新科技股份公司",
-        "苏州协作企业集团",
+        '杭州梦想软件有限公司',
+        '南京创新科技股份公司',
+        '苏州协作企业集团',
       ],
-      shouldFilter: ["张伟", "刘芳", "陈刚"],
+      shouldFilter: ['张伟', '刘芳', '陈刚'],
     },
   },
   {
     id: 3,
-    name: "法人代表（另一种表达）",
+    name: '法人代表（另一种表达）',
     content: `民事起诉状
 
 原告：深圳天际网络技术有限公司
@@ -154,13 +154,13 @@ const testCases: TestCase[] = [
 法人代表：赵云
 2023年11月1日`,
     expectedParties: {
-      shouldKeep: ["深圳天际网络技术有限公司", "广州星辰电子商务有限公司"],
-      shouldFilter: ["赵云", "孙丽"],
+      shouldKeep: ['深圳天际网络技术有限公司', '广州星辰电子商务有限公司'],
+      shouldFilter: ['赵云', '孙丽'],
     },
   },
   {
     id: 4,
-    name: "多个公司的法定代表人",
+    name: '多个公司的法定代表人',
     content: `民事起诉状
 
 原告：北京华信投资管理有限公司
@@ -188,16 +188,16 @@ const testCases: TestCase[] = [
 2023年8月5日`,
     expectedParties: {
       shouldKeep: [
-        "北京华信投资管理有限公司",
-        "上海金鼎实业发展股份有限公司",
-        "广州信达控股集团有限公司",
+        '北京华信投资管理有限公司',
+        '上海金鼎实业发展股份有限公司',
+        '广州信达控股集团有限公司',
       ],
-      shouldFilter: ["周涛", "吴强", "郑敏"],
+      shouldFilter: ['周涛', '吴强', '郑敏'],
     },
   },
   {
     id: 5,
-    name: "法定代表人同时也是独立当事人",
+    name: '法定代表人同时也是独立当事人',
     content: `民事起诉状
 
 原告：张大伟，男，1988年7月12日出生，汉族，住上海市徐汇区淮海中路200号，联系电话：18700187000，职业：企业总经理
@@ -221,13 +221,13 @@ const testCases: TestCase[] = [
 具状人：张大伟
 2023年10月30日`,
     expectedParties: {
-      shouldKeep: ["张大伟", "上海华诚科技有限公司", "北京长城贸易有限公司"],
-      shouldFilter: ["李华"],
+      shouldKeep: ['张大伟', '上海华诚科技有限公司', '北京长城贸易有限公司'],
+      shouldFilter: ['李华'],
     },
   },
   {
     id: 6,
-    name: "只有法定代表人，没有详细公司信息",
+    name: '只有法定代表人，没有详细公司信息',
     content: `民事起诉状
 
 原告：某某科技有限公司
@@ -245,13 +245,13 @@ const testCases: TestCase[] = [
 具状人：某某科技有限公司
 2023年12月1日`,
     expectedParties: {
-      shouldKeep: ["某某科技有限公司", "某某贸易有限公司"],
-      shouldFilter: ["王明", "李华"],
+      shouldKeep: ['某某科技有限公司', '某某贸易有限公司'],
+      shouldFilter: ['王明', '李华'],
     },
   },
   {
     id: 7,
-    name: "公司名称和法定代表人混在一起",
+    name: '公司名称和法定代表人混在一起',
     content: `民事起诉状
 
 原告：上海华诚科技有限公司（法定代表人：王明，身份证号：310101198005150001）
@@ -268,13 +268,13 @@ const testCases: TestCase[] = [
 具状人：上海华诚科技有限公司
 2023年11月15日`,
     expectedParties: {
-      shouldKeep: ["上海华诚科技有限公司", "北京长城贸易有限公司"],
-      shouldFilter: ["王明", "李华"],
+      shouldKeep: ['上海华诚科技有限公司', '北京长城贸易有限公司'],
+      shouldFilter: ['王明', '李华'],
     },
   },
   {
     id: 8,
-    name: "法定代表人的多种写法",
+    name: '法定代表人的多种写法',
     content: `民事起诉状
 
 原告：杭州梦想软件有限公司
@@ -298,16 +298,16 @@ const testCases: TestCase[] = [
 2023年10月25日`,
     expectedParties: {
       shouldKeep: [
-        "杭州梦想软件有限公司",
-        "南京创新科技股份公司",
-        "苏州协作企业集团",
+        '杭州梦想软件有限公司',
+        '南京创新科技股份公司',
+        '苏州协作企业集团',
       ],
-      shouldFilter: ["张伟", "刘芳", "陈刚"],
+      shouldFilter: ['张伟', '刘芳', '陈刚'],
     },
   },
   {
     id: 9,
-    name: "自然人当事人（无公司）",
+    name: '自然人当事人（无公司）',
     content: `民事起诉状
 
 原告：王小红，女，1990年3月8日出生，汉族，住上海市浦东新区陆家嘴环路100号，联系电话：18600186000，职业：财务主管
@@ -327,13 +327,13 @@ const testCases: TestCase[] = [
 具状人：王小红
 2023年9月10日`,
     expectedParties: {
-      shouldKeep: ["王小红", "张大伟"],
+      shouldKeep: ['王小红', '张大伟'],
       shouldFilter: [],
     },
   },
   {
     id: 10,
-    name: "混合公司和个人",
+    name: '混合公司和个人',
     content: `民事起诉状
 
 原告：李明，男，1985年5月10日出生，汉族，住广州市天河区天河路200号，联系电话：15900159000
@@ -357,12 +357,12 @@ const testCases: TestCase[] = [
 2023年11月20日`,
     expectedParties: {
       shouldKeep: [
-        "李明",
-        "深圳天际网络技术有限公司",
-        "王华",
-        "广州星辰电子商务有限公司",
+        '李明',
+        '深圳天际网络技术有限公司',
+        '王华',
+        '广州星辰电子商务有限公司',
       ],
-      shouldFilter: ["赵云", "孙丽"],
+      shouldFilter: ['赵云', '孙丽'],
     },
   },
 ];
@@ -376,20 +376,20 @@ const testCases: TestCase[] = [
  */
 async function evaluateTestCase(
   testCase: TestCase,
-  agent: DocAnalyzerAgent,
+  agent: DocAnalyzerAgent
 ): Promise<TestResult> {
   const input: DocumentAnalysisInput = {
     documentId: `test-case-${testCase.id}`,
-    filePath: "",
-    fileType: "TXT",
+    filePath: '',
+    fileType: 'TXT',
     content: testCase.content,
   };
 
   try {
     const startTime = Date.now();
     const result = await agent.execute({
-      task: "DOCUMENT_ANALYZE",
-      taskType: "DOC_ANALYZER",
+      task: 'DOCUMENT_ANALYZE',
+      taskType: 'DOC_ANALYZER',
       data: input,
       priority: TaskPriority.MEDIUM,
     });
@@ -398,8 +398,8 @@ async function evaluateTestCase(
     // 调试输出
     const dataStr = result.data
       ? JSON.stringify(result.data).substring(0, 800)
-      : "undefined";
-    console.log("Debug result structure:", {
+      : 'undefined';
+    console.log('Debug result structure:', {
       success: result.success,
       hasData: !!result.data,
       dataType: typeof result.data,
@@ -414,26 +414,26 @@ async function evaluateTestCase(
 
     // result.data是DocumentAnalysisOutput，包含extractedData
     const actualParties = (result.data as any)?.extractedData?.parties || [];
-    const actualPartyNames = actualParties.map((p) => p.name);
+    const actualPartyNames = actualParties.map(p => p.name);
 
     // 检查正确保留的当事人
-    const correctKept = testCase.expectedParties.shouldKeep.filter((name) =>
-      actualPartyNames.includes(name),
+    const correctKept = testCase.expectedParties.shouldKeep.filter(name =>
+      actualPartyNames.includes(name)
     );
 
     // 检查错误过滤的当事人（应该保留但被过滤）
     const incorrectFiltered = testCase.expectedParties.shouldKeep.filter(
-      (name) => !actualPartyNames.includes(name),
+      name => !actualPartyNames.includes(name)
     );
 
     // 检查正确过滤的当事人
     const correctFiltered = testCase.expectedParties.shouldFilter.filter(
-      (name) => !actualPartyNames.includes(name),
+      name => !actualPartyNames.includes(name)
     );
 
     // 检查错误保留的当事人（应该过滤但被保留）
-    const incorrectKept = testCase.expectedParties.shouldFilter.filter((name) =>
-      actualPartyNames.includes(name),
+    const incorrectKept = testCase.expectedParties.shouldFilter.filter(name =>
+      actualPartyNames.includes(name)
     );
 
     const totalExpected =
@@ -444,11 +444,11 @@ async function evaluateTestCase(
 
     console.log(`\n测试案例 ${testCase.id}: ${testCase.name}`);
     console.log(`处理时间: ${processingTime}ms`);
-    console.log(`识别当事人: ${actualPartyNames.join(", ")}`);
-    console.log(`正确保留: ${correctKept.join(", ")}`);
-    console.log(`错误过滤: ${incorrectFiltered.join(", ")}`);
-    console.log(`正确过滤: ${correctFiltered.join(", ")}`);
-    console.log(`错误保留: ${incorrectKept.join(", ")}`);
+    console.log(`识别当事人: ${actualPartyNames.join(', ')}`);
+    console.log(`正确保留: ${correctKept.join(', ')}`);
+    console.log(`错误过滤: ${incorrectFiltered.join(', ')}`);
+    console.log(`正确过滤: ${correctFiltered.join(', ')}`);
+    console.log(`错误保留: ${incorrectKept.join(', ')}`);
     console.log(`准确率: ${accuracy.toFixed(2)}%`);
 
     return {
@@ -464,16 +464,16 @@ async function evaluateTestCase(
     };
   } catch (error) {
     console.error(`\n测试案例 ${testCase.id} 失败:`, error);
-    console.error("Error details:", {
+    console.error('Error details:', {
       message: error instanceof Error ? error.message : String(error),
-      name: error instanceof Error ? error.name : "Unknown",
-      stack: error instanceof Error ? error.stack : "",
+      name: error instanceof Error ? error.name : 'Unknown',
+      stack: error instanceof Error ? error.stack : '',
       cause: error instanceof Error ? error.cause : undefined,
       toString: String(error),
     });
     // 打印更详细的堆栈信息
     if (error instanceof Error) {
-      console.error("Full stack:", error.stack);
+      console.error('Full stack:', error.stack);
     }
     return {
       caseId: testCase.id,
@@ -493,9 +493,9 @@ async function evaluateTestCase(
  * 运行所有测试用例
  */
 async function runEvaluation(): Promise<EvaluationSummary> {
-  console.log("========================================");
-  console.log("法定代表人过滤功能评估");
-  console.log("========================================");
+  console.log('========================================');
+  console.log('法定代表人过滤功能评估');
+  console.log('========================================');
   console.log(`测试用例数量: ${testCases.length}`);
 
   const agent = new DocAnalyzerAgent();
@@ -516,20 +516,20 @@ async function runEvaluation(): Promise<EvaluationSummary> {
       sum +
       r.expectedParties.shouldKeep.length +
       r.expectedParties.shouldFilter.length,
-    0,
+    0
   );
   const correctKept = results.reduce((sum, r) => sum + r.correctKept.length, 0);
   const correctFiltered = results.reduce(
     (sum, r) => sum + r.correctFiltered.length,
-    0,
+    0
   );
   const incorrectFiltered = results.reduce(
     (sum, r) => sum + r.incorrectFiltered.length,
-    0,
+    0
   );
   const incorrectKept = results.reduce(
     (sum, r) => sum + r.incorrectKept.length,
-    0,
+    0
   );
 
   const overallAccuracy =
@@ -569,7 +569,7 @@ function generateReport(summary: EvaluationSummary): string {
 
 ## 评估概要
 
-- **评估时间**: ${new Date().toLocaleString("zh-CN")}
+- **评估时间**: ${new Date().toLocaleString('zh-CN')}
 - **测试用例数量**: ${summary.totalCases}
 - **总当事人数量**: ${summary.totalParties}
 - **整体准确率**: ${summary.overallAccuracy.toFixed(2)}%
@@ -589,22 +589,22 @@ function generateReport(summary: EvaluationSummary): string {
 
 ${summary.results
   .map(
-    (r) => `
+    r => `
 ### 案例 ${r.caseId}: ${r.caseName}
 
 **准确率**: ${r.accuracy.toFixed(2)}%
 
-**预期保留**: ${r.expectedParties.shouldKeep.join(", ")}
-**预期过滤**: ${r.expectedParties.shouldFilter.join(", ")}
-**实际识别**: ${r.actualParties.map((p) => p.name).join(", ")}
+**预期保留**: ${r.expectedParties.shouldKeep.join(', ')}
+**预期过滤**: ${r.expectedParties.shouldFilter.join(', ')}
+**实际识别**: ${r.actualParties.map(p => p.name).join(', ')}
 
-**正确保留**: ${r.correctKept.join(", ") || "无"}
-**错误过滤**: ${r.incorrectFiltered.join(", ") || "无"}
-**正确过滤**: ${r.correctFiltered.join(", ") || "无"}
-**错误保留**: ${r.incorrectKept.join(", ") || "无"}
-`,
+**正确保留**: ${r.correctKept.join(', ') || '无'}
+**错误过滤**: ${r.incorrectFiltered.join(', ') || '无'}
+**正确过滤**: ${r.correctFiltered.join(', ') || '无'}
+**错误保留**: ${r.incorrectKept.join(', ') || '无'}
+`
   )
-  .join("---\n")}
+  .join('---\n')}
 
 ## 评估结论
 
@@ -612,7 +612,7 @@ ${summary.results
 
 - 目标准确率: >90%
 - 实际准确率: ${summary.overallAccuracy.toFixed(2)}%
-- 达标状态: ${summary.overallAccuracy >= 90 ? "✅ 达标" : "❌ 未达标"}
+- 达标状态: ${summary.overallAccuracy >= 90 ? '✅ 达标' : '❌ 未达标'}
 
 ### 问题分析
 
@@ -622,16 +622,16 @@ ${
 #### 错误过滤问题
 错误过滤了 ${summary.incorrectFiltered} 个应该保留的当事人：
 ${summary.results
-  .filter((r) => r.incorrectFiltered.length > 0)
-  .map((r) => `- 案例${r.caseId}: ${r.incorrectFiltered.join(", ")}`)
-  .join("\n")}
+  .filter(r => r.incorrectFiltered.length > 0)
+  .map(r => `- 案例${r.caseId}: ${r.incorrectFiltered.join(', ')}`)
+  .join('\n')}
 
 **建议**:
 - 检查是否过于严格地过滤了短名称当事人
 - 增加当事人详细信息的权重（如地址、联系方式等）
 - 优化公司名称识别逻辑
 `
-    : "✅ 无错误过滤问题"
+    : '✅ 无错误过滤问题'
 }
 
 ${
@@ -640,16 +640,16 @@ ${
 #### 错误保留问题
 错误保留了 ${summary.incorrectKept} 个应该过滤的法定代表人：
 ${summary.results
-  .filter((r) => r.incorrectKept.length > 0)
-  .map((r) => `- 案例${r.caseId}: ${r.incorrectKept.join(", ")}`)
-  .join("\n")}
+  .filter(r => r.incorrectKept.length > 0)
+  .map(r => `- 案例${r.caseId}: ${r.incorrectKept.join(', ')}`)
+  .join('\n')}
 
 **建议**:
 - 增强法定代表人识别规则
 - 检查上下文，识别"法定代表人："后面的名称
 - 优化短名称法定代表人的过滤逻辑
 `
-    : "✅ 无错误保留问题"
+    : '✅ 无错误保留问题'
 }
 
 ### 优化建议
@@ -671,7 +671,7 @@ ${summary.results
 
 ---
 
-_报告生成时间: ${new Date().toLocaleString("zh-CN")}_
+_报告生成时间: ${new Date().toLocaleString('zh-CN')}_
 `;
 
   return report;
@@ -682,35 +682,35 @@ _报告生成时间: ${new Date().toLocaleString("zh-CN")}_
  */
 async function main() {
   try {
-    console.log("开始评估...\n");
+    console.log('开始评估...\n');
     const summary = await runEvaluation();
     const report = generateReport(summary);
 
     // 保存报告
     const reportPath = path.join(
       __dirname,
-      "../docs/LEGAL_REPRESENTATIVE_FILTER_EVALUATION.md",
+      '../docs/LEGAL_REPRESENTATIVE_FILTER_EVALUATION.md'
     );
-    fs.writeFileSync(reportPath, report, "utf-8");
+    fs.writeFileSync(reportPath, report, 'utf-8');
     console.log(`\n评估报告已保存至: ${reportPath}`);
 
     // 打印汇总
-    console.log("\n========================================");
-    console.log("评估汇总");
-    console.log("========================================");
+    console.log('\n========================================');
+    console.log('评估汇总');
+    console.log('========================================');
     console.log(`整体准确率: ${summary.overallAccuracy.toFixed(2)}%`);
     console.log(`保留准确率: ${summary.keepAccuracy.toFixed(2)}%`);
     console.log(`过滤准确率: ${summary.filterAccuracy.toFixed(2)}%`);
     console.log(`错误过滤: ${summary.incorrectFiltered} 个`);
     console.log(`错误保留: ${summary.incorrectKept} 个`);
     console.log(
-      `达标状态: ${summary.overallAccuracy >= 90 ? "✅ 达标" : "❌ 未达标"}`,
+      `达标状态: ${summary.overallAccuracy >= 90 ? '✅ 达标' : '❌ 未达标'}`
     );
-    console.log("========================================");
+    console.log('========================================');
 
     process.exit(summary.overallAccuracy >= 90 ? 0 : 1);
   } catch (error) {
-    console.error("评估失败:", error);
+    console.error('评估失败:', error);
     process.exit(1);
   }
 }

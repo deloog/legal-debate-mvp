@@ -3,10 +3,10 @@
  * 第二层：规则匹配兜底
  */
 
-import type { ExtractedData, TimelineEvent } from "../../core/types";
-import { getDatePatterns } from "./timeline-utils";
-import { extractDateEventPairs } from "./timeline-parser";
-import { buildRuleBasedEvent, isSimilarEvent } from "./timeline-event-builder";
+import type { ExtractedData, TimelineEvent } from '../../core/types';
+import { getDatePatterns } from './timeline-utils';
+import { extractDateEventPairs } from './timeline-parser';
+import { buildRuleBasedEvent, isSimilarEvent } from './timeline-event-builder';
 
 /**
  * 规则匹配层 - 使用多种规则模式进行匹配
@@ -14,7 +14,7 @@ import { buildRuleBasedEvent, isSimilarEvent } from "./timeline-event-builder";
 export function ruleMatchLayer(
   text: string,
   extractedData?: ExtractedData,
-  aiExtracted?: TimelineEvent[],
+  aiExtracted?: TimelineEvent[]
 ): TimelineEvent[] {
   const events: TimelineEvent[] = [];
   let idCounter = aiExtracted ? aiExtracted.length : 0;
@@ -23,8 +23,8 @@ export function ruleMatchLayer(
   const dateEventPairs = extractDateEventPairs(text, datePatterns);
 
   for (const { date, eventText } of dateEventPairs) {
-    const isAlreadyExtracted = aiExtracted?.some((aiEvent) =>
-      isSimilarEvent(aiEvent, eventText, date),
+    const isAlreadyExtracted = aiExtracted?.some(aiEvent =>
+      isSimilarEvent(aiEvent, eventText, date)
     );
 
     if (!isAlreadyExtracted) {

@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string; roundId: string }> },
+  { params }: { params: Promise<{ id: string; roundId: string }> }
 ) {
   try {
     const { id, roundId } = await params;
@@ -11,8 +11,8 @@ export async function GET(
     // 验证参数
     if (!id || !roundId) {
       return NextResponse.json(
-        { success: false, error: "缺少必要参数" },
-        { status: 400 },
+        { success: false, error: '缺少必要参数' },
+        { status: 400 }
       );
     }
 
@@ -24,8 +24,8 @@ export async function GET(
 
     if (!debate) {
       return NextResponse.json(
-        { success: false, error: "辩论不存在" },
-        { status: 404 },
+        { success: false, error: '辩论不存在' },
+        { status: 404 }
       );
     }
 
@@ -42,8 +42,8 @@ export async function GET(
 
     if (!round) {
       return NextResponse.json(
-        { success: false, error: "辩论轮次不存在" },
-        { status: 404 },
+        { success: false, error: '辩论轮次不存在' },
+        { status: 404 }
       );
     }
 
@@ -58,7 +58,7 @@ export async function GET(
         completedAt: round.completedAt,
         createdAt: round.createdAt,
         updatedAt: round.updatedAt,
-        arguments: round.arguments.map((arg) => ({
+        arguments: round.arguments.map(arg => ({
           id: arg.id,
           side: arg.side,
           content: arg.content,
@@ -67,10 +67,10 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("获取辩论轮次失败:", error);
+    console.error('获取辩论轮次失败:', error);
     return NextResponse.json(
-      { success: false, error: "服务器内部错误" },
-      { status: 500 },
+      { success: false, error: '服务器内部错误' },
+      { status: 500 }
     );
   }
 }

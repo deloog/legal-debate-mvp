@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/db/prisma";
-import { RoundStatus, DebateStatus } from "@prisma/client";
+import { prisma } from '@/lib/db/prisma';
+import { RoundStatus, DebateStatus } from '@prisma/client';
 
 /**
  * 轮次状态转换规则
@@ -27,7 +27,7 @@ export async function transitionRoundStatus(
   options?: {
     userId?: string;
     reason?: string;
-  },
+  }
 ) {
   // 获取当前轮次状态
   const currentRound = await prisma.debateRound.findUnique({
@@ -89,19 +89,19 @@ async function updateDebateProgress(debateId: string) {
   // 获取辩论的所有轮次
   const rounds = await prisma.debateRound.findMany({
     where: { debateId },
-    orderBy: { roundNumber: "desc" },
+    orderBy: { roundNumber: 'desc' },
   });
 
   const totalRounds = rounds.length;
   const completedRounds = rounds.filter(
-    (r) => r.status === RoundStatus.COMPLETED,
+    r => r.status === RoundStatus.COMPLETED
   ).length;
   const inProgressRounds = rounds.filter(
-    (r) => r.status === RoundStatus.IN_PROGRESS,
+    r => r.status === RoundStatus.IN_PROGRESS
   ).length;
 
   // 计算当前轮次
-  const currentRound = Math.max(...rounds.map((r) => r.roundNumber), 0);
+  const currentRound = Math.max(...rounds.map(r => r.roundNumber), 0);
 
   // 确定辩论状态
   let debateStatus: DebateStatus;
@@ -134,14 +134,14 @@ async function logRoundStatusChange(
   options?: {
     userId?: string;
     reason?: string;
-  },
+  }
 ) {
   try {
     // 使用AIInteraction表记录状态变更（临时方案）
     await prisma.aIInteraction.create({
       data: {
-        type: "ROUND_STATUS_CHANGE",
-        provider: "SYSTEM",
+        type: 'ROUND_STATUS_CHANGE',
+        provider: 'SYSTEM',
         request: {
           roundId,
           from: fromStatus,
@@ -155,7 +155,7 @@ async function logRoundStatusChange(
     });
   } catch (error) {
     // 日志记录失败不影响主要流程
-    console.warn("Failed to log round status change:", error);
+    console.warn('Failed to log round status change:', error);
   }
 }
 
@@ -167,14 +167,14 @@ export async function startNewRound(
   roundNumber: number,
   options?: {
     userId?: string;
-  },
+  }
 ) {
   // 验证辩论是否存在且可以进行新轮次
   const debate = await prisma.debate.findUnique({
     where: { id: debateId },
     include: {
       rounds: {
-        orderBy: { roundNumber: "desc" },
+        orderBy: { roundNumber: 'desc' },
         take: 1,
       },
     },
@@ -193,7 +193,7 @@ export async function startNewRound(
   if (debate.rounds.length > 0) {
     const lastRound = debate.rounds[0];
     if (lastRound.status !== RoundStatus.COMPLETED) {
-      throw new Error("前一轮次尚未完成");
+      throw new Error('前一轮次尚未完成');
     }
   }
 
@@ -225,7 +225,7 @@ export async function startNewRound(
     {
       userId: options?.userId,
       reason: `创建第${roundNumber}轮`,
-    },
+    }
   );
 
   return newRound;
@@ -237,7 +237,7 @@ export async function startNewRound(
 export async function startRound(
   roundId: string,
   reason?: string,
-  userId?: string,
+  userId?: string
 ) {
   return transitionRoundStatus(roundId, RoundStatus.IN_PROGRESS, {
     userId,
@@ -251,7 +251,7 @@ export async function startRound(
 export async function completeRound(
   roundId: string,
   reason?: string,
-  userId?: string,
+  userId?: string
 ) {
   return transitionRoundStatus(roundId, RoundStatus.COMPLETED, {
     userId,
@@ -265,7 +265,7 @@ export async function completeRound(
 export async function failRound(
   roundId: string,
   reason: string,
-  userId?: string,
+  userId?: string
 ) {
   return transitionRoundStatus(roundId, RoundStatus.FAILED, { userId, reason });
 }
@@ -276,7 +276,7 @@ export async function failRound(
 export async function retryRound(
   roundId: string,
   reason?: string,
-  userId?: string,
+  userId?: string
 ) {
   return transitionRoundStatus(roundId, RoundStatus.PENDING, {
     userId,
@@ -289,7 +289,7 @@ export async function retryRound(
  */
 export async function getRoundStatusStats(debateId: string) {
   const rounds = await prisma.debateRound.groupBy({
-    by: ["status"],
+    by: ['status'],
     where: { debateId },
     _count: {
       status: true,
@@ -301,6 +301,6 @@ export async function getRoundStatusStats(debateId: string) {
       acc[item.status] = item._count.status;
       return acc;
     },
-    {} as Record<string, number>,
+    {} as Record<string, number>
   );
 }

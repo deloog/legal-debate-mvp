@@ -1,17 +1,17 @@
-require("dotenv").config();
-const { Pool } = require("pg");
+require('dotenv').config();
+const { Pool } = require('pg');
 
 const pool = new Pool({
   connectionString:
     process.env.DATABASE_URL ||
-    "postgresql://postgres:password@localhost:5432/legal_debate_dev",
+    'postgresql://postgres:password@localhost:5432/legal_debate_dev',
 });
 
 async function seedDatabase() {
   const client = await pool.connect();
 
   try {
-    console.log("开始插入种子数据...");
+    console.log('开始插入种子数据...');
 
     // 插入用户数据
     await client.query(`
@@ -55,31 +55,31 @@ async function seedDatabase() {
       ON CONFLICT DO NOTHING
     `);
 
-    console.log("种子数据插入完成！");
+    console.log('种子数据插入完成！');
 
     // 显示插入的数据统计
-    const userCount = await client.query("SELECT COUNT(*) as count FROM users");
+    const userCount = await client.query('SELECT COUNT(*) as count FROM users');
     const docCount = await client.query(
-      "SELECT COUNT(*) as count FROM documents",
+      'SELECT COUNT(*) as count FROM documents'
     );
     const analysisCount = await client.query(
-      "SELECT COUNT(*) as count FROM analyses",
+      'SELECT COUNT(*) as count FROM analyses'
     );
     const msgCount = await client.query(
-      "SELECT COUNT(*) as count FROM chat_messages",
+      'SELECT COUNT(*) as count FROM chat_messages'
     );
     const aiCount = await client.query(
-      "SELECT COUNT(*) as count FROM ai_interactions",
+      'SELECT COUNT(*) as count FROM ai_interactions'
     );
 
-    console.log("\n数据统计：");
+    console.log('\n数据统计：');
     console.log(`- 用户: ${userCount.rows[0].count} 个`);
     console.log(`- 文档: ${docCount.rows[0].count} 个`);
     console.log(`- 分析: ${analysisCount.rows[0].count} 个`);
     console.log(`- 聊天消息: ${msgCount.rows[0].count} 个`);
     console.log(`- AI交互: ${aiCount.rows[0].count} 个`);
   } catch (error) {
-    console.error("种子数据插入失败:", error);
+    console.error('种子数据插入失败:', error);
   } finally {
     client.release();
     await pool.end();

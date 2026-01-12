@@ -48,10 +48,10 @@ export class CoverageChecker {
    */
   calculateE2EFlowCoverage(
     testedScenarios: string[],
-    requiredScenarios: string[],
+    requiredScenarios: string[]
   ): CoverageMetric {
-    const covered = requiredScenarios.filter((scenario) =>
-      testedScenarios.some((tested) => tested.includes(scenario)),
+    const covered = requiredScenarios.filter(scenario =>
+      testedScenarios.some(tested => tested.includes(scenario))
     ).length;
 
     const actual = (covered / requiredScenarios.length) * 100;
@@ -69,10 +69,10 @@ export class CoverageChecker {
    */
   calculateCriticalPathCoverage(
     testedSteps: string[],
-    requiredSteps: string[],
+    requiredSteps: string[]
   ): CoverageMetric {
-    const covered = requiredSteps.filter((step) =>
-      testedSteps.some((tested) => tested.includes(step)),
+    const covered = requiredSteps.filter(step =>
+      testedSteps.some(tested => tested.includes(step))
     ).length;
 
     const actual = (covered / requiredSteps.length) * 100;
@@ -90,10 +90,10 @@ export class CoverageChecker {
    */
   calculateExceptionHandlingCoverage(
     testedExceptions: string[],
-    requiredExceptions: string[],
+    requiredExceptions: string[]
   ): CoverageMetric {
-    const covered = requiredExceptions.filter((exception) =>
-      testedExceptions.some((tested) => tested.includes(exception)),
+    const covered = requiredExceptions.filter(exception =>
+      testedExceptions.some(tested => tested.includes(exception))
     ).length;
 
     const actual = (covered / requiredExceptions.length) * 100;
@@ -150,56 +150,56 @@ export class CoverageChecker {
     testSuites: {
       name: string;
       tests: string[];
-    }[],
+    }[]
   ): CoverageResult {
     // 提取测试场景
-    const testedScenarios = testSuites.flatMap((suite) => suite.tests);
+    const testedScenarios = testSuites.flatMap(suite => suite.tests);
 
     // 定义必需的测试场景
     const requiredE2EScenarios = [
-      "单轮辩论",
-      "多轮辩论",
-      "文档上传",
-      "文档解析",
-      "法条检索",
-      "适用性分析",
-      "辩论生成",
-      "流式输出",
+      '单轮辩论',
+      '多轮辩论',
+      '文档上传',
+      '文档解析',
+      '法条检索',
+      '适用性分析',
+      '辩论生成',
+      '流式输出',
     ];
 
     const requiredCriticalSteps = [
-      "创建案件",
-      "上传文档",
-      "文档解析",
-      "法条检索",
-      "适用性分析",
-      "创建辩论",
-      "生成论点",
+      '创建案件',
+      '上传文档',
+      '文档解析',
+      '法条检索',
+      '适用性分析',
+      '创建辩论',
+      '生成论点',
     ];
 
     const requiredExceptions = [
-      "文档解析失败",
-      "法条检索无结果",
-      "AI服务超时",
-      "AI服务错误",
-      "SSE连接中断",
-      "并发冲突",
+      '文档解析失败',
+      '法条检索无结果',
+      'AI服务超时',
+      'AI服务错误',
+      'SSE连接中断',
+      '并发冲突',
     ];
 
     // 计算各项覆盖率
     const e2eFlow = this.calculateE2EFlowCoverage(
       testedScenarios,
-      requiredE2EScenarios,
+      requiredE2EScenarios
     );
 
     const criticalPath = this.calculateCriticalPathCoverage(
       testedScenarios,
-      requiredCriticalSteps,
+      requiredCriticalSteps
     );
 
     const exceptionHandling = this.calculateExceptionHandlingCoverage(
       testedScenarios,
-      requiredExceptions,
+      requiredExceptions
     );
 
     const overall = this.calculateOverallCoverage({
@@ -224,7 +224,7 @@ export class CoverageChecker {
         exceptionHandling,
         overall,
       },
-      issues,
+      issues
     );
 
     const passed =
@@ -257,48 +257,48 @@ export class CoverageChecker {
 
     if (!metrics.e2eFlow.passed) {
       issues.push({
-        type: "e2eFlow",
-        metric: "E2E流程覆盖率",
+        type: 'e2eFlow',
+        metric: 'E2E流程覆盖率',
         actual: metrics.e2eFlow.actual,
         expected: metrics.e2eFlow.target,
         message: `E2E流程覆盖率 ${metrics.e2eFlow.actual.toFixed(
-          1,
+          1
         )}% 未达到目标 ${metrics.e2eFlow.target}%`,
       });
     }
 
     if (!metrics.criticalPath.passed) {
       issues.push({
-        type: "criticalPath",
-        metric: "关键路径覆盖率",
+        type: 'criticalPath',
+        metric: '关键路径覆盖率',
         actual: metrics.criticalPath.actual,
         expected: metrics.criticalPath.target,
         message: `关键路径覆盖率 ${metrics.criticalPath.actual.toFixed(
-          1,
+          1
         )}% 未达到目标 ${metrics.criticalPath.target}%`,
       });
     }
 
     if (!metrics.exceptionHandling.passed) {
       issues.push({
-        type: "exceptionHandling",
-        metric: "异常处理覆盖率",
+        type: 'exceptionHandling',
+        metric: '异常处理覆盖率',
         actual: metrics.exceptionHandling.actual,
         expected: metrics.exceptionHandling.target,
         message: `异常处理覆盖率 ${metrics.exceptionHandling.actual.toFixed(
-          1,
+          1
         )}% 未达到目标 ${metrics.exceptionHandling.target}%`,
       });
     }
 
     if (!metrics.overall.passed) {
       issues.push({
-        type: "overall",
-        metric: "整体覆盖率",
+        type: 'overall',
+        metric: '整体覆盖率',
         actual: metrics.overall.actual,
         expected: metrics.overall.target,
         message: `整体覆盖率 ${metrics.overall.actual.toFixed(
-          1,
+          1
         )}% 未达到目标 ${metrics.overall.target}%`,
       });
     }
@@ -316,34 +316,34 @@ export class CoverageChecker {
       exceptionHandling: CoverageMetric;
       overall: CoverageMetric;
     },
-    issues: CoverageIssue[],
+    issues: CoverageIssue[]
   ): string[] {
     const recommendations: string[] = [];
 
     // E2E流程建议
     if (metrics.e2eFlow.actual < metrics.e2eFlow.target) {
-      recommendations.push("E2E流程覆盖率不足，建议补充完整流程测试用例");
+      recommendations.push('E2E流程覆盖率不足，建议补充完整流程测试用例');
       recommendations.push(
-        "考虑添加更复杂的用户场景测试，如断点续传、多轮嵌套等",
+        '考虑添加更复杂的用户场景测试，如断点续传、多轮嵌套等'
       );
     }
 
     // 关键路径建议
     if (metrics.criticalPath.actual < metrics.criticalPath.target) {
-      recommendations.push("关键路径覆盖率不足，建议增加核心功能测试");
-      recommendations.push("确保所有关键API接口都有对应的E2E测试");
+      recommendations.push('关键路径覆盖率不足，建议增加核心功能测试');
+      recommendations.push('确保所有关键API接口都有对应的E2E测试');
     }
 
     // 异常处理建议
     if (metrics.exceptionHandling.actual < metrics.exceptionHandling.target) {
-      recommendations.push("异常处理覆盖率不足，建议补充异常场景测试");
-      recommendations.push("关注网络异常、服务超时、数据冲突等边界情况");
+      recommendations.push('异常处理覆盖率不足，建议补充异常场景测试');
+      recommendations.push('关注网络异常、服务超时、数据冲突等边界情况');
     }
 
     // 整体建议
     if (issues.length > 0) {
-      recommendations.push("定期审查和更新测试用例，保持覆盖率处于高位");
-      recommendations.push("建立覆盖率门禁，确保新代码不会降低覆盖率");
+      recommendations.push('定期审查和更新测试用例，保持覆盖率处于高位');
+      recommendations.push('建立覆盖率门禁，确保新代码不会降低覆盖率');
     }
 
     return recommendations;
@@ -353,38 +353,38 @@ export class CoverageChecker {
    * 打印覆盖率报告
    */
   printReport(result: CoverageResult): void {
-    console.log("\n========================================");
-    console.log("       覆盖率检查报告");
-    console.log("========================================\n");
+    console.log('\n========================================');
+    console.log('       覆盖率检查报告');
+    console.log('========================================\n');
 
-    this.printMetric("E2E流程覆盖率", result.e2eFlow);
-    this.printMetric("关键路径覆盖率", result.criticalPath);
-    this.printMetric("异常处理覆盖率", result.exceptionHandling);
-    this.printMetric("整体覆盖率", result.overall);
+    this.printMetric('E2E流程覆盖率', result.e2eFlow);
+    this.printMetric('关键路径覆盖率', result.criticalPath);
+    this.printMetric('异常处理覆盖率', result.exceptionHandling);
+    this.printMetric('整体覆盖率', result.overall);
 
     console.log(
-      `\n${result.passed ? "✅" : "❌"} 覆盖率检查${result.passed ? "通过" : "未通过"}\n`,
+      `\n${result.passed ? '✅' : '❌'} 覆盖率检查${result.passed ? '通过' : '未通过'}\n`
     );
 
     if (result.issues.length > 0) {
-      console.log("覆盖率问题");
-      console.log("--------");
+      console.log('覆盖率问题');
+      console.log('--------');
       result.issues.forEach((issue, index) => {
         console.log(`${index + 1}. [${issue.type}] ${issue.metric}`);
         console.log(`   ${issue.message}`);
         console.log(
-          `   实际: ${issue.actual.toFixed(1)}%, 期望: ${issue.expected}%\n`,
+          `   实际: ${issue.actual.toFixed(1)}%, 期望: ${issue.expected}%\n`
         );
       });
     }
 
     if (result.recommendations.length > 0) {
-      console.log("改进建议");
-      console.log("--------");
+      console.log('改进建议');
+      console.log('--------');
       result.recommendations.forEach((rec, index) => {
         console.log(`${index + 1}. ${rec}`);
       });
-      console.log("");
+      console.log('');
     }
   }
 
@@ -392,12 +392,12 @@ export class CoverageChecker {
    * 打印单个指标
    */
   private printMetric(name: string, metric: CoverageMetric): void {
-    const status = metric.passed ? "✅" : "❌";
+    const status = metric.passed ? '✅' : '❌';
     const gap = metric.target - metric.actual;
 
     console.log(`${name}`);
     console.log(
-      `  实际: ${metric.actual.toFixed(1)}% | 目标: ${metric.target}% | 最低要求: ${metric.min}%`,
+      `  实际: ${metric.actual.toFixed(1)}% | 目标: ${metric.target}% | 最低要求: ${metric.min}%`
     );
 
     if (gap > 0) {
@@ -406,7 +406,7 @@ export class CoverageChecker {
       console.log(`  ${status} 达标`);
     }
 
-    console.log("");
+    console.log('');
   }
 
   /**
@@ -415,61 +415,61 @@ export class CoverageChecker {
   generateMarkdownReport(result: CoverageResult): string {
     const lines: string[] = [];
 
-    lines.push("# 覆盖率检查报告\n");
-    lines.push(`**检查状态**: ${result.passed ? "✅ 通过" : "❌ 未通过"}\n`);
+    lines.push('# 覆盖率检查报告\n');
+    lines.push(`**检查状态**: ${result.passed ? '✅ 通过' : '❌ 未通过'}\n`);
 
-    lines.push("## 覆盖率指标\n");
+    lines.push('## 覆盖率指标\n');
 
-    lines.push("### E2E流程覆盖率");
+    lines.push('### E2E流程覆盖率');
     lines.push(`- 实际: **${result.e2eFlow.actual.toFixed(1)}%**`);
     lines.push(`- 目标: ${result.e2eFlow.target}%`);
     lines.push(`- 最低要求: ${result.e2eFlow.min}%`);
-    lines.push(`- 状态: ${result.e2eFlow.passed ? "✅ 达标" : "❌ 未达标"}\n`);
+    lines.push(`- 状态: ${result.e2eFlow.passed ? '✅ 达标' : '❌ 未达标'}\n`);
 
-    lines.push("### 关键路径覆盖率");
+    lines.push('### 关键路径覆盖率');
     lines.push(`- 实际: **${result.criticalPath.actual.toFixed(1)}%**`);
     lines.push(`- 目标: ${result.criticalPath.target}%`);
     lines.push(`- 最低要求: ${result.criticalPath.min}%`);
     lines.push(
-      `- 状态: ${result.criticalPath.passed ? "✅ 达标" : "❌ 未达标"}\n`,
+      `- 状态: ${result.criticalPath.passed ? '✅ 达标' : '❌ 未达标'}\n`
     );
 
-    lines.push("### 异常处理覆盖率");
+    lines.push('### 异常处理覆盖率');
     lines.push(`- 实际: **${result.exceptionHandling.actual.toFixed(1)}%**`);
     lines.push(`- 目标: ${result.exceptionHandling.target}%`);
     lines.push(`- 最低要求: ${result.exceptionHandling.min}%`);
     lines.push(
-      `- 状态: ${result.exceptionHandling.passed ? "✅ 达标" : "❌ 未达标"}\n`,
+      `- 状态: ${result.exceptionHandling.passed ? '✅ 达标' : '❌ 未达标'}\n`
     );
 
-    lines.push("### 整体覆盖率");
+    lines.push('### 整体覆盖率');
     lines.push(`- 实际: **${result.overall.actual.toFixed(1)}%**`);
     lines.push(`- 目标: ${result.overall.target}%`);
     lines.push(`- 最低要求: ${result.overall.min}%`);
-    lines.push(`- 状态: ${result.overall.passed ? "✅ 达标" : "❌ 未达标"}\n`);
+    lines.push(`- 状态: ${result.overall.passed ? '✅ 达标' : '❌ 未达标'}\n`);
 
     if (result.issues.length > 0) {
-      lines.push("## 发现的问题\n");
+      lines.push('## 发现的问题\n');
 
       result.issues.forEach((issue, index) => {
         lines.push(`${index + 1}. **${issue.metric}**`);
         lines.push(`   - 类型: ${issue.type}`);
         lines.push(`   - ${issue.message}`);
         lines.push(
-          `   - 实际: ${issue.actual.toFixed(1)}%, 期望: ${issue.expected}%\n`,
+          `   - 实际: ${issue.actual.toFixed(1)}%, 期望: ${issue.expected}%\n`
         );
       });
     }
 
     if (result.recommendations.length > 0) {
-      lines.push("## 改进建议\n");
+      lines.push('## 改进建议\n');
 
       result.recommendations.forEach((rec, index) => {
         lines.push(`${index + 1}. ${rec}`);
       });
     }
 
-    return lines.join("\n");
+    return lines.join('\n');
   }
 }
 

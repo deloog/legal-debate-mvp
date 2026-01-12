@@ -6,12 +6,12 @@
  * 目标：当事人信息准确率≥98%，诉讼请求准确率≥95%，金额识别精度≥99%
  */
 
-import { DocAnalyzerAgent } from "../src/lib/agent/doc-analyzer/doc-analyzer-agent";
-import { AgentContext, TaskPriority } from "../src/types/agent";
-import { LawsuitRequestClassifier } from "../src/lib/classification/lawsuit-request-classifier";
-import { PrecisionAmountExtractor } from "../src/lib/extraction/amount-extractor-precision";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { DocAnalyzerAgent } from '../src/lib/agent/doc-analyzer/doc-analyzer-agent';
+import { AgentContext, TaskPriority } from '../src/types/agent';
+import { LawsuitRequestClassifier } from '../src/lib/classification/lawsuit-request-classifier';
+import { PrecisionAmountExtractor } from '../src/lib/extraction/amount-extractor-precision';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 interface TestDocument {
   id: string;
@@ -73,8 +73,8 @@ class OptimizationTester {
    * 运行优化效果测试
    */
   async runOptimizationTest(): Promise<OptimizationReport> {
-    console.log("🚀 开始文档解析优化效果测试");
-    console.log("================================================");
+    console.log('🚀 开始文档解析优化效果测试');
+    console.log('================================================');
 
     // 加载测试文档
     const testDocuments = this.loadTestDocuments();
@@ -107,25 +107,25 @@ class OptimizationTester {
       // 测试文档1：复杂的民事纠纷
       const civilCasePath = join(
         process.cwd(),
-        "test-data/legal-documents/test-variation-civil-case.txt",
+        'test-data/legal-documents/test-variation-civil-case.txt'
       );
-      const civilCaseContent = readFileSync(civilCasePath, "utf-8");
+      const civilCaseContent = readFileSync(civilCasePath, 'utf-8');
 
       testDocs.push({
-        id: "civil-case-001",
-        name: "复杂民事货款纠纷案",
+        id: 'civil-case-001',
+        name: '复杂民事货款纠纷案',
         content: civilCaseContent,
         expectedParties: {
-          plaintiffs: ["XX科技有限公司"],
-          defendants: ["YY贸易有限公司"],
-          legalRepresentatives: ["张三", "李四"],
+          plaintiffs: ['XX科技有限公司'],
+          defendants: ['YY贸易有限公司'],
+          legalRepresentatives: ['张三', '李四'],
         },
         expectedClaims: {
           types: [
-            "PAY_PRINCIPAL",
-            "PAY_INTEREST",
-            "PAY_PENALTY",
-            "LITIGATION_COST",
+            'PAY_PRINCIPAL',
+            'PAY_INTEREST',
+            'PAY_PENALTY',
+            'LITIGATION_COST',
           ],
           amounts: [500000, 36666.67, 15000, 0],
         },
@@ -134,8 +134,8 @@ class OptimizationTester {
 
       // 测试文档2：多被告案件
       testDocs.push({
-        id: "multi-defendant-001",
-        name: "多被告借款纠纷案",
+        id: 'multi-defendant-001',
+        name: '多被告借款纠纷案',
         content: `
           原告：王某某，男，汉族，1985年5月10日出生
           被告一：张某某，系XX公司法定代表人
@@ -148,12 +148,12 @@ class OptimizationTester {
           3. 判令三被告承担本案全部诉讼费用。
         `,
         expectedParties: {
-          plaintiffs: ["王某某"],
-          defendants: ["张某某", "XX科技有限公司", "李某某"],
-          legalRepresentatives: ["张某某"],
+          plaintiffs: ['王某某'],
+          defendants: ['张某某', 'XX科技有限公司', '李某某'],
+          legalRepresentatives: ['张某某'],
         },
         expectedClaims: {
-          types: ["PAY_PRINCIPAL", "PAY_INTEREST", "LITIGATION_COST"],
+          types: ['PAY_PRINCIPAL', 'PAY_INTEREST', 'LITIGATION_COST'],
           amounts: [1000000, 0, 0],
         },
         expectedAmounts: [1000000],
@@ -161,8 +161,8 @@ class OptimizationTester {
 
       // 测试文档3：法定代表人识别测试
       testDocs.push({
-        id: "legal-rep-001",
-        name: "法定代表人识别测试案",
+        id: 'legal-rep-001',
+        name: '法定代表人识别测试案',
         content: `
           原告：AA商贸有限公司
           法定代表人：赵某某，该公司执行董事
@@ -175,12 +175,12 @@ class OptimizationTester {
           2. 判令被告承担本案诉讼费用。
         `,
         expectedParties: {
-          plaintiffs: ["AA商贸有限公司"],
-          defendants: ["BB建材有限公司"],
-          legalRepresentatives: ["赵某某", "钱某某"],
+          plaintiffs: ['AA商贸有限公司'],
+          defendants: ['BB建材有限公司'],
+          legalRepresentatives: ['赵某某', '钱某某'],
         },
         expectedClaims: {
-          types: ["PAY_PRINCIPAL", "PAY_PENALTY", "LITIGATION_COST"],
+          types: ['PAY_PRINCIPAL', 'PAY_PENALTY', 'LITIGATION_COST'],
           amounts: [500000, 0, 0],
         },
         expectedAmounts: [500000],
@@ -188,8 +188,8 @@ class OptimizationTester {
 
       // 测试文档4：复合诉讼请求测试
       testDocs.push({
-        id: "compound-claims-001",
-        name: "复合诉讼请求测试案",
+        id: 'compound-claims-001',
+        name: '复合诉讼请求测试案',
         content: `
           原告：孙某某，女，汉族，1990年3月20日出生
           被告：周某某，男，汉族，1985年7月15日出生
@@ -200,22 +200,22 @@ class OptimizationTester {
           3. 本案诉讼费用由被告承担。
         `,
         expectedParties: {
-          plaintiffs: ["孙某某"],
-          defendants: ["周某某"],
+          plaintiffs: ['孙某某'],
+          defendants: ['周某某'],
         },
         expectedClaims: {
           types: [
-            "PAY_DAMAGES",
-            "PAY_PENALTY",
-            "PERFORMANCE",
-            "LITIGATION_COST",
+            'PAY_DAMAGES',
+            'PAY_PENALTY',
+            'PERFORMANCE',
+            'LITIGATION_COST',
           ],
           amounts: [200000, 50000, 0, 0],
         },
         expectedAmounts: [200000, 50000],
       });
     } catch (error) {
-      console.error("❌ 加载测试文档失败:", error);
+      console.error('❌ 加载测试文档失败:', error);
       process.exit(1);
     }
 
@@ -243,12 +243,12 @@ class OptimizationTester {
     try {
       // 使用优化后的分析器
       const context: AgentContext = {
-        task: "document_analysis",
+        task: 'document_analysis',
         priority: TaskPriority.MEDIUM,
         data: {
           documentId: doc.id,
-          filePath: "",
-          fileType: "TXT" as const,
+          filePath: '',
+          fileType: 'TXT' as const,
           content: doc.content,
         },
         metadata: {},
@@ -262,7 +262,7 @@ class OptimizationTester {
         result.partyAccuracy = this.evaluatePartyAccuracy(
           analysis.extractedData.parties,
           doc.expectedParties,
-          result,
+          result
         );
       }
 
@@ -271,7 +271,7 @@ class OptimizationTester {
         result.claimAccuracy = this.evaluateClaimAccuracy(
           analysis.extractedData.claims,
           doc.expectedClaims,
-          result,
+          result
         );
       }
 
@@ -280,7 +280,7 @@ class OptimizationTester {
         result.amountAccuracy = this.evaluateAmountAccuracy(
           analysis.extractedData.claims,
           doc.expectedAmounts,
-          result,
+          result
         );
       }
 
@@ -291,13 +291,13 @@ class OptimizationTester {
 
       // 记录改进效果
       if (result.partyAccuracy >= 98) {
-        result.improvements.push("当事人信息准确率达到≥98%目标");
+        result.improvements.push('当事人信息准确率达到≥98%目标');
       }
       if (result.claimAccuracy >= 95) {
-        result.improvements.push("诉讼请求准确率达到≥95%目标");
+        result.improvements.push('诉讼请求准确率达到≥95%目标');
       }
       if (result.amountAccuracy >= 99) {
-        result.improvements.push("金额识别精度达到≥99%目标");
+        result.improvements.push('金额识别精度达到≥99%目标');
       }
     } catch (error) {
       result.errors.push(`分析过程中发生错误: ${(error as Error).message}`);
@@ -313,7 +313,7 @@ class OptimizationTester {
   private evaluatePartyAccuracy(
     actualParties: any,
     expectedParties: any,
-    result: TestResult,
+    result: TestResult
   ): number {
     let correctCount = 0;
     let totalCount = 0;
@@ -322,11 +322,11 @@ class OptimizationTester {
     if (expectedParties.plaintiffs) {
       totalCount += expectedParties.plaintiffs.length;
       const actualPlaintiffs = actualParties
-        .filter((p: any) => p.type === "plaintiff")
+        .filter((p: any) => p.type === 'plaintiff')
         .map((p: any) => p.name);
       correctCount += this.calculateMatchCount(
         actualPlaintiffs,
-        expectedParties.plaintiffs,
+        expectedParties.plaintiffs
       );
     }
 
@@ -334,11 +334,11 @@ class OptimizationTester {
     if (expectedParties.defendants) {
       totalCount += expectedParties.defendants.length;
       const actualDefendants = actualParties
-        .filter((p: any) => p.type === "defendant")
+        .filter((p: any) => p.type === 'defendant')
         .map((p: any) => p.name);
       correctCount += this.calculateMatchCount(
         actualDefendants,
-        expectedParties.defendants,
+        expectedParties.defendants
       );
     }
 
@@ -348,12 +348,12 @@ class OptimizationTester {
       const actualLegalReps = actualParties
         .filter(
           (p: any) =>
-            p.type === "other" && p.role && p.role.includes("法定代表人"),
+            p.type === 'other' && p.role && p.role.includes('法定代表人')
         )
         .map((p: any) => p.name);
       correctCount += this.calculateMatchCount(
         actualLegalReps,
-        expectedParties.legalRepresentatives,
+        expectedParties.legalRepresentatives
       );
     }
 
@@ -366,7 +366,7 @@ class OptimizationTester {
   private evaluateClaimAccuracy(
     actualClaims: any,
     expectedClaims: any,
-    result: TestResult,
+    result: TestResult
   ): number {
     let correctCount = 0;
     const totalCount = expectedClaims.types.length;
@@ -401,7 +401,7 @@ class OptimizationTester {
           correctCount += 0.5; // 金额匹配给部分分数
         } else if (expectedClaims.amounts[i] !== 0) {
           result.warnings.push(
-            `金额不匹配: 期望 ${expectedClaims.amounts[i]}, 实际 ${actualAmounts[i]}`,
+            `金额不匹配: 期望 ${expectedClaims.amounts[i]}, 实际 ${actualAmounts[i]}`
           );
         }
       }
@@ -418,7 +418,7 @@ class OptimizationTester {
   private evaluateAmountAccuracy(
     actualClaims: any,
     expectedAmounts: number[],
-    result: TestResult,
+    result: TestResult
   ): number {
     const actualAmounts = actualClaims
       .filter((claim: any) => claim.amount)
@@ -430,7 +430,7 @@ class OptimizationTester {
 
     if (actualAmounts.length !== expectedAmounts.length) {
       result.warnings.push(
-        `金额数量不匹配: 期望 ${expectedAmounts.length}, 实际 ${actualAmounts.length}`,
+        `金额数量不匹配: 期望 ${expectedAmounts.length}, 实际 ${actualAmounts.length}`
       );
       return 0;
     }
@@ -444,7 +444,7 @@ class OptimizationTester {
         correctCount++;
       } else {
         result.warnings.push(
-          `金额识别不准确: 期望 ${expectedAmounts[i]}, 实际 ${actualAmounts[i]}`,
+          `金额识别不准确: 期望 ${expectedAmounts[i]}, 实际 ${actualAmounts[i]}`
         );
       }
     }
@@ -460,9 +460,9 @@ class OptimizationTester {
     for (const expectedItem of expected) {
       if (
         actual.some(
-          (actualItem) =>
+          actualItem =>
             actualItem.includes(expectedItem) ||
-            expectedItem.includes(actualItem),
+            expectedItem.includes(actualItem)
         )
       ) {
         count++;
@@ -475,7 +475,7 @@ class OptimizationTester {
    * 生成优化报告
    */
   private generateOptimizationReport(
-    results: TestResult[],
+    results: TestResult[]
   ): OptimizationReport {
     const totalDocs = results.length;
     const avgPartyAcc =
@@ -513,11 +513,11 @@ class OptimizationTester {
    * 获取性能评级
    */
   private getPerformanceRating(accuracy: number): string {
-    if (accuracy >= 98) return "🏆 优秀";
-    if (accuracy >= 95) return "🥇 良好";
-    if (accuracy >= 90) return "🥈 合格";
-    if (accuracy >= 80) return "🥉 需改进";
-    return "❌ 不合格";
+    if (accuracy >= 98) return '🏆 优秀';
+    if (accuracy >= 95) return '🥇 良好';
+    if (accuracy >= 90) return '🥈 合格';
+    if (accuracy >= 80) return '🥉 需改进';
+    return '❌ 不合格';
   }
 
   /**
@@ -535,14 +535,14 @@ class OptimizationTester {
 
     if (avgParty < 98) {
       recommendations.push(
-        "当事人信息识别需要进一步优化，建议增加更多角色识别规则",
+        '当事人信息识别需要进一步优化，建议增加更多角色识别规则'
       );
     }
     if (avgClaim < 95) {
-      recommendations.push("诉讼请求分类需要改进，建议扩展分类规则库");
+      recommendations.push('诉讼请求分类需要改进，建议扩展分类规则库');
     }
     if (avgAmount < 99) {
-      recommendations.push("金额识别精度需提升，建议优化中文数字转换算法");
+      recommendations.push('金额识别精度需提升，建议优化中文数字转换算法');
     }
 
     // 分析常见错误
@@ -590,11 +590,11 @@ class OptimizationTester {
     console.log(`  ⏱️  处理时间: ${result.processingTime}ms`);
 
     if (result.improvements.length > 0) {
-      console.log(`  🎯 达成目标: ${result.improvements.join(", ")}`);
+      console.log(`  🎯 达成目标: ${result.improvements.join(', ')}`);
     }
 
     if (result.warnings.length > 0) {
-      console.log(`  ⚠️  警告: ${result.warnings.slice(0, 3).join(", ")}`);
+      console.log(`  ⚠️  警告: ${result.warnings.slice(0, 3).join(', ')}`);
     }
   }
 
@@ -602,34 +602,34 @@ class OptimizationTester {
    * 显示优化报告
    */
   private displayOptimizationReport(report: OptimizationReport): void {
-    console.log("\n📊 优化效果评估报告");
-    console.log("==========================================");
+    console.log('\n📊 优化效果评估报告');
+    console.log('==========================================');
     console.log(`测试文档数量: ${report.totalDocuments}`);
     console.log(`当事人信息准确率: ${report.improvements.partyAccuracy}`);
     console.log(`诉讼请求准确率: ${report.improvements.claimAccuracy}`);
     console.log(`金额识别精度: ${report.improvements.amountAccuracy}`);
     console.log(`整体性能评级: ${report.improvements.overallPerformance}`);
 
-    console.log("\n🎯 目标达成情况:");
+    console.log('\n🎯 目标达成情况:');
     console.log(
-      `当事人信息准确率≥98%: ${report.averagePartyAccuracy >= 98 ? "✅ 已达成" : "❌ 未达成"}`,
+      `当事人信息准确率≥98%: ${report.averagePartyAccuracy >= 98 ? '✅ 已达成' : '❌ 未达成'}`
     );
     console.log(
-      `诉讼请求准确率≥95%: ${report.averageClaimAccuracy >= 95 ? "✅ 已达成" : "❌ 未达成"}`,
+      `诉讼请求准确率≥95%: ${report.averageClaimAccuracy >= 95 ? '✅ 已达成' : '❌ 未达成'}`
     );
     console.log(
-      `金额识别精度≥99%: ${report.averageAmountAccuracy >= 99 ? "✅ 已达成" : "❌ 未达成"}`,
+      `金额识别精度≥99%: ${report.averageAmountAccuracy >= 99 ? '✅ 已达成' : '❌ 未达成'}`
     );
 
     if (report.recommendations.length > 0) {
-      console.log("\n💡 改进建议:");
+      console.log('\n💡 改进建议:');
       report.recommendations.forEach((rec, index) => {
         console.log(`${index + 1}. ${rec}`);
       });
     }
 
-    console.log("\n📈 详细结果:");
-    report.detailedResults.forEach((result) => {
+    console.log('\n📈 详细结果:');
+    report.detailedResults.forEach(result => {
       console.log(`\n📄 ${result.documentName}:`);
       console.log(`   整体准确率: ${result.overallAccuracy.toFixed(1)}%`);
       if (result.processingTime > 5000) {
@@ -647,11 +647,11 @@ async function main() {
     const report = await tester.runOptimizationTest();
 
     // 保存报告到文件
-    const reportPath = join(__dirname, "../optimization-effect-report.json");
-    require("fs").writeFileSync(reportPath, JSON.stringify(report, null, 2));
+    const reportPath = join(__dirname, '../optimization-effect-report.json');
+    require('fs').writeFileSync(reportPath, JSON.stringify(report, null, 2));
     console.log(`\n📁 详细报告已保存至: ${reportPath}`);
   } catch (error) {
-    console.error("❌ 测试执行失败:", error);
+    console.error('❌ 测试执行失败:', error);
     process.exit(1);
   }
 }

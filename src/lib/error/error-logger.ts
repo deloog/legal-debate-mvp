@@ -5,7 +5,7 @@
  * 负责捕获所有类型错误、评估严重程度、存储到数据库
  */
 
-import { ErrorLog, ErrorContext, ErrorType, ErrorSeverity } from "./types";
+import { ErrorLog, ErrorContext, ErrorType, ErrorSeverity } from './types';
 
 /**
  * 错误日志记录器
@@ -43,7 +43,7 @@ export class ErrorLogger {
 
     // 2. 提取错误信息
     const errorType = this.extractErrorType(error);
-    const errorMessage = error.message || "Unknown error";
+    const errorMessage = error.message || 'Unknown error';
     const stackTrace = this.extractStackTrace(error);
 
     // 3. 评估严重程度
@@ -82,66 +82,66 @@ export class ErrorLogger {
    */
   private extractErrorType(error: Error): ErrorType {
     // 根据错误消息和类型判断
-    const message = error.message?.toLowerCase() || "";
+    const message = error.message?.toLowerCase() || '';
 
-    if (message.includes("timeout")) {
-      if (message.includes("ai")) {
+    if (message.includes('timeout')) {
+      if (message.includes('ai')) {
         return ErrorType.AI_TIMEOUT;
       }
-      if (message.includes("network")) {
+      if (message.includes('network')) {
         return ErrorType.NETWORK_TIMEOUT;
       }
-      if (message.includes("agent")) {
+      if (message.includes('agent')) {
         return ErrorType.AGENT_TIMEOUT;
       }
       // 默认超时错误识别为网络超时
       return ErrorType.NETWORK_TIMEOUT;
     }
 
-    if (message.includes("rate limit")) {
+    if (message.includes('rate limit')) {
       return ErrorType.AI_RATE_LIMIT;
     }
 
-    if (message.includes("quota")) {
+    if (message.includes('quota')) {
       return ErrorType.AI_QUOTA_EXCEEDED;
     }
 
-    if (message.includes("connection")) {
-      if (message.includes("database")) {
+    if (message.includes('connection')) {
+      if (message.includes('database')) {
         return ErrorType.DATABASE_CONNECTION_ERROR;
       }
-      if (message.includes("network")) {
+      if (message.includes('network')) {
         return ErrorType.NETWORK_CONNECTION_ERROR;
       }
     }
 
-    if (message.includes("validation")) {
-      if (message.includes("required")) {
+    if (message.includes('validation')) {
+      if (message.includes('required')) {
         return ErrorType.VALIDATION_REQUIRED_FIELD;
       }
-      if (message.includes("format")) {
+      if (message.includes('format')) {
         return ErrorType.VALIDATION_FORMAT_ERROR;
       }
       return ErrorType.VALIDATION_ERROR;
     }
 
-    if (message.includes("not found")) {
-      if (message.includes("file")) {
+    if (message.includes('not found')) {
+      if (message.includes('file')) {
         return ErrorType.FILE_NOT_FOUND;
       }
-      if (message.includes("memory")) {
+      if (message.includes('memory')) {
         return ErrorType.MEMORY_NOT_FOUND;
       }
-      if (message.includes("agent")) {
+      if (message.includes('agent')) {
         return ErrorType.AGENT_NOT_FOUND;
       }
     }
 
-    if (error.name?.includes("PrismaClientKnownRequestError")) {
+    if (error.name?.includes('PrismaClientKnownRequestError')) {
       return ErrorType.DATABASE_ERROR;
     }
 
-    if (error.name?.includes("PrismaClientInitializationError")) {
+    if (error.name?.includes('PrismaClientInitializationError')) {
       return ErrorType.DATABASE_CONNECTION_ERROR;
     }
 
@@ -161,17 +161,17 @@ export class ErrorLogger {
     }
 
     // 2. 根据错误消息判断
-    const message = error.message?.toLowerCase() || "";
+    const message = error.message?.toLowerCase() || '';
 
-    if (message.includes("critical") || message.includes("fatal")) {
+    if (message.includes('critical') || message.includes('fatal')) {
       return ErrorSeverity.CRITICAL;
     }
 
-    if (message.includes("failed") || message.includes("error")) {
+    if (message.includes('failed') || message.includes('error')) {
       return ErrorSeverity.HIGH;
     }
 
-    if (message.includes("warning") || message.includes("deprecated")) {
+    if (message.includes('warning') || message.includes('deprecated')) {
       return ErrorSeverity.MEDIUM;
     }
 
@@ -186,13 +186,13 @@ export class ErrorLogger {
    */
   private extractStackTrace(error: Error): string {
     if (!error.stack) {
-      return "";
+      return '';
     }
 
     // 限制堆栈跟踪长度
     const maxLines = 20;
-    const lines = error.stack.split("\n").slice(0, maxLines);
-    return lines.join("\n");
+    const lines = error.stack.split('\n').slice(0, maxLines);
+    return lines.join('\n');
   }
 
   /**
@@ -202,7 +202,7 @@ export class ErrorLogger {
    */
   private extractErrorCode(error: Error): string | undefined {
     // 从错误对象中提取错误码
-    if ("code" in error && typeof error.code === "string") {
+    if ('code' in error && typeof error.code === 'string') {
       return error.code;
     }
 
@@ -221,8 +221,8 @@ export class ErrorLogger {
    */
   private getCacheKey(error: Error, context: ErrorContext): string {
     const type = this.extractErrorType(error);
-    const agent = context.agentName || "unknown";
-    const task = context.taskId || "unknown";
+    const agent = context.agentName || 'unknown';
+    const task = context.taskId || 'unknown';
     return `${type}_${agent}_${task}_${Date.now()}`;
   }
 
@@ -299,26 +299,26 @@ export class ErrorLogger {
    * @returns 脱敏后的数据
    */
   private sanitizeInputData(
-    data: Record<string, unknown>,
+    data: Record<string, unknown>
   ): Record<string, unknown> {
     const sanitized: Record<string, unknown> = {};
 
     const sensitiveKeys = [
-      "password",
-      "token",
-      "secret",
-      "api_key",
-      "apikey",
-      "key",
+      'password',
+      'token',
+      'secret',
+      'api_key',
+      'apikey',
+      'key',
     ];
 
     for (const [key, value] of Object.entries(data)) {
       const lowerKey = key.toLowerCase();
-      if (sensitiveKeys.some((k) => lowerKey.includes(k))) {
-        sanitized[key] = "[REDACTED]";
-      } else if (typeof value === "string" && value.length > 500) {
+      if (sensitiveKeys.some(k => lowerKey.includes(k))) {
+        sanitized[key] = '[REDACTED]';
+      } else if (typeof value === 'string' && value.length > 500) {
         // 限制字符串长度
-        sanitized[key] = value.substring(0, 500) + "...";
+        sanitized[key] = value.substring(0, 500) + '...';
       } else {
         sanitized[key] = value;
       }
@@ -334,9 +334,9 @@ export class ErrorLogger {
    */
   private sanitizeUserId(userId: string): string {
     if (userId.length <= 4) {
-      return "****";
+      return '****';
     }
-    return userId.substring(0, 2) + "***" + userId.substring(userId.length - 2);
+    return userId.substring(0, 2) + '***' + userId.substring(userId.length - 2);
   }
 
   /**
@@ -345,13 +345,13 @@ export class ErrorLogger {
    */
   async saveToDatabase(errorLog: ErrorLog): Promise<void> {
     try {
-      const { prisma } = await import("@/lib/db/prisma");
+      const { prisma } = await import('@/lib/db/prisma');
       const result = await prisma.errorLog.create({
         data: {
           userId: errorLog.userId,
           caseId: errorLog.caseId,
           errorType: errorLog.errorType as unknown as never,
-          errorCode: errorLog.errorCode || "",
+          errorCode: errorLog.errorCode || '',
           errorMessage: errorLog.errorMessage,
           stackTrace: errorLog.stackTrace,
           context: errorLog.context as unknown as never,
@@ -366,7 +366,7 @@ export class ErrorLogger {
       // 更新错误日志ID
       errorLog.id = result.id;
     } catch (dbError) {
-      console.error("Failed to save error to database:", dbError);
+      console.error('Failed to save error to database:', dbError);
       // 不抛出异常，避免错误记录失败影响主流程
     }
   }
@@ -378,10 +378,10 @@ export class ErrorLogger {
    */
   async updateErrorLog(
     errorId: string,
-    updates: Partial<ErrorLog>,
+    updates: Partial<ErrorLog>
   ): Promise<void> {
     try {
-      const { prisma } = await import("@/lib/db/prisma");
+      const { prisma } = await import('@/lib/db/prisma');
       await prisma.errorLog.update({
         where: { id: errorId },
         data: {

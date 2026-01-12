@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 // =============================================================================
 // 日志和监控工具类
 // =============================================================================
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.logger = exports.StructuredLogger = void 0;
 class StructuredLogger {
   constructor() {
@@ -46,19 +46,19 @@ class StructuredLogger {
     };
   }
   debug(message, context) {
-    const entry = this.createLogEntry("debug", message, context);
+    const entry = this.createLogEntry('debug', message, context);
     this.addLog(entry);
   }
   info(message, context) {
-    const entry = this.createLogEntry("info", message, context);
+    const entry = this.createLogEntry('info', message, context);
     this.addLog(entry);
   }
   warn(message, context) {
-    const entry = this.createLogEntry("warn", message, context);
+    const entry = this.createLogEntry('warn', message, context);
     this.addLog(entry);
   }
   error(message, error, context) {
-    const entry = this.createLogEntry("error", message, context, error);
+    const entry = this.createLogEntry('error', message, context, error);
     this.addLog(entry);
     this.updateErrorMetrics(error);
   }
@@ -69,7 +69,7 @@ class StructuredLogger {
       this.logs = this.logs.slice(-this.maxLogSize);
     }
     // 在开发环境中也输出到控制台
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.NODE_ENV !== 'production') {
       const logMessage = `[${entry.timestamp}] [${entry.level.toUpperCase()}] ${entry.message}`;
       if (entry.context) {
         console.log(logMessage, entry.context);
@@ -83,11 +83,11 @@ class StructuredLogger {
   }
   updateErrorMetrics(error) {
     if (!error) return;
-    if (error.name === "SecurityError") {
+    if (error.name === 'SecurityError') {
       this.metrics.errors.securityErrors++;
-    } else if (error.name === "ValidationError") {
+    } else if (error.name === 'ValidationError') {
       this.metrics.errors.validationErrors++;
-    } else if (error.name === "AnalysisError") {
+    } else if (error.name === 'AnalysisError') {
       this.metrics.errors.analysisErrors++;
     } else {
       this.metrics.errors.otherErrors++;
@@ -131,16 +131,16 @@ class StructuredLogger {
     const now = Date.now();
     const oneMinuteAgo = now - 60000;
     const recentLogs = this.logs.filter(
-      (log) => log.timestamp >= new Date(oneMinuteAgo).toISOString(),
+      log => log.timestamp >= new Date(oneMinuteAgo).toISOString()
     );
-    this.metrics.performance.throughputPerMinute = recentLogs.filter((log) =>
-      log.message.includes("文档分析完成"),
+    this.metrics.performance.throughputPerMinute = recentLogs.filter(log =>
+      log.message.includes('文档分析完成')
     ).length;
   }
   getLogs(level, limit) {
     let filteredLogs = this.logs;
     if (level) {
-      filteredLogs = filteredLogs.filter((log) => log.level === level);
+      filteredLogs = filteredLogs.filter(log => log.level === level);
     }
     if (limit) {
       filteredLogs = filteredLogs.slice(-limit);
@@ -158,7 +158,7 @@ class StructuredLogger {
         exportTime: new Date().toISOString(),
       },
       null,
-      2,
+      2
     );
   }
   clearLogs() {

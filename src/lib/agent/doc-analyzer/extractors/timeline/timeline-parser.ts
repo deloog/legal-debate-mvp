@@ -3,16 +3,16 @@
  * 日期、事件和AI响应解析
  */
 
-import type { TimelineEvent, TimelineEventType } from "../../core/types";
-import { normalizeDate } from "./timeline-utils";
-import { getEventTypePatterns } from "./timeline-utils";
+import type { TimelineEvent, TimelineEventType } from '../../core/types';
+import { normalizeDate } from './timeline-utils';
+import { getEventTypePatterns } from './timeline-utils';
 
 /**
  * 从文本中提取日期
  */
 export function extractDate(
   text: string,
-  datePatterns: RegExp[],
+  datePatterns: RegExp[]
 ): {
   date: string;
   matched: boolean;
@@ -26,7 +26,7 @@ export function extractDate(
       };
     }
   }
-  return { date: "", matched: false };
+  return { date: '', matched: false };
 }
 
 /**
@@ -34,25 +34,25 @@ export function extractDate(
  */
 export function extractEventText(
   sentence: string,
-  date: string,
+  date: string
 ): string | null {
-  let eventText = sentence.replace(date, "").trim();
+  let eventText = sentence.replace(date, '').trim();
 
   if (eventText === sentence) {
     eventText = sentence
-      .replace(/\d{4}年\d{1,2}月\d{1,2}日?/g, "")
-      .replace(/\d{4}-\d{1,2}-\d{1,2}/g, "")
-      .replace(/\d{4}\/\d{1,2}\/\d{1,2}/g, "")
-      .replace(/\d{4}\.\d{1,2}\.\d{1,2}/g, "")
-      .replace(/\d{4}年\d{1,2}月/g, "")
-      .replace(/\d{4}年/g, "")
-      .replace(/\d{1,2}月\d{1,2}日/g, "")
+      .replace(/\d{4}年\d{1,2}月\d{1,2}日?/g, '')
+      .replace(/\d{4}-\d{1,2}-\d{1,2}/g, '')
+      .replace(/\d{4}\/\d{1,2}\/\d{1,2}/g, '')
+      .replace(/\d{4}\.\d{1,2}\.\d{1,2}/g, '')
+      .replace(/\d{4}年\d{1,2}月/g, '')
+      .replace(/\d{4}年/g, '')
+      .replace(/\d{1,2}月\d{1,2}日/g, '')
       .trim();
   }
 
   eventText = eventText
-    .replace(/^(于|在|自|从|至|到)\s*/g, "")
-    .replace(/^(发生|进行|完成|签署|签订|履行|违约|起诉)/g, "")
+    .replace(/^(于|在|自|从|至|到)\s*/g, '')
+    .replace(/^(发生|进行|完成|签署|签订|履行|违约|起诉)/g, '')
     .trim();
 
   if (eventText.length < 2 || /^上述|该|此|其$/.test(eventText)) {
@@ -75,7 +75,7 @@ export function determineEventType(eventText: string): TimelineEventType {
       }
     }
   }
-  return "OTHER";
+  return 'OTHER';
 }
 
 /**
@@ -83,10 +83,10 @@ export function determineEventType(eventText: string): TimelineEventType {
  */
 export function extractDateEventPairs(
   text: string,
-  datePatterns: RegExp[],
+  datePatterns: RegExp[]
 ): Array<{ date: string; eventText: string }> {
   const pairs: Array<{ date: string; eventText: string }> = [];
-  const segments = text.split(/[。！？；，\n]/).filter((s) => s.trim());
+  const segments = text.split(/[。！？；，\n]/).filter(s => s.trim());
 
   for (const segment of segments) {
     const dateMatch = extractDate(segment, datePatterns);
@@ -111,10 +111,10 @@ export function extractDateEventPairs(
 export function extractJSONFromText(text: string): string {
   let extracted = text.trim();
 
-  if (extracted.includes("```json")) {
-    extracted = extracted.replace(/```json\s*/g, "").replace(/```\s*$/g, "");
-  } else if (extracted.includes("```")) {
-    extracted = extracted.replace(/```\s*/g, "").replace(/```\s*$/g, "");
+  if (extracted.includes('```json')) {
+    extracted = extracted.replace(/```json\s*/g, '').replace(/```\s*$/g, '');
+  } else if (extracted.includes('```')) {
+    extracted = extracted.replace(/```\s*/g, '').replace(/```\s*$/g, '');
   }
 
   const objectMatch = extracted.match(/\{[\s\S]*\}/);
@@ -131,13 +131,13 @@ export function extractJSONFromText(text: string): string {
 export function cleanJSONString(jsonStr: string): string {
   let cleaned = jsonStr.trim();
 
-  cleaned = cleaned.replace(/,\s*}/g, "}");
-  cleaned = cleaned.replace(/,\s*\]/g, "]");
+  cleaned = cleaned.replace(/,\s*}/g, '}');
+  cleaned = cleaned.replace(/,\s*\]/g, ']');
   cleaned = cleaned.replace(/'([^']*)'/g, '"$1"');
-  cleaned = cleaned.replace(/\/\/.*$/gm, "");
-  cleaned = cleaned.replace(/\/\*[\s\S]*?\*\//g, "");
-  cleaned = cleaned.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-  cleaned = cleaned.replace(/\n\s*\n/g, "\n");
+  cleaned = cleaned.replace(/\/\/.*$/gm, '');
+  cleaned = cleaned.replace(/\/\*[\s\S]*?\*\//g, '');
+  cleaned = cleaned.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  cleaned = cleaned.replace(/\n\s*\n/g, '\n');
 
   return cleaned.trim();
 }
@@ -150,19 +150,19 @@ export function parseAIExtractionResponse(aiResponse: string): TimelineEvent[] {
     let cleanedResponse = aiResponse.trim();
 
     const responsePreview = cleanedResponse.substring(0, 1000);
-    console.log("[AI响应解析] 原始响应预览:", responsePreview);
+    console.log('[AI响应解析] 原始响应预览:', responsePreview);
 
     cleanedResponse = extractJSONFromText(cleanedResponse);
     cleanedResponse = cleanJSONString(cleanedResponse);
 
     const parsed = JSON.parse(cleanedResponse);
     console.log(
-      "[AI响应解析] JSON解析成功，字段数:",
-      Object.keys(parsed).length,
+      '[AI响应解析] JSON解析成功，字段数:',
+      Object.keys(parsed).length
     );
 
     if (!parsed.timelineEvents || !Array.isArray(parsed.timelineEvents)) {
-      console.warn("[AI响应解析] timelineEvents字段缺失或类型错误");
+      console.warn('[AI响应解析] timelineEvents字段缺失或类型错误');
       return [];
     }
 
@@ -181,27 +181,27 @@ export function parseAIExtractionResponse(aiResponse: string): TimelineEvent[] {
 
       return {
         id: `ai_event_${index}`,
-        date: eventItem.date || "",
-        event: eventItem.event || "",
+        date: eventItem.date || '',
+        event: eventItem.event || '',
         eventType: eventItem.eventType,
         importance: Math.min(
           5,
-          Math.max(1, Math.round(eventItem.importance || 3)),
+          Math.max(1, Math.round(eventItem.importance || 3))
         ),
         evidence: Array.isArray(eventItem.evidence) ? eventItem.evidence : [],
-        source: "explicit",
+        source: 'explicit',
       };
     });
 
-    console.log("[AI响应解析] 成功解析事件数:", events.length);
+    console.log('[AI响应解析] 成功解析事件数:', events.length);
     return events;
   } catch (error) {
-    console.error("[AI响应解析] 完整解析失败:", {
+    console.error('[AI响应解析] 完整解析失败:', {
       error: error instanceof Error ? error.message : String(error),
       responsePreview: aiResponse.substring(0, 500),
     });
 
-    console.log("[AI响应解析] 尝试部分解析...");
+    console.log('[AI响应解析] 尝试部分解析...');
     return parsePartialAIExtraction(aiResponse);
   }
 }
@@ -210,21 +210,21 @@ export function parseAIExtractionResponse(aiResponse: string): TimelineEvent[] {
  * 部分解析AI提取响应（容错机制）
  */
 export function parsePartialAIExtraction(aiResponse: string): TimelineEvent[] {
-  console.log("[AI响应解析] 部分解析模式启动");
+  console.log('[AI响应解析] 部分解析模式启动');
   const events: TimelineEvent[] = [];
 
   try {
     const dateMatches = Array.from(
-      aiResponse.matchAll(/"date"\s*:\s*"([^"]+)"/gi),
+      aiResponse.matchAll(/"date"\s*:\s*"([^"]+)"/gi)
     );
     const eventMatches = Array.from(
-      aiResponse.matchAll(/"event"\s*:\s*"([^"]+)"/gi),
+      aiResponse.matchAll(/"event"\s*:\s*"([^"]+)"/gi)
     );
     const typeMatches = Array.from(
-      aiResponse.matchAll(/"eventType"\s*:\s*"([^"]+)"/gi),
+      aiResponse.matchAll(/"eventType"\s*:\s*"([^"]+)"/gi)
     );
     const importanceMatches = Array.from(
-      aiResponse.matchAll(/"importance"\s*:\s*(\d+)/gi),
+      aiResponse.matchAll(/"importance"\s*:\s*(\d+)/gi)
     );
 
     if (dateMatches.length > 0 && eventMatches.length > 0) {
@@ -232,7 +232,7 @@ export function parsePartialAIExtraction(aiResponse: string): TimelineEvent[] {
         dateMatches.length,
         eventMatches.length,
         typeMatches.length,
-        importanceMatches.length,
+        importanceMatches.length
       );
 
       for (let i = 0; i < count; i++) {
@@ -251,17 +251,17 @@ export function parsePartialAIExtraction(aiResponse: string): TimelineEvent[] {
             eventType: eventType || determineEventType(event),
             importance,
             evidence: [],
-            source: "explicit",
+            source: 'explicit',
           });
         }
       }
 
       console.log(`[AI响应解析] 部分解析成功，提取${events.length}个事件`);
     } else {
-      console.warn("[AI响应解析] 部分解析失败，未找到有效的事件数据");
+      console.warn('[AI响应解析] 部分解析失败，未找到有效的事件数据');
     }
   } catch (error) {
-    console.error("[AI响应解析] 部分解析异常:", error);
+    console.error('[AI响应解析] 部分解析异常:', error);
   }
 
   return events;

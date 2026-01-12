@@ -3,8 +3,8 @@
  * 包含：记忆更新功能
  */
 
-import { MemoryManager } from "../memory-agent/memory-manager";
-import type { UpdateMemoryResult } from "./types";
+import { MemoryManager } from '../memory-agent/memory-manager';
+import type { UpdateMemoryResult } from './types';
 
 /**
  * update_memory - 记忆更新
@@ -13,14 +13,14 @@ import type { UpdateMemoryResult } from "./types";
 export async function update_memory(
   memoryManager: MemoryManager,
   params: {
-    memoryType: "WORKING" | "HOT" | "COLD";
+    memoryType: 'WORKING' | 'HOT' | 'COLD';
     memoryKey: string;
     memoryValue: unknown;
     importance?: number;
     ttl?: number;
     metadata?: Record<string, unknown>;
   },
-  userId: string,
+  userId: string
 ): Promise<UpdateMemoryResult> {
   try {
     const existing = await memoryManager.getMemory({
@@ -37,12 +37,12 @@ export async function update_memory(
           importance: params.importance,
           ttl: params.ttl,
         },
-        userId,
+        userId
       );
       return {
         success: true,
         memoryId: existing.memoryId,
-        action: "updated",
+        action: 'updated',
       };
     }
 
@@ -54,14 +54,14 @@ export async function update_memory(
         importance: params.importance,
         ttl: params.ttl,
       },
-      userId,
+      userId
     );
     return {
       success: true,
       memoryId: params.memoryKey,
-      action: "created",
+      action: 'created',
     };
   } catch {
-    return { success: true, action: "created" };
+    return { success: true, action: 'created' };
   }
 }

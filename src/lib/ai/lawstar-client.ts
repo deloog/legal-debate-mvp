@@ -13,10 +13,10 @@ import type {
   LawStarVectorResponse,
   LawStarError,
   LawStarStats,
-} from "../../types/lawstar-api";
+} from '../../types/lawstar-api';
 
-import cacheManager from "../cache/manager";
-import * as crypto from "crypto";
+import cacheManager from '../cache/manager';
+import * as crypto from 'crypto';
 
 // =============================================================================
 // 法律之星客户端类
@@ -73,7 +73,7 @@ export class LawStarClient {
       // 检查返回的数据结构
       if (!response || !response.Authorization) {
         throw new Error(
-          "Authentication failed: No authorization token received",
+          'Authentication failed: No authorization token received'
         );
       }
 
@@ -82,7 +82,7 @@ export class LawStarClient {
       this.tokenExpiry = Date.now() + 4 * 60 * 60 * 1000 - 5 * 60 * 1000;
       return this.authToken;
     } catch (error) {
-      throw this.handleError(error as Error, "authentication");
+      throw this.handleError(error as Error, 'authentication');
     }
   }
 
@@ -98,9 +98,9 @@ export class LawStarClient {
 
     try {
       const response = await fetch(url, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           appid: authConfig.appId,
@@ -113,7 +113,7 @@ export class LawStarClient {
 
       if (!response.ok) {
         throw new Error(
-          `Authentication failed: HTTP ${response.status} ${response.statusText}`,
+          `Authentication failed: HTTP ${response.status} ${response.statusText}`
         );
       }
 
@@ -121,28 +121,28 @@ export class LawStarClient {
 
       // 调试日志
       console.log(
-        "LawStar authentication response:",
-        JSON.stringify(data, null, 2),
+        'LawStar authentication response:',
+        JSON.stringify(data, null, 2)
       );
 
       // 检查响应状态码 - 支持数字和字符串格式
-      if (data.code !== 200 && data.code !== "200") {
+      if (data.code !== 200 && data.code !== '200') {
         const errorMsg =
-          data.msg || data.message || "Unknown authentication error";
+          data.msg || data.message || 'Unknown authentication error';
         throw new Error(
-          `Authentication failed: ${errorMsg} (code: ${data.code})`,
+          `Authentication failed: ${errorMsg} (code: ${data.code})`
         );
       }
 
       // 检查是否有数据字段
       if (!data.data) {
-        throw new Error("Authentication failed: No data field in response");
+        throw new Error('Authentication failed: No data field in response');
       }
 
       // 检查是否有Authorization字段
       if (!data.data.Authorization) {
         throw new Error(
-          "Authentication failed: No Authorization token in response data",
+          'Authentication failed: No Authorization token in response data'
         );
       }
 
@@ -153,9 +153,9 @@ export class LawStarClient {
       // 如果是网络错误或超时，重新抛出
       if (
         error instanceof Error &&
-        (error.name === "AbortError" ||
-          error.message.includes("timeout") ||
-          error.message.includes("network"))
+        (error.name === 'AbortError' ||
+          error.message.includes('timeout') ||
+          error.message.includes('network'))
       ) {
         throw error;
       }
@@ -173,7 +173,7 @@ export class LawStarClient {
    * 查询法规
    */
   public async searchRegulations(
-    request: LawStarRegulationRequest,
+    request: LawStarRegulationRequest
   ): Promise<LawStarRegulationResponse> {
     this.stats.regulation.totalRequests++;
     const startTime = Date.now();
@@ -181,9 +181,9 @@ export class LawStarClient {
     try {
       // 检查缓存
       if (this.config.cache?.enabled) {
-        const cached = await this.getFromCache("regulation", request);
+        const cached = await this.getFromCache('regulation', request);
         if (cached) {
-          this.updateStats("regulation", true, Date.now() - startTime, true);
+          this.updateStats('regulation', true, Date.now() - startTime, true);
           return cached as LawStarRegulationResponse;
         }
       }
@@ -193,14 +193,14 @@ export class LawStarClient {
 
       // 缓存结果
       if (this.config.cache?.enabled) {
-        await this.saveToCache("regulation", request, response);
+        await this.saveToCache('regulation', request, response);
       }
 
-      this.updateStats("regulation", true, Date.now() - startTime, false);
+      this.updateStats('regulation', true, Date.now() - startTime, false);
       return response;
     } catch (error) {
-      this.updateStats("regulation", false, Date.now() - startTime, false);
-      throw this.handleError(error as Error, "regulation");
+      this.updateStats('regulation', false, Date.now() - startTime, false);
+      throw this.handleError(error as Error, 'regulation');
     }
   }
 
@@ -208,7 +208,7 @@ export class LawStarClient {
    * 执行法规查询请求
    */
   private async executeRegulationRequest(
-    request: LawStarRegulationRequest,
+    request: LawStarRegulationRequest
   ): Promise<LawStarRegulationResponse> {
     const authToken = await this.getAuthToken();
     const config = this.config.regulation;
@@ -216,24 +216,24 @@ export class LawStarClient {
     // 使用专业版查询接口
     const url = `${config.baseURL}/api/lawData/professional/query`;
     const params = new URLSearchParams({
-      field: request.field || "lawlevel",
+      field: request.field || 'lawlevel',
       page: String(request.page || 1),
       rows: String(request.pageSize || 10),
     });
 
-    if (request.keyword) params.append("keyword", request.keyword);
-    if (request.lawType) params.append("effective", request.lawType);
-    if (request.effectLevel) params.append("lawlevel", request.effectLevel);
-    if (request.validity) params.append("timelinessnew", request.validity);
-    if (request.startDate) params.append("startDate", request.startDate);
-    if (request.endDate) params.append("endDate", request.endDate);
-    if (request.depName) params.append("depName", request.depName);
-    if (request.fileNum) params.append("fileNum", request.fileNum);
+    if (request.keyword) params.append('keyword', request.keyword);
+    if (request.lawType) params.append('effective', request.lawType);
+    if (request.effectLevel) params.append('lawlevel', request.effectLevel);
+    if (request.validity) params.append('timelinessnew', request.validity);
+    if (request.startDate) params.append('startDate', request.startDate);
+    if (request.endDate) params.append('endDate', request.endDate);
+    if (request.depName) params.append('depName', request.depName);
+    if (request.fileNum) params.append('fileNum', request.fileNum);
 
     return this.makeRequest(
       `${url}?${params.toString()}`,
       authToken,
-      config.timeout || 30000,
+      config.timeout || 30000
     );
   }
 
@@ -245,7 +245,7 @@ export class LawStarClient {
    * 向量查询（语义检索）
    */
   public async vectorSearch(
-    request: LawStarVectorRequest,
+    request: LawStarVectorRequest
   ): Promise<LawStarVectorResponse> {
     this.stats.vector.totalRequests++;
     const startTime = Date.now();
@@ -253,9 +253,9 @@ export class LawStarClient {
     try {
       // 检查缓存
       if (this.config.cache?.enabled) {
-        const cached = await this.getFromCache("vector", request);
+        const cached = await this.getFromCache('vector', request);
         if (cached) {
-          this.updateStats("vector", true, Date.now() - startTime, true);
+          this.updateStats('vector', true, Date.now() - startTime, true);
           return cached as LawStarVectorResponse;
         }
       }
@@ -265,14 +265,14 @@ export class LawStarClient {
 
       // 缓存结果
       if (this.config.cache?.enabled) {
-        await this.saveToCache("vector", request, response);
+        await this.saveToCache('vector', request, response);
       }
 
-      this.updateStats("vector", true, Date.now() - startTime, false);
+      this.updateStats('vector', true, Date.now() - startTime, false);
       return response;
     } catch (error) {
-      this.updateStats("vector", false, Date.now() - startTime, false);
-      throw this.handleError(error as Error, "vector");
+      this.updateStats('vector', false, Date.now() - startTime, false);
+      throw this.handleError(error as Error, 'vector');
     }
   }
 
@@ -280,7 +280,7 @@ export class LawStarClient {
    * 执行向量查询请求
    */
   private async executeVectorRequest(
-    request: LawStarVectorRequest,
+    request: LawStarVectorRequest
   ): Promise<LawStarVectorResponse> {
     const authToken = await this.getAuthToken();
     const config = this.config.vector;
@@ -290,23 +290,23 @@ export class LawStarClient {
       rows: String(request.topK || 10),
     });
 
-    if (request.query) params.append("vector", request.query);
-    if (request.keyword) params.append("keyword", request.keyword);
-    if (request.lawType) params.append("xls", request.lawType);
-    if (request.areaFacet) params.append("areaFacet", request.areaFacet);
-    if (request.fbdwFacet) params.append("fbdwFacet", request.fbdwFacet);
-    if (request.topicsFacet) params.append("topicsFacet", request.topicsFacet);
-    if (request.rawnumber) params.append("rawnumber", request.rawnumber);
-    if (request.filenum) params.append("filenum", request.filenum);
+    if (request.query) params.append('vector', request.query);
+    if (request.keyword) params.append('keyword', request.keyword);
+    if (request.lawType) params.append('xls', request.lawType);
+    if (request.areaFacet) params.append('areaFacet', request.areaFacet);
+    if (request.fbdwFacet) params.append('fbdwFacet', request.fbdwFacet);
+    if (request.topicsFacet) params.append('topicsFacet', request.topicsFacet);
+    if (request.rawnumber) params.append('rawnumber', request.rawnumber);
+    if (request.filenum) params.append('filenum', request.filenum);
     if (request.timeliness !== undefined)
-      params.append("lawstatexlsFacet", String(request.timeliness));
+      params.append('lawstatexlsFacet', String(request.timeliness));
     if (request.includeContent !== undefined)
-      params.append("includeContent", String(request.includeContent));
+      params.append('includeContent', String(request.includeContent));
 
     return this.makeRequest(
       `${url}?${params.toString()}`,
       authToken,
-      config.timeout || 30000,
+      config.timeout || 30000
     );
   }
 
@@ -320,11 +320,11 @@ export class LawStarClient {
   private async makeRequest(
     url: string,
     authToken: string | null,
-    timeout: number,
+    timeout: number
   ): Promise<any> {
     // 检查authToken是否有效
     if (!authToken) {
-      throw new Error("Authentication token is required but not available");
+      throw new Error('Authentication token is required but not available');
     }
 
     const maxRetries = this.config.retry?.maxRetries || 3;
@@ -338,9 +338,9 @@ export class LawStarClient {
         const timeoutId = setTimeout(() => controller.abort(), timeout);
 
         const response = await fetch(url, {
-          method: "GET",
+          method: 'GET',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: authToken,
           },
           signal: controller.signal,
@@ -355,9 +355,9 @@ export class LawStarClient {
         const data = await response.json();
 
         // 检查API响应状态 - 支持数字和字符串格式
-        if (data.code !== "200" && data.code !== 200) {
+        if (data.code !== '200' && data.code !== 200) {
           throw new Error(
-            `API Error ${data.code}: ${data.msg || data.message || "Unknown error"}`,
+            `API Error ${data.code}: ${data.msg || data.message || 'Unknown error'}`
           );
         }
 
@@ -380,7 +380,7 @@ export class LawStarClient {
       }
     }
 
-    throw lastError || new Error("Request failed");
+    throw lastError || new Error('Request failed');
   }
 
   /**
@@ -389,11 +389,11 @@ export class LawStarClient {
   private shouldRetry(error: Error): boolean {
     const message = error.message.toLowerCase();
     return (
-      message.includes("timeout") ||
-      message.includes("network") ||
-      message.includes("econnreset") ||
-      message.includes("enotfound") ||
-      message.includes("429") // Rate limit
+      message.includes('timeout') ||
+      message.includes('network') ||
+      message.includes('econnreset') ||
+      message.includes('enotfound') ||
+      message.includes('429') // Rate limit
     );
   }
 
@@ -401,7 +401,7 @@ export class LawStarClient {
    * 延迟函数
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   // =============================================================================
@@ -412,14 +412,14 @@ export class LawStarClient {
    * 从缓存获取数据
    */
   private async getFromCache(
-    type: "regulation" | "vector",
-    request: any,
+    type: 'regulation' | 'vector',
+    request: any
   ): Promise<any | null> {
     try {
       const cacheKey = this.generateCacheKey(type, request);
       return await cacheManager.get(cacheKey);
     } catch (error) {
-      console.warn("Cache get failed:", error);
+      console.warn('Cache get failed:', error);
       return null;
     }
   }
@@ -428,16 +428,16 @@ export class LawStarClient {
    * 保存数据到缓存
    */
   private async saveToCache(
-    type: "regulation" | "vector",
+    type: 'regulation' | 'vector',
     request: any,
-    response: any,
+    response: any
   ): Promise<void> {
     try {
       const cacheKey = this.generateCacheKey(type, request);
       const ttl = this.config.cache?.ttl || 3600;
       await cacheManager.set(cacheKey, response, { ttl });
     } catch (error) {
-      console.warn("Cache set failed:", error);
+      console.warn('Cache set failed:', error);
     }
   }
 
@@ -445,15 +445,15 @@ export class LawStarClient {
    * 生成缓存键
    */
   private generateCacheKey(
-    type: "regulation" | "vector",
-    request: any,
+    type: 'regulation' | 'vector',
+    request: any
   ): string {
     const keyData = { type, ...request };
     // 使用SHA256哈希替代Base64编码，避免长文本导致的键长度问题
     const hash = crypto
-      .createHash("sha256")
+      .createHash('sha256')
       .update(JSON.stringify(keyData))
-      .digest("hex");
+      .digest('hex');
     return `lawstar_${type}_${hash}`;
   }
 
@@ -466,28 +466,28 @@ export class LawStarClient {
    */
   private handleError(error: Error, context: string): LawStarError {
     const message = error.message.toLowerCase();
-    let errorType: LawStarError["type"] = "unknown";
+    let errorType: LawStarError['type'] = 'unknown';
     let code = 500;
     let retryable = false;
 
-    if (message.includes("authentication") || message.includes("401")) {
-      errorType = "authentication";
+    if (message.includes('authentication') || message.includes('401')) {
+      errorType = 'authentication';
       code = 401;
       retryable = false;
-    } else if (message.includes("rate limit") || message.includes("429")) {
-      errorType = "rate_limit";
+    } else if (message.includes('rate limit') || message.includes('429')) {
+      errorType = 'rate_limit';
       code = 429;
       retryable = true;
-    } else if (message.includes("timeout") || message.includes("network")) {
-      errorType = "network";
+    } else if (message.includes('timeout') || message.includes('network')) {
+      errorType = 'network';
       code = 503;
       retryable = true;
-    } else if (message.includes("validation") || message.includes("400")) {
-      errorType = "validation";
+    } else if (message.includes('validation') || message.includes('400')) {
+      errorType = 'validation';
       code = 400;
       retryable = false;
-    } else if (message.includes("500") || message.includes("server")) {
-      errorType = "server";
+    } else if (message.includes('500') || message.includes('server')) {
+      errorType = 'server';
       code = 500;
       retryable = true;
     }
@@ -509,10 +509,10 @@ export class LawStarClient {
    * 更新统计信息
    */
   private updateStats(
-    type: "regulation" | "vector",
+    type: 'regulation' | 'vector',
     success: boolean,
     duration: number,
-    cached: boolean,
+    cached: boolean
   ): void {
     const stats = this.stats[type];
 
@@ -598,7 +598,7 @@ export class LawStarClient {
  * 创建法律之星客户端
  */
 export function createLawStarClient(
-  config: LawStarClientConfig,
+  config: LawStarClientConfig
 ): LawStarClient {
   return new LawStarClient(config);
 }

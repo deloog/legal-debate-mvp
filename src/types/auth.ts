@@ -122,14 +122,14 @@ export interface EmailValidationError {
  * 认证错误代码
  */
 export enum AuthErrorCode {
-  INVALID_CREDENTIALS = "INVALID_CREDENTIALS",
-  USER_NOT_FOUND = "USER_NOT_FOUND",
-  USER_EXISTS = "USER_EXISTS",
-  INVALID_PASSWORD = "INVALID_PASSWORD",
-  INVALID_TOKEN = "INVALID_TOKEN",
-  TOKEN_EXPIRED = "TOKEN_EXPIRED",
-  UNAUTHORIZED = "UNAUTHORIZED",
-  FORBIDDEN = "FORBIDDEN",
+  INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
+  USER_NOT_FOUND = 'USER_NOT_FOUND',
+  USER_EXISTS = 'USER_EXISTS',
+  INVALID_PASSWORD = 'INVALID_PASSWORD',
+  INVALID_TOKEN = 'INVALID_TOKEN',
+  TOKEN_EXPIRED = 'TOKEN_EXPIRED',
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  FORBIDDEN = 'FORBIDDEN',
 }
 
 /**
@@ -146,10 +146,10 @@ export interface AuthError {
 // =============================================================================
 
 export enum UserStatus {
-  ACTIVE = "ACTIVE",
-  SUSPENDED = "SUSPENDED",
-  BANNED = "BANNED",
-  INACTIVE = "INACTIVE",
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+  BANNED = 'BANNED',
+  INACTIVE = 'INACTIVE',
 }
 
 // =============================================================================
@@ -157,11 +157,11 @@ export enum UserStatus {
 // =============================================================================
 
 export enum UserRole {
-  USER = "USER",
-  LAWYER = "LAWYER",
-  ENTERPRISE = "ENTERPRISE",
-  ADMIN = "ADMIN",
-  SUPER_ADMIN = "SUPER_ADMIN",
+  USER = 'USER',
+  LAWYER = 'LAWYER',
+  ENTERPRISE = 'ENTERPRISE',
+  ADMIN = 'ADMIN',
+  SUPER_ADMIN = 'SUPER_ADMIN',
 }
 
 // =============================================================================

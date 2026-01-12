@@ -3,7 +3,7 @@
  * 检查文件中的硬编码敏感信息和配置
  */
 
-import { MAX_ISSUES_TO_SHOW } from "../config.mjs";
+import { MAX_ISSUES_TO_SHOW } from '../config.mjs';
 
 /**
  * 检查硬编码值
@@ -33,19 +33,19 @@ export function checkHardcodedValues(filePath, content) {
   if (urls && urls.length > 0) {
     // 排除一些常见的开发URL和文档URL
     const allowedUrls = [
-      "localhost",
-      "127.0.0.1",
-      "example.com",
-      "http://",
-      "https://",
-      "github.com",
-      "npmjs.com",
-      "vercel.com",
+      'localhost',
+      '127.0.0.1',
+      'example.com',
+      'http://',
+      'https://',
+      'github.com',
+      'npmjs.com',
+      'vercel.com',
     ];
 
-    const suspiciousUrls = urls.filter((url) => {
+    const suspiciousUrls = urls.filter(url => {
       // 检查是否包含允许的URL模式
-      const isAllowed = allowedUrls.some((allowed) => url.includes(allowed));
+      const isAllowed = allowedUrls.some(allowed => url.includes(allowed));
       // 排除注释中的URL
       const isInComment =
         content.includes(`// ${url}`) || content.includes(`/* ${url}`);
@@ -54,7 +54,7 @@ export function checkHardcodedValues(filePath, content) {
 
     if (suspiciousUrls.length > 0) {
       issues.push(
-        `发现硬编码URL，建议使用环境变量: ${suspiciousUrls.slice(0, MAX_ISSUES_TO_SHOW).join(", ")}`,
+        `发现硬编码URL，建议使用环境变量: ${suspiciousUrls.slice(0, MAX_ISSUES_TO_SHOW).join(', ')}`
       );
     }
   }
@@ -64,7 +64,7 @@ export function checkHardcodedValues(filePath, content) {
   const ports = content.match(portPattern);
   if (ports && ports.length > 0) {
     issues.push(
-      `发现硬编码端口号，建议使用环境变量: ${ports.slice(0, MAX_ISSUES_TO_SHOW).join(", ")}`,
+      `发现硬编码端口号，建议使用环境变量: ${ports.slice(0, MAX_ISSUES_TO_SHOW).join(', ')}`
     );
   }
 
@@ -77,6 +77,6 @@ export function checkHardcodedValues(filePath, content) {
 
   return {
     passed: issues.length === 0,
-    message: issues.length === 0 ? "未发现硬编码敏感值" : issues.join("; "),
+    message: issues.length === 0 ? '未发现硬编码敏感值' : issues.join('; '),
   };
 }

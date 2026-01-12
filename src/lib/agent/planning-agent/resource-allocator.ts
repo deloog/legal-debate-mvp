@@ -1,7 +1,7 @@
 // 资源分配器
 
-import { AgentType, TaskPriority } from "../../../types/agent";
-import type { SubTask } from "./types";
+import { AgentType, TaskPriority } from '../../../types/agent';
+import type { SubTask } from './types';
 import {
   type AgentResource,
   type AllocationConfig,
@@ -9,7 +9,7 @@ import {
   PlanningErrorType,
   type ResourceAllocation,
   type ResourceAvailability,
-} from "./types";
+} from './types';
 
 // =============================================================================
 // ResourceAllocator类
@@ -24,7 +24,7 @@ export class ResourceAllocator {
       enableLoadBalancing: true,
       maxLoadPerAgent: 100,
       enablePrioritization: true,
-    },
+    }
   ) {
     this.config = config;
     this.allocationHistory = new Map();
@@ -33,7 +33,7 @@ export class ResourceAllocator {
   // 主分配方法
   public async allocate(
     tasks: SubTask[],
-    priority?: TaskPriority,
+    priority?: TaskPriority
   ): Promise<ResourceAllocation> {
     try {
       const allocationPriority = priority || TaskPriority.MEDIUM;
@@ -47,7 +47,7 @@ export class ResourceAllocator {
         const agentResource = this.createAgentResource(
           agentType,
           tasks,
-          allocationPriority,
+          allocationPriority
         );
         agentsMap.set(agentType, agentResource);
       }
@@ -77,8 +77,8 @@ export class ResourceAllocator {
     } catch (error) {
       throw this.createError(
         PlanningErrorType.RESOURCE_ALLOCATION_FAILED,
-        error instanceof Error ? error.message : "Resource allocation failed",
-        { originalError: error },
+        error instanceof Error ? error.message : 'Resource allocation failed',
+        { originalError: error }
       );
     }
   }
@@ -86,7 +86,7 @@ export class ResourceAllocator {
   // 获取需要的Agent类型
   private getRequiredAgentTypes(tasks: SubTask[]): AgentType[] {
     const agentTypes = new Set<AgentType>();
-    tasks.forEach((task) => agentTypes.add(task.agent));
+    tasks.forEach(task => agentTypes.add(task.agent));
     return Array.from(agentTypes);
   }
 
@@ -94,13 +94,13 @@ export class ResourceAllocator {
   private createAgentResource(
     agentType: AgentType,
     tasks: SubTask[],
-    priority: TaskPriority,
+    priority: TaskPriority
   ): AgentResource {
     // 计算该Agent需要执行的任务数量
-    const agentTasks = tasks.filter((task) => task.agent === agentType);
+    const agentTasks = tasks.filter(task => task.agent === agentType);
     const estimatedLoad = agentTasks.reduce(
       (sum, task) => sum + (task.estimatedTime || 0),
-      0,
+      0
     );
 
     // 计算时间范围
@@ -127,7 +127,7 @@ export class ResourceAllocator {
 
     // 简单估算：假设无依赖的任务同时开始
     const startTasks = tasks.filter(
-      (t) => !t.dependencies || t.dependencies.length === 0,
+      t => !t.dependencies || t.dependencies.length === 0
     );
     if (startTasks.length > 0) {
       minStart = 0;
@@ -138,7 +138,7 @@ export class ResourceAllocator {
     // 计算总时间作为结束时间
     const totalTime = tasks.reduce(
       (sum, task) => sum + (task.estimatedTime || 0),
-      0,
+      0
     );
     maxEnd = totalTime;
 
@@ -175,12 +175,12 @@ export class ResourceAllocator {
 
   // 计算利用率
   private calculateUtilization(
-    agentsMap: Map<AgentType, AgentResource>,
+    agentsMap: Map<AgentType, AgentResource>
   ): number {
     let totalLoad = 0;
     const totalCapacity = agentsMap.size * this.config.maxLoadPerAgent;
 
-    agentsMap.forEach((resource) => {
+    agentsMap.forEach(resource => {
       totalLoad += resource.estimatedLoad;
     });
 
@@ -217,7 +217,7 @@ export class ResourceAllocator {
     // 计算所有依赖任务的最晚结束时间
     let maxEndTime = 0;
     for (const depId of task.dependencies) {
-      const depTask = allTasks.find((t) => t.id === depId);
+      const depTask = allTasks.find(t => t.id === depId);
       if (depTask) {
         const depEndTime =
           this.getTaskStartTime(depTask, allTasks) +
@@ -231,7 +231,7 @@ export class ResourceAllocator {
 
   // 查询资源可用性
   public async queryAvailability(
-    agentType: AgentType,
+    agentType: AgentType
   ): Promise<ResourceAvailability> {
     // 检查历史分配记录
     const history = this.allocationHistory.get(agentType) || [];
@@ -258,7 +258,7 @@ export class ResourceAllocator {
 
   // 批量查询资源可用性
   public async queryAllAvailability(
-    agentTypes: AgentType[],
+    agentTypes: AgentType[]
   ): Promise<ResourceAvailability[]> {
     const results: ResourceAvailability[] = [];
 
@@ -293,7 +293,7 @@ export class ResourceAllocator {
   private createError(
     type: PlanningErrorType,
     message: string,
-    details?: unknown,
+    details?: unknown
   ): PlanningError {
     return {
       type,

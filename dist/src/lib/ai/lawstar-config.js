@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 /**
  * 法律之星服务配置
  *
  * 提供法规查询和向量查询的配置管理
  */
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.LAWSTAR_CAPABILITIES =
   exports.TEST_LAWSTAR_CONFIG =
   exports.PRODUCTION_LAWSTAR_CONFIG =
@@ -22,19 +22,19 @@ exports.getLawStarStatus = getLawStarStatus;
 exports.DEFAULT_LAWSTAR_CONFIG = {
   regulation: {
     baseURL:
-      process.env.LAWSTAR_REGULATION_BASE_URL || "https://api.law-star.com",
-    appId: process.env.LAWSTAR_REGULATION_APP_ID || "jHW-4773-B2c6C44150ff8047",
+      process.env.LAWSTAR_REGULATION_BASE_URL || 'https://api.law-star.com',
+    appId: process.env.LAWSTAR_REGULATION_APP_ID || 'jHW-4773-B2c6C44150ff8047',
     appSecret:
       process.env.LAWSTAR_REGULATION_APP_SECRET ||
-      "a3B4fE7d3B40Abf9d96ae5601B2B3996",
+      'a3B4fE7d3B40Abf9d96ae5601B2B3996',
     timeout: 30000,
   },
   vector: {
-    baseURL: process.env.LAWSTAR_VECTOR_BASE_URL || "https://api.law-star.com",
-    appId: process.env.LAWSTAR_VECTOR_APP_ID || "iTW-7650-C06fd2e8675F17dc",
+    baseURL: process.env.LAWSTAR_VECTOR_BASE_URL || 'https://api.law-star.com',
+    appId: process.env.LAWSTAR_VECTOR_APP_ID || 'iTW-7650-C06fd2e8675F17dc',
     appSecret:
       process.env.LAWSTAR_VECTOR_APP_SECRET ||
-      "6bB16131b7296bf31E1eC2bd9954e28a",
+      '6bB16131b7296bf31E1eC2bd9954e28a',
     timeout: 30000,
   },
   cache: {
@@ -95,15 +95,15 @@ exports.PRODUCTION_LAWSTAR_CONFIG = {
 // =============================================================================
 exports.TEST_LAWSTAR_CONFIG = {
   regulation: {
-    baseURL: "http://localhost:3000/mock/lawstar",
-    appId: "test-regulation-app-id",
-    appSecret: "test-regulation-app-secret",
+    baseURL: 'http://localhost:3000/mock/lawstar',
+    appId: 'test-regulation-app-id',
+    appSecret: 'test-regulation-app-secret',
     timeout: 5000,
   },
   vector: {
-    baseURL: "http://localhost:3000/mock/lawstar",
-    appId: "test-vector-app-id",
-    appSecret: "test-vector-app-secret",
+    baseURL: 'http://localhost:3000/mock/lawstar',
+    appId: 'test-vector-app-id',
+    appSecret: 'test-vector-app-secret',
     timeout: 5000,
   },
   cache: {
@@ -119,13 +119,13 @@ exports.TEST_LAWSTAR_CONFIG = {
 // 配置选择器
 // =============================================================================
 function getLawStarConfig() {
-  const nodeEnv = process.env.NODE_ENV || "development";
+  const nodeEnv = process.env.NODE_ENV || 'development';
   switch (nodeEnv) {
-    case "production":
+    case 'production':
       return exports.PRODUCTION_LAWSTAR_CONFIG;
-    case "test":
+    case 'test':
       return exports.TEST_LAWSTAR_CONFIG;
-    case "development":
+    case 'development':
     default:
       return exports.DEVELOPMENT_LAWSTAR_CONFIG;
   }
@@ -138,23 +138,23 @@ function validateLawStarConfig() {
   const errors = [];
   // 验证法规查询配置
   if (!config.regulation.appId) {
-    errors.push("Law Star regulation app ID is required");
+    errors.push('Law Star regulation app ID is required');
   }
   if (!config.regulation.appSecret) {
-    errors.push("Law Star regulation app secret is required");
+    errors.push('Law Star regulation app secret is required');
   }
   if (!config.regulation.baseURL) {
-    errors.push("Law Star regulation base URL is required");
+    errors.push('Law Star regulation base URL is required');
   }
   // 验证向量查询配置
   if (!config.vector.appId) {
-    errors.push("Law Star vector app ID is required");
+    errors.push('Law Star vector app ID is required');
   }
   if (!config.vector.appSecret) {
-    errors.push("Law Star vector app secret is required");
+    errors.push('Law Star vector app secret is required');
   }
   if (!config.vector.baseURL) {
-    errors.push("Law Star vector base URL is required");
+    errors.push('Law Star vector base URL is required');
   }
   return {
     valid: errors.length === 0,
@@ -166,14 +166,14 @@ function validateLawStarConfig() {
 // =============================================================================
 exports.LAWSTAR_CAPABILITIES = {
   regulation: {
-    name: "法规查询",
-    description: "基于关键词的法条检索",
+    name: '法规查询',
+    description: '基于关键词的法条检索',
     features: [
-      "关键词搜索",
-      "法律类型筛选",
-      "效力级别筛选",
-      "时效性筛选",
-      "分页查询",
+      '关键词搜索',
+      '法律类型筛选',
+      '效力级别筛选',
+      '时效性筛选',
+      '分页查询',
     ],
     rateLimits: {
       requestsPerSecond: 10,
@@ -182,14 +182,14 @@ exports.LAWSTAR_CAPABILITIES = {
     },
   },
   vector: {
-    name: "向量查询",
-    description: "基于语义的智能检索",
+    name: '向量查询',
+    description: '基于语义的智能检索',
     features: [
-      "语义理解",
-      "相似度匹配",
-      "智能排序",
-      "法律类型过滤",
-      "条款匹配",
+      '语义理解',
+      '相似度匹配',
+      '智能排序',
+      '法律类型过滤',
+      '条款匹配',
     ],
     rateLimits: {
       requestsPerSecond: 5,

@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { cache } from "@/lib/cache/manager";
-import { CacheNamespace } from "@/lib/cache/types";
+import { NextResponse } from 'next/server';
+import { cache } from '@/lib/cache/manager';
+import { CacheNamespace } from '@/lib/cache/types';
 
 /**
  * 响应缓存配置
@@ -21,9 +21,9 @@ const defaultConfig: CacheConfig = {
   enabled: true,
   ttl: 300, // 5分钟
   namespace: CacheNamespace.API_RESPONSE,
-  bypassMethods: ["POST", "PUT", "DELETE", "PATCH"],
-  bypassHeaders: ["authorization"],
-  varyHeaders: ["accept", "accept-language"],
+  bypassMethods: ['POST', 'PUT', 'DELETE', 'PATCH'],
+  bypassHeaders: ['authorization'],
+  varyHeaders: ['accept', 'accept-language'],
 };
 
 /**
@@ -33,7 +33,7 @@ function generateCacheKey(
   url: string,
   method: string,
   body?: string,
-  headers?: Record<string, string>,
+  headers?: Record<string, string>
 ): string {
   const parts = [method.toUpperCase(), url];
 
@@ -51,16 +51,16 @@ function generateCacheKey(
   // 添加Vary头
   if (headers) {
     const varyParts = defaultConfig.varyHeaders
-      .map((header) => headers[header])
+      .map(header => headers[header])
       .filter(Boolean);
     if (varyParts.length > 0) {
-      parts.push(varyParts.join(","));
+      parts.push(varyParts.join(','));
     }
   }
 
   // 生成哈希
-  const key = parts.join("|");
-  return Buffer.from(key).toString("base64").replace(/[+/=]/g, "");
+  const key = parts.join('|');
+  return Buffer.from(key).toString('base64').replace(/[+/=]/g, '');
 }
 
 /**
@@ -69,7 +69,7 @@ function generateCacheKey(
 function shouldCacheRequest(
   config: CacheConfig,
   method: string,
-  headers: Headers,
+  headers: Headers
 ): boolean {
   // 检查是否启用缓存
   if (!config.enabled) {
@@ -89,10 +89,10 @@ function shouldCacheRequest(
   }
 
   // 检查Cache-Control头
-  const cacheControl = headers.get("Cache-Control");
+  const cacheControl = headers.get('Cache-Control');
   if (
-    cacheControl?.includes("no-cache") ||
-    cacheControl?.includes("no-store")
+    cacheControl?.includes('no-cache') ||
+    cacheControl?.includes('no-store')
   ) {
     return false;
   }
@@ -106,23 +106,23 @@ function shouldCacheRequest(
 function setCacheHeaders(
   response: NextResponse,
   ttl: number,
-  hit: boolean,
+  hit: boolean
 ): NextResponse {
   // 设置Cache-Control头
   const cacheControl = hit
     ? `public, max-age=${ttl}, must-revalidate`
     : `public, max-age=${ttl}`;
 
-  response.headers.set("Cache-Control", cacheControl);
+  response.headers.set('Cache-Control', cacheControl);
 
   // 设置ETag（如果可用）
-  if (!response.headers.has("ETag")) {
-    const etag = Buffer.from(Date.now().toString()).toString("base64");
-    response.headers.set("ETag", etag);
+  if (!response.headers.has('ETag')) {
+    const etag = Buffer.from(Date.now().toString()).toString('base64');
+    response.headers.set('ETag', etag);
   }
 
   // 设置X-Cache头
-  response.headers.set("X-Cache", hit ? "HIT" : "MISS");
+  response.headers.set('X-Cache', hit ? 'HIT' : 'MISS');
 
   return response;
 }
@@ -134,7 +134,7 @@ export function createResponseCacheMiddleware(config?: Partial<CacheConfig>) {
   const finalConfig = { ...defaultConfig, ...config };
 
   return async function responseCacheMiddleware(
-    request: Request,
+    request: Request
   ): Promise<NextResponse | undefined> {
     const url = request.url;
     const method = request.method;
@@ -161,7 +161,7 @@ export function createResponseCacheMiddleware(config?: Partial<CacheConfig>) {
       // 缓存未命中，继续处理
       return undefined;
     } catch (error) {
-      console.error("缓存中间件错误:", error);
+      console.error('缓存中间件错误:', error);
       // 缓存失败时继续处理请求
       return undefined;
     }
@@ -175,7 +175,7 @@ export function createResponseCacheMiddleware(config?: Partial<CacheConfig>) {
 export async function cacheResponse(
   request: Request,
   response: NextResponse,
-  config?: Partial<CacheConfig>,
+  config?: Partial<CacheConfig>
 ): Promise<void> {
   const finalConfig = { ...defaultConfig, ...config };
 
@@ -203,7 +203,7 @@ export async function cacheResponse(
       ttl: finalConfig.ttl,
     });
   } catch (error) {
-    console.error("缓存响应错误:", error);
+    console.error('缓存响应错误:', error);
   }
 }
 
@@ -213,12 +213,12 @@ export async function cacheResponse(
  */
 export async function clearApiCache(
   pattern?: string,
-  namespace: CacheNamespace = CacheNamespace.API_RESPONSE,
+  namespace: CacheNamespace = CacheNamespace.API_RESPONSE
 ): Promise<number> {
   try {
     // Redis支持模式匹配删除
-    const redis = await import("@/lib/cache/redis").then((m) => m.redis);
-    const keyPattern = `${namespace}:${pattern || "*"}`;
+    const redis = await import('@/lib/cache/redis').then(m => m.redis);
+    const keyPattern = `${namespace}:${pattern || '*'}`;
     const keys = await redis.keys(keyPattern);
 
     if (keys.length > 0) {
@@ -228,7 +228,7 @@ export async function clearApiCache(
 
     return 0;
   } catch (error) {
-    console.error("清除缓存失败:", error);
+    console.error('清除缓存失败:', error);
     return 0;
   }
 }

@@ -2,7 +2,7 @@
  * 推理链完整性检查器
  * 检查推理步骤的完整性、连贯性和是否存在循环推理
  */
-import { ReasoningChainCheck } from "../types";
+import { ReasoningChainCheck } from '../types';
 
 /**
  * 待验证数据接口
@@ -34,26 +34,26 @@ export class ReasoningChainChecker {
 
     // 检查推理缺口
     if (steps.length < 2) {
-      gaps.push("推理步骤过少，无法形成完整的推理链");
+      gaps.push('推理步骤过少，无法形成完整的推理链');
     }
 
     // 检查逻辑连接词
     if (data.reasoning) {
       const connectors = [
-        "因此",
-        "所以",
-        "由于",
-        "基于",
-        "综上",
-        "由此可见",
-        "这意味着",
+        '因此',
+        '所以',
+        '由于',
+        '基于',
+        '综上',
+        '由此可见',
+        '这意味着',
       ];
-      const hasConnector = connectors.some((conn) =>
-        data.reasoning!.includes(conn),
+      const hasConnector = connectors.some(conn =>
+        data.reasoning!.includes(conn)
       );
 
       if (!hasConnector) {
-        gaps.push("缺少逻辑连接词，推理链不连贯");
+        gaps.push('缺少逻辑连接词，推理链不连贯');
       }
     }
 
@@ -70,11 +70,11 @@ export class ReasoningChainChecker {
           // 检查内容相似
           const similarity = this.calculateSimilarity(
             data.arguments[i],
-            data.arguments[j],
+            data.arguments[j]
           );
           if (similarity > 0.8) {
             loops.push(
-              `步骤${i + 1}和步骤${j + 1}内容高度相似，可能存在循环推理`,
+              `步骤${i + 1}和步骤${j + 1}内容高度相似，可能存在循环推理`
             );
           }
 
@@ -85,8 +85,8 @@ export class ReasoningChainChecker {
           if (keywords1.length > 0 && keywords2.length > 0) {
             const coreKeywords1 = keywords1.slice(0, 3);
             const coreKeywords2 = keywords2.slice(0, 3);
-            const coreOverlap = coreKeywords1.filter((k) =>
-              coreKeywords2.includes(k),
+            const coreOverlap = coreKeywords1.filter(k =>
+              coreKeywords2.includes(k)
             );
 
             if (
@@ -96,7 +96,7 @@ export class ReasoningChainChecker {
                 0.6
             ) {
               loops.push(
-                `步骤${i + 1}和步骤${j + 1}核心论点重复，可能存在循环推理`,
+                `步骤${i + 1}和步骤${j + 1}核心论点重复，可能存在循环推理`
               );
             }
           }
@@ -129,7 +129,7 @@ export class ReasoningChainChecker {
       return 0;
     }
 
-    const intersection = new Set([...words1].filter((x) => words2.has(x)));
+    const intersection = new Set([...words1].filter(x => words2.has(x)));
     const union = new Set([...words1, ...words2]);
 
     return intersection.size / union.size;
@@ -141,30 +141,30 @@ export class ReasoningChainChecker {
   private extractKeywords(text: string): string[] {
     // 移除停用词和标点
     const stopWords = new Set([
-      "的",
-      "了",
-      "是",
-      "在",
-      "和",
-      "有",
-      "我",
-      "你",
-      "他",
-      "她",
-      "它",
-      "我们",
-      "你们",
-      "他们",
-      "这",
-      "那",
-      "这个",
-      "那个",
+      '的',
+      '了',
+      '是',
+      '在',
+      '和',
+      '有',
+      '我',
+      '你',
+      '他',
+      '她',
+      '它',
+      '我们',
+      '你们',
+      '他们',
+      '这',
+      '那',
+      '这个',
+      '那个',
     ]);
 
     const words = text
-      .replace(/[，。！？；：""''（）]/g, " ")
+      .replace(/[，。！？；：""''（）]/g, ' ')
       .split(/\s+/)
-      .filter((word) => word.length > 1 && !stopWords.has(word));
+      .filter(word => word.length > 1 && !stopWords.has(word));
 
     return [...new Set(words)].slice(0, 10); // 最多返回10个关键词
   }

@@ -4,8 +4,8 @@
  * 每个函数复用核心原子函数，保持<200行
  */
 
-import { PrismaClient } from "@prisma/client";
-import { MemoryManager } from "../memory-agent/memory-manager";
+import { PrismaClient } from '@prisma/client';
+import { MemoryManager } from '../memory-agent/memory-manager';
 import {
   analyze_text,
   extract_entities,
@@ -20,7 +20,7 @@ import {
   rank_items,
   generate_summary,
   merge_results,
-} from "./index";
+} from './index';
 import type {
   ParseDocumentParams,
   ParseDocumentResult,
@@ -30,7 +30,7 @@ import type {
   GenerateArgumentResult,
   EntityExtractionResult,
   ClassificationResult,
-} from "./types";
+} from './types';
 
 /**
  * parse_document - 文档解析（组合函数）
@@ -39,7 +39,7 @@ import type {
 export async function parse_document(
   prisma: PrismaClient,
   memoryManager: MemoryManager,
-  params: ParseDocumentParams,
+  params: ParseDocumentParams
 ): Promise<ParseDocumentResult> {
   const startTime = Date.now();
 
@@ -50,16 +50,16 @@ export async function parse_document(
   let entities: EntityExtractionResult | undefined;
   if (params.options?.extractEntities) {
     entities = await extract_entities(params.content, [
-      "PERSON",
-      "DATE",
-      "AMOUNT",
+      'PERSON',
+      'DATE',
+      'AMOUNT',
     ]);
   }
 
   // 3. 内容分类
   let classification: ClassificationResult | undefined;
   if (params.options?.classifyContent) {
-    classification = await classify_content(params.content, "case_type");
+    classification = await classify_content(params.content, 'case_type');
   }
 
   const result: ParseDocumentResult = {
@@ -70,12 +70,12 @@ export async function parse_document(
 
   // 4. 记录行动
   await log_action(prisma, {
-    actionType: "ANALYZE",
-    actionName: "parse_document",
-    agentName: "UtilityAction",
+    actionType: 'ANALYZE',
+    actionName: 'parse_document',
+    agentName: 'UtilityAction',
     input: params,
     output: result,
-    status: "success",
+    status: 'success',
     executionTime: Date.now() - startTime,
   });
 
@@ -90,7 +90,7 @@ export async function search_laws(
   prisma: PrismaClient,
   memoryManager: MemoryManager,
   params: SearchLawsParams,
-  userId: string,
+  userId: string
 ): Promise<SearchLawsResult> {
   const startTime = Date.now();
   const cacheKey = `law_search:${params.query}:${params.limit || 10}`;
@@ -105,7 +105,7 @@ export async function search_laws(
 
   // 2. 数据库检索
   const searchResult = await search_database(prisma, {
-    table: "lawArticle",
+    table: 'lawArticle',
     query: params.query,
     filters: params.category ? { category: params.category } : undefined,
     limit: params.limit || 10,
@@ -114,8 +114,8 @@ export async function search_laws(
   // 3. 结果排序（基于相关性）
   const { ranked } = await rank_items(
     searchResult.items as Array<{ id: string; relevanceScore?: number }>,
-    (item) => item.relevanceScore || 0,
-    "desc",
+    item => item.relevanceScore || 0,
+    'desc'
   );
 
   const result: SearchLawsResult = {
@@ -137,12 +137,12 @@ export async function search_laws(
 
   // 5. 记录行动
   await log_action(prisma, {
-    actionType: "RETRIEVE",
-    actionName: "search_laws",
-    agentName: "UtilityAction",
+    actionType: 'RETRIEVE',
+    actionName: 'search_laws',
+    agentName: 'UtilityAction',
     input: params,
     output: result,
-    status: "success",
+    status: 'success',
     executionTime: Date.now() - startTime,
   });
 
@@ -156,15 +156,15 @@ export async function search_laws(
 export async function generate_argument(
   prisma: PrismaClient,
   aiService: { call: (args: unknown) => Promise<unknown> },
-  params: GenerateArgumentParams,
+  params: GenerateArgumentParams
 ): Promise<GenerateArgumentResult> {
   const startTime = Date.now();
 
   // 1. 构建提示词
-  const prompt = `基于以下案件信息，生成${params.side === "plaintiff" ? "原告" : "被告"}的论点：
+  const prompt = `基于以下案件信息，生成${params.side === 'plaintiff' ? '原告' : '被告'}的论点：
 
 案件信息：${JSON.stringify(params.caseInfo)}
-${params.legalBasis ? `法律依据：${JSON.stringify(params.legalBasis)}` : ""}
+${params.legalBasis ? `法律依据：${JSON.stringify(params.legalBasis)}` : ''}
 
 请生成包含主要论点、支持论据、法律引用的完整论点。`;
 
@@ -172,12 +172,12 @@ ${params.legalBasis ? `法律依据：${JSON.stringify(params.legalBasis)}` : ""
   const aiResult = await call_ai_service(
     {
       prompt,
-      provider: "deepseek",
-      model: "deepseek-chat",
+      provider: 'deepseek',
+      model: 'deepseek-chat',
       temperature: 0.7,
       maxTokens: 2000,
     },
-    aiService,
+    aiService
   );
 
   if (!aiResult.success) {
@@ -190,19 +190,19 @@ ${params.legalBasis ? `法律依据：${JSON.stringify(params.legalBasis)}` : ""
   // 4. 数据验证
   const validationRules = [
     {
-      field: "argument",
-      type: "string",
+      field: 'argument',
+      type: 'string',
       required: true,
       minLength: 10,
     },
     {
-      field: "supportingPoints",
-      type: "object",
+      field: 'supportingPoints',
+      type: 'object',
       required: true,
     },
     {
-      field: "legalReferences",
-      type: "object",
+      field: 'legalReferences',
+      type: 'object',
       required: true,
     },
   ];
@@ -227,12 +227,12 @@ ${params.legalBasis ? `法律依据：${JSON.stringify(params.legalBasis)}` : ""
 
   // 6. 记录行动
   await log_action(prisma, {
-    actionType: "GENERATE",
-    actionName: "generate_argument",
-    agentName: "UtilityAction",
+    actionType: 'GENERATE',
+    actionName: 'generate_argument',
+    agentName: 'UtilityAction',
     input: params,
     output: result,
-    status: verifyResult.passed ? "success" : "partial",
+    status: verifyResult.passed ? 'success' : 'partial',
     executionTime: Date.now() - startTime,
   });
 
@@ -252,7 +252,7 @@ export async function analyze_case(
     type: string;
   },
   userId: string,
-  caseId: string,
+  caseId: string
 ) {
   const startTime = Date.now();
 
@@ -265,13 +265,13 @@ export async function analyze_case(
   // 3. 提取实体
   const entities = await extract_entities(
     `${caseInfo.title}\n${caseInfo.description}`,
-    ["PERSON", "DATE", "AMOUNT"],
+    ['PERSON', 'DATE', 'AMOUNT']
   );
 
   // 4. 验证案件类型
   const classification = await classify_content(
     `${caseInfo.title}\n${caseInfo.description}`,
-    "case_type",
+    'case_type'
   );
 
   const result = {
@@ -285,12 +285,12 @@ export async function analyze_case(
 
   // 5. 记录行动
   await log_action(prisma, {
-    actionType: "ANALYZE",
-    actionName: "analyze_case",
-    agentName: "UtilityAction",
+    actionType: 'ANALYZE',
+    actionName: 'analyze_case',
+    agentName: 'UtilityAction',
     input: caseInfo,
     output: result,
-    status: "success",
+    status: 'success',
     executionTime: Date.now() - startTime,
   });
 
@@ -298,12 +298,12 @@ export async function analyze_case(
   await update_memory(
     memoryManager,
     {
-      memoryType: "HOT",
+      memoryType: 'HOT',
       memoryKey: `case_analysis:${caseId}`,
       memoryValue: result,
       importance: 0.9,
     },
-    userId,
+    userId
   );
 
   return result;
@@ -314,10 +314,10 @@ export async function analyze_case(
  * 使用核心原子函数：extract_entities
  */
 export async function extract_timeline(
-  content: string,
+  content: string
 ): Promise<Array<{ date: string; event: string }>> {
   // 提取日期实体
-  const entityResult = await extract_entities(content, ["DATE"]);
+  const entityResult = await extract_entities(content, ['DATE']);
 
   // 构建时间线
   const timeline: Array<{ date: string; event: string }> = [];
@@ -340,7 +340,7 @@ export async function extract_timeline(
  */
 export async function compress_content(
   content: string,
-  maxLength: number,
+  maxLength: number
 ): Promise<{
   compressed: string;
   originalLength: number;
@@ -364,7 +364,7 @@ export async function compress_content(
  */
 export async function validate_case_data(
   prisma: PrismaClient,
-  caseData: Record<string, unknown>,
+  caseData: Record<string, unknown>
 ): Promise<{
   valid: boolean;
   errors: string[];
@@ -372,46 +372,46 @@ export async function validate_case_data(
 }> {
   const rules = [
     {
-      field: "title",
-      type: "string",
+      field: 'title',
+      type: 'string',
       required: true,
       minLength: 5,
       maxLength: 200,
     },
     {
-      field: "description",
-      type: "string",
+      field: 'description',
+      type: 'string',
       required: true,
       minLength: 20,
     },
     {
-      field: "type",
-      type: "string",
+      field: 'type',
+      type: 'string',
       required: true,
     },
     {
-      field: "amount",
-      type: "number",
+      field: 'amount',
+      type: 'number',
       required: false,
       customValidator: (value: unknown) =>
-        typeof value === "number" && value > 0,
+        typeof value === 'number' && value > 0,
     },
   ];
 
   const result = await validate_data(caseData, rules);
 
   await log_action(prisma, {
-    actionType: "VERIFY",
-    actionName: "validate_case_data",
-    agentName: "UtilityAction",
+    actionType: 'VERIFY',
+    actionName: 'validate_case_data',
+    agentName: 'UtilityAction',
     input: caseData,
     output: result,
-    status: result.valid ? "success" : "failure",
+    status: result.valid ? 'success' : 'failure',
   });
 
   return {
     valid: result.valid,
-    errors: result.errors.map((e) => e.message),
+    errors: result.errors.map(e => e.message),
     warnings: result.warnings,
   };
 }
@@ -430,7 +430,7 @@ export async function search_and_rank<T>(
     limit?: number;
     useCache?: boolean;
   },
-  userId: string,
+  userId: string
 ): Promise<{
   results: T[];
   scores: number[];
@@ -457,7 +457,7 @@ export async function search_and_rank<T>(
   const { ranked, scores } = await rank_items(
     searchResult.items,
     params.scoreFn,
-    "desc",
+    'desc'
   );
 
   const results = { results: ranked, scores, cached: false };
@@ -477,7 +477,7 @@ export async function search_and_rank<T>(
 export async function merge_and_deduplicate<T>(
   prisma: PrismaClient,
   resultSets: T[][],
-  keySelector: (item: T) => string,
+  keySelector: (item: T) => string
 ): Promise<{
   merged: T[];
   originalCount: number;
@@ -486,12 +486,12 @@ export async function merge_and_deduplicate<T>(
   const mergeResult = await merge_results(resultSets, true, keySelector);
 
   await log_action(prisma, {
-    actionType: "TRANSFORM",
-    actionName: "merge_and_deduplicate",
-    agentName: "UtilityAction",
+    actionType: 'TRANSFORM',
+    actionName: 'merge_and_deduplicate',
+    agentName: 'UtilityAction',
     input: { setCount: resultSets.length },
     output: mergeResult,
-    status: "success",
+    status: 'success',
   });
 
   return {

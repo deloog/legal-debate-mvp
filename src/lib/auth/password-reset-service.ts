@@ -4,21 +4,21 @@
  * 处理密码找回和重置的核心逻辑，包括发送验证码和重置密码。
  */
 
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
-import { z } from "zod";
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+import { z } from 'zod';
 import type {
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
-} from "@/types/password-reset";
+} from '@/types/password-reset';
 import {
   PasswordResetErrorCode,
   VerificationCodeTypeEnum,
-} from "@/types/password-reset";
-import { getEmailService } from "./email-service";
-import { getVerificationCodeService } from "./verification-code-service";
+} from '@/types/password-reset';
+import { getEmailService } from './email-service';
+import { getVerificationCodeService } from './verification-code-service';
 
 // =============================================================================
 // 验证 Schema
@@ -48,15 +48,15 @@ function validatePasswordComplexity(password: string): {
   }
 
   if (!/[a-z]/.test(password)) {
-    errors.push("密码必须包含至少一个小写字母");
+    errors.push('密码必须包含至少一个小写字母');
   }
 
   if (!/[A-Z]/.test(password)) {
-    errors.push("密码必须包含至少一个大写字母");
+    errors.push('密码必须包含至少一个大写字母');
   }
 
   if (!/[0-9]/.test(password)) {
-    errors.push("密码必须包含至少一个数字");
+    errors.push('密码必须包含至少一个数字');
   }
 
   // 可选：特殊字符
@@ -74,18 +74,18 @@ function validatePasswordComplexity(password: string): {
  * 邮箱验证 schema
  */
 const forgotPasswordSchema = z.object({
-  email: z.string().email("请输入有效的邮箱地址"),
+  email: z.string().email('请输入有效的邮箱地址'),
 });
 
 /**
  * 密码重置验证 schema
  */
 const resetPasswordSchema = z.object({
-  email: z.string().email("请输入有效的邮箱地址"),
+  email: z.string().email('请输入有效的邮箱地址'),
   code: z
     .string()
-    .length(6, "验证码必须是6位数字")
-    .regex(/^\d+$/, "验证码必须是数字"),
+    .length(6, '验证码必须是6位数字')
+    .regex(/^\d+$/, '验证码必须是数字'),
   newPassword: z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH),
   confirmPassword: z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH),
 });
@@ -110,7 +110,7 @@ class PasswordResetService {
    * 忘记密码 - 发送验证码
    */
   async forgotPassword(
-    request: ForgotPasswordRequest,
+    request: ForgotPasswordRequest
   ): Promise<ForgotPasswordResponse> {
     try {
       // 验证请求参数
@@ -125,7 +125,7 @@ class PasswordResetService {
       if (!user) {
         return {
           success: true,
-          message: "如果该邮箱已注册，您将收到密码重置验证码",
+          message: '如果该邮箱已注册，您将收到密码重置验证码',
           data: {
             expiresAt: new Date(Date.now() + 15 * 60 * 1000),
             attemptWindow: 60,
@@ -138,13 +138,13 @@ class PasswordResetService {
       // 创建验证码
       const codeResult = await this.verificationCodeService.createCode(
         user.id,
-        VerificationCodeTypeEnum.PASSWORD_RESET,
+        VerificationCodeTypeEnum.PASSWORD_RESET
       );
 
       if (!codeResult.success) {
         return {
           success: false,
-          message: codeResult.error || "创建验证码失败",
+          message: codeResult.error || '创建验证码失败',
           error: codeResult.error,
         };
       }
@@ -153,20 +153,20 @@ class PasswordResetService {
       const emailResult = await this.emailService.sendPasswordResetEmail(
         user.email,
         codeResult.code,
-        codeResult.expiresAt,
+        codeResult.expiresAt
       );
 
       if (!emailResult.success) {
         return {
           success: false,
-          message: "发送邮件失败，请稍后重试",
+          message: '发送邮件失败，请稍后重试',
           error: PasswordResetErrorCode.EMAIL_SEND_FAILED,
         };
       }
 
       return {
         success: true,
-        message: "密码重置验证码已发送到您的邮箱",
+        message: '密码重置验证码已发送到您的邮箱',
         data: {
           expiresAt: codeResult.expiresAt,
           attemptWindow: 60,
@@ -179,16 +179,16 @@ class PasswordResetService {
         const firstError = error.issues[0];
         return {
           success: false,
-          message: firstError?.message || "输入验证失败",
+          message: firstError?.message || '输入验证失败',
           error: PasswordResetErrorCode.INVALID_EMAIL,
         };
       }
 
-      console.error("密码找回失败:", error);
+      console.error('密码找回失败:', error);
       return {
         success: false,
-        message: "密码找回失败，请稍后重试",
-        error: error instanceof Error ? error.message : "未知错误",
+        message: '密码找回失败，请稍后重试',
+        error: error instanceof Error ? error.message : '未知错误',
       };
     }
   }
@@ -197,7 +197,7 @@ class PasswordResetService {
    * 重置密码
    */
   async resetPassword(
-    request: ResetPasswordRequest,
+    request: ResetPasswordRequest
   ): Promise<ResetPasswordResponse> {
     try {
       // 验证请求参数
@@ -207,14 +207,14 @@ class PasswordResetService {
       if (validatedData.newPassword !== validatedData.confirmPassword) {
         return {
           success: false,
-          message: "两次输入的密码不一致",
+          message: '两次输入的密码不一致',
           error: PasswordResetErrorCode.PASSWORD_MISMATCH,
         };
       }
 
       // 验证密码复杂度
       const complexityCheck = validatePasswordComplexity(
-        validatedData.newPassword,
+        validatedData.newPassword
       );
       if (!complexityCheck.valid) {
         return {
@@ -228,13 +228,13 @@ class PasswordResetService {
       const verifyResult = await this.verificationCodeService.verifyCode(
         validatedData.email,
         validatedData.code,
-        VerificationCodeTypeEnum.PASSWORD_RESET,
+        VerificationCodeTypeEnum.PASSWORD_RESET
       );
 
       if (!verifyResult.valid || !verifyResult.userId) {
         return {
           success: false,
-          message: verifyResult.error || "验证码无效或已过期",
+          message: verifyResult.error || '验证码无效或已过期',
           error: PasswordResetErrorCode.INVALID_CODE,
         };
       }
@@ -247,7 +247,7 @@ class PasswordResetService {
       if (!user) {
         return {
           success: false,
-          message: "用户不存在",
+          message: '用户不存在',
           error: PasswordResetErrorCode.USER_NOT_FOUND,
         };
       }
@@ -277,7 +277,7 @@ class PasswordResetService {
 
       return {
         success: true,
-        message: "密码重置成功，请使用新密码登录",
+        message: '密码重置成功，请使用新密码登录',
         data: {
           userId: user.id,
           email: user.email,
@@ -288,16 +288,16 @@ class PasswordResetService {
         const firstError = error.issues[0];
         return {
           success: false,
-          message: firstError?.message || "输入验证失败",
+          message: firstError?.message || '输入验证失败',
           error: PasswordResetErrorCode.INVALID_EMAIL,
         };
       }
 
-      console.error("密码重置失败:", error);
+      console.error('密码重置失败:', error);
       return {
         success: false,
-        message: "密码重置失败，请稍后重试",
-        error: error instanceof Error ? error.message : "未知错误",
+        message: '密码重置失败，请稍后重试',
+        error: error instanceof Error ? error.message : '未知错误',
       };
     }
   }
@@ -320,7 +320,7 @@ let instance: PasswordResetService | null = null;
  * 获取密码重置服务实例
  */
 export function getPasswordResetService(
-  prisma?: PrismaClient,
+  prisma?: PrismaClient
 ): PasswordResetService {
   if (!instance) {
     instance = new PasswordResetService(prisma);

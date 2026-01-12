@@ -8,7 +8,7 @@ import {
   IssueCategory,
   IssueType,
   LogicalVerificationResult,
-} from "../types";
+} from '../types';
 
 /**
  * 逻辑一致性问题收集器类
@@ -28,7 +28,7 @@ export class LogicalIssueCollector {
         severity: IssueSeverity.MEDIUM,
         category: IssueCategory.LOGICAL,
         message: gap,
-        detectedBy: "logical",
+        detectedBy: 'logical',
       });
     }
 
@@ -40,7 +40,7 @@ export class LogicalIssueCollector {
         severity: IssueSeverity.MEDIUM,
         category: IssueCategory.LOGICAL,
         message: loop,
-        detectedBy: "logical",
+        detectedBy: 'logical',
       });
     }
 
@@ -52,8 +52,8 @@ export class LogicalIssueCollector {
         severity: contradiction.severity,
         category: IssueCategory.LOGICAL,
         message: contradiction.description,
-        suggestion: "请检查并修正矛盾的陈述",
-        detectedBy: "logical",
+        suggestion: '请检查并修正矛盾的陈述',
+        detectedBy: 'logical',
       });
     }
 
@@ -64,8 +64,8 @@ export class LogicalIssueCollector {
         type: IssueType.LOGICAL_ERROR,
         severity: IssueSeverity.MEDIUM,
         category: IssueCategory.LOGICAL,
-        message: "法条引用逻辑性不足，请检查法条的有效性和相关性",
-        detectedBy: "logical",
+        message: '法条引用逻辑性不足，请检查法条的有效性和相关性',
+        detectedBy: 'logical',
       });
     }
 

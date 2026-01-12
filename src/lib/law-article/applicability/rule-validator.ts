@@ -1,6 +1,6 @@
-import { LawArticle, LawStatus, LawType } from "@prisma/client";
-import { DocumentAnalysisOutput } from "@/lib/agent/doc-analyzer/core/types";
-import { RuleValidationResult } from "./types";
+import { LawArticle, LawStatus, LawType } from '@prisma/client';
+import { DocumentAnalysisOutput } from '@/lib/agent/doc-analyzer/core/types';
+import { RuleValidationResult } from './types';
 
 /**
  * 规则验证器
@@ -14,7 +14,7 @@ export class RuleValidator {
    */
   public validateArticle(
     article: LawArticle,
-    caseInfo: DocumentAnalysisOutput,
+    caseInfo: DocumentAnalysisOutput
   ): RuleValidationResult {
     // 时效性检查
     const validity = this.checkValidity(article);
@@ -29,7 +29,7 @@ export class RuleValidator {
     const overallScore = this.calculateOverallScore(
       validity,
       scope,
-      levelScore,
+      levelScore
     );
 
     return {
@@ -45,7 +45,7 @@ export class RuleValidator {
    */
   public validateArticles(
     articles: LawArticle[],
-    caseInfo: DocumentAnalysisOutput,
+    caseInfo: DocumentAnalysisOutput
   ): Map<string, RuleValidationResult> {
     const results = new Map<string, RuleValidationResult>();
 
@@ -93,7 +93,7 @@ export class RuleValidator {
 
     return {
       passed: true,
-      reason: "法条在有效期内，状态正常",
+      reason: '法条在有效期内，状态正常',
     };
   }
 
@@ -102,7 +102,7 @@ export class RuleValidator {
    */
   private checkScope(
     article: LawArticle,
-    caseInfo: DocumentAnalysisOutput,
+    caseInfo: DocumentAnalysisOutput
   ): { passed: boolean; reason?: string } {
     const caseType = caseInfo.extractedData.caseType;
 
@@ -124,14 +124,14 @@ export class RuleValidator {
       if (isLocalRegulation) {
         return {
           passed: true,
-          reason: "地方法规，需确认管辖权范围",
+          reason: '地方法规，需确认管辖权范围',
         };
       }
     }
 
     return {
       passed: true,
-      reason: "法条适用范围与案件匹配",
+      reason: '法条适用范围与案件匹配',
     };
   }
 
@@ -140,7 +140,7 @@ export class RuleValidator {
    */
   private checkCategoryMatch(
     article: LawArticle,
-    caseType: string | undefined,
+    caseType: string | undefined
   ): { passed: boolean; reason?: string } {
     if (!caseType) {
       // 无法确定案件类型，不进行分类检查
@@ -176,20 +176,20 @@ export class RuleValidator {
    */
   private checkTypeMatch(
     article: LawArticle,
-    caseInfo: DocumentAnalysisOutput,
+    caseInfo: DocumentAnalysisOutput
   ): { passed: boolean; reason?: string } {
     const caseType = caseInfo.extractedData.caseType;
 
     // 刑事案件主要使用刑法相关法条
-    if (caseType === "criminal" && article.lawType !== LawType.LAW) {
+    if (caseType === 'criminal' && article.lawType !== LawType.LAW) {
       return {
         passed: false,
-        reason: "刑事案件应优先适用法律层级法条，而非其他层级法条",
+        reason: '刑事案件应优先适用法律层级法条，而非其他层级法条',
       };
     }
 
     // 民事案件可以使用多种法条类型
-    if (caseType === "civil") {
+    if (caseType === 'civil') {
       // 民事案件优先使用法律和行政法规
       if (
         article.lawType === LawType.CONSTITUTION ||
@@ -197,14 +197,14 @@ export class RuleValidator {
       ) {
         return {
           passed: false,
-          reason: "法条类型不适用于民事案件",
+          reason: '法条类型不适用于民事案件',
         };
       }
     }
 
     return {
       passed: true,
-      reason: "法条类型与案件类型匹配",
+      reason: '法条类型与案件类型匹配',
     };
   }
 
@@ -248,7 +248,7 @@ export class RuleValidator {
     // 归一化引用量评分
     const referenceScore = Math.min(
       article.referenceCount / maxReferenceCount,
-      1,
+      1
     );
 
     // 热度评分：浏览量权重60%，引用量权重40%
@@ -263,7 +263,7 @@ export class RuleValidator {
   private calculateOverallScore(
     validity: { passed: boolean; reason?: string },
     scope: { passed: boolean; reason?: string },
-    levelScore: number,
+    levelScore: number
   ): number {
     let score = levelScore;
 
@@ -291,13 +291,13 @@ export class RuleValidator {
    */
   private getCategoryMapping(): Record<string, string[]> {
     return {
-      civil: ["CIVIL"],
-      criminal: ["CRIMINAL"],
-      administrative: ["ADMINISTRATIVE"],
-      commercial: ["CIVIL", "COMMERCIAL"],
-      labor: ["LABOR"],
-      intellectual: ["INTELLECTUAL_PROPERTY"],
-      other: ["CIVIL", "ADMINISTRATIVE", "OTHER"],
+      civil: ['CIVIL'],
+      criminal: ['CRIMINAL'],
+      administrative: ['ADMINISTRATIVE'],
+      commercial: ['CIVIL', 'COMMERCIAL'],
+      labor: ['LABOR'],
+      intellectual: ['INTELLECTUAL_PROPERTY'],
+      other: ['CIVIL', 'ADMINISTRATIVE', 'OTHER'],
     };
   }
 
@@ -306,11 +306,11 @@ export class RuleValidator {
    */
   private translateLawStatus(status: LawStatus): string {
     const translations: Record<LawStatus, string> = {
-      DRAFT: "草案",
-      VALID: "有效",
-      AMENDED: "已修订",
-      REPEALED: "已废止",
-      EXPIRED: "已过期",
+      DRAFT: '草案',
+      VALID: '有效',
+      AMENDED: '已修订',
+      REPEALED: '已废止',
+      EXPIRED: '已过期',
     };
     return translations[status] || status;
   }
@@ -320,15 +320,15 @@ export class RuleValidator {
    */
   private translateLawCategory(category: string): string {
     const translations: Record<string, string> = {
-      CIVIL: "民事",
-      CRIMINAL: "刑事",
-      ADMINISTRATIVE: "行政",
-      COMMERCIAL: "商事",
-      ECONOMIC: "经济",
-      LABOR: "劳动",
-      INTELLECTUAL_PROPERTY: "知识产权",
-      PROCEDURE: "程序",
-      OTHER: "其他",
+      CIVIL: '民事',
+      CRIMINAL: '刑事',
+      ADMINISTRATIVE: '行政',
+      COMMERCIAL: '商事',
+      ECONOMIC: '经济',
+      LABOR: '劳动',
+      INTELLECTUAL_PROPERTY: '知识产权',
+      PROCEDURE: '程序',
+      OTHER: '其他',
     };
     return translations[category] || category;
   }
@@ -338,13 +338,13 @@ export class RuleValidator {
    */
   private translateCaseType(type: string): string {
     const translations: Record<string, string> = {
-      civil: "民事案件",
-      criminal: "刑事案件",
-      administrative: "行政案件",
-      commercial: "商事案件",
-      labor: "劳动案件",
-      intellectual: "知识产权案件",
-      other: "其他案件",
+      civil: '民事案件',
+      criminal: '刑事案件',
+      administrative: '行政案件',
+      commercial: '商事案件',
+      labor: '劳动案件',
+      intellectual: '知识产权案件',
+      other: '其他案件',
     };
     return translations[type] || type;
   }
@@ -353,7 +353,7 @@ export class RuleValidator {
    * 格式化日期
    */
   private formatDate(date: Date): string {
-    return date.toISOString().split("T")[0];
+    return date.toISOString().split('T')[0];
   }
 }
 

@@ -3,24 +3,24 @@
  * 使用刷新令牌获取新的访问令牌
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 import {
   verifyToken,
   generateAccessToken,
   generateRefreshToken,
-} from "@/lib/auth/jwt";
-import { prisma } from "@/lib/db/prisma";
-import type { JwtPayload } from "@/types/auth";
-import type { RefreshTokenResponse } from "@/types/auth";
+} from '@/lib/auth/jwt';
+import { prisma } from '@/lib/db/prisma';
+import type { JwtPayload } from '@/types/auth';
+import type { RefreshTokenResponse } from '@/types/auth';
 
 export async function POST(
-  request: NextRequest,
+  request: NextRequest
 ): Promise<NextResponse<RefreshTokenResponse>> {
   try {
     const body = await request.json();
     const { refreshToken } = body as { refreshToken?: string };
 
-    console.log("[REFRESH] Request body:", {
+    console.log('[REFRESH] Request body:', {
       hasRefreshToken: !!refreshToken,
       tokenLength: refreshToken?.length,
     });
@@ -29,16 +29,16 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: "刷新令牌不能为空",
-          error: "MISSING_REFRESH_TOKEN",
+          message: '刷新令牌不能为空',
+          error: 'MISSING_REFRESH_TOKEN',
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     // 验证刷新令牌
     const verificationResult = verifyToken(refreshToken);
-    console.log("[REFRESH] Token verification:", {
+    console.log('[REFRESH] Token verification:', {
       valid: verificationResult.valid,
       error: verificationResult.error,
     });
@@ -47,10 +47,10 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: "无效或过期的刷新令牌",
+          message: '无效或过期的刷新令牌',
           error: verificationResult.error,
         },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -73,21 +73,21 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: "用户不存在",
-          error: "USER_NOT_FOUND",
+          message: '用户不存在',
+          error: 'USER_NOT_FOUND',
         },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
-    if (user.status !== "ACTIVE") {
+    if (user.status !== 'ACTIVE') {
       return NextResponse.json(
         {
           success: false,
-          message: "用户账户已被禁用",
-          error: "USER_INACTIVE",
+          message: '用户账户已被禁用',
+          error: 'USER_INACTIVE',
         },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -102,7 +102,7 @@ export async function POST(
       },
     });
 
-    console.log("[REFRESH] Session query result:", {
+    console.log('[REFRESH] Session query result:', {
       found: !!session,
       userId: user.id,
       expires: session?.expires,
@@ -113,10 +113,10 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: "刷新令牌已失效或不存在",
-          error: "SESSION_NOT_FOUND",
+          message: '刷新令牌已失效或不存在',
+          error: 'SESSION_NOT_FOUND',
         },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -147,29 +147,29 @@ export async function POST(
     return NextResponse.json(
       {
         success: true,
-        message: "令牌刷新成功",
+        message: '令牌刷新成功',
         data: {
           token: newAccessToken,
           refreshToken: newRefreshToken,
           expiresIn,
         },
       },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error) {
-    console.error("[REFRESH] Token refresh error:", error);
+    console.error('[REFRESH] Token refresh error:', error);
     if (error instanceof Error) {
-      console.error("[REFRESH] Error message:", error.message);
-      console.error("[REFRESH] Error stack:", error.stack);
+      console.error('[REFRESH] Error message:', error.message);
+      console.error('[REFRESH] Error stack:', error.stack);
     }
 
     return NextResponse.json(
       {
         success: false,
-        message: "令牌刷新失败",
-        error: "INTERNAL_SERVER_ERROR",
+        message: '令牌刷新失败',
+        error: 'INTERNAL_SERVER_ERROR',
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

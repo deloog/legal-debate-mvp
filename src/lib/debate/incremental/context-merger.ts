@@ -12,15 +12,15 @@ import {
   IncrementalAnalysisConfig,
   DEFAULT_INCREMENTAL_CONFIG,
   MergeResult,
-} from "./types";
+} from './types';
 
 /**
  * 上下文合并器类
  */
 export class ContextMerger {
-  private config: IncrementalAnalysisConfig["merge"];
+  private config: IncrementalAnalysisConfig['merge'];
 
-  constructor(config?: Partial<IncrementalAnalysisConfig["merge"]>) {
+  constructor(config?: Partial<IncrementalAnalysisConfig['merge']>) {
     this.config = {
       ...DEFAULT_INCREMENTAL_CONFIG.merge,
       ...config,
@@ -32,13 +32,13 @@ export class ContextMerger {
    */
   private mergeMaterials(
     oldMaterials: Material[],
-    diff: DiffResult,
+    diff: DiffResult
   ): Material[] {
     const materialMap = new Map<string, Material>();
 
     // 添加旧资料（排除删除的）
     for (const material of oldMaterials) {
-      const isDeleted = diff.deleted.some((d) => d.id === material.id);
+      const isDeleted = diff.deleted.some(d => d.id === material.id);
       if (!isDeleted) {
         materialMap.set(material.id, material);
       }
@@ -57,7 +57,7 @@ export class ContextMerger {
    */
   private mergeDocuments(
     oldDocuments: DocumentAnalysisOutput[],
-    newDocuments: DocumentAnalysisOutput[],
+    newDocuments: DocumentAnalysisOutput[]
   ): DocumentAnalysisOutput[] {
     const documentMap = new Map<string, DocumentAnalysisOutput>();
 
@@ -81,7 +81,7 @@ export class ContextMerger {
    */
   private mergeLawArticles(
     oldLawArticles: LawArticleApplicabilityResult[],
-    newLawArticles: LawArticleApplicabilityResult[],
+    newLawArticles: LawArticleApplicabilityResult[]
   ): LawArticleApplicabilityResult[] {
     const lawArticleMap = new Map<string, LawArticleApplicabilityResult>();
 
@@ -105,7 +105,7 @@ export class ContextMerger {
    */
   private mergeEvidence(
     oldEvidence: EvidenceAnalysisResult[],
-    newEvidenceList: EvidenceAnalysisResult[],
+    newEvidenceList: EvidenceAnalysisResult[]
   ): EvidenceAnalysisResult[] {
     const evidenceMap = new Map<string, EvidenceAnalysisResult>();
 
@@ -126,19 +126,19 @@ export class ContextMerger {
    * 解决冲突
    */
   private resolveConflict():
-    | "new-priority"
-    | "old-priority"
-    | "merged"
-    | "conflict" {
+    | 'new-priority'
+    | 'old-priority'
+    | 'merged'
+    | 'conflict' {
     switch (this.config.conflictResolution) {
-      case "new-priority":
-        return "new-priority";
-      case "old-priority":
-        return "old-priority";
-      case "manual":
-        return "conflict";
+      case 'new-priority':
+        return 'new-priority';
+      case 'old-priority':
+        return 'old-priority';
+      case 'manual':
+        return 'conflict';
       default:
-        return "new-priority";
+        return 'new-priority';
     }
   }
 
@@ -159,7 +159,7 @@ export class ContextMerger {
       newDocuments: DocumentAnalysisOutput[];
       newLawArticles: LawArticleApplicabilityResult[];
       newEvidence: EvidenceAnalysisResult[];
-    },
+    }
   ): MergeResult {
     const oldDocs = historicalContext.analysisResults.documents || [];
     const oldLawArticles = historicalContext.analysisResults.lawArticles || [];
@@ -168,7 +168,7 @@ export class ContextMerger {
     // 合并资料
     const mergedMaterials = this.mergeMaterials(
       historicalContext.materials,
-      diff,
+      diff
     );
 
     // 根据合并策略合并分析结果
@@ -177,7 +177,7 @@ export class ContextMerger {
     let mergedEvidence: EvidenceAnalysisResult[];
 
     switch (this.config.strategy) {
-      case "append":
+      case 'append':
         mergedDocuments = [...oldDocs, ...incrementalAnalysis.newDocuments];
         mergedLawArticles = [
           ...oldLawArticles,
@@ -186,25 +186,25 @@ export class ContextMerger {
         mergedEvidence = [...oldEvidence, ...incrementalAnalysis.newEvidence];
         break;
 
-      case "replace":
+      case 'replace':
         mergedDocuments = [...incrementalAnalysis.newDocuments];
         mergedLawArticles = [...incrementalAnalysis.newLawArticles];
         mergedEvidence = [...incrementalAnalysis.newEvidence];
         break;
 
-      case "merge":
+      case 'merge':
       default:
         mergedDocuments = this.mergeDocuments(
           oldDocs,
-          incrementalAnalysis.newDocuments,
+          incrementalAnalysis.newDocuments
         );
         mergedLawArticles = this.mergeLawArticles(
           oldLawArticles,
-          incrementalAnalysis.newLawArticles,
+          incrementalAnalysis.newLawArticles
         );
         mergedEvidence = this.mergeEvidence(
           oldEvidence,
-          incrementalAnalysis.newEvidence,
+          incrementalAnalysis.newEvidence
         );
         break;
     }
@@ -222,7 +222,7 @@ export class ContextMerger {
       field: string;
       oldValue: unknown;
       newValue: unknown;
-      resolution: "new-priority" | "old-priority" | "merged" | "conflict";
+      resolution: 'new-priority' | 'old-priority' | 'merged' | 'conflict';
     }> = [];
 
     const warnings: string[] = [];
@@ -241,14 +241,14 @@ export class ContextMerger {
   /**
    * 更新配置
    */
-  updateConfig(config: Partial<IncrementalAnalysisConfig["merge"]>): void {
+  updateConfig(config: Partial<IncrementalAnalysisConfig['merge']>): void {
     this.config = { ...this.config, ...config };
   }
 
   /**
    * 获取当前配置
    */
-  getConfig(): IncrementalAnalysisConfig["merge"] {
+  getConfig(): IncrementalAnalysisConfig['merge'] {
     return { ...this.config };
   }
 }

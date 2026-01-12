@@ -1,11 +1,11 @@
-import { getUnifiedAIService } from "./unified-service";
-import { AIProvider } from "../../types/ai-service";
+import { getUnifiedAIService } from './unified-service';
+import { AIProvider } from '../../types/ai-service';
 
 // 定义模型类型枚举
 export enum AIModelType {
-  GLM4_FLASH = "glm-4-flash",
-  GLM4 = "glm-4",
-  DEEPSEEK_CHAT = "deepseek-chat",
+  GLM4_FLASH = 'glm-4-flash',
+  GLM4 = 'glm-4',
+  DEEPSEEK_CHAT = 'deepseek-chat',
 }
 
 // =============================================================================
@@ -29,7 +29,7 @@ export interface DocumentParseResponse {
   data?: {
     extractedData: {
       parties: Array<{
-        type: "plaintiff" | "defendant" | "other";
+        type: 'plaintiff' | 'defendant' | 'other';
         name: string;
         role?: string;
         contact?: string;
@@ -49,13 +49,13 @@ export interface DocumentParseResponse {
       }>;
       summary?: string;
       caseType?:
-        | "civil"
-        | "criminal"
-        | "administrative"
-        | "commercial"
-        | "labor"
-        | "intellectual"
-        | "other";
+        | 'civil'
+        | 'criminal'
+        | 'administrative'
+        | 'commercial'
+        | 'labor'
+        | 'intellectual'
+        | 'other';
       keyFacts?: string[];
     };
     confidence: number;
@@ -70,8 +70,8 @@ export interface DocumentParseResponse {
 }
 
 export class DocumentParser {
-  private aiProvider: AIProvider = "zhipu";
-  private aiModel: string = "glm-4-flash";
+  private aiProvider: AIProvider = 'zhipu';
+  private aiModel: string = 'glm-4-flash';
   private useMock: boolean;
   private forceRealAI: boolean = false;
 
@@ -95,11 +95,11 @@ export class DocumentParser {
       return false;
     }
     // 检查环境变量
-    if (process.env.USE_MOCK_AI === "true") {
+    if (process.env.USE_MOCK_AI === 'true') {
       return true;
     }
     // 检查测试环境
-    if (process.env.NODE_ENV === "test") {
+    if (process.env.NODE_ENV === 'test') {
       return true;
     }
     // 使用构造函数传入的配置
@@ -115,62 +115,62 @@ export class DocumentParser {
       extractedData: {
         parties: [
           {
-            type: "plaintiff",
-            name: "张三",
-            role: "原告",
-            contact: "13800138000",
-            address: "北京市朝阳区",
+            type: 'plaintiff',
+            name: '张三',
+            role: '原告',
+            contact: '13800138000',
+            address: '北京市朝阳区',
           },
           {
-            type: "defendant",
-            name: "某科技公司",
-            role: "被告",
-            contact: "010-12345678",
-            address: "上海市浦东新区",
+            type: 'defendant',
+            name: '某科技公司',
+            role: '被告',
+            contact: '010-12345678',
+            address: '上海市浦东新区',
           },
         ],
         claims: [
           {
-            type: "PAY_PRINCIPAL",
-            content: "判令被告支付货款100000元",
+            type: 'PAY_PRINCIPAL',
+            content: '判令被告支付货款100000元',
             amount: 100000,
-            evidence: ["合同协议", "付款凭证"],
-            legalBasis: "民法典第579条",
+            evidence: ['合同协议', '付款凭证'],
+            legalBasis: '民法典第579条',
           },
           {
-            type: "PAY_INTEREST",
-            content: "判令被告支付利息（按年利率6%计算）",
+            type: 'PAY_INTEREST',
+            content: '判令被告支付利息（按年利率6%计算）',
             amount: null,
-            evidence: ["合同约定"],
-            legalBasis: "民法典第676条",
+            evidence: ['合同约定'],
+            legalBasis: '民法典第676条',
           },
           {
-            type: "LITIGATION_COST",
-            content: "判令被告承担本案诉讼费用",
+            type: 'LITIGATION_COST',
+            content: '判令被告承担本案诉讼费用',
             amount: null,
             evidence: [],
-            legalBasis: "诉讼费用交纳办法",
+            legalBasis: '诉讼费用交纳办法',
           },
         ],
         timeline: [
           {
-            date: "2024-01-15",
-            event: "签订合同",
-            description: "双方签订服务合同",
+            date: '2024-01-15',
+            event: '签订合同',
+            description: '双方签订服务合同',
           },
           {
-            date: "2024-06-20",
-            event: "发生争议",
-            description: "因合同履行问题产生纠纷",
+            date: '2024-06-20',
+            event: '发生争议',
+            description: '因合同履行问题产生纠纷',
           },
         ],
         summary:
-          "本案为服务合同纠纷，原告张三请求被告某科技公司支付货款及利息。",
-        caseType: "civil",
+          '本案为服务合同纠纷，原告张三请求被告某科技公司支付货款及利息。',
+        caseType: 'civil',
         keyFacts: [
-          "双方签订服务合同",
-          "被告未按时支付货款",
-          "原告多次催要无果",
+          '双方签订服务合同',
+          '被告未按时支付货款',
+          '原告多次催要无果',
         ],
       },
       confidence: 0.95,
@@ -184,7 +184,7 @@ export class DocumentParser {
   async analyzeWithAI(prompt: string): Promise<string> {
     // 如果是Mock模式，直接返回预设的Mock响应
     if (this.shouldUseMock()) {
-      console.log("使用Mock模式进行文档分析");
+      console.log('使用Mock模式进行文档分析');
       return this.generateMockResponse();
     }
 
@@ -197,7 +197,7 @@ export class DocumentParser {
 
         const unifiedService = await getUnifiedAIService(
           undefined,
-          this.forceRealAI,
+          this.forceRealAI
         );
 
         const response = await unifiedService.chatCompletion({
@@ -205,12 +205,12 @@ export class DocumentParser {
           provider: this.aiProvider,
           messages: [
             {
-              role: "system",
+              role: 'system',
               content:
-                "你是一个专业的法律文档分析专家，专门从法律文档中提取结构化信息。",
+                '你是一个专业的法律文档分析专家，专门从法律文档中提取结构化信息。',
             },
             {
-              role: "user",
+              role: 'user',
               content: prompt,
             },
           ],
@@ -222,27 +222,27 @@ export class DocumentParser {
           console.log(`✅ [尝试 ${attempt}/${maxRetries}] AI调用成功`);
           return response.choices[0].message.content;
         } else {
-          throw new Error("AI服务返回了空响应");
+          throw new Error('AI服务返回了空响应');
         }
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
         console.error(
           `❌ [尝试 ${attempt}/${maxRetries}] AI调用失败:`,
-          lastError.message,
+          lastError.message
         );
 
         // 如果不是最后一次尝试，等待后重试
         if (attempt < maxRetries) {
           const waitTime = attempt * 1000; // 递增等待时间：1秒、2秒、3秒
           console.log(`⏳ 等待 ${waitTime}ms 后重试...`);
-          await new Promise((resolve) => setTimeout(resolve, waitTime));
+          await new Promise(resolve => setTimeout(resolve, waitTime));
         }
       }
     }
 
     // 所有重试都失败，返回友好错误信息
     throw new Error(
-      `AI分析当前繁忙，请稍后再试。技术详情：${lastError?.message || "未知错误"}`,
+      `AI分析当前繁忙，请稍后再试。技术详情：${lastError?.message || '未知错误'}`
     );
   }
 
@@ -251,7 +251,7 @@ export class DocumentParser {
   // =============================================================================
 
   async parseDocument(
-    request: DocumentParseRequest,
+    request: DocumentParseRequest
   ): Promise<DocumentParseResponse> {
     const startTime = Date.now();
 
@@ -259,7 +259,7 @@ export class DocumentParser {
       // 构建分析提示词
       const prompt = this.buildDocumentAnalysisPrompt(
         request.textContent,
-        request.extractOptions,
+        request.extractOptions
       );
 
       // 调用AI服务
@@ -284,7 +284,7 @@ export class DocumentParser {
 
       return {
         success: false,
-        error: "文档解析失败",
+        error: '文档解析失败',
         metadata: {
           model: this.aiModel,
           responseTime,
@@ -300,29 +300,29 @@ export class DocumentParser {
 
   private buildDocumentAnalysisPrompt(
     textContent: string,
-    options?: DocumentParseRequest["extractOptions"],
+    options?: DocumentParseRequest['extractOptions']
   ): string {
     const analysisTasks = [];
 
     if (options?.extractParties !== false) {
-      analysisTasks.push("当事人信息提取");
+      analysisTasks.push('当事人信息提取');
     }
 
     if (options?.extractClaims !== false) {
-      analysisTasks.push("诉讼请求识别");
+      analysisTasks.push('诉讼请求识别');
     }
 
     if (options?.extractTimeline !== false) {
-      analysisTasks.push("时间线整理");
+      analysisTasks.push('时间线整理');
     }
 
     if (options?.generateSummary === true) {
-      analysisTasks.push("案件摘要生成");
+      analysisTasks.push('案件摘要生成');
     }
 
     return `你是一个专业的法律文档分析专家。请对以下法律文档进行分析，完成以下任务：
 
-分析任务：${analysisTasks.join("、")}
+分析任务：${analysisTasks.join('、')}
 
 文档内容：
 ${textContent}
@@ -376,7 +376,7 @@ ${textContent}
   // =============================================================================
 
   private parseAIResponse(aiResponse: string): {
-    extractedData: DocumentParseResponse["data"]["extractedData"];
+    extractedData: DocumentParseResponse['data']['extractedData'];
     confidence: number;
     tokenUsed: number;
   } {
@@ -386,11 +386,11 @@ ${textContent}
 
       // 移除所有可能的代码块标记
       cleanedResponse = cleanedResponse
-        .replace(/```json\s*\n?/gi, "")
-        .replace(/```text\s*\n?/gi, "")
-        .replace(/```javascript\s*\n?/gi, "")
-        .replace(/```js\s*\n?/gi, "")
-        .replace(/```\s*$/gi, "")
+        .replace(/```json\s*\n?/gi, '')
+        .replace(/```text\s*\n?/gi, '')
+        .replace(/```javascript\s*\n?/gi, '')
+        .replace(/```js\s*\n?/gi, '')
+        .replace(/```\s*$/gi, '')
         .trim();
 
       // 提取完整的JSON对象（支持嵌套）
@@ -404,7 +404,7 @@ ${textContent}
 
       // 验证响应结构
       if (!parsed.extractedData) {
-        throw new Error("AI响应格式不正确：缺少extractedData字段");
+        throw new Error('AI响应格式不正确：缺少extractedData字段');
       }
 
       return {
@@ -420,8 +420,8 @@ ${textContent}
         tokenUsed: this.estimateTokenUsage(aiResponse),
       };
     } catch (error) {
-      console.error("AI响应解析失败:", error);
-      console.error("原始响应:", aiResponse);
+      console.error('AI响应解析失败:', error);
+      console.error('原始响应:', aiResponse);
 
       // JSON解析失败时的降级处理
       return {
@@ -429,7 +429,7 @@ ${textContent}
           parties: [],
           claims: [],
           timeline: [],
-          summary: "AI响应解析失败，请手动分析",
+          summary: 'AI响应解析失败，请手动分析',
           keyFacts: [],
         },
         confidence: 0.3,

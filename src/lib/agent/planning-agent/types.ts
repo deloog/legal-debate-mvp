@@ -1,7 +1,7 @@
 // PlanningAgent类型定义
 
-import type { AgentType } from "../../../types/agent";
-import { TaskPriority } from "../../../types/agent";
+import type { AgentType } from '../../../types/agent';
+import { TaskPriority } from '../../../types/agent';
 
 // =============================================================================
 // 任务分解相关类型
@@ -27,11 +27,11 @@ export interface DecompositionResult {
 
 // 任务类型枚举
 export enum TaskType {
-  DEBATE = "debate",
-  DOCUMENT_GENERATION = "document_generation",
-  ANALYSIS = "analysis",
-  LEGAL_RESEARCH = "legal_research",
-  CUSTOM = "custom",
+  DEBATE = 'debate',
+  DOCUMENT_GENERATION = 'document_generation',
+  ANALYSIS = 'analysis',
+  LEGAL_RESEARCH = 'legal_research',
+  CUSTOM = 'custom',
 }
 
 // 任务分解配置
@@ -51,7 +51,7 @@ export interface Strategy {
   description: string;
   swotAnalysis: SWOTAnalysis;
   recommendations: string[];
-  riskLevel: "low" | "medium" | "high";
+  riskLevel: 'low' | 'medium' | 'high';
   feasibilityScore: number;
   confidence: number;
 }
@@ -87,7 +87,7 @@ export interface Workflow {
   id: string;
   name: string;
   tasks: SubTask[];
-  executionMode: "sequential" | "parallel" | "mixed";
+  executionMode: 'sequential' | 'parallel' | 'mixed';
   estimatedTotalTime: number;
   dependencies: TaskDependency[];
 }
@@ -96,14 +96,14 @@ export interface Workflow {
 export interface TaskDependency {
   taskId: string;
   dependsOn: string[];
-  type: "strict" | "weak";
+  type: 'strict' | 'weak';
 }
 
 // 工作流执行模式
 export enum ExecutionMode {
-  SEQUENTIAL = "sequential",
-  PARALLEL = "parallel",
-  MIXED = "mixed",
+  SEQUENTIAL = 'sequential',
+  PARALLEL = 'parallel',
+  MIXED = 'mixed',
 }
 
 // 工作流编排结果
@@ -118,7 +118,7 @@ export interface ExecutionStep {
   step: number;
   taskId: string;
   taskName: string;
-  mode: "execute" | "wait" | "parallel";
+  mode: 'execute' | 'wait' | 'parallel';
   dependencies: string[];
   estimatedTime: number;
 }
@@ -217,7 +217,7 @@ export interface CaseInfo {
 // 当事人信息
 export interface PartyInfo {
   name: string;
-  role: "plaintiff" | "defendant";
+  role: 'plaintiff' | 'defendant';
 }
 
 // 规划约束
@@ -235,12 +235,12 @@ export interface PlanningConstraints {
 
 // 规划错误类型
 export enum PlanningErrorType {
-  INVALID_TASK_TYPE = "invalid_task_type",
-  DECOMPOSITION_FAILED = "decomposition_failed",
-  STRATEGY_GENERATION_FAILED = "strategy_generation_failed",
-  WORKFLOW_ORCHESTRATION_FAILED = "workflow_orchestration_failed",
-  RESOURCE_ALLOCATION_FAILED = "resource_allocation_failed",
-  UNSATISFIABLE_CONSTRAINTS = "unsatisfiable_constraints",
+  INVALID_TASK_TYPE = 'invalid_task_type',
+  DECOMPOSITION_FAILED = 'decomposition_failed',
+  STRATEGY_GENERATION_FAILED = 'strategy_generation_failed',
+  WORKFLOW_ORCHESTRATION_FAILED = 'workflow_orchestration_failed',
+  RESOURCE_ALLOCATION_FAILED = 'resource_allocation_failed',
+  UNSATISFIABLE_CONSTRAINTS = 'unsatisfiable_constraints',
 }
 
 // 规划错误

@@ -3,20 +3,20 @@
  * 独立运行，不使用Jest的mock环境，确保真实AI调用
  */
 
-import { config } from "dotenv";
-import { OpenAI } from "openai";
+import { config } from 'dotenv';
+import { OpenAI } from 'openai';
 
 // 加载环境变量
-config({ path: ".env" });
+config({ path: '.env' });
 
 async function runAccuracyTest() {
-  console.log("=".repeat(60));
-  console.log("准确性提升验证测试");
-  console.log("=".repeat(60));
+  console.log('='.repeat(60));
+  console.log('准确性提升验证测试');
+  console.log('='.repeat(60));
 
   const testCases = [
     {
-      id: "DOC-001",
+      id: 'DOC-001',
       content: `民事起诉状
 
 原告：王小红，女，1985年3月15日出生，汉族，住上海市浦东新区陆家嘴环路100号。
@@ -44,26 +44,26 @@ async function runAccuracyTest() {
 2024年1月15日`,
       expected: {
         parties: [
-          { name: "王小红", type: "plaintiff", role: "原告" },
-          { name: "张大伟", type: "defendant", role: "被告" },
-          { name: "赵明", type: "other", role: "第三人" },
+          { name: '王小红', type: 'plaintiff', role: '原告' },
+          { name: '张大伟', type: 'defendant', role: '被告' },
+          { name: '赵明', type: 'other', role: '第三人' },
         ],
         claims: [
           {
-            type: "PAY_PRINCIPAL",
-            content: "支付拖欠货款",
-            keywords: ["拖欠货款", "800000"],
+            type: 'PAY_PRINCIPAL',
+            content: '支付拖欠货款',
+            keywords: ['拖欠货款', '800000'],
           },
-          { type: "PAY_PENALTY", content: "支付违约金", keywords: ["违约金"] },
+          { type: 'PAY_PENALTY', content: '支付违约金', keywords: ['违约金'] },
           {
-            type: "LITIGATION_COST",
-            content: "诉讼费用",
-            keywords: ["诉讼费用"],
+            type: 'LITIGATION_COST',
+            content: '诉讼费用',
+            keywords: ['诉讼费用'],
           },
           {
-            type: "PAY_DAMAGES",
-            content: "赔偿律师费",
-            keywords: ["律师费", "50000"],
+            type: 'PAY_DAMAGES',
+            content: '赔偿律师费',
+            keywords: ['律师费', '50000'],
           },
         ],
         amounts: [800000, 50000],
@@ -71,10 +71,10 @@ async function runAccuracyTest() {
     },
   ];
 
-  console.log("正在创建AI客户端...");
+  console.log('正在创建AI客户端...');
   const client = new OpenAI({
     apiKey: process.env.DEEPSEEK_API_KEY,
-    baseURL: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1",
+    baseURL: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com/v1',
     timeout: 60000,
   });
 
@@ -140,17 +140,17 @@ ${testCase.content}
 }`;
 
       const startTime = Date.now();
-      console.log("正在调用DeepSeek API...");
+      console.log('正在调用DeepSeek API...');
       const response = await client.chat.completions.create({
-        model: "deepseek-chat",
+        model: 'deepseek-chat',
         messages: [
           {
-            role: "system",
+            role: 'system',
             content:
-              "你是一个专业的法律文档分析专家，专门从法律文档中提取结构化信息。",
+              '你是一个专业的法律文档分析专家，专门从法律文档中提取结构化信息。',
           },
           {
-            role: "user",
+            role: 'user',
             content: prompt,
           },
         ],
@@ -167,55 +167,55 @@ ${testCase.content}
 
       let cleanedContent = aiContent.trim();
 
-      if (cleanedContent.includes("```json")) {
+      if (cleanedContent.includes('```json')) {
         cleanedContent = cleanedContent
-          .replace(/```json\\s*/, "")
-          .replace(/```\\s*$/, "");
-      } else if (cleanedContent.includes("```")) {
+          .replace(/```json\\s*/, '')
+          .replace(/```\\s*$/, '');
+      } else if (cleanedContent.includes('```')) {
         cleanedContent = cleanedContent
-          .replace(/```\\s*/, "")
-          .replace(/```\\s*$/, "");
+          .replace(/```\\s*/, '')
+          .replace(/```\\s*$/, '');
       }
 
       const parsedResponse = JSON.parse(cleanedContent);
       const extractedData = parsedResponse.extractedData;
 
       // 评估当事人识别
-      const extractedParties = extractedData.parties.map((p) => p.name);
-      const expectedParties = testCase.expected.parties.map((p) => p.name);
-      const partyMatches = extractedParties.filter((name) =>
-        expectedParties.some((expected) => expected.includes(name)),
+      const extractedParties = extractedData.parties.map(p => p.name);
+      const expectedParties = testCase.expected.parties.map(p => p.name);
+      const partyMatches = extractedParties.filter(name =>
+        expectedParties.some(expected => expected.includes(name))
       );
       const partyAccuracy = partyMatches.length / expectedParties.length;
 
       // 评估诉讼请求提取
-      const extractedClaims = extractedData.claims.map((c) => c.content);
+      const extractedClaims = extractedData.claims.map(c => c.content);
 
       // 输出详细对比
-      console.log("\n  详细对比:");
-      console.log("    提取的请求:");
+      console.log('\n  详细对比:');
+      console.log('    提取的请求:');
       extractedClaims.forEach((claim, i) => {
         console.log(`      ${i + 1}. ${claim}`);
       });
-      console.log("    预期的请求:");
+      console.log('    预期的请求:');
       testCase.expected.claims.forEach((claim, i) => {
         console.log(`      ${i + 1}. ${claim.content}`);
       });
 
       // 使用关键词匹配逻辑
-      const claimMatches = testCase.expected.claims.filter((expected) => {
-        return extractedClaims.some((extracted) => {
+      const claimMatches = testCase.expected.claims.filter(expected => {
+        return extractedClaims.some(extracted => {
           // 检查是否包含关键词
           if (expected.keywords) {
-            return expected.keywords.some((keyword) =>
-              extracted.includes(keyword),
+            return expected.keywords.some(keyword =>
+              extracted.includes(keyword)
             );
           }
           // 如果没有关键词，使用内容匹配
-          const normalizedExtracted = extracted.replace(/[\s，。、；]/g, "");
+          const normalizedExtracted = extracted.replace(/[\s，。、；]/g, '');
           const normalizedExpected = expected.content.replace(
             /[\s，。、；]/g,
-            "",
+            ''
           );
           return (
             normalizedExtracted.includes(normalizedExpected) ||
@@ -228,12 +228,10 @@ ${testCase.content}
 
       // 评估金额提取
       const extractedAmounts = extractedData.claims
-        .map((c) => c.amount)
-        .filter((a) => typeof a === "number" && a > 0);
-      const amountMatches = testCase.expected.amounts.filter((expected) =>
-        extractedAmounts.some(
-          (extracted) => Math.abs(extracted - expected) < 1,
-        ),
+        .map(c => c.amount)
+        .filter(a => typeof a === 'number' && a > 0);
+      const amountMatches = testCase.expected.amounts.filter(expected =>
+        extractedAmounts.some(extracted => Math.abs(extracted - expected) < 1)
       );
       const amountAccuracy =
         amountMatches.length / testCase.expected.amounts.length;
@@ -242,8 +240,8 @@ ${testCase.content}
       const overallScore = (partyAccuracy + claimRecall + amountAccuracy) / 3;
 
       // 输出结果
-      console.log("\n" + "-".repeat(60));
-      console.log("评估结果:");
+      console.log('\n' + '-'.repeat(60));
+      console.log('评估结果:');
       console.log(`  当事人识别准确率: ${(partyAccuracy * 100).toFixed(2)}%`);
       console.log(`    提取: ${JSON.stringify(extractedParties)}`);
       console.log(`    预期: ${JSON.stringify(expectedParties)}`);
@@ -254,44 +252,44 @@ ${testCase.content}
       console.log(`    提取: ${JSON.stringify(extractedAmounts)}`);
       console.log(`    预期: ${JSON.stringify(testCase.expected.amounts)}`);
       console.log(`  综合评分: ${(overallScore * 100).toFixed(2)}%`);
-      console.log("-".repeat(60));
+      console.log('-'.repeat(60));
 
       results.partyRecognitionAccuracy = partyAccuracy;
       results.claimExtractionRecall = claimRecall;
       results.amountExtractionAccuracy = amountAccuracy;
       results.overallScore = overallScore;
     } catch (error) {
-      console.error("分析失败:", error.message);
+      console.error('分析失败:', error.message);
       results.errors.push(error.message);
     }
   }
 
   // 生成测试报告
-  console.log("\n" + "=".repeat(60));
-  console.log("测试报告");
-  console.log("=".repeat(60));
+  console.log('\n' + '='.repeat(60));
+  console.log('测试报告');
+  console.log('='.repeat(60));
   console.log(
-    `当事人识别准确率: ${(results.partyRecognitionAccuracy * 100).toFixed(2)}%`,
+    `当事人识别准确率: ${(results.partyRecognitionAccuracy * 100).toFixed(2)}%`
   );
   console.log(
-    `诉讼请求提取召回率: ${(results.claimExtractionRecall * 100).toFixed(2)}%`,
+    `诉讼请求提取召回率: ${(results.claimExtractionRecall * 100).toFixed(2)}%`
   );
   console.log(
-    `金额提取准确率: ${(results.amountExtractionAccuracy * 100).toFixed(2)}%`,
+    `金额提取准确率: ${(results.amountExtractionAccuracy * 100).toFixed(2)}%`
   );
   console.log(`综合评分: ${(results.overallScore * 100).toFixed(2)}%`);
-  console.log("\n测试结果:");
+  console.log('\n测试结果:');
   console.log(
-    `  当事人识别: ${results.partyRecognitionAccuracy >= 0.95 ? "通过" : "未通过"} (目标: >= 95%)`,
+    `  当事人识别: ${results.partyRecognitionAccuracy >= 0.95 ? '通过' : '未通过'} (目标: >= 95%)`
   );
   console.log(
-    `  诉讼请求提取: ${results.claimExtractionRecall >= 0.95 ? "通过" : "未通过"} (目标: >= 95%)`,
+    `  诉讼请求提取: ${results.claimExtractionRecall >= 0.95 ? '通过' : '未通过'} (目标: >= 95%)`
   );
   console.log(
-    `  金额提取: ${results.amountExtractionAccuracy >= 0.95 ? "通过" : "未通过"} (目标: >= 95%)`,
+    `  金额提取: ${results.amountExtractionAccuracy >= 0.95 ? '通过' : '未通过'} (目标: >= 95%)`
   );
   console.log(
-    `  综合评分: ${results.overallScore >= 0.95 ? "通过" : "未通过"} (目标: >= 95%)`,
+    `  综合评分: ${results.overallScore >= 0.95 ? '通过' : '未通过'} (目标: >= 95%)`
   );
 
   const allPassed =
@@ -300,19 +298,19 @@ ${testCase.content}
     results.amountExtractionAccuracy >= 0.95 &&
     results.overallScore >= 0.95;
 
-  console.log("\n" + "=".repeat(60));
-  console.log(allPassed ? "✓ 所有测试通过！" : "✗ 部分测试未通过");
-  console.log("=".repeat(60));
+  console.log('\n' + '='.repeat(60));
+  console.log(allPassed ? '✓ 所有测试通过！' : '✗ 部分测试未通过');
+  console.log('='.repeat(60));
 
   return { passed: allPassed, results };
 }
 
 // 运行测试
 runAccuracyTest()
-  .then((result) => {
+  .then(result => {
     process.exit(result.passed ? 0 : 1);
   })
-  .catch((error) => {
-    console.error("测试执行失败:", error);
+  .catch(error => {
+    console.error('测试执行失败:', error);
     process.exit(1);
   });

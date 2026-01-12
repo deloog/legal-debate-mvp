@@ -1,7 +1,7 @@
 // Agent降级策略配置
 // 为各个Agent定义降级处理逻辑
 
-import type { AgentContext } from "../../../types/agent";
+import type { AgentContext } from '../../../types/agent';
 
 // =============================================================================
 // 降级策略返回类型定义
@@ -133,22 +133,22 @@ export interface CoordinatorFallbackResult {
  */
 export function createDocAnalyzerFallbackStrategy() {
   return async (error: unknown): Promise<DocAnalyzerFallbackResult> => {
-    console.warn("[DocAnalyzer] AI分析失败，使用降级策略:", error);
+    console.warn('[DocAnalyzer] AI分析失败，使用降级策略:', error);
 
     // 返回基础分析结果
     return {
       summary:
-        "文档已接收，但AI分析服务暂时不可用。系统将使用基础规则进行分析。",
+        '文档已接收，但AI分析服务暂时不可用。系统将使用基础规则进行分析。',
       keyPoints: [
-        "文档结构已识别",
-        "主要法律条款已提取",
-        "建议人工复核分析结果",
+        '文档结构已识别',
+        '主要法律条款已提取',
+        '建议人工复核分析结果',
       ],
       analysis: {
         fallback: true,
-        method: "RULE_BASED",
+        method: 'RULE_BASED',
         confidence: 0.5,
-        warnings: ["AI服务不可用，使用基础规则"],
+        warnings: ['AI服务不可用，使用基础规则'],
       },
     };
   };
@@ -160,15 +160,15 @@ export function createDocAnalyzerFallbackStrategy() {
  */
 export function createEvidenceAnalyzerFallbackStrategy() {
   return async (error: unknown): Promise<EvidenceAnalyzerFallbackResult> => {
-    console.warn("[EvidenceAnalyzer] 证据分析失败，使用降级策略:", error);
+    console.warn('[EvidenceAnalyzer] 证据分析失败，使用降级策略:', error);
 
     return {
-      credibility: "未知",
-      strength: "中等",
-      relevance: "需要人工评估",
-      notes: "AI评估服务暂不可用，建议人工审查证据材料",
+      credibility: '未知',
+      strength: '中等',
+      relevance: '需要人工评估',
+      notes: 'AI评估服务暂不可用，建议人工审查证据材料',
       fallback: true,
-      warnings: ["AI评估服务不可用"],
+      warnings: ['AI评估服务不可用'],
     };
   };
 }
@@ -179,14 +179,14 @@ export function createEvidenceAnalyzerFallbackStrategy() {
  */
 export function createResearcherFallbackStrategy() {
   return async (error: unknown): Promise<ResearcherFallbackResult> => {
-    console.warn("[Researcher] 法律检索失败，使用降级策略:", error);
+    console.warn('[Researcher] 法律检索失败，使用降级策略:', error);
 
     return {
       sources: [],
-      summary: "AI法律检索服务暂不可用，建议使用传统法律数据库进行查询",
-      alternativeAction: "建议使用中国裁判文书网、北大法宝等传统数据库",
+      summary: 'AI法律检索服务暂不可用，建议使用传统法律数据库进行查询',
+      alternativeAction: '建议使用中国裁判文书网、北大法宝等传统数据库',
       fallback: true,
-      warnings: ["AI检索服务不可用"],
+      warnings: ['AI检索服务不可用'],
     };
   };
 }
@@ -197,23 +197,23 @@ export function createResearcherFallbackStrategy() {
  */
 export function createStrategistFallbackStrategy() {
   return async (error: unknown): Promise<StrategistFallbackResult> => {
-    console.warn("[Strategist] 策略生成失败，使用降级策略:", error);
+    console.warn('[Strategist] 策略生成失败，使用降级策略:', error);
 
     return {
-      strategy: "基础策略",
-      priority: "需要人工制定详细策略",
+      strategy: '基础策略',
+      priority: '需要人工制定详细策略',
       keyActions: [
-        "1. 仔细分析案件事实",
-        "2. 梳理法律适用问题",
-        "3. 准备充分的证据材料",
-        "4. 考虑替代解决方案",
+        '1. 仔细分析案件事实',
+        '2. 梳理法律适用问题',
+        '3. 准备充分的证据材料',
+        '4. 考虑替代解决方案',
       ],
       recommendations: [
-        "AI策略生成服务暂不可用",
-        "建议咨询专业律师制定详细策略",
+        'AI策略生成服务暂不可用',
+        '建议咨询专业律师制定详细策略',
       ],
       fallback: true,
-      warnings: ["AI策略服务不可用"],
+      warnings: ['AI策略服务不可用'],
     };
   };
 }
@@ -225,16 +225,16 @@ export function createStrategistFallbackStrategy() {
 export function createWriterFallbackStrategy() {
   return async (
     error: unknown,
-    context: AgentContext,
+    context: AgentContext
   ): Promise<WriterFallbackResult> => {
-    console.warn("[Writer] 文书生成失败，使用降级策略:", error);
+    console.warn('[Writer] 文书生成失败，使用降级策略:', error);
 
-    const caseType = context.data?.caseType || "通用";
+    const caseType = context.data?.caseType || '通用';
     return {
       content: `[${caseType}文书模板]\n\n注意：AI文书生成服务暂不可用，以下为基础模板，请根据实际情况修改。\n\n[请在人工协助下完成详细文书撰写]`,
-      format: "TEXT",
+      format: 'TEXT',
       template: true,
-      warnings: ["AI文书生成服务不可用", "需要人工完成详细撰写"],
+      warnings: ['AI文书生成服务不可用', '需要人工完成详细撰写'],
       fallback: true,
     };
   };
@@ -246,21 +246,21 @@ export function createWriterFallbackStrategy() {
  */
 export function createReviewerFallbackStrategy() {
   return async (error: unknown): Promise<ReviewerFallbackResult> => {
-    console.warn("[Reviewer] 文书审查失败，使用降级策略:", error);
+    console.warn('[Reviewer] 文书审查失败，使用降级策略:', error);
 
     return {
       issues: [],
       score: 0.5,
-      status: "需要人工审查",
+      status: '需要人工审查',
       checklist: [
-        "检查法律条文引用准确性",
-        "检查事实陈述一致性",
-        "检查逻辑论证完整性",
-        "检查格式规范",
+        '检查法律条文引用准确性',
+        '检查事实陈述一致性',
+        '检查逻辑论证完整性',
+        '检查格式规范',
       ],
-      recommendation: "AI审查服务暂不可用，建议由资深律师进行人工审查",
+      recommendation: 'AI审查服务暂不可用，建议由资深律师进行人工审查',
       fallback: true,
-      warnings: ["AI审查服务不可用"],
+      warnings: ['AI审查服务不可用'],
     };
   };
 }
@@ -271,14 +271,14 @@ export function createReviewerFallbackStrategy() {
  */
 export function createSchedulerFallbackStrategy() {
   return async (error: unknown): Promise<SchedulerFallbackResult> => {
-    console.warn("[Scheduler] 任务调度失败，使用降级策略:", error);
+    console.warn('[Scheduler] 任务调度失败，使用降级策略:', error);
 
     return {
       schedule: [],
-      optimization: "基础优先级",
-      notes: "AI任务优化服务暂不可用，使用基础调度",
+      optimization: '基础优先级',
+      notes: 'AI任务优化服务暂不可用，使用基础调度',
       fallback: true,
-      warnings: ["AI调度优化服务不可用"],
+      warnings: ['AI调度优化服务不可用'],
     };
   };
 }
@@ -289,14 +289,14 @@ export function createSchedulerFallbackStrategy() {
  */
 export function createReporterFallbackStrategy() {
   return async (error: unknown): Promise<ReporterFallbackResult> => {
-    console.warn("[Reporter] 汇报生成失败，使用降级策略:", error);
+    console.warn('[Reporter] 汇报生成失败，使用降级策略:', error);
 
     return {
-      summary: "基础汇报",
+      summary: '基础汇报',
       metrics: {},
-      recommendations: ["AI汇报生成服务暂不可用，建议人工生成详细报告"],
+      recommendations: ['AI汇报生成服务暂不可用，建议人工生成详细报告'],
       fallback: true,
-      warnings: ["AI汇报服务不可用"],
+      warnings: ['AI汇报服务不可用'],
     };
   };
 }
@@ -307,13 +307,13 @@ export function createReporterFallbackStrategy() {
  */
 export function createSummarizerFallbackStrategy() {
   return async (error: unknown): Promise<SummarizerFallbackResult> => {
-    console.warn("[Summarizer] 总结生成失败，使用降级策略:", error);
+    console.warn('[Summarizer] 总结生成失败，使用降级策略:', error);
 
     return {
-      summary: "AI总结服务暂不可用",
-      keyPoints: ["需要人工总结"],
+      summary: 'AI总结服务暂不可用',
+      keyPoints: ['需要人工总结'],
       fallback: true,
-      warnings: ["AI总结服务不可用"],
+      warnings: ['AI总结服务不可用'],
     };
   };
 }
@@ -324,14 +324,14 @@ export function createSummarizerFallbackStrategy() {
  */
 export function createCoordinatorFallbackStrategy() {
   return async (error: unknown): Promise<CoordinatorFallbackResult> => {
-    console.warn("[Coordinator] 任务协调失败，使用降级策略:", error);
+    console.warn('[Coordinator] 任务协调失败，使用降级策略:', error);
 
     return {
       plan: [],
-      status: "需要人工协调",
-      recommendation: "AI任务协调服务暂不可用，建议人工指定任务执行顺序",
+      status: '需要人工协调',
+      recommendation: 'AI任务协调服务暂不可用，建议人工指定任务执行顺序',
       fallback: true,
-      warnings: ["AI协调服务不可用"],
+      warnings: ['AI协调服务不可用'],
     };
   };
 }
@@ -348,7 +348,7 @@ const FALLBACK_STRATEGIES: Record<
   string,
   () => (
     error: unknown,
-    context: AgentContext,
+    context: AgentContext
   ) => Promise<
     | DocAnalyzerFallbackResult
     | EvidenceAnalyzerFallbackResult
@@ -380,11 +380,11 @@ const FALLBACK_STRATEGIES: Record<
  * @returns 降级策略函数
  */
 export function getFallbackStrategy(
-  agentType: string,
+  agentType: string
 ):
   | ((
       error: unknown,
-      context: AgentContext,
+      context: AgentContext
     ) => Promise<
       | DocAnalyzerFallbackResult
       | EvidenceAnalyzerFallbackResult

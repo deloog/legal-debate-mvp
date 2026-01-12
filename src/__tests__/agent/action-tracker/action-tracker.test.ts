@@ -2,14 +2,14 @@
  * ActionTracker集成测试
  */
 
-import { ActionTracker } from "@/lib/agent/action-tracker/action-tracker";
-import { actionLogger } from "@/lib/agent/action-tracker/action-logger";
-import { performanceAnalyzer } from "@/lib/agent/action-tracker/performance-analyzer";
-import { behaviorAnalyzer } from "@/lib/agent/action-tracker/behavior-analyzer";
-import { layerStatistics } from "@/lib/agent/action-tracker/layer-statistics";
-import { ActionLayer, ActionType } from "@prisma/client";
+import { ActionTracker } from '@/lib/agent/action-tracker/action-tracker';
+import { actionLogger } from '@/lib/agent/action-tracker/action-logger';
+import { performanceAnalyzer } from '@/lib/agent/action-tracker/performance-analyzer';
+import { behaviorAnalyzer } from '@/lib/agent/action-tracker/behavior-analyzer';
+import { layerStatistics } from '@/lib/agent/action-tracker/layer-statistics';
+import { ActionLayer, ActionType } from '@prisma/client';
 
-jest.mock("@/lib/agent/action-tracker/action-logger", () => ({
+jest.mock('@/lib/agent/action-tracker/action-logger', () => ({
   actionLogger: {
     logAction: jest.fn(),
     buildActionChain: jest.fn(),
@@ -18,25 +18,25 @@ jest.mock("@/lib/agent/action-tracker/action-logger", () => ({
   },
 }));
 
-jest.mock("@/lib/agent/action-tracker/performance-analyzer", () => ({
+jest.mock('@/lib/agent/action-tracker/performance-analyzer', () => ({
   performanceAnalyzer: {
     getPerformanceReport: jest.fn(),
   },
 }));
 
-jest.mock("@/lib/agent/action-tracker/behavior-analyzer", () => ({
+jest.mock('@/lib/agent/action-tracker/behavior-analyzer', () => ({
   behaviorAnalyzer: {
     getBehaviorReport: jest.fn(),
   },
 }));
 
-jest.mock("@/lib/agent/action-tracker/layer-statistics", () => ({
+jest.mock('@/lib/agent/action-tracker/layer-statistics', () => ({
   layerStatistics: {
     getLayerReport: jest.fn(),
   },
 }));
 
-describe("ActionTracker", () => {
+describe('ActionTracker', () => {
   let tracker: ActionTracker;
 
   beforeEach(() => {
@@ -44,8 +44,8 @@ describe("ActionTracker", () => {
     jest.clearAllMocks();
   });
 
-  describe("配置管理", () => {
-    it("应该使用默认配置初始化", () => {
+  describe('配置管理', () => {
+    it('应该使用默认配置初始化', () => {
       const config = tracker.getConfig();
       expect(config.autoTrackingEnabled).toBe(true);
       expect(config.performanceAnalysisEnabled).toBe(true);
@@ -53,7 +53,7 @@ describe("ActionTracker", () => {
       expect(config.inefficientThreshold).toBe(5000);
     });
 
-    it("应该能够更新配置", () => {
+    it('应该能够更新配置', () => {
       tracker.updateConfig({
         autoTrackingEnabled: false,
         inefficientThreshold: 3000,
@@ -65,15 +65,15 @@ describe("ActionTracker", () => {
     });
   });
 
-  describe("trackAction", () => {
-    it("应该追踪并执行行动", async () => {
+  describe('trackAction', () => {
+    it('应该追踪并执行行动', async () => {
       const mockResult = { success: true };
       (actionLogger.logAction as jest.Mock).mockResolvedValue(mockResult);
 
       const input = {
-        agentName: "TestAgent",
+        agentName: 'TestAgent',
         actionType: ActionType.ANALYZE,
-        actionName: "testAction",
+        actionName: 'testAction',
         actionLayer: ActionLayer.CORE,
         parameters: {},
       };
@@ -85,16 +85,16 @@ describe("ActionTracker", () => {
       expect(actionLogger.logAction).toHaveBeenCalledWith(input, executeFn);
     });
 
-    it("当自动追踪禁用时不追踪", async () => {
+    it('当自动追踪禁用时不追踪', async () => {
       tracker.updateConfig({ autoTrackingEnabled: false });
 
       const mockResult = { success: true };
       const executeFn = jest.fn().mockResolvedValue(mockResult);
 
       const input = {
-        agentName: "TestAgent",
+        agentName: 'TestAgent',
         actionType: ActionType.ANALYZE,
-        actionName: "testAction",
+        actionName: 'testAction',
         actionLayer: ActionLayer.CORE,
         parameters: {},
       };
@@ -106,11 +106,11 @@ describe("ActionTracker", () => {
     });
   });
 
-  describe("buildActionChain", () => {
-    it("应该构建行动链", async () => {
+  describe('buildActionChain', () => {
+    it('应该构建行动链', async () => {
       const mockChain = {
-        chainId: "chain-1",
-        rootActionId: "action-1",
+        chainId: 'chain-1',
+        rootActionId: 'action-1',
         depth: 2,
         actions: [],
         totalExecutionTime: 1000,
@@ -118,15 +118,15 @@ describe("ActionTracker", () => {
 
       (actionLogger.buildActionChain as jest.Mock).mockResolvedValue(mockChain);
 
-      const result = await tracker.buildActionChain("action-1");
+      const result = await tracker.buildActionChain('action-1');
 
       expect(result).toEqual(mockChain);
-      expect(actionLogger.buildActionChain).toHaveBeenCalledWith("action-1");
+      expect(actionLogger.buildActionChain).toHaveBeenCalledWith('action-1');
     });
   });
 
-  describe("生成报告", () => {
-    it("应该生成性能报告", async () => {
+  describe('生成报告', () => {
+    it('应该生成性能报告', async () => {
       const mockReport = {
         generatedAt: new Date(),
         filters: {},
@@ -145,7 +145,7 @@ describe("ActionTracker", () => {
       };
 
       (performanceAnalyzer.getPerformanceReport as jest.Mock).mockResolvedValue(
-        mockReport,
+        mockReport
       );
 
       const result = await tracker.generatePerformanceReport();
@@ -154,7 +154,7 @@ describe("ActionTracker", () => {
       expect(performanceAnalyzer.getPerformanceReport).toHaveBeenCalled();
     });
 
-    it("应该生成行为报告", async () => {
+    it('应该生成行为报告', async () => {
       const mockReport = {
         generatedAt: new Date(),
         filters: {},
@@ -165,7 +165,7 @@ describe("ActionTracker", () => {
       };
 
       (behaviorAnalyzer.getBehaviorReport as jest.Mock).mockResolvedValue(
-        mockReport,
+        mockReport
       );
 
       const result = await tracker.generateBehaviorReport();
@@ -174,7 +174,7 @@ describe("ActionTracker", () => {
       expect(behaviorAnalyzer.getBehaviorReport).toHaveBeenCalled();
     });
 
-    it("应该生成分层报告", async () => {
+    it('应该生成分层报告', async () => {
       const mockReport = {
         generatedAt: new Date(),
         coreLayer: {
@@ -209,7 +209,7 @@ describe("ActionTracker", () => {
       };
 
       (layerStatistics.getLayerReport as jest.Mock).mockResolvedValue(
-        mockReport,
+        mockReport
       );
 
       const result = await tracker.generateLayerReport();
@@ -218,7 +218,7 @@ describe("ActionTracker", () => {
       expect(layerStatistics.getLayerReport).toHaveBeenCalled();
     });
 
-    it("应该生成综合报告", async () => {
+    it('应该生成综合报告', async () => {
       const mockPerformanceReport = {
         generatedAt: new Date(),
         filters: {},
@@ -279,21 +279,21 @@ describe("ActionTracker", () => {
       };
 
       (performanceAnalyzer.getPerformanceReport as jest.Mock).mockResolvedValue(
-        mockPerformanceReport,
+        mockPerformanceReport
       );
       (behaviorAnalyzer.getBehaviorReport as jest.Mock).mockResolvedValue(
-        mockBehaviorReport,
+        mockBehaviorReport
       );
       (layerStatistics.getLayerReport as jest.Mock).mockResolvedValue(
-        mockLayerReport,
+        mockLayerReport
       );
 
       (actionLogger.queryActions as jest.Mock).mockResolvedValue([
         {
-          id: "action-1",
-          agentName: "TestAgent",
-          actionName: "testAction",
-          status: "COMPLETED",
+          id: 'action-1',
+          agentName: 'TestAgent',
+          actionName: 'testAction',
+          status: 'COMPLETED',
           executionTime: 100,
         },
       ]);
@@ -306,27 +306,27 @@ describe("ActionTracker", () => {
 
       const result = await tracker.generateComprehensiveReport(filters);
 
-      expect(result).toHaveProperty("generatedAt");
-      expect(result).toHaveProperty("filters", filters);
-      expect(result).toHaveProperty("performanceReport");
-      expect(result).toHaveProperty("behaviorReport");
-      expect(result).toHaveProperty("layerReport");
-      expect(result).toHaveProperty("summary");
+      expect(result).toHaveProperty('generatedAt');
+      expect(result).toHaveProperty('filters', filters);
+      expect(result).toHaveProperty('performanceReport');
+      expect(result).toHaveProperty('behaviorReport');
+      expect(result).toHaveProperty('layerReport');
+      expect(result).toHaveProperty('summary');
     });
   });
 
-  describe("getRealtimeMetrics", () => {
-    it("应该获取实时指标", async () => {
+  describe('getRealtimeMetrics', () => {
+    it('应该获取实时指标', async () => {
       const mockActions = [
         {
-          status: "RUNNING",
+          status: 'RUNNING',
         },
         {
-          status: "COMPLETED",
+          status: 'COMPLETED',
           executionTime: 100,
         },
         {
-          status: "FAILED",
+          status: 'FAILED',
         },
       ];
 
@@ -334,18 +334,18 @@ describe("ActionTracker", () => {
 
       const result = await tracker.getRealtimeMetrics();
 
-      expect(result).toHaveProperty("updatedAt");
-      expect(result).toHaveProperty("runningActions");
-      expect(result).toHaveProperty("recentSuccessCount");
-      expect(result).toHaveProperty("recentFailureCount");
-      expect(result).toHaveProperty("recentAvgExecutionTime");
-      expect(result).toHaveProperty("currentErrorRate");
-      expect(result).toHaveProperty("peakConcurrency");
+      expect(result).toHaveProperty('updatedAt');
+      expect(result).toHaveProperty('runningActions');
+      expect(result).toHaveProperty('recentSuccessCount');
+      expect(result).toHaveProperty('recentFailureCount');
+      expect(result).toHaveProperty('recentAvgExecutionTime');
+      expect(result).toHaveProperty('currentErrorRate');
+      expect(result).toHaveProperty('peakConcurrency');
     });
   });
 
-  describe("cleanup", () => {
-    it("应该清理过期数据", async () => {
+  describe('cleanup', () => {
+    it('应该清理过期数据', async () => {
       (actionLogger.cleanupOldActions as jest.Mock).mockResolvedValue(10);
 
       const result = await tracker.cleanup(30);
@@ -354,7 +354,7 @@ describe("ActionTracker", () => {
       expect(actionLogger.cleanupOldActions).toHaveBeenCalledWith(30);
     });
 
-    it("应该使用配置中的默认保留天数", async () => {
+    it('应该使用配置中的默认保留天数', async () => {
       (actionLogger.cleanupOldActions as jest.Mock).mockResolvedValue(10);
 
       await tracker.cleanup();

@@ -1,10 +1,10 @@
-import { testPrisma } from "../../../test-utils/database";
+import { testPrisma } from '../../../test-utils/database';
 import {
   setupTestDatabase,
   cleanupTestDatabase,
-} from "../../../test-utils/database";
+} from '../../../test-utils/database';
 
-describe("Argument Content Basic Handling", () => {
+describe('Argument Content Basic Handling', () => {
   let testUser: any;
   let testCase: any;
   let testDebate: any;
@@ -16,9 +16,9 @@ describe("Argument Content Basic Handling", () => {
     // 创建测试用户
     testUser = await testPrisma.user.create({
       data: {
-        email: "test-argument-basic@example.com",
-        name: "测试用户",
-        role: "USER",
+        email: 'test-argument-basic@example.com',
+        name: '测试用户',
+        role: 'USER',
       },
     });
 
@@ -26,12 +26,12 @@ describe("Argument Content Basic Handling", () => {
     testCase = await testPrisma.case.create({
       data: {
         userId: testUser.id,
-        title: "论点基础内容测试案件",
-        description: "这是一个用于测试论点基础内容处理的案件",
-        type: "CIVIL",
-        status: "ACTIVE",
-        plaintiffName: "张三",
-        defendantName: "李四",
+        title: '论点基础内容测试案件',
+        description: '这是一个用于测试论点基础内容处理的案件',
+        type: 'CIVIL',
+        status: 'ACTIVE',
+        plaintiffName: '张三',
+        defendantName: '李四',
       },
     });
 
@@ -44,8 +44,8 @@ describe("Argument Content Basic Handling", () => {
         user: {
           connect: { id: testUser.id },
         },
-        title: "论点基础内容测试辩论",
-        status: "IN_PROGRESS" as const,
+        title: '论点基础内容测试辩论',
+        status: 'IN_PROGRESS' as const,
         currentRound: 1,
       },
     });
@@ -57,7 +57,7 @@ describe("Argument Content Basic Handling", () => {
           connect: { id: testDebate.id },
         },
         roundNumber: 1,
-        status: "IN_PROGRESS" as const,
+        status: 'IN_PROGRESS' as const,
         startedAt: new Date(),
       },
     });
@@ -67,16 +67,16 @@ describe("Argument Content Basic Handling", () => {
     await cleanupTestDatabase();
   });
 
-  describe("Content Length Handling", () => {
-    it("should handle short content properly", async () => {
-      const shortContent = "短论点";
+  describe('Content Length Handling', () => {
+    it('should handle short content properly', async () => {
+      const shortContent = '短论点';
 
       const argument = await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: testRound.id },
           },
-          side: "PLAINTIFF" as const,
+          side: 'PLAINTIFF' as const,
           content: shortContent,
         },
       });
@@ -85,16 +85,16 @@ describe("Argument Content Basic Handling", () => {
       expect(argument.content.length).toBe(3);
     });
 
-    it("should handle medium length content properly", async () => {
+    it('should handle medium length content properly', async () => {
       const mediumContent =
-        "这是一个中等长度的论点内容，包含多个句子和详细描述。";
+        '这是一个中等长度的论点内容，包含多个句子和详细描述。';
 
       const argument = await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: testRound.id },
           },
-          side: "DEFENDANT" as const,
+          side: 'DEFENDANT' as const,
           content: mediumContent,
         },
       });
@@ -103,15 +103,15 @@ describe("Argument Content Basic Handling", () => {
       expect(argument.content.length).toBeGreaterThan(20);
     });
 
-    it("should handle long content properly", async () => {
-      const longContent = "这是一个非常长的论点内容。".repeat(100);
+    it('should handle long content properly', async () => {
+      const longContent = '这是一个非常长的论点内容。'.repeat(100);
 
       const argument = await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: testRound.id },
           },
-          side: "PLAINTIFF" as const,
+          side: 'PLAINTIFF' as const,
           content: longContent,
         },
       });
@@ -121,17 +121,17 @@ describe("Argument Content Basic Handling", () => {
     });
   });
 
-  describe("Special Content Handling", () => {
-    it("should handle special characters in content", async () => {
+  describe('Special Content Handling', () => {
+    it('should handle special characters in content', async () => {
       const specialContent =
-        "论点包含特殊字符：@#$%^&*()_+-={}[]|\\:\";'<>?,./";
+        '论点包含特殊字符：@#$%^&*()_+-={}[]|\\:";\'<>?,./';
 
       const argument = await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: testRound.id },
           },
-          side: "DEFENDANT" as const,
+          side: 'DEFENDANT' as const,
           content: specialContent,
         },
       });
@@ -139,15 +139,15 @@ describe("Argument Content Basic Handling", () => {
       expect(argument.content).toBe(specialContent);
     });
 
-    it("should handle Unicode characters in content", async () => {
-      const unicodeContent = "论点包含Unicode字符：🏛️⚖️📜💼🔍📊";
+    it('should handle Unicode characters in content', async () => {
+      const unicodeContent = '论点包含Unicode字符：🏛️⚖️📜💼🔍📊';
 
       const argument = await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: testRound.id },
           },
-          side: "NEUTRAL" as const,
+          side: 'NEUTRAL' as const,
           content: unicodeContent,
         },
       });
@@ -155,7 +155,7 @@ describe("Argument Content Basic Handling", () => {
       expect(argument.content).toBe(unicodeContent);
     });
 
-    it("should handle multiline content properly", async () => {
+    it('should handle multiline content properly', async () => {
       const multilineContent = `这是第一行论点。
 这是第二行论点。
 这是第三行论点。`;
@@ -165,42 +165,42 @@ describe("Argument Content Basic Handling", () => {
           round: {
             connect: { id: testRound.id },
           },
-          side: "PLAINTIFF" as const,
+          side: 'PLAINTIFF' as const,
           content: multilineContent,
         },
       });
 
       expect(argument.content).toBe(multilineContent);
-      expect(argument.content).toContain("\n");
+      expect(argument.content).toContain('\n');
     });
   });
 
-  describe("Content Validation", () => {
-    it("should reject empty content", async () => {
+  describe('Content Validation', () => {
+    it('should reject empty content', async () => {
       await expect(
         testPrisma.argument.create({
           data: {
             round: {
               connect: { id: testRound.id },
             },
-            side: "PLAINTIFF" as const,
-            content: "",
+            side: 'PLAINTIFF' as const,
+            content: '',
           },
-        }),
+        })
       ).rejects.toThrow();
     });
 
-    it("should reject whitespace-only content", async () => {
+    it('should reject whitespace-only content', async () => {
       await expect(
         testPrisma.argument.create({
           data: {
             round: {
               connect: { id: testRound.id },
             },
-            side: "PLAINTIFF" as const,
-            content: "   \t\n   ",
+            side: 'PLAINTIFF' as const,
+            content: '   \t\n   ',
           },
-        }),
+        })
       ).rejects.toThrow();
     });
   });

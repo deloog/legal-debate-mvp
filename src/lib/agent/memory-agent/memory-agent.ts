@@ -62,13 +62,13 @@
  * - 查询性能：<100ms（Working），<500ms（Hot），<1s（Cold）
  */
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
-import type { AIService } from "../../ai/service-refactored";
-import { MemoryManager } from "./memory-manager";
-import { MemoryCompressor } from "./compressor";
-import { MemoryMigrator } from "./migrator";
-import { ErrorLearner } from "./error-learner";
+import type { AIService } from '../../ai/service-refactored';
+import { MemoryManager } from './memory-manager';
+import { MemoryCompressor } from './compressor';
+import { MemoryMigrator } from './migrator';
+import { ErrorLearner } from './error-learner';
 import type {
   StoreMemoryInput,
   GetMemoryInput,
@@ -77,7 +77,7 @@ import type {
   CompressionResult,
   LearningResult,
   MigrationResult,
-} from "./types";
+} from './types';
 
 /**
  * MemoryAgent - 记忆Agent主类
@@ -91,7 +91,7 @@ export class MemoryAgent {
 
   constructor(
     private prisma: PrismaClient,
-    private aiService: AIService,
+    private aiService: AIService
   ) {
     this.memoryManager = new MemoryManager(prisma);
     this.compressor = new MemoryCompressor(aiService);
@@ -107,13 +107,13 @@ export class MemoryAgent {
       return;
     }
 
-    console.log("Initializing MemoryAgent...");
+    console.log('Initializing MemoryAgent...');
 
     // 启动记忆迁移定时任务
     this.migrator.start();
 
     this.initialized = true;
-    console.log("MemoryAgent initialized successfully");
+    console.log('MemoryAgent initialized successfully');
   }
 
   /**
@@ -124,13 +124,13 @@ export class MemoryAgent {
       return;
     }
 
-    console.log("Shutting down MemoryAgent...");
+    console.log('Shutting down MemoryAgent...');
 
     // 停止定时任务
     this.migrator.stop();
 
     this.initialized = false;
-    console.log("MemoryAgent shut down successfully");
+    console.log('MemoryAgent shut down successfully');
   }
 
   /**
@@ -140,13 +140,13 @@ export class MemoryAgent {
     input: StoreMemoryInput,
     userId: string,
     caseId?: string,
-    debateId?: string,
+    debateId?: string
   ): Promise<string> {
     const memory = await this.memoryManager.storeMemory(
       input,
       userId,
       caseId,
-      debateId,
+      debateId
     );
 
     return memory.memoryId;
@@ -173,18 +173,18 @@ export class MemoryAgent {
     // 由于memory-manager缺少getById方法，这里需要补充
 
     // 临时实现：查找所有记忆并匹配ID
-    const allMemories = await this.memoryManager.getMemoriesByType("WORKING");
-    const memory = allMemories.find((m) => m.memoryId === memoryId);
+    const allMemories = await this.memoryManager.getMemoriesByType('WORKING');
+    const memory = allMemories.find(m => m.memoryId === memoryId);
 
     if (!memory) {
       // 尝试从Hot Memory查找
-      const hotMemories = await this.memoryManager.getMemoriesByType("HOT");
-      const hotMemory = hotMemories.find((m) => m.memoryId === memoryId);
+      const hotMemories = await this.memoryManager.getMemoriesByType('HOT');
+      const hotMemory = hotMemories.find(m => m.memoryId === memoryId);
 
       if (!hotMemory) {
         return {
           success: false,
-          error: "Memory not found",
+          error: 'Memory not found',
         };
       }
 
@@ -219,9 +219,9 @@ export class MemoryAgent {
    * 执行记忆迁移（手动触发）
    */
   async triggerMigration(
-    type: "workingToHot" | "hotToCold",
+    type: 'workingToHot' | 'hotToCold'
   ): Promise<MigrationResult> {
-    if (type === "workingToHot") {
+    if (type === 'workingToHot') {
       return await this.migrator.migrateWorkingToHot();
     } else {
       return await this.migrator.compressHotToCold();

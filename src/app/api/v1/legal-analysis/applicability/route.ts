@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withErrorHandler } from "@/app/api/lib/errors/error-handler";
-import { createSuccessResponse } from "@/app/api/lib/responses/api-response";
-import { prisma } from "@/lib/db/prisma";
-import { ApplicabilityAnalyzer } from "@/lib/law-article/applicability/applicability-analyzer";
-import type { ApplicabilityInput } from "@/lib/law-article/applicability/types";
-import type { DocumentAnalysisOutput } from "@/lib/agent/doc-analyzer/core/types";
+import { NextRequest, NextResponse } from 'next/server';
+import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
+import { createSuccessResponse } from '@/app/api/lib/responses/api-response';
+import { prisma } from '@/lib/db/prisma';
+import { ApplicabilityAnalyzer } from '@/lib/law-article/applicability/applicability-analyzer';
+import type { ApplicabilityInput } from '@/lib/law-article/applicability/types';
+import type { DocumentAnalysisOutput } from '@/lib/agent/doc-analyzer/core/types';
 
 /**
  * POST /api/v1/legal-analysis/applicability
@@ -19,11 +19,11 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       {
         success: false,
         error: {
-          code: "INVALID_PARAMS",
-          message: "caseId参数必填",
+          code: 'INVALID_PARAMS',
+          message: 'caseId参数必填',
         },
       },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -36,11 +36,11 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       {
         success: false,
         error: {
-          code: "INVALID_PARAMS",
-          message: "articleIds参数必填且必须是数组",
+          code: 'INVALID_PARAMS',
+          message: 'articleIds参数必填且必须是数组',
         },
       },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -52,7 +52,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     include: {
       documents: {
         where: {
-          analysisStatus: "COMPLETED",
+          analysisStatus: 'COMPLETED',
         },
       },
     },
@@ -63,58 +63,58 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       {
         success: false,
         error: {
-          code: "CASE_NOT_FOUND",
-          message: "案件不存在",
+          code: 'CASE_NOT_FOUND',
+          message: '案件不存在',
         },
       },
-      { status: 404 },
+      { status: 404 }
     );
   }
 
   // 构建案情摘要（DocumentAnalysisOutput格式）
   const parties = caseData.documents.flatMap(
-    (doc) =>
+    doc =>
       (doc.analysisResult as { extractedData?: { parties?: unknown[] } } | null)
-        ?.extractedData?.parties || [],
+        ?.extractedData?.parties || []
   );
 
   const claims = caseData.documents.flatMap(
-    (doc) =>
+    doc =>
       (doc.analysisResult as { extractedData?: { claims?: unknown[] } } | null)
-        ?.extractedData?.claims || [],
+        ?.extractedData?.claims || []
   );
 
   const keyFacts = caseData.documents.flatMap(
-    (doc) =>
+    doc =>
       (
         doc.analysisResult as {
           extractedData?: {
             keyFacts?: unknown[];
           };
         } | null
-      )?.extractedData?.keyFacts || [],
+      )?.extractedData?.keyFacts || []
   );
 
   const disputeFocuses = caseData.documents.flatMap(
-    (doc) =>
+    doc =>
       (
         doc.analysisResult as {
           extractedData?: {
             disputeFocuses?: unknown[];
           };
         } | null
-      )?.extractedData?.disputeFocuses || [],
+      )?.extractedData?.disputeFocuses || []
   );
 
   const timeline = caseData.documents.flatMap(
-    (doc) =>
+    doc =>
       (
         doc.analysisResult as {
           extractedData?: {
             timeline?: unknown[];
           };
         } | null
-      )?.extractedData?.timeline || [],
+      )?.extractedData?.timeline || []
   );
 
   const caseInfo: DocumentAnalysisOutput = {
@@ -134,7 +134,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     confidence: 0.8,
     processingTime: 0,
     metadata: {
-      analysisModel: "combined",
+      analysisModel: 'combined',
     },
   };
 
@@ -150,11 +150,11 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       {
         success: false,
         error: {
-          code: "ARTICLES_NOT_FOUND",
-          message: "未找到指定的法条",
+          code: 'ARTICLES_NOT_FOUND',
+          message: '未找到指定的法条',
         },
       },
-      { status: 404 },
+      { status: 404 }
     );
   }
 
@@ -177,41 +177,41 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 
   // 保存分析结果到LegalReference表
   const timestamp = new Date();
-  const applicableCount = report.results.filter((r) => r.applicable).length;
+  const applicableCount = report.results.filter(r => r.applicable).length;
   const notApplicableCount = report.results.length - applicableCount;
 
   // 更新LegalReference记录
   for (const result of report.results) {
-    const article = articles.find((a) => a.id === result.articleId);
+    const article = articles.find(a => a.id === result.articleId);
     await prisma.legalReference.upsert({
       where: { id: result.articleId },
       update: {
         applicabilityScore: result.score,
-        applicabilityReason: result.reasons?.join("; ") || null,
+        applicabilityReason: result.reasons?.join('; ') || null,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         analysisResult: result as any,
         analyzedAt: timestamp,
-        status: result.applicable ? "VALID" : "EXPIRED",
+        status: result.applicable ? 'VALID' : 'EXPIRED',
       },
       create: {
         id: result.articleId,
-        source: "LAW_ARTICLE",
-        content: article?.fullText || "",
-        lawType: article?.lawType || "OTHER",
-        category: article?.category || "OTHER",
+        source: 'LAW_ARTICLE',
+        content: article?.fullText || '',
+        lawType: article?.lawType || 'OTHER',
+        category: article?.category || 'OTHER',
         applicabilityScore: result.score,
-        applicabilityReason: result.reasons?.join("; ") || null,
+        applicabilityReason: result.reasons?.join('; ') || null,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         analysisResult: result as any,
         analyzedAt: timestamp,
-        status: result.applicable ? "VALID" : "EXPIRED",
+        status: result.applicable ? 'VALID' : 'EXPIRED',
         caseId,
       },
     });
   }
 
   // 转换响应格式
-  const results = report.results.map((result) => ({
+  const results = report.results.map(result => ({
     articleId: result.articleId,
     applicable: result.applicable,
     score: result.score,
@@ -240,10 +240,10 @@ export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-      "Access-Control-Max-Age": "86400",
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '86400',
     },
   });
 });

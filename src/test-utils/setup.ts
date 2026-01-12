@@ -1,8 +1,8 @@
-import "@testing-library/jest-dom";
-import React, { ReactElement } from "react";
+import '@testing-library/jest-dom';
+import React, { ReactElement } from 'react';
 
 // Mock Next.js router
-jest.mock("next/navigation", () => ({
+jest.mock('next/navigation', () => ({
   useRouter() {
     return {
       push: jest.fn(),
@@ -17,17 +17,17 @@ jest.mock("next/navigation", () => ({
     return new URLSearchParams();
   },
   usePathname() {
-    return "/";
+    return '/';
   },
 }));
 
 // Mock Next.js dynamic import
-jest.mock("next/dynamic", () => () => {
+jest.mock('next/dynamic', () => () => {
   return function DynamicComponent(
-    props: Record<string, unknown>,
+    props: Record<string, unknown>
   ): ReactElement {
-    return React.createElement("div", {
-      "data-testid": "dynamic-component",
+    return React.createElement('div', {
+      'data-testid': 'dynamic-component',
       ...props,
     });
   };
@@ -36,8 +36,8 @@ jest.mock("next/dynamic", () => () => {
 // Set up global Web API polyfills before any imports
 (global as any).Request = class Request {
   constructor(input: string | Request, init: RequestInit = {}) {
-    this.url = typeof input === "string" ? input : input.toString();
-    this.method = init.method || "GET";
+    this.url = typeof input === 'string' ? input : input.toString();
+    this.method = init.method || 'GET';
     this.headers = new Map();
 
     if (init.headers) {
@@ -52,14 +52,14 @@ jest.mock("next/dynamic", () => () => {
 
     this.body = init.body;
     this.signal = init.signal;
-    this.credentials = init.credentials || "same-origin";
-    this.cache = init.cache || "default";
-    this.redirect = init.redirect || "follow";
+    this.credentials = init.credentials || 'same-origin';
+    this.cache = init.cache || 'default';
+    this.redirect = init.redirect || 'follow';
     this.referrer = init.referrer;
-    this.referrerPolicy = init.referrerPolicy || "";
-    this.integrity = init.integrity || "";
+    this.referrerPolicy = init.referrerPolicy || '';
+    this.integrity = init.integrity || '';
     this.keepalive = init.keepalive || false;
-    this.mode = init.mode || "cors";
+    this.mode = init.mode || 'cors';
   }
 
   url: string;
@@ -80,10 +80,10 @@ jest.mock("next/dynamic", () => () => {
     if (this.body) {
       try {
         return JSON.parse(
-          typeof this.body === "string" ? this.body : this.body.toString(),
+          typeof this.body === 'string' ? this.body : this.body.toString()
         );
       } catch {
-        throw new Error("Invalid JSON");
+        throw new Error('Invalid JSON');
       }
     }
     return {};
@@ -91,15 +91,15 @@ jest.mock("next/dynamic", () => () => {
 
   async text(): Promise<string> {
     return this.body
-      ? typeof this.body === "string"
+      ? typeof this.body === 'string'
         ? this.body
         : this.body.toString()
-      : "";
+      : '';
   }
 
   async blob(): Promise<Blob> {
     return new Blob([
-      typeof this.body === "string" ? this.body : String(this.body || ""),
+      typeof this.body === 'string' ? this.body : String(this.body || ''),
     ]);
   }
 
@@ -122,12 +122,12 @@ jest.mock("next/dynamic", () => () => {
   constructor(body?: BodyInit, init: any = {}) {
     this.body = body;
     this.status = init.status || 200;
-    this.statusText = init.statusText || "OK";
+    this.statusText = init.statusText || 'OK';
     this.headers = new Map();
-    this.url = init.url || "";
+    this.url = init.url || '';
     this.ok = this.status >= 200 && this.status < 300;
     this.redirected = init.redirected || false;
-    this.type = init.type || "basic";
+    this.type = init.type || 'basic';
 
     if (init.headers) {
       if (init.headers instanceof Map) {
@@ -142,11 +142,11 @@ jest.mock("next/dynamic", () => () => {
     }
 
     if (
-      typeof body === "object" &&
+      typeof body === 'object' &&
       body !== null &&
-      !init.headers?.get?.("Content-Type")
+      !init.headers?.get?.('Content-Type')
     ) {
-      this.headers.set("Content-Type", "application/json");
+      this.headers.set('Content-Type', 'application/json');
     }
 
     // Add header property for compatibility with existing tests
@@ -188,7 +188,7 @@ jest.mock("next/dynamic", () => () => {
     return new Response(JSON.stringify(data), {
       ...init,
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         ...init.headers,
       },
     });
@@ -204,7 +204,7 @@ jest.mock("next/dynamic", () => () => {
   static error(): Response {
     return new Response(null, {
       status: 500,
-      statusText: "Internal Server Error",
+      statusText: 'Internal Server Error',
     });
   }
 
@@ -219,10 +219,10 @@ jest.mock("next/dynamic", () => () => {
 
   async text(): Promise<string> {
     return this.body
-      ? typeof this.body === "string"
+      ? typeof this.body === 'string'
         ? this.body
         : this.body.toString()
-      : "";
+      : '';
   }
 
   async blob(): Promise<Blob> {
@@ -230,12 +230,12 @@ jest.mock("next/dynamic", () => () => {
     if (body === null || body === undefined) {
       return new Blob([]);
     }
-    if (typeof body === "string") {
+    if (typeof body === 'string') {
       return new Blob([body]);
     }
     if (body instanceof ReadableStream) {
       // Handle ReadableStream by converting to text first
-      return new Blob(["stream"]);
+      return new Blob(['stream']);
     }
     return new Blob([String(body)]);
   }
@@ -258,7 +258,7 @@ jest.mock("next/dynamic", () => () => {
 (global as any).Headers = class Headers {
   constructor(init: HeadersInit = {}) {
     this.headers = new Map();
-    if (typeof init === "object") {
+    if (typeof init === 'object') {
       if (init instanceof Map) {
         this.headers = init;
       } else if (Array.isArray(init)) {
@@ -313,14 +313,14 @@ jest.mock("next/dynamic", () => () => {
   }
 
   forEach(
-    callback: (value: string, key: string, map: Map<string, string>) => void,
+    callback: (value: string, key: string, map: Map<string, string>) => void
   ): void {
     this.headers.forEach(callback);
   }
 };
 
 // Mock Next.js server module
-jest.mock("next/server", () => {
+jest.mock('next/server', () => {
   const MockHeaders = (global as any).Headers;
   const MockRequest = (global as any).Request;
   const MockResponse = (global as any).Response;
@@ -343,8 +343,8 @@ const originalWarn = console.warn;
 beforeAll(() => {
   console.warn = (...args: unknown[]) => {
     if (
-      typeof args[0] === "string" &&
-      args[0].includes("act() is deprecated")
+      typeof args[0] === 'string' &&
+      args[0].includes('act() is deprecated')
     ) {
       return;
     }

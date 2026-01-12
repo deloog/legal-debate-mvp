@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 interface FeedbackRequest {
-  action: "CONFIRMED" | "REMOVED" | "MANUALLY_ADDED";
-  removedReason?: "NOT_RELEVANT" | "REPEALED" | "OTHER";
+  action: 'CONFIRMED' | 'REMOVED' | 'MANUALLY_ADDED';
+  removedReason?: 'NOT_RELEVANT' | 'REPEALED' | 'OTHER';
   otherReason?: string;
 }
 
@@ -15,39 +15,39 @@ interface FeedbackRequest {
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 获取路径参数
     const resolvedParams = await params;
     // 获取当前用户（简化版，实际应从session获取）
-    const userId = request.headers.get("x-user-id") || "default-user";
+    const userId = request.headers.get('x-user-id') || 'default-user';
 
     // 解析请求体
     const body: FeedbackRequest = await request.json();
 
     // 验证必填字段
     if (!body.action) {
-      return NextResponse.json({ error: "缺少action参数" }, { status: 400 });
+      return NextResponse.json({ error: '缺少action参数' }, { status: 400 });
     }
 
-    if (!["CONFIRMED", "REMOVED", "MANUALLY_ADDED"].includes(body.action)) {
-      return NextResponse.json({ error: "无效的action参数" }, { status: 400 });
+    if (!['CONFIRMED', 'REMOVED', 'MANUALLY_ADDED'].includes(body.action)) {
+      return NextResponse.json({ error: '无效的action参数' }, { status: 400 });
     }
 
     // 验证移除原因
-    if (body.action === "REMOVED" && !body.removedReason) {
+    if (body.action === 'REMOVED' && !body.removedReason) {
       return NextResponse.json(
-        { error: "移除操作需要提供removedReason参数" },
-        { status: 400 },
+        { error: '移除操作需要提供removedReason参数' },
+        { status: 400 }
       );
     }
 
     // 验证otherReason
-    if (body.removedReason === "OTHER" && !body.otherReason?.trim()) {
+    if (body.removedReason === 'OTHER' && !body.otherReason?.trim()) {
       return NextResponse.json(
         { error: '选择"其他"原因时需要提供otherReason参数' },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -57,7 +57,7 @@ export async function PUT(
     });
 
     if (!legalReference) {
-      return NextResponse.json({ error: "法条不存在" }, { status: 404 });
+      return NextResponse.json({ error: '法条不存在' }, { status: 404 });
     }
 
     // 获取现有metadata
@@ -87,14 +87,14 @@ export async function PUT(
       data: updatedLegalReference,
     });
   } catch (error) {
-    console.error("更新法条反馈失败：", error);
+    console.error('更新法条反馈失败：', error);
 
     return NextResponse.json(
       {
-        error: "服务器错误",
-        details: error instanceof Error ? error.message : "未知错误",
+        error: '服务器错误',
+        details: error instanceof Error ? error.message : '未知错误',
       },
-      { status: 500 },
+      { status: 500 }
     );
   } finally {
     await prisma.$disconnect();

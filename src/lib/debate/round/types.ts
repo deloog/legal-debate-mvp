@@ -22,7 +22,7 @@ export interface RoundConfig {
   /**
    * 递进策略
    */
-  progressionStrategy?: "depth" | "breadth" | "refutation";
+  progressionStrategy?: 'depth' | 'breadth' | 'refutation';
 }
 
 /**
@@ -204,7 +204,7 @@ export interface UncoveredAngle {
   /**
    * 角度类型
    */
-  type: "legal" | "factual" | "procedural" | "evidential";
+  type: 'legal' | 'factual' | 'procedural' | 'evidential';
 
   /**
    * 角度描述
@@ -214,7 +214,7 @@ export interface UncoveredAngle {
   /**
    * 优先级
    */
-  priority: "high" | "medium" | "low";
+  priority: 'high' | 'medium' | 'low';
 
   /**
    * 建议探索方向
@@ -309,7 +309,7 @@ export interface NoveltyScore {
   /**
    * 评级
    */
-  rating: "high" | "medium" | "low";
+  rating: 'high' | 'medium' | 'low';
 
   /**
    * 分析详情

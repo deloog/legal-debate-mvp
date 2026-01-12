@@ -8,8 +8,8 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -26,8 +26,8 @@ export async function GET() {
     // 查询Working→Hot迁移统计
     const workingToHotActions = await prisma.agentAction.findMany({
       where: {
-        agentName: "MemoryAgent",
-        actionType: "MIGRATE_WORKING_TO_HOT" as any,
+        agentName: 'MemoryAgent',
+        actionType: 'MIGRATE_WORKING_TO_HOT' as any,
         createdAt: {
           gte: sevenDaysAgo,
         },
@@ -35,14 +35,14 @@ export async function GET() {
     });
 
     const workingToHotCompleted = workingToHotActions.filter(
-      (action) => action.status === "COMPLETED",
+      action => action.status === 'COMPLETED'
     ).length;
     const workingToHotFailed = workingToHotActions.filter(
-      (action) => action.status === "FAILED",
+      action => action.status === 'FAILED'
     ).length;
     const workingToHotTotalTime = workingToHotActions.reduce(
       (sum, action) => sum + (action.executionTime || 0),
-      0,
+      0
     );
     const workingToHotAvgTime =
       workingToHotCompleted > 0
@@ -52,8 +52,8 @@ export async function GET() {
     // 查询Hot→Cold迁移统计
     const hotToColdActions = await prisma.agentAction.findMany({
       where: {
-        agentName: "MemoryAgent",
-        actionType: "MIGRATE_HOT_TO_COLD" as any,
+        agentName: 'MemoryAgent',
+        actionType: 'MIGRATE_HOT_TO_COLD' as any,
         createdAt: {
           gte: sevenDaysAgo,
         },
@@ -61,14 +61,14 @@ export async function GET() {
     });
 
     const hotToColdCompleted = hotToColdActions.filter(
-      (action) => action.status === "COMPLETED",
+      action => action.status === 'COMPLETED'
     ).length;
     const hotToColdFailed = hotToColdActions.filter(
-      (action) => action.status === "FAILED",
+      action => action.status === 'FAILED'
     ).length;
     const hotToColdTotalTime = hotToColdActions.reduce(
       (sum, action) => sum + (action.executionTime || 0),
-      0,
+      0
     );
     const hotToColdAvgTime =
       hotToColdCompleted > 0
@@ -77,8 +77,8 @@ export async function GET() {
 
     // 计算压缩比统计
     const compressionRatios = hotToColdActions
-      .filter((action) => action.status === "COMPLETED")
-      .map((action) => {
+      .filter(action => action.status === 'COMPLETED')
+      .map(action => {
         const ratio = (action.parameters as Record<string, unknown>)
           ?.compressionRatio as number;
         return ratio && ratio > 0 ? ratio : null;
@@ -100,13 +100,13 @@ export async function GET() {
     // 查询最近迁移记录（最近10条）
     const recentMigrations = await prisma.agentAction.findMany({
       where: {
-        agentName: "MemoryAgent",
+        agentName: 'MemoryAgent',
         actionType: {
-          in: ["MIGRATE_WORKING_TO_HOT", "MIGRATE_HOT_TO_COLD"] as any,
+          in: ['MIGRATE_WORKING_TO_HOT', 'MIGRATE_HOT_TO_COLD'] as any,
         },
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
       take: 10,
       select: {
@@ -120,7 +120,7 @@ export async function GET() {
       },
     });
 
-    const formattedRecentMigrations = recentMigrations.map((action) => ({
+    const formattedRecentMigrations = recentMigrations.map(action => ({
       id: action.id,
       actionType: action.actionType,
       actionName: action.actionName,
@@ -140,16 +140,16 @@ export async function GET() {
     for (let i = 6; i >= 0; i--) {
       const date = new Date(now);
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split("T")[0];
+      const dateStr = date.toISOString().split('T')[0];
 
-      const dayStart = new Date(dateStr + "T00:00:00Z");
-      const dayEnd = new Date(dateStr + "T23:59:59Z");
+      const dayStart = new Date(dateStr + 'T00:00:00Z');
+      const dayEnd = new Date(dateStr + 'T23:59:59Z');
 
       const dayCount = await prisma.agentAction.count({
         where: {
-          agentName: "MemoryAgent",
+          agentName: 'MemoryAgent',
           actionType: {
-            in: ["MIGRATE_WORKING_TO_HOT", "MIGRATE_HOT_TO_COLD"] as any,
+            in: ['MIGRATE_WORKING_TO_HOT', 'MIGRATE_HOT_TO_COLD'] as any,
           },
           createdAt: {
             gte: dayStart,
@@ -185,18 +185,18 @@ export async function GET() {
         },
         recentMigrations: formattedRecentMigrations,
         dailyTrend,
-        period: "last7days",
+        period: 'last7days',
       },
     });
   } catch (error) {
-    console.error("Error fetching migration stats:", error);
+    console.error('Error fetching migration stats:', error);
     return NextResponse.json(
       {
         success: false,
-        error: "获取迁移统计失败",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: '获取迁移统计失败',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

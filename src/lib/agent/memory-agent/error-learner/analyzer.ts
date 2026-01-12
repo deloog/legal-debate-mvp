@@ -3,12 +3,12 @@
  * 分析错误模式、常见原因和根本原因
  */
 
-import { v4 as uuidv4 } from "uuid";
-import { PrismaClient, ErrorType } from "@prisma/client";
+import { v4 as uuidv4 } from 'uuid';
+import { PrismaClient, ErrorType } from '@prisma/client';
 
-import { AIService } from "@/lib/ai/service-refactored";
-import type { AIRequestConfig, AIResponse } from "@/types/ai-service";
-import type { ErrorPattern } from "../types";
+import { AIService } from '@/lib/ai/service-refactored';
+import type { AIRequestConfig, AIResponse } from '@/types/ai-service';
+import type { ErrorPattern } from '../types';
 
 /**
  * ErrorPatternAnalyzer - 错误模式分析类
@@ -16,7 +16,7 @@ import type { ErrorPattern } from "../types";
 export class ErrorPatternAnalyzer {
   constructor(
     private prisma: PrismaClient,
-    private aiService: AIService,
+    private aiService: AIService
   ) {}
 
   /**
@@ -63,12 +63,12 @@ export class ErrorPatternAnalyzer {
       },
       take: 10,
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
     });
 
     // 提取上下文信息
-    const contexts = errors.map((e) => e.context);
+    const contexts = errors.map(e => e.context);
 
     // 使用AI聚类分析
     if (contexts.length === 0) {
@@ -77,20 +77,20 @@ export class ErrorPatternAnalyzer {
 
     const prompt = `请分析以下${contexts.length}个错误上下文，提取3-5个最常见的原因：
 
-${contexts.map((c, i) => `${i + 1}. ${JSON.stringify(c)}`).join("\n")}
+${contexts.map((c, i) => `${i + 1}. ${JSON.stringify(c)}`).join('\n')}
 
 返回格式：纯文本，每行一个原因`;
 
     const requestConfig: AIRequestConfig = {
-      model: "deepseek-chat",
+      model: 'deepseek-chat',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content:
-            "你是一个专业的错误分析助手，擅长从多个错误实例中找出共同原因。",
+            '你是一个专业的错误分析助手，擅长从多个错误实例中找出共同原因。',
         },
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
@@ -101,11 +101,11 @@ ${contexts.map((c, i) => `${i + 1}. ${JSON.stringify(c)}`).join("\n")}
     const response: AIResponse =
       await this.aiService.chatCompletion(requestConfig);
 
-    const content = response.choices[0]?.message?.content || "";
+    const content = response.choices[0]?.message?.content || '';
     return content
-      .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0)
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
       .slice(0, 5);
   }
 
@@ -132,14 +132,14 @@ ${contexts.map((c, i) => `${i + 1}. ${JSON.stringify(c)}`).join("\n")}
 2. 解释为什么导致这个错误`;
 
     const requestConfig: AIRequestConfig = {
-      model: "deepseek-chat",
+      model: 'deepseek-chat',
       messages: [
         {
-          role: "system",
-          content: "你是一个专业的错误分析助手，擅长找出错误的根本原因。",
+          role: 'system',
+          content: '你是一个专业的错误分析助手，擅长找出错误的根本原因。',
         },
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
@@ -150,6 +150,6 @@ ${contexts.map((c, i) => `${i + 1}. ${JSON.stringify(c)}`).join("\n")}
     const response: AIResponse =
       await this.aiService.chatCompletion(requestConfig);
 
-    return response.choices[0]?.message?.content?.trim() || "";
+    return response.choices[0]?.message?.content?.trim() || '';
   }
 }

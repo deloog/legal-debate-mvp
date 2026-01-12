@@ -1,5 +1,5 @@
-import { writeFile, unlink, mkdir } from "fs/promises";
-import { join } from "path";
+import { writeFile, unlink, mkdir } from 'fs/promises';
+import { join } from 'path';
 
 export interface FileMetadata {
   filename: string;
@@ -14,7 +14,7 @@ export interface FileMetadata {
  * 负责文件的物理存储管理
  */
 export class FileStorage {
-  private static readonly UPLOAD_DIR = join(process.cwd(), "public", "uploads");
+  private static readonly UPLOAD_DIR = join(process.cwd(), 'public', 'uploads');
 
   /**
    * 保存文件到指定路径
@@ -22,7 +22,7 @@ export class FileStorage {
   static async saveFile(
     buffer: Buffer,
     caseId: string,
-    originalFilename: string,
+    originalFilename: string
   ): Promise<FileMetadata> {
     const uploadDir = join(this.UPLOAD_DIR, caseId);
 
@@ -50,7 +50,7 @@ export class FileStorage {
    * 删除文件
    */
   static async deleteFile(relativePath: string): Promise<void> {
-    const fullPath = join(process.cwd(), "public", relativePath);
+    const fullPath = join(process.cwd(), 'public', relativePath);
     try {
       await unlink(fullPath);
     } catch (error) {
@@ -62,9 +62,9 @@ export class FileStorage {
    * 获取文件扩展名
    */
   private static getExtension(filename: string): string {
-    const lastDotIndex = filename.lastIndexOf(".");
+    const lastDotIndex = filename.lastIndexOf('.');
     if (lastDotIndex === -1) {
-      return "";
+      return '';
     }
     return filename.substring(lastDotIndex + 1).toLowerCase();
   }
@@ -81,17 +81,17 @@ export class FileStorage {
    */
   private static getMimeType(extension: string): string {
     const mimeMap: Record<string, string> = {
-      pdf: "application/pdf",
-      doc: "application/msword",
-      docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      txt: "text/plain",
-      jpg: "image/jpeg",
-      jpeg: "image/jpeg",
-      png: "image/png",
-      gif: "image/gif",
+      pdf: 'application/pdf',
+      doc: 'application/msword',
+      docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      txt: 'text/plain',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      gif: 'image/gif',
     };
 
-    return mimeMap[extension.toLowerCase()] || "application/octet-stream";
+    return mimeMap[extension.toLowerCase()] || 'application/octet-stream';
   }
 
   /**
@@ -99,7 +99,7 @@ export class FileStorage {
    */
   static validateFileSize(
     size: number,
-    maxSize: number = 10 * 1024 * 1024,
+    maxSize: number = 10 * 1024 * 1024
   ): boolean {
     return size <= maxSize;
   }
@@ -109,7 +109,7 @@ export class FileStorage {
    */
   static validateFileType(
     extension: string,
-    allowedTypes: string[] = ["pdf", "doc", "docx", "txt"],
+    allowedTypes: string[] = ['pdf', 'doc', 'docx', 'txt']
   ): boolean {
     return allowedTypes.includes(extension.toLowerCase());
   }
@@ -119,11 +119,11 @@ export class FileStorage {
    */
   static formatFileSize(bytes: number): string {
     if (bytes === 0) {
-      return "0 B";
+      return '0 B';
     }
 
     const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
+    const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
     return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;

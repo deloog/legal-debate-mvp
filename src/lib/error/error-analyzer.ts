@@ -5,7 +5,7 @@
  * 负责根因分析、模式识别、趋势分析
  */
 
-import { prisma } from "@/lib/db/prisma";
+import { prisma } from '@/lib/db/prisma';
 import {
   ErrorLog,
   ErrorType,
@@ -13,7 +13,7 @@ import {
   RootCauseAnalysis,
   ErrorSeverity,
   TimeRange,
-} from "./types";
+} from './types';
 
 /**
  * 错误分析器
@@ -25,7 +25,7 @@ export class ErrorAnalyzer {
    * @returns 根因分析结果
    */
   async performRootCauseAnalysis(
-    errorLog: ErrorLog,
+    errorLog: ErrorLog
   ): Promise<RootCauseAnalysis> {
     const analysisId = `analysis_${Date.now()}`;
     const rootCause = this.identifyRootCause(errorLog);
@@ -35,7 +35,7 @@ export class ErrorAnalyzer {
 
     return {
       analysisId,
-      errorLogId: errorLog.id || "",
+      errorLogId: errorLog.id || '',
       rootCause,
       confidence,
       contributingFactors,
@@ -60,7 +60,7 @@ export class ErrorAnalyzer {
         },
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
     });
 
@@ -123,14 +123,14 @@ export class ErrorAnalyzer {
 
     // 按小时统计
     const hours = Math.ceil(
-      (timeRange.end.getTime() - timeRange.start.getTime()) / (1000 * 60 * 60),
+      (timeRange.end.getTime() - timeRange.start.getTime()) / (1000 * 60 * 60)
     );
     const hourlyTrend = new Array(hours).fill(0);
 
     for (const error of errorLogs) {
       const hourIndex = Math.floor(
         (error.createdAt.getTime() - timeRange.start.getTime()) /
-          (1000 * 60 * 60),
+          (1000 * 60 * 60)
       );
       if (hourIndex >= 0 && hourIndex < hours) {
         hourlyTrend[hourIndex]++;
@@ -138,7 +138,7 @@ export class ErrorAnalyzer {
     }
 
     // 计算恢复率
-    const recovered = errorLogs.filter((log) => log.recovered).length;
+    const recovered = errorLogs.filter(log => log.recovered).length;
     const recoveryRate =
       errorLogs.length > 0 ? recovered / errorLogs.length : 0;
 
@@ -160,35 +160,35 @@ export class ErrorAnalyzer {
     const errorMessage = errorLog.errorMessage.toLowerCase();
 
     // 根据错误类型和消息判断根因
-    if (errorMessage.includes("timeout")) {
-      return "服务响应超时，可能是网络延迟或服务处理能力不足";
+    if (errorMessage.includes('timeout')) {
+      return '服务响应超时，可能是网络延迟或服务处理能力不足';
     }
 
-    if (errorMessage.includes("rate limit")) {
-      return "API调用频率超出限制，需要实现请求限流";
+    if (errorMessage.includes('rate limit')) {
+      return 'API调用频率超出限制，需要实现请求限流';
     }
 
-    if (errorMessage.includes("connection")) {
-      return "网络连接失败，可能是服务不可用或网络配置问题";
+    if (errorMessage.includes('connection')) {
+      return '网络连接失败，可能是服务不可用或网络配置问题';
     }
 
-    if (errorMessage.includes("not found")) {
-      return "请求的资源不存在，可能是数据被删除或ID错误";
+    if (errorMessage.includes('not found')) {
+      return '请求的资源不存在，可能是数据被删除或ID错误';
     }
 
-    if (errorMessage.includes("validation")) {
-      return "数据验证失败，输入数据不符合业务规则";
+    if (errorMessage.includes('validation')) {
+      return '数据验证失败，输入数据不符合业务规则';
     }
 
-    if (errorMessage.includes("database") || errorMessage.includes("db")) {
-      return "数据库操作失败，可能是数据结构问题或约束冲突";
+    if (errorMessage.includes('database') || errorMessage.includes('db')) {
+      return '数据库操作失败，可能是数据结构问题或约束冲突';
     }
 
     if (errorType === ErrorType.AI_SERVICE_ERROR) {
-      return "AI服务错误，可能是模型响应异常或API配置问题";
+      return 'AI服务错误，可能是模型响应异常或API配置问题';
     }
 
-    return "未知原因，需要进一步调查";
+    return '未知原因，需要进一步调查';
   }
 
   /**
@@ -201,19 +201,19 @@ export class ErrorAnalyzer {
 
     const errorMessage = errorLog.errorMessage.toLowerCase();
 
-    if (errorMessage.includes("timeout")) {
-      factors.push("网络延迟");
-      factors.push("服务负载过高");
+    if (errorMessage.includes('timeout')) {
+      factors.push('网络延迟');
+      factors.push('服务负载过高');
     }
 
-    if (errorMessage.includes("connection")) {
-      factors.push("网络不稳定");
-      factors.push("服务可用性");
+    if (errorMessage.includes('connection')) {
+      factors.push('网络不稳定');
+      factors.push('服务可用性');
     }
 
-    if (errorMessage.includes("validation")) {
-      factors.push("输入数据质量");
-      factors.push("业务规则变更");
+    if (errorMessage.includes('validation')) {
+      factors.push('输入数据质量');
+      factors.push('业务规则变更');
     }
 
     if (errorLog.context?.agentName) {
@@ -236,39 +236,39 @@ export class ErrorAnalyzer {
     const fixes: string[] = [];
     const errorMessage = errorLog.errorMessage.toLowerCase();
 
-    if (errorMessage.includes("timeout")) {
-      fixes.push("增加超时时间配置");
-      fixes.push("实现指数退避重试机制");
-      fixes.push("监控服务响应时间");
+    if (errorMessage.includes('timeout')) {
+      fixes.push('增加超时时间配置');
+      fixes.push('实现指数退避重试机制');
+      fixes.push('监控服务响应时间');
     }
 
-    if (errorMessage.includes("rate limit")) {
-      fixes.push("实现请求队列和限流");
-      fixes.push("增加缓存层减少API调用");
-      fixes.push("联系服务提供商提升配额");
+    if (errorMessage.includes('rate limit')) {
+      fixes.push('实现请求队列和限流');
+      fixes.push('增加缓存层减少API调用');
+      fixes.push('联系服务提供商提升配额');
     }
 
-    if (errorMessage.includes("connection")) {
-      fixes.push("检查网络连接和防火墙配置");
-      fixes.push("实现连接池和健康检查");
-      fixes.push("增加重试机制");
+    if (errorMessage.includes('connection')) {
+      fixes.push('检查网络连接和防火墙配置');
+      fixes.push('实现连接池和健康检查');
+      fixes.push('增加重试机制');
     }
 
-    if (errorMessage.includes("validation")) {
-      fixes.push("改进前端验证逻辑");
-      fixes.push("提供更清晰的错误提示");
-      fixes.push("更新业务规则文档");
+    if (errorMessage.includes('validation')) {
+      fixes.push('改进前端验证逻辑');
+      fixes.push('提供更清晰的错误提示');
+      fixes.push('更新业务规则文档');
     }
 
-    if (errorMessage.includes("database")) {
-      fixes.push("检查数据库连接池配置");
-      fixes.push("优化数据库查询性能");
-      fixes.push("审查数据完整性约束");
+    if (errorMessage.includes('database')) {
+      fixes.push('检查数据库连接池配置');
+      fixes.push('优化数据库查询性能');
+      fixes.push('审查数据完整性约束');
     }
 
     // 通用建议
-    fixes.push("增强日志记录");
-    fixes.push("添加监控和告警");
+    fixes.push('增强日志记录');
+    fixes.push('添加监控和告警');
 
     return fixes;
   }
@@ -285,9 +285,9 @@ export class ErrorAnalyzer {
 
     // 明确的错误消息提高置信度
     if (
-      errorMessage.includes("timeout") ||
-      errorMessage.includes("rate limit") ||
-      errorMessage.includes("not found")
+      errorMessage.includes('timeout') ||
+      errorMessage.includes('rate limit') ||
+      errorMessage.includes('not found')
     ) {
       confidence += 0.2;
     }
@@ -313,7 +313,7 @@ export class ErrorAnalyzer {
    */
   private analyzePattern(
     errorType: ErrorType,
-    errors: ErrorLog[],
+    errors: ErrorLog[]
   ): ErrorPattern {
     const patternId = `pattern_${errorType}_${Date.now()}`;
     const frequency = errors.length;
@@ -332,7 +332,7 @@ export class ErrorAnalyzer {
       .map(([cause]) => cause);
 
     // 确定根因（最常见的原因）
-    const rootCause = topCauses[0] || "Unknown";
+    const rootCause = topCauses[0] || 'Unknown';
 
     // 计算平均恢复时间
     let totalRecoveryTime = 0;
@@ -352,11 +352,11 @@ export class ErrorAnalyzer {
     const recentErrors = errors.slice(0, Math.floor(errors.length / 2));
     const olderErrors = errors.slice(Math.floor(errors.length / 2));
 
-    let trend: "INCREASING" | "STABLE" | "DECREASING" = "STABLE";
+    let trend: 'INCREASING' | 'STABLE' | 'DECREASING' = 'STABLE';
     if (recentErrors.length > olderErrors.length + 2) {
-      trend = "INCREASING";
+      trend = 'INCREASING';
     } else if (recentErrors.length < olderErrors.length - 2) {
-      trend = "DECREASING";
+      trend = 'DECREASING';
     }
 
     return {
@@ -402,7 +402,7 @@ export class ErrorAnalyzer {
 
     // 汇总统计
     const totalErrors = errorLogs.length;
-    const recoveredErrors = errorLogs.filter((log) => log.recovered).length;
+    const recoveredErrors = errorLogs.filter(log => log.recovered).length;
     const recoveryRate = totalErrors > 0 ? recoveredErrors / totalErrors : 0;
 
     // 按类型统计

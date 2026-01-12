@@ -1,10 +1,10 @@
-import { CacheManager } from "./manager";
+import { CacheManager } from './manager';
 import {
   CacheOptions,
   CacheNamespace,
   defaultCacheConfig,
   CacheStrategy,
-} from "./types";
+} from './types';
 
 // 缓存策略基类
 export abstract class BaseCacheStrategy {
@@ -18,7 +18,7 @@ export abstract class BaseCacheStrategy {
   abstract set<T>(
     key: string,
     value: T,
-    options?: CacheOptions,
+    options?: CacheOptions
   ): Promise<boolean>;
   abstract delete(key: string, options?: CacheOptions): Promise<boolean>;
 }
@@ -32,7 +32,7 @@ export class LazyLoadingStrategy extends BaseCacheStrategy {
   async set<T>(
     key: string,
     value: T,
-    options?: CacheOptions,
+    options?: CacheOptions
   ): Promise<boolean> {
     return await this.cacheManager.set<T>(key, value, options);
   }
@@ -45,7 +45,7 @@ export class LazyLoadingStrategy extends BaseCacheStrategy {
   async getOrSet<T>(
     key: string,
     dataProvider: () => Promise<T>,
-    options?: CacheOptions,
+    options?: CacheOptions
   ): Promise<T | null> {
     return await this.cacheManager.getOrSet<T>(key, dataProvider, options);
   }
@@ -57,7 +57,7 @@ export class WriteThroughStrategy extends BaseCacheStrategy {
 
   constructor(
     cacheManager: CacheManager,
-    dataWriter: (key: string, value: any) => Promise<boolean>,
+    dataWriter: (key: string, value: any) => Promise<boolean>
   ) {
     super(cacheManager);
     this.dataWriter = dataWriter;
@@ -77,7 +77,7 @@ export class WriteThroughStrategy extends BaseCacheStrategy {
   async set<T>(
     key: string,
     value: T,
-    options?: CacheOptions,
+    options?: CacheOptions
   ): Promise<boolean> {
     try {
       // 先写入数据源
@@ -120,7 +120,7 @@ export class WriteBehindStrategy extends BaseCacheStrategy {
   constructor(
     cacheManager: CacheManager,
     dataWriter: (key: string, value: any) => Promise<boolean>,
-    batchWriteDelay: number = 5000,
+    batchWriteDelay: number = 5000
   ) {
     super(cacheManager);
     this.dataWriter = dataWriter;
@@ -141,14 +141,14 @@ export class WriteBehindStrategy extends BaseCacheStrategy {
   async set<T>(
     key: string,
     value: T,
-    options?: CacheOptions,
+    options?: CacheOptions
   ): Promise<boolean> {
     try {
       // 立即写入缓存
       const cacheSetSuccess = await this.cacheManager.set<T>(
         key,
         value,
-        options,
+        options
       );
 
       if (cacheSetSuccess) {
@@ -225,7 +225,7 @@ export class WriteBehindStrategy extends BaseCacheStrategy {
 
     const results = await Promise.allSettled(writePromises);
     const successCount = results.filter(
-      (result) => result.status === "fulfilled" && result.value,
+      result => result.status === 'fulfilled' && result.value
     ).length;
     const failureCount = results.length - successCount;
 
@@ -250,7 +250,7 @@ export class WriteBehindStrategy extends BaseCacheStrategy {
     }
 
     const timestamps = Array.from(this.writeQueue.values()).map(
-      (data) => data.timestamp,
+      data => data.timestamp
     );
     return {
       size: this.writeQueue.size,
@@ -268,7 +268,7 @@ export class RefreshAheadStrategy extends BaseCacheStrategy {
   constructor(
     cacheManager: CacheManager,
     dataProvider: (key: string) => Promise<any>,
-    refreshThreshold: number = 300, // 默认5分钟
+    refreshThreshold: number = 300 // 默认5分钟
   ) {
     super(cacheManager);
     this.dataProvider = dataProvider;
@@ -292,7 +292,7 @@ export class RefreshAheadStrategy extends BaseCacheStrategy {
   async set<T>(
     key: string,
     value: T,
-    options?: CacheOptions,
+    options?: CacheOptions
   ): Promise<boolean> {
     return await this.cacheManager.set<T>(key, value, options);
   }
@@ -368,7 +368,7 @@ export class CacheStrategyFactory {
 
   // 创建写穿透策略
   createWriteThroughStrategy(
-    dataWriter: (key: string, value: any) => Promise<boolean>,
+    dataWriter: (key: string, value: any) => Promise<boolean>
   ): WriteThroughStrategy {
     return new WriteThroughStrategy(this.cacheManager, dataWriter);
   }
@@ -376,24 +376,24 @@ export class CacheStrategyFactory {
   // 创建写回策略
   createWriteBehindStrategy(
     dataWriter: (key: string, value: any) => Promise<boolean>,
-    batchWriteDelay?: number,
+    batchWriteDelay?: number
   ): WriteBehindStrategy {
     return new WriteBehindStrategy(
       this.cacheManager,
       dataWriter,
-      batchWriteDelay,
+      batchWriteDelay
     );
   }
 
   // 创建预刷新策略
   createRefreshAheadStrategy(
     dataProvider: (key: string) => Promise<any>,
-    refreshThreshold?: number,
+    refreshThreshold?: number
   ): RefreshAheadStrategy {
     return new RefreshAheadStrategy(
       this.cacheManager,
       dataProvider,
-      refreshThreshold,
+      refreshThreshold
     );
   }
 
@@ -405,7 +405,7 @@ export class CacheStrategyFactory {
     options?: {
       batchWriteDelay?: number;
       refreshThreshold?: number;
-    },
+    }
   ): BaseCacheStrategy {
     switch (strategy) {
       case CacheStrategy.LAZY_LOADING:
@@ -413,26 +413,26 @@ export class CacheStrategyFactory {
 
       case CacheStrategy.WRITE_THROUGH:
         if (!dataWriter) {
-          throw new Error("写穿透策略需要提供 dataWriter 函数");
+          throw new Error('写穿透策略需要提供 dataWriter 函数');
         }
         return this.createWriteThroughStrategy(dataWriter);
 
       case CacheStrategy.WRITE_BEHIND:
         if (!dataWriter) {
-          throw new Error("写回策略需要提供 dataWriter 函数");
+          throw new Error('写回策略需要提供 dataWriter 函数');
         }
         return this.createWriteBehindStrategy(
           dataWriter,
-          options?.batchWriteDelay,
+          options?.batchWriteDelay
         );
 
       case CacheStrategy.REFRESH_AHEAD:
         if (!dataProvider) {
-          throw new Error("预刷新策略需要提供 dataProvider 函数");
+          throw new Error('预刷新策略需要提供 dataProvider 函数');
         }
         return this.createRefreshAheadStrategy(
           dataProvider,
-          options?.refreshThreshold,
+          options?.refreshThreshold
         );
 
       default:
@@ -442,7 +442,7 @@ export class CacheStrategyFactory {
 }
 
 // 创建默认策略工厂实例
-import { cacheManager } from "./manager";
+import { cacheManager } from './manager';
 export const cacheStrategyFactory = new CacheStrategyFactory(cacheManager);
 
 // 预定义的缓存策略配置

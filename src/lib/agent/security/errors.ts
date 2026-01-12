@@ -6,20 +6,20 @@ export class AnalysisError extends Error {
   constructor(
     message: string,
     public readonly cause: Error,
-    public readonly context: Record<string, any>,
+    public readonly context: Record<string, any>
   ) {
     super(message);
-    this.name = "AnalysisError";
+    this.name = 'AnalysisError';
   }
 }
 
 export class SecurityError extends Error {
   constructor(
     message: string,
-    public readonly context?: Record<string, any>,
+    public readonly context?: Record<string, any>
   ) {
     super(message);
-    this.name = "SecurityError";
+    this.name = 'SecurityError';
   }
 }
 
@@ -27,9 +27,9 @@ export class ValidationError extends Error {
   constructor(
     message: string,
     public readonly field?: string,
-    public readonly value?: any,
+    public readonly value?: any
   ) {
     super(message);
-    this.name = "ValidationError";
+    this.name = 'ValidationError';
   }
 }

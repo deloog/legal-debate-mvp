@@ -3,16 +3,16 @@
  * 第三层：AI审查修正
  */
 
-import type { TimelineEvent, TimelineEventType } from "../../core/types";
-import { getUnifiedAIService } from "@/lib/ai/unified-service";
-import { extractJSONFromText, cleanJSONString } from "./timeline-parser";
+import type { TimelineEvent, TimelineEventType } from '../../core/types';
+import { getUnifiedAIService } from '@/lib/ai/unified-service';
+import { extractJSONFromText, cleanJSONString } from './timeline-parser';
 
 /**
  * AI审查层 - 对时间线事件进行审查和修正
  */
 export async function aiReviewLayer(
   events: TimelineEvent[],
-  originalText: string,
+  originalText: string
 ): Promise<TimelineEvent[]> {
   try {
     const unifiedService = await getUnifiedAIService();
@@ -20,16 +20,16 @@ export async function aiReviewLayer(
     const prompt = buildAIReviewPrompt(events, originalText);
 
     const response = await unifiedService.chatCompletion({
-      model: "deepseek-chat",
-      provider: "deepseek",
+      model: 'deepseek-chat',
+      provider: 'deepseek',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content:
-            "你是一个专业的法律时间线审查专家。请审查和修正时间线事件识别结果。",
+            '你是一个专业的法律时间线审查专家。请审查和修正时间线事件识别结果。',
         },
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
@@ -39,14 +39,14 @@ export async function aiReviewLayer(
 
     if (response.choices && response.choices.length > 0) {
       return parseAIReviewResponse(
-        response.choices[0].message.content || "",
-        events,
+        response.choices[0].message.content || '',
+        events
       );
     }
 
     return events;
   } catch (error) {
-    console.error("AI审查层失败:", error);
+    console.error('AI审查层失败:', error);
     return events;
   }
 }
@@ -56,15 +56,15 @@ export async function aiReviewLayer(
  */
 function buildAIReviewPrompt(
   events: TimelineEvent[],
-  originalText: string,
+  originalText: string
 ): string {
   const eventList = events
     .map(
       (e, index) =>
         `${index + 1}. ${e.date} - ${e.event} [${e.eventType}]
-   - 重要性: ${e.importance}`,
+   - 重要性: ${e.importance}`
     )
-    .join("\n");
+    .join('\n');
 
   return `请审查以下从法律文档中识别的时间线事件列表，确保其准确性和完整性。
 
@@ -109,19 +109,19 @@ ${eventList}
  */
 function parseAIReviewResponse(
   aiResponse: string,
-  originalEvents: TimelineEvent[],
+  originalEvents: TimelineEvent[]
 ): TimelineEvent[] {
   try {
     let cleanedResponse = aiResponse.trim();
 
     const responsePreview = cleanedResponse.substring(0, 1000);
-    console.log("[AI审查响应解析] 原始响应预览:", responsePreview);
+    console.log('[AI审查响应解析] 原始响应预览:', responsePreview);
 
     cleanedResponse = extractJSONFromText(cleanedResponse);
     cleanedResponse = cleanJSONString(cleanedResponse);
 
     const parsed = JSON.parse(cleanedResponse);
-    console.log("[AI审查响应解析] JSON解析成功");
+    console.log('[AI审查响应解析] JSON解析成功');
 
     const invalidIds = new Set(parsed.invalidIds || []);
     const reviewedItems = parsed.reviewedEvents || [];
@@ -136,37 +136,37 @@ function parseAIReviewResponse(
           importance?: number;
           evidence?: string[];
         };
-        const original = originalEvents.find((e) => e.id === reviewedItem.id);
+        const original = originalEvents.find(e => e.id === reviewedItem.id);
 
         return {
           id: reviewedItem.id,
-          date: reviewedItem.date || original?.date || "",
-          event: reviewedItem.event || original?.event || "",
+          date: reviewedItem.date || original?.date || '',
+          event: reviewedItem.event || original?.event || '',
           eventType: (reviewedItem.eventType ||
             original?.eventType) as TimelineEventType,
           importance: Math.min(
             5,
-            Math.max(1, Math.round(reviewedItem.importance || 3)),
+            Math.max(1, Math.round(reviewedItem.importance || 3))
           ),
           evidence: Array.isArray(reviewedItem.evidence)
             ? reviewedItem.evidence
             : original?.evidence || [],
-          source: original?.source || "explicit",
+          source: original?.source || 'explicit',
         };
       })
-      .filter((item) => !invalidIds.has(item.id));
+      .filter(item => !invalidIds.has(item.id));
 
     console.log(
-      `[AI审查响应解析] 成功解析${result.length}个事件，删除${invalidIds.size}个无效事件`,
+      `[AI审查响应解析] 成功解析${result.length}个事件，删除${invalidIds.size}个无效事件`
     );
     return result;
   } catch (error) {
-    console.error("[AI审查响应解析] 完整解析失败:", {
+    console.error('[AI审查响应解析] 完整解析失败:', {
       error: error instanceof Error ? error.message : String(error),
       responsePreview: aiResponse.substring(0, 500),
     });
 
-    console.log("[AI审查响应解析] 使用原始事件");
+    console.log('[AI审查响应解析] 使用原始事件');
     return originalEvents;
   }
 }

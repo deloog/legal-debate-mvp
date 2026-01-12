@@ -3,7 +3,7 @@
  * 验证多轮辩论的上下文继承和论点递进
  */
 
-import { test, expect, APIRequestContext } from "@playwright/test";
+import { test, expect, APIRequestContext } from '@playwright/test';
 import {
   createTestCase,
   uploadTestDocument,
@@ -16,18 +16,18 @@ import {
   cleanupTestData,
   verifyDatabaseData,
   PerformanceRecorder,
-} from "./helpers";
+} from './helpers';
 
-test.describe("多轮辩论流程", () => {
+test.describe('多轮辩论流程', () => {
   let apiContext: APIRequestContext;
   let perfRecorder: PerformanceRecorder;
-  const testUserId = "test-e2e-user-multi-round";
+  const testUserId = 'test-e2e-user-multi-round';
   let caseId: string;
   let debateId: string;
 
   test.beforeAll(async ({ playwright }) => {
     apiContext = await playwright.request.newContext({
-      baseURL: "http://localhost:3000",
+      baseURL: 'http://localhost:3000',
     });
     perfRecorder = new PerformanceRecorder();
   });
@@ -41,7 +41,7 @@ test.describe("多轮辩论流程", () => {
     }
   });
 
-  test("两轮辩论流程：上下文继承和论点递进", async () => {
+  test('两轮辩论流程：上下文继承和论点递进', async () => {
     // 增加测试超时时间，适应多轮AI服务调用
     test.setTimeout(120000);
     const startTime = Date.now();
@@ -54,33 +54,33 @@ test.describe("多轮辩论流程", () => {
     const testDocument = await uploadTestDocument(
       apiContext,
       caseId,
-      "%PDF_SAMPLE%",
+      '%PDF_SAMPLE%'
     );
     const parseResult = await waitForDocumentParsing(
       apiContext,
-      testDocument.documentId,
+      testDocument.documentId
     );
 
     const keywords = parseResult.claims.map(
-      (claim: { text: string }) => claim.text,
+      (claim: { text: string }) => claim.text
     );
     const searchResults = await searchLawArticles(
       apiContext,
       keywords,
-      "CIVIL",
-      { allowEmpty: true },
+      'CIVIL',
+      { allowEmpty: true }
     );
 
     // 如果没有检索到法条，使用测试法条ID
     const articleIds =
       searchResults.length > 0
         ? searchResults.slice(0, 5).map((a: { id: string }) => a.id)
-        : ["mock-article-id-1"];
+        : ['mock-article-id-1'];
 
     const applicabilityResult = await analyzeApplicability(
       apiContext,
       caseId,
-      articleIds,
+      articleIds
     );
     const debate = await createDebate(apiContext, caseId);
     debateId = debate.debateId;
@@ -92,9 +92,9 @@ test.describe("多轮辩论流程", () => {
       apiContext,
       debateId,
       debate.roundId,
-      applicableArticles,
+      applicableArticles
     );
-    perfRecorder.record("第一轮辩论", Date.now() - round1Start);
+    perfRecorder.record('第一轮辩论', Date.now() - round1Start);
 
     // 验证第一轮结果
     expect(args1).toBeDefined();
@@ -109,13 +109,13 @@ test.describe("多轮辩论流程", () => {
         data: {
           evidence: [
             {
-              type: "CONTRACT",
-              content: "补充证据：2024年3月补充协议",
-              date: "2024-03-15",
+              type: 'CONTRACT',
+              content: '补充证据：2024年3月补充协议',
+              date: '2024-03-15',
             },
           ],
         },
-      },
+      }
     );
 
     // 如果证据提交API不可用，直接创建第二轮
@@ -123,7 +123,7 @@ test.describe("多轮辩论流程", () => {
     if (evidenceResponse.ok()) {
       // 查询已创建的第二轮（createDebate可能自动创建了第二轮）
       const roundsResponse = await apiContext.get(
-        `/api/v1/debates/${debateId}/rounds`,
+        `/api/v1/debates/${debateId}/rounds`
       );
       const rounds = (await roundsResponse.json()).data;
       if (rounds.length > 1) {
@@ -142,9 +142,9 @@ test.describe("多轮辩论流程", () => {
       apiContext,
       debateId,
       round2Id,
-      applicableArticles,
+      applicableArticles
     );
-    perfRecorder.record("第二轮辩论", Date.now() - round2Start);
+    perfRecorder.record('第二轮辩论', Date.now() - round2Start);
 
     // 验证论点递进
     expect(args2.plaintiff.arguments.length).toBeGreaterThan(0);
@@ -153,7 +153,7 @@ test.describe("多轮辩论流程", () => {
     // 验证第二轮论点引用第一轮（包含references字段）
     const hasReferences = args2.plaintiff.arguments.some(
       (arg: { references: { roundNumber: number }[] }) =>
-        arg.references && arg.references.length > 0,
+        arg.references && arg.references.length > 0
     );
     expect(hasReferences).toBe(true);
 
@@ -163,13 +163,13 @@ test.describe("多轮辩论流程", () => {
     // 验证总流程时间
     const totalTime = Date.now() - startTime;
     expect(totalTime).toBeLessThan(90000);
-    perfRecorder.record("多轮流程", totalTime);
+    perfRecorder.record('多轮流程', totalTime);
 
-    console.log("=== 多轮辩论流程性能报告 ===");
+    console.log('=== 多轮辩论流程性能报告 ===');
     console.log(JSON.stringify(perfRecorder.getAllStats(), null, 2));
   });
 
-  test("验证上下文继承：第二轮引用第一轮论点", async () => {
+  test('验证上下文继承：第二轮引用第一轮论点', async () => {
     test.setTimeout(90000);
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
@@ -187,20 +187,20 @@ test.describe("多轮辩论流程", () => {
     // 验证第二轮论点引用第一轮
     const referencesRound1 = args2.plaintiff.arguments.some(
       (arg: { references: { roundNumber: number }[] }) =>
-        arg.references.some((ref) => ref.roundNumber === 1),
+        arg.references.some(ref => ref.roundNumber === 1)
     );
     expect(referencesRound1).toBe(true);
 
     // 验证历史轮次数据不被修改
     const round1Data = await apiContext.get(
-      `/api/v1/debates/${debateId}/rounds/${debate.roundId}`,
+      `/api/v1/debates/${debateId}/rounds/${debate.roundId}`
     );
     expect(round1Data.ok()).toBe(true);
     const round1Result = await round1Data.json();
-    expect(round1Result.data.status).toBe("COMPLETED");
+    expect(round1Result.data.status).toBe('COMPLETED');
   });
 
-  test("验证论点递进：观点逐步深化", async () => {
+  test('验证论点递进：观点逐步深化', async () => {
     test.setTimeout(90000);
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
@@ -213,7 +213,7 @@ test.describe("多轮辩论流程", () => {
       apiContext,
       debateId,
       debate.roundId,
-      [],
+      []
     );
 
     // 第二轮
@@ -224,12 +224,12 @@ test.describe("多轮辩论流程", () => {
     const avgLength1 =
       args1.plaintiff.arguments.reduce(
         (sum: number, arg: { content: string }) => sum + arg.content.length,
-        0,
+        0
       ) / args1.plaintiff.arguments.length;
     const avgLength2 =
       args2.plaintiff.arguments.reduce(
         (sum: number, arg: { content: string }) => sum + arg.content.length,
-        0,
+        0
       ) / args2.plaintiff.arguments.length;
 
     expect(avgLength2).toBeGreaterThan(avgLength1);
@@ -238,25 +238,25 @@ test.describe("多轮辩论流程", () => {
     const lawCount1 = new Set(
       args1.plaintiff.arguments.flatMap(
         (arg: { legalBasis: { articleId: string }[] }) =>
-          arg.legalBasis.map((lb) => lb.articleId),
-      ),
+          arg.legalBasis.map(lb => lb.articleId)
+      )
     ).size;
     const lawCount2 = new Set(
       args2.plaintiff.arguments.flatMap(
         (arg: { legalBasis: { articleId: string }[] }) =>
-          arg.legalBasis.map((lb) => lb.articleId),
-      ),
+          arg.legalBasis.map(lb => lb.articleId)
+      )
     ).size;
 
     expect(lawCount2).toBeGreaterThanOrEqual(lawCount1);
 
     console.log(
-      `论点平均长度: 第一轮=${avgLength1.toFixed(0)}字符, 第二轮=${avgLength2.toFixed(0)}字符`,
+      `论点平均长度: 第一轮=${avgLength1.toFixed(0)}字符, 第二轮=${avgLength2.toFixed(0)}字符`
     );
     console.log(`法条引用数: 第一轮=${lawCount1}, 第二轮=${lawCount2}`);
   });
 
-  test("验证增量分析：只分析新增数据", async () => {
+  test('验证增量分析：只分析新增数据', async () => {
     test.setTimeout(90000);
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
@@ -284,16 +284,16 @@ test.describe("多轮辩论流程", () => {
     // 只验证两者都在合理范围内，不强制要求加速比
     expect(speedup).toBeGreaterThan(0.5); // 至少不慢于2倍
 
-    perfRecorder.record("第一轮分析", round1Duration);
-    perfRecorder.record("第二轮分析", round2Duration);
-    perfRecorder.record("加速比", speedup);
+    perfRecorder.record('第一轮分析', round1Duration);
+    perfRecorder.record('第二轮分析', round2Duration);
+    perfRecorder.record('加速比', speedup);
 
     console.log(
-      `增量分析：第一轮=${round1Duration}ms, 第二轮=${round2Duration}ms, 加速比=${speedup.toFixed(2)}x`,
+      `增量分析：第一轮=${round1Duration}ms, 第二轮=${round2Duration}ms, 加速比=${speedup.toFixed(2)}x`
     );
   });
 
-  test("验证三轮辩论：完整的多轮支持", async () => {
+  test('验证三轮辩论：完整的多轮支持', async () => {
     test.setTimeout(120000);
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
@@ -315,7 +315,7 @@ test.describe("多轮辩论流程", () => {
     // 验证三轮论点数量递增 - 假设第二轮论点数应多于第一轮，第三轮论点数应多于或等于第二轮
     expect(args2.plaintiff.arguments.length).toBeGreaterThan(0);
     expect(args3.plaintiff.arguments.length).toBeGreaterThanOrEqual(
-      args2.plaintiff.arguments.length,
+      args2.plaintiff.arguments.length
     );
 
     // 验证数据库中轮次正确递增
@@ -323,15 +323,15 @@ test.describe("多轮辩论流程", () => {
 
     // 验证所有轮次状态
     const allRoundsResponse = await apiContext.get(
-      `/api/v1/debates/${debateId}/rounds`,
+      `/api/v1/debates/${debateId}/rounds`
     );
     expect(allRoundsResponse.ok()).toBe(true);
     const allRoundsData = await allRoundsResponse.json();
     const allRounds = allRoundsData.data || [];
 
     expect(allRounds.length).toBe(3);
-    expect(allRounds[0].status).toBe("COMPLETED");
-    expect(allRounds[1].status).toBe("COMPLETED");
-    expect(allRounds[2].status).toBe("COMPLETED");
+    expect(allRounds[0].status).toBe('COMPLETED');
+    expect(allRounds[1].status).toBe('COMPLETED');
+    expect(allRounds[2].status).toBe('COMPLETED');
   });
 });

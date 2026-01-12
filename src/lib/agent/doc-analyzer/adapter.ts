@@ -4,9 +4,9 @@
  * 将新的模块化DocAnalyzerAgent适配到现有的API接口
  */
 
-import { DocAnalyzerAgent } from "./doc-analyzer-agent";
-import type { AgentContext } from "../../../types/agent";
-import type { DocumentAnalysisOutput } from "./core/types";
+import { DocAnalyzerAgent } from './doc-analyzer-agent';
+import type { AgentContext } from '../../../types/agent';
+import type { DocumentAnalysisOutput } from './core/types';
 
 export class DocAnalyzerAgentAdapter {
   private agent: DocAnalyzerAgent;
@@ -59,9 +59,9 @@ export class DocAnalyzerAgentAdapter {
         success: false,
         error: {
           code:
-            error instanceof Error ? error.constructor.name : "UNKNOWN_ERROR",
+            error instanceof Error ? error.constructor.name : 'UNKNOWN_ERROR',
           message: error instanceof Error ? error.message : String(error),
-          type: "EXECUTION_ERROR",
+          type: 'EXECUTION_ERROR',
         },
       };
     }

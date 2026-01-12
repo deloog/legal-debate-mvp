@@ -12,9 +12,9 @@
  * node scripts/check-coverage-gate.ts
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { fileURLToPath } from "url";
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,49 +46,49 @@ const THRESHOLDS: Record<string, ThresholdConfig> = {
     lines: 70,
   },
   // API层 - 关键业务逻辑
-  "src/app/api/": {
+  'src/app/api/': {
     statements: 90,
     branches: 85,
     functions: 90,
     lines: 90,
   },
   // 缓存层 - 基础设施
-  "src/lib/cache/": {
+  'src/lib/cache/': {
     statements: 85,
     branches: 80,
     functions: 85,
     lines: 85,
   },
   // 数据库层 - 基础设施
-  "src/lib/db/": {
+  'src/lib/db/': {
     statements: 80,
     branches: 75,
     functions: 80,
     lines: 80,
   },
   // AI服务层 - 外部依赖
-  "src/lib/ai/": {
+  'src/lib/ai/': {
     statements: 60,
     branches: 50,
     functions: 60,
     lines: 60,
   },
   // 辩论功能层 - 核心业务
-  "src/lib/debate/": {
+  'src/lib/debate/': {
     statements: 85,
     branches: 80,
     functions: 85,
     lines: 85,
   },
   // 法条检索层 - 核心业务
-  "src/lib/law-article/": {
+  'src/lib/law-article/': {
     statements: 90,
     branches: 85,
     functions: 90,
     lines: 90,
   },
   // 监控层 - 基础设施
-  "src/lib/monitoring/": {
+  'src/lib/monitoring/': {
     statements: 75,
     branches: 70,
     functions: 75,
@@ -101,7 +101,7 @@ const THRESHOLDS: Record<string, ThresholdConfig> = {
  */
 function readCoverageData(coveragePath: string): CoverageData | null {
   try {
-    const jsonContent = fs.readFileSync(coveragePath, "utf-8");
+    const jsonContent = fs.readFileSync(coveragePath, 'utf-8');
     const data = JSON.parse(jsonContent);
 
     // 如果数据已经是汇总格式，直接返回
@@ -115,7 +115,7 @@ function readCoverageData(coveragePath: string): CoverageData | null {
   } catch (error) {
     console.error(`❌ 无法读取覆盖率文件: ${coveragePath}`);
     console.error(
-      `   错误: ${error instanceof Error ? error.message : String(error)}`,
+      `   错误: ${error instanceof Error ? error.message : String(error)}`
     );
     return null;
   }
@@ -125,8 +125,8 @@ function readCoverageData(coveragePath: string): CoverageData | null {
  * 计算总体覆盖率
  */
 function calculateTotalCoverage(
-  coverageData: Record<string, any>,
-): CoverageData["total"] {
+  coverageData: Record<string, any>
+): CoverageData['total'] {
   let totalStatements = 0;
   let coveredStatements = 0;
   let totalBranches = 0;
@@ -205,11 +205,11 @@ function calculateTotalCoverage(
  * 查找匹配的阈值配置
  */
 function findMatchingThreshold(filePath: string): ThresholdConfig | null {
-  const normalizedPath = filePath.replace(/\\/g, "/");
+  const normalizedPath = filePath.replace(/\\/g, '/');
 
   for (const [pattern, threshold] of Object.entries(THRESHOLDS)) {
-    if (pattern === "global") continue;
-    if (normalizedPath.includes(pattern.replace("./", ""))) {
+    if (pattern === 'global') continue;
+    if (normalizedPath.includes(pattern.replace('./', ''))) {
       return threshold;
     }
   }
@@ -224,14 +224,14 @@ function checkThreshold(
   actual: number,
   threshold: number,
   metricName: string,
-  filePath?: string,
+  filePath?: string
 ): boolean {
   const passed = actual >= threshold;
 
   if (!passed) {
-    const filePrefix = filePath ? `${path.basename(filePath)} - ` : "";
+    const filePrefix = filePath ? `${path.basename(filePath)} - ` : '';
     console.error(
-      `   ❌ ${filePrefix}${metricName}: ${actual.toFixed(2)}% (阈值: ${threshold}%)`,
+      `   ❌ ${filePrefix}${metricName}: ${actual.toFixed(2)}% (阈值: ${threshold}%)`
     );
   }
 
@@ -243,28 +243,28 @@ function checkThreshold(
  */
 function formatCoverageReport(
   coverageData: CoverageData,
-  failures: string[],
+  failures: string[]
 ): void {
-  console.log("\n📊 覆盖率报告\n");
-  console.log("━".repeat(60));
+  console.log('\n📊 覆盖率报告\n');
+  console.log('━'.repeat(60));
 
   const total = coverageData.total;
-  console.log("\n📈 总体覆盖率:");
+  console.log('\n📈 总体覆盖率:');
   console.log(`   Statements: ${total.statements.pct.toFixed(2)}%`);
   console.log(`   Branches:   ${total.branches.pct.toFixed(2)}%`);
   console.log(`   Functions:  ${total.functions.pct.toFixed(2)}%`);
   console.log(`   Lines:      ${total.lines.pct.toFixed(2)}%`);
 
-  console.log("\n━".repeat(60));
+  console.log('\n━'.repeat(60));
 
   if (failures.length > 0) {
-    console.log("\n❌ 未达标的模块:\n");
+    console.log('\n❌ 未达标的模块:\n');
     failures.forEach((failure, index) => {
       console.log(`   ${index + 1}. ${failure}`);
     });
   }
 
-  console.log("\n━".repeat(60));
+  console.log('\n━'.repeat(60));
 }
 
 /**
@@ -274,13 +274,13 @@ function checkGlobalCoverage(coverageData: CoverageData): boolean {
   const global = THRESHOLDS.global;
   const total = coverageData.total;
 
-  console.log("\n🔍 检查整体覆盖率:");
+  console.log('\n🔍 检查整体覆盖率:');
 
   const passed = [
-    checkThreshold(total.statements.pct, global.statements, "Statements"),
-    checkThreshold(total.branches.pct, global.branches, "Branches"),
-    checkThreshold(total.functions.pct, global.functions, "Functions"),
-    checkThreshold(total.lines.pct, global.lines, "Lines"),
+    checkThreshold(total.statements.pct, global.statements, 'Statements'),
+    checkThreshold(total.branches.pct, global.branches, 'Branches'),
+    checkThreshold(total.functions.pct, global.functions, 'Functions'),
+    checkThreshold(total.lines.pct, global.lines, 'Lines'),
   ].every(Boolean);
 
   return passed;
@@ -356,10 +356,10 @@ function calculateFileCoverage(fileCoverage: any): {
 function checkModuleCoverage(coverageData: CoverageData): string[] {
   const failures: string[] = [];
 
-  console.log("\n🔍 检查各模块覆盖率:");
+  console.log('\n🔍 检查各模块覆盖率:');
 
   for (const filePath of Object.keys(coverageData)) {
-    if (filePath === "total") continue;
+    if (filePath === 'total') continue;
 
     const threshold = findMatchingThreshold(filePath);
     if (!threshold) continue;
@@ -372,24 +372,24 @@ function checkModuleCoverage(coverageData: CoverageData): string[] {
 
     const fileName = path.basename(filePath);
     const passed = [
-      checkThreshold(filePct.lines, threshold.lines, "Lines", fileName),
+      checkThreshold(filePct.lines, threshold.lines, 'Lines', fileName),
       checkThreshold(
         filePct.statements,
         threshold.statements,
-        "Statements",
-        fileName,
+        'Statements',
+        fileName
       ),
       checkThreshold(
         filePct.functions,
         threshold.functions,
-        "Functions",
-        fileName,
+        'Functions',
+        fileName
       ),
       checkThreshold(
         filePct.branches,
         threshold.branches,
-        "Branches",
-        fileName,
+        'Branches',
+        fileName
       ),
     ].every(Boolean);
 
@@ -405,20 +405,20 @@ function checkModuleCoverage(coverageData: CoverageData): string[] {
  * 主函数
  */
 function main(): void {
-  console.log("🚀 开始检查覆盖率门禁...\n");
+  console.log('🚀 开始检查覆盖率门禁...\n');
 
   // 覆盖率报告路径
   const coveragePath = path.resolve(
     process.cwd(),
-    "coverage-final",
-    "coverage-final.json",
+    'coverage-final',
+    'coverage-final.json'
   );
 
   // 读取覆盖率数据
   const coverageData = readCoverageData(coveragePath);
   if (!coverageData) {
-    console.error("\n❌ 覆盖率门禁检查失败：无法读取覆盖率数据");
-    console.error("   请先运行测试: npm run test:coverage\n");
+    console.error('\n❌ 覆盖率门禁检查失败：无法读取覆盖率数据');
+    console.error('   请先运行测试: npm run test:coverage\n');
     process.exit(1);
   }
 
@@ -433,31 +433,31 @@ function main(): void {
   formatCoverageReport(coverageData, moduleFailures);
 
   // 最终结果
-  console.log("\n🎯 检查结果:");
+  console.log('\n🎯 检查结果:');
 
   if (globalPassed && modulesPassed) {
-    console.log("   ✅ 所有覆盖率检查通过！");
-    console.log("\n💡 建议:");
-    console.log("   - 定期运行覆盖率检查");
-    console.log("   - 关注边缘情况的测试覆盖");
-    console.log("   - 保持测试质量和可维护性\n");
+    console.log('   ✅ 所有覆盖率检查通过！');
+    console.log('\n💡 建议:');
+    console.log('   - 定期运行覆盖率检查');
+    console.log('   - 关注边缘情况的测试覆盖');
+    console.log('   - 保持测试质量和可维护性\n');
     process.exit(0);
   } else {
-    console.log("   ❌ 覆盖率门禁检查失败！");
+    console.log('   ❌ 覆盖率门禁检查失败！');
 
     if (!globalPassed) {
-      console.log("\n⚠️  整体覆盖率未达标");
-      console.log("   请参考 docs/TEST_COVERAGE_GUIDE.md 了解详细信息");
+      console.log('\n⚠️  整体覆盖率未达标');
+      console.log('   请参考 docs/TEST_COVERAGE_GUIDE.md 了解详细信息');
     }
 
     if (!modulesPassed) {
-      console.log("\n⚠️  部分模块覆盖率未达标");
-      console.log("   请补充测试用例以提高覆盖率");
+      console.log('\n⚠️  部分模块覆盖率未达标');
+      console.log('   请补充测试用例以提高覆盖率');
     }
 
-    console.log("\n📚 相关文档:");
-    console.log("   - 测试覆盖率指南: docs/TEST_COVERAGE_GUIDE.md");
-    console.log("   - 测试策略: docs/TEST_STRATEGY.md\n");
+    console.log('\n📚 相关文档:');
+    console.log('   - 测试覆盖率指南: docs/TEST_COVERAGE_GUIDE.md');
+    console.log('   - 测试策略: docs/TEST_STRATEGY.md\n');
 
     process.exit(1);
   }

@@ -5,8 +5,8 @@
  * 提供多种恢复方法：重试、退避、降级、熔断
  */
 
-import { ErrorLog, RecoveryMethod, ErrorType } from "./types";
-import { circuitBreakerManager } from "./circuit-breaker";
+import { ErrorLog, RecoveryMethod, ErrorType } from './types';
+import { circuitBreakerManager } from './circuit-breaker';
 
 /**
  * 错误恢复器
@@ -28,7 +28,7 @@ export class ErrorRecovery {
       enableBackoff?: boolean;
       fallbackFunction?: () => Promise<T>;
       circuitBreakerName?: string;
-    } = {},
+    } = {}
   ): Promise<{ success: boolean; result?: T; method?: RecoveryMethod }> {
     const {
       enableRetry = true,
@@ -51,7 +51,7 @@ export class ErrorRecovery {
       const result = await this.tryWithCircuitBreaker(
         errorLog,
         operation,
-        circuitBreakerName,
+        circuitBreakerName
       );
       if (result.success) {
         return result;
@@ -64,7 +64,7 @@ export class ErrorRecovery {
         errorLog,
         operation,
         maxRetries,
-        enableBackoff,
+        enableBackoff
       );
       if (retryResult.success) {
         return retryResult;
@@ -114,7 +114,7 @@ export class ErrorRecovery {
     errorLog: ErrorLog,
     operation: () => Promise<T>,
     maxRetries: number,
-    enableBackoff: boolean,
+    enableBackoff: boolean
   ): Promise<{ success: boolean; result?: T; method?: RecoveryMethod }> {
     const startTime = Date.now();
 
@@ -123,7 +123,7 @@ export class ErrorRecovery {
         const result = await this.executeWithDelay(
           operation,
           attempt,
-          enableBackoff,
+          enableBackoff
         );
 
         // 更新恢复状态
@@ -160,7 +160,7 @@ export class ErrorRecovery {
   private async executeWithDelay<T>(
     operation: () => Promise<T>,
     attempt: number,
-    enableBackoff: boolean,
+    enableBackoff: boolean
   ): Promise<T> {
     if (enableBackoff && attempt > 1) {
       // 指数退避：2^(attempt-1) * 100ms
@@ -181,7 +181,7 @@ export class ErrorRecovery {
   private async tryWithCircuitBreaker<T>(
     errorLog: ErrorLog,
     operation: () => Promise<T>,
-    breakerName: string,
+    breakerName: string
   ): Promise<{ success: boolean; result?: T; method?: RecoveryMethod }> {
     const breaker = circuitBreakerManager.getBreaker(breakerName);
     const startTime = Date.now();
@@ -217,7 +217,7 @@ export class ErrorRecovery {
    */
   private async tryFallback<T>(
     errorLog: ErrorLog,
-    fallbackFunction: () => Promise<T>,
+    fallbackFunction: () => Promise<T>
   ): Promise<{ success: boolean; result?: T; method?: RecoveryMethod }> {
     const startTime = Date.now();
 
@@ -270,7 +270,7 @@ export class ErrorRecovery {
    * @returns Promise
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -286,8 +286,8 @@ export class ErrorRecovery {
     byMethod: Record<RecoveryMethod, number>;
     avgRecoveryTime: number;
   } {
-    const recovered = errorLogs.filter((log) => log.recovered);
-    const unrecovered = errorLogs.filter((log) => !log.recovered);
+    const recovered = errorLogs.filter(log => log.recovered);
+    const unrecovered = errorLogs.filter(log => !log.recovered);
 
     const byMethod: Record<RecoveryMethod, number> = {
       [RecoveryMethod.RETRY]: 0,

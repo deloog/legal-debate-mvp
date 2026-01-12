@@ -7,8 +7,8 @@ import type {
   ExtractedData,
   TimelineEvent,
   TimelineEventType,
-} from "../../core/types";
-import { determineEventType } from "./timeline-parser";
+} from '../../core/types';
+import { determineEventType } from './timeline-parser';
 
 /**
  * 基于规则构建时间线事件
@@ -16,7 +16,7 @@ import { determineEventType } from "./timeline-parser";
 export function buildRuleBasedEvent(
   id: string,
   date: string,
-  eventText: string,
+  eventText: string
 ): TimelineEvent | null {
   const eventType = determineEventType(eventText);
   const importance = calculateImportance(eventText, eventType);
@@ -29,7 +29,7 @@ export function buildRuleBasedEvent(
     eventType,
     importance,
     evidence,
-    source: "explicit",
+    source: 'explicit',
   };
 }
 
@@ -38,7 +38,7 @@ export function buildRuleBasedEvent(
  */
 export function mergeAndDeduplicate(
   aiEvents: TimelineEvent[],
-  ruleEvents: TimelineEvent[],
+  ruleEvents: TimelineEvent[]
 ): TimelineEvent[] {
   const seen = new Set<string>();
   const unique: TimelineEvent[] = [];
@@ -68,7 +68,7 @@ export function mergeAndDeduplicate(
 export function isSimilarEvent(
   aiEvent: TimelineEvent,
   eventText: string,
-  date: string,
+  date: string
 ): boolean {
   if (aiEvent.date !== date) return false;
 
@@ -86,7 +86,7 @@ export function isSimilarEvent(
  */
 export function calculateImportance(
   eventText: string,
-  eventType?: TimelineEventType,
+  eventType?: TimelineEventType
 ): number {
   let score = 2;
 
@@ -102,17 +102,17 @@ export function calculateImportance(
     EVIDENCE: 3,
     OTHER: 2,
   };
-  score += typeWeights[eventType || "OTHER"];
+  score += typeWeights[eventType || 'OTHER'];
 
   const highImportanceKeywords = [
-    "签订",
-    "履行",
-    "违约",
-    "起诉",
-    "判决",
-    "终止",
+    '签订',
+    '履行',
+    '违约',
+    '起诉',
+    '判决',
+    '终止',
   ];
-  if (highImportanceKeywords.some((kw) => eventText.includes(kw))) {
+  if (highImportanceKeywords.some(kw => eventText.includes(kw))) {
     score += 1;
   }
 
@@ -151,7 +151,7 @@ export function extractEvidence(eventText: string): string[] {
  */
 export function enrichEventsWithExtractedData(
   events: TimelineEvent[],
-  extractedData: ExtractedData,
+  extractedData: ExtractedData
 ): void {
   if (!extractedData.disputeFocuses) return;
 
@@ -183,15 +183,13 @@ export function enrichEventsWithExtractedData(
  */
 function isEventRelatedToFocus(
   eventText: string,
-  focusDescription: string,
+  focusDescription: string
 ): boolean {
-  const eventKeywords = eventText.split(/[，。；\s]/).map((k) => k.trim());
-  const focusKeywords = focusDescription
-    .split(/[，。；\s]/)
-    .map((k) => k.trim());
+  const eventKeywords = eventText.split(/[，。；\s]/).map(k => k.trim());
+  const focusKeywords = focusDescription.split(/[，。；\s]/).map(k => k.trim());
 
-  return eventKeywords.some((ek) =>
-    focusKeywords.some((fk) => fk.includes(ek) || ek.includes(fk)),
+  return eventKeywords.some(ek =>
+    focusKeywords.some(fk => fk.includes(ek) || ek.includes(fk))
   );
 }
 
@@ -200,12 +198,12 @@ function isEventRelatedToFocus(
  */
 function isEventRelatedToClaim(
   eventText: string,
-  claimContent: string,
+  claimContent: string
 ): boolean {
-  const eventKeywords = eventText.split(/[，。；\s]/).map((k) => k.trim());
-  const claimKeywords = claimContent.split(/[，。；\s]/).map((k) => k.trim());
+  const eventKeywords = eventText.split(/[，。；\s]/).map(k => k.trim());
+  const claimKeywords = claimContent.split(/[，。；\s]/).map(k => k.trim());
 
-  return eventKeywords.some((ek) =>
-    claimKeywords.some((ck) => ck.includes(ek) || ek.includes(ck)),
+  return eventKeywords.some(ek =>
+    claimKeywords.some(ck => ck.includes(ek) || ek.includes(ck))
   );
 }

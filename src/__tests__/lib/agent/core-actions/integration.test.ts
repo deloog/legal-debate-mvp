@@ -3,17 +3,17 @@
  * 测试与MemoryManager和PrismaClient的实际集成
  */
 
-import { PrismaClient } from "@prisma/client";
-import { MemoryManager } from "@/lib/agent/memory-agent/memory-manager";
-import * as core from "@/lib/agent/core-actions/index";
+import { PrismaClient } from '@prisma/client';
+import { MemoryManager } from '@/lib/agent/memory-agent/memory-manager';
+import * as core from '@/lib/agent/core-actions/index';
 import type {
   ValidationRule,
   HandleErrorParams,
   RetryOperationParams,
   MergeResultsParams,
-} from "@/lib/agent/core-actions/types";
+} from '@/lib/agent/core-actions/types';
 
-describe("核心原子函数 - 集成测试", () => {
+describe('核心原子函数 - 集成测试', () => {
   let prisma: PrismaClient;
   let memoryManager: MemoryManager;
 
@@ -29,28 +29,28 @@ describe("核心原子函数 - 集成测试", () => {
     await prisma.$disconnect();
   });
 
-  describe("与MemoryManager的集成测试", () => {
-    it("应该成功存储和检索记忆", async () => {
-      const memoryKey = "integration-test-key";
-      const memoryValue = { data: "test", timestamp: Date.now() };
+  describe('与MemoryManager的集成测试', () => {
+    it('应该成功存储和检索记忆', async () => {
+      const memoryKey = 'integration-test-key';
+      const memoryValue = { data: 'test', timestamp: Date.now() };
 
       // 存储记忆
       const storeResult = await core.update_memory(
         memoryManager,
         {
-          memoryType: "WORKING",
+          memoryType: 'WORKING',
           memoryKey,
           memoryValue,
           importance: 0.5,
         },
-        "test-user",
+        'test-user'
       );
 
       expect(storeResult.success).toBe(true);
 
       // 检索记忆
       const retrieveResult = await memoryManager.getMemory({
-        memoryType: "WORKING",
+        memoryType: 'WORKING',
         memoryKey,
       });
 
@@ -58,9 +58,9 @@ describe("核心原子函数 - 集成测试", () => {
       expect(retrieveResult?.memoryValue).toMatchObject(memoryValue);
     });
 
-    it("应该正确缓存和检索结果", async () => {
-      const cacheKey = "integration-cache-key";
-      const cacheData = { result: "cached", time: Date.now() };
+    it('应该正确缓存和检索结果', async () => {
+      const cacheKey = 'integration-cache-key';
+      const cacheData = { result: 'cached', time: Date.now() };
 
       // 缓存结果
       const cacheResult = await core.cache_result(
@@ -68,14 +68,14 @@ describe("核心原子函数 - 集成测试", () => {
         cacheKey,
         cacheData,
         3600,
-        "test-user",
+        'test-user'
       );
 
       expect(cacheResult.success).toBe(true);
 
       // 检索缓存
       const cachedMemory = await memoryManager.getMemory({
-        memoryType: "WORKING",
+        memoryType: 'WORKING',
         memoryKey: cacheKey,
       });
 
@@ -83,8 +83,8 @@ describe("核心原子函数 - 集成测试", () => {
       expect(cachedMemory?.memoryValue).toMatchObject(cacheData);
     });
 
-    it("应该在多次调用中复用缓存", async () => {
-      const cacheKey = "integration-reuse-key";
+    it('应该在多次调用中复用缓存', async () => {
+      const cacheKey = 'integration-reuse-key';
       const cacheData = { value: 42, calculated: true };
 
       // 第一次调用：存储缓存
@@ -93,54 +93,54 @@ describe("核心原子函数 - 集成测试", () => {
         cacheKey,
         cacheData,
         60,
-        "test-user",
+        'test-user'
       );
 
       expect(firstCall.success).toBe(true);
 
       // 第二次调用：从缓存读取
       const cachedMemory = await memoryManager.getMemory({
-        memoryType: "WORKING",
+        memoryType: 'WORKING',
         memoryKey: cacheKey,
       });
 
       expect(cachedMemory?.memoryValue).toEqual(cacheData);
     });
 
-    it("应该正确更新已存在的记忆", async () => {
-      const memoryKey = "integration-update-key";
-      const initialValue = { step: 1, data: "initial" };
-      const updatedValue = { step: 2, data: "updated" };
+    it('应该正确更新已存在的记忆', async () => {
+      const memoryKey = 'integration-update-key';
+      const initialValue = { step: 1, data: 'initial' };
+      const updatedValue = { step: 2, data: 'updated' };
 
       // 存储初始值
       await core.update_memory(
         memoryManager,
         {
-          memoryType: "HOT",
+          memoryType: 'HOT',
           memoryKey,
           memoryValue: initialValue,
           importance: 0.5,
         },
-        "test-user",
+        'test-user'
       );
 
       // 更新记忆
       const updateResult = await core.update_memory(
         memoryManager,
         {
-          memoryType: "HOT",
+          memoryType: 'HOT',
           memoryKey,
           memoryValue: updatedValue,
           importance: 0.7,
         },
-        "test-user",
+        'test-user'
       );
 
-      expect(updateResult.action).toBe("updated");
+      expect(updateResult.action).toBe('updated');
 
       // 验证更新
       const updatedMemory = await memoryManager.getMemory({
-        memoryType: "HOT",
+        memoryType: 'HOT',
         memoryKey,
       });
 
@@ -148,15 +148,15 @@ describe("核心原子函数 - 集成测试", () => {
     });
   });
 
-  describe("与PrismaClient的集成测试", () => {
-    it("应该正确记录行动日志", async () => {
+  describe('与PrismaClient的集成测试', () => {
+    it('应该正确记录行动日志', async () => {
       const params = {
-        actionType: "ANALYZE" as const, // 使用有效的ActionType枚举值
-        actionName: "integration_test_action",
-        agentName: "IntegrationTestAgent",
-        input: { testData: "value" },
-        output: { result: "success" },
-        status: "success" as const,
+        actionType: 'ANALYZE' as const, // 使用有效的ActionType枚举值
+        actionName: 'integration_test_action',
+        agentName: 'IntegrationTestAgent',
+        input: { testData: 'value' },
+        output: { result: 'success' },
+        status: 'success' as const,
         executionTime: 100,
       };
 
@@ -164,15 +164,15 @@ describe("核心原子函数 - 集成测试", () => {
 
       expect(result.success).toBe(true);
       expect(result.recordId).toBeDefined();
-      expect(typeof result.recordId).toBe("string");
+      expect(typeof result.recordId).toBe('string');
     });
 
-    it("应该正确记录错误日志", async () => {
-      const error = new Error("Integration test error");
+    it('应该正确记录错误日志', async () => {
+      const error = new Error('Integration test error');
       const params: HandleErrorParams = {
         error,
-        actionName: "integration_error_test",
-        context: { testContext: "integration" }, // context是必填字段
+        actionName: 'integration_error_test',
+        context: { testContext: 'integration' }, // context是必填字段
         metadata: {},
       };
 
@@ -180,14 +180,14 @@ describe("核心原子函数 - 集成测试", () => {
 
       expect(result.handled).toBe(true);
       expect(result.errorId).toBeDefined();
-      expect(typeof result.errorId).toBe("string");
+      expect(typeof result.errorId).toBe('string');
     });
 
-    it("应该正确标记可重试错误", async () => {
-      const networkError = new Error("Network timeout");
+    it('应该正确标记可重试错误', async () => {
+      const networkError = new Error('Network timeout');
       const params: HandleErrorParams = {
         error: networkError,
-        actionName: "network_test",
+        actionName: 'network_test',
         context: {}, // context是必填字段
       };
 
@@ -196,16 +196,16 @@ describe("核心原子函数 - 集成测试", () => {
       expect(result.retryable).toBe(true);
     });
 
-    it("应该正确标记不可重试错误", async () => {
+    it('应该正确标记不可重试错误', async () => {
       // 创建一个name为ValidationError的自定义错误类
       class ValidationError extends Error {
-        name = "ValidationError" as const;
+        name = 'ValidationError' as const;
       }
 
-      const validationError = new ValidationError("Invalid input");
+      const validationError = new ValidationError('Invalid input');
       const params: HandleErrorParams = {
         error: validationError,
-        actionName: "validation_test",
+        actionName: 'validation_test',
         context: {}, // context是必填字段
       };
 
@@ -215,10 +215,10 @@ describe("核心原子函数 - 集成测试", () => {
     });
   });
 
-  describe("端到端流程测试", () => {
-    it("应该完整执行分析-验证-存储流程", async () => {
+  describe('端到端流程测试', () => {
+    it('应该完整执行分析-验证-存储流程', async () => {
       // 1. 分析文本
-      const text = "张三于2024年1月1日支付了50万元违约金。";
+      const text = '张三于2024年1月1日支付了50万元违约金。';
       const analysisResult = await core.analyze_text(text);
 
       expect(analysisResult).toBeDefined();
@@ -227,19 +227,19 @@ describe("核心原子函数 - 集成测试", () => {
 
       // 2. 提取实体
       const entityResult = await core.extract_entities(text, [
-        "PERSON",
-        "DATE",
-        "AMOUNT",
+        'PERSON',
+        'DATE',
+        'AMOUNT',
       ]);
 
       expect(entityResult.entities.length).toBeGreaterThan(0);
 
       // 3. 存储到记忆
-      const memoryKey = "e2e-analysis-key";
+      const memoryKey = 'e2e-analysis-key';
       const storeResult = await core.update_memory(
         memoryManager,
         {
-          memoryType: "HOT",
+          memoryType: 'HOT',
           memoryKey,
           memoryValue: {
             analysis: analysisResult,
@@ -247,14 +247,14 @@ describe("核心原子函数 - 集成测试", () => {
           },
           importance: 0.8,
         },
-        "e2e-user",
+        'e2e-user'
       );
 
       expect(storeResult.success).toBe(true);
 
       // 4. 从记忆检索
       const retrievedMemory = await memoryManager.getMemory({
-        memoryType: "HOT",
+        memoryType: 'HOT',
         memoryKey,
       });
 
@@ -268,27 +268,27 @@ describe("核心原子函数 - 集成测试", () => {
 
       // 5. 记录行动日志
       const logResult = await core.log_action(prisma, {
-        actionType: "ANALYZE" as const, // 使用有效的ActionType枚举值
-        actionName: "e2e_test",
-        agentName: "E2ETestAgent",
+        actionType: 'ANALYZE' as const, // 使用有效的ActionType枚举值
+        actionName: 'e2e_test',
+        agentName: 'E2ETestAgent',
         input: { text },
         output: {
           analysisResult,
           entityResult,
         },
-        status: "success",
+        status: 'success',
         executionTime: 100,
       });
 
       expect(logResult.success).toBe(true);
     });
 
-    it("应该正确执行重试机制并记录错误", async () => {
+    it('应该正确执行重试机制并记录错误', async () => {
       let attemptCount = 0;
       const flakyOperation = jest.fn().mockImplementation(() => {
         attemptCount++;
         if (attemptCount < 3) {
-          throw new Error("Temporary failure");
+          throw new Error('Temporary failure');
         }
         return { success: true };
       });
@@ -308,19 +308,19 @@ describe("核心原子函数 - 集成测试", () => {
 
       // 记录成功日志
       await core.log_action(prisma, {
-        actionType: "ANALYZE" as const, // 使用有效的ActionType枚举值
-        actionName: "retry_with_success",
-        agentName: "RetryTestAgent",
+        actionType: 'ANALYZE' as const, // 使用有效的ActionType枚举值
+        actionName: 'retry_with_success',
+        agentName: 'RetryTestAgent',
         input: { attempts: result.attempts }, // parameters是必填字段
-        status: "success",
+        status: 'success',
         executionTime: result.executionTime,
       });
     });
 
-    it("应该在重试失败时记录错误", async () => {
+    it('应该在重试失败时记录错误', async () => {
       const failingOperation = jest
         .fn()
-        .mockRejectedValue(new Error("Persistent failure"));
+        .mockRejectedValue(new Error('Persistent failure'));
 
       const params: RetryOperationParams = {
         operation: failingOperation,
@@ -335,8 +335,8 @@ describe("核心原子函数 - 集成测试", () => {
 
       // 记录错误
       const errorResult = await core.handle_error(prisma, {
-        error: result.error || new Error("Unknown error"),
-        actionName: "retry_failed_test",
+        error: result.error || new Error('Unknown error'),
+        actionName: 'retry_failed_test',
         context: { attempts: result.attempts },
       });
 
@@ -345,42 +345,42 @@ describe("核心原子函数 - 集成测试", () => {
     });
   });
 
-  describe("数据流集成测试", () => {
-    it("应该正确验证、转换和存储数据", async () => {
+  describe('数据流集成测试', () => {
+    it('应该正确验证、转换和存储数据', async () => {
       const rawData = {
-        name: "  测试名称  ", // 有空格
-        email: "test@example.com",
-        age: "25", // 字符串而非数字
+        name: '  测试名称  ', // 有空格
+        email: 'test@example.com',
+        age: '25', // 字符串而非数字
       };
 
       // 验证数据
       const validationRules: ValidationRule[] = [
         {
-          field: "name",
-          type: "string",
+          field: 'name',
+          type: 'string',
           required: true,
           minLength: 2,
           maxLength: 50,
-          customValidator: (value) =>
-            typeof value === "string" && value.trim().length > 0,
+          customValidator: value =>
+            typeof value === 'string' && value.trim().length > 0,
         },
         {
-          field: "email",
-          type: "string",
+          field: 'email',
+          type: 'string',
           required: true,
           pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
         },
         {
-          field: "age",
-          type: "number",
+          field: 'age',
+          type: 'number',
           required: true,
-          customValidator: (value) => typeof value === "number" && value > 0,
+          customValidator: value => typeof value === 'number' && value > 0,
         },
       ];
 
       const validationResult = await core.validate_data(
         rawData,
-        validationRules,
+        validationRules
       );
 
       // 应该有验证错误（name有空格，age是字符串）
@@ -397,36 +397,36 @@ describe("核心原子函数 - 集成测试", () => {
       // 重新验证
       const cleanedValidationResult = await core.validate_data(
         cleanedData,
-        validationRules,
+        validationRules
       );
 
       expect(cleanedValidationResult.valid).toBe(true);
 
       // 存储到记忆
-      const memoryKey = "data-flow-test-key";
+      const memoryKey = 'data-flow-test-key';
       const storeResult = await core.update_memory(
         memoryManager,
         {
-          memoryType: "HOT",
+          memoryType: 'HOT',
           memoryKey,
           memoryValue: cleanedData,
           importance: 0.6,
         },
-        "data-flow-user",
+        'data-flow-user'
       );
 
       expect(storeResult.success).toBe(true);
     });
 
-    it("应该正确合并、排序和缓存结果", async () => {
+    it('应该正确合并、排序和缓存结果', async () => {
       // 准备多个结果集
       const results1 = [
-        { id: 1, score: 70, name: "Item 1" },
-        { id: 2, score: 90, name: "Item 2" },
+        { id: 1, score: 70, name: 'Item 1' },
+        { id: 2, score: 90, name: 'Item 2' },
       ];
       const results2 = [
-        { id: 3, score: 85, name: "Item 3" },
-        { id: 4, score: 65, name: "Item 4" },
+        { id: 3, score: 85, name: 'Item 3' },
+        { id: 4, score: 65, name: 'Item 4' },
       ];
 
       // 合并结果
@@ -447,8 +447,8 @@ describe("核心原子函数 - 集成测试", () => {
       // 排序结果
       const rankResult = await core.rank_items(
         mergeResult.merged,
-        (item) => item.score,
-        "desc",
+        item => item.score,
+        'desc'
       );
 
       expect(rankResult.ranked[0].score).toBe(90);
@@ -457,7 +457,7 @@ describe("核心原子函数 - 集成测试", () => {
       expect(rankResult.ranked[3].score).toBe(65);
 
       // 缓存结果
-      const cacheKey = "merged-results-key";
+      const cacheKey = 'merged-results-key';
       const cacheResult = await core.cache_result(
         memoryManager,
         cacheKey,
@@ -466,14 +466,14 @@ describe("核心原子函数 - 集成测试", () => {
           ranked: rankResult.ranked,
         },
         1800,
-        "data-flow-user",
+        'data-flow-user'
       );
 
       expect(cacheResult.success).toBe(true);
 
       // 验证缓存
       const cached = await memoryManager.getMemory({
-        memoryType: "WORKING",
+        memoryType: 'WORKING',
         memoryKey: cacheKey,
       });
 
@@ -485,15 +485,15 @@ describe("核心原子函数 - 集成测试", () => {
     });
   });
 
-  describe("错误恢复集成测试", () => {
-    it("应该正确处理并从错误中恢复", async () => {
+  describe('错误恢复集成测试', () => {
+    it('应该正确处理并从错误中恢复', async () => {
       let attempt = 0;
       const operation = jest.fn().mockImplementation(() => {
         attempt++;
         if (attempt === 1) {
-          throw new Error("First attempt failed");
+          throw new Error('First attempt failed');
         }
-        return { success: true, data: "recovered" };
+        return { success: true, data: 'recovered' };
       });
 
       // 执行重试
@@ -509,22 +509,22 @@ describe("核心原子函数 - 集成测试", () => {
 
       // 记录恢复
       const logResult = await core.log_action(prisma, {
-        actionType: "ANALYZE" as const, // 使用有效的ActionType枚举值
-        actionName: "error_recovery_test",
-        agentName: "RecoveryAgent",
+        actionType: 'ANALYZE' as const, // 使用有效的ActionType枚举值
+        actionName: 'error_recovery_test',
+        agentName: 'RecoveryAgent',
         input: { attempts: retryResult.attempts },
         output: { recovered: true },
-        status: "success",
+        status: 'success',
         executionTime: retryResult.executionTime,
       });
 
       expect(logResult.success).toBe(true);
     });
 
-    it("应该在最终失败时记录详细信息", async () => {
+    it('应该在最终失败时记录详细信息', async () => {
       const operation = jest
         .fn()
-        .mockRejectedValue(new Error("All attempts failed"));
+        .mockRejectedValue(new Error('All attempts failed'));
 
       const retryParams: RetryOperationParams = {
         operation,
@@ -538,11 +538,11 @@ describe("核心原子函数 - 集成测试", () => {
 
       // 记录错误
       const errorParams: HandleErrorParams = {
-        error: retryResult.error || new Error("Unknown error"),
-        actionName: "all_failed_test",
+        error: retryResult.error || new Error('Unknown error'),
+        actionName: 'all_failed_test',
         context: {
           attempts: retryResult.attempts,
-          lastError: "All attempts failed",
+          lastError: 'All attempts failed',
         },
         metadata: {}, // metadata确保类型正确
       };

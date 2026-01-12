@@ -2,9 +2,9 @@
  * 微信 OAuth API 路由
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { wechatOAuth } from "@/lib/auth/wechat-oauth";
-import { OAuthService } from "@/lib/auth/oauth-service";
+import { NextRequest, NextResponse } from 'next/server';
+import { wechatOAuth } from '@/lib/auth/wechat-oauth';
+import { OAuthService } from '@/lib/auth/oauth-service';
 
 /**
  * 生成随机state
@@ -19,7 +19,7 @@ function generateState(): string {
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const redirectUri = searchParams.get("redirect_uri");
+    const redirectUri = searchParams.get('redirect_uri');
     const state = generateState();
 
     const response = await wechatOAuth.authorize({
@@ -36,10 +36,10 @@ export async function GET(request: NextRequest) {
       state: response.state,
     });
   } catch (error) {
-    console.error("Wechat authorize error:", error);
+    console.error('Wechat authorize error:', error);
     return NextResponse.json(
-      { error: "Failed to generate authorize URL" },
-      { status: 500 },
+      { error: 'Failed to generate authorize URL' },
+      { status: 500 }
     );
   }
 }
@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
 
     if (!code || !state) {
       return NextResponse.json(
-        { error: "Code and state are required" },
-        { status: 400 },
+        { error: 'Code and state are required' },
+        { status: 400 }
       );
     }
 
@@ -68,21 +68,21 @@ export async function POST(request: NextRequest) {
     if (!callbackResponse.success) {
       return NextResponse.json(
         { error: callbackResponse.error },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     // 获取用户信息
     const userInfo = await wechatOAuth.getUserInfo(
       callbackResponse.token,
-      callbackResponse.user.id,
+      callbackResponse.user.id
     );
 
     // 处理登录
     const loginResult = await OAuthService.handleOAuthLogin(
-      "wechat",
+      'wechat',
       callbackResponse.user.id,
-      userInfo,
+      userInfo
     );
 
     return NextResponse.json({
@@ -92,10 +92,10 @@ export async function POST(request: NextRequest) {
       isNewUser: loginResult.isNewUser,
     });
   } catch (error) {
-    console.error("Wechat callback error:", error);
+    console.error('Wechat callback error:', error);
     return NextResponse.json(
-      { error: "Failed to handle OAuth callback" },
-      { status: 500 },
+      { error: 'Failed to handle OAuth callback' },
+      { status: 500 }
     );
   }
 }

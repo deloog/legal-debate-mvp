@@ -1,6 +1,6 @@
 // 流式生成器：支持流式输出生成的文档
 
-import { StreamConfig, SSEMessage } from "./types";
+import { StreamConfig, SSEMessage } from './types';
 
 /**
  * 流式生成器类
@@ -12,7 +12,7 @@ export class StreamGenerator {
     this.config = {
       chunkSize: config?.chunkSize ?? 200,
       delayMs: config?.delayMs ?? 100,
-      format: config?.format ?? "sse",
+      format: config?.format ?? 'sse',
       maxChunks: config?.maxChunks,
     };
   }
@@ -21,7 +21,7 @@ export class StreamGenerator {
    * 生成SSE流
    */
   async *generateSSEStream(
-    content: string,
+    content: string
   ): AsyncGenerator<SSEMessage, void, unknown> {
     const chunks = this.splitContent(content);
 
@@ -29,7 +29,7 @@ export class StreamGenerator {
       const chunk = chunks[i];
       const message: SSEMessage = {
         data: chunk,
-        event: i === chunks.length - 1 ? "done" : "chunk",
+        event: i === chunks.length - 1 ? 'done' : 'chunk',
         id: `chunk-${i}`,
       };
 
@@ -45,7 +45,7 @@ export class StreamGenerator {
    * 生成JSON流
    */
   async *generateJSONStream(
-    content: string,
+    content: string
   ): AsyncGenerator<SSEMessage, void, unknown> {
     const chunks = this.splitContent(content);
 
@@ -58,7 +58,7 @@ export class StreamGenerator {
           total: chunks.length,
           finished: i === chunks.length - 1,
         }),
-        event: i === chunks.length - 1 ? "done" : "chunk",
+        event: i === chunks.length - 1 ? 'done' : 'chunk',
         id: `chunk-${i}`,
       };
 
@@ -74,7 +74,7 @@ export class StreamGenerator {
    * 格式化SSE消息为字符串
    */
   formatSSEMessage(message: SSEMessage): string {
-    let output = "";
+    let output = '';
 
     if (message.id) {
       output += `id: ${message.id}\n`;
@@ -94,7 +94,7 @@ export class StreamGenerator {
    */
   async generateStreamText(
     content: string,
-    callback: (chunk: string, index: number, total: number) => void,
+    callback: (chunk: string, index: number, total: number) => void
   ): Promise<void> {
     const chunks = this.splitContent(content);
 
@@ -112,7 +112,7 @@ export class StreamGenerator {
    * 流式生成带进度的内容
    */
   async *generateWithProgress(
-    content: string,
+    content: string
   ): AsyncGenerator<
     { chunk: string; progress: number; finished: boolean },
     void,
@@ -162,7 +162,7 @@ export class StreamGenerator {
    * 延迟函数
    */
   private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -186,7 +186,7 @@ export class StreamGenerator {
     this.config = {
       chunkSize: 200,
       delayMs: 100,
-      format: "sse",
+      format: 'sse',
       maxChunks: undefined,
     };
   }
@@ -213,7 +213,7 @@ export class StreamGenerator {
     const chunks = this.splitContent(content);
     return {
       count: chunks.length,
-      sizes: chunks.map((chunk) => chunk.length),
+      sizes: chunks.map(chunk => chunk.length),
     };
   }
 }

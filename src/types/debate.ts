@@ -23,7 +23,7 @@ export interface CaseInfo {
  * 论点
  */
 export interface Argument {
-  side: "plaintiff" | "defendant";
+  side: 'plaintiff' | 'defendant';
   content: string;
   legalBasis?: string;
   reasoning?: string;
@@ -40,7 +40,7 @@ export interface DebateRound {
   roundNumber: number;
   plaintiffArguments: Argument[];
   defendantArguments: Argument[];
-  status: "pending" | "in_progress" | "completed";
+  status: 'pending' | 'in_progress' | 'completed';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -55,7 +55,7 @@ export interface Debate {
   description: string;
   rounds: DebateRound[];
   currentRound: number;
-  status: "pending" | "in_progress" | "completed" | "paused";
+  status: 'pending' | 'in_progress' | 'completed' | 'paused';
   createdAt: Date;
   updatedAt: Date;
 }

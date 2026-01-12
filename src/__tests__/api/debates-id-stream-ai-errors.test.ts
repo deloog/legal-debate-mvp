@@ -8,18 +8,18 @@ import {
   beforeEach,
   afterEach,
   jest,
-} from "@jest/globals";
+} from '@jest/globals';
 
 // Mock TextDecoder for Node.js environment
-import { TextDecoder } from "util";
-if (typeof global.TextDecoder === "undefined") {
+import { TextDecoder } from 'util';
+if (typeof global.TextDecoder === 'undefined') {
   global.TextDecoder = TextDecoder as any;
 }
 
 /// <reference path="./test-types.d.ts" />
 
 // Mock Prisma
-jest.mock("@/lib/db/prisma", () => ({
+jest.mock('@/lib/db/prisma', () => ({
   prisma: {
     debate: {
       findUnique: jest.fn(),
@@ -41,13 +41,13 @@ jest.mock("@/lib/db/prisma", () => ({
 // Mock AI service
 const mockGetUnifiedAIService = jest.fn() as any;
 
-jest.mock("@/lib/ai/unified-service", () => ({
+jest.mock('@/lib/ai/unified-service', () => ({
   getUnifiedAIService: mockGetUnifiedAIService,
 }));
 
-import { prisma } from "@/lib/db/prisma";
+import { prisma } from '@/lib/db/prisma';
 
-describe("Debates Stream API - AI Service Error Handling", () => {
+describe('Debates Stream API - AI Service Error Handling', () => {
   let mockReq: any;
   let mockContext: any;
   let mockedPrisma: any;
@@ -58,7 +58,7 @@ describe("Debates Stream API - AI Service Error Handling", () => {
 
     // 创建模拟的NextRequest对象
     mockReq = {
-      url: "http://localhost:3000/api/v1/debates/123e4567-e89b-12d3-a456-426614174000/stream",
+      url: 'http://localhost:3000/api/v1/debates/123e4567-e89b-12d3-a456-426614174000/stream',
       headers: new Headers(),
       signal: {
         addEventListener: jest.fn(),
@@ -70,7 +70,7 @@ describe("Debates Stream API - AI Service Error Handling", () => {
     // 创建模拟的context对象
     mockContext = {
       params: {
-        id: "123e4567-e89b-12d3-a456-426614174000",
+        id: '123e4567-e89b-12d3-a456-426614174000',
       },
     };
   });
@@ -79,8 +79,8 @@ describe("Debates Stream API - AI Service Error Handling", () => {
     jest.clearAllMocks();
   });
 
-  describe("AI Service Error Scenarios", () => {
-    it("should handle AI service returning empty content", async () => {
+  describe('AI Service Error Scenarios', () => {
+    it('should handle AI service returning empty content', async () => {
       // Mock AI service to return empty content
       // @ts-ignore
       // @ts-ignore
@@ -89,19 +89,19 @@ describe("Debates Stream API - AI Service Error Handling", () => {
         generateDebate: jest.fn().mockResolvedValue({
           choices: [
             {
-              message: { content: "" },
+              message: { content: '' },
             },
           ],
         } as any) as any,
       });
 
       mockedPrisma.debate.findUnique.mockResolvedValue({
-        id: "123e4567-e89b-12d3-a456-426614174000",
-        title: "测试辩论",
-        status: "active",
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        title: '测试辩论',
+        status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 1 },
-        case: { title: "测试案件", description: "案件描述" },
+        case: { title: '测试案件', description: '案件描述' },
         rounds: [],
         _count: { rounds: 0, arguments: 0 },
       } as any);
@@ -114,10 +114,10 @@ describe("Debates Stream API - AI Service Error Handling", () => {
           debateRound: {
             // @ts-ignore
             create: jest.fn().mockResolvedValue({
-              id: "round-1",
-              debateId: "123e4567-e89b-12d3-a456-426614174000",
+              id: 'round-1',
+              debateId: '123e4567-e89b-12d3-a456-426614174000',
               roundNumber: 1,
-              status: "IN_PROGRESS",
+              status: 'IN_PROGRESS',
               startedAt: new Date(),
             } as any),
           },
@@ -132,14 +132,14 @@ describe("Debates Stream API - AI Service Error Handling", () => {
         });
       });
 
-      const { GET } = await import("@/app/api/v1/debates/[id]/stream/route");
+      const { GET } = await import('@/app/api/v1/debates/[id]/stream/route');
 
       const response = await GET(mockReq, mockContext);
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(ReadableStream);
     });
 
-    it("should handle AI service timeout", async () => {
+    it('should handle AI service timeout', async () => {
       // Mock AI service to timeout
       mockGetUnifiedAIService.mockResolvedValue({
         generateDebate: jest
@@ -147,54 +147,54 @@ describe("Debates Stream API - AI Service Error Handling", () => {
           .mockImplementation(
             () =>
               new Promise((resolve, reject) =>
-                setTimeout(() => reject(new Error("AI service timeout")), 100),
-              ),
+                setTimeout(() => reject(new Error('AI service timeout')), 100)
+              )
           ) as any,
       });
 
       mockedPrisma.debate.findUnique.mockResolvedValue({
-        id: "123e4567-e89b-12d3-a456-426614174000",
-        title: "测试辩论",
-        status: "active",
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        title: '测试辩论',
+        status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 1 },
-        case: { title: "测试案件", description: "案件描述" },
+        case: { title: '测试案件', description: '案件描述' },
         rounds: [],
         _count: { rounds: 0, arguments: 0 },
       } as any);
 
       mockedPrisma.debateRound.findMany.mockResolvedValue([]);
 
-      const { GET } = await import("@/app/api/v1/debates/[id]/stream/route");
+      const { GET } = await import('@/app/api/v1/debates/[id]/stream/route');
 
       const response = await GET(mockReq, mockContext);
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(ReadableStream);
     });
 
-    it("should handle AI service complete failure", async () => {
+    it('should handle AI service complete failure', async () => {
       // Mock AI service to completely fail
       mockGetUnifiedAIService.mockRejectedValue(
-        new Error("AI service unavailable"),
+        new Error('AI service unavailable')
       );
 
       mockedPrisma.debate.findUnique.mockResolvedValue({
-        id: "123e4567-e89b-12d3-a456-426614174000",
-        title: "测试辩论",
-        status: "active",
-        case: { title: "测试案件", description: "案件描述" },
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        title: '测试辩论',
+        status: 'active',
+        case: { title: '测试案件', description: '案件描述' },
       });
 
       mockedPrisma.debateRound.findMany.mockResolvedValue([]);
 
-      const { GET } = await import("@/app/api/v1/debates/[id]/stream/route");
+      const { GET } = await import('@/app/api/v1/debates/[id]/stream/route');
 
       const response = await GET(mockReq, mockContext);
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(ReadableStream);
     });
 
-    it("should handle AI service returning malformed response", async () => {
+    it('should handle AI service returning malformed response', async () => {
       // Mock AI service to return malformed response
       // @ts-ignore
       // @ts-ignore
@@ -206,12 +206,12 @@ describe("Debates Stream API - AI Service Error Handling", () => {
       });
 
       mockedPrisma.debate.findUnique.mockResolvedValue({
-        id: "123e4567-e89b-12d3-a456-426614174000",
-        title: "测试辩论",
-        status: "active",
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        title: '测试辩论',
+        status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 1 },
-        case: { title: "测试案件", description: "案件描述" },
+        case: { title: '测试案件', description: '案件描述' },
         rounds: [],
         _count: { rounds: 0, arguments: 0 },
       } as any);
@@ -225,10 +225,10 @@ describe("Debates Stream API - AI Service Error Handling", () => {
           debateRound: {
             // @ts-ignore
             create: jest.fn().mockResolvedValue({
-              id: "round-1",
-              debateId: "123e4567-e89b-12d3-a456-426614174000",
+              id: 'round-1',
+              debateId: '123e4567-e89b-12d3-a456-426614174000',
               roundNumber: 1,
-              status: "IN_PROGRESS",
+              status: 'IN_PROGRESS',
               startedAt: new Date(),
             } as any),
           },
@@ -245,63 +245,63 @@ describe("Debates Stream API - AI Service Error Handling", () => {
         return await callback(tx as any);
       });
 
-      const { GET } = await import("@/app/api/v1/debates/[id]/stream/route");
+      const { GET } = await import('@/app/api/v1/debates/[id]/stream/route');
 
       const response = await GET(mockReq, mockContext);
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(ReadableStream);
     });
 
-    it("should handle AI service network errors", async () => {
+    it('should handle AI service network errors', async () => {
       // Mock AI service network error
       mockGetUnifiedAIService.mockResolvedValue({
         generateDebate: jest.fn().mockImplementation(() => {
-          throw new Error("Network error");
+          throw new Error('Network error');
         }),
       });
 
       mockedPrisma.debate.findUnique.mockResolvedValue({
-        id: "123e4567-e89b-12d3-a456-426614174000",
-        title: "测试辩论",
-        status: "active",
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        title: '测试辩论',
+        status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 1 },
-        case: { title: "测试案件", description: "案件描述" },
+        case: { title: '测试案件', description: '案件描述' },
         rounds: [],
         _count: { rounds: 0, arguments: 0 },
       } as any);
 
       mockedPrisma.debateRound.findMany.mockResolvedValue([]);
 
-      const { GET } = await import("@/app/api/v1/debates/[id]/stream/route");
+      const { GET } = await import('@/app/api/v1/debates/[id]/stream/route');
 
       const response = await GET(mockReq, mockContext);
       expect(response.status).toBe(200);
       expect(response.body).toBeInstanceOf(ReadableStream);
     });
 
-    it("should handle AI service rate limiting", async () => {
+    it('should handle AI service rate limiting', async () => {
       // Mock AI service rate limiting
       mockGetUnifiedAIService.mockResolvedValue({
         generateDebate: jest.fn().mockImplementation(() => {
-          throw new Error("Rate limit exceeded");
+          throw new Error('Rate limit exceeded');
         }) as any,
       });
 
       mockedPrisma.debate.findUnique.mockResolvedValue({
-        id: "123e4567-e89b-12d3-a456-426614174000",
-        title: "测试辩论",
-        status: "active",
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        title: '测试辩论',
+        status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 1 },
-        case: { title: "测试案件", description: "案件描述" },
+        case: { title: '测试案件', description: '案件描述' },
         rounds: [],
         _count: { rounds: 0, arguments: 0 },
       } as any);
 
       mockedPrisma.debateRound.findMany.mockResolvedValue([]);
 
-      const { GET } = await import("@/app/api/v1/debates/[id]/stream/route");
+      const { GET } = await import('@/app/api/v1/debates/[id]/stream/route');
 
       const response = await GET(mockReq, mockContext);
       expect(response.status).toBe(200);

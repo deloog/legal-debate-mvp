@@ -3,39 +3,39 @@
  * 验证各种异常情况的处理机制
  */
 
-import { expect, test, APIRequestContext } from "@playwright/test";
+import { expect, test, APIRequestContext } from '@playwright/test';
 import {
   cleanupTestData,
   createTestCase,
   searchLawArticles,
   uploadTestDocument,
   waitForDocumentParsing,
-} from "./helpers";
+} from './helpers';
 
 type LawCategory =
-  | "CIVIL"
-  | "CRIMINAL"
-  | "ADMINISTRATIVE"
-  | "LABOR"
-  | "COMMERCIAL"
-  | "INTELLECTUAL"
-  | "PROCEDURAL";
+  | 'CIVIL'
+  | 'CRIMINAL'
+  | 'ADMINISTRATIVE'
+  | 'LABOR'
+  | 'COMMERCIAL'
+  | 'INTELLECTUAL'
+  | 'PROCEDURAL';
 
-test.describe("异常处理流程", () => {
+test.describe('异常处理流程', () => {
   let apiContext: APIRequestContext;
-  const testUserId = "test-e2e-error-handling";
+  const testUserId = 'test-e2e-error-handling';
   let caseId: string;
 
   test.beforeAll(async ({ playwright }) => {
     apiContext = await playwright.request.newContext({
-      baseURL: "http://localhost:3000",
+      baseURL: 'http://localhost:3000',
     });
   });
 
   test.afterEach(async () => {
     if (caseId) {
       await cleanupTestData(caseId);
-      caseId = "";
+      caseId = '';
     }
   });
 
@@ -45,19 +45,19 @@ test.describe("异常处理流程", () => {
     }
   });
 
-  test("文档解析失败：无效文档格式", async () => {
+  test('文档解析失败：无效文档格式', async () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
     // 上传无效格式文档
-    const invalidFile = new Blob(["invalid content"], {
-      type: "application/octet-stream",
+    const invalidFile = new Blob(['invalid content'], {
+      type: 'application/octet-stream',
     });
     const formData = new FormData();
-    formData.append("file", invalidFile, "invalid.bin");
-    formData.append("caseId", caseId);
+    formData.append('file', invalidFile, 'invalid.bin');
+    formData.append('caseId', caseId);
 
-    const response = await apiContext.post("/api/v1/documents/upload", {
+    const response = await apiContext.post('/api/v1/documents/upload', {
       multipart: formData,
     });
 
@@ -71,10 +71,10 @@ test.describe("异常处理流程", () => {
       try {
         await waitForDocumentParsing(apiContext, result.data.filename, 30000);
         // 如果解析成功，说明文件被接受了，这也是可接受的
-        console.log("文件被接受并解析成功");
+        console.log('文件被接受并解析成功');
       } catch (error) {
         // 期望解析失败
-        expect((error as Error).message).toContain("失败");
+        expect((error as Error).message).toContain('失败');
       }
     } else {
       // 如果上传直接失败，验证错误信息
@@ -84,26 +84,26 @@ test.describe("异常处理流程", () => {
     }
   });
 
-  test("文档解析失败：超大文件", async () => {
+  test('文档解析失败：超大文件', async () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
     // 创建11MB的文件内容
-    const largeContent = new Array(11 * 1024 * 1024).fill("a").join("");
-    const largeFileBuffer = Buffer.from(largeContent, "utf8");
+    const largeContent = new Array(11 * 1024 * 1024).fill('a').join('');
+    const largeFileBuffer = Buffer.from(largeContent, 'utf8');
 
     // 上传超大文件（超过限制）
     const formData = {
       file: {
-        name: "large.pdf",
-        mimeType: "application/pdf",
+        name: 'large.pdf',
+        mimeType: 'application/pdf',
         buffer: largeFileBuffer,
       },
       caseId,
       fileId: `test-large-${Date.now()}`,
     };
 
-    const response = await apiContext.post("/api/v1/documents/upload", {
+    const response = await apiContext.post('/api/v1/documents/upload', {
       multipart: formData,
     });
 
@@ -120,16 +120,16 @@ test.describe("异常处理流程", () => {
 
     // 如果返回400，检查是否是类型验证问题
     if (status === 400) {
-      console.log("文件大小验证前，类型验证先失败");
+      console.log('文件大小验证前，类型验证先失败');
     }
   });
 
-  test("法条检索无结果：关键词过于冷门", async () => {
+  test('法条检索无结果：关键词过于冷门', async () => {
     // 使用更冷门的关键词，避免匹配到Mock数据
     const results = await searchLawArticles(
       apiContext,
-      ["xkcdqwertyuiopasdfghjklzxcvbnm1234567890冷门测试"],
-      "CIVIL",
+      ['xkcdqwertyuiopasdfghjklzxcvbnm1234567890冷门测试'],
+      'CIVIL'
     );
 
     // 验证返回空结果（由于Mock数据库可能包含一些测试数据，这里只验证有结果返回）
@@ -139,22 +139,22 @@ test.describe("异常处理流程", () => {
     console.log(`法条检索结果数: ${results.length}`);
   });
 
-  test("法条检索失败：非法分类", async () => {
+  test('法条检索失败：非法分类', async () => {
     const results = await searchLawArticles(
       apiContext,
-      ["合同"],
-      "INVALID_CATEGORY" as LawCategory,
+      ['合同'],
+      'INVALID_CATEGORY' as LawCategory
     );
 
     // 验证返回空结果或错误
     expect(results).toBeDefined();
   });
 
-  test("AI服务超时：模拟超时响应", async ({ page }) => {
-    page.route("/api/v1/ai/analyze", (route) => {
+  test('AI服务超时：模拟超时响应', async ({ page }) => {
+    page.route('/api/v1/ai/analyze', route => {
       // 模拟30秒超时
       setTimeout(() => {
-        route.abort("timedout");
+        route.abort('timedout');
       }, 30000);
     });
 
@@ -165,7 +165,7 @@ test.describe("异常处理流程", () => {
     const testDocument = await uploadTestDocument(
       apiContext,
       caseId,
-      "%PDF_SAMPLE%",
+      '%PDF_SAMPLE%'
     );
 
     try {
@@ -173,11 +173,11 @@ test.describe("异常处理流程", () => {
       // 超时错误应该被抛出
       expect(true).toBe(false);
     } catch (_error) {
-      expect((_error as Error).message).toContain("超时");
+      expect((_error as Error).message).toContain('超时');
     }
   });
 
-  test("AI服务错误：模拟500错误", async () => {
+  test('AI服务错误：模拟500错误', async () => {
     // 注意：AI分析在文档上传时内部调用，不是独立的API端点
     // 这个测试改为验证文档解析失败后的处理
     const testCase = await createTestCase(apiContext, testUserId);
@@ -188,7 +188,7 @@ test.describe("异常处理流程", () => {
     const testDocument = await uploadTestDocument(
       apiContext,
       caseId,
-      "%PDF_SAMPLE%",
+      '%PDF_SAMPLE%'
     );
 
     // 等待文档解析完成
@@ -196,24 +196,24 @@ test.describe("异常处理流程", () => {
     const parseResult = await waitForDocumentParsing(
       apiContext,
       testDocument.documentId,
-      60000,
+      60000
     );
     expect(parseResult).toBeDefined();
     expect(parseResult.claims?.length).toBeGreaterThan(0);
-    console.log("文档解析成功（使用Mock数据）");
+    console.log('文档解析成功（使用Mock数据）');
   });
 
-  test("SSE连接中断：断线重连机制", async ({ page }) => {
+  test('SSE连接中断：断线重连机制', async ({ page }) => {
     // 注意：SSE断线重连是高级功能，需要服务端实现
     // 当前实现只有基本的SSE流式输出
     // 这个测试暂时跳过，标记为TODO
 
-    console.log("SSE断线重连功能尚未实现，跳过此测试");
-    test.skip(true, "SSE断线重连是高级功能，作为后续优化项");
+    console.log('SSE断线重连功能尚未实现，跳过此测试');
+    test.skip(true, 'SSE断线重连是高级功能，作为后续优化项');
 
     let connectionCount = 0;
 
-    page.route("/api/v1/debates/*/stream", (route) => {
+    page.route('/api/v1/debates/*/stream', route => {
       connectionCount++;
 
       const streamData: string[] = [];
@@ -221,16 +221,16 @@ test.describe("异常处理流程", () => {
       // 模拟前3个chunk正常发送
       for (let i = 0; i < 3; i++) {
         const data = {
-          type: "argument",
+          type: 'argument',
           content: `论点${i + 1}`,
-          side: "PLAINTIFF",
+          side: 'PLAINTIFF',
         };
         streamData.push(`data: ${JSON.stringify(data)}\n\n`);
       }
 
       // 第2次连接后模拟断开
       if (connectionCount === 2) {
-        route.abort("failed");
+        route.abort('failed');
         return;
       }
 
@@ -238,28 +238,28 @@ test.describe("异常处理流程", () => {
       route.fulfill({
         status: 200,
         headers: {
-          "Content-Type": "text/event-stream",
-          "Cache-Control": "no-cache",
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
         },
-        body: streamData.join(""),
+        body: streamData.join(''),
       });
     });
 
     // 监听SSE事件
     page.evaluate(() => {
-      const eventSource = new EventSource("/api/v1/debates/test/stream");
+      const eventSource = new EventSource('/api/v1/debates/test/stream');
 
-      eventSource.addEventListener("argument", (event: Event) => {
+      eventSource.addEventListener('argument', (event: Event) => {
         const data = JSON.parse((event as MessageEvent).data);
-        console.log("收到论点:", data.content);
+        console.log('收到论点:', data.content);
       });
 
       eventSource.onerror = () => {
-        console.log("连接错误，将自动重连...");
+        console.log('连接错误，将自动重连...');
       };
 
-      eventSource.addEventListener("close", () => {
-        console.log("连接关闭");
+      eventSource.addEventListener('close', () => {
+        console.log('连接关闭');
       });
     });
 
@@ -269,12 +269,12 @@ test.describe("异常处理流程", () => {
     expect(connectionCount).toBeGreaterThan(1);
   });
 
-  test("数据库操作失败：并发请求冲突", async () => {
+  test('数据库操作失败：并发请求冲突', async () => {
     // 注意：PUT /api/v1/cases/[id] API在测试环境存在路径参数解析问题
     // params.id为undefined导致验证失败，这是Next.js动态路由在测试中的已知问题
     // 暂时跳过此测试，等待API修复或找到正确的测试方法
 
-    test.skip(true, "PUT API路径参数解析问题，需要修复API路由");
+    test.skip(true, 'PUT API路径参数解析问题，需要修复API路由');
 
     return;
 
@@ -286,19 +286,19 @@ test.describe("异常处理流程", () => {
     // PUT API期望直接传递更新字段，不嵌套在data中
     const update1 = apiContext.put(`/api/v1/cases/${caseId}`, {
       data: {
-        title: "更新1",
-        description: "测试更新",
-        type: "civil",
-        status: "active",
+        title: '更新1',
+        description: '测试更新',
+        type: 'civil',
+        status: 'active',
       },
     });
 
     const update2 = apiContext.put(`/api/v1/cases/${caseId}`, {
       data: {
-        title: "更新2",
-        description: "测试更新",
-        type: "civil",
-        status: "active",
+        title: '更新2',
+        description: '测试更新',
+        type: 'civil',
+        status: 'active',
       },
     });
 
@@ -306,15 +306,15 @@ test.describe("异常处理流程", () => {
 
     // 如果都失败，检查错误详情
     if (!result1.ok() && !result2.ok()) {
-      console.log("并发请求详情:");
-      console.log("update1:", result1.status(), await result1.text());
-      console.log("update2:", result2.status(), await result2.text());
+      console.log('并发请求详情:');
+      console.log('update1:', result1.status(), await result1.text());
+      console.log('update2:', result2.status(), await result2.text());
     }
 
     // 验证至少有一个成功（或者两个都成功，没有并发冲突）
     const atLeastOneSuccess = result1.ok() || result2.ok();
     if (!atLeastOneSuccess) {
-      console.warn("两个请求都失败，这可能是预期的行为（API验证）");
+      console.warn('两个请求都失败，这可能是预期的行为（API验证）');
       // 当前API可能不支持PUT请求，或者需要不同的格式
       // 这个测试标记为通过，验证了错误处理机制
     }
@@ -326,20 +326,20 @@ test.describe("异常处理流程", () => {
     expect(finalResult.data.title).toMatch(/更新[12]/);
 
     console.log(
-      `并发测试结果：update1=${result1.ok()}, update2=${result2.ok()}, 最终标题=${finalResult.data.title}`,
+      `并发测试结果：update1=${result1.ok()}, update2=${result2.ok()}, 最终标题=${finalResult.data.title}`
     );
   });
 
-  test("验证友好的错误提示信息", async () => {
+  test('验证友好的错误提示信息', async () => {
     // 注意：这个测试需要前端UI实现错误提示组件
     // 当前测试中，我们只验证API返回了友好的错误信息
 
-    console.log("前端错误提示组件尚未实现，测试API错误响应格式");
+    console.log('前端错误提示组件尚未实现，测试API错误响应格式');
 
     // 使用UUID格式的无效ID
     // 根据API实现，如果UUID格式有效但案件不存在，返回404
     // 如果UUID格式无效，返回400
-    const invalidId = "00000000-0000-0000-0000-000000000000";
+    const invalidId = '00000000-0000-0000-0000-000000000000';
     const response = await apiContext.get(`/api/v1/cases/${invalidId}`);
 
     const status = response.status();
@@ -352,15 +352,15 @@ test.describe("异常处理流程", () => {
     expect(result.success).toBe(false);
     expect(result.error).toBeDefined();
 
-    console.log("API错误响应:", result);
+    console.log('API错误响应:', result);
   });
 
-  test("验证系统状态可恢复：错误后继续操作", async () => {
+  test('验证系统状态可恢复：错误后继续操作', async () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
     // 使用UUID格式的无效ID
-    const invalidId = "00000000-0000-0000-0000-000000000000";
+    const invalidId = '00000000-0000-0000-0000-000000000000';
     const errorResponse = await apiContext.get(`/api/v1/cases/${invalidId}`);
 
     const errorStatus = errorResponse.status();
@@ -374,7 +374,7 @@ test.describe("异常处理流程", () => {
     if (
       caseId &&
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-        caseId,
+        caseId
       )
     ) {
       const newResponse = await apiContext.get(`/api/v1/cases/${caseId}`);
@@ -384,23 +384,23 @@ test.describe("异常处理流程", () => {
       expect(result.data.id).toBeDefined();
       expect(result.data.id).toBe(caseId);
     } else {
-      console.log("跳过案件查询，因为caseId格式无效:", caseId);
+      console.log('跳过案件查询，因为caseId格式无效:', caseId);
     }
   });
 
-  test("验证数据不丢失：失败操作不影响已有数据", async () => {
+  test('验证数据不丢失：失败操作不影响已有数据', async () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
     const testDocument = await uploadTestDocument(
       apiContext,
       caseId,
-      "%PDF_SAMPLE%",
+      '%PDF_SAMPLE%'
     );
     const parseResult = await waitForDocumentParsing(
       apiContext,
       testDocument.documentId,
-      30000,
+      30000
     );
 
     // 记录原始数据
@@ -408,7 +408,7 @@ test.describe("异常处理流程", () => {
     const originalPartiesCount = parseResult.parties?.length || 0;
 
     // 使用UUID格式的无效ID
-    const invalidId = "00000000-0000-0000-0000-000000000000";
+    const invalidId = '00000000-0000-0000-0000-000000000000';
     const errorResponse = await apiContext.get(`/api/v1/cases/${invalidId}`);
 
     const errorStatus = errorResponse.status();
@@ -419,7 +419,7 @@ test.describe("异常处理流程", () => {
 
     // 验证原始数据未被修改（重新获取文档）
     const docResponse = await apiContext.get(
-      `/api/v1/documents/${testDocument.documentId}`,
+      `/api/v1/documents/${testDocument.documentId}`
     );
     const docResult = await docResponse.json();
 
@@ -432,7 +432,7 @@ test.describe("异常处理流程", () => {
     expect(currentPartiesCount).toBe(originalPartiesCount);
 
     console.log(
-      `数据验证：claims=${currentClaimsCount}/${originalClaimsCount}, parties=${currentPartiesCount}/${originalPartiesCount}`,
+      `数据验证：claims=${currentClaimsCount}/${originalClaimsCount}, parties=${currentPartiesCount}/${originalPartiesCount}`
     );
   });
 });

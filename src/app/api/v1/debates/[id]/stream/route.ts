@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { ApiError } from "@/app/api/lib/errors/api-error";
-import { validatePathParam } from "@/app/api/lib/validation/validator";
-import { uuidSchema } from "@/app/api/lib/validation/schemas";
-import { prisma } from "@/lib/db/prisma";
-import { getUnifiedAIService } from "@/lib/ai/unified-service";
+import { NextRequest, NextResponse } from 'next/server';
+import { ApiError } from '@/app/api/lib/errors/api-error';
+import { validatePathParam } from '@/app/api/lib/validation/validator';
+import { uuidSchema } from '@/app/api/lib/validation/schemas';
+import { prisma } from '@/lib/db/prisma';
+import { getUnifiedAIService } from '@/lib/ai/unified-service';
 import {
   DebateStatus,
   RoundStatus,
   ArgumentSide,
   ArgumentType,
-} from "@prisma/client";
+} from '@prisma/client';
 
 // 确保在Node.js环境中可以使用Web Streams API
 const { ReadableStream } = globalThis;
@@ -20,15 +20,15 @@ const { ReadableStream } = globalThis;
 function extractCorrelationId(request: NextRequest): string | undefined {
   // 从请求头获取
   const headerCorrelationId =
-    request.headers.get("X-Correlation-ID") ||
-    request.headers.get("x-correlation-id");
+    request.headers.get('X-Correlation-ID') ||
+    request.headers.get('x-correlation-id');
   if (headerCorrelationId) {
     return headerCorrelationId;
   }
 
   // 从查询参数获取
   const url = new URL(request.url);
-  const queryCorrelationId = url.searchParams.get("correlationId");
+  const queryCorrelationId = url.searchParams.get('correlationId');
   if (queryCorrelationId) {
     return queryCorrelationId;
   }
@@ -43,13 +43,13 @@ function createStreamError(
   error: string | Error | ApiError,
   correlationId?: string,
   statusCode: number = 500,
-  details?: Record<string, unknown>,
+  details?: Record<string, unknown>
 ): string {
   const errorMessage = error instanceof Error ? error.message : error;
-  const errorCode = error instanceof ApiError ? error.code : "STREAM_ERROR";
+  const errorCode = error instanceof ApiError ? error.code : 'STREAM_ERROR';
 
   return `data: ${JSON.stringify({
-    type: "error",
+    type: 'error',
     timestamp: new Date().toISOString(),
     correlationId,
     error: {
@@ -66,7 +66,7 @@ function createStreamError(
  * 这是一个简化的解析器，实际使用时需要根据AI服务的返回格式调整
  */
 function parseDebateArguments(
-  content: string,
+  content: string
   // roundNumber: number,
 ): Array<{
   side: ArgumentSide;
@@ -116,7 +116,7 @@ function parseDebateArguments(
         side: ArgumentSide.DEFENDANT,
         content: `原告的指控缺乏事实和法律依据，应当驳回其诉讼请求。`,
         confidence: 0.82,
-      },
+      }
     );
   }
 
@@ -129,7 +129,7 @@ function parseDebateArguments(
  */
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
+  context: { params: Promise<{ id: string }> }
 ) {
   // 验证路径参数
   const params = await context.params;
@@ -149,7 +149,7 @@ export async function GET(
         include: {
           arguments: true,
         },
-        orderBy: { roundNumber: "desc" },
+        orderBy: { roundNumber: 'desc' },
         take: 1,
       },
     },
@@ -159,24 +159,24 @@ export async function GET(
     const correlationId = extractCorrelationId(request);
     return NextResponse.json(
       {
-        error: "Debate not found",
+        error: 'Debate not found',
         correlationId,
         timestamp: new Date().toISOString(),
       },
       {
         status: 404,
-        headers: { "x-correlation-id": correlationId },
-      },
+        headers: { 'x-correlation-id': correlationId },
+      }
     );
   }
 
   // 设置SSE响应头
   const headers = new Headers({
-    "Content-Type": "text/event-stream",
-    "Cache-Control": "no-cache",
-    Connection: "keep-alive",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   });
 
   // 创建SSE流
@@ -187,10 +187,10 @@ export async function GET(
         // 发送连接确认
         controller.enqueue(
           `data: ${JSON.stringify({
-            type: "connected",
+            type: 'connected',
             timestamp: new Date().toISOString(),
             debateId,
-          })}\n\n`,
+          })}\n\n`
         );
 
         // 获取AI服务实例
@@ -211,11 +211,11 @@ export async function GET(
           if (isStreamActive) {
             controller.enqueue(
               `data: ${JSON.stringify({
-                type: "round_started",
+                type: 'round_started',
                 timestamp: new Date().toISOString(),
                 debateId,
                 roundNumber: roundIndex,
-              })}\n\n`,
+              })}\n\n`
             );
           }
 
@@ -228,13 +228,13 @@ export async function GET(
             });
 
             const debateContent =
-              debateResponse.choices?.[0]?.message?.content || "";
+              debateResponse.choices?.[0]?.message?.content || '';
 
             // 解析AI生成的论点（这里需要根据实际AI返回格式调整）
             const generatedArguments = parseDebateArguments(debateContent);
 
             // 保存轮次到数据库
-            const newRound = await prisma.$transaction(async (tx) => {
+            const newRound = await prisma.$transaction(async tx => {
               const round = await tx.debateRound.create({
                 data: {
                   debateId,
@@ -252,7 +252,7 @@ export async function GET(
                     side: arg.side,
                     content: arg.content,
                     type: ArgumentType.MAIN_POINT,
-                    aiProvider: "deepseek",
+                    aiProvider: 'deepseek',
                     confidence: arg.confidence,
                   },
                 });
@@ -276,7 +276,7 @@ export async function GET(
               if (isStreamActive) {
                 controller.enqueue(
                   `data: ${JSON.stringify({
-                    type: "argument_generated",
+                    type: 'argument_generated',
                     timestamp: new Date().toISOString(),
                     debateId,
                     roundNumber: roundIndex,
@@ -284,12 +284,12 @@ export async function GET(
                       ...arg,
                       roundId: newRound.id,
                     },
-                  })}\n\n`,
+                  })}\n\n`
                 );
               }
 
               // 添加延迟以模拟真实的处理时间
-              await new Promise((resolve) => setTimeout(resolve, 1500));
+              await new Promise(resolve => setTimeout(resolve, 1500));
             }
 
             // 完成轮次
@@ -304,32 +304,32 @@ export async function GET(
             if (isStreamActive) {
               controller.enqueue(
                 `data: ${JSON.stringify({
-                  type: "round_completed",
+                  type: 'round_completed',
                   timestamp: new Date().toISOString(),
                   debateId,
                   roundNumber: roundIndex,
                   summary: `第${roundIndex}轮辩论完成`,
-                })}\n\n`,
+                })}\n\n`
               );
             }
           } catch (aiError) {
-            console.error("AI service error:", aiError);
+            console.error('AI service error:', aiError);
             const correlationId = extractCorrelationId(request);
             const errorEvent = createStreamError(
               new ApiError(
                 503,
-                "AI_SERVICE_ERROR",
-                "Failed to generate arguments",
+                'AI_SERVICE_ERROR',
+                'Failed to generate arguments',
                 {
                   roundNumber: roundIndex,
                   originalError:
                     aiError instanceof Error
                       ? aiError.message
-                      : "Unknown error",
-                },
+                      : 'Unknown error',
+                }
               ),
               correlationId,
-              503,
+              503
             );
 
             // 直接发送错误事件
@@ -337,7 +337,7 @@ export async function GET(
               try {
                 controller.enqueue(errorEvent);
               } catch (enqueueError) {
-                console.warn("Failed to enqueue AI error event:", enqueueError);
+                console.warn('Failed to enqueue AI error event:', enqueueError);
               }
             }
 
@@ -346,8 +346,8 @@ export async function GET(
               controller.close();
             } catch (closeError) {
               console.warn(
-                "Failed to close stream after AI error:",
-                closeError,
+                'Failed to close stream after AI error:',
+                closeError
               );
             }
             return;
@@ -358,38 +358,38 @@ export async function GET(
         if (isStreamActive) {
           controller.enqueue(
             `data: ${JSON.stringify({
-              type: "completed",
+              type: 'completed',
               timestamp: new Date().toISOString(),
               debateId,
               totalRounds: maxRounds,
-            })}\n\n`,
+            })}\n\n`
           );
         }
 
         controller.close();
       } catch (error) {
-        console.error("Stream error:", error);
+        console.error('Stream error:', error);
         const correlationId = extractCorrelationId(request);
         const errorEvent = createStreamError(
           new ApiError(
             500,
-            "STREAM_ERROR",
-            error instanceof Error ? error.message : "Unknown stream error",
+            'STREAM_ERROR',
+            error instanceof Error ? error.message : 'Unknown stream error',
             {
               debateId,
               originalError:
-                error instanceof Error ? error.stack : "Unknown error",
-            },
+                error instanceof Error ? error.stack : 'Unknown error',
+            }
           ),
           correlationId,
-          500,
+          500
         );
 
         if (isStreamActive) {
           try {
             controller.enqueue(errorEvent);
           } catch (enqueueError) {
-            console.warn("Failed to enqueue stream error event:", enqueueError);
+            console.warn('Failed to enqueue stream error event:', enqueueError);
           }
         }
 
@@ -397,12 +397,12 @@ export async function GET(
         try {
           controller.close();
         } catch (closeError) {
-          console.warn("Failed to close stream:", closeError);
+          console.warn('Failed to close stream:', closeError);
         }
       }
 
       // 处理客户端断开连接
-      request.signal.addEventListener("abort", () => {
+      request.signal.addEventListener('abort', () => {
         isStreamActive = false;
         controller.close();
       });
@@ -422,10 +422,10 @@ export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Access-Control-Max-Age": "86400",
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
     },
   });
 }

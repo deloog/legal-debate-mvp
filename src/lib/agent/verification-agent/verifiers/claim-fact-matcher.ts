@@ -24,7 +24,7 @@ export class ClaimFactMatcher {
       return 0;
     }
 
-    const factsText = data.facts.join(" ");
+    const factsText = data.facts.join(' ');
     let totalMatchScore = 0;
 
     // 检查每个诉讼请求是否在事实中有支撑
@@ -63,30 +63,30 @@ export class ClaimFactMatcher {
   private extractKeywords(text: string): string[] {
     // 移除停用词和标点
     const stopWords = new Set([
-      "的",
-      "了",
-      "是",
-      "在",
-      "和",
-      "有",
-      "我",
-      "你",
-      "他",
-      "她",
-      "它",
-      "我们",
-      "你们",
-      "他们",
-      "这",
-      "那",
-      "这个",
-      "那个",
+      '的',
+      '了',
+      '是',
+      '在',
+      '和',
+      '有',
+      '我',
+      '你',
+      '他',
+      '她',
+      '它',
+      '我们',
+      '你们',
+      '他们',
+      '这',
+      '那',
+      '这个',
+      '那个',
     ]);
 
     const words = text
-      .replace(/[，。！？；：""''（）]/g, " ")
+      .replace(/[，。！？；：""''（）]/g, ' ')
       .split(/\s+/)
-      .filter((word) => word.length > 1 && !stopWords.has(word));
+      .filter(word => word.length > 1 && !stopWords.has(word));
 
     return [...new Set(words)].slice(0, 10); // 最多返回10个关键词
   }

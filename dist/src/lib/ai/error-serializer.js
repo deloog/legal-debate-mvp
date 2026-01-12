@@ -1,5 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.AIErrorSerializer = void 0;
 // =============================================================================
 // 错误序列化器类
@@ -17,7 +17,7 @@ class AIErrorSerializer {
       code: standardError.code,
       message: this.truncateMessage(
         standardError.message,
-        finalConfig.maxMessageLength,
+        finalConfig.maxMessageLength
       ),
       type: standardError.type,
       provider: standardError.provider,
@@ -54,20 +54,20 @@ class AIErrorSerializer {
       // 验证版本兼容性
       if (parsed.version !== this.VERSION) {
         console.warn(
-          `Error serialization version mismatch: expected ${this.VERSION}, got ${parsed.version}`,
+          `Error serialization version mismatch: expected ${this.VERSION}, got ${parsed.version}`
         );
       }
       return parsed;
     } catch (error) {
       throw new Error(
-        `Failed to deserialize error JSON: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to deserialize error JSON: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
   /**
    * 创建用户友好的错误消息
    */
-  static createUserFriendlyMessage(error, locale = "zh-CN") {
+  static createUserFriendlyMessage(error, locale = 'zh-CN') {
     const messages = this.getLocalizedMessage(locale);
     // 基础错误消息
     let message = messages[error.type] || messages.unknown_error;
@@ -93,7 +93,7 @@ class AIErrorSerializer {
     const providers = {};
     let retryableErrors = 0;
     let nonRetryableErrors = 0;
-    errors.forEach((error) => {
+    errors.forEach(error => {
       // 统计错误类型
       errorTypes[error.type] = (errorTypes[error.type] || 0) + 1;
       // 统计提供商
@@ -110,11 +110,11 @@ class AIErrorSerializer {
     // 找出最常见的错误类型
     const mostCommonError =
       Object.entries(errorTypes).sort(([, a], [, b]) => b - a)[0]?.[0] ||
-      "unknown_error";
+      'unknown_error';
     // 找出问题最多的提供商
     const mostProblematicProvider =
       Object.entries(providers).sort(([, a], [, b]) => b - a)[0]?.[0] ||
-      "zhipu";
+      'zhipu';
     return {
       totalErrors: errors.length,
       errorTypes,
@@ -137,19 +137,19 @@ class AIErrorSerializer {
     }
     if (error instanceof Error) {
       return {
-        code: error.name || "UNKNOWN_ERROR",
+        code: error.name || 'UNKNOWN_ERROR',
         message: error.message,
         type: this.inferErrorType(error),
-        provider: "zhipu", // 使用默认提供商
+        provider: 'zhipu', // 使用默认提供商
         timestamp: Date.now(),
         retryable: this.isRetryableError(error),
       };
     }
     return {
-      code: "UNKNOWN_ERROR",
+      code: 'UNKNOWN_ERROR',
       message: String(error),
-      type: "unknown_error",
-      provider: "zhipu", // 使用默认提供商
+      type: 'unknown_error',
+      provider: 'zhipu', // 使用默认提供商
       timestamp: Date.now(),
       retryable: false,
     };
@@ -160,9 +160,9 @@ class AIErrorSerializer {
   static isAIError(error) {
     return (
       error &&
-      typeof error === "object" &&
-      "type" in error &&
-      "provider" in error
+      typeof error === 'object' &&
+      'type' in error &&
+      'provider' in error
     );
   }
   /**
@@ -170,24 +170,24 @@ class AIErrorSerializer {
    */
   static inferErrorType(error) {
     const message = error.message.toLowerCase();
-    if (message.includes("timeout")) return "timeout_error";
-    if (message.includes("network") || message.includes("connection"))
-      return "network_error";
-    if (message.includes("authentication") || message.includes("unauthorized"))
-      return "authentication_error";
-    if (message.includes("permission") || message.includes("forbidden"))
-      return "permission_error";
-    if (message.includes("rate limit") || message.includes("too many requests"))
-      return "rate_limit_error";
-    if (message.includes("not found") || message.includes("does not exist"))
-      return "not_found_error";
-    if (message.includes("quota") || message.includes("limit"))
-      return "insufficient_quota";
-    if (message.includes("validation") || message.includes("invalid"))
-      return "validation_error";
-    if (message.includes("model") && message.includes("not available"))
-      return "model_not_available";
-    return "unknown_error";
+    if (message.includes('timeout')) return 'timeout_error';
+    if (message.includes('network') || message.includes('connection'))
+      return 'network_error';
+    if (message.includes('authentication') || message.includes('unauthorized'))
+      return 'authentication_error';
+    if (message.includes('permission') || message.includes('forbidden'))
+      return 'permission_error';
+    if (message.includes('rate limit') || message.includes('too many requests'))
+      return 'rate_limit_error';
+    if (message.includes('not found') || message.includes('does not exist'))
+      return 'not_found_error';
+    if (message.includes('quota') || message.includes('limit'))
+      return 'insufficient_quota';
+    if (message.includes('validation') || message.includes('invalid'))
+      return 'validation_error';
+    if (message.includes('model') && message.includes('not available'))
+      return 'model_not_available';
+    return 'unknown_error';
   }
   /**
    * 判断错误是否可重试
@@ -195,10 +195,10 @@ class AIErrorSerializer {
   static isRetryableError(error) {
     const message = error.message.toLowerCase();
     return (
-      message.includes("timeout") ||
-      message.includes("network") ||
-      message.includes("connection") ||
-      message.includes("rate limit")
+      message.includes('timeout') ||
+      message.includes('network') ||
+      message.includes('connection') ||
+      message.includes('rate limit')
     );
   }
   /**
@@ -208,7 +208,7 @@ class AIErrorSerializer {
     if (!maxLength || message.length <= maxLength) {
       return message;
     }
-    return message.substring(0, maxLength - 3) + "...";
+    return message.substring(0, maxLength - 3) + '...';
   }
   /**
    * 提取错误详情
@@ -246,25 +246,25 @@ class AIErrorSerializer {
    */
   static sanitizeMessage(message) {
     return message
-      .replace(/api[_-]?key[s]?[:\s=]+[a-zA-Z0-9_-]+/gi, "api_key:***")
-      .replace(/token[:\s=]+[a-zA-Z0-9._-]+/gi, "token:***")
-      .replace(/password[:\s=]+[^\s]+/gi, "password:***")
-      .replace(/secret[:\s=]+[^\s]+/gi, "secret:***");
+      .replace(/api[_-]?key[s]?[:\s=]+[a-zA-Z0-9_-]+/gi, 'api_key:***')
+      .replace(/token[:\s=]+[a-zA-Z0-9._-]+/gi, 'token:***')
+      .replace(/password[:\s=]+[^\s]+/gi, 'password:***')
+      .replace(/secret[:\s=]+[^\s]+/gi, 'secret:***');
   }
   /**
    * 递归清理对象中的敏感信息
    */
   static sanitizeObject(obj) {
-    if (typeof obj !== "object" || obj === null) {
+    if (typeof obj !== 'object' || obj === null) {
       return obj;
     }
     if (Array.isArray(obj)) {
-      return obj.map((item) => this.sanitizeObject(item));
+      return obj.map(item => this.sanitizeObject(item));
     }
     const sanitized = {};
     for (const [key, value] of Object.entries(obj)) {
       if (this.isSensitiveKey(key)) {
-        sanitized[key] = "***";
+        sanitized[key] = '***';
       } else {
         sanitized[key] = this.sanitizeObject(value);
       }
@@ -276,25 +276,25 @@ class AIErrorSerializer {
    */
   static isSensitiveKey(key) {
     const sensitiveKeys = [
-      "apikey",
-      "api_key",
-      "api-key",
-      "token",
-      "accesstoken",
-      "access_token",
-      "access-token",
-      "password",
-      "passwd",
-      "pwd",
-      "secret",
-      "privatekey",
-      "private_key",
-      "private-key",
-      "authorization",
-      "auth",
+      'apikey',
+      'api_key',
+      'api-key',
+      'token',
+      'accesstoken',
+      'access_token',
+      'access-token',
+      'password',
+      'passwd',
+      'pwd',
+      'secret',
+      'privatekey',
+      'private_key',
+      'private-key',
+      'authorization',
+      'auth',
     ];
-    return sensitiveKeys.some((sensitive) =>
-      key.toLowerCase().includes(sensitive.toLowerCase()),
+    return sensitiveKeys.some(sensitive =>
+      key.toLowerCase().includes(sensitive.toLowerCase())
     );
   }
   /**
@@ -302,40 +302,40 @@ class AIErrorSerializer {
    */
   static getLocalizedMessage(locale) {
     const messages = {
-      "zh-CN": {
-        authentication_error: "认证失败，请检查API密钥",
-        permission_error: "权限不足，无法执行该操作",
-        not_found_error: "请求的资源不存在",
-        rate_limit_error: "请求频率过高，请稍后重试",
-        api_error: "API服务错误",
-        timeout_error: "请求超时，请检查网络连接",
-        network_error: "网络连接错误",
-        validation_error: "请求参数验证失败",
-        insufficient_quota: "配额不足，请检查账户余额",
-        model_not_available: "指定的模型不可用",
-        content_filter: "内容被过滤",
-        unknown_error: "未知错误",
+      'zh-CN': {
+        authentication_error: '认证失败，请检查API密钥',
+        permission_error: '权限不足，无法执行该操作',
+        not_found_error: '请求的资源不存在',
+        rate_limit_error: '请求频率过高，请稍后重试',
+        api_error: 'API服务错误',
+        timeout_error: '请求超时，请检查网络连接',
+        network_error: '网络连接错误',
+        validation_error: '请求参数验证失败',
+        insufficient_quota: '配额不足，请检查账户余额',
+        model_not_available: '指定的模型不可用',
+        content_filter: '内容被过滤',
+        unknown_error: '未知错误',
       },
-      "en-US": {
-        authentication_error: "Authentication failed, please check API key",
-        permission_error: "Insufficient permissions to perform this operation",
-        not_found_error: "Requested resource not found",
-        rate_limit_error: "Rate limit exceeded, please try again later",
-        api_error: "API service error",
-        timeout_error: "Request timeout, please check network connection",
-        network_error: "Network connection error",
-        validation_error: "Request parameter validation failed",
-        insufficient_quota: "Insufficient quota, please check account balance",
-        model_not_available: "Specified model is not available",
-        content_filter: "Content was filtered",
-        unknown_error: "Unknown error",
+      'en-US': {
+        authentication_error: 'Authentication failed, please check API key',
+        permission_error: 'Insufficient permissions to perform this operation',
+        not_found_error: 'Requested resource not found',
+        rate_limit_error: 'Rate limit exceeded, please try again later',
+        api_error: 'API service error',
+        timeout_error: 'Request timeout, please check network connection',
+        network_error: 'Network connection error',
+        validation_error: 'Request parameter validation failed',
+        insufficient_quota: 'Insufficient quota, please check account balance',
+        model_not_available: 'Specified model is not available',
+        content_filter: 'Content was filtered',
+        unknown_error: 'Unknown error',
       },
     };
-    return messages[locale] || messages["en-US"];
+    return messages[locale] || messages['en-US'];
   }
 }
 exports.AIErrorSerializer = AIErrorSerializer;
-AIErrorSerializer.VERSION = "1.0.0";
+AIErrorSerializer.VERSION = '1.0.0';
 AIErrorSerializer.DEFAULT_CONFIG = {
   includeStackTrace: false,
   includeRequestContext: true,

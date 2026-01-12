@@ -2,31 +2,31 @@
  * QQ OAuth2.0 实现
  */
 
-import { OAuthBaseProvider } from "./oauth-base";
-import type { OAuthTokenResponse, OAuthUserInfo } from "../../types/oauth";
-import type { QqUserInfo } from "../../types/oauth";
+import { OAuthBaseProvider } from './oauth-base';
+import type { OAuthTokenResponse, OAuthUserInfo } from '../../types/oauth';
+import type { QqUserInfo } from '../../types/oauth';
 
 /**
  * QQ OAuth 提供商
  */
 export class QqOAuthProvider extends OAuthBaseProvider {
   constructor() {
-    const appId = process.env.QQ_APP_ID || "";
-    const appKey = process.env.QQ_APP_KEY || "";
-    const redirectUri = process.env.QQ_REDIRECT_URI || "";
+    const appId = process.env.QQ_APP_ID || '';
+    const appKey = process.env.QQ_APP_KEY || '';
+    const redirectUri = process.env.QQ_REDIRECT_URI || '';
 
     if (!appId || !appKey) {
-      throw new Error("QQ_APP_ID and QQ_APP_KEY are required");
+      throw new Error('QQ_APP_ID and QQ_APP_KEY are required');
     }
 
     super({
       appId,
       appSecret: appKey,
       redirectUri,
-      scope: "get_user_info",
-      authorizeUrl: "https://graph.qq.com/oauth2.0/authorize",
-      tokenUrl: "https://graph.qq.com/oauth2.0/token",
-      userInfoUrl: "https://graph.qq.com/user/get_user_info",
+      scope: 'get_user_info',
+      authorizeUrl: 'https://graph.qq.com/oauth2.0/authorize',
+      tokenUrl: 'https://graph.qq.com/oauth2.0/token',
+      userInfoUrl: 'https://graph.qq.com/user/get_user_info',
     });
   }
 
@@ -34,7 +34,7 @@ export class QqOAuthProvider extends OAuthBaseProvider {
    * 获取提供商名称
    */
   protected getProviderName(): string {
-    return "qq";
+    return 'qq';
   }
 
   /**
@@ -42,7 +42,7 @@ export class QqOAuthProvider extends OAuthBaseProvider {
    */
   buildAuthorizeUrl(state: string, redirectUri?: string): string {
     const params = {
-      response_type: "code",
+      response_type: 'code',
       client_id: this.config.appId,
       redirect_uri: redirectUri || this.config.redirectUri,
       state,
@@ -57,7 +57,7 @@ export class QqOAuthProvider extends OAuthBaseProvider {
    */
   async exchangeToken(code: string): Promise<OAuthTokenResponse> {
     const params = {
-      grant_type: "authorization_code",
+      grant_type: 'authorization_code',
       client_id: this.config.appId,
       client_secret: this.config.appSecret,
       code,
@@ -67,20 +67,20 @@ export class QqOAuthProvider extends OAuthBaseProvider {
     try {
       const responseText = await this.post(this.config.tokenUrl, params);
       const response = this.parseQqTokenResponse(
-        responseText as string,
+        responseText as string
       ) as QqTokenResponse;
 
       return {
         access_token: response.access_token,
         expires_in: Number.parseInt(response.expires_in, 10),
         refresh_token: response.refresh_token,
-        openid: "", // QQ需要单独获取openid
+        openid: '', // QQ需要单独获取openid
         scope: response.scope,
       };
     } catch (error) {
-      console.error("QQ exchangeToken error:", error);
+      console.error('QQ exchangeToken error:', error);
       throw new Error(
-        `Failed to exchange token: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Failed to exchange token: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
@@ -90,10 +90,10 @@ export class QqOAuthProvider extends OAuthBaseProvider {
    */
   async getUserInfo(
     accessToken: string,
-    openid?: string,
+    openid?: string
   ): Promise<OAuthUserInfo> {
     if (!openid) {
-      throw new Error("OpenID is required for QQ user info");
+      throw new Error('OpenID is required for QQ user info');
     }
 
     const params = {
@@ -104,7 +104,7 @@ export class QqOAuthProvider extends OAuthBaseProvider {
 
     try {
       const response = (await this.get(
-        this.buildUrl(this.config.userInfoUrl, params),
+        this.buildUrl(this.config.userInfoUrl, params)
       )) as QqUserInfo;
 
       return {
@@ -117,9 +117,9 @@ export class QqOAuthProvider extends OAuthBaseProvider {
         rawUserInfo: response,
       };
     } catch (error) {
-      console.error("QQ getUserInfo error:", error);
+      console.error('QQ getUserInfo error:', error);
       throw new Error(
-        `Failed to get user info: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Failed to get user info: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
@@ -148,14 +148,14 @@ export class QqOAuthProvider extends OAuthBaseProvider {
       const match = (responseText as string).match(/"openid":"([^"]+)"/);
 
       if (!match) {
-        throw new Error("Failed to parse OpenID from QQ response");
+        throw new Error('Failed to parse OpenID from QQ response');
       }
 
       return match[1];
     } catch (error) {
-      console.error("QQ getQqOpenId error:", error);
+      console.error('QQ getQqOpenId error:', error);
       throw new Error(
-        `Failed to get OpenID: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Failed to get OpenID: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
@@ -165,7 +165,7 @@ export class QqOAuthProvider extends OAuthBaseProvider {
    */
   async refreshAccessToken(refreshToken: string): Promise<OAuthTokenResponse> {
     const params = {
-      grant_type: "refresh_token",
+      grant_type: 'refresh_token',
       client_id: this.config.appId,
       client_secret: this.config.appSecret,
       refresh_token: refreshToken,
@@ -174,20 +174,20 @@ export class QqOAuthProvider extends OAuthBaseProvider {
     try {
       const responseText = await this.post(this.config.tokenUrl, params);
       const response = this.parseQqTokenResponse(
-        responseText as string,
+        responseText as string
       ) as QqTokenResponse;
 
       return {
         access_token: response.access_token,
         expires_in: Number.parseInt(response.expires_in, 10),
         refresh_token: response.refresh_token,
-        openid: "",
+        openid: '',
         scope: response.scope,
       };
     } catch (error) {
-      console.error("QQ refreshAccessToken error:", error);
+      console.error('QQ refreshAccessToken error:', error);
       throw new Error(
-        `Failed to refresh token: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Failed to refresh token: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
@@ -195,14 +195,14 @@ export class QqOAuthProvider extends OAuthBaseProvider {
   /**
    * 映射性别
    */
-  private mapGender(gender: string): "male" | "female" | "unknown" {
-    if (gender === "男") {
-      return "male";
+  private mapGender(gender: string): 'male' | 'female' | 'unknown' {
+    if (gender === '男') {
+      return 'male';
     }
-    if (gender === "女") {
-      return "female";
+    if (gender === '女') {
+      return 'female';
     }
-    return "unknown";
+    return 'unknown';
   }
 }
 

@@ -8,14 +8,14 @@
  * 4. 生成结论
  */
 
-import { createHash } from "crypto";
+import { createHash } from 'crypto';
 import type {
   Fact,
   ReasoningStep,
   ReasoningChain,
   LogicValidationResult,
   LawArticle,
-} from "./types";
+} from './types';
 
 // =============================================================================
 // 类型定义
@@ -25,7 +25,7 @@ interface ReasoningOptions {
   /** 最大推理步骤数 */
   maxSteps?: number;
   /** 推理类型（deductive/inductive/analogical） */
-  reasoningType?: "deductive" | "inductive" | "analogical";
+  reasoningType?: 'deductive' | 'inductive' | 'analogical';
   /** 最小置信度 */
   minConfidence?: number;
 }
@@ -37,7 +37,7 @@ interface ReasoningOptions {
 export class LegalReasoner {
   private readonly defaultOptions: ReasoningOptions = {
     maxSteps: 10,
-    reasoningType: "deductive",
+    reasoningType: 'deductive',
     minConfidence: 0.5,
   };
 
@@ -47,7 +47,7 @@ export class LegalReasoner {
   async buildReasoningChain(
     facts: Fact[],
     laws: LawArticle[],
-    options: ReasoningOptions = {},
+    options: ReasoningOptions = {}
   ): Promise<ReasoningChain> {
     const startTime = Date.now();
     const opts = { ...this.defaultOptions, ...options };
@@ -84,7 +84,7 @@ export class LegalReasoner {
   private extractKeyFacts(facts: Fact[]): Fact[] {
     // 按相关性排序，提取前N个关键事实
     return facts
-      .filter((f) => f.relevance > 0.5)
+      .filter(f => f.relevance > 0.5)
       .sort((a, b) => b.relevance - a.relevance)
       .slice(0, 5);
   }
@@ -95,11 +95,11 @@ export class LegalReasoner {
   private buildSteps(
     facts: Fact[],
     laws: LawArticle[],
-    options: ReasoningOptions,
+    options: ReasoningOptions
   ): ReasoningStep[] {
     const steps: ReasoningStep[] = [];
     const maxSteps = options.maxSteps || 10;
-    const reasoningType = options.reasoningType || "deductive";
+    const reasoningType = options.reasoningType || 'deductive';
 
     for (let i = 0; i < maxSteps && i < laws.length; i++) {
       const law = laws[i];
@@ -135,7 +135,7 @@ export class LegalReasoner {
     const keywords = law.keywords || [];
     const lawText = law.content.toLowerCase();
 
-    return facts.filter((fact) => {
+    return facts.filter(fact => {
       const factText = fact.content.toLowerCase();
 
       // 检查是否包含法条关键词
@@ -163,12 +163,12 @@ export class LegalReasoner {
   private generateStepContent(
     law: LawArticle,
     facts: Fact[],
-    order: number,
+    order: number
   ): string {
     const templates = [
-      `根据法条${law.articleNumber}，结合事实${facts.map((f) => f.id).join("、")}，可以得出推论。`,
-      `依据${law.lawName}第${law.articleNumber}条，以及相关事实${facts.map((f) => f.id).join("、")}，适用该法条。`,
-      `第${order}步：根据${law.articleNumber}条规定，${this.truncateContent(law.content, 30)}，结合事实${facts.map((f) => f.id).join("、")}，适用。`,
+      `根据法条${law.articleNumber}，结合事实${facts.map(f => f.id).join('、')}，可以得出推论。`,
+      `依据${law.lawName}第${law.articleNumber}条，以及相关事实${facts.map(f => f.id).join('、')}，适用该法条。`,
+      `第${order}步：根据${law.articleNumber}条规定，${this.truncateContent(law.content, 30)}，结合事实${facts.map(f => f.id).join('、')}，适用。`,
     ];
 
     return templates[order % templates.length];
@@ -181,9 +181,9 @@ export class LegalReasoner {
     let confidence = 0.5;
 
     // 基于法条级别
-    if (law.level === "constitution") {
+    if (law.level === 'constitution') {
       confidence += 0.3;
-    } else if (law.level === "law") {
+    } else if (law.level === 'law') {
       confidence += 0.2;
     }
 
@@ -202,10 +202,10 @@ export class LegalReasoner {
     steps: ReasoningStep[],
     facts: Fact[],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    laws: LawArticle[],
+    laws: LawArticle[]
   ): string {
     if (steps.length === 0) {
-      return "由于缺乏足够的法律依据和事实支持，无法得出有效结论。";
+      return '由于缺乏足够的法律依据和事实支持，无法得出有效结论。';
     }
 
     const lastStep = steps[steps.length - 1];
@@ -219,10 +219,10 @@ export class LegalReasoner {
    */
   private getConclusionTemplate(step: ReasoningStep): string {
     const templates = [
-      "原告的诉请具有法律依据，应当予以支持",
-      "被告应当承担相应的法律责任",
-      "双方应当履行各自的法律义务",
-      "应当依照法律规定进行裁判",
+      '原告的诉请具有法律依据，应当予以支持',
+      '被告应当承担相应的法律责任',
+      '双方应当履行各自的法律义务',
+      '应当依照法律规定进行裁判',
     ];
 
     return templates[step.order % templates.length];
@@ -233,7 +233,7 @@ export class LegalReasoner {
    */
   private calculateLogicScore(
     steps: ReasoningStep[],
-    conclusion: string,
+    conclusion: string
   ): number {
     if (steps.length === 0) {
       return 0;
@@ -250,7 +250,7 @@ export class LegalReasoner {
     score += avgConfidence * 0.4;
 
     // 基于结论质量（简化的长度和关键词检查）
-    if (conclusion.length > 20 && conclusion.includes("结论")) {
+    if (conclusion.length > 20 && conclusion.includes('结论')) {
       score += 0.3;
     }
 
@@ -263,7 +263,7 @@ export class LegalReasoner {
   private calculateCompleteness(
     steps: ReasoningStep[],
     facts: Fact[],
-    laws: LawArticle[],
+    laws: LawArticle[]
   ): number {
     let completeness = 0;
 
@@ -293,7 +293,7 @@ export class LegalReasoner {
    * 验证逻辑
    */
   validateLogic(reasoningChain: ReasoningChain): LogicValidationResult {
-    const issues: LogicValidationResult["issues"] = [];
+    const issues: LogicValidationResult['issues'] = [];
     let passed = true;
 
     // 检查是否有矛盾
@@ -318,7 +318,7 @@ export class LegalReasoner {
       passed,
       score: this.calculateLogicScore(
         reasoningChain.steps,
-        reasoningChain.conclusion,
+        reasoningChain.conclusion
       ),
       issues,
     };
@@ -328,9 +328,9 @@ export class LegalReasoner {
    * 检查矛盾
    */
   private checkContradictions(
-    reasoningChain: ReasoningChain,
-  ): LogicValidationResult["issues"] {
-    const issues: LogicValidationResult["issues"] = [];
+    reasoningChain: ReasoningChain
+  ): LogicValidationResult['issues'] {
+    const issues: LogicValidationResult['issues'] = [];
 
     // 简化处理：检查结论是否与前提矛盾
     const conclusionKeywords = this.extractKeywords(reasoningChain.conclusion);
@@ -344,7 +344,7 @@ export class LegalReasoner {
     }
 
     // 检查结论中是否有否定词但前提中没有
-    const negationWords = ["不", "无", "否", "非", "未"];
+    const negationWords = ['不', '无', '否', '非', '未'];
     for (const word of negationWords) {
       if (conclusionKeywords.includes(word)) {
         let found = false;
@@ -356,9 +356,9 @@ export class LegalReasoner {
         }
         if (!found) {
           issues.push({
-            type: "contradiction",
+            type: 'contradiction',
             description: `结论中包含否定词"${word}"，但前提中未明确提及`,
-            severity: "medium",
+            severity: 'medium',
           });
         }
       }
@@ -371,16 +371,16 @@ export class LegalReasoner {
    * 检查缺失前提
    */
   private checkMissingPremises(
-    reasoningChain: ReasoningChain,
-  ): LogicValidationResult["issues"] {
-    const issues: LogicValidationResult["issues"] = [];
+    reasoningChain: ReasoningChain
+  ): LogicValidationResult['issues'] {
+    const issues: LogicValidationResult['issues'] = [];
 
     // 检查推理链是否缺少必要步骤
     if (reasoningChain.steps.length < 2) {
       issues.push({
-        type: "missing_premise",
-        description: "推理步骤过少，可能缺少必要的前提",
-        severity: "high",
+        type: 'missing_premise',
+        description: '推理步骤过少，可能缺少必要的前提',
+        severity: 'high',
       });
     }
 
@@ -391,25 +391,25 @@ export class LegalReasoner {
    * 检查无效推理
    */
   private checkInvalidInferences(
-    reasoningChain: ReasoningChain,
-  ): LogicValidationResult["issues"] {
-    const issues: LogicValidationResult["issues"] = [];
+    reasoningChain: ReasoningChain
+  ): LogicValidationResult['issues'] {
+    const issues: LogicValidationResult['issues'] = [];
 
     // 检查每一步推理是否有效
     for (const step of reasoningChain.steps) {
       if (step.facts.length === 0) {
         issues.push({
-          type: "invalid_inference",
+          type: 'invalid_inference',
           description: `步骤${step.order}没有相关事实支持`,
-          severity: "high",
+          severity: 'high',
         });
       }
 
       if (step.confidence < 0.5) {
         issues.push({
-          type: "invalid_inference",
+          type: 'invalid_inference',
           description: `步骤${step.order}的置信度过低`,
-          severity: "medium",
+          severity: 'medium',
         });
       }
     }
@@ -421,16 +421,16 @@ export class LegalReasoner {
    * 检查弱论点
    */
   private checkWeakArguments(
-    reasoningChain: ReasoningChain,
-  ): LogicValidationResult["issues"] {
-    const issues: LogicValidationResult["issues"] = [];
+    reasoningChain: ReasoningChain
+  ): LogicValidationResult['issues'] {
+    const issues: LogicValidationResult['issues'] = [];
 
     // 检查结论是否过于简短
     if (reasoningChain.conclusion.length < 50) {
       issues.push({
-        type: "weak_argument",
-        description: "结论过于简短，缺乏充分论证",
-        severity: "low",
+        type: 'weak_argument',
+        description: '结论过于简短，缺乏充分论证',
+        severity: 'low',
       });
     }
 
@@ -444,7 +444,7 @@ export class LegalReasoner {
     // 简化处理：提取常见关键词
     const keywords = text
       .split(/[\s，。；：，]+/)
-      .filter((word) => word.length > 1);
+      .filter(word => word.length > 1);
     return keywords;
   }
 
@@ -452,9 +452,9 @@ export class LegalReasoner {
    * 生成步骤ID
    */
   private generateStepId(): string {
-    return createHash("sha256")
+    return createHash('sha256')
       .update(`step-${Date.now()}-${Math.random()}`)
-      .digest("hex")
+      .digest('hex')
       .substring(0, 16);
   }
 
@@ -465,7 +465,7 @@ export class LegalReasoner {
     if (content.length <= maxLength) {
       return content;
     }
-    return content.substring(0, maxLength) + "...";
+    return content.substring(0, maxLength) + '...';
   }
 
   /**
@@ -473,7 +473,7 @@ export class LegalReasoner {
    */
   async batchBuildReasoningChains(
     cases: { facts: Fact[]; laws: LawArticle[] }[],
-    options: ReasoningOptions = {},
+    options: ReasoningOptions = {}
   ): Promise<ReasoningChain[]> {
     const results: ReasoningChain[] = [];
 
@@ -481,7 +481,7 @@ export class LegalReasoner {
       const chain = await this.buildReasoningChain(
         caseInfo.facts,
         caseInfo.laws,
-        options,
+        options
       );
       results.push(chain);
     }

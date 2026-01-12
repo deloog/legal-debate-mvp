@@ -12,7 +12,7 @@ import {
   type Agent,
   type AgentMetadata,
   type ValidationResult,
-} from "../../types/agent";
+} from '../../types/agent';
 
 // 重新导出类型供测试使用
 export {
@@ -42,10 +42,10 @@ export function createTestAgentError(
   type: AgentErrorType,
   agentName: string,
   retryable: boolean = false,
-  details?: Record<string, any>,
+  details?: Record<string, any>
 ): TestAgentError {
   return {
-    name: "AgentError", // 添加name属性
+    name: 'AgentError', // 添加name属性
     code,
     message,
     type,
@@ -72,7 +72,7 @@ export function createTestAgentResult(
     cached?: boolean;
     cacheKey?: string;
     error?: TestAgentError;
-  } = {},
+  } = {}
 ): AgentResult & { error?: TestAgentError } {
   return {
     success: options.success !== false,
@@ -97,21 +97,21 @@ export function validateTestAgentContext(context: AgentContext): {
 } {
   const errors: string[] = [];
 
-  if (!context.task || typeof context.task !== "string") {
-    errors.push("Task is required and must be a string");
+  if (!context.task || typeof context.task !== 'string') {
+    errors.push('Task is required and must be a string');
   }
 
-  if (!context.data || typeof context.data !== "object") {
-    errors.push("Data is required and must be an object");
+  if (!context.data || typeof context.data !== 'object') {
+    errors.push('Data is required and must be an object');
   }
 
   const validPriorities = Object.values(TaskPriority);
   if (!validPriorities.includes(context.priority)) {
-    errors.push("Priority must be a valid TaskPriority value");
+    errors.push('Priority must be a valid TaskPriority value');
   }
 
-  if (context.options && typeof context.options !== "object") {
-    errors.push("Options must be an object if provided");
+  if (context.options && typeof context.options !== 'object') {
+    errors.push('Options must be an object if provided');
   }
 
   return {
@@ -129,7 +129,7 @@ export function isValidTestAgentStatus(status: string): status is AgentStatus {
 }
 
 export function isValidTestTaskPriority(
-  priority: string,
+  priority: string
 ): priority is TaskPriority {
   return Object.values(TaskPriority).includes(priority as TaskPriority);
 }
@@ -137,7 +137,7 @@ export function isValidTestTaskPriority(
 // 创建模拟Agent类的工厂函数
 export function createMockAgentClass(
   className: string,
-  defaultMetadata: Partial<AgentMetadata> = {},
+  defaultMetadata: Partial<AgentMetadata> = {}
 ): new (...args: any[]) => Agent {
   return class MockAgent {
     public readonly name: string;
@@ -147,10 +147,10 @@ export function createMockAgentClass(
 
     constructor(...args: any[]) {
       // 第一个参数是agentName，其余是依赖项
-      const agentName = typeof args[0] === "string" ? args[0] : className;
+      const agentName = typeof args[0] === 'string' ? args[0] : className;
       this.name = agentName;
       this.type = defaultMetadata.type || AgentType.RESEARCHER;
-      this.version = defaultMetadata.version || "1.0.0";
+      this.version = defaultMetadata.version || '1.0.0';
       this.description =
         defaultMetadata.description || `Mock ${className} Agent`;
     }
@@ -177,7 +177,7 @@ export function createMockAgentClass(
       const executionTime = metadata.averageExecutionTime || 300;
 
       // 模拟执行时间
-      await new Promise((resolve) => setTimeout(resolve, executionTime));
+      await new Promise(resolve => setTimeout(resolve, executionTime));
 
       const success =
         metadata.successRate === undefined ||
@@ -220,12 +220,12 @@ export function createMockAgent(
   config: Partial<AgentMetadata> & {
     name: string;
     type: AgentType;
-  },
+  }
 ): Agent {
   const metadata: AgentMetadata = {
     name: config.name,
     type: config.type,
-    version: config.version || "1.0.0",
+    version: config.version || '1.0.0',
     description: config.description || `Mock agent ${config.name}`,
     capabilities: config.capabilities || [],
     supportedTasks: config.supportedTasks || [],
@@ -250,7 +250,7 @@ export function createMockAgent(
     async execute(context: AgentContext): Promise<AgentResult> {
       // 模拟执行
       const executionTime = metadata.averageExecutionTime || 100;
-      await new Promise((resolve) => setTimeout(resolve, executionTime));
+      await new Promise(resolve => setTimeout(resolve, executionTime));
 
       const success =
         metadata.successRate === undefined ||
@@ -302,109 +302,109 @@ export function createMockAgent(
 // 错误分类函数（用于错误处理测试）
 export function categorizeTestError(
   error: Error | TestAgentError | string,
-  agentName: string,
+  agentName: string
 ): TestAgentError {
-  if (typeof error === "string") {
+  if (typeof error === 'string') {
     return createTestAgentError(
-      "UNKNOWN_ERROR",
+      'UNKNOWN_ERROR',
       error,
       AgentErrorType.UNKNOWN_ERROR,
       agentName,
-      false,
+      false
     );
   }
 
-  if ("type" in error && error.type) {
+  if ('type' in error && error.type) {
     // 已经是TestAgentError
     return error as TestAgentError;
   }
 
   // 根据错误类型分类
-  if (error.name === "ValidationError") {
+  if (error.name === 'ValidationError') {
     return createTestAgentError(
-      "VALIDATION_FAILED",
+      'VALIDATION_FAILED',
       error.message,
       AgentErrorType.VALIDATION_ERROR,
       agentName,
       true,
-      { originalError: error.name },
+      { originalError: error.name }
     );
   }
 
-  if (error.name === "TimeoutError") {
+  if (error.name === 'TimeoutError') {
     return createTestAgentError(
-      "EXECUTION_TIMEOUT",
+      'EXECUTION_TIMEOUT',
       error.message,
       AgentErrorType.TIMEOUT_ERROR,
       agentName,
       true,
-      { originalError: error.name },
+      { originalError: error.name }
     );
   }
 
   // 优先检查具体的关键词，确保正确分类
-  if (error.message.includes("Network connection failed")) {
+  if (error.message.includes('Network connection failed')) {
     return createTestAgentError(
-      "NETWORK_FAILURE",
+      'NETWORK_FAILURE',
       error.message,
       AgentErrorType.NETWORK_ERROR,
       agentName,
       true,
-      { originalError: error.name },
+      { originalError: error.name }
     );
   }
 
-  if (error.message.includes("Database connection lost")) {
+  if (error.message.includes('Database connection lost')) {
     return createTestAgentError(
-      "DATABASE_ERROR",
+      'DATABASE_ERROR',
       error.message,
       AgentErrorType.DATABASE_ERROR,
       agentName,
       true,
-      { originalError: error.name },
+      { originalError: error.name }
     );
   }
 
-  if (error.message.includes("Permission denied")) {
+  if (error.message.includes('Permission denied')) {
     return createTestAgentError(
-      "PERMISSION_DENIED",
+      'PERMISSION_DENIED',
       error.message,
       AgentErrorType.PERMISSION_ERROR,
       agentName,
       false,
-      { originalError: error.name },
+      { originalError: error.name }
     );
   }
 
-  if (error.message.includes("Rate limit exceeded")) {
+  if (error.message.includes('Rate limit exceeded')) {
     return createTestAgentError(
-      "RATE_LIMIT_EXCEEDED",
+      'RATE_LIMIT_EXCEEDED',
       error.message,
       AgentErrorType.RATE_LIMIT_ERROR,
       agentName,
       true,
-      { originalError: error.name },
+      { originalError: error.name }
     );
   }
 
-  if (error.message.includes("Invalid input data")) {
+  if (error.message.includes('Invalid input data')) {
     return createTestAgentError(
-      "VALIDATION_FAILED",
+      'VALIDATION_FAILED',
       error.message,
       AgentErrorType.VALIDATION_ERROR,
       agentName,
       true,
-      { originalError: error.name },
+      { originalError: error.name }
     );
   }
 
   // 默认为执行错误
   return createTestAgentError(
-    "EXECUTION_FAILED",
+    'EXECUTION_FAILED',
     error.message,
     AgentErrorType.EXECUTION_ERROR,
     agentName,
     true,
-    { originalError: error.name, originalStack: error.stack },
+    { originalError: error.name, originalStack: error.stack }
   );
 }

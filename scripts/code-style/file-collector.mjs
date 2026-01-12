@@ -3,10 +3,10 @@
  * 负责递归收集需要检查的文件
  */
 
-import fs from "fs/promises";
-import fsSync from "fs";
-import path from "path";
-import { config } from "./config.mjs";
+import fs from 'fs/promises';
+import fsSync from 'fs';
+import path from 'path';
+import { config } from './config.mjs';
 
 /**
  * 异步递归获取所有目标文件
@@ -24,9 +24,7 @@ export async function getAllFiles(dir) {
 
         if (stat.isDirectory()) {
           // 跳过排除的目录
-          if (
-            !config.excludePatterns.some((pattern) => item.includes(pattern))
-          ) {
+          if (!config.excludePatterns.some(pattern => item.includes(pattern))) {
             await traverse(fullPath);
           }
         } else {
@@ -51,7 +49,7 @@ export async function getAllFiles(dir) {
  */
 export async function collectFiles() {
   const allFiles = [];
-  const currentScript = process.argv[1] || "scripts/check-code-style.mjs";
+  const currentScript = process.argv[1] || 'scripts/check-code-style.mjs';
 
   for (const dir of config.targetDirectories) {
     try {
@@ -71,7 +69,7 @@ export async function collectFiles() {
 
   // 排除当前脚本文件，避免自我检查
   const filteredFiles = allFiles.filter(
-    (file) => path.resolve(file) !== path.resolve(currentScript),
+    file => path.resolve(file) !== path.resolve(currentScript)
   );
 
   return filteredFiles;

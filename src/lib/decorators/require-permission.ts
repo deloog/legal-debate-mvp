@@ -3,13 +3,13 @@
  * 用于类和方法级别的权限控制
  */
 
-import type { NextRequest } from "next/server";
-import type { PermissionCheckOptions } from "../middleware/permission-check";
+import type { NextRequest } from 'next/server';
+import type { PermissionCheckOptions } from '../middleware/permission-check';
 import {
   checkPermissions,
   PermissionCheckMode,
-} from "../middleware/permission-check";
-import type { PermissionCheckResult } from "@/types/permission";
+} from '../middleware/permission-check';
+import type { PermissionCheckResult } from '@/types/permission';
 
 // =============================================================================
 // 权限装饰器选项
@@ -34,12 +34,12 @@ export interface RequirePermissionDecoratorOptions extends PermissionCheckOption
  */
 export function RequirePermission(
   permissions: string | string[],
-  options: RequirePermissionDecoratorOptions = {},
+  options: RequirePermissionDecoratorOptions = {}
 ): MethodDecorator {
   return function (
     target: unknown,
     propertyKey: string | symbol,
-    descriptor: PropertyDescriptor,
+    descriptor: PropertyDescriptor
   ): PropertyDescriptor {
     // 防御性编程：如果 descriptor 不存在，直接返回
     if (!descriptor || !descriptor.value) {
@@ -58,7 +58,7 @@ export function RequirePermission(
       const userId = getUserIdFromArgs(args);
 
       if (!request || !userId) {
-        throw createPermissionError("未认证", "请先登录", "user:login");
+        throw createPermissionError('未认证', '请先登录', 'user:login');
       }
 
       const permissionList = Array.isArray(permissions)
@@ -68,9 +68,9 @@ export function RequirePermission(
 
       if (!result.hasPermission) {
         throw createPermissionError(
-          result.reason ?? "权限不足",
-          "您没有执行此操作的权限",
-          result.requiredPermission ?? permissionList.join(","),
+          result.reason ?? '权限不足',
+          '您没有执行此操作的权限',
+          result.requiredPermission ?? permissionList.join(',')
         );
       }
 
@@ -89,7 +89,7 @@ export function RequirePermission(
  */
 export function RequireAnyPermission(
   permissions: string[],
-  options: RequirePermissionDecoratorOptions = {},
+  options: RequirePermissionDecoratorOptions = {}
 ): MethodDecorator {
   return RequirePermission(permissions, {
     ...options,
@@ -105,7 +105,7 @@ export function RequireAnyPermission(
  */
 export function RequireAllPermissions(
   permissions: string[],
-  options: RequirePermissionDecoratorOptions = {},
+  options: RequirePermissionDecoratorOptions = {}
 ): MethodDecorator {
   return RequirePermission(permissions, {
     ...options,
@@ -123,7 +123,7 @@ export function RequireAllPermissions(
  * @returns 用户ID或null
  */
 function getUserIdFromArgs(args: unknown[]): string | null {
-  if (args.length > 1 && typeof args[1] === "string") {
+  if (args.length > 1 && typeof args[1] === 'string') {
     return args[1] as string;
   }
 
@@ -131,7 +131,7 @@ function getUserIdFromArgs(args: unknown[]): string | null {
     const request = args[0] as NextRequest;
     // 防御性检查：确保 request 和 headers 存在
     if (request && request.headers) {
-      return request.headers.get("x-user-id");
+      return request.headers.get('x-user-id');
     }
   }
 
@@ -148,7 +148,7 @@ function getUserIdFromArgs(args: unknown[]): string | null {
 function createPermissionError(
   error: string,
   message: string,
-  requiredPermission?: string,
+  requiredPermission?: string
 ): Error {
   const permissionError = new Error(message) as Error & {
     statusCode: number;
@@ -157,7 +157,7 @@ function createPermissionError(
   };
 
   permissionError.statusCode = 403;
-  permissionError.code = "PERMISSION_DENIED";
+  permissionError.code = 'PERMISSION_DENIED';
   permissionError.requiredPermission = requiredPermission;
 
   return permissionError;

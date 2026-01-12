@@ -2,19 +2,19 @@
  * 密码重置 API
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { getPasswordResetService } from "@/lib/auth/password-reset-service";
+import { NextRequest, NextResponse } from 'next/server';
+import { getPasswordResetService } from '@/lib/auth/password-reset-service';
 import type {
   ResetPasswordRequest,
   ResetPasswordResponse,
-} from "@/types/password-reset";
+} from '@/types/password-reset';
 
 /**
  * POST /api/auth/reset-password
  * 使用验证码重置密码
  */
 export async function POST(
-  request: NextRequest,
+  request: NextRequest
 ): Promise<NextResponse<ResetPasswordResponse>> {
   try {
     // 解析请求体
@@ -33,11 +33,11 @@ export async function POST(
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
-    console.error("密码重置 API 错误:", error);
+    console.error('密码重置 API 错误:', error);
     const errorResponse: ResetPasswordResponse = {
       success: false,
-      message: "服务器内部错误，请稍后重试",
-      error: "SERVER_ERROR",
+      message: '服务器内部错误，请稍后重试',
+      error: 'SERVER_ERROR',
     };
     return NextResponse.json(errorResponse, { status: 500 });
   }
@@ -48,7 +48,7 @@ export async function POST(
  */
 export async function GET(): Promise<NextResponse> {
   return NextResponse.json(
-    { success: false, message: "方法不允许" },
-    { status: 405 },
+    { success: false, message: '方法不允许' },
+    { status: 405 }
   );
 }

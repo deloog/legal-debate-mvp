@@ -2,10 +2,10 @@
  * 企业认证服务
  */
 
-import { prisma } from "@/lib/db/prisma";
-import type { EnterpriseAccountPublic } from "@/types/enterprise";
-import { EnterpriseStatus, EnterpriseReviewAction } from "@/types/enterprise";
-import { UserRole } from "@/types/auth";
+import { prisma } from '@/lib/db/prisma';
+import type { EnterpriseAccountPublic } from '@/types/enterprise';
+import { EnterpriseStatus, EnterpriseReviewAction } from '@/types/enterprise';
+import { UserRole } from '@/types/auth';
 
 // =============================================================================
 // 企业注册服务
@@ -25,7 +25,7 @@ export async function createEnterpriseAccount(
     legalPerson: string;
     industryType: string;
     businessLicense?: string;
-  },
+  }
 ): Promise<EnterpriseAccountPublic> {
   // 检查统一社会信用代码是否已存在
   const existingAccount = await prisma.enterpriseAccount.findUnique({
@@ -33,7 +33,7 @@ export async function createEnterpriseAccount(
   });
 
   if (existingAccount) {
-    throw new Error("统一社会信用代码已被注册");
+    throw new Error('统一社会信用代码已被注册');
   }
 
   // 检查用户是否已有企业账号
@@ -42,7 +42,7 @@ export async function createEnterpriseAccount(
   });
 
   if (userEnterpriseAccount) {
-    throw new Error("该用户已注册企业账号");
+    throw new Error('该用户已注册企业账号');
   }
 
   // 创建企业账号
@@ -60,7 +60,7 @@ export async function createEnterpriseAccount(
   // 更新用户角色为企业用户
   await prisma.user.update({
     where: { id: userId },
-    data: { role: "ENTERPRISE" as UserRole },
+    data: { role: 'ENTERPRISE' as UserRole },
   });
 
   return toPublicEnterpriseAccount(enterpriseAccount);
@@ -76,7 +76,7 @@ export async function createEnterpriseAccount(
  * @returns 企业账号信息或null
  */
 export async function getEnterpriseAccountById(
-  enterpriseId: string,
+  enterpriseId: string
 ): Promise<EnterpriseAccountPublic | null> {
   const enterpriseAccount = await prisma.enterpriseAccount.findUnique({
     where: { id: enterpriseId },
@@ -95,7 +95,7 @@ export async function getEnterpriseAccountById(
  * @returns 企业账号信息或null
  */
 export async function getEnterpriseAccountByUserId(
-  userId: string,
+  userId: string
 ): Promise<EnterpriseAccountPublic | null> {
   const enterpriseAccount = await prisma.enterpriseAccount.findUnique({
     where: { userId },
@@ -120,7 +120,7 @@ export async function getEnterpriseAccountByUserId(
  */
 export async function updateBusinessLicense(
   userId: string,
-  businessLicense: string,
+  businessLicense: string
 ): Promise<EnterpriseAccountPublic> {
   const enterpriseAccount = await prisma.enterpriseAccount.update({
     where: { userId },
@@ -146,7 +146,7 @@ export async function reviewEnterpriseAccount(
   enterpriseId: string,
   reviewerId: string,
   action: EnterpriseReviewAction,
-  reviewNotes?: string,
+  reviewNotes?: string
 ): Promise<EnterpriseAccountPublic> {
   // 确定审核后的状态
   const newStatus = getReviewStatus(action);
@@ -185,7 +185,7 @@ export async function reviewEnterpriseAccount(
     if (enterprise) {
       await prisma.user.update({
         where: { id: enterprise.userId },
-        data: { role: "ENTERPRISE" as UserRole },
+        data: { role: 'ENTERPRISE' as UserRole },
       });
     }
   }

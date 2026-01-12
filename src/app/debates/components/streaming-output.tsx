@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useTypewriter } from "@/lib/hooks/use-debate-stream";
+import { useTypewriter } from '@/lib/hooks/use-debate-stream';
 
 export interface StreamingOutputProps {
   content: string;
   isStreaming: boolean;
-  side: "PLAINTIFF" | "DEFENDANT" | "NEUTRAL";
-  accentColor: "blue" | "red" | "gray";
+  side: 'PLAINTIFF' | 'DEFENDANT' | 'NEUTRAL';
+  accentColor: 'blue' | 'red' | 'gray';
 }
 
 /**
@@ -14,22 +14,22 @@ export interface StreamingOutputProps {
  */
 const colorStyles = {
   blue: {
-    border: "border-blue-500",
-    bg: "bg-blue-50 dark:bg-blue-950/20",
-    text: "text-blue-700 dark:text-blue-300",
-    indicator: "bg-blue-500",
+    border: 'border-blue-500',
+    bg: 'bg-blue-50 dark:bg-blue-950/20',
+    text: 'text-blue-700 dark:text-blue-300',
+    indicator: 'bg-blue-500',
   },
   red: {
-    border: "border-red-500",
-    bg: "bg-red-50 dark:bg-red-950/20",
-    text: "text-red-700 dark:text-red-300",
-    indicator: "bg-red-500",
+    border: 'border-red-500',
+    bg: 'bg-red-50 dark:bg-red-950/20',
+    text: 'text-red-700 dark:text-red-300',
+    indicator: 'bg-red-500',
   },
   gray: {
-    border: "border-gray-500",
-    bg: "bg-gray-50 dark:bg-gray-950/20",
-    text: "text-gray-700 dark:text-gray-300",
-    indicator: "bg-gray-500",
+    border: 'border-gray-500',
+    bg: 'bg-gray-50 dark:bg-gray-950/20',
+    text: 'text-gray-700 dark:text-gray-300',
+    indicator: 'bg-gray-500',
   },
 };
 
@@ -37,9 +37,9 @@ const colorStyles = {
  * 方向标签
  */
 const sideLabels: Record<string, string> = {
-  PLAINTIFF: "原告",
-  DEFENDANT: "被告",
-  NEUTRAL: "中立",
+  PLAINTIFF: '原告',
+  DEFENDANT: '被告',
+  NEUTRAL: '中立',
 };
 
 /**
@@ -68,41 +68,41 @@ export function StreamingOutput({
       className={`rounded-lg border-2 ${styles.border} ${styles.bg} p-4 shadow-lg`}
     >
       {/* 头部：方向和状态 */}
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+      <div className='mb-3 flex items-center justify-between'>
+        <div className='flex items-center gap-2'>
+          <span className='text-sm font-medium text-zinc-700 dark:text-zinc-300'>
             {sideLabels[side]}
           </span>
           {isStreaming && (
-            <div className="flex items-center gap-1">
+            <div className='flex items-center gap-1'>
               <div
                 className={`h-2 w-2 animate-pulse rounded-full ${styles.indicator}`}
               />
-              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+              <span className='text-xs text-zinc-500 dark:text-zinc-400'>
                 生成中...
               </span>
             </div>
           )}
         </div>
         {isComplete && !isStreaming && (
-          <span className="rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+          <span className='rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400'>
             已完成
           </span>
         )}
       </div>
 
       {/* 流式输出内容 */}
-      <div className="min-h-15">
+      <div className='min-h-15'>
         {displayedText ? (
-          <p className="text-sm leading-relaxed text-zinc-800 dark:text-zinc-200">
+          <p className='text-sm leading-relaxed text-zinc-800 dark:text-zinc-200'>
             {displayedText}
             {isStreaming && !isComplete && (
-              <span className="inline-block w-2 h-4 ml-1 bg-zinc-500 animate-pulse" />
+              <span className='inline-block w-2 h-4 ml-1 bg-zinc-500 animate-pulse' />
             )}
           </p>
         ) : (
-          <div className="flex items-center gap-2 text-sm text-zinc-400">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600" />
+          <div className='flex items-center gap-2 text-sm text-zinc-400'>
+            <div className='h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600' />
             <span>AI正在生成论点...</span>
           </div>
         )}
@@ -110,8 +110,8 @@ export function StreamingOutput({
 
       {/* 进度条 */}
       {isStreaming && (
-        <div className="mt-3">
-          <div className="h-1 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
+        <div className='mt-3'>
+          <div className='h-1 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700'>
             <div
               className={`h-full ${styles.indicator} transition-all duration-300`}
               style={{

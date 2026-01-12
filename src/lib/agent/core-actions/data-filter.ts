@@ -3,7 +3,7 @@
  * 包含：filter_data
  */
 
-import type { FilterDataResult } from "./types";
+import type { FilterDataResult } from './types';
 
 /**
  * 14. filter_data - 数据过滤
@@ -12,7 +12,7 @@ import type { FilterDataResult } from "./types";
 export async function filter_data<T>(
   data: T[],
   filterFn: (item: T) => boolean,
-  options?: { maxResults?: number; offset?: number },
+  options?: { maxResults?: number; offset?: number }
 ): Promise<FilterDataResult<T>> {
   const filtered = data.filter(filterFn);
   const { maxResults, offset = 0 } = options || {};

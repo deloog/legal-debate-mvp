@@ -1,6 +1,6 @@
 // 工作流编排器
 
-import type { SubTask } from "./types";
+import type { SubTask } from './types';
 import {
   type Workflow,
   type TaskDependency,
@@ -10,7 +10,7 @@ import {
   type OrchestrationConfig,
   type PlanningError,
   PlanningErrorType,
-} from "./types";
+} from './types';
 
 // =============================================================================
 // WorkflowOrchestrator类
@@ -25,7 +25,7 @@ export class WorkflowOrchestrator {
       defaultExecutionMode: ExecutionMode.SEQUENTIAL,
       maxConcurrentTasks: 3,
       enableOptimization: true,
-    },
+    }
   ) {
     this.config = config;
   }
@@ -33,7 +33,7 @@ export class WorkflowOrchestrator {
   // 主编排方法
   public async orchestrate(
     tasks: SubTask[],
-    mode?: ExecutionMode,
+    mode?: ExecutionMode
   ): Promise<OrchestrationResult> {
     try {
       this.workflowCounter++;
@@ -47,23 +47,23 @@ export class WorkflowOrchestrator {
       // 创建工作流
       const workflow = this.createWorkflow(
         `workflow-${this.workflowCounter}`,
-        "自动化生成的工作流",
+        '自动化生成的工作流',
         tasks,
         executionMode,
-        dependencies,
+        dependencies
       );
 
       // 生成执行计划
       const executionPlan = this.generateExecutionPlan(
         tasks,
         executionMode,
-        dependencies,
+        dependencies
       );
 
       // 估算执行时长
       const estimatedDuration = this.estimateDuration(
         executionPlan,
-        executionMode,
+        executionMode
       );
 
       return {
@@ -76,8 +76,8 @@ export class WorkflowOrchestrator {
         PlanningErrorType.WORKFLOW_ORCHESTRATION_FAILED,
         error instanceof Error
           ? error.message
-          : "Workflow orchestration failed",
-        { originalError: error },
+          : 'Workflow orchestration failed',
+        { originalError: error }
       );
     }
   }
@@ -85,8 +85,8 @@ export class WorkflowOrchestrator {
   // 构建依赖关系
   private buildDependencies(tasks: SubTask[]): TaskDependency[] {
     return tasks
-      .filter((task) => task.dependencies && task.dependencies.length > 0)
-      .map((task) => ({
+      .filter(task => task.dependencies && task.dependencies.length > 0)
+      .map(task => ({
         taskId: task.id,
         dependsOn: task.dependencies || [],
         type: this.determineDependencyType(task),
@@ -94,12 +94,12 @@ export class WorkflowOrchestrator {
   }
 
   // 确定依赖类型
-  private determineDependencyType(task: SubTask): "strict" | "weak" {
+  private determineDependencyType(task: SubTask): 'strict' | 'weak' {
     // 如果任务是审查类任务，使用弱依赖
-    if (task.id.includes("review")) {
-      return "weak";
+    if (task.id.includes('review')) {
+      return 'weak';
     }
-    return "strict";
+    return 'strict';
   }
 
   // 创建工作流
@@ -108,11 +108,11 @@ export class WorkflowOrchestrator {
     name: string,
     tasks: SubTask[],
     executionMode: ExecutionMode,
-    dependencies: TaskDependency[],
+    dependencies: TaskDependency[]
   ): Workflow {
     const estimatedTotalTime = tasks.reduce(
       (sum, task) => sum + (task.estimatedTime || 0),
-      0,
+      0
     );
 
     return {
@@ -129,7 +129,7 @@ export class WorkflowOrchestrator {
   private generateExecutionPlan(
     tasks: SubTask[],
     executionMode: ExecutionMode,
-    dependencies: TaskDependency[],
+    dependencies: TaskDependency[]
   ): ExecutionStep[] {
     switch (executionMode) {
       case ExecutionMode.SEQUENTIAL:
@@ -153,7 +153,7 @@ export class WorkflowOrchestrator {
         step: stepNumber++,
         taskId: task.id,
         taskName: task.name,
-        mode: "execute",
+        mode: 'execute',
         dependencies: task.dependencies || [],
         estimatedTime: task.estimatedTime || 0,
       });
@@ -165,16 +165,16 @@ export class WorkflowOrchestrator {
   // 生成并行执行计划
   private generateParallelPlan(
     tasks: SubTask[],
-    dependencies: TaskDependency[],
+    dependencies: TaskDependency[]
   ): ExecutionStep[] {
     const steps: ExecutionStep[] = [];
     const taskMap = new Map<string, SubTask>();
-    tasks.forEach((task) => taskMap.set(task.id, task));
+    tasks.forEach(task => taskMap.set(task.id, task));
 
     // 构建依赖图
     const dependents = new Map<string, string[]>();
-    dependencies.forEach((dep) => {
-      dep.dependsOn.forEach((depId) => {
+    dependencies.forEach(dep => {
+      dep.dependsOn.forEach(depId => {
         const list = dependents.get(depId) || [];
         list.push(dep.taskId);
         dependents.set(depId, list);
@@ -183,7 +183,7 @@ export class WorkflowOrchestrator {
 
     // 找到无依赖的任务（起点）
     const startTasks = tasks.filter(
-      (task) => !task.dependencies || task.dependencies.length === 0,
+      task => !task.dependencies || task.dependencies.length === 0
     );
 
     let stepNumber = 1;
@@ -195,7 +195,7 @@ export class WorkflowOrchestrator {
           step: stepNumber,
           taskId: task.id,
           taskName: task.name,
-          mode: startTasks.length > 1 ? "parallel" : "execute",
+          mode: startTasks.length > 1 ? 'parallel' : 'execute',
           dependencies: [],
           estimatedTime: task.estimatedTime || 0,
         });
@@ -204,14 +204,14 @@ export class WorkflowOrchestrator {
     }
 
     // 处理有依赖的任务
-    const processedTasks = new Set<string>(startTasks.map((t) => t.id));
-    let remainingTasks = tasks.filter((t) => !processedTasks.has(t.id));
+    const processedTasks = new Set<string>(startTasks.map(t => t.id));
+    let remainingTasks = tasks.filter(t => !processedTasks.has(t.id));
 
     while (remainingTasks.length > 0) {
       // 找到当前可以执行的任务（所有依赖都已完成）
-      const readyTasks = remainingTasks.filter((task) => {
+      const readyTasks = remainingTasks.filter(task => {
         if (!task.dependencies) return true;
-        return task.dependencies.every((depId) => processedTasks.has(depId));
+        return task.dependencies.every(depId => processedTasks.has(depId));
       });
 
       if (readyTasks.length === 0) {
@@ -221,12 +221,12 @@ export class WorkflowOrchestrator {
           step: stepNumber++,
           taskId: nextTask.id,
           taskName: nextTask.name,
-          mode: "execute",
+          mode: 'execute',
           dependencies: nextTask.dependencies || [],
           estimatedTime: nextTask.estimatedTime || 0,
         });
         processedTasks.add(nextTask.id);
-        remainingTasks = remainingTasks.filter((t) => t.id !== nextTask.id);
+        remainingTasks = remainingTasks.filter(t => t.id !== nextTask.id);
         continue;
       }
 
@@ -236,7 +236,7 @@ export class WorkflowOrchestrator {
           step: stepNumber,
           taskId: task.id,
           taskName: task.name,
-          mode: readyTasks.length > 1 ? "parallel" : "execute",
+          mode: readyTasks.length > 1 ? 'parallel' : 'execute',
           dependencies: task.dependencies || [],
           estimatedTime: task.estimatedTime || 0,
         });
@@ -244,8 +244,8 @@ export class WorkflowOrchestrator {
       stepNumber++;
 
       // 标记为已处理
-      readyTasks.forEach((t) => processedTasks.add(t.id));
-      remainingTasks = remainingTasks.filter((t) => !processedTasks.has(t.id));
+      readyTasks.forEach(t => processedTasks.add(t.id));
+      remainingTasks = remainingTasks.filter(t => !processedTasks.has(t.id));
     }
 
     return steps;
@@ -256,7 +256,7 @@ export class WorkflowOrchestrator {
     // 混合模式：允许某些任务并行，某些必须顺序
     const steps: ExecutionStep[] = [];
     const taskMap = new Map<string, SubTask>();
-    tasks.forEach((task) => taskMap.set(task.id, task));
+    tasks.forEach(task => taskMap.set(task.id, task));
 
     let stepNumber = 1;
     const processedTasks = new Set<string>();
@@ -283,7 +283,7 @@ export class WorkflowOrchestrator {
           step: stepNumber++,
           taskId: task.id,
           taskName: task.name,
-          mode: "execute",
+          mode: 'execute',
           dependencies: task.dependencies || [],
           estimatedTime: task.estimatedTime || 0,
         });
@@ -294,7 +294,7 @@ export class WorkflowOrchestrator {
             step: stepNumber,
             taskId: task.id,
             taskName: task.name,
-            mode: "parallel",
+            mode: 'parallel',
             dependencies: task.dependencies || [],
             estimatedTime: task.estimatedTime || 0,
           });
@@ -302,7 +302,7 @@ export class WorkflowOrchestrator {
         stepNumber++;
       }
 
-      group.forEach((t) => processedTasks.add(t.id));
+      group.forEach(t => processedTasks.add(t.id));
     }
 
     return steps;
@@ -311,21 +311,21 @@ export class WorkflowOrchestrator {
   // 识别可并行执行的任务组
   private identifyParallelGroups(sortedTasks: SubTask[]): SubTask[][] {
     const groups: SubTask[][] = [];
-    const taskSet = new Set<string>(sortedTasks.map((t) => t.id));
+    const taskSet = new Set<string>(sortedTasks.map(t => t.id));
     const processed = new Set<string>();
 
     while (processed.size < taskSet.size) {
       // 找到当前可执行的任务（保持排序后的顺序）
       const readyTasks = sortedTasks.filter(
-        (task) =>
+        task =>
           !processed.has(task.id) &&
           (!task.dependencies ||
-            task.dependencies.every((dep) => processed.has(dep))),
+            task.dependencies.every(dep => processed.has(dep)))
       );
 
       if (readyTasks.length === 0) {
         // 循环依赖，按排序顺序添加
-        const remaining = sortedTasks.filter((t) => !processed.has(t.id));
+        const remaining = sortedTasks.filter(t => !processed.has(t.id));
         groups.push([remaining[0]]);
         processed.add(remaining[0].id);
       } else {
@@ -333,7 +333,7 @@ export class WorkflowOrchestrator {
         const maxTasks = this.config.maxConcurrentTasks;
         const batch = readyTasks.slice(0, maxTasks);
         groups.push(batch);
-        batch.forEach((t) => processed.add(t.id));
+        batch.forEach(t => processed.add(t.id));
       }
     }
 
@@ -343,7 +343,7 @@ export class WorkflowOrchestrator {
   // 估算执行时长
   private estimateDuration(
     plan: ExecutionStep[],
-    executionMode: ExecutionMode,
+    executionMode: ExecutionMode
   ): number {
     if (executionMode === ExecutionMode.SEQUENTIAL) {
       // 顺序执行：总时间
@@ -352,12 +352,12 @@ export class WorkflowOrchestrator {
 
     if (executionMode === ExecutionMode.PARALLEL) {
       // 完全并行：最长路径时间
-      return Math.max(...plan.map((step) => step.estimatedTime));
+      return Math.max(...plan.map(step => step.estimatedTime));
     }
 
     // 混合模式：按step分组，每组取最大时间
     const stepMap = new Map<number, ExecutionStep[]>();
-    plan.forEach((step) => {
+    plan.forEach(step => {
       const list = stepMap.get(step.step) || [];
       list.push(step);
       stepMap.set(step.step, list);
@@ -368,7 +368,7 @@ export class WorkflowOrchestrator {
 
     for (const stepKey of stepKeys) {
       const steps = stepMap.get(stepKey)!;
-      totalTime += Math.max(...steps.map((s) => s.estimatedTime));
+      totalTime += Math.max(...steps.map(s => s.estimatedTime));
     }
 
     return totalTime;
@@ -378,7 +378,7 @@ export class WorkflowOrchestrator {
   private createError(
     type: PlanningErrorType,
     message: string,
-    details?: unknown,
+    details?: unknown
   ): PlanningError {
     return {
       type,

@@ -1,11 +1,11 @@
 // DocumentGenerator单元测试
 
-import { DocumentGenerator } from "@/lib/agent/generation-agent/document-generator";
-import { CaseInfo } from "@/types/debate";
-import type { LawArticle } from "@prisma/client";
-import type { DocumentGenerationConfig } from "@/lib/agent/generation-agent/types";
+import { DocumentGenerator } from '@/lib/agent/generation-agent/document-generator';
+import { CaseInfo } from '@/types/debate';
+import type { LawArticle } from '@prisma/client';
+import type { DocumentGenerationConfig } from '@/lib/agent/generation-agent/types';
 
-describe("DocumentGenerator", () => {
+describe('DocumentGenerator', () => {
   let generator: DocumentGenerator;
   let mockCaseInfo: CaseInfo;
   let mockLawArticles: LawArticle[];
@@ -13,34 +13,34 @@ describe("DocumentGenerator", () => {
   beforeEach(() => {
     generator = new DocumentGenerator();
     mockCaseInfo = {
-      title: "合同纠纷案件",
-      description: "关于合同履行争议的案件",
+      title: '合同纠纷案件',
+      description: '关于合同履行争议的案件',
     };
     mockLawArticles = [
       {
-        id: "law-1",
-        lawName: "民法典",
-        articleNumber: "第一百一十九条",
-        fullText: "依法成立的合同，对当事人具有法律约束力。",
-        lawType: "LAW",
-        category: "COMMERCIAL",
-        subCategory: "合同",
-        tags: ["合同", "民法典"],
-        keywords: ["合同", "法律约束力"],
-        version: "1.0",
+        id: 'law-1',
+        lawName: '民法典',
+        articleNumber: '第一百一十九条',
+        fullText: '依法成立的合同，对当事人具有法律约束力。',
+        lawType: 'LAW',
+        category: 'COMMERCIAL',
+        subCategory: '合同',
+        tags: ['合同', '民法典'],
+        keywords: ['合同', '法律约束力'],
+        version: '1.0',
         effectiveDate: new Date(),
         expiryDate: null,
-        status: "VALID",
+        status: 'VALID',
         amendmentHistory: null,
         parentId: null,
         chapterNumber: null,
         sectionNumber: null,
         level: 0,
-        issuingAuthority: "全国人民代表大会",
+        issuingAuthority: '全国人民代表大会',
         jurisdiction: null,
         relatedArticles: [],
         legalBasis: null,
-        searchableText: "依法成立的合同，对当事人具有法律约束力。",
+        searchableText: '依法成立的合同，对当事人具有法律约束力。',
         viewCount: 0,
         referenceCount: 0,
         createdAt: new Date(),
@@ -49,48 +49,48 @@ describe("DocumentGenerator", () => {
     ];
   });
 
-  describe("构造函数", () => {
-    it("应该使用默认配置创建实例", () => {
+  describe('构造函数', () => {
+    it('应该使用默认配置创建实例', () => {
       const defaultGenerator = new DocumentGenerator();
       expect(defaultGenerator).toBeDefined();
     });
 
-    it("应该使用自定义配置创建实例", () => {
+    it('应该使用自定义配置创建实例', () => {
       const customGenerator = new DocumentGenerator({
-        format: "general",
+        format: 'general',
         includeHeader: false,
         includeFooter: false,
-        dateFormat: "en-US",
+        dateFormat: 'en-US',
       });
       expect(customGenerator).toBeDefined();
     });
   });
 
-  describe("generateComplaint", () => {
-    it("应该生成有效的起诉状", () => {
+  describe('generateComplaint', () => {
+    it('应该生成有效的起诉状', () => {
       const result = generator.generateComplaint(mockCaseInfo, mockLawArticles);
 
       expect(result).toBeDefined();
       expect(result.content).toBeDefined();
-      expect(result.type).toBe("complaint");
+      expect(result.type).toBe('complaint');
       expect(result.qualityScore).toBeGreaterThanOrEqual(0);
       expect(result.qualityScore).toBeLessThanOrEqual(1);
     });
 
-    it("起诉状应该包含案件描述", () => {
+    it('起诉状应该包含案件描述', () => {
       const result = generator.generateComplaint(mockCaseInfo, mockLawArticles);
 
       expect(result.content).toContain(mockCaseInfo.description);
     });
 
-    it("应该支持自定义选项", () => {
+    it('应该支持自定义选项', () => {
       const options: Partial<DocumentGenerationConfig> = {
-        format: "general",
+        format: 'general',
       };
       const result = generator.generateComplaint(
         mockCaseInfo,
         mockLawArticles,
-        options,
+        options
       );
 
       expect(result).toBeDefined();
@@ -98,56 +98,56 @@ describe("DocumentGenerator", () => {
     });
   });
 
-  describe("generateAnswer", () => {
-    it("应该生成有效的答辩状", () => {
+  describe('generateAnswer', () => {
+    it('应该生成有效的答辩状', () => {
       const result = generator.generateAnswer(mockCaseInfo, mockLawArticles);
 
       expect(result).toBeDefined();
       expect(result.content).toBeDefined();
-      expect(result.type).toBe("answer");
+      expect(result.type).toBe('answer');
       expect(result.qualityScore).toBeGreaterThanOrEqual(0);
       expect(result.qualityScore).toBeLessThanOrEqual(1);
     });
 
-    it("应该支持自定义选项", () => {
+    it('应该支持自定义选项', () => {
       const options: Partial<DocumentGenerationConfig> = {
-        format: "general",
+        format: 'general',
       };
       const result = generator.generateAnswer(
         mockCaseInfo,
         mockLawArticles,
-        options,
+        options
       );
 
       expect(result).toBeDefined();
     });
   });
 
-  describe("generateEvidence", () => {
-    it("应该生成有效的证据清单", () => {
+  describe('generateEvidence', () => {
+    it('应该生成有效的证据清单', () => {
       const mockEvidence = [
-        { name: "合同原件", description: "双方签订的书面合同" },
-        { name: "付款凭证", description: "银行转账记录" },
+        { name: '合同原件', description: '双方签订的书面合同' },
+        { name: '付款凭证', description: '银行转账记录' },
       ];
       const result = generator.generateEvidence(mockCaseInfo, mockEvidence);
 
       expect(result).toBeDefined();
       expect(result.content).toBeDefined();
-      expect(result.type).toBe("evidence");
+      expect(result.type).toBe('evidence');
     });
 
-    it("应该列出所有证据", () => {
+    it('应该列出所有证据', () => {
       const mockEvidence = [
-        { name: "证据1", description: "描述1" },
-        { name: "证据2", description: "描述2" },
+        { name: '证据1', description: '描述1' },
+        { name: '证据2', description: '描述2' },
       ];
       const result = generator.generateEvidence(mockCaseInfo, mockEvidence);
 
-      expect(result.content).toContain("证据1");
-      expect(result.content).toContain("证据2");
+      expect(result.content).toContain('证据1');
+      expect(result.content).toContain('证据2');
     });
 
-    it("应该处理空证据列表", () => {
+    it('应该处理空证据列表', () => {
       const result = generator.generateEvidence(mockCaseInfo, []);
 
       expect(result).toBeDefined();
@@ -155,60 +155,60 @@ describe("DocumentGenerator", () => {
     });
   });
 
-  describe("generateAppeal", () => {
-    it("应该生成有效的上诉状", () => {
+  describe('generateAppeal', () => {
+    it('应该生成有效的上诉状', () => {
       const result = generator.generateAppeal(mockCaseInfo, mockLawArticles);
 
       expect(result).toBeDefined();
       expect(result.content).toBeDefined();
-      expect(result.type).toBe("appeal");
+      expect(result.type).toBe('appeal');
     });
 
-    it("上诉状应该包含上诉理由", () => {
+    it('上诉状应该包含上诉理由', () => {
       const result = generator.generateAppeal(mockCaseInfo, mockLawArticles);
 
       expect(result.content).toBeDefined();
       expect(result.content.length).toBeGreaterThan(0);
     });
 
-    it("应该支持自定义选项", () => {
+    it('应该支持自定义选项', () => {
       const options: Partial<DocumentGenerationConfig> = {
-        format: "general",
+        format: 'general',
       };
       const result = generator.generateAppeal(
         mockCaseInfo,
         mockLawArticles,
-        options,
+        options
       );
 
       expect(result).toBeDefined();
     });
   });
 
-  describe("updateConfig", () => {
-    it("应该能够更新配置", () => {
-      generator.updateConfig({ format: "general" });
+  describe('updateConfig', () => {
+    it('应该能够更新配置', () => {
+      generator.updateConfig({ format: 'general' });
       const config = generator.getConfig();
 
-      expect(config.format).toBe("general");
+      expect(config.format).toBe('general');
     });
 
-    it("应该能够更新多个配置项", () => {
+    it('应该能够更新多个配置项', () => {
       generator.updateConfig({
-        format: "general",
+        format: 'general',
         includeHeader: false,
         includeFooter: false,
       });
       const config = generator.getConfig();
 
-      expect(config.format).toBe("general");
+      expect(config.format).toBe('general');
       expect(config.includeHeader).toBe(false);
       expect(config.includeFooter).toBe(false);
     });
   });
 
-  describe("getConfig", () => {
-    it("应该返回配置的副本", () => {
+  describe('getConfig', () => {
+    it('应该返回配置的副本', () => {
       const config1 = generator.getConfig();
       const config2 = generator.getConfig();
 
@@ -217,22 +217,22 @@ describe("DocumentGenerator", () => {
     });
   });
 
-  describe("错误处理", () => {
-    it("应该处理缺失的案例信息", () => {
+  describe('错误处理', () => {
+    it('应该处理缺失的案例信息', () => {
       const emptyCaseInfo: CaseInfo = {
-        title: "",
-        description: "",
+        title: '',
+        description: '',
       };
 
       const result = generator.generateComplaint(
         emptyCaseInfo,
-        mockLawArticles,
+        mockLawArticles
       );
 
       expect(result).toBeDefined();
     });
 
-    it("应该处理缺失的法律条文", () => {
+    it('应该处理缺失的法律条文', () => {
       const result = generator.generateComplaint(mockCaseInfo, []);
 
       expect(result).toBeDefined();

@@ -14,9 +14,9 @@ import type {
   ReviewIssue,
   ReviewerConfig,
   Correction,
-} from "../core/types";
-import type { AIRequestConfig, AIResponse } from "../../../../types/ai-service";
-import { logger } from "../../../agent/security/logger";
+} from '../core/types';
+import type { AIRequestConfig, AIResponse } from '../../../../types/ai-service';
+import { logger } from '../../../agent/security/logger';
 
 interface AIReviewResponse {
   issues: AIReviewIssue[];
@@ -24,7 +24,7 @@ interface AIReviewResponse {
 }
 
 interface AIReviewIssue {
-  severity: "ERROR" | "WARNING" | "INFO";
+  severity: 'ERROR' | 'WARNING' | 'INFO';
   category: string;
   message: string;
   suggestion?: string;
@@ -44,7 +44,7 @@ interface AIServiceLike {
  * AI审查器
  */
 export class AIReviewer {
-  public readonly name = "AIReviewer";
+  public readonly name = 'AIReviewer';
   private aiService: AIServiceLike | null = null;
   private initialized = false;
 
@@ -54,7 +54,7 @@ export class AIReviewer {
   public async initialize(aiService: AIServiceLike): Promise<void> {
     this.aiService = aiService;
     this.initialized = true;
-    logger.info("AIReviewer初始化完成");
+    logger.info('AIReviewer初始化完成');
   }
 
   /**
@@ -63,25 +63,25 @@ export class AIReviewer {
   public async review(
     data: ExtractedData,
     fullText: string,
-    config?: Partial<ReviewerConfig>,
+    config?: Partial<ReviewerConfig>
   ): Promise<ReviewResult> {
-    logger.debug("AIReviewer开始审查");
+    logger.debug('AIReviewer开始审查');
 
     const issues: ReviewIssue[] = [];
     const corrections: Correction[] = [];
 
     // 如果AI服务未初始化，跳过AI审查
     if (!this.initialized || !this.aiService) {
-      logger.warn("AI服务未初始化，跳过AI审查");
+      logger.warn('AI服务未初始化，跳过AI审查');
       return {
         passed: true,
         score: 1.0,
         issues: [
           {
-            severity: "WARNING",
-            category: "AI",
-            message: "AI服务未初始化，跳过AI审查",
-            suggestion: "检查AI服务配置",
+            severity: 'WARNING',
+            category: 'AI',
+            message: 'AI服务未初始化，跳过AI审查',
+            suggestion: '检查AI服务配置',
           },
         ],
         corrections: [],
@@ -105,10 +105,10 @@ export class AIReviewer {
 
       // AI审查失败不阻断流程，记录问题
       issues.push({
-        severity: "WARNING",
-        category: "AI",
+        severity: 'WARNING',
+        category: 'AI',
         message: `AI审查失败：${errorMessage}`,
-        suggestion: "后续手动审查",
+        suggestion: '后续手动审查',
       });
     }
 
@@ -117,7 +117,7 @@ export class AIReviewer {
     const threshold = config?.threshold ?? 0.7;
     const passed = score >= threshold;
 
-    logger.debug("AIReviewer审查完成", {
+    logger.debug('AIReviewer审查完成', {
       score,
       passed,
       issues: issues.length,
@@ -186,20 +186,20 @@ ${dataSummary}
    */
   private async callAIReview(prompt: string): Promise<AIReviewResponse> {
     if (!this.aiService) {
-      throw new Error("AI service not initialized");
+      throw new Error('AI service not initialized');
     }
 
     try {
       const response = await this.aiService.chatCompletion({
-        model: "zhipu-pro",
+        model: 'zhipu-pro',
         messages: [
           {
-            role: "system",
+            role: 'system',
             content:
-              "你是一个专业的法律文档审查专家，负责审查文档分析结果的准确性。",
+              '你是一个专业的法律文档审查专家，负责审查文档分析结果的准确性。',
           },
           {
-            role: "user",
+            role: 'user',
             content: prompt,
           },
         ],
@@ -208,7 +208,7 @@ ${dataSummary}
         timeout: 10000,
       });
 
-      const content = response.choices[0]?.message?.content || "";
+      const content = response.choices[0]?.message?.content || '';
       return this.parseJSONResponse(content);
     } catch (error) {
       const errorMessage =
@@ -232,7 +232,7 @@ ${dataSummary}
       // 如果没有找到JSON，返回空结果
       return { issues: [], corrections: [] };
     } catch {
-      logger.warn("解析AI响应JSON失败", { content });
+      logger.warn('解析AI响应JSON失败', { content });
       return { issues: [], corrections: [] };
     }
   }
@@ -243,7 +243,7 @@ ${dataSummary}
   private parseAIResponse(
     aiResult: AIReviewResponse,
     issues: ReviewIssue[],
-    corrections: Correction[],
+    corrections: Correction[]
   ): void {
     // 解析问题
     if (aiResult.issues && Array.isArray(aiResult.issues)) {
@@ -267,11 +267,11 @@ ${dataSummary}
     if (aiResult.corrections && Array.isArray(aiResult.corrections)) {
       aiResult.corrections.forEach((correction: AIReviewCorrection) => {
         const correctionType = correction.type as
-          | "ADD_CLAIM"
-          | "ADD_PARTY"
-          | "FIX_AMOUNT"
-          | "FIX_ROLE"
-          | "OTHER";
+          | 'ADD_CLAIM'
+          | 'ADD_PARTY'
+          | 'FIX_AMOUNT'
+          | 'FIX_ROLE'
+          | 'OTHER';
         if (
           this.isValidCorrectionType(correction.type) &&
           correction.description
@@ -279,7 +279,7 @@ ${dataSummary}
           corrections.push({
             type: correctionType,
             description: correction.description,
-            rule: correction.rule || "AI_RECOMMENDATION",
+            rule: correction.rule || 'AI_RECOMMENDATION',
           });
         }
       });
@@ -290,7 +290,7 @@ ${dataSummary}
    * 验证严重性级别
    */
   private isValidSeverity(severity: string): boolean {
-    return ["ERROR", "WARNING", "INFO"].includes(severity);
+    return ['ERROR', 'WARNING', 'INFO'].includes(severity);
   }
 
   /**
@@ -298,11 +298,11 @@ ${dataSummary}
    */
   private isValidCorrectionType(type: string): boolean {
     return [
-      "ADD_CLAIM",
-      "ADD_PARTY",
-      "FIX_AMOUNT",
-      "FIX_ROLE",
-      "OTHER",
+      'ADD_CLAIM',
+      'ADD_PARTY',
+      'FIX_AMOUNT',
+      'FIX_ROLE',
+      'OTHER',
     ].includes(type);
   }
 
@@ -314,8 +314,8 @@ ${dataSummary}
       return 1.0;
     }
 
-    const errorCount = issues.filter((i) => i.severity === "ERROR").length;
-    const warningCount = issues.filter((i) => i.severity === "WARNING").length;
+    const errorCount = issues.filter(i => i.severity === 'ERROR').length;
+    const warningCount = issues.filter(i => i.severity === 'WARNING').length;
 
     // AI审查的权重更严格：ERROR=4, WARNING=2
     const penalty = errorCount * 4 + warningCount * 2;

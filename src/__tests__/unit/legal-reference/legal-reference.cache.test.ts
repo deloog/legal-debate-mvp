@@ -1,5 +1,5 @@
-import { PrismaClient, LegalReferenceStatus } from "@prisma/client";
-import { beforeEach, describe, expect, it, afterEach } from "@jest/globals";
+import { PrismaClient, LegalReferenceStatus } from '@prisma/client';
+import { beforeEach, describe, expect, it, afterEach } from '@jest/globals';
 
 const prisma = new PrismaClient({
   datasources: {
@@ -9,7 +9,7 @@ const prisma = new PrismaClient({
   },
 });
 
-describe("Legal Reference Cache Management", () => {
+describe('Legal Reference Cache Management', () => {
   let testRefId: string;
   let testUserId: string;
 
@@ -17,10 +17,10 @@ describe("Legal Reference Cache Management", () => {
     // 创建测试用户
     const user = await prisma.user.create({
       data: {
-        email: "test-cache@example.com",
-        username: "testcache",
-        name: "Cache Test User",
-        role: "USER",
+        email: 'test-cache@example.com',
+        username: 'testcache',
+        name: 'Cache Test User',
+        role: 'USER',
       },
     });
     testUserId = user.id;
@@ -29,7 +29,7 @@ describe("Legal Reference Cache Management", () => {
     await prisma.legalReference.deleteMany({
       where: {
         source: {
-          contains: "cache-test-",
+          contains: 'cache-test-',
         },
       },
     });
@@ -43,7 +43,7 @@ describe("Legal Reference Cache Management", () => {
           id: testRefId,
         },
       });
-      testRefId = "";
+      testRefId = '';
     }
 
     if (testUserId) {
@@ -52,21 +52,21 @@ describe("Legal Reference Cache Management", () => {
           id: testUserId,
         },
       });
-      testUserId = "";
+      testUserId = '';
     }
   });
 
-  describe("Cache Creation", () => {
-    it("should create legal reference with cache metadata", async () => {
+  describe('Cache Creation', () => {
+    it('should create legal reference with cache metadata', async () => {
       const now = new Date();
       const expiryTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
       const refData = {
-        source: "cache-test-《民法典》",
-        content: "测试缓存功能的法条内容。",
-        lawType: "民法",
-        articleNumber: "第1条",
-        cacheSource: "lawstar",
+        source: 'cache-test-《民法典》',
+        content: '测试缓存功能的法条内容。',
+        lawType: '民法',
+        articleNumber: '第1条',
+        cacheSource: 'lawstar',
         cacheExpiry: expiryTime,
         hitCount: 0,
         lastAccessed: now,
@@ -84,14 +84,14 @@ describe("Legal Reference Cache Management", () => {
       expect(legalRef.lastAccessed).toEqual(now);
     });
 
-    it("should support different cache sources", async () => {
-      const sources = ["local", "lawstar", "manual", "ai-analysis"];
+    it('should support different cache sources', async () => {
+      const sources = ['local', 'lawstar', 'manual', 'ai-analysis'];
 
       for (const source of sources) {
         const refData = {
           source: `cache-test-${source}-《测试法》`,
           content: `来自${source}的法条`,
-          lawType: "测试法",
+          lawType: '测试法',
           cacheSource: source,
         };
 
@@ -104,13 +104,13 @@ describe("Legal Reference Cache Management", () => {
     });
   });
 
-  describe("Cache Hit Tracking", () => {
-    it("should increment hit count on access", async () => {
+  describe('Cache Hit Tracking', () => {
+    it('should increment hit count on access', async () => {
       const legalRef = await prisma.legalReference.create({
         data: {
-          source: "cache-test-hit-《测试法》",
-          content: "测试命中计数的法条",
-          lawType: "测试法",
+          source: 'cache-test-hit-《测试法》',
+          content: '测试命中计数的法条',
+          lawType: '测试法',
           hitCount: 10,
         },
       });
@@ -137,12 +137,12 @@ describe("Legal Reference Cache Management", () => {
       expect(updatedRef?.lastAccessed).toBeDefined();
     });
 
-    it("should track access patterns", async () => {
+    it('should track access patterns', async () => {
       const legalRef = await prisma.legalReference.create({
         data: {
-          source: "cache-test-pattern-《测试法》",
-          content: "测试访问模式的法条",
-          lawType: "测试法",
+          source: 'cache-test-pattern-《测试法》',
+          content: '测试访问模式的法条',
+          lawType: '测试法',
         },
       });
 
@@ -171,28 +171,28 @@ describe("Legal Reference Cache Management", () => {
 
       expect(finalRef?.hitCount).toBe(5);
       expect(finalRef?.lastAccessed).toEqual(
-        accessTimes[accessTimes.length - 1],
+        accessTimes[accessTimes.length - 1]
       );
     });
   });
 
-  describe("Cache Expiry", () => {
-    it("should identify expired cache entries", async () => {
+  describe('Cache Expiry', () => {
+    it('should identify expired cache entries', async () => {
       const pastExpiry = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24小时前过期
       const futureExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24小时后过期
 
       await prisma.legalReference.createMany({
         data: [
           {
-            source: "cache-test-expired-《过期法条》",
-            content: "已过期的法条",
-            lawType: "测试法",
+            source: 'cache-test-expired-《过期法条》',
+            content: '已过期的法条',
+            lawType: '测试法',
             cacheExpiry: pastExpiry,
           },
           {
-            source: "cache-test-valid-《有效法条》",
-            content: "仍然有效的法条",
-            lawType: "测试法",
+            source: 'cache-test-valid-《有效法条》',
+            content: '仍然有效的法条',
+            lawType: '测试法',
             cacheExpiry: futureExpiry,
           },
         ],
@@ -217,19 +217,19 @@ describe("Legal Reference Cache Management", () => {
       });
 
       expect(expiredRefs).toHaveLength(1);
-      expect(expiredRefs[0].source).toContain("过期法条");
+      expect(expiredRefs[0].source).toContain('过期法条');
       expect(validRefs).toHaveLength(1);
-      expect(validRefs[0].source).toContain("有效法条");
+      expect(validRefs[0].source).toContain('有效法条');
     });
 
-    it("should support cache refresh", async () => {
+    it('should support cache refresh', async () => {
       const originalExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1小时后过期
 
       const legalRef = await prisma.legalReference.create({
         data: {
-          source: "cache-test-refresh-《测试法条》",
-          content: "需要刷新的法条",
-          lawType: "测试法",
+          source: 'cache-test-refresh-《测试法条》',
+          content: '需要刷新的法条',
+          lawType: '测试法',
           cacheExpiry: originalExpiry,
         },
       });
@@ -252,13 +252,13 @@ describe("Legal Reference Cache Management", () => {
     });
   });
 
-  describe("Cache Performance", () => {
-    it("should handle high-frequency access efficiently", async () => {
+  describe('Cache Performance', () => {
+    it('should handle high-frequency access efficiently', async () => {
       const legalRef = await prisma.legalReference.create({
         data: {
-          source: "cache-test-perf-《性能测试法条》",
-          content: "性能测试的法条",
-          lawType: "测试法",
+          source: 'cache-test-perf-《性能测试法条》',
+          content: '性能测试的法条',
+          lawType: '测试法',
         },
       });
 
@@ -290,36 +290,36 @@ describe("Legal Reference Cache Management", () => {
       expect(finalRef?.hitCount).toBe(100);
     });
 
-    it("should maintain cache statistics", async () => {
+    it('should maintain cache statistics', async () => {
       const refs = await prisma.legalReference.createMany({
         data: [
           {
-            source: "cache-test-stats-1《统计法条1》",
-            content: "统计测试1",
-            lawType: "测试法",
+            source: 'cache-test-stats-1《统计法条1》',
+            content: '统计测试1',
+            lawType: '测试法',
             hitCount: 50,
-            cacheSource: "local",
+            cacheSource: 'local',
           },
           {
-            source: "cache-test-stats-2《统计法条2》",
-            content: "统计测试2",
-            lawType: "测试法",
+            source: 'cache-test-stats-2《统计法条2》',
+            content: '统计测试2',
+            lawType: '测试法',
             hitCount: 30,
-            cacheSource: "lawstar",
+            cacheSource: 'lawstar',
           },
           {
-            source: "cache-test-stats-3《统计法条3》",
-            content: "统计测试3",
-            lawType: "测试法",
+            source: 'cache-test-stats-3《统计法条3》',
+            content: '统计测试3',
+            lawType: '测试法',
             hitCount: 20,
-            cacheSource: "manual",
+            cacheSource: 'manual',
           },
         ],
       });
 
       // 获取缓存统计，过滤掉null值
       const rawStats = await prisma.legalReference.groupBy({
-        by: ["cacheSource"],
+        by: ['cacheSource'],
         _sum: {
           hitCount: true,
         },
@@ -329,18 +329,16 @@ describe("Legal Reference Cache Management", () => {
       });
 
       // 过滤掉null值，只统计有效的缓存源
-      const cacheStats = rawStats.filter((stat) => stat.cacheSource !== null);
+      const cacheStats = rawStats.filter(stat => stat.cacheSource !== null);
 
       expect(cacheStats).toHaveLength(3);
 
-      const localStats = cacheStats.find(
-        (stat) => stat.cacheSource === "local",
-      );
+      const localStats = cacheStats.find(stat => stat.cacheSource === 'local');
       const lawstarStats = cacheStats.find(
-        (stat) => stat.cacheSource === "lawstar",
+        stat => stat.cacheSource === 'lawstar'
       );
       const manualStats = cacheStats.find(
-        (stat) => stat.cacheSource === "manual",
+        stat => stat.cacheSource === 'manual'
       );
 
       expect(localStats?._sum.hitCount).toBe(50);

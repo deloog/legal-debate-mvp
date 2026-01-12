@@ -1,7 +1,7 @@
-import { AnalysisStatus } from "@prisma/client";
+import { AnalysisStatus } from '@prisma/client';
 
 // Mock Prisma Client - inline to avoid scope issues
-jest.mock("../../../lib/db/prisma", () => ({
+jest.mock('../../../lib/db/prisma', () => ({
   prisma: {
     document: {
       create: jest.fn(),
@@ -19,18 +19,18 @@ jest.mock("../../../lib/db/prisma", () => ({
   },
 }));
 
-const prismaMock = require("../../../lib/db/prisma").prisma;
+const prismaMock = require('../../../lib/db/prisma').prisma;
 
 // Test data factories
 const createMockDocument = (overrides = {}) => ({
-  id: "doc-123",
-  caseId: "case-123",
-  userId: "user-123",
-  filename: "test-document.pdf",
-  filePath: "/uploads/documents/test-document.pdf",
-  fileType: "PDF",
+  id: 'doc-123',
+  caseId: 'case-123',
+  userId: 'user-123',
+  filename: 'test-document.pdf',
+  filePath: '/uploads/documents/test-document.pdf',
+  fileType: 'PDF',
   fileSize: 1024000,
-  mimeType: "application/pdf",
+  mimeType: 'application/pdf',
   extractedData: null,
   analysisStatus: AnalysisStatus.PENDING,
   analysisResult: null,
@@ -41,20 +41,20 @@ const createMockDocument = (overrides = {}) => ({
   ...overrides,
 });
 
-describe("File Upload and Validation", () => {
+describe('File Upload and Validation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should validate required fields for document creation", async () => {
+  it('should validate required fields for document creation', async () => {
     const documentData = {
-      caseId: "case-123",
-      userId: "user-123",
-      filename: "test.pdf",
-      filePath: "/uploads/test.pdf",
-      fileType: "PDF",
+      caseId: 'case-123',
+      userId: 'user-123',
+      filename: 'test.pdf',
+      filePath: '/uploads/test.pdf',
+      fileType: 'PDF',
       fileSize: 1024,
-      mimeType: "application/pdf",
+      mimeType: 'application/pdf',
     };
 
     const expectedDocument = createMockDocument(documentData);
@@ -71,8 +71,8 @@ describe("File Upload and Validation", () => {
     expect(result.mimeType).toBe(documentData.mimeType);
   });
 
-  it("should handle different file types", async () => {
-    const fileTypes = ["PDF", "DOCX", "TXT", "JPG", "PNG"];
+  it('should handle different file types', async () => {
+    const fileTypes = ['PDF', 'DOCX', 'TXT', 'JPG', 'PNG'];
     const documents = [];
 
     for (const fileType of fileTypes) {
@@ -90,10 +90,10 @@ describe("File Upload and Validation", () => {
     });
 
     expect(result).toHaveLength(fileTypes.length);
-    expect(result.map((d) => d.fileType)).toEqual(fileTypes);
+    expect(result.map(d => d.fileType)).toEqual(fileTypes);
   });
 
-  it("should handle file size validation", async () => {
+  it('should handle file size validation', async () => {
     const smallFile = createMockDocument({ fileSize: 1024 }); // 1KB
     const largeFile = createMockDocument({ fileSize: 10485760 }); // 10MB
 
@@ -113,27 +113,27 @@ describe("File Upload and Validation", () => {
     expect(result[1].fileSize).toBe(10485760);
   });
 
-  it("should handle very large file sizes", async () => {
+  it('should handle very large file sizes', async () => {
     const largeFile = createMockDocument({
       fileSize: 50 * 1024 * 1024, // 50MB
-      filename: "large-document.pdf",
+      filename: 'large-document.pdf',
     });
 
     prismaMock.document.create.mockResolvedValue(largeFile);
 
     const result = await prismaMock.document.create({
       data: {
-        caseId: "case-123",
-        userId: "user-123",
-        filename: "large-document.pdf",
-        filePath: "/uploads/large-document.pdf",
-        fileType: "PDF",
+        caseId: 'case-123',
+        userId: 'user-123',
+        filename: 'large-document.pdf',
+        filePath: '/uploads/large-document.pdf',
+        fileType: 'PDF',
         fileSize: 50 * 1024 * 1024,
-        mimeType: "application/pdf",
+        mimeType: 'application/pdf',
       },
     });
 
     expect(result.fileSize).toBe(50 * 1024 * 1024);
-    expect(result.filename).toBe("large-document.pdf");
+    expect(result.filename).toBe('large-document.pdf');
   });
 });

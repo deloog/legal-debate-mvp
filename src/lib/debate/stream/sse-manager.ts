@@ -8,7 +8,7 @@ import {
   DebateStreamEventType,
   SSEConnectionState,
   SSEConnectionStats,
-} from "./types";
+} from './types';
 
 /**
  * SSE事件管理器类
@@ -30,7 +30,7 @@ export class SSEEventManager {
       lastActivityTime: new Date(),
       totalEventsSent: 0,
       totalBytesSent: 0,
-      lastEventId: "",
+      lastEventId: '',
       reconnectAttempts: 0,
     };
   }
@@ -54,15 +54,15 @@ export class SSEEventManager {
     }
 
     // 处理多行数据
-    const dataLines = event.data.split("\n");
-    dataLines.forEach((line) => {
+    const dataLines = event.data.split('\n');
+    dataLines.forEach(line => {
       lines.push(`data: ${line}`);
     });
 
     // SSE事件以两个换行符结束
-    lines.push("", "");
+    lines.push('', '');
 
-    const formatted = lines.join("\n");
+    const formatted = lines.join('\n');
     return formatted;
   }
 
@@ -83,11 +83,11 @@ export class SSEEventManager {
     type: DebateStreamEventType,
     data: unknown,
     id?: string,
-    retry?: number,
+    retry?: number
   ): SSEEvent {
     return {
       event: type,
-      data: typeof data === "string" ? data : JSON.stringify(data),
+      data: typeof data === 'string' ? data : JSON.stringify(data),
       id: id || this.generateEventId(),
       retry,
     };

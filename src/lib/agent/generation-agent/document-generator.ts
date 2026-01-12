@@ -5,9 +5,9 @@ import {
   DocumentGenerationConfig,
   GenerationOutput,
   GenerationMetadata,
-} from "./types";
-import type { LawArticle } from "@prisma/client";
-import { CaseInfo } from "@/types/debate";
+} from './types';
+import type { LawArticle } from '@prisma/client';
+import { CaseInfo } from '@/types/debate';
 
 /**
  * 文书模板库
@@ -117,29 +117,29 @@ export class DocumentGenerator {
   generateComplaint(
     caseInfo: CaseInfo,
     lawArticles: LawArticle[],
-    options?: Partial<DocumentGenerationConfig>,
+    options?: Partial<DocumentGenerationConfig>
   ): GenerationOutput {
     const startTime = Date.now();
 
     const template = DOCUMENT_TEMPLATES.complaint;
     const content = this.applyTemplate(template, {
       plaintiffName:
-        caseInfo.description.split("原告")[1]?.split("被告")[0].trim() || "",
+        caseInfo.description.split('原告')[1]?.split('被告')[0].trim() || '',
       defendantName:
-        caseInfo.description.split("被告")[1]?.split("。")[0].trim() || "",
+        caseInfo.description.split('被告')[1]?.split('。')[0].trim() || '',
       claims: this.extractClaims(caseInfo.description),
       facts: caseInfo.description,
       legalBasis: this.formatLegalBasis(lawArticles),
-      evidence: "详见证据清单",
-      court: caseInfo.court || "人民法院",
+      evidence: '详见证据清单',
+      court: caseInfo.court || '人民法院',
       date: this.formatDate(new Date()),
     });
 
-    const metadata = this.createMetadata("complaint", startTime);
+    const metadata = this.createMetadata('complaint', startTime);
 
     return {
       content: this.formatContent(content, options),
-      type: "complaint",
+      type: 'complaint',
       qualityScore: this.calculateQualityScore(content),
       metadata,
     };
@@ -151,28 +151,28 @@ export class DocumentGenerator {
   generateAnswer(
     caseInfo: CaseInfo,
     lawArticles: LawArticle[],
-    options?: Partial<DocumentGenerationConfig>,
+    options?: Partial<DocumentGenerationConfig>
   ): GenerationOutput {
     const startTime = Date.now();
 
     const template = DOCUMENT_TEMPLATES.answer;
     const content = this.applyTemplate(template, {
       plaintiffName:
-        caseInfo.description.split("原告")[1]?.split("被告")[0].trim() || "",
+        caseInfo.description.split('原告')[1]?.split('被告')[0].trim() || '',
       defendantName:
-        caseInfo.description.split("被告")[1]?.split("。")[0].trim() || "",
-      defensePoints: "1. 不同意原告的诉讼请求\n2. 原告的主张缺乏事实和法律依据",
+        caseInfo.description.split('被告')[1]?.split('。')[0].trim() || '',
+      defensePoints: '1. 不同意原告的诉讼请求\n2. 原告的主张缺乏事实和法律依据',
       facts: caseInfo.description,
       legalBasis: this.formatLegalBasis(lawArticles),
-      court: caseInfo.court || "人民法院",
+      court: caseInfo.court || '人民法院',
       date: this.formatDate(new Date()),
     });
 
-    const metadata = this.createMetadata("answer", startTime);
+    const metadata = this.createMetadata('answer', startTime);
 
     return {
       content: this.formatContent(content, options),
-      type: "answer",
+      type: 'answer',
       qualityScore: this.calculateQualityScore(content),
       metadata,
     };
@@ -184,32 +184,32 @@ export class DocumentGenerator {
   generateEvidence(
     caseInfo: CaseInfo,
     evidenceData: unknown[],
-    options?: Partial<DocumentGenerationConfig>,
+    options?: Partial<DocumentGenerationConfig>
   ): GenerationOutput {
     const startTime = Date.now();
 
     const template = DOCUMENT_TEMPLATES.evidence;
     const evidenceList = Array.isArray(evidenceData)
-      ? evidenceData.map((e, i) => `${i + 1}. ${JSON.stringify(e)}`).join("\n")
-      : "无证据";
+      ? evidenceData.map((e, i) => `${i + 1}. ${JSON.stringify(e)}`).join('\n')
+      : '无证据';
 
     const content = this.applyTemplate(template, {
-      caseNumber: caseInfo.caseNumber || "",
+      caseNumber: caseInfo.caseNumber || '',
       plaintiffName:
-        caseInfo.description.split("原告")[1]?.split("被告")[0].trim() || "",
+        caseInfo.description.split('原告')[1]?.split('被告')[0].trim() || '',
       defendantName:
-        caseInfo.description.split("被告")[1]?.split("。")[0].trim() || "",
+        caseInfo.description.split('被告')[1]?.split('。')[0].trim() || '',
       evidenceList,
-      evidenceDescription: "详见案件描述",
-      author: "律伴助手",
+      evidenceDescription: '详见案件描述',
+      author: '律伴助手',
       date: this.formatDate(new Date()),
     });
 
-    const metadata = this.createMetadata("evidence", startTime);
+    const metadata = this.createMetadata('evidence', startTime);
 
     return {
       content: this.formatContent(content, options),
-      type: "evidence",
+      type: 'evidence',
       qualityScore: this.calculateQualityScore(content),
       metadata,
     };
@@ -221,31 +221,31 @@ export class DocumentGenerator {
   generateAppeal(
     caseInfo: CaseInfo,
     lawArticles: LawArticle[],
-    options?: Partial<DocumentGenerationConfig>,
+    options?: Partial<DocumentGenerationConfig>
   ): GenerationOutput {
     const startTime = Date.now();
 
     const template = DOCUMENT_TEMPLATES.appeal;
     const content = this.applyTemplate(template, {
       name:
-        caseInfo.description.split("原告")[1]?.split("被告")[0].trim() || "",
-      role: "原告",
+        caseInfo.description.split('原告')[1]?.split('被告')[0].trim() || '',
+      role: '原告',
       opponentName:
-        caseInfo.description.split("被告")[1]?.split("。")[0].trim() || "",
-      opponentRole: "被告",
-      appealRequests: "1. 撤销一审判决\n2. 依法改判或发回重审",
+        caseInfo.description.split('被告')[1]?.split('。')[0].trim() || '',
+      opponentRole: '被告',
+      appealRequests: '1. 撤销一审判决\n2. 依法改判或发回重审',
       appealReasons: caseInfo.description,
       facts: caseInfo.description,
       legalBasis: this.formatLegalBasis(lawArticles),
-      court: "上级人民法院",
+      court: '上级人民法院',
       date: this.formatDate(new Date()),
     });
 
-    const metadata = this.createMetadata("appeal", startTime);
+    const metadata = this.createMetadata('appeal', startTime);
 
     return {
       content: this.formatContent(content, options),
-      type: "appeal",
+      type: 'appeal',
       qualityScore: this.calculateQualityScore(content),
       metadata,
     };
@@ -256,12 +256,12 @@ export class DocumentGenerator {
    */
   private applyTemplate(
     template: string,
-    placeholders: Record<string, string>,
+    placeholders: Record<string, string>
   ): string {
     let content = template;
 
     for (const [key, value] of Object.entries(placeholders)) {
-      const regex = new RegExp(`\\{\\{${key}\\}\\}`, "g");
+      const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
       content = content.replace(regex, value);
     }
 
@@ -281,16 +281,16 @@ export class DocumentGenerator {
    */
   private formatLegalBasis(lawArticles: LawArticle[]): string {
     if (!lawArticles || lawArticles.length === 0) {
-      return "暂无法律依据";
+      return '暂无法律依据';
     }
 
     return lawArticles
       .slice(0, 5)
       .map(
-        (article) =>
-          `《${article.lawName}》${article.articleNumber} ${article.fullText?.substring(0, 100)}...`,
+        article =>
+          `《${article.lawName}》${article.articleNumber} ${article.fullText?.substring(0, 100)}...`
       )
-      .join("\n");
+      .join('\n');
   }
 
   /**
@@ -298,8 +298,8 @@ export class DocumentGenerator {
    */
   private formatDate(date: Date): string {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
     return `${year}年${month}月${day}日`;
   }
 
@@ -308,7 +308,7 @@ export class DocumentGenerator {
    */
   private formatContent(
     content: string,
-    options?: Partial<DocumentGenerationConfig>,
+    options?: Partial<DocumentGenerationConfig>
   ): string {
     let formatted = content.trim();
 
@@ -328,15 +328,15 @@ export class DocumentGenerator {
    */
   private createMetadata(
     type: DocumentType,
-    startTime: number,
+    startTime: number
   ): GenerationMetadata {
     const generationTime = Date.now() - startTime;
 
     return {
       generatedAt: new Date().toISOString(),
-      generatedBy: "GenerationAgent",
+      generatedBy: 'GenerationAgent',
       generationTime,
-      aiProvider: "deepseek",
+      aiProvider: 'deepseek',
       wordCount: 0,
       qualityScore: 0,
     };
@@ -353,10 +353,10 @@ export class DocumentGenerator {
     if (content.length > 500) score += 20;
 
     // 包含法律依据
-    if (content.includes("法律依据")) score += 20;
+    if (content.includes('法律依据')) score += 20;
 
     // 包含事实描述
-    if (content.includes("事实")) score += 20;
+    if (content.includes('事实')) score += 20;
 
     // 包含日期
     if (/\d{4}年\d{1,2}月\d{1,2}日/.test(content)) score += 20;

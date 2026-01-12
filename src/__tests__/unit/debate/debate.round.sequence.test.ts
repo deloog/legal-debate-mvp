@@ -1,10 +1,10 @@
-import { testPrisma } from "../../../test-utils/database";
+import { testPrisma } from '../../../test-utils/database';
 import {
   setupTestDatabase,
   cleanupTestDatabase,
-} from "../../../test-utils/database";
+} from '../../../test-utils/database';
 
-describe("Debate Round Sequence Management", () => {
+describe('Debate Round Sequence Management', () => {
   let testUser: any;
   let testCase: any;
   let testDebate: any;
@@ -15,9 +15,9 @@ describe("Debate Round Sequence Management", () => {
     // 创建测试用户
     testUser = await testPrisma.user.create({
       data: {
-        email: "test-round-sequence@example.com",
-        name: "测试用户",
-        role: "USER",
+        email: 'test-round-sequence@example.com',
+        name: '测试用户',
+        role: 'USER',
       },
     });
 
@@ -25,12 +25,12 @@ describe("Debate Round Sequence Management", () => {
     testCase = await testPrisma.case.create({
       data: {
         userId: testUser.id,
-        title: "轮次序列测试案件",
-        description: "这是一个用于测试辩论轮次序列管理的案件",
-        type: "CIVIL",
-        status: "ACTIVE",
-        plaintiffName: "张三",
-        defendantName: "李四",
+        title: '轮次序列测试案件',
+        description: '这是一个用于测试辩论轮次序列管理的案件',
+        type: 'CIVIL',
+        status: 'ACTIVE',
+        plaintiffName: '张三',
+        defendantName: '李四',
       },
     });
 
@@ -43,8 +43,8 @@ describe("Debate Round Sequence Management", () => {
         user: {
           connect: { id: testUser.id },
         },
-        title: "轮次序列测试辩论",
-        status: "IN_PROGRESS" as const,
+        title: '轮次序列测试辩论',
+        status: 'IN_PROGRESS' as const,
         currentRound: 0,
       },
     });
@@ -54,8 +54,8 @@ describe("Debate Round Sequence Management", () => {
     await cleanupTestDatabase();
   });
 
-  describe("Round Sequence Creation", () => {
-    it("should create multiple rounds in sequence", async () => {
+  describe('Round Sequence Creation', () => {
+    it('should create multiple rounds in sequence', async () => {
       const rounds = [];
 
       for (let i = 1; i <= 5; i++) {
@@ -65,7 +65,7 @@ describe("Debate Round Sequence Management", () => {
               connect: { id: testDebate.id },
             },
             roundNumber: i,
-            status: "PENDING" as const,
+            status: 'PENDING' as const,
           },
         });
         rounds.push(round);
@@ -77,7 +77,7 @@ describe("Debate Round Sequence Management", () => {
       });
     });
 
-    it("should create rounds with gaps in sequence", async () => {
+    it('should create rounds with gaps in sequence', async () => {
       const rounds = [];
 
       for (let i = 10; i <= 15; i++) {
@@ -87,7 +87,7 @@ describe("Debate Round Sequence Management", () => {
               connect: { id: testDebate.id },
             },
             roundNumber: i,
-            status: "PENDING" as const,
+            status: 'PENDING' as const,
           },
         });
         rounds.push(round);
@@ -100,7 +100,7 @@ describe("Debate Round Sequence Management", () => {
     });
   });
 
-  describe("Round Sequence Retrieval", () => {
+  describe('Round Sequence Retrieval', () => {
     beforeEach(async () => {
       // 清理现有的轮次数据
       await testPrisma.debateRound.deleteMany({
@@ -113,36 +113,36 @@ describe("Debate Round Sequence Management", () => {
           {
             debateId: testDebate.id,
             roundNumber: 1,
-            status: "COMPLETED",
-            startedAt: new Date("2023-01-01T10:00:00Z"),
-            completedAt: new Date("2023-01-01T10:30:00Z"),
+            status: 'COMPLETED',
+            startedAt: new Date('2023-01-01T10:00:00Z'),
+            completedAt: new Date('2023-01-01T10:30:00Z'),
           },
           {
             debateId: testDebate.id,
             roundNumber: 2,
-            status: "COMPLETED",
-            startedAt: new Date("2023-01-01T11:00:00Z"),
-            completedAt: new Date("2023-01-01T11:45:00Z"),
+            status: 'COMPLETED',
+            startedAt: new Date('2023-01-01T11:00:00Z'),
+            completedAt: new Date('2023-01-01T11:45:00Z'),
           },
           {
             debateId: testDebate.id,
             roundNumber: 3,
-            status: "IN_PROGRESS",
-            startedAt: new Date("2023-01-01T12:00:00Z"),
+            status: 'IN_PROGRESS',
+            startedAt: new Date('2023-01-01T12:00:00Z'),
           },
           {
             debateId: testDebate.id,
             roundNumber: 4,
-            status: "PENDING",
+            status: 'PENDING',
           },
         ],
       });
     });
 
-    it("should retrieve rounds in ascending order", async () => {
+    it('should retrieve rounds in ascending order', async () => {
       const rounds = await testPrisma.debateRound.findMany({
         where: { debateId: testDebate.id },
-        orderBy: { roundNumber: "asc" },
+        orderBy: { roundNumber: 'asc' },
       });
 
       expect(rounds).toHaveLength(4);
@@ -154,15 +154,15 @@ describe("Debate Round Sequence Management", () => {
       // 验证顺序
       for (let i = 1; i < rounds.length; i++) {
         expect(rounds[i].roundNumber).toBeGreaterThan(
-          rounds[i - 1].roundNumber,
+          rounds[i - 1].roundNumber
         );
       }
     });
 
-    it("should retrieve rounds in descending order", async () => {
+    it('should retrieve rounds in descending order', async () => {
       const rounds = await testPrisma.debateRound.findMany({
         where: { debateId: testDebate.id },
-        orderBy: { roundNumber: "desc" },
+        orderBy: { roundNumber: 'desc' },
       });
 
       expect(rounds).toHaveLength(4);
@@ -177,7 +177,7 @@ describe("Debate Round Sequence Management", () => {
       }
     });
 
-    it("should find specific round in sequence", async () => {
+    it('should find specific round in sequence', async () => {
       const round = await testPrisma.debateRound.findFirst({
         where: {
           debateId: testDebate.id,
@@ -187,29 +187,29 @@ describe("Debate Round Sequence Management", () => {
 
       expect(round).not.toBeNull();
       expect(round?.roundNumber).toBe(2);
-      expect(round?.status).toBe("COMPLETED");
+      expect(round?.status).toBe('COMPLETED');
     });
 
-    it("should get rounds by status range", async () => {
+    it('should get rounds by status range', async () => {
       const completedRounds = await testPrisma.debateRound.findMany({
         where: {
           debateId: testDebate.id,
-          status: "COMPLETED",
+          status: 'COMPLETED',
         },
-        orderBy: { roundNumber: "asc" },
+        orderBy: { roundNumber: 'asc' },
       });
 
       const inProgressRounds = await testPrisma.debateRound.findMany({
         where: {
           debateId: testDebate.id,
-          status: "IN_PROGRESS",
+          status: 'IN_PROGRESS',
         },
       });
 
       const pendingRounds = await testPrisma.debateRound.findMany({
         where: {
           debateId: testDebate.id,
-          status: "PENDING",
+          status: 'PENDING',
         },
       });
 
@@ -217,22 +217,22 @@ describe("Debate Round Sequence Management", () => {
       expect(inProgressRounds).toHaveLength(1);
       expect(pendingRounds).toHaveLength(1);
 
-      completedRounds.forEach((round) => {
-        expect(round.status).toBe("COMPLETED");
+      completedRounds.forEach(round => {
+        expect(round.status).toBe('COMPLETED');
         expect(round.completedAt).toBeDefined();
       });
     });
   });
 
-  describe("Round Sequence Validation", () => {
-    it("should prevent duplicate round numbers in same debate", async () => {
+  describe('Round Sequence Validation', () => {
+    it('should prevent duplicate round numbers in same debate', async () => {
       await testPrisma.debateRound.create({
         data: {
           debate: {
             connect: { id: testDebate.id },
           },
           roundNumber: 100,
-          status: "PENDING" as const,
+          status: 'PENDING' as const,
         },
       });
 
@@ -243,13 +243,13 @@ describe("Debate Round Sequence Management", () => {
               connect: { id: testDebate.id },
             },
             roundNumber: 100, // 重复的轮次编号
-            status: "PENDING" as const,
+            status: 'PENDING' as const,
           },
-        }),
+        })
       ).rejects.toThrow();
     });
 
-    it("should allow same round numbers in different debates", async () => {
+    it('should allow same round numbers in different debates', async () => {
       // 创建第二个辩论
       const secondDebate = await testPrisma.debate.create({
         data: {
@@ -259,8 +259,8 @@ describe("Debate Round Sequence Management", () => {
           user: {
             connect: { id: testUser.id },
           },
-          title: "第二个测试辩论",
-          status: "IN_PROGRESS" as const,
+          title: '第二个测试辩论',
+          status: 'IN_PROGRESS' as const,
           currentRound: 0,
         },
       });
@@ -272,7 +272,7 @@ describe("Debate Round Sequence Management", () => {
             connect: { id: testDebate.id },
           },
           roundNumber: 200,
-          status: "PENDING" as const,
+          status: 'PENDING' as const,
         },
       });
 
@@ -282,7 +282,7 @@ describe("Debate Round Sequence Management", () => {
             connect: { id: secondDebate.id },
           },
           roundNumber: 200, // 相同的轮次编号，但不同辩论
-          status: "PENDING" as const,
+          status: 'PENDING' as const,
         },
       });
 

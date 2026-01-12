@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest } from 'next/server';
 
 /**
  * 创建符合Next.js Request接口的mock请求对象
@@ -10,16 +10,16 @@ export function createMockRequest(
     body?: any;
     headers?: Record<string, string>;
     correlationId?: string;
-  } = {},
+  } = {}
 ) {
-  const { method = "GET", body, headers = {}, correlationId } = options;
+  const { method = 'GET', body, headers = {}, correlationId } = options;
 
   // 创建符合Next.js Request接口的mock
   const request = new Request(url, {
     method,
     headers: new Headers({
-      "content-type": "application/json",
-      "x-correlation-id": correlationId || "test-correlation-id",
+      'content-type': 'application/json',
+      'x-correlation-id': correlationId || 'test-correlation-id',
       ...headers,
     }),
     // 对于POST/PUT，需要序列化body
@@ -28,7 +28,7 @@ export function createMockRequest(
 
   // 确保json()方法正确工作
   if (!request.json) {
-    Object.defineProperty(request, "json", {
+    Object.defineProperty(request, 'json', {
       value: async () => body,
       writable: false,
     });
@@ -45,15 +45,15 @@ export function createMockStreamRequest(
   options: {
     correlationId?: string;
     headers?: Record<string, string>;
-  } = {},
+  } = {}
 ) {
   const { correlationId, headers = {} } = options;
 
   return {
     url,
     headers: new Headers({
-      "content-type": "text/event-stream",
-      "x-correlation-id": correlationId || "test-correlation-id",
+      'content-type': 'text/event-stream',
+      'x-correlation-id': correlationId || 'test-correlation-id',
       ...headers,
     }),
     signal: {

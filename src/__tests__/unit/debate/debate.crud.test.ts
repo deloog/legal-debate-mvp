@@ -1,10 +1,10 @@
-import { testPrisma } from "../../../test-utils/database";
+import { testPrisma } from '../../../test-utils/database';
 import {
   setupTestDatabase,
   cleanupTestDatabase,
-} from "../../../test-utils/database";
+} from '../../../test-utils/database';
 
-describe("Debate CRUD Operations", () => {
+describe('Debate CRUD Operations', () => {
   let testUser: any;
   let testCase: any;
 
@@ -14,9 +14,9 @@ describe("Debate CRUD Operations", () => {
     // 创建测试用户
     testUser = await testPrisma.user.create({
       data: {
-        email: "test-debate@example.com",
-        name: "测试用户",
-        role: "USER",
+        email: 'test-debate@example.com',
+        name: '测试用户',
+        role: 'USER',
       },
     });
 
@@ -24,12 +24,12 @@ describe("Debate CRUD Operations", () => {
     testCase = await testPrisma.case.create({
       data: {
         userId: testUser.id,
-        title: "测试案件",
-        description: "这是一个用于测试辩论功能的案件",
-        type: "CIVIL",
-        status: "ACTIVE",
-        plaintiffName: "张三",
-        defendantName: "李四",
+        title: '测试案件',
+        description: '这是一个用于测试辩论功能的案件',
+        type: 'CIVIL',
+        status: 'ACTIVE',
+        plaintiffName: '张三',
+        defendantName: '李四',
       },
     });
   });
@@ -38,8 +38,8 @@ describe("Debate CRUD Operations", () => {
     await cleanupTestDatabase();
   });
 
-  describe("Create Debate", () => {
-    it("should create a new debate successfully", async () => {
+  describe('Create Debate', () => {
+    it('should create a new debate successfully', async () => {
       const debateData = {
         case: {
           connect: { id: testCase.id },
@@ -47,20 +47,20 @@ describe("Debate CRUD Operations", () => {
         user: {
           connect: { id: testUser.id },
         },
-        title: "违约责任辩论",
-        status: "DRAFT" as const,
+        title: '违约责任辩论',
+        status: 'DRAFT' as const,
         debateConfig: {
-          mode: "adversarial",
+          mode: 'adversarial',
           maxRounds: 3,
           aiConfig: {
             plaintiff: {
-              provider: "deepseek",
-              model: "deepseek-chat",
+              provider: 'deepseek',
+              model: 'deepseek-chat',
               temperature: 0.7,
             },
             defendant: {
-              provider: "zhipu",
-              model: "glm-4-flash",
+              provider: 'zhipu',
+              model: 'glm-4-flash',
               temperature: 0.7,
             },
           },
@@ -72,14 +72,14 @@ describe("Debate CRUD Operations", () => {
       });
 
       expect(debate.id).toBeDefined();
-      expect(debate.title).toBe("违约责任辩论");
-      expect(debate.status).toBe("DRAFT");
+      expect(debate.title).toBe('违约责任辩论');
+      expect(debate.status).toBe('DRAFT');
       expect(debate.currentRound).toBe(0);
       expect(debate.createdAt).toBeInstanceOf(Date);
       expect(debate.updatedAt).toBeInstanceOf(Date);
     });
 
-    it("should create debate with minimal required fields", async () => {
+    it('should create debate with minimal required fields', async () => {
       const debateData = {
         case: {
           connect: { id: testCase.id },
@@ -87,7 +87,7 @@ describe("Debate CRUD Operations", () => {
         user: {
           connect: { id: testUser.id },
         },
-        title: "最小配置辩论",
+        title: '最小配置辩论',
       };
 
       const debate = await testPrisma.debate.create({
@@ -95,25 +95,25 @@ describe("Debate CRUD Operations", () => {
       });
 
       expect(debate.id).toBeDefined();
-      expect(debate.title).toBe("最小配置辩论");
-      expect(debate.status).toBe("DRAFT");
+      expect(debate.title).toBe('最小配置辩论');
+      expect(debate.status).toBe('DRAFT');
       expect(debate.currentRound).toBe(0);
       expect(debate.debateConfig).toBeNull();
     });
 
-    it("should fail when required fields are missing", async () => {
+    it('should fail when required fields are missing', async () => {
       const invalidData = {
-        title: "缺少必要字段的辩论",
+        title: '缺少必要字段的辩论',
         // 缺少 caseId 和 userId - 真正缺少必需字段
       };
 
       await expect(
-        testPrisma.debate.create({ data: invalidData as any }),
+        testPrisma.debate.create({ data: invalidData as any })
       ).rejects.toThrow();
     });
   });
 
-  describe("Read Debate", () => {
+  describe('Read Debate', () => {
     let testDebate: any;
 
     beforeAll(async () => {
@@ -125,26 +125,26 @@ describe("Debate CRUD Operations", () => {
           user: {
             connect: { id: testUser.id },
           },
-          title: "读取测试辩论",
-          status: "IN_PROGRESS" as const,
+          title: '读取测试辩论',
+          status: 'IN_PROGRESS' as const,
           currentRound: 2,
         },
       });
     });
 
-    it("should retrieve debate by id", async () => {
+    it('should retrieve debate by id', async () => {
       const debate = await testPrisma.debate.findUnique({
         where: { id: testDebate.id },
       });
 
       expect(debate).not.toBeNull();
       expect(debate?.id).toBe(testDebate.id);
-      expect(debate?.title).toBe("读取测试辩论");
-      expect(debate?.status).toBe("IN_PROGRESS");
+      expect(debate?.title).toBe('读取测试辩论');
+      expect(debate?.status).toBe('IN_PROGRESS');
       expect(debate?.currentRound).toBe(2);
     });
 
-    it("should retrieve debate with relations", async () => {
+    it('should retrieve debate with relations', async () => {
       const debate = await testPrisma.debate.findUnique({
         where: { id: testDebate.id },
         include: {
@@ -162,37 +162,37 @@ describe("Debate CRUD Operations", () => {
       expect(debate?.user.id).toBe(testUser.id);
     });
 
-    it("should return null for non-existent debate", async () => {
+    it('should return null for non-existent debate', async () => {
       const debate = await testPrisma.debate.findUnique({
-        where: { id: "non-existent-id" },
+        where: { id: 'non-existent-id' },
       });
 
       expect(debate).toBeNull();
     });
 
-    it("should filter debates by user", async () => {
+    it('should filter debates by user', async () => {
       const debates = await testPrisma.debate.findMany({
         where: { userId: testUser.id },
       });
 
       expect(debates.length).toBeGreaterThan(0);
-      debates.forEach((debate) => {
+      debates.forEach(debate => {
         expect(debate.userId).toBe(testUser.id);
       });
     });
 
-    it("should filter debates by status", async () => {
+    it('should filter debates by status', async () => {
       const debates = await testPrisma.debate.findMany({
-        where: { status: "IN_PROGRESS" },
+        where: { status: 'IN_PROGRESS' },
       });
 
-      debates.forEach((debate) => {
-        expect(debate.status).toBe("IN_PROGRESS");
+      debates.forEach(debate => {
+        expect(debate.status).toBe('IN_PROGRESS');
       });
     });
   });
 
-  describe("Update Debate", () => {
+  describe('Update Debate', () => {
     let testDebate: any;
 
     beforeAll(async () => {
@@ -204,26 +204,26 @@ describe("Debate CRUD Operations", () => {
           user: {
             connect: { id: testUser.id },
           },
-          title: "更新测试辩论",
-          status: "DRAFT" as const,
+          title: '更新测试辩论',
+          status: 'DRAFT' as const,
           currentRound: 0,
         },
       });
     });
 
-    it("should update debate status", async () => {
+    it('should update debate status', async () => {
       const updatedDebate = await testPrisma.debate.update({
         where: { id: testDebate.id },
-        data: { status: "IN_PROGRESS" as const },
+        data: { status: 'IN_PROGRESS' as const },
       });
 
-      expect(updatedDebate.status).toBe("IN_PROGRESS");
+      expect(updatedDebate.status).toBe('IN_PROGRESS');
       expect(updatedDebate.updatedAt.getTime()).toBeGreaterThan(
-        testDebate.updatedAt.getTime(),
+        testDebate.updatedAt.getTime()
       );
     });
 
-    it("should update current round", async () => {
+    it('should update current round', async () => {
       const updatedDebate = await testPrisma.debate.update({
         where: { id: testDebate.id },
         data: { currentRound: 3 },
@@ -232,9 +232,9 @@ describe("Debate CRUD Operations", () => {
       expect(updatedDebate.currentRound).toBe(3);
     });
 
-    it("should update debate config", async () => {
+    it('should update debate config', async () => {
       const newConfig = {
-        mode: "collaborative",
+        mode: 'collaborative',
         maxRounds: 5,
         autoAdvance: true,
       };
@@ -247,13 +247,13 @@ describe("Debate CRUD Operations", () => {
       expect(updatedDebate.debateConfig).toMatchObject(newConfig);
     });
 
-    it("should update multiple fields simultaneously", async () => {
+    it('should update multiple fields simultaneously', async () => {
       const updateData = {
-        title: "更新的标题",
-        status: "COMPLETED" as const,
+        title: '更新的标题',
+        status: 'COMPLETED' as const,
         currentRound: 4,
         debateConfig: {
-          mode: "adversarial",
+          mode: 'adversarial',
           completedAt: new Date().toISOString(),
         },
       };
@@ -270,7 +270,7 @@ describe("Debate CRUD Operations", () => {
     });
   });
 
-  describe("Delete Debate", () => {
+  describe('Delete Debate', () => {
     let testDebate: any;
 
     beforeEach(async () => {
@@ -282,13 +282,13 @@ describe("Debate CRUD Operations", () => {
           user: {
             connect: { id: testUser.id },
           },
-          title: "删除测试辩论",
-          status: "DRAFT" as const,
+          title: '删除测试辩论',
+          status: 'DRAFT' as const,
         },
       });
     });
 
-    it("should delete debate permanently", async () => {
+    it('should delete debate permanently', async () => {
       await testPrisma.debate.delete({
         where: { id: testDebate.id },
       });
@@ -300,16 +300,16 @@ describe("Debate CRUD Operations", () => {
       expect(deletedDebate).toBeNull();
     });
 
-    it("should handle deletion of non-existent debate", async () => {
+    it('should handle deletion of non-existent debate', async () => {
       await expect(
         testPrisma.debate.delete({
-          where: { id: "non-existent-id" },
-        }),
+          where: { id: 'non-existent-id' },
+        })
       ).rejects.toThrow();
     });
   });
 
-  describe("Soft Delete Debate", () => {
+  describe('Soft Delete Debate', () => {
     let testDebate: any;
 
     beforeEach(async () => {
@@ -321,13 +321,13 @@ describe("Debate CRUD Operations", () => {
           user: {
             connect: { id: testUser.id },
           },
-          title: "软删除测试辩论",
-          status: "DRAFT" as const,
+          title: '软删除测试辩论',
+          status: 'DRAFT' as const,
         },
       });
     });
 
-    it("should soft delete debate", async () => {
+    it('should soft delete debate', async () => {
       const deletedAt = new Date();
 
       await testPrisma.debate.update({
@@ -343,7 +343,7 @@ describe("Debate CRUD Operations", () => {
       expect(softDeletedDebate?.deletedAt).toEqual(deletedAt);
     });
 
-    it("should filter out soft deleted debates in queries", async () => {
+    it('should filter out soft deleted debates in queries', async () => {
       // 软删除一个辩论
       await testPrisma.debate.update({
         where: { id: testDebate.id },
@@ -355,7 +355,7 @@ describe("Debate CRUD Operations", () => {
         where: { deletedAt: null },
       });
 
-      activeDebates.forEach((debate) => {
+      activeDebates.forEach(debate => {
         expect(debate.deletedAt).toBeNull();
       });
     });

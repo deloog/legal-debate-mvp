@@ -3,15 +3,15 @@
  * 整合差异识别、增量分析和上下文合并的完整流程
  */
 
-import { DiffDetector, generateFingerprints } from "./diff-detector";
-import { IncrementalAnalyzer } from "./incremental-analyzer";
-import { ContextMerger } from "./context-merger";
+import { DiffDetector, generateFingerprints } from './diff-detector';
+import { IncrementalAnalyzer } from './incremental-analyzer';
+import { ContextMerger } from './context-merger';
 import {
   IncrementalAnalysisInput,
   IncrementalAnalysisResult,
   IncrementalAnalysisConfig,
   DEFAULT_INCREMENTAL_CONFIG,
-} from "./types";
+} from './types';
 
 /**
  * 增量分析管理器类
@@ -37,7 +37,7 @@ export class IncrementalManager {
    * 执行增量分析（主入口）
    */
   async execute(
-    input: IncrementalAnalysisInput,
+    input: IncrementalAnalysisInput
   ): Promise<IncrementalAnalysisResult> {
     const startTime = Date.now();
 
@@ -47,7 +47,7 @@ export class IncrementalManager {
     // 2. 检测差异
     const diff = this.diffDetector.detect(
       input.historicalContext.materials,
-      input.newMaterials,
+      input.newMaterials
     );
 
     // 3. 执行增量分析
@@ -57,7 +57,7 @@ export class IncrementalManager {
     const mergeResult = this.contextMerger.merge(
       diff,
       input.historicalContext,
-      incrementalAnalysis,
+      incrementalAnalysis
     );
 
     // 5. 计算统计信息
@@ -141,7 +141,7 @@ export class IncrementalManager {
  * 工厂函数：创建增量分析管理器
  */
 export function createIncrementalManager(
-  config?: Partial<IncrementalAnalysisConfig>,
+  config?: Partial<IncrementalAnalysisConfig>
 ): IncrementalManager {
   return new IncrementalManager(config);
 }
@@ -151,7 +151,7 @@ export function createIncrementalManager(
  */
 export async function executeIncrementalAnalysis(
   input: IncrementalAnalysisInput,
-  config?: Partial<IncrementalAnalysisConfig>,
+  config?: Partial<IncrementalAnalysisConfig>
 ): Promise<IncrementalAnalysisResult> {
   const manager = createIncrementalManager(config);
   return manager.execute(input);

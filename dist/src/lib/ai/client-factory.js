@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 var __createBinding =
   (this && this.__createBinding) ||
   (Object.create
@@ -7,7 +7,7 @@ var __createBinding =
         var desc = Object.getOwnPropertyDescriptor(m, k);
         if (
           !desc ||
-          ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)
+          ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)
         ) {
           desc = {
             enumerable: true,
@@ -26,10 +26,10 @@ var __setModuleDefault =
   (this && this.__setModuleDefault) ||
   (Object.create
     ? function (o, v) {
-        Object.defineProperty(o, "default", { enumerable: true, value: v });
+        Object.defineProperty(o, 'default', { enumerable: true, value: v });
       }
     : function (o, v) {
-        o["default"] = v;
+        o['default'] = v;
       });
 var __importStar =
   (this && this.__importStar) ||
@@ -50,12 +50,12 @@ var __importStar =
       var result = {};
       if (mod != null)
         for (var k = ownKeys(mod), i = 0; i < k.length; i++)
-          if (k[i] !== "default") __createBinding(result, mod, k[i]);
+          if (k[i] !== 'default') __createBinding(result, mod, k[i]);
       __setModuleDefault(result, mod);
       return result;
     };
   })();
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.AIClientFactory = void 0;
 // =============================================================================
 // AI客户端工厂
@@ -69,13 +69,13 @@ class AIClientFactory {
    */
   static async createClient(config) {
     switch (config.provider) {
-      case "zhipu":
+      case 'zhipu':
         return this.createZhipuClient(config);
-      case "deepseek":
+      case 'deepseek':
         return this.createDeepSeekClient(config);
-      case "openai":
+      case 'openai':
         return this.createOpenAIClient(config);
-      case "anthropic":
+      case 'anthropic':
         return this.createAnthropicClient(config);
       default:
         throw new Error(`Unsupported provider: ${config.provider}`);
@@ -88,19 +88,19 @@ class AIClientFactory {
     try {
       // 使用OpenAI兼容格式调用智谱清言API
       const { OpenAI } = await Promise.resolve().then(() =>
-        __importStar(require("openai")),
+        __importStar(require('openai'))
       );
       return new OpenAI({
         apiKey: config.apiKey,
-        baseURL: config.baseURL || "https://open.bigmodel.cn/api/paas/v4/",
+        baseURL: config.baseURL || 'https://open.bigmodel.cn/api/paas/v4/',
         timeout: config.timeout || 30000,
       });
     } catch (error) {
       console.warn(
-        "OpenAI client not available for Zhipu, using mock client. Error:",
-        error,
+        'OpenAI client not available for Zhipu, using mock client. Error:',
+        error
       );
-      return this.createMockClient("zhipu");
+      return this.createMockClient('zhipu');
     }
   }
   /**
@@ -110,19 +110,19 @@ class AIClientFactory {
     try {
       // DeepSeek API兼容OpenAI格式，直接使用OpenAI客户端
       const { OpenAI } = await Promise.resolve().then(() =>
-        __importStar(require("openai")),
+        __importStar(require('openai'))
       );
       return new OpenAI({
         apiKey: config.apiKey,
-        baseURL: config.baseURL || "https://api.deepseek.com/v1",
+        baseURL: config.baseURL || 'https://api.deepseek.com/v1',
         timeout: config.timeout || 30000,
       });
     } catch (error) {
       console.warn(
-        "DeepSeek client not available, using mock client. Error:",
-        error,
+        'DeepSeek client not available, using mock client. Error:',
+        error
       );
-      return this.createMockClient("deepseek");
+      return this.createMockClient('deepseek');
     }
   }
   /**
@@ -131,7 +131,7 @@ class AIClientFactory {
   static async createOpenAIClient(config) {
     try {
       const { OpenAI } = await Promise.resolve().then(() =>
-        __importStar(require("openai")),
+        __importStar(require('openai'))
       );
       return new OpenAI({
         apiKey: config.apiKey,
@@ -140,10 +140,10 @@ class AIClientFactory {
       });
     } catch (error) {
       console.warn(
-        "OpenAI client not available, using mock client. Error:",
-        error,
+        'OpenAI client not available, using mock client. Error:',
+        error
       );
-      return this.createMockClient("openai");
+      return this.createMockClient('openai');
     }
   }
   /**
@@ -152,7 +152,7 @@ class AIClientFactory {
   static async createAnthropicClient(config) {
     try {
       const Anthropic = await Promise.resolve().then(() =>
-        __importStar(require("@anthropic-ai/sdk")),
+        __importStar(require('@anthropic-ai/sdk'))
       );
       return new Anthropic.default({
         apiKey: config.apiKey,
@@ -161,10 +161,10 @@ class AIClientFactory {
       });
     } catch (error) {
       console.warn(
-        "Anthropic client not available, using mock client. Error:",
-        error,
+        'Anthropic client not available, using mock client. Error:',
+        error
       );
-      return this.createMockClient("anthropic");
+      return this.createMockClient('anthropic');
     }
   }
   /**
@@ -174,19 +174,19 @@ class AIClientFactory {
     return {
       chat: {
         completions: {
-          create: async (params) => ({
+          create: async params => ({
             id: `${provider}_mock_${Date.now()}`,
-            object: "chat.completion",
+            object: 'chat.completion',
             created: Date.now(),
             model: params.model,
             choices: [
               {
                 index: 0,
                 message: {
-                  role: "assistant",
-                  content: `Mock response from ${provider} for: ${params.messages[params.messages.length - 1]?.content || "unknown"}`,
+                  role: 'assistant',
+                  content: `Mock response from ${provider} for: ${params.messages[params.messages.length - 1]?.content || 'unknown'}`,
                 },
-                finish_reason: "stop",
+                finish_reason: 'stop',
                 logprobs: null,
               },
             ],
@@ -199,11 +199,11 @@ class AIClientFactory {
         },
       },
       embeddings: {
-        create: async (params) => ({
-          object: "list",
+        create: async params => ({
+          object: 'list',
           data: [
             {
-              object: "embedding",
+              object: 'embedding',
               embedding: new Array(1536).fill(0).map(() => Math.random()),
               index: 0,
             },

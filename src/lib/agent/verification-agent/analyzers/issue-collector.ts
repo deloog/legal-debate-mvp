@@ -9,10 +9,10 @@ import {
   FactualVerificationResult,
   LogicalVerificationResult,
   CompletenessVerificationResult,
-} from "../types";
-import { FactualIssueCollector } from "./factual-issue-collector";
-import { LogicalIssueCollector } from "./logical-issue-collector";
-import { CompletenessIssueCollector } from "./completeness-issue-collector";
+} from '../types';
+import { FactualIssueCollector } from './factual-issue-collector';
+import { LogicalIssueCollector } from './logical-issue-collector';
+import { CompletenessIssueCollector } from './completeness-issue-collector';
 
 /**
  * 问题收集器类（Facade）
@@ -34,7 +34,7 @@ export class IssueCollector {
   collectAllIssues(
     factualResult: FactualVerificationResult,
     logicalResult: LogicalVerificationResult,
-    completenessResult: CompletenessVerificationResult,
+    completenessResult: CompletenessVerificationResult
   ): VerificationIssue[] {
     const issues: VerificationIssue[] = [];
 
@@ -62,7 +62,7 @@ export class IssueCollector {
     };
 
     return [...issues].sort(
-      (a, b) => severityOrder[a.severity] - severityOrder[b.severity],
+      (a, b) => severityOrder[a.severity] - severityOrder[b.severity]
     );
   }
 
@@ -70,7 +70,7 @@ export class IssueCollector {
    * 按类别分组问题
    */
   groupByCategory(
-    issues: VerificationIssue[],
+    issues: VerificationIssue[]
   ): Map<IssueCategory, VerificationIssue[]> {
     const groups = new Map<IssueCategory, VerificationIssue[]>();
 
@@ -88,7 +88,7 @@ export class IssueCollector {
    * 按严重程度分组问题
    */
   groupBySeverity(
-    issues: VerificationIssue[],
+    issues: VerificationIssue[]
   ): Map<IssueSeverity, VerificationIssue[]> {
     const groups = new Map<IssueSeverity, VerificationIssue[]>();
 
@@ -111,9 +111,9 @@ export class IssueCollector {
       severity?: IssueSeverity[];
       category?: IssueCategory[];
       detectedBy?: string[];
-    },
+    }
   ): VerificationIssue[] {
-    return issues.filter((issue) => {
+    return issues.filter(issue => {
       if (filters.severity && !filters.severity.includes(issue.severity)) {
         return false;
       }
@@ -203,7 +203,7 @@ export class IssueCollector {
       high: stats.bySeverity.high || 0,
       medium: stats.bySeverity.medium || 0,
       low: stats.bySeverity.low || 0,
-      summary: summary.join("，"),
+      summary: summary.join('，'),
     };
   }
 }

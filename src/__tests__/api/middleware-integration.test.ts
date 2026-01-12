@@ -1,29 +1,29 @@
 import {
   MiddlewareStack,
   createRequestContext,
-} from "@/app/api/lib/middleware/core";
+} from '@/app/api/lib/middleware/core';
 import {
   corsMiddleware,
   securityMiddleware,
   rateLimitMiddleware,
-} from "@/app/api/lib/middleware/security";
-import { NextRequest, NextResponse } from "next/server";
+} from '@/app/api/lib/middleware/security';
+import { NextRequest, NextResponse } from 'next/server';
 
-describe("Middleware Integration Tests", () => {
-  describe("Complete Middleware Stack", () => {
-    it("should handle typical API request flow", async () => {
+describe('Middleware Integration Tests', () => {
+  describe('Complete Middleware Stack', () => {
+    it('should handle typical API request flow', async () => {
       const stack = new MiddlewareStack();
       const testRequest = new NextRequest(
-        "http://localhost:3000/api/v1/users",
+        'http://localhost:3000/api/v1/users',
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "content-type": "application/json",
-            origin: "http://localhost:3000",
-            "x-forwarded-for": "192.168.1.100",
+            'content-type': 'application/json',
+            origin: 'http://localhost:3000',
+            'x-forwarded-for': '192.168.1.100',
           },
-          body: JSON.stringify({ name: "John Doe", email: "john@example.com" }),
-        },
+          body: JSON.stringify({ name: 'John Doe', email: 'john@example.com' }),
+        }
       );
       const testContext = createRequestContext(testRequest);
 
@@ -31,15 +31,15 @@ describe("Middleware Integration Tests", () => {
       const authMiddleware = jest
         .fn()
         .mockImplementation(async (req, ctx, response) => {
-          ctx.userId = "user123";
-          ctx.role = "admin";
+          ctx.userId = 'user123';
+          ctx.role = 'admin';
         });
 
       // Request logging middleware
       const loggingMiddleware = jest
         .fn()
         .mockImplementation(async (req, ctx, response) => {
-          response.headers.set("X-Request-ID", ctx.requestId);
+          response.headers.set('X-Request-ID', ctx.requestId);
         });
 
       // Response middleware
@@ -53,7 +53,7 @@ describe("Middleware Integration Tests", () => {
               role: ctx.role,
               requestId: ctx.requestId,
               processingTime: Date.now() - ctx.startTime,
-              endpoint: "/api/v1/users",
+              endpoint: '/api/v1/users',
             },
           });
         });
@@ -76,8 +76,8 @@ describe("Middleware Integration Tests", () => {
       // Verify response data
       const responseData = await result.json();
       expect(responseData.success).toBe(true);
-      expect(responseData.data.userId).toBe("user123");
-      expect(responseData.data.role).toBe("admin");
+      expect(responseData.data.userId).toBe('user123');
+      expect(responseData.data.role).toBe('admin');
       expect(responseData.data.requestId).toMatch(/^req_\d+_[a-z0-9]+$/);
       expect(responseData.data.processingTime).toBeGreaterThanOrEqual(0);
 
@@ -91,14 +91,14 @@ describe("Middleware Integration Tests", () => {
       expect(responseMiddleware).toHaveBeenCalled();
     });
 
-    it("should handle OPTIONS preflight correctly", async () => {
+    it('should handle OPTIONS preflight correctly', async () => {
       const stack = new MiddlewareStack();
-      const testRequest = new NextRequest("http://localhost:3000/api/v1/data", {
-        method: "OPTIONS",
+      const testRequest = new NextRequest('http://localhost:3000/api/v1/data', {
+        method: 'OPTIONS',
         headers: {
-          origin: "http://localhost:3000",
-          "access-control-request-method": "POST",
-          "access-control-request-headers": "Content-Type, Authorization",
+          origin: 'http://localhost:3000',
+          'access-control-request-method': 'POST',
+          'access-control-request-headers': 'Content-Type, Authorization',
         },
       });
       const testContext = createRequestContext(testRequest);
@@ -112,28 +112,28 @@ describe("Middleware Integration Tests", () => {
 
       // Verify OPTIONS response
       expect(result.status).toBe(200);
-      expect(result.headers.get("Access-Control-Allow-Origin")).toBe(
-        "http://localhost:3000",
+      expect(result.headers.get('Access-Control-Allow-Origin')).toBe(
+        'http://localhost:3000'
       );
-      expect(result.headers.get("Access-Control-Allow-Methods")).toBe(
-        "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+      expect(result.headers.get('Access-Control-Allow-Methods')).toBe(
+        'GET, POST, PUT, DELETE, PATCH, OPTIONS'
       );
-      expect(result.headers.get("Access-Control-Allow-Headers")).toBe(
-        "Content-Type, Authorization, X-Requested-With, Accept, Origin",
+      expect(result.headers.get('Access-Control-Allow-Headers')).toBe(
+        'Content-Type, Authorization, X-Requested-With, Accept, Origin'
       );
-      expect(result.headers.get("Access-Control-Allow-Credentials")).toBe(
-        "true",
+      expect(result.headers.get('Access-Control-Allow-Credentials')).toBe(
+        'true'
       );
-      expect(result.headers.get("Access-Control-Max-Age")).toBe("86400");
+      expect(result.headers.get('Access-Control-Max-Age')).toBe('86400');
     });
 
-    it("should handle rate limiting properly", async () => {
+    it('should handle rate limiting properly', async () => {
       const stack = new MiddlewareStack();
-      const testRequest = new NextRequest("http://localhost:3000/api/v1/test", {
-        method: "GET",
+      const testRequest = new NextRequest('http://localhost:3000/api/v1/test', {
+        method: 'GET',
         headers: {
-          origin: "http://localhost:3000",
-          "x-forwarded-for": "192.168.1.200",
+          origin: 'http://localhost:3000',
+          'x-forwarded-for': '192.168.1.200',
         },
       });
       const testContext = createRequestContext(testRequest);
@@ -142,7 +142,7 @@ describe("Middleware Integration Tests", () => {
       const responseMiddleware = jest
         .fn()
         .mockImplementation(async (req, ctx, response) => {
-          return NextResponse.json({ message: "OK" });
+          return NextResponse.json({ message: 'OK' });
         });
 
       stack
@@ -154,7 +154,7 @@ describe("Middleware Integration Tests", () => {
       // First request should succeed
       const result1 = await stack.execute(
         testRequest,
-        createRequestContext(testRequest),
+        createRequestContext(testRequest)
       );
       expect(result1.status).toBe(200);
 
@@ -162,18 +162,18 @@ describe("Middleware Integration Tests", () => {
       for (let i = 0; i < 50; i++) {
         const result = await stack.execute(
           testRequest,
-          createRequestContext(testRequest),
+          createRequestContext(testRequest)
         );
         expect(result.status).toBe(200);
       }
     });
 
-    it("should maintain context isolation between requests", async () => {
+    it('should maintain context isolation between requests', async () => {
       const stack = new MiddlewareStack();
 
       // Create multiple requests with different contexts
-      const request1 = new NextRequest("http://localhost:3000/api/test1");
-      const request2 = new NextRequest("http://localhost:3000/api/test2");
+      const request1 = new NextRequest('http://localhost:3000/api/test1');
+      const request2 = new NextRequest('http://localhost:3000/api/test2');
 
       const context1 = createRequestContext(request1);
       const context2 = createRequestContext(request2);
@@ -183,7 +183,7 @@ describe("Middleware Integration Tests", () => {
         .fn()
         .mockImplementation(async (req, ctx, response) => {
           ctx.userId = `user_${ctx.requestId}`;
-          ctx.customData = "test";
+          ctx.customData = 'test';
         });
 
       const responseMiddleware = jest
@@ -214,23 +214,23 @@ describe("Middleware Integration Tests", () => {
       expect(data2.requestId).toBe(context2.requestId);
     });
 
-    it("should handle middleware chain termination correctly", async () => {
+    it('should handle middleware chain termination correctly', async () => {
       const stack = new MiddlewareStack();
-      const testRequest = new NextRequest("http://localhost:3000/api/test");
+      const testRequest = new NextRequest('http://localhost:3000/api/test');
       const testContext = createRequestContext(testRequest);
 
       // Early termination middleware
       const terminationMiddleware = jest
         .fn()
         .mockImplementation(async (req, ctx, response) => {
-          return NextResponse.json({ message: "Early termination" });
+          return NextResponse.json({ message: 'Early termination' });
         });
 
       const shouldNotExecuteMiddleware = jest
         .fn()
         .mockImplementation(async (req, ctx, response) => {
           // This should never be called
-          throw new Error("Should not execute");
+          throw new Error('Should not execute');
         });
 
       stack.use(terminationMiddleware).use(shouldNotExecuteMiddleware);
@@ -241,26 +241,26 @@ describe("Middleware Integration Tests", () => {
       expect(shouldNotExecuteMiddleware).not.toHaveBeenCalled();
 
       const responseData = await result.json();
-      expect(responseData.message).toBe("Early termination");
+      expect(responseData.message).toBe('Early termination');
     });
 
-    it("should handle error propagation through middleware chain", async () => {
+    it('should handle error propagation through middleware chain', async () => {
       const stack = new MiddlewareStack();
-      const testRequest = new NextRequest("http://localhost:3000/api/error");
+      const testRequest = new NextRequest('http://localhost:3000/api/error');
       const testContext = createRequestContext(testRequest);
 
       // Error throwing middleware
       const errorMiddleware = jest
         .fn()
         .mockImplementation(async (req, ctx, response) => {
-          throw new Error("Test error");
+          throw new Error('Test error');
         });
 
       const shouldNotExecuteMiddleware = jest
         .fn()
         .mockImplementation(async (req, ctx, response) => {
           // This should never be called
-          throw new Error("Should not execute after error");
+          throw new Error('Should not execute after error');
         });
 
       stack
@@ -276,22 +276,22 @@ describe("Middleware Integration Tests", () => {
 
       const responseData = await result.json();
       expect(responseData.success).toBe(false);
-      expect(responseData.error.code).toBe("INTERNAL_SERVER_ERROR");
+      expect(responseData.error.code).toBe('INTERNAL_SERVER_ERROR');
     });
   });
 
-  describe("Real-world Scenarios", () => {
-    it("should simulate API endpoint with authentication", async () => {
+  describe('Real-world Scenarios', () => {
+    it('should simulate API endpoint with authentication', async () => {
       const stack = new MiddlewareStack();
       const testRequest = new NextRequest(
-        "http://localhost:3000/api/v1/profile",
+        'http://localhost:3000/api/v1/profile',
         {
-          method: "GET",
+          method: 'GET',
           headers: {
-            authorization: "Bearer valid-token",
-            origin: "http://localhost:3000",
+            authorization: 'Bearer valid-token',
+            origin: 'http://localhost:3000',
           },
-        },
+        }
       );
       const testContext = createRequestContext(testRequest);
 
@@ -299,22 +299,22 @@ describe("Middleware Integration Tests", () => {
       const authMiddleware = jest
         .fn()
         .mockImplementation(async (req, ctx, response) => {
-          const token = req.headers.get("authorization");
+          const token = req.headers.get('authorization');
           if (!token) {
             return NextResponse.json(
-              { error: "Unauthorized" },
-              { status: 401 },
+              { error: 'Unauthorized' },
+              { status: 401 }
             );
           }
 
           // Simulate token validation
-          if (token === "Bearer valid-token") {
-            ctx.userId = "user123";
-            ctx.role = "user";
+          if (token === 'Bearer valid-token') {
+            ctx.userId = 'user123';
+            ctx.role = 'user';
           } else {
             return NextResponse.json(
-              { error: "Invalid token" },
-              { status: 401 },
+              { error: 'Invalid token' },
+              { status: 401 }
             );
           }
         });
@@ -325,16 +325,16 @@ describe("Middleware Integration Tests", () => {
         .mockImplementation(async (req, ctx, response) => {
           if (!ctx.userId) {
             return NextResponse.json(
-              { error: "Authentication required" },
-              { status: 401 },
+              { error: 'Authentication required' },
+              { status: 401 }
             );
           }
 
           return NextResponse.json({
             user: {
               id: ctx.userId,
-              name: "John Doe",
-              email: "john@example.com",
+              name: 'John Doe',
+              email: 'john@example.com',
               role: ctx.role,
             },
           });
@@ -351,22 +351,22 @@ describe("Middleware Integration Tests", () => {
       expect(result.status).toBe(200);
 
       const responseData = await result.json();
-      expect(responseData.user.id).toBe("user123");
-      expect(responseData.user.name).toBe("John Doe");
-      expect(responseData.user.role).toBe("user");
+      expect(responseData.user.id).toBe('user123');
+      expect(responseData.user.name).toBe('John Doe');
+      expect(responseData.user.role).toBe('user');
     });
 
-    it("should handle file upload simulation", async () => {
+    it('should handle file upload simulation', async () => {
       const stack = new MiddlewareStack();
       const testRequest = new NextRequest(
-        "http://localhost:3000/api/v1/upload",
+        'http://localhost:3000/api/v1/upload',
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "content-type": "multipart/form-data",
-            origin: "http://localhost:3000",
+            'content-type': 'multipart/form-data',
+            origin: 'http://localhost:3000',
           },
-        },
+        }
       );
       const testContext = createRequestContext(testRequest);
 
@@ -374,16 +374,16 @@ describe("Middleware Integration Tests", () => {
       const fileValidationMiddleware = jest
         .fn()
         .mockImplementation(async (req, ctx, response) => {
-          const contentType = req.headers.get("content-type");
-          if (!contentType || !contentType.includes("multipart/form-data")) {
+          const contentType = req.headers.get('content-type');
+          if (!contentType || !contentType.includes('multipart/form-data')) {
             return NextResponse.json(
-              { error: "Invalid content type" },
-              { status: 400 },
+              { error: 'Invalid content type' },
+              { status: 400 }
             );
           }
 
           ctx.fileSize = 1024 * 1024; // 1MB
-          ctx.fileName = "test-file.pdf";
+          ctx.fileName = 'test-file.pdf';
         });
 
       // Upload processing middleware
@@ -392,8 +392,8 @@ describe("Middleware Integration Tests", () => {
         .mockImplementation(async (req, ctx, response) => {
           if (!ctx.fileName) {
             return NextResponse.json(
-              { error: "No file provided" },
-              { status: 400 },
+              { error: 'No file provided' },
+              { status: 400 }
             );
           }
 
@@ -406,7 +406,7 @@ describe("Middleware Integration Tests", () => {
               name: ctx.fileName,
               originalSize: ctx.fileSize,
               compressedSize: processedSize,
-              url: "/uploads/" + ctx.fileName,
+              url: '/uploads/' + ctx.fileName,
             },
           });
         });
@@ -424,7 +424,7 @@ describe("Middleware Integration Tests", () => {
 
       const responseData = await result.json();
       expect(responseData.success).toBe(true);
-      expect(responseData.file.name).toBe("test-file.pdf");
+      expect(responseData.file.name).toBe('test-file.pdf');
       expect(responseData.file.originalSize).toBe(1024 * 1024);
       expect(responseData.file.compressedSize).toBe(1024 * 1024 * 0.8);
     });

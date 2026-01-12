@@ -3,9 +3,9 @@
  * 实现AI摘要生成、关键信息提取、压缩比例计算
  */
 
-import { AIService } from "@/lib/ai/service-refactored";
-import type { AIRequestConfig, AIResponse } from "@/types/ai-service";
-import type { Memory, CompressionResult, KeyInfo } from "./types";
+import { AIService } from '@/lib/ai/service-refactored';
+import type { AIRequestConfig, AIResponse } from '@/types/ai-service';
+import type { Memory, CompressionResult, KeyInfo } from './types';
 
 /**
  * 压缩比配置
@@ -65,10 +65,10 @@ export class MemoryCompressor {
    */
   private determineTargetRatio(memory: Memory): number {
     // 根据记忆类型确定
-    if (memory.memoryType === "WORKING") {
+    if (memory.memoryType === 'WORKING') {
       return COMPRESSION_RATIO_CONFIG.WORKING_TO_HOT;
     }
-    if (memory.memoryType === "HOT") {
+    if (memory.memoryType === 'HOT') {
       return COMPRESSION_RATIO_CONFIG.HOT_TO_COLD;
     }
     return 0.1; // Cold Memory最小化
@@ -81,15 +81,15 @@ export class MemoryCompressor {
     const prompt = this.buildSummaryPrompt(data);
 
     const requestConfig: AIRequestConfig = {
-      model: "deepseek-chat",
+      model: 'deepseek-chat',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content:
-            "你是一个专业的法律信息摘要助手，擅长提取关键信息和生成简洁摘要。",
+            '你是一个专业的法律信息摘要助手，擅长提取关键信息和生成简洁摘要。',
         },
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
@@ -100,7 +100,7 @@ export class MemoryCompressor {
     const response: AIResponse =
       await this.aiService.chatCompletion(requestConfig);
 
-    return response.choices[0]?.message?.content?.trim() || "";
+    return response.choices[0]?.message?.content?.trim() || '';
   }
 
   /**
@@ -127,15 +127,15 @@ ${json}
     const prompt = this.buildKeyInfoPrompt(data);
 
     const requestConfig: AIRequestConfig = {
-      model: "deepseek-chat",
+      model: 'deepseek-chat',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content:
-            "你是一个专业的信息提取助手，擅长从结构化数据中提取关键信息。",
+            '你是一个专业的信息提取助手，擅长从结构化数据中提取关键信息。',
         },
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
@@ -147,7 +147,7 @@ ${json}
       await this.aiService.chatCompletion(requestConfig);
 
     // 解析AI返回的JSON
-    const content = response.choices[0]?.message?.content || "";
+    const content = response.choices[0]?.message?.content || '';
     const jsonMatch = content.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
       try {
@@ -188,7 +188,7 @@ ${json}
     const extractValue = (
       obj: Record<string, unknown>,
       keys: string[],
-      importance: number,
+      importance: number
     ) => {
       for (const key of keys) {
         if (obj[key] !== undefined && obj[key] !== null) {
@@ -202,17 +202,17 @@ ${json}
     };
 
     // 检查是否为对象类型
-    if (typeof data === "object" && data !== null) {
+    if (typeof data === 'object' && data !== null) {
       const dataObj = data as Record<string, unknown>;
 
       // 高重要性字段
-      extractValue(dataObj, ["amount", "date", "party", "claim"], 1.0);
+      extractValue(dataObj, ['amount', 'date', 'party', 'claim'], 1.0);
 
       // 中重要性字段
-      extractValue(dataObj, ["fact", "evidence", "argument"], 0.8);
+      extractValue(dataObj, ['fact', 'evidence', 'argument'], 0.8);
 
       // 低重要性字段
-      extractValue(dataObj, ["description", "note", "comment"], 0.5);
+      extractValue(dataObj, ['description', 'note', 'comment'], 0.5);
     }
 
     // 按重要性排序
@@ -224,7 +224,7 @@ ${json}
    */
   private calculateCompressionRatio(
     original: unknown,
-    compressed: { summary: string; keyInfo: KeyInfo[] },
+    compressed: { summary: string; keyInfo: KeyInfo[] }
   ): number {
     const originalSize = JSON.stringify(original).length;
     const compressedSize =
@@ -237,7 +237,7 @@ ${json}
    * 基于规则的压缩（降级方案）
    */
   private async ruleBasedCompression(
-    data: unknown,
+    data: unknown
   ): Promise<CompressionResult> {
     const summary = this.generateRuleSummary(data);
     const keyInfo = this.extractKeyInfoByRules(data);
@@ -254,19 +254,19 @@ ${json}
    * 生成规则摘要（降级方案）
    */
   private generateRuleSummary(data: unknown): string {
-    if (typeof data === "string") {
+    if (typeof data === 'string') {
       // 字符串直接截断
-      return data.length > 100 ? data.slice(0, 100) + "..." : data;
+      return data.length > 100 ? data.slice(0, 100) + '...' : data;
     }
 
-    if (typeof data === "object" && data !== null) {
+    if (typeof data === 'object' && data !== null) {
       // 对象提取关键字段
       const keys = Object.keys(data as Record<string, unknown>).slice(0, 3);
       const parts = keys.map(
-        (key) =>
-          `${key}:${JSON.stringify((data as Record<string, unknown>)[key])}`,
+        key =>
+          `${key}:${JSON.stringify((data as Record<string, unknown>)[key])}`
       );
-      return parts.join(", ");
+      return parts.join(', ');
     }
 
     return String(data).slice(0, 100);

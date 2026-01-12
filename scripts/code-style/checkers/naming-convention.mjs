@@ -3,7 +3,7 @@
  * 检查变量和函数的命名规范
  */
 
-import { MAX_ISSUES_TO_SHOW } from "../config.mjs";
+import { MAX_ISSUES_TO_SHOW } from '../config.mjs';
 
 /**
  * 检查命名约定
@@ -17,7 +17,7 @@ export function checkNamingConventions(filePath, content) {
   const anonymousMatches = content.match(anonymousFunctionRegex);
 
   if (anonymousMatches) {
-    issues.push("发现匿名函数导出，建议使用命名函数");
+    issues.push('发现匿名函数导出，建议使用命名函数');
   }
 
   // 检查snake_case变量名（应该使用camelCase）
@@ -25,14 +25,14 @@ export function checkNamingConventions(filePath, content) {
   const snakeCaseVars = [];
   let match;
   while ((match = camelCaseRegex.exec(content)) !== null) {
-    if (match[1].includes("_") && match[1] !== match[1].toUpperCase()) {
+    if (match[1].includes('_') && match[1] !== match[1].toUpperCase()) {
       snakeCaseVars.push(match[1]);
     }
   }
 
   if (snakeCaseVars.length > 0) {
     issues.push(
-      `发现snake_case变量名，建议使用camelCase: ${snakeCaseVars.slice(0, MAX_ISSUES_TO_SHOW).join(", ")}`,
+      `发现snake_case变量名，建议使用camelCase: ${snakeCaseVars.slice(0, MAX_ISSUES_TO_SHOW).join(', ')}`
     );
   }
 
@@ -41,19 +41,19 @@ export function checkNamingConventions(filePath, content) {
   const pascalCaseVars = [];
   while ((match = pascalCaseVarRegex.exec(content)) !== null) {
     // 排除React组件（通常以大写字母开头）
-    if (!filePath.includes(".tsx") && !filePath.includes(".jsx")) {
+    if (!filePath.includes('.tsx') && !filePath.includes('.jsx')) {
       pascalCaseVars.push(match[1]);
     }
   }
 
   if (pascalCaseVars.length > 0) {
     issues.push(
-      `发现PascalCase变量名，建议用于类/组件: ${pascalCaseVars.slice(0, MAX_ISSUES_TO_SHOW).join(", ")}`,
+      `发现PascalCase变量名，建议用于类/组件: ${pascalCaseVars.slice(0, MAX_ISSUES_TO_SHOW).join(', ')}`
     );
   }
 
   return {
     passed: issues.length === 0,
-    message: issues.length === 0 ? "命名约定检查通过" : issues.join("; "),
+    message: issues.length === 0 ? '命名约定检查通过' : issues.join('; '),
   };
 }

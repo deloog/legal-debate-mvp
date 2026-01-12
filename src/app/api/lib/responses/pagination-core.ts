@@ -17,7 +17,7 @@ export interface PaginationQuery {
   page: number;
   limit: number;
   sort?: string;
-  order: "asc" | "desc";
+  order: 'asc' | 'desc';
 }
 
 /**
@@ -38,7 +38,7 @@ export function buildPaginationOptions(query: PaginationQuery) {
   return {
     skip,
     take: limit,
-    orderBy: sort ? { [sort]: order } : { createdAt: "desc" as const },
+    orderBy: sort ? { [sort]: order } : { createdAt: 'desc' as const },
   };
 }
 
@@ -46,7 +46,7 @@ export function buildPaginationOptions(query: PaginationQuery) {
  * 构建搜索查询选项
  */
 export function buildSearchOptions(
-  query: PaginationQuery & { search?: string },
+  query: PaginationQuery & { search?: string }
 ) {
   const { page, limit, sort, order, search } = query;
   const skip = (page - 1) * limit;
@@ -54,8 +54,8 @@ export function buildSearchOptions(
   const where = search
     ? {
         OR: [
-          { title: { contains: search, mode: "insensitive" } },
-          { description: { contains: search, mode: "insensitive" } },
+          { title: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
         ],
       }
     : {};
@@ -64,7 +64,7 @@ export function buildSearchOptions(
     where,
     skip,
     take: limit,
-    orderBy: sort ? { [sort]: order } : { createdAt: "desc" as const },
+    orderBy: sort ? { [sort]: order } : { createdAt: 'desc' as const },
   };
 }
 
@@ -86,7 +86,7 @@ export function validatePaginationParams(params: {
 }): PaginationQuery {
   // 处理page参数
   let page = 1;
-  if (params.page !== undefined && params.page !== null && params.page !== "") {
+  if (params.page !== undefined && params.page !== null && params.page !== '') {
     const parsedPage = Number(params.page);
     if (!isNaN(parsedPage)) {
       page = Math.floor(parsedPage); // 确保是整数
@@ -98,7 +98,7 @@ export function validatePaginationParams(params: {
   if (
     params.limit !== undefined &&
     params.limit !== null &&
-    params.limit !== ""
+    params.limit !== ''
   ) {
     const parsedLimit = Number(params.limit);
     if (!isNaN(parsedLimit)) {
@@ -107,24 +107,24 @@ export function validatePaginationParams(params: {
   }
 
   // 处理布尔值转换
-  if (typeof params.limit === "boolean") {
+  if (typeof params.limit === 'boolean') {
     limit = params.limit ? 1 : 20;
   }
 
   // 验证边界条件
   if (page < 1) {
-    throw new Error("Page must be greater than 0");
+    throw new Error('Page must be greater than 0');
   }
 
   if (limit < 1 || limit > 100) {
-    throw new Error("Limit must be between 1 and 100");
+    throw new Error('Limit must be between 1 and 100');
   }
 
   // 验证order参数
-  let order: "asc" | "desc" = "desc";
-  if (params.order && typeof params.order === "string") {
+  let order: 'asc' | 'desc' = 'desc';
+  if (params.order && typeof params.order === 'string') {
     const normalizedOrder = params.order.toLowerCase();
-    if (normalizedOrder === "asc" || normalizedOrder === "desc") {
+    if (normalizedOrder === 'asc' || normalizedOrder === 'desc') {
       order = normalizedOrder;
     }
   }
@@ -132,7 +132,7 @@ export function validatePaginationParams(params: {
   return {
     page,
     limit,
-    sort: typeof params.sort === "string" ? params.sort : undefined,
+    sort: typeof params.sort === 'string' ? params.sort : undefined,
     order,
   };
 }

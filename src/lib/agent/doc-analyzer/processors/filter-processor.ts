@@ -9,8 +9,8 @@
  * 性能目标：<10ms
  */
 
-import { logger } from "../../../agent/security/logger";
-import type { CaseType } from "../core/types";
+import { logger } from '../../../agent/security/logger';
+import type { CaseType } from '../core/types';
 
 // =============================================================================
 // 接口定义
@@ -96,14 +96,14 @@ export class FilterProcessor {
     const qualityCheck = this.checkOCRQuality(text);
     if (!qualityCheck.passed) {
       const processingTime = Date.now() - startTime;
-      logger.warn("OCR质量检查未通过", {
+      logger.warn('OCR质量检查未通过', {
         reason: qualityCheck.reason,
         processingTime,
       });
       return {
         passed: false,
         filteredText: text,
-        documentType: "other",
+        documentType: 'other',
         qualityScore: qualityCheck.score,
         warnings: qualityCheck.warnings,
         reason: qualityCheck.reason,
@@ -117,7 +117,7 @@ export class FilterProcessor {
     const formatCheck = this.validateFormat(text, documentType);
     if (!formatCheck.valid) {
       const processingTime = Date.now() - startTime;
-      logger.warn("格式校验未通过", {
+      logger.warn('格式校验未通过', {
         reason: formatCheck.reason,
         processingTime,
       });
@@ -135,7 +135,7 @@ export class FilterProcessor {
     const filteredText = this.cleanText(text);
 
     const processingTime = Date.now() - startTime;
-    logger.info("过滤检查通过", {
+    logger.info('过滤检查通过', {
       documentType,
       qualityScore: qualityCheck.score,
       processingTime,
@@ -165,7 +165,7 @@ export class FilterProcessor {
     // 检查文本长度
     if (text.length < this.config.minWordCount) {
       warnings.push(
-        `文本长度过短：${text.length}字符（最低要求${this.config.minWordCount}）`,
+        `文本长度过短：${text.length}字符（最低要求${this.config.minWordCount}）`
       );
       score -= 0.5; // 提高扣分权重
     }
@@ -174,7 +174,7 @@ export class FilterProcessor {
     const chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length;
     if (chineseChars < this.config.minChineseChars) {
       warnings.push(
-        `中文字符过少：${chineseChars}个（最低要求${this.config.minChineseChars}）`,
+        `中文字符过少：${chineseChars}个（最低要求${this.config.minChineseChars}）`
       );
       score -= 0.5; // 提高扣分权重，确保中文字符过少时会fail
     }
@@ -184,7 +184,7 @@ export class FilterProcessor {
     const garbageRatio = garbageChars / text.length;
     if (garbageRatio > this.config.maxGarbageRatio) {
       warnings.push(
-        `乱码比例过高：${(garbageRatio * 100).toFixed(1)}%（最高允许${(this.config.maxGarbageRatio * 100).toFixed(1)}%）`,
+        `乱码比例过高：${(garbageRatio * 100).toFixed(1)}%（最高允许${(this.config.maxGarbageRatio * 100).toFixed(1)}%）`
       );
       score -= 0.4 * (garbageRatio / this.config.maxGarbageRatio);
     }
@@ -194,8 +194,8 @@ export class FilterProcessor {
       return {
         passed: false,
         score: 0,
-        warnings: ["文档内容为空"],
-        reason: "OCR质量不合格：文档内容为空",
+        warnings: ['文档内容为空'],
+        reason: 'OCR质量不合格：文档内容为空',
       };
     }
 
@@ -243,7 +243,7 @@ export class FilterProcessor {
 
     // 计算每种类型的匹配得分
     for (const [type, patterns] of Object.entries(
-      this.DOCUMENT_TYPE_PATTERNS,
+      this.DOCUMENT_TYPE_PATTERNS
     )) {
       for (const pattern of patterns) {
         const matches = text.match(pattern);
@@ -255,7 +255,7 @@ export class FilterProcessor {
 
     // 找出得分最高的类型
     let maxScore = 0;
-    let maxType: CaseType = "other";
+    let maxType: CaseType = 'other';
     for (const [type, score] of Object.entries(scores)) {
       if (score > maxScore) {
         maxScore = score;
@@ -265,10 +265,10 @@ export class FilterProcessor {
 
     // 如果没有任何匹配，返回other
     if (maxScore === 0) {
-      return "other";
+      return 'other';
     }
 
-    logger.debug("文档类型分类结果", {
+    logger.debug('文档类型分类结果', {
       type: maxType,
       score: maxScore,
       scores,
@@ -281,7 +281,7 @@ export class FilterProcessor {
    */
   private validateFormat(
     text: string,
-    docType: CaseType,
+    docType: CaseType
   ): {
     valid: boolean;
     warnings: string[];
@@ -294,24 +294,24 @@ export class FilterProcessor {
     const hasContent = text.length > 50;
 
     if (!hasTitle) {
-      warnings.push("文档缺少标题或案由");
+      warnings.push('文档缺少标题或案由');
     }
 
     if (!hasContent) {
-      warnings.push("文档内容过短");
+      warnings.push('文档内容过短');
     }
 
     // 检查通用的原告或被告信息（不限于civil）
     const hasPlaintiffDefendant = /原告|被告/g.test(text);
     if (!hasPlaintiffDefendant) {
-      warnings.push("文档缺少原告或被告信息");
+      warnings.push('文档缺少原告或被告信息');
     }
 
     // 根据文档类型检查特定元素
-    if (docType === "criminal") {
+    if (docType === 'criminal') {
       const hasDefendant = /被告人/g.test(text);
       if (!hasDefendant) {
-        warnings.push("刑事文档缺少被告人信息");
+        warnings.push('刑事文档缺少被告人信息');
       }
     }
 
@@ -319,13 +319,13 @@ export class FilterProcessor {
     const specialCharRatio = this.countGarbageChars(text) / text.length;
     if (specialCharRatio > this.config.maxGarbageRatio) {
       warnings.push(
-        `特殊字符比例过高：${(specialCharRatio * 100).toFixed(1)}%`,
+        `特殊字符比例过高：${(specialCharRatio * 100).toFixed(1)}%`
       );
     }
 
     // 综合判断
     const valid = warnings.length < 2;
-    const reason = !valid ? `格式校验失败：${warnings.join("、")}` : undefined;
+    const reason = !valid ? `格式校验失败：${warnings.join('、')}` : undefined;
 
     return {
       valid,
@@ -339,18 +339,18 @@ export class FilterProcessor {
    */
   private cleanText(text: string): string {
     // 将连续的多个空格替换为单个空格
-    let cleaned = text.replace(/[ \t]+/g, " ");
+    let cleaned = text.replace(/[ \t]+/g, ' ');
     // 去除段落首尾空格
-    cleaned = cleaned.replace(/^ +/gm, "").replace(/ +$/gm, "");
+    cleaned = cleaned.replace(/^ +/gm, '').replace(/ +$/gm, '');
 
     // 将多个连续换行替换为单个换行
-    cleaned = cleaned.replace(/\n{3,}/g, "\n\n");
+    cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
 
     // 去除控制字符（保留换行）
-    cleaned = cleaned.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "");
+    cleaned = cleaned.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
 
     // 标准化换行符
-    cleaned = cleaned.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    cleaned = cleaned.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
     return cleaned.trim();
   }
@@ -367,7 +367,7 @@ export class FilterProcessor {
    */
   public updateConfig(config: Partial<FilterConfig>): void {
     this.config = { ...this.config, ...config };
-    logger.info("FilterProcessor配置已更新", { config: this.config });
+    logger.info('FilterProcessor配置已更新', { config: this.config });
   }
 }
 
@@ -379,7 +379,7 @@ export class FilterProcessor {
  * 创建默认FilterProcessor实例
  */
 export function createFilterProcessor(
-  config?: Partial<FilterConfig>,
+  config?: Partial<FilterConfig>
 ): FilterProcessor {
   return new FilterProcessor(config);
 }

@@ -3,8 +3,8 @@
  * 包含：AI服务调用、数据库检索
  */
 
-import type { PrismaClient } from "@prisma/client";
-import type { AIServiceCallResult, DatabaseSearchResult } from "./types";
+import type { PrismaClient } from '@prisma/client';
+import type { AIServiceCallResult, DatabaseSearchResult } from './types';
 
 /**
  * 5. call_ai_service - AI服务调用
@@ -13,14 +13,14 @@ import type { AIServiceCallResult, DatabaseSearchResult } from "./types";
 export async function call_ai_service(
   params: {
     prompt: string;
-    provider: "deepseek" | "zhipu" | "openai";
+    provider: 'deepseek' | 'zhipu' | 'openai';
     model?: string;
     temperature?: number;
     maxTokens?: number;
     stream?: boolean;
     systemPrompt?: string;
   },
-  aiService: { call: (args: unknown) => Promise<unknown> },
+  aiService: { call: (args: unknown) => Promise<unknown> }
 ): Promise<AIServiceCallResult> {
   const startTime = Date.now();
 
@@ -44,10 +44,10 @@ export async function call_ai_service(
   } catch (error) {
     return {
       success: false,
-      response: "",
+      response: '',
       model: params.model || params.provider,
       executionTime: Date.now() - startTime,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -63,14 +63,14 @@ export async function search_database<T = unknown>(
     query?: string;
     filters?: Record<string, unknown>;
     orderBy?: string;
-    orderDirection?: "asc" | "desc";
+    orderDirection?: 'asc' | 'desc';
     limit?: number;
     offset?: number;
-  },
+  }
 ): Promise<DatabaseSearchResult<T>> {
   const startTime = Date.now();
 
-  await new Promise((resolve) => setTimeout(resolve, 10));
+  await new Promise(resolve => setTimeout(resolve, 10));
 
   const model = (prisma as unknown as Record<string, unknown>)[
     params.table
@@ -82,7 +82,7 @@ export async function search_database<T = unknown>(
   }
 
   const orderBy = params.orderBy
-    ? [{ [params.orderBy]: params.orderDirection || "asc" }]
+    ? [{ [params.orderBy]: params.orderDirection || 'asc' }]
     : undefined;
 
   const result = (await model.findMany({

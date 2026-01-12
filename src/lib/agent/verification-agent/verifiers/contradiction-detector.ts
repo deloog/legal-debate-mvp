@@ -7,7 +7,7 @@ import {
   Contradiction,
   ContradictionType,
   IssueSeverity,
-} from "../types";
+} from '../types';
 
 /**
  * 待验证数据接口
@@ -68,7 +68,7 @@ export class ContradictionDetector {
     // 检测时间矛盾
     if (data.dates && Array.isArray(data.dates) && data.dates.length > 1) {
       const sortedDates = [...data.dates].sort(
-        (a, b) => new Date(a.value).getTime() - new Date(b.value).getTime(),
+        (a, b) => new Date(a.value).getTime() - new Date(b.value).getTime()
       );
 
       for (let i = 0; i < sortedDates.length - 1; i++) {
@@ -98,20 +98,20 @@ export class ContradictionDetector {
    */
   private hasFactualContradiction(fact1: string, fact2: string): boolean {
     // 检查否定词
-    const negationWords1 = ["不", "没有", "未", "非"];
-    const negationWords2 = ["是", "有", "存在"];
+    const negationWords1 = ['不', '没有', '未', '非'];
+    const negationWords2 = ['是', '有', '存在'];
 
     const words1 = fact1.split(/[^a-zA-Z0-9\u4e00-\u9fa5]/);
     const words2 = fact2.split(/[^a-zA-Z0-9\u4e00-\u9fa5]/);
 
     // 查找相同的核心词
     const commonWords = words1.filter(
-      (word) => words2.includes(word) && word.length > 1,
+      word => words2.includes(word) && word.length > 1
     );
 
     if (commonWords.length > 0) {
-      const hasNegation1 = negationWords1.some((word) => fact1.includes(word));
-      const hasNegation2 = negationWords2.some((word) => fact2.includes(word));
+      const hasNegation1 = negationWords1.some(word => fact1.includes(word));
+      const hasNegation2 = negationWords2.some(word => fact2.includes(word));
 
       return hasNegation1 && hasNegation2;
     }
@@ -124,11 +124,11 @@ export class ContradictionDetector {
    */
   private hasLogicalContradiction(arg1: string, arg2: string): boolean {
     const contradictionPairs = [
-      ["一定", "不一定"],
-      ["必须", "不必"],
-      ["肯定", "可能不"],
-      ["完全", "部分"],
-      ["所有", "有些"],
+      ['一定', '不一定'],
+      ['必须', '不必'],
+      ['肯定', '可能不'],
+      ['完全', '部分'],
+      ['所有', '有些'],
     ];
 
     for (const [word1, word2] of contradictionPairs) {

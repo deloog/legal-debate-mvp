@@ -9,23 +9,23 @@ import {
   beforeAll,
   beforeEach,
   jest,
-} from "@jest/globals";
+} from '@jest/globals';
 import {
   generateAccessToken,
   generateRefreshToken,
   verifyToken,
-} from "@/lib/auth/jwt";
+} from '@/lib/auth/jwt';
 import {
   cleanupExpiredSessions,
   cleanupUserSessions,
   getExpiredSessionsCount,
   getActiveSessionsCount,
   executeSessionCleanup,
-} from "@/lib/cron/cleanup-sessions";
-import type { JwtPayload } from "@/types/auth";
+} from '@/lib/cron/cleanup-sessions';
+import type { JwtPayload } from '@/types/auth';
 
 // Mock Prisma 客户端
-jest.mock("@/lib/db/prisma", () => ({
+jest.mock('@/lib/db/prisma', () => ({
   prisma: {
     session: {
       deleteMany: jest
@@ -41,7 +41,7 @@ jest.mock("@/lib/db/prisma", () => ({
   },
 }));
 
-import { prisma } from "@/lib/db/prisma";
+import { prisma } from '@/lib/db/prisma';
 
 // 类型断言 helper
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,7 +51,7 @@ const mockCount = prisma.session.count as jest.Mock<any>;
 
 // 设置测试环境变量
 beforeAll(() => {
-  process.env.JWT_SECRET = "test-secret-key-for-session-tests";
+  process.env.JWT_SECRET = 'test-secret-key-for-session-tests';
 });
 
 // 重置所有 mock
@@ -59,18 +59,18 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe("会话管理功能测试", () => {
-  describe("Token刷新功能", () => {
-    it("应该生成有效的访问令牌", () => {
+describe('会话管理功能测试', () => {
+  describe('Token刷新功能', () => {
+    it('应该生成有效的访问令牌', () => {
       const payload: JwtPayload = {
-        userId: "user-123",
-        email: "user@example.com",
-        role: "USER",
+        userId: 'user-123',
+        email: 'user@example.com',
+        role: 'USER',
       };
 
       const accessToken = generateAccessToken(payload);
 
-      expect(typeof accessToken).toBe("string");
+      expect(typeof accessToken).toBe('string');
       expect(accessToken.length).toBeGreaterThan(0);
 
       // 验证令牌
@@ -80,16 +80,16 @@ describe("会话管理功能测试", () => {
       expect(result.payload?.userId).toBe(payload.userId);
     });
 
-    it("应该生成有效的刷新令牌", () => {
+    it('应该生成有效的刷新令牌', () => {
       const payload: JwtPayload = {
-        userId: "user-123",
-        email: "user@example.com",
-        role: "USER",
+        userId: 'user-123',
+        email: 'user@example.com',
+        role: 'USER',
       };
 
       const refreshToken = generateRefreshToken(payload);
 
-      expect(typeof refreshToken).toBe("string");
+      expect(typeof refreshToken).toBe('string');
       expect(refreshToken.length).toBeGreaterThan(0);
 
       // 验证令牌
@@ -99,11 +99,11 @@ describe("会话管理功能测试", () => {
       expect(result.payload?.userId).toBe(payload.userId);
     });
 
-    it("访问令牌和刷新令牌应该不同", () => {
+    it('访问令牌和刷新令牌应该不同', () => {
       const payload: JwtPayload = {
-        userId: "user-123",
-        email: "user@example.com",
-        role: "USER",
+        userId: 'user-123',
+        email: 'user@example.com',
+        role: 'USER',
       };
 
       const accessToken = generateAccessToken(payload);
@@ -114,8 +114,8 @@ describe("会话管理功能测试", () => {
     });
   });
 
-  describe("会话清理功能", () => {
-    it("应该成功清理过期会话", async () => {
+  describe('会话清理功能', () => {
+    it('应该成功清理过期会话', async () => {
       mockDeleteMany.mockResolvedValue({
         count: 5,
       });
@@ -132,8 +132,8 @@ describe("会话管理功能测试", () => {
       });
     });
 
-    it("应该清理指定用户的所有会话", async () => {
-      const userId = "user-123";
+    it('应该清理指定用户的所有会话', async () => {
+      const userId = 'user-123';
       mockDeleteMany.mockResolvedValue({
         count: 3,
       });
@@ -146,7 +146,7 @@ describe("会话管理功能测试", () => {
       });
     });
 
-    it("应该获取过期会话数量", async () => {
+    it('应该获取过期会话数量', async () => {
       mockCount.mockResolvedValue(10);
 
       const count = await getExpiredSessionsCount();
@@ -161,7 +161,7 @@ describe("会话管理功能测试", () => {
       });
     });
 
-    it("应该获取活跃会话数量", async () => {
+    it('应该获取活跃会话数量', async () => {
       mockCount.mockResolvedValue(25);
 
       const count = await getActiveSessionsCount();
@@ -176,7 +176,7 @@ describe("会话管理功能测试", () => {
       });
     });
 
-    it("应该正确执行完整的会话清理流程", async () => {
+    it('应该正确执行完整的会话清理流程', async () => {
       // Mock 各个函数的返回值
       mockDeleteMany.mockResolvedValue({ count: 5 });
       mockCount
@@ -195,16 +195,16 @@ describe("会话管理功能测试", () => {
       expect(mockCount).toHaveBeenCalledTimes(2);
     });
 
-    it("应该处理清理过期会话时的错误", async () => {
-      mockDeleteMany.mockRejectedValue(new Error("Database error"));
+    it('应该处理清理过期会话时的错误', async () => {
+      mockDeleteMany.mockRejectedValue(new Error('Database error'));
 
       await expect(cleanupExpiredSessions()).rejects.toThrow(
-        "清理过期会话失败",
+        '清理过期会话失败'
       );
     });
 
-    it("应该处理获取过期会话数量时的错误", async () => {
-      mockCount.mockRejectedValue(new Error("Database error"));
+    it('应该处理获取过期会话数量时的错误', async () => {
+      mockCount.mockRejectedValue(new Error('Database error'));
 
       const count = await getExpiredSessionsCount();
 
@@ -213,12 +213,12 @@ describe("会话管理功能测试", () => {
     });
   });
 
-  describe("令牌验证功能", () => {
-    it("应该正确验证有效的令牌", () => {
+  describe('令牌验证功能', () => {
+    it('应该正确验证有效的令牌', () => {
       const payload: JwtPayload = {
-        userId: "user-123",
-        email: "user@example.com",
-        role: "USER",
+        userId: 'user-123',
+        email: 'user@example.com',
+        role: 'USER',
       };
 
       const token = generateAccessToken(payload);
@@ -231,13 +231,13 @@ describe("会话管理功能测试", () => {
       expect(result.payload?.role).toBe(payload.role);
     });
 
-    it("应该拒绝无效的令牌", () => {
-      const invalidToken = "invalid.token.string";
+    it('应该拒绝无效的令牌', () => {
+      const invalidToken = 'invalid.token.string';
       const result = verifyToken(invalidToken);
 
       expect(result.valid).toBe(false);
       expect(result.payload).toBeNull();
-      expect(result.error).toBe("INVALID_TOKEN");
+      expect(result.error).toBe('INVALID_TOKEN');
     });
   });
 });

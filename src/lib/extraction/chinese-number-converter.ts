@@ -3,7 +3,7 @@
  * 负责将中文数字转换为阿拉伯数字
  */
 
-import { chineseNumberMap } from "./amount-patterns";
+import { chineseNumberMap } from './amount-patterns';
 
 /**
  * 中文数字转换配置
@@ -90,7 +90,7 @@ export class ChineseNumberConverter {
    * 将中文数字转换为阿拉伯数字
    */
   convertToNumber(chineseStr: string): number {
-    const cleaned = chineseStr.replace(/[（()（）\s]/g, "");
+    const cleaned = chineseStr.replace(/[（()（）\s]/g, '');
 
     // 优先匹配特殊表达式
     if (this.config.enableSpecialCases) {
@@ -109,7 +109,7 @@ export class ChineseNumberConverter {
     }
 
     // 处理"X万X"格式
-    if (cleaned.includes("万")) {
+    if (cleaned.includes('万')) {
       return this.parseWanFormat(cleaned);
     }
 
@@ -122,7 +122,7 @@ export class ChineseNumberConverter {
    */
   private matchSpecialCase(cleaned: string): number | null {
     const sortedSpecials = Object.entries(this.specialCases).sort(
-      (a, b) => b[0].length - a[0].length,
+      (a, b) => b[0].length - a[0].length
     );
 
     for (const [pattern, value] of sortedSpecials) {
@@ -158,13 +158,13 @@ export class ChineseNumberConverter {
    * 将中文数字转为阿拉伯数字（单个数字或简单组合）
    */
   private parseChineseToArabic(str: string): number {
-    const cleanStr = str.replace(/[元圆整]/g, "");
+    const cleanStr = str.replace(/[元圆整]/g, '');
     let result = 0;
 
     for (const char of cleanStr) {
       const num = chineseNumberMap[char];
       if (num !== undefined) {
-        if (char === "拾" && result === 0) {
+        if (char === '拾' && result === 0) {
           result = 10;
         } else {
           result += num;
@@ -179,9 +179,9 @@ export class ChineseNumberConverter {
    * 解析"X万X"格式
    */
   private parseWanFormat(cleaned: string): number {
-    const parts = cleaned.split("万");
+    const parts = cleaned.split('万');
     const wanPart = parts[0];
-    const afterWan = parts[1] || "";
+    const afterWan = parts[1] || '';
 
     // 解析"万"前面的数字
     let wanValue = 0;
@@ -221,7 +221,7 @@ export class ChineseNumberConverter {
     let total = wanValue * 10000;
 
     // 处理"万"后面的部分
-    if (afterWan && !afterWan.includes("元")) {
+    if (afterWan && !afterWan.includes('元')) {
       let subValue = 0;
       temp = 0;
       for (const char of afterWan) {

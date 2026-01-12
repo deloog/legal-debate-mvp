@@ -9,12 +9,12 @@
 // - 任务完成度验证：验证金额提取的完整性
 // =============================================================================
 
-import type { Claim } from "../core/types";
+import type { Claim } from '../core/types';
 import {
   PrecisionAmountExtractor,
   type AmountExtractionResult,
-} from "../../../extraction/amount-extractor-precision";
-import { VerificationAgent } from "../../verification-agent";
+} from '../../../extraction/amount-extractor-precision';
+import { VerificationAgent } from '../../verification-agent';
 
 // =============================================================================
 // 接口定义
@@ -44,7 +44,7 @@ export interface AmountExtractionOutput {
   validation: {
     isValid: boolean;
     issues: string[];
-    riskLevel: "low" | "medium" | "high";
+    riskLevel: 'low' | 'medium' | 'high';
   };
 }
 
@@ -66,7 +66,7 @@ export class AmountExtractor {
    */
   async extractFromText(
     text: string,
-    options: AmountExtractionOptions = {},
+    options: AmountExtractionOptions = {}
   ): Promise<AmountExtractionOutput> {
     const extractionResults =
       await this.precisionExtractor.extractWithPrecision(text);
@@ -74,14 +74,14 @@ export class AmountExtractor {
     // 过滤和处理结果
     const processedAmounts = this.processExtractionResults(
       extractionResults,
-      options,
+      options
     );
 
     // 使用VerificationAgent进行三重验证
     const verifiedAmounts = await this.verifyAmounts(
       processedAmounts,
       text,
-      options,
+      options
     );
 
     // 生成摘要
@@ -109,7 +109,7 @@ export class AmountExtractor {
       context?: string;
     }>,
     fullText: string,
-    options: AmountExtractionOptions,
+    options: AmountExtractionOptions
   ): Promise<
     Array<{
       originalText: string;
@@ -134,7 +134,7 @@ export class AmountExtractor {
       // 2. 逻辑一致性验证：验证金额在上下文中的合理性
       const logicalValid = await this.verifyLogicalConsistency(
         amount,
-        fullText,
+        fullText
       );
 
       // 3. 任务完成度验证：验证金额提取的完整性
@@ -145,7 +145,7 @@ export class AmountExtractor {
         amount.confidence,
         factualValid,
         logicalValid,
-        completenessValid,
+        completenessValid
       );
 
       verifiedAmounts.push({
@@ -171,7 +171,7 @@ export class AmountExtractor {
       const result = await this.verificationAgent.verify({
         amounts: [
           {
-            field: "extracted",
+            field: 'extracted',
             value: amount.normalizedAmount,
           },
         ],
@@ -194,14 +194,14 @@ export class AmountExtractor {
       currency: string;
       confidence: number;
     },
-    fullText: string,
+    fullText: string
   ): Promise<boolean> {
     // 检查金额在法律上下文中的合理性
     const context = this.extractContext(amount.originalText, fullText);
-    const legalKeywords = ["赔偿", "违约金", "利息", "本金", "费用", "损失"];
+    const legalKeywords = ['赔偿', '违约金', '利息', '本金', '费用', '损失'];
 
-    const hasLegalContext = legalKeywords.some((keyword) =>
-      context.includes(keyword),
+    const hasLegalContext = legalKeywords.some(keyword =>
+      context.includes(keyword)
     );
 
     // 如果有法律上下文，金额应该在合理范围内
@@ -224,7 +224,7 @@ export class AmountExtractor {
       currency: string;
       confidence: number;
     },
-    options: AmountExtractionOptions,
+    options: AmountExtractionOptions
   ): boolean {
     // 检查是否满足货币要求
     if (options.requireCurrency && !amount.currency) {
@@ -246,7 +246,7 @@ export class AmountExtractor {
     originalConfidence: number,
     factualValid: boolean,
     logicalValid: boolean,
-    completenessValid: boolean,
+    completenessValid: boolean
   ): number {
     let adjusted = originalConfidence;
 
@@ -279,7 +279,7 @@ export class AmountExtractor {
       currency: string;
       confidence: number;
     },
-    fullText: string,
+    fullText: string
   ): string {
     return this.extractContext(amount.originalText, fullText);
   }
@@ -289,7 +289,7 @@ export class AmountExtractor {
    */
   private extractContext(target: string, fullText: string): string {
     const index = fullText.indexOf(target);
-    if (index === -1) return "";
+    if (index === -1) return '';
 
     const start = Math.max(0, index - 50);
     const end = Math.min(fullText.length, index + target.length + 50);
@@ -320,12 +320,12 @@ export class AmountExtractor {
    */
   private async extractAmountFromClaim(claim: Claim): Promise<Claim> {
     // 如果已经有金额且是数字，直接返回
-    if (typeof claim.amount === "number" && claim.amount > 0) {
+    if (typeof claim.amount === 'number' && claim.amount > 0) {
       return claim;
     }
 
     // 如果有金额字符串，尝试解析
-    if (typeof claim.amount === "string") {
+    if (typeof claim.amount === 'string') {
       const result = await this.normalizeAmountString(claim.amount);
       return {
         ...claim,
@@ -354,7 +354,7 @@ export class AmountExtractor {
    */
   private processExtractionResults(
     results: AmountExtractionResult[],
-    options: AmountExtractionOptions,
+    options: AmountExtractionOptions
   ): Array<{
     originalText: string;
     normalizedAmount: number;
@@ -363,7 +363,7 @@ export class AmountExtractor {
     context?: string;
   }> {
     const processed = results
-      .filter((result) => {
+      .filter(result => {
         // 过滤无意义的原始文本（如纯单位）
         if (result.originalText.length < 2) {
           return false;
@@ -376,7 +376,7 @@ export class AmountExtractor {
 
         return result.normalizedAmount > 0;
       })
-      .map((result) => ({
+      .map(result => ({
         originalText: result.originalText,
         normalizedAmount: result.normalizedAmount,
         currency: result.currency,
@@ -398,7 +398,7 @@ export class AmountExtractor {
       currency: string;
       confidence: number;
       context?: string;
-    }>,
+    }>
   ): Array<{
     originalText: string;
     normalizedAmount: number;
@@ -436,10 +436,10 @@ export class AmountExtractor {
       currency: string;
       confidence: number;
       context?: string;
-    }>,
+    }>
   ): { total: number; count: number; average: number; currency: string } {
     if (amounts.length === 0) {
-      return { total: 0, count: 0, average: 0, currency: "CNY" };
+      return { total: 0, count: 0, average: 0, currency: 'CNY' };
     }
 
     const total = amounts.reduce((sum, a) => sum + a.normalizedAmount, 0);
@@ -460,11 +460,11 @@ export class AmountExtractor {
       currency: string;
       confidence: number;
       context?: string;
-    }>,
+    }>
   ): {
     isValid: boolean;
     issues: string[];
-    riskLevel: "low" | "medium" | "high";
+    riskLevel: 'low' | 'medium' | 'high';
   } {
     const issues: string[] = [];
 
@@ -480,9 +480,9 @@ export class AmountExtractor {
     }
 
     // 检查货币一致性
-    const currencies = new Set(amounts.map((a) => a.currency));
+    const currencies = new Set(amounts.map(a => a.currency));
     if (currencies.size > 1) {
-      issues.push(`多种货币单位: ${Array.from(currencies).join(", ")}`);
+      issues.push(`多种货币单位: ${Array.from(currencies).join(', ')}`);
     }
 
     // 计算风险等级
@@ -500,13 +500,13 @@ export class AmountExtractor {
    */
   private calculateRiskLevel(
     issues: string[],
-    total: number,
-  ): "low" | "medium" | "high" {
+    total: number
+  ): 'low' | 'medium' | 'high' {
     const ratio = issues.length / Math.max(total, 1);
 
-    if (ratio === 0) return "low";
-    if (ratio <= 0.3) return "medium";
-    return "high";
+    if (ratio === 0) return 'low';
+    if (ratio <= 0.3) return 'medium';
+    return 'high';
   }
 
   /**
@@ -530,7 +530,7 @@ export class AmountExtractor {
       currency: string;
       confidence: number;
       context?: string;
-    }>,
+    }>
   ): {
     originalText: string;
     normalizedAmount: number;
@@ -539,7 +539,7 @@ export class AmountExtractor {
     context?: string;
   } {
     if (amounts.length === 0) {
-      throw new Error("没有可用的金额");
+      throw new Error('没有可用的金额');
     }
 
     return amounts.sort((a, b) => b.confidence - a.confidence)[0];
@@ -562,7 +562,7 @@ export class AmountExtractor {
   /**
    * 检查金额是否合理
    */
-  isAmountReasonable(amount: number, currency: string = "CNY"): boolean {
+  isAmountReasonable(amount: number, currency: string = 'CNY'): boolean {
     // 金额必须大于0
     if (amount <= 0) return false;
 
@@ -581,18 +581,18 @@ export class AmountExtractor {
   /**
    * 格式化金额用于显示
    */
-  formatAmount(amount: number, currency: string = "CNY"): string {
-    const formatted = amount.toLocaleString("zh-CN", {
+  formatAmount(amount: number, currency: string = 'CNY'): string {
+    const formatted = amount.toLocaleString('zh-CN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
 
     const currencySymbols: { [key: string]: string } = {
-      CNY: "¥",
-      USD: "$",
-      EUR: "€",
-      GBP: "£",
-      HKD: "HK$",
+      CNY: '¥',
+      USD: '$',
+      EUR: '€',
+      GBP: '£',
+      HKD: 'HK$',
     };
 
     const symbol = currencySymbols[currency] || currency;
@@ -616,7 +616,7 @@ export function createAmountExtractor(): AmountExtractor {
  */
 export async function extractBestAmount(
   text: string,
-  currency?: string,
+  currency?: string
 ): Promise<{ amount: number; currency: string; confidence: number } | null> {
   const extractor = createAmountExtractor();
   const result = await extractor.extractFromText(text, { currency });

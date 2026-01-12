@@ -1,19 +1,19 @@
-import crypto from "crypto";
-import { cacheManager } from "../cache/manager";
+import crypto from 'crypto';
+import { cacheManager } from '../cache/manager';
 import type {
   SearchCacheKey,
   SearchCacheValue,
   SearchStatistics,
-} from "./types";
+} from './types';
 
 /**
  * 法条检索缓存管理器
  * 负责管理检索结果的缓存
  */
 export class SearchCacheManager {
-  private static readonly CACHE_PREFIX = "law_article_search";
+  private static readonly CACHE_PREFIX = 'law_article_search';
   private static readonly DEFAULT_TTL = 5 * 60; // 5分钟（秒）
-  private static readonly CACHE_KEY_SEPARATOR = ":";
+  private static readonly CACHE_KEY_SEPARATOR = ':';
 
   /**
    * 生成缓存键
@@ -31,10 +31,10 @@ export class SearchCacheManager {
       keyParts.push(`sub:${key.subCategory.trim().toLowerCase()}`);
     }
     if (key.tags && key.tags.length > 0) {
-      keyParts.push(`tags:${key.tags.sort().join(",")}`);
+      keyParts.push(`tags:${key.tags.sort().join(',')}`);
     }
     if (key.sortField) {
-      keyParts.push(`sort:${key.sortField}:${key.sortOrder || "desc"}`);
+      keyParts.push(`sort:${key.sortField}:${key.sortOrder || 'desc'}`);
     }
     if (key.page) {
       keyParts.push(`page:${key.page}`);
@@ -46,7 +46,7 @@ export class SearchCacheManager {
     // 如果键太长，使用SHA256哈希
     const keyString = keyParts.join(this.CACHE_KEY_SEPARATOR);
     if (keyString.length > 200) {
-      return `${this.CACHE_PREFIX}:hash:${crypto.createHash("sha256").update(keyString).digest("hex")}`;
+      return `${this.CACHE_PREFIX}:hash:${crypto.createHash('sha256').update(keyString).digest('hex')}`;
     }
 
     return keyString;
@@ -75,7 +75,7 @@ export class SearchCacheManager {
 
       return null;
     } catch (error) {
-      console.error("Error getting search cache:", error);
+      console.error('Error getting search cache:', error);
       return null;
     }
   }
@@ -86,7 +86,7 @@ export class SearchCacheManager {
   static async setCache(
     key: SearchCacheKey,
     value: SearchCacheValue,
-    ttl?: number,
+    ttl?: number
   ): Promise<void> {
     try {
       const cacheKey = this.generateCacheKey(key);
@@ -94,7 +94,7 @@ export class SearchCacheManager {
 
       await cacheManager.set(cacheKey, value, { ttl: cacheTTL });
     } catch (error) {
-      console.error("Error setting search cache:", error);
+      console.error('Error setting search cache:', error);
     }
   }
 
@@ -106,7 +106,7 @@ export class SearchCacheManager {
       const cacheKey = this.generateCacheKey(key);
       await cacheManager.delete(cacheKey);
     } catch (error) {
-      console.error("Error deleting search cache:", error);
+      console.error('Error deleting search cache:', error);
     }
   }
 
@@ -120,7 +120,7 @@ export class SearchCacheManager {
       console.log(`Clearing all cache with prefix: ${this.CACHE_PREFIX}`);
       // TODO: 实现按前缀清除缓存
     } catch (error) {
-      console.error("Error clearing all search cache:", error);
+      console.error('Error clearing all search cache:', error);
     }
   }
 
@@ -134,7 +134,7 @@ export class SearchCacheManager {
 
       await cacheManager.set(viewKey, currentViews + 1, { ttl: 60 * 60 });
     } catch (error) {
-      console.error("Error incrementing view count:", error);
+      console.error('Error incrementing view count:', error);
     }
   }
 
@@ -146,7 +146,7 @@ export class SearchCacheManager {
       const viewKey = `${this.CACHE_PREFIX}:views:${articleId}`;
       return (await cacheManager.get<number>(viewKey)) || 0;
     } catch (error) {
-      console.error("Error getting view count:", error);
+      console.error('Error getting view count:', error);
       return 0;
     }
   }
@@ -171,7 +171,7 @@ export class SearchCacheManager {
 
       await cacheManager.set(statsKey, newStats, { ttl: 60 * 60 });
     } catch (error) {
-      console.error("Error recording search stats:", error);
+      console.error('Error recording search stats:', error);
     }
   }
 
@@ -196,7 +196,7 @@ export class SearchCacheManager {
         await cacheManager.set(statsKey, newStats, { ttl: 60 * 60 });
       }
     } catch (error) {
-      console.error("Error recording cache hit:", error);
+      console.error('Error recording cache hit:', error);
     }
   }
 
@@ -208,7 +208,7 @@ export class SearchCacheManager {
       const statsKey = `${this.CACHE_PREFIX}:stats`;
       return await cacheManager.get<SearchStatistics>(statsKey);
     } catch (error) {
-      console.error("Error getting search statistics:", error);
+      console.error('Error getting search statistics:', error);
       return null;
     }
   }
@@ -221,7 +221,7 @@ export class SearchCacheManager {
       const statsKey = `${this.CACHE_PREFIX}:stats`;
       await cacheManager.delete(statsKey);
     } catch (error) {
-      console.error("Error resetting search statistics:", error);
+      console.error('Error resetting search statistics:', error);
     }
   }
 
@@ -230,16 +230,16 @@ export class SearchCacheManager {
    */
   static async warmUpCache(
     queries: SearchCacheKey[],
-    values: SearchCacheValue[],
+    values: SearchCacheValue[]
   ): Promise<void> {
     try {
       const promises = queries.map((key, index) =>
-        this.setCache(key, values[index]),
+        this.setCache(key, values[index])
       );
 
       await Promise.all(promises);
     } catch (error) {
-      console.error("Error warming up cache:", error);
+      console.error('Error warming up cache:', error);
     }
   }
 }

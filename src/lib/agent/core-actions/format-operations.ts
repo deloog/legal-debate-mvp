@@ -3,7 +3,7 @@
  * 包含：格式转换功能
  */
 
-import type { FormatTransformResult } from "./types";
+import type { FormatTransformResult } from './types';
 
 /**
  * transform_format - 格式转换（别名函数）
@@ -12,7 +12,7 @@ import type { FormatTransformResult } from "./types";
 export async function transform_format(
   sourceFormat: string,
   targetFormat: string,
-  data: unknown,
+  data: unknown
 ): Promise<FormatTransformResult> {
   return format_transform({
     sourceFormat,
@@ -34,7 +34,7 @@ export async function format_transform(params: {
   const warnings: string[] = [];
   let transformed: unknown = data;
 
-  const supportedFormats = ["json", "text", "object"];
+  const supportedFormats = ['json', 'text', 'object'];
   if (
     !supportedFormats.includes(sourceFormat) ||
     !supportedFormats.includes(targetFormat)
@@ -48,18 +48,18 @@ export async function format_transform(params: {
     };
   }
 
-  if (sourceFormat === "json" && targetFormat === "text") {
+  if (sourceFormat === 'json' && targetFormat === 'text') {
     transformed = JSON.stringify(data, null, 2);
-  } else if (sourceFormat === "text" && targetFormat === "json") {
+  } else if (sourceFormat === 'text' && targetFormat === 'json') {
     try {
       transformed = JSON.parse(data as string);
     } catch {
       transformed = { content: data };
     }
-  } else if (sourceFormat === "object" && targetFormat === "json") {
+  } else if (sourceFormat === 'object' && targetFormat === 'json') {
     transformed = JSON.stringify(data);
   } else {
-    warnings.push("No transformation needed");
+    warnings.push('No transformation needed');
   }
 
   return {

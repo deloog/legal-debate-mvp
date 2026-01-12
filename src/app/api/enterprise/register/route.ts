@@ -2,11 +2,11 @@
  * 企业注册API
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { getAuthUser } from "@/lib/middleware/auth";
-import { createEnterpriseAccount } from "@/lib/enterprise/service";
-import { validateEnterpriseRegistration } from "@/lib/enterprise/validator";
-import type { EnterpriseRegisterRequest } from "@/types/enterprise";
+import { NextRequest, NextResponse } from 'next/server';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { createEnterpriseAccount } from '@/lib/enterprise/service';
+import { validateEnterpriseRegistration } from '@/lib/enterprise/validator';
+import type { EnterpriseRegisterRequest } from '@/types/enterprise';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,10 +16,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "未登录",
-          error: "UNAUTHORIZED",
+          message: '未登录',
+          error: 'UNAUTHORIZED',
         },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -45,10 +45,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "输入数据验证失败",
+          message: '输入数据验证失败',
           errors: validation.errors,
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -64,10 +64,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        message: "企业注册成功，等待审核",
+        message: '企业注册成功，等待审核',
         data: { enterprise: enterpriseAccount },
       },
-      { status: 201 },
+      { status: 201 }
     );
   } catch (error) {
     if (error instanceof Error) {
@@ -77,17 +77,17 @@ export async function POST(request: NextRequest) {
           message: error.message,
           error: error.name,
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     return NextResponse.json(
       {
         success: false,
-        message: "服务器内部错误",
-        error: "INTERNAL_SERVER_ERROR",
+        message: '服务器内部错误',
+        error: 'INTERNAL_SERVER_ERROR',
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

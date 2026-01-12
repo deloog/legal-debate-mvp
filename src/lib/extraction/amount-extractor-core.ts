@@ -3,12 +3,12 @@
  * 负责金额提取的主要逻辑
  */
 
-import { chineseNumberPatterns, extractCurrency } from "./amount-patterns";
-import { ChineseNumberConverter } from "./chinese-number-converter";
+import { chineseNumberPatterns, extractCurrency } from './amount-patterns';
+import { ChineseNumberConverter } from './chinese-number-converter';
 import {
   AmountValidator,
   type AmountExtractionResult,
-} from "./amount-validator";
+} from './amount-validator';
 
 /**
  * 金额提取核心配置
@@ -29,7 +29,7 @@ export class AmountExtractorCore {
 
   constructor(config?: AmountExtractorConfig) {
     this.config = {
-      currency: "CNY",
+      currency: 'CNY',
       minConfidence: 0.5,
       enableContextValidation: true,
       ...config,
@@ -85,9 +85,9 @@ export class AmountExtractorCore {
           const result: AmountExtractionResult = {
             originalText: match[0],
             normalizedAmount: 0,
-            currency: "CNY",
+            currency: 'CNY',
             confidence: 0.8,
-            extractionMethod: "regex",
+            extractionMethod: 'regex',
             processingNotes: [],
           };
 
@@ -98,7 +98,7 @@ export class AmountExtractorCore {
           // 处理模糊金额
           if (this.isFuzzyAmount(match[0])) {
             result.confidence = 0.6;
-            result.processingNotes.push("模糊金额表达");
+            result.processingNotes.push('模糊金额表达');
           }
 
           // 处理范围金额
@@ -125,15 +125,15 @@ export class AmountExtractorCore {
    */
   private isFuzzyAmount(text: string): boolean {
     const fuzzyKeywords = [
-      "约",
-      "大概",
-      "大约",
-      "左右",
-      "差不多",
-      "接近",
-      "近",
+      '约',
+      '大概',
+      '大约',
+      '左右',
+      '差不多',
+      '接近',
+      '近',
     ];
-    return fuzzyKeywords.some((keyword) => text.includes(keyword));
+    return fuzzyKeywords.some(keyword => text.includes(keyword));
   }
 
   /**
@@ -145,7 +145,7 @@ export class AmountExtractorCore {
 
     // 按优先级排序
     const chinesePatterns = [...chineseNumberPatterns.chineseNumbers].sort(
-      (a, b) => b.priority - a.priority,
+      (a, b) => b.priority - a.priority
     );
 
     for (const { pattern } of chinesePatterns) {
@@ -156,8 +156,8 @@ export class AmountExtractorCore {
 
           // 跳过无效匹配
           if (
-            matchedText === "万" ||
-            matchedText === "万元" ||
+            matchedText === '万' ||
+            matchedText === '万元' ||
             matchedText.length < 1
           ) {
             continue;
@@ -187,10 +187,10 @@ export class AmountExtractorCore {
           const result: AmountExtractionResult = {
             originalText: matchedText,
             normalizedAmount: 0,
-            currency: "CNY",
+            currency: 'CNY',
             confidence: 0.9,
-            extractionMethod: "regex",
-            processingNotes: ["中文数字识别"],
+            extractionMethod: 'regex',
+            processingNotes: ['中文数字识别'],
           };
 
           result.normalizedAmount =
@@ -220,10 +220,10 @@ export class AmountExtractorCore {
           const result: AmountExtractionResult = {
             originalText: match[0],
             normalizedAmount: 0,
-            currency: "CNY",
+            currency: 'CNY',
             confidence: 0.85,
-            extractionMethod: "regex",
-            processingNotes: ["混合格式解析"],
+            extractionMethod: 'regex',
+            processingNotes: ['混合格式解析'],
           };
 
           const numberPart = match[1];
@@ -244,8 +244,8 @@ export class AmountExtractorCore {
    * 解析数字字符串
    */
   private parseNumericString(str: string): number {
-    const cleanStr = str.replace(/[^\d.,]/g, "");
-    const noCommas = cleanStr.replace(/,/g, "");
+    const cleanStr = str.replace(/[^\d.,]/g, '');
+    const noCommas = cleanStr.replace(/,/g, '');
     const num = parseFloat(noCommas);
     return isNaN(num) ? 0 : num;
   }
@@ -254,7 +254,7 @@ export class AmountExtractorCore {
    * 合并和去重
    */
   private mergeAndDeduplicate(
-    matches: AmountExtractionResult[],
+    matches: AmountExtractionResult[]
   ): AmountExtractionResult[] {
     const seen = new Set<string>();
     const filtered1: AmountExtractionResult[] = [];
@@ -278,7 +278,7 @@ export class AmountExtractorCore {
         if (
           this.validator.areAmountsSimilar(
             match.normalizedAmount,
-            parseFloat(processedKey.split("_")[0]),
+            parseFloat(processedKey.split('_')[0])
           )
         ) {
           hasSimilar = true;
@@ -315,7 +315,7 @@ export class AmountExtractorCore {
    */
   private contextualValidation(
     results: AmountExtractionResult[],
-    fullText: string,
+    fullText: string
   ): AmountExtractionResult[] {
     const validatedResults: AmountExtractionResult[] = [];
 
@@ -325,10 +325,10 @@ export class AmountExtractorCore {
 
       if (isInLegalContext) {
         result.confidence = Math.min(result.confidence + 0.1, 1.0);
-        result.processingNotes.push("法律上下文验证通过");
+        result.processingNotes.push('法律上下文验证通过');
       } else {
         result.confidence = Math.max(result.confidence - 0.2, 0.3);
-        result.processingNotes.push("法律上下文验证未通过");
+        result.processingNotes.push('法律上下文验证未通过');
       }
 
       validatedResults.push(result);
@@ -342,7 +342,7 @@ export class AmountExtractorCore {
    */
   private extractContext(target: string, fullText: string): string {
     const index = fullText.indexOf(target);
-    if (index === -1) return "";
+    if (index === -1) return '';
 
     const start = Math.max(0, index - 50);
     const end = Math.min(fullText.length, index + target.length + 50);
@@ -354,7 +354,7 @@ export class AmountExtractorCore {
    * 获取最佳金额提取结果
    */
   getBestExtraction(
-    results: AmountExtractionResult[],
+    results: AmountExtractionResult[]
   ): AmountExtractionResult | null {
     if (results.length === 0) return null;
 
@@ -363,14 +363,14 @@ export class AmountExtractorCore {
         return b.confidence - a.confidence;
       }
       if (
-        a.extractionMethod === "ai_confirmed" &&
-        b.extractionMethod !== "ai_confirmed"
+        a.extractionMethod === 'ai_confirmed' &&
+        b.extractionMethod !== 'ai_confirmed'
       ) {
         return -1;
       }
       if (
-        b.extractionMethod === "ai_confirmed" &&
-        a.extractionMethod !== "ai_confirmed"
+        b.extractionMethod === 'ai_confirmed' &&
+        a.extractionMethod !== 'ai_confirmed'
       ) {
         return 1;
       }
@@ -385,38 +385,38 @@ export class AmountExtractorCore {
    */
   generateExtractionReport(results: AmountExtractionResult[]): string {
     if (results.length === 0) {
-      return "未检测到金额信息";
+      return '未检测到金额信息';
     }
 
     const best = this.getBestExtraction(results);
     const validation = this.validator.validateAmountConsistency(results);
 
-    let report = "金额提取报告\n";
-    report += "===================\n";
+    let report = '金额提取报告\n';
+    report += '===================\n';
 
     if (best) {
       report += `最佳提取结果: ${best.originalText} → ${best.normalizedAmount} ${best.currency}\n`;
       report += `置信度: ${(best.confidence * 100).toFixed(1)}%\n`;
       report += `提取方法: ${best.extractionMethod}\n`;
       if (best.processingNotes.length > 0) {
-        report += `处理说明: ${best.processingNotes.join(", ")}\n`;
+        report += `处理说明: ${best.processingNotes.join(', ')}\n`;
       }
     }
 
-    report += "\n验证结果:\n";
-    report += `有效性: ${validation.isValid ? "✅ 通过" : "❌ 存在问题"}\n`;
+    report += '\n验证结果:\n';
+    report += `有效性: ${validation.isValid ? '✅ 通过' : '❌ 存在问题'}\n`;
     report += `风险等级: ${validation.riskLevel}\n`;
 
     if (validation.inconsistencies.length > 0) {
-      report += "发现的问题:\n";
-      validation.inconsistencies.forEach((issue) => {
+      report += '发现的问题:\n';
+      validation.inconsistencies.forEach(issue => {
         report += `  - ${issue}\n`;
       });
     }
 
     if (validation.suggestions.length > 0) {
-      report += "建议:\n";
-      validation.suggestions.forEach((suggestion) => {
+      report += '建议:\n';
+      validation.suggestions.forEach(suggestion => {
         report += `  - ${suggestion}\n`;
       });
     }

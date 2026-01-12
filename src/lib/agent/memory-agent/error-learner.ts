@@ -3,15 +3,15 @@
  * 从error_logs表学习错误模式，更新知识库
  */
 
-import { v4 as uuidv4 } from "uuid";
-import { PrismaClient, ErrorType } from "@prisma/client";
+import { v4 as uuidv4 } from 'uuid';
+import { PrismaClient, ErrorType } from '@prisma/client';
 
-import { AIService } from "@/lib/ai/service-refactored";
-import { MemoryManager } from "./memory-manager";
-import { ErrorPatternAnalyzer } from "./error-learner/analyzer";
-import { AIHelpers } from "./error-learner/ai-helpers";
-import { KnowledgeBaseUpdater } from "./error-learner/knowledge-base";
-import type { LearningResult, ErrorAnalysis } from "./types";
+import { AIService } from '@/lib/ai/service-refactored';
+import { MemoryManager } from './memory-manager';
+import { ErrorPatternAnalyzer } from './error-learner/analyzer';
+import { AIHelpers } from './error-learner/ai-helpers';
+import { KnowledgeBaseUpdater } from './error-learner/knowledge-base';
+import type { LearningResult, ErrorAnalysis } from './types';
 
 /**
  * ErrorLearner - 错误学习类
@@ -24,7 +24,7 @@ export class ErrorLearner {
   constructor(
     private prisma: PrismaClient,
     private aiService: AIService,
-    private memoryManager: MemoryManager,
+    private memoryManager: MemoryManager
   ) {
     this.analyzer = new ErrorPatternAnalyzer(prisma, aiService);
     this.aiHelpers = new AIHelpers(aiService);
@@ -56,7 +56,7 @@ export class ErrorLearner {
     // AI生成学习笔记
     const learningNotes = await this.aiHelpers.generateLearningNotes(
       error,
-      pattern,
+      pattern
     );
 
     // 提取预防措施
@@ -71,7 +71,7 @@ export class ErrorLearner {
           userId: error.userId,
         },
         pattern,
-        preventionMeasures,
+        preventionMeasures
       );
 
     // 标记错误已学习
@@ -105,7 +105,7 @@ export class ErrorLearner {
       },
       take: limit,
       orderBy: {
-        createdAt: "asc",
+        createdAt: 'asc',
       },
     });
 
@@ -155,7 +155,7 @@ export class ErrorLearner {
         errorCode: error.errorCode,
         errorMessage: error.errorMessage,
       },
-      pattern,
+      pattern
     );
 
     return {

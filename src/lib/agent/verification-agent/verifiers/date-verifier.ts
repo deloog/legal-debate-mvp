@@ -8,7 +8,7 @@ import {
   IssueSeverity,
   VerificationIssue,
   IssueCategory,
-} from "../types";
+} from '../types';
 
 /**
  * 源数据接口（用于对比验证）
@@ -34,7 +34,7 @@ export class DateVerifier {
   async verify(
     data: DataToVerify,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    source?: SourceData,
+    source?: SourceData
   ): Promise<DateVerification> {
     const issues: string[] = [];
     const details = {
@@ -47,7 +47,7 @@ export class DateVerifier {
       return {
         passed: false,
         details,
-        issues: ["未提供日期数据"],
+        issues: ['未提供日期数据'],
       };
     }
 
@@ -69,7 +69,7 @@ export class DateVerifier {
       }
 
       // 逻辑验证（日期不能过早）
-      if (date < new Date("1900-01-01")) {
+      if (date < new Date('1900-01-01')) {
         details.logicalValid = false;
         issues.push(`字段${dateItem.field}的日期过早`);
       }
@@ -83,7 +83,7 @@ export class DateVerifier {
         if (parsedDates[i].date > parsedDates[i + 1].date) {
           details.chronologicalValid = false;
           issues.push(
-            `时间顺序错误：${parsedDates[i].field}晚于${parsedDates[i + 1].field}`,
+            `时间顺序错误：${parsedDates[i].field}晚于${parsedDates[i + 1].field}`
           );
         }
       }
@@ -130,7 +130,7 @@ export class DateVerifier {
         severity: IssueSeverity.MEDIUM,
         category: IssueCategory.FACTUAL,
         message: issue,
-        detectedBy: "factual",
+        detectedBy: 'factual',
       });
     }
 

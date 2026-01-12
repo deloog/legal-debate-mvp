@@ -4,10 +4,10 @@
  * 整合法律检索、适用性分析、论点生成、法律推理等功能
  */
 
-import { LawSearcher } from "./law-searcher";
-import { ApplicabilityAnalyzer } from "./applicability-analyzer";
-import { ArgumentGenerator } from "./argument-generator";
-import { LegalReasoner } from "./legal-reasoner";
+import { LawSearcher } from './law-searcher';
+import { ApplicabilityAnalyzer } from './applicability-analyzer';
+import { ArgumentGenerator } from './argument-generator';
+import { LegalReasoner } from './legal-reasoner';
 import type {
   LegalAgentConfig,
   LegalQuery,
@@ -20,7 +20,7 @@ import type {
   LogicValidationResult,
   LegalBasis,
   Argument,
-} from "./types";
+} from './types';
 
 // =============================================================================
 // LegalAgent类
@@ -68,7 +68,7 @@ export class LegalAgent {
    * 分析法条适用性
    */
   async analyzeApplicability(
-    input: ApplicabilityAnalysisInput,
+    input: ApplicabilityAnalysisInput
   ): Promise<ApplicabilityResult> {
     return this.analyzer.analyze(input, {
       threshold: this.config.applicabilityThreshold,
@@ -81,7 +81,7 @@ export class LegalAgent {
    */
   async generateArguments(
     legalBasis: LegalBasis,
-    side: "PLAINTIFF" | "DEFENDANT" = "PLAINTIFF",
+    side: 'PLAINTIFF' | 'DEFENDANT' = 'PLAINTIFF'
   ): Promise<ArgumentGenerationResult> {
     return this.argumentGenerator.generate(legalBasis, {
       mainCount: this.config.argumentCount.main,
@@ -97,14 +97,14 @@ export class LegalAgent {
   async generateRebuttal(
     legalBasis: LegalBasis,
     counterArguments: Argument[],
-    side: "PLAINTIFF" | "DEFENDANT" = "DEFENDANT",
+    side: 'PLAINTIFF' | 'DEFENDANT' = 'DEFENDANT'
   ): Promise<ArgumentGenerationResult> {
     return this.argumentGenerator.generateRebuttal(
       legalBasis,
       counterArguments,
       {
         side,
-      },
+      }
     );
   }
 
@@ -113,11 +113,11 @@ export class LegalAgent {
    */
   async buildReasoningChain(
     facts: Fact[],
-    laws: unknown[],
+    laws: unknown[]
   ): Promise<ReasoningChain> {
     return this.reasoner.buildReasoningChain(facts, laws as never, {
       maxSteps: this.config.maxReasoningSteps,
-      reasoningType: "deductive",
+      reasoningType: 'deductive',
       minConfidence: 0.5,
     });
   }
@@ -144,7 +144,7 @@ export class LegalAgent {
     /** 事实列表 */
     facts: Fact[];
     /** 论点方向 */
-    side?: "PLAINTIFF" | "DEFENDANT";
+    side?: 'PLAINTIFF' | 'DEFENDANT';
   }) {
     // 1. 搜索相关法条
     const searchResult = await this.searchLaws({
@@ -161,7 +161,7 @@ export class LegalAgent {
         argumentResult: null,
         reasoningChain: null,
         validation: null,
-        error: "未找到相关法条",
+        error: '未找到相关法条',
       };
     }
 
@@ -178,25 +178,25 @@ export class LegalAgent {
         argumentResult: null,
         reasoningChain: null,
         validation: null,
-        error: "未找到适用的法条",
+        error: '未找到适用的法条',
       };
     }
 
     // 3. 生成论点
     const legalBasis: LegalBasis = {
       articles: applicabilityResult.applicableArticles,
-      facts: input.facts.map((f) => f.content),
+      facts: input.facts.map(f => f.content),
     };
 
     const argumentResult = await this.generateArguments(
       legalBasis,
-      input.side || "PLAINTIFF",
+      input.side || 'PLAINTIFF'
     );
 
     // 4. 构建推理链
     const reasoningChain = await this.buildReasoningChain(
       input.facts,
-      applicabilityResult.applicableArticles,
+      applicabilityResult.applicableArticles
     );
 
     // 5. 验证推理逻辑
@@ -222,8 +222,8 @@ export class LegalAgent {
       lawType?: string;
       caseInfo: unknown;
       facts: Fact[];
-      side?: "PLAINTIFF" | "DEFENDANT";
-    }>,
+      side?: 'PLAINTIFF' | 'DEFENDANT';
+    }>
   ) {
     const results = [];
 

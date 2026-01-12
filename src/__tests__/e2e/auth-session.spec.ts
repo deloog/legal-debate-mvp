@@ -2,21 +2,21 @@
  * 用户会话管理测试
  */
 
-import { expect, test } from "@playwright/test";
-import { createTestUser, loginUser } from "./auth-helpers";
+import { expect, test } from '@playwright/test';
+import { createTestUser, loginUser } from './auth-helpers';
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
-test.describe("用户会话管理", () => {
-  test.skip("应该成功刷新访问令牌", async ({ request }) => {
+test.describe('用户会话管理', () => {
+  test.skip('应该成功刷新访问令牌', async ({ request }) => {
     const testUser = await createTestUser(request);
     // 使用login而不是register返回的token，避免register创建session问题
     const { token, refreshToken: refreshTokenValue } = await loginUser(
       request,
       testUser.email,
-      testUser.password,
+      testUser.password
     );
-    console.log("[TEST] Got tokens from login:", {
+    console.log('[TEST] Got tokens from login:', {
       hasToken: !!token,
       hasRefreshToken: !!refreshTokenValue,
       refreshTokenLength: refreshTokenValue.length,
@@ -27,7 +27,7 @@ test.describe("用户会话管理", () => {
     });
 
     const refreshData = await refreshResponse.json();
-    console.log("[TEST] Refresh API response:", {
+    console.log('[TEST] Refresh API response:', {
       status: refreshResponse.status(),
       success: refreshData.success,
       message: refreshData.message,
@@ -41,11 +41,11 @@ test.describe("用户会话管理", () => {
     expect(refreshData.data?.expiresIn).toBe(15 * 60);
   });
 
-  test("应该支持登出当前设备", async ({ request }) => {
+  test('应该支持登出当前设备', async ({ request }) => {
     const testUser = await createTestUser(request);
-    const token = testUser.token || "";
-    const refreshTokenValue = testUser.refreshToken || "";
-    console.log("[TEST] Got tokens for logout current:", {
+    const token = testUser.token || '';
+    const refreshTokenValue = testUser.refreshToken || '';
+    console.log('[TEST] Got tokens for logout current:', {
       hasRefreshToken: !!refreshTokenValue,
       refreshTokenLength: refreshTokenValue.length,
     });
@@ -60,7 +60,7 @@ test.describe("用户会话管理", () => {
     });
 
     const logoutData = await logoutResponse.json();
-    console.log("[TEST] Logout API response:", {
+    console.log('[TEST] Logout API response:', {
       status: logoutResponse.status(),
       success: logoutData.success,
       message: logoutData.message,
@@ -68,7 +68,7 @@ test.describe("用户会话管理", () => {
     });
     expect(logoutResponse.ok()).toBeTruthy();
     expect(logoutData.success).toBe(true);
-    expect(logoutData.message).toContain("登出");
+    expect(logoutData.message).toContain('登出');
 
     // 注意：登出后，access token在过期前仍然有效（JWT是无状态的）
     // 只有refresh token被删除，无法使用refresh token刷新
@@ -78,11 +78,11 @@ test.describe("用户会话管理", () => {
     expect(refreshResponse.status()).toBe(401);
   });
 
-  test("应该支持登出所有设备", async ({ request }) => {
+  test('应该支持登出所有设备', async ({ request }) => {
     const testUser = await createTestUser(request);
-    const token = testUser.token || "";
-    const refreshTokenValue = testUser.refreshToken || "";
-    console.log("[TEST] Got tokens for logout all:", {
+    const token = testUser.token || '';
+    const refreshTokenValue = testUser.refreshToken || '';
+    console.log('[TEST] Got tokens for logout all:', {
       hasRefreshToken: !!refreshTokenValue,
       refreshTokenLength: refreshTokenValue.length,
     });
@@ -97,7 +97,7 @@ test.describe("用户会话管理", () => {
     });
 
     const logoutData = await logoutResponse.json();
-    console.log("[TEST] Logout all devices API response:", {
+    console.log('[TEST] Logout all devices API response:', {
       status: logoutResponse.status(),
       success: logoutData.success,
       message: logoutData.message,
@@ -105,12 +105,12 @@ test.describe("用户会话管理", () => {
     });
     expect(logoutResponse.ok()).toBeTruthy();
     expect(logoutData.success).toBe(true);
-    expect(logoutData.message).toContain("所有设备");
+    expect(logoutData.message).toContain('所有设备');
   });
 
-  test("过期的令牌应该被拒绝", async ({ request }) => {
+  test('过期的令牌应该被拒绝', async ({ request }) => {
     const expiredToken =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJleGFtcGxlIiwiaWF0IjoxNjAwMDAwMDAwLCJleHAiOjE2MDAwMDAwMDF9.invalid";
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJleGFtcGxlIiwiaWF0IjoxNjAwMDAwMDAwLCJleHAiOjE2MDAwMDAwMDF9.invalid';
 
     const response = await request.get(`${BASE_URL}/api/auth/me`, {
       headers: { Authorization: `Bearer ${expiredToken}` },

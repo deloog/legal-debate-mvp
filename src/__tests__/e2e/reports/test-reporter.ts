@@ -3,7 +3,7 @@
  * 生成标准化的E2E测试报告
  */
 
-import fs from "fs";
+import fs from 'fs';
 
 // Playwright类型定义
 interface TestCase {
@@ -12,7 +12,7 @@ interface TestCase {
 }
 
 interface TestResult {
-  status: "passed" | "failed" | "skipped";
+  status: 'passed' | 'failed' | 'skipped';
   duration: number;
   title?: string;
   error?: { message: string };
@@ -62,7 +62,7 @@ export interface TestResultSummary {
 
 export interface TestCaseResult {
   name: string;
-  status: "passed" | "failed" | "skipped";
+  status: 'passed' | 'failed' | 'skipped';
   duration: number;
   error?: string;
 }
@@ -74,7 +74,7 @@ export interface DataConsistencyResults {
 
 export interface ConsistencyCheck {
   name: string;
-  status: "passed" | "failed";
+  status: 'passed' | 'failed';
   message: string;
 }
 
@@ -85,7 +85,7 @@ export interface CoverageStats {
 }
 
 export interface TestIssue {
-  severity: "high" | "medium" | "low";
+  severity: 'high' | 'medium' | 'low';
   category: string;
   description: string;
   affectedTests: string[];
@@ -96,8 +96,8 @@ export class E2ETestReporter {
   private startTime: number = Date.now();
 
   onBegin(): void {
-    console.log("=== E2E测试开始 ===");
-    console.log(`测试环境: ${process.env.NODE_ENV || "development"}`);
+    console.log('=== E2E测试开始 ===');
+    console.log(`测试环境: ${process.env.NODE_ENV || 'development'}`);
     console.log(`开始时间: ${new Date().toISOString()}`);
   }
 
@@ -124,9 +124,9 @@ export class E2ETestReporter {
 
     const summary: Summary = {
       totalTests: allResults.length,
-      passed: allResults.filter((r) => r.status === "passed").length,
-      failed: allResults.filter((r) => r.status === "failed").length,
-      skipped: allResults.filter((r) => r.status === "skipped").length,
+      passed: allResults.filter(r => r.status === 'passed').length,
+      failed: allResults.filter(r => r.status === 'failed').length,
+      skipped: allResults.filter(r => r.status === 'skipped').length,
       passRate: 0,
     };
 
@@ -146,7 +146,7 @@ export class E2ETestReporter {
         environment: {
           os: process.platform,
           nodeVersion: process.version,
-          testFramework: "Playwright",
+          testFramework: 'Playwright',
         },
       },
       summary,
@@ -161,16 +161,16 @@ export class E2ETestReporter {
 
   private analyzeFunctionalTests(): TestSuiteResults {
     return {
-      singleRound: this.analyzeSuite("单轮辩论完整流程"),
-      multiRound: this.analyzeSuite("多轮辩论流程"),
-      errorHandling: this.analyzeSuite("异常处理流程"),
+      singleRound: this.analyzeSuite('单轮辩论完整流程'),
+      multiRound: this.analyzeSuite('多轮辩论流程'),
+      errorHandling: this.analyzeSuite('异常处理流程'),
     };
   }
 
   private analyzePerformanceTests(): TestSuiteResults {
     return {
-      singleRound: this.analyzeSuite("响应时间性能测试"),
-      multiRound: this.analyzeSuite("并发用户性能测试"),
+      singleRound: this.analyzeSuite('响应时间性能测试'),
+      multiRound: this.analyzeSuite('并发用户性能测试'),
       errorHandling: { total: 0, passed: 0, failed: 0, tests: [] },
     };
   }
@@ -180,11 +180,11 @@ export class E2ETestReporter {
 
     return {
       total: suiteResults.length,
-      passed: suiteResults.filter((r) => r.status === "passed").length,
-      failed: suiteResults.filter((r) => r.status === "failed").length,
-      tests: suiteResults.map((r) => ({
+      passed: suiteResults.filter(r => r.status === 'passed').length,
+      failed: suiteResults.filter(r => r.status === 'failed').length,
+      tests: suiteResults.map(r => ({
         name: r.title,
-        status: r.status as "passed" | "failed" | "skipped",
+        status: r.status as 'passed' | 'failed' | 'skipped',
         duration: r.duration,
         error: r.error?.message,
       })),
@@ -192,16 +192,16 @@ export class E2ETestReporter {
   }
 
   private analyzeDataConsistency(): DataConsistencyResults {
-    const consistencyResults = this.results.get("数据一致性测试") || [];
-    const allPassed = consistencyResults.every((r) => r.status === "passed");
+    const consistencyResults = this.results.get('数据一致性测试') || [];
+    const allPassed = consistencyResults.every(r => r.status === 'passed');
 
     return {
       passed: allPassed,
-      checks: consistencyResults.map((r) => ({
+      checks: consistencyResults.map(r => ({
         name: r.title,
-        status: r.status as "passed" | "failed",
+        status: r.status as 'passed' | 'failed',
         message:
-          r.status === "passed" ? "数据一致性检查通过" : "数据一致性检查失败",
+          r.status === 'passed' ? '数据一致性检查通过' : '数据一致性检查失败',
       })),
     };
   }
@@ -211,23 +211,23 @@ export class E2ETestReporter {
     const allTestNames = Array.from(this.results.keys()).flat();
 
     const e2eFlowTests = allTestNames.filter(
-      (name) =>
-        name.includes("单轮辩论") ||
-        name.includes("多轮辩论") ||
-        name.includes("完整流程"),
+      name =>
+        name.includes('单轮辩论') ||
+        name.includes('多轮辩论') ||
+        name.includes('完整流程')
     );
 
     const criticalPathTests = allTestNames.filter(
-      (name) =>
-        name.includes("文档上传") ||
-        name.includes("文档解析") ||
-        name.includes("法条检索") ||
-        name.includes("辩论生成"),
+      name =>
+        name.includes('文档上传') ||
+        name.includes('文档解析') ||
+        name.includes('法条检索') ||
+        name.includes('辩论生成')
     );
 
     const exceptionTests = allTestNames.filter(
-      (name) =>
-        name.includes("异常") || name.includes("失败") || name.includes("错误"),
+      name =>
+        name.includes('异常') || name.includes('失败') || name.includes('错误')
     );
 
     return {
@@ -240,29 +240,29 @@ export class E2ETestReporter {
   private identifyIssues(results: TestResult[]): TestIssue[] {
     const issues: TestIssue[] = [];
 
-    const failedTests = results.filter((r) => r.status === "failed");
+    const failedTests = results.filter(r => r.status === 'failed');
 
-    failedTests.forEach((test) => {
-      const error = test.error?.message || "未知错误";
+    failedTests.forEach(test => {
+      const error = test.error?.message || '未知错误';
 
-      if (error.includes("超时")) {
+      if (error.includes('超时')) {
         issues.push({
-          severity: "high",
-          category: "性能",
+          severity: 'high',
+          category: '性能',
           description: `测试超时: ${test.title}`,
           affectedTests: [test.title],
         });
-      } else if (error.includes("断言失败")) {
+      } else if (error.includes('断言失败')) {
         issues.push({
-          severity: "medium",
-          category: "功能",
+          severity: 'medium',
+          category: '功能',
           description: `功能验证失败: ${test.title}`,
           affectedTests: [test.title],
         });
       } else {
         issues.push({
-          severity: "medium",
-          category: "其他",
+          severity: 'medium',
+          category: '其他',
           description: `测试失败: ${test.title} - ${error}`,
           affectedTests: [test.title],
         });
@@ -274,96 +274,96 @@ export class E2ETestReporter {
 
   private generateRecommendations(
     issues: TestIssue[],
-    summary: Summary,
+    summary: Summary
   ): string[] {
     const recommendations: string[] = [];
 
     if (summary.passRate < 100) {
-      recommendations.push("存在失败的测试用例，需要修复后重新运行");
+      recommendations.push('存在失败的测试用例，需要修复后重新运行');
     }
 
-    const highSeverityIssues = issues.filter((i) => i.severity === "high");
+    const highSeverityIssues = issues.filter(i => i.severity === 'high');
     if (highSeverityIssues.length > 0) {
       recommendations.push(
-        `存在${highSeverityIssues.length}个高优先级问题，需要优先处理`,
+        `存在${highSeverityIssues.length}个高优先级问题，需要优先处理`
       );
     }
 
-    const performanceIssues = issues.filter((i) => i.category === "性能");
+    const performanceIssues = issues.filter(i => i.category === '性能');
     if (performanceIssues.length > 0) {
-      recommendations.push("性能指标未达标，建议优化接口响应时间");
+      recommendations.push('性能指标未达标，建议优化接口响应时间');
     }
 
     if (summary.skipped > 0) {
       recommendations.push(
-        `有${summary.skipped}个测试用例被跳过，建议补充测试`,
+        `有${summary.skipped}个测试用例被跳过，建议补充测试`
       );
     }
 
-    recommendations.push("建议在CI/CD中集成E2E测试，确保代码质量");
+    recommendations.push('建议在CI/CD中集成E2E测试，确保代码质量');
 
     return recommendations;
   }
 
   private printReport(report: TestReport): void {
-    console.log("\n");
-    console.log("========================================");
-    console.log("       E2E测试报告");
-    console.log("========================================\n");
+    console.log('\n');
+    console.log('========================================');
+    console.log('       E2E测试报告');
+    console.log('========================================\n');
 
-    console.log("执行概要");
-    console.log("--------");
+    console.log('执行概要');
+    console.log('--------');
     console.log(`执行时间: ${report.execution.timestamp}`);
     console.log(`总耗时: ${report.execution.duration}ms`);
     console.log(`操作系统: ${report.execution.environment.os}`);
     console.log(`Node版本: ${report.execution.environment.nodeVersion}\n`);
 
-    console.log("测试结果");
-    console.log("--------");
+    console.log('测试结果');
+    console.log('--------');
     console.log(`总测试数: ${report.summary.totalTests}`);
     console.log(
-      `通过: ${report.summary.passed} (${report.summary.passRate.toFixed(2)}%)`,
+      `通过: ${report.summary.passed} (${report.summary.passRate.toFixed(2)}%)`
     );
     console.log(`失败: ${report.summary.failed}`);
     console.log(`跳过: ${report.summary.skipped}\n`);
 
-    console.log("功能测试结果");
-    console.log("--------");
+    console.log('功能测试结果');
+    console.log('--------');
     console.log(
-      `单轮辩论: ${report.functionalTests.singleRound.passed}/${report.functionalTests.singleRound.total}`,
+      `单轮辩论: ${report.functionalTests.singleRound.passed}/${report.functionalTests.singleRound.total}`
     );
     console.log(
-      `多轮辩论: ${report.functionalTests.multiRound.passed}/${report.functionalTests.multiRound.total}`,
+      `多轮辩论: ${report.functionalTests.multiRound.passed}/${report.functionalTests.multiRound.total}`
     );
     console.log(
-      `异常处理: ${report.functionalTests.errorHandling.passed}/${report.functionalTests.errorHandling.total}\n`,
+      `异常处理: ${report.functionalTests.errorHandling.passed}/${report.functionalTests.errorHandling.total}\n`
     );
 
-    console.log("覆盖率统计");
-    console.log("--------");
+    console.log('覆盖率统计');
+    console.log('--------');
     console.log(`E2E流程: ${report.coverage.e2eFlow.toFixed(1)}%`);
     console.log(`关键路径: ${report.coverage.criticalPath.toFixed(1)}%`);
     console.log(`异常处理: ${report.coverage.exceptionHandling.toFixed(1)}%\n`);
 
     if (report.issues.length > 0) {
-      console.log("发现的问题");
-      console.log("--------");
+      console.log('发现的问题');
+      console.log('--------');
       report.issues.forEach((issue, index) => {
         console.log(
-          `${index + 1}. [${issue.severity.toUpperCase()}] ${issue.category}`,
+          `${index + 1}. [${issue.severity.toUpperCase()}] ${issue.category}`
         );
         console.log(`   ${issue.description}`);
-        console.log(`   影响测试: ${issue.affectedTests.join(", ")}\n`);
+        console.log(`   影响测试: ${issue.affectedTests.join(', ')}\n`);
       });
     }
 
     if (report.recommendations.length > 0) {
-      console.log("改进建议");
-      console.log("--------");
+      console.log('改进建议');
+      console.log('--------');
       report.recommendations.forEach((rec, index) => {
         console.log(`${index + 1}. ${rec}`);
       });
-      console.log("");
+      console.log('');
     }
   }
 
@@ -421,33 +421,33 @@ export class E2ETestReporter {
 
 | 指标 | 覆盖率 | 目标 | 状态 |
 |--------|--------|------|------|
-| E2E流程 | ${report.coverage.e2eFlow.toFixed(1)}% | >90% | ${report.coverage.e2eFlow >= 90 ? "✅" : "❌"} |
-| 关键路径 | ${report.coverage.criticalPath.toFixed(1)}% | 100% | ${report.coverage.criticalPath >= 100 ? "✅" : "❌"} |
-| 异常处理 | ${report.coverage.exceptionHandling.toFixed(1)}% | >85% | ${report.coverage.exceptionHandling >= 85 ? "✅" : "❌"} |
+| E2E流程 | ${report.coverage.e2eFlow.toFixed(1)}% | >90% | ${report.coverage.e2eFlow >= 90 ? '✅' : '❌'} |
+| 关键路径 | ${report.coverage.criticalPath.toFixed(1)}% | 100% | ${report.coverage.criticalPath >= 100 ? '✅' : '❌'} |
+| 异常处理 | ${report.coverage.exceptionHandling.toFixed(1)}% | >85% | ${report.coverage.exceptionHandling >= 85 ? '✅' : '❌'} |
 
 ## 数据一致性检查
 
-${report.dataConsistency.passed ? "✅ 所有一致性检查通过" : "❌ 存在一致性检查失败"}
+${report.dataConsistency.passed ? '✅ 所有一致性检查通过' : '❌ 存在一致性检查失败'}
 
 ## 发现的问题
 
 ${
   report.issues.length === 0
-    ? "无"
+    ? '无'
     : report.issues
         .map(
           (issue, i) => `
 ${i + 1}. **[${issue.severity.toUpperCase()}] ${issue.category}**
    - ${issue.description}
-   - 影响测试: ${issue.affectedTests.join(", ")}
-`,
+   - 影响测试: ${issue.affectedTests.join(', ')}
+`
         )
-        .join("")
+        .join('')
 }
 
 ## 改进建议
 
-${report.recommendations.map((rec, i) => `${i + 1}. ${rec}`).join("\n")}
+${report.recommendations.map((rec, i) => `${i + 1}. ${rec}`).join('\n')}
 `;
   }
 }

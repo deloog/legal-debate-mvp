@@ -82,13 +82,13 @@ import {
   IssueType,
   IssueSeverity,
   IssueCategory,
-} from "./types";
-import { FactualVerifier } from "./verifiers/factual-verifier";
-import { LogicalVerifier } from "./verifiers/logical-verifier";
-import { CompletenessVerifier } from "./verifiers/completeness-verifier";
-import { ScoreCalculator } from "./analyzers/score-calculator";
-import { IssueCollector } from "./analyzers/issue-collector";
-import { SuggestionGenerator } from "./analyzers/suggestion-generator";
+} from './types';
+import { FactualVerifier } from './verifiers/factual-verifier';
+import { LogicalVerifier } from './verifiers/logical-verifier';
+import { CompletenessVerifier } from './verifiers/completeness-verifier';
+import { ScoreCalculator } from './analyzers/score-calculator';
+import { IssueCollector } from './analyzers/issue-collector';
+import { SuggestionGenerator } from './analyzers/suggestion-generator';
 
 /**
  * 待验证数据接口
@@ -156,7 +156,7 @@ export class VerificationAgent {
    */
   async verify(
     data: DataToVerify,
-    source?: SourceData,
+    source?: SourceData
   ): Promise<VerificationResult> {
     const startTime = Date.now();
 
@@ -173,7 +173,7 @@ export class VerificationAgent {
       const overallScore = this.scoreCalculator.calculateOverallScore(
         factualResult,
         logicalResult,
-        completenessResult,
+        completenessResult
       );
 
       // 检查是否通过
@@ -181,14 +181,14 @@ export class VerificationAgent {
         overallScore,
         factualResult,
         logicalResult,
-        completenessResult,
+        completenessResult
       );
 
       // 收集问题
       const issues = this.issueCollector.collectAllIssues(
         factualResult,
         logicalResult,
-        completenessResult,
+        completenessResult
       );
 
       // 生成建议
@@ -226,8 +226,8 @@ export class VerificationAgent {
             type: IssueType.VALIDATION_ERROR,
             severity: IssueSeverity.CRITICAL,
             category: IssueCategory.FACTUAL,
-            message: `验证过程出错: ${error instanceof Error ? error.message : "未知错误"}`,
-            detectedBy: "system",
+            message: `验证过程出错: ${error instanceof Error ? error.message : '未知错误'}`,
+            detectedBy: 'system',
           },
         ],
         suggestions: [],
@@ -241,7 +241,7 @@ export class VerificationAgent {
    */
   async verifyFactual(
     data: DataToVerify,
-    source?: SourceData,
+    source?: SourceData
   ): Promise<FactualVerificationResult> {
     return this.factualVerifier.verify(data, source);
   }
@@ -257,7 +257,7 @@ export class VerificationAgent {
    * 仅验证完成度
    */
   async verifyCompleteness(
-    data: DataToVerify,
+    data: DataToVerify
   ): Promise<CompletenessVerificationResult> {
     return this.completenessVerifier.verify(data);
   }
@@ -267,7 +267,7 @@ export class VerificationAgent {
    */
   async generateReport(
     data: DataToVerify,
-    source?: SourceData,
+    source?: SourceData
   ): Promise<{
     summary: string;
     scores: Record<string, { score: number; level: string }>;
@@ -286,7 +286,7 @@ export class VerificationAgent {
 
     // 生成摘要
     const level = this.scoreCalculator.getScoreLevel(result.overallScore);
-    const summary = `综合评分: ${result.overallScore.toFixed(2)} (${level}) - ${result.passed ? "通过" : "未通过"}`;
+    const summary = `综合评分: ${result.overallScore.toFixed(2)} (${level}) - ${result.passed ? '通过' : '未通过'}`;
 
     // 生成评分详情
     const scores: Record<string, { score: number; level: string }> = {
@@ -313,7 +313,7 @@ export class VerificationAgent {
 
     // 生成建议统计
     const suggestionSummary = this.suggestionGenerator.generateSummary(
-      result.suggestions,
+      result.suggestions
     );
 
     return {
@@ -342,7 +342,7 @@ export class VerificationAgent {
    */
   async getImprovementPlan(
     data: DataToVerify,
-    source?: SourceData,
+    source?: SourceData
   ): Promise<
     Array<{
       priority: string;
@@ -358,14 +358,14 @@ export class VerificationAgent {
   > {
     const result = await this.verify(data, source);
     const plan = this.suggestionGenerator.generateImprovementPlan(
-      result.suggestions,
+      result.suggestions
     );
 
-    return plan.map((item) => ({
+    return plan.map(item => ({
       priority: item.priority,
       count: item.suggestions.length,
       estimatedTime: item.estimatedTime,
-      items: item.suggestions.map((s) => ({
+      items: item.suggestions.map(s => ({
         type: s.type,
         action: s.action,
         reason: s.reason,
@@ -414,7 +414,7 @@ export type {
   FactualVerificationResult,
   LogicalVerificationResult,
   CompletenessVerificationResult,
-} from "./types";
+} from './types';
 export {
   DEFAULT_VERIFICATION_CONFIG,
   IssueType,
@@ -422,11 +422,11 @@ export {
   IssueCategory,
   SuggestionType,
   SuggestionPriority,
-} from "./types";
+} from './types';
 
-export { FactualVerifier } from "./verifiers/factual-verifier";
-export { LogicalVerifier } from "./verifiers/logical-verifier";
-export { CompletenessVerifier } from "./verifiers/completeness-verifier";
-export { ScoreCalculator } from "./analyzers/score-calculator";
-export { IssueCollector } from "./analyzers/issue-collector";
-export { SuggestionGenerator } from "./analyzers/suggestion-generator";
+export { FactualVerifier } from './verifiers/factual-verifier';
+export { LogicalVerifier } from './verifiers/logical-verifier';
+export { CompletenessVerifier } from './verifiers/completeness-verifier';
+export { ScoreCalculator } from './analyzers/score-calculator';
+export { IssueCollector } from './analyzers/issue-collector';
+export { SuggestionGenerator } from './analyzers/suggestion-generator';

@@ -1,10 +1,10 @@
-import { LawArticle } from "@prisma/client";
-import { DocumentAnalysisOutput } from "@/lib/agent/doc-analyzer/core/types";
-import { SemanticMatchResult } from "./types";
-import { AIServiceFactory } from "@/lib/ai/service-refactored";
-import { getAIConfig } from "@/lib/ai/config";
-import type { AIRequestConfig } from "@/types/ai-service";
-import type { AIService } from "@/lib/ai/service-refactored";
+import { LawArticle } from '@prisma/client';
+import { DocumentAnalysisOutput } from '@/lib/agent/doc-analyzer/core/types';
+import { SemanticMatchResult } from './types';
+import { AIServiceFactory } from '@/lib/ai/service-refactored';
+import { getAIConfig } from '@/lib/ai/config';
+import type { AIRequestConfig } from '@/types/ai-service';
+import type { AIService } from '@/lib/ai/service-refactored';
 
 /**
  * 语义匹配器
@@ -27,12 +27,12 @@ export class SemanticMatcher {
     try {
       const config = getAIConfig();
       this.aiService = await AIServiceFactory.getInstance(
-        "semantic-matcher",
-        config,
+        'semantic-matcher',
+        config
       );
       this.initialized = true;
     } catch (error) {
-      console.error("Failed to initialize SemanticMatcher:", error);
+      console.error('Failed to initialize SemanticMatcher:', error);
       throw error;
     }
   }
@@ -42,7 +42,7 @@ export class SemanticMatcher {
    */
   public async matchArticle(
     article: LawArticle,
-    caseInfo: DocumentAnalysisOutput,
+    caseInfo: DocumentAnalysisOutput
   ): Promise<SemanticMatchResult> {
     const caseContext = this.buildCaseContext(caseInfo);
     const articleContext = this.buildArticleContext(article);
@@ -55,7 +55,7 @@ export class SemanticMatcher {
     if (keywordScore < 0.1) {
       return {
         semanticRelevance: keywordScore * 0.5,
-        relevanceReason: "关键词匹配度极低，法条与案情相关性较弱",
+        relevanceReason: '关键词匹配度极低，法条与案情相关性较弱',
         matchedKeywords: keywordMatch.matchedKeywords,
       };
     }
@@ -63,7 +63,7 @@ export class SemanticMatcher {
     // 使用AI进行语义分析（高级层）
     const aiResult = await this.performSemanticAnalysis(
       caseContext,
-      articleContext,
+      articleContext
     );
 
     // 合并关键词匹配和AI分析结果
@@ -81,7 +81,7 @@ export class SemanticMatcher {
    */
   public async matchArticles(
     articles: LawArticle[],
-    caseInfo: DocumentAnalysisOutput,
+    caseInfo: DocumentAnalysisOutput
   ): Promise<Map<string, SemanticMatchResult>> {
     const results = new Map<string, SemanticMatchResult>();
 
@@ -108,22 +108,22 @@ export class SemanticMatcher {
     // 当事人
     if (extractedData.parties && extractedData.parties.length > 0) {
       const plaintiffNames = extractedData.parties
-        .filter((p) => p.type === "plaintiff")
-        .map((p) => p.name)
-        .join("、");
+        .filter(p => p.type === 'plaintiff')
+        .map(p => p.name)
+        .join('、');
       const defendantNames = extractedData.parties
-        .filter((p) => p.type === "defendant")
-        .map((p) => p.name)
-        .join("、");
-      parts.push(`原告：${plaintiffNames || "未明确"}`);
-      parts.push(`被告：${defendantNames || "未明确"}`);
+        .filter(p => p.type === 'defendant')
+        .map(p => p.name)
+        .join('、');
+      parts.push(`原告：${plaintiffNames || '未明确'}`);
+      parts.push(`被告：${defendantNames || '未明确'}`);
     }
 
     // 诉讼请求
     if (extractedData.claims && extractedData.claims.length > 0) {
       const claimTexts = extractedData.claims
-        .map((c) => `【${this.translateClaimType(c.type)}】${c.content}`)
-        .join("；");
+        .map(c => `【${this.translateClaimType(c.type)}】${c.content}`)
+        .join('；');
       parts.push(`诉讼请求：${claimTexts}`);
     }
 
@@ -131,8 +131,8 @@ export class SemanticMatcher {
     if (extractedData.keyFacts && extractedData.keyFacts.length > 0) {
       const factTexts = extractedData.keyFacts
         .slice(0, 5) // 最多取5个关键事实
-        .map((f) => f.description)
-        .join("；");
+        .map(f => f.description)
+        .join('；');
       parts.push(`关键事实：${factTexts}`);
     }
 
@@ -143,8 +143,8 @@ export class SemanticMatcher {
     ) {
       const disputeTexts = extractedData.disputeFocuses
         .slice(0, 3) // 最多取3个争议焦点
-        .map((d) => d.coreIssue)
-        .join("；");
+        .map(d => d.coreIssue)
+        .join('；');
       parts.push(`争议焦点：${disputeTexts}`);
     }
 
@@ -153,7 +153,7 @@ export class SemanticMatcher {
       parts.push(`案件摘要：${extractedData.summary}`);
     }
 
-    return parts.join("\n");
+    return parts.join('\n');
   }
 
   /**
@@ -187,7 +187,7 @@ export class SemanticMatcher {
       parts.push(`发布机关：${article.issuingAuthority}`);
     }
 
-    return parts.join("\n");
+    return parts.join('\n');
   }
 
   /**
@@ -195,7 +195,7 @@ export class SemanticMatcher {
    */
   private matchKeywords(
     article: LawArticle,
-    caseContext: string,
+    caseContext: string
   ): { matchedKeywords: string[]; score: number } {
     const keywordMap = this.getKeywordMapping();
     const matchedKeywords: string[] = [];
@@ -244,21 +244,21 @@ export class SemanticMatcher {
    */
   private async performSemanticAnalysis(
     caseContext: string,
-    articleContext: string,
+    articleContext: string
   ): Promise<{ score: number; reason: string }> {
     try {
       const prompt = this.buildAnalysisPrompt(caseContext, articleContext);
 
       const request: AIRequestConfig = {
-        model: "glm-4-flash",
+        model: 'glm-4-flash',
         messages: [
           {
-            role: "system",
+            role: 'system',
             content:
-              "你是专业的法律语义分析专家，擅长分析法条与案件情况的语义相关性。",
+              '你是专业的法律语义分析专家，擅长分析法条与案件情况的语义相关性。',
           },
           {
-            role: "user",
+            role: 'user',
             content: prompt,
           },
         ],
@@ -271,11 +271,11 @@ export class SemanticMatcher {
 
       return this.parseAIResponse(result);
     } catch (error) {
-      console.error("AI semantic analysis failed:", error);
+      console.error('AI semantic analysis failed:', error);
       // 返回保守分数
       return {
         score: 0.3,
-        reason: "AI分析失败，使用保守评分",
+        reason: 'AI分析失败，使用保守评分',
       };
     }
   }
@@ -285,7 +285,7 @@ export class SemanticMatcher {
    */
   private buildAnalysisPrompt(
     caseContext: string,
-    articleContext: string,
+    articleContext: string
   ): string {
     return `作为专业的法律语义分析专家，请从多个维度系统评估法条与案件的语义相关性。
 
@@ -324,19 +324,19 @@ ${articleContext}
       // 尝试提取JSON部分
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
-        throw new Error("No JSON found in response");
+        throw new Error('No JSON found in response');
       }
 
       const result = JSON.parse(jsonMatch[0]);
       return {
         score: Math.min(Math.max(result.score || 0, 0), 1),
-        reason: result.reason || "",
+        reason: result.reason || '',
       };
     } catch (error) {
-      console.error("Failed to parse AI response:", error);
+      console.error('Failed to parse AI response:', error);
       return {
         score: 0.3,
-        reason: "AI响应解析失败",
+        reason: 'AI响应解析失败',
       };
     }
   }
@@ -400,13 +400,13 @@ ${articleContext}
    */
   private translateCaseType(type: string): string {
     const translations: Record<string, string> = {
-      civil: "民事案件",
-      criminal: "刑事案件",
-      administrative: "行政案件",
-      commercial: "商事案件",
-      labor: "劳动案件",
-      intellectual: "知识产权案件",
-      other: "其他案件",
+      civil: '民事案件',
+      criminal: '刑事案件',
+      administrative: '行政案件',
+      commercial: '商事案件',
+      labor: '劳动案件',
+      intellectual: '知识产权案件',
+      other: '其他案件',
     };
     return translations[type] || type;
   }
@@ -416,14 +416,14 @@ ${articleContext}
    */
   private translateClaimType(type: string): string {
     const translations: Record<string, string> = {
-      PAY_PRINCIPAL: "支付本金",
-      PAY_INTEREST: "支付利息",
-      PAY_PENALTY: "支付违约金",
-      PAY_DAMAGES: "赔偿损失",
-      LITIGATION_COST: "诉讼费用",
-      PERFORMANCE: "履行义务",
-      TERMINATION: "解除合同",
-      OTHER: "其他请求",
+      PAY_PRINCIPAL: '支付本金',
+      PAY_INTEREST: '支付利息',
+      PAY_PENALTY: '支付违约金',
+      PAY_DAMAGES: '赔偿损失',
+      LITIGATION_COST: '诉讼费用',
+      PERFORMANCE: '履行义务',
+      TERMINATION: '解除合同',
+      OTHER: '其他请求',
     };
     return translations[type] || type;
   }
@@ -433,13 +433,13 @@ ${articleContext}
    */
   private translateLawCategory(category: string): string {
     const translations: Record<string, string> = {
-      CIVIL: "民事",
-      CRIMINAL: "刑事",
-      ADMINISTRATIVE: "行政",
-      COMMERCIAL: "商事",
-      LABOR: "劳动",
-      INTELLECTUAL_PROPERTY: "知识产权",
-      PROCEDURE: "程序",
+      CIVIL: '民事',
+      CRIMINAL: '刑事',
+      ADMINISTRATIVE: '行政',
+      COMMERCIAL: '商事',
+      LABOR: '劳动',
+      INTELLECTUAL_PROPERTY: '知识产权',
+      PROCEDURE: '程序',
     };
     return translations[category] || category;
   }

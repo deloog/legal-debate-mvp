@@ -8,10 +8,10 @@
  * - 缓存命中率统计
  */
 
-import type { DocumentAnalysisOutput, CacheConfig } from "../core/types";
-import { CACHE_TTL_MAP } from "../core/constants";
-import { CacheManager } from "../../../cache";
-import { logger } from "../../../agent/security/logger";
+import type { DocumentAnalysisOutput, CacheConfig } from '../core/types';
+import { CACHE_TTL_MAP } from '../core/constants';
+import { CacheManager } from '../../../cache';
+import { logger } from '../../../agent/security/logger';
 
 export class CacheProcessor {
   private cacheManager: CacheManager;
@@ -30,7 +30,7 @@ export class CacheProcessor {
     this.config = {
       enabled: true,
       ttl: 86400,
-      namespace: "doc-analyzer",
+      namespace: 'doc-analyzer',
       ...config,
     };
     this.namespace = this.config.namespace;
@@ -48,7 +48,7 @@ export class CacheProcessor {
   public async get(
     documentId: string,
     fileType: string,
-    text: string,
+    text: string
   ): Promise<DocumentAnalysisOutput | null> {
     if (!this.config.enabled || this.disabled) {
       return null;
@@ -62,9 +62,9 @@ export class CacheProcessor {
 
       if (cached) {
         this.stats.hits++;
-        logger.info("缓存命中", {
+        logger.info('缓存命中', {
           documentId,
-          key: key.substring(0, 50) + "...",
+          key: key.substring(0, 50) + '...',
         });
         return cached;
       }
@@ -73,7 +73,7 @@ export class CacheProcessor {
       return null;
     } catch (error) {
       this.stats.errors++;
-      logger.error("缓存获取失败", error);
+      logger.error('缓存获取失败', error);
       return null;
     }
   }
@@ -85,7 +85,7 @@ export class CacheProcessor {
     documentId: string,
     fileType: string,
     text: string,
-    data: DocumentAnalysisOutput,
+    data: DocumentAnalysisOutput
   ): Promise<boolean> {
     if (!this.config.enabled || this.disabled) {
       return false;
@@ -104,7 +104,7 @@ export class CacheProcessor {
       return true;
     } catch (error) {
       this.stats.errors++;
-      logger.error("缓存设置失败", error);
+      logger.error('缓存设置失败', error);
       return false;
     }
   }
@@ -115,7 +115,7 @@ export class CacheProcessor {
   public generateKey(
     documentId: string,
     fileType: string,
-    text: string,
+    text: string
   ): string {
     const keyInput = `${documentId}_${fileType}_${text.substring(0, 1000)}`;
     return this.hash(keyInput);
@@ -180,18 +180,18 @@ export class CacheProcessor {
     try {
       if (documentId) {
         // 清除特定文档的缓存 - 使用Redis keys命令
-        const key = this.generateKey(documentId, "FILE", "");
+        const key = this.generateKey(documentId, 'FILE', '');
         // 由于CacheManager没有按前缀删除的方法，这里只是记录日志
-        logger.info("请求清除文档缓存", { documentId, key });
+        logger.info('请求清除文档缓存', { documentId, key });
         return true;
       } else {
         // 清除所有文档分析缓存
         await this.cacheManager.clearNamespace(this.namespace);
-        logger.info("清除所有文档分析缓存");
+        logger.info('清除所有文档分析缓存');
         return true;
       }
     } catch (error) {
-      logger.error("清除缓存失败", error);
+      logger.error('清除缓存失败', error);
       return false;
     }
   }

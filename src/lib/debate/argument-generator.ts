@@ -1,13 +1,13 @@
 // 论点生成器：生成正反方论点
 
-import { AIClient } from "@/lib/ai/clients";
+import { AIClient } from '@/lib/ai/clients';
 import {
   DebateInput,
   Argument,
   DebateGenerationConfig,
   DEFAULT_DEBATE_CONFIG,
-} from "./types";
-import { PromptBuilder } from "./prompt-builder";
+} from './types';
+import { PromptBuilder } from './prompt-builder';
 
 /**
  * AI生成的论点数据结构
@@ -41,7 +41,7 @@ export class ArgumentGenerator {
 
   constructor(
     aiClient: AIClient,
-    config: Partial<DebateGenerationConfig> = {},
+    config: Partial<DebateGenerationConfig> = {}
   ) {
     this.aiClient = aiClient;
     this.config = { ...DEFAULT_DEBATE_CONFIG, ...config };
@@ -51,14 +51,14 @@ export class ArgumentGenerator {
    * 生成正方论点
    */
   async generatePlaintiffArguments(input: DebateInput): Promise<Argument[]> {
-    return this.generateArguments(input, "plaintiff");
+    return this.generateArguments(input, 'plaintiff');
   }
 
   /**
    * 生成反方论点
    */
   async generateDefendantArguments(input: DebateInput): Promise<Argument[]> {
-    return this.generateArguments(input, "defendant");
+    return this.generateArguments(input, 'defendant');
   }
 
   /**
@@ -66,7 +66,7 @@ export class ArgumentGenerator {
    */
   private async generateArguments(
     input: DebateInput,
-    side: "plaintiff" | "defendant",
+    side: 'plaintiff' | 'defendant'
   ): Promise<Argument[]> {
     const startTime = Date.now();
 
@@ -86,7 +86,7 @@ export class ArgumentGenerator {
     const arguments_ = this.convertToArguments(
       generatedData,
       side,
-      Date.now() - startTime,
+      Date.now() - startTime
     );
 
     // 确保平衡
@@ -105,8 +105,8 @@ export class ArgumentGenerator {
     maxTokens?: number;
   }): Promise<string> {
     const messages = [
-      { role: "system" as const, content: promptOptions.systemPrompt || "" },
-      { role: "user" as const, content: promptOptions.userPrompt },
+      { role: 'system' as const, content: promptOptions.systemPrompt || '' },
+      { role: 'user' as const, content: promptOptions.userPrompt },
     ];
 
     try {
@@ -115,9 +115,9 @@ export class ArgumentGenerator {
         maxTokens: promptOptions.maxTokens ?? this.config.maxTokens,
       });
     } catch (error) {
-      console.error("AI调用失败:", error);
+      console.error('AI调用失败:', error);
       throw new Error(
-        `论点生成失败: ${error instanceof Error ? error.message : String(error)}`,
+        `论点生成失败: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
@@ -158,7 +158,7 @@ export class ArgumentGenerator {
       }
 
       // 所有解析方式都失败，返回默认空数组
-      console.warn("AI响应解析失败，返回空数组");
+      console.warn('AI响应解析失败，返回空数组');
       return { arguments: [] };
     }
   }
@@ -168,17 +168,17 @@ export class ArgumentGenerator {
    */
   private convertToArguments(
     data: AIResponseData,
-    side: "plaintiff" | "defendant",
-    generationTime: number,
+    side: 'plaintiff' | 'defendant',
+    generationTime: number
   ): Argument[] {
     if (!data.arguments || !Array.isArray(data.arguments)) {
-      console.warn("AI响应中缺少有效的arguments数组");
+      console.warn('AI响应中缺少有效的arguments数组');
       return [];
     }
 
     return data.arguments.map((arg, index) => {
       // 验证法条引用
-      const legalBasis = arg.legalBasis.map((basis) => ({
+      const legalBasis = arg.legalBasis.map(basis => ({
         ...basis,
         relevance: Math.min(1, Math.max(0, basis.relevance || 0.8)),
       }));
@@ -197,7 +197,7 @@ export class ArgumentGenerator {
         logicScore,
         legalAccuracyScore,
         overallScore: (logicScore + legalAccuracyScore) / 2,
-        generatedBy: "ai",
+        generatedBy: 'ai',
         aiProvider: this.config.aiProvider,
         generationTime,
       };
@@ -207,20 +207,20 @@ export class ArgumentGenerator {
   /**
    * 验证论点类型
    */
-  private validateArgumentType(type: string): Argument["type"] {
+  private validateArgumentType(type: string): Argument['type'] {
     const validTypes = [
-      "main_point",
-      "supporting",
-      "rebuttal",
-      "evidence",
-      "conclusion",
+      'main_point',
+      'supporting',
+      'rebuttal',
+      'evidence',
+      'conclusion',
     ];
 
     if (validTypes.includes(type)) {
-      return type as Argument["type"];
+      return type as Argument['type'];
     }
 
-    return "main_point"; // 默认为主论点
+    return 'main_point'; // 默认为主论点
   }
 
   /**
@@ -274,7 +274,7 @@ export class ArgumentGenerator {
 
     // 法条说明长度
     const hasExplanation = arg.legalBasis.some(
-      (b) => b.explanation && b.explanation.length > 20,
+      b => b.explanation && b.explanation.length > 20
     );
     if (hasExplanation) {
       score += 0.5;
@@ -288,7 +288,7 @@ export class ArgumentGenerator {
    */
   private ensureBalance(
     arguments_: Argument[],
-    side: "plaintiff" | "defendant",
+    side: 'plaintiff' | 'defendant'
   ): void {
     // 根据平衡严格度确定目标论点数量
     const targetCount = this.getTargetArgumentCount();
@@ -296,7 +296,7 @@ export class ArgumentGenerator {
     // 如果论点数量不足，补充论点
     if (arguments_.length < targetCount) {
       console.warn(
-        `${side}论点数量不足（${arguments_.length}/${targetCount}），建议增加`,
+        `${side}论点数量不足（${arguments_.length}/${targetCount}），建议增加`
       );
     }
 
@@ -311,11 +311,11 @@ export class ArgumentGenerator {
    */
   private getTargetArgumentCount(): number {
     switch (this.config.balanceStrictness) {
-      case "low":
+      case 'low':
         return 3;
-      case "medium":
+      case 'medium':
         return 4;
-      case "high":
+      case 'high':
         return 5;
     }
   }

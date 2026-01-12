@@ -5,10 +5,10 @@
  * 整合所有模块，提供统一的错误处理接口
  */
 
-import { ErrorLogger } from "./error-logger";
-import { ErrorRecovery } from "./error-recovery";
-import { ErrorAnalyzer } from "./error-analyzer";
-import { circuitBreakerManager } from "./circuit-breaker";
+import { ErrorLogger } from './error-logger';
+import { ErrorRecovery } from './error-recovery';
+import { ErrorAnalyzer } from './error-analyzer';
+import { circuitBreakerManager } from './circuit-breaker';
 import {
   ErrorLog,
   ErrorContext,
@@ -16,7 +16,7 @@ import {
   ErrorHandlingResult,
   RecoveryMethod,
   TimeRange,
-} from "./types";
+} from './types';
 
 /**
  * 错误日志系统
@@ -44,7 +44,7 @@ export class ErrorLogSystem {
     error: Error,
     context: ErrorContext,
     operation?: () => Promise<T>,
-    options: ErrorHandlingOptions = {},
+    options: ErrorHandlingOptions = {}
   ): Promise<ErrorHandlingResult> {
     const startTime = Date.now();
 
@@ -65,11 +65,11 @@ export class ErrorLogSystem {
           enableBackoff: true,
           fallbackFunction: options.fallbackFunction,
           circuitBreakerName: context.agentName,
-        },
+        }
       );
 
       recoverySuccess = recoveryResult.success;
-      fallbackUsed = recoveryResult.method === "FALLBACK";
+      fallbackUsed = recoveryResult.method === 'FALLBACK';
 
       // 更新错误日志
       if (recoverySuccess) {
@@ -109,11 +109,11 @@ export class ErrorLogSystem {
   async executeWithRetry<T>(
     operation: () => Promise<T>,
     context: ErrorContext,
-    options: ErrorHandlingOptions = {},
+    options: ErrorHandlingOptions = {}
   ): Promise<T> {
     try {
       // 使用熔断器保护
-      const breakerName = context.agentName || "default";
+      const breakerName = context.agentName || 'default';
       const breaker = circuitBreakerManager.getBreaker(breakerName);
 
       const result = await breaker.execute(operation);
@@ -126,7 +126,7 @@ export class ErrorLogSystem {
         err,
         context,
         operation,
-        options,
+        options
       );
 
       if (handlingResult.recoverySuccess && handlingResult.errorLog.recovered) {
@@ -144,7 +144,7 @@ export class ErrorLogSystem {
    * @returns 错误日志
    */
   async getErrorLog(errorId: string): Promise<ErrorLog | null> {
-    const { prisma } = await import("@/lib/db/prisma");
+    const { prisma } = await import('@/lib/db/prisma');
     const error = await prisma.errorLog.findUnique({
       where: { id: errorId },
     });
@@ -168,7 +168,7 @@ export class ErrorLogSystem {
     timeRange?: TimeRange;
     limit?: number;
   }): Promise<ErrorLog[]> {
-    const { prisma } = await import("@/lib/db/prisma");
+    const { prisma } = await import('@/lib/db/prisma');
 
     const where: Record<string, unknown> = {};
 
@@ -193,7 +193,7 @@ export class ErrorLogSystem {
 
     const errors = await prisma.errorLog.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       take: filters?.limit || 100,
     });
 
@@ -251,7 +251,7 @@ export class ErrorLogSystem {
    * @returns 删除的记录数
    */
   async cleanupOldLogs(olderThanDays: number = 30): Promise<number> {
-    const { prisma } = await import("@/lib/db/prisma");
+    const { prisma } = await import('@/lib/db/prisma');
 
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);

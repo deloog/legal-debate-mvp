@@ -7,7 +7,7 @@
  * - Script层：脚本与API层（复杂计算）
  */
 
-import { ActionType, ActionLayer, ActionStatus } from "@prisma/client";
+import { ActionType, ActionLayer, ActionStatus } from '@prisma/client';
 
 /**
  * 行动记录输入参数
@@ -46,7 +46,7 @@ export interface ActionLogOutput {
   /** 记录时间 */
   recordedAt: Date;
   /** 记录状态 */
-  status: "SUCCESS" | "FAILED";
+  status: 'SUCCESS' | 'FAILED';
   /** 错误信息（如果有） */
   error?: string;
 }
@@ -54,7 +54,7 @@ export interface ActionLogOutput {
 /**
  * 行动开始记录
  */
-export interface ActionStartInput extends Omit<ActionLogInput, "parameters"> {
+export interface ActionStartInput extends Omit<ActionLogInput, 'parameters'> {
   /** 行动参数 */
   parameters: unknown;
   /** 执行开始时间 */

@@ -3,7 +3,7 @@
  * 日期解析、标准化和推断工具
  */
 
-import type { TimelineEventType } from "../../core/types";
+import type { TimelineEventType } from '../../core/types';
 
 /**
  * 解析日期字符串为Date对象
@@ -81,8 +81,8 @@ export function normalizeDate(dateStr: string): string {
   const parsed = parseDate(dateStr);
   if (parsed && !isNaN(parsed.getTime())) {
     const year = parsed.getFullYear();
-    const month = String(parsed.getMonth() + 1).padStart(2, "0");
-    const day = String(parsed.getDate()).padStart(2, "0");
+    const month = String(parsed.getMonth() + 1).padStart(2, '0');
+    const day = String(parsed.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
 
@@ -98,9 +98,9 @@ export function inferEarliestDate(earliestDate?: string): string {
     const threeMonthsAgo = new Date(
       now.getFullYear(),
       now.getMonth() - 3,
-      now.getDate(),
+      now.getDate()
     );
-    return threeMonthsAgo.toISOString().split("T")[0];
+    return threeMonthsAgo.toISOString().split('T')[0];
   }
 
   return earliestDate;
@@ -111,7 +111,7 @@ export function inferEarliestDate(earliestDate?: string): string {
  */
 export function inferDateBetween(startDate?: string, endDate?: string): string {
   if (!startDate || !endDate) {
-    return startDate || endDate || "";
+    return startDate || endDate || '';
   }
 
   const start = parseDate(startDate);
@@ -119,29 +119,29 @@ export function inferDateBetween(startDate?: string, endDate?: string): string {
 
   if (start && end) {
     const midTime = new Date((start.getTime() + end.getTime()) / 2);
-    return midTime.toISOString().split("T")[0];
+    return midTime.toISOString().split('T')[0];
   }
 
-  return startDate || endDate || "";
+  return startDate || endDate || '';
 }
 
 /**
  * 推断最早日期之后的时间
  */
 export function inferDateAfter(startDate?: string): string {
-  if (!startDate) return "";
+  if (!startDate) return '';
 
   const start = parseDate(startDate);
   if (start) {
     const oneMonthLater = new Date(
       start.getFullYear(),
       start.getMonth() + 1,
-      start.getDate(),
+      start.getDate()
     );
-    return oneMonthLater.toISOString().split("T")[0];
+    return oneMonthLater.toISOString().split('T')[0];
   }
 
-  return "";
+  return '';
 }
 
 /**
@@ -165,11 +165,11 @@ export function getDatePatterns(): RegExp[] {
 export function getEventTypePatterns(): Map<TimelineEventType, RegExp[]> {
   const patterns = new Map<TimelineEventType, RegExp[]>();
 
-  patterns.set("CONTRACT_SIGNED", [/签订|签署|订立|达成|协议|合同/gi]);
-  patterns.set("PERFORMANCE_START", [/开始.*履行|履行.*义务|执行.*合同/gi]);
-  patterns.set("BREACH_OCCURRED", [/违约|未履行|逾期|停止.*履行|拒绝.*履行/gi]);
-  patterns.set("DEMAND_SENT", [/催告|发函|通知|要求.*支付|要求.*履行/gi]);
-  patterns.set("LAWSUIT_FILED", [
+  patterns.set('CONTRACT_SIGNED', [/签订|签署|订立|达成|协议|合同/gi]);
+  patterns.set('PERFORMANCE_START', [/开始.*履行|履行.*义务|执行.*合同/gi]);
+  patterns.set('BREACH_OCCURRED', [/违约|未履行|逾期|停止.*履行|拒绝.*履行/gi]);
+  patterns.set('DEMAND_SENT', [/催告|发函|通知|要求.*支付|要求.*履行/gi]);
+  patterns.set('LAWSUIT_FILED', [
     /起诉|提起.*诉讼|向法院.*起诉|申请.*仲裁|提起诉讼|起诉至法院|诉至法院/gi,
   ]);
 

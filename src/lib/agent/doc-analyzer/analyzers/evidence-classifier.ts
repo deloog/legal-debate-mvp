@@ -7,7 +7,7 @@
  * 3. 从文本中识别证据描述
  */
 
-import type { ExtractedData, EvidenceType } from "../core/types";
+import type { ExtractedData, EvidenceType } from '../core/types';
 
 // =============================================================================
 // EvidenceClassifier类
@@ -25,7 +25,7 @@ export class EvidenceClassifier {
    */
   extractRawEvidence(
     extractedData: ExtractedData,
-    text: string,
+    text: string
   ): Map<string, string> {
     const evidence = new Map<string, string>();
 
@@ -72,7 +72,7 @@ export class EvidenceClassifier {
     const textEvidence = this.extractEvidenceFromText(text);
     for (const ev of textEvidence) {
       if (!evidence.has(ev)) {
-        evidence.set(ev, "文本直接提取");
+        evidence.set(ev, '文本直接提取');
       }
     }
 
@@ -118,7 +118,7 @@ export class EvidenceClassifier {
     }
 
     // 默认为书证
-    return "DOCUMENTARY_EVIDENCE";
+    return 'DOCUMENTARY_EVIDENCE';
   }
 
   /**
@@ -127,32 +127,32 @@ export class EvidenceClassifier {
   private initializeEvidencePatterns(): Map<EvidenceType, RegExp[]> {
     const patterns = new Map<EvidenceType, RegExp[]>();
 
-    patterns.set("PHYSICAL_EVIDENCE", [
+    patterns.set('PHYSICAL_EVIDENCE', [
       /物证|实物|原物|样品/gi,
       /照片|录像|录音|录音/gi,
     ]);
 
-    patterns.set("DOCUMENTARY_EVIDENCE", [
+    patterns.set('DOCUMENTARY_EVIDENCE', [
       /书证|合同|协议|票据|单据|证明|文件|档案|记录/gi,
       /判决|裁定|决定|裁决|意见书/gi,
     ]);
 
-    patterns.set("WITNESS_TESTIMONY", [
+    patterns.set('WITNESS_TESTIMONY', [
       /证人|证言|陈述|证词/gi,
       /当事人.*说|当事人.*陈述|原告.*表示|被告.*表示/gi,
     ]);
 
-    patterns.set("EXPERT_OPINION", [
+    patterns.set('EXPERT_OPINION', [
       /鉴定|评估|检测|测试|化验|意见/gi,
       /鉴定人|评估人|检测机构/gi,
     ]);
 
-    patterns.set("AUDIO_VIDEO_EVIDENCE", [
+    patterns.set('AUDIO_VIDEO_EVIDENCE', [
       /录像|视频|录音|音频/gi,
       /监控|拍照|摄影/gi,
     ]);
 
-    patterns.set("ELECTRONIC_EVIDENCE", [
+    patterns.set('ELECTRONIC_EVIDENCE', [
       /电子数据|聊天记录|邮件|短信|微信|支付宝/gi,
       /截图|打印件|复制件/gi,
     ]);

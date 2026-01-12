@@ -8,7 +8,7 @@ import type {
   ClassificationResult,
   GenerateSummaryResult,
   GenerateSummaryParams,
-} from "./types";
+} from './types';
 
 /**
  * 1. analyze_text - 文本分析
@@ -19,22 +19,22 @@ export async function analyze_text(text: string): Promise<TextAnalysisResult> {
   const hasNumbers = /\d/.test(text);
   const hasEnglish = /[a-zA-Z]/.test(text);
 
-  const lines = text === "" ? [] : text.split("\n");
+  const lines = text === '' ? [] : text.split('\n');
   const words = text
     .trim()
     .split(/\s+/)
-    .filter((w) => w.length > 0);
+    .filter(w => w.length > 0);
 
   let keyPhrases: string[] = [];
   if (hasChinese) {
     keyPhrases = extractChinesePhrases(text);
   }
 
-  let language: "zh" | "en" | "unknown" = "unknown";
+  let language: 'zh' | 'en' | 'unknown' = 'unknown';
   if (hasChinese) {
-    language = "zh";
+    language = 'zh';
   } else if (hasEnglish) {
-    language = "en";
+    language = 'en';
   }
 
   return {
@@ -82,21 +82,21 @@ function extractChinesePhrases(text: string): string[] {
  */
 export async function classify_content(
   content: string,
-  classificationType: "case_type" | "document_type" | "topic",
+  classificationType: 'case_type' | 'document_type' | 'topic'
 ): Promise<ClassificationResult> {
-  let category = "未分类";
+  let category = '未分类';
   let confidence = 0.5;
 
-  if (classificationType === "case_type") {
+  if (classificationType === 'case_type') {
     const result = classifyCaseType(content);
     category = result.category;
     confidence = result.confidence;
-  } else if (classificationType === "document_type") {
+  } else if (classificationType === 'document_type') {
     const result = classifyDocumentType(content);
     category = result.category;
     confidence = result.confidence;
-  } else if (classificationType === "topic") {
-    category = "法律咨询";
+  } else if (classificationType === 'topic') {
+    category = '法律咨询';
     confidence = 0.6;
   }
 
@@ -104,12 +104,12 @@ export async function classify_content(
     [];
 
   // 为其他可能的分类生成备选项
-  if (classificationType === "case_type") {
+  if (classificationType === 'case_type') {
     const keywords = {
-      合同纠纷: ["合同", "违约", "买卖", "租赁"],
-      劳动纠纷: ["劳动", "工资", "工伤", "解雇"],
-      侵权纠纷: ["侵权", "损害赔偿", "人身伤害"],
-      婚姻家庭: ["离婚", "抚养", "赡养", "继承"],
+      合同纠纷: ['合同', '违约', '买卖', '租赁'],
+      劳动纠纷: ['劳动', '工资', '工伤', '解雇'],
+      侵权纠纷: ['侵权', '损害赔偿', '人身伤害'],
+      婚姻家庭: ['离婚', '抚养', '赡养', '继承'],
     };
 
     for (const [altCategory, words] of Object.entries(keywords)) {
@@ -146,13 +146,13 @@ function classifyCaseType(content: string): {
   confidence: number;
 } {
   const keywords = {
-    合同纠纷: ["合同", "违约", "买卖", "租赁"],
-    劳动纠纷: ["劳动", "工资", "工伤", "解雇"],
-    侵权纠纷: ["侵权", "损害赔偿", "人身伤害"],
-    婚姻家庭: ["离婚", "抚养", "赡养", "继承"],
+    合同纠纷: ['合同', '违约', '买卖', '租赁'],
+    劳动纠纷: ['劳动', '工资', '工伤', '解雇'],
+    侵权纠纷: ['侵权', '损害赔偿', '人身伤害'],
+    婚姻家庭: ['离婚', '抚养', '赡养', '继承'],
   };
 
-  let bestMatch = "未分类";
+  let bestMatch = '未分类';
   let maxScore = 0;
 
   for (const [category, words] of Object.entries(keywords)) {
@@ -179,20 +179,20 @@ function classifyDocumentType(content: string): {
   category: string;
   confidence: number;
 } {
-  if (content.includes("起诉状") || content.includes("民事起诉状")) {
-    return { category: "起诉状", confidence: 0.9 };
+  if (content.includes('起诉状') || content.includes('民事起诉状')) {
+    return { category: '起诉状', confidence: 0.9 };
   }
-  if (content.includes("答辩状")) {
-    return { category: "答辩状", confidence: 0.9 };
+  if (content.includes('答辩状')) {
+    return { category: '答辩状', confidence: 0.9 };
   }
-  if (content.includes("判决书") || content.includes("法院判决")) {
-    return { category: "判决书", confidence: 0.9 };
+  if (content.includes('判决书') || content.includes('法院判决')) {
+    return { category: '判决书', confidence: 0.9 };
   }
-  if (content.includes("调解书") || content.includes("调解协议")) {
-    return { category: "调解书", confidence: 0.85 };
+  if (content.includes('调解书') || content.includes('调解协议')) {
+    return { category: '调解书', confidence: 0.85 };
   }
 
-  return { category: "法律文书", confidence: 0.6 };
+  return { category: '法律文书', confidence: 0.6 };
 }
 
 /**
@@ -202,14 +202,14 @@ function classifyDocumentType(content: string): {
 export async function generate_summary(
   contentOrParams: string | GenerateSummaryParams,
   maxLengthOrTargetRatio?: number,
-  preserveKeyInfo?: boolean,
+  preserveKeyInfo?: boolean
 ): Promise<GenerateSummaryResult> {
   let content: string;
   let maxLength: number | undefined;
   let targetRatio: number | undefined;
   let shouldPreserveKeyInfo: boolean = true;
 
-  if (typeof contentOrParams === "string") {
+  if (typeof contentOrParams === 'string') {
     content = contentOrParams;
     maxLength = maxLengthOrTargetRatio;
     shouldPreserveKeyInfo = preserveKeyInfo ?? true;
@@ -225,10 +225,10 @@ export async function generate_summary(
 
   if (maxLength && content.length > maxLength) {
     const actualMaxLength = maxLength > 3 ? maxLength - 3 : 0;
-    summary = content.slice(0, actualMaxLength) + "...";
+    summary = content.slice(0, actualMaxLength) + '...';
   } else if (targetRatio && targetRatio < 1) {
     const targetLength = Math.floor(content.length * targetRatio);
-    summary = content.slice(0, Math.max(targetLength, 50)) + "...";
+    summary = content.slice(0, Math.max(targetLength, 50)) + '...';
   }
 
   const keyPoints = extractKeyPoints(content, shouldPreserveKeyInfo);
@@ -251,7 +251,7 @@ function extractKeyPoints(content: string, preserveKeyInfo: boolean): string[] {
   if (preserveKeyInfo) {
     const sentences = content
       .split(/[。！？\n]/)
-      .filter((s) => s.trim().length > 10);
+      .filter(s => s.trim().length > 10);
     keyPoints.push(...sentences.slice(0, 3));
   } else {
     const words = content.split(/\s+/);

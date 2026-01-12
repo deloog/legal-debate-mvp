@@ -10,13 +10,13 @@
 // - amount-validator.ts: 金额验证
 // =============================================================================
 
-import { AmountExtractorCore } from "./amount-extractor-core";
-import { ChineseNumberConverter } from "./chinese-number-converter";
+import { AmountExtractorCore } from './amount-extractor-core';
+import { ChineseNumberConverter } from './chinese-number-converter';
 import {
   AmountValidator,
   type AmountExtractionResult,
   type AmountValidationResult,
-} from "./amount-validator";
+} from './amount-validator';
 
 /**
  * 精度金额提取器（兼容原API的包装类）
@@ -50,7 +50,7 @@ export class PrecisionAmountExtractor {
    * 验证金额一致性
    */
   validateAmountConsistency(
-    amounts: AmountExtractionResult[],
+    amounts: AmountExtractionResult[]
   ): AmountValidationResult {
     return this.validator.validateAmountConsistency(amounts);
   }
@@ -59,7 +59,7 @@ export class PrecisionAmountExtractor {
    * 获取最佳金额提取结果
    */
   getBestExtraction(
-    results: AmountExtractionResult[],
+    results: AmountExtractionResult[]
   ): AmountExtractionResult | null {
     return this.core.getBestExtraction(results);
   }

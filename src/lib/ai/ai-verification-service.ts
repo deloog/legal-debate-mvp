@@ -1,6 +1,6 @@
-import { getUnifiedAIService } from "./unified-service";
-import { AIProvider } from "../../types/ai-service";
-import { Party, Claim } from "../agent/doc-analyzer/core/types";
+import { getUnifiedAIService } from './unified-service';
+import { AIProvider } from '../../types/ai-service';
+import { Party, Claim } from '../agent/doc-analyzer/core/types';
 
 // =============================================================================
 // AI验证服务 - 使用AI来验证AI的输出质量
@@ -52,8 +52,8 @@ export interface VerificationResult {
 }
 
 export class AIVerificationService {
-  private provider: AIProvider = "zhipu";
-  private model: string = "glm-4-flash";
+  private provider: AIProvider = 'zhipu';
+  private model: string = 'glm-4-flash';
 
   constructor() {
     // 可以配置使用不同的AI提供商进行交叉验证
@@ -63,7 +63,7 @@ export class AIVerificationService {
    * 使用AI验证文档解析结果的准确性
    */
   async verifyExtraction(
-    request: VerificationRequest,
+    request: VerificationRequest
   ): Promise<VerificationResult> {
     try {
       const unifiedService = await getUnifiedAIService();
@@ -71,12 +71,12 @@ export class AIVerificationService {
       const verificationPrompt = this.buildVerificationPrompt(request);
 
       console.log(
-        "[AI验证] 请求的当事人数量:",
-        request.extractedData.parties?.length || 0,
+        '[AI验证] 请求的当事人数量:',
+        request.extractedData.parties?.length || 0
       );
       console.log(
-        "[AI验证] 请求的诉讼请求数量:",
-        request.extractedData.claims?.length || 0,
+        '[AI验证] 请求的诉讼请求数量:',
+        request.extractedData.claims?.length || 0
       );
 
       const response = await unifiedService.chatCompletion({
@@ -84,7 +84,7 @@ export class AIVerificationService {
         provider: this.provider,
         messages: [
           {
-            role: "system",
+            role: 'system',
             content: `你是一个专业的法律文档验证专家。你的任务是客观、准确地评估AI从法律文档中提取信息的质量。
 
 请从以下维度进行评估：
@@ -95,7 +95,7 @@ export class AIVerificationService {
 请严格按照JSON格式返回评估结果，不要包含任何说明文字。`,
           },
           {
-            role: "user",
+            role: 'user',
             content: verificationPrompt,
           },
         ],
@@ -104,15 +104,15 @@ export class AIVerificationService {
       });
 
       if (!response.choices || response.choices.length === 0) {
-        throw new Error("AI验证服务返回空响应");
+        throw new Error('AI验证服务返回空响应');
       }
 
       const aiResponse = response.choices[0].message.content;
-      console.log("[AI验证] 原始响应长度:", aiResponse.length);
-      console.log("[AI验证] 原始响应预览:", aiResponse.substring(0, 200));
+      console.log('[AI验证] 原始响应长度:', aiResponse.length);
+      console.log('[AI验证] 原始响应预览:', aiResponse.substring(0, 200));
       return this.parseVerificationResponse(aiResponse);
     } catch (error) {
-      console.error("AI验证失败:", error);
+      console.error('AI验证失败:', error);
       // 降级到基础验证
       return this.fallbackVerification(request);
     }
@@ -219,11 +219,11 @@ AI提取结果：
 
       // 移除所有可能的代码块标记
       cleanedResponse = cleanedResponse
-        .replace(/```json\s*\n?/gi, "")
-        .replace(/```text\s*\n?/gi, "")
-        .replace(/```javascript\s*\n?/gi, "")
-        .replace(/```js\s*\n?/gi, "")
-        .replace(/```\s*$/gi, "")
+        .replace(/```json\s*\n?/gi, '')
+        .replace(/```text\s*\n?/gi, '')
+        .replace(/```javascript\s*\n?/gi, '')
+        .replace(/```js\s*\n?/gi, '')
+        .replace(/```\s*$/gi, '')
         .trim();
 
       // 提取完整的JSON对象（支持嵌套）
@@ -239,10 +239,10 @@ AI提取结果：
 
       return parsed as VerificationResult;
     } catch (error) {
-      console.error("解析AI验证响应失败:", error);
-      console.error("原始响应:", response);
+      console.error('解析AI验证响应失败:', error);
+      console.error('原始响应:', response);
       throw new Error(
-        `AI验证响应解析失败: ${error instanceof Error ? error.message : String(error)}`,
+        `AI验证响应解析失败: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
@@ -251,19 +251,19 @@ AI提取结果：
    * 验证响应结果结构
    */
   private validateVerificationResult(result: unknown): void {
-    if (typeof result !== "object" || result === null) {
-      throw new Error("AI验证响应必须是一个对象");
+    if (typeof result !== 'object' || result === null) {
+      throw new Error('AI验证响应必须是一个对象');
     }
 
     const resultObj = result as Record<string, unknown>;
 
     const requiredFields = [
-      "overallAccuracy",
-      "partiesAccuracy",
-      "claimsAccuracy",
-      "qualityAssessment",
-      "detailedAnalysis",
-      "confidence",
+      'overallAccuracy',
+      'partiesAccuracy',
+      'claimsAccuracy',
+      'qualityAssessment',
+      'detailedAnalysis',
+      'confidence',
     ];
 
     for (const field of requiredFields) {
@@ -277,15 +277,15 @@ AI提取结果：
     const confidence = resultObj.confidence as number;
 
     if (
-      typeof overallAccuracy !== "number" ||
+      typeof overallAccuracy !== 'number' ||
       overallAccuracy < 0 ||
       overallAccuracy > 100
     ) {
-      throw new Error("overallAccuracy必须在0-100之间");
+      throw new Error('overallAccuracy必须在0-100之间');
     }
 
-    if (typeof confidence !== "number" || confidence < 0 || confidence > 1) {
-      throw new Error("confidence必须在0-1之间");
+    if (typeof confidence !== 'number' || confidence < 0 || confidence > 1) {
+      throw new Error('confidence必须在0-1之间');
     }
   }
 
@@ -294,16 +294,16 @@ AI提取结果：
    * 基于实际提取质量进行评估，提高准确率
    */
   private fallbackVerification(
-    request: VerificationRequest,
+    request: VerificationRequest
   ): VerificationResult {
-    console.warn("使用降级验证机制");
+    console.warn('使用降级验证机制');
     console.log(
-      "提取的当事人数量:",
-      request.extractedData.parties?.length || 0,
+      '提取的当事人数量:',
+      request.extractedData.parties?.length || 0
     );
     console.log(
-      "提取的诉讼请求数量:",
-      request.extractedData.claims?.length || 0,
+      '提取的诉讼请求数量:',
+      request.extractedData.claims?.length || 0
     );
 
     const { extractedData, goldStandard } = request;
@@ -314,9 +314,7 @@ AI提取结果：
 
     // 检查重复
     if (duplicates.length > 0) {
-      issues.push(
-        `发现重复当事人: ${duplicates.map((d) => d.name).join(", ")}`,
-      );
+      issues.push(`发现重复当事人: ${duplicates.map(d => d.name).join(', ')}`);
     }
 
     // 优化评分逻辑
@@ -331,10 +329,10 @@ AI提取结果：
       } else {
         // 有黄金标准，对比评分
         const extractedNames = new Set(
-          extractedData.parties.map((p) => p.name).filter(Boolean),
+          extractedData.parties.map(p => p.name).filter(Boolean)
         );
         const goldNames = new Set(
-          goldStandard.parties.map((p) => p.name).filter(Boolean),
+          goldStandard.parties.map(p => p.name).filter(Boolean)
         );
 
         let correctCount = 0;
@@ -358,7 +356,7 @@ AI提取结果：
       }
     } else {
       partiesScore = 0;
-      issues.push("未识别到任何当事人");
+      issues.push('未识别到任何当事人');
     }
 
     // 诉讼请求评分 - 基于黄金标准对比和类型映射
@@ -369,25 +367,25 @@ AI提取结果：
       } else {
         // 有黄金标准，使用类型映射对比
         const typeMapping: Record<string, string> = {
-          payment: "PAY_PRINCIPAL",
-          restitution: "PAY_PRINCIPAL",
-          偿还: "PAY_PRINCIPAL",
-          返还: "PAY_PRINCIPAL",
-          compensation: "PAY_DAMAGES",
-          damages: "PAY_DAMAGES",
-          赔偿: "PAY_DAMAGES",
-          损害: "PAY_DAMAGES",
+          payment: 'PAY_PRINCIPAL',
+          restitution: 'PAY_PRINCIPAL',
+          偿还: 'PAY_PRINCIPAL',
+          返还: 'PAY_PRINCIPAL',
+          compensation: 'PAY_DAMAGES',
+          damages: 'PAY_DAMAGES',
+          赔偿: 'PAY_DAMAGES',
+          损害: 'PAY_DAMAGES',
         };
 
         const extractedTypes = new Set(
-          extractedData.claims.map((c) => c.type).filter(Boolean),
+          extractedData.claims.map(c => c.type).filter(Boolean)
         );
         const goldTypes = new Set(
-          goldStandard.claims.map((c) => {
+          goldStandard.claims.map(c => {
             // 映射黄金标准中的非标准类型
-            const goldType = typeof c.type === "string" ? c.type : "";
+            const goldType = typeof c.type === 'string' ? c.type : '';
             return typeMapping[goldType] || goldType;
-          }),
+          })
         );
 
         let correctCount = 0;
@@ -406,7 +404,7 @@ AI提取结果：
       }
     } else {
       claimsScore = 0;
-      issues.push("未识别到任何诉讼请求");
+      issues.push('未识别到任何诉讼请求');
     }
 
     const overallAccuracy = Math.round((partiesScore + claimsScore) / 2);
@@ -415,17 +413,17 @@ AI提取结果：
       overallAccuracy,
       partiesAccuracy: {
         score: partiesScore,
-        issues: issues.filter((i) => i.includes("当事人")),
+        issues: issues.filter(i => i.includes('当事人')),
         correctCount: Math.max(
           0,
-          extractedData.parties.length - duplicates.length,
+          extractedData.parties.length - duplicates.length
         ),
         totalCount: extractedData.parties.length,
         duplicates,
       },
       claimsAccuracy: {
         score: claimsScore,
-        issues: issues.filter((i) => i.includes("诉讼请求")),
+        issues: issues.filter(i => i.includes('诉讼请求')),
         correctCount: extractedData.claims.length,
         totalCount: Math.max(1, extractedData.claims.length),
         missingClaims: [],
@@ -435,7 +433,7 @@ AI提取结果：
         consistency: Math.max(50, 100 - duplicates.length * 20),
         clarity: Math.round((partiesScore + claimsScore) / 2),
       },
-      detailedAnalysis: `降级验证结果：当事人${extractedData.parties.length}个（准确率${partiesScore}%），诉讼请求${extractedData.claims.length}个（准确率${claimsScore}%）。${duplicates.length > 0 ? `重复${duplicates.length}个。` : ""}`,
+      detailedAnalysis: `降级验证结果：当事人${extractedData.parties.length}个（准确率${partiesScore}%），诉讼请求${extractedData.claims.length}个（准确率${claimsScore}%）。${duplicates.length > 0 ? `重复${duplicates.length}个。` : ''}`,
       confidence: 0.7, // 提高置信度，基于实际对比
     };
   }
@@ -444,11 +442,11 @@ AI提取结果：
    * 查找重复的当事人
    */
   private findDuplicates(
-    parties: Party[],
+    parties: Party[]
   ): Array<{ name: string; occurrences: number; roles: string[] }> {
     const nameMap = new Map<string, { count: number; roles: string[] }>();
 
-    parties.forEach((party) => {
+    parties.forEach(party => {
       const name = party.name;
       if (!name) return;
 

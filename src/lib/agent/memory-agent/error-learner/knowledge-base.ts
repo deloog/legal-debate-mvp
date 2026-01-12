@@ -3,8 +3,8 @@
  * 更新Cold Memory中的错误知识
  */
 
-import { MemoryManager } from "../memory-manager";
-import type { ErrorPattern, PreventionMeasure } from "../types";
+import { MemoryManager } from '../memory-manager';
+import type { ErrorPattern, PreventionMeasure } from '../types';
 
 /**
  * KnowledgeBaseUpdater - 知识库更新类
@@ -18,7 +18,7 @@ export class KnowledgeBaseUpdater {
   async updateKnowledgeBase(
     error: { errorType: string; userId: string | null },
     pattern: ErrorPattern,
-    preventionMeasures: PreventionMeasure[],
+    preventionMeasures: PreventionMeasure[]
   ): Promise<boolean> {
     try {
       const knowledgeKey = `error_pattern_${error.errorType}`;
@@ -44,12 +44,12 @@ export class KnowledgeBaseUpdater {
       await this.memoryManager.storeColdMemory(
         knowledgeKey,
         newKnowledge,
-        error.userId || "system",
+        error.userId || 'system'
       );
 
       return true;
     } catch (error) {
-      console.error("Failed to update knowledge base:", error);
+      console.error('Failed to update knowledge base:', error);
       return false;
     }
   }

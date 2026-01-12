@@ -3,7 +3,7 @@
  * 负责将辩论生成过程转换为流式事件
  */
 
-import { SSEEventManager } from "./sse-manager";
+import { SSEEventManager } from './sse-manager';
 import {
   type SSEEvent,
   SSEConnectionState,
@@ -15,7 +15,7 @@ import {
   type ErrorEventData,
   type PingEventData,
   type DisconnectedEventData,
-} from "./types";
+} from './types';
 
 /**
  * 流式生成器配置
@@ -43,7 +43,7 @@ export class DebateStreamGenerator {
   constructor(
     sessionId: string,
     config: StreamGeneratorConfig,
-    write: (data: string) => void,
+    write: (data: string) => void
   ) {
     this.manager = new SSEEventManager(sessionId);
     this.config = config;
@@ -62,7 +62,7 @@ export class DebateStreamGenerator {
       sessionId: this.manager.getStats().sessionId,
     };
 
-    const event = this.manager.createEvent("connected", eventData);
+    const event = this.manager.createEvent('connected', eventData);
     this.sendEvent(event);
     this.manager.setState(SSEConnectionState.CONNECTED);
   }
@@ -78,7 +78,7 @@ export class DebateStreamGenerator {
       timestamp: new Date().toISOString(),
     };
 
-    const event = this.manager.createEvent("round-start", eventData);
+    const event = this.manager.createEvent('round-start', eventData);
     this.sendEvent(event);
   }
 
@@ -87,7 +87,7 @@ export class DebateStreamGenerator {
    */
   sendArgument(argument: ArgumentEventData): void {
     this.generatedArguments.push(argument);
-    const event = this.manager.createEvent("argument", argument);
+    const event = this.manager.createEvent('argument', argument);
     this.sendEvent(event);
     this.updateProgress();
   }
@@ -98,7 +98,7 @@ export class DebateStreamGenerator {
   sendProgress(
     currentStep: string,
     totalSteps: number,
-    customProgress?: number,
+    customProgress?: number
   ): void {
     let progress: number;
     if (customProgress) {
@@ -124,7 +124,7 @@ export class DebateStreamGenerator {
       eventData.estimatedRemainingTime = estimatedRemainingTime;
     }
 
-    const event = this.manager.createEvent("progress", eventData);
+    const event = this.manager.createEvent('progress', eventData);
     this.sendEvent(event);
     this.currentProgress = progress;
   }
@@ -161,10 +161,10 @@ export class DebateStreamGenerator {
     const generationTime = Date.now() - this.startTime;
 
     const plaintiffCount = this.generatedArguments.filter(
-      (arg) => arg.side === "PLAINTIFF",
+      arg => arg.side === 'PLAINTIFF'
     ).length;
     const defendantCount = this.generatedArguments.filter(
-      (arg) => arg.side === "DEFENDANT",
+      arg => arg.side === 'DEFENDANT'
     ).length;
 
     const eventData: CompletedEventData = {
@@ -177,7 +177,7 @@ export class DebateStreamGenerator {
       timestamp: new Date().toISOString(),
     };
 
-    const event = this.manager.createEvent("completed", eventData);
+    const event = this.manager.createEvent('completed', eventData);
     this.sendEvent(event);
     this.stopProgressUpdates();
   }
@@ -189,7 +189,7 @@ export class DebateStreamGenerator {
     code: string,
     message: string,
     details?: unknown,
-    roundId?: string,
+    roundId?: string
   ): void {
     const eventData: ErrorEventData = {
       debateId: this.config.debateId,
@@ -200,7 +200,7 @@ export class DebateStreamGenerator {
       timestamp: new Date().toISOString(),
     };
 
-    const event = this.manager.createEvent("error", eventData, undefined, 3000);
+    const event = this.manager.createEvent('error', eventData, undefined, 3000);
     this.sendEvent(event);
     this.manager.setState(SSEConnectionState.ERROR);
   }
@@ -214,7 +214,7 @@ export class DebateStreamGenerator {
       serverTime: new Date().toISOString(),
     };
 
-    const event = this.manager.createEvent("ping", eventData);
+    const event = this.manager.createEvent('ping', eventData);
     this.sendEvent(event);
   }
 
@@ -228,7 +228,7 @@ export class DebateStreamGenerator {
       timestamp: new Date().toISOString(),
     };
 
-    const event = this.manager.createEvent("disconnected", eventData);
+    const event = this.manager.createEvent('disconnected', eventData);
     this.sendEvent(event);
     this.manager.cleanup();
   }

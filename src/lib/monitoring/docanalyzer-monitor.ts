@@ -21,10 +21,10 @@ export interface QualityMetrics {
 }
 
 export interface TrendAnalysis {
-  period: "hour" | "day" | "week";
+  period: 'hour' | 'day' | 'week';
   averageQualityScore: number;
   averageProcessingTime: number;
-  qualityTrend: "improving" | "stable" | "declining";
+  qualityTrend: 'improving' | 'stable' | 'declining';
   successRate: number;
   issueDistribution: { [key: string]: number };
 }
@@ -33,12 +33,12 @@ export interface AlertConfig {
   minQualityScore: number;
   maxProcessingTime: number;
   enableAlerts: boolean;
-  alertChannels: ("console" | "log" | "external")[];
+  alertChannels: ('console' | 'log' | 'external')[];
 }
 
 export interface Alert {
   timestamp: number;
-  level: "warning" | "error" | "critical";
+  level: 'warning' | 'error' | 'critical';
   message: string;
   details?: any;
 }
@@ -53,7 +53,7 @@ export class DocAnalyzerMonitor {
     minQualityScore: 0.7,
     maxProcessingTime: 100,
     enableAlerts: true,
-    alertChannels: ["console"],
+    alertChannels: ['console'],
   };
 
   private readonly MAX_METRICS_STORED = 1000;
@@ -78,33 +78,31 @@ export class DocAnalyzerMonitor {
   /**
    * 获取质量评分趋势
    */
-  getQualityTrend(period: "hour" | "day" | "week" = "day"): TrendAnalysis {
+  getQualityTrend(period: 'hour' | 'day' | 'week' = 'day'): TrendAnalysis {
     const now = Date.now();
     const periodStart = this.getPeriodStart(now, period);
 
-    const periodMetrics = this.metrics.filter(
-      (m) => m.timestamp >= periodStart,
-    );
+    const periodMetrics = this.metrics.filter(m => m.timestamp >= periodStart);
 
     if (periodMetrics.length === 0) {
       return {
         period,
         averageQualityScore: 0,
         averageProcessingTime: 0,
-        qualityTrend: "stable",
+        qualityTrend: 'stable',
         successRate: 0,
         issueDistribution: {},
       };
     }
 
     const averageQualityScore = this.calculateAverage(
-      periodMetrics.map((m) => m.qualityScore),
+      periodMetrics.map(m => m.qualityScore)
     );
     const averageProcessingTime = this.calculateAverage(
-      periodMetrics.map((m) => m.processingTime),
+      periodMetrics.map(m => m.processingTime)
     );
     const successRate =
-      periodMetrics.filter((m) => m.validationResults.isValid).length /
+      periodMetrics.filter(m => m.validationResults.isValid).length /
       periodMetrics.length;
 
     const issueDistribution = this.analyzeIssueDistribution(periodMetrics);
@@ -159,43 +157,43 @@ export class DocAnalyzerMonitor {
    * 生成监控报告
    */
   generateReport(): string {
-    const recentTrend = this.getQualityTrend("day");
+    const recentTrend = this.getQualityTrend('day');
     const recentMetrics = this.getRecentMetrics(10);
     const recentAlerts = this.getAlerts().slice(-5);
 
-    let report = "DocAnalyzer监控报告\n";
-    report += "================\n\n";
+    let report = 'DocAnalyzer监控报告\n';
+    report += '================\n\n';
 
-    report += "质量趋势（24小时）\n";
-    report += "----------------\n";
+    report += '质量趋势（24小时）\n';
+    report += '----------------\n';
     report += `平均质量评分: ${(recentTrend.averageQualityScore * 100).toFixed(1)}%\n`;
     report += `平均处理时间: ${recentTrend.averageProcessingTime.toFixed(2)}ms\n`;
     report += `成功率: ${(recentTrend.successRate * 100).toFixed(1)}%\n`;
     report += `趋势: ${this.formatTrend(recentTrend.qualityTrend)}\n\n`;
 
     if (Object.keys(recentTrend.issueDistribution).length > 0) {
-      report += "问题分布\n";
-      report += "----------------\n";
+      report += '问题分布\n';
+      report += '----------------\n';
       const sortedIssues = Object.entries(recentTrend.issueDistribution)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5);
       for (const [issue, count] of sortedIssues) {
         report += `  ${issue}: ${count}次\n`;
       }
-      report += "\n";
+      report += '\n';
     }
 
     if (recentAlerts.length > 0) {
-      report += "最近告警\n";
-      report += "----------------\n";
+      report += '最近告警\n';
+      report += '----------------\n';
       for (const alert of recentAlerts) {
         report += `[${alert.level.toUpperCase()}] ${new Date(alert.timestamp).toLocaleTimeString()} ${alert.message}\n`;
       }
-      report += "\n";
+      report += '\n';
     }
 
-    report += "最近处理记录\n";
-    report += "----------------\n";
+    report += '最近处理记录\n';
+    report += '----------------\n';
     for (const metric of recentMetrics) {
       report += `[${new Date(metric.timestamp).toLocaleTimeString()}] 质量评分: ${(metric.qualityScore * 100).toFixed(1)}%, 耗时: ${metric.processingTime}ms\n`;
     }
@@ -206,13 +204,13 @@ export class DocAnalyzerMonitor {
   /**
    * 获取周期开始时间
    */
-  private getPeriodStart(now: number, period: "hour" | "day" | "week"): number {
+  private getPeriodStart(now: number, period: 'hour' | 'day' | 'week'): number {
     switch (period) {
-      case "hour":
+      case 'hour':
         return now - 60 * 60 * 1000;
-      case "day":
+      case 'day':
         return now - 24 * 60 * 60 * 1000;
-      case "week":
+      case 'week':
         return now - 7 * 24 * 60 * 60 * 1000;
     }
   }
@@ -246,26 +244,24 @@ export class DocAnalyzerMonitor {
    * 计算质量趋势
    */
   private calculateQualityTrend(
-    metrics: QualityMetrics[],
-  ): "improving" | "stable" | "declining" {
-    if (metrics.length < 2) return "stable";
+    metrics: QualityMetrics[]
+  ): 'improving' | 'stable' | 'declining' {
+    if (metrics.length < 2) return 'stable';
 
     const half = Math.floor(metrics.length / 2);
     const firstHalf = metrics.slice(0, half);
     const secondHalf = metrics.slice(half);
 
-    const firstAvg = this.calculateAverage(
-      firstHalf.map((m) => m.qualityScore),
-    );
+    const firstAvg = this.calculateAverage(firstHalf.map(m => m.qualityScore));
     const secondAvg = this.calculateAverage(
-      secondHalf.map((m) => m.qualityScore),
+      secondHalf.map(m => m.qualityScore)
     );
 
     const diff = secondAvg - firstAvg;
 
-    if (diff > 0.05) return "improving";
-    if (diff < -0.05) return "declining";
-    return "stable";
+    if (diff > 0.05) return 'improving';
+    if (diff < -0.05) return 'declining';
+    return 'stable';
   }
 
   /**
@@ -275,18 +271,18 @@ export class DocAnalyzerMonitor {
     // 质量评分过低
     if (metric.qualityScore < this.config.minQualityScore) {
       this.createAlert(
-        "warning",
+        'warning',
         `质量评分过低: ${(metric.qualityScore * 100).toFixed(1)}%`,
         {
           metric,
           threshold: this.config.minQualityScore,
-        },
+        }
       );
     }
 
     // 处理时间过长
     if (metric.processingTime > this.config.maxProcessingTime) {
-      this.createAlert("warning", `处理时间过长: ${metric.processingTime}ms`, {
+      this.createAlert('warning', `处理时间过长: ${metric.processingTime}ms`, {
         metric,
         threshold: this.config.maxProcessingTime,
       });
@@ -298,11 +294,11 @@ export class DocAnalyzerMonitor {
       metric.validationResults.issues.length > 0
     ) {
       this.createAlert(
-        "error",
-        `验证失败: ${metric.validationResults.issues.join(", ")}`,
+        'error',
+        `验证失败: ${metric.validationResults.issues.join(', ')}`,
         {
           metric,
-        },
+        }
       );
     }
   }
@@ -311,9 +307,9 @@ export class DocAnalyzerMonitor {
    * 创建告警
    */
   private createAlert(
-    level: "warning" | "error" | "critical",
+    level: 'warning' | 'error' | 'critical',
     message: string,
-    details?: any,
+    details?: any
   ): void {
     const alert: Alert = {
       timestamp: Date.now(),
@@ -334,20 +330,20 @@ export class DocAnalyzerMonitor {
    * 发送告警到指定渠道
    */
   private sendAlert(
-    channel: "console" | "log" | "external",
-    alert: Alert,
+    channel: 'console' | 'log' | 'external',
+    alert: Alert
   ): void {
     switch (channel) {
-      case "console":
+      case 'console':
         console.warn(
           `[DocAnalyzer Alert] [${alert.level.toUpperCase()}] ${alert.message}`,
-          alert.details || "",
+          alert.details || ''
         );
         break;
-      case "log":
+      case 'log':
         // 实际项目中可以写入日志文件
         break;
-      case "external":
+      case 'external':
         // 实际项目中可以发送到外部监控系统（如Sentry、DataDog等）
         break;
     }
@@ -356,14 +352,14 @@ export class DocAnalyzerMonitor {
   /**
    * 格式化趋势
    */
-  private formatTrend(trend: "improving" | "stable" | "declining"): string {
+  private formatTrend(trend: 'improving' | 'stable' | 'declining'): string {
     switch (trend) {
-      case "improving":
-        return "📈 提升";
-      case "declining":
-        return "📉 下降";
-      case "stable":
-        return "➡️ 稳定";
+      case 'improving':
+        return '📈 提升';
+      case 'declining':
+        return '📉 下降';
+      case 'stable':
+        return '➡️ 稳定';
     }
   }
 
@@ -388,10 +384,10 @@ export class DocAnalyzerMonitor {
       totalMetrics: this.metrics.length,
       totalAlerts: this.alerts.length,
       averageQualityScore: this.calculateAverage(
-        this.metrics.map((m) => m.qualityScore),
+        this.metrics.map(m => m.qualityScore)
       ),
       averageProcessingTime: this.calculateAverage(
-        this.metrics.map((m) => m.processingTime),
+        this.metrics.map(m => m.processingTime)
       ),
     };
   }
@@ -421,7 +417,7 @@ export function recordDocAnalyzerMetric(metric: QualityMetrics): void {
  * 便捷函数：获取质量趋势
  */
 export function getDocAnalyzerTrend(
-  period?: "hour" | "day" | "week",
+  period?: 'hour' | 'day' | 'week'
 ): TrendAnalysis {
   return getDocAnalyzerMonitor().getQualityTrend(period);
 }

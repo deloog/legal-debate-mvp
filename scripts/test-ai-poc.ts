@@ -7,11 +7,11 @@
  * 记录响应时间、成本和性能指标
  */
 
-import { config } from "dotenv";
-import { getUnifiedAIService } from "../src/lib/ai/unified-service";
-import { validateAIConfig } from "../src/lib/ai/config";
-import { validateLawStarConfig } from "../src/lib/ai/lawstar-config";
-import { getAIConfig } from "../src/lib/ai/config";
+import { config } from 'dotenv';
+import { getUnifiedAIService } from '../src/lib/ai/unified-service';
+import { validateAIConfig } from '../src/lib/ai/config';
+import { validateLawStarConfig } from '../src/lib/ai/lawstar-config';
+import { getAIConfig } from '../src/lib/ai/config';
 
 // 加载环境变量
 config();
@@ -32,16 +32,16 @@ const TEST_CASES = {
 
   // 测试案件信息
   testCase: {
-    title: "房屋买卖合同纠纷",
-    description: "买方支付定金后卖方违约不办理过户，要求解除合同并赔偿损失",
-    legalReferences: ["《民法典》第577条", "《民法典》第587条"],
+    title: '房屋买卖合同纠纷',
+    description: '买方支付定金后卖方违约不办理过户，要求解除合同并赔偿损失',
+    legalReferences: ['《民法典》第577条', '《民法典》第587条'],
   },
 
   // 测试查询
   testQueries: {
-    keyword: "合同违约",
-    semanticQuery: "房屋买卖合同买方违约如何处理",
-    lawType: "民法",
+    keyword: '合同违约',
+    semanticQuery: '房屋买卖合同买方违约如何处理',
+    lawType: '民法',
     topK: 5,
   },
 };
@@ -89,7 +89,7 @@ function recordMetric(
   success: boolean,
   error?: string,
   tokens?: number,
-  cost?: number,
+  cost?: number
 ): PerformanceMetrics {
   return {
     provider,
@@ -120,47 +120,47 @@ function estimateTokens(text: string): number {
 // 测试函数
 // =============================================================================
 
-async function testConfigValidation(): Promise<POCResults["configValidation"]> {
-  console.log("🔧 验证配置文件...");
+async function testConfigValidation(): Promise<POCResults['configValidation']> {
+  console.log('🔧 验证配置文件...');
 
   // 调试：输出环境变量
-  console.log("环境变量调试:");
+  console.log('环境变量调试:');
   console.log(
-    "ZHIPU_API_KEY:",
-    process.env.ZHIPU_API_KEY ? "已设置" : "未设置",
+    'ZHIPU_API_KEY:',
+    process.env.ZHIPU_API_KEY ? '已设置' : '未设置'
   );
   console.log(
-    "DEEPSEEK_API_KEY:",
-    process.env.DEEPSEEK_API_KEY ? "已设置" : "未设置",
+    'DEEPSEEK_API_KEY:',
+    process.env.DEEPSEEK_API_KEY ? '已设置' : '未设置'
   );
-  console.log("NODE_ENV:", process.env.NODE_ENV);
+  console.log('NODE_ENV:', process.env.NODE_ENV);
 
   // 调试：输出实际配置
   const config = getAIConfig();
-  console.log("\n实际配置信息:");
-  console.log("客户端数量:", config.clients.length);
+  console.log('\n实际配置信息:');
+  console.log('客户端数量:', config.clients.length);
   config.clients.forEach((client, index) => {
     console.log(`客户端 ${index + 1}:`);
     console.log(`  提供商: ${client.provider}`);
-    console.log(`  API密钥: ${client.apiKey ? "已设置" : "未设置"}`);
+    console.log(`  API密钥: ${client.apiKey ? '已设置' : '未设置'}`);
     console.log(`  API密钥长度: ${client.apiKey?.length || 0}`);
   });
 
   const aiValidation = validateAIConfig();
   const lawstarValidation = validateLawStarConfig();
 
-  console.log("\n验证结果:");
-  console.log("AI配置验证:", aiValidation.valid ? "✅ 通过" : "❌ 失败");
+  console.log('\n验证结果:');
+  console.log('AI配置验证:', aiValidation.valid ? '✅ 通过' : '❌ 失败');
   if (!aiValidation.valid) {
-    console.log("AI配置错误:", aiValidation.errors);
+    console.log('AI配置错误:', aiValidation.errors);
   }
 
   console.log(
-    "法律之星配置验证:",
-    lawstarValidation.valid ? "✅ 通过" : "❌ 失败",
+    '法律之星配置验证:',
+    lawstarValidation.valid ? '✅ 通过' : '❌ 失败'
   );
   if (!lawstarValidation.valid) {
-    console.log("法律之星配置错误:", lawstarValidation.errors);
+    console.log('法律之星配置错误:', lawstarValidation.errors);
   }
 
   return {
@@ -170,9 +170,9 @@ async function testConfigValidation(): Promise<POCResults["configValidation"]> {
 }
 
 async function testZhipuDocumentParsing(
-  aiService: any,
+  aiService: any
 ): Promise<PerformanceMetrics[]> {
-  console.log("📝 测试智谱清言文档解析API...");
+  console.log('📝 测试智谱清言文档解析API...');
   const metrics: PerformanceMetrics[] = [];
   const startTime = Date.now();
 
@@ -184,27 +184,27 @@ async function testZhipuDocumentParsing(
 
     const endTime = Date.now();
     const tokens = estimateTokens(
-      TEST_CASES.contractDispute + JSON.stringify(response),
+      TEST_CASES.contractDispute + JSON.stringify(response)
     );
 
     metrics.push(
       recordMetric(
-        "智谱清言",
-        "文档解析",
+        '智谱清言',
+        '文档解析',
         startTime,
         endTime,
         true,
         undefined,
         tokens,
-        tokens * 0.00001, // 简单成本估算
-      ),
+        tokens * 0.00001 // 简单成本估算
+      )
     );
 
     console.log(
-      `✅ 文档解析成功，响应时间: ${formatDuration(endTime - startTime)}`,
+      `✅ 文档解析成功，响应时间: ${formatDuration(endTime - startTime)}`
     );
     console.log(
-      `   提取内容长度: ${response.choices[0].message.content.length} 字符`,
+      `   提取内容长度: ${response.choices[0].message.content.length} 字符`
     );
   } catch (error) {
     const endTime = Date.now();
@@ -212,13 +212,13 @@ async function testZhipuDocumentParsing(
       error instanceof Error ? error.message : JSON.stringify(error);
     metrics.push(
       recordMetric(
-        "智谱清言",
-        "文档解析",
+        '智谱清言',
+        '文档解析',
         startTime,
         endTime,
         false,
-        errorMessage,
-      ),
+        errorMessage
+      )
     );
 
     console.log(`❌ 文档解析失败: ${errorMessage}`);
@@ -228,9 +228,9 @@ async function testZhipuDocumentParsing(
 }
 
 async function testDeepSeekDebateGeneration(
-  aiService: any,
+  aiService: any
 ): Promise<PerformanceMetrics[]> {
-  console.log("🗣️ 测试DeepSeek辩论生成API...");
+  console.log('🗣️ 测试DeepSeek辩论生成API...');
   const metrics: PerformanceMetrics[] = [];
   const startTime = Date.now();
 
@@ -240,27 +240,27 @@ async function testDeepSeekDebateGeneration(
     const endTime = Date.now();
     const tokens = estimateTokens(
       JSON.stringify(TEST_CASES.testCase) +
-        JSON.stringify(response.choices[0].message.content),
+        JSON.stringify(response.choices[0].message.content)
     );
 
     metrics.push(
       recordMetric(
-        "DeepSeek",
-        "辩论生成",
+        'DeepSeek',
+        '辩论生成',
         startTime,
         endTime,
         true,
         undefined,
         tokens,
-        tokens * 0.00001, // 简单成本估算
-      ),
+        tokens * 0.00001 // 简单成本估算
+      )
     );
 
     console.log(
-      `✅ 辩论生成成功，响应时间: ${formatDuration(endTime - startTime)}`,
+      `✅ 辩论生成成功，响应时间: ${formatDuration(endTime - startTime)}`
     );
     console.log(
-      `   生成内容长度: ${response.choices[0].message.content.length} 字符`,
+      `   生成内容长度: ${response.choices[0].message.content.length} 字符`
     );
   } catch (error) {
     const endTime = Date.now();
@@ -268,13 +268,13 @@ async function testDeepSeekDebateGeneration(
       error instanceof Error ? error.message : JSON.stringify(error);
     metrics.push(
       recordMetric(
-        "DeepSeek",
-        "辩论生成",
+        'DeepSeek',
+        '辩论生成',
         startTime,
         endTime,
         false,
-        errorMessage,
-      ),
+        errorMessage
+      )
     );
 
     console.log(`❌ 辩论生成失败: ${errorMessage}`);
@@ -284,9 +284,9 @@ async function testDeepSeekDebateGeneration(
 }
 
 async function testLawStarRegulationSearch(
-  aiService: any,
+  aiService: any
 ): Promise<PerformanceMetrics[]> {
-  console.log("⚖️ 测试法律之星法规查询API...");
+  console.log('⚖️ 测试法律之星法规查询API...');
   const metrics: PerformanceMetrics[] = [];
   const startTime = Date.now();
 
@@ -301,19 +301,19 @@ async function testLawStarRegulationSearch(
 
     metrics.push(
       recordMetric(
-        "法律之星",
-        "法规查询",
+        '法律之星',
+        '法规查询',
         startTime,
         endTime,
         true,
         undefined,
         undefined,
-        0.01, // 假设每次调用0.01元
-      ),
+        0.01 // 假设每次调用0.01元
+      )
     );
 
     console.log(
-      `✅ 法规查询成功，响应时间: ${formatDuration(endTime - startTime)}`,
+      `✅ 法规查询成功，响应时间: ${formatDuration(endTime - startTime)}`
     );
     console.log(`   返回结果数量: ${response.data.lawdata.length} 条`);
   } catch (error) {
@@ -322,13 +322,13 @@ async function testLawStarRegulationSearch(
       error instanceof Error ? error.message : JSON.stringify(error);
     metrics.push(
       recordMetric(
-        "法律之星",
-        "法规查询",
+        '法律之星',
+        '法规查询',
         startTime,
         endTime,
         false,
-        errorMessage,
-      ),
+        errorMessage
+      )
     );
 
     console.log(`❌ 法规查询失败: ${errorMessage}`);
@@ -338,9 +338,9 @@ async function testLawStarRegulationSearch(
 }
 
 async function testLawStarVectorSearch(
-  aiService: any,
+  aiService: any
 ): Promise<PerformanceMetrics[]> {
-  console.log("🔍 测试法律之星向量查询API...");
+  console.log('🔍 测试法律之星向量查询API...');
   const metrics: PerformanceMetrics[] = [];
   const startTime = Date.now();
 
@@ -355,19 +355,19 @@ async function testLawStarVectorSearch(
 
     metrics.push(
       recordMetric(
-        "法律之星",
-        "向量查询",
+        '法律之星',
+        '向量查询',
         startTime,
         endTime,
         true,
         undefined,
         undefined,
-        0.01, // 假设每次调用0.01元
-      ),
+        0.01 // 假设每次调用0.01元
+      )
     );
 
     console.log(
-      `✅ 向量查询成功，响应时间: ${formatDuration(endTime - startTime)}`,
+      `✅ 向量查询成功，响应时间: ${formatDuration(endTime - startTime)}`
     );
     console.log(`   返回匹配数量: ${response.data.result.length} 条`);
   } catch (error) {
@@ -376,13 +376,13 @@ async function testLawStarVectorSearch(
       error instanceof Error ? error.message : JSON.stringify(error);
     metrics.push(
       recordMetric(
-        "法律之星",
-        "向量查询",
+        '法律之星',
+        '向量查询',
         startTime,
         endTime,
         false,
-        errorMessage,
-      ),
+        errorMessage
+      )
     );
 
     console.log(`❌ 向量查询失败: ${errorMessage}`);
@@ -392,9 +392,9 @@ async function testLawStarVectorSearch(
 }
 
 async function testSmartLegalSearch(
-  aiService: any,
+  aiService: any
 ): Promise<PerformanceMetrics[]> {
-  console.log("🧠 测试智能法律检索（关键词+语义）...");
+  console.log('🧠 测试智能法律检索（关键词+语义）...');
   const metrics: PerformanceMetrics[] = [];
   const startTime = Date.now();
 
@@ -410,25 +410,25 @@ async function testSmartLegalSearch(
 
     metrics.push(
       recordMetric(
-        "法律之星",
-        "智能检索",
+        '法律之星',
+        '智能检索',
         startTime,
         endTime,
         true,
         undefined,
         undefined,
-        0.02, // 假设每次调用0.02元（两个查询）
-      ),
+        0.02 // 假设每次调用0.02元（两个查询）
+      )
     );
 
     console.log(
-      `✅ 智能检索成功，响应时间: ${formatDuration(endTime - startTime)}`,
+      `✅ 智能检索成功，响应时间: ${formatDuration(endTime - startTime)}`
     );
     console.log(
-      `   关键词结果: ${response.keywordResults?.data.lawdata.length || 0} 条`,
+      `   关键词结果: ${response.keywordResults?.data.lawdata.length || 0} 条`
     );
     console.log(
-      `   语义结果: ${response.semanticResults?.data.result.length || 0} 条`,
+      `   语义结果: ${response.semanticResults?.data.result.length || 0} 条`
     );
     console.log(`   合并去重后: ${response.combined.length} 条`);
   } catch (error) {
@@ -437,13 +437,13 @@ async function testSmartLegalSearch(
       error instanceof Error ? error.message : JSON.stringify(error);
     metrics.push(
       recordMetric(
-        "法律之星",
-        "智能检索",
+        '法律之星',
+        '智能检索',
         startTime,
         endTime,
         false,
-        errorMessage,
-      ),
+        errorMessage
+      )
     );
 
     console.log(`❌ 智能检索失败: ${errorMessage}`);
@@ -453,9 +453,9 @@ async function testSmartLegalSearch(
 }
 
 async function testCompleteCaseAnalysis(
-  aiService: any,
+  aiService: any
 ): Promise<PerformanceMetrics[]> {
-  console.log("🎯 测试完整案件分析流程...");
+  console.log('🎯 测试完整案件分析流程...');
   const metrics: PerformanceMetrics[] = [];
   const startTime = Date.now();
 
@@ -469,26 +469,26 @@ async function testCompleteCaseAnalysis(
 
     metrics.push(
       recordMetric(
-        "统一AI服务",
-        "完整分析",
+        '统一AI服务',
+        '完整分析',
         startTime,
         endTime,
         true,
         undefined,
         undefined,
-        0.1, // 假设每次完整分析0.1元
-      ),
+        0.1 // 假设每次完整分析0.1元
+      )
     );
 
     console.log(
-      `✅ 完整分析成功，响应时间: ${formatDuration(endTime - startTime)}`,
+      `✅ 完整分析成功，响应时间: ${formatDuration(endTime - startTime)}`
     );
     console.log(
-      `   文档分析: ${response.documentAnalysis.choices[0].message.content.length} 字符`,
+      `   文档分析: ${response.documentAnalysis.choices[0].message.content.length} 字符`
     );
     console.log(`   法律依据: ${response.legalReferences.combined.length} 条`);
     console.log(
-      `   辩论论点: ${response.debatePoints.choices[0].message.content.length} 字符`,
+      `   辩论论点: ${response.debatePoints.choices[0].message.content.length} 字符`
     );
   } catch (error) {
     const endTime = Date.now();
@@ -496,13 +496,13 @@ async function testCompleteCaseAnalysis(
       error instanceof Error ? error.message : JSON.stringify(error);
     metrics.push(
       recordMetric(
-        "统一AI服务",
-        "完整分析",
+        '统一AI服务',
+        '完整分析',
         startTime,
         endTime,
         false,
-        errorMessage,
-      ),
+        errorMessage
+      )
     );
 
     console.log(`❌ 完整分析失败: ${errorMessage}`);
@@ -516,8 +516,8 @@ async function testCompleteCaseAnalysis(
 // =============================================================================
 
 async function main(): Promise<void> {
-  console.log("🚀 开始AI提供商POC验证测试\n");
-  console.log("=".repeat(60));
+  console.log('🚀 开始AI提供商POC验证测试\n');
+  console.log('='.repeat(60));
 
   const startTime = Date.now();
   const results: POCResults = {
@@ -543,53 +543,53 @@ async function main(): Promise<void> {
       !results.configValidation.ai.valid ||
       !results.configValidation.lawstar.valid
     ) {
-      console.log("\n❌ 配置验证失败，请检查环境变量配置");
+      console.log('\n❌ 配置验证失败，请检查环境变量配置');
       process.exit(1);
     }
 
-    console.log("\n" + "=".repeat(60));
-    console.log("🔧 初始化统一AI服务...");
+    console.log('\n' + '='.repeat(60));
+    console.log('🔧 初始化统一AI服务...');
 
     // 2. 初始化AI服务
     const aiService = await getUnifiedAIService();
 
-    console.log("✅ AI服务初始化成功\n");
-    console.log("=".repeat(60));
+    console.log('✅ AI服务初始化成功\n');
+    console.log('='.repeat(60));
 
     // 3. 执行测试
-    console.log("🧪 开始功能测试...\n");
+    console.log('🧪 开始功能测试...\n');
 
     // 3.1 智谱清言文档解析
     const zhipuMetrics = await testZhipuDocumentParsing(aiService);
     results.tests.push(...zhipuMetrics);
-    console.log("");
+    console.log('');
 
     // 3.2 DeepSeek辩论生成
     const deepseekMetrics = await testDeepSeekDebateGeneration(aiService);
     results.tests.push(...deepseekMetrics);
-    console.log("");
+    console.log('');
 
     // 3.3 法律之星法规查询
     const regulationMetrics = await testLawStarRegulationSearch(aiService);
     results.tests.push(...regulationMetrics);
-    console.log("");
+    console.log('');
 
     // 3.4 法律之星向量查询
     const vectorMetrics = await testLawStarVectorSearch(aiService);
     results.tests.push(...vectorMetrics);
-    console.log("");
+    console.log('');
 
     // 3.5 智能法律检索
     const smartSearchMetrics = await testSmartLegalSearch(aiService);
     results.tests.push(...smartSearchMetrics);
-    console.log("");
+    console.log('');
 
     // 3.6 完整案件分析
     const completeAnalysisMetrics = await testCompleteCaseAnalysis(aiService);
     results.tests.push(...completeAnalysisMetrics);
   } catch (error) {
     console.log(
-      `❌ 测试过程中发生严重错误: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
+      `❌ 测试过程中发生严重错误: ${error instanceof Error ? error.message : JSON.stringify(error)}`
     );
     process.exit(1);
   }
@@ -598,33 +598,33 @@ async function main(): Promise<void> {
   const endTime = Date.now();
 
   results.summary.totalTests = results.tests.length;
-  results.summary.successCount = results.tests.filter((t) => t.success).length;
-  results.summary.failureCount = results.tests.filter((t) => !t.success).length;
+  results.summary.successCount = results.tests.filter(t => t.success).length;
+  results.summary.failureCount = results.tests.filter(t => !t.success).length;
   results.summary.averageResponseTime =
     results.tests.reduce((sum, t) => sum + t.duration, 0) /
     results.tests.length;
 
   // 按提供商统计成本
-  results.tests.forEach((test) => {
+  results.tests.forEach(test => {
     if (test.cost) {
       results.summary.estimatedCosts[test.provider] =
         (results.summary.estimatedCosts[test.provider] || 0) + test.cost;
     }
   });
 
-  console.log("\n" + "=".repeat(60));
-  console.log("📊 POC验证测试总结报告");
-  console.log("=".repeat(60));
+  console.log('\n' + '='.repeat(60));
+  console.log('📊 POC验证测试总结报告');
+  console.log('='.repeat(60));
 
   console.log(`\n📈 总体统计:`);
   console.log(`   总测试数: ${results.summary.totalTests}`);
   console.log(`   成功数: ${results.summary.successCount}`);
   console.log(`   失败数: ${results.summary.failureCount}`);
   console.log(
-    `   成功率: ${((results.summary.successCount / results.summary.totalTests) * 100).toFixed(1)}%`,
+    `   成功率: ${((results.summary.successCount / results.summary.totalTests) * 100).toFixed(1)}%`
   );
   console.log(
-    `   平均响应时间: ${formatDuration(results.summary.averageResponseTime)}`,
+    `   平均响应时间: ${formatDuration(results.summary.averageResponseTime)}`
   );
   console.log(`   总耗时: ${formatDuration(endTime - startTime)}`);
 
@@ -634,15 +634,15 @@ async function main(): Promise<void> {
   });
   const totalCost = Object.values(results.summary.estimatedCosts).reduce(
     (sum, cost) => sum + cost,
-    0,
+    0
   );
   console.log(`   总计: ¥${totalCost.toFixed(4)}`);
 
   console.log(`\n📋 详细测试结果:`);
   results.tests.forEach((test, index) => {
-    const status = test.success ? "✅" : "❌";
+    const status = test.success ? '✅' : '❌';
     console.log(
-      `   ${index + 1}. ${status} ${test.provider} - ${test.function} - ${formatDuration(test.duration)}`,
+      `   ${index + 1}. ${status} ${test.provider} - ${test.function} - ${formatDuration(test.duration)}`
     );
     if (test.error) {
       console.log(`      错误: ${test.error}`);
@@ -656,21 +656,21 @@ async function main(): Promise<void> {
   });
 
   // 5. 保存结果到文件
-  const reportPath = "./ai-poc-validation-report.json";
-  const fs = require("fs");
+  const reportPath = './ai-poc-validation-report.json';
+  const fs = require('fs');
   fs.writeFileSync(reportPath, JSON.stringify(results, null, 2));
   console.log(`\n📄 详细报告已保存到: ${reportPath}`);
 
-  console.log("\n🎉 AI提供商POC验证测试完成！");
+  console.log('\n🎉 AI提供商POC验证测试完成！');
 
   // 6. 退出码
   if (results.summary.failureCount > 0) {
     console.log(
-      `⚠️  有 ${results.summary.failureCount} 个测试失败，请检查配置和网络连接`,
+      `⚠️  有 ${results.summary.failureCount} 个测试失败，请检查配置和网络连接`
     );
     process.exit(1);
   } else {
-    console.log("✅ 所有测试通过，AI服务可以正常使用");
+    console.log('✅ 所有测试通过，AI服务可以正常使用');
     process.exit(0);
   }
 }
@@ -680,8 +680,8 @@ async function main(): Promise<void> {
 // =============================================================================
 
 if (require.main === module) {
-  main().catch((error) => {
-    console.error("脚本执行失败:", error);
+  main().catch(error => {
+    console.error('脚本执行失败:', error);
     process.exit(1);
   });
 }

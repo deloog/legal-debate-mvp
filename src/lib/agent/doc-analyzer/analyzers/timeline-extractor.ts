@@ -12,7 +12,7 @@ import type {
   ExtractedData,
   TimelineEvent,
   TimelineReport,
-} from "../core/types";
+} from '../core/types';
 
 // =============================================================================
 // TimelineExtractor类
@@ -62,7 +62,7 @@ export class TimelineExtractor {
    * 将事件日期格式统一为ISO格式
    */
   private formatEventsDates(events: TimelineEvent[]): TimelineEvent[] {
-    return events.map((event) => ({
+    return events.map(event => ({
       ...event,
       date: this.formatDateToIso(event.date),
     }));
@@ -81,27 +81,27 @@ export class TimelineExtractor {
     const chineseDateMatch = dateStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
     if (chineseDateMatch) {
       const [, year, month, day] = chineseDateMatch;
-      return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     }
 
     // 处理点分隔日期：2024.1.15
     const dotDateMatch = dateStr.match(/(\d{4})\.(\d{1,2})\.(\d{1,2})/);
     if (dotDateMatch) {
       const [, year, month, day] = dotDateMatch;
-      return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     }
 
     // 处理斜杠分隔日期：2024/1/15
     const slashDateMatch = dateStr.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);
     if (slashDateMatch) {
       const [, year, month, day] = slashDateMatch;
-      return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     }
 
     // 无法识别的格式，尝试使用Date解析
     const parsed = new Date(dateStr);
     if (!isNaN(parsed.getTime())) {
-      return parsed.toISOString().split("T")[0];
+      return parsed.toISOString().split('T')[0];
     }
 
     return dateStr;
@@ -112,7 +112,7 @@ export class TimelineExtractor {
    */
   private extractEventsFromText(text: string): TimelineEvent[] {
     const events: TimelineEvent[] = [];
-    const lines = text.split("\n");
+    const lines = text.split('\n');
     let eventId = 1;
 
     for (const line of lines) {
@@ -125,8 +125,8 @@ export class TimelineExtractor {
           date: this.formatDateToIso(dateMatch),
           event: line.trim(),
           description: line.trim(),
-          type: eventType as "OTHER",
-          source: "TEXT_EXTRACTION",
+          type: eventType as 'OTHER',
+          source: 'TEXT_EXTRACTION',
         });
       }
     }
@@ -138,7 +138,7 @@ export class TimelineExtractor {
    * 从提取的数据中构建事件
    */
   private buildEventsFromExtractedData(
-    extractedData: ExtractedData,
+    extractedData: ExtractedData
   ): TimelineEvent[] {
     const events: TimelineEvent[] = [];
     let eventId = 1;
@@ -151,10 +151,10 @@ export class TimelineExtractor {
         events.push({
           id: `event_${eventId++}`,
           date: this.formatDateToIso(dateMatch),
-          event: "诉讼请求",
+          event: '诉讼请求',
           description: claim.content,
-          type: "OTHER",
-          source: "inferred",
+          type: 'OTHER',
+          source: 'inferred',
         });
       }
     }
@@ -166,23 +166,23 @@ export class TimelineExtractor {
    * 检测事件类型
    */
   private detectEventType(line: string): string {
-    if (line.includes("立案") || line.includes("起诉")) {
-      return "FILING";
+    if (line.includes('立案') || line.includes('起诉')) {
+      return 'FILING';
     }
-    if (line.includes("开庭") || line.includes("庭审")) {
-      return "HEARING";
+    if (line.includes('开庭') || line.includes('庭审')) {
+      return 'HEARING';
     }
-    if (line.includes("判决") || line.includes("裁定")) {
-      return "JUDGMENT";
+    if (line.includes('判决') || line.includes('裁定')) {
+      return 'JUDGMENT';
     }
-    if (line.includes("证据") || line.includes("材料")) {
-      return "EVIDENCE";
+    if (line.includes('证据') || line.includes('材料')) {
+      return 'EVIDENCE';
     }
-    if (line.includes("答辩") || line.includes("反驳")) {
-      return "DEFENSE";
+    if (line.includes('答辩') || line.includes('反驳')) {
+      return 'DEFENSE';
     }
 
-    return "OTHER";
+    return 'OTHER';
   }
 
   /**
@@ -213,7 +213,7 @@ export class TimelineExtractor {
    */
   private mergeEvents(
     textEvents: TimelineEvent[],
-    extractedEvents: TimelineEvent[],
+    extractedEvents: TimelineEvent[]
   ): TimelineEvent[] {
     const eventMap = new Map<string, TimelineEvent>();
 
@@ -335,14 +335,14 @@ export class TimelineExtractor {
   private initializeEventPatterns(): Map<RegExp, string> {
     const patterns = new Map<RegExp, string>();
 
-    patterns.set(/立案/g, "FILING");
-    patterns.set(/起诉/g, "FILING");
-    patterns.set(/开庭/g, "HEARING");
-    patterns.set(/庭审/g, "HEARING");
-    patterns.set(/判决/g, "JUDGMENT");
-    patterns.set(/裁定/g, "JUDGMENT");
-    patterns.set(/调解/g, "MEDIATION");
-    patterns.set(/送达/g, "SERVICE");
+    patterns.set(/立案/g, 'FILING');
+    patterns.set(/起诉/g, 'FILING');
+    patterns.set(/开庭/g, 'HEARING');
+    patterns.set(/庭审/g, 'HEARING');
+    patterns.set(/判决/g, 'JUDGMENT');
+    patterns.set(/裁定/g, 'JUDGMENT');
+    patterns.set(/调解/g, 'MEDIATION');
+    patterns.set(/送达/g, 'SERVICE');
 
     return patterns;
   }

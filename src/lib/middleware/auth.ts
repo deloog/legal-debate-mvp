@@ -2,17 +2,17 @@
  * 认证中间件
  */
 
-import type { NextRequest } from "next/server";
-import { verifyToken, extractTokenFromHeader } from "../auth/jwt";
-import type { JwtPayload } from "@/types/auth";
+import type { NextRequest } from 'next/server';
+import { verifyToken, extractTokenFromHeader } from '../auth/jwt';
+import type { JwtPayload } from '@/types/auth';
 
 /**
  * 获取认证用户信息
  */
 export async function getAuthUser(
-  request: NextRequest,
+  request: NextRequest
 ): Promise<JwtPayload | null> {
-  const authHeader = request.headers.get("authorization");
+  const authHeader = request.headers.get('authorization');
   const token = extractTokenFromHeader(authHeader);
 
   if (!token) {
@@ -41,7 +41,7 @@ export async function isAuthenticated(request: NextRequest): Promise<boolean> {
  */
 export async function hasRole(
   request: NextRequest,
-  allowedRoles: string[],
+  allowedRoles: string[]
 ): Promise<boolean> {
   const user = await getAuthUser(request);
 
@@ -56,12 +56,12 @@ export async function hasRole(
  * 验证用户是否为管理员
  */
 export async function isAdmin(request: NextRequest): Promise<boolean> {
-  return await hasRole(request, ["ADMIN", "SUPER_ADMIN"]);
+  return await hasRole(request, ['ADMIN', 'SUPER_ADMIN']);
 }
 
 /**
  * 验证用户是否为超级管理员
  */
 export async function isSuperAdmin(request: NextRequest): Promise<boolean> {
-  return await hasRole(request, ["SUPER_ADMIN"]);
+  return await hasRole(request, ['SUPER_ADMIN']);
 }

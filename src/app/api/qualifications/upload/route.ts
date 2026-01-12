@@ -3,36 +3,36 @@
  * POST /api/qualifications/upload
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { verifyToken, extractTokenFromHeader } from "@/lib/auth/jwt";
-import { validateBasicInfo } from "@/lib/qualification/validator";
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyToken, extractTokenFromHeader } from '@/lib/auth/jwt';
+import { validateBasicInfo } from '@/lib/qualification/validator';
 import {
   verifyLawyerQualification,
   buildVerificationData,
   requiresManualReview,
-} from "@/lib/qualification/service";
+} from '@/lib/qualification/service';
 import {
   QualificationStatus,
   QualificationErrorCode,
-} from "@/types/qualification";
-import type { QualificationUploadRequest } from "@/types/qualification";
-import type { Prisma } from "@prisma/client";
+} from '@/types/qualification';
+import type { QualificationUploadRequest } from '@/types/qualification';
+import type { Prisma } from '@prisma/client';
 
-import { prisma } from "@/lib/db/prisma";
+import { prisma } from '@/lib/db/prisma';
 
 // TypeScript 重新加载触发点
 export async function POST(request: NextRequest) {
   try {
     // 验证认证
-    const authHeader = request.headers.get("authorization");
+    const authHeader = request.headers.get('authorization');
     if (!authHeader) {
       return NextResponse.json(
         {
           success: false,
-          message: "未授权",
-          error: "缺少认证信息",
+          message: '未授权',
+          error: '缺少认证信息',
         } as const,
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -42,10 +42,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "未授权",
-          error: "无效的认证格式",
+          message: '未授权',
+          error: '无效的认证格式',
         } as const,
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -54,10 +54,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "未授权",
-          error: "无效的token",
+          message: '未授权',
+          error: '无效的token',
         } as const,
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -79,15 +79,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "信息验证失败",
+          message: '信息验证失败',
           error: validation.errors,
         } as const,
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     // 获取格式化后的执业证号
-    const formattedLicenseNumber = licenseNumber.replace(/[-\s]/g, "");
+    const formattedLicenseNumber = licenseNumber.replace(/[-\s]/g, '');
 
     // 检查执业证号是否已存在
     const existingQualification = await prisma.lawyerQualification.findUnique({
@@ -98,10 +98,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "执业证号已存在",
+          message: '执业证号已存在',
           error: QualificationErrorCode.QUALIFICATION_EXISTS,
         } as const,
-        { status: 409 },
+        { status: 409 }
       );
     }
 
@@ -114,16 +114,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "您已提交过律师资格认证",
-          error: "已有资格认证记录",
+          message: '您已提交过律师资格认证',
+          error: '已有资格认证记录',
         } as const,
-        { status: 409 },
+        { status: 409 }
       );
     }
 
     // 调用第三方验证
     const verificationResult = await verifyLawyerQualification(
-      formattedLicenseNumber,
+      formattedLicenseNumber
     );
     const verificationData = buildVerificationData(verificationResult);
 
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
     if (initialStatus === QualificationStatus.APPROVED) {
       await prisma.user.update({
         where: { id: userId },
-        data: { role: "LAWYER" },
+        data: { role: 'LAWYER' },
       });
     }
 
@@ -164,8 +164,8 @@ export async function POST(request: NextRequest) {
         success: true,
         message:
           initialStatus === QualificationStatus.APPROVED
-            ? "律师资格验证通过"
-            : "律师资格审核已提交，请等待管理员审核",
+            ? '律师资格验证通过'
+            : '律师资格审核已提交，请等待管理员审核',
         data: {
           qualification: {
             id: qualification.id,
@@ -180,17 +180,17 @@ export async function POST(request: NextRequest) {
           },
         },
       } as const,
-      { status: 201 },
+      { status: 201 }
     );
   } catch (error) {
-    console.error("律师资格上传失败:", error);
+    console.error('律师资格上传失败:', error);
     return NextResponse.json(
       {
         success: false,
-        message: "服务器错误",
-        error: error instanceof Error ? error.message : "未知错误",
+        message: '服务器错误',
+        error: error instanceof Error ? error.message : '未知错误',
       } as const,
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

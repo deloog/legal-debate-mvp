@@ -2,16 +2,16 @@
  * 管理员审核企业账号API
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { getAuthUser } from "@/lib/middleware/auth";
-import { requireRole } from "@/lib/middleware/permissions";
-import { reviewEnterpriseAccount } from "@/lib/enterprise/service";
-import { UserRole } from "@/types/auth";
-import type { EnterpriseReviewRequest } from "@/types/enterprise";
+import { NextRequest, NextResponse } from 'next/server';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { requireRole } from '@/lib/middleware/permissions';
+import { reviewEnterpriseAccount } from '@/lib/enterprise/service';
+import { UserRole } from '@/types/auth';
+import type { EnterpriseReviewRequest } from '@/types/enterprise';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ) {
   try {
     // 获取认证用户信息
@@ -20,10 +20,10 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: "未登录",
-          error: "UNAUTHORIZED",
+          message: '未登录',
+          error: 'UNAUTHORIZED',
         },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -36,10 +36,10 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: "权限不足",
-          error: "FORBIDDEN",
+          message: '权限不足',
+          error: 'FORBIDDEN',
         },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -52,12 +52,12 @@ export async function POST(
       params.id,
       user.userId,
       reviewAction,
-      reviewNotes,
+      reviewNotes
     );
 
     return NextResponse.json({
       success: true,
-      message: "审核完成",
+      message: '审核完成',
       data: enterpriseAccount,
     });
   } catch (error) {
@@ -68,17 +68,17 @@ export async function POST(
           message: error.message,
           error: error.name,
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     return NextResponse.json(
       {
         success: false,
-        message: "服务器内部错误",
-        error: "INTERNAL_SERVER_ERROR",
+        message: '服务器内部错误',
+        error: 'INTERNAL_SERVER_ERROR',
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

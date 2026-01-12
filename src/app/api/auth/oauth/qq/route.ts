@@ -2,9 +2,9 @@
  * QQ OAuth API 路由
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { qqOAuth } from "@/lib/auth/qq-oauth";
-import { OAuthService } from "@/lib/auth/oauth-service";
+import { NextRequest, NextResponse } from 'next/server';
+import { qqOAuth } from '@/lib/auth/qq-oauth';
+import { OAuthService } from '@/lib/auth/oauth-service';
 
 /**
  * 生成随机state
@@ -19,7 +19,7 @@ function generateState(): string {
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const redirectUri = searchParams.get("redirect_uri");
+    const redirectUri = searchParams.get('redirect_uri');
     const state = generateState();
 
     const response = await qqOAuth.authorize({
@@ -36,10 +36,10 @@ export async function GET(request: NextRequest) {
       state: response.state,
     });
   } catch (error) {
-    console.error("QQ authorize error:", error);
+    console.error('QQ authorize error:', error);
     return NextResponse.json(
-      { error: "Failed to generate authorize URL" },
-      { status: 500 },
+      { error: 'Failed to generate authorize URL' },
+      { status: 500 }
     );
   }
 }
@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
 
     if (!code || !state) {
       return NextResponse.json(
-        { error: "Code and state are required" },
-        { status: 400 },
+        { error: 'Code and state are required' },
+        { status: 400 }
       );
     }
 
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     if (!callbackResponse.success) {
       return NextResponse.json(
         { error: callbackResponse.error },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -78,14 +78,14 @@ export async function POST(request: NextRequest) {
     // 获取用户信息
     const userInfo = await qqOAuth.getUserInfo(
       callbackResponse.token,
-      qqOpenId,
+      qqOpenId
     );
 
     // 处理登录
     const loginResult = await OAuthService.handleOAuthLogin(
-      "qq",
+      'qq',
       qqOpenId,
-      userInfo,
+      userInfo
     );
 
     return NextResponse.json({
@@ -95,10 +95,10 @@ export async function POST(request: NextRequest) {
       isNewUser: loginResult.isNewUser,
     });
   } catch (error) {
-    console.error("QQ callback error:", error);
+    console.error('QQ callback error:', error);
     return NextResponse.json(
-      { error: "Failed to handle OAuth callback" },
-      { status: 500 },
+      { error: 'Failed to handle OAuth callback' },
+      { status: 500 }
     );
   }
 }

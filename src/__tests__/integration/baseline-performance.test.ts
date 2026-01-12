@@ -1,12 +1,12 @@
-import { DocAnalyzerAgent } from "@/lib/agent/doc-analyzer/doc-analyzer-agent";
-import { LawSearcher } from "@/lib/agent/legal-agent/law-searcher";
-import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+import { DocAnalyzerAgent } from '@/lib/agent/doc-analyzer/doc-analyzer-agent';
+import { LawSearcher } from '@/lib/agent/legal-agent/law-searcher';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 // 设置Jest超时时间
 jest.setTimeout(60000);
 
 // Mock文件系统
-jest.mock("fs", () => ({
+jest.mock('fs', () => ({
   readFileSync: jest.fn(() => {
     return `民事起诉状
 
@@ -60,7 +60,7 @@ interface BaselineMetrics {
 // 测试结果收集
 const testResults: BaselineTestResult[] = [];
 
-describe("基准性能测试 - Manus增强前", () => {
+describe('基准性能测试 - Manus增强前', () => {
   let docAnalyzer: DocAnalyzerAgent;
   let lawSearcher: LawSearcher;
 
@@ -83,8 +83,8 @@ describe("基准性能测试 - Manus增强前", () => {
     jest.clearAllTimers();
   });
 
-  describe("基准测试：文档解析（不使用MemoryAgent缓存）", () => {
-    it("B1.1 应该测试文档解析准确率（Manus增强前）", async () => {
+  describe('基准测试：文档解析（不使用MemoryAgent缓存）', () => {
+    it('B1.1 应该测试文档解析准确率（Manus增强前）', async () => {
       const startTime = Date.now();
       let tokenCount = 0;
       let success = false;
@@ -94,7 +94,7 @@ describe("基准性能测试 - Manus增强前", () => {
       try {
         // 模拟文档解析过程（基准场景）
         // 注意：这是基准测试，使用固定值模拟Manus增强前的性能
-        await new Promise((resolve) => setTimeout(resolve, 4000));
+        await new Promise(resolve => setTimeout(resolve, 4000));
 
         success = true;
         accuracy = 0.88; // 基准值：88分（Manus增强前）
@@ -113,7 +113,7 @@ describe("基准性能测试 - Manus增强前", () => {
         expect(accuracy).toBeLessThanOrEqual(0.9); // 基准范围
       } catch (error) {
         success = false;
-        console.error("文档解析失败:", error);
+        console.error('文档解析失败:', error);
       }
 
       const endTime = Date.now();
@@ -121,7 +121,7 @@ describe("基准性能测试 - Manus增强前", () => {
 
       // 记录测试结果
       testResults.push({
-        testName: "B1.1 文档解析准确率",
+        testName: 'B1.1 文档解析准确率',
         accuracy,
         responseTime,
         aiCost,
@@ -133,11 +133,11 @@ describe("基准性能测试 - Manus增强前", () => {
         `📊 B1.1 准确率: ${(accuracy * 100).toFixed(1)}%, ` +
           `时间: ${responseTime}ms, ` +
           `Token: ${tokenCount}, ` +
-          `成本: ¥${aiCost.toFixed(4)}`,
+          `成本: ¥${aiCost.toFixed(4)}`
       );
     });
 
-    it("B1.2 应该测试文档解析响应时间", async () => {
+    it('B1.2 应该测试文档解析响应时间', async () => {
       const testRuns = 5;
       const responseTimes: number[] = [];
 
@@ -146,7 +146,7 @@ describe("基准性能测试 - Manus增强前", () => {
 
         try {
           // 模拟文档解析
-          await new Promise((resolve) => {
+          await new Promise(resolve => {
             setTimeout(() => {
               resolve({ success: true, data: {} });
             }, 4000); // 基准：4秒
@@ -169,13 +169,13 @@ describe("基准性能测试 - Manus增强前", () => {
       expect(averageTime).toBeLessThanOrEqual(5000); // 最多5秒
 
       console.log(
-        `📊 B1.2 平均响应时间: ${averageTime.toFixed(0)}ms (基准范围: 3-5秒)`,
+        `📊 B1.2 平均响应时间: ${averageTime.toFixed(0)}ms (基准范围: 3-5秒)`
       );
     });
   });
 
-  describe("基准测试：法条检索（不使用MemoryAgent缓存）", () => {
-    it("B2.1 应该测试法条检索准确率（Manus增强前）", async () => {
+  describe('基准测试：法条检索（不使用MemoryAgent缓存）', () => {
+    it('B2.1 应该测试法条检索准确率（Manus增强前）', async () => {
       const startTime = Date.now();
       let tokenCount = 0;
       let success = false;
@@ -185,8 +185,8 @@ describe("基准性能测试 - Manus增强前", () => {
       try {
         // 执行法条检索（本地TF-IDF，不调用AI）
         const result = await lawSearcher.search({
-          keywords: ["合同", "违约", "赔偿"],
-          caseType: "CIVIL",
+          keywords: ['合同', '违约', '赔偿'],
+          caseType: 'CIVIL',
           limit: 10,
         });
 
@@ -203,7 +203,7 @@ describe("基准性能测试 - Manus增强前", () => {
         expect(accuracy).toBeLessThanOrEqual(0.9);
       } catch (error) {
         success = false;
-        console.error("法条检索失败:", error);
+        console.error('法条检索失败:', error);
       }
 
       const endTime = Date.now();
@@ -211,7 +211,7 @@ describe("基准性能测试 - Manus增强前", () => {
 
       // 记录测试结果
       testResults.push({
-        testName: "B2.1 法条检索准确率",
+        testName: 'B2.1 法条检索准确率',
         accuracy,
         responseTime,
         aiCost,
@@ -223,11 +223,11 @@ describe("基准性能测试 - Manus增强前", () => {
         `📊 B2.1 准确率: ${(accuracy * 100).toFixed(1)}%, ` +
           `时间: ${responseTime}ms, ` +
           `Token: ${tokenCount}, ` +
-          `成本: ¥${aiCost.toFixed(4)}`,
+          `成本: ¥${aiCost.toFixed(4)}`
       );
     });
 
-    it("B2.2 应该测试法条检索响应时间", async () => {
+    it('B2.2 应该测试法条检索响应时间', async () => {
       const testRuns = 5;
       const responseTimes: number[] = [];
 
@@ -241,8 +241,8 @@ describe("基准性能测试 - Manus增强前", () => {
 
           // 执行法条检索
           await searcher.search({
-            keywords: ["合同"],
-            caseType: "CIVIL",
+            keywords: ['合同'],
+            caseType: 'CIVIL',
             limit: 10,
           });
 
@@ -264,13 +264,13 @@ describe("基准性能测试 - Manus增强前", () => {
       expect(averageTime).toBeLessThanOrEqual(5000); // 最多5秒（留有余量）
 
       console.log(
-        `📊 B2.2 平均响应时间: ${averageTime.toFixed(0)}ms (基准范围: 0-5秒)`,
+        `📊 B2.2 平均响应时间: ${averageTime.toFixed(0)}ms (基准范围: 0-5秒)`
       );
     });
   });
 
-  describe("基准测试：辩论生成（不使用MemoryAgent缓存和VerificationAgent）", () => {
-    it("B3.1 应该测试辩论生成质量（Manus增强前）", async () => {
+  describe('基准测试：辩论生成（不使用MemoryAgent缓存和VerificationAgent）', () => {
+    it('B3.1 应该测试辩论生成质量（Manus增强前）', async () => {
       const startTime = Date.now();
       let tokenCount = 0;
       let success = false;
@@ -279,7 +279,7 @@ describe("基准性能测试 - Manus增强前", () => {
 
       try {
         // 模拟辩论生成
-        await new Promise((resolve) => {
+        await new Promise(resolve => {
           setTimeout(() => {
             resolve({ success: true, data: {} });
           }, 8000); // 基准：8秒
@@ -301,7 +301,7 @@ describe("基准性能测试 - Manus增强前", () => {
         expect(accuracy).toBeLessThanOrEqual(0.9);
       } catch (error) {
         success = false;
-        console.error("辩论生成失败:", error);
+        console.error('辩论生成失败:', error);
       }
 
       const endTime = Date.now();
@@ -309,7 +309,7 @@ describe("基准性能测试 - Manus增强前", () => {
 
       // 记录测试结果
       testResults.push({
-        testName: "B3.1 辩论生成质量",
+        testName: 'B3.1 辩论生成质量',
         accuracy,
         responseTime,
         aiCost,
@@ -321,11 +321,11 @@ describe("基准性能测试 - Manus增强前", () => {
         `📊 B3.1 质量: ${(accuracy * 100).toFixed(1)}%, ` +
           `时间: ${responseTime}ms, ` +
           `Token: ${tokenCount}, ` +
-          `成本: ¥${aiCost.toFixed(4)}`,
+          `成本: ¥${aiCost.toFixed(4)}`
       );
     });
 
-    it("B3.2 应该测试辩论生成响应时间", async () => {
+    it('B3.2 应该测试辩论生成响应时间', async () => {
       const testRuns = 5;
       const responseTimes: number[] = [];
 
@@ -334,7 +334,7 @@ describe("基准性能测试 - Manus增强前", () => {
 
         try {
           // 模拟辩论生成
-          await new Promise((resolve) => {
+          await new Promise(resolve => {
             setTimeout(() => {
               resolve({ success: true, data: {} });
             }, 8000);
@@ -357,13 +357,13 @@ describe("基准性能测试 - Manus增强前", () => {
       expect(averageTime).toBeLessThanOrEqual(12000); // 最多12秒
 
       console.log(
-        `📊 B3.2 平均响应时间: ${averageTime.toFixed(0)}ms (基准范围: 7-12秒)`,
+        `📊 B3.2 平均响应时间: ${averageTime.toFixed(0)}ms (基准范围: 7-12秒)`
       );
     });
   });
 
-  describe("基准测试：综合评分（Manus增强前）", () => {
-    it("B4.1 应该计算综合评分（88分基准）", () => {
+  describe('基准测试：综合评分（Manus增强前）', () => {
+    it('B4.1 应该计算综合评分（88分基准）', () => {
       // 定义各维度基准评分
       const documentAccuracy = 0.88; // 文档解析准确率
       const retrievalAccuracy = 0.85; // 法条检索准确率
@@ -377,32 +377,32 @@ describe("基准性能测试 - Manus增强前", () => {
       expect(overallScore).toBeCloseTo(0.865, 2);
 
       console.log(
-        `📊 B4.1 综合评分: ${(overallScore * 100).toFixed(1)}% (基准: 86.5分)`,
+        `📊 B4.1 综合评分: ${(overallScore * 100).toFixed(1)}% (基准: 86.5分)`
       );
       console.log(
-        `   - 文档解析: ${(documentAccuracy * 100).toFixed(1)}% (权重40%)`,
+        `   - 文档解析: ${(documentAccuracy * 100).toFixed(1)}% (权重40%)`
       );
       console.log(
-        `   - 法条检索: ${(retrievalAccuracy * 100).toFixed(1)}% (权重30%)`,
+        `   - 法条检索: ${(retrievalAccuracy * 100).toFixed(1)}% (权重30%)`
       );
       console.log(
-        `   - 辩论质量: ${(debateQuality * 100).toFixed(1)}% (权重30%)`,
+        `   - 辩论质量: ${(debateQuality * 100).toFixed(1)}% (权重30%)`
       );
     });
 
-    it("B4.2 应该汇总所有基准测试结果", () => {
+    it('B4.2 应该汇总所有基准测试结果', () => {
       // 验证测试结果已收集
       console.log(`\n📊 收集到 ${testResults.length} 个测试结果`);
-      testResults.forEach((result) => {
+      testResults.forEach(result => {
         console.log(
           `   - ${result.testName}: success=${result.success}, ` +
             `accuracy=${(result.accuracy * 100).toFixed(1)}%, ` +
-            `time=${result.responseTime}ms`,
+            `time=${result.responseTime}ms`
         );
       });
 
       // 过滤成功的测试
-      const successfulTests = testResults.filter((t) => t.success);
+      const successfulTests = testResults.filter(t => t.success);
       console.log(`\n📊 成功的测试: ${successfulTests.length} 个`);
 
       // 如果没有收集到测试结果，使用基准值
@@ -417,11 +417,11 @@ describe("基准性能测试 - Manus增强前", () => {
         totalAICost = successfulTests.reduce((sum, t) => sum + t.aiCost, 0);
         totalTokenCount = successfulTests.reduce(
           (sum, t) => sum + t.tokenCount,
-          0,
+          0
         );
       } else {
         // 使用基准值（当测试结果未收集时）
-        console.log("⚠️  未收集到测试结果，使用基准值");
+        console.log('⚠️  未收集到测试结果，使用基准值');
         averageResponseTime = 4672; // (4000 + 3.8 + 8000) / 3
         totalAICost = 0.00042; // 0.00035 + 0 + 0.00007
         totalTokenCount = 2800; // 1300 + 0 + 1500
@@ -438,33 +438,33 @@ describe("基准性能测试 - Manus增强前", () => {
       };
 
       // 打印基准报告
-      console.log("\n" + "=".repeat(60));
-      console.log("📊 Manus增强前 - 基准性能报告");
-      console.log("=".repeat(60) + "\n");
+      console.log('\n' + '='.repeat(60));
+      console.log('📊 Manus增强前 - 基准性能报告');
+      console.log('='.repeat(60) + '\n');
 
       console.log(
-        "✅ 成功测试数:",
-        `${successfulTests.length}/${testResults.length}`,
+        '✅ 成功测试数:',
+        `${successfulTests.length}/${testResults.length}`
       );
-      console.log("\n📈 准确性指标:");
+      console.log('\n📈 准确性指标:');
       console.log(
-        `   文档解析: ${(metrics.documentAccuracy * 100).toFixed(1)}%`,
+        `   文档解析: ${(metrics.documentAccuracy * 100).toFixed(1)}%`
       );
       console.log(
-        `   法条检索: ${(metrics.retrievalAccuracy * 100).toFixed(1)}%`,
+        `   法条检索: ${(metrics.retrievalAccuracy * 100).toFixed(1)}%`
       );
       console.log(`   综合评分: ${(metrics.overallScore * 100).toFixed(1)}%`);
 
-      console.log("\n⏱️  性能指标:");
+      console.log('\n⏱️  性能指标:');
       console.log(
-        `   平均响应时间: ${metrics.averageResponseTime.toFixed(0)}ms`,
+        `   平均响应时间: ${metrics.averageResponseTime.toFixed(0)}ms`
       );
 
-      console.log("\n💰 AI成本:");
+      console.log('\n💰 AI成本:');
       console.log(`   总Token消耗: ${metrics.totalTokenCount}`);
       console.log(`   总AI成本: ¥${metrics.totalAICost.toFixed(4)}`);
 
-      console.log("\n" + "=".repeat(60) + "\n");
+      console.log('\n' + '='.repeat(60) + '\n');
 
       // 验证基准数据
       expect(metrics.overallScore).toBeCloseTo(0.865, 2); // 86.5分基准
@@ -476,8 +476,8 @@ describe("基准性能测试 - Manus增强前", () => {
     });
   });
 
-  describe("基准测试：无缓存场景", () => {
-    it("B5.1 应该验证无MemoryAgent缓存的AI调用次数", () => {
+  describe('基准测试：无缓存场景', () => {
+    it('B5.1 应该验证无MemoryAgent缓存的AI调用次数', () => {
       // 模拟完整流程（无缓存）
       const aiCallCount = {
         documentAnalysis: 1, // 文档解析1次
@@ -502,7 +502,7 @@ describe("基准性能测试 - Manus增强前", () => {
       console.log(`   - 三重验证: ${aiCallCount.verification}次 (未使用)`);
     });
 
-    it("B5.2 应该验证无VerificationAgent的质量保障", () => {
+    it('B5.2 应该验证无VerificationAgent的质量保障', () => {
       // 计算质量指标（模拟人工评分）
       const qualityMetrics = {
         factualAccuracy: 0.88, // 事实准确性（较低）
@@ -516,13 +516,13 @@ describe("基准性能测试 - Manus增强前", () => {
 
       console.log(`📊 B5.2 无VerificationAgent质量指标:`);
       console.log(
-        `   - 事实准确性: ${(qualityMetrics.factualAccuracy * 100).toFixed(1)}%`,
+        `   - 事实准确性: ${(qualityMetrics.factualAccuracy * 100).toFixed(1)}%`
       );
       console.log(
-        `   - 逻辑一致性: ${(qualityMetrics.logicalConsistency * 100).toFixed(1)}%`,
+        `   - 逻辑一致性: ${(qualityMetrics.logicalConsistency * 100).toFixed(1)}%`
       );
       console.log(
-        `   - 完整性: ${(qualityMetrics.completeness * 100).toFixed(1)}%`,
+        `   - 完整性: ${(qualityMetrics.completeness * 100).toFixed(1)}%`
       );
       console.log(`   ⚠️  质量低于90%，需要Manus增强`);
     });

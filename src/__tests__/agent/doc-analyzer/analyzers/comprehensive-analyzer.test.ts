@@ -3,54 +3,54 @@
  * 目标：综合分析准确性
  */
 
-import { ComprehensiveAnalyzer } from "@/lib/agent/doc-analyzer/analyzers/comprehensive-analyzer";
+import { ComprehensiveAnalyzer } from '@/lib/agent/doc-analyzer/analyzers/comprehensive-analyzer';
 import type {
   Party,
   Claim,
   TimelineEvent,
-} from "@/lib/agent/doc-analyzer/core/types";
+} from '@/lib/agent/doc-analyzer/core/types';
 
-describe("ComprehensiveAnalyzer", () => {
+describe('ComprehensiveAnalyzer', () => {
   let analyzer: ComprehensiveAnalyzer;
 
   beforeEach(() => {
     analyzer = new ComprehensiveAnalyzer();
   });
 
-  describe("analyze", () => {
-    it("应该执行完整的综合分析", () => {
+  describe('analyze', () => {
+    it('应该执行完整的综合分析', () => {
       const parties: Party[] = [
         {
-          type: "plaintiff",
-          name: "张三",
+          type: 'plaintiff',
+          name: '张三',
         },
         {
-          type: "defendant",
-          name: "李四",
+          type: 'defendant',
+          name: '李四',
         },
       ];
 
       const claims: Claim[] = [
         {
-          type: "PAY_PRINCIPAL",
-          content: "偿还本金",
+          type: 'PAY_PRINCIPAL',
+          content: '偿还本金',
           amount: 50000,
-          currency: "CNY",
-          evidence: ["合同书"],
+          currency: 'CNY',
+          evidence: ['合同书'],
         },
       ];
 
       const timeline: TimelineEvent[] = [
         {
-          id: "ev_1",
-          date: "2024-01-15",
-          event: "签订合同",
+          id: 'ev_1',
+          date: '2024-01-15',
+          event: '签订合同',
         },
         {
-          id: "ev_2",
-          date: "2024-06-01",
-          event: "立案",
-          type: "FILING",
+          id: 'ev_2',
+          date: '2024-06-01',
+          event: '立案',
+          type: 'FILING',
         },
       ];
 
@@ -65,11 +65,11 @@ describe("ComprehensiveAnalyzer", () => {
       expect(result.overallConfidence).toBeLessThanOrEqual(1);
     });
 
-    it("应该检测当事人与诉讼请求不匹配", () => {
+    it('应该检测当事人与诉讼请求不匹配', () => {
       const parties: Party[] = [
         {
-          type: "plaintiff",
-          name: "张三",
+          type: 'plaintiff',
+          name: '张三',
         },
       ];
 
@@ -84,7 +84,7 @@ describe("ComprehensiveAnalyzer", () => {
       expect(result.qualityScore).toBeDefined();
     });
 
-    it("应该返回分析元数据", () => {
+    it('应该返回分析元数据', () => {
       const parties: Party[] = [];
       const claims: Claim[] = [];
       const timeline: TimelineEvent[] = [];
@@ -98,8 +98,8 @@ describe("ComprehensiveAnalyzer", () => {
     });
   });
 
-  describe("边界情况", () => {
-    it("应该处理空数据", () => {
+  describe('边界情况', () => {
+    it('应该处理空数据', () => {
       const parties: Party[] = [];
       const claims: Claim[] = [];
       const timeline: TimelineEvent[] = [];
@@ -112,11 +112,11 @@ describe("ComprehensiveAnalyzer", () => {
       expect(result.qualityScore).toBeDefined();
     });
 
-    it("应该处理只有部分数据", () => {
+    it('应该处理只有部分数据', () => {
       const parties: Party[] = [
         {
-          type: "plaintiff",
-          name: "张三",
+          type: 'plaintiff',
+          name: '张三',
         },
       ];
 
@@ -129,21 +129,21 @@ describe("ComprehensiveAnalyzer", () => {
       expect(result.overallConfidence).toBeGreaterThanOrEqual(0);
     });
 
-    it("应该处理包含证据分析的数据", () => {
+    it('应该处理包含证据分析的数据', () => {
       const parties: Party[] = [
         {
-          type: "plaintiff",
-          name: "张三",
+          type: 'plaintiff',
+          name: '张三',
         },
       ];
 
       const claims: Claim[] = [
         {
-          type: "PAY_PRINCIPAL",
-          content: "偿还本金",
+          type: 'PAY_PRINCIPAL',
+          content: '偿还本金',
           amount: 50000,
-          currency: "CNY",
-          evidence: ["合同书"],
+          currency: 'CNY',
+          evidence: ['合同书'],
         },
       ];
 
@@ -177,7 +177,7 @@ describe("ComprehensiveAnalyzer", () => {
         parties,
         claims,
         timeline,
-        evidenceAnalysis,
+        evidenceAnalysis
       );
 
       expect(result).toBeDefined();
@@ -185,34 +185,34 @@ describe("ComprehensiveAnalyzer", () => {
     });
   });
 
-  describe("质量评分", () => {
-    it("应该计算有效的质量评分", () => {
+  describe('质量评分', () => {
+    it('应该计算有效的质量评分', () => {
       const parties: Party[] = [
         {
-          type: "plaintiff",
-          name: "张三",
+          type: 'plaintiff',
+          name: '张三',
         },
         {
-          type: "defendant",
-          name: "李四",
+          type: 'defendant',
+          name: '李四',
         },
       ];
 
       const claims: Claim[] = [
         {
-          type: "PAY_PRINCIPAL",
-          content: "偿还本金",
+          type: 'PAY_PRINCIPAL',
+          content: '偿还本金',
           amount: 50000,
-          currency: "CNY",
-          evidence: ["合同书"],
+          currency: 'CNY',
+          evidence: ['合同书'],
         },
       ];
 
       const timeline: TimelineEvent[] = [
         {
-          id: "ev_1",
-          date: "2024-01-15",
-          event: "签订合同",
+          id: 'ev_1',
+          date: '2024-01-15',
+          event: '签订合同',
         },
       ];
 
@@ -232,7 +232,7 @@ describe("ComprehensiveAnalyzer", () => {
       expect(qualityScore.relevanceScore).toBeLessThanOrEqual(100);
     });
 
-    it("应该返回有效的评级", () => {
+    it('应该返回有效的评级', () => {
       const parties: Party[] = [];
       const claims: Claim[] = [];
       const timeline: TimelineEvent[] = [];
@@ -241,11 +241,11 @@ describe("ComprehensiveAnalyzer", () => {
       const qualityScore = result.qualityScore;
 
       const validGrades = [
-        "EXCELLENT",
-        "GOOD",
-        "SATISFACTORY",
-        "NEEDS_IMPROVEMENT",
-        "POOR",
+        'EXCELLENT',
+        'GOOD',
+        'SATISFACTORY',
+        'NEEDS_IMPROVEMENT',
+        'POOR',
       ];
       expect(validGrades).toContain(qualityScore.grade);
     });

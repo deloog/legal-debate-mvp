@@ -3,17 +3,17 @@
  * 工具方法：访问追踪、实体转换、过期时间计算
  */
 
-import { PrismaClient, MemoryType } from "@prisma/client";
+import { PrismaClient, MemoryType } from '@prisma/client';
 
-import { TTL_CONFIG } from "./config";
-import type { Memory } from "../types";
+import { TTL_CONFIG } from './config';
+import type { Memory } from '../types';
 
 /**
  * 追踪访问（更新计数和时间）
  */
 export async function trackAccess(
   prisma: PrismaClient,
-  record: import("@prisma/client").AgentMemory,
+  record: import('@prisma/client').AgentMemory
 ): Promise<void> {
   await prisma.agentMemory.update({
     where: { id: record.id },
@@ -28,7 +28,7 @@ export async function trackAccess(
  * 转换为Memory实体
  */
 export function toMemoryEntity(
-  record: import("@prisma/client").AgentMemory,
+  record: import('@prisma/client').AgentMemory
 ): Memory {
   return {
     memoryId: record.id,
@@ -50,9 +50,9 @@ export function toMemoryEntity(
  */
 export function calculateExpiry(
   memoryType: MemoryType,
-  ttl?: number,
+  ttl?: number
 ): Date | null {
-  if (memoryType === "COLD") {
+  if (memoryType === 'COLD') {
     return null;
   }
 

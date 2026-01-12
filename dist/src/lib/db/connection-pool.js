@@ -1,5 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.connectionPoolConfig =
   exports.poolMonitor =
   exports.ConnectionPoolMonitor =
@@ -9,19 +9,19 @@ exports.connectionPoolConfig =
   exports.getPoolStats =
   exports.ConnectionStatus =
     void 0;
-const prisma_1 = require("./prisma");
+const prisma_1 = require('./prisma');
 // 连接池状态枚举
 var ConnectionStatus;
 (function (ConnectionStatus) {
-  ConnectionStatus["IDLE"] = "idle";
-  ConnectionStatus["ACTIVE"] = "active";
-  ConnectionStatus["WAITING"] = "waiting";
-  ConnectionStatus["ERROR"] = "error";
+  ConnectionStatus['IDLE'] = 'idle';
+  ConnectionStatus['ACTIVE'] = 'active';
+  ConnectionStatus['WAITING'] = 'waiting';
+  ConnectionStatus['ERROR'] = 'error';
 })(ConnectionStatus || (exports.ConnectionStatus = ConnectionStatus = {}));
 // 默认连接池配置
 const defaultPoolConfig = {
-  minConnections: parseInt(process.env.DATABASE_POOL_MIN || "2", 10),
-  maxConnections: parseInt(process.env.DATABASE_POOL_MAX || "20", 10),
+  minConnections: parseInt(process.env.DATABASE_POOL_MIN || '2', 10),
+  maxConnections: parseInt(process.env.DATABASE_POOL_MAX || '20', 10),
   connectionTimeoutMillis: 10000,
   idleTimeoutMillis: 30000,
   maxLifetimeHours: 24,
@@ -56,7 +56,7 @@ const getPoolStats = async () => {
       connectionErrors: 0, // 需要从错误计数器获取
     };
   } catch (error) {
-    console.error("获取连接池统计信息失败:", error);
+    console.error('获取连接池统计信息失败:', error);
     return null;
   }
 };
@@ -74,11 +74,11 @@ const checkPoolHealth = async () => {
     const connectionUtilization =
       stats.activeConnections / stats.maxConnections;
     if (connectionUtilization > 0.8) {
-      console.warn("连接池使用率过高:", connectionUtilization);
+      console.warn('连接池使用率过高:', connectionUtilization);
     }
     return true;
   } catch (error) {
-    console.error("连接池健康检查失败:", error);
+    console.error('连接池健康检查失败:', error);
     return false;
   }
 };
@@ -93,24 +93,24 @@ const warmupConnectionPool = async () => {
     }
     await Promise.all(promises);
     console.log(
-      `连接池预热完成，创建了 ${defaultPoolConfig.minConnections} 个连接`,
+      `连接池预热完成，创建了 ${defaultPoolConfig.minConnections} 个连接`
     );
   } catch (error) {
-    console.error("连接池预热失败:", error);
+    console.error('连接池预热失败:', error);
   }
 };
 exports.warmupConnectionPool = warmupConnectionPool;
 // 优雅关闭连接池
 const gracefulShutdown = async () => {
   try {
-    console.log("开始优雅关闭数据库连接池...");
+    console.log('开始优雅关闭数据库连接池...');
     // 等待所有活跃操作完成
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     // 关闭所有连接
     await prisma_1.prisma.$disconnect();
-    console.log("数据库连接池已优雅关闭");
+    console.log('数据库连接池已优雅关闭');
   } catch (error) {
-    console.error("关闭连接池时出错:", error);
+    console.error('关闭连接池时出错:', error);
     throw error;
   }
 };
@@ -125,11 +125,11 @@ class ConnectionPoolMonitor {
     if (this.interval) {
       return;
     }
-    console.log("启动连接池监控器");
+    console.log('启动连接池监控器');
     this.interval = setInterval(async () => {
       const stats = await (0, exports.getPoolStats)();
       if (stats) {
-        console.log("连接池状态:", {
+        console.log('连接池状态:', {
           active: stats.activeConnections,
           total: stats.totalConnections,
           utilization: `${((stats.activeConnections / stats.maxConnections) * 100).toFixed(1)}%`,
@@ -137,7 +137,7 @@ class ConnectionPoolMonitor {
       }
       const isHealthy = await (0, exports.checkPoolHealth)();
       if (!isHealthy) {
-        console.error("连接池健康检查失败");
+        console.error('连接池健康检查失败');
       }
     }, this.checkIntervalMs);
   }
@@ -145,7 +145,7 @@ class ConnectionPoolMonitor {
     if (this.interval) {
       clearInterval(this.interval);
       this.interval = null;
-      console.log("连接池监控器已停止");
+      console.log('连接池监控器已停止');
     }
   }
 }

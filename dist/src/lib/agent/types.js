@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 // Agent系统内部类型定义和工具函数
 var __createBinding =
   (this && this.__createBinding) ||
@@ -8,7 +8,7 @@ var __createBinding =
         var desc = Object.getOwnPropertyDescriptor(m, k);
         if (
           !desc ||
-          ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)
+          ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)
         ) {
           desc = {
             enumerable: true,
@@ -27,10 +27,10 @@ var __setModuleDefault =
   (this && this.__setModuleDefault) ||
   (Object.create
     ? function (o, v) {
-        Object.defineProperty(o, "default", { enumerable: true, value: v });
+        Object.defineProperty(o, 'default', { enumerable: true, value: v });
       }
     : function (o, v) {
-        o["default"] = v;
+        o['default'] = v;
       });
 var __importStar =
   (this && this.__importStar) ||
@@ -51,12 +51,12 @@ var __importStar =
       var result = {};
       if (mod != null)
         for (var k = ownKeys(mod), i = 0; i < k.length; i++)
-          if (k[i] !== "default") __createBinding(result, mod, k[i]);
+          if (k[i] !== 'default') __createBinding(result, mod, k[i]);
       __setModuleDefault(result, mod);
       return result;
     };
   })();
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.DEFAULT_AGENT_CONFIG = exports.AgentLogLevel = void 0;
 exports.createAgentError = createAgentError;
 exports.createAgentResult = createAgentResult;
@@ -68,15 +68,15 @@ exports.isValidAgentType = isValidAgentType;
 exports.isValidAgentStatus = isValidAgentStatus;
 exports.isValidTaskPriority = isValidTaskPriority;
 exports.isValidAgent = isValidAgent;
-const agent_1 = require("../../types/agent");
-const crypto = __importStar(require("crypto"));
+const agent_1 = require('../../types/agent');
+const crypto = __importStar(require('crypto'));
 // Agent日志级别
 var AgentLogLevel;
 (function (AgentLogLevel) {
-  AgentLogLevel["DEBUG"] = "debug";
-  AgentLogLevel["INFO"] = "info";
-  AgentLogLevel["WARN"] = "warn";
-  AgentLogLevel["ERROR"] = "error";
+  AgentLogLevel['DEBUG'] = 'debug';
+  AgentLogLevel['INFO'] = 'info';
+  AgentLogLevel['WARN'] = 'warn';
+  AgentLogLevel['ERROR'] = 'error';
 })(AgentLogLevel || (exports.AgentLogLevel = AgentLogLevel = {}));
 // =============================================================================
 // Agent执行工具函数
@@ -88,7 +88,7 @@ function createAgentError(
   type,
   agentName,
   retryable = false,
-  details,
+  details
 ) {
   return {
     code,
@@ -122,17 +122,17 @@ function createAgentResult(agentName, data, options = {}) {
 // 验证Agent上下文
 function validateAgentContext(context) {
   const errors = [];
-  if (!context.task || typeof context.task !== "string") {
-    errors.push("Task is required and must be a string");
+  if (!context.task || typeof context.task !== 'string') {
+    errors.push('Task is required and must be a string');
   }
-  if (!context.data || typeof context.data !== "object") {
-    errors.push("Data is required and must be an object");
+  if (!context.data || typeof context.data !== 'object') {
+    errors.push('Data is required and must be an object');
   }
   if (!Object.values(agent_1.TaskPriority).includes(context.priority)) {
-    errors.push("Priority must be a valid TaskPriority value");
+    errors.push('Priority must be a valid TaskPriority value');
   }
-  if (context.options && typeof context.options !== "object") {
-    errors.push("Options must be an object if provided");
+  if (context.options && typeof context.options !== 'object') {
+    errors.push('Options must be an object if provided');
   }
   return {
     valid: errors.length === 0,
@@ -142,15 +142,15 @@ function validateAgentContext(context) {
 // 生成缓存键
 function generateCacheKey(context) {
   const keyData = {
-    agentName: context.taskType || "unknown",
+    agentName: context.taskType || 'unknown',
     task: context.task,
     data: context.data,
     options: context.options,
   };
   return crypto
-    .createHash("sha256")
+    .createHash('sha256')
     .update(JSON.stringify(keyData))
-    .digest("hex");
+    .digest('hex');
 }
 // 计算执行统计
 function calculateExecutionStats(startTime, endTime, success, previousStats) {
@@ -201,12 +201,12 @@ function isValidTaskPriority(priority) {
 function isValidAgent(obj) {
   return (
     obj &&
-    typeof obj === "object" &&
-    typeof obj.name === "string" &&
-    typeof obj.type === "string" &&
-    typeof obj.version === "string" &&
-    typeof obj.description === "string" &&
-    typeof obj.execute === "function"
+    typeof obj === 'object' &&
+    typeof obj.name === 'string' &&
+    typeof obj.type === 'string' &&
+    typeof obj.version === 'string' &&
+    typeof obj.description === 'string' &&
+    typeof obj.execute === 'function'
   );
 }
 // =============================================================================
@@ -221,7 +221,7 @@ exports.DEFAULT_AGENT_CONFIG = {
     enabled: true,
     ttl: 300000, // 5分钟
     maxSize: 1000,
-    keyPrefix: "agent_",
+    keyPrefix: 'agent_',
   },
   retry: {
     maxAttempts: 3,

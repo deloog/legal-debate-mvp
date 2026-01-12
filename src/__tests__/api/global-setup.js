@@ -4,7 +4,7 @@
  */
 
 // 设置Web API polyfills
-const util = require("util");
+const util = require('util');
 
 if (!global.TextEncoder) {
   global.TextEncoder = util.TextEncoder;
@@ -17,7 +17,7 @@ if (!global.TextDecoder) {
 const MockHeaders = class {
   constructor(init = {}) {
     this.headers = {};
-    if (typeof init === "object") {
+    if (typeof init === 'object') {
       Object.assign(this.headers, init);
     }
   }
@@ -59,8 +59,8 @@ const MockHeaders = class {
 
 const MockRequest = class {
   constructor(input, init = {}) {
-    this.url = typeof input === "string" ? input : input.toString();
-    this.method = init.method || "GET";
+    this.url = typeof input === 'string' ? input : input.toString();
+    this.method = init.method || 'GET';
 
     if (init.headers instanceof MockHeaders) {
       this.headers = init.headers;
@@ -75,10 +75,10 @@ const MockRequest = class {
     if (this.body) {
       try {
         return JSON.parse(
-          typeof this.body === "string" ? this.body : this.body.toString(),
+          typeof this.body === 'string' ? this.body : this.body.toString()
         );
       } catch {
-        throw new Error("Invalid JSON");
+        throw new Error('Invalid JSON');
       }
     }
     return {};
@@ -86,10 +86,10 @@ const MockRequest = class {
 
   async text() {
     return this.body
-      ? typeof this.body === "string"
+      ? typeof this.body === 'string'
         ? this.body
         : this.body.toString()
-      : "";
+      : '';
   }
 };
 
@@ -97,15 +97,15 @@ const MockResponse = class {
   constructor(body, init = {}) {
     init = init || {};
 
-    if (typeof body === "object" && body !== null) {
+    if (typeof body === 'object' && body !== null) {
       body = JSON.stringify(body);
       if (!init.headers) {
         init.headers = new MockHeaders();
       } else if (!(init.headers instanceof MockHeaders)) {
         init.headers = new MockHeaders(init.headers);
       }
-      if (!init.headers.get("Content-Type")) {
-        init.headers.set("Content-Type", "application/json");
+      if (!init.headers.get('Content-Type')) {
+        init.headers.set('Content-Type', 'application/json');
       }
     } else if (!init.headers) {
       init.headers = new MockHeaders();
@@ -132,7 +132,7 @@ const MockResponse = class {
   }
 
   async text() {
-    return this.body || "";
+    return this.body || '';
   }
 };
 
@@ -145,8 +145,8 @@ global.NextResponse = MockResponse;
 
 // 设置Web Crypto API
 global.crypto = {
-  randomUUID: () => "123e4567-e89b-12d3-a456-426614174000",
-  getRandomValues: (arr) => {
+  randomUUID: () => '123e4567-e89b-12d3-a456-426614174000',
+  getRandomValues: arr => {
     for (let i = 0; i < arr.length; i++) {
       arr[i] = Math.floor(Math.random() * 256);
     }
@@ -157,12 +157,12 @@ global.crypto = {
 // 模拟fetch
 global.fetch = jest.fn(() =>
   Promise.resolve(
-    new MockResponse("{}", {
+    new MockResponse('{}', {
       status: 200,
-      statusText: "OK",
+      statusText: 'OK',
       headers: new MockHeaders(),
-    }),
-  ),
+    })
+  )
 );
 
 // 模拟localStorage和sessionStorage
@@ -186,10 +186,10 @@ global.sessionStorage = {
 
 // 设置环境变量
 if (!process.env.NODE_ENV) {
-  process.env.NODE_ENV = "test";
+  process.env.NODE_ENV = 'test';
 }
 
 // 导出全局设置函数
 export default async function globalSetup() {
-  console.log("Global setup completed for API tests");
+  console.log('Global setup completed for API tests');
 }

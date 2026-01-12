@@ -17,14 +17,14 @@ export interface SSEEvent {
  * 辩论流式事件类型
  */
 export type DebateStreamEventType =
-  | "connected" // 连接确认
-  | "round-start" // 轮次开始
-  | "argument" // 论点生成
-  | "progress" // 进度更新
-  | "completed" // 完成
-  | "error" // 错误
-  | "ping" // 心跳
-  | "disconnected"; // 断开连接
+  | 'connected' // 连接确认
+  | 'round-start' // 轮次开始
+  | 'argument' // 论点生成
+  | 'progress' // 进度更新
+  | 'completed' // 完成
+  | 'error' // 错误
+  | 'ping' // 心跳
+  | 'disconnected'; // 断开连接
 
 /**
  * 连接事件数据
@@ -52,9 +52,9 @@ export interface RoundStartEventData {
 export interface ArgumentEventData {
   argumentId: string;
   roundId: string;
-  side: "PLAINTIFF" | "DEFENDANT";
+  side: 'PLAINTIFF' | 'DEFENDANT';
   content: string;
-  type: "MAIN_POINT" | "SUPPORTING" | "REBUTTAL";
+  type: 'MAIN_POINT' | 'SUPPORTING' | 'REBUTTAL';
   timestamp: string;
 }
 
@@ -129,11 +129,11 @@ export interface SSEConnectionConfig {
  * SSE连接状态
  */
 export enum SSEConnectionState {
-  CONNECTING = "CONNECTING",
-  CONNECTED = "CONNECTED",
-  DISCONNECTED = "DISCONNECTED",
-  ERROR = "ERROR",
-  RECONNECTING = "RECONNECTING",
+  CONNECTING = 'CONNECTING',
+  CONNECTED = 'CONNECTED',
+  DISCONNECTED = 'DISCONNECTED',
+  ERROR = 'ERROR',
+  RECONNECTING = 'RECONNECTING',
 }
 
 /**

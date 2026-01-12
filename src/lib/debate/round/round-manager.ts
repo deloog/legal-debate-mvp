@@ -1,10 +1,10 @@
 // 轮次管理器：管理轮次生命周期和状态
 
-import { RoundConfig, RoundSummary, RoundContext } from "./types";
-import { RoundValidator } from "./round-validator";
-import { ContextInheritanceProcessor } from "./context-inheritance";
-import { prisma } from "@/lib/db/prisma";
-import { DebateRound, Argument } from "@prisma/client";
+import { RoundConfig, RoundSummary, RoundContext } from './types';
+import { RoundValidator } from './round-validator';
+import { ContextInheritanceProcessor } from './context-inheritance';
+import { prisma } from '@/lib/db/prisma';
+import { DebateRound, Argument } from '@prisma/client';
 
 /**
  * 轮次管理器类
@@ -28,7 +28,7 @@ export class RoundManager {
    */
   async startRound(
     debateId: string,
-    config?: RoundConfig,
+    config?: RoundConfig
   ): Promise<DebateRound> {
     // 验证是否可以开始新轮次
     const validationResult = await this.validator.validateCanStart(debateId);
@@ -51,7 +51,7 @@ export class RoundManager {
       data: {
         debateId,
         roundNumber: newRoundNumber,
-        status: "IN_PROGRESS",
+        status: 'IN_PROGRESS',
         startedAt: new Date(),
       },
     });
@@ -63,7 +63,7 @@ export class RoundManager {
     });
 
     console.log(
-      `[RoundManager] 轮次 ${newRoundNumber} 已开始，ID: ${round.id}`,
+      `[RoundManager] 轮次 ${newRoundNumber} 已开始，ID: ${round.id}`
     );
     return round;
   }
@@ -80,18 +80,18 @@ export class RoundManager {
       where: { id: roundId },
       include: {
         arguments: {
-          orderBy: { createdAt: "asc" },
+          orderBy: { createdAt: 'asc' },
         },
         debate: true,
       },
     });
 
     if (!round) {
-      throw new Error("轮次不存在");
+      throw new Error('轮次不存在');
     }
 
     // 验证状态转换
-    if (!this.validator.validateStatusTransition(round.status, "COMPLETED")) {
+    if (!this.validator.validateStatusTransition(round.status, 'COMPLETED')) {
       throw new Error(`无法从${round.status}状态转换为COMPLETED状态`);
     }
 
@@ -101,8 +101,8 @@ export class RoundManager {
     if (!completenessValidation.valid) {
       console.warn(
         `[RoundManager] 轮次完整性验证警告：${this.validator.getWarningSummary(
-          completenessValidation,
-        )}`,
+          completenessValidation
+        )}`
       );
     }
 
@@ -110,7 +110,7 @@ export class RoundManager {
     const updatedRound = await prisma.debateRound.update({
       where: { id: roundId },
       data: {
-        status: "COMPLETED",
+        status: 'COMPLETED',
         completedAt: new Date(),
       },
       include: {
@@ -121,7 +121,7 @@ export class RoundManager {
     // 生成轮次摘要
     const summary = this.generateRoundSummary(updatedRound);
     console.log(
-      `[RoundManager] 轮次 ${summary.roundNumber} 已完成，原告论点：${summary.plaintiffSummary.argumentCount}，被告论点：${summary.defendantSummary.argumentCount}`,
+      `[RoundManager] 轮次 ${summary.roundNumber} 已完成，原告论点：${summary.plaintiffSummary.argumentCount}，被告论点：${summary.defendantSummary.argumentCount}`
     );
 
     return summary;
@@ -139,24 +139,24 @@ export class RoundManager {
     });
 
     if (!round) {
-      throw new Error("轮次不存在");
+      throw new Error('轮次不存在');
     }
 
     // 验证状态转换
-    if (!this.validator.validateStatusTransition(round.status, "FAILED")) {
+    if (!this.validator.validateStatusTransition(round.status, 'FAILED')) {
       throw new Error(`无法从${round.status}状态转换为FAILED状态`);
     }
 
     await prisma.debateRound.update({
       where: { id: roundId },
       data: {
-        status: "FAILED",
+        status: 'FAILED',
         completedAt: new Date(),
       },
     });
 
     console.warn(
-      `[RoundManager] 轮次 ${round.roundNumber} 失败，原因：${reason || "未知"}`,
+      `[RoundManager] 轮次 ${round.roundNumber} 失败，原因：${reason || '未知'}`
     );
   }
 
@@ -172,16 +172,16 @@ export class RoundManager {
     });
 
     if (!round) {
-      throw new Error("轮次不存在");
+      throw new Error('轮次不存在');
     }
 
-    if (round.status !== "FAILED") {
-      throw new Error("只能重试失败的轮次");
+    if (round.status !== 'FAILED') {
+      throw new Error('只能重试失败的轮次');
     }
 
     // 验证是否可以开始新轮次（重新验证辩论状态）
     const validationResult = await this.validator.validateCanStart(
-      round.debateId,
+      round.debateId
     );
     if (!validationResult.valid) {
       throw new Error(this.validator.getErrorSummary(validationResult));
@@ -191,7 +191,7 @@ export class RoundManager {
     const updatedRound = await prisma.debateRound.update({
       where: { id: roundId },
       data: {
-        status: "IN_PROGRESS",
+        status: 'IN_PROGRESS',
         startedAt: new Date(),
         completedAt: null,
       },
@@ -214,12 +214,12 @@ export class RoundManager {
     });
 
     if (!round) {
-      throw new Error("轮次不存在");
+      throw new Error('轮次不存在');
     }
 
     return this.contextProcessor.buildRoundContext(
       round.debateId,
-      round.roundNumber,
+      round.roundNumber
     );
   }
 
@@ -236,7 +236,7 @@ export class RoundManager {
     });
 
     if (!round) {
-      throw new Error("轮次不存在");
+      throw new Error('轮次不存在');
     }
 
     return this.generateRoundSummary(round);
@@ -255,17 +255,17 @@ export class RoundManager {
    */
   async addArgument(
     roundId: string,
-    side: "PLAINTIFF" | "DEFENDANT",
+    side: 'PLAINTIFF' | 'DEFENDANT',
     content: string,
     type:
-      | "MAIN_POINT"
-      | "SUPPORTING"
-      | "REBUTTAL"
-      | "EVIDENCE"
-      | "LEGAL_BASIS"
-      | "CONCLUSION",
+      | 'MAIN_POINT'
+      | 'SUPPORTING'
+      | 'REBUTTAL'
+      | 'EVIDENCE'
+      | 'LEGAL_BASIS'
+      | 'CONCLUSION',
     aiProvider?: string,
-    confidence?: number,
+    confidence?: number
   ): Promise<{ roundId: string; argumentId: string }> {
     // 验证轮次状态
     const round = await prisma.debateRound.findUnique({
@@ -273,12 +273,12 @@ export class RoundManager {
     });
 
     if (!round) {
-      throw new Error("轮次不存在");
+      throw new Error('轮次不存在');
     }
 
-    if (round.status !== "IN_PROGRESS") {
+    if (round.status !== 'IN_PROGRESS') {
       throw new Error(
-        `只能在IN_PROGRESS状态的轮次中添加论点，当前状态：${round.status}`,
+        `只能在IN_PROGRESS状态的轮次中添加论点，当前状态：${round.status}`
       );
     }
 
@@ -287,15 +287,15 @@ export class RoundManager {
       where: {
         debateId: round.debateId,
         roundNumber: { lt: round.roundNumber },
-        status: "COMPLETED",
+        status: 'COMPLETED',
       },
       include: { arguments: true },
     });
 
-    const historicalArguments = historicalRounds.flatMap((r) => r.arguments);
+    const historicalArguments = historicalRounds.flatMap(r => r.arguments);
     const noveltyScore = await this.contextProcessor.calculateNoveltyScore(
       content,
-      historicalArguments,
+      historicalArguments
     );
 
     // 创建论点
@@ -311,7 +311,7 @@ export class RoundManager {
     });
 
     console.log(
-      `[RoundManager] 已添加${side === "PLAINTIFF" ? "原告" : "被告"}论点，新颖度：${noveltyScore.rating} (${noveltyScore.score.toFixed(2)})`,
+      `[RoundManager] 已添加${side === 'PLAINTIFF' ? '原告' : '被告'}论点，新颖度：${noveltyScore.rating} (${noveltyScore.score.toFixed(2)})`
     );
 
     return { roundId, argumentId: argument.id };
@@ -326,7 +326,7 @@ export class RoundManager {
     });
 
     if (!debate) {
-      throw new Error("辩论不存在");
+      throw new Error('辩论不存在');
     }
 
     return debate.currentRound;
@@ -336,17 +336,17 @@ export class RoundManager {
    * 生成轮次摘要
    */
   private generateRoundSummary(
-    round: DebateRound & { arguments: Array<Argument> },
+    round: DebateRound & { arguments: Array<Argument> }
   ): RoundSummary {
-    const plaintiffArgs = round.arguments.filter((a) => a.side === "PLAINTIFF");
-    const defendantArgs = round.arguments.filter((a) => a.side === "DEFENDANT");
+    const plaintiffArgs = round.arguments.filter(a => a.side === 'PLAINTIFF');
+    const defendantArgs = round.arguments.filter(a => a.side === 'DEFENDANT');
 
     const plaintiffScores = plaintiffArgs
-      .map((a) => a.confidence || 0)
-      .filter((s) => s > 0);
+      .map(a => a.confidence || 0)
+      .filter(s => s > 0);
     const defendantScores = defendantArgs
-      .map((a) => a.confidence || 0)
-      .filter((s) => s > 0);
+      .map(a => a.confidence || 0)
+      .filter(s => s > 0);
 
     const plaintiffAverageScore =
       plaintiffScores.length > 0
@@ -361,16 +361,16 @@ export class RoundManager {
 
     // 提取关键点
     const plaintiffKeyPoints = plaintiffArgs
-      .map((a) => this.extractKeyPoint(a.content))
+      .map(a => this.extractKeyPoint(a.content))
       .slice(0, 3);
     const defendantKeyPoints = defendantArgs
-      .map((a) => this.extractKeyPoint(a.content))
+      .map(a => this.extractKeyPoint(a.content))
       .slice(0, 3);
 
     // 识别争议焦点
     const disputeFocus = this.identifyDisputeFocus(
       plaintiffArgs,
-      defendantArgs,
+      defendantArgs
     );
 
     return {
@@ -395,7 +395,7 @@ export class RoundManager {
    * 提取关键点
    */
   private extractKeyPoint(content: string): string {
-    return content.length > 80 ? content.substring(0, 80) + "..." : content;
+    return content.length > 80 ? content.substring(0, 80) + '...' : content;
   }
 
   /**
@@ -403,7 +403,7 @@ export class RoundManager {
    */
   private identifyDisputeFocus(
     plaintiffArgs: Argument[],
-    defendantArgs: Argument[],
+    defendantArgs: Argument[]
   ): string[] {
     const focus: string[] = [];
 
@@ -427,10 +427,10 @@ export class RoundManager {
    */
   private hasDisagreement(content1: string, content2: string): boolean {
     const contradictions = [
-      ["同意", "反对"],
-      ["应当", "不应当"],
-      ["符合", "不符合"],
-      ["有效", "无效"],
+      ['同意', '反对'],
+      ['应当', '不应当'],
+      ['符合', '不符合'],
+      ['有效', '无效'],
     ];
 
     for (const [word1, word2] of contradictions) {
@@ -449,7 +449,7 @@ export class RoundManager {
    * 查找公共子串
    */
   private findCommonSubstring(str1: string, str2: string): string {
-    let maxSub = "";
+    let maxSub = '';
     for (let i = 0; i < str1.length; i++) {
       for (let j = i + 1; j <= str1.length; j++) {
         const sub = str1.substring(i, j);
@@ -472,10 +472,10 @@ export class RoundManager {
       where: { debateId },
       include: {
         arguments: {
-          orderBy: { createdAt: "asc" },
+          orderBy: { createdAt: 'asc' },
         },
       },
-      orderBy: { roundNumber: "asc" },
+      orderBy: { roundNumber: 'asc' },
     });
   }
 
@@ -489,11 +489,11 @@ export class RoundManager {
     return prisma.debateRound.findFirst({
       where: {
         debateId,
-        status: "IN_PROGRESS",
+        status: 'IN_PROGRESS',
       },
       include: {
         arguments: {
-          orderBy: { createdAt: "asc" },
+          orderBy: { createdAt: 'asc' },
         },
       },
     });

@@ -12,9 +12,9 @@
  * node scripts/track-coverage-history.ts
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { execSync } from "child_process";
+import * as fs from 'fs';
+import * as path from 'path';
+import { execSync } from 'child_process';
 
 interface CoverageData {
   statements: { pct: number; total: number; covered: number };
@@ -36,13 +36,13 @@ interface CoverageHistory {
 }
 
 // 覆盖率历史文件路径
-const HISTORY_FILE = path.join(process.cwd(), "docs", "coverage-history.json");
+const HISTORY_FILE = path.join(process.cwd(), 'docs', 'coverage-history.json');
 
 // 覆盖率报告路径
 const COVERAGE_REPORT_PATH = path.join(
   process.cwd(),
-  "coverage-final",
-  "coverage-final.json",
+  'coverage-final',
+  'coverage-final.json'
 );
 
 /**
@@ -51,11 +51,11 @@ const COVERAGE_REPORT_PATH = path.join(
 function readCoverageHistory(): CoverageHistory {
   try {
     if (fs.existsSync(HISTORY_FILE)) {
-      const content = fs.readFileSync(HISTORY_FILE, "utf-8");
+      const content = fs.readFileSync(HISTORY_FILE, 'utf-8');
       return JSON.parse(content);
     }
   } catch {
-    console.warn("⚠️  无法读取历史文件，将创建新文件");
+    console.warn('⚠️  无法读取历史文件，将创建新文件');
   }
   return { records: [] };
 }
@@ -75,7 +75,7 @@ function writeCoverageHistory(history: CoverageHistory): void {
     history.records = history.records.slice(-50);
 
     // 写入文件
-    fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2), "utf-8");
+    fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2), 'utf-8');
     console.log(`✅  覆盖率历史已保存: ${HISTORY_FILE}`);
   } catch (error) {
     console.error(`❌ 无法写入历史文件: ${error}`);
@@ -99,7 +99,7 @@ function readCurrentCoverage(): Record<string, FileCoverage> | null {
       return null;
     }
 
-    const content = fs.readFileSync(COVERAGE_REPORT_PATH, "utf-8");
+    const content = fs.readFileSync(COVERAGE_REPORT_PATH, 'utf-8');
     return JSON.parse(content);
   } catch (error) {
     console.error(`❌ 无法读取覆盖率报告: ${error}`);
@@ -111,7 +111,7 @@ function readCurrentCoverage(): Record<string, FileCoverage> | null {
  * 计算总体覆盖率
  */
 function calculateTotalCoverage(
-  coverageData: Record<string, FileCoverage>,
+  coverageData: Record<string, FileCoverage>
 ): CoverageData {
   let totalStatements = 0;
   let coveredStatements = 0;
@@ -191,7 +191,7 @@ function calculateTotalCoverage(
  * 按模块分类覆盖率
  */
 function categorizeModules(
-  coverageData: Record<string, FileCoverage>,
+  coverageData: Record<string, FileCoverage>
 ): Record<string, CoverageData> {
   const modules: Record<string, CoverageData> = {
     API: {
@@ -229,15 +229,15 @@ function categorizeModules(
   for (const filePath of Object.keys(coverageData)) {
     const fileCoverage = coverageData[filePath];
 
-    if (filePath.includes("/api/")) {
+    if (filePath.includes('/api/')) {
       addToModule(modules.API, fileCoverage);
-    } else if (filePath.includes("/debate/")) {
+    } else if (filePath.includes('/debate/')) {
       addToModule(modules.Debate, fileCoverage);
-    } else if (filePath.includes("/middleware/")) {
+    } else if (filePath.includes('/middleware/')) {
       addToModule(modules.Middleware, fileCoverage);
-    } else if (filePath.includes("/agent/")) {
+    } else if (filePath.includes('/agent/')) {
       addToModule(modules.Agent, fileCoverage);
-    } else if (filePath.includes("/cache/")) {
+    } else if (filePath.includes('/cache/')) {
       addToModule(modules.Cache, fileCoverage);
     }
   }
@@ -310,17 +310,17 @@ function addToModule(mod: CoverageData, fileCoverage: FileCoverage): void {
  */
 function getGitInfo(): { commit: string; branch: string } {
   try {
-    let commit = process.env.GITHUB_SHA || "unknown";
+    let commit = process.env.GITHUB_SHA || 'unknown';
     let branch =
-      process.env.GITHUB_REF?.replace("refs/heads/", "") || "unknown";
+      process.env.GITHUB_REF?.replace('refs/heads/', '') || 'unknown';
 
     // 尝试从Git获取信息
     try {
-      if (commit === "unknown") {
-        commit = execSync("git rev-parse HEAD").toString().trim();
+      if (commit === 'unknown') {
+        commit = execSync('git rev-parse HEAD').toString().trim();
       }
-      if (branch === "unknown") {
-        branch = execSync("git rev-parse --abbrev-ref HEAD").toString().trim();
+      if (branch === 'unknown') {
+        branch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
       }
     } catch {
       // Git命令失败，使用默认值
@@ -328,8 +328,8 @@ function getGitInfo(): { commit: string; branch: string } {
 
     return { commit, branch };
   } catch {
-    console.warn("⚠️  无法获取Git信息");
-    return { commit: "unknown", branch: "unknown" };
+    console.warn('⚠️  无法获取Git信息');
+    return { commit: 'unknown', branch: 'unknown' };
   }
 }
 
@@ -337,20 +337,20 @@ function getGitInfo(): { commit: string; branch: string } {
  * 生成覆盖率历史报告
  */
 function generateHistoryReport(history: CoverageHistory): void {
-  console.log("\n📊 覆盖率历史报告\n");
-  console.log("━".repeat(80));
+  console.log('\n📊 覆盖率历史报告\n');
+  console.log('━'.repeat(80));
 
   if (history.records.length === 0) {
-    console.log("暂无历史记录\n");
+    console.log('暂无历史记录\n');
     return;
   }
 
   // 显示最近5次记录
   const recentRecords = history.records.slice(-5);
-  console.log("\n📈 最近5次覆盖率记录:\n");
+  console.log('\n📈 最近5次覆盖率记录:\n');
 
   recentRecords.forEach((record, index) => {
-    const date = new Date(record.timestamp).toLocaleString("zh-CN");
+    const date = new Date(record.timestamp).toLocaleString('zh-CN');
     const total = record.total;
 
     console.log(`${index + 1}. ${date} (${record.branch.substring(0, 10)}...)`);
@@ -358,7 +358,7 @@ function generateHistoryReport(history: CoverageHistory): void {
     console.log(`   Branches:   ${total.branches.pct.toFixed(2)}%`);
     console.log(`   Functions:  ${total.functions.pct.toFixed(2)}%`);
     console.log(`   Lines:      ${total.lines.pct.toFixed(2)}%`);
-    console.log("");
+    console.log('');
   });
 
   // 计算趋势
@@ -366,49 +366,49 @@ function generateHistoryReport(history: CoverageHistory): void {
     const latest = history.records[history.records.length - 1];
     const previous = history.records[history.records.length - 2];
 
-    console.log("📊 覆盖率趋势对比:\n");
-    console.log("指标         最新      上一次    变化");
-    console.log("─".repeat(40));
+    console.log('📊 覆盖率趋势对比:\n');
+    console.log('指标         最新      上一次    变化');
+    console.log('─'.repeat(40));
 
     const metrics = [
-      { name: "Statements", key: "statements" },
-      { name: "Branches", key: "branches" },
-      { name: "Functions", key: "functions" },
-      { name: "Lines", key: "lines" },
+      { name: 'Statements', key: 'statements' },
+      { name: 'Branches', key: 'branches' },
+      { name: 'Functions', key: 'functions' },
+      { name: 'Lines', key: 'lines' },
     ];
 
-    metrics.forEach((metric) => {
+    metrics.forEach(metric => {
       const latestPct = latest.total[metric.key].pct;
       const previousPct = previous.total[metric.key].pct;
       const change = latestPct - previousPct;
-      const arrow = change > 0 ? "↑" : change < 0 ? "↓" : "→";
-      const color = change > 0 ? "🟢" : change < 0 ? "🔴" : "⚪";
+      const arrow = change > 0 ? '↑' : change < 0 ? '↓' : '→';
+      const color = change > 0 ? '🟢' : change < 0 ? '🔴' : '⚪';
 
       console.log(
         `${metric.name.padEnd(10)} ${latestPct
           .toFixed(2)
           .padStart(7)}% ${previousPct
           .toFixed(2)
-          .padStart(7)}% ${color} ${arrow} ${Math.abs(change).toFixed(2)}%`,
+          .padStart(7)}% ${color} ${arrow} ${Math.abs(change).toFixed(2)}%`
       );
     });
 
-    console.log("");
+    console.log('');
   }
 
-  console.log("━".repeat(80));
+  console.log('━'.repeat(80));
 }
 
 /**
  * 主函数
  */
 function main(): void {
-  console.log("🚀 开始追踪覆盖率历史...\n");
+  console.log('🚀 开始追踪覆盖率历史...\n');
 
   // 读取当前覆盖率
   const currentCoverage = readCurrentCoverage();
   if (!currentCoverage) {
-    console.error("❌ 无法读取覆盖率数据");
+    console.error('❌ 无法读取覆盖率数据');
     process.exit(1);
   }
 
@@ -442,7 +442,7 @@ function main(): void {
   // 生成报告
   generateHistoryReport(history);
 
-  console.log("\n✅ 覆盖率历史追踪完成！");
+  console.log('\n✅ 覆盖率历史追踪完成！');
   console.log(`📁 历史文件: ${HISTORY_FILE}`);
 }
 

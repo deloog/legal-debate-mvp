@@ -45,38 +45,38 @@
  * - 性能目标：<2秒（首次），<500ms（缓存命中）
  */
 
-import { BaseAgent } from "../base-agent";
-import { AgentType, AgentContext } from "../../../types/agent";
+import { BaseAgent } from '../base-agent';
+import { AgentType, AgentContext } from '../../../types/agent';
 import {
   DocumentAnalysisOutput,
   DocumentAnalysisInput,
   AnalysisProcess,
   Correction,
-} from "./core/types";
-import { DEFAULT_CONFIG } from "./core/constants";
+} from './core/types';
+import { DEFAULT_CONFIG } from './core/constants';
 import {
   createFaultToleranceConfig,
   createRetryConfig,
   createFallbackConfig,
   createCircuitBreakerConfig,
   type AgentFaultToleranceConfig,
-} from "../fault-tolerance/config";
-import { TextExtractor } from "./extractors/text-extractor";
-import { FilterProcessor } from "./processors/filter-processor";
-import { AIProcessor } from "./processors/ai-processor";
-import { RuleProcessor } from "./processors/rule-processor";
-import { CacheProcessor } from "./processors/cache-processor";
-import { LegalRepresentativeFilter } from "./processors/legal-representative-filter";
-import { ReviewerManager } from "./reviewers/reviewer-manager";
-import { AIReviewer } from "./reviewers/ai-reviewer";
-import { RuleReviewer } from "./reviewers/rule-reviewer";
+} from '../fault-tolerance/config';
+import { TextExtractor } from './extractors/text-extractor';
+import { FilterProcessor } from './processors/filter-processor';
+import { AIProcessor } from './processors/ai-processor';
+import { RuleProcessor } from './processors/rule-processor';
+import { CacheProcessor } from './processors/cache-processor';
+import { LegalRepresentativeFilter } from './processors/legal-representative-filter';
+import { ReviewerManager } from './reviewers/reviewer-manager';
+import { AIReviewer } from './reviewers/ai-reviewer';
+import { RuleReviewer } from './reviewers/rule-reviewer';
 import {
   EvidenceAnalyzer,
   TimelineExtractor,
   ComprehensiveAnalyzer,
-} from "./analyzers";
-import { logger } from "../../agent/security/logger";
-import { AnalysisError } from "../../agent/security/errors";
+} from './analyzers';
+import { logger } from '../../agent/security/logger';
+import { AnalysisError } from '../../agent/security/errors';
 
 export class DocAnalyzerAgent extends BaseAgent {
   private textExtractor: TextExtractor;
@@ -100,17 +100,17 @@ export class DocAnalyzerAgent extends BaseAgent {
         maxRetries: 3,
         backoffMs: [1000, 2000, 4000],
         retryableErrors: [
-          "TIMEOUT",
-          "AI_SERVICE_ERROR",
-          "NETWORK_ERROR",
-          "RATE_LIMIT_ERROR",
-          "ECONNREFUSED",
-          "ETIMEDOUT",
+          'TIMEOUT',
+          'AI_SERVICE_ERROR',
+          'NETWORK_ERROR',
+          'RATE_LIMIT_ERROR',
+          'ECONNREFUSED',
+          'ETIMEDOUT',
         ],
       },
       fallback: {
         enabled: true,
-        fallbackType: "SIMPLE",
+        fallbackType: 'SIMPLE',
       },
       circuitBreaker: {
         enabled: true,
@@ -130,7 +130,7 @@ export class DocAnalyzerAgent extends BaseAgent {
     this.cacheProcessor = new CacheProcessor({
       enabled: DEFAULT_CONFIG.cacheEnabled,
       ttl: DEFAULT_CONFIG.cacheTTL,
-      namespace: "doc-analyzer",
+      namespace: 'doc-analyzer',
     });
     this.reviewerManager = new ReviewerManager();
     this.setupReviewers();
@@ -142,7 +142,7 @@ export class DocAnalyzerAgent extends BaseAgent {
   }
 
   get name(): string {
-    return "DocAnalyzer";
+    return 'DocAnalyzer';
   }
 
   get type(): AgentType {
@@ -150,28 +150,28 @@ export class DocAnalyzerAgent extends BaseAgent {
   }
 
   get version(): string {
-    return "3.0.0";
+    return '3.0.0';
   }
 
   get description(): string {
-    return "模块化文档分析智能体，实现五层处理架构和Reviewer审查流程";
+    return '模块化文档分析智能体，实现五层处理架构和Reviewer审查流程';
   }
 
   getCapabilities(): string[] {
     return [
-      "DOCUMENT_ANALYSIS",
-      "TEXT_EXTRACTION",
-      "STRUCTURED_DATA_EXTRACTION",
-      "QUALITY_REVIEW",
+      'DOCUMENT_ANALYSIS',
+      'TEXT_EXTRACTION',
+      'STRUCTURED_DATA_EXTRACTION',
+      'QUALITY_REVIEW',
     ];
   }
 
   getSupportedTasks(): string[] {
     return [
-      "DOCUMENT_PARSE",
-      "DOCUMENT_ANALYZE",
-      "INFO_EXTRACT",
-      "QUALITY_CHECK",
+      'DOCUMENT_PARSE',
+      'DOCUMENT_ANALYZE',
+      'INFO_EXTRACT',
+      'QUALITY_CHECK',
     ];
   }
 
@@ -184,7 +184,7 @@ export class DocAnalyzerAgent extends BaseAgent {
   }
 
   getOptionalConfig(): string[] {
-    return ["aiTimeout", "maxRetries", "cacheEnabled"];
+    return ['aiTimeout', 'maxRetries', 'cacheEnabled'];
   }
 
   /**
@@ -210,13 +210,13 @@ export class DocAnalyzerAgent extends BaseAgent {
 
   getProcessingSteps(): string[] {
     return [
-      "Input validation",
-      "Layer 0: Text extraction",
-      "Layer 1: Filter (OCR quality + doc type)",
-      "Layer 2: AI core understanding",
-      "Layer 3: Rule validation",
-      "Layer 4: Reviewer check",
-      "Layer 5: Cache",
+      'Input validation',
+      'Layer 0: Text extraction',
+      'Layer 1: Filter (OCR quality + doc type)',
+      'Layer 2: AI core understanding',
+      'Layer 3: Rule validation',
+      'Layer 4: Reviewer check',
+      'Layer 5: Cache',
     ];
   }
 
@@ -224,7 +224,7 @@ export class DocAnalyzerAgent extends BaseAgent {
    * 初始化Agent
    */
   async initialize(): Promise<void> {
-    logger.info("DocAnalyzerAgent初始化", { version: this.version });
+    logger.info('DocAnalyzerAgent初始化', { version: this.version });
 
     // 初始化AIReviewer
     if (this.aiReviewer) {
@@ -242,7 +242,7 @@ export class DocAnalyzerAgent extends BaseAgent {
     this.reviewerManager.registerReviewer(this.aiReviewer);
     this.reviewerManager.registerReviewer(this.ruleReviewer);
 
-    logger.info("审查器已注册", { count: 2 });
+    logger.info('审查器已注册', { count: 2 });
   }
 
   /**
@@ -257,38 +257,38 @@ export class DocAnalyzerAgent extends BaseAgent {
       const aiService = await this.aiProcessor.getAIService();
       if (aiService) {
         await this.aiReviewer.initialize(aiService);
-        logger.info("AIReviewer初始化成功");
+        logger.info('AIReviewer初始化成功');
       }
     } catch (error) {
-      logger.warn("AIReviewer初始化失败", error);
+      logger.warn('AIReviewer初始化失败', error);
     }
   }
 
   protected async executeLogic(
-    context: AgentContext,
+    context: AgentContext
   ): Promise<DocumentAnalysisOutput> {
     const input = context.data as unknown as DocumentAnalysisInput;
     const startTime = Date.now();
 
     try {
       // Layer 0: 输入验证
-      const { validateInput } = await import("./validators");
+      const { validateInput } = await import('./validators');
       validateInput(input);
 
       // Layer 0: 文本提取
-      let extractedText = input.content || "";
+      let extractedText = input.content || '';
       if (!extractedText) {
         extractedText = await this.textExtractor.extractText(
           input.filePath,
-          input.fileType,
+          input.fileType
         );
       }
 
       if (!extractedText?.trim()) {
         throw new AnalysisError(
-          "无法从文档中提取有效文本内容",
-          new Error("文档内容为空"),
-          { documentId: input.documentId },
+          '无法从文档中提取有效文本内容',
+          new Error('文档内容为空'),
+          { documentId: input.documentId }
         );
       }
 
@@ -296,7 +296,7 @@ export class DocAnalyzerAgent extends BaseAgent {
       const cached = await this.cacheProcessor.get(
         input.documentId,
         input.fileType,
-        extractedText,
+        extractedText
       );
 
       if (cached) {
@@ -307,13 +307,13 @@ export class DocAnalyzerAgent extends BaseAgent {
       const filterResult = await this.filterProcessor.process(extractedText);
       if (!filterResult.passed) {
         throw new AnalysisError(
-          `文档质量检查未通过：${filterResult.reason || "未知原因"}`,
-          new Error(filterResult.reason || "质量检查失败"),
+          `文档质量检查未通过：${filterResult.reason || '未知原因'}`,
+          new Error(filterResult.reason || '质量检查失败'),
           {
             documentId: input.documentId,
             qualityScore: filterResult.qualityScore,
             warnings: filterResult.warnings,
-          },
+          }
         );
       }
 
@@ -326,20 +326,20 @@ export class DocAnalyzerAgent extends BaseAgent {
       // Layer 3: 规则验证（算法兜底，使用AmountExtractor和ClaimExtractor）
       const ruleResult = await this.ruleProcessor.process(
         aiResult.extractedData,
-        filteredText,
+        filteredText
       );
 
       // Layer 3.5: 法定代表人过滤（在规则验证后进行）
       const legalRepFilterResult =
         await this.legalRepFilter.applyToExtractedData(
           filteredText,
-          ruleResult.data,
+          ruleResult.data
         );
 
       // Layer 3.6: 时间线提取（新增）
       const timelineReport = this.timelineExtractor.extractTimeline(
         filteredText,
-        legalRepFilterResult,
+        legalRepFilterResult
       );
       legalRepFilterResult.timeline = timelineReport.events;
 
@@ -348,7 +348,7 @@ export class DocAnalyzerAgent extends BaseAgent {
       if (input.options?.analyzeEvidence) {
         evidenceAnalysis = this.evidenceAnalyzer.analyze(
           filteredText,
-          legalRepFilterResult,
+          legalRepFilterResult
         );
       }
 
@@ -359,7 +359,7 @@ export class DocAnalyzerAgent extends BaseAgent {
           legalRepFilterResult.parties,
           legalRepFilterResult.claims,
           timelineReport.events,
-          evidenceAnalysis,
+          evidenceAnalysis
         );
       }
 
@@ -370,7 +370,7 @@ export class DocAnalyzerAgent extends BaseAgent {
       const reviewResult = await this.reviewerManager.review(
         legalRepFilterResult,
         filteredText,
-        reviewConfig,
+        reviewConfig
       );
 
       // 应用审查结果修正
@@ -378,18 +378,18 @@ export class DocAnalyzerAgent extends BaseAgent {
       if (reviewResult.corrections && reviewResult.corrections.length > 0) {
         finalExtractedData = this.applyCorrections(
           legalRepFilterResult,
-          reviewResult.corrections,
+          reviewResult.corrections
         );
-        logger.info("应用AI审查修正", {
+        logger.info('应用AI审查修正', {
           count: reviewResult.corrections.length,
-          types: reviewResult.corrections.map((c) => c.type),
+          types: reviewResult.corrections.map(c => c.type),
         });
       }
 
       // 计算综合置信度
       let confidence = aiResult.confidence;
       if (reviewResult.score < 0.7) {
-        logger.warn("审查评分低于阈值", { score: reviewResult.score });
+        logger.warn('审查评分低于阈值', { score: reviewResult.score });
         confidence = Math.min(confidence, reviewResult.score);
       }
 
@@ -405,9 +405,9 @@ export class DocAnalyzerAgent extends BaseAgent {
       if (ruleResult.corrections && ruleResult.corrections.length > 0) {
         ruleResult.corrections.forEach((correction: Correction) => {
           if (
-            correction.type === "OTHER" ||
-            correction.description.includes("缺少") ||
-            correction.description.includes("推断")
+            correction.type === 'OTHER' ||
+            correction.description.includes('缺少') ||
+            correction.description.includes('推断')
           ) {
             warnings.push(correction.description);
           }
@@ -421,7 +421,7 @@ export class DocAnalyzerAgent extends BaseAgent {
         processingTime: Date.now() - startTime,
         metadata: {
           wordCount: this.textExtractor.countWords(filteredText),
-          analysisModel: "zhipu-glm-4.6-modular",
+          analysisModel: 'zhipu-glm-4.6-modular',
           tokenUsed: aiResult.tokenUsed,
           analysisProcess: {
             ...aiResult.analysisProcess,
@@ -440,10 +440,10 @@ export class DocAnalyzerAgent extends BaseAgent {
         input.documentId,
         input.fileType,
         extractedText,
-        output,
+        output
       );
 
-      logger.info("文档分析完成", {
+      logger.info('文档分析完成', {
         documentId: input.documentId,
         processingTime: output.processingTime,
         confidence: output.confidence,
@@ -455,7 +455,7 @@ export class DocAnalyzerAgent extends BaseAgent {
       return output;
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      logger.error("文档分析失败", error, {
+      logger.error('文档分析失败', error, {
         documentId: input.documentId,
         processingTime,
       });
@@ -467,7 +467,7 @@ export class DocAnalyzerAgent extends BaseAgent {
       throw new AnalysisError(
         `文档分析失败: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error : new Error(String(error)),
-        { documentId: input.documentId },
+        { documentId: input.documentId }
       );
     }
   }
@@ -477,9 +477,9 @@ export class DocAnalyzerAgent extends BaseAgent {
    * 根据Reviewer返回的corrections实际修改数据
    */
   private applyCorrections(
-    data: DocumentAnalysisOutput["extractedData"],
-    corrections: unknown[],
-  ): DocumentAnalysisOutput["extractedData"] {
+    data: DocumentAnalysisOutput['extractedData'],
+    corrections: unknown[]
+  ): DocumentAnalysisOutput['extractedData'] {
     const result = {
       ...data,
       parties: [...data.parties],
@@ -502,43 +502,43 @@ export class DocAnalyzerAgent extends BaseAgent {
         };
       };
       switch (typedCorrection.type) {
-        case "ADD_PARTY":
+        case 'ADD_PARTY':
           // 添加遗漏的当事人
           if (typedCorrection.correctedValue) {
             const newParty = typedCorrection.correctedValue as {
               name?: string;
               role?: string;
-              type?: "plaintiff" | "defendant" | "other";
+              type?: 'plaintiff' | 'defendant' | 'other';
             };
-            const exists = result.parties.some((p) => p.name === newParty.name);
+            const exists = result.parties.some(p => p.name === newParty.name);
             if (!exists && newParty.name) {
               result.parties.push({
-                type: newParty.type || "other",
+                type: newParty.type || 'other',
                 name: newParty.name,
                 role: newParty.role,
               });
-              logger.debug("应用修正：添加当事人", {
+              logger.debug('应用修正：添加当事人', {
                 name: newParty.name,
               });
             }
           }
           break;
 
-        case "FIX_ROLE":
+        case 'FIX_ROLE':
           // 修正当事人角色
           if (
             typedCorrection.correctedValue &&
             typedCorrection.correctedValue.name
           ) {
             const partyIndex = result.parties.findIndex(
-              (p) => p.name === typedCorrection.correctedValue.name,
+              p => p.name === typedCorrection.correctedValue.name
             );
             if (partyIndex >= 0) {
               result.parties[partyIndex] = {
                 ...result.parties[partyIndex],
                 role: typedCorrection.correctedValue.role,
               };
-              logger.debug("应用修正：修正角色", {
+              logger.debug('应用修正：修正角色', {
                 name: typedCorrection.correctedValue.name,
                 oldRole: result.parties[partyIndex].role,
                 newRole: typedCorrection.correctedValue.role,
@@ -547,7 +547,7 @@ export class DocAnalyzerAgent extends BaseAgent {
           }
           break;
 
-        case "ADD_CLAIM":
+        case 'ADD_CLAIM':
           // 添加遗漏的诉讼请求
           if (typedCorrection.correctedValue) {
             const newClaim = typedCorrection.correctedValue as {
@@ -557,24 +557,24 @@ export class DocAnalyzerAgent extends BaseAgent {
               currency?: string;
             };
             const exists = result.claims.some(
-              (c) => c.type === newClaim.type && c.content === newClaim.content,
+              c => c.type === newClaim.type && c.content === newClaim.content
             );
             if (!exists && newClaim.type && newClaim.content) {
               result.claims.push({
                 type: newClaim.type as
-                  | "PAY_PRINCIPAL"
-                  | "PAY_INTEREST"
-                  | "PAY_PENALTY"
-                  | "PAY_DAMAGES"
-                  | "LITIGATION_COST"
-                  | "PERFORMANCE"
-                  | "TERMINATION"
-                  | "OTHER",
+                  | 'PAY_PRINCIPAL'
+                  | 'PAY_INTEREST'
+                  | 'PAY_PENALTY'
+                  | 'PAY_DAMAGES'
+                  | 'LITIGATION_COST'
+                  | 'PERFORMANCE'
+                  | 'TERMINATION'
+                  | 'OTHER',
                 content: newClaim.content,
                 amount: newClaim.amount,
-                currency: newClaim.currency || "CNY",
+                currency: newClaim.currency || 'CNY',
               });
-              logger.debug("应用修正：添加诉讼请求", {
+              logger.debug('应用修正：添加诉讼请求', {
                 type: newClaim.type,
                 content: newClaim.content,
               });
@@ -582,21 +582,21 @@ export class DocAnalyzerAgent extends BaseAgent {
           }
           break;
 
-        case "FIX_AMOUNT":
+        case 'FIX_AMOUNT':
           // 修正金额
           if (
             typedCorrection.correctedValue &&
             typedCorrection.correctedValue.type
           ) {
             const claimIndex = result.claims.findIndex(
-              (c) => c.type === typedCorrection.correctedValue.type,
+              c => c.type === typedCorrection.correctedValue.type
             );
             if (claimIndex >= 0) {
               result.claims[claimIndex] = {
                 ...result.claims[claimIndex],
                 amount: typedCorrection.correctedValue.amount,
               };
-              logger.debug("应用修正：修正金额", {
+              logger.debug('应用修正：修正金额', {
                 type: typedCorrection.correctedValue.type,
                 oldAmount: result.claims[claimIndex].amount,
                 newAmount: typedCorrection.correctedValue.amount,
@@ -606,7 +606,7 @@ export class DocAnalyzerAgent extends BaseAgent {
           break;
 
         default:
-          logger.debug("未知修正类型", { type: typedCorrection.type });
+          logger.debug('未知修正类型', { type: typedCorrection.type });
           break;
       }
     }
@@ -615,7 +615,7 @@ export class DocAnalyzerAgent extends BaseAgent {
   }
 
   async cleanup(): Promise<void> {
-    logger.info("DocAnalyzerAgent清理");
+    logger.info('DocAnalyzerAgent清理');
   }
 
   /**
@@ -634,17 +634,17 @@ export class DocAnalyzerAgent extends BaseAgent {
         maxRetries: 3,
         backoffMs: [1000, 2000, 4000],
         retryableErrors: [
-          "TIMEOUT",
-          "AI_SERVICE_ERROR",
-          "NETWORK_ERROR",
-          "RATE_LIMIT_ERROR",
-          "ECONNREFUSED",
-          "ETIMEDOUT",
+          'TIMEOUT',
+          'AI_SERVICE_ERROR',
+          'NETWORK_ERROR',
+          'RATE_LIMIT_ERROR',
+          'ECONNREFUSED',
+          'ETIMEDOUT',
         ],
       }),
       fallback: createFallbackConfig({
         enabled: true,
-        fallbackType: "SIMPLE",
+        fallbackType: 'SIMPLE',
         fallbackFunction: this.createFallbackResult.bind(this),
       }),
       circuitBreaker: createCircuitBreakerConfig({
@@ -662,11 +662,11 @@ export class DocAnalyzerAgent extends BaseAgent {
    */
   private async createFallbackResult(
     error: unknown,
-    context: AgentContext,
+    context: AgentContext
   ): Promise<DocumentAnalysisOutput> {
     const input = context.data as unknown as DocumentAnalysisInput;
 
-    logger.warn("文档解析降级到简化结果", {
+    logger.warn('文档解析降级到简化结果', {
       documentId: input.documentId,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -682,18 +682,18 @@ export class DocAnalyzerAgent extends BaseAgent {
       processingTime: 0,
       metadata: {
         wordCount: 0,
-        analysisModel: "fallback-simple",
+        analysisModel: 'fallback-simple',
         tokenUsed: 0,
         analysisProcess: {
-          ocrErrors: [error instanceof Error ? error.message : "Unknown"],
+          ocrErrors: [error instanceof Error ? error.message : 'Unknown'],
           entitiesListed: {
             persons: [],
             companies: [],
             amounts: [],
           },
-          roleReasoning: "Fallback - no analysis performed",
-          claimDecomposition: "Fallback - no analysis performed",
-          amountNormalization: "Fallback - no analysis performed",
+          roleReasoning: 'Fallback - no analysis performed',
+          claimDecomposition: 'Fallback - no analysis performed',
+          amountNormalization: 'Fallback - no analysis performed',
           validationResults: {
             duplicatesFound: [],
             roleConflicts: [],

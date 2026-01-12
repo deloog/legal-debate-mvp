@@ -8,7 +8,7 @@ import {
   IssueSeverity,
   VerificationIssue,
   IssueCategory,
-} from "../types";
+} from '../types';
 
 /**
  * 源数据接口（用于对比验证）
@@ -39,7 +39,7 @@ export class ConsistencyVerifier {
    */
   async verify(
     data: DataToVerify,
-    source?: SourceData,
+    source?: SourceData
   ): Promise<ConsistencyVerification> {
     const issues: string[] = [];
     const details = {
@@ -55,7 +55,7 @@ export class ConsistencyVerifier {
       for (const [key, value] of Object.entries(source.rawData)) {
         if (data[key] !== undefined && data[key] !== value) {
           inconsistencies.push(
-            `字段${key}不一致：期望"${value}"，实际"${data[key]}"`,
+            `字段${key}不一致：期望"${value}"，实际"${data[key]}"`
           );
         }
       }
@@ -69,14 +69,14 @@ export class ConsistencyVerifier {
       // 无源数据时，检查数据内部一致性
       if (data.parties && data.amounts && data.dates) {
         // 检查必填字段是否完整
-        const requiredFields = ["plaintiff", "defendant"];
+        const requiredFields = ['plaintiff', 'defendant'];
         const missingFields = requiredFields.filter(
-          (field) => !data.parties![field],
+          field => !data.parties![field]
         );
 
         if (missingFields.length > 0) {
           details.dataConsistent = false;
-          issues.push(`缺少必填字段：${missingFields.join(", ")}`);
+          issues.push(`缺少必填字段：${missingFields.join(', ')}`);
         }
       }
     }
@@ -85,13 +85,13 @@ export class ConsistencyVerifier {
     if (data.amounts) {
       const duplicateFields = data.amounts.filter(
         (item, index, arr) =>
-          arr.findIndex((i) => i.field === item.field) !== index,
+          arr.findIndex(i => i.field === item.field) !== index
       );
 
       if (duplicateFields.length > 0) {
         details.noConflicts = false;
         issues.push(
-          `存在重复字段：${duplicateFields.map((d) => d.field).join(", ")}`,
+          `存在重复字段：${duplicateFields.map(d => d.field).join(', ')}`
         );
       }
     }
@@ -137,7 +137,7 @@ export class ConsistencyVerifier {
         severity: IssueSeverity.HIGH,
         category: IssueCategory.FACTUAL,
         message: issue,
-        detectedBy: "factual",
+        detectedBy: 'factual',
       });
     }
 

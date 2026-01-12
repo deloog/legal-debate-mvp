@@ -9,10 +9,10 @@
  * 5. 结果合并去重
  */
 
-import * as fs from "fs/promises";
-import * as path from "path";
-import { createHash } from "crypto";
-import type { LegalQuery, LawArticle, SearchResult } from "./types";
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { createHash } from 'crypto';
+import type { LegalQuery, LawArticle, SearchResult } from './types';
 
 // =============================================================================
 // 类型定义
@@ -62,7 +62,7 @@ export class LawSearcher {
   private dataDir: string;
   private initialized: boolean = false;
 
-  constructor(dataDir: string = path.join(process.cwd(), "data")) {
+  constructor(dataDir: string = path.join(process.cwd(), 'data')) {
     this.dataDir = dataDir;
   }
 
@@ -78,7 +78,7 @@ export class LawSearcher {
       await this.buildSearchIndex();
       this.initialized = true;
     } catch (error) {
-      console.error("LawSearcher initialization failed:", error);
+      console.error('LawSearcher initialization failed:', error);
       throw error;
     }
   }
@@ -98,7 +98,7 @@ export class LawSearcher {
       return {
         articles: [],
         total: 0,
-        source: "local",
+        source: 'local',
         executionTime: Date.now() - startTime,
       };
     }
@@ -125,7 +125,7 @@ export class LawSearcher {
     return {
       articles: finalResults,
       total: merged.length,
-      source: externalResults.length > 0 ? "mixed" : "local",
+      source: externalResults.length > 0 ? 'mixed' : 'local',
       executionTime: Date.now() - startTime,
     };
   }
@@ -143,7 +143,7 @@ export class LawSearcher {
     // 1. 关键词匹配
     const keywordResults = this.searchByKeywords(
       Array.from(articles.values()),
-      query.keywords,
+      query.keywords
     );
 
     // 2. 案件类型过滤
@@ -201,7 +201,7 @@ export class LawSearcher {
    */
   private searchByKeywords(
     articles: LawArticle[],
-    keywords: string[],
+    keywords: string[]
   ): LawArticle[] {
     if (keywords.length === 0) {
       return articles;
@@ -219,7 +219,7 @@ export class LawSearcher {
         article.articleNumber,
         ...(article.keywords || []),
       ]
-        .join(" ")
+        .join(' ')
         .toLowerCase();
 
       for (const keyword of keywords) {
@@ -258,19 +258,19 @@ export class LawSearcher {
    */
   private filterByCaseType(
     articles: LawArticle[],
-    caseType?: string,
+    caseType?: string
   ): LawArticle[] {
     if (!caseType) {
       return articles;
     }
 
     const typeMapping: Record<string, string> = {
-      民事: "CIVIL",
-      刑事: "CRIMINAL",
-      行政: "ADMINISTRATIVE",
-      商事: "COMMERCIAL",
-      知识产权: "INTELLECTUAL",
-      劳动: "LABOR",
+      民事: 'CIVIL',
+      刑事: 'CRIMINAL',
+      行政: 'ADMINISTRATIVE',
+      商事: 'COMMERCIAL',
+      知识产权: 'INTELLECTUAL',
+      劳动: 'LABOR',
     };
 
     const targetCategory = typeMapping[caseType];
@@ -278,7 +278,7 @@ export class LawSearcher {
       return articles;
     }
 
-    return articles.filter((a) => a.category === targetCategory);
+    return articles.filter(a => a.category === targetCategory);
   }
 
   /**
@@ -286,19 +286,19 @@ export class LawSearcher {
    */
   private filterByLawType(
     articles: LawArticle[],
-    lawType?: string,
+    lawType?: string
   ): LawArticle[] {
     if (!lawType) {
       return articles;
     }
 
     const typeMapping: Record<string, string> = {
-      民事: "CIVIL",
-      刑事: "CRIMINAL",
-      行政: "ADMINISTRATIVE",
-      商事: "COMMERCIAL",
-      知识产权: "INTELLECTUAL",
-      劳动: "LABOR",
+      民事: 'CIVIL',
+      刑事: 'CRIMINAL',
+      行政: 'ADMINISTRATIVE',
+      商事: 'COMMERCIAL',
+      知识产权: 'INTELLECTUAL',
+      劳动: 'LABOR',
     };
 
     const targetCategory = typeMapping[lawType];
@@ -306,7 +306,7 @@ export class LawSearcher {
       return articles;
     }
 
-    return articles.filter((a) => a.category === targetCategory);
+    return articles.filter(a => a.category === targetCategory);
   }
 
   /**
@@ -314,7 +314,7 @@ export class LawSearcher {
    */
   private mergeResults(
     localResults: LawArticle[],
-    externalResults: LawArticle[],
+    externalResults: LawArticle[]
   ): LawArticle[] {
     const merged = new Map<string, LawArticle>();
 
@@ -351,9 +351,9 @@ export class LawSearcher {
     const files = await fs.readdir(this.dataDir);
     return files
       .filter(
-        (file) => file.startsWith("law-articles-") && file.endsWith(".json"),
+        file => file.startsWith('law-articles-') && file.endsWith('.json')
       )
-      .map((file) => path.join(this.dataDir, file));
+      .map(file => path.join(this.dataDir, file));
   }
 
   /**
@@ -361,7 +361,7 @@ export class LawSearcher {
    */
   private async loadLawFile(filePath: string): Promise<RawLawArticle[]> {
     try {
-      const content = await fs.readFile(filePath, "utf-8");
+      const content = await fs.readFile(filePath, 'utf-8');
       const data = JSON.parse(content) as LawArticleData;
       return data.data || [];
     } catch (error) {
@@ -374,9 +374,9 @@ export class LawSearcher {
    * 转换为LawArticle类型
    */
   private convertToLawArticle(raw: RawLawArticle): LawArticle {
-    const id = createHash("sha256")
+    const id = createHash('sha256')
       .update(`${raw.lawName}-${raw.articleNumber}`)
-      .digest("hex");
+      .digest('hex');
 
     return {
       id,
@@ -385,7 +385,7 @@ export class LawSearcher {
       content: raw.fullText,
       category: raw.category,
       effectiveDate: raw.effectiveDate,
-      deprecated: raw.status !== "VALID",
+      deprecated: raw.status !== 'VALID',
       keywords: raw.keywords,
       level: this.mapLawLevel(raw.lawType),
     };
@@ -395,24 +395,24 @@ export class LawSearcher {
    * 映射法律层级
    */
   private mapLawLevel(
-    lawType?: string,
-  ): "constitution" | "law" | "administrative" | "regulation" | "local" {
+    lawType?: string
+  ): 'constitution' | 'law' | 'administrative' | 'regulation' | 'local' {
     if (!lawType) {
-      return "law";
+      return 'law';
     }
 
     const typeMap: Record<
       string,
-      "constitution" | "law" | "administrative" | "regulation" | "local"
+      'constitution' | 'law' | 'administrative' | 'regulation' | 'local'
     > = {
-      CONSTITUTION: "constitution",
-      LAW: "law",
-      ADMINISTRATIVE: "administrative",
-      REGULATION: "regulation",
-      LOCAL: "local",
+      CONSTITUTION: 'constitution',
+      LAW: 'law',
+      ADMINISTRATIVE: 'administrative',
+      REGULATION: 'regulation',
+      LOCAL: 'local',
     };
 
-    return typeMap[lawType] || "law";
+    return typeMap[lawType] || 'law';
   }
 
   /**
@@ -421,14 +421,14 @@ export class LawSearcher {
   private extractTerms(article: LawArticle): Map<string, number> {
     const terms = new Map<string, number>();
     const text = [article.content, article.lawName, article.articleNumber].join(
-      " ",
+      ' '
     );
 
     // 简单分词（按空格和标点符号）
     const words = text
       .toLowerCase()
       .split(/[，。；：\s]+/)
-      .filter((word) => word.length > 1);
+      .filter(word => word.length > 1);
 
     for (const word of words) {
       terms.set(word, (terms.get(word) || 0) + 1);
@@ -444,7 +444,7 @@ export class LawSearcher {
     doc: TFIDFDocument,
     term: string,
     documentFrequency: Map<string, number>,
-    totalDocuments: number,
+    totalDocuments: number
   ): number {
     const tf = (doc.terms.get(term) || 0) / doc.totalTerms;
     const df = documentFrequency.get(term) || 1;

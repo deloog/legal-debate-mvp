@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useCallback, useRef } from "react";
-import { Search, X } from "lucide-react";
+import { useState, useCallback, useRef } from 'react';
+import { Search, X } from 'lucide-react';
 
 /**
  * 案件搜索组件
@@ -14,7 +14,7 @@ interface CaseSearchProps {
 }
 
 export function CaseSearch({
-  className = "",
+  className = '',
   onSearch,
   value,
 }: CaseSearchProps) {
@@ -33,7 +33,7 @@ export function CaseSearch({
         onSearch(query);
       }, 300);
     },
-    [onSearch],
+    [onSearch]
   );
 
   /**
@@ -49,28 +49,28 @@ export function CaseSearch({
    * 清空搜索
    */
   const handleClear = () => {
-    setLocalQuery("");
-    onSearch("");
+    setLocalQuery('');
+    onSearch('');
   };
 
   return (
     <div className={`relative ${className}`}>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
+      <div className='relative'>
+        <Search className='absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400' />
         <input
-          type="text"
+          type='text'
           value={localQuery}
           onChange={handleChange}
-          placeholder="搜索案件标题、描述..."
-          className="w-full rounded-lg border border-zinc-300 bg-white py-2.5 pl-10 pr-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-50 dark:placeholder-zinc-500 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+          placeholder='搜索案件标题、描述...'
+          className='w-full rounded-lg border border-zinc-300 bg-white py-2.5 pl-10 pr-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-50 dark:placeholder-zinc-500 dark:focus:border-blue-400 dark:focus:ring-blue-400'
         />
         {localQuery && (
           <button
             onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-            type="button"
+            className='absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'
+            type='button'
           >
-            <X className="h-4 w-4" />
+            <X className='h-4 w-4' />
           </button>
         )}
       </div>

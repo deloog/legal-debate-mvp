@@ -1,8 +1,8 @@
 // 质量评估器：评估辩论整体质量
 
-import { Argument, DebateResult, QualityAssessment } from "../types";
-import { LogicValidator } from "../validators/logic-validator";
-import { LawValidator } from "../validators/law-validator";
+import { Argument, DebateResult, QualityAssessment } from '../types';
+import { LogicValidator } from '../validators/logic-validator';
+import { LawValidator } from '../validators/law-validator';
 
 /**
  * 质量评估器类
@@ -13,7 +13,7 @@ export class QualityAssessor {
    */
   static assessDebate(
     plaintiffArguments: Argument[],
-    defendantArguments: Argument[],
+    defendantArguments: Argument[]
   ): QualityAssessment {
     const allArguments = [...plaintiffArguments, ...defendantArguments];
 
@@ -30,11 +30,11 @@ export class QualityAssessor {
     // 3. 评估正反方平衡度
     const balanceScore = this.assessBalance(
       plaintiffArguments,
-      defendantArguments,
+      defendantArguments
     );
     const balanceDetails = this.assessBalanceDetails(
       plaintiffArguments,
-      defendantArguments,
+      defendantArguments
     );
 
     // 4. 计算整体质量
@@ -48,7 +48,7 @@ export class QualityAssessor {
     const suggestions = this.generateSuggestions(
       logicClarityScore,
       legalAccuracyScore,
-      balanceScore,
+      balanceScore
     );
 
     return {
@@ -93,29 +93,29 @@ export class QualityAssessor {
     if (avgContentLength >= 30 && avgContentLength <= 200) {
       details.push(`论点内容长度适中（平均${avgContentLength.toFixed(0)}字）`);
     } else if (avgContentLength < 30) {
-      details.push("论点内容偏短，建议补充");
+      details.push('论点内容偏短，建议补充');
     } else {
-      details.push("论点内容偏长，建议精简");
+      details.push('论点内容偏长，建议精简');
     }
 
     if (avgReasoningLength >= 100 && avgReasoningLength <= 500) {
       details.push(
-        `推理过程长度适中（平均${avgReasoningLength.toFixed(0)}字）`,
+        `推理过程长度适中（平均${avgReasoningLength.toFixed(0)}字）`
       );
     } else if (avgReasoningLength < 100) {
-      details.push("推理过程偏短，建议补充");
+      details.push('推理过程偏短，建议补充');
     } else {
-      details.push("推理过程偏长，建议精简");
+      details.push('推理过程偏长，建议精简');
     }
 
     if (avgLegalBasisCount >= 1 && avgLegalBasisCount <= 3) {
       details.push(
-        `法律依据数量适中（平均${avgLegalBasisCount.toFixed(1)}个）`,
+        `法律依据数量适中（平均${avgLegalBasisCount.toFixed(1)}个）`
       );
     } else if (avgLegalBasisCount < 1) {
-      details.push("法律依据不足，建议增加");
+      details.push('法律依据不足，建议增加');
     } else {
-      details.push("法律依据过多，建议精简");
+      details.push('法律依据过多，建议精简');
     }
 
     return details;
@@ -128,11 +128,11 @@ export class QualityAssessor {
     const details: string[] = [];
 
     const argumentsWithLegalBasis = arguments_.filter(
-      (arg) => arg.legalBasis.length > 0,
+      arg => arg.legalBasis.length > 0
     );
 
     if (argumentsWithLegalBasis.length === arguments_.length) {
-      details.push("所有论点都有法律依据");
+      details.push('所有论点都有法律依据');
     } else {
       const withoutLegalBasis =
         arguments_.length - argumentsWithLegalBasis.length;
@@ -141,14 +141,14 @@ export class QualityAssessor {
 
     const totalLegalBasis = arguments_.reduce(
       (sum, arg) => sum + arg.legalBasis.length,
-      0,
+      0
     );
 
     const avgRelevance =
       arguments_.reduce(
         (sum, arg) =>
           sum + arg.legalBasis.reduce((s, b) => s + (b.relevance || 0), 0),
-        0,
+        0
       ) / (totalLegalBasis || 1);
 
     if (avgRelevance >= 0.8) {
@@ -167,13 +167,13 @@ export class QualityAssessor {
    */
   private static assessBalance(
     plaintiffArguments: Argument[],
-    defendantArguments: Argument[],
+    defendantArguments: Argument[]
   ): number {
     let score = 5.0; // 基础分
 
     // 1. 数量平衡
     const countDiff = Math.abs(
-      plaintiffArguments.length - defendantArguments.length,
+      plaintiffArguments.length - defendantArguments.length
     );
     if (countDiff === 0) {
       score += 2.5;
@@ -212,7 +212,7 @@ export class QualityAssessor {
    */
   private static assessBalanceDetails(
     plaintiffArguments: Argument[],
-    defendantArguments: Argument[],
+    defendantArguments: Argument[]
   ): string[] {
     const details: string[] = [];
 
@@ -223,7 +223,7 @@ export class QualityAssessor {
     details.push(`被告论点数量：${defendantCount}`);
 
     if (plaintiffCount === defendantCount) {
-      details.push("论点数量平衡");
+      details.push('论点数量平衡');
     } else {
       const diff = Math.abs(plaintiffCount - defendantCount);
       details.push(`论点数量差异：${diff}个`);
@@ -241,9 +241,9 @@ export class QualityAssessor {
     details.push(`被告平均质量：${defendantAvgScore.toFixed(1)}/10`);
 
     if (Math.abs(plaintiffAvgScore - defendantAvgScore) < 0.5) {
-      details.push("论点质量平衡");
+      details.push('论点质量平衡');
     } else {
-      details.push("论点质量存在一定差异");
+      details.push('论点质量存在一定差异');
     }
 
     return details;
@@ -255,27 +255,27 @@ export class QualityAssessor {
   private static generateSuggestions(
     logicClarity: number,
     legalAccuracy: number,
-    balance: number,
+    balance: number
   ): string[] {
     const suggestions: string[] = [];
 
     if (logicClarity < 7.0) {
-      suggestions.push("建议增加推理过程的详细程度");
-      suggestions.push("建议加强论点与事实的关联性");
+      suggestions.push('建议增加推理过程的详细程度');
+      suggestions.push('建议加强论点与事实的关联性');
     }
 
     if (legalAccuracy < 7.0) {
-      suggestions.push("建议增加法律依据的数量");
-      suggestions.push("建议提高法条与论点的相关性");
+      suggestions.push('建议增加法律依据的数量');
+      suggestions.push('建议提高法条与论点的相关性');
     }
 
     if (balance < 7.0) {
-      suggestions.push("建议调整论点数量以达到平衡");
-      suggestions.push("建议优化较弱方论点的质量");
+      suggestions.push('建议调整论点数量以达到平衡');
+      suggestions.push('建议优化较弱方论点的质量');
     }
 
     if (logicClarity >= 8.0 && legalAccuracy >= 8.0 && balance >= 8.0) {
-      suggestions.push("辩论质量优秀，可直接使用");
+      suggestions.push('辩论质量优秀，可直接使用');
     }
 
     return suggestions;
@@ -286,8 +286,8 @@ export class QualityAssessor {
    */
   static createQualityMetrics(
     plaintiffArguments: Argument[],
-    defendantArguments: Argument[],
-  ): DebateResult["qualityMetrics"] {
+    defendantArguments: Argument[]
+  ): DebateResult['qualityMetrics'] {
     const logicClarity = LogicValidator.calculateAverageLogicClarityScore([
       ...plaintiffArguments,
       ...defendantArguments,
@@ -300,7 +300,7 @@ export class QualityAssessor {
 
     const balanceScore = this.assessBalance(
       plaintiffArguments,
-      defendantArguments,
+      defendantArguments
     );
 
     const plaintiffLogic =

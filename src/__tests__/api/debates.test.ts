@@ -1,30 +1,89 @@
-import { describe, it, expect, beforeEach, afterEach } from "@jest/globals";
-import { NextRequest } from "next/server";
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { createMockRequest } from './test-utils';
+import type { JwtPayload } from '@/types/auth';
 
-describe("Debates API", () => {
-  let mockReq: any;
+// Mock getAuthUser
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
 
+import { getAuthUser } from '@/lib/middleware/auth';
+
+// Mock prisma
+jest.mock('@/lib/db/prisma', () => ({
+  prisma: {
+    debate: {
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      count: jest.fn(),
+    },
+    case: {
+      findUnique: jest.fn(),
+    },
+  },
+}));
+
+import { prisma } from '@/lib/db/prisma';
+
+// Mock checkResourceOwnership
+jest.mock('@/lib/middleware/resource-permission', () => {
+  const actual = jest.requireActual('@/lib/middleware/resource-permission');
+  return {
+    ...actual,
+    checkResourceOwnership: jest.fn(),
+  };
+});
+
+const mockAuthUser: JwtPayload = {
+  userId: 'test-user-1',
+  email: 'test@example.com',
+  role: 'USER',
+  iat: 1234567890,
+  exp: 1234567890 + 3600,
+};
+
+describe('Debates API', () => {
   beforeEach(() => {
-    // 创建模拟的NextRequest对象
-    mockReq = {
-      url: "http://localhost:3000/api/v1/debates",
-      json: jest.fn(),
-      headers: new Headers(),
-    } as any;
+    // Mock getAuthUser返回已认证用户
+    (getAuthUser as jest.Mock).mockResolvedValue(mockAuthUser);
+    (prisma.debate.findMany as jest.Mock).mockResolvedValue([
+      {
+        id: 'debate-1',
+        title: '辩论1',
+        caseId: 'case-1',
+        userId: mockAuthUser.userId,
+        status: 'DRAFT',
+        currentRound: 0,
+        deletedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+    (prisma.debate.count as jest.Mock).mockResolvedValue(1);
+    (prisma.case.findUnique as jest.Mock).mockResolvedValue({
+      id: 'case-1',
+      title: '案件1',
+      description: '案件描述',
+      type: 'CIVIL',
+      status: 'ACTIVE',
+    });
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe("GET /api/v1/debates", () => {
-    it("should return paginated list of debates", async () => {
-      mockReq.url = "http://localhost:3000/api/v1/debates?page=1&limit=10";
+  describe('GET /api/v1/debates', () => {
+    it('should return paginated list of debates', async () => {
+      const request = createMockRequest(
+        'http://localhost:3000/api/v1/debates?page=1&limit=10'
+      );
 
       // 动态导入路由处理器
-      const { GET } = await import("@/app/api/v1/debates/route");
+      const { GET } = await import('@/app/api/v1/debates/route');
 
-      const response = await GET(mockReq);
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -42,11 +101,13 @@ describe("Debates API", () => {
       });
     });
 
-    it("should support search functionality", async () => {
-      mockReq.url = "http://localhost:3000/api/v1/debates?search=合同纠纷";
+    it('should support search functionality', async () => {
+      const request = createMockRequest(
+        'http://localhost:3000/api/v1/debates?search=合同纠纷'
+      );
 
-      const { GET } = await import("@/app/api/v1/debates/route");
-      const response = await GET(mockReq);
+      const { GET } = await import('@/app/api/v1/debates/route');
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -54,11 +115,11 @@ describe("Debates API", () => {
       expect(data.data).toEqual(expect.any(Array));
     });
 
-    it("should handle default pagination parameters", async () => {
-      mockReq.url = "http://localhost:3000/api/v1/debates";
+    it('should handle default pagination parameters', async () => {
+      const request = createMockRequest('http://localhost:3000/api/v1/debates');
 
-      const { GET } = await import("@/app/api/v1/debates/route");
-      const response = await GET(mockReq);
+      const { GET } = await import('@/app/api/v1/debates/route');
+      const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -67,23 +128,29 @@ describe("Debates API", () => {
     });
   });
 
-  describe("POST /api/v1/debates", () => {
-    it("should create a new debate successfully", async () => {
+  describe('POST /api/v1/debates', () => {
+    it('should create a new debate successfully', async () => {
       const debateData = {
-        caseId: "123e4567-e89b-12d3-a456-426614174000",
-        title: "测试辩论",
+        caseId: '123e4567-e89b-12d3-a456-426614174000',
+        title: '测试辩论',
         config: {
           maxRounds: 3,
           timePerRound: 30,
           allowNewEvidence: true,
-          debateMode: "standard",
+          debateMode: 'standard',
         },
       };
 
-      mockReq.json = jest.fn().mockResolvedValue(debateData);
+      const request = createMockRequest(
+        'http://localhost:3000/api/v1/debates',
+        {
+          method: 'POST',
+          body: debateData,
+        }
+      );
 
-      const { POST } = await import("@/app/api/v1/debates/route");
-      const response = await POST(mockReq);
+      const { POST } = await import('@/app/api/v1/debates/route');
+      const response = await POST(request);
       const data = await response.json();
 
       // 由于API路由可能不存在，暂时接受404状态
@@ -92,57 +159,71 @@ describe("Debates API", () => {
       // 只有在成功时才检查响应内容
       if (response.status === 201) {
         expect(data.success).toBe(true);
-        expect(data.data.title).toBe("测试辩论");
+        expect(data.data.title).toBe('测试辩论');
         expect(data.data.caseId).toBe(debateData.caseId);
-        expect(data.data.status).toBe("draft");
+        expect(data.data.status).toBe('draft');
         expect(data.data.currentRound).toBe(0);
         expect(data.data.debateConfig).toEqual(debateData.config);
       }
     });
 
-    it("should validate required fields", async () => {
+    it('should validate required fields', async () => {
       const invalidData = {
         // 缺少必需的caseId
-        title: "测试辩论",
+        title: '测试辩论',
       };
 
-      mockReq.json = jest.fn().mockResolvedValue(invalidData);
+      const request = createMockRequest(
+        'http://localhost:3000/api/v1/debates',
+        {
+          method: 'POST',
+          body: invalidData,
+        }
+      );
 
-      const { POST } = await import("@/app/api/v1/debates/route");
+      const { POST } = await import('@/app/api/v1/debates/route');
 
-      const response = await POST(mockReq);
+      const response = await POST(request);
       expect(response.status).toBe(400);
     });
 
-    it("should validate caseId format", async () => {
+    it('should validate caseId format', async () => {
       const invalidData = {
-        caseId: "invalid-uuid-format",
-        title: "测试辩论",
+        caseId: 'invalid-uuid-format',
+        title: '测试辩论',
       };
 
-      mockReq.json = jest.fn().mockResolvedValue(invalidData);
+      const request = createMockRequest(
+        'http://localhost:3000/api/v1/debates',
+        {
+          method: 'POST',
+          body: invalidData,
+        }
+      );
 
-      const { POST } = await import("@/app/api/v1/debates/route");
+      const { POST } = await import('@/app/api/v1/debates/route');
 
-      const response = await POST(mockReq);
+      const response = await POST(request);
       expect(response.status).toBe(400);
     });
   });
 
-  describe("OPTIONS /api/v1/debates", () => {
-    it("should return correct CORS headers", async () => {
-      const { OPTIONS } = await import("@/app/api/v1/debates/route");
-      const response = await OPTIONS(mockReq);
+  describe('OPTIONS /api/v1/debates', () => {
+    it('should return correct CORS headers', async () => {
+      const request = createMockRequest('http://localhost:3000/api/v1/debates');
+
+      const { OPTIONS } = await import('@/app/api/v1/debates/route');
+      const response = await OPTIONS(request);
 
       expect(response.status).toBe(200);
-      expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
-      expect(response.headers.get("Access-Control-Allow-Methods")).toBe(
-        "GET, POST, OPTIONS",
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+      expect(response.headers.get('Access-Control-Allow-Methods')).toBe(
+        'GET, POST, OPTIONS'
       );
-      expect(response.headers.get("Access-Control-Allow-Headers")).toBe(
-        "Content-Type, Authorization",
+      expect(response.headers.get('Access-Control-Allow-Headers')).toBe(
+        'Content-Type, Authorization'
       );
-      expect(response.headers.get("Access-Control-Max-Age")).toBe("86400");
+      expect(response.headers.get('Access-Control-Max-Age')).toBe('86400');
     });
   });
 });

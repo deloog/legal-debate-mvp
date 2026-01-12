@@ -1,7 +1,7 @@
 // Agent初始化 - 注册所有Agent到AgentRegistry
 
-import { agentRegistry } from "./registry";
-import { DocAnalyzerAgent } from "./doc-analyzer/doc-analyzer-agent";
+import { agentRegistry } from './registry';
+import { DocAnalyzerAgent } from './doc-analyzer/doc-analyzer-agent';
 
 /**
  * 初始化并注册所有Agent
@@ -12,14 +12,14 @@ export async function initAgents(): Promise<void> {
     try {
       const docAnalyzerAgent = new DocAnalyzerAgent();
       docAnalyzerAgent.initialize();
-      agentRegistry.registerAgent(docAnalyzerAgent, "system-init");
+      agentRegistry.registerAgent(docAnalyzerAgent, 'system-init');
     } catch (error) {
-      console.warn("DocAnalyzer Agent初始化失败:", error);
+      console.warn('DocAnalyzer Agent初始化失败:', error);
     }
 
     // 输出注册统计信息
     const stats = agentRegistry.getStatistics();
-    console.log("Agent初始化完成:", {
+    console.log('Agent初始化完成:', {
       总数: stats.totalAgents,
       活跃: stats.activeAgents,
       禁用: stats.disabledAgents,
@@ -28,9 +28,9 @@ export async function initAgents(): Promise<void> {
 
     // 执行健康检查
     const healthResults = await agentRegistry.performHealthCheck();
-    console.log("Agent健康检查结果:", healthResults);
+    console.log('Agent健康检查结果:', healthResults);
   } catch (error) {
-    console.error("Agent初始化失败:", error);
+    console.error('Agent初始化失败:', error);
     throw error;
   }
 }
@@ -39,9 +39,9 @@ export async function initAgents(): Promise<void> {
  * 获取已注册的DocAnalyzer Agent
  */
 export function getDocAnalyzerAgent(): DocAnalyzerAgent {
-  const agent = agentRegistry.getAgent("docAnalyzer");
+  const agent = agentRegistry.getAgent('docAnalyzer');
   if (!agent) {
-    throw new Error("DocAnalyzer Agent未注册");
+    throw new Error('DocAnalyzer Agent未注册');
   }
   return agent as DocAnalyzerAgent;
 }
@@ -65,9 +65,9 @@ export async function cleanupAgents(): Promise<void> {
 
     // 清空注册表
     agentRegistry.clear();
-    console.log("Agent清理完成");
+    console.log('Agent清理完成');
   } catch (error) {
-    console.error("Agent清理失败:", error);
+    console.error('Agent清理失败:', error);
     throw error;
   }
 }

@@ -12,7 +12,7 @@ import {
   IncrementalAnalysisConfig,
   LawArticleApplicabilityResult,
   Material,
-} from "./types";
+} from './types';
 
 /**
  * 增量分析器类
@@ -54,41 +54,41 @@ export class IncrementalAnalyzer {
   /**
    * 根据资料类型确定分析类型
    */
-  private determineAnalysisType(material: Material): AnalysisTask["type"] {
+  private determineAnalysisType(material: Material): AnalysisTask['type'] {
     switch (material.type) {
-      case "DOCUMENT":
-        return "DOCUMENT_ANALYSIS";
-      case "LAW_ARTICLE":
-        return "LAW_SEARCH";
-      case "EVIDENCE":
-        return "EVIDENCE_ANALYSIS";
-      case "ARGUMENT":
-        return "DOCUMENT_ANALYSIS";
+      case 'DOCUMENT':
+        return 'DOCUMENT_ANALYSIS';
+      case 'LAW_ARTICLE':
+        return 'LAW_SEARCH';
+      case 'EVIDENCE':
+        return 'EVIDENCE_ANALYSIS';
+      case 'ARGUMENT':
+        return 'DOCUMENT_ANALYSIS';
       default:
-        return "DOCUMENT_ANALYSIS";
+        return 'DOCUMENT_ANALYSIS';
     }
   }
 
   /**
    * 根据资料属性确定优先级
    */
-  private determinePriority(material: Material): AnalysisTask["priority"] {
+  private determinePriority(material: Material): AnalysisTask['priority'] {
     const metadata = material.metadata;
     const priority = metadata.priority;
 
-    if (priority === "high" || priority === "medium" || priority === "low") {
+    if (priority === 'high' || priority === 'medium' || priority === 'low') {
       return priority;
     }
 
     switch (material.type) {
-      case "DOCUMENT":
-        return "high";
-      case "EVIDENCE":
-        return "high";
-      case "LAW_ARTICLE":
-        return "medium";
+      case 'DOCUMENT':
+        return 'high';
+      case 'EVIDENCE':
+        return 'high';
+      case 'LAW_ARTICLE':
+        return 'medium';
       default:
-        return "medium";
+        return 'medium';
     }
   }
 
@@ -96,19 +96,19 @@ export class IncrementalAnalyzer {
    * 分析文档资料（模拟实现）
    */
   private async analyzeDocument(
-    material: Material,
+    material: Material
   ): Promise<DocumentAnalysisOutput> {
     // TODO: 这里应该调用实际的 DocAnalyzer 服务
     return {
       parties: [
         {
-          name: "原告",
-          role: "plaintiff",
+          name: '原告',
+          role: 'plaintiff',
           confidence: 0.95,
         },
         {
-          name: "被告",
-          role: "defendant",
+          name: '被告',
+          role: 'defendant',
           confidence: 0.9,
         },
       ],
@@ -123,16 +123,16 @@ export class IncrementalAnalyzer {
    * 分析法条资料（模拟实现）
    */
   private async analyzeLawArticle(
-    material: Material,
+    material: Material
   ): Promise<LawArticleApplicabilityResult> {
     // TODO: 这里应该调用实际的 ApplicabilityAnalyzer 服务
     return {
       articleId: material.id,
-      lawName: "模拟法条",
-      articleNumber: "第1条",
+      lawName: '模拟法条',
+      articleNumber: '第1条',
       applicable: true,
       score: 0.8,
-      reasons: ["相关性较高"],
+      reasons: ['相关性较高'],
       warnings: [],
     };
   }
@@ -141,7 +141,7 @@ export class IncrementalAnalyzer {
    * 分析证据资料（模拟实现）
    */
   private async analyzeEvidence(
-    material: Material,
+    material: Material
   ): Promise<EvidenceAnalysisResult> {
     // TODO: 这里应该调用实际的证据分析服务
     return {
@@ -165,13 +165,13 @@ export class IncrementalAnalyzer {
       let result: unknown;
 
       switch (task.type) {
-        case "DOCUMENT_ANALYSIS":
+        case 'DOCUMENT_ANALYSIS':
           result = await this.analyzeDocument(task.material);
           break;
-        case "LAW_SEARCH":
+        case 'LAW_SEARCH':
           result = await this.analyzeLawArticle(task.material);
           break;
-        case "EVIDENCE_ANALYSIS":
+        case 'EVIDENCE_ANALYSIS':
           result = await this.analyzeEvidence(task.material);
           break;
         default:
@@ -200,14 +200,14 @@ export class IncrementalAnalyzer {
     for (let i = 0; i < tasks.length; i += maxConcurrent) {
       const batch = tasks.slice(i, i + maxConcurrent);
       const batchResults = await Promise.allSettled(
-        batch.map((task) => this.executeTask(task)),
+        batch.map(task => this.executeTask(task))
       );
 
       for (const result of batchResults) {
-        if (result.status === "fulfilled") {
+        if (result.status === 'fulfilled') {
           results.push(result.value);
         } else {
-          console.error("任务执行失败:", result.reason);
+          console.error('任务执行失败:', result.reason);
         }
       }
     }
@@ -220,7 +220,7 @@ export class IncrementalAnalyzer {
    */
   private organizeResults(
     tasks: AnalysisTask[],
-    results: unknown[],
+    results: unknown[]
   ): {
     newDocuments: DocumentAnalysisOutput[];
     newLawArticles: LawArticleApplicabilityResult[];
@@ -239,15 +239,15 @@ export class IncrementalAnalyzer {
       if (!result) continue;
 
       switch (task.type) {
-        case "DOCUMENT_ANALYSIS":
+        case 'DOCUMENT_ANALYSIS':
           organized.newDocuments.push(result as DocumentAnalysisOutput);
           break;
-        case "LAW_SEARCH":
+        case 'LAW_SEARCH':
           organized.newLawArticles.push(
-            result as LawArticleApplicabilityResult,
+            result as LawArticleApplicabilityResult
           );
           break;
-        case "EVIDENCE_ANALYSIS":
+        case 'EVIDENCE_ANALYSIS':
           organized.newEvidence.push(result as EvidenceAnalysisResult);
           break;
       }

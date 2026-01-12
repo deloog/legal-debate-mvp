@@ -1,17 +1,17 @@
 // 逻辑验证器：验证论点逻辑清晰度和完整性
 
-import { Argument, ValidationResult } from "../types";
+import { Argument, ValidationResult } from '../types';
 
 /**
  * 逻辑问题类型
  */
 interface LogicIssue {
   type:
-    | "incomplete"
-    | "missing_reasoning"
-    | "weak_connection"
-    | "contradiction";
-  severity: "error" | "warning";
+    | 'incomplete'
+    | 'missing_reasoning'
+    | 'weak_connection'
+    | 'contradiction';
+  severity: 'error' | 'warning';
   message: string;
   argumentId: string;
 }
@@ -29,9 +29,9 @@ export class LogicValidator {
     // 1. 检查推理过程是否存在
     if (!argument.reasoning || argument.reasoning.trim().length < 20) {
       issues.push({
-        type: "missing_reasoning",
-        severity: "error",
-        message: "论点缺少推理过程或推理过程过于简单",
+        type: 'missing_reasoning',
+        severity: 'error',
+        message: '论点缺少推理过程或推理过程过于简单',
         argumentId: argument.id,
       });
     }
@@ -39,9 +39,9 @@ export class LogicValidator {
     // 2. 检查论点内容
     if (!argument.content || argument.content.trim().length < 10) {
       issues.push({
-        type: "incomplete",
-        severity: "error",
-        message: "论点内容不完整",
+        type: 'incomplete',
+        severity: 'error',
+        message: '论点内容不完整',
         argumentId: argument.id,
       });
     }
@@ -50,13 +50,13 @@ export class LogicValidator {
     if (argument.content && argument.reasoning) {
       const connectionStrength = this.checkContentReasoningConnection(
         argument.content,
-        argument.reasoning,
+        argument.reasoning
       );
       if (connectionStrength < 0.5) {
         issues.push({
-          type: "weak_connection",
-          severity: "warning",
-          message: "论点内容与推理过程的关联性较弱",
+          type: 'weak_connection',
+          severity: 'warning',
+          message: '论点内容与推理过程的关联性较弱',
           argumentId: argument.id,
         });
       }
@@ -65,9 +65,9 @@ export class LogicValidator {
     // 4. 检查是否有法律依据
     if (!argument.legalBasis || argument.legalBasis.length === 0) {
       issues.push({
-        type: "incomplete",
-        severity: "warning",
-        message: "论点缺少法律依据",
+        type: 'incomplete',
+        severity: 'warning',
+        message: '论点缺少法律依据',
         argumentId: argument.id,
       });
     }
@@ -79,15 +79,15 @@ export class LogicValidator {
     return {
       valid: score >= 0.6,
       errors: issues
-        .filter((issue) => issue.severity === "error")
-        .map((issue) => ({
+        .filter(issue => issue.severity === 'error')
+        .map(issue => ({
           field: issue.type,
           message: issue.message,
           severity: issue.severity,
         })),
       warnings: issues
-        .filter((issue) => issue.severity === "warning")
-        .map((issue) => issue.message),
+        .filter(issue => issue.severity === 'warning')
+        .map(issue => issue.message),
     };
   }
 
@@ -99,7 +99,7 @@ export class LogicValidator {
       return {
         valid: false,
         errors: [
-          { field: "arguments", message: "没有论点可验证", severity: "error" },
+          { field: 'arguments', message: '没有论点可验证', severity: 'error' },
         ],
         warnings: [],
       };
@@ -109,7 +109,7 @@ export class LogicValidator {
     const allErrors: Array<{
       field: string;
       message: string;
-      severity: "error" | "warning";
+      severity: 'error' | 'warning';
     }> = [];
     const allWarnings: string[] = [];
 
@@ -142,15 +142,13 @@ export class LogicValidator {
    */
   private static checkContentReasoningConnection(
     content: string,
-    reasoning: string,
+    reasoning: string
   ): number {
     const contentWords = this.tokenize(content);
     const reasoningWords = this.tokenize(reasoning);
 
     // 计算词汇重叠
-    const overlap = contentWords.filter((word) =>
-      reasoningWords.includes(word),
-    );
+    const overlap = contentWords.filter(word => reasoningWords.includes(word));
     const overlapRatio = overlap.length / contentWords.length;
 
     return overlapRatio;
@@ -162,21 +160,21 @@ export class LogicValidator {
   private static tokenize(text: string): string[] {
     return text
       .toLowerCase()
-      .replace(/[^\u4e00-\u9fa5a-z0-9]/g, " ")
+      .replace(/[^\u4e00-\u9fa5a-z0-9]/g, ' ')
       .split(/\s+/)
-      .filter((word) => word.length > 1);
+      .filter(word => word.length > 1);
   }
 
   /**
    * 检查论点之间的矛盾
    */
   private static checkContradictions(
-    arguments_: Argument[],
-  ): Array<{ field: string; message: string; severity: "error" | "warning" }> {
+    arguments_: Argument[]
+  ): Array<{ field: string; message: string; severity: 'error' | 'warning' }> {
     const contradictions: Array<{
       field: string;
       message: string;
-      severity: "error" | "warning";
+      severity: 'error' | 'warning';
     }> = [];
 
     // 检查所有论点对的矛盾
@@ -192,13 +190,13 @@ export class LogicValidator {
 
         const hasContradiction = this.detectContradiction(
           arg1.content,
-          arg2.content,
+          arg2.content
         );
         if (hasContradiction) {
           contradictions.push({
-            field: "contradiction",
+            field: 'contradiction',
             message: `论点 ${arg1.id} 和 ${arg2.id} 之间存在矛盾`,
-            severity: "error",
+            severity: 'error',
           });
         }
       }
@@ -212,16 +210,16 @@ export class LogicValidator {
    */
   private static detectContradiction(
     content1: string,
-    content2: string,
+    content2: string
   ): boolean {
     // 简单矛盾检测逻辑
     const contradictionKeywords = [
-      ["不", "是"],
-      ["未", "已"],
-      ["没有", "有"],
-      ["不应", "应"],
-      ["不能", "可以"],
-      ["非", "是"],
+      ['不', '是'],
+      ['未', '已'],
+      ['没有', '有'],
+      ['不应', '应'],
+      ['不能', '可以'],
+      ['非', '是'],
     ];
 
     for (const [neg1, pos1] of contradictionKeywords) {
@@ -243,9 +241,9 @@ export class LogicValidator {
     let score = 1.0;
 
     for (const issue of issues) {
-      if (issue.severity === "error") {
+      if (issue.severity === 'error') {
         score -= 0.3;
-      } else if (issue.severity === "warning") {
+      } else if (issue.severity === 'warning') {
         score -= 0.15;
       }
     }
@@ -293,7 +291,7 @@ export class LogicValidator {
 
     const totalScore = arguments_.reduce(
       (sum, arg) => sum + this.calculateLogicClarityScore(arg),
-      0,
+      0
     );
 
     return totalScore / arguments_.length;

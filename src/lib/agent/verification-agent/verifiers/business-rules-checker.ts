@@ -2,7 +2,7 @@
  * 业务规则检查器
  * 检查数据是否符合预定义的业务规则
  */
-import { BusinessRulesCheck } from "../types";
+import { BusinessRulesCheck } from '../types';
 
 /**
  * 业务规则配置
@@ -25,8 +25,8 @@ interface DataToVerify {
  */
 const DEFAULT_BUSINESS_RULES: BusinessRuleConfig[] = [
   {
-    name: "has_mandatory_party_info",
-    validator: (data) => {
+    name: 'has_mandatory_party_info',
+    validator: data => {
       const parties = data.parties as Record<string, unknown> | undefined;
       return (
         parties?.plaintiff &&
@@ -34,15 +34,15 @@ const DEFAULT_BUSINESS_RULES: BusinessRuleConfig[] = [
         parties.plaintiff !== parties.defendant
       );
     },
-    errorMessage: "必须包含不同的原告和被告信息",
+    errorMessage: '必须包含不同的原告和被告信息',
   },
   {
-    name: "amount_positive",
-    validator: (data) =>
+    name: 'amount_positive',
+    validator: data =>
       !data.amount ||
       (parseFloat(String(data.amount as string | number)) >= 0 &&
         !isNaN(parseFloat(String(data.amount as string | number)))),
-    errorMessage: "金额必须为非负数",
+    errorMessage: '金额必须为非负数',
   },
 ];
 
@@ -71,7 +71,7 @@ export class BusinessRulesChecker {
         }
       } catch (error) {
         warnings.push(
-          `规则${rule.name}验证失败: ${error instanceof Error ? error.message : "未知错误"}`,
+          `规则${rule.name}验证失败: ${error instanceof Error ? error.message : '未知错误'}`
         );
       }
     }

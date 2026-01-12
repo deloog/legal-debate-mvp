@@ -8,11 +8,11 @@ import {
   ActionType,
   ActionLayer,
   ActionStatus,
-} from "@prisma/client";
+} from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-describe("AgentAction模型", () => {
+describe('AgentAction模型', () => {
   let testUserId: string;
   let testCaseId: string;
   let testDebateId: string;
@@ -20,9 +20,9 @@ describe("AgentAction模型", () => {
   beforeAll(async () => {
     const user = await prisma.user.create({
       data: {
-        email: "test-action@example.com",
-        username: "test_action",
-        role: "USER",
+        email: 'test-action@example.com',
+        username: 'test_action',
+        role: 'USER',
       },
     });
     testUserId = user.id;
@@ -30,10 +30,10 @@ describe("AgentAction模型", () => {
     const testCase = await prisma.case.create({
       data: {
         userId: testUserId,
-        title: "测试案件",
-        description: "测试描述",
-        type: "CIVIL",
-        status: "DRAFT",
+        title: '测试案件',
+        description: '测试描述',
+        type: 'CIVIL',
+        status: 'DRAFT',
       },
     });
     testCaseId = testCase.id;
@@ -42,8 +42,8 @@ describe("AgentAction模型", () => {
       data: {
         caseId: testCaseId,
         userId: testUserId,
-        title: "测试辩论",
-        status: "DRAFT",
+        title: '测试辩论',
+        status: 'DRAFT',
       },
     });
     testDebateId = testDebate.id;
@@ -60,25 +60,25 @@ describe("AgentAction模型", () => {
       where: { userId: testUserId },
     });
     await prisma.user.deleteMany({
-      where: { email: "test-action@example.com" },
+      where: { email: 'test-action@example.com' },
     });
     await prisma.$disconnect();
   });
 
-  describe("创建Agent行动", () => {
-    it("应成功创建核心层行动", async () => {
+  describe('创建Agent行动', () => {
+    it('应成功创建核心层行动', async () => {
       const action = await prisma.agentAction.create({
         data: {
           userId: testUserId,
           caseId: testCaseId,
           debateId: testDebateId,
-          agentName: "AnalysisAgent",
+          agentName: 'AnalysisAgent',
           actionType: ActionType.ANALYZE,
-          actionName: "analyze_document",
+          actionName: 'analyze_document',
           actionLayer: ActionLayer.CORE,
           parameters: {
-            documentId: "doc123",
-            analysisType: "comprehensive",
+            documentId: 'doc123',
+            analysisType: 'comprehensive',
           },
         },
       });
@@ -89,17 +89,17 @@ describe("AgentAction模型", () => {
       expect(action.status).toBe(ActionStatus.PENDING);
     });
 
-    it("应成功创建实用程序层行动", async () => {
+    it('应成功创建实用程序层行动', async () => {
       const action = await prisma.agentAction.create({
         data: {
           userId: testUserId,
           caseId: testCaseId,
-          agentName: "UtilityAgent",
+          agentName: 'UtilityAgent',
           actionType: ActionType.RETRIEVE,
-          actionName: "search_legal_references",
+          actionName: 'search_legal_references',
           actionLayer: ActionLayer.UTILITY,
           parameters: {
-            query: "合同纠纷",
+            query: '合同纠纷',
             limit: 10,
           },
         },
@@ -110,17 +110,17 @@ describe("AgentAction模型", () => {
       expect(action.actionType).toBe(ActionType.RETRIEVE);
     });
 
-    it("应成功创建脚本层行动", async () => {
+    it('应成功创建脚本层行动', async () => {
       const action = await prisma.agentAction.create({
         data: {
           userId: testUserId,
-          agentName: "ScriptAgent",
+          agentName: 'ScriptAgent',
           actionType: ActionType.GENERATE,
-          actionName: "generate_debate_strategy",
+          actionName: 'generate_debate_strategy',
           actionLayer: ActionLayer.SCRIPT,
           parameters: {
-            caseContext: { type: "contract_dispute" },
-            strategyType: "aggressive",
+            caseContext: { type: 'contract_dispute' },
+            strategyType: 'aggressive',
           },
         },
       });
@@ -130,15 +130,15 @@ describe("AgentAction模型", () => {
       expect(action.actionType).toBe(ActionType.GENERATE);
     });
 
-    it("应创建带子行动的行动", async () => {
+    it('应创建带子行动的行动', async () => {
       const parentAction = await prisma.agentAction.create({
         data: {
           userId: testUserId,
-          agentName: "OrchestratorAgent",
+          agentName: 'OrchestratorAgent',
           actionType: ActionType.TRANSFORM,
-          actionName: "orchestrate_analysis",
+          actionName: 'orchestrate_analysis',
           actionLayer: ActionLayer.SCRIPT,
-          parameters: { workflow: "analysis_pipeline" },
+          parameters: { workflow: 'analysis_pipeline' },
         },
       });
 
@@ -146,9 +146,9 @@ describe("AgentAction模型", () => {
         data: {
           userId: testUserId,
           caseId: testCaseId,
-          agentName: "AnalysisAgent",
+          agentName: 'AnalysisAgent',
           actionType: ActionType.ANALYZE,
-          actionName: "extract_facts",
+          actionName: 'extract_facts',
           actionLayer: ActionLayer.CORE,
           parameters: {},
           parentActionId: parentAction.id,
@@ -159,9 +159,9 @@ describe("AgentAction模型", () => {
         data: {
           userId: testUserId,
           caseId: testCaseId,
-          agentName: "AnalysisAgent",
+          agentName: 'AnalysisAgent',
           actionType: ActionType.ANALYZE,
-          actionName: "extract_claims",
+          actionName: 'extract_claims',
           actionLayer: ActionLayer.CORE,
           parameters: {},
           parentActionId: parentAction.id,
@@ -180,8 +180,8 @@ describe("AgentAction模型", () => {
     });
   });
 
-  describe("Agent行动查询", () => {
-    it("应按行动类型查询", async () => {
+  describe('Agent行动查询', () => {
+    it('应按行动类型查询', async () => {
       const analyzeActions = await prisma.agentAction.findMany({
         where: {
           actionType: ActionType.ANALYZE,
@@ -190,11 +190,11 @@ describe("AgentAction模型", () => {
 
       expect(analyzeActions.length).toBeGreaterThan(0);
       expect(
-        analyzeActions.every((a) => a.actionType === ActionType.ANALYZE),
+        analyzeActions.every(a => a.actionType === ActionType.ANALYZE)
       ).toBe(true);
     });
 
-    it("应按行动层查询", async () => {
+    it('应按行动层查询', async () => {
       const coreActions = await prisma.agentAction.findMany({
         where: {
           actionLayer: ActionLayer.CORE,
@@ -204,7 +204,7 @@ describe("AgentAction模型", () => {
       expect(coreActions.length).toBeGreaterThan(0);
     });
 
-    it("应按状态查询", async () => {
+    it('应按状态查询', async () => {
       const pendingActions = await prisma.agentAction.findMany({
         where: {
           status: ActionStatus.PENDING,
@@ -214,17 +214,17 @@ describe("AgentAction模型", () => {
       expect(pendingActions.length).toBeGreaterThan(0);
     });
 
-    it("应按Agent名称查询", async () => {
+    it('应按Agent名称查询', async () => {
       const agentActions = await prisma.agentAction.findMany({
         where: {
-          agentName: "AnalysisAgent",
+          agentName: 'AnalysisAgent',
         },
       });
 
       expect(agentActions.length).toBeGreaterThan(0);
     });
 
-    it("应查询父行动的子行动", async () => {
+    it('应查询父行动的子行动', async () => {
       const parentAction = await prisma.agentAction.findFirst({
         where: {
           childActions: { isEmpty: false },
@@ -236,14 +236,14 @@ describe("AgentAction模型", () => {
     });
   });
 
-  describe("Agent行动更新", () => {
-    it("应更新行动状态", async () => {
+  describe('Agent行动更新', () => {
+    it('应更新行动状态', async () => {
       const action = await prisma.agentAction.create({
         data: {
           userId: testUserId,
-          agentName: "UpdateAgent",
+          agentName: 'UpdateAgent',
           actionType: ActionType.VERIFY,
-          actionName: "verify_result",
+          actionName: 'verify_result',
           actionLayer: ActionLayer.UTILITY,
           parameters: { test: true },
           status: ActionStatus.PENDING,
@@ -260,15 +260,15 @@ describe("AgentAction模型", () => {
       expect(updated.status).toBe(ActionStatus.RUNNING);
     });
 
-    it("应更新行动结果", async () => {
+    it('应更新行动结果', async () => {
       const action = await prisma.agentAction.create({
         data: {
           userId: testUserId,
-          agentName: "ResultAgent",
+          agentName: 'ResultAgent',
           actionType: ActionType.COMMUNICATE,
-          actionName: "send_message",
+          actionName: 'send_message',
           actionLayer: ActionLayer.UTILITY,
-          parameters: { message: "test" },
+          parameters: { message: 'test' },
           status: ActionStatus.RUNNING,
         },
       });
@@ -277,23 +277,23 @@ describe("AgentAction模型", () => {
         where: { id: action.id },
         data: {
           status: ActionStatus.COMPLETED,
-          result: { success: true, messageId: "msg123" },
+          result: { success: true, messageId: 'msg123' },
           executionTime: 1500,
         },
       });
 
       expect(updated.status).toBe(ActionStatus.COMPLETED);
-      expect(updated.result).toEqual({ success: true, messageId: "msg123" });
+      expect(updated.result).toEqual({ success: true, messageId: 'msg123' });
       expect(updated.executionTime).toBe(1500);
     });
 
-    it("应更新失败状态", async () => {
+    it('应更新失败状态', async () => {
       const action = await prisma.agentAction.create({
         data: {
           userId: testUserId,
-          agentName: "FailAgent",
+          agentName: 'FailAgent',
           actionType: ActionType.GENERATE,
-          actionName: "generate_with_error",
+          actionName: 'generate_with_error',
           actionLayer: ActionLayer.SCRIPT,
           parameters: { shouldFail: true },
           status: ActionStatus.RUNNING,
@@ -304,7 +304,7 @@ describe("AgentAction模型", () => {
         where: { id: action.id },
         data: {
           status: ActionStatus.FAILED,
-          result: { error: "Failed to generate" },
+          result: { error: 'Failed to generate' },
           retryCount: 1,
         },
       });
@@ -314,14 +314,14 @@ describe("AgentAction模型", () => {
     });
   });
 
-  describe("Agent行动删除", () => {
-    it("应删除行动", async () => {
+  describe('Agent行动删除', () => {
+    it('应删除行动', async () => {
       const action = await prisma.agentAction.create({
         data: {
           userId: testUserId,
-          agentName: "DeleteAgent",
+          agentName: 'DeleteAgent',
           actionType: ActionType.ANALYZE,
-          actionName: "delete_test",
+          actionName: 'delete_test',
           actionLayer: ActionLayer.CORE,
           parameters: {},
         },
@@ -339,8 +339,8 @@ describe("AgentAction模型", () => {
     });
   });
 
-  describe("Agent行动统计", () => {
-    it("应按行动类型统计", async () => {
+  describe('Agent行动统计', () => {
+    it('应按行动类型统计', async () => {
       const analyzeCount = await prisma.agentAction.count({
         where: { actionType: ActionType.ANALYZE },
       });
@@ -354,12 +354,12 @@ describe("AgentAction模型", () => {
       expect(analyzeCount + retrieveCount + generateCount).toBeGreaterThan(0);
     });
 
-    it("应计算成功率", async () => {
+    it('应计算成功率', async () => {
       const allActions = await prisma.agentAction.findMany({
         where: { userId: testUserId },
       });
       const completedActions = allActions.filter(
-        (a) => a.status === ActionStatus.COMPLETED,
+        a => a.status === ActionStatus.COMPLETED
       );
       const successRate =
         allActions.length > 0 ? completedActions.length / allActions.length : 0;
@@ -368,7 +368,7 @@ describe("AgentAction模型", () => {
       expect(successRate).toBeLessThanOrEqual(1);
     });
 
-    it("应计算平均执行时间", async () => {
+    it('应计算平均执行时间', async () => {
       const completedActions = await prisma.agentAction.findMany({
         where: {
           userId: testUserId,
@@ -381,7 +381,7 @@ describe("AgentAction模型", () => {
         completedActions.length > 0
           ? completedActions.reduce(
               (sum, a) => sum + (a.executionTime || 0),
-              0,
+              0
             ) / completedActions.length
           : 0;
 

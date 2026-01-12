@@ -1,34 +1,68 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withErrorHandler } from "@/app/api/lib/errors/error-handler";
-import { createSuccessResponse } from "@/app/api/lib/responses/api-response";
-import { validatePathParam } from "@/app/api/lib/validation/validator";
-import { uuidSchema } from "@/app/api/lib/validation/schemas";
-import { prisma } from "@/lib/db/prisma";
-import { Prisma } from "@prisma/client";
+import { NextRequest, NextResponse } from 'next/server';
+import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
+import { createSuccessResponse } from '@/app/api/lib/responses/api-response';
+import { validatePathParam } from '@/app/api/lib/validation/validator';
+import { uuidSchema } from '@/app/api/lib/validation/schemas';
+import { prisma } from '@/lib/db/prisma';
+import { Prisma } from '@prisma/client';
+import { getAuthUser } from '@/lib/middleware/auth';
+import {
+  checkResourceOwnership,
+  createPermissionErrorResponse,
+  ResourceType,
+} from '@/lib/middleware/resource-permission';
 
 /**
  * GET /api/v1/cases/[id]
  * 获取单个案件详情
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
+    // Next.js 15中params是Promise，需要await
+    const { id } = await params;
+
     // 验证路径参数
-    const id = validatePathParam(params.id, uuidSchema);
+    const validatedId = validatePathParam(id, uuidSchema);
+
+    // 获取认证用户
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { error: '未认证', message: '请先登录' },
+        { status: 401 }
+      );
+    }
+
+    // 检查资源权限
+    const permissionResult = await checkResourceOwnership(
+      authUser.userId,
+      validatedId,
+      ResourceType.CASE
+    );
+
+    if (!permissionResult.hasPermission) {
+      return createPermissionErrorResponse(
+        permissionResult.reason ?? '您无权访问此案件'
+      );
+    }
 
     // 调用实际的数据库查询
     const caseItem = await prisma.case.findUnique({
-      where: { id },
+      where: { id: validatedId },
       include: {
         documents: {
-          orderBy: { createdAt: "desc" },
+          orderBy: { createdAt: 'desc' },
         },
         debates: {
           include: {
             rounds: {
-              orderBy: { roundNumber: "asc" },
+              orderBy: { roundNumber: 'asc' },
             },
           },
-          orderBy: { createdAt: "desc" },
+          orderBy: { createdAt: 'desc' },
         },
         user: {
           select: {
@@ -42,12 +76,12 @@ export const GET = withErrorHandler(
     });
 
     if (!caseItem) {
-      const { NotFoundError } = await import("@/app/api/lib/errors/api-error");
-      throw new NotFoundError("Case");
+      const { NotFoundError } = await import('@/app/api/lib/errors/api-error');
+      throw new NotFoundError('Case');
     }
 
     return createSuccessResponse(caseItem);
-  },
+  }
 );
 
 /**
@@ -55,95 +89,133 @@ export const GET = withErrorHandler(
  * 更新案件信息
  */
 export const PUT = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
+    // Next.js 15中params是Promise，需要await
+    const { id } = await params;
+
     // 验证路径参数
-    const id = validatePathParam(params.id, uuidSchema);
+    const validatedId = validatePathParam(id, uuidSchema);
 
-    // 检查请求体是否为空
-    const contentType = request.headers.get("Content-Type");
+    // 获取认证用户
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { error: '未认证', message: '请先登录' },
+        { status: 401 }
+      );
+    }
 
-    // 如果请求没有Content-Type，则认为是空请求体
-    if (!contentType) {
-      const { ValidationError } =
-        await import("@/app/api/lib/errors/api-error");
-      throw new ValidationError("Request body is required for PUT requests");
+    // 检查资源权限
+    const permissionResult = await checkResourceOwnership(
+      authUser.userId,
+      validatedId,
+      ResourceType.CASE
+    );
+
+    if (!permissionResult.hasPermission) {
+      return createPermissionErrorResponse(
+        permissionResult.reason ?? '您无权修改此案件'
+      );
     }
 
     // 验证请求体
     const { updateCaseSchema } =
-      await import("@/app/api/lib/validation/schemas");
+      await import('@/app/api/lib/validation/schemas');
+    const { validateRequestBody } =
+      await import('@/app/api/lib/validation/core');
 
-    try {
-      const body = await request.json();
-      const validatedData = updateCaseSchema.parse(body);
+    const validatedData = await validateRequestBody(request, updateCaseSchema);
 
-      // 转换类型枚举值
-      const typeMap: Record<
-        string,
-        | "CIVIL"
-        | "CRIMINAL"
-        | "ADMINISTRATIVE"
-        | "COMMERCIAL"
-        | "LABOR"
-        | "INTELLECTUAL"
-        | "OTHER"
-      > = {
-        civil: "CIVIL",
-        criminal: "CRIMINAL",
-        administrative: "ADMINISTRATIVE",
-        commercial: "COMMERCIAL",
-        labor: "LABOR",
-        intellectual: "INTELLECTUAL",
-        other: "OTHER",
-      };
+    // 转换类型枚举值
+    const typeMap: Record<
+      string,
+      | 'CIVIL'
+      | 'CRIMINAL'
+      | 'ADMINISTRATIVE'
+      | 'COMMERCIAL'
+      | 'LABOR'
+      | 'INTELLECTUAL'
+      | 'OTHER'
+    > = {
+      civil: 'CIVIL',
+      criminal: 'CRIMINAL',
+      administrative: 'ADMINISTRATIVE',
+      commercial: 'COMMERCIAL',
+      labor: 'LABOR',
+      intellectual: 'INTELLECTUAL',
+      other: 'OTHER',
+    };
 
-      const statusMap: Record<
-        string,
-        "DRAFT" | "ACTIVE" | "COMPLETED" | "ARCHIVED"
-      > = {
-        draft: "DRAFT",
-        active: "ACTIVE",
-        completed: "COMPLETED",
-        archived: "ARCHIVED",
-      };
+    const statusMap: Record<
+      string,
+      'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'ARCHIVED'
+    > = {
+      draft: 'DRAFT',
+      active: 'ACTIVE',
+      completed: 'COMPLETED',
+      archived: 'ARCHIVED',
+    };
 
-      // 调用实际的数据库操作
-      const updatedCase = await prisma.case.update({
-        where: { id },
-        data: {
-          title: validatedData.title,
-          description: validatedData.description,
-          type: validatedData.type ? typeMap[validatedData.type] : undefined,
-          status: validatedData.status
-            ? statusMap[validatedData.status]
-            : undefined,
-          amount: validatedData.amount
-            ? new Prisma.Decimal(validatedData.amount)
-            : undefined,
-          caseNumber: validatedData.caseNumber,
-          cause: validatedData.cause,
-          court: validatedData.court,
-          plaintiffName: validatedData.plaintiffName,
-          defendantName: validatedData.defendantName,
-          metadata: validatedData.metadata,
-          updatedAt: new Date(),
-        },
-      });
+    // 构建更新数据对象，只包含提供的字段
+    const updateData: Record<string, unknown> = {};
 
-      return createSuccessResponse(updatedCase);
-    } catch (error) {
-      // 如果是JSON解析错误，重新抛出为验证错误
-      if (
-        error instanceof SyntaxError &&
-        error.message.includes("Unexpected end of JSON input")
-      ) {
-        const { ValidationError } =
-          await import("@/app/api/lib/errors/api-error");
-        throw new ValidationError("Invalid JSON in request body");
-      }
-      throw error;
+    if (validatedData.title !== undefined) {
+      updateData.title = validatedData.title;
     }
-  },
+    if (validatedData.description !== undefined) {
+      updateData.description = validatedData.description;
+    }
+    if (validatedData.type !== undefined) {
+      updateData.type = typeMap[validatedData.type];
+    }
+    if (validatedData.status !== undefined) {
+      updateData.status = statusMap[validatedData.status];
+    }
+    if (validatedData.amount !== undefined) {
+      updateData.amount = new Prisma.Decimal(validatedData.amount);
+    }
+    if (validatedData.caseNumber !== undefined) {
+      updateData.caseNumber = validatedData.caseNumber;
+    }
+    if (validatedData.cause !== undefined) {
+      updateData.cause = validatedData.cause;
+    }
+    if (validatedData.court !== undefined) {
+      updateData.court = validatedData.court;
+    }
+    if (validatedData.plaintiffName !== undefined) {
+      updateData.plaintiffName = validatedData.plaintiffName;
+    }
+    if (validatedData.defendantName !== undefined) {
+      updateData.defendantName = validatedData.defendantName;
+    }
+    if (validatedData.metadata !== undefined) {
+      updateData.metadata = validatedData.metadata;
+    }
+
+    // 如果没有任何更新字段，返回错误
+    if (Object.keys(updateData).length === 0) {
+      const { ValidationError } =
+        await import('@/app/api/lib/errors/api-error');
+      throw new ValidationError(
+        'At least one field must be provided for update'
+      );
+    }
+
+    // 自动更新updatedAt时间戳
+    updateData.updatedAt = new Date();
+
+    // 调用实际的数据库操作
+    const updatedCase = await prisma.case.update({
+      where: { id: validatedId },
+      data: updateData,
+    });
+
+    return createSuccessResponse(updatedCase);
+  }
 );
 
 /**
@@ -151,20 +223,48 @@ export const PUT = withErrorHandler(
  * 删除案件（软删除）
  */
 export const DELETE = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
+    // Next.js 15中params是Promise，需要await
+    const { id } = await params;
+
     // 验证路径参数
-    const id = validatePathParam(params.id, uuidSchema);
+    const validatedId = validatePathParam(id, uuidSchema);
+
+    // 获取认证用户
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { error: '未认证', message: '请先登录' },
+        { status: 401 }
+      );
+    }
+
+    // 检查资源权限
+    const permissionResult = await checkResourceOwnership(
+      authUser.userId,
+      validatedId,
+      ResourceType.CASE
+    );
+
+    if (!permissionResult.hasPermission) {
+      return createPermissionErrorResponse(
+        permissionResult.reason ?? '您无权删除此案件'
+      );
+    }
 
     // 调用实际的数据库操作（软删除）
     await prisma.case.update({
-      where: { id },
+      where: { id: validatedId },
       data: {
         deletedAt: new Date(),
       },
     });
 
     return new NextResponse(null, { status: 204 });
-  },
+  }
 );
 
 /**
@@ -175,10 +275,10 @@ export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Access-Control-Max-Age": "86400",
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
     },
   });
 });

@@ -21,10 +21,10 @@ export {
   createFallbackConfig,
   createCircuitBreakerConfig,
   createFaultToleranceConfig,
-} from "./config";
+} from './config';
 
 export {
   // 容错执行器
   FaultTolerantExecutor,
   createFaultTolerantExecutor,
-} from "./executor";
+} from './executor';

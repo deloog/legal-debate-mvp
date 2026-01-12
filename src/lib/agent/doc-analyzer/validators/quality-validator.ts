@@ -9,11 +9,11 @@
  * - 生成质量评分和问题报告
  */
 
-import type { ExtractedData, Party, Claim } from "../core/types";
-import { QUALITY_VALIDATION_RULES } from "../core/constants";
+import type { ExtractedData, Party, Claim } from '../core/types';
+import { QUALITY_VALIDATION_RULES } from '../core/constants';
 
 export interface QualityIssue {
-  severity: "ERROR" | "WARNING" | "INFO";
+  severity: 'ERROR' | 'WARNING' | 'INFO';
   category: string;
   message: string;
   suggestion?: string;
@@ -40,47 +40,47 @@ function validateParties(parties: Party[]): QualityIssue[] {
 
   if (parties.length < QUALITY_VALIDATION_RULES.MIN_PARTIES) {
     issues.push({
-      severity: "ERROR",
-      category: "当事人",
+      severity: 'ERROR',
+      category: '当事人',
       message: `当事人数量不足，至少需要${QUALITY_VALIDATION_RULES.MIN_PARTIES}个`,
-      suggestion: "检查文档是否包含明确的当事人信息",
+      suggestion: '检查文档是否包含明确的当事人信息',
     });
   }
 
-  const hasPlaintiff = parties.some((p) => p.type === "plaintiff");
-  const hasDefendant = parties.some((p) => p.type === "defendant");
+  const hasPlaintiff = parties.some(p => p.type === 'plaintiff');
+  const hasDefendant = parties.some(p => p.type === 'defendant');
 
   if (!hasPlaintiff && parties.length > 0) {
     issues.push({
-      severity: "WARNING",
-      category: "当事人",
-      message: "缺少原告信息",
-      suggestion: "根据文档内容推断原告角色",
+      severity: 'WARNING',
+      category: '当事人',
+      message: '缺少原告信息',
+      suggestion: '根据文档内容推断原告角色',
     });
   }
 
   if (!hasDefendant && parties.length > 0) {
     issues.push({
-      severity: "WARNING",
-      category: "当事人",
-      message: "缺少被告信息",
-      suggestion: "从诉讼请求中推断被告信息",
+      severity: 'WARNING',
+      category: '当事人',
+      message: '缺少被告信息',
+      suggestion: '从诉讼请求中推断被告信息',
     });
   }
 
   parties.forEach((party, index) => {
     if (!party.name || party.name.trim().length === 0) {
       issues.push({
-        severity: "ERROR",
-        category: "当事人",
+        severity: 'ERROR',
+        category: '当事人',
         message: `第${index + 1}个当事人姓名为空`,
       });
     }
 
     if (party.name && party.name.length > 100) {
       issues.push({
-        severity: "WARNING",
-        category: "当事人",
+        severity: 'WARNING',
+        category: '当事人',
         message: `第${index + 1}个当事人姓名过长（${party.name.length}字符）`,
       });
     }
@@ -97,36 +97,36 @@ function validateClaims(claims: Claim[]): QualityIssue[] {
 
   if (claims.length < QUALITY_VALIDATION_RULES.MIN_CLAIMS) {
     issues.push({
-      severity: "ERROR",
-      category: "诉讼请求",
+      severity: 'ERROR',
+      category: '诉讼请求',
       message: `诉讼请求数量不足，至少需要${QUALITY_VALIDATION_RULES.MIN_CLAIMS}个`,
-      suggestion: "检查文档是否包含明确的诉讼请求",
+      suggestion: '检查文档是否包含明确的诉讼请求',
     });
   }
 
-  const hasLitigationCost = claims.some((c) => c.type === "LITIGATION_COST");
+  const hasLitigationCost = claims.some(c => c.type === 'LITIGATION_COST');
   if (!hasLitigationCost) {
     issues.push({
-      severity: "INFO",
-      category: "诉讼请求",
-      message: "缺少诉讼费用请求",
-      suggestion: "通常诉讼费用应当包含在请求中",
+      severity: 'INFO',
+      category: '诉讼请求',
+      message: '缺少诉讼费用请求',
+      suggestion: '通常诉讼费用应当包含在请求中',
     });
   }
 
   claims.forEach((claim, index) => {
     if (!claim.content || claim.content.trim().length === 0) {
       issues.push({
-        severity: "ERROR",
-        category: "诉讼请求",
+        severity: 'ERROR',
+        category: '诉讼请求',
         message: `第${index + 1}条诉讼请求内容为空`,
       });
     }
 
     if (!claim.type || claim.type.length === 0) {
       issues.push({
-        severity: "WARNING",
-        category: "诉讼请求",
+        severity: 'WARNING',
+        category: '诉讼请求',
         message: `第${index + 1}条诉讼请求类型为空`,
       });
     }
@@ -143,19 +143,19 @@ function validateConfidence(confidence: number): QualityIssue[] {
 
   if (confidence < QUALITY_VALIDATION_RULES.MIN_CONFIDENCE) {
     issues.push({
-      severity: "ERROR",
-      category: "置信度",
+      severity: 'ERROR',
+      category: '置信度',
       message: `置信度过低（${confidence.toFixed(2)}），低于最低要求${QUALITY_VALIDATION_RULES.MIN_CONFIDENCE}`,
-      suggestion: "建议重新分析或人工校验",
+      suggestion: '建议重新分析或人工校验',
     });
   }
 
   if (confidence < 0.8) {
     issues.push({
-      severity: "WARNING",
-      category: "置信度",
+      severity: 'WARNING',
+      category: '置信度',
       message: `置信度较低（${confidence.toFixed(2)}）`,
-      suggestion: "建议人工复核提取结果",
+      suggestion: '建议人工复核提取结果',
     });
   }
 
@@ -172,16 +172,16 @@ function validateAmounts(claims: Claim[]): QualityIssue[] {
     if (claim.amount !== undefined && claim.amount !== null) {
       if (claim.amount < 0) {
         issues.push({
-          severity: "ERROR",
-          category: "金额",
+          severity: 'ERROR',
+          category: '金额',
           message: `第${index + 1}条请求金额为负数`,
         });
       }
 
       if (claim.amount > 1e9) {
         issues.push({
-          severity: "WARNING",
-          category: "金额",
+          severity: 'WARNING',
+          category: '金额',
           message: `第${index + 1}条请求金额过大（${claim.amount}）`,
         });
       }
@@ -197,13 +197,13 @@ function validateAmounts(claims: Claim[]): QualityIssue[] {
 function calculateQualityScore(
   issues: QualityIssue[],
   partyCount: number,
-  claimCount: number,
+  claimCount: number
 ): number {
   let score = 100;
 
-  const errorCount = issues.filter((i) => i.severity === "ERROR").length;
-  const warningCount = issues.filter((i) => i.severity === "WARNING").length;
-  const infoCount = issues.filter((i) => i.severity === "INFO").length;
+  const errorCount = issues.filter(i => i.severity === 'ERROR').length;
+  const warningCount = issues.filter(i => i.severity === 'WARNING').length;
+  const infoCount = issues.filter(i => i.severity === 'INFO').length;
 
   score -= errorCount * 20;
   score -= warningCount * 5;
@@ -229,7 +229,7 @@ export class QualityValidator {
    */
   public validate(
     data: ExtractedData,
-    confidence: number = 0.8,
+    confidence: number = 0.8
   ): QualityResult {
     const issues: QualityIssue[] = [];
 
@@ -242,17 +242,17 @@ export class QualityValidator {
       partyCount: data.parties.length,
       claimCount: data.claims.length,
       confidence,
-      hasPlaintiff: data.parties.some((p) => p.type === "plaintiff"),
-      hasDefendant: data.parties.some((p) => p.type === "defendant"),
+      hasPlaintiff: data.parties.some(p => p.type === 'plaintiff'),
+      hasDefendant: data.parties.some(p => p.type === 'defendant'),
     };
 
     const score = calculateQualityScore(
       issues,
       metrics.partyCount,
-      metrics.claimCount,
+      metrics.claimCount
     );
 
-    const passed = score >= 60 && !issues.some((i) => i.severity === "ERROR");
+    const passed = score >= 60 && !issues.some(i => i.severity === 'ERROR');
 
     return {
       passed,
@@ -267,13 +267,13 @@ export class QualityValidator {
    */
   public quickValidate(
     data: ExtractedData,
-    confidence: number = 0.8,
+    confidence: number = 0.8
   ): {
     passed: boolean;
     errors: QualityIssue[];
   } {
     const result = this.validate(data, confidence);
-    const errors = result.issues.filter((i) => i.severity === "ERROR");
+    const errors = result.issues.filter(i => i.severity === 'ERROR');
 
     return {
       passed: errors.length === 0,

@@ -1,11 +1,11 @@
 // 容错执行器测试
-import { FaultTolerantExecutor } from "../../../lib/agent/fault-tolerance/executor";
-import { createFaultToleranceConfig } from "../../../lib/agent/fault-tolerance/config";
-import { CircuitBreakerManager } from "../../../lib/error/circuit-breaker";
-import { ErrorLogger } from "../../../lib/error/error-logger";
-import type { AgentContext, TaskPriority } from "../../../types/agent";
+import { FaultTolerantExecutor } from '../../../lib/agent/fault-tolerance/executor';
+import { createFaultToleranceConfig } from '../../../lib/agent/fault-tolerance/config';
+import { CircuitBreakerManager } from '../../../lib/error/circuit-breaker';
+import { ErrorLogger } from '../../../lib/error/error-logger';
+import type { AgentContext, TaskPriority } from '../../../types/agent';
 
-describe("FaultTolerantExecutor", () => {
+describe('FaultTolerantExecutor', () => {
   let executor: FaultTolerantExecutor;
   let errorLogger: ErrorLogger;
   let circuitBreakerManager: CircuitBreakerManager;
@@ -16,9 +16,9 @@ describe("FaultTolerantExecutor", () => {
     executor = new FaultTolerantExecutor(errorLogger, circuitBreakerManager);
   });
 
-  describe("execute - 成功执行", () => {
-    it("应该成功执行函数", async () => {
-      const mockFn = jest.fn().mockResolvedValue({ result: "success" });
+  describe('execute - 成功执行', () => {
+    it('应该成功执行函数', async () => {
+      const mockFn = jest.fn().mockResolvedValue({ result: 'success' });
       const config = createFaultToleranceConfig({
         circuitBreaker: {
           enabled: false,
@@ -28,30 +28,30 @@ describe("FaultTolerantExecutor", () => {
         },
       });
       const context: AgentContext = {
-        task: "test task",
-        priority: "MEDIUM" as TaskPriority,
+        task: 'test task',
+        priority: 'MEDIUM' as TaskPriority,
         data: {},
       };
 
       const result = await executor.execute(
-        "test-agent",
+        'test-agent',
         mockFn,
         config,
-        context,
+        context
       );
 
-      expect(result.result).toEqual({ result: "success" });
+      expect(result.result).toEqual({ result: 'success' });
       expect(result.faultResult.success).toBe(true);
       expect(result.faultResult.totalAttempts).toBe(1);
       expect(result.faultResult.fallbackUsed).toBe(false);
       expect(mockFn).toHaveBeenCalledTimes(1);
     });
 
-    it("应该在第一次重试时成功", async () => {
+    it('应该在第一次重试时成功', async () => {
       const mockFn = jest
         .fn()
-        .mockRejectedValueOnce(new Error("TIMEOUT"))
-        .mockResolvedValueOnce({ result: "success" });
+        .mockRejectedValueOnce(new Error('TIMEOUT'))
+        .mockResolvedValueOnce({ result: 'success' });
       const config = createFaultToleranceConfig({
         circuitBreaker: {
           enabled: false,
@@ -61,33 +61,33 @@ describe("FaultTolerantExecutor", () => {
         },
       });
       const context: AgentContext = {
-        task: "test task",
-        priority: "MEDIUM" as TaskPriority,
+        task: 'test task',
+        priority: 'MEDIUM' as TaskPriority,
         data: {},
       };
 
       const result = await executor.execute(
-        "test-agent",
+        'test-agent',
         mockFn,
         config,
-        context,
+        context
       );
 
-      expect(result.result).toEqual({ result: "success" });
+      expect(result.result).toEqual({ result: 'success' });
       expect(result.faultResult.success).toBe(true);
       expect(result.faultResult.totalAttempts).toBe(2);
       expect(mockFn).toHaveBeenCalledTimes(2);
     });
   });
 
-  describe("execute - 重试机制", () => {
-    it("应该重试可重试的错误", async () => {
-      const mockFn = jest.fn().mockRejectedValue(new Error("TIMEOUT"));
+  describe('execute - 重试机制', () => {
+    it('应该重试可重试的错误', async () => {
+      const mockFn = jest.fn().mockRejectedValue(new Error('TIMEOUT'));
       const config = createFaultToleranceConfig({
         retry: {
           maxRetries: 2,
           backoffMs: [10, 20],
-          retryableErrors: ["TIMEOUT"],
+          retryableErrors: ['TIMEOUT'],
         },
         circuitBreaker: {
           enabled: false,
@@ -97,16 +97,16 @@ describe("FaultTolerantExecutor", () => {
         },
       });
       const context: AgentContext = {
-        task: "test task",
-        priority: "MEDIUM" as TaskPriority,
+        task: 'test task',
+        priority: 'MEDIUM' as TaskPriority,
         data: {},
       };
 
       const result = await executor.execute(
-        "test-agent",
+        'test-agent',
         mockFn,
         config,
-        context,
+        context
       );
 
       expect(result.faultResult.success).toBe(false);
@@ -114,13 +114,13 @@ describe("FaultTolerantExecutor", () => {
       expect(mockFn).toHaveBeenCalledTimes(2);
     });
 
-    it("不应该重试不可重试的错误", async () => {
-      const mockFn = jest.fn().mockRejectedValue(new Error("VALIDATION_ERROR"));
+    it('不应该重试不可重试的错误', async () => {
+      const mockFn = jest.fn().mockRejectedValue(new Error('VALIDATION_ERROR'));
       const config = createFaultToleranceConfig({
         retry: {
           maxRetries: 1, // 修改为1次，这样不可重试错误就只执行1次
           backoffMs: [10, 20, 30],
-          retryableErrors: ["TIMEOUT"],
+          retryableErrors: ['TIMEOUT'],
         },
         circuitBreaker: {
           enabled: false,
@@ -130,16 +130,16 @@ describe("FaultTolerantExecutor", () => {
         },
       });
       const context: AgentContext = {
-        task: "test task",
-        priority: "MEDIUM" as TaskPriority,
+        task: 'test task',
+        priority: 'MEDIUM' as TaskPriority,
         data: {},
       };
 
       const result = await executor.execute(
-        "test-agent",
+        'test-agent',
         mockFn,
         config,
-        context,
+        context
       );
 
       expect(result.faultResult.success).toBe(false);
@@ -147,23 +147,23 @@ describe("FaultTolerantExecutor", () => {
       expect(mockFn).toHaveBeenCalledTimes(1);
     });
 
-    it("应该使用指数退避策略", async () => {
+    it('应该使用指数退避策略', async () => {
       let callCount = 0;
       const timestamps: number[] = [];
       const mockFn = jest.fn().mockImplementation(async () => {
         timestamps.push(Date.now());
         callCount++;
         if (callCount === 1) {
-          throw new Error("TIMEOUT");
+          throw new Error('TIMEOUT');
         }
-        return { result: "success" };
+        return { result: 'success' };
       });
 
       const config = createFaultToleranceConfig({
         retry: {
           maxRetries: 2,
           backoffMs: [100, 200],
-          retryableErrors: ["TIMEOUT"],
+          retryableErrors: ['TIMEOUT'],
         },
         circuitBreaker: {
           enabled: false,
@@ -173,16 +173,16 @@ describe("FaultTolerantExecutor", () => {
         },
       });
       const context: AgentContext = {
-        task: "test task",
-        priority: "MEDIUM" as TaskPriority,
+        task: 'test task',
+        priority: 'MEDIUM' as TaskPriority,
         data: {},
       };
 
       const result = await executor.execute(
-        "test-agent",
+        'test-agent',
         mockFn,
         config,
-        context,
+        context
       );
 
       expect(result.faultResult.success).toBe(true);
@@ -192,9 +192,9 @@ describe("FaultTolerantExecutor", () => {
     });
   });
 
-  describe("execute - 降级机制", () => {
-    it("应该在重试失败后使用降级策略", async () => {
-      const mockFn = jest.fn().mockRejectedValue(new Error("TIMEOUT"));
+  describe('execute - 降级机制', () => {
+    it('应该在重试失败后使用降级策略', async () => {
+      const mockFn = jest.fn().mockRejectedValue(new Error('TIMEOUT'));
       const mockFallback = jest.fn().mockResolvedValue({
         fallbackResult: true,
       });
@@ -203,11 +203,11 @@ describe("FaultTolerantExecutor", () => {
         retry: {
           maxRetries: 2,
           backoffMs: [10],
-          retryableErrors: ["TIMEOUT"],
+          retryableErrors: ['TIMEOUT'],
         },
         fallback: {
           enabled: true,
-          fallbackType: "SIMPLE",
+          fallbackType: 'SIMPLE',
           fallbackFunction: mockFallback,
         },
         circuitBreaker: {
@@ -218,40 +218,40 @@ describe("FaultTolerantExecutor", () => {
         },
       });
       const context: AgentContext = {
-        task: "test task",
-        priority: "MEDIUM" as TaskPriority,
+        task: 'test task',
+        priority: 'MEDIUM' as TaskPriority,
         data: {},
       };
 
       const result = await executor.execute(
-        "test-agent",
+        'test-agent',
         mockFn,
         config,
-        context,
+        context
       );
 
       expect(result.result).toEqual({ fallbackResult: true });
       expect(result.faultResult.success).toBe(true);
       expect(result.faultResult.fallbackUsed).toBe(true);
-      expect(result.faultResult.fallbackType).toBe("SIMPLE");
+      expect(result.faultResult.fallbackType).toBe('SIMPLE');
       expect(mockFallback).toHaveBeenCalledTimes(1);
     });
 
-    it("降级失败时应该返回错误", async () => {
-      const mockFn = jest.fn().mockRejectedValue(new Error("TIMEOUT"));
+    it('降级失败时应该返回错误', async () => {
+      const mockFn = jest.fn().mockRejectedValue(new Error('TIMEOUT'));
       const mockFallback = jest
         .fn()
-        .mockRejectedValue(new Error("Fallback failed"));
+        .mockRejectedValue(new Error('Fallback failed'));
 
       const config = createFaultToleranceConfig({
         retry: {
           maxRetries: 2,
           backoffMs: [10],
-          retryableErrors: ["TIMEOUT"],
+          retryableErrors: ['TIMEOUT'],
         },
         fallback: {
           enabled: true,
-          fallbackType: "SIMPLE",
+          fallbackType: 'SIMPLE',
           fallbackFunction: mockFallback,
         },
         circuitBreaker: {
@@ -262,16 +262,16 @@ describe("FaultTolerantExecutor", () => {
         },
       });
       const context: AgentContext = {
-        task: "test task",
-        priority: "MEDIUM" as TaskPriority,
+        task: 'test task',
+        priority: 'MEDIUM' as TaskPriority,
         data: {},
       };
 
       const result = await executor.execute(
-        "test-agent",
+        'test-agent',
         mockFn,
         config,
-        context,
+        context
       );
 
       expect(result.faultResult.success).toBe(false);
@@ -280,32 +280,32 @@ describe("FaultTolerantExecutor", () => {
     });
   });
 
-  describe("静态方法", () => {
-    describe("createRetryResult", () => {
-      it("应该创建重试结果对象", () => {
+  describe('静态方法', () => {
+    describe('createRetryResult', () => {
+      it('应该创建重试结果对象', () => {
         const result = FaultTolerantExecutor.createRetryResult(
           true,
           3,
-          { data: "test" },
+          { data: 'test' },
           undefined,
-          100,
+          100
         );
 
         expect(result.success).toBe(true);
         expect(result.attempts).toBe(3);
-        expect(result.result).toEqual({ data: "test" });
+        expect(result.result).toEqual({ data: 'test' });
         expect(result.error).toBeUndefined();
         expect(result.executionTime).toBe(100);
       });
     });
 
-    describe("calculateRetrySuccessRate", () => {
-      it("应该计算重试成功率", () => {
+    describe('calculateRetrySuccessRate', () => {
+      it('应该计算重试成功率', () => {
         const rate = FaultTolerantExecutor.calculateRetrySuccessRate(10, 8);
         expect(rate).toBe(0.8);
       });
 
-      it("总次数为0时应该返回0", () => {
+      it('总次数为0时应该返回0', () => {
         const rate = FaultTolerantExecutor.calculateRetrySuccessRate(0, 0);
         expect(rate).toBe(0);
       });

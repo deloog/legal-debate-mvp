@@ -5,16 +5,16 @@ import {
   beforeAll,
   afterAll,
   beforeEach,
-} from "@jest/globals";
-import ApplicabilityAnalyzer from "@/lib/law-article/applicability/applicability-analyzer";
+} from '@jest/globals';
+import ApplicabilityAnalyzer from '@/lib/law-article/applicability/applicability-analyzer';
 import {
   createMockCaseInfo,
   createMockArticles,
   createMixedArticles,
-} from "./test-data";
-import type { ApplicabilityInput } from "@/lib/law-article/applicability/types";
+} from './test-data';
+import type { ApplicabilityInput } from '@/lib/law-article/applicability/types';
 
-describe("ApplicabilityAnalyzer", () => {
+describe('ApplicabilityAnalyzer', () => {
   let analyzer: ApplicabilityAnalyzer;
 
   beforeAll(async () => {
@@ -30,20 +30,20 @@ describe("ApplicabilityAnalyzer", () => {
     // 重置任何需要重置的状态
   });
 
-  describe("initialize", () => {
-    it("应该成功初始化", async () => {
+  describe('initialize', () => {
+    it('应该成功初始化', async () => {
       const newAnalyzer = new ApplicabilityAnalyzer();
       await expect(newAnalyzer.initialize()).resolves.not.toThrow();
       await newAnalyzer.destroy();
     });
 
-    it("应该能够重复初始化", async () => {
+    it('应该能够重复初始化', async () => {
       await expect(analyzer.initialize()).resolves.not.toThrow();
     });
   });
 
-  describe("analyze", () => {
-    it("应该分析法条的适用性", async () => {
+  describe('analyze', () => {
+    it('应该分析法条的适用性', async () => {
       const articles = createMockArticles(5);
       const caseInfo = createMockCaseInfo();
 
@@ -60,7 +60,7 @@ describe("ApplicabilityAnalyzer", () => {
       expect(result.statistics.executionTime).toBeGreaterThan(0);
     });
 
-    it("应该正确计算适用和不适用法条数量", async () => {
+    it('应该正确计算适用和不适用法条数量', async () => {
       const articles = createMixedArticles();
       const caseInfo = createMockCaseInfo();
 
@@ -74,11 +74,11 @@ describe("ApplicabilityAnalyzer", () => {
       expect(result.applicableArticles).toBeGreaterThanOrEqual(0);
       expect(result.notApplicableArticles).toBeGreaterThanOrEqual(0);
       expect(result.applicableArticles + result.notApplicableArticles).toBe(
-        result.totalArticles,
+        result.totalArticles
       );
     });
 
-    it("应该按适用性评分排序结果", async () => {
+    it('应该按适用性评分排序结果', async () => {
       const articles = createMockArticles(10);
       const caseInfo = createMockCaseInfo();
 
@@ -89,13 +89,13 @@ describe("ApplicabilityAnalyzer", () => {
 
       const result = await analyzer.analyze(input);
 
-      const scores = result.results.map((r) => r.score);
+      const scores = result.results.map(r => r.score);
       const sortedScores = [...scores].sort((a, b) => b - a);
 
       expect(scores).toEqual(sortedScores);
     });
 
-    it("应该正确处理自定义配置", async () => {
+    it('应该正确处理自定义配置', async () => {
       const articles = createMockArticles(3);
       const caseInfo = createMockCaseInfo();
 
@@ -117,7 +117,7 @@ describe("ApplicabilityAnalyzer", () => {
       expect(result.config.minApplicabilityScore).toBe(0.7);
     });
 
-    it("应该生成详细的适用性原因", async () => {
+    it('应该生成详细的适用性原因', async () => {
       const articles = createMockArticles(3);
       const caseInfo = createMockCaseInfo();
 
@@ -131,7 +131,7 @@ describe("ApplicabilityAnalyzer", () => {
 
       const result = await analyzer.analyze(input);
 
-      result.results.forEach((r) => {
+      result.results.forEach(r => {
         expect(r.reasons).toBeDefined();
         expect(Array.isArray(r.reasons)).toBe(true);
         if (r.warnings.length > 0) {
@@ -141,8 +141,8 @@ describe("ApplicabilityAnalyzer", () => {
     });
   });
 
-  describe("性能测试", () => {
-    it("应该在2秒内完成10条法条的分析", async () => {
+  describe('性能测试', () => {
+    it('应该在2秒内完成10条法条的分析', async () => {
       const articles = createMockArticles(10);
       const caseInfo = createMockCaseInfo();
 
@@ -162,7 +162,7 @@ describe("ApplicabilityAnalyzer", () => {
       expect(endTime - startTime).toBeLessThan(2000);
     });
 
-    it("应该记录各阶段耗时", async () => {
+    it('应该记录各阶段耗时', async () => {
       const articles = createMockArticles(5);
       const caseInfo = createMockCaseInfo();
 
@@ -185,8 +185,8 @@ describe("ApplicabilityAnalyzer", () => {
     });
   });
 
-  describe("综合评分计算", () => {
-    it("应该正确计算最终适用性评分", async () => {
+  describe('综合评分计算', () => {
+    it('应该正确计算最终适用性评分', async () => {
       const articles = createMockArticles(5);
       const caseInfo = createMockCaseInfo();
 
@@ -200,7 +200,7 @@ describe("ApplicabilityAnalyzer", () => {
 
       const result = await analyzer.analyze(input);
 
-      result.results.forEach((r) => {
+      result.results.forEach(r => {
         expect(r.score).toBeGreaterThanOrEqual(0);
         expect(r.score).toBeLessThanOrEqual(1);
         expect(r.semanticScore).toBeGreaterThanOrEqual(0);
@@ -210,7 +210,7 @@ describe("ApplicabilityAnalyzer", () => {
       });
     });
 
-    it("应该基于配置的阈值判断是否适用", async () => {
+    it('应该基于配置的阈值判断是否适用', async () => {
       const articles = createMockArticles(5);
       const caseInfo = createMockCaseInfo();
 
@@ -236,18 +236,18 @@ describe("ApplicabilityAnalyzer", () => {
       const highThresholdResult = await analyzer.analyze(highThresholdInput);
 
       const lowApplicableCount = lowThresholdResult.results.filter(
-        (r) => r.applicable,
+        r => r.applicable
       ).length;
       const highApplicableCount = highThresholdResult.results.filter(
-        (r) => r.applicable,
+        r => r.applicable
       ).length;
 
       expect(lowApplicableCount).toBeGreaterThanOrEqual(highApplicableCount);
     });
   });
 
-  describe("统计信息", () => {
-    it("应该正确计算统计信息", async () => {
+  describe('统计信息', () => {
+    it('应该正确计算统计信息', async () => {
       const articles = createMockArticles(10);
       const caseInfo = createMockCaseInfo();
 
@@ -266,13 +266,13 @@ describe("ApplicabilityAnalyzer", () => {
       expect(result.statistics.maxScore).toBeLessThanOrEqual(1);
       expect(result.statistics.minScore).toBeGreaterThanOrEqual(0);
       expect(result.statistics.maxScore).toBeGreaterThanOrEqual(
-        result.statistics.minScore,
+        result.statistics.minScore
       );
       expect(result.statistics.applicableRatio).toBeGreaterThanOrEqual(0);
       expect(result.statistics.applicableRatio).toBeLessThanOrEqual(1);
     });
 
-    it("应该提供按类型分组的统计", async () => {
+    it('应该提供按类型分组的统计', async () => {
       const articles = createMixedArticles();
       const caseInfo = createMockCaseInfo();
 
@@ -288,8 +288,8 @@ describe("ApplicabilityAnalyzer", () => {
     });
   });
 
-  describe("destroy", () => {
-    it("应该能够清理资源", async () => {
+  describe('destroy', () => {
+    it('应该能够清理资源', async () => {
       const newAnalyzer = new ApplicabilityAnalyzer();
       await newAnalyzer.initialize();
       await expect(newAnalyzer.destroy()).resolves.not.toThrow();

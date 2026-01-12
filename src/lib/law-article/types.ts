@@ -1,4 +1,4 @@
-import type { LawArticle, LawCategory, LawStatus } from "@prisma/client";
+import type { LawArticle, LawCategory, LawStatus } from '@prisma/client';
 
 /**
  * 检索查询参数
@@ -28,12 +28,12 @@ export interface SearchQuery {
   /** 排序参数 */
   sort?: {
     field:
-      | "createdAt"
-      | "updatedAt"
-      | "viewCount"
-      | "referenceCount"
-      | "relevance";
-    order: "asc" | "desc";
+      | 'createdAt'
+      | 'updatedAt'
+      | 'viewCount'
+      | 'referenceCount'
+      | 'relevance';
+    order: 'asc' | 'desc';
   };
   /** 是否包含子法条 */
   includeChildren?: boolean;

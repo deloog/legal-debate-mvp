@@ -1,5 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.AIRequestExecutor = void 0;
 // =============================================================================
 // AI请求执行器
@@ -23,16 +23,16 @@ class AIRequestExecutor {
     try {
       // 根据提供商调用对应的聊天完成接口
       switch (provider) {
-        case "zhipu":
+        case 'zhipu':
           response = await this.executeZhipuRequest(client, request);
           break;
-        case "deepseek":
+        case 'deepseek':
           response = await this.executeDeepSeekRequest(client, request);
           break;
-        case "openai":
+        case 'openai':
           response = await this.executeOpenAIRequest(client, request);
           break;
-        case "anthropic":
+        case 'anthropic':
           response = await this.executeAnthropicRequest(client, request);
           break;
         default:
@@ -92,7 +92,7 @@ class AIRequestExecutor {
   async executeAnthropicRequest(client, request) {
     const response = await client.messages.create({
       model: request.model,
-      messages: request.messages.map((m) => ({
+      messages: request.messages.map(m => ({
         role: m.role,
         content: m.content,
       })),
@@ -111,7 +111,7 @@ class AIRequestExecutor {
   convertResponse(response, provider) {
     return {
       id: response.id || `${provider}_${Date.now()}`,
-      object: response.object || "chat.completion",
+      object: response.object || 'chat.completion',
       created: response.created || Date.now(),
       model: response.model,
       choices: response.choices || [
@@ -119,10 +119,10 @@ class AIRequestExecutor {
           index: 0,
           message: response.message ||
             response.content || {
-              role: "assistant",
+              role: 'assistant',
               content: response.content?.text || response.content,
             },
-          finishReason: response.finish_reason || "stop",
+          finishReason: response.finish_reason || 'stop',
           logprobs: response.logprobs || null,
         },
       ],
@@ -138,17 +138,17 @@ class AIRequestExecutor {
   convertAnthropicResponse(response) {
     return {
       id: response.id,
-      object: "chat.completion",
+      object: 'chat.completion',
       created: Date.now(),
       model: response.model,
       choices: [
         {
           index: 0,
           message: {
-            role: "assistant",
-            content: response.content[0]?.text || "",
+            role: 'assistant',
+            content: response.content[0]?.text || '',
           },
-          finish_reason: response.stop_reason || "stop",
+          finish_reason: response.stop_reason || 'stop',
           logprobs: null,
         },
       ],
@@ -165,7 +165,7 @@ class AIRequestExecutor {
    */
   createAIError(error, provider) {
     return {
-      code: error.name || "UNKNOWN_ERROR",
+      code: error.name || 'UNKNOWN_ERROR',
       message: error.message,
       type: this.inferErrorType(error),
       provider,
@@ -178,24 +178,24 @@ class AIRequestExecutor {
    */
   inferErrorType(error) {
     const message = error.message.toLowerCase();
-    if (message.includes("timeout")) return "timeout_error";
-    if (message.includes("network") || message.includes("connection"))
-      return "network_error";
-    if (message.includes("authentication") || message.includes("unauthorized"))
-      return "authentication_error";
-    if (message.includes("permission") || message.includes("forbidden"))
-      return "permission_error";
-    if (message.includes("rate limit") || message.includes("too many requests"))
-      return "rate_limit_error";
-    if (message.includes("not found") || message.includes("does not exist"))
-      return "not_found_error";
-    if (message.includes("quota") || message.includes("limit"))
-      return "insufficient_quota";
-    if (message.includes("validation") || message.includes("invalid"))
-      return "validation_error";
-    if (message.includes("model") && message.includes("not available"))
-      return "model_not_available";
-    return "unknown_error";
+    if (message.includes('timeout')) return 'timeout_error';
+    if (message.includes('network') || message.includes('connection'))
+      return 'network_error';
+    if (message.includes('authentication') || message.includes('unauthorized'))
+      return 'authentication_error';
+    if (message.includes('permission') || message.includes('forbidden'))
+      return 'permission_error';
+    if (message.includes('rate limit') || message.includes('too many requests'))
+      return 'rate_limit_error';
+    if (message.includes('not found') || message.includes('does not exist'))
+      return 'not_found_error';
+    if (message.includes('quota') || message.includes('limit'))
+      return 'insufficient_quota';
+    if (message.includes('validation') || message.includes('invalid'))
+      return 'validation_error';
+    if (message.includes('model') && message.includes('not available'))
+      return 'model_not_available';
+    return 'unknown_error';
   }
   /**
    * 判断错误是否可重试
@@ -203,10 +203,10 @@ class AIRequestExecutor {
   isRetryableError(error) {
     const message = error.message.toLowerCase();
     return (
-      message.includes("timeout") ||
-      message.includes("network") ||
-      message.includes("connection") ||
-      message.includes("rate limit")
+      message.includes('timeout') ||
+      message.includes('network') ||
+      message.includes('connection') ||
+      message.includes('rate limit')
     );
   }
   /**

@@ -5,13 +5,13 @@
  */
 
 // 导出主类
-export { LegalAgent } from "./legal-agent";
+export { LegalAgent } from './legal-agent';
 
 // 导出子模块
-export { LawSearcher } from "./law-searcher";
-export { ApplicabilityAnalyzer } from "./applicability-analyzer";
-export { ArgumentGenerator } from "./argument-generator";
-export { LegalReasoner } from "./legal-reasoner";
+export { LawSearcher } from './law-searcher';
+export { ApplicabilityAnalyzer } from './applicability-analyzer';
+export { ArgumentGenerator } from './argument-generator';
+export { LegalReasoner } from './legal-reasoner';
 
 // 导出类型
 export type {
@@ -33,7 +33,7 @@ export type {
   ReasoningChain,
   LogicValidationResult,
   LegalAgentConfig,
-} from "./types";
+} from './types';
 
 // 导出默认配置
-export { DEFAULT_LEGAL_AGENT_CONFIG } from "./types";
+export { DEFAULT_LEGAL_AGENT_CONFIG } from './types';

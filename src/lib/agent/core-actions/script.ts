@@ -4,20 +4,20 @@
  * 每个函数处理复杂场景，保持<200行
  */
 
-import { PrismaClient } from "@prisma/client";
-import { MemoryManager } from "../memory-agent/memory-manager";
+import { PrismaClient } from '@prisma/client';
+import { MemoryManager } from '../memory-agent/memory-manager';
 import {
   log_action,
   handle_error,
   retry_operation,
   update_memory,
-} from "./index";
-import { generate_argument, search_laws } from "./utility";
+} from './index';
+import { generate_argument, search_laws } from './utility';
 import type {
   BatchQueryResult,
   ExternalAPIParams,
   ExternalAPIResult,
-} from "./types";
+} from './types';
 
 /**
  * batch_query_laws - 批量法律检索（脚本层）
@@ -27,7 +27,7 @@ export async function batch_query_laws(
   prisma: PrismaClient,
   memoryManager: MemoryManager,
   queries: Array<{ query: string; category?: string; limit?: number }>,
-  userId: string,
+  userId: string
 ): Promise<
   BatchQueryResult<{
     id: string;
@@ -59,16 +59,16 @@ export async function batch_query_laws(
   for (let i = 0; i < queries.length; i += maxConcurrency) {
     const batch = queries.slice(i, i + maxConcurrency);
     const batchResults = await Promise.allSettled(
-      batch.map((query) =>
-        search_laws(prisma, memoryManager, query, userId).then((data) => ({
+      batch.map(query =>
+        search_laws(prisma, memoryManager, query, userId).then(data => ({
           query,
           data,
-        })),
-      ),
+        }))
+      )
     );
 
     for (const result of batchResults) {
-      if (result.status === "fulfilled") {
+      if (result.status === 'fulfilled') {
         results.push({
           query: result.value.query,
           data: result.value.data.articles,
@@ -86,12 +86,12 @@ export async function batch_query_laws(
   }
 
   await log_action(prisma, {
-    actionType: "RETRIEVE",
-    actionName: "batch_query_laws",
-    agentName: "ScriptAction",
+    actionType: 'RETRIEVE',
+    actionName: 'batch_query_laws',
+    agentName: 'ScriptAction',
     input: { queries },
     output: results,
-    status: failureCount === 0 ? "success" : "partial",
+    status: failureCount === 0 ? 'success' : 'partial',
     executionTime: Date.now() - startTime,
   });
 
@@ -109,7 +109,7 @@ export async function batch_query_laws(
  */
 export async function external_api_call<T>(
   prisma: PrismaClient,
-  params: ExternalAPIParams,
+  params: ExternalAPIParams
 ): Promise<ExternalAPIResult<T>> {
   const startTime = Date.now();
 
@@ -117,7 +117,7 @@ export async function external_api_call<T>(
     const controller = new AbortController();
     const timeoutId = setTimeout(
       () => controller.abort(),
-      params.timeout || 10000,
+      params.timeout || 10000
     );
 
     try {
@@ -147,7 +147,7 @@ export async function external_api_call<T>(
 
       await handle_error(prisma, {
         error: error as Error,
-        actionName: "external_api_call",
+        actionName: 'external_api_call',
         context: { url: params.url },
       });
 
@@ -183,9 +183,9 @@ export async function generate_debate_arguments(
   aiService: { call: (args: unknown) => Promise<unknown> },
   params: {
     caseInfo: unknown;
-    side: "plaintiff" | "defendant";
+    side: 'plaintiff' | 'defendant';
     userId: string;
-  },
+  }
 ) {
   const startTime = Date.now();
 
@@ -199,14 +199,14 @@ export async function generate_debate_arguments(
         limit: 5,
         useCache: true,
       },
-      params.userId,
+      params.userId
     );
 
     // 2. 生成论点
     const argumentResult = await generate_argument(prisma, aiService, {
       caseInfo: params.caseInfo,
       side: params.side,
-      legalBasis: relevantLaws.articles.map((law) => law.content),
+      legalBasis: relevantLaws.articles.map(law => law.content),
     });
 
     const result = {
@@ -220,22 +220,22 @@ export async function generate_debate_arguments(
     await update_memory(
       memoryManager,
       {
-        memoryType: "WORKING",
+        memoryType: 'WORKING',
         memoryKey: `debate_arguments:${params.userId}:${Date.now()}`,
         memoryValue: result,
         importance: 0.95,
       },
-      params.userId,
+      params.userId
     );
 
     // 4. 记录行动
     await log_action(prisma, {
-      actionType: "GENERATE",
-      actionName: "generate_debate_arguments",
-      agentName: "ScriptAction",
+      actionType: 'GENERATE',
+      actionName: 'generate_debate_arguments',
+      agentName: 'ScriptAction',
       input: params,
       output: result,
-      status: "success",
+      status: 'success',
       executionTime: Date.now() - startTime,
     });
 
@@ -243,7 +243,7 @@ export async function generate_debate_arguments(
   } catch (error) {
     await handle_error(prisma, {
       error: error as Error,
-      actionName: "generate_debate_arguments",
+      actionName: 'generate_debate_arguments',
       context: params,
     });
 
@@ -259,7 +259,7 @@ export async function analyze_document_batch(
   prisma: PrismaClient,
   memoryManager: MemoryManager,
   documentIds: string[],
-  userId: string,
+  userId: string
 ) {
   const startTime = Date.now();
 
@@ -282,7 +282,7 @@ export async function analyze_document_batch(
       if (!document) {
         results.push({
           documentId,
-          error: new Error("Document not found"),
+          error: new Error('Document not found'),
         });
         continue;
       }
@@ -301,12 +301,12 @@ export async function analyze_document_batch(
       await update_memory(
         memoryManager,
         {
-          memoryType: "HOT",
+          memoryType: 'HOT',
           memoryKey: `document_analysis:${documentId}`,
           memoryValue: analysis,
           importance: 0.8,
         },
-        userId,
+        userId
       );
     } catch (error) {
       results.push({
@@ -317,20 +317,20 @@ export async function analyze_document_batch(
   }
 
   await log_action(prisma, {
-    actionType: "ANALYZE",
-    actionName: "analyze_document_batch",
-    agentName: "ScriptAction",
+    actionType: 'ANALYZE',
+    actionName: 'analyze_document_batch',
+    agentName: 'ScriptAction',
     input: { documentIds },
     output: results,
-    status: "success",
+    status: 'success',
     executionTime: Date.now() - startTime,
   });
 
   return {
     results,
     totalDocuments: documentIds.length,
-    successful: results.filter((r) => !r.error).length,
-    failed: results.filter((r) => r.error).length,
+    successful: results.filter(r => !r.error).length,
+    failed: results.filter(r => r.error).length,
   };
 }
 
@@ -343,8 +343,8 @@ export async function sync_with_external(
   params: {
     externalUrl: string;
     dataToSync: unknown;
-    syncType: "push" | "pull";
-  },
+    syncType: 'push' | 'pull';
+  }
 ): Promise<{
   success: boolean;
   syncedItems: number;
@@ -355,7 +355,7 @@ export async function sync_with_external(
 
   const apiCall = await external_api_call(prisma, {
     url: params.externalUrl,
-    method: "POST",
+    method: 'POST',
     body: {
       type: params.syncType,
       data: params.dataToSync,
@@ -365,12 +365,12 @@ export async function sync_with_external(
 
   if (apiCall.success) {
     await log_action(prisma, {
-      actionType: "COMMUNICATE",
-      actionName: "sync_with_external",
-      agentName: "ScriptAction",
+      actionType: 'COMMUNICATE',
+      actionName: 'sync_with_external',
+      agentName: 'ScriptAction',
       input: params,
       output: apiCall,
-      status: "success",
+      status: 'success',
       executionTime: Date.now() - startTime,
     });
 
@@ -410,7 +410,7 @@ export async function execute_workflow(
       params: unknown;
     }>;
   },
-  userId: string,
+  userId: string
 ) {
   const startTime = Date.now();
   const results: Array<{
@@ -424,7 +424,7 @@ export async function execute_workflow(
     try {
       let result;
       switch (step.action) {
-        case "search_laws":
+        case 'search_laws':
           result = await search_laws(
             prisma,
             memoryManager,
@@ -434,18 +434,18 @@ export async function execute_workflow(
               limit?: number;
               useCache?: boolean;
             },
-            userId,
+            userId
           );
           break;
-        case "generate_argument":
+        case 'generate_argument':
           result = await generate_argument(
             prisma,
             aiService,
             step.params as {
               caseInfo: unknown;
-              side: "plaintiff" | "defendant";
+              side: 'plaintiff' | 'defendant';
               legalBasis?: unknown;
-            },
+            }
           );
           break;
         default:
@@ -473,16 +473,16 @@ export async function execute_workflow(
     }
   }
 
-  const successCount = results.filter((r) => r.success).length;
-  const failureCount = results.filter((r) => !r.success).length;
+  const successCount = results.filter(r => r.success).length;
+  const failureCount = results.filter(r => !r.success).length;
 
   await log_action(prisma, {
-    actionType: "COMMUNICATE",
-    actionName: "execute_workflow",
-    agentName: "ScriptAction",
+    actionType: 'COMMUNICATE',
+    actionName: 'execute_workflow',
+    agentName: 'ScriptAction',
     input: workflow,
     output: results,
-    status: failureCount === 0 ? "success" : "partial",
+    status: failureCount === 0 ? 'success' : 'partial',
     executionTime: Date.now() - startTime,
   });
 

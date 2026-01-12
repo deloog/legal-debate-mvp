@@ -3,7 +3,7 @@
  * 提供资格验证、第三方核验接口
  */
 
-import type { ThirdPartyVerificationResult } from "@/types/qualification";
+import type { ThirdPartyVerificationResult } from '@/types/qualification';
 
 /**
  * 第三方验证服务配置
@@ -21,9 +21,9 @@ interface VerificationConfig {
  */
 function getVerificationConfig(): VerificationConfig {
   return {
-    apiUrl: process.env.MOJ_VERIFICATION_API_URL || "",
-    apiKey: process.env.MOJ_VERIFICATION_API_KEY || "",
-    enabled: process.env.ENABLE_MOJ_VERIFICATION === "true",
+    apiUrl: process.env.MOJ_VERIFICATION_API_URL || '',
+    apiKey: process.env.MOJ_VERIFICATION_API_KEY || '',
+    enabled: process.env.ENABLE_MOJ_VERIFICATION === 'true',
   };
 }
 
@@ -34,7 +34,7 @@ function getVerificationConfig(): VerificationConfig {
  * @returns 验证结果
  */
 async function callMoJVerificationApi(
-  licenseNumber: string,
+  licenseNumber: string
 ): Promise<ThirdPartyVerificationResult> {
   const config = getVerificationConfig();
 
@@ -48,14 +48,14 @@ async function callMoJVerificationApi(
 
   try {
     const response = await fetch(config.apiUrl, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${config.apiKey}`,
       },
       body: JSON.stringify({
         licenseNumber,
-        verifyType: "LAWYER_STATUS",
+        verifyType: 'LAWYER_STATUS',
       }),
     });
 
@@ -78,7 +78,7 @@ async function callMoJVerificationApi(
 
       return {
         success: true,
-        verified: verifiedData.status === "NORMAL",
+        verified: verifiedData.status === 'NORMAL',
         data: verifiedData,
       };
     }
@@ -88,11 +88,11 @@ async function callMoJVerificationApi(
       verified: false,
     };
   } catch (error) {
-    console.error("司法部API调用失败:", error);
+    console.error('司法部API调用失败:', error);
     return {
       success: true,
       verified: false,
-      error: error instanceof Error ? error.message : "未知错误",
+      error: error instanceof Error ? error.message : '未知错误',
     };
   }
 }
@@ -104,7 +104,7 @@ async function callMoJVerificationApi(
  * @returns 验证结果
  */
 export async function verifyLawyerQualification(
-  licenseNumber: string,
+  licenseNumber: string
 ): Promise<ThirdPartyVerificationResult> {
   return callMoJVerificationApi(licenseNumber);
 }
@@ -123,7 +123,7 @@ export async function recognizeLicensePhoto(): Promise<{
   // 前期不实现，要求用户手动输入关键信息
   return {
     success: false,
-    error: "OCR功能暂未实现，请手动输入执业证信息",
+    error: 'OCR功能暂未实现，请手动输入执业证信息',
   };
 }
 
@@ -133,12 +133,12 @@ export async function recognizeLicensePhoto(): Promise<{
  * @returns 验证数据
  */
 export function buildVerificationData(
-  verificationResult: ThirdPartyVerificationResult,
+  verificationResult: ThirdPartyVerificationResult
 ): Record<string, unknown> {
   return {
     verified: verificationResult.verified,
     verifiedAt: new Date().toISOString(),
-    source: verificationResult.data ? "MOJ_API" : "MANUAL",
+    source: verificationResult.data ? 'MOJ_API' : 'MANUAL',
     data: verificationResult.data,
     error: verificationResult.error,
   };
@@ -150,7 +150,7 @@ export function buildVerificationData(
  * @returns 是否需要人工审核
  */
 export function requiresManualReview(
-  verificationResult: ThirdPartyVerificationResult,
+  verificationResult: ThirdPartyVerificationResult
 ): boolean {
   if (!verificationResult.success) {
     return true;

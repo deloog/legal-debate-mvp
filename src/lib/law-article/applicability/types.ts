@@ -1,5 +1,5 @@
-import { LawArticle } from "@prisma/client";
-import { DocumentAnalysisOutput } from "@/lib/agent/doc-analyzer/core/types";
+import { LawArticle } from '@prisma/client';
+import { DocumentAnalysisOutput } from '@/lib/agent/doc-analyzer/core/types';
 
 /**
  * 适用性分析输入接口
@@ -90,7 +90,7 @@ export interface AIReviewResult {
  */
 export interface StatusWarning {
   /** 警告级别 */
-  level: "info" | "warning" | "error";
+  level: 'info' | 'warning' | 'error';
   /** 警告消息 */
   message: string;
 }

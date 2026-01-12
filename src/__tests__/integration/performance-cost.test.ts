@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { DocAnalyzerAgent } from "@/lib/agent/doc-analyzer/doc-analyzer-agent";
-import { LawSearcher } from "@/lib/agent/legal-agent/law-searcher";
-import type { DocumentAnalysisInput } from "@/lib/agent/doc-analyzer/core/types";
-import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+import { DocAnalyzerAgent } from '@/lib/agent/doc-analyzer/doc-analyzer-agent';
+import { LawSearcher } from '@/lib/agent/legal-agent/law-searcher';
+import type { DocumentAnalysisInput } from '@/lib/agent/doc-analyzer/core/types';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 // 设置Jest超时时间
 jest.setTimeout(60000);
 
 // Mock文件系统
-jest.mock("fs", () => ({
+jest.mock('fs', () => ({
   readFileSync: jest.fn(() => {
     return `民事起诉状
 
@@ -57,7 +57,7 @@ const testResults: PerformanceTestResult[] = [];
 // AI成本配置
 const AI_COST_PER_TOKEN = 0.00000014;
 
-describe("性能与成本验证 - 性能优化与成本控制", () => {
+describe('性能与成本验证 - 性能优化与成本控制', () => {
   let docAnalyzer: DocAnalyzerAgent;
   let lawSearcher: LawSearcher;
 
@@ -81,8 +81,8 @@ describe("性能与成本验证 - 性能优化与成本控制", () => {
     jest.clearAllTimers();
   });
 
-  describe("缓存性能验证", () => {
-    it("P1.1 应该验证MemoryAgent缓存性能", async () => {
+  describe('缓存性能验证', () => {
+    it('P1.1 应该验证MemoryAgent缓存性能', async () => {
       const startTime = Date.now();
       let success = false;
       let responseTime = 0;
@@ -100,16 +100,16 @@ describe("性能与成本验证 - 性能优化与成本控制", () => {
           const input: DocumentAnalysisInput = {
             documentId: `perf-cache-${i}`,
             content:
-              "民事起诉状\n\n原告：张三\n被告：李四\n\n诉讼请求：请求判令被告支付合同款项100000元。",
-            fileType: "TXT",
+              '民事起诉状\n\n原告：张三\n被告：李四\n\n诉讼请求：请求判令被告支付合同款项100000元。',
+            fileType: 'TXT',
             filePath: `/test/path/test-contract-${i}.txt`,
           };
 
           await docAnalyzer.execute({
-            taskType: "document-analysis",
-            task: "解析合同纠纷起诉状",
-            priority: "HIGH",
-            userId: "perf-test-user",
+            taskType: 'document-analysis',
+            task: '解析合同纠纷起诉状',
+            priority: 'HIGH',
+            userId: 'perf-test-user',
             data: input,
           } as any);
 
@@ -126,7 +126,7 @@ describe("性能与成本验证 - 性能优化与成本控制", () => {
 
         const endTime = Date.now();
         responseTime = endTime - startTime;
-        cacheHitRate = cacheHits.filter((hit) => hit === 1).length / testCases;
+        cacheHitRate = cacheHits.filter(hit => hit === 1).length / testCases;
         success = true;
         tokenCount = 800 * (1 - cacheHitRate);
         aiCost = tokenCount * AI_COST_PER_TOKEN;
@@ -135,11 +135,11 @@ describe("性能与成本验证 - 性能优化与成本控制", () => {
         expect(cacheHitRate).toBeGreaterThan(0.5);
       } catch (error) {
         success = false;
-        console.error("缓存性能测试失败:", error);
+        console.error('缓存性能测试失败:', error);
       }
 
       testResults.push({
-        testName: "P1.1 MemoryAgent缓存性能",
+        testName: 'P1.1 MemoryAgent缓存性能',
         responseTime,
         aiCost,
         tokenCount,
@@ -148,21 +148,21 @@ describe("性能与成本验证 - 性能优化与成本控制", () => {
       });
 
       console.log(
-        `📊 P1.1 缓存性能: ${success ? "✅" : "❌"}, ` +
+        `📊 P1.1 缓存性能: ${success ? '✅' : '❌'}, ` +
           `缓存命中率: ${(cacheHitRate * 100).toFixed(1)}% (目标:>60%), ` +
-          `平均响应时间: ${(responseTime / 5).toFixed(0)}ms`,
+          `平均响应时间: ${(responseTime / 5).toFixed(0)}ms`
       );
     });
   });
 
-  describe("综合性能与成本验证", () => {
+  describe('综合性能与成本验证', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    describe("综合评分验证", () => {
-      it("P4.2 应该汇总所有性能成本测试结果", () => {
-        const successfulTests = testResults.filter((t) => t.success);
+    describe('综合评分验证', () => {
+      it('P4.2 应该汇总所有性能成本测试结果', () => {
+        const successfulTests = testResults.filter(t => t.success);
 
         const metrics = {
           avgResponseTime:
@@ -174,37 +174,37 @@ describe("性能与成本验证 - 性能优化与成本控制", () => {
           totalAICost: successfulTests.reduce((sum, t) => sum + t.aiCost, 0),
           totalTokenCount: successfulTests.reduce(
             (sum, t) => sum + t.tokenCount,
-            0,
+            0
           ),
           avgCacheHitRate:
             successfulTests.reduce((sum, t) => sum + t.cacheHitRate, 0) /
             successfulTests.length,
         };
 
-        console.log("\n" + "=".repeat(60));
-        console.log("📊 性能与成本验证报告");
-        console.log("=".repeat(60) + "\n");
+        console.log('\n' + '='.repeat(60));
+        console.log('📊 性能与成本验证报告');
+        console.log('='.repeat(60) + '\n');
 
         console.log(
-          "✅ 成功测试数:",
-          `${successfulTests.length}/${testResults.length}`,
+          '✅ 成功测试数:',
+          `${successfulTests.length}/${testResults.length}`
         );
-        console.log("\n⏱️  性能指标:");
+        console.log('\n⏱️  性能指标:');
         console.log(
-          `   平均响应时间: ${metrics.avgResponseTime.toFixed(0)}ms (目标: <3000ms)`,
+          `   平均响应时间: ${metrics.avgResponseTime.toFixed(0)}ms (目标: <3000ms)`
         );
         console.log(
-          `   平均缓存命中率: ${(metrics.avgCacheHitRate * 100).toFixed(1)}% (目标: >60%)`,
+          `   平均缓存命中率: ${(metrics.avgCacheHitRate * 100).toFixed(1)}% (目标: >60%)`
         );
 
-        console.log("\n💰 AI成本:");
+        console.log('\n💰 AI成本:');
         console.log(`   总Token消耗: ${metrics.totalTokenCount}`);
         console.log(`   总AI成本: ¥${metrics.totalAICost.toFixed(4)}`);
         console.log(
-          `   平均单次成本: ¥${metrics.avgAICost.toFixed(4)} (目标: <¥0.0002)`,
+          `   平均单次成本: ¥${metrics.avgAICost.toFixed(4)} (目标: <¥0.0002)`
         );
 
-        console.log("\n" + "=".repeat(60) + "\n");
+        console.log('\n' + '='.repeat(60) + '\n');
 
         expect(metrics.avgResponseTime).toBeLessThan(3000);
         expect(metrics.avgCacheHitRate).toBeGreaterThan(0.5);

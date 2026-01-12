@@ -3,7 +3,7 @@
  * 基于Manus三层记忆架构
  */
 
-import { MemoryType } from "@prisma/client";
+import { MemoryType } from '@prisma/client';
 
 /**
  * Memory - 记忆实体

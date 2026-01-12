@@ -1,7 +1,7 @@
 // Agent依赖注入容器
 
-import type { Agent } from "../../types/agent";
-import { AgentType } from "../../types/agent";
+import type { Agent } from '../../types/agent';
+import { AgentType } from '../../types/agent';
 
 // =============================================================================
 // 依赖注入容器接口
@@ -69,7 +69,7 @@ export class AgentDIContainer {
   public register<T>(
     token: string,
     provider: DependencyProvider<T>,
-    singleton: boolean = true,
+    singleton: boolean = true
   ): void {
     this.dependencies.set(token, {
       provider,
@@ -85,7 +85,7 @@ export class AgentDIContainer {
   public registerFactory<T>(
     token: string,
     factory: DependencyFactory<T>,
-    singleton: boolean = false,
+    singleton: boolean = false
   ): void {
     this.dependencies.set(token, {
       provider: undefined,
@@ -100,7 +100,7 @@ export class AgentDIContainer {
    */
   public registerAgentConfig(
     agentName: string,
-    config: AgentCreationConfig,
+    config: AgentCreationConfig
   ): void {
     this.agentConfigs.set(agentName, config);
   }
@@ -126,7 +126,7 @@ export class AgentDIContainer {
       instance = registration.factory();
     } else if (registration.provider) {
       instance =
-        typeof registration.provider === "function"
+        typeof registration.provider === 'function'
           ? (registration.provider as () => T)()
           : registration.provider;
     } else {
@@ -166,7 +166,7 @@ export class AgentDIContainer {
     const registration = this.dependencies.get(token);
     if (
       registration?.instance &&
-      typeof registration.instance.cleanup === "function"
+      typeof registration.instance.cleanup === 'function'
     ) {
       registration.instance.cleanup();
     }
@@ -189,7 +189,7 @@ export class AgentDIContainer {
    */
   public createAgent<T extends Agent>(
     agentClass: new (...args: any[]) => T,
-    agentName: string,
+    agentName: string
   ): T {
     const config = this.getAgentConfig(agentName) || {};
 
@@ -201,7 +201,7 @@ export class AgentDIContainer {
 
     // 注入配置
     if (config.options) {
-      if (typeof instance.configure === "function") {
+      if (typeof instance.configure === 'function') {
         instance.configure(config.options);
       }
     }
@@ -209,7 +209,7 @@ export class AgentDIContainer {
     // 初始化
     if (
       config.initialize !== false &&
-      typeof instance.initialize === "function"
+      typeof instance.initialize === 'function'
     ) {
       instance.initialize();
     }
@@ -231,7 +231,7 @@ export class AgentDIContainer {
     // 使用依赖注入
     if (config.dependencies) {
       for (const [paramName, dependencyToken] of Object.entries(
-        config.dependencies,
+        config.dependencies
       )) {
         const dependency = this.resolve(dependencyToken);
         args.push(dependency);
@@ -250,7 +250,7 @@ export class AgentDIContainer {
    */
   public createAgents<T extends Agent>(
     agentClass: new (...args: any[]) => T,
-    agentNames: string[],
+    agentNames: string[]
   ): T[] {
     const agents: T[] = [];
     const errors: string[] = [];
@@ -265,7 +265,7 @@ export class AgentDIContainer {
     }
 
     if (errors.length > 0) {
-      console.warn("Batch agent creation errors:", errors);
+      console.warn('Batch agent creation errors:', errors);
     }
 
     return agents;
@@ -278,7 +278,7 @@ export class AgentDIContainer {
     // 清理所有单例实例
     for (const [token, registration] of this.dependencies.entries()) {
       if (registration.singleton && registration.instance) {
-        if (typeof registration.instance.cleanup === "function") {
+        if (typeof registration.instance.cleanup === 'function') {
           registration.instance.cleanup();
         }
       }
@@ -313,7 +313,7 @@ export class AgentDIContainer {
         token,
         singleton: registration.singleton,
         hasInstance: registration.instance !== undefined,
-      }),
+      })
     );
 
     const agentConfigs = Array.from(this.agentConfigs.entries()).map(
@@ -322,7 +322,7 @@ export class AgentDIContainer {
         hasDependencies:
           config.dependencies && Object.keys(config.dependencies).length > 0,
         hasOptions: config.options && Object.keys(config.options).length > 0,
-      }),
+      })
     );
 
     return {
@@ -368,22 +368,22 @@ export const diContainer = AgentDIContainer.getInstance();
 
 export const DEPENDENCY_TOKENS = {
   // 数据库相关
-  DATABASE: "database",
-  CACHE: "cache",
-  LOGGER: "logger",
+  DATABASE: 'database',
+  CACHE: 'cache',
+  LOGGER: 'logger',
 
   // AI服务相关
-  AI_SERVICE: "aiService",
-  AI_CLIENT: "aiClient",
+  AI_SERVICE: 'aiService',
+  AI_CLIENT: 'aiClient',
 
   // 配置相关
-  CONFIG: "config",
-  ENVIRONMENT: "environment",
+  CONFIG: 'config',
+  ENVIRONMENT: 'environment',
 
   // 工具相关
-  METRICS: "metrics",
-  MONITOR: "monitor",
+  METRICS: 'metrics',
+  MONITOR: 'monitor',
 
   // Agent相关
-  AGENT_REGISTRY: "agentRegistry",
+  AGENT_REGISTRY: 'agentRegistry',
 } as const;

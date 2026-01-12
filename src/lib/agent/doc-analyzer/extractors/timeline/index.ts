@@ -3,24 +3,24 @@
  * 主入口文件，整合所有子模块
  */
 
-import type { ExtractedData, TimelineEvent } from "../../core/types";
+import type { ExtractedData, TimelineEvent } from '../../core/types';
 import type {
   TimelineExtractionOptions,
   TimelineExtractionOutput,
-} from "./timeline-types";
+} from './timeline-types';
 
-import { aiExtractLayer } from "./timeline-ai-extractor";
-import { ruleMatchLayer } from "./timeline-rule-matcher";
-import { aiReviewLayer } from "./timeline-ai-reviewer";
+import { aiExtractLayer } from './timeline-ai-extractor';
+import { ruleMatchLayer } from './timeline-rule-matcher';
+import { aiReviewLayer } from './timeline-ai-reviewer';
 import {
   mergeAndDeduplicate,
   enrichEventsWithExtractedData,
-} from "./timeline-event-builder";
+} from './timeline-event-builder';
 import {
   sortEvents,
   detectAndFillGaps,
   generateSummary,
-} from "./timeline-analyzer";
+} from './timeline-analyzer';
 
 // 导出所有类型
 export type {
@@ -31,7 +31,7 @@ export type {
   AIExtractionResponse,
   AIReviewResponse,
   DateEventPair,
-} from "./timeline-types";
+} from './timeline-types';
 
 /**
  * 时间线提取器类 - 三层架构
@@ -46,7 +46,7 @@ export class TimelineExtractor {
   async extractFromText(
     text: string,
     extractedData?: ExtractedData,
-    options: TimelineExtractionOptions = {},
+    options: TimelineExtractionOptions = {}
   ): Promise<TimelineExtractionOutput> {
     let aiExtracted: TimelineEvent[] = [];
     let ruleExtracted: TimelineEvent[] = [];
@@ -71,13 +71,13 @@ export class TimelineExtractor {
 
     // 过滤推断结果
     if (options.includeInferred === false) {
-      mergedEvents = mergedEvents.filter((e) => e.source !== "inferred");
+      mergedEvents = mergedEvents.filter(e => e.source !== 'inferred');
     }
 
     // 过滤低重要性事件
     if (options.minImportance !== undefined) {
       mergedEvents = mergedEvents.filter(
-        (e) => (e.importance || 1) >= options.minImportance,
+        e => (e.importance || 1) >= options.minImportance
       );
     }
 
@@ -88,7 +88,7 @@ export class TimelineExtractor {
     const gapInfo = detectAndFillGaps(
       mergedEvents,
       text,
-      options.fillGaps !== false,
+      options.fillGaps !== false
     );
     if (gapInfo.inferredEvents.length > 0) {
       mergedEvents = [...mergedEvents, ...gapInfo.inferredEvents];
@@ -104,7 +104,7 @@ export class TimelineExtractor {
       gapInfo,
       aiExtracted,
       ruleExtracted,
-      aiReviewed,
+      aiReviewed
     );
 
     return { events: mergedEvents, summary, gapInfo };
@@ -124,7 +124,7 @@ export function createTimelineExtractor(): TimelineExtractor {
 export async function extractTimelineFromText(
   text: string,
   extractedData?: ExtractedData,
-  options?: TimelineExtractionOptions,
+  options?: TimelineExtractionOptions
 ): Promise<TimelineEvent[]> {
   const extractor = createTimelineExtractor();
   const result = await extractor.extractFromText(text, extractedData, options);

@@ -1,6 +1,6 @@
-import type { AIRequestConfig, AIResponse } from "../../types/ai-service";
-import cacheManager from "../cache/manager";
-import * as crypto from "crypto";
+import type { AIRequestConfig, AIResponse } from '../../types/ai-service';
+import cacheManager from '../cache/manager';
+import * as crypto from 'crypto';
 
 // =============================================================================
 // AI缓存管理器
@@ -20,7 +20,7 @@ export class AICacheManager {
    * 检查缓存
    */
   public async checkCache(
-    request: AIRequestConfig,
+    request: AIRequestConfig
   ): Promise<AIResponse | null> {
     if (!this.cacheManager) {
       return null;
@@ -36,7 +36,7 @@ export class AICacheManager {
 
       return null;
     } catch (error) {
-      console.warn("Cache check failed:", error);
+      console.warn('Cache check failed:', error);
       return null;
     }
   }
@@ -47,7 +47,7 @@ export class AICacheManager {
   public async cacheResponse(
     request: AIRequestConfig,
     response: AIResponse,
-    ttl?: number,
+    ttl?: number
   ): Promise<void> {
     if (!this.cacheManager) {
       return;
@@ -59,7 +59,7 @@ export class AICacheManager {
 
       await this.cacheManager.set(cacheKey, response, { ttl: defaultTtl });
     } catch (error) {
-      console.warn("Cache storage failed:", error);
+      console.warn('Cache storage failed:', error);
     }
   }
 
@@ -69,7 +69,7 @@ export class AICacheManager {
   private generateCacheKey(request: AIRequestConfig): string {
     const keyData = {
       model: request.model,
-      messages: request.messages.map((m) => ({
+      messages: request.messages.map(m => ({
         role: m.role,
         content: m.content,
       })),
@@ -79,9 +79,9 @@ export class AICacheManager {
 
     // 使用SHA256哈希替代Base64编码，避免长文本导致的键长度问题
     const hash = crypto
-      .createHash("sha256")
+      .createHash('sha256')
       .update(JSON.stringify(keyData))
-      .digest("hex");
+      .digest('hex');
     return `ai_chat_${hash}`;
   }
 
@@ -97,20 +97,20 @@ export class AICacheManager {
     const caseType = this.extractCaseType(caseInfo.title, caseInfo.description);
     const keyElements = this.extractKeyElements(
       caseInfo.title,
-      caseInfo.description,
+      caseInfo.description
     );
 
     // 生成基于案件类型和关键要素的模糊匹配键
     const keyData = {
       caseType,
       keyElements: keyElements.sort(), // 排序确保一致性
-      model: "deepseek-chat",
+      model: 'deepseek-chat',
     };
 
     const hash = crypto
-      .createHash("sha256")
+      .createHash('sha256')
       .update(JSON.stringify(keyData))
-      .digest("hex");
+      .digest('hex');
 
     return `debate_fuzzy_${hash}`;
   }
@@ -128,7 +128,7 @@ export class AICacheManager {
       const exactKey = this.generateDebateCacheKey(caseInfo);
       const exactMatch = await this.cacheManager.get(exactKey);
       if (exactMatch) {
-        console.log("Found exact debate cache match");
+        console.log('Found exact debate cache match');
         return exactMatch as AIResponse;
       }
 
@@ -138,7 +138,7 @@ export class AICacheManager {
 
       if (similarMatches.length > 0) {
         console.log(
-          `Found ${similarMatches.length} similar debate cache matches`,
+          `Found ${similarMatches.length} similar debate cache matches`
         );
         // 返回最相似的缓存结果
         return similarMatches[0] as AIResponse;
@@ -146,7 +146,7 @@ export class AICacheManager {
 
       return null;
     } catch (error) {
-      console.warn("Debate cache check failed:", error);
+      console.warn('Debate cache check failed:', error);
       return null;
     }
   }
@@ -161,7 +161,7 @@ export class AICacheManager {
       legalReferences?: string[];
     },
     response: AIResponse,
-    ttl?: number,
+    ttl?: number
   ): Promise<void> {
     try {
       const cacheKey = this.generateDebateCacheKey(caseInfo);
@@ -173,7 +173,7 @@ export class AICacheManager {
       const similarKey = this.generateSimilarCaseKey(caseInfo);
       await this.addToSimilarCaseIndex(similarKey, cacheKey);
     } catch (error) {
-      console.warn("Debate cache storage failed:", error);
+      console.warn('Debate cache storage failed:', error);
     }
   }
 
@@ -181,46 +181,46 @@ export class AICacheManager {
    * 提取案件类型
    */
   private extractCaseType(title: string, description: string): string {
-    const text = (title + " " + description).toLowerCase();
+    const text = (title + ' ' + description).toLowerCase();
 
-    if (text.includes("合同") || text.includes("违约")) return "合同纠纷";
-    if (text.includes("劳动") || text.includes("工资")) return "劳动纠纷";
-    if (text.includes("交通") || text.includes("事故")) return "交通事故";
-    if (text.includes("侵权") || text.includes("赔偿")) return "侵权纠纷";
-    if (text.includes("婚姻") || text.includes("离婚")) return "婚姻家庭";
-    if (text.includes("房产") || text.includes("房屋")) return "房产纠纷";
+    if (text.includes('合同') || text.includes('违约')) return '合同纠纷';
+    if (text.includes('劳动') || text.includes('工资')) return '劳动纠纷';
+    if (text.includes('交通') || text.includes('事故')) return '交通事故';
+    if (text.includes('侵权') || text.includes('赔偿')) return '侵权纠纷';
+    if (text.includes('婚姻') || text.includes('离婚')) return '婚姻家庭';
+    if (text.includes('房产') || text.includes('房屋')) return '房产纠纷';
 
-    return "其他纠纷";
+    return '其他纠纷';
   }
 
   /**
    * 提取案件关键要素
    */
   private extractKeyElements(title: string, description: string): string[] {
-    const text = (title + " " + description).toLowerCase();
+    const text = (title + ' ' + description).toLowerCase();
     const elements: string[] = [];
 
     // 常见法律关键词
     const legalKeywords = [
-      "违约",
-      "侵权",
-      "赔偿",
-      "解除",
-      "无效",
-      "撤销",
-      "定金",
-      "违约金",
-      "损失",
-      "医疗费",
-      "误工费",
-      "工资",
-      "经济补偿",
-      "解除合同",
-      "过户",
-      "交付",
+      '违约',
+      '侵权',
+      '赔偿',
+      '解除',
+      '无效',
+      '撤销',
+      '定金',
+      '违约金',
+      '损失',
+      '医疗费',
+      '误工费',
+      '工资',
+      '经济补偿',
+      '解除合同',
+      '过户',
+      '交付',
     ];
 
-    legalKeywords.forEach((keyword) => {
+    legalKeywords.forEach(keyword => {
       if (text.includes(keyword)) {
         elements.push(keyword);
       }
@@ -240,10 +240,10 @@ export class AICacheManager {
     const caseType = this.extractCaseType(caseInfo.title, caseInfo.description);
     const keyElements = this.extractKeyElements(
       caseInfo.title,
-      caseInfo.description,
+      caseInfo.description
     );
 
-    return `similar_${caseType}_${keyElements.slice(0, 3).sort().join("_")}`;
+    return `similar_${caseType}_${keyElements.slice(0, 3).sort().join('_')}`;
   }
 
   /**
@@ -259,13 +259,13 @@ export class AICacheManager {
 
       // 批量获取缓存内容
       const promises = keysArray.map((key: string) =>
-        this.cacheManager.get(key).catch(() => null),
+        this.cacheManager.get(key).catch(() => null)
       );
 
       const results = await Promise.all(promises);
-      return results.filter((result) => result !== null);
+      return results.filter(result => result !== null);
     } catch (error) {
-      console.warn("Find similar debates failed:", error);
+      console.warn('Find similar debates failed:', error);
       return [];
     }
   }
@@ -275,7 +275,7 @@ export class AICacheManager {
    */
   private async addToSimilarCaseIndex(
     similarKey: string,
-    cacheKey: string,
+    cacheKey: string
   ): Promise<void> {
     try {
       const existingKeys = (await this.cacheManager.get(similarKey)) || [];
@@ -285,7 +285,7 @@ export class AICacheManager {
 
       await this.cacheManager.set(similarKey, updatedKeys, { ttl: 3600 }); // 索引缓存1小时
     } catch (error) {
-      console.warn("Add to similar case index failed:", error);
+      console.warn('Add to similar case index failed:', error);
     }
   }
 
@@ -306,13 +306,13 @@ export class AICacheManager {
         }
       } else {
         // 清除所有AI相关缓存
-        const aiKeys = await this.getCacheKeys("ai_chat_*");
+        const aiKeys = await this.getCacheKeys('ai_chat_*');
         if (aiKeys.length > 0) {
           await this.cacheManager.mdelete(aiKeys);
         }
       }
     } catch (error) {
-      console.warn("Cache clear failed:", error);
+      console.warn('Cache clear failed:', error);
     }
   }
 

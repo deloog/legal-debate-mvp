@@ -1,26 +1,38 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withErrorHandler } from "@/app/api/lib/errors/error-handler";
+import { NextRequest, NextResponse } from 'next/server';
+import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import {
   createPaginatedResponse,
   createCreatedResponse,
-} from "@/app/api/lib/responses/api-response";
+} from '@/app/api/lib/responses/api-response';
 import {
   validateQueryParams,
   validateRequestBody,
-} from "@/app/api/lib/validation/validator";
+} from '@/app/api/lib/validation/validator';
 import {
   createDebateSchema,
   paginationSchema,
-} from "@/app/api/lib/validation/schemas";
-import { buildPaginationOptions } from "@/app/api/lib/responses/pagination";
-import { prisma } from "@/lib/db/prisma";
-import { DebateStatus } from "@prisma/client";
+} from '@/app/api/lib/validation/schemas';
+import { buildPaginationOptions } from '@/app/api/lib/responses/pagination';
+import { prisma } from '@/lib/db/prisma';
+import { DebateStatus } from '@prisma/client';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { isAdminRole } from '@/lib/middleware/resource-permission';
+import { UserRole } from '@/types/auth';
 
 /**
  * GET /api/v1/debates
  * 获取辩论列表（支持分页和搜索）
  */
 export const GET = withErrorHandler(async (request: NextRequest) => {
+  // 获取认证用户
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { error: '未认证', message: '请先登录' },
+      { status: 401 }
+    );
+  }
+
   // 验证查询参数
   const query = validateQueryParams(request, paginationSchema);
   const { search, page, limit } = query;
@@ -28,17 +40,32 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   // 构建查询选项
   const options = buildPaginationOptions(query);
 
-  // 构建搜索条件
-  const whereCondition = search
-    ? {
-        OR: [
-          { title: { contains: search, mode: "insensitive" as const } },
-          {
-            case: { title: { contains: search, mode: "insensitive" as const } },
-          },
-        ],
-      }
-    : {};
+  // 获取可选的userId过滤参数
+  const { searchParams } = new URL(request.url);
+  const userIdFilter = searchParams.get('userId');
+
+  // 构建查询条件
+  const whereCondition: Record<string, unknown> = {
+    deletedAt: null,
+  };
+
+  // 权限过滤：非管理员只能看到自己创建的辩论
+  if (!isAdminRole(authUser.role as UserRole)) {
+    whereCondition.userId = authUser.userId;
+  } else if (userIdFilter) {
+    // 管理员可以根据userId参数过滤
+    whereCondition.userId = userIdFilter;
+  }
+
+  // 添加搜索条件
+  if (search) {
+    whereCondition.OR = [
+      { title: { contains: search, mode: 'insensitive' as const } },
+      {
+        case: { title: { contains: search, mode: 'insensitive' as const } },
+      },
+    ];
+  }
 
   // 并行执行数据查询和总数统计
   const [debates, total] = await Promise.all([
@@ -66,7 +93,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
         },
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
       ...options,
     }),
@@ -93,6 +120,15 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
  * 创建新辩论
  */
 export const POST = withErrorHandler(async (request: NextRequest) => {
+  // 获取认证用户
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { error: '未认证', message: '请先登录' },
+      { status: 401 }
+    );
+  }
+
   // 验证请求体
   const body = await validateRequestBody(request, createDebateSchema);
 
@@ -107,28 +143,16 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       {
         success: false,
         error: {
-          code: "CASE_NOT_FOUND",
-          message: "指定的案件不存在",
+          code: 'CASE_NOT_FOUND',
+          message: '指定的案件不存在',
         },
       },
-      { status: 404 },
+      { status: 404 }
     );
   }
 
-  // TODO: 从认证中获取实际用户ID，这里临时使用第一个用户
-  let userId = (await prisma.user.findFirst({ select: { id: true } }))?.id;
-
-  if (!userId) {
-    // 如果没有用户，创建一个临时测试用户
-    const testUser = await prisma.user.create({
-      data: {
-        email: `test-${Date.now()}@example.com`,
-        username: `testuser-${Date.now()}`,
-        name: "Test User",
-      },
-    });
-    userId = testUser.id;
-  }
+  // 从token获取用户ID
+  const userId = authUser.userId;
 
   // 创建新的辩论和初始轮次
   const bodyInput = body as {
@@ -143,7 +167,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const newDebate = await prisma.debate.create({
     data: {
       caseId: body.caseId,
-      userId: userId,
+      userId,
       title: body.title,
       debateConfig: body.config,
       status: debateStatus,
@@ -153,8 +177,8 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
           roundNumber: 1,
           status:
             debateStatus === DebateStatus.IN_PROGRESS
-              ? "IN_PROGRESS"
-              : "PENDING",
+              ? 'IN_PROGRESS'
+              : 'PENDING',
         },
       },
     },
@@ -175,7 +199,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       },
       rounds: {
         orderBy: {
-          roundNumber: "asc",
+          roundNumber: 'asc',
         },
       },
     },
@@ -192,10 +216,10 @@ export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Access-Control-Max-Age": "86400",
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
     },
   });
 });

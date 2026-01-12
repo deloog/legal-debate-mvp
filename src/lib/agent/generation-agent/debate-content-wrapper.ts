@@ -4,9 +4,9 @@ import {
   DebateGenerationResult,
   Argument,
   LegalReference,
-} from "@/types/debate";
-import type { LawArticle } from "@prisma/client";
-import { DebateGenerationConfig, QualityMetrics } from "./types";
+} from '@/types/debate';
+import type { LawArticle } from '@prisma/client';
+import { DebateGenerationConfig, QualityMetrics } from './types';
 
 /**
  * 辩论内容包装器类
@@ -16,7 +16,7 @@ export class DebateContentWrapper {
 
   constructor(config: Partial<DebateGenerationConfig> = {}) {
     this.config = {
-      balanceStrictness: config.balanceStrictness ?? "medium",
+      balanceStrictness: config.balanceStrictness ?? 'medium',
       includeLegalAnalysis: config.includeLegalAnalysis ?? true,
       maxArgumentsPerSide: config.maxArgumentsPerSide ?? 3,
       qualityThreshold: config.qualityThreshold ?? 0.7,
@@ -29,7 +29,7 @@ export class DebateContentWrapper {
   wrapDebateResult(
     plaintiffArguments: Argument[],
     defendantArguments: Argument[],
-    lawArticles: LawArticle[],
+    lawArticles: LawArticle[]
   ): DebateGenerationResult {
     const validPlaintiffArguments =
       this.validateAndFilterArguments(plaintiffArguments);
@@ -38,17 +38,17 @@ export class DebateContentWrapper {
 
     const balancedPlaintiffArgs = this.balanceArguments(
       validPlaintiffArguments,
-      validDefendantArguments,
+      validDefendantArguments
     );
     const balancedDefendantArgs = this.balanceArguments(
       validDefendantArguments,
-      validPlaintiffArguments,
+      validPlaintiffArguments
     );
 
     const legalBasis = this.convertToLegalReferences(lawArticles);
     const qualityScore = this.calculateOverallQuality(
       balancedPlaintiffArgs,
-      balancedDefendantArgs,
+      balancedDefendantArgs
     );
 
     return {
@@ -57,7 +57,7 @@ export class DebateContentWrapper {
       legalBasis,
       metadata: {
         generatedAt: new Date(),
-        model: "deepseek",
+        model: 'deepseek',
         tokensUsed: 0,
         confidence: qualityScore,
         executionTime: 0,
@@ -69,12 +69,12 @@ export class DebateContentWrapper {
    * 包装单方论点
    */
   wrapSideArguments(
-    side: "plaintiff" | "defendant",
+    side: 'plaintiff' | 'defendant',
     argumentsList: Argument[],
-    lawArticles: LawArticle[],
+    lawArticles: LawArticle[]
   ): Argument[] {
     const validArguments = this.validateAndFilterArguments(argumentsList);
-    const wrappedArguments = validArguments.map((arg) => ({
+    const wrappedArguments = validArguments.map(arg => ({
       ...arg,
       legalBasis: this.getLegalBasisForArgument(arg, lawArticles),
       reasoning: this.enhanceReasoning(arg),
@@ -88,9 +88,9 @@ export class DebateContentWrapper {
    * 格式化辩论输出为文本
    */
   formatDebateAsText(result: DebateGenerationResult): string {
-    let output = "";
+    let output = '';
 
-    output += "【原告观点】\n";
+    output += '【原告观点】\n';
     result.plaintiffArguments.forEach((arg, index) => {
       output += `${index + 1}. ${arg.content}\n`;
       if (arg.legalBasis) {
@@ -99,10 +99,10 @@ export class DebateContentWrapper {
       if (arg.reasoning) {
         output += `   论证：${arg.reasoning}\n`;
       }
-      output += "\n";
+      output += '\n';
     });
 
-    output += "\n【被告观点】\n";
+    output += '\n【被告观点】\n';
     result.defendantArguments.forEach((arg, index) => {
       output += `${index + 1}. ${arg.content}\n`;
       if (arg.legalBasis) {
@@ -111,15 +111,15 @@ export class DebateContentWrapper {
       if (arg.reasoning) {
         output += `   论证：${arg.reasoning}\n`;
       }
-      output += "\n";
+      output += '\n';
     });
 
     if (this.config.includeLegalAnalysis && result.legalBasis.length > 0) {
-      output += "\n【法律依据】\n";
+      output += '\n【法律依据】\n';
       result.legalBasis.forEach((ref, index) => {
         output += `${index + 1}. ${ref.lawName} ${ref.articleNumber}\n`;
         output += `   ${ref.fullText?.substring(0, 100)}...\n`;
-        output += "\n";
+        output += '\n';
       });
     }
 
@@ -138,7 +138,7 @@ export class DebateContentWrapper {
         metadata: result.metadata,
       },
       null,
-      2,
+      2
     );
   }
 
@@ -146,7 +146,7 @@ export class DebateContentWrapper {
    * 验证并过滤论点
    */
   private validateAndFilterArguments(argumentList: Argument[]): Argument[] {
-    return argumentList.filter((arg) => {
+    return argumentList.filter(arg => {
       if (!arg.content || arg.content.trim().length === 0) {
         return false;
       }
@@ -167,7 +167,7 @@ export class DebateContentWrapper {
    */
   private balanceArguments(
     targetArguments: Argument[],
-    opponentArguments: Argument[],
+    opponentArguments: Argument[]
   ): Argument[] {
     const maxCount = this.config.maxArgumentsPerSide!;
 
@@ -185,9 +185,9 @@ export class DebateContentWrapper {
    * 转换法律依据
    */
   private convertToLegalReferences(
-    lawArticles: LawArticle[],
+    lawArticles: LawArticle[]
   ): LegalReference[] {
-    return lawArticles.map((article) => ({
+    return lawArticles.map(article => ({
       lawName: article.lawName,
       articleNumber: article.articleNumber,
       fullText: article.fullText,
@@ -201,17 +201,17 @@ export class DebateContentWrapper {
    */
   private getLegalBasisForArgument(
     argument: Argument,
-    lawArticles: LawArticle[],
+    lawArticles: LawArticle[]
   ): string {
     if (argument.legalBasis) {
       return argument.legalBasis;
     }
 
     const keywords = this.extractKeywords(argument.content);
-    const matchedArticles = lawArticles.filter((article) =>
-      keywords.some((keyword) =>
-        article.fullText?.toLowerCase().includes(keyword.toLowerCase()),
-      ),
+    const matchedArticles = lawArticles.filter(article =>
+      keywords.some(keyword =>
+        article.fullText?.toLowerCase().includes(keyword.toLowerCase())
+      )
     );
 
     if (matchedArticles.length > 0) {
@@ -219,7 +219,7 @@ export class DebateContentWrapper {
       return `《${article.lawName}》${article.articleNumber}`;
     }
 
-    return "暂无明确法律依据";
+    return '暂无明确法律依据';
   }
 
   /**
@@ -230,7 +230,7 @@ export class DebateContentWrapper {
       return argument.reasoning;
     }
 
-    return "基于上述事实，本观点具有合理性和法律依据。";
+    return '基于上述事实，本观点具有合理性和法律依据。';
   }
 
   /**
@@ -238,39 +238,39 @@ export class DebateContentWrapper {
    */
   private extractKeywords(text: string): string[] {
     const commonWords = new Set([
-      "的",
-      "了",
-      "在",
-      "是",
-      "我",
-      "有",
-      "和",
-      "就",
-      "不",
-      "人",
-      "都",
-      "一",
-      "一个",
-      "上",
-      "也",
-      "很",
-      "到",
-      "说",
-      "要",
-      "去",
-      "你",
-      "会",
-      "着",
-      "没有",
-      "看",
-      "好",
-      "自己",
-      "这",
+      '的',
+      '了',
+      '在',
+      '是',
+      '我',
+      '有',
+      '和',
+      '就',
+      '不',
+      '人',
+      '都',
+      '一',
+      '一个',
+      '上',
+      '也',
+      '很',
+      '到',
+      '说',
+      '要',
+      '去',
+      '你',
+      '会',
+      '着',
+      '没有',
+      '看',
+      '好',
+      '自己',
+      '这',
     ]);
 
     return text
       .split(/[，。！？、\s]+/)
-      .filter((word) => word.length > 1 && !commonWords.has(word))
+      .filter(word => word.length > 1 && !commonWords.has(word))
       .slice(0, 5);
   }
 
@@ -279,19 +279,19 @@ export class DebateContentWrapper {
    */
   private calculateOverallQuality(
     plaintiffArgs: Argument[],
-    defendantArgs: Argument[],
+    defendantArgs: Argument[]
   ): number {
     let totalScore = 0;
     let count = 0;
 
-    plaintiffArgs.forEach((arg) => {
+    plaintiffArgs.forEach(arg => {
       if (arg.score !== undefined) {
         totalScore += arg.score;
         count++;
       }
     });
 
-    defendantArgs.forEach((arg) => {
+    defendantArgs.forEach(arg => {
       if (arg.score !== undefined) {
         totalScore += arg.score;
         count++;
@@ -335,11 +335,11 @@ export class DebateContentWrapper {
     if (argumentList.length === 0) return 0;
 
     let totalClarity = 0;
-    argumentList.forEach((arg) => {
+    argumentList.forEach(arg => {
       let clarity = 0.5;
       if (arg.content.length > 20) clarity += 0.2;
       if (arg.content.length > 50) clarity += 0.2;
-      if (arg.content.includes("，") || arg.content.includes("、"))
+      if (arg.content.includes('，') || arg.content.includes('、'))
         clarity += 0.1;
       totalClarity += Math.min(1, clarity);
     });
@@ -354,7 +354,7 @@ export class DebateContentWrapper {
     if (argumentList.length === 0) return 0;
 
     let totalLogic = 0;
-    argumentList.forEach((arg) => {
+    argumentList.forEach(arg => {
       let logic = 0.5;
       if (arg.legalBasis) logic += 0.2;
       if (arg.reasoning) logic += 0.2;

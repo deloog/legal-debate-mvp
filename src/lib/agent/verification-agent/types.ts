@@ -231,70 +231,70 @@ export interface QualityThresholdCheck {
  * 问题类型枚举
  */
 export enum IssueType {
-  MISSING_DATA = "missing_data",
-  INCORRECT_DATA = "incorrect_data",
-  INCONSISTENT_DATA = "inconsistent_data",
-  LOGICAL_ERROR = "logical_error",
-  FORMAT_ERROR = "format_error",
-  VALIDATION_ERROR = "validation_error",
-  BUSINESS_RULE_VIOLATION = "business_rule_violation",
-  QUALITY_BELOW_THRESHOLD = "quality_below_threshold",
-  CONTRADICTION = "contradiction",
-  AMBIGUITY = "ambiguity",
+  MISSING_DATA = 'missing_data',
+  INCORRECT_DATA = 'incorrect_data',
+  INCONSISTENT_DATA = 'inconsistent_data',
+  LOGICAL_ERROR = 'logical_error',
+  FORMAT_ERROR = 'format_error',
+  VALIDATION_ERROR = 'validation_error',
+  BUSINESS_RULE_VIOLATION = 'business_rule_violation',
+  QUALITY_BELOW_THRESHOLD = 'quality_below_threshold',
+  CONTRADICTION = 'contradiction',
+  AMBIGUITY = 'ambiguity',
 }
 
 /**
  * 问题严重程度
  */
 export enum IssueSeverity {
-  CRITICAL = "critical",
-  HIGH = "high",
-  MEDIUM = "medium",
-  LOW = "low",
+  CRITICAL = 'critical',
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low',
 }
 
 /**
  * 问题类别
  */
 export enum IssueCategory {
-  FACTUAL = "factual",
-  LOGICAL = "logical",
-  COMPLETENESS = "completeness",
-  FORMAT = "format",
-  QUALITY = "quality",
+  FACTUAL = 'factual',
+  LOGICAL = 'logical',
+  COMPLETENESS = 'completeness',
+  FORMAT = 'format',
+  QUALITY = 'quality',
 }
 
 /**
  * 建议类型
  */
 export enum SuggestionType {
-  DATA_COMPLETION = "data_completion",
-  DATA_CORRECTION = "data_correction",
-  LOGIC_IMPROVEMENT = "logic_improvement",
-  FORMAT_STANDARDIZATION = "format_standardization",
-  VALIDATION_ENHANCEMENT = "validation_enhancement",
-  RISK_MITIGATION = "risk_mitigation",
+  DATA_COMPLETION = 'data_completion',
+  DATA_CORRECTION = 'data_correction',
+  LOGIC_IMPROVEMENT = 'logic_improvement',
+  FORMAT_STANDARDIZATION = 'format_standardization',
+  VALIDATION_ENHANCEMENT = 'validation_enhancement',
+  RISK_MITIGATION = 'risk_mitigation',
 }
 
 /**
  * 建议优先级
  */
 export enum SuggestionPriority {
-  URGENT = "urgent",
-  HIGH = "high",
-  MEDIUM = "medium",
-  LOW = "low",
+  URGENT = 'urgent',
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low',
 }
 
 /**
  * 矛盾类型
  */
 export enum ContradictionType {
-  FACTUAL = "factual",
-  LOGICAL = "logical",
-  TEMPORAL = "temporal",
-  CAUSAL = "causal",
-  LEGAL = "legal",
+  FACTUAL = 'factual',
+  LOGICAL = 'logical',
+  TEMPORAL = 'temporal',
+  CAUSAL = 'causal',
+  LEGAL = 'legal',
 }
 
 /**
@@ -336,7 +336,7 @@ export const DEFAULT_VERIFICATION_CONFIG: VerificationConfig = {
   },
   aiSettings: {
     enabled: true,
-    provider: "zhipu",
+    provider: 'zhipu',
     timeout: 30000,
   },
 };

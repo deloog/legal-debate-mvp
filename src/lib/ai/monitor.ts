@@ -7,7 +7,7 @@ import type {
   HealthStatus,
   ServiceStatus,
   AIErrorType,
-} from "../../types/ai-service";
+} from '../../types/ai-service';
 
 // =============================================================================
 // AI监控系统实现
@@ -45,29 +45,29 @@ export class AIMonitor {
   private initializeAlertThresholds(): void {
     if (this.config.alertThresholds) {
       this.alertThresholds.set(
-        "responseTime",
-        this.config.alertThresholds.responseTime,
+        'responseTime',
+        this.config.alertThresholds.responseTime
       );
       this.alertThresholds.set(
-        "errorRate",
-        this.config.alertThresholds.errorRate,
+        'errorRate',
+        this.config.alertThresholds.errorRate
       );
       this.alertThresholds.set(
-        "rateLimitHits",
-        this.config.alertThresholds.rateLimitHits,
+        'rateLimitHits',
+        this.config.alertThresholds.rateLimitHits
       );
       this.alertThresholds.set(
-        "queueLength",
-        this.config.alertThresholds.queueLength,
+        'queueLength',
+        this.config.alertThresholds.queueLength
       );
     }
   }
 
   public start(): void {
     // 测试环境不启动定时器，避免Jest异步清理错误
-    if (process.env.NODE_ENV === "test") {
-      this.logEvent("monitor_start", undefined, undefined, {
-        message: "AI Monitor started (test mode - no interval)",
+    if (process.env.NODE_ENV === 'test') {
+      this.logEvent('monitor_start', undefined, undefined, {
+        message: 'AI Monitor started (test mode - no interval)',
       });
       return;
     }
@@ -80,8 +80,8 @@ export class AIMonitor {
       this.collectMetrics();
     }, this.config.metricsInterval);
 
-    this.logEvent("monitor_start", undefined, undefined, {
-      message: "AI Monitor started",
+    this.logEvent('monitor_start', undefined, undefined, {
+      message: 'AI Monitor started',
     });
   }
 
@@ -91,8 +91,8 @@ export class AIMonitor {
       this.metricsInterval = null;
     }
 
-    this.logEvent("monitor_stop", undefined, undefined, {
-      message: "AI Monitor stopped",
+    this.logEvent('monitor_stop', undefined, undefined, {
+      message: 'AI Monitor stopped',
     });
   }
 
@@ -121,7 +121,7 @@ export class AIMonitor {
     const requestId = this.generateRequestId();
     const startTime = Date.now();
 
-    this.logEvent("request_start", provider, model, {
+    this.logEvent('request_start', provider, model, {
       requestId,
       startTime,
     });
@@ -137,7 +137,7 @@ export class AIMonitor {
     responseTime: number,
     tokensUsed: number = 0,
     cacheHit: boolean = false,
-    errorType?: string,
+    errorType?: string
   ): void {
     const metrics: PerformanceMetrics = {
       provider,
@@ -168,7 +168,7 @@ export class AIMonitor {
     this.updateHealthStatus(provider, success, responseTime, errorType);
 
     // 记录事件
-    const eventType = success ? "request_complete" : "request_error";
+    const eventType = success ? 'request_complete' : 'request_error';
     this.logEvent(eventType, provider, model, {
       requestId,
       responseTime,
@@ -182,34 +182,34 @@ export class AIMonitor {
   }
 
   public recordProviderSwitch(provider: AIProvider, reason: string): void {
-    this.logEvent("provider_switch", provider, undefined, { reason });
+    this.logEvent('provider_switch', provider, undefined, { reason });
   }
 
   public recordFallbackActivation(
     provider: AIProvider,
-    strategy: string,
+    strategy: string
   ): void {
-    this.logEvent("fallback_activated", provider, undefined, { strategy });
+    this.logEvent('fallback_activated', provider, undefined, { strategy });
   }
 
   public recordRateLimitHit(provider: AIProvider, resetTime?: number): void {
-    this.logEvent("rate_limit_hit", provider, undefined, { resetTime });
+    this.logEvent('rate_limit_hit', provider, undefined, { resetTime });
   }
 
   public recordCacheHit(provider: AIProvider, key: string): void {
-    this.logEvent("cache_hit", provider, undefined, { key });
+    this.logEvent('cache_hit', provider, undefined, { key });
   }
 
   public recordCacheMiss(provider: AIProvider, key: string): void {
-    this.logEvent("cache_miss", provider, undefined, { key });
+    this.logEvent('cache_miss', provider, undefined, { key });
   }
 
   public recordHealthCheck(
     provider: AIProvider,
     healthy: boolean,
-    responseTime: number,
+    responseTime: number
   ): void {
-    this.logEvent("health_check", provider, undefined, {
+    this.logEvent('health_check', provider, undefined, {
       healthy,
       responseTime,
     });
@@ -225,7 +225,7 @@ export class AIMonitor {
     provider: AIProvider,
     success: boolean,
     responseTime: number,
-    errorType?: string,
+    errorType?: string
   ): void {
     let health = this.healthStatus.get(provider);
 
@@ -259,14 +259,14 @@ export class AIMonitor {
       provider,
       success,
       responseTime,
-      errorType,
+      errorType
     );
 
     if (health.healthy !== isHealthy) {
       health.healthy = isHealthy;
-      this.logEvent("health_change", provider, undefined, {
+      this.logEvent('health_change', provider, undefined, {
         healthy: isHealthy,
-        reason: isHealthy ? "recovered" : "degraded",
+        reason: isHealthy ? 'recovered' : 'degraded',
       });
     }
   }
@@ -275,7 +275,7 @@ export class AIMonitor {
     provider: AIProvider,
     success: boolean,
     responseTime: number,
-    errorType?: string,
+    errorType?: string
   ): boolean {
     // 如果最近有连续失败，标记为不健康
     const health = this.healthStatus.get(provider);
@@ -285,16 +285,16 @@ export class AIMonitor {
 
     // 响应时间过长，标记为不健康
     const responseTimeThreshold =
-      this.alertThresholds.get("responseTime") || 10000; // 10秒
+      this.alertThresholds.get('responseTime') || 10000; // 10秒
     if (responseTime > responseTimeThreshold) {
       return false;
     }
 
     // 特定错误类型，标记为不健康
     const criticalErrors = [
-      "authentication_error",
-      "permission_error",
-      "insufficient_quota",
+      'authentication_error',
+      'permission_error',
+      'insufficient_quota',
     ];
     if (errorType && criticalErrors.includes(errorType)) {
       return false;
@@ -314,9 +314,9 @@ export class AIMonitor {
 
     // 检查响应时间告警
     const avgResponseTime = this.calculateAverageResponseTime(recentMetrics);
-    const responseTimeThreshold = this.alertThresholds.get("responseTime");
+    const responseTimeThreshold = this.alertThresholds.get('responseTime');
     if (responseTimeThreshold && avgResponseTime > responseTimeThreshold) {
-      this.triggerAlert("high_response_time", provider, {
+      this.triggerAlert('high_response_time', provider, {
         average: avgResponseTime,
         threshold: responseTimeThreshold,
       });
@@ -324,9 +324,9 @@ export class AIMonitor {
 
     // 检查错误率告警
     const errorRate = this.calculateErrorRate(recentMetrics);
-    const errorRateThreshold = this.alertThresholds.get("errorRate");
+    const errorRateThreshold = this.alertThresholds.get('errorRate');
     if (errorRateThreshold && errorRate > errorRateThreshold) {
-      this.triggerAlert("high_error_rate", provider, {
+      this.triggerAlert('high_error_rate', provider, {
         errorRate,
         threshold: errorRateThreshold,
       });
@@ -334,9 +334,9 @@ export class AIMonitor {
 
     // 检查速率限制告警
     const rateLimitHits = this.countRateLimitHits(provider, 300000);
-    const rateLimitThreshold = this.alertThresholds.get("rateLimitHits");
+    const rateLimitThreshold = this.alertThresholds.get('rateLimitHits');
     if (rateLimitThreshold && rateLimitHits > rateLimitThreshold) {
-      this.triggerAlert("rate_limit_exceeded", provider, {
+      this.triggerAlert('rate_limit_exceeded', provider, {
         count: rateLimitHits,
         threshold: rateLimitThreshold,
       });
@@ -346,7 +346,7 @@ export class AIMonitor {
   private triggerAlert(
     type: string,
     provider: AIProvider,
-    data: Record<string, unknown>,
+    data: Record<string, unknown>
   ): void {
     const alert = {
       type,
@@ -357,19 +357,19 @@ export class AIMonitor {
     };
 
     // 记录告警事件
-    this.logEvent("alert", provider, undefined, alert);
+    this.logEvent('alert', provider, undefined, alert);
 
     // 根据严重程度输出不同级别的日志
     const message = `Alert [${type}] for provider ${provider}: ${JSON.stringify(data)}`;
 
     switch (alert.severity) {
-      case "critical":
+      case 'critical':
         console.error(`🚨 CRITICAL: ${message}`);
         break;
-      case "warning":
+      case 'warning':
         console.warn(`⚠️  WARNING: ${message}`);
         break;
-      case "info":
+      case 'info':
         console.info(`ℹ️  INFO: ${message}`);
         break;
       default:
@@ -377,17 +377,17 @@ export class AIMonitor {
     }
   }
 
-  private getAlertSeverity(type: string): "critical" | "warning" | "info" {
-    const severityMap: Record<string, "critical" | "warning" | "info"> = {
-      high_response_time: "warning",
-      high_error_rate: "critical",
-      rate_limit_exceeded: "warning",
-      provider_down: "critical",
-      authentication_error: "critical",
-      insufficient_quota: "critical",
+  private getAlertSeverity(type: string): 'critical' | 'warning' | 'info' {
+    const severityMap: Record<string, 'critical' | 'warning' | 'info'> = {
+      high_response_time: 'warning',
+      high_error_rate: 'critical',
+      rate_limit_exceeded: 'warning',
+      provider_down: 'critical',
+      authentication_error: 'critical',
+      insufficient_quota: 'critical',
     };
 
-    return severityMap[type] || "info";
+    return severityMap[type] || 'info';
   }
 
   // =============================================================================
@@ -398,7 +398,7 @@ export class AIMonitor {
     type: MonitorEventType,
     provider?: AIProvider,
     model?: string,
-    data?: Record<string, unknown>,
+    data?: Record<string, unknown>
   ): void {
     const event: MonitorEvent = {
       type,
@@ -422,26 +422,26 @@ export class AIMonitor {
   }
 
   private outputLog(event: MonitorEvent): void {
-    const logLevel = this.config.logLevel || "info";
+    const logLevel = this.config.logLevel || 'info';
     const message =
       `[${new Date(event.timestamp).toISOString()}] ${event.type.toUpperCase()}` +
-      (event.provider ? ` [${event.provider}]` : "") +
-      (event.model ? ` [${event.model}]` : "") +
+      (event.provider ? ` [${event.provider}]` : '') +
+      (event.model ? ` [${event.model}]` : '') +
       (event.data && Object.keys(event.data).length > 0
         ? ` ${JSON.stringify(event.data)}`
-        : "");
+        : '');
 
     switch (logLevel) {
-      case "debug":
+      case 'debug':
         console.debug(message);
         break;
-      case "info":
+      case 'info':
         console.info(message);
         break;
-      case "warn":
+      case 'warn':
         console.warn(message);
         break;
-      case "error":
+      case 'error':
         console.error(message);
         break;
     }
@@ -454,16 +454,16 @@ export class AIMonitor {
   private collectMetrics(): void {
     // 定期收集和聚合指标
     const providers: AIProvider[] = [
-      "zhipu",
-      "deepseek",
-      "openai",
-      "anthropic",
+      'zhipu',
+      'deepseek',
+      'openai',
+      'anthropic',
     ];
 
-    providers.forEach((provider) => {
+    providers.forEach(provider => {
       const recentMetrics = this.getRecentMetrics(
         provider,
-        this.config.metricsInterval,
+        this.config.metricsInterval
       );
       if (recentMetrics.length > 0) {
         const avgResponseTime =
@@ -471,7 +471,7 @@ export class AIMonitor {
         const errorRate = this.calculateErrorRate(recentMetrics);
         const totalTokens = this.calculateTotalTokens(recentMetrics);
 
-        this.logEvent("metrics_collected", provider, undefined, {
+        this.logEvent('metrics_collected', provider, undefined, {
           interval: this.config.metricsInterval,
           requestCount: recentMetrics.length,
           avgResponseTime,
@@ -491,9 +491,7 @@ export class AIMonitor {
 
     // 清理过期指标
     this.metrics.forEach((metricsList, key) => {
-      const filteredMetrics = metricsList.filter(
-        (m) => m.timestamp > cutoffTime,
-      );
+      const filteredMetrics = metricsList.filter(m => m.timestamp > cutoffTime);
       if (filteredMetrics.length === 0) {
         this.metrics.delete(key);
       } else {
@@ -502,7 +500,7 @@ export class AIMonitor {
     });
 
     // 清理过期事件
-    this.events = this.events.filter((e) => e.timestamp > cutoffTime);
+    this.events = this.events.filter(e => e.timestamp > cutoffTime);
   }
 
   // =============================================================================
@@ -515,14 +513,14 @@ export class AIMonitor {
 
   private getRecentMetrics(
     provider: AIProvider,
-    timeWindow: number,
+    timeWindow: number
   ): PerformanceMetrics[] {
     const cutoffTime = Date.now() - timeWindow;
     const recentMetrics: PerformanceMetrics[] = [];
 
     this.metrics.forEach((metricsList, key) => {
       if (key.startsWith(`${provider}:`)) {
-        const filtered = metricsList.filter((m) => m.timestamp > cutoffTime);
+        const filtered = metricsList.filter(m => m.timestamp > cutoffTime);
         recentMetrics.push(...filtered);
       }
     });
@@ -540,7 +538,7 @@ export class AIMonitor {
   private calculateErrorRate(metrics: PerformanceMetrics[]): number {
     if (metrics.length === 0) return 0;
 
-    const errorCount = metrics.filter((m) => !m.success).length;
+    const errorCount = metrics.filter(m => !m.success).length;
     return (errorCount / metrics.length) * 100;
   }
 
@@ -551,10 +549,10 @@ export class AIMonitor {
   private countRateLimitHits(provider: AIProvider, timeWindow: number): number {
     const cutoffTime = Date.now() - timeWindow;
     return this.events.filter(
-      (e) =>
-        e.type === "rate_limit_hit" &&
+      e =>
+        e.type === 'rate_limit_hit' &&
         e.provider === provider &&
-        e.timestamp > cutoffTime,
+        e.timestamp > cutoffTime
     ).length;
   }
 
@@ -565,12 +563,12 @@ export class AIMonitor {
   public getServiceStatus(): ServiceStatus {
     const totalRequests = Array.from(this.metrics.values()).reduce(
       (sum, metricsList) => sum + metricsList.length,
-      0,
+      0
     );
 
     const totalErrors = Array.from(this.metrics.values()).reduce(
-      (sum, metricsList) => sum + metricsList.filter((m) => !m.success).length,
-      0,
+      (sum, metricsList) => sum + metricsList.filter(m => !m.success).length,
+      0
     );
 
     const providerStatus = {} as Record<AIProvider, HealthStatus>;
@@ -579,12 +577,12 @@ export class AIMonitor {
     });
 
     const averageResponseTime = this.calculateAverageResponseTime(
-      Array.from(this.metrics.values()).flat(),
+      Array.from(this.metrics.values()).flat()
     );
 
     return {
       initialized: true,
-      healthy: Object.values(providerStatus).some((h) => h.healthy),
+      healthy: Object.values(providerStatus).some(h => h.healthy),
       totalRequests,
       totalErrors,
       averageResponseTime,
@@ -597,12 +595,12 @@ export class AIMonitor {
   public getMetrics(
     provider?: AIProvider,
     model?: string,
-    timeWindow?: number,
+    timeWindow?: number
   ): PerformanceMetrics[] {
     const metrics: PerformanceMetrics[] = [];
 
     this.metrics.forEach((metricsList, key) => {
-      const [keyProvider, keyModel] = key.split(":");
+      const [keyProvider, keyModel] = key.split(':');
 
       if (
         (!provider || keyProvider === provider) &&
@@ -613,7 +611,7 @@ export class AIMonitor {
         // 如果指定了时间窗口，过滤指标
         if (timeWindow) {
           const cutoffTime = Date.now() - timeWindow;
-          filteredMetrics = metricsList.filter((m) => m.timestamp > cutoffTime);
+          filteredMetrics = metricsList.filter(m => m.timestamp > cutoffTime);
         }
 
         metrics.push(...filteredMetrics);
@@ -625,24 +623,24 @@ export class AIMonitor {
 
   public getEvents(
     eventType?: MonitorEventType,
-    timeWindow?: number,
+    timeWindow?: number
   ): MonitorEvent[] {
     let events = this.events;
 
     if (eventType) {
-      events = events.filter((e) => e.type === eventType);
+      events = events.filter(e => e.type === eventType);
     }
 
     if (timeWindow) {
       const cutoffTime = Date.now() - timeWindow;
-      events = events.filter((e) => e.timestamp > cutoffTime);
+      events = events.filter(e => e.timestamp > cutoffTime);
     }
 
     return events;
   }
 
   public getHealthStatus(
-    provider?: AIProvider,
+    provider?: AIProvider
   ): HealthStatus | Map<AIProvider, HealthStatus> {
     if (provider) {
       return (
@@ -672,14 +670,14 @@ export class AIMonitor {
 
     const report = {
       timestamp: new Date().toISOString(),
-      timeWindow: timeWindow || "all",
+      timeWindow: timeWindow || 'all',
       summary: {
         totalRequests: metrics.length,
-        successfulRequests: metrics.filter((m) => m.success).length,
-        failedRequests: metrics.filter((m) => !m.success).length,
+        successfulRequests: metrics.filter(m => m.success).length,
+        failedRequests: metrics.filter(m => !m.success).length,
         averageResponseTime: this.calculateAverageResponseTime(metrics),
         totalTokens: this.calculateTotalTokens(metrics),
-        cacheHits: metrics.filter((m) => m.cacheHit).length,
+        cacheHits: metrics.filter(m => m.cacheHit).length,
       },
       providerStats: this.getProviderReport(metrics),
       serviceStatus,
@@ -690,7 +688,7 @@ export class AIMonitor {
   }
 
   private getProviderReport(
-    metrics: PerformanceMetrics[],
+    metrics: PerformanceMetrics[]
   ): Record<string, unknown> {
     interface ProviderStat {
       requests: number;
@@ -705,19 +703,19 @@ export class AIMonitor {
 
     const providerStats: Record<string, ProviderStat> = {};
 
-    const providers = Array.from(new Set(metrics.map((m) => m.provider)));
+    const providers = Array.from(new Set(metrics.map(m => m.provider)));
 
-    providers.forEach((provider) => {
-      const providerMetrics = metrics.filter((m) => m.provider === provider);
+    providers.forEach(provider => {
+      const providerMetrics = metrics.filter(m => m.provider === provider);
       const health = this.healthStatus.get(provider);
 
       providerStats[provider] = {
         requests: providerMetrics.length,
-        successful: providerMetrics.filter((m) => m.success).length,
-        failed: providerMetrics.filter((m) => !m.success).length,
+        successful: providerMetrics.filter(m => m.success).length,
+        failed: providerMetrics.filter(m => !m.success).length,
         averageResponseTime: this.calculateAverageResponseTime(providerMetrics),
         totalTokens: this.calculateTotalTokens(providerMetrics),
-        cacheHits: providerMetrics.filter((m) => m.cacheHit).length,
+        cacheHits: providerMetrics.filter(m => m.cacheHit).length,
         healthy: health?.healthy || false,
         lastCheck: health?.lastCheck || 0,
       };
@@ -735,8 +733,8 @@ export class MonitorFactory {
   private static instances: Map<string, AIMonitor> = new Map();
 
   public static getInstance(
-    name: string = "default",
-    config?: MonitorConfig,
+    name: string = 'default',
+    config?: MonitorConfig
   ): AIMonitor {
     let instance = this.instances.get(name);
 
@@ -744,7 +742,7 @@ export class MonitorFactory {
       const defaultConfig: MonitorConfig = {
         enabled: true,
         metricsInterval: 60000, // 1分钟
-        logLevel: "info",
+        logLevel: 'info',
         persistMetrics: true,
         alertThresholds: {
           responseTime: 5000, // 5秒
@@ -764,7 +762,7 @@ export class MonitorFactory {
 
   public static createCustomInstance(
     name: string,
-    config: MonitorConfig,
+    config: MonitorConfig
   ): AIMonitor {
     const instance = new AIMonitor(config);
     this.instances.set(name, instance);

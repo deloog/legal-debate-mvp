@@ -14,8 +14,8 @@ import type {
   ErrorEventData,
   PingEventData,
   DisconnectedEventData,
-} from "./types";
-import { SSEConnectionState } from "./types";
+} from './types';
+import { SSEConnectionState } from './types';
 
 /**
  * 事件回调类型
@@ -49,7 +49,7 @@ export class SSEClient {
   private eventSource: any = null;
   private reconnectTimer?: NodeJS.Timeout;
   private reconnectAttempts = 0;
-  private lastEventId = "";
+  private lastEventId = '';
   private eventHandlers: Map<DebateStreamEventType, SSEEventHandler[]> =
     new Map();
 
@@ -70,12 +70,12 @@ export class SSEClient {
   connect(): void {
     if (this.eventSource && this.eventSource.readyState === 1) {
       // 1 = OPEN
-      this.log("已经连接，无需重复连接");
+      this.log('已经连接，无需重复连接');
       return;
     }
 
     this.state = SSEConnectionState.CONNECTING;
-    this.log("开始连接SSE端点:", this.config.url);
+    this.log('开始连接SSE端点:', this.config.url);
 
     const url = this.buildUrl();
 
@@ -83,7 +83,7 @@ export class SSEClient {
       this.eventSource = new EventSource(url);
       this.setupEventListeners();
     } catch (error) {
-      this.log("连接失败:", error);
+      this.log('连接失败:', error);
       this.state = SSEConnectionState.ERROR;
       this.handleError(error);
     }
@@ -96,14 +96,14 @@ export class SSEClient {
     this.state = SSEConnectionState.DISCONNECTED;
     this.clearReconnectTimer();
     this.stopEventSource();
-    this.log("断开连接");
+    this.log('断开连接');
   }
 
   /**
    * 手动触发重连
    */
   reconnect(): void {
-    this.log("手动触发重连");
+    this.log('手动触发重连');
     this.stopEventSource();
     this.connect();
   }
@@ -151,8 +151,8 @@ export class SSEClient {
    */
   private buildUrl(): string {
     const url = new URL(this.config.url);
-    url.searchParams.append("debateId", this.config.debateId);
-    url.searchParams.append("roundId", this.config.roundId);
+    url.searchParams.append('debateId', this.config.debateId);
+    url.searchParams.append('roundId', this.config.roundId);
     return url.toString();
   }
 
@@ -168,11 +168,11 @@ export class SSEClient {
       this.state = SSEConnectionState.CONNECTED;
       this.reconnectAttempts = 0;
       this.clearReconnectTimer();
-      this.log("SSE连接已建立");
+      this.log('SSE连接已建立');
     };
 
     this.eventSource.onerror = (error: any) => {
-      this.log("SSE连接错误:", error);
+      this.log('SSE连接错误:', error);
       this.handleConnectionError();
     };
 
@@ -185,17 +185,17 @@ export class SSEClient {
    */
   private registerSpecificListeners(): void {
     const events: DebateStreamEventType[] = [
-      "connected",
-      "round-start",
-      "argument",
-      "progress",
-      "completed",
-      "error",
-      "ping",
-      "disconnected",
+      'connected',
+      'round-start',
+      'argument',
+      'progress',
+      'completed',
+      'error',
+      'ping',
+      'disconnected',
     ];
 
-    events.forEach((eventType) => {
+    events.forEach(eventType => {
       this.eventSource?.addEventListener(eventType, (event: MessageEvent) => {
         this.handleEvent(eventType, event);
       });
@@ -210,9 +210,9 @@ export class SSEClient {
       return;
     }
 
-    this.eventSource.addEventListener("connected", (event: MessageEvent) => {
-      this.lastEventId = event.lastEventId || "";
-      this.log("收到Last-Event-ID:", this.lastEventId);
+    this.eventSource.addEventListener('connected', (event: MessageEvent) => {
+      this.lastEventId = event.lastEventId || '';
+      this.log('收到Last-Event-ID:', this.lastEventId);
     });
   }
 
@@ -221,7 +221,7 @@ export class SSEClient {
    */
   private handleEvent(
     eventType: DebateStreamEventType,
-    event: MessageEvent,
+    event: MessageEvent
   ): void {
     try {
       const data = JSON.parse(event.data);
@@ -234,7 +234,7 @@ export class SSEClient {
       this.callConfigCallback(eventType, data);
       this.emit(eventType, data);
     } catch (error) {
-      this.log("事件解析失败:", error);
+      this.log('事件解析失败:', error);
     }
   }
 
@@ -243,11 +243,11 @@ export class SSEClient {
    */
   private callConfigCallback(
     eventType: DebateStreamEventType,
-    data: any,
+    data: any
   ): void {
     const callbacks: Record<string, ((data: any) => void) | undefined> = {
       connected: this.config.onConnected,
-      "round-start": this.config.onRoundStart,
+      'round-start': this.config.onRoundStart,
       argument: this.config.onArgument,
       progress: this.config.onProgress,
       completed: this.config.onCompleted,
@@ -268,7 +268,7 @@ export class SSEClient {
   private emit(eventType: DebateStreamEventType, data: any): void {
     const handlers = this.eventHandlers.get(eventType);
     if (handlers) {
-      handlers.forEach((handler) => {
+      handlers.forEach(handler => {
         try {
           handler(data);
         } catch (error) {
@@ -293,15 +293,15 @@ export class SSEClient {
    * 处理错误
    */
   private handleError(error: any): void {
-    this.log("错误:", error);
+    this.log('错误:', error);
     this.state = SSEConnectionState.ERROR;
 
     if (this.config.onError) {
       this.config.onError({
         debateId: this.config.debateId,
         roundId: this.config.roundId,
-        code: "CONNECTION_ERROR",
-        message: "连接失败",
+        code: 'CONNECTION_ERROR',
+        message: '连接失败',
         details: error,
         timestamp: new Date().toISOString(),
       });
@@ -317,12 +317,12 @@ export class SSEClient {
     const { maxRetryAttempts, enableReconnection } = this.config;
 
     if (!enableReconnection) {
-      this.log("自动重连已禁用");
+      this.log('自动重连已禁用');
       return;
     }
 
     if (this.reconnectAttempts >= maxRetryAttempts) {
-      this.log("已达到最大重连次数，放弃重连");
+      this.log('已达到最大重连次数，放弃重连');
       this.state = SSEConnectionState.DISCONNECTED;
 
       if (this.config.onReconnectFailed) {
@@ -357,7 +357,7 @@ export class SSEClient {
     const maxDelay = 30000;
     const delay = Math.min(
       baseDelay * Math.pow(2, this.reconnectAttempts - 1),
-      maxDelay,
+      maxDelay
     );
     const jitter = Math.random() * 500;
     return Math.floor(delay + jitter);

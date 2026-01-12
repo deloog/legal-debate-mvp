@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useState, useCallback, useRef } from "react";
-import { FileValidator } from "@/app/documents/components/file-validator";
+import { useState, useCallback, useRef } from 'react';
+import { FileValidator } from '@/app/documents/components/file-validator';
 import type {
   UploadProgressState,
   UploadStatus,
-} from "@/app/documents/components/upload-progress";
+} from '@/app/documents/components/upload-progress';
 
-import type { UploadedFile } from "@/app/documents/components/file-list";
+import type { UploadedFile } from '@/app/documents/components/file-list';
 
 interface UploadOptions {
   caseId: string;
@@ -81,12 +81,12 @@ export const useDocumentUpload = (options: UploadOptions) => {
         total,
         speed: Math.round(speed),
         remainingTime: Math.round(remainingTime),
-        status: "uploading",
+        status: 'uploading',
       };
 
-      setUploadProgress((prev) => new Map(prev).set(fileId, progress));
+      setUploadProgress(prev => new Map(prev).set(fileId, progress));
     },
-    [],
+    []
   );
 
   /**
@@ -95,12 +95,12 @@ export const useDocumentUpload = (options: UploadOptions) => {
   const createFormData = useCallback(
     (file: File, fileId: string): FormData => {
       const formData = new FormData();
-      formData.append("file", file);
-      formData.append("fileId", fileId);
-      formData.append("caseId", caseId);
+      formData.append('file', file);
+      formData.append('fileId', fileId);
+      formData.append('caseId', caseId);
       return formData;
     },
-    [caseId],
+    [caseId]
   );
 
   /**
@@ -110,7 +110,7 @@ export const useDocumentUpload = (options: UploadOptions) => {
     async (context: UploadFileContext): Promise<unknown> => {
       const { file, fileId } = context;
 
-      setUploadProgress((prev) =>
+      setUploadProgress(prev =>
         new Map(prev).set(fileId, {
           fileId,
           fileName: file.name,
@@ -119,8 +119,8 @@ export const useDocumentUpload = (options: UploadOptions) => {
           total: file.size,
           speed: 0,
           remainingTime: 0,
-          status: "uploading",
-        }),
+          status: 'uploading',
+        })
       );
 
       const startTime = Date.now();
@@ -133,54 +133,54 @@ export const useDocumentUpload = (options: UploadOptions) => {
         const response = await new Promise<unknown>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
 
-          xhr.upload.addEventListener("progress", (event) => {
+          xhr.upload.addEventListener('progress', event => {
             if (event.lengthComputable) {
               updateProgress(fileId, event.loaded, event.total);
             }
           });
 
-          xhr.addEventListener("load", () => {
+          xhr.addEventListener('load', () => {
             if (xhr.status >= 200 && xhr.status < 300) {
               try {
                 const result = JSON.parse(xhr.responseText);
                 resolve(result);
               } catch {
-                reject(new Error("解析响应失败"));
+                reject(new Error('解析响应失败'));
               }
             } else {
               reject(new Error(`上传失败: ${xhr.status}`));
             }
           });
 
-          xhr.addEventListener("error", () => {
-            reject(new Error("网络错误，上传失败"));
+          xhr.addEventListener('error', () => {
+            reject(new Error('网络错误，上传失败'));
           });
 
-          xhr.addEventListener("abort", () => {
-            reject(new Error("上传已取消"));
+          xhr.addEventListener('abort', () => {
+            reject(new Error('上传已取消'));
           });
 
-          xhr.addEventListener("timeout", () => {
-            reject(new Error("上传超时"));
+          xhr.addEventListener('timeout', () => {
+            reject(new Error('上传超时'));
           });
 
           xhr.timeout = 30000;
 
-          xhr.open("POST", "/api/v1/documents/upload");
+          xhr.open('POST', '/api/v1/documents/upload');
           xhr.setRequestHeader(
-            "Authorization",
-            `Bearer ${localStorage.getItem("token") || ""}`,
+            'Authorization',
+            `Bearer ${localStorage.getItem('token') || ''}`
           );
           xhr.send(formData);
         });
 
-        setUploadProgress((prev) => {
+        setUploadProgress(prev => {
           const updated = new Map(prev);
           const current = updated.get(fileId);
           if (current) {
             updated.set(fileId, {
               ...current,
-              status: "completed" as UploadStatus,
+              status: 'completed' as UploadStatus,
             });
           }
           return updated;
@@ -189,14 +189,14 @@ export const useDocumentUpload = (options: UploadOptions) => {
         return response;
       } catch (error) {
         const errorMessage =
-          error instanceof Error ? error.message : "上传失败";
-        setUploadProgress((prev) => {
+          error instanceof Error ? error.message : '上传失败';
+        setUploadProgress(prev => {
           const updated = new Map(prev);
           const current = updated.get(fileId);
           if (current) {
             updated.set(fileId, {
               ...current,
-              status: "error" as UploadStatus,
+              status: 'error' as UploadStatus,
               error: errorMessage,
             });
           }
@@ -206,7 +206,7 @@ export const useDocumentUpload = (options: UploadOptions) => {
         throw error;
       }
     },
-    [createFormData, updateProgress],
+    [createFormData, updateProgress]
   );
 
   /**
@@ -224,7 +224,7 @@ export const useDocumentUpload = (options: UploadOptions) => {
 
       await uploadFile(context);
     },
-    [uploadFile],
+    [uploadFile]
   );
 
   /**
@@ -235,13 +235,13 @@ export const useDocumentUpload = (options: UploadOptions) => {
     if (context) {
       context.abortController.abort();
 
-      setUploadProgress((prev) => {
+      setUploadProgress(prev => {
         const updated = new Map(prev);
         const current = updated.get(fileId);
         if (current) {
           updated.set(fileId, {
             ...current,
-            status: "cancelled" as UploadStatus,
+            status: 'cancelled' as UploadStatus,
           });
         }
         return updated;
@@ -256,13 +256,13 @@ export const useDocumentUpload = (options: UploadOptions) => {
     async (files: File[]): Promise<void> => {
       const errors = FileValidator.validateFiles(files);
       if (errors.length > 0) {
-        onUploadError?.(new Error(errors.map((e) => e.message).join("; ")));
+        onUploadError?.(new Error(errors.map(e => e.message).join('; ')));
         return;
       }
 
       setIsUploading(true);
 
-      const contexts: UploadFileContext[] = files.map((file) => ({
+      const contexts: UploadFileContext[] = files.map(file => ({
         file,
         fileId: generateFileId(file),
         retryCount: 0,
@@ -274,7 +274,7 @@ export const useDocumentUpload = (options: UploadOptions) => {
       setUploadQueue(contexts);
 
       uploadContextRef.current.clear();
-      contexts.forEach((ctx) => {
+      contexts.forEach(ctx => {
         uploadContextRef.current.set(ctx.fileId, ctx);
       });
 
@@ -297,12 +297,12 @@ export const useDocumentUpload = (options: UploadOptions) => {
             if (retryCount >= maxRetries) {
               failedFiles.push(ctx.file.name);
             } else {
-              await new Promise((resolve) => setTimeout(resolve, 1000));
+              await new Promise(resolve => setTimeout(resolve, 1000));
             }
           }
         }
 
-        setUploadQueue((prev) => prev.filter((c) => c.fileId !== ctx.fileId));
+        setUploadQueue(prev => prev.filter(c => c.fileId !== ctx.fileId));
         uploadContextRef.current.delete(ctx.fileId);
       }
 
@@ -310,13 +310,13 @@ export const useDocumentUpload = (options: UploadOptions) => {
 
       if (failedFiles.length > 0) {
         onUploadError?.(
-          new Error(`以下文件上传失败: ${failedFiles.join(", ")}`),
+          new Error(`以下文件上传失败: ${failedFiles.join(', ')}`)
         );
       } else {
         onUploadSuccess?.(results as UploadedFile[]);
       }
     },
-    [generateFileId, uploadFile, onUploadError, onUploadSuccess, maxRetries],
+    [generateFileId, uploadFile, onUploadError, onUploadSuccess, maxRetries]
   );
 
   return {

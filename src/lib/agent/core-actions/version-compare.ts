@@ -3,7 +3,7 @@
  * 包含：compare_versions
  */
 
-import type { CompareVersionsResult } from "./types";
+import type { CompareVersionsResult } from './types';
 
 /**
  * 17. compare_versions - 版本对比
@@ -28,7 +28,7 @@ export async function compare_versions<
     field: keyof T;
     valueA: unknown;
     valueB: unknown;
-    changeType: "added" | "removed" | "modified";
+    changeType: 'added' | 'removed' | 'modified';
   }> = [];
 
   for (const field of finalFields) {
@@ -40,21 +40,21 @@ export async function compare_versions<
         field,
         valueA: valA,
         valueB: valB,
-        changeType: "added",
+        changeType: 'added',
       });
     } else if (valA !== undefined && valB === undefined) {
       differences.push({
         field,
         valueA: valA,
         valueB: valB,
-        changeType: "removed",
+        changeType: 'removed',
       });
     } else if (valA !== valB) {
       differences.push({
         field,
         valueA: valA,
         valueB: valB,
-        changeType: "modified",
+        changeType: 'modified',
       });
     }
   }

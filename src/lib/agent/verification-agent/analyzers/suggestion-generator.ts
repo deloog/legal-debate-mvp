@@ -7,10 +7,10 @@ import {
   SuggestionType,
   SuggestionPriority,
   VerificationIssue,
-} from "../types";
-import { FactBasedSuggestionGenerator } from "./fact-based-suggestion-generator";
-import { LogicBasedSuggestionGenerator } from "./logic-based-suggestion-generator";
-import { QualityBasedSuggestionGenerator } from "./quality-based-suggestion-generator";
+} from '../types';
+import { FactBasedSuggestionGenerator } from './fact-based-suggestion-generator';
+import { LogicBasedSuggestionGenerator } from './logic-based-suggestion-generator';
+import { QualityBasedSuggestionGenerator } from './quality-based-suggestion-generator';
 
 /**
  * 建议生成器类（Facade）
@@ -56,7 +56,7 @@ export class SuggestionGenerator {
    * 按类型分组建议
    */
   groupByType(
-    suggestions: VerificationSuggestion[],
+    suggestions: VerificationSuggestion[]
   ): Map<SuggestionType, VerificationSuggestion[]> {
     const groups = new Map<SuggestionType, VerificationSuggestion[]>();
 
@@ -74,7 +74,7 @@ export class SuggestionGenerator {
    * 按优先级分组建议
    */
   groupByPriority(
-    suggestions: VerificationSuggestion[],
+    suggestions: VerificationSuggestion[]
   ): Map<SuggestionPriority, VerificationSuggestion[]> {
     const groups = new Map<SuggestionPriority, VerificationSuggestion[]>();
 
@@ -97,16 +97,16 @@ export class SuggestionGenerator {
       type?: SuggestionType[];
       priority?: SuggestionPriority[];
       target?: string[];
-    },
+    }
   ): VerificationSuggestion[] {
-    return suggestions.filter((suggestion) => {
+    return suggestions.filter(suggestion => {
       if (filters.type && !filters.type.includes(suggestion.type)) {
         return false;
       }
       if (filters.priority && !filters.priority.includes(suggestion.priority)) {
         return false;
       }
-      if (filters.target && !filters.target.includes(suggestion.target || "")) {
+      if (filters.target && !filters.target.includes(suggestion.target || '')) {
         return false;
       }
       return true;
@@ -179,7 +179,7 @@ export class SuggestionGenerator {
       medium,
       low,
       byType,
-      summary: summary.join("，"),
+      summary: summary.join('，'),
     };
   }
 
@@ -246,7 +246,7 @@ export class SuggestionGenerator {
    * 去重建议
    */
   private deduplicateSuggestions(
-    suggestions: VerificationSuggestion[],
+    suggestions: VerificationSuggestion[]
   ): VerificationSuggestion[] {
     const seen = new Set<string>();
     const unique: VerificationSuggestion[] = [];
@@ -266,7 +266,7 @@ export class SuggestionGenerator {
    * 按优先级排序
    */
   private sortByPriority(
-    suggestions: VerificationSuggestion[],
+    suggestions: VerificationSuggestion[]
   ): VerificationSuggestion[] {
     const priorityOrder: Record<SuggestionPriority, number> = {
       urgent: 0,
@@ -276,7 +276,7 @@ export class SuggestionGenerator {
     };
 
     return [...suggestions].sort(
-      (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority],
+      (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]
     );
   }
 }

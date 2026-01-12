@@ -1,4 +1,4 @@
-declare module "deepseek-api" {
+declare module 'deepseek-api' {
   interface DeepSeekConfig {
     apiKey: string;
   }
@@ -6,7 +6,7 @@ declare module "deepseek-api" {
   interface ChatCompletionRequest {
     model: string;
     messages: Array<{
-      role: "system" | "user" | "assistant";
+      role: 'system' | 'user' | 'assistant';
       content: string;
     }>;
     temperature?: number;

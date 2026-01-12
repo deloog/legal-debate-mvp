@@ -3,7 +3,7 @@
  * 包含：rank_items
  */
 
-import type { RankItemsResult } from "./types";
+import type { RankItemsResult } from './types';
 
 /**
  * 15. rank_items - 项目排序
@@ -12,13 +12,13 @@ import type { RankItemsResult } from "./types";
 export async function rank_items<T>(
   params:
     | T[]
-    | { items: T[]; scoreFn: (item: T) => number; order?: "asc" | "desc" },
+    | { items: T[]; scoreFn: (item: T) => number; order?: 'asc' | 'desc' },
   scoreFn?: (item: T) => number,
-  order: "asc" | "desc" = "desc",
+  order: 'asc' | 'desc' = 'desc'
 ): Promise<RankItemsResult<T>> {
   let itemsArr: T[];
   let score: (item: T) => number;
-  let ord: "asc" | "desc" = "desc";
+  let ord: 'asc' | 'desc' = 'desc';
 
   if (Array.isArray(params)) {
     itemsArr = params;
@@ -27,7 +27,7 @@ export async function rank_items<T>(
   } else {
     itemsArr = params.items;
     score = params.scoreFn;
-    ord = params.order || "desc";
+    ord = params.order || 'desc';
   }
 
   const scores = itemsArr.map(score);
@@ -41,7 +41,7 @@ export async function rank_items<T>(
 
   indexed.sort((a, b) => {
     const diff = a.score - b.score;
-    return ord === "asc" ? diff : -diff;
+    return ord === 'asc' ? diff : -diff;
   });
 
   const ranked = indexed.map(({ item }) => item);

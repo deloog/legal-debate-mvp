@@ -4,11 +4,11 @@
  */
 
 // 立即模拟next/server模块
-jest.mock("next/server", () => {
+jest.mock('next/server', () => {
   const MockHeaders = class {
     constructor(init = {}) {
       this.headers = {};
-      if (typeof init === "object") {
+      if (typeof init === 'object') {
         this.headers = { ...init };
       }
     }
@@ -50,8 +50,8 @@ jest.mock("next/server", () => {
 
   const MockRequest = class {
     constructor(input, init = {}) {
-      this.url = typeof input === "string" ? input : input.toString();
-      this.method = init.method || "GET";
+      this.url = typeof input === 'string' ? input : input.toString();
+      this.method = init.method || 'GET';
 
       if (init.headers instanceof MockHeaders) {
         this.headers = init.headers;
@@ -66,10 +66,10 @@ jest.mock("next/server", () => {
       if (this.body) {
         try {
           return JSON.parse(
-            typeof this.body === "string" ? this.body : this.body.toString(),
+            typeof this.body === 'string' ? this.body : this.body.toString()
           );
         } catch {
-          throw new Error("Invalid JSON");
+          throw new Error('Invalid JSON');
         }
       }
       return {};
@@ -77,10 +77,10 @@ jest.mock("next/server", () => {
 
     async text() {
       return this.body
-        ? typeof this.body === "string"
+        ? typeof this.body === 'string'
           ? this.body
           : this.body.toString()
-        : "";
+        : '';
     }
   };
 
@@ -88,15 +88,15 @@ jest.mock("next/server", () => {
     constructor(body, init = {}) {
       init = init || {};
 
-      if (typeof body === "object" && body !== null) {
+      if (typeof body === 'object' && body !== null) {
         body = JSON.stringify(body);
         if (!init.headers) {
           init.headers = new MockHeaders();
         } else if (!(init.headers instanceof MockHeaders)) {
           init.headers = new MockHeaders(init.headers);
         }
-        if (!init.headers.get("Content-Type")) {
-          init.headers.set("Content-Type", "application/json");
+        if (!init.headers.get('Content-Type')) {
+          init.headers.set('Content-Type', 'application/json');
         }
       } else if (!init.headers) {
         init.headers = new MockHeaders();
@@ -123,7 +123,7 @@ jest.mock("next/server", () => {
     }
 
     async text() {
-      return this.body || "";
+      return this.body || '';
     }
   };
 

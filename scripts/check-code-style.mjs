@@ -5,19 +5,19 @@
  * 检查代码是否符合.clinerules中定义的代码风格要求
  */
 
-import { validateConfig } from "./code-style/config.mjs";
-import { collectFiles } from "./code-style/file-collector.mjs";
+import { validateConfig } from './code-style/config.mjs';
+import { collectFiles } from './code-style/file-collector.mjs';
 import {
   batchCheckFiles,
   setupErrorHandling,
-} from "./code-style/batch-processor.mjs";
-import { displayResults, displayFileList } from "./code-style/reporter.mjs";
+} from './code-style/batch-processor.mjs';
+import { displayResults, displayFileList } from './code-style/reporter.mjs';
 
 /**
  * 主函数
  */
 async function main() {
-  console.log("🔍 开始代码风格检查...\n");
+  console.log('🔍 开始代码风格检查...\n');
 
   setupErrorHandling();
 
@@ -25,11 +25,11 @@ async function main() {
     // 验证配置
     validateConfig();
 
-    console.log("📂 正在收集文件...");
+    console.log('📂 正在收集文件...');
     const allFiles = await collectFiles();
 
     if (allFiles.length === 0) {
-      console.log("⚠️  未找到需要检查的文件");
+      console.log('⚠️  未找到需要检查的文件');
       process.exit(0);
     }
 
@@ -41,8 +41,8 @@ async function main() {
 
     process.exit(allPassed ? 0 : 1);
   } catch (error) {
-    console.error("检查过程中发生错误:", error.message);
-    console.error("错误堆栈:", error.stack);
+    console.error('检查过程中发生错误:', error.message);
+    console.error('错误堆栈:', error.stack);
     process.exit(1);
   }
 }

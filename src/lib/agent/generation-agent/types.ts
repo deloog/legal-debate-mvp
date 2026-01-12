@@ -1,12 +1,12 @@
 // GenerationAgent类型定义
 
-import { CaseInfo } from "@/types/debate";
-import type { LawArticle } from "@prisma/client";
+import { CaseInfo } from '@/types/debate';
+import type { LawArticle } from '@prisma/client';
 
 /**
  * 文书类型
  */
-export type DocumentType = "complaint" | "answer" | "evidence" | "appeal";
+export type DocumentType = 'complaint' | 'answer' | 'evidence' | 'appeal';
 
 /**
  * 文书模板
@@ -26,15 +26,15 @@ export interface GenerationOptions {
   includeLegalBasis?: boolean;
   includeEvidence?: boolean;
   includeSummary?: boolean;
-  format?: "legal" | "general";
-  language?: "zh-CN" | "en-US";
+  format?: 'legal' | 'general';
+  language?: 'zh-CN' | 'en-US';
 }
 
 /**
  * 生成输入
  */
 export interface GenerationInput {
-  type: DocumentType | "debate";
+  type: DocumentType | 'debate';
   caseInfo: CaseInfo;
   lawArticles?: LawArticle[];
   template?: DocumentTemplate;
@@ -59,7 +59,7 @@ export interface GenerationMetadata {
  */
 export interface GenerationOutput {
   content: string;
-  type: DocumentType | "debate";
+  type: DocumentType | 'debate';
   qualityScore: number;
   metadata: GenerationMetadata;
 }
@@ -70,7 +70,7 @@ export interface GenerationOutput {
 export interface StreamConfig {
   chunkSize: number;
   delayMs: number;
-  format: "sse" | "json";
+  format: 'sse' | 'json';
   maxChunks?: number;
 }
 
@@ -79,7 +79,7 @@ export interface StreamConfig {
  */
 export interface SSEMessage {
   data: string;
-  event?: "chunk" | "done" | "error";
+  event?: 'chunk' | 'done' | 'error';
   id?: string;
   retry?: number;
 }
@@ -88,9 +88,9 @@ export interface SSEMessage {
  * 内容优化选项
  */
 export interface OptimizationOptions {
-  clarityLevel: "low" | "medium" | "high";
+  clarityLevel: 'low' | 'medium' | 'high';
   logicCheck: boolean;
-  formatStandard: "legal" | "general";
+  formatStandard: 'legal' | 'general';
   maxLength?: number;
 }
 
@@ -109,12 +109,12 @@ export interface OptimizationResult {
  */
 export interface GenerationAgentConfig {
   defaultTemplate?: string;
-  defaultFormat: "legal" | "general";
+  defaultFormat: 'legal' | 'general';
   enableStream: boolean;
   streamChunkSize: number;
   streamDelayMs: number;
   autoOptimize: boolean;
-  optimizationLevel: "low" | "medium" | "high";
+  optimizationLevel: 'low' | 'medium' | 'high';
   aiProvider: string;
   temperature: number;
   maxTokens: number;
@@ -126,17 +126,17 @@ export interface GenerationAgentConfig {
 export interface DocumentGenerationConfig {
   documentType: DocumentType;
   template?: string;
-  format: "legal" | "general";
+  format: 'legal' | 'general';
   includeHeader: boolean;
   includeFooter: boolean;
-  dateFormat: "zh-CN" | "en-US" | "ISO";
+  dateFormat: 'zh-CN' | 'en-US' | 'ISO';
 }
 
 /**
  * 辩论生成配置
  */
 export interface DebateGenerationConfig {
-  balanceStrictness: "low" | "medium" | "high";
+  balanceStrictness: 'low' | 'medium' | 'high';
   includeLegalAnalysis: boolean;
   maxArgumentsPerSide: number;
   qualityThreshold: number;
@@ -161,7 +161,7 @@ export interface QualityAssessment {
   passed: boolean;
   issues: Array<{
     type: string;
-    severity: "low" | "medium" | "high";
+    severity: 'low' | 'medium' | 'high';
     description: string;
   }>;
   suggestions: string[];
@@ -171,13 +171,13 @@ export interface QualityAssessment {
  * 默认配置
  */
 export const DEFAULT_GENERATION_CONFIG: GenerationAgentConfig = {
-  defaultFormat: "legal",
+  defaultFormat: 'legal',
   enableStream: true,
   streamChunkSize: 200,
   streamDelayMs: 100,
   autoOptimize: true,
-  optimizationLevel: "medium",
-  aiProvider: "deepseek",
+  optimizationLevel: 'medium',
+  aiProvider: 'deepseek',
   temperature: 0.7,
   maxTokens: 2000,
 };
@@ -188,14 +188,14 @@ export const DEFAULT_GENERATION_CONFIG: GenerationAgentConfig = {
 export const DEFAULT_STREAM_CONFIG: StreamConfig = {
   chunkSize: 200,
   delayMs: 100,
-  format: "sse",
+  format: 'sse',
 };
 
 /**
  * 默认优化选项
  */
 export const DEFAULT_OPTIMIZATION_OPTIONS: OptimizationOptions = {
-  clarityLevel: "medium",
+  clarityLevel: 'medium',
   logicCheck: true,
-  formatStandard: "legal",
+  formatStandard: 'legal',
 };

@@ -4,11 +4,11 @@
  * 核心追踪器，整合所有子模块，提供统一的追踪和分析接口
  */
 
-import { actionLogger } from "./action-logger";
-import { performanceAnalyzer } from "./performance-analyzer";
-import { behaviorAnalyzer } from "./behavior-analyzer";
-import { layerStatistics } from "./layer-statistics";
-import { DEFAULT_ACTION_TRACKER_CONFIG } from "./types";
+import { actionLogger } from './action-logger';
+import { performanceAnalyzer } from './performance-analyzer';
+import { behaviorAnalyzer } from './behavior-analyzer';
+import { layerStatistics } from './layer-statistics';
+import { DEFAULT_ACTION_TRACKER_CONFIG } from './types';
 import type {
   ActionLogInput,
   ActionChain,
@@ -19,7 +19,7 @@ import type {
   ReportFilters,
   RealtimeMetrics,
   ActionTrackerConfig,
-} from "./types";
+} from './types';
 
 /**
  * Agent行动追踪器类
@@ -55,7 +55,7 @@ export class ActionTracker {
    */
   async trackAction<T>(
     input: ActionLogInput,
-    executeFn: () => Promise<T>,
+    executeFn: () => Promise<T>
   ): Promise<T> {
     if (!this.config.autoTrackingEnabled) {
       return executeFn();
@@ -78,7 +78,7 @@ export class ActionTracker {
    * @returns 性能报告
    */
   async generatePerformanceReport(
-    filters = {} as Partial<ReportFilters>,
+    filters = {} as Partial<ReportFilters>
   ): Promise<PerformanceReport> {
     return performanceAnalyzer.getPerformanceReport(filters);
   }
@@ -89,7 +89,7 @@ export class ActionTracker {
    * @returns 行为报告
    */
   async generateBehaviorReport(
-    filters = {} as Partial<ReportFilters>,
+    filters = {} as Partial<ReportFilters>
   ): Promise<BehaviorReport> {
     return behaviorAnalyzer.getBehaviorReport(filters);
   }
@@ -100,7 +100,7 @@ export class ActionTracker {
    * @returns 分层报告
    */
   async generateLayerReport(
-    filters = {} as Partial<ReportFilters>,
+    filters = {} as Partial<ReportFilters>
   ): Promise<LayerReport> {
     return layerStatistics.getLayerReport(filters);
   }
@@ -111,7 +111,7 @@ export class ActionTracker {
    * @returns 综合报告
    */
   async generateComprehensiveReport(
-    filters: ReportFilters = {},
+    filters: ReportFilters = {}
   ): Promise<ComprehensiveReport> {
     const performanceReport = filters.includePerformance
       ? await this.generatePerformanceReport(filters)
@@ -149,7 +149,7 @@ export class ActionTracker {
       .queryActions({
         startTime: oneMinuteAgo,
       })
-      .then((actions) => actions.filter((a) => a.status === "RUNNING"));
+      .then(actions => actions.filter(a => a.status === 'RUNNING'));
     const runningCount = runningActions.length;
 
     // 最近1分钟的成功行动
@@ -157,7 +157,7 @@ export class ActionTracker {
       .queryActions({
         startTime: oneMinuteAgo,
       })
-      .then((actions) => actions.filter((a) => a.status === "COMPLETED"));
+      .then(actions => actions.filter(a => a.status === 'COMPLETED'));
     const recentSuccessCount = recentSuccessActions.length;
 
     // 最近1分钟的失败行动
@@ -165,12 +165,12 @@ export class ActionTracker {
       .queryActions({
         startTime: oneMinuteAgo,
       })
-      .then((actions) => actions.filter((a) => a.status === "FAILED"));
+      .then(actions => actions.filter(a => a.status === 'FAILED'));
     const recentFailureCount = recentFailureActions.length;
 
     // 计算最近1分钟的平均耗时
     const recentCompleted = recentSuccessActions.filter(
-      (a) => a.executionTime !== null,
+      a => a.executionTime !== null
     );
     const recentAvgExecutionTime =
       recentCompleted.length > 0
@@ -204,7 +204,7 @@ export class ActionTracker {
    */
   async cleanup(retentionDays?: number): Promise<number> {
     return actionLogger.cleanupOldActions(
-      retentionDays ?? this.config.dataRetentionDays,
+      retentionDays ?? this.config.dataRetentionDays
     );
   }
 
@@ -214,8 +214,8 @@ export class ActionTracker {
    * @returns 总体摘要
    */
   private async generateSummary(
-    filters = {} as Partial<ReportFilters>,
-  ): Promise<ComprehensiveReport["summary"]> {
+    filters = {} as Partial<ReportFilters>
+  ): Promise<ComprehensiveReport['summary']> {
     // 构建查询参数（只传递ActionLogger支持的参数）
     const queryFilters: Parameters<typeof actionLogger.queryActions>[0] = {
       agentName: filters.agentName,
@@ -229,7 +229,7 @@ export class ActionTracker {
     const totalActions = allActions.length;
 
     // 计算平均执行时间
-    const completedActions = allActions.filter((a) => a.executionTime !== null);
+    const completedActions = allActions.filter(a => a.executionTime !== null);
     const avgExecutionTime =
       completedActions.length > 0
         ? completedActions.reduce((sum, a) => sum + (a.executionTime ?? 0), 0) /
@@ -237,7 +237,7 @@ export class ActionTracker {
         : 0;
 
     // 计算整体成功率
-    const successActions = allActions.filter((a) => a.status === "COMPLETED");
+    const successActions = allActions.filter(a => a.status === 'COMPLETED');
     const overallSuccessRate =
       totalActions > 0 ? successActions.length / totalActions : 1;
 
@@ -249,7 +249,7 @@ export class ActionTracker {
     }
     const mostActiveAgent =
       Array.from(agentCounts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ??
-      "";
+      '';
 
     // 找出最常用的行动
     const actionCounts = new Map<string, number>();
@@ -259,7 +259,7 @@ export class ActionTracker {
     }
     const mostUsedAction =
       Array.from(actionCounts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ??
-      "";
+      '';
 
     // 找出性能瓶颈
     const performanceBottlenecks: string[] = [];
@@ -271,7 +271,7 @@ export class ActionTracker {
       const count = countByAction.get(action.actionName) ?? 0;
       avgTimeByAction.set(
         action.actionName,
-        time + (action.executionTime ?? 0),
+        time + (action.executionTime ?? 0)
       );
       countByAction.set(action.actionName, count + 1);
     }

@@ -43,7 +43,7 @@ export interface LawArticle {
   /** 适用范围 */
   scope?: string[];
   /** 法律层级（宪法>法律>行政法规>部门规章>地方性法规） */
-  level?: "constitution" | "law" | "administrative" | "regulation" | "local";
+  level?: 'constitution' | 'law' | 'administrative' | 'regulation' | 'local';
   /** 关键词列表 */
   keywords?: string[];
 }
@@ -57,7 +57,7 @@ export interface SearchResult {
   /** 总数量 */
   total: number;
   /** 搜索来源（local/external） */
-  source: "local" | "external" | "mixed";
+  source: 'local' | 'external' | 'mixed';
   /** 执行时间（毫秒） */
   executionTime: number;
 }
@@ -174,16 +174,16 @@ export interface LegalBasis {
 /**
  * 论点方向
  */
-export type ArgumentSide = "PLAINTIFF" | "DEFENDANT";
+export type ArgumentSide = 'PLAINTIFF' | 'DEFENDANT';
 
 /**
  * 论点类型
  */
 export type ArgumentType =
-  | "main"
-  | "supporting"
-  | "legal_reference"
-  | "rebuttal";
+  | 'main'
+  | 'supporting'
+  | 'legal_reference'
+  | 'rebuttal';
 
 /**
  * 论点信息
@@ -238,7 +238,7 @@ export interface Fact {
   /** 事实内容 */
   content: string;
   /** 事实类型（争议事实/无争议事实） */
-  type: "disputed" | "undisputed";
+  type: 'disputed' | 'undisputed';
   /** 相关性 */
   relevance: number;
 }
@@ -258,7 +258,7 @@ export interface ReasoningStep {
   /** 涉及的事实 */
   facts: Fact[];
   /** 逻辑类型（演绎/归纳/类比） */
-  logicType: "deductive" | "inductive" | "analogical";
+  logicType: 'deductive' | 'inductive' | 'analogical';
   /** 置信度（0-1） */
   confidence: number;
 }
@@ -294,12 +294,12 @@ export interface LogicValidationResult {
   /** 发现的逻辑问题 */
   issues: {
     type:
-      | "contradiction"
-      | "missing_premise"
-      | "invalid_inference"
-      | "weak_argument";
+      | 'contradiction'
+      | 'missing_premise'
+      | 'invalid_inference'
+      | 'weak_argument';
     description: string;
-    severity: "high" | "medium" | "low";
+    severity: 'high' | 'medium' | 'low';
   }[];
 }
 

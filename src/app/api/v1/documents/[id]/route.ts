@@ -1,7 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { unlink } from "fs/promises";
-import { join } from "path";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { unlink } from 'fs/promises';
+import { join } from 'path';
+import { getAuthUser } from '@/lib/middleware/auth';
+import {
+  checkResourceOwnership,
+  ResourceType,
+} from '@/lib/middleware/resource-permission';
 
 /**
  * 获取文档详情
@@ -9,12 +14,35 @@ import { join } from "path";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
+    // 获取认证用户
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: '未认证', message: '请先登录' },
+        { status: 401 }
+      );
+    }
+
     // Next.js 15+ 需要await params
     const resolvedParams = await params;
     const documentId = resolvedParams.id;
+
+    // 检查资源所有权
+    const permissionResult = await checkResourceOwnership(
+      authUser.userId,
+      documentId,
+      ResourceType.DOCUMENT
+    );
+
+    if (!permissionResult.hasPermission) {
+      return NextResponse.json(
+        { success: false, error: permissionResult.reason || '无权访问此文档' },
+        { status: 403 }
+      );
+    }
 
     console.log(`查询文档详情 [${documentId}]`);
     const document = await prisma.document.findUnique({
@@ -33,18 +61,18 @@ export async function GET(
 
     if (!document) {
       return NextResponse.json(
-        { success: false, error: "文档不存在" },
-        { status: 404 },
+        { success: false, error: '文档不存在' },
+        { status: 404 }
       );
     }
 
     // 格式化分析结果以符合E2E测试期望
     let analysisResult: Record<string, unknown> | null = null;
-    if (document.analysisResult && document.analysisStatus === "COMPLETED") {
+    if (document.analysisResult && document.analysisStatus === 'COMPLETED') {
       try {
         console.log(
-          "处理文档分析结果:",
-          JSON.stringify(document.analysisResult, null, 2),
+          '处理文档分析结果:',
+          JSON.stringify(document.analysisResult, null, 2)
         );
 
         const result = document.analysisResult as {
@@ -76,14 +104,14 @@ export async function GET(
         } as Record<string, unknown>;
 
         console.log(
-          "格式化后的analysisResult:",
-          JSON.stringify(analysisResult, null, 2),
+          '格式化后的analysisResult:',
+          JSON.stringify(analysisResult, null, 2)
         );
       } catch (error) {
-        console.error("处理analysisResult时出错:", error);
+        console.error('处理analysisResult时出错:', error);
         console.error(
-          "错误详情:",
-          error instanceof Error ? error.message : String(error),
+          '错误详情:',
+          error instanceof Error ? error.message : String(error)
         );
         // 发生错误时设置为null，而不是让整个请求失败
         analysisResult = null;
@@ -108,13 +136,13 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("获取文档详情失败:", error);
+    console.error('获取文档详情失败:', error);
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "获取文档详情失败",
+        error: error instanceof Error ? error.message : '获取文档详情失败',
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -125,12 +153,35 @@ export async function GET(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
+    // 获取认证用户
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: '未认证', message: '请先登录' },
+        { status: 401 }
+      );
+    }
+
     // Next.js 15+ 需要await params
     const resolvedParams = await params;
     const documentId = resolvedParams.id;
+
+    // 检查资源所有权
+    const permissionResult = await checkResourceOwnership(
+      authUser.userId,
+      documentId,
+      ResourceType.DOCUMENT
+    );
+
+    if (!permissionResult.hasPermission) {
+      return NextResponse.json(
+        { success: false, error: permissionResult.reason || '无权删除此文档' },
+        { status: 403 }
+      );
+    }
 
     const document = await prisma.document.findUnique({
       where: { id: documentId },
@@ -138,36 +189,37 @@ export async function DELETE(
 
     if (!document) {
       return NextResponse.json(
-        { success: false, error: "文档不存在" },
-        { status: 404 },
+        { success: false, error: '文档不存在' },
+        { status: 404 }
       );
     }
 
     // 删除物理文件
-    const filePath = join(process.cwd(), "public", document.filePath);
+    const filePath = join(process.cwd(), 'public', document.filePath);
     try {
       await unlink(filePath);
     } catch (error) {
-      console.warn("删除物理文件失败:", error);
+      console.warn('删除物理文件失败:', error);
     }
 
-    // 删除数据库记录
-    await prisma.document.delete({
+    // 软删除（设置deletedAt字段）
+    await prisma.document.update({
       where: { id: documentId },
+      data: { deletedAt: new Date() },
     });
 
-    return NextResponse.json({
-      success: true,
-      message: "文档删除成功",
-    });
+    return NextResponse.json(
+      { success: true, message: '文档删除成功' },
+      { status: 204 }
+    );
   } catch (error) {
-    console.error("删除文档失败:", error);
+    console.error('删除文档失败:', error);
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "删除文档失败",
+        error: error instanceof Error ? error.message : '删除文档失败',
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

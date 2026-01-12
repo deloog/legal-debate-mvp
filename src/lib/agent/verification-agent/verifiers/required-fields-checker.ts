@@ -2,7 +2,7 @@
  * 必填字段完整性检查器
  * 检查必填字段是否完整、类型正确、长度符合要求
  */
-import { RequiredFieldsCheck } from "../types";
+import { RequiredFieldsCheck } from '../types';
 
 /**
  * 必填字段配置
@@ -26,9 +26,9 @@ interface DataToVerify {
  * 默认必填字段配置
  */
 const DEFAULT_REQUIRED_FIELDS: RequiredFieldConfig[] = [
-  { field: "title", minLength: 5, maxLength: 200 },
-  { field: "description", minLength: 10 },
-  { field: "type", pattern: /^[A-Z_]+$/ },
+  { field: 'title', minLength: 5, maxLength: 200 },
+  { field: 'description', minLength: 10 },
+  { field: 'type', pattern: /^[A-Z_]+$/ },
 ];
 
 /**
@@ -52,7 +52,7 @@ export class RequiredFieldsChecker {
       const value = data[fieldConfig.field];
 
       // 检查字段是否存在
-      if (value === undefined || value === null || value === "") {
+      if (value === undefined || value === null || value === '') {
         missingFields.push(fieldConfig.field);
         continue;
       }

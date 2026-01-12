@@ -1,9 +1,9 @@
-import type { LawArticle, LawCategory, LawStatus } from "@prisma/client";
+import type { LawArticle, LawCategory, LawStatus } from '@prisma/client';
 import type {
   RelevanceScore,
   RelevanceWeightConfig,
   SearchQuery,
-} from "./types";
+} from './types';
 
 /**
  * 法条相关性评分器
@@ -25,7 +25,7 @@ export class RelevanceScorer {
   static calculateScore(
     article: LawArticle,
     query: SearchQuery,
-    weights: RelevanceWeightConfig = RelevanceScorer.DEFAULT_WEIGHTS,
+    weights: RelevanceWeightConfig = RelevanceScorer.DEFAULT_WEIGHTS
   ): RelevanceScore {
     const keywordScore = this.calculateKeywordScore(article, query);
     const categoryScore = this.calculateCategoryScore(article, query);
@@ -53,7 +53,7 @@ export class RelevanceScorer {
    */
   private static calculateKeywordScore(
     article: LawArticle,
-    query: SearchQuery,
+    query: SearchQuery
   ): number {
     if (!query.keyword || !query.keyword.trim()) {
       return 0;
@@ -61,10 +61,10 @@ export class RelevanceScorer {
 
     const keyword = query.keyword.trim().toLowerCase();
     const searchableFields = [
-      article.fullText?.toLowerCase() || "",
-      article.searchableText?.toLowerCase() || "",
-      article.lawName?.toLowerCase() || "",
-      article.articleNumber?.toLowerCase() || "",
+      article.fullText?.toLowerCase() || '',
+      article.searchableText?.toLowerCase() || '',
+      article.lawName?.toLowerCase() || '',
+      article.articleNumber?.toLowerCase() || '',
     ];
 
     // 计算关键词在各字段中的出现次数
@@ -86,7 +86,7 @@ export class RelevanceScorer {
    */
   private static calculateCategoryScore(
     article: LawArticle,
-    query: SearchQuery,
+    query: SearchQuery
   ): number {
     let score = 0;
     let maxScore = 0;
@@ -118,7 +118,7 @@ export class RelevanceScorer {
    */
   private static calculateTagScore(
     article: LawArticle,
-    query: SearchQuery,
+    query: SearchQuery
   ): number {
     if (!query.tags || query.tags.length === 0) {
       return 0;
@@ -129,17 +129,15 @@ export class RelevanceScorer {
     const allTags = [...articleTags, ...articleKeywords];
 
     // 计算匹配的标签数量
-    const matchedCount = query.tags.filter((tag) =>
-      allTags.some((at) => at.toLowerCase() === tag.toLowerCase()),
+    const matchedCount = query.tags.filter(tag =>
+      allTags.some(at => at.toLowerCase() === tag.toLowerCase())
     ).length;
 
     // 计算匹配的keywords数量
     let matchedKeywordsCount = 0;
     if (query.keywords && query.keywords.length > 0) {
-      matchedKeywordsCount = query.keywords.filter((keyword) =>
-        articleKeywords.some(
-          (ak) => ak.toLowerCase() === keyword.toLowerCase(),
-        ),
+      matchedKeywordsCount = query.keywords.filter(keyword =>
+        articleKeywords.some(ak => ak.toLowerCase() === keyword.toLowerCase())
       ).length;
     }
 
@@ -178,8 +176,8 @@ export class RelevanceScorer {
    */
   private static calculateMatchDetails(
     article: LawArticle,
-    query: SearchQuery,
-  ): RelevanceScore["details"] {
+    query: SearchQuery
+  ): RelevanceScore['details'] {
     const matchedKeywords = this.extractMatchedKeywords(article, query);
     const matchedTags = this.extractMatchedTags(article, query);
 
@@ -202,7 +200,7 @@ export class RelevanceScorer {
    */
   private static extractMatchedKeywords(
     article: LawArticle,
-    query: SearchQuery,
+    query: SearchQuery
   ): string[] {
     if (!query.keyword || !query.keyword.trim()) {
       return [];
@@ -229,7 +227,7 @@ export class RelevanceScorer {
    */
   private static extractMatchedTags(
     article: LawArticle,
-    query: SearchQuery,
+    query: SearchQuery
   ): string[] {
     if (!query.tags || query.tags.length === 0) {
       return [];
@@ -239,8 +237,8 @@ export class RelevanceScorer {
     const articleKeywords = article.keywords || [];
     const allTags = [...articleTags, ...articleKeywords];
 
-    return query.tags.filter((tag) =>
-      allTags.some((at) => at.toLowerCase() === tag.toLowerCase()),
+    return query.tags.filter(tag =>
+      allTags.some(at => at.toLowerCase() === tag.toLowerCase())
     );
   }
 
@@ -249,7 +247,7 @@ export class RelevanceScorer {
    */
   static calculateSimilarity(
     article1: LawArticle,
-    article2: LawArticle,
+    article2: LawArticle
   ): number {
     // 分类相似度
     const categorySimilarity =
@@ -258,7 +256,7 @@ export class RelevanceScorer {
     // 标签相似度
     const tags1 = new Set(article1.tags || []);
     const tags2 = new Set(article2.tags || []);
-    const intersection = new Set([...tags1].filter((tag) => tags2.has(tag)));
+    const intersection = new Set([...tags1].filter(tag => tags2.has(tag)));
     const union = new Set([...tags1, ...tags2]);
     const tagSimilarity = union.size > 0 ? intersection.size / union.size : 0.0;
 
@@ -266,7 +264,7 @@ export class RelevanceScorer {
     const keywords1 = new Set(article1.keywords || []);
     const keywords2 = new Set(article2.keywords || []);
     const intersectionKw = new Set(
-      [...keywords1].filter((kw) => keywords2.has(kw)),
+      [...keywords1].filter(kw => keywords2.has(kw))
     );
     const unionKw = new Set([...keywords1, ...keywords2]);
     const keywordSimilarity =
@@ -283,13 +281,13 @@ export class RelevanceScorer {
    */
   static sortArticlesByRelevance<T extends { relevanceScore: number }>(
     articles: T[],
-    order: "asc" | "desc" = "desc",
+    order: 'asc' | 'desc' = 'desc'
   ): T[] {
     return [...articles].sort((a, b) => {
       const scoreA = a.relevanceScore;
       const scoreB = b.relevanceScore;
 
-      if (order === "desc") {
+      if (order === 'desc') {
         return scoreB - scoreA;
       } else {
         return scoreA - scoreB;
@@ -302,9 +300,9 @@ export class RelevanceScorer {
    */
   static filterArticlesByMinScore<T extends { relevanceScore: number }>(
     articles: T[],
-    minScore: number,
+    minScore: number
   ): T[] {
-    return articles.filter((article) => article.relevanceScore >= minScore);
+    return articles.filter(article => article.relevanceScore >= minScore);
   }
 
   /**
@@ -324,7 +322,7 @@ export class RelevanceScorer {
    * 归一化权重配置
    */
   static normalizeWeights(
-    weights: RelevanceWeightConfig,
+    weights: RelevanceWeightConfig
   ): RelevanceWeightConfig {
     const total =
       weights.keywordWeight +

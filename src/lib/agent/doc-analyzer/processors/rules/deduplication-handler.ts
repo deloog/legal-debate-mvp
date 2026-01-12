@@ -7,8 +7,8 @@
  * - 诉讼请求去重
  */
 
-import type { Party, Claim, Correction } from "../../core/types";
-import { logger } from "../../../../agent/security/logger";
+import type { Party, Claim, Correction } from '../../core/types';
+import { logger } from '../../../../agent/security/logger';
 
 export class DeduplicationHandler {
   /**
@@ -19,14 +19,14 @@ export class DeduplicationHandler {
     const duplicates: string[] = [];
     const filteredLegalReps: string[] = [];
 
-    parties.forEach((party) => {
+    parties.forEach(party => {
       const name = party.name?.trim();
       if (!name) return;
 
       // 过滤法定代表人（Bad Case 8修复）
       if (this.isLegalRepresentative(name, party.role, parties)) {
         filteredLegalReps.push(name);
-        logger.info("过滤法定代表人，不作为独立当事人", {
+        logger.info('过滤法定代表人，不作为独立当事人', {
           name,
           role: party.role,
         });
@@ -48,8 +48,8 @@ export class DeduplicationHandler {
           existing.address = party.address;
         }
         if (
-          party.type === "plaintiff" ||
-          (party.type === "defendant" && existing.type !== "plaintiff")
+          party.type === 'plaintiff' ||
+          (party.type === 'defendant' && existing.type !== 'plaintiff')
         ) {
           existing.type = party.type;
         }
@@ -64,17 +64,17 @@ export class DeduplicationHandler {
     // 记录去重和过滤结果
     const reportParts: string[] = [];
     if (duplicates.length > 0) {
-      reportParts.push(`去重当事人：${duplicates.join(", ")}`);
+      reportParts.push(`去重当事人：${duplicates.join(', ')}`);
     }
     if (filteredLegalReps.length > 0) {
-      reportParts.push(`过滤法定代表人：${filteredLegalReps.join(", ")}`);
+      reportParts.push(`过滤法定代表人：${filteredLegalReps.join(', ')}`);
     }
 
     if (reportParts.length > 0) {
       corrections.push({
-        type: "FIX_ROLE",
-        description: reportParts.join("; "),
-        rule: "PARTY_DEDUPLICATION_AND_FILTER",
+        type: 'FIX_ROLE',
+        description: reportParts.join('; '),
+        rule: 'PARTY_DEDUPLICATION_AND_FILTER',
         originalValue: { duplicates, filteredLegalReps },
         correctedValue: parties.length,
       });
@@ -87,7 +87,7 @@ export class DeduplicationHandler {
   private isLegalRepresentative(
     name: string,
     role: string | undefined,
-    allParties: Party[],
+    allParties: Party[]
   ): boolean {
     // 检查角色是否表明是法定代表人
     const legalRepRolePatterns = [
@@ -102,13 +102,13 @@ export class DeduplicationHandler {
       /代表/,
     ];
 
-    if (role && legalRepRolePatterns.some((pattern) => pattern.test(role))) {
+    if (role && legalRepRolePatterns.some(pattern => pattern.test(role))) {
       return true;
     }
 
     // 检查是否有公司实体当事人存在（如"ABC科技有限公司"）
     const companyParties = allParties.filter(
-      (p) => p.name !== name && /公司|企业|集团|有限|股份/.test(p.name),
+      p => p.name !== name && /公司|企业|集团|有限|股份/.test(p.name)
     );
 
     // 如果有公司当事人，而此人只是个人姓名且角色包含代表信息，很可能是法定代表人
@@ -131,8 +131,8 @@ export class DeduplicationHandler {
     const unique: Claim[] = [];
     let duplicates = 0;
 
-    claims.forEach((claim) => {
-      const key = `${claim.type}_${claim.content}_${claim.amount || "null"}`;
+    claims.forEach(claim => {
+      const key = `${claim.type}_${claim.content}_${claim.amount || 'null'}`;
       if (!seen.has(key)) {
         seen.add(key);
         unique.push(claim);
@@ -146,9 +146,9 @@ export class DeduplicationHandler {
 
     if (duplicates > 0) {
       corrections.push({
-        type: "FIX_AMOUNT",
+        type: 'FIX_AMOUNT',
         description: `去重诉讼请求：${duplicates}条`,
-        rule: "CLAIM_DEDUPLICATION",
+        rule: 'CLAIM_DEDUPLICATION',
       });
     }
   }

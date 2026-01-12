@@ -10,21 +10,21 @@ import type {
   CaseInfo,
   DebateGenerationResult,
   LegalReference,
-} from "../../types/debate";
-import { AICacheManager } from "./cache-manager";
-import { getAIConfig } from "./config";
-import { DebatePromptOptimizer } from "./debate-prompt-optimizer";
-import { LawStarClient, createLawStarClient } from "./lawstar-client";
-import { getLawStarConfig } from "./lawstar-config";
-import { AIService, AIServiceFactory } from "./service";
+} from '../../types/debate';
+import { AICacheManager } from './cache-manager';
+import { getAIConfig } from './config';
+import { DebatePromptOptimizer } from './debate-prompt-optimizer';
+import { LawStarClient, createLawStarClient } from './lawstar-client';
+import { getLawStarConfig } from './lawstar-config';
+import { AIService, AIServiceFactory } from './service';
 
-import type { AIRequestConfig, AIResponse } from "../../types/ai-service";
+import type { AIRequestConfig, AIResponse } from '../../types/ai-service';
 import type {
   LawStarRegulationRequest,
   LawStarRegulationResponse,
   LawStarVectorRequest,
   LawStarVectorResponse,
-} from "../../types/lawstar-api";
+} from '../../types/lawstar-api';
 
 // =============================================================================
 // 统一服务类型定义
@@ -77,7 +77,7 @@ export class UnifiedAIService {
   constructor(
     config?: Partial<UnifiedAIServiceConfig>,
     debateConfig?: Partial<DebateGeneratorConfig>,
-    useRealAPI: boolean = false,
+    useRealAPI: boolean = false
   ) {
     this.config = {
       enableGeneralAI: config?.enableGeneralAI !== false,
@@ -113,8 +113,8 @@ export class UnifiedAIService {
             enableCoT: true,
             enableFewShot: true,
             maxExamples: 2,
-            complexityLevel: "advanced",
-          },
+            complexityLevel: 'advanced',
+          }
         );
       }
 
@@ -124,9 +124,9 @@ export class UnifiedAIService {
       }
 
       this.initialized = true;
-      console.log("Unified AI Service initialized successfully");
+      console.log('Unified AI Service initialized successfully');
     } catch (error) {
-      console.error("Failed to initialize Unified AI Service:", error);
+      console.error('Failed to initialize Unified AI Service:', error);
       throw error;
     }
   }
@@ -135,13 +135,13 @@ export class UnifiedAIService {
     try {
       const aiConfig = getAIConfig(this.useRealAPI);
       this.generalAIService = await AIServiceFactory.getInstance(
-        "default",
+        'default',
         aiConfig,
-        this.useRealAPI,
+        this.useRealAPI
       );
-      console.log("General AI Service initialized");
+      console.log('General AI Service initialized');
     } catch (error) {
-      console.error("Failed to initialize General AI Service:", error);
+      console.error('Failed to initialize General AI Service:', error);
       throw error;
     }
   }
@@ -150,9 +150,9 @@ export class UnifiedAIService {
     try {
       const lawStarConfig = getLawStarConfig();
       this.legalAIService = createLawStarClient(lawStarConfig);
-      console.log("Legal AI Service (Law Star) initialized");
+      console.log('Legal AI Service (Law Star) initialized');
     } catch (error) {
-      console.error("Failed to initialize Legal AI Service:", error);
+      console.error('Failed to initialize Legal AI Service:', error);
       throw error;
     }
   }
@@ -179,21 +179,21 @@ export class UnifiedAIService {
     options?: {
       extractKeyInfo?: boolean;
       identifyLegalIssues?: boolean;
-    },
+    }
   ): Promise<AIResponse> {
     this.ensureInitialized();
     this.ensureGeneralAIAvailable();
 
     const systemPrompt = `你是一个专业的法律文档分析助手。请分析以下文档内容：
-${options?.extractKeyInfo ? "- 提取关键信息（当事人、案由、诉求等）" : ""}
-${options?.identifyLegalIssues ? "- 识别法律问题和争议焦点" : ""}`;
+${options?.extractKeyInfo ? '- 提取关键信息（当事人、案由、诉求等）' : ''}
+${options?.identifyLegalIssues ? '- 识别法律问题和争议焦点' : ''}`;
 
     return this.generalAIService!.chatCompletion({
-      model: "glm-4-flash",
-      provider: "zhipu", // 明确指定提供商
+      model: 'glm-4-flash',
+      provider: 'zhipu', // 明确指定提供商
       messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content },
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content },
       ],
       temperature: 0.3,
       maxTokens: 2000,
@@ -210,20 +210,20 @@ ${options?.identifyLegalIssues ? "- 识别法律问题和争议焦点" : ""}`;
   }): Promise<AIResponse>;
   public async generateDebate(
     caseInfo: CaseInfo,
-    legalReferences?: LegalReference[],
+    legalReferences?: LegalReference[]
   ): Promise<DebateGenerationResult>;
   public async generateDebate(
     caseInfo:
       | CaseInfo
       | { title: string; description: string; legalReferences?: string[] },
-    legalReferences?: LegalReference[] | undefined,
+    legalReferences?: LegalReference[] | undefined
   ): Promise<AIResponse | DebateGenerationResult> {
     this.ensureInitialized();
     this.ensureGeneralAIAvailable();
 
     // 兼容旧API：如果使用旧格式调用
     const isOldAPI =
-      "legalReferences" in caseInfo &&
+      'legalReferences' in caseInfo &&
       !legalReferences &&
       Array.isArray(
         (
@@ -232,7 +232,7 @@ ${options?.identifyLegalIssues ? "- 识别法律问题和争议焦点" : ""}`;
             description: string;
             legalReferences?: string[];
           }
-        ).legalReferences,
+        ).legalReferences
       );
     const oldFormatCase = isOldAPI ? caseInfo : null;
     const newFormatCase = isOldAPI ? null : caseInfo;
@@ -244,13 +244,13 @@ ${options?.identifyLegalIssues ? "- 识别法律问题和争议焦点" : ""}`;
           title: string;
           description: string;
           legalReferences?: string[];
-        },
+        }
       );
     }
 
     // 新API：返回DebateGenerationResult，支持逻辑验证
     if (!newFormatCase) {
-      throw new Error("Invalid arguments");
+      throw new Error('Invalid arguments');
     }
 
     return this.generateDebateEnhanced(newFormatCase, legalReferences || []);
@@ -267,27 +267,27 @@ ${options?.identifyLegalIssues ? "- 识别法律问题和争议焦点" : ""}`;
     // 1. 首先检查缓存
     const cachedResponse = await this.cacheManager.checkDebateCache(caseInfo);
     if (cachedResponse) {
-      console.log("Using cached debate response");
+      console.log('Using cached debate response');
       return {
         ...cachedResponse,
         cached: true,
-        provider: "deepseek",
+        provider: 'deepseek',
       };
     }
 
     const response = await this.generalAIService!.chatCompletion({
-      model: "deepseek-chat",
-      provider: "deepseek",
+      model: 'deepseek-chat',
+      provider: 'deepseek',
       messages: [
         {
-          role: "system",
-          content: "你是一个专业的法律辩论助手，请提供简洁、结构化的辩论论点。",
+          role: 'system',
+          content: '你是一个专业的法律辩论助手，请提供简洁、结构化的辩论论点。',
         },
         {
-          role: "user",
+          role: 'user',
           content: `案件：${caseInfo.title}
 描述：${caseInfo.description}
-${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` : ""}
+${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join('、')}` : ''}
 
 请分别列出原告和被告的3-4个核心论点，每个论点包含：主张、法律依据、事实依据。`,
         },
@@ -307,7 +307,7 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
    */
   private async generateDebateEnhanced(
     caseInfo: CaseInfo,
-    legalReferences: LegalReference[],
+    legalReferences: LegalReference[]
   ): Promise<DebateGenerationResult> {
     let attempts = 0;
     let bestResult: DebateGenerationResult | null = null;
@@ -318,7 +318,7 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
       try {
         const result = await this.generateDebateInternal(
           caseInfo,
-          legalReferences,
+          legalReferences
         );
 
         if (this.debateConfig.enableLogicalVerification) {
@@ -354,7 +354,7 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
     }
 
     if (!bestResult) {
-      throw new Error("无法生成满足要求的辩论论点");
+      throw new Error('无法生成满足要求的辩论论点');
     }
 
     const executionTime = Date.now();
@@ -363,7 +363,7 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
       ...bestResult,
       metadata: {
         generatedAt: new Date(),
-        model: "deepseek-chat",
+        model: 'deepseek-chat',
         tokensUsed: 1500,
         executionTime,
         confidence: this.calculateOverallScore(bestResult),
@@ -376,31 +376,31 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
    */
   private async generateDebateInternal(
     caseInfo: CaseInfo,
-    legalReferences: LegalReference[],
+    legalReferences: LegalReference[]
   ): Promise<DebateGenerationResult> {
-    const legalTexts = legalReferences.map((ref) => ref.fullText).join("\n\n");
+    const legalTexts = legalReferences.map(ref => ref.fullText).join('\n\n');
     const prompt = await this.buildPrompt(caseInfo, legalTexts);
 
     const response = await this.generalAIService!.chatCompletion({
-      model: "deepseek-chat",
-      provider: "deepseek",
+      model: 'deepseek-chat',
+      provider: 'deepseek',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content: this.debateConfig.usePromptOptimizer
             ? (await this.promptOptimizer?.generateOptimizedPrompt(caseInfo))
                 .systemPrompt
-            : "你是专业的法律辩论生成助手，擅长生成逻辑清晰、法律依据准确的辩论论点。",
+            : '你是专业的法律辩论生成助手，擅长生成逻辑清晰、法律依据准确的辩论论点。',
         },
-        { role: "user", content: prompt },
+        { role: 'user', content: prompt },
       ],
       temperature: 0.7,
       maxTokens: 2000,
     });
 
     return this.parseDebateResponse(
-      response.choices[0].message.content || "",
-      legalReferences,
+      response.choices[0].message.content || '',
+      legalReferences
     );
   }
 
@@ -409,12 +409,12 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
    */
   private async buildPrompt(
     caseInfo: CaseInfo,
-    legalTexts: string,
+    legalTexts: string
   ): Promise<string> {
     if (this.debateConfig.usePromptOptimizer && this.promptOptimizer) {
       const optimized = await this.promptOptimizer.generateOptimizedPrompt(
         caseInfo,
-        legalTexts.split("\n\n").filter((t) => t),
+        legalTexts.split('\n\n').filter(t => t)
       );
       return optimized.userPrompt;
     }
@@ -456,7 +456,7 @@ ${legalTexts}
    */
   private parseDebateResponse(
     response: string,
-    legalReferences: LegalReference[],
+    legalReferences: LegalReference[]
   ): DebateGenerationResult {
     const jsonMatch = response.match(/\{[\s\S]*\}/);
 
@@ -470,25 +470,25 @@ ${legalTexts}
           parsed.plaintiffArguments?.every(this.isValidArgument) &&
           parsed.defendantArguments?.every(this.isValidArgument)
         ) {
-          console.log("JSON解析成功");
+          console.log('JSON解析成功');
           return {
             plaintiffArguments: parsed.plaintiffArguments || [],
             defendantArguments: parsed.defendantArguments || [],
             legalBasis: legalReferences,
             metadata: {
               generatedAt: new Date(),
-              model: "deepseek-chat",
+              model: 'deepseek-chat',
               tokensUsed: 0,
               confidence: 0,
             },
           };
         }
       } catch (error) {
-        console.error("JSON解析失败，尝试其他解析方法:", error);
+        console.error('JSON解析失败，尝试其他解析方法:', error);
       }
     }
 
-    console.log("尝试从文本提取论点");
+    console.log('尝试从文本提取论点');
     return this.extractArgumentsFromText(response, legalReferences);
   }
 
@@ -497,12 +497,12 @@ ${legalTexts}
    */
   private isValidArgument(arg: unknown): arg is Argument {
     return (
-      typeof arg === "object" &&
+      typeof arg === 'object' &&
       arg !== null &&
-      "content" in arg &&
-      typeof arg.content === "string" &&
-      "side" in arg &&
-      typeof arg.side === "string"
+      'content' in arg &&
+      typeof arg.content === 'string' &&
+      'side' in arg &&
+      typeof arg.side === 'string'
     );
   }
 
@@ -511,32 +511,32 @@ ${legalTexts}
    */
   private extractArgumentsFromText(
     text: string,
-    legalReferences: LegalReference[],
+    legalReferences: LegalReference[]
   ): DebateGenerationResult {
     const plaintiffArguments: Argument[] = [];
     const defendantArguments: Argument[] = [];
 
     const plaintiffSection = this.extractSection(text, [
-      "原告",
-      "申请人",
-      "指控方",
-      " Plaintiff",
+      '原告',
+      '申请人',
+      '指控方',
+      ' Plaintiff',
     ]);
 
     const defendantSection = this.extractSection(text, [
-      "被告",
-      "被申请人",
-      "辩护方",
-      " Defendant",
+      '被告',
+      '被申请人',
+      '辩护方',
+      ' Defendant',
     ]);
 
     const plaintiffMatches =
       plaintiffSection.match(/\d+\.\s*(.+?)(?=\n|$)/g) || [];
     for (const match of plaintiffMatches) {
-      const content = match.replace(/^\d+\.\s*/, "").trim();
+      const content = match.replace(/^\d+\.\s*/, '').trim();
       if (content.length > 5) {
         plaintiffArguments.push({
-          side: "plaintiff",
+          side: 'plaintiff',
           content,
           legalBasis: this.extractLegalBasis(content),
           reasoning: this.extractReasoning(content),
@@ -547,10 +547,10 @@ ${legalTexts}
     const defendantMatches =
       defendantSection.match(/\d+\.\s*(.+?)(?=\n|$)/g) || [];
     for (const match of defendantMatches) {
-      const content = match.replace(/^\d+\.\s*/, "").trim();
+      const content = match.replace(/^\d+\.\s*/, '').trim();
       if (content.length > 5) {
         defendantArguments.push({
-          side: "defendant",
+          side: 'defendant',
           content,
           legalBasis: this.extractLegalBasis(content),
           reasoning: this.extractReasoning(content),
@@ -559,7 +559,7 @@ ${legalTexts}
     }
 
     console.log(
-      `提取到 ${plaintiffArguments.length} 个原告论点，${defendantArguments.length} 个被告论点`,
+      `提取到 ${plaintiffArguments.length} 个原告论点，${defendantArguments.length} 个被告论点`
     );
 
     return {
@@ -568,7 +568,7 @@ ${legalTexts}
       legalBasis: legalReferences,
       metadata: {
         generatedAt: new Date(),
-        model: "deepseek-chat",
+        model: 'deepseek-chat',
         tokensUsed: 0,
         confidence: 0,
       },
@@ -615,7 +615,7 @@ ${legalTexts}
    */
   private extractLegalBasis(content: string): string | undefined {
     const legalMatch = content.match(
-      /根据|依据|依照|按照.+?(?:法|条例|规定|解释)/,
+      /根据|依据|依照|按照.+?(?:法|条例|规定|解释)/
     );
 
     if (legalMatch) {
@@ -634,7 +634,7 @@ ${legalTexts}
    */
   private extractReasoning(content: string): string | undefined {
     const connectorMatch = content.match(
-      /(因此|所以|基于此|由此可见|综上所述)/,
+      /(因此|所以|基于此|由此可见|综上所述)/
     );
 
     if (connectorMatch) {
@@ -654,21 +654,21 @@ ${legalTexts}
 
     // 更全面的逻辑连接词列表
     const logicalConnectors = [
-      "因此",
-      "基于此",
-      "根据",
-      "由于",
-      "因为",
-      "所以",
-      "据此",
-      "基于",
-      "鉴于",
-      "鉴于上述",
-      "由此可见",
-      "综上所述",
-      "从而",
-      "进而",
-      "故此",
+      '因此',
+      '基于此',
+      '根据',
+      '由于',
+      '因为',
+      '所以',
+      '据此',
+      '基于',
+      '鉴于',
+      '鉴于上述',
+      '由此可见',
+      '综上所述',
+      '从而',
+      '进而',
+      '故此',
     ];
 
     for (const arg of args) {
@@ -693,7 +693,7 @@ ${legalTexts}
         // 推理深度：检测推理步骤（逗号分隔的多个要点）
         const reasoningSteps = arg.reasoning
           .split(/[，。；,.;]/)
-          .filter((s) => s.trim().length > 2);
+          .filter(s => s.trim().length > 2);
         if (reasoningSteps.length >= 2) {
           score += 0.05;
         }
@@ -734,7 +734,7 @@ ${legalTexts}
       /由于.*?所以/g,
       /根据.*?故此/g,
     ];
-    return causalPatterns.some((pattern) => pattern.test(content));
+    return causalPatterns.some(pattern => pattern.test(content));
   }
 
   /**
@@ -742,10 +742,10 @@ ${legalTexts}
    */
   private calculateOverallScore(result: DebateGenerationResult): number {
     const plaintiffScore = this.calculateLogicalScore(
-      result.plaintiffArguments,
+      result.plaintiffArguments
     );
     const defendantScore = this.calculateLogicalScore(
-      result.defendantArguments,
+      result.defendantArguments
     );
 
     const logicalConsistency = (plaintiffScore + defendantScore) / 2;
@@ -821,7 +821,7 @@ ${legalTexts}
    * 配置辩论生成器
    */
   public configureDebateGenerator(
-    config: Partial<DebateGeneratorConfig>,
+    config: Partial<DebateGeneratorConfig>
   ): void {
     this.debateConfig = { ...this.debateConfig, ...config };
   }
@@ -841,7 +841,7 @@ ${legalTexts}
    * 法规查询（使用法律之星）
    */
   public async searchLegalRegulations(
-    request: LawStarRegulationRequest,
+    request: LawStarRegulationRequest
   ): Promise<LawStarRegulationResponse> {
     this.ensureInitialized();
     this.ensureLegalAIAvailable();
@@ -853,7 +853,7 @@ ${legalTexts}
    * 向量查询（使用法律之星）
    */
   public async searchLegalByVector(
-    request: LawStarVectorRequest,
+    request: LawStarVectorRequest
   ): Promise<LawStarVectorResponse> {
     this.ensureInitialized();
     this.ensureLegalAIAvailable();
@@ -874,7 +874,7 @@ ${legalTexts}
     semanticResults?: LawStarVectorResponse;
     combined: Array<{
       lawId: string;
-      source: "keyword" | "semantic";
+      source: 'keyword' | 'semantic';
       relevanceScore?: number;
       similarity?: number;
       score?: number;
@@ -891,7 +891,7 @@ ${legalTexts}
       combined: Array<{
         lawId: string;
         lawName: string;
-        source: "keyword" | "semantic";
+        source: 'keyword' | 'semantic';
         relevanceScore?: number;
         similarity?: number;
         score?: number;
@@ -912,10 +912,10 @@ ${legalTexts}
           keyword: query.keyword,
           lawType: query.lawType,
           pageSize: query.topK || 10,
-        }).then((res) => {
+        }).then(res => {
           results.keywordResults = res;
           return res;
-        }),
+        })
       );
     }
 
@@ -925,10 +925,10 @@ ${legalTexts}
           query: query.semanticQuery,
           lawType: query.lawType,
           topK: query.topK || 10,
-        }).then((res) => {
+        }).then(res => {
           results.semanticResults = res;
           return res;
-        }),
+        })
       );
     }
 
@@ -944,7 +944,7 @@ ${legalTexts}
           results.combined.push({
             lawId: item.lawId,
             lawName: item.lawName,
-            source: "keyword",
+            source: 'keyword',
             title: item.lawName,
           });
         }
@@ -958,7 +958,7 @@ ${legalTexts}
           results.combined.push({
             lawId: match.lawId,
             lawName: match.lawName,
-            source: "semantic",
+            source: 'semantic',
             relevanceScore: match.score,
             similarity: match.score,
             score: match.score,
@@ -998,7 +998,7 @@ ${legalTexts}
       semanticResults?: LawStarVectorResponse;
       combined: Array<{
         lawId: string;
-        source: "keyword" | "semantic";
+        source: 'keyword' | 'semantic';
         relevanceScore?: number;
         similarity?: number;
         score?: number;
@@ -1018,10 +1018,10 @@ ${legalTexts}
 
     // 2. 提取关键词进行法律检索
     const keywords = this.extractKeywords(
-      documentAnalysis.choices[0].message.content,
+      documentAnalysis.choices[0].message.content
     );
     const legalReferences = await this.smartLegalSearch({
-      keyword: keywords.join(" "),
+      keyword: keywords.join(' '),
       semanticQuery: document.content.substring(0, 500),
       topK: 5,
     });
@@ -1031,7 +1031,7 @@ ${legalTexts}
       title: document.title,
       description: documentAnalysis.choices[0].message.content,
       legalReferences: legalReferences.combined.map(
-        (ref) => ref.lawName || ref.title,
+        ref => ref.lawName || ref.title
       ),
     });
 
@@ -1049,14 +1049,14 @@ ${legalTexts}
     // 简单的关键词提取逻辑
     const keywords: string[] = [];
     const legalTerms = [
-      "合同",
-      "侵权",
-      "违约",
-      "赔偿",
-      "诉讼",
-      "仲裁",
-      "民法",
-      "刑法",
+      '合同',
+      '侵权',
+      '违约',
+      '赔偿',
+      '诉讼',
+      '仲裁',
+      '民法',
+      '刑法',
     ];
 
     for (const term of legalTerms) {
@@ -1065,7 +1065,7 @@ ${legalTexts}
       }
     }
 
-    return keywords.length > 0 ? keywords : ["法律"];
+    return keywords.length > 0 ? keywords : ['法律'];
   }
 
   // =============================================================================
@@ -1103,7 +1103,7 @@ ${legalTexts}
           this.generalAIService.getAvailableProviders();
         status.generalAI.healthy = aiStatus.healthy;
       } catch (error) {
-        console.error("Failed to get general AI status:", error);
+        console.error('Failed to get general AI status:', error);
       }
     }
 
@@ -1116,7 +1116,7 @@ ${legalTexts}
         status.legalAI.vector = true;
         status.legalAI.healthy = lawStarHealthy;
       } catch (error) {
-        console.error("Failed to get legal AI status:", error);
+        console.error('Failed to get legal AI status:', error);
       }
     }
 
@@ -1147,20 +1147,20 @@ ${legalTexts}
   private ensureInitialized(): void {
     if (!this.initialized) {
       throw new Error(
-        "Unified AI Service not initialized. Call initialize() first.",
+        'Unified AI Service not initialized. Call initialize() first.'
       );
     }
   }
 
   private ensureGeneralAIAvailable(): void {
     if (!this.generalAIService) {
-      throw new Error("General AI Service is not available");
+      throw new Error('General AI Service is not available');
     }
   }
 
   private ensureLegalAIAvailable(): void {
     if (!this.legalAIService) {
-      throw new Error("Legal AI Service is not available");
+      throw new Error('Legal AI Service is not available');
     }
   }
 
@@ -1172,7 +1172,7 @@ ${legalTexts}
       await this.generalAIService.shutdown();
     }
     this.initialized = false;
-    console.log("Unified AI Service shut down");
+    console.log('Unified AI Service shut down');
   }
 }
 
@@ -1185,7 +1185,7 @@ let accuracyTestServiceInstance: UnifiedAIService | null = null;
 
 export async function getUnifiedAIService(
   config?: Partial<UnifiedAIServiceConfig>,
-  useRealAPI: boolean = false,
+  useRealAPI: boolean = false
 ): Promise<UnifiedAIService> {
   // 如果明确请求使用真实API（准确性测试），使用专用实例
   if (useRealAPI) {
@@ -1193,7 +1193,7 @@ export async function getUnifiedAIService(
       accuracyTestServiceInstance = new UnifiedAIService(
         config,
         undefined,
-        true,
+        true
       );
       await accuracyTestServiceInstance.initialize();
     }

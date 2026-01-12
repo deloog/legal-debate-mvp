@@ -47,7 +47,7 @@ export interface AccuracyReport {
   reportId: string;
   generatedAt: Date;
   version: string;
-  overallStatus: "PASSED" | "FAILED" | "PARTIAL";
+  overallStatus: 'PASSED' | 'FAILED' | 'PARTIAL';
   summary: {
     totalTests: number;
     passedTests: number;
@@ -79,20 +79,20 @@ export class AccuracyEvaluator {
     expectedClaims: string[];
     extractedAmounts: number[];
     expectedAmounts: number[];
-  }): AccuracyMetrics["documentParsing"] {
+  }): AccuracyMetrics['documentParsing'] {
     const partyRecognitionAccuracy = this.calculateAccuracy(
       data.extractedParties,
-      data.expectedParties,
+      data.expectedParties
     );
 
     const claimExtractionRecall = this.calculateRecall(
       data.extractedClaims,
-      data.expectedClaims,
+      data.expectedClaims
     );
 
     const amountExtractionAccuracy = this.calculateAmountAccuracy(
       data.extractedAmounts,
-      data.expectedAmounts,
+      data.expectedAmounts
     );
 
     const overallScore =
@@ -117,10 +117,10 @@ export class AccuracyEvaluator {
     relevantArticles: string[];
     applicabilityScores: number[];
     relevanceScores: number[];
-  }): AccuracyMetrics["lawRetrieval"] {
+  }): AccuracyMetrics['lawRetrieval'] {
     const recallRate = this.calculateRecall(
       data.retrievedArticles,
-      data.relevantArticles,
+      data.relevantArticles
     );
 
     const applicabilityScore =
@@ -149,7 +149,7 @@ export class AccuracyEvaluator {
     argumentLogicScores: number[];
     legalBasisAccuracyScores: number[];
     balanceScores: number[];
-  }): AccuracyMetrics["debateGeneration"] {
+  }): AccuracyMetrics['debateGeneration'] {
     const argumentLogicScore =
       data.argumentLogicScores.length > 0
         ? data.argumentLogicScores.reduce((a, b) => a + b, 0) /
@@ -185,7 +185,7 @@ export class AccuracyEvaluator {
     totalCacheRequests: number;
     apiCallsWithCache: number;
     apiCallsWithoutCache: number;
-  }): AccuracyMetrics["performance"] {
+  }): AccuracyMetrics['performance'] {
     const errorRecoveryRate =
       data.totalErrors > 0 ? data.recoveredErrors / data.totalErrors : 0;
 
@@ -215,7 +215,7 @@ export class AccuracyEvaluator {
     testName: string,
     actualValue: number,
     targetValue: number,
-    details?: string[],
+    details?: string[]
   ): AccuracyTestResult {
     const passed = actualValue >= targetValue;
     const improvement = ((actualValue - targetValue) / targetValue) * 100;
@@ -235,26 +235,26 @@ export class AccuracyEvaluator {
    */
   generateReport(
     metrics: AccuracyMetrics,
-    testResults: AccuracyTestResult[],
+    testResults: AccuracyTestResult[]
   ): AccuracyReport {
-    const passedTests = testResults.filter((r) => r.passed).length;
-    const failedTests = testResults.filter((r) => !r.passed).length;
+    const passedTests = testResults.filter(r => r.passed).length;
+    const failedTests = testResults.filter(r => !r.passed).length;
     const passRate =
       testResults.length > 0 ? passedTests / testResults.length : 1; // 默认为1表示全部通过
 
-    let overallStatus: "PASSED" | "FAILED" | "PARTIAL";
+    let overallStatus: 'PASSED' | 'FAILED' | 'PARTIAL';
     if (testResults.length === 0 || passRate >= 1) {
-      overallStatus = "PASSED";
+      overallStatus = 'PASSED';
     } else if (passRate >= 0.8) {
-      overallStatus = "PARTIAL";
+      overallStatus = 'PARTIAL';
     } else {
-      overallStatus = "FAILED";
+      overallStatus = 'FAILED';
     }
 
     const recommendations = this.generateRecommendations(metrics);
 
     const testResultsMap = new Map();
-    testResults.forEach((result) => {
+    testResults.forEach(result => {
       testResultsMap.set(result.testName, result);
     });
 
@@ -286,7 +286,7 @@ export class AccuracyEvaluator {
       recommendations.push(
         `当事人识别准确率${(
           metrics.documentParsing.partyRecognitionAccuracy * 100
-        ).toFixed(1)}%低于目标95%，建议优化AI提示词和规则算法`,
+        ).toFixed(1)}%低于目标95%，建议优化AI提示词和规则算法`
       );
     }
 
@@ -294,7 +294,7 @@ export class AccuracyEvaluator {
       recommendations.push(
         `诉讼请求提取召回率${(
           metrics.documentParsing.claimExtractionRecall * 100
-        ).toFixed(1)}%低于目标95%，建议增强诉讼请求分类规则`,
+        ).toFixed(1)}%低于目标95%，建议增强诉讼请求分类规则`
       );
     }
 
@@ -302,7 +302,7 @@ export class AccuracyEvaluator {
       recommendations.push(
         `金额提取准确率${(
           metrics.documentParsing.amountExtractionAccuracy * 100
-        ).toFixed(1)}%低于目标95%，建议优化金额识别正则表达式`,
+        ).toFixed(1)}%低于目标95%，建议优化金额识别正则表达式`
       );
     }
 
@@ -310,8 +310,8 @@ export class AccuracyEvaluator {
     if (metrics.lawRetrieval.recallRate < 0.9) {
       recommendations.push(
         `法条检索召回率${(metrics.lawRetrieval.recallRate * 100).toFixed(
-          1,
-        )}%低于目标90%，建议优化关键词匹配和扩展算法`,
+          1
+        )}%低于目标90%，建议优化关键词匹配和扩展算法`
       );
     }
 
@@ -320,7 +320,7 @@ export class AccuracyEvaluator {
       recommendations.push(
         `论点逻辑性评分${(
           metrics.debateGeneration.argumentLogicScore * 100
-        ).toFixed(1)}%低于目标92%，建议优化论点生成AI提示词`,
+        ).toFixed(1)}%低于目标92%，建议优化论点生成AI提示词`
       );
     }
 
@@ -328,16 +328,16 @@ export class AccuracyEvaluator {
     if (metrics.performance.cacheHitRate < 0.6) {
       recommendations.push(
         `缓存命中率${(metrics.performance.cacheHitRate * 100).toFixed(
-          1,
-        )}%低于目标60%，建议优化缓存策略`,
+          1
+        )}%低于目标60%，建议优化缓存策略`
       );
     }
 
     if (metrics.performance.errorRecoveryRate < 0.9) {
       recommendations.push(
         `错误恢复率${(metrics.performance.errorRecoveryRate * 100).toFixed(
-          1,
-        )}%低于目标90%，建议完善错误处理和重试机制`,
+          1
+        )}%低于目标90%，建议完善错误处理和重试机制`
       );
     }
 
@@ -350,7 +350,7 @@ export class AccuracyEvaluator {
   private calculateAccuracy<T>(extracted: T[], expected: T[]): number {
     if (expected.length === 0) return 1;
 
-    const correct = extracted.filter((e) => expected.includes(e)).length;
+    const correct = extracted.filter(e => expected.includes(e)).length;
     return correct / expected.length;
   }
 
@@ -360,7 +360,7 @@ export class AccuracyEvaluator {
   private calculateRecall<T>(extracted: T[], expected: T[]): number {
     if (expected.length === 0) return 1;
 
-    const recalled = expected.filter((e) => extracted.includes(e)).length;
+    const recalled = expected.filter(e => extracted.includes(e)).length;
     return recalled / expected.length;
   }
 
@@ -370,14 +370,14 @@ export class AccuracyEvaluator {
   private calculateAmountAccuracy(
     extracted: number[],
     expected: number[],
-    tolerance: number = 0.01, // 1%容差
+    tolerance: number = 0.01 // 1%容差
   ): number {
     if (expected.length === 0) return 1;
 
     let correct = 0;
     for (const exp of expected) {
       const found = extracted.find(
-        (ext) => Math.abs(ext - exp) / Math.abs(exp) <= tolerance,
+        ext => Math.abs(ext - exp) / Math.abs(exp) <= tolerance
       );
       if (found) correct++;
     }

@@ -1,18 +1,18 @@
 // 容错执行器
 // 实现Agent容错机制的核心逻辑：重试、降级、熔断
 
-import { ErrorLogger } from "../../error/error-logger";
-import { CircuitBreakerManager } from "../../error/circuit-breaker";
+import { ErrorLogger } from '../../error/error-logger';
+import { CircuitBreakerManager } from '../../error/circuit-breaker';
 import type {
   AgentContext,
   AgentError,
   AgentErrorType,
-} from "../../../types/agent";
+} from '../../../types/agent';
 import type {
   AgentFaultToleranceConfig,
   FaultToleranceResult,
   RetryConfig,
-} from "./config";
+} from './config';
 
 // =============================================================================
 // 容错执行器类
@@ -25,7 +25,7 @@ import type {
 export class FaultTolerantExecutor {
   constructor(
     private errorLogger: ErrorLogger,
-    private circuitBreakerManager: CircuitBreakerManager,
+    private circuitBreakerManager: CircuitBreakerManager
   ) {}
 
   /**
@@ -40,7 +40,7 @@ export class FaultTolerantExecutor {
     agentName: string,
     fn: () => Promise<T>,
     config: AgentFaultToleranceConfig,
-    context: AgentContext,
+    context: AgentContext
   ): Promise<{ result: T; faultResult: FaultToleranceResult }> {
     const startTime = Date.now();
 
@@ -48,15 +48,15 @@ export class FaultTolerantExecutor {
     if (config.circuitBreaker.enabled) {
       const breaker = this.circuitBreakerManager.getBreaker(
         agentName,
-        this.convertToCircuitBreakerConfig(config.circuitBreaker),
+        this.convertToCircuitBreakerConfig(config.circuitBreaker)
       );
 
       if (breaker.isOpen()) {
         // 熔断器已开启，直接拒绝请求
         const error: AgentError = {
-          code: "CIRCUIT_BREAKER_OPEN",
+          code: 'CIRCUIT_BREAKER_OPEN',
           message: `Circuit breaker is OPEN for agent ${agentName}`,
-          type: "EXECUTION_ERROR" as AgentErrorType,
+          type: 'EXECUTION_ERROR' as AgentErrorType,
           agentName,
           timestamp: Date.now(),
           retryable: false,
@@ -81,7 +81,7 @@ export class FaultTolerantExecutor {
       agentName,
       fn,
       config.retry,
-      context,
+      context
     );
 
     // 3. 重试成功
@@ -103,7 +103,7 @@ export class FaultTolerantExecutor {
       try {
         const fallbackResult = await config.fallback.fallbackFunction(
           retryResult.error,
-          context,
+          context
         );
 
         // 降级成功（使用类型断言，因为降级结果可能与原始类型不同）
@@ -158,7 +158,7 @@ export class FaultTolerantExecutor {
     agentName: string,
     fn: () => Promise<T>,
     config: RetryConfig,
-    context: AgentContext,
+    context: AgentContext
   ): Promise<{
     success: boolean;
     result?: T;
@@ -236,7 +236,7 @@ export class FaultTolerantExecutor {
 
     // 检查是否在可重试错误列表中（使用精确匹配而非子串匹配）
     return config.retryableErrors.some(
-      (retryableCode) => errorCodeUpper === retryableCode.toUpperCase(),
+      retryableCode => errorCodeUpper === retryableCode.toUpperCase()
     );
   }
 
@@ -247,7 +247,7 @@ export class FaultTolerantExecutor {
   private async logError(
     agentName: string,
     error: unknown,
-    context: AgentContext,
+    context: AgentContext
   ): Promise<void> {
     try {
       await this.errorLogger.captureError(error as Error, {
@@ -262,7 +262,7 @@ export class FaultTolerantExecutor {
       });
     } catch (logError) {
       // 错误日志记录失败不影响主流程
-      console.error("[FaultTolerantExecutor] Failed to log error:", logError);
+      console.error('[FaultTolerantExecutor] Failed to log error:', logError);
     }
   }
 
@@ -271,7 +271,7 @@ export class FaultTolerantExecutor {
    * @private
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -310,7 +310,7 @@ export class FaultTolerantExecutor {
     attempts: number,
     result?: T,
     error?: unknown,
-    executionTime?: number,
+    executionTime?: number
   ): {
     success: boolean;
     result?: T;
@@ -334,7 +334,7 @@ export class FaultTolerantExecutor {
    */
   static calculateRetrySuccessRate(
     totalAttempts: number,
-    successfulAttempts: number,
+    successfulAttempts: number
   ): number {
     if (totalAttempts === 0) return 0;
     return successfulAttempts / totalAttempts;

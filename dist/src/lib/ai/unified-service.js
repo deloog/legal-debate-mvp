@@ -1,19 +1,19 @@
-"use strict";
+'use strict';
 /**
  * 统一AI服务管理器
  *
  * 整合通用AI服务（智谱、DeepSeek等）和法律专用服务（法律之星）
  * 提供统一的接口供上层业务调用
  */
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.UnifiedAIService = void 0;
 exports.getUnifiedAIService = getUnifiedAIService;
 exports.resetUnifiedAIService = resetUnifiedAIService;
-const service_1 = require("./service");
-const lawstar_client_1 = require("./lawstar-client");
-const config_1 = require("./config");
-const lawstar_config_1 = require("./lawstar-config");
-const cache_manager_1 = require("./cache-manager");
+const service_1 = require('./service');
+const lawstar_client_1 = require('./lawstar-client');
+const config_1 = require('./config');
+const lawstar_config_1 = require('./lawstar-config');
+const cache_manager_1 = require('./cache-manager');
 // =============================================================================
 // 统一AI服务管理器
 // =============================================================================
@@ -42,9 +42,9 @@ class UnifiedAIService {
         await this.initializeLegalAI();
       }
       this.initialized = true;
-      console.log("Unified AI Service initialized successfully");
+      console.log('Unified AI Service initialized successfully');
     } catch (error) {
-      console.error("Failed to initialize Unified AI Service:", error);
+      console.error('Failed to initialize Unified AI Service:', error);
       throw error;
     }
   }
@@ -52,12 +52,12 @@ class UnifiedAIService {
     try {
       const aiConfig = (0, config_1.getAIConfig)();
       this.generalAIService = await service_1.AIServiceFactory.getInstance(
-        "default",
-        aiConfig,
+        'default',
+        aiConfig
       );
-      console.log("General AI Service initialized");
+      console.log('General AI Service initialized');
     } catch (error) {
-      console.error("Failed to initialize General AI Service:", error);
+      console.error('Failed to initialize General AI Service:', error);
       throw error;
     }
   }
@@ -65,11 +65,11 @@ class UnifiedAIService {
     try {
       const lawStarConfig = (0, lawstar_config_1.getLawStarConfig)();
       this.legalAIService = (0, lawstar_client_1.createLawStarClient)(
-        lawStarConfig,
+        lawStarConfig
       );
-      console.log("Legal AI Service (Law Star) initialized");
+      console.log('Legal AI Service (Law Star) initialized');
     } catch (error) {
-      console.error("Failed to initialize Legal AI Service:", error);
+      console.error('Failed to initialize Legal AI Service:', error);
       throw error;
     }
   }
@@ -91,14 +91,14 @@ class UnifiedAIService {
     this.ensureInitialized();
     this.ensureGeneralAIAvailable();
     const systemPrompt = `你是一个专业的法律文档分析助手。请分析以下文档内容：
-${options?.extractKeyInfo ? "- 提取关键信息（当事人、案由、诉求等）" : ""}
-${options?.identifyLegalIssues ? "- 识别法律问题和争议焦点" : ""}`;
+${options?.extractKeyInfo ? '- 提取关键信息（当事人、案由、诉求等）' : ''}
+${options?.identifyLegalIssues ? '- 识别法律问题和争议焦点' : ''}`;
     return this.generalAIService.chatCompletion({
-      model: "glm-4-flash",
-      provider: "zhipu", // 明确指定提供商
+      model: 'glm-4-flash',
+      provider: 'zhipu', // 明确指定提供商
       messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content },
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content },
       ],
       temperature: 0.3,
       maxTokens: 2000,
@@ -113,28 +113,28 @@ ${options?.identifyLegalIssues ? "- 识别法律问题和争议焦点" : ""}`;
     // 1. 首先检查缓存
     const cachedResponse = await this.cacheManager.checkDebateCache(caseInfo);
     if (cachedResponse) {
-      console.log("Using cached debate response");
+      console.log('Using cached debate response');
       return {
         ...cachedResponse,
         cached: true,
-        provider: "deepseek",
+        provider: 'deepseek',
       };
     }
     // 优化后的提示词设计 - 更简洁直接
     const prompt = `案件：${caseInfo.title}
 描述：${caseInfo.description}
-${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` : ""}
+${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join('、')}` : ''}
 
 请分别列出原告和被告的3-4个核心论点，每个论点包含：主张、法律依据、事实依据。`;
     const response = await this.generalAIService.chatCompletion({
-      model: "deepseek-chat",
-      provider: "deepseek", // 明确指定提供商
+      model: 'deepseek-chat',
+      provider: 'deepseek', // 明确指定提供商
       messages: [
         {
-          role: "system",
-          content: "你是一个专业的法律辩论助手，请提供简洁、结构化的辩论论点。",
+          role: 'system',
+          content: '你是一个专业的法律辩论助手，请提供简洁、结构化的辩论论点。',
         },
-        { role: "user", content: prompt },
+        { role: 'user', content: prompt },
       ],
       temperature: 0.5, // 降低随机性，提高一致性
       maxTokens: 2000, // 减少输出长度，优化响应时间
@@ -182,10 +182,10 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
             lawType: query.lawType,
             pageSize: query.topK || 10,
           })
-          .then((res) => {
+          .then(res => {
             results.keywordResults = res;
             return res;
-          }),
+          })
       );
     }
     if (query.semanticQuery) {
@@ -196,10 +196,10 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
             lawType: query.lawType,
             topK: query.topK || 10,
           })
-          .then((res) => {
+          .then(res => {
             results.semanticResults = res;
             return res;
-          }),
+          })
       );
     }
     await Promise.allSettled(promises);
@@ -211,7 +211,7 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
           seenIds.add(item.lawId);
           results.combined.push({
             ...item,
-            source: "keyword",
+            source: 'keyword',
           });
         }
       }
@@ -222,7 +222,7 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
           seenIds.add(match.lawId);
           results.combined.push({
             ...match,
-            source: "semantic",
+            source: 'semantic',
           });
         }
       }
@@ -253,10 +253,10 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
     });
     // 2. 提取关键词进行法律检索
     const keywords = this.extractKeywords(
-      documentAnalysis.choices[0].message.content,
+      documentAnalysis.choices[0].message.content
     );
     const legalReferences = await this.smartLegalSearch({
-      keyword: keywords.join(" "),
+      keyword: keywords.join(' '),
       semanticQuery: document.content.substring(0, 500),
       topK: 5,
     });
@@ -265,7 +265,7 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
       title: document.title,
       description: documentAnalysis.choices[0].message.content,
       legalReferences: legalReferences.combined.map(
-        (ref) => ref.lawName || ref.title,
+        ref => ref.lawName || ref.title
       ),
     });
     return {
@@ -281,21 +281,21 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
     // 简单的关键词提取逻辑
     const keywords = [];
     const legalTerms = [
-      "合同",
-      "侵权",
-      "违约",
-      "赔偿",
-      "诉讼",
-      "仲裁",
-      "民法",
-      "刑法",
+      '合同',
+      '侵权',
+      '违约',
+      '赔偿',
+      '诉讼',
+      '仲裁',
+      '民法',
+      '刑法',
     ];
     for (const term of legalTerms) {
       if (text.includes(term)) {
         keywords.push(term);
       }
     }
-    return keywords.length > 0 ? keywords : ["法律"];
+    return keywords.length > 0 ? keywords : ['法律'];
   }
   // =============================================================================
   // 状态和健康检查
@@ -330,7 +330,7 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
           this.generalAIService.getAvailableProviders();
         status.generalAI.healthy = aiStatus.healthy;
       } catch (error) {
-        console.error("Failed to get general AI status:", error);
+        console.error('Failed to get general AI status:', error);
       }
     }
     // 检查法律AI服务
@@ -342,7 +342,7 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
         status.legalAI.vector = true;
         status.legalAI.healthy = lawStarHealthy;
       } catch (error) {
-        console.error("Failed to get legal AI status:", error);
+        console.error('Failed to get legal AI status:', error);
       }
     }
     // 计算整体健康状态
@@ -368,18 +368,18 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
   ensureInitialized() {
     if (!this.initialized) {
       throw new Error(
-        "Unified AI Service not initialized. Call initialize() first.",
+        'Unified AI Service not initialized. Call initialize() first.'
       );
     }
   }
   ensureGeneralAIAvailable() {
     if (!this.generalAIService) {
-      throw new Error("General AI Service is not available");
+      throw new Error('General AI Service is not available');
     }
   }
   ensureLegalAIAvailable() {
     if (!this.legalAIService) {
-      throw new Error("Legal AI Service is not available");
+      throw new Error('Legal AI Service is not available');
     }
   }
   /**
@@ -390,7 +390,7 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` 
       await this.generalAIService.shutdown();
     }
     this.initialized = false;
-    console.log("Unified AI Service shut down");
+    console.log('Unified AI Service shut down');
   }
 }
 exports.UnifiedAIService = UnifiedAIService;

@@ -3,27 +3,27 @@
  * 验证完整的增量分析流程
  */
 
-import { IncrementalManager } from "../../../lib/debate/incremental/incremental-manager";
-import { Material } from "../../../lib/debate/incremental/types";
+import { IncrementalManager } from '../../../lib/debate/incremental/incremental-manager';
+import { Material } from '../../../lib/debate/incremental/types';
 
-describe("IncrementalManager", () => {
+describe('IncrementalManager', () => {
   let manager: IncrementalManager;
 
   beforeEach(() => {
     manager = new IncrementalManager();
   });
 
-  describe("完整增量分析流程", () => {
-    it("应执行完整的增量分析流程", async () => {
+  describe('完整增量分析流程', () => {
+    it('应执行完整的增量分析流程', async () => {
       const historicalContext = {
         materials: [
           {
-            id: "1",
-            type: "DOCUMENT" as const,
-            content: "旧文档内容",
-            fingerprint: "old_hash",
+            id: '1',
+            type: 'DOCUMENT' as const,
+            content: '旧文档内容',
+            fingerprint: 'old_hash',
             metadata: {
-              source: "test",
+              source: 'test',
               uploadTime: new Date(),
             },
           },
@@ -37,12 +37,12 @@ describe("IncrementalManager", () => {
 
       const newMaterials: Material[] = [
         {
-          id: "2",
-          type: "DOCUMENT" as const,
-          content: "新文档内容",
-          fingerprint: "new_hash",
+          id: '2',
+          type: 'DOCUMENT' as const,
+          content: '新文档内容',
+          fingerprint: 'new_hash',
           metadata: {
-            source: "test",
+            source: 'test',
             uploadTime: new Date(),
           },
         },
@@ -64,7 +64,7 @@ describe("IncrementalManager", () => {
       expect(result.statistics.timeSaved).toBeGreaterThan(0);
     });
 
-    it("应正确合并上下文", async () => {
+    it('应正确合并上下文', async () => {
       const historicalContext = {
         materials: [],
         analysisResults: {
@@ -76,12 +76,12 @@ describe("IncrementalManager", () => {
 
       const newMaterials: Material[] = [
         {
-          id: "1",
-          type: "DOCUMENT" as const,
-          content: "新内容",
-          fingerprint: "hash",
+          id: '1',
+          type: 'DOCUMENT' as const,
+          content: '新内容',
+          fingerprint: 'hash',
           metadata: {
-            source: "test",
+            source: 'test',
             uploadTime: new Date(),
           },
         },
@@ -97,12 +97,12 @@ describe("IncrementalManager", () => {
     });
   });
 
-  describe("配置管理", () => {
-    it("应正确更新配置", () => {
+  describe('配置管理', () => {
+    it('应正确更新配置', () => {
       const newConfig = {
         diffDetection: {
           enabled: false,
-          algorithm: "semantic" as const,
+          algorithm: 'semantic' as const,
           similarityThreshold: 0.8,
         },
       };
@@ -111,11 +111,11 @@ describe("IncrementalManager", () => {
       const config = manager.getConfig();
 
       expect(config.diffDetection.enabled).toBe(false);
-      expect(config.diffDetection.algorithm).toBe("semantic");
+      expect(config.diffDetection.algorithm).toBe('semantic');
       expect(config.diffDetection.similarityThreshold).toBe(0.8);
     });
 
-    it("应提供对子组件的访问", () => {
+    it('应提供对子组件的访问', () => {
       expect(manager.getDiffDetector()).toBeDefined();
       expect(manager.getIncrementalAnalyzer()).toBeDefined();
       expect(manager.getContextMerger()).toBeDefined();

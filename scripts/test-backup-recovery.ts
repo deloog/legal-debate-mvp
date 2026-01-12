@@ -1,12 +1,12 @@
-import { exec } from "child_process";
-import { promisify } from "util";
-import fs from "fs/promises";
-import path from "path";
-import { DatabaseBackupManager, createBackupManager } from "./backup-database";
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import fs from 'fs/promises';
+import path from 'path';
+import { DatabaseBackupManager, createBackupManager } from './backup-database';
 import {
   DatabaseRestoreManager,
   createRestoreManager,
-} from "./restore-database";
+} from './restore-database';
 
 const execAsync = promisify(exec);
 
@@ -45,32 +45,32 @@ export class BackupRecoveryTester {
 
   // 执行所有测试
   async runAllTests(): Promise<void> {
-    console.log("🚀 开始备份恢复完整测试...");
+    console.log('🚀 开始备份恢复完整测试...');
     const startTime = Date.now();
 
     try {
       // 测试1: 备份功能测试
-      await this.runTest("备份功能测试", () => this.testBackupFunctionality());
+      await this.runTest('备份功能测试', () => this.testBackupFunctionality());
 
       // 测试2: 备份验证功能测试
-      await this.runTest("备份验证功能测试", () => this.testBackupValidation());
+      await this.runTest('备份验证功能测试', () => this.testBackupValidation());
 
       // 测试3: 恢复功能测试
-      await this.runTest("恢复功能测试", () => this.testRestoreFunctionality());
+      await this.runTest('恢复功能测试', () => this.testRestoreFunctionality());
 
       // 测试4: 数据一致性测试
-      await this.runTest("数据一致性测试", () => this.testDataConsistency());
+      await this.runTest('数据一致性测试', () => this.testDataConsistency());
 
       // 测试5: 完整流程测试
-      await this.runTest("完整流程测试", () => this.testCompleteWorkflow());
+      await this.runTest('完整流程测试', () => this.testCompleteWorkflow());
 
       // 测试6: 错误处理测试
-      await this.runTest("错误处理测试", () => this.testErrorHandling());
+      await this.runTest('错误处理测试', () => this.testErrorHandling());
 
       const totalTime = Date.now() - startTime;
       this.printTestSummary(totalTime);
     } catch (error) {
-      console.error("测试过程中发生错误:", error);
+      console.error('测试过程中发生错误:', error);
     } finally {
       // 清理测试环境
       if (this.config.cleanupAfterTest) {
@@ -82,7 +82,7 @@ export class BackupRecoveryTester {
   // 运行单个测试
   private async runTest(
     testName: string,
-    testFunction: () => Promise<void>,
+    testFunction: () => Promise<void>
   ): Promise<void> {
     console.log(`\n📋 运行测试: ${testName}`);
     const startTime = Date.now();
@@ -110,7 +110,7 @@ export class BackupRecoveryTester {
 
       console.log(`❌ ${testName} - 失败 (${duration}ms)`);
       console.log(
-        `   错误: ${error instanceof Error ? error.message : String(error)}`,
+        `   错误: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
@@ -127,7 +127,7 @@ export class BackupRecoveryTester {
     }
 
     if (backupInfo.size === 0) {
-      throw new Error("备份文件大小为0");
+      throw new Error('备份文件大小为0');
     }
 
     // 验证备份文件存在
@@ -135,12 +135,12 @@ export class BackupRecoveryTester {
     const stats = await fs.stat(backupPath);
 
     if (stats.size !== backupInfo.size) {
-      throw new Error("备份文件大小不匹配");
+      throw new Error('备份文件大小不匹配');
     }
 
     console.log(`   备份文件: ${backupInfo.filename}`);
     console.log(
-      `   文件大小: ${(backupInfo.size / 1024 / 1024).toFixed(2)} MB`,
+      `   文件大小: ${(backupInfo.size / 1024 / 1024).toFixed(2)} MB`
     );
   }
 
@@ -159,7 +159,7 @@ export class BackupRecoveryTester {
     const isValid = await backupManager.verifyBackup(backupInfo.filename);
 
     if (!isValid) {
-      throw new Error("备份验证失败");
+      throw new Error('备份验证失败');
     }
 
     console.log(`   验证备份: ${backupInfo.filename} - ✅ 有效`);
@@ -179,7 +179,7 @@ export class BackupRecoveryTester {
 
     // 配置恢复到测试数据库
     const testRestoreManager = new DatabaseRestoreManager({
-      databaseUrl: process.env.DATABASE_URL || "",
+      databaseUrl: process.env.DATABASE_URL || '',
       backupDir: this.config.backupDir,
       targetDatabase: this.config.testDatabase,
       createTargetDb: true,
@@ -188,7 +188,7 @@ export class BackupRecoveryTester {
 
     // 执行恢复
     const restoreInfo = await testRestoreManager.restoreDatabase(
-      backupInfo.filename,
+      backupInfo.filename
     );
 
     if (!restoreInfo.success) {
@@ -197,11 +197,11 @@ export class BackupRecoveryTester {
 
     // 验证恢复结果
     const isValid = await testRestoreManager.validateRestoredDatabase(
-      this.config.testDatabase,
+      this.config.testDatabase
     );
 
     if (!isValid) {
-      throw new Error("恢复后的数据库验证失败");
+      throw new Error('恢复后的数据库验证失败');
     }
 
     console.log(`   恢复数据库: ${this.config.testDatabase}`);
@@ -211,16 +211,16 @@ export class BackupRecoveryTester {
   // 测试4: 数据一致性测试
   private async testDataConsistency(): Promise<void> {
     const originalConsistency = await this.checkDatabaseConsistency(
-      this.config.originalDatabase,
+      this.config.originalDatabase
     );
     const testConsistency = await this.checkDatabaseConsistency(
-      this.config.testDatabase,
+      this.config.testDatabase
     );
 
     // 比较表数量
     if (originalConsistency.tableCount !== testConsistency.tableCount) {
       throw new Error(
-        `表数量不匹配: 原始${originalConsistency.tableCount}, 恢复${testConsistency.tableCount}`,
+        `表数量不匹配: 原始${originalConsistency.tableCount}, 恢复${testConsistency.tableCount}`
       );
     }
 
@@ -231,7 +231,7 @@ export class BackupRecoveryTester {
 
       if (originalCount !== testCount) {
         throw new Error(
-          `表${tableName}记录数不匹配: 原始${originalCount}, 恢复${testCount}`,
+          `表${tableName}记录数不匹配: 原始${originalCount}, 恢复${testCount}`
         );
       }
     }
@@ -239,37 +239,37 @@ export class BackupRecoveryTester {
     console.log(`   表数量: ${testConsistency.tableCount}`);
     console.log(`   记录数量: ${JSON.stringify(testConsistency.recordCounts)}`);
     console.log(
-      `   外键约束: ${testConsistency.foreignKeyChecks ? "✅" : "❌"}`,
+      `   外键约束: ${testConsistency.foreignKeyChecks ? '✅' : '❌'}`
     );
-    console.log(`   索引检查: ${testConsistency.indexChecks ? "✅" : "❌"}`);
+    console.log(`   索引检查: ${testConsistency.indexChecks ? '✅' : '❌'}`);
   }
 
   // 检查数据库一致性
   private async checkDatabaseConsistency(
-    databaseName: string,
+    databaseName: string
   ): Promise<ConsistencyCheck> {
-    const pgpassPath = path.join(process.cwd(), "config", ".pgpass");
+    const pgpassPath = path.join(process.cwd(), 'config', '.pgpass');
     const connectionInfo =
-      process.env.DATABASE_URL?.replace(/\/[^\/?]+(\?|$)/, "") || "";
+      process.env.DATABASE_URL?.replace(/\/[^\/?]+(\?|$)/, '') || '';
 
     try {
       // 获取表数量
       const tableCountCommand = `set PGPASSFILE="${pgpassPath}" && psql "${connectionInfo}/${databaseName}" -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';"`;
       const tableCountResult = await execAsync(tableCountCommand);
       const tableCount = parseInt(
-        tableCountResult.stdout.trim().split("\n")[2],
+        tableCountResult.stdout.trim().split('\n')[2]
       );
 
       // 获取所有表名
       const tableNamesCommand = `set PGPASSFILE="${pgpassPath}" && psql "${connectionInfo}/${databaseName}" -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';"`;
       const tableNamesResult = await execAsync(tableNamesCommand);
       const tableNames = tableNamesResult.stdout
-        .split("\n")
+        .split('\n')
         .filter(
-          (line) =>
+          line =>
             line.trim() &&
-            !line.includes("table_name") &&
-            line.includes("-") === false,
+            !line.includes('table_name') &&
+            line.includes('-') === false
         );
 
       // 获取每张表的记录数
@@ -279,7 +279,7 @@ export class BackupRecoveryTester {
         if (trimmedName) {
           const countCommand = `set PGPASSFILE="${pgpassPath}" && psql "${connectionInfo}/${databaseName}" -c "SELECT COUNT(*) FROM ${trimmedName};"`;
           const countResult = await execAsync(countCommand);
-          const count = parseInt(countResult.stdout.trim().split("\n")[0]);
+          const count = parseInt(countResult.stdout.trim().split('\n')[0]);
           recordCounts[trimmedName] = count;
         }
       }
@@ -292,7 +292,7 @@ export class BackupRecoveryTester {
       };
     } catch (error) {
       throw new Error(
-        `检查数据库一致性失败 ${databaseName}: ${error instanceof Error ? error.message : String(error)}`,
+        `检查数据库一致性失败 ${databaseName}: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
@@ -316,20 +316,20 @@ export class BackupRecoveryTester {
     const isBackupValid = await backupManager.verifyBackup(backupInfo.filename);
 
     if (!isBackupValid) {
-      throw new Error("备份验证失败");
+      throw new Error('备份验证失败');
     }
 
     // 恢复到测试数据库
     const testRestoreManager = new DatabaseRestoreManager({
-      databaseUrl: process.env.DATABASE_URL || "",
+      databaseUrl: process.env.DATABASE_URL || '',
       backupDir: this.config.backupDir,
-      targetDatabase: this.config.testDatabase + "_workflow",
+      targetDatabase: this.config.testDatabase + '_workflow',
       createTargetDb: true,
       dropExistingDb: true,
     });
 
     const restoreInfo = await testRestoreManager.restoreDatabase(
-      backupInfo.filename,
+      backupInfo.filename
     );
 
     if (!restoreInfo.success) {
@@ -338,15 +338,15 @@ export class BackupRecoveryTester {
 
     // 验证恢复结果
     const isRestoreValid = await testRestoreManager.validateRestoredDatabase(
-      this.config.testDatabase + "_workflow",
+      this.config.testDatabase + '_workflow'
     );
 
     if (!isRestoreValid) {
-      throw new Error("恢复后的数据库验证失败");
+      throw new Error('恢复后的数据库验证失败');
     }
 
     console.log(
-      `   完整流程成功: ${backupInfo.filename} -> ${this.config.testDatabase}_workflow`,
+      `   完整流程成功: ${backupInfo.filename} -> ${this.config.testDatabase}_workflow`
     );
   }
 
@@ -356,19 +356,19 @@ export class BackupRecoveryTester {
 
     // 测试恢复不存在的备份文件
     try {
-      await restoreManager.restoreDatabase("nonexistent_backup.sql");
-      throw new Error("应该抛出文件不存在的错误");
+      await restoreManager.restoreDatabase('nonexistent_backup.sql');
+      throw new Error('应该抛出文件不存在的错误');
     } catch (error) {
-      if (!error.message.includes("备份文件验证失败")) {
+      if (!error.message.includes('备份文件验证失败')) {
         throw new Error(`错误消息不正确: ${error.message}`);
       }
     }
 
     // 测试恢复到不存在的数据库（不自动创建）
     const testRestoreManager = new DatabaseRestoreManager({
-      databaseUrl: process.env.DATABASE_URL || "",
+      databaseUrl: process.env.DATABASE_URL || '',
       backupDir: this.config.backupDir,
-      targetDatabase: "nonexistent_test_db",
+      targetDatabase: 'nonexistent_test_db',
       createTargetDb: false,
       dropExistingDb: false,
     });
@@ -382,8 +382,8 @@ export class BackupRecoveryTester {
         console.log(`   数据库已存在，恢复成功`);
       } catch (error) {
         if (
-          !error.message.includes("数据库") &&
-          !error.message.includes("connection")
+          !error.message.includes('数据库') &&
+          !error.message.includes('connection')
         ) {
           throw new Error(`错误处理测试失败: ${error.message}`);
         }
@@ -396,16 +396,16 @@ export class BackupRecoveryTester {
 
   // 打印测试摘要
   private printTestSummary(totalTime: number): void {
-    console.log("\n" + "=".repeat(60));
-    console.log("📊 测试摘要报告");
-    console.log("=".repeat(60));
+    console.log('\n' + '='.repeat(60));
+    console.log('📊 测试摘要报告');
+    console.log('='.repeat(60));
 
     const passedTests = this.testResults.filter(
-      (result) => result.success,
+      result => result.success
     ).length;
     const failedTests = this.testResults.length - passedTests;
     const successRate = ((passedTests / this.testResults.length) * 100).toFixed(
-      1,
+      1
     );
 
     console.log(`总测试数: ${this.testResults.length}`);
@@ -415,48 +415,48 @@ export class BackupRecoveryTester {
     console.log(`总耗时: ${totalTime}ms`);
 
     if (failedTests > 0) {
-      console.log("\n❌ 失败的测试:");
+      console.log('\n❌ 失败的测试:');
       this.testResults
-        .filter((result) => !result.success)
-        .forEach((result) => {
+        .filter(result => !result.success)
+        .forEach(result => {
           console.log(`   - ${result.testName}: ${result.error}`);
         });
     }
 
-    console.log("\n📈 详细结果:");
-    this.testResults.forEach((result) => {
-      const status = result.success ? "✅" : "❌";
+    console.log('\n📈 详细结果:');
+    this.testResults.forEach(result => {
+      const status = result.success ? '✅' : '❌';
       console.log(`   ${status} ${result.testName} (${result.duration}ms)`);
       if (result.details) {
         console.log(`      详情: ${JSON.stringify(result.details, null, 2)}`);
       }
     });
 
-    console.log("\n" + "=".repeat(60));
+    console.log('\n' + '='.repeat(60));
 
     if (failedTests === 0) {
-      console.log("🎉 所有测试通过！备份恢复系统工作正常。");
+      console.log('🎉 所有测试通过！备份恢复系统工作正常。');
     } else {
-      console.log("⚠️ 部分测试失败，请检查相关功能。");
+      console.log('⚠️ 部分测试失败，请检查相关功能。');
     }
   }
 
   // 清理测试环境
   private async cleanup(): Promise<void> {
-    console.log("\n🧹 清理测试环境...");
+    console.log('\n🧹 清理测试环境...');
 
     try {
       // 删除测试数据库
       const testDatabases = [
         this.config.testDatabase,
-        this.config.testDatabase + "_workflow",
+        this.config.testDatabase + '_workflow',
       ];
 
       for (const dbName of testDatabases) {
         try {
-          const pgpassPath = path.join(process.cwd(), "config", ".pgpass");
+          const pgpassPath = path.join(process.cwd(), 'config', '.pgpass');
           const connectionInfo =
-            process.env.DATABASE_URL?.replace(/\/[^\/?]+(\?|$)/, "") || "";
+            process.env.DATABASE_URL?.replace(/\/[^\/?]+(\?|$)/, '') || '';
 
           const dropDbCommand = `set PGPASSFILE="${pgpassPath}" && psql "${connectionInfo}/postgres" -c "DROP DATABASE IF EXISTS ${dbName};"`;
           await execAsync(dropDbCommand);
@@ -464,13 +464,13 @@ export class BackupRecoveryTester {
           console.log(`   删除测试数据库: ${dbName}`);
         } catch (error) {
           console.log(
-            `   ⚠️ 无法删除数据库 ${dbName}: ${error instanceof Error ? error.message : String(error)}`,
+            `   ⚠️ 无法删除数据库 ${dbName}: ${error instanceof Error ? error.message : String(error)}`
           );
         }
       }
     } catch (error) {
       console.error(
-        `清理失败: ${error instanceof Error ? error.message : String(error)}`,
+        `清理失败: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
@@ -478,10 +478,10 @@ export class BackupRecoveryTester {
 
 // 创建测试配置
 export const createTestConfig = (): TestConfig => ({
-  originalDatabase: process.env.TEST_ORIGINAL_DATABASE || "legal_debate_dev",
-  testDatabase: process.env.TEST_TARGET_DATABASE || "legal_debate_test_restore",
-  backupDir: process.env.BACKUP_DIR || "./backups",
-  cleanupAfterTest: process.env.TEST_CLEANUP_AFTER !== "false",
+  originalDatabase: process.env.TEST_ORIGINAL_DATABASE || 'legal_debate_dev',
+  testDatabase: process.env.TEST_TARGET_DATABASE || 'legal_debate_test_restore',
+  backupDir: process.env.BACKUP_DIR || './backups',
+  cleanupAfterTest: process.env.TEST_CLEANUP_AFTER !== 'false',
 });
 
 // 运行备份恢复测试

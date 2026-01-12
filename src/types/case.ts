@@ -1,4 +1,4 @@
-import { Case as PrismaCase } from "@prisma/client";
+import { Case as PrismaCase } from '@prisma/client';
 
 // DocAnalyzer输出的metadata结构
 export interface CaseMetadata {
@@ -27,7 +27,7 @@ export interface CaseMetadata {
 
 export interface PartyInfo {
   name: string;
-  type?: "individual" | "company" | "organization";
+  type?: 'individual' | 'company' | 'organization';
   idNumber?: string;
   address?: string;
   contact?: string;
@@ -36,7 +36,7 @@ export interface PartyInfo {
 
 export interface Claim {
   id: string;
-  type: "payment" | "compensation" | "performance" | "declaration" | "other";
+  type: 'payment' | 'compensation' | 'performance' | 'declaration' | 'other';
   description: string;
   amount?: number;
   currency?: string;
@@ -95,14 +95,14 @@ export interface CaseQueryParams {
   court?: string;
   page?: number;
   limit?: number;
-  sortBy?: "createdAt" | "updatedAt" | "title";
-  sortOrder?: "asc" | "desc";
+  sortBy?: 'createdAt' | 'updatedAt' | 'title';
+  sortOrder?: 'asc' | 'desc';
 }
 
 // DocAnalyzer输入结构
 export interface DocAnalyzerInput {
   documentContent: string;
-  documentType: "lawsuit" | "contract" | "evidence" | "other";
+  documentType: 'lawsuit' | 'contract' | 'evidence' | 'other';
   caseId?: string;
 }
 

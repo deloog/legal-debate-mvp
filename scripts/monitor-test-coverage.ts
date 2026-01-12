@@ -13,11 +13,11 @@
  * node scripts/monitor-test-coverage.ts
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { fileURLToPath } from "url";
-import { exec } from "child_process";
-import { promisify } from "util";
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
@@ -59,7 +59,7 @@ interface CoverageComparison {
 
 // 配置
 const CONFIG = {
-  historyFile: path.resolve(process.cwd(), "docs/coverage-history.json"),
+  historyFile: path.resolve(process.cwd(), 'docs/coverage-history.json'),
   warningThreshold: -2, // 覆盖率下降超过2%发出警告
   errorThreshold: -5, // 覆盖率下降超过5%发出错误
   keepHistoryDays: 30, // 保留30天历史记录
@@ -70,30 +70,30 @@ const CONFIG = {
  */
 async function runCoverageTests(): Promise<any> {
   try {
-    console.log("🧪 运行测试...\n");
+    console.log('🧪 运行测试...\n');
     const { stdout, stderr } = await execAsync(
-      "npm run test:coverage -- --json --outputFile=coverage-final/coverage-final.json",
+      'npm run test:coverage -- --json --outputFile=coverage-final/coverage-final.json'
     );
 
-    if (stderr && !stderr.includes("Jest did not exit")) {
+    if (stderr && !stderr.includes('Jest did not exit')) {
       console.error(`⚠️  测试警告: ${stderr}`);
     }
 
-    console.log("✅ 测试完成\n");
+    console.log('✅ 测试完成\n');
 
     // 读取覆盖率数据
     const coveragePath = path.resolve(
       process.cwd(),
-      "coverage-final",
-      "coverage-final.json",
+      'coverage-final',
+      'coverage-final.json'
     );
-    const coverageData = JSON.parse(fs.readFileSync(coveragePath, "utf-8"));
+    const coverageData = JSON.parse(fs.readFileSync(coveragePath, 'utf-8'));
 
     return coverageData;
   } catch (error) {
     console.error(
-      "❌ 测试运行失败:",
-      error instanceof Error ? error.message : String(error),
+      '❌ 测试运行失败:',
+      error instanceof Error ? error.message : String(error)
     );
     process.exit(1);
   }
@@ -102,7 +102,7 @@ async function runCoverageTests(): Promise<any> {
 /**
  * 提取总体覆盖率
  */
-function extractTotalCoverage(coverageData: any): CoverageHistory["total"] {
+function extractTotalCoverage(coverageData: any): CoverageHistory['total'] {
   // 如果数据已经是汇总格式
   if (coverageData.total) {
     return {
@@ -180,7 +180,7 @@ function extractModuleCoverage(coverageData: any): Record<string, number> {
   const modules: Record<string, number> = {};
 
   for (const filePath of Object.keys(coverageData)) {
-    if (filePath === "total") continue;
+    if (filePath === 'total') continue;
 
     const fileName = path.basename(filePath);
     const coverage = coverageData[filePath]?.lines?.pct || 0;
@@ -199,12 +199,12 @@ function readHistory(): CoverageHistory[] {
       return [];
     }
 
-    const content = fs.readFileSync(CONFIG.historyFile, "utf-8");
+    const content = fs.readFileSync(CONFIG.historyFile, 'utf-8');
     return JSON.parse(content);
   } catch (error) {
     console.error(
-      "⚠️  无法读取历史记录:",
-      error instanceof Error ? error.message : String(error),
+      '⚠️  无法读取历史记录:',
+      error instanceof Error ? error.message : String(error)
     );
     return [];
   }
@@ -218,13 +218,13 @@ function saveHistory(history: CoverageHistory[]): void {
     fs.writeFileSync(
       CONFIG.historyFile,
       JSON.stringify(history, null, 2),
-      "utf-8",
+      'utf-8'
     );
-    console.log("✅ 历史记录已保存\n");
+    console.log('✅ 历史记录已保存\n');
   } catch (error) {
     console.error(
-      "❌ 保存历史记录失败:",
-      error instanceof Error ? error.message : String(error),
+      '❌ 保存历史记录失败:',
+      error instanceof Error ? error.message : String(error)
     );
   }
 }
@@ -235,10 +235,10 @@ function saveHistory(history: CoverageHistory[]): void {
 function cleanupHistory(history: CoverageHistory[]): CoverageHistory[] {
   const now = new Date();
   const cutoffDate = new Date(
-    now.getTime() - CONFIG.keepHistoryDays * 24 * 60 * 60 * 1000,
+    now.getTime() - CONFIG.keepHistoryDays * 24 * 60 * 60 * 1000
   );
 
-  return history.filter((record) => {
+  return history.filter(record => {
     const recordDate = new Date(record.timestamp);
     return recordDate > cutoffDate;
   });
@@ -249,7 +249,7 @@ function cleanupHistory(history: CoverageHistory[]): CoverageHistory[] {
  */
 function compareCoverage(
   oldHistory: CoverageHistory[],
-  newRecord: CoverageHistory,
+  newRecord: CoverageHistory
 ): CoverageComparison | null {
   if (oldHistory.length === 0) {
     return null;
@@ -289,10 +289,10 @@ function compareCoverage(
  * 格式化百分比变化
  */
 function formatChange(change: number): string {
-  const arrow = change > 0 ? "↑" : "↓";
+  const arrow = change > 0 ? '↑' : '↓';
   const color =
-    change > 0 ? "green" : change < CONFIG.warningThreshold ? "red" : "yellow";
-  return `${change > 0 ? "+" : ""}${change.toFixed(2)}% ${arrow}`;
+    change > 0 ? 'green' : change < CONFIG.warningThreshold ? 'red' : 'yellow';
+  return `${change > 0 ? '+' : ''}${change.toFixed(2)}% ${arrow}`;
 }
 
 /**
@@ -300,20 +300,20 @@ function formatChange(change: number): string {
  */
 function generateReport(
   newRecord: CoverageHistory,
-  comparison: CoverageComparison | null,
+  comparison: CoverageComparison | null
 ): void {
-  console.log("\n📊 覆盖率监控报告\n");
-  console.log("━".repeat(70));
+  console.log('\n📊 覆盖率监控报告\n');
+  console.log('━'.repeat(70));
 
   // 总体覆盖率
-  console.log("\n📈 总体覆盖率:");
+  console.log('\n📈 总体覆盖率:');
   console.log(`   Statements: ${newRecord.total.statements.toFixed(2)}%`);
   console.log(`   Branches:   ${newRecord.total.branches.toFixed(2)}%`);
   console.log(`   Functions:  ${newRecord.total.functions.toFixed(2)}%`);
   console.log(`   Lines:      ${newRecord.total.lines.toFixed(2)}%`);
 
   if (comparison) {
-    console.log("\n📊 变化趋势:");
+    console.log('\n📊 变化趋势:');
     console.log(`   Statements: ${formatChange(comparison.statementChange)}`);
     console.log(`   Branches:   ${formatChange(comparison.branchChange)}`);
     console.log(`   Functions:  ${formatChange(comparison.functionChange)}`);
@@ -321,11 +321,11 @@ function generateReport(
 
     // 模块变化
     if (comparison.moduleChanges.length > 0) {
-      console.log("\n📦 模块变化:");
-      comparison.moduleChanges.forEach((change) => {
-        const arrow = change.change > 0 ? "↑" : "↓";
+      console.log('\n📦 模块变化:');
+      comparison.moduleChanges.forEach(change => {
+        const arrow = change.change > 0 ? '↑' : '↓';
         console.log(
-          `   ${change.module}: ${change.newCoverage.toFixed(2)}% (${formatChange(change.change)})`,
+          `   ${change.module}: ${change.newCoverage.toFixed(2)}% (${formatChange(change.change)})`
         );
       });
     }
@@ -344,16 +344,16 @@ function generateReport(
       comparison.lineChange < CONFIG.errorThreshold;
 
     if (hasError) {
-      console.log("\n⚠️  警告: 覆盖率显著下降！");
-      console.log("   请检查最近的代码变更，确保测试质量。");
+      console.log('\n⚠️  警告: 覆盖率显著下降！');
+      console.log('   请检查最近的代码变更，确保测试质量。');
     } else if (hasWarning) {
-      console.log("\n📝 提示: 覆盖率有所下降，请关注。");
+      console.log('\n📝 提示: 覆盖率有所下降，请关注。');
     }
   } else {
-    console.log("\n📝 提示: 这是首次覆盖率记录，已建立基线。");
+    console.log('\n📝 提示: 这是首次覆盖率记录，已建立基线。');
   }
 
-  console.log("\n━".repeat(70));
+  console.log('\n━'.repeat(70));
 }
 
 /**
@@ -361,44 +361,44 @@ function generateReport(
  */
 function generateTrendReport(history: CoverageHistory[]): void {
   if (history.length < 2) {
-    console.log("\n📝 趋势分析: 需要更多历史数据\n");
+    console.log('\n📝 趋势分析: 需要更多历史数据\n');
     return;
   }
 
-  console.log("\n📈 覆盖率趋势（最近5次记录）\n");
-  console.log("━".repeat(70));
+  console.log('\n📈 覆盖率趋势（最近5次记录）\n');
+  console.log('━'.repeat(70));
 
   const recentHistory = history.slice(-5);
 
   console.log(
-    "时间                | Statements | Branches | Functions | Lines",
+    '时间                | Statements | Branches | Functions | Lines'
   );
-  console.log("─".repeat(70));
+  console.log('─'.repeat(70));
 
-  recentHistory.forEach((record) => {
-    const timestamp = new Date(record.timestamp).toLocaleString("zh-CN", {
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
+  recentHistory.forEach(record => {
+    const timestamp = new Date(record.timestamp).toLocaleString('zh-CN', {
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
     });
 
     console.log(
       `${timestamp} | ${record.total.statements.toFixed(2).padStart(10)}% | ` +
         `${record.total.branches.toFixed(2).padStart(8)}% | ` +
         `${record.total.functions.toFixed(2).padStart(9)}% | ` +
-        `${record.total.lines.toFixed(2).padStart(5)}%`,
+        `${record.total.lines.toFixed(2).padStart(5)}%`
     );
   });
 
-  console.log("━".repeat(70) + "\n");
+  console.log('━'.repeat(70) + '\n');
 }
 
 /**
  * 主函数
  */
 async function main(): Promise<void> {
-  console.log("🚀 开始监控覆盖率...\n");
+  console.log('🚀 开始监控覆盖率...\n');
 
   // 读取历史记录
   const history = readHistory();
@@ -428,22 +428,22 @@ async function main(): Promise<void> {
   saveHistory(updatedHistory);
 
   // 统计信息
-  console.log("📊 统计信息:");
+  console.log('📊 统计信息:');
   console.log(`   历史记录数: ${updatedHistory.length}`);
   console.log(`   记录保留: ${CONFIG.keepHistoryDays} 天\n`);
 
-  console.log("✅ 监控完成\n");
-  console.log("💡 建议:");
-  console.log("   - 定期运行此脚本监控覆盖率趋势");
-  console.log("   - 在PR前检查覆盖率变化");
-  console.log("   - 关注显著下降的模块\n");
+  console.log('✅ 监控完成\n');
+  console.log('💡 建议:');
+  console.log('   - 定期运行此脚本监控覆盖率趋势');
+  console.log('   - 在PR前检查覆盖率变化');
+  console.log('   - 关注显著下降的模块\n');
 }
 
 // 运行主函数
-main().catch((error) => {
+main().catch(error => {
   console.error(
-    "❌ 监控失败:",
-    error instanceof Error ? error.message : String(error),
+    '❌ 监控失败:',
+    error instanceof Error ? error.message : String(error)
   );
   process.exit(1);
 });

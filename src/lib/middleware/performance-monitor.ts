@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
 /**
  * 性能指标接口
@@ -27,8 +27,8 @@ interface PerformanceConfig {
  */
 const defaultConfig: PerformanceConfig = {
   enabled:
-    process.env.NODE_ENV !== "test" ||
-    process.env.ENABLE_PERFORMANCE_MONITORING === "true",
+    process.env.NODE_ENV !== 'test' ||
+    process.env.ENABLE_PERFORMANCE_MONITORING === 'true',
   slowThreshold: 2000, // 2秒
   logSlowQueries: true,
   logAllRequests: false, // 生产环境只记录慢速请求
@@ -115,13 +115,13 @@ class PerformanceLogger {
       };
     }
 
-    const responseTimes = this.metrics.map((m) => m.responseTime);
+    const responseTimes = this.metrics.map(m => m.responseTime);
     const total = this.metrics.length;
     const average = responseTimes.reduce((a, b) => a + b, 0) / total;
     const max = Math.max(...responseTimes);
     const min = Math.min(...responseTimes);
     const slowCount = responseTimes.filter(
-      (t) => t > defaultConfig.slowThreshold,
+      t => t > defaultConfig.slowThreshold
     ).length;
     const slowRate = (slowCount / total) * 100;
 
@@ -150,14 +150,14 @@ const performanceLogger = new PerformanceLogger();
  * 性能监控中间件工厂
  */
 export function createPerformanceMonitorMiddleware(
-  config?: Partial<PerformanceConfig>,
+  config?: Partial<PerformanceConfig>
 ) {
   const finalConfig = { ...defaultConfig, ...config };
 
   return async function performanceMonitorMiddleware(
     request: Request,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _context: { params?: Record<string, string> },
+    _context: { params?: Record<string, string> }
   ): Promise<NextResponse | undefined> {
     if (!finalConfig.enabled) {
       return undefined; // 继续处理请求
@@ -182,7 +182,7 @@ export async function measurePerformance(
   request: Request,
   response: NextResponse,
   startTime: number,
-  config?: Partial<PerformanceConfig>,
+  config?: Partial<PerformanceConfig>
 ): Promise<void> {
   const finalConfig = { ...defaultConfig, ...config };
 
@@ -197,7 +197,7 @@ export async function measurePerformance(
   const method = request.method;
 
   // 获取缓存状态
-  const cacheStatus = response.headers.get("X-Cache");
+  const cacheStatus = response.headers.get('X-Cache');
 
   // 记录性能指标
   const metric: PerformanceMetrics = {
@@ -212,10 +212,10 @@ export async function measurePerformance(
   performanceLogger.record(metric);
 
   // 添加性能头到响应
-  response.headers.set("X-Response-Time", `${responseTime}ms`);
+  response.headers.set('X-Response-Time', `${responseTime}ms`);
 
   if (cacheStatus) {
-    response.headers.set("X-Cache-Status", cacheStatus);
+    response.headers.set('X-Cache-Status', cacheStatus);
   }
 }
 
@@ -223,7 +223,7 @@ export async function measurePerformance(
  * 获取性能统计信息
  */
 export function getPerformanceStats(): ReturnType<
-  PerformanceLogger["getStats"]
+  PerformanceLogger['getStats']
 > {
   return performanceLogger.getStats();
 }
@@ -246,14 +246,14 @@ export function clearPerformanceMetrics(): void {
  * 生成性能报告
  */
 export function generatePerformanceReport(): {
-  summary: ReturnType<PerformanceLogger["getStats"]>;
+  summary: ReturnType<PerformanceLogger['getStats']>;
   slowRequests: PerformanceMetrics[];
   timestamp: Date;
 } {
   const stats = performanceLogger.getStats();
   const slowRequests = performanceLogger
     .getMetrics()
-    .filter((m) => m.responseTime > defaultConfig.slowThreshold);
+    .filter(m => m.responseTime > defaultConfig.slowThreshold);
 
   return {
     summary: stats,
@@ -276,7 +276,7 @@ export function checkPerformanceHealth(): {
   // 检查平均响应时间
   if (stats.average > defaultConfig.slowThreshold) {
     issues.push(
-      `平均响应时间 ${stats.average.toFixed(0)}ms 超过阈值 ${finalConfig.slowThreshold}ms`,
+      `平均响应时间 ${stats.average.toFixed(0)}ms 超过阈值 ${finalConfig.slowThreshold}ms`
     );
   }
 

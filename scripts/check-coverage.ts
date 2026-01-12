@@ -1,30 +1,30 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const fs = require("fs");
+const fs = require('fs');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const path = require("path");
+const path = require('path');
 
 const coverageFile = path.join(
   __dirname,
-  "..",
-  "coverage",
-  "coverage-final.json",
+  '..',
+  'coverage',
+  'coverage-final.json'
 );
-const coverage = JSON.parse(fs.readFileSync(coverageFile, "utf-8"));
+const coverage = JSON.parse(fs.readFileSync(coverageFile, 'utf-8'));
 
 const targetFiles = [
-  "src/lib/ai/debate-prompt-optimizer.ts",
-  "src/lib/ai/enhanced-debate-generator.ts",
+  'src/lib/ai/debate-prompt-optimizer.ts',
+  'src/lib/ai/enhanced-debate-generator.ts',
 ];
 
-console.log("=== AI模块覆盖率报告 ===\n");
+console.log('=== AI模块覆盖率报告 ===\n');
 
 for (const targetPath of targetFiles) {
   const normalizedPath = path.resolve(targetPath);
-  const coverageKey = Object.keys(coverage).find((k) => {
+  const coverageKey = Object.keys(coverage).find(k => {
     const absPath = path.resolve(k);
     return (
       absPath === normalizedPath ||
-      absPath.includes(targetPath.replace("src/", ""))
+      absPath.includes(targetPath.replace('src/', ''))
     );
   });
 
@@ -42,7 +42,7 @@ for (const targetPath of targetFiles) {
     console.log(`  语句覆盖率: ${statements}%`);
     console.log(`  分支覆盖率: ${branches}%`);
     console.log(`  函数覆盖率: ${functions}%`);
-    console.log("");
+    console.log('');
   } else {
     console.log(`未找到覆盖率数据: ${targetPath}\n`);
   }

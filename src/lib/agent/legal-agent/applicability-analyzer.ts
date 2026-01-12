@@ -14,7 +14,7 @@ import type {
   AIReviewResult,
   RuleValidationResult,
   LawArticle,
-} from "./types";
+} from './types';
 
 // =============================================================================
 // 类型定义
@@ -39,7 +39,7 @@ export class ApplicabilityAnalyzer {
    */
   async analyze(
     input: ApplicabilityAnalysisInput,
-    options: AnalysisOptions = {},
+    options: AnalysisOptions = {}
   ): Promise<ApplicabilityResult> {
     const startTime = Date.now();
     const threshold = options.threshold || this.defaultThreshold;
@@ -47,7 +47,7 @@ export class ApplicabilityAnalyzer {
     // 1. 语义匹配分析
     const semanticScores = this.analyzeSemanticMatch(
       input.articles,
-      input.caseInfo,
+      input.caseInfo
     );
 
     // 2. 规则验证
@@ -66,14 +66,14 @@ export class ApplicabilityAnalyzer {
       input.articles,
       semanticScores,
       validation,
-      threshold,
+      threshold
     );
 
     // 5. 计算综合评分
     const overallScore = this.calculateOverallScore(
       applicableArticles,
       semanticScores,
-      validation,
+      validation
     );
 
     return {
@@ -92,7 +92,7 @@ export class ApplicabilityAnalyzer {
    */
   private analyzeSemanticMatch(
     articles: LawArticle[],
-    caseInfo: unknown,
+    caseInfo: unknown
   ): Map<string, number> {
     const scores = new Map<string, number>();
 
@@ -109,7 +109,7 @@ export class ApplicabilityAnalyzer {
    */
   private calculateSemanticScore(
     article: LawArticle,
-    caseInfo: unknown,
+    caseInfo: unknown
   ): number {
     // 模拟语义匹配：基于关键词匹配度
     const articleKeywords = article.keywords || [];
@@ -136,20 +136,20 @@ export class ApplicabilityAnalyzer {
    */
   private extractCaseKeywords(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    caseInfo: unknown,
+    caseInfo: unknown
   ): string[] {
     // 简化处理：从案件信息中提取常见法律关键词
     const commonKeywords = [
-      "合同",
-      "违约",
-      "赔偿",
-      "履行",
-      "解除",
-      "责任",
-      "损失",
-      "义务",
-      "权利",
-      "支付",
+      '合同',
+      '违约',
+      '赔偿',
+      '履行',
+      '解除',
+      '责任',
+      '损失',
+      '义务',
+      '权利',
+      '支付',
     ];
 
     // TODO: 实际应根据caseInfo提取
@@ -161,7 +161,7 @@ export class ApplicabilityAnalyzer {
    */
   private validateArticle(
     article: LawArticle,
-    caseInfo: unknown,
+    caseInfo: unknown
   ): RuleValidationResult {
     const timeValidity = this.checkTimeValidity(article);
     const scopeValidity = this.checkScopeValidity(article, caseInfo);
@@ -189,7 +189,7 @@ export class ApplicabilityAnalyzer {
     if (article.deprecated) {
       return {
         valid: false,
-        reason: "法条已废止",
+        reason: '法条已废止',
       };
     }
 
@@ -199,7 +199,7 @@ export class ApplicabilityAnalyzer {
       if (effectiveDate > now) {
         return {
           valid: false,
-          reason: "法条尚未生效",
+          reason: '法条尚未生效',
         };
       }
     }
@@ -213,14 +213,14 @@ export class ApplicabilityAnalyzer {
   private checkScopeValidity(
     article: LawArticle,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _caseInfo: unknown,
+    _caseInfo: unknown
   ): { valid: boolean; reason?: string } {
     // 简化处理：如果有适用范围限制，需要匹配案件所在地域
     if (article.scope && article.scope.length > 0) {
       // TODO: 实际应根据caseInfo中的地域信息判断
       return {
         valid: true,
-        reason: "适用范围匹配",
+        reason: '适用范围匹配',
       };
     }
 
@@ -232,7 +232,7 @@ export class ApplicabilityAnalyzer {
    */
   private checkLevelValidity(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _article: LawArticle,
+    _article: LawArticle
   ): {
     valid: boolean;
     reason?: string;
@@ -247,7 +247,7 @@ export class ApplicabilityAnalyzer {
   private async performAIReview(
     input: ApplicabilityAnalysisInput,
     semanticScores: Map<string, number>,
-    validation: Map<string, RuleValidationResult>,
+    validation: Map<string, RuleValidationResult>
   ): Promise<AIReviewResult> {
     // 模拟AI审查结果
     const applicable: LawArticle[] = [];
@@ -261,11 +261,11 @@ export class ApplicabilityAnalyzer {
       if (score > 0.7 && ruleResult?.passed) {
         applicable.push(article);
         comments.push(
-          `法条${article.articleNumber}与案件高度相关，语义相似度${score.toFixed(2)}`,
+          `法条${article.articleNumber}与案件高度相关，语义相似度${score.toFixed(2)}`
         );
       } else if (score > 0.4) {
         comments.push(
-          `法条${article.articleNumber}与案件有一定关联，建议进一步分析`,
+          `法条${article.articleNumber}与案件有一定关联，建议进一步分析`
         );
       } else {
         notApplicable.push(article);
@@ -295,7 +295,7 @@ export class ApplicabilityAnalyzer {
       applicable: [],
       notApplicable: [],
       score: 0,
-      comments: ["AI审查未启用"],
+      comments: ['AI审查未启用'],
     };
   }
 
@@ -306,7 +306,7 @@ export class ApplicabilityAnalyzer {
     articles: LawArticle[],
     semanticScores: Map<string, number>,
     validation: Map<string, RuleValidationResult>,
-    threshold: number,
+    threshold: number
   ): { applicableArticles: LawArticle[]; notApplicableArticles: LawArticle[] } {
     const applicableArticles: LawArticle[] = [];
     const notApplicableArticles: LawArticle[] = [];
@@ -332,7 +332,7 @@ export class ApplicabilityAnalyzer {
   private calculateOverallScore(
     applicableArticles: LawArticle[],
     semanticScores: Map<string, number>,
-    validation: Map<string, RuleValidationResult>,
+    validation: Map<string, RuleValidationResult>
   ): number {
     if (applicableArticles.length === 0) {
       return 0;
@@ -361,7 +361,7 @@ export class ApplicabilityAnalyzer {
    */
   async batchAnalyze(
     inputs: ApplicabilityAnalysisInput[],
-    options: AnalysisOptions = {},
+    options: AnalysisOptions = {}
   ): Promise<ApplicabilityResult[]> {
     const results: ApplicabilityResult[] = [];
 

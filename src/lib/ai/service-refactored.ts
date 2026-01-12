@@ -8,15 +8,15 @@ import type {
   HealthStatus,
   LoadBalancerStatus,
   PerformanceMetrics,
-} from "../../types/ai-service";
+} from '../../types/ai-service';
 
-import { LoadBalancerFactory } from "./load-balancer";
-import { MonitorFactory } from "./monitor";
-import { FallbackManagerFactory, type FallbackStats } from "./fallback";
-import { AIClientFactory } from "./client-factory";
-import { AICacheManager } from "./cache-manager";
-import { AIRequestExecutor } from "./request-executor";
-import AIErrorSerializer from "./error-serializer";
+import { LoadBalancerFactory } from './load-balancer';
+import { MonitorFactory } from './monitor';
+import { FallbackManagerFactory, type FallbackStats } from './fallback';
+import { AIClientFactory } from './client-factory';
+import { AICacheManager } from './cache-manager';
+import { AIRequestExecutor } from './request-executor';
+import AIErrorSerializer from './error-serializer';
 
 // =============================================================================
 // 类型定义
@@ -78,13 +78,13 @@ export class AIService {
     try {
       // 初始化组件
       this.loadBalancer = LoadBalancerFactory.getInstance(
-        "main",
-        this.config.loadBalancer,
+        'main',
+        this.config.loadBalancer
       );
-      this.monitor = MonitorFactory.getInstance("main", this.config.monitor);
+      this.monitor = MonitorFactory.getInstance('main', this.config.monitor);
       this.fallbackManager = FallbackManagerFactory.getInstance(
-        "main",
-        this.config.fallback,
+        'main',
+        this.config.fallback
       );
 
       // 初始化AI客户端
@@ -94,9 +94,9 @@ export class AIService {
       this.requestExecutor = new AIRequestExecutor(this.clients);
 
       this.initialized = true;
-      console.log("AI Service initialized successfully");
+      console.log('AI Service initialized successfully');
     } catch (error) {
-      console.error("Failed to initialize AI Service:", error);
+      console.error('Failed to initialize AI Service:', error);
       throw error;
     }
   }
@@ -112,7 +112,7 @@ export class AIService {
       } catch (error) {
         console.error(
           `Failed to initialize client for ${clientConfig.provider}:`,
-          error,
+          error
         );
 
         // 记录初始化失败
@@ -127,7 +127,7 @@ export class AIService {
 
   public async chatCompletion(request: AIRequestConfig): Promise<AIResponse> {
     if (!this.initialized) {
-      throw new Error("AI Service not initialized");
+      throw new Error('AI Service not initialized');
     }
 
     // 如果请求中指定了提供商，使用指定的提供商，否则使用负载均衡器选择
@@ -152,7 +152,7 @@ export class AIService {
             true,
             0,
             0,
-            true,
+            true
           );
           this.loadBalancer.decrementConnections(provider);
           return cachedResponse;
@@ -161,7 +161,7 @@ export class AIService {
         // 执行请求
         const response = await this.requestExecutor.executeRequest(
           provider,
-          request,
+          request
         );
         const duration = Date.now() - startTime;
         response.duration = duration;
@@ -170,7 +170,7 @@ export class AIService {
         await this.cacheManager.cacheResponse(
           request,
           response,
-          this.config.fallback?.cacheFallback?.ttl,
+          this.config.fallback?.cacheFallback?.ttl
         );
 
         // 记录成功指标
@@ -181,7 +181,7 @@ export class AIService {
           true,
           duration,
           response.usage?.totalTokens || 0,
-          false,
+          false
         );
 
         // 更新负载均衡器状态
@@ -202,7 +202,7 @@ export class AIService {
           duration,
           0,
           false,
-          aiError.type,
+          aiError.type
         );
 
         // 更新负载均衡器状态
@@ -213,11 +213,11 @@ export class AIService {
         const fallbackResponse = await this.fallbackManager.handleFailure(
           aiError,
           request,
-          Array.from(this.clients.keys()),
+          Array.from(this.clients.keys())
         );
 
         if (fallbackResponse) {
-          this.monitor.recordFallbackActivation(provider, "success");
+          this.monitor.recordFallbackActivation(provider, 'success');
           return fallbackResponse;
         }
 
@@ -232,7 +232,7 @@ export class AIService {
         0,
         0,
         false,
-        (error as AIError)?.type || "unknown_error",
+        (error as AIError)?.type || 'unknown_error'
       );
 
       throw error;
@@ -289,7 +289,7 @@ export class AIService {
           };
           return acc;
         },
-        {} as Record<AIProvider, HealthStatus>,
+        {} as Record<AIProvider, HealthStatus>
       ),
       lastUpdate: Date.now(),
     };
@@ -306,9 +306,9 @@ export class AIService {
         ]);
 
       return (
-        loadBalancerHealthy.status === "fulfilled" &&
-        monitorHealthy.status === "fulfilled" &&
-        fallbackHealthy.status === "fulfilled" &&
+        loadBalancerHealthy.status === 'fulfilled' &&
+        monitorHealthy.status === 'fulfilled' &&
+        fallbackHealthy.status === 'fulfilled' &&
         loadBalancerHealthy.value &&
         monitorHealthy.value &&
         fallbackHealthy.value
@@ -321,7 +321,7 @@ export class AIService {
   private async checkLoadBalancerHealth(): Promise<boolean> {
     try {
       const status = this.loadBalancer.getLoadBalancerStatus();
-      return status.providerStats.some((stat) => stat.healthy);
+      return status.providerStats.some(stat => stat.healthy);
     } catch {
       return false;
     }
@@ -373,9 +373,9 @@ export class AIService {
       this.loadBalancer.reset();
 
       this.initialized = false;
-      console.log("AI Service shut down successfully");
+      console.log('AI Service shut down successfully');
     } catch (error) {
-      console.error("Error during AI Service shutdown:", error);
+      console.error('Error during AI Service shutdown:', error);
       throw error;
     }
   }
@@ -416,7 +416,7 @@ export class AIService {
    */
   public serializeError(
     error: AIError | Error | unknown,
-    context?: Record<string, unknown>,
+    context?: Record<string, unknown>
   ): string {
     return AIErrorSerializer.serializeToJson(error, context, {
       sanitizeSensitiveInfo: true,
@@ -430,7 +430,7 @@ export class AIService {
    */
   public createUserFriendlyError(
     error: AIError | Error | unknown,
-    locale: string = "zh-CN",
+    locale: string = 'zh-CN'
   ): string {
     const serializedError = AIErrorSerializer.serialize(error, undefined, {
       sanitizeSensitiveInfo: true,
@@ -442,12 +442,12 @@ export class AIService {
    * 生成错误摘要
    */
   public generateErrorSummary(
-    errors: (AIError | Error | unknown)[],
+    errors: (AIError | Error | unknown)[]
   ): ErrorSummary {
-    const serializedErrors = errors.map((error) =>
+    const serializedErrors = errors.map(error =>
       AIErrorSerializer.serialize(error, undefined, {
         sanitizeSensitiveInfo: true,
-      }),
+      })
     );
     return AIErrorSerializer.generateSummary(serializedErrors);
   }
@@ -461,16 +461,16 @@ export class AIServiceFactory {
   private static instances: Map<string, AIService> = new Map();
 
   public static async getInstance(
-    name: string = "default",
+    name: string = 'default',
     config?: AIServiceConfig,
-    useRealAPI: boolean = false,
+    useRealAPI: boolean = false
   ): Promise<AIService> {
     let instance = this.instances.get(name);
 
     if (!instance) {
       if (!config) {
         // 如果没有提供配置，从getAIConfig获取
-        const { getAIConfig } = await import("./config");
+        const { getAIConfig } = await import('./config');
         config = getAIConfig(useRealAPI);
       }
 
@@ -484,7 +484,7 @@ export class AIServiceFactory {
 
   public static async createCustomInstance(
     name: string,
-    config: AIServiceConfig,
+    config: AIServiceConfig
   ): Promise<AIService> {
     const instance = new AIService(config);
     await instance.initialize();
@@ -506,13 +506,10 @@ export class AIServiceFactory {
   }
 
   public static async shutdownAll(): Promise<void> {
-    const shutdownPromises = Array.from(this.instances.values()).map(
-      (instance) =>
-        instance
-          .shutdown()
-          .catch((error) =>
-            console.error("Error shutting down instance:", error),
-          ),
+    const shutdownPromises = Array.from(this.instances.values()).map(instance =>
+      instance
+        .shutdown()
+        .catch(error => console.error('Error shutting down instance:', error))
     );
 
     await Promise.allSettled(shutdownPromises);

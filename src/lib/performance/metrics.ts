@@ -50,42 +50,42 @@ class PerformanceCollector {
    * 收集LCP（最大内容绘制）
    */
   collectLCP(value: number): void {
-    this.recordMetric("lcp", value);
+    this.recordMetric('lcp', value);
   }
 
   /**
    * 收集FID（首输入延迟）
    */
   collectFID(value: number): void {
-    this.recordMetric("fid", value);
+    this.recordMetric('fid', value);
   }
 
   /**
    * 收集FCP（首次内容绘制）
    */
   collectFCP(value: number): void {
-    this.recordMetric("fcp", value);
+    this.recordMetric('fcp', value);
   }
 
   /**
    * 收集TTFB（首字节时间）
    */
   collectTTFB(value: number): void {
-    this.recordMetric("ttfb", value);
+    this.recordMetric('ttfb', value);
   }
 
   /**
    * 收集CLS（累积布局偏移）
    */
   collectCLS(value: number): void {
-    this.recordMetric("cls", value);
+    this.recordMetric('cls', value);
   }
 
   /**
    * 收集FP（首次绘制）
    */
   collectFP(value: number): void {
-    this.recordMetric("fp", value);
+    this.recordMetric('fp', value);
   }
 
   /**
@@ -100,8 +100,8 @@ class PerformanceCollector {
 
     // 发送到分析服务（生产环境）
     if (
-      typeof window !== "undefined" &&
-      process.env.NODE_ENV === "production"
+      typeof window !== 'undefined' &&
+      process.env.NODE_ENV === 'production'
     ) {
       this.sendToAnalytics(metric);
     }
@@ -112,7 +112,7 @@ class PerformanceCollector {
    */
   private sendToAnalytics(metric: PerformanceMetrics): void {
     // TODO: 实现发送到分析服务
-    console.log("Performance Metric:", metric);
+    console.log('Performance Metric:', metric);
   }
 
   /**
@@ -138,11 +138,11 @@ class PerformanceCollector {
     const sums: Partial<PerformanceMetrics> = {};
     const counts: Record<string, number> = {};
 
-    this.metrics.forEach((metric) => {
-      Object.keys(metric).forEach((key) => {
-        if (key !== "timestamp") {
+    this.metrics.forEach(metric => {
+      Object.keys(metric).forEach(key => {
+        if (key !== 'timestamp') {
           const value = metric[key as keyof PerformanceMetrics];
-          if (typeof value === "number") {
+          if (typeof value === 'number') {
             sums[key as keyof PerformanceMetrics] =
               ((sums[key as keyof PerformanceMetrics] as number) || 0) + value;
             counts[key] = (counts[key] || 0) + 1;
@@ -152,7 +152,7 @@ class PerformanceCollector {
     });
 
     const averages: Partial<PerformanceMetrics> = {};
-    Object.keys(sums).forEach((key) => {
+    Object.keys(sums).forEach(key => {
       const sum = sums[key as keyof PerformanceMetrics] as number;
       const count = counts[key];
       averages[key as keyof PerformanceMetrics] = sum / count;
@@ -176,45 +176,45 @@ export const performanceCollector = new PerformanceCollector();
  * 使用Performance Observer收集Web Vitals
  */
 export function initPerformanceObservers(): void {
-  if (typeof window === "undefined" || !window.performance) {
+  if (typeof window === 'undefined' || !window.performance) {
     return;
   }
 
   // 收集LCP
-  if ("PerformanceObserver" in window) {
+  if ('PerformanceObserver' in window) {
     try {
-      const lcpObserver = new PerformanceObserver((list) => {
+      const lcpObserver = new PerformanceObserver(list => {
         const entries = list.getEntries();
         const lastEntry = entries[entries.length - 1] as LCPEntry;
         if (lastEntry?.startTime) {
           performanceCollector.collectLCP(lastEntry.startTime);
         }
       });
-      lcpObserver.observe({ type: "largest-contentful-paint", buffered: true });
+      lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
     } catch (e) {
-      console.warn("LCP Observer setup failed:", e);
+      console.warn('LCP Observer setup failed:', e);
     }
 
     // 收集FID
     try {
-      const fidObserver = new PerformanceObserver((list) => {
+      const fidObserver = new PerformanceObserver(list => {
         const entries = list.getEntries();
         entries.forEach((entry: FIDEntry) => {
           if (entry.processingStart) {
             performanceCollector.collectFID(
-              entry.processingStart - entry.startTime,
+              entry.processingStart - entry.startTime
             );
           }
         });
       });
-      fidObserver.observe({ type: "first-input", buffered: true });
+      fidObserver.observe({ type: 'first-input', buffered: true });
     } catch (e) {
-      console.warn("FID Observer setup failed:", e);
+      console.warn('FID Observer setup failed:', e);
     }
 
     // 收集CLS
     try {
-      const clsObserver = new PerformanceObserver((list) => {
+      const clsObserver = new PerformanceObserver(list => {
         const entries = list.getEntries();
         let clsValue = 0;
         entries.forEach((entry: CLSEntry) => {
@@ -224,14 +224,14 @@ export function initPerformanceObservers(): void {
         });
         performanceCollector.collectCLS(clsValue);
       });
-      clsObserver.observe({ type: "layout-shift", buffered: true });
+      clsObserver.observe({ type: 'layout-shift', buffered: true });
     } catch (e) {
-      console.warn("CLS Observer setup failed:", e);
+      console.warn('CLS Observer setup failed:', e);
     }
   }
 
   // 收集传统性能指标
-  window.addEventListener("load", () => {
+  window.addEventListener('load', () => {
     setTimeout(() => {
       const perfData = window.performance.timing;
       if (perfData) {
@@ -250,7 +250,7 @@ export function initPerformanceObservers(): void {
  */
 export function recordInteractionTime(
   interactionName: string,
-  startTime: number,
+  startTime: number
 ): number {
   const endTime = Date.now();
   const duration = endTime - startTime;
@@ -271,10 +271,10 @@ export function checkPerformanceThresholds(metrics: PerformanceMetrics): {
   >;
 } {
   const thresholds = {
-    lcp: { value: 2500, label: "LCP" }, // < 2.5s
-    fid: { value: 100, label: "FID" }, // < 100ms
-    fcp: { value: 1800, label: "FCP" }, // < 1.8s
-    cls: { value: 0.1, label: "CLS" }, // < 0.1
+    lcp: { value: 2500, label: 'LCP' }, // < 2.5s
+    fid: { value: 100, label: 'FID' }, // < 100ms
+    fcp: { value: 1800, label: 'FCP' }, // < 1.8s
+    cls: { value: 0.1, label: 'CLS' }, // < 0.1
   };
 
   const details: Record<
@@ -283,11 +283,11 @@ export function checkPerformanceThresholds(metrics: PerformanceMetrics): {
   > = {};
   let allPassed = true;
 
-  Object.keys(thresholds).forEach((key) => {
+  Object.keys(thresholds).forEach(key => {
     const thresholdInfo = thresholds[key as keyof typeof thresholds];
     const metricValue = metrics[key as keyof PerformanceMetrics];
 
-    if (typeof metricValue === "number") {
+    if (typeof metricValue === 'number') {
       const passed = metricValue <= thresholdInfo.value;
       details[key] = {
         value: metricValue,

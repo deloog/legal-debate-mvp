@@ -7,15 +7,15 @@
  * - 支持MINIMAL/STANDARD/COMPREHENSIVE三层架构
  */
 
-import { FewShotLibrary } from "./few-shot-library";
+import { FewShotLibrary } from './few-shot-library';
 
 /**
  * 提示词层级
  */
 export enum PromptTier {
-  MINIMAL = "MINIMAL", // 最小提示词（<500字）- 简单文档
-  STANDARD = "STANDARD", // 标准提示词（<800字）- 中等文档
-  COMPREHENSIVE = "COMPREHENSIVE", // 完整提示词（<1200字）- 复杂文档
+  MINIMAL = 'MINIMAL', // 最小提示词（<500字）- 简单文档
+  STANDARD = 'STANDARD', // 标准提示词（<800字）- 中等文档
+  COMPREHENSIVE = 'COMPREHENSIVE', // 完整提示词（<1200字）- 复杂文档
 }
 
 /**
@@ -94,8 +94,8 @@ export class SmartPromptBuilder {
     if (amountMatches > 2) score += 0.2;
 
     // 指标4：法律关系复杂（+0.2）
-    const legalTerms = ["合同", "侵权", "股权", "知识产权"];
-    const legalScore = legalTerms.filter((t) => text.includes(t)).length;
+    const legalTerms = ['合同', '侵权', '股权', '知识产权'];
+    const legalScore = legalTerms.filter(t => text.includes(t)).length;
     if (legalScore > 2) score += 0.2;
 
     return Math.min(score, 1.0);
@@ -141,7 +141,7 @@ export class SmartPromptBuilder {
     if (config.includeExamples) {
       const relevantExamples = this.fewShotLibrary.selectRelevantExamples(
         text,
-        config.exampleCount,
+        config.exampleCount
       );
       parts.push(this.formatExamples(relevantExamples));
     }
@@ -152,7 +152,7 @@ export class SmartPromptBuilder {
     // Part 5: 文档内容
     parts.push(`\n文档内容：\n${text}`);
 
-    return parts.join("\n\n");
+    return parts.join('\n\n');
   }
 
   /**
@@ -196,15 +196,15 @@ export class SmartPromptBuilder {
    * 格式化示例
    */
   private formatExamples(
-    examples: Array<{ input: string; output: string }>,
+    examples: Array<{ input: string; output: string }>
   ): string {
-    if (examples.length === 0) return "";
+    if (examples.length === 0) return '';
 
     const formatted = examples.map((ex, index) => {
       return `【示例${index + 1}】\n输入：${ex.input}\n输出：${ex.output}`;
     });
 
-    return formatted.join("\n\n");
+    return formatted.join('\n\n');
   }
 
   /**

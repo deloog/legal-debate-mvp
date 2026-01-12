@@ -13,12 +13,12 @@ import type {
   ClassifiedEvidence,
   EvidenceStrengthReport,
   EvidenceAnalysisResult,
-} from "../core/types";
+} from '../core/types';
 
-import { EvidenceClassifier } from "./evidence-classifier";
-import { EvidenceStrengthAnalyzer } from "./evidence-strength-analyzer";
-import { EvidenceRelationAnalyzer } from "./evidence-relation-analyzer";
-import { EvidenceCompletenessAnalyzer } from "./evidence-completeness-analyzer";
+import { EvidenceClassifier } from './evidence-classifier';
+import { EvidenceStrengthAnalyzer } from './evidence-strength-analyzer';
+import { EvidenceRelationAnalyzer } from './evidence-relation-analyzer';
+import { EvidenceCompletenessAnalyzer } from './evidence-completeness-analyzer';
 
 // =============================================================================
 // EvidenceAnalyzer类
@@ -50,7 +50,7 @@ export class EvidenceAnalyzer {
     // 3. 证据关联分析
     const evidenceRelations = this.relationAnalyzer.analyzeRelations(
       classifiedEvidence,
-      extractedData,
+      extractedData
     );
 
     // 4. 证据强度评估
@@ -63,14 +63,14 @@ export class EvidenceAnalyzer {
     // 6. 计算整体置信度
     const confidence = this.calculateConfidence(
       classifiedEvidence,
-      completenessScore,
+      completenessScore
     );
 
     // 7. 检查缺失的证据类型
     const missingEvidenceTypes =
       this.completenessAnalyzer.detectMissingEvidenceTypes(
         classifiedEvidence,
-        extractedData,
+        extractedData
       );
 
     return {
@@ -91,7 +91,7 @@ export class EvidenceAnalyzer {
    * 证据分类
    */
   private classifyEvidence(
-    rawEvidence: Map<string, string>,
+    rawEvidence: Map<string, string>
   ): ClassifiedEvidence[] {
     const classified: ClassifiedEvidence[] = [];
     let idCounter = 1;
@@ -119,15 +119,13 @@ export class EvidenceAnalyzer {
    * 证据强度评估
    */
   private assessEvidenceStrength(
-    classifiedEvidence: ClassifiedEvidence[],
+    classifiedEvidence: ClassifiedEvidence[]
   ): EvidenceStrengthReport {
     const totalEvidence = classifiedEvidence.length;
     const strongEvidence = classifiedEvidence.filter(
-      (e) => e.strength >= 4,
+      e => e.strength >= 4
     ).length;
-    const weakEvidence = classifiedEvidence.filter(
-      (e) => e.strength <= 2,
-    ).length;
+    const weakEvidence = classifiedEvidence.filter(e => e.strength <= 2).length;
 
     const averageStrength =
       totalEvidence > 0
@@ -144,17 +142,17 @@ export class EvidenceAnalyzer {
     // 按类型统计
     const byType: Record<string, number> = {};
     const allTypes: string[] = [
-      "PHYSICAL_EVIDENCE",
-      "DOCUMENTARY_EVIDENCE",
-      "WITNESS_TESTIMONY",
-      "EXPERT_OPINION",
-      "AUDIO_VIDEO_EVIDENCE",
-      "ELECTRONIC_EVIDENCE",
-      "OTHER",
+      'PHYSICAL_EVIDENCE',
+      'DOCUMENTARY_EVIDENCE',
+      'WITNESS_TESTIMONY',
+      'EXPERT_OPINION',
+      'AUDIO_VIDEO_EVIDENCE',
+      'ELECTRONIC_EVIDENCE',
+      'OTHER',
     ];
 
     for (const type of allTypes) {
-      byType[type] = classifiedEvidence.filter((e) => e.type === type).length;
+      byType[type] = classifiedEvidence.filter(e => e.type === type).length;
     }
 
     return {
@@ -172,7 +170,7 @@ export class EvidenceAnalyzer {
    */
   private calculateConfidence(
     classifiedEvidence: ClassifiedEvidence[],
-    completenessScore: number,
+    completenessScore: number
   ): number {
     if (classifiedEvidence.length === 0) return 0;
 

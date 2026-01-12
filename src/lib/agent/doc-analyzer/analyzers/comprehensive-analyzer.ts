@@ -19,7 +19,7 @@ import type {
   TimelineEvent,
   ComprehensiveAnalysisResult,
   EvidenceAnalysisResult,
-} from "../core/types";
+} from '../core/types';
 
 // =============================================================================
 // ComprehensiveAnalyzer类
@@ -33,7 +33,7 @@ export class ComprehensiveAnalyzer {
     parties: Party[],
     claims: Claim[],
     timeline: TimelineEvent[],
-    evidenceAnalysis?: EvidenceAnalysisResult,
+    evidenceAnalysis?: EvidenceAnalysisResult
   ): ComprehensiveAnalysisResult {
     const startTime = Date.now();
 
@@ -41,33 +41,33 @@ export class ComprehensiveAnalyzer {
     const consistencyReport = this.analyzeConsistency(
       parties,
       claims,
-      timeline,
+      timeline
     );
 
     // 2. 完整性分析
     const completenessReport = this.analyzeCompleteness(
       parties,
       claims,
-      timeline,
+      timeline
     );
 
     // 3. 质量评分
     const qualityScore = this.calculateQualityScore(
       consistencyReport,
-      completenessReport,
+      completenessReport
     );
 
     // 4. 生成建议
     const suggestions = this.generateSuggestions(
       consistencyReport,
-      completenessReport,
+      completenessReport
     );
 
     // 5. 计算整体置信度
     const overallConfidence = this.calculateOverallConfidence(
       consistencyReport,
       completenessReport,
-      evidenceAnalysis,
+      evidenceAnalysis
     );
 
     return {
@@ -79,7 +79,7 @@ export class ComprehensiveAnalyzer {
       metadata: {
         analyzedAt: Date.now(),
         analysisDuration: Date.now() - startTime,
-        dataSources: ["PARTIES", "CLAIMS", "TIMELINE"],
+        dataSources: ['PARTIES', 'CLAIMS', 'TIMELINE'],
       },
     };
   }
@@ -90,7 +90,7 @@ export class ComprehensiveAnalyzer {
   private analyzeConsistency(
     parties: Party[],
     claims: Claim[],
-    timeline: TimelineEvent[],
+    timeline: TimelineEvent[]
   ): ConsistencyReport {
     const issues: ConsistencyIssue[] = [];
 
@@ -110,15 +110,15 @@ export class ComprehensiveAnalyzer {
     const partyClaimConsistency = this.calculatePartyClaimScore(
       parties,
       claims,
-      partyClaimIssues,
+      partyClaimIssues
     );
     const timelineConsistency = this.calculateTimelineScore(
       timeline,
-      timelineIssues,
+      timelineIssues
     );
     const evidenceConsistency = this.calculateEvidenceScore(
       claims,
-      evidenceIssues,
+      evidenceIssues
     );
 
     // 5. 计算整体一致性得分
@@ -144,48 +144,48 @@ export class ComprehensiveAnalyzer {
    */
   private checkPartyClaimConsistency(
     parties: Party[],
-    claims: Claim[],
+    claims: Claim[]
   ): ConsistencyIssue[] {
     const issues: ConsistencyIssue[] = [];
 
     // 检查是否有诉讼请求但没有相关当事人
     if (claims.length > 0 && parties.length === 0) {
       issues.push({
-        type: "PARTY_CLAIM_MISMATCH",
-        severity: "ERROR",
-        description: "存在诉讼请求但缺少当事人信息",
-        affectedItems: claims.map((c) => c.content),
-        suggestion: "请补充原告和被告信息",
+        type: 'PARTY_CLAIM_MISMATCH',
+        severity: 'ERROR',
+        description: '存在诉讼请求但缺少当事人信息',
+        affectedItems: claims.map(c => c.content),
+        suggestion: '请补充原告和被告信息',
       });
     }
 
     // 检查是否有诉讼请求的当事人类型缺失
-    const hasPlaintiff = parties.some((p) => p.type === "plaintiff");
-    const hasDefendant = parties.some((p) => p.type === "defendant");
+    const hasPlaintiff = parties.some(p => p.type === 'plaintiff');
+    const hasDefendant = parties.some(p => p.type === 'defendant');
     const hasPaymentClaim = claims.some(
-      (c) =>
-        c.type === "PAY_PRINCIPAL" ||
-        c.type === "PAY_INTEREST" ||
-        c.type === "PAY_DAMAGES",
+      c =>
+        c.type === 'PAY_PRINCIPAL' ||
+        c.type === 'PAY_INTEREST' ||
+        c.type === 'PAY_DAMAGES'
     );
 
     if (hasPaymentClaim && !hasDefendant) {
       issues.push({
-        type: "PARTY_CLAIM_MISMATCH",
-        severity: "WARNING",
-        description: "存在金钱给付诉讼请求但缺少被告",
-        affectedItems: ["PARTIES"],
-        suggestion: "请确认是否遗漏被告信息",
+        type: 'PARTY_CLAIM_MISMATCH',
+        severity: 'WARNING',
+        description: '存在金钱给付诉讼请求但缺少被告',
+        affectedItems: ['PARTIES'],
+        suggestion: '请确认是否遗漏被告信息',
       });
     }
 
     if (hasPaymentClaim && !hasPlaintiff) {
       issues.push({
-        type: "PARTY_CLAIM_MISMATCH",
-        severity: "WARNING",
-        description: "存在金钱给付诉讼请求但缺少原告",
-        affectedItems: ["PARTIES"],
-        suggestion: "请确认是否遗漏原告信息",
+        type: 'PARTY_CLAIM_MISMATCH',
+        severity: 'WARNING',
+        description: '存在金钱给付诉讼请求但缺少原告',
+        affectedItems: ['PARTIES'],
+        suggestion: '请确认是否遗漏原告信息',
       });
     }
 
@@ -196,7 +196,7 @@ export class ComprehensiveAnalyzer {
    * 检查时间线一致性
    */
   private checkTimelineConsistency(
-    timeline: TimelineEvent[],
+    timeline: TimelineEvent[]
   ): ConsistencyIssue[] {
     const issues: ConsistencyIssue[] = [];
 
@@ -206,12 +206,12 @@ export class ComprehensiveAnalyzer {
 
     // 检查事件顺序是否合理
     const sortedTimeline = [...timeline].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
     // 检查是否有不合理的事件顺序
-    const filingEvent = sortedTimeline.find((e) => e.type === "FILING");
-    const judgmentEvent = sortedTimeline.find((e) => e.type === "JUDGMENT");
+    const filingEvent = sortedTimeline.find(e => e.type === 'FILING');
+    const judgmentEvent = sortedTimeline.find(e => e.type === 'JUDGMENT');
 
     if (filingEvent && judgmentEvent) {
       const filingDate = new Date(filingEvent.date).getTime();
@@ -219,11 +219,11 @@ export class ComprehensiveAnalyzer {
 
       if (judgmentDate < filingDate) {
         issues.push({
-          type: "TIMELINE_DISCREPANCY",
-          severity: "ERROR",
-          description: "判决日期早于立案日期",
-          affectedItems: [filingEvent.id || "", judgmentEvent.id || ""],
-          suggestion: "请核实日期信息是否正确",
+          type: 'TIMELINE_DISCREPANCY',
+          severity: 'ERROR',
+          description: '判决日期早于立案日期',
+          affectedItems: [filingEvent.id || '', judgmentEvent.id || ''],
+          suggestion: '请核实日期信息是否正确',
         });
       }
     }
@@ -239,16 +239,16 @@ export class ComprehensiveAnalyzer {
 
     // 检查诉讼请求是否有证据支持
     const claimsWithoutEvidence = claims.filter(
-      (c) => !c.evidence || c.evidence.length === 0,
+      c => !c.evidence || c.evidence.length === 0
     );
 
     if (claimsWithoutEvidence.length > 0) {
       issues.push({
-        type: "EVIDENCE_CONTRADICTION",
-        severity: "WARNING",
-        description: "部分诉讼请求缺少证据支持",
-        affectedItems: claimsWithoutEvidence.map((c) => c.content),
-        suggestion: "建议补充相关证据或说明证据来源",
+        type: 'EVIDENCE_CONTRADICTION',
+        severity: 'WARNING',
+        description: '部分诉讼请求缺少证据支持',
+        affectedItems: claimsWithoutEvidence.map(c => c.content),
+        suggestion: '建议补充相关证据或说明证据来源',
       });
     }
 
@@ -261,7 +261,7 @@ export class ComprehensiveAnalyzer {
   private analyzeCompleteness(
     parties: Party[],
     claims: Claim[],
-    timeline: TimelineEvent[],
+    timeline: TimelineEvent[]
   ): CompletenessReport {
     const checks: CompletenessCheck[] = [];
 
@@ -314,28 +314,28 @@ export class ComprehensiveAnalyzer {
   private checkPartyCompleteness(parties: Party[]): CompletenessCheck {
     const missingItems: string[] = [];
 
-    const hasPlaintiff = parties.some((p) => p.type === "plaintiff");
-    const hasDefendant = parties.some((p) => p.type === "defendant");
+    const hasPlaintiff = parties.some(p => p.type === 'plaintiff');
+    const hasDefendant = parties.some(p => p.type === 'defendant');
 
     if (!hasPlaintiff) {
-      missingItems.push("原告");
+      missingItems.push('原告');
     }
     if (!hasDefendant) {
-      missingItems.push("被告");
+      missingItems.push('被告');
     }
 
     const incompleteParties = parties.filter(
-      (p) => !p.name || p.name.trim() === "",
+      p => !p.name || p.name.trim() === ''
     );
     if (incompleteParties.length > 0) {
-      missingItems.push("当事人姓名");
+      missingItems.push('当事人姓名');
     }
 
     return {
-      category: "PARTY_COMPLETENESS",
+      category: 'PARTY_COMPLETENESS',
       isComplete: missingItems.length === 0,
       missingItems,
-      importance: "HIGH",
+      importance: 'HIGH',
     };
   }
 
@@ -346,21 +346,21 @@ export class ComprehensiveAnalyzer {
     const missingItems: string[] = [];
 
     if (claims.length === 0) {
-      missingItems.push("诉讼请求");
+      missingItems.push('诉讼请求');
     }
 
     const incompleteClaims = claims.filter(
-      (c) => !c.content || c.content.trim() === "",
+      c => !c.content || c.content.trim() === ''
     );
     if (incompleteClaims.length > 0) {
-      missingItems.push("诉讼请求内容");
+      missingItems.push('诉讼请求内容');
     }
 
     return {
-      category: "CLAIM_COMPLETENESS",
+      category: 'CLAIM_COMPLETENESS',
       isComplete: missingItems.length === 0,
       missingItems,
-      importance: "HIGH",
+      importance: 'HIGH',
     };
   }
 
@@ -368,19 +368,19 @@ export class ComprehensiveAnalyzer {
    * 检查时间线完整性
    */
   private checkTimelineCompleteness(
-    timeline: TimelineEvent[],
+    timeline: TimelineEvent[]
   ): CompletenessCheck {
     const missingItems: string[] = [];
 
     if (timeline.length === 0) {
-      missingItems.push("时间线事件");
+      missingItems.push('时间线事件');
     }
 
     return {
-      category: "TIMELINE_COMPLETENESS",
+      category: 'TIMELINE_COMPLETENESS',
       isComplete: missingItems.length === 0,
       missingItems,
-      importance: "MEDIUM",
+      importance: 'MEDIUM',
     };
   }
 
@@ -391,18 +391,18 @@ export class ComprehensiveAnalyzer {
     const missingItems: string[] = [];
 
     const claimsWithoutEvidence = claims.filter(
-      (c) => !c.evidence || c.evidence.length === 0,
+      c => !c.evidence || c.evidence.length === 0
     );
 
     if (claimsWithoutEvidence.length > 0) {
-      missingItems.push("部分诉讼请求缺少证据支持");
+      missingItems.push('部分诉讼请求缺少证据支持');
     }
 
     return {
-      category: "EVIDENCE_CHAIN_COMPLETENESS",
+      category: 'EVIDENCE_CHAIN_COMPLETENESS',
       isComplete: missingItems.length === 0,
       missingItems,
-      importance: "MEDIUM",
+      importance: 'MEDIUM',
     };
   }
 
@@ -411,21 +411,21 @@ export class ComprehensiveAnalyzer {
    */
   private calculateQualityScore(
     consistencyReport: ConsistencyReport,
-    completenessReport: CompletenessReport,
+    completenessReport: CompletenessReport
   ): QualityScoreReport {
     const accuracyScore = Math.round(
-      (consistencyReport.score * 0.6 + completenessReport.score * 0.4) * 100,
+      (consistencyReport.score * 0.6 + completenessReport.score * 0.4) * 100
     );
     const completenessScore = Math.round(completenessReport.score * 100);
     const consistencyScore = Math.round(consistencyReport.score * 100);
     const relevanceScore = Math.round(
-      (consistencyReport.score * 0.5 + completenessReport.score * 0.5) * 100,
+      (consistencyReport.score * 0.5 + completenessReport.score * 0.5) * 100
     );
     const overallScore = Math.round(
       accuracyScore * 0.3 +
         completenessScore * 0.3 +
         consistencyScore * 0.2 +
-        relevanceScore * 0.2,
+        relevanceScore * 0.2
     );
 
     const grade = this.determineGrade(overallScore);
@@ -444,13 +444,13 @@ export class ComprehensiveAnalyzer {
    * 确定评分等级
    */
   private determineGrade(
-    score: number,
-  ): "EXCELLENT" | "GOOD" | "SATISFACTORY" | "NEEDS_IMPROVEMENT" | "POOR" {
-    if (score >= 90) return "EXCELLENT";
-    if (score >= 80) return "GOOD";
-    if (score >= 70) return "SATISFACTORY";
-    if (score >= 60) return "NEEDS_IMPROVEMENT";
-    return "POOR";
+    score: number
+  ): 'EXCELLENT' | 'GOOD' | 'SATISFACTORY' | 'NEEDS_IMPROVEMENT' | 'POOR' {
+    if (score >= 90) return 'EXCELLENT';
+    if (score >= 80) return 'GOOD';
+    if (score >= 70) return 'SATISFACTORY';
+    if (score >= 60) return 'NEEDS_IMPROVEMENT';
+    return 'POOR';
   }
 
   /**
@@ -458,7 +458,7 @@ export class ComprehensiveAnalyzer {
    */
   private generateSuggestions(
     consistencyReport: ConsistencyReport,
-    completenessReport: CompletenessReport,
+    completenessReport: CompletenessReport
   ): string[] {
     const suggestions: string[] = [];
 
@@ -480,24 +480,24 @@ export class ComprehensiveAnalyzer {
    * 生成完整性建议
    */
   private generateCompletenessSuggestions(
-    checks: CompletenessCheck[],
+    checks: CompletenessCheck[]
   ): string[] {
     const suggestions: string[] = [];
 
     for (const check of checks) {
       if (!check.isComplete) {
         switch (check.category) {
-          case "PARTY_COMPLETENESS":
-            suggestions.push("建议补充完整的当事人信息");
+          case 'PARTY_COMPLETENESS':
+            suggestions.push('建议补充完整的当事人信息');
             break;
-          case "CLAIM_COMPLETENESS":
-            suggestions.push("建议补充明确的诉讼请求内容");
+          case 'CLAIM_COMPLETENESS':
+            suggestions.push('建议补充明确的诉讼请求内容');
             break;
-          case "TIMELINE_COMPLETENESS":
-            suggestions.push("建议完善案件时间线");
+          case 'TIMELINE_COMPLETENESS':
+            suggestions.push('建议完善案件时间线');
             break;
-          case "EVIDENCE_CHAIN_COMPLETENESS":
-            suggestions.push("建议补充相关证据以支持诉讼请求");
+          case 'EVIDENCE_CHAIN_COMPLETENESS':
+            suggestions.push('建议补充相关证据以支持诉讼请求');
             break;
         }
       }
@@ -512,7 +512,7 @@ export class ComprehensiveAnalyzer {
   private calculateOverallConfidence(
     consistencyReport: ConsistencyReport,
     completenessReport: CompletenessReport,
-    evidenceAnalysis?: EvidenceAnalysisResult,
+    evidenceAnalysis?: EvidenceAnalysisResult
   ): number {
     let confidence =
       consistencyReport.score * 0.5 + completenessReport.score * 0.3;
@@ -530,15 +530,15 @@ export class ComprehensiveAnalyzer {
   private calculatePartyClaimScore(
     parties: Party[],
     claims: Claim[],
-    issues: ConsistencyIssue[],
+    issues: ConsistencyIssue[]
   ): number {
     let score = 1;
 
     // 根据问题严重程度扣分
     for (const issue of issues) {
-      if (issue.severity === "ERROR") {
+      if (issue.severity === 'ERROR') {
         score -= 0.3;
-      } else if (issue.severity === "WARNING") {
+      } else if (issue.severity === 'WARNING') {
         score -= 0.1;
       }
     }
@@ -551,7 +551,7 @@ export class ComprehensiveAnalyzer {
    */
   private calculateTimelineScore(
     timeline: TimelineEvent[],
-    issues: ConsistencyIssue[],
+    issues: ConsistencyIssue[]
   ): number {
     let score = 1;
 
@@ -564,9 +564,9 @@ export class ComprehensiveAnalyzer {
 
     // 根据问题严重程度扣分
     for (const issue of issues) {
-      if (issue.severity === "ERROR") {
+      if (issue.severity === 'ERROR') {
         score -= 0.3;
-      } else if (issue.severity === "WARNING") {
+      } else if (issue.severity === 'WARNING') {
         score -= 0.1;
       }
     }
@@ -579,15 +579,15 @@ export class ComprehensiveAnalyzer {
    */
   private calculateEvidenceScore(
     claims: Claim[],
-    issues: ConsistencyIssue[],
+    issues: ConsistencyIssue[]
   ): number {
     let score = 1;
 
     // 根据问题严重程度扣分
     for (const issue of issues) {
-      if (issue.severity === "ERROR") {
+      if (issue.severity === 'ERROR') {
         score -= 0.3;
-      } else if (issue.severity === "WARNING") {
+      } else if (issue.severity === 'WARNING') {
         score -= 0.1;
       }
     }

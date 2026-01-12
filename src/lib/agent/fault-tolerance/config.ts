@@ -1,7 +1,7 @@
 // 容错配置模块
 // 定义Agent容错机制的各种配置选项
 
-import type { AgentContext } from "../../../types/agent";
+import type { AgentContext } from '../../../types/agent';
 
 // =============================================================================
 // 容错配置类型定义
@@ -28,11 +28,11 @@ export interface FallbackConfig {
   /** 是否启用降级功能 */
   enabled: boolean;
   /** 降级类型 */
-  fallbackType?: "SIMPLE" | "CACHED" | "RULE_BASED" | "TEMPLATE" | "LOCAL";
+  fallbackType?: 'SIMPLE' | 'CACHED' | 'RULE_BASED' | 'TEMPLATE' | 'LOCAL';
   /** 降级函数（由具体Agent提供） */
   fallbackFunction?: (
     error: unknown,
-    context: AgentContext,
+    context: AgentContext
   ) => Promise<unknown>;
 }
 
@@ -96,12 +96,12 @@ export const DEFAULT_RETRY_CONFIG: RetryConfig = {
   maxRetries: 3,
   backoffMs: [1000, 2000, 4000],
   retryableErrors: [
-    "TIMEOUT",
-    "NETWORK",
-    "AI_SERVICE",
-    "RATE_LIMIT",
-    "ECONNREFUSED",
-    "ETIMEDOUT",
+    'TIMEOUT',
+    'NETWORK',
+    'AI_SERVICE',
+    'RATE_LIMIT',
+    'ECONNREFUSED',
+    'ETIMEDOUT',
   ],
 };
 
@@ -110,7 +110,7 @@ export const DEFAULT_RETRY_CONFIG: RetryConfig = {
  */
 export const DEFAULT_FALLBACK_CONFIG: FallbackConfig = {
   enabled: false,
-  fallbackType: "SIMPLE",
+  fallbackType: 'SIMPLE',
 };
 
 /**
@@ -140,32 +140,32 @@ export const DEFAULT_FAULT_TOLERANCE_CONFIG: AgentFaultToleranceConfig = {
  * 验证容错配置
  */
 export function validateFaultToleranceConfig(
-  config: AgentFaultToleranceConfig,
+  config: AgentFaultToleranceConfig
 ): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   // 验证重试配置
   if (config.retry.maxRetries < 0) {
-    errors.push("maxRetries must be non-negative");
+    errors.push('maxRetries must be non-negative');
   }
 
   if (config.retry.backoffMs.length === 0) {
-    errors.push("backoffMs array must not be empty");
+    errors.push('backoffMs array must not be empty');
   }
 
   for (const ms of config.retry.backoffMs) {
     if (ms < 0) {
-      errors.push("backoffMs values must be positive");
+      errors.push('backoffMs values must be positive');
     }
   }
 
   if (config.retry.retryableErrors.length === 0) {
-    errors.push("retryableErrors array must not be empty");
+    errors.push('retryableErrors array must not be empty');
   }
 
   // 验证降级配置
   if (config.fallback.enabled && !config.fallback.fallbackFunction) {
-    errors.push("fallbackFunction is required when fallback is enabled");
+    errors.push('fallbackFunction is required when fallback is enabled');
   }
 
   // 验证熔断器配置
@@ -174,15 +174,15 @@ export function validateFaultToleranceConfig(
       config.circuitBreaker.failureThreshold < 0 ||
       config.circuitBreaker.failureThreshold > 1
     ) {
-      errors.push("failureThreshold must be between 0 and 1");
+      errors.push('failureThreshold must be between 0 and 1');
     }
 
     if (config.circuitBreaker.timeout < 0) {
-      errors.push("timeout must be positive");
+      errors.push('timeout must be positive');
     }
 
     if (config.circuitBreaker.halfOpenRequests < 0) {
-      errors.push("halfOpenRequests must be non-negative");
+      errors.push('halfOpenRequests must be non-negative');
     }
   }
 
@@ -196,7 +196,7 @@ export function validateFaultToleranceConfig(
  * 创建重试配置
  */
 export function createRetryConfig(
-  overrides: Partial<RetryConfig> = {},
+  overrides: Partial<RetryConfig> = {}
 ): RetryConfig {
   return {
     ...DEFAULT_RETRY_CONFIG,
@@ -208,7 +208,7 @@ export function createRetryConfig(
  * 创建降级配置
  */
 export function createFallbackConfig(
-  overrides: Partial<FallbackConfig> = {},
+  overrides: Partial<FallbackConfig> = {}
 ): FallbackConfig {
   return {
     ...DEFAULT_FALLBACK_CONFIG,
@@ -220,7 +220,7 @@ export function createFallbackConfig(
  * 创建熔断器配置
  */
 export function createCircuitBreakerConfig(
-  overrides: Partial<CircuitBreakerConfig> = {},
+  overrides: Partial<CircuitBreakerConfig> = {}
 ): CircuitBreakerConfig {
   return {
     ...DEFAULT_CIRCUIT_BREAKER_CONFIG,
@@ -232,7 +232,7 @@ export function createCircuitBreakerConfig(
  * 创建完整容错配置
  */
 export function createFaultToleranceConfig(
-  overrides: Partial<AgentFaultToleranceConfig> = {},
+  overrides: Partial<AgentFaultToleranceConfig> = {}
 ): AgentFaultToleranceConfig {
   const config: AgentFaultToleranceConfig = {
     retry: {
@@ -253,7 +253,7 @@ export function createFaultToleranceConfig(
   const validation = validateFaultToleranceConfig(config);
   if (!validation.valid) {
     throw new Error(
-      `Invalid fault tolerance config: ${validation.errors.join(", ")}`,
+      `Invalid fault tolerance config: ${validation.errors.join(', ')}`
     );
   }
 

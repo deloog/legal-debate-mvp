@@ -5,14 +5,14 @@
  * 验证迁移脚本可无错误执行且包含必要的索引
  */
 
-import { PrismaClient } from "@prisma/client";
-import { execSync } from "child_process";
-import fs from "fs";
-import path from "path";
+import { PrismaClient } from '@prisma/client';
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
 interface MigrationTest {
   name: string;
-  status: "PASSED" | "FAILED" | "SKIPPED";
+  status: 'PASSED' | 'FAILED' | 'SKIPPED';
   details?: string;
   error?: string;
 }
@@ -29,7 +29,7 @@ class MigrationIntegrityTester {
    * 运行所有迁移测试
    */
   async runAllTests(): Promise<void> {
-    console.log("🧪 开始数据库迁移完整性测试...\n");
+    console.log('🧪 开始数据库迁移完整性测试...\n');
 
     // 1. 验证迁移文件存在性
     await this.testMigrationFilesExistence();
@@ -64,40 +64,40 @@ class MigrationIntegrityTester {
    */
   private async testMigrationFilesExistence(): Promise<void> {
     try {
-      const migrationsDir = path.join(process.cwd(), "prisma", "migrations");
+      const migrationsDir = path.join(process.cwd(), 'prisma', 'migrations');
       const migrations = fs
         .readdirSync(migrationsDir)
-        .filter((item) => !item.includes("migration_lock.toml"))
-        .filter((item) =>
-          fs.statSync(path.join(migrationsDir, item)).isDirectory(),
+        .filter(item => !item.includes('migration_lock.toml'))
+        .filter(item =>
+          fs.statSync(path.join(migrationsDir, item)).isDirectory()
         );
 
       const requiredMigrations = [
-        "20251218093212_debate_system_complete_model",
-        "20251219044717_add_case_fields_for_docanalyzer",
-        "20251219084435_add_argument_checks",
-        "20251219092351_enhance_user_and_legal_reference_tables",
+        '20251218093212_debate_system_complete_model',
+        '20251219044717_add_case_fields_for_docanalyzer',
+        '20251219084435_add_argument_checks',
+        '20251219092351_enhance_user_and_legal_reference_tables',
       ];
 
       const missingMigrations = requiredMigrations.filter(
-        (migration) => !migrations.includes(migration),
+        migration => !migrations.includes(migration)
       );
 
       if (missingMigrations.length === 0) {
         this.addTestResult(
-          "迁移文件存在性",
-          "PASSED",
-          `找到 ${migrations.length} 个迁移文件`,
+          '迁移文件存在性',
+          'PASSED',
+          `找到 ${migrations.length} 个迁移文件`
         );
       } else {
         this.addTestResult(
-          "迁移文件存在性",
-          "FAILED",
-          `缺失迁移文件: ${missingMigrations.join(", ")}`,
+          '迁移文件存在性',
+          'FAILED',
+          `缺失迁移文件: ${missingMigrations.join(', ')}`
         );
       }
     } catch (error) {
-      this.addTestResult("迁移文件存在性", "FAILED", "", error as string);
+      this.addTestResult('迁移文件存在性', 'FAILED', '', error as string);
     }
   }
 
@@ -106,12 +106,12 @@ class MigrationIntegrityTester {
    */
   private async testMigrationScriptSyntax(): Promise<void> {
     try {
-      const migrationsDir = path.join(process.cwd(), "prisma", "migrations");
+      const migrationsDir = path.join(process.cwd(), 'prisma', 'migrations');
       const migrations = fs
         .readdirSync(migrationsDir)
-        .filter((item) => !item.includes("migration_lock.toml"))
-        .filter((item) =>
-          fs.statSync(path.join(migrationsDir, item)).isDirectory(),
+        .filter(item => !item.includes('migration_lock.toml'))
+        .filter(item =>
+          fs.statSync(path.join(migrationsDir, item)).isDirectory()
         );
 
       let syntaxErrors = 0;
@@ -120,10 +120,10 @@ class MigrationIntegrityTester {
         const migrationFile = path.join(
           migrationsDir,
           migration,
-          "migration.sql",
+          'migration.sql'
         );
         if (fs.existsSync(migrationFile)) {
-          const content = fs.readFileSync(migrationFile, "utf8");
+          const content = fs.readFileSync(migrationFile, 'utf8');
 
           // 基本语法检查
           if (!content.trim()) {
@@ -136,7 +136,7 @@ class MigrationIntegrityTester {
             /CREATE TABLE.*\(\s*\)/, // 空表定义
             /ALTER TABLE.*ADD COLUMN.*\(\s*\)/, // 空列定义
             /CREATE INDEX.*\(\s*\)/, // 空索引定义
-          ].some((pattern) => pattern.test(content));
+          ].some(pattern => pattern.test(content));
 
           if (hasSyntaxErrors) {
             syntaxErrors++;
@@ -147,19 +147,19 @@ class MigrationIntegrityTester {
 
       if (syntaxErrors === 0) {
         this.addTestResult(
-          "迁移脚本语法",
-          "PASSED",
-          "所有迁移文件语法检查通过",
+          '迁移脚本语法',
+          'PASSED',
+          '所有迁移文件语法检查通过'
         );
       } else {
         this.addTestResult(
-          "迁移脚本语法",
-          "FAILED",
-          `发现 ${syntaxErrors} 个语法问题`,
+          '迁移脚本语法',
+          'FAILED',
+          `发现 ${syntaxErrors} 个语法问题`
         );
       }
     } catch (error) {
-      this.addTestResult("迁移脚本语法", "FAILED", "", error as string);
+      this.addTestResult('迁移脚本语法', 'FAILED', '', error as string);
     }
   }
 
@@ -170,9 +170,9 @@ class MigrationIntegrityTester {
     try {
       await this.prisma.$connect();
       await this.prisma.$queryRaw`SELECT 1`;
-      this.addTestResult("数据库连接", "PASSED", "数据库连接正常");
+      this.addTestResult('数据库连接', 'PASSED', '数据库连接正常');
     } catch (error) {
-      this.addTestResult("数据库连接", "FAILED", "", error as string);
+      this.addTestResult('数据库连接', 'FAILED', '', error as string);
     } finally {
       await this.prisma.$disconnect();
     }
@@ -186,16 +186,16 @@ class MigrationIntegrityTester {
       await this.prisma.$connect();
 
       const expectedTables = [
-        "users",
-        "accounts",
-        "sessions",
-        "cases",
-        "documents",
-        "debates",
-        "debate_rounds",
-        "arguments",
-        "legal_references",
-        "ai_interactions",
+        'users',
+        'accounts',
+        'sessions',
+        'cases',
+        'documents',
+        'debates',
+        'debate_rounds',
+        'arguments',
+        'legal_references',
+        'ai_interactions',
       ];
 
       const existingTables = await this.prisma.$queryRaw<
@@ -204,26 +204,26 @@ class MigrationIntegrityTester {
         SELECT tablename FROM pg_tables WHERE schemaname = 'public'
       `;
 
-      const tableNames = existingTables.map((row) => row.tablename);
+      const tableNames = existingTables.map(row => row.tablename);
       const missingTables = expectedTables.filter(
-        (table) => !tableNames.includes(table),
+        table => !tableNames.includes(table)
       );
 
       if (missingTables.length === 0) {
         this.addTestResult(
-          "表结构完整性",
-          "PASSED",
-          `所有 ${expectedTables.length} 个表已创建`,
+          '表结构完整性',
+          'PASSED',
+          `所有 ${expectedTables.length} 个表已创建`
         );
       } else {
         this.addTestResult(
-          "表结构完整性",
-          "FAILED",
-          `缺失表: ${missingTables.join(", ")}`,
+          '表结构完整性',
+          'FAILED',
+          `缺失表: ${missingTables.join(', ')}`
         );
       }
     } catch (error) {
-      this.addTestResult("表结构完整性", "FAILED", "", error as string);
+      this.addTestResult('表结构完整性', 'FAILED', '', error as string);
     } finally {
       await this.prisma.$disconnect();
     }
@@ -237,19 +237,19 @@ class MigrationIntegrityTester {
       await this.prisma.$connect();
 
       const expectedIndexes = [
-        "users_email_key",
-        "users_email_idx",
-        "users_username_idx",
-        "cases_userId_idx",
-        "cases_status_idx",
-        "cases_type_idx",
-        "debates_caseId_idx",
-        "debates_userId_idx",
-        "debates_status_idx",
-        "arguments_roundId_idx",
-        "arguments_side_idx",
-        "legal_references_caseId_idx",
-        "legal_references_lawType_idx",
+        'users_email_key',
+        'users_email_idx',
+        'users_username_idx',
+        'cases_userId_idx',
+        'cases_status_idx',
+        'cases_type_idx',
+        'debates_caseId_idx',
+        'debates_userId_idx',
+        'debates_status_idx',
+        'arguments_roundId_idx',
+        'arguments_side_idx',
+        'legal_references_caseId_idx',
+        'legal_references_lawType_idx',
       ];
 
       const existingIndexes = await this.prisma.$queryRaw<
@@ -258,9 +258,9 @@ class MigrationIntegrityTester {
         SELECT indexname FROM pg_indexes WHERE schemaname = 'public'
       `;
 
-      const indexNames = existingIndexes.map((row) => row.indexname);
-      const criticalIndexes = expectedIndexes.filter((index) =>
-        indexNames.includes(index),
+      const indexNames = existingIndexes.map(row => row.indexname);
+      const criticalIndexes = expectedIndexes.filter(index =>
+        indexNames.includes(index)
       );
 
       const coverageRate =
@@ -268,19 +268,19 @@ class MigrationIntegrityTester {
 
       if (coverageRate >= 90) {
         this.addTestResult(
-          "索引完整性",
-          "PASSED",
-          `关键索引覆盖率: ${coverageRate.toFixed(1)}% (${criticalIndexes.length}/${expectedIndexes.length})`,
+          '索引完整性',
+          'PASSED',
+          `关键索引覆盖率: ${coverageRate.toFixed(1)}% (${criticalIndexes.length}/${expectedIndexes.length})`
         );
       } else {
         this.addTestResult(
-          "索引完整性",
-          "FAILED",
-          `关键索引覆盖率过低: ${coverageRate.toFixed(1)}%`,
+          '索引完整性',
+          'FAILED',
+          `关键索引覆盖率过低: ${coverageRate.toFixed(1)}%`
         );
       }
     } catch (error) {
-      this.addTestResult("索引完整性", "FAILED", "", error as string);
+      this.addTestResult('索引完整性', 'FAILED', '', error as string);
     } finally {
       await this.prisma.$disconnect();
     }
@@ -294,16 +294,16 @@ class MigrationIntegrityTester {
       await this.prisma.$connect();
 
       const expectedConstraints = [
-        "accounts_userId_fkey",
-        "sessions_userId_fkey",
-        "cases_userId_fkey",
-        "documents_caseId_fkey",
-        "documents_userId_fkey",
-        "debates_caseId_fkey",
-        "debates_userId_fkey",
-        "debate_rounds_debateId_fkey",
-        "arguments_roundId_fkey",
-        "legal_references_caseId_fkey",
+        'accounts_userId_fkey',
+        'sessions_userId_fkey',
+        'cases_userId_fkey',
+        'documents_caseId_fkey',
+        'documents_userId_fkey',
+        'debates_caseId_fkey',
+        'debates_userId_fkey',
+        'debate_rounds_debateId_fkey',
+        'arguments_roundId_fkey',
+        'legal_references_caseId_fkey',
       ];
 
       const existingConstraints = await this.prisma.$queryRaw<
@@ -314,27 +314,27 @@ class MigrationIntegrityTester {
       `;
 
       const constraintNames = existingConstraints.map(
-        (row) => row.constraint_name,
+        row => row.constraint_name
       );
-      const foundConstraints = expectedConstraints.filter((constraint) =>
-        constraintNames.includes(constraint),
+      const foundConstraints = expectedConstraints.filter(constraint =>
+        constraintNames.includes(constraint)
       );
 
       if (foundConstraints.length === expectedConstraints.length) {
         this.addTestResult(
-          "外键约束",
-          "PASSED",
-          `所有 ${expectedConstraints.length} 个外键约束已创建`,
+          '外键约束',
+          'PASSED',
+          `所有 ${expectedConstraints.length} 个外键约束已创建`
         );
       } else {
         this.addTestResult(
-          "外键约束",
-          "FAILED",
-          `部分外键约束缺失: ${expectedConstraints.length - foundConstraints.length} 个`,
+          '外键约束',
+          'FAILED',
+          `部分外键约束缺失: ${expectedConstraints.length - foundConstraints.length} 个`
         );
       }
     } catch (error) {
-      this.addTestResult("外键约束", "FAILED", "", error as string);
+      this.addTestResult('外键约束', 'FAILED', '', error as string);
     } finally {
       await this.prisma.$disconnect();
     }
@@ -348,16 +348,16 @@ class MigrationIntegrityTester {
       await this.prisma.$connect();
 
       const expectedEnums = [
-        "UserRole",
-        "UserStatus",
-        "CaseType",
-        "CaseStatus",
-        "AnalysisStatus",
-        "DebateStatus",
-        "RoundStatus",
-        "ArgumentSide",
-        "ArgumentType",
-        "LegalReferenceStatus",
+        'UserRole',
+        'UserStatus',
+        'CaseType',
+        'CaseStatus',
+        'AnalysisStatus',
+        'DebateStatus',
+        'RoundStatus',
+        'ArgumentSide',
+        'ArgumentType',
+        'LegalReferenceStatus',
       ];
 
       const existingEnums = await this.prisma.$queryRaw<
@@ -366,26 +366,26 @@ class MigrationIntegrityTester {
         SELECT typname FROM pg_type WHERE typtype = 'e'
       `;
 
-      const enumNames = existingEnums.map((row) => row.typname);
+      const enumNames = existingEnums.map(row => row.typname);
       const missingEnums = expectedEnums.filter(
-        (enumType) => !enumNames.includes(enumType),
+        enumType => !enumNames.includes(enumType)
       );
 
       if (missingEnums.length === 0) {
         this.addTestResult(
-          "枚举类型",
-          "PASSED",
-          `所有 ${expectedEnums.length} 个枚举类型已创建`,
+          '枚举类型',
+          'PASSED',
+          `所有 ${expectedEnums.length} 个枚举类型已创建`
         );
       } else {
         this.addTestResult(
-          "枚举类型",
-          "FAILED",
-          `缺失枚举类型: ${missingEnums.join(", ")}`,
+          '枚举类型',
+          'FAILED',
+          `缺失枚举类型: ${missingEnums.join(', ')}`
         );
       }
     } catch (error) {
-      this.addTestResult("枚举类型", "FAILED", "", error as string);
+      this.addTestResult('枚举类型', 'FAILED', '', error as string);
     } finally {
       await this.prisma.$disconnect();
     }
@@ -399,29 +399,29 @@ class MigrationIntegrityTester {
       await this.prisma.$connect();
 
       // 检查种子数据脚本存在
-      const seedFile = path.join(process.cwd(), "prisma", "seed.ts");
+      const seedFile = path.join(process.cwd(), 'prisma', 'seed.ts');
       const seedExists = fs.existsSync(seedFile);
 
       if (!seedExists) {
-        this.addTestResult("种子数据", "FAILED", "种子数据脚本不存在");
+        this.addTestResult('种子数据', 'FAILED', '种子数据脚本不存在');
         return;
       }
 
       // 尝试运行种子数据（可选）
       try {
-        console.log("📝 运行种子数据脚本...");
-        execSync("npx tsx prisma/seed.ts", { stdio: "pipe" });
-        this.addTestResult("种子数据", "PASSED", "种子数据脚本执行成功");
+        console.log('📝 运行种子数据脚本...');
+        execSync('npx tsx prisma/seed.ts', { stdio: 'pipe' });
+        this.addTestResult('种子数据', 'PASSED', '种子数据脚本执行成功');
       } catch (seedError) {
         this.addTestResult(
-          "种子数据",
-          "FAILED",
-          "种子数据脚本执行失败",
-          seedError as string,
+          '种子数据',
+          'FAILED',
+          '种子数据脚本执行失败',
+          seedError as string
         );
       }
     } catch (error) {
-      this.addTestResult("种子数据", "FAILED", "", error as string);
+      this.addTestResult('种子数据', 'FAILED', '', error as string);
     } finally {
       await this.prisma.$disconnect();
     }
@@ -432,9 +432,9 @@ class MigrationIntegrityTester {
    */
   private addTestResult(
     name: string,
-    status: "PASSED" | "FAILED" | "SKIPPED",
+    status: 'PASSED' | 'FAILED' | 'SKIPPED',
     details?: string,
-    error?: string,
+    error?: string
   ): void {
     this.testResults.push({ name, status, details, error });
   }
@@ -443,23 +443,21 @@ class MigrationIntegrityTester {
    * 打印测试结果
    */
   private printTestResults(): void {
-    console.log("\n" + "=".repeat(80));
-    console.log("📊 数据库迁移完整性测试报告");
-    console.log("=".repeat(80));
+    console.log('\n' + '='.repeat(80));
+    console.log('📊 数据库迁移完整性测试报告');
+    console.log('='.repeat(80));
 
-    const passed = this.testResults.filter((r) => r.status === "PASSED").length;
-    const failed = this.testResults.filter((r) => r.status === "FAILED").length;
-    const skipped = this.testResults.filter(
-      (r) => r.status === "SKIPPED",
-    ).length;
+    const passed = this.testResults.filter(r => r.status === 'PASSED').length;
+    const failed = this.testResults.filter(r => r.status === 'FAILED').length;
+    const skipped = this.testResults.filter(r => r.status === 'SKIPPED').length;
 
-    this.testResults.forEach((result) => {
+    this.testResults.forEach(result => {
       const icon =
-        result.status === "PASSED"
-          ? "✅"
-          : result.status === "FAILED"
-            ? "❌"
-            : "⏭️";
+        result.status === 'PASSED'
+          ? '✅'
+          : result.status === 'FAILED'
+            ? '❌'
+            : '⏭️';
       console.log(`${icon} ${result.name}: ${result.status}`);
 
       if (result.details) {
@@ -469,10 +467,10 @@ class MigrationIntegrityTester {
       if (result.error) {
         console.log(`   🚨 错误: ${result.error}`);
       }
-      console.log("");
+      console.log('');
     });
 
-    console.log("─".repeat(80));
+    console.log('─'.repeat(80));
     console.log(`📈 测试统计:`);
     console.log(`   ✅ 通过: ${passed}`);
     console.log(`   ❌ 失败: ${failed}`);
@@ -481,13 +479,13 @@ class MigrationIntegrityTester {
 
     const successRate = (passed / this.testResults.length) * 100;
     console.log(`   🎯 成功率: ${successRate.toFixed(1)}%`);
-    console.log("=".repeat(80));
+    console.log('='.repeat(80));
 
     if (failed > 0) {
-      console.log("\n⚠️ 发现问题，请检查迁移脚本完整性");
+      console.log('\n⚠️ 发现问题，请检查迁移脚本完整性');
       process.exit(1);
     } else {
-      console.log("\n🎉 所有测试通过！迁移脚本完整性验证成功");
+      console.log('\n🎉 所有测试通过！迁移脚本完整性验证成功');
     }
   }
 }

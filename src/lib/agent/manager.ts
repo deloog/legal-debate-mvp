@@ -8,25 +8,25 @@ import type {
   AgentStatus,
   AgentEvent,
   AgentEventType,
-} from "../../types/agent";
+} from '../../types/agent';
 
 import {
   AgentError,
   AgentErrorType,
   AgentMetrics,
   TaskPriority,
-} from "../../types/agent";
+} from '../../types/agent';
 
-import { agentRegistry, AgentDiscoveryOptions } from "./registry";
+import { agentRegistry, AgentDiscoveryOptions } from './registry';
 
 import {
   createAgentResult,
   createAgentError,
   AgentExecutionState,
   AgentLogLevel,
-} from "./types";
+} from './types';
 
-import { EventEmitter } from "events";
+import { EventEmitter } from 'events';
 
 // =============================================================================
 // Agent管理器配置接口
@@ -60,7 +60,7 @@ export interface AgentManagerConfig {
 export interface ExecutionStatus {
   executionId: string;
   agentName: string;
-  status: "pending" | "running" | "completed" | "failed" | "cancelled";
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
   startTime: number;
   endTime?: number;
   result?: AgentResult;
@@ -185,7 +185,7 @@ export class AgentManager extends EventEmitter {
       enableCache?: boolean;
       retryAttempts?: number;
       metadata?: Record<string, any>;
-    } = {},
+    } = {}
   ): Promise<AgentResult> {
     const executionId = this.generateExecutionId();
     const priority = options.priority || TaskPriority.MEDIUM;
@@ -206,7 +206,7 @@ export class AgentManager extends EventEmitter {
     if (this.config.enableResultCache && options.enableCache !== false) {
       const cachedResult = this.getCachedResult(agentName, context);
       if (cachedResult) {
-        this.emit("execution_cached", {
+        this.emit('execution_cached', {
           executionId,
           agentName,
           result: cachedResult,
@@ -245,23 +245,23 @@ export class AgentManager extends EventEmitter {
         timeout?: number;
         enableCache?: boolean;
       };
-    }>,
+    }>
   ): Promise<AgentResult[]> {
     const promises = tasks.map(({ agentName, task, data, options }) =>
-      this.execute(agentName, task, data || {}, options),
+      this.execute(agentName, task, data || {}, options)
     );
 
     const results = await Promise.allSettled(promises);
 
     // 检查是否有失败的执行
-    const failures = results.filter((result) => result.status === "rejected");
+    const failures = results.filter(result => result.status === 'rejected');
     if (failures.length > 0) {
       const error = failures[0];
-      throw error?.reason || new Error("Batch execution failed");
+      throw error?.reason || new Error('Batch execution failed');
     }
 
     return results.map(
-      (result) => (result as PromiseFulfilledResult<AgentResult>).value,
+      result => (result as PromiseFulfilledResult<AgentResult>).value
     );
   }
 
@@ -270,12 +270,12 @@ export class AgentManager extends EventEmitter {
    */
   public async executeWorkflow(
     workflow: AgentWorkflowConfig,
-    context: AgentContext,
+    context: AgentContext
   ): Promise<AgentResult[]> {
     const results: AgentResult[] = [];
 
     // 根据工作流配置执行Agent
-    if (workflow.executionMode === "sequential") {
+    if (workflow.executionMode === 'sequential') {
       // 顺序执行
       for (const agentType of workflow.agents) {
         const agents = agentRegistry.getAgentsByType(agentType);
@@ -288,20 +288,20 @@ export class AgentManager extends EventEmitter {
         const result = await this.execute(
           bestAgent.name,
           context.task,
-          context.data,
+          context.data
         );
         results.push(result);
 
         // 如果执行失败且配置为停止，则中断工作流
-        if (!result.success && workflow.errorHandling === "stop") {
+        if (!result.success && workflow.errorHandling === 'stop') {
           throw new Error(
-            `Workflow stopped due to failure in agent: ${bestAgent.name}`,
+            `Workflow stopped due to failure in agent: ${bestAgent.name}`
           );
         }
       }
-    } else if (workflow.executionMode === "parallel") {
+    } else if (workflow.executionMode === 'parallel') {
       // 并行执行
-      const promises = workflow.agents.map(async (agentType) => {
+      const promises = workflow.agents.map(async agentType => {
         const agents = agentRegistry.getAgentsByType(agentType);
         if (agents.length === 0) {
           throw new Error(`No agents found for type: ${agentType}`);
@@ -312,21 +312,21 @@ export class AgentManager extends EventEmitter {
       });
 
       const parallelResults = await Promise.allSettled(promises);
-      parallelResults.forEach((result) => {
-        if (result.status === "fulfilled") {
+      parallelResults.forEach(result => {
+        if (result.status === 'fulfilled') {
           results.push(result.value);
         } else {
           // 创建错误结果
           results.push(
-            createAgentResult("workflow", undefined, {
+            createAgentResult('workflow', undefined, {
               success: false,
               error: createAgentError(
-                "WORKFLOW_ERROR",
-                result.reason?.message || "Unknown workflow error",
+                'WORKFLOW_ERROR',
+                result.reason?.message || 'Unknown workflow error',
                 AgentErrorType.EXECUTION_ERROR,
-                "workflow",
+                'workflow'
               ),
-            }),
+            })
           );
         }
       });
@@ -353,18 +353,18 @@ export class AgentManager extends EventEmitter {
     const status = this.runningExecutions.get(executionId);
     if (
       !status ||
-      status.status === "completed" ||
-      status.status === "cancelled"
+      status.status === 'completed' ||
+      status.status === 'cancelled'
     ) {
       return false;
     }
 
-    status.status = "cancelled";
+    status.status = 'cancelled';
     status.endTime = Date.now();
 
-    this.updateStats("cancelled", Date.now() - status.startTime);
+    this.updateStats('cancelled', Date.now() - status.startTime);
 
-    this.emit("execution_cancelled", {
+    this.emit('execution_cancelled', {
       executionId,
       agentName: status.agentName,
     });
@@ -422,7 +422,7 @@ export class AgentManager extends EventEmitter {
   public async cleanup(): Promise<void> {
     // 取消所有正在运行的执行
     for (const [executionId, status] of this.runningExecutions.entries()) {
-      if (status.status === "running") {
+      if (status.status === 'running') {
         this.cancelExecution(executionId);
       }
     }
@@ -487,21 +487,21 @@ export class AgentManager extends EventEmitter {
     const status: ExecutionStatus = {
       executionId,
       agentName,
-      status: "running",
+      status: 'running',
       startTime: Date.now(),
     };
 
     this.runningExecutions.set(executionId, status);
     this.stats.currentConcurrentExecutions = Math.max(
       this.stats.currentConcurrentExecutions,
-      this.runningExecutions.size,
+      this.runningExecutions.size
     );
 
-    this.emit("execution_started", { executionId, agentName });
+    this.emit('execution_started', { executionId, agentName });
 
     try {
       // 检查是否已被取消
-      if (status.status === "cancelled") {
+      if (status.status === 'cancelled') {
         throw new Error(`Execution ${executionId} was cancelled`);
       }
 
@@ -515,12 +515,12 @@ export class AgentManager extends EventEmitter {
       const result = await this.executeWithTimeout(
         agent,
         context,
-        item.timestamp,
+        item.timestamp
       );
 
       // 再次检查是否已被取消
       const currentStatus = this.runningExecutions.get(executionId);
-      if (currentStatus && currentStatus.status === "cancelled") {
+      if (currentStatus && currentStatus.status === 'cancelled') {
         throw new Error(`Execution ${executionId} was cancelled`);
       }
 
@@ -530,30 +530,30 @@ export class AgentManager extends EventEmitter {
       }
 
       // 更新状态
-      status.status = "completed";
+      status.status = 'completed';
       status.endTime = Date.now();
       status.result = result;
 
-      this.updateStats("completed", status.endTime - status.startTime);
-      this.emit("execution_completed", { executionId, agentName, result });
+      this.updateStats('completed', status.endTime - status.startTime);
+      this.emit('execution_completed', { executionId, agentName, result });
 
       resolve(result);
     } catch (error) {
       // 检查是否为取消导致的错误
-      if (status.status === "cancelled") {
-        this.updateStats("cancelled", Date.now() - status.startTime);
-        this.emit("execution_cancelled", { executionId, agentName });
+      if (status.status === 'cancelled') {
+        this.updateStats('cancelled', Date.now() - status.startTime);
+        this.emit('execution_cancelled', { executionId, agentName });
         reject(new Error(`Execution ${executionId} was cancelled`));
         return;
       }
 
       // 更新状态
-      status.status = "failed";
+      status.status = 'failed';
       status.endTime = Date.now();
       status.error = this.createErrorFromException(error);
 
-      this.updateStats("failed", status.endTime - status.startTime);
-      this.emit("execution_failed", {
+      this.updateStats('failed', status.endTime - status.startTime);
+      this.emit('execution_failed', {
         executionId,
         agentName,
         error: status.error,
@@ -575,7 +575,7 @@ export class AgentManager extends EventEmitter {
   private async executeWithTimeout(
     agent: Agent,
     context: AgentContext,
-    queueTime: number,
+    queueTime: number
   ): Promise<AgentResult> {
     const timeout = context.options?.timeout || this.config.defaultTimeout;
 
@@ -583,10 +583,10 @@ export class AgentManager extends EventEmitter {
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => {
         const timeoutError = createAgentError(
-          "TIMEOUT",
+          'TIMEOUT',
           `Execution timeout after ${timeout}ms`,
           AgentErrorType.TIMEOUT_ERROR,
-          agent.name,
+          agent.name
         );
         reject(timeoutError);
       }, timeout);
@@ -604,7 +604,7 @@ export class AgentManager extends EventEmitter {
    */
   private getCachedResult(
     agentName: string,
-    context: AgentContext,
+    context: AgentContext
   ): AgentResult | undefined {
     const cacheKey = this.generateCacheKey(agentName, context);
     const cached = this.resultCache.get(cacheKey);
@@ -624,7 +624,7 @@ export class AgentManager extends EventEmitter {
   private cacheResult(
     agentName: string,
     context: AgentContext,
-    result: AgentResult,
+    result: AgentResult
   ): void {
     const cacheKey = this.generateCacheKey(agentName, context);
     this.resultCache.set(cacheKey, {
@@ -660,7 +660,7 @@ export class AgentManager extends EventEmitter {
    */
   private comparePriority(
     priority1: TaskPriority,
-    priority2: TaskPriority,
+    priority2: TaskPriority
   ): number {
     const priorityOrder = {
       [TaskPriority.URGENT]: 4,
@@ -676,21 +676,21 @@ export class AgentManager extends EventEmitter {
    * 从异常创建错误
    */
   private createErrorFromException(error: any): AgentError {
-    if (error && typeof error === "object" && "code" in error) {
+    if (error && typeof error === 'object' && 'code' in error) {
       return createAgentError(
         error.code as string,
-        error.message || "Unknown error",
+        error.message || 'Unknown error',
         this.mapErrorType(error.code as string),
-        "agent-manager",
-        this.isRetryableError(error.code as string),
+        'agent-manager',
+        this.isRetryableError(error.code as string)
       );
     }
 
     return createAgentError(
-      "EXECUTION_ERROR",
-      error?.message || "Unknown execution error",
+      'EXECUTION_ERROR',
+      error?.message || 'Unknown execution error',
       AgentErrorType.EXECUTION_ERROR,
-      "agent-manager",
+      'agent-manager'
     );
   }
 
@@ -700,13 +700,13 @@ export class AgentManager extends EventEmitter {
   private mapErrorType(code: string): AgentErrorType {
     const codeLower = code.toLowerCase();
 
-    if (codeLower.includes("timeout")) return AgentErrorType.TIMEOUT_ERROR;
-    if (codeLower.includes("network")) return AgentErrorType.NETWORK_ERROR;
-    if (codeLower.includes("rate_limit"))
+    if (codeLower.includes('timeout')) return AgentErrorType.TIMEOUT_ERROR;
+    if (codeLower.includes('network')) return AgentErrorType.NETWORK_ERROR;
+    if (codeLower.includes('rate_limit'))
       return AgentErrorType.RATE_LIMIT_ERROR;
-    if (codeLower.includes("permission"))
+    if (codeLower.includes('permission'))
       return AgentErrorType.PERMISSION_ERROR;
-    if (codeLower.includes("validation"))
+    if (codeLower.includes('validation'))
       return AgentErrorType.VALIDATION_ERROR;
 
     return AgentErrorType.EXECUTION_ERROR;
@@ -717,13 +717,13 @@ export class AgentManager extends EventEmitter {
    */
   private isRetryableError(code: string): boolean {
     const retryableCodes = [
-      "TIMEOUT_ERROR",
-      "NETWORK_ERROR",
-      "RATE_LIMIT_ERROR",
-      "AI_SERVICE_ERROR",
+      'TIMEOUT_ERROR',
+      'NETWORK_ERROR',
+      'RATE_LIMIT_ERROR',
+      'AI_SERVICE_ERROR',
     ];
-    return retryableCodes.some((rc) =>
-      code.toLowerCase().includes(rc.toLowerCase()),
+    return retryableCodes.some(rc =>
+      code.toLowerCase().includes(rc.toLowerCase())
     );
   }
 
@@ -731,8 +731,8 @@ export class AgentManager extends EventEmitter {
    * 更新统计信息
    */
   private updateStats(
-    type: "completed" | "failed" | "cancelled",
-    executionTime: number,
+    type: 'completed' | 'failed' | 'cancelled',
+    executionTime: number
   ): void {
     this.stats.totalExecutions++;
     this.stats.totalExecutionTime += executionTime;
@@ -744,13 +744,13 @@ export class AgentManager extends EventEmitter {
     }
 
     switch (type) {
-      case "completed":
+      case 'completed':
         this.stats.successfulExecutions++;
         break;
-      case "failed":
+      case 'failed':
         this.stats.failedExecutions++;
         break;
-      case "cancelled":
+      case 'cancelled':
         this.stats.cancelledExecutions++;
         break;
     }
@@ -761,7 +761,7 @@ export class AgentManager extends EventEmitter {
    */
   private startMetricsCollection(): void {
     this.metricsTimer = setInterval(() => {
-      this.emit("metrics", {
+      this.emit('metrics', {
         timestamp: Date.now(),
         stats: this.getStatistics(),
       });

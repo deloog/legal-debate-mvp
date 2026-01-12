@@ -140,24 +140,24 @@ export const chineseNumberMap: Record<string, number> = {
  * 货币映射
  */
 export const currencyMap: Record<string, string> = {
-  元: "CNY",
-  圆: "CNY",
-  人民币: "CNY",
-  "￥": "CNY",
-  CNY: "CNY",
-  RMB: "CNY",
-  美元: "USD",
-  USD: "USD",
-  $: "USD",
-  港币: "HKD",
-  港元: "HKD",
-  HK$: "HKD",
-  欧元: "EUR",
-  EUR: "EUR",
-  "€": "EUR",
-  英镑: "GBP",
-  GBP: "GBP",
-  "£": "GBP",
+  元: 'CNY',
+  圆: 'CNY',
+  人民币: 'CNY',
+  '￥': 'CNY',
+  CNY: 'CNY',
+  RMB: 'CNY',
+  美元: 'USD',
+  USD: 'USD',
+  $: 'USD',
+  港币: 'HKD',
+  港元: 'HKD',
+  HK$: 'HKD',
+  欧元: 'EUR',
+  EUR: 'EUR',
+  '€': 'EUR',
+  英镑: 'GBP',
+  GBP: 'GBP',
+  '£': 'GBP',
 };
 
 /**
@@ -169,5 +169,5 @@ export function extractCurrency(text: string): string {
       return currency;
     }
   }
-  return "CNY";
+  return 'CNY';
 }

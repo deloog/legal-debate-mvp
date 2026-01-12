@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withErrorHandler } from "@/app/api/lib/errors/error-handler";
+import { NextRequest, NextResponse } from 'next/server';
+import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import {
   createDefaultMiddlewareStack,
   createRequestContext,
-} from "@/app/api/lib/middleware";
+} from '@/app/api/lib/middleware';
 
 // 创建中间件栈
 const middlewareStack = createDefaultMiddlewareStack();
@@ -18,18 +18,18 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const middlewareResponse = await middlewareStack.execute(request, context);
 
   // 2. 获取版本信息
-  const packageJson = require("../../../../package.json");
+  const packageJson = require('../../../../package.json');
 
   const versionData = {
     api: {
-      version: "v1",
-      name: "Legal Debate API",
-      description: "RESTful API for Legal Debate System",
+      version: 'v1',
+      name: 'Legal Debate API',
+      description: 'RESTful API for Legal Debate System',
     },
     application: {
-      name: packageJson.name || "legal-debate-mvp",
-      version: packageJson.version || "1.0.0",
-      description: packageJson.description || "Legal Debate MVP System",
+      name: packageJson.name || 'legal-debate-mvp',
+      version: packageJson.version || '1.0.0',
+      description: packageJson.description || 'Legal Debate MVP System',
     },
     runtime: {
       nodeVersion: process.version,
@@ -38,18 +38,18 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
       uptime: process.uptime(),
     },
     endpoints: {
-      v1: "/api/v1",
-      health: "/api/health",
-      version: "/api/version",
+      v1: '/api/v1',
+      health: '/api/health',
+      version: '/api/version',
     },
     documentation: {
-      swagger: "/api/docs",
-      postman: "/api/docs/postman",
+      swagger: '/api/docs',
+      postman: '/api/docs/postman',
     },
     support: {
-      contact: "support@legaldebate.com",
-      documentation: "https://docs.legaldebate.com",
-      issues: "https://github.com/legaldebate/issues",
+      contact: 'support@legaldebate.com',
+      documentation: 'https://docs.legaldebate.com',
+      issues: 'https://github.com/legaldebate/issues',
     },
   };
 
@@ -58,7 +58,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     success: true,
     data: versionData,
     meta: {
-      version: "v1",
+      version: 'v1',
       timestamp: new Date().toISOString(),
     },
   };
@@ -71,7 +71,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   });
 
   // 确保Content-Type正确设置
-  response.headers.set("Content-Type", "application/json");
+  response.headers.set('Content-Type', 'application/json');
 
   return response;
 });

@@ -6,7 +6,7 @@
 /**
  * 资料类型
  */
-export type MaterialType = "DOCUMENT" | "LAW_ARTICLE" | "EVIDENCE" | "ARGUMENT";
+export type MaterialType = 'DOCUMENT' | 'LAW_ARTICLE' | 'EVIDENCE' | 'ARGUMENT';
 
 /**
  * 资料接口
@@ -55,8 +55,8 @@ export interface IncrementalAnalysisInput {
   config?: {
     enableDiffDetection?: boolean; // 启用差异检测
     enableIncrementalAnalysis?: boolean; // 启用增量分析
-    mergeStrategy?: "append" | "replace" | "merge"; // 合并策略
-    conflictResolution?: "new-priority" | "old-priority" | "manual"; // 冲突解决策略
+    mergeStrategy?: 'append' | 'replace' | 'merge'; // 合并策略
+    conflictResolution?: 'new-priority' | 'old-priority' | 'manual'; // 冲突解决策略
   };
 }
 
@@ -66,7 +66,7 @@ export interface IncrementalAnalysisInput {
 export interface DocumentAnalysisOutput {
   parties: Array<{
     name: string;
-    role: "plaintiff" | "defendant" | "other";
+    role: 'plaintiff' | 'defendant' | 'other';
     confidence: number;
   }>;
   claims: Array<{
@@ -162,7 +162,7 @@ export interface MergeResult {
     field: string;
     oldValue: unknown;
     newValue: unknown;
-    resolution: "new-priority" | "old-priority" | "merged" | "conflict";
+    resolution: 'new-priority' | 'old-priority' | 'merged' | 'conflict';
   }>;
   warnings: string[];
 }
@@ -171,9 +171,9 @@ export interface MergeResult {
  * 分析类型
  */
 export type AnalysisType =
-  | "DOCUMENT_ANALYSIS"
-  | "LAW_SEARCH"
-  | "EVIDENCE_ANALYSIS";
+  | 'DOCUMENT_ANALYSIS'
+  | 'LAW_SEARCH'
+  | 'EVIDENCE_ANALYSIS';
 
 /**
  * 分析任务
@@ -182,7 +182,7 @@ export interface AnalysisTask {
   id: string;
   type: AnalysisType;
   material: Material;
-  priority: "high" | "medium" | "low";
+  priority: 'high' | 'medium' | 'low';
 }
 
 /**
@@ -192,7 +192,7 @@ export interface IncrementalAnalysisConfig {
   // 差异检测配置
   diffDetection: {
     enabled: boolean;
-    algorithm: "fingerprint" | "semantic" | "hybrid";
+    algorithm: 'fingerprint' | 'semantic' | 'hybrid';
     similarityThreshold: number; // 相似度阈值 0-1
   };
 
@@ -205,8 +205,8 @@ export interface IncrementalAnalysisConfig {
 
   // 合并配置
   merge: {
-    strategy: "append" | "replace" | "merge";
-    conflictResolution: "new-priority" | "old-priority" | "manual";
+    strategy: 'append' | 'replace' | 'merge';
+    conflictResolution: 'new-priority' | 'old-priority' | 'manual';
     enableConflictDetection: boolean;
   };
 
@@ -223,7 +223,7 @@ export interface IncrementalAnalysisConfig {
 export const DEFAULT_INCREMENTAL_CONFIG: IncrementalAnalysisConfig = {
   diffDetection: {
     enabled: true,
-    algorithm: "fingerprint",
+    algorithm: 'fingerprint',
     similarityThreshold: 0.9,
   },
   analysis: {
@@ -232,8 +232,8 @@ export const DEFAULT_INCREMENTAL_CONFIG: IncrementalAnalysisConfig = {
     retryCount: 3,
   },
   merge: {
-    strategy: "merge",
-    conflictResolution: "new-priority",
+    strategy: 'merge',
+    conflictResolution: 'new-priority',
     enableConflictDetection: true,
   },
   cache: {

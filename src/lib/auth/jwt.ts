@@ -2,19 +2,19 @@
  * JWT 工具函数
  */
 
-import jwt from "jsonwebtoken";
-import type { JwtPayload, JwtVerifyResult } from "@/types/auth";
+import jwt from 'jsonwebtoken';
+import type { JwtPayload, JwtVerifyResult } from '@/types/auth';
 
 const JWT_SECRET =
-  process.env.JWT_SECRET || "default-secret-key-change-in-production";
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
+  process.env.JWT_SECRET || 'default-secret-key-change-in-production';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 /**
  * 生成 JWT Token
  */
 export function generateToken(payload: JwtPayload, expiresIn?: string): string {
   const options: jwt.SignOptions = {
-    expiresIn: (expiresIn || JWT_EXPIRES_IN) as jwt.SignOptions["expiresIn"],
+    expiresIn: (expiresIn || JWT_EXPIRES_IN) as jwt.SignOptions['expiresIn'],
   };
 
   return jwt.sign(payload, JWT_SECRET, options);
@@ -36,20 +36,20 @@ export function verifyToken(token: string): JwtVerifyResult {
       return {
         valid: false,
         payload: null,
-        error: "TOKEN_EXPIRED",
+        error: 'TOKEN_EXPIRED',
       };
     }
     if (error instanceof jwt.JsonWebTokenError) {
       return {
         valid: false,
         payload: null,
-        error: "INVALID_TOKEN",
+        error: 'INVALID_TOKEN',
       };
     }
     return {
       valid: false,
       payload: null,
-      error: "UNKNOWN_ERROR",
+      error: 'UNKNOWN_ERROR',
     };
   }
 }
@@ -70,14 +70,14 @@ export function decodeToken(token: string): JwtPayload | null {
  * 从 Authorization Header 中提取 Token
  */
 export function extractTokenFromHeader(
-  authHeader: string | null,
+  authHeader: string | null
 ): string | null {
   if (!authHeader) {
     return null;
   }
 
-  const parts = authHeader.split(" ");
-  if (parts.length !== 2 || parts[0] !== "Bearer") {
+  const parts = authHeader.split(' ');
+  if (parts.length !== 2 || parts[0] !== 'Bearer') {
     return null;
   }
 
@@ -89,7 +89,7 @@ export function extractTokenFromHeader(
  */
 export function generateRefreshToken(
   payload: JwtPayload,
-  expiresIn?: string,
+  expiresIn?: string
 ): string {
   // 添加jti确保每次生成的token都不同（避免并发冲突）
   const refreshTokenPayload: JwtPayload = {
@@ -98,7 +98,7 @@ export function generateRefreshToken(
   };
 
   const options: jwt.SignOptions = {
-    expiresIn: (expiresIn || "7d") as jwt.SignOptions["expiresIn"],
+    expiresIn: (expiresIn || '7d') as jwt.SignOptions['expiresIn'],
   };
 
   return jwt.sign(refreshTokenPayload, JWT_SECRET, options);
@@ -125,10 +125,10 @@ export function isTokenExpiringSoon(token: string): boolean {
  */
 export function generateAccessToken(
   payload: JwtPayload,
-  expiresIn?: string,
+  expiresIn?: string
 ): string {
   const options: jwt.SignOptions = {
-    expiresIn: (expiresIn || "15m") as jwt.SignOptions["expiresIn"],
+    expiresIn: (expiresIn || '15m') as jwt.SignOptions['expiresIn'],
   };
 
   return jwt.sign(payload, JWT_SECRET, options);

@@ -3,9 +3,9 @@
  * 用于API路由的权限验证
  */
 
-import type { NextRequest, NextResponse } from "next/server";
-import { hasPermission } from "./permissions";
-import type { PermissionCheckResult } from "@/types/permission";
+import type { NextRequest, NextResponse } from 'next/server';
+import { hasPermission } from './permissions';
+import type { PermissionCheckResult } from '@/types/permission';
 
 // =============================================================================
 // 权限检查选项
@@ -15,8 +15,8 @@ import type { PermissionCheckResult } from "@/types/permission";
  * 权限检查模式
  */
 export enum PermissionCheckMode {
-  ANY = "any", // 拥有任意一个权限即可
-  ALL = "all", // 必须拥有所有权限
+  ANY = 'any', // 拥有任意一个权限即可
+  ALL = 'all', // 必须拥有所有权限
 }
 
 /**
@@ -41,7 +41,7 @@ export interface PermissionCheckOptions {
 export async function checkPermissions(
   userId: string,
   requiredPermissions: string[],
-  options: PermissionCheckOptions = {},
+  options: PermissionCheckOptions = {}
 ): Promise<PermissionCheckResult> {
   const mode = options.mode ?? PermissionCheckMode.ALL;
   const results: PermissionCheckResult[] = [];
@@ -75,7 +75,7 @@ export async function checkPermissions(
     const lastResult = results[results.length - 1] ?? { actualPermissions: [] };
     return {
       hasPermission: true,
-      requiredPermission: requiredPermissions.join(","),
+      requiredPermission: requiredPermissions.join(','),
       actualPermissions: lastResult.actualPermissions,
     };
   }
@@ -83,8 +83,8 @@ export async function checkPermissions(
   // 默认返回无权限
   return {
     hasPermission: false,
-    reason: "缺少所需权限",
-    requiredPermission: requiredPermissions.join(","),
+    reason: '缺少所需权限',
+    requiredPermission: requiredPermissions.join(','),
   };
 }
 
@@ -96,7 +96,7 @@ export async function checkPermissions(
  */
 export function requirePermission(
   requiredPermissions: string | string[],
-  options: PermissionCheckOptions = {},
+  options: PermissionCheckOptions = {}
 ) {
   return async function (request: NextRequest, userId: string) {
     const permissions = Array.isArray(requiredPermissions)
@@ -122,16 +122,16 @@ export function requirePermission(
  * @returns 403错误响应
  */
 function createPermissionErrorResponse(
-  result: PermissionCheckResult,
+  result: PermissionCheckResult
 ): NextResponse {
   return Response.json(
     {
-      error: "权限不足",
-      message: result.reason ?? "您没有执行此操作的权限",
+      error: '权限不足',
+      message: result.reason ?? '您没有执行此操作的权限',
       requiredPermission: result.requiredPermission,
       actualPermissions: result.actualPermissions ?? [],
     },
-    { status: 403 },
+    { status: 403 }
   ) as unknown as NextResponse;
 }
 
@@ -155,7 +155,7 @@ export function isValidPermissionName(permission: string): boolean {
  * @returns 用户ID或null
  */
 export function extractUserIdFromRequest(request: NextRequest): string | null {
-  const userId = request.headers.get("x-user-id");
+  const userId = request.headers.get('x-user-id');
   return userId ?? null;
 }
 
@@ -169,14 +169,14 @@ export function extractUserIdFromRequest(request: NextRequest): string | null {
 export async function validatePermissions(
   request: NextRequest,
   requiredPermissions: string | string[],
-  options: PermissionCheckOptions = {},
+  options: PermissionCheckOptions = {}
 ): Promise<NextResponse | null> {
   const userId = extractUserIdFromRequest(request);
 
   if (!userId) {
     return Response.json(
-      { error: "未认证", message: "请先登录" },
-      { status: 401 },
+      { error: '未认证', message: '请先登录' },
+      { status: 401 }
     ) as unknown as NextResponse;
   }
 

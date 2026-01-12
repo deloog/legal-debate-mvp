@@ -8,7 +8,7 @@ import {
   IssueSeverity,
   VerificationIssue,
   IssueCategory,
-} from "../types";
+} from '../types';
 
 /**
  * 源数据接口（用于对比验证）
@@ -33,7 +33,7 @@ export class AmountVerifier {
    */
   async verify(
     data: DataToVerify,
-    source?: SourceData,
+    source?: SourceData
   ): Promise<AmountVerification> {
     const issues: string[] = [];
     const details = {
@@ -47,7 +47,7 @@ export class AmountVerifier {
       return {
         passed: false,
         details,
-        issues: ["未提供金额数据"],
+        issues: ['未提供金额数据'],
       };
     }
 
@@ -78,16 +78,14 @@ export class AmountVerifier {
 
       // 与源数据对比
       if (source?.amounts) {
-        const sourceAmount = source.amounts.find(
-          (a) => a.field === amount.field,
-        );
+        const sourceAmount = source.amounts.find(a => a.field === amount.field);
         if (
           sourceAmount &&
           amountValue !== parseFloat(String(sourceAmount.value))
         ) {
           details.currencyValid = false;
           issues.push(
-            `字段${amount.field}金额不一致：期望"${sourceAmount.value}"，实际"${amount.value}"`,
+            `字段${amount.field}金额不一致：期望"${sourceAmount.value}"，实际"${amount.value}"`
           );
         }
       }
@@ -136,7 +134,7 @@ export class AmountVerifier {
         severity: IssueSeverity.HIGH,
         category: IssueCategory.FACTUAL,
         message: issue,
-        detectedBy: "factual",
+        detectedBy: 'factual',
       });
     }
 

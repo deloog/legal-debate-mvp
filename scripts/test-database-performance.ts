@@ -2,8 +2,8 @@ import {
   prisma,
   checkDatabaseConnection,
   getConnectionInfo,
-} from "../src/lib/db/prisma";
-import { getPoolStats, checkPoolHealth } from "../src/lib/db/connection-pool";
+} from '../src/lib/db/prisma';
+import { getPoolStats, checkPoolHealth } from '../src/lib/db/connection-pool';
 
 interface PerformanceMetrics {
   queryTimes: number[];
@@ -24,7 +24,7 @@ class DatabasePerformanceTester {
 
   // 1. 查询速度基准测试
   async testQueryPerformance(): Promise<void> {
-    console.log("🚀 开始查询性能基准测试...\n");
+    console.log('🚀 开始查询性能基准测试...\n');
 
     const queries = [
       // 基础查询
@@ -33,9 +33,9 @@ class DatabasePerformanceTester {
       () => prisma.debate.findMany({ take: 10 }),
 
       // 索引查询
-      () => prisma.user.findMany({ where: { email: "test@example.com" } }),
-      () => prisma.case.findMany({ where: { userId: "test-user-id" } }),
-      () => prisma.debate.findMany({ where: { status: "DRAFT" } }),
+      () => prisma.user.findMany({ where: { email: 'test@example.com' } }),
+      () => prisma.case.findMany({ where: { userId: 'test-user-id' } }),
+      () => prisma.debate.findMany({ where: { status: 'DRAFT' } }),
 
       // 关联查询
       () =>
@@ -53,9 +53,9 @@ class DatabasePerformanceTester {
         prisma.legalReference.findMany({
           where: {
             relevanceScore: { gte: 0.8 },
-            status: "VALID",
+            status: 'VALID',
           },
-          orderBy: { applicabilityScore: "desc" },
+          orderBy: { applicabilityScore: 'desc' },
           take: 20,
         }),
     ];
@@ -91,13 +91,13 @@ class DatabasePerformanceTester {
     console.log(`  最快响应时间: ${minTime}ms`);
     console.log(`  最慢响应时间: ${maxTime}ms`);
     console.log(
-      `  成功率: ${((this.metrics.successCount / queries.length) * 100).toFixed(1)}%`,
+      `  成功率: ${((this.metrics.successCount / queries.length) * 100).toFixed(1)}%`
     );
   }
 
   // 2. 并发处理测试
   async testConcurrentQueries(): Promise<void> {
-    console.log("\n🔄 开始并发查询测试...\n");
+    console.log('\n🔄 开始并发查询测试...\n');
 
     const concurrentLevels = [5, 10, 20];
 
@@ -113,7 +113,7 @@ class DatabasePerformanceTester {
             .findFirst({
               where: { id: `user-${i}` },
             })
-            .catch(() => null), // 忽略不存在的用户错误
+            .catch(() => null) // 忽略不存在的用户错误
         );
       }
 
@@ -132,24 +132,24 @@ class DatabasePerformanceTester {
 
   // 3. 连接池压力测试
   async testConnectionPool(): Promise<void> {
-    console.log("\n🏊 开始连接池压力测试...\n");
+    console.log('\n🏊 开始连接池压力测试...\n');
 
     try {
       // 获取连接池状态
       const poolStats = await getPoolStats();
       this.metrics.poolStats = poolStats;
 
-      console.log("  连接池状态:");
-      console.log(`    活跃连接数: ${poolStats.activeConnections || "N/A"}`);
-      console.log(`    空闲连接数: ${poolStats.idleConnections || "N/A"}`);
-      console.log(`    总连接数: ${poolStats.totalConnections || "N/A"}`);
+      console.log('  连接池状态:');
+      console.log(`    活跃连接数: ${poolStats.activeConnections || 'N/A'}`);
+      console.log(`    空闲连接数: ${poolStats.idleConnections || 'N/A'}`);
+      console.log(`    总连接数: ${poolStats.totalConnections || 'N/A'}`);
 
       // 连接池健康检查
       const isHealthy = await checkPoolHealth();
-      console.log(`    连接池健康状态: ${isHealthy ? "✅ 健康" : "❌ 异常"}`);
+      console.log(`    连接池健康状态: ${isHealthy ? '✅ 健康' : '❌ 异常'}`);
 
       // 快速连接创建测试
-      console.log("  快速连接创建测试:");
+      console.log('  快速连接创建测试:');
       const quickStart = Date.now();
       await checkDatabaseConnection();
       const quickEnd = Date.now();
@@ -162,25 +162,25 @@ class DatabasePerformanceTester {
 
   // 4. 实际业务场景性能验证
   async testBusinessScenarios(): Promise<void> {
-    console.log("\n💼 开始业务场景性能验证...\n");
+    console.log('\n💼 开始业务场景性能验证...\n');
 
     const scenarios = [
       {
-        name: "案件创建流程",
+        name: '案件创建流程',
         test: async () => {
           // 模拟案件创建的数据库操作
           const user = await prisma.user.findFirst();
-          if (!user) throw new Error("未找到测试用户");
+          if (!user) throw new Error('未找到测试用户');
 
           const startTime = Date.now();
 
           // 创建案件
           const caseData = {
             userId: user.id,
-            title: "测试案件",
-            description: "性能测试案件",
-            type: "CIVIL" as const,
-            status: "DRAFT" as const,
+            title: '测试案件',
+            description: '性能测试案件',
+            type: 'CIVIL' as const,
+            status: 'DRAFT' as const,
           };
 
           // 模拟业务查询
@@ -194,7 +194,7 @@ class DatabasePerformanceTester {
       },
 
       {
-        name: "辩论数据查询",
+        name: '辩论数据查询',
         test: async () => {
           const startTime = Date.now();
 
@@ -222,7 +222,7 @@ class DatabasePerformanceTester {
       },
 
       {
-        name: "法条检索查询",
+        name: '法条检索查询',
         test: async () => {
           const startTime = Date.now();
 
@@ -230,13 +230,13 @@ class DatabasePerformanceTester {
           await prisma.legalReference.findMany({
             where: {
               OR: [
-                { category: { contains: "民法" } },
-                { source: { contains: "民法典" } },
+                { category: { contains: '民法' } },
+                { source: { contains: '民法典' } },
               ],
-              status: "VALID",
+              status: 'VALID',
             },
             orderBy: {
-              relevanceScore: "desc",
+              relevanceScore: 'desc',
             },
             take: 10,
           });
@@ -267,8 +267,8 @@ class DatabasePerformanceTester {
 
   // 5. 生成性能报告
   generatePerformanceReport(): void {
-    console.log("\n📋 数据库性能测试报告");
-    console.log("=".repeat(50));
+    console.log('\n📋 数据库性能测试报告');
+    console.log('='.repeat(50));
 
     // 查询性能评估
     const avgQueryTime =
@@ -277,32 +277,32 @@ class DatabasePerformanceTester {
           this.metrics.queryTimes.length
         : 0;
 
-    console.log("\n🔍 查询性能评估:");
+    console.log('\n🔍 查询性能评估:');
     console.log(`  平均查询时间: ${avgQueryTime.toFixed(2)}ms`);
     console.log(
-      `  性能评级: ${avgQueryTime < 100 ? "✅ 优秀" : avgQueryTime < 500 ? "⚠️ 良好" : "❌ 需要优化"}`,
+      `  性能评级: ${avgQueryTime < 100 ? '✅ 优秀' : avgQueryTime < 500 ? '⚠️ 良好' : '❌ 需要优化'}`
     );
 
     // 并发能力评估
-    console.log("\n🔄 并发处理能力:");
+    console.log('\n🔄 并发处理能力:');
     console.log(`  最大并发测试: ${this.metrics.concurrentQueries}`);
     console.log(
-      `  并发处理: ${this.metrics.concurrentQueries >= 10 ? "✅ 满足要求" : "⚠️ 需要提升"}`,
+      `  并发处理: ${this.metrics.concurrentQueries >= 10 ? '✅ 满足要求' : '⚠️ 需要提升'}`
     );
 
     // 连接池状态
-    console.log("\n🏊 连接池状态:");
+    console.log('\n🏊 连接池状态:');
     if (this.metrics.poolStats) {
       console.log(`  连接池配置: ✅ 正常`);
       console.log(
-        `  连接管理: ${this.metrics.poolStats.totalConnections ? "✅ 正常" : "⚠️ 需要检查"}`,
+        `  连接管理: ${this.metrics.poolStats.totalConnections ? '✅ 正常' : '⚠️ 需要检查'}`
       );
     } else {
       console.log(`  连接池状态: ⚠️ 未获取到详细信息`);
     }
 
     // 总体评估
-    console.log("\n🎯 总体性能评估:");
+    console.log('\n🎯 总体性能评估:');
     const queryPerformanceGood = avgQueryTime < 500;
     const concurrencyGood = this.metrics.concurrentQueries >= 10;
     const errorRateLow = this.metrics.errorCount === 0;
@@ -310,20 +310,20 @@ class DatabasePerformanceTester {
     const allGood = queryPerformanceGood && concurrencyGood && errorRateLow;
 
     console.log(
-      `  查询性能: ${queryPerformanceGood ? "✅ 通过" : "❌ 不达标"}`,
+      `  查询性能: ${queryPerformanceGood ? '✅ 通过' : '❌ 不达标'}`
     );
-    console.log(`  并发能力: ${concurrencyGood ? "✅ 通过" : "❌ 不达标"}`);
-    console.log(`  错误率: ${errorRateLow ? "✅ 通过" : "❌ 过高"}`);
+    console.log(`  并发能力: ${concurrencyGood ? '✅ 通过' : '❌ 不达标'}`);
+    console.log(`  错误率: ${errorRateLow ? '✅ 通过' : '❌ 过高'}`);
     console.log(
-      `  总体评估: ${allGood ? "✅ 性能满足要求" : "❌ 性能需要优化"}`,
+      `  总体评估: ${allGood ? '✅ 性能满足要求' : '❌ 性能需要优化'}`
     );
 
-    console.log("\n" + "=".repeat(50));
+    console.log('\n' + '='.repeat(50));
   }
 
   // 执行完整测试套件
   async runFullTest(): Promise<void> {
-    console.log("🧪 开始数据库性能完整测试...\n");
+    console.log('🧪 开始数据库性能完整测试...\n');
 
     try {
       await this.testQueryPerformance();
@@ -332,7 +332,7 @@ class DatabasePerformanceTester {
       await this.testBusinessScenarios();
       this.generatePerformanceReport();
     } catch (error) {
-      console.error("\n❌ 性能测试过程中发生错误:", error);
+      console.error('\n❌ 性能测试过程中发生错误:', error);
     } finally {
       await prisma.$disconnect();
     }
@@ -345,7 +345,7 @@ async function main() {
   await tester.runFullTest();
 }
 
-main().catch((error) => {
-  console.error("性能测试执行失败:", error);
+main().catch(error => {
+  console.error('性能测试执行失败:', error);
   process.exit(1);
 });

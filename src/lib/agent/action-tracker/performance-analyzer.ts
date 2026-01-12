@@ -4,13 +4,13 @@
  * 负责分析Agent行动的性能指标，包括平均耗时、成功率、错误率等
  */
 
-import { prisma } from "@/lib/db/prisma";
-import { ActionStatus, ActionLayer } from "@prisma/client";
+import { prisma } from '@/lib/db/prisma';
+import { ActionStatus, ActionLayer } from '@prisma/client';
 import type {
   PerformanceMetrics,
   PerformanceReport,
   PerformanceFilters,
-} from "./types";
+} from './types';
 
 /**
  * 性能分析器类
@@ -22,7 +22,7 @@ export class PerformanceAnalyzer {
    * @returns 平均执行时间（毫秒）
    */
   async getAverageExecutionTime(
-    filters: PerformanceFilters = {},
+    filters: PerformanceFilters = {}
   ): Promise<number> {
     const where = this.buildWhereClause(filters);
 
@@ -73,7 +73,7 @@ export class PerformanceAnalyzer {
    * @returns 性能报告
    */
   async getPerformanceReport(
-    filters: PerformanceFilters = {},
+    filters: PerformanceFilters = {}
   ): Promise<PerformanceReport> {
     const overallMetrics = await this.calculateMetrics(filters);
 
@@ -130,7 +130,7 @@ export class PerformanceAnalyzer {
    */
   async comparePerformance(
     filters1: PerformanceFilters,
-    filters2: PerformanceFilters,
+    filters2: PerformanceFilters
   ): Promise<{
     metrics1: PerformanceMetrics;
     metrics2: PerformanceMetrics;
@@ -173,7 +173,7 @@ export class PerformanceAnalyzer {
    * @returns 性能指标
    */
   private async calculateMetrics(
-    filters: PerformanceFilters,
+    filters: PerformanceFilters
   ): Promise<PerformanceMetrics> {
     const where = this.buildWhereClause(filters);
 
@@ -211,7 +211,7 @@ export class PerformanceAnalyzer {
    * @returns Prisma where子句
    */
   private buildWhereClause(
-    filters: PerformanceFilters,
+    filters: PerformanceFilters
   ): Record<string, unknown> {
     const where: Record<string, unknown> = {};
 
@@ -249,17 +249,17 @@ export class PerformanceAnalyzer {
    * @returns 行动名称列表
    */
   private async getUniqueActionNames(
-    filters: PerformanceFilters,
+    filters: PerformanceFilters
   ): Promise<string[]> {
     const actions = await prisma.agentAction.findMany({
       where: this.buildWhereClause(filters),
       select: {
         actionName: true,
       },
-      distinct: ["actionName"],
+      distinct: ['actionName'],
     });
 
-    return actions.map((a) => a.actionName);
+    return actions.map(a => a.actionName);
   }
 
   /**
@@ -268,17 +268,17 @@ export class PerformanceAnalyzer {
    * @returns Agent名称列表
    */
   private async getUniqueAgentNames(
-    filters: PerformanceFilters,
+    filters: PerformanceFilters
   ): Promise<string[]> {
     const actions = await prisma.agentAction.findMany({
       where: this.buildWhereClause(filters),
       select: {
         agentName: true,
       },
-      distinct: ["agentName"],
+      distinct: ['agentName'],
     });
 
-    return actions.map((a) => a.agentName);
+    return actions.map(a => a.agentName);
   }
 
   /**
@@ -287,17 +287,17 @@ export class PerformanceAnalyzer {
    * @returns 行动层级列表
    */
   private async getUniqueActionLayers(
-    filters: PerformanceFilters,
+    filters: PerformanceFilters
   ): Promise<ActionLayer[]> {
     const actions = await prisma.agentAction.findMany({
       where: this.buildWhereClause(filters),
       select: {
         actionLayer: true,
       },
-      distinct: ["actionLayer"],
+      distinct: ['actionLayer'],
     });
 
-    return actions.map((a) => a.actionLayer);
+    return actions.map(a => a.actionLayer);
   }
 }
 

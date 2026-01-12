@@ -10,22 +10,22 @@
  * 企业状态枚举
  */
 export enum EnterpriseStatus {
-  PENDING = "PENDING", // 待审核
-  UNDER_REVIEW = "UNDER_REVIEW", // 审核中
-  APPROVED = "APPROVED", // 已通过
-  REJECTED = "REJECTED", // 已拒绝
-  EXPIRED = "EXPIRED", // 已过期
-  SUSPENDED = "SUSPENDED", // 已暂停
+  PENDING = 'PENDING', // 待审核
+  UNDER_REVIEW = 'UNDER_REVIEW', // 审核中
+  APPROVED = 'APPROVED', // 已通过
+  REJECTED = 'REJECTED', // 已拒绝
+  EXPIRED = 'EXPIRED', // 已过期
+  SUSPENDED = 'SUSPENDED', // 已暂停
 }
 
 /**
  * 企业审核操作枚举
  */
 export enum EnterpriseReviewAction {
-  APPROVE = "APPROVE", // 通过
-  REJECT = "REJECT", // 拒绝
-  SUSPEND = "SUSPEND", // 暂停
-  REACTIVATE = "REACTIVATE", // 重新激活
+  APPROVE = 'APPROVE', // 通过
+  REJECT = 'REJECT', // 拒绝
+  SUSPEND = 'SUSPEND', // 暂停
+  REACTIVATE = 'REACTIVATE', // 重新激活
 }
 
 // =============================================================================
@@ -205,7 +205,7 @@ export interface OcrRecognizeRequest {
  */
 export interface OcrRecognizeResponse {
   success: boolean;
-  data?: BusinessLicenseOcrResult["data"];
+  data?: BusinessLicenseOcrResult['data'];
   error?: string;
 }
 

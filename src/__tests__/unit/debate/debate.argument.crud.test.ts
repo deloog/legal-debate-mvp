@@ -1,10 +1,10 @@
-import { testPrisma } from "../../../test-utils/database";
+import { testPrisma } from '../../../test-utils/database';
 import {
   setupTestDatabase,
   cleanupTestDatabase,
-} from "../../../test-utils/database";
+} from '../../../test-utils/database';
 
-describe("Argument CRUD Operations", () => {
+describe('Argument CRUD Operations', () => {
   let testUser: any;
   let testCase: any;
   let testDebate: any;
@@ -16,9 +16,9 @@ describe("Argument CRUD Operations", () => {
     // 创建测试用户
     testUser = await testPrisma.user.create({
       data: {
-        email: "test-argument-crud@example.com",
-        name: "测试用户",
-        role: "USER",
+        email: 'test-argument-crud@example.com',
+        name: '测试用户',
+        role: 'USER',
       },
     });
 
@@ -26,12 +26,12 @@ describe("Argument CRUD Operations", () => {
     testCase = await testPrisma.case.create({
       data: {
         userId: testUser.id,
-        title: "论点CRUD测试案件",
-        description: "这是一个用于测试论点CRUD操作的案件",
-        type: "CIVIL",
-        status: "ACTIVE",
-        plaintiffName: "张三",
-        defendantName: "李四",
+        title: '论点CRUD测试案件',
+        description: '这是一个用于测试论点CRUD操作的案件',
+        type: 'CIVIL',
+        status: 'ACTIVE',
+        plaintiffName: '张三',
+        defendantName: '李四',
       },
     });
 
@@ -44,8 +44,8 @@ describe("Argument CRUD Operations", () => {
         user: {
           connect: { id: testUser.id },
         },
-        title: "论点CRUD测试辩论",
-        status: "IN_PROGRESS" as const,
+        title: '论点CRUD测试辩论',
+        status: 'IN_PROGRESS' as const,
         currentRound: 1,
       },
     });
@@ -57,7 +57,7 @@ describe("Argument CRUD Operations", () => {
           connect: { id: testDebate.id },
         },
         roundNumber: 1,
-        status: "IN_PROGRESS" as const,
+        status: 'IN_PROGRESS' as const,
         startedAt: new Date(),
       },
     });
@@ -67,16 +67,16 @@ describe("Argument CRUD Operations", () => {
     await cleanupTestDatabase();
   });
 
-  describe("Create Argument", () => {
-    it("should create a plaintiff argument successfully", async () => {
+  describe('Create Argument', () => {
+    it('should create a plaintiff argument successfully', async () => {
       const argumentData = {
         round: {
           connect: { id: testRound.id },
         },
-        side: "PLAINTIFF" as const,
-        content: "根据合同约定，被告应在约定时间内支付货款。",
-        type: "MAIN_POINT" as const,
-        aiProvider: "deepseek",
+        side: 'PLAINTIFF' as const,
+        content: '根据合同约定，被告应在约定时间内支付货款。',
+        type: 'MAIN_POINT' as const,
+        aiProvider: 'deepseek',
         generationTime: 1500,
         confidence: 0.85,
       };
@@ -86,28 +86,28 @@ describe("Argument CRUD Operations", () => {
       });
 
       expect(argument.id).toBeDefined();
-      expect(argument.side).toBe("PLAINTIFF");
+      expect(argument.side).toBe('PLAINTIFF');
       expect(argument.content).toBe(
-        "根据合同约定，被告应在约定时间内支付货款。",
+        '根据合同约定，被告应在约定时间内支付货款。'
       );
-      expect(argument.type).toBe("MAIN_POINT");
+      expect(argument.type).toBe('MAIN_POINT');
       expect(argument.roundId).toBe(testRound.id);
-      expect(argument.aiProvider).toBe("deepseek");
+      expect(argument.aiProvider).toBe('deepseek');
       expect(argument.generationTime).toBe(1500);
       expect(argument.confidence).toBe(0.85);
       expect(argument.createdAt).toBeInstanceOf(Date);
       expect(argument.updatedAt).toBeInstanceOf(Date);
     });
 
-    it("should create a defendant argument successfully", async () => {
+    it('should create a defendant argument successfully', async () => {
       const argumentData = {
         round: {
           connect: { id: testRound.id },
         },
-        side: "DEFENDANT" as const,
-        content: "由于货物质量问题，原告拒绝支付货款是合理的。",
-        type: "MAIN_POINT" as const,
-        aiProvider: "zhipu",
+        side: 'DEFENDANT' as const,
+        content: '由于货物质量问题，原告拒绝支付货款是合理的。',
+        type: 'MAIN_POINT' as const,
+        aiProvider: 'zhipu',
         generationTime: 1200,
         confidence: 0.78,
       };
@@ -116,38 +116,38 @@ describe("Argument CRUD Operations", () => {
         data: argumentData,
       });
 
-      expect(argument.side).toBe("DEFENDANT");
+      expect(argument.side).toBe('DEFENDANT');
       expect(argument.content).toBe(
-        "由于货物质量问题，原告拒绝支付货款是合理的。",
+        '由于货物质量问题，原告拒绝支付货款是合理的。'
       );
-      expect(argument.aiProvider).toBe("zhipu");
+      expect(argument.aiProvider).toBe('zhipu');
     });
 
-    it("should create a neutral argument successfully", async () => {
+    it('should create a neutral argument successfully', async () => {
       const argumentData = {
         round: {
           connect: { id: testRound.id },
         },
-        side: "NEUTRAL" as const,
-        content: "根据相关法律条文，双方都应履行合同义务。",
-        type: "LEGAL_BASIS" as const,
+        side: 'NEUTRAL' as const,
+        content: '根据相关法律条文，双方都应履行合同义务。',
+        type: 'LEGAL_BASIS' as const,
       };
 
       const argument = await testPrisma.argument.create({
         data: argumentData,
       });
 
-      expect(argument.side).toBe("NEUTRAL");
-      expect(argument.type).toBe("LEGAL_BASIS");
+      expect(argument.side).toBe('NEUTRAL');
+      expect(argument.type).toBe('LEGAL_BASIS');
     });
 
-    it("should create argument with minimal required fields", async () => {
+    it('should create argument with minimal required fields', async () => {
       const argumentData = {
         round: {
           connect: { id: testRound.id },
         },
-        side: "PLAINTIFF" as const,
-        content: "最简单的论点内容",
+        side: 'PLAINTIFF' as const,
+        content: '最简单的论点内容',
       };
 
       const argument = await testPrisma.argument.create({
@@ -155,26 +155,26 @@ describe("Argument CRUD Operations", () => {
       });
 
       expect(argument.id).toBeDefined();
-      expect(argument.content).toBe("最简单的论点内容");
-      expect(argument.type).toBe("MAIN_POINT"); // 默认值
+      expect(argument.content).toBe('最简单的论点内容');
+      expect(argument.type).toBe('MAIN_POINT'); // 默认值
       expect(argument.aiProvider).toBeNull(); // 默认值
       expect(argument.generationTime).toBeNull(); // 默认值
       expect(argument.confidence).toBeNull(); // 默认值
     });
 
-    it("should fail when required fields are missing", async () => {
+    it('should fail when required fields are missing', async () => {
       const invalidData = {
-        content: "缺少必要字段的论点",
+        content: '缺少必要字段的论点',
         // 缺少 roundId 和 side - 真正缺少必需字段
       };
 
       await expect(
-        testPrisma.argument.create({ data: invalidData as any }),
+        testPrisma.argument.create({ data: invalidData as any })
       ).rejects.toThrow();
     });
   });
 
-  describe("Read Argument", () => {
+  describe('Read Argument', () => {
     let testArgument: any;
 
     beforeAll(async () => {
@@ -183,25 +183,25 @@ describe("Argument CRUD Operations", () => {
           round: {
             connect: { id: testRound.id },
           },
-          side: "PLAINTIFF" as const,
-          content: "这是一个测试论点",
-          type: "MAIN_POINT" as const,
+          side: 'PLAINTIFF' as const,
+          content: '这是一个测试论点',
+          type: 'MAIN_POINT' as const,
         },
       });
     });
 
-    it("should retrieve argument by id", async () => {
+    it('should retrieve argument by id', async () => {
       const argument = await testPrisma.argument.findUnique({
         where: { id: testArgument.id },
       });
 
       expect(argument).not.toBeNull();
       expect(argument?.id).toBe(testArgument.id);
-      expect(argument?.side).toBe("PLAINTIFF");
-      expect(argument?.content).toBe("这是一个测试论点");
+      expect(argument?.side).toBe('PLAINTIFF');
+      expect(argument?.content).toBe('这是一个测试论点');
     });
 
-    it("should retrieve argument with relations", async () => {
+    it('should retrieve argument with relations', async () => {
       const argument = await testPrisma.argument.findUnique({
         where: { id: testArgument.id },
         include: {
@@ -219,28 +219,28 @@ describe("Argument CRUD Operations", () => {
       expect(argument?.round.debate.id).toBe(testDebate.id);
     });
 
-    it("should filter arguments by round", async () => {
+    it('should filter arguments by round', async () => {
       const argumentList = await testPrisma.argument.findMany({
         where: { roundId: testRound.id },
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: 'asc' },
       });
 
       expect(argumentList.length).toBeGreaterThan(0);
-      argumentList.forEach((argument) => {
+      argumentList.forEach(argument => {
         expect(argument.roundId).toBe(testRound.id);
       });
     });
 
-    it("should return null for non-existent argument", async () => {
+    it('should return null for non-existent argument', async () => {
       const argument = await testPrisma.argument.findUnique({
-        where: { id: "non-existent-id" },
+        where: { id: 'non-existent-id' },
       });
 
       expect(argument).toBeNull();
     });
   });
 
-  describe("Update Argument", () => {
+  describe('Update Argument', () => {
     let testArgument: any;
 
     beforeEach(async () => {
@@ -249,37 +249,37 @@ describe("Argument CRUD Operations", () => {
           round: {
             connect: { id: testRound.id },
           },
-          side: "PLAINTIFF" as const,
-          content: "原始论点内容",
-          type: "MAIN_POINT" as const,
+          side: 'PLAINTIFF' as const,
+          content: '原始论点内容',
+          type: 'MAIN_POINT' as const,
         },
       });
     });
 
-    it("should update argument content", async () => {
+    it('should update argument content', async () => {
       const updatedArgument = await testPrisma.argument.update({
         where: { id: testArgument.id },
-        data: { content: "更新后的论点内容" },
+        data: { content: '更新后的论点内容' },
       });
 
-      expect(updatedArgument.content).toBe("更新后的论点内容");
+      expect(updatedArgument.content).toBe('更新后的论点内容');
       expect(updatedArgument.updatedAt.getTime()).toBeGreaterThan(
-        testArgument.updatedAt.getTime(),
+        testArgument.updatedAt.getTime()
       );
     });
 
-    it("should update argument type", async () => {
+    it('should update argument type', async () => {
       const updatedArgument = await testPrisma.argument.update({
         where: { id: testArgument.id },
-        data: { type: "SUPPORTING" as const },
+        data: { type: 'SUPPORTING' as const },
       });
 
-      expect(updatedArgument.type).toBe("SUPPORTING");
+      expect(updatedArgument.type).toBe('SUPPORTING');
     });
 
-    it("should update AI metadata", async () => {
+    it('should update AI metadata', async () => {
       const aiData = {
-        aiProvider: "deepseek",
+        aiProvider: 'deepseek',
         generationTime: 2000,
         confidence: 0.92,
       };
@@ -294,11 +294,11 @@ describe("Argument CRUD Operations", () => {
       expect(updatedArgument.confidence).toBe(aiData.confidence);
     });
 
-    it("should update multiple fields simultaneously", async () => {
+    it('should update multiple fields simultaneously', async () => {
       const updateData = {
-        content: "完全更新的论点内容",
-        type: "REBUTTAL" as const,
-        aiProvider: "zhipu",
+        content: '完全更新的论点内容',
+        type: 'REBUTTAL' as const,
+        aiProvider: 'zhipu',
         generationTime: 1800,
         confidence: 0.88,
       };
@@ -316,7 +316,7 @@ describe("Argument CRUD Operations", () => {
     });
   });
 
-  describe("Delete Argument", () => {
+  describe('Delete Argument', () => {
     let testArgument: any;
 
     beforeEach(async () => {
@@ -325,14 +325,14 @@ describe("Argument CRUD Operations", () => {
           round: {
             connect: { id: testRound.id },
           },
-          side: "PLAINTIFF" as const,
-          content: "待删除的论点",
-          type: "MAIN_POINT" as const,
+          side: 'PLAINTIFF' as const,
+          content: '待删除的论点',
+          type: 'MAIN_POINT' as const,
         },
       });
     });
 
-    it("should delete argument permanently", async () => {
+    it('should delete argument permanently', async () => {
       await testPrisma.argument.delete({
         where: { id: testArgument.id },
       });
@@ -344,11 +344,11 @@ describe("Argument CRUD Operations", () => {
       expect(deletedArgument).toBeNull();
     });
 
-    it("should handle deletion of non-existent argument", async () => {
+    it('should handle deletion of non-existent argument', async () => {
       await expect(
         testPrisma.argument.delete({
-          where: { id: "non-existent-id" },
-        }),
+          where: { id: 'non-existent-id' },
+        })
       ).rejects.toThrow();
     });
   });

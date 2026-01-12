@@ -9,16 +9,16 @@ import {
   getDocAnalyzerTrend,
   generateDocAnalyzerReport,
   type QualityMetrics,
-} from "../src/lib/monitoring/docanalyzer-monitor";
+} from '../src/lib/monitoring/docanalyzer-monitor';
 
 // =============================================================================
 // 测试函数
 // =============================================================================
 
 async function testMonitorBasic(): Promise<void> {
-  console.log("\n========================================");
-  console.log("测试基本监控功能");
-  console.log("========================================");
+  console.log('\n========================================');
+  console.log('测试基本监控功能');
+  console.log('========================================');
 
   const monitor = getDocAnalyzerMonitor();
 
@@ -26,8 +26,8 @@ async function testMonitorBasic(): Promise<void> {
   const testMetrics: QualityMetrics[] = [
     {
       timestamp: Date.now() - 3600000 * 2, // 2小时前
-      documentId: "doc001",
-      documentType: "civil",
+      documentId: 'doc001',
+      documentType: 'civil',
       qualityScore: 0.85,
       processingTime: 45,
       reviewerCounts: {
@@ -42,8 +42,8 @@ async function testMonitorBasic(): Promise<void> {
     },
     {
       timestamp: Date.now() - 3600000, // 1小时前
-      documentId: "doc002",
-      documentType: "criminal",
+      documentId: 'doc002',
+      documentType: 'criminal',
       qualityScore: 0.72,
       processingTime: 68,
       reviewerCounts: {
@@ -58,8 +58,8 @@ async function testMonitorBasic(): Promise<void> {
     },
     {
       timestamp: Date.now() - 1800000, // 30分钟前
-      documentId: "doc003",
-      documentType: "civil",
+      documentId: 'doc003',
+      documentType: 'civil',
       qualityScore: 0.91,
       processingTime: 35,
       reviewerCounts: {
@@ -74,8 +74,8 @@ async function testMonitorBasic(): Promise<void> {
     },
     {
       timestamp: Date.now() - 600000, // 10分钟前
-      documentId: "doc004",
-      documentType: "civil",
+      documentId: 'doc004',
+      documentType: 'civil',
       qualityScore: 0.65, // 低于阈值，应触发告警
       processingTime: 120, // 超过阈值，应触发告警
       reviewerCounts: {
@@ -85,13 +85,13 @@ async function testMonitorBasic(): Promise<void> {
       },
       validationResults: {
         isValid: false,
-        issues: ["缺少必要信息", "格式不符合要求"],
+        issues: ['缺少必要信息', '格式不符合要求'],
       },
     },
     {
       timestamp: Date.now(), // 现在
-      documentId: "doc005",
-      documentType: "administrative",
+      documentId: 'doc005',
+      documentType: 'administrative',
       qualityScore: 0.88,
       processingTime: 42,
       reviewerCounts: {
@@ -109,48 +109,48 @@ async function testMonitorBasic(): Promise<void> {
   for (const metric of testMetrics) {
     monitor.recordMetric(metric);
     console.log(
-      `已记录文档 ${metric.documentId}: 质量评分 ${(metric.qualityScore * 100).toFixed(1)}%, 耗时 ${metric.processingTime}ms`,
+      `已记录文档 ${metric.documentId}: 质量评分 ${(metric.qualityScore * 100).toFixed(1)}%, 耗时 ${metric.processingTime}ms`
     );
   }
 
-  console.log("\n获取告警:");
+  console.log('\n获取告警:');
   const alerts = monitor.getAlerts();
   for (const alert of alerts) {
     console.log(`  [${alert.level.toUpperCase()}] ${alert.message}`);
   }
 
-  console.log("\n获取最近指标:");
+  console.log('\n获取最近指标:');
   const recentMetrics = monitor.getRecentMetrics(3);
   for (const metric of recentMetrics) {
     console.log(
-      `  文档 ${metric.documentId}: 质量评分 ${(metric.qualityScore * 100).toFixed(1)}%, 耗时 ${metric.processingTime}ms`,
+      `  文档 ${metric.documentId}: 质量评分 ${(metric.qualityScore * 100).toFixed(1)}%, 耗时 ${metric.processingTime}ms`
     );
   }
 
-  console.log("\n获取监控统计:");
+  console.log('\n获取监控统计:');
   const stats = monitor.getStats();
   console.log(`  总指标数: ${stats.totalMetrics}`);
   console.log(`  总告警数: ${stats.totalAlerts}`);
   console.log(
-    `  平均质量评分: ${(stats.averageQualityScore * 100).toFixed(1)}%`,
+    `  平均质量评分: ${(stats.averageQualityScore * 100).toFixed(1)}%`
   );
   console.log(`  平均处理时间: ${stats.averageProcessingTime.toFixed(2)}ms`);
 }
 
 async function testTrendAnalysis(): Promise<void> {
-  console.log("\n========================================");
-  console.log("测试趋势分析");
-  console.log("========================================");
+  console.log('\n========================================');
+  console.log('测试趋势分析');
+  console.log('========================================');
 
   const monitor = getDocAnalyzerMonitor();
 
-  const hourTrend = monitor.getQualityTrend("hour");
-  console.log("\n最近1小时趋势:");
+  const hourTrend = monitor.getQualityTrend('hour');
+  console.log('\n最近1小时趋势:');
   console.log(
-    `  平均质量评分: ${(hourTrend.averageQualityScore * 100).toFixed(1)}%`,
+    `  平均质量评分: ${(hourTrend.averageQualityScore * 100).toFixed(1)}%`
   );
   console.log(
-    `  平均处理时间: ${hourTrend.averageProcessingTime.toFixed(2)}ms`,
+    `  平均处理时间: ${hourTrend.averageProcessingTime.toFixed(2)}ms`
   );
   console.log(`  成功率: ${(hourTrend.successRate * 100).toFixed(1)}%`);
   console.log(`  趋势: ${hourTrend.qualityTrend}`);
@@ -159,10 +159,10 @@ async function testTrendAnalysis(): Promise<void> {
     console.log(`    ${issue}: ${count}次`);
   });
 
-  const dayTrend = monitor.getQualityTrend("day");
-  console.log("\n最近24小时趋势:");
+  const dayTrend = monitor.getQualityTrend('day');
+  console.log('\n最近24小时趋势:');
   console.log(
-    `  平均质量评分: ${(dayTrend.averageQualityScore * 100).toFixed(1)}%`,
+    `  平均质量评分: ${(dayTrend.averageQualityScore * 100).toFixed(1)}%`
   );
   console.log(`  平均处理时间: ${dayTrend.averageProcessingTime.toFixed(2)}ms`);
   console.log(`  成功率: ${(dayTrend.successRate * 100).toFixed(1)}%`);
@@ -170,26 +170,26 @@ async function testTrendAnalysis(): Promise<void> {
 }
 
 async function testReportGeneration(): Promise<void> {
-  console.log("\n========================================");
-  console.log("生成监控报告");
-  console.log("========================================\n");
+  console.log('\n========================================');
+  console.log('生成监控报告');
+  console.log('========================================\n');
 
   const report = generateDocAnalyzerReport();
   console.log(report);
 }
 
 async function testConfigManagement(): Promise<void> {
-  console.log("\n========================================");
-  console.log("测试配置管理");
-  console.log("========================================");
+  console.log('\n========================================');
+  console.log('测试配置管理');
+  console.log('========================================');
 
   const monitor = getDocAnalyzerMonitor();
 
-  console.log("\n当前配置:");
+  console.log('\n当前配置:');
   console.log(`  最小质量评分: ${monitor.getConfig().minQualityScore}`);
   console.log(`  最大处理时间: ${monitor.getConfig().maxProcessingTime}ms`);
   console.log(`  告警启用: ${monitor.getConfig().enableAlerts}`);
-  console.log(`  告警渠道: ${monitor.getConfig().alertChannels.join(", ")}`);
+  console.log(`  告警渠道: ${monitor.getConfig().alertChannels.join(', ')}`);
 
   // 更新配置
   monitor.updateConfig({
@@ -197,7 +197,7 @@ async function testConfigManagement(): Promise<void> {
     maxProcessingTime: 80,
   });
 
-  console.log("\n更新后配置:");
+  console.log('\n更新后配置:');
   console.log(`  最小质量评分: ${monitor.getConfig().minQualityScore}`);
   console.log(`  最大处理时间: ${monitor.getConfig().maxProcessingTime}ms`);
 
@@ -207,21 +207,21 @@ async function testConfigManagement(): Promise<void> {
     maxProcessingTime: 100,
   });
 
-  console.log("\n已恢复默认配置");
+  console.log('\n已恢复默认配置');
 }
 
 async function testConvenienceFunctions(): Promise<void> {
-  console.log("\n========================================");
-  console.log("测试便捷函数");
-  console.log("========================================");
+  console.log('\n========================================');
+  console.log('测试便捷函数');
+  console.log('========================================');
 
   const monitor = getDocAnalyzerMonitor();
 
   // 记录新指标
   recordDocAnalyzerMetric({
     timestamp: Date.now(),
-    documentId: "doc006",
-    documentType: "civil",
+    documentId: 'doc006',
+    documentType: 'civil',
     qualityScore: 0.95,
     processingTime: 38,
     reviewerCounts: {
@@ -235,16 +235,16 @@ async function testConvenienceFunctions(): Promise<void> {
     },
   });
 
-  console.log("\n已使用便捷函数记录指标");
+  console.log('\n已使用便捷函数记录指标');
 
   // 使用便捷函数获取趋势
-  const trend = getDocAnalyzerTrend("day");
+  const trend = getDocAnalyzerTrend('day');
   console.log(
-    `\n使用便捷函数获取趋势: 平均质量评分 ${(trend.averageQualityScore * 100).toFixed(1)}%`,
+    `\n使用便捷函数获取趋势: 平均质量评分 ${(trend.averageQualityScore * 100).toFixed(1)}%`
   );
 
   // 使用便捷函数生成报告
-  console.log("\n使用便捷函数生成报告:");
+  console.log('\n使用便捷函数生成报告:');
   const report = generateDocAnalyzerReport();
   console.log(report);
 }
@@ -254,9 +254,9 @@ async function testConvenienceFunctions(): Promise<void> {
 // =============================================================================
 
 async function runAllTests(): Promise<void> {
-  console.log("========================================");
-  console.log("DocAnalyzer监控模块测试");
-  console.log("========================================");
+  console.log('========================================');
+  console.log('DocAnalyzer监控模块测试');
+  console.log('========================================');
 
   await testMonitorBasic();
   await testTrendAnalysis();
@@ -264,9 +264,9 @@ async function runAllTests(): Promise<void> {
   await testReportGeneration();
   await testConvenienceFunctions();
 
-  console.log("\n========================================");
-  console.log("测试完成");
-  console.log("========================================");
+  console.log('\n========================================');
+  console.log('测试完成');
+  console.log('========================================');
 }
 
 // 运行测试

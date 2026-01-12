@@ -1,13 +1,13 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.DocAnalyzerAgent = exports.DocAnalyzerAgentOptimized = void 0;
-const base_agent_1 = require("./base-agent");
-const agent_1 = require("../../types/agent");
-const errors_1 = require("./security/errors");
-const file_utils_1 = require("./security/file-utils");
-const concurrency_controller_1 = require("./security/concurrency-controller");
-const logger_1 = require("./security/logger");
-const dependency_injection_1 = require("./security/dependency-injection");
+const base_agent_1 = require('./base-agent');
+const agent_1 = require('../../types/agent');
+const errors_1 = require('./security/errors');
+const file_utils_1 = require('./security/file-utils');
+const concurrency_controller_1 = require('./security/concurrency-controller');
+const logger_1 = require('./security/logger');
+const dependency_injection_1 = require('./security/dependency-injection');
 class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
   constructor() {
     super();
@@ -15,36 +15,36 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
   }
   // 重写基类属性
   get name() {
-    return "DocAnalyzerOptimized";
+    return 'DocAnalyzerOptimized';
   }
   get type() {
     return agent_1.AgentType.DOC_ANALYZER;
   }
   get version() {
-    return "2.0.0";
+    return '2.0.0';
   }
   get description() {
-    return "优化版文档分析智能体，采用思维链(CoT)增强、结构化约束和自我修正策略，目标当事人准确率≥98%，诉讼请求准确率≥95%";
+    return '优化版文档分析智能体，采用思维链(CoT)增强、结构化约束和自我修正策略，目标当事人准确率≥98%，诉讼请求准确率≥95%';
   }
   // 重写基类方法
   getCapabilities() {
     return [
-      "DOCUMENT_ANALYSIS",
-      "TEXT_EXTRACTION",
-      "STRUCTURED_DATA_EXTRACTION",
-      "DEDUPLICATION",
-      "CHAIN_OF_THOUGHT",
-      "SELF_CORRECTION",
+      'DOCUMENT_ANALYSIS',
+      'TEXT_EXTRACTION',
+      'STRUCTURED_DATA_EXTRACTION',
+      'DEDUPLICATION',
+      'CHAIN_OF_THOUGHT',
+      'SELF_CORRECTION',
     ];
   }
   getSupportedTasks() {
     return [
-      "DOCUMENT_PARSE",
-      "DOCUMENT_ANALYZE",
-      "INFO_EXTRACT",
-      "DEDUPLICATE_PARTIES",
-      "CHAIN_OF_THOUGHT_REASONING",
-      "SELF_VERIFICATION",
+      'DOCUMENT_PARSE',
+      'DOCUMENT_ANALYZE',
+      'INFO_EXTRACT',
+      'DEDUPLICATE_PARTIES',
+      'CHAIN_OF_THOUGHT_REASONING',
+      'SELF_VERIFICATION',
     ];
   }
   getDependencies() {
@@ -54,28 +54,28 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
     return [];
   }
   getOptionalConfig() {
-    return ["timeout", "retryAttempts", "cacheEnabled", "fewShotExamples"];
+    return ['timeout', 'retryAttempts', 'cacheEnabled', 'fewShotExamples'];
   }
   getProcessingSteps() {
     return [
-      "Input validation",
-      "Document text extraction",
-      "Chain of thought analysis",
-      "Structured extraction",
-      "Self-verification",
-      "Result formatting",
+      'Input validation',
+      'Document text extraction',
+      'Chain of thought analysis',
+      'Structured extraction',
+      'Self-verification',
+      'Result formatting',
     ];
   }
   async executeLogic(context) {
     const input = context.data;
     const startTime = Date.now();
     return await concurrency_controller_1.documentConcurrencyController.withConcurrency(
-      "document-analysis",
+      'document-analysis',
       (0, dependency_injection_1.getConfig)().maxConcurrentDocuments,
       async () => {
         try {
           // 记录开始日志
-          logger_1.logger.info("开始文档分析", {
+          logger_1.logger.info('开始文档分析', {
             documentId: input.documentId,
             fileType: input.fileType,
             filePath: input.filePath,
@@ -90,20 +90,20 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
           } else {
             extractedText = await this.extractDocumentText(
               input.filePath,
-              input.fileType,
+              input.fileType
             );
           }
           if (!extractedText || extractedText.trim().length === 0) {
             throw new errors_1.AnalysisError(
-              "无法从文档中提取有效文本内容",
-              new Error("文档内容为空"),
-              { documentId: input.documentId },
+              '无法从文档中提取有效文本内容',
+              new Error('文档内容为空'),
+              { documentId: input.documentId }
             );
           }
           // 使用优化的AI分析提取的文本
           const analysisResult = await this.analyzeDocumentWithOptimizedAI(
             extractedText,
-            input.options,
+            input.options
           );
           // 计算处理时间
           const processingTime = Date.now() - startTime;
@@ -114,17 +114,17 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
             processingTime,
             metadata: {
               fileSize:
-                input.filePath && input.fileType !== "IMAGE"
+                input.filePath && input.fileType !== 'IMAGE'
                   ? await this.getFileSizeSecurely(input.filePath)
                   : 0,
               wordCount: this.countWords(extractedText),
-              analysisModel: "zhipu-glm-4.6-optimized",
+              analysisModel: 'zhipu-glm-4.6-optimized',
               tokenUsed: analysisResult.tokenUsed,
               analysisProcess: analysisResult.analysisProcess,
             },
           };
           // 记录成功日志
-          logger_1.logger.info("文档分析完成", {
+          logger_1.logger.info('文档分析完成', {
             documentId: input.documentId,
             processingTime,
             confidence: result.confidence,
@@ -135,7 +135,7 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
           logger_1.logger.recordDocumentProcessing(
             true,
             processingTime,
-            result.confidence,
+            result.confidence
           );
           return result;
         } catch (error) {
@@ -148,9 +148,9 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
               documentId: input.documentId,
               processingTime,
               fileType: input.fileType,
-            },
+            }
           );
-          logger_1.logger.error("文档分析失败", wrappedError, {
+          logger_1.logger.error('文档分析失败', wrappedError, {
             documentId: input.documentId,
             processingTime,
             fileType: input.fileType,
@@ -159,7 +159,7 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
           logger_1.logger.recordDocumentProcessing(false, processingTime, 0);
           throw wrappedError;
         }
-      },
+      }
     );
   }
   // =============================================================================
@@ -168,22 +168,22 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
   async extractDocumentText(filePath, fileType) {
     try {
       switch (fileType) {
-        case "PDF":
+        case 'PDF':
           return await this.extractPDFText(filePath);
-        case "DOCX":
+        case 'DOCX':
           return await this.extractDOCXText(filePath);
-        case "DOC":
+        case 'DOC':
           return await this.extractDOCText(filePath);
-        case "TXT":
+        case 'TXT':
           return await this.extractTXTText(filePath);
-        case "IMAGE":
+        case 'IMAGE':
           return await this.extractImageText(filePath);
         default:
           throw new Error(`不支持的文档格式: ${fileType}`);
       }
     } catch (error) {
       throw new Error(
-        `文档文本提取失败: ${error instanceof Error ? error.message : String(error)}`,
+        `文档文本提取失败: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
@@ -194,7 +194,7 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
     try {
       // 安全验证
       file_utils_1.SecureFileUtils.validateFilePath(filePath);
-      const pdfParse = require("pdf-parse");
+      const pdfParse = require('pdf-parse');
       const buffer =
         await file_utils_1.SecureFileUtils.readFileSecurely(filePath);
       const data = await pdfParse(buffer);
@@ -203,7 +203,7 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
       throw new errors_1.AnalysisError(
         `PDF文件解析失败`,
         error instanceof Error ? error : new Error(String(error)),
-        { filePath },
+        { filePath }
       );
     }
   }
@@ -211,7 +211,7 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
     try {
       // 安全验证
       file_utils_1.SecureFileUtils.validateFilePath(filePath);
-      const mammoth = require("mammoth");
+      const mammoth = require('mammoth');
       const buffer =
         await file_utils_1.SecureFileUtils.readFileSecurely(filePath);
       const result = await mammoth.extractRawText({ buffer });
@@ -220,7 +220,7 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
       throw new errors_1.AnalysisError(
         `DOCX文件解析失败`,
         error instanceof Error ? error : new Error(String(error)),
-        { filePath },
+        { filePath }
       );
     }
   }
@@ -231,11 +231,11 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
       // 首先尝试使用antiword（安全版本）
       try {
         return await file_utils_1.SecureFileUtils.executeCommandSecurely(
-          "antiword",
-          [filePath],
+          'antiword',
+          [filePath]
         );
       } catch (antiwordError) {
-        logger_1.logger.warn("antiword不可用，尝试使用textract", {
+        logger_1.logger.warn('antiword不可用，尝试使用textract', {
           filePath,
           error: antiwordError,
         });
@@ -245,20 +245,20 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
       throw new errors_1.AnalysisError(
         `DOC文件解析失败`,
         error instanceof Error ? error : new Error(String(error)),
-        { filePath },
+        { filePath }
       );
     }
   }
   async extractDOCWithTextract(filePath) {
     try {
-      const textract = require("textract");
+      const textract = require('textract');
       return new Promise((resolve, reject) => {
         textract.fromFileWithPath(filePath, (error, text) => {
           if (error) {
             reject(
               new errors_1.AnalysisError(`Textract解析失败`, error, {
                 filePath,
-              }),
+              })
             );
           } else {
             resolve(text.trim());
@@ -269,7 +269,7 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
       throw new errors_1.AnalysisError(
         `Textract不可用`,
         error instanceof Error ? error : new Error(String(error)),
-        { filePath },
+        { filePath }
       );
     }
   }
@@ -281,28 +281,28 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
       throw new errors_1.AnalysisError(
         `TXT文件读取失败`,
         error instanceof Error ? error : new Error(String(error)),
-        { filePath },
+        { filePath }
       );
     }
   }
   async extractImageText(filePath) {
     try {
-      const Tesseract = require("tesseract.js");
+      const Tesseract = require('tesseract.js');
       const {
         data: { text },
-      } = await Tesseract.recognize(filePath, "chi_sim+eng");
+      } = await Tesseract.recognize(filePath, 'chi_sim+eng');
       return text.trim();
     } catch (error) {
       if (
         error instanceof Error &&
-        error.message.includes("Cannot find module")
+        error.message.includes('Cannot find module')
       ) {
         throw new Error(
-          "OCR功能需要安装tesseract.js库，请运行: npm install tesseract.js",
+          'OCR功能需要安装tesseract.js库，请运行: npm install tesseract.js'
         );
       }
       throw new Error(
-        `图片OCR识别失败: ${error instanceof Error ? error.message : String(error)}`,
+        `图片OCR识别失败: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
@@ -320,20 +320,20 @@ class DocAnalyzerAgentOptimized extends base_agent_1.BaseAgent {
   buildOptimizedAnalysisPrompt(text, options) {
     const analysisTasks = [];
     if (options?.extractParties !== false) {
-      analysisTasks.push("当事人信息提取");
+      analysisTasks.push('当事人信息提取');
     }
     if (options?.extractClaims !== false) {
-      analysisTasks.push("诉讼请求识别");
+      analysisTasks.push('诉讼请求识别');
     }
     if (options?.extractTimeline !== false) {
-      analysisTasks.push("时间线整理");
+      analysisTasks.push('时间线整理');
     }
     if (options?.generateSummary === true) {
-      analysisTasks.push("案件摘要生成");
+      analysisTasks.push('案件摘要生成');
     }
     return `你是一个专业的法律文档分析专家。请对以下法律文档进行分析，完成以下任务：
 
-分析任务：${analysisTasks.join("、")}
+分析任务：${analysisTasks.join('、')}
 
 文档内容：
 ${text}
@@ -465,21 +465,21 @@ ${text}
       // 清理AI响应中的代码块标记
       let cleanedResponse = aiResponse.trim();
       // 移除可能的代码块标记
-      if (cleanedResponse.includes("```json")) {
+      if (cleanedResponse.includes('```json')) {
         cleanedResponse = cleanedResponse
-          .replace(/```json\s*/, "")
-          .replace(/```\s*$/, "");
+          .replace(/```json\s*/, '')
+          .replace(/```\s*$/, '');
       }
-      if (cleanedResponse.includes("```")) {
+      if (cleanedResponse.includes('```')) {
         cleanedResponse = cleanedResponse
-          .replace(/```\s*/, "")
-          .replace(/```\s*$/, "");
+          .replace(/```\s*/, '')
+          .replace(/```\s*$/, '');
       }
       // 尝试解析JSON响应
       const parsed = JSON.parse(cleanedResponse);
       // 验证响应结构
       if (!parsed.extractedData) {
-        throw new Error("AI响应格式不正确：缺少extractedData字段");
+        throw new Error('AI响应格式不正确：缺少extractedData字段');
       }
       // 进行后处理：去重和清理
       const cleanedData = this.postProcessExtractedData(parsed.extractedData);
@@ -496,17 +496,17 @@ ${text}
           parties: [],
           claims: [],
           timeline: [],
-          summary: "AI响应解析失败，请手动分析",
+          summary: 'AI响应解析失败，请手动分析',
           keyFacts: [],
         },
         confidence: 0.3,
         tokenUsed: this.estimateTokenUsage(aiResponse),
         analysisProcess: {
-          ocrErrors: ["JSON解析失败"],
+          ocrErrors: ['JSON解析失败'],
           entitiesListed: { persons: [], companies: [], amounts: [] },
-          roleReasoning: "解析失败",
-          claimDecomposition: "无法进行",
-          amountNormalization: "无法进行",
+          roleReasoning: '解析失败',
+          claimDecomposition: '无法进行',
+          amountNormalization: '无法进行',
           validationResults: {
             duplicatesFound: [],
             roleConflicts: [],
@@ -541,7 +541,7 @@ ${text}
    */
   deduplicateParties(parties) {
     const nameMap = new Map();
-    parties.forEach((party) => {
+    parties.forEach(party => {
       const name = party.name?.trim();
       if (!name) return;
       const existing = nameMap.get(name);
@@ -560,8 +560,8 @@ ${text}
         }
         // 优先使用最重要的法律角色
         if (
-          party.type === "plaintiff" ||
-          (party.type === "defendant" && existing.type !== "plaintiff")
+          party.type === 'plaintiff' ||
+          (party.type === 'defendant' && existing.type !== 'plaintiff')
         ) {
           existing.type = party.type;
         }
@@ -576,13 +576,13 @@ ${text}
    * 诉讼请求标准化
    */
   normalizeClaims(claims) {
-    return claims.map((claim) => {
+    return claims.map(claim => {
       // 确保类型使用标准分类
       const standardType = this.standardizeClaimType(claim.type);
       return {
         ...claim,
         type: standardType,
-        currency: claim.currency || "CNY",
+        currency: claim.currency || 'CNY',
       };
     });
   }
@@ -591,25 +591,25 @@ ${text}
    */
   standardizeClaimType(type) {
     const typeMap = {
-      偿还本金: "PAY_PRINCIPAL",
-      支付利息: "PAY_INTEREST",
-      违约金: "PAY_PENALTY",
-      赔偿损失: "PAY_DAMAGES",
-      诉讼费用: "LITIGATION_COST",
-      履行义务: "PERFORMANCE",
-      解除合同: "TERMINATION",
-      payment: "PAY_PRINCIPAL",
-      penalty: "PAY_PENALTY",
-      costs: "LITIGATION_COST",
-      compensation: "PAY_DAMAGES",
+      偿还本金: 'PAY_PRINCIPAL',
+      支付利息: 'PAY_INTEREST',
+      违约金: 'PAY_PENALTY',
+      赔偿损失: 'PAY_DAMAGES',
+      诉讼费用: 'LITIGATION_COST',
+      履行义务: 'PERFORMANCE',
+      解除合同: 'TERMINATION',
+      payment: 'PAY_PRINCIPAL',
+      penalty: 'PAY_PENALTY',
+      costs: 'LITIGATION_COST',
+      compensation: 'PAY_DAMAGES',
     };
-    return typeMap[type] || "OTHER";
+    return typeMap[type] || 'OTHER';
   }
   /**
    * 金额处理
    */
   processAmounts(claims) {
-    return claims.map((claim) => {
+    return claims.map(claim => {
       if (claim.amount) {
         return {
           ...claim,
@@ -623,12 +623,12 @@ ${text}
    * 金额标准化
    */
   normalizeAmount(amount) {
-    if (typeof amount === "number") {
+    if (typeof amount === 'number') {
       return amount;
     }
-    if (typeof amount === "string") {
+    if (typeof amount === 'string') {
       // 移除逗号分隔符
-      let normalized = amount.replace(/,/g, "");
+      let normalized = amount.replace(/,/g, '');
       // 处理中文数字
       const chineseNumbers = {
         零: 0,
@@ -692,9 +692,9 @@ ${text}
   validateInput(input) {
     if (!input.documentId || input.documentId.trim().length === 0) {
       throw new errors_1.ValidationError(
-        "文档ID不能为空",
-        "documentId",
-        input.documentId,
+        '文档ID不能为空',
+        'documentId',
+        input.documentId
       );
     }
     // 如果提供了filePath，则验证它；如果提供了content，则允许filePath为空
@@ -703,17 +703,17 @@ ${text}
       file_utils_1.SecureFileUtils.validateFilePath(input.filePath);
     } else if (!input.content) {
       throw new errors_1.ValidationError(
-        "文件路径和内容不能都为空",
-        "filePath",
-        input.filePath,
+        '文件路径和内容不能都为空',
+        'filePath',
+        input.filePath
       );
     }
-    const supportedTypes = ["PDF", "DOCX", "DOC", "TXT", "IMAGE"];
+    const supportedTypes = ['PDF', 'DOCX', 'DOC', 'TXT', 'IMAGE'];
     if (!supportedTypes.includes(input.fileType)) {
       throw new errors_1.ValidationError(
-        `不支持的文档格式: ${input.fileType}，支持的格式: ${supportedTypes.join(", ")}`,
-        "fileType",
-        input.fileType,
+        `不支持的文档格式: ${input.fileType}，支持的格式: ${supportedTypes.join(', ')}`,
+        'fileType',
+        input.fileType
       );
     }
   }

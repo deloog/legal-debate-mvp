@@ -9,42 +9,42 @@ export enum AgentType {
   /**
    * @deprecated 使用ANALYSIS替代，保留用于向后兼容
    */
-  DOC_ANALYZER = "doc_analyzer",
+  DOC_ANALYZER = 'doc_analyzer',
   /**
    * 新AnalysisAgent - 分析层Agent，包含文档解析、证据分析、综合分析
    */
-  ANALYSIS = "analysis",
-  PLANNING = "planning",
-  LEGAL = "legal",
-  GENERATION = "generation",
-  VERIFICATION = "verification",
-  MEMORY = "memory",
+  ANALYSIS = 'analysis',
+  PLANNING = 'planning',
+  LEGAL = 'legal',
+  GENERATION = 'generation',
+  VERIFICATION = 'verification',
+  MEMORY = 'memory',
   // 以下类型保留用于向后兼容
-  EVIDENCE_ANALYZER = "evidence_analyzer",
-  RESEARCHER = "researcher",
-  STRATEGIST = "strategist",
-  WRITER = "writer",
-  REVIEWER = "reviewer",
-  SCHEDULER = "scheduler",
-  REPORTER = "reporter",
-  SUMMARIZER = "summarizer",
-  COORDINATOR = "coordinator",
+  EVIDENCE_ANALYZER = 'evidence_analyzer',
+  RESEARCHER = 'researcher',
+  STRATEGIST = 'strategist',
+  WRITER = 'writer',
+  REVIEWER = 'reviewer',
+  SCHEDULER = 'scheduler',
+  REPORTER = 'reporter',
+  SUMMARIZER = 'summarizer',
+  COORDINATOR = 'coordinator',
 }
 
 // Agent状态枚举
 export enum AgentStatus {
-  IDLE = "idle",
-  BUSY = "busy",
-  ERROR = "error",
-  DISABLED = "disabled",
+  IDLE = 'idle',
+  BUSY = 'busy',
+  ERROR = 'error',
+  DISABLED = 'disabled',
 }
 
 // 任务优先级
 export enum TaskPriority {
-  LOW = "low",
-  MEDIUM = "medium",
-  HIGH = "high",
-  URGENT = "urgent",
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  URGENT = 'urgent',
 }
 
 // =============================================================================
@@ -132,16 +132,16 @@ export interface AgentError {
 
 // Agent错误类型
 export enum AgentErrorType {
-  VALIDATION_ERROR = "validation_error",
-  EXECUTION_ERROR = "execution_error",
-  TIMEOUT_ERROR = "timeout_error",
-  NETWORK_ERROR = "network_error",
-  AI_SERVICE_ERROR = "ai_service_error",
-  DATABASE_ERROR = "database_error",
-  CONFIGURATION_ERROR = "configuration_error",
-  PERMISSION_ERROR = "permission_error",
-  RATE_LIMIT_ERROR = "rate_limit_error",
-  UNKNOWN_ERROR = "unknown_error",
+  VALIDATION_ERROR = 'validation_error',
+  EXECUTION_ERROR = 'execution_error',
+  TIMEOUT_ERROR = 'timeout_error',
+  NETWORK_ERROR = 'network_error',
+  AI_SERVICE_ERROR = 'ai_service_error',
+  DATABASE_ERROR = 'database_error',
+  CONFIGURATION_ERROR = 'configuration_error',
+  PERMISSION_ERROR = 'permission_error',
+  RATE_LIMIT_ERROR = 'rate_limit_error',
+  UNKNOWN_ERROR = 'unknown_error',
 }
 
 // Agent验证结果
@@ -259,7 +259,7 @@ export interface Agent {
 export interface AgentFactory {
   createAgent(
     agentType: AgentType,
-    config?: Record<string, unknown>,
+    config?: Record<string, unknown>
   ): Promise<Agent>;
   getSupportedTypes(): AgentType[];
 }
@@ -270,13 +270,13 @@ export interface AgentFactory {
 
 // Agent事件类型
 export enum AgentEventType {
-  REGISTERED = "registered",
-  UNREGISTERED = "unregistered",
-  EXECUTION_STARTED = "execution_started",
-  EXECUTION_COMPLETED = "execution_completed",
-  EXECUTION_FAILED = "execution_failed",
-  CONFIGURATION_CHANGED = "configuration_changed",
-  STATUS_CHANGED = "status_changed",
+  REGISTERED = 'registered',
+  UNREGISTERED = 'unregistered',
+  EXECUTION_STARTED = 'execution_started',
+  EXECUTION_COMPLETED = 'execution_completed',
+  EXECUTION_FAILED = 'execution_failed',
+  CONFIGURATION_CHANGED = 'configuration_changed',
+  STATUS_CHANGED = 'status_changed',
 }
 
 // Agent事件
@@ -290,12 +290,12 @@ export interface AgentEvent {
 // Agent工作流配置
 export interface AgentWorkflowConfig {
   agents: AgentType[];
-  executionMode: "sequential" | "parallel" | "mixed";
+  executionMode: 'sequential' | 'parallel' | 'mixed';
   timeout?: number;
   retryPolicy?: {
     maxAttempts: number;
     backoffMultiplier: number;
     baseDelay: number;
   };
-  errorHandling?: "stop" | "continue" | "retry";
+  errorHandling?: 'stop' | 'continue' | 'retry';
 }

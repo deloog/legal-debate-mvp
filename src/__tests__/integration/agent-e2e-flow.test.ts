@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { DocAnalyzerAgent } from "@/lib/agent/doc-analyzer/doc-analyzer-agent";
-import { LawSearcher } from "@/lib/agent/legal-agent/law-searcher";
-import { DocumentGenerator } from "@/lib/agent/generation-agent/document-generator";
-import type { DocumentAnalysisInput } from "@/lib/agent/doc-analyzer/core/types";
-import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+import { DocAnalyzerAgent } from '@/lib/agent/doc-analyzer/doc-analyzer-agent';
+import { LawSearcher } from '@/lib/agent/legal-agent/law-searcher';
+import { DocumentGenerator } from '@/lib/agent/generation-agent/document-generator';
+import type { DocumentAnalysisInput } from '@/lib/agent/doc-analyzer/core/types';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 // 设置Jest超时时间
 jest.setTimeout(60000);
 
 // Mock文件系统
-jest.mock("fs", () => ({
+jest.mock('fs', () => ({
   readFileSync: jest.fn(() => {
     return `民事起诉状
 
@@ -55,7 +55,7 @@ interface E2ETestResult {
 // 测试结果收集
 const testResults: E2ETestResult[] = [];
 
-describe("端到端流程测试 - 6个智能体协同", () => {
+describe('端到端流程测试 - 6个智能体协同', () => {
   let docAnalyzer: DocAnalyzerAgent;
   let lawSearcher: LawSearcher;
   let documentGenerator: DocumentGenerator;
@@ -82,8 +82,8 @@ describe("端到端流程测试 - 6个智能体协同", () => {
     jest.clearAllTimers();
   });
 
-  describe("PlanningAgent任务分解与规划", () => {
-    it("E1.1 应该验证PlanningAgent任务分解", async () => {
+  describe('PlanningAgent任务分解与规划', () => {
+    it('E1.1 应该验证PlanningAgent任务分解', async () => {
       const startTime = Date.now();
       let success = false;
       let accuracy = 0;
@@ -94,10 +94,10 @@ describe("端到端流程测试 - 6个智能体协同", () => {
         // 模拟PlanningAgent任务分解
         const decomposition = {
           tasks: [
-            { id: "T1", name: "文档解析", type: "ANALYSIS" },
-            { id: "T2", name: "法条检索", type: "SEARCH" },
-            { id: "T3", name: "论点生成", type: "GENERATION" },
-            { id: "T4", name: "辩论生成", type: "GENERATION" },
+            { id: 'T1', name: '文档解析', type: 'ANALYSIS' },
+            { id: 'T2', name: '法条检索', type: 'SEARCH' },
+            { id: 'T3', name: '论点生成', type: 'GENERATION' },
+            { id: 'T4', name: '辩论生成', type: 'GENERATION' },
           ],
           estimatedTime: 30000,
         };
@@ -113,14 +113,14 @@ describe("端到端流程测试 - 6个智能体协同", () => {
         expect(decomposition.tasks.length).toBeGreaterThan(0);
       } catch (error) {
         success = false;
-        console.error("任务分解测试失败:", error);
+        console.error('任务分解测试失败:', error);
       }
 
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
       testResults.push({
-        testName: "E1.1 PlanningAgent任务分解",
+        testName: 'E1.1 PlanningAgent任务分解',
         accuracy,
         responseTime,
         aiCost,
@@ -129,15 +129,15 @@ describe("端到端流程测试 - 6个智能体协同", () => {
       });
 
       console.log(
-        `📊 E1.1 任务分解: ${success ? "✅" : "❌"}, ` +
+        `📊 E1.1 任务分解: ${success ? '✅' : '❌'}, ` +
           `准确率: ${(accuracy * 100).toFixed(1)}%, ` +
           `时间: ${responseTime}ms, ` +
           `Token: ${tokenCount}, ` +
-          `成本: ¥${aiCost.toFixed(4)}`,
+          `成本: ¥${aiCost.toFixed(4)}`
       );
     });
 
-    it("E1.2 应该验证PlanningAgent策略规划", async () => {
+    it('E1.2 应该验证PlanningAgent策略规划', async () => {
       const startTime = Date.now();
       let success = false;
       let accuracy = 0;
@@ -147,10 +147,10 @@ describe("端到端流程测试 - 6个智能体协同", () => {
       try {
         // 模拟SWOT分析
         const swotAnalysis = {
-          strengths: ["证据充分", "法律依据明确"],
-          weaknesses: ["时间限制", "资源有限"],
-          opportunities: ["调解可能", "快速结案"],
-          threats: ["证据灭失", "对方抗辩"],
+          strengths: ['证据充分', '法律依据明确'],
+          weaknesses: ['时间限制', '资源有限'],
+          opportunities: ['调解可能', '快速结案'],
+          threats: ['证据灭失', '对方抗辩'],
         };
 
         success = true;
@@ -163,14 +163,14 @@ describe("端到端流程测试 - 6个智能体协同", () => {
         expect(swotAnalysis.strengths).toBeDefined();
       } catch (error) {
         success = false;
-        console.error("策略规划测试失败:", error);
+        console.error('策略规划测试失败:', error);
       }
 
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
       testResults.push({
-        testName: "E1.2 PlanningAgent策略规划",
+        testName: 'E1.2 PlanningAgent策略规划',
         accuracy,
         responseTime,
         aiCost,
@@ -179,17 +179,17 @@ describe("端到端流程测试 - 6个智能体协同", () => {
       });
 
       console.log(
-        `📊 E1.2 策略规划: ${success ? "✅" : "❌"}, ` +
+        `📊 E1.2 策略规划: ${success ? '✅' : '❌'}, ` +
           `准确率: ${(accuracy * 100).toFixed(1)}%, ` +
           `时间: ${responseTime}ms, ` +
           `Token: ${tokenCount}, ` +
-          `成本: ¥${aiCost.toFixed(4)}`,
+          `成本: ¥${aiCost.toFixed(4)}`
       );
     });
   });
 
-  describe("AnalysisAgent文档解析与证据分析", () => {
-    it("E2.1 应该验证AnalysisAgent文档解析", async () => {
+  describe('AnalysisAgent文档解析与证据分析', () => {
+    it('E2.1 应该验证AnalysisAgent文档解析', async () => {
       const startTime = Date.now();
       let success = false;
       let accuracy = 0;
@@ -198,18 +198,18 @@ describe("端到端流程测试 - 6个智能体协同", () => {
 
       try {
         const input: DocumentAnalysisInput = {
-          documentId: "e2e-doc-001",
+          documentId: 'e2e-doc-001',
           content:
-            "民事起诉状\n\n原告：张三\n被告：李四\n\n诉讼请求：请求判令被告支付合同款项100000元。",
-          fileType: "TXT",
-          filePath: "/test/path/test-contract.txt",
+            '民事起诉状\n\n原告：张三\n被告：李四\n\n诉讼请求：请求判令被告支付合同款项100000元。',
+          fileType: 'TXT',
+          filePath: '/test/path/test-contract.txt',
         };
 
         const result = await docAnalyzer.execute({
-          taskType: "document-analysis",
-          task: "解析合同纠纷起诉状",
-          priority: "HIGH",
-          userId: "e2e-test-user",
+          taskType: 'document-analysis',
+          task: '解析合同纠纷起诉状',
+          priority: 'HIGH',
+          userId: 'e2e-test-user',
           data: input,
         } as any);
 
@@ -222,14 +222,14 @@ describe("端到端流程测试 - 6个智能体协同", () => {
         expect(success).toBe(true);
       } catch (error) {
         success = false;
-        console.error("文档解析测试失败:", error);
+        console.error('文档解析测试失败:', error);
       }
 
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
       testResults.push({
-        testName: "E2.1 AnalysisAgent文档解析",
+        testName: 'E2.1 AnalysisAgent文档解析',
         accuracy,
         responseTime,
         aiCost,
@@ -238,17 +238,17 @@ describe("端到端流程测试 - 6个智能体协同", () => {
       });
 
       console.log(
-        `📊 E2.1 文档解析: ${success ? "✅" : "❌"}, ` +
+        `📊 E2.1 文档解析: ${success ? '✅' : '❌'}, ` +
           `准确率: ${(accuracy * 100).toFixed(1)}%, ` +
           `时间: ${responseTime}ms, ` +
           `Token: ${tokenCount}, ` +
-          `成本: ¥${aiCost.toFixed(4)}`,
+          `成本: ¥${aiCost.toFixed(4)}`
       );
     });
   });
 
-  describe("LegalAgent法条检索与论点生成", () => {
-    it("E3.1 应该验证LegalAgent法条检索", async () => {
+  describe('LegalAgent法条检索与论点生成', () => {
+    it('E3.1 应该验证LegalAgent法条检索', async () => {
       const startTime = Date.now();
       let success = false;
       let accuracy = 0;
@@ -257,8 +257,8 @@ describe("端到端流程测试 - 6个智能体协同", () => {
 
       try {
         const result = await lawSearcher.search({
-          keywords: ["合同", "违约", "赔偿"],
-          caseType: "CIVIL",
+          keywords: ['合同', '违约', '赔偿'],
+          caseType: 'CIVIL',
           limit: 10,
         });
 
@@ -272,14 +272,14 @@ describe("端到端流程测试 - 6个智能体协同", () => {
         expect(result.articles).toBeDefined();
       } catch (error) {
         success = false;
-        console.error("法条检索测试失败:", error);
+        console.error('法条检索测试失败:', error);
       }
 
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
       testResults.push({
-        testName: "E3.1 LegalAgent法条检索",
+        testName: 'E3.1 LegalAgent法条检索',
         accuracy,
         responseTime,
         aiCost,
@@ -288,17 +288,17 @@ describe("端到端流程测试 - 6个智能体协同", () => {
       });
 
       console.log(
-        `📊 E3.1 法条检索: ${success ? "✅" : "❌"}, ` +
+        `📊 E3.1 法条检索: ${success ? '✅' : '❌'}, ` +
           `准确率: ${(accuracy * 100).toFixed(1)}%, ` +
           `时间: ${responseTime}ms, ` +
           `Token: ${tokenCount}, ` +
-          `成本: ¥${aiCost.toFixed(4)}`,
+          `成本: ¥${aiCost.toFixed(4)}`
       );
     });
   });
 
-  describe("GenerationAgent辩论内容生成", () => {
-    it("E4.1 应该验证GenerationAgent辩论生成", async () => {
+  describe('GenerationAgent辩论内容生成', () => {
+    it('E4.1 应该验证GenerationAgent辩论生成', async () => {
       const startTime = Date.now();
       let success = false;
       let accuracy = 0;
@@ -307,13 +307,13 @@ describe("端到端流程测试 - 6个智能体协同", () => {
 
       try {
         const debate = await (documentGenerator as any).generate({
-          documentType: "COMPLAINT",
-          template: "STANDARD",
+          documentType: 'COMPLAINT',
+          template: 'STANDARD',
           data: {
-            plaintiff: { name: "张三" },
-            defendant: { name: "李四" },
-            claims: [{ type: "CONTRACT", amount: 100000 }],
-            facts: "双方签订合同，被告未按期付款",
+            plaintiff: { name: '张三' },
+            defendant: { name: '李四' },
+            claims: [{ type: 'CONTRACT', amount: 100000 }],
+            facts: '双方签订合同，被告未按期付款',
           },
         });
 
@@ -327,14 +327,14 @@ describe("端到端流程测试 - 6个智能体协同", () => {
         expect(debate).toBeDefined();
       } catch (error) {
         success = false;
-        console.error("辩论生成测试失败:", error);
+        console.error('辩论生成测试失败:', error);
       }
 
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
       testResults.push({
-        testName: "E4.1 GenerationAgent辩论生成",
+        testName: 'E4.1 GenerationAgent辩论生成',
         accuracy,
         responseTime,
         aiCost,
@@ -343,17 +343,17 @@ describe("端到端流程测试 - 6个智能体协同", () => {
       });
 
       console.log(
-        `📊 E4.1 辩论生成: ${success ? "✅" : "❌"}, ` +
+        `📊 E4.1 辩论生成: ${success ? '✅' : '❌'}, ` +
           `准确率: ${(accuracy * 100).toFixed(1)}%, ` +
           `时间: ${responseTime}ms, ` +
           `Token: ${tokenCount}, ` +
-          `成本: ¥${aiCost.toFixed(4)}`,
+          `成本: ¥${aiCost.toFixed(4)}`
       );
     });
   });
 
-  describe("完整流程验证", () => {
-    it("E5.1 应该验证完整端到端流程", async () => {
+  describe('完整流程验证', () => {
+    it('E5.1 应该验证完整端到端流程', async () => {
       const startTime = Date.now();
       let success = false;
       let accuracy = 0;
@@ -386,14 +386,14 @@ describe("端到端流程测试 - 6个智能体协同", () => {
         expect(accuracy).toBeGreaterThan(0.9);
       } catch (error) {
         success = false;
-        console.error("完整流程测试失败:", error);
+        console.error('完整流程测试失败:', error);
       }
 
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
       testResults.push({
-        testName: "E5.1 完整端到端流程",
+        testName: 'E5.1 完整端到端流程',
         accuracy,
         responseTime,
         aiCost,
@@ -402,22 +402,22 @@ describe("端到端流程测试 - 6个智能体协同", () => {
       });
 
       console.log(
-        `📊 E5.1 完整流程: ${success ? "✅" : "❌"}, ` +
+        `📊 E5.1 完整流程: ${success ? '✅' : '❌'}, ` +
           `准确率: ${(accuracy * 100).toFixed(1)}%, ` +
           `时间: ${responseTime}ms, ` +
           `Token: ${tokenCount}, ` +
-          `成本: ¥${aiCost.toFixed(4)}`,
+          `成本: ¥${aiCost.toFixed(4)}`
       );
     });
   });
 
-  describe("端到端综合评分", () => {
+  describe('端到端综合评分', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    describe("综合评分验证", () => {
-      it("E6.1 应该计算端到端综合评分", () => {
+    describe('综合评分验证', () => {
+      it('E6.1 应该计算端到端综合评分', () => {
         const planningScore = 0.95;
         const analysisScore = 0.95;
         const retrievalScore = 0.9;
@@ -437,30 +437,30 @@ describe("端到端流程测试 - 6个智能体协同", () => {
         expect(overallScore).toBeCloseTo(0.93, 2);
 
         console.log(
-          `📊 E6.1 综合评分: ${(overallScore * 100).toFixed(1)}% (目标: 93分+)`,
+          `📊 E6.1 综合评分: ${(overallScore * 100).toFixed(1)}% (目标: 93分+)`
         );
         console.log(
-          `   - PlanningAgent: ${(planningScore * 100).toFixed(1)}% (权重15%)`,
+          `   - PlanningAgent: ${(planningScore * 100).toFixed(1)}% (权重15%)`
         );
         console.log(
-          `   - AnalysisAgent: ${(analysisScore * 100).toFixed(1)}% (权重25%)`,
+          `   - AnalysisAgent: ${(analysisScore * 100).toFixed(1)}% (权重25%)`
         );
         console.log(
-          `   - LegalAgent: ${(retrievalScore * 100).toFixed(1)}% (权重15%)`,
+          `   - LegalAgent: ${(retrievalScore * 100).toFixed(1)}% (权重15%)`
         );
         console.log(
-          `   - ArgumentGenerator: ${(argumentScore * 100).toFixed(1)}% (权重20%)`,
+          `   - ArgumentGenerator: ${(argumentScore * 100).toFixed(1)}% (权重20%)`
         );
         console.log(
-          `   - GenerationAgent: ${(generationScore * 100).toFixed(1)}% (权重15%)`,
+          `   - GenerationAgent: ${(generationScore * 100).toFixed(1)}% (权重15%)`
         );
         console.log(
-          `   - VerificationAgent: ${(verificationScore * 100).toFixed(1)}% (权重10%)`,
+          `   - VerificationAgent: ${(verificationScore * 100).toFixed(1)}% (权重10%)`
         );
       });
 
-      it("E6.2 应该汇总所有端到端测试结果", () => {
-        const successfulTests = testResults.filter((t) => t.success);
+      it('E6.2 应该汇总所有端到端测试结果', () => {
+        const successfulTests = testResults.filter(t => t.success);
 
         const metrics = {
           planningAccuracy: 0.95,
@@ -475,31 +475,31 @@ describe("端到端流程测试 - 6个智能体协同", () => {
           totalAICost: successfulTests.reduce((sum, t) => sum + t.aiCost, 0),
           totalTokenCount: successfulTests.reduce(
             (sum, t) => sum + t.tokenCount,
-            0,
+            0
           ),
         };
 
-        console.log("\n" + "=".repeat(60));
-        console.log("📊 端到端流程验证报告");
-        console.log("=".repeat(60) + "\n");
+        console.log('\n' + '='.repeat(60));
+        console.log('📊 端到端流程验证报告');
+        console.log('='.repeat(60) + '\n');
 
         console.log(
-          "✅ 成功测试数:",
-          `${successfulTests.length}/${testResults.length}`,
+          '✅ 成功测试数:',
+          `${successfulTests.length}/${testResults.length}`
         );
-        console.log("\n📈 准确性指标:");
+        console.log('\n📈 准确性指标:');
         console.log(`   综合评分: ${(metrics.overallScore * 100).toFixed(1)}%`);
 
-        console.log("\n⏱️  性能指标:");
+        console.log('\n⏱️  性能指标:');
         console.log(
-          `   平均响应时间: ${metrics.averageResponseTime.toFixed(0)}ms`,
+          `   平均响应时间: ${metrics.averageResponseTime.toFixed(0)}ms`
         );
 
-        console.log("\n💰 AI成本:");
+        console.log('\n💰 AI成本:');
         console.log(`   总Token消耗: ${metrics.totalTokenCount}`);
         console.log(`   总AI成本: ¥${metrics.totalAICost.toFixed(4)}`);
 
-        console.log("\n" + "=".repeat(60) + "\n");
+        console.log('\n' + '='.repeat(60) + '\n');
 
         expect(metrics.overallScore).toBeGreaterThanOrEqual(0.93);
         expect(successfulTests.length).toBeGreaterThan(0);

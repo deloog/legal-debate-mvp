@@ -20,4 +20,4 @@ export const DEFAULT_IMPORTANCE = 0.5;
 /**
  * Agent名称常量
  */
-export const AGENT_NAME = "MemoryAgent" as const;
+export const AGENT_NAME = 'MemoryAgent' as const;

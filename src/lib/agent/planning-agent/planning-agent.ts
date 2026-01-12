@@ -1,9 +1,9 @@
 // PlanningAgent主类 - 整合规划层
 
-import { TaskDecomposer } from "./task-decomposer";
-import { StrategyPlanner } from "./strategy-planner";
-import { WorkflowOrchestrator } from "./workflow-orchestrator";
-import { ResourceAllocator } from "./resource-allocator";
+import { TaskDecomposer } from './task-decomposer';
+import { StrategyPlanner } from './strategy-planner';
+import { WorkflowOrchestrator } from './workflow-orchestrator';
+import { ResourceAllocator } from './resource-allocator';
 import {
   type PlanningInput,
   type PlanningOutput,
@@ -12,7 +12,7 @@ import {
   TaskType,
   type PlanningError,
   PlanningErrorType,
-} from "./types";
+} from './types';
 
 // =============================================================================
 // PlanningAgent类
@@ -40,7 +40,7 @@ export class PlanningAgent {
       // 步骤1：任务分解
       const decomposition = await this.taskDecomposer.decompose(
         input.taskType,
-        input.caseInfo,
+        input.caseInfo
       );
 
       // 步骤2：策略规划
@@ -49,13 +49,13 @@ export class PlanningAgent {
       // 步骤3：工作流编排
       const orchestration = await this.workflowOrchestrator.orchestrate(
         decomposition.subTasks,
-        ExecutionMode.SEQUENTIAL,
+        ExecutionMode.SEQUENTIAL
       );
 
       // 步骤4：资源分配
       const allocation = await this.resourceAllocator.allocate(
         decomposition.subTasks,
-        input.constraints?.priorityOverride,
+        input.constraints?.priorityOverride
       );
 
       // 步骤5：生成元数据
@@ -63,7 +63,7 @@ export class PlanningAgent {
         decomposition,
         planning,
         orchestration,
-        allocation,
+        allocation
       );
 
       return {
@@ -79,8 +79,8 @@ export class PlanningAgent {
       }
       throw this.createError(
         PlanningErrorType.INVALID_TASK_TYPE,
-        error instanceof Error ? error.message : "Planning failed",
-        { originalError: error },
+        error instanceof Error ? error.message : 'Planning failed',
+        { originalError: error }
       );
     }
   }
@@ -90,21 +90,21 @@ export class PlanningAgent {
     if (!input.taskType) {
       throw this.createError(
         PlanningErrorType.INVALID_TASK_TYPE,
-        "Task type is required",
+        'Task type is required'
       );
     }
 
     if (!input.userGoal) {
       throw this.createError(
         PlanningErrorType.INVALID_TASK_TYPE,
-        "User goal is required",
+        'User goal is required'
       );
     }
 
     if (!input.caseInfo) {
       throw this.createError(
         PlanningErrorType.INVALID_TASK_TYPE,
-        "Case info is required",
+        'Case info is required'
       );
     }
   }
@@ -114,7 +114,7 @@ export class PlanningAgent {
     decomposition: unknown,
     planning: unknown,
     orchestration: unknown,
-    allocation: unknown,
+    allocation: unknown
   ): PlanningMetadata {
     // 计算总任务数
     const totalTasks = this.extractTotalTasks(decomposition);
@@ -125,7 +125,7 @@ export class PlanningAgent {
     // 确定推荐执行模式
     const recommendedExecutionMode = this.determineRecommendedMode(
       totalTasks,
-      allocation,
+      allocation
     );
 
     // 获取关键路径任务
@@ -149,7 +149,7 @@ export class PlanningAgent {
 
   // 提取总任务数
   private extractTotalTasks(decomposition: unknown): number {
-    if (decomposition && typeof decomposition === "object") {
+    if (decomposition && typeof decomposition === 'object') {
       const decomp = decomposition as Record<string, unknown>;
       const subTasks = decomp.subTasks as unknown[] | undefined;
       return subTasks?.length || 0;
@@ -159,7 +159,7 @@ export class PlanningAgent {
 
   // 提取总预估时间
   private extractTotalEstimatedTime(decomposition: unknown): number {
-    if (decomposition && typeof decomposition === "object") {
+    if (decomposition && typeof decomposition === 'object') {
       const decomp = decomposition as Record<string, unknown>;
       return (decomp.totalTime as number) || 0;
     }
@@ -169,7 +169,7 @@ export class PlanningAgent {
   // 确定推荐执行模式
   private determineRecommendedMode(
     totalTasks: number,
-    allocation: unknown,
+    allocation: unknown
   ): ExecutionMode {
     // 任务多时建议并行
     if (totalTasks > 5) {
@@ -177,7 +177,7 @@ export class PlanningAgent {
     }
 
     // 有负载压力时建议并行
-    if (allocation && typeof allocation === "object") {
+    if (allocation && typeof allocation === 'object') {
       const alloc = allocation as Record<string, unknown>;
       const utilization = alloc.utilizationRate as number;
       if (utilization && utilization > 0.8) {
@@ -191,7 +191,7 @@ export class PlanningAgent {
 
   // 提取关键路径任务
   private extractCriticalPathTasks(decomposition: unknown): string[] {
-    if (decomposition && typeof decomposition === "object") {
+    if (decomposition && typeof decomposition === 'object') {
       const decomp = decomposition as Record<string, unknown>;
       return (decomp.criticalPath as string[]) || [];
     }
@@ -201,31 +201,31 @@ export class PlanningAgent {
   // 识别风险因素
   private identifyRiskFactors(
     planning: unknown,
-    allocation: unknown,
+    allocation: unknown
   ): string[] {
     const riskFactors: string[] = [];
 
     // 分析策略风险
-    if (planning && typeof planning === "object") {
+    if (planning && typeof planning === 'object') {
       const plan = planning as Record<string, unknown>;
       const strategy = plan.strategy as Record<string, unknown> | undefined;
 
-      if (strategy?.riskLevel === "high") {
-        riskFactors.push("策略风险等级高");
+      if (strategy?.riskLevel === 'high') {
+        riskFactors.push('策略风险等级高');
       }
 
       if ((strategy?.confidence as number) < 0.7) {
-        riskFactors.push("策略置信度低");
+        riskFactors.push('策略置信度低');
       }
     }
 
     // 分析资源风险
-    if (allocation && typeof allocation === "object") {
+    if (allocation && typeof allocation === 'object') {
       const alloc = allocation as Record<string, unknown>;
       const utilization = alloc.utilizationRate as number;
 
       if (utilization && utilization > 0.9) {
-        riskFactors.push("资源利用率过高");
+        riskFactors.push('资源利用率过高');
       }
     }
 
@@ -235,12 +235,12 @@ export class PlanningAgent {
   // 计算置信度
   private calculateConfidence(
     planning: unknown,
-    riskFactors: string[],
+    riskFactors: string[]
   ): number {
     let confidence = 0.8;
 
     // 基于策略置信度调整
-    if (planning && typeof planning === "object") {
+    if (planning && typeof planning === 'object') {
       const plan = planning as Record<string, unknown>;
       const strategy = plan.strategy as Record<string, unknown> | undefined;
       const strategyConfidence = (strategy?.confidence as number) || 0.8;
@@ -258,20 +258,20 @@ export class PlanningAgent {
   private generateSelectionReason(planning: unknown): string {
     const reasons: string[] = [];
 
-    if (planning && typeof planning === "object") {
+    if (planning && typeof planning === 'object') {
       const plan = planning as Record<string, unknown>;
       const strategy = plan.strategy as Record<string, unknown> | undefined;
 
       if ((strategy?.feasibilityScore as number) > 0.8) {
-        reasons.push("可行性得分高");
+        reasons.push('可行性得分高');
       }
 
-      if (strategy?.riskLevel === "low") {
-        reasons.push("风险可控");
+      if (strategy?.riskLevel === 'low') {
+        reasons.push('风险可控');
       }
 
       if ((strategy?.confidence as number) > 0.85) {
-        reasons.push("信心度高");
+        reasons.push('信心度高');
       }
 
       if (
@@ -283,12 +283,12 @@ export class PlanningAgent {
         const strengths = swot.strengths as unknown[];
         const weaknesses = swot.weaknesses as unknown[];
         if (strengths.length > weaknesses.length) {
-          reasons.push("优势多于劣势");
+          reasons.push('优势多于劣势');
         }
       }
     }
 
-    return reasons.length > 0 ? reasons.join("，") : "策略符合当前需求";
+    return reasons.length > 0 ? reasons.join('，') : '策略符合当前需求';
   }
 
   // 快速规划（用于简单场景）
@@ -296,7 +296,7 @@ export class PlanningAgent {
     const input: PlanningInput = {
       taskType,
       caseInfo: {},
-      userGoal: "快速处理",
+      userGoal: '快速处理',
     };
 
     return this.plan(input);
@@ -305,10 +305,10 @@ export class PlanningAgent {
   // 判断是否为规划错误
   private isPlanningError(error: unknown): error is PlanningError {
     return (
-      typeof error === "object" &&
+      typeof error === 'object' &&
       error !== null &&
-      "type" in error &&
-      "message" in error
+      'type' in error &&
+      'message' in error
     );
   }
 
@@ -316,7 +316,7 @@ export class PlanningAgent {
   private createError(
     type: PlanningErrorType,
     message: string,
-    details?: unknown,
+    details?: unknown
   ): PlanningError {
     return {
       type,

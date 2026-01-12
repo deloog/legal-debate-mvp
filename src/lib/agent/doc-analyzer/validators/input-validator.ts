@@ -10,15 +10,15 @@
 import type {
   DocumentAnalysisInput,
   DocumentAnalysisOptions,
-} from "../core/types";
-import { ERROR_MESSAGES } from "../core/constants";
+} from '../core/types';
+import { ERROR_MESSAGES } from '../core/constants';
 
-const SUPPORTED_FILE_TYPES = ["PDF", "DOCX", "DOC", "TXT", "IMAGE"] as const;
+const SUPPORTED_FILE_TYPES = ['PDF', 'DOCX', 'DOC', 'TXT', 'IMAGE'] as const;
 
 export class InputValidationError extends Error {
   constructor(field: string, message: string) {
     super(`输入验证失败 [${field}]: ${message}`);
-    this.name = "InputValidationError";
+    this.name = 'InputValidationError';
   }
 }
 
@@ -26,19 +26,19 @@ export class InputValidationError extends Error {
  * 验证文档ID
  */
 function validateDocumentId(documentId: string): void {
-  if (!documentId || typeof documentId !== "string") {
+  if (!documentId || typeof documentId !== 'string') {
     throw new InputValidationError(
-      "documentId",
-      ERROR_MESSAGES.INVALID_DOCUMENT_ID,
+      'documentId',
+      ERROR_MESSAGES.INVALID_DOCUMENT_ID
     );
   }
 
   if (documentId.trim().length === 0) {
-    throw new InputValidationError("documentId", "文档ID不能为空字符串");
+    throw new InputValidationError('documentId', '文档ID不能为空字符串');
   }
 
   if (documentId.length > 100) {
-    throw new InputValidationError("documentId", "文档ID长度不能超过100个字符");
+    throw new InputValidationError('documentId', '文档ID长度不能超过100个字符');
   }
 }
 
@@ -47,15 +47,15 @@ function validateDocumentId(documentId: string): void {
  */
 function validateFilePath(filePath?: string): void {
   // 如果提供了filePath，验证其有效性
-  if (filePath !== undefined && filePath !== null && filePath !== "") {
-    if (typeof filePath !== "string") {
+  if (filePath !== undefined && filePath !== null && filePath !== '') {
+    if (typeof filePath !== 'string') {
       throw new InputValidationError(
-        "filePath",
-        ERROR_MESSAGES.INVALID_FILE_PATH,
+        'filePath',
+        ERROR_MESSAGES.INVALID_FILE_PATH
       );
     }
     if (filePath.trim().length === 0) {
-      throw new InputValidationError("filePath", "文件路径不能为空");
+      throw new InputValidationError('filePath', '文件路径不能为空');
     }
   }
 }
@@ -64,19 +64,19 @@ function validateFilePath(filePath?: string): void {
  * 验证文件类型（可选）
  */
 function validateFileType(fileType?: string): void {
-  if (fileType !== undefined && fileType !== null && fileType !== "") {
-    if (typeof fileType !== "string") {
+  if (fileType !== undefined && fileType !== null && fileType !== '') {
+    if (typeof fileType !== 'string') {
       throw new InputValidationError(
-        "fileType",
-        ERROR_MESSAGES.UNSUPPORTED_FILE_TYPE,
+        'fileType',
+        ERROR_MESSAGES.UNSUPPORTED_FILE_TYPE
       );
     }
     const upperFileType =
       fileType.toUpperCase() as (typeof SUPPORTED_FILE_TYPES)[number];
     if (!SUPPORTED_FILE_TYPES.includes(upperFileType)) {
       throw new InputValidationError(
-        "fileType",
-        ERROR_MESSAGES.UNSUPPORTED_FILE_TYPE,
+        'fileType',
+        ERROR_MESSAGES.UNSUPPORTED_FILE_TYPE
       );
     }
   }
@@ -90,36 +90,36 @@ function validateOptions(options?: DocumentAnalysisOptions): void {
     return;
   }
 
-  if (typeof options !== "object") {
-    throw new InputValidationError("options", "选项必须是对象类型");
+  if (typeof options !== 'object') {
+    throw new InputValidationError('options', '选项必须是对象类型');
   }
 
   if (
     options.extractParties !== undefined &&
-    typeof options.extractParties !== "boolean"
+    typeof options.extractParties !== 'boolean'
   ) {
-    throw new InputValidationError("options.extractParties", "必须是布尔值");
+    throw new InputValidationError('options.extractParties', '必须是布尔值');
   }
 
   if (
     options.extractClaims !== undefined &&
-    typeof options.extractClaims !== "boolean"
+    typeof options.extractClaims !== 'boolean'
   ) {
-    throw new InputValidationError("options.extractClaims", "必须是布尔值");
+    throw new InputValidationError('options.extractClaims', '必须是布尔值');
   }
 
   if (
     options.extractTimeline !== undefined &&
-    typeof options.extractTimeline !== "boolean"
+    typeof options.extractTimeline !== 'boolean'
   ) {
-    throw new InputValidationError("options.extractTimeline", "必须是布尔值");
+    throw new InputValidationError('options.extractTimeline', '必须是布尔值');
   }
 
   if (
     options.generateSummary !== undefined &&
-    typeof options.generateSummary !== "boolean"
+    typeof options.generateSummary !== 'boolean'
   ) {
-    throw new InputValidationError("options.generateSummary", "必须是布尔值");
+    throw new InputValidationError('options.generateSummary', '必须是布尔值');
   }
 }
 
@@ -131,16 +131,16 @@ function validateContent(content?: string): void {
     return;
   }
 
-  if (typeof content !== "string") {
-    throw new InputValidationError("content", "内容必须是字符串类型");
+  if (typeof content !== 'string') {
+    throw new InputValidationError('content', '内容必须是字符串类型');
   }
 
   if (content.trim().length === 0) {
-    throw new InputValidationError("content", ERROR_MESSAGES.EMPTY_DOCUMENT);
+    throw new InputValidationError('content', ERROR_MESSAGES.EMPTY_DOCUMENT);
   }
 
   if (content.length > 500000) {
-    throw new InputValidationError("content", "内容长度不能超过500000个字符");
+    throw new InputValidationError('content', '内容长度不能超过500000个字符');
   }
 }
 
@@ -155,7 +155,7 @@ export function validateInput(input: DocumentAnalysisInput): void {
   const hasContent = input.content && input.content.trim().length > 0;
 
   if (!hasFilePath && !hasContent) {
-    throw new InputValidationError("input", "必须提供filePath或content之一");
+    throw new InputValidationError('input', '必须提供filePath或content之一');
   }
 
   validateFilePath(input.filePath);
@@ -184,7 +184,7 @@ export class InputValidator {
       if (error instanceof InputValidationError) {
         return { valid: false, errors: [error.message] };
       }
-      return { valid: false, errors: ["未知验证错误"] };
+      return { valid: false, errors: ['未知验证错误'] };
     }
   }
 
@@ -193,7 +193,7 @@ export class InputValidator {
    */
   public isFileTypeSupported(fileType: string): boolean {
     return SUPPORTED_FILE_TYPES.includes(
-      fileType.toUpperCase() as (typeof SUPPORTED_FILE_TYPES)[number],
+      fileType.toUpperCase() as (typeof SUPPORTED_FILE_TYPES)[number]
     );
   }
 }

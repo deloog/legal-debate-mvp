@@ -4,7 +4,7 @@
  * 包含所有文档分析相关的常量、配置和映射
  */
 
-import type { DocAnalyzerConfig } from "./types";
+import type { DocAnalyzerConfig } from './types';
 
 // =============================================================================
 // 默认配置
@@ -21,17 +21,17 @@ export const DEFAULT_CONFIG: DocAnalyzerConfig = {
     aiReviewer: {
       enabled: true,
       threshold: 0.8,
-      rules: ["ALL"],
+      rules: ['ALL'],
     },
     ruleReviewer: {
       enabled: true,
       threshold: 0.7,
-      rules: ["ALL"],
+      rules: ['ALL'],
     },
     confidenceReviewer: {
       enabled: true,
       threshold: 0.75,
-      rules: ["CONFIDENCE_THRESHOLD"],
+      rules: ['CONFIDENCE_THRESHOLD'],
     },
   },
 };
@@ -41,28 +41,28 @@ export const DEFAULT_CONFIG: DocAnalyzerConfig = {
 // =============================================================================
 
 export const CLAIM_TYPE_MAP: { [key: string]: string } = {
-  偿还本金: "PAY_PRINCIPAL",
-  支付利息: "PAY_INTEREST",
-  违约金: "PAY_PENALTY",
-  赔偿损失: "PAY_DAMAGES",
-  诉讼费用: "LITIGATION_COST",
-  履行义务: "PERFORMANCE",
-  解除合同: "TERMINATION",
-  payment: "PAY_PRINCIPAL",
-  penalty: "PAY_PENALTY",
-  costs: "LITIGATION_COST",
-  compensation: "PAY_DAMAGES",
+  偿还本金: 'PAY_PRINCIPAL',
+  支付利息: 'PAY_INTEREST',
+  违约金: 'PAY_PENALTY',
+  赔偿损失: 'PAY_DAMAGES',
+  诉讼费用: 'LITIGATION_COST',
+  履行义务: 'PERFORMANCE',
+  解除合同: 'TERMINATION',
+  payment: 'PAY_PRINCIPAL',
+  penalty: 'PAY_PENALTY',
+  costs: 'LITIGATION_COST',
+  compensation: 'PAY_DAMAGES',
 };
 
 export const CLAIM_TYPE_LABELS: { [key: string]: string } = {
-  PAY_PRINCIPAL: "偿还本金",
-  PAY_INTEREST: "支付利息",
-  PAY_PENALTY: "支付违约金",
-  PAY_DAMAGES: "赔偿损失",
-  LITIGATION_COST: "承担诉讼费用",
-  PERFORMANCE: "履行义务",
-  TERMINATION: "解除合同",
-  OTHER: "其他",
+  PAY_PRINCIPAL: '偿还本金',
+  PAY_INTEREST: '支付利息',
+  PAY_PENALTY: '支付违约金',
+  PAY_DAMAGES: '赔偿损失',
+  LITIGATION_COST: '承担诉讼费用',
+  PERFORMANCE: '履行义务',
+  TERMINATION: '解除合同',
+  OTHER: '其他',
 };
 
 // =============================================================================
@@ -155,35 +155,35 @@ export const POST_PROCESSING_RULES = {
   COMPOUND_PATTERNS: [
     {
       regex: /本金.*?(\d+\.?\d*万?)元?.*?及.*?利息/,
-      types: ["PAY_PRINCIPAL", "PAY_INTEREST"],
+      types: ['PAY_PRINCIPAL', 'PAY_INTEREST'],
     },
     {
       regex: /货款.*?(\d+\.?\d*万?)元?.*?及.*?违约金/,
-      types: ["PAY_PRINCIPAL", "PAY_PENALTY"],
+      types: ['PAY_PRINCIPAL', 'PAY_PENALTY'],
     },
     {
       regex: /偿还.*?(\d+\.?\d*万?)元?.*?及.*?利息/,
-      types: ["PAY_PRINCIPAL", "PAY_INTEREST"],
+      types: ['PAY_PRINCIPAL', 'PAY_INTEREST'],
     },
     {
       regex: /本金.*?(\d+\.?\d*万?)元?.*?利息.*?共计/,
-      types: ["PAY_PRINCIPAL", "PAY_INTEREST"],
+      types: ['PAY_PRINCIPAL', 'PAY_INTEREST'],
     },
     {
       regex: /偿还.*?(\d+\.?\d*万?)元?.*?及.*?利息.*?共计/,
-      types: ["PAY_PRINCIPAL", "PAY_INTEREST"],
+      types: ['PAY_PRINCIPAL', 'PAY_INTEREST'],
     },
     {
       regex: /本金.*利息/,
-      types: ["PAY_PRINCIPAL", "PAY_INTEREST"],
+      types: ['PAY_PRINCIPAL', 'PAY_INTEREST'],
     },
     {
       regex: /本金.*违约金/,
-      types: ["PAY_PRINCIPAL", "PAY_PENALTY"],
+      types: ['PAY_PRINCIPAL', 'PAY_PENALTY'],
     },
     {
       regex: /利息.*违约金/,
-      types: ["PAY_INTEREST", "PAY_PENALTY"],
+      types: ['PAY_INTEREST', 'PAY_PENALTY'],
     },
   ],
 };
@@ -193,9 +193,9 @@ export const POST_PROCESSING_RULES = {
 // =============================================================================
 
 export const PARTY_ROLE_INDICATORS = {
-  plaintiff: ["原告", "申请人", "起诉人", "上诉人"],
-  defendant: ["被告", "被申请人", "被起诉人", "被上诉人"],
-  other: ["第三人"],
+  plaintiff: ['原告', '申请人', '起诉人', '上诉人'],
+  defendant: ['被告', '被申请人', '被起诉人', '被上诉人'],
+  other: ['第三人'],
 };
 
 // =============================================================================
@@ -207,7 +207,7 @@ export const QUALITY_VALIDATION_RULES = {
   MIN_CLAIMS: 1,
   MIN_CONFIDENCE: 0.5,
   REQUIRED_CLAIM_TYPES: [],
-  OPTIONAL_CLAIM_TYPES: ["LITIGATION_COST", "PAY_INTEREST", "PAY_PENALTY"],
+  OPTIONAL_CLAIM_TYPES: ['LITIGATION_COST', 'PAY_INTEREST', 'PAY_PENALTY'],
 };
 
 // =============================================================================
@@ -216,37 +216,37 @@ export const QUALITY_VALIDATION_RULES = {
 
 export const TYPICAL_CLAIM_EXAMPLES = [
   {
-    name: "标准借款纠纷",
-    text: "1. 判令被告偿还借款本金100万元；2. 判令被告支付利息（按LPR四倍计算）；3. 诉讼费用由被告承担",
+    name: '标准借款纠纷',
+    text: '1. 判令被告偿还借款本金100万元；2. 判令被告支付利息（按LPR四倍计算）；3. 诉讼费用由被告承担',
     expected: [
       {
-        type: "PAY_PRINCIPAL",
-        content: "偿还借款本金100万元",
+        type: 'PAY_PRINCIPAL',
+        content: '偿还借款本金100万元',
         amount: 1000000,
       },
       {
-        type: "PAY_INTEREST",
-        content: "支付利息（按LPR四倍计算）",
+        type: 'PAY_INTEREST',
+        content: '支付利息（按LPR四倍计算）',
         amount: null,
       },
-      { type: "LITIGATION_COST", content: "诉讼费用由被告承担", amount: null },
+      { type: 'LITIGATION_COST', content: '诉讼费用由被告承担', amount: null },
     ],
   },
   {
-    name: "复合请求拆解",
-    text: "判令被告偿还本金及利息共计150万元",
+    name: '复合请求拆解',
+    text: '判令被告偿还本金及利息共计150万元',
     expected: [
-      { type: "PAY_PRINCIPAL", content: "偿还本金", amount: null },
-      { type: "PAY_INTEREST", content: "支付利息", amount: null },
+      { type: 'PAY_PRINCIPAL', content: '偿还本金', amount: null },
+      { type: 'PAY_INTEREST', content: '支付利息', amount: null },
     ],
   },
   {
-    name: "买卖合同纠纷",
-    text: "1. 判令被告支付货款50万元；2. 判令被告支付违约金5万元；3. 诉讼费用由被告承担",
+    name: '买卖合同纠纷',
+    text: '1. 判令被告支付货款50万元；2. 判令被告支付违约金5万元；3. 诉讼费用由被告承担',
     expected: [
-      { type: "PAY_PRINCIPAL", content: "支付货款50万元", amount: 500000 },
-      { type: "PAY_PENALTY", content: "支付违约金5万元", amount: 50000 },
-      { type: "LITIGATION_COST", content: "诉讼费用由被告承担", amount: null },
+      { type: 'PAY_PRINCIPAL', content: '支付货款50万元', amount: 500000 },
+      { type: 'PAY_PENALTY', content: '支付违约金5万元', amount: 50000 },
+      { type: 'LITIGATION_COST', content: '诉讼费用由被告承担', amount: null },
     ],
   },
 ];
@@ -256,16 +256,16 @@ export const TYPICAL_CLAIM_EXAMPLES = [
 // =============================================================================
 
 export const ERROR_MESSAGES = {
-  INVALID_DOCUMENT_ID: "文档ID不能为空",
-  INVALID_FILE_PATH: "文件路径无效",
-  UNSUPPORTED_FILE_TYPE: "不支持的文档格式",
-  EMPTY_DOCUMENT: "文档内容为空",
-  AI_TIMEOUT: "AI调用超时",
-  AI_FAILURE: "AI服务不可用",
-  OCR_FAILURE: "OCR识别失败",
-  PARSE_ERROR: "文档解析失败",
-  CACHE_ERROR: "缓存操作失败",
-  VALIDATION_ERROR: "数据验证失败",
+  INVALID_DOCUMENT_ID: '文档ID不能为空',
+  INVALID_FILE_PATH: '文件路径无效',
+  UNSUPPORTED_FILE_TYPE: '不支持的文档格式',
+  EMPTY_DOCUMENT: '文档内容为空',
+  AI_TIMEOUT: 'AI调用超时',
+  AI_FAILURE: 'AI服务不可用',
+  OCR_FAILURE: 'OCR识别失败',
+  PARSE_ERROR: '文档解析失败',
+  CACHE_ERROR: '缓存操作失败',
+  VALIDATION_ERROR: '数据验证失败',
 };
 
 // =============================================================================
@@ -273,14 +273,14 @@ export const ERROR_MESSAGES = {
 // =============================================================================
 
 export const LOG_MESSAGES = {
-  ANALYSIS_STARTED: "开始文档分析",
-  ANALYSIS_COMPLETED: "文档分析完成",
-  ANALYSIS_FAILED: "文档分析失败",
-  CACHE_HIT: "缓存命中",
-  CACHE_MISS: "缓存未命中",
-  CHUNK_PROCESSING: "处理文档分块",
-  RULE_CORRECTION: "规则修正",
-  REVIEW_ISSUE: "审查发现问题",
-  RETRY_ATTEMPT: "重试尝试",
-  FALLBACK_MODE: "降级模式",
+  ANALYSIS_STARTED: '开始文档分析',
+  ANALYSIS_COMPLETED: '文档分析完成',
+  ANALYSIS_FAILED: '文档分析失败',
+  CACHE_HIT: '缓存命中',
+  CACHE_MISS: '缓存未命中',
+  CHUNK_PROCESSING: '处理文档分块',
+  RULE_CORRECTION: '规则修正',
+  REVIEW_ISSUE: '审查发现问题',
+  RETRY_ATTEMPT: '重试尝试',
+  FALLBACK_MODE: '降级模式',
 };

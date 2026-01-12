@@ -3,27 +3,27 @@
  * POST /api/admin/qualifications/[id]/review
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { verifyToken, extractTokenFromHeader } from "@/lib/auth/jwt";
-import { prisma } from "@/lib/db/prisma";
-import type { ReviewRequest } from "@/types/qualification";
-import { QualificationStatus } from "@/types/qualification";
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyToken, extractTokenFromHeader } from '@/lib/auth/jwt';
+import { prisma } from '@/lib/db/prisma';
+import type { ReviewRequest } from '@/types/qualification';
+import { QualificationStatus } from '@/types/qualification';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 验证认证
-    const authHeader = request.headers.get("authorization");
+    const authHeader = request.headers.get('authorization');
     if (!authHeader) {
       return NextResponse.json(
         {
           success: false,
-          message: "未授权",
-          error: "缺少认证信息",
+          message: '未授权',
+          error: '缺少认证信息',
         } as const,
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -33,10 +33,10 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: "未授权",
-          error: "无效的认证格式",
+          message: '未授权',
+          error: '无效的认证格式',
         } as const,
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -45,24 +45,24 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: "未授权",
-          error: "无效的token",
+          message: '未授权',
+          error: '无效的token',
         } as const,
-        { status: 401 },
+        { status: 401 }
       );
     }
 
     const { role } = tokenResult.payload;
 
     // 验证管理员权限
-    if (role !== "ADMIN" && role !== "SUPER_ADMIN") {
+    if (role !== 'ADMIN' && role !== 'SUPER_ADMIN') {
       return NextResponse.json(
         {
           success: false,
-          message: "权限不足",
-          error: "需要管理员权限",
+          message: '权限不足',
+          error: '需要管理员权限',
         } as const,
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -71,14 +71,14 @@ export async function POST(
     const { approved, reviewNotes } = body;
 
     // 验证请求数据
-    if (typeof approved !== "boolean" || !reviewNotes) {
+    if (typeof approved !== 'boolean' || !reviewNotes) {
       return NextResponse.json(
         {
           success: false,
-          message: "参数错误",
-          error: "approved和reviewNotes为必填项",
+          message: '参数错误',
+          error: 'approved和reviewNotes为必填项',
         } as const,
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -101,13 +101,13 @@ export async function POST(
     if (approved) {
       await prisma.user.update({
         where: { id: qualification.userId },
-        data: { role: "LAWYER" },
+        data: { role: 'LAWYER' },
       });
     }
 
     return NextResponse.json({
       success: true,
-      message: approved ? "审核通过" : "审核拒绝",
+      message: approved ? '审核通过' : '审核拒绝',
       data: {
         qualification: {
           id: qualification.id,
@@ -122,14 +122,14 @@ export async function POST(
       },
     } as const);
   } catch (error) {
-    console.error("审核律师资格失败:", error);
+    console.error('审核律师资格失败:', error);
     return NextResponse.json(
       {
         success: false,
-        message: "服务器错误",
-        error: error instanceof Error ? error.message : "未知错误",
+        message: '服务器错误',
+        error: error instanceof Error ? error.message : '未知错误',
       } as const,
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

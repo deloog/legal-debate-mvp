@@ -1,8 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.cache = exports.cacheManager = exports.CacheManager = void 0;
-const redis_1 = require("./redis");
-const types_1 = require("./types");
+const redis_1 = require('./redis');
+const types_1 = require('./types');
 // JSON序列化器
 const jsonSerializer = {
   serialize(value) {
@@ -10,7 +10,7 @@ const jsonSerializer = {
       return JSON.stringify(value);
     } catch (error) {
       throw new Error(
-        `序列化失败: ${error instanceof Error ? error.message : String(error)}`,
+        `序列化失败: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   },
@@ -19,7 +19,7 @@ const jsonSerializer = {
       return JSON.parse(value);
     } catch (error) {
       throw new Error(
-        `反序列化失败: ${error instanceof Error ? error.message : String(error)}`,
+        `反序列化失败: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   },
@@ -52,11 +52,11 @@ class CacheManager {
       parts.push(namespace);
     }
     parts.push(key);
-    const fullKey = parts.join(":");
+    const fullKey = parts.join(':');
     // 验证键长度
     if (fullKey.length > this.config.maxKeyLength) {
       throw new Error(
-        `缓存键长度超过限制: ${fullKey.length} > ${this.config.maxKeyLength}`,
+        `缓存键长度超过限制: ${fullKey.length} > ${this.config.maxKeyLength}`
       );
     }
     return fullKey;
@@ -64,11 +64,11 @@ class CacheManager {
   // 触发事件
   emitEvent(event) {
     if (!this.config.enableMetrics) return;
-    this.eventListeners.forEach((listener) => {
+    this.eventListeners.forEach(listener => {
       try {
         listener(event);
       } catch (error) {
-        console.error("缓存事件监听器执行失败:", error);
+        console.error('缓存事件监听器执行失败:', error);
       }
     });
   }
@@ -77,16 +77,16 @@ class CacheManager {
     if (!this.config.enableMetrics) return;
     this.stats.totalRequests++;
     switch (type) {
-      case "hit":
+      case 'hit':
         this.stats.hits++;
         break;
-      case "miss":
+      case 'miss':
         this.stats.misses++;
         break;
-      case "set":
+      case 'set':
         this.stats.sets++;
         break;
-      case "delete":
+      case 'delete':
         this.stats.deletes++;
         break;
     }
@@ -117,9 +117,9 @@ class CacheManager {
       const startTime = Date.now();
       const value = await redis_1.redis.get(fullKey);
       if (value === null) {
-        this.updateStats("miss");
+        this.updateStats('miss');
         this.emitEvent({
-          type: "miss",
+          type: 'miss',
           key,
           namespace: options?.namespace,
           timestamp: new Date(),
@@ -127,9 +127,9 @@ class CacheManager {
         });
         return null;
       }
-      this.updateStats("hit");
+      this.updateStats('hit');
       this.emitEvent({
-        type: "hit",
+        type: 'hit',
         key,
         namespace: options?.namespace,
         timestamp: new Date(),
@@ -139,7 +139,7 @@ class CacheManager {
     } catch (error) {
       console.error(`获取缓存失败 [${key}]:`, error);
       this.emitEvent({
-        type: "miss",
+        type: 'miss',
         key,
         namespace: options?.namespace,
         timestamp: new Date(),
@@ -158,16 +158,16 @@ class CacheManager {
       // 检查值大小
       if (serializedValue.length > this.config.maxValueSize) {
         throw new Error(
-          `缓存值大小超过限制: ${serializedValue.length} > ${this.config.maxValueSize}`,
+          `缓存值大小超过限制: ${serializedValue.length} > ${this.config.maxValueSize}`
         );
       }
       const ttl = options?.ttl ?? this.config.defaultTtl;
       const result = await redis_1.redis.setex(fullKey, ttl, serializedValue);
-      const success = result === "OK";
+      const success = result === 'OK';
       if (success) {
-        this.updateStats("set");
+        this.updateStats('set');
         this.emitEvent({
-          type: "set",
+          type: 'set',
           key,
           namespace: options?.namespace,
           timestamp: new Date(),
@@ -187,9 +187,9 @@ class CacheManager {
       const result = await redis_1.redis.del(fullKey);
       const success = result > 0;
       if (success) {
-        this.updateStats("delete");
+        this.updateStats('delete');
         this.emitEvent({
-          type: "delete",
+          type: 'delete',
           key,
           namespace: options?.namespace,
           timestamp: new Date(),
@@ -235,9 +235,7 @@ class CacheManager {
   }
   // 批量获取
   async mget(keys, options) {
-    const fullKeys = keys.map((key) =>
-      this.generateKey(key, options?.namespace),
-    );
+    const fullKeys = keys.map(key => this.generateKey(key, options?.namespace));
     try {
       const values = await redis_1.redis.mget(...fullKeys);
       const result = new Map();
@@ -256,8 +254,8 @@ class CacheManager {
       });
       return result;
     } catch (error) {
-      console.error("批量获取缓存失败:", error);
-      return new Map(keys.map((key) => [key, null]));
+      console.error('批量获取缓存失败:', error);
+      return new Map(keys.map(key => [key, null]));
     }
   }
   // 批量设置
@@ -299,14 +297,12 @@ class CacheManager {
   }
   // 批量删除
   async mdelete(keys, options) {
-    const fullKeys = keys.map((key) =>
-      this.generateKey(key, options?.namespace),
-    );
+    const fullKeys = keys.map(key => this.generateKey(key, options?.namespace));
     try {
       const result = await redis_1.redis.del(...fullKeys);
       return result;
     } catch (error) {
-      console.error("批量删除缓存失败:", error);
+      console.error('批量删除缓存失败:', error);
       return 0;
     }
   }
@@ -394,14 +390,13 @@ exports.cache = {
   mget: (keys, options) => exports.cacheManager.mget(keys, options),
   mset: (items, options) => exports.cacheManager.mset(items, options),
   mdelete: (keys, options) => exports.cacheManager.mdelete(keys, options),
-  clearNamespace: (namespace) => exports.cacheManager.clearNamespace(namespace),
+  clearNamespace: namespace => exports.cacheManager.clearNamespace(namespace),
   getOrSet: (key, valueProvider, options) =>
     exports.cacheManager.getOrSet(key, valueProvider, options),
   getStats: () => exports.cacheManager.getStats(),
   resetStats: () => exports.cacheManager.resetStats(),
-  addEventListener: (listener) =>
-    exports.cacheManager.addEventListener(listener),
-  removeEventListener: (listener) =>
+  addEventListener: listener => exports.cacheManager.addEventListener(listener),
+  removeEventListener: listener =>
     exports.cacheManager.removeEventListener(listener),
 };
 exports.default = exports.cacheManager;

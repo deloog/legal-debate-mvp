@@ -8,12 +8,12 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from '@prisma/client';
 import type {
   LogActionResult,
   VerifyOutputResult,
   HandleErrorResult,
-} from "./types";
+} from './types';
 
 /**
  * log_action - 行动记录
@@ -27,25 +27,25 @@ export async function log_action(
     agentName?: string;
     input?: unknown;
     output?: unknown;
-    status: "success" | "failure" | "partial";
+    status: 'success' | 'failure' | 'partial';
     executionTime?: number;
     metadata?: Record<string, unknown>;
-  },
+  }
 ): Promise<LogActionResult> {
-  const statusMap: Record<string, "COMPLETED" | "FAILED" | "RUNNING"> = {
-    success: "COMPLETED",
-    failure: "FAILED",
-    partial: "RUNNING",
+  const statusMap: Record<string, 'COMPLETED' | 'FAILED' | 'RUNNING'> = {
+    success: 'COMPLETED',
+    failure: 'FAILED',
+    partial: 'RUNNING',
   };
 
-  const statusValue = statusMap[params.status] || "COMPLETED";
+  const statusValue = statusMap[params.status] || 'COMPLETED';
 
   const record = await prisma.agentAction.create({
     data: {
       actionType: params.actionType as any,
       actionName: params.actionName,
-      agentName: params.agentName || "CoreAction",
-      actionLayer: "CORE" as any,
+      agentName: params.agentName || 'CoreAction',
+      actionLayer: 'CORE' as any,
       parameters: (params.input ?? null) as any,
       result: (params.output ?? null) as any,
       status: statusValue as any,
@@ -66,7 +66,7 @@ export async function log_action(
  */
 export async function verify_output(
   output: unknown,
-  validationCriteria: unknown,
+  validationCriteria: unknown
 ): Promise<VerifyOutputResult> {
   const issues: Array<{
     type: string;
@@ -76,25 +76,25 @@ export async function verify_output(
 
   if (output === null || output === undefined) {
     issues.push({
-      type: "MISSING_OUTPUT",
-      message: "Output is null or undefined",
-      severity: "error",
+      type: 'MISSING_OUTPUT',
+      message: 'Output is null or undefined',
+      severity: 'error',
     });
   }
 
   if (typeof output !== typeof validationCriteria) {
     issues.push({
-      type: "TYPE_MISMATCH",
-      message: "Output type mismatch",
-      severity: "warning",
+      type: 'TYPE_MISMATCH',
+      message: 'Output type mismatch',
+      severity: 'warning',
     });
   }
 
   if (
-    typeof output === "object" &&
+    typeof output === 'object' &&
     output !== null &&
     !Array.isArray(output) &&
-    typeof validationCriteria === "object" &&
+    typeof validationCriteria === 'object' &&
     validationCriteria !== null &&
     !Array.isArray(validationCriteria)
   ) {
@@ -103,29 +103,29 @@ export async function verify_output(
 
     if (
       criteria.minArgumentLength !== undefined &&
-      typeof criteria.minArgumentLength === "number"
+      typeof criteria.minArgumentLength === 'number'
     ) {
       const argLength =
         out.argument !== undefined ? String(out.argument).length : 0;
       if (argLength < criteria.minArgumentLength) {
         issues.push({
-          type: "LENGTH_MISMATCH",
+          type: 'LENGTH_MISMATCH',
           message: `Argument length ${argLength} is less than minimum ${criteria.minArgumentLength}`,
-          severity: "error",
+          severity: 'error',
         });
       }
     }
 
     if (
       criteria.minSupportingPoints !== undefined &&
-      typeof criteria.minSupportingPoints === "number"
+      typeof criteria.minSupportingPoints === 'number'
     ) {
       const points = out.points !== undefined ? Number(out.points) : 0;
       if (points < criteria.minSupportingPoints) {
         issues.push({
-          type: "INSUFFICIENT_POINTS",
+          type: 'INSUFFICIENT_POINTS',
           message: `Supporting points ${points} is less than minimum ${criteria.minSupportingPoints}`,
-          severity: "warning",
+          severity: 'warning',
         });
       }
     }
@@ -134,7 +134,7 @@ export async function verify_output(
   const score = issues.length === 0 ? 1 : Math.max(0, 1 - issues.length * 0.1);
 
   return {
-    valid: issues.filter((i) => i.severity === "error").length === 0,
+    valid: issues.filter(i => i.severity === 'error').length === 0,
     score,
     issues,
     passed: score >= 0.9,
@@ -153,32 +153,32 @@ export async function handle_error(
     agentName?: string;
     actionName?: string;
     metadata?: Record<string, unknown>;
-  },
+  }
 ): Promise<HandleErrorResult> {
   const errorTypeMap: Record<string, string> = {
-    Error: "UNKNOWN_ERROR",
-    TypeError: "UNKNOWN_ERROR",
-    ReferenceError: "UNKNOWN_ERROR",
-    RangeError: "UNKNOWN_ERROR",
-    SyntaxError: "UNKNOWN_ERROR",
-    NetworkError: "NETWORK_ERROR",
-    TimeoutError: "NETWORK_TIMEOUT",
-    ValidationError: "VALIDATION_ERROR",
-    AIError: "AI_SERVICE_ERROR",
-    DatabaseError: "DATABASE_ERROR",
+    Error: 'UNKNOWN_ERROR',
+    TypeError: 'UNKNOWN_ERROR',
+    ReferenceError: 'UNKNOWN_ERROR',
+    RangeError: 'UNKNOWN_ERROR',
+    SyntaxError: 'UNKNOWN_ERROR',
+    NetworkError: 'NETWORK_ERROR',
+    TimeoutError: 'NETWORK_TIMEOUT',
+    ValidationError: 'VALIDATION_ERROR',
+    AIError: 'AI_SERVICE_ERROR',
+    DatabaseError: 'DATABASE_ERROR',
   };
 
-  const errorType = errorTypeMap[params.error.name] || "UNKNOWN_ERROR";
+  const errorType = errorTypeMap[params.error.name] || 'UNKNOWN_ERROR';
 
   const errorLog = await prisma.errorLog.create({
     data: {
       errorType: errorType as any,
       errorCode: params.error.name,
       errorMessage: params.error.message,
-      attemptedAction: params.actionName || "unknown",
+      attemptedAction: params.actionName || 'unknown',
       context: params.context as any,
-      stackTrace: params.error.stack || "",
-      severity: "MEDIUM" as any,
+      stackTrace: params.error.stack || '',
+      severity: 'MEDIUM' as any,
       metadata: params.metadata as any,
     },
   });
@@ -186,8 +186,8 @@ export async function handle_error(
   return {
     handled: true,
     errorId: errorLog.id,
-    actionTaken: "logged",
+    actionTaken: 'logged',
     recovered: false,
-    retryable: params.error.name !== "ValidationError",
+    retryable: params.error.name !== 'ValidationError',
   };
 }

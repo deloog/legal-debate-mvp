@@ -1,11 +1,11 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.ServiceContainer = void 0;
 exports.getDocumentParser = getDocumentParser;
 exports.getAmountExtractor = getAmountExtractor;
 exports.getConfig = getConfig;
-const document_parser_1 = require("../../ai/document-parser");
-const amount_extractor_precision_1 = require("../../extraction/amount-extractor-precision");
+const document_parser_1 = require('../../ai/document-parser');
+const amount_extractor_precision_1 = require('../../extraction/amount-extractor-precision');
 class ServiceContainer {
   constructor() {
     this.services = new Map();
@@ -48,25 +48,25 @@ class ServiceContainer {
   static registerDefaults() {
     const container = ServiceContainer.getInstance();
     // 注册文档解析器
-    container.register("documentParser", () => {
+    container.register('documentParser', () => {
       return new document_parser_1.DocumentParser();
     });
     // 注册金额提取器
-    container.register("amountExtractor", () => {
+    container.register('amountExtractor', () => {
       return new amount_extractor_precision_1.PrecisionAmountExtractor();
     });
     // 注册配置
-    container.register("config", () => ({
+    container.register('config', () => ({
       maxConcurrentDocuments: 3,
       defaultTimeout: 30000,
-      enableDebugLogging: process.env.NODE_ENV !== "production",
+      enableDebugLogging: process.env.NODE_ENV !== 'production',
       security: {
         maxFileSize: 50 * 1024 * 1024, // 50MB
         allowedPaths: [
           process.cwd(),
-          process.cwd() + "/temp",
-          process.cwd() + "/uploads",
-          process.cwd() + "/test-data",
+          process.cwd() + '/temp',
+          process.cwd() + '/uploads',
+          process.cwd() + '/test-data',
         ],
       },
     }));
@@ -75,13 +75,13 @@ class ServiceContainer {
 exports.ServiceContainer = ServiceContainer;
 // 便捷的服务访问函数
 function getDocumentParser() {
-  return ServiceContainer.getInstance().get("documentParser");
+  return ServiceContainer.getInstance().get('documentParser');
 }
 function getAmountExtractor() {
-  return ServiceContainer.getInstance().get("amountExtractor");
+  return ServiceContainer.getInstance().get('amountExtractor');
 }
 function getConfig() {
-  return ServiceContainer.getInstance().get("config");
+  return ServiceContainer.getInstance().get('config');
 }
 // 初始化默认服务
 ServiceContainer.registerDefaults();

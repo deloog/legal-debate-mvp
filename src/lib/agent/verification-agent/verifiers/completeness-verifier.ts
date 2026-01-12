@@ -8,11 +8,11 @@ import {
   IssueSeverity,
   VerificationIssue,
   IssueCategory,
-} from "../types";
-import { RequiredFieldsChecker } from "./required-fields-checker";
-import { BusinessRulesChecker } from "./business-rules-checker";
-import { FormatChecker } from "./format-checker";
-import { QualityThresholdChecker } from "./quality-threshold-checker";
+} from '../types';
+import { RequiredFieldsChecker } from './required-fields-checker';
+import { BusinessRulesChecker } from './business-rules-checker';
+import { FormatChecker } from './format-checker';
+import { QualityThresholdChecker } from './quality-threshold-checker';
 
 /**
  * 待验证数据接口
@@ -93,7 +93,7 @@ export class CompletenessVerifier {
       requiredFields,
       businessRules,
       formatCheck,
-      qualityCheck,
+      qualityCheck
     );
 
     const passed =
@@ -124,7 +124,7 @@ export class CompletenessVerifier {
     requiredFields: { score: number },
     businessRules: { passed: boolean },
     formatCheck: { passed: boolean },
-    qualityCheck: { score: number },
+    qualityCheck: { score: number }
   ): number {
     let score = 0;
 
@@ -158,7 +158,7 @@ export class CompletenessVerifier {
         category: IssueCategory.COMPLETENESS,
         field: field,
         message: `缺少必填字段: ${field}`,
-        detectedBy: "completeness",
+        detectedBy: 'completeness',
       });
     }
 
@@ -170,7 +170,7 @@ export class CompletenessVerifier {
         severity: IssueSeverity.HIGH,
         category: IssueCategory.COMPLETENESS,
         message: rule,
-        detectedBy: "completeness",
+        detectedBy: 'completeness',
       });
     }
 
@@ -184,13 +184,13 @@ export class CompletenessVerifier {
         field: error.field,
         message: `${error.field}格式错误: ${error.error}`,
         suggestion: `期望格式: ${error.expected}`,
-        detectedBy: "completeness",
+        detectedBy: 'completeness',
       });
     }
 
     // 质量阈值问题
     for (const [name, threshold] of Object.entries(
-      result.details.qualityCheck.thresholds,
+      result.details.qualityCheck.thresholds
     )) {
       if (!threshold.passed) {
         issues.push({
@@ -199,7 +199,7 @@ export class CompletenessVerifier {
           severity: IssueSeverity.MEDIUM,
           category: IssueCategory.QUALITY,
           message: `${name}质量低于阈值: 实际${threshold.actual}, 期望${threshold.threshold}`,
-          detectedBy: "completeness",
+          detectedBy: 'completeness',
         });
       }
     }

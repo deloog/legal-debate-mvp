@@ -3,8 +3,8 @@
  * 测试SSE连接、重连机制、事件处理等功能
  */
 
-import { SSEClient, SSEClientConfig } from "@/lib/debate/stream/sse-client";
-import { SSEConnectionState } from "@/lib/debate/stream/types";
+import { SSEClient, SSEClientConfig } from '@/lib/debate/stream/sse-client';
+import { SSEConnectionState } from '@/lib/debate/stream/types';
 
 // Mock EventSource
 class MockEventSource {
@@ -13,7 +13,7 @@ class MockEventSource {
   static readonly CLOSED = 2;
 
   readyState = 0;
-  url = "";
+  url = '';
   onopen: ((this: MockEventSource, ev: Event) => unknown) | null = null;
   onmessage: ((this: MockEventSource, ev: MessageEvent) => unknown) | null =
     null;
@@ -31,7 +31,7 @@ class MockEventSource {
   triggerOpen(): void {
     this.readyState = 1; // OPEN
     if (this.onopen) {
-      this.onopen(new Event("open"));
+      this.onopen(new Event('open'));
     }
   }
 
@@ -41,7 +41,7 @@ class MockEventSource {
 
   addEventListener(
     type: string,
-    listener: (ev: MessageEvent) => unknown,
+    listener: (ev: MessageEvent) => unknown
   ): void {
     if (!this.listeners.has(type)) {
       this.listeners.set(type, []);
@@ -57,7 +57,7 @@ class MockEventSource {
     });
     const handlers = this.listeners.get(type);
     if (handlers) {
-      handlers.forEach((handler) => handler(event));
+      handlers.forEach(handler => handler(event));
     }
   }
 
@@ -67,7 +67,7 @@ class MockEventSource {
       if (error instanceof Event) {
         this.onerror(error);
       } else {
-        this.onerror(new Event("error"));
+        this.onerror(new Event('error'));
       }
     }
   }
@@ -78,12 +78,12 @@ class MockEventSource {
 (global as typeof globalThis & { EventSource?: unknown }).EventSource =
   MockEventSource;
 
-describe("SSEClient", () => {
+describe('SSEClient', () => {
   let client: SSEClient;
   const config: SSEClientConfig = {
-    url: "http://localhost:3000/api/stream",
-    debateId: "debate-123",
-    roundId: "round-456",
+    url: 'http://localhost:3000/api/stream',
+    debateId: 'debate-123',
+    roundId: 'round-456',
     enableLogging: false,
     maxRetryAttempts: 3,
   };
@@ -100,23 +100,23 @@ describe("SSEClient", () => {
     jest.useRealTimers();
   });
 
-  describe("连接管理", () => {
-    it("应该成功连接到SSE端点", () => {
+  describe('连接管理', () => {
+    it('应该成功连接到SSE端点', () => {
       client = new SSEClient(config);
       client.connect();
 
       // 手动触发连接打开
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
       expect(client.getState()).toBe(SSEConnectionState.CONNECTED);
     });
 
-    it("应该避免重复连接", () => {
+    it('应该避免重复连接', () => {
       client = new SSEClient(config);
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
       const stateBefore = client.getState();
@@ -127,11 +127,11 @@ describe("SSEClient", () => {
       expect(stateAfter).toBe(SSEConnectionState.CONNECTED);
     });
 
-    it("应该正确断开连接", () => {
+    it('应该正确断开连接', () => {
       client = new SSEClient(config);
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
       client.disconnect();
@@ -140,8 +140,8 @@ describe("SSEClient", () => {
     });
   });
 
-  describe("事件处理", () => {
-    it("应该接收连接事件", () => {
+  describe('事件处理', () => {
+    it('应该接收连接事件', () => {
       const onConnectedMock = jest.fn();
       client = new SSEClient({
         ...config,
@@ -149,20 +149,20 @@ describe("SSEClient", () => {
       });
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
-      eventSource.emitEvent("connected", {
-        debateId: "debate-123",
-        roundId: "round-456",
+      eventSource.emitEvent('connected', {
+        debateId: 'debate-123',
+        roundId: 'round-456',
         timestamp: new Date().toISOString(),
-        sessionId: "session-001",
+        sessionId: 'session-001',
       });
 
       expect(onConnectedMock).toHaveBeenCalled();
-      expect(onConnectedMock.mock.calls[0][0].debateId).toBe("debate-123");
+      expect(onConnectedMock.mock.calls[0][0].debateId).toBe('debate-123');
     });
 
-    it("应该接收轮次开始事件", () => {
+    it('应该接收轮次开始事件', () => {
       const onRoundStartMock = jest.fn();
       client = new SSEClient({
         ...config,
@@ -170,12 +170,12 @@ describe("SSEClient", () => {
       });
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
-      eventSource.emitEvent("round-start", {
-        debateId: "debate-123",
-        roundId: "round-456",
+      eventSource.emitEvent('round-start', {
+        debateId: 'debate-123',
+        roundId: 'round-456',
         roundNumber: 1,
         timestamp: new Date().toISOString(),
       });
@@ -183,7 +183,7 @@ describe("SSEClient", () => {
       expect(onRoundStartMock).toHaveBeenCalled();
     });
 
-    it("应该接收论点事件", () => {
+    it('应该接收论点事件', () => {
       const onArgumentMock = jest.fn();
       client = new SSEClient({
         ...config,
@@ -191,23 +191,23 @@ describe("SSEClient", () => {
       });
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
-      eventSource.emitEvent("argument", {
-        argumentId: "arg-1",
-        roundId: "round-456",
-        side: "PLAINTIFF",
-        content: "测试论点",
-        type: "MAIN_POINT",
+      eventSource.emitEvent('argument', {
+        argumentId: 'arg-1',
+        roundId: 'round-456',
+        side: 'PLAINTIFF',
+        content: '测试论点',
+        type: 'MAIN_POINT',
         timestamp: new Date().toISOString(),
       });
 
       expect(onArgumentMock).toHaveBeenCalled();
-      expect(onArgumentMock.mock.calls[0][0].content).toBe("测试论点");
+      expect(onArgumentMock.mock.calls[0][0].content).toBe('测试论点');
     });
 
-    it("应该接收进度事件", () => {
+    it('应该接收进度事件', () => {
       const onProgressMock = jest.fn();
       client = new SSEClient({
         ...config,
@@ -215,14 +215,14 @@ describe("SSEClient", () => {
       });
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
-      eventSource.emitEvent("progress", {
-        debateId: "debate-123",
-        roundId: "round-456",
+      eventSource.emitEvent('progress', {
+        debateId: 'debate-123',
+        roundId: 'round-456',
         progress: 50,
-        currentStep: "生成论点",
+        currentStep: '生成论点',
         totalSteps: 4,
         timestamp: new Date().toISOString(),
       });
@@ -231,7 +231,7 @@ describe("SSEClient", () => {
       expect(onProgressMock.mock.calls[0][0].progress).toBe(50);
     });
 
-    it("应该接收完成事件", () => {
+    it('应该接收完成事件', () => {
       const onCompletedMock = jest.fn();
       client = new SSEClient({
         ...config,
@@ -239,12 +239,12 @@ describe("SSEClient", () => {
       });
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
-      eventSource.emitEvent("completed", {
-        debateId: "debate-123",
-        roundId: "round-456",
+      eventSource.emitEvent('completed', {
+        debateId: 'debate-123',
+        roundId: 'round-456',
         totalArguments: 4,
         plaintiffArguments: 2,
         defendantArguments: 2,
@@ -255,7 +255,7 @@ describe("SSEClient", () => {
       expect(onCompletedMock).toHaveBeenCalled();
     });
 
-    it("应该接收错误事件", () => {
+    it('应该接收错误事件', () => {
       const onErrorMock = jest.fn();
       client = new SSEClient({
         ...config,
@@ -263,21 +263,21 @@ describe("SSEClient", () => {
       });
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
-      eventSource.emitEvent("error", {
-        debateId: "debate-123",
-        roundId: "round-456",
-        code: "AI_ERROR",
-        message: "AI服务不可用",
+      eventSource.emitEvent('error', {
+        debateId: 'debate-123',
+        roundId: 'round-456',
+        code: 'AI_ERROR',
+        message: 'AI服务不可用',
         timestamp: new Date().toISOString(),
       });
 
       expect(onErrorMock).toHaveBeenCalled();
     });
 
-    it("应该接收心跳事件", () => {
+    it('应该接收心跳事件', () => {
       const onPingMock = jest.fn();
       client = new SSEClient({
         ...config,
@@ -285,10 +285,10 @@ describe("SSEClient", () => {
       });
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
-      eventSource.emitEvent("ping", {
+      eventSource.emitEvent('ping', {
         timestamp: new Date().toISOString(),
         serverTime: new Date().toISOString(),
       });
@@ -296,7 +296,7 @@ describe("SSEClient", () => {
       expect(onPingMock).toHaveBeenCalled();
     });
 
-    it("应该接收断开连接事件", () => {
+    it('应该接收断开连接事件', () => {
       const onDisconnectedMock = jest.fn();
       client = new SSEClient({
         ...config,
@@ -304,11 +304,11 @@ describe("SSEClient", () => {
       });
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
-      eventSource.emitEvent("disconnected", {
-        reason: "正常关闭",
+      eventSource.emitEvent('disconnected', {
+        reason: '正常关闭',
         code: 1000,
         timestamp: new Date().toISOString(),
       });
@@ -317,46 +317,46 @@ describe("SSEClient", () => {
     });
   });
 
-  describe("事件监听器管理", () => {
-    it("应该能够注册事件处理器", () => {
+  describe('事件监听器管理', () => {
+    it('应该能够注册事件处理器', () => {
       const handler = jest.fn();
       client = new SSEClient(config);
       client.connect();
 
-      client.on("argument", handler);
+      client.on('argument', handler);
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       jest.advanceTimersByTime(100);
 
-      eventSource.emitEvent("argument", {
-        argumentId: "arg-1",
-        roundId: "round-456",
-        side: "PLAINTIFF",
-        content: "测试论点",
-        type: "MAIN_POINT",
+      eventSource.emitEvent('argument', {
+        argumentId: 'arg-1',
+        roundId: 'round-456',
+        side: 'PLAINTIFF',
+        content: '测试论点',
+        type: 'MAIN_POINT',
         timestamp: new Date().toISOString(),
       });
 
       expect(handler).toHaveBeenCalled();
     });
 
-    it("应该能够移除事件处理器", () => {
+    it('应该能够移除事件处理器', () => {
       const handler = jest.fn();
       client = new SSEClient(config);
       client.connect();
 
-      client.on("argument", handler);
-      client.off("argument", handler);
+      client.on('argument', handler);
+      client.off('argument', handler);
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       jest.advanceTimersByTime(100);
 
-      eventSource.emitEvent("argument", {
-        argumentId: "arg-1",
-        roundId: "round-456",
-        side: "PLAINTIFF",
-        content: "测试论点",
-        type: "MAIN_POINT",
+      eventSource.emitEvent('argument', {
+        argumentId: 'arg-1',
+        roundId: 'round-456',
+        side: 'PLAINTIFF',
+        content: '测试论点',
+        type: 'MAIN_POINT',
         timestamp: new Date().toISOString(),
       });
 
@@ -364,8 +364,8 @@ describe("SSEClient", () => {
     });
   });
 
-  describe("重连机制", () => {
-    it("应该在连接失败后自动重连", () => {
+  describe('重连机制', () => {
+    it('应该在连接失败后自动重连', () => {
       const onReconnectingMock = jest.fn();
       client = new SSEClient({
         ...config,
@@ -373,7 +373,7 @@ describe("SSEClient", () => {
       });
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       jest.advanceTimersByTime(100);
 
       // 模拟连接错误
@@ -385,7 +385,7 @@ describe("SSEClient", () => {
       expect(onReconnectingMock).toHaveBeenCalledWith(1, expect.anything());
     });
 
-    it("应该使用指数退避算法计算重连延迟", () => {
+    it('应该使用指数退避算法计算重连延迟', () => {
       const delays: number[] = [];
       const onReconnectingMock = jest.fn((attempt: number, delay: number) => {
         delays.push(delay);
@@ -398,7 +398,7 @@ describe("SSEClient", () => {
       });
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       jest.advanceTimersByTime(100);
 
       // 模拟多次连接失败
@@ -411,7 +411,7 @@ describe("SSEClient", () => {
       expect(delays[1]).toBeGreaterThan(delays[0]);
     });
 
-    it("应该在达到最大重连次数后放弃重连", () => {
+    it('应该在达到最大重连次数后放弃重连', () => {
       const onReconnectFailedMock = jest.fn();
       client = new SSEClient({
         ...config,
@@ -420,7 +420,7 @@ describe("SSEClient", () => {
       });
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       jest.runAllTimers();
 
       // 模拟达到最大重连次数（需要触发maxRetryAttempts + 1次错误才能放弃）
@@ -436,15 +436,15 @@ describe("SSEClient", () => {
       expect(client.getState()).toBe(SSEConnectionState.DISCONNECTED);
     });
 
-    it("应该能够在连接成功后重置重连计数", () => {
+    it('应该能够在连接成功后重置重连计数', () => {
       client = new SSEClient(config);
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
       // 保存初始重连计数
-      const initialAttempts = client["reconnectAttempts"];
+      const initialAttempts = client['reconnectAttempts'];
       expect(initialAttempts).toBe(0);
 
       // 模拟连接错误
@@ -455,86 +455,86 @@ describe("SSEClient", () => {
       // 运行所有定时器以完成重连
       jest.runAllTimers();
       // 手动触发新连接的打开
-      const newEventSource = client["eventSource"] as MockEventSource;
+      const newEventSource = client['eventSource'] as MockEventSource;
       newEventSource.triggerOpen();
 
       // 重连成功后重连计数应该重置
-      expect(client["reconnectAttempts"]).toBe(0);
+      expect(client['reconnectAttempts']).toBe(0);
       expect(client.getState()).toBe(SSEConnectionState.CONNECTED);
     });
 
-    it("应该支持手动重连", () => {
+    it('应该支持手动重连', () => {
       client = new SSEClient(config);
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
       client.disconnect();
       expect(client.getState()).toBe(SSEConnectionState.DISCONNECTED);
 
       client.reconnect();
-      const newEventSource = client["eventSource"] as MockEventSource;
+      const newEventSource = client['eventSource'] as MockEventSource;
       newEventSource.triggerOpen();
 
       expect(client.getState()).toBe(SSEConnectionState.CONNECTED);
     });
   });
 
-  describe("Last-Event-ID支持", () => {
-    it("应该记录Last-Event-ID", () => {
+  describe('Last-Event-ID支持', () => {
+    it('应该记录Last-Event-ID', () => {
       client = new SSEClient(config);
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
       eventSource.emitEvent(
-        "connected",
+        'connected',
         {
-          debateId: "debate-123",
-          roundId: "round-456",
+          debateId: 'debate-123',
+          roundId: 'round-456',
           timestamp: new Date().toISOString(),
-          sessionId: "session-001",
+          sessionId: 'session-001',
         },
-        "event-123",
+        'event-123'
       );
 
-      expect(client["lastEventId"]).toBe("event-123");
+      expect(client['lastEventId']).toBe('event-123');
     });
 
-    it("应该在重连时使用Last-Event-ID", () => {
+    it('应该在重连时使用Last-Event-ID', () => {
       client = new SSEClient(config);
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
       eventSource.emitEvent(
-        "connected",
+        'connected',
         {
-          debateId: "debate-123",
-          roundId: "round-456",
+          debateId: 'debate-123',
+          roundId: 'round-456',
           timestamp: new Date().toISOString(),
-          sessionId: "session-001",
+          sessionId: 'session-001',
         },
-        "event-123",
+        'event-123'
       );
 
-      const lastEventIdBefore = client["lastEventId"];
-      expect(lastEventIdBefore).toBe("event-123");
+      const lastEventIdBefore = client['lastEventId'];
+      expect(lastEventIdBefore).toBe('event-123');
 
       // 模拟断线
       eventSource.emitError();
       jest.advanceTimersByTime(2000);
 
       // Last-Event-ID应该被保留
-      expect(client["lastEventId"]).toBe(lastEventIdBefore);
+      expect(client['lastEventId']).toBe(lastEventIdBefore);
     });
   });
 
-  describe("禁用自动重连", () => {
-    it("应该在禁用自动重连时不尝试重连", () => {
+  describe('禁用自动重连', () => {
+    it('应该在禁用自动重连时不尝试重连', () => {
       const onReconnectingMock = jest.fn();
       client = new SSEClient({
         ...config,
@@ -543,7 +543,7 @@ describe("SSEClient", () => {
       });
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
       // 模拟连接错误
@@ -555,21 +555,21 @@ describe("SSEClient", () => {
     });
   });
 
-  describe("资源清理", () => {
-    it("应该清理所有资源", () => {
+  describe('资源清理', () => {
+    it('应该清理所有资源', () => {
       const handler = jest.fn();
       client = new SSEClient(config);
       client.connect();
 
-      const eventSource = client["eventSource"] as MockEventSource;
+      const eventSource = client['eventSource'] as MockEventSource;
       eventSource.triggerOpen();
 
-      client.on("argument", handler);
+      client.on('argument', handler);
 
       client.destroy();
 
       expect(client.getState()).toBe(SSEConnectionState.DISCONNECTED);
-      expect(client["eventHandlers"].size).toBe(0);
+      expect(client['eventHandlers'].size).toBe(0);
     });
   });
 });

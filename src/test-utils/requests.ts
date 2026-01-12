@@ -2,7 +2,7 @@
  * 测试辅助函数 - 创建模拟的 HTTP 请求
  */
 
-import { NextRequest } from "next/server";
+import { NextRequest } from 'next/server';
 
 /**
  * 创建模拟的 NextRequest 用于测试 GET 请求
@@ -10,7 +10,7 @@ import { NextRequest } from "next/server";
 export const createMockGetRequest = (url: string): NextRequest => {
   return {
     url,
-    method: "GET",
+    method: 'GET',
     headers: new Headers(),
     cookies: {
       get: () => undefined,
@@ -19,7 +19,7 @@ export const createMockGetRequest = (url: string): NextRequest => {
       delete: () => {},
     },
     json: async () => ({}),
-    text: async () => "",
+    text: async () => '',
     blob: async () => new Blob(),
     formData: async () => new FormData(),
     arrayBuffer: async () => new ArrayBuffer(0),
@@ -27,17 +27,17 @@ export const createMockGetRequest = (url: string): NextRequest => {
     bodyUsed: false,
     clone: () => createMockGetRequest(url),
     nextUrl: {
-      pathname: "",
-      search: "",
+      pathname: '',
+      search: '',
       searchParams: new URLSearchParams(),
-      hash: "",
-      href: "",
-      origin: "",
-      protocol: "http:",
-      host: "localhost",
-      hostname: "localhost",
-      port: "",
-      basePath: "",
+      hash: '',
+      href: '',
+      origin: '',
+      protocol: 'http:',
+      host: 'localhost',
+      hostname: 'localhost',
+      port: '',
+      basePath: '',
     },
     page: undefined,
     ua: undefined,
@@ -49,12 +49,12 @@ export const createMockGetRequest = (url: string): NextRequest => {
  */
 export const createMockPostRequest = (
   url: string,
-  body: Record<string, unknown>,
+  body: Record<string, unknown>
 ): NextRequest => {
   return {
     url,
-    method: "POST",
-    headers: new Headers({ "Content-Type": "application/json" }),
+    method: 'POST',
+    headers: new Headers({ 'Content-Type': 'application/json' }),
     cookies: {
       get: () => undefined,
       getAll: () => [],
@@ -70,17 +70,17 @@ export const createMockPostRequest = (
     bodyUsed: false,
     clone: () => createMockPostRequest(url, body),
     nextUrl: {
-      pathname: "",
-      search: "",
+      pathname: '',
+      search: '',
       searchParams: new URLSearchParams(),
-      hash: "",
-      href: "",
-      origin: "",
-      protocol: "http:",
-      host: "localhost",
-      hostname: "localhost",
-      port: "",
-      basePath: "",
+      hash: '',
+      href: '',
+      origin: '',
+      protocol: 'http:',
+      host: 'localhost',
+      hostname: 'localhost',
+      port: '',
+      basePath: '',
     },
     page: undefined,
     ua: undefined,

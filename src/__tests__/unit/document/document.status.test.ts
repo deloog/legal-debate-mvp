@@ -1,7 +1,7 @@
-import { AnalysisStatus } from "@prisma/client";
+import { AnalysisStatus } from '@prisma/client';
 
 // Mock Prisma Client - inline to avoid scope issues
-jest.mock("../../../lib/db/prisma", () => ({
+jest.mock('../../../lib/db/prisma', () => ({
   prisma: {
     document: {
       create: jest.fn(),
@@ -19,18 +19,18 @@ jest.mock("../../../lib/db/prisma", () => ({
   },
 }));
 
-const prismaMock = require("../../../lib/db/prisma").prisma;
+const prismaMock = require('../../../lib/db/prisma').prisma;
 
 // Test data factories
 const createMockDocument = (overrides = {}) => ({
-  id: "doc-123",
-  caseId: "case-123",
-  userId: "user-123",
-  filename: "test-document.pdf",
-  filePath: "/uploads/documents/test-document.pdf",
-  fileType: "PDF",
+  id: 'doc-123',
+  caseId: 'case-123',
+  userId: 'user-123',
+  filename: 'test-document.pdf',
+  filePath: '/uploads/documents/test-document.pdf',
+  fileType: 'PDF',
   fileSize: 1024000,
-  mimeType: "application/pdf",
+  mimeType: 'application/pdf',
   extractedData: null,
   analysisStatus: AnalysisStatus.PENDING,
   analysisResult: null,
@@ -41,12 +41,12 @@ const createMockDocument = (overrides = {}) => ({
   ...overrides,
 });
 
-describe("Document Status Flow", () => {
+describe('Document Status Flow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should follow correct status flow for successful analysis", async () => {
+  it('should follow correct status flow for successful analysis', async () => {
     const document = createMockDocument({
       analysisStatus: AnalysisStatus.PENDING,
     });
@@ -64,7 +64,7 @@ describe("Document Status Flow", () => {
     expect(result.analysisStatus).toBe(AnalysisStatus.PROCESSING);
 
     // Step 2: Complete with result
-    const analysisResult = { summary: "分析完成", confidence: 0.9 };
+    const analysisResult = { summary: '分析完成', confidence: 0.9 };
     prismaMock.document.update.mockResolvedValue({
       ...result,
       analysisStatus: AnalysisStatus.COMPLETED,
@@ -82,7 +82,7 @@ describe("Document Status Flow", () => {
     expect(result.analysisResult).toEqual(analysisResult);
   });
 
-  it("should handle failed analysis correctly", async () => {
+  it('should handle failed analysis correctly', async () => {
     const document = createMockDocument({
       analysisStatus: AnalysisStatus.PROCESSING,
     });
@@ -91,26 +91,26 @@ describe("Document Status Flow", () => {
     prismaMock.document.update.mockResolvedValue({
       ...document,
       analysisStatus: AnalysisStatus.FAILED,
-      analysisError: "AI服务超时",
+      analysisError: 'AI服务超时',
     });
 
     const result = await prismaMock.document.update({
       where: { id: document.id },
       data: {
         analysisStatus: AnalysisStatus.FAILED,
-        analysisError: "AI服务超时",
+        analysisError: 'AI服务超时',
       },
     });
 
     expect(result.analysisStatus).toBe(AnalysisStatus.FAILED);
-    expect(result.analysisError).toBe("AI服务超时");
+    expect(result.analysisError).toBe('AI服务超时');
   });
 
-  it("should handle missing analysis result gracefully", async () => {
+  it('should handle missing analysis result gracefully', async () => {
     const document = createMockDocument({
       analysisStatus: AnalysisStatus.FAILED,
       analysisResult: null,
-      analysisError: "AI服务不可用",
+      analysisError: 'AI服务不可用',
     });
 
     prismaMock.document.findUnique.mockResolvedValue(document);
@@ -121,14 +121,14 @@ describe("Document Status Flow", () => {
 
     expect(result.analysisStatus).toBe(AnalysisStatus.FAILED);
     expect(result.analysisResult).toBeNull();
-    expect(result.analysisError).toBe("AI服务不可用");
+    expect(result.analysisError).toBe('AI服务不可用');
   });
 
-  it("should handle empty extracted data", async () => {
+  it('should handle empty extracted data', async () => {
     const document = createMockDocument({
       extractedData: {},
       analysisStatus: AnalysisStatus.COMPLETED,
-      analysisResult: { summary: "无有效内容可提取" },
+      analysisResult: { summary: '无有效内容可提取' },
     });
 
     prismaMock.document.update.mockResolvedValue(document);
@@ -138,11 +138,11 @@ describe("Document Status Flow", () => {
       data: {
         extractedData: {},
         analysisStatus: AnalysisStatus.COMPLETED,
-        analysisResult: { summary: "无有效内容可提取" },
+        analysisResult: { summary: '无有效内容可提取' },
       },
     });
 
     expect(result.extractedData).toEqual({});
-    expect(result.analysisResult.summary).toBe("无有效内容可提取");
+    expect(result.analysisResult.summary).toBe('无有效内容可提取');
   });
 });

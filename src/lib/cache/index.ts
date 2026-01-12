@@ -7,14 +7,14 @@ export {
   disconnectRedis,
   connectRedis,
   getRedisInfo,
-} from "./redis";
-export { CacheManager, cacheManager, cache } from "./manager";
+} from './redis';
+export { CacheManager, cacheManager, cache } from './manager';
 export {
   CacheMonitor,
   cacheMonitorInstance,
   getCacheMonitor,
   cacheMonitoringUtils,
-} from "./monitor";
+} from './monitor';
 
 // 类型定义
 export type {
@@ -32,9 +32,9 @@ export type {
   CacheKeyGenerator,
   CacheTagManager,
   CacheNamespaceManager,
-} from "./types";
+} from './types';
 
-export { CacheNamespace, CacheStrategy, defaultCacheConfig } from "./types";
+export { CacheNamespace, CacheStrategy, defaultCacheConfig } from './types';
 
 // 缓存策略
 export {
@@ -46,24 +46,24 @@ export {
   CacheStrategyFactory,
   cacheStrategyFactory,
   cacheStrategyConfigs,
-} from "./strategies";
+} from './strategies';
 
 // 便捷导出 - 常用功能
-export { cache as cacheInstance } from "./manager";
-export { cacheMonitorInstance as cacheMonitor } from "./monitor";
+export { cache as cacheInstance } from './manager';
+export { cacheMonitorInstance as cacheMonitor } from './monitor';
 
 // 导入用于内部使用
-import type { CacheOptions, CacheHealth, CacheStats } from "./types";
-import { CacheNamespace, CacheStrategy, defaultCacheConfig } from "./types";
-import { cache as cacheInstance, cacheManager } from "./manager";
-import { cacheMonitorInstance } from "./monitor";
-import { cacheStrategyFactory } from "./strategies";
+import type { CacheOptions, CacheHealth, CacheStats } from './types';
+import { CacheNamespace, CacheStrategy, defaultCacheConfig } from './types';
+import { cache as cacheInstance, cacheManager } from './manager';
+import { cacheMonitorInstance } from './monitor';
+import { cacheStrategyFactory } from './strategies';
 import {
   redis,
   connectRedis,
   checkRedisConnection,
   disconnectRedis,
-} from "./redis";
+} from './redis';
 
 // 类型别名
 export type CacheNamespaceType = CacheNamespace;
@@ -76,7 +76,7 @@ export const cacheUtils = {
   async getOrSet<T>(
     key: string,
     valueProvider: () => Promise<T>,
-    options?: CacheOptions,
+    options?: CacheOptions
   ): Promise<T | null> {
     return cacheInstance.getOrSet<T>(key, valueProvider, options);
   },
@@ -84,14 +84,14 @@ export const cacheUtils = {
   // 批量操作
   async batchGet<T>(
     keys: string[],
-    options?: CacheOptions,
+    options?: CacheOptions
   ): Promise<Map<string, T | null>> {
     return cacheInstance.mget<T>(keys, options);
   },
 
   async batchSet<T>(
     items: Array<{ key: string; value: T; ttl?: number }>,
-    options?: CacheOptions,
+    options?: CacheOptions
   ) {
     return cacheInstance.mset<T>(items, options);
   },
@@ -112,7 +112,7 @@ export const cacheUtils = {
 
   // 生成报告
   async generateReport(): Promise<string> {
-    const { cacheMonitoringUtils } = await import("./monitor");
+    const { cacheMonitoringUtils } = await import('./monitor');
     return cacheMonitoringUtils.generateReport();
   },
 
@@ -136,7 +136,7 @@ export function Cached(options?: {
   return function (
     target: any,
     propertyName: string,
-    descriptor: PropertyDescriptor,
+    descriptor: PropertyDescriptor
   ) {
     const method = descriptor.value;
 
@@ -155,7 +155,7 @@ export function Cached(options?: {
       const cached = await cacheUtils.getOrSet(
         key,
         () => method.apply(this, args),
-        cacheOptions,
+        cacheOptions
       );
 
       return cached;
@@ -191,7 +191,7 @@ export function createCache(namespace: CacheNamespace, defaultTtl?: number) {
     async getOrSet<T>(
       key: string,
       valueProvider: () => Promise<T>,
-      ttl?: number,
+      ttl?: number
     ): Promise<T | null> {
       return cacheInstance.getOrSet<T>(key, valueProvider, { namespace, ttl });
     },
@@ -217,12 +217,12 @@ export async function initializeCache(): Promise<void> {
     const isConnected = await checkRedisConnection();
 
     if (!isConnected) {
-      throw new Error("Redis连接失败");
+      throw new Error('Redis连接失败');
     }
 
-    console.log("✅ 缓存系统初始化成功");
+    console.log('✅ 缓存系统初始化成功');
   } catch (error) {
-    console.error("❌ 缓存系统初始化失败:", error);
+    console.error('❌ 缓存系统初始化失败:', error);
     throw error;
   }
 }
@@ -236,18 +236,18 @@ export async function cleanupCache(): Promise<void> {
     // 断开连接
     await disconnectRedis();
 
-    console.log("✅ 缓存系统清理完成");
+    console.log('✅ 缓存系统清理完成');
   } catch (error) {
-    console.error("❌ 缓存系统清理失败:", error);
+    console.error('❌ 缓存系统清理失败:', error);
     throw error;
   }
 }
 
 // 开发环境下的自动初始化
-if (process.env.NODE_ENV === "development" && typeof window === "undefined") {
+if (process.env.NODE_ENV === 'development' && typeof window === 'undefined') {
   // 服务端开发环境下自动初始化
-  initializeCache().catch((error) => {
-    console.error("开发环境缓存自动初始化失败:", error);
+  initializeCache().catch(error => {
+    console.error('开发环境缓存自动初始化失败:', error);
   });
 }
 

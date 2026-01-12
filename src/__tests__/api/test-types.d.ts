@@ -10,9 +10,9 @@ declare global {
 }
 
 // Extend Jest mock types to accept any parameter
-declare module "jest" {
+declare module 'jest' {
   function fn<T extends any[] = any[], R = any>(
-    implementation?: (...args: any) => any,
+    implementation?: (...args: any) => any
   ): any;
 
   interface Mock<T extends any[], R> {

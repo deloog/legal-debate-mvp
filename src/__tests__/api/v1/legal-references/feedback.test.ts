@@ -1,16 +1,16 @@
-import { PUT } from "@/app/api/v1/legal-references/[id]/feedback/route";
+import { PUT } from '@/app/api/v1/legal-references/[id]/feedback/route';
 import {
   createMockRequest,
   createTestResponse,
   assertions,
-} from "../../test-utils";
+} from '../../test-utils';
 
 // Mock PrismaClient
 const mockFindUnique = jest.fn();
 const mockUpdate = jest.fn();
 const mockDisconnect = jest.fn();
 
-jest.mock("@prisma/client", () => ({
+jest.mock('@prisma/client', () => ({
   PrismaClient: jest.fn().mockImplementation(() => ({
     legalReference: {
       findUnique: () => mockFindUnique(),
@@ -23,18 +23,18 @@ jest.mock("@prisma/client", () => ({
 /**
  * 法条反馈API单元测试
  */
-describe("法条反馈API", () => {
+describe('法条反馈API', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe("PUT /api/v1/legal-references/[id]/feedback", () => {
-    it("应该成功确认法条适用", async () => {
+  describe('PUT /api/v1/legal-references/[id]/feedback', () => {
+    it('应该成功确认法条适用', async () => {
       const mockLegalReference = {
-        id: "article-1",
-        lawName: "中华人民共和国合同法",
-        articleNumber: "第8条",
-        content: "依法成立的合同，对当事人具有法律约束力。",
+        id: 'article-1',
+        lawName: '中华人民共和国合同法',
+        articleNumber: '第8条',
+        content: '依法成立的合同，对当事人具有法律约束力。',
         metadata: {},
       };
 
@@ -43,24 +43,24 @@ describe("法条反馈API", () => {
         ...mockLegalReference,
         metadata: {
           lawyerFeedback: {
-            action: "CONFIRMED",
-            timestamp: "2024-01-01T00:00:00.000Z",
+            action: 'CONFIRMED',
+            timestamp: '2024-01-01T00:00:00.000Z',
           },
         },
       });
 
       const request = createMockRequest(
-        "http://localhost:3000/api/v1/legal-references/article-1/feedback",
+        'http://localhost:3000/api/v1/legal-references/article-1/feedback',
         {
-          method: "PUT",
+          method: 'PUT',
           body: {
-            action: "CONFIRMED",
+            action: 'CONFIRMED',
           },
-        },
+        }
       );
 
       const response = await PUT(request, {
-        params: Promise.resolve({ id: "article-1" }),
+        params: Promise.resolve({ id: 'article-1' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -68,16 +68,16 @@ describe("法条反馈API", () => {
       expect(testResponse.data).toBeDefined();
       expect(testResponse.data.success).toBe(true);
       expect(testResponse.data.data.metadata.lawyerFeedback.action).toBe(
-        "CONFIRMED",
+        'CONFIRMED'
       );
     });
 
-    it("应该成功移除法条并记录原因", async () => {
+    it('应该成功移除法条并记录原因', async () => {
       const mockLegalReference = {
-        id: "article-1",
-        lawName: "中华人民共和国合同法",
-        articleNumber: "第8条",
-        content: "依法成立的合同，对当事人具有法律约束力。",
+        id: 'article-1',
+        lawName: '中华人民共和国合同法',
+        articleNumber: '第8条',
+        content: '依法成立的合同，对当事人具有法律约束力。',
         metadata: {},
       };
 
@@ -86,26 +86,26 @@ describe("法条反馈API", () => {
         ...mockLegalReference,
         metadata: {
           lawyerFeedback: {
-            action: "REMOVED",
-            removedReason: "NOT_RELEVANT",
-            timestamp: "2024-01-01T00:00:00.000Z",
+            action: 'REMOVED',
+            removedReason: 'NOT_RELEVANT',
+            timestamp: '2024-01-01T00:00:00.000Z',
           },
         },
       });
 
       const request = createMockRequest(
-        "http://localhost:3000/api/v1/legal-references/article-1/feedback",
+        'http://localhost:3000/api/v1/legal-references/article-1/feedback',
         {
-          method: "PUT",
+          method: 'PUT',
           body: {
-            action: "REMOVED",
-            removedReason: "NOT_RELEVANT",
+            action: 'REMOVED',
+            removedReason: 'NOT_RELEVANT',
           },
-        },
+        }
       );
 
       const response = await PUT(request, {
-        params: Promise.resolve({ id: "article-1" }),
+        params: Promise.resolve({ id: 'article-1' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -113,19 +113,19 @@ describe("法条反馈API", () => {
       expect(testResponse.data).toBeDefined();
       expect(testResponse.data.success).toBe(true);
       expect(testResponse.data.data.metadata.lawyerFeedback.action).toBe(
-        "REMOVED",
+        'REMOVED'
       );
       expect(testResponse.data.data.metadata.lawyerFeedback.removedReason).toBe(
-        "NOT_RELEVANT",
+        'NOT_RELEVANT'
       );
     });
 
     it('应该支持"其他"移除原因', async () => {
       const mockLegalReference = {
-        id: "article-1",
-        lawName: "中华人民共和国合同法",
-        articleNumber: "第8条",
-        content: "依法成立的合同，对当事人具有法律约束力。",
+        id: 'article-1',
+        lawName: '中华人民共和国合同法',
+        articleNumber: '第8条',
+        content: '依法成立的合同，对当事人具有法律约束力。',
         metadata: {},
       };
 
@@ -134,28 +134,28 @@ describe("法条反馈API", () => {
         ...mockLegalReference,
         metadata: {
           lawyerFeedback: {
-            action: "REMOVED",
-            removedReason: "OTHER",
-            otherReason: "该法条与本案实际情况不符",
-            timestamp: "2024-01-01T00:00:00.000Z",
+            action: 'REMOVED',
+            removedReason: 'OTHER',
+            otherReason: '该法条与本案实际情况不符',
+            timestamp: '2024-01-01T00:00:00.000Z',
           },
         },
       });
 
       const request = createMockRequest(
-        "http://localhost:3000/api/v1/legal-references/article-1/feedback",
+        'http://localhost:3000/api/v1/legal-references/article-1/feedback',
         {
-          method: "PUT",
+          method: 'PUT',
           body: {
-            action: "REMOVED",
-            removedReason: "OTHER",
-            otherReason: "该法条与本案实际情况不符",
+            action: 'REMOVED',
+            removedReason: 'OTHER',
+            otherReason: '该法条与本案实际情况不符',
           },
-        },
+        }
       );
 
       const response = await PUT(request, {
-        params: Promise.resolve({ id: "article-1" }),
+        params: Promise.resolve({ id: 'article-1' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -163,110 +163,110 @@ describe("法条反馈API", () => {
       expect(testResponse.data).toBeDefined();
       expect(testResponse.data.success).toBe(true);
       expect(testResponse.data.data.metadata.lawyerFeedback.removedReason).toBe(
-        "OTHER",
+        'OTHER'
       );
       expect(testResponse.data.data.metadata.lawyerFeedback.otherReason).toBe(
-        "该法条与本案实际情况不符",
+        '该法条与本案实际情况不符'
       );
     });
 
-    it("缺少action参数时应返回400错误", async () => {
+    it('缺少action参数时应返回400错误', async () => {
       const request = createMockRequest(
-        "http://localhost:3000/api/v1/legal-references/article-1/feedback",
+        'http://localhost:3000/api/v1/legal-references/article-1/feedback',
         {
-          method: "PUT",
+          method: 'PUT',
           body: {},
-        },
+        }
       );
 
       const response = await PUT(request, {
-        params: Promise.resolve({ id: "article-1" }),
+        params: Promise.resolve({ id: 'article-1' }),
       });
       const testResponse = await createTestResponse(response);
 
       assertions.assertError(testResponse, 400);
-      expect(testResponse.error).toBe("缺少action参数");
+      expect(testResponse.error).toBe('缺少action参数');
     });
 
-    it("无效的action参数时应返回400错误", async () => {
+    it('无效的action参数时应返回400错误', async () => {
       const request = createMockRequest(
-        "http://localhost:3000/api/v1/legal-references/article-1/feedback",
+        'http://localhost:3000/api/v1/legal-references/article-1/feedback',
         {
-          method: "PUT",
+          method: 'PUT',
           body: {
-            action: "INVALID_ACTION",
+            action: 'INVALID_ACTION',
           },
-        },
+        }
       );
 
       const response = await PUT(request, {
-        params: Promise.resolve({ id: "article-1" }),
+        params: Promise.resolve({ id: 'article-1' }),
       });
       const testResponse = await createTestResponse(response);
 
       assertions.assertError(testResponse, 400);
-      expect(testResponse.error).toBe("无效的action参数");
+      expect(testResponse.error).toBe('无效的action参数');
     });
 
-    it("移除操作缺少removedReason时应返回400错误", async () => {
+    it('移除操作缺少removedReason时应返回400错误', async () => {
       const request = createMockRequest(
-        "http://localhost:3000/api/v1/legal-references/article-1/feedback",
+        'http://localhost:3000/api/v1/legal-references/article-1/feedback',
         {
-          method: "PUT",
+          method: 'PUT',
           body: {
-            action: "REMOVED",
+            action: 'REMOVED',
           },
-        },
+        }
       );
 
       const response = await PUT(request, {
-        params: Promise.resolve({ id: "article-1" }),
+        params: Promise.resolve({ id: 'article-1' }),
       });
       const testResponse = await createTestResponse(response);
 
       assertions.assertError(testResponse, 400);
-      expect(testResponse.error).toBe("移除操作需要提供removedReason参数");
+      expect(testResponse.error).toBe('移除操作需要提供removedReason参数');
     });
 
     it('选择"其他"原因但缺少otherReason时应返回400错误', async () => {
       const request = createMockRequest(
-        "http://localhost:3000/api/v1/legal-references/article-1/feedback",
+        'http://localhost:3000/api/v1/legal-references/article-1/feedback',
         {
-          method: "PUT",
+          method: 'PUT',
           body: {
-            action: "REMOVED",
-            removedReason: "OTHER",
-            otherReason: "   ", // 空白字符
+            action: 'REMOVED',
+            removedReason: 'OTHER',
+            otherReason: '   ', // 空白字符
           },
-        },
+        }
       );
 
       const response = await PUT(request, {
-        params: Promise.resolve({ id: "article-1" }),
+        params: Promise.resolve({ id: 'article-1' }),
       });
       const testResponse = await createTestResponse(response);
 
       assertions.assertError(testResponse, 400);
       expect(testResponse.error).toBe(
-        '选择"其他"原因时需要提供otherReason参数',
+        '选择"其他"原因时需要提供otherReason参数'
       );
     });
 
-    it("法条不存在时应返回404错误", async () => {
+    it('法条不存在时应返回404错误', async () => {
       mockFindUnique.mockResolvedValue(null);
 
       const request = createMockRequest(
-        "http://localhost:3000/api/v1/legal-references/nonexistent/feedback",
+        'http://localhost:3000/api/v1/legal-references/nonexistent/feedback',
         {
-          method: "PUT",
+          method: 'PUT',
           body: {
-            action: "CONFIRMED",
+            action: 'CONFIRMED',
           },
-        },
+        }
       );
 
       const response = await PUT(request, {
-        params: Promise.resolve({ id: "nonexistent" }),
+        params: Promise.resolve({ id: 'nonexistent' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -274,14 +274,14 @@ describe("法条反馈API", () => {
       expect(testResponse.error).toBeDefined();
     });
 
-    it("应该保留现有的metadata数据", async () => {
+    it('应该保留现有的metadata数据', async () => {
       const mockLegalReference = {
-        id: "article-1",
-        lawName: "中华人民共和国合同法",
-        articleNumber: "第8条",
-        content: "依法成立的合同，对当事人具有法律约束力。",
+        id: 'article-1',
+        lawName: '中华人民共和国合同法',
+        articleNumber: '第8条',
+        content: '依法成立的合同，对当事人具有法律约束力。',
         metadata: {
-          existingData: "should be preserved",
+          existingData: 'should be preserved',
           existingNumber: 123,
         },
       };
@@ -290,27 +290,27 @@ describe("法条反馈API", () => {
       mockUpdate.mockResolvedValue({
         ...mockLegalReference,
         metadata: {
-          existingData: "should be preserved",
+          existingData: 'should be preserved',
           existingNumber: 123,
           lawyerFeedback: {
-            action: "CONFIRMED",
-            timestamp: "2024-01-01T00:00:00.000Z",
+            action: 'CONFIRMED',
+            timestamp: '2024-01-01T00:00:00.000Z',
           },
         },
       });
 
       const request = createMockRequest(
-        "http://localhost:3000/api/v1/legal-references/article-1/feedback",
+        'http://localhost:3000/api/v1/legal-references/article-1/feedback',
         {
-          method: "PUT",
+          method: 'PUT',
           body: {
-            action: "CONFIRMED",
+            action: 'CONFIRMED',
           },
-        },
+        }
       );
 
       const response = await PUT(request, {
-        params: Promise.resolve({ id: "article-1" }),
+        params: Promise.resolve({ id: 'article-1' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -318,7 +318,7 @@ describe("法条反馈API", () => {
       expect(testResponse.data).toBeDefined();
       expect(testResponse.data.success).toBe(true);
       expect(testResponse.data.data.metadata.existingData).toBe(
-        "should be preserved",
+        'should be preserved'
       );
       expect(testResponse.data.data.metadata.existingNumber).toBe(123);
     });

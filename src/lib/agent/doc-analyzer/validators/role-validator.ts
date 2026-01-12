@@ -8,11 +8,11 @@
  * - 提供角色推断和修正建议
  */
 
-import type { Party, Claim } from "../core/types";
-import { PARTY_ROLE_INDICATORS } from "../core/constants";
+import type { Party, Claim } from '../core/types';
+import { PARTY_ROLE_INDICATORS } from '../core/constants';
 
 export interface RoleIssue {
-  severity: "ERROR" | "WARNING";
+  severity: 'ERROR' | 'WARNING';
   category: string;
   message: string;
   suggestion?: string;
@@ -29,11 +29,11 @@ export interface RoleValidationResult {
  * 检测角色冲突（同一人既是原告又是被告）
  */
 function detectRoleConflicts(
-  parties: Party[],
+  parties: Party[]
 ): Array<{ name: string; roles: string[] }> {
   const nameMap = new Map<string, string[]>();
 
-  parties.forEach((party) => {
+  parties.forEach(party => {
     const normalizedName = normalizePartyName(party.name);
     if (!nameMap.has(normalizedName)) {
       nameMap.set(normalizedName, []);
@@ -61,7 +61,7 @@ function detectRoleConflicts(
 function normalizePartyName(name: string): string {
   return name
     .trim()
-    .replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, "")
+    .replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '')
     .toLowerCase();
 }
 
@@ -76,8 +76,8 @@ function validatePartyNames(parties: Party[]): RoleIssue[] {
 
     if (!name) {
       issues.push({
-        severity: "ERROR",
-        category: "姓名",
+        severity: 'ERROR',
+        category: '姓名',
         message: `第${index + 1}个当事人姓名为空`,
       });
       return;
@@ -85,16 +85,16 @@ function validatePartyNames(parties: Party[]): RoleIssue[] {
 
     if (name.length < 2) {
       issues.push({
-        severity: "ERROR",
-        category: "姓名",
+        severity: 'ERROR',
+        category: '姓名',
         message: `第${index + 1}个当事人姓名过短：${name}`,
       });
     }
 
     if (name.length > 50) {
       issues.push({
-        severity: "WARNING",
-        category: "姓名",
+        severity: 'WARNING',
+        category: '姓名',
         message: `第${index + 1}个当事人姓名过长：${name}`,
       });
     }
@@ -107,12 +107,12 @@ function validatePartyNames(parties: Party[]): RoleIssue[] {
       /^\d+$/,
     ];
 
-    if (invalidPatterns.some((pattern) => pattern.test(name))) {
+    if (invalidPatterns.some(pattern => pattern.test(name))) {
       issues.push({
-        severity: "WARNING",
-        category: "姓名",
+        severity: 'WARNING',
+        category: '姓名',
         message: `第${index + 1}个当事人姓名可能不合法：${name}`,
-        suggestion: "检查是否为占位符或缺少具体名称",
+        suggestion: '检查是否为占位符或缺少具体名称',
       });
     }
   });
@@ -125,46 +125,46 @@ function validatePartyNames(parties: Party[]): RoleIssue[] {
  */
 function validateRoleCompleteness(
   parties: Party[],
-  claims: Claim[],
+  claims: Claim[]
 ): RoleIssue[] {
   const issues: RoleIssue[] = [];
 
-  const hasPlaintiff = parties.some((p) => p.type === "plaintiff");
-  const hasDefendant = parties.some((p) => p.type === "defendant");
+  const hasPlaintiff = parties.some(p => p.type === 'plaintiff');
+  const hasDefendant = parties.some(p => p.type === 'defendant');
 
   if (!hasPlaintiff && claims.length > 0) {
     issues.push({
-      severity: "ERROR",
-      category: "角色完整性",
-      message: "缺少原告",
-      suggestion: "从诉讼请求中推断原告信息",
+      severity: 'ERROR',
+      category: '角色完整性',
+      message: '缺少原告',
+      suggestion: '从诉讼请求中推断原告信息',
     });
   }
 
   if (!hasDefendant && claims.length > 0) {
     issues.push({
-      severity: "ERROR",
-      category: "角色完整性",
-      message: "缺少被告",
-      suggestion: "从诉讼请求中推断被告信息",
+      severity: 'ERROR',
+      category: '角色完整性',
+      message: '缺少被告',
+      suggestion: '从诉讼请求中推断被告信息',
     });
   }
 
-  const plaintiffCount = parties.filter((p) => p.type === "plaintiff").length;
-  const defendantCount = parties.filter((p) => p.type === "defendant").length;
+  const plaintiffCount = parties.filter(p => p.type === 'plaintiff').length;
+  const defendantCount = parties.filter(p => p.type === 'defendant').length;
 
   if (plaintiffCount > 10) {
     issues.push({
-      severity: "WARNING",
-      category: "角色完整性",
+      severity: 'WARNING',
+      category: '角色完整性',
       message: `原告数量过多（${plaintiffCount}个）`,
     });
   }
 
   if (defendantCount > 10) {
     issues.push({
-      severity: "WARNING",
-      category: "角色完整性",
+      severity: 'WARNING',
+      category: '角色完整性',
       message: `被告数量过多（${defendantCount}个）`,
     });
   }
@@ -178,16 +178,16 @@ function validateRoleCompleteness(
 function inferMissingRoles(parties: Party[], claims: Claim[]): Party[] {
   const suggestions: Party[] = [];
 
-  const hasPlaintiff = parties.some((p) => p.type === "plaintiff");
-  const hasDefendant = parties.some((p) => p.type === "defendant");
+  const hasPlaintiff = parties.some(p => p.type === 'plaintiff');
+  const hasDefendant = parties.some(p => p.type === 'defendant');
 
   if (!hasPlaintiff) {
     const inferredPlaintiff = inferPlaintiff(claims);
     if (inferredPlaintiff) {
       suggestions.push({
-        type: "plaintiff",
+        type: 'plaintiff',
         name: inferredPlaintiff,
-        role: "推断原告",
+        role: '推断原告',
         _inferred: true,
       });
     }
@@ -197,9 +197,9 @@ function inferMissingRoles(parties: Party[], claims: Claim[]): Party[] {
     const inferredDefendant = inferDefendant(claims);
     if (inferredDefendant) {
       suggestions.push({
-        type: "defendant",
+        type: 'defendant',
         name: inferredDefendant,
-        role: "推断被告",
+        role: '推断被告',
         _inferred: true,
       });
     }
@@ -213,7 +213,7 @@ function inferMissingRoles(parties: Party[], claims: Claim[]): Party[] {
  */
 function inferPlaintiff(claims: Claim[]): string | null {
   for (const claim of claims) {
-    const content = claim.content || "";
+    const content = claim.content || '';
 
     const plaintiffPatterns = [/(.+?)起诉.+?/, /(.+?)诉.+?/, /请求.+?判令/];
 
@@ -221,7 +221,7 @@ function inferPlaintiff(claims: Claim[]): string | null {
       const match = content.match(pattern);
       if (match && match[1] && match[1].length < 20) {
         const name = match[1].trim();
-        if (!name.includes("法院") && !name.includes("本院")) {
+        if (!name.includes('法院') && !name.includes('本院')) {
           return name;
         }
       }
@@ -236,7 +236,7 @@ function inferPlaintiff(claims: Claim[]): string | null {
  */
 function inferDefendant(claims: Claim[]): string | null {
   for (const claim of claims) {
-    const content = claim.content || "";
+    const content = claim.content || '';
 
     const defendantPatterns = [
       /判令(.+?)偿还/,
@@ -248,7 +248,7 @@ function inferDefendant(claims: Claim[]): string | null {
       const match = content.match(pattern);
       if (match && match[1] && match[1].length < 20) {
         const name = match[1].trim();
-        if (!name.includes("公司") || (name.length > 2 && name.length < 30)) {
+        if (!name.includes('公司') || (name.length > 2 && name.length < 30)) {
           return name;
         }
       }
@@ -273,18 +273,18 @@ export class RoleValidator {
 
     const conflicts = detectRoleConflicts(parties);
 
-    conflicts.forEach((conflict) => {
+    conflicts.forEach(conflict => {
       issues.push({
-        severity: "ERROR",
-        category: "角色冲突",
-        message: `${conflict.name}同时担任多个角色：${conflict.roles.join(", ")}`,
-        suggestion: "检查是否为同一个人或公司，需要修正",
+        severity: 'ERROR',
+        category: '角色冲突',
+        message: `${conflict.name}同时担任多个角色：${conflict.roles.join(', ')}`,
+        suggestion: '检查是否为同一个人或公司，需要修正',
       });
     });
 
     const suggestions = claims ? inferMissingRoles(parties, claims) : [];
 
-    const passed = !issues.some((i) => i.severity === "ERROR");
+    const passed = !issues.some(i => i.severity === 'ERROR');
 
     return {
       passed,

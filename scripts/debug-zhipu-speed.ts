@@ -1,21 +1,21 @@
-import { getUnifiedAIService } from "../src/lib/ai/unified-service";
+import { getUnifiedAIService } from '../src/lib/ai/unified-service';
 
 async function testZhipuSpeed() {
   try {
-    console.log("开始测试智谱AI响应时间...");
+    console.log('开始测试智谱AI响应时间...');
 
     // 测试1: 简单问题
-    console.log("\n=== 测试1: 简单问题 ===");
+    console.log('\n=== 测试1: 简单问题 ===');
     const startTime1 = Date.now();
 
     const unifiedService = await getUnifiedAIService();
     const response1 = await unifiedService.chatCompletion({
-      model: "glm-4-flash",
-      provider: "zhipu",
+      model: 'glm-4-flash',
+      provider: 'zhipu',
       messages: [
         {
-          role: "user",
-          content: "请简单回答：1+1等于几？",
+          role: 'user',
+          content: '请简单回答：1+1等于几？',
         },
       ],
       temperature: 0.1,
@@ -23,21 +23,21 @@ async function testZhipuSpeed() {
     });
 
     const endTime1 = Date.now();
-    console.log("响应内容:", response1.choices[0].message.content);
-    console.log("响应时间:", endTime1 - startTime1, "ms");
+    console.log('响应内容:', response1.choices[0].message.content);
+    console.log('响应时间:', endTime1 - startTime1, 'ms');
 
     // 测试2: 中等复杂度问题
-    console.log("\n=== 测试2: 中等复杂度问题 ===");
+    console.log('\n=== 测试2: 中等复杂度问题 ===');
     const startTime2 = Date.now();
 
     const response2 = await unifiedService.chatCompletion({
-      model: "glm-4-flash",
-      provider: "zhipu",
+      model: 'glm-4-flash',
+      provider: 'zhipu',
       messages: [
         {
-          role: "user",
+          role: 'user',
           content:
-            "请分析以下文本并提取关键信息：张三向李四借款50000元，约定年利率6%，借款期限为1年。请提取借款人、出借人、借款金额、利率和期限。",
+            '请分析以下文本并提取关键信息：张三向李四借款50000元，约定年利率6%，借款期限为1年。请提取借款人、出借人、借款金额、利率和期限。',
         },
       ],
       temperature: 0.1,
@@ -45,11 +45,11 @@ async function testZhipuSpeed() {
     });
 
     const endTime2 = Date.now();
-    console.log("响应内容:", response2.choices[0].message.content);
-    console.log("响应时间:", endTime2 - startTime2, "ms");
+    console.log('响应内容:', response2.choices[0].message.content);
+    console.log('响应时间:', endTime2 - startTime2, 'ms');
 
     // 测试3: 复杂法律文档分析（类似我们的优化版提示词）
-    console.log("\n=== 测试3: 复杂法律文档分析 ===");
+    console.log('\n=== 测试3: 复杂法律文档分析 ===');
     const startTime3 = Date.now();
 
     const legalPrompt = `你是一个专业的法律文档分析专家。请对以下法律文档进行分析：
@@ -66,16 +66,16 @@ async function testZhipuSpeed() {
 请按照JSON格式返回分析结果，包含当事人信息和诉讼请求。`;
 
     const response3 = await unifiedService.chatCompletion({
-      model: "glm-4-flash",
-      provider: "zhipu",
+      model: 'glm-4-flash',
+      provider: 'zhipu',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content:
-            "你是一个专业的法律文档分析专家，专门从法律文档中提取结构化信息。",
+            '你是一个专业的法律文档分析专家，专门从法律文档中提取结构化信息。',
         },
         {
-          role: "user",
+          role: 'user',
           content: legalPrompt,
         },
       ],
@@ -85,14 +85,14 @@ async function testZhipuSpeed() {
 
     const endTime3 = Date.now();
     console.log(
-      "响应内容长度:",
+      '响应内容长度:',
       response3.choices[0].message.content.length,
-      "字符",
+      '字符'
     );
-    console.log("响应时间:", endTime3 - startTime3, "ms");
+    console.log('响应时间:', endTime3 - startTime3, 'ms');
 
     // 测试4: 使用优化版提示词（完整版本）
-    console.log("\n=== 测试4: 优化版完整提示词 ===");
+    console.log('\n=== 测试4: 优化版完整提示词 ===');
     const startTime4 = Date.now();
 
     const optimizedPrompt = `你是一个专业的法律文档分析专家。请对以下法律文档进行分析，完成以下任务：
@@ -174,16 +174,16 @@ async function testZhipuSpeed() {
 }`;
 
     const response4 = await unifiedService.chatCompletion({
-      model: "glm-4-flash",
-      provider: "zhipu",
+      model: 'glm-4-flash',
+      provider: 'zhipu',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content:
-            "你是一个专业的法律文档分析专家，专门从法律文档中提取结构化信息。",
+            '你是一个专业的法律文档分析专家，专门从法律文档中提取结构化信息。',
         },
         {
-          role: "user",
+          role: 'user',
           content: optimizedPrompt,
         },
       ],
@@ -193,14 +193,14 @@ async function testZhipuSpeed() {
 
     const endTime4 = Date.now();
     console.log(
-      "响应内容长度:",
+      '响应内容长度:',
       response4.choices[0].message.content.length,
-      "字符",
+      '字符'
     );
-    console.log("响应时间:", endTime4 - startTime4, "ms");
+    console.log('响应时间:', endTime4 - startTime4, 'ms');
   } catch (error) {
-    console.error("测试失败:", error.message);
-    console.error("错误详情:", error);
+    console.error('测试失败:', error.message);
+    console.error('错误详情:', error);
   }
 }
 

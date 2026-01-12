@@ -2,9 +2,9 @@
  * 获取当前用户信息 API
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getAuthUser } from "@/lib/middleware/auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * GET /api/auth/me
@@ -17,8 +17,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, message: "未认证" },
-        { status: 401 },
+        { success: false, message: '未认证' },
+        { status: 401 }
       );
     }
 
@@ -44,26 +44,26 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (!currentUser) {
       return NextResponse.json(
-        { success: false, message: "用户不存在" },
-        { status: 404 },
+        { success: false, message: '用户不存在' },
+        { status: 404 }
       );
     }
 
     return NextResponse.json(
       {
         success: true,
-        message: "获取成功",
+        message: '获取成功',
         data: {
           user: currentUser,
         },
       },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error) {
-    console.error("获取用户信息失败:", error);
+    console.error('获取用户信息失败:', error);
     return NextResponse.json(
-      { success: false, message: "获取失败，请稍后重试" },
-      { status: 500 },
+      { success: false, message: '获取失败，请稍后重试' },
+      { status: 500 }
     );
   }
 }

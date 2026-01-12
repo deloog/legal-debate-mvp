@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * 通用ID验证 - 支持UUID和CUID格式
@@ -8,9 +8,9 @@ import { z } from "zod";
  */
 export const uuidSchema = z
   .string()
-  .min(1, "ID is required")
+  .min(1, 'ID is required')
   .refine(
-    (val) => {
+    val => {
       // 尝试UUID格式
       const uuidRegex =
         /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -23,7 +23,7 @@ export const uuidSchema = z
         uuidRegex.test(val) || cuidRegex.test(val) || testIdRegex.test(val)
       );
     },
-    { message: "Invalid ID format (expected UUID or CUID)" },
+    { message: 'Invalid ID format (expected UUID or CUID)' }
   );
 
 /**
@@ -33,7 +33,7 @@ export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   sort: z.string().optional(),
-  order: z.enum(["asc", "desc"]).default("desc"),
+  order: z.enum(['asc', 'desc']).default('desc'),
   search: z.string().optional(),
 });
 
@@ -41,22 +41,22 @@ export const paginationSchema = z.object({
  * 案件相关验证模式
  */
 export const createCaseSchema = z.object({
-  userId: z.string().min(1, "User ID is required"),
-  title: z.string().min(1, "Title is required").max(200, "Title too long"),
+  userId: z.string().min(1, 'User ID is required'),
+  title: z.string().min(1, 'Title is required').max(200, 'Title too long'),
   description: z
     .string()
-    .min(1, "Description is required")
-    .max(2000, "Description too long"),
+    .min(1, 'Description is required')
+    .max(2000, 'Description too long'),
   type: z.enum([
-    "civil",
-    "criminal",
-    "administrative",
-    "labor",
-    "commercial",
-    "intellectual",
-    "other",
+    'civil',
+    'criminal',
+    'administrative',
+    'labor',
+    'commercial',
+    'intellectual',
+    'other',
   ]),
-  status: z.enum(["draft", "active", "completed", "archived"]).default("draft"),
+  status: z.enum(['draft', 'active', 'completed', 'archived']).default('draft'),
   amount: z.number().optional(),
   caseNumber: z.string().optional(),
   cause: z.string().optional(),
@@ -73,27 +73,34 @@ export const caseQuerySchema = paginationSchema.extend({
   userId: z.string().optional(),
   type: z
     .enum([
-      "civil",
-      "criminal",
-      "administrative",
-      "labor",
-      "commercial",
-      "intellectual",
-      "other",
+      'civil',
+      'criminal',
+      'administrative',
+      'labor',
+      'commercial',
+      'intellectual',
+      'other',
     ])
     .optional(),
-  status: z.enum(["draft", "active", "completed", "archived"]).optional(),
+  status: z.enum(['draft', 'active', 'completed', 'archived']).optional(),
 });
 
-export const updateCaseSchema = createCaseSchema.partial();
+/**
+ * 案件更新验证模式
+ * 注意：不包含userId字段，因为案件的所有权不允许修改
+ */
+export const updateCaseSchema = createCaseSchema
+  .omit({ userId: true })
+  .partial()
+  .strict();
 
 /**
  * 文档相关验证模式
  */
 export const uploadDocumentSchema = z.object({
   caseId: uuidSchema,
-  filename: z.string().min(1, "Filename is required"),
-  fileType: z.enum(["pdf", "doc", "docx", "jpg", "png", "txt"]),
+  filename: z.string().min(1, 'Filename is required'),
+  fileType: z.enum(['pdf', 'doc', 'docx', 'jpg', 'png', 'txt']),
   description: z.string().optional(),
 });
 
@@ -102,16 +109,16 @@ export const uploadDocumentSchema = z.object({
  */
 export const createDebateSchema = z.object({
   caseId: uuidSchema,
-  title: z.string().min(1, "Title is required").max(200, "Title too long"),
+  title: z.string().min(1, 'Title is required').max(200, 'Title too long'),
   status: z
-    .enum(["DRAFT", "IN_PROGRESS", "PAUSED", "COMPLETED", "ARCHIVED"])
+    .enum(['DRAFT', 'IN_PROGRESS', 'PAUSED', 'COMPLETED', 'ARCHIVED'])
     .optional(),
   config: z
     .object({
       maxRounds: z.number().int().min(1).max(10).default(3),
       timePerRound: z.number().int().min(1).max(60).default(30), // minutes
       allowNewEvidence: z.boolean().default(true),
-      debateMode: z.enum(["standard", "fast", "detailed"]).default("standard"),
+      debateMode: z.enum(['standard', 'fast', 'detailed']).default('standard'),
     })
     .optional(),
 });
@@ -124,8 +131,8 @@ export const updateDebateSchema = createDebateSchema.partial();
 export const createDebateRoundSchema = z.object({
   roundNumber: z.number().int().min(1).optional(),
   status: z
-    .enum(["PENDING", "IN_PROGRESS", "COMPLETED", "FAILED"])
-    .default("PENDING"),
+    .enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED'])
+    .default('PENDING'),
 });
 
 /**
@@ -133,28 +140,28 @@ export const createDebateRoundSchema = z.object({
  */
 export const createArgumentSchema = z.object({
   roundId: uuidSchema,
-  side: z.enum(["PLAINTIFF", "DEFENDANT", "NEUTRAL"]),
+  side: z.enum(['PLAINTIFF', 'DEFENDANT', 'NEUTRAL']),
   content: z
     .string()
-    .min(1, "Content is required")
-    .max(2000, "Content too long"),
+    .min(1, 'Content is required')
+    .max(2000, 'Content too long'),
   type: z
     .enum([
-      "MAIN_POINT",
-      "SUPPORTING",
-      "REBUTTAL",
-      "EVIDENCE",
-      "LEGAL_BASIS",
-      "CONCLUSION",
+      'MAIN_POINT',
+      'SUPPORTING',
+      'REBUTTAL',
+      'EVIDENCE',
+      'LEGAL_BASIS',
+      'CONCLUSION',
     ])
-    .default("MAIN_POINT"),
+    .default('MAIN_POINT'),
   legalReferences: z
     .array(
       z.object({
         id: uuidSchema.optional(),
         content: z.string(),
         relevance: z.number().min(0).max(1),
-      }),
+      })
     )
     .optional(),
 });
@@ -165,8 +172,8 @@ export const createArgumentSchema = z.object({
 export const createLegalReferenceSchema = z.object({
   caseId: uuidSchema.optional(),
   roundId: uuidSchema.optional(),
-  source: z.string().min(1, "Source is required"),
-  content: z.string().min(1, "Content is required"),
+  source: z.string().min(1, 'Source is required'),
+  content: z.string().min(1, 'Content is required'),
   category: z.string().optional(),
   relevance: z.number().min(0).max(1).optional(),
   retrievalQuery: z.string().optional(),
@@ -176,12 +183,12 @@ export const createLegalReferenceSchema = z.object({
  * 用户相关验证模式
  */
 export const createUserSchema = z.object({
-  email: z.string().email("Invalid email format"),
+  email: z.string().email('Invalid email format'),
   username: z
     .string()
-    .min(3, "Username too short")
-    .max(50, "Username too long"),
-  role: z.enum(["lawyer", "admin", "user"]).default("lawyer"),
+    .min(3, 'Username too short')
+    .max(50, 'Username too long'),
+  role: z.enum(['lawyer', 'admin', 'user']).default('lawyer'),
   profile: z
     .object({
       firstName: z.string().optional(),
@@ -209,7 +216,7 @@ export const parseDocumentSchema = z.object({
 });
 
 export const searchLawsSchema = z.object({
-  query: z.string().min(1, "Query is required").max(500, "Query too long"),
+  query: z.string().min(1, 'Query is required').max(500, 'Query too long'),
   category: z.string().optional(),
   limit: z.number().int().min(1).max(50).default(10),
   includeExpired: z.boolean().default(false),
@@ -222,8 +229,8 @@ export const generateDebateSchema = z.object({
     .object({
       maxArguments: z.number().int().min(2).max(10).default(6),
       legalDepth: z
-        .enum(["basic", "intermediate", "advanced"])
-        .default("intermediate"),
+        .enum(['basic', 'intermediate', 'advanced'])
+        .default('intermediate'),
       includeEvidence: z.boolean().default(true),
     })
     .optional(),

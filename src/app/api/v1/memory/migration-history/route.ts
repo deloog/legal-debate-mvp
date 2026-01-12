@@ -3,8 +3,8 @@
  * GET /api/v1/memory/migration-history - 获取迁移历史记录
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -17,28 +17,28 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
 
     // 解析查询参数
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
     const limit = Math.min(
       100,
-      Math.max(1, parseInt(searchParams.get("limit") || "20")),
+      Math.max(1, parseInt(searchParams.get('limit') || '20'))
     );
-    const actionType = searchParams.get("actionType");
-    const status = searchParams.get("status");
+    const actionType = searchParams.get('actionType');
+    const status = searchParams.get('status');
     const skip = (page - 1) * limit;
 
     // 构建查询条件
     const where: Record<string, unknown> = {
-      agentName: "MemoryAgent",
+      agentName: 'MemoryAgent',
       actionType: {
-        in: ["MIGRATE_WORKING_TO_HOT", "MIGRATE_HOT_TO_COLD"],
+        in: ['MIGRATE_WORKING_TO_HOT', 'MIGRATE_HOT_TO_COLD'],
       },
     };
 
-    if (actionType && actionType !== "all") {
+    if (actionType && actionType !== 'all') {
       where.actionType = actionType;
     }
 
-    if (status && status !== "all") {
+    if (status && status !== 'all') {
       where.status = status;
     }
 
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       prisma.agentAction.findMany({
         where,
         orderBy: {
-          createdAt: "desc",
+          createdAt: 'desc',
         },
         skip,
         take: limit,
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // 格式化返回数据
-    const formattedActions = actions.map((action) => ({
+    const formattedActions = actions.map(action => ({
       id: action.id,
       actionType: action.actionType,
       actionName: action.actionName,
@@ -107,14 +107,14 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching migration history:", error);
+    console.error('Error fetching migration history:', error);
     return NextResponse.json(
       {
         success: false,
-        error: "获取迁移历史失败",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: '获取迁移历史失败',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

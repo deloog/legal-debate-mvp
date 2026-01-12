@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { ApiError } from "./api-error";
+import { NextRequest, NextResponse } from 'next/server';
+import { ApiError } from './api-error';
 
 /**
  * 从请求中提取关联ID
@@ -7,15 +7,15 @@ import { ApiError } from "./api-error";
 function extractCorrelationId(request: NextRequest): string | undefined {
   // 从请求头获取
   const headerCorrelationId =
-    request.headers.get("X-Correlation-ID") ||
-    request.headers.get("x-correlation-id");
+    request.headers.get('X-Correlation-ID') ||
+    request.headers.get('x-correlation-id');
   if (headerCorrelationId) {
     return headerCorrelationId;
   }
 
   // 从查询参数获取
   const url = new URL(request.url);
-  const queryCorrelationId = url.searchParams.get("correlationId");
+  const queryCorrelationId = url.searchParams.get('correlationId');
   if (queryCorrelationId) {
     return queryCorrelationId;
   }
@@ -33,15 +33,15 @@ function getSecureErrorMessage(error: Error, isProduction: boolean): string {
 
   // 生产环境下隐藏敏感错误信息
   const safeMessages = [
-    "Internal server error",
-    "Service temporarily unavailable",
-    "Request processing failed",
-    "Database connection error",
+    'Internal server error',
+    'Service temporarily unavailable',
+    'Request processing failed',
+    'Database connection error',
   ];
 
   return safeMessages.includes(error.message)
     ? error.message
-    : "Internal server error";
+    : 'Internal server error';
 }
 
 /**
@@ -50,14 +50,14 @@ function getSecureErrorMessage(error: Error, isProduction: boolean): string {
  */
 export function handleApiError(
   error: unknown,
-  request: NextRequest,
+  request: NextRequest
 ): NextResponse {
   const correlationId = extractCorrelationId(request);
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = process.env.NODE_ENV === 'production';
 
   // 记录错误日志
-  console.error("API Error:", {
-    error: error instanceof Error ? error.message : "Unknown error",
+  console.error('API Error:', {
+    error: error instanceof Error ? error.message : 'Unknown error',
     stack: error instanceof Error ? error.stack : undefined,
     url: request.url,
     method: request.method,
@@ -75,13 +75,13 @@ export function handleApiError(
   }
 
   // 处理Zod验证错误
-  if (error && typeof error === "object" && "issues" in error) {
+  if (error && typeof error === 'object' && 'issues' in error) {
     const response = NextResponse.json(
       {
         success: false,
         error: {
-          code: "VALIDATION_ERROR",
-          message: "Request validation failed",
+          code: 'VALIDATION_ERROR',
+          message: 'Request validation failed',
           details: {
             validationErrors: error.issues,
           },
@@ -93,26 +93,26 @@ export function handleApiError(
         status: 400,
         headers: correlationId
           ? {
-              "X-Correlation-ID": correlationId,
+              'X-Correlation-ID': correlationId,
             }
           : undefined,
-      },
+      }
     );
     return response;
   }
 
   // 处理Prisma错误
-  if (error && typeof error === "object" && "code" in error) {
+  if (error && typeof error === 'object' && 'code' in error) {
     const prismaError = error as { code: string; message: string };
 
     switch (prismaError.code) {
-      case "P2002":
+      case 'P2002':
         return NextResponse.json(
           {
             success: false,
             error: {
-              code: "DUPLICATE_ENTRY",
-              message: "Resource already exists",
+              code: 'DUPLICATE_ENTRY',
+              message: 'Resource already exists',
               timestamp: new Date().toISOString(),
               correlationId,
             },
@@ -121,18 +121,18 @@ export function handleApiError(
             status: 409,
             headers: correlationId
               ? {
-                  "X-Correlation-ID": correlationId,
+                  'X-Correlation-ID': correlationId,
                 }
               : undefined,
-          },
+          }
         );
-      case "P2025":
+      case 'P2025':
         return NextResponse.json(
           {
             success: false,
             error: {
-              code: "NOT_FOUND",
-              message: "Resource not found",
+              code: 'NOT_FOUND',
+              message: 'Resource not found',
               timestamp: new Date().toISOString(),
               correlationId,
             },
@@ -141,10 +141,10 @@ export function handleApiError(
             status: 404,
             headers: correlationId
               ? {
-                  "X-Correlation-ID": correlationId,
+                  'X-Correlation-ID': correlationId,
                 }
               : undefined,
-          },
+          }
         );
       default:
         break;
@@ -153,16 +153,16 @@ export function handleApiError(
 
   // 默认内部服务器错误
   const errorMessage = isProduction
-    ? "Internal server error"
+    ? 'Internal server error'
     : error instanceof Error
       ? error.message
-      : "Unknown error";
+      : 'Unknown error';
 
   return NextResponse.json(
     {
       success: false,
       error: {
-        code: "INTERNAL_SERVER_ERROR",
+        code: 'INTERNAL_SERVER_ERROR',
         message: errorMessage,
         timestamp: new Date().toISOString(),
         correlationId,
@@ -172,10 +172,10 @@ export function handleApiError(
       status: 500,
       headers: correlationId
         ? {
-            "X-Correlation-ID": correlationId,
+            'X-Correlation-ID': correlationId,
           }
         : undefined,
-    },
+    }
   );
 }
 
@@ -183,7 +183,7 @@ export function handleApiError(
  * API路由包装器，统一处理错误
  */
 export function withErrorHandler(
-  handler: (request: NextRequest, ...args: any[]) => Promise<NextResponse>,
+  handler: (request: NextRequest, ...args: any[]) => Promise<NextResponse>
 ) {
   return async (
     request: NextRequest,
@@ -202,7 +202,7 @@ export function withErrorHandler(
  */
 export async function withErrorHandling<T>(
   promise: Promise<T>,
-  request: NextRequest,
+  request: NextRequest
 ): Promise<[T | null, NextResponse | null]> {
   try {
     const result = await promise;

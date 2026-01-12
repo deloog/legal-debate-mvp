@@ -3,7 +3,7 @@
  * 包含：merge_results
  */
 
-import type { MergeResultsResult } from "./types";
+import type { MergeResultsResult } from './types';
 
 /**
  * 13. merge_results - 结果合并
@@ -18,7 +18,7 @@ export async function merge_results<T>(
         keySelector?: (item: T) => string;
       },
   deduplicate = false,
-  keySelector?: (item: T) => string,
+  keySelector?: (item: T) => string
 ): Promise<MergeResultsResult<T>> {
   let resultsArr: T[][];
   let dedup = deduplicate;
@@ -37,7 +37,7 @@ export async function merge_results<T>(
 
   if (dedup && keySel) {
     const seen = new Set<string>();
-    merged = merged.filter((item) => {
+    merged = merged.filter(item => {
       const key = keySel!(item);
       if (seen.has(key)) {
         return false;

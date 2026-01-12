@@ -1,13 +1,13 @@
 // 法律验证器：验证法条引用的准确性
 
-import { Argument, ValidationResult, DebateInput } from "../types";
+import { Argument, ValidationResult, DebateInput } from '../types';
 
 /**
  * 法律问题类型
  */
 interface LawIssue {
-  type: "missing_law" | "invalid_law" | "weak_relevance" | "format_error";
-  severity: "error" | "warning";
+  type: 'missing_law' | 'invalid_law' | 'weak_relevance' | 'format_error';
+  severity: 'error' | 'warning';
   message: string;
   argumentId: string;
 }
@@ -22,8 +22,8 @@ export class LawValidator {
     // 从输入中提取可用的法条
     this.availableLaws = new Set(
       (input.lawArticles || []).map(
-        (article) => `${article.lawName} ${article.articleNumber}`,
-      ),
+        article => `${article.lawName} ${article.articleNumber}`
+      )
     );
   }
 
@@ -36,9 +36,9 @@ export class LawValidator {
     // 1. 检查是否有法律依据
     if (!argument.legalBasis || argument.legalBasis.length === 0) {
       issues.push({
-        type: "missing_law",
-        severity: "error",
-        message: "论点缺少法律依据",
+        type: 'missing_law',
+        severity: 'error',
+        message: '论点缺少法律依据',
         argumentId: argument.id,
       });
     } else {
@@ -55,15 +55,15 @@ export class LawValidator {
     return {
       valid: score >= 0.6,
       errors: issues
-        .filter((issue) => issue.severity === "error")
-        .map((issue) => ({
+        .filter(issue => issue.severity === 'error')
+        .map(issue => ({
           field: issue.type,
           message: issue.message,
           severity: issue.severity,
         })),
       warnings: issues
-        .filter((issue) => issue.severity === "warning")
-        .map((issue) => issue.message),
+        .filter(issue => issue.severity === 'warning')
+        .map(issue => issue.message),
     };
   }
 
@@ -75,7 +75,7 @@ export class LawValidator {
       return {
         valid: false,
         errors: [
-          { field: "arguments", message: "没有论点可验证", severity: "error" },
+          { field: 'arguments', message: '没有论点可验证', severity: 'error' },
         ],
         warnings: [],
       };
@@ -85,7 +85,7 @@ export class LawValidator {
     const allErrors: Array<{
       field: string;
       message: string;
-      severity: "error" | "warning";
+      severity: 'error' | 'warning';
     }> = [];
     const allWarnings: string[] = [];
 
@@ -116,7 +116,7 @@ export class LawValidator {
       relevance: number;
       explanation: string;
     },
-    argumentId: string,
+    argumentId: string
   ): LawIssue[] {
     const issues: LawIssue[] = [];
 
@@ -124,8 +124,8 @@ export class LawValidator {
     const lawReference = `${basis.lawName} ${basis.articleNumber}`;
     if (!this.availableLaws.has(lawReference)) {
       issues.push({
-        type: "invalid_law",
-        severity: "error",
+        type: 'invalid_law',
+        severity: 'error',
         message: `法条 "${lawReference}" 不在可用法条列表中`,
         argumentId,
       });
@@ -134,8 +134,8 @@ export class LawValidator {
     // 2. 检查法条格式
     if (!this.isValidLawFormat(basis.lawName, basis.articleNumber)) {
       issues.push({
-        type: "format_error",
-        severity: "warning",
+        type: 'format_error',
+        severity: 'warning',
         message: `法条格式可能不正确: "${lawReference}"`,
         argumentId,
       });
@@ -144,8 +144,8 @@ export class LawValidator {
     // 3. 检查相关性评分
     if (basis.relevance < 0.5) {
       issues.push({
-        type: "weak_relevance",
-        severity: "warning",
+        type: 'weak_relevance',
+        severity: 'warning',
         message: `法条相关性较低（${basis.relevance.toFixed(2)}），建议增加相关性说明`,
         argumentId,
       });
@@ -154,9 +154,9 @@ export class LawValidator {
     // 4. 检查说明内容
     if (!basis.explanation || basis.explanation.trim().length < 10) {
       issues.push({
-        type: "format_error",
-        severity: "warning",
-        message: "法条说明过于简单或缺失",
+        type: 'format_error',
+        severity: 'warning',
+        message: '法条说明过于简单或缺失',
         argumentId,
       });
     }
@@ -185,9 +185,9 @@ export class LawValidator {
     let score = 1.0;
 
     for (const issue of issues) {
-      if (issue.severity === "error") {
+      if (issue.severity === 'error') {
         score -= 0.35;
-      } else if (issue.severity === "warning") {
+      } else if (issue.severity === 'warning') {
         score -= 0.15;
       }
     }
@@ -220,7 +220,7 @@ export class LawValidator {
 
     // 法条说明长度
     const hasGoodExplanation = argument.legalBasis.some(
-      (b) => b.explanation && b.explanation.length > 20,
+      b => b.explanation && b.explanation.length > 20
     );
     if (hasGoodExplanation) {
       score += 0.5;
@@ -239,7 +239,7 @@ export class LawValidator {
 
     const totalScore = arguments_.reduce(
       (sum, arg) => sum + this.calculateLegalAccuracyScore(arg),
-      0,
+      0
     );
 
     return totalScore / arguments_.length;

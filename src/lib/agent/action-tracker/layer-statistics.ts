@@ -4,9 +4,9 @@
  * 负责分析Agent行动的层级分布和健康度
  */
 
-import { prisma } from "@/lib/db/prisma";
-import { ActionStatus, ActionLayer } from "@prisma/client";
-import type { LayerMetrics, LayerReport, PerformanceFilters } from "./types";
+import { prisma } from '@/lib/db/prisma';
+import { ActionStatus, ActionLayer } from '@prisma/client';
+import type { LayerMetrics, LayerReport, PerformanceFilters } from './types';
 
 /**
  * 分层统计器类
@@ -21,7 +21,7 @@ export class LayerStatistics {
     const coreLayer = await this.getLayerMetrics(ActionLayer.CORE, filters);
     const utilityLayer = await this.getLayerMetrics(
       ActionLayer.UTILITY,
-      filters,
+      filters
     );
     const scriptLayer = await this.getLayerMetrics(ActionLayer.SCRIPT, filters);
 
@@ -53,7 +53,7 @@ export class LayerStatistics {
     const healthScore = this.calculateHealthScore(
       coreLayer,
       utilityLayer,
-      scriptLayer,
+      scriptLayer
     );
 
     return {
@@ -77,7 +77,7 @@ export class LayerStatistics {
    */
   async getLayerMetrics(
     layer: ActionLayer,
-    filters: PerformanceFilters = {},
+    filters: PerformanceFilters = {}
   ): Promise<LayerMetrics> {
     const where = {
       ...this.buildWhereClause(filters),
@@ -103,24 +103,24 @@ export class LayerStatistics {
 
     // 获取唯一行动数
     const uniqueActions = await prisma.agentAction.groupBy({
-      by: ["actionName"],
+      by: ['actionName'],
       where,
     });
 
     // 获取最常用的行动
     const topActionsResult = await prisma.agentAction.groupBy({
-      by: ["actionName"],
+      by: ['actionName'],
       where,
       _count: true,
       orderBy: {
         _count: {
-          actionName: "desc",
+          actionName: 'desc',
         },
       },
       take: 5,
     });
 
-    const topActions = topActionsResult.map((item) => ({
+    const topActions = topActionsResult.map(item => ({
       actionName: item.actionName,
       count: item._count,
     }));
@@ -145,7 +145,7 @@ export class LayerStatistics {
   private calculateHealthScore(
     coreLayer: LayerMetrics,
     utilityLayer: LayerMetrics,
-    scriptLayer: LayerMetrics,
+    scriptLayer: LayerMetrics
   ): number {
     // 健康度计算基于：
     // 1. 整体成功率（权重0.4）
@@ -206,7 +206,7 @@ export class LayerStatistics {
    * @returns Prisma where子句
    */
   private buildWhereClause(
-    filters: PerformanceFilters,
+    filters: PerformanceFilters
   ): Record<string, unknown> {
     const where: Record<string, unknown> = {};
 

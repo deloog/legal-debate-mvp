@@ -2,10 +2,10 @@
  * OAuth 账号绑定 API 路由
  */
 
-import { verifyToken } from "@/lib/auth/jwt";
-import { OAuthService } from "@/lib/auth/oauth-service";
-import type { OAuthUserInfo } from "@/types/oauth";
-import { NextRequest, NextResponse } from "next/server";
+import { verifyToken } from '@/lib/auth/jwt';
+import { OAuthService } from '@/lib/auth/oauth-service';
+import type { OAuthUserInfo } from '@/types/oauth';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * POST /api/auth/oauth/bind - 绑定 OAuth 账号
@@ -13,16 +13,16 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     // 验证用户身份
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const token = authHeader.substring(7);
     const decoded = verifyToken(token);
 
     if (!decoded.valid || !decoded.payload?.userId) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -30,8 +30,8 @@ export async function POST(request: NextRequest) {
 
     if (!provider || !providerAccountId || !userInfo) {
       return NextResponse.json(
-        { error: "Provider, providerAccountId and userInfo are required" },
-        { status: 400 },
+        { error: 'Provider, providerAccountId and userInfo are required' },
+        { status: 400 }
       );
     }
 
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       decoded.payload.userId,
       provider,
       providerAccountId,
-      userInfo as OAuthUserInfo,
+      userInfo as OAuthUserInfo
     );
 
     return NextResponse.json({
@@ -48,13 +48,13 @@ export async function POST(request: NextRequest) {
       account,
     });
   } catch (error) {
-    console.error("Bind OAuth account error:", error);
+    console.error('Bind OAuth account error:', error);
     return NextResponse.json(
       {
         error:
-          error instanceof Error ? error.message : "Failed to bind account",
+          error instanceof Error ? error.message : 'Failed to bind account',
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -65,21 +65,21 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     // 验证用户身份
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const token = authHeader.substring(7);
     const decoded = verifyToken(token);
 
     if (!decoded.valid || !decoded.payload?.userId) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     // 获取账号列表
     const accounts = await OAuthService.getUserOAuthAccounts(
-      decoded.payload.userId,
+      decoded.payload.userId
     );
 
     return NextResponse.json({
@@ -87,13 +87,13 @@ export async function GET(request: NextRequest) {
       accounts,
     });
   } catch (error) {
-    console.error("Get OAuth accounts error:", error);
+    console.error('Get OAuth accounts error:', error);
     return NextResponse.json(
       {
         error:
-          error instanceof Error ? error.message : "Failed to get accounts",
+          error instanceof Error ? error.message : 'Failed to get accounts',
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

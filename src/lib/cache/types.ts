@@ -52,22 +52,22 @@ export interface CacheConfig {
 
 // 缓存命名空间枚举
 export enum CacheNamespace {
-  USER_SESSION = "user_session",
-  USER_DATA = "user_data",
-  AI_RESPONSE = "ai_response",
-  CONFIGURATION = "configuration",
-  DATABASE_QUERY = "database_query",
-  API_RESPONSE = "api_response",
-  TEMPORARY = "temporary",
-  SYSTEM = "system",
+  USER_SESSION = 'user_session',
+  USER_DATA = 'user_data',
+  AI_RESPONSE = 'ai_response',
+  CONFIGURATION = 'configuration',
+  DATABASE_QUERY = 'database_query',
+  API_RESPONSE = 'api_response',
+  TEMPORARY = 'temporary',
+  SYSTEM = 'system',
 }
 
 // 缓存策略枚举
 export enum CacheStrategy {
-  LAZY_LOADING = "lazy_loading", // 懒加载
-  WRITE_THROUGH = "write_through", // 写穿透
-  WRITE_BEHIND = "write_behind", // 写回
-  REFRESH_AHEAD = "refresh_ahead", // 预刷新
+  LAZY_LOADING = 'lazy_loading', // 懒加载
+  WRITE_THROUGH = 'write_through', // 写穿透
+  WRITE_BEHIND = 'write_behind', // 写回
+  REFRESH_AHEAD = 'refresh_ahead', // 预刷新
 }
 
 // 缓存操作结果接口
@@ -76,7 +76,7 @@ export interface CacheOperationResult {
   key?: string;
   value?: any;
   error?: Error;
-  operation: "get" | "set" | "delete" | "clear" | "exists";
+  operation: 'get' | 'set' | 'delete' | 'clear' | 'exists';
   timestamp: Date;
 }
 
@@ -95,7 +95,7 @@ export interface CacheBatchResult<T = any> {
 
 // 缓存事件接口
 export interface CacheEvent {
-  type: "hit" | "miss" | "set" | "delete" | "expire" | "evict";
+  type: 'hit' | 'miss' | 'set' | 'delete' | 'expire' | 'evict';
   key: string;
   namespace?: string;
   timestamp: Date;
@@ -142,11 +142,11 @@ export interface CacheNamespaceManager {
 
 // 默认缓存配置
 export const defaultCacheConfig: CacheConfig = {
-  keyPrefix: process.env.CACHE_KEY_PREFIX || "legal_debate:",
-  defaultTtl: parseInt(process.env.CACHE_DEFAULT_TTL || "3600", 10), // 1小时
-  sessionTtl: parseInt(process.env.CACHE_SESSION_TTL || "1800", 10), // 30分钟
-  configTtl: parseInt(process.env.CACHE_CONFIG_TTL || "86400", 10), // 24小时
-  enableMetrics: process.env.NODE_ENV !== "production",
+  keyPrefix: process.env.CACHE_KEY_PREFIX || 'legal_debate:',
+  defaultTtl: parseInt(process.env.CACHE_DEFAULT_TTL || '3600', 10), // 1小时
+  sessionTtl: parseInt(process.env.CACHE_SESSION_TTL || '1800', 10), // 30分钟
+  configTtl: parseInt(process.env.CACHE_CONFIG_TTL || '86400', 10), // 24小时
+  enableMetrics: process.env.NODE_ENV !== 'production',
   enableCompression: false,
   maxKeyLength: 2000, // 增加到2000，支持更长的缓存键
   maxValueSize: 1024 * 1024, // 1MB

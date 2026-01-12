@@ -9,8 +9,8 @@
  * 性能目标：<5ms
  */
 
-import type { Party, ExtractedData } from "../core/types";
-import { logger } from "../../../agent/security/logger";
+import type { Party, ExtractedData } from '../core/types';
+import { logger } from '../../../agent/security/logger';
 
 // =============================================================================
 // 接口定义
@@ -33,20 +33,20 @@ export interface LegalRepFilterConfig {
 
 const DEFAULT_CONFIG: LegalRepFilterConfig = {
   legalRepKeywords: [
-    "法定代表人",
-    "法定代表",
-    "法人代表",
-    "负责人",
-    "执行事务合伙人",
+    '法定代表人',
+    '法定代表',
+    '法人代表',
+    '负责人',
+    '执行事务合伙人',
   ],
   independentRoles: [
-    "原告",
-    "被告",
-    "第三人",
-    "申请人",
-    "被申请人",
-    "上诉人",
-    "被上诉人",
+    '原告',
+    '被告',
+    '第三人',
+    '申请人',
+    '被申请人',
+    '上诉人',
+    '被上诉人',
   ],
 };
 
@@ -66,15 +66,15 @@ export class LegalRepresentativeFilter {
    */
   public async filter(
     text: string,
-    parties: Party[],
+    parties: Party[]
   ): Promise<LegalRepFilterResult> {
     const startTime = Date.now();
 
     const filteredParties = parties.filter((party: Party) => {
       // 规则0: 如果名称本身就包含法定代表人关键词，直接过滤
       if (
-        this.config.legalRepKeywords.some((keyword) =>
-          party.name.includes(keyword),
+        this.config.legalRepKeywords.some(keyword =>
+          party.name.includes(keyword)
         )
       ) {
         return false;
@@ -83,7 +83,7 @@ export class LegalRepresentativeFilter {
       // 规则1: 如果角色包含独立角色关键词，直接保留
       if (
         party.role &&
-        this.config.independentRoles.some((role) => party.role!.includes(role))
+        this.config.independentRoles.some(role => party.role!.includes(role))
       ) {
         return true;
       }
@@ -91,8 +91,8 @@ export class LegalRepresentativeFilter {
       // 规则2: 如果角色包含法定代表人关键词，过滤掉
       if (
         party.role &&
-        this.config.legalRepKeywords.some((keyword) =>
-          party.role!.includes(keyword),
+        this.config.legalRepKeywords.some(keyword =>
+          party.role!.includes(keyword)
         )
       ) {
         return false;
@@ -100,11 +100,11 @@ export class LegalRepresentativeFilter {
 
       // 规则3: 检查名称在上下文中是否紧跟法定代表人关键词
       const patterns = this.config.legalRepKeywords.map(
-        (keyword) =>
+        keyword =>
           new RegExp(
-            `${keyword}[:：]?\\s*${party.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
-            "g",
-          ),
+            `${keyword}[:：]?\\s*${party.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`,
+            'g'
+          )
       );
 
       for (const pattern of patterns) {
@@ -118,11 +118,11 @@ export class LegalRepresentativeFilter {
         // 如果名称很短且没有详细地址和联系方式，可能是法定代表人
         // 检查这个名称是否有独立的角色
         const hasIndependentRole = parties.some(
-          (p) =>
+          p =>
             p.name === party.name &&
-            p.type !== "other" &&
+            p.type !== 'other' &&
             p.role &&
-            this.config.independentRoles.some((role) => p.role!.includes(role)),
+            this.config.independentRoles.some(role => p.role!.includes(role))
         );
 
         if (!hasIndependentRole) {
@@ -138,9 +138,9 @@ export class LegalRepresentativeFilter {
 
     if (filteredCount > 0) {
       const filteredNames = parties
-        .filter((p) => !filteredParties.some((fp) => fp.name === p.name))
-        .map((p) => p.name);
-      logger.info("法定代表人已过滤", {
+        .filter(p => !filteredParties.some(fp => fp.name === p.name))
+        .map(p => p.name);
+      logger.info('法定代表人已过滤', {
         filteredCount,
         filteredNames,
         processingTime,
@@ -159,7 +159,7 @@ export class LegalRepresentativeFilter {
    */
   public async applyToExtractedData(
     text: string,
-    data: ExtractedData,
+    data: ExtractedData
   ): Promise<ExtractedData> {
     if (!data.parties || data.parties.length === 0) {
       return data;
@@ -185,7 +185,7 @@ export class LegalRepresentativeFilter {
    */
   public updateConfig(config: Partial<LegalRepFilterConfig>): void {
     this.config = { ...this.config, ...config };
-    logger.info("LegalRepresentativeFilter配置已更新", { config: this.config });
+    logger.info('LegalRepresentativeFilter配置已更新', { config: this.config });
   }
 }
 
@@ -197,7 +197,7 @@ export class LegalRepresentativeFilter {
  * 创建默认LegalRepresentativeFilter实例
  */
 export function createLegalRepFilter(
-  config?: Partial<LegalRepFilterConfig>,
+  config?: Partial<LegalRepFilterConfig>
 ): LegalRepresentativeFilter {
   return new LegalRepresentativeFilter(config);
 }

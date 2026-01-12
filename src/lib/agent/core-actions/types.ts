@@ -4,7 +4,7 @@
  * 分层行动空间：Core Layer -> Utility Layer -> Script Layer
  */
 
-import { MemoryType } from "@prisma/client";
+import { MemoryType } from '@prisma/client';
 
 // =============================================================================
 // 核心层类型（Core Layer - 18个原子函数）
@@ -61,7 +61,7 @@ export interface DatabaseSearchParams {
   query?: string;
   filters?: Record<string, unknown>;
   orderBy?: string;
-  orderDirection?: "asc" | "desc";
+  orderDirection?: 'asc' | 'desc';
   limit?: number;
   offset?: number;
 }
@@ -81,7 +81,7 @@ export interface DatabaseSearchResult<T = unknown> {
  */
 export interface AIServiceCallParams {
   prompt: string;
-  provider: "deepseek" | "zhipu" | "openai";
+  provider: 'deepseek' | 'zhipu' | 'openai';
   model?: string;
   temperature?: number;
   maxTokens?: number;
@@ -160,7 +160,7 @@ export interface LogActionParams {
   agentName?: string;
   input?: unknown;
   output?: unknown;
-  status: "success" | "failure" | "partial";
+  status: 'success' | 'failure' | 'partial';
   executionTime?: number;
   metadata?: Record<string, unknown>;
 }
@@ -284,7 +284,7 @@ export interface FilterDataResult<T = unknown> {
 export interface RankItemsParams<T = unknown> {
   items: T[];
   scoreFn: (item: T) => number;
-  order?: "asc" | "desc";
+  order?: 'asc' | 'desc';
 }
 
 /**
@@ -336,7 +336,7 @@ export interface CompareVersionsResult<T = unknown> {
     field: keyof T;
     valueA: unknown;
     valueB: unknown;
-    changeType: "added" | "removed" | "modified";
+    changeType: 'added' | 'removed' | 'modified';
   }>;
   versionA: T;
   versionB: T;
@@ -360,7 +360,7 @@ export interface UpdateMemoryParams {
 export interface UpdateMemoryResult {
   success: boolean;
   memoryId?: string;
-  action: "created" | "updated";
+  action: 'created' | 'updated';
   compressed?: boolean;
   compressionRatio?: number;
 }
@@ -422,7 +422,7 @@ export interface SearchLawsResult {
  */
 export interface GenerateArgumentParams {
   caseInfo: unknown;
-  side: "plaintiff" | "defendant";
+  side: 'plaintiff' | 'defendant';
   legalBasis?: unknown;
 }
 
@@ -475,7 +475,7 @@ export interface BatchQueryResult<T = unknown> {
  */
 export interface ExternalAPIParams {
   url: string;
-  method: "GET" | "POST" | "PUT" | "DELETE";
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   headers?: Record<string, string>;
   body?: unknown;
   timeout?: number;

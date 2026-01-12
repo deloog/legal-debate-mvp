@@ -3,7 +3,7 @@
  * 包含：validate_data
  */
 
-import type { ValidationResult } from "./types";
+import type { ValidationResult } from './types';
 
 /**
  * 6. validate_data - 数据验证
@@ -19,7 +19,7 @@ export async function validate_data(
     maxLength?: number;
     pattern?: RegExp;
     customValidator?: (value: unknown) => boolean;
-  }>,
+  }>
 ): Promise<ValidationResult> {
   const errors: Array<{ field: string; message: string }> = [];
   const warnings: string[] = [];

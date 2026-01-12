@@ -11,7 +11,7 @@
 export interface DocumentAnalysisInput {
   documentId: string;
   filePath: string;
-  fileType: "PDF" | "DOCX" | "DOC" | "TXT" | "IMAGE";
+  fileType: 'PDF' | 'DOCX' | 'DOC' | 'TXT' | 'IMAGE';
   options?: DocumentAnalysisOptions;
   content?: string;
 }
@@ -50,7 +50,7 @@ export interface ExtractedData {
 }
 
 export interface Party {
-  type: "plaintiff" | "defendant" | "other";
+  type: 'plaintiff' | 'defendant' | 'other';
   name: string;
   role?: string;
   contact?: string;
@@ -69,14 +69,14 @@ export interface Claim {
 }
 
 export type ClaimType =
-  | "PAY_PRINCIPAL"
-  | "PAY_INTEREST"
-  | "PAY_PENALTY"
-  | "PAY_DAMAGES"
-  | "LITIGATION_COST"
-  | "PERFORMANCE"
-  | "TERMINATION"
-  | "OTHER";
+  | 'PAY_PRINCIPAL'
+  | 'PAY_INTEREST'
+  | 'PAY_PENALTY'
+  | 'PAY_DAMAGES'
+  | 'LITIGATION_COST'
+  | 'PERFORMANCE'
+  | 'TERMINATION'
+  | 'OTHER';
 
 export interface TimelineEvent {
   id?: string; // 唯一标识
@@ -86,7 +86,7 @@ export interface TimelineEvent {
   eventType?: TimelineEventType;
   importance?: number; // 1-5，5最重要
   evidence?: string[];
-  source?: "explicit" | "inferred" | "TEXT_EXTRACTION" | "CASE_INFO"; // 证据来源
+  source?: 'explicit' | 'inferred' | 'TEXT_EXTRACTION' | 'CASE_INFO'; // 证据来源
   type?: TimelineEventType; // 兼容性字段
 }
 
@@ -103,28 +103,28 @@ export interface TimelineReport {
 }
 
 export type TimelineEventType =
-  | "CONTRACT_SIGNED"
-  | "PERFORMANCE_START"
-  | "BREACH_OCCURRED"
-  | "DEMAND_SENT"
-  | "LAWSUIT_FILED"
-  | "FILING" // 立案
-  | "HEARING" // 开庭
-  | "JUDGMENT" // 判决
-  | "EVIDENCE" // 证据
-  | "DEFENSE" // 答辩
-  | "MEDIATION" // 调解
-  | "SERVICE" // 送达
-  | "OTHER";
+  | 'CONTRACT_SIGNED'
+  | 'PERFORMANCE_START'
+  | 'BREACH_OCCURRED'
+  | 'DEMAND_SENT'
+  | 'LAWSUIT_FILED'
+  | 'FILING' // 立案
+  | 'HEARING' // 开庭
+  | 'JUDGMENT' // 判决
+  | 'EVIDENCE' // 证据
+  | 'DEFENSE' // 答辩
+  | 'MEDIATION' // 调解
+  | 'SERVICE' // 送达
+  | 'OTHER';
 
 export type CaseType =
-  | "civil"
-  | "criminal"
-  | "administrative"
-  | "commercial"
-  | "labor"
-  | "intellectual"
-  | "other";
+  | 'civil'
+  | 'criminal'
+  | 'administrative'
+  | 'commercial'
+  | 'labor'
+  | 'intellectual'
+  | 'other';
 
 // =============================================================================
 // 争议焦点类型
@@ -147,13 +147,13 @@ export interface DisputeFocus {
 }
 
 export type DisputeFocusCategory =
-  | "CONTRACT_BREACH"
-  | "PAYMENT_DISPUTE"
-  | "LIABILITY_ISSUE"
-  | "DAMAGES_CALCULATION"
-  | "PERFORMANCE_DISPUTE"
-  | "VALIDITY_ISSUE"
-  | "OTHER";
+  | 'CONTRACT_BREACH'
+  | 'PAYMENT_DISPUTE'
+  | 'LIABILITY_ISSUE'
+  | 'DAMAGES_CALCULATION'
+  | 'PERFORMANCE_DISPUTE'
+  | 'VALIDITY_ISSUE'
+  | 'OTHER';
 
 // =============================================================================
 // 关键事实类型
@@ -174,21 +174,21 @@ export interface KeyFact {
 }
 
 export type FactCategory =
-  | "CONTRACT_TERM"
-  | "PERFORMANCE_ACT"
-  | "BREACH_BEHAVIOR"
-  | "DAMAGE_OCCURRENCE"
-  | "LEGAL_RELATION"
-  | "OTHER";
+  | 'CONTRACT_TERM'
+  | 'PERFORMANCE_ACT'
+  | 'BREACH_BEHAVIOR'
+  | 'DAMAGE_OCCURRENCE'
+  | 'LEGAL_RELATION'
+  | 'OTHER';
 
 export type FactType =
-  | "EXPLICIT" // 明确提到的事实
-  | "INFERRED" // 推断得到的事实
-  | "ADMITTED" // 承认的事实
-  | "DISPUTED"; // 争议的事实
+  | 'EXPLICIT' // 明确提到的事实
+  | 'INFERRED' // 推断得到的事实
+  | 'ADMITTED' // 承认的事实
+  | 'DISPUTED'; // 争议的事实
 
 export interface FactVerification {
-  status: "VERIFIED" | "CONTROVERSIAL" | "UNVERIFIED";
+  status: 'VERIFIED' | 'CONTROVERSIAL' | 'UNVERIFIED';
   sources: string[];
   reliability: number; // 可靠性评分 0-1
 }
@@ -215,7 +215,7 @@ export interface PostProcessingResult {
 }
 
 export interface Correction {
-  type: "ADD_CLAIM" | "ADD_PARTY" | "FIX_AMOUNT" | "FIX_ROLE" | "OTHER";
+  type: 'ADD_CLAIM' | 'ADD_PARTY' | 'FIX_AMOUNT' | 'FIX_ROLE' | 'OTHER';
   description: string;
   originalValue?: unknown;
   correctedValue?: unknown;
@@ -235,7 +235,7 @@ export interface ReviewResult {
 }
 
 export interface ReviewIssue {
-  severity: "ERROR" | "WARNING" | "INFO";
+  severity: 'ERROR' | 'WARNING' | 'INFO';
   category: string;
   message: string;
   suggestion?: string;
@@ -339,13 +339,13 @@ export interface ValidationResults {
 // =============================================================================
 
 export type EvidenceType =
-  | "PHYSICAL_EVIDENCE" // 物证
-  | "DOCUMENTARY_EVIDENCE" // 书证
-  | "WITNESS_TESTIMONY" // 证人证言
-  | "EXPERT_OPINION" // 鉴定意见
-  | "AUDIO_VIDEO_EVIDENCE" // 视听资料
-  | "ELECTRONIC_EVIDENCE" // 电子数据
-  | "OTHER";
+  | 'PHYSICAL_EVIDENCE' // 物证
+  | 'DOCUMENTARY_EVIDENCE' // 书证
+  | 'WITNESS_TESTIMONY' // 证人证言
+  | 'EXPERT_OPINION' // 鉴定意见
+  | 'AUDIO_VIDEO_EVIDENCE' // 视听资料
+  | 'ELECTRONIC_EVIDENCE' // 电子数据
+  | 'OTHER';
 
 export interface ClassifiedEvidence {
   id: string;
@@ -360,7 +360,7 @@ export interface ClassifiedEvidence {
 export interface EvidenceRelation {
   evidenceId: string;
   relatedTo: string;
-  relationType: "SUPPORTS" | "CONTRADICTS" | "RELATES_TO";
+  relationType: 'SUPPORTS' | 'CONTRADICTS' | 'RELATES_TO';
   strength: number; // 关联强度 0-1
 }
 
@@ -388,11 +388,11 @@ export interface EvidenceAnalysisResult {
 
 export interface ConsistencyIssue {
   type:
-    | "PARTY_CLAIM_MISMATCH"
-    | "TIMELINE_DISCREPANCY"
-    | "EVIDENCE_CONTRADICTION"
-    | "LOGIC_GAP";
-  severity: "ERROR" | "WARNING" | "INFO";
+    | 'PARTY_CLAIM_MISMATCH'
+    | 'TIMELINE_DISCREPANCY'
+    | 'EVIDENCE_CONTRADICTION'
+    | 'LOGIC_GAP';
+  severity: 'ERROR' | 'WARNING' | 'INFO';
   description: string;
   affectedItems: string[]; // 相关的当事人ID、时间线事件ID等
   suggestion?: string;
@@ -411,7 +411,7 @@ export interface CompletenessCheck {
   category: string;
   isComplete: boolean;
   missingItems: string[];
-  importance: "HIGH" | "MEDIUM" | "LOW";
+  importance: 'HIGH' | 'MEDIUM' | 'LOW';
 }
 
 export interface CompletenessReport {
@@ -430,7 +430,7 @@ export interface QualityScoreReport {
   completenessScore: number; // 完整性
   consistencyScore: number; // 一致性
   relevanceScore: number; // 相关性
-  grade: "EXCELLENT" | "GOOD" | "SATISFACTORY" | "NEEDS_IMPROVEMENT" | "POOR";
+  grade: 'EXCELLENT' | 'GOOD' | 'SATISFACTORY' | 'NEEDS_IMPROVEMENT' | 'POOR';
 }
 
 export interface ComprehensiveAnalysisResult {

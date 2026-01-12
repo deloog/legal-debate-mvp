@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 // =============================================================================
 // 并发控制工具类
 // =============================================================================
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.documentConcurrencyController =
   exports.ConcurrencyController =
   exports.Semaphore =
@@ -29,7 +29,7 @@ class Semaphore {
         const index = this.waitQueue.indexOf(waitItem);
         if (index > -1) {
           this.waitQueue.splice(index, 1);
-          reject(new Error("等待并发许可超时"));
+          reject(new Error('等待并发许可超时'));
         }
       }, queueTimeout);
       waitItem.timeout = timeout;

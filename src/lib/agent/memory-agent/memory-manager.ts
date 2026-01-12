@@ -3,7 +3,7 @@
  * 实现Working Memory、Hot Memory、Cold Memory的CRUD操作
  */
 
-import { PrismaClient, MemoryType } from "@prisma/client";
+import { PrismaClient, MemoryType } from '@prisma/client';
 
 import type {
   Memory,
@@ -11,13 +11,13 @@ import type {
   StoreMemoryInput,
   GetMemoryInput,
   MemoryStats,
-} from "./types";
-import { DEFAULT_IMPORTANCE, AGENT_NAME } from "./memory-manager/config";
+} from './types';
+import { DEFAULT_IMPORTANCE, AGENT_NAME } from './memory-manager/config';
 import {
   trackAccess,
   toMemoryEntity,
   calculateExpiry,
-} from "./memory-manager/helpers";
+} from './memory-manager/helpers';
 
 /**
  * MemoryManager - 三层记忆管理类
@@ -32,7 +32,7 @@ export class MemoryManager {
     input: StoreMemoryInput,
     userId: string,
     caseId?: string,
-    debateId?: string,
+    debateId?: string
   ): Promise<Memory> {
     const {
       memoryType,
@@ -96,18 +96,18 @@ export class MemoryManager {
     userId: string,
     caseId?: string,
     debateId?: string,
-    ttl?: number,
+    ttl?: number
   ): Promise<void> {
     await this.storeMemory(
       {
-        memoryType: "WORKING",
+        memoryType: 'WORKING',
         memoryKey: key,
         memoryValue: value,
         ttl,
       },
       userId,
       caseId,
-      debateId,
+      debateId
     );
   }
 
@@ -116,7 +116,7 @@ export class MemoryManager {
    */
   async getWorkingMemory(key: string): Promise<unknown> {
     const input: GetMemoryInput = {
-      memoryType: "WORKING",
+      memoryType: 'WORKING',
       memoryKey: key,
     };
 
@@ -132,7 +132,7 @@ export class MemoryManager {
       where: {
         agentName: AGENT_NAME,
         memoryKey: key,
-        memoryType: "WORKING",
+        memoryType: 'WORKING',
       },
     });
   }
@@ -145,17 +145,17 @@ export class MemoryManager {
     value: unknown,
     userId: string,
     importance: number,
-    caseId?: string,
+    caseId?: string
   ): Promise<void> {
     await this.storeMemory(
       {
-        memoryType: "HOT",
+        memoryType: 'HOT',
         memoryKey: key,
         memoryValue: value,
         importance,
       },
       userId,
-      caseId,
+      caseId
     );
   }
 
@@ -164,7 +164,7 @@ export class MemoryManager {
    */
   async getHotMemory(key: string): Promise<unknown> {
     const input: GetMemoryInput = {
-      memoryType: "HOT",
+      memoryType: 'HOT',
       memoryKey: key,
     };
 
@@ -180,7 +180,7 @@ export class MemoryManager {
       where: {
         agentName: AGENT_NAME,
         memoryKey: key,
-        memoryType: "HOT",
+        memoryType: 'HOT',
       },
       data: {
         memoryValue: JSON.stringify(value),
@@ -195,16 +195,16 @@ export class MemoryManager {
   async storeColdMemory(
     key: string,
     value: unknown,
-    userId: string,
+    userId: string
   ): Promise<void> {
     await this.storeMemory(
       {
-        memoryType: "COLD",
+        memoryType: 'COLD',
         memoryKey: key,
         memoryValue: value,
         importance: 1.0, // 冷记忆重要性较高
       },
-      userId,
+      userId
     );
   }
 
@@ -213,7 +213,7 @@ export class MemoryManager {
    */
   async getColdMemory(key: string): Promise<unknown> {
     const input: GetMemoryInput = {
-      memoryType: "COLD",
+      memoryType: 'COLD',
       memoryKey: key,
     };
 
@@ -256,10 +256,10 @@ export class MemoryManager {
         memoryType,
         OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
       },
-      orderBy: { lastAccessedAt: "desc" },
+      orderBy: { lastAccessedAt: 'desc' },
     });
 
-    return records.map((record) => toMemoryEntity(record));
+    return records.map(record => toMemoryEntity(record));
   }
 
   /**
@@ -300,7 +300,7 @@ export class MemoryManager {
    * 通过ID获取记忆（包含元数据）
    */
   async getMemoryWithMetadata(
-    memoryId: string,
+    memoryId: string
   ): Promise<MemoryWithMetadata | null> {
     const record = await this.prisma.agentMemory.findFirst({
       where: {
@@ -336,13 +336,13 @@ export class MemoryManager {
       compressedCount,
     ] = await Promise.all([
       this.prisma.agentMemory.count({
-        where: { memoryType: "WORKING" },
+        where: { memoryType: 'WORKING' },
       }),
       this.prisma.agentMemory.count({
-        where: { memoryType: "HOT" },
+        where: { memoryType: 'HOT' },
       }),
       this.prisma.agentMemory.count({
-        where: { memoryType: "COLD" },
+        where: { memoryType: 'COLD' },
       }),
       this.prisma.agentMemory.count(),
       this.prisma.agentMemory.aggregate({
@@ -376,7 +376,7 @@ export class MemoryManager {
    */
   async markAsCompressed(
     memoryId: string,
-    compressionRatio: number,
+    compressionRatio: number
   ): Promise<void> {
     await this.prisma.agentMemory.update({
       where: { id: memoryId },

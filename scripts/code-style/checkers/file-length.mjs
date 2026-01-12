@@ -3,13 +3,13 @@
  * 检查文件是否超过最大行数限制
  */
 
-import { MAX_FILE_LINES } from "../config.mjs";
+import { MAX_FILE_LINES } from '../config.mjs';
 
 /**
  * 检查文件长度
  */
 export function checkFileLength(filePath, content) {
-  const lines = content.split("\n").length;
+  const lines = content.split('\n').length;
 
   if (lines > MAX_FILE_LINES) {
     return {

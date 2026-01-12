@@ -12,7 +12,7 @@ import {
   LOGICAL_CONNECTORS,
   CAUSAL_KEYWORDS,
   type CausalType,
-} from "../../../agent/legal-agent/reasoning-rules";
+} from '../../../agent/legal-agent/reasoning-rules';
 
 // =============================================================================
 // 类型定义
@@ -62,7 +62,7 @@ export interface ReasoningChainInfo {
   /** 推理步骤 */
   steps: string[];
   /** 推理类型 */
-  type: "deductive" | "inductive" | "analogical";
+  type: 'deductive' | 'inductive' | 'analogical';
 }
 
 // =============================================================================
@@ -117,12 +117,12 @@ export class LogicScoringEnhancer {
     baseScore: number,
     content: string,
     reasoningChain?: ReasoningChainInfo,
-    allArguments?: string[],
+    allArguments?: string[]
   ): LogicScoringResult {
     // 评估推理深度
     const depthEvaluation = this.evaluateReasoningDepth(
       content,
-      reasoningChain,
+      reasoningChain
     );
 
     // 评估逻辑连接词
@@ -140,17 +140,17 @@ export class LogicScoringEnhancer {
     const depthBonus = this.calculateDepthBonus(depthEvaluation.depth);
     const connectorBonus = this.calculateConnectorBonus(
       connectorEvaluation.strong,
-      connectorEvaluation.weak,
+      connectorEvaluation.weak
     );
     const causalBonus = this.calculateCausalBonus(causalEvaluation.count);
     const coherenceBonus = this.calculateCoherenceBonus(
-      coherenceEvaluation.score,
+      coherenceEvaluation.score
     );
 
     // 计算总奖励分（不超过最大奖励）
     const totalBonus = Math.min(
       SCORING_CONFIG.MAX_BONUS_SCORE,
-      depthBonus + connectorBonus + causalBonus + coherenceBonus,
+      depthBonus + connectorBonus + causalBonus + coherenceBonus
     );
 
     // 计算最终评分
@@ -193,14 +193,14 @@ export class LogicScoringEnhancer {
    */
   private evaluateReasoningDepth(
     content: string,
-    reasoningChain?: ReasoningChainInfo,
+    reasoningChain?: ReasoningChainInfo
   ): { steps: number; depth: number } {
     // 如果有明确的推理链，使用推理链步骤数
     if (reasoningChain && reasoningChain.steps.length > 0) {
       const steps = reasoningChain.steps.length;
       const depth = Math.min(
         steps / SCORING_CONFIG.OPTIMAL_REASONING_STEPS,
-        1.0,
+        1.0
       );
       return { steps, depth };
     }
@@ -302,12 +302,12 @@ export class LogicScoringEnhancer {
 
       // 检查是否有逻辑连接词连接
       const hasConnector = LOGICAL_CONNECTORS.some(
-        (c) => current.includes(c.word) || next.includes(c.word),
+        c => current.includes(c.word) || next.includes(c.word)
       );
 
       // 检查是否有因果关系
-      const hasCausal = Object.values(CAUSAL_KEYWORDS).some((keywords) =>
-        keywords.some((k) => current.includes(k) || next.includes(k)),
+      const hasCausal = Object.values(CAUSAL_KEYWORDS).some(keywords =>
+        keywords.some(k => current.includes(k) || next.includes(k))
       );
 
       if (hasConnector || hasCausal) {
@@ -352,7 +352,7 @@ export class LogicScoringEnhancer {
    */
   private calculateConnectorBonus(
     strongCount: number,
-    weakCount: number,
+    weakCount: number
   ): number {
     const strongBonus = strongCount * SCORING_CONFIG.STRONG_CONNECTOR_BONUS;
     const weakBonus = weakCount * SCORING_CONFIG.WEAK_CONNECTOR_BONUS;
@@ -401,8 +401,8 @@ export class LogicScoringEnhancer {
     // 简单的句子分割逻辑
     return text
       .split(/[。；；!?！？]+/)
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
   }
 }
 
@@ -426,7 +426,7 @@ export function createLogicScoringEnhancer(): LogicScoringEnhancer {
  */
 export function quickEvaluateLogic(
   baseScore: number,
-  content: string,
+  content: string
 ): LogicScoringResult {
   const enhancer = new LogicScoringEnhancer();
   return enhancer.enhanceScore(baseScore, content);
@@ -441,10 +441,10 @@ export function quickEvaluateLogic(
  */
 export function batchEvaluateLogic(
   baseScores: number[],
-  argumentList: string[],
+  argumentList: string[]
 ): LogicScoringResult[] {
   const enhancer = new LogicScoringEnhancer();
   return baseScores.map((score, index) =>
-    enhancer.enhanceScore(score, argumentList[index], undefined, argumentList),
+    enhancer.enhanceScore(score, argumentList[index], undefined, argumentList)
   );
 }

@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 // =============================================================================
 // 金额提取精度优化模块
 // 专门用于处理中文金额表达、货币单位、格式不统一等问题
 // 目标：金额识别精度≥99%
 // =============================================================================
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.PrecisionAmountExtractor = void 0;
 class PrecisionAmountExtractor {
   constructor() {
@@ -78,24 +78,24 @@ class PrecisionAmountExtractor {
       乙: 100000000,
     };
     this.currencyMap = {
-      元: "CNY",
-      圆: "CNY",
-      人民币: "CNY",
-      "￥": "CNY",
-      CNY: "CNY",
-      RMB: "CNY",
-      美元: "USD",
-      USD: "USD",
-      $: "USD",
-      港币: "HKD",
-      港元: "HKD",
-      HK$: "HKD",
-      欧元: "EUR",
-      EUR: "EUR",
-      "€": "EUR",
-      英镑: "GBP",
-      GBP: "GBP",
-      "£": "GBP",
+      元: 'CNY',
+      圆: 'CNY',
+      人民币: 'CNY',
+      '￥': 'CNY',
+      CNY: 'CNY',
+      RMB: 'CNY',
+      美元: 'USD',
+      USD: 'USD',
+      $: 'USD',
+      港币: 'HKD',
+      港元: 'HKD',
+      HK$: 'HKD',
+      欧元: 'EUR',
+      EUR: 'EUR',
+      '€': 'EUR',
+      英镑: 'GBP',
+      GBP: 'GBP',
+      '£': 'GBP',
     };
   }
   /**
@@ -136,9 +136,9 @@ class PrecisionAmountExtractor {
             const result = {
               originalText: match[0],
               normalizedAmount: 0,
-              currency: "CNY",
+              currency: 'CNY',
               confidence: 0.8,
-              extractionMethod: "regex",
+              extractionMethod: 'regex',
               processingNotes: [],
             };
             // 尝试解析数字部分
@@ -167,10 +167,10 @@ class PrecisionAmountExtractor {
         const result = {
           originalText: match,
           normalizedAmount: 0,
-          currency: "CNY",
+          currency: 'CNY',
           confidence: 0.9,
-          extractionMethod: "regex",
-          processingNotes: ["中文数字识别"],
+          extractionMethod: 'regex',
+          processingNotes: ['中文数字识别'],
         };
         result.normalizedAmount = this.convertChineseToNumber(match);
         result.currency = this.extractCurrency(match);
@@ -193,10 +193,10 @@ class PrecisionAmountExtractor {
           const result = {
             originalText: match[0],
             normalizedAmount: 0,
-            currency: "CNY",
+            currency: 'CNY',
             confidence: 0.85,
-            extractionMethod: "regex",
-            processingNotes: ["混合格式解析"],
+            extractionMethod: 'regex',
+            processingNotes: ['混合格式解析'],
           };
           // 提取数字部分
           const numberPart = match[1];
@@ -243,8 +243,8 @@ class PrecisionAmountExtractor {
    */
   parseNumericString(str) {
     // 移除非数字字符
-    const cleanStr = str.replace(/[^\d.]/g, "");
-    if (cleanStr.includes(".")) {
+    const cleanStr = str.replace(/[^\d.]/g, '');
+    if (cleanStr.includes('.')) {
       return parseFloat(cleanStr);
     } else {
       return parseInt(cleanStr, 10);
@@ -259,7 +259,7 @@ class PrecisionAmountExtractor {
         return currency;
       }
     }
-    return "CNY"; // 默认人民币
+    return 'CNY'; // 默认人民币
   }
   /**
    * 合并和去重
@@ -282,20 +282,20 @@ class PrecisionAmountExtractor {
   validateAndNormalize(match) {
     // 金额合理性检查
     if (match.normalizedAmount <= 0) {
-      match.processingNotes.push("金额必须大于0");
+      match.processingNotes.push('金额必须大于0');
       return null;
     }
     if (match.normalizedAmount > 1000000000) {
       // 超过1000万
-      match.processingNotes.push("金额异常大，需要验证");
+      match.processingNotes.push('金额异常大，需要验证');
       match.confidence = Math.min(match.confidence, 0.6);
     }
     // 单位标准化
-    if (match.currency === "CNY") {
+    if (match.currency === 'CNY') {
       // 检查是否是万元单位
-      if (match.originalText.includes("万")) {
+      if (match.originalText.includes('万')) {
         match.normalizedAmount *= 10000;
-        match.processingNotes.push("万元单位已转换为元");
+        match.processingNotes.push('万元单位已转换为元');
       }
     }
     return match;
@@ -312,10 +312,10 @@ class PrecisionAmountExtractor {
       const isInLegalContext = this.isInLegalContext(context);
       if (isInLegalContext) {
         result.confidence = Math.min(result.confidence + 0.1, 1.0);
-        result.processingNotes.push("法律上下文验证通过");
+        result.processingNotes.push('法律上下文验证通过');
       } else {
         result.confidence = Math.max(result.confidence - 0.2, 0.3);
-        result.processingNotes.push("法律上下文验证未通过");
+        result.processingNotes.push('法律上下文验证未通过');
       }
       validatedResults.push(result);
     }
@@ -326,7 +326,7 @@ class PrecisionAmountExtractor {
    */
   extractContext(target, fullText) {
     const index = fullText.indexOf(target);
-    if (index === -1) return "";
+    if (index === -1) return '';
     const start = Math.max(0, index - 50);
     const end = Math.min(fullText.length, index + target.length + 50);
     return fullText.substring(start, end);
@@ -336,23 +336,23 @@ class PrecisionAmountExtractor {
    */
   isInLegalContext(context) {
     const legalKeywords = [
-      "诉讼",
-      "请求",
-      "判令",
-      "支付",
-      "偿还",
-      "赔偿",
-      "违约",
-      "利息",
-      "本金",
-      "费用",
-      "损失",
-      "合同",
-      "义务",
-      "责任",
-      "金额",
+      '诉讼',
+      '请求',
+      '判令',
+      '支付',
+      '偿还',
+      '赔偿',
+      '违约',
+      '利息',
+      '本金',
+      '费用',
+      '损失',
+      '合同',
+      '义务',
+      '责任',
+      '金额',
     ];
-    return legalKeywords.some((keyword) => context.includes(keyword));
+    return legalKeywords.some(keyword => context.includes(keyword));
   }
   /**
    * 验证金额一致性
@@ -371,27 +371,27 @@ class PrecisionAmountExtractor {
       }
     }
     if (duplicates.length > 0) {
-      inconsistencies.push(`发现重复金额: ${duplicates.join(", ")}`);
-      suggestions.push("检查是否为同一金额的不同表达方式");
+      inconsistencies.push(`发现重复金额: ${duplicates.join(', ')}`);
+      suggestions.push('检查是否为同一金额的不同表达方式');
     }
     // 检查金额范围合理性
     for (const amount of amounts) {
       if (amount.normalizedAmount < 0.01) {
         inconsistencies.push(`金额过小: ${amount.normalizedAmount}`);
-        suggestions.push("检查金额单位是否正确");
+        suggestions.push('检查金额单位是否正确');
       }
       if (amount.normalizedAmount > 100000000) {
         inconsistencies.push(`金额异常大: ${amount.normalizedAmount}`);
-        suggestions.push("验证大额金额的合理性");
+        suggestions.push('验证大额金额的合理性');
       }
     }
     // 检查货币单位一致性
-    const currencies = new Set(amounts.map((a) => a.currency));
+    const currencies = new Set(amounts.map(a => a.currency));
     if (currencies.size > 1) {
       inconsistencies.push(
-        `多种货币单位: ${Array.from(currencies).join(", ")}`,
+        `多种货币单位: ${Array.from(currencies).join(', ')}`
       );
-      suggestions.push("统一货币单位或进行汇率转换");
+      suggestions.push('统一货币单位或进行汇率转换');
     }
     // 计算风险等级
     const riskLevel = this.calculateRiskLevel(inconsistencies, amounts.length);
@@ -408,9 +408,9 @@ class PrecisionAmountExtractor {
   calculateRiskLevel(inconsistencies, totalAmounts) {
     const inconsistencyRatio =
       inconsistencies.length / Math.max(totalAmounts, 1);
-    if (inconsistencyRatio === 0) return "low";
-    if (inconsistencyRatio <= 0.3) return "medium";
-    return "high";
+    if (inconsistencyRatio === 0) return 'low';
+    if (inconsistencyRatio <= 0.3) return 'medium';
+    return 'high';
   }
   /**
    * 获取最佳金额提取结果
@@ -425,14 +425,14 @@ class PrecisionAmountExtractor {
       }
       // 置信度相同时，选择更精确的提取方法
       if (
-        a.extractionMethod === "ai_confirmed" &&
-        b.extractionMethod !== "ai_confirmed"
+        a.extractionMethod === 'ai_confirmed' &&
+        b.extractionMethod !== 'ai_confirmed'
       ) {
         return -1;
       }
       if (
-        b.extractionMethod === "ai_confirmed" &&
-        a.extractionMethod !== "ai_confirmed"
+        b.extractionMethod === 'ai_confirmed' &&
+        a.extractionMethod !== 'ai_confirmed'
       ) {
         return 1;
       }
@@ -446,32 +446,32 @@ class PrecisionAmountExtractor {
    */
   generateExtractionReport(results) {
     if (results.length === 0) {
-      return "未检测到金额信息";
+      return '未检测到金额信息';
     }
     const best = this.getBestExtraction(results);
     const validation = this.validateAmountConsistency(results);
-    let report = "金额提取报告\n";
-    report += "===================\n";
+    let report = '金额提取报告\n';
+    report += '===================\n';
     if (best) {
       report += `最佳提取结果: ${best.originalText} → ${best.normalizedAmount} ${best.currency}\n`;
       report += `置信度: ${(best.confidence * 100).toFixed(1)}%\n`;
       report += `提取方法: ${best.extractionMethod}\n`;
       if (best.processingNotes.length > 0) {
-        report += `处理说明: ${best.processingNotes.join(", ")}\n`;
+        report += `处理说明: ${best.processingNotes.join(', ')}\n`;
       }
     }
-    report += "\n验证结果:\n";
-    report += `有效性: ${validation.isValid ? "✅ 通过" : "❌ 存在问题"}\n`;
+    report += '\n验证结果:\n';
+    report += `有效性: ${validation.isValid ? '✅ 通过' : '❌ 存在问题'}\n`;
     report += `风险等级: ${validation.riskLevel}\n`;
     if (validation.inconsistencies.length > 0) {
-      report += "发现的问题:\n";
-      validation.inconsistencies.forEach((issue) => {
+      report += '发现的问题:\n';
+      validation.inconsistencies.forEach(issue => {
         report += `  - ${issue}\n`;
       });
     }
     if (validation.suggestions.length > 0) {
-      report += "建议:\n";
-      validation.suggestions.forEach((suggestion) => {
+      report += '建议:\n';
+      validation.suggestions.forEach(suggestion => {
         report += `  - ${suggestion}\n`;
       });
     }

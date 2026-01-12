@@ -1,14 +1,14 @@
-import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
-import { LawArticleSearchService } from "../../lib/law-article/search-service";
-import type { SearchQuery } from "../../lib/law-article/types";
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import { LawArticleSearchService } from '../../lib/law-article/search-service';
+import type { SearchQuery } from '../../lib/law-article/types';
 
-describe("LawArticleSearchService 性能测试", () => {
+describe('LawArticleSearchService 性能测试', () => {
   const MAX_EXECUTION_TIME = 1000; // 最大执行时间：1秒（1000毫秒）
 
-  describe("检索性能测试", () => {
-    it("关键词检索应该在1秒内完成", async () => {
+  describe('检索性能测试', () => {
+    it('关键词检索应该在1秒内完成', async () => {
       const query: SearchQuery = {
-        keyword: "合同",
+        keyword: '合同',
         pagination: {
           page: 1,
           pageSize: 20,
@@ -26,10 +26,10 @@ describe("LawArticleSearchService 性能测试", () => {
       expect(result.executionTime).toBeLessThan(MAX_EXECUTION_TIME);
     });
 
-    it("分类筛选检索应该在1秒内完成", async () => {
+    it('分类筛选检索应该在1秒内完成', async () => {
       const query: SearchQuery = {
-        keyword: "责任",
-        category: "CIVIL",
+        keyword: '责任',
+        category: 'CIVIL',
         pagination: {
           page: 1,
           pageSize: 20,
@@ -46,12 +46,12 @@ describe("LawArticleSearchService 性能测试", () => {
       expect(result.executionTime).toBeLessThan(MAX_EXECUTION_TIME);
     });
 
-    it("相关性排序检索应该在1秒内完成", async () => {
+    it('相关性排序检索应该在1秒内完成', async () => {
       const query: SearchQuery = {
-        keyword: "违约",
+        keyword: '违约',
         sort: {
-          field: "relevance",
-          order: "desc",
+          field: 'relevance',
+          order: 'desc',
         },
         pagination: {
           page: 1,
@@ -69,14 +69,14 @@ describe("LawArticleSearchService 性能测试", () => {
       expect(result.executionTime).toBeLessThan(MAX_EXECUTION_TIME);
     });
 
-    it("多条件组合检索应该在1秒内完成", async () => {
+    it('多条件组合检索应该在1秒内完成', async () => {
       const query: SearchQuery = {
-        keyword: "违约",
-        category: "CIVIL",
-        tags: ["民事", "合同"],
+        keyword: '违约',
+        category: 'CIVIL',
+        tags: ['民事', '合同'],
         sort: {
-          field: "relevance",
-          order: "desc",
+          field: 'relevance',
+          order: 'desc',
         },
         pagination: {
           page: 1,
@@ -94,9 +94,9 @@ describe("LawArticleSearchService 性能测试", () => {
       expect(result.executionTime).toBeLessThan(MAX_EXECUTION_TIME);
     });
 
-    it("分页检索第二页应该在1秒内完成", async () => {
+    it('分页检索第二页应该在1秒内完成', async () => {
       const query: SearchQuery = {
-        keyword: "权利",
+        keyword: '权利',
         pagination: {
           page: 2,
           pageSize: 20,
@@ -114,9 +114,9 @@ describe("LawArticleSearchService 性能测试", () => {
       expect(result.pagination.page).toBe(2);
     });
 
-    it("缓存命中检索应该在100毫秒内完成", async () => {
+    it('缓存命中检索应该在100毫秒内完成', async () => {
       const query: SearchQuery = {
-        keyword: "义务",
+        keyword: '义务',
         pagination: {
           page: 1,
           pageSize: 20,
@@ -139,10 +139,10 @@ describe("LawArticleSearchService 性能测试", () => {
     });
   });
 
-  describe("批量检索性能测试", () => {
-    it("连续10次检索平均时间应该小于500ms", async () => {
+  describe('批量检索性能测试', () => {
+    it('连续10次检索平均时间应该小于500ms', async () => {
       const query: SearchQuery = {
-        keyword: "合同",
+        keyword: '合同',
         pagination: {
           page: 1,
           pageSize: 10,
@@ -172,18 +172,18 @@ describe("LawArticleSearchService 性能测试", () => {
       expect(maxTime).toBeLessThan(MAX_EXECUTION_TIME);
     });
 
-    it("并发5次检索应该在1秒内完成", async () => {
+    it('并发5次检索应该在1秒内完成', async () => {
       const queries: SearchQuery[] = [
-        { keyword: "合同", pagination: { page: 1, pageSize: 10 } },
-        { keyword: "责任", pagination: { page: 1, pageSize: 10 } },
-        { keyword: "违约", pagination: { page: 1, pageSize: 10 } },
-        { keyword: "赔偿", pagination: { page: 1, pageSize: 10 } },
-        { keyword: "义务", pagination: { page: 1, pageSize: 10 } },
+        { keyword: '合同', pagination: { page: 1, pageSize: 10 } },
+        { keyword: '责任', pagination: { page: 1, pageSize: 10 } },
+        { keyword: '违约', pagination: { page: 1, pageSize: 10 } },
+        { keyword: '赔偿', pagination: { page: 1, pageSize: 10 } },
+        { keyword: '义务', pagination: { page: 1, pageSize: 10 } },
       ];
 
       const startTime = Date.now();
       const results = await Promise.all(
-        queries.map((query) => LawArticleSearchService.search(query)),
+        queries.map(query => LawArticleSearchService.search(query))
       );
       const executionTime = Date.now() - startTime;
 
@@ -195,11 +195,11 @@ describe("LawArticleSearchService 性能测试", () => {
     });
   });
 
-  describe("其他方法性能测试", () => {
-    it("getArticleById 应该在500ms内完成", async () => {
+  describe('其他方法性能测试', () => {
+    it('getArticleById 应该在500ms内完成', async () => {
       // 先获取一个法条ID
       const searchResult = await LawArticleSearchService.search({
-        keyword: "合同",
+        keyword: '合同',
         pagination: { page: 1, pageSize: 1 },
       });
 
@@ -217,9 +217,9 @@ describe("LawArticleSearchService 性能测试", () => {
       }
     });
 
-    it("findSimilarArticles 应该在1秒内完成", async () => {
+    it('findSimilarArticles 应该在1秒内完成', async () => {
       const searchResult = await LawArticleSearchService.search({
-        keyword: "合同",
+        keyword: '合同',
         pagination: { page: 1, pageSize: 1 },
       });
 
@@ -238,11 +238,11 @@ describe("LawArticleSearchService 性能测试", () => {
       }
     });
 
-    it("getPopularArticles 应该在500ms内完成", async () => {
+    it('getPopularArticles 应该在500ms内完成', async () => {
       const startTime = Date.now();
       const popularArticles = await LawArticleSearchService.getPopularArticles(
         undefined,
-        10,
+        10
       );
       const executionTime = Date.now() - startTime;
 
@@ -252,7 +252,7 @@ describe("LawArticleSearchService 性能测试", () => {
       expect(popularArticles).toBeInstanceOf(Array);
     });
 
-    it("getCategoryStats 应该在500ms内完成", async () => {
+    it('getCategoryStats 应该在500ms内完成', async () => {
       const startTime = Date.now();
       const stats = await LawArticleSearchService.getCategoryStats();
       const executionTime = Date.now() - startTime;
@@ -263,12 +263,12 @@ describe("LawArticleSearchService 性能测试", () => {
       expect(stats).toBeInstanceOf(Array);
     });
 
-    it("getSuggestions 应该在500ms内完成", async () => {
+    it('getSuggestions 应该在500ms内完成', async () => {
       const startTime = Date.now();
       const suggestions = await LawArticleSearchService.getSuggestions(
-        "民法典",
+        '民法典',
         undefined,
-        10,
+        10
       );
       const executionTime = Date.now() - startTime;
 
@@ -279,10 +279,10 @@ describe("LawArticleSearchService 性能测试", () => {
     });
   });
 
-  describe("极限性能测试", () => {
-    it("大量结果检索（100条）应该在2秒内完成", async () => {
+  describe('极限性能测试', () => {
+    it('大量结果检索（100条）应该在2秒内完成', async () => {
       const query: SearchQuery = {
-        keyword: "权利",
+        keyword: '权利',
         pagination: {
           page: 1,
           pageSize: 100,
@@ -299,14 +299,14 @@ describe("LawArticleSearchService 性能测试", () => {
       expect(executionTime).toBeLessThan(2000);
     });
 
-    it("复杂查询（多条件+大页码）应该在2秒内完成", async () => {
+    it('复杂查询（多条件+大页码）应该在2秒内完成', async () => {
       const query: SearchQuery = {
-        keyword: "违约",
-        category: "CIVIL",
-        tags: ["民事", "合同"],
+        keyword: '违约',
+        category: 'CIVIL',
+        tags: ['民事', '合同'],
         sort: {
-          field: "relevance",
-          order: "desc",
+          field: 'relevance',
+          order: 'desc',
         },
         minRelevanceScore: 0.3,
         pagination: {

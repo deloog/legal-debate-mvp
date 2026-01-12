@@ -7,12 +7,12 @@
  * - 支持性能监控和指标收集
  */
 
-import { logger } from "../../../agent/security/logger";
+import { logger } from '../../../agent/security/logger';
 
 export class DocAnalyzerLogger {
   private module: string;
 
-  constructor(module: string = "DocAnalyzer") {
+  constructor(module: string = 'DocAnalyzer') {
     this.module = module;
   }
 
@@ -48,7 +48,7 @@ export class DocAnalyzerLogger {
    * 记录文档分析开始
    */
   logAnalysisStart(documentId: string): void {
-    logger.info("文档分析开始", { module: this.module, documentId });
+    logger.info('文档分析开始', { module: this.module, documentId });
   }
 
   /**
@@ -57,10 +57,10 @@ export class DocAnalyzerLogger {
   logAnalysisComplete(
     documentId: string,
     processingTime: number,
-    confidence: number,
+    confidence: number
   ): void {
     logger.recordDocumentProcessing(true, processingTime, confidence);
-    logger.info("文档分析完成", {
+    logger.info('文档分析完成', {
       module: this.module,
       documentId,
       processingTime,
@@ -74,10 +74,10 @@ export class DocAnalyzerLogger {
   logAnalysisFailure(
     documentId: string,
     error: Error,
-    processingTime: number,
+    processingTime: number
   ): void {
     logger.recordDocumentProcessing(false, processingTime, 0);
-    logger.error("文档分析失败", error, {
+    logger.error('文档分析失败', error, {
       module: this.module,
       documentId,
       processingTime,
@@ -88,21 +88,21 @@ export class DocAnalyzerLogger {
    * 记录缓存命中
    */
   logCacheHit(documentId: string): void {
-    logger.info("缓存命中", { module: this.module, documentId });
+    logger.info('缓存命中', { module: this.module, documentId });
   }
 
   /**
    * 记录缓存未命中
    */
   logCacheMiss(documentId: string): void {
-    logger.debug("缓存未命中", { module: this.module, documentId });
+    logger.debug('缓存未命中', { module: this.module, documentId });
   }
 
   /**
    * 记录AI调用
    */
   logAICall(provider: string, model: string, tokens: number): void {
-    logger.debug("AI调用", {
+    logger.debug('AI调用', {
       module: this.module,
       provider,
       model,
@@ -116,9 +116,9 @@ export class DocAnalyzerLogger {
   logPerformanceMetric(
     metricName: string,
     value: number,
-    unit: string = "ms",
+    unit: string = 'ms'
   ): void {
-    logger.debug("性能指标", {
+    logger.debug('性能指标', {
       module: this.module,
       metricName,
       value,
@@ -137,4 +137,4 @@ export class DocAnalyzerLogger {
 /**
  * 默认DocAnalyzer日志实例
  */
-export const docAnalyzerLogger = new DocAnalyzerLogger("DocAnalyzer");
+export const docAnalyzerLogger = new DocAnalyzerLogger('DocAnalyzer');

@@ -3,15 +3,15 @@
  * 第三层：对争议焦点进行审查和修正
  */
 
-import { getUnifiedAIService } from "@/lib/ai/unified-service";
-import type { DisputeFocus } from "../../core/types";
+import { getUnifiedAIService } from '@/lib/ai/unified-service';
+import type { DisputeFocus } from '../../core/types';
 
 /**
  * AI审查层 - 对争议焦点进行审查和修正
  */
 export async function aiReviewLayer(
   focuses: DisputeFocus[],
-  originalText: string,
+  originalText: string
 ): Promise<DisputeFocus[]> {
   try {
     const unifiedService = await getUnifiedAIService();
@@ -19,16 +19,16 @@ export async function aiReviewLayer(
     const prompt = buildAIReviewPrompt(focuses, originalText);
 
     const response = await unifiedService.chatCompletion({
-      model: "deepseek-chat",
-      provider: "deepseek",
+      model: 'deepseek-chat',
+      provider: 'deepseek',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content:
-            "你是一个专业的法律争议焦点审查专家。请审查和修正争议焦点识别结果。",
+            '你是一个专业的法律争议焦点审查专家。请审查和修正争议焦点识别结果。',
         },
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
@@ -38,14 +38,14 @@ export async function aiReviewLayer(
 
     if (response.choices && response.choices.length > 0) {
       return parseAIReviewResponse(
-        response.choices[0].message.content || "",
-        focuses,
+        response.choices[0].message.content || '',
+        focuses
       );
     }
 
     return focuses;
   } catch (error) {
-    console.error("AI审查层失败:", error);
+    console.error('AI审查层失败:', error);
     return focuses;
   }
 }
@@ -55,7 +55,7 @@ export async function aiReviewLayer(
  */
 function buildAIReviewPrompt(
   focuses: DisputeFocus[],
-  originalText: string,
+  originalText: string
 ): string {
   const focusList = focuses
     .map(
@@ -65,9 +65,9 @@ function buildAIReviewPrompt(
    - 被告观点: ${f.positionB}
    - 核心争议: ${f.coreIssue}
    - 重要性: ${f.importance}
-   - 置信度: ${f.confidence}`,
+   - 置信度: ${f.confidence}`
     )
-    .join("\n");
+    .join('\n');
 
   return `请审查以下从法律文档中识别的争议焦点列表，确保其准确性和完整性。
 
@@ -116,20 +116,20 @@ ${focusList}
  */
 function parseAIReviewResponse(
   aiResponse: string,
-  originalFocuses: DisputeFocus[],
+  originalFocuses: DisputeFocus[]
 ): DisputeFocus[] {
   try {
     let cleanedResponse = aiResponse.trim();
 
-    if (cleanedResponse.includes("```json")) {
+    if (cleanedResponse.includes('```json')) {
       cleanedResponse = cleanedResponse
-        .replace(/```json\s*/, "")
-        .replace(/```\s*$/, "");
+        .replace(/```json\s*/, '')
+        .replace(/```\s*$/, '');
     }
-    if (cleanedResponse.includes("```")) {
+    if (cleanedResponse.includes('```')) {
       cleanedResponse = cleanedResponse
-        .replace(/```\s*/, "")
-        .replace(/```\s*$/, "");
+        .replace(/```\s*/, '')
+        .replace(/```\s*$/, '');
     }
 
     const parsed = JSON.parse(cleanedResponse);
@@ -139,18 +139,18 @@ function parseAIReviewResponse(
 
     return reviewedItems
       .map((item: any) => {
-        const original = originalFocuses.find((f) => f.id === item.id);
+        const original = originalFocuses.find(f => f.id === item.id);
 
         return {
           id: item.id,
           category: item.category,
-          description: item.description || original?.description || "",
-          positionA: item.positionA || original?.positionA || "未明确",
-          positionB: item.positionB || original?.positionB || "未明确",
-          coreIssue: item.coreIssue || original?.coreIssue || "",
+          description: item.description || original?.description || '',
+          positionA: item.positionA || original?.positionA || '未明确',
+          positionB: item.positionB || original?.positionB || '未明确',
+          coreIssue: item.coreIssue || original?.coreIssue || '',
           importance: Math.min(
             10,
-            Math.max(1, Math.round(item.importance || 5)),
+            Math.max(1, Math.round(item.importance || 5))
           ),
           confidence: Math.min(1, Math.max(0, item.confidence || 0.8)),
           relatedClaims: original?.relatedClaims || [],
@@ -160,9 +160,9 @@ function parseAIReviewResponse(
           _inferred: (item.confidence || 0.8) < 0.9,
         };
       })
-      .filter((item) => !invalidIds.has(item.id));
+      .filter(item => !invalidIds.has(item.id));
   } catch (error) {
-    console.error("解析AI审查响应失败:", error);
+    console.error('解析AI审查响应失败:', error);
     return originalFocuses;
   }
 }

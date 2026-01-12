@@ -2,9 +2,9 @@
  * 获取当前用户企业信息API
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { getAuthUser } from "@/lib/middleware/auth";
-import { getEnterpriseAccountByUserId } from "@/lib/enterprise/service";
+import { NextRequest, NextResponse } from 'next/server';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { getEnterpriseAccountByUserId } from '@/lib/enterprise/service';
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,10 +14,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "未登录",
-          error: "UNAUTHORIZED",
+          message: '未登录',
+          error: 'UNAUTHORIZED',
         },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -28,10 +28,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "未找到企业账号",
-          error: "NOT_FOUND",
+          message: '未找到企业账号',
+          error: 'NOT_FOUND',
         },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -47,17 +47,17 @@ export async function GET(request: NextRequest) {
           message: error.message,
           error: error.name,
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     return NextResponse.json(
       {
         success: false,
-        message: "服务器内部错误",
-        error: "INTERNAL_SERVER_ERROR",
+        message: '服务器内部错误',
+        error: 'INTERNAL_SERVER_ERROR',
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

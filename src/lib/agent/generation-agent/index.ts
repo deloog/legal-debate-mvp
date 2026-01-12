@@ -1,19 +1,19 @@
 // GenerationAgent：生成法律文书和辩论内容的核心代理
 
-import { CaseInfo, DebateGenerationResult } from "@/types/debate";
-import type { LawArticle } from "@prisma/client";
+import { CaseInfo, DebateGenerationResult } from '@/types/debate';
+import type { LawArticle } from '@prisma/client';
 import {
   DocumentGenerator,
   DebateContentWrapper,
   StreamGenerator,
   ContentOptimizer,
-} from ".";
+} from '.';
 import {
   GenerationAgentConfig,
   GenerationInput,
   GenerationOutput,
   DocumentType,
-} from "./types";
+} from './types';
 
 /**
  * GenerationAgent：生成法律文书和辩论内容的核心代理
@@ -27,13 +27,13 @@ export class GenerationAgent {
 
   constructor(config?: Partial<GenerationAgentConfig>) {
     this.config = {
-      defaultFormat: config?.defaultFormat ?? "legal",
+      defaultFormat: config?.defaultFormat ?? 'legal',
       enableStream: config?.enableStream ?? true,
       streamChunkSize: config?.streamChunkSize ?? 200,
       streamDelayMs: config?.streamDelayMs ?? 100,
       autoOptimize: config?.autoOptimize ?? true,
-      optimizationLevel: config?.optimizationLevel ?? "medium",
-      aiProvider: config?.aiProvider ?? "deepseek",
+      optimizationLevel: config?.optimizationLevel ?? 'medium',
+      aiProvider: config?.aiProvider ?? 'deepseek',
       temperature: config?.temperature ?? 0.7,
       maxTokens: config?.maxTokens ?? 2000,
     };
@@ -42,11 +42,11 @@ export class GenerationAgent {
       format: this.config.defaultFormat,
       includeHeader: true,
       includeFooter: true,
-      dateFormat: "zh-CN",
+      dateFormat: 'zh-CN',
     });
 
     this.debateWrapper = new DebateContentWrapper({
-      balanceStrictness: "medium",
+      balanceStrictness: 'medium',
       includeLegalAnalysis: true,
       maxArgumentsPerSide: 3,
       qualityThreshold: 0.7,
@@ -55,7 +55,7 @@ export class GenerationAgent {
     this.streamGenerator = new StreamGenerator({
       chunkSize: this.config.streamChunkSize,
       delayMs: this.config.streamDelayMs,
-      format: "sse",
+      format: 'sse',
     });
 
     this.contentOptimizer = new ContentOptimizer({
@@ -71,35 +71,35 @@ export class GenerationAgent {
   async generateDocument(input: GenerationInput): Promise<GenerationOutput> {
     const { type, caseInfo, lawArticles = [], options } = input;
 
-    if (type === "debate") {
-      throw new Error("请使用 generateDebate 方法生成辩论内容");
+    if (type === 'debate') {
+      throw new Error('请使用 generateDebate 方法生成辩论内容');
     }
 
     let output: GenerationOutput;
 
     switch (type) {
-      case "complaint":
+      case 'complaint':
         output = this.documentGenerator.generateComplaint(
           caseInfo,
           lawArticles,
-          options,
+          options
         );
         break;
-      case "answer":
+      case 'answer':
         output = this.documentGenerator.generateAnswer(
           caseInfo,
           lawArticles,
-          options,
+          options
         );
         break;
-      case "evidence":
+      case 'evidence':
         output = this.documentGenerator.generateEvidence(caseInfo, [], options);
         break;
-      case "appeal":
+      case 'appeal':
         output = this.documentGenerator.generateAppeal(
           caseInfo,
           lawArticles,
-          options,
+          options
         );
         break;
       default:
@@ -121,21 +121,21 @@ export class GenerationAgent {
    */
   async generateDebate(
     caseInfo: CaseInfo,
-    lawArticles: LawArticle[],
+    lawArticles: LawArticle[]
   ): Promise<DebateGenerationResult> {
     const plaintiffArguments = this.generatePlaintiffArguments(
       caseInfo,
-      lawArticles,
+      lawArticles
     );
     const defendantArguments = this.generateDefendantArguments(
       caseInfo,
-      lawArticles,
+      lawArticles
     );
 
     const result = this.debateWrapper.wrapDebateResult(
       plaintiffArguments,
       defendantArguments,
-      lawArticles,
+      lawArticles
     );
 
     return result;
@@ -145,7 +145,7 @@ export class GenerationAgent {
    * 流式生成内容
    */
   async *generateStream(
-    content: string,
+    content: string
   ): AsyncGenerator<{ chunk: string; progress: number; finished: boolean }> {
     yield* this.streamGenerator.generateWithProgress(content);
   }
@@ -155,10 +155,10 @@ export class GenerationAgent {
    */
   async generateComplaint(
     caseInfo: CaseInfo,
-    lawArticles?: LawArticle[],
+    lawArticles?: LawArticle[]
   ): Promise<GenerationOutput> {
     return this.generateDocument({
-      type: "complaint",
+      type: 'complaint',
       caseInfo,
       lawArticles,
     });
@@ -169,10 +169,10 @@ export class GenerationAgent {
    */
   async generateAnswer(
     caseInfo: CaseInfo,
-    lawArticles?: LawArticle[],
+    lawArticles?: LawArticle[]
   ): Promise<GenerationOutput> {
     return this.generateDocument({
-      type: "answer",
+      type: 'answer',
       caseInfo,
       lawArticles,
     });
@@ -183,7 +183,7 @@ export class GenerationAgent {
    */
   async generateEvidence(caseInfo: CaseInfo): Promise<GenerationOutput> {
     return this.generateDocument({
-      type: "evidence",
+      type: 'evidence',
       caseInfo,
       template: undefined,
       options: undefined,
@@ -195,10 +195,10 @@ export class GenerationAgent {
    */
   async generateAppeal(
     caseInfo: CaseInfo,
-    lawArticles?: LawArticle[],
+    lawArticles?: LawArticle[]
   ): Promise<GenerationOutput> {
     return this.generateDocument({
-      type: "appeal",
+      type: 'appeal',
       caseInfo,
       lawArticles,
     });
@@ -224,32 +224,32 @@ export class GenerationAgent {
    */
   private generatePlaintiffArguments(
     caseInfo: CaseInfo,
-    lawArticles: LawArticle[],
+    lawArticles: LawArticle[]
   ) {
     return [
       {
-        side: "plaintiff" as const,
+        side: 'plaintiff' as const,
         content: `根据案件事实，${caseInfo.title}`,
         legalBasis: lawArticles[0]
           ? `《${lawArticles[0].lawName}》${lawArticles[0].articleNumber}`
           : undefined,
-        reasoning: "基于上述事实和法律依据，原告的主张具有充分理由。",
+        reasoning: '基于上述事实和法律依据，原告的主张具有充分理由。',
         score: 0.85,
         evidenceRefs: [],
       },
       {
-        side: "plaintiff" as const,
-        content: "被告的行为已构成违约，应承担相应的法律责任。",
+        side: 'plaintiff' as const,
+        content: '被告的行为已构成违约，应承担相应的法律责任。',
         legalBasis: undefined,
-        reasoning: "根据合同法相关规定，违约方应当承担违约责任。",
+        reasoning: '根据合同法相关规定，违约方应当承担违约责任。',
         score: 0.8,
         evidenceRefs: [],
       },
       {
-        side: "plaintiff" as const,
-        content: "请求法院判令被告履行合同义务，赔偿原告损失。",
+        side: 'plaintiff' as const,
+        content: '请求法院判令被告履行合同义务，赔偿原告损失。',
         legalBasis: undefined,
-        reasoning: "为维护原告合法权益，请求法院依法裁判。",
+        reasoning: '为维护原告合法权益，请求法院依法裁判。',
         score: 0.9,
         evidenceRefs: [],
       },
@@ -263,30 +263,30 @@ export class GenerationAgent {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _caseInfo: CaseInfo,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _lawArticles: LawArticle[],
+    _lawArticles: LawArticle[]
   ) {
     return [
       {
-        side: "defendant" as const,
-        content: "原告的主张缺乏事实和法律依据。",
+        side: 'defendant' as const,
+        content: '原告的主张缺乏事实和法律依据。',
         legalBasis: undefined,
-        reasoning: "原告未能提供充分证据证明其主张。",
+        reasoning: '原告未能提供充分证据证明其主张。',
         score: 0.8,
         evidenceRefs: [],
       },
       {
-        side: "defendant" as const,
-        content: "被告已履行合同义务，不存在违约行为。",
+        side: 'defendant' as const,
+        content: '被告已履行合同义务，不存在违约行为。',
         legalBasis: undefined,
-        reasoning: "根据合同约定和相关事实，被告已履行全部义务。",
+        reasoning: '根据合同约定和相关事实，被告已履行全部义务。',
         score: 0.85,
         evidenceRefs: [],
       },
       {
-        side: "defendant" as const,
-        content: "请求法院驳回原告的全部诉讼请求。",
+        side: 'defendant' as const,
+        content: '请求法院驳回原告的全部诉讼请求。',
         legalBasis: undefined,
-        reasoning: "原告的诉讼请求没有事实和法律依据，不应予以支持。",
+        reasoning: '原告的诉讼请求没有事实和法律依据，不应予以支持。',
         score: 0.9,
         evidenceRefs: [],
       },
@@ -366,7 +366,7 @@ export class GenerationAgent {
    * 批量生成文档
    */
   async batchGenerateDocuments(
-    inputs: GenerationInput[],
+    inputs: GenerationInput[]
   ): Promise<GenerationOutput[]> {
     const results: GenerationOutput[] = [];
 
@@ -383,22 +383,22 @@ export class GenerationAgent {
    */
   private validateInput(input: GenerationInput): void {
     if (!input.caseInfo) {
-      throw new Error("案件信息不能为空");
+      throw new Error('案件信息不能为空');
     }
 
     if (!input.caseInfo.description) {
-      throw new Error("案件描述不能为空");
+      throw new Error('案件描述不能为空');
     }
 
-    if (input.type === "debate") {
+    if (input.type === 'debate') {
       return;
     }
 
     const validTypes: DocumentType[] = [
-      "complaint",
-      "answer",
-      "evidence",
-      "appeal",
+      'complaint',
+      'answer',
+      'evidence',
+      'appeal',
     ];
     if (!validTypes.includes(input.type as DocumentType)) {
       throw new Error(`不支持的文档类型: ${input.type}`);
@@ -407,8 +407,8 @@ export class GenerationAgent {
 }
 
 // 导出所有模块
-export { DocumentGenerator } from "./document-generator";
-export { DebateContentWrapper } from "./debate-content-wrapper";
-export { StreamGenerator } from "./stream-generator";
-export { ContentOptimizer } from "./content-optimizer";
-export * from "./types";
+export { DocumentGenerator } from './document-generator';
+export { DebateContentWrapper } from './debate-content-wrapper';
+export { StreamGenerator } from './stream-generator';
+export { ContentOptimizer } from './content-optimizer';
+export * from './types';

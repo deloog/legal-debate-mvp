@@ -3,7 +3,7 @@
  * 包含：重试机制功能
  */
 
-import type { RetryOperationResult } from "./types";
+import type { RetryOperationResult } from './types';
 
 /**
  * retry_operation - 重试操作
@@ -47,9 +47,9 @@ export async function retry_operation<T>(params: {
 
       const delay = Math.min(
         baseDelay * Math.pow(backoffMultiplier, attempt - 1),
-        maxDelay,
+        maxDelay
       );
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
 
@@ -57,6 +57,6 @@ export async function retry_operation<T>(params: {
     success: false,
     attempts: maxAttempts,
     executionTime: Date.now() - startTime,
-    error: new Error("Max retries exceeded"),
+    error: new Error('Max retries exceeded'),
   };
 }

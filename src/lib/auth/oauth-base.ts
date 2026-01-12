@@ -12,7 +12,7 @@ import type {
   OAuthTokenResponse,
   OAuthUserInfo,
   StateValidationResult,
-} from "../../types/oauth";
+} from '../../types/oauth';
 
 /**
  * OAuth 基础类
@@ -29,7 +29,7 @@ export abstract class OAuthBaseProvider {
   };
 
   // State 存储键前缀
-  private readonly STATE_PREFIX = "oauth_state_";
+  private readonly STATE_PREFIX = 'oauth_state_';
   private readonly STATE_EXPIRY = 10 * 60 * 1000; // 10分钟
 
   constructor(config: {
@@ -59,14 +59,14 @@ export abstract class OAuthBaseProvider {
    */
   abstract getUserInfo(
     accessToken: string,
-    openid?: string,
+    openid?: string
   ): Promise<OAuthUserInfo>;
 
   /**
    * 初始化授权流程
    */
   async authorize(
-    request: OAuthAuthorizeRequest,
+    request: OAuthAuthorizeRequest
   ): Promise<OAuthAuthorizeResponse> {
     try {
       const stateData: OAuthState = {
@@ -82,7 +82,7 @@ export abstract class OAuthBaseProvider {
       // 生成授权URL
       const authorizeUrl = this.buildAuthorizeUrl(
         stateData.state,
-        stateData.redirectUri,
+        stateData.redirectUri
       );
 
       return {
@@ -91,12 +91,12 @@ export abstract class OAuthBaseProvider {
         state: stateData.state,
       };
     } catch (error) {
-      console.error("OAuth authorize error:", error);
+      console.error('OAuth authorize error:', error);
       return {
         success: false,
-        authorizeUrl: "",
-        state: "",
-        error: error instanceof Error ? error.message : "授权失败",
+        authorizeUrl: '',
+        state: '',
+        error: error instanceof Error ? error.message : '授权失败',
       };
     }
   }
@@ -105,13 +105,13 @@ export abstract class OAuthBaseProvider {
    * 处理回调
    */
   async callback(
-    request: OAuthCallbackRequest,
+    request: OAuthCallbackRequest
   ): Promise<OAuthCallbackResponse> {
     try {
       // 验证 state
       const stateValidation = this.validateState(request.state);
       if (!stateValidation.valid || !stateValidation.stateData) {
-        throw new Error(stateValidation.error || "Invalid state");
+        throw new Error(stateValidation.error || 'Invalid state');
       }
 
       // 交换访问令牌
@@ -120,7 +120,7 @@ export abstract class OAuthBaseProvider {
       // 获取用户信息
       const userInfo = await this.getUserInfo(
         tokenResponse.access_token,
-        tokenResponse.openid,
+        tokenResponse.openid
       );
 
       // 这里应该调用用户服务处理登录逻辑
@@ -135,27 +135,27 @@ export abstract class OAuthBaseProvider {
             userInfo.email || `${userInfo.id}@${this.getProviderName()}.oauth`,
           username: userInfo.nickname,
           name: userInfo.nickname,
-          role: "USER",
+          role: 'USER',
           createdAt: new Date(),
         },
         token: tokenResponse.access_token,
         refreshToken: tokenResponse.refresh_token,
       };
     } catch (error) {
-      console.error("OAuth callback error:", error);
+      console.error('OAuth callback error:', error);
       return {
         success: false,
         isNewUser: false,
         user: {
-          id: "",
-          email: "",
+          id: '',
+          email: '',
           username: null,
           name: null,
-          role: "USER",
+          role: 'USER',
           createdAt: new Date(),
         },
-        token: "",
-        error: error instanceof Error ? error.message : "回调处理失败",
+        token: '',
+        error: error instanceof Error ? error.message : '回调处理失败',
       };
     }
   }
@@ -166,7 +166,7 @@ export abstract class OAuthBaseProvider {
   protected createOAuthError(
     code: string,
     message: string,
-    details?: unknown,
+    details?: unknown
   ): OAuthError {
     return {
       code: code as never,
@@ -192,7 +192,7 @@ export abstract class OAuthBaseProvider {
 
     // 简单实现：使用 sessionStorage（前端）或 内存存储（后端）
     // 在实际应用中，应该使用 Redis 或数据库
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       sessionStorage.setItem(key, value);
       setTimeout(() => {
         sessionStorage.removeItem(key);
@@ -206,9 +206,9 @@ export abstract class OAuthBaseProvider {
   private validateState(state: string): StateValidationResult {
     try {
       const key = `${this.STATE_PREFIX}${state}`;
-      let stateStr = "";
-      if (typeof window !== "undefined") {
-        stateStr = sessionStorage.getItem(key) || "";
+      let stateStr = '';
+      if (typeof window !== 'undefined') {
+        stateStr = sessionStorage.getItem(key) || '';
         sessionStorage.removeItem(key);
       }
 
@@ -216,7 +216,7 @@ export abstract class OAuthBaseProvider {
         return {
           valid: false,
           stateData: null,
-          error: "State not found or expired",
+          error: 'State not found or expired',
         };
       }
 
@@ -228,7 +228,7 @@ export abstract class OAuthBaseProvider {
         return {
           valid: false,
           stateData: null,
-          error: "State expired",
+          error: 'State expired',
         };
       }
 
@@ -237,7 +237,7 @@ export abstract class OAuthBaseProvider {
         return {
           valid: false,
           stateData: null,
-          error: "Provider mismatch",
+          error: 'Provider mismatch',
         };
       }
 
@@ -251,7 +251,7 @@ export abstract class OAuthBaseProvider {
         valid: false,
         stateData: null,
         error:
-          error instanceof Error ? error.message : "State validation failed",
+          error instanceof Error ? error.message : 'State validation failed',
       };
     }
   }
@@ -286,12 +286,12 @@ export abstract class OAuthBaseProvider {
    */
   protected async get(
     url: string,
-    headers?: Record<string, string>,
+    headers?: Record<string, string>
   ): Promise<unknown> {
     const response = await fetch(url, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         ...headers,
       },
     });
@@ -309,7 +309,7 @@ export abstract class OAuthBaseProvider {
   protected async post(
     url: string,
     data: Record<string, string>,
-    headers?: Record<string, string>,
+    headers?: Record<string, string>
   ): Promise<unknown> {
     const formData = new URLSearchParams();
     Object.entries(data).forEach(([key, value]) => {
@@ -317,9 +317,9 @@ export abstract class OAuthBaseProvider {
     });
 
     const response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        'Content-Type': 'application/x-www-form-urlencoded',
         ...headers,
       },
       body: formData.toString(),
@@ -339,8 +339,8 @@ export abstract class OAuthBaseProvider {
     // 默认实现，子类可以覆盖
     throw new Error(
       `Token refresh not implemented for this provider${
-        refreshToken ? ` (token: ${refreshToken.slice(0, 8)}...)` : ""
-      }`,
+        refreshToken ? ` (token: ${refreshToken.slice(0, 8)}...)` : ''
+      }`
     );
   }
 }

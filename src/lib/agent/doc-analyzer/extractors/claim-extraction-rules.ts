@@ -3,7 +3,7 @@
 // 从主提取器拆分，控制文件行数在200行以内
 // =============================================================================
 
-import type { ClaimType } from "../core/types";
+import type { ClaimType } from '../core/types';
 
 // =============================================================================
 // 接口定义
@@ -32,44 +32,44 @@ export interface ClaimRule {
  */
 export const COMPOUND_CLAIM_PATTERNS: CompoundClaimMatch[] = [
   {
-    originalText: "本金.*利息",
-    types: ["PAY_PRINCIPAL", "PAY_INTEREST"],
+    originalText: '本金.*利息',
+    types: ['PAY_PRINCIPAL', 'PAY_INTEREST'],
   },
   {
-    originalText: "本金.*违约金",
-    types: ["PAY_PRINCIPAL", "PAY_PENALTY"],
+    originalText: '本金.*违约金',
+    types: ['PAY_PRINCIPAL', 'PAY_PENALTY'],
   },
   {
-    originalText: "利息.*违约金",
-    types: ["PAY_INTEREST", "PAY_PENALTY"],
+    originalText: '利息.*违约金',
+    types: ['PAY_INTEREST', 'PAY_PENALTY'],
   },
   {
-    originalText: "本金.*利息.*共计",
-    types: ["PAY_PRINCIPAL", "PAY_INTEREST"],
+    originalText: '本金.*利息.*共计',
+    types: ['PAY_PRINCIPAL', 'PAY_INTEREST'],
   },
   {
-    originalText: "偿还.*及.*利息",
-    types: ["PAY_PRINCIPAL", "PAY_INTEREST"],
+    originalText: '偿还.*及.*利息',
+    types: ['PAY_PRINCIPAL', 'PAY_INTEREST'],
   },
   {
-    originalText: "本金.*利息.*违约金",
-    types: ["PAY_PRINCIPAL", "PAY_INTEREST", "PAY_PENALTY"],
+    originalText: '本金.*利息.*违约金',
+    types: ['PAY_PRINCIPAL', 'PAY_INTEREST', 'PAY_PENALTY'],
   },
   {
-    originalText: "偿还本金.*支付利息.*及.*违约金",
-    types: ["PAY_PRINCIPAL", "PAY_INTEREST", "PAY_PENALTY"],
+    originalText: '偿还本金.*支付利息.*及.*违约金',
+    types: ['PAY_PRINCIPAL', 'PAY_INTEREST', 'PAY_PENALTY'],
   },
   {
-    originalText: "支付货款.*并承担.*资金占用费",
-    types: ["PAY_PRINCIPAL", "PAY_INTEREST"],
+    originalText: '支付货款.*并承担.*资金占用费',
+    types: ['PAY_PRINCIPAL', 'PAY_INTEREST'],
   },
   {
-    originalText: "本金.*从.*之日.*至.*之日止",
-    types: ["PAY_PRINCIPAL", "PAY_INTEREST"],
+    originalText: '本金.*从.*之日.*至.*之日止',
+    types: ['PAY_PRINCIPAL', 'PAY_INTEREST'],
   },
   {
-    originalText: "解除.*合同.*赔偿.*损失.*承担.*诉讼费",
-    types: ["TERMINATION", "PAY_DAMAGES", "LITIGATION_COST"],
+    originalText: '解除.*合同.*赔偿.*损失.*承担.*诉讼费',
+    types: ['TERMINATION', 'PAY_DAMAGES', 'LITIGATION_COST'],
   },
 ];
 
@@ -78,7 +78,7 @@ export const COMPOUND_CLAIM_PATTERNS: CompoundClaimMatch[] = [
  */
 export const CLAIM_TYPE_RULES: ClaimRule[] = [
   {
-    type: "PAY_PRINCIPAL",
+    type: 'PAY_PRINCIPAL',
     patterns: [
       /偿还本金|支付本金|归还本金/gi,
       /判令被告支付(.*?)(货款|本金|欠款)/gi,
@@ -86,18 +86,18 @@ export const CLAIM_TYPE_RULES: ClaimRule[] = [
       /偿还.*万元(?!利息)/gi,
     ],
     synonyms: [
-      "货款",
-      "欠款",
-      "借款",
-      "贷款",
-      "垫付款",
-      "预付款",
-      "货款支付",
-      "货款偿还",
-      "借款偿还",
-      "借款支付",
-      "欠款支付",
-      "欠款偿还",
+      '货款',
+      '欠款',
+      '借款',
+      '贷款',
+      '垫付款',
+      '预付款',
+      '货款支付',
+      '货款偿还',
+      '借款偿还',
+      '借款支付',
+      '欠款支付',
+      '欠款偿还',
     ],
     hiddenPatterns: [
       /货款/gi,
@@ -118,7 +118,7 @@ export const CLAIM_TYPE_RULES: ClaimRule[] = [
     ],
   },
   {
-    type: "PAY_INTEREST",
+    type: 'PAY_INTEREST',
     patterns: [
       /支付利息|承担利息|支付利息/gi,
       /利息.*年利率|年利率.*利息/gi,
@@ -129,12 +129,12 @@ export const CLAIM_TYPE_RULES: ClaimRule[] = [
       /资金.*年利率/gi,
     ],
     synonyms: [
-      "利息计算",
-      "利息支付",
-      "利息承担",
-      "利息偿还",
-      "年利率利息",
-      "月利率利息",
+      '利息计算',
+      '利息支付',
+      '利息承担',
+      '利息偿还',
+      '年利率利息',
+      '月利率利息',
     ],
     hiddenPatterns: [
       /利息|利率|年利率|月利率|资金占用费/gi,
@@ -150,7 +150,7 @@ export const CLAIM_TYPE_RULES: ClaimRule[] = [
     ],
   },
   {
-    type: "PAY_PENALTY",
+    type: 'PAY_PENALTY',
     patterns: [
       /支付违约金|承担违约金/gi,
       /违约金.*万元/gi,
@@ -159,17 +159,17 @@ export const CLAIM_TYPE_RULES: ClaimRule[] = [
       /逾期罚息/gi,
     ],
     synonyms: [
-      "罚金",
-      "罚款",
-      "违约罚金",
-      "逾期违约金",
-      "迟延履行金",
-      "赔偿金违约",
-      "违约赔偿",
-      "罚息支付",
-      "罚息承担",
-      "滞纳金支付",
-      "滞纳金承担",
+      '罚金',
+      '罚款',
+      '违约罚金',
+      '逾期违约金',
+      '迟延履行金',
+      '赔偿金违约',
+      '违约赔偿',
+      '罚息支付',
+      '罚息承担',
+      '滞纳金支付',
+      '滞纳金承担',
     ],
     hiddenPatterns: [
       /罚金/gi,
@@ -190,9 +190,9 @@ export const CLAIM_TYPE_RULES: ClaimRule[] = [
     ],
   },
   {
-    type: "PAY_DAMAGES",
+    type: 'PAY_DAMAGES',
     patterns: [/赔偿损失|承担损失/gi, /赔偿.*万元/gi, /经济损失/gi],
-    synonyms: ["财产损失", "直接损失", "间接损失", "实际损失", "精神损害"],
+    synonyms: ['财产损失', '直接损失', '间接损失', '实际损失', '精神损害'],
     hiddenPatterns: [
       /经济损失/gi,
       /财产损失/gi,
@@ -202,7 +202,7 @@ export const CLAIM_TYPE_RULES: ClaimRule[] = [
     ],
   },
   {
-    type: "LITIGATION_COST",
+    type: 'LITIGATION_COST',
     patterns: [
       /诉讼费用.*承担/gi,
       /本案.*诉讼费/gi,
@@ -210,23 +210,23 @@ export const CLAIM_TYPE_RULES: ClaimRule[] = [
       /诉讼费.*被告/gi,
     ],
     synonyms: [
-      "案件受理费",
-      "保全费",
-      "鉴定费",
-      "公告费",
-      "执行费",
-      "律师费",
-      "代理费",
-      "公证费",
-      "翻译费",
-      "差旅费",
-      "费用诉讼",
-      "诉讼费用",
-      "本案费",
-      "案件费用",
-      "律师费承担",
-      "代理费承担",
-      "差旅费承担",
+      '案件受理费',
+      '保全费',
+      '鉴定费',
+      '公告费',
+      '执行费',
+      '律师费',
+      '代理费',
+      '公证费',
+      '翻译费',
+      '差旅费',
+      '费用诉讼',
+      '诉讼费用',
+      '本案费',
+      '案件费用',
+      '律师费承担',
+      '代理费承担',
+      '差旅费承担',
     ],
     hiddenPatterns: [
       /诉讼费/gi,
@@ -255,21 +255,21 @@ export const CLAIM_TYPE_RULES: ClaimRule[] = [
     ],
   },
   {
-    type: "PERFORMANCE",
+    type: 'PERFORMANCE',
     patterns: [/履行义务|继续履行/gi, /履行合同/gi],
-    synonyms: ["继续履行合同", "履行合同义务"],
+    synonyms: ['继续履行合同', '履行合同义务'],
     hiddenPatterns: [],
   },
   {
-    type: "TERMINATION",
+    type: 'TERMINATION',
     patterns: [/解除合同|终止合同/gi, /解除.*合同/gi],
-    synonyms: ["解除合同关系", "终止合同关系"],
+    synonyms: ['解除合同关系', '终止合同关系'],
     hiddenPatterns: [],
   },
   {
-    type: "OTHER",
+    type: 'OTHER',
     patterns: [/判令被告/gi, /诉讼请求/gi],
-    synonyms: ["其他诉讼请求"],
+    synonyms: ['其他诉讼请求'],
     hiddenPatterns: [],
   },
 ];
@@ -278,7 +278,7 @@ export const CLAIM_TYPE_RULES: ClaimRule[] = [
  * 获取指定类型的正则表达式模式
  */
 export function getClaimPatterns(type: ClaimType): RegExp[] {
-  const rule = CLAIM_TYPE_RULES.find((r) => r.type === type);
+  const rule = CLAIM_TYPE_RULES.find(r => r.type === type);
   return rule?.patterns || [];
 }
 
@@ -286,7 +286,7 @@ export function getClaimPatterns(type: ClaimType): RegExp[] {
  * 获取指定类型的隐藏模式
  */
 export function getHiddenPatterns(type: ClaimType): RegExp[] {
-  const rule = CLAIM_TYPE_RULES.find((r) => r.type === type);
+  const rule = CLAIM_TYPE_RULES.find(r => r.type === type);
   return rule?.hiddenPatterns || [];
 }
 
@@ -298,8 +298,8 @@ export function textContainsClaimType(text: string, type: ClaimType): boolean {
   const hiddenPatterns = getHiddenPatterns(type);
 
   return (
-    patterns.some((pattern) => pattern.test(text)) ||
-    hiddenPatterns.some((pattern) => pattern.test(text))
+    patterns.some(pattern => pattern.test(text)) ||
+    hiddenPatterns.some(pattern => pattern.test(text))
   );
 }
 
@@ -319,7 +319,7 @@ export function likelyHasLitigationCost(text: string): boolean {
     /全部诉讼费用/,
     /判令被告/,
   ];
-  return patterns.some((pattern) => pattern.test(text));
+  return patterns.some(pattern => pattern.test(text));
 }
 
 /**
@@ -340,7 +340,7 @@ export function likelyHasPrincipal(text: string): boolean {
     /判令被告偿还本金/gi,
     /承担.*万元/gi,
   ];
-  return patterns.some((pattern) => pattern.test(text));
+  return patterns.some(pattern => pattern.test(text));
 }
 
 /**
@@ -348,7 +348,7 @@ export function likelyHasPrincipal(text: string): boolean {
  */
 export function likelyHasInterest(text: string): boolean {
   const patterns = [/利息|利率|年利率|月利率|资金占用费/];
-  return patterns.some((pattern) => pattern.test(text));
+  return patterns.some(pattern => pattern.test(text));
 }
 
 /**
@@ -356,7 +356,7 @@ export function likelyHasInterest(text: string): boolean {
  */
 export function likelyHasPenalty(text: string): boolean {
   const patterns = [/违约金|罚息|滞纳金/];
-  return patterns.some((pattern) => pattern.test(text));
+  return patterns.some(pattern => pattern.test(text));
 }
 
 /**
@@ -366,7 +366,7 @@ export function likelyHasPenalty(text: string): boolean {
 export function shouldInferLitigationCost(text: string): boolean {
   const hasJudgeCommand = /判令被告/.test(text);
   const hasExplicitLitigationCost = /诉讼费用|本案.*诉讼费|全部诉讼费用/.test(
-    text,
+    text
   );
 
   if (hasJudgeCommand && !hasExplicitLitigationCost) {
@@ -422,7 +422,7 @@ export function identifyCompoundClaims(text: string): ClaimType[] {
   for (const pattern of COMPOUND_CLAIM_PATTERNS) {
     if (
       pattern.originalText &&
-      new RegExp(pattern.originalText, "i").test(text)
+      new RegExp(pattern.originalText, 'i').test(text)
     ) {
       for (const type of pattern.types) {
         if (!identifiedTypes.includes(type)) {
@@ -440,14 +440,14 @@ export function identifyCompoundClaims(text: string): ClaimType[] {
  */
 export function getClaimTypeLabel(type: ClaimType): string {
   const labels: Record<ClaimType, string> = {
-    PAY_PRINCIPAL: "偿还本金",
-    PAY_INTEREST: "支付利息",
-    PAY_PENALTY: "支付违约金",
-    LITIGATION_COST: "承担诉讼费用",
-    PAY_DAMAGES: "赔偿损失",
-    PERFORMANCE: "履行义务",
-    TERMINATION: "解除合同",
-    OTHER: "其他",
+    PAY_PRINCIPAL: '偿还本金',
+    PAY_INTEREST: '支付利息',
+    PAY_PENALTY: '支付违约金',
+    LITIGATION_COST: '承担诉讼费用',
+    PAY_DAMAGES: '赔偿损失',
+    PERFORMANCE: '履行义务',
+    TERMINATION: '解除合同',
+    OTHER: '其他',
   };
   return labels[type] || type;
 }

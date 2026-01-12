@@ -5,7 +5,7 @@ import type {
   HealthStatus,
   ProviderStats,
   LoadBalancerStatus,
-} from "../../types/ai-service";
+} from '../../types/ai-service';
 
 // =============================================================================
 // 负载均衡器实现
@@ -34,13 +34,13 @@ export class LoadBalancer {
 
   private initializeProviderStats(): void {
     const providers: AIProvider[] = [
-      "zhipu",
-      "deepseek",
-      "openai",
-      "anthropic",
+      'zhipu',
+      'deepseek',
+      'openai',
+      'anthropic',
     ];
 
-    providers.forEach((provider) => {
+    providers.forEach(provider => {
       const weight = this.config.weights?.[provider] || 1;
 
       // 只初始化权重大于0的提供商
@@ -79,23 +79,23 @@ export class LoadBalancer {
 
     if (healthyProviders.length === 0) {
       console.warn(
-        "No healthy providers available, falling back to all providers",
+        'No healthy providers available, falling back to all providers'
       );
       return this.getFallbackProvider();
     }
 
     switch (this.config.strategy) {
-      case "round_robin":
+      case 'round_robin':
         return this.selectRoundRobin(healthyProviders);
-      case "weighted_round_robin":
+      case 'weighted_round_robin':
         return this.selectWeightedRoundRobin(healthyProviders);
-      case "least_connections":
+      case 'least_connections':
         return this.selectLeastConnections(healthyProviders);
-      case "least_response_time":
+      case 'least_response_time':
         return this.selectLeastResponseTime(healthyProviders);
-      case "random":
+      case 'random':
         return this.selectRandom(healthyProviders);
-      case "provider_priority":
+      case 'provider_priority':
         return this.selectByPriority(healthyProviders);
       default:
         return this.selectRoundRobin(healthyProviders);
@@ -124,7 +124,7 @@ export class LoadBalancer {
       }
     });
 
-    return availableProviders.length > 0 ? availableProviders[0] : "zhipu";
+    return availableProviders.length > 0 ? availableProviders[0] : 'zhipu';
   }
 
   private selectRoundRobin(providers: AIProvider[]): AIProvider {
@@ -206,10 +206,10 @@ export class LoadBalancer {
 
     // 预定义的优先级顺序
     const priorityOrder: AIProvider[] = [
-      "zhipu",
-      "deepseek",
-      "openai",
-      "anthropic",
+      'zhipu',
+      'deepseek',
+      'openai',
+      'anthropic',
     ];
 
     for (const provider of priorityOrder) {
@@ -228,7 +228,7 @@ export class LoadBalancer {
   public updateProviderHealth(
     provider: AIProvider,
     healthy: boolean,
-    responseTime?: number,
+    responseTime?: number
   ): void {
     const health = this.healthStatus.get(provider);
     if (!health) return;
@@ -237,7 +237,7 @@ export class LoadBalancer {
 
     if (healthy !== health.healthy) {
       console.log(
-        `Provider ${provider} health changed from ${health.healthy} to ${healthy}`,
+        `Provider ${provider} health changed from ${health.healthy} to ${healthy}`
       );
     }
 
@@ -260,7 +260,7 @@ export class LoadBalancer {
     if (health.consecutiveFailures >= this.config.failureThreshold) {
       health.healthy = false;
       console.warn(
-        `Provider ${provider} marked as unhealthy after ${health.consecutiveFailures} failures`,
+        `Provider ${provider} marked as unhealthy after ${health.consecutiveFailures} failures`
       );
     }
 
@@ -277,7 +277,7 @@ export class LoadBalancer {
   public updateProviderStats(
     provider: AIProvider,
     success: boolean,
-    responseTime: number,
+    responseTime: number
   ): void {
     const stats = this.providerStats.get(provider);
     if (!stats) return;
@@ -319,11 +319,11 @@ export class LoadBalancer {
     const providerStats = Array.from(this.providerStats.values());
     const totalRequests = providerStats.reduce(
       (sum, stats) => sum + stats.totalRequests,
-      0,
+      0
     );
     const totalErrors = providerStats.reduce(
       (sum, stats) => sum + stats.failedRequests,
-      0,
+      0
     );
     const averageResponseTime =
       providerStats.reduce((sum, stats) => sum + stats.averageResponseTime, 0) /
@@ -408,14 +408,14 @@ export class LoadBalancerFactory {
   private static instances: Map<string, LoadBalancer> = new Map();
 
   public static getInstance(
-    name: string = "default",
-    config?: LoadBalancerConfig,
+    name: string = 'default',
+    config?: LoadBalancerConfig
   ): LoadBalancer {
     let instance = this.instances.get(name);
 
     if (!instance) {
       const defaultConfig: LoadBalancerConfig = {
-        strategy: "weighted_round_robin",
+        strategy: 'weighted_round_robin',
         healthCheckInterval: 30000, // 30秒
         healthCheckTimeout: 5000, // 5秒
         failureThreshold: 3, // 连续失败3次标记为不健康
@@ -438,7 +438,7 @@ export class LoadBalancerFactory {
 
   public static createCustomInstance(
     name: string,
-    config: LoadBalancerConfig,
+    config: LoadBalancerConfig
   ): LoadBalancer {
     const instance = new LoadBalancer(config);
     this.instances.set(name, instance);

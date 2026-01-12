@@ -1,9 +1,9 @@
-import prisma from "../src/lib/db/prisma.js";
+import prisma from '../src/lib/db/prisma.js';
 
 async function testConnection() {
   try {
     await prisma.$queryRaw`SELECT 1`;
-    console.log("Database connection: true");
+    console.log('Database connection: true');
 
     // Test basic queries
     const userCount = await prisma.user.count();
@@ -17,7 +17,7 @@ async function testConnection() {
 
     await prisma.$disconnect();
   } catch (error) {
-    console.error("Connection error:", error);
+    console.error('Connection error:', error);
     process.exit(1);
   }
 }

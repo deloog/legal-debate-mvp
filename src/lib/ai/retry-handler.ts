@@ -5,7 +5,7 @@
  * 支持多次重试、递增超时、自动降级到Mock
  */
 
-import { fallbackDocAnalysis, validateMockResult } from "./mock-doc-analyzer";
+import { fallbackDocAnalysis, validateMockResult } from './mock-doc-analyzer';
 
 // =============================================================================
 // 类型定义
@@ -62,15 +62,15 @@ export function isTimeoutError(error: unknown): boolean {
 
   const errorMessage = error.message.toLowerCase();
   const timeoutKeywords = [
-    "timeout",
-    "timed out",
-    "time out",
-    "exceeded timeout",
-    "请求超时",
-    "超时",
+    'timeout',
+    'timed out',
+    'time out',
+    'exceeded timeout',
+    '请求超时',
+    '超时',
   ];
 
-  return timeoutKeywords.some((keyword) => errorMessage.includes(keyword));
+  return timeoutKeywords.some(keyword => errorMessage.includes(keyword));
 }
 
 /**
@@ -86,17 +86,17 @@ export function isNetworkError(error: unknown): boolean {
 
   const errorMessage = error.message.toLowerCase();
   const networkKeywords = [
-    "network",
-    "network error",
-    "connection refused",
-    "connection timeout",
-    "连接失败",
-    "网络错误",
-    "econnrefused",
-    "enotfound",
+    'network',
+    'network error',
+    'connection refused',
+    'connection timeout',
+    '连接失败',
+    '网络错误',
+    'econnrefused',
+    'enotfound',
   ];
 
-  return networkKeywords.some((keyword) => errorMessage.includes(keyword));
+  return networkKeywords.some(keyword => errorMessage.includes(keyword));
 }
 
 /**
@@ -122,7 +122,7 @@ export function isRetryableError(error: unknown): boolean {
  */
 export async function retryWithFallback<T>(
   requestFn: () => Promise<T>,
-  options: RetryOptions,
+  options: RetryOptions
 ): Promise<RetryResult<T>> {
   const {
     maxAttempts = 2,
@@ -143,7 +143,7 @@ export async function retryWithFallback<T>(
     try {
       if (verboseLogging) {
         console.log(
-          `[重试处理] 第${attempts + 1}/${maxAttempts}次尝试，超时${timeout}ms`,
+          `[重试处理] 第${attempts + 1}/${maxAttempts}次尝试，超时${timeout}ms`
         );
       }
 
@@ -157,7 +157,7 @@ export async function retryWithFallback<T>(
 
       if (verboseLogging) {
         console.log(
-          `[重试处理] 第${attempts + 1}次尝试成功，耗时${duration}ms`,
+          `[重试处理] 第${attempts + 1}次尝试成功，耗时${duration}ms`
         );
       }
 
@@ -174,7 +174,7 @@ export async function retryWithFallback<T>(
 
       if (verboseLogging) {
         console.error(
-          `[重试处理] 第${attempts + 1}次尝试失败: ${lastError.message}，耗时${attemptDuration}ms`,
+          `[重试处理] 第${attempts + 1}次尝试失败: ${lastError.message}，耗时${attemptDuration}ms`
         );
       }
 
@@ -185,7 +185,7 @@ export async function retryWithFallback<T>(
       if (!shouldContinue) {
         // 最后一次失败，检查是否启用降级
         if (enableFallback) {
-          console.warn("[重试处理] 所有重试失败，启用Mock降级");
+          console.warn('[重试处理] 所有重试失败，启用Mock降级');
           const totalDuration = Date.now() - startTime;
 
           try {
@@ -254,7 +254,7 @@ export async function retryWithFallback<T>(
  * @returns 重试结果
  */
 export async function retryDocAnalysis<T>(
-  requestFn: () => Promise<T>,
+  requestFn: () => Promise<T>
 ): Promise<RetryResult<T>> {
   return retryWithFallback(requestFn, {
     maxAttempts: 2,
@@ -272,7 +272,7 @@ export async function retryDocAnalysis<T>(
  * @returns Promise
  */
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
@@ -345,17 +345,17 @@ export function getDevelopmentRetryConfig(): RetryOptions {
  */
 export function getRetryConfig(): RetryOptions {
   const isE2ETest =
-    process.env.TEST_TYPE === "e2e" || process.env.PLAYWRIGHT_TEST === "true";
-  const nodeEnv = process.env.NODE_ENV || "development";
+    process.env.TEST_TYPE === 'e2e' || process.env.PLAYWRIGHT_TEST === 'true';
+  const nodeEnv = process.env.NODE_ENV || 'development';
 
   if (isE2ETest) {
     return getE2ERetryConfig();
   }
 
   switch (nodeEnv) {
-    case "production":
+    case 'production':
       return getProductionRetryConfig();
-    case "development":
+    case 'development':
     default:
       return getDevelopmentRetryConfig();
   }

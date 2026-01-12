@@ -8,11 +8,11 @@ import {
   AmountVerification,
   DateVerification,
   ConsistencyVerification,
-} from "../types";
-import { PartyVerifier } from "./party-verifier";
-import { AmountVerifier } from "./amount-verifier";
-import { DateVerifier } from "./date-verifier";
-import { ConsistencyVerifier } from "./consistency-verifier";
+} from '../types';
+import { PartyVerifier } from './party-verifier';
+import { AmountVerifier } from './amount-verifier';
+import { DateVerifier } from './date-verifier';
+import { ConsistencyVerifier } from './consistency-verifier';
 
 /**
  * 源数据接口（用于对比验证）
@@ -95,7 +95,7 @@ export class FactualVerifier {
    */
   async verify(
     data: DataToVerify,
-    source?: SourceData,
+    source?: SourceData
   ): Promise<FactualVerificationResult> {
     const startTime = Date.now();
 
@@ -121,7 +121,7 @@ export class FactualVerifier {
       partyCheck,
       amountCheck,
       dateCheck,
-      consistencyCheck,
+      consistencyCheck
     );
 
     const passed =
@@ -153,7 +153,7 @@ export class FactualVerifier {
     partyCheck: PartyVerification,
     amountCheck: AmountVerification,
     dateCheck: DateVerification,
-    consistencyCheck: ConsistencyVerification,
+    consistencyCheck: ConsistencyVerification
   ): number {
     const scores: number[] = [];
 
@@ -197,7 +197,7 @@ export class FactualVerifier {
       ...this.amountVerifier.convertToIssues(result.details.amountCheck),
       ...this.dateVerifier.convertToIssues(result.details.dateCheck),
       ...this.consistencyVerifier.convertToIssues(
-        result.details.consistencyCheck,
+        result.details.consistencyCheck
       ),
     ];
     return issues;

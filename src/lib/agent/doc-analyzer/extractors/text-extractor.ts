@@ -4,10 +4,10 @@
  * 负责从不同格式的文档中提取文本内容
  */
 
-import { SecureFileUtils } from "../../../agent/security/file-utils";
-import { AnalysisError } from "../../../agent/security/errors";
-import { logger } from "../../../agent/security/logger";
-import { ERROR_MESSAGES } from "../core/constants";
+import { SecureFileUtils } from '../../../agent/security/file-utils';
+import { AnalysisError } from '../../../agent/security/errors';
+import { logger } from '../../../agent/security/logger';
+import { ERROR_MESSAGES } from '../core/constants';
 
 export class TextExtractor {
   /**
@@ -22,24 +22,24 @@ export class TextExtractor {
       const fileTypeUpper = fileType.toUpperCase();
 
       switch (fileTypeUpper) {
-        case "PDF":
+        case 'PDF':
           return await this.extractPDFText(filePath);
 
-        case "DOCX":
+        case 'DOCX':
           return await this.extractDOCXText(filePath);
 
-        case "DOC":
+        case 'DOC':
           return await this.extractDOCText(filePath);
 
-        case "TXT":
+        case 'TXT':
           return await this.extractTXTText(filePath);
 
-        case "IMAGE":
+        case 'IMAGE':
           return await this.extractImageText(filePath);
 
         default:
           throw new Error(
-            `${ERROR_MESSAGES.UNSUPPORTED_FILE_TYPE}: ${fileType}`,
+            `${ERROR_MESSAGES.UNSUPPORTED_FILE_TYPE}: ${fileType}`
           );
       }
     } catch (error) {
@@ -47,7 +47,7 @@ export class TextExtractor {
       throw new AnalysisError(
         `${ERROR_MESSAGES.OCR_FAILURE}: ${errorMsg}`,
         error instanceof Error ? error : new Error(errorMsg),
-        { filePath, fileType },
+        { filePath, fileType }
       );
     }
   }
@@ -59,7 +59,7 @@ export class TextExtractor {
     try {
       SecureFileUtils.validateFilePath(filePath);
 
-      const pdfParseModule = await import("pdf-parse");
+      const pdfParseModule = await import('pdf-parse');
       const pdfParse = pdfParseModule.default || pdfParseModule;
       const buffer = await SecureFileUtils.readFileSecurely(filePath);
 
@@ -69,9 +69,9 @@ export class TextExtractor {
       return data.text;
     } catch (error) {
       throw new AnalysisError(
-        "PDF文件解析失败",
+        'PDF文件解析失败',
         error instanceof Error ? error : new Error(String(error)),
-        { filePath },
+        { filePath }
       );
     }
   }
@@ -83,7 +83,7 @@ export class TextExtractor {
     try {
       SecureFileUtils.validateFilePath(filePath);
 
-      const mammothModule = await import("mammoth");
+      const mammothModule = await import('mammoth');
       const mammoth = mammothModule.default || mammothModule;
       const buffer = await SecureFileUtils.readFileSecurely(filePath);
       const result = await mammoth.extractRawText({ buffer });
@@ -91,9 +91,9 @@ export class TextExtractor {
       return result.value;
     } catch (error) {
       throw new AnalysisError(
-        "DOCX文件解析失败",
+        'DOCX文件解析失败',
         error instanceof Error ? error : new Error(String(error)),
-        { filePath },
+        { filePath }
       );
     }
   }
@@ -107,11 +107,11 @@ export class TextExtractor {
 
       // 首先尝试使用antiword（安全版本）
       try {
-        return await SecureFileUtils.executeCommandSecurely("antiword", [
+        return await SecureFileUtils.executeCommandSecurely('antiword', [
           filePath,
         ]);
       } catch (antiwordError) {
-        logger.warn("antiword不可用，尝试使用textract", {
+        logger.warn('antiword不可用，尝试使用textract', {
           filePath,
           error: antiwordError,
         });
@@ -119,9 +119,9 @@ export class TextExtractor {
       }
     } catch (error) {
       throw new AnalysisError(
-        "DOC文件解析失败",
+        'DOC文件解析失败',
         error instanceof Error ? error : new Error(String(error)),
-        { filePath },
+        { filePath }
       );
     }
   }
@@ -132,7 +132,7 @@ export class TextExtractor {
   private async extractDOCWithTextract(filePath: string): Promise<string> {
     try {
       // @ts-expect-error - textract lacks TypeScript definitions
-      const textractModule = await import("textract");
+      const textractModule = await import('textract');
       const textract = textractModule.default || textractModule;
 
       return new Promise((resolve, reject) => {
@@ -140,12 +140,12 @@ export class TextExtractor {
           textract as unknown as {
             fromFileWithPath: (
               filePath: string,
-              callback: (error: Error | null, text: string) => void,
+              callback: (error: Error | null, text: string) => void
             ) => void;
           }
         ).fromFileWithPath(filePath, (error: Error | null, text: string) => {
           if (error) {
-            reject(new AnalysisError("Textract解析失败", error, { filePath }));
+            reject(new AnalysisError('Textract解析失败', error, { filePath }));
           } else {
             resolve(text.trim());
           }
@@ -153,9 +153,9 @@ export class TextExtractor {
       });
     } catch (error) {
       throw new AnalysisError(
-        "Textract不可用",
+        'Textract不可用',
         error instanceof Error ? error : new Error(String(error)),
-        { filePath },
+        { filePath }
       );
     }
   }
@@ -168,9 +168,9 @@ export class TextExtractor {
       return await SecureFileUtils.readTextFileSecurely(filePath);
     } catch (error) {
       throw new AnalysisError(
-        "TXT文件读取失败",
+        'TXT文件读取失败',
         error instanceof Error ? error : new Error(String(error)),
-        { filePath },
+        { filePath }
       );
     }
   }
@@ -181,25 +181,25 @@ export class TextExtractor {
   private async extractImageText(filePath: string): Promise<string> {
     try {
       // @ts-expect-error - tesseract.js lacks TypeScript definitions
-      const tesseractModule = await import("tesseract.js");
+      const tesseractModule = await import('tesseract.js');
       const Tesseract = tesseractModule.default || tesseractModule;
 
       const {
         data: { text },
-      } = await Tesseract.recognize(filePath, "chi_sim+eng");
+      } = await Tesseract.recognize(filePath, 'chi_sim+eng');
 
       return text.trim();
     } catch (error) {
       if (
         error instanceof Error &&
-        error.message.includes("Cannot find module")
+        error.message.includes('Cannot find module')
       ) {
         throw new Error(
-          "OCR功能需要安装tesseract.js库，请运行: npm install tesseract.js",
+          'OCR功能需要安装tesseract.js库，请运行: npm install tesseract.js'
         );
       }
       throw new Error(
-        `图片OCR识别失败: ${error instanceof Error ? error.message : String(error)}`,
+        `图片OCR识别失败: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
@@ -223,7 +223,7 @@ export class TextExtractor {
    */
   splitTextSmart(
     text: string,
-    maxChunkSize: number,
+    maxChunkSize: number
   ): Array<{ text: string; start: number; end: number }> {
     const chunks: Array<{ text: string; start: number; end: number }> = [];
     let currentPos = 0;

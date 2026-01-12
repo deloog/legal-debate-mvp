@@ -2,7 +2,7 @@
  * 时间线提取器类型定义
  */
 
-import type { TimelineEvent, TimelineEventType } from "../../core/types";
+import type { TimelineEvent, TimelineEventType } from '../../core/types';
 
 /**
  * 时间线提取选项

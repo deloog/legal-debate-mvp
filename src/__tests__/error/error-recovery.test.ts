@@ -4,28 +4,28 @@
  * 测试错误恢复器
  */
 
-import { ErrorRecovery } from "@/lib/error/error-recovery";
+import { ErrorRecovery } from '@/lib/error/error-recovery';
 import {
   ErrorLog,
   ErrorType,
   ErrorSeverity,
   RecoveryMethod,
-} from "@/lib/error/types";
+} from '@/lib/error/types';
 
-describe("ErrorRecovery", () => {
+describe('ErrorRecovery', () => {
   let recovery: ErrorRecovery;
 
   beforeEach(() => {
     recovery = new ErrorRecovery();
   });
 
-  describe("错误恢复流程", () => {
-    it("应该成功恢复网络错误", async () => {
-      const mockOperation = jest.fn().mockResolvedValue("success");
+  describe('错误恢复流程', () => {
+    it('应该成功恢复网络错误', async () => {
+      const mockOperation = jest.fn().mockResolvedValue('success');
       const errorLog: ErrorLog = {
-        id: "1",
+        id: '1',
         errorType: ErrorType.NETWORK_ERROR,
-        errorMessage: "Network error",
+        errorMessage: 'Network error',
         context: {},
         severity: ErrorSeverity.MEDIUM,
         recoveryAttempts: 0,
@@ -46,12 +46,12 @@ describe("ErrorRecovery", () => {
       expect(mockOperation).toHaveBeenCalled();
     });
 
-    it("应该在成功时立即停止重试", async () => {
-      const mockOperation = jest.fn().mockResolvedValue("success");
+    it('应该在成功时立即停止重试', async () => {
+      const mockOperation = jest.fn().mockResolvedValue('success');
       const errorLog: ErrorLog = {
-        id: "1",
+        id: '1',
         errorType: ErrorType.NETWORK_ERROR,
-        errorMessage: "Network error",
+        errorMessage: 'Network error',
         context: {},
         severity: ErrorSeverity.MEDIUM,
         recoveryAttempts: 0,
@@ -71,13 +71,13 @@ describe("ErrorRecovery", () => {
       expect(mockOperation).toHaveBeenCalledTimes(1);
     });
 
-    it("应该使用降级函数", async () => {
-      const mockOperation = jest.fn().mockRejectedValue(new Error("Failed"));
-      const fallbackFn = jest.fn().mockResolvedValue("fallback");
+    it('应该使用降级函数', async () => {
+      const mockOperation = jest.fn().mockRejectedValue(new Error('Failed'));
+      const fallbackFn = jest.fn().mockResolvedValue('fallback');
       const errorLog: ErrorLog = {
-        id: "1",
+        id: '1',
         errorType: ErrorType.VALIDATION_ERROR,
-        errorMessage: "Validation error",
+        errorMessage: 'Validation error',
         context: {},
         severity: ErrorSeverity.MEDIUM,
         recoveryAttempts: 0,
@@ -96,12 +96,12 @@ describe("ErrorRecovery", () => {
       expect(fallbackFn).toHaveBeenCalled();
     });
 
-    it("应该尝试重试并最终失败", async () => {
-      const mockOperation = jest.fn().mockRejectedValue(new Error("Failed"));
+    it('应该尝试重试并最终失败', async () => {
+      const mockOperation = jest.fn().mockRejectedValue(new Error('Failed'));
       const errorLog: ErrorLog = {
-        id: "1",
+        id: '1',
         errorType: ErrorType.NETWORK_ERROR,
-        errorMessage: "Network error",
+        errorMessage: 'Network error',
         context: {},
         severity: ErrorSeverity.MEDIUM,
         recoveryAttempts: 0,
@@ -122,12 +122,12 @@ describe("ErrorRecovery", () => {
       expect(mockOperation).toHaveBeenCalledTimes(2);
     });
 
-    it("应该在已恢复时直接返回", async () => {
+    it('应该在已恢复时直接返回', async () => {
       const mockOperation = jest.fn();
       const errorLog: ErrorLog = {
-        id: "1",
+        id: '1',
         errorType: ErrorType.NETWORK_ERROR,
-        errorMessage: "Network error",
+        errorMessage: 'Network error',
         context: {},
         severity: ErrorSeverity.MEDIUM,
         recoveryAttempts: 1,
@@ -148,12 +148,12 @@ describe("ErrorRecovery", () => {
     });
   });
 
-  describe("忽略错误", () => {
-    it("应该正确标记错误为忽略", () => {
+  describe('忽略错误', () => {
+    it('应该正确标记错误为忽略', () => {
       const errorLog: ErrorLog = {
-        id: "1",
+        id: '1',
         errorType: ErrorType.MEMORY_EXPIRED,
-        errorMessage: "Memory expired",
+        errorMessage: 'Memory expired',
         context: {},
         severity: ErrorSeverity.LOW,
         recoveryAttempts: 0,
@@ -170,12 +170,12 @@ describe("ErrorRecovery", () => {
     });
   });
 
-  describe("人工介入", () => {
-    it("应该正确标记需要人工介入", () => {
+  describe('人工介入', () => {
+    it('应该正确标记需要人工介入', () => {
       const errorLog: ErrorLog = {
-        id: "1",
+        id: '1',
         errorType: ErrorType.AGENT_NOT_FOUND,
-        errorMessage: "Agent not found",
+        errorMessage: 'Agent not found',
         context: {},
         severity: ErrorSeverity.CRITICAL,
         recoveryAttempts: 0,
@@ -191,13 +191,13 @@ describe("ErrorRecovery", () => {
     });
   });
 
-  describe("恢复统计", () => {
-    it("应该正确计算恢复统计信息", () => {
+  describe('恢复统计', () => {
+    it('应该正确计算恢复统计信息', () => {
       const errorLogs: ErrorLog[] = [
         {
-          id: "1",
+          id: '1',
           errorType: ErrorType.NETWORK_ERROR,
-          errorMessage: "Error 1",
+          errorMessage: 'Error 1',
           context: {},
           severity: ErrorSeverity.MEDIUM,
           recoveryAttempts: 2,
@@ -208,9 +208,9 @@ describe("ErrorRecovery", () => {
           createdAt: new Date(),
         },
         {
-          id: "2",
+          id: '2',
           errorType: ErrorType.VALIDATION_ERROR,
-          errorMessage: "Error 2",
+          errorMessage: 'Error 2',
           context: {},
           severity: ErrorSeverity.MEDIUM,
           recoveryAttempts: 1,
@@ -221,9 +221,9 @@ describe("ErrorRecovery", () => {
           createdAt: new Date(),
         },
         {
-          id: "3",
+          id: '3',
           errorType: ErrorType.UNKNOWN_ERROR,
-          errorMessage: "Error 3",
+          errorMessage: 'Error 3',
           context: {},
           severity: ErrorSeverity.HIGH,
           recoveryAttempts: 0,
@@ -242,12 +242,12 @@ describe("ErrorRecovery", () => {
       expect(stats.avgRecoveryTime).toBe(750);
     });
 
-    it("应该按恢复方法分类统计", () => {
+    it('应该按恢复方法分类统计', () => {
       const errorLogs: ErrorLog[] = [
         {
-          id: "1",
+          id: '1',
           errorType: ErrorType.NETWORK_ERROR,
-          errorMessage: "Error 1",
+          errorMessage: 'Error 1',
           context: {},
           severity: ErrorSeverity.MEDIUM,
           recoveryAttempts: 1,
@@ -257,9 +257,9 @@ describe("ErrorRecovery", () => {
           createdAt: new Date(),
         },
         {
-          id: "2",
+          id: '2',
           errorType: ErrorType.VALIDATION_ERROR,
-          errorMessage: "Error 2",
+          errorMessage: 'Error 2',
           context: {},
           severity: ErrorSeverity.MEDIUM,
           recoveryAttempts: 1,

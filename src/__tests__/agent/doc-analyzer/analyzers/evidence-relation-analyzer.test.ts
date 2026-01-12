@@ -3,27 +3,27 @@
  * 目标：证据关联分析准确性
  */
 
-import { EvidenceRelationAnalyzer } from "@/lib/agent/doc-analyzer/analyzers/evidence-relation-analyzer";
+import { EvidenceRelationAnalyzer } from '@/lib/agent/doc-analyzer/analyzers/evidence-relation-analyzer';
 import type {
   ClassifiedEvidence,
   ExtractedData,
-} from "@/lib/agent/doc-analyzer/core/types";
+} from '@/lib/agent/doc-analyzer/core/types';
 
-describe("EvidenceRelationAnalyzer", () => {
+describe('EvidenceRelationAnalyzer', () => {
   let analyzer: EvidenceRelationAnalyzer;
 
   beforeEach(() => {
     analyzer = new EvidenceRelationAnalyzer();
   });
 
-  describe("analyzeRelations", () => {
-    it("应该分析证据与当事人的关联", () => {
+  describe('analyzeRelations', () => {
+    it('应该分析证据与当事人的关联', () => {
       const classifiedEvidence: ClassifiedEvidence[] = [
         {
-          id: "ev_1",
-          type: "DOCUMENTARY_EVIDENCE",
-          content: "张三签署的合同",
-          source: "诉讼请求证据",
+          id: 'ev_1',
+          type: 'DOCUMENTARY_EVIDENCE',
+          content: '张三签署的合同',
+          source: '诉讼请求证据',
           strength: 5,
           reliability: 0.9,
           relatedTo: [],
@@ -32,8 +32,8 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const extractedData: ExtractedData = {
         parties: [
-          { type: "plaintiff", name: "张三", role: "PLAINTIFF" },
-          { type: "defendant", name: "李四", role: "DEFENDANT" },
+          { type: 'plaintiff', name: '张三', role: 'PLAINTIFF' },
+          { type: 'defendant', name: '李四', role: 'DEFENDANT' },
         ],
         claims: [],
         disputeFocuses: [],
@@ -42,21 +42,21 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const relations = analyzer.analyzeRelations(
         classifiedEvidence,
-        extractedData,
+        extractedData
       );
 
       expect(relations).toBeInstanceOf(Array);
       expect(relations.length).toBeGreaterThan(0);
-      expect(classifiedEvidence[0].relatedTo).toContain("张三");
+      expect(classifiedEvidence[0].relatedTo).toContain('张三');
     });
 
-    it("应该分析证据与诉讼请求的关联", () => {
+    it('应该分析证据与诉讼请求的关联', () => {
       const classifiedEvidence: ClassifiedEvidence[] = [
         {
-          id: "ev_1",
-          type: "DOCUMENTARY_EVIDENCE",
-          content: "支付50000元的银行转账记录",
-          source: "诉讼请求证据",
+          id: 'ev_1',
+          type: 'DOCUMENTARY_EVIDENCE',
+          content: '支付50000元的银行转账记录',
+          source: '诉讼请求证据',
           strength: 5,
           reliability: 0.9,
           relatedTo: [],
@@ -67,10 +67,10 @@ describe("EvidenceRelationAnalyzer", () => {
         parties: [],
         claims: [
           {
-            type: "PAY_PRINCIPAL",
-            content: "支付50000元",
+            type: 'PAY_PRINCIPAL',
+            content: '支付50000元',
             amount: 50000,
-            currency: "CNY",
+            currency: 'CNY',
           },
         ],
         disputeFocuses: [],
@@ -79,20 +79,20 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const relations = analyzer.analyzeRelations(
         classifiedEvidence,
-        extractedData,
+        extractedData
       );
 
       expect(relations).toBeInstanceOf(Array);
       expect(relations.length).toBeGreaterThan(0);
     });
 
-    it("应该分析证据与争议焦点的关联", () => {
+    it('应该分析证据与争议焦点的关联', () => {
       const classifiedEvidence: ClassifiedEvidence[] = [
         {
-          id: "ev_1",
-          type: "DOCUMENTARY_EVIDENCE",
-          content: "合同显示违约条款",
-          source: "争议焦点证据",
+          id: 'ev_1',
+          type: 'DOCUMENTARY_EVIDENCE',
+          content: '合同显示违约条款',
+          source: '争议焦点证据',
           strength: 4,
           reliability: 0.8,
           relatedTo: [],
@@ -104,16 +104,16 @@ describe("EvidenceRelationAnalyzer", () => {
         claims: [],
         disputeFocuses: [
           {
-            id: "focus_1",
-            category: "CONTRACT_BREACH",
-            coreIssue: "违约条款",
-            positionA: "原告观点",
-            positionB: "被告观点",
+            id: 'focus_1',
+            category: 'CONTRACT_BREACH',
+            coreIssue: '违约条款',
+            positionA: '原告观点',
+            positionB: '被告观点',
             importance: 5,
             confidence: 0.9,
             relatedClaims: [],
             relatedFacts: [],
-            description: "合同中是否存在违约条款",
+            description: '合同中是否存在违约条款',
           },
         ],
         keyFacts: [],
@@ -121,20 +121,20 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const relations = analyzer.analyzeRelations(
         classifiedEvidence,
-        extractedData,
+        extractedData
       );
 
       expect(relations).toBeInstanceOf(Array);
     });
   });
 
-  describe("findRelatedParties", () => {
-    it("应该查找证据中提到的当事人", () => {
-      const evidenceContent = "张三和李四签订的合同";
+  describe('findRelatedParties', () => {
+    it('应该查找证据中提到的当事人', () => {
+      const evidenceContent = '张三和李四签订的合同';
       const extractedData: ExtractedData = {
         parties: [
-          { type: "plaintiff", name: "张三", role: "PLAINTIFF" },
-          { type: "defendant", name: "李四", role: "DEFENDANT" },
+          { type: 'plaintiff', name: '张三', role: 'PLAINTIFF' },
+          { type: 'defendant', name: '李四', role: 'DEFENDANT' },
         ],
         claims: [],
         disputeFocuses: [],
@@ -143,15 +143,15 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const related = analyzer.findRelatedParties(
         evidenceContent,
-        extractedData,
+        extractedData
       );
 
-      expect(related).toContain("张三");
-      expect(related).toContain("李四");
+      expect(related).toContain('张三');
+      expect(related).toContain('李四');
     });
 
-    it("应该处理空当事人列表", () => {
-      const evidenceContent = "合同证据";
+    it('应该处理空当事人列表', () => {
+      const evidenceContent = '合同证据';
       const extractedData: ExtractedData = {
         parties: [],
         claims: [],
@@ -161,14 +161,14 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const related = analyzer.findRelatedParties(
         evidenceContent,
-        extractedData,
+        extractedData
       );
 
       expect(related).toHaveLength(0);
     });
 
-    it("应该处理未定义的当事人", () => {
-      const evidenceContent = "合同证据";
+    it('应该处理未定义的当事人', () => {
+      const evidenceContent = '合同证据';
       const extractedData: ExtractedData = {
         parties: undefined,
         claims: [],
@@ -178,24 +178,24 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const related = analyzer.findRelatedParties(
         evidenceContent,
-        extractedData,
+        extractedData
       );
 
       expect(related).toHaveLength(0);
     });
   });
 
-  describe("findRelatedClaims", () => {
-    it("应该查找证据中提到的诉讼请求", () => {
-      const evidenceContent = "支付50000元的银行记录";
+  describe('findRelatedClaims', () => {
+    it('应该查找证据中提到的诉讼请求', () => {
+      const evidenceContent = '支付50000元的银行记录';
       const extractedData: ExtractedData = {
         parties: [],
         claims: [
           {
-            type: "PAY_PRINCIPAL",
-            content: "支付50000元",
+            type: 'PAY_PRINCIPAL',
+            content: '支付50000元',
             amount: 50000,
-            currency: "CNY",
+            currency: 'CNY',
           },
         ],
         disputeFocuses: [],
@@ -204,22 +204,22 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const related = analyzer.findRelatedClaims(
         evidenceContent,
-        extractedData,
+        extractedData
       );
 
-      expect(related).toContain("PAY_PRINCIPAL");
+      expect(related).toContain('PAY_PRINCIPAL');
     });
 
-    it("应该根据法律依据查找相关诉讼请求", () => {
-      const evidenceContent = "根据合同法规定";
+    it('应该根据法律依据查找相关诉讼请求', () => {
+      const evidenceContent = '根据合同法规定';
       const extractedData: ExtractedData = {
         parties: [],
         claims: [
           {
-            type: "PAY_INTEREST",
-            content: "支付利息",
-            currency: "CNY",
-            legalBasis: "合同法",
+            type: 'PAY_INTEREST',
+            content: '支付利息',
+            currency: 'CNY',
+            legalBasis: '合同法',
           },
         ],
         disputeFocuses: [],
@@ -228,14 +228,14 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const related = analyzer.findRelatedClaims(
         evidenceContent,
-        extractedData,
+        extractedData
       );
 
       expect(related.length).toBeGreaterThanOrEqual(0);
     });
 
-    it("应该处理空诉讼请求列表", () => {
-      const evidenceContent = "证据内容";
+    it('应该处理空诉讼请求列表', () => {
+      const evidenceContent = '证据内容';
       const extractedData: ExtractedData = {
         parties: [],
         claims: [],
@@ -245,31 +245,31 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const related = analyzer.findRelatedClaims(
         evidenceContent,
-        extractedData,
+        extractedData
       );
 
       expect(related).toHaveLength(0);
     });
   });
 
-  describe("findRelatedDisputeFocuses", () => {
-    it("应该查找证据中提到的争议焦点", () => {
-      const evidenceContent = "违约条款明显";
+  describe('findRelatedDisputeFocuses', () => {
+    it('应该查找证据中提到的争议焦点', () => {
+      const evidenceContent = '违约条款明显';
       const extractedData: ExtractedData = {
         parties: [],
         claims: [],
         disputeFocuses: [
           {
-            id: "focus_1",
-            category: "CONTRACT_BREACH",
-            coreIssue: "违约条款",
-            positionA: "原告观点",
-            positionB: "被告观点",
+            id: 'focus_1',
+            category: 'CONTRACT_BREACH',
+            coreIssue: '违约条款',
+            positionA: '原告观点',
+            positionB: '被告观点',
             importance: 5,
             confidence: 0.9,
             relatedClaims: [],
             relatedFacts: [],
-            description: "合同中是否存在违约条款",
+            description: '合同中是否存在违约条款',
           },
         ],
         keyFacts: [],
@@ -277,29 +277,29 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const related = analyzer.findRelatedDisputeFocuses(
         evidenceContent,
-        extractedData,
+        extractedData
       );
 
-      expect(related).toContain("focus_1");
+      expect(related).toContain('focus_1');
     });
 
-    it("应该根据描述查找争议焦点", () => {
-      const evidenceContent = "合同中是否存在违约条款";
+    it('应该根据描述查找争议焦点', () => {
+      const evidenceContent = '合同中是否存在违约条款';
       const extractedData: ExtractedData = {
         parties: [],
         claims: [],
         disputeFocuses: [
           {
-            id: "focus_1",
-            category: "CONTRACT_BREACH",
-            coreIssue: "违约",
-            positionA: "原告观点",
-            positionB: "被告观点",
+            id: 'focus_1',
+            category: 'CONTRACT_BREACH',
+            coreIssue: '违约',
+            positionA: '原告观点',
+            positionB: '被告观点',
             importance: 5,
             confidence: 0.9,
             relatedClaims: [],
             relatedFacts: [],
-            description: "合同中是否存在违约条款",
+            description: '合同中是否存在违约条款',
           },
         ],
         keyFacts: [],
@@ -307,14 +307,14 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const related = analyzer.findRelatedDisputeFocuses(
         evidenceContent,
-        extractedData,
+        extractedData
       );
 
-      expect(related).toContain("focus_1");
+      expect(related).toContain('focus_1');
     });
 
-    it("应该处理空争议焦点列表", () => {
-      const evidenceContent = "证据内容";
+    it('应该处理空争议焦点列表', () => {
+      const evidenceContent = '证据内容';
       const extractedData: ExtractedData = {
         parties: [],
         claims: [],
@@ -324,20 +324,20 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const related = analyzer.findRelatedDisputeFocuses(
         evidenceContent,
-        extractedData,
+        extractedData
       );
 
       expect(related).toHaveLength(0);
     });
   });
 
-  describe("calculateRelationStrength", () => {
-    it("应该计算关联强度", () => {
+  describe('calculateRelationStrength', () => {
+    it('应该计算关联强度', () => {
       const evidence: ClassifiedEvidence = {
-        id: "ev_1",
-        type: "DOCUMENTARY_EVIDENCE",
-        content: "合同",
-        source: "诉讼请求证据",
+        id: 'ev_1',
+        type: 'DOCUMENTARY_EVIDENCE',
+        content: '合同',
+        source: '诉讼请求证据',
         strength: 5,
         reliability: 0.9,
         relatedTo: [],
@@ -345,15 +345,15 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const relations = [
         {
-          evidenceId: "ev_1",
-          relatedTo: "张三",
-          relationType: "RELATES_TO" as const,
+          evidenceId: 'ev_1',
+          relatedTo: '张三',
+          relationType: 'RELATES_TO' as const,
           strength: 0.6,
         },
         {
-          evidenceId: "ev_1",
-          relatedTo: "PAY_PRINCIPAL",
-          relationType: "SUPPORTS" as const,
+          evidenceId: 'ev_1',
+          relatedTo: 'PAY_PRINCIPAL',
+          relationType: 'SUPPORTS' as const,
           strength: 0.8,
         },
       ];
@@ -364,12 +364,12 @@ describe("EvidenceRelationAnalyzer", () => {
       expect(strength).toBeLessThanOrEqual(1);
     });
 
-    it("应该处理空关联列表", () => {
+    it('应该处理空关联列表', () => {
       const evidence: ClassifiedEvidence = {
-        id: "ev_1",
-        type: "DOCUMENTARY_EVIDENCE",
-        content: "合同",
-        source: "诉讼请求证据",
+        id: 'ev_1',
+        type: 'DOCUMENTARY_EVIDENCE',
+        content: '合同',
+        source: '诉讼请求证据',
         strength: 5,
         reliability: 0.9,
         relatedTo: [],
@@ -381,13 +381,13 @@ describe("EvidenceRelationAnalyzer", () => {
     });
   });
 
-  describe("generateReport", () => {
-    it("应该生成关联分析报告", () => {
+  describe('generateReport', () => {
+    it('应该生成关联分析报告', () => {
       const evidence: ClassifiedEvidence = {
-        id: "ev_1",
-        type: "DOCUMENTARY_EVIDENCE",
-        content: "合同",
-        source: "诉讼请求证据",
+        id: 'ev_1',
+        type: 'DOCUMENTARY_EVIDENCE',
+        content: '合同',
+        source: '诉讼请求证据',
         strength: 5,
         reliability: 0.9,
         relatedTo: [],
@@ -395,15 +395,15 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const relations = [
         {
-          evidenceId: "ev_1",
-          relatedTo: "张三",
-          relationType: "RELATES_TO" as const,
+          evidenceId: 'ev_1',
+          relatedTo: '张三',
+          relationType: 'RELATES_TO' as const,
           strength: 0.6,
         },
         {
-          evidenceId: "ev_1",
-          relatedTo: "PAY_PRINCIPAL",
-          relationType: "SUPPORTS" as const,
+          evidenceId: 'ev_1',
+          relatedTo: 'PAY_PRINCIPAL',
+          relationType: 'SUPPORTS' as const,
           strength: 0.8,
         },
       ];
@@ -419,8 +419,8 @@ describe("EvidenceRelationAnalyzer", () => {
     });
   });
 
-  describe("边界情况", () => {
-    it("应该处理空证据列表", () => {
+  describe('边界情况', () => {
+    it('应该处理空证据列表', () => {
       const classifiedEvidence: ClassifiedEvidence[] = [];
       const extractedData: ExtractedData = {
         parties: [],
@@ -431,14 +431,14 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const relations = analyzer.analyzeRelations(
         classifiedEvidence,
-        extractedData,
+        extractedData
       );
 
       expect(relations).toHaveLength(0);
     });
 
-    it("应该处理特殊字符", () => {
-      const evidenceContent = "合同\n\t\r内容";
+    it('应该处理特殊字符', () => {
+      const evidenceContent = '合同\n\t\r内容';
       const extractedData: ExtractedData = {
         parties: [],
         claims: [],
@@ -448,14 +448,14 @@ describe("EvidenceRelationAnalyzer", () => {
 
       const related = analyzer.findRelatedParties(
         evidenceContent,
-        extractedData,
+        extractedData
       );
 
       expect(related).toBeDefined();
     });
 
-    it("应该处理超长文本", () => {
-      const longText = "合同".repeat(1000);
+    it('应该处理超长文本', () => {
+      const longText = '合同'.repeat(1000);
       const extractedData: ExtractedData = {
         parties: [],
         claims: [],

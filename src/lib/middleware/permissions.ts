@@ -2,9 +2,9 @@
  * 权限中间件
  */
 
-import { prisma } from "@/lib/db/prisma";
-import type { UserRole } from "@/types/auth";
-import type { PermissionCheckResult } from "@/types/permission";
+import { prisma } from '@/lib/db/prisma';
+import type { UserRole } from '@/types/auth';
+import type { PermissionCheckResult } from '@/types/permission';
 
 // =============================================================================
 // 角色检查函数
@@ -18,7 +18,7 @@ import type { PermissionCheckResult } from "@/types/permission";
  */
 export function requireRole(
   userRole: string,
-  allowedRoles: UserRole[],
+  allowedRoles: UserRole[]
 ): boolean {
   return allowedRoles.includes(userRole as UserRole);
 }
@@ -29,7 +29,7 @@ export function requireRole(
  * @returns 是否为管理员
  */
 export function isAdmin(userRole: string): boolean {
-  return userRole === "ADMIN" || userRole === "SUPER_ADMIN";
+  return userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
 }
 
 /**
@@ -38,7 +38,7 @@ export function isAdmin(userRole: string): boolean {
  * @returns 是否为超级管理员
  */
 export function isSuperAdmin(userRole: string): boolean {
-  return userRole === "SUPER_ADMIN";
+  return userRole === 'SUPER_ADMIN';
 }
 
 // =============================================================================
@@ -53,7 +53,7 @@ export function isSuperAdmin(userRole: string): boolean {
  */
 export async function hasPermission(
   userId: string,
-  permissionName: string,
+  permissionName: string
 ): Promise<PermissionCheckResult> {
   try {
     // 获取用户信息，包括用户角色
@@ -65,13 +65,13 @@ export async function hasPermission(
     if (!user) {
       return {
         hasPermission: false,
-        reason: "用户不存在",
+        reason: '用户不存在',
         requiredPermission: permissionName,
       };
     }
 
     // 超级管理员拥有所有权限
-    if (user.role === "SUPER_ADMIN") {
+    if (user.role === 'SUPER_ADMIN') {
       return {
         hasPermission: true,
         requiredPermission: permissionName,
@@ -103,29 +103,29 @@ export async function hasPermission(
     if (!role) {
       return {
         hasPermission: false,
-        reason: "角色不存在",
+        reason: '角色不存在',
         requiredPermission: permissionName,
       };
     }
 
     // 检查角色是否有该权限
     const hasRolePermission = role.permissions.some(
-      (rp) => rp.permission?.name === permissionName,
+      rp => rp.permission?.name === permissionName
     );
 
-    const allPermissions = role.permissions.map((rp) => rp.permission?.name);
+    const allPermissions = role.permissions.map(rp => rp.permission?.name);
 
     return {
       hasPermission: hasRolePermission,
-      reason: hasRolePermission ? undefined : "角色缺少该权限",
+      reason: hasRolePermission ? undefined : '角色缺少该权限',
       requiredPermission: permissionName,
       actualPermissions: allPermissions.filter((p): p is string => !!p),
     };
   } catch (error) {
-    console.error("检查权限时出错:", error);
+    console.error('检查权限时出错:', error);
     return {
       hasPermission: false,
-      reason: "权限检查失败",
+      reason: '权限检查失败',
       requiredPermission: permissionName,
     };
   }
@@ -148,8 +148,8 @@ export async function getUserPermissions(userId: string): Promise<string[]> {
     }
 
     // 超级管理员拥有所有权限
-    if (user.role === "SUPER_ADMIN") {
-      return ["*"]; // "*" 表示所有权限
+    if (user.role === 'SUPER_ADMIN') {
+      return ['*']; // "*" 表示所有权限
     }
 
     const permissions: string[] = [];
@@ -174,7 +174,7 @@ export async function getUserPermissions(userId: string): Promise<string[]> {
 
     if (role) {
       const rolePermissions = role.permissions
-        .map((rp) => rp.permission?.name)
+        .map(rp => rp.permission?.name)
         .filter((p): p is string => !!p);
       permissions.push(...rolePermissions);
     }
@@ -182,7 +182,7 @@ export async function getUserPermissions(userId: string): Promise<string[]> {
     // 去重
     return Array.from(new Set(permissions));
   } catch (error) {
-    console.error("获取用户权限时出错:", error);
+    console.error('获取用户权限时出错:', error);
     return [];
   }
 }
@@ -195,7 +195,7 @@ export async function getUserPermissions(userId: string): Promise<string[]> {
  */
 export async function hasPermissions(
   userId: string,
-  permissionNames: string[],
+  permissionNames: string[]
 ): Promise<Record<string, boolean>> {
   const results: Record<string, boolean> = {};
 
@@ -205,8 +205,8 @@ export async function hasPermissions(
     select: { role: true },
   });
 
-  if (user?.role === "SUPER_ADMIN") {
-    permissionNames.forEach((name) => {
+  if (user?.role === 'SUPER_ADMIN') {
+    permissionNames.forEach(name => {
       results[name] = true;
     });
     return results;
@@ -233,7 +233,7 @@ export async function hasPermissions(
  */
 export async function assignPermissionToRole(
   roleId: string,
-  permissionId: string,
+  permissionId: string
 ): Promise<unknown> {
   try {
     return await prisma.rolePermission.create({
@@ -243,8 +243,8 @@ export async function assignPermissionToRole(
       },
     });
   } catch (error) {
-    console.error("为角色分配权限时出错:", error);
-    throw new Error("为角色分配权限失败");
+    console.error('为角色分配权限时出错:', error);
+    throw new Error('为角色分配权限失败');
   }
 }
 
@@ -256,19 +256,19 @@ export async function assignPermissionToRole(
  */
 export async function assignPermissionsToRole(
   roleId: string,
-  permissionIds: string[],
+  permissionIds: string[]
 ): Promise<unknown[]> {
   try {
     return await prisma.rolePermission.createMany({
-      data: permissionIds.map((permissionId) => ({
+      data: permissionIds.map(permissionId => ({
         roleId,
         permissionId,
       })),
       skipDuplicates: true,
     });
   } catch (error) {
-    console.error("批量为角色分配权限时出错:", error);
-    throw new Error("批量为角色分配权限失败");
+    console.error('批量为角色分配权限时出错:', error);
+    throw new Error('批量为角色分配权限失败');
   }
 }
 
@@ -280,7 +280,7 @@ export async function assignPermissionsToRole(
  */
 export async function revokePermissionFromRole(
   roleId: string,
-  permissionId: string,
+  permissionId: string
 ): Promise<unknown> {
   try {
     return await prisma.rolePermission.deleteMany({
@@ -290,8 +290,8 @@ export async function revokePermissionFromRole(
       },
     });
   } catch (error) {
-    console.error("撤销角色权限时出错:", error);
-    throw new Error("撤销角色权限失败");
+    console.error('撤销角色权限时出错:', error);
+    throw new Error('撤销角色权限失败');
   }
 }
 
@@ -309,9 +309,9 @@ export async function getRolePermissions(roleId: string): Promise<unknown[]> {
       },
     });
 
-    return rolePermissions.map((rp) => rp.permission);
+    return rolePermissions.map(rp => rp.permission);
   } catch (error) {
-    console.error("获取角色权限时出错:", error);
+    console.error('获取角色权限时出错:', error);
     return [];
   }
 }

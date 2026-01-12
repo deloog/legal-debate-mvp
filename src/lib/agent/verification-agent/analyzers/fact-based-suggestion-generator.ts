@@ -9,7 +9,7 @@ import {
   VerificationIssue,
   IssueType,
   IssueSeverity,
-} from "../types";
+} from '../types';
 
 /**
  * 事实准确性建议生成器类
@@ -38,7 +38,7 @@ export class FactBasedSuggestionGenerator {
    * 生成数据补充建议
    */
   private generateDataCompletionSuggestion(
-    issue: VerificationIssue,
+    issue: VerificationIssue
   ): VerificationSuggestion {
     const priority = this.getPriorityBySeverity(issue.severity);
 
@@ -49,7 +49,7 @@ export class FactBasedSuggestionGenerator {
       target: issue.field,
       action: `补充缺失的${issue.field}字段`,
       reason: issue.message,
-      estimatedImpact: "提升数据完整性和验证通过率",
+      estimatedImpact: '提升数据完整性和验证通过率',
     };
   }
 
@@ -57,7 +57,7 @@ export class FactBasedSuggestionGenerator {
    * 生成数据修正建议
    */
   private generateDataCorrectionSuggestion(
-    issue: VerificationIssue,
+    issue: VerificationIssue
   ): VerificationSuggestion {
     const priority = this.getPriorityBySeverity(issue.severity);
 
@@ -68,7 +68,7 @@ export class FactBasedSuggestionGenerator {
       target: issue.field,
       action: `修正${issue.field}字段的数据`,
       reason: issue.message,
-      estimatedImpact: "提升事实准确性评分",
+      estimatedImpact: '提升事实准确性评分',
     };
   }
 
@@ -76,15 +76,15 @@ export class FactBasedSuggestionGenerator {
    * 生成数据一致性建议
    */
   private generateDataConsistencySuggestion(
-    issue: VerificationIssue,
+    issue: VerificationIssue
   ): VerificationSuggestion {
     return {
       id: `suggestion-consistency-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       type: SuggestionType.DATA_CORRECTION,
       priority: SuggestionPriority.HIGH,
-      action: "检查并统一数据源，确保数据一致性",
+      action: '检查并统一数据源，确保数据一致性',
       reason: issue.message,
-      estimatedImpact: "解决数据冲突，提升一致性评分",
+      estimatedImpact: '解决数据冲突，提升一致性评分',
     };
   }
 

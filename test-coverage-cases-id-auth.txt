@@ -1,0 +1,431 @@
+
+> legal_debate_mvp@0.1.0 test
+> jest cases-id-auth.test.ts
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.error
+    API Error: {
+      error: 'Case not found',
+      stack: 'ApiError: Case not found\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:80:13\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\lib\\errors\\error-handler.ts:193:14\n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-auth.test.ts:78:7)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'GET',
+      correlationId: undefined,
+      timestamp: '2026-01-12T07:12:12.781Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m"API Error:"[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m"Unknown error"[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-auth.test.ts:78:7)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.error
+    API Error: {
+      error: 'Token瑙ｆ瀽澶辫触',
+      stack: 'Error: Token瑙ｆ瀽澶辫触\n' +
+        '    at D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-auth.test.ts:88:15\n' +
+        '    at D:\\legal_debate_mvp\\node_modules\\jest-mock\\build\\index.js:305:39\n' +
+        '    at D:\\legal_debate_mvp\\node_modules\\jest-mock\\build\\index.js:312:13\n' +
+        '    at mockConstructor (D:\\legal_debate_mvp\\node_modules\\jest-mock\\build\\index.js:102:19)\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:31:39\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\lib\\errors\\error-handler.ts:193:14\n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-auth.test.ts:95:24)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'GET',
+      correlationId: undefined,
+      timestamp: '2026-01-12T07:12:12.790Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m"API Error:"[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m"Unknown error"[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-auth.test.ts:95:24)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    prisma:error 
+    Invalid `prisma.case.update()` invocation in
+    D:\legal_debate_mvp\src\app\api\v1\cases\[id]\route.ts:173:45
+    
+      170 };
+      171 
+      172 // 璋冪敤瀹為檯鐨勬暟鎹簱鎿嶄綔
+    鈫?173 const updatedCase = await prisma.case.update(
+    An operation failed because it depends on one or more records that were required but not found. Record to update not found.
+
+      at Object.mc (node_modules/@prisma/client/runtime/library.js:21:432)
+
+  console.error
+    API Error: {
+      error: '\n' +
+        'Invalid `prisma.case.update()` invocation in\n' +
+        'D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:173:45\n' +
+        '\n' +
+        '  170 };\n' +
+        '  171 \n' +
+        '  172 // 璋冪敤瀹為檯鐨勬暟鎹簱鎿嶄綔\n' +
+        '鈫?173 const updatedCase = await prisma.case.update(\n' +
+        'An operation failed because it depends on one or more records that were required but not found. Record to update not found.',
+      stack: 'PrismaClientKnownRequestError: \n' +
+        'Invalid `prisma.case.update()` invocation in\n' +
+        'D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:173:45\n' +
+        '\n' +
+        '  170 };\n' +
+        '  171 \n' +
+        '  172 // 璋冪敤瀹為檯鐨勬暟鎹簱鎿嶄綔\n' +
+        '鈫?173 const updatedCase = await prisma.case.update(\n' +
+        'An operation failed because it depends on one or more records that were required but not found. Record to update not found.\n' +
+        '    at $n.handleRequestError (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:121:7315)\n' +
+        '    at $n.handleAndLogRequestError (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:121:6623)\n' +
+        '    at $n.request (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:121:6307)\n' +
+        '    at l (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:130:9633)\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:173:27\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\lib\\errors\\error-handler.ts:193:14\n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-auth.test.ts:142:7)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'PUT',
+      correlationId: undefined,
+      timestamp: '2026-01-12T07:12:12.979Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m"API Error:"[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m"Unknown error"[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-auth.test.ts:142:7)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    prisma:error 
+    Invalid `prisma.case.update()` invocation in
+    D:\legal_debate_mvp\src\app\api\v1\cases\[id]\route.ts:249:23
+    
+      246 }
+      247 
+      248 // 璋冪敤瀹為檯鐨勬暟鎹簱鎿嶄綔锛堣蒋鍒犻櫎锛?    鈫?249 await prisma.case.update(
+    An operation failed because it depends on one or more records that were required but not found. Record to update not found.
+
+      at Object.mc (node_modules/@prisma/client/runtime/library.js:21:432)
+
+  console.error
+    API Error: {
+      error: '\n' +
+        'Invalid `prisma.case.update()` invocation in\n' +
+        'D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:249:23\n' +
+        '\n' +
+        '  246 }\n' +
+        '  247 \n' +
+        '  248 // 璋冪敤瀹為檯鐨勬暟鎹簱鎿嶄綔锛堣蒋鍒犻櫎锛塡n' +
+        '鈫?249 await prisma.case.update(\n' +
+        'An operation failed because it depends on one or more records that were required but not found. Record to update not found.',
+      stack: 'PrismaClientKnownRequestError: \n' +
+        'Invalid `prisma.case.update()` invocation in\n' +
+        'D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:249:23\n' +
+        '\n' +
+        '  246 }\n' +
+        '  247 \n' +
+        '  248 // 璋冪敤瀹為檯鐨勬暟鎹簱鎿嶄綔锛堣蒋鍒犻櫎锛塡n' +
+        '鈫?249 await prisma.case.update(\n' +
+        'An operation failed because it depends on one or more records that were required but not found. Record to update not found.\n' +
+        '    at $n.handleRequestError (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:121:7315)\n' +
+        '    at $n.handleAndLogRequestError (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:121:6623)\n' +
+        '    at $n.request (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:121:6307)\n' +
+        '    at l (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:130:9633)\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:249:5\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\lib\\errors\\error-handler.ts:193:14\n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-auth.test.ts:203:7)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'DELETE',
+      correlationId: undefined,
+      timestamp: '2026-01-12T07:12:13.000Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m"API Error:"[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m"Unknown error"[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-auth.test.ts:203:7)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.error
+    API Error: {
+      error: 'Case not found',
+      stack: 'ApiError: Case not found\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:80:13\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\lib\\errors\\error-handler.ts:193:14\n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-auth.test.ts:242:7)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'GET',
+      correlationId: undefined,
+      timestamp: '2026-01-12T07:12:13.015Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m"API Error:"[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m"Unknown error"[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-auth.test.ts:242:7)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.error
+    API Error: {
+      error: 'Case not found',
+      stack: 'ApiError: Case not found\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:80:13\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\lib\\errors\\error-handler.ts:193:14\n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-auth.test.ts:296:7)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'GET',
+      correlationId: undefined,
+      timestamp: '2026-01-12T07:12:13.024Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m"API Error:"[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m"Unknown error"[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-auth.test.ts:296:7)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    prisma:error 
+    Invalid `prisma.case.update()` invocation in
+    D:\legal_debate_mvp\src\app\api\v1\cases\[id]\route.ts:173:45
+    
+      170 };
+      171 
+      172 // 璋冪敤瀹為檯鐨勬暟鎹簱鎿嶄綔
+    鈫?173 const updatedCase = await prisma.case.update(
+    An operation failed because it depends on one or more records that were required but not found. Record to update not found.
+
+      at Object.mc (node_modules/@prisma/client/runtime/library.js:21:432)
+
+  console.error
+    API Error: {
+      error: '\n' +
+        'Invalid `prisma.case.update()` invocation in\n' +
+        'D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:173:45\n' +
+        '\n' +
+        '  170 };\n' +
+        '  171 \n' +
+        '  172 // 璋冪敤瀹為檯鐨勬暟鎹簱鎿嶄綔\n' +
+        '鈫?173 const updatedCase = await prisma.case.update(\n' +
+        'An operation failed because it depends on one or more records that were required but not found. Record to update not found.',
+      stack: 'PrismaClientKnownRequestError: \n' +
+        'Invalid `prisma.case.update()` invocation in\n' +
+        'D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:173:45\n' +
+        '\n' +
+        '  170 };\n' +
+        '  171 \n' +
+        '  172 // 璋冪敤瀹為檯鐨勬暟鎹簱鎿嶄綔\n' +
+        '鈫?173 const updatedCase = await prisma.case.update(\n' +
+        'An operation failed because it depends on one or more records that were required but not found. Record to update not found.\n' +
+        '    at $n.handleRequestError (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:121:7315)\n' +
+        '    at $n.handleAndLogRequestError (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:121:6623)\n' +
+        '    at $n.request (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:121:6307)\n' +
+        '    at l (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:130:9633)\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:173:27\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\lib\\errors\\error-handler.ts:193:14\n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-auth.test.ts:307:7)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'PUT',
+      correlationId: undefined,
+      timestamp: '2026-01-12T07:12:13.030Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m"API Error:"[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m"Unknown error"[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-auth.test.ts:307:7)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    prisma:error 
+    Invalid `prisma.case.update()` invocation in
+    D:\legal_debate_mvp\src\app\api\v1\cases\[id]\route.ts:249:23
+    
+      246 }
+      247 
+      248 // 璋冪敤瀹為檯鐨勬暟鎹簱鎿嶄綔锛堣蒋鍒犻櫎锛?    鈫?249 await prisma.case.update(
+    An operation failed because it depends on one or more records that were required but not found. Record to update not found.
+
+      at Object.mc (node_modules/@prisma/client/runtime/library.js:21:432)
+
+  console.error
+    API Error: {
+      error: '\n' +
+        'Invalid `prisma.case.update()` invocation in\n' +
+        'D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:249:23\n' +
+        '\n' +
+        '  246 }\n' +
+        '  247 \n' +
+        '  248 // 璋冪敤瀹為檯鐨勬暟鎹簱鎿嶄綔锛堣蒋鍒犻櫎锛塡n' +
+        '鈫?249 await prisma.case.update(\n' +
+        'An operation failed because it depends on one or more records that were required but not found. Record to update not found.',
+      stack: 'PrismaClientKnownRequestError: \n' +
+        'Invalid `prisma.case.update()` invocation in\n' +
+        'D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:249:23\n' +
+        '\n' +
+        '  246 }\n' +
+        '  247 \n' +
+        '  248 // 璋冪敤瀹為檯鐨勬暟鎹簱鎿嶄綔锛堣蒋鍒犻櫎锛塡n' +
+        '鈫?249 await prisma.case.update(\n' +
+        'An operation failed because it depends on one or more records that were required but not found. Record to update not found.\n' +
+        '    at $n.handleRequestError (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:121:7315)\n' +
+        '    at $n.handleAndLogRequestError (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:121:6623)\n' +
+        '    at $n.request (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:121:6307)\n' +
+        '    at l (D:\\legal_debate_mvp\\node_modules\\@prisma\\client\\runtime\\library.js:130:9633)\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:249:5\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\lib\\errors\\error-handler.ts:193:14\n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-auth.test.ts:318:7)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'DELETE',
+      correlationId: undefined,
+      timestamp: '2026-01-12T07:12:13.035Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m"API Error:"[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m"Unknown error"[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-auth.test.ts:318:7)
+
+PASS src/__tests__/api/cases-id-auth.test.ts
+  鍗曚釜妗堜欢API - 璁よ瘉闆嗘垚娴嬭瘯
+    GET鏂规硶 - 璁よ瘉楠岃瘉
+      鈭?鏈璇佽姹傚簲杩斿洖401 (33 ms)
+      鈭?宸茶璇佽姹傚簲閫氳繃楠岃瘉骞剁户缁鐞?(87 ms)
+      鈭?搴旀纭鐞嗚璇佷腑闂翠欢鎶涘嚭鐨勯敊璇?(6 ms)
+    PUT鏂规硶 - 璁よ瘉楠岃瘉
+      鈭?鏈璇佽姹傚簲杩斿洖401 (2 ms)
+      鈭?宸茶璇佽姹傚簲閫氳繃楠岃瘉骞剁户缁鐞?(186 ms)
+      鈭?鏈璇佹椂涓嶅簲鎵ц鏁版嵁搴撴搷浣?(2 ms)
+    DELETE鏂规硶 - 璁よ瘉楠岃瘉
+      鈭?鏈璇佽姹傚簲杩斿洖401 (11 ms)
+      鈭?宸茶璇佽姹傚簲閫氳繃楠岃瘉骞剁户缁鐞?(8 ms)
+      鈭?鏈璇佹椂涓嶅簲鎵ц鏁版嵁搴撴搷浣?(2 ms)
+    璁よ瘉涓庢潈闄愰泦鎴愭祴璇?      鈭?搴斿厛楠岃瘉璁よ瘉锛屽啀楠岃瘉鏉冮檺 (13 ms)
+      鈭?璁よ瘉澶辫触鏃跺簲涓嶈繘琛屾潈闄愭鏌?(1 ms)
+    涓嶅悓HTTP鏂规硶鐨勮璇佷竴鑷存€?      鈭?鎵€鏈夋柟娉曢兘搴斾娇鐢ㄧ浉鍚岀殑璁よ瘉閫昏緫 (17 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       12 passed, 12 total
+Snapshots:   0 total
+Time:        1.252 s
+Ran all test suites matching cases-id-auth.test.ts.

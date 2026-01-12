@@ -3,29 +3,29 @@
  * 演示权限中间件的使用
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { getAuthUser } from "@/lib/middleware/auth";
-import { validatePermissions } from "@/lib/middleware/permission-check";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { validatePermissions } from '@/lib/middleware/permission-check';
 
 // 获取单个用户（管理员权限）
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
     return Response.json(
-      { error: "未认证", message: "请先登录" },
+      { error: '未认证', message: '请先登录' },
       {
         status: 401,
-      },
+      }
     ) as unknown as NextResponse;
   }
 
   // 检查权限
-  const permissionError = await validatePermissions(request, "user:read");
+  const permissionError = await validatePermissions(request, 'user:read');
 
   if (permissionError) {
     return permissionError;
@@ -50,20 +50,20 @@ export async function GET(
 
     if (!user) {
       return Response.json(
-        { error: "用户不存在", message: `用户ID ${userId} 不存在` },
-        { status: 404 },
+        { error: '用户不存在', message: `用户ID ${userId} 不存在` },
+        { status: 404 }
       ) as unknown as NextResponse;
     }
 
     return Response.json(
       { data: { user } },
-      { status: 200 },
+      { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error("获取用户信息失败:", error);
+    console.error('获取用户信息失败:', error);
     return Response.json(
-      { error: "服务器错误", message: "获取用户信息失败" },
-      { status: 500 },
+      { error: '服务器错误', message: '获取用户信息失败' },
+      { status: 500 }
     ) as unknown as NextResponse;
   }
 }
@@ -71,21 +71,21 @@ export async function GET(
 // 更新用户（管理员权限）
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
     return Response.json(
-      { error: "未认证", message: "请先登录" },
+      { error: '未认证', message: '请先登录' },
       {
         status: 401,
-      },
+      }
     ) as unknown as NextResponse;
   }
 
   // 检查权限（需要update权限）
-  const permissionError = await validatePermissions(request, "user:update");
+  const permissionError = await validatePermissions(request, 'user:update');
 
   if (permissionError) {
     return permissionError;
@@ -106,13 +106,13 @@ export async function PUT(
 
     return Response.json(
       { data: { user: updatedUser } },
-      { status: 200 },
+      { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error("更新用户失败:", error);
+    console.error('更新用户失败:', error);
     return Response.json(
-      { error: "服务器错误", message: "更新用户失败" },
-      { status: 500 },
+      { error: '服务器错误', message: '更新用户失败' },
+      { status: 500 }
     ) as unknown as NextResponse;
   }
 }
@@ -120,21 +120,21 @@ export async function PUT(
 // 删除用户（管理员权限）
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
     return Response.json(
-      { error: "未认证", message: "请先登录" },
+      { error: '未认证', message: '请先登录' },
       {
         status: 401,
-      },
+      }
     ) as unknown as NextResponse;
   }
 
   // 检查权限（需要delete权限）
-  const permissionError = await validatePermissions(request, "user:delete");
+  const permissionError = await validatePermissions(request, 'user:delete');
 
   if (permissionError) {
     return permissionError;
@@ -149,14 +149,14 @@ export async function DELETE(
     });
 
     return Response.json(
-      { data: { message: "用户已删除" } },
-      { status: 200 },
+      { data: { message: '用户已删除' } },
+      { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error("删除用户失败:", error);
+    console.error('删除用户失败:', error);
     return Response.json(
-      { error: "服务器错误", message: "删除用户失败" },
-      { status: 500 },
+      { error: '服务器错误', message: '删除用户失败' },
+      { status: 500 }
     ) as unknown as NextResponse;
   }
 }

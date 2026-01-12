@@ -2,9 +2,9 @@ import {
   cleanupTestDatabase,
   setupTestDatabase,
   testPrisma,
-} from "../../../test-utils/database";
+} from '../../../test-utils/database';
 
-describe("Argument Basic Search and Filtering", () => {
+describe('Argument Basic Search and Filtering', () => {
   let testUser: any;
   let testCase: any;
   let testDebate: any;
@@ -16,9 +16,9 @@ describe("Argument Basic Search and Filtering", () => {
     // 创建测试用户
     testUser = await testPrisma.user.create({
       data: {
-        email: "test-argument-search-basic@example.com",
-        name: "测试用户",
-        role: "USER",
+        email: 'test-argument-search-basic@example.com',
+        name: '测试用户',
+        role: 'USER',
       },
     });
 
@@ -26,12 +26,12 @@ describe("Argument Basic Search and Filtering", () => {
     testCase = await testPrisma.case.create({
       data: {
         userId: testUser.id,
-        title: "论点基础搜索测试案件",
-        description: "这是一个用于测试论点基础搜索和过滤的案件",
-        type: "CIVIL",
-        status: "ACTIVE",
-        plaintiffName: "张三",
-        defendantName: "李四",
+        title: '论点基础搜索测试案件',
+        description: '这是一个用于测试论点基础搜索和过滤的案件',
+        type: 'CIVIL',
+        status: 'ACTIVE',
+        plaintiffName: '张三',
+        defendantName: '李四',
       },
     });
 
@@ -44,8 +44,8 @@ describe("Argument Basic Search and Filtering", () => {
         user: {
           connect: { id: testUser.id },
         },
-        title: "论点基础搜索测试辩论",
-        status: "IN_PROGRESS" as const,
+        title: '论点基础搜索测试辩论',
+        status: 'IN_PROGRESS' as const,
         currentRound: 1,
       },
     });
@@ -57,7 +57,7 @@ describe("Argument Basic Search and Filtering", () => {
           connect: { id: testDebate.id },
         },
         roundNumber: 1,
-        status: "IN_PROGRESS" as const,
+        status: 'IN_PROGRESS' as const,
         startedAt: new Date(),
       },
     });
@@ -67,10 +67,10 @@ describe("Argument Basic Search and Filtering", () => {
     await cleanupTestDatabase();
   });
 
-  describe("Content Keyword Search", () => {
-    it("should filter arguments by content keywords", async () => {
+  describe('Content Keyword Search', () => {
+    it('should filter arguments by content keywords', async () => {
       // 创建包含特定关键词的论点
-      const keywords = ["合同", "违约", "赔偿", "证据"];
+      const keywords = ['合同', '违约', '赔偿', '证据'];
 
       for (const keyword of keywords) {
         await testPrisma.argument.create({
@@ -78,9 +78,9 @@ describe("Argument Basic Search and Filtering", () => {
             round: {
               connect: { id: testRound.id },
             },
-            side: "PLAINTIFF" as const,
+            side: 'PLAINTIFF' as const,
             content: `包含${keyword}的论点`,
-            type: "MAIN_POINT" as const,
+            type: 'MAIN_POINT' as const,
           },
         });
       }
@@ -89,26 +89,26 @@ describe("Argument Basic Search and Filtering", () => {
       const contractArguments = await testPrisma.argument.findMany({
         where: {
           content: {
-            contains: "合同",
+            contains: '合同',
           },
         },
       });
 
       expect(contractArguments.length).toBeGreaterThanOrEqual(1);
-      contractArguments.forEach((arg) => {
-        expect(arg.content).toContain("合同");
+      contractArguments.forEach(arg => {
+        expect(arg.content).toContain('合同');
       });
     });
 
-    it("should find multiple keywords in content", async () => {
+    it('should find multiple keywords in content', async () => {
       await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: testRound.id },
           },
-          side: "DEFENDANT" as const,
-          content: "这个合同涉及违约问题和赔偿要求",
-          type: "MAIN_POINT" as const,
+          side: 'DEFENDANT' as const,
+          content: '这个合同涉及违约问题和赔偿要求',
+          type: 'MAIN_POINT' as const,
         },
       });
 
@@ -116,41 +116,41 @@ describe("Argument Basic Search and Filtering", () => {
       const multiKeywordArgs = await testPrisma.argument.findMany({
         where: {
           content: {
-            contains: "合同",
+            contains: '合同',
           },
         },
       });
 
       expect(multiKeywordArgs.length).toBeGreaterThanOrEqual(1);
       const foundArg = multiKeywordArgs.find(
-        (arg) =>
-          arg.content.includes("合同") &&
-          arg.content.includes("违约") &&
-          arg.content.includes("赔偿"),
+        arg =>
+          arg.content.includes('合同') &&
+          arg.content.includes('违约') &&
+          arg.content.includes('赔偿')
       );
       expect(foundArg).toBeDefined();
     });
 
-    it("should handle partial keyword matches", async () => {
+    it('should handle partial keyword matches', async () => {
       await testPrisma.argument.createMany({
         data: [
           {
             roundId: testRound.id,
-            side: "PLAINTIFF",
-            content: "劳动合同纠纷案例",
-            type: "MAIN_POINT",
+            side: 'PLAINTIFF',
+            content: '劳动合同纠纷案例',
+            type: 'MAIN_POINT',
           },
           {
             roundId: testRound.id,
-            side: "DEFENDANT",
-            content: "租赁合同争议处理",
-            type: "REBUTTAL",
+            side: 'DEFENDANT',
+            content: '租赁合同争议处理',
+            type: 'REBUTTAL',
           },
           {
             roundId: testRound.id,
-            side: "NEUTRAL",
-            content: "买卖合同违约分析",
-            type: "EVIDENCE",
+            side: 'NEUTRAL',
+            content: '买卖合同违约分析',
+            type: 'EVIDENCE',
           },
         ],
       });
@@ -158,35 +158,35 @@ describe("Argument Basic Search and Filtering", () => {
       const contractArgs = await testPrisma.argument.findMany({
         where: {
           content: {
-            contains: "合同",
+            contains: '合同',
           },
         },
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: 'asc' },
       });
 
       expect(contractArgs.length).toBeGreaterThanOrEqual(3);
-      contractArgs.forEach((arg) => {
-        expect(arg.content).toContain("合同");
+      contractArgs.forEach(arg => {
+        expect(arg.content).toContain('合同');
       });
     });
   });
 
-  describe("Case Sensitive Search", () => {
-    it("should handle case-sensitive content search", async () => {
+  describe('Case Sensitive Search', () => {
+    it('should handle case-sensitive content search', async () => {
       await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: testRound.id },
           },
-          side: "DEFENDANT" as const,
-          content: "包含大写LETTER的论点",
+          side: 'DEFENDANT' as const,
+          content: '包含大写LETTER的论点',
         },
       });
 
       const uppercaseResults = await testPrisma.argument.findMany({
         where: {
           content: {
-            contains: "LETTER",
+            contains: 'LETTER',
           },
         },
       });
@@ -194,7 +194,7 @@ describe("Argument Basic Search and Filtering", () => {
       const lowercaseResults = await testPrisma.argument.findMany({
         where: {
           content: {
-            contains: "letter",
+            contains: 'letter',
           },
         },
       });
@@ -203,26 +203,26 @@ describe("Argument Basic Search and Filtering", () => {
       // 大小写敏感性的行为取决于数据库配置
     });
 
-    it("should handle mixed case search terms", async () => {
+    it('should handle mixed case search terms', async () => {
       await testPrisma.argument.createMany({
         data: [
           {
             roundId: testRound.id,
-            side: "PLAINTIFF",
-            content: "Case Study Analysis",
-            type: "MAIN_POINT",
+            side: 'PLAINTIFF',
+            content: 'Case Study Analysis',
+            type: 'MAIN_POINT',
           },
           {
             roundId: testRound.id,
-            side: "DEFENDANT",
-            content: "case study review",
-            type: "REBUTTAL",
+            side: 'DEFENDANT',
+            content: 'case study review',
+            type: 'REBUTTAL',
           },
           {
             roundId: testRound.id,
-            side: "NEUTRAL",
-            content: "CASE STUDY FINDINGS",
-            type: "EVIDENCE",
+            side: 'NEUTRAL',
+            content: 'CASE STUDY FINDINGS',
+            type: 'EVIDENCE',
           },
         ],
       });
@@ -230,39 +230,39 @@ describe("Argument Basic Search and Filtering", () => {
       const caseStudyArgs = await testPrisma.argument.findMany({
         where: {
           content: {
-            contains: "Case",
+            contains: 'Case',
           },
         },
       });
 
       expect(caseStudyArgs.length).toBeGreaterThanOrEqual(1);
-      caseStudyArgs.forEach((arg) => {
+      caseStudyArgs.forEach(arg => {
         expect(arg.content).toMatch(/case/i);
       });
     });
   });
 
-  describe("Search with Special Characters", () => {
-    it("should handle special characters in search", async () => {
+  describe('Search with Special Characters', () => {
+    it('should handle special characters in search', async () => {
       await testPrisma.argument.createMany({
         data: [
           {
             roundId: testRound.id,
-            side: "PLAINTIFF",
-            content: "论点包含特殊字符：@#$%^&*()",
-            type: "MAIN_POINT",
+            side: 'PLAINTIFF',
+            content: '论点包含特殊字符：@#$%^&*()',
+            type: 'MAIN_POINT',
           },
           {
             roundId: testRound.id,
-            side: "DEFENDANT",
-            content: "包含中文标点符号：，。！？",
-            type: "REBUTTAL",
+            side: 'DEFENDANT',
+            content: '包含中文标点符号：，。！？',
+            type: 'REBUTTAL',
           },
           {
             roundId: testRound.id,
-            side: "NEUTRAL",
-            content: "包含数字符号：123%$#",
-            type: "EVIDENCE",
+            side: 'NEUTRAL',
+            content: '包含数字符号：123%$#',
+            type: 'EVIDENCE',
           },
         ],
       });
@@ -270,7 +270,7 @@ describe("Argument Basic Search and Filtering", () => {
       const specialCharArgs = await testPrisma.argument.findMany({
         where: {
           content: {
-            contains: "@#$%",
+            contains: '@#$%',
           },
         },
       });
@@ -278,46 +278,46 @@ describe("Argument Basic Search and Filtering", () => {
       expect(specialCharArgs.length).toBeGreaterThanOrEqual(1);
     });
 
-    it("should handle unicode and emoji in search", async () => {
+    it('should handle unicode and emoji in search', async () => {
       await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: testRound.id },
           },
-          side: "PLAINTIFF" as const,
-          content: "论点包含表情符号：🏛️⚖️📜💼",
-          type: "MAIN_POINT" as const,
+          side: 'PLAINTIFF' as const,
+          content: '论点包含表情符号：🏛️⚖️📜💼',
+          type: 'MAIN_POINT' as const,
         },
       });
 
       const emojiArgs = await testPrisma.argument.findMany({
         where: {
           content: {
-            contains: "⚖️",
+            contains: '⚖️',
           },
         },
       });
 
       expect(emojiArgs.length).toBeGreaterThanOrEqual(1);
-      expect(emojiArgs[0].content).toContain("⚖️");
+      expect(emojiArgs[0].content).toContain('⚖️');
     });
   });
 
-  describe("Empty and Null Search Handling", () => {
-    it("should handle empty search terms", async () => {
+  describe('Empty and Null Search Handling', () => {
+    it('should handle empty search terms', async () => {
       await testPrisma.argument.createMany({
         data: [
           {
             roundId: testRound.id,
-            side: "PLAINTIFF",
-            content: "正常论点内容",
-            type: "MAIN_POINT",
+            side: 'PLAINTIFF',
+            content: '正常论点内容',
+            type: 'MAIN_POINT',
           },
           {
             roundId: testRound.id,
-            side: "DEFENDANT",
-            content: "另一个正常论点",
-            type: "REBUTTAL",
+            side: 'DEFENDANT',
+            content: '另一个正常论点',
+            type: 'REBUTTAL',
           },
         ],
       });
@@ -326,7 +326,7 @@ describe("Argument Basic Search and Filtering", () => {
       const emptySearchResults = await testPrisma.argument.findMany({
         where: {
           content: {
-            contains: "",
+            contains: '',
           },
         },
       });
@@ -334,16 +334,16 @@ describe("Argument Basic Search and Filtering", () => {
       expect(emptySearchResults.length).toBeGreaterThanOrEqual(2);
     });
 
-    it("should handle null content gracefully", async () => {
+    it('should handle null content gracefully', async () => {
       // 创建一个没有内容的论点（如果schema允许）
       const argument = await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: testRound.id },
           },
-          side: "NEUTRAL" as const,
-          content: "测试内容",
-          type: "EVIDENCE" as const,
+          side: 'NEUTRAL' as const,
+          content: '测试内容',
+          type: 'EVIDENCE' as const,
         },
       });
 

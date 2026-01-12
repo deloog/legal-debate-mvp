@@ -7,7 +7,7 @@
  * 3. 评估证据整体质量
  */
 
-import type { EvidenceType, ClassifiedEvidence } from "../core/types";
+import type { EvidenceType, ClassifiedEvidence } from '../core/types';
 
 // =============================================================================
 // EvidenceStrengthAnalyzer类
@@ -34,13 +34,13 @@ export class EvidenceStrengthAnalyzer {
     score += typeWeights[type];
 
     // 内容强度指标
-    const strengthKeywords = ["原件", "盖章", "签名", "公证", "认证"];
-    if (strengthKeywords.some((kw) => content.includes(kw))) {
+    const strengthKeywords = ['原件', '盖章', '签名', '公证', '认证'];
+    if (strengthKeywords.some(kw => content.includes(kw))) {
       score += 1;
     }
 
-    const weakKeywords = ["复印件", "副本", "打印件"];
-    if (weakKeywords.some((kw) => content.includes(kw))) {
+    const weakKeywords = ['复印件', '副本', '打印件'];
+    if (weakKeywords.some(kw => content.includes(kw))) {
       score -= 1;
     }
 
@@ -58,11 +58,11 @@ export class EvidenceStrengthAnalyzer {
     let reliability = 0.5; // 基础可靠性
 
     // 来源可靠性指标
-    if (content.includes("官方") || content.includes("公证")) {
+    if (content.includes('官方') || content.includes('公证')) {
       reliability += 0.2;
     }
 
-    if (content.includes("第三方") || content.includes("鉴定")) {
+    if (content.includes('第三方') || content.includes('鉴定')) {
       reliability += 0.15;
     }
 
@@ -76,7 +76,7 @@ export class EvidenceStrengthAnalyzer {
     strength: number;
     reliability: number;
     qualityScore: number;
-    grade: "STRONG" | "MODERATE" | "WEAK";
+    grade: 'STRONG' | 'MODERATE' | 'WEAK';
   } {
     const strength = evidence.strength;
     const reliability = evidence.reliability;
@@ -84,13 +84,13 @@ export class EvidenceStrengthAnalyzer {
     // 综合质量评分（强度0.6 + 可靠性0.4）
     const qualityScore = (strength / 5) * 0.6 + reliability * 0.4;
 
-    let grade: "STRONG" | "MODERATE" | "WEAK";
+    let grade: 'STRONG' | 'MODERATE' | 'WEAK';
     if (qualityScore >= 0.7) {
-      grade = "STRONG";
+      grade = 'STRONG';
     } else if (qualityScore >= 0.5) {
-      grade = "MODERATE";
+      grade = 'MODERATE';
     } else {
-      grade = "WEAK";
+      grade = 'WEAK';
     }
 
     return {
@@ -109,27 +109,27 @@ export class EvidenceStrengthAnalyzer {
 
     // 强度不足
     if (evidence.strength <= 2) {
-      suggestions.push("证据强度较弱，建议补充更强的证据形式");
+      suggestions.push('证据强度较弱，建议补充更强的证据形式');
     }
 
     // 可靠性低
     if (evidence.reliability < 0.5) {
-      suggestions.push("证据可靠性较低，建议提供官方或第三方认证材料");
+      suggestions.push('证据可靠性较低，建议提供官方或第三方认证材料');
     }
 
     // 书证相关建议
-    if (evidence.type === "DOCUMENTARY_EVIDENCE") {
+    if (evidence.type === 'DOCUMENTARY_EVIDENCE') {
       if (
-        evidence.content.includes("复印件") ||
-        evidence.content.includes("打印件")
+        evidence.content.includes('复印件') ||
+        evidence.content.includes('打印件')
       ) {
-        suggestions.push("建议提供原件或公证后的复印件");
+        suggestions.push('建议提供原件或公证后的复印件');
       }
     }
 
     // 证人证言相关建议
-    if (evidence.type === "WITNESS_TESTIMONY") {
-      suggestions.push("建议补充证人证言的书面记录");
+    if (evidence.type === 'WITNESS_TESTIMONY') {
+      suggestions.push('建议补充证人证言的书面记录');
     }
 
     return suggestions;

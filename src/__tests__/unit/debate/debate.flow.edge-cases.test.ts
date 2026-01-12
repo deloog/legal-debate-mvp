@@ -1,10 +1,10 @@
-import { testPrisma } from "../../../test-utils/database";
+import { testPrisma } from '../../../test-utils/database';
 import {
   setupTestDatabase,
   cleanupTestDatabase,
-} from "../../../test-utils/database";
+} from '../../../test-utils/database';
 
-describe("Debate Flow Edge Cases", () => {
+describe('Debate Flow Edge Cases', () => {
   let testUser: any;
   let testCase: any;
 
@@ -14,9 +14,9 @@ describe("Debate Flow Edge Cases", () => {
     // 创建测试用户
     testUser = await testPrisma.user.create({
       data: {
-        email: "test-edge@example.com",
-        name: "边界测试用户",
-        role: "USER",
+        email: 'test-edge@example.com',
+        name: '边界测试用户',
+        role: 'USER',
       },
     });
 
@@ -24,12 +24,12 @@ describe("Debate Flow Edge Cases", () => {
     testCase = await testPrisma.case.create({
       data: {
         userId: testUser.id,
-        title: "边界情况测试案件",
-        description: "这是一个用于测试辩论边界情况的案件",
-        type: "CIVIL",
-        status: "ACTIVE",
-        plaintiffName: "张三",
-        defendantName: "李四",
+        title: '边界情况测试案件',
+        description: '这是一个用于测试辩论边界情况的案件',
+        type: 'CIVIL',
+        status: 'ACTIVE',
+        plaintiffName: '张三',
+        defendantName: '李四',
       },
     });
   });
@@ -38,8 +38,8 @@ describe("Debate Flow Edge Cases", () => {
     await cleanupTestDatabase();
   });
 
-  describe("Debate Interruption and Resumption", () => {
-    it("should handle debate interruption and resumption", async () => {
+  describe('Debate Interruption and Resumption', () => {
+    it('should handle debate interruption and resumption', async () => {
       // 创建辩论
       const debate = await testPrisma.debate.create({
         data: {
@@ -49,8 +49,8 @@ describe("Debate Flow Edge Cases", () => {
           user: {
             connect: { id: testUser.id },
           },
-          title: "中断恢复测试辩论",
-          status: "IN_PROGRESS" as const,
+          title: '中断恢复测试辩论',
+          status: 'IN_PROGRESS' as const,
           currentRound: 1,
         },
       });
@@ -62,7 +62,7 @@ describe("Debate Flow Edge Cases", () => {
             connect: { id: debate.id },
           },
           roundNumber: 1,
-          status: "IN_PROGRESS" as const,
+          status: 'IN_PROGRESS' as const,
           startedAt: new Date(),
         },
       });
@@ -73,9 +73,9 @@ describe("Debate Flow Edge Cases", () => {
           round: {
             connect: { id: round.id },
           },
-          side: "PLAINTIFF" as const,
-          content: "中断前的论点",
-          type: "MAIN_POINT" as const,
+          side: 'PLAINTIFF' as const,
+          content: '中断前的论点',
+          type: 'MAIN_POINT' as const,
         },
       });
 
@@ -83,7 +83,7 @@ describe("Debate Flow Edge Cases", () => {
       await testPrisma.debateRound.update({
         where: { id: round.id },
         data: {
-          status: "FAILED" as const,
+          status: 'FAILED' as const,
           completedAt: new Date(),
         },
       });
@@ -91,7 +91,7 @@ describe("Debate Flow Edge Cases", () => {
       // 暂停辩论
       await testPrisma.debate.update({
         where: { id: debate.id },
-        data: { status: "PAUSED" as const },
+        data: { status: 'PAUSED' as const },
       });
 
       // 验证中断状态
@@ -100,14 +100,14 @@ describe("Debate Flow Edge Cases", () => {
         include: { rounds: true },
       });
 
-      expect(pausedDebate?.status).toBe("PAUSED");
-      expect(pausedDebate?.rounds[0]?.status).toBe("FAILED");
+      expect(pausedDebate?.status).toBe('PAUSED');
+      expect(pausedDebate?.rounds[0]?.status).toBe('FAILED');
 
       // 恢复辩论 - 创建新轮次
       await testPrisma.debate.update({
         where: { id: debate.id },
         data: {
-          status: "IN_PROGRESS" as const,
+          status: 'IN_PROGRESS' as const,
           currentRound: 2, // 继续下一轮
         },
       });
@@ -118,7 +118,7 @@ describe("Debate Flow Edge Cases", () => {
             connect: { id: debate.id },
           },
           roundNumber: 2,
-          status: "IN_PROGRESS" as const,
+          status: 'IN_PROGRESS' as const,
           startedAt: new Date(),
         },
       });
@@ -129,9 +129,9 @@ describe("Debate Flow Edge Cases", () => {
           round: {
             connect: { id: resumedRound.id },
           },
-          side: "DEFENDANT" as const,
-          content: "恢复后的论点",
-          type: "MAIN_POINT" as const,
+          side: 'DEFENDANT' as const,
+          content: '恢复后的论点',
+          type: 'MAIN_POINT' as const,
         },
       });
 
@@ -141,21 +141,21 @@ describe("Debate Flow Edge Cases", () => {
         include: {
           rounds: {
             include: { arguments: true },
-            orderBy: { roundNumber: "asc" },
+            orderBy: { roundNumber: 'asc' },
           },
         },
       });
 
-      expect(resumedDebate?.status).toBe("IN_PROGRESS");
+      expect(resumedDebate?.status).toBe('IN_PROGRESS');
       expect(resumedDebate?.rounds).toHaveLength(2);
-      expect(resumedDebate?.rounds[0]?.status).toBe("FAILED");
-      expect(resumedDebate?.rounds[1]?.status).toBe("IN_PROGRESS");
+      expect(resumedDebate?.rounds[0]?.status).toBe('FAILED');
+      expect(resumedDebate?.rounds[1]?.status).toBe('IN_PROGRESS');
       expect(resumedDebate?.rounds[1]?.arguments).toHaveLength(1);
     });
   });
 
-  describe("Single Round Debate", () => {
-    it("should handle debate with single round", async () => {
+  describe('Single Round Debate', () => {
+    it('should handle debate with single round', async () => {
       const debate = await testPrisma.debate.create({
         data: {
           case: {
@@ -164,11 +164,11 @@ describe("Debate Flow Edge Cases", () => {
           user: {
             connect: { id: testUser.id },
           },
-          title: "单轮辩论",
-          status: "IN_PROGRESS" as const,
+          title: '单轮辩论',
+          status: 'IN_PROGRESS' as const,
           currentRound: 1,
           debateConfig: {
-            mode: "adversarial",
+            mode: 'adversarial',
             maxRounds: 1, // 只进行一轮
           },
         },
@@ -180,7 +180,7 @@ describe("Debate Flow Edge Cases", () => {
             connect: { id: debate.id },
           },
           roundNumber: 1,
-          status: "IN_PROGRESS" as const,
+          status: 'IN_PROGRESS' as const,
           startedAt: new Date(),
         },
       });
@@ -191,9 +191,9 @@ describe("Debate Flow Edge Cases", () => {
           round: {
             connect: { id: round.id },
           },
-          side: "PLAINTIFF" as const,
-          content: "单轮辩论的原告论点",
-          type: "MAIN_POINT" as const,
+          side: 'PLAINTIFF' as const,
+          content: '单轮辩论的原告论点',
+          type: 'MAIN_POINT' as const,
         },
       });
 
@@ -202,9 +202,9 @@ describe("Debate Flow Edge Cases", () => {
           round: {
             connect: { id: round.id },
           },
-          side: "DEFENDANT" as const,
-          content: "单轮辩论的被告论点",
-          type: "MAIN_POINT" as const,
+          side: 'DEFENDANT' as const,
+          content: '单轮辩论的被告论点',
+          type: 'MAIN_POINT' as const,
         },
       });
 
@@ -212,7 +212,7 @@ describe("Debate Flow Edge Cases", () => {
       await testPrisma.debateRound.update({
         where: { id: round.id },
         data: {
-          status: "COMPLETED" as const,
+          status: 'COMPLETED' as const,
           completedAt: new Date(),
         },
       });
@@ -220,7 +220,7 @@ describe("Debate Flow Edge Cases", () => {
       await testPrisma.debate.update({
         where: { id: debate.id },
         data: {
-          status: "COMPLETED" as const,
+          status: 'COMPLETED' as const,
         },
       });
 
@@ -230,14 +230,14 @@ describe("Debate Flow Edge Cases", () => {
         include: { rounds: true },
       });
 
-      expect(finalDebate?.status).toBe("COMPLETED");
+      expect(finalDebate?.status).toBe('COMPLETED');
       expect(finalDebate?.rounds).toHaveLength(1);
       expect(finalDebate?.currentRound).toBe(1);
     });
   });
 
-  describe("Collaborative Mode Debate", () => {
-    it("should handle debate with collaborative mode", async () => {
+  describe('Collaborative Mode Debate', () => {
+    it('should handle debate with collaborative mode', async () => {
       const debate = await testPrisma.debate.create({
         data: {
           case: {
@@ -246,11 +246,11 @@ describe("Debate Flow Edge Cases", () => {
           user: {
             connect: { id: testUser.id },
           },
-          title: "协作模式辩论",
-          status: "IN_PROGRESS" as const,
+          title: '协作模式辩论',
+          status: 'IN_PROGRESS' as const,
           currentRound: 1,
           debateConfig: {
-            mode: "collaborative", // 协作模式
+            mode: 'collaborative', // 协作模式
             maxRounds: 2,
           },
         },
@@ -262,7 +262,7 @@ describe("Debate Flow Edge Cases", () => {
             connect: { id: debate.id },
           },
           roundNumber: 1,
-          status: "IN_PROGRESS" as const,
+          status: 'IN_PROGRESS' as const,
           startedAt: new Date(),
         },
       });
@@ -273,9 +273,9 @@ describe("Debate Flow Edge Cases", () => {
           round: {
             connect: { id: round.id },
           },
-          side: "NEUTRAL" as const,
-          content: "协作模式下的分析性论点",
-          type: "MAIN_POINT" as const,
+          side: 'NEUTRAL' as const,
+          content: '协作模式下的分析性论点',
+          type: 'MAIN_POINT' as const,
         },
       });
 
@@ -284,9 +284,9 @@ describe("Debate Flow Edge Cases", () => {
           round: {
             connect: { id: round.id },
           },
-          side: "PLAINTIFF" as const,
-          content: "协作模式下的建设性建议",
-          type: "SUPPORTING" as const,
+          side: 'PLAINTIFF' as const,
+          content: '协作模式下的建设性建议',
+          type: 'SUPPORTING' as const,
         },
       });
 
@@ -297,10 +297,10 @@ describe("Debate Flow Edge Cases", () => {
       });
 
       expect((collaborativeDebate?.debateConfig as any)?.mode).toBe(
-        "collaborative",
+        'collaborative'
       );
       expect(
-        collaborativeDebate?.rounds[0]?.arguments.length,
+        collaborativeDebate?.rounds[0]?.arguments.length
       ).toBeGreaterThanOrEqual(2);
     });
   });

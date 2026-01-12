@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db/prisma";
+import { prisma } from '@/lib/db/prisma';
 
 /**
  * API性能指标接口
@@ -64,14 +64,14 @@ export class APIMonitor {
    * 记录API请求指标
    */
   static async logRequest(
-    metrics: Omit<APIMetrics, "timestamp">,
+    metrics: Omit<APIMetrics, 'timestamp'>
   ): Promise<void> {
     try {
       // 记录到AIInteraction表（复用现有表结构）
       await prisma.aIInteraction.create({
         data: {
-          type: "API_REQUEST",
-          provider: "MONITOR",
+          type: 'API_REQUEST',
+          provider: 'MONITOR',
           model: `${metrics.method} ${metrics.endpoint}`,
           request: {
             endpoint: metrics.endpoint,
@@ -91,7 +91,7 @@ export class APIMonitor {
         },
       });
     } catch (error) {
-      console.error("Failed to log API metrics:", error);
+      console.error('Failed to log API metrics:', error);
     }
   }
 
@@ -99,13 +99,13 @@ export class APIMonitor {
    * 记录数据库操作指标
    */
   static async logDatabaseOperation(
-    metrics: Omit<DatabaseMetrics, "timestamp">,
+    metrics: Omit<DatabaseMetrics, 'timestamp'>
   ): Promise<void> {
     try {
       await prisma.aIInteraction.create({
         data: {
-          type: "DATABASE_OPERATION",
-          provider: "DATABASE",
+          type: 'DATABASE_OPERATION',
+          provider: 'DATABASE',
           model: `${metrics.operation} ${metrics.table}`,
           request: {
             operation: metrics.operation,
@@ -119,7 +119,7 @@ export class APIMonitor {
         },
       });
     } catch (error) {
-      console.error("Failed to log database metrics:", error);
+      console.error('Failed to log database metrics:', error);
     }
   }
 
@@ -127,12 +127,12 @@ export class APIMonitor {
    * 记录AI服务指标
    */
   static async logAIOperation(
-    metrics: Omit<AIMetrics, "timestamp">,
+    metrics: Omit<AIMetrics, 'timestamp'>
   ): Promise<void> {
     try {
       await prisma.aIInteraction.create({
         data: {
-          type: "AI_OPERATION",
+          type: 'AI_OPERATION',
           provider: metrics.provider,
           model: metrics.model,
           request: {
@@ -147,7 +147,7 @@ export class APIMonitor {
         },
       });
     } catch (error) {
-      console.error("Failed to log AI metrics:", error);
+      console.error('Failed to log AI metrics:', error);
     }
   }
 
@@ -155,13 +155,13 @@ export class APIMonitor {
    * 记录业务事件
    */
   static async logBusinessEvent(
-    metrics: Omit<BusinessMetrics, "timestamp">,
+    metrics: Omit<BusinessMetrics, 'timestamp'>
   ): Promise<void> {
     try {
       await prisma.aIInteraction.create({
         data: {
-          type: "BUSINESS_EVENT",
-          provider: "SYSTEM",
+          type: 'BUSINESS_EVENT',
+          provider: 'SYSTEM',
           model: metrics.eventType,
           request: {
             entityType: metrics.entityType,
@@ -174,7 +174,7 @@ export class APIMonitor {
         },
       });
     } catch (error) {
-      console.error("Failed to log business metrics:", error);
+      console.error('Failed to log business metrics:', error);
     }
   }
 
@@ -203,14 +203,14 @@ export class APIMonitor {
     const interactions = await prisma.aIInteraction.findMany({
       where: {
         ...where,
-        type: "API_REQUEST",
+        type: 'API_REQUEST',
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       take: 1000, // 限制查询数量
     });
 
     const totalRequests = interactions.length;
-    const successfulRequests = interactions.filter((i) => i.success).length;
+    const successfulRequests = interactions.filter(i => i.success).length;
     const errorRate =
       totalRequests > 0
         ? (totalRequests - successfulRequests) / totalRequests
@@ -225,7 +225,7 @@ export class APIMonitor {
     // 统计端点性能
     const endpointStats = interactions.reduce(
       (acc, interaction) => {
-        const endpoint = interaction.model || "unknown";
+        const endpoint = interaction.model || 'unknown';
         if (!acc[endpoint]) {
           acc[endpoint] = { count: 0, totalResponseTime: 0 };
         }
@@ -233,7 +233,7 @@ export class APIMonitor {
         acc[endpoint].totalResponseTime += interaction.duration || 0;
         return acc;
       },
-      {} as Record<string, { count: number; totalResponseTime: number }>,
+      {} as Record<string, { count: number; totalResponseTime: number }>
     );
 
     const topEndpoints = Object.entries(endpointStats)
@@ -281,14 +281,14 @@ export class APIMonitor {
     const interactions = await prisma.aIInteraction.findMany({
       where: {
         ...where,
-        type: "AI_OPERATION",
+        type: 'AI_OPERATION',
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       take: 1000,
     });
 
     const totalOperations = interactions.length;
-    const successfulOperations = interactions.filter((i) => i.success).length;
+    const successfulOperations = interactions.filter(i => i.success).length;
     const successRate =
       totalOperations > 0 ? successfulOperations / totalOperations : 0;
 
@@ -300,14 +300,14 @@ export class APIMonitor {
 
     const totalTokens = interactions.reduce(
       (sum, i) => sum + (i.tokensUsed || 0),
-      0,
+      0
     );
     const totalCost = interactions.reduce((sum, i) => sum + (i.cost || 0), 0);
 
     // 统计提供商性能
     const providerStats = interactions.reduce(
       (acc, interaction) => {
-        const provider = interaction.provider || "unknown";
+        const provider = interaction.provider || 'unknown';
         if (!acc[provider]) {
           acc[provider] = { count: 0, successful: 0 };
         }
@@ -317,7 +317,7 @@ export class APIMonitor {
         }
         return acc;
       },
-      {} as Record<string, { count: number; successful: number }>,
+      {} as Record<string, { count: number; successful: number }>
     );
 
     const providerStatsArray = Object.entries(providerStats).map(
@@ -325,7 +325,7 @@ export class APIMonitor {
         provider,
         count: stats.count,
         successRate: stats.count > 0 ? stats.successful / stats.count : 0,
-      }),
+      })
     );
 
     return {
@@ -361,9 +361,9 @@ export class APIMonitor {
     const interactions = await prisma.aIInteraction.findMany({
       where: {
         ...where,
-        type: "BUSINESS_EVENT",
+        type: 'BUSINESS_EVENT',
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       take: 1000,
     });
 
@@ -372,22 +372,22 @@ export class APIMonitor {
     // 统计事件类型
     const eventTypeStats = interactions.reduce(
       (acc, interaction) => {
-        const eventType = interaction.model || "unknown";
+        const eventType = interaction.model || 'unknown';
         acc[eventType] = (acc[eventType] || 0) + 1;
         return acc;
       },
-      {} as Record<string, number>,
+      {} as Record<string, number>
     );
 
     // 统计实体类型
     const entityTypeStats = interactions.reduce(
       (acc, interaction) => {
         const request = interaction.request as any;
-        const entityType = request?.entityType || "unknown";
+        const entityType = request?.entityType || 'unknown';
         acc[entityType] = (acc[entityType] || 0) + 1;
         return acc;
       },
-      {} as Record<string, number>,
+      {} as Record<string, number>
     );
 
     return {
@@ -396,13 +396,13 @@ export class APIMonitor {
         ([eventType, count]) => ({
           eventType,
           count,
-        }),
+        })
       ),
       entityTypeStats: Object.entries(entityTypeStats).map(
         ([entityType, count]) => ({
           entityType,
           count,
-        }),
+        })
       ),
     };
   }
@@ -422,10 +422,10 @@ export class APIMonitor {
           },
           type: {
             in: [
-              "API_REQUEST",
-              "DATABASE_OPERATION",
-              "AI_OPERATION",
-              "BUSINESS_EVENT",
+              'API_REQUEST',
+              'DATABASE_OPERATION',
+              'AI_OPERATION',
+              'BUSINESS_EVENT',
             ],
           },
         },
@@ -433,7 +433,7 @@ export class APIMonitor {
 
       console.log(`Cleaned up monitoring data older than ${daysToKeep} days`);
     } catch (error) {
-      console.error("Failed to cleanup old monitoring data:", error);
+      console.error('Failed to cleanup old monitoring data:', error);
     }
   }
 }
@@ -452,7 +452,7 @@ export function createPerformanceTracker(endpoint: string, method: string) {
       userId?: string,
       userAgent?: string,
       ip?: string,
-      error?: string,
+      error?: string
     ) => {
       const responseTime = Date.now() - startTime;
 
@@ -480,7 +480,7 @@ export function monitorDatabaseQuery(operation: string, table: string) {
   return function (
     target: any,
     propertyName: string,
-    descriptor: PropertyDescriptor,
+    descriptor: PropertyDescriptor
   ) {
     const method = descriptor.value;
 
@@ -494,7 +494,7 @@ export function monitorDatabaseQuery(operation: string, table: string) {
         return result;
       } catch (err) {
         success = false;
-        error = err instanceof Error ? err.message : "Unknown error";
+        error = err instanceof Error ? err.message : 'Unknown error';
         throw err;
       } finally {
         const duration = Date.now() - startTime;
@@ -506,8 +506,8 @@ export function monitorDatabaseQuery(operation: string, table: string) {
           duration,
           success,
           error,
-        }).catch((logError) => {
-          console.error("Failed to log database operation:", logError);
+        }).catch(logError => {
+          console.error('Failed to log database operation:', logError);
         });
       }
     };
@@ -522,12 +522,12 @@ export function monitorDatabaseQuery(operation: string, table: string) {
 export function monitorAICall(
   provider: string,
   operation: string,
-  model?: string,
+  model?: string
 ) {
   return function (
     target: any,
     propertyName: string,
-    descriptor: PropertyDescriptor,
+    descriptor: PropertyDescriptor
   ) {
     const method = descriptor.value;
 
@@ -542,7 +542,7 @@ export function monitorAICall(
         const result = await method.apply(this, args);
 
         // 尝试从结果中提取token和cost信息
-        if (result && typeof result === "object") {
+        if (result && typeof result === 'object') {
           tokensUsed = (result as any).tokensUsed;
           cost = (result as any).cost;
         }
@@ -550,7 +550,7 @@ export function monitorAICall(
         return result;
       } catch (err) {
         success = false;
-        error = err instanceof Error ? err.message : "Unknown error";
+        error = err instanceof Error ? err.message : 'Unknown error';
         throw err;
       } finally {
         const duration = Date.now() - startTime;
@@ -565,8 +565,8 @@ export function monitorAICall(
           cost,
           success,
           error,
-        }).catch((logError) => {
-          console.error("Failed to log AI operation:", logError);
+        }).catch(logError => {
+          console.error('Failed to log AI operation:', logError);
         });
       }
     };

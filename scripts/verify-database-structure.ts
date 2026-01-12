@@ -1,36 +1,36 @@
-import { prisma } from "../src/lib/db/prisma";
+import { prisma } from '../src/lib/db/prisma';
 
 async function verifyDatabaseStructure() {
   try {
-    console.log("🔍 开始验证数据库结构...\n");
+    console.log('🔍 开始验证数据库结构...\n');
 
     // 1. 检查所有表是否存在
     const tables = await prisma.$queryRaw`
       SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename
     `;
 
-    console.log("=== 数据库表列表 ===");
+    console.log('=== 数据库表列表 ===');
     console.log(`表数量: ${(tables as any[]).length}`);
 
     const expectedTables = [
-      "accounts",
-      "ai_interactions",
-      "arguments",
-      "cases",
-      "debate_rounds",
-      "debates",
-      "documents",
-      "legal_references",
-      "sessions",
-      "users",
+      'accounts',
+      'ai_interactions',
+      'arguments',
+      'cases',
+      'debate_rounds',
+      'debates',
+      'documents',
+      'legal_references',
+      'sessions',
+      'users',
     ];
 
-    const actualTables = (tables as any[]).map((t) => t.tablename);
+    const actualTables = (tables as any[]).map(t => t.tablename);
 
-    console.log("\n✅ 表存在性检查:");
-    expectedTables.forEach((table) => {
+    console.log('\n✅ 表存在性检查:');
+    expectedTables.forEach(table => {
       const exists = actualTables.includes(table);
-      console.log(`  ${exists ? "✅" : "❌"} ${table}`);
+      console.log(`  ${exists ? '✅' : '❌'} ${table}`);
     });
 
     // 2. 检查索引
@@ -51,7 +51,7 @@ async function verifyDatabaseStructure() {
     console.log(`外键数量: ${(constraints as any[]).length}`);
 
     // 4. 检查数据
-    console.log("\n=== 数据验证 ===");
+    console.log('\n=== 数据验证 ===');
     const userCount = await prisma.user.count();
     const caseCount = await prisma.case.count();
     const documentCount = await prisma.document.count();
@@ -67,31 +67,31 @@ async function verifyDatabaseStructure() {
     console.log(`法律依据数量: ${legalReferenceCount}`);
 
     // 5. 验证验收标准
-    console.log("\n=== 验收标准验证 ===");
+    console.log('\n=== 验收标准验证 ===');
 
-    const allTablesExist = expectedTables.every((table) =>
-      actualTables.includes(table),
+    const allTablesExist = expectedTables.every(table =>
+      actualTables.includes(table)
     );
     const hasData = userCount > 0 && caseCount > 0 && documentCount > 0;
     const hasIndexes = (indexes as any[]).length > 0;
     const hasConstraints = (constraints as any[]).length > 0;
 
-    console.log(`✅ 所有表创建成功: ${allTablesExist ? "通过" : "失败"}`);
+    console.log(`✅ 所有表创建成功: ${allTablesExist ? '通过' : '失败'}`);
     console.log(
-      `✅ 索引和约束正确: ${hasIndexes && hasConstraints ? "通过" : "失败"}`,
+      `✅ 索引和约束正确: ${hasIndexes && hasConstraints ? '通过' : '失败'}`
     );
-    console.log(`✅ 种子数据创建: ${hasData ? "通过" : "失败"}`);
+    console.log(`✅ 种子数据创建: ${hasData ? '通过' : '失败'}`);
 
     const allChecksPass =
       allTablesExist && hasIndexes && hasConstraints && hasData;
     console.log(
-      `\n🎯 总体验证结果: ${allChecksPass ? "✅ 全部通过" : "❌ 存在问题"}`,
+      `\n🎯 总体验证结果: ${allChecksPass ? '✅ 全部通过' : '❌ 存在问题'}`
     );
 
     await prisma.$disconnect();
     return allChecksPass;
   } catch (error) {
-    console.error("❌ 验证数据库结构时出错:", error);
+    console.error('❌ 验证数据库结构时出错:', error);
     await prisma.$disconnect();
     return false;
   }
@@ -103,6 +103,6 @@ verifyDatabaseStructure()
     process.exit(success ? 0 : 1);
   })
   .catch((error: Error) => {
-    console.error("验证脚本执行失败:", error);
+    console.error('验证脚本执行失败:', error);
     process.exit(1);
   });

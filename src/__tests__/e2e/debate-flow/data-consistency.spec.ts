@@ -3,7 +3,7 @@
  * 验证跨模块数据传递和状态同步
  */
 
-import { test, expect, APIRequestContext } from "@playwright/test";
+import { test, expect, APIRequestContext } from '@playwright/test';
 import {
   createTestCase,
   uploadTestDocument,
@@ -14,17 +14,17 @@ import {
   createDebateRound,
   generateArguments,
   cleanupTestData,
-} from "./helpers";
-import { prisma } from "@/lib/db/prisma";
+} from './helpers';
+import { prisma } from '@/lib/db/prisma';
 
-test.describe("数据一致性测试", () => {
+test.describe('数据一致性测试', () => {
   let apiContext: APIRequestContext;
-  const testUserId = "test-e2e-data-consistency";
+  const testUserId = 'test-e2e-data-consistency';
   let caseId: string;
 
   test.beforeAll(async ({ playwright }) => {
     apiContext = await playwright.request.newContext({
-      baseURL: "http://localhost:3000",
+      baseURL: 'http://localhost:3000',
     });
   });
 
@@ -37,7 +37,7 @@ test.describe("数据一致性测试", () => {
     }
   });
 
-  test("验证文档解析结果与案件关联正确", async () => {
+  test('验证文档解析结果与案件关联正确', async () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
@@ -45,11 +45,11 @@ test.describe("数据一致性测试", () => {
     const testDocument = await uploadTestDocument(
       apiContext,
       caseId,
-      "%PDF-1.4%\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Count 1\n/Kids [3 0 R]\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/Resources <<\n/Font <<\n/F1 <<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica\n>>\n>>\n>>\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<<\n/Length 44\n>>\nstream\nBT\n/F1 12 Tf\n50 700 Td\n(Test Document) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000286 00000 n\ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n392\n%%EOF",
+      '%PDF-1.4%\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Count 1\n/Kids [3 0 R]\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/Resources <<\n/Font <<\n/F1 <<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica\n>>\n>>\n>>\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<<\n/Length 44\n>>\nstream\nBT\n/F1 12 Tf\n50 700 Td\n(Test Document) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000286 00000 n\ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n392\n%%EOF'
     );
     const parseResult = await waitForDocumentParsing(
       apiContext,
-      testDocument.documentId,
+      testDocument.documentId
     );
 
     // 验证数据库中的文档记录
@@ -59,7 +59,7 @@ test.describe("数据一致性测试", () => {
 
     expect(dbDocument).toBeDefined();
     expect(dbDocument.caseId).toBe(caseId);
-    expect(dbDocument.analysisStatus).toBe("COMPLETED");
+    expect(dbDocument.analysisStatus).toBe('COMPLETED');
 
     // 验证解析结果存在（不进行深度比较，因为数据结构可能不同）
     const dbResult = dbDocument.analysisResult as {
@@ -76,30 +76,30 @@ test.describe("数据一致性测试", () => {
 
     // 验证数据量一致
     expect(dbResult?.extractedData?.parties?.length).toBe(
-      parseResult.parties.length,
+      parseResult.parties.length
     );
     expect(dbResult?.extractedData?.claims?.length).toBe(
-      parseResult.claims.length,
+      parseResult.claims.length
     );
     expect(dbResult?.extractedData?.keyFacts?.length).toBe(
-      parseResult.facts.length,
+      parseResult.facts.length
     );
   });
 
-  test("验证法条检索结果与辩论引用一致", async () => {
+  test('验证法条检索结果与辩论引用一致', async () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
     const searchResults = await searchLawArticles(
       apiContext,
-      ["合同", "违约"],
-      "CIVIL",
-      { allowEmpty: true }, // 允许空结果，测试可能因无匹配法条而失败
+      ['合同', '违约'],
+      'CIVIL',
+      { allowEmpty: true } // 允许空结果，测试可能因无匹配法条而失败
     );
 
     // 如果没有检索到法条，跳过此测试
     if (searchResults.length === 0) {
-      console.log("警告：法条检索返回空结果，跳过测试");
+      console.log('警告：法条检索返回空结果，跳过测试');
       return;
     }
 
@@ -109,25 +109,25 @@ test.describe("数据一致性测试", () => {
       apiContext,
       debate.debateId,
       debate.roundId,
-      searchResults.slice(0, 3).map((a: { id: string }) => a.id),
+      searchResults.slice(0, 3).map((a: { id: string }) => a.id)
     );
 
     // 验证论点引用的法条在检索结果中
     const referencedArticles = new Set(
-      generatedArgs.plaintiff.arguments.flatMap((arg) =>
-        arg.legalBasis.map((lb: { articleId: string }) => lb.articleId),
-      ),
+      generatedArgs.plaintiff.arguments.flatMap(arg =>
+        arg.legalBasis.map((lb: { articleId: string }) => lb.articleId)
+      )
     );
 
     referencedArticles.forEach((articleId: string) => {
       const found = searchResults.some(
-        (result: { id: string }) => result.id === articleId,
+        (result: { id: string }) => result.id === articleId
       );
       expect(found).toBe(true);
     });
   });
 
-  test("验证辩论轮次与论点关联正确", async () => {
+  test('验证辩论轮次与论点关联正确', async () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
@@ -147,25 +147,25 @@ test.describe("数据一致性测试", () => {
 
     // 验证论点所属方
     dbRound.arguments.forEach((arg: { side: string; roundId: string }) => {
-      expect(["PLAINTIFF", "DEFENDANT", "NEUTRAL"]).toContain(arg.side);
+      expect(['PLAINTIFF', 'DEFENDANT', 'NEUTRAL']).toContain(arg.side);
       expect(arg.roundId).toBe(debate.roundId);
     });
   });
 
-  test("验证缓存数据与数据库数据一致", async () => {
+  test('验证缓存数据与数据库数据一致', async () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
     // 第一次检索（应写入缓存）
-    const search1 = await searchLawArticles(apiContext, ["合同"], "CIVIL");
+    const search1 = await searchLawArticles(apiContext, ['合同'], 'CIVIL');
 
     // 第二次检索（应从缓存读取）
-    const search2 = await searchLawArticles(apiContext, ["合同"], "CIVIL");
+    const search2 = await searchLawArticles(apiContext, ['合同'], 'CIVIL');
 
     // 验证两次结果一致
     expect(search1.length).toBe(search2.length);
     expect(search1.map((a: { id: string }) => a.id)).toEqual(
-      search2.map((a: { id: string }) => a.id),
+      search2.map((a: { id: string }) => a.id)
     );
 
     // 验证相关性分数一致
@@ -174,14 +174,14 @@ test.describe("数据一致性测试", () => {
     }
   });
 
-  test("验证AI交互记录完整", async () => {
+  test('验证AI交互记录完整', async () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
     const testDocument = await uploadTestDocument(
       apiContext,
       caseId,
-      "%PDF-1.4%\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Count 1\n/Kids [3 0 R]\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/Resources <<\n/Font <<\n/F1 <<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica\n>>\n>>\n>>\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<<\n/Length 44\n>>\nstream\nBT\n/F1 12 Tf\n50 700 Td\n(Test Document) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000286 00000 n\ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n392\n%%EOF",
+      '%PDF-1.4%\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Count 1\n/Kids [3 0 R]\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/Resources <<\n/Font <<\n/F1 <<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica\n>>\n>>\n>>\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<<\n/Length 44\n>>\nstream\nBT\n/F1 12 Tf\n50 700 Td\n(Test Document) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000286 00000 n\ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n392\n%%EOF'
     );
     await waitForDocumentParsing(apiContext, testDocument.documentId);
 
@@ -193,7 +193,7 @@ test.describe("数据一致性测试", () => {
         },
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
     });
 
@@ -204,7 +204,7 @@ test.describe("数据一致性测试", () => {
     // 如果有AI交互记录，验证其结构
     if (interactions.length > 0) {
       const analysisRecord = interactions.find(
-        (i: { type: string }) => i.type === "document_analysis",
+        (i: { type: string }) => i.type === 'document_analysis'
       );
       if (analysisRecord) {
         expect(analysisRecord.provider).toBeDefined();
@@ -224,7 +224,7 @@ test.describe("数据一致性测试", () => {
     expect(tableInfo).toBeDefined();
   });
 
-  test("验证用户操作日志完整", async () => {
+  test('验证用户操作日志完整', async () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
@@ -235,7 +235,7 @@ test.describe("数据一致性测试", () => {
     await uploadTestDocument(
       apiContext,
       testCase.caseId,
-      "%PDF-1.4%\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Count 1\n/Kids [3 0 R]\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/Resources <<\n/Font <<\n/F1 <<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica\n>>\n>>\n>>\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<<\n/Length 44\n>>\nstream\nBT\n/F1 12 Tf\n50 700 Td\n(Test Document) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000286 00000 n\ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n392\n%%EOF",
+      '%PDF-1.4%\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Count 1\n/Kids [3 0 R]\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/Resources <<\n/Font <<\n/F1 <<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica\n>>\n>>\n>>\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<<\n/Length 44\n>>\nstream\nBT\n/F1 12 Tf\n50 700 Td\n(Test Document) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000286 00000 n\ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n392\n%%EOF'
     );
 
     // 查询用户活动
@@ -249,11 +249,11 @@ test.describe("数据一致性测试", () => {
 
     // 验证更新时间晚于创建时间
     expect(caseData.updatedAt.getTime()).toBeGreaterThanOrEqual(
-      caseData.createdAt.getTime(),
+      caseData.createdAt.getTime()
     );
   });
 
-  test("验证多轮辩论上下文继承正确", async () => {
+  test('验证多轮辩论上下文继承正确', async () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
@@ -271,7 +271,7 @@ test.describe("数据一致性测试", () => {
       where: { id: debate.roundId },
     });
 
-    expect(round1Check.status).toBe("COMPLETED");
+    expect(round1Check.status).toBe('COMPLETED');
     expect(round1Check.completedAt).toBeDefined();
 
     // 验证第二轮上下文包含第一轮信息
@@ -279,10 +279,10 @@ test.describe("数据一致性测试", () => {
       where: { id: round2Id },
     });
 
-    expect(round2Check.status).toBe("COMPLETED");
+    expect(round2Check.status).toBe('COMPLETED');
   });
 
-  test("验证软删除不影响数据统计", async () => {
+  test('验证软删除不影响数据统计', async () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
@@ -325,7 +325,7 @@ test.describe("数据一致性测试", () => {
     });
   });
 
-  test.skip("验证法条适用性分析结果存储正确 (API未实现)", async () => {
+  test.skip('验证法条适用性分析结果存储正确 (API未实现)', async () => {
     // 注意：法条适用性分析API可能不存在或功能未实现
     // 暂时跳过此测试
 
@@ -333,38 +333,38 @@ test.describe("数据一致性测试", () => {
     caseId = testCase.caseId;
 
     const applicabilityResult = await analyzeApplicability(apiContext, caseId, [
-      "test-article-1",
-      "test-article-2",
+      'test-article-1',
+      'test-article-2',
     ]);
 
     // 验证结果数据结构
-    expect(applicabilityResult).toHaveProperty("analyzedAt");
-    expect(applicabilityResult).toHaveProperty("totalArticles");
-    expect(applicabilityResult).toHaveProperty("applicableArticles");
-    expect(applicabilityResult).toHaveProperty("notApplicableArticles");
-    expect(applicabilityResult).toHaveProperty("results");
+    expect(applicabilityResult).toHaveProperty('analyzedAt');
+    expect(applicabilityResult).toHaveProperty('totalArticles');
+    expect(applicabilityResult).toHaveProperty('applicableArticles');
+    expect(applicabilityResult).toHaveProperty('notApplicableArticles');
+    expect(applicabilityResult).toHaveProperty('results');
 
     // 验证每个分析结果包含所有必要字段
-    applicabilityResult.results.forEach((result) => {
-      expect(result).toHaveProperty("articleId");
-      expect(result).toHaveProperty("applicable");
-      expect(result).toHaveProperty("score");
-      expect(result).toHaveProperty("reasons");
-      expect(result).toHaveProperty("warnings");
+    applicabilityResult.results.forEach(result => {
+      expect(result).toHaveProperty('articleId');
+      expect(result).toHaveProperty('applicable');
+      expect(result).toHaveProperty('score');
+      expect(result).toHaveProperty('reasons');
+      expect(result).toHaveProperty('warnings');
     });
 
     // 验证适用法条数量
     const applicableCount = applicabilityResult.results.filter(
-      (r: { applicable: boolean }) => r.applicable,
+      (r: { applicable: boolean }) => r.applicable
     ).length;
 
     expect(applicableCount).toBe(applicabilityResult.applicableArticles);
     expect(applicableCount).toBeLessThanOrEqual(
-      applicabilityResult.totalArticles as number,
+      applicabilityResult.totalArticles as number
     );
   });
 
-  test("验证增量分析不重复处理旧数据", async () => {
+  test('验证增量分析不重复处理旧数据', async () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
@@ -382,7 +382,7 @@ test.describe("数据一致性测试", () => {
     const round2Duration = Date.now() - round2Start;
 
     console.log(
-      `第一轮耗时: ${round1Duration}ms, 第二轮耗时: ${round2Duration}ms`,
+      `第一轮耗时: ${round1Duration}ms, 第二轮耗时: ${round2Duration}ms`
     );
 
     // 验证第二轮不比第一轮慢太多（可能使用了缓存）
@@ -398,7 +398,7 @@ test.describe("数据一致性测试", () => {
     }
   });
 
-  test("验证多轮辩论数据完整性", async () => {
+  test('验证多轮辩论数据完整性', async () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
@@ -439,7 +439,7 @@ test.describe("数据一致性测试", () => {
     const totalArguments = dbDebate.rounds.reduce(
       (sum: number, round: { arguments: unknown[] }) =>
         sum + round.arguments.length,
-      0,
+      0
     );
 
     expect(totalArguments).toBeGreaterThan(6); // 至少3轮，每轮至少2个论点

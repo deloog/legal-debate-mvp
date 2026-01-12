@@ -1,4 +1,4 @@
-import { redis } from "./redis";
+import { redis } from './redis';
 import {
   CacheItem,
   CacheOptions,
@@ -11,7 +11,7 @@ import {
   CacheSerializer,
   CacheNamespace,
   defaultCacheConfig,
-} from "./types";
+} from './types';
 
 // JSON序列化器
 const jsonSerializer: CacheSerializer = {
@@ -20,7 +20,7 @@ const jsonSerializer: CacheSerializer = {
       return JSON.stringify(value);
     } catch (error) {
       throw new Error(
-        `序列化失败: ${error instanceof Error ? error.message : String(error)}`,
+        `序列化失败: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   },
@@ -30,7 +30,7 @@ const jsonSerializer: CacheSerializer = {
       return JSON.parse(value) as T;
     } catch (error) {
       throw new Error(
-        `反序列化失败: ${error instanceof Error ? error.message : String(error)}`,
+        `反序列化失败: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   },
@@ -69,12 +69,12 @@ export class CacheManager {
 
     parts.push(key);
 
-    const fullKey = parts.join(":");
+    const fullKey = parts.join(':');
 
     // 验证键长度
     if (fullKey.length > this.config.maxKeyLength) {
       throw new Error(
-        `缓存键长度超过限制: ${fullKey.length} > ${this.config.maxKeyLength}`,
+        `缓存键长度超过限制: ${fullKey.length} > ${this.config.maxKeyLength}`
       );
     }
 
@@ -85,32 +85,32 @@ export class CacheManager {
   private emitEvent(event: CacheEvent): void {
     if (!this.config.enableMetrics) return;
 
-    this.eventListeners.forEach((listener) => {
+    this.eventListeners.forEach(listener => {
       try {
         listener(event);
       } catch (error) {
-        console.error("缓存事件监听器执行失败:", error);
+        console.error('缓存事件监听器执行失败:', error);
       }
     });
   }
 
   // 更新统计信息
-  private updateStats(type: "hit" | "miss" | "set" | "delete"): void {
+  private updateStats(type: 'hit' | 'miss' | 'set' | 'delete'): void {
     if (!this.config.enableMetrics) return;
 
     this.stats.totalRequests++;
 
     switch (type) {
-      case "hit":
+      case 'hit':
         this.stats.hits++;
         break;
-      case "miss":
+      case 'miss':
         this.stats.misses++;
         break;
-      case "set":
+      case 'set':
         this.stats.sets++;
         break;
-      case "delete":
+      case 'delete':
         this.stats.deletes++;
         break;
     }
@@ -147,9 +147,9 @@ export class CacheManager {
       const value = await redis.get(fullKey);
 
       if (value === null) {
-        this.updateStats("miss");
+        this.updateStats('miss');
         this.emitEvent({
-          type: "miss",
+          type: 'miss',
           key,
           namespace: options?.namespace,
           timestamp: new Date(),
@@ -158,9 +158,9 @@ export class CacheManager {
         return null;
       }
 
-      this.updateStats("hit");
+      this.updateStats('hit');
       this.emitEvent({
-        type: "hit",
+        type: 'hit',
         key,
         namespace: options?.namespace,
         timestamp: new Date(),
@@ -171,7 +171,7 @@ export class CacheManager {
     } catch (error) {
       console.error(`获取缓存失败 [${key}]:`, error);
       this.emitEvent({
-        type: "miss",
+        type: 'miss',
         key,
         namespace: options?.namespace,
         timestamp: new Date(),
@@ -187,7 +187,7 @@ export class CacheManager {
   async set<T>(
     key: string,
     value: T,
-    options?: CacheOptions,
+    options?: CacheOptions
   ): Promise<boolean> {
     try {
       const fullKey = this.generateKey(key, options?.namespace);
@@ -196,19 +196,19 @@ export class CacheManager {
       // 检查值大小
       if (serializedValue.length > this.config.maxValueSize) {
         throw new Error(
-          `缓存值大小超过限制: ${serializedValue.length} > ${this.config.maxValueSize}`,
+          `缓存值大小超过限制: ${serializedValue.length} > ${this.config.maxValueSize}`
         );
       }
 
       const ttl = options?.ttl ?? this.config.defaultTtl;
       const result = await redis.setex(fullKey, ttl, serializedValue);
 
-      const success = result === "OK";
+      const success = result === 'OK';
 
       if (success) {
-        this.updateStats("set");
+        this.updateStats('set');
         this.emitEvent({
-          type: "set",
+          type: 'set',
           key,
           namespace: options?.namespace,
           timestamp: new Date(),
@@ -232,9 +232,9 @@ export class CacheManager {
       const success = result > 0;
 
       if (success) {
-        this.updateStats("delete");
+        this.updateStats('delete');
         this.emitEvent({
-          type: "delete",
+          type: 'delete',
           key,
           namespace: options?.namespace,
           timestamp: new Date(),
@@ -264,7 +264,7 @@ export class CacheManager {
   async expire(
     key: string,
     ttl: number,
-    options?: CacheOptions,
+    options?: CacheOptions
   ): Promise<boolean> {
     try {
       const fullKey = this.generateKey(key, options?.namespace);
@@ -290,11 +290,9 @@ export class CacheManager {
   // 批量获取
   async mget<T>(
     keys: string[],
-    options?: CacheOptions,
+    options?: CacheOptions
   ): Promise<Map<string, T | null>> {
-    const fullKeys = keys.map((key) =>
-      this.generateKey(key, options?.namespace),
-    );
+    const fullKeys = keys.map(key => this.generateKey(key, options?.namespace));
 
     try {
       const values = await redis.mget(...fullKeys);
@@ -316,15 +314,15 @@ export class CacheManager {
 
       return result;
     } catch (error) {
-      console.error("批量获取缓存失败:", error);
-      return new Map(keys.map((key) => [key, null]));
+      console.error('批量获取缓存失败:', error);
+      return new Map(keys.map(key => [key, null]));
     }
   }
 
   // 批量设置
   async mset<T>(
     items: Array<{ key: string; value: T; ttl?: number }>,
-    options?: CacheOptions,
+    options?: CacheOptions
   ): Promise<CacheBatchResult<T>> {
     const results: Array<{
       key: string;
@@ -373,15 +371,13 @@ export class CacheManager {
 
   // 批量删除
   async mdelete(keys: string[], options?: CacheOptions): Promise<number> {
-    const fullKeys = keys.map((key) =>
-      this.generateKey(key, options?.namespace),
-    );
+    const fullKeys = keys.map(key => this.generateKey(key, options?.namespace));
 
     try {
       const result = await redis.del(...fullKeys);
       return result;
     } catch (error) {
-      console.error("批量删除缓存失败:", error);
+      console.error('批量删除缓存失败:', error);
       return 0;
     }
   }
@@ -442,7 +438,7 @@ export class CacheManager {
   async getOrSet<T>(
     key: string,
     valueProvider: () => Promise<T>,
-    options?: CacheOptions,
+    options?: CacheOptions
   ): Promise<T | null> {
     // 尝试从缓存获取
     const cached = await this.get<T>(key, options);
@@ -495,7 +491,7 @@ export const cache = {
     cacheManager.mget<T>(keys, options),
   mset: <T>(
     items: Array<{ key: string; value: T; ttl?: number }>,
-    options?: CacheOptions,
+    options?: CacheOptions
   ) => cacheManager.mset<T>(items, options),
   mdelete: (keys: string[], options?: CacheOptions) =>
     cacheManager.mdelete(keys, options),
@@ -504,7 +500,7 @@ export const cache = {
   getOrSet: <T>(
     key: string,
     valueProvider: () => Promise<T>,
-    options?: CacheOptions,
+    options?: CacheOptions
   ) => cacheManager.getOrSet<T>(key, valueProvider, options),
   getStats: () => cacheManager.getStats(),
   resetStats: () => cacheManager.resetStats(),

@@ -1,4 +1,4 @@
-import type { AIProvider, AIClientConfig } from "../../types/ai-service";
+import type { AIProvider, AIClientConfig } from '../../types/ai-service';
 
 // =============================================================================
 // AI客户端工厂
@@ -13,13 +13,13 @@ export class AIClientFactory {
    */
   public static async createClient(config: AIClientConfig): Promise<any> {
     switch (config.provider) {
-      case "zhipu":
+      case 'zhipu':
         return this.createZhipuClient(config);
-      case "deepseek":
+      case 'deepseek':
         return this.createDeepSeekClient(config);
-      case "openai":
+      case 'openai':
         return this.createOpenAIClient(config);
-      case "anthropic":
+      case 'anthropic':
         return this.createAnthropicClient(config);
       default:
         throw new Error(`Unsupported provider: ${config.provider}`);
@@ -32,19 +32,19 @@ export class AIClientFactory {
   private static async createZhipuClient(config: AIClientConfig): Promise<any> {
     try {
       // 使用OpenAI兼容格式调用智谱清言API
-      const { OpenAI } = await import("openai");
+      const { OpenAI } = await import('openai');
 
       return new OpenAI({
         apiKey: config.apiKey,
-        baseURL: config.baseURL || "https://open.bigmodel.cn/api/paas/v4/",
+        baseURL: config.baseURL || 'https://open.bigmodel.cn/api/paas/v4/',
         timeout: config.timeout || 30000,
       });
     } catch (error) {
       console.warn(
-        "OpenAI client not available for Zhipu, using mock client. Error:",
-        error,
+        'OpenAI client not available for Zhipu, using mock client. Error:',
+        error
       );
-      return this.createMockClient("zhipu");
+      return this.createMockClient('zhipu');
     }
   }
 
@@ -52,23 +52,23 @@ export class AIClientFactory {
    * 创建DeepSeek客户端
    */
   private static async createDeepSeekClient(
-    config: AIClientConfig,
+    config: AIClientConfig
   ): Promise<any> {
     try {
       // DeepSeek API兼容OpenAI格式，直接使用OpenAI客户端
-      const { OpenAI } = await import("openai");
+      const { OpenAI } = await import('openai');
 
       return new OpenAI({
         apiKey: config.apiKey,
-        baseURL: config.baseURL || "https://api.deepseek.com/v1",
+        baseURL: config.baseURL || 'https://api.deepseek.com/v1',
         timeout: config.timeout || 30000,
       });
     } catch (error) {
       console.warn(
-        "DeepSeek client not available, using mock client. Error:",
-        error,
+        'DeepSeek client not available, using mock client. Error:',
+        error
       );
-      return this.createMockClient("deepseek");
+      return this.createMockClient('deepseek');
     }
   }
 
@@ -76,10 +76,10 @@ export class AIClientFactory {
    * 创建OpenAI客户端
    */
   private static async createOpenAIClient(
-    config: AIClientConfig,
+    config: AIClientConfig
   ): Promise<any> {
     try {
-      const { OpenAI } = await import("openai");
+      const { OpenAI } = await import('openai');
 
       return new OpenAI({
         apiKey: config.apiKey,
@@ -88,10 +88,10 @@ export class AIClientFactory {
       });
     } catch (error) {
       console.warn(
-        "OpenAI client not available, using mock client. Error:",
-        error,
+        'OpenAI client not available, using mock client. Error:',
+        error
       );
-      return this.createMockClient("openai");
+      return this.createMockClient('openai');
     }
   }
 
@@ -99,10 +99,10 @@ export class AIClientFactory {
    * 创建Anthropic客户端
    */
   private static async createAnthropicClient(
-    config: AIClientConfig,
+    config: AIClientConfig
   ): Promise<any> {
     try {
-      const Anthropic = await import("@anthropic-ai/sdk");
+      const Anthropic = await import('@anthropic-ai/sdk');
 
       return new Anthropic.default({
         apiKey: config.apiKey,
@@ -111,10 +111,10 @@ export class AIClientFactory {
       });
     } catch (error) {
       console.warn(
-        "Anthropic client not available, using mock client. Error:",
-        error,
+        'Anthropic client not available, using mock client. Error:',
+        error
       );
-      return this.createMockClient("anthropic");
+      return this.createMockClient('anthropic');
     }
   }
 
@@ -127,90 +127,90 @@ export class AIClientFactory {
         completions: {
           create: async (params: any) => {
             const userMessage =
-              params.messages[params.messages.length - 1]?.content || "";
+              params.messages[params.messages.length - 1]?.content || '';
 
             // 检查是否是文档分析请求
             if (
-              userMessage.includes("你是专业法律文档分析专家") ||
-              userMessage.includes("extractedData")
+              userMessage.includes('你是专业法律文档分析专家') ||
+              userMessage.includes('extractedData')
             ) {
               // 返回JSON格式的模拟文档分析结果
               return {
                 id: `${provider}_mock_${Date.now()}`,
-                object: "chat.completion",
+                object: 'chat.completion',
                 created: Date.now(),
                 model: params.model,
                 choices: [
                   {
                     index: 0,
                     message: {
-                      role: "assistant",
+                      role: 'assistant',
                       content: JSON.stringify({
                         extractedData: {
                           parties: [
                             {
-                              type: "plaintiff",
-                              name: "王小红",
-                              role: "原告",
-                              contact: "18600186000",
-                              address: "上海市浦东新区陆家嘴环路100号",
+                              type: 'plaintiff',
+                              name: '王小红',
+                              role: '原告',
+                              contact: '18600186000',
+                              address: '上海市浦东新区陆家嘴环路100号',
                             },
                             {
-                              type: "defendant",
-                              name: "张大伟",
-                              role: "被告",
-                              contact: "18700187000",
-                              address: "上海市徐汇区淮海中路200号",
+                              type: 'defendant',
+                              name: '张大伟',
+                              role: '被告',
+                              contact: '18700187000',
+                              address: '上海市徐汇区淮海中路200号',
                             },
                             {
-                              type: "other",
-                              name: "赵明",
-                              role: "第三人",
-                              contact: "18800188000",
-                              address: "上海市静安区南京西路300号",
+                              type: 'other',
+                              name: '赵明',
+                              role: '第三人',
+                              contact: '18800188000',
+                              address: '上海市静安区南京西路300号',
                             },
                           ],
                           claims: [
                             {
-                              type: "PAY_PRINCIPAL",
-                              content: "支付拖欠货款人民币800,000元",
+                              type: 'PAY_PRINCIPAL',
+                              content: '支付拖欠货款人民币800,000元',
                               amount: 800000,
-                              currency: "CNY",
+                              currency: 'CNY',
                             },
                             {
-                              type: "PAY_PENALTY",
+                              type: 'PAY_PENALTY',
                               content:
-                                "支付违约金（以800,000元为基数，自2023年5月1日起至实际付清之日止，按年利率8%计算）",
-                              currency: "CNY",
+                                '支付违约金（以800,000元为基数，自2023年5月1日起至实际付清之日止，按年利率8%计算）',
+                              currency: 'CNY',
                             },
                             {
-                              type: "LITIGATION_COST",
-                              content: "承担本案全部诉讼费用",
+                              type: 'LITIGATION_COST',
+                              content: '承担本案全部诉讼费用',
                             },
                             {
-                              type: "PAY_DAMAGES",
-                              content: "赔偿原告因追讨欠款产生的律师费50,000元",
+                              type: 'PAY_DAMAGES',
+                              content: '赔偿原告因追讨欠款产生的律师费50,000元',
                               amount: 50000,
-                              currency: "CNY",
+                              currency: 'CNY',
                             },
                           ],
                           timeline: [],
                           summary:
-                            "民事借款合同纠纷案，原告王小红诉被告张大伟拖欠货款800,000元，要求支付违约金和律师费。",
-                          caseType: "civil",
+                            '民事借款合同纠纷案，原告王小红诉被告张大伟拖欠货款800,000元，要求支付违约金和律师费。',
+                          caseType: 'civil',
                           keyFacts: [],
                         },
                         confidence: 0.85,
                         analysisProcess: {
                           ocrErrors: [],
                           entitiesListed: {
-                            persons: ["王小红", "张大伟", "赵明"],
+                            persons: ['王小红', '张大伟', '赵明'],
                             companies: [],
-                            amounts: ["800,000", "50,000"],
+                            amounts: ['800,000', '50,000'],
                           },
                           roleReasoning: "根据'原告：'和'被告：'关键词识别",
-                          claimDecomposition: "复合请求拆解完成",
-                          amountNormalization: "已标准化",
+                          claimDecomposition: '复合请求拆解完成',
+                          amountNormalization: '已标准化',
                           validationResults: {
                             duplicatesFound: [],
                             roleConflicts: [],
@@ -220,7 +220,7 @@ export class AIClientFactory {
                         },
                       }),
                     },
-                    finish_reason: "stop",
+                    finish_reason: 'stop',
                     logprobs: null,
                   },
                 ],
@@ -235,17 +235,17 @@ export class AIClientFactory {
             // 默认文本响应
             return {
               id: `${provider}_mock_${Date.now()}`,
-              object: "chat.completion",
+              object: 'chat.completion',
               created: Date.now(),
               model: params.model,
               choices: [
                 {
                   index: 0,
                   message: {
-                    role: "assistant",
+                    role: 'assistant',
                     content: `Mock response from ${provider} for: ${userMessage}`,
                   },
-                  finish_reason: "stop",
+                  finish_reason: 'stop',
                   logprobs: null,
                 },
               ],
@@ -260,10 +260,10 @@ export class AIClientFactory {
       },
       embeddings: {
         create: async (params: any) => ({
-          object: "list",
+          object: 'list',
           data: [
             {
-              object: "embedding",
+              object: 'embedding',
               embedding: new Array(1536).fill(0).map(() => Math.random()),
               index: 0,
             },

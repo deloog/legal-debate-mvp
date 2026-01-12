@@ -4,9 +4,9 @@
  * 负责分析Agent的行为模式，包括常用路径、错误模式等
  */
 
-import { prisma } from "@/lib/db/prisma";
-import { ActionStatus } from "@prisma/client";
-import type { BehaviorReport, BehaviorFilters } from "./types";
+import { prisma } from '@/lib/db/prisma';
+import { ActionStatus } from '@prisma/client';
+import type { BehaviorReport, BehaviorFilters } from './types';
 
 /**
  * 行为分析器类
@@ -27,7 +27,7 @@ export class BehaviorAnalyzer {
     // 查询所有行动
     const actions = await prisma.agentAction.findMany({
       where: this.buildWhereClause(filters),
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: 'asc' },
     });
 
     // 构建路径图
@@ -35,7 +35,7 @@ export class BehaviorAnalyzer {
 
     for (const action of actions) {
       if (action.parentActionId) {
-        const parent = actions.find((a) => a.id === action.parentActionId);
+        const parent = actions.find(a => a.id === action.parentActionId);
         if (parent) {
           const path = `${parent.agentName}:${parent.actionName} -> ${action.agentName}:${action.actionName}`;
           const existing = pathMap.get(path);
@@ -54,7 +54,7 @@ export class BehaviorAnalyzer {
     // 转换为数组并排序
     return Array.from(pathMap.entries())
       .map(([path, data]) => ({
-        path: path.split(" -> "),
+        path: path.split(' -> '),
         count: data.count,
         avgExecutionTime: data.totalTime / data.count,
       }))
@@ -81,7 +81,7 @@ export class BehaviorAnalyzer {
         ...where,
         status: ActionStatus.FAILED,
       },
-      orderBy: { updatedAt: "desc" },
+      orderBy: { updatedAt: 'desc' },
       take: 1000,
     });
 
@@ -121,7 +121,7 @@ export class BehaviorAnalyzer {
    * @returns 行为报告
    */
   async getBehaviorReport(
-    filters: BehaviorFilters = {},
+    filters: BehaviorFilters = {}
   ): Promise<BehaviorReport> {
     const commonPaths = await this.analyzeCommonPaths(filters);
     const errorPatterns = await this.analyzeErrorPatterns(filters);
@@ -148,12 +148,12 @@ export class BehaviorAnalyzer {
    * @returns 层级使用统计
    */
   private async analyzeLayerPreference(
-    filters: BehaviorFilters = {},
+    filters: BehaviorFilters = {}
   ): Promise<Record<string, { count: number; avgExecutionTime: number }>> {
     const where = this.buildWhereClause(filters);
 
     const result = await prisma.agentAction.groupBy({
-      by: ["actionLayer"],
+      by: ['actionLayer'],
       where,
       _count: true,
       _avg: {
@@ -182,7 +182,7 @@ export class BehaviorAnalyzer {
    * @returns 重试统计
    */
   private async analyzeRetryPatterns(
-    filters: BehaviorFilters = {},
+    filters: BehaviorFilters = {}
   ): Promise<Map<string, number>> {
     const where = this.buildWhereClause(filters);
 

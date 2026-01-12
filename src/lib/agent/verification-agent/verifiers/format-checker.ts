@@ -2,7 +2,7 @@
  * 格式验证器
  * 检查字段格式是否符合要求（如邮箱、手机号等）
  */
-import { FormatCheck, FormatError } from "../types";
+import { FormatCheck, FormatError } from '../types';
 
 /**
  * 格式验证配置
@@ -26,16 +26,16 @@ interface DataToVerify {
  */
 const DEFAULT_FORMAT_VALIDATORS: FormatValidatorConfig[] = [
   {
-    field: "email",
-    format: "email",
-    validator: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value)),
-    errorMessage: "邮箱格式无效",
+    field: 'email',
+    format: 'email',
+    validator: value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value)),
+    errorMessage: '邮箱格式无效',
   },
   {
-    field: "phone",
-    format: "phone",
-    validator: (value) => /^1[3-9]\d{9}$/.test(String(value)),
-    errorMessage: "手机号格式无效",
+    field: 'phone',
+    format: 'phone',
+    validator: value => /^1[3-9]\d{9}$/.test(String(value)),
+    errorMessage: '手机号格式无效',
   },
 ];
 
@@ -59,7 +59,7 @@ export class FormatChecker {
     for (const validator of this.formatValidators) {
       const value = data[validator.field];
 
-      if (value === undefined || value === null || value === "") {
+      if (value === undefined || value === null || value === '') {
         continue;
       }
 

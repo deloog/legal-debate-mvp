@@ -2,10 +2,10 @@
  * OAuth 服务 - 处理用户登录、创建和账号管理
  */
 
-import { PrismaClient } from "@prisma/client";
-import { generateToken } from "./jwt";
-import type { OAuthUserInfo } from "../../types/oauth";
-import type { OAuthAccount } from "../../types/oauth";
+import { PrismaClient } from '@prisma/client';
+import { generateToken } from './jwt';
+import type { OAuthUserInfo } from '../../types/oauth';
+import type { OAuthAccount } from '../../types/oauth';
 
 const prisma = new PrismaClient();
 
@@ -36,7 +36,7 @@ export class OAuthService {
   static async handleOAuthLogin(
     provider: string,
     providerAccountId: string,
-    userInfo: OAuthUserInfo,
+    userInfo: OAuthUserInfo
   ): Promise<OAuthLoginResult> {
     try {
       // 查找已存在的 OAuth 账号
@@ -71,7 +71,7 @@ export class OAuthService {
             createdAt: user.createdAt,
           },
           token,
-          refreshToken: "", // OAuth刷新令牌由OAuth提供商管理
+          refreshToken: '', // OAuth刷新令牌由OAuth提供商管理
           isNewUser: false,
         };
       }
@@ -80,7 +80,7 @@ export class OAuthService {
       const newUser = await this.createOAuthUser(
         provider,
         providerAccountId,
-        userInfo,
+        userInfo
       );
 
       const token = generateToken({
@@ -99,13 +99,13 @@ export class OAuthService {
           createdAt: newUser.createdAt,
         },
         token,
-        refreshToken: "",
+        refreshToken: '',
         isNewUser: true,
       };
     } catch (error) {
-      console.error("OAuth login error:", error);
+      console.error('OAuth login error:', error);
       throw new Error(
-        `Failed to handle OAuth login: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Failed to handle OAuth login: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
@@ -116,7 +116,7 @@ export class OAuthService {
   private static async createOAuthUser(
     provider: string,
     providerAccountId: string,
-    userInfo: OAuthUserInfo,
+    userInfo: OAuthUserInfo
   ) {
     // 生成唯一邮箱
     const email = userInfo.email || `${userInfo.id}@${provider}.oauth`;
@@ -127,7 +127,7 @@ export class OAuthService {
     });
 
     if (existingUser) {
-      throw new Error("Email already exists");
+      throw new Error('Email already exists');
     }
 
     // 创建新用户
@@ -137,13 +137,13 @@ export class OAuthService {
         username: userInfo.nickname,
         name: userInfo.nickname,
         avatar: userInfo.avatar,
-        role: "USER",
-        status: "ACTIVE",
+        role: 'USER',
+        status: 'ACTIVE',
         lastLoginAt: new Date(),
         loginCount: 1,
         accounts: {
           create: {
-            type: "oauth",
+            type: 'oauth',
             provider,
             providerAccountId,
           },
@@ -161,7 +161,7 @@ export class OAuthService {
     userId: string,
     provider: string,
     providerAccountId: string,
-    userInfo: OAuthUserInfo,
+    userInfo: OAuthUserInfo
   ): Promise<OAuthAccount> {
     try {
       // 检查 OAuth 账号是否已存在
@@ -175,17 +175,17 @@ export class OAuthService {
       });
 
       if (existingAccount) {
-        throw new Error("OAuth account already bound");
+        throw new Error('OAuth account already bound');
       }
 
       // 创建 OAuth 账号绑定
       const account = await prisma.account.create({
         data: {
           userId,
-          type: "oauth",
+          type: 'oauth',
           provider,
           providerAccountId,
-          access_token: "",
+          access_token: '',
         },
       });
 
@@ -199,9 +199,9 @@ export class OAuthService {
         createdAt: new Date(), // 使用当前时间作为占位符
       };
     } catch (error) {
-      console.error("Bind OAuth account error:", error);
+      console.error('Bind OAuth account error:', error);
       throw new Error(
-        `Failed to bind OAuth account: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Failed to bind OAuth account: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
@@ -211,7 +211,7 @@ export class OAuthService {
    */
   static async unbindOAuthAccount(
     userId: string,
-    provider: string,
+    provider: string
   ): Promise<void> {
     try {
       // 检查用户是否还有其他登录方式
@@ -223,12 +223,12 @@ export class OAuthService {
       });
 
       if (!user) {
-        throw new Error("User not found");
+        throw new Error('User not found');
       }
 
       // 检查是否至少保留一种登录方式
       if (user.accounts.length <= 1) {
-        throw new Error("Cannot unbind the last login method");
+        throw new Error('Cannot unbind the last login method');
       }
 
       // 解绑 OAuth 账号
@@ -236,13 +236,13 @@ export class OAuthService {
         where: {
           userId,
           provider,
-          type: "oauth",
+          type: 'oauth',
         },
       });
     } catch (error) {
-      console.error("Unbind OAuth account error:", error);
+      console.error('Unbind OAuth account error:', error);
       throw new Error(
-        `Failed to unbind OAuth account: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Failed to unbind OAuth account: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
@@ -255,14 +255,14 @@ export class OAuthService {
       const accounts = await prisma.account.findMany({
         where: {
           userId,
-          type: "oauth",
+          type: 'oauth',
         },
         orderBy: {
-          id: "desc",
+          id: 'desc',
         },
       });
 
-      return accounts.map((account) => ({
+      return accounts.map(account => ({
         id: account.id,
         provider: account.provider as never,
         providerAccountId: account.providerAccountId,
@@ -270,9 +270,9 @@ export class OAuthService {
         createdAt: new Date(), // 使用当前时间作为占位符
       }));
     } catch (error) {
-      console.error("Get user OAuth accounts error:", error);
+      console.error('Get user OAuth accounts error:', error);
       throw new Error(
-        `Failed to get OAuth accounts: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Failed to get OAuth accounts: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   }
@@ -297,11 +297,11 @@ export class OAuthService {
       const hasPassword = !!user.password;
       // 检查是否有其他 OAuth 登录方式
       const hasOtherOAuth =
-        user.accounts.filter((a) => a.type === "oauth").length > 1;
+        user.accounts.filter(a => a.type === 'oauth').length > 1;
 
       return hasPassword || hasOtherOAuth;
     } catch (error) {
-      console.error("Check can unbind error:", error);
+      console.error('Check can unbind error:', error);
       return false;
     }
   }

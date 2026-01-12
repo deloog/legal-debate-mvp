@@ -8,7 +8,7 @@ import {
   IssueCategory,
   IssueType,
   FactualVerificationResult,
-} from "../types";
+} from '../types';
 
 /**
  * 事实准确性问题收集器类
@@ -27,9 +27,9 @@ export class FactualIssueCollector {
         type: IssueType.INCORRECT_DATA,
         severity: IssueSeverity.HIGH,
         category: IssueCategory.FACTUAL,
-        field: "parties",
+        field: 'parties',
         message: issue,
-        detectedBy: "factual",
+        detectedBy: 'factual',
       });
     }
 
@@ -40,9 +40,9 @@ export class FactualIssueCollector {
         type: IssueType.INCORRECT_DATA,
         severity: IssueSeverity.HIGH,
         category: IssueCategory.FACTUAL,
-        field: "amounts",
+        field: 'amounts',
         message: issue,
-        detectedBy: "factual",
+        detectedBy: 'factual',
       });
     }
 
@@ -53,9 +53,9 @@ export class FactualIssueCollector {
         type: IssueType.INCORRECT_DATA,
         severity: IssueSeverity.MEDIUM,
         category: IssueCategory.FACTUAL,
-        field: "dates",
+        field: 'dates',
         message: issue,
-        detectedBy: "factual",
+        detectedBy: 'factual',
       });
     }
 
@@ -67,7 +67,7 @@ export class FactualIssueCollector {
         severity: IssueSeverity.HIGH,
         category: IssueCategory.FACTUAL,
         message: issue,
-        detectedBy: "factual",
+        detectedBy: 'factual',
       });
     }
 

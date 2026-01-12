@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import { withErrorHandler } from "@/app/api/lib/errors/error-handler";
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import {
   createSuccessResponse,
   createCreatedResponse,
-} from "@/app/api/lib/responses/api-response";
+} from '@/app/api/lib/responses/api-response';
 import {
   validateRequestBody,
   validatePathParam,
-} from "@/app/api/lib/validation/validator";
-import { uuidSchema } from "@/app/api/lib/validation/schemas";
-import { prisma } from "@/lib/db/prisma";
-import { DebateStatus, RoundStatus } from "@prisma/client";
+} from '@/app/api/lib/validation/validator';
+import { uuidSchema } from '@/app/api/lib/validation/schemas';
+import { prisma } from '@/lib/db/prisma';
+import { DebateStatus, RoundStatus } from '@prisma/client';
 
 /**
  * POST /api/v1/debates/[id]/rounds
@@ -20,7 +20,7 @@ import { DebateStatus, RoundStatus } from "@prisma/client";
 export const POST = withErrorHandler(
   async (
     request: NextRequest,
-    context: { params: Promise<{ id: string }> },
+    context: { params: Promise<{ id: string }> }
   ) => {
     // Next.js 15+ requires awaiting params
     const resolvedParams = await context.params;
@@ -33,7 +33,7 @@ export const POST = withErrorHandler(
     await validateRequestBody(request, z.object({}).passthrough());
 
     // 使用事务确保数据一致性
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async tx => {
       // 1. 获取当前辩论信息
       const debate = await tx.debate.findUnique({
         where: { id: debateId },
@@ -41,7 +41,7 @@ export const POST = withErrorHandler(
       });
 
       if (!debate) {
-        throw new Error("Debate not found");
+        throw new Error('Debate not found');
       }
 
       // 检查辩论状态
@@ -49,7 +49,7 @@ export const POST = withErrorHandler(
         debate.status !== DebateStatus.DRAFT &&
         debate.status !== DebateStatus.IN_PROGRESS
       ) {
-        throw new Error("Cannot create round for completed or archived debate");
+        throw new Error('Cannot create round for completed or archived debate');
       }
 
       // 2. 计算新轮次号
@@ -89,7 +89,7 @@ export const POST = withErrorHandler(
     });
 
     return createCreatedResponse(result);
-  },
+  }
 );
 
 /**
@@ -99,7 +99,7 @@ export const POST = withErrorHandler(
 export const GET = withErrorHandler(
   async (
     request: NextRequest,
-    context: { params: Promise<{ id: string }> },
+    context: { params: Promise<{ id: string }> }
   ) => {
     // Next.js 15+ requires awaiting params
     const resolvedParams = await context.params;
@@ -112,14 +112,14 @@ export const GET = withErrorHandler(
       where: { debateId },
       include: {
         arguments: {
-          orderBy: { createdAt: "asc" },
+          orderBy: { createdAt: 'asc' },
         },
       },
-      orderBy: { roundNumber: "asc" },
+      orderBy: { roundNumber: 'asc' },
     });
 
     return createSuccessResponse(rounds);
-  },
+  }
 );
 
 /**
@@ -130,10 +130,10 @@ export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Access-Control-Max-Age": "86400",
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
     },
   });
 });

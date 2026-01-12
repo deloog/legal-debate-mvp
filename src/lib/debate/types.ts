@@ -30,7 +30,7 @@ export interface DebateInput {
     temperature?: number;
     maxTokens?: number;
     includeLegalAnalysis?: boolean;
-    balanceStrictness?: "low" | "medium" | "high";
+    balanceStrictness?: 'low' | 'medium' | 'high';
   };
 }
 
@@ -40,8 +40,8 @@ export interface DebateInput {
 export interface Argument {
   // 基础信息
   id: string;
-  side: "plaintiff" | "defendant";
-  type: "main_point" | "supporting" | "rebuttal" | "evidence" | "conclusion";
+  side: 'plaintiff' | 'defendant';
+  type: 'main_point' | 'supporting' | 'rebuttal' | 'evidence' | 'conclusion';
 
   // 论点内容
   content: string;
@@ -59,8 +59,8 @@ export interface Argument {
   overallScore: number; // 综合评分 0-10
 
   // 生成信息
-  generatedBy: "ai" | "rule";
-  aiProvider?: "zhipu" | "deepseek";
+  generatedBy: 'ai' | 'rule';
+  aiProvider?: 'zhipu' | 'deepseek';
   generationTime: number;
 }
 
@@ -140,7 +140,7 @@ export interface ValidationResult {
   errors: Array<{
     field: string;
     message: string;
-    severity: "error" | "warning";
+    severity: 'error' | 'warning';
   }>;
   warnings: string[];
 }
@@ -160,10 +160,10 @@ export interface PromptOptions {
  * 辩论生成配置
  */
 export interface DebateGenerationConfig {
-  aiProvider: "zhipu" | "deepseek";
+  aiProvider: 'zhipu' | 'deepseek';
   temperature: number;
   maxTokens: number;
-  balanceStrictness: "low" | "medium" | "high";
+  balanceStrictness: 'low' | 'medium' | 'high';
   includeLegalAnalysis: boolean;
   enableReview: boolean; // 是否启用AI审查层
 }
@@ -172,10 +172,10 @@ export interface DebateGenerationConfig {
  * 默认配置
  */
 export const DEFAULT_DEBATE_CONFIG: DebateGenerationConfig = {
-  aiProvider: "deepseek",
+  aiProvider: 'deepseek',
   temperature: 0.7,
   maxTokens: 2000,
-  balanceStrictness: "medium",
+  balanceStrictness: 'medium',
   includeLegalAnalysis: true,
   enableReview: true,
 };

@@ -10,7 +10,7 @@ import type {
   EmailSendResult,
   EmailTemplate,
   IEmailService,
-} from "@/types/password-reset";
+} from '@/types/password-reset';
 
 // =============================================================================
 // 邮件模板
@@ -21,14 +21,14 @@ import type {
  */
 function getPasswordResetTemplate(
   code: string,
-  expiresAt: Date,
+  expiresAt: Date
 ): EmailTemplate {
-  const formattedDate = expiresAt.toLocaleString("zh-CN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
+  const formattedDate = expiresAt.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 
   const textContent = `
@@ -73,7 +73,7 @@ function getPasswordResetTemplate(
   `.trim();
 
   return {
-    subject: "律伴助手 - 密码重置",
+    subject: '律伴助手 - 密码重置',
     textContent,
     htmlContent,
   };
@@ -84,14 +84,14 @@ function getPasswordResetTemplate(
  */
 function getEmailVerificationTemplate(
   code: string,
-  expiresAt: Date,
+  expiresAt: Date
 ): EmailTemplate {
-  const formattedDate = expiresAt.toLocaleString("zh-CN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
+  const formattedDate = expiresAt.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 
   const textContent = `
@@ -133,7 +133,7 @@ function getEmailVerificationTemplate(
   `.trim();
 
   return {
-    subject: "律伴助手 - 邮箱验证",
+    subject: '律伴助手 - 邮箱验证',
     textContent,
     htmlContent,
   };
@@ -149,36 +149,36 @@ function getEmailVerificationTemplate(
 class DevEmailService implements IEmailService {
   private isDevEnvironment(): boolean {
     return (
-      process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test"
+      process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'
     );
   }
 
   private logEmail(options: EmailSendOptions): void {
-    console.log("\n" + "=".repeat(60));
-    console.log("📧 邮件发送（开发环境）");
-    console.log("=".repeat(60));
+    console.log('\n' + '='.repeat(60));
+    console.log('📧 邮件发送（开发环境）');
+    console.log('='.repeat(60));
     console.log(`收件人: ${options.to}`);
     console.log(`主题: ${options.subject}`);
-    console.log("-".repeat(60));
-    console.log("内容（纯文本）：");
+    console.log('-'.repeat(60));
+    console.log('内容（纯文本）：');
     console.log(options.text);
     if (options.html) {
-      console.log("-".repeat(60));
-      console.log("内容（HTML）：");
+      console.log('-'.repeat(60));
+      console.log('内容（HTML）：');
       console.log(options.html);
     }
-    console.log("=".repeat(60) + "\n");
+    console.log('='.repeat(60) + '\n');
   }
 
   async sendPasswordResetEmail(
     email: string,
     code: string,
-    expiresAt: Date,
+    expiresAt: Date
   ): Promise<EmailSendResult> {
     if (!this.isDevEnvironment()) {
       return {
         success: false,
-        error: "非开发环境，请使用生产邮件服务",
+        error: '非开发环境，请使用生产邮件服务',
       };
     }
 
@@ -203,12 +203,12 @@ class DevEmailService implements IEmailService {
   async sendVerificationEmail(
     email: string,
     code: string,
-    expiresAt: Date,
+    expiresAt: Date
   ): Promise<EmailSendResult> {
     if (!this.isDevEnvironment()) {
       return {
         success: false,
-        error: "非开发环境，请使用生产邮件服务",
+        error: '非开发环境，请使用生产邮件服务',
       };
     }
 
@@ -247,7 +247,7 @@ class ProdEmailService implements IEmailService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _code: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _expiresAt: Date,
+    _expiresAt: Date
   ): Promise<EmailSendResult> {
     // TODO: 集成真实邮件服务
     // 示例：使用nodemailer
@@ -258,7 +258,7 @@ class ProdEmailService implements IEmailService {
 
     return {
       success: false,
-      error: "生产邮件服务尚未配置",
+      error: '生产邮件服务尚未配置',
     };
   }
 
@@ -267,7 +267,7 @@ class ProdEmailService implements IEmailService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _code: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _expiresAt: Date,
+    _expiresAt: Date
   ): Promise<EmailSendResult> {
     // TODO: 集成真实邮件服务
 
@@ -275,7 +275,7 @@ class ProdEmailService implements IEmailService {
 
     return {
       success: false,
-      error: "生产邮件服务尚未配置",
+      error: '生产邮件服务尚未配置',
     };
   }
 }
@@ -289,7 +289,7 @@ class ProdEmailService implements IEmailService {
  */
 export function getEmailService(): IEmailService {
   const isDev =
-    process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
+    process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 
   if (isDev) {
     return new DevEmailService();

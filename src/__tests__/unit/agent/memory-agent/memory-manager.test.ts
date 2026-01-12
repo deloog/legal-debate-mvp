@@ -4,12 +4,12 @@
  */
 
 // Mock uuid模块
-jest.mock("uuid", () => ({
-  v4: jest.fn().mockReturnValue("mock-uuid-v4"),
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('mock-uuid-v4'),
 }));
 
-import { PrismaClient, AgentMemory, MemoryType } from "@prisma/client";
-import { MemoryManager } from "@/lib/agent/memory-agent";
+import { PrismaClient, AgentMemory, MemoryType } from '@prisma/client';
+import { MemoryManager } from '@/lib/agent/memory-agent';
 
 // Mock PrismaClient with proper types
 const mockPrisma = {
@@ -37,7 +37,7 @@ const mockAgentMemory = mockPrisma.agentMemory as unknown as {
   aggregate: jest.Mock;
 };
 
-describe("MemoryManager", () => {
+describe('MemoryManager', () => {
   let memoryManager: MemoryManager;
 
   beforeEach(() => {
@@ -45,14 +45,14 @@ describe("MemoryManager", () => {
     memoryManager = new MemoryManager(mockPrisma);
   });
 
-  describe("Working Memory CRUD", () => {
-    it("应该能够存储Working Memory", async () => {
+  describe('Working Memory CRUD', () => {
+    it('应该能够存储Working Memory', async () => {
       const mockMemory: Partial<AgentMemory> = {
-        id: "mem1",
-        agentName: "MemoryAgent",
-        memoryKey: "test_key",
-        memoryValue: JSON.stringify({ data: "test" }),
-        memoryType: "WORKING" as MemoryType,
+        id: 'mem1',
+        agentName: 'MemoryAgent',
+        memoryKey: 'test_key',
+        memoryValue: JSON.stringify({ data: 'test' }),
+        memoryType: 'WORKING' as MemoryType,
         importance: 0.5,
         accessCount: 0,
         lastAccessedAt: new Date(),
@@ -65,28 +65,28 @@ describe("MemoryManager", () => {
       mockAgentMemory.create.mockResolvedValue(mockMemory);
 
       await memoryManager.storeWorkingMemory(
-        "test_key",
-        { data: "test" },
-        "user1",
+        'test_key',
+        { data: 'test' },
+        'user1'
       );
 
       expect(mockAgentMemory.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          memoryType: "WORKING",
-          memoryKey: "test_key",
-          memoryValue: JSON.stringify({ data: "test" }),
-          userId: "user1",
+          memoryType: 'WORKING',
+          memoryKey: 'test_key',
+          memoryValue: JSON.stringify({ data: 'test' }),
+          userId: 'user1',
         }),
       });
     });
 
-    it("应该能够获取Working Memory", async () => {
+    it('应该能够获取Working Memory', async () => {
       const mockMemory: Partial<AgentMemory> = {
-        id: "mem1",
-        agentName: "MemoryAgent",
-        memoryKey: "test_key",
-        memoryValue: JSON.stringify({ data: "test" }),
-        memoryType: "WORKING" as MemoryType,
+        id: 'mem1',
+        agentName: 'MemoryAgent',
+        memoryKey: 'test_key',
+        memoryValue: JSON.stringify({ data: 'test' }),
+        memoryType: 'WORKING' as MemoryType,
         importance: 0.5,
         accessCount: 1,
         lastAccessedAt: new Date(),
@@ -101,48 +101,48 @@ describe("MemoryManager", () => {
         accessCount: 2,
       });
 
-      const result = await memoryManager.getWorkingMemory("test_key");
+      const result = await memoryManager.getWorkingMemory('test_key');
 
-      expect(result).toEqual({ data: "test" });
+      expect(result).toEqual({ data: 'test' });
       expect(mockAgentMemory.update).toHaveBeenCalledWith({
-        where: { id: "mem1" },
+        where: { id: 'mem1' },
         data: expect.objectContaining({
           accessCount: { increment: 1 },
         }),
       });
     });
 
-    it("应该能够删除Working Memory", async () => {
+    it('应该能够删除Working Memory', async () => {
       mockAgentMemory.deleteMany.mockResolvedValue({ count: 1 });
 
-      await memoryManager.deleteWorkingMemory("test_key");
+      await memoryManager.deleteWorkingMemory('test_key');
 
       expect(mockAgentMemory.deleteMany).toHaveBeenCalledWith({
         where: {
-          agentName: "MemoryAgent",
-          memoryKey: "test_key",
-          memoryType: "WORKING",
+          agentName: 'MemoryAgent',
+          memoryKey: 'test_key',
+          memoryType: 'WORKING',
         },
       });
     });
 
-    it("应该返回null对于不存在的记忆", async () => {
+    it('应该返回null对于不存在的记忆', async () => {
       mockAgentMemory.findFirst.mockResolvedValue(null);
 
-      const result = await memoryManager.getWorkingMemory("nonexistent");
+      const result = await memoryManager.getWorkingMemory('nonexistent');
 
       expect(result).toBeUndefined();
     });
   });
 
-  describe("Hot Memory CRUD", () => {
-    it("应该能够存储Hot Memory", async () => {
+  describe('Hot Memory CRUD', () => {
+    it('应该能够存储Hot Memory', async () => {
       const mockMemory: Partial<AgentMemory> = {
-        id: "mem1",
-        agentName: "MemoryAgent",
-        memoryKey: "hot_key",
-        memoryValue: JSON.stringify({ data: "hot" }),
-        memoryType: "HOT" as MemoryType,
+        id: 'mem1',
+        agentName: 'MemoryAgent',
+        memoryKey: 'hot_key',
+        memoryValue: JSON.stringify({ data: 'hot' }),
+        memoryType: 'HOT' as MemoryType,
         importance: 0.8,
         accessCount: 0,
         lastAccessedAt: new Date(),
@@ -155,28 +155,28 @@ describe("MemoryManager", () => {
       mockAgentMemory.create.mockResolvedValue(mockMemory);
 
       await memoryManager.storeHotMemory(
-        "hot_key",
-        { data: "hot" },
-        "user1",
-        0.8,
+        'hot_key',
+        { data: 'hot' },
+        'user1',
+        0.8
       );
 
       expect(mockAgentMemory.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          memoryType: "HOT",
-          memoryKey: "hot_key",
+          memoryType: 'HOT',
+          memoryKey: 'hot_key',
           importance: 0.8,
         }),
       });
     });
 
-    it("应该能够获取Hot Memory", async () => {
+    it('应该能够获取Hot Memory', async () => {
       const mockMemory: Partial<AgentMemory> = {
-        id: "mem1",
-        agentName: "MemoryAgent",
-        memoryKey: "hot_key",
-        memoryValue: JSON.stringify({ data: "hot" }),
-        memoryType: "HOT" as MemoryType,
+        id: 'mem1',
+        agentName: 'MemoryAgent',
+        memoryKey: 'hot_key',
+        memoryValue: JSON.stringify({ data: 'hot' }),
+        memoryType: 'HOT' as MemoryType,
         importance: 0.8,
         accessCount: 1,
         lastAccessedAt: new Date(),
@@ -188,37 +188,37 @@ describe("MemoryManager", () => {
       mockAgentMemory.findFirst.mockResolvedValue(mockMemory);
       mockAgentMemory.update.mockResolvedValue(mockMemory);
 
-      const result = await memoryManager.getHotMemory("hot_key");
+      const result = await memoryManager.getHotMemory('hot_key');
 
-      expect(result).toEqual({ data: "hot" });
+      expect(result).toEqual({ data: 'hot' });
     });
 
-    it("应该能够更新Hot Memory", async () => {
+    it('应该能够更新Hot Memory', async () => {
       mockAgentMemory.updateMany.mockResolvedValue({ count: 1 });
 
-      await memoryManager.updateHotMemory("hot_key", { data: "updated" });
+      await memoryManager.updateHotMemory('hot_key', { data: 'updated' });
 
       expect(mockAgentMemory.updateMany).toHaveBeenCalledWith({
         where: {
-          agentName: "MemoryAgent",
-          memoryKey: "hot_key",
-          memoryType: "HOT",
+          agentName: 'MemoryAgent',
+          memoryKey: 'hot_key',
+          memoryType: 'HOT',
         },
         data: expect.objectContaining({
-          memoryValue: JSON.stringify({ data: "updated" }),
+          memoryValue: JSON.stringify({ data: 'updated' }),
         }),
       });
     });
   });
 
-  describe("Cold Memory CRUD", () => {
-    it("应该能够存储Cold Memory", async () => {
+  describe('Cold Memory CRUD', () => {
+    it('应该能够存储Cold Memory', async () => {
       const mockMemory: Partial<AgentMemory> = {
-        id: "mem1",
-        agentName: "MemoryAgent",
-        memoryKey: "cold_key",
-        memoryValue: JSON.stringify({ data: "cold" }),
-        memoryType: "COLD" as MemoryType,
+        id: 'mem1',
+        agentName: 'MemoryAgent',
+        memoryKey: 'cold_key',
+        memoryValue: JSON.stringify({ data: 'cold' }),
+        memoryType: 'COLD' as MemoryType,
         importance: 1.0,
         accessCount: 0,
         lastAccessedAt: new Date(),
@@ -231,28 +231,28 @@ describe("MemoryManager", () => {
       mockAgentMemory.create.mockResolvedValue(mockMemory);
 
       await memoryManager.storeColdMemory(
-        "cold_key",
-        { data: "cold" },
-        "user1",
+        'cold_key',
+        { data: 'cold' },
+        'user1'
       );
 
       expect(mockAgentMemory.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          memoryType: "COLD",
-          memoryKey: "cold_key",
+          memoryType: 'COLD',
+          memoryKey: 'cold_key',
           importance: 1.0,
           expiresAt: null,
         }),
       });
     });
 
-    it("应该能够获取Cold Memory", async () => {
+    it('应该能够获取Cold Memory', async () => {
       const mockMemory: Partial<AgentMemory> = {
-        id: "mem1",
-        agentName: "MemoryAgent",
-        memoryKey: "cold_key",
-        memoryValue: JSON.stringify({ data: "cold" }),
-        memoryType: "COLD" as MemoryType,
+        id: 'mem1',
+        agentName: 'MemoryAgent',
+        memoryKey: 'cold_key',
+        memoryValue: JSON.stringify({ data: 'cold' }),
+        memoryType: 'COLD' as MemoryType,
         importance: 1.0,
         accessCount: 1,
         lastAccessedAt: new Date(),
@@ -264,25 +264,25 @@ describe("MemoryManager", () => {
       mockAgentMemory.findFirst.mockResolvedValue(mockMemory);
       mockAgentMemory.update.mockResolvedValue(mockMemory);
 
-      const result = await memoryManager.getColdMemory("cold_key");
+      const result = await memoryManager.getColdMemory('cold_key');
 
-      expect(result).toEqual({ data: "cold" });
+      expect(result).toEqual({ data: 'cold' });
     });
   });
 
-  describe("记忆过期", () => {
-    it("应该自动过滤过期的记忆", async () => {
+  describe('记忆过期', () => {
+    it('应该自动过滤过期的记忆', async () => {
       mockAgentMemory.findFirst.mockResolvedValue(null);
 
       const result = await memoryManager.getMemory({
-        memoryType: "WORKING",
-        memoryKey: "expired",
+        memoryType: 'WORKING',
+        memoryKey: 'expired',
       });
 
       expect(result).toBeNull();
     });
 
-    it("应该能够清理过期记忆", async () => {
+    it('应该能够清理过期记忆', async () => {
       mockAgentMemory.deleteMany.mockResolvedValue({ count: 10 });
 
       const count = await memoryManager.cleanExpired();
@@ -290,7 +290,7 @@ describe("MemoryManager", () => {
       expect(count).toBe(10);
       expect(mockPrisma.agentMemory.deleteMany).toHaveBeenCalledWith({
         where: {
-          agentName: "MemoryAgent",
+          agentName: 'MemoryAgent',
           expiresAt: {
             lt: expect.any(Date),
           },
@@ -299,14 +299,14 @@ describe("MemoryManager", () => {
     });
   });
 
-  describe("访问计数追踪", () => {
-    it("应该正确追踪访问次数", async () => {
+  describe('访问计数追踪', () => {
+    it('应该正确追踪访问次数', async () => {
       const mockMemory: Partial<AgentMemory> = {
-        id: "mem1",
-        agentName: "MemoryAgent",
-        memoryKey: "test_key",
-        memoryValue: JSON.stringify({ data: "test" }),
-        memoryType: "WORKING" as MemoryType,
+        id: 'mem1',
+        agentName: 'MemoryAgent',
+        memoryKey: 'test_key',
+        memoryValue: JSON.stringify({ data: 'test' }),
+        memoryType: 'WORKING' as MemoryType,
         importance: 0.5,
         accessCount: 5,
         lastAccessedAt: new Date(),
@@ -322,10 +322,10 @@ describe("MemoryManager", () => {
         lastAccessedAt: new Date(),
       });
 
-      await memoryManager.getWorkingMemory("test_key");
+      await memoryManager.getWorkingMemory('test_key');
 
       expect(mockAgentMemory.update).toHaveBeenCalledWith({
-        where: { id: "mem1" },
+        where: { id: 'mem1' },
         data: {
           accessCount: { increment: 1 },
           lastAccessedAt: expect.any(Date),
@@ -334,8 +334,8 @@ describe("MemoryManager", () => {
     });
   });
 
-  describe("统计信息", () => {
-    it("应该能够获取记忆统计信息", async () => {
+  describe('统计信息', () => {
+    it('应该能够获取记忆统计信息', async () => {
       mockAgentMemory.count.mockResolvedValueOnce(10); // working
       mockAgentMemory.count.mockResolvedValueOnce(20); // hot
       mockAgentMemory.count.mockResolvedValueOnce(30); // cold
@@ -358,15 +358,15 @@ describe("MemoryManager", () => {
     });
   });
 
-  describe("边界条件", () => {
-    it("应该处理空键值", async () => {
+  describe('边界条件', () => {
+    it('应该处理空键值', async () => {
       mockAgentMemory.findFirst.mockResolvedValue(null);
       mockAgentMemory.create.mockResolvedValue({
-        id: "mem1",
-        agentName: "MemoryAgent",
-        memoryKey: "",
+        id: 'mem1',
+        agentName: 'MemoryAgent',
+        memoryKey: '',
         memoryValue: JSON.stringify(null),
-        memoryType: "WORKING" as MemoryType,
+        memoryType: 'WORKING' as MemoryType,
         importance: 0.5,
         accessCount: 0,
         lastAccessedAt: new Date(),
@@ -375,21 +375,21 @@ describe("MemoryManager", () => {
         expiresAt: new Date(Date.now() + 3600000),
       });
 
-      await memoryManager.storeWorkingMemory("", null, "user1");
+      await memoryManager.storeWorkingMemory('', null, 'user1');
 
       expect(mockAgentMemory.create).toHaveBeenCalled();
     });
 
-    it("应该处理大数据存储", async () => {
-      const bigData = { items: Array(1000).fill({ data: "test" }) };
+    it('应该处理大数据存储', async () => {
+      const bigData = { items: Array(1000).fill({ data: 'test' }) };
 
       mockAgentMemory.findFirst.mockResolvedValue(null);
       mockAgentMemory.create.mockResolvedValue({
-        id: "mem1",
-        agentName: "MemoryAgent",
-        memoryKey: "big_data",
+        id: 'mem1',
+        agentName: 'MemoryAgent',
+        memoryKey: 'big_data',
         memoryValue: JSON.stringify(bigData),
-        memoryType: "WORKING" as MemoryType,
+        memoryType: 'WORKING' as MemoryType,
         importance: 0.5,
         accessCount: 0,
         lastAccessedAt: new Date(),
@@ -398,18 +398,18 @@ describe("MemoryManager", () => {
         expiresAt: new Date(Date.now() + 3600000),
       });
 
-      await memoryManager.storeWorkingMemory("big_data", bigData, "user1");
+      await memoryManager.storeWorkingMemory('big_data', bigData, 'user1');
 
       expect(mockAgentMemory.create).toHaveBeenCalled();
     });
 
-    it("应该处理JSON解析错误", async () => {
+    it('应该处理JSON解析错误', async () => {
       const invalidMemory: Partial<AgentMemory> = {
-        id: "mem1",
-        agentName: "MemoryAgent",
-        memoryKey: "test_key",
-        memoryValue: "invalid json",
-        memoryType: "WORKING" as MemoryType,
+        id: 'mem1',
+        agentName: 'MemoryAgent',
+        memoryKey: 'test_key',
+        memoryValue: 'invalid json',
+        memoryType: 'WORKING' as MemoryType,
         importance: 0.5,
         accessCount: 0,
         lastAccessedAt: new Date(),
@@ -421,7 +421,7 @@ describe("MemoryManager", () => {
       mockAgentMemory.findFirst.mockResolvedValue(invalidMemory);
 
       await expect(
-        memoryManager.getWorkingMemory("test_key"),
+        memoryManager.getWorkingMemory('test_key')
       ).rejects.toThrow();
     });
   });

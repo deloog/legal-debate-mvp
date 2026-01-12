@@ -4,9 +4,9 @@
  * 负责记录Agent执行的每个行动，支持行动链追踪
  */
 
-import { prisma } from "@/lib/db/prisma";
-import { ErrorLogger } from "@/lib/error/error-logger";
-import { ActionStatus } from "@prisma/client";
+import { prisma } from '@/lib/db/prisma';
+import { ErrorLogger } from '@/lib/error/error-logger';
+import { ActionStatus } from '@prisma/client';
 import type {
   ActionLogInput,
   ActionLogOutput,
@@ -14,7 +14,7 @@ import type {
   ActionCompleteInput,
   ActionFailedInput,
   ActionChain,
-} from "./types";
+} from './types';
 
 /**
  * 行动记录器类
@@ -68,7 +68,7 @@ export class ActionLogger {
    * @returns 记录结果
    */
   async logActionComplete(
-    input: ActionCompleteInput,
+    input: ActionCompleteInput
   ): Promise<ActionLogOutput> {
     try {
       const action = await prisma.agentAction.update({
@@ -85,11 +85,11 @@ export class ActionLogger {
       return {
         actionId: action.id,
         recordedAt: action.updatedAt ?? new Date(),
-        status: "SUCCESS",
+        status: 'SUCCESS',
       };
     } catch (error) {
       await this.errorLogger.captureError(error as Error, {
-        operation: "logActionComplete",
+        operation: 'logActionComplete',
       });
       throw error;
     }
@@ -120,12 +120,12 @@ export class ActionLogger {
       return {
         actionId: action.id,
         recordedAt: action.updatedAt ?? new Date(),
-        status: "FAILED",
+        status: 'FAILED',
         error: errorMessage,
       };
     } catch (error) {
       await this.errorLogger.captureError(error as Error, {
-        operation: "logActionFailed",
+        operation: 'logActionFailed',
       });
       throw error;
     }
@@ -139,7 +139,7 @@ export class ActionLogger {
    */
   async logAction<T>(
     input: ActionLogInput,
-    executeFn: () => Promise<T>,
+    executeFn: () => Promise<T>
   ): Promise<T> {
     const startedAt = new Date();
     const actionId = await this.logActionStart({
@@ -189,21 +189,21 @@ export class ActionLogger {
         where: {
           OR: [{ id: rootActionId }, { parentActionId: rootActionId }],
         },
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: 'asc' },
       });
 
       if (actions.length === 0) {
         throw new Error(`Action not found: ${rootActionId}`);
       }
 
-      const actionMap = new Map(actions.map((a) => [a.id, a]));
+      const actionMap = new Map(actions.map(a => [a.id, a]));
       const maxDepth = this.calculateMaxDepth(rootActionId, actionMap);
 
       return {
         chainId: rootActionId,
         rootActionId,
         depth: maxDepth,
-        actions: actions.map((a) => ({
+        actions: actions.map(a => ({
           actionId: a.id,
           actionName: a.actionName,
           agentName: a.agentName,
@@ -212,12 +212,12 @@ export class ActionLogger {
         })),
         totalExecutionTime: actions.reduce(
           (sum, a) => sum + (a.executionTime ?? 0),
-          0,
+          0
         ),
       };
     } catch (error) {
       await this.errorLogger.captureError(error as Error, {
-        operation: "buildActionChain",
+        operation: 'buildActionChain',
       });
       throw error;
     }
@@ -247,7 +247,7 @@ export class ActionLogger {
       return result.count;
     } catch (error) {
       await this.errorLogger.captureError(error as Error, {
-        operation: "cleanupOldActions",
+        operation: 'cleanupOldActions',
         executionEnvironment: {},
       });
       throw error;
@@ -303,7 +303,7 @@ export class ActionLogger {
 
     return prisma.agentAction.findMany({
       where,
-      orderBy: { updatedAt: "desc" },
+      orderBy: { updatedAt: 'desc' },
       take: filters.limit,
       skip: filters.offset,
     });
@@ -315,22 +315,22 @@ export class ActionLogger {
    * @returns 清理后的参数
    */
   private sanitizeParameters(parameters: unknown): unknown {
-    if (typeof parameters !== "object" || parameters === null) {
+    if (typeof parameters !== 'object' || parameters === null) {
       return parameters;
     }
 
     const sanitized = { ...(parameters as Record<string, unknown>) };
     const sensitiveKeys = [
-      "password",
-      "token",
-      "secret",
-      "apiKey",
-      "apiSecret",
+      'password',
+      'token',
+      'secret',
+      'apiKey',
+      'apiSecret',
     ];
 
     for (const key of sensitiveKeys) {
       if (key in sanitized) {
-        sanitized[key] = "***REDACTED***";
+        sanitized[key] = '***REDACTED***';
       }
     }
 
@@ -345,13 +345,13 @@ export class ActionLogger {
   private sanitizeResult(result: unknown): unknown {
     const MAX_RESULT_SIZE = 10000; // 10KB
 
-    if (typeof result === "string") {
+    if (typeof result === 'string') {
       return result.length > MAX_RESULT_SIZE
-        ? result.substring(0, MAX_RESULT_SIZE) + "... (truncated)"
+        ? result.substring(0, MAX_RESULT_SIZE) + '... (truncated)'
         : result;
     }
 
-    if (typeof result === "object" && result !== null) {
+    if (typeof result === 'object' && result !== null) {
       const json = JSON.stringify(result);
       if (json.length > MAX_RESULT_SIZE) {
         return {
@@ -371,8 +371,8 @@ export class ActionLogger {
    * @returns 格式化的错误消息
    */
   private formatErrorMessage(error: Error): string {
-    const message = error.message || "Unknown error";
-    const stack = error.stack ? error.stack.split("\n")[0] : "";
+    const message = error.message || 'Unknown error';
+    const stack = error.stack ? error.stack.split('\n')[0] : '';
 
     return stack ? `${message} (${stack.trim()})` : message;
   }
@@ -387,7 +387,7 @@ export class ActionLogger {
   private calculateMaxDepth(
     actionId: string,
     actionMap: Map<string, unknown>,
-    currentDepth: number = 0,
+    currentDepth: number = 0
   ): number {
     const action = actionMap.get(actionId) as
       | { childActions?: string[] }
@@ -397,8 +397,8 @@ export class ActionLogger {
       return currentDepth;
     }
 
-    const childDepths = action.childActions.map((childId) =>
-      this.calculateMaxDepth(childId, actionMap, currentDepth + 1),
+    const childDepths = action.childActions.map(childId =>
+      this.calculateMaxDepth(childId, actionMap, currentDepth + 1)
     );
 
     return Math.max(...childDepths);

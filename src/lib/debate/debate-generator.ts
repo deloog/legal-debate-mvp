@@ -1,10 +1,10 @@
 // 辩论生成器：协调整个辩论生成流程
 
-import { AIClient } from "@/lib/ai/clients";
-import { DebateInput, DebateResult, DebateGenerationConfig } from "./types";
-import { ArgumentGenerator } from "./argument-generator";
-import { LogicValidator } from "./validators";
-import { QualityAssessor } from "./assessors";
+import { AIClient } from '@/lib/ai/clients';
+import { DebateInput, DebateResult, DebateGenerationConfig } from './types';
+import { ArgumentGenerator } from './argument-generator';
+import { LogicValidator } from './validators';
+import { QualityAssessor } from './assessors';
 
 /**
  * 辩论生成器类
@@ -15,13 +15,13 @@ export class DebateGenerator {
 
   constructor(
     aiClient: AIClient,
-    config: Partial<DebateGenerationConfig> = {},
+    config: Partial<DebateGenerationConfig> = {}
   ) {
     this.config = {
-      aiProvider: "deepseek",
+      aiProvider: 'deepseek',
       temperature: 0.7,
       maxTokens: 2000,
-      balanceStrictness: "medium",
+      balanceStrictness: 'medium',
       includeLegalAnalysis: true,
       enableReview: true,
       ...config,
@@ -54,7 +54,7 @@ export class DebateGenerator {
       // 5. 计算质量指标
       const qualityMetrics = QualityAssessor.createQualityMetrics(
         plaintiffArguments,
-        defendantArguments,
+        defendantArguments
       );
 
       // 6. 计算生成统计
@@ -84,9 +84,9 @@ export class DebateGenerator {
 
       return result;
     } catch (error) {
-      console.error("辩论生成失败:", error);
+      console.error('辩论生成失败:', error);
       throw new Error(
-        `辩论生成失败: ${error instanceof Error ? error.message : String(error)}`,
+        `辩论生成失败: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
@@ -98,7 +98,7 @@ export class DebateGenerator {
     const result = await this.generate(input);
     const assessment = QualityAssessor.assessDebate(
       result.plaintiffArguments,
-      result.defendantArguments,
+      result.defendantArguments
     );
 
     // 将评估结果附加到结果中（作为扩展）
@@ -112,34 +112,34 @@ export class DebateGenerator {
    */
   private validateInput(input: DebateInput): void {
     if (!input.caseInfo) {
-      throw new Error("案件信息不能为空");
+      throw new Error('案件信息不能为空');
     }
 
     if (!input.caseInfo.title || input.caseInfo.title.trim().length === 0) {
-      throw new Error("案件名称不能为空");
+      throw new Error('案件名称不能为空');
     }
 
     if (
       !input.caseInfo.description ||
       input.caseInfo.description.trim().length === 0
     ) {
-      throw new Error("案件描述不能为空");
+      throw new Error('案件描述不能为空');
     }
 
     if (!input.caseInfo.parties) {
-      throw new Error("当事人信息不能为空");
+      throw new Error('当事人信息不能为空');
     }
 
     if (!input.caseInfo.parties.plaintiff) {
-      throw new Error("原告信息不能为空");
+      throw new Error('原告信息不能为空');
     }
 
     if (!input.caseInfo.parties.defendant) {
-      throw new Error("被告信息不能为空");
+      throw new Error('被告信息不能为空');
     }
 
     if (!input.lawArticles || input.lawArticles.length === 0) {
-      throw new Error("法条列表不能为空");
+      throw new Error('法条列表不能为空');
     }
   }
 
@@ -150,7 +150,7 @@ export class DebateGenerator {
     // AI审查层可以在这里实现
     // 例如：调用另一个AI模型对生成的论点进行审查
     // 目前暂不实现，可作为扩展点
-    console.log("AI审查层已启用（当前版本暂未实现）");
+    console.log('AI审查层已启用（当前版本暂未实现）');
   }
 
   /**

@@ -10,9 +10,9 @@
  * 验证码类型枚举
  */
 export enum VerificationCodeTypeEnum {
-  PASSWORD_RESET = "PASSWORD_RESET",
-  EMAIL_VERIFICATION = "EMAIL_VERIFICATION",
-  PHONE_VERIFICATION = "PHONE_VERIFICATION",
+  PASSWORD_RESET = 'PASSWORD_RESET',
+  EMAIL_VERIFICATION = 'EMAIL_VERIFICATION',
+  PHONE_VERIFICATION = 'PHONE_VERIFICATION',
 }
 
 // =============================================================================
@@ -142,12 +142,12 @@ export interface IEmailService {
   sendPasswordResetEmail(
     email: string,
     code: string,
-    expiresAt: Date,
+    expiresAt: Date
   ): Promise<EmailSendResult>;
   sendVerificationEmail(
     email: string,
     code: string,
-    expiresAt: Date,
+    expiresAt: Date
   ): Promise<EmailSendResult>;
 }
 
@@ -159,15 +159,15 @@ export interface IEmailService {
  * 密码重置错误代码
  */
 export enum PasswordResetErrorCode {
-  USER_NOT_FOUND = "USER_NOT_FOUND",
-  INVALID_EMAIL = "INVALID_EMAIL",
-  CODE_EXPIRED = "CODE_EXPIRED",
-  CODE_ALREADY_USED = "CODE_ALREADY_USED",
-  INVALID_CODE = "INVALID_CODE",
-  PASSWORD_MISMATCH = "PASSWORD_MISMATCH",
-  INVALID_PASSWORD = "INVALID_PASSWORD",
-  TOO_MANY_ATTEMPTS = "TOO_MANY_ATTEMPTS",
-  EMAIL_SEND_FAILED = "EMAIL_SEND_FAILED",
+  USER_NOT_FOUND = 'USER_NOT_FOUND',
+  INVALID_EMAIL = 'INVALID_EMAIL',
+  CODE_EXPIRED = 'CODE_EXPIRED',
+  CODE_ALREADY_USED = 'CODE_ALREADY_USED',
+  INVALID_CODE = 'INVALID_CODE',
+  PASSWORD_MISMATCH = 'PASSWORD_MISMATCH',
+  INVALID_PASSWORD = 'INVALID_PASSWORD',
+  TOO_MANY_ATTEMPTS = 'TOO_MANY_ATTEMPTS',
+  EMAIL_SEND_FAILED = 'EMAIL_SEND_FAILED',
 }
 
 /**

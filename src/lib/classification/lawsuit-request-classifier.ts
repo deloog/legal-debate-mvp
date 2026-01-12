@@ -4,44 +4,44 @@
 // 支持原子化拆解、分类映射、语义理解
 // =============================================================================
 
-import { PrecisionAmountExtractor } from "../extraction/amount-extractor-precision";
+import { PrecisionAmountExtractor } from '../extraction/amount-extractor-precision';
 
 export enum LawsuitRequestType {
   // 金钱给付请求
-  PAY_PRINCIPAL = "PAY_PRINCIPAL", // 偿还本金
-  PAY_INTEREST = "PAY_INTEREST", // 支付利息
-  PAY_PENALTY = "PAY_PENALTY", // 违约金
-  PAY_DAMAGES = "PAY_DAMAGES", // 赔偿损失
-  PAY_COMPENSATION = "PAY_COMPENSATION", // 补偿款
-  PAY_COSTS = "PAY_COSTS", // 费用支出
+  PAY_PRINCIPAL = 'PAY_PRINCIPAL', // 偿还本金
+  PAY_INTEREST = 'PAY_INTEREST', // 支付利息
+  PAY_PENALTY = 'PAY_PENALTY', // 违约金
+  PAY_DAMAGES = 'PAY_DAMAGES', // 赔偿损失
+  PAY_COMPENSATION = 'PAY_COMPENSATION', // 补偿款
+  PAY_COSTS = 'PAY_COSTS', // 费用支出
 
   // 行为履行请求
-  PERFORMANCE = "PERFORMANCE", // 履行义务
-  DELIVERY = "DELIVERY", // 交付货物
-  SERVICE = "SERVICE", // 提供服务
-  TRANSFER = "TRANSFER", // 转移财产
+  PERFORMANCE = 'PERFORMANCE', // 履行义务
+  DELIVERY = 'DELIVERY', // 交付货物
+  SERVICE = 'SERVICE', // 提供服务
+  TRANSFER = 'TRANSFER', // 转移财产
 
   // 确认请求
-  CONFIRMATION = "CONFIRMATION", // 确认关系
-  VALIDATION = "VALIDATION", // 确认效力
-  OWNERSHIP = "OWNERSHIP", // 确认所有权
+  CONFIRMATION = 'CONFIRMATION', // 确认关系
+  VALIDATION = 'VALIDATION', // 确认效力
+  OWNERSHIP = 'OWNERSHIP', // 确认所有权
 
   // 形成请求
-  TERMINATION = "TERMINATION", // 解除合同
-  CANCELLATION = "CANCELLATION", // 撤销行为
-  RESCISSION = "RESCISSION", // 废除合同
+  TERMINATION = 'TERMINATION', // 解除合同
+  CANCELLATION = 'CANCELLATION', // 撤销行为
+  RESCISSION = 'RESCISSION', // 废除合同
 
   // 程序性请求
-  LITIGATION_COST = "LITIGATION_COST", // 诉讼费用
-  ATTORNEY_FEES = "ATTORNEY_FEES", // 律师费
-  INTEREST_COST = "INTEREST_COST", // 利息损失
+  LITIGATION_COST = 'LITIGATION_COST', // 诉讼费用
+  ATTORNEY_FEES = 'ATTORNEY_FEES', // 律师费
+  INTEREST_COST = 'INTEREST_COST', // 利息损失
 
   // 复合请求
-  COMPOUND = "COMPOUND", // 复合请求
-  MULTIPLE = "MULTIPLE", // 多项请求
+  COMPOUND = 'COMPOUND', // 复合请求
+  MULTIPLE = 'MULTIPLE', // 多项请求
 
   // 其他
-  OTHER = "OTHER",
+  OTHER = 'OTHER',
 }
 
 export interface ClassificationRule {
@@ -96,7 +96,7 @@ export class LawsuitRequestClassifier {
     const rules: ClassificationRule[] = [
       {
         type: LawsuitRequestType.PAY_PRINCIPAL,
-        keywords: ["本金", "货款", "借款", "欠款", "价款", "购货款", "销售款"],
+        keywords: ['本金', '货款', '借款', '欠款', '价款', '购货款', '销售款'],
         patterns: [
           /偿还.*?本金/gi,
           /支付.*?本金/gi,
@@ -105,16 +105,16 @@ export class LawsuitRequestClassifier {
           /支付.*?货款/gi,
         ],
         priority: 1,
-        description: "请求对方支付本金或货款",
+        description: '请求对方支付本金或货款',
         examples: [
-          "判令被告偿还借款本金50万元",
-          "请求支付货款100万元",
-          "要求归还本金80万元",
+          '判令被告偿还借款本金50万元',
+          '请求支付货款100万元',
+          '要求归还本金80万元',
         ],
       },
       {
         type: LawsuitRequestType.PAY_INTEREST,
-        keywords: ["利息", "罚息", "逾期利息", "违约利息", "迟延利息"],
+        keywords: ['利息', '罚息', '逾期利息', '违约利息', '迟延利息'],
         patterns: [
           /支付.*?利息/gi,
           /承担.*?利息/gi,
@@ -123,16 +123,16 @@ export class LawsuitRequestClassifier {
           /.*?月利率.*?%/gi,
         ],
         priority: 2,
-        description: "请求支付利息或利息损失",
+        description: '请求支付利息或利息损失',
         examples: [
-          "支付自借款之日起至实际清偿之日止的利息",
-          "按年利率6%计算利息",
-          "承担逾期付款利息",
+          '支付自借款之日起至实际清偿之日止的利息',
+          '按年利率6%计算利息',
+          '承担逾期付款利息',
         ],
       },
       {
         type: LawsuitRequestType.PAY_PENALTY,
-        keywords: ["违约金", "罚金", "滞纳金", "赔偿金", "违约责任"],
+        keywords: ['违约金', '罚金', '滞纳金', '赔偿金', '违约责任'],
         patterns: [
           /支付.*?违约金/gi,
           /承担.*?违约金/gi,
@@ -140,16 +140,16 @@ export class LawsuitRequestClassifier {
           /支付.*?罚金/gi,
         ],
         priority: 3,
-        description: "请求支付违约金或罚金",
+        description: '请求支付违约金或罚金',
         examples: [
-          "支付违约金10万元",
-          "承担合同约定的违约金",
-          "赔偿逾期付款违约金",
+          '支付违约金10万元',
+          '承担合同约定的违约金',
+          '赔偿逾期付款违约金',
         ],
       },
       {
         type: LawsuitRequestType.PAY_DAMAGES,
-        keywords: ["损失", "赔偿损失", "损害赔偿", "经济损失", "实际损失"],
+        keywords: ['损失', '赔偿损失', '损害赔偿', '经济损失', '实际损失'],
         patterns: [
           /赔偿.*?损失/gi,
           /承担.*?损失/gi,
@@ -157,16 +157,16 @@ export class LawsuitRequestClassifier {
           /赔偿.*?损害/gi,
         ],
         priority: 4,
-        description: "请求赔偿损失或损害",
+        description: '请求赔偿损失或损害',
         examples: [
-          "赔偿经济损失50万元",
-          "承担实际损失30万元",
-          "赔偿因违约造成的损失",
+          '赔偿经济损失50万元',
+          '承担实际损失30万元',
+          '赔偿因违约造成的损失',
         ],
       },
       {
         type: LawsuitRequestType.LITIGATION_COST,
-        keywords: ["诉讼费", "案件受理费", "保全费", "执行费", "费用"],
+        keywords: ['诉讼费', '案件受理费', '保全费', '执行费', '费用'],
         patterns: [
           /承担.*?诉讼费/gi,
           /支付.*?诉讼费/gi,
@@ -174,16 +174,16 @@ export class LawsuitRequestClassifier {
           /承担.*?保全费/gi,
         ],
         priority: 5,
-        description: "请求承担诉讼相关费用",
+        description: '请求承担诉讼相关费用',
         examples: [
-          "由被告承担本案诉讼费用",
-          "案件受理费由被告负担",
-          "保全费由被申请人承担",
+          '由被告承担本案诉讼费用',
+          '案件受理费由被告负担',
+          '保全费由被申请人承担',
         ],
       },
       {
         type: LawsuitRequestType.PERFORMANCE,
-        keywords: ["履行", "继续履行", "执行", "完成", "实施"],
+        keywords: ['履行', '继续履行', '执行', '完成', '实施'],
         patterns: [
           /继续履行.*?合同/gi,
           /履行.*?义务/gi,
@@ -191,16 +191,16 @@ export class LawsuitRequestClassifier {
           /完成.*?义务/gi,
         ],
         priority: 6,
-        description: "请求履行合同义务或特定义务",
+        description: '请求履行合同义务或特定义务',
         examples: [
-          "继续履行商品房买卖合同",
-          "履行交付房屋的义务",
-          "执行合同约定的义务",
+          '继续履行商品房买卖合同',
+          '履行交付房屋的义务',
+          '执行合同约定的义务',
         ],
       },
       {
         type: LawsuitRequestType.TERMINATION,
-        keywords: ["解除", "终止", "撤销", "废除", "无效"],
+        keywords: ['解除', '终止', '撤销', '废除', '无效'],
         patterns: [
           /解除.*?合同/gi,
           /终止.*?合同/gi,
@@ -208,16 +208,16 @@ export class LawsuitRequestClassifier {
           /确认.*?合同.*?无效/gi,
         ],
         priority: 7,
-        description: "请求解除或终止合同关系",
+        description: '请求解除或终止合同关系',
         examples: [
-          "解除双方签订的买卖合同",
-          "终止租赁合同关系",
-          "确认劳动合同无效",
+          '解除双方签订的买卖合同',
+          '终止租赁合同关系',
+          '确认劳动合同无效',
         ],
       },
       {
         type: LawsuitRequestType.CONFIRMATION,
-        keywords: ["确认", "认定", "判定", "声明"],
+        keywords: ['确认', '认定', '判定', '声明'],
         patterns: [
           /确认.*?关系/gi,
           /认定.*?事实/gi,
@@ -225,16 +225,16 @@ export class LawsuitRequestClassifier {
           /声明.*?权利/gi,
         ],
         priority: 8,
-        description: "请求确认某种法律关系或事实",
+        description: '请求确认某种法律关系或事实',
         examples: [
-          "确认原被告之间存在借贷关系",
-          "认定房屋归原告所有",
-          "确认商标权归属",
+          '确认原被告之间存在借贷关系',
+          '认定房屋归原告所有',
+          '确认商标权归属',
         ],
       },
     ];
 
-    rules.forEach((rule) => {
+    rules.forEach(rule => {
       this.classificationRules.set(rule.type, rule);
     });
   }
@@ -243,7 +243,7 @@ export class LawsuitRequestClassifier {
    * 分类诉讼请求
    */
   async classifyLawsuitRequests(
-    requestText: string,
+    requestText: string
   ): Promise<ClassificationResult> {
     const claims: ClassifiedClaim[] = [];
     const warnings: string[] = [];
@@ -273,7 +273,7 @@ export class LawsuitRequestClassifier {
     // 第四步：验证和清理
     const validation = this.validateClassification(
       processedClaims,
-      requestText,
+      requestText
     );
 
     // 第五步：计算整体置信度
@@ -282,9 +282,9 @@ export class LawsuitRequestClassifier {
     return {
       claims: processedClaims,
       totalAmount: totalAmount > 0 ? totalAmount : undefined,
-      currency: currencies.size === 1 ? Array.from(currencies)[0] : "CNY",
+      currency: currencies.size === 1 ? Array.from(currencies)[0] : 'CNY',
       hasCompoundClaims: processedClaims.some(
-        (c) => c.subClaims && c.subClaims.length > 0,
+        c => c.subClaims && c.subClaims.length > 0
       ),
       classificationConfidence: overallConfidence,
       unclassifiedText: validation.unclassifiedText,
@@ -299,9 +299,7 @@ export class LawsuitRequestClassifier {
     const claims: string[] = [];
 
     // 按标点符号拆分
-    const sentences = text
-      .split(/[；;。\n]/)
-      .filter((s) => s.trim().length > 0);
+    const sentences = text.split(/[；;。\n]/).filter(s => s.trim().length > 0);
 
     for (const sentence of sentences) {
       const trimmed = sentence.trim();
@@ -332,7 +330,7 @@ export class LawsuitRequestClassifier {
       /以及.*?费用/,
     ];
 
-    return multipleIndicators.some((pattern) => pattern.test(text));
+    return multipleIndicators.some(pattern => pattern.test(text));
   }
 
   /**
@@ -342,7 +340,7 @@ export class LawsuitRequestClassifier {
     const subClaims: string[] = [];
 
     // 使用连词拆解
-    const connectors = ["及", "并", "加", "另", "同时", "以及", "且"];
+    const connectors = ['及', '并', '加', '另', '同时', '以及', '且'];
 
     let remainingText = text;
     for (const connector of connectors) {
@@ -366,7 +364,7 @@ export class LawsuitRequestClassifier {
    * 分类单个请求
    */
   private async classifySingleClaim(
-    claimText: string,
+    claimText: string
   ): Promise<ClassifiedClaim | null> {
     const matchedTypes: {
       type: LawsuitRequestType;
@@ -430,10 +428,10 @@ export class LawsuitRequestClassifier {
       matchedKeywords: bestMatch.keywords,
       matchedPatterns: bestMatch.patterns,
       amount: bestAmount?.normalizedAmount,
-      currency: bestAmount?.currency || "CNY",
+      currency: bestAmount?.currency || 'CNY',
       description: this.getClassificationDescription(bestMatch.type),
       evidence: [],
-      legalBasis: "",
+      legalBasis: '',
     };
   }
 
@@ -452,7 +450,7 @@ export class LawsuitRequestClassifier {
       if (this.shouldCombineClaims(current, next)) {
         // 创建复合请求
         const compoundClaim: ClassifiedClaim = {
-          originalText: current.originalText + "；" + next.originalText,
+          originalText: current.originalText + '；' + next.originalText,
           classifiedType: LawsuitRequestType.COMPOUND,
           confidence: (current.confidence + next.confidence) / 2,
           matchedKeywords: [
@@ -465,7 +463,7 @@ export class LawsuitRequestClassifier {
           ],
           amount: (current.amount || 0) + (next.amount || 0),
           currency: current.currency,
-          description: "复合请求，包含多个子请求",
+          description: '复合请求，包含多个子请求',
           subClaims: [current, next],
         };
 
@@ -479,7 +477,7 @@ export class LawsuitRequestClassifier {
     // 添加最后一个请求（如果未被复合）
     if (claims.length > 0 && processedClaims.length < claims.length) {
       const lastClaim = claims[claims.length - 1];
-      if (!compoundClaims.some((c) => c.subClaims?.includes(lastClaim))) {
+      if (!compoundClaims.some(c => c.subClaims?.includes(lastClaim))) {
         processedClaims.push(lastClaim);
       }
     }
@@ -492,12 +490,12 @@ export class LawsuitRequestClassifier {
    */
   private shouldCombineClaims(
     claim1: ClassifiedClaim,
-    claim2: ClassifiedClaim,
+    claim2: ClassifiedClaim
   ): boolean {
     // 同一原文中的连续请求
     if (
-      !claim1.originalText.includes("；") &&
-      !claim2.originalText.includes("；")
+      !claim1.originalText.includes('；') &&
+      !claim2.originalText.includes('；')
     ) {
       return false;
     }
@@ -521,7 +519,7 @@ export class LawsuitRequestClassifier {
    */
   private validateClassification(
     claims: ClassifiedClaim[],
-    originalText: string,
+    originalText: string
   ): { unclassifiedText: string[]; warnings: string[] } {
     const unclassifiedText: string[] = [];
     const warnings: string[] = [];
@@ -529,20 +527,20 @@ export class LawsuitRequestClassifier {
     // 检查是否有未分类的文本
     let remainingText = originalText;
     for (const claim of claims) {
-      remainingText = remainingText.replace(claim.originalText, "");
+      remainingText = remainingText.replace(claim.originalText, '');
     }
 
-    const cleanRemaining = remainingText.replace(/[；;。\s]/g, "").trim();
+    const cleanRemaining = remainingText.replace(/[；;。\s]/g, '').trim();
     if (cleanRemaining.length > 10) {
       unclassifiedText.push(cleanRemaining);
     }
 
     // 检查金额一致性
-    const amounts = claims.filter((c) => c.amount && c.amount > 0);
+    const amounts = claims.filter(c => c.amount && c.amount > 0);
     if (amounts.length > 1) {
-      const currencies = new Set(amounts.map((a) => a.currency));
+      const currencies = new Set(amounts.map(a => a.currency));
       if (currencies.size > 1) {
-        warnings.push("发现多种货币单位，建议统一");
+        warnings.push('发现多种货币单位，建议统一');
       }
     }
 
@@ -551,7 +549,7 @@ export class LawsuitRequestClassifier {
     for (const claim of claims) {
       typeCounts.set(
         claim.classifiedType,
-        (typeCounts.get(claim.classifiedType) || 0) + 1,
+        (typeCounts.get(claim.classifiedType) || 0) + 1
       );
     }
 
@@ -572,7 +570,7 @@ export class LawsuitRequestClassifier {
 
     const totalConfidence = claims.reduce(
       (sum, claim) => sum + claim.confidence,
-      0,
+      0
     );
     return totalConfidence / claims.length;
   }
@@ -582,51 +580,51 @@ export class LawsuitRequestClassifier {
    */
   private getClassificationDescription(type: LawsuitRequestType): string {
     const descriptions: { [key in LawsuitRequestType]: string } = {
-      [LawsuitRequestType.PAY_PRINCIPAL]: "请求支付本金或货款",
-      [LawsuitRequestType.PAY_INTEREST]: "请求支付利息",
-      [LawsuitRequestType.PAY_PENALTY]: "请求支付违约金或罚金",
-      [LawsuitRequestType.PAY_DAMAGES]: "请求赔偿损失或损害",
-      [LawsuitRequestType.PAY_COMPENSATION]: "请求支付补偿款",
-      [LawsuitRequestType.PAY_COSTS]: "请求支付费用",
-      [LawsuitRequestType.PERFORMANCE]: "请求履行特定义务",
-      [LawsuitRequestType.DELIVERY]: "请求交付特定物品",
-      [LawsuitRequestType.SERVICE]: "请求提供服务",
-      [LawsuitRequestType.TRANSFER]: "请求转移财产权",
-      [LawsuitRequestType.CONFIRMATION]: "请求确认法律关系或事实",
-      [LawsuitRequestType.VALIDATION]: "请求确认效力",
-      [LawsuitRequestType.OWNERSHIP]: "请求确认所有权",
-      [LawsuitRequestType.TERMINATION]: "请求解除或终止关系",
-      [LawsuitRequestType.CANCELLATION]: "请求撤销行为",
-      [LawsuitRequestType.RESCISSION]: "请求废除合同",
-      [LawsuitRequestType.LITIGATION_COST]: "请求承担诉讼费用",
-      [LawsuitRequestType.ATTORNEY_FEES]: "请求支付律师费",
-      [LawsuitRequestType.INTEREST_COST]: "请求承担利息损失",
-      [LawsuitRequestType.COMPOUND]: "复合请求，包含多个子请求",
-      [LawsuitRequestType.MULTIPLE]: "多项请求",
-      [LawsuitRequestType.OTHER]: "其他请求",
+      [LawsuitRequestType.PAY_PRINCIPAL]: '请求支付本金或货款',
+      [LawsuitRequestType.PAY_INTEREST]: '请求支付利息',
+      [LawsuitRequestType.PAY_PENALTY]: '请求支付违约金或罚金',
+      [LawsuitRequestType.PAY_DAMAGES]: '请求赔偿损失或损害',
+      [LawsuitRequestType.PAY_COMPENSATION]: '请求支付补偿款',
+      [LawsuitRequestType.PAY_COSTS]: '请求支付费用',
+      [LawsuitRequestType.PERFORMANCE]: '请求履行特定义务',
+      [LawsuitRequestType.DELIVERY]: '请求交付特定物品',
+      [LawsuitRequestType.SERVICE]: '请求提供服务',
+      [LawsuitRequestType.TRANSFER]: '请求转移财产权',
+      [LawsuitRequestType.CONFIRMATION]: '请求确认法律关系或事实',
+      [LawsuitRequestType.VALIDATION]: '请求确认效力',
+      [LawsuitRequestType.OWNERSHIP]: '请求确认所有权',
+      [LawsuitRequestType.TERMINATION]: '请求解除或终止关系',
+      [LawsuitRequestType.CANCELLATION]: '请求撤销行为',
+      [LawsuitRequestType.RESCISSION]: '请求废除合同',
+      [LawsuitRequestType.LITIGATION_COST]: '请求承担诉讼费用',
+      [LawsuitRequestType.ATTORNEY_FEES]: '请求支付律师费',
+      [LawsuitRequestType.INTEREST_COST]: '请求承担利息损失',
+      [LawsuitRequestType.COMPOUND]: '复合请求，包含多个子请求',
+      [LawsuitRequestType.MULTIPLE]: '多项请求',
+      [LawsuitRequestType.OTHER]: '其他请求',
     };
 
-    return descriptions[type] || "未知请求类型";
+    return descriptions[type] || '未知请求类型';
   }
 
   /**
    * 生成分类报告
    */
   generateClassificationReport(result: ClassificationResult): string {
-    let report = "诉讼请求分类报告\n";
-    report += "===================\n";
+    let report = '诉讼请求分类报告\n';
+    report += '===================\n';
 
     // 基本信息
     report += `总请求数量: ${result.claims.length}\n`;
     report += `整体置信度: ${(result.classificationConfidence * 100).toFixed(1)}%\n`;
-    report += `包含复合请求: ${result.hasCompoundClaims ? "是" : "否"}\n`;
+    report += `包含复合请求: ${result.hasCompoundClaims ? '是' : '否'}\n`;
 
     if (result.totalAmount) {
       report += `涉及总金额: ${result.totalAmount} ${result.currency}\n`;
     }
 
     // 详细分类结果
-    report += "\n详细分类结果:\n";
+    report += '\n详细分类结果:\n';
     result.claims.forEach((claim, index) => {
       report += `${index + 1}. ${claim.originalText}\n`;
       report += `   类型: ${claim.classifiedType}\n`;
@@ -638,7 +636,7 @@ export class LawsuitRequestClassifier {
       }
 
       if (claim.matchedKeywords.length > 0) {
-        report += `   匹配关键词: ${claim.matchedKeywords.join(", ")}\n`;
+        report += `   匹配关键词: ${claim.matchedKeywords.join(', ')}\n`;
       }
 
       if (claim.subClaims && claim.subClaims.length > 0) {
@@ -648,22 +646,22 @@ export class LawsuitRequestClassifier {
         });
       }
 
-      report += "\n";
+      report += '\n';
     });
 
     // 警告信息
     if (result.warnings.length > 0) {
-      report += "警告信息:\n";
-      result.warnings.forEach((warning) => {
+      report += '警告信息:\n';
+      result.warnings.forEach(warning => {
         report += `  - ${warning}\n`;
       });
-      report += "\n";
+      report += '\n';
     }
 
     // 未分类文本
     if (result.unclassifiedText.length > 0) {
-      report += "未分类文本:\n";
-      result.unclassifiedText.forEach((text) => {
+      report += '未分类文本:\n';
+      result.unclassifiedText.forEach(text => {
         report += `  - ${text}\n`;
       });
     }

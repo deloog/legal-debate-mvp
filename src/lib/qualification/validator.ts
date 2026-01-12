@@ -6,7 +6,7 @@
 import type {
   LicenseNumberValidation,
   BasicInfoValidation,
-} from "@/types/qualification";
+} from '@/types/qualification';
 
 /**
  * 执业证号正则表达式（17位数字）
@@ -27,21 +27,21 @@ const ID_CARD_REGEX =
  * @returns 验证结果
  */
 export function validateLicenseNumber(
-  licenseNumber: string,
+  licenseNumber: string
 ): LicenseNumberValidation {
   const errors: string[] = [];
 
   if (!licenseNumber) {
-    errors.push("执业证号不能为空");
+    errors.push('执业证号不能为空');
     return { valid: false, errors };
   }
 
   // 移除可能的连字符和空格
-  const cleaned = licenseNumber.replace(/[-\s]/g, "");
+  const cleaned = licenseNumber.replace(/[-\s]/g, '');
 
   // 验证格式
   if (!LICENSE_NUMBER_REGEX.test(cleaned)) {
-    errors.push("执业证号格式不正确，应为17位数字");
+    errors.push('执业证号格式不正确，应为17位数字');
     return { valid: false, errors };
   }
 
@@ -65,7 +65,7 @@ export function validateIdCardNumber(idCardNumber: string): boolean {
 
   // 校验码验证
   const weights = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2];
-  const checkCodes = ["1", "0", "X", "9", "8", "7", "6", "5", "4", "3", "2"];
+  const checkCodes = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'];
 
   let sum = 0;
   for (let i = 0; i < 17; i += 1) {
@@ -134,22 +134,22 @@ export function validateBasicInfo(data: {
   // 验证执业证号
   const licenseValidation = validateLicenseNumber(data.licenseNumber);
   if (!licenseValidation.valid) {
-    errors.licenseNumber = licenseValidation.errors.join(", ");
+    errors.licenseNumber = licenseValidation.errors.join(', ');
   }
 
   // 验证姓名
   if (!validateFullName(data.fullName)) {
-    errors.fullName = "姓名格式不正确";
+    errors.fullName = '姓名格式不正确';
   }
 
   // 验证身份证号
   if (!validateIdCardNumber(data.idCardNumber)) {
-    errors.idCardNumber = "身份证号格式不正确";
+    errors.idCardNumber = '身份证号格式不正确';
   }
 
   // 验证律所名称
   if (!validateLawFirm(data.lawFirm)) {
-    errors.lawFirm = "律所名称格式不正确";
+    errors.lawFirm = '律所名称格式不正确';
   }
 
   return {
@@ -167,8 +167,8 @@ export function validateBasicInfo(data: {
  */
 export function checkLicenseNumberDuplicate(
   existingLicenseNumbers: string[],
-  licenseNumber: string,
+  licenseNumber: string
 ): boolean {
-  const cleaned = licenseNumber.replace(/[-\s]/g, "");
+  const cleaned = licenseNumber.replace(/[-\s]/g, '');
   return existingLicenseNumbers.includes(cleaned);
 }

@@ -4,7 +4,7 @@
  * 提供详细的性能指标收集、分析和报告功能
  */
 
-import * as crypto from "crypto";
+import * as crypto from 'crypto';
 
 // =============================================================================
 // 性能指标类型定义
@@ -57,8 +57,8 @@ export interface OperationStats {
 }
 
 export interface PerformanceAlert {
-  type: "response_time" | "error_rate" | "cache_hit_rate" | "token_efficiency";
-  severity: "low" | "medium" | "high" | "critical";
+  type: 'response_time' | 'error_rate' | 'cache_hit_rate' | 'token_efficiency';
+  severity: 'low' | 'medium' | 'high' | 'critical';
   message: string;
   threshold: number;
   actualValue: number;
@@ -93,7 +93,7 @@ export class PerformanceMonitor {
   /**
    * 记录性能指标
    */
-  public recordMetric(metric: Omit<PerformanceMetric, "requestId">): string {
+  public recordMetric(metric: Omit<PerformanceMetric, 'requestId'>): string {
     const requestId = this.generateRequestId();
     const fullMetric: PerformanceMetric = {
       ...metric,
@@ -112,7 +112,7 @@ export class PerformanceMonitor {
     this.checkAlerts(fullMetric);
 
     console.log(
-      `📊 Performance: ${metric.provider}/${metric.model} - ${metric.operation}: ${metric.duration}ms (${metric.cached ? "cached" : "generated"})`,
+      `📊 Performance: ${metric.provider}/${metric.model} - ${metric.operation}: ${metric.duration}ms (${metric.cached ? 'cached' : 'generated'})`
     );
 
     return requestId;
@@ -124,7 +124,7 @@ export class PerformanceMonitor {
   public startRequest(
     provider: string,
     model: string,
-    operation: string,
+    operation: string
   ): string {
     const requestId = this.generateRequestId();
 
@@ -148,7 +148,7 @@ export class PerformanceMonitor {
     success: boolean,
     tokenCount?: number,
     cached: boolean = false,
-    errorType?: string,
+    errorType?: string
   ): void {
     const pendingRequests =
       ((this as any).pendingRequests as Map<string, any>) || new Map();
@@ -181,7 +181,7 @@ export class PerformanceMonitor {
     this.checkAlerts(metric);
 
     console.log(
-      `📊 Performance Complete: ${pending.provider}/${pending.model} - ${pending.operation}: ${duration}ms (${cached ? "cached" : "generated"})`,
+      `📊 Performance Complete: ${pending.provider}/${pending.model} - ${pending.operation}: ${duration}ms (${cached ? 'cached' : 'generated'})`
     );
   }
 
@@ -193,7 +193,7 @@ export class PerformanceMonitor {
    * 更新告警阈值
    */
   public updateAlertThresholds(
-    thresholds: Partial<typeof this.alertThresholds>,
+    thresholds: Partial<typeof this.alertThresholds>
   ): void {
     this.alertThresholds = { ...this.alertThresholds, ...thresholds };
   }
@@ -207,11 +207,11 @@ export class PerformanceMonitor {
     // 响应时间告警
     if (metric.duration > this.alertThresholds.responseTime) {
       alerts.push({
-        type: "response_time",
+        type: 'response_time',
         severity:
           metric.duration > this.alertThresholds.responseTime * 2
-            ? "critical"
-            : "high",
+            ? 'critical'
+            : 'high',
         message: `响应时间过长: ${metric.duration}ms`,
         threshold: this.alertThresholds.responseTime,
         actualValue: metric.duration,
@@ -222,9 +222,9 @@ export class PerformanceMonitor {
     // 错误率告警
     if (!metric.success) {
       alerts.push({
-        type: "error_rate",
-        severity: "medium",
-        message: `请求失败: ${metric.errorType || "unknown"}`,
+        type: 'error_rate',
+        severity: 'medium',
+        message: `请求失败: ${metric.errorType || 'unknown'}`,
         threshold: 0,
         actualValue: 1,
         timestamp: Date.now(),
@@ -248,17 +248,15 @@ export class PerformanceMonitor {
    */
   public getSummary(timeWindow?: number): PerformanceSummary {
     const cutoffTime = timeWindow ? Date.now() - timeWindow : 0;
-    const relevantMetrics = this.metrics.filter(
-      (m) => m.timestamp > cutoffTime,
-    );
+    const relevantMetrics = this.metrics.filter(m => m.timestamp > cutoffTime);
 
     if (relevantMetrics.length === 0) {
       return this.getEmptySummary();
     }
 
-    const successfulMetrics = relevantMetrics.filter((m) => m.success);
-    const failedMetrics = relevantMetrics.filter((m) => !m.success);
-    const durations = successfulMetrics.map((m) => m.duration);
+    const successfulMetrics = relevantMetrics.filter(m => m.success);
+    const failedMetrics = relevantMetrics.filter(m => !m.success);
+    const durations = successfulMetrics.map(m => m.duration);
 
     // 基础统计
     const totalRequests = relevantMetrics.length;
@@ -281,13 +279,13 @@ export class PerformanceMonitor {
       sortedDurations[Math.floor(sortedDurations.length * 0.99)];
 
     // 缓存统计
-    const cachedRequests = relevantMetrics.filter((m) => m.cached).length;
+    const cachedRequests = relevantMetrics.filter(m => m.cached).length;
     const cacheHitRate = (cachedRequests / totalRequests) * 100;
 
     // Token效率统计
     const totalTokens = successfulMetrics.reduce(
       (sum, m) => sum + (m.tokenCount || 0),
-      0,
+      0
     );
     const totalTime = successfulMetrics.reduce((sum, m) => sum + m.duration, 0);
     const tokenEfficiency =
@@ -322,7 +320,7 @@ export class PerformanceMonitor {
    * 计算提供商统计
    */
   private calculateProviderStats(
-    metrics: PerformanceMetric[],
+    metrics: PerformanceMetric[]
   ): Record<string, ProviderStats> {
     const stats: Record<string, ProviderStats> = {};
 
@@ -334,24 +332,24 @@ export class PerformanceMonitor {
         acc[key].push(metric);
         return acc;
       },
-      {} as Record<string, PerformanceMetric[]>,
+      {} as Record<string, PerformanceMetric[]>
     );
 
     // 计算每个提供商的统计
     Object.entries(grouped).forEach(([provider, providerMetrics]) => {
-      const successful = providerMetrics.filter((m) => m.success);
-      const durations = successful.map((m) => m.duration);
-      const cached = providerMetrics.filter((m) => m.cached).length;
+      const successful = providerMetrics.filter(m => m.success);
+      const durations = successful.map(m => m.duration);
+      const cached = providerMetrics.filter(m => m.cached).length;
 
       const errorDistribution = providerMetrics
-        .filter((m) => !m.success)
+        .filter(m => !m.success)
         .reduce(
           (acc, m) => {
-            const errorType = m.errorType || "unknown";
+            const errorType = m.errorType || 'unknown';
             acc[errorType] = (acc[errorType] || 0) + 1;
             return acc;
           },
-          {} as Record<string, number>,
+          {} as Record<string, number>
         );
 
       stats[provider] = {
@@ -373,7 +371,7 @@ export class PerformanceMonitor {
    * 计算操作统计
    */
   private calculateOperationStats(
-    metrics: PerformanceMetric[],
+    metrics: PerformanceMetric[]
   ): Record<string, OperationStats> {
     const stats: Record<string, OperationStats> = {};
 
@@ -385,14 +383,14 @@ export class PerformanceMonitor {
         acc[key].push(metric);
         return acc;
       },
-      {} as Record<string, PerformanceMetric[]>,
+      {} as Record<string, PerformanceMetric[]>
     );
 
     // 计算每个操作的统计
     Object.entries(grouped).forEach(([operation, operationMetrics]) => {
-      const successful = operationMetrics.filter((m) => m.success);
-      const durations = successful.map((m) => m.duration);
-      const cached = operationMetrics.filter((m) => m.cached).length;
+      const successful = operationMetrics.filter(m => m.success);
+      const durations = successful.map(m => m.duration);
+      const cached = operationMetrics.filter(m => m.cached).length;
 
       stats[operation] = {
         totalRequests: operationMetrics.length,
@@ -440,7 +438,7 @@ export class PerformanceMonitor {
    */
   public getActiveAlerts(timeWindow?: number): PerformanceAlert[] {
     const cutoffTime = timeWindow ? Date.now() - timeWindow : 0;
-    return this.alerts.filter((alert) => alert.timestamp > cutoffTime);
+    return this.alerts.filter(alert => alert.timestamp > cutoffTime);
   }
 
   /**
@@ -459,7 +457,7 @@ export class PerformanceMonitor {
    */
   public exportMetrics(timeWindow?: number): PerformanceMetric[] {
     const cutoffTime = timeWindow ? Date.now() - timeWindow : 0;
-    return this.metrics.filter((m) => m.timestamp > cutoffTime);
+    return this.metrics.filter(m => m.timestamp > cutoffTime);
   }
 
   /**
@@ -476,7 +474,7 @@ export class PerformanceMonitor {
 ${new Date().toISOString()}
 
 ## 时间窗口
-${timeWindow ? `最近 ${(timeWindow / 60000).toFixed(1)} 分钟` : "全部时间"}
+${timeWindow ? `最近 ${(timeWindow / 60000).toFixed(1)} 分钟` : '全部时间'}
 
 ## 总体性能指标
 - 总请求数: ${summary.totalRequests}
@@ -508,10 +506,10 @@ ${Object.entries(summary.providerStats)
 - 缓存命中率: ${stats.cacheHitRate.toFixed(2)}%
 - 错误分布: ${Object.entries(stats.errorDistribution)
       .map(([error, count]) => `${error}(${count})`)
-      .join(", ")}
-`,
+      .join(', ')}
+`
   )
-  .join("\n")}
+  .join('\n')}
 
 ## 操作性能
 ${Object.entries(summary.operationStats)
@@ -522,25 +520,25 @@ ${Object.entries(summary.operationStats)
 - 平均响应时间: ${stats.averageResponseTime.toFixed(0)}ms
 - 成功率: ${stats.successRate.toFixed(2)}%
 - 缓存命中率: ${stats.cacheHitRate.toFixed(2)}%
-`,
+`
   )
-  .join("\n")}
+  .join('\n')}
 
 ## 活跃告警
 ${
   activeAlerts.length > 0
     ? activeAlerts
         .map(
-          (alert) => `
+          alert => `
 ### ${alert.type} - ${alert.severity}
 - 消息: ${alert.message}
 - 阈值: ${alert.threshold}
 - 实际值: ${alert.actualValue}
 - 时间: ${new Date(alert.timestamp).toISOString()}
-`,
+`
         )
-        .join("\n")
-    : "无活跃告警"
+        .join('\n')
+    : '无活跃告警'
 }
 `;
 
@@ -555,7 +553,7 @@ ${
    * 生成请求ID
    */
   private generateRequestId(): string {
-    return `req_${Date.now()}_${crypto.randomBytes(8).toString("hex").substring(0, 8)}`;
+    return `req_${Date.now()}_${crypto.randomBytes(8).toString('hex').substring(0, 8)}`;
   }
 
   /**
@@ -564,7 +562,7 @@ ${
   public clearOldMetrics(maxAge: number): void {
     const cutoffTime = Date.now() - maxAge;
     const originalLength = this.metrics.length;
-    this.metrics = this.metrics.filter((m) => m.timestamp > cutoffTime);
+    this.metrics = this.metrics.filter(m => m.timestamp > cutoffTime);
     const cleared = originalLength - this.metrics.length;
 
     if (cleared > 0) {
@@ -579,7 +577,7 @@ ${
     this.metrics = [];
     this.alerts = [];
     (this as any).pendingRequests?.clear();
-    console.log("Performance monitor reset");
+    console.log('Performance monitor reset');
   }
 }
 

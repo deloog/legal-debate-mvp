@@ -3,12 +3,12 @@
  * 第一层：使用DeepSeek进行智能识别
  */
 
-import { getUnifiedAIService } from "@/lib/ai/unified-service";
+import { getUnifiedAIService } from '@/lib/ai/unified-service';
 import type {
   DisputeFocus,
   DisputeFocusCategory,
   ExtractedData,
-} from "../../core/types";
+} from '../../core/types';
 
 /**
  * AI识别层 - 使用DeepSeek进行智能识别
@@ -16,7 +16,7 @@ import type {
 export async function aiExtractLayer(
   text: string,
   extractedData?: ExtractedData,
-  rulePatterns?: Map<DisputeFocusCategory, RegExp[]>,
+  rulePatterns?: Map<DisputeFocusCategory, RegExp[]>
 ): Promise<DisputeFocus[]> {
   try {
     const unifiedService = await getUnifiedAIService();
@@ -24,16 +24,16 @@ export async function aiExtractLayer(
     const prompt = buildAIExtractionPrompt(text, extractedData);
 
     const response = await unifiedService.chatCompletion({
-      model: "deepseek-chat",
-      provider: "deepseek",
+      model: 'deepseek-chat',
+      provider: 'deepseek',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content:
-            "你是一个专业的法律争议焦点识别专家。请从法律文档中准确识别争议焦点。",
+            '你是一个专业的法律争议焦点识别专家。请从法律文档中准确识别争议焦点。',
         },
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
@@ -43,13 +43,13 @@ export async function aiExtractLayer(
 
     if (response.choices && response.choices.length > 0) {
       return parseAIExtractionResponse(
-        response.choices[0].message.content || "",
+        response.choices[0].message.content || ''
       );
     }
 
     return [];
   } catch (error) {
-    console.error("AI识别层失败:", error);
+    console.error('AI识别层失败:', error);
     return [];
   }
 }
@@ -59,12 +59,12 @@ export async function aiExtractLayer(
  */
 function buildAIExtractionPrompt(
   text: string,
-  extractedData?: ExtractedData,
+  extractedData?: ExtractedData
 ): string {
-  let contextInfo = "";
+  let contextInfo = '';
 
   if (extractedData?.claims && extractedData.claims.length > 0) {
-    contextInfo += `\n诉讼请求信息：\n${extractedData.claims.map((c) => `${c.type}: ${c.content}`).join("\n")}`;
+    contextInfo += `\n诉讼请求信息：\n${extractedData.claims.map(c => `${c.type}: ${c.content}`).join('\n')}`;
   }
 
   return `请从以下法律文档中准确识别争议焦点。
@@ -116,15 +116,15 @@ function parseAIExtractionResponse(aiResponse: string): DisputeFocus[] {
     let cleanedResponse = aiResponse.trim();
 
     // 移除代码块标记
-    if (cleanedResponse.includes("```json")) {
+    if (cleanedResponse.includes('```json')) {
       cleanedResponse = cleanedResponse
-        .replace(/```json\s*/, "")
-        .replace(/```\s*$/, "");
+        .replace(/```json\s*/, '')
+        .replace(/```\s*$/, '');
     }
-    if (cleanedResponse.includes("```")) {
+    if (cleanedResponse.includes('```')) {
       cleanedResponse = cleanedResponse
-        .replace(/```\s*/, "")
-        .replace(/```\s*$/, "");
+        .replace(/```\s*/, '')
+        .replace(/```\s*$/, '');
     }
 
     const parsed = JSON.parse(cleanedResponse);
@@ -136,11 +136,11 @@ function parseAIExtractionResponse(aiResponse: string): DisputeFocus[] {
     return parsed.disputeFocuses.map((item: any, index: number) => ({
       id: `ai_focus_${index}`,
       category: item.category,
-      description: item.description || "",
-      positionA: item.positionA || "未明确",
-      positionB: item.positionB || "未明确",
+      description: item.description || '',
+      positionA: item.positionA || '未明确',
+      positionB: item.positionB || '未明确',
       coreIssue:
-        item.coreIssue || item.description?.split(/[，。；；]/)[0] || "",
+        item.coreIssue || item.description?.split(/[，。；；]/)[0] || '',
       importance: Math.min(10, Math.max(1, Math.round(item.importance || 5))),
       confidence: Math.min(1, Math.max(0, item.confidence || 0.7)),
       relatedClaims: [],
@@ -150,7 +150,7 @@ function parseAIExtractionResponse(aiResponse: string): DisputeFocus[] {
       _inferred: (item.confidence || 0.7) < 0.8,
     }));
   } catch (error) {
-    console.error("解析AI识别响应失败:", error);
+    console.error('解析AI识别响应失败:', error);
     return [];
   }
 }

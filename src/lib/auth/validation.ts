@@ -2,8 +2,8 @@
  * 邮箱和输入验证工具函数
  */
 
-import type { EmailValidationError } from "@/types/auth";
-import { validatePassword as checkPasswordComplexity } from "./password";
+import type { EmailValidationError } from '@/types/auth';
+import { validatePassword as checkPasswordComplexity } from './password';
 
 /**
  * 验证邮箱格式
@@ -14,7 +14,7 @@ export function validateEmail(email: string): EmailValidationError {
   if (!emailRegex.test(email)) {
     return {
       valid: false,
-      error: "邮箱格式不正确",
+      error: '邮箱格式不正确',
     };
   }
 
@@ -36,7 +36,7 @@ export function validateUsername(username: string): {
   if (!usernameRegex.test(username)) {
     return {
       valid: false,
-      error: "用户名长度为2-20位，只能包含字母、数字、下划线和中文",
+      error: '用户名长度为2-20位，只能包含字母、数字、下划线和中文',
     };
   }
 
@@ -52,7 +52,7 @@ export function validateUsername(username: string): {
 export function validateRegisterRequest(
   email: string,
   password: string,
-  username?: string,
+  username?: string
 ): {
   valid: boolean;
   errors: string[];
@@ -90,7 +90,7 @@ export function validateRegisterRequest(
  */
 export function validateLoginRequest(
   email: string,
-  password: string,
+  password: string
 ): {
   valid: boolean;
   errors: string[];
@@ -104,8 +104,8 @@ export function validateLoginRequest(
   }
 
   // 验证密码不为空
-  if (!password || password.trim() === "") {
-    errors.push("密码不能为空");
+  if (!password || password.trim() === '') {
+    errors.push('密码不能为空');
   }
 
   return {
@@ -118,5 +118,5 @@ export function validateLoginRequest(
  * 清理用户输入（防止XSS和SQL注入）
  */
 export function sanitizeInput(input: string): string {
-  return input.trim().replace(/[<>]/g, "");
+  return input.trim().replace(/[<>]/g, '');
 }

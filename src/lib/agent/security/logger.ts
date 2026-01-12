@@ -4,7 +4,7 @@
 
 export interface LogEntry {
   timestamp: string;
-  level: "debug" | "info" | "warn" | "error";
+  level: 'debug' | 'info' | 'warn' | 'error';
   message: string;
   context?: Record<string, any>;
   error?: Error;
@@ -65,10 +65,10 @@ export class StructuredLogger {
   }
 
   private createLogEntry(
-    level: LogEntry["level"],
+    level: LogEntry['level'],
     message: string,
     context?: Record<string, any>,
-    error?: Error,
+    error?: Error
   ): LogEntry {
     return {
       timestamp: new Date().toISOString(),
@@ -80,22 +80,22 @@ export class StructuredLogger {
   }
 
   debug(message: string, context?: Record<string, any>): void {
-    const entry = this.createLogEntry("debug", message, context);
+    const entry = this.createLogEntry('debug', message, context);
     this.addLog(entry);
   }
 
   info(message: string, context?: Record<string, any>): void {
-    const entry = this.createLogEntry("info", message, context);
+    const entry = this.createLogEntry('info', message, context);
     this.addLog(entry);
   }
 
   warn(message: string, context?: Record<string, any>): void {
-    const entry = this.createLogEntry("warn", message, context);
+    const entry = this.createLogEntry('warn', message, context);
     this.addLog(entry);
   }
 
   error(message: string, error?: Error, context?: Record<string, any>): void {
-    const entry = this.createLogEntry("error", message, context, error);
+    const entry = this.createLogEntry('error', message, context, error);
     this.addLog(entry);
     this.updateErrorMetrics(error);
   }
@@ -109,7 +109,7 @@ export class StructuredLogger {
     }
 
     // 在开发环境中也输出到控制台
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.NODE_ENV !== 'production') {
       const logMessage = `[${entry.timestamp}] [${entry.level.toUpperCase()}] ${entry.message}`;
       if (entry.context) {
         console.log(logMessage, entry.context);
@@ -125,11 +125,11 @@ export class StructuredLogger {
   private updateErrorMetrics(error?: Error): void {
     if (!error) return;
 
-    if (error.name === "SecurityError") {
+    if (error.name === 'SecurityError') {
       this.metrics.errors.securityErrors++;
-    } else if (error.name === "ValidationError") {
+    } else if (error.name === 'ValidationError') {
       this.metrics.errors.validationErrors++;
-    } else if (error.name === "AnalysisError") {
+    } else if (error.name === 'AnalysisError') {
       this.metrics.errors.analysisErrors++;
     } else {
       this.metrics.errors.otherErrors++;
@@ -139,7 +139,7 @@ export class StructuredLogger {
   recordDocumentProcessing(
     success: boolean,
     processingTime: number,
-    confidence: number,
+    confidence: number
   ): void {
     this.metrics.documentProcessing.totalProcessed++;
 
@@ -187,18 +187,18 @@ export class StructuredLogger {
     const now = Date.now();
     const oneMinuteAgo = now - 60000;
     const recentLogs = this.logs.filter(
-      (log) => log.timestamp >= new Date(oneMinuteAgo).toISOString(),
+      log => log.timestamp >= new Date(oneMinuteAgo).toISOString()
     );
-    this.metrics.performance.throughputPerMinute = recentLogs.filter((log) =>
-      log.message.includes("文档分析完成"),
+    this.metrics.performance.throughputPerMinute = recentLogs.filter(log =>
+      log.message.includes('文档分析完成')
     ).length;
   }
 
-  getLogs(level?: LogEntry["level"], limit?: number): LogEntry[] {
+  getLogs(level?: LogEntry['level'], limit?: number): LogEntry[] {
     let filteredLogs = this.logs;
 
     if (level) {
-      filteredLogs = filteredLogs.filter((log) => log.level === level);
+      filteredLogs = filteredLogs.filter(log => log.level === level);
     }
 
     if (limit) {
@@ -220,7 +220,7 @@ export class StructuredLogger {
         exportTime: new Date().toISOString(),
       },
       null,
-      2,
+      2
     );
   }
 

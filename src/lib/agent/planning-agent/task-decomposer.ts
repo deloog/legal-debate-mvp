@@ -1,7 +1,7 @@
 // 任务分解器
 
-import { AgentType } from "../../../types/agent";
-import { TaskPriority } from "../../../types/agent";
+import { AgentType } from '../../../types/agent';
+import { TaskPriority } from '../../../types/agent';
 import {
   type SubTask,
   type DecompositionResult,
@@ -9,7 +9,7 @@ import {
   TaskType,
   type PlanningError,
   PlanningErrorType,
-} from "./types";
+} from './types';
 
 // =============================================================================
 // TaskDecomposer类
@@ -23,7 +23,7 @@ export class TaskDecomposer {
       enableOptimization: true,
       maxParallelTasks: 3,
       defaultTaskTime: 5000,
-    },
+    }
   ) {
     this.config = config;
   }
@@ -31,7 +31,7 @@ export class TaskDecomposer {
   // 主分解方法
   public async decompose(
     taskType: TaskType,
-    caseInfo?: unknown,
+    caseInfo?: unknown
   ): Promise<DecompositionResult> {
     try {
       let subTasks: SubTask[];
@@ -55,7 +55,7 @@ export class TaskDecomposer {
         default:
           throw this.createError(
             PlanningErrorType.INVALID_TASK_TYPE,
-            `Unknown task type: ${taskType}`,
+            `Unknown task type: ${taskType}`
           );
       }
 
@@ -76,8 +76,8 @@ export class TaskDecomposer {
     } catch (error) {
       throw this.createError(
         PlanningErrorType.DECOMPOSITION_FAILED,
-        error instanceof Error ? error.message : "Task decomposition failed",
-        { originalError: error },
+        error instanceof Error ? error.message : 'Task decomposition failed',
+        { originalError: error }
       );
     }
   }
@@ -86,40 +86,40 @@ export class TaskDecomposer {
   private decomposeDebateTask(): SubTask[] {
     return [
       this.createSubTask(
-        "analyze_document",
-        "分析文档",
+        'analyze_document',
+        '分析文档',
         AgentType.DOC_ANALYZER,
         TaskPriority.HIGH,
         3000,
         [],
-        "解析案件文档，提取关键信息",
+        '解析案件文档，提取关键信息'
       ),
       this.createSubTask(
-        "search_laws",
-        "检索法条",
+        'search_laws',
+        '检索法条',
         AgentType.RESEARCHER,
         TaskPriority.HIGH,
         2000,
-        ["analyze_document"],
-        "检索相关法律条文",
+        ['analyze_document'],
+        '检索相关法律条文'
       ),
       this.createSubTask(
-        "generate_arguments",
-        "生成论点",
+        'generate_arguments',
+        '生成论点',
         AgentType.WRITER,
         TaskPriority.HIGH,
         5000,
-        ["analyze_document", "search_laws"],
-        "生成正反方论点",
+        ['analyze_document', 'search_laws'],
+        '生成正反方论点'
       ),
       this.createSubTask(
-        "review_result",
-        "审查结果",
+        'review_result',
+        '审查结果',
         AgentType.REVIEWER,
         TaskPriority.MEDIUM,
         2000,
-        ["generate_arguments"],
-        "验证生成结果的质量",
+        ['generate_arguments'],
+        '验证生成结果的质量'
       ),
     ];
   }
@@ -128,31 +128,31 @@ export class TaskDecomposer {
   private decomposeDocumentGenerationTask(): SubTask[] {
     return [
       this.createSubTask(
-        "analyze_case",
-        "分析案件",
+        'analyze_case',
+        '分析案件',
         AgentType.DOC_ANALYZER,
         TaskPriority.HIGH,
         2000,
         [],
-        "分析案件基本情况",
+        '分析案件基本情况'
       ),
       this.createSubTask(
-        "generate_document",
-        "生成文书",
+        'generate_document',
+        '生成文书',
         AgentType.WRITER,
         TaskPriority.HIGH,
         4000,
-        ["analyze_case"],
-        "根据模板生成法律文书",
+        ['analyze_case'],
+        '根据模板生成法律文书'
       ),
       this.createSubTask(
-        "verify_document",
-        "验证文书",
+        'verify_document',
+        '验证文书',
         AgentType.REVIEWER,
         TaskPriority.MEDIUM,
         1500,
-        ["generate_document"],
-        "验证文书格式和内容",
+        ['generate_document'],
+        '验证文书格式和内容'
       ),
     ];
   }
@@ -161,31 +161,31 @@ export class TaskDecomposer {
   private decomposeAnalysisTask(): SubTask[] {
     return [
       this.createSubTask(
-        "extract_parties",
-        "提取当事人",
+        'extract_parties',
+        '提取当事人',
         AgentType.DOC_ANALYZER,
         TaskPriority.HIGH,
         2000,
         [],
-        "识别案件当事人",
+        '识别案件当事人'
       ),
       this.createSubTask(
-        "extract_claims",
-        "提取诉讼请求",
+        'extract_claims',
+        '提取诉讼请求',
         AgentType.DOC_ANALYZER,
         TaskPriority.HIGH,
         1500,
-        ["extract_parties"],
-        "提取诉讼请求信息",
+        ['extract_parties'],
+        '提取诉讼请求信息'
       ),
       this.createSubTask(
-        "analyze_evidence",
-        "分析证据",
+        'analyze_evidence',
+        '分析证据',
         AgentType.EVIDENCE_ANALYZER,
         TaskPriority.MEDIUM,
         3000,
         [],
-        "分析证据链",
+        '分析证据链'
       ),
     ];
   }
@@ -194,38 +194,38 @@ export class TaskDecomposer {
   private decomposeLegalResearchTask(): SubTask[] {
     return [
       this.createSubTask(
-        "identify_legal_issues",
-        "识别法律问题",
+        'identify_legal_issues',
+        '识别法律问题',
         AgentType.STRATEGIST,
         TaskPriority.HIGH,
         2000,
         [],
-        "分析案件中的法律问题",
+        '分析案件中的法律问题'
       ),
       this.createSubTask(
-        "search_relevant_laws",
-        "检索相关法律",
+        'search_relevant_laws',
+        '检索相关法律',
         AgentType.RESEARCHER,
         TaskPriority.HIGH,
         3000,
-        ["identify_legal_issues"],
-        "检索相关法律条文",
+        ['identify_legal_issues'],
+        '检索相关法律条文'
       ),
       this.createSubTask(
-        "analyze_applicability",
-        "分析适用性",
+        'analyze_applicability',
+        '分析适用性',
         AgentType.STRATEGIST,
         TaskPriority.MEDIUM,
         2500,
-        ["search_relevant_laws"],
-        "分析法律条文的适用性",
+        ['search_relevant_laws'],
+        '分析法律条文的适用性'
       ),
     ];
   }
 
   // 自定义任务分解
   private decomposeCustomTask(caseInfo?: unknown): SubTask[] {
-    if (caseInfo && typeof caseInfo === "object") {
+    if (caseInfo && typeof caseInfo === 'object') {
       const info = caseInfo as Record<string, unknown>;
       const customTasks = info.customTasks as SubTask[] | undefined;
 
@@ -237,22 +237,22 @@ export class TaskDecomposer {
     // 默认通用分解
     return [
       this.createSubTask(
-        "analyze_input",
-        "分析输入",
+        'analyze_input',
+        '分析输入',
         AgentType.DOC_ANALYZER,
         TaskPriority.HIGH,
         2000,
         [],
-        "分析输入数据",
+        '分析输入数据'
       ),
       this.createSubTask(
-        "process_data",
-        "处理数据",
+        'process_data',
+        '处理数据',
         AgentType.RESEARCHER,
         TaskPriority.HIGH,
         3000,
-        ["analyze_input"],
-        "处理和分析数据",
+        ['analyze_input'],
+        '处理和分析数据'
       ),
     ];
   }
@@ -265,7 +265,7 @@ export class TaskDecomposer {
     priority: TaskPriority,
     estimatedTime: number,
     dependencies?: string[],
-    description?: string,
+    description?: string
   ): SubTask {
     return {
       id,
@@ -304,7 +304,7 @@ export class TaskDecomposer {
       // 检查依赖是否已执行
       const dependenciesMet =
         !task.dependencies ||
-        task.dependencies.every((dep) => executedIds.has(dep));
+        task.dependencies.every(dep => executedIds.has(dep));
 
       if (dependenciesMet) {
         processed.push(task);
@@ -325,11 +325,11 @@ export class TaskDecomposer {
   // 计算关键路径
   private calculateCriticalPath(tasks: SubTask[]): string[] {
     const taskMap = new Map<string, SubTask>();
-    tasks.forEach((task) => taskMap.set(task.id, task));
+    tasks.forEach(task => taskMap.set(task.id, task));
 
     // 拓扑排序
     const inDegree = new Map<string, number>();
-    taskMap.forEach((task) => {
+    taskMap.forEach(task => {
       inDegree.set(task.id, task.dependencies?.length || 0);
     });
 
@@ -346,7 +346,7 @@ export class TaskDecomposer {
       criticalPath.push(current);
 
       // 找到依赖当前任务的任务
-      taskMap.forEach((task) => {
+      taskMap.forEach(task => {
         if (task.dependencies?.includes(current)) {
           const newDegree = (inDegree.get(task.id) || 0) - 1;
           inDegree.set(task.id, newDegree);
@@ -365,7 +365,7 @@ export class TaskDecomposer {
   private createError(
     type: PlanningErrorType,
     message: string,
-    details?: unknown,
+    details?: unknown
   ): PlanningError {
     return {
       type,

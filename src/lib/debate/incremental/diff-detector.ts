@@ -3,21 +3,21 @@
  * 用于识别新旧资料之间的差异，支持多种算法
  */
 
-import { createHash } from "crypto";
+import { createHash } from 'crypto';
 import {
   Material,
   DiffResult,
   IncrementalAnalysisConfig,
   DEFAULT_INCREMENTAL_CONFIG,
-} from "./types";
+} from './types';
 
 /**
  * 差异识别器类
  */
 export class DiffDetector {
-  private config: IncrementalAnalysisConfig["diffDetection"];
+  private config: IncrementalAnalysisConfig['diffDetection'];
 
-  constructor(config?: Partial<IncrementalAnalysisConfig["diffDetection"]>) {
+  constructor(config?: Partial<IncrementalAnalysisConfig['diffDetection']>) {
     this.config = {
       ...DEFAULT_INCREMENTAL_CONFIG.diffDetection,
       ...config,
@@ -28,7 +28,7 @@ export class DiffDetector {
    * 计算内容指纹（MD5哈希）
    */
   private calculateFingerprint(content: string): string {
-    return createHash("md5").update(content).digest("hex");
+    return createHash('md5').update(content).digest('hex');
   }
 
   /**
@@ -60,7 +60,7 @@ export class DiffDetector {
         dp[i][j] = Math.min(
           dp[i - 1][j] + 1, // 删除
           dp[i][j - 1] + 1, // 插入
-          dp[i - 1][j - 1] + cost, // 替换
+          dp[i - 1][j - 1] + cost // 替换
         );
       }
     }
@@ -74,7 +74,7 @@ export class DiffDetector {
    */
   private detectByFingerprint(
     oldMaterials: Material[],
-    newMaterials: Material[],
+    newMaterials: Material[]
   ): DiffResult {
     const result: DiffResult = {
       added: [],
@@ -84,10 +84,10 @@ export class DiffDetector {
     };
 
     const oldMap = new Map<string, Material>();
-    oldMaterials.forEach((m) => oldMap.set(m.id, m));
+    oldMaterials.forEach(m => oldMap.set(m.id, m));
 
     const newMap = new Map<string, Material>();
-    newMaterials.forEach((m) => newMap.set(m.id, m));
+    newMaterials.forEach(m => newMap.set(m.id, m));
 
     // 检查新资料
     for (const newMaterial of newMaterials) {
@@ -123,7 +123,7 @@ export class DiffDetector {
    */
   private detectBySemantic(
     oldMaterials: Material[],
-    newMaterials: Material[],
+    newMaterials: Material[]
   ): DiffResult {
     const result: DiffResult = {
       added: [],
@@ -133,10 +133,10 @@ export class DiffDetector {
     };
 
     const oldMap = new Map<string, Material>();
-    oldMaterials.forEach((m) => oldMap.set(m.id, m));
+    oldMaterials.forEach(m => oldMap.set(m.id, m));
 
     const newMap = new Map<string, Material>();
-    newMaterials.forEach((m) => newMap.set(m.id, m));
+    newMaterials.forEach(m => newMap.set(m.id, m));
 
     // 检查新资料
     for (const newMaterial of newMaterials) {
@@ -149,7 +149,7 @@ export class DiffDetector {
         // 计算相似度
         const similarity = this.calculateSimilarity(
           oldMaterial.content,
-          newMaterial.content,
+          newMaterial.content
         );
 
         if (similarity < this.config.similarityThreshold) {
@@ -177,12 +177,12 @@ export class DiffDetector {
    */
   private detectByHybrid(
     oldMaterials: Material[],
-    newMaterials: Material[],
+    newMaterials: Material[]
   ): DiffResult {
     // 先用指纹检测
     const fingerprintResult = this.detectByFingerprint(
       oldMaterials,
-      newMaterials,
+      newMaterials
     );
 
     // 对指纹识别为"修改"的资料，用语义相似度进一步验证
@@ -190,11 +190,11 @@ export class DiffDetector {
     const reclassifiedAsUnchanged: Material[] = [];
 
     for (const modified of fingerprintResult.modified) {
-      const oldMaterial = oldMaterials.find((m) => m.id === modified.id);
+      const oldMaterial = oldMaterials.find(m => m.id === modified.id);
       if (oldMaterial) {
         const similarity = this.calculateSimilarity(
           oldMaterial.content,
-          modified.content,
+          modified.content
         );
 
         if (similarity >= this.config.similarityThreshold) {
@@ -233,11 +233,11 @@ export class DiffDetector {
 
     // 根据算法选择检测方式
     switch (this.config.algorithm) {
-      case "fingerprint":
+      case 'fingerprint':
         return this.detectByFingerprint(oldMaterials, newMaterials);
-      case "semantic":
+      case 'semantic':
         return this.detectBySemantic(oldMaterials, newMaterials);
-      case "hybrid":
+      case 'hybrid':
         return this.detectByHybrid(oldMaterials, newMaterials);
       default:
         return this.detectByFingerprint(oldMaterials, newMaterials);
@@ -248,7 +248,7 @@ export class DiffDetector {
    * 更新配置
    */
   updateConfig(
-    config: Partial<IncrementalAnalysisConfig["diffDetection"]>,
+    config: Partial<IncrementalAnalysisConfig['diffDetection']>
   ): void {
     this.config = { ...this.config, ...config };
   }
@@ -256,7 +256,7 @@ export class DiffDetector {
   /**
    * 获取当前配置
    */
-  getConfig(): IncrementalAnalysisConfig["diffDetection"] {
+  getConfig(): IncrementalAnalysisConfig['diffDetection'] {
     return { ...this.config };
   }
 }
@@ -265,19 +265,19 @@ export class DiffDetector {
  * 工具函数：为资料生成指纹
  */
 export function generateFingerprint(material: Material): string {
-  const hash = createHash("md5");
+  const hash = createHash('md5');
   hash.update(material.content);
   if (material.metadata) {
     hash.update(JSON.stringify(material.metadata));
   }
-  return hash.digest("hex");
+  return hash.digest('hex');
 }
 
 /**
  * 工具函数：批量生成指纹
  */
 export function generateFingerprints(
-  materials: Material[],
+  materials: Material[]
 ): Map<string, string> {
   const fingerprintMap = new Map<string, string>();
   for (const material of materials) {

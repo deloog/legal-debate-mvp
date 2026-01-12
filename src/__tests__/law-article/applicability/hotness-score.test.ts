@@ -1,12 +1,12 @@
-import RuleValidator from "@/lib/law-article/applicability/rule-validator";
-import { LawArticle, LawType, LawCategory } from "@prisma/client";
+import RuleValidator from '@/lib/law-article/applicability/rule-validator';
+import { LawArticle, LawType, LawCategory } from '@prisma/client';
 import type {
   DocumentAnalysisOutput,
   Claim,
   KeyFact,
-} from "@/lib/agent/doc-analyzer/core/types";
+} from '@/lib/agent/doc-analyzer/core/types';
 
-describe("RuleValidator - 热度评分功能", () => {
+describe('RuleValidator - 热度评分功能', () => {
   let validator: RuleValidator;
   let mockCaseInfo: DocumentAnalysisOutput;
 
@@ -15,21 +15,21 @@ describe("RuleValidator - 热度评分功能", () => {
 
     // 创建完整的Claim对象
     const mockClaim: Claim = {
-      type: "PAY_PRINCIPAL",
-      content: "支付货款100000元",
-      currency: "CNY",
+      type: 'PAY_PRINCIPAL',
+      content: '支付货款100000元',
+      currency: 'CNY',
     };
 
     // 创建完整的KeyFact对象
     const mockKeyFacts: KeyFact[] = [
       {
-        id: "fact-1",
-        category: "CONTRACT_TERM",
-        description: "2024年1月签订合同",
-        details: "双方签订买卖合同",
+        id: 'fact-1',
+        category: 'CONTRACT_TERM',
+        description: '2024年1月签订合同',
+        details: '双方签订买卖合同',
         importance: 8,
         confidence: 0.9,
-        factType: "EXPLICIT",
+        factType: 'EXPLICIT',
         relatedDisputes: [],
       },
     ];
@@ -37,15 +37,15 @@ describe("RuleValidator - 热度评分功能", () => {
     mockCaseInfo = {
       success: true,
       extractedData: {
-        caseType: "civil",
+        caseType: 'civil',
         parties: [
-          { type: "plaintiff", name: "张三" },
-          { type: "defendant", name: "李四" },
+          { type: 'plaintiff', name: '张三' },
+          { type: 'defendant', name: '李四' },
         ],
         claims: [mockClaim],
         keyFacts: mockKeyFacts,
         disputeFocuses: [],
-        summary: "合同纠纷案件",
+        summary: '合同纠纷案件',
       },
       confidence: 0.9,
       processingTime: 1000,
@@ -53,7 +53,7 @@ describe("RuleValidator - 热度评分功能", () => {
         pages: 10,
         wordCount: 5000,
         fileSize: 1024,
-        analysisModel: "gpt-4",
+        analysisModel: 'gpt-4',
         tokenUsed: 1000,
         processingTime: 1000,
       },
@@ -62,29 +62,29 @@ describe("RuleValidator - 热度评分功能", () => {
 
   const createMockArticle = (overrides: Partial<LawArticle>): LawArticle => {
     return {
-      id: "test-article-id",
-      lawName: "测试法",
-      articleNumber: "第1条",
-      fullText: "测试内容",
+      id: 'test-article-id',
+      lawName: '测试法',
+      articleNumber: '第1条',
+      fullText: '测试内容',
       lawType: LawType.LAW,
       category: LawCategory.CIVIL,
-      subCategory: "合同",
+      subCategory: '合同',
       tags: [],
       keywords: [],
-      version: "1.0",
-      effectiveDate: new Date("2020-01-01"),
+      version: '1.0',
+      effectiveDate: new Date('2020-01-01'),
       expiryDate: null,
-      status: "VALID",
+      status: 'VALID',
       amendmentHistory: null,
       parentId: null,
       chapterNumber: null,
       sectionNumber: null,
       level: 0,
-      issuingAuthority: "测试机关",
-      jurisdiction: "全国",
+      issuingAuthority: '测试机关',
+      jurisdiction: '全国',
       relatedArticles: [],
       legalBasis: null,
-      searchableText: "测试内容",
+      searchableText: '测试内容',
       viewCount: 100,
       referenceCount: 50,
       createdAt: new Date(),
@@ -93,10 +93,10 @@ describe("RuleValidator - 热度评分功能", () => {
     } as LawArticle;
   };
 
-  describe("热度评分计算", () => {
-    it("应该正确计算高热度法条的评分", () => {
+  describe('热度评分计算', () => {
+    it('应该正确计算高热度法条的评分', () => {
       const article = createMockArticle({
-        id: "hot-article",
+        id: 'hot-article',
         viewCount: 10000, // 最大浏览量
         referenceCount: 5000, // 最大引用量
         lawType: LawType.LAW,
@@ -110,9 +110,9 @@ describe("RuleValidator - 热度评分功能", () => {
       expect(result.levelScore).toBe(1.0);
     });
 
-    it("应该正确计算低热度法条的评分", () => {
+    it('应该正确计算低热度法条的评分', () => {
       const article = createMockArticle({
-        id: "low-hotness-article",
+        id: 'low-hotness-article',
         viewCount: 10, // 低浏览量
         referenceCount: 5, // 低引用量
         lawType: LawType.LAW,
@@ -126,9 +126,9 @@ describe("RuleValidator - 热度评分功能", () => {
       expect(result.levelScore).toBeCloseTo(0.8, 3);
     });
 
-    it("应该正确计算中等热度法条的评分", () => {
+    it('应该正确计算中等热度法条的评分', () => {
       const article = createMockArticle({
-        id: "medium-hotness-article",
+        id: 'medium-hotness-article',
         viewCount: 5000, // 中等浏览量
         referenceCount: 2500, // 中等引用量
         lawType: LawType.LAW,
@@ -142,9 +142,9 @@ describe("RuleValidator - 热度评分功能", () => {
       expect(result.levelScore).toBe(0.9);
     });
 
-    it("应该正确处理只有浏览量的法条", () => {
+    it('应该正确处理只有浏览量的法条', () => {
       const article = createMockArticle({
-        id: "view-only-article",
+        id: 'view-only-article',
         viewCount: 8000, // 高浏览量
         referenceCount: 0, // 无引用量
         lawType: LawType.LAW,
@@ -158,9 +158,9 @@ describe("RuleValidator - 热度评分功能", () => {
       expect(result.levelScore).toBeCloseTo(0.896, 3);
     });
 
-    it("应该正确处理只有引用量的法条", () => {
+    it('应该正确处理只有引用量的法条', () => {
       const article = createMockArticle({
-        id: "reference-only-article",
+        id: 'reference-only-article',
         viewCount: 0, // 无浏览量
         referenceCount: 4000, // 高引用量
         lawType: LawType.LAW,
@@ -175,10 +175,10 @@ describe("RuleValidator - 热度评分功能", () => {
     });
   });
 
-  describe("不同法条类型的热度影响", () => {
-    it("应该为法律类型法条计算正确评分（高热度）", () => {
+  describe('不同法条类型的热度影响', () => {
+    it('应该为法律类型法条计算正确评分（高热度）', () => {
       const article = createMockArticle({
-        id: "law-high-hotness",
+        id: 'law-high-hotness',
         lawType: LawType.LAW,
         viewCount: 9000,
         referenceCount: 4500,
@@ -192,9 +192,9 @@ describe("RuleValidator - 热度评分功能", () => {
       expect(result.levelScore).toBeCloseTo(0.98, 2);
     });
 
-    it("应该为行政法规类型法条计算正确评分（高热度）", () => {
+    it('应该为行政法规类型法条计算正确评分（高热度）', () => {
       const article = createMockArticle({
-        id: "admin-reg-high-hotness",
+        id: 'admin-reg-high-hotness',
         lawType: LawType.ADMINISTRATIVE_REGULATION,
         viewCount: 9000,
         referenceCount: 4500,
@@ -208,9 +208,9 @@ describe("RuleValidator - 热度评分功能", () => {
       expect(result.levelScore).toBeCloseTo(0.86, 2);
     });
 
-    it("应该为部门规章类型法条计算正确评分（高热度）", () => {
+    it('应该为部门规章类型法条计算正确评分（高热度）', () => {
       const article = createMockArticle({
-        id: "dept-rule-high-hotness",
+        id: 'dept-rule-high-hotness',
         lawType: LawType.DEPARTMENTAL_RULE,
         viewCount: 9000,
         referenceCount: 4500,
@@ -225,10 +225,10 @@ describe("RuleValidator - 热度评分功能", () => {
     });
   });
 
-  describe("边界值处理", () => {
-    it("应该正确处理最大浏览量", () => {
+  describe('边界值处理', () => {
+    it('应该正确处理最大浏览量', () => {
       const article = createMockArticle({
-        id: "max-view-article",
+        id: 'max-view-article',
         lawType: LawType.LAW,
         viewCount: 10000,
         referenceCount: 1000,
@@ -242,9 +242,9 @@ describe("RuleValidator - 热度评分功能", () => {
       expect(result.levelScore).toBeCloseTo(0.936, 3);
     });
 
-    it("应该正确处理最大引用量", () => {
+    it('应该正确处理最大引用量', () => {
       const article = createMockArticle({
-        id: "max-reference-article",
+        id: 'max-reference-article',
         lawType: LawType.LAW,
         viewCount: 1000,
         referenceCount: 5000,
@@ -258,9 +258,9 @@ describe("RuleValidator - 热度评分功能", () => {
       expect(result.levelScore).toBeCloseTo(0.892, 3);
     });
 
-    it("应该正确处理零热度", () => {
+    it('应该正确处理零热度', () => {
       const article = createMockArticle({
-        id: "zero-hotness-article",
+        id: 'zero-hotness-article',
         lawType: LawType.LAW,
         viewCount: 0,
         referenceCount: 0,
@@ -274,9 +274,9 @@ describe("RuleValidator - 热度评分功能", () => {
       expect(result.levelScore).toBe(0.8);
     });
 
-    it("应该限制最大评分为1.0", () => {
+    it('应该限制最大评分为1.0', () => {
       const article = createMockArticle({
-        id: "beyond-max-article",
+        id: 'beyond-max-article',
         lawType: LawType.LAW,
         viewCount: 20000, // 超过最大值
         referenceCount: 10000, // 超过最大值

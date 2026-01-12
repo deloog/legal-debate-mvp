@@ -12,11 +12,11 @@ import type {
   AgentMetrics,
   AgentEvent,
   AgentEventType,
-} from "../../types/agent";
+} from '../../types/agent';
 
-import { AgentType, AgentStatus, TaskPriority } from "../../types/agent";
+import { AgentType, AgentStatus, TaskPriority } from '../../types/agent';
 
-import * as crypto from "crypto";
+import * as crypto from 'crypto';
 
 // =============================================================================
 // 内部工具类型
@@ -43,10 +43,10 @@ export interface AgentCacheConfig {
 
 // Agent日志级别
 export enum AgentLogLevel {
-  DEBUG = "debug",
-  INFO = "info",
-  WARN = "warn",
-  ERROR = "error",
+  DEBUG = 'debug',
+  INFO = 'info',
+  WARN = 'warn',
+  ERROR = 'error',
 }
 
 // Agent日志条目
@@ -109,7 +109,7 @@ export function createAgentError(
   type: AgentErrorType,
   agentName: string,
   retryable: boolean = false,
-  details?: Record<string, any>,
+  details?: Record<string, any>
 ): AgentError {
   return {
     code,
@@ -139,7 +139,7 @@ export function createAgentResult(
     cached?: boolean;
     cacheKey?: string;
     error?: AgentError;
-  } = {},
+  } = {}
 ): AgentResult {
   return {
     success: options.success !== false,
@@ -165,20 +165,20 @@ export function validateAgentContext(context: AgentContext): {
 } {
   const errors: string[] = [];
 
-  if (!context.task || typeof context.task !== "string") {
-    errors.push("Task is required and must be a string");
+  if (!context.task || typeof context.task !== 'string') {
+    errors.push('Task is required and must be a string');
   }
 
-  if (!context.data || typeof context.data !== "object") {
-    errors.push("Data is required and must be an object");
+  if (!context.data || typeof context.data !== 'object') {
+    errors.push('Data is required and must be an object');
   }
 
   if (!Object.values(TaskPriority).includes(context.priority)) {
-    errors.push("Priority must be a valid TaskPriority value");
+    errors.push('Priority must be a valid TaskPriority value');
   }
 
-  if (context.options && typeof context.options !== "object") {
-    errors.push("Options must be an object if provided");
+  if (context.options && typeof context.options !== 'object') {
+    errors.push('Options must be an object if provided');
   }
 
   return {
@@ -190,16 +190,16 @@ export function validateAgentContext(context: AgentContext): {
 // 生成缓存键
 export function generateCacheKey(context: AgentContext): string {
   const keyData = {
-    agentName: context.taskType || "unknown",
+    agentName: context.taskType || 'unknown',
     task: context.task,
     data: context.data,
     options: context.options,
   };
 
   return crypto
-    .createHash("sha256")
+    .createHash('sha256')
     .update(JSON.stringify(keyData))
-    .digest("hex");
+    .digest('hex');
 }
 
 // 计算执行统计
@@ -207,7 +207,7 @@ export function calculateExecutionStats(
   startTime: number,
   endTime: number,
   success: boolean,
-  previousStats?: AgentStats,
+  previousStats?: AgentStats
 ): Partial<AgentStats> {
   const executionTime = endTime - startTime;
   const totalExecutions = (previousStats?.totalExecutions || 0) + 1;
@@ -248,7 +248,7 @@ export interface AgentEventManager {
 export function createAgentEvent(
   type: AgentEventType,
   agentName: string,
-  data?: any,
+  data?: any
 ): AgentEvent {
   return {
     type,
@@ -274,7 +274,7 @@ export function isValidAgentStatus(status: string): status is AgentStatus {
 
 // 检查是否为有效的TaskPriority
 export function isValidTaskPriority(
-  priority: string,
+  priority: string
 ): priority is TaskPriority {
   return Object.values(TaskPriority).includes(priority as TaskPriority);
 }
@@ -283,12 +283,12 @@ export function isValidTaskPriority(
 export function isValidAgent(obj: any): obj is Agent {
   return (
     obj &&
-    typeof obj === "object" &&
-    typeof obj.name === "string" &&
-    typeof obj.type === "string" &&
-    typeof obj.version === "string" &&
-    typeof obj.description === "string" &&
-    typeof obj.execute === "function"
+    typeof obj === 'object' &&
+    typeof obj.name === 'string' &&
+    typeof obj.type === 'string' &&
+    typeof obj.version === 'string' &&
+    typeof obj.description === 'string' &&
+    typeof obj.execute === 'function'
   );
 }
 
@@ -305,7 +305,7 @@ export const DEFAULT_AGENT_CONFIG: AgentSystemConfig = {
     enabled: true,
     ttl: 300000, // 5分钟
     maxSize: 1000,
-    keyPrefix: "agent_",
+    keyPrefix: 'agent_',
   },
   retry: {
     maxAttempts: 3,

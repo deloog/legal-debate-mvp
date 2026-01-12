@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * 请求上下文接口
@@ -18,7 +18,7 @@ export interface RequestContext {
 export type Middleware = (
   request: NextRequest,
   context: RequestContext,
-  response: NextResponse,
+  response: NextResponse
 ) => Promise<void | NextResponse>;
 
 /**
@@ -40,7 +40,7 @@ export class MiddlewareStack {
    */
   async execute(
     request: NextRequest,
-    context: RequestContext,
+    context: RequestContext
   ): Promise<NextResponse> {
     // 1. 创建单一response实例，贯穿所有中间件
     const finalResponse = NextResponse.next();
@@ -55,7 +55,7 @@ export class MiddlewareStack {
           return result;
         }
       } catch (error) {
-        const { handleApiError } = await import("../errors/error-handler");
+        const { handleApiError } = await import('../errors/error-handler');
         return handleApiError(error, request);
       }
     }

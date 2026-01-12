@@ -2,9 +2,9 @@
  * useCompressionPreview - 压缩预览Hook
  */
 
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 export interface CompressionPreviewInput {
   content?: string;
@@ -53,23 +53,23 @@ export function useCompressionPreview(): CompressionPreviewResult {
     setError(null);
 
     try {
-      const response = await fetch("/api/v1/memory/compress-preview", {
-        method: "POST",
+      const response = await fetch('/api/v1/memory/compress-preview', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(input),
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "压缩预览失败");
+        throw new Error(data.error || '压缩预览失败');
       }
 
       const data = await response.json();
       setPreview(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "压缩预览失败");
+      setError(err instanceof Error ? err.message : '压缩预览失败');
       setPreview(null);
     } finally {
       setLoading(false);

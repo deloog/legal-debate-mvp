@@ -7,22 +7,22 @@ import type {
   AgentRegistration,
   AgentContext,
   TaskPriority,
-} from "../../types/agent";
+} from '../../types/agent';
 
-import { AgentStatus, AgentEventType, AgentEvent } from "../../types/agent";
+import { AgentStatus, AgentEventType, AgentEvent } from '../../types/agent';
 
 import {
   AgentEventListener,
   AgentEventManager,
   createAgentEvent,
   isValidAgent,
-} from "./types";
+} from './types';
 
 import {
   AgentDIContainer,
   AgentCreationConfig,
   diContainer,
-} from "./di-container";
+} from './di-container';
 
 // =============================================================================
 // Agent发现选项接口
@@ -50,8 +50,8 @@ export interface AgentDiscoveryOptions {
   withoutDependencies?: AgentType[];
 
   // 排序选项
-  sortBy?: "name" | "type" | "successRate" | "executionTime" | "lastUsed";
-  sortOrder?: "asc" | "desc";
+  sortBy?: 'name' | 'type' | 'successRate' | 'executionTime' | 'lastUsed';
+  sortOrder?: 'asc' | 'desc';
 
   // 分页选项
   limit?: number;
@@ -93,7 +93,7 @@ export class AgentRegistry implements AgentEventManager {
 
   private constructor() {
     // 初始化事件监听器映射
-    Object.values(AgentEventType).forEach((eventType) => {
+    Object.values(AgentEventType).forEach(eventType => {
       this.eventListeners.set(eventType, []);
     });
 
@@ -110,7 +110,7 @@ export class AgentRegistry implements AgentEventManager {
    */
   public registerAgent(agent: Agent, updatedBy?: string): boolean {
     if (!isValidAgent(agent)) {
-      throw new Error(`Invalid agent: ${(agent as any).name || "unknown"}`);
+      throw new Error(`Invalid agent: ${(agent as any).name || 'unknown'}`);
     }
 
     // 检查Agent是否有getMetadata方法，如果没有则创建基本元数据
@@ -139,7 +139,7 @@ export class AgentRegistry implements AgentEventManager {
       const existing = this.agents.get(agent.name)!;
       if (existing.metadata.status !== AgentStatus.DISABLED) {
         throw new Error(
-          `Agent '${agent.name}' is already registered and active`,
+          `Agent '${agent.name}' is already registered and active`
         );
       }
       // 更新已存在的Agent
@@ -155,7 +155,7 @@ export class AgentRegistry implements AgentEventManager {
     }
     const typeAgents = this.agentsByType.get(agent.type)!;
     const existingIndex = typeAgents.findIndex(
-      (a) => a.metadata.name === agent.name,
+      a => a.metadata.name === agent.name
     );
     if (existingIndex >= 0) {
       typeAgents[existingIndex] = registration;
@@ -168,7 +168,7 @@ export class AgentRegistry implements AgentEventManager {
       createAgentEvent(AgentEventType.REGISTERED, agent.name, {
         type: agent.type,
         metadata,
-      }),
+      })
     );
 
     return true;
@@ -191,7 +191,7 @@ export class AgentRegistry implements AgentEventManager {
     // 从类型索引中移除
     const typeAgents = this.agentsByType.get(agentType);
     if (typeAgents) {
-      const index = typeAgents.findIndex((a) => a.metadata.name === agentName);
+      const index = typeAgents.findIndex(a => a.metadata.name === agentName);
       if (index >= 0) {
         typeAgents.splice(index, 1);
       }
@@ -204,7 +204,7 @@ export class AgentRegistry implements AgentEventManager {
     this.emit(
       createAgentEvent(AgentEventType.UNREGISTERED, agentName, {
         type: agentType,
-      }),
+      })
     );
 
     return true;
@@ -228,7 +228,7 @@ export class AgentRegistry implements AgentEventManager {
         createAgentEvent(AgentEventType.STATUS_CHANGED, agentName, {
           oldStatus,
           newStatus: AgentStatus.DISABLED,
-        }),
+        })
       );
     }
 
@@ -253,7 +253,7 @@ export class AgentRegistry implements AgentEventManager {
         createAgentEvent(AgentEventType.STATUS_CHANGED, agentName, {
           oldStatus,
           newStatus: AgentStatus.IDLE,
-        }),
+        })
       );
     }
 
@@ -293,8 +293,8 @@ export class AgentRegistry implements AgentEventManager {
   public getAgentsByType(agentType: AgentType): Agent[] {
     const registrations = this.agentsByType.get(agentType) || [];
     return registrations
-      .filter((reg) => reg.metadata.status !== AgentStatus.DISABLED)
-      .map((reg) => reg.instance);
+      .filter(reg => reg.metadata.status !== AgentStatus.DISABLED)
+      .map(reg => reg.instance);
   }
 
   /**
@@ -441,7 +441,7 @@ export class AgentRegistry implements AgentEventManager {
     }
 
     if (errors.length > 0) {
-      console.warn("Batch registration errors:", errors);
+      console.warn('Batch registration errors:', errors);
     }
 
     return successCount;
@@ -503,7 +503,7 @@ export class AgentRegistry implements AgentEventManager {
    */
   public getDiagnostics(): {
     timestamp: number;
-    statistics: ReturnType<AgentRegistry["getStatistics"]>;
+    statistics: ReturnType<AgentRegistry['getStatistics']>;
     agents: AgentMetadata[];
     eventListeners: Record<string, number>;
   } {
@@ -530,7 +530,7 @@ export class AgentRegistry implements AgentEventManager {
   public registerAgentWithDI<T extends Agent>(
     agentClass: new (...args: any[]) => T,
     agentName: string,
-    config?: AgentCreationConfig,
+    config?: AgentCreationConfig
   ): boolean {
     try {
       // 创建Agent实例
@@ -549,7 +549,7 @@ export class AgentRegistry implements AgentEventManager {
    */
   public registerAgentsWithDI<T extends Agent>(
     agentClass: new (...args: any[]) => T,
-    agentConfigs: Array<{ name: string; config?: AgentCreationConfig }>,
+    agentConfigs: Array<{ name: string; config?: AgentCreationConfig }>
   ): number {
     let successCount = 0;
     const errors: string[] = [];
@@ -565,7 +565,7 @@ export class AgentRegistry implements AgentEventManager {
     }
 
     if (errors.length > 0) {
-      console.warn("Batch registration with DI errors:", errors);
+      console.warn('Batch registration with DI errors:', errors);
     }
 
     return successCount;
@@ -579,32 +579,32 @@ export class AgentRegistry implements AgentEventManager {
 
     // 按能力过滤
     if (options.byCapability && options.byCapability.length > 0) {
-      agents = agents.filter((reg) =>
-        options.byCapability!.some((capability) =>
-          reg.metadata.capabilities.includes(capability),
-        ),
+      agents = agents.filter(reg =>
+        options.byCapability!.some(capability =>
+          reg.metadata.capabilities.includes(capability)
+        )
       );
     }
 
     // 按任务类型过滤
     if (options.byTaskType && options.byTaskType.length > 0) {
-      agents = agents.filter((reg) =>
-        options.byTaskType!.some((taskType) =>
-          reg.metadata.supportedTasks.includes(taskType),
-        ),
+      agents = agents.filter(reg =>
+        options.byTaskType!.some(taskType =>
+          reg.metadata.supportedTasks.includes(taskType)
+        )
       );
     }
 
     // 按状态过滤
     if (options.byStatus && options.byStatus.length > 0) {
-      agents = agents.filter((reg) =>
-        options.byStatus!.includes(reg.metadata.status),
+      agents = agents.filter(reg =>
+        options.byStatus!.includes(reg.metadata.status)
       );
     }
 
     // 按性能要求过滤
     if (options.byPerformance) {
-      agents = agents.filter((reg) => {
+      agents = agents.filter(reg => {
         const perf = options.byPerformance!;
 
         if (perf.minSuccessRate && reg.metadata.successRate !== undefined) {
@@ -628,23 +628,23 @@ export class AgentRegistry implements AgentEventManager {
 
     // 按依赖关系过滤
     if (options.withDependencies && options.withDependencies.length > 0) {
-      agents = agents.filter((reg) => {
+      agents = agents.filter(reg => {
         if (!reg.metadata.dependencies) {
           return false;
         }
-        return options.withDependencies!.some((dep) =>
-          reg.metadata.dependencies!.includes(dep),
+        return options.withDependencies!.some(dep =>
+          reg.metadata.dependencies!.includes(dep)
         );
       });
     }
 
     if (options.withoutDependencies && options.withoutDependencies.length > 0) {
-      agents = agents.filter((reg) => {
+      agents = agents.filter(reg => {
         if (!reg.metadata.dependencies) {
           return true;
         }
-        return !options.withoutDependencies!.some((dep) =>
-          reg.metadata.dependencies!.includes(dep),
+        return !options.withoutDependencies!.some(dep =>
+          reg.metadata.dependencies!.includes(dep)
         );
       });
     }
@@ -654,7 +654,7 @@ export class AgentRegistry implements AgentEventManager {
       agents = this.sortAgents(
         agents,
         options.sortBy,
-        options.sortOrder || "asc",
+        options.sortOrder || 'asc'
       );
     }
 
@@ -668,8 +668,8 @@ export class AgentRegistry implements AgentEventManager {
     }
 
     return agents
-      .filter((reg) => reg.metadata.status !== AgentStatus.DISABLED)
-      .map((reg) => reg.instance);
+      .filter(reg => reg.metadata.status !== AgentStatus.DISABLED)
+      .map(reg => reg.instance);
   }
 
   /**
@@ -682,14 +682,14 @@ export class AgentRegistry implements AgentEventManager {
       preferredType?: AgentType;
       excludedTypes?: AgentType[];
       maxRecommendations?: number;
-    },
+    }
   ): AgentRecommendation[] {
     const allAgents = this.getAllRegistrations();
     const candidates = allAgents.filter(
-      (reg) =>
+      reg =>
         reg.metadata.status !== AgentStatus.DISABLED &&
         (!options?.excludedTypes ||
-          !options.excludedTypes.includes(reg.metadata.type)),
+          !options.excludedTypes.includes(reg.metadata.type))
     );
 
     const recommendations: AgentRecommendation[] = [];
@@ -704,7 +704,7 @@ export class AgentRegistry implements AgentEventManager {
           reasons: this.generateRecommendationReasons(
             registration,
             task,
-            score,
+            score
           ),
           confidence: Math.min(score / 100, 1.0),
         });
@@ -724,8 +724,8 @@ export class AgentRegistry implements AgentEventManager {
   public findAgentsByCapability(capability: string): Agent[] {
     const options: AgentDiscoveryOptions = {
       byCapability: [capability],
-      sortBy: "successRate",
-      sortOrder: "desc",
+      sortBy: 'successRate',
+      sortOrder: 'desc',
     };
     return this.discoverAgents(options);
   }
@@ -736,8 +736,8 @@ export class AgentRegistry implements AgentEventManager {
   public findAgentsByTask(taskType: string): Agent[] {
     const options: AgentDiscoveryOptions = {
       byTaskType: [taskType],
-      sortBy: "successRate",
-      sortOrder: "desc",
+      sortBy: 'successRate',
+      sortOrder: 'desc',
     };
     return this.discoverAgents(options);
   }
@@ -746,12 +746,12 @@ export class AgentRegistry implements AgentEventManager {
    * 查找最佳性能Agent
    */
   public findBestPerformingAgents(
-    metric: "successRate" | "executionTime" = "successRate",
-    limit: number = 5,
+    metric: 'successRate' | 'executionTime' = 'successRate',
+    limit: number = 5
   ): Agent[] {
     const options: AgentDiscoveryOptions = {
       sortBy: metric,
-      sortOrder: metric === "successRate" ? "desc" : "asc",
+      sortOrder: metric === 'successRate' ? 'desc' : 'asc',
       limit,
     };
     return this.discoverAgents(options);
@@ -761,8 +761,8 @@ export class AgentRegistry implements AgentEventManager {
    * 获取增强的统计信息
    */
   public getEnhancedStatistics(): {
-    registry: ReturnType<AgentRegistry["getStatistics"]>;
-    diContainer: ReturnType<AgentDIContainer["getStatistics"]>;
+    registry: ReturnType<AgentRegistry['getStatistics']>;
+    diContainer: ReturnType<AgentDIContainer['getStatistics']>;
     capabilities: Record<string, number>;
     tasks: Record<string, number>;
   } {
@@ -796,8 +796,8 @@ export class AgentRegistry implements AgentEventManager {
    */
   public getFullDiagnostics(): {
     timestamp: number;
-    registry: ReturnType<AgentRegistry["getDiagnostics"]>;
-    diContainer: ReturnType<AgentDIContainer["getDiagnostics"]>;
+    registry: ReturnType<AgentRegistry['getDiagnostics']>;
+    diContainer: ReturnType<AgentDIContainer['getDiagnostics']>;
     recommendations: Array<{
       agentName: string;
       issues: string[];
@@ -828,29 +828,29 @@ export class AgentRegistry implements AgentEventManager {
   private sortAgents(
     registrations: AgentRegistration[],
     sortBy: string,
-    sortOrder: "asc" | "desc",
+    sortOrder: 'asc' | 'desc'
   ): AgentRegistration[] {
     return registrations.sort((a, b) => {
       let valueA: any, valueB: any;
 
       switch (sortBy) {
-        case "name":
+        case 'name':
           valueA = a.metadata.name;
           valueB = b.metadata.name;
           break;
-        case "type":
+        case 'type':
           valueA = a.metadata.type;
           valueB = b.metadata.type;
           break;
-        case "successRate":
+        case 'successRate':
           valueA = a.metadata.successRate || 0;
           valueB = b.metadata.successRate || 0;
           break;
-        case "executionTime":
+        case 'executionTime':
           valueA = a.metadata.averageExecutionTime || Infinity;
           valueB = b.metadata.averageExecutionTime || Infinity;
           break;
-        case "lastUsed":
+        case 'lastUsed':
           valueA = a.metadata.lastUsed || 0;
           valueB = b.metadata.lastUsed || 0;
           break;
@@ -859,10 +859,10 @@ export class AgentRegistry implements AgentEventManager {
       }
 
       if (valueA < valueB) {
-        return sortOrder === "asc" ? -1 : 1;
+        return sortOrder === 'asc' ? -1 : 1;
       }
       if (valueA > valueB) {
-        return sortOrder === "asc" ? 1 : -1;
+        return sortOrder === 'asc' ? 1 : -1;
       }
       return 0;
     });
@@ -874,7 +874,7 @@ export class AgentRegistry implements AgentEventManager {
   private calculateAgentScore(
     registration: AgentRegistration,
     task: string,
-    context?: AgentContext,
+    context?: AgentContext
   ): number {
     let score = 0;
     const metadata = registration.metadata;
@@ -936,7 +936,7 @@ export class AgentRegistry implements AgentEventManager {
   private generateRecommendationReasons(
     registration: AgentRegistration,
     task: string,
-    score: number,
+    score: number
   ): string[] {
     const reasons: string[] = [];
     const metadata = registration.metadata;
@@ -961,7 +961,7 @@ export class AgentRegistry implements AgentEventManager {
     }
 
     if (score > 80) {
-      reasons.push("综合评分优秀");
+      reasons.push('综合评分优秀');
     }
 
     return reasons;
@@ -984,29 +984,29 @@ export class AgentRegistry implements AgentEventManager {
       // 检查成功率
       if (registration.metadata.successRate !== undefined) {
         if (registration.metadata.successRate < 0.5) {
-          issues.push("成功率偏低");
-          suggestions.push("优化Agent实现以提高成功率");
+          issues.push('成功率偏低');
+          suggestions.push('优化Agent实现以提高成功率');
         }
       }
 
       // 检查执行时间
       if (registration.metadata.averageExecutionTime !== undefined) {
         if (registration.metadata.averageExecutionTime > 5000) {
-          issues.push("执行时间过长");
-          suggestions.push("优化算法或增加缓存机制");
+          issues.push('执行时间过长');
+          suggestions.push('优化算法或增加缓存机制');
         }
       }
 
       // 检查能力定义
       if (registration.metadata.capabilities.length === 0) {
-        issues.push("缺少能力定义");
-        suggestions.push("添加Agent能力描述");
+        issues.push('缺少能力定义');
+        suggestions.push('添加Agent能力描述');
       }
 
       // 检查任务支持
       if (registration.metadata.supportedTasks.length === 0) {
-        issues.push("缺少任务支持定义");
-        suggestions.push("添加支持的任务类型");
+        issues.push('缺少任务支持定义');
+        suggestions.push('添加支持的任务类型');
       }
 
       if (issues.length > 0 || suggestions.length > 0) {

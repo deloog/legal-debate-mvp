@@ -10,7 +10,7 @@ import {
   type AgentError,
   type AgentResult,
   type TestAgentError,
-} from "./test-utils";
+} from './test-utils';
 
 interface AgentMetadata {
   name: string;
@@ -57,17 +57,17 @@ class SimpleAgentRegistry {
 
   async register(
     agent: Agent,
-    metadata?: Partial<AgentMetadata>,
+    metadata?: Partial<AgentMetadata>
   ): Promise<void> {
     if (!agent.name || !agent.type) {
-      throw new Error("Agent must have name and type");
+      throw new Error('Agent must have name and type');
     }
 
     const fullMetadata: AgentMetadata = {
       name: agent.name,
       type: agent.type,
-      version: agent.version || "1.0.0",
-      description: agent.description || "",
+      version: agent.version || '1.0.0',
+      description: agent.description || '',
       capabilities: [],
       supportedTasks: [],
       status: AgentStatus.IDLE,
@@ -80,7 +80,7 @@ class SimpleAgentRegistry {
       registeredAt: Date.now(),
     });
 
-    this.emit("registered", { agentName: agent.name, metadata: fullMetadata });
+    this.emit('registered', { agentName: agent.name, metadata: fullMetadata });
   }
 
   async unregister(agentName: string): Promise<void> {
@@ -90,7 +90,7 @@ class SimpleAgentRegistry {
     }
 
     this.agents.delete(agentName);
-    this.emit("unregistered", { agentName });
+    this.emit('unregistered', { agentName });
   }
 
   get(agentName: string): Agent | undefined {
@@ -107,8 +107,8 @@ class SimpleAgentRegistry {
 
   listByType(type: AgentType): string[] {
     return Array.from(this.agents.values())
-      .filter((agent) => agent.metadata.type === type)
-      .map((agent) => agent.metadata.name);
+      .filter(agent => agent.metadata.type === type)
+      .map(agent => agent.metadata.name);
   }
 
   updateStatus(agentName: string, status: AgentStatus): void {
@@ -120,7 +120,7 @@ class SimpleAgentRegistry {
     const oldStatus = agent.metadata.status;
     agent.metadata.status = status;
 
-    this.emit("status_changed", {
+    this.emit('status_changed', {
       agentName,
       oldStatus,
       newStatus: status,
@@ -129,7 +129,7 @@ class SimpleAgentRegistry {
 
   private emit(event: string, data: any): void {
     const listeners = this.eventListeners.get(event) || [];
-    listeners.forEach((listener) => {
+    listeners.forEach(listener => {
       try {
         listener(data);
       } catch (error) {
@@ -166,8 +166,8 @@ class MockAgent implements Agent {
   constructor(
     name: string,
     type: AgentType,
-    version: string = "1.0.0",
-    description: string = "Mock agent for testing",
+    version: string = '1.0.0',
+    description: string = 'Mock agent for testing'
   ) {
     this.name = name;
     this.type = type;
@@ -189,225 +189,225 @@ class MockAgent implements Agent {
   }
 }
 
-describe("AgentRegistry", () => {
+describe('AgentRegistry', () => {
   let registry: SimpleAgentRegistry;
 
   beforeEach(() => {
     registry = new SimpleAgentRegistry();
   });
 
-  describe("Registration", () => {
-    it("should register an agent successfully", async () => {
-      const agent = new MockAgent("TestAgent", AgentType.DOC_ANALYZER);
+  describe('Registration', () => {
+    it('should register an agent successfully', async () => {
+      const agent = new MockAgent('TestAgent', AgentType.DOC_ANALYZER);
 
       await registry.register(agent);
 
-      expect(registry.get("TestAgent")).toBe(agent);
-      expect(registry.list()).toContain("TestAgent");
-      expect(registry.getMetadata("TestAgent")?.name).toBe("TestAgent");
-      expect(registry.getMetadata("TestAgent")?.type).toBe(
-        AgentType.DOC_ANALYZER,
+      expect(registry.get('TestAgent')).toBe(agent);
+      expect(registry.list()).toContain('TestAgent');
+      expect(registry.getMetadata('TestAgent')?.name).toBe('TestAgent');
+      expect(registry.getMetadata('TestAgent')?.type).toBe(
+        AgentType.DOC_ANALYZER
       );
     });
 
-    it("should register agent with custom metadata", async () => {
-      const agent = new MockAgent("CustomAgent", AgentType.RESEARCHER);
+    it('should register agent with custom metadata', async () => {
+      const agent = new MockAgent('CustomAgent', AgentType.RESEARCHER);
       const customMetadata = {
-        version: "2.0.0",
-        description: "Custom research agent",
-        capabilities: ["research", "analysis"],
-        supportedTasks: ["literature_review"],
+        version: '2.0.0',
+        description: 'Custom research agent',
+        capabilities: ['research', 'analysis'],
+        supportedTasks: ['literature_review'],
       };
 
       await registry.register(agent, customMetadata);
 
-      const metadata = registry.getMetadata("CustomAgent");
-      expect(metadata?.version).toBe("2.0.0");
-      expect(metadata?.description).toBe("Custom research agent");
-      expect(metadata?.capabilities).toEqual(["research", "analysis"]);
-      expect(metadata?.supportedTasks).toEqual(["literature_review"]);
+      const metadata = registry.getMetadata('CustomAgent');
+      expect(metadata?.version).toBe('2.0.0');
+      expect(metadata?.description).toBe('Custom research agent');
+      expect(metadata?.capabilities).toEqual(['research', 'analysis']);
+      expect(metadata?.supportedTasks).toEqual(['literature_review']);
     });
 
-    it("should throw error when registering invalid agent", async () => {
+    it('should throw error when registering invalid agent', async () => {
       const invalidAgent = {
-        name: "",
-        type: "" as AgentType,
-        version: "1.0.0",
-        description: "Invalid agent",
+        name: '',
+        type: '' as AgentType,
+        version: '1.0.0',
+        description: 'Invalid agent',
         execute: async () => ({
           success: false,
-          agentName: "",
+          agentName: '',
           executionTime: 0,
         }),
       } as Agent;
 
       await expect(registry.register(invalidAgent)).rejects.toThrow(
-        "Agent must have name and type",
+        'Agent must have name and type'
       );
     });
   });
 
-  describe("Unregistration", () => {
-    it("should unregister an agent successfully", async () => {
-      const agent = new MockAgent("TestAgent", AgentType.DOC_ANALYZER);
+  describe('Unregistration', () => {
+    it('should unregister an agent successfully', async () => {
+      const agent = new MockAgent('TestAgent', AgentType.DOC_ANALYZER);
       await registry.register(agent);
 
-      await registry.unregister("TestAgent");
+      await registry.unregister('TestAgent');
 
-      expect(registry.get("TestAgent")).toBeUndefined();
-      expect(registry.list()).not.toContain("TestAgent");
+      expect(registry.get('TestAgent')).toBeUndefined();
+      expect(registry.list()).not.toContain('TestAgent');
     });
 
-    it("should throw error when unregistering non-existent agent", async () => {
-      await expect(registry.unregister("NonExistent")).rejects.toThrow(
-        "Agent NonExistent not found",
+    it('should throw error when unregistering non-existent agent', async () => {
+      await expect(registry.unregister('NonExistent')).rejects.toThrow(
+        'Agent NonExistent not found'
       );
     });
   });
 
-  describe("Listing and Querying", () => {
+  describe('Listing and Querying', () => {
     beforeEach(async () => {
       await registry.register(
-        new MockAgent("DocAnalyzer", AgentType.DOC_ANALYZER),
+        new MockAgent('DocAnalyzer', AgentType.DOC_ANALYZER)
       );
       await registry.register(
-        new MockAgent("Researcher", AgentType.RESEARCHER),
+        new MockAgent('Researcher', AgentType.RESEARCHER)
       );
       await registry.register(
-        new MockAgent("DocAnalyzer2", AgentType.DOC_ANALYZER),
+        new MockAgent('DocAnalyzer2', AgentType.DOC_ANALYZER)
       );
     });
 
-    it("should list all registered agents", () => {
+    it('should list all registered agents', () => {
       const agents = registry.list();
       expect(agents).toHaveLength(3);
-      expect(agents).toContain("DocAnalyzer");
-      expect(agents).toContain("Researcher");
-      expect(agents).toContain("DocAnalyzer2");
+      expect(agents).toContain('DocAnalyzer');
+      expect(agents).toContain('Researcher');
+      expect(agents).toContain('DocAnalyzer2');
     });
 
-    it("should list agents by type", () => {
+    it('should list agents by type', () => {
       const docAnalyzers = registry.listByType(AgentType.DOC_ANALYZER);
       const researchers = registry.listByType(AgentType.RESEARCHER);
 
       expect(docAnalyzers).toHaveLength(2);
-      expect(docAnalyzers).toContain("DocAnalyzer");
-      expect(docAnalyzers).toContain("DocAnalyzer2");
+      expect(docAnalyzers).toContain('DocAnalyzer');
+      expect(docAnalyzers).toContain('DocAnalyzer2');
 
       expect(researchers).toHaveLength(1);
-      expect(researchers).toContain("Researcher");
+      expect(researchers).toContain('Researcher');
     });
 
-    it("should return empty array for non-existent type", () => {
+    it('should return empty array for non-existent type', () => {
       const writers = registry.listByType(AgentType.WRITER);
       expect(writers).toHaveLength(0);
     });
   });
 
-  describe("Status Management", () => {
+  describe('Status Management', () => {
     beforeEach(async () => {
       await registry.register(
-        new MockAgent("TestAgent", AgentType.DOC_ANALYZER),
+        new MockAgent('TestAgent', AgentType.DOC_ANALYZER)
       );
     });
 
-    it("should update agent status", () => {
-      registry.updateStatus("TestAgent", AgentStatus.BUSY);
+    it('should update agent status', () => {
+      registry.updateStatus('TestAgent', AgentStatus.BUSY);
 
-      const metadata = registry.getMetadata("TestAgent");
+      const metadata = registry.getMetadata('TestAgent');
       expect(metadata?.status).toBe(AgentStatus.BUSY);
     });
 
-    it("should throw error when updating status of non-existent agent", () => {
+    it('should throw error when updating status of non-existent agent', () => {
       expect(() => {
-        registry.updateStatus("NonExistent", AgentStatus.BUSY);
-      }).toThrow("Agent NonExistent not found");
+        registry.updateStatus('NonExistent', AgentStatus.BUSY);
+      }).toThrow('Agent NonExistent not found');
     });
   });
 
-  describe("Event System", () => {
-    it("should emit registration event", async () => {
+  describe('Event System', () => {
+    it('should emit registration event', async () => {
       const mockListener = jest.fn();
-      registry.on("registered", mockListener);
+      registry.on('registered', mockListener);
 
-      const agent = new MockAgent("TestAgent", AgentType.DOC_ANALYZER);
+      const agent = new MockAgent('TestAgent', AgentType.DOC_ANALYZER);
       await registry.register(agent);
 
       expect(mockListener).toHaveBeenCalledWith({
-        agentName: "TestAgent",
+        agentName: 'TestAgent',
         metadata: expect.objectContaining({
-          name: "TestAgent",
+          name: 'TestAgent',
           type: AgentType.DOC_ANALYZER,
         }),
       });
     });
 
-    it("should emit unregistration event", async () => {
+    it('should emit unregistration event', async () => {
       const mockListener = jest.fn();
-      registry.on("unregistered", mockListener);
+      registry.on('unregistered', mockListener);
 
-      const agent = new MockAgent("TestAgent", AgentType.DOC_ANALYZER);
+      const agent = new MockAgent('TestAgent', AgentType.DOC_ANALYZER);
       await registry.register(agent);
-      await registry.unregister("TestAgent");
+      await registry.unregister('TestAgent');
 
       expect(mockListener).toHaveBeenCalledWith({
-        agentName: "TestAgent",
+        agentName: 'TestAgent',
       });
     });
 
-    it("should emit status change event", async () => {
+    it('should emit status change event', async () => {
       const mockListener = jest.fn();
-      registry.on("status_changed", mockListener);
+      registry.on('status_changed', mockListener);
 
-      const agent = new MockAgent("TestAgent", AgentType.DOC_ANALYZER);
+      const agent = new MockAgent('TestAgent', AgentType.DOC_ANALYZER);
       await registry.register(agent);
 
-      registry.updateStatus("TestAgent", AgentStatus.BUSY);
+      registry.updateStatus('TestAgent', AgentStatus.BUSY);
 
       expect(mockListener).toHaveBeenCalledWith({
-        agentName: "TestAgent",
+        agentName: 'TestAgent',
         oldStatus: AgentStatus.IDLE,
         newStatus: AgentStatus.BUSY,
       });
     });
 
-    it("should handle event listener errors gracefully", async () => {
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+    it('should handle event listener errors gracefully', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       const faultyListener = jest.fn(() => {
-        throw new Error("Listener error");
+        throw new Error('Listener error');
       });
 
-      registry.on("registered", faultyListener);
+      registry.on('registered', faultyListener);
 
-      const agent = new MockAgent("TestAgent", AgentType.DOC_ANALYZER);
+      const agent = new MockAgent('TestAgent', AgentType.DOC_ANALYZER);
 
       // Should not throw despite listener error
       await expect(registry.register(agent)).resolves.not.toThrow();
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        "Error in event listener for registered:",
-        expect.any(Error),
+        'Error in event listener for registered:',
+        expect.any(Error)
       );
 
       consoleSpy.mockRestore();
     });
   });
 
-  describe("Agent Execution", () => {
-    it("should execute agent through registry", async () => {
-      const agent = new MockAgent("TestAgent", AgentType.DOC_ANALYZER);
+  describe('Agent Execution', () => {
+    it('should execute agent through registry', async () => {
+      const agent = new MockAgent('TestAgent', AgentType.DOC_ANALYZER);
       await registry.register(agent);
 
       const context: AgentContext = {
-        task: "Test task",
+        task: 'Test task',
         priority: TaskPriority.MEDIUM,
-        data: { input: "test data" },
+        data: { input: 'test data' },
       };
 
       const result = await agent.execute(context);
 
       expect(result.success).toBe(true);
-      expect(result.agentName).toBe("TestAgent");
+      expect(result.agentName).toBe('TestAgent');
       expect(result.data).toEqual({ processed: true, input: context.data });
     });
   });

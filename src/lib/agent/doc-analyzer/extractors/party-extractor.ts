@@ -7,13 +7,13 @@
  * - 补充和修正AI识别的当事人数据
  */
 
-import type { Party } from "../core/types";
-import { logger } from "../../../agent/security/logger";
+import type { Party } from '../core/types';
+import { logger } from '../../../agent/security/logger';
 
 export interface PartyExtractionResult {
   parties: Party[];
   confidence: number;
-  method: "regex" | "rule" | "hybrid";
+  method: 'regex' | 'rule' | 'hybrid';
 }
 
 /**
@@ -21,7 +21,7 @@ export interface PartyExtractionResult {
  */
 interface PartyPattern {
   regex: RegExp;
-  type: "plaintiff" | "defendant" | "other";
+  type: 'plaintiff' | 'defendant' | 'other';
   role?: string;
 }
 
@@ -30,30 +30,30 @@ export class PartyExtractor {
   private readonly plaintiffPatterns: PartyPattern[] = [
     {
       regex: /(?:原告|申请人|上诉人)[：:]\s*([^\n]+)/gu,
-      type: "plaintiff",
-      role: "原告",
+      type: 'plaintiff',
+      role: '原告',
     },
     {
       regex: /(?:原告|申请人)[：:]\s*([^\n]+)，(?:性别|男|女)/gu,
-      type: "plaintiff",
-      role: "原告",
+      type: 'plaintiff',
+      role: '原告',
     },
     {
       regex: /原告[：:]\s*([^\n]+?)(?:，|。|\n)/gu,
-      type: "plaintiff",
-      role: "原告",
+      type: 'plaintiff',
+      role: '原告',
     },
     // 上诉人识别（原审原告）- 支持中英文括号
     {
       regex: /上诉人[（(](?:原审)?原告[）)][：:]\s*([^\n，。]+)/gu,
-      type: "plaintiff",
-      role: "上诉人",
+      type: 'plaintiff',
+      role: '上诉人',
     },
     // 上诉人单独出现
     {
       regex: /上诉人[：:]\s*([^\n，。]+)/gu,
-      type: "plaintiff",
-      role: "上诉人",
+      type: 'plaintiff',
+      role: '上诉人',
     },
   ];
 
@@ -61,30 +61,30 @@ export class PartyExtractor {
   private readonly defendantPatterns: PartyPattern[] = [
     {
       regex: /(?:被告|被申请人|被上诉人)[：:]\s*([^\n]+)/gu,
-      type: "defendant",
-      role: "被告",
+      type: 'defendant',
+      role: '被告',
     },
     {
       regex: /(?:被告|被申请人)[：:]\s*([^\n]+)，(?:性别|男|女)/gu,
-      type: "defendant",
-      role: "被告",
+      type: 'defendant',
+      role: '被告',
     },
     {
       regex: /被告[：:]\s*([^\n]+?)(?:，|。|\n)/gu,
-      type: "defendant",
-      role: "被告",
+      type: 'defendant',
+      role: '被告',
     },
     // 被上诉人识别（原审被告）- 支持中英文括号
     {
       regex: /被上诉人[（(](?:原审)?被告[）)][：:]\s*([^\n，。]+)/gu,
-      type: "defendant",
-      role: "被上诉人",
+      type: 'defendant',
+      role: '被上诉人',
     },
     // 被上诉人单独出现
     {
       regex: /被上诉人[：:]\s*([^\n，。]+)/gu,
-      type: "defendant",
-      role: "被上诉人",
+      type: 'defendant',
+      role: '被上诉人',
     },
   ];
 
@@ -92,8 +92,8 @@ export class PartyExtractor {
   private readonly thirdPartyPatterns: PartyPattern[] = [
     {
       regex: /第三人[：:]\s*([^\n]+)/gu,
-      type: "other",
-      role: "第三人",
+      type: 'other',
+      role: '第三人',
     },
   ];
 
@@ -110,10 +110,10 @@ export class PartyExtractor {
    */
   public async extractFromText(
     text: string,
-    existingParties: Party[] = [],
+    existingParties: Party[] = []
   ): Promise<PartyExtractionResult> {
     const extractedParties: Party[] = [...existingParties];
-    const existingNames = new Set(existingParties.map((p) => p.name));
+    const existingNames = new Set(existingParties.map(p => p.name));
 
     // 提取地址信息并关联到当事人
     const addressMap = this.extractAddresses(text);
@@ -128,7 +128,7 @@ export class PartyExtractor {
         }
         extractedParties.push(plaintiff);
         existingNames.add(plaintiff.name);
-        logger.debug("算法兜底提取原告", { name: plaintiff.name });
+        logger.debug('算法兜底提取原告', { name: plaintiff.name });
       }
     }
 
@@ -142,7 +142,7 @@ export class PartyExtractor {
         }
         extractedParties.push(defendant);
         existingNames.add(defendant.name);
-        logger.debug("算法兜底提取被告", { name: defendant.name });
+        logger.debug('算法兜底提取被告', { name: defendant.name });
       }
     }
 
@@ -156,7 +156,7 @@ export class PartyExtractor {
         }
         extractedParties.push(thirdParty);
         existingNames.add(thirdParty.name);
-        logger.debug("算法兜底提取第三人", { name: thirdParty.name });
+        logger.debug('算法兜底提取第三人', { name: thirdParty.name });
       }
     }
 
@@ -164,7 +164,7 @@ export class PartyExtractor {
     const inferredDefendant = this.inferDefendantFromClaims(text);
     if (inferredDefendant && !existingNames.has(inferredDefendant.name)) {
       extractedParties.push(inferredDefendant);
-      logger.info("从诉讼请求推断被告", {
+      logger.info('从诉讼请求推断被告', {
         name: inferredDefendant.name,
       });
     }
@@ -175,13 +175,13 @@ export class PartyExtractor {
     // 计算置信度
     const confidence = this.calculateConfidence(
       extractedParties.length,
-      filteredParties.length,
+      filteredParties.length
     );
 
     return {
       parties: filteredParties,
       confidence,
-      method: "regex",
+      method: 'regex',
     };
   }
 
@@ -210,7 +210,7 @@ export class PartyExtractor {
           !this.isLawyer(name)
         ) {
           addressMap.set(name, address);
-          logger.debug("提取当事人地址", { name, address });
+          logger.debug('提取当事人地址', { name, address });
         }
       }
     }
@@ -230,7 +230,7 @@ export class PartyExtractor {
       let match: RegExpExecArray | null;
 
       // ✅ 添加调试日志
-      logger.debug("[DEBUG] 执行正则匹配", {
+      logger.debug('[DEBUG] 执行正则匹配', {
         pattern: pattern.regex.source,
         flags: pattern.regex.flags,
         textSample: text.substring(0, 200),
@@ -244,7 +244,7 @@ export class PartyExtractor {
         const cleanedName = this.cleanName(rawName);
 
         // ✅ 添加调试日志
-        logger.debug("[DEBUG] 正则匹配结果", {
+        logger.debug('[DEBUG] 正则匹配结果', {
           matched: rawName,
           cleaned: cleanedName,
           isCommon: this.isCommonWords(cleanedName),
@@ -268,9 +268,9 @@ export class PartyExtractor {
       }
     }
 
-    logger.debug("[DEBUG] 最终提取的当事人", {
+    logger.debug('[DEBUG] 最终提取的当事人', {
       count: parties.length,
-      names: parties.map((p) => p.name),
+      names: parties.map(p => p.name),
     });
 
     return parties;
@@ -282,9 +282,9 @@ export class PartyExtractor {
   private cleanName(name: string): string {
     return name
       .trim()
-      .replace(/，[^\n]*$/, "") // 移除第一个逗号后的内容（保留地址等信息）
-      .replace(/[（\(].*?[）\)]$/, "") // 移除括号内容（保留公司类型信息）
-      .replace(/等/g, "") // 移除"等"
+      .replace(/，[^\n]*$/, '') // 移除第一个逗号后的内容（保留地址等信息）
+      .replace(/[（\(].*?[）\)]$/, '') // 移除括号内容（保留公司类型信息）
+      .replace(/等/g, '') // 移除"等"
       .trim();
   }
 
@@ -293,7 +293,7 @@ export class PartyExtractor {
    */
   private extractMultipleParties(
     name: string,
-    type: "plaintiff" | "defendant" | "other",
+    type: 'plaintiff' | 'defendant' | 'other'
   ): Party[] {
     const parties: Party[] = [];
     // 使用顿号或逗号分割
@@ -305,11 +305,11 @@ export class PartyExtractor {
           type,
           name: cleaned,
           role:
-            type === "plaintiff"
-              ? "原告"
-              : type === "defendant"
-                ? "被告"
-                : "第三人",
+            type === 'plaintiff'
+              ? '原告'
+              : type === 'defendant'
+                ? '被告'
+                : '第三人',
           _inferred: true,
         });
       }
@@ -335,9 +335,9 @@ export class PartyExtractor {
         // 验证名称有效性
         if (name && !this.isCommonWords(name)) {
           return {
-            type: "defendant",
+            type: 'defendant',
             name,
-            role: "推断被告",
+            role: '推断被告',
             _inferred: true,
           };
         }
@@ -352,20 +352,20 @@ export class PartyExtractor {
    */
   private isCommonWords(text: string): boolean {
     const commonWords = [
-      "对方",
-      "被告方",
-      "原告方",
-      "当事人",
-      "第三人",
-      "诉讼请求",
-      "诉讼费",
-      "律师费",
-      "利息",
-      "本金",
-      "涉案",
-      "本案",
-      "被申请人",
-      "申请人",
+      '对方',
+      '被告方',
+      '原告方',
+      '当事人',
+      '第三人',
+      '诉讼请求',
+      '诉讼费',
+      '律师费',
+      '利息',
+      '本金',
+      '涉案',
+      '本案',
+      '被申请人',
+      '申请人',
     ];
     return commonWords.includes(text);
   }
@@ -391,13 +391,13 @@ export class PartyExtractor {
 
       // 检查名称长度（过短可能是误识别）
       if (party.name.length < 2) {
-        logger.debug("过滤过短名称", { name: party.name });
+        logger.debug('过滤过短名称', { name: party.name });
         continue;
       }
 
       // 检查是否包含律师关键字
       if (this.isLawyer(party.name)) {
-        logger.debug("过滤诉讼代理人", { name: party.name });
+        logger.debug('过滤诉讼代理人', { name: party.name });
         continue;
       }
 
@@ -411,7 +411,7 @@ export class PartyExtractor {
    * 判断是否为占位符
    */
   private isPlaceholder(name: string): boolean {
-    return name.includes("某某") || /^某某.*某某$/.test(name);
+    return name.includes('某某') || /^某某.*某某$/.test(name);
   }
 
   /**
@@ -419,28 +419,28 @@ export class PartyExtractor {
    */
   private isCompanyName(name: string): boolean {
     const companyKeywords = [
-      "公司",
-      "企业",
-      "集团",
-      "有限",
-      "股份",
-      "责任",
-      "合伙",
-      "个体",
-      "厂",
-      "店",
-      "中心",
-      "工作室",
+      '公司',
+      '企业',
+      '集团',
+      '有限',
+      '股份',
+      '责任',
+      '合伙',
+      '个体',
+      '厂',
+      '店',
+      '中心',
+      '工作室',
     ];
-    return companyKeywords.some((keyword) => name.includes(keyword));
+    return companyKeywords.some(keyword => name.includes(keyword));
   }
 
   /**
    * 判断是否为律师
    */
   private isLawyer(name: string): boolean {
-    const lawyerKeywords = ["律师", "律师所", "律所"];
-    return lawyerKeywords.some((keyword) => name.includes(keyword));
+    const lawyerKeywords = ['律师', '律师所', '律所'];
+    return lawyerKeywords.some(keyword => name.includes(keyword));
   }
 
   /**
@@ -448,7 +448,7 @@ export class PartyExtractor {
    */
   private calculateConfidence(
     originalCount: number,
-    filteredCount: number,
+    filteredCount: number
   ): number {
     if (originalCount === 0) {
       return 0.0;
@@ -475,8 +475,8 @@ export class PartyExtractor {
     for (const algParty of algorithmParties) {
       if (!mergedNames.has(algParty.name)) {
         // 检查是否与现有当事人相似（可能是同一人的不同表述）
-        const similar = merged.find((p) =>
-          this.isSimilarName(p.name, algParty.name),
+        const similar = merged.find(p =>
+          this.isSimilarName(p.name, algParty.name)
         );
         if (similar) {
           // 如果相似，保留置信度更高的
@@ -499,8 +499,8 @@ export class PartyExtractor {
    */
   private isSimilarName(name1: string, name2: string): boolean {
     // 移除空格和标点
-    const n1 = name1.replace(/\s+/g, "");
-    const n2 = name2.replace(/\s+/g, "");
+    const n1 = name1.replace(/\s+/g, '');
+    const n2 = name2.replace(/\s+/g, '');
 
     if (n1 === n2) {
       return true;

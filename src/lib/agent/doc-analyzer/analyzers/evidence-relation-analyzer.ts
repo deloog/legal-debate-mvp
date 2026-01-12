@@ -12,7 +12,7 @@ import type {
   ExtractedData,
   EvidenceRelation,
   ClassifiedEvidence,
-} from "../core/types";
+} from '../core/types';
 
 // =============================================================================
 // EvidenceRelationAnalyzer类
@@ -24,7 +24,7 @@ export class EvidenceRelationAnalyzer {
    */
   analyzeRelations(
     classifiedEvidence: ClassifiedEvidence[],
-    extractedData: ExtractedData,
+    extractedData: ExtractedData
   ): EvidenceRelation[] {
     const relations: EvidenceRelation[] = [];
 
@@ -32,13 +32,13 @@ export class EvidenceRelationAnalyzer {
     for (const evidence of classifiedEvidence) {
       const relatedParties = this.findRelatedParties(
         evidence.content,
-        extractedData,
+        extractedData
       );
       for (const party of relatedParties) {
         relations.push({
           evidenceId: evidence.id,
           relatedTo: party,
-          relationType: "RELATES_TO",
+          relationType: 'RELATES_TO',
           strength: 0.6,
         });
         evidence.relatedTo.push(party);
@@ -47,13 +47,13 @@ export class EvidenceRelationAnalyzer {
       // 关联到诉讼请求
       const relatedClaims = this.findRelatedClaims(
         evidence.content,
-        extractedData,
+        extractedData
       );
       for (const claim of relatedClaims) {
         relations.push({
           evidenceId: evidence.id,
           relatedTo: claim,
-          relationType: "SUPPORTS",
+          relationType: 'SUPPORTS',
           strength: 0.8,
         });
       }
@@ -61,13 +61,13 @@ export class EvidenceRelationAnalyzer {
       // 关联到争议焦点
       const relatedFocuses = this.findRelatedDisputeFocuses(
         evidence.content,
-        extractedData,
+        extractedData
       );
       for (const focus of relatedFocuses) {
         relations.push({
           evidenceId: evidence.id,
           relatedTo: focus,
-          relationType: "SUPPORTS",
+          relationType: 'SUPPORTS',
           strength: 0.7,
         });
       }
@@ -81,7 +81,7 @@ export class EvidenceRelationAnalyzer {
    */
   findRelatedParties(
     evidenceContent: string,
-    extractedData: ExtractedData,
+    extractedData: ExtractedData
   ): string[] {
     const related: string[] = [];
 
@@ -101,7 +101,7 @@ export class EvidenceRelationAnalyzer {
    */
   findRelatedClaims(
     evidenceContent: string,
-    extractedData: ExtractedData,
+    extractedData: ExtractedData
   ): string[] {
     const related: string[] = [];
 
@@ -124,7 +124,7 @@ export class EvidenceRelationAnalyzer {
    */
   findRelatedDisputeFocuses(
     evidenceContent: string,
-    extractedData: ExtractedData,
+    extractedData: ExtractedData
   ): string[] {
     const related: string[] = [];
 
@@ -147,7 +147,7 @@ export class EvidenceRelationAnalyzer {
    */
   calculateRelationStrength(
     evidence: ClassifiedEvidence,
-    relations: EvidenceRelation[],
+    relations: EvidenceRelation[]
   ): number {
     if (relations.length === 0) return 0;
 
@@ -160,7 +160,7 @@ export class EvidenceRelationAnalyzer {
    */
   generateReport(
     evidence: ClassifiedEvidence,
-    relations: EvidenceRelation[],
+    relations: EvidenceRelation[]
   ): {
     totalRelations: number;
     partyRelations: number;
@@ -169,13 +169,13 @@ export class EvidenceRelationAnalyzer {
     avgStrength: number;
   } {
     const partyRelations = relations.filter(
-      (r) => r.relationType === "RELATES_TO",
+      r => r.relationType === 'RELATES_TO'
     ).length;
     const claimRelations = relations.filter(
-      (r) => r.relationType === "SUPPORTS",
+      r => r.relationType === 'SUPPORTS'
     ).length;
     const focusRelations = relations.filter(
-      (r) => r.relationType === "SUPPORTS",
+      r => r.relationType === 'SUPPORTS'
     ).length;
 
     const avgStrength = this.calculateRelationStrength(evidence, relations);

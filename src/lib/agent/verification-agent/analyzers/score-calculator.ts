@@ -8,7 +8,7 @@ import {
   CompletenessVerificationResult,
   VerificationConfig,
   DEFAULT_VERIFICATION_CONFIG,
-} from "../types";
+} from '../types';
 
 /**
  * 评分计算器类
@@ -29,7 +29,7 @@ export class ScoreCalculator {
   calculateOverallScore(
     factualResult: FactualVerificationResult,
     logicalResult: LogicalVerificationResult,
-    completenessResult: CompletenessVerificationResult,
+    completenessResult: CompletenessVerificationResult
   ): number {
     // 使用加权平均计算综合评分
     const score =
@@ -47,7 +47,7 @@ export class ScoreCalculator {
     overallScore: number,
     factualResult: FactualVerificationResult,
     logicalResult: LogicalVerificationResult,
-    completenessResult: CompletenessVerificationResult,
+    completenessResult: CompletenessVerificationResult
   ): boolean {
     return (
       overallScore >= this.config.thresholds.overall &&
@@ -63,7 +63,7 @@ export class ScoreCalculator {
   calculateImprovementPotential(
     factualResult: FactualVerificationResult,
     logicalResult: LogicalVerificationResult,
-    completenessResult: CompletenessVerificationResult,
+    completenessResult: CompletenessVerificationResult
   ): {
     overall: number;
     factual: number;
@@ -92,18 +92,18 @@ export class ScoreCalculator {
    */
   getScoreLevel(score: number): string {
     if (score >= 0.95) {
-      return "优秀";
+      return '优秀';
     }
     if (score >= 0.9) {
-      return "良好";
+      return '良好';
     }
     if (score >= 0.8) {
-      return "及格";
+      return '及格';
     }
     if (score >= 0.7) {
-      return "待改进";
+      return '待改进';
     }
-    return "不合格";
+    return '不合格';
   }
 
   /**
@@ -113,7 +113,7 @@ export class ScoreCalculator {
     overallScore: number,
     factualResult: FactualVerificationResult,
     logicalResult: LogicalVerificationResult,
-    completenessResult: CompletenessVerificationResult,
+    completenessResult: CompletenessVerificationResult
   ): {
     overall: { score: number; level: string; passed: boolean };
     factual: { score: number; passed: boolean; issues: string[] };
@@ -151,28 +151,28 @@ export class ScoreCalculator {
     const issues: string[] = [];
 
     if (!result.details.partyCheck.passed) {
-      issues.push("当事人信息验证未通过");
+      issues.push('当事人信息验证未通过');
     }
     if (result.details.partyCheck.issues.length > 0) {
       issues.push(...result.details.partyCheck.issues);
     }
 
     if (!result.details.amountCheck.passed) {
-      issues.push("金额数据验证未通过");
+      issues.push('金额数据验证未通过');
     }
     if (result.details.amountCheck.issues.length > 0) {
       issues.push(...result.details.amountCheck.issues);
     }
 
     if (!result.details.dateCheck.passed) {
-      issues.push("日期时间验证未通过");
+      issues.push('日期时间验证未通过');
     }
     if (result.details.dateCheck.issues.length > 0) {
       issues.push(...result.details.dateCheck.issues);
     }
 
     if (!result.details.consistencyCheck.passed) {
-      issues.push("数据一致性验证未通过");
+      issues.push('数据一致性验证未通过');
     }
     if (result.details.consistencyCheck.issues.length > 0) {
       issues.push(...result.details.consistencyCheck.issues);
@@ -188,7 +188,7 @@ export class ScoreCalculator {
     const issues: string[] = [];
 
     if (result.details.claimFactMatch < this.config.thresholds.logical) {
-      issues.push("诉讼请求与事实匹配度不足");
+      issues.push('诉讼请求与事实匹配度不足');
     }
 
     if (result.details.reasoningChain.gaps.length > 0) {
@@ -200,15 +200,15 @@ export class ScoreCalculator {
     }
 
     if (!result.details.legalLogic.valid) {
-      issues.push("法条引用无效");
+      issues.push('法条引用无效');
     }
     if (!result.details.legalLogic.relevant) {
-      issues.push("法条引用相关性不足");
+      issues.push('法条引用相关性不足');
     }
 
     if (result.details.contradictions.hasContradictions) {
       issues.push(
-        `检测到${result.details.contradictions.contradictions.length}个矛盾`,
+        `检测到${result.details.contradictions.contradictions.length}个矛盾`
       );
     }
 
@@ -219,7 +219,7 @@ export class ScoreCalculator {
    * 提取完成度问题
    */
   private extractCompletenessIssues(
-    result: CompletenessVerificationResult,
+    result: CompletenessVerificationResult
   ): string[] {
     const issues: string[] = [];
 
@@ -228,7 +228,7 @@ export class ScoreCalculator {
       result.details.requiredFields.missingFields.length > 0
     ) {
       issues.push(
-        `缺少${result.details.requiredFields.missingFields.length}个必填字段`,
+        `缺少${result.details.requiredFields.missingFields.length}个必填字段`
       );
     }
 
@@ -237,18 +237,18 @@ export class ScoreCalculator {
       result.details.businessRules.violatedRules.length > 0
     ) {
       issues.push(
-        `违反${result.details.businessRules.violatedRules.length}个业务规则`,
+        `违反${result.details.businessRules.violatedRules.length}个业务规则`
       );
     }
 
     if (result.details.formatCheck.formatErrors.length > 0) {
       issues.push(
-        `存在${result.details.formatCheck.formatErrors.length}个格式错误`,
+        `存在${result.details.formatCheck.formatErrors.length}个格式错误`
       );
     }
 
     const failedThresholds = Object.entries(
-      result.details.qualityCheck.thresholds,
+      result.details.qualityCheck.thresholds
     ).filter(([, v]) => !v.passed);
 
     if (failedThresholds.length > 0) {

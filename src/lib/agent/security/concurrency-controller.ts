@@ -38,7 +38,7 @@ export class Semaphore {
         const index = this.waitQueue.indexOf(waitItem);
         if (index > -1) {
           this.waitQueue.splice(index, 1);
-          reject(new Error("等待并发许可超时"));
+          reject(new Error('等待并发许可超时'));
         }
       }, queueTimeout);
 
@@ -92,7 +92,7 @@ export class ConcurrencyController {
     key: string,
     maxConcurrent: number,
     fn: () => Promise<T>,
-    options?: ConcurrencyOptions,
+    options?: ConcurrencyOptions
   ): Promise<T> {
     const semaphore = this.getSemaphore(key, maxConcurrent);
 

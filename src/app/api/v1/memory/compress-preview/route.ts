@@ -8,8 +8,8 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { NextRequest, NextResponse } from "next/server";
-import { MemoryCompressor } from "@/lib/agent/memory-agent/compressor";
+import { NextRequest, NextResponse } from 'next/server';
+import { MemoryCompressor } from '@/lib/agent/memory-agent/compressor';
 
 // 创建简单的mock AI服务
 const mockAIService = {
@@ -19,7 +19,7 @@ const mockAIService = {
         {
           message: {
             content: JSON.stringify([
-              { field: "摘要", value: "压缩后的摘要", importance: 1.0 },
+              { field: '摘要', value: '压缩后的摘要', importance: 1.0 },
             ]),
           },
         },
@@ -43,8 +43,8 @@ export async function POST(request: NextRequest) {
     // 验证输入
     if (body.memoryId === undefined && body.content === undefined) {
       return NextResponse.json(
-        { error: "必须提供memoryId或content" },
-        { status: 400 },
+        { error: '必须提供memoryId或content' },
+        { status: 400 }
       );
     }
 
@@ -54,16 +54,16 @@ export async function POST(request: NextRequest) {
     if (body.memoryId !== undefined && body.memoryId !== null) {
       // 通过memoryId获取记忆内容
       const { MemoryManager } =
-        await import("@/lib/agent/memory-agent/memory-manager");
+        await import('@/lib/agent/memory-agent/memory-manager');
       const mockPrisma = {
         agentMemory: {
           findUnique: async () => {
             return {
               memoryId: body.memoryId,
-              memoryKey: "test-key",
+              memoryKey: 'test-key',
               memoryValue:
-                "这是一段很长的测试内容，用于测试记忆压缩功能。需要包含足够多的信息才能看到明显的压缩效果。",
-              memoryType: "HOT",
+                '这是一段很长的测试内容，用于测试记忆压缩功能。需要包含足够多的信息才能看到明显的压缩效果。',
+              memoryType: 'HOT',
               importance: 0.8,
             };
           },
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       const memory = await manager.getMemoryById(body.memoryId);
 
       if (!memory) {
-        return NextResponse.json({ error: "记忆不存在" }, { status: 404 });
+        return NextResponse.json({ error: '记忆不存在' }, { status: 404 });
       }
 
       memoryContent = memory.memoryValue;
@@ -87,9 +87,9 @@ export async function POST(request: NextRequest) {
     // 执行压缩预览
     const compressionResult = await compressor.compressMemory({
       memoryId,
-      memoryKey: "preview-key",
+      memoryKey: 'preview-key',
       memoryValue: memoryContent,
-      memoryType: "HOT",
+      memoryType: 'HOT',
       importance: body.importance || 0.8,
       accessCount: 0,
       lastAccessedAt: new Date(),
@@ -100,8 +100,8 @@ export async function POST(request: NextRequest) {
 
     if (!compressionResult.success) {
       return NextResponse.json(
-        { error: "压缩失败", details: compressionResult.error },
-        { status: 500 },
+        { error: '压缩失败', details: compressionResult.error },
+        { status: 500 }
       );
     }
 
@@ -126,10 +126,10 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("记忆压缩预览失败:", error);
+    console.error('记忆压缩预览失败:', error);
     return NextResponse.json(
-      { error: "内部服务器错误", details: String(error) },
-      { status: 500 },
+      { error: '内部服务器错误', details: String(error) },
+      { status: 500 }
     );
   }
 }

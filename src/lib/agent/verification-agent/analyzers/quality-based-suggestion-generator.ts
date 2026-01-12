@@ -8,7 +8,7 @@ import {
   SuggestionPriority,
   VerificationIssue,
   IssueType,
-} from "../types";
+} from '../types';
 
 /**
  * 质量/完成度建议生成器类
@@ -37,7 +37,7 @@ export class QualityBasedSuggestionGenerator {
    * 生成格式标准化建议
    */
   private generateFormatStandardizationSuggestion(
-    issue: VerificationIssue,
+    issue: VerificationIssue
   ): VerificationSuggestion {
     return {
       id: `suggestion-format-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -46,7 +46,7 @@ export class QualityBasedSuggestionGenerator {
       target: issue.field,
       action: `按照${issue.suggestion}修正${issue.field}的格式`,
       reason: issue.message,
-      estimatedImpact: "提升格式正确性评分",
+      estimatedImpact: '提升格式正确性评分',
     };
   }
 
@@ -54,15 +54,15 @@ export class QualityBasedSuggestionGenerator {
    * 生成规则修复建议
    */
   private generateRuleFixSuggestion(
-    issue: VerificationIssue,
+    issue: VerificationIssue
   ): VerificationSuggestion {
     return {
       id: `suggestion-rule-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       type: SuggestionType.VALIDATION_ENHANCEMENT,
       priority: SuggestionPriority.HIGH,
-      action: "检查并修正违反的业务规则",
+      action: '检查并修正违反的业务规则',
       reason: issue.message,
-      estimatedImpact: "确保符合业务规范",
+      estimatedImpact: '确保符合业务规范',
     };
   }
 
@@ -70,15 +70,15 @@ export class QualityBasedSuggestionGenerator {
    * 生成质量改进建议
    */
   private generateQualityImprovementSuggestion(
-    issue: VerificationIssue,
+    issue: VerificationIssue
   ): VerificationSuggestion {
     return {
       id: `suggestion-quality-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       type: SuggestionType.VALIDATION_ENHANCEMENT,
       priority: SuggestionPriority.MEDIUM,
-      action: "丰富内容描述，提升内容质量",
+      action: '丰富内容描述，提升内容质量',
       reason: issue.message,
-      estimatedImpact: "提升质量评分",
+      estimatedImpact: '提升质量评分',
     };
   }
 }

@@ -8,11 +8,11 @@ import {
   SemanticMatchResult,
   RuleValidationResult,
   AIReviewResult,
-} from "./types";
-import { LawArticle, LawStatus } from "@prisma/client";
-import SemanticMatcher from "./semantic-matcher";
-import RuleValidator from "./rule-validator";
-import AIReviewer from "./ai-reviewer";
+} from './types';
+import { LawArticle, LawStatus } from '@prisma/client';
+import SemanticMatcher from './semantic-matcher';
+import RuleValidator from './rule-validator';
+import AIReviewer from './ai-reviewer';
 
 /**
  * 法条适用性分析器
@@ -50,7 +50,7 @@ export class ApplicabilityAnalyzer {
    * 分析法条适用性（主入口）
    */
   public async analyze(
-    input: ApplicabilityInput,
+    input: ApplicabilityInput
   ): Promise<ApplicabilityAnalysisReport> {
     const config: Required<ApplicabilityConfig> = {
       ...DEFAULT_APPLICABILITY_CONFIG,
@@ -78,7 +78,7 @@ export class ApplicabilityAnalyzer {
       const semanticStart = Date.now();
       semanticMatches = await this.semanticMatcher.matchArticles(
         input.articles,
-        input.caseInfo,
+        input.caseInfo
       );
       timings.semanticMatching = Date.now() - semanticStart;
     }
@@ -89,7 +89,7 @@ export class ApplicabilityAnalyzer {
       const ruleStart = Date.now();
       ruleValidations = this.ruleValidator.validateArticles(
         input.articles,
-        input.caseInfo,
+        input.caseInfo
       );
       timings.ruleValidation = Date.now() - ruleStart;
     }
@@ -102,7 +102,7 @@ export class ApplicabilityAnalyzer {
         input.articles,
         input.caseInfo,
         semanticMatches,
-        ruleValidations,
+        ruleValidations
       );
       timings.aiReview = Date.now() - aiStart;
     }
@@ -113,7 +113,7 @@ export class ApplicabilityAnalyzer {
       semanticMatches,
       ruleValidations,
       aiReviews,
-      thresholds,
+      thresholds
     );
 
     // 计算统计信息
@@ -123,8 +123,8 @@ export class ApplicabilityAnalyzer {
     return {
       analyzedAt: new Date(),
       totalArticles: input.articles.length,
-      applicableArticles: results.filter((r) => r.applicable).length,
-      notApplicableArticles: results.filter((r) => !r.applicable).length,
+      applicableArticles: results.filter(r => r.applicable).length,
+      notApplicableArticles: results.filter(r => !r.applicable).length,
       results,
       statistics,
       config,
@@ -143,9 +143,9 @@ export class ApplicabilityAnalyzer {
       minExclusionScore: number;
       aiLowConfidenceThreshold: number;
       defaultApplicabilityThreshold: number;
-    },
+    }
   ): ArticleApplicabilityResult[] {
-    return articles.map((article) => {
+    return articles.map(article => {
       const semanticMatch = semanticMatches.get(article.id);
       const ruleValidation = ruleValidations.get(article.id);
       const aiReview = aiReviews.get(article.id);
@@ -157,14 +157,14 @@ export class ApplicabilityAnalyzer {
       const score = this.calculateFinalScore(
         semanticScore,
         ruleScore,
-        aiReview,
+        aiReview
       );
 
       // 判断是否适用
       const applicable = this.determineApplicability(
         score,
         aiReview,
-        thresholds,
+        thresholds
       );
 
       // 添加法条状态警告
@@ -174,12 +174,12 @@ export class ApplicabilityAnalyzer {
       const reasons = this.collectReasons(
         semanticMatch,
         ruleValidation,
-        aiReview,
+        aiReview
       );
       const warnings = this.collectWarnings(
         semanticMatch,
         ruleValidation,
-        aiReview,
+        aiReview
       );
 
       return {
@@ -204,24 +204,24 @@ export class ApplicabilityAnalyzer {
    * 添加法条状态警告
    */
   private addStatusWarning(
-    article: LawArticle,
-  ): { level: "error" | "warning" | "info"; message: string } | undefined {
+    article: LawArticle
+  ): { level: 'error' | 'warning' | 'info'; message: string } | undefined {
     if (article.status === LawStatus.REPEALED) {
       return {
-        level: "error",
-        message: "⚠️ 已废止 - 该法条已失效，不建议引用",
+        level: 'error',
+        message: '⚠️ 已废止 - 该法条已失效，不建议引用',
       };
     }
     if (article.status === LawStatus.AMENDED) {
       return {
-        level: "warning",
-        message: "⚠️ 已修订 - 请确认使用最新版本",
+        level: 'warning',
+        message: '⚠️ 已修订 - 请确认使用最新版本',
       };
     }
     if (article.status === LawStatus.EXPIRED) {
       return {
-        level: "warning",
-        message: "⚠️ 已过期 - 法条已超过有效期",
+        level: 'warning',
+        message: '⚠️ 已过期 - 法条已超过有效期',
       };
     }
     return undefined;
@@ -233,7 +233,7 @@ export class ApplicabilityAnalyzer {
   private calculateFinalScore(
     semanticScore: number,
     ruleScore: number,
-    aiReview: AIReviewResult | undefined,
+    aiReview: AIReviewResult | undefined
   ): number {
     if (aiReview && aiReview.confidence !== undefined) {
       // 有AI审查结果，综合三者
@@ -254,7 +254,7 @@ export class ApplicabilityAnalyzer {
       minExclusionScore: number;
       aiLowConfidenceThreshold: number;
       defaultApplicabilityThreshold: number;
-    },
+    }
   ): boolean {
     // 评分低于排除阈值的直接排除
     if (score < thresholds.minExclusionScore) {
@@ -285,7 +285,7 @@ export class ApplicabilityAnalyzer {
   private collectReasons(
     semanticMatch: SemanticMatchResult | undefined,
     ruleValidation: RuleValidationResult | undefined,
-    aiReview: AIReviewResult | undefined,
+    aiReview: AIReviewResult | undefined
   ): string[] {
     const reasons: string[] = [];
 
@@ -311,7 +311,7 @@ export class ApplicabilityAnalyzer {
   private collectWarnings(
     semanticMatch: SemanticMatchResult | undefined,
     ruleValidation: RuleValidationResult | undefined,
-    aiReview: AIReviewResult | undefined,
+    aiReview: AIReviewResult | undefined
   ): string[] {
     const warnings: string[] = [];
 
@@ -338,11 +338,11 @@ export class ApplicabilityAnalyzer {
       ruleValidation: number;
       aiReview: number;
     },
-    startTime: number,
+    startTime: number
   ): AnalysisStatistics {
     const executionTime = Date.now() - startTime;
-    const scores = results.map((r) => r.score);
-    const applicableCount = results.filter((r) => r.applicable).length;
+    const scores = results.map(r => r.score);
+    const applicableCount = results.filter(r => r.applicable).length;
 
     return {
       averageScore: scores.reduce((a, b) => a + b, 0) / results.length,
@@ -362,11 +362,11 @@ export class ApplicabilityAnalyzer {
    * 按法条类型分组统计
    */
   private groupByType(
-    results: ArticleApplicabilityResult[],
+    results: ArticleApplicabilityResult[]
   ): Record<string, number> {
     return {
-      applicable: results.filter((r) => r.applicable).length,
-      notApplicable: results.filter((r) => !r.applicable).length,
+      applicable: results.filter(r => r.applicable).length,
+      notApplicable: results.filter(r => !r.applicable).length,
     };
   }
 
@@ -374,7 +374,7 @@ export class ApplicabilityAnalyzer {
    * 按法律分类分组统计
    */
   private groupByCategory(
-    results: ArticleApplicabilityResult[],
+    results: ArticleApplicabilityResult[]
   ): Record<string, number> {
     return {
       total: results.length,

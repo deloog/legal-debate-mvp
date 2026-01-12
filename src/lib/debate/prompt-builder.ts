@@ -1,6 +1,6 @@
 // Prompt构建器：构建辩论生成提示词
 
-import { DebateInput, PromptOptions, DEFAULT_DEBATE_CONFIG } from "./types";
+import { DebateInput, PromptOptions, DEFAULT_DEBATE_CONFIG } from './types';
 
 /**
  * Prompt构建器类
@@ -11,8 +11,8 @@ export class PromptBuilder {
    */
   static buildDebatePrompt(
     input: DebateInput,
-    side: "plaintiff" | "defendant",
-    options?: Partial<PromptOptions>,
+    side: 'plaintiff' | 'defendant',
+    options?: Partial<PromptOptions>
   ): PromptOptions {
     const temperature =
       options?.temperature ??
@@ -64,8 +64,8 @@ export class PromptBuilder {
    */
   private static buildUserPrompt(
     input: DebateInput,
-    side: "plaintiff" | "defendant",
-    config?: DebateInput["config"] | undefined,
+    side: 'plaintiff' | 'defendant',
+    config?: DebateInput['config'] | undefined
   ): string {
     const { caseInfo, lawArticles } = input;
     const { includeLegalAnalysis } = config ?? DEFAULT_DEBATE_CONFIG;
@@ -73,92 +73,92 @@ export class PromptBuilder {
     const promptParts: string[] = [];
 
     // 案件信息
-    promptParts.push("## 案件信息\n");
+    promptParts.push('## 案件信息\n');
     promptParts.push(`**案件名称**：${caseInfo.title}\n`);
     promptParts.push(`**案件类型**：${caseInfo.caseType}\n`);
     promptParts.push(`**案件描述**：\n${caseInfo.description}\n`);
 
     // 当事人信息
-    promptParts.push("## 当事人信息\n");
+    promptParts.push('## 当事人信息\n');
     promptParts.push(`**原告**：${caseInfo.parties.plaintiff}\n`);
     promptParts.push(`**被告**：${caseInfo.parties.defendant}\n`);
 
     // 诉讼请求
     if (caseInfo.claims.length > 0) {
-      promptParts.push("## 诉讼请求\n");
-      caseInfo.claims.forEach((claim) => {
+      promptParts.push('## 诉讼请求\n');
+      caseInfo.claims.forEach(claim => {
         promptParts.push(`${claim}`);
       });
-      promptParts.push("\n");
+      promptParts.push('\n');
     }
 
     // 案件事实
     if (caseInfo.facts.length > 0) {
-      promptParts.push("## 案件事实\n");
-      caseInfo.facts.forEach((fact) => {
+      promptParts.push('## 案件事实\n');
+      caseInfo.facts.forEach(fact => {
         promptParts.push(`${fact}`);
       });
-      promptParts.push("\n");
+      promptParts.push('\n');
     }
 
     // 相关法条
     if (lawArticles.length > 0) {
-      promptParts.push("## 相关法条\n");
-      lawArticles.forEach((article) => {
+      promptParts.push('## 相关法条\n');
+      lawArticles.forEach(article => {
         promptParts.push(`**${article.lawName} ${article.articleNumber}**：`);
         promptParts.push(article.content);
-        promptParts.push("\n");
+        promptParts.push('\n');
       });
     }
 
     // 法律分析
     if (includeLegalAnalysis && lawArticles.length > 0) {
-      const sideName = side === "plaintiff" ? "原告" : "被告";
-      promptParts.push("## 法律分析要点\n");
+      const sideName = side === 'plaintiff' ? '原告' : '被告';
+      promptParts.push('## 法律分析要点\n');
       promptParts.push(`请分析上述法条如何支持${sideName}的论点：\n`);
     }
 
     // 辩论要求
-    const sideText = side === "plaintiff" ? "原告方" : "被告方";
+    const sideText = side === 'plaintiff' ? '原告方' : '被告方';
     promptParts.push(`## ${sideText}辩论要求\n`);
     promptParts.push(
-      `请为${sideText}生成${this.getArgumentCountString(config?.balanceStrictness)}个论点。\n`,
+      `请为${sideText}生成${this.getArgumentCountString(config?.balanceStrictness)}个论点。\n`
     );
-    promptParts.push("每个论点应包含：\n");
-    promptParts.push("1. **主要论点**：清晰陈述核心观点\n");
-    promptParts.push("2. **推理过程**：详细说明从事实到结论的逻辑推理\n");
-    promptParts.push("3. **法律依据**：引用相关法条，说明如何支持该论点\n");
-    promptParts.push("4. **事实支撑**：引用案件事实作为论点支撑\n");
+    promptParts.push('每个论点应包含：\n');
+    promptParts.push('1. **主要论点**：清晰陈述核心观点\n');
+    promptParts.push('2. **推理过程**：详细说明从事实到结论的逻辑推理\n');
+    promptParts.push('3. **法律依据**：引用相关法条，说明如何支持该论点\n');
+    promptParts.push('4. **事实支撑**：引用案件事实作为论点支撑\n');
 
     // 输出格式
-    promptParts.push("\n## 输出格式\n");
-    promptParts.push("请严格按照以下JSON格式输出：\n");
+    promptParts.push('\n## 输出格式\n');
+    promptParts.push('请严格按照以下JSON格式输出：\n');
     promptParts.push(this.getOutputFormat());
 
     // 示例
     if (config?.includeLegalAnalysis !== false) {
-      promptParts.push("\n## 输出示例\n");
+      promptParts.push('\n## 输出示例\n');
       promptParts.push(this.getExample(side));
     }
 
-    return promptParts.join("\n");
+    return promptParts.join('\n');
   }
 
   /**
    * 获取论点数量说明
    */
   private static getArgumentCountString(
-    strictness?: "low" | "medium" | "high" | undefined,
+    strictness?: 'low' | 'medium' | 'high' | undefined
   ): string {
     switch (strictness) {
-      case "low":
-        return "3-5";
-      case "medium":
-        return "4-6";
-      case "high":
-        return "5-7";
+      case 'low':
+        return '3-5';
+      case 'medium':
+        return '4-6';
+      case 'high':
+        return '5-7';
       default:
-        return "4-6";
+        return '4-6';
     }
   }
 
@@ -188,8 +188,8 @@ export class PromptBuilder {
   /**
    * 获取示例
    */
-  private static getExample(side: "plaintiff" | "defendant"): string {
-    const sideText = side === "plaintiff" ? "原告" : "被告";
+  private static getExample(side: 'plaintiff' | 'defendant'): string {
+    const sideText = side === 'plaintiff' ? '原告' : '被告';
     return `${sideText}论点示例：
 
 {
@@ -229,34 +229,34 @@ export class PromptBuilder {
    */
   static buildReviewPrompt(
     argumentList: string[],
-    originalInput: DebateInput,
+    originalInput: DebateInput
   ): string {
     const promptParts: string[] = [];
 
-    promptParts.push("## 辩论论点审查任务\n");
-    promptParts.push("请对以下生成的辩论论点进行审查和优化。\n");
+    promptParts.push('## 辩论论点审查任务\n');
+    promptParts.push('请对以下生成的辩论论点进行审查和优化。\n');
 
-    promptParts.push("### 生成的论点\n");
+    promptParts.push('### 生成的论点\n');
     argumentList.forEach((arg, index) => {
       promptParts.push(`\n**论点 ${index + 1}**：\n${arg}`);
     });
 
-    promptParts.push("\n### 案件背景\n");
+    promptParts.push('\n### 案件背景\n');
     promptParts.push(`**案件名称**：${originalInput.caseInfo.title}\n`);
     promptParts.push(`**案件类型**：${originalInput.caseInfo.caseType}\n`);
 
-    promptParts.push("\n### 审查要点\n");
-    promptParts.push("请从以下维度审查论点：\n");
-    promptParts.push("1. **逻辑清晰度**：论点推理是否清晰完整\n");
-    promptParts.push("2. **法律准确性**：法条引用是否准确相关\n");
-    promptParts.push("3. **事实依据**：论点是否基于案件事实\n");
-    promptParts.push("4. **表达质量**：语言是否简洁准确\n");
+    promptParts.push('\n### 审查要点\n');
+    promptParts.push('请从以下维度审查论点：\n');
+    promptParts.push('1. **逻辑清晰度**：论点推理是否清晰完整\n');
+    promptParts.push('2. **法律准确性**：法条引用是否准确相关\n');
+    promptParts.push('3. **事实依据**：论点是否基于案件事实\n');
+    promptParts.push('4. **表达质量**：语言是否简洁准确\n');
 
-    promptParts.push("\n### 输出要求\n");
-    promptParts.push("- 列出需要修正的问题\n");
-    promptParts.push("- 提供改进建议\n");
-    promptParts.push("- 如有需要，提供优化后的论点\n");
+    promptParts.push('\n### 输出要求\n');
+    promptParts.push('- 列出需要修正的问题\n');
+    promptParts.push('- 提供改进建议\n');
+    promptParts.push('- 如有需要，提供优化后的论点\n');
 
-    return promptParts.join("\n");
+    return promptParts.join('\n');
   }
 }

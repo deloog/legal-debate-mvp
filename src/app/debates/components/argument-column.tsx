@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { Argument } from "@prisma/client";
-import { ArgumentCard } from "./argument-card";
+import { Argument } from '@prisma/client';
+import { ArgumentCard } from './argument-card';
 
 export interface ArgumentColumnProps {
   title: string;
-  side: "PLAINTIFF" | "DEFENDANT" | "NEUTRAL";
+  side: 'PLAINTIFF' | 'DEFENDANT' | 'NEUTRAL';
   arguments: Argument[];
   streamingArgumentId?: string | null;
-  accentColor: "blue" | "red" | "gray";
+  accentColor: 'blue' | 'red' | 'gray';
 }
 
 /**
@@ -16,22 +16,22 @@ export interface ArgumentColumnProps {
  */
 const colorStyles = {
   blue: {
-    header: "bg-blue-500",
-    border: "border-blue-500/20",
-    bg: "bg-blue-50 dark:bg-blue-950/20",
-    text: "text-blue-700 dark:text-blue-300",
+    header: 'bg-blue-500',
+    border: 'border-blue-500/20',
+    bg: 'bg-blue-50 dark:bg-blue-950/20',
+    text: 'text-blue-700 dark:text-blue-300',
   },
   red: {
-    header: "bg-red-500",
-    border: "border-red-500/20",
-    bg: "bg-red-50 dark:bg-red-950/20",
-    text: "text-red-700 dark:text-red-300",
+    header: 'bg-red-500',
+    border: 'border-red-500/20',
+    bg: 'bg-red-50 dark:bg-red-950/20',
+    text: 'text-red-700 dark:text-red-300',
   },
   gray: {
-    header: "bg-gray-500",
-    border: "border-gray-500/20",
-    bg: "bg-gray-50 dark:bg-gray-950/20",
-    text: "text-gray-700 dark:text-gray-300",
+    header: 'bg-gray-500',
+    border: 'border-gray-500/20',
+    bg: 'bg-gray-50 dark:bg-gray-950/20',
+    text: 'text-gray-700 dark:text-gray-300',
   },
 };
 
@@ -47,7 +47,7 @@ export function ArgumentColumn({
   accentColor,
 }: ArgumentColumnProps) {
   const styles = colorStyles[accentColor];
-  const filteredArguments = argumentsList.filter((arg) => arg.side === side);
+  const filteredArguments = argumentsList.filter(arg => arg.side === side);
 
   return (
     <div
@@ -58,20 +58,20 @@ export function ArgumentColumn({
         className={`${styles.header} rounded-t-xl px-4 py-3 text-center font-medium text-white`}
       >
         {title}
-        <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-xs">
+        <span className='ml-2 rounded-full bg-white/20 px-2 py-0.5 text-xs'>
           {filteredArguments.length}
         </span>
       </div>
 
       {/* 论点列表 */}
-      <div className="flex-1 space-y-3 p-4">
+      <div className='flex-1 space-y-3 p-4'>
         {filteredArguments.length === 0 ? (
-          <div className="flex h-32 items-center justify-center text-sm text-zinc-400">
+          <div className='flex h-32 items-center justify-center text-sm text-zinc-400'>
             暂无论点
           </div>
         ) : (
-          <div className="space-y-3">
-            {filteredArguments.map((argument) => (
+          <div className='space-y-3'>
+            {filteredArguments.map(argument => (
               <ArgumentCard
                 key={argument.id}
                 argument={argument}

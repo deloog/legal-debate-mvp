@@ -2,12 +2,12 @@
  * 认证E2E测试辅助函数
  */
 
-import type { APIRequestContext } from "@playwright/test";
+import type { APIRequestContext } from '@playwright/test';
 
 // =============================================================================
 // 测试基础URL
 // =============================================================================
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 // =============================================================================
 // 测试数据类型定义
@@ -78,12 +78,12 @@ interface CurrentUserResponseData {
  * 创建测试用户
  */
 export async function createTestUser(
-  apiContext: APIRequestContext,
+  apiContext: APIRequestContext
 ): Promise<TestUser> {
   const timestamp = Date.now();
   const shortId = String(timestamp).slice(-6);
   const email = `test-${timestamp}@example.com`;
-  const password = "TestPass123";
+  const password = 'TestPass123';
 
   const response = await apiContext.post(`${BASE_URL}/api/auth/register`, {
     data: {
@@ -97,12 +97,12 @@ export async function createTestUser(
   const data: AuthResponseData = await response.json();
 
   return {
-    id: data.data?.user.id || "",
+    id: data.data?.user.id || '',
     email,
     password,
     username: `test${shortId}`,
     name: `TestUser${shortId}`,
-    role: data.data?.user.role || "USER",
+    role: data.data?.user.role || 'USER',
     token: data.data?.token,
     refreshToken: data.data?.refreshToken,
   };
@@ -114,15 +114,15 @@ export async function createTestUser(
 export async function loginUser(
   apiContext: APIRequestContext,
   email: string,
-  password: string,
+  password: string
 ): Promise<{ token: string; refreshToken: string }> {
   const response = await apiContext.post(`${BASE_URL}/api/auth/login`, {
     data: { email, password },
   });
 
   const data: AuthResponseData = await response.json();
-  const token = data.data?.token || "";
-  const refreshToken = data.data?.refreshToken || "";
+  const token = data.data?.token || '';
+  const refreshToken = data.data?.refreshToken || '';
 
   return { token, refreshToken };
 }
@@ -132,14 +132,14 @@ export async function loginUser(
  */
 export async function refreshToken(
   apiContext: APIRequestContext,
-  refreshTokenValue: string,
+  refreshTokenValue: string
 ): Promise<string> {
   const response = await apiContext.post(`${BASE_URL}/api/auth/refresh`, {
     data: { refreshToken: refreshTokenValue },
   });
 
   const data: RefreshResponseData = await response.json();
-  return data.data?.token || "";
+  return data.data?.token || '';
 }
 
 /**
@@ -147,7 +147,7 @@ export async function refreshToken(
  */
 export async function getCurrentUser(
   apiContext: APIRequestContext,
-  token: string,
+  token: string
 ): Promise<CurrentUserResponseData> {
   const response = await apiContext.get(`${BASE_URL}/api/auth/me`, {
     headers: {
@@ -165,7 +165,7 @@ export async function logout(
   apiContext: APIRequestContext,
   token: string,
   refreshToken: string,
-  allDevices = false,
+  allDevices = false
 ): Promise<{ success: boolean; message: string }> {
   const response = await apiContext.post(`${BASE_URL}/api/auth/logout`, {
     data: { allDevices },

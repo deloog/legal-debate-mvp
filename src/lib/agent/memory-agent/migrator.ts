@@ -8,13 +8,13 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import * as cron from "node-cron";
-import { PrismaClient } from "@prisma/client";
+import * as cron from 'node-cron';
+import { PrismaClient } from '@prisma/client';
 
-import { MemoryManager } from "./memory-manager";
-import { MemoryCompressor } from "./compressor";
-import type { Memory, MigrationResult } from "./types";
-import { MIGRATION_CONFIG, FILTER_CONSTANTS } from "./migrator/config";
+import { MemoryManager } from './memory-manager';
+import { MemoryCompressor } from './compressor';
+import type { Memory, MigrationResult } from './types';
+import { MIGRATION_CONFIG, FILTER_CONSTANTS } from './migrator/config';
 
 const prisma = new PrismaClient();
 
@@ -27,7 +27,7 @@ export class MemoryMigrator {
 
   constructor(
     private memoryManager: MemoryManager,
-    private compressor: MemoryCompressor,
+    private compressor: MemoryCompressor
   ) {
     // 不在构造函数中启动定时任务
     // 由外部调用start方法启动
@@ -38,8 +38,8 @@ export class MemoryMigrator {
    */
   private async logMigrationAction(
     memory: Memory,
-    actionType: "MIGRATE_WORKING_TO_HOT" | "MIGRATE_HOT_TO_COLD",
-    status: "COMPLETED" | "FAILED",
+    actionType: 'MIGRATE_WORKING_TO_HOT' | 'MIGRATE_HOT_TO_COLD',
+    status: 'COMPLETED' | 'FAILED',
     metadata?: {
       originalType: string;
       targetType: string;
@@ -47,18 +47,18 @@ export class MemoryMigrator {
       accessCount: number;
       compressionRatio?: number;
       error?: string;
-    },
+    }
   ): Promise<void> {
     try {
       await prisma.agentAction.create({
         data: {
-          agentName: "MemoryAgent",
+          agentName: 'MemoryAgent',
           actionType: actionType as any,
           actionName:
-            actionType === "MIGRATE_WORKING_TO_HOT"
-              ? "Working→Hot Migration"
-              : "Hot→Cold Migration",
-          actionLayer: "SCRIPT",
+            actionType === 'MIGRATE_WORKING_TO_HOT'
+              ? 'Working→Hot Migration'
+              : 'Hot→Cold Migration',
+          actionLayer: 'SCRIPT',
           parameters: {
             memoryId: memory.memoryId,
             memoryKey: memory.memoryKey,
@@ -74,7 +74,7 @@ export class MemoryMigrator {
         },
       });
     } catch (error) {
-      console.error("Failed to log migration action:", error);
+      console.error('Failed to log migration action:', error);
       // 不影响迁移流程
     }
   }
@@ -84,24 +84,24 @@ export class MemoryMigrator {
    */
   start(): void {
     if (this.workingToHotCron) {
-      console.log("MemoryMigrator already started");
+      console.log('MemoryMigrator already started');
       return;
     }
 
-    console.log("Starting MemoryMigrator cron jobs...");
+    console.log('Starting MemoryMigrator cron jobs...');
 
     // Working→Hot迁移（每小时）
     this.workingToHotCron = cron.schedule(
       MIGRATION_CONFIG.WORKING_TO_HOT_CRON,
-      () => this.migrateWorkingToHot().catch(console.error),
+      () => this.migrateWorkingToHot().catch(console.error)
     );
 
     // Hot→Cold归档（每天）
     this.hotToColdCron = cron.schedule(MIGRATION_CONFIG.HOT_TO_COLD_CRON, () =>
-      this.compressHotToCold().catch(console.error),
+      this.compressHotToCold().catch(console.error)
     );
 
-    console.log("MemoryMigrator cron jobs started successfully");
+    console.log('MemoryMigrator cron jobs started successfully');
   }
 
   /**
@@ -118,7 +118,7 @@ export class MemoryMigrator {
       this.hotToColdCron = undefined;
     }
 
-    console.log("MemoryMigrator cron jobs stopped");
+    console.log('MemoryMigrator cron jobs stopped');
   }
 
   /**
@@ -133,10 +133,10 @@ export class MemoryMigrator {
     try {
       // 获取所有Working Memory
       const workingMemories =
-        await this.memoryManager.getMemoriesByType("WORKING");
+        await this.memoryManager.getMemoriesByType('WORKING');
 
       console.log(
-        `Found ${workingMemories.length} Working Memories to migrate`,
+        `Found ${workingMemories.length} Working Memories to migrate`
       );
 
       // 过滤候选记忆
@@ -147,12 +147,12 @@ export class MemoryMigrator {
       // 限制迁移数量
       const toMigrate = candidates.slice(
         0,
-        MIGRATION_CONFIG.MAX_MIGRATION_COUNT,
+        MIGRATION_CONFIG.MAX_MIGRATION_COUNT
       );
 
       for (const memory of toMigrate) {
         try {
-          await this.migrateSingleMemory(memory, "HOT");
+          await this.migrateSingleMemory(memory, 'HOT');
           migratedCount++;
         } catch (error) {
           console.error(`Failed to migrate memory ${memory.memoryId}:`, error);
@@ -163,10 +163,10 @@ export class MemoryMigrator {
       skippedCount = workingMemories.length - toMigrate.length;
 
       console.log(
-        `Working→Hot migration completed: ${migratedCount} migrated, ${skippedCount} skipped, ${failedCount} failed`,
+        `Working→Hot migration completed: ${migratedCount} migrated, ${skippedCount} skipped, ${failedCount} failed`
       );
     } catch (error) {
-      console.error("Error during Working→Hot migration:", error);
+      console.error('Error during Working→Hot migration:', error);
       failedCount++;
     }
 
@@ -189,7 +189,7 @@ export class MemoryMigrator {
 
     try {
       // 获取所有Hot Memory
-      const hotMemories = await this.memoryManager.getMemoriesByType("HOT");
+      const hotMemories = await this.memoryManager.getMemoriesByType('HOT');
 
       console.log(`Found ${hotMemories.length} Hot Memories to archive`);
 
@@ -201,7 +201,7 @@ export class MemoryMigrator {
       // 限制迁移数量
       const toCompress = candidates.slice(
         0,
-        MIGRATION_CONFIG.MAX_MIGRATION_COUNT,
+        MIGRATION_CONFIG.MAX_MIGRATION_COUNT
       );
 
       for (const memory of toCompress) {
@@ -217,10 +217,10 @@ export class MemoryMigrator {
       skippedCount = hotMemories.length - toCompress.length;
 
       console.log(
-        `Hot→Cold archiving completed: ${migratedCount} migrated, ${skippedCount} skipped, ${failedCount} failed`,
+        `Hot→Cold archiving completed: ${migratedCount} migrated, ${skippedCount} skipped, ${failedCount} failed`
       );
     } catch (error) {
-      console.error("Error during Hot→Cold archiving:", error);
+      console.error('Error during Hot→Cold archiving:', error);
       failedCount++;
     }
 
@@ -237,7 +237,7 @@ export class MemoryMigrator {
    */
   async forcemigrate(
     memoryId: string,
-    targetType: "HOT" | "COLD",
+    targetType: 'HOT' | 'COLD'
   ): Promise<void> {
     // 查找记忆
     const memory = await this.memoryManager.getMemoryById(memoryId);
@@ -254,7 +254,7 @@ export class MemoryMigrator {
    * 过滤Working Memory候选
    */
   private filterWorkingCandidates(memories: Memory[]): Memory[] {
-    return memories.filter((memory) => {
+    return memories.filter(memory => {
       if (!memory.expiresAt) {
         return false;
       }
@@ -273,7 +273,7 @@ export class MemoryMigrator {
    * 过滤Hot Memory候选
    */
   private filterHotCandidates(memories: Memory[]): Memory[] {
-    return memories.filter((memory) => {
+    return memories.filter(memory => {
       if (!memory.expiresAt) {
         return false;
       }
@@ -291,48 +291,48 @@ export class MemoryMigrator {
    */
   private async migrateSingleMemory(
     memory: Memory,
-    targetType: "HOT" | "COLD",
+    targetType: 'HOT' | 'COLD'
   ): Promise<void> {
     const startTime = Date.now();
 
     try {
       // 获取包含元数据的记忆
       const memoryWithMetadata = await this.memoryManager.getMemoryWithMetadata(
-        memory.memoryId,
+        memory.memoryId
       );
 
       if (!memoryWithMetadata) {
         throw new Error(
-          `Failed to retrieve memory with metadata: ${memory.memoryId}`,
+          `Failed to retrieve memory with metadata: ${memory.memoryId}`
         );
       }
 
       // 删除原始记忆
-      if (memory.memoryType === "WORKING") {
+      if (memory.memoryType === 'WORKING') {
         await this.memoryManager.deleteWorkingMemory(memory.memoryKey);
       }
 
       // 存储到目标层级
-      if (targetType === "HOT") {
+      if (targetType === 'HOT') {
         await this.memoryManager.storeHotMemory(
           memory.memoryKey,
           memory.memoryValue,
-          memoryWithMetadata.userId || "system",
+          memoryWithMetadata.userId || 'system',
           memory.importance,
-          memoryWithMetadata.caseId || undefined,
+          memoryWithMetadata.caseId || undefined
         );
 
         // 记录迁移历史
         await this.logMigrationAction(
           memory,
-          "MIGRATE_WORKING_TO_HOT",
-          "COMPLETED",
+          'MIGRATE_WORKING_TO_HOT',
+          'COMPLETED',
           {
             originalType: memory.memoryType,
-            targetType: "HOT",
+            targetType: 'HOT',
             importance: memory.importance,
             accessCount: memory.accessCount,
-          },
+          }
         );
       }
 
@@ -340,9 +340,9 @@ export class MemoryMigrator {
       const executionTime = Date.now() - startTime;
       await prisma.agentAction.updateMany({
         where: {
-          agentName: "MemoryAgent",
+          agentName: 'MemoryAgent',
           parameters: {
-            path: ["memoryId"],
+            path: ['memoryId'],
             equals: memory.memoryId,
           },
         },
@@ -352,15 +352,15 @@ export class MemoryMigrator {
       // 记录失败的迁移
       await this.logMigrationAction(
         memory,
-        targetType === "HOT" ? "MIGRATE_WORKING_TO_HOT" : "MIGRATE_HOT_TO_COLD",
-        "FAILED",
+        targetType === 'HOT' ? 'MIGRATE_WORKING_TO_HOT' : 'MIGRATE_HOT_TO_COLD',
+        'FAILED',
         {
           originalType: memory.memoryType,
           targetType,
           importance: memory.importance,
           accessCount: memory.accessCount,
-          error: error instanceof Error ? error.message : "Unknown error",
-        },
+          error: error instanceof Error ? error.message : 'Unknown error',
+        }
       );
       throw error;
     }
@@ -378,7 +378,7 @@ export class MemoryMigrator {
 
       if (!compressionResult.success) {
         throw new Error(
-          `Compression failed: ${compressionResult.error || "Unknown error"}`,
+          `Compression failed: ${compressionResult.error || 'Unknown error'}`
         );
       }
 
@@ -397,36 +397,36 @@ export class MemoryMigrator {
       await this.memoryManager.storeColdMemory(
         memory.memoryKey,
         compressedValue,
-        memory.memoryId,
+        memory.memoryId
       );
 
       // 标记为已压缩（如果后续需要）
       await this.memoryManager.markAsCompressed(
         memory.memoryId,
-        compressionResult.ratio || 0,
+        compressionResult.ratio || 0
       );
 
       // 记录迁移历史
       await this.logMigrationAction(
         memory,
-        "MIGRATE_HOT_TO_COLD",
-        "COMPLETED",
+        'MIGRATE_HOT_TO_COLD',
+        'COMPLETED',
         {
           originalType: memory.memoryType,
-          targetType: "COLD",
+          targetType: 'COLD',
           importance: memory.importance,
           accessCount: memory.accessCount,
           compressionRatio: compressionResult.ratio,
-        },
+        }
       );
 
       // 更新执行时间
       const executionTime = Date.now() - startTime;
       await prisma.agentAction.updateMany({
         where: {
-          agentName: "MemoryAgent",
+          agentName: 'MemoryAgent',
           parameters: {
-            path: ["memoryId"],
+            path: ['memoryId'],
             equals: memory.memoryId,
           },
         },
@@ -434,12 +434,12 @@ export class MemoryMigrator {
       });
     } catch (error) {
       // 记录失败的归档
-      await this.logMigrationAction(memory, "MIGRATE_HOT_TO_COLD", "FAILED", {
+      await this.logMigrationAction(memory, 'MIGRATE_HOT_TO_COLD', 'FAILED', {
         originalType: memory.memoryType,
-        targetType: "COLD",
+        targetType: 'COLD',
         importance: memory.importance,
         accessCount: memory.accessCount,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
       throw error;
     }
@@ -456,8 +456,8 @@ export class MemoryMigrator {
     hotToColdEligible: number;
   }> {
     const [workingMemories, hotMemories] = await Promise.all([
-      this.memoryManager.getMemoriesByType("WORKING"),
-      this.memoryManager.getMemoriesByType("HOT"),
+      this.memoryManager.getMemoriesByType('WORKING'),
+      this.memoryManager.getMemoriesByType('HOT'),
     ]);
 
     const workingToHotEligible =
@@ -468,7 +468,7 @@ export class MemoryMigrator {
     return {
       workingCount: workingMemories.length,
       hotCount: hotMemories.length,
-      coldCount: (await this.memoryManager.getMemoriesByType("COLD")).length,
+      coldCount: (await this.memoryManager.getMemoriesByType('COLD')).length,
       workingToHotEligible,
       hotToColdEligible,
     };

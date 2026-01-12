@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 import type {
   MigrationHistoryItem,
   Pagination,
-} from "./migration-history-list";
-import type { MigrationStatsResponse as StatsResponse } from "./migration-stats";
+} from './migration-history-list';
+import type { MigrationStatsResponse as StatsResponse } from './migration-stats';
 
 export interface UseMigrationHistoryOptions {
   initialPage?: number;
@@ -38,7 +38,7 @@ export interface UseMigrationHistoryReturn {
 }
 
 export function useMigrationHistory(
-  options: UseMigrationHistoryOptions = {},
+  options: UseMigrationHistoryOptions = {}
 ): UseMigrationHistoryReturn {
   const { initialPage = 1, initialLimit = 20, autoFetch = true } = options;
 
@@ -62,32 +62,32 @@ export function useMigrationHistory(
 
   const [page, setPage] = useState(initialPage);
   const [limit, setLimit] = useState(initialLimit);
-  const [actionType, setActionType] = useState("all");
-  const [status, setStatus] = useState("all");
+  const [actionType, setActionType] = useState('all');
+  const [status, setStatus] = useState('all');
 
   const fetchHistory = useCallback(async () => {
     try {
-      setHistoryState((prev) => ({ ...prev, loading: true, error: null }));
+      setHistoryState(prev => ({ ...prev, loading: true, error: null }));
 
       const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
       });
 
-      if (actionType && actionType !== "all") {
-        params.set("actionType", actionType);
+      if (actionType && actionType !== 'all') {
+        params.set('actionType', actionType);
       }
 
-      if (status && status !== "all") {
-        params.set("status", status);
+      if (status && status !== 'all') {
+        params.set('status', status);
       }
 
       const response = await fetch(
-        `/api/v1/memory/migration-history?${params}`,
+        `/api/v1/memory/migration-history?${params}`
       );
 
       if (!response.ok) {
-        throw new Error("获取迁移历史失败");
+        throw new Error('获取迁移历史失败');
       }
 
       const result = await response.json();
@@ -100,25 +100,25 @@ export function useMigrationHistory(
           error: null,
         });
       } else {
-        throw new Error(result.error || "未知错误");
+        throw new Error(result.error || '未知错误');
       }
     } catch (err) {
-      setHistoryState((prev) => ({
+      setHistoryState(prev => ({
         ...prev,
         loading: false,
-        error: err instanceof Error ? err.message : "未知错误",
+        error: err instanceof Error ? err.message : '未知错误',
       }));
     }
   }, [page, limit, actionType, status]);
 
   const fetchStats = useCallback(async () => {
     try {
-      setStatsState((prev) => ({ ...prev, loading: true, error: null }));
+      setStatsState(prev => ({ ...prev, loading: true, error: null }));
 
-      const response = await fetch("/api/v1/memory/migration-stats");
+      const response = await fetch('/api/v1/memory/migration-stats');
 
       if (!response.ok) {
-        throw new Error("获取迁移统计失败");
+        throw new Error('获取迁移统计失败');
       }
 
       const result = await response.json();
@@ -130,13 +130,13 @@ export function useMigrationHistory(
           error: null,
         });
       } else {
-        throw new Error("未知错误");
+        throw new Error('未知错误');
       }
     } catch (err) {
-      setStatsState((prev) => ({
+      setStatsState(prev => ({
         ...prev,
         loading: false,
-        error: err instanceof Error ? err.message : "未知错误",
+        error: err instanceof Error ? err.message : '未知错误',
       }));
     }
   }, []);

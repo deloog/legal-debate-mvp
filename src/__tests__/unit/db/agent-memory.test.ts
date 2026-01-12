@@ -3,11 +3,11 @@
  * 测试三层记忆架构（工作记忆、热记忆、冷记忆）
  */
 
-import { PrismaClient, MemoryType } from "@prisma/client";
+import { PrismaClient, MemoryType } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-describe("AgentMemory模型", () => {
+describe('AgentMemory模型', () => {
   let testUserId: string;
   let testCaseId: string;
   let testDebateId: string;
@@ -16,10 +16,10 @@ describe("AgentMemory模型", () => {
     // 创建测试用户、案件和辩论
     const user = await prisma.user.create({
       data: {
-        email: "test-agent-memory@example.com",
-        username: "test_agent_memory",
-        name: "Test Agent Memory",
-        role: "USER",
+        email: 'test-agent-memory@example.com',
+        username: 'test_agent_memory',
+        name: 'Test Agent Memory',
+        role: 'USER',
       },
     });
     testUserId = user.id;
@@ -27,10 +27,10 @@ describe("AgentMemory模型", () => {
     const testCase = await prisma.case.create({
       data: {
         userId: testUserId,
-        title: "测试案件",
-        description: "测试案件描述",
-        type: "CIVIL",
-        status: "DRAFT",
+        title: '测试案件',
+        description: '测试案件描述',
+        type: 'CIVIL',
+        status: 'DRAFT',
       },
     });
     testCaseId = testCase.id;
@@ -39,8 +39,8 @@ describe("AgentMemory模型", () => {
       data: {
         caseId: testCaseId,
         userId: testUserId,
-        title: "测试辩论",
-        status: "DRAFT",
+        title: '测试辩论',
+        status: 'DRAFT',
       },
     });
     testDebateId = testDebate.id;
@@ -60,22 +60,22 @@ describe("AgentMemory模型", () => {
       where: { userId: testUserId },
     });
     await prisma.user.deleteMany({
-      where: { email: "test-agent-memory@example.com" },
+      where: { email: 'test-agent-memory@example.com' },
     });
     await prisma.$disconnect();
   });
 
-  describe("创建记忆记录", () => {
-    it("应成功创建工作记忆", async () => {
+  describe('创建记忆记录', () => {
+    it('应成功创建工作记忆', async () => {
       const memory = await prisma.agentMemory.create({
         data: {
           userId: testUserId,
           caseId: testCaseId,
           debateId: testDebateId,
           memoryType: MemoryType.WORKING,
-          agentName: "TestAgent",
-          memoryKey: "current_task",
-          memoryValue: { task: "analyze_case", step: 1 },
+          agentName: 'TestAgent',
+          memoryKey: 'current_task',
+          memoryValue: { task: 'analyze_case', step: 1 },
           importance: 0.8,
           expiresAt: new Date(Date.now() + 3600000), // 1小时后过期
         },
@@ -84,19 +84,19 @@ describe("AgentMemory模型", () => {
       expect(memory).toBeDefined();
       expect(memory.id).toBeDefined();
       expect(memory.memoryType).toBe(MemoryType.WORKING);
-      expect(memory.agentName).toBe("TestAgent");
+      expect(memory.agentName).toBe('TestAgent');
       expect(memory.importance).toBe(0.8);
     });
 
-    it("应成功创建热记忆", async () => {
+    it('应成功创建热记忆', async () => {
       const memory = await prisma.agentMemory.create({
         data: {
           userId: testUserId,
           caseId: testCaseId,
           memoryType: MemoryType.HOT,
-          agentName: "TestAgent",
-          memoryKey: "last_case_pattern",
-          memoryValue: { pattern: "contract_dispute", successRate: 0.95 },
+          agentName: 'TestAgent',
+          memoryKey: 'last_case_pattern',
+          memoryValue: { pattern: 'contract_dispute', successRate: 0.95 },
           importance: 0.7,
           expiresAt: new Date(Date.now() + 604800000), // 7天后过期
         },
@@ -106,14 +106,14 @@ describe("AgentMemory模型", () => {
       expect(memory.memoryType).toBe(MemoryType.HOT);
     });
 
-    it("应成功创建冷记忆", async () => {
+    it('应成功创建冷记忆', async () => {
       const memory = await prisma.agentMemory.create({
         data: {
           userId: testUserId,
           memoryType: MemoryType.COLD,
-          agentName: "TestAgent",
-          memoryKey: "knowledge_law_article_123",
-          memoryValue: { lawId: "123", summary: "合同法相关条款" },
+          agentName: 'TestAgent',
+          memoryKey: 'knowledge_law_article_123',
+          memoryValue: { lawId: '123', summary: '合同法相关条款' },
           importance: 0.9,
         },
       });
@@ -123,13 +123,13 @@ describe("AgentMemory模型", () => {
       expect(memory.expiresAt).toBeNull(); // 冷记忆无过期时间
     });
 
-    it("应拒绝创建重复的记忆键", async () => {
+    it('应拒绝创建重复的记忆键', async () => {
       const memoryData = {
         userId: testUserId,
         memoryType: MemoryType.WORKING,
-        agentName: "TestAgent",
-        memoryKey: "unique_key",
-        memoryValue: { test: "data" },
+        agentName: 'TestAgent',
+        memoryKey: 'unique_key',
+        memoryValue: { test: 'data' },
       };
 
       await prisma.agentMemory.create({
@@ -139,20 +139,20 @@ describe("AgentMemory模型", () => {
       await expect(
         prisma.agentMemory.create({
           data: memoryData,
-        }),
+        })
       ).rejects.toThrow();
     });
   });
 
-  describe("记忆记录查询", () => {
-    it("应按记忆类型查询", async () => {
+  describe('记忆记录查询', () => {
+    it('应按记忆类型查询', async () => {
       await prisma.agentMemory.create({
         data: {
           userId: testUserId,
           memoryType: MemoryType.WORKING,
-          agentName: "QueryAgent",
-          memoryKey: "query_test_1",
-          memoryValue: { type: "working" },
+          agentName: 'QueryAgent',
+          memoryKey: 'query_test_1',
+          memoryValue: { type: 'working' },
         },
       });
 
@@ -165,28 +165,28 @@ describe("AgentMemory模型", () => {
 
       expect(workingMemories.length).toBeGreaterThan(0);
       expect(
-        workingMemories.every((m) => m.memoryType === MemoryType.WORKING),
+        workingMemories.every(m => m.memoryType === MemoryType.WORKING)
       ).toBe(true);
     });
 
-    it("应按Agent名称查询", async () => {
+    it('应按Agent名称查询', async () => {
       const agentMemories = await prisma.agentMemory.findMany({
         where: {
           userId: testUserId,
-          agentName: "TestAgent",
+          agentName: 'TestAgent',
         },
       });
 
       expect(agentMemories.length).toBeGreaterThan(0);
     });
 
-    it("应按重要性排序查询", async () => {
+    it('应按重要性排序查询', async () => {
       const memories = await prisma.agentMemory.findMany({
         where: {
           userId: testUserId,
         },
         orderBy: {
-          importance: "desc",
+          importance: 'desc',
         },
         take: 5,
       });
@@ -194,18 +194,18 @@ describe("AgentMemory模型", () => {
       expect(memories.length).toBe(5);
       for (let i = 0; i < memories.length - 1; i++) {
         expect(memories[i].importance).toBeGreaterThanOrEqual(
-          memories[i + 1].importance,
+          memories[i + 1].importance
         );
       }
     });
 
-    it("应查询已过期的记忆", async () => {
+    it('应查询已过期的记忆', async () => {
       await prisma.agentMemory.create({
         data: {
           userId: testUserId,
           memoryType: MemoryType.WORKING,
-          agentName: "TestAgent",
-          memoryKey: "expired_memory",
+          agentName: 'TestAgent',
+          memoryKey: 'expired_memory',
           memoryValue: { expired: true },
           expiresAt: new Date(Date.now() - 1000), // 已过期
         },
@@ -223,14 +223,14 @@ describe("AgentMemory模型", () => {
     });
   });
 
-  describe("记忆记录更新", () => {
-    it("应更新记忆访问计数", async () => {
+  describe('记忆记录更新', () => {
+    it('应更新记忆访问计数', async () => {
       const memory = await prisma.agentMemory.create({
         data: {
           userId: testUserId,
           memoryType: MemoryType.WORKING,
-          agentName: "TestAgent",
-          memoryKey: "access_count_test",
+          agentName: 'TestAgent',
+          memoryKey: 'access_count_test',
           memoryValue: { count: 0 },
         },
       });
@@ -247,35 +247,35 @@ describe("AgentMemory模型", () => {
       expect(updated.lastAccessedAt).toBeDefined();
     });
 
-    it("应更新记忆值", async () => {
+    it('应更新记忆值', async () => {
       const memory = await prisma.agentMemory.create({
         data: {
           userId: testUserId,
           memoryType: MemoryType.WORKING,
-          agentName: "TestAgent",
-          memoryKey: "value_update_test",
-          memoryValue: { old: "value" },
+          agentName: 'TestAgent',
+          memoryKey: 'value_update_test',
+          memoryValue: { old: 'value' },
         },
       });
 
       const updated = await prisma.agentMemory.update({
         where: { id: memory.id },
         data: {
-          memoryValue: { new: "value" },
+          memoryValue: { new: 'value' },
         },
       });
 
-      expect(updated.memoryValue).toEqual({ new: "value" });
+      expect(updated.memoryValue).toEqual({ new: 'value' });
     });
 
-    it("应支持压缩标记", async () => {
+    it('应支持压缩标记', async () => {
       const memory = await prisma.agentMemory.create({
         data: {
           userId: testUserId,
           memoryType: MemoryType.COLD,
-          agentName: "TestAgent",
-          memoryKey: "compressed_test",
-          memoryValue: { large: "data".repeat(100) },
+          agentName: 'TestAgent',
+          memoryKey: 'compressed_test',
+          memoryValue: { large: 'data'.repeat(100) },
           compressed: false,
         },
       });
@@ -293,14 +293,14 @@ describe("AgentMemory模型", () => {
     });
   });
 
-  describe("记忆记录删除", () => {
-    it("应删除过期记忆", async () => {
+  describe('记忆记录删除', () => {
+    it('应删除过期记忆', async () => {
       const memory = await prisma.agentMemory.create({
         data: {
           userId: testUserId,
           memoryType: MemoryType.WORKING,
-          agentName: "TestAgent",
-          memoryKey: "delete_test",
+          agentName: 'TestAgent',
+          memoryKey: 'delete_test',
           memoryValue: { delete: true },
           expiresAt: new Date(Date.now() - 1000),
         },
@@ -317,22 +317,22 @@ describe("AgentMemory模型", () => {
       expect(deleted).toBeNull();
     });
 
-    it("应批量删除低重要性记忆", async () => {
+    it('应批量删除低重要性记忆', async () => {
       await prisma.agentMemory.createMany({
         data: [
           {
             userId: testUserId,
             memoryType: MemoryType.WORKING,
-            agentName: "BatchDeleteAgent",
-            memoryKey: "low_importance_1",
+            agentName: 'BatchDeleteAgent',
+            memoryKey: 'low_importance_1',
             memoryValue: { low: 1 },
             importance: 0.1,
           },
           {
             userId: testUserId,
             memoryType: MemoryType.WORKING,
-            agentName: "BatchDeleteAgent",
-            memoryKey: "low_importance_2",
+            agentName: 'BatchDeleteAgent',
+            memoryKey: 'low_importance_2',
             memoryValue: { low: 2 },
             importance: 0.2,
           },
@@ -350,8 +350,8 @@ describe("AgentMemory模型", () => {
     });
   });
 
-  describe("关联查询", () => {
-    it("应查询案件相关记忆", async () => {
+  describe('关联查询', () => {
+    it('应查询案件相关记忆', async () => {
       const memories = await prisma.agentMemory.findMany({
         where: {
           caseId: testCaseId,
@@ -361,7 +361,7 @@ describe("AgentMemory模型", () => {
       expect(memories.length).toBeGreaterThan(0);
     });
 
-    it("应查询辩论相关记忆", async () => {
+    it('应查询辩论相关记忆', async () => {
       const memories = await prisma.agentMemory.findMany({
         where: {
           debateId: testDebateId,

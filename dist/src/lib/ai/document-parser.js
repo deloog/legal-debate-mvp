@@ -1,18 +1,18 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+'use strict';
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.DocumentParser = exports.AIModelType = void 0;
-const unified_service_1 = require("./unified-service");
+const unified_service_1 = require('./unified-service');
 // 定义模型类型枚举
 var AIModelType;
 (function (AIModelType) {
-  AIModelType["GLM4_FLASH"] = "glm-4-flash";
-  AIModelType["GLM4"] = "glm-4";
-  AIModelType["DEEPSEEK_CHAT"] = "deepseek-chat";
+  AIModelType['GLM4_FLASH'] = 'glm-4-flash';
+  AIModelType['GLM4'] = 'glm-4';
+  AIModelType['DEEPSEEK_CHAT'] = 'deepseek-chat';
 })(AIModelType || (exports.AIModelType = AIModelType = {}));
 class DocumentParser {
   constructor() {
-    this.aiProvider = "zhipu";
-    this.aiModel = "glm-4-flash";
+    this.aiProvider = 'zhipu';
+    this.aiModel = 'glm-4-flash';
     // 默认配置
   }
   // =============================================================================
@@ -26,12 +26,12 @@ class DocumentParser {
         provider: this.aiProvider,
         messages: [
           {
-            role: "system",
+            role: 'system',
             content:
-              "你是一个专业的法律文档分析专家，专门从法律文档中提取结构化信息。",
+              '你是一个专业的法律文档分析专家，专门从法律文档中提取结构化信息。',
           },
           {
-            role: "user",
+            role: 'user',
             content: prompt,
           },
         ],
@@ -41,12 +41,12 @@ class DocumentParser {
       if (response.choices && response.choices.length > 0) {
         return response.choices[0].message.content;
       } else {
-        throw new Error("AI服务返回了空响应");
+        throw new Error('AI服务返回了空响应');
       }
     } catch (error) {
-      console.error("DocumentParser AI分析失败:", error);
+      console.error('DocumentParser AI分析失败:', error);
       throw new Error(
-        `AI分析失败: ${error instanceof Error ? error.message : String(error)}`,
+        `AI分析失败: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
@@ -59,7 +59,7 @@ class DocumentParser {
       // 构建分析提示词
       const prompt = this.buildDocumentAnalysisPrompt(
         request.textContent,
-        request.extractOptions,
+        request.extractOptions
       );
       // 调用AI服务
       const aiResponse = await this.analyzeWithAI(prompt);
@@ -94,20 +94,20 @@ class DocumentParser {
   buildDocumentAnalysisPrompt(textContent, options) {
     const analysisTasks = [];
     if (options?.extractParties !== false) {
-      analysisTasks.push("当事人信息提取");
+      analysisTasks.push('当事人信息提取');
     }
     if (options?.extractClaims !== false) {
-      analysisTasks.push("诉讼请求识别");
+      analysisTasks.push('诉讼请求识别');
     }
     if (options?.extractTimeline !== false) {
-      analysisTasks.push("时间线整理");
+      analysisTasks.push('时间线整理');
     }
     if (options?.generateSummary === true) {
-      analysisTasks.push("案件摘要生成");
+      analysisTasks.push('案件摘要生成');
     }
     return `你是一个专业的法律文档分析专家。请对以下法律文档进行分析，完成以下任务：
 
-分析任务：${analysisTasks.join("、")}
+分析任务：${analysisTasks.join('、')}
 
 文档内容：
 ${textContent}
@@ -163,21 +163,21 @@ ${textContent}
       // 清理AI响应中的代码块标记
       let cleanedResponse = aiResponse.trim();
       // 移除可能的代码块标记
-      if (cleanedResponse.includes("```json")) {
+      if (cleanedResponse.includes('```json')) {
         cleanedResponse = cleanedResponse
-          .replace(/```json\s*/, "")
-          .replace(/```\s*$/, "");
+          .replace(/```json\s*/, '')
+          .replace(/```\s*$/, '');
       }
-      if (cleanedResponse.includes("```")) {
+      if (cleanedResponse.includes('```')) {
         cleanedResponse = cleanedResponse
-          .replace(/```\s*/, "")
-          .replace(/```\s*$/, "");
+          .replace(/```\s*/, '')
+          .replace(/```\s*$/, '');
       }
       // 尝试解析JSON响应
       const parsed = JSON.parse(cleanedResponse);
       // 验证响应结构
       if (!parsed.extractedData) {
-        throw new Error("AI响应格式不正确：缺少extractedData字段");
+        throw new Error('AI响应格式不正确：缺少extractedData字段');
       }
       return {
         extractedData: {
@@ -198,7 +198,7 @@ ${textContent}
           parties: [],
           claims: [],
           timeline: [],
-          summary: "AI响应解析失败，请手动分析",
+          summary: 'AI响应解析失败，请手动分析',
           keyFacts: [],
         },
         confidence: 0.3,

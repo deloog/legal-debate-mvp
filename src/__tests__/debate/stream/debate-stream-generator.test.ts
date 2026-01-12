@@ -3,15 +3,15 @@
  * 测试流式事件发送、进度追踪、错误处理等功能
  */
 
-import { DebateStreamGenerator } from "@/lib/debate/stream/debate-stream-generator";
-import type { ArgumentEventData } from "@/lib/debate/stream/types";
+import { DebateStreamGenerator } from '@/lib/debate/stream/debate-stream-generator';
+import type { ArgumentEventData } from '@/lib/debate/stream/types';
 
-describe("DebateStreamGenerator", () => {
+describe('DebateStreamGenerator', () => {
   let generator: DebateStreamGenerator;
-  const sessionId = "test-session-001";
+  const sessionId = 'test-session-001';
   const config = {
-    debateId: "debate-123",
-    roundId: "round-456",
+    debateId: 'debate-123',
+    roundId: 'round-456',
     roundNumber: 1,
     totalArguments: 4,
     progressInterval: 1000,
@@ -30,71 +30,71 @@ describe("DebateStreamGenerator", () => {
     generator.cleanup();
   });
 
-  describe("连接事件", () => {
-    it("应该发送连接确认事件", () => {
+  describe('连接事件', () => {
+    it('应该发送连接确认事件', () => {
       generator.sendConnected();
 
       expect(outputChunks.length).toBe(1);
-      expect(outputChunks[0]).toContain("event: connected");
+      expect(outputChunks[0]).toContain('event: connected');
       expect(outputChunks[0]).toContain(config.debateId);
       expect(outputChunks[0]).toContain(config.roundId);
       expect(outputChunks[0]).toContain(sessionId);
     });
 
-    it("应该发送轮次开始事件", () => {
+    it('应该发送轮次开始事件', () => {
       generator.sendRoundStart();
 
       expect(outputChunks.length).toBe(1);
-      expect(outputChunks[0]).toContain("event: round-start");
+      expect(outputChunks[0]).toContain('event: round-start');
       expect(outputChunks[0]).toContain('"roundNumber":1');
     });
 
-    it("应该发送断开连接事件", () => {
-      generator.sendDisconnected("正常关闭", 1000);
+    it('应该发送断开连接事件', () => {
+      generator.sendDisconnected('正常关闭', 1000);
 
       expect(outputChunks.length).toBe(1);
-      expect(outputChunks[0]).toContain("event: disconnected");
+      expect(outputChunks[0]).toContain('event: disconnected');
       expect(outputChunks[0]).toContain('"reason":"正常关闭"');
       expect(outputChunks[0]).toContain('"code":1000');
     });
   });
 
-  describe("论点事件", () => {
-    it("应该发送论点生成事件", () => {
+  describe('论点事件', () => {
+    it('应该发送论点生成事件', () => {
       const argument: ArgumentEventData = {
-        argumentId: "arg-1",
+        argumentId: 'arg-1',
         roundId: config.roundId,
-        side: "PLAINTIFF",
-        content: "这是原告的论点",
-        type: "MAIN_POINT",
+        side: 'PLAINTIFF',
+        content: '这是原告的论点',
+        type: 'MAIN_POINT',
         timestamp: new Date().toISOString(),
       };
 
       generator.sendArgument(argument);
 
       expect(outputChunks.length).toBe(1);
-      expect(outputChunks[0]).toContain("event: argument");
+      expect(outputChunks[0]).toContain('event: argument');
       expect(outputChunks[0]).toContain('"argumentId":"arg-1"');
       expect(outputChunks[0]).toContain('"side":"PLAINTIFF"');
-      expect(outputChunks[0]).toContain("这是原告的论点");
+      expect(outputChunks[0]).toContain('这是原告的论点');
     });
 
-    it("应该正确跟踪生成的论点", () => {
+    it('应该正确跟踪生成的论点', () => {
       const argument1: ArgumentEventData = {
-        argumentId: "arg-1",
+        argumentId: 'arg-1',
         roundId: config.roundId,
-        side: "PLAINTIFF",
-        content: "论点1",
-        type: "MAIN_POINT",
+        side: 'PLAINTIFF',
+        content: '论点1',
+        type: 'MAIN_POINT',
         timestamp: new Date().toISOString(),
       };
 
       const argument2: ArgumentEventData = {
-        argumentId: "arg-2",
+        argumentId: 'arg-2',
         roundId: config.roundId,
-        side: "DEFENDANT",
-        content: "论点2",
-        type: "REBUTTAL",
+        side: 'DEFENDANT',
+        content: '论点2',
+        type: 'REBUTTAL',
         timestamp: new Date().toISOString(),
       };
 
@@ -107,62 +107,62 @@ describe("DebateStreamGenerator", () => {
     });
   });
 
-  describe("进度事件", () => {
-    it("应该发送进度更新事件", () => {
-      generator.sendProgress("生成原告论点", 4);
+  describe('进度事件', () => {
+    it('应该发送进度更新事件', () => {
+      generator.sendProgress('生成原告论点', 4);
 
       expect(outputChunks.length).toBe(1);
-      expect(outputChunks[0]).toContain("event: progress");
+      expect(outputChunks[0]).toContain('event: progress');
       expect(outputChunks[0]).toContain('"currentStep":"生成原告论点"');
       expect(outputChunks[0]).toContain('"totalSteps":4');
       expect(outputChunks[0]).toContain('"progress":0'); // 没有论点时为0
     });
 
-    it("应该基于生成的论点计算进度", () => {
+    it('应该基于生成的论点计算进度', () => {
       const argument: ArgumentEventData = {
-        argumentId: "arg-1",
+        argumentId: 'arg-1',
         roundId: config.roundId,
-        side: "PLAINTIFF",
-        content: "论点1",
-        type: "MAIN_POINT",
+        side: 'PLAINTIFF',
+        content: '论点1',
+        type: 'MAIN_POINT',
         timestamp: new Date().toISOString(),
       };
 
       generator.sendArgument(argument);
-      generator.sendProgress("生成原告论点", 4);
+      generator.sendProgress('生成原告论点', 4);
 
       expect(outputChunks[1]).toContain('"progress":25'); // 1/4 = 25%
     });
 
-    it("应该支持自定义进度值", () => {
-      generator.sendProgress("初始化中", 10, 50);
+    it('应该支持自定义进度值', () => {
+      generator.sendProgress('初始化中', 10, 50);
 
       expect(outputChunks.length).toBe(1);
       expect(outputChunks[0]).toContain('"progress":50');
     });
 
-    it("应该估算剩余时间", () => {
+    it('应该估算剩余时间', () => {
       const argument: ArgumentEventData = {
-        argumentId: "arg-1",
+        argumentId: 'arg-1',
         roundId: config.roundId,
-        side: "PLAINTIFF",
-        content: "论点1",
-        type: "MAIN_POINT",
+        side: 'PLAINTIFF',
+        content: '论点1',
+        type: 'MAIN_POINT',
         timestamp: new Date().toISOString(),
       };
 
       generator.sendArgument(argument);
-      generator.sendProgress("生成原告论点", 4);
+      generator.sendProgress('生成原告论点', 4);
 
       // 等待一小段时间以进行估算
       setTimeout(() => {
         const chunk = outputChunks[1];
-        expect(chunk).toContain("estimatedRemainingTime");
+        expect(chunk).toContain('estimatedRemainingTime');
       }, 100);
     });
   });
 
-  describe("自动进度更新", () => {
+  describe('自动进度更新', () => {
     beforeEach(() => {
       jest.useFakeTimers();
     });
@@ -171,8 +171,8 @@ describe("DebateStreamGenerator", () => {
       jest.useRealTimers();
     });
 
-    it("应该启动自动进度更新", () => {
-      const steps = ["初始化", "生成原告论点", "生成被告论点", "完成"];
+    it('应该启动自动进度更新', () => {
+      const steps = ['初始化', '生成原告论点', '生成被告论点', '完成'];
 
       generator.startProgressUpdates(steps);
 
@@ -184,8 +184,8 @@ describe("DebateStreamGenerator", () => {
       generator.stopProgressUpdates();
     });
 
-    it("应该停止自动进度更新", () => {
-      const steps = ["初始化", "生成原告论点", "生成被告论点", "完成"];
+    it('应该停止自动进度更新', () => {
+      const steps = ['初始化', '生成原告论点', '生成被告论点', '完成'];
 
       generator.startProgressUpdates(steps);
 
@@ -198,8 +198,8 @@ describe("DebateStreamGenerator", () => {
       expect(outputChunks.length).toBe(countAfter2Sec);
     });
 
-    it("应该使用当前步骤名称", () => {
-      const steps = ["初始化", "生成原告论点", "生成被告论点", "完成"];
+    it('应该使用当前步骤名称', () => {
+      const steps = ['初始化', '生成原告论点', '生成被告论点', '完成'];
 
       generator.startProgressUpdates(steps);
 
@@ -211,7 +211,7 @@ describe("DebateStreamGenerator", () => {
     });
   });
 
-  describe("完成事件", () => {
+  describe('完成事件', () => {
     beforeEach(() => {
       jest.useFakeTimers();
     });
@@ -220,15 +220,15 @@ describe("DebateStreamGenerator", () => {
       jest.useRealTimers();
     });
 
-    it("应该发送完成事件", () => {
+    it('应该发送完成事件', () => {
       // 添加一些论点
       for (let i = 0; i < 4; i++) {
         const argument: ArgumentEventData = {
           argumentId: `arg-${i}`,
           roundId: config.roundId,
-          side: i % 2 === 0 ? "PLAINTIFF" : "DEFENDANT",
+          side: i % 2 === 0 ? 'PLAINTIFF' : 'DEFENDANT',
           content: `论点${i}`,
-          type: "MAIN_POINT",
+          type: 'MAIN_POINT',
           timestamp: new Date().toISOString(),
         };
         generator.sendArgument(argument);
@@ -237,15 +237,15 @@ describe("DebateStreamGenerator", () => {
       generator.sendCompleted();
 
       expect(outputChunks.length).toBe(5); // 4个论点 + 1个完成事件
-      expect(outputChunks[4]).toContain("event: completed");
+      expect(outputChunks[4]).toContain('event: completed');
       expect(outputChunks[4]).toContain('"totalArguments":4');
       expect(outputChunks[4]).toContain('"plaintiffArguments":2');
       expect(outputChunks[4]).toContain('"defendantArguments":2');
-      expect(outputChunks[4]).toContain("generationTime");
+      expect(outputChunks[4]).toContain('generationTime');
     });
 
-    it("应该在发送完成事件后停止进度更新", () => {
-      const steps = ["初始化", "生成原告论点", "生成被告论点", "完成"];
+    it('应该在发送完成事件后停止进度更新', () => {
+      const steps = ['初始化', '生成原告论点', '生成被告论点', '完成'];
       generator.startProgressUpdates(steps);
 
       generator.sendCompleted();
@@ -255,36 +255,36 @@ describe("DebateStreamGenerator", () => {
     });
   });
 
-  describe("错误处理", () => {
-    it("应该发送错误事件", () => {
-      generator.sendError("AI_ERROR", "AI服务不可用", { retryable: true });
+  describe('错误处理', () => {
+    it('应该发送错误事件', () => {
+      generator.sendError('AI_ERROR', 'AI服务不可用', { retryable: true });
 
       expect(outputChunks.length).toBe(1);
-      expect(outputChunks[0]).toContain("event: error");
+      expect(outputChunks[0]).toContain('event: error');
       expect(outputChunks[0]).toContain('"code":"AI_ERROR"');
       expect(outputChunks[0]).toContain('"message":"AI服务不可用"');
       expect(outputChunks[0]).toContain('"retryable":true');
     });
 
-    it("应该支持指定轮次ID", () => {
+    it('应该支持指定轮次ID', () => {
       generator.sendError(
-        "VALIDATION_ERROR",
-        "输入无效",
+        'VALIDATION_ERROR',
+        '输入无效',
         undefined,
-        "custom-round-id",
+        'custom-round-id'
       );
 
       expect(outputChunks[0]).toContain('"roundId":"custom-round-id"');
     });
 
-    it("应该设置错误重试间隔", () => {
-      generator.sendError("NETWORK_ERROR", "网络超时");
+    it('应该设置错误重试间隔', () => {
+      generator.sendError('NETWORK_ERROR', '网络超时');
 
-      expect(outputChunks[0]).toContain("retry: 3000");
+      expect(outputChunks[0]).toContain('retry: 3000');
     });
   });
 
-  describe("心跳机制", () => {
+  describe('心跳机制', () => {
     beforeEach(() => {
       jest.useFakeTimers();
     });
@@ -293,20 +293,20 @@ describe("DebateStreamGenerator", () => {
       jest.useRealTimers();
     });
 
-    it("应该启动心跳", () => {
+    it('应该启动心跳', () => {
       generator.startHeartbeat(1000);
 
       jest.advanceTimersByTime(3000);
 
       expect(outputChunks.length).toBe(3);
-      outputChunks.forEach((chunk) => {
-        expect(chunk).toContain("event: ping");
+      outputChunks.forEach(chunk => {
+        expect(chunk).toContain('event: ping');
       });
 
       generator.stopHeartbeat();
     });
 
-    it("应该停止心跳", () => {
+    it('应该停止心跳', () => {
       generator.startHeartbeat(1000);
 
       jest.advanceTimersByTime(2000);
@@ -318,21 +318,21 @@ describe("DebateStreamGenerator", () => {
       expect(outputChunks.length).toBe(countAfter2Sec);
     });
 
-    it("心跳应该包含时间戳", () => {
+    it('心跳应该包含时间戳', () => {
       generator.startHeartbeat(1000);
 
       jest.advanceTimersByTime(1000);
 
-      expect(outputChunks[0]).toContain("event: ping");
-      expect(outputChunks[0]).toContain("timestamp");
-      expect(outputChunks[0]).toContain("serverTime");
+      expect(outputChunks[0]).toContain('event: ping');
+      expect(outputChunks[0]).toContain('timestamp');
+      expect(outputChunks[0]).toContain('serverTime');
 
       generator.stopHeartbeat();
     });
   });
 
-  describe("统计信息", () => {
-    it("应该返回会话统计信息", () => {
+  describe('统计信息', () => {
+    it('应该返回会话统计信息', () => {
       const stats = generator.getStats();
 
       expect(stats.sessionId).toBe(sessionId);
@@ -340,7 +340,7 @@ describe("DebateStreamGenerator", () => {
       expect(stats.totalBytesSent).toBe(0);
     });
 
-    it("应该跟踪发送的事件数量", () => {
+    it('应该跟踪发送的事件数量', () => {
       generator.sendConnected();
       generator.sendRoundStart();
 
@@ -348,7 +348,7 @@ describe("DebateStreamGenerator", () => {
       expect(stats.totalEventsSent).toBe(2);
     });
 
-    it("应该跟踪发送的字节数", () => {
+    it('应该跟踪发送的字节数', () => {
       generator.sendConnected();
 
       const stats = generator.getStats();
@@ -356,10 +356,10 @@ describe("DebateStreamGenerator", () => {
     });
   });
 
-  describe("清理资源", () => {
-    it("应该清理所有资源", () => {
+  describe('清理资源', () => {
+    it('应该清理所有资源', () => {
       jest.useFakeTimers();
-      const steps = ["初始化", "完成"];
+      const steps = ['初始化', '完成'];
       generator.startProgressUpdates(steps);
       generator.startHeartbeat(1000);
 
@@ -375,8 +375,8 @@ describe("DebateStreamGenerator", () => {
     });
   });
 
-  describe("边缘情况", () => {
-    it("应该处理没有论点的情况", () => {
+  describe('边缘情况', () => {
+    it('应该处理没有论点的情况', () => {
       generator.sendCompleted();
 
       expect(outputChunks[0]).toContain('"totalArguments":0');
@@ -384,14 +384,14 @@ describe("DebateStreamGenerator", () => {
       expect(outputChunks[0]).toContain('"defendantArguments":0');
     });
 
-    it("应该处理只有原告论点的情况", () => {
+    it('应该处理只有原告论点的情况', () => {
       for (let i = 0; i < 4; i++) {
         const argument: ArgumentEventData = {
           argumentId: `arg-${i}`,
           roundId: config.roundId,
-          side: "PLAINTIFF",
+          side: 'PLAINTIFF',
           content: `论点${i}`,
-          type: "MAIN_POINT",
+          type: 'MAIN_POINT',
           timestamp: new Date().toISOString(),
         };
         generator.sendArgument(argument);
@@ -403,25 +403,25 @@ describe("DebateStreamGenerator", () => {
       expect(outputChunks[4]).toContain('"defendantArguments":0');
     });
 
-    it("应该处理进度为0时的剩余时间计算", () => {
-      generator.sendProgress("初始化中", 10, 0);
+    it('应该处理进度为0时的剩余时间计算', () => {
+      generator.sendProgress('初始化中', 10, 0);
 
       // 当进度为0时，estimatedRemainingTime应为null且不包含在输出中
-      expect(outputChunks[0]).not.toContain("estimatedRemainingTime");
+      expect(outputChunks[0]).not.toContain('estimatedRemainingTime');
     });
 
-    it("应该正确计算100%进度", () => {
+    it('应该正确计算100%进度', () => {
       const argument: ArgumentEventData = {
-        argumentId: "arg-1",
+        argumentId: 'arg-1',
         roundId: config.roundId,
-        side: "PLAINTIFF",
-        content: "论点",
-        type: "MAIN_POINT",
+        side: 'PLAINTIFF',
+        content: '论点',
+        type: 'MAIN_POINT',
         timestamp: new Date().toISOString(),
       };
 
       generator.sendArgument(argument);
-      generator.sendProgress("完成", 4, 100);
+      generator.sendProgress('完成', 4, 100);
 
       expect(outputChunks[1]).toContain('"progress":100');
     });

@@ -10,12 +10,12 @@ import {
   VerificationIssue,
   IssueCategory,
   Contradiction,
-} from "../types";
-import { ClaimFactMatcher } from "./claim-fact-matcher";
-import { ReasoningChainChecker } from "./reasoning-chain-checker";
-import { LegalLogicChecker } from "./legal-logic-checker";
-import { ContradictionDetector } from "./contradiction-detector";
-import { LogicScoringEnhancer } from "./logic-scoring-enhancer";
+} from '../types';
+import { ClaimFactMatcher } from './claim-fact-matcher';
+import { ReasoningChainChecker } from './reasoning-chain-checker';
+import { LegalLogicChecker } from './legal-logic-checker';
+import { ContradictionDetector } from './contradiction-detector';
+import { LogicScoringEnhancer } from './logic-scoring-enhancer';
 
 /**
  * 待验证数据接口
@@ -115,7 +115,7 @@ export class LogicalVerifier {
       reasoningChain,
       legalLogic,
       contradictions,
-      data,
+      data
     );
 
     const passed =
@@ -148,7 +148,7 @@ export class LogicalVerifier {
       hasContradictions: boolean;
       contradictions: Contradiction[];
     },
-    data: DataToVerify,
+    data: DataToVerify
   ): number {
     let score = 0;
 
@@ -190,7 +190,7 @@ export class LogicalVerifier {
           0.5, // 基础评分
           argument,
           undefined,
-          data.arguments,
+          data.arguments
         );
         enhancementScore += result.finalScore;
         argumentCount++;
@@ -219,7 +219,7 @@ export class LogicalVerifier {
         severity: IssueSeverity.MEDIUM,
         category: IssueCategory.LOGICAL,
         message: gap,
-        detectedBy: "logical",
+        detectedBy: 'logical',
       });
     }
 
@@ -231,7 +231,7 @@ export class LogicalVerifier {
         severity: IssueSeverity.MEDIUM,
         category: IssueCategory.LOGICAL,
         message: loop,
-        detectedBy: "logical",
+        detectedBy: 'logical',
       });
     }
 
@@ -243,8 +243,8 @@ export class LogicalVerifier {
         severity: contradiction.severity,
         category: IssueCategory.LOGICAL,
         message: contradiction.description,
-        suggestion: "请检查并修正矛盾的陈述",
-        detectedBy: "logical",
+        suggestion: '请检查并修正矛盾的陈述',
+        detectedBy: 'logical',
       });
     }
 
@@ -255,8 +255,8 @@ export class LogicalVerifier {
         type: IssueType.LOGICAL_ERROR,
         severity: IssueSeverity.MEDIUM,
         category: IssueCategory.LOGICAL,
-        message: "法条引用逻辑性不足，请检查法条的有效性和相关性",
-        detectedBy: "logical",
+        message: '法条引用逻辑性不足，请检查法条的有效性和相关性',
+        detectedBy: 'logical',
       });
     }
 

@@ -36,7 +36,7 @@ export interface DocAnalysisResult {
  * 当事人
  */
 export interface Party {
-  type: "plaintiff" | "defendant" | "third_party";
+  type: 'plaintiff' | 'defendant' | 'third_party';
   name: string;
   role: string;
 }
@@ -46,7 +46,7 @@ export interface Party {
  */
 export interface LegalRepresentative {
   name: string;
-  role: "lawyer" | "legal_representative";
+  role: 'lawyer' | 'legal_representative';
   organization?: string;
 }
 
@@ -70,12 +70,12 @@ export interface AnalysisMetadata {
  * @returns Mock分析结果
  */
 export function fallbackDocAnalysis(): DocAnalysisResult {
-  console.warn("[Mock] 使用Mock文档分析结果");
+  console.warn('[Mock] 使用Mock文档分析结果');
 
   return {
-    document_type: "unknown",
-    case_number: "",
-    case_title: "",
+    document_type: 'unknown',
+    case_number: '',
+    case_title: '',
     parties: [],
     legal_representatives: [],
     claims: [],
@@ -83,15 +83,15 @@ export function fallbackDocAnalysis(): DocAnalysisResult {
     key_facts: [],
     core_disputes: [],
     procedural_history: [],
-    litigation_status: "",
-    court_name: "",
+    litigation_status: '',
+    court_name: '',
     trial_date: null,
     relevant_laws: [],
     analysis_confidence: 0,
-    raw_response: "",
+    raw_response: '',
     metadata: {
       processing_time: 0,
-      model_used: "mock",
+      model_used: 'mock',
       timestamp: new Date().toISOString(),
       fallback_used: true,
     },
@@ -105,9 +105,9 @@ export function fallbackDocAnalysis(): DocAnalysisResult {
  * @returns 是否有效
  */
 export function validateMockResult(
-  result: unknown,
+  result: unknown
 ): result is DocAnalysisResult {
-  if (!result || typeof result !== "object") {
+  if (!result || typeof result !== 'object') {
     return false;
   }
 
@@ -115,23 +115,23 @@ export function validateMockResult(
 
   // 检查必需的字段
   const requiredFields: Array<keyof DocAnalysisResult> = [
-    "document_type",
-    "case_number",
-    "case_title",
-    "parties",
-    "legal_representatives",
-    "claims",
-    "causes_of_action",
-    "key_facts",
-    "core_disputes",
-    "procedural_history",
-    "litigation_status",
-    "court_name",
-    "trial_date",
-    "relevant_laws",
-    "analysis_confidence",
-    "raw_response",
-    "metadata",
+    'document_type',
+    'case_number',
+    'case_title',
+    'parties',
+    'legal_representatives',
+    'claims',
+    'causes_of_action',
+    'key_facts',
+    'core_disputes',
+    'procedural_history',
+    'litigation_status',
+    'court_name',
+    'trial_date',
+    'relevant_laws',
+    'analysis_confidence',
+    'raw_response',
+    'metadata',
   ];
 
   for (const field of requiredFields) {
@@ -142,8 +142,8 @@ export function validateMockResult(
   }
 
   // 验证metadata
-  if (!typedResult.metadata || typeof typedResult.metadata !== "object") {
-    console.error("[Mock] metadata格式错误");
+  if (!typedResult.metadata || typeof typedResult.metadata !== 'object') {
+    console.error('[Mock] metadata格式错误');
     return false;
   }
 
@@ -158,17 +158,17 @@ export function validateMockResult(
     !Array.isArray(typedResult.procedural_history) ||
     !Array.isArray(typedResult.relevant_laws)
   ) {
-    console.error("[Mock] 数组字段类型错误");
+    console.error('[Mock] 数组字段类型错误');
     return false;
   }
 
-  if (typeof typedResult.analysis_confidence !== "number") {
-    console.error("[Mock] analysis_confidence应为数字类型");
+  if (typeof typedResult.analysis_confidence !== 'number') {
+    console.error('[Mock] analysis_confidence应为数字类型');
     return false;
   }
 
-  if (typeof typedResult.raw_response !== "string") {
-    console.error("[Mock] raw_response应为字符串类型");
+  if (typeof typedResult.raw_response !== 'string') {
+    console.error('[Mock] raw_response应为字符串类型');
     return false;
   }
 
@@ -182,12 +182,12 @@ export function validateMockResult(
  * @returns 完整的Mock结果
  */
 export function createMockResult(
-  partial: Partial<DocAnalysisResult> = {},
+  partial: Partial<DocAnalysisResult> = {}
 ): DocAnalysisResult {
   const baseResult = {
-    document_type: "unknown",
-    case_number: "",
-    case_title: "",
+    document_type: 'unknown',
+    case_number: '',
+    case_title: '',
     parties: [],
     legal_representatives: [],
     claims: [],
@@ -195,15 +195,15 @@ export function createMockResult(
     key_facts: [],
     core_disputes: [],
     procedural_history: [],
-    litigation_status: "",
-    court_name: "",
+    litigation_status: '',
+    court_name: '',
     trial_date: null,
     relevant_laws: [],
     analysis_confidence: 0,
-    raw_response: "",
+    raw_response: '',
     metadata: {
       processing_time: 0,
-      model_used: "mock",
+      model_used: 'mock',
       timestamp: new Date().toISOString(),
       fallback_used: true,
     },
@@ -228,10 +228,10 @@ export function createMockResult(
  */
 export function createMockParty(
   name: string,
-  type: "plaintiff" | "defendant" | "third_party" = "defendant",
+  type: 'plaintiff' | 'defendant' | 'third_party' = 'defendant'
 ): Party {
   const role =
-    type === "plaintiff" ? "原告" : type === "defendant" ? "被告" : "第三人";
+    type === 'plaintiff' ? '原告' : type === 'defendant' ? '被告' : '第三人';
 
   return {
     name,
@@ -249,12 +249,12 @@ export function createMockParty(
  */
 export function createMockLegalRepresentative(
   name: string,
-  role: "lawyer" | "legal_representative" = "lawyer",
+  role: 'lawyer' | 'legal_representative' = 'lawyer'
 ): LegalRepresentative {
   return {
     name,
     role,
-    organization: "",
+    organization: '',
   };
 }
 

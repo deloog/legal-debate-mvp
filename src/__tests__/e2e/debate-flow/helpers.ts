@@ -3,8 +3,8 @@
  * 提供通用的测试辅助函数，减少重复代码
  */
 
-import { prisma } from "@/lib/db/prisma";
-import { APIRequestContext, Page } from "@playwright/test";
+import { prisma } from '@/lib/db/prisma';
+import { APIRequestContext, Page } from '@playwright/test';
 
 // 类型定义
 interface Claim {
@@ -49,7 +49,7 @@ interface DebateConfig {
   maxRounds: number;
   timePerRound: number;
   allowNewEvidence: boolean;
-  debateMode: "standard" | "fast" | "detailed";
+  debateMode: 'standard' | 'fast' | 'detailed';
 }
 
 interface ArgumentsResult {
@@ -84,28 +84,28 @@ interface PerformanceStats {
  */
 export async function createTestCase(
   apiContext: APIRequestContext,
-  userId?: string,
+  userId?: string
 ): Promise<{ caseId: string; title: string }> {
   const title = `测试案件_${Date.now()}`;
 
   // 如果没有提供userId，使用默认的E2E测试用户ID（与init-e2e-test-data.ts脚本一致）
-  const effectiveUserId = userId || "test-e2e-user-single-round";
+  const effectiveUserId = userId || 'test-e2e-user-single-round';
 
-  const response = await apiContext.post("/api/v1/cases", {
+  const response = await apiContext.post('/api/v1/cases', {
     data: {
       userId: effectiveUserId,
       title,
-      description: "端到端测试案件",
-      type: "civil",
-      status: "active",
+      description: '端到端测试案件',
+      type: 'civil',
+      status: 'active',
     },
   });
 
   if (!response.ok()) {
     const errorBody = await response
       .json()
-      .catch(() => ({ error: "Unknown error" }));
-    console.error("创建案件失败详情:", {
+      .catch(() => ({ error: 'Unknown error' }));
+    console.error('创建案件失败详情:', {
       status: response.status(),
       statusText: response.statusText(),
       body: errorBody,
@@ -130,23 +130,23 @@ export async function createTestCase(
 export async function uploadTestDocument(
   apiContext: APIRequestContext,
   caseId: string,
-  fileContent: string,
+  fileContent: string
 ): Promise<{ documentId: string; filename: string }> {
   const fileId = `test-file-${Date.now()}`;
-  const fileBuffer = Buffer.from(fileContent, "utf-8");
+  const fileBuffer = Buffer.from(fileContent, 'utf-8');
 
   // Playwright API multipart格式
   const formData = {
     file: {
-      name: "test-document.pdf",
-      mimeType: "application/pdf",
+      name: 'test-document.pdf',
+      mimeType: 'application/pdf',
       buffer: fileBuffer,
     },
     caseId,
     fileId,
   };
 
-  const response = await apiContext.post("/api/v1/documents/upload", {
+  const response = await apiContext.post('/api/v1/documents/upload', {
     multipart: formData,
   });
 
@@ -168,7 +168,7 @@ export async function uploadTestDocument(
 export async function waitForDocumentParsing(
   apiContext: APIRequestContext,
   documentId: string,
-  timeout: number = 120000,
+  timeout: number = 120000
 ): Promise<DocumentAnalysisResult> {
   const startTime = Date.now();
   let pollInterval = 1000; // 初始间隔1秒
@@ -180,7 +180,7 @@ export async function waitForDocumentParsing(
     if (response.ok()) {
       const result = await response.json();
 
-      if (result.data.analysisStatus === "COMPLETED") {
+      if (result.data.analysisStatus === 'COMPLETED') {
         const elapsed = Date.now() - startTime;
         console.log(`文档解析完成 [${documentId}]: ${elapsed}ms`);
         const rawResult = result.data.analysisResult as {
@@ -206,10 +206,10 @@ export async function waitForDocumentParsing(
 
         // 尝试转换为字符串数组（如果是对象数组）
         const facts = rawFacts.map((fact: unknown) => {
-          if (typeof fact === "string") {
+          if (typeof fact === 'string') {
             return fact;
           }
-          if (typeof fact === "object" && fact !== null) {
+          if (typeof fact === 'object' && fact !== null) {
             const factObj = fact as { date?: string; description?: string };
             if (factObj.date && factObj.description) {
               return `${factObj.date}: ${factObj.description}`;
@@ -223,33 +223,33 @@ export async function waitForDocumentParsing(
 
         return {
           claims:
-            rawResult?.extractedData?.claims?.map((c) => ({
+            rawResult?.extractedData?.claims?.map(c => ({
               text:
                 (c as { content?: string; text?: string }).content ||
                 (c as { text?: string }).text ||
-                "",
+                '',
               type: c.type,
               amount: c.amount,
               description:
-                (c as { content?: string; text?: string }).content || "",
+                (c as { content?: string; text?: string }).content || '',
             })) || [],
           parties:
-            rawResult?.extractedData?.parties?.map((p) => ({
-              name: p.name || "",
-              role: p.role || "",
+            rawResult?.extractedData?.parties?.map(p => ({
+              name: p.name || '',
+              role: p.role || '',
               type: p.type,
               description: p.description,
             })) || [],
           facts,
         } as DocumentAnalysisResult;
-      } else if (result.data.analysisStatus === "FAILED") {
-        const errorDetails = result.data.analysisError || "未知错误";
+      } else if (result.data.analysisStatus === 'FAILED') {
+        const errorDetails = result.data.analysisError || '未知错误';
         console.error(`文档解析失败 [${documentId}]: ${errorDetails}`);
         throw new Error(`文档解析失败: ${errorDetails}`);
-      } else if (result.data.analysisStatus === "PROCESSING") {
+      } else if (result.data.analysisStatus === 'PROCESSING') {
         const elapsed = Date.now() - startTime;
         console.log(
-          `文档解析中 [${documentId}]: ${elapsed}ms, 状态: PROCESSING`,
+          `文档解析中 [${documentId}]: ${elapsed}ms, 状态: PROCESSING`
         );
       } else {
         console.log(`文档状态 [${documentId}]: ${result.data.analysisStatus}`);
@@ -259,13 +259,13 @@ export async function waitForDocumentParsing(
     }
 
     // 指数退避轮询
-    await new Promise((resolve) => setTimeout(resolve, pollInterval));
+    await new Promise(resolve => setTimeout(resolve, pollInterval));
     pollInterval = Math.min(pollInterval * 2, maxPollInterval);
   }
 
   const elapsed = Date.now() - startTime;
   throw new Error(
-    `文档解析超时 [${documentId}]: ${elapsed}ms, 超过${timeout}ms`,
+    `文档解析超时 [${documentId}]: ${elapsed}ms, 超过${timeout}ms`
   );
 }
 
@@ -283,7 +283,7 @@ export async function searchLawArticles(
     maxRetries?: number;
     expandKeywords?: boolean;
     allowInvalidCategory?: boolean;
-  } = {},
+  } = {}
 ): Promise<LawArticle[]> {
   const {
     allowEmpty = false,
@@ -292,25 +292,25 @@ export async function searchLawArticles(
     allowInvalidCategory = false,
   } = options;
 
-  console.log("开始法条检索:", { keywords, category });
+  console.log('开始法条检索:', { keywords, category });
 
   // 关键词扩展：添加同义词和相关词
   let expandedKeywords = [...keywords];
   if (expandKeywords) {
     const keywordMap: Record<string, string[]> = {
-      合同: ["违约", "履行", "义务", "责任"],
-      违约: ["合同", "赔偿", "违约金", "损害赔偿"],
-      支付: ["付款", "报酬", "价款", "欠款", "金钱债务"],
-      货款: ["价款", "款项", "欠款"],
-      利息: ["迟延利息", "违约利息"],
-      赔偿: ["损失", "损害赔偿", "违约金"],
-      解除: ["终止", "撤销"],
-      履行: ["执行", "实施"],
-      义务: ["责任", "债务"],
-      承揽: ["承揽合同", "定作人", "承揽人"],
+      合同: ['违约', '履行', '义务', '责任'],
+      违约: ['合同', '赔偿', '违约金', '损害赔偿'],
+      支付: ['付款', '报酬', '价款', '欠款', '金钱债务'],
+      货款: ['价款', '款项', '欠款'],
+      利息: ['迟延利息', '违约利息'],
+      赔偿: ['损失', '损害赔偿', '违约金'],
+      解除: ['终止', '撤销'],
+      履行: ['执行', '实施'],
+      义务: ['责任', '债务'],
+      承揽: ['承揽合同', '定作人', '承揽人'],
     };
 
-    keywords.forEach((kw) => {
+    keywords.forEach(kw => {
       if (keywordMap[kw]) {
         expandedKeywords = [...expandedKeywords, ...keywordMap[kw]];
       }
@@ -320,7 +320,7 @@ export async function searchLawArticles(
   // 去重并限制关键词数量
   expandedKeywords = [...new Set(expandedKeywords)].slice(0, 10);
 
-  console.log("扩展后的关键词:", expandedKeywords);
+  console.log('扩展后的关键词:', expandedKeywords);
 
   const requestBody = {
     keywords: expandedKeywords,
@@ -328,9 +328,9 @@ export async function searchLawArticles(
     limit: 20,
   };
 
-  console.log("法条检索请求体:", JSON.stringify(requestBody, null, 2));
+  console.log('法条检索请求体:', JSON.stringify(requestBody, null, 2));
 
-  const response = await apiContext.post("/api/v1/law-articles/search", {
+  const response = await apiContext.post('/api/v1/law-articles/search', {
     data: requestBody,
   });
 
@@ -338,8 +338,8 @@ export async function searchLawArticles(
   if (!response.ok()) {
     const errorBody = await response
       .json()
-      .catch(() => ({ error: "Unknown error" }));
-    console.error("法条检索失败详情:", {
+      .catch(() => ({ error: 'Unknown error' }));
+    console.error('法条检索失败详情:', {
       status: response.status(),
       statusText: response.statusText(),
       body: errorBody,
@@ -349,9 +349,9 @@ export async function searchLawArticles(
     // 非法分类错误，返回空数组（用于测试验证）
     if (
       response.status() === 400 &&
-      errorBody.error?.code === "INVALID_CATEGORY"
+      errorBody.error?.code === 'INVALID_CATEGORY'
     ) {
-      console.log("非法分类错误，返回空数组");
+      console.log('非法分类错误，返回空数组');
       return [];
     }
 
@@ -360,7 +360,7 @@ export async function searchLawArticles(
       allowInvalidCategory ||
       (response.status() >= 400 && response.status() < 500)
     ) {
-      console.warn("法条检索客户端错误，返回空数组");
+      console.warn('法条检索客户端错误，返回空数组');
       return [];
     }
 
@@ -368,26 +368,26 @@ export async function searchLawArticles(
   }
 
   const result = await response.json();
-  console.log("法条检索API响应:", JSON.stringify(result, null, 2));
+  console.log('法条检索API响应:', JSON.stringify(result, null, 2));
 
   if (!result.data) {
-    console.warn("法条检索响应缺少data字段:", result);
+    console.warn('法条检索响应缺少data字段:', result);
     if (!allowEmpty) {
-      throw new Error("法条检索响应格式错误：缺少data字段");
+      throw new Error('法条检索响应格式错误：缺少data字段');
     }
     return [];
   }
 
   if (!result.data.articles) {
-    console.warn("法条检索结果缺少articles字段:", result);
+    console.warn('法条检索结果缺少articles字段:', result);
     if (!allowEmpty) {
-      throw new Error("法条检索响应格式错误：缺少articles字段");
+      throw new Error('法条检索响应格式错误：缺少articles字段');
     }
     return [];
   }
 
   if (result.data.articles.length === 0) {
-    console.warn("法条检索结果为空数组", {
+    console.warn('法条检索结果为空数组', {
       keywords,
       expandedKeywords,
       category,
@@ -397,15 +397,15 @@ export async function searchLawArticles(
     if (!allowEmpty) {
       // 如果不允许空结果，尝试使用默认关键词重试
       if (maxRetries > 0) {
-        console.log("尝试使用默认关键词重试...");
-        return searchLawArticles(apiContext, ["合同", "违约"], category, {
+        console.log('尝试使用默认关键词重试...');
+        return searchLawArticles(apiContext, ['合同', '违约'], category, {
           allowEmpty: false,
           maxRetries: maxRetries - 1,
           expandKeywords: false,
         });
       }
       throw new Error(
-        `法条检索未返回结果。关键词: ${keywords.join(", ")}，分类: ${category || "无"}`,
+        `法条检索未返回结果。关键词: ${keywords.join(', ')}，分类: ${category || '无'}`
       );
     }
   } else {
@@ -421,16 +421,16 @@ export async function searchLawArticles(
 export async function analyzeApplicability(
   apiContext: APIRequestContext,
   caseId: string,
-  articleIds: string[],
+  articleIds: string[]
 ): Promise<ApplicabilityResult> {
   const response = await apiContext.post(
-    "/api/v1/legal-analysis/applicability",
+    '/api/v1/legal-analysis/applicability',
     {
       data: {
         caseId,
         articleIds,
       },
-    },
+    }
   );
 
   if (!response.ok()) {
@@ -447,15 +447,15 @@ export async function analyzeApplicability(
 export async function createDebate(
   apiContext: APIRequestContext,
   caseId: string,
-  config: Partial<DebateConfig> = {},
+  config: Partial<DebateConfig> = {}
 ): Promise<{ debateId: string; roundId: string }> {
-  const response = await apiContext.post("/api/v1/debates", {
+  const response = await apiContext.post('/api/v1/debates', {
     data: {
       caseId,
-      title: "测试辩论",
-      status: "IN_PROGRESS",
+      title: '测试辩论',
+      status: 'IN_PROGRESS',
       config: {
-        debateMode: "standard",
+        debateMode: 'standard',
         maxRounds: 3,
         timePerRound: 30,
         allowNewEvidence: true,
@@ -467,17 +467,17 @@ export async function createDebate(
   if (!response.ok()) {
     const errorBody = await response
       .json()
-      .catch(() => ({ error: "Unknown error" }));
-    console.error("创建辩论失败详情:", {
+      .catch(() => ({ error: 'Unknown error' }));
+    console.error('创建辩论失败详情:', {
       status: response.status(),
       statusText: response.statusText(),
       body: errorBody,
       request: {
         caseId,
-        title: "测试辩论",
-        status: "IN_PROGRESS",
+        title: '测试辩论',
+        status: 'IN_PROGRESS',
         config: {
-          debateMode: "standard",
+          debateMode: 'standard',
           maxRounds: 3,
           timePerRound: 30,
           allowNewEvidence: true,
@@ -490,10 +490,10 @@ export async function createDebate(
 
   const result = await response.json();
   if (!result.data) {
-    throw new Error("创建辩论返回数据格式错误");
+    throw new Error('创建辩论返回数据格式错误');
   }
   if (!result.data.rounds || result.data.rounds.length === 0) {
-    throw new Error("创建辩论返回的轮次数据为空");
+    throw new Error('创建辩论返回的轮次数据为空');
   }
   return {
     debateId: result.data.id,
@@ -507,7 +507,7 @@ export async function createDebate(
  */
 export async function createDebateRound(
   apiContext: APIRequestContext,
-  debateId: string,
+  debateId: string
 ): Promise<string> {
   // API会自动计算roundNumber，不需要传递任何参数
   const response = await apiContext.post(`/api/v1/debates/${debateId}/rounds`, {
@@ -517,8 +517,8 @@ export async function createDebateRound(
   if (!response.ok()) {
     const errorBody = await response
       .json()
-      .catch(() => ({ error: "Unknown error" }));
-    console.error("创建辩论轮次失败详情:", {
+      .catch(() => ({ error: 'Unknown error' }));
+    console.error('创建辩论轮次失败详情:', {
       status: response.status(),
       statusText: response.statusText(),
       body: errorBody,
@@ -531,7 +531,7 @@ export async function createDebateRound(
 
   const result = await response.json();
   if (!result.data || !result.data.id) {
-    throw new Error("创建辩论轮次返回数据格式错误");
+    throw new Error('创建辩论轮次返回数据格式错误');
   }
   return result.data.id;
 }
@@ -543,7 +543,7 @@ export async function generateArguments(
   apiContext: APIRequestContext,
   debateId: string,
   roundId: string,
-  applicableArticles: string[],
+  applicableArticles: string[]
 ): Promise<ArgumentsResult> {
   const response = await apiContext.post(
     `/api/v1/debates/${debateId}/rounds/${roundId}/generate`,
@@ -551,12 +551,12 @@ export async function generateArguments(
       data: {
         applicableArticles,
       },
-    },
+    }
   );
 
   if (!response.ok()) {
     const errorBody = await response.json();
-    console.error("生成辩论论点失败详情:", {
+    console.error('生成辩论论点失败详情:', {
       status: response.status(),
       statusText: response.statusText(),
       body: errorBody,
@@ -579,31 +579,31 @@ export async function generateArguments(
 export async function testSSEStream(
   page: Page,
   url: string,
-  expectedChunks: number = 3,
+  expectedChunks: number = 3
 ): Promise<string[]> {
   const chunks: string[] = [];
 
-  await page.route(url, async (route) => {
+  await page.route(url, async route => {
     const streamData: string[] = [];
 
     for (let i = 0; i < expectedChunks; i++) {
       const data = {
-        type: "argument",
-        content: "这是测试论点内容...",
-        side: "PLAINTIFF",
+        type: 'argument',
+        content: '这是测试论点内容...',
+        side: 'PLAINTIFF',
       };
 
       streamData.push(`data: ${JSON.stringify(data)}\n\n`);
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
 
     route.fulfill({
       status: 200,
       headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
       },
-      body: streamData.join(""),
+      body: streamData.join(''),
     });
   });
 
@@ -631,7 +631,7 @@ export async function verifyDatabaseData(
   caseId: string,
   expectedDocuments: number,
   expectedDebates: number,
-  expectedRounds: number,
+  expectedRounds: number
 ): Promise<boolean> {
   const caseData = await prisma.case.findUnique({
     where: { id: caseId },
@@ -651,24 +651,24 @@ export async function verifyDatabaseData(
 
   if (caseData.documents.length !== expectedDocuments) {
     throw new Error(
-      `文档数量不匹配: 期望${expectedDocuments}, 实际${caseData.documents.length}`,
+      `文档数量不匹配: 期望${expectedDocuments}, 实际${caseData.documents.length}`
     );
   }
 
   if (caseData.debates.length !== expectedDebates) {
     throw new Error(
-      `辩论数量不匹配: 期望${expectedDebates}, 实际${caseData.debates.length}`,
+      `辩论数量不匹配: 期望${expectedDebates}, 实际${caseData.debates.length}`
     );
   }
 
   const totalRounds = caseData.debates.reduce(
     (sum, debate) => sum + debate.rounds.length,
-    0,
+    0
   );
 
   if (totalRounds !== expectedRounds) {
     throw new Error(
-      `轮次数量不匹配: 期望${expectedRounds}, 实际${totalRounds}`,
+      `轮次数量不匹配: 期望${expectedRounds}, 实际${totalRounds}`
     );
   }
 
@@ -729,13 +729,13 @@ export function assertPerformance(
   actual: number,
   target: number,
   metricName: string,
-  tolerance: number = 1.2,
+  tolerance: number = 1.2
 ): void {
   const threshold = target * tolerance;
 
   if (actual > threshold) {
     throw new Error(
-      `性能指标不达标: ${metricName} = ${actual}ms, 期望<${target}ms (容忍度${tolerance}x)`,
+      `性能指标不达标: ${metricName} = ${actual}ms, 期望<${target}ms (容忍度${tolerance}x)`
     );
   }
 }

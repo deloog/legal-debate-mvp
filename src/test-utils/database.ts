@@ -1,10 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
 // Create a test instance of Prisma Client with test database
 export const testPrisma = new PrismaClient({
   datasources: {
     db: {
-      url: "postgresql://postgres:TFL5650056btg@localhost:5432/legal_debate_test",
+      url: 'postgresql://postgres:TFL5650056btg@localhost:5432/legal_debate_test',
     },
   },
 });
@@ -19,9 +19,9 @@ export const setupTestDatabase = async () => {
     // Note: For SQLite, this will create database file
     // For PostgreSQL, ensure test database exists
 
-    console.log("Test database connected successfully");
+    console.log('Test database connected successfully');
   } catch (error) {
-    console.error("Failed to connect to test database:", error);
+    console.error('Failed to connect to test database:', error);
     throw error;
   }
 };
@@ -43,9 +43,9 @@ export const cleanupTestDatabase = async () => {
     // Disconnect
     await testPrisma.$disconnect();
 
-    console.log("Test database cleaned up successfully");
+    console.log('Test database cleaned up successfully');
   } catch (error) {
-    console.error("Failed to cleanup test database:", error);
+    console.error('Failed to cleanup test database:', error);
     throw error;
   }
 };
@@ -77,10 +77,10 @@ export const resetDatabase = async () => {
 // Test database isolation utilities
 export const createTestDatabase = async () => {
   // For SQLite, ensure we have a fresh test database
-  const testDbPath = "./test.db";
+  const testDbPath = './test.db';
   try {
     // Remove existing test database file if it exists
-    const fs = await import("fs/promises");
+    const fs = await import('fs/promises');
     try {
       await fs.unlink(testDbPath);
     } catch (error) {
@@ -88,9 +88,9 @@ export const createTestDatabase = async () => {
     }
 
     await setupTestDatabase();
-    console.log("Fresh test database created");
+    console.log('Fresh test database created');
   } catch (error) {
-    console.error("Failed to create test database:", error);
+    console.error('Failed to create test database:', error);
     throw error;
   }
 };

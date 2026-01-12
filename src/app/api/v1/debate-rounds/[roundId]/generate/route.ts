@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { withErrorHandler } from "@/app/api/lib/errors/error-handler";
-import { createSuccessResponse } from "@/app/api/lib/responses/api-response";
-import { prisma } from "@/lib/db/prisma";
+import { NextRequest, NextResponse } from 'next/server';
+import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
+import { createSuccessResponse } from '@/app/api/lib/responses/api-response';
+import { prisma } from '@/lib/db/prisma';
 import {
   ArgumentSide,
   ArgumentType,
   RoundStatus,
   DebateStatus,
-} from "@prisma/client";
+} from '@prisma/client';
 
 /**
  * POST /api/v1/debate-rounds/[roundId]/generate
@@ -16,7 +16,7 @@ import {
 export const POST = withErrorHandler(
   async (
     request: NextRequest,
-    { params }: { params: Promise<{ roundId: string }> },
+    { params }: { params: Promise<{ roundId: string }> }
   ) => {
     const { roundId } = await params;
 
@@ -25,7 +25,7 @@ export const POST = withErrorHandler(
     try {
       const parsedBody = await request.json();
       body =
-        typeof parsedBody === "object" && parsedBody !== null
+        typeof parsedBody === 'object' && parsedBody !== null
           ? (parsedBody as Record<string, unknown>)
           : {};
     } catch {
@@ -43,7 +43,7 @@ export const POST = withErrorHandler(
               include: {
                 documents: {
                   where: {
-                    analysisStatus: "COMPLETED",
+                    analysisStatus: 'COMPLETED',
                   },
                 },
               },
@@ -59,11 +59,11 @@ export const POST = withErrorHandler(
         {
           success: false,
           error: {
-            code: "ROUND_NOT_FOUND",
-            message: "辩论轮次不存在",
+            code: 'ROUND_NOT_FOUND',
+            message: '辩论轮次不存在',
           },
         },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -77,11 +77,11 @@ export const POST = withErrorHandler(
         {
           success: false,
           error: {
-            code: "ARGUMENTS_ALREADY_GENERATED",
-            message: "论点已生成，无法重复生成",
+            code: 'ARGUMENTS_ALREADY_GENERATED',
+            message: '论点已生成，无法重复生成',
           },
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -89,7 +89,7 @@ export const POST = withErrorHandler(
     const articleIds =
       Array.isArray(body.applicableArticles) &&
       body.applicableArticles.every(
-        (item): item is string => typeof item === "string",
+        (item): item is string => typeof item === 'string'
       )
         ? (body.applicableArticles as string[])
         : [];
@@ -103,34 +103,34 @@ export const POST = withErrorHandler(
     // 获取案件分析数据
     const caseData = round.debate.case;
     const claims = caseData.documents.flatMap(
-      (doc) =>
+      doc =>
         (
           doc.analysisResult as {
             extractedData?: {
               claims?: unknown[];
             };
           } | null
-        )?.extractedData?.claims || [],
+        )?.extractedData?.claims || []
     );
     const parties = caseData.documents.flatMap(
-      (doc) =>
+      doc =>
         (
           doc.analysisResult as {
             extractedData?: {
               parties?: unknown[];
             };
           } | null
-        )?.extractedData?.parties || [],
+        )?.extractedData?.parties || []
     );
     const keyFacts = caseData.documents.flatMap(
-      (doc) =>
+      doc =>
         (
           doc.analysisResult as {
             extractedData?: {
               keyFacts?: unknown[];
             };
           } | null
-        )?.extractedData?.keyFacts || [],
+        )?.extractedData?.keyFacts || []
     );
 
     // 更新轮次状态为进行中
@@ -144,7 +144,7 @@ export const POST = withErrorHandler(
 
     // 生成论点
     const plaintiffArguments = generateSideArguments({
-      side: "PLAINTIFF",
+      side: 'PLAINTIFF',
       claims,
       parties,
       keyFacts,
@@ -154,7 +154,7 @@ export const POST = withErrorHandler(
     });
 
     const defendantArguments = generateSideArguments({
-      side: "DEFENDANT",
+      side: 'DEFENDANT',
       claims,
       parties,
       keyFacts,
@@ -204,14 +204,14 @@ export const POST = withErrorHandler(
 
     return createSuccessResponse({
       plaintiff: {
-        arguments: plaintiffArguments.map((arg) => ({
+        arguments: plaintiffArguments.map(arg => ({
           id: arg.id,
           type: arg.type,
           content: arg.content,
         })),
       },
       defendant: {
-        arguments: defendantArguments.map((arg) => ({
+        arguments: defendantArguments.map(arg => ({
           id: arg.id,
           type: arg.type,
           content: arg.content,
@@ -221,7 +221,7 @@ export const POST = withErrorHandler(
       roundNumber: round.roundNumber,
       generatedAt: new Date().toISOString(),
     });
-  },
+  }
 );
 
 /**
@@ -232,10 +232,10 @@ export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-      "Access-Control-Max-Age": "86400",
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '86400',
     },
   });
 });
@@ -244,7 +244,7 @@ export const OPTIONS = withErrorHandler(async () => {
  * 生成单方论点
  */
 interface GenerateSideArgumentsInput {
-  side: "PLAINTIFF" | "DEFENDANT";
+  side: 'PLAINTIFF' | 'DEFENDANT';
   claims: unknown[];
   parties: unknown[];
   keyFacts: unknown[];
@@ -262,10 +262,10 @@ function generateSideArguments(input: GenerateSideArgumentsInput) {
   const { side, claims, parties, keyFacts, articles, roundId } = input;
 
   // 获取原告或被告名称
-  const sideName = side === "PLAINTIFF" ? "原告" : "被告";
+  const sideName = side === 'PLAINTIFF' ? '原告' : '被告';
   const partyName =
     (parties as { type: string; name: string }[]).find(
-      (p) => p.type.toLowerCase() === side.toLowerCase(),
+      p => p.type.toLowerCase() === side.toLowerCase()
     )?.name || sideName;
 
   const arguments_: Array<{
@@ -279,8 +279,8 @@ function generateSideArguments(input: GenerateSideArgumentsInput) {
   }> = [];
 
   // 为每个法条生成法律依据论点
-  articles.slice(0, Math.min(articles.length, 3)).forEach((article) => {
-    const content = `${sideName}（${partyName}）主张：根据《${article.lawName}》${article.articleNumber}条规定，${article.fullText.substring(0, 50)}...，${side === "PLAINTIFF" ? "请求法院支持原告诉请" : "请求法院驳回原告诉请"}。`;
+  articles.slice(0, Math.min(articles.length, 3)).forEach(article => {
+    const content = `${sideName}（${partyName}）主张：根据《${article.lawName}》${article.articleNumber}条规定，${article.fullText.substring(0, 50)}...，${side === 'PLAINTIFF' ? '请求法院支持原告诉请' : '请求法院驳回原告诉请'}。`;
 
     arguments_.push({
       id: `arg-${side}-${Date.now()}-${arguments_.length}`,
@@ -288,14 +288,14 @@ function generateSideArguments(input: GenerateSideArgumentsInput) {
       side: side as ArgumentSide,
       content,
       type: ArgumentType.LEGAL_BASIS,
-      aiProvider: "DEEPSEEK",
+      aiProvider: 'DEEPSEEK',
       confidence: 0.8,
     });
   });
 
   // 生成主要论点（确保至少有一条论点）
   const claimContent = (claims as Array<{ content: string }>)[0]?.content;
-  const mainContent = `${sideName}（${partyName}）的核心主张：${claimContent || "根据案件事实，${sideName}的请求具有充分的事实和法律依据"}。${side === "PLAINTIFF" ? "请求法院依法支持原告的全部诉讼请求。" : "请求法院依法驳回原告的全部诉讼请求。"}`;
+  const mainContent = `${sideName}（${partyName}）的核心主张：${claimContent || '根据案件事实，${sideName}的请求具有充分的事实和法律依据'}。${side === 'PLAINTIFF' ? '请求法院依法支持原告的全部诉讼请求。' : '请求法院依法驳回原告的全部诉讼请求。'}`;
 
   arguments_.push({
     id: `arg-${side}-${Date.now()}-${arguments_.length}`,
@@ -303,13 +303,13 @@ function generateSideArguments(input: GenerateSideArgumentsInput) {
     side: side as ArgumentSide,
     content: mainContent,
     type: ArgumentType.MAIN_POINT,
-    aiProvider: "DEEPSEEK",
+    aiProvider: 'DEEPSEEK',
     confidence: 0.85,
   });
 
   // 生成支持论点（确保至少有两条论点）
   const factContent = (keyFacts as { description?: string }[])[0]?.description;
-  const supportContent = `${sideName}（${partyName}）的事实依据：${factContent || "根据本案查明的事实，能够充分支持${sideName}的主张"}。该事实与本案的争议焦点密切相关，具有重要的证明作用。`;
+  const supportContent = `${sideName}（${partyName}）的事实依据：${factContent || '根据本案查明的事实，能够充分支持${sideName}的主张'}。该事实与本案的争议焦点密切相关，具有重要的证明作用。`;
 
   arguments_.push({
     id: `arg-${side}-${Date.now()}-${arguments_.length}`,
@@ -317,7 +317,7 @@ function generateSideArguments(input: GenerateSideArgumentsInput) {
     side: side as ArgumentSide,
     content: supportContent,
     type: ArgumentType.SUPPORTING,
-    aiProvider: "DEEPSEEK",
+    aiProvider: 'DEEPSEEK',
     confidence: 0.75,
   });
 

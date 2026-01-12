@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 // =============================================================================
 // 安全相关错误类定义
 // =============================================================================
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.ValidationError =
   exports.SecurityError =
   exports.AnalysisError =
@@ -12,7 +12,7 @@ class AnalysisError extends Error {
     super(message);
     this.cause = cause;
     this.context = context;
-    this.name = "AnalysisError";
+    this.name = 'AnalysisError';
   }
 }
 exports.AnalysisError = AnalysisError;
@@ -20,7 +20,7 @@ class SecurityError extends Error {
   constructor(message, context) {
     super(message);
     this.context = context;
-    this.name = "SecurityError";
+    this.name = 'SecurityError';
   }
 }
 exports.SecurityError = SecurityError;
@@ -29,7 +29,7 @@ class ValidationError extends Error {
     super(message);
     this.field = field;
     this.value = value;
-    this.name = "ValidationError";
+    this.name = 'ValidationError';
   }
 }
 exports.ValidationError = ValidationError;

@@ -4,13 +4,13 @@
  * 处理验证码的生成、验证和管理，支持密码重置、邮箱验证等场景。
  */
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 import type {
   VerifyCodeResult,
   VerificationCodeConfig,
   VerificationCodeResult,
   VerificationCodeTypeEnum,
-} from "@/types/password-reset";
+} from '@/types/password-reset';
 
 // =============================================================================
 // 配置常量
@@ -31,11 +31,11 @@ const DEFAULT_CONFIG: VerificationCodeConfig = {
  */
 const TYPE_MAPPING: Record<
   VerificationCodeTypeEnum,
-  "PASSWORD_RESET" | "EMAIL_VERIFICATION" | "PHONE_VERIFICATION"
+  'PASSWORD_RESET' | 'EMAIL_VERIFICATION' | 'PHONE_VERIFICATION'
 > = {
-  PASSWORD_RESET: "PASSWORD_RESET",
-  EMAIL_VERIFICATION: "EMAIL_VERIFICATION",
-  PHONE_VERIFICATION: "PHONE_VERIFICATION",
+  PASSWORD_RESET: 'PASSWORD_RESET',
+  EMAIL_VERIFICATION: 'EMAIL_VERIFICATION',
+  PHONE_VERIFICATION: 'PHONE_VERIFICATION',
 };
 
 // =============================================================================
@@ -59,8 +59,8 @@ class VerificationCodeService {
    */
   private generateCode(): string {
     const code = Array.from({ length: this.config.length }, () =>
-      Math.floor(Math.random() * 10).toString(),
-    ).join("");
+      Math.floor(Math.random() * 10).toString()
+    ).join('');
     return code;
   }
 
@@ -78,7 +78,7 @@ class VerificationCodeService {
    */
   private async checkAttemptLimit(
     userId: string,
-    type: VerificationCodeTypeEnum,
+    type: VerificationCodeTypeEnum
   ): Promise<{
     allowed: boolean;
     nextAttemptAt?: Date;
@@ -86,7 +86,7 @@ class VerificationCodeService {
   }> {
     const windowStart = new Date();
     windowStart.setMinutes(
-      windowStart.getMinutes() - this.config.attemptWindow,
+      windowStart.getMinutes() - this.config.attemptWindow
     );
 
     const recentAttempts = await this.prisma.verificationCode.count({
@@ -110,14 +110,14 @@ class VerificationCodeService {
           },
         },
         orderBy: {
-          createdAt: "asc",
+          createdAt: 'asc',
         },
       });
 
       if (lastAttempt) {
         const nextAttemptAt = new Date(lastAttempt.createdAt);
         nextAttemptAt.setMinutes(
-          nextAttemptAt.getMinutes() + this.config.attemptWindow,
+          nextAttemptAt.getMinutes() + this.config.attemptWindow
         );
 
         return {
@@ -139,7 +139,7 @@ class VerificationCodeService {
    */
   async createCode(
     userId: string,
-    type: VerificationCodeTypeEnum,
+    type: VerificationCodeTypeEnum
   ): Promise<VerificationCodeResult> {
     try {
       // 检查尝试限制
@@ -147,7 +147,7 @@ class VerificationCodeService {
       if (!limitCheck.allowed) {
         return {
           success: false,
-          code: "",
+          code: '',
           expiresAt: new Date(),
           error: `尝试次数过多，请 ${this.formatTimeRemaining(limitCheck.nextAttemptAt!)} 后再试`,
         };
@@ -173,12 +173,12 @@ class VerificationCodeService {
         expiresAt,
       };
     } catch (error) {
-      console.error("创建验证码失败:", error);
+      console.error('创建验证码失败:', error);
       return {
         success: false,
-        code: "",
+        code: '',
         expiresAt: new Date(),
-        error: error instanceof Error ? error.message : "未知错误",
+        error: error instanceof Error ? error.message : '未知错误',
       };
     }
   }
@@ -189,7 +189,7 @@ class VerificationCodeService {
   async verifyCode(
     email: string,
     code: string,
-    type: VerificationCodeTypeEnum,
+    type: VerificationCodeTypeEnum
   ): Promise<VerifyCodeResult> {
     try {
       // 查找用户
@@ -202,7 +202,7 @@ class VerificationCodeService {
         return {
           valid: false,
           userId: null,
-          error: "用户不存在",
+          error: '用户不存在',
         };
       }
 
@@ -218,7 +218,7 @@ class VerificationCodeService {
           },
         },
         orderBy: {
-          createdAt: "desc",
+          createdAt: 'desc',
         },
       });
 
@@ -226,7 +226,7 @@ class VerificationCodeService {
         return {
           valid: false,
           userId: null,
-          error: "验证码无效或已过期",
+          error: '验证码无效或已过期',
         };
       }
 
@@ -242,11 +242,11 @@ class VerificationCodeService {
         error: null,
       };
     } catch (error) {
-      console.error("验证验证码失败:", error);
+      console.error('验证验证码失败:', error);
       return {
         valid: false,
         userId: null,
-        error: error instanceof Error ? error.message : "验证失败",
+        error: error instanceof Error ? error.message : '验证失败',
       };
     }
   }
@@ -266,7 +266,7 @@ class VerificationCodeService {
 
       return result.count;
     } catch (error) {
-      console.error("清理过期验证码失败:", error);
+      console.error('清理过期验证码失败:', error);
       return 0;
     }
   }
@@ -312,7 +312,7 @@ let instance: VerificationCodeService | null = null;
  */
 export function getVerificationCodeService(
   prisma?: PrismaClient,
-  config?: Partial<VerificationCodeConfig>,
+  config?: Partial<VerificationCodeConfig>
 ): VerificationCodeService {
   if (!instance) {
     instance = new VerificationCodeService(prisma, config);

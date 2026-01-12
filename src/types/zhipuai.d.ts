@@ -1,4 +1,4 @@
-declare module "zhipuai" {
+declare module 'zhipuai' {
   // =============================================================================
   // 基础配置类型
   // =============================================================================
@@ -27,14 +27,14 @@ declare module "zhipuai" {
     user?: string;
     tools?: Tool[];
     tool_choice?:
-      | "auto"
-      | "none"
-      | { type: "function"; function: { name: string } };
-    response_format?: { type: "text" | "json_object" };
+      | 'auto'
+      | 'none'
+      | { type: 'function'; function: { name: string } };
+    response_format?: { type: 'text' | 'json_object' };
   }
 
   export interface ChatMessage {
-    role: "system" | "user" | "assistant" | "tool";
+    role: 'system' | 'user' | 'assistant' | 'tool';
     content?: string | null;
     tool_calls?: ToolCall[];
     tool_call_id?: string;
@@ -42,12 +42,12 @@ declare module "zhipuai" {
   }
 
   export interface Tool {
-    type: "function";
+    type: 'function';
     function: {
       name: string;
       description?: string;
       parameters: {
-        type: "object";
+        type: 'object';
         properties: Record<string, unknown>;
         required?: string[];
       };
@@ -56,7 +56,7 @@ declare module "zhipuai" {
 
   export interface ToolCall {
     id: string;
-    type: "function";
+    type: 'function';
     function: {
       name: string;
       arguments: string;
@@ -65,7 +65,7 @@ declare module "zhipuai" {
 
   export interface ChatCompletionResponse {
     id: string;
-    object: "chat.completion";
+    object: 'chat.completion';
     created: number;
     model: string;
     choices: ChatCompletionChoice[];
@@ -76,7 +76,7 @@ declare module "zhipuai" {
   export interface ChatCompletionChoice {
     index: number;
     message: ChatMessage;
-    finish_reason: "stop" | "length" | "tool_calls" | "content_filter";
+    finish_reason: 'stop' | 'length' | 'tool_calls' | 'content_filter';
     logprobs?: null;
   }
 
@@ -86,7 +86,7 @@ declare module "zhipuai" {
 
   export interface ChatCompletionChunk {
     id: string;
-    object: "chat.completion.chunk";
+    object: 'chat.completion.chunk';
     created: number;
     model: string;
     choices: ChatCompletionChunkChoice[];
@@ -100,7 +100,7 @@ declare module "zhipuai" {
       content?: string | null;
       tool_calls?: ToolCall[];
     };
-    finish_reason?: "stop" | "length" | "tool_calls" | "content_filter";
+    finish_reason?: 'stop' | 'length' | 'tool_calls' | 'content_filter';
     logprobs?: null;
   }
 
@@ -111,20 +111,20 @@ declare module "zhipuai" {
   export interface EmbeddingRequest {
     model: string;
     input: string | string[];
-    encoding_format?: "float" | "base64";
+    encoding_format?: 'float' | 'base64';
     dimensions?: number;
     user?: string;
   }
 
   export interface EmbeddingResponse {
-    object: "list";
+    object: 'list';
     data: Embedding[];
     model: string;
     usage: TokenUsage;
   }
 
   export interface Embedding {
-    object: "embedding";
+    object: 'embedding';
     embedding: number[];
     index: number;
   }
@@ -188,18 +188,18 @@ declare module "zhipuai" {
 
   export interface Model {
     id: string;
-    object: "model";
+    object: 'model';
     created: number;
     owned_by: string;
   }
 
   export interface ModelListResponse {
-    object: "list";
+    object: 'list';
     data: Model[];
   }
 
   export interface UsageResponse {
-    object: "usage";
+    object: 'usage';
     total_usage: number;
     // 其他可能的字段
     [key: string]: unknown;

@@ -2,14 +2,14 @@
  * 用户注册 API
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
-import { hashPassword, validatePassword } from "@/lib/auth/password";
-import { validateEmail, validateRegisterRequest } from "@/lib/auth/validation";
-import { generateAccessToken, generateRefreshToken } from "@/lib/auth/jwt";
-import type { AuthResponse, RegisterRequest } from "@/types/auth";
-import type { JwtPayload } from "@/types/auth";
-import { AuthErrorCode } from "@/types/auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { hashPassword, validatePassword } from '@/lib/auth/password';
+import { validateEmail, validateRegisterRequest } from '@/lib/auth/validation';
+import { generateAccessToken, generateRefreshToken } from '@/lib/auth/jwt';
+import type { AuthResponse, RegisterRequest } from '@/types/auth';
+import type { JwtPayload } from '@/types/auth';
+import { AuthErrorCode } from '@/types/auth';
 
 /**
  * POST /api/auth/register
@@ -26,8 +26,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!validation.valid) {
       const response: AuthResponse = {
         success: false,
-        message: "输入验证失败",
-        error: validation.errors.join("; "),
+        message: '输入验证失败',
+        error: validation.errors.join('; '),
       };
       return NextResponse.json(response, { status: 400 });
     }
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!emailValidation.valid) {
       const response: AuthResponse = {
         success: false,
-        message: "邮箱格式不正确",
+        message: '邮箱格式不正确',
         error: emailValidation.error,
       };
       return NextResponse.json(response, { status: 400 });
@@ -48,8 +48,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!passwordValidation.valid) {
       const response: AuthResponse = {
         success: false,
-        message: "密码不符合要求",
-        error: passwordValidation.errors.join("; "),
+        message: '密码不符合要求',
+        error: passwordValidation.errors.join('; '),
       };
       return NextResponse.json(response, { status: 400 });
     }
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (existingUser) {
       const response: AuthResponse = {
         success: false,
-        message: "邮箱已被注册",
+        message: '邮箱已被注册',
         error: AuthErrorCode.USER_EXISTS,
       };
       return NextResponse.json(response, { status: 409 });
@@ -77,9 +77,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         email,
         username: username || null,
         name: name || username || null,
-        status: "ACTIVE",
+        status: 'ACTIVE',
         password: hashedPassword,
-        role: "USER",
+        role: 'USER',
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
 
-    console.log("[REGISTER] Generated tokens:", {
+    console.log('[REGISTER] Generated tokens:', {
       accessTokenLength: accessToken.length,
       refreshTokenLength: refreshToken.length,
       userId: user.id,
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     });
 
-    console.log("[REGISTER] Created session:", {
+    console.log('[REGISTER] Created session:', {
       sessionId: session.id,
       tokenLength: session.sessionToken.length,
       expires: session.expires,
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // 返回响应
     const response: AuthResponse = {
       success: true,
-      message: "注册成功，请使用邮箱登录",
+      message: '注册成功，请使用邮箱登录',
       data: {
         user: {
           id: user.id,
@@ -146,11 +146,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     };
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
-    console.error("注册失败:", error);
+    console.error('注册失败:', error);
     const response: AuthResponse = {
       success: false,
-      message: "注册失败，请稍后重试",
-      error: "SERVER_ERROR",
+      message: '注册失败，请稍后重试',
+      error: 'SERVER_ERROR',
     };
     return NextResponse.json(response, { status: 500 });
   }
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
  */
 export async function GET(): Promise<NextResponse> {
   return NextResponse.json(
-    { success: false, message: "方法不允许" },
-    { status: 405 },
+    { success: false, message: '方法不允许' },
+    { status: 405 }
   );
 }

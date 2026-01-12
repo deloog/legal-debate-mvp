@@ -11,13 +11,13 @@
  * AI服务超时错误
  */
 export class AIServiceTimeoutError extends Error {
-  public readonly code: string = "AI_TIMEOUT";
+  public readonly code: string = 'AI_TIMEOUT';
   public readonly statusCode: number = 408;
   public readonly timestamp: number;
 
   constructor(public readonly context: string) {
     super(`AI服务调用超时: ${context}`);
-    this.name = "AIServiceTimeoutError";
+    this.name = 'AIServiceTimeoutError';
     this.timestamp = Date.now();
     Object.setPrototypeOf(this, AIServiceTimeoutError.prototype);
   }
@@ -27,16 +27,16 @@ export class AIServiceTimeoutError extends Error {
  * AI服务失败错误
  */
 export class AIServiceFailureError extends Error {
-  public readonly code: string = "AI_SERVICE_FAILURE";
+  public readonly code: string = 'AI_SERVICE_FAILURE';
   public readonly statusCode: number = 500;
   public readonly timestamp: number;
 
   constructor(
     public readonly context: string,
-    public readonly originalError: Error,
+    public readonly originalError: Error
   ) {
     super(`AI服务调用失败: ${context}`);
-    this.name = "AIServiceFailureError";
+    this.name = 'AIServiceFailureError';
     this.cause = originalError;
     this.timestamp = Date.now();
     Object.setPrototypeOf(this, AIServiceFailureError.prototype);
@@ -47,13 +47,13 @@ export class AIServiceFailureError extends Error {
  * AI服务繁忙错误
  */
 export class AIServiceBusyError extends Error {
-  public readonly code: string = "AI_SERVICE_BUSY";
+  public readonly code: string = 'AI_SERVICE_BUSY';
   public readonly statusCode: number = 503;
   public readonly timestamp: number;
 
   constructor(public readonly context: string) {
     super(`AI服务繁忙: ${context}`);
-    this.name = "AIServiceBusyError";
+    this.name = 'AIServiceBusyError';
     this.timestamp = Date.now();
     Object.setPrototypeOf(this, AIServiceBusyError.prototype);
   }
@@ -101,7 +101,7 @@ export class AIServiceErrorHandler {
   static async withTimeout<T>(
     promise: Promise<T>,
     context: string,
-    timeoutMs: number = AIServiceErrorHandler.DEFAULT_TIMEOUT_MS,
+    timeoutMs: number = AIServiceErrorHandler.DEFAULT_TIMEOUT_MS
   ): Promise<T> {
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => {
@@ -129,11 +129,11 @@ export class AIServiceErrorHandler {
    */
   static async withRetry<T>(
     operation: () => Promise<T>,
-    options: RetryOptions = {},
+    options: RetryOptions = {}
   ): Promise<T> {
     const {
       maxRetries = AIServiceErrorHandler.DEFAULT_MAX_RETRIES,
-      context = "AI服务调用",
+      context = 'AI服务调用',
       enableExponentialBackoff = true,
       shouldRetry = AIServiceErrorHandler.isRetryable,
     } = options;
@@ -157,14 +157,14 @@ export class AIServiceErrorHandler {
           : 1000; // 固定1秒延迟
 
         // 等待后再重试
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        await new Promise(resolve => setTimeout(resolve, delay));
 
         console.warn(
           `操作重试 (第${attempt + 1}/${maxRetries}次): ${context}`,
           {
             error: (error as Error).message,
             delay: `${delay}ms`,
-          },
+          }
         );
       }
     }
@@ -179,36 +179,36 @@ export class AIServiceErrorHandler {
    * @param locale 语言环境，默认zh-CN
    * @returns 友好的错误提示
    */
-  static getFriendlyMessage(error: Error, locale: string = "zh-CN"): string {
+  static getFriendlyMessage(error: Error, locale: string = 'zh-CN'): string {
     // 超时错误
     if (error instanceof AIServiceTimeoutError) {
-      if (locale === "zh-CN") {
-        return "分析时间较长，请耐心等待";
+      if (locale === 'zh-CN') {
+        return '分析时间较长，请耐心等待';
       }
-      return "Analysis is taking longer than expected, please be patient";
+      return 'Analysis is taking longer than expected, please be patient';
     }
 
     // 服务繁忙错误
     if (error instanceof AIServiceBusyError) {
-      if (locale === "zh-CN") {
-        return "当前服务繁忙，请稍后重试";
+      if (locale === 'zh-CN') {
+        return '当前服务繁忙，请稍后重试';
       }
-      return "Service is currently busy, please try again later";
+      return 'Service is currently busy, please try again later';
     }
 
     // 服务失败错误
     if (error instanceof AIServiceFailureError) {
-      if (locale === "zh-CN") {
-        return "当前服务繁忙，请稍后重试";
+      if (locale === 'zh-CN') {
+        return '当前服务繁忙，请稍后重试';
       }
-      return "Service is currently busy, please try again later";
+      return 'Service is currently busy, please try again later';
     }
 
     // 通用错误提示
-    if (locale === "zh-CN") {
-      return "系统处理出现问题，请稍后重试";
+    if (locale === 'zh-CN') {
+      return '系统处理出现问题，请稍后重试';
     }
-    return "System encountered an issue, please try again later";
+    return 'System encountered an issue, please try again later';
   }
 
   /**
@@ -221,10 +221,10 @@ export class AIServiceErrorHandler {
 
     // 网络错误可重试
     if (
-      errorMessage.includes("network") ||
-      errorMessage.includes("timeout") ||
-      errorMessage.includes("econnreset") ||
-      errorMessage.includes("etimedout")
+      errorMessage.includes('network') ||
+      errorMessage.includes('timeout') ||
+      errorMessage.includes('econnreset') ||
+      errorMessage.includes('etimedout')
     ) {
       return true;
     }

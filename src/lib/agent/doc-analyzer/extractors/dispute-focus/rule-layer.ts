@@ -7,7 +7,7 @@ import type {
   DisputeFocus,
   DisputeFocusCategory,
   ExtractedData,
-} from "../../core/types";
+} from '../../core/types';
 
 /**
  * 初始化规则模式
@@ -15,7 +15,7 @@ import type {
 export function initializeRulePatterns(): Map<DisputeFocusCategory, RegExp[]> {
   const patterns = new Map<DisputeFocusCategory, RegExp[]>();
 
-  patterns.set("CONTRACT_BREACH", [
+  patterns.set('CONTRACT_BREACH', [
     /违约/gi,
     /未履行\s*(合同|义务)/gi,
     /解除\s*合同/gi,
@@ -30,7 +30,7 @@ export function initializeRulePatterns(): Map<DisputeFocusCategory, RegExp[]> {
     /被告.*未能.*履行/gi,
   ]);
 
-  patterns.set("PAYMENT_DISPUTE", [
+  patterns.set('PAYMENT_DISPUTE', [
     /支付\s*本金/gi,
     /偿还\s*欠款/gi,
     /金额.*争议/gi,
@@ -44,7 +44,7 @@ export function initializeRulePatterns(): Map<DisputeFocusCategory, RegExp[]> {
     /借款.*本金/gi,
   ]);
 
-  patterns.set("LIABILITY_ISSUE", [
+  patterns.set('LIABILITY_ISSUE', [
     /承担\s*责任/gi,
     /责任\s*认定/gi,
     /责任\s*划分/gi,
@@ -56,7 +56,7 @@ export function initializeRulePatterns(): Map<DisputeFocusCategory, RegExp[]> {
     /减轻\s*责任/gi,
   ]);
 
-  patterns.set("DAMAGES_CALCULATION", [
+  patterns.set('DAMAGES_CALCULATION', [
     /损失.*计算/gi,
     /赔偿\s*数额/gi,
     /违约金.*计算/gi,
@@ -65,14 +65,14 @@ export function initializeRulePatterns(): Map<DisputeFocusCategory, RegExp[]> {
     /计算方式.*意见不一/gi,
   ]);
 
-  patterns.set("PERFORMANCE_DISPUTE", [
+  patterns.set('PERFORMANCE_DISPUTE', [
     /继续\s*履行/gi,
     /履行\s*义务/gi,
     /是否\s*履行/gi,
     /履行.*争议/gi,
   ]);
 
-  patterns.set("VALIDITY_ISSUE", [
+  patterns.set('VALIDITY_ISSUE', [
     /合同\s*效力/gi,
     /是否\s*有效/gi,
     /是否\s*成立/gi,
@@ -81,7 +81,7 @@ export function initializeRulePatterns(): Map<DisputeFocusCategory, RegExp[]> {
     /合同.*成立/gi,
   ]);
 
-  patterns.set("OTHER", [
+  patterns.set('OTHER', [
     /争议\s*焦点/gi,
     /核心.*问题/gi,
     /主要.*分歧/gi,
@@ -99,26 +99,26 @@ export function ruleMatchLayer(
   text: string,
   extractedData?: ExtractedData,
   aiExtracted?: DisputeFocus[],
-  rulePatterns?: Map<DisputeFocusCategory, RegExp[]>,
+  rulePatterns?: Map<DisputeFocusCategory, RegExp[]>
 ): DisputeFocus[] {
   const focuses: DisputeFocus[] = [];
   let idCounter = aiExtracted ? aiExtracted.length : 0;
   const patternsMap = rulePatterns || initializeRulePatterns();
 
   // 调试日志
-  console.log("[规则匹配层] 开始匹配文本长度:", text.length);
-  console.log("[规则匹配层] 模式数量:", patternsMap.size);
+  console.log('[规则匹配层] 开始匹配文本长度:', text.length);
+  console.log('[规则匹配层] 模式数量:', patternsMap.size);
 
   for (const [category, patterns] of patternsMap) {
     console.log(
-      `[规则匹配层] 处理类别: ${category}, 模式数量: ${patterns.length}`,
+      `[规则匹配层] 处理类别: ${category}, 模式数量: ${patterns.length}`
     );
     for (const pattern of patterns) {
       const matches = text.matchAll(pattern);
       for (const match of matches) {
         // 检查是否已被AI提取层覆盖
-        const isAlreadyExtracted = aiExtracted?.some((aiFocus) =>
-          isSimilarFocus(aiFocus, match[0], category),
+        const isAlreadyExtracted = aiExtracted?.some(aiFocus =>
+          isSimilarFocus(aiFocus, match[0], category)
         );
 
         if (!isAlreadyExtracted) {
@@ -128,7 +128,7 @@ export function ruleMatchLayer(
             category,
             match,
             text,
-            extractedData,
+            extractedData
           );
           if (focus) focuses.push(focus);
         }
@@ -145,7 +145,7 @@ export function ruleMatchLayer(
 function isSimilarFocus(
   aiFocus: DisputeFocus,
   matchedText: string,
-  category: DisputeFocusCategory,
+  category: DisputeFocusCategory
 ): boolean {
   if (aiFocus.category !== category) return false;
 
@@ -175,7 +175,7 @@ function buildRuleBasedFocus(
   category: DisputeFocusCategory,
   match: RegExpMatchArray,
   text: string,
-  extractedData?: ExtractedData,
+  extractedData?: ExtractedData
 ): DisputeFocus | null {
   const matchedText = match[0];
   const matchIndex = match.index || 0;
@@ -209,7 +209,7 @@ function buildRuleBasedFocus(
 function extractPositionA(
   text: string,
   matchedText: string,
-  matchIndex: number,
+  matchIndex: number
 ): string {
   const patterns = [/原告认为|原告主张|原告称/gi, /原告方面/gi, /起诉方认为/gi];
 
@@ -222,7 +222,7 @@ function extractPositionA(
     }
   }
 
-  return "未明确";
+  return '未明确';
 }
 
 /**
@@ -231,7 +231,7 @@ function extractPositionA(
 function extractPositionB(
   text: string,
   matchedText: string,
-  matchIndex: number,
+  matchIndex: number
 ): string {
   const patterns = [
     /被告认为|被告主张|被告称/gi,
@@ -244,7 +244,7 @@ function extractPositionB(
     const contextStart = matchIndex;
     const contextEnd = Math.min(
       text.length,
-      contextStart + matchedText.length + 100,
+      contextStart + matchedText.length + 100
     );
     const context = text.substring(contextStart, contextEnd);
 
@@ -252,7 +252,7 @@ function extractPositionB(
     if (match) return match[0];
   }
 
-  return "未明确";
+  return '未明确';
 }
 
 /**
@@ -281,21 +281,21 @@ function extractCoreIssue(matchedText: string): string {
  */
 function calculateImportance(
   text: string,
-  category: DisputeFocusCategory,
+  category: DisputeFocusCategory
 ): number {
   let score = 5;
 
   const highImportanceKeywords = [
-    "本金",
-    "利息",
-    "违约金",
-    "赔偿",
-    "损失",
-    "履行",
-    "解除",
+    '本金',
+    '利息',
+    '违约金',
+    '赔偿',
+    '损失',
+    '履行',
+    '解除',
   ];
-  const hasKeyword = highImportanceKeywords.some((kw) =>
-    text.toLowerCase().includes(kw),
+  const hasKeyword = highImportanceKeywords.some(kw =>
+    text.toLowerCase().includes(kw)
   );
   if (hasKeyword) score += 2;
 
@@ -322,11 +322,11 @@ function calculateImportance(
 function calculateConfidence(
   matchedText: string,
   positionA: string,
-  positionB: string,
+  positionB: string
 ): number {
   let confidence = 0.5;
 
-  if (positionA !== "未明确" && positionB !== "未明确") {
+  if (positionA !== '未明确' && positionB !== '未明确') {
     confidence += 0.2;
   }
 
@@ -346,7 +346,7 @@ function calculateConfidence(
  */
 function extractRelatedClaims(
   text: string,
-  extractedData?: ExtractedData,
+  extractedData?: ExtractedData
 ): string[] {
   const related: string[] = [];
 
@@ -365,11 +365,11 @@ function extractRelatedClaims(
  * 判断是否与诉讼请求相关
  */
 function isRelatedToClaim(text: string, claimContent: string): boolean {
-  const textKeywords = text.split(/[，。；；\s]/).map((k) => k.trim());
-  const claimKeywords = claimContent.split(/[，。；；\s]/).map((k) => k.trim());
+  const textKeywords = text.split(/[，。；；\s]/).map(k => k.trim());
+  const claimKeywords = claimContent.split(/[，。；；\s]/).map(k => k.trim());
 
-  return textKeywords.some((tk) =>
-    claimKeywords.some((ck) => tk.includes(ck) || ck.includes(tk)),
+  return textKeywords.some(tk =>
+    claimKeywords.some(ck => tk.includes(ck) || ck.includes(tk))
   );
 }
 
@@ -379,7 +379,7 @@ function isRelatedToClaim(text: string, claimContent: string): boolean {
 function extractLegalBasis(
   matchedText: string,
   fullText: string,
-  matchIndex: number,
+  matchIndex: number
 ): string | undefined {
   const patterns = [
     /依据\s*《[^》]+》/gi,
