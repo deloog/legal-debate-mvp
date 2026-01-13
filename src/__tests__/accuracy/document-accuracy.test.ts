@@ -133,9 +133,8 @@ class DocumentAccuracyTester {
   }
 
   private calculatePartiesAccuracy(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     extracted: any[],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     expected: any[]
   ): { accuracy: number; correct: number } {
     let correct = 0;
@@ -171,9 +170,8 @@ class DocumentAccuracyTester {
   }
 
   private calculateClaimsRecall(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     extracted: any[],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     expected: any[]
   ): { recall: number; correct: number } {
     let correct = 0;

@@ -1,0 +1,329 @@
+/**
+ * 案件管理API - 管理员专用
+ * 支持分页、筛选、搜索、删除
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { validatePermissions } from '@/lib/middleware/permission-check';
+
+// =============================================================================
+// 类型定义
+// =============================================================================
+
+/**
+ * 案件列表查询参数
+ */
+interface CaseListQueryParams {
+  page?: string;
+  limit?: string;
+  status?: string;
+  type?: string;
+  userId?: string;
+  search?: string;
+}
+
+/**
+ * 案件列表响应数据
+ */
+interface CaseListResponse {
+  cases: Array<{
+    id: string;
+    title: string;
+    description: string | null;
+    type: string;
+    status: string;
+    amount: string | null;
+    caseNumber: string | null;
+    cause: string | null;
+    court: string | null;
+    plaintiffName: string | null;
+    defendantName: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    user: {
+      id: string;
+      email: string;
+      username: string | null;
+      name: string | null;
+    };
+    documentsCount: number;
+    debatesCount: number;
+  }>;
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+// =============================================================================
+// 辅助函数
+// =============================================================================
+
+/**
+ * 验证案件类型枚举值
+ */
+function isValidCaseType(type: string): boolean {
+  const validTypes = [
+    'CIVIL',
+    'CRIMINAL',
+    'ADMINISTRATIVE',
+    'COMMERCIAL',
+    'LABOR',
+    'INTELLECTUAL',
+    'OTHER',
+  ];
+  return validTypes.includes(type);
+}
+
+/**
+ * 验证案件状态枚举值
+ */
+function isValidCaseStatus(status: string): boolean {
+  const validStatuses = ['DRAFT', 'ACTIVE', 'COMPLETED', 'ARCHIVED'];
+  return validStatuses.includes(status);
+}
+
+/**
+ * 解析查询参数
+ */
+function parseQueryParams(request: NextRequest): CaseListQueryParams {
+  const url = new URL(request.url);
+  return {
+    page: url.searchParams.get('page') ?? '1',
+    limit: url.searchParams.get('limit') ?? '20',
+    status: url.searchParams.get('status') ?? undefined,
+    type: url.searchParams.get('type') ?? undefined,
+    userId: url.searchParams.get('userId') ?? undefined,
+    search: url.searchParams.get('search') ?? undefined,
+  };
+}
+
+/**
+ * 构建Prisma查询条件
+ */
+function buildWhereClause(params: CaseListQueryParams) {
+  const where: Record<string, unknown> = {
+    deletedAt: null,
+  };
+
+  if (params.status && isValidCaseStatus(params.status)) {
+    where.status = params.status;
+  }
+
+  if (params.type && isValidCaseType(params.type)) {
+    where.type = params.type;
+  }
+
+  if (params.userId && params.userId.trim() !== '') {
+    where.userId = params.userId;
+  }
+
+  if (params.search && params.search.trim() !== '') {
+    where.OR = [
+      { title: { contains: params.search, mode: 'insensitive' } },
+      { description: { contains: params.search, mode: 'insensitive' } },
+      { caseNumber: { contains: params.search, mode: 'insensitive' } },
+      { cause: { contains: params.search, mode: 'insensitive' } },
+      { plaintiffName: { contains: params.search, mode: 'insensitive' } },
+      { defendantName: { contains: params.search, mode: 'insensitive' } },
+    ];
+  }
+
+  return where;
+}
+
+// =============================================================================
+// API处理函数
+// =============================================================================
+
+/**
+ * GET /api/admin/cases
+ * 获取案件列表（管理员权限）
+ */
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  // 验证用户身份
+  const user = await getAuthUser(request);
+  if (!user) {
+    return Response.json(
+      { error: '未认证', message: '请先登录' },
+      { status: 401 }
+    ) as unknown as NextResponse;
+  }
+
+  // 检查权限
+  const permissionError = await validatePermissions(request, 'case:read');
+  if (permissionError) {
+    return permissionError;
+  }
+
+  try {
+    // 解析查询参数
+    const params = parseQueryParams(request);
+    const page = Math.max(1, Number.parseInt(params.page, 10));
+    const limit = Math.min(100, Math.max(1, Number.parseInt(params.limit, 10)));
+    const skip = (page - 1) * limit;
+
+    // 构建查询条件
+    const where = buildWhereClause(params);
+
+    // 查询案件总数
+    const total = await prisma.case.count({ where });
+
+    // 查询案件列表
+    const cases = await prisma.case.findMany({
+      where,
+      skip,
+      take: limit,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        type: true,
+        status: true,
+        amount: true,
+        caseNumber: true,
+        cause: true,
+        court: true,
+        plaintiffName: true,
+        defendantName: true,
+        createdAt: true,
+        updatedAt: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            documents: true,
+            debates: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // 构建响应数据
+    const responseData: CaseListResponse = {
+      cases: cases.map(caseItem => ({
+        id: caseItem.id,
+        title: caseItem.title,
+        description: caseItem.description,
+        type: caseItem.type,
+        status: caseItem.status,
+        amount: caseItem.amount ? caseItem.amount.toString() : null,
+        caseNumber: caseItem.caseNumber,
+        cause: caseItem.cause,
+        court: caseItem.court,
+        plaintiffName: caseItem.plaintiffName,
+        defendantName: caseItem.defendantName,
+        createdAt: caseItem.createdAt,
+        updatedAt: caseItem.updatedAt,
+        user: caseItem.user,
+        documentsCount: caseItem._count.documents,
+        debatesCount: caseItem._count.debates,
+      })),
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+
+    return Response.json(
+      { data: responseData },
+      { status: 200 }
+    ) as unknown as NextResponse;
+  } catch (error) {
+    console.error('获取案件列表失败:', error);
+    return Response.json(
+      { error: '服务器错误', message: '获取案件列表失败' },
+      { status: 500 }
+    ) as unknown as NextResponse;
+  }
+}
+
+/**
+ * DELETE /api/admin/cases/[id]
+ * 删除案件（软删除）
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  // 验证用户身份
+  const user = await getAuthUser(request);
+  if (!user) {
+    return Response.json(
+      { error: '未认证', message: '请先登录' },
+      { status: 401 }
+    ) as unknown as NextResponse;
+  }
+
+  // 检查权限
+  const permissionError = await validatePermissions(request, 'case:delete');
+  if (permissionError) {
+    return permissionError;
+  }
+
+  try {
+    const { id } = await params;
+
+    // 检查案件是否存在
+    const existingCase = await prisma.case.findUnique({
+      where: { id },
+    });
+
+    if (!existingCase) {
+      return Response.json(
+        { error: '案件不存在', message: '未找到指定案件' },
+        { status: 404 }
+      ) as unknown as NextResponse;
+    }
+
+    // 软删除案件
+    await prisma.case.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+
+    return Response.json(
+      { message: '案件删除成功' },
+      { status: 200 }
+    ) as unknown as NextResponse;
+  } catch (error) {
+    console.error('删除案件失败:', error);
+    return Response.json(
+      { error: '服务器错误', message: '删除案件失败' },
+      { status: 500 }
+    ) as unknown as NextResponse;
+  }
+}
+
+/**
+ * OPTIONS /api/admin/cases
+ * CORS预检请求
+ */
+export async function OPTIONS(): Promise<NextResponse> {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
+}

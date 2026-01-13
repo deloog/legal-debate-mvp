@@ -35,11 +35,10 @@ jest.mock('@/lib/ai/unified-service', () => ({
 import { prisma } from '@/lib/db/prisma';
 
 // Type assertion for mocked prisma
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const mockedPrisma = prisma as any;
 
 describe('Debates ID API', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockReq: any;
 
   beforeEach(() => {
@@ -48,7 +47,6 @@ describe('Debates ID API', () => {
       url: 'http://localhost:3000/api/v1/debates/123e4567-e89b-12d3-a456-426614174000',
       json: jest.fn(),
       headers: new Headers(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
   });
 
@@ -208,7 +206,7 @@ describe('Debates ID API', () => {
 
       // @ts-expect-error - testing purpose
       mockReq.json = jest.fn().mockResolvedValue(invalidData);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       mockedPrisma.debate.findUnique.mockResolvedValue({ id: '123' } as any);
 
       const { PUT } = await import('@/app/api/v1/debates/[id]/route');
@@ -265,7 +263,6 @@ describe('Debates ID API', () => {
     });
 
     it('should handle database errors during deletion', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockedPrisma.debate.findUnique.mockResolvedValue({ id: '123' } as any);
       mockedPrisma.debate.delete.mockRejectedValue(
         new Error('Database connection failed')

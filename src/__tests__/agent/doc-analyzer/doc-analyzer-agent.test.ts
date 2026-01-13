@@ -102,7 +102,7 @@ describe('DocAnalyzerAgent', () => {
     const mockContext: AgentContext = {
       task: 'DOCUMENT_ANALYZE',
       taskType: 'DOCUMENT_ANALYZE',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       priority: 'MEDIUM' as any,
       data: mockInput as unknown as Record<string, unknown>,
       userId: 'user-001',

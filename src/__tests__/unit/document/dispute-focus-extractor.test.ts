@@ -56,7 +56,7 @@ const MOCK_EXTRACTED_DATA = {
 // =============================================================================
 
 // 必须在jest.mock之前声明mock函数
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const mockChatCompletion = jest.fn() as any;
 
 // Mock unified-service

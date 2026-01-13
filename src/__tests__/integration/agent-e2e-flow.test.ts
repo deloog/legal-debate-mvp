@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { DocAnalyzerAgent } from '@/lib/agent/doc-analyzer/doc-analyzer-agent';
 import { LawSearcher } from '@/lib/agent/legal-agent/law-searcher';
 import { DocumentGenerator } from '@/lib/agent/generation-agent/document-generator';

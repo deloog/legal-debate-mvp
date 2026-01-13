@@ -202,7 +202,6 @@ describe('ErrorLogger', () => {
 
   describe('错误码提取', () => {
     it('应该从错误对象中提取错误码', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const error = new Error('Test error') as any;
       error.code = 'ECONNREFUSED';
       const context: ErrorContext = {};

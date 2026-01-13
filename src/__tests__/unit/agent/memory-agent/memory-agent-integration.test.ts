@@ -3,7 +3,6 @@
  * 减少mock使用，让实际代码路径被执行以提升覆盖率
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { MemoryAgent } from '@/lib/agent/memory-agent/memory-agent';
 import {
   PrismaClient,

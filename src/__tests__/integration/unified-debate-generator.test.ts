@@ -113,7 +113,7 @@ describe('UnifiedAIService - Enhanced Debate Generation', () => {
     });
     unifiedService['generalAIService'] = {
       chatCompletion: jest.fn().mockResolvedValue(mockAIResponse),
-    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    } as any;
     unifiedService['initialized'] = true;
 
     // Mock promptOptimizer to return proper object
@@ -128,7 +128,7 @@ describe('UnifiedAIService - Enhanced Debate Generation', () => {
         issues: [],
         suggestions: [],
       }),
-    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    } as any;
   });
 
   afterEach(() => {
@@ -172,7 +172,7 @@ describe('UnifiedAIService - Enhanced Debate Generation', () => {
     test('应该使用正确的AI配置调用服务', async () => {
       await unifiedService.generateDebate(mockCaseInfo, mockLegalReferences);
 
-      const aiService = unifiedService['generalAIService'] as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+      const aiService = unifiedService['generalAIService'] as any;
       expect(aiService.chatCompletion).toHaveBeenCalledWith(
         expect.objectContaining({
           model: 'deepseek-chat',
@@ -289,7 +289,7 @@ describe('UnifiedAIService - Enhanced Debate Generation', () => {
       const retryService = new UnifiedAIService(undefined, {
         maxRetries: 3,
       });
-      retryService['generalAIService'] = failingService as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+      retryService['generalAIService'] = failingService as any;
       retryService['initialized'] = true;
       retryService['promptOptimizer'] = {
         generateOptimizedPrompt: jest.fn().mockResolvedValue({
@@ -297,7 +297,7 @@ describe('UnifiedAIService - Enhanced Debate Generation', () => {
             '你是专业的法律辩论生成助手，擅长生成逻辑清晰、法律依据准确的辩论论点。',
           userPrompt: '请根据以下案情和法条生成辩论论点...',
         }),
-      } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+      } as any;
 
       const result = await retryService.generateDebate(
         mockCaseInfo,
@@ -316,7 +316,7 @@ describe('UnifiedAIService - Enhanced Debate Generation', () => {
       const failService = new UnifiedAIService(undefined, {
         maxRetries: 2,
       });
-      failService['generalAIService'] = alwaysFailingService as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+      failService['generalAIService'] = alwaysFailingService as any;
       failService['initialized'] = true;
       failService['promptOptimizer'] = {
         generateOptimizedPrompt: jest.fn().mockResolvedValue({
@@ -324,7 +324,7 @@ describe('UnifiedAIService - Enhanced Debate Generation', () => {
             '你是专业的法律辩论生成助手，擅长生成逻辑清晰、法律依据准确的辩论论点。',
           userPrompt: '请根据以下案情和法条生成辩论论点...',
         }),
-      } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+      } as any;
 
       await expect(
         failService.generateDebate(mockCaseInfo, mockLegalReferences)

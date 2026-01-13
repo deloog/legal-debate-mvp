@@ -178,7 +178,6 @@ describe('ConnectionManager', () => {
 
   describe('executeWithRetry', () => {
     it('应该成功执行操作', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const result = await manager.executeWithRetry(async connection => {
         return 'success';
       });
@@ -188,7 +187,6 @@ describe('ConnectionManager', () => {
 
     it('应该处理操作失败', async () => {
       await expect(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         manager.executeWithRetry(async connection => {
           throw new Error('操作失败');
         })
@@ -199,7 +197,6 @@ describe('ConnectionManager', () => {
       let attemptCount = 0;
 
       try {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         await manager.executeWithRetry(async connection => {
           attemptCount++;
           throw new Error('测试错误');
@@ -257,7 +254,6 @@ describe('全局连接管理器', () => {
 
 describe('executeWithRetry便捷函数', () => {
   it('应该使用全局管理器执行操作', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const result = await executeWithRetry(async connection => {
       return 'test-result';
     });
@@ -267,7 +263,6 @@ describe('executeWithRetry便捷函数', () => {
 
   it('应该处理执行失败', async () => {
     await expect(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       executeWithRetry(async connection => {
         throw new Error('执行失败');
       })
@@ -278,7 +273,6 @@ describe('executeWithRetry便捷函数', () => {
     let attempts = 0;
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       await executeWithRetry(async connection => {
         attempts++;
         throw new Error('测试');

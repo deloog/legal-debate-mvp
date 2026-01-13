@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * DebatePromptOptimizer 单元测试
  * 测试提示词优化器的核心功能

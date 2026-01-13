@@ -208,32 +208,26 @@ export async function reviewEnterprise(
 }
 
 /**
- * 创建管理员用户
+ * 管理员登录（使用seed脚本创建的管理员账户）
  */
-export async function createAdminUser(
+export async function adminLogin(
   apiContext: APIRequestContext
-): Promise<{ userId: string; token: string }> {
-  const timestamp = Date.now();
-  const email = `admin-test-${timestamp}@example.com`;
-  const password = 'AdminPass123';
+): Promise<{ userId: string; token: string; email: string }> {
+  const email = 'admin@example.com';
+  const password = 'Admin@123';
 
-  const response = await apiContext.post(`${getBaseUrl()}/api/auth/register`, {
+  const response = await apiContext.post(`${getBaseUrl()}/api/auth/login`, {
     data: {
       email,
       password,
-      username: `admin${timestamp.toString().slice(-6)}`,
-      name: `AdminTest${timestamp.toString().slice(-6)}`,
     },
   });
 
   const data = await response.json();
+  const token = data.data?.token || '';
+  const userId = data.data?.user?.id || '';
 
-  // 注意：这里假设注册后需要手动将用户设置为管理员角色
-  // 实际使用时需要通过数据库或其他方式创建管理员用户
-  return {
-    userId: data.data?.user?.id || '',
-    token: data.data?.token || '',
-  };
+  return { userId, token, email };
 }
 
 /**

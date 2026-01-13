@@ -27,9 +27,9 @@ jest.mock('@/lib/db/prisma', () => ({
 import { prisma } from '@/lib/db/prisma';
 
 // 类型断言 helper
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const mockUserFindUnique = prisma.user.findUnique as jest.Mock<any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const mockRoleFindUnique = prisma.role.findUnique as jest.Mock<any>;
 
 // 重置所有 mock

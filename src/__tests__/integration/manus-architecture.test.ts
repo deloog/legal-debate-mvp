@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { DocAnalyzerAgent } from '@/lib/agent/doc-analyzer/doc-analyzer-agent';
 import type { DocumentAnalysisInput } from '@/lib/agent/doc-analyzer/core/types';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';

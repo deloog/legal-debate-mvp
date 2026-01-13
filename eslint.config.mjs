@@ -31,6 +31,15 @@ const eslintConfig = defineConfig([
     "*.config.js",
     "*.config.mjs",
   ]),
+  // Override rules for test files
+  {
+    files: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
+    rules: {
+      '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+    },
+  },
 ]);
 
 export default eslintConfig;

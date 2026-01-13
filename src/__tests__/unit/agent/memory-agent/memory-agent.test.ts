@@ -435,7 +435,7 @@ describe('MemoryAgent', () => {
   describe('压缩记忆', () => {
     it('应该成功压缩记忆', async () => {
       // Mock memoryManager返回记忆
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const memoryManagerMock = (memoryAgent as any)
         .memoryManager as MemoryManager;
       const getMemoriesSpy = jest
@@ -455,10 +455,10 @@ describe('MemoryAgent', () => {
         ]);
 
       // Mock compressor返回成功结果
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const compressorMock = (memoryAgent as any).compressor;
       const compressSpy = jest
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         .spyOn(compressorMock as any, 'compressMemory')
         .mockResolvedValue({
           success: true,
@@ -477,7 +477,6 @@ describe('MemoryAgent', () => {
     });
 
     it('应该处理找不到记忆的情况', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const memoryManagerMock = (memoryAgent as any)
         .memoryManager as MemoryManager;
       const getMemoriesSpy = jest
@@ -495,10 +494,9 @@ describe('MemoryAgent', () => {
 
   describe('触发迁移', () => {
     it('应该成功触发Working到Hot的迁移', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const migratorMock = (memoryAgent as any).migrator;
       const migrateSpy = jest
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         .spyOn(migratorMock as any, 'migrateWorkingToHot')
         .mockResolvedValue({
           migratedCount: 5,
@@ -516,10 +514,9 @@ describe('MemoryAgent', () => {
     });
 
     it('应该成功触发Hot到Cold的迁移', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const migratorMock = (memoryAgent as any).migrator;
       const compressSpy = jest
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         .spyOn(migratorMock as any, 'compressHotToCold')
         .mockResolvedValue({
           migratedCount: 3,
@@ -547,10 +544,9 @@ describe('MemoryAgent', () => {
         hotToColdEligible: 8,
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const migratorMock = (memoryAgent as any).migrator;
       const getStatsSpy = jest
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         .spyOn(migratorMock as any, 'getMigrationStats')
         .mockResolvedValue(stats);
 
@@ -568,10 +564,9 @@ describe('MemoryAgent', () => {
 
   describe('批量学习错误', () => {
     it('应该成功批量学习错误', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errorLearnerMock = (memoryAgent as any).errorLearner;
       const batchLearnSpy = jest
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         .spyOn(errorLearnerMock as any, 'batchLearn')
         .mockResolvedValue([
           { learningId: 'l1', errorId: 'e1', learnedAt: new Date() },
@@ -586,10 +581,9 @@ describe('MemoryAgent', () => {
     });
 
     it('应该使用默认限制数量', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errorLearnerMock = (memoryAgent as any).errorLearner;
       const batchLearnSpy = jest
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         .spyOn(errorLearnerMock as any, 'batchLearn')
         .mockResolvedValue([]);
 

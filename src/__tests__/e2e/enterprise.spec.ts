@@ -8,11 +8,13 @@ import { test, expect } from '@playwright/test';
 import { request as APIRequest } from '@playwright/test';
 import {
   createTestUserAndLogin,
+  adminLogin,
   generateTestEnterpriseData,
   generateTestBusinessLicense,
   registerEnterprise,
   getEnterpriseInfo,
   uploadBusinessLicense,
+  reviewEnterprise,
 } from './enterprise-helpers';
 
 test.describe('企业认证E2E测试', () => {
@@ -185,6 +187,115 @@ test.describe('企业认证E2E测试', () => {
 
       expect(responseObj.success).toBe(false);
       expect(responseObj.error).toBe('UNAUTHORIZED');
+    });
+  });
+
+  // =============================================================================
+  // 企业审核流程测试
+  // =============================================================================
+
+  test.describe('企业审核流程', () => {
+    test('应该成功通过企业审核', async () => {
+      const { token } = await createTestUserAndLogin(apiContext);
+      const enterpriseData = generateTestEnterpriseData();
+      await registerEnterprise(apiContext, token, enterpriseData);
+      await uploadBusinessLicense(apiContext, token, {
+        businessLicense: generateTestBusinessLicense(),
+      });
+
+      // 管理员登录并审核
+      const { token: adminToken } = await adminLogin(apiContext);
+      const enterpriseResponse = await getEnterpriseInfo(apiContext, token);
+      const enterpriseId =
+        (
+          enterpriseResponse as unknown as {
+            data?: { enterprise: { id: string } };
+          }
+        ).data?.enterprise.id || '';
+
+      const reviewResponse = await reviewEnterprise(
+        apiContext,
+        adminToken,
+        enterpriseId,
+        {
+          reviewAction: 'APPROVE',
+          reviewNotes: '审核通过',
+        }
+      );
+
+      const reviewResponseObj = reviewResponse as {
+        success: boolean;
+        message: string;
+        data?: { status: string };
+      };
+
+      expect(reviewResponseObj.success).toBe(true);
+      expect(reviewResponseObj.data?.status).toBe('APPROVED');
+    });
+
+    test('应该成功拒绝企业审核', async () => {
+      const { token } = await createTestUserAndLogin(apiContext);
+      const enterpriseData = generateTestEnterpriseData();
+      await registerEnterprise(apiContext, token, enterpriseData);
+
+      // 管理员登录并审核
+      const { token: adminToken } = await adminLogin(apiContext);
+      const enterpriseResponse = await getEnterpriseInfo(apiContext, token);
+      const enterpriseId =
+        (
+          enterpriseResponse as unknown as {
+            data?: { enterprise: { id: string } };
+          }
+        ).data?.enterprise.id || '';
+
+      const reviewResponse = await reviewEnterprise(
+        apiContext,
+        adminToken,
+        enterpriseId,
+        {
+          reviewAction: 'REJECT',
+          reviewNotes: '企业信息不完整',
+        }
+      );
+
+      const reviewResponseObj = reviewResponse as {
+        success: boolean;
+        message: string;
+        data?: { status: string };
+      };
+
+      expect(reviewResponseObj.success).toBe(true);
+      expect(reviewResponseObj.data?.status).toBe('REJECTED');
+    });
+
+    test('应该拒绝非管理员用户审核', async () => {
+      const { token } = await createTestUserAndLogin(apiContext);
+      const enterpriseData = generateTestEnterpriseData();
+      await registerEnterprise(apiContext, token, enterpriseData);
+      const enterpriseResponse = await getEnterpriseInfo(apiContext, token);
+      const enterpriseId =
+        (
+          enterpriseResponse as unknown as {
+            data?: { enterprise: { id: string } };
+          }
+        ).data?.enterprise.id || '';
+
+      const reviewResponse = await reviewEnterprise(
+        apiContext,
+        token,
+        enterpriseId,
+        {
+          reviewAction: 'APPROVE',
+        }
+      );
+
+      const reviewResponseObj = reviewResponse as {
+        success: boolean;
+        error?: string;
+      };
+
+      expect(reviewResponseObj.success).toBe(false);
+      expect(reviewResponseObj.error).toBe('FORBIDDEN');
     });
   });
 });

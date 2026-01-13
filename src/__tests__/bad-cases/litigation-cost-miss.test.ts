@@ -110,7 +110,6 @@ describe('Bad Case测试库 - 诉讼费用遗漏案例', () => {
         expect(result.success).toBe(true);
 
         const data = result.data as {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           extractedData: { parties: any[]; claims: any[] };
         };
         expect(data.extractedData).toBeDefined();
@@ -148,7 +147,6 @@ describe('Bad Case测试库 - 诉讼费用遗漏案例', () => {
         },
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data = result.data as { extractedData: { claims: any[] } };
       const litigationCostClaims = data.extractedData.claims.filter(
         claim => claim.type === 'LITIGATION_COST'
@@ -171,7 +169,6 @@ describe('Bad Case测试库 - 诉讼费用遗漏案例', () => {
         },
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data = result.data as { extractedData: { claims: any[] } };
       const hasPrincipal = data.extractedData.claims.some(
         claim => claim.type === 'PAY_PRINCIPAL'

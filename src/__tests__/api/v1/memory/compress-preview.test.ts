@@ -4,8 +4,6 @@
  * 注意：由于 NextRequest mock 的类型限制，需要使用类型断言。
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { POST } from '@/app/api/v1/memory/compress-preview/route';
 import { NextRequest } from 'next/server';
 

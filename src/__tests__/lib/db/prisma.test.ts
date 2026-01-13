@@ -11,7 +11,7 @@ import {
 describe('Prisma客户端', () => {
   beforeAll(() => {
     // 设置测试环境
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
     // @ts-ignore - 只读属性，但在测试环境中需要修改
     process.env.NODE_ENV = 'test';
   });

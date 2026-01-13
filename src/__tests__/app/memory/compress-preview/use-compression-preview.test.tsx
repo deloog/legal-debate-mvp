@@ -4,8 +4,6 @@
  * 注意：由于 Jest 模拟 fetch 的类型限制，需要使用类型断言。
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { renderHook, act } from '@testing-library/react';
 import { useCompressionPreview } from '@/app/memory/compress-preview/use-compression-preview';
 

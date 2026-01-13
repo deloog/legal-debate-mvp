@@ -44,9 +44,9 @@ jest.mock('@/lib/db/prisma', () => ({
 import { prisma } from '@/lib/db/prisma';
 
 // 类型断言 helper
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const mockDeleteMany = prisma.session.deleteMany as jest.Mock<any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const mockCount = prisma.session.count as jest.Mock<any>;
 
 // 设置测试环境变量

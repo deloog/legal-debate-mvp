@@ -39,7 +39,6 @@ const mockGetUnifiedAIService = jest.fn(() => ({
       },
     ],
   }),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 })) as any;
 
 jest.mock('@/lib/ai/unified-service', () => ({
@@ -49,16 +48,15 @@ jest.mock('@/lib/ai/unified-service', () => ({
 import { prisma } from '@/lib/db/prisma';
 
 describe('Debates Stream API - Basic Tests', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockReq: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   let mockContext: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   let mockedPrisma: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     mockedPrisma = prisma as any;
 
     // 创建模拟的NextRequest对象
@@ -70,7 +68,6 @@ describe('Debates Stream API - Basic Tests', () => {
         removeEventListener: jest.fn(),
         aborted: false,
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
 
     // 创建模拟的context对象
@@ -274,12 +271,9 @@ describe('Debates Stream API - Basic Tests', () => {
       mockedPrisma.debateRound.findMany.mockResolvedValue([]);
 
       // Mock transaction to avoid actual database operations
-      mockedPrisma.$transaction.mockImplementation(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        async (callback: any) => {
-          return await callback(mockedPrisma);
-        }
-      );
+      mockedPrisma.$transaction.mockImplementation(async (callback: any) => {
+        return await callback(mockedPrisma);
+      });
 
       const { GET } = await import('@/app/api/v1/debates/[id]/stream/route');
 
@@ -313,7 +307,6 @@ describe('Debates Stream API - Basic Tests', () => {
         clearTimeout(timeout);
         try {
           reader.cancel();
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (_e) {
           // 忽略取消错误
         }

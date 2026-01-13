@@ -123,22 +123,25 @@ module.exports = {
     },
   },
   transform: {
-    "^.+\\.(ts|tsx)$": [
-      "ts-jest",
-      {
-        tsconfig: {
-          jsx: "react-jsx",
-          esModuleInterop: true,
-          baseUrl: ".",
-          paths: {
-            "@/*": ["./src/*"],
+      "^.+\\.(ts|tsx)$": [
+        "ts-jest",
+        {
+          tsconfig: {
+            jsx: "react-jsx",
+            esModuleInterop: true,
+            baseUrl: ".",
+            paths: {
+              "@/*": ["./src/*"],
+            },
+            strict: false,
+            noImplicitAny: false,
+            skipLibCheck: true,
+          },
+          diagnostics: {
+            warnOnly: true,
           },
         },
-        diagnostics: {
-          warnOnly: true,
-        },
-      },
-    ],
+      ],
     "^.+\\.(js|jsx)$": [
       "ts-jest",
       {

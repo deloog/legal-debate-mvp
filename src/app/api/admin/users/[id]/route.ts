@@ -1,14 +1,154 @@
 /**
- * 用户管理API - 管理员专用
- * 演示权限中间件的使用
+ * 用户详情API - 管理员专用
+ * 支持获取、更新、删除用户
  */
 
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
+import { UserRole, UserStatus } from '@/types/auth';
+import { NextRequest, NextResponse } from 'next/server';
 
-// 获取单个用户（管理员权限）
+// =============================================================================
+// 类型定义
+// =============================================================================
+
+/**
+ * 用户更新请求体
+ */
+interface UpdateUserRequest {
+  username?: string;
+  name?: string;
+  role?: UserRole;
+  status?: UserStatus;
+  phone?: string;
+  address?: string;
+  bio?: string;
+}
+
+/**
+ * 用户详情响应数据
+ */
+interface UserDetailResponse {
+  user: {
+    id: string;
+    email: string;
+    username: string | null;
+    name: string | null;
+    role: string;
+    status: string;
+    phone: string | null;
+    address: string | null;
+    bio: string | null;
+    avatar: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    lastLoginAt: Date | null;
+    loginCount: number;
+    emailVerified: Date | null;
+  };
+  lawyerQualification: {
+    id: string;
+    licenseNumber: string;
+    fullName: string;
+    lawFirm: string;
+    status: string;
+    submittedAt: Date;
+    reviewedAt: Date | null;
+    reviewNotes: string | null;
+  } | null;
+  enterpriseAccount: {
+    id: string;
+    enterpriseName: string;
+    creditCode: string;
+    legalPerson: string;
+    industryType: string;
+    status: string;
+    submittedAt: Date;
+    reviewedAt: Date | null;
+    expiresAt: Date | null;
+  } | null;
+  statistics: {
+    casesCount: number;
+    debatesCount: number;
+    documentsCount: number;
+  };
+}
+
+/**
+ * 用户统计信息
+ */
+interface UserStatistics {
+  casesCount: number;
+  debatesCount: number;
+  documentsCount: number;
+}
+
+// =============================================================================
+// 辅助函数
+// =============================================================================
+
+/**
+ * 验证用户ID格式
+ */
+function isValidUserId(id: string): boolean {
+  return id.length > 0 && /^[a-zA-Z0-9_-]+$/.test(id);
+}
+
+/**
+ * 验证角色枚举值
+ */
+function isValidRole(role: string): role is UserRole {
+  const validRoles: UserRole[] = [
+    UserRole.USER,
+    UserRole.LAWYER,
+    UserRole.ENTERPRISE,
+    UserRole.ADMIN,
+    UserRole.SUPER_ADMIN,
+  ];
+  return validRoles.includes(role as UserRole);
+}
+
+/**
+ * 验证状态枚举值
+ */
+function isValidStatus(status: string): status is UserStatus {
+  const validStatuses: UserStatus[] = [
+    UserStatus.ACTIVE,
+    UserStatus.SUSPENDED,
+    UserStatus.BANNED,
+    UserStatus.INACTIVE,
+  ];
+  return validStatuses.includes(status as UserStatus);
+}
+
+/**
+ * 获取用户统计信息
+ */
+async function getUserStatistics(userId: string): Promise<UserStatistics> {
+  const [casesCount, debatesCount, documentsCount] = await Promise.all([
+    prisma.case.count({
+      where: { userId, deletedAt: null },
+    }),
+    prisma.debate.count({
+      where: { userId, deletedAt: null },
+    }),
+    prisma.document.count({
+      where: { userId, deletedAt: null },
+    }),
+  ]);
+
+  return { casesCount, debatesCount, documentsCount };
+}
+
+// =============================================================================
+// API处理函数
+// =============================================================================
+
+/**
+ * GET /api/admin/users/[id]
+ * 获取用户详细信息（管理员权限）
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -18,24 +158,29 @@ export async function GET(
   if (!user) {
     return Response.json(
       { error: '未认证', message: '请先登录' },
-      {
-        status: 401,
-      }
+      { status: 401 }
     ) as unknown as NextResponse;
   }
 
   // 检查权限
   const permissionError = await validatePermissions(request, 'user:read');
-
   if (permissionError) {
     return permissionError;
   }
 
-  // 获取用户ID
   const userId = params.id;
 
+  // 验证用户ID
+  if (!isValidUserId(userId)) {
+    return Response.json(
+      { error: '无效参数', message: '用户ID格式不正确' },
+      { status: 400 }
+    ) as unknown as NextResponse;
+  }
+
   try {
-    const user = await prisma.user.findUnique({
+    // 查询用户基本信息
+    const userData = await prisma.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
@@ -44,31 +189,84 @@ export async function GET(
         name: true,
         role: true,
         status: true,
+        phone: true,
+        address: true,
+        bio: true,
+        avatar: true,
         createdAt: true,
+        updatedAt: true,
+        lastLoginAt: true,
+        loginCount: true,
+        emailVerified: true,
       },
     });
 
-    if (!user) {
+    if (!userData) {
       return Response.json(
-        { error: '用户不存在', message: `用户ID ${userId} 不存在` },
+        { error: '未找到', message: '用户不存在' },
         { status: 404 }
       ) as unknown as NextResponse;
     }
 
+    // 查询律师资格认证
+    const lawyerQualification = await prisma.lawyerQualification.findFirst({
+      where: { userId },
+      select: {
+        id: true,
+        licenseNumber: true,
+        fullName: true,
+        lawFirm: true,
+        status: true,
+        submittedAt: true,
+        reviewedAt: true,
+        reviewNotes: true,
+      },
+    });
+
+    // 查询企业认证
+    const enterpriseAccount = await prisma.enterpriseAccount.findUnique({
+      where: { userId },
+      select: {
+        id: true,
+        enterpriseName: true,
+        creditCode: true,
+        legalPerson: true,
+        industryType: true,
+        status: true,
+        submittedAt: true,
+        reviewedAt: true,
+        expiresAt: true,
+      },
+    });
+
+    // 获取用户统计信息
+    const statistics = await getUserStatistics(userId);
+
+    // 构建响应数据
+    const responseData: UserDetailResponse = {
+      user: userData,
+      lawyerQualification,
+      enterpriseAccount,
+      statistics,
+    };
+
     return Response.json(
-      { data: { user } },
+      { data: responseData },
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('获取用户信息失败:', error);
+    console.error('获取用户详情失败:', error);
     return Response.json(
-      { error: '服务器错误', message: '获取用户信息失败' },
+      { error: '服务器错误', message: '获取用户详情失败' },
       { status: 500 }
     ) as unknown as NextResponse;
   }
 }
 
-// 更新用户（管理员权限）
+/**
+ * PUT /api/admin/users/[id]
+ * 更新用户信息（管理员权限）
+ */
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -78,85 +276,199 @@ export async function PUT(
   if (!user) {
     return Response.json(
       { error: '未认证', message: '请先登录' },
-      {
-        status: 401,
-      }
+      { status: 401 }
     ) as unknown as NextResponse;
   }
 
-  // 检查权限（需要update权限）
+  // 检查权限
   const permissionError = await validatePermissions(request, 'user:update');
-
   if (permissionError) {
     return permissionError;
   }
 
-  // 获取用户ID
   const userId = params.id;
 
+  // 验证用户ID
+  if (!isValidUserId(userId)) {
+    return Response.json(
+      { error: '无效参数', message: '用户ID格式不正确' },
+      { status: 400 }
+    ) as unknown as NextResponse;
+  }
+
   try {
-    const body = await request.json();
+    // 解析请求体
+    const body = (await request.json()) as UpdateUserRequest;
+
+    // 验证角色和状态
+    if (body.role !== undefined && !isValidRole(body.role)) {
+      return Response.json(
+        { error: '无效参数', message: '角色值不正确' },
+        { status: 400 }
+      ) as unknown as NextResponse;
+    }
+
+    if (body.status !== undefined && !isValidStatus(body.status)) {
+      return Response.json(
+        { error: '无效参数', message: '状态值不正确' },
+        { status: 400 }
+      ) as unknown as NextResponse;
+    }
+
+    // 构建更新数据
+    const updateData: Record<string, unknown> = {};
+    if (body.username !== undefined) {
+      updateData.username = body.username;
+    }
+    if (body.name !== undefined) {
+      updateData.name = body.name;
+    }
+    if (body.role !== undefined) {
+      updateData.role = body.role;
+    }
+    if (body.status !== undefined) {
+      updateData.status = body.status;
+    }
+    if (body.phone !== undefined) {
+      updateData.phone = body.phone;
+    }
+    if (body.address !== undefined) {
+      updateData.address = body.address;
+    }
+    if (body.bio !== undefined) {
+      updateData.bio = body.bio;
+    }
+
+    // 更新用户
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: {
-        name: body.name,
-        status: body.status,
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        name: true,
+        role: true,
+        status: true,
+        phone: true,
+        address: true,
+        bio: true,
+        avatar: true,
+        createdAt: true,
+        updatedAt: true,
+        lastLoginAt: true,
+        loginCount: true,
+        emailVerified: true,
       },
     });
 
     return Response.json(
-      { data: { user: updatedUser } },
+      { data: { user: updatedUser }, message: '更新成功' },
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('更新用户失败:', error);
+    console.error('更新用户信息失败:', error);
+    if (
+      error instanceof Error &&
+      error.message.includes('Record to update not found')
+    ) {
+      return Response.json(
+        { error: '未找到', message: '用户不存在' },
+        { status: 404 }
+      ) as unknown as NextResponse;
+    }
     return Response.json(
-      { error: '服务器错误', message: '更新用户失败' },
+      { error: '服务器错误', message: '更新用户信息失败' },
       { status: 500 }
     ) as unknown as NextResponse;
   }
 }
 
-// 删除用户（管理员权限）
+/**
+ * DELETE /api/admin/users/[id]
+ * 删除用户（软删除，管理员权限）
+ */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   // 验证用户身份
-  const user = await getAuthUser(request);
-  if (!user) {
+  const currentUser = await getAuthUser(request);
+  if (!currentUser) {
     return Response.json(
       { error: '未认证', message: '请先登录' },
-      {
-        status: 401,
-      }
+      { status: 401 }
     ) as unknown as NextResponse;
   }
 
-  // 检查权限（需要delete权限）
+  // 检查权限
   const permissionError = await validatePermissions(request, 'user:delete');
-
   if (permissionError) {
     return permissionError;
   }
 
-  // 获取用户ID
   const userId = params.id;
 
+  // 验证用户ID
+  if (!isValidUserId(userId)) {
+    return Response.json(
+      { error: '无效参数', message: '用户ID格式不正确' },
+      { status: 400 }
+    ) as unknown as NextResponse;
+  }
+
+  // 不允许删除自己
+  if (userId === currentUser.userId) {
+    return Response.json(
+      { error: '禁止操作', message: '不能删除自己的账户' },
+      { status: 403 }
+    ) as unknown as NextResponse;
+  }
+
   try {
-    await prisma.user.delete({
+    // 软删除用户
+    await prisma.user.update({
       where: { id: userId },
+      data: {
+        deletedAt: new Date(),
+        status: 'INACTIVE',
+      },
     });
 
     return Response.json(
-      { data: { message: '用户已删除' } },
+      { message: '删除成功' },
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
     console.error('删除用户失败:', error);
+    if (
+      error instanceof Error &&
+      error.message.includes('Record to update not found')
+    ) {
+      return Response.json(
+        { error: '未找到', message: '用户不存在' },
+        { status: 404 }
+      ) as unknown as NextResponse;
+    }
     return Response.json(
       { error: '服务器错误', message: '删除用户失败' },
       { status: 500 }
     ) as unknown as NextResponse;
   }
+}
+
+/**
+ * OPTIONS /api/admin/users/[id]
+ * CORS预检请求
+ */
+export async function OPTIONS(): Promise<NextResponse> {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
 }

@@ -5,8 +5,6 @@
  * 在测试中需要使用 `as any` 类型断言来解决类型检查问题。
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { PrismaClient } from '@prisma/client';
 import { GET } from '@/app/api/v1/memory/migration-history/route';

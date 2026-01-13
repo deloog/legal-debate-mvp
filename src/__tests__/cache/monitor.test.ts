@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // 测试文件中使用 any 类型是为了 Jest mock 的类型断言需求
 import { CacheManager } from '@/lib/cache/manager';
 import { CacheMonitor, cacheMonitoringUtils } from '@/lib/cache/monitor';

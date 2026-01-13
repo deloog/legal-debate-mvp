@@ -40,7 +40,6 @@ jest.mock('@/lib/db/prisma', () => ({
 }));
 
 describe('辩论论点生成API', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockReq: any;
 
   beforeEach(() => {
@@ -49,7 +48,6 @@ describe('辩论论点生成API', () => {
       url: 'http://localhost:3000/api/v1/debate-rounds/round-1/generate',
       json: jest.fn(),
       headers: new Headers(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
   });
 
@@ -81,7 +79,6 @@ describe('辩论论点生成API', () => {
                     claims: [{ content: '赔偿损失' }],
                     keyFacts: [{ description: '违约事实' }],
                   },
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any,
               },
             ],
@@ -150,7 +147,6 @@ describe('辩论论点生成API', () => {
                     claims: [],
                     keyFacts: [],
                   },
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any,
               },
             ],
@@ -188,7 +184,6 @@ describe('辩论论点生成API', () => {
                     claims: [],
                     keyFacts: [],
                   },
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any,
               },
             ],
@@ -238,7 +233,6 @@ describe('辩论论点生成API', () => {
                     claims: [],
                     keyFacts: [],
                   },
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any,
               },
             ],
@@ -297,7 +291,6 @@ describe('辩论论点生成API', () => {
                     claims: [{ content: '赔偿损失' }],
                     keyFacts: [],
                   },
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any,
               },
             ],
@@ -343,7 +336,6 @@ describe('辩论论点生成API', () => {
                     claims: [],
                     keyFacts: [{ description: '违约事实' }],
                   },
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any,
               },
             ],
@@ -389,7 +381,6 @@ describe('辩论论点生成API', () => {
                     claims: [],
                     keyFacts: [],
                   },
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any,
               },
             ],
@@ -429,7 +420,6 @@ describe('辩论论点生成API', () => {
                     claims: [],
                     keyFacts: [],
                   },
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any,
               },
             ],
@@ -471,7 +461,6 @@ describe('辩论论点生成API', () => {
                     claims: [],
                     keyFacts: [],
                   },
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any,
               },
             ],
@@ -520,7 +509,6 @@ describe('辩论论点生成API', () => {
                     claims: [],
                     keyFacts: [],
                   },
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 } as any,
               },
             ],

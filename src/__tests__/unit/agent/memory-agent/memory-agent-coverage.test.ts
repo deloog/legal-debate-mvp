@@ -31,7 +31,7 @@ const mockPrisma = mockDeep<PrismaClient>();
 
 describe('MemoryAgent覆盖率测试', () => {
   let memoryAgent: MemoryAgent;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   let aiService: any;
 
   beforeEach(() => {
