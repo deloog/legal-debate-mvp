@@ -40,6 +40,9 @@ model User {
   verificationCodes    VerificationCode[]
   enterpriseAccount    EnterpriseAccount?    @relation("UserEnterpriseAccount")
   reviewedEnterpriseReviews EnterpriseReview[] @relation("EnterpriseReviews")
+  userMemberships     UserMembership[]
+  usageRecords         UsageRecord[]
+  membershipHistoryRecords MembershipHistory[]
 
   @@index([email])
   @@index([username])
@@ -107,6 +110,10 @@ model Case {
   @@index([plaintiffName])
   @@index([defendantName])
   @@index([cause])
+  @@index([userId, status, createdAt])
+  @@index([userId, type, createdAt])
+  @@index([status, createdAt])
+  @@index([deletedAt])
   @@map("cases")
 }
 
@@ -132,6 +139,9 @@ model Document {
   @@index([caseId])
   @@index([userId])
   @@index([analysisStatus])
+  @@index([caseId, analysisStatus, createdAt])
+  @@index([userId, analysisStatus, createdAt])
+  @@index([deletedAt])
   @@map("documents")
 }
 
@@ -154,6 +164,9 @@ model Debate {
   @@index([userId])
   @@index([status])
   @@index([createdAt])
+  @@index([userId, status, createdAt])
+  @@index([caseId, status, createdAt])
+  @@index([deletedAt])
   @@map("debates")
 }
 
@@ -447,6 +460,33 @@ model AgentAction {
   @@map("agent_actions")
 }
 
+// 11. 操作日志模块 - 用户操作追踪
+model ActionLog {
+  id              String           @id @default(cuid())
+  userId          String
+  actionType      ActionLogType
+  actionCategory  ActionLogCategory
+  description     String          @db.Text
+  resourceType    String?
+  resourceId      String?
+  ipAddress       String?
+  userAgent       String?
+  requestMethod   String?
+  requestPath     String?
+  requestParams   Json?
+  responseStatus  Int?
+  executionTime   Int?
+  metadata        Json?
+  createdAt       DateTime         @default(now())
+
+  @@index([userId])
+  @@index([actionType])
+  @@index([actionCategory])
+  @@index([resourceType])
+  @@index([createdAt])
+  @@map("action_logs")
+}
+
 enum UserRole {
   USER
   LAWYER
@@ -647,6 +687,60 @@ enum ActionStatus {
   CANCELLED
 }
 
+// 操作日志类型
+enum ActionLogType {
+  // 用户操作
+  LOGIN
+  LOGOUT
+  REGISTER
+  UPDATE_PROFILE
+  CHANGE_PASSWORD
+
+  // 案件操作
+  CREATE_CASE
+  UPDATE_CASE
+  DELETE_CASE
+  VIEW_CASE
+
+  // 文档操作
+  UPLOAD_DOCUMENT
+  DELETE_DOCUMENT
+  ANALYZE_DOCUMENT
+
+  // 辩论操作
+  CREATE_DEBATE
+  UPDATE_DEBATE
+  DELETE_DEBATE
+  GENERATE_ARGUMENT
+
+  // 管理操作
+  APPROVE_QUALIFICATION
+  REJECT_QUALIFICATION
+  UPDATE_USER_ROLE
+  BAN_USER
+  UNBAN_USER
+
+  // 系统操作
+  EXPORT_DATA
+  IMPORT_DATA
+  SYSTEM_CONFIG_UPDATE
+
+  // 其他操作
+  UNKNOWN
+}
+
+// 操作日志分类
+enum ActionLogCategory {
+  AUTH           // 认证相关
+  USER           // 用户管理
+  CASE           // 案件管理
+  DOCUMENT       // 文档管理
+  DEBATE         // 辩论管理
+  ADMIN          // 管理操作
+  SYSTEM         // 系统操作
+  OTHER          // 其他操作
+}
+
 // === 律师资格验证模块 ===
 
 model LawyerQualification {
@@ -807,4 +901,319 @@ model RolePermission {
 
   @@unique([roleId, permissionId])
   @@map("role_permissions")
+}
+
+// === 系统配置管理模块 ===
+
+model SystemConfig {
+  id              String      @id @default(cuid())
+  key             String      @unique
+  value           Json
+  type            ConfigType
+  category         String
+  description      String?
+  isPublic        Boolean     @default(false)
+  isRequired      Boolean     @default(false)
+  defaultValue    Json?
+  validationRules Json?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([category])
+  @@index([type])
+  @@index([isPublic])
+  @@map("system_configs")
+}
+
+// === 报告系统模块 ===
+
+model Report {
+  id           String      @id @default(cuid())
+  type         ReportType
+  periodStart  DateTime
+  periodEnd    DateTime
+  status       ReportStatus @default(PENDING)
+  filePath     String?
+  fileSize     Int?
+  format       ReportFormat @default(HTML)
+  generatedBy  String?
+  generatedAt  DateTime?
+  downloadCount Int         @default(0)
+  metadata     Json?
+  content      Json?
+  error        String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([type])
+  @@index([status])
+  @@index([periodStart])
+  @@index([periodEnd])
+  @@index([generatedBy])
+  @@index([createdAt])
+  @@map("reports")
+}
+
+enum ReportType {
+  WEEKLY
+  MONTHLY
+  CUSTOM
+}
+
+enum ReportStatus {
+  PENDING
+  GENERATING
+  COMPLETED
+  FAILED
+}
+
+enum ReportFormat {
+  HTML
+  PDF
+  JSON
+}
+
+enum ConfigType {
+  STRING   // 字符串
+  NUMBER   // 数字
+  BOOLEAN  // 布尔值
+  ARRAY    // 数组
+  OBJECT   // 对象
+}
+
+// === 告警管理模块 ===
+
+model Alert {
+  alertId              String                @id @default(cuid())
+  ruleId               String
+  ruleName             String
+  severity             AlertSeverity
+  status               AlertStatus           @default(TRIGGERED)
+  errorLogId           String
+  errorType            ErrorType
+  errorMessage         String               @db.Text
+  message              String               @db.Text
+  details              Json?
+  notificationHistory   Json
+  acknowledgedBy       String?
+  acknowledgedAt       DateTime?
+  resolvedAt           DateTime?
+  resolutionNotes      String?              @db.Text
+  triggeredAt          DateTime
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  @@index([ruleId])
+  @@index([severity])
+  @@index([status])
+  @@index([errorLogId])
+  @@index([errorType])
+  @@index([triggeredAt])
+  @@map("alerts")
+}
+
+enum AlertStatus {
+  TRIGGERED     // 已触发
+  ACKNOWLEDGED  // 已确认
+  RESOLVED      // 已解决
+}
+
+enum AlertSeverity {
+  CRITICAL // 严重告警
+  HIGH     // 高级告警
+  MEDIUM   // 中级告警
+  LOW      // 低级告警
+}
+
+enum AlertChannel {
+  LOG      // 日志
+  EMAIL    // 邮件
+  WEBHOOK  // Webhook
+  SMS      // 短信
+}
+
+// === 会员等级系统模块 ===
+
+model MembershipTier {
+  id          String                     @id @default(cuid())
+  name        String                     @unique
+  displayName  String
+  description  String
+  tier        MembershipTierType          @unique
+  price       Decimal                    @db.Decimal(10, 2)
+  currency    String                     @default("CNY")
+  billingCycle BillingCycle
+  features    String[]
+  permissions Json                       // MembershipPermissionConfig
+  isActive    Boolean                    @default(true)
+  sortOrder   Int                        @default(0)
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+
+  userMemberships UserMembership[]
+  tierLimits      TierLimit[]
+
+  @@index([tier])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("membership_tiers")
+}
+
+model UserMembership {
+  id               String             @id @default(cuid())
+  userId           String
+  tierId           String
+  status           MembershipStatus   @default(PENDING)
+  startDate        DateTime
+  endDate          DateTime
+  autoRenew        Boolean            @default(false)
+  cancelledAt      DateTime?
+  cancelledReason  String?
+  pausedAt         DateTime?
+  pausedReason     String?
+  notes            String?
+  metadata         Json?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier            MembershipTier     @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  usageRecords     UsageRecord[]
+  historyRecords   MembershipHistory[]
+
+  @@unique([userId, tierId, startDate])
+  @@index([userId])
+  @@index([tierId])
+  @@index([status])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([userId, status, endDate])
+  @@map("user_memberships")
+}
+
+model UsageRecord {
+  id           String      @id @default(cuid())
+  userId       String
+  membershipId String
+  usageType    UsageType
+  quantity     Int
+  unit         String
+  resourceId   String?
+  resourceType String?
+  description  String?
+  metadata     Json?
+  periodStart  DateTime
+  periodEnd    DateTime
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  membership  UserMembership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([membershipId])
+  @@index([usageType])
+  @@index([periodStart])
+  @@index([periodEnd])
+  @@index([userId, usageType, periodStart, periodEnd])
+  @@map("usage_records")
+}
+
+model TierLimit {
+  id           String      @id @default(cuid())
+  tierId       String
+  limitType    LimitType
+  limitValue   Int?        // null表示无限制
+  period       String?
+  description  String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  tier         MembershipTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  @@unique([tierId, limitType])
+  @@index([tierId])
+  @@index([limitType])
+  @@map("tier_limits")
+}
+
+model MembershipHistory {
+  id          String                  @id @default(cuid())
+  userId      String
+  membershipId String
+  changeType  MembershipChangeType
+  fromTier    MembershipTierType?
+  toTier      MembershipTierType?
+  fromStatus  MembershipStatus
+  toStatus    MembershipStatus
+  reason      String?
+  performedBy String
+  metadata    Json?
+  createdAt   DateTime                @default(now())
+
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  membership  UserMembership  @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([membershipId])
+  @@index([changeType])
+  @@index([createdAt])
+  @@map("membership_history")
+}
+
+// 会员等级枚举
+enum MembershipTierType {
+  FREE
+  BASIC
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+// 会员状态枚举
+enum MembershipStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  SUSPENDED
+  PENDING
+}
+
+// 订阅周期枚举
+enum BillingCycle {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  LIFETIME
+}
+
+// 使用量类型枚举
+enum UsageType {
+  CASE_CREATED
+  DEBATE_GENERATED
+  DOCUMENT_ANALYZED
+  LAW_ARTICLE_SEARCHED
+  AI_TOKEN_USED
+  STORAGE_USED
+}
+
+// 限制类型枚举
+enum LimitType {
+  MAX_CASES
+  MAX_DEBATES
+  MAX_DOCUMENTS
+  MAX_AI_TOKENS_MONTHLY
+  MAX_STORAGE_MB
+  MAX_LAW_ARTICLE_SEARCHES
+  MAX_CONCURRENT_REQUESTS
+}
+
+// 会员变更类型枚举
+enum MembershipChangeType {
+  UPGRADE
+  DOWNGRADE
+  CANCEL
+  RENEW
+  PAUSE
+  RESUME
+  EXPIRE
 }

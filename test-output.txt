@@ -1,122 +1,614 @@
 
 > legal_debate_mvp@0.1.0 test
-> jest src/__tests__/debate/stream/ src/__tests__/integration/sse-stream-integration.test.ts
+> jest src/__tests__/unit/stats/UserStatsCards.test.tsx
 
-PASS src/__tests__/integration/sse-stream-integration.test.ts
-  SSE娴佸紡杈撳嚭闆嗘垚娴嬭瘯
-    绔埌绔祦寮忕敓鎴?      鈭?搴旇瀹屾暣娴佸紡鐢熸垚涓€鍦鸿京璁?(545 ms)
-      鈭?搴旇姝ｇ‘澶勭悊鐢熸垚杩囩▼涓殑閿欒 (104 ms)
-    瀹㈡埛绔?鏈嶅姟鍣ㄩ泦鎴?      鈭?搴旇鑳藉寤虹珛骞跺鐞嗗畬鏁寸殑SSE浼氳瘽 (180 ms)
-      鈭?搴旇姝ｇ‘澶勭悊鏂嚎閲嶈繛 (112 ms)
-    杩涘害杩借釜闆嗘垚
-      鈭?搴旇姝ｇ‘杩借釜鍜屾姤鍛婅繘搴?(361 ms)
-    閿欒鎭㈠闆嗘垚
-      鈭?搴旇鍦ㄩ敊璇悗鑳藉鎭㈠骞剁户缁敓鎴?(121 ms)
+FAIL src/__tests__/unit/stats/UserStatsCards.test.tsx
+  StatCard
+    鈭?搴旇姝ｇ‘娓叉煋鍗＄墖鏍囬鍜屽€?(65 ms)
+    鈭?搴旇鏄剧ず姝ｅ闀胯秼鍔?(7 ms)
+    鈭?搴旇鏄剧ず璐熷闀胯秼鍔?(4 ms)
+    脳 搴旇鑷畾涔塼rendLabel (6 ms)
+    鈭?褰搕rend鏈畾涔夋椂涓嶆樉绀鸿秼鍔?(4 ms)
+    鈭?搴旇姝ｇ‘鏍煎紡鍖栧ぇ鏁板瓧 (3 ms)
+  StatsSummary
+    鈭?搴旇娓叉煋鍥涗釜缁熻鍗＄墖 (7 ms)
+    鈭?搴旇鏄剧ず鎬荤敤鎴锋暟 (6 ms)
+    脳 搴旇鏄剧ず鏂板鐢ㄦ埛鍜屽闀跨巼 (7 ms)
+    鈭?搴旇鏄剧ず鏃ュ潎鏂板鐢ㄦ埛 (6 ms)
+    鈭?搴旇鏄剧ず骞冲潎鐧诲綍棰戠巼 (4 ms)
+    脳 褰撴彁渚沘ctiveUsers鍜宎ctiveRate鏃舵樉绀烘椿璺冪敤鎴?(6 ms)
+    鈭?褰撴彁渚沘ctiveUsers鏃朵笉鏄剧ず骞冲潎鐧诲綍棰戠巼 (6 ms)
+    鈭?褰揳ctiveUsers涓簎ndefined鏃舵樉绀哄钩鍧囩櫥褰曢鐜?(4 ms)
+    鈭?褰揳vgLoginFrequency涓簎ndefined鏃舵樉绀? (5 ms)
+    脳 搴旇姝ｇ‘澶勭悊璐熷闀跨巼 (5 ms)
+    脳 搴旇姝ｇ‘澶勭悊闆跺闀跨巼 (5 ms)
+    鈭?搴旇姝ｇ‘鏍煎紡鍖栧ぇ鏁板€?(5 ms)
 
-PASS src/__tests__/debate/stream/sse-client.test.ts
-  SSEClient
-    杩炴帴绠＄悊
-      鈭?搴旇鎴愬姛杩炴帴鍒癝SE绔偣 (2 ms)
-      鈭?搴旇閬垮厤閲嶅杩炴帴 (1 ms)
-      鈭?搴旇姝ｇ‘鏂紑杩炴帴 (4 ms)
-    浜嬩欢澶勭悊
-      鈭?搴旇鎺ユ敹杩炴帴浜嬩欢 (3 ms)
-      鈭?搴旇鎺ユ敹杞寮€濮嬩簨浠?(2 ms)
-      鈭?搴旇鎺ユ敹璁虹偣浜嬩欢 (2 ms)
-      鈭?搴旇鎺ユ敹杩涘害浜嬩欢 (1 ms)
-      鈭?搴旇鎺ユ敹瀹屾垚浜嬩欢 (2 ms)
-      鈭?搴旇鎺ユ敹閿欒浜嬩欢 (1 ms)
-      鈭?搴旇鎺ユ敹蹇冭烦浜嬩欢 (2 ms)
-      鈭?搴旇鎺ユ敹鏂紑杩炴帴浜嬩欢 (1 ms)
-    浜嬩欢鐩戝惉鍣ㄧ鐞?      鈭?搴旇鑳藉娉ㄥ唽浜嬩欢澶勭悊鍣?(1 ms)
-      鈭?搴旇鑳藉绉婚櫎浜嬩欢澶勭悊鍣?(1 ms)
-    閲嶈繛鏈哄埗
-      鈭?搴旇鍦ㄨ繛鎺ュけ璐ュ悗鑷姩閲嶈繛 (3 ms)
-      鈭?搴旇浣跨敤鎸囨暟閫€閬跨畻娉曡绠楅噸杩炲欢杩?(3 ms)
-      鈭?搴旇鍦ㄨ揪鍒版渶澶ч噸杩炴鏁板悗鏀惧純閲嶈繛 (1 ms)
-      鈭?搴旇鑳藉鍦ㄨ繛鎺ユ垚鍔熷悗閲嶇疆閲嶈繛璁℃暟 (1 ms)
-      鈭?搴旇鏀寔鎵嬪姩閲嶈繛 (2 ms)
-    Last-Event-ID鏀寔
-      鈭?搴旇璁板綍Last-Event-ID (1 ms)
-      鈭?搴旇鍦ㄩ噸杩炴椂浣跨敤Last-Event-ID (1 ms)
-    绂佺敤鑷姩閲嶈繛
-      鈭?搴旇鍦ㄧ鐢ㄨ嚜鍔ㄩ噸杩炴椂涓嶅皾璇曢噸杩?(2 ms)
-    璧勬簮娓呯悊
-      鈭?搴旇娓呯悊鎵€鏈夎祫婧?(1 ms)
+  鈼?StatCard 鈥?搴旇鑷畾涔塼rendLabel
 
-PASS src/__tests__/debate/stream/sse-manager.test.ts
-  SSEEventManager
-    浼氳瘽绠＄悊
-      鈭?搴旇鐢熸垚鍞竴鐨勪細璇滻D (1 ms)
-      鈭?搴旇姝ｇ‘璺熻釜寮€濮嬫椂闂?(1 ms)
-    浜嬩欢鏍煎紡鍖?      鈭?搴旇姝ｇ‘鏍煎紡鍖栧熀鏈琒SE浜嬩欢 (1 ms)
-      鈭?搴旇鏀寔甯D鐨勪簨浠?      鈭?搴旇鏀寔甯﹂噸璇曢棿闅旂殑浜嬩欢 (1 ms)
-      鈭?搴旇姝ｇ‘澶勭悊鍖呭惈鎹㈣绗︾殑娑堟伅
-      鈭?搴旇浠ュ弻鎹㈣绗︾粨鏉熸瘡涓簨浠?(1 ms)
-    蹇冭烦鏈哄埗
-      鈭?搴旇鍚姩蹇冭烦 (1 ms)
-      鈭?搴旇鎸夌収鎸囧畾闂撮殧鍙戦€佸績璺?(1 ms)
-      鈭?搴旇鑳藉仠姝㈠績璺?(1 ms)
-      鈭?澶氭鍚姩蹇冭烦搴旇瑕嗙洊涔嬪墠鐨勫績璺?(1 ms)
-    杩炴帴瓒呮椂
-      鈭?搴旇妫€娴嬭繛鎺ヨ秴鏃?(1 ms)
-      鈭?娲诲姩鏃堕棿鏇存柊搴旇閲嶇疆瓒呮椂 (2 ms)
-      鈭?搴旇鑳藉仠姝㈣繛鎺ヨ秴鏃?(1 ms)
-    缁熻淇℃伅
-      鈭?搴旇姝ｇ‘璁板綍鍙戦€佷簨浠舵暟 (3 ms)
-      鈭?搴旇姝ｇ‘璁板綍鍙戦€佸瓧鑺傛暟 (1 ms)
-      鈭?搴旇璁板綍鏈€鍚庝簨浠禝D
-      鈭?搴旇璁板綍閲嶈繛娆℃暟 (1 ms)
-      鈭?搴旇閲嶇疆閲嶈繛娆℃暟
-      鈭?搴旇姝ｇ‘鏇存柊娲诲姩鏃堕棿
-    杩炴帴鐘舵€?      鈭?搴旇姝ｇ‘璁剧疆鍜岃幏鍙栫姸鎬?      鈭?搴旇鍦ㄦ竻鐞嗘椂淇濇寔杩炴帴鐘舵€?(1 ms)
-    娓呯悊璧勬簮
-      鈭?搴旇鍋滄蹇冭烦
-      鈭?搴旇娓呴櫎杩炴帴瓒呮椂
-    杈圭紭鎯呭喌
-      鈭?搴旇澶勭悊绌烘暟鎹簨浠?(1 ms)
-      鈭?搴旇澶勭悊undefined閲嶈瘯闂撮殧
-      鈭?搴旇澶勭悊undefined浜嬩欢ID (1 ms)
-      鈭?搴旇澶勭悊JSON搴忓垪鍖栧鏉傚璞?
-PASS src/__tests__/debate/stream/debate-stream-generator.test.ts
-  DebateStreamGenerator
-    杩炴帴浜嬩欢
-      鈭?搴旇鍙戦€佽繛鎺ョ‘璁や簨浠?(1 ms)
-      鈭?搴旇鍙戦€佽疆娆″紑濮嬩簨浠?(1 ms)
-      鈭?搴旇鍙戦€佹柇寮€杩炴帴浜嬩欢 (1 ms)
-    璁虹偣浜嬩欢
-      鈭?搴旇鍙戦€佽鐐圭敓鎴愪簨浠?(1 ms)
-      鈭?搴旇姝ｇ‘璺熻釜鐢熸垚鐨勮鐐?    杩涘害浜嬩欢
-      鈭?搴旇鍙戦€佽繘搴︽洿鏂颁簨浠?(1 ms)
-      鈭?搴旇鍩轰簬鐢熸垚鐨勮鐐硅绠楄繘搴?(1 ms)
-      鈭?搴旇鏀寔鑷畾涔夎繘搴﹀€?      鈭?搴旇浼扮畻鍓╀綑鏃堕棿 (1 ms)
-    鑷姩杩涘害鏇存柊
-      鈭?搴旇鍚姩鑷姩杩涘害鏇存柊 (1 ms)
-      鈭?搴旇鍋滄鑷姩杩涘害鏇存柊 (1 ms)
-      鈭?搴旇浣跨敤褰撳墠姝ラ鍚嶇О (1 ms)
-    瀹屾垚浜嬩欢
-      鈭?搴旇鍙戦€佸畬鎴愪簨浠?(1 ms)
-      鈭?搴旇鍦ㄥ彂閫佸畬鎴愪簨浠跺悗鍋滄杩涘害鏇存柊 (1 ms)
-    閿欒澶勭悊
-      鈭?搴旇鍙戦€侀敊璇簨浠?(1 ms)
-      鈭?搴旇鏀寔鎸囧畾杞ID
-      鈭?搴旇璁剧疆閿欒閲嶈瘯闂撮殧
-    蹇冭烦鏈哄埗
-      鈭?搴旇鍚姩蹇冭烦 (1 ms)
-      鈭?搴旇鍋滄蹇冭烦
-      鈭?蹇冭烦搴旇鍖呭惈鏃堕棿鎴?(1 ms)
-    缁熻淇℃伅
-      鈭?搴旇杩斿洖浼氳瘽缁熻淇℃伅 (4 ms)
-      鈭?搴旇璺熻釜鍙戦€佺殑浜嬩欢鏁伴噺
-      鈭?搴旇璺熻釜鍙戦€佺殑瀛楄妭鏁?    娓呯悊璧勬簮
-      鈭?搴旇娓呯悊鎵€鏈夎祫婧?(1 ms)
-    杈圭紭鎯呭喌
-      鈭?搴旇澶勭悊娌℃湁璁虹偣鐨勬儏鍐?(1 ms)
-      鈭?搴旇澶勭悊鍙湁鍘熷憡璁虹偣鐨勬儏鍐?      鈭?搴旇澶勭悊杩涘害涓?鏃剁殑鍓╀綑鏃堕棿璁＄畻 (1 ms)
-      鈭?搴旇姝ｇ‘璁＄畻100%杩涘害
+    TestingLibraryElementError: Unable to find an element with the text: +15% 娲昏穬鐜? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
 
-Test Suites: 4 passed, 4 total
-Tests:       84 passed, 84 total
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="bg-white rounded-lg shadow p-6"
+        >
+          <div
+            class="flex items-center justify-between"
+          >
+            <h3
+              class="text-sm font-medium text-gray-500"
+            >
+              娲昏穬鐢ㄦ埛
+            </h3>
+            <span
+              class="text-xs font-medium text-green-600"
+            >
+              +
+              15.0
+              % 
+              娲昏穬鐜?[0m
+            </span>
+          </div>
+          <div
+            class="mt-2"
+          >
+            <div
+              class="text-3xl font-bold text-gray-900"
+            >
+              30
+               
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      34 |     );
+      35 |
+    > 36 |     expect(screen.getByText('+15% 娲昏穬鐜?)).toBeInTheDocument();
+         |                   ^
+      37 |   });
+      38 |
+      39 |   it('褰搕rend鏈畾涔夋椂涓嶆樉绀鸿秼鍔?, () => {
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/unit/stats/UserStatsCards.test.tsx:36:19)
+
+  鈼?StatsSummary 鈥?搴旇鏄剧ず鏂板鐢ㄦ埛鍜屽闀跨巼
+
+    TestingLibraryElementError: Unable to find an element with the text: +10% 澧為暱鐜? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                鎬荤敤鎴锋暟
+              </h3>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                1,000
+                 
+                浜?[0m
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                鏂板鐢ㄦ埛
+              </h3>
+              <span
+                class="text-xs font-medium text-green-600"
+              >
+                +
+                10.0
+                % 
+                澧為暱鐜?[0m
+              </span>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                100
+                 
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                鏃ュ潎鏂板
+              </h3>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                3
+                 
+                浜?[0m
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                骞冲潎鐧诲綍棰戠巼
+              </h3>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                0
+                 
+                娆?鍛?[0m
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      78 |
+      79 |     expect(screen.getByText('100')).toBeInTheDocument();
+    > 80 |     expect(screen.getByText('+10% 澧為暱鐜?)).toBeInTheDocument();
+         |                   ^
+      81 |   });
+      82 |
+      83 |   it('搴旇鏄剧ず鏃ュ潎鏂板鐢ㄦ埛', () => {
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/unit/stats/UserStatsCards.test.tsx:80:19)
+
+  鈼?StatsSummary 鈥?褰撴彁渚沘ctiveUsers鍜宎ctiveRate鏃舵樉绀烘椿璺冪敤鎴?
+    TestingLibraryElementError: Unable to find an element with the text: +50% 娲昏穬鐜? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                鎬荤敤鎴锋暟
+              </h3>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                1,000
+                 
+                浜?[0m
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                鏂板鐢ㄦ埛
+              </h3>
+              <span
+                class="text-xs font-medium text-green-600"
+              >
+                +
+                10.0
+                % 
+                澧為暱鐜?[0m
+              </span>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                100
+                 
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                鏃ュ潎鏂板
+              </h3>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                3
+                 
+                浜?[0m
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                娲昏穬鐢ㄦ埛
+              </h3>
+              <span
+                class="text-xs font-medium text-green-600"
+              >
+                +
+                50.0
+                % 
+                娲昏穬鐜?[0m
+              </span>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                500
+                 
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      100 |     expect(screen.getByText('娲昏穬鐢ㄦ埛')).toBeInTheDocument();
+      101 |     expect(screen.getByText('500')).toBeInTheDocument();
+    > 102 |     expect(screen.getByText('+50% 娲昏穬鐜?)).toBeInTheDocument();
+          |                   ^
+      103 |   });
+      104 |
+      105 |   it('褰撴彁渚沘ctiveUsers鏃朵笉鏄剧ず骞冲潎鐧诲綍棰戠巼', () => {
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/unit/stats/UserStatsCards.test.tsx:102:19)
+
+  鈼?StatsSummary 鈥?搴旇姝ｇ‘澶勭悊璐熷闀跨巼
+
+    TestingLibraryElementError: Unable to find an element with the text: -5% 澧為暱鐜? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                鎬荤敤鎴锋暟
+              </h3>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                1,000
+                 
+                浜?[0m
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                鏂板鐢ㄦ埛
+              </h3>
+              <span
+                class="text-xs font-medium text-red-600"
+              >
+                -5.0
+                % 
+                澧為暱鐜?[0m
+              </span>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                100
+                 
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                鏃ュ潎鏂板
+              </h3>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                3
+                 
+                浜?[0m
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                骞冲潎鐧诲綍棰戠巼
+              </h3>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                0
+                 
+                娆?鍛?[0m
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      132 |     render(<StatsSummary {...defaultProps} growthRate={-5} />);
+      133 |
+    > 134 |     expect(screen.getByText('-5% 澧為暱鐜?)).toBeInTheDocument();
+          |                   ^
+      135 |   });
+      136 |
+      137 |   it('搴旇姝ｇ‘澶勭悊闆跺闀跨巼', () => {
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/unit/stats/UserStatsCards.test.tsx:134:19)
+
+  鈼?StatsSummary 鈥?搴旇姝ｇ‘澶勭悊闆跺闀跨巼
+
+    TestingLibraryElementError: Unable to find an element with the text: +0% 澧為暱鐜? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                鎬荤敤鎴锋暟
+              </h3>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                1,000
+                 
+                浜?[0m
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                鏂板鐢ㄦ埛
+              </h3>
+              <span
+                class="text-xs font-medium text-green-600"
+              >
+                0.0
+                % 
+                澧為暱鐜?[0m
+              </span>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                100
+                 
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                鏃ュ潎鏂板
+              </h3>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                3
+                 
+                浜?[0m
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <h3
+                class="text-sm font-medium text-gray-500"
+              >
+                骞冲潎鐧诲綍棰戠巼
+              </h3>
+            </div>
+            <div
+              class="mt-2"
+            >
+              <div
+                class="text-3xl font-bold text-gray-900"
+              >
+                0
+                 
+                娆?鍛?[0m
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      138 |     render(<StatsSummary {...defaultProps} growthRate={0} />);
+      139 |
+    > 140 |     expect(screen.getByText('+0% 澧為暱鐜?)).toBeInTheDocument();
+          |                   ^
+      141 |   });
+      142 |
+      143 |   it('搴旇姝ｇ‘鏍煎紡鍖栧ぇ鏁板€?, () => {
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/unit/stats/UserStatsCards.test.tsx:140:19)
+
+Test Suites: 1 failed, 1 total
+Tests:       5 failed, 13 passed, 18 total
 Snapshots:   0 total
-Time:        3.048 s, estimated 4 s
-Ran all test suites matching src/__tests__/debate/stream/|src/__tests__/integration/sse-stream-integration.test.ts.
+Time:        1.659 s
+Ran all test suites matching src/__tests__/unit/stats/UserStatsCards.test.tsx.

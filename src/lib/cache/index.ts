@@ -1,37 +1,37 @@
 // Redis缓存系统 - 统一导出接口
 
 // 核心模块
-export {
-  redis,
-  checkRedisConnection,
-  disconnectRedis,
-  connectRedis,
-  getRedisInfo,
-} from './redis';
-export { CacheManager, cacheManager, cache } from './manager';
+export { cache, CacheManager, cacheManager } from './manager';
 export {
   CacheMonitor,
+  cacheMonitoringUtils,
   cacheMonitorInstance,
   getCacheMonitor,
-  cacheMonitoringUtils,
 } from './monitor';
+export {
+  checkRedisConnection,
+  connectRedis,
+  disconnectRedis,
+  getRedisInfo,
+  redis,
+} from './redis';
 
 // 类型定义
 export type {
-  CacheItem,
-  CacheOptions,
-  CacheStats,
-  CacheHealth,
-  CacheConfig,
-  CacheOperationResult,
   CacheBatchResult,
+  CacheCompressor,
+  CacheConfig,
   CacheEvent,
   CacheEventListener,
-  CacheSerializer,
-  CacheCompressor,
+  CacheHealth,
+  CacheItem,
   CacheKeyGenerator,
-  CacheTagManager,
   CacheNamespaceManager,
+  CacheOperationResult,
+  CacheOptions,
+  CacheSerializer,
+  CacheStats,
+  CacheTagManager,
 } from './types';
 
 export { CacheNamespace, CacheStrategy, defaultCacheConfig } from './types';
@@ -39,31 +39,66 @@ export { CacheNamespace, CacheStrategy, defaultCacheConfig } from './types';
 // 缓存策略
 export {
   BaseCacheStrategy,
-  LazyLoadingStrategy,
-  WriteThroughStrategy,
-  WriteBehindStrategy,
-  RefreshAheadStrategy,
+  cacheStrategyConfigs,
   CacheStrategyFactory,
   cacheStrategyFactory,
-  cacheStrategyConfigs,
+  LazyLoadingStrategy,
+  RefreshAheadStrategy,
+  WriteBehindStrategy,
+  WriteThroughStrategy,
 } from './strategies';
+
+// 缓存配置
+export {
+  cacheSystemConfig,
+  getAllPreloadKeys,
+  getConfigSummary,
+  getNamespaceConfig,
+  getRefreshThreshold,
+  setNamespaceTTL,
+  shouldAutoRefresh,
+  validateConfig,
+} from './cache-config';
+
+// 缓存预加载
+export {
+  addPreloadItem,
+  addPreloadItems,
+  autoStartPreload,
+  cachePreload,
+  cancelAllPreloads,
+  cancelPreload,
+  cleanupPreload,
+  clearPreloadQueue,
+  executePreload,
+  generatePreloadReport,
+  getDataProvider,
+  getPreloadStatus,
+  initializePreloadFromConfig,
+  registerDataProvider,
+  scheduleCacheRefresh,
+  schedulePreload,
+  unregisterDataProvider,
+} from './cache-preload';
 
 // 便捷导出 - 常用功能
 export { cache as cacheInstance } from './manager';
 export { cacheMonitorInstance as cacheMonitor } from './monitor';
 
 // 导入用于内部使用
-import type { CacheOptions, CacheHealth, CacheStats } from './types';
-import { CacheNamespace, CacheStrategy, defaultCacheConfig } from './types';
 import { cache as cacheInstance, cacheManager } from './manager';
 import { cacheMonitorInstance } from './monitor';
-import { cacheStrategyFactory } from './strategies';
 import {
-  redis,
-  connectRedis,
   checkRedisConnection,
+  connectRedis,
   disconnectRedis,
+  redis,
 } from './redis';
+import { cacheStrategyFactory } from './strategies';
+import type { CacheHealth, CacheOptions, CacheStats } from './types';
+import { CacheNamespace, CacheStrategy, defaultCacheConfig } from './types';
+import { cacheSystemConfig } from './cache-config';
+import { cachePreload } from './cache-preload';
 
 // 类型别名
 export type CacheNamespaceType = CacheNamespace;
@@ -131,23 +166,23 @@ export const cacheUtils = {
 export function Cached(options?: {
   ttl?: number;
   namespace?: CacheNamespace;
-  keyGenerator?: (...args: any[]) => string;
+  keyGenerator?: (...args: unknown[]) => string;
 }) {
   return function (
-    target: any,
+    target: object,
     propertyName: string,
     descriptor: PropertyDescriptor
   ) {
     const method = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       // 生成缓存键
       const key = options?.keyGenerator
         ? options.keyGenerator(...args)
         : `${target.constructor.name}:${propertyName}:${JSON.stringify(args)}`;
 
       const cacheOptions: CacheOptions = {
-        ttl: options?.ttl,
+        ttl: options?.ttl || defaultCacheConfig.defaultTtl,
         namespace: options?.namespace,
       };
 
@@ -166,7 +201,7 @@ export function Cached(options?: {
 }
 
 // 缓存工厂函数
-export function createCache(namespace: CacheNamespace, defaultTtl?: number) {
+export function createCache(namespace: CacheNamespace) {
   return {
     async get<T>(key: string, ttl?: number): Promise<T | null> {
       return cacheInstance.get<T>(key, { namespace, ttl });
@@ -199,13 +234,13 @@ export function createCache(namespace: CacheNamespace, defaultTtl?: number) {
 }
 
 // 常用缓存实例
-export const userCache = createCache(CacheNamespace.USER_SESSION, 1800); // 30分钟
-export const dataCache = createCache(CacheNamespace.USER_DATA, 3600); // 1小时
-export const aiCache = createCache(CacheNamespace.AI_RESPONSE, 3600); // 1小时
-export const configCache = createCache(CacheNamespace.CONFIGURATION, 86400); // 24小时
-export const queryCache = createCache(CacheNamespace.DATABASE_QUERY, 3600); // 1小时
-export const apiCache = createCache(CacheNamespace.API_RESPONSE, 300); // 5分钟
-export const tempCache = createCache(CacheNamespace.TEMPORARY, 60); // 1分钟
+export const userCache = createCache(CacheNamespace.USER_SESSION); // 30分钟
+export const dataCache = createCache(CacheNamespace.USER_DATA); // 1小时
+export const aiCache = createCache(CacheNamespace.AI_RESPONSE); // 1小时
+export const configCache = createCache(CacheNamespace.CONFIGURATION); // 24小时
+export const queryCache = createCache(CacheNamespace.DATABASE_QUERY); // 1小时
+export const apiCache = createCache(CacheNamespace.API_RESPONSE); // 5分钟
+export const tempCache = createCache(CacheNamespace.TEMPORARY); // 1分钟
 
 // 缓存初始化函数
 export async function initializeCache(): Promise<void> {
@@ -259,6 +294,12 @@ const cacheExports = {
   cache: cacheInstance,
   cacheMonitor: cacheMonitorInstance,
   cacheStrategyFactory,
+
+  // 配置
+  cacheSystemConfig,
+
+  // 预加载
+  cachePreload,
 
   // 工具
   cacheUtils,

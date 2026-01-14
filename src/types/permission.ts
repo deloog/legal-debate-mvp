@@ -17,6 +17,7 @@ export enum PermissionAction {
   MANAGE = 'manage', // 所有权限
   APPROVE = 'approve', // 审核
   REVIEW = 'review', // 查看审核
+  EXPORT = 'export', // 导出
 }
 
 /**
@@ -32,6 +33,9 @@ export enum PermissionResource {
   REVIEW = 'review', // 审核管理
   QUALIFICATION = 'qualification', // 资格管理
   ENTERPRISE = 'enterprise', // 企业管理
+  STATS = 'stats', // 统计数据
+  EXPORT = 'export', // 数据导出
+  REPORT = 'report', // 报告管理
 }
 
 // =============================================================================
@@ -205,6 +209,33 @@ export const ENTERPRISE_PERMISSIONS = {
 } as const;
 
 /**
+ * 统计数据权限
+ */
+export const STATS_PERMISSIONS = {
+  READ: 'stats:read',
+  EXPORT: 'stats:export',
+} as const;
+
+/**
+ * 数据导出权限
+ */
+export const EXPORT_PERMISSIONS = {
+  CASE: 'export:case',
+  STATS: 'export:stats',
+} as const;
+
+/**
+ * 报告管理权限
+ */
+export const REPORT_PERMISSIONS = {
+  CREATE: 'report:create',
+  READ: 'report:read',
+  UPDATE: 'report:update',
+  DELETE: 'report:delete',
+  MANAGE: 'report:manage',
+} as const;
+
+/**
  * 所有权限集合
  */
 export const ALL_PERMISSIONS = [
@@ -217,6 +248,9 @@ export const ALL_PERMISSIONS = [
   ...Object.values(REVIEW_PERMISSIONS),
   ...Object.values(QUALIFICATION_PERMISSIONS),
   ...Object.values(ENTERPRISE_PERMISSIONS),
+  ...Object.values(STATS_PERMISSIONS),
+  ...Object.values(EXPORT_PERMISSIONS),
+  ...Object.values(REPORT_PERMISSIONS),
 ] as const;
 
 /**
@@ -490,6 +524,66 @@ export const PERMISSION_DEFINITIONS = [
     name: ENTERPRISE_PERMISSIONS.MANAGE,
     description: '管理企业',
     resource: PermissionResource.ENTERPRISE,
+    action: PermissionAction.MANAGE,
+  },
+
+  // 统计数据
+  {
+    name: STATS_PERMISSIONS.READ,
+    description: '查看统计数据',
+    resource: PermissionResource.STATS,
+    action: PermissionAction.READ,
+  },
+  {
+    name: STATS_PERMISSIONS.EXPORT,
+    description: '导出统计数据',
+    resource: PermissionResource.STATS,
+    action: PermissionAction.EXPORT,
+  },
+
+  // 数据导出
+  {
+    name: EXPORT_PERMISSIONS.CASE,
+    description: '导出案件数据',
+    resource: PermissionResource.EXPORT,
+    action: PermissionAction.READ,
+  },
+  {
+    name: EXPORT_PERMISSIONS.STATS,
+    description: '导出统计数据',
+    resource: PermissionResource.EXPORT,
+    action: PermissionAction.READ,
+  },
+
+  // 报告管理
+  {
+    name: REPORT_PERMISSIONS.CREATE,
+    description: '创建报告',
+    resource: PermissionResource.REPORT,
+    action: PermissionAction.CREATE,
+  },
+  {
+    name: REPORT_PERMISSIONS.READ,
+    description: '查看报告',
+    resource: PermissionResource.REPORT,
+    action: PermissionAction.READ,
+  },
+  {
+    name: REPORT_PERMISSIONS.UPDATE,
+    description: '更新报告',
+    resource: PermissionResource.REPORT,
+    action: PermissionAction.UPDATE,
+  },
+  {
+    name: REPORT_PERMISSIONS.DELETE,
+    description: '删除报告',
+    resource: PermissionResource.REPORT,
+    action: PermissionAction.DELETE,
+  },
+  {
+    name: REPORT_PERMISSIONS.MANAGE,
+    description: '管理报告',
+    resource: PermissionResource.REPORT,
     action: PermissionAction.MANAGE,
   },
 ] as const;

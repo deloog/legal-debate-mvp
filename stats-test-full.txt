@@ -1,0 +1,284 @@
+
+> legal_debate_mvp@0.1.0 test:e2e
+> playwright test src/__tests__/e2e/stats.spec.ts
+
+
+Running 30 tests using 1 worker
+
+=== 鐢ㄦ埛娉ㄥ唽瓒嬪娍API鍝嶅簲 ===
+success: [33mtrue[39m
+message: 鑾峰彇娉ㄥ唽瓒嬪娍鎴愬姛
+error: [90mundefined[39m
+data: {
+  trend: [
+    { date: [32m'2026-01-13'[39m, count: [33m317[39m },
+    { date: [32m'2026-01-14'[39m, count: [33m331[39m }
+  ],
+  summary: { totalUsers: [33m648[39m, newUsers: [33m648[39m, growthRate: [33m0[39m, averageDaily: [33m21.6[39m },
+  metadata: {
+    timeRange: [32m'LAST_30_DAYS'[39m,
+    granularity: [32m'DAY'[39m,
+    startDate: [32m'2025-12-15T16:00:00.000Z'[39m,
+    endDate: [32m'2026-01-14T15:59:59.999Z'[39m
+  }
+}
+==================
+  鉁?  1 src\__tests__\e2e\stats.spec.ts:51:7 鈥?缁熻绯荤粺 - 鐢ㄦ埛缁熻API 鈥?搴旇鑳藉鑾峰彇鐢ㄦ埛娉ㄥ唽瓒嬪娍 (37ms)
+  鉁?  2 src\__tests__\e2e\stats.spec.ts:67:7 鈥?缁熻绯荤粺 - 鐢ㄦ埛缁熻API 鈥?搴旇鏀寔涓嶅悓鐨勬椂闂磋寖鍥?(25ms)
+  鉁?  3 src\__tests__\e2e\stats.spec.ts:75:7 鈥?缁熻绯荤粺 - 鐢ㄦ埛缁熻API 鈥?搴旇鏀寔涓嶅悓鐨勬椂闂寸矑搴?(26ms)
+=== 鐢ㄦ埛娲昏穬搴PI鍝嶅簲 ===
+success: [33mtrue[39m
+message: 鑾峰彇娲昏穬搴︽暟鎹垚鍔?error: [90mundefined[39m
+data: {
+  distribution: { veryActive: [33m1[39m, active: [33m0[39m, inactive: [33m0[39m, dormant: [33m0[39m },
+  trend: [
+    { date: [32m'2026-01-13'[39m, activeUsers: [33m0[39m, newUsers: [33m317[39m },
+    { date: [32m'2026-01-14'[39m, activeUsers: [33m1[39m, newUsers: [33m331[39m }
+  ],
+  summary: {
+    totalUsers: [33m1[39m,
+    activeUsers: [33m1[39m,
+    activeRate: [33m100[39m,
+    avgLoginFrequency: [33m0[39m
+  },
+  metadata: {
+    timeRange: [32m'LAST_30_DAYS'[39m,
+    startDate: [32m'2025-12-15T16:00:00.000Z'[39m,
+    endDate: [32m'2026-01-14T15:59:59.999Z'[39m
+  }
+}
+==================
+  鉁?  4 src\__tests__\e2e\stats.spec.ts:84:7 鈥?缁熻绯荤粺 - 鐢ㄦ埛缁熻API 鈥?搴旇鑳藉鑾峰彇鐢ㄦ埛娲昏穬搴?(120ms)
+  鉁?  5 src\__tests__\e2e\stats.spec.ts:100:7 鈥?缁熻绯荤粺 - 鐢ㄦ埛缁熻API 鈥?鏅€氱敤鎴锋棤娉曡闂粺璁PI (19ms)
+  鉁?  6 src\__tests__\e2e\stats.spec.ts:121:7 鈥?缁熻绯荤粺 - 妗堜欢缁熻API 鈥?搴旇鑳藉鑾峰彇妗堜欢绫诲瀷鍒嗗竷 (31ms)
+  鉁?  7 src\__tests__\e2e\stats.spec.ts:130:7 鈥?缁熻绯荤粺 - 妗堜欢缁熻API 鈥?搴旇鑳藉鎸夌姸鎬佺瓫閫夋浠?(21ms)
+  鉁?  8 src\__tests__\e2e\stats.spec.ts:138:7 鈥?缁熻绯荤粺 - 妗堜欢缁熻API 鈥?搴旇鑳藉鑾峰彇妗堜欢鏁堢巼缁熻 (20ms)
+  鉁?  9 src\__tests__\e2e\stats.spec.ts:147:7 鈥?缁熻绯荤粺 - 妗堜欢缁熻API 鈥?搴旇鑳藉鎸夋浠剁被鍨嬬瓫閫?(21ms)
+=== 杈╄鐢熸垚娆℃暟API鍝嶅簲 ===
+success: [33mtrue[39m
+message: 鑾峰彇杈╄鐢熸垚娆℃暟鎴愬姛
+error: [90mundefined[39m
+data: {
+  trend: [
+    {
+      date: [32m'2026-01-13'[39m,
+      debatesCreated: [33m315[39m,
+      argumentsGenerated: [33m45[39m,
+      averageArgumentsPerDebate: [33m0.14285714285714285[39m
+    },
+    {
+      date: [32m'2026-01-14'[39m,
+      debatesCreated: [33m1[39m,
+      argumentsGenerated: [33m0[39m,
+      averageArgumentsPerDebate: [33m0[39m
+    }
+  ],
+  summary: {
+    totalDebates: [33m316[39m,
+    totalArguments: [33m45[39m,
+    averageArgumentsPerDebate: [33m0.14[39m,
+    growthRate: [33m0[39m
+  },
+  metadata: {
+    timeRange: [32m'LAST_30_DAYS'[39m,
+    granularity: [32m'DAY'[39m,
+    startDate: [32m'2025-12-15T16:00:00.000Z'[39m,
+    endDate: [32m'2026-01-14T15:59:59.999Z'[39m
+  }
+}
+==================
+  鉁? 10 src\__tests__\e2e\stats.spec.ts:169:7 鈥?缁熻绯荤粺 - 杈╄缁熻API 鈥?搴旇鑳藉鑾峰彇杈╄鐢熸垚娆℃暟 (41ms)
+  鉁? 11 src\__tests__\e2e\stats.spec.ts:185:7 鈥?缁熻绯荤粺 - 杈╄缁熻API 鈥?搴旇鏀寔鎸夎京璁虹姸鎬佺瓫閫?(24ms)
+  鉁? 12 src\__tests__\e2e\stats.spec.ts:193:7 鈥?缁熻绯荤粺 - 杈╄缁熻API 鈥?搴旇鑳藉鑾峰彇杈╄璐ㄩ噺璇勫垎 (22ms)
+  鉁? 13 src\__tests__\e2e\stats.spec.ts:203:7 鈥?缁熻绯荤粺 - 杈╄缁熻API 鈥?搴旇鏀寔缃俊搴﹁寖鍥寸瓫閫?(18ms)
+  鉁? 14 src\__tests__\e2e\stats.spec.ts:226:7 鈥?缁熻绯荤粺 - 鎬ц兘缁熻API 鈥?搴旇鑳藉鑾峰彇鍝嶅簲鏃堕棿缁熻 (27ms)
+  鉁? 15 src\__tests__\e2e\stats.spec.ts:235:7 鈥?缁熻绯荤粺 - 鎬ц兘缁熻API 鈥?搴旇鏀寔鎸夋湇鍔″晢绛涢€?(22ms)
+  鉁? 16 src\__tests__\e2e\stats.spec.ts:243:7 鈥?缁熻绯荤粺 - 鎬ц兘缁熻API 鈥?搴旇鑳藉鑾峰彇閿欒鐜囩粺璁?(30ms)
+  鉁? 17 src\__tests__\e2e\stats.spec.ts:252:7 鈥?缁熻绯荤粺 - 鎬ц兘缁熻API 鈥?搴旇鏀寔鍖呭惈宸叉仮澶嶉敊璇?(22ms)
+  鉁? 18 src\__tests__\e2e\stats.spec.ts:278:7 鈥?缁熻绯荤粺 - 鏁版嵁瀵煎嚭鍔熻兘 鈥?搴旇鑳藉瀵煎嚭妗堜欢鏁版嵁涓篊SV (56ms)
+  鉁? 19 src\__tests__\e2e\stats.spec.ts:288:7 鈥?缁熻绯荤粺 - 鏁版嵁瀵煎嚭鍔熻兘 鈥?搴旇鑳藉瀵煎嚭妗堜欢鏁版嵁涓篍XCEL (58ms)
+  鉁? 20 src\__tests__\e2e\stats.spec.ts:296:7 鈥?缁熻绯荤粺 - 鏁版嵁瀵煎嚭鍔熻兘 鈥?搴旇鑳藉瀵煎嚭缁熻鏁版嵁 (32ms)
+  鉁? 21 src\__tests__\e2e\stats.spec.ts:306:7 鈥?缁熻绯荤粺 - 鏁版嵁瀵煎嚭鍔熻兘 鈥?搴旇鏀寔瀵煎嚭涓嶅悓绫诲瀷鐨勭粺璁℃暟鎹?(51ms)
+  鉁? 22 src\__tests__\e2e\stats.spec.ts:321:7 鈥?缁熻绯荤粺 - 鏁版嵁瀵煎嚭鍔熻兘 鈥?鏅€氱敤鎴锋棤娉曞鍑烘暟鎹?(20ms)
+  鉁? 23 src\__tests__\e2e\stats.spec.ts:347:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鑳藉鑾峰彇鎶ュ憡鍒楄〃 (63ms)
+  鉁? 24 src\__tests__\e2e\stats.spec.ts:354:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鏀寔鎸夌被鍨嬬瓫閫夋姤鍛?(35ms)
+  鉁? 25 src\__tests__\e2e\stats.spec.ts:362:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鏀寔鎸夌姸鎬佺瓫閫夋姤鍛?(42ms)
+  鉁? 26 src\__tests__\e2e\stats.spec.ts:370:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鏀寔鎶ュ憡鍒楄〃鍒嗛〉 (38ms)
+  鉁? 27 src\__tests__\e2e\stats.spec.ts:379:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鑳藉鍒涘缓鍛ㄦ姤 (32ms)
+  鉁? 28 src\__tests__\e2e\stats.spec.ts:393:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鑳藉鍒涘缓鏈堟姤 (31ms)
+  鉁? 29 src\__tests__\e2e\stats.spec.ts:407:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鑳藉鍒涘缓鑷畾涔夋姤鍛?(31ms)
+  鉁? 30 src\__tests__\e2e\stats.spec.ts:421:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?鏅€氱敤鎴锋棤娉曞垱寤烘姤鍛?(27ms)
+
+
+  1) src\__tests__\e2e\stats.spec.ts:278:7 鈥?缁熻绯荤粺 - 鏁版嵁瀵煎嚭鍔熻兘 鈥?搴旇鑳藉瀵煎嚭妗堜欢鏁版嵁涓篊SV 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      282 |     });
+      283 |
+    > 284 |     expect(response.success).toBe(true);
+          |                              ^
+      285 |     expect(response.data).toBeDefined();
+      286 |   });
+      287 |
+        at D:\legal_debate_mvp\src\__tests__\e2e\stats.spec.ts:284:30
+
+  2) src\__tests__\e2e\stats.spec.ts:288:7 鈥?缁熻绯荤粺 - 鏁版嵁瀵煎嚭鍔熻兘 鈥?搴旇鑳藉瀵煎嚭妗堜欢鏁版嵁涓篍XCEL 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      291 |     });
+      292 |
+    > 293 |     expect(response.success).toBe(true);
+          |                              ^
+      294 |   });
+      295 |
+      296 |   test('搴旇鑳藉瀵煎嚭缁熻鏁版嵁', async ({ request }) => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\stats.spec.ts:293:30
+
+  3) src\__tests__\e2e\stats.spec.ts:296:7 鈥?缁熻绯荤粺 - 鏁版嵁瀵煎嚭鍔熻兘 鈥?搴旇鑳藉瀵煎嚭缁熻鏁版嵁 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      301 |     });
+      302 |
+    > 303 |     expect(response.success).toBe(true);
+          |                              ^
+      304 |   });
+      305 |
+      306 |   test('搴旇鏀寔瀵煎嚭涓嶅悓绫诲瀷鐨勭粺璁℃暟鎹?, async ({ request }) => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\stats.spec.ts:303:30
+
+  4) src\__tests__\e2e\stats.spec.ts:347:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鑳藉鑾峰彇鎶ュ憡鍒楄〃 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      348 |     const response = await getReportsList(request, adminToken);
+      349 |
+    > 350 |     expect(response.success).toBe(true);
+          |                              ^
+      351 |     expect(response.data).toBeDefined();
+      352 |   });
+      353 |
+        at D:\legal_debate_mvp\src\__tests__\e2e\stats.spec.ts:350:30
+
+  5) src\__tests__\e2e\stats.spec.ts:354:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鏀寔鎸夌被鍨嬬瓫閫夋姤鍛?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      357 |     });
+      358 |
+    > 359 |     expect(response.success).toBe(true);
+          |                              ^
+      360 |   });
+      361 |
+      362 |   test('搴旇鏀寔鎸夌姸鎬佺瓫閫夋姤鍛?, async ({ request }) => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\stats.spec.ts:359:30
+
+  6) src\__tests__\e2e\stats.spec.ts:362:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鏀寔鎸夌姸鎬佺瓫閫夋姤鍛?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      365 |     });
+      366 |
+    > 367 |     expect(response.success).toBe(true);
+          |                              ^
+      368 |   });
+      369 |
+      370 |   test('搴旇鏀寔鎶ュ憡鍒楄〃鍒嗛〉', async ({ request }) => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\stats.spec.ts:367:30
+
+  7) src\__tests__\e2e\stats.spec.ts:370:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鏀寔鎶ュ憡鍒楄〃鍒嗛〉 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      374 |     });
+      375 |
+    > 376 |     expect(response.success).toBe(true);
+          |                              ^
+      377 |   });
+      378 |
+      379 |   test('搴旇鑳藉鍒涘缓鍛ㄦ姤', async ({ request }) => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\stats.spec.ts:376:30
+
+  8) src\__tests__\e2e\stats.spec.ts:379:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鑳藉鍒涘缓鍛ㄦ姤 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      388 |     });
+      389 |
+    > 390 |     expect(response.success).toBe(true);
+          |                              ^
+      391 |   });
+      392 |
+      393 |   test('搴旇鑳藉鍒涘缓鏈堟姤', async ({ request }) => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\stats.spec.ts:390:30
+
+  9) src\__tests__\e2e\stats.spec.ts:393:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鑳藉鍒涘缓鏈堟姤 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      402 |     });
+      403 |
+    > 404 |     expect(response.success).toBe(true);
+          |                              ^
+      405 |   });
+      406 |
+      407 |   test('搴旇鑳藉鍒涘缓鑷畾涔夋姤鍛?, async ({ request }) => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\stats.spec.ts:404:30
+
+  10) src\__tests__\e2e\stats.spec.ts:407:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鑳藉鍒涘缓鑷畾涔夋姤鍛?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      416 |     });
+      417 |
+    > 418 |     expect(response.success).toBe(true);
+          |                              ^
+      419 |   });
+      420 |
+      421 |   test('鏅€氱敤鎴锋棤娉曞垱寤烘姤鍛?, async ({ request }) => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\stats.spec.ts:418:30
+
+  10 failed
+    src\__tests__\e2e\stats.spec.ts:278:7 鈥?缁熻绯荤粺 - 鏁版嵁瀵煎嚭鍔熻兘 鈥?搴旇鑳藉瀵煎嚭妗堜欢鏁版嵁涓篊SV 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+    src\__tests__\e2e\stats.spec.ts:288:7 鈥?缁熻绯荤粺 - 鏁版嵁瀵煎嚭鍔熻兘 鈥?搴旇鑳藉瀵煎嚭妗堜欢鏁版嵁涓篍XCEL 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+    src\__tests__\e2e\stats.spec.ts:296:7 鈥?缁熻绯荤粺 - 鏁版嵁瀵煎嚭鍔熻兘 鈥?搴旇鑳藉瀵煎嚭缁熻鏁版嵁 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+    src\__tests__\e2e\stats.spec.ts:347:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鑳藉鑾峰彇鎶ュ憡鍒楄〃 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+    src\__tests__\e2e\stats.spec.ts:354:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鏀寔鎸夌被鍨嬬瓫閫夋姤鍛?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+    src\__tests__\e2e\stats.spec.ts:362:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鏀寔鎸夌姸鎬佺瓫閫夋姤鍛?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+    src\__tests__\e2e\stats.spec.ts:370:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鏀寔鎶ュ憡鍒楄〃鍒嗛〉 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+    src\__tests__\e2e\stats.spec.ts:379:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鑳藉鍒涘缓鍛ㄦ姤 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+    src\__tests__\e2e\stats.spec.ts:393:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鑳藉鍒涘缓鏈堟姤 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+    src\__tests__\e2e\stats.spec.ts:407:7 鈥?缁熻绯荤粺 - 鎶ュ憡绯荤粺 鈥?搴旇鑳藉鍒涘缓鑷畾涔夋姤鍛?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+  20 passed (19.1s)

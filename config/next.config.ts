@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60,
     dangerouslyAllowSVG: false,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // 启用图片懒加载
+    loader: 'default',
+    // 优化图片加载策略
+    unoptimized: false,
   },
 
   // Configure webpack for better performance
@@ -26,11 +30,63 @@ const nextConfig: NextConfig = {
 
     // 生产环境优化
     if (!dev) {
-      // 启用生产环境压缩
+      // 启用生产环境压缩和优化
       config.optimization = {
         ...config.optimization,
         minimize: true,
+        // 启用代码分割
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            // 第三方库单独打包
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              priority: 10,
+              name: 'vendors',
+            },
+            // React相关库单独打包
+            react: {
+              test: /[\\/]node_modules[\\/](react|react-dom|react-dom-client)[\\/]/,
+              priority: 20,
+              name: 'react',
+            },
+            // 公共代码提取
+            common: {
+              minChunks: 2,
+              priority: 5,
+              reuseExistingChunk: true,
+              name: 'common',
+            },
+          },
+        },
+        // 启用作用域提升
+        usedExports: true,
+        // Tree Shaking优化
+        sideEffects: true,
       };
+
+      // 配置外部依赖（减少打包体积）
+      if (!isServer) {
+        config.externals = {
+          ...config.externals,
+          'react-native': 'react-native',
+        };
+      }
+    }
+
+    // 添加打包分析插件（仅在分析时启用）
+    if (process.env.ANALYZE === 'true') {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - Dynamic import for bundle analyzer
+      const { BundleAnalyzerPlugin } = await import('@next/bundle-analyzer');
+      config.plugins.push(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore - BundleAnalyzerPlugin type
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'static',
+          openAnalyzer: false,
+        })
+      );
     }
 
     return config;
@@ -52,6 +108,19 @@ const nextConfig: NextConfig = {
 
   // 配置输出优化
   output: 'standalone',
+
+  // 配置实验性功能
+  experimental: {
+    // 启用优化包导入
+    optimizePackageImports: ['lucide-react', 'axios'],
+  },
+
+  // 配置动态导入优化
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
+    },
+  },
 
   // 配置头部信息（包括缓存策略）
   async headers() {
@@ -82,7 +151,22 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // 预加载关键资源
+      {
+        source: '/_next/static/chunks/pages/_app.js',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
     ];
+  },
+
+  // 配置重定向优化
+  async redirects() {
+    return [];
   },
 };
 

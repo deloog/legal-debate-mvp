@@ -6,6 +6,7 @@
 import type { NextRequest, NextResponse } from 'next/server';
 import { hasPermission } from './permissions';
 import type { PermissionCheckResult } from '@/types/permission';
+import { getAuthUser } from './auth';
 
 // =============================================================================
 // 权限检查选项
@@ -171,14 +172,18 @@ export async function validatePermissions(
   requiredPermissions: string | string[],
   options: PermissionCheckOptions = {}
 ): Promise<NextResponse | null> {
-  const userId = extractUserIdFromRequest(request);
+  // 先从JWT token中获取用户信息
+  const user = await getAuthUser(request);
 
-  if (!userId) {
+  if (!user) {
     return Response.json(
       { error: '未认证', message: '请先登录' },
       { status: 401 }
     ) as unknown as NextResponse;
   }
+
+  // 使用JWT payload中的userId
+  const userId = user.userId;
 
   const checkMiddleware = requirePermission(requiredPermissions, options);
   return checkMiddleware(request, userId);

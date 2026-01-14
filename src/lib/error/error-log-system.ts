@@ -9,6 +9,7 @@ import { ErrorLogger } from './error-logger';
 import { ErrorRecovery } from './error-recovery';
 import { ErrorAnalyzer } from './error-analyzer';
 import { circuitBreakerManager } from './circuit-breaker';
+import { alertManager } from './alert-manager';
 import {
   ErrorLog,
   ErrorContext,
@@ -51,7 +52,17 @@ export class ErrorLogSystem {
     // 1. 捕获并记录错误
     const errorLog = await this.logger.captureError(error, context);
 
-    // 2. 尝试恢复
+    // 2. 触发告警检查
+    if (options.enableLogging !== false) {
+      try {
+        await alertManager.processError(errorLog);
+      } catch (alertError) {
+        // 告警处理失败不应影响主流程
+        console.error('Failed to process alert:', alertError);
+      }
+    }
+
+    // 3. 尝试恢复
     let recoverySuccess = false;
     let fallbackUsed = false;
 
@@ -77,7 +88,7 @@ export class ErrorLogSystem {
       }
     }
 
-    // 3. 执行分析（如果启用）
+    // 4. 执行分析（如果启用）
     if (options.enableLearning && !errorLog.learned) {
       const analysis = await this.analyzer.performRootCauseAnalysis(errorLog);
 

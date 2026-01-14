@@ -143,11 +143,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     };
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    console.error('登录失败:', error);
+    console.error('登录失败详情:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+    });
     const response: AuthResponse = {
       success: false,
       message: '登录失败，请稍后重试',
-      error: 'SERVER_ERROR',
+      error: error instanceof Error ? error.message : 'SERVER_ERROR',
     };
     return NextResponse.json(response, { status: 500 });
   }

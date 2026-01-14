@@ -7,6 +7,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
+import {
+  successResponse,
+  unauthorizedResponse,
+  serverErrorResponse,
+} from '@/lib/api-response';
 
 // =============================================================================
 // 类型定义
@@ -116,10 +121,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
-      { error: '未认证', message: '请先登录' },
-      { status: 401 }
-    ) as unknown as NextResponse;
+    return unauthorizedResponse();
   }
 
   // 检查权限
@@ -172,15 +174,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     };
 
-    return Response.json(
-      { data: responseData },
-      { status: 200 }
-    ) as unknown as NextResponse;
+    return successResponse(responseData, '获取用户列表成功');
   } catch (error) {
     console.error('获取用户列表失败:', error);
-    return Response.json(
-      { error: '服务器错误', message: '获取用户列表失败' },
-      { status: 500 }
-    ) as unknown as NextResponse;
+    return serverErrorResponse('获取用户列表失败');
   }
 }
