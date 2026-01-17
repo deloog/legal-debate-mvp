@@ -1,614 +1,1656 @@
+  console.error
+    Error: Not implemented: navigation (except hash changes)
+        at module.exports (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\browser\not-implemented.js:9:17)
+        at navigateFetch (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\window\navigation.js:77:3)
+        at exports.navigate (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\window\navigation.js:55:3)
+        at LocationImpl._locationObjectNavigate (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\window\Location-impl.js:30:5)
+        at LocationImpl._locationObjectSetterNavigate (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\window\Location-impl.js:24:17)
+        at LocationImpl.set href [as href] (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\window\Location-impl.js:46:10)
+        at Location.set href [as href] (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\generated\Location.js:125:37)
+        at onClick (D:\legal_debate_mvp\src\components\order\OrderList.tsx:297:54)
+        at executeDispatch (D:\legal_debate_mvp\node_modules\react-dom\cjs\react-dom-client.development.js:19116:9)
+        at runWithFiberInDEV (D:\legal_debate_mvp\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+        at processDispatchQueue (D:\legal_debate_mvp\node_modules\react-dom\cjs\react-dom-client.development.js:19166:19)
+        at D:\legal_debate_mvp\node_modules\react-dom\cjs\react-dom-client.development.js:19767:9
+        at batchedUpdates$1 (D:\legal_debate_mvp\node_modules\react-dom\cjs\react-dom-client.development.js:3255:40)
+        at dispatchEventForPluginEventSystem (D:\legal_debate_mvp\node_modules\react-dom\cjs\react-dom-client.development.js:19320:7)
+        at dispatchEvent (D:\legal_debate_mvp\node_modules\react-dom\cjs\react-dom-client.development.js:23585:11)
+        at dispatchDiscreteEvent (D:\legal_debate_mvp\node_modules\react-dom\cjs\react-dom-client.development.js:23553:11)
+        at HTMLDivElement.callTheUserObjectsOperation (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\generated\EventListener.js:26:30)
+        at innerInvokeEventListeners (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:350:25)
+        at invokeEventListeners (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:286:3)
+        at HTMLButtonElementImpl._dispatch (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:233:9)
+        at fireAnEvent (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\helpers\events.js:18:36)
+        at HTMLButtonElementImpl.click (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\nodes\HTMLElement-impl.js:85:5)
+        at HTMLButtonElement.click (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\generated\HTMLElement.js:108:34)
+        at Object.<anonymous> (D:\legal_debate_mvp\src\__tests__\components\order\OrderList.test.tsx:422:22) {
+      type: 'not implemented'
+    }
 
-> legal_debate_mvp@0.1.0 test
-> jest src/__tests__/unit/stats/UserStatsCards.test.tsx
+    [0m [90m 295 |[39m                 [33m<[39m[33m/[39m[33mp[39m[33m>[39m
+     [90m 296 |[39m                 [33m<[39m[33mButton[39m
+    [31m[1m>[22m[39m[90m 297 |[39m                   onClick[33m=[39m{() [33m=>[39m window[33m.[39mlocation[33m.[39mhref [33m=[39m [32m'/membership'[39m}
+     [90m     |[39m                                                      [31m[1m^[22m[39m
+     [90m 298 |[39m                   className[33m=[39m[32m'mt-4'[39m
+     [90m 299 |[39m                   variant[33m=[39m[32m'outline'[39m
+     [90m 300 |[39m                 [33m>[39m[0m
 
-FAIL src/__tests__/unit/stats/UserStatsCards.test.tsx
-  StatCard
-    鈭?搴旇姝ｇ‘娓叉煋鍗＄墖鏍囬鍜屽€?(65 ms)
-    鈭?搴旇鏄剧ず姝ｅ闀胯秼鍔?(7 ms)
-    鈭?搴旇鏄剧ず璐熷闀胯秼鍔?(4 ms)
-    脳 搴旇鑷畾涔塼rendLabel (6 ms)
-    鈭?褰搕rend鏈畾涔夋椂涓嶆樉绀鸿秼鍔?(4 ms)
-    鈭?搴旇姝ｇ‘鏍煎紡鍖栧ぇ鏁板瓧 (3 ms)
-  StatsSummary
-    鈭?搴旇娓叉煋鍥涗釜缁熻鍗＄墖 (7 ms)
-    鈭?搴旇鏄剧ず鎬荤敤鎴锋暟 (6 ms)
-    脳 搴旇鏄剧ず鏂板鐢ㄦ埛鍜屽闀跨巼 (7 ms)
-    鈭?搴旇鏄剧ず鏃ュ潎鏂板鐢ㄦ埛 (6 ms)
-    鈭?搴旇鏄剧ず骞冲潎鐧诲綍棰戠巼 (4 ms)
-    脳 褰撴彁渚沘ctiveUsers鍜宎ctiveRate鏃舵樉绀烘椿璺冪敤鎴?(6 ms)
-    鈭?褰撴彁渚沘ctiveUsers鏃朵笉鏄剧ず骞冲潎鐧诲綍棰戠巼 (6 ms)
-    鈭?褰揳ctiveUsers涓簎ndefined鏃舵樉绀哄钩鍧囩櫥褰曢鐜?(4 ms)
-    鈭?褰揳vgLoginFrequency涓簎ndefined鏃舵樉绀? (5 ms)
-    脳 搴旇姝ｇ‘澶勭悊璐熷闀跨巼 (5 ms)
-    脳 搴旇姝ｇ‘澶勭悊闆跺闀跨巼 (5 ms)
-    鈭?搴旇姝ｇ‘鏍煎紡鍖栧ぇ鏁板€?(5 ms)
+      at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:87:23)
+      at module.exports (node_modules/jsdom/lib/jsdom/browser/not-implemented.js:12:26)
+      at navigateFetch (node_modules/jsdom/lib/jsdom/living/window/navigation.js:77:3)
+      at exports.navigate (node_modules/jsdom/lib/jsdom/living/window/navigation.js:55:3)
+      at LocationImpl._locationObjectNavigate (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:30:5)
+      at LocationImpl._locationObjectSetterNavigate (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:24:17)
+      at LocationImpl.set href [as href] (node_modules/jsdom/lib/jsdom/living/window/Location-impl.js:46:10)
+      at Location.set href [as href] (node_modules/jsdom/lib/jsdom/living/generated/Location.js:125:37)
+      at onClick (src/components/order/OrderList.tsx:297:54)
+      at executeDispatch (node_modules/react-dom/cjs/react-dom-client.development.js:19116:9)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at processDispatchQueue (node_modules/react-dom/cjs/react-dom-client.development.js:19166:19)
+      at node_modules/react-dom/cjs/react-dom-client.development.js:19767:9
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3255:40)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:19320:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23585:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23553:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLButtonElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
+      at fireAnEvent (node_modules/jsdom/lib/jsdom/living/helpers/events.js:18:36)
+      at HTMLButtonElementImpl.click (node_modules/jsdom/lib/jsdom/living/nodes/HTMLElement-impl.js:85:5)
+      at HTMLButtonElement.click (node_modules/jsdom/lib/jsdom/living/generated/HTMLElement.js:108:34)
+      at Object.<anonymous> (src/__tests__/components/order/OrderList.test.tsx:422:22)
 
-  鈼?StatCard 鈥?搴旇鑷畾涔塼rendLabel
+FAIL src/__tests__/components/order/OrderList.test.tsx
+  OrderList
+    脳 should render order list component (1096 ms)
+    脳 should display orders after loading (46 ms)
+    鈭?should show loading state (7 ms)
+    鈭?should handle fetch error (35 ms)
+    脳 should filter orders by status (1106 ms)
+    鈭?should search orders by text (58 ms)
+    脳 should sort orders by different fields (1059 ms)
+    鈭?should handle pagination (28 ms)
+    鈭?should display payment method correctly (30 ms)
+    鈭?should display amount formatted correctly (31 ms)
+    鈭?should show empty state when no orders (31 ms)
+    鈭?should show empty state with search message when searching (62 ms)
+    鈭?should refresh orders when refresh button is clicked (62 ms)
+    鈭?should format dates correctly (16 ms)
+    鈭?should handle retry on error (61 ms)
+    鈭?should display status badges with correct variants (32 ms)
+    鈭?should navigate to membership page when clicking go to membership button (76 ms)
 
-    TestingLibraryElementError: Unable to find an element with the text: +15% 娲昏穬鐜? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+  鈼?OrderList 鈥?should render order list component
+
+    Unable to find an element with the text: 鎼滅储璁㈠崟鍙锋垨鎻忚堪. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
 
     Ignored nodes: comments, script, style
     <body>
       <div>
         <div
-          class="bg-white rounded-lg shadow p-6"
+          class="space-y-4"
         >
           <div
-            class="flex items-center justify-between"
-          >
-            <h3
-              class="text-sm font-medium text-gray-500"
-            >
-              娲昏穬鐢ㄦ埛
-            </h3>
-            <span
-              class="text-xs font-medium text-green-600"
-            >
-              +
-              15.0
-              % 
-              娲昏穬鐜?[0m
-            </span>
-          </div>
-          <div
-            class="mt-2"
+            class="rounded-lg border bg-white shadow-sm "
           >
             <div
-              class="text-3xl font-bold text-gray-900"
+              class="flex flex-wrap gap-3 p-4"
             >
-              30
-               
+              <div
+                class="relative flex-1 min-w-[200px]"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-search absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21 21-4.34-4.34"
+                  />
+                  <circle
+                    cx="11"
+                    cy="11"
+                    r="8"
+                  />
+                </svg>
+                <input
+                  class="w-full rounded-md border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="鎼滅储璁㈠崟鍙锋垨鎻忚堪"
+                  type="text"
+                  value=""
+                />
+              </div>
+              <select
+                class="rounded-md border border-gray-300 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option
+                  value=""
+                >
+                  鍏ㄩ儴鐘舵€?[0m
+                </option>
+                <option
+                  value="PENDING"
+                >
+                  寰呮敮浠?[0m
+                </option>
+                <option
+                  value="PROCESSING"
+                >
+                  澶勭悊涓?[0m
+                </option>
+                <option
+                  value="PAID"
+                >
+                  宸叉敮浠?[0m
+                </option>
+                <option
+                  value="FAILED"
+                >
+                  鏀粯澶辫触
+                </option>
+                <option
+                  value="CANCELLED"
+                >
+                  宸插彇娑?[0m
+                </option>
+                <option
+                  value="REFUNDED"
+                >
+                  宸查€€娆?[0m
+                </option>
+                <option
+                  value="EXPIRED"
+                >
+                  宸茶繃鏈?[0m
+                </option>
+              </select>
+              <div
+                class="flex items-center gap-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-arrow-up-down h-4 w-4 text-gray-400"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21 16-4 4-4-4"
+                  />
+                  <path
+                    d="M17 20V4"
+                  />
+                  <path
+                    d="m3 8 4-4 4 4"
+                  />
+                  <path
+                    d="M7 4v16"
+                  />
+                </svg>
+                <select
+                  class="rounded-md border border-gray-300 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option
+                    value="createdAt"
+                  >
+                    鍒涘缓鏃堕棿
+                  </option>
+                  <option
+                    value="updatedAt"
+                  >
+                    鏇存柊鏃堕棿
+                  </option>
+                  <option
+                    value="amount"
+                  >
+                    閲戦
+                  </option>
+                  <option
+                    value="paidAt"
+                  >
+                    鏀粯鏃堕棿
+                  </option>
+                </select>
+              </div>
+              <button
+                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
+                type="button"
+              >
+                鍒锋柊
+              </button>
+            </div>
+          </div>
+          <div
+            class="rounded-lg border bg-white shadow-sm "
+          >
+            <div
+              class="overflow-x-auto"
+            >
+              <table
+                class="w-full min-w-[600px]"
+              >
+                <thead>
+                  <tr
+                    class="border-b border-gray-200 bg-gray-50 text-left text-xs uppercase tracking-wider text-gray-500"
+                  >
+                    <th
+                      class="px-4 py-3"
+                    >
+                      璁㈠崟鍙?[0m
+                    </th>
+                    <th
+                      class="px-4 py-3"
+                    >
+                      鍒涘缓鏃堕棿
+                    </th>
+                    <th
+                      class="px-4 py-3"
+                    >
+                      閲戦
+                    </th>
+                    <th
+                      class="px-4 py-3"
+                    >
+                      鏀粯鏂瑰紡
+                    </th>
+                    <th
+                      class="px-4 py-3"
+                    >
+                      鐘舵€?[0m
+                    </th>
+                    <th
+                      class="px-4 py-3 text-right"
+                    >
+                      鎿嶄綔
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  class="divide-y divide-gray-200"
+                >
+                  <tr
+                    class="cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <td
+                      class="px-4 py-3"
+                    >
+                      <div
+                        class="font-mono text-sm text-gray-900"
+                      >
+                        ORD202401010001
+                      </div>
+                      <div
+                        class="mt-1 text-xs text-gray-500"
+                      >
+                        浼氬憳鍗囩骇
+                      </div>
+                    </td>
+                    <td
+                      class="px-4 py-3 text-sm text-gray-600"
+                    >
+                      2024/01/01 18:00
+                    </td>
+                    <td
+                      class="px-4 py-3 text-sm font-semibold text-gray-900"
+                    >
+                      楼99.99
+                    </td>
+                    <td
+                      class="px-4 py-3 text-sm text-gray-600"
+                    >
+                      寰俊鏀粯
+                    </td>
+                    <td
+                      class="px-4 py-3"
+                    >
+                      <span
+                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 "
+                      >
+                        宸叉敮浠?[0m
+                      </span>
+                    </td>
+                    <td
+                      class="px-4 py-3 text-right"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-3 py-1.5 text-sm "
+                        type="button"
+                      >
+                        鏌ョ湅
+                      </button>
+                    </td>
+                  </tr>
+                  <tr
+                    class="cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <td
+                      class="px-4 py-3"
+                    >
+                      <div
+                        class="font-mono text-sm text-gray-900"
+                      >
+                        ORD202401010002
+                      </div>
+                      <div
+                        class="mt-1 text-xs text-gray-500"
+                      >
+                        浼氬憳鍗囩骇
+                      </div>
+                    </td>
+                    <td
+                      class="px-4 py-3 text-sm text-gray-600"
+                    >
+                      2024/01/02 18:00
+                    </td>
+                    <td
+                      class="px-4 py-3 text-sm font-semibold text-gray-900"
+                    >
+                      楼199.99
+                    </td>
+                    <td
+                      class="px-4 py-3 text-sm text-gray-600"
+                    >
+                      鏀粯瀹?[0m
+                    </td>
+                    <td
+                      class="px-4 py-3"
+                    >
+                      <span
+                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 "
+                      >
+                        寰呮敮浠?[0m
+                      </span>
+                    </td>
+                    <td
+                      class="px-4 py-3 text-right"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-3 py-1.5 text-sm "
+                        type="button"
+                      >
+                        鏌ョ湅
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
     </body>
 
-      34 |     );
-      35 |
-    > 36 |     expect(screen.getByText('+15% 娲昏穬鐜?)).toBeInTheDocument();
+      93 |     render(<OrderList userId={mockUserId} />);
+      94 |
+    > 95 |     await waitFor(() => {
+         |                  ^
+      96 |       expect(screen.getByText('鎼滅储璁㈠崟鍙锋垨鎻忚堪')).toBeInTheDocument();
+      97 |     });
+      98 |
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/components/order/OrderList.test.tsx:95:18)
+
+  鈼?OrderList 鈥?should display orders after loading
+
+    TestingLibraryElementError: Found multiple elements with the text: 宸叉敮浠?
+    Here are the matching elements:
+
+    Ignored nodes: comments, script, style
+    <option
+      value="PAID"
+    >
+      宸叉敮浠?[0m
+    </option>
+
+    Ignored nodes: comments, script, style
+    <span
+      class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 "
+    >
+      宸叉敮浠?[0m
+    </span>
+
+    (If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="space-y-4"
+        >
+          <div
+            class="rounded-lg border bg-white shadow-sm "
+          >
+            <div
+              class="flex flex-wrap gap-3 p-4"
+            >
+              <div
+                class="relative flex-1 min-w-[200px]"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-search absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21 21-4.34-4.34"
+                  />
+                  <circle
+                    cx="11"
+                    cy="11"
+                    r="8"
+                  />
+                </svg>
+                <input
+                  class="w-full rounded-md border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="鎼滅储璁㈠崟鍙锋垨鎻忚堪"
+                  type="text"
+                  value=""
+                />
+              </div>
+              <select
+                class="rounded-md border border-gray-300 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option
+                  value=""
+                >
+                  鍏ㄩ儴鐘舵€?[0m
+                </option>
+                <option
+                  value="PENDING"
+                >
+                  寰呮敮浠?[0m
+                </option>
+                <option
+                  value="PROCESSING"
+                >
+                  澶勭悊涓?[0m
+                </option>
+                <option
+                  value="PAID"
+                >
+                  宸叉敮浠?[0m
+                </option>
+                <option
+                  value="FAILED"
+                >
+                  鏀粯澶辫触
+                </option>
+                <option
+                  value="CANCELLED"
+                >
+                  宸插彇娑?[0m
+                </option>
+                <option
+                  value="REFUNDED"
+                >
+                  宸查€€娆?[0m
+                </option>
+                <option
+                  value="EXPIRED"
+                >
+                  宸茶繃鏈?[0m
+                </option>
+              </select>
+              <div
+                class="flex items-center gap-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-arrow-up-down h-4 w-4 text-gray-400"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21 16-4 4-4-4"
+                  />
+                  <path
+                    d="M17 20V4"
+                  />
+                  <path
+                    d="m3 8 4-4 4 4"
+                  />
+                  <path
+                    d="M7 4v16"
+                  />
+                </svg>
+                <select
+                  class="rounded-md border border-gray-300 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option
+                    value="createdAt"
+                  >
+                    鍒涘缓鏃堕棿
+                  </option>
+                  <option
+                    value="updatedAt"
+                  >
+                    鏇存柊鏃堕棿
+                  </option>
+                  <option
+                    value="amount"
+                  >
+                    閲戦
+                  </option>
+                  <option
+                    value="paidAt"
+                  >
+                    鏀粯鏃堕棿
+                  </option>
+                </select>
+              </div>
+              <button
+                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
+                type="button"
+              >
+                鍒锋柊
+              </button>
+            </div>
+          </div>
+          <div
+            class="rounded-lg border bg-white shadow-sm "
+          >
+            <div
+              class="overflow-x-auto"
+            >
+              <table
+                class="w-full min-w-[600px]"
+              >
+                <thead>
+                  <tr
+                    class="border-b border-gray-200 bg-gray-50 text-left text-xs uppercase tracking-wider text-gray-500"
+                  >
+                    <th
+                      class="px-4 py-3"
+                    >
+                      璁㈠崟鍙?[0m
+                    </th>
+                    <th
+                      class="px-4 py-3"
+                    >
+                      鍒涘缓鏃堕棿
+                    </th>
+                    <th
+                      class="px-4 py-3"
+                    >
+                      閲戦
+                    </th>
+                    <th
+                      class="px-4 py-3"
+                    >
+                      鏀粯鏂瑰紡
+                    </th>
+                    <th
+                      class="px-4 py-3"
+                    >
+                      鐘舵€?[0m
+                    </th>
+                    <th
+                      class="px-4 py-3 text-right"
+                    >
+                      鎿嶄綔
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  class="divide-y divide-gray-200"
+                >
+                  <tr
+                    class="cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <td
+                      class="px-4 py-3"
+                    >
+                      <div
+                        class="font-mono text-sm text-gray-900"
+                      >
+                        ORD202401010001
+                      </div>
+                      <div
+                        class="mt-1 text-xs text-gray-500"
+                      >
+                        浼氬憳鍗囩骇
+                      </div>
+                    </td>
+                    <td
+                      class="px-4 py-3 text-sm text-gray-600"
+                    >
+                      2024/01/01 18:00
+                    </td>
+                    <td
+                      class="px-4 py-3 text-sm font-semibold text-gray-900"
+                    >
+                      楼99.99
+                    </td>
+                    <td
+                      class="px-4 py-3 text-sm text-gray-600"
+                    >
+                      寰俊鏀粯
+                    </td>
+                    <td
+                      class="px-4 py-3"
+                    >
+                      <span
+                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 "
+                      >
+                        宸叉敮浠?[0m
+                      </span>
+                    </td>
+                    <td
+                      class="px-4 py-3 text-right"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-3 py-1.5 text-sm "
+                        type="button"
+                      >
+                        鏌ョ湅
+                      </button>
+                    </td>
+                  </tr>
+                  <tr
+                    class="cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <td
+                      class="px-4 py-3"
+                    >
+                      <div
+                        class="font-mono text-sm text-gray-900"
+                      >
+                        ORD202401010002
+                      </div>
+                      <div
+                        class="mt-1 text-xs text-gray-500"
+                      >
+                        浼氬憳鍗囩骇
+                      </div>
+                    </td>
+                    <td
+                      class="px-4 py-3 text-sm text-gray-600"
+                    >
+                      2024/01/02 18:00
+                    </td>
+                    <td
+                      class="px-4 py-3 text-sm font-semibold text-gray-900"
+                    >
+                      楼199.99
+                    </td>
+                    <td
+                      class="px-4 py-3 text-sm text-gray-600"
+                    >
+                      鏀粯瀹?[0m
+                    </td>
+                    <td
+                      class="px-4 py-3"
+                    >
+                      <span
+                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 "
+                      >
+                        寰呮敮浠?[0m
+                      </span>
+                    </td>
+                    <td
+                      class="px-4 py-3 text-right"
+                    >
+                      <button
+                        class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-3 py-1.5 text-sm "
+                        type="button"
+                      >
+                        鏌ョ湅
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      111 |     });
+      112 |
+    > 113 |     expect(screen.getByText('宸叉敮浠?)).toBeInTheDocument();
+          |                   ^
+      114 |     expect(screen.getByText('寰呮敮浠?)).toBeInTheDocument();
+      115 |   });
+      116 |
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at getElementError (node_modules/@testing-library/dom/dist/query-helpers.js:20:35)
+      at getMultipleElementsFoundError (node_modules/@testing-library/dom/dist/query-helpers.js:23:10)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/components/order/OrderList.test.tsx:113:19)
+
+  鈼?OrderList 鈥?should filter orders by status
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: StringContaining "status=PAID", Any<Object>
+    Received
+           1: "/api/orders?page=1&limit=10&sortBy=createdAt&sortOrder=desc"
+           2: "/api/orders?status=PAID&page=1&limit=10&sortBy=createdAt&sortOrder=desc"
+
+    Number of calls: 2
+
+    Ignored nodes: comments, script, style
+    <html>
+      <head />
+      <body>
+        <div>
+          <div
+            class="space-y-4"
+          >
+            <div
+              class="rounded-lg border bg-white shadow-sm "
+            >
+              <div
+                class="flex flex-wrap gap-3 p-4"
+              >
+                <div
+                  class="relative flex-1 min-w-[200px]"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-search absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="m21 21-4.34-4.34"
+                    />
+                    <circle
+                      cx="11"
+                      cy="11"
+                      r="8"
+                    />
+                  </svg>
+                  <input
+                    class="w-full rounded-md border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    placeholder="鎼滅储璁㈠崟鍙锋垨鎻忚堪"
+                    type="text"
+                    value=""
+                  />
+                </div>
+                <select
+                  class="rounded-md border border-gray-300 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option
+                    value=""
+                  >
+                    鍏ㄩ儴鐘舵€?[0m
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    寰呮敮浠?[0m
+                  </option>
+                  <option
+                    value="PROCESSING"
+                  >
+                    澶勭悊涓?[0m
+                  </option>
+                  <option
+                    value="PAID"
+                  >
+                    宸叉敮浠?[0m
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    鏀粯澶辫触
+                  </option>
+                  <option
+                    value="CANCELLED"
+                  >
+                    宸插彇娑?[0m
+                  </option>
+                  <option
+                    value="REFUNDED"
+                  >
+                    宸查€€娆?[0m
+                  </option>
+                  <option
+                    value="EXPIRED"
+                  >
+                    宸茶繃鏈?[0m
+                  </option>
+                </select>
+                <div
+                  class="flex items-center gap-2"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-arrow-up-down h-4 w-4 text-gray-400"
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="m21 16-4 4-4-4"
+                    />
+                    <path
+                      d="M17 20V4"
+                    />
+                    <path
+                      d="m3 8 4-4 4 4"
+                    />
+                    <path
+                      d="M7 4v16"
+                    />
+                  </svg>
+                  <select
+                    class="rounded-md border border-gray-300 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option
+                      value="createdAt"
+                    >
+                      鍒涘缓鏃堕棿
+                    </option>
+                    <option
+                      value="updatedAt"
+                    >
+                      鏇存柊鏃堕棿
+                    </option>
+                    <option
+                      value="amount"
+                    >
+                      閲戦
+                    </option>
+                    <option
+                      value="paidAt"
+                    >
+                      鏀粯鏃堕棿
+                    </option>
+                  </select>
+                </div>
+                <button
+                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
+                  type="button"
+                >
+                  鍒锋柊
+                </button>
+              </div>
+            </div>
+            <div
+              class="rounded-lg border bg-white shadow-sm "
+            >
+              <div
+                class="overflow-x-auto"
+              >
+                <table
+                  class="w-full min-w-[600px]"
+                >
+                  <thead>
+                    <tr
+                      class="border-b border-gray-200 bg-gray-50 text-left text-xs uppercase tracking-wider text-gray-500"
+                    >
+                      <th
+                        class="px-4 py-3"
+                      >
+                        璁㈠崟鍙?[0m
+                      </th>
+                      <th
+                        class="px-4 py-3"
+                      >
+                        鍒涘缓鏃堕棿
+                      </th>
+                      <th
+                        class="px-4 py-3"
+                      >
+                        閲戦
+                      </th>
+                      <th
+                        class="px-4 py-3"
+                      >
+                        鏀粯鏂瑰紡
+                      </th>
+                      <th
+                        class="px-4 py-3"
+                      >
+                        鐘舵€?[0m
+                      </th>
+                      <th
+                        class="px-4 py-3 text-right"
+                      >
+                        鎿嶄綔
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    class="divide-y divide-gray-200"
+                  >
+                    <tr
+                      class="cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <td
+                        class="px-4 py-3"
+                      >
+                        <div
+                          class="font-mono text-sm text-gray-900"
+                        >
+                          ORD202401010001
+                        </div>
+                        <div
+                          class="mt-1 text-xs text-gray-500"
+                        >
+                          浼氬憳鍗囩骇
+                        </div>
+                      </td>
+                      <td
+                        class="px-4 py-3 text-sm text-gray-600"
+                      >
+                        2024/01/01 18:00
+                      </td>
+                      <td
+                        class="px-4 py-3 text-sm font-semibold text-gray-900"
+                      >
+                        楼99.99
+                      </td>
+                      <td
+                        class="px-4 py-3 text-sm text-gray-600"
+                      >
+                        寰俊鏀粯
+                      </td>
+                      <td
+                        class="px-4 py-3"
+                      >
+                        <span
+                          class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 "
+                        >
+                          宸叉敮浠?[0m
+                        </span>
+                      </td>
+                      <td
+                        class="px-4 py-3 text-right"
+                      >
+                        <button
+                          class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-3 py-1.5 text-sm "
+                          type="button"
+                        >
+                          鏌ョ湅
+                        </button>
+                      </td>
+                    </tr>
+                    <tr
+                      class="cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <td
+                        class="px-4 py-3"
+                      >
+                        <div
+                          class="font-mono text-sm text-gray-900"
+                        >
+                          ORD202401010002
+                        </div>
+                        <div
+                          class="mt-1 text-xs text-gray-500"
+                        >
+                          浼氬憳鍗囩骇
+                        </div>
+                      </td>
+                      <td
+                        class="px-4 py-3 text-sm text-gray-600"
+                      >
+                        2024/01/02 18:00
+                      </td>
+                      <td
+                        class="px-4 py-3 text-sm font-semibold text-gray-900"
+                      >
+                        楼199.99
+                      </td>
+                      <td
+                        class="px-4 py-3 text-sm text-gray-600"
+                      >
+                        鏀粯瀹?[0m
+                      </td>
+                      <td
+                        class="px-4 py-3"
+                      >
+                        <span
+                          class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 "
+                        >
+                          寰呮敮浠?[0m
+                        </span>
+                      </td>
+                      <td
+                        class="px-4 py-3 text-right"
+                      >
+                        <button
+                          class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-3 py-1.5 text-sm "
+                          type="button"
+                        >
+                          鏌ョ湅
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+
+      167 |
+      168 |       await waitFor(() => {
+    > 169 |         expect(mockFetch).toHaveBeenCalledWith(
+          |                           ^
+      170 |           expect.stringContaining('status=PAID'),
+      171 |           expect.any(Object)
+      172 |         );
+
+      at src/__tests__/components/order/OrderList.test.tsx:169:27
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at checkRealTimersCallback (node_modules/@testing-library/dom/dist/wait-for.js:118:16)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:579:19)
+
+  鈼?OrderList 鈥?should sort orders by different fields
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: StringContaining "sortBy=amount", Any<Object>
+    Received
+           1: "/api/orders?page=1&limit=10&sortBy=createdAt&sortOrder=desc"
+           2: "/api/orders?page=1&limit=10&sortBy=amount&sortOrder=desc"
+
+    Number of calls: 2
+
+    Ignored nodes: comments, script, style
+    <html>
+      <head />
+      <body>
+        <div>
+          <div
+            class="space-y-4"
+          >
+            <div
+              class="rounded-lg border bg-white shadow-sm "
+            >
+              <div
+                class="flex flex-wrap gap-3 p-4"
+              >
+                <div
+                  class="relative flex-1 min-w-[200px]"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-search absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="m21 21-4.34-4.34"
+                    />
+                    <circle
+                      cx="11"
+                      cy="11"
+                      r="8"
+                    />
+                  </svg>
+                  <input
+                    class="w-full rounded-md border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    placeholder="鎼滅储璁㈠崟鍙锋垨鎻忚堪"
+                    type="text"
+                    value=""
+                  />
+                </div>
+                <select
+                  class="rounded-md border border-gray-300 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option
+                    value=""
+                  >
+                    鍏ㄩ儴鐘舵€?[0m
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    寰呮敮浠?[0m
+                  </option>
+                  <option
+                    value="PROCESSING"
+                  >
+                    澶勭悊涓?[0m
+                  </option>
+                  <option
+                    value="PAID"
+                  >
+                    宸叉敮浠?[0m
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    鏀粯澶辫触
+                  </option>
+                  <option
+                    value="CANCELLED"
+                  >
+                    宸插彇娑?[0m
+                  </option>
+                  <option
+                    value="REFUNDED"
+                  >
+                    宸查€€娆?[0m
+                  </option>
+                  <option
+                    value="EXPIRED"
+                  >
+                    宸茶繃鏈?[0m
+                  </option>
+                </select>
+                <div
+                  class="flex items-center gap-2"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-arrow-up-down h-4 w-4 text-gray-400"
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="m21 16-4 4-4-4"
+                    />
+                    <path
+                      d="M17 20V4"
+                    />
+                    <path
+                      d="m3 8 4-4 4 4"
+                    />
+                    <path
+                      d="M7 4v16"
+                    />
+                  </svg>
+                  <select
+                    class="rounded-md border border-gray-300 py-2 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option
+                      value="createdAt"
+                    >
+                      鍒涘缓鏃堕棿
+                    </option>
+                    <option
+                      value="updatedAt"
+                    >
+                      鏇存柊鏃堕棿
+                    </option>
+                    <option
+                      value="amount"
+                    >
+                      閲戦
+                    </option>
+                    <option
+                      value="paidAt"
+                    >
+                      鏀粯鏃堕棿
+                    </option>
+                  </select>
+                </div>
+                <button
+                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
+                  type="button"
+                >
+                  鍒锋柊
+                </button>
+              </div>
+            </div>
+            <div
+              class="rounded-lg border bg-white shadow-sm "
+            >
+              <div
+                class="overflow-x-auto"
+              >
+                <table
+                  class="w-full min-w-[600px]"
+                >
+                  <thead>
+                    <tr
+                      class="border-b border-gray-200 bg-gray-50 text-left text-xs uppercase tracking-wider text-gray-500"
+                    >
+                      <th
+                        class="px-4 py-3"
+                      >
+                        璁㈠崟鍙?[0m
+                      </th>
+                      <th
+                        class="px-4 py-3"
+                      >
+                        鍒涘缓鏃堕棿
+                      </th>
+                      <th
+                        class="px-4 py-3"
+                      >
+                        閲戦
+                      </th>
+                      <th
+                        class="px-4 py-3"
+                      >
+                        鏀粯鏂瑰紡
+                      </th>
+                      <th
+                        class="px-4 py-3"
+                      >
+                        鐘舵€?[0m
+                      </th>
+                      <th
+                        class="px-4 py-3 text-right"
+                      >
+                        鎿嶄綔
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    class="divide-y divide-gray-200"
+                  >
+                    <tr
+                      class="cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <td
+                        class="px-4 py-3"
+                      >
+                        <div
+                          class="font-mono text-sm text-gray-900"
+                        >
+                          ORD202401010001
+                        </div>
+                        <div
+                          class="mt-1 text-xs text-gray-500"
+                        >
+                          浼氬憳鍗囩骇
+                        </div>
+                      </td>
+                      <td
+                        class="px-4 py-3 text-sm text-gray-600"
+                      >
+                        2024/01/01 18:00
+                      </td>
+                      <td
+                        class="px-4 py-3 text-sm font-semibold text-gray-900"
+                      >
+                        楼99.99
+                      </td>
+                      <td
+                        class="px-4 py-3 text-sm text-gray-600"
+                      >
+                        寰俊鏀粯
+                      </td>
+                      <td
+                        class="px-4 py-3"
+                      >
+                        <span
+                          class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 "
+                        >
+                          宸叉敮浠?[0m
+                        </span>
+                      </td>
+                      <td
+                        class="px-4 py-3 text-right"
+                      >
+                        <button
+                          class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-3 py-1.5 text-sm "
+                          type="button"
+                        >
+                          鏌ョ湅
+                        </button>
+                      </td>
+                    </tr>
+                    <tr
+                      class="cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <td
+                        class="px-4 py-3"
+                      >
+                        <div
+                          class="font-mono text-sm text-gray-900"
+                        >
+                          ORD202401010002
+                        </div>
+                        <div
+                          class="mt-1 text-xs text-gray-500"
+                        >
+                          浼氬憳鍗囩骇
+                        </div>
+                      </td>
+                      <td
+                        class="px-4 py-3 text-sm text-gray-600"
+                      >
+                        2024/01/02 18:00
+                      </td>
+                      <td
+                        class="px-4 py-3 text-sm font-semibold text-gray-900"
+                      >
+                        楼199.99
+                      </td>
+                      <td
+                        class="px-4 py-3 text-sm text-gray-600"
+                      >
+                        鏀粯瀹?[0m
+                      </td>
+                      <td
+                        class="px-4 py-3"
+                      >
+                        <span
+                          class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 "
+                        >
+                          寰呮敮浠?[0m
+                        </span>
+                      </td>
+                      <td
+                        class="px-4 py-3 text-right"
+                      >
+                        <button
+                          class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-3 py-1.5 text-sm "
+                          type="button"
+                        >
+                          鏌ョ湅
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+
+      208 |
+      209 |       await waitFor(() => {
+    > 210 |         expect(mockFetch).toHaveBeenCalledWith(
+          |                           ^
+      211 |           expect.stringContaining('sortBy=amount'),
+      212 |           expect.any(Object)
+      213 |         );
+
+      at src/__tests__/components/order/OrderList.test.tsx:210:27
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at checkRealTimersCallback (node_modules/@testing-library/dom/dist/wait-for.js:118:16)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:579:19)
+
+FAIL src/__tests__/components/order/OrderDetailModal.test.tsx
+  OrderDetailModal
+    鈭?should render modal with order details (25 ms)
+    脳 should display order status badge (18 ms)
+    鈭?should display payment status for different order statuses (18 ms)
+    鈭?should display payment method correctly (12 ms)
+    鈭?should display Alipay payment method (12 ms)
+    鈭?should display Balance payment method (12 ms)
+    鈭?should display membership tier information (15 ms)
+    鈭?should display metadata information (17 ms)
+    鈭?should display metadata with autoRenew true (14 ms)
+    鈭?should display order description (12 ms)
+    鈭?should display dates correctly (12 ms)
+    鈭?should display paid date when order is paid (11 ms)
+    鈭?should call onClose when close button is clicked (35 ms)
+    鈭?should call onClose when close button at bottom is clicked (18 ms)
+    鈭?should call window.location.reload when refresh button is clicked (18 ms)
+    鈭?should show cancel button for pending order (22 ms)
+    鈭?should not show cancel button for paid order (16 ms)
+    鈭?should cancel order when confirm is accepted (34 ms)
+    鈭?should not cancel order when confirm is declined (23 ms)
+    鈭?should display error when cancel fails (45 ms)
+    鈭?should show failed reason when order failed (14 ms)
+    鈭?should display status description for pending order (12 ms)
+    鈭?should display status description for paid order (14 ms)
+    鈭?should display payment records when available (15 ms)
+    鈭?should not display payment records section when empty (13 ms)
+    鈭?should close modal when clicking backdrop (16 ms)
+    鈭?should handle cancel button disabled state while cancelling (38 ms)
+    鈭?should format amount correctly (11 ms)
+    鈭?should display different billing cycles (10 ms)
+    鈭?should display yearly billing cycle (13 ms)
+    鈭?should display lifetime billing cycle (10 ms)
+
+  鈼?OrderDetailModal 鈥?should display order status badge
+
+    TestingLibraryElementError: Found multiple elements with the text: 寰呮敮浠?
+    Here are the matching elements:
+
+    Ignored nodes: comments, script, style
+    <span
+      class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 text-sm"
+    >
+      寰呮敮浠?[0m
+    </span>
+
+    Ignored nodes: comments, script, style
+    <span
+      class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 "
+    >
+      寰呮敮浠?[0m
+    </span>
+
+    (If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          aria-labelledby="modal-title"
+          aria-modal="true"
+          class="fixed inset-0 z-50 overflow-y-auto"
+          role="dialog"
+        >
+          <div
+            class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity"
+          />
+          <div
+            class="flex min-h-screen items-center justify-center p-4"
+          >
+            <div
+              class="relative z-10 mx-auto w-full max-w-2xl bg-white rounded-lg shadow-xl"
+            >
+              <div
+                class="flex items-center justify-between border-b border-gray-200 p-4"
+              >
+                <h3
+                  class="text-xl font-semibold text-gray-900"
+                  id="modal-title"
+                >
+                  璁㈠崟璇︽儏
+                </h3>
+                <button
+                  class="rounded-md p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-500"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-x h-5 w-5"
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M18 6 6 18"
+                    />
+                    <path
+                      d="m6 6 12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div
+                class="max-h-[70vh] overflow-y-auto p-4"
+              >
+                <div
+                  class="mb-4 rounded-lg border border-gray-200 p-4"
+                >
+                  <div
+                    class="flex items-center justify-between mb-4"
+                  >
+                    <div
+                      class="flex items-center gap-3"
+                    >
+                      <span
+                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 text-sm"
+                      >
+                        寰呮敮浠?[0m
+                      </span>
+                      <span
+                        class="text-sm text-gray-600"
+                      >
+                        璁㈠崟寰呮敮浠橈紝璇峰湪杩囨湡鏃堕棿鍐呭畬鎴愭敮浠?[0m
+                      </span>
+                    </div>
+                    <button
+                      class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-3 py-1.5 text-sm "
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="lucide lucide-refresh-cw mr-2 h-4 w-4"
+                        fill="none"
+                        height="24"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+                        />
+                        <path
+                          d="M21 3v5h-5"
+                        />
+                        <path
+                          d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+                        />
+                        <path
+                          d="M8 16H3v5"
+                        />
+                      </svg>
+                      鍒锋柊
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="mb-4 space-y-3"
+                >
+                  <h4
+                    class="font-semibold text-gray-900"
+                  >
+                    鍩烘湰淇℃伅
+                  </h4>
+                  <div
+                    class="grid gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 sm:grid-cols-2"
+                  >
+                    <div>
+                      <div
+                        class="text-xs uppercase tracking-wider text-gray-500"
+                      >
+                        璁㈠崟鍙?[0m
+                      </div>
+                      <div
+                        class="mt-1 font-mono text-sm font-medium text-gray-900"
+                      >
+                        ORD202401010001
+                      </div>
+                    </div>
+                    <div>
+                      <div
+                        class="text-xs uppercase tracking-wider text-gray-500"
+                      >
+                        鍒涘缓鏃堕棿
+                      </div>
+                      <div
+                        class="mt-1 text-sm font-medium text-gray-900"
+                      >
+                        2024/01/01 18:00
+                      </div>
+                    </div>
+                    <div>
+                      <div
+                        class="text-xs uppercase tracking-wider text-gray-500"
+                      >
+                        鏀粯鏃堕棿
+                      </div...
+
+      80 |     );
+      81 |
+    > 82 |     expect(screen.getByText('寰呮敮浠?)).toBeInTheDocument();
          |                   ^
-      37 |   });
-      38 |
-      39 |   it('褰搕rend鏈畾涔夋椂涓嶆樉绀鸿秼鍔?, () => {
+      83 |   });
+      84 |
+      85 |   it('should display payment status for different order statuses', () => {
 
       at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
-      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
-      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at getElementError (node_modules/@testing-library/dom/dist/query-helpers.js:20:35)
+      at getMultipleElementsFoundError (node_modules/@testing-library/dom/dist/query-helpers.js:23:10)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:55:13
       at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
-      at Object.<anonymous> (src/__tests__/unit/stats/UserStatsCards.test.tsx:36:19)
+      at Object.<anonymous> (src/__tests__/components/order/OrderDetailModal.test.tsx:82:19)
 
-  鈼?StatsSummary 鈥?搴旇鏄剧ず鏂板鐢ㄦ埛鍜屽闀跨巼
-
-    TestingLibraryElementError: Unable to find an element with the text: +10% 澧為暱鐜? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
-
-    Ignored nodes: comments, script, style
-    <body>
-      <div>
-        <div
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                鎬荤敤鎴锋暟
-              </h3>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                1,000
-                 
-                浜?[0m
-              </div>
-            </div>
-          </div>
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                鏂板鐢ㄦ埛
-              </h3>
-              <span
-                class="text-xs font-medium text-green-600"
-              >
-                +
-                10.0
-                % 
-                澧為暱鐜?[0m
-              </span>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                100
-                 
-              </div>
-            </div>
-          </div>
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                鏃ュ潎鏂板
-              </h3>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                3
-                 
-                浜?[0m
-              </div>
-            </div>
-          </div>
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                骞冲潎鐧诲綍棰戠巼
-              </h3>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                0
-                 
-                娆?鍛?[0m
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </body>
-
-      78 |
-      79 |     expect(screen.getByText('100')).toBeInTheDocument();
-    > 80 |     expect(screen.getByText('+10% 澧為暱鐜?)).toBeInTheDocument();
-         |                   ^
-      81 |   });
-      82 |
-      83 |   it('搴旇鏄剧ず鏃ュ潎鏂板鐢ㄦ埛', () => {
-
-      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
-      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
-      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
-      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
-      at Object.<anonymous> (src/__tests__/unit/stats/UserStatsCards.test.tsx:80:19)
-
-  鈼?StatsSummary 鈥?褰撴彁渚沘ctiveUsers鍜宎ctiveRate鏃舵樉绀烘椿璺冪敤鎴?
-    TestingLibraryElementError: Unable to find an element with the text: +50% 娲昏穬鐜? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
-
-    Ignored nodes: comments, script, style
-    <body>
-      <div>
-        <div
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                鎬荤敤鎴锋暟
-              </h3>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                1,000
-                 
-                浜?[0m
-              </div>
-            </div>
-          </div>
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                鏂板鐢ㄦ埛
-              </h3>
-              <span
-                class="text-xs font-medium text-green-600"
-              >
-                +
-                10.0
-                % 
-                澧為暱鐜?[0m
-              </span>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                100
-                 
-              </div>
-            </div>
-          </div>
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                鏃ュ潎鏂板
-              </h3>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                3
-                 
-                浜?[0m
-              </div>
-            </div>
-          </div>
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                娲昏穬鐢ㄦ埛
-              </h3>
-              <span
-                class="text-xs font-medium text-green-600"
-              >
-                +
-                50.0
-                % 
-                娲昏穬鐜?[0m
-              </span>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                500
-                 
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </body>
-
-      100 |     expect(screen.getByText('娲昏穬鐢ㄦ埛')).toBeInTheDocument();
-      101 |     expect(screen.getByText('500')).toBeInTheDocument();
-    > 102 |     expect(screen.getByText('+50% 娲昏穬鐜?)).toBeInTheDocument();
-          |                   ^
-      103 |   });
-      104 |
-      105 |   it('褰撴彁渚沘ctiveUsers鏃朵笉鏄剧ず骞冲潎鐧诲綍棰戠巼', () => {
-
-      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
-      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
-      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
-      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
-      at Object.<anonymous> (src/__tests__/unit/stats/UserStatsCards.test.tsx:102:19)
-
-  鈼?StatsSummary 鈥?搴旇姝ｇ‘澶勭悊璐熷闀跨巼
-
-    TestingLibraryElementError: Unable to find an element with the text: -5% 澧為暱鐜? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
-
-    Ignored nodes: comments, script, style
-    <body>
-      <div>
-        <div
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                鎬荤敤鎴锋暟
-              </h3>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                1,000
-                 
-                浜?[0m
-              </div>
-            </div>
-          </div>
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                鏂板鐢ㄦ埛
-              </h3>
-              <span
-                class="text-xs font-medium text-red-600"
-              >
-                -5.0
-                % 
-                澧為暱鐜?[0m
-              </span>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                100
-                 
-              </div>
-            </div>
-          </div>
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                鏃ュ潎鏂板
-              </h3>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                3
-                 
-                浜?[0m
-              </div>
-            </div>
-          </div>
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                骞冲潎鐧诲綍棰戠巼
-              </h3>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                0
-                 
-                娆?鍛?[0m
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </body>
-
-      132 |     render(<StatsSummary {...defaultProps} growthRate={-5} />);
-      133 |
-    > 134 |     expect(screen.getByText('-5% 澧為暱鐜?)).toBeInTheDocument();
-          |                   ^
-      135 |   });
-      136 |
-      137 |   it('搴旇姝ｇ‘澶勭悊闆跺闀跨巼', () => {
-
-      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
-      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
-      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
-      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
-      at Object.<anonymous> (src/__tests__/unit/stats/UserStatsCards.test.tsx:134:19)
-
-  鈼?StatsSummary 鈥?搴旇姝ｇ‘澶勭悊闆跺闀跨巼
-
-    TestingLibraryElementError: Unable to find an element with the text: +0% 澧為暱鐜? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
-
-    Ignored nodes: comments, script, style
-    <body>
-      <div>
-        <div
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                鎬荤敤鎴锋暟
-              </h3>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                1,000
-                 
-                浜?[0m
-              </div>
-            </div>
-          </div>
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                鏂板鐢ㄦ埛
-              </h3>
-              <span
-                class="text-xs font-medium text-green-600"
-              >
-                0.0
-                % 
-                澧為暱鐜?[0m
-              </span>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                100
-                 
-              </div>
-            </div>
-          </div>
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                鏃ュ潎鏂板
-              </h3>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                3
-                 
-                浜?[0m
-              </div>
-            </div>
-          </div>
-          <div
-            class="bg-white rounded-lg shadow p-6"
-          >
-            <div
-              class="flex items-center justify-between"
-            >
-              <h3
-                class="text-sm font-medium text-gray-500"
-              >
-                骞冲潎鐧诲綍棰戠巼
-              </h3>
-            </div>
-            <div
-              class="mt-2"
-            >
-              <div
-                class="text-3xl font-bold text-gray-900"
-              >
-                0
-                 
-                娆?鍛?[0m
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </body>
-
-      138 |     render(<StatsSummary {...defaultProps} growthRate={0} />);
-      139 |
-    > 140 |     expect(screen.getByText('+0% 澧為暱鐜?)).toBeInTheDocument();
-          |                   ^
-      141 |   });
-      142 |
-      143 |   it('搴旇姝ｇ‘鏍煎紡鍖栧ぇ鏁板€?, () => {
-
-      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
-      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
-      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
-      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
-      at Object.<anonymous> (src/__tests__/unit/stats/UserStatsCards.test.tsx:140:19)
-
-Test Suites: 1 failed, 1 total
-Tests:       5 failed, 13 passed, 18 total
+Test Suites: 2 failed, 2 total
+Tests:       5 failed, 43 passed, 48 total
 Snapshots:   0 total
-Time:        1.659 s
-Ran all test suites matching src/__tests__/unit/stats/UserStatsCards.test.tsx.
+Time:        6.074 s
+Ran all test suites matching src/__tests__/components/order/.

@@ -1,175 +1,432 @@
 /**
- * 系统配置相关类型定义
+ * 配置类型定义
+ * 用于类型安全的配置管理
  */
-
-// =============================================================================
-// 配置类型枚举
-// =============================================================================
 
 /**
- * 配置类型枚举
+ * 环境类型
  */
-export const CONFIG_TYPES = [
-  'STRING',
-  'NUMBER',
-  'BOOLEAN',
-  'ARRAY',
-  'OBJECT',
-] as const;
-export type ConfigType = (typeof CONFIG_TYPES)[number];
-
-/**
- * 配置分类枚举
- */
-export const CONFIG_CATEGORIES = [
-  'general', // 通用配置
-  'ai', // AI服务配置
-  'storage', // 存储配置
-  'security', // 安全配置
-  'feature', // 功能配置
-  'ui', // UI配置
-  'notification', // 通知配置
-  'other', // 其他配置
-] as const;
-export type ConfigCategory = (typeof CONFIG_CATEGORIES)[number];
-
-// =============================================================================
-// 系统配置接口
-// =============================================================================
-
-/**
- * 系统配置项
- */
-export interface SystemConfig {
-  id: string;
-  key: string;
-  value: unknown;
-  type: ConfigType;
-  category: string;
-  description: string | null;
-  isPublic: boolean;
-  isRequired: boolean;
-  defaultValue: unknown | null;
-  validationRules: unknown | null;
-  createdAt: Date;
-  updatedAt: Date;
+export enum Environment {
+  DEVELOPMENT = 'development',
+  TEST = 'test',
+  PRODUCTION = 'production',
 }
 
 /**
- * 配置查询参数
+ * 日志级别
  */
-export interface ConfigQueryParams {
-  page?: string;
-  limit?: string;
-  category?: string;
-  type?: string;
-  isPublic?: string;
-  search?: string;
+export enum LogLevel {
+  ERROR = 'error',
+  WARN = 'warn',
+  INFO = 'info',
+  DEBUG = 'debug',
 }
 
 /**
- * 配置列表响应数据
+ * 数据库配置
  */
-export interface ConfigResponse {
-  configs: SystemConfig[];
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
+export interface DatabaseConfig {
+  url: string;
+  poolMin: number;
+  poolMax: number;
+  idleTimeout: number;
+  connectTimeout: number;
+}
+
+/**
+ * Redis配置
+ */
+export interface RedisConfig {
+  url: string;
+  maxRetries: number;
+  connectTimeout: number;
+  idleTimeout: number;
+  maxRetriesPerRequest: number;
+  enableOfflineQueue: boolean;
+  persistenceMode?: 'aof' | 'rdb' | 'off';
+  aofFsyncEverySec?: number;
+}
+
+/**
+ * 缓存配置
+ */
+export interface CacheConfig {
+  defaultTTL: number;
+  sessionTTL: number;
+  configTTL: number;
+  keyPrefix: string;
+  maxSize?: number;
+  updateAgeOnGet?: boolean;
+}
+
+/**
+ * 认证配置
+ */
+export interface AuthConfig {
+  jwtSecret: string;
+  jwtExpiresIn: string;
+  bcryptSaltRounds: number;
+}
+
+/**
+ * AI服务配置
+ */
+export interface AIServiceConfig {
+  useRealAI: boolean;
+  zhipu?: {
+    apiKey: string;
+    baseUrl: string;
+    model: string;
+    maxTokens: number;
+    rateLimit: number;
+  };
+  deepseek?: {
+    apiKey: string;
+    baseUrl: string;
+    model: string;
+    maxTokens: number;
+    rateLimit: number;
+  };
+  openai?: {
+    apiKey: string;
+    baseUrl: string;
+    model: string;
+    maxTokens: number;
+    rateLimit: number;
+  };
+  anthropic?: {
+    apiKey: string;
+    baseUrl: string;
+    model: string;
+    maxTokens: number;
+    rateLimit: number;
+  };
+  timeout: number;
+  retryCount: number;
+  retryDelay: number;
+}
+
+/**
+ * 法律之星API配置
+ */
+export interface LawstarConfig {
+  regulation: {
+    baseUrl: string;
+    appId: string;
+    appSecret: string;
+    rateLimit: number;
+  };
+  vector: {
+    baseUrl: string;
+    appId: string;
+    appSecret: string;
+    rateLimit: number;
   };
 }
 
 /**
- * 创建配置请求
+ * 微信支付配置
  */
-export interface CreateConfigRequest {
-  key: string;
-  value: unknown;
-  type: ConfigType;
-  category: ConfigCategory;
-  description?: string;
-  isPublic?: boolean;
-  isRequired?: boolean;
-  defaultValue?: unknown;
-  validationRules?: unknown;
+export interface WechatPayConfig {
+  appId: string;
+  mchId: string;
+  apiKey: string;
+  apiV3Key: string;
+  serialNo: string;
+  certPath: string;
+  notifyUrl: string;
+  sandbox: boolean;
 }
 
 /**
- * 更新配置请求
+ * 支付宝配置
  */
-export interface UpdateConfigRequest {
-  value?: unknown;
-  description?: string;
-  isPublic?: boolean;
-  isRequired?: boolean;
-  defaultValue?: unknown;
-  validationRules?: unknown;
+export interface AlipayConfig {
+  appId: string;
+  privateKey: string;
+  publicKey: string;
+  notifyUrl: string;
+  sandbox: boolean;
 }
 
 /**
- * 批量更新配置请求
+ * 支付系统配置
  */
-export interface BatchUpdateConfigRequest {
-  configs: Array<{
-    key: string;
-    value: unknown;
-  }>;
-}
-
-// =============================================================================
-// 工具函数
-// =============================================================================
-
-/**
- * 验证配置类型
- */
-export function isValidConfigType(type: string): type is ConfigType {
-  return CONFIG_TYPES.includes(type as ConfigType);
+export interface PaymentConfig {
+  wechat: WechatPayConfig;
+  alipay: AlipayConfig;
+  timeout: number;
+  retryCount: number;
+  successCallbackAttempts: number;
 }
 
 /**
- * 验证配置分类
+ * 会员价格配置
  */
-export function isValidConfigCategory(
-  category: string
-): category is ConfigCategory {
-  return CONFIG_CATEGORIES.includes(category as ConfigCategory);
+export interface MembershipPriceConfig {
+  free: number;
+  basic: number;
+  professional: number;
+  enterprise: number;
 }
 
 /**
- * 根据类型获取配置值的显示格式
+ * 会员折扣配置
  */
-export function formatConfigValue(value: unknown, type: ConfigType): string {
-  switch (type) {
-    case 'BOOLEAN':
-      return value === true ? '是' : value === false ? '否' : String(value);
-    case 'OBJECT':
-    case 'ARRAY':
-      return JSON.stringify(value, null, 2);
-    default:
-      return String(value);
-  }
+export interface MembershipDiscountConfig {
+  quarterly: number;
+  yearly: number;
 }
 
 /**
- * 解析配置值为指定类型
+ * 会员系统配置
  */
-export function parseConfigValue(value: unknown, type: ConfigType): unknown {
-  switch (type) {
-    case 'STRING':
-      return String(value ?? '');
-    case 'NUMBER':
-      return Number(value ?? 0);
-    case 'BOOLEAN':
-      return Boolean(value);
-    case 'ARRAY':
-      return Array.isArray(value) ? value : JSON.parse(String(value ?? '[]'));
-    case 'OBJECT':
-      return typeof value === 'object' && value !== null
-        ? value
-        : JSON.parse(String(value ?? '{}'));
-    default:
-      return value;
-  }
+export interface MembershipConfig {
+  prices: MembershipPriceConfig;
+  discounts: MembershipDiscountConfig;
+  orderExpireHours: number;
+  retryPaymentCount: number;
+}
+
+/**
+ * Next.js配置
+ */
+export interface NextjsConfig {
+  authUrl: string;
+  secret: string;
+  apiUrl: string;
+  appUrl: string;
+  appName: string;
+  appDescription: string;
+}
+
+/**
+ * CORS配置
+ */
+export interface CorsConfig {
+  allowedOrigins: string[];
+  allowedMethods: string[];
+  allowedHeaders: string[];
+  credentials: boolean;
+  maxAge: number;
+}
+
+/**
+ * Rate Limiting配置
+ */
+export interface RateLimitConfig {
+  windowMs: number;
+  maxRequests: number;
+  skipSuccessfulRequests: boolean;
+}
+
+/**
+ * 安全头配置
+ */
+export interface SecurityHeadersConfig {
+  contentSecurityPolicy: string;
+  hstsMaxAge: number;
+  xFrameOptions: string;
+  xContentTypeOptions: string;
+}
+
+/**
+ * 安全配置
+ */
+export interface SecurityConfig {
+  cors: CorsConfig;
+  rateLimit: RateLimitConfig;
+  headers: SecurityHeadersConfig;
+}
+
+/**
+ * Winston日志配置
+ */
+export interface WinstonConfig {
+  level: LogLevel;
+  fileMaxSize: string;
+  fileMaxFiles: string;
+  datePattern: string;
+  format: string;
+  path: string;
+}
+
+/**
+ * Prometheus配置
+ */
+export interface PrometheusConfig {
+  enabled: boolean;
+  port: number;
+  metricsPath: string;
+}
+
+/**
+ * Grafana配置
+ */
+export interface GrafanaConfig {
+  adminPassword: string;
+  adminUser: string;
+  url: string;
+}
+
+/**
+ * Alertmanager配置
+ */
+export interface AlertmanagerConfig {
+  enabled: boolean;
+  url: string;
+}
+
+/**
+ * 告警邮件配置
+ */
+export interface AlertEmailConfig {
+  enabled: boolean;
+  to: string;
+  from: string;
+  smtpHost: string;
+  smtpPort: number;
+  smtpUser: string;
+  smtpPassword: string;
+}
+
+/**
+ * 监控告警配置
+ */
+export interface MonitoringConfig {
+  prometheus: PrometheusConfig;
+  grafana: GrafanaConfig;
+  alertmanager: AlertmanagerConfig;
+  email: AlertEmailConfig;
+}
+
+/**
+ * API性能配置
+ */
+export interface ApiPerformanceConfig {
+  timeout: number;
+  maxConcurrentRequests: number;
+}
+
+/**
+ * 数据库性能配置
+ */
+export interface DatabasePerformanceConfig {
+  queryTimeout: number;
+  maxExecutionTime: number;
+}
+
+/**
+ * 性能配置
+ */
+export interface PerformanceConfig {
+  cache?: CacheConfig;
+  api: ApiPerformanceConfig;
+  database: DatabasePerformanceConfig;
+}
+
+/**
+ * 备份存储配置（S3）
+ */
+export interface BackupStorageConfig {
+  enabled: boolean;
+  bucket?: string;
+  region?: string;
+  accessKey?: string;
+  secretKey?: string;
+}
+
+/**
+ * 备份配置
+ */
+export interface BackupConfig {
+  enabled: boolean;
+  schedule: string;
+  retentionDays: number;
+  path: string;
+  storage?: BackupStorageConfig;
+}
+
+/**
+ * 第三方登录配置
+ */
+export interface SocialLoginConfig {
+  wechat?: {
+    appId: string;
+    appSecret: string;
+    redirectUri: string;
+  };
+  qq?: {
+    appId: string;
+    appKey: string;
+    redirectUri: string;
+  };
+}
+
+/**
+ * 文件存储配置（OSS）
+ */
+export interface StorageConfig {
+  type: 'local' | 'oss';
+  uploadPath?: string;
+  maxSize: number;
+  allowedTypes: string[];
+  oss?: {
+    enabled: boolean;
+    accessKey: string;
+    secretKey: string;
+    bucket: string;
+    region: string;
+    endpoint: string;
+  };
+}
+
+/**
+ * SMTP配置
+ */
+export interface SmtpConfig {
+  enabled: boolean;
+  host: string;
+  port: number;
+  secure: boolean;
+  user: string;
+  password: string;
+  from: string;
+  replyTo: string;
+}
+
+/**
+ * 其他配置
+ */
+export interface MiscConfig {
+  version: string;
+  environment: Environment;
+  maintenanceMode: boolean;
+  maintenanceMessage: string;
+  timezone: string;
+}
+
+/**
+ * 完整配置接口
+ */
+export interface AppConfig {
+  environment: Environment;
+  database: DatabaseConfig;
+  redis: RedisConfig;
+  cache: CacheConfig;
+  auth: AuthConfig;
+  ai: AIServiceConfig;
+  lawstar: LawstarConfig;
+  payment: PaymentConfig;
+  membership: MembershipConfig;
+  nextjs: NextjsConfig;
+  security: SecurityConfig;
+  log: WinstonConfig;
+  monitoring: MonitoringConfig;
+  performance: PerformanceConfig;
+  backup: BackupConfig;
+  socialLogin?: SocialLoginConfig;
+  storage: StorageConfig;
+  smtp: SmtpConfig;
+  misc: MiscConfig;
 }
