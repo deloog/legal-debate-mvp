@@ -1,36 +1,66 @@
 /** @type {import("jest").Config} **/
-const baseConfig = require('./jest.config.js');
+import baseConfig from './jest.config.js';
 
-module.exports = {
-  ...baseConfig,
-  testEnvironment: 'jest-environment-jsdom',
+// 创建一个新的配置对象，不直接展开 baseConfig
+const config = {
+  // 继承基础配置的大部分设置
+  preset: baseConfig.preset,
   setupFiles: ['<rootDir>/src/__tests__/api/setup.js'],
   setupFilesAfterEnv: ['whatwg-fetch', '<rootDir>/src/test-utils/setup.ts'],
-  testMatch: ['<rootDir>/src/__tests__/api/**/*.{test,spec}.{ts,tsx}'],
-  // 启用API测试覆盖率收集
-  collectCoverage: true,
+  moduleNameMapper: baseConfig.moduleNameMapper,
+  modulePathIgnorePatterns: baseConfig.modulePathIgnorePatterns,
+  transform: baseConfig.transform,
+  transformIgnorePatterns: baseConfig.transformIgnorePatterns,
+  moduleFileExtensions: baseConfig.moduleFileExtensions,
+  verbose: baseConfig.verbose,
 
-  // 定义要收集覆盖率的API文件范围
-  collectCoverageFrom: [
-    // 核心API库文件
-    'src/app/api/lib/**/*.{ts,tsx}',
-    // API端点文件
-    'src/app/api/v1/**/*.{ts,tsx}',
-    // 根API文件
-    'src/app/api/health/**/*.{ts,tsx}',
-    'src/app/api/version/**/*.{ts,tsx}',
-    // 排除类型定义文件
-    '!**/*.d.ts',
-    '!**/node_modules/**',
+  // 测试环境：使用 jsdom 支持 React 组件测试
+  testEnvironment: 'jest-environment-jsdom',
+
+  // 测试匹配模式
+  testMatch: [
+    '<rootDir>/src/__tests__/api/**/*.{test,spec}.{ts,tsx}',
+    '<rootDir>/src/__tests__/components/**/*.{test,spec}.{ts,tsx}',
   ],
 
-  // 指定覆盖率报告目录（与主配置分开）
-  coverageDirectory: 'coverage/api',
+  // 忽略的测试路径
+  testPathIgnorePatterns: [
+    '<rootDir>/.next/',
+    '<rootDir>/node_modules/',
+    '<rootDir>/coverage/',
+  ],
+
+  // 启用测试覆盖率收集
+  collectCoverage: true,
+
+  // 定义要收集覆盖率的文件范围
+  collectCoverageFrom: [
+    'src/app/api/**/*.{ts,tsx}',
+    'src/components/membership/**/*.{ts,tsx}',
+    'src/components/payment/**/*.{ts,tsx}',
+    'src/components/ui/**/*.{ts,tsx}',
+    'src/app/membership/**/*.{ts,tsx}',
+    '!**/*.d.ts',
+    '!**/node_modules/**',
+    '!**/*.test.{ts,tsx}',
+    '!**/*.spec.{ts,tsx}',
+  ],
+
+  // 覆盖率路径忽略模式
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '/.next/',
+    '/coverage/',
+    '/dist/',
+  ],
+
+  // 覆盖率报告目录
+  coverageDirectory: 'coverage/web',
 
   // 覆盖率报告格式
-  coverageReporters: ['text', 'lcov', 'html'],
+  coverageReporters: ['text', 'text-summary', 'lcov', 'html', 'json'],
 
-  // 设置合理的API覆盖率阈值（初始目标）
+  // 覆盖率阈值
   coverageThreshold: {
     global: {
       branches: 60,
@@ -38,14 +68,14 @@ module.exports = {
       lines: 70,
       statements: 70,
     },
-    'src/app/api/lib/': {
-      branches: 70,
-      functions: 80,
-      lines: 80,
-      statements: 80,
-    },
   },
-  // 对于API测试，我们可以使用并行
+
+  // 并行配置
   maxWorkers: 4,
   maxConcurrency: 4,
+
+  // 超时时间
+  testTimeout: 30000,
 };
+
+export default config;

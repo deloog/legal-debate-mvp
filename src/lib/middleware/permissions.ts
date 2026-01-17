@@ -257,7 +257,7 @@ export async function assignPermissionToRole(
 export async function assignPermissionsToRole(
   roleId: string,
   permissionIds: string[]
-): Promise<unknown[]> {
+): Promise<{ count: number }> {
   try {
     return await prisma.rolePermission.createMany({
       data: permissionIds.map(permissionId => ({

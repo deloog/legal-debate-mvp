@@ -16,6 +16,13 @@ const nextConfig: NextConfig = {
     loader: 'default',
     // 优化图片加载策略
     unoptimized: false,
+    // 图片域名白名单
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'api.qrserver.com',
+      },
+    ],
   },
 
   // Configure webpack for better performance

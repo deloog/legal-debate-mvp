@@ -3,6 +3,10 @@ import { AIVerificationService } from '../src/lib/ai/ai-verification-service';
 import { AgentContext, TaskPriority } from '../src/types/agent';
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import type {
+  DocumentAnalysisOutput,
+  ClaimType,
+} from '../src/lib/agent/doc-analyzer/core/types';
 
 // =============================================================================
 // 改进的文档解析准确性测试脚本
@@ -251,7 +255,8 @@ class ImprovedDocumentAccuracyTester {
         throw new Error(analysisResult.error?.message || '分析失败');
       }
 
-      const extractedData = analysisResult.data.extractedData;
+      const output = analysisResult.data as DocumentAnalysisOutput;
+      const extractedData = output.extractedData;
 
       // 读取原始文档内容用于AI验证
       const originalText = readFileSync(testDoc.filePath, 'utf-8');
@@ -260,8 +265,20 @@ class ImprovedDocumentAccuracyTester {
       const verificationResult =
         await this.verificationService.verifyExtraction({
           originalText,
-          extractedData,
-          goldStandard: testDoc.goldStandard,
+          extractedData: {
+            parties: extractedData.parties || [],
+            claims: extractedData.claims || [],
+          },
+          goldStandard: testDoc.goldStandard
+            ? {
+                parties: testDoc.goldStandard.parties || [],
+                claims: (testDoc.goldStandard.claims || []).map(claim => ({
+                  ...claim,
+                  currency: 'CNY',
+                  type: claim.type as ClaimType,
+                })),
+              }
+            : undefined,
         });
 
       const processingTime = Date.now() - startTime;

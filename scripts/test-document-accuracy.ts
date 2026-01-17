@@ -2,6 +2,7 @@ import { DocAnalyzerAgent } from '../src/lib/agent/doc-analyzer';
 import { AgentContext, TaskPriority } from '../src/types/agent';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
+import type { DocumentAnalysisOutput } from '../src/lib/agent/doc-analyzer/core/types';
 
 // =============================================================================
 // 文档解析准确性测试脚本
@@ -201,7 +202,8 @@ class DocumentAccuracyTester {
         throw new Error(result.error?.message || '分析失败');
       }
 
-      const extractedData = result.data.extractedData;
+      const output = result.data as DocumentAnalysisOutput;
+      const extractedData = output.extractedData;
 
       // 计算当事人信息准确率
       const partiesMetrics = this.calculatePartiesAccuracy(

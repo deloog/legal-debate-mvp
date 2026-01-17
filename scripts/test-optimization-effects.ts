@@ -10,8 +10,39 @@ import { DocAnalyzerAgent } from '../src/lib/agent/doc-analyzer/doc-analyzer-age
 import { AgentContext, TaskPriority } from '../src/types/agent';
 import { LawsuitRequestClassifier } from '../src/lib/classification/lawsuit-request-classifier';
 import { PrecisionAmountExtractor } from '../src/lib/extraction/amount-extractor-precision';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
+
+// =============================================================================
+// 类型定义
+// =============================================================================
+
+interface ExtractedParty {
+  type: 'plaintiff' | 'defendant' | 'other';
+  name: string;
+  role?: string;
+  contact?: string;
+  address?: string;
+}
+
+interface ExtractedClaim {
+  type: string;
+  content: string;
+  amount?: number;
+  evidence?: string[];
+  legalBasis?: string;
+}
+
+interface ExpectedParties {
+  plaintiffs: string[];
+  defendants: string[];
+  legalRepresentatives?: string[];
+}
+
+interface ExpectedClaims {
+  types: string[];
+  amounts: number[];
+}
 
 interface TestDocument {
   id: string;
@@ -255,21 +286,25 @@ class OptimizationTester {
       };
 
       const analysisResult = await this.analyzer.execute(context);
-      const analysis = analysisResult.data;
+      const analysis = analysisResult.data as {
+        extractedData?: {
+          parties?: ExtractedParty[];
+          claims?: ExtractedClaim[];
+        };
+      };
 
       // 评估当事人信息准确率
       if (doc.expectedParties) {
         result.partyAccuracy = this.evaluatePartyAccuracy(
-          analysis.extractedData.parties,
-          doc.expectedParties,
-          result
+          analysis.extractedData?.parties || [],
+          doc.expectedParties
         );
       }
 
       // 评估诉讼请求准确率
       if (doc.expectedClaims) {
         result.claimAccuracy = this.evaluateClaimAccuracy(
-          analysis.extractedData.claims,
+          analysis.extractedData?.claims || [],
           doc.expectedClaims,
           result
         );
@@ -278,7 +313,7 @@ class OptimizationTester {
       // 评估金额识别精度
       if (doc.expectedAmounts) {
         result.amountAccuracy = this.evaluateAmountAccuracy(
-          analysis.extractedData.claims,
+          analysis.extractedData?.claims || [],
           doc.expectedAmounts,
           result
         );
@@ -311,9 +346,8 @@ class OptimizationTester {
    * 评估当事人信息准确率
    */
   private evaluatePartyAccuracy(
-    actualParties: any,
-    expectedParties: any,
-    result: TestResult
+    actualParties: ExtractedParty[],
+    expectedParties: ExpectedParties
   ): number {
     let correctCount = 0;
     let totalCount = 0;
@@ -322,8 +356,8 @@ class OptimizationTester {
     if (expectedParties.plaintiffs) {
       totalCount += expectedParties.plaintiffs.length;
       const actualPlaintiffs = actualParties
-        .filter((p: any) => p.type === 'plaintiff')
-        .map((p: any) => p.name);
+        .filter(p => p.type === 'plaintiff')
+        .map(p => p.name);
       correctCount += this.calculateMatchCount(
         actualPlaintiffs,
         expectedParties.plaintiffs
@@ -334,8 +368,8 @@ class OptimizationTester {
     if (expectedParties.defendants) {
       totalCount += expectedParties.defendants.length;
       const actualDefendants = actualParties
-        .filter((p: any) => p.type === 'defendant')
-        .map((p: any) => p.name);
+        .filter(p => p.type === 'defendant')
+        .map(p => p.name);
       correctCount += this.calculateMatchCount(
         actualDefendants,
         expectedParties.defendants
@@ -347,10 +381,9 @@ class OptimizationTester {
       totalCount += expectedParties.legalRepresentatives.length;
       const actualLegalReps = actualParties
         .filter(
-          (p: any) =>
-            p.type === 'other' && p.role && p.role.includes('法定代表人')
+          p => p.type === 'other' && p.role && p.role.includes('法定代表人')
         )
-        .map((p: any) => p.name);
+        .map(p => p.name);
       correctCount += this.calculateMatchCount(
         actualLegalReps,
         expectedParties.legalRepresentatives
@@ -364,28 +397,28 @@ class OptimizationTester {
    * 评估诉讼请求准确率
    */
   private evaluateClaimAccuracy(
-    actualClaims: any,
-    expectedClaims: any,
-    result: TestResult
+    actualClaims: ExtractedClaim[],
+    expectedClaims: ExpectedClaims,
+    testResult: TestResult
   ): number {
     let correctCount = 0;
     const totalCount = expectedClaims.types.length;
 
-    const actualTypes = actualClaims.map((claim: any) => claim.type);
+    const actualTypes = actualClaims.map(claim => claim.type);
 
     for (const expectedType of expectedClaims.types) {
       if (actualTypes.includes(expectedType)) {
         correctCount++;
       } else {
-        result.warnings.push(`未识别到预期请求类型: ${expectedType}`);
+        testResult.warnings.push(`未识别到预期请求类型: ${expectedType}`);
       }
     }
 
     // 检查金额匹配
     if (expectedClaims.amounts) {
       const actualAmounts = actualClaims
-        .filter((claim: any) => claim.amount)
-        .map((claim: any) => claim.amount);
+        .filter(claim => claim.amount)
+        .map(claim => claim.amount);
 
       for (
         let i = 0;
@@ -400,7 +433,7 @@ class OptimizationTester {
           // 允许1%误差
           correctCount += 0.5; // 金额匹配给部分分数
         } else if (expectedClaims.amounts[i] !== 0) {
-          result.warnings.push(
+          testResult.warnings.push(
             `金额不匹配: 期望 ${expectedClaims.amounts[i]}, 实际 ${actualAmounts[i]}`
           );
         }
@@ -416,20 +449,20 @@ class OptimizationTester {
    * 评估金额识别精度
    */
   private evaluateAmountAccuracy(
-    actualClaims: any,
+    actualClaims: ExtractedClaim[],
     expectedAmounts: number[],
-    result: TestResult
+    testResult: TestResult
   ): number {
     const actualAmounts = actualClaims
-      .filter((claim: any) => claim.amount)
-      .map((claim: any) => claim.amount);
+      .filter(claim => claim.amount)
+      .map(claim => claim.amount);
 
     if (actualAmounts.length === 0 && expectedAmounts.length === 0) {
       return 100;
     }
 
     if (actualAmounts.length !== expectedAmounts.length) {
-      result.warnings.push(
+      testResult.warnings.push(
         `金额数量不匹配: 期望 ${expectedAmounts.length}, 实际 ${actualAmounts.length}`
       );
       return 0;
@@ -443,7 +476,7 @@ class OptimizationTester {
         // 允许1%误差
         correctCount++;
       } else {
-        result.warnings.push(
+        testResult.warnings.push(
           `金额识别不准确: 期望 ${expectedAmounts[i]}, 实际 ${actualAmounts[i]}`
         );
       }
@@ -648,7 +681,7 @@ async function main() {
 
     // 保存报告到文件
     const reportPath = join(__dirname, '../optimization-effect-report.json');
-    require('fs').writeFileSync(reportPath, JSON.stringify(report, null, 2));
+    writeFileSync(reportPath, JSON.stringify(report, null, 2));
     console.log(`\n📁 详细报告已保存至: ${reportPath}`);
   } catch (error) {
     console.error('❌ 测试执行失败:', error);

@@ -1,6 +1,7 @@
 import { DocAnalyzerAgent } from '../src/lib/agent/doc-analyzer';
 import { AgentContext, TaskPriority } from '../src/types/agent';
 import { join } from 'path';
+import type { DocumentAnalysisOutput } from '../src/lib/agent/doc-analyzer/core/types';
 
 // =============================================================================
 // AI泛化能力测试脚本
@@ -10,8 +11,8 @@ import { join } from 'path';
 interface ExtractedParty {
   type: string;
   name: string;
-  role: string;
-  contact: string;
+  role?: string;
+  contact?: string;
 }
 
 interface ExtractedClaim {
@@ -95,12 +96,13 @@ class AIGeneralizationTester {
       throw new Error(result.error?.message || '分析失败');
     }
 
+    const output = result.data as DocumentAnalysisOutput;
     return {
       success: true,
       documentId: 'variation-civil-case-001',
-      extracted: result.data.extractedData,
-      confidence: result.data.confidence,
-      processingTime: result.data.processingTime,
+      extracted: output.extractedData,
+      confidence: output.confidence,
+      processingTime: output.processingTime,
     };
   }
 
@@ -116,8 +118,10 @@ class AIGeneralizationTester {
       console.log('  提取的当事人:');
       result.extracted.parties.forEach(
         (party: ExtractedParty, index: number) => {
+          const role = party.role || '未知';
+          const contact = party.contact || '无';
           console.log(
-            `    ${index + 1}. ${party.type}: ${party.name} (${party.role}) - ${party.contact}`
+            `    ${index + 1}. ${party.type}: ${party.name} (${role}) - ${contact}`
           );
         }
       );

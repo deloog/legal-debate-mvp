@@ -9,11 +9,12 @@
 
 import fs from 'fs';
 import path from 'path';
-import { DocAnalyzerAgent } from '../src/lib/agent/doc-analyzer/doc-analyzer-agent';
 import type {
   DocumentAnalysisInput,
+  DocumentAnalysisOutput,
   Party,
 } from '../src/lib/agent/doc-analyzer/core/types';
+import { DocAnalyzerAgent } from '../src/lib/agent/doc-analyzer/doc-analyzer-agent';
 import { TaskPriority } from '../src/types/agent';
 
 // =============================================================================
@@ -390,7 +391,7 @@ async function evaluateTestCase(
     const result = await agent.execute({
       task: 'DOCUMENT_ANALYZE',
       taskType: 'DOC_ANALYZER',
-      data: input,
+      data: input as unknown as Record<string, unknown>,
       priority: TaskPriority.MEDIUM,
     });
     const processingTime = Date.now() - startTime;
@@ -404,16 +405,17 @@ async function evaluateTestCase(
       hasData: !!result.data,
       dataType: typeof result.data,
       extractedData: result.data
-        ? (result.data as any).extractedData
+        ? (result.data as DocumentAnalysisOutput).extractedData
         : undefined,
       parties: result.data
-        ? (result.data as any).extractedData?.parties
+        ? (result.data as DocumentAnalysisOutput).extractedData?.parties
         : undefined,
       dataStr,
     });
 
     // result.data是DocumentAnalysisOutput，包含extractedData
-    const actualParties = (result.data as any)?.extractedData?.parties || [];
+    const actualParties =
+      (result.data as DocumentAnalysisOutput)?.extractedData?.parties || [];
     const actualPartyNames = actualParties.map(p => p.name);
 
     // 检查正确保留的当事人
@@ -720,5 +722,6 @@ if (require.main === module) {
   main();
 }
 
-export { runEvaluation, generateReport };
-export type { TestResult, EvaluationSummary };
+export { generateReport, runEvaluation };
+
+export type { EvaluationSummary, TestResult };

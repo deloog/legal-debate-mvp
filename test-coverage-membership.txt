@@ -1,0 +1,289 @@
+PASS src/__tests__/components/membership/UsageHistory.test.tsx
+  UsageHistory
+    鍔犺浇鐘舵€?      鈭?搴旇鏄剧ず鍔犺浇涓姸鎬?(44 ms)
+    绌虹姸鎬?      鈭?搴旇鏄剧ず鏆傛棤璁板綍鎻愮ず (10 ms)
+    鍘嗗彶璁板綍鏄剧ず
+      鈭?搴旇鏄剧ず鍘嗗彶璁板綍鍒楄〃 (33 ms)
+      鈭?搴旇鏄剧ず鍙樻洿绫诲瀷鏍囩 (7 ms)
+      鈭?搴旇鏄剧ず鏃堕棿淇℃伅 (9 ms)
+      鈭?搴旇鏄剧ず绛夌骇鍙樻洿 (10 ms)
+      鈭?搴旇鏄剧ず鍘熷洜 (6 ms)
+    鍒嗛〉鍔熻兘
+      鈭?搴旇鏄剧ず鍒嗛〉鎺т欢 (24 ms)
+      鈭?绗竴椤垫椂涓婁竴椤垫寜閽簲璇ョ鐢?(16 ms)
+      鈭?绗竴椤垫椂涓嬩竴椤垫寜閽簲璇ュ惎鐢?(13 ms)
+      鈭?鐐瑰嚮涓嬩竴椤靛簲璇ョ炕椤?(45 ms)
+      鈭?绗簩椤垫椂涓婁竴椤垫寜閽簲璇ュ惎鐢?(29 ms)
+      鈭?绗簩椤垫椂涓嬩竴椤垫寜閽簲璇ョ鐢?(25 ms)
+      鈭?鐐瑰嚮涓婁竴椤靛簲璇ョ炕鍥炵涓€椤?(32 ms)
+    鍙樻洿绫诲瀷棰滆壊
+      鈭?鍗囩骇搴旇鏄剧ず缁胯壊 (7 ms)
+      鈭?闄嶇骇搴旇鏄剧ず姗欒壊 (4 ms)
+      鈭?鍙栨秷搴旇鏄剧ず绾㈣壊 (5 ms)
+      鈭?缁垂搴旇鏄剧ず钃濊壊 (7 ms)
+
+PASS src/__tests__/components/membership/MembershipInfo.test.tsx
+  MembershipInfo
+    鍔犺浇鐘舵€?      鈭?搴旇鏄剧ず鍔犺浇涓姸鎬?(44 ms)
+    鏃犱細鍛樼姸鎬?      鈭?搴旇鏄剧ず鍏嶈垂鐢ㄦ埛鎻愮ず (11 ms)
+    娲昏穬浼氬憳鏄剧ず
+      鈭?搴旇鏄剧ず浼氬憳绛夌骇鍜岀姸鎬?(45 ms)
+      鈭?搴旇鏄剧ず鍒版湡鏃ユ湡 (19 ms)
+      鈭?搴旇鏄剧ず鑷姩缁垂鎻愮ず (12 ms)
+      鈭?涓嶅簲璇ユ樉绀鸿嚜鍔ㄧ画璐规彁绀猴紙褰?autoRenew 涓?false锛?(21 ms)
+    浣跨敤閲忕粺璁℃樉绀?      鈭?搴旇鏄剧ず鎵€鏈変娇鐢ㄩ噺缁熻椤?(20 ms)
+      鈭?搴旇姝ｇ‘鏄剧ず闄愬埗鑼冨洿鍐呯殑浣跨敤閲?(28 ms)
+      鈭?搴旇姝ｇ‘鏄剧ず鏃犻檺鍒剁殑浣跨敤閲?(12 ms)
+    鐘舵€佹樉绀?      鈭?搴旇姝ｇ‘鏄剧ず 娲昏穬 鐘舵€?(14 ms)
+      鈭?搴旇姝ｇ‘鏄剧ず 宸茶繃鏈?鐘舵€?(12 ms)
+      鈭?搴旇姝ｇ‘鏄剧ず 宸插彇娑?鐘舵€?(10 ms)
+      鈭?搴旇姝ｇ‘鏄剧ず 宸叉殏鍋?鐘舵€?(11 ms)
+      鈭?搴旇姝ｇ‘鏄剧ず 寰呭鐞?鐘舵€?(11 ms)
+    浼氬憳绛夌骇棰滆壊
+      鈭?浼佷笟鐗堝簲璇ユ樉绀虹传鑹?(12 ms)
+      鈭?涓撲笟鐗堝簲璇ユ樉绀鸿摑鑹?(9 ms)
+      鈭?鍩虹鐗堝簲璇ユ樉绀虹豢鑹?(14 ms)
+      鈭?鍏嶈垂鐗堝簲璇ユ樉绀虹伆鑹?(17 ms)
+    杈圭晫鎯呭喌
+      鈭?搴旇澶勭悊闄愬埗涓?0 鐨勬儏鍐?(13 ms)
+
+PASS src/__tests__/components/membership/TierUpgradeCard.test.tsx
+  TierUpgradeCard
+    鍗＄墖鏄剧ず
+      鈭?搴旇鏄剧ず绛夌骇鍚嶇О (63 ms)
+      鈭?搴旇鏄剧ず绛夌骇鎻忚堪 (16 ms)
+      鈭?搴旇鏄剧ず浠锋牸 (15 ms)
+      鈭?搴旇鏄剧ず鍔熻兘鍒楄〃 (25 ms)
+      鈭?搴旇鏄剧ず鏉冮檺璇存槑 (17 ms)
+      鈭?涓嶅簲璇ユ樉绀轰笓灞炲鏈?(19 ms)
+    褰撳墠绛夌骇鏍囪瘑
+      鈭?搴旇鏄剧ず褰撳墠鏂规鏍囩 (15 ms)
+      鈭?搴旇绂佺敤鍗囩骇鎸夐挳 (12 ms)
+      鈭?涓嶅簲璇ユ樉绀哄綋鍓嶆柟妗堟爣绛撅紙闈炲綋鍓嶇瓑绾э級 (19 ms)
+      鈭?搴旇鏄剧ず鍗囩骇鎸夐挳锛堥潪褰撳墠绛夌骇锛?(18 ms)
+    鎺ㄨ崘鏍囪瘑
+      鈭?搴旇鏄剧ず鎺ㄨ崘鏍囩 (20 ms)
+      鈭?搴旇鏄剧ず钃濊壊杈规 (22 ms)
+      鈭?涓嶅簲璇ユ樉绀烘帹鑽愭爣绛撅紙闈炴帹鑽愶級 (16 ms)
+    绛夌骇棰滆壊
+      鈭?浼佷笟鐗堝簲璇ユ樉绀虹传鑹茶竟妗嗗拰鑳屾櫙 (11 ms)
+      鈭?涓撲笟鐗堝簲璇ユ樉绀鸿摑鑹茶竟妗嗗拰鑳屾櫙 (14 ms)
+      鈭?鍩虹鐗堝簲璇ユ樉绀虹豢鑹茶竟妗嗗拰鑳屾櫙 (12 ms)
+      鈭?鍏嶈垂鐗堝簲璇ユ樉绀虹伆鑹茶竟妗嗗拰鑳屾櫙 (17 ms)
+    璁¤垂鍛ㄦ湡
+      鈭?搴旇姝ｇ‘鏄剧ず鏈堜粯浠锋牸 (9 ms)
+      鈭?搴旇姝ｇ‘鏄剧ず瀛ｄ粯浠锋牸 (13 ms)
+      鈭?搴旇姝ｇ‘鏄剧ず骞翠粯浠锋牸 (18 ms)
+      鈭?搴旇姝ｇ‘鏄剧ず姘镐箙浠锋牸 (11 ms)
+    鍗囩骇鎸夐挳浜や簰
+      鈭?搴旇璋冪敤 onUpgrade 鍥炶皟鍑芥暟 (18 ms)
+      鈭?搴旇涓嶈皟鐢?onUpgrade 鍥炶皟鍑芥暟锛堝綋鍓嶇瓑绾э級 (15 ms)
+      鈭?搴旇涓嶈皟鐢?onUpgrade 鍥炶皟鍑芥暟锛堟棤 onUpgrade锛?(9 ms)
+
+---------------------------------------------------|---------|----------|---------|---------|-------------------
+File                                               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+---------------------------------------------------|---------|----------|---------|---------|-------------------
+All files                                          |    2.91 |     3.12 |    6.22 |    2.86 |                   
+ app/api/admin/action-logs                         |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-171             
+ app/api/admin/cases                               |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-305             
+ app/api/admin/configs                             |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 8-322             
+ app/api/admin/configs/[key]                       |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-252             
+ app/api/admin/enterprise/[id]/review              |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 5-75              
+ app/api/admin/error-logs                          |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-174             
+ app/api/admin/export/cases                        |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-288             
+ app/api/admin/export/stats                        |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-593             
+ app/api/admin/law-articles                        |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-211             
+ app/api/admin/law-articles/[id]/review            |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-149             
+ app/api/admin/law-articles/import                 |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-299             
+ app/api/admin/permissions                         |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-79              
+ app/api/admin/qualifications                      |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-226             
+ app/api/admin/qualifications/[id]/review          |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-126             
+ app/api/admin/reports                             |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-254             
+ app/api/admin/reports/[id]                        |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-141             
+ app/api/admin/roles                               |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-260             
+ app/api/admin/roles/[id]                          |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-306             
+ app/api/admin/roles/[id]/permissions              |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-224             
+ app/api/admin/roles/[id]/permissions/batch        |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-197             
+ app/api/admin/users                               |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-180             
+ app/api/admin/users/[id]                          |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-465             
+ app/api/admin/users/[id]/role                     |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-157             
+ app/api/admin/users/batch-role                    |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-168             
+ app/api/auth/forgot-password                      |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 5-50              
+ app/api/auth/login                                |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 5-164             
+ app/api/auth/logout                               |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-96              
+ app/api/auth/me                                   |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 5-64              
+ app/api/auth/oauth/bind                           |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 5-91              
+ app/api/auth/oauth/qq                             |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 5-99              
+ app/api/auth/oauth/unbind/[provider]              |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 5-56              
+ app/api/auth/oauth/wechat                         |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 5-96              
+ app/api/auth/refresh                              |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-166             
+ app/api/auth/register                             |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 5-163             
+ app/api/auth/reset-password                       |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 5-50              
+ app/api/debate/stream                             |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-144             
+ app/api/enterprise/me                             |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 5-54              
+ app/api/enterprise/qualification/upload           |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 5-112             
+ app/api/enterprise/register                       |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 5-84              
+ app/api/health                                    |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-260             
+ app/api/health/deps                               |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-244             
+ app/api/lib/errors                                |       0 |        0 |       0 |       0 |                   
+  api-error.ts                                     |       0 |        0 |       0 |       0 | 1-122             
+  error-handler.ts                                 |       0 |        0 |       0 |       0 | 1-211             
+ app/api/lib/middleware                            |       0 |        0 |       0 |       0 |                   
+  core.ts                                          |       0 |        0 |       0 |       0 | 1-74              
+  index.ts                                         |       0 |      100 |       0 |       0 | 1-29              
+  logging.ts                                       |       0 |        0 |       0 |       0 | 7-69              
+  security.ts                                      |       0 |        0 |       0 |       0 | 3-145             
+ app/api/lib/responses                             |       0 |        0 |       0 |       0 |                   
+  api-response.ts                                  |       0 |        0 |       0 |       0 | 1-160             
+  pagination-core.ts                               |       0 |        0 |       0 |       0 | 34-132            
+  pagination-utils.ts                              |       0 |        0 |       0 |       0 | 4-189             
+  pagination.ts                                    |       0 |      100 |     100 |       0 | 2-3               
+  success.ts                                       |       0 |      100 |       0 |       0 | 1-91              
+ app/api/lib/validation                            |       0 |        0 |       0 |       0 |                   
+  core.ts                                          |       0 |        0 |       0 |       0 | 2-138             
+  schemas.ts                                       |       0 |        0 |       0 |       0 | 1-242             
+  utils.ts                                         |       0 |        0 |       0 |       0 | 2-136             
+  validator.ts                                     |       0 |      100 |     100 |       0 | 2-3               
+ app/api/memberships/cancel                        |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-219             
+ app/api/memberships/downgrade                     |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-301             
+ app/api/memberships/history                       |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-193             
+ app/api/memberships/me                            |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-291             
+ app/api/memberships/tiers                         |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-177             
+ app/api/memberships/upgrade                       |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-344             
+ app/api/memberships/usage                         |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 7-297             
+ app/api/qualifications/me                         |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-60              
+ app/api/qualifications/upload                     |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-187             
+ app/api/stats/cases/efficiency                    |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-400             
+ app/api/stats/cases/type-distribution             |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-312             
+ app/api/stats/debates/generation-count            |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-387             
+ app/api/stats/debates/quality-score               |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-379             
+ app/api/stats/performance/error-rate              |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-448             
+ app/api/stats/performance/response-time           |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-440             
+ app/api/stats/users/activity                      |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-388             
+ app/api/stats/users/registration-trend            |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-389             
+ app/api/v1/cases                                  |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-203             
+ app/api/v1/cases/[id]                             |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-275             
+ app/api/v1/debate-rounds/[roundId]/generate       |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-324             
+ app/api/v1/debates                                |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-216             
+ app/api/v1/debates/[id]                           |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-241             
+ app/api/v1/debates/[id]/rounds                    |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-130             
+ app/api/v1/debates/[id]/rounds/[roundId]          |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-71              
+ app/api/v1/debates/[id]/rounds/[roundId]/generate |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-327             
+ app/api/v1/debates/[id]/stream                    |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-422             
+ app/api/v1/documents/[id]                         |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-217             
+ app/api/v1/documents/analyze                      |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-209             
+ app/api/v1/documents/upload                       |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-360             
+ app/api/v1/law-articles/search                    |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-216             
+ app/api/v1/legal-analysis/applicability           |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-240             
+ app/api/v1/legal-analysis/applicability_bak       |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-240             
+ app/api/v1/legal-references/[id]/feedback         |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-100             
+ app/api/v1/memory/compress-preview                |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 11-130            
+ app/api/v1/memory/migration-history               |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 6-111             
+ app/api/v1/memory/migration-stats                 |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 11-193            
+ app/api/version                                   |       0 |        0 |       0 |       0 |                   
+  route.ts                                         |       0 |        0 |       0 |       0 | 1-89              
+ app/membership                                    |       0 |        0 |       0 |       0 |                   
+  page.tsx                                         |       0 |        0 |       0 |       0 | 3-208             
+ components/membership                             |   89.76 |     82.5 |     100 |   89.43 |                   
+  MembershipInfo.tsx                               |   98.03 |    97.56 |     100 |   97.87 | 101               
+  TierUpgradeCard.tsx                              |   87.09 |    81.39 |     100 |   87.09 | 45-47,51,70       
+  UsageHistory.tsx                                 |   82.22 |    66.66 |     100 |   82.22 | 27-33,48-54       
+ components/ui                                     |   96.15 |    64.28 |   88.88 |   96.15 |                   
+  badge.tsx                                        |     100 |       50 |     100 |     100 | 11                
+  button.tsx                                       |     100 |    66.66 |     100 |     100 | 12                
+  card.tsx                                         |   91.66 |    83.33 |   83.33 |   91.66 | 43                
+  progress.tsx                                     |     100 |    33.33 |     100 |     100 | 12-13             
+---------------------------------------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 2.91% ( 139/4767 )
+Branches     : 3.12% ( 108/3454 )
+Functions    : 6.22% ( 31/498 )
+Lines        : 2.86% ( 135/4713 )
+================================================================================
+Jest: "global" coverage threshold for statements (70%) not met: 2.91%
+Jest: "global" coverage threshold for branches (60%) not met: 3.12%
+Jest: "global" coverage threshold for lines (70%) not met: 2.86%
+Jest: "global" coverage threshold for functions (70%) not met: 6.22%
+Test Suites: 3 passed, 3 total
+Tests:       61 passed, 61 total
+Snapshots:   0 total
+Time:        5.667 s
+Ran all test suites matching src/__tests__/components/membership/.

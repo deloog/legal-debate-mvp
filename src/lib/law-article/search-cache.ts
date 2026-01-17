@@ -154,18 +154,39 @@ export class SearchCacheManager {
   /**
    * 记录检索统计信息
    */
-  static async recordSearch(): Promise<void> {
+  static async recordSearch(keyword?: string): Promise<void> {
     try {
       const statsKey = `${this.CACHE_PREFIX}:stats`;
       const stats = await cacheManager.get<SearchStatistics>(statsKey);
 
       const now = new Date();
+
+      // 更新热门关键词
+      let topKeywords = stats?.topKeywords || [];
+      if (keyword && keyword.trim()) {
+        const trimmedKeyword = keyword.trim();
+        const existingIndex = topKeywords.findIndex(
+          k => k.keyword === trimmedKeyword
+        );
+
+        if (existingIndex >= 0) {
+          topKeywords[existingIndex].count++;
+        } else {
+          topKeywords.push({ keyword: trimmedKeyword, count: 1 });
+        }
+
+        // 按计数排序并保留前10个
+        topKeywords = topKeywords
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10);
+      }
+
       const newStats: SearchStatistics = {
         totalSearches: (stats?.totalSearches || 0) + 1,
         cacheHits: stats?.cacheHits || 0,
         cacheHitRate: 0,
         averageExecutionTime: stats?.averageExecutionTime || 0,
-        topKeywords: stats?.topKeywords || [],
+        topKeywords,
         lastSearchTime: now,
       };
 

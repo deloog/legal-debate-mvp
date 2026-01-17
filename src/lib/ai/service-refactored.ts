@@ -212,8 +212,7 @@ export class AIService {
         // 尝试降级处理
         const fallbackResponse = await this.fallbackManager.handleFailure(
           aiError,
-          request,
-          Array.from(this.clients.keys())
+          request
         );
 
         if (fallbackResponse) {
