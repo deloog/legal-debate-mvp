@@ -3,11 +3,11 @@
  * GET /api/orders
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import { Order, OrderStatus } from '@/types/payment';
 import { getUserOrders } from '@/lib/order/order-service';
+import { Order, OrderStatus } from '@/types/payment';
+import { getServerSession } from 'next-auth';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * GET /api/orders
@@ -31,10 +31,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // 获取查询参数
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
+    const userId = searchParams.get('userId');
     const page = Number.parseInt(searchParams.get('page') || '1', 10);
     const limit = Number.parseInt(searchParams.get('limit') || '20', 10);
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
+
+    // 使用传入的userId或当前会话的userId
+    const targetUserId = userId || session.user.id;
 
     // 验证状态参数
     const validStatuses = [
@@ -106,7 +110,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     // 查询订单列表
-    const { orders, total } = await getUserOrders(session.user.id, {
+    const { orders, total } = await getUserOrders(targetUserId, {
       status: status as OrderStatus,
       page,
       limit,

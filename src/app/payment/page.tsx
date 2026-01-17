@@ -16,6 +16,7 @@ interface MembershipTierInfo {
   price: number;
   currency: string;
   billingCycle: 'MONTHLY' | 'QUARTERLY' | 'YEARLY' | 'LIFETIME';
+  originalPrice?: unknown; // 保存原始价格数据用于调试
 }
 
 export default function PaymentPage() {
@@ -67,9 +68,23 @@ export default function PaymentPage() {
           (t: MembershipTierInfo) => t.id === tierId
         );
         if (tier) {
+          // 处理price字段：可能是字符串、数字或其他格式
+          let normalizedPrice = 0;
+          if (typeof tier.price === 'number') {
+            normalizedPrice = tier.price;
+          } else if (typeof tier.price === 'string') {
+            // 尝试从字符串中提取数字
+            const match = tier.price.match(/(\d+(?:\.\d+)?)/);
+            if (match) {
+              normalizedPrice = parseFloat(match[0]);
+            }
+          }
+
           setTierInfo({
             ...tier,
+            price: normalizedPrice,
             billingCycle,
+            originalPrice: tier.price, // 保存原始价格用于调试
           });
         } else {
           throw new Error('会员等级不存在');
@@ -102,12 +117,19 @@ export default function PaymentPage() {
       const data = await response.json();
 
       if (data.success && data.data) {
+        // 处理price字段
+        let normalizedPrice = 0;
+        const amount = Number(data.data.amount);
+        if (!isNaN(amount)) {
+          normalizedPrice = amount;
+        }
+
         setTierInfo({
           id: data.data.membershipTierId,
           name: data.data.membershipTier?.name || '',
           displayName: data.data.membershipTier?.displayName || '',
           tier: data.data.membershipTier?.tier || '',
-          price: Number(data.data.amount),
+          price: normalizedPrice,
           currency: data.data.currency,
           billingCycle: 'MONTHLY',
         });

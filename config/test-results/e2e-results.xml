@@ -1,715 +1,369 @@
-<testsuites id="" name="" tests="35" failures="13" skipped="0" errors="0" time="74.884595">
-<testsuite name="auth.spec.ts" timestamp="2026-01-11T15:09:50.209Z" hostname="chromium" tests="35" failures="13" skipped="0" time="22.589" errors="0">
-<testcase name="用户注册与登录流程 › 应该成功注册新用户" classname="auth.spec.ts" time="1.609">
-<system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9veevz0000gc4xrlw08ksc",
-      "email": "test-1768144191418@example.com",
-      "username": "test191418",
-      "name": "TestUser191418",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:09:52.989Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVldnowMDAwZ2M0eHJsdzA4a3NjIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQxOTE0MThAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDE5MiwiZXhwIjoxNzY4NzQ4OTkyfQ.U-0proLcUnmhQbvBTzR0G504zw8n0-NQDHrjX-uP3RQ"
-  }
-}
-]]>
-</system-out>
-</testcase>
-<testcase name="用户注册与登录流程 › 注册时应该验证邮箱格式" classname="auth.spec.ts" time="0.025">
-</testcase>
-<testcase name="用户注册与登录流程 › 注册时应该验证密码复杂度" classname="auth.spec.ts" time="0.021">
-</testcase>
-<testcase name="用户注册与登录流程 › 应该拒绝重复注册的邮箱" classname="auth.spec.ts" time="0.3">
-<failure message="auth.spec.ts:242:7 应该拒绝重复注册的邮箱" type="FAILURE">
-<![CDATA[  [chromium] › auth.spec.ts:242:7 › 用户注册与登录流程 › 应该拒绝重复注册的邮箱 ────────────────────────────────────────
+<testsuites id="" name="" tests="27" failures="7" skipped="15" errors="0" time="363.526942">
+<testsuite name="payment-ui.spec.ts" timestamp="2026-01-17T08:35:11.299Z" hostname="chromium" tests="27" failures="7" skipped="15" time="347.862" errors="0">
+<testcase name="支付页面功能测试 › 应该加载支付页面并显示基本信息" classname="payment-ui.spec.ts" time="0">
+<failure message="payment-ui.spec.ts:180:7 应该加载支付页面并显示基本信息" type="FAILURE">
+<![CDATA[  [chromium] › payment-ui.spec.ts:180:7 › 支付页面功能测试 › 应该加载支付页面并显示基本信息 ───────────────────────────────
 
-    Error: expect(received).toContain(expected) // indexOf
+    Error: expect(received).toBeDefined()
 
-    Expected substring: "已注册"
-    Received string:    "USER_EXISTS"
+    Received: undefined
 
-      255 |     expect(response.status()).toBe(409);
-      256 |     expect(data.success).toBe(false);
-    > 257 |     expect(data.error).toContain("已注册");
+      168 |     // 找到第一个活跃的会员等级
+      169 |     const activeTier = tiers.data?.tiers?.find(tier => tier.isActive);
+    > 170 |     expect(activeTier).toBeDefined();
           |                        ^
-      258 |   });
-      259 |
-      260 |   test("应该成功登录已注册用户", async ({ request }) => {
-        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:257:24
+      171 |     validTierId = activeTier?.id || '';
+      172 |
+      173 |     await context.close();
+        at D:\legal_debate_mvp\src\__tests__\e2e\payment-ui.spec.ts:170:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\..\test-results\payment-ui-支付页面功能测试-应该加载支付页面并显示基本信息-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
 ]]>
 </failure>
 <system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9vef780001gc4x1xlb33ls",
-      "email": "test-1768144193135@example.com",
-      "username": "test193135",
-      "name": "TestUser193135",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:09:53.394Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVmNzgwMDAxZ2M0eDF4bGIzM2xzIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQxOTMxMzVAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDE5MywiZXhwIjoxNzY4NzQ4OTkzfQ.BKqzcILzQ3jsgrQ0GT2kPkZiUil6xmQbEyeaUmdrY8o"
-  }
-}
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\payment-ui-支付页面功能测试-应该加载支付页面并显示基本信息-chromium\test-failed-1.png]]
 ]]>
 </system-out>
 </testcase>
-<testcase name="用户注册与登录流程 › 应该成功登录已注册用户" classname="auth.spec.ts" time="1.138">
-<system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9vegn00002gc4x1rigyzw6",
-      "email": "test-1768144194958@example.com",
-      "username": "test194958",
-      "name": "TestUser194958",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:09:55.259Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVnbjAwMDAyZ2M0eDFyaWd5enc2IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQxOTQ5NThAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDE5NSwiZXhwIjoxNzY4NzQ4OTk1fQ.qQfUpWKA2KojaGfj0QN_P6SejKZn7ZEQaWnqRn6ld28"
-  }
-}
-]]>
-</system-out>
+<testcase name="支付页面功能测试 › 应该显示所有支付方式选项" classname="payment-ui.spec.ts" time="0">
+<skipped>
+</skipped>
 </testcase>
-<testcase name="用户注册与登录流程 › 应该拒绝错误的密码" classname="auth.spec.ts" time="0.553">
-<system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9vehht0003gc4xsdekop3v",
-      "email": "test-1768144196104@example.com",
-      "username": "test196104",
-      "name": "TestUser196104",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:09:56.367Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVoaHQwMDAzZ2M0eHNkZWtvcDN2IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQxOTYxMDRAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDE5NiwiZXhwIjoxNzY4NzQ4OTk2fQ.7xkoL0r52U0Q9imXVnzOXijTHtFN57ZbjCteNFzucbc"
-  }
-}
-]]>
-</system-out>
+<testcase name="支付页面功能测试 › 应该能够选择支付方式" classname="payment-ui.spec.ts" time="0">
+<skipped>
+</skipped>
 </testcase>
-<testcase name="用户注册与登录流程 › 应该获取当前用户信息" classname="auth.spec.ts" time="1.118">
-<failure message="auth.spec.ts:287:7 应该获取当前用户信息" type="FAILURE">
-<![CDATA[  [chromium] › auth.spec.ts:287:7 › 用户注册与登录流程 › 应该获取当前用户信息 ─────────────────────────────────────────
+<testcase name="支付页面功能测试 › 应该显示支付确认区域" classname="payment-ui.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="支付页面功能测试 › 应该显示温馨提示信息" classname="payment-ui.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="支付页面功能测试 › 应该能够取消支付并返回" classname="payment-ui.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="支付成功页面测试 › 应该显示支付成功页面" classname="payment-ui.spec.ts" time="1.551">
+</testcase>
+<testcase name="支付成功页面测试 › 应该显示订单信息" classname="payment-ui.spec.ts" time="1.053">
+</testcase>
+<testcase name="支付成功页面测试 › 应该能够返回首页" classname="payment-ui.spec.ts" time="2.273">
+</testcase>
+<testcase name="支付失败页面测试 › 应该显示支付失败页面" classname="payment-ui.spec.ts" time="1.316">
+</testcase>
+<testcase name="支付失败页面测试 › 应该显示错误详情" classname="payment-ui.spec.ts" time="32.491">
+<failure message="payment-ui.spec.ts:309:7 应该显示错误详情" type="FAILURE">
+<![CDATA[  [chromium] › payment-ui.spec.ts:309:7 › 支付失败页面测试 › 应该显示错误详情 ──────────────────────────────────────
 
-    TypeError: Cannot read properties of undefined (reading 'email')
+    Error: expect(locator).toBeVisible() failed
 
-      302 |     expect(response.ok()).toBeTruthy();
-      303 |     expect(data.success).toBe(true);
-    > 304 |     expect(data.data?.user.email).toBe(testUser.email);
-          |                            ^
-      305 |     expect(data.data?.user.id).toBe(testUser.id);
-      306 |   });
-      307 |
-        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:304:28
+    Locator: getByText('支付超时')
+    Expected: visible
+    Timeout: 30000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 30000ms
+      - waiting for getByText('支付超时')
+
+
+      316 |     // 验证错误详情
+      317 |     await expect(page.getByText('错误详情')).toBeVisible();
+    > 318 |     await expect(page.getByText('支付超时')).toBeVisible();
+          |                                          ^
+      319 |   });
+      320 |
+      321 |   test('应该支持重试支付', async ({ page }) => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\payment-ui.spec.ts:318:42
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\..\test-results\payment-ui-支付失败页面测试-应该显示错误详情-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\..\test-results\payment-ui-支付失败页面测试-应该显示错误详情-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\..\test-results\payment-ui-支付失败页面测试-应该显示错误详情-chromium\error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9vehyp0004gc4xea37l0mh",
-      "email": "test-1768144196685@example.com",
-      "username": "test196685",
-      "name": "TestUser196685",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:09:56.975Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVoeXAwMDA0Z2M0eGVhMzdsMG1oIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQxOTY2ODVAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDE5NiwiZXhwIjoxNzY4NzQ4OTk2fQ._rk1_WjgObTsJr0lIhQrCAVRDb-Ut45oWzPT2VyxoT0"
-  }
-}
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\payment-ui-支付失败页面测试-应该显示错误详情-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|..\..\test-results\payment-ui-支付失败页面测试-应该显示错误详情-chromium\video.webm]]
+
+[[ATTACHMENT|..\..\test-results\payment-ui-支付失败页面测试-应该显示错误详情-chromium\error-context.md]]
 ]]>
 </system-out>
 </testcase>
-<testcase name="用户注册与登录流程 › 未认证用户应该无法获取当前用户信息" classname="auth.spec.ts" time="0.045">
+<testcase name="支付失败页面测试 › 应该支持重试支付" classname="payment-ui.spec.ts" time="1.317">
 </testcase>
-<testcase name="用户会话管理 › 应该成功刷新访问令牌" classname="auth.spec.ts" time="1.136">
-<failure message="auth.spec.ts:320:7 应该成功刷新访问令牌" type="FAILURE">
-<![CDATA[  [chromium] › auth.spec.ts:320:7 › 用户会话管理 › 应该成功刷新访问令牌 ────────────────────────────────────────────
+<testcase name="支付失败页面测试 › 应该能够联系客服" classname="payment-ui.spec.ts" time="1.07">
+<failure message="payment-ui.spec.ts:329:7 应该能够联系客服" type="FAILURE">
+<![CDATA[  [chromium] › payment-ui.spec.ts:329:7 › 支付失败页面测试 › 应该能够联系客服 ──────────────────────────────────────
 
-    Error: expect(received).toBeTruthy()
+    Error: expect(locator).toBeVisible() failed
 
-    Received: false
+    Locator: getByText('客服')
+    Expected: visible
+    Error: strict mode violation: getByText('客服') resolved to 2 elements:
+        1) <button type="button" class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base flex-1">…</button> aka getByRole('button', { name: '联系客服' })
+        2) <li>• 如问题持续存在，请联系客服寻求帮助</li> aka getByText('• 如问题持续存在，请联系客服寻求帮助')
 
-      192 |
-      193 |   const data: RefreshResponseData = await response.json();
-    > 194 |   expect(response.ok()).toBeTruthy();
-          |                         ^
-      195 |   expect(data.success).toBe(true);
-      196 |
-      197 |   return data.data?.token || "";
-        at refreshToken (D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:194:25)
-        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:332:22
+    Call log:
+      - Expect "toBeVisible" with timeout 30000ms
+      - waiting for getByText('客服')
+
+
+      335 |
+      336 |     // 验证联系信息显示
+    > 337 |     await expect(page.getByText('客服')).toBeVisible();
+          |                                        ^
+      338 |   });
+      339 | });
+      340 |
+        at D:\legal_debate_mvp\src\__tests__\e2e\payment-ui.spec.ts:337:40
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\..\test-results\payment-ui-支付失败页面测试-应该能够联系客服-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\..\test-results\payment-ui-支付失败页面测试-应该能够联系客服-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\..\test-results\payment-ui-支付失败页面测试-应该能够联系客服-chromium\error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9vejvv0005gc4xz9cvdig3",
-      "email": "test-1768144199110@example.com",
-      "username": "test199110",
-      "name": "TestUser199110",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:09:59.466Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVqdnYwMDA1Z2M0eHo5Y3ZkaWczIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQxOTkxMTBAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDE5OSwiZXhwIjoxNzY4NzQ4OTk5fQ.aipSa7BTsuLa8nZCBGaPyYTZ4NqDc8T9gXOvmyOsJ6E"
-  }
-}
-]]>
-</system-out>
-</testcase>
-<testcase name="用户会话管理 › 应该支持登出当前设备" classname="auth.spec.ts" time="1.174">
-<system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9velmp0006gc4xrahtt83w",
-      "email": "test-1768144201444@example.com",
-      "username": "test201444",
-      "name": "TestUser201444",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:01.728Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVsbXAwMDA2Z2M0eHJhaHR0ODN3IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDE0NDRAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwMSwiZXhwIjoxNzY4NzQ5MDAxfQ.hmf6aHgsBdMes3dPTfMzH0ZM5cCNJW5m4XskFJLOP3Y"
-  }
-}
-]]>
-</system-out>
-</testcase>
-<testcase name="用户会话管理 › 应该支持登出所有设备" classname="auth.spec.ts" time="0.52">
-<system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9vemie0007gc4x3mfb3u5e",
-      "email": "test-1768144202627@example.com",
-      "username": "test202627",
-      "name": "TestUser202627",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:02.869Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVtaWUwMDA3Z2M0eDNtZmIzdTVlIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDI2MjdAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwMiwiZXhwIjoxNzY4NzQ5MDAyfQ.4XHPk9d9nyWezgCk9DxODn_8gWQRLcDox9faPzH9fRo"
-  }
-}
-]]>
-</system-out>
-</testcase>
-<testcase name="用户会话管理 › 过期的令牌应该被拒绝" classname="auth.spec.ts" time="0.014">
-</testcase>
-<testcase name="密码找回与重置 › 应该发送密码重置验证码" classname="auth.spec.ts" time="1.759">
-<system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9vemy40008gc4xtuhuyy1y",
-      "email": "test-1768144203195@example.com",
-      "username": "test203195",
-      "name": "TestUser203195",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:03.435Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVteTQwMDA4Z2M0eHR1aHV5eTF5IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDMxOTVAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwMywiZXhwIjoxNzY4NzQ5MDAzfQ.hS5SXWDY2ugw3nW5LlJ5Bg2at6aRqvijr6atlBPVhSI"
-  }
-}
-]]>
-</system-out>
-</testcase>
-<testcase name="密码找回与重置 › 应该防止邮箱枚举攻击（不存在的用户也返回成功）" classname="auth.spec.ts" time="0.016">
-</testcase>
-<testcase name="密码找回与重置 › 应该验证验证码格式" classname="auth.spec.ts" time="0.507">
-<system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9veocd000bgc4xtgq9ejpn",
-      "email": "test-1768144205004@example.com",
-      "username": "test205004",
-      "name": "TestUser205004",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:05.244Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVvY2QwMDBiZ2M0eHRncTllanBuIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDUwMDRAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwNSwiZXhwIjoxNzY4NzQ5MDA1fQ.Rs9DO4CFHVvVwd5Ivs14z9AR3gfueQZIE2BzpxbFDAw"
-  }
-}
-]]>
-</system-out>
-</testcase>
-<testcase name="密码找回与重置 › 应该拒绝无效的验证码" classname="auth.spec.ts" time="0.258">
-<system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9veoqr000cgc4x3o2e49g8",
-      "email": "test-1768144205523@example.com",
-      "username": "test205523",
-      "name": "TestUser205523",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:05.763Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVvcXIwMDBjZ2M0eDNvMmU0OWc4IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDU1MjNAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwNSwiZXhwIjoxNzY4NzQ5MDA1fQ.A9g_qMuN1eTPrEwqEQbjOA6fGmOZve-mEBrPI7RrBxI"
-  }
-}
-]]>
-</system-out>
-</testcase>
-<testcase name="密码找回与重置 › 应该验证新密码复杂度" classname="auth.spec.ts" time="0.258">
-<system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9veoyd000dgc4xykfyl4ug",
-      "email": "test-1768144205795@example.com",
-      "username": "test205795",
-      "name": "TestUser205795",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:06.036Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVveWQwMDBkZ2M0eHlrZnlsNHVnIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDU3OTVAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwNiwiZXhwIjoxNzY4NzQ5MDA2fQ.UROhfSWJHzHsjQXwhMW7qt0LnKV6MuniFJ4-6WbG1LY"
-  }
-}
-]]>
-</system-out>
-</testcase>
-<testcase name="律师资格验证流程 › 应该提交律师资格申请" classname="auth.spec.ts" time="0.811">
-<failure message="auth.spec.ts:495:7 应该提交律师资格申请" type="FAILURE">
-<![CDATA[  [chromium] › auth.spec.ts:495:7 › 律师资格验证流程 › 应该提交律师资格申请 ──────────────────────────────────────────
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\payment-ui-支付失败页面测试-应该能够联系客服-chromium\test-failed-1.png]]
 
-    Error: expect(received).toBeTruthy()
+[[ATTACHMENT|..\..\test-results\payment-ui-支付失败页面测试-应该能够联系客服-chromium\video.webm]]
 
-    Received: false
+[[ATTACHMENT|..\..\test-results\payment-ui-支付失败页面测试-应该能够联系客服-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="订单管理页面测试 › 应该加载订单列表页面" classname="payment-ui.spec.ts" time="23.437">
+<failure message="payment-ui.spec.ts:375:7 应该加载订单列表页面" type="FAILURE">
+<![CDATA[  [chromium] › payment-ui.spec.ts:375:7 › 订单管理页面测试 › 应该加载订单列表页面 ────────────────────────────────────
 
-      517 |
-      518 |     const data: QualificationResponseData = await response.json();
-    > 519 |     expect(response.ok()).toBeTruthy();
-          |                           ^
-      520 |     expect(data.success).toBe(true);
-      521 |     expect(data.data?.qualification.status).toBe("PENDING");
-      522 |   });
-        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:519:27
+    TimeoutError: page.waitForLoadState: Timeout 10000ms exceeded.
+
+      370 |
+      371 |     // 等待登录成功（跳转到首页或目标页面）
+    > 372 |     await page.waitForLoadState('networkidle', { timeout: 10000 });
+          |                ^
+      373 |   });
+      374 |
+      375 |   test('应该加载订单列表页面', async ({ page }) => {
+        at D:\legal_debate_mvp\src\__tests__\e2e\payment-ui.spec.ts:372:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\..\test-results\payment-ui-订单管理页面测试-应该加载订单列表页面-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\..\test-results\payment-ui-订单管理页面测试-应该加载订单列表页面-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\..\test-results\payment-ui-订单管理页面测试-应该加载订单列表页面-chromium\error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9vep5v000egc4x0vjfsuut",
-      "email": "test-1768144206067@example.com",
-      "username": "test206067",
-      "name": "TestUser206067",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:06.306Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVwNXYwMDBlZ2M0eDB2amZzdXV0IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDYwNjdAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwNiwiZXhwIjoxNzY4NzQ5MDA2fQ.ekq6Y_AnWqMbUAjPvQYJ5kABnWDnmLZuP4PD9ylZx7M"
-  }
-}
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\payment-ui-订单管理页面测试-应该加载订单列表页面-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|..\..\test-results\payment-ui-订单管理页面测试-应该加载订单列表页面-chromium\video.webm]]
+
+[[ATTACHMENT|..\..\test-results\payment-ui-订单管理页面测试-应该加载订单列表页面-chromium\error-context.md]]
 ]]>
 </system-out>
 </testcase>
-<testcase name="律师资格验证流程 › 应该验证执业证号格式" classname="auth.spec.ts" time="0.591">
-<failure message="auth.spec.ts:524:7 应该验证执业证号格式" type="FAILURE">
-<![CDATA[  [chromium] › auth.spec.ts:524:7 › 律师资格验证流程 › 应该验证执业证号格式 ──────────────────────────────────────────
+<testcase name="订单管理页面测试 › 应该显示筛选选项" classname="payment-ui.spec.ts" time="36.512">
+<failure message="payment-ui.spec.ts:384:7 应该显示筛选选项" type="FAILURE">
+<![CDATA[  [chromium] › payment-ui.spec.ts:384:7 › 订单管理页面测试 › 应该显示筛选选项 ──────────────────────────────────────
 
-    Error: expect(received).toBe(expected) // Object.is equality
+    Error: expect(locator).toBeVisible() failed
 
-    Expected: 400
-    Received: 401
+    Locator:  locator('text=全部')
+    Expected: visible
+    Received: hidden
+    Timeout:  30000ms
 
-      545 |     );
-      546 |
-    > 547 |     expect(response.status()).toBe(400);
-          |                               ^
-      548 |   });
-      549 |
-      550 |   test("应该验证身份证号格式", async ({ request }) => {
-        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:547:31
+    Call log:
+      - Expect "toBeVisible" with timeout 30000ms
+      - waiting for locator('text=全部')
+        33 × locator resolved to <option value="" selected>全部状态</option>
+           - unexpected value "hidden"
+
+
+      387 |
+      388 |     // 验证状态筛选
+    > 389 |     await expect(page.locator('text=全部')).toBeVisible();
+          |                                           ^
+      390 |     await expect(page.locator('text=待支付')).toBeVisible();
+      391 |     await expect(page.locator('text=已支付')).toBeVisible();
+      392 |
+        at D:\legal_debate_mvp\src\__tests__\e2e\payment-ui.spec.ts:389:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\..\test-results\payment-ui-订单管理页面测试-应该显示筛选选项-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\..\test-results\payment-ui-订单管理页面测试-应该显示筛选选项-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\..\test-results\payment-ui-订单管理页面测试-应该显示筛选选项-chromium\error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9veqlk000fgc4xxpy7u5nx",
-      "email": "test-1768144207866@example.com",
-      "username": "test207866",
-      "name": "TestUser207866",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:08.167Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVxbGswMDBmZ2M0eHhweTd1NW54IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDc4NjZAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwOCwiZXhwIjoxNzY4NzQ5MDA4fQ.ssDiPv11FY4-5BNNaCApPAq1mVfhxhHEDcoT0Gv-jSs"
-  }
-}
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\payment-ui-订单管理页面测试-应该显示筛选选项-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|..\..\test-results\payment-ui-订单管理页面测试-应该显示筛选选项-chromium\video.webm]]
+
+[[ATTACHMENT|..\..\test-results\payment-ui-订单管理页面测试-应该显示筛选选项-chromium\error-context.md]]
 ]]>
 </system-out>
 </testcase>
-<testcase name="律师资格验证流程 › 应该验证身份证号格式" classname="auth.spec.ts" time="0.542">
-<failure message="auth.spec.ts:550:7 应该验证身份证号格式" type="FAILURE">
-<![CDATA[  [chromium] › auth.spec.ts:550:7 › 律师资格验证流程 › 应该验证身份证号格式 ──────────────────────────────────────────
+<testcase name="订单管理页面测试 › 应该支持按状态筛选订单" classname="payment-ui.spec.ts" time="125.255">
+<failure message="payment-ui.spec.ts:399:7 应该支持按状态筛选订单" type="FAILURE">
+<![CDATA[  [chromium] › payment-ui.spec.ts:399:7 › 订单管理页面测试 › 应该支持按状态筛选订单 ───────────────────────────────────
 
-    Error: expect(received).toBe(expected) // Object.is equality
+    Test timeout of 120000ms exceeded.
 
-    Expected: 400
-    Received: 401
+    Error: page.click: Test timeout of 120000ms exceeded.
+    Call log:
+      - waiting for locator('text=待支付')
+        - locator resolved to <option value="PENDING">待支付</option>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is not visible
+        - retrying click action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and stable
+          - element is not visible
+        - retrying click action
+          - waiting 100ms
+        226 × waiting for element to be visible, enabled and stable
+            - element is not visible
+          - retrying click action
+            - waiting 500ms
 
-      571 |     );
-      572 |
-    > 573 |     expect(response.status()).toBe(400);
-          |                               ^
-      574 |   });
-      575 |
-      576 |   test("应该获取当前用户的资格状态", async ({ request }) => {
-        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:573:31
+
+      402 |
+      403 |     // 点击待支付筛选
+    > 404 |     await page.click('text=待支付');
+          |                ^
+      405 |
+      406 |     // 验证筛选生效
+      407 |     await expect(page.locator('.order-list')).toBeVisible();
+        at D:\legal_debate_mvp\src\__tests__\e2e\payment-ui.spec.ts:404:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\..\test-results\payment-ui-订单管理页面测试-应该支持按状态筛选订单-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\..\..\test-results\payment-ui-订单管理页面测试-应该支持按状态筛选订单-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\..\test-results\payment-ui-订单管理页面测试-应该支持按状态筛选订单-chromium\error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9verql000ggc4x1xcd5wz0",
-      "email": "test-1768144209389@example.com",
-      "username": "test209389",
-      "name": "TestUser209389",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:09.644Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVycWwwMDBnZ2M0eDF4Y2Q1d3owIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMDkzODlAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIwOSwiZXhwIjoxNzY4NzQ5MDA5fQ.HysE_k0LVJAOFIRYSiZ4c7Nd8v5NsByUcgwE4BexVcc"
-  }
-}
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\payment-ui-订单管理页面测试-应该支持按状态筛选订单-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|..\..\test-results\payment-ui-订单管理页面测试-应该支持按状态筛选订单-chromium\video.webm]]
+
+[[ATTACHMENT|..\..\test-results\payment-ui-订单管理页面测试-应该支持按状态筛选订单-chromium\error-context.md]]
 ]]>
 </system-out>
 </testcase>
-<testcase name="律师资格验证流程 › 应该获取当前用户的资格状态" classname="auth.spec.ts" time="0.814">
-<failure message="auth.spec.ts:576:7 应该获取当前用户的资格状态" type="FAILURE">
-<![CDATA[  [chromium] › auth.spec.ts:576:7 › 律师资格验证流程 › 应该获取当前用户的资格状态 ───────────────────────────────────────
+<testcase name="订单管理页面测试 › 应该支持搜索订单" classname="payment-ui.spec.ts" time="121.587">
+<failure message="payment-ui.spec.ts:410:7 应该支持搜索订单" type="FAILURE">
+<![CDATA[  [chromium] › payment-ui.spec.ts:410:7 › 订单管理页面测试 › 应该支持搜索订单 ──────────────────────────────────────
 
-    Error: expect(received).toBeTruthy()
+    Test timeout of 120000ms exceeded.
 
-    Received: false
+    Error: locator.fill: Test timeout of 120000ms exceeded.
+    Call log:
+      - waiting for locator('input[placeholder="搜索订单号、描述"]')
 
-      603 |
-      604 |     const data = await response.json();
-    > 605 |     expect(response.ok()).toBeTruthy();
-          |                           ^
-      606 |     expect(data.success).toBe(true);
-      607 |   });
-      608 |
-        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:605:27
+
+      414 |     // 输入搜索关键词
+      415 |     const searchInput = page.locator('input[placeholder="搜索订单号、描述"]');
+    > 416 |     await searchInput.fill('测试订单');
+          |                       ^
+      417 |
+      418 |     // 验证搜索框有值
+      419 |     const inputValue = await searchInput.inputValue();
+        at D:\legal_debate_mvp\src\__tests__\e2e\payment-ui.spec.ts:416:23
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\..\..\test-results\payment-ui-订单管理页面测试-应该支持搜索订单-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\..\..\test-results\payment-ui-订单管理页面测试-应该支持搜索订单-chromium\error-context.md
 ]]>
 </failure>
 <system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9vesx4000hgc4xgcmrzyah",
-      "email": "test-1768144210894@example.com",
-      "username": "test210894",
-      "name": "TestUser210894",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:11.175Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmVzeDQwMDBoZ2M0eGdjbXJ6eWFoIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMTA4OTRAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIxMSwiZXhwIjoxNzY4NzQ5MDExfQ.0eQhfL-nRFfAxAV-R1MfhUkc9RBaKg62LAib-otgMLg"
-  }
-}
+<![CDATA[
+[[ATTACHMENT|..\..\test-results\payment-ui-订单管理页面测试-应该支持搜索订单-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|..\..\test-results\payment-ui-订单管理页面测试-应该支持搜索订单-chromium\error-context.md]]
 ]]>
 </system-out>
 </testcase>
-<testcase name="律师资格验证流程 › 管理员应该能够审核资格申请" classname="auth.spec.ts" time="1.648">
-<failure message="auth.spec.ts:609:7 管理员应该能够审核资格申请" type="FAILURE">
-<![CDATA[  [chromium] › auth.spec.ts:609:7 › 律师资格验证流程 › 管理员应该能够审核资格申请 ───────────────────────────────────────
-
-    Error: expect(received).toBeTruthy()
-
-    Received: false
-
-      661 |
-      662 |     const reviewData = await reviewResponse.json();
-    > 663 |     expect(reviewResponse.ok()).toBeTruthy();
-          |                                 ^
-      664 |     expect(reviewData.success).toBe(true);
-      665 |   });
-      666 | });
-        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:663:33
-]]>
-</failure>
-<system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9veug9000jgc4xafpn2zcv",
-      "email": "test-1768144212919@example.com",
-      "username": "test212919",
-      "name": "TestUser212919",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:13.160Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmV1ZzkwMDBqZ2M0eGFmcG4yemN2IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMTI5MTlAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIxMywiZXhwIjoxNzY4NzQ5MDEzfQ.zyoZpY0PfBZQWkPmH35sxmYXKdAZ2IFa88Gc9JB8NfY"
-  }
-}
-]]>
-</system-out>
+<testcase name="订单管理页面测试 › 应该支持排序功能" classname="payment-ui.spec.ts" time="0">
+<skipped>
+</skipped>
 </testcase>
-<testcase name="企业认证流程 › 应该提交企业注册申请" classname="auth.spec.ts" time="0.7">
-<failure message="auth.spec.ts:673:7 应该提交企业注册申请" type="FAILURE">
-<![CDATA[  [chromium] › auth.spec.ts:673:7 › 企业认证流程 › 应该提交企业注册申请 ────────────────────────────────────────────
-
-    Error: expect(received).toBeTruthy()
-
-    Received: false
-
-      692 |
-      693 |     const data: EnterpriseResponseData = await response.json();
-    > 694 |     expect(response.ok()).toBeTruthy();
-          |                           ^
-      695 |     expect(data.success).toBe(true);
-      696 |     expect(data.data?.enterprise.status).toBe("PENDING");
-      697 |   });
-        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:694:27
-]]>
-</failure>
-<system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9vew8m000kgc4xwboa34v6",
-      "email": "test-1768144215221@example.com",
-      "username": "test215221",
-      "name": "TestUser215221",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:15.477Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmV3OG0wMDBrZ2M0eHdib2EzNHY2IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMTUyMjFAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIxNSwiZXhwIjoxNzY4NzQ5MDE1fQ.wRofRtVoyOWAMbkiFyQDUwaCgpFCZAeco4j4HrI77c4"
-  }
-}
-]]>
-</system-out>
+<testcase name="订单管理页面测试 › 应该支持分页导航" classname="payment-ui.spec.ts" time="0">
+<skipped>
+</skipped>
 </testcase>
-<testcase name="企业认证流程 › 应该验证统一社会信用代码格式" classname="auth.spec.ts" time="0.543">
-<system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9vexia000lgc4xm06n25ia",
-      "email": "test-1768144216863@example.com",
-      "username": "test216863",
-      "name": "TestUser216863",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:17.116Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmV4aWEwMDBsZ2M0eG0wNm4yNWlhIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMTY4NjNAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIxNywiZXhwIjoxNzY4NzQ5MDE3fQ.e2nRJnE-QulsCt1gzM7dv7msziaI2BiKJwhRchrFaEs"
-  }
-}
-]]>
-</system-out>
+<testcase name="订单管理页面测试 › 应该支持刷新订单列表" classname="payment-ui.spec.ts" time="0">
+<skipped>
+</skipped>
 </testcase>
-<testcase name="企业认证流程 › 应该获取当前用户的企业信息" classname="auth.spec.ts" time="0.699">
-<failure message="auth.spec.ts:722:7 应该获取当前用户的企业信息" type="FAILURE">
-<![CDATA[  [chromium] › auth.spec.ts:722:7 › 企业认证流程 › 应该获取当前用户的企业信息 ─────────────────────────────────────────
-
-    Error: expect(received).toBeTruthy()
-
-    Received: false
-
-      749 |
-      750 |     const data = await response.json();
-    > 751 |     expect(response.ok()).toBeTruthy();
-          |                           ^
-      752 |     expect(data.success).toBe(true);
-      753 |   });
-      754 | });
-        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:751:27
-]]>
-</failure>
-<system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9vexx7000mgc4xw0he4mqh",
-      "email": "test-1768144217416@example.com",
-      "username": "test217416",
-      "name": "TestUser217416",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:17.654Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmV4eDcwMDBtZ2M0eHcwaGU0bXFoIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMTc0MTZAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIxNywiZXhwIjoxNzY4NzQ5MDE3fQ.aBbe08If3Tet_LjIjdqYNTSwFYl5FRmHkfpJI5pEe6c"
-  }
-}
-]]>
-</system-out>
+<testcase name="完整支付流程测试 › 完整支付流程：从支付页面到成功页面" classname="payment-ui.spec.ts" time="0">
+<skipped>
+</skipped>
 </testcase>
-<testcase name="第三方认证流程 › 应该支持微信OAuth授权流程" classname="auth.spec.ts" time="4.051">
+<testcase name="完整支付流程测试 › 完整支付流程：支付失败后重试" classname="payment-ui.spec.ts" time="0">
+<skipped>
+</skipped>
 </testcase>
-<testcase name="第三方认证流程 › 应该支持QQ OAuth授权流程" classname="auth.spec.ts" time="0.253">
+<testcase name="完整支付流程测试 › 完整支付流程：从订单列表跳转" classname="payment-ui.spec.ts" time="0">
+<skipped>
+</skipped>
 </testcase>
-<testcase name="第三方认证流程 › 应该验证OAuth参数" classname="auth.spec.ts" time="0.054">
-<failure message="auth.spec.ts:783:7 应该验证OAuth参数" type="FAILURE">
-<![CDATA[  [chromium] › auth.spec.ts:783:7 › 第三方认证流程 › 应该验证OAuth参数 ──────────────────────────────────────────
-
-    Error: expect(received).toBe(expected) // Object.is equality
-
-    Expected: 400
-    Received: 500
-
-      785 |     const response = await request.get(`${BASE_URL}/api/auth/oauth/wechat`);
-      786 |
-    > 787 |     expect(response.status()).toBe(400);
-          |                               ^
-      788 |   });
-      789 | });
-      790 |
-        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:787:31
-]]>
-</failure>
+<testcase name="响应式设计和用户体验测试 › 应该在小屏幕上正确显示" classname="payment-ui.spec.ts" time="0">
+<skipped>
+</skipped>
 </testcase>
-<testcase name="综合测试 - 完整用户生命周期 › 完整用户生命周期：注册到激活" classname="auth.spec.ts" time="0.546">
-<failure message="auth.spec.ts:796:7 完整用户生命周期：注册到激活" type="FAILURE">
-<![CDATA[  [chromium] › auth.spec.ts:796:7 › 综合测试 - 完整用户生命周期 › 完整用户生命周期：注册到激活 ───────────────────────────────
-
-    TypeError: Cannot read properties of undefined (reading 'email')
-
-      833 |     const meData: CurrentUserResponseData = await meResponse.json();
-      834 |     expect(meResponse.ok()).toBeTruthy();
-    > 835 |     expect(meData.data?.user.email).toBe(email);
-          |                              ^
-      836 |
-      837 |     // 4. 刷新令牌
-      838 |     const newToken = await refreshToken(request, rt);
-        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:835:30
-]]>
-</failure>
+<testcase name="响应式设计和用户体验测试 › 应该支持键盘导航" classname="payment-ui.spec.ts" time="0">
+<skipped>
+</skipped>
 </testcase>
-<testcase name="安全和边界情况测试 › 应该拒绝无效的JWT令牌" classname="auth.spec.ts" time="0.043">
+<testcase name="响应式设计和用户体验测试 › 应该显示加载状态" classname="payment-ui.spec.ts" time="0">
+<skipped>
+</skipped>
 </testcase>
-<testcase name="安全和边界情况测试 › 应该拒绝缺少Authorization头的请求" classname="auth.spec.ts" time="0.016">
-</testcase>
-<testcase name="安全和边界情况测试 › 应该拒绝格式错误的Authorization头" classname="auth.spec.ts" time="0.019">
-</testcase>
-<testcase name="安全和边界情况测试 › 应该处理过大的请求体" classname="auth.spec.ts" time="0.502">
-<failure message="auth.spec.ts:917:7 应该处理过大的请求体" type="FAILURE">
-<![CDATA[  [chromium] › auth.spec.ts:917:7 › 安全和边界情况测试 › 应该处理过大的请求体 ─────────────────────────────────────────
-
-    Error: expect(received).toContain(expected) // indexOf
-
-    Expected value: 200
-    Received array: [400, 413]
-
-      929 |
-      930 |     // 应该返回413 Payload Too Large或处理错误
-    > 931 |     expect([400, 413]).toContain(response.status());
-          |                        ^
-      932 |   });
-      933 |
-      934 |   test("应该处理缺失必填字段的请求", async ({ request }) => {
-        at D:\legal_debate_mvp\src\__tests__\e2e\auth.spec.ts:931:24
-]]>
-</failure>
-<system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9vf4ko000ogc4x5b64j8jv",
-      "email": "test-1768144226038@example.com",
-      "username": "test226038",
-      "name": "TestUser226038",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:26.275Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmY0a28wMDBvZ2M0eDViNjRqOGp2IiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMjYwMzhAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIyNiwiZXhwIjoxNzY4NzQ5MDI2fQ.hvbZvQPSM1FEiZ5OxqwzNrAPaQu_SIsO8IWZVxV9Nu0"
-  }
-}
-]]>
-</system-out>
-</testcase>
-<testcase name="安全和边界情况测试 › 应该处理缺失必填字段的请求" classname="auth.spec.ts" time="0.292">
-<system-out>
-<![CDATA[[createTestUser] 注册响应状态: 201
-[createTestUser] 响应数据: {
-  "success": true,
-  "message": "注册成功，请使用邮箱登录",
-  "data": {
-    "user": {
-      "id": "cmk9vf5p0000pgc4x0cjj888l",
-      "email": "test-1768144227474@example.com",
-      "username": "test227474",
-      "name": "TestUser227474",
-      "role": "USER",
-      "createdAt": "2026-01-11T15:10:27.726Z"
-    },
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWs5dmY1cDAwMDBwZ2M0eDBjamo4ODhsIiwiZW1haWwiOiJ0ZXN0LTE3NjgxNDQyMjc0NzRAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2ODE0NDIyNywiZXhwIjoxNzY4NzQ5MDI3fQ.3MiRotp38xqbR7XEi23R3XwK8BFhyn1Y-yNfot3grkc"
-  }
-}
-]]>
-</system-out>
-</testcase>
-<testcase name="安全和边界情况测试 › 应该处理空请求体" classname="auth.spec.ts" time="0.014">
+<testcase name="响应式设计和用户体验测试 › 应该处理网络错误" classname="payment-ui.spec.ts" time="0">
+<skipped>
+</skipped>
 </testcase>
 </testsuite>
 </testsuites>
