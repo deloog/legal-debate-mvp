@@ -1,0 +1,647 @@
+  console.error
+    Error: Not implemented: navigation (except hash changes)
+        at module.exports (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\browser\not-implemented.js:9:17)
+        at navigateFetch (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\window\navigation.js:77:3)
+        at exports.navigate (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\window\navigation.js:55:3)
+        at Timeout._onTimeout (D:\legal_debate_mvp\node_modules\jsdom\lib\jsdom\living\nodes\HTMLHyperlinkElementUtils-impl.js:80:7)
+        at listOnTimeout (node:internal/timers:594:17)
+        at processTimers (node:internal/timers:529:7) {
+      type: 'not implemented'
+    }
+
+      at VirtualConsole.<anonymous> (node_modules/@jest/environment-jsdom-abstract/build/index.js:87:23)
+      at module.exports (node_modules/jsdom/lib/jsdom/browser/not-implemented.js:12:26)
+      at navigateFetch (node_modules/jsdom/lib/jsdom/living/window/navigation.js:77:3)
+      at exports.navigate (node_modules/jsdom/lib/jsdom/living/window/navigation.js:55:3)
+      at Timeout._onTimeout (node_modules/jsdom/lib/jsdom/living/nodes/HTMLHyperlinkElementUtils-impl.js:80:7)
+
+FAIL src/__tests__/app/admin/export.page.test.tsx
+  数据导出页面
+    页面渲染
+      √ 应该正确渲染页面标题 (52 ms)
+      √ 应该渲染导出表单区域 (10 ms)
+      √ 应该渲染导出历史区域 (8 ms)
+      √ 应该显示导出类型选择器 (11 ms)
+      √ 应该显示导出格式选择器 (10 ms)
+      √ 应该显示时间范围选择器 (7 ms)
+    导出类型选择
+      √ 应该默认选择案件数据 (10 ms)
+      √ 应该能够切换到统计数据 (15 ms)
+      √ 选择统计数据时应该显示统计类型选择器 (13 ms)
+    导出格式选择
+      √ 应该默认选择CSV格式 (8 ms)
+      √ 应该能够选择Excel格式 (8 ms)
+      √ 应该能够选择JSON格式 (8 ms)
+    时间范围选择
+      √ 应该默认选择近30天 (6 ms)
+      √ 应该能够选择近7天 (9 ms)
+      √ 应该能够选择近90天 (9 ms)
+      √ 应该能够选择自定义时间范围 (14 ms)
+      √ 应该能够输入自定义开始日期 (16 ms)
+      √ 应该能够输入自定义结束日期 (15 ms)
+    统计类型选择
+      √ 应该默认选择用户注册统计 (11 ms)
+      √ 应该能够选择用户活跃度统计 (15 ms)
+      √ 应该能够选择案件类型分布统计 (13 ms)
+      √ 应该能够选择性能响应时间统计 (14 ms)
+    导出功能
+      √ 应该能够导出案件数据 (19 ms)
+      √ 应该能够导出统计数据 (36 ms)
+      × 导出成功后应该触发文件下载 (7 ms)
+      × 导出成功后应该更新导出历史 (6 ms)
+      × 导出失败时应该显示错误信息 (6 ms)
+      × 导出按钮在加载期间应该禁用 (5 ms)
+    自定义日期验证
+      × 自定义时间范围应该需要输入开始日期 (5 ms)
+      × 自定义时间范围应该需要输入结束日期 (5 ms)
+      × 应该能够同时输入开始和结束日期 (6 ms)
+    UI元素
+      × 导出类型选项应该包含案件数据和统计数据 (8 ms)
+      × 导出格式选项应该包含CSV、Excel和JSON (6 ms)
+      × 时间范围选项应该包含预设和自定义选项 (5 ms)
+    导出历史
+      × 应该显示暂无导出记录提示 (6 ms)
+      × 导出成功后应该更新导出历史列表 (5 ms)
+    错误处理
+      × 应该显示API调用失败的错误信息 (5 ms)
+      × 错误信息应该显示在错误框中 (6 ms)
+
+  ● 数据导出页面 › 导出功能 › 导出成功后应该触发文件下载
+
+    The error below may be caused by using the wrong test environment, see https://jestjs.io/docs/configuration#testenvironment-string.
+    Consider using the "jsdom" test environment.
+
+    ReferenceError: document is not defined
+
+      435 |             return mockLink as unknown as HTMLAnchorElement;
+      436 |           }
+    > 437 |           return document.createElement(tag);
+          |           ^
+      438 |         });
+      439 |
+      440 |       const appendChildSpy = jest
+
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:11)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+
+  ● 数据导出页面 › 导出功能 › 导出成功后应该更新导出历史
+
+    The error below may be caused by using the wrong test environment, see https://jestjs.io/docs/configuration#testenvironment-string.
+    Consider using the "jsdom" test environment.
+
+    ReferenceError: document is not defined
+
+      435 |             return mockLink as unknown as HTMLAnchorElement;
+      436 |           }
+    > 437 |           return document.createElement(tag);
+          |           ^
+      438 |         });
+      439 |
+      440 |       const appendChildSpy = jest
+
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:11)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+
+  ● 数据导出页面 › 导出功能 › 导出失败时应该显示错误信息
+
+    The error below may be caused by using the wrong test environment, see https://jestjs.io/docs/configuration#testenvironment-string.
+    Consider using the "jsdom" test environment.
+
+    ReferenceError: document is not defined
+
+      435 |             return mockLink as unknown as HTMLAnchorElement;
+      436 |           }
+    > 437 |           return document.createElement(tag);
+          |           ^
+      438 |         });
+      439 |
+      440 |       const appendChildSpy = jest
+
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:11)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+
+  ● 数据导出页面 › 导出功能 › 导出按钮在加载期间应该禁用
+
+    The error below may be caused by using the wrong test environment, see https://jestjs.io/docs/configuration#testenvironment-string.
+    Consider using the "jsdom" test environment.
+
+    ReferenceError: document is not defined
+
+      435 |             return mockLink as unknown as HTMLAnchorElement;
+      436 |           }
+    > 437 |           return document.createElement(tag);
+          |           ^
+      438 |         });
+      439 |
+      440 |       const appendChildSpy = jest
+
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:11)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+
+  ● 数据导出页面 › 自定义日期验证 › 自定义时间范围应该需要输入开始日期
+
+    The error below may be caused by using the wrong test environment, see https://jestjs.io/docs/configuration#testenvironment-string.
+    Consider using the "jsdom" test environment.
+
+    ReferenceError: document is not defined
+
+      435 |             return mockLink as unknown as HTMLAnchorElement;
+      436 |           }
+    > 437 |           return document.createElement(tag);
+          |           ^
+      438 |         });
+      439 |
+      440 |       const appendChildSpy = jest
+
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:11)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+
+  ● 数据导出页面 › 自定义日期验证 › 自定义时间范围应该需要输入结束日期
+
+    The error below may be caused by using the wrong test environment, see https://jestjs.io/docs/configuration#testenvironment-string.
+    Consider using the "jsdom" test environment.
+
+    ReferenceError: document is not defined
+
+      435 |             return mockLink as unknown as HTMLAnchorElement;
+      436 |           }
+    > 437 |           return document.createElement(tag);
+          |           ^
+      438 |         });
+      439 |
+      440 |       const appendChildSpy = jest
+
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:11)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+
+  ● 数据导出页面 › 自定义日期验证 › 应该能够同时输入开始和结束日期
+
+    The error below may be caused by using the wrong test environment, see https://jestjs.io/docs/configuration#testenvironment-string.
+    Consider using the "jsdom" test environment.
+
+    ReferenceError: document is not defined
+
+      435 |             return mockLink as unknown as HTMLAnchorElement;
+      436 |           }
+    > 437 |           return document.createElement(tag);
+          |           ^
+      438 |         });
+      439 |
+      440 |       const appendChildSpy = jest
+
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:11)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+
+  ● 数据导出页面 › UI元素 › 导出类型选项应该包含案件数据和统计数据
+
+    The error below may be caused by using the wrong test environment, see https://jestjs.io/docs/configuration#testenvironment-string.
+    Consider using the "jsdom" test environment.
+
+    ReferenceError: document is not defined
+
+      435 |             return mockLink as unknown as HTMLAnchorElement;
+      436 |           }
+    > 437 |           return document.createElement(tag);
+          |           ^
+      438 |         });
+      439 |
+      440 |       const appendChildSpy = jest
+
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:11)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+
+  ● 数据导出页面 › UI元素 › 导出格式选项应该包含CSV、Excel和JSON
+
+    The error below may be caused by using the wrong test environment, see https://jestjs.io/docs/configuration#testenvironment-string.
+    Consider using the "jsdom" test environment.
+
+    ReferenceError: document is not defined
+
+      435 |             return mockLink as unknown as HTMLAnchorElement;
+      436 |           }
+    > 437 |           return document.createElement(tag);
+          |           ^
+      438 |         });
+      439 |
+      440 |       const appendChildSpy = jest
+
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:11)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+
+  ● 数据导出页面 › UI元素 › 时间范围选项应该包含预设和自定义选项
+
+    The error below may be caused by using the wrong test environment, see https://jestjs.io/docs/configuration#testenvironment-string.
+    Consider using the "jsdom" test environment.
+
+    ReferenceError: document is not defined
+
+      435 |             return mockLink as unknown as HTMLAnchorElement;
+      436 |           }
+    > 437 |           return document.createElement(tag);
+          |           ^
+      438 |         });
+      439 |
+      440 |       const appendChildSpy = jest
+
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:11)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+
+  ● 数据导出页面 › 导出历史 › 应该显示暂无导出记录提示
+
+    The error below may be caused by using the wrong test environment, see https://jestjs.io/docs/configuration#testenvironment-string.
+    Consider using the "jsdom" test environment.
+
+    ReferenceError: document is not defined
+
+      435 |             return mockLink as unknown as HTMLAnchorElement;
+      436 |           }
+    > 437 |           return document.createElement(tag);
+          |           ^
+      438 |         });
+      439 |
+      440 |       const appendChildSpy = jest
+
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:11)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+
+  ● 数据导出页面 › 导出历史 › 导出成功后应该更新导出历史列表
+
+    The error below may be caused by using the wrong test environment, see https://jestjs.io/docs/configuration#testenvironment-string.
+    Consider using the "jsdom" test environment.
+
+    ReferenceError: document is not defined
+
+      435 |             return mockLink as unknown as HTMLAnchorElement;
+      436 |           }
+    > 437 |           return document.createElement(tag);
+          |           ^
+      438 |         });
+      439 |
+      440 |       const appendChildSpy = jest
+
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:11)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+
+  ● 数据导出页面 › 错误处理 › 应该显示API调用失败的错误信息
+
+    The error below may be caused by using the wrong test environment, see https://jestjs.io/docs/configuration#testenvironment-string.
+    Consider using the "jsdom" test environment.
+
+    ReferenceError: document is not defined
+
+      435 |             return mockLink as unknown as HTMLAnchorElement;
+      436 |           }
+    > 437 |           return document.createElement(tag);
+          |           ^
+      438 |         });
+      439 |
+      440 |       const appendChildSpy = jest
+
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:11)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+
+  ● 数据导出页面 › 错误处理 › 错误信息应该显示在错误框中
+
+    The error below may be caused by using the wrong test environment, see https://jestjs.io/docs/configuration#testenvironment-string.
+    Consider using the "jsdom" test environment.
+
+    ReferenceError: document is not defined
+
+      435 |             return mockLink as unknown as HTMLAnchorElement;
+      436 |           }
+    > 437 |           return document.createElement(tag);
+          |           ^
+      438 |         });
+      439 |
+      440 |       const appendChildSpy = jest
+
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:11)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+      at Document.<anonymous> (src/__tests__/app/admin/export.page.test.tsx:437:27)
+
+Test Suites: 1 failed, 1 total
+Tests:       14 failed, 24 passed, 38 total
+Snapshots:   0 total
+Time:        2.087 s
+Ran all test suites matching src/__tests__/app/admin/export.page.test.tsx.

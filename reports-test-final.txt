@@ -1,0 +1,4847 @@
+  console.error
+    An update to ReportsPage inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 74 |[39m       setError(err [36minstanceof[39m [33mError[39m [33m?[39m err[33m.[39mmessage [33m:[39m [32m'加载报告失败'[39m)[33m;[39m
+     [90m 75 |[39m     } [36mfinally[39m {
+    [31m[1m>[22m[39m[90m 76 |[39m       setLoading([36mfalse[39m)[33m;[39m
+     [90m    |[39m       [31m[1m^[22m[39m
+     [90m 77 |[39m     }
+     [90m 78 |[39m   }[33m;[39m
+     [90m 79 |[39m[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at loadReports (src/app/admin/reports/page.tsx:76:7)
+
+  console.error
+    An update to ReportsPage inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 74 |[39m       setError(err [36minstanceof[39m [33mError[39m [33m?[39m err[33m.[39mmessage [33m:[39m [32m'加载报告失败'[39m)[33m;[39m
+     [90m 75 |[39m     } [36mfinally[39m {
+    [31m[1m>[22m[39m[90m 76 |[39m       setLoading([36mfalse[39m)[33m;[39m
+     [90m    |[39m       [31m[1m^[22m[39m
+     [90m 77 |[39m     }
+     [90m 78 |[39m   }[33m;[39m
+     [90m 79 |[39m[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at loadReports (src/app/admin/reports/page.tsx:76:7)
+
+  console.error
+    An update to ReportsPage inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 74 |[39m       setError(err [36minstanceof[39m [33mError[39m [33m?[39m err[33m.[39mmessage [33m:[39m [32m'加载报告失败'[39m)[33m;[39m
+     [90m 75 |[39m     } [36mfinally[39m {
+    [31m[1m>[22m[39m[90m 76 |[39m       setLoading([36mfalse[39m)[33m;[39m
+     [90m    |[39m       [31m[1m^[22m[39m
+     [90m 77 |[39m     }
+     [90m 78 |[39m   }[33m;[39m
+     [90m 79 |[39m[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at loadReports (src/app/admin/reports/page.tsx:76:7)
+
+  console.error
+    An update to ReportsPage inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 74 |[39m       setError(err [36minstanceof[39m [33mError[39m [33m?[39m err[33m.[39mmessage [33m:[39m [32m'加载报告失败'[39m)[33m;[39m
+     [90m 75 |[39m     } [36mfinally[39m {
+    [31m[1m>[22m[39m[90m 76 |[39m       setLoading([36mfalse[39m)[33m;[39m
+     [90m    |[39m       [31m[1m^[22m[39m
+     [90m 77 |[39m     }
+     [90m 78 |[39m   }[33m;[39m
+     [90m 79 |[39m[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at loadReports (src/app/admin/reports/page.tsx:76:7)
+
+FAIL src/__tests__/app/admin/reports.page.test.tsx (25.894 s)
+  报告管理页面
+    页面渲染
+      √ 应该正确渲染页面标题 (54 ms)
+      √ 应该渲染生成报告按钮 (25 ms)
+      √ 应该渲染筛选栏 (31 ms)
+      × 应该渲染报告列表 (1025 ms)
+    报告列表显示
+      × 应该显示所有报告 (1015 ms)
+      √ 应该显示报告类型 (21 ms)
+      √ 应该显示报告状态 (9 ms)
+      × 应该显示报告时间范围 (1022 ms)
+      × 应该显示报告文件大小 (1011 ms)
+      × 应该显示下载按钮（已完成报告） (1012 ms)
+      × 应该显示删除按钮（失败报告） (1022 ms)
+    筛选功能
+      √ 应该能够按报告类型筛选 (57 ms)
+      √ 应该能够按状态筛选 (17 ms)
+      √ 应该能够设置开始日期 (13 ms)
+      √ 应该能够设置结束日期 (14 ms)
+      √ 点击搜索按钮应该触发数据加载 (18 ms)
+    分页功能
+      × 应该显示分页信息 (1015 ms)
+      × 应该显示上一页和下一页按钮 (1040 ms)
+      × 上一页按钮应该在第一页时禁用 (1032 ms)
+      × 下一页按钮应该在没有更多数据时禁用 (1011 ms)
+    报告详情跳转
+      × 点击报告名称应该跳转到详情页 (1014 ms)
+    下载功能
+      × 点击下载按钮应该触发下载 (1024 ms)
+    删除功能
+      × 点击删除按钮应该显示确认对话框 (1035 ms)
+      × 确认删除应该调用删除API (1035 ms)
+      × 取消删除不应该调用删除API (1026 ms)
+      × 删除成功应该刷新列表 (1031 ms)
+      × 删除失败应该显示错误提示 (1014 ms)
+    生成报告功能
+      × 点击生成报告按钮应该显示弹窗 (1057 ms)
+      √ 应该能够选择报告类型 (105 ms)
+      × 应该能够设置时间范围 (1039 ms)
+      √ 点击取消按钮应该关闭弹窗 (45 ms)
+      × 点击生成按钮应该提交生成请求 (1029 ms)
+      × 生成成功应该显示成功消息 (1068 ms)
+      × 生成失败应该显示错误消息 (1048 ms)
+    空状态
+      √ 应该显示暂无报告记录提示 (32 ms)
+    加载状态
+      √ 应该显示加载中状态 (7 ms)
+    错误处理
+      × 应该显示加载报告失败的错误信息 (1018 ms)
+      × 错误信息应该显示在错误框中 (1016 ms)
+
+  ● 报告管理页面 › 页面渲染 › 应该渲染报告列表
+
+    Unable to find an element with the text: weekly-report-20240108.csv. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      228 |       render(<ReportsPage />);
+      229 |
+    > 230 |       await waitFor(() => {
+          |                    ^
+      231 |         expect(screen.getByText(mockReports[0].fileName)).toBeInTheDocument();
+      232 |       });
+      233 |     });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:230:20)
+
+  ● 报告管理页面 › 报告列表显示 › 应该显示所有报告
+
+    Unable to find an element with the text: weekly-report-20240108.csv. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      242 |       render(<ReportsPage />);
+      243 |
+    > 244 |       await waitFor(() => {
+          |                    ^
+      245 |         mockReports.forEach(report => {
+      246 |           expect(screen.getByText(report.fileName)).toBeInTheDocument();
+      247 |         });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:244:20)
+
+  ● 报告管理页面 › 报告列表显示 › 应该显示报告时间范围
+
+    Unable to find an element with the text: 2024-01-01 ~ 2024-01-07. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      272 |       render(<ReportsPage />);
+      273 |
+    > 274 |       await waitFor(() => {
+          |                    ^
+      275 |         expect(screen.getByText('2024-01-01 ~ 2024-01-07')).toBeInTheDocument();
+      276 |       });
+      277 |     });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:274:20)
+
+  ● 报告管理页面 › 报告列表显示 › 应该显示报告文件大小
+
+    Unable to find an element with the text: 1 MB. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      280 |       render(<ReportsPage />);
+      281 |
+    > 282 |       await waitFor(() => {
+          |                    ^
+      283 |         expect(screen.getByText('1 MB')).toBeInTheDocument();
+      284 |         expect(screen.getByText('5 MB')).toBeInTheDocument();
+      285 |       });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:282:20)
+
+  ● 报告管理页面 › 报告列表显示 › 应该显示下载按钮（已完成报告）
+
+    Unable to find an element with the text: 下载. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      289 |       render(<ReportsPage />);
+      290 |
+    > 291 |       await waitFor(() => {
+          |                    ^
+      292 |         const downloadButtons = screen.getAllByText('下载');
+      293 |         expect(downloadButtons.length).toBeGreaterThan(0);
+      294 |       });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:291:20)
+
+  ● 报告管理页面 › 报告列表显示 › 应该显示删除按钮（失败报告）
+
+    Unable to find an element with the text: 删除. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      298 |       render(<ReportsPage />);
+      299 |
+    > 300 |       await waitFor(() => {
+          |                    ^
+      301 |         expect(screen.getByText('删除')).toBeInTheDocument();
+      302 |       });
+      303 |     });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:300:20)
+
+  ● 报告管理页面 › 分页功能 › 应该显示分页信息
+
+    Unable to find an element with the text: 共 4 条记录，第 1 页. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      375 |       render(<ReportsPage />);
+      376 |
+    > 377 |       await waitFor(() => {
+          |                    ^
+      378 |         expect(screen.getByText('共 4 条记录，第 1 页')).toBeInTheDocument();
+      379 |       });
+      380 |     });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:377:20)
+
+  ● 报告管理页面 › 分页功能 › 应该显示上一页和下一页按钮
+
+    Unable to find an element with the text: 上一页. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      383 |       render(<ReportsPage />);
+      384 |
+    > 385 |       await waitFor(() => {
+          |                    ^
+      386 |         expect(screen.getByText('上一页')).toBeInTheDocument();
+      387 |         expect(screen.getByText('下一页')).toBeInTheDocument();
+      388 |       });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:385:20)
+
+  ● 报告管理页面 › 分页功能 › 上一页按钮应该在第一页时禁用
+
+    Unable to find an element with the text: 上一页. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      392 |       render(<ReportsPage />);
+      393 |
+    > 394 |       await waitFor(() => {
+          |                    ^
+      395 |         const prevButton = screen.getByText('上一页');
+      396 |         expect(prevButton).toBeDisabled();
+      397 |       });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:394:20)
+
+  ● 报告管理页面 › 分页功能 › 下一页按钮应该在没有更多数据时禁用
+
+    Unable to find an element with the text: 下一页. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      401 |       render(<ReportsPage />);
+      402 |
+    > 403 |       await waitFor(() => {
+          |                    ^
+      404 |         const nextButton = screen.getByText('下一页');
+      405 |         expect(nextButton).toBeDisabled();
+      406 |       });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:403:20)
+
+  ● 报告管理页面 › 报告详情跳转 › 点击报告名称应该跳转到详情页
+
+    Unable to find an element with the text: weekly-report-20240108.csv. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      422 |       render(<ReportsPage />);
+      423 |
+    > 424 |       await waitFor(() => {
+          |                    ^
+      425 |         const reportName = screen.getByText(mockReports[0].fileName);
+      426 |         fireEvent.click(reportName);
+      427 |       });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:424:20)
+
+  ● 报告管理页面 › 下载功能 › 点击下载按钮应该触发下载
+
+    Unable to find an element with the text: 下载. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      439 |       render(<ReportsPage />);
+      440 |
+    > 441 |       await waitFor(() => {
+          |                    ^
+      442 |         const downloadButton = screen.getAllByText('下载')[0];
+      443 |         expect(downloadButton).toBeInTheDocument();
+      444 |       });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:441:20)
+
+  ● 报告管理页面 › 删除功能 › 点击删除按钮应该显示确认对话框
+
+    Unable to find an element with the text: 删除. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      455 |       render(<ReportsPage />);
+      456 |
+    > 457 |       await waitFor(() => {
+          |                    ^
+      458 |         const deleteButton = screen.getByText('删除');
+      459 |         fireEvent.click(deleteButton);
+      460 |       });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:457:20)
+
+  ● 报告管理页面 › 删除功能 › 确认删除应该调用删除API
+
+    Unable to find an element with the text: 删除. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      467 |       render(<ReportsPage />);
+      468 |
+    > 469 |       await waitFor(() => {
+          |                    ^
+      470 |         const deleteButton = screen.getByText('删除');
+      471 |         fireEvent.click(deleteButton);
+      472 |       });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:469:20)
+
+  ● 报告管理页面 › 删除功能 › 取消删除不应该调用删除API
+
+    Unable to find an element with the text: 删除. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      486 |       render(<ReportsPage />);
+      487 |
+    > 488 |       await waitFor(() => {
+          |                    ^
+      489 |         const deleteButton = screen.getByText('删除');
+      490 |         fireEvent.click(deleteButton);
+      491 |       });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:488:20)
+
+  ● 报告管理页面 › 删除功能 › 删除成功应该刷新列表
+
+    Unable to find an element with the text: 删除. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      507 |       render(<ReportsPage />);
+      508 |
+    > 509 |       await waitFor(() => {
+          |                    ^
+      510 |         const deleteButton = screen.getByText('删除');
+      511 |         fireEvent.click(deleteButton);
+      512 |       });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:509:20)
+
+  ● 报告管理页面 › 删除功能 › 删除失败应该显示错误提示
+
+    Unable to find an element with the text: 删除. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      526 |       render(<ReportsPage />);
+      527 |
+    > 528 |       await waitFor(() => {
+          |                    ^
+      529 |         const deleteButton = screen.getByText('删除');
+      530 |         fireEvent.click(deleteButton);
+      531 |       });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:528:20)
+
+  ● 报告管理页面 › 生成报告功能 › 点击生成报告按钮应该显示弹窗
+
+    Found multiple elements with the text: 生成报告
+
+    Here are the matching elements:
+
+    Ignored nodes: comments, script, style
+    <button
+      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      生成报告
+    </button>
+
+    Ignored nodes: comments, script, style
+    <h3
+      class="text-lg font-semibold text-gray-900"
+    >
+      生成报告
+    </h3>
+
+    (If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+          <div
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <div
+              class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4"
+            >
+              <div
+                class="p-6 border-b border-gray-200"
+              >
+                <h3
+                  class="text-lg font-semibold text-gray-900"
+                >
+                  生成报告
+                </h3>
+              </div>
+              <form
+                class="p-6 space-y-4"
+              >
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    报告类型
+                  </label>
+                  <select
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option
+                      value="WEEKLY"
+                    >
+                      周报
+                    </option>
+                    <option
+                      value="MONTHLY"
+                    >
+                      月报
+                    </option>
+                    <option
+                      value="CUSTOM"
+                    >
+                      自定义
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    时间范围
+                  </label>
+                  <div
+                    class="grid grid-cols-2 gap-4"
+                  >
+                    <div>
+                      <input
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required=""
+                        type="date"
+                        value=""
+                      />
+                    </div>
+                    <div>
+                      <input
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required=""
+                        type="date"
+                        value=""
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="flex gap-3"
+                >
+                  <button
+                    class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    type="button"
+                  >
+                    取消
+                  </button>
+                  <button
+                    class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    type="submit"
+                  >
+                    生成
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      552 |       });
+      553 |
+    > 554 |       await waitFor(() => {
+          |                    ^
+      555 |         expect(screen.getByText('生成报告')).toBeInTheDocument();
+      556 |         expect(screen.getByText('报告类型')).toBeInTheDocument();
+      557 |         expect(screen.getByText('时间范围')).toBeInTheDocument();
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:554:20)
+
+  ● 报告管理页面 › 生成报告功能 › 应该能够设置时间范围
+
+    Unable to find role="textbox"
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+          <div
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <div
+              class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4"
+            >
+              <div
+                class="p-6 border-b border-gray-200"
+              >
+                <h3
+                  class="text-lg font-semibold text-gray-900"
+                >
+                  生成报告
+                </h3>
+              </div>
+              <form
+                class="p-6 space-y-4"
+              >
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    报告类型
+                  </label>
+                  <select
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option
+                      value="WEEKLY"
+                    >
+                      周报
+                    </option>
+                    <option
+                      value="MONTHLY"
+                    >
+                      月报
+                    </option>
+                    <option
+                      value="CUSTOM"
+                    >
+                      自定义
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    时间范围
+                  </label>
+                  <div
+                    class="grid grid-cols-2 gap-4"
+                  >
+                    <div>
+                      <input
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required=""
+                        type="date"
+                        value=""
+                      />
+                    </div>
+                    <div>
+                      <input
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required=""
+                        type="date"
+                        value=""
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="flex gap-3"
+                >
+                  <button
+                    class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    type="button"
+                  >
+                    取消
+                  </button>
+                  <button
+                    class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    type="submit"
+                  >
+                    生成
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      585 |       });
+      586 |
+    > 587 |       await waitFor(() => {
+          |                    ^
+      588 |         const dateInputs = screen.getAllByRole('textbox');
+      589 |         expect(dateInputs.length).toBeGreaterThan(0);
+      590 |       });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:587:20)
+
+  ● 报告管理页面 › 生成报告功能 › 点击生成按钮应该提交生成请求
+
+    Unable to find role="textbox"
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+          <div
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <div
+              class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4"
+            >
+              <div
+                class="p-6 border-b border-gray-200"
+              >
+                <h3
+                  class="text-lg font-semibold text-gray-900"
+                >
+                  生成报告
+                </h3>
+              </div>
+              <form
+                class="p-6 space-y-4"
+              >
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    报告类型
+                  </label>
+                  <select
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option
+                      value="WEEKLY"
+                    >
+                      周报
+                    </option>
+                    <option
+                      value="MONTHLY"
+                    >
+                      月报
+                    </option>
+                    <option
+                      value="CUSTOM"
+                    >
+                      自定义
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    时间范围
+                  </label>
+                  <div
+                    class="grid grid-cols-2 gap-4"
+                  >
+                    <div>
+                      <input
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required=""
+                        type="date"
+                        value=""
+                      />
+                    </div>
+                    <div>
+                      <input
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required=""
+                        type="date"
+                        value=""
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="flex gap-3"
+                >
+                  <button
+                    class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    type="button"
+                  >
+                    取消
+                  </button>
+                  <button
+                    class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    type="submit"
+                  >
+                    生成
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      622 |       });
+      623 |
+    > 624 |       await waitFor(() => {
+          |                    ^
+      625 |         const dateInputs = screen.getAllByRole('textbox');
+      626 |         // 设置必填的时间范围
+      627 |         fireEvent.change(dateInputs[0], { target: { value: '2024-01-01' } });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:624:20)
+
+  ● 报告管理页面 › 生成报告功能 › 生成成功应该显示成功消息
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: "报告生成请求已提交，请稍后查看"
+
+    Number of calls: 0
+
+    Ignored nodes: comments, script, style
+    <html>
+      <head />
+      <body>
+        <div>
+          <div
+            class="container mx-auto px-4 py-8"
+          >
+            <div
+              class="mb-6 flex items-center justify-between"
+            >
+              <div>
+                <h1
+                  class="text-3xl font-bold text-gray-900"
+                >
+                  报告管理
+                </h1>
+                <p
+                  class="text-gray-600 mt-2"
+                >
+                  管理系统生成的各类报告
+                </p>
+              </div>
+              <button
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                生成报告
+              </button>
+            </div>
+            <div
+              class="bg-white rounded-lg shadow p-6 mb-6"
+            >
+              <div
+                class="grid grid-cols-1 md:grid-cols-5 gap-4"
+              >
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                    for="report-type"
+                  >
+                    报告类型
+                  </label>
+                  <select
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="report-type"
+                  >
+                    <option
+                      value=""
+                    >
+                      全部
+                    </option>
+                    <option
+                      value="WEEKLY"
+                    >
+                      周报
+                    </option>
+                    <option
+                      value="MONTHLY"
+                    >
+                      月报
+                    </option>
+                    <option
+                      value="CUSTOM"
+                    >
+                      自定义
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                    for="report-status"
+                  >
+                    状态
+                  </label>
+                  <select
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="report-status"
+                  >
+                    <option
+                      value=""
+                    >
+                      全部
+                    </option>
+                    <option
+                      value="PENDING"
+                    >
+                      待处理
+                    </option>
+                    <option
+                      value="GENERATING"
+                    >
+                      生成中
+                    </option>
+                    <option
+                      value="COMPLETED"
+                    >
+                      已完成
+                    </option>
+                    <option
+                      value="FAILED"
+                    >
+                      失败
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                    for="period-start"
+                  >
+                    开始日期
+                  </label>
+                  <input
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="period-start"
+                    type="date"
+                    value=""
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                    for="period-end"
+                  >
+                    结束日期
+                  </label>
+                  <input
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="period-end"
+                    type="date"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="flex items-end"
+                >
+                  <button
+                    class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    搜索
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div
+              class="bg-white rounded-lg shadow p-6"
+            >
+              <div
+                class="text-center py-8"
+              >
+                <p
+                  class="text-gray-500"
+                >
+                  暂无报告记录
+                </p>
+              </div>
+            </div>
+            <div
+              class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            >
+              <div
+                class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4"
+              >
+                <div
+                  class="p-6 border-b border-gray-200"
+                >
+                  <h3
+                    class="text-lg font-semibold text-gray-900"
+                  >
+                    生成报告
+                  </h3>
+                </div>
+                <form
+                  class="p-6 space-y-4"
+                >
+                  <div>
+                    <label
+                      class="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      报告类型
+                    </label>
+                    <select
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option
+                        value="WEEKLY"
+                      >
+                        周报
+                      </option>
+                      <option
+                        value="MONTHLY"
+                      >
+                        月报
+                      </option>
+                      <option
+                        value="CUSTOM"
+                      >
+                        自定义
+                      </option>
+                    </select>
+                  </div>
+                  <div>
+                    <label
+                      class="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      时间范围
+                    </label>
+                    <div
+                      class="grid grid-cols-2 gap-4"
+                    >
+                      <div>
+                        <input
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required=""
+                          type="date"
+                          value=""
+                        />
+                      </div>
+                      <div>
+                        <input
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required=""
+                          type="date"
+                          value=""
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="flex gap-3"
+                  >
+                    <button
+                      class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                      type="button"
+                    >
+                      取消
+                    </button>
+                    <button
+                      class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      type="submit"
+                    >
+                      生成
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+
+      664 |
+      665 |       await waitFor(() => {
+    > 666 |         expect(mockAlert).toHaveBeenCalledWith(
+          |                           ^
+      667 |           '报告生成请求已提交，请稍后查看'
+      668 |         );
+      669 |       });
+
+      at src/__tests__/app/admin/reports.page.test.tsx:666:27
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at checkRealTimersCallback (node_modules/@testing-library/dom/dist/wait-for.js:118:16)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:579:19)
+
+  ● 报告管理页面 › 生成报告功能 › 生成失败应该显示错误消息
+
+    Unable to find an element with the text: 生成报告失败. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+          <div
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <div
+              class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4"
+            >
+              <div
+                class="p-6 border-b border-gray-200"
+              >
+                <h3
+                  class="text-lg font-semibold text-gray-900"
+                >
+                  生成报告
+                </h3>
+              </div>
+              <form
+                class="p-6 space-y-4"
+              >
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    报告类型
+                  </label>
+                  <select
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option
+                      value="WEEKLY"
+                    >
+                      周报
+                    </option>
+                    <option
+                      value="MONTHLY"
+                    >
+                      月报
+                    </option>
+                    <option
+                      value="CUSTOM"
+                    >
+                      自定义
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                  >
+                    时间范围
+                  </label>
+                  <div
+                    class="grid grid-cols-2 gap-4"
+                  >
+                    <div>
+                      <input
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required=""
+                        type="date"
+                        value=""
+                      />
+                    </div>
+                    <div>
+                      <input
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required=""
+                        type="date"
+                        value=""
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="flex gap-3"
+                >
+                  <button
+                    class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    type="button"
+                  >
+                    取消
+                  </button>
+                  <button
+                    class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    type="submit"
+                  >
+                    生成
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      687 |       });
+      688 |
+    > 689 |       await waitFor(() => {
+          |                    ^
+      690 |         expect(screen.getByText('生成报告失败')).toBeInTheDocument();
+      691 |       });
+      692 |     });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:689:20)
+
+  ● 报告管理页面 › 错误处理 › 应该显示加载报告失败的错误信息
+
+    Unable to find an element with the text: 加载报告失败. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      743 |       render(<ReportsPage />);
+      744 |
+    > 745 |       await waitFor(() => {
+          |                    ^
+      746 |         expect(screen.getByText('加载报告失败')).toBeInTheDocument();
+      747 |       });
+      748 |     });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:745:20)
+
+  ● 报告管理页面 › 错误处理 › 错误信息应该显示在错误框中
+
+    Unable to find an element with the text: 加载报告失败. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="container mx-auto px-4 py-8"
+        >
+          <div
+            class="mb-6 flex items-center justify-between"
+          >
+            <div>
+              <h1
+                class="text-3xl font-bold text-gray-900"
+              >
+                报告管理
+              </h1>
+              <p
+                class="text-gray-600 mt-2"
+              >
+                管理系统生成的各类报告
+              </p>
+            </div>
+            <button
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              生成报告
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-type"
+                >
+                  报告类型
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-type"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="WEEKLY"
+                  >
+                    周报
+                  </option>
+                  <option
+                    value="MONTHLY"
+                  >
+                    月报
+                  </option>
+                  <option
+                    value="CUSTOM"
+                  >
+                    自定义
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="report-status"
+                >
+                  状态
+                </label>
+                <select
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="report-status"
+                >
+                  <option
+                    value=""
+                  >
+                    全部
+                  </option>
+                  <option
+                    value="PENDING"
+                  >
+                    待处理
+                  </option>
+                  <option
+                    value="GENERATING"
+                  >
+                    生成中
+                  </option>
+                  <option
+                    value="COMPLETED"
+                  >
+                    已完成
+                  </option>
+                  <option
+                    value="FAILED"
+                  >
+                    失败
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-start"
+                >
+                  开始日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-start"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  for="period-end"
+                >
+                  结束日期
+                </label>
+                <input
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="period-end"
+                  type="date"
+                  value=""
+                />
+              </div>
+              <div
+                class="flex items-end"
+              >
+                <button
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  搜索
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6"
+          >
+            <div
+              class="text-center py-8"
+            >
+              <p
+                class="text-gray-500"
+              >
+                暂无报告记录
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      755 |       render(<ReportsPage />);
+      756 |
+    > 757 |       await waitFor(() => {
+          |                    ^
+      758 |         const errorBox = screen.getByText('加载报告失败').closest('.p-4');
+      759 |         expect(errorBox).toHaveClass('bg-red-50');
+      760 |       });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/admin/reports.page.test.tsx:757:20)
+
+Test Suites: 1 failed, 1 total
+Tests:       24 failed, 14 passed, 38 total
+Snapshots:   0 total
+Time:        26.777 s
+Ran all test suites matching src/__tests__/app/admin/reports.page.test.tsx.

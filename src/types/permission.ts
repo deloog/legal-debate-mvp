@@ -236,6 +236,16 @@ export const REPORT_PERMISSIONS = {
 } as const;
 
 /**
+ * 告警管理权限
+ */
+export const ALERT_PERMISSIONS = {
+  READ: 'alert:read',
+  ACKNOWLEDGE: 'alert:acknowledge',
+  RESOLVE: 'alert:resolve',
+  MANAGE: 'alert:manage',
+} as const;
+
+/**
  * 所有权限集合
  */
 export const ALL_PERMISSIONS = [
@@ -251,6 +261,7 @@ export const ALL_PERMISSIONS = [
   ...Object.values(STATS_PERMISSIONS),
   ...Object.values(EXPORT_PERMISSIONS),
   ...Object.values(REPORT_PERMISSIONS),
+  ...Object.values(ALERT_PERMISSIONS),
 ] as const;
 
 /**

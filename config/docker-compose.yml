@@ -1,40 +1,112 @@
 version: '3.8'
 
 services:
+  # PostgreSQL 数据库服务
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: legal-debate-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: legal_debate_dev
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: TFL5650056btg
+      POSTGRES_DB: ${POSTGRES_DB:-legal_debate_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
     ports:
-      - '5432:5432'
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-legal_debate_dev}']
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
+    networks:
+      - backend
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
 
+  # Redis 缓存服务
   redis:
     image: redis:7-alpine
     container_name: legal-debate-redis
     restart: unless-stopped
     ports:
-      - '6379:6379'
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
+      - ./docker/redis.conf:/usr/local/etc/redis/redis.conf:ro
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
-    command: redis-server --appendonly yes
+      start_period: 10s
+    networks:
+      - backend
+    command: redis-server /usr/local/etc/redis/redis.conf
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  # Next.js 应用服务
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: legal-debate-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-legal_debate_dev}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_TLS: ${REDIS_TLS:-false}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      BCRYPT_SALT_ROUNDS: ${BCRYPT_SALT_ROUNDS:-12}
+      USE_REAL_AI: ${USE_REAL_AI:-false}
+      ZHIPU_API_KEY: ${ZHIPU_API_KEY}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - backend
+      - frontend
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:3000/api/health || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+networks:
+  backend:
+    driver: bridge
+  frontend:
+    driver: bridge
 
 volumes:
   postgres_data:
+    driver: local
   redis_data:
+    driver: local

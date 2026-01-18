@@ -1,0 +1,350 @@
+{{ define "slack.default" }}
+{{- if gt (len .Alerts.Firing) 0 -}}
+告警触发：{{ .Alerts.Firing | len }}个告警
+{{- range .Alerts.Firing -}}
+**告警名称：** {{ .Labels.alertname }}
+
+**严重程度：** {{ .Labels.severity | toUpper }}
+
+**类别：** {{ .Labels.category | toUpper }}
+
+**描述：** {{ .Annotations.description }}
+
+**触发时间：** {{ .StartsAt.Format "2006-01-02 15:04:05 MST" }}
+
+**状态：** 🔴 {{ .Status | toUpper }}
+
+---
+{{- end }}
+
+{{- if gt (len .Alerts.Resolved) 0 -}}
+告警解决：{{ .Alerts.Resolved | len }}个告警
+{{- range .Alerts.Resolved -}}
+**告警名称：** {{ .Labels.alertname }}
+
+**严重程度：** {{ .Labels.severity | toUpper }}
+
+**类别：** {{ .Labels.category | toUpper }}
+
+**描述：** {{ .Annotations.description }}
+
+**触发时间：** {{ .StartsAt.Format "2006-01-02 15:04:05 MST" }}
+
+**解决时间：** {{ .EndsAt.Format "2006-01-02 15:04:05 MST" }}
+
+**状态：** 🟢 {{ .Status | toUpper }}
+
+---
+{{- end }}
+{{- end }}
+
+**详情：** <{{ .ExternalURL }}|query&0=alertname={{ index .GroupLabels "alertname" }}>
+{{- end }}
+
+
+{{ define "email.default" }}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>告警通知 - {{ .GroupLabels.alertname }}</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      border-radius: 10px 10px 0 0;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .severity-critical {
+      background: #dc3545;
+    }
+    .severity-warning {
+      background: #ffc107;
+      color: #333;
+    }
+    .content {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 0 0 10px 10px;
+    }
+    .alert {
+      background: white;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+    }
+    .alert.critical {
+      border-left-color: #dc3545;
+    }
+    .alert.warning {
+      border-left-color: #ffc107;
+    }
+    .alert.resolved {
+      border-left-color: #28a745;
+    }
+    .label {
+      font-weight: bold;
+      color: #666;
+    }
+    .value {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .timestamp {
+      color: #999;
+      font-size: 12px;
+    }
+    .resolved {
+      color: #28a745;
+      font-weight: bold;
+    }
+    .footer {
+      text-align: center;
+      color: #999;
+      font-size: 12px;
+      margin-top: 20px;
+    }
+    a {
+      color: #667eea;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>{{ .Status | toUpper }}: {{ .GroupLabels.alertname }}</h1>
+    </div>
+    <div class="content">
+      {{- if gt (len .Alerts.Firing) 0 }}
+      <h3>🔴 触发的告警 ({{ .Alerts.Firing | len }})</h3>
+      {{- range .Alerts.Firing }}
+      <div class="alert {{ if eq .Labels.severity "critical" }}critical{{ else if eq .Labels.severity "warning" }}warning{{ end }}">
+        <div class="value">
+          <span class="label">告警名称：</span>{{ .Labels.alertname }}
+        </div>
+        <div class="value">
+          <span class="label">严重程度：</span>{{ .Labels.severity | toUpper }}
+        </div>
+        <div class="value">
+          <span class="label">类别：</span>{{ .Labels.category | toUpper }}
+        </div>
+        <div class="value">
+          <span class="label">描述：</span>{{ .Annotations.description }}
+        </div>
+        <div class="value">
+          <span class="label">实例：</span>{{ .Labels.instance }}
+        </div>
+        <div class="value">
+          <span class="label">触发时间：</span>{{ .StartsAt.Format "2006-01-02 15:04:05" }}
+        </div>
+        {{- if .Annotations.dashboard }}
+        <div class="value">
+          <span class="label">仪表板：</span><a href="{{ .Annotations.dashboard }}">查看详情</a>
+        </div>
+        {{- end }}
+      </div>
+      {{- end }}
+      {{- end }}
+
+      {{- if gt (len .Alerts.Resolved) 0 }}
+      <h3>🟢 已解决的告警 ({{ .Alerts.Resolved | len }})</h3>
+      {{- range .Alerts.Resolved }}
+      <div class="alert resolved">
+        <div class="value">
+          <span class="label">告警名称：</span>{{ .Labels.alertname }}
+        </div>
+        <div class="value">
+          <span class="label">严重程度：</span>{{ .Labels.severity | toUpper }}
+        </div>
+        <div class="value">
+          <span class="label">描述：</span>{{ .Annotations.description }}
+        </div>
+        <div class="value">
+          <span class="label resolved">触发时间：</span>{{ .StartsAt.Format "2006-01-02 15:04:05" }}
+        </div>
+        <div class="value">
+          <span class="label resolved">解决时间：</span>{{ .EndsAt.Format "2006-01-02 15:04:05" }}
+        </div>
+        <div class="value">
+          <span class="label">持续时间：</span>{{ .EndsAt.Sub .StartsAt }}
+        </div>
+      </div>
+      {{- end }}
+      {{- end }}
+
+      <div class="footer">
+        <p>告警详情：<a href="{{ .ExternalURL }}">查看Alertmanager</a></p>
+        <p>律伴助手智能监控系统</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+{{- end }}
+
+
+{{ define "webhook.default" }}
+{
+  "alert_name": "{{ .GroupLabels.alertname }}",
+  "severity": "{{ .GroupLabels.severity | toUpper }}",
+  "category": "{{ .GroupLabels.category | toUpper }}",
+  "status": "{{ .Status | toUpper }}",
+  "firing_count": {{ .Alerts.Firing | len }},
+  "resolved_count": {{ .Alerts.Resolved | len }},
+  "alerts": [
+    {{- range $i, $alert := .Alerts }}
+    {{- if $i }},{{ end }}
+    {
+      "name": "{{ $alert.Labels.alertname }}",
+      "severity": "{{ $alert.Labels.severity | toUpper }}",
+      "category": "{{ $alert.Labels.category | toUpper }}",
+      "status": "{{ $alert.Status | toUpper }}",
+      "description": {{ $alert.Annotations.description | json }},
+      "instance": "{{ $alert.Labels.instance }}",
+      "start_time": "{{ $alert.StartsAt.Format "2006-01-02T15:04:05Z" }}",
+      "end_time": "{{ $alert.EndsAt.Format "2006-01-02T15:04:05Z" }}",
+      "labels": {
+        {{- range $label, $value := $alert.Labels }}
+        {{- if $label }},
+        {{- end }}
+        "{{ $label }}": "{{ $value }}"
+        {{- end }}
+      },
+      "annotations": {
+        {{- range $key, $value := $alert.Annotations }}
+        {{- if $key }},
+        {{- end }}
+        "{{ $key }}": {{ $value | json }}
+        {{- end }}
+      }
+    }
+    {{- end }}
+  ],
+  "group_labels": {
+    {{- range $label, $value := .GroupLabels }}
+    {{- if $label }},
+    {{- end }}
+    "{{ $label }}": "{{ $value }}"
+    {{- end }}
+  },
+  "external_url": "{{ .ExternalURL }}",
+  "timestamp": "{{ .ExternalURL | time "2006-01-02T15:04:05Z" }}"
+}
+{{- end }}
+
+
+{{ define "dingtalk.default" }}
+告警通知
+
+**告警状态：** {{ if eq .Status "firing" }}🔴 告警触发{{ else }}🟢 告警解决{{ end }}
+
+**告警名称：** {{ .GroupLabels.alertname }}
+
+**严重程度：** {{ .GroupLabels.severity | toUpper }}
+
+**类别：** {{ .GroupLabels.category | toUpper }}
+
+**触发告警数：** {{ .Alerts.Firing | len }}
+
+**解决告警数：** {{ .Alerts.Resolved | len }}
+
+---
+
+{{- range .Alerts.Firing }}
+**告警详情：**
+
+*   **名称：** {{ .Labels.alertname }}
+*   **严重程度：** {{ .Labels.severity | toUpper }}
+*   **描述：** {{ .Annotations.description }}
+*   **实例：** {{ .Labels.instance }}
+*   **触发时间：** {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+
+{{- if .Annotations.dashboard }}
+*   **仪表板：** {{ .Annotations.dashboard }}
+{{- end }}
+
+---
+{{- end }}
+
+{{- if gt (len .Alerts.Resolved) 0 }}
+**已解决告警：**
+
+{{- range .Alerts.Resolved }}
+*   **名称：** {{ .Labels.alertname }}
+*   **持续时间：** {{ .EndsAt.Sub .StartsAt }}
+
+---
+{{- end }}
+{{- end }}
+
+**查看详情：** {{ .ExternalURL }}
+{{- end }}
+
+
+{{ define "wechat.default" }}
+告警通知
+
+<color>{{ if eq .Status "firing" }}#ff0000{{ else }}#00ff00{{ end }}</color>
+
+<b>告警状态：</b> {{ if eq .Status "firing" }}🔴 告警触发{{ else }}🟢 告警解决{{ end }}
+
+<b>告警名称：</b> {{ .GroupLabels.alertname }}
+
+<b>严重程度：</b> {{ .GroupLabels.severity | toUpper }}
+
+<b>类别：</b> {{ .GroupLabels.category | toUpper }}
+
+<b>触发告警数：</b> {{ .Alerts.Firing | len }}
+
+<b>解决告警数：</b> {{ .Alerts.Resolved | len }}
+
+---
+
+{{- range .Alerts.Firing }}
+<b>告警详情：</b>
+
+<b>名称：</b> {{ .Labels.alertname }}
+<b>严重程度：</b> {{ .Labels.severity | toUpper }}
+<b>描述：</b> {{ .Annotations.description }}
+<b>实例：</b> {{ .Labels.instance }}
+<b>触发时间：</b> {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+
+{{- if .Annotations.dashboard }}
+<b>仪表板：</b> {{ .Annotations.dashboard }}
+{{- end }}
+
+---
+{{- end }}
+
+{{- if gt (len .Alerts.Resolved) 0 }}
+<b>已解决告警：</b>
+
+{{- range .Alerts.Resolved }}
+<b>名称：</b> {{ .Labels.alertname }}
+<b>持续时间：</b> {{ .EndsAt.Sub .StartsAt }}
+
+---
+{{- end }}
+{{- end }}
+
+<a href="{{ .ExternalURL }}">查看详情</a>
+{{- end }}

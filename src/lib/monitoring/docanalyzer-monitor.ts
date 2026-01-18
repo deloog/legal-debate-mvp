@@ -40,7 +40,7 @@ export interface Alert {
   timestamp: number;
   level: 'warning' | 'error' | 'critical';
   message: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 /**
@@ -309,7 +309,7 @@ export class DocAnalyzerMonitor {
   private createAlert(
     level: 'warning' | 'error' | 'critical',
     message: string,
-    details?: any
+    details?: Record<string, unknown>
   ): void {
     const alert: Alert = {
       timestamp: Date.now(),
@@ -427,4 +427,11 @@ export function getDocAnalyzerTrend(
  */
 export function generateDocAnalyzerReport(): string {
   return getDocAnalyzerMonitor().generateReport();
+}
+
+/**
+ * 重置单例实例（主要用于测试）
+ */
+export function resetDocAnalyzerMonitor(): void {
+  monitorInstance = null;
 }

@@ -1,0 +1,166 @@
+# Filebeat 配置文件
+# 用于收集应用日志并发送到 Logstash
+# 适配 Next.js 应用的日志格式
+
+# ==========================================
+# Filebeat 配置
+# ==========================================
+
+filebeat.inputs:
+  # 应用日志输入
+  - type: log
+    enabled: true
+    paths:
+      - ./logs/*.log
+      - ./logs/**/*.log
+    fields:
+      log_type: application
+      environment: ${NODE_ENV:development}
+      application: legal-debate
+    fields_under_root: true
+    multiline:
+      pattern: '^\['
+      negate: true
+      match: after
+    json:
+      keys_under_root: true
+      add_error_key: true
+    tags: ['application']
+
+  # 错误日志输入
+  - type: log
+    enabled: true
+    paths:
+      - ./logs/*error*.log
+    fields:
+      log_type: error
+      environment: ${NODE_ENV:development}
+      application: legal-debate
+    fields_under_root: true
+    multiline:
+      pattern: '^\['
+      negate: true
+      match: after
+    json:
+      keys_under_root: true
+      add_error_key: true
+    tags: ['error']
+
+  # 操作日志输入
+  - type: log
+    enabled: true
+    paths:
+      - ./logs/*action*.log
+    fields:
+      log_type: action
+      environment: ${NODE_ENV:development}
+      application: legal-debate
+    fields_under_root: true
+    json:
+      keys_under_root: true
+      add_error_key: true
+    tags: ['action']
+
+  # 系统日志输入（可选，启用需要适当权限）
+  - type: log
+    enabled: ${SYSTEM_LOG_ENABLED:false}
+    paths:
+      - /var/log/syslog
+      - /var/log/messages
+    fields:
+      log_type: system
+      environment: ${NODE_ENV:development}
+    fields_under_root: true
+    tags: ['system']
+
+# ==========================================
+# 处理器配置
+# ==========================================
+
+processors:
+  # 添加主机信息
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+
+  # 添加云元数据（如果在云环境中）
+  - add_cloud_metadata: ~
+
+  # 添加 Docker 元数据（如果在 Docker 中）
+  - add_docker_metadata: ~
+
+  # 添加进程信息
+  - add_process_metadata:
+      match_pids: ['${PID}']
+
+  # 删除不必要的事件字段
+  - drop_event:
+      when:
+        not:
+          or:
+            - equals:
+                log_type: application
+            - equals:
+                log_type: error
+            - equals:
+                log_type: action
+            - equals:
+                log_type: system
+
+# ==========================================
+# 输出配置
+# ==========================================
+
+# 输出到 Logstash
+output.logstash:
+  hosts: ['${LOGSTASH_HOST:localhost:5044}']
+  loadbalance: true
+  compression_level: 3
+  pipeline: main
+  bulk_max_size: 2048
+  ttl: 30
+  ssl:
+    enabled: ${LOGSTASH_SSL_ENABLED:false}
+    certificate_authorities: ['/etc/filebeat/ca.crt']
+    certificate: '/etc/filebeat/client.crt'
+    key: '/etc/filebeat/client.key'
+    verification_mode: full
+
+# 备用输出到文件（用于调试）
+# output.file:
+#   path: /var/lib/filebeat
+#   filename: filebeat
+#   rotate_every_kb: 10000
+#   number_of_files: 7
+#   permissions: 0600
+
+# ==========================================
+# 监控配置
+# ==========================================
+
+# HTTP 端点用于监控
+monitoring.enabled: true
+
+# 日志级别
+logging.level: ${LOGGING_LEVEL:info}
+logging.selectors: ['*']
+logging.to_files: true
+logging.files:
+  path: ./logs/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0640
+
+# ==========================================
+# 性能配置
+# ==========================================
+
+# 队列配置
+queue.mem:
+  events: 4096
+  flush.min_events: 512
+  flush.timeout: 1s
+
+# 读取配置
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false

@@ -1,0 +1,232 @@
+# Alertmanager配置文件
+# 用于告警路由、分组、抑制和通知
+
+# 全局配置
+global:
+  # SMTP配置（邮件通知）
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@legal-debate.com'
+  smtp_auth_username: 'alerts@legal-debate.com'
+  smtp_auth_password: '{{ .Env.SMTP_PASSWORD }}'
+  smtp_require_tls: true
+  smtp_hello: 'legal-debate.com'
+
+  # 解析超时
+  resolve_timeout: 5m
+
+# 路由配置
+route:
+  # 接收者
+  receiver: 'default-receiver'
+
+  # 分组配置
+  group_by: ['alertname', 'cluster', 'service', 'severity', 'category']
+
+  # 分组等待时间
+  group_wait: 30s
+
+  # 分组间隔
+  group_interval: 5m
+
+  # 重复间隔
+  repeat_interval: 4h
+
+  # 子路由
+  routes:
+    # 严重告警路由（立即发送）
+    - match:
+        severity: critical
+      receiver: 'critical-receiver'
+      group_wait: 10s
+      group_interval: 1m
+      repeat_interval: 15m
+
+    # API告警路由
+    - match:
+        category: api
+      receiver: 'api-receiver'
+
+    # 数据库告警路由
+    - match:
+        category: database
+      receiver: 'database-receiver'
+
+    # AI服务告警路由
+    - match:
+        category: ai
+      receiver: 'ai-receiver'
+
+    # 系统资源告警路由
+    - match:
+        category: system
+      receiver: 'system-receiver'
+
+    # 缓存告警路由
+    - match:
+        category: cache
+      receiver: 'cache-receiver'
+
+    # 应用健康告警路由
+    - match:
+        category: application
+      receiver: 'application-receiver'
+
+    # 商业指标告警路由
+    - match:
+        category: business
+      receiver: 'business-receiver'
+
+# 抑制规则
+inhibit_rules:
+  # 如果critical告警触发，抑制同一组内的warning告警
+  - source_match:
+      severity: 'critical'
+    target_match_re:
+      severity: 'warning|info'
+    equal: ['alertname', 'instance']
+
+  # 如果服务不健康，抑制该服务的性能告警
+  - source_match:
+      alertname: 'ApplicationInstanceUnhealthy'
+    target_match_re:
+      alertname: '(HighAPIErrorRate|SlowAPIResponseTime|HighAIServiceErrorRate)'
+    equal: ['instance']
+
+  # 如果数据库连接错误，抑制慢查询告警
+  - source_match:
+      alertname: 'DatabaseConnectionErrors'
+    target_match:
+      alertname: 'TooManySlowQueries'
+    equal: ['instance']
+
+# 接收器配置
+receivers:
+  # 默认接收器
+  - name: 'default-receiver'
+    email_configs:
+      - to: 'team@legal-debate.com'
+        from: 'alerts@legal-debate.com'
+        headers:
+          Subject: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
+          X-Auto-Response-Suppress: 'No'
+
+  # 严重告警接收器
+  - name: 'critical-receiver'
+    email_configs:
+      - to: 'oncall@legal-debate.com,team@legal-debate.com'
+        from: 'alerts@legal-debate.com'
+        headers:
+          Subject: '[CRITICAL] {{ .GroupLabels.alertname }}'
+          X-Priority: '1'
+          X-Auto-Response-Suppress: 'No'
+    webhook_configs:
+      - url: 'http://alert-webhook:5000/alerts'
+        send_resolved: true
+        http_config:
+          bearer_token: '{{ .Env.WEBHOOK_TOKEN }}'
+
+  # API告警接收器
+  - name: 'api-receiver'
+    email_configs:
+      - to: 'api-team@legal-debate.com'
+        from: 'alerts@legal-debate.com'
+        headers:
+          Subject: '[API] {{ .GroupLabels.alertname }}'
+          X-Auto-Response-Suppress: 'No'
+
+  # 数据库告警接收器
+  - name: 'database-receiver'
+    email_configs:
+      - to: 'db-team@legal-debate.com'
+        from: 'alerts@legal-debate.com'
+        headers:
+          Subject: '[DATABASE] {{ .GroupLabels.alertname }}'
+          X-Auto-Response-Suppress: 'No'
+
+  # AI服务告警接收器
+  - name: 'ai-receiver'
+    email_configs:
+      - to: 'ai-team@legal-debate.com'
+        from: 'alerts@legal-debate.com'
+        headers:
+          Subject: '[AI SERVICE] {{ .GroupLabels.alertname }}'
+          X-Auto-Response-Suppress: 'No'
+
+  # 系统资源告警接收器
+  - name: 'system-receiver'
+    email_configs:
+      - to: 'ops-team@legal-debate.com'
+        from: 'alerts@legal-debate.com'
+        headers:
+          Subject: '[SYSTEM] {{ .GroupLabels.alertname }}'
+          X-Auto-Response-Suppress: 'No'
+
+  # 缓存告警接收器
+  - name: 'cache-receiver'
+    email_configs:
+      - to: 'ops-team@legal-debate.com'
+        from: 'alerts@legal-debate.com'
+        headers:
+          Subject: '[CACHE] {{ .GroupLabels.alertname }}'
+          X-Auto-Response-Suppress: 'No'
+
+  # 应用健康告警接收器
+  - name: 'application-receiver'
+    email_configs:
+      - to: 'dev-team@legal-debate.com'
+        from: 'alerts@legal-debate.com'
+        headers:
+          Subject: '[APP] {{ .GroupLabels.alertname }}'
+          X-Auto-Response-Suppress: 'No'
+
+  # 商业指标告警接收器
+  - name: 'business-receiver'
+    email_configs:
+      - to: 'business-team@legal-debate.com,management@legal-debate.com'
+        from: 'alerts@legal-debate.com'
+        headers:
+          Subject: '[BUSINESS] {{ .GroupLabels.alertname }}'
+          X-Auto-Response-Suppress: 'No'
+
+# 模板配置
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Webhook配置（用于集成钉钉、企业微信等）
+webhook_configs:
+  - name: 'dingtalk-webhook'
+    url: '{{ .Env.DINGTALK_WEBHOOK_URL }}'
+    send_resolved: true
+    http_config:
+      bearer_token: '{{ .Env.DINGTALK_TOKEN }}'
+
+# 时间间隔
+time_intervals:
+  # 工作时间（周一到周五，9:00-18:00）
+  - name: 'working_hours'
+    time_intervals:
+      - times:
+          - start_time: '09:00'
+            end_time: '18:00'
+        weekdays: ['monday:friday']
+
+  # 非工作时间（周一到周五，18:00-次日9:00）
+  - name: 'off_hours'
+    time_intervals:
+      - times:
+          - start_time: '18:00'
+            end_time: '09:00'
+        weekdays: ['monday:friday']
+      - weekdays: ['saturday', 'sunday']
+
+  # 节假日
+  - name: 'holidays'
+    time_intervals:
+      - months: ['january']
+        days_of_month: ['1st']
+      - months: ['may']
+        days_of_month: ['1st', '2nd', '3rd']
+      - months: ['october']
+        days_of_month: ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th']
+      - months: ['december']
+        days_of_month: ['24th', '25th', '26th', '27th', '28th', '29th', '30th', '31st']

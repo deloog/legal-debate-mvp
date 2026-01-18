@@ -1,0 +1,240 @@
+{
+  "dashboard": {
+    "title": "Database Performance Dashboard",
+    "tags": ["database", "performance", "legal-debate"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Query Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(legal_debate_db_queries_total[5m])",
+            "legendFormat": "{{operation}} {{table}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "qps"
+          }
+        ],
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "id": 2,
+        "title": "Query Execution Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(legal_debate_db_query_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95 {{operation}}",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(legal_debate_db_query_duration_seconds_bucket[5m]))",
+            "legendFormat": "P99 {{operation}}",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Execution Time"
+          }
+        ],
+        "gridPos": {
+          "x": 12,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "id": 3,
+        "title": "Connection Pool Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "legal_debate_db_pool_connections_active",
+            "legendFormat": "Active Connections",
+            "refId": "A"
+          },
+          {
+            "expr": "legal_debate_db_pool_connections_idle",
+            "legendFormat": "Idle Connections",
+            "refId": "B"
+          },
+          {
+            "expr": "legal_debate_db_pool_connections_total",
+            "legendFormat": "Total Connections",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Connections"
+          }
+        ],
+        "gridPos": {
+          "x": 0,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "Cache Hit Ratio",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "legal_debate_db_cache_hit_ratio",
+            "legendFormat": "Hit Ratio",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "max": 1,
+            "unit": "percentunit",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "red"
+                },
+                {
+                  "value": 0.8,
+                  "color": "yellow"
+                },
+                {
+                  "value": 0.95,
+                  "color": "green"
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "x": 12,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "id": 5,
+        "title": "Slow Queries",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(10, legal_debate_db_slow_queries_total)",
+            "legendFormat": "{{query}}",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              }
+            }
+          }
+        ],
+        "gridPos": {
+          "x": 0,
+          "y": 16,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "id": 6,
+        "title": "Database Size",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "legal_debate_db_size_bytes",
+            "legendFormat": "Database Size",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "bytes"
+          }
+        ],
+        "gridPos": {
+          "x": 12,
+          "y": 16,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "id": 7,
+        "title": "Transaction Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(legal_debate_db_transactions_total[5m])",
+            "legendFormat": "Transaction Rate",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ops"
+          }
+        ],
+        "gridPos": {
+          "x": 0,
+          "y": 24,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "id": 8,
+        "title": "Lock Wait Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(legal_debate_db_lock_wait_seconds[5m])",
+            "legendFormat": "Lock Wait Time",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s"
+          }
+        ],
+        "gridPos": {
+          "x": 12,
+          "y": 24,
+          "w": 12,
+          "h": 8
+        }
+      }
+    ],
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    }
+  }
+}

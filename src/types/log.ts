@@ -207,6 +207,97 @@ export const ACTION_LOG_CATEGORIES = [
 export type ActionLogCategory = (typeof ACTION_LOG_CATEGORIES)[number];
 
 // =============================================================================
+// 告警相关类型
+// =============================================================================
+
+/**
+ * 告警严重程度枚举
+ */
+export const ALERT_SEVERITY = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'] as const;
+export type AlertSeverity = (typeof ALERT_SEVERITY)[number];
+
+/**
+ * 告警状态枚举
+ */
+export const ALERT_STATUS = ['TRIGGERED', 'ACKNOWLEDGED', 'RESOLVED'] as const;
+export type AlertStatus = (typeof ALERT_STATUS)[number];
+
+/**
+ * 告警项
+ */
+export interface AlertItem {
+  alertId: string;
+  ruleId: string;
+  ruleName: string;
+  severity: AlertSeverity;
+  status: AlertStatus;
+  errorLogId: string;
+  errorType: string;
+  errorMessage: string;
+  message: string;
+  details: unknown | null;
+  notificationHistory: unknown;
+  acknowledgedBy: string | null;
+  acknowledgedAt: Date | null;
+  resolvedAt: Date | null;
+  resolutionNotes: string | null;
+  triggeredAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * 告警查询参数
+ */
+export interface AlertQueryParams {
+  page?: string;
+  limit?: string;
+  severity?: AlertSeverity;
+  status?: AlertStatus;
+  errorType?: string;
+  startTime?: string;
+  endTime?: string;
+  search?: string;
+}
+
+/**
+ * 告警响应数据
+ */
+export interface AlertResponse {
+  alerts: AlertItem[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+  statistics: {
+    total: number;
+    triggered: number;
+    acknowledged: number;
+    resolved: number;
+    bySeverity: Record<AlertSeverity, number>;
+    byType: Record<string, number>;
+  };
+}
+
+/**
+ * 告警操作请求
+ */
+export interface AlertActionRequest {
+  notes?: string;
+}
+
+/**
+ * 告警操作响应
+ */
+export interface AlertActionResponse {
+  success: boolean;
+  message: string;
+  alert: AlertItem;
+}
+
+// =============================================================================
 // 通用日志统计类型
 // =============================================================================
 
@@ -258,4 +349,92 @@ export function isValidActionCategory(
   category: string
 ): category is ActionLogCategory {
   return ACTION_LOG_CATEGORIES.includes(category as ActionLogCategory);
+}
+
+// =============================================================================
+// 告警相关工具函数
+// =============================================================================
+
+/**
+ * 验证告警严重程度
+ */
+export function isValidAlertSeverity(
+  severity: string
+): severity is AlertSeverity {
+  return ALERT_SEVERITY.includes(severity as AlertSeverity);
+}
+
+/**
+ * 验证告警状态
+ */
+export function isValidAlertStatus(status: string): status is AlertStatus {
+  return ALERT_STATUS.includes(status as AlertStatus);
+}
+
+/**
+ * 获取告警严重程度对应的颜色
+ */
+export function getSeverityColor(severity: AlertSeverity): string {
+  switch (severity) {
+    case 'CRITICAL':
+      return '#dc3545';
+    case 'HIGH':
+      return '#fd7e14';
+    case 'MEDIUM':
+      return '#ffc107';
+    case 'LOW':
+      return '#28a745';
+    default:
+      return '#6c757d';
+  }
+}
+
+/**
+ * 获取告警严重程度对应的图标
+ */
+export function getSeverityIcon(severity: AlertSeverity): string {
+  switch (severity) {
+    case 'CRITICAL':
+      return '🔴';
+    case 'HIGH':
+      return '🟠';
+    case 'MEDIUM':
+      return '🟡';
+    case 'LOW':
+      return '🟢';
+    default:
+      return '⚪';
+  }
+}
+
+/**
+ * 获取告警状态对应的标签文本
+ */
+export function getAlertStatusText(status: AlertStatus): string {
+  switch (status) {
+    case 'TRIGGERED':
+      return '已触发';
+    case 'ACKNOWLEDGED':
+      return '已确认';
+    case 'RESOLVED':
+      return '已解决';
+    default:
+      return '未知';
+  }
+}
+
+/**
+ * 获取告警状态对应的颜色类名
+ */
+export function getAlertStatusColor(status: AlertStatus): string {
+  switch (status) {
+    case 'TRIGGERED':
+      return 'bg-red-100 text-red-800';
+    case 'ACKNOWLEDGED':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'RESOLVED':
+      return 'bg-green-100 text-green-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
 }

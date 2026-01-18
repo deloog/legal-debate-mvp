@@ -1,0 +1,259 @@
+{
+  "dashboard": {
+    "title": "AI Service Monitoring Dashboard",
+    "tags": ["ai", "monitoring", "legal-debate"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "AI Service Call Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(legal_debate_ai_calls_total[5m])",
+            "legendFormat": "{{provider}} {{operation}} {{model}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "cps"
+          }
+        ],
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "id": 2,
+        "title": "AI Service Response Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(legal_debate_ai_response_time_seconds_bucket[5m]))",
+            "legendFormat": "P95 {{provider}}",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(legal_debate_ai_response_time_seconds_bucket[5m]))",
+            "legendFormat": "P99 {{provider}}",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Response Time"
+          }
+        ],
+        "gridPos": {
+          "x": 12,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "id": 3,
+        "title": "AI Service Success Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(legal_debate_ai_calls_total{success=\"true\"}[5m]) / rate(legal_debate_ai_calls_total[5m])",
+            "legendFormat": "{{provider}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "min": 0,
+            "max": 1
+          }
+        ],
+        "gridPos": {
+          "x": 0,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "AI Service Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(legal_debate_ai_errors_total[5m])",
+            "legendFormat": "{{provider}} {{error_type}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ops"
+          }
+        ],
+        "gridPos": {
+          "x": 12,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "id": 5,
+        "title": "Token Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(legal_debate_ai_tokens_total[5m])",
+            "legendFormat": "{{provider}} {{model}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ops"
+          }
+        ],
+        "gridPos": {
+          "x": 0,
+          "y": 16,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "id": 6,
+        "title": "AI Service Cost",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(legal_debate_ai_cost_total[5m])",
+            "legendFormat": "{{provider}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "currencyUSD"
+          }
+        ],
+        "gridPos": {
+          "x": 12,
+          "y": 16,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "id": 7,
+        "title": "AI Service Performance Summary",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg(legal_debate_ai_response_time_seconds)",
+            "legendFormat": "Avg Response Time",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(legal_debate_ai_calls_total[5m]))",
+            "legendFormat": "Calls per 5m",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(rate(legal_debate_ai_cost_total[1h]))",
+            "legendFormat": "Cost per Hour",
+            "refId": "C"
+          }
+        ],
+        "gridPos": {
+          "x": 0,
+          "y": 24,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "id": 8,
+        "title": "AI Service Health",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "legal_debate_ai_service_health",
+            "legendFormat": "Health",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "max": 1,
+            "unit": "percentunit",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "red"
+                },
+                {
+                  "value": 0.8,
+                  "color": "yellow"
+                },
+                {
+                  "value": 0.95,
+                  "color": "green"
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "x": 12,
+          "y": 24,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "id": 9,
+        "title": "Top Expensive AI Operations",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(10, legal_debate_ai_cost_total)",
+            "legendFormat": "{{operation}} {{provider}}",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              }
+            }
+          }
+        ],
+        "gridPos": {
+          "x": 0,
+          "y": 32,
+          "w": 24,
+          "h": 8
+        }
+      }
+    ],
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    }
+  }
+}

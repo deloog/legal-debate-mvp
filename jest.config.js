@@ -14,6 +14,7 @@ module.exports = {
     "<rootDir>/src/__tests__/**/*.{test,spec}.{ts,tsx}",
     "<rootDir>/src/**/*.{test,spec}.{ts,tsx}",
     "!<rootDir>/src/__tests__/index.{ts,tsx}",
+    "<rootDir>/src/__tests__/scripts/**/*.{test,spec}.{ts,tsx}",
   ],
   testPathIgnorePatterns: [
     "<rootDir>/.next/",
@@ -37,6 +38,9 @@ module.exports = {
     // 显式包含debate模块
     "src/lib/debate/**/*.{ts,tsx}",
     "!src/lib/debate/**/__tests__/**",
+    // 脚本文件（实用工具）
+    "scripts/**/*.{ts,js}",
+    "!scripts/**/*.d.ts",
   ],
   // 新增：覆盖率路径忽略模式
   coveragePathIgnorePatterns: [
@@ -120,6 +124,13 @@ module.exports = {
       branches: 70,
       functions: 75,
       lines: 75,
+    },
+    // 脚本文件 - 实用工具，要求高
+    "./scripts/": {
+      statements: 90,
+      branches: 85,
+      functions: 90,
+      lines: 90,
     },
   },
   transform: {

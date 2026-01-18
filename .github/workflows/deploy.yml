@@ -1,0 +1,251 @@
+name: Deploy Pipeline
+
+on:
+  push:
+    branches:
+      - develop
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment environment"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      version:
+        description: "Version to deploy (optional)"
+        required: false
+        type: string
+
+jobs:
+  pre-deploy-checks:
+    name: Pre-Deploy Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint:check
+
+      - name: Run type checking
+        run: npm run type-check
+
+      - name: Run tests
+        run: npm run test:ci
+        env:
+          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+          REDIS_URL: ${{ secrets.TEST_REDIS_URL }}
+          NODE_ENV: test
+
+      - name: Check coverage gate
+        run: npm run coverage:check
+
+  deploy-dev:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    needs: pre-deploy-checks
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment:
+      name: development
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure environment
+        run: |
+          echo "DATABASE_URL=${{ secrets.DEV_DATABASE_URL }}" >> $GITHUB_ENV
+          echo "REDIS_URL=${{ secrets.DEV_REDIS_URL }}" >> $GITHUB_ENV
+          echo "NEXTAUTH_SECRET=${{ secrets.DEV_NEXTAUTH_SECRET }}" >> $GITHUB_ENV
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build application
+        run: npm run build
+
+      - name: Deploy to development
+        id: deploy
+        run: |
+          echo "::notice title=Deployment::Deploying to development environment"
+          echo "::set-output name=url::https://dev.example.com"
+        continue-on-error: false
+
+      - name: Health check
+        run: |
+          sleep 10
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://dev.example.com/api/health || echo "000")
+          if [ "$response" != "200" ]; then
+            echo "::error title=Health Check Failed::Health check returned $response"
+            exit 1
+          fi
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: pre-deploy-checks
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging'
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure environment
+        run: |
+          echo "DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}" >> $GITHUB_ENV
+          echo "REDIS_URL=${{ secrets.STAGING_REDIS_URL }}" >> $GITHUB_ENV
+          echo "NEXTAUTH_SECRET=${{ secrets.STAGING_NEXTAUTH_SECRET }}" >> $GITHUB_ENV
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build application
+        run: npm run build
+
+      - name: Deploy to staging
+        id: deploy
+        run: |
+          echo "::notice title=Deployment::Deploying to staging environment"
+          echo "::set-output name=url::https://staging.example.com"
+        continue-on-error: false
+
+      - name: Health check
+        run: |
+          sleep 10
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://staging.example.com/api/health || echo "000")
+          if [ "$response" != "200" ]; then
+            echo "::error title=Health Check Failed::Health check returned $response"
+            exit 1
+          fi
+
+      - name: Run smoke tests
+        run: npm run test:e2e:ci -- --grep "Smoke Test"
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: pre-deploy-checks
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure environment
+        run: |
+          echo "DATABASE_URL=${{ secrets.PROD_DATABASE_URL }}" >> $GITHUB_ENV
+          echo "REDIS_URL=${{ secrets.PROD_REDIS_URL }}" >> $GITHUB_ENV
+          echo "NEXTAUTH_SECRET=${{ secrets.PROD_NEXTAUTH_SECRET }}" >> $GITHUB_ENV
+          echo "ZHIPU_API_KEY=${{ secrets.PROD_ZHIPU_API_KEY }}" >> $GITHUB_ENV
+          echo "DEEPSEEK_API_KEY=${{ secrets.PROD_DEEPSEEK_API_KEY }}" >> $GITHUB_ENV
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build application
+        run: npm run build
+
+      - name: Run database migrations
+        run: |
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+
+      - name: Create database backup
+        run: |
+          timestamp=$(date +%Y%m%d_%H%M%S)
+          backup_file="backup_prod_${timestamp}.sql"
+          PGPASSWORD=${{ secrets.PG_PASSWORD }} pg_dump -h ${{ secrets.PG_HOST }} -U ${{ secrets.PG_USER }} -d ${{ secrets.PG_DATABASE }} > $backup_file
+          echo "::notice title=Backup::Database backup created: $backup_file"
+        continue-on-error: true
+
+      - name: Deploy to production
+        id: deploy
+        run: |
+          echo "::notice title=Deployment::Deploying to production environment"
+          echo "::set-output name=url::https://example.com"
+        continue-on-error: false
+
+      - name: Health check
+        run: |
+          sleep 10
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://example.com/api/health || echo "000")
+          if [ "$response" != "200" ]; then
+            echo "::error title=Health Check Failed::Health check returned $response"
+            exit 1
+          fi
+
+      - name: Run smoke tests
+        run: npm run test:e2e:ci -- --grep "Smoke Test"
+
+      - name: Notify deployment success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: '✅ Production deployment successful! Version: ${{ github.ref_name }}'
+            })
+
+      - name: Notify deployment failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: '❌ Production deployment failed! Please check the logs for details.'
+            })

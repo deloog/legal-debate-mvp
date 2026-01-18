@@ -1,0 +1,363 @@
+# Alertmanager告警规则配置
+# 用于Prometheus告警规则
+# 遵循Prometheus告警规则规范
+
+groups:
+  # ========================================
+  # API性能告警规则组
+  # ========================================
+  - name: api_performance_alerts
+    interval: 30s
+    rules:
+      # API错误率过高告警
+      - alert: HighAPIErrorRate
+        expr: |
+          (
+            sum(rate(legal_debate_api_requests_total{status=~"5.."}[5m]))
+            /
+            sum(rate(legal_debate_api_requests_total[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          category: api
+        annotations:
+          summary: "API错误率过高"
+          description: "API错误率在过去5分钟内超过5%，当前值: {{ $value | humanizePercentage }}"
+          dashboard: "http://grafana:3000/d/api-performance"
+
+      # API响应时间过长告警
+      - alert: SlowAPIResponseTime
+        expr: |
+          histogram_quantile(0.95, sum(rate(legal_debate_api_response_time_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          category: api
+        annotations:
+          summary: "API响应时间过长"
+          description: "API P95响应时间在过去5分钟内超过2秒，当前值: {{ $value }}s"
+          dashboard: "http://grafana:3000/d/api-performance"
+
+      # API请求率异常下降告警
+      - alert: APITrafficDrop
+        expr: |
+          (
+            sum(rate(legal_debate_api_requests_total[5m]))
+            /
+            sum(rate(legal_debate_api_requests_total[5m] offset 10m))
+          ) < 0.5
+        for: 10m
+        labels:
+          severity: warning
+          category: api
+        annotations:
+          summary: "API请求流量异常下降"
+          description: "API请求量在过去10分钟内下降超过50%，当前比率: {{ $value | humanizePercentage }}"
+
+  # ========================================
+  # 数据库性能告警规则组
+  # ========================================
+  - name: database_performance_alerts
+    interval: 30s
+    rules:
+      # 数据库连接池使用率过高
+      - alert: HighDatabaseConnectionPoolUsage
+        expr: |
+          legal_debate_database_connection_pool_usage / legal_debate_database_connection_pool_size > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "数据库连接池使用率过高"
+          description: "数据库连接池使用率在过去5分钟内超过80%，当前值: {{ $value | humanizePercentage }}"
+          dashboard: "http://grafana:3000/d/database-performance"
+
+      # 慢查询告警
+      - alert: TooManySlowQueries
+        expr: |
+          sum(increase(legal_debate_database_slow_queries_count[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "慢查询数量过多"
+          description: "在过去5分钟内检测到超过10个慢查询，当前值: {{ $value }}"
+          dashboard: "http://grafana:3000/d/database-performance"
+
+      # 数据库连接错误告警
+      - alert: DatabaseConnectionErrors
+        expr: |
+          sum(rate(legal_debate_database_connection_errors[5m])) > 3
+        for: 5m
+        labels:
+          severity: critical
+          category: database
+        annotations:
+          summary: "数据库连接错误频繁"
+          description: "在过去5分钟内检测到超过3次数据库连接错误，当前值: {{ $value }}/s"
+          dashboard: "http://grafana:3000/d/database-performance"
+
+      # 数据库大小告警
+      - alert: DatabaseSizeTooLarge
+        expr: |
+          legal_debate_database_size_bytes / 10737418240 > 0.8  # 10GB的80%
+        for: 30m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "数据库大小接近上限"
+          description: "数据库大小已超过10GB的80%，当前值: {{ $value | humanize }}"
+
+  # ========================================
+  # AI服务告警规则组
+  # ========================================
+  - name: ai_service_alerts
+    interval: 30s
+    rules:
+      # AI服务错误率过高
+      - alert: HighAIServiceErrorRate
+        expr: |
+          (
+            sum(rate(legal_debate_ai_service_errors_total[5m]))
+            /
+            sum(rate(legal_debate_ai_service_requests_total[5m]))
+          ) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          category: ai
+        annotations:
+          summary: "AI服务错误率过高"
+          description: "AI服务错误率在过去5分钟内超过10%，当前值: {{ $value | humanizePercentage }}"
+          dashboard: "http://grafana:3000/d/ai-service-monitoring"
+
+      # AI服务响应时间过长
+      - alert: SlowAIServiceResponse
+        expr: |
+          histogram_quantile(0.95, sum(rate(legal_debate_ai_service_response_time_bucket[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+          category: ai
+        annotations:
+          summary: "AI服务响应时间过长"
+          description: "AI服务P95响应时间在过去5分钟内超过10秒，当前值: {{ $value }}s"
+          dashboard: "http://grafana:3000/d/ai-service-monitoring"
+
+      # AI服务限流告警
+      - alert: AIServiceRateLimit
+        expr: |
+          sum(rate(legal_debate_ai_rate_limit_exceeded_total[1m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          category: ai
+        annotations:
+          summary: "AI服务限流频繁"
+          description: "在过去1分钟内检测到超过5次AI服务限流，当前值: {{ $value }}/s"
+          dashboard: "http://grafana:3000/d/ai-service-monitoring"
+
+      # AI服务超时告警
+      - alert: AIServiceTimeout
+        expr: |
+          sum(rate(legal_debate_ai_service_timeouts_total[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          category: ai
+        annotations:
+          summary: "AI服务超时频繁"
+          description: "在过去5分钟内检测到超过5次AI服务超时，当前值: {{ $value }}/s"
+          dashboard: "http://grafana:3000/d/ai-service-monitoring"
+
+  # ========================================
+  # 系统资源告警规则组
+  # ========================================
+  - name: system_resource_alerts
+    interval: 30s
+    rules:
+      # 内存使用率过高
+      - alert: HighMemoryUsage
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          category: system
+        annotations:
+          summary: "内存使用率过高"
+          description: "系统内存使用率在过去10分钟内超过85%，当前值: {{ $value | humanizePercentage }}"
+
+      # CPU使用率过高
+      - alert: HighCPUUsage
+        expr: |
+          (100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: system
+        annotations:
+          summary: "CPU使用率过高"
+          description: "系统CPU使用率在过去5分钟内超过80%，当前值: {{ $value }}%"
+
+      # 磁盘使用率过高
+      - alert: HighDiskUsage
+        expr: |
+          (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.1
+        for: 10m
+        labels:
+          severity: critical
+          category: system
+        annotations:
+          summary: "磁盘使用率过高"
+          description: "根分区磁盘使用率超过90%，当前可用空间: {{ $value | humanize }}"
+
+      # 磁盘I/O过高
+      - alert: HighDiskIO
+        expr: |
+          sum(rate(node_disk_io_time_seconds_total[5m])) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          category: system
+        annotations:
+          summary: "磁盘I/O过高"
+          description: "磁盘I/O在过去5分钟内超过80%，当前值: {{ $value | humanizePercentage }}"
+
+  # ========================================
+  # 缓存告警规则组
+  # ========================================
+  - name: cache_alerts
+    interval: 30s
+    rules:
+      # Redis连接池使用率过高
+      - alert: HighRedisConnectionUsage
+        expr: |
+          legal_debate_redis_connected_clients / legal_debate_redis_max_clients > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          category: cache
+        annotations:
+          summary: "Redis连接池使用率过高"
+          description: "Redis连接池使用率在过去5分钟内超过80%，当前值: {{ $value | humanizePercentage }}"
+
+      # Redis内存使用率过高
+      - alert: HighRedisMemoryUsage
+        expr: |
+          legal_debate_redis_used_memory_bytes / legal_debate_redis_max_memory_bytes > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          category: cache
+        annotations:
+          summary: "Redis内存使用率过高"
+          description: "Redis内存使用率在过去5分钟内超过90%，当前值: {{ $value | humanizePercentage }}"
+
+      # 缓存命中率过低
+      - alert: LowCacheHitRate
+        expr: |
+          legal_debate_cache_hit_rate < 0.6
+        for: 10m
+        labels:
+          severity: warning
+          category: cache
+        annotations:
+          summary: "缓存命中率过低"
+          description: "缓存命中率在过去10分钟内低于60%，当前值: {{ $value | humanizePercentage }}"
+
+  # ========================================
+  # 应用健康告警规则组
+  # ========================================
+  - name: application_health_alerts
+    interval: 30s
+    rules:
+      # 应用实例不健康
+      - alert: ApplicationInstanceUnhealthy
+        expr: |
+          legal_debate_application_health == 0
+        for: 2m
+        labels:
+          severity: critical
+          category: application
+        annotations:
+          summary: "应用实例不健康"
+          description: "应用实例在过去2分钟内报告为不健康"
+
+      # 错误日志过多
+      - alert: TooManyErrorLogs
+        expr: |
+          sum(rate(legal_debate_error_logs_total{level="error"}[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+          category: application
+        annotations:
+          summary: "错误日志过多"
+          description: "在过去5分钟内检测到超过10条错误日志，当前值: {{ $value }}/s"
+
+      # 致命错误日志
+      - alert: FatalErrorLogs
+        expr: |
+          sum(rate(legal_debate_error_logs_total{level="fatal"}[5m])) > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: application
+        annotations:
+          summary: "检测到致命错误"
+          description: "在过去1分钟内检测到致命错误日志，当前值: {{ $value }}/s"
+
+  # ========================================
+  # 商业指标告警规则组
+  # ========================================
+  - name: business_metrics_alerts
+    interval: 60s
+    rules:
+      # 支付失败率过高
+      - alert: HighPaymentFailureRate
+        expr: |
+          (
+            sum(rate(legal_debate_payments_total{status="failed"}[10m]))
+            /
+            sum(rate(legal_debate_payments_total[10m]))
+          ) > 0.05
+        for: 10m
+        labels:
+          severity: critical
+          category: business
+        annotations:
+          summary: "支付失败率过高"
+          description: "支付失败率在过去10分钟内超过5%，当前值: {{ $value | humanizePercentage }}"
+
+      # 新用户注册异常
+      - alert: AbnormalUserRegistration
+        expr: |
+          sum(increase(legal_debate_user_registrations_total[1h])) < 5
+        for: 1h
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "新用户注册异常"
+          description: "在过去1小时内新用户注册数量低于5个，可能存在注册问题"
+
+      # 辩论生成失败率过高
+      - alert: HighDebateGenerationFailureRate
+        expr: |
+          (
+            sum(rate(legal_debate_debates_total{status="failed"}[10m]))
+            /
+            sum(rate(legal_debate_debates_total[10m]))
+          ) > 0.1
+        for: 10m
+        labels:
+          severity: critical
+          category: business
+        annotations:
+          summary: "辩论生成失败率过高"
+          description: "辩论生成失败率在过去10分钟内超过10%，当前值: {{ $value | humanizePercentage }}"
