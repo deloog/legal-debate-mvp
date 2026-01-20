@@ -66,8 +66,8 @@ describe('法条反馈API', () => {
 
       expect(testResponse.status).toBe(200);
       expect(testResponse.data).toBeDefined();
-      expect(testResponse.data.success).toBe(true);
-      expect(testResponse.data.data.metadata.lawyerFeedback.action).toBe(
+      expect(testResponse.success).toBe(true);
+      expect(testResponse.data.metadata.lawyerFeedback.action).toBe(
         'CONFIRMED'
       );
     });
@@ -111,11 +111,9 @@ describe('法条反馈API', () => {
 
       expect(testResponse.status).toBe(200);
       expect(testResponse.data).toBeDefined();
-      expect(testResponse.data.success).toBe(true);
-      expect(testResponse.data.data.metadata.lawyerFeedback.action).toBe(
-        'REMOVED'
-      );
-      expect(testResponse.data.data.metadata.lawyerFeedback.removedReason).toBe(
+      expect(testResponse.success).toBe(true);
+      expect(testResponse.data.metadata.lawyerFeedback.action).toBe('REMOVED');
+      expect(testResponse.data.metadata.lawyerFeedback.removedReason).toBe(
         'NOT_RELEVANT'
       );
     });
@@ -161,11 +159,11 @@ describe('法条反馈API', () => {
 
       expect(testResponse.status).toBe(200);
       expect(testResponse.data).toBeDefined();
-      expect(testResponse.data.success).toBe(true);
-      expect(testResponse.data.data.metadata.lawyerFeedback.removedReason).toBe(
+      expect(testResponse.success).toBe(true);
+      expect(testResponse.data.metadata.lawyerFeedback.removedReason).toBe(
         'OTHER'
       );
-      expect(testResponse.data.data.metadata.lawyerFeedback.otherReason).toBe(
+      expect(testResponse.data.metadata.lawyerFeedback.otherReason).toBe(
         '该法条与本案实际情况不符'
       );
     });
@@ -316,11 +314,11 @@ describe('法条反馈API', () => {
 
       expect(testResponse.status).toBe(200);
       expect(testResponse.data).toBeDefined();
-      expect(testResponse.data.success).toBe(true);
-      expect(testResponse.data.data.metadata.existingData).toBe(
+      expect(testResponse.success).toBe(true);
+      expect(testResponse.data.metadata.existingData).toBe(
         'should be preserved'
       );
-      expect(testResponse.data.data.metadata.existingNumber).toBe(123);
+      expect(testResponse.data.metadata.existingNumber).toBe(123);
     });
   });
 });

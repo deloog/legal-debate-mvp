@@ -8,7 +8,6 @@ import { checkDatabaseConnection, getConnectionInfo } from '@/lib/db/prisma';
 import { AIServiceFactory } from '@/lib/ai/service-refactored';
 import type {
   HealthStatus,
-  DependenciesCheckResponse,
   DatabaseHealth,
   AIServiceHealth,
 } from '@/types/health';
@@ -212,26 +211,28 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     ai: aiServiceHealth,
   });
 
-  // 4. 构建响应数据
-  const depsData: DependenciesCheckResponse = {
-    status: overallStatus,
-    timestamp: new Date().toISOString(),
-    dependencies: {
-      database: databaseHealth,
-      ai: aiServiceHealth,
+  // 4. 构建响应数据（使用与/health路由相同的结构）
+  const response = NextResponse.json(
+    {
+      data: {
+        status: overallStatus,
+        timestamp: new Date().toISOString(),
+        dependencies: {
+          database: databaseHealth,
+          ai: aiServiceHealth,
+        },
+        summary,
+      },
+      meta: {
+        status: overallStatus,
+        timestamp: new Date().toISOString(),
+        version: 'v1',
+      },
     },
-    summary,
-    meta: {
-      status: overallStatus,
-      timestamp: new Date().toISOString(),
-      version: 'v1',
-    },
-  };
-
-  // 5. 创建响应并手动复制中间件headers
-  const response = NextResponse.json(depsData, {
-    status: overallStatus === 'healthy' ? 200 : 503,
-  });
+    {
+      status: overallStatus === 'healthy' ? 200 : 503,
+    }
+  );
 
   // 手动复制中间件headers
   middlewareResponse.headers.forEach((value, key) => {

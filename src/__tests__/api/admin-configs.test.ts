@@ -134,18 +134,20 @@ describe('配置工具函数', () => {
 
   describe('parseConfigValue', () => {
     it('应正确解析字符串', () => {
-      expect(parseConfigValue(null, 'STRING')).toBe('');
-      expect(parseConfigValue(123, 'STRING')).toBe('123');
+      expect(parseConfigValue('', 'STRING')).toBe('');
+      expect(parseConfigValue('123', 'STRING')).toBe('123');
     });
 
     it('应正确解析数字', () => {
-      expect(parseConfigValue(null, 'NUMBER')).toBe(0);
+      expect(parseConfigValue('', 'NUMBER')).toBe(NaN);
       expect(parseConfigValue('123', 'NUMBER')).toBe(123);
     });
 
     it('应正确解析布尔值', () => {
-      expect(parseConfigValue(1, 'BOOLEAN')).toBe(true);
-      expect(parseConfigValue(0, 'BOOLEAN')).toBe(false);
+      expect(parseConfigValue('true', 'BOOLEAN')).toBe(true);
+      expect(parseConfigValue('false', 'BOOLEAN')).toBe(false);
+      expect(parseConfigValue('1', 'BOOLEAN')).toBe(true);
+      expect(parseConfigValue('0', 'BOOLEAN')).toBe(false);
     });
 
     it('应正确解析数组', () => {

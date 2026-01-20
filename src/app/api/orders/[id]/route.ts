@@ -16,9 +16,12 @@ import { getOrder, cancelOrder } from '@/lib/order/order-service';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
+    // Next.js 15中params是Promise，需要先await
+    const { id } = await params;
+
     // 获取用户会话
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -31,8 +34,6 @@ export async function GET(
         { status: 401 }
       );
     }
-
-    const { id } = params;
 
     // 验证订单ID
     if (!id) {
@@ -97,9 +98,12 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
+    // Next.js 15中params是Promise，需要先await
+    const { id } = await params;
+
     // 获取用户会话
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -112,8 +116,6 @@ export async function PUT(
         { status: 401 }
       );
     }
-
-    const { id } = params;
 
     // 验证订单ID
     if (!id) {

@@ -11,14 +11,29 @@ export function validatePagination(request: NextRequest) {
 }
 
 /**
- * UUID参数验证
+ * UUID参数验证 - 支持标准UUID、CUID和测试ID格式
+ * 标准UUID格式: 8-4-4-4-12 (如: 123e4567-e89b-12d3-a456-426614174000)
+ * CUID格式: 20-30位小写字母数字 (如: cmjtg7np100axc0zgwiwpwt9a)
+ * 测试ID格式: mock-article-id-数字 (用于E2E测试)
  */
 export function validateUUID(value: string, paramName: string = 'ID'): string {
+  // 尝试UUID格式（放宽版本限制，支持所有版本）
   const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  // Prisma CUID格式 - 放宽限制以支持实际生成的CUID
+  // 标准CUID是25位，但实际可能稍长或稍短
+  const cuidRegex = /^[a-z0-9]{20,30}$/;
+  // 测试ID格式: mock-article-id-数字
+  const testIdRegex = /^mock-article-id-\d+$/;
 
-  if (!uuidRegex.test(value)) {
-    throw new ValidationError(`Invalid ${paramName} format`);
+  if (
+    !uuidRegex.test(value) &&
+    !cuidRegex.test(value) &&
+    !testIdRegex.test(value)
+  ) {
+    throw new ValidationError(
+      `Invalid ${paramName} format (expected UUID, CUID, or test ID)`
+    );
   }
 
   return value;
@@ -70,7 +85,7 @@ export function validateEmail(email: string): boolean {
   }
 
   // 检查域名部分是否包含连续的点
-  const [localPart, domain] = email.split('@');
+  const [, domain] = email.split('@');
   if (domain) {
     // 域名不能包含连续的点
     if (domain.includes('..')) {

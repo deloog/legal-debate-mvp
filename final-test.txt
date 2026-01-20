@@ -1,0 +1,139 @@
+  console.error
+    瀹℃牳娉曟潯澶辫触: Error: Database error
+        at Object.<anonymous> (D:\legal_debate_mvp\src\__tests__\api\admin\law-articles\[id]\review.test.ts:348:9)
+        at Promise.finally.completed (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1557:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1497:10)
+        at _callCircusTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1007:40)
+        at _runTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:947:3)
+        at D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:849:7
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:862:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at run (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:761:3)
+        at runAndTransformResultsToJestFormat (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1918:21)
+        at jestAdapter (D:\legal_debate_mvp\node_modules\jest-circus\build\runner.js:101:19)
+        at runTestInternal (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:275:16)
+        at runTest (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:343:7)
+
+    [0m [90m 140 |[39m     [36mreturn[39m successResponse(updatedArticle[33m,[39m [32m'瀹℃牳娉曟潯鎴愬姛'[39m)[33m;[39m
+     [90m 141 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 142 |[39m     console[33m.[39merror([32m'瀹℃牳娉曟潯澶辫触:'[39m[33m,[39m error)[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m 143 |[39m     [36mreturn[39m serverErrorResponse([32m'瀹℃牳娉曟潯澶辫触'[39m)[33m;[39m
+     [90m 144 |[39m   }
+     [90m 145 |[39m }[0m
+
+      at POST (src/app/api/admin/law-articles/[id]/review/route.ts:142:13)
+      at Object.<anonymous> (src/__tests__/api/admin/law-articles/[id]/review.test.ts:367:24)
+
+FAIL src/__tests__/api/admin/law-articles/[id]/review.test.ts
+  娉曟潯瀹℃牳API
+    POST /api/admin/law-articles/[id]/review
+      鈭?搴旇鎴愬姛閫氳繃瀹℃牳 (6 ms)
+      鈭?搴旇鎴愬姛鎷掔粷瀹℃牳 (1 ms)
+      鈭?搴旇鏀寔瀹℃牳澶囨敞 (1 ms)
+      鈭?搴旇杩斿洖401褰撶敤鎴锋湭璁よ瘉
+      鈭?搴旇杩斿洖403褰撶敤鎴锋棤鏉冮檺
+      鈭?搴旇杩斿洖404褰撴硶鏉′笉瀛樺湪 (1 ms)
+      脳 搴旇杩斿洖400褰撹姹傛牸寮忛敊璇?(2 ms)
+      鈭?搴旇杩斿洖400褰撶己灏戝鏍哥姸鎬?(1 ms)
+      鈭?搴旇杩斿洖400褰撳鏍哥姸鎬佹棤鏁?      鈭?搴旇杩斿洖500褰撴暟鎹簱鏇存柊澶辫触 (27 ms)
+
+  鈼?娉曟潯瀹℃牳API 鈥?POST /api/admin/law-articles/[id]/review 鈥?搴旇杩斿洖400褰撹姹傛牸寮忛敊璇?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 404
+
+      275 |       const response = await POST(request, { params });
+      276 |
+    > 277 |       expect(response.status).toBe(400);
+          |                               ^
+      278 |     });
+      279 |
+      280 |     it('搴旇杩斿洖400褰撶己灏戝鏍哥姸鎬?, async () => {
+
+      at Object.<anonymous> (src/__tests__/api/admin/law-articles/[id]/review.test.ts:277:31)
+
+  console.error
+    鑾峰彇娉曟潯璇︽儏澶辫触: Error: Database error
+        at Object.<anonymous> (D:\legal_debate_mvp\src\__tests__\api\admin\law-articles\[id].test.ts:146:9)
+        at Promise.finally.completed (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1557:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1497:10)
+        at _callCircusTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1007:40)
+        at _runTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:947:3)
+        at D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:849:7
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:862:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at run (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:761:3)
+        at runAndTransformResultsToJestFormat (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1918:21)
+        at jestAdapter (D:\legal_debate_mvp\node_modules\jest-circus\build\runner.js:101:19)
+        at runTestInternal (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:275:16)
+        at runTest (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:343:7)
+
+    [0m [90m 220 |[39m     [36mreturn[39m successResponse(article[33m,[39m [32m'鑾峰彇娉曟潯璇︽儏鎴愬姛'[39m)[33m;[39m
+     [90m 221 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 222 |[39m     console[33m.[39merror([32m'鑾峰彇娉曟潯璇︽儏澶辫触:'[39m[33m,[39m error)[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m 223 |[39m     [36mreturn[39m serverErrorResponse([32m'鑾峰彇娉曟潯璇︽儏澶辫触'[39m)[33m;[39m
+     [90m 224 |[39m   }
+     [90m 225 |[39m }[0m
+
+      at GET (src/app/api/admin/law-articles/[id]/route.ts:222:13)
+      at Object.<anonymous> (src/__tests__/api/admin/law-articles/[id].test.ts:154:24)
+
+  console.error
+    鍒犻櫎娉曟潯澶辫触: Error: Database error
+        at Object.<anonymous> (D:\legal_debate_mvp\src\__tests__\api\admin\law-articles\[id].test.ts:422:9)
+        at Promise.finally.completed (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1557:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1497:10)
+        at _callCircusTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1007:40)
+        at _runTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:947:3)
+        at D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:849:7
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:862:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at run (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:761:3)
+        at runAndTransformResultsToJestFormat (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1918:21)
+        at jestAdapter (D:\legal_debate_mvp\node_modules\jest-circus\build\runner.js:101:19)
+        at runTestInternal (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:275:16)
+        at runTest (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:343:7)
+
+    [0m [90m 380 |[39m     [36mreturn[39m successResponse({ id }[33m,[39m [32m'鍒犻櫎娉曟潯鎴愬姛'[39m)[33m;[39m
+     [90m 381 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 382 |[39m     console[33m.[39merror([32m'鍒犻櫎娉曟潯澶辫触:'[39m[33m,[39m error)[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m 383 |[39m     [36mreturn[39m serverErrorResponse([32m'鍒犻櫎娉曟潯澶辫触'[39m)[33m;[39m
+     [90m 384 |[39m   }
+     [90m 385 |[39m }[0m
+
+      at DELETE (src/app/api/admin/law-articles/[id]/route.ts:382:13)
+      at Object.<anonymous> (src/__tests__/api/admin/law-articles/[id].test.ts:436:24)
+
+PASS src/__tests__/api/admin/law-articles/[id].test.ts
+  娉曟潯璇︽儏鍜屾洿鏂癆PI
+    GET /api/admin/law-articles/[id]
+      鈭?搴旇鎴愬姛鑾峰彇娉曟潯璇︽儏 (2 ms)
+      鈭?搴旇杩斿洖401褰撶敤鎴锋湭璁よ瘉 (1 ms)
+      鈭?搴旇杩斿洖403褰撶敤鎴锋棤鏉冮檺 (1 ms)
+      鈭?搴旇杩斿洖404褰撴硶鏉′笉瀛樺湪 (1 ms)
+      鈭?搴旇杩斿洖500褰撴暟鎹簱鏌ヨ澶辫触 (21 ms)
+    PUT /api/admin/law-articles/[id]
+      鈭?搴旇鎴愬姛鏇存柊娉曟潯 (2 ms)
+      鈭?搴旇杩斿洖400褰撹姹傛牸寮忛敊璇?      鈭?搴旇杩斿洖400褰撴病鏈夐渶瑕佹洿鏂扮殑瀛楁 (1 ms)
+      鈭?搴旇楠岃瘉娉曞緥绫诲瀷鏋氫妇鍊?(1 ms)
+      鈭?搴旇鏀寔鏇存柊鏍囩
+      鈭?搴旇鏀寔鏇存柊鍏抽敭璇?    DELETE /api/admin/law-articles/[id]
+      鈭?搴旇鎴愬姛鍒犻櫎娉曟潯 (1 ms)
+      鈭?搴旇杩斿洖404褰撴硶鏉′笉瀛樺湪
+      鈭?搴旇杩斿洖500褰撴暟鎹簱鍒犻櫎澶辫触 (4 ms)
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       1 failed, 23 passed, 24 total
+Snapshots:   0 total
+Time:        1.095 s
+Ran all test suites matching src/__tests__/api/admin/law-articles.

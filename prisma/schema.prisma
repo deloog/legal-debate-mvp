@@ -1,25 +1,3 @@
-// === 生产环境连接池配置 ===
-// 连接池大小通过环境变量或连接字符串参数配置：
-// - connection_limit: 最大连接数（推荐：10-100）
-// - pool_timeout: 连接池获取超时（毫秒）
-// - statement_cache_size: 预编译语句缓存大小（推荐：100-1000）
-// 
-// 环境变量：
-// - DATABASE_POOL_MIN: 最小连接数（默认：2）
-// - DATABASE_POOL_MAX: 最大连接数（默认：20，生产环境建议：50-100）
-// - DATABASE_POOL_TIMEOUT: 连接获取超时（毫秒，默认：30000）
-// - DATABASE_IDLE_TIMEOUT: 空闲连接超时（毫秒，默认：30000）
-//
-// 生产环境推荐配置：
-// 最小连接数：10-20（保证基础连接）
-// 最大连接数：50-100（根据负载调整）
-// 连接超时：30秒
-// 空闲超时：30-60秒
-// 连接生命周期：24小时
-//
-// 连接字符串示例（生产环境）：
-// postgresql://user:password@host:port/database?connection_limit=50&pool_timeout=30000
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -30,45 +8,48 @@ datasource db {
 }
 
 model User {
-  id                   String     @id @default(cuid())
-  email                String     @unique
-  username             String?
-  name                 String?
-  password             String?
-  role                 UserRole   @default(USER)
-  permissions          Json?
-  organizationId       String?
-  createdAt            DateTime   @default(now())
-  updatedAt            DateTime   @updatedAt
-  deletedAt            DateTime?
-  address              String?
-  avatar               String?
-  bio                  String?
-  emailVerified        DateTime?
-  lastLoginAt          DateTime?
-  loginCount           Int        @default(0)
-  passwordResetExpires DateTime?
-  passwordResetToken   String?
-  phone                String?
-  preferences          Json?
-  status               UserStatus @default(ACTIVE)
-  accounts             Account[]
-  cases                Case[]
-  debates              Debate[]
-  documents            Document[]
-  sessions             Session[]
-  lawyerQualifications LawyerQualification[]
-  reviewedQualifications LawyerQualification[] @relation("QualificationReviews")
-  verificationCodes    VerificationCode[]
-  enterpriseAccount    EnterpriseAccount?    @relation("UserEnterpriseAccount")
-  reviewedEnterpriseReviews EnterpriseReview[] @relation("EnterpriseReviews")
-  userMemberships     UserMembership[]
-  usageRecords         UsageRecord[]
-  membershipHistoryRecords MembershipHistory[]
-  orders              Order[]
-  paymentRecords       PaymentRecord[]
-  refundRecords       RefundRecord[]
-  invoices            Invoice[]
+  id                        String                @id @default(cuid())
+  email                     String                @unique
+  username                  String?
+  name                      String?
+  role                      UserRole              @default(USER)
+  permissions               Json?
+  organizationId            String?
+  createdAt                 DateTime              @default(now())
+  updatedAt                 DateTime              @updatedAt
+  deletedAt                 DateTime?
+  address                   String?
+  avatar                    String?
+  bio                       String?
+  emailVerified             DateTime?
+  lastLoginAt               DateTime?
+  loginCount                Int                   @default(0)
+  passwordResetExpires      DateTime?
+  passwordResetToken        String?
+  phone                     String?
+  preferences               Json?
+  status                    UserStatus            @default(ACTIVE)
+  password                  String?
+  accounts                  Account[]
+  cases                     Case[]
+  clients                   Client[]
+  communications            CommunicationRecord[]
+  debates                   Debate[]
+  documents                 Document[]
+  enterpriseAccount         EnterpriseAccount?    @relation("UserEnterpriseAccount")
+  reviewedEnterpriseReviews EnterpriseReview[]    @relation("EnterpriseReviews")
+  invoices                  Invoice[]
+  reviewedQualifications    LawyerQualification[] @relation("QualificationReviews")
+  lawyerQualifications      LawyerQualification[]
+  membershipHistoryRecords  MembershipHistory[]
+  orders                    Order[]
+  paymentRecords            PaymentRecord[]
+  refundRecords             RefundRecord[]
+  sessions                  Session[]
+  usageRecords              UsageRecord[]
+  userMemberships           UserMembership[]
+  verificationCodes         VerificationCode[]
+  followUpTasks              FollowUpTask[]
 
   @@index([email])
   @@index([username])
@@ -124,12 +105,15 @@ model Case {
   court           String?
   defendantName   String?
   plaintiffName   String?
+  clientId        String?
+  client          Client?          @relation(fields: [clientId], references: [id])
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   debates         Debate[]
   documents       Document[]
   legalReferences LegalReference[]
 
   @@index([userId])
+  @@index([clientId])
   @@index([status])
   @@index([type])
   @@index([createdAt])
@@ -274,51 +258,35 @@ model LegalReference {
 }
 
 model LawArticle {
-  id                String              @id @default(cuid())
-
-  // === 基础信息 ===
-  lawName           String
-  articleNumber     String
-  fullText          String              @db.Text
-
-  // === 分类系统 ===
-  lawType           LawType
-  category          LawCategory
-  subCategory       String?
-  tags              String[]
-  keywords          String[]
-
-  // === 版本管理 ===
-  version           String              @default("1.0")
-  effectiveDate     DateTime
-  expiryDate        DateTime?
-  status            LawStatus           @default(VALID)
-  amendmentHistory  Json?
-
-  // === 层级关系 ===
-  parentId          String?
-  chapterNumber     String?
-  sectionNumber     String?
-  level             Int                 @default(0)
-
-  // === 元数据 ===
-  issuingAuthority  String
-  jurisdiction      String?
-  relatedArticles   String[]
-  legalBasis        String?
-
-  // === 检索和统计 ===
-  searchableText    String              @db.Text
-  viewCount         Int                 @default(0)
-  referenceCount    Int                 @default(0)
-
-  // === 时间戳 ===
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-
-  // === 关联关系 ===
-  parent            LawArticle?         @relation("ArticleHierarchy", fields: [parentId], references: [id])
-  children          LawArticle[]        @relation("ArticleHierarchy")
+  id               String       @id @default(cuid())
+  lawName          String
+  articleNumber    String
+  fullText         String
+  lawType          LawType
+  category         LawCategory
+  subCategory      String?
+  tags             String[]
+  keywords         String[]
+  version          String       @default("1.0")
+  effectiveDate    DateTime
+  expiryDate       DateTime?
+  status           LawStatus    @default(VALID)
+  amendmentHistory Json?
+  parentId         String?
+  chapterNumber    String?
+  sectionNumber    String?
+  level            Int          @default(0)
+  issuingAuthority String
+  jurisdiction     String?
+  relatedArticles  String[]
+  legalBasis       String?
+  searchableText   String
+  viewCount        Int          @default(0)
+  referenceCount   Int          @default(0)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  parent           LawArticle?  @relation("ArticleHierarchy", fields: [parentId], references: [id])
+  children         LawArticle[] @relation("ArticleHierarchy")
 
   @@unique([lawName, articleNumber])
   @@index([lawType])
@@ -354,9 +322,6 @@ model AIInteraction {
   @@map("ai_interactions")
 }
 
-// === v3.0 Manus增强表 ===
-
-// 7. Agent记忆管理模块 - 三层记忆架构
 model AgentMemory {
   id               String     @id @default(cuid())
   userId           String
@@ -390,7 +355,6 @@ model AgentMemory {
   @@map("agent_memories")
 }
 
-// 8. 验证层模块 - 三重验证机制
 model VerificationResult {
   id                 String           @id @default(cuid())
   entityType         String
@@ -406,8 +370,8 @@ model VerificationResult {
   verifiedBy         String
   verificationTime   Int
   metadata           Json?
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
 
   @@unique([entityType, entityId])
   @@index([entityType])
@@ -419,27 +383,26 @@ model VerificationResult {
   @@map("verification_results")
 }
 
-// 9. 错误学习模块 - 错误学习机制
 model ErrorLog {
-  id               String       @id @default(cuid())
+  id               String        @id @default(cuid())
   userId           String?
   caseId           String?
   errorType        ErrorType
   errorCode        String
-  errorMessage     String       @db.Text
-  stackTrace       String?      @db.Text
+  errorMessage     String
+  stackTrace       String?
   context          Json
   attemptedAction  Json?
-  recoveryAttempts Int          @default(0)
-  recovered        Boolean      @default(false)
+  recoveryAttempts Int           @default(0)
+  recovered        Boolean       @default(false)
   recoveryMethod   String?
   recoveryTime     Int?
-  learned          Boolean      @default(false)
-  learningNotes    String?      @db.Text
+  learned          Boolean       @default(false)
+  learningNotes    String?
   severity         ErrorSeverity
   metadata         Json?
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
   @@index([userId])
   @@index([caseId])
@@ -452,26 +415,25 @@ model ErrorLog {
   @@map("error_logs")
 }
 
-// 10. Agent行动空间模块 - 行动空间管理
 model AgentAction {
-  id              String       @id @default(cuid())
-  userId          String?
-  caseId          String?
-  debateId        String?
-  agentName       String
-  actionType      ActionType
-  actionName      String
-  actionLayer     ActionLayer
-  parameters      Json
-  result          Json?
-  status          ActionStatus @default(PENDING)
-  executionTime   Int?
-  retryCount      Int          @default(0)
-  parentActionId  String?
-  childActions    String[]
-  metadata        Json?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id             String       @id @default(cuid())
+  userId         String?
+  caseId         String?
+  debateId       String?
+  agentName      String
+  actionType     ActionType
+  actionName     String
+  actionLayer    ActionLayer
+  parameters     Json
+  result         Json?
+  status         ActionStatus @default(PENDING)
+  executionTime  Int?
+  retryCount     Int          @default(0)
+  parentActionId String?
+  childActions   String[]
+  metadata       Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@index([userId])
   @@index([caseId])
@@ -486,24 +448,23 @@ model AgentAction {
   @@map("agent_actions")
 }
 
-// 11. 操作日志模块 - 用户操作追踪
 model ActionLog {
-  id              String           @id @default(cuid())
-  userId          String
-  actionType      ActionLogType
-  actionCategory  ActionLogCategory
-  description     String          @db.Text
-  resourceType    String?
-  resourceId      String?
-  ipAddress       String?
-  userAgent       String?
-  requestMethod   String?
-  requestPath     String?
-  requestParams   Json?
-  responseStatus  Int?
-  executionTime   Int?
-  metadata        Json?
-  createdAt       DateTime         @default(now())
+  id             String            @id @default(cuid())
+  userId         String
+  actionType     ActionLogType
+  actionCategory ActionLogCategory
+  description    String
+  resourceType   String?
+  resourceId     String?
+  ipAddress      String?
+  userAgent      String?
+  requestMethod  String?
+  requestPath    String?
+  requestParams  Json?
+  responseStatus Int?
+  executionTime  Int?
+  metadata       Json?
+  createdAt      DateTime          @default(now())
 
   @@index([userId])
   @@index([actionType])
@@ -513,12 +474,540 @@ model ActionLog {
   @@map("action_logs")
 }
 
+model LawyerQualification {
+  id               String              @id @default(cuid())
+  userId           String
+  licenseNumber    String              @unique
+  fullName         String
+  idCardNumber     String
+  lawFirm          String
+  licensePhoto     String?
+  status           QualificationStatus @default(PENDING)
+  submittedAt      DateTime            @default(now())
+  reviewedAt       DateTime?
+  reviewerId       String?
+  reviewNotes      String?
+  verificationData Json?
+  metadata         Json?
+  reviewer         User?               @relation("QualificationReviews", fields: [reviewerId], references: [id])
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([submittedAt])
+  @@map("lawyer_qualifications")
+}
+
+model VerificationCode {
+  id        String               @id @default(cuid())
+  userId    String
+  code      String
+  type      VerificationCodeType @default(PASSWORD_RESET)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime             @default(now())
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([code])
+  @@index([expiresAt])
+  @@map("verification_codes")
+}
+
+model EnterpriseAccount {
+  id               String             @id @default(cuid())
+  userId           String             @unique
+  enterpriseName   String
+  creditCode       String             @unique
+  legalPerson      String
+  industryType     String
+  businessLicense  String?
+  status           EnterpriseStatus   @default(PENDING)
+  submittedAt      DateTime           @default(now())
+  reviewedAt       DateTime?
+  reviewerId       String?
+  reviewNotes      String?
+  verificationData Json?
+  expiresAt        DateTime?
+  metadata         Json?
+  user             User               @relation("UserEnterpriseAccount", fields: [userId], references: [id], onDelete: Cascade)
+  reviews          EnterpriseReview[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([submittedAt])
+  @@map("enterprise_accounts")
+}
+
+model EnterpriseReview {
+  id           String                 @id @default(cuid())
+  enterpriseId String
+  reviewerId   String
+  reviewAction EnterpriseReviewAction
+  reviewNotes  String?
+  reviewData   Json?
+  createdAt    DateTime               @default(now())
+  enterprise   EnterpriseAccount      @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
+  reviewer     User                   @relation("EnterpriseReviews", fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@index([enterpriseId])
+  @@index([reviewerId])
+  @@map("enterprise_reviews")
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  isDefault   Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  resource    String
+  action      String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  roles       RolePermission[]
+
+  @@index([resource, action])
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model SystemConfig {
+  id              String     @id @default(cuid())
+  key             String     @unique
+  value           Json
+  type            ConfigType
+  category        String
+  description     String?
+  isPublic        Boolean    @default(false)
+  isRequired      Boolean    @default(false)
+  defaultValue    Json?
+  validationRules Json?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@index([category])
+  @@index([type])
+  @@index([isPublic])
+  @@map("system_configs")
+}
+
+model Report {
+  id            String       @id @default(cuid())
+  type          ReportType
+  periodStart   DateTime
+  periodEnd     DateTime
+  status        ReportStatus @default(PENDING)
+  filePath      String?
+  fileSize      Int?
+  format        ReportFormat @default(HTML)
+  generatedBy   String?
+  generatedAt   DateTime?
+  downloadCount Int          @default(0)
+  metadata      Json?
+  content       Json?
+  error         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([type])
+  @@index([status])
+  @@index([periodStart])
+  @@index([periodEnd])
+  @@index([generatedBy])
+  @@index([createdAt])
+  @@map("reports")
+}
+
+model Alert {
+  alertId             String        @id @default(cuid())
+  ruleId              String
+  ruleName            String
+  severity            AlertSeverity
+  status              AlertStatus   @default(TRIGGERED)
+  errorLogId          String
+  errorType           ErrorType
+  errorMessage        String
+  message             String
+  details             Json?
+  notificationHistory Json
+  acknowledgedBy      String?
+  acknowledgedAt      DateTime?
+  resolvedAt          DateTime?
+  resolutionNotes     String?
+  triggeredAt         DateTime
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@index([ruleId])
+  @@index([severity])
+  @@index([status])
+  @@index([errorLogId])
+  @@index([errorType])
+  @@index([triggeredAt])
+  @@map("alerts")
+}
+
+model MembershipTier {
+  id              String             @id @default(cuid())
+  name            String             @unique
+  displayName     String
+  description     String
+  tier            MembershipTierType @unique
+  price           Decimal            @db.Decimal(10, 2)
+  currency        String             @default("CNY")
+  billingCycle    BillingCycle
+  features        String[]
+  permissions     Json
+  isActive        Boolean            @default(true)
+  sortOrder       Int                @default(0)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  orders          Order[]
+  tierLimits      TierLimit[]
+  userMemberships UserMembership[]
+
+  @@index([tier])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("membership_tiers")
+}
+
+model UserMembership {
+  id              String              @id @default(cuid())
+  userId          String
+  tierId          String
+  status          MembershipStatus    @default(PENDING)
+  startDate       DateTime
+  endDate         DateTime
+  autoRenew       Boolean             @default(false)
+  cancelledAt     DateTime?
+  cancelledReason String?
+  pausedAt        DateTime?
+  pausedReason    String?
+  notes           String?
+  metadata        Json?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  historyRecords  MembershipHistory[]
+  usageRecords    UsageRecord[]
+  tier            MembershipTier      @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tierId, startDate])
+  @@index([userId])
+  @@index([tierId])
+  @@index([status])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([userId, status, endDate])
+  @@map("user_memberships")
+}
+
+model UsageRecord {
+  id           String         @id @default(cuid())
+  userId       String
+  membershipId String
+  usageType    UsageType
+  quantity     Int
+  unit         String
+  resourceId   String?
+  resourceType String?
+  description  String?
+  metadata     Json?
+  periodStart  DateTime
+  periodEnd    DateTime
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  membership   UserMembership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([membershipId])
+  @@index([usageType])
+  @@index([periodStart])
+  @@index([periodEnd])
+  @@index([userId, usageType, periodStart, periodEnd])
+  @@map("usage_records")
+}
+
+model TierLimit {
+  id          String         @id @default(cuid())
+  tierId      String
+  limitType   LimitType
+  limitValue  Int?
+  period      String?
+  description String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  tier        MembershipTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  @@unique([tierId, limitType])
+  @@index([tierId])
+  @@index([limitType])
+  @@map("tier_limits")
+}
+
+model MembershipHistory {
+  id           String               @id @default(cuid())
+  userId       String
+  membershipId String
+  changeType   MembershipChangeType
+  fromTier     MembershipTierType?
+  toTier       MembershipTierType?
+  fromStatus   MembershipStatus
+  toStatus     MembershipStatus
+  reason       String?
+  performedBy  String
+  metadata     Json?
+  createdAt    DateTime             @default(now())
+  membership   UserMembership       @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([membershipId])
+  @@index([changeType])
+  @@index([createdAt])
+  @@map("membership_history")
+}
+
+model Order {
+  id               String          @id @default(cuid())
+  orderNo          String          @unique
+  userId           String
+  membershipTierId String
+  paymentMethod    PaymentMethod   @default(WECHAT)
+  status           OrderStatus     @default(PENDING)
+  amount           Decimal         @db.Decimal(10, 2)
+  currency         String          @default("CNY")
+  description      String
+  metadata         Json?
+  expiredAt        DateTime
+  paidAt           DateTime?
+  failedReason     String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  invoices         Invoice[]
+  membershipTier   MembershipTier  @relation(fields: [membershipTierId], references: [id], onDelete: Cascade)
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentRecords   PaymentRecord[]
+  refundRecords    RefundRecord[]
+
+  @@index([userId])
+  @@index([membershipTierId])
+  @@index([paymentMethod])
+  @@index([status])
+  @@index([orderNo])
+  @@index([expiredAt])
+  @@index([createdAt])
+  @@index([userId, status, expiredAt])
+  @@map("orders")
+}
+
+model PaymentRecord {
+  id                String         @id @default(cuid())
+  orderId           String
+  userId            String
+  paymentMethod     PaymentMethod  @default(WECHAT)
+  status            PaymentStatus  @default(PENDING)
+  amount            Decimal        @db.Decimal(10, 2)
+  currency          String         @default("CNY")
+  transactionId     String?
+  thirdPartyOrderNo String?
+  errorCode         String?
+  errorMessage      String?
+  metadata          Json?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  order             Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refundRecords     RefundRecord[]
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([paymentMethod])
+  @@index([status])
+  @@index([transactionId])
+  @@index([thirdPartyOrderNo])
+  @@index([createdAt])
+  @@map("payment_records")
+}
+
+model RefundRecord {
+  id                 String        @id @default(cuid())
+  orderId            String
+  paymentRecordId    String
+  userId             String
+  paymentMethod      PaymentMethod @default(WECHAT)
+  status             RefundStatus  @default(PENDING)
+  reason             RefundReason
+  amount             Decimal       @db.Decimal(10, 2)
+  refundAmount       Decimal       @db.Decimal(10, 2)
+  currency           String        @default("CNY")
+  transactionId      String?
+  thirdPartyRefundNo String?
+  rejectedReason     String?
+  metadata           Json?
+  appliedAt          DateTime      @default(now())
+  processedAt        DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  order              Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  paymentRecord      PaymentRecord @relation(fields: [paymentRecordId], references: [id], onDelete: Cascade)
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([paymentRecordId])
+  @@index([userId])
+  @@index([paymentMethod])
+  @@index([status])
+  @@index([reason])
+  @@index([appliedAt])
+  @@index([createdAt])
+  @@map("refund_records")
+}
+
+model Invoice {
+  id        String        @id @default(cuid())
+  orderId   String
+  userId    String
+  type      InvoiceType   @default(PERSONAL)
+  status    InvoiceStatus @default(PENDING)
+  amount    Decimal       @db.Decimal(10, 2)
+  currency  String        @default("CNY")
+  title     String?
+  taxNumber String?
+  email     String?
+  filePath  String?
+  issuedAt  DateTime?
+  metadata  Json?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  order     Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@map("invoices")
+}
+
+model Client {
+  id             String                @id @default(cuid())
+  userId         String
+  clientType     ClientType            @default(INDIVIDUAL)
+  name           String
+  gender         String?
+  age            Int?
+  profession     String?
+  phone          String?
+  email          String?
+  address        String?
+  idCardNumber   String?
+  company        String?
+  creditCode     String?
+  legalRep       String?
+  source         ClientSource?
+  tags           String[]              @default([])
+  status         ClientStatus          @default(ACTIVE)
+  notes          String?
+  metadata       Json?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  deletedAt      DateTime?
+  cases          Case[]
+  user           User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  communications CommunicationRecord[]
+  followUpTasks  FollowUpTask[]
+
+  @@index([userId])
+  @@index([clientType])
+  @@index([status])
+  @@index([source])
+  @@map("clients")
+}
+
+model CommunicationRecord {
+  id               String            @id @default(cuid())
+  clientId         String
+  userId           String
+  type             CommunicationType @default(PHONE)
+  summary          String
+  content          String?
+  nextFollowUpDate DateTime?
+  isImportant      Boolean           @default(false)
+  metadata         Json?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  client           Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  followUpTasks    FollowUpTask[]
+
+  @@index([clientId])
+  @@index([userId])
+  @@index([type])
+  @@index([nextFollowUpDate])
+  @@index([createdAt])
+  @@map("communication_records")
+}
+
+model FollowUpTask {
+  id               String               @id @default(cuid())
+  clientId         String
+  communicationId  String
+  userId           String
+  type             CommunicationType      @default(PHONE)
+  summary          String
+  dueDate          DateTime
+  priority         FollowUpTaskPriority @default(MEDIUM)
+  status           FollowUpTaskStatus   @default(PENDING)
+  completedAt      DateTime?
+  notes            String?
+  metadata         Json?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  client           Client               @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  communication    CommunicationRecord  @relation(fields: [communicationId], references: [id], onDelete: Cascade)
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([communicationId])
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+  @@index([dueDate])
+  @@map("follow_up_tasks")
+}
+
 enum UserRole {
   USER
   LAWYER
-  ENTERPRISE
   ADMIN
   SUPER_ADMIN
+  ENTERPRISE
 }
 
 enum UserStatus {
@@ -621,70 +1110,53 @@ enum LawStatus {
   EXPIRED
 }
 
-// === v3.0 Manus增强枚举类型 ===
-
 enum MemoryType {
-  WORKING  // 工作记忆：当前任务上下文，TTL 1小时
-  HOT      // 热记忆：近期任务经验，TTL 7天
-  COLD     // 冷记忆：长期知识库，永久保留
+  WORKING
+  HOT
+  COLD
 }
 
 enum VerificationType {
-  FACTUAL        // 事实准确性验证
-  LOGICAL        // 逻辑一致性验证
-  COMPLETENESS   // 任务完成度验证
-  COMPREHENSIVE  // 综合验证（三重）
+  FACTUAL
+  LOGICAL
+  COMPLETENESS
+  COMPREHENSIVE
 }
 
 enum ErrorType {
-  // AI服务相关错误
   AI_SERVICE_ERROR
   AI_TIMEOUT
   AI_RATE_LIMIT
   AI_QUOTA_EXCEEDED
-
-  // 数据库相关错误
   DATABASE_ERROR
   DATABASE_CONNECTION_ERROR
   DATABASE_QUERY_ERROR
   DATABASE_CONSTRAINT_ERROR
-
-  // 验证相关错误
   VALIDATION_ERROR
   VALIDATION_REQUIRED_FIELD
   VALIDATION_FORMAT_ERROR
   VALIDATION_BUSINESS_RULE
-
-  // 网络相关错误
   NETWORK_ERROR
   NETWORK_TIMEOUT
   NETWORK_CONNECTION_ERROR
-
-  // 文件相关错误
   FILE_ERROR
   FILE_NOT_FOUND
   FILE_READ_ERROR
   FILE_WRITE_ERROR
-
-  // Agent相关错误
   AGENT_ERROR
   AGENT_TIMEOUT
   AGENT_NOT_FOUND
-
-  // 记忆相关错误
   MEMORY_ERROR
   MEMORY_NOT_FOUND
   MEMORY_EXPIRED
-
-  // 其他错误
   UNKNOWN_ERROR
 }
 
 enum ErrorSeverity {
-  LOW      // 低：不影响核心功能
-  MEDIUM   // 中：影响部分功能
-  HIGH     // 高：影响核心功能
-  CRITICAL // 严重：系统无法运行
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
 
 enum ActionType {
@@ -699,9 +1171,9 @@ enum ActionType {
 }
 
 enum ActionLayer {
-  CORE     // 核心原子函数层（<20个基础操作）
-  UTILITY  // 实用程序层（组合操作）
-  SCRIPT   // 脚本层（复杂计算）
+  CORE
+  UTILITY
+  SCRIPT
 }
 
 enum ActionStatus {
@@ -713,271 +1185,73 @@ enum ActionStatus {
   CANCELLED
 }
 
-// 操作日志类型
 enum ActionLogType {
-  // 用户操作
   LOGIN
   LOGOUT
   REGISTER
   UPDATE_PROFILE
   CHANGE_PASSWORD
-
-  // 案件操作
   CREATE_CASE
   UPDATE_CASE
   DELETE_CASE
   VIEW_CASE
-
-  // 文档操作
   UPLOAD_DOCUMENT
   DELETE_DOCUMENT
   ANALYZE_DOCUMENT
-
-  // 辩论操作
   CREATE_DEBATE
   UPDATE_DEBATE
   DELETE_DEBATE
   GENERATE_ARGUMENT
-
-  // 管理操作
   APPROVE_QUALIFICATION
   REJECT_QUALIFICATION
   UPDATE_USER_ROLE
   BAN_USER
   UNBAN_USER
-
-  // 系统操作
   EXPORT_DATA
   IMPORT_DATA
   SYSTEM_CONFIG_UPDATE
-
-  // 其他操作
   UNKNOWN
 }
 
-// 操作日志分类
 enum ActionLogCategory {
-  AUTH           // 认证相关
-  USER           // 用户管理
-  CASE           // 案件管理
-  DOCUMENT       // 文档管理
-  DEBATE         // 辩论管理
-  ADMIN          // 管理操作
-  SYSTEM         // 系统操作
-  OTHER          // 其他操作
-}
-
-// === 律师资格验证模块 ===
-
-model LawyerQualification {
-  id              String                 @id @default(cuid())
-  userId          String
-  licenseNumber   String                 // 17位执业证号
-  fullName        String                 // 律师姓名
-  idCardNumber    String                 // 身份证号
-  lawFirm         String                 // 执业律所
-  licensePhoto    String?                // 执业证照片路径
-  status          QualificationStatus    @default(PENDING)
-  submittedAt     DateTime               @default(now())
-  reviewedAt      DateTime?
-  reviewerId      String?                // 审核管理员ID
-  reviewNotes     String?
-  verificationData Json?                 // 验证数据（第三方API返回）
-  metadata        Json?
-
-  user            User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reviewer        User?                  @relation("QualificationReviews", fields: [reviewerId], references: [id], onDelete: SetNull)
-
-  @@unique([licenseNumber])
-  @@index([userId])
-  @@index([status])
-  @@index([submittedAt])
-  @@map("lawyer_qualifications")
+  AUTH
+  USER
+  CASE
+  DOCUMENT
+  DEBATE
+  ADMIN
+  SYSTEM
+  OTHER
 }
 
 enum QualificationStatus {
-  PENDING      // 待审核
-  UNDER_REVIEW // 审核中
-  APPROVED     // 已通过
-  REJECTED     // 已拒绝
-  EXPIRED      // 已过期
-}
-
-// === 验证码模块 ===
-
-model VerificationCode {
-  id        String                  @id @default(cuid())
-  userId    String
-  code      String                  // 6位数字验证码
-  type      VerificationCodeType     @default(PASSWORD_RESET)
-  expiresAt DateTime
-  usedAt    DateTime?
-  createdAt DateTime                @default(now())
-  
-  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@index([userId, type])
-  @@index([code])
-  @@index([expiresAt])
-  @@map("verification_codes")
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  EXPIRED
 }
 
 enum VerificationCodeType {
-  PASSWORD_RESET     // 密码重置验证码
-  EMAIL_VERIFICATION // 邮箱验证码
-  PHONE_VERIFICATION // 手机验证码
-}
-
-// === 企业认证模块 ===
-
-model EnterpriseAccount {
-  id              String                   @id @default(cuid())
-  userId          String                   @unique
-  enterpriseName  String                   // 企业名称
-  creditCode      String                   @unique // 统一社会信用代码（18位）
-  legalPerson     String                   // 法人代表
-  industryType    String                   // 行业类型
-  businessLicense String?                  // 营业执照图片路径
-  status          EnterpriseStatus          @default(PENDING)
-  submittedAt     DateTime                 @default(now())
-  reviewedAt      DateTime?
-  reviewerId      String?                  // 审核管理员ID
-  reviewNotes     String?
-  verificationData Json?                    // 验证数据（OCR识别或第三方API返回）
-  expiresAt       DateTime?                 // 认证有效期
-  metadata        Json?
-
-  user            User                     @relation("UserEnterpriseAccount", fields: [userId], references: [id], onDelete: Cascade)
-  reviews         EnterpriseReview[]
-
-  @@index([userId])
-  @@index([status])
-  @@index([submittedAt])
-  @@map("enterprise_accounts")
-}
-
-model EnterpriseReview {
-  id              String              @id @default(cuid())
-  enterpriseId    String
-  reviewerId      String
-  reviewAction    EnterpriseReviewAction
-  reviewNotes     String?
-  reviewData      Json?               // 审核相关数据
-  createdAt       DateTime            @default(now())
-
-  enterprise      EnterpriseAccount   @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
-  reviewer        User                @relation("EnterpriseReviews", fields: [reviewerId], references: [id], onDelete: Cascade)
-
-  @@index([enterpriseId])
-  @@index([reviewerId])
-  @@map("enterprise_reviews")
+  PASSWORD_RESET
+  EMAIL_VERIFICATION
+  PHONE_VERIFICATION
 }
 
 enum EnterpriseStatus {
-  PENDING      // 待审核
-  UNDER_REVIEW // 审核中
-  APPROVED     // 已通过
-  REJECTED     // 已拒绝
-  EXPIRED      // 已过期
-  SUSPENDED    // 已暂停
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  EXPIRED
+  SUSPENDED
 }
 
 enum EnterpriseReviewAction {
-  APPROVE  // 通过
-  REJECT   // 拒绝
-  SUSPEND  // 暂停
-  REACTIVATE // 重新激活
-}
-
-// === RBAC权限模型模块 ===
-
-model Role {
-  id          String         @id @default(cuid())
-  name        String         @unique
-  description String?
-  isDefault   Boolean        @default(false)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  permissions RolePermission[]
-
-  @@map("roles")
-}
-
-model Permission {
-  id          String         @id @default(cuid())
-  name        String         @unique
-  description String?
-  resource    String         // 资源类型：user, case, debate, document, law, system等
-  action      String         // 操作类型：create, read, update, delete等
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  roles       RolePermission[]
-
-  @@index([resource, action])
-  @@map("permissions")
-}
-
-model RolePermission {
-  id           String     @id @default(cuid())
-  roleId       String
-  permissionId String
-  createdAt    DateTime   @default(now())
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-
-  @@unique([roleId, permissionId])
-  @@map("role_permissions")
-}
-
-// === 系统配置管理模块 ===
-
-model SystemConfig {
-  id              String      @id @default(cuid())
-  key             String      @unique
-  value           Json
-  type            ConfigType
-  category         String
-  description      String?
-  isPublic        Boolean     @default(false)
-  isRequired      Boolean     @default(false)
-  defaultValue    Json?
-  validationRules Json?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  @@index([category])
-  @@index([type])
-  @@index([isPublic])
-  @@map("system_configs")
-}
-
-// === 报告系统模块 ===
-
-model Report {
-  id           String      @id @default(cuid())
-  type         ReportType
-  periodStart  DateTime
-  periodEnd    DateTime
-  status       ReportStatus @default(PENDING)
-  filePath     String?
-  fileSize     Int?
-  format       ReportFormat @default(HTML)
-  generatedBy  String?
-  generatedAt  DateTime?
-  downloadCount Int         @default(0)
-  metadata     Json?
-  content      Json?
-  error        String?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-
-  @@index([type])
-  @@index([status])
-  @@index([periodStart])
-  @@index([periodEnd])
-  @@index([generatedBy])
-  @@index([createdAt])
-  @@map("reports")
+  APPROVE
+  REJECT
+  SUSPEND
+  REACTIVATE
 }
 
 enum ReportType {
@@ -1000,195 +1274,33 @@ enum ReportFormat {
 }
 
 enum ConfigType {
-  STRING   // 字符串
-  NUMBER   // 数字
-  BOOLEAN  // 布尔值
-  ARRAY    // 数组
-  OBJECT   // 对象
-}
-
-// === 告警管理模块 ===
-
-model Alert {
-  alertId              String                @id @default(cuid())
-  ruleId               String
-  ruleName             String
-  severity             AlertSeverity
-  status               AlertStatus           @default(TRIGGERED)
-  errorLogId           String
-  errorType            ErrorType
-  errorMessage         String               @db.Text
-  message              String               @db.Text
-  details              Json?
-  notificationHistory   Json
-  acknowledgedBy       String?
-  acknowledgedAt       DateTime?
-  resolvedAt           DateTime?
-  resolutionNotes      String?              @db.Text
-  triggeredAt          DateTime
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-
-  @@index([ruleId])
-  @@index([severity])
-  @@index([status])
-  @@index([errorLogId])
-  @@index([errorType])
-  @@index([triggeredAt])
-  @@map("alerts")
+  STRING
+  NUMBER
+  BOOLEAN
+  ARRAY
+  OBJECT
 }
 
 enum AlertStatus {
-  TRIGGERED     // 已触发
-  ACKNOWLEDGED  // 已确认
-  RESOLVED      // 已解决
+  TRIGGERED
+  ACKNOWLEDGED
+  RESOLVED
 }
 
 enum AlertSeverity {
-  CRITICAL // 严重告警
-  HIGH     // 高级告警
-  MEDIUM   // 中级告警
-  LOW      // 低级告警
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
 }
 
 enum AlertChannel {
-  LOG      // 日志
-  EMAIL    // 邮件
-  WEBHOOK  // Webhook
-  SMS      // 短信
+  LOG
+  EMAIL
+  WEBHOOK
+  SMS
 }
 
-// === 会员等级系统模块 ===
-
-model MembershipTier {
-  id          String                     @id @default(cuid())
-  name        String                     @unique
-  displayName  String
-  description  String
-  tier        MembershipTierType          @unique
-  price       Decimal                    @db.Decimal(10, 2)
-  currency    String                     @default("CNY")
-  billingCycle BillingCycle
-  features    String[]
-  permissions Json                       // MembershipPermissionConfig
-  isActive    Boolean                    @default(true)
-  sortOrder   Int                        @default(0)
-  createdAt   DateTime                   @default(now())
-  updatedAt   DateTime                   @updatedAt
-
-  userMemberships UserMembership[]
-  tierLimits      TierLimit[]
-  orders          Order[]
-
-  @@index([tier])
-  @@index([isActive])
-  @@index([sortOrder])
-  @@map("membership_tiers")
-}
-
-model UserMembership {
-  id               String             @id @default(cuid())
-  userId           String
-  tierId           String
-  status           MembershipStatus   @default(PENDING)
-  startDate        DateTime
-  endDate          DateTime
-  autoRenew        Boolean            @default(false)
-  cancelledAt      DateTime?
-  cancelledReason  String?
-  pausedAt         DateTime?
-  pausedReason     String?
-  notes            String?
-  metadata         Json?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-
-  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tier            MembershipTier     @relation(fields: [tierId], references: [id], onDelete: Cascade)
-  usageRecords     UsageRecord[]
-  historyRecords   MembershipHistory[]
-
-  @@unique([userId, tierId, startDate])
-  @@index([userId])
-  @@index([tierId])
-  @@index([status])
-  @@index([startDate])
-  @@index([endDate])
-  @@index([userId, status, endDate])
-  @@map("user_memberships")
-}
-
-model UsageRecord {
-  id           String      @id @default(cuid())
-  userId       String
-  membershipId String
-  usageType    UsageType
-  quantity     Int
-  unit         String
-  resourceId   String?
-  resourceType String?
-  description  String?
-  metadata     Json?
-  periodStart  DateTime
-  periodEnd    DateTime
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-
-  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  membership  UserMembership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([membershipId])
-  @@index([usageType])
-  @@index([periodStart])
-  @@index([periodEnd])
-  @@index([userId, usageType, periodStart, periodEnd])
-  @@map("usage_records")
-}
-
-model TierLimit {
-  id           String      @id @default(cuid())
-  tierId       String
-  limitType    LimitType
-  limitValue   Int?        // null表示无限制
-  period       String?
-  description  String?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-
-  tier         MembershipTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
-
-  @@unique([tierId, limitType])
-  @@index([tierId])
-  @@index([limitType])
-  @@map("tier_limits")
-}
-
-model MembershipHistory {
-  id          String                  @id @default(cuid())
-  userId      String
-  membershipId String
-  changeType  MembershipChangeType
-  fromTier    MembershipTierType?
-  toTier      MembershipTierType?
-  fromStatus  MembershipStatus
-  toStatus    MembershipStatus
-  reason      String?
-  performedBy String
-  metadata    Json?
-  createdAt   DateTime                @default(now())
-
-  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  membership  UserMembership  @relation(fields: [membershipId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([membershipId])
-  @@index([changeType])
-  @@index([createdAt])
-  @@map("membership_history")
-}
-
-// 会员等级枚举
 enum MembershipTierType {
   FREE
   BASIC
@@ -1196,7 +1308,6 @@ enum MembershipTierType {
   ENTERPRISE
 }
 
-// 会员状态枚举
 enum MembershipStatus {
   ACTIVE
   EXPIRED
@@ -1205,7 +1316,6 @@ enum MembershipStatus {
   PENDING
 }
 
-// 订阅周期枚举
 enum BillingCycle {
   MONTHLY
   QUARTERLY
@@ -1213,7 +1323,6 @@ enum BillingCycle {
   LIFETIME
 }
 
-// 使用量类型枚举
 enum UsageType {
   CASE_CREATED
   DEBATE_GENERATED
@@ -1223,7 +1332,6 @@ enum UsageType {
   STORAGE_USED
 }
 
-// 限制类型枚举
 enum LimitType {
   MAX_CASES
   MAX_DEBATES
@@ -1234,7 +1342,6 @@ enum LimitType {
   MAX_CONCURRENT_REQUESTS
 }
 
-// 会员变更类型枚举
 enum MembershipChangeType {
   UPGRADE
   DOWNGRADE
@@ -1245,193 +1352,98 @@ enum MembershipChangeType {
   EXPIRE
 }
 
-// === 支付系统模块 ===
-
-model Order {
-  id                  String            @id @default(cuid())
-  orderNo              String            @unique
-  userId               String
-  membershipTierId     String
-  paymentMethod        PaymentMethod     @default(WECHAT)
-  status              OrderStatus       @default(PENDING)
-  amount               Decimal           @db.Decimal(10, 2)
-  currency             String            @default("CNY")
-  description          String
-  metadata             Json?
-  expiredAt            DateTime
-  paidAt               DateTime?
-  failedReason         String?
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
-
-  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  membershipTier       MembershipTier     @relation(fields: [membershipTierId], references: [id], onDelete: Cascade)
-  paymentRecords       PaymentRecord[]
-  refundRecords        RefundRecord[]
-  invoices             Invoice[]
-
-  @@index([userId])
-  @@index([membershipTierId])
-  @@index([paymentMethod])
-  @@index([status])
-  @@index([orderNo])
-  @@index([expiredAt])
-  @@index([createdAt])
-  @@index([userId, status, expiredAt])
-  @@map("orders")
-}
-
-model PaymentRecord {
-  id                  String            @id @default(cuid())
-  orderId             String
-  userId              String
-  paymentMethod        PaymentMethod     @default(WECHAT)
-  status              PaymentStatus    @default(PENDING)
-  amount               Decimal           @db.Decimal(10, 2)
-  currency             String            @default("CNY")
-  transactionId        String?           // 第三方支付平台的交易ID
-  thirdPartyOrderNo   String?           // 第三方平台的订单号
-  errorCode           String?
-  errorMessage        String?
-  metadata            Json?
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
-
-  order               Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  refundRecords       RefundRecord[]
-
-  @@index([orderId])
-  @@index([userId])
-  @@index([paymentMethod])
-  @@index([status])
-  @@index([transactionId])
-  @@index([thirdPartyOrderNo])
-  @@index([createdAt])
-  @@map("payment_records")
-}
-
-model RefundRecord {
-  id                      String            @id @default(cuid())
-  orderId                 String
-  paymentRecordId          String
-  userId                  String
-  paymentMethod           PaymentMethod     @default(WECHAT)
-  status                  RefundStatus      @default(PENDING)
-  reason                  RefundReason
-  amount                   Decimal           @db.Decimal(10, 2)
-  refundAmount            Decimal           @db.Decimal(10, 2)
-  currency                String            @default("CNY")
-  transactionId           String?           // 第三方支付平台的退款交易ID
-  thirdPartyRefundNo     String?           // 第三方平台的退款单号
-  rejectedReason         String?
-  metadata                Json?
-  appliedAt               DateTime          @default(now())
-  processedAt             DateTime?
-  createdAt               DateTime          @default(now())
-  updatedAt               DateTime          @updatedAt
-
-  order                   Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  paymentRecord           PaymentRecord     @relation(fields: [paymentRecordId], references: [id], onDelete: Cascade)
-  user                    User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([orderId])
-  @@index([paymentRecordId])
-  @@index([userId])
-  @@index([paymentMethod])
-  @@index([status])
-  @@index([reason])
-  @@index([appliedAt])
-  @@index([createdAt])
-  @@map("refund_records")
-}
-
-model Invoice {
-  id              String          @id @default(cuid())
-  orderId         String
-  userId          String
-  type            InvoiceType    @default(PERSONAL)
-  status          InvoiceStatus  @default(PENDING)
-  amount          Decimal        @db.Decimal(10, 2)
-  currency        String         @default("CNY")
-  title           String?        // 发票抬头
-  taxNumber       String?        // 税号
-  email           String?        // 接收邮箱
-  filePath        String?
-  issuedAt        DateTime?
-  metadata        Json?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-
-  order           Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([orderId])
-  @@index([userId])
-  @@index([type])
-  @@index([status])
-  @@index([createdAt])
-  @@map("invoices")
-}
-
-// 支付方式枚举
 enum PaymentMethod {
-  WECHAT  // 微信支付
-  ALIPAY  // 支付宝
-  BALANCE // 余额支付（预留）
+  WECHAT
+  ALIPAY
+  BALANCE
 }
 
-// 支付状态枚举
 enum PaymentStatus {
-  PENDING     // 待支付
-  PROCESSING  // 处理中
-  SUCCESS     // 支付成功
-  FAILED      // 支付失败
-  REFUNDING   // 退款中
-  REFUNDED    // 已退款
-  CANCELLED   // 已取消
-  EXPIRED     // 已过期
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+  REFUNDING
+  REFUNDED
+  CANCELLED
+  EXPIRED
 }
 
-// 订单状态枚举
 enum OrderStatus {
-  PENDING   // 待支付
-  PAID      // 已支付
-  FAILED    // 支付失败
-  CANCELLED // 已取消
-  REFUNDED  // 已退款
-  EXPIRED   // 已过期
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
+  EXPIRED
 }
 
-// 退款状态枚举
 enum RefundStatus {
-  PENDING     // 待处理
-  PROCESSING  // 处理中
-  SUCCESS     // 退款成功
-  FAILED      // 退款失败
-  CANCELLED   // 已取消
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+  CANCELLED
 }
 
-// 退款原因枚举
 enum RefundReason {
-  USER_REQUEST      // 用户申请
-  SYSTEM_ERROR      // 系统错误
-  DUPLICATE_PAYMENT // 重复支付
-  SERVICE_ISSUE    // 服务问题
-  OTHER            // 其他原因
+  USER_REQUEST
+  SYSTEM_ERROR
+  DUPLICATE_PAYMENT
+  SERVICE_ISSUE
+  OTHER
 }
 
-// 发票状态枚举
 enum InvoiceStatus {
-  PENDING    // 待开具
-  PROCESSING // 开具中
-  COMPLETED  // 已开具
-  FAILED     // 开具失败
-  CANCELLED  // 已取消
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
 }
 
-// 发票类型枚举
 enum InvoiceType {
-  PERSONAL   // 个人发票
-  ENTERPRISE // 企业发票
+  PERSONAL
+  ENTERPRISE
+}
+
+enum ClientType {
+  INDIVIDUAL
+  ENTERPRISE
+  POTENTIAL
+}
+
+enum ClientSource {
+  REFERRAL
+  ONLINE
+  EVENT
+  ADVERTISING
+  OTHER
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  LOST
+  BLACKLISTED
+}
+
+enum CommunicationType {
+  PHONE
+  EMAIL
+  MEETING
+  WECHAT
+  OTHER
+}
+
+enum FollowUpTaskStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum FollowUpTaskPriority {
+  HIGH
+  MEDIUM
+  LOW
 }

@@ -3,12 +3,19 @@
  * 支持审核通过/拒绝操作
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { LAW_PERMISSIONS } from '@/types/permission';
 import { LawStatus } from '@prisma/client';
+import {
+  successResponse,
+  unauthorizedResponse,
+  badRequestResponse,
+  notFoundResponse,
+  serverErrorResponse,
+} from '@/lib/api-response';
 
 // =============================================================================
 // 类型定义
@@ -60,14 +67,11 @@ function isValidReviewStatus(
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-): Promise<Response> {
+): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
-      { error: '未认证', message: '请先登录' },
-      { status: 401 }
-    );
+    return unauthorizedResponse();
   }
 
   // 检查权限
@@ -89,32 +93,20 @@ export async function POST(
     });
 
     if (!article) {
-      return Response.json(
-        { error: '法条不存在', message: '未找到指定的法条' },
-        { status: 404 }
-      );
+      return notFoundResponse('未找到指定的法条');
     }
 
     // 解析请求体
     const body: unknown = await request.json();
     if (!body || typeof body !== 'object') {
-      return Response.json(
-        { error: '请求格式错误', message: '请提供有效的JSON数据' },
-        { status: 400 }
-      );
+      return badRequestResponse('请提供有效的JSON数据');
     }
 
     const reviewData = body as LawArticleReviewRequest;
 
     // 验证审核状态
     if (!reviewData.status || !isValidReviewStatus(reviewData.status)) {
-      return Response.json(
-        {
-          error: '请求格式错误',
-          message: 'status字段必须为APPROVED或REJECTED',
-        },
-        { status: 400 }
-      );
+      return badRequestResponse('status字段必须为APPROVED或REJECTED');
     }
 
     // 更新法条状态
@@ -143,12 +135,9 @@ export async function POST(
       reviewNotes: reviewData.reviewNotes,
     };
 
-    return Response.json({ data: response }, { status: 200 });
+    return successResponse(response, '审核法条成功');
   } catch (error) {
     console.error('审核法条失败:', error);
-    return Response.json(
-      { error: '服务器错误', message: '审核法条失败' },
-      { status: 500 }
-    );
+    return serverErrorResponse('审核法条失败');
   }
 }

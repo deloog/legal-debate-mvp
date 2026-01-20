@@ -1,0 +1,207 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
+import {
+  createSuccessResponse,
+  createNoContentResponse,
+} from '@/app/api/lib/responses/success';
+import { prisma } from '@/lib/db/prisma';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
+
+const updateCommunicationSchema = z
+  .object({
+    type: z.enum(['PHONE', 'EMAIL', 'MEETING', 'WECHAT', 'OTHER']).optional(),
+    summary: z.string().min(1, '摘要不能为空').max(1000).optional(),
+    content: z.string().max(10000).optional(),
+    nextFollowUpDate: z.string().datetime().optional(),
+    isImportant: z.boolean().optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
+  })
+  .partial();
+
+type CommunicationRecord = {
+  id: string;
+  clientId: string;
+  userId: string;
+  type: 'PHONE' | 'EMAIL' | 'MEETING' | 'WECHAT' | 'OTHER';
+  summary: string;
+  content: string | null;
+  nextFollowUpDate: Date | null;
+  isImportant: boolean;
+  metadata: Record<string, unknown> | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+async function mapCommunicationRecord(
+  record: unknown
+): Promise<CommunicationRecord> {
+  if (!record || typeof record !== 'object') {
+    throw new Error('Invalid communication record data');
+  }
+
+  const recordObj = record as Record<string, unknown>;
+  return {
+    id: String(recordObj.id || ''),
+    clientId: String(recordObj.clientId || ''),
+    userId: String(recordObj.userId || ''),
+    type: recordObj.type as 'PHONE' | 'EMAIL' | 'MEETING' | 'WECHAT' | 'OTHER',
+    summary: String(recordObj.summary || ''),
+    content: recordObj.content as string | null,
+    nextFollowUpDate: recordObj.nextFollowUpDate
+      ? new Date(recordObj.nextFollowUpDate as string)
+      : null,
+    isImportant: Boolean(recordObj.isImportant),
+    metadata: recordObj.metadata as Record<string, unknown> | null,
+    createdAt: new Date(recordObj.createdAt as string),
+    updatedAt: new Date(recordObj.updatedAt as string),
+  };
+}
+
+/**
+ * GET /api/communications/[id]
+ * 获取沟通记录详情
+ */
+export const GET = withErrorHandler(
+  async (request: NextRequest, { params }: { params: { id: string } }) => {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { error: '未认证', message: '请先登录' },
+        { status: 401 }
+      );
+    }
+
+    const { id } = params;
+
+    const communication = await prisma.communicationRecord.findFirst({
+      where: {
+        id,
+        userId: authUser.userId,
+      },
+    });
+
+    if (!communication) {
+      return NextResponse.json(
+        { error: '沟通记录不存在', message: '未找到指定沟通记录' },
+        { status: 404 }
+      );
+    }
+
+    const communicationDetail = await mapCommunicationRecord(communication);
+
+    return createSuccessResponse(communicationDetail);
+  }
+);
+
+/**
+ * PATCH /api/communications/[id]
+ * 更新沟通记录
+ */
+export const PATCH = withErrorHandler(
+  async (request: NextRequest, { params }: { params: { id: string } }) => {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { error: '未认证', message: '请先登录' },
+        { status: 401 }
+      );
+    }
+
+    const { id } = params;
+    const body = await request.json();
+    const validatedData = updateCommunicationSchema.parse(body);
+
+    const communication = await prisma.communicationRecord.findFirst({
+      where: {
+        id,
+        userId: authUser.userId,
+      },
+    });
+
+    if (!communication) {
+      return NextResponse.json(
+        { error: '沟通记录不存在', message: '未找到指定沟通记录' },
+        { status: 404 }
+      );
+    }
+
+    const updatedCommunication = await prisma.communicationRecord.update({
+      where: {
+        id,
+      },
+      data: {
+        type: validatedData.type,
+        summary: validatedData.summary,
+        content: validatedData.content,
+        nextFollowUpDate: validatedData.nextFollowUpDate
+          ? new Date(validatedData.nextFollowUpDate)
+          : undefined,
+        isImportant: validatedData.isImportant,
+        metadata: validatedData.metadata as Prisma.JsonValue,
+      },
+    });
+
+    const communicationDetail =
+      await mapCommunicationRecord(updatedCommunication);
+
+    return createSuccessResponse(communicationDetail);
+  }
+);
+
+/**
+ * DELETE /api/communications/[id]
+ * 删除沟通记录
+ */
+export const DELETE = withErrorHandler(
+  async (request: NextRequest, { params }: { params: { id: string } }) => {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { error: '未认证', message: '请先登录' },
+        { status: 401 }
+      );
+    }
+
+    const { id } = params;
+
+    const communication = await prisma.communicationRecord.findFirst({
+      where: {
+        id,
+        userId: authUser.userId,
+      },
+    });
+
+    if (!communication) {
+      return NextResponse.json(
+        { error: '沟通记录不存在', message: '未找到指定沟通记录' },
+        { status: 404 }
+      );
+    }
+
+    await prisma.communicationRecord.delete({
+      where: {
+        id,
+      },
+    });
+
+    return createNoContentResponse();
+  }
+);
+
+/**
+ * OPTIONS /api/communications/[id]
+ * CORS预检请求
+ */
+export const OPTIONS = withErrorHandler(async () => {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, PATCH, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
+});

@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, RefreshCw, AlertCircle } from 'lucide-react';
+import { ArrowLeft, RefreshCw, AlertCircle, FileText } from 'lucide-react';
 import { OrderStatus } from '@/types/payment';
 import { useState } from 'react';
 
@@ -88,12 +88,23 @@ export function OrderActions({ orderId, status }: OrderActionsProps) {
 
           {/* 已支付状态 */}
           {status === OrderStatus.PAID && (
-            <div className='rounded-md bg-green-50 p-3 text-sm text-green-800'>
-              <div className='font-semibold'>支付成功</div>
-              <div className='mt-1'>
-                订单已支付成功，会员权益已生效。如需发票或退款，请联系客服。
+            <>
+              <Button
+                onClick={() =>
+                  (window.location.href = `/invoices/apply?orderId=${orderId}`)
+                }
+                className='w-full bg-blue-600 hover:bg-blue-700'
+              >
+                <FileText className='mr-2 h-4 w-4' />
+                申请发票
+              </Button>
+              <div className='rounded-md bg-green-50 p-3 text-sm text-green-800'>
+                <div className='font-semibold'>支付成功</div>
+                <div className='mt-1'>
+                  订单已支付成功，会员权益已生效。如需发票，请点击上方按钮申请。
+                </div>
               </div>
-            </div>
+            </>
           )}
 
           {/* 已取消状态 */}

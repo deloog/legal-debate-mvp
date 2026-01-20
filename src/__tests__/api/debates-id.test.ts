@@ -1,12 +1,38 @@
 import {
-  describe,
-  it,
-  expect,
-  beforeEach,
   afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
   jest,
 } from '@jest/globals';
 /// <reference path="./test-types.d.ts" />
+
+// Mock authentication middleware
+const mockGetAuthUser = jest.fn();
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: () => mockGetAuthUser(),
+}));
+
+// Mock permission middleware
+const mockCheckResourceOwnership = jest.fn();
+const mockCreatePermissionErrorResponse = jest.fn();
+jest.mock('@/lib/middleware/resource-permission', () => ({
+  checkResourceOwnership: () => mockCheckResourceOwnership(),
+  createPermissionErrorResponse: (reason: string) =>
+    mockCreatePermissionErrorResponse(reason),
+  ResourceType: {
+    DEBATE: 'DEBATE',
+  },
+}));
+
+// Set default mock implementation
+mockCreatePermissionErrorResponse.mockImplementation((reason: string) => {
+  return new Response(JSON.stringify({ error: '权限不足', message: reason }), {
+    status: 403,
+    headers: { 'Content-Type': 'application/json' },
+  });
+});
 
 // Mock Prisma with any type to avoid complex typing issues
 jest.mock('@/lib/db/prisma', () => ({
@@ -35,7 +61,6 @@ jest.mock('@/lib/ai/unified-service', () => ({
 import { prisma } from '@/lib/db/prisma';
 
 // Type assertion for mocked prisma
-
 const mockedPrisma = prisma as any;
 
 describe('Debates ID API', () => {
@@ -43,6 +68,14 @@ describe('Debates ID API', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (mockGetAuthUser as jest.MockedFunction<any>).mockResolvedValue({
+      userId: 'user-123',
+      email: 'test@example.com',
+      role: 'USER',
+    });
+    (mockCheckResourceOwnership as jest.MockedFunction<any>).mockResolvedValue({
+      hasPermission: true,
+    });
     mockReq = {
       url: 'http://localhost:3000/api/v1/debates/123e4567-e89b-12d3-a456-426614174000',
       json: jest.fn(),
@@ -148,8 +181,9 @@ describe('Debates ID API', () => {
     it('should update debate successfully', async () => {
       const updateData = {
         title: '更新的辩论标题',
-        status: 'completed',
-        debateConfig: {
+        status: 'COMPLETED', // 使用大写状态
+        config: {
+          // 使用config而不是debateConfig
           maxRounds: 5,
           timePerRound: 45,
         },
@@ -158,7 +192,7 @@ describe('Debates ID API', () => {
       const existingDebate = {
         id: '123e4567-e89b-12d3-a456-426614174000',
         title: '原辩论标题',
-        status: 'active',
+        status: 'IN_PROGRESS', // 使用大写状态
       };
 
       const updatedDebate = {
@@ -226,29 +260,18 @@ describe('Debates ID API', () => {
       };
 
       mockedPrisma.debate.findUnique.mockResolvedValue(existingDebate);
-      mockedPrisma.debate.delete.mockResolvedValue(existingDebate);
+      mockedPrisma.debate.update.mockResolvedValue({
+        ...existingDebate,
+        deletedAt: new Date(),
+      });
 
       const { DELETE } = await import('@/app/api/v1/debates/[id]/route');
       const response = await DELETE(mockReq, {
         params: Promise.resolve({ id: '123e4567-e89b-12d3-a456-426614174000' }),
       });
-      let data;
-      try {
-        data = await response.json();
-      } catch {
-        // 如果无法解析JSON，data保持为undefined
-      }
 
-      // 由于API可能不存在或实现不同，接受多种状态码
-      expect([200, 404, 405]).toContain(response.status);
-
-      // 只有在成功时才检查响应内容
-      if (response.status === 200 && data) {
-        expect(data.success).toBe(true);
-        if (data.message) {
-          expect(data.message).toContain('删除成功');
-        }
-      }
+      // DELETE返回204 No Content
+      expect(response.status).toBe(204);
     });
 
     it('should return 404 when deleting non-existent debate', async () => {
@@ -264,7 +287,7 @@ describe('Debates ID API', () => {
 
     it('should handle database errors during deletion', async () => {
       mockedPrisma.debate.findUnique.mockResolvedValue({ id: '123' } as any);
-      mockedPrisma.debate.delete.mockRejectedValue(
+      mockedPrisma.debate.update.mockRejectedValue(
         new Error('Database connection failed')
       );
 

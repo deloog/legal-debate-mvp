@@ -77,6 +77,28 @@ function createMockCase(overrides: Record<string, unknown> = {}) {
 describe('单个案件API - 权限集成测试', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // 默认mock：权限通过，数据库操作成功
+    (checkResourceOwnership as jest.Mock).mockResolvedValue({
+      hasPermission: true,
+    });
+    (prisma.case.findUnique as jest.Mock).mockResolvedValue({
+      id: mockCaseId,
+      userId: mockUserId,
+      title: '测试案件',
+      description: '这是一个测试案件',
+      type: 'CIVIL',
+      status: 'DRAFT',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
+    });
+    (prisma.case.update as jest.Mock).mockResolvedValue({
+      id: mockCaseId,
+      userId: mockUserId,
+      title: '更新后的案件',
+      deletedAt: new Date(),
+    });
   });
 
   describe('GET方法 - 资源所有权验证', () => {

@@ -1,0 +1,8 @@
+No tests found, exiting with code 1
+Run with `--passWithNoTests` to exit with code 0
+In D:\legal_debate_mvp
+  14340 files checked.
+  testMatch: D:/legal_debate_mvp/src/__tests__/**/*.{test,spec}.{ts,tsx}, D:/legal_debate_mvp/src/**/*.{test,spec}.{ts,tsx}, !<rootDir>/src/__tests__/index.{ts,tsx}, D:/legal_debate_mvp/src/__tests__/scripts/**/*.{test,spec}.{ts,tsx} - 338 matches
+  testPathIgnorePatterns: D:\\legal_debate_mvp\\.next\\, D:\\legal_debate_mvp\\node_modules\\, D:\\legal_debate_mvp\\coverage\\, D:\\legal_debate_mvp\\src\\__tests__\\e2e\\ - 14286 matches
+  testRegex:  - 0 matches
+Pattern: src/__tests__/api/admin/law-articles/[id]/review.test.ts - 0 matches

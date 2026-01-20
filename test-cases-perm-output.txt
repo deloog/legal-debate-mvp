@@ -1,0 +1,557 @@
+鈼?Validation Warning:
+
+  Unknown option "coverageProvider" with value "v8" was found.
+  This is probably a typing mistake. Fixing it will remove this message.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.error
+    API Error: {
+      error: 'Case not found',
+      stack: 'ApiError: Case not found\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:80:13\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\lib\\errors\\error-handler.ts:193:14\n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-permission.test.ts:164:24)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'GET',
+      correlationId: undefined,
+      timestamp: '2026-01-19T13:16:56.984Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m'API Error:'[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m'Unknown error'[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:164:24)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.error
+    API Error: {
+      error: 'Case not found',
+      stack: 'ApiError: Case not found\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:219:13\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\lib\\errors\\error-handler.ts:193:14\n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-permission.test.ts:213:24)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'PUT',
+      correlationId: undefined,
+      timestamp: '2026-01-19T13:16:56.996Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m'API Error:'[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m'Unknown error'[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:213:24)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.error
+    API Error: {
+      error: 'Case not found',
+      stack: 'ApiError: Case not found\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:219:13\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\lib\\errors\\error-handler.ts:193:14\n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-permission.test.ts:263:24)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'PUT',
+      correlationId: undefined,
+      timestamp: '2026-01-19T13:16:57.006Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m'API Error:'[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m'Unknown error'[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:263:24)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.error
+    API Error: {
+      error: 'Case not found',
+      stack: 'ApiError: Case not found\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:219:13\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\lib\\errors\\error-handler.ts:193:14\n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-permission.test.ts:289:24)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'PUT',
+      correlationId: undefined,
+      timestamp: '2026-01-19T13:16:57.011Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m'API Error:'[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m'Unknown error'[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:289:24)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.error
+    API Error: {
+      error: 'Case not found',
+      stack: 'ApiError: Case not found\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:277:13\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\lib\\errors\\error-handler.ts:193:14\n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-permission.test.ts:336:24)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'DELETE',
+      correlationId: undefined,
+      timestamp: '2026-01-19T13:16:57.020Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m'API Error:'[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m'Unknown error'[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:336:24)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.error
+    API Error: {
+      error: 'Case not found',
+      stack: 'ApiError: Case not found\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:277:13\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\lib\\errors\\error-handler.ts:193:14\n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-permission.test.ts:387:24)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'DELETE',
+      correlationId: undefined,
+      timestamp: '2026-01-19T13:16:57.026Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m'API Error:'[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m'Unknown error'[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:387:24)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.error
+    API Error: {
+      error: 'Case not found',
+      stack: 'ApiError: Case not found\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\v1\\cases\\[id]\\route.ts:277:13\n' +
+        '    at D:\\legal_debate_mvp\\src\\app\\api\\lib\\errors\\error-handler.ts:193:14\n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-permission.test.ts:412:24)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'DELETE',
+      correlationId: undefined,
+      timestamp: '2026-01-19T13:16:57.029Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m'API Error:'[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m'Unknown error'[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:412:24)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.error
+    API Error: {
+      error: '鏁版嵁搴撹繛鎺ュけ璐?,
+      stack: 'Error: 鏁版嵁搴撹繛鎺ュけ璐n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-permission.test.ts:528:9)\n' +
+        '    at Promise.finally.completed (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1557:28)\n' +
+        '    at new Promise (<anonymous>)\n' +
+        '    at callAsyncCircusFn (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1497:10)\n' +
+        '    at _callCircusTest (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1007:40)\n' +
+        '    at _runTest (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:947:3)\n' +
+        '    at D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:849:7\n' +
+        '    at _runTestsForDescribeBlock (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:862:11)\n' +
+        '    at _runTestsForDescribeBlock (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:857:11)\n' +
+        '    at _runTestsForDescribeBlock (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:857:11)\n' +
+        '    at run (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:761:3)\n' +
+        '    at runAndTransformResultsToJestFormat (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1918:21)\n' +
+        '    at jestAdapter (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\runner.js:101:19)\n' +
+        '    at runTestInternal (D:\\legal_debate_mvp\\node_modules\\jest-runner\\build\\index.js:275:16)\n' +
+        '    at runTest (D:\\legal_debate_mvp\\node_modules\\jest-runner\\build\\index.js:343:7)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'GET',
+      correlationId: undefined,
+      timestamp: '2026-01-19T13:16:57.040Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m'API Error:'[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m'Unknown error'[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:535:24)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.error
+    API Error: {
+      error: '鏁版嵁搴撹繛鎺ュけ璐?,
+      stack: 'Error: 鏁版嵁搴撹繛鎺ュけ璐n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-permission.test.ts:547:9)\n' +
+        '    at Promise.finally.completed (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1557:28)\n' +
+        '    at new Promise (<anonymous>)\n' +
+        '    at callAsyncCircusFn (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1497:10)\n' +
+        '    at _callCircusTest (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1007:40)\n' +
+        '    at _runTest (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:947:3)\n' +
+        '    at D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:849:7\n' +
+        '    at _runTestsForDescribeBlock (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:862:11)\n' +
+        '    at _runTestsForDescribeBlock (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:857:11)\n' +
+        '    at _runTestsForDescribeBlock (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:857:11)\n' +
+        '    at run (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:761:3)\n' +
+        '    at runAndTransformResultsToJestFormat (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1918:21)\n' +
+        '    at jestAdapter (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\runner.js:101:19)\n' +
+        '    at runTestInternal (D:\\legal_debate_mvp\\node_modules\\jest-runner\\build\\index.js:275:16)\n' +
+        '    at runTest (D:\\legal_debate_mvp\\node_modules\\jest-runner\\build\\index.js:343:7)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'PUT',
+      correlationId: undefined,
+      timestamp: '2026-01-19T13:16:57.043Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m'API Error:'[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m'Unknown error'[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:556:24)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.error
+    API Error: {
+      error: '鏁版嵁搴撹繛鎺ュけ璐?,
+      stack: 'Error: 鏁版嵁搴撹繛鎺ュけ璐n' +
+        '    at Object.<anonymous> (D:\\legal_debate_mvp\\src\\__tests__\\api\\cases-id-permission.test.ts:568:9)\n' +
+        '    at Promise.finally.completed (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1557:28)\n' +
+        '    at new Promise (<anonymous>)\n' +
+        '    at callAsyncCircusFn (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1497:10)\n' +
+        '    at _callCircusTest (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1007:40)\n' +
+        '    at _runTest (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:947:3)\n' +
+        '    at D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:849:7\n' +
+        '    at _runTestsForDescribeBlock (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:862:11)\n' +
+        '    at _runTestsForDescribeBlock (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:857:11)\n' +
+        '    at _runTestsForDescribeBlock (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:857:11)\n' +
+        '    at run (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:761:3)\n' +
+        '    at runAndTransformResultsToJestFormat (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1918:21)\n' +
+        '    at jestAdapter (D:\\legal_debate_mvp\\node_modules\\jest-circus\\build\\runner.js:101:19)\n' +
+        '    at runTestInternal (D:\\legal_debate_mvp\\node_modules\\jest-runner\\build\\index.js:275:16)\n' +
+        '    at runTest (D:\\legal_debate_mvp\\node_modules\\jest-runner\\build\\index.js:343:7)',
+      url: 'http://localhost:3000/api/v1/cases/123e4567-e89b-12d3-a456-426614174000',
+      method: 'DELETE',
+      correlationId: undefined,
+      timestamp: '2026-01-19T13:16:57.046Z'
+    }
+
+    [0m [90m 57 |[39m
+     [90m 58 |[39m   [90m// 璁板綍閿欒鏃ュ織[39m
+    [31m[1m>[22m[39m[90m 59 |[39m   console[33m.[39merror([32m'API Error:'[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 60 |[39m     error[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m'Unknown error'[39m[33m,[39m
+     [90m 61 |[39m     stack[33m:[39m error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mstack [33m:[39m undefined[33m,[39m
+     [90m 62 |[39m     url[33m:[39m request[33m.[39murl[33m,[39m[0m
+
+      at handleApiError (src/app/api/lib/errors/error-handler.ts:59:11)
+      at src/app/api/lib/errors/error-handler.ts:195:14
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:576:24)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174000', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+  console.log
+    楠岃瘉璺緞鍙傛暟: { param: '123e4567-e89b-12d3-a456-426614174001', paramType: 'string' }
+
+      at validatePathParam (src/app/api/lib/validation/core.ts:85:13)
+
+FAIL api src/__tests__/api/cases-id-permission.test.ts
+  鍗曚釜妗堜欢API - 鏉冮檺闆嗘垚娴嬭瘯
+    GET鏂规硶 - 璧勬簮鎵€鏈夋潈楠岃瘉
+      鈭?鐢ㄦ埛鍙互璁块棶鑷繁鍒涘缓鐨勬浠?(39 ms)
+      鈭?鐢ㄦ埛鏃犳硶璁块棶浠栦汉鍒涘缓鐨勬浠?(2 ms)
+      鈭?绠＄悊鍛樺彲浠ヨ闂墍鏈夋浠?(2 ms)
+      鈭?涓嶅瓨鍦ㄧ殑妗堜欢搴旇繑鍥?04 (26 ms)
+      鈭?宸插垹闄ょ殑妗堜欢涓嶈兘琚闂紙鏉冮檺妫€鏌ユ嫤鎴級 (1 ms)
+    PUT鏂规硶 - 璧勬簮鎵€鏈夋潈楠岃瘉
+      脳 鐢ㄦ埛鍙互鏇存柊鑷繁鍒涘缓鐨勬浠?(8 ms)
+      鈭?鐢ㄦ埛鏃犳硶鏇存柊浠栦汉鍒涘缓鐨勬浠?(1 ms)
+      脳 绠＄悊鍛樺彲浠ユ洿鏂版墍鏈夋浠?(5 ms)
+      脳 瓒呯骇绠＄悊鍛樺彲浠ユ洿鏂版墍鏈夋浠?(7 ms)
+      鈭?鏉冮檺妫€鏌ュけ璐ユ椂涓嶅簲鎵ц鏁版嵁搴撴洿鏂版搷浣?(1 ms)
+    DELETE鏂规硶 - 璧勬簮鎵€鏈夋潈楠岃瘉
+      脳 鐢ㄦ埛鍙互鍒犻櫎鑷繁鍒涘缓鐨勬浠?(4 ms)
+      鈭?鐢ㄦ埛鏃犳硶鍒犻櫎浠栦汉鍒涘缓鐨勬浠?(1 ms)
+      脳 绠＄悊鍛樺彲浠ュ垹闄ゆ墍鏈夋浠?(3 ms)
+      脳 瓒呯骇绠＄悊鍛樺彲浠ュ垹闄ゆ墍鏈夋浠?(3 ms)
+      鈭?鏉冮檺妫€鏌ュけ璐ユ椂涓嶅簲鎵ц鏁版嵁搴撳垹闄ゆ搷浣?(1 ms)
+    鏉冮檺涓庤璇侀泦鎴愭祴璇?      鈭?搴斿厛楠岃瘉璁よ瘉锛屽啀楠岃瘉鏉冮檺锛圙ET锛?(1 ms)
+      鈭?搴斿厛楠岃瘉璁よ瘉锛屽啀楠岃瘉鏉冮檺锛圥UT锛?(1 ms)
+      鈭?搴斿厛楠岃瘉璁よ瘉锛屽啀楠岃瘉鏉冮檺锛圖ELETE锛?(1 ms)
+    鏉冮檺妫€鏌ラ敊璇鐞?      鈭?搴旀纭鐞嗘潈闄愭鏌ユ姏鍑虹殑閿欒锛圙ET锛?(5 ms)
+      鈭?搴旀纭鐞嗘潈闄愭鏌ユ姏鍑虹殑閿欒锛圥UT锛?(3 ms)
+      鈭?搴旀纭鐞嗘潈闄愭鏌ユ姏鍑虹殑閿欒锛圖ELETE锛?(2 ms)
+    鏉冮檺鍙傛暟楠岃瘉
+      鈭?鎵€鏈夋柟娉曢兘搴斾紶閫掓纭殑璧勬簮绫诲瀷锛圕ASE锛?(3 ms)
+    杈圭晫鎯呭喌娴嬭瘯
+      鈭?绌烘潈闄愬師鍥犲簲浣跨敤榛樿娑堟伅 (1 ms)
+      鈭?鏅€氱敤鎴疯鑹叉棤娉曡幏鍙栫鐞嗗憳鏉冮檺 (1 ms)
+
+  鈼?鍗曚釜妗堜欢API - 鏉冮檺闆嗘垚娴嬭瘯 鈥?PUT鏂规硶 - 璧勬簮鎵€鏈夋潈楠岃瘉 鈥?鐢ㄦ埛鍙互鏇存柊鑷繁鍒涘缓鐨勬浠?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 404
+
+      215 |       });
+      216 |
+    > 217 |       expect(response.status).toBe(200);
+          |                               ^
+      218 |       expect(prisma.case.update).toHaveBeenCalled();
+      219 |     });
+      220 |
+
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:217:31)
+
+  鈼?鍗曚釜妗堜欢API - 鏉冮檺闆嗘垚娴嬭瘯 鈥?PUT鏂规硶 - 璧勬簮鎵€鏈夋潈楠岃瘉 鈥?绠＄悊鍛樺彲浠ユ洿鏂版墍鏈夋浠?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 404
+
+      265 |       });
+      266 |
+    > 267 |       expect(response.status).toBe(200);
+          |                               ^
+      268 |     });
+      269 |
+      270 |     it('瓒呯骇绠＄悊鍛樺彲浠ユ洿鏂版墍鏈夋浠?, async () => {
+
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:267:31)
+
+  鈼?鍗曚釜妗堜欢API - 鏉冮檺闆嗘垚娴嬭瘯 鈥?PUT鏂规硶 - 璧勬簮鎵€鏈夋潈楠岃瘉 鈥?瓒呯骇绠＄悊鍛樺彲浠ユ洿鏂版墍鏈夋浠?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 404
+
+      291 |       });
+      292 |
+    > 293 |       expect(response.status).toBe(200);
+          |                               ^
+      294 |     });
+      295 |
+      296 |     it('鏉冮檺妫€鏌ュけ璐ユ椂涓嶅簲鎵ц鏁版嵁搴撴洿鏂版搷浣?, async () => {
+
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:293:31)
+
+  鈼?鍗曚釜妗堜欢API - 鏉冮檺闆嗘垚娴嬭瘯 鈥?DELETE鏂规硶 - 璧勬簮鎵€鏈夋潈楠岃瘉 鈥?鐢ㄦ埛鍙互鍒犻櫎鑷繁鍒涘缓鐨勬浠?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 204
+    Received: 404
+
+      338 |       });
+      339 |
+    > 340 |       expect(response.status).toBe(204);
+          |                               ^
+      341 |       expect(prisma.case.update).toHaveBeenCalledWith({
+      342 |         where: { id: mockCaseId },
+      343 |         data: { deletedAt: expect.any(Date) },
+
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:340:31)
+
+  鈼?鍗曚釜妗堜欢API - 鏉冮檺闆嗘垚娴嬭瘯 鈥?DELETE鏂规硶 - 璧勬簮鎵€鏈夋潈楠岃瘉 鈥?绠＄悊鍛樺彲浠ュ垹闄ゆ墍鏈夋浠?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 204
+    Received: 404
+
+      389 |       });
+      390 |
+    > 391 |       expect(response.status).toBe(204);
+          |                               ^
+      392 |     });
+      393 |
+      394 |     it('瓒呯骇绠＄悊鍛樺彲浠ュ垹闄ゆ墍鏈夋浠?, async () => {
+
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:391:31)
+
+  鈼?鍗曚釜妗堜欢API - 鏉冮檺闆嗘垚娴嬭瘯 鈥?DELETE鏂规硶 - 璧勬簮鎵€鏈夋潈楠岃瘉 鈥?瓒呯骇绠＄悊鍛樺彲浠ュ垹闄ゆ墍鏈夋浠?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 204
+    Received: 404
+
+      414 |       });
+      415 |
+    > 416 |       expect(response.status).toBe(204);
+          |                               ^
+      417 |     });
+      418 |
+      419 |     it('鏉冮檺妫€鏌ュけ璐ユ椂涓嶅簲鎵ц鏁版嵁搴撳垹闄ゆ搷浣?, async () => {
+
+      at Object.<anonymous> (src/__tests__/api/cases-id-permission.test.ts:416:31)
+
+Test Suites: 1 failed, 1 total
+Tests:       6 failed, 18 passed, 24 total
+Snapshots:   0 total
+Time:        1.114 s, estimated 2 s
+Ran all test suites matching src/__tests__/api/cases-id-permission.test.ts.

@@ -60,14 +60,14 @@ describe('Health API', () => {
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(200);
-      expect(testResponse.data.data.status).toBe('healthy');
-      expect(testResponse.data.data.services).toBeDefined();
-      expect(testResponse.data.data.services.database.status).toBe('healthy');
-      expect(testResponse.data.data.services.ai.status).toBe('healthy');
-      expect(testResponse.data.data.system).toBeDefined();
-      expect(testResponse.data.data.system.uptime).toBeGreaterThan(0);
-      expect(testResponse.data.data.system.memory).toBeDefined();
-      expect(testResponse.data.data.system.nodeVersion).toBeDefined();
+      expect(testResponse.data.status).toBe('healthy');
+      expect(testResponse.data.services).toBeDefined();
+      expect(testResponse.data.services.database.status).toBe('healthy');
+      expect(testResponse.data.services.ai.status).toBe('healthy');
+      expect(testResponse.data.system).toBeDefined();
+      expect(testResponse.data.system.uptime).toBeGreaterThan(0);
+      expect(testResponse.data.system.memory).toBeDefined();
+      expect(testResponse.data.system.nodeVersion).toBeDefined();
     });
 
     it('应返回不健康状态当数据库连接失败', async () => {
@@ -93,8 +93,8 @@ describe('Health API', () => {
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(503);
-      expect(testResponse.data.data.status).toBe('unhealthy');
-      expect(testResponse.data.data.services.database.status).toBe('unhealthy');
+      expect(testResponse.data.status).toBe('unhealthy');
+      expect(testResponse.data.services.database.status).toBe('unhealthy');
     });
 
     it('应返回不健康状态当AI服务不可用', async () => {
@@ -123,8 +123,8 @@ describe('Health API', () => {
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(503);
-      expect(testResponse.data.data.status).toBe('unhealthy');
-      expect(testResponse.data.data.services.ai.status).toBe('unhealthy');
+      expect(testResponse.data.status).toBe('unhealthy');
+      expect(testResponse.data.services.ai.status).toBe('unhealthy');
     });
 
     it('应包含数据库连接信息', async () => {
@@ -151,15 +151,12 @@ describe('Health API', () => {
       const response = await HealthGET(request);
       const testResponse = await createTestResponse(response);
 
+      expect(testResponse.data.services.database.connectionInfo).toBeDefined();
       expect(
-        testResponse.data.data.services.database.connectionInfo
-      ).toBeDefined();
-      expect(
-        testResponse.data.data.services.database.connectionInfo
-          .activeConnections
+        testResponse.data.services.database.connectionInfo.activeConnections
       ).toBe(10);
       expect(
-        testResponse.data.data.services.database.connectionInfo.totalConnections
+        testResponse.data.services.database.connectionInfo.totalConnections
       ).toBe(100);
     });
 
@@ -196,13 +193,13 @@ describe('Health API', () => {
       const response = await HealthGET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.services.ai.providers).toBeDefined();
-      expect(testResponse.data.data.services.ai.providers).toHaveLength(2);
-      expect(testResponse.data.data.services.ai.availableProviders).toEqual([
+      expect(testResponse.data.services.ai.providers).toBeDefined();
+      expect(testResponse.data.services.ai.providers).toHaveLength(2);
+      expect(testResponse.data.services.ai.availableProviders).toEqual([
         'deepseek',
         'zhipu',
       ]);
-      expect(testResponse.data.data.services.ai.availableModels).toEqual([
+      expect(testResponse.data.services.ai.availableModels).toEqual([
         'deepseek-chat',
         'glm-4',
       ]);
@@ -239,11 +236,11 @@ describe('Health API', () => {
       const testResponse = await createTestResponse(response);
 
       expect(
-        testResponse.data.data.services.database.responseTime
+        testResponse.data.services.database.responseTime
       ).toBeGreaterThanOrEqual(10);
-      expect(
-        testResponse.data.data.services.ai.responseTime
-      ).toBeGreaterThanOrEqual(10);
+      expect(testResponse.data.services.ai.responseTime).toBeGreaterThanOrEqual(
+        10
+      );
     });
 
     it('应包含系统信息', async () => {
@@ -266,16 +263,16 @@ describe('Health API', () => {
       const response = await HealthGET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.system).toBeDefined();
-      expect(testResponse.data.data.system.uptime).toBeGreaterThan(0);
-      expect(testResponse.data.data.system.memory).toBeDefined();
-      expect(testResponse.data.data.system.memory.used).toBeGreaterThan(0);
-      expect(testResponse.data.data.system.memory.total).toBeGreaterThan(0);
-      expect(testResponse.data.data.system.cpu).toBeDefined();
-      expect(testResponse.data.data.system.nodeVersion).toBeDefined();
-      expect(testResponse.data.data.system.platform).toBeDefined();
-      expect(testResponse.data.data.system.arch).toBeDefined();
-      expect(testResponse.data.data.system.environment).toBeDefined();
+      expect(testResponse.data.system).toBeDefined();
+      expect(testResponse.data.system.uptime).toBeGreaterThan(0);
+      expect(testResponse.data.system.memory).toBeDefined();
+      expect(testResponse.data.system.memory.used).toBeGreaterThan(0);
+      expect(testResponse.data.system.memory.total).toBeGreaterThan(0);
+      expect(testResponse.data.system.cpu).toBeDefined();
+      expect(testResponse.data.system.nodeVersion).toBeDefined();
+      expect(testResponse.data.system.platform).toBeDefined();
+      expect(testResponse.data.system.arch).toBeDefined();
+      expect(testResponse.data.system.environment).toBeDefined();
     });
 
     it('应包含响应headers', async () => {
@@ -548,8 +545,8 @@ describe('Health API', () => {
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(503);
-      expect(testResponse.data.data.services.database.status).toBe('unhealthy');
-      expect(testResponse.data.data.services.database.message).toBe(
+      expect(testResponse.data.services.database.status).toBe('unhealthy');
+      expect(testResponse.data.services.database.message).toBe(
         'Database connection error'
       );
     });
@@ -566,10 +563,8 @@ describe('Health API', () => {
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(503);
-      expect(testResponse.data.data.services.ai.status).toBe('unhealthy');
-      expect(testResponse.data.data.services.ai.message).toBe(
-        'AI service error'
-      );
+      expect(testResponse.data.services.ai.status).toBe('unhealthy');
+      expect(testResponse.data.services.ai.message).toBe('AI service error');
     });
 
     it('应优雅处理未知错误', async () => {
@@ -596,7 +591,7 @@ describe('Health API', () => {
 
       // 当发生未知错误时，应返回503状态
       expect(testResponse.status).toBe(503);
-      expect(testResponse.data.data.services.database.status).toBe('unhealthy');
+      expect(testResponse.data.services.database.status).toBe('unhealthy');
     });
   });
 });

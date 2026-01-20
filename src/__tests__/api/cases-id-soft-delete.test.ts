@@ -78,6 +78,33 @@ describe('DELETE方法 - 软删除逻辑验证', () => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2024-01-15T10:00:00Z'));
+
+    // 默认mock：权限通过，数据库操作成功
+    (checkResourceOwnership as jest.Mock).mockResolvedValue({
+      hasPermission: true,
+    });
+    (prisma.case.findUnique as jest.Mock).mockResolvedValue({
+      id: mockCaseId,
+      userId: mockUserId,
+      title: '测试案件',
+      description: '这是一个测试案件',
+      type: 'CIVIL',
+      status: 'DRAFT',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
+    });
+    (prisma.case.update as jest.Mock).mockResolvedValue({
+      id: mockCaseId,
+      userId: mockUserId,
+      title: '测试案件',
+      description: '这是一个测试案件',
+      type: 'CIVIL',
+      status: 'DRAFT',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: new Date('2024-01-15T10:00:00Z'),
+    });
   });
 
   afterEach(() => {

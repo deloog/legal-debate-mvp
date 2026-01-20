@@ -3,12 +3,12 @@
  * 测试法条列表、导入、审核功能
  */
 
-import { NextRequest } from 'next/server';
-import { GET } from '@/app/api/admin/law-articles/route';
-import { POST as POST_IMPORT } from '@/app/api/admin/law-articles/import/route';
 import { POST as POST_REVIEW } from '@/app/api/admin/law-articles/[id]/review/route';
+import { POST as POST_IMPORT } from '@/app/api/admin/law-articles/import/route';
+import { GET } from '@/app/api/admin/law-articles/route';
 import { prisma } from '@/lib/db/prisma';
 import { LawStatus } from '@prisma/client';
+import { NextRequest } from 'next/server';
 
 // =============================================================================
 // Mock设置
@@ -38,8 +38,8 @@ jest.mock('@/lib/middleware/auth', () => ({
   getAuthUser: jest.fn(),
 }));
 
-import { validatePermissions } from '@/lib/middleware/permission-check';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { validatePermissions } from '@/lib/middleware/permission-check';
 
 // =============================================================================
 // 测试数据
@@ -121,9 +121,23 @@ function setupListMocks({
   (getAuthUser as jest.Mock).mockResolvedValue(
     isAuthenticated ? mockUser : null
   );
-  (validatePermissions as jest.Mock).mockResolvedValue(
-    hasPermission ? null : Response.json({ error: '权限不足' }, { status: 403 })
-  );
+
+  // 修复权限检查的返回格式
+  if (hasPermission) {
+    (validatePermissions as jest.Mock).mockResolvedValue(null);
+  } else {
+    (validatePermissions as jest.Mock).mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          success: false,
+          message: '无权限访问此资源',
+          error: 'FORBIDDEN',
+        }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      )
+    );
+  }
+
   (prisma.lawArticle.count as jest.Mock).mockResolvedValue(totalCount);
   (prisma.lawArticle.findMany as jest.Mock).mockResolvedValue(articles);
 }
@@ -183,7 +197,8 @@ describe('法条列表API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe('未认证');
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('UNAUTHORIZED');
     });
 
     test('无权限时应返回403错误', async () => {
@@ -193,7 +208,8 @@ describe('法条列表API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(403);
-      expect(data.error).toBe('权限不足');
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('FORBIDDEN');
     });
   });
 
@@ -325,18 +341,33 @@ describe('法条导入API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe('未认证');
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('UNAUTHORIZED');
     });
 
     test('无权限时应返回403错误', async () => {
       (getAuthUser as jest.Mock).mockResolvedValue(mockUser);
       (validatePermissions as jest.Mock).mockResolvedValue(
-        Response.json({ error: '权限不足' }, { status: 403 })
+        new Response(
+          JSON.stringify({
+            success: false,
+            message: '无权限访问此资源',
+            error: 'FORBIDDEN',
+          }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        )
       );
       const request = createImportRequest({ articles: [] });
       const response = await POST_IMPORT(request);
 
       expect(response.status).toBe(403);
+      expect(data => {
+        const parsed = data.json ? data : response.json();
+        return parsed.then(p => {
+          expect(p.success).toBe(false);
+          expect(p.error).toBe('FORBIDDEN');
+        });
+      });
     });
   });
 
@@ -357,7 +388,8 @@ describe('法条导入API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe('请求格式错误');
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('BAD_REQUEST');
     });
 
     test('应验证articles字段为数组', async () => {
@@ -369,7 +401,8 @@ describe('法条导入API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe('请求格式错误');
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('BAD_REQUEST');
     });
 
     test('应验证articles字段不为空', async () => {
@@ -381,7 +414,8 @@ describe('法条导入API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe('请求数据为空');
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('BAD_REQUEST');
     });
 
     test('应限制单次导入最多1000条', async () => {
@@ -401,7 +435,8 @@ describe('法条导入API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe('请求数据过大');
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('BAD_REQUEST');
     });
   });
 
@@ -532,13 +567,21 @@ describe('法条审核API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe('未认证');
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('UNAUTHORIZED');
     });
 
     test('无权限时应返回403错误', async () => {
       (getAuthUser as jest.Mock).mockResolvedValue(mockUser);
       (validatePermissions as jest.Mock).mockResolvedValue(
-        Response.json({ error: '权限不足' }, { status: 403 })
+        new Response(
+          JSON.stringify({
+            success: false,
+            message: '无权限访问此资源',
+            error: 'FORBIDDEN',
+          }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        )
       );
       const request = createReviewRequest('1', { status: 'APPROVED' });
       const response = await POST_REVIEW(request, {
@@ -546,6 +589,9 @@ describe('法条审核API', () => {
       });
 
       expect(response.status).toBe(403);
+      const data = await response.json();
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('FORBIDDEN');
     });
   });
 
@@ -618,7 +664,8 @@ describe('法条审核API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(404);
-      expect(data.error).toBe('法条不存在');
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('NOT_FOUND');
     });
   });
 
@@ -637,7 +684,8 @@ describe('法条审核API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe('请求格式错误');
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('BAD_REQUEST');
     });
   });
 });

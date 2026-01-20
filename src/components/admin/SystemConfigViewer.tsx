@@ -1,216 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import {
-  SystemConfig,
-  UpdateConfigRequest,
-  CreateConfigRequest,
-  ConfigType,
-  ConfigCategory,
-} from '@/types/config';
-import { formatConfigValue } from '@/types/config';
-
-/**
- * 配置项接口
- */
-interface ConfigItemProps {
-  config: SystemConfig;
-  isEditing: boolean;
-  editValue: unknown;
-  onEdit: () => void;
-  onSave: () => void;
-  onCancel: () => void;
-  onDelete: () => void;
-  onValueChange: (value: unknown) => void;
-}
-
-/**
- * 单个配置项组件
- */
-function ConfigItem({
-  config,
-  isEditing,
-  editValue,
-  onEdit,
-  onSave,
-  onCancel,
-  onDelete,
-  onValueChange,
-}: ConfigItemProps) {
-  const [localValue, setLocalValue] = useState<unknown>(editValue);
-
-  useEffect(() => {
-    setLocalValue(editValue);
-  }, [editValue]);
-
-  const handleSave = () => {
-    onValueChange(localValue);
-    onSave();
-  };
-
-  return (
-    <div className='bg-white rounded-lg border border-gray-200 p-6 hover:shadow-sm transition-shadow'>
-      <div className='flex items-start justify-between mb-4'>
-        <div className='flex-1'>
-          <div className='flex items-center gap-2 mb-1'>
-            <h3 className='text-lg font-semibold text-gray-900'>
-              {config.key}
-            </h3>
-            {config.isRequired && (
-              <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800'>
-                必填
-              </span>
-            )}
-            {config.isPublic && (
-              <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800'>
-                公开
-              </span>
-            )}
-            <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800'>
-              {config.type}
-            </span>
-          </div>
-          <p className='text-sm text-gray-600'>{config.description}</p>
-        </div>
-        <div className='flex gap-2'>
-          {!isEditing ? (
-            <>
-              <button
-                onClick={onEdit}
-                className='px-3 py-1 text-sm text-blue-600 hover:text-blue-800 border border-blue-600 rounded hover:bg-blue-50 transition-colors'
-              >
-                编辑
-              </button>
-              {!config.isRequired && (
-                <button
-                  onClick={onDelete}
-                  className='px-3 py-1 text-sm text-red-600 hover:text-red-800 border border-red-600 rounded hover:bg-red-50 transition-colors'
-                >
-                  删除
-                </button>
-              )}
-            </>
-          ) : (
-            <>
-              <button
-                onClick={handleSave}
-                className='px-3 py-1 text-sm text-green-600 hover:text-green-800 border border-green-600 rounded hover:bg-green-50 transition-colors'
-              >
-                保存
-              </button>
-              <button
-                onClick={onCancel}
-                className='px-3 py-1 text-sm text-gray-600 hover:text-gray-800 border border-gray-600 rounded hover:bg-gray-50 transition-colors'
-              >
-                取消
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className='bg-gray-50 rounded-lg p-4'>
-        <label className='block text-sm font-medium text-gray-700 mb-2'>
-          配置值
-        </label>
-        {isEditing ? (
-          <ConfigValueInput
-            type={config.type}
-            value={localValue}
-            onChange={setLocalValue}
-          />
-        ) : (
-          <div className='text-sm font-mono bg-white rounded border border-gray-200 p-3'>
-            {formatConfigValue(config.value, config.type)}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/**
- * 配置值输入组件
- */
-interface ConfigValueInputProps {
-  type: ConfigType;
-  value: unknown;
-  onChange: (value: unknown) => void;
-}
-
-function ConfigValueInput({ type, value, onChange }: ConfigValueInputProps) {
-  const handleChange = (
-    e:
-      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-      | React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const inputValue = e.target.value;
-    let parsedValue: unknown;
-
-    switch (type) {
-      case 'STRING':
-        parsedValue = inputValue;
-        break;
-      case 'NUMBER':
-        parsedValue = Number.parseFloat(inputValue);
-        break;
-      case 'BOOLEAN':
-        parsedValue = inputValue === 'true';
-        break;
-      case 'ARRAY':
-      case 'OBJECT':
-        try {
-          parsedValue = JSON.parse(inputValue);
-        } catch {
-          parsedValue = inputValue;
-        }
-        break;
-      default:
-        parsedValue = inputValue;
-    }
-
-    onChange(parsedValue);
-  };
-
-  const baseClassName =
-    'w-full text-sm font-mono rounded border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500';
-
-  if (type === 'BOOLEAN') {
-    return (
-      <select
-        value={String(value)}
-        onChange={handleChange}
-        className={baseClassName + ' p-2'}
-      >
-        <option value='true'>true</option>
-        <option value='false'>false</option>
-      </select>
-    );
-  }
-
-  if (type === 'STRING' && String(value).length < 100) {
-    return (
-      <input
-        type='text'
-        value={String(value)}
-        onChange={handleChange}
-        className={baseClassName + ' p-2'}
-      />
-    );
-  }
-
-  return (
-    <textarea
-      value={
-        typeof value === 'object'
-          ? JSON.stringify(value, null, 2)
-          : String(value)
-      }
-      onChange={handleChange}
-      className={baseClassName + ' p-2 min-h-25'}
-    />
-  );
-}
+import React, { useState } from 'react';
+import { SystemConfig } from '@prisma/client';
+import { ConfigItem } from '@/components/admin/ConfigItem';
+import { ConfigValueInput } from '@/components/admin/ConfigValueInput';
+import { UpdateConfigRequest, CreateConfigRequest } from '@/types/config';
 
 /**
  * 配置查看器Props
@@ -445,19 +239,11 @@ function CreateConfigDialog({ onClose, onSave }: CreateConfigDialogProps) {
                 onChange={e => handleChange('type', e.target.value)}
                 className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
               >
-                {(
-                  [
-                    'STRING',
-                    'NUMBER',
-                    'BOOLEAN',
-                    'ARRAY',
-                    'OBJECT',
-                  ] as ConfigType[]
-                ).map(type => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
+                <option value='STRING'>STRING</option>
+                <option value='NUMBER'>NUMBER</option>
+                <option value='BOOLEAN'>BOOLEAN</option>
+                <option value='ARRAY'>ARRAY</option>
+                <option value='OBJECT'>OBJECT</option>
               </select>
             </div>
 
@@ -470,22 +256,14 @@ function CreateConfigDialog({ onClose, onSave }: CreateConfigDialogProps) {
                 onChange={e => handleChange('category', e.target.value)}
                 className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
               >
-                {(
-                  [
-                    'general',
-                    'ai',
-                    'storage',
-                    'security',
-                    'feature',
-                    'ui',
-                    'notification',
-                    'other',
-                  ] as ConfigCategory[]
-                ).map(cat => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
+                <option value='general'>general</option>
+                <option value='ai'>ai</option>
+                <option value='storage'>storage</option>
+                <option value='security'>security</option>
+                <option value='feature'>feature</option>
+                <option value='ui'>ui</option>
+                <option value='notification'>notification</option>
+                <option value='other'>other</option>
               </select>
             </div>
 

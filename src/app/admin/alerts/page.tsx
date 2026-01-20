@@ -162,8 +162,10 @@ export default function AlertsPage() {
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
-    <div className='container mx-auto px-4 py-6'>
-      <h1 className='text-2xl font-bold text-gray-900 mb-6'>告警监控</h1>
+    <div>
+      <div className='mb-6'>
+        <h2 className='text-2xl font-bold text-gray-900'>告警监控</h2>
+      </div>
 
       <div className='mb-6'>
         <AlertStatistics statistics={calculateStatistics()} />

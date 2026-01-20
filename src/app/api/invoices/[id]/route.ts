@@ -14,9 +14,13 @@ import { getInvoice, cancelInvoice } from '@/lib/invoice/invoice-service';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
+    // Next.js 15中params是Promise，需要先await
+    const { id } = await params;
+    const invoiceId = id;
+
     // 获取用户会话
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -29,8 +33,6 @@ export async function GET(
         { status: 401 }
       );
     }
-
-    const invoiceId = params.id;
 
     // 查询发票详情
     const invoice = await getInvoice(invoiceId);
@@ -83,9 +85,13 @@ export async function GET(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
+    // Next.js 15中params是Promise，需要先await
+    const { id } = await params;
+    const invoiceId = id;
+
     // 获取用户会话
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -98,8 +104,6 @@ export async function DELETE(
         { status: 401 }
       );
     }
-
-    const invoiceId = params.id;
 
     // 获取请求体中的取消原因
     const body = await request.json();

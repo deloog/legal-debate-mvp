@@ -1,0 +1,3784 @@
+
+> legal_debate_mvp@0.1.0 test
+> jest src/__tests__/lib/
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+  console.log
+    连接管理器已优雅关闭
+
+      at ConnectionManager.shutdown (src/lib/db/connection-manager.ts:298:15)
+
+FAIL src/__tests__/lib/db/connection-manager.test.ts (30.956 s)
+  ConnectionPoolError
+    √ 应该创建错误实例 (3 ms)
+    √ 应该支持retryable属性
+    √ 默认retryable为false
+  ConnectionManager
+    构造函数
+      √ 应该使用默认配置创建实例 (30 ms)
+      √ 应该支持自定义配置 (2 ms)
+    获取连接
+      √ 应该成功获取连接 (60 ms)
+      √ 应该处理连接失败 (105 ms)
+      × 应该在连接超时时抛出错误 (30016 ms)
+    释放连接
+      √ 应该成功释放连接 (4 ms)
+      √ 应该处理释放连接失败 (3 ms)
+    统计信息
+      √ 应该返回正确的统计信息 (6 ms)
+      √ 应该重置统计信息 (2 ms)
+    健康检查
+      √ 应该成功执行健康检查 (3 ms)
+      √ 应该处理健康检查失败 (3 ms)
+    优雅关闭
+      √ 应该成功关闭管理器 (2 ms)
+      √ 应该处理关闭时的错误 (3 ms)
+    executeWithRetry
+      √ 应该成功执行操作 (4 ms)
+      √ 应该处理操作失败 (7 ms)
+      √ 应该支持自定义重试次数 (3 ms)
+    接口实现
+      √ 应该实现IConnectionManager接口 (1 ms)
+    边界条件
+      √ 应该处理释放未获取的连接 (1 ms)
+      √ 应该处理多次释放同一个连接 (2 ms)
+  全局连接管理器
+    √ 应该创建全局实例
+    √ 应该支持获取连接 (1 ms)
+    √ 应该获取统计信息
+  executeWithRetry便捷函数
+    √ 应该使用全局管理器执行操作 (1 ms)
+    √ 应该处理执行失败 (1 ms)
+    √ 应该支持自定义重试次数 (1 ms)
+  IConnectionManager接口
+    √ 应该定义必需的方法 (1 ms)
+
+  ● ConnectionManager › 获取连接 › 应该在连接超时时抛出错误
+
+    thrown: "Exceeded timeout of 30000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+      91 |     });
+      92 |
+    > 93 |     it('应该在连接超时时抛出错误', async () => {
+         |       ^
+      94 |       const manager2 = new ConnectionManager({
+      95 |         maxConnections: 1,
+      96 |         acquireTimeoutMillis: 100,
+
+      at src/__tests__/lib/db/connection-manager.test.ts:93:7
+      at src/__tests__/lib/db/connection-manager.test.ts:68:11
+      at Object.<anonymous> (src/__tests__/lib/db/connection-manager.test.ts:38:9)
+
+FAIL src/__tests__/lib/auth/email-service.test.ts
+  邮件服务
+    DevEmailService
+      sendPasswordResetEmail
+        × 应该在开发环境中发送密码重置邮件 (1 ms)
+        × 应该输出格式正确的邮件内容
+        × 应该在非开发环境返回错误 (1 ms)
+      sendVerificationEmail
+        × 应该在开发环境中发送验证邮件 (1 ms)
+        × 应该输出格式正确的验证邮件内容 (1 ms)
+        × 应该在非开发环境返回错误 (1 ms)
+    getEmailService
+      × 应该在开发环境返回 DevEmailService (1 ms)
+      × 应该在测试环境返回 DevEmailService (1 ms)
+      × 应该在生产环境返回 ProdEmailService (2 ms)
+
+  ● 邮件服务 › DevEmailService › sendPasswordResetEmail › 应该在开发环境中发送密码重置邮件
+
+    Property `NODE_ENV` does not have access type get
+
+      17 |     global.console.log = mockConsoleLog;
+      18 |     global.console.warn = mockConsoleWarn;
+    > 19 |     envSpy = jest.spyOn(process.env, 'NODE_ENV', 'get');
+         |                   ^
+      20 |   });
+      21 |
+      22 |   afterEach(() => {
+
+      at ModuleMocker._spyOnProperty (node_modules/jest-mock/build/index.js:650:13)
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:19:19)
+
+  ● 邮件服务 › DevEmailService › sendPasswordResetEmail › 应该在开发环境中发送密码重置邮件
+
+    TypeError: Cannot read properties of undefined (reading 'mockRestore')
+
+      21 |
+      22 |   afterEach(() => {
+    > 23 |     envSpy.mockRestore();
+         |            ^
+      24 |   });
+      25 |
+      26 |   describe('DevEmailService', () => {
+
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:23:12)
+
+  ● 邮件服务 › DevEmailService › sendPasswordResetEmail › 应该输出格式正确的邮件内容
+
+    Property `NODE_ENV` does not have access type get
+
+      17 |     global.console.log = mockConsoleLog;
+      18 |     global.console.warn = mockConsoleWarn;
+    > 19 |     envSpy = jest.spyOn(process.env, 'NODE_ENV', 'get');
+         |                   ^
+      20 |   });
+      21 |
+      22 |   afterEach(() => {
+
+      at ModuleMocker._spyOnProperty (node_modules/jest-mock/build/index.js:650:13)
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:19:19)
+
+  ● 邮件服务 › DevEmailService › sendPasswordResetEmail › 应该输出格式正确的邮件内容
+
+    TypeError: Cannot read properties of undefined (reading 'mockRestore')
+
+      21 |
+      22 |   afterEach(() => {
+    > 23 |     envSpy.mockRestore();
+         |            ^
+      24 |   });
+      25 |
+      26 |   describe('DevEmailService', () => {
+
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:23:12)
+
+  ● 邮件服务 › DevEmailService › sendPasswordResetEmail › 应该在非开发环境返回错误
+
+    Property `NODE_ENV` does not have access type get
+
+      17 |     global.console.log = mockConsoleLog;
+      18 |     global.console.warn = mockConsoleWarn;
+    > 19 |     envSpy = jest.spyOn(process.env, 'NODE_ENV', 'get');
+         |                   ^
+      20 |   });
+      21 |
+      22 |   afterEach(() => {
+
+      at ModuleMocker._spyOnProperty (node_modules/jest-mock/build/index.js:650:13)
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:19:19)
+
+  ● 邮件服务 › DevEmailService › sendPasswordResetEmail › 应该在非开发环境返回错误
+
+    TypeError: Cannot read properties of undefined (reading 'mockRestore')
+
+      21 |
+      22 |   afterEach(() => {
+    > 23 |     envSpy.mockRestore();
+         |            ^
+      24 |   });
+      25 |
+      26 |   describe('DevEmailService', () => {
+
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:23:12)
+
+  ● 邮件服务 › DevEmailService › sendVerificationEmail › 应该在开发环境中发送验证邮件
+
+    Property `NODE_ENV` does not have access type get
+
+      17 |     global.console.log = mockConsoleLog;
+      18 |     global.console.warn = mockConsoleWarn;
+    > 19 |     envSpy = jest.spyOn(process.env, 'NODE_ENV', 'get');
+         |                   ^
+      20 |   });
+      21 |
+      22 |   afterEach(() => {
+
+      at ModuleMocker._spyOnProperty (node_modules/jest-mock/build/index.js:650:13)
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:19:19)
+
+  ● 邮件服务 › DevEmailService › sendVerificationEmail › 应该在开发环境中发送验证邮件
+
+    TypeError: Cannot read properties of undefined (reading 'mockRestore')
+
+      21 |
+      22 |   afterEach(() => {
+    > 23 |     envSpy.mockRestore();
+         |            ^
+      24 |   });
+      25 |
+      26 |   describe('DevEmailService', () => {
+
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:23:12)
+
+  ● 邮件服务 › DevEmailService › sendVerificationEmail › 应该输出格式正确的验证邮件内容
+
+    Property `NODE_ENV` does not have access type get
+
+      17 |     global.console.log = mockConsoleLog;
+      18 |     global.console.warn = mockConsoleWarn;
+    > 19 |     envSpy = jest.spyOn(process.env, 'NODE_ENV', 'get');
+         |                   ^
+      20 |   });
+      21 |
+      22 |   afterEach(() => {
+
+      at ModuleMocker._spyOnProperty (node_modules/jest-mock/build/index.js:650:13)
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:19:19)
+
+  ● 邮件服务 › DevEmailService › sendVerificationEmail › 应该输出格式正确的验证邮件内容
+
+    TypeError: Cannot read properties of undefined (reading 'mockRestore')
+
+      21 |
+      22 |   afterEach(() => {
+    > 23 |     envSpy.mockRestore();
+         |            ^
+      24 |   });
+      25 |
+      26 |   describe('DevEmailService', () => {
+
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:23:12)
+
+  ● 邮件服务 › DevEmailService › sendVerificationEmail › 应该在非开发环境返回错误
+
+    Property `NODE_ENV` does not have access type get
+
+      17 |     global.console.log = mockConsoleLog;
+      18 |     global.console.warn = mockConsoleWarn;
+    > 19 |     envSpy = jest.spyOn(process.env, 'NODE_ENV', 'get');
+         |                   ^
+      20 |   });
+      21 |
+      22 |   afterEach(() => {
+
+      at ModuleMocker._spyOnProperty (node_modules/jest-mock/build/index.js:650:13)
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:19:19)
+
+  ● 邮件服务 › DevEmailService › sendVerificationEmail › 应该在非开发环境返回错误
+
+    TypeError: Cannot read properties of undefined (reading 'mockRestore')
+
+      21 |
+      22 |   afterEach(() => {
+    > 23 |     envSpy.mockRestore();
+         |            ^
+      24 |   });
+      25 |
+      26 |   describe('DevEmailService', () => {
+
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:23:12)
+
+  ● 邮件服务 › getEmailService › 应该在开发环境返回 DevEmailService
+
+    Property `NODE_ENV` does not have access type get
+
+      17 |     global.console.log = mockConsoleLog;
+      18 |     global.console.warn = mockConsoleWarn;
+    > 19 |     envSpy = jest.spyOn(process.env, 'NODE_ENV', 'get');
+         |                   ^
+      20 |   });
+      21 |
+      22 |   afterEach(() => {
+
+      at ModuleMocker._spyOnProperty (node_modules/jest-mock/build/index.js:650:13)
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:19:19)
+
+  ● 邮件服务 › getEmailService › 应该在开发环境返回 DevEmailService
+
+    TypeError: Cannot read properties of undefined (reading 'mockRestore')
+
+      21 |
+      22 |   afterEach(() => {
+    > 23 |     envSpy.mockRestore();
+         |            ^
+      24 |   });
+      25 |
+      26 |   describe('DevEmailService', () => {
+
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:23:12)
+
+  ● 邮件服务 › getEmailService › 应该在测试环境返回 DevEmailService
+
+    Property `NODE_ENV` does not have access type get
+
+      17 |     global.console.log = mockConsoleLog;
+      18 |     global.console.warn = mockConsoleWarn;
+    > 19 |     envSpy = jest.spyOn(process.env, 'NODE_ENV', 'get');
+         |                   ^
+      20 |   });
+      21 |
+      22 |   afterEach(() => {
+
+      at ModuleMocker._spyOnProperty (node_modules/jest-mock/build/index.js:650:13)
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:19:19)
+
+  ● 邮件服务 › getEmailService › 应该在测试环境返回 DevEmailService
+
+    TypeError: Cannot read properties of undefined (reading 'mockRestore')
+
+      21 |
+      22 |   afterEach(() => {
+    > 23 |     envSpy.mockRestore();
+         |            ^
+      24 |   });
+      25 |
+      26 |   describe('DevEmailService', () => {
+
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:23:12)
+
+  ● 邮件服务 › getEmailService › 应该在生产环境返回 ProdEmailService
+
+    Property `NODE_ENV` does not have access type get
+
+      17 |     global.console.log = mockConsoleLog;
+      18 |     global.console.warn = mockConsoleWarn;
+    > 19 |     envSpy = jest.spyOn(process.env, 'NODE_ENV', 'get');
+         |                   ^
+      20 |   });
+      21 |
+      22 |   afterEach(() => {
+
+      at ModuleMocker._spyOnProperty (node_modules/jest-mock/build/index.js:650:13)
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:19:19)
+
+  ● 邮件服务 › getEmailService › 应该在生产环境返回 ProdEmailService
+
+    TypeError: Cannot read properties of undefined (reading 'mockRestore')
+
+      21 |
+      22 |   afterEach(() => {
+    > 23 |     envSpy.mockRestore();
+         |            ^
+      24 |   });
+      25 |
+      26 |   describe('DevEmailService', () => {
+
+      at Object.<anonymous> (src/__tests__/lib/auth/email-service.test.ts:23:12)
+
+  console.log
+    
+    ============================================================
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:157:13)
+
+  console.log
+    📧 邮件发送（开发环境）
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:158:13)
+
+  console.log
+    ============================================================
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:159:13)
+
+  console.log
+    收件人: test-forgot@example.com
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:160:13)
+
+  console.log
+    主题: 律伴助手 - 密码重置
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:161:13)
+
+  console.log
+    ------------------------------------------------------------
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:162:13)
+
+  console.log
+    内容（纯文本）：
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:163:13)
+
+  console.log
+    您好，
+    
+    您收到了一封密码重置邮件。
+    
+    您的验证码是：102574
+    
+    验证码将在 2026/01/19 14:24 过期。
+    
+    如果您没有请求密码重置，请忽略此邮件。
+    
+    ---
+    律伴助手
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:164:13)
+
+  console.log
+    ------------------------------------------------------------
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:166:15)
+
+  console.log
+    内容（HTML）：
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:167:15)
+
+  console.log
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>密码重置</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: #f5f5f5; padding: 20px; border-radius: 5px;">
+        <h2 style="color: #4a90e2; margin-top: 0;">密码重置</h2>
+        <p>您好，</p>
+        <p>您收到了一封密码重置邮件。</p>
+        <div style="background: #e8f4fd; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0;">
+          <p style="margin: 0; font-size: 18px; color: #4a90e2;">验证码</p>
+          <p style="margin: 10px 0; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #4a90e2;">102574</p>
+        </div>
+        <p>验证码将在 <strong>2026/01/19 14:24</strong> 过期。</p>
+        <p>如果您没有请求密码重置，请忽略此邮件。</p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+        <p style="font-size: 12px; color: #999; margin-bottom: 0;">律伴助手</p>
+      </div>
+    </body>
+    </html>
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:168:15)
+
+  console.log
+    ============================================================
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:170:13)
+
+  console.log
+    
+    ============================================================
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:157:13)
+
+  console.log
+    📧 邮件发送（开发环境）
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:158:13)
+
+  console.log
+    ============================================================
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:159:13)
+
+  console.log
+    收件人: test-active@example.com
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:160:13)
+
+  console.log
+    主题: 律伴助手 - 密码重置
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:161:13)
+
+  console.log
+    ------------------------------------------------------------
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:162:13)
+
+  console.log
+    内容（纯文本）：
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:163:13)
+
+  console.log
+    您好，
+    
+    您收到了一封密码重置邮件。
+    
+    您的验证码是：823540
+    
+    验证码将在 2026/01/19 14:24 过期。
+    
+    如果您没有请求密码重置，请忽略此邮件。
+    
+    ---
+    律伴助手
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:164:13)
+
+  console.log
+    ------------------------------------------------------------
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:166:15)
+
+  console.log
+    内容（HTML）：
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:167:15)
+
+  console.log
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>密码重置</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: #f5f5f5; padding: 20px; border-radius: 5px;">
+        <h2 style="color: #4a90e2; margin-top: 0;">密码重置</h2>
+        <p>您好，</p>
+        <p>您收到了一封密码重置邮件。</p>
+        <div style="background: #e8f4fd; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0;">
+          <p style="margin: 0; font-size: 18px; color: #4a90e2;">验证码</p>
+          <p style="margin: 10px 0; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #4a90e2;">823540</p>
+        </div>
+        <p>验证码将在 <strong>2026/01/19 14:24</strong> 过期。</p>
+        <p>如果您没有请求密码重置，请忽略此邮件。</p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+        <p style="font-size: 12px; color: #999; margin-bottom: 0;">律伴助手</p>
+      </div>
+    </body>
+    </html>
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:168:15)
+
+  console.log
+    ============================================================
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:170:13)
+
+  console.log
+    
+    ============================================================
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:157:13)
+
+  console.log
+    📧 邮件发送（开发环境）
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:158:13)
+
+  console.log
+    ============================================================
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:159:13)
+
+  console.log
+    收件人: test-suspended@example.com
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:160:13)
+
+  console.log
+    主题: 律伴助手 - 密码重置
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:161:13)
+
+  console.log
+    ------------------------------------------------------------
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:162:13)
+
+  console.log
+    内容（纯文本）：
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:163:13)
+
+  console.log
+    您好，
+    
+    您收到了一封密码重置邮件。
+    
+    您的验证码是：930794
+    
+    验证码将在 2026/01/19 14:24 过期。
+    
+    如果您没有请求密码重置，请忽略此邮件。
+    
+    ---
+    律伴助手
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:164:13)
+
+  console.log
+    ------------------------------------------------------------
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:166:15)
+
+  console.log
+    内容（HTML）：
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:167:15)
+
+  console.log
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>密码重置</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: #f5f5f5; padding: 20px; border-radius: 5px;">
+        <h2 style="color: #4a90e2; margin-top: 0;">密码重置</h2>
+        <p>您好，</p>
+        <p>您收到了一封密码重置邮件。</p>
+        <div style="background: #e8f4fd; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0;">
+          <p style="margin: 0; font-size: 18px; color: #4a90e2;">验证码</p>
+          <p style="margin: 10px 0; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #4a90e2;">930794</p>
+        </div>
+        <p>验证码将在 <strong>2026/01/19 14:24</strong> 过期。</p>
+        <p>如果您没有请求密码重置，请忽略此邮件。</p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+        <p style="font-size: 12px; color: #999; margin-bottom: 0;">律伴助手</p>
+      </div>
+    </body>
+    </html>
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:168:15)
+
+  console.log
+    ============================================================
+
+      at DevEmailService.logEmail (src/lib/auth/email-service.ts:170:13)
+
+PASS src/__tests__/lib/auth/password-reset-service.test.ts (5.163 s)
+  密码重置服务
+    validatePasswordComplexity
+      √ 应该接受符合复杂度要求的密码 (88 ms)
+      √ 应该拒绝太短的密码 (78 ms)
+      √ 应该拒绝缺少小写字母的密码 (203 ms)
+      √ 应该拒绝缺少大写字母的密码 (77 ms)
+      √ 应该拒绝缺少数字的密码 (203 ms)
+      √ 应该拒绝太长的密码 (233 ms)
+      √ 应该返回多个错误当密码有多项问题时 (185 ms)
+    forgotPassword
+      √ 应该为存在的用户发送验证码 (481 ms)
+      √ 应该对不存在的用户返回成功（防止邮箱枚举） (77 ms)
+      √ 应该拒绝无效的邮箱格式 (77 ms)
+      √ 应该为活跃用户发送验证码 (264 ms)
+      √ 应该对暂停用户返回成功（防止邮箱枚举） (248 ms)
+    resetPassword
+      √ 应该使用有效的验证码重置密码 (528 ms)
+      √ 应该拒绝不匹配的确认密码 (186 ms)
+      √ 应该拒绝不符合复杂度要求的密码 (188 ms)
+      √ 应该拒绝无效的验证码 (262 ms)
+      √ 应该拒绝过期的验证码 (373 ms)
+      √ 应该拒绝无效的邮箱格式 (78 ms)
+      √ 应该拒绝无效的验证码格式 (325 ms)
+    getPasswordResetService
+      √ 应该返回单例实例 (93 ms)
+
+  console.log
+    连接池预热完成，创建了 2 个连接
+
+      at warmupConnectionPool (src/lib/db/connection-pool.ts:120:13)
+
+  console.log
+    连接池预热完成，创建了 2 个连接
+
+      at warmupConnectionPool (src/lib/db/connection-pool.ts:120:13)
+
+  console.log
+    开始优雅关闭数据库连接池...
+
+      at gracefulShutdown (src/lib/db/connection-pool.ts:131:13)
+
+  console.log
+    数据库连接池已优雅关闭
+
+      at gracefulShutdown (src/lib/db/connection-pool.ts:139:13)
+
+  console.log
+    开始优雅关闭数据库连接池...
+
+      at gracefulShutdown (src/lib/db/connection-pool.ts:131:13)
+
+  console.log
+    数据库连接池已优雅关闭
+
+      at gracefulShutdown (src/lib/db/connection-pool.ts:139:13)
+
+  console.log
+    启动连接池监控器
+
+      at ConnectionPoolMonitor.start (src/lib/db/connection-pool.ts:156:13)
+
+  console.log
+    连接池监控器已停止
+
+      at ConnectionPoolMonitor.stop (src/lib/db/connection-pool.ts:178:15)
+
+  console.log
+    启动连接池监控器
+
+      at ConnectionPoolMonitor.start (src/lib/db/connection-pool.ts:156:13)
+
+  console.log
+    连接池监控器已停止
+
+      at ConnectionPoolMonitor.stop (src/lib/db/connection-pool.ts:178:15)
+
+  console.log
+    启动连接池监控器
+
+      at ConnectionPoolMonitor.start (src/lib/db/connection-pool.ts:156:13)
+
+  console.log
+    连接池监控器已停止
+
+      at ConnectionPoolMonitor.stop (src/lib/db/connection-pool.ts:178:15)
+
+  console.log
+    启动连接池监控器
+
+      at ConnectionPoolMonitor.start (src/lib/db/connection-pool.ts:156:13)
+
+  console.log
+    连接池监控器已停止
+
+      at ConnectionPoolMonitor.stop (src/lib/db/connection-pool.ts:178:15)
+
+PASS src/__tests__/lib/db/connection-pool.test.ts
+  连接池配置
+    默认配置
+      √ 应该有正确的默认值 (1 ms)
+      √ 应该从环境变量读取配置 (1 ms)
+  连接池统计
+    √ 应该获取连接池统计信息 (252 ms)
+    √ 应该处理获取统计信息失败的情况 (8 ms)
+    √ 应该返回正确的统计结构 (9 ms)
+  连接池健康检查
+    √ 应该成功执行健康检查 (8 ms)
+    √ 应该处理健康检查失败的情况 (8 ms)
+  连接池预热
+    √ 应该成功预热连接池 (53 ms)
+    √ 应该处理预热失败的情况 (1 ms)
+  优雅关闭
+    √ 应该成功优雅关闭连接池 (1022 ms)
+    √ 应该处理关闭时的错误 (1023 ms)
+  连接池监控器
+    √ 应该成功启动监控器 (3 ms)
+    √ 应该成功停止监控器 (2 ms)
+    √ 不应该重复启动监控器 (1 ms)
+    √ 应该处理停止未启动的监控器 (1 ms)
+    √ 全局监控器实例应该可用
+    √ 全局监控器应该能够启动和停止 (2 ms)
+  ConnectionStatus枚举
+    √ 应该包含所有必需的状态 (1 ms)
+
+PASS src/__tests__/lib/auth/password.test.ts
+  密码工具函数
+    hashPassword
+      √ 应该成功哈希密码 (233 ms)
+      √ 相同的密码应该产生不同的哈希值 (465 ms)
+      √ 应该处理空密码 (233 ms)
+    verifyPassword
+      √ 应该验证正确的密码 (469 ms)
+      √ 应该拒绝错误的密码 (463 ms)
+      √ 应该处理空密码 (464 ms)
+    validatePassword
+      √ 应该接受有效的密码 (1 ms)
+      √ 应该拒绝少于6位的密码
+      √ 应该拒绝只有字母的密码 (1 ms)
+      √ 应该拒绝只有数字的密码 (1 ms)
+      √ 应该拒绝长度不足的密码
+      √ 应该接受混合大小写字母和数字的密码
+      √ 应该接受包含特殊字符的密码
+    generateRandomPassword
+      √ 应该生成默认长度的密码 (1 ms)
+      √ 应该生成指定长度的密码 (1 ms)
+      √ 应该生成不同的密码
+      √ 生成的密码应该包含字母 (1 ms)
+      √ 生成的密码应该包含数字
+      √ 生成的密码应该包含特殊字符 (1 ms)
+      √ 应该生成长度为8的密码
+      √ 应该生成长度为20的密码 (1 ms)
+
+PASS src/__tests__/lib/auth/verification-code-service.test.ts
+  验证码服务
+    createCode
+      √ 应该成功创建验证码 (98 ms)
+      √ 应该创建不同类型的验证码 (232 ms)
+      √ 应该在达到最大尝试次数后限制验证码创建 (358 ms)
+    verifyCode
+      √ 应该成功验证正确的验证码 (125 ms)
+      √ 应该拒绝错误的验证码 (234 ms)
+      √ 应该拒绝过期的验证码 (278 ms)
+      √ 应该拒绝不匹配类型的验证码 (108 ms)
+      √ 应该在验证成功后删除验证码 (249 ms)
+      √ 应该在多次验证失败后返回错误 (109 ms)
+    cleanupExpiredCodes
+      √ 应该清理过期的验证码 (108 ms)
+    getVerificationCodeService
+      √ 应该返回单例实例 (109 ms)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.510Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:48:22)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.532Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.534Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.535Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.541Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.542Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.544Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.550Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.551Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.553Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.557Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.558Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.560Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.563Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.564Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.566Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.569Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.570Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.573Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.576Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.577Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.578Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.583Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.583Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Updated Prometheus monitor config","timestamp":"2026-01-19T06:10:08.585Z","context":{"enabled":false,"prefix":"test_","collectInterval":1000}}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.586Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.589Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.590Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.606Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.609Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.610Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.612Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.617Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.618Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.619Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.622Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.623Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.624Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.627Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.628Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.629Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.632Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.632Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.634Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.636Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.641Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.643Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.645Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.646Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Registered collector: test_memory_usage","timestamp":"2026-01-19T06:10:08.647Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.648Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.651Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.651Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Registered collector: test_memory_usage","timestamp":"2026-01-19T06:10:08.653Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Registered collector: test_cpu_usage","timestamp":"2026-01-19T06:10:08.653Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.655Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.657Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.658Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Registered collector: test_test_metric","timestamp":"2026-01-19T06:10:08.660Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.661Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.665Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.669Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Registered collector: test_test_metric","timestamp":"2026-01-19T06:10:08.672Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Unregistered collector: test_test_metric","timestamp":"2026-01-19T06:10:08.673Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.674Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.677Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.678Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Registered collector: test_metric1","timestamp":"2026-01-19T06:10:08.679Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Registered collector: test_metric2","timestamp":"2026-01-19T06:10:08.680Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.681Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.684Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.685Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Registered collector: test_error_metric","timestamp":"2026-01-19T06:10:08.686Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Registered collector: test_valid_metric","timestamp":"2026-01-19T06:10:08.687Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.error
+    {"level":"error","message":"Failed to collect metric test_error_metric","timestamp":"2026-01-19T06:10:08.689Z","error":{}}
+
+    [0m [90m 185 |[39m
+     [90m 186 |[39m     [36mconst[39m method [33m=[39m [36mthis[39m[33m.[39mgetConsoleMethod(level)[33m;[39m
+    [31m[1m>[22m[39m[90m 187 |[39m     method(formatted)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 188 |[39m   }
+     [90m 189 |[39m
+     [90m 190 |[39m   [90m/**[39m[0m
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.error (config/winston.config.ts:280:10)
+      at PrometheusMonitor.collectMetrics (src/lib/monitoring/prometheus-metrics.ts:254:21)
+      at src/__tests__/lib/monitoring/prometheus-metrics.test.ts:296:28
+      at Object.<anonymous> (node_modules/expect/build/index.js:1824:9)
+      at Object.throwingMatcher [as toThrow] (node_modules/expect/build/index.js:2235:93)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:296:50)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.692Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.696Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.697Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.702Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.706Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.707Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.709Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.711Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.712Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.713Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.716Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.716Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.718Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.721Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.722Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.724Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.730Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.731Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.733Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.736Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.737Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.739Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.743Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.744Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.750Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.753Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.755Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.757Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.759Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.760Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.762Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.764Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.765Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.766Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.769Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.769Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.771Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.774Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.774Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.776Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.777Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.780Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.781Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Started collecting metrics every 1000ms","timestamp":"2026-01-19T06:10:08.782Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Stopped collecting metrics","timestamp":"2026-01-19T06:10:08.785Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.786Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.787Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Started collecting metrics every 1000ms","timestamp":"2026-01-19T06:10:08.789Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Stopped collecting metrics","timestamp":"2026-01-19T06:10:08.789Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.792Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.794Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.795Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Started collecting metrics every 1000ms","timestamp":"2026-01-19T06:10:08.796Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is already running","timestamp":"2026-01-19T06:10:08.796Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.startCollecting (src/lib/monitoring/prometheus-metrics.ts:354:19)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:474:15)
+
+  console.info
+    {"level":"info","message":"Stopped collecting metrics","timestamp":"2026-01-19T06:10:08.796Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.801Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.803Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.805Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.807Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:484:15)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.812Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.814Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.815Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Updated Prometheus monitor config","timestamp":"2026-01-19T06:10:08.816Z","context":{"enabled":false,"prefix":"test_","collectInterval":2000}}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.817Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.819Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.820Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Updated Prometheus monitor config","timestamp":"2026-01-19T06:10:08.822Z","context":{"enabled":false,"prefix":"test_","collectInterval":1000}}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.823Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.825Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.826Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.827Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.830Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.831Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.832Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.836Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.837Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Started collecting metrics every 1000ms","timestamp":"2026-01-19T06:10:08.839Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Registered collector: test_test","timestamp":"2026-01-19T06:10:08.839Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Stopped collecting metrics","timestamp":"2026-01-19T06:10:08.840Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.841Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.842Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.843Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:35:13)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.845Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.846Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.847Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at resetPrometheusMonitor (src/lib/monitoring/prometheus-metrics.ts:458:21)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:564:27)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.850Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.851Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.852Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at resetPrometheusMonitor (src/lib/monitoring/prometheus-metrics.ts:458:21)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:576:27)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.855Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.856Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.857Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at resetPrometheusMonitor (src/lib/monitoring/prometheus-metrics.ts:458:21)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:564:27)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.860Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.861Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.863Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at resetPrometheusMonitor (src/lib/monitoring/prometheus-metrics.ts:458:21)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:585:27)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.865Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.866Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.867Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at resetPrometheusMonitor (src/lib/monitoring/prometheus-metrics.ts:458:21)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:585:27)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.869Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.870Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.872Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at resetPrometheusMonitor (src/lib/monitoring/prometheus-metrics.ts:458:21)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:585:27)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.875Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.876Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.warn
+    {"level":"warn","message":"Collection timer is not running","timestamp":"2026-01-19T06:10:08.877Z"}
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+      at Logger.writeLog (config/winston.config.ts:164:12)
+      at Logger.log (config/winston.config.ts:133:17)
+      at Logger.warn (config/winston.config.ts:273:10)
+      at PrometheusMonitor.stopCollecting (src/lib/monitoring/prometheus-metrics.ts:372:19)
+      at PrometheusMonitor.destroy (src/lib/monitoring/prometheus-metrics.ts:430:10)
+      at resetPrometheusMonitor (src/lib/monitoring/prometheus-metrics.ts:458:21)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/prometheus-metrics.test.ts:585:27)
+
+  console.info
+    {"level":"info","message":"Cleared all metrics","timestamp":"2026-01-19T06:10:08.880Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+  console.info
+    {"level":"info","message":"Destroyed Prometheus monitor","timestamp":"2026-01-19T06:10:08.880Z"}
+
+      at Logger.writeToConsole (config/winston.config.ts:187:5)
+
+PASS src/__tests__/lib/monitoring/prometheus-metrics.test.ts
+  PrometheusMonitor
+    constructor
+      √ 应该使用默认配置创建监控实例 (34 ms)
+      √ 应该使用自定义配置创建监控实例 (9 ms)
+      √ 应该创建空的指标存储 (7 ms)
+      √ 应该创建空的收集器存储 (6 ms)
+    incrementCounter
+      √ 应该增加计数器指标 (7 ms)
+      √ 应该使用默认值1增加计数器 (6 ms)
+      √ 应该合并标签 (6 ms)
+      √ 应该禁用时忽略指标 (7 ms)
+      √ 应该限制存储的指标数量 (20 ms)
+    setGauge
+      √ 应该设置仪表盘指标 (7 ms)
+      √ 应该支持负值 (5 ms)
+      √ 应该更新现有指标 (5 ms)
+    recordHistogram
+      √ 应该记录直方图指标 (4 ms)
+      √ 应该记录多个值 (9 ms)
+    recordSummary
+      √ 应该记录摘要指标 (5 ms)
+    registerCollector
+      √ 应该注册指标收集器 (5 ms)
+      √ 应该支持多个收集器 (7 ms)
+      √ 收集时应该执行收集器 (11 ms)
+    unregisterCollector
+      √ 应该取消注册指标收集器 (8 ms)
+    collectMetrics
+      √ 应该收集所有注册收集器的指标 (6 ms)
+      √ 应该捕获收集器错误 (15 ms)
+    getPrometheusMetrics
+      √ 应该生成Prometheus格式的指标数据 (7 ms)
+      √ 应该包含标签 (5 ms)
+      √ 应该转义特殊字符 (4 ms)
+    formatLabels
+      √ 应该格式化空标签 (6 ms)
+      √ 应该格式化多个标签 (8 ms)
+    escapeLabelValue
+      √ 应该转义反斜杠 (6 ms)
+      √ 应该转义双引号 (6 ms)
+      √ 应该转义换行符 (10 ms)
+    getAllMetrics
+      √ 应该返回所有指标的副本 (5 ms)
+    getMetricsByName
+      √ 应该返回指定名称的指标 (5 ms)
+      √ 应该返回空数组如果指标不存在 (4 ms)
+    getMetricsByType
+      √ 应该返回指定类型的指标 (5 ms)
+    clearMetrics
+      √ 应该清除所有指标 (6 ms)
+    startCollecting / stopCollecting
+      √ 应该启动定时收集 (6 ms)
+      √ 应该停止定时收集 (8 ms)
+      √ 重复启动应该警告 (10 ms)
+      √ 停止未启动的定时器应该警告 (9 ms)
+    updateConfig
+      √ 应该更新配置 (5 ms)
+      √ 应该保留未更新的配置 (6 ms)
+    getConfig
+      √ 应该返回配置的副本 (4 ms)
+    getStats
+      √ 应该返回正确的统计信息 (6 ms)
+    destroy
+      √ 应该清理所有资源 (9 ms)
+  Singleton Pattern
+    √ 应该返回相同的实例 (4 ms)
+    √ 重置后应该返回新实例 (11 ms)
+  Convenience Functions
+    √ incrementCounter 应该调用监控器的incrementCounter (4 ms)
+    √ setGauge 应该调用监控器的setGauge (5 ms)
+    √ recordHistogram 应该调用监控器的recordHistogram (5 ms)
+    √ recordSummary 应该调用监控器的recordSummary (5 ms)
+
+PASS src/__tests__/lib/agent/core-actions/core.test.ts
+  核心原子函数 - Core Layer
+    analyze_text - 文本分析
+      √ 应该正确分析中文文本 (2 ms)
+      √ 应该正确分析英文文本
+      √ 应该正确处理空文本 (1 ms)
+      √ 应该正确提取关键短语 (1 ms)
+    extract_entities - 实体提取
+      √ 应该正确提取人名实体 (1 ms)
+      √ 应该正确提取日期实体 (1 ms)
+      √ 应该正确提取金额实体 (1 ms)
+      √ 应该正确返回实体分类统计 (1 ms)
+    classify_content - 内容分类
+      √ 应该正确分类合同纠纷案件 (3 ms)
+      √ 应该正确分类劳动合同纠纷 (1 ms)
+      √ 应该返回备选分类 (1 ms)
+    search_database - 数据库检索
+      √ 应该正确执行数据库查询 (15 ms)
+      √ 应该正确应用过滤条件 (15 ms)
+      √ 应该正确应用排序 (16 ms)
+    call_ai_service - AI服务调用
+      √ 应该正确调用DeepSeek服务 (1 ms)
+      √ 应该正确处理API错误
+    validate_data - 数据验证
+      √ 应该正确验证有效数据 (1 ms)
+      √ 应该正确检测无效数据
+      √ 应该正确应用正则验证
+    format_transform - 格式转换
+      √ 应该正确将JSON转换为文本 (1 ms)
+      √ 应该正确将文本转换为JSON (1 ms)
+      √ 应该正确处理不支持的格式转换
+    cache_result - 缓存结果
+      √ 应该成功缓存数据 (1 ms)
+      √ 应该正确处理缓存失败 (1 ms)
+    log_action - 行动记录
+      √ 应该正确记录成功的行动 (1 ms)
+      √ 应该正确记录失败的行动 (1 ms)
+    verify_output - 输出验证
+      √ 应该正确验证有效输出 (1 ms)
+      √ 应该检测输出中的问题 (1 ms)
+    handle_error - 错误处理
+      √ 应该正确处理并记录错误 (32 ms)
+      √ 应该正确标记可重试错误
+    retry_operation - 重试操作
+      √ 应该成功执行操作无需重试
+      √ 应该在失败后重试并成功 (62 ms)
+      √ 应该在达到最大重试次数后放弃 (15 ms)
+    merge_results - 结果合并
+      √ 应该正确合并多个结果集 (3 ms)
+      √ 应该正确合并并去重 (3 ms)
+      √ 应该正确合并对象数组 (2 ms)
+    filter_data - 数据过滤
+      √ 应该正确过滤数据 (3 ms)
+      √ 应该正确应用最大结果限制 (1 ms)
+      √ 应该正确应用偏移量 (1 ms)
+    rank_items - 项目排序
+      √ 应该正确按分数降序排列 (1 ms)
+      √ 应该正确按分数升序排列 (1 ms)
+    generate_summary - 摘要生成
+      √ 应该正确生成文本摘要 (2 ms)
+      √ 应该正确提取关键点 (1 ms)
+    compare_versions - 版本对比
+      √ 应该正确对比两个版本 (1 ms)
+      √ 应该正确识别新增字段 (1 ms)
+      √ 应该正确识别修改字段 (1 ms)
+    update_memory - 记忆更新
+      √ 应该成功创建新记忆 (1 ms)
+      √ 应该更新现有记忆 (2 ms)
+    generate_summary - 字符串参数测试
+      √ 应该正确处理字符串参数 (1 ms)
+    classify_content - document_type测试
+      √ 应该正确分类文档类型 (1 ms)
+    validate_data - minLength/maxLength测试
+      √ 应该正确验证字符串长度 (1 ms)
+    rank_items - 数组参数重载测试
+      √ 应该正确处理数组参数 (1 ms)
+    compare_versions - removed字段测试
+      √ 应该正确识别删除字段 (1 ms)
+    call_ai_service - zhipu provider测试
+      √ 应该正确调用智谱服务 (2 ms)
+    search_database - offset/hasMore测试
+      √ 应该正确计算hasMore (22 ms)
+    format_transform - object格式测试
+      √ 应该正确将object转换为json (2 ms)
+    verify_output - 空对象测试
+      √ 应该正确验证空对象 (1 ms)
+    handle_error - 多种错误类型测试
+      √ 应该正确处理不同类型的错误 (1 ms)
+    format_transform - 不支持格式测试
+      √ 应该正确处理不支持的源格式
+      √ 应该正确处理不支持的目标格式 (1 ms)
+    verify_output - 支持点测试
+      √ 应该正确验证支持点数量不足
+    retry_operation - shouldRetry测试
+      √ 应该在shouldRetry返回false时不重试 (1 ms)
+    update_memory - 异常处理测试
+      √ 应该在异常时返回默认结果
+    format_transform - 无转换测试
+      √ 应该在无转换需要时返回警告 (1 ms)
+    verify_output - null/undefined测试
+      √ 应该正确检测null输出
+      √ 应该正确检测undefined输出
+    verify_output - 类型不匹配测试
+      √ 应该检测类型不匹配 (1 ms)
+
+PASS src/__tests__/lib/agent/core-actions/integration.test.ts
+  核心原子函数 - 集成测试
+    与MemoryManager的集成测试
+      √ 应该成功存储和检索记忆 (209 ms)
+      √ 应该正确缓存和检索结果 (7 ms)
+      √ 应该在多次调用中复用缓存 (5 ms)
+      √ 应该正确更新已存在的记忆 (14 ms)
+    与PrismaClient的集成测试
+      √ 应该正确记录行动日志 (4 ms)
+      √ 应该正确记录错误日志 (15 ms)
+      √ 应该正确标记可重试错误 (3 ms)
+      √ 应该正确标记不可重试错误 (2 ms)
+    端到端流程测试
+      √ 应该完整执行分析-验证-存储流程 (11 ms)
+      √ 应该正确执行重试机制并记录错误 (58 ms)
+      √ 应该在重试失败时记录错误 (16 ms)
+    数据流集成测试
+      √ 应该正确验证、转换和存储数据 (12 ms)
+      √ 应该正确合并、排序和缓存结果 (13 ms)
+    错误恢复集成测试
+      √ 应该正确处理并从错误中恢复 (14 ms)
+      √ 应该在最终失败时记录详细信息 (39 ms)
+
+  console.log
+    数据库连接已断开
+
+      at disconnectDatabase (src/lib/db/prisma.ts:43:13)
+
+  console.error
+    断开数据库连接时出错: Error: 断开连接失败
+        at Object.<anonymous> (D:\legal_debate_mvp\src\__tests__\lib\db\prisma.test.ts:64:28)
+        at Promise.finally.completed (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1557:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1497:10)
+        at _callCircusTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1007:40)
+        at _runTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:947:3)
+        at D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:849:7
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:862:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at run (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:761:3)
+        at runAndTransformResultsToJestFormat (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1918:21)
+        at jestAdapter (D:\legal_debate_mvp\node_modules\jest-circus\build\runner.js:101:19)
+        at runTestInternal (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:275:16)
+        at runTest (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:343:7)
+
+    [0m [90m 43 |[39m     console[33m.[39mlog([32m'数据库连接已断开'[39m)[33m;[39m
+     [90m 44 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 45 |[39m     console[33m.[39merror([32m'断开数据库连接时出错:'[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 46 |[39m     [36mthrow[39m error[33m;[39m
+     [90m 47 |[39m   }
+     [90m 48 |[39m }[33m;[39m[0m
+
+      at disconnectDatabase (src/lib/db/prisma.ts:45:13)
+      at Object.<anonymous> (src/__tests__/lib/db/prisma.test.ts:66:7)
+
+  console.log
+    prisma:error 
+    Invalid `prisma.$queryRaw()` invocation:
+    
+    
+    Raw query failed. Code: `42703`. Message: `字段 "invalid_sql" 不存在`
+
+      at Object.mc (node_modules/@prisma/client/runtime/library.js:21:432)
+
+PASS src/__tests__/lib/db/prisma.test.ts
+  Prisma客户端
+    数据库连接
+      √ 应该创建Prisma客户端实例 (2 ms)
+      √ 应该成功检查数据库连接 (50 ms)
+      √ 应该获取连接信息 (12 ms)
+      √ 应该处理获取连接信息失败的情况 (8 ms)
+    数据库断开连接
+      √ 应该成功断开数据库连接 (2 ms)
+      √ 应该处理断开连接时的错误 (6 ms)
+    开发环境变量
+      √ 应该使用开发环境日志级别
+    单例模式
+      √ 应该返回同一个Prisma实例 (1 ms)
+    数据库查询
+      √ 应该能够执行原始查询 (3 ms)
+      √ 应该处理查询错误 (190 ms)
+
+  console.warn
+    [DocAnalyzer Alert] [WARNING] 质量评分过低: 60.0% {
+      metric: {
+        timestamp: 1768795810426,
+        qualityScore: 0.6,
+        processingTime: 60,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: true, issues: [] }
+      },
+      threshold: 0.7
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:273:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:236:15)
+
+  console.warn
+    [DocAnalyzer Alert] [WARNING] 质量评分过低: 60.0% {
+      metric: {
+        timestamp: 1768799410436,
+        qualityScore: 0.6,
+        processingTime: 60,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: true, issues: [] }
+      },
+      threshold: 0.7
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:273:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:291:15)
+
+  console.warn
+    [DocAnalyzer Alert] [ERROR] 验证失败: Missing party {
+      metric: {
+        timestamp: 1768803009440,
+        qualityScore: 0.8,
+        processingTime: 50,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: false, issues: [Array] }
+      }
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:296:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:314:15)
+
+  console.warn
+    [DocAnalyzer Alert] [ERROR] 验证失败: Missing party, Invalid claim {
+      metric: {
+        timestamp: 1768803008440,
+        qualityScore: 0.7,
+        processingTime: 60,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: false, issues: [Array] }
+      }
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:296:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:329:15)
+
+  console.warn
+    [DocAnalyzer Alert] [ERROR] 验证失败: Issue {
+      metric: {
+        timestamp: 1768803010446,
+        qualityScore: 0.7,
+        processingTime: 60,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: false, issues: [Array] }
+      }
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:296:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:370:15)
+
+  console.warn
+    [DocAnalyzer Alert] [WARNING] 质量评分过低: 40.0% {
+      metric: {
+        timestamp: 1768803010452,
+        qualityScore: 0.4,
+        processingTime: 150,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: true, issues: [] }
+      },
+      threshold: 0.5
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:273:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:450:15)
+
+  console.warn
+    [DocAnalyzer Alert] [WARNING] 处理时间过长: 150ms {
+      metric: {
+        timestamp: 1768803010452,
+        qualityScore: 0.4,
+        processingTime: 150,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: true, issues: [] }
+      },
+      threshold: 100
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:285:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:450:15)
+
+  console.warn
+    [DocAnalyzer Alert] [WARNING] 质量评分过低: 40.0% {
+      metric: {
+        timestamp: 1768803010460,
+        qualityScore: 0.4,
+        processingTime: 50,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: true, issues: [] }
+      },
+      threshold: 0.5
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:273:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:483:15)
+
+  console.warn
+    [DocAnalyzer Alert] [ERROR] 验证失败: Test issue {
+      metric: {
+        timestamp: 1768803009465,
+        qualityScore: 0.8200000000000001,
+        processingTime: 48,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: false, issues: [Array] }
+      }
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:296:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:552:17)
+
+  console.warn
+    [DocAnalyzer Alert] [ERROR] 验证失败: Test issue {
+      metric: {
+        timestamp: 1768803007465,
+        qualityScore: 0.8600000000000001,
+        processingTime: 44,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: false, issues: [Array] }
+      }
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:296:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:552:17)
+
+  console.warn
+    [DocAnalyzer Alert] [ERROR] 验证失败: Issue A {
+      metric: {
+        timestamp: 1768803010473,
+        qualityScore: 0.7,
+        processingTime: 60,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: false, issues: [Array] }
+      }
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:296:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:583:17)
+
+  console.warn
+    [DocAnalyzer Alert] [ERROR] 验证失败: Issue A {
+      metric: {
+        timestamp: 1768803009473,
+        qualityScore: 0.7,
+        processingTime: 60,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: false, issues: [Array] }
+      }
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:296:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:583:17)
+
+  console.warn
+    [DocAnalyzer Alert] [ERROR] 验证失败: Issue A {
+      metric: {
+        timestamp: 1768803008473,
+        qualityScore: 0.7,
+        processingTime: 60,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: false, issues: [Array] }
+      }
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:296:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:583:17)
+
+  console.warn
+    [DocAnalyzer Alert] [ERROR] 验证失败: Issue B, Issue C {
+      metric: {
+        timestamp: 1768803007473,
+        qualityScore: 0.8,
+        processingTime: 50,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: false, issues: [Array] }
+      }
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:296:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:599:15)
+
+  console.warn
+    [DocAnalyzer Alert] [WARNING] 质量评分过低: 40.0% {
+      metric: {
+        timestamp: 1768803008484,
+        qualityScore: 0.4,
+        processingTime: 150,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: true, issues: [] }
+      },
+      threshold: 0.5
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:273:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:627:15)
+
+  console.warn
+    [DocAnalyzer Alert] [WARNING] 处理时间过长: 150ms {
+      metric: {
+        timestamp: 1768803008484,
+        qualityScore: 0.4,
+        processingTime: 150,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: true, issues: [] }
+      },
+      threshold: 100
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:285:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:627:15)
+
+  console.warn
+    [DocAnalyzer Alert] [WARNING] 质量评分过低: 30.0% {
+      metric: {
+        timestamp: 1768803009484,
+        qualityScore: 0.3,
+        processingTime: 180,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: false, issues: [Array] }
+      },
+      threshold: 0.5
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:273:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:642:15)
+
+  console.warn
+    [DocAnalyzer Alert] [WARNING] 处理时间过长: 180ms {
+      metric: {
+        timestamp: 1768803009484,
+        qualityScore: 0.3,
+        processingTime: 180,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: false, issues: [Array] }
+      },
+      threshold: 100
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:285:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:642:15)
+
+  console.warn
+    [DocAnalyzer Alert] [ERROR] 验证失败: Critical issue {
+      metric: {
+        timestamp: 1768803009484,
+        qualityScore: 0.3,
+        processingTime: 180,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: false, issues: [Array] }
+      }
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:296:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:642:15)
+
+  console.warn
+    [DocAnalyzer Alert] [WARNING] 质量评分过低: 40.0% {
+      metric: {
+        timestamp: 1768803010499,
+        qualityScore: 0.4,
+        processingTime: 50,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: true, issues: [] }
+      },
+      threshold: 0.5
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:273:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:685:15)
+
+  console.warn
+    [DocAnalyzer Alert] [ERROR] 验证失败: Test issue {
+      metric: {
+        timestamp: 1768803009503,
+        qualityScore: 0.8,
+        processingTime: 60,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: false, issues: [Array] }
+      }
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:296:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:715:17)
+
+  console.warn
+    [DocAnalyzer Alert] [ERROR] 验证失败: Test issue {
+      metric: {
+        timestamp: 1768803007503,
+        qualityScore: 0.8,
+        processingTime: 80,
+        reviewerCounts: { partiesExtracted: 1, claimsExtracted: 1, amountsExtracted: 1 },
+        validationResults: { isValid: false, issues: [Array] }
+      }
+    }
+
+    [0m [90m 369 |[39m       [36mreturn[39m[33m;[39m
+     [90m 370 |[39m     }
+    [31m[1m>[22m[39m[90m 371 |[39m     originalWarn([33m...[39margs)[33m;[39m
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 372 |[39m   }[33m;[39m
+     [90m 373 |[39m })[33m;[39m
+     [90m 374 |[39m[0m
+
+      at console.warn (src/test-utils/setup.ts:371:5)
+      at DocAnalyzerMonitor.sendAlert (src/lib/monitoring/docanalyzer-monitor.ts:338:17)
+      at DocAnalyzerMonitor.createAlert (src/lib/monitoring/docanalyzer-monitor.ts:325:12)
+      at DocAnalyzerMonitor.checkAlerts (src/lib/monitoring/docanalyzer-monitor.ts:296:12)
+      at DocAnalyzerMonitor.recordMetric (src/lib/monitoring/docanalyzer-monitor.ts:74:12)
+      at Object.<anonymous> (src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts:715:17)
+
+PASS src/__tests__/lib/monitoring/docanalyzer-monitor.test.ts
+  DocAnalyzerMonitor
+    recordMetric
+      √ 应该成功记录质量指标 (1 ms)
+      √ 应该限制存储的指标数量 (1 ms)
+      √ 应该触发质量评分过低告警 (1 ms)
+      √ 应该触发处理时间过长告警 (1 ms)
+      √ 应该触发验证失败告警 (1 ms)
+    getQualityTrend
+      √ 应该返回默认周期的趋势分析 (1 ms)
+      √ 应该支持不同周期 (1 ms)
+      √ 应该计算质量趋势为提升 (9 ms)
+      √ 应该计算质量趋势为下降 (5 ms)
+      √ 应该分析问题分布 (5 ms)
+      √ 应该计算成功率 (5 ms)
+    getRecentMetrics
+      √ 应该返回最近N条指标
+      √ 应该返回所有指标如果N大于总数 (1 ms)
+    getAlerts
+      √ 应该返回所有告警 (6 ms)
+      √ 应该返回告警的副本
+    clearAlerts
+      √ 应该清除所有告警 (3 ms)
+    updateConfig
+      √ 应该更新告警配置
+      √ 应该保留未更新的配置 (1 ms)
+    getConfig
+      √ 应该返回配置的副本
+    generateReport
+      √ 应该生成监控报告 (9 ms)
+      √ 应该包含问题分布 (10 ms)
+      √ 应该包含最近告警 (15 ms)
+    reset
+      √ 应该重置监控数据 (3 ms)
+    getStats
+      √ 应该返回监控统计信息 (8 ms)
+      √ 应该处理空数据情况
+    Singleton Pattern
+      √ 应该返回相同的实例 (1 ms)
+      √ 重置后应该返回新实例
+    Convenience Functions
+      √ recordDocAnalyzerMetric应该记录指标
+      √ getDocAnalyzerTrend应该返回趋势 (1 ms)
+      √ generateDocAnalyzerReport应该生成报告 (1 ms)
+
+PASS src/__tests__/lib/monitoring/api-monitor.test.ts
+  APIMonitor
+    logRequest
+      √ 应该成功记录API请求指标 (1 ms)
+      √ 应该处理错误情况
+      √ 应该捕获数据库错误 (1 ms)
+    logDatabaseOperation
+      √ 应该成功记录数据库操作指标 (1 ms)
+      √ 应该记录失败的数据库操作 (1 ms)
+    logAIOperation
+      √ 应该成功记录AI操作指标 (1 ms)
+      √ 应该记录失败的AI操作
+    logBusinessEvent
+      √ 应该成功记录业务事件 (1 ms)
+      √ 应该记录没有用户的业务事件 (1 ms)
+    getAPIStats
+      √ 应该返回API性能统计 (1 ms)
+      √ 应该支持时间范围过滤 (1 ms)
+    getAIStats
+      √ 应该返回AI服务统计 (1 ms)
+    getBusinessStats
+      √ 应该返回业务事件统计 (1 ms)
+    cleanupOldData
+      √ 应该清理旧的监控数据 (1 ms)
+    createPerformanceTracker
+      √ 应该创建性能追踪器 (1 ms)
+      √ 应该计算响应时间 (23 ms)
+    monitorDatabaseQuery装饰器
+      √ 应该监控成功的数据库查询 (1 ms)
+      √ 应该监控失败的数据库查询 (18 ms)
+    monitorAICall装饰器
+      √ 应该监控成功的AI调用 (1 ms)
+      √ 应该监控失败的AI调用 (2 ms)
+
+PASS src/__tests__/lib/export/excel-generator.test.ts
+  ExcelGenerator
+    构造函数
+      √ 应该正确初始化Excel生成器 (1 ms)
+      √ 应该设置正确的属性 (1 ms)
+      √ 应该使用默认标题 (1 ms)
+    escapeField方法
+      √ 应该正确转义包含逗号的字段
+      √ 应该正确转义包含双引号的字段
+      √ 应该正确转义包含换行符的字段
+      √ 应该正确处理null和undefined值 (1 ms)
+      √ 应该正确处理数字值
+      √ 应该正确处理对象值（转为字符串） (1 ms)
+      √ 应该正确处理数组值（转为字符串）
+    generate方法
+      √ 应该生成CSV格式内容
+      √ 应该包含所有表头 (1 ms)
+      √ 应该包含所有数据行 (1 ms)
+      √ 应该使用换行符分隔行
+      √ 应该包含标题行 (1 ms)
+    toBlob方法
+      √ 应该返回Blob对象
+      √ 应该设置正确的MIME类型
+      √ 应该设置正确的字符编码 (4 ms)
+      √ 应该包含UTF-8 BOM
+    toDownloadUrl方法
+      √ 应该返回下载URL (1 ms)
+      √ 应该生成唯一的URL
+    静态方法fromArray
+      √ 应该从对象数组创建Excel生成器
+      √ 应该从第一个对象提取表头 (1 ms)
+      √ 应该使用自定义表头 (1 ms)
+      √ 应该使用默认标题
+      √ 应该支持自定义标题 (1 ms)
+  generateExportFilename
+    √ 应该生成包含数据类型的文件名 (1 ms)
+    √ 应该生成包含时间戳的文件名 (1 ms)
+    √ 应该使用正确的文件扩展名 (1 ms)
+    √ 应该使用下划线分隔各部分 (1 ms)
+    √ 应该使用下划线分隔日期时间 (1 ms)
+    √ 应该正确处理长数据类型名 (1 ms)
+    √ 应该生成唯一的文件名 (1 ms)
+    √ 应该生成可读的文件名 (1 ms)
+
+PASS src/__tests__/lib/agent/legal-agent/reasoning-rules.test.ts
+  reasoning-rules
+    LOGICAL_CONNECTORS
+      √ 应该包含16个逻辑连接词 (1 ms)
+      √ 每个连接词应该有type、word、strength和contexts属性 (10 ms)
+      √ 连接词应该按强度分组（相同强度可任意顺序）
+    CAUSAL_KEYWORDS
+      √ 应该包含5种因果类型
+      √ 每种因果类型应该包含关键词数组 (1 ms)
+    REASONING_PATTERNS
+      √ 应该包含3种推理类型 (1 ms)
+      √ 每种推理模式应该有type、steps和description属性 (2 ms)
+    CAUSAL_PATTERNS
+      √ 应该包含5种因果模式
+      √ 每种因果模式应该有type、cause、effect和strength属性 (3 ms)
+    selectLogicalConnector
+      √ 应该返回指定上下文中强度最高的连接词 (1 ms)
+      √ 当minStrength参数生效时，应该只返回强度达到阈值的连接词 (1 ms)
+      √ 当没有符合条件的连接词时，应该返回undefined
+      √ premise上下文应该返回因由连接词 (1 ms)
+    getAvailableConnectors
+      √ 应该返回指定上下文中的所有连接词 (1 ms)
+      √ conclusion上下文应该返回因由和总结连接词 (1 ms)
+      √ argument上下文应该返回所有类型连接词 (1 ms)
+    getRandomConnector
+      √ 应该返回指定上下文中的一个随机连接词
+      √ 多次调用应该返回可能不同的连接词 (1 ms)
+    identifyCausalType
+      √ 应该能识别直接因果关系
+      √ 应该能识别间接因果关系（仅包含间接因果关键词）
+      √ 应该能识别条件因果关系 (1 ms)
+      √ 当文本中没有因果关系时，应该返回undefined
+    calculateReasoningDepth
+      √ 应该正确计算推理深度评分
+      √ 应该对演绎推理给予奖励 (1 ms)
+      √ 应该对类比推理的多步骤给予奖励（达到阈值） (1 ms)
+      √ 评分应该限制在0-1之间
+    getReasoningPattern
+      √ 应该返回指定的推理模式
+      √ 应该返回归纳推理模式 (1 ms)
+      √ 应该返回类比推理模式 (1 ms)
+    generateReasoningChain
+      √ 应该生成3个步骤的推理链 (1 ms)
+      √ 推理链应该包含有效的内容和连接词
+    evaluateArgumentLogic
+      √ 应该评估论点逻辑性并返回评分
+      √ 包含强逻辑连接词的论点应该得分更高 (1 ms)
+      √ 包含因果关系的论点应该得分更高 (1 ms)
+      √ 应该对推理深度给予奖励
+    辅助函数
+      √ getConnectorCount应该返回16 (1 ms)
+      √ getReasoningTypeCount应该返回3 (1 ms)
+      √ getCausalTypeCount应该返回5
+
+PASS src/__tests__/lib/export/csv-generator.test.ts
+  CsvGenerator
+    构造函数
+      √ 应该正确初始化CSV生成器 (1 ms)
+      √ 应该使用默认逗号作为分隔符 (1 ms)
+      √ 应该支持自定义分隔符 (1 ms)
+    escapeField方法
+      √ 应该正确转义包含逗号的字段
+      √ 应该正确转义包含双引号的字段 (1 ms)
+      √ 应该正确转义包含换行符的字段 (1 ms)
+      √ 应该正确处理null和undefined值
+      √ 应该正确处理数字值 (1 ms)
+    generate方法
+      √ 应该生成包含BOM的CSV内容 (1 ms)
+      √ 应该包含所有表头 (1 ms)
+      √ 应该包含所有数据行 (2 ms)
+      √ 应该使用换行符分隔行
+    toBlob方法
+      √ 应该返回Blob对象 (1 ms)
+      √ 应该设置正确的MIME类型 (1 ms)
+      √ 应该设置正确的字符编码 (1 ms)
+    toDownloadUrl方法
+      √ 应该返回下载URL (1 ms)
+    静态方法fromArray
+      √ 应该从对象数组创建CSV生成器
+      √ 应该从第一个对象提取表头 (1 ms)
+      √ 应该使用自定义表头 (1 ms)
+  flattenObject
+    √ 应该正确展平嵌套对象 (3 ms)
+    √ 应该正确处理数组 (1 ms)
+    √ 应该正确处理null和undefined值 (1 ms)
+    √ 应该支持前缀
+  formatDate
+    √ 应该正确格式化Date对象 (1 ms)
+    √ 应该正确格式化ISO字符串 (1 ms)
+    √ 应该处理无效日期
+  formatNumber
+    √ 应该正确格式化数字为字符串 (2 ms)
+    √ 应该使用默认小数位数2 (1 ms)
+    √ 应该支持自定义小数位数 (1 ms)
+    √ 应该正确处理整数
+    √ 应该正确处理小数 (1 ms)
+
+PASS src/__tests__/lib/auth/validation.test.ts
+  验证工具函数
+    validateEmail
+      √ 应该接受有效的邮箱 (2 ms)
+      √ 应该拒绝无效的邮箱 (1 ms)
+    validateUsername
+      √ 应该接受有效的用户名 (1 ms)
+      √ 应该拒绝太短的用户名 (1 ms)
+      √ 应该拒绝太长的用户名
+      √ 应该拒绝包含特殊字符的用户名
+    validateRegisterRequest
+      √ 应该接受有效的注册请求
+      √ 应该拒绝无效的邮箱 (1 ms)
+      √ 应该拒绝无效的密码 (1 ms)
+      √ 应该拒绝无效的用户名
+      √ 应该接受不带用户名的注册请求
+      √ 应该返回所有验证错误 (1 ms)
+    validateLoginRequest
+      √ 应该接受有效的登录请求
+      √ 应该拒绝无效的邮箱
+      √ 应该拒绝空密码 (1 ms)
+      √ 应该拒绝只有空格的密码
+      √ 应该返回所有验证错误 (1 ms)
+    sanitizeInput
+      √ 应该移除 HTML 标签 (3 ms)
+      √ 应该移除前后空格
+      √ 应该处理空字符串 (1 ms)
+      √ 应该处理只有空格的字符串
+      √ 应该处理只有标签的输入
+
+PASS src/__tests__/lib/docker/validate-config.test.ts
+  validateDockerComposeConfig
+    √ 应该验证有效的配置 (1 ms)
+    √ 应该拒绝无效的配置类型
+    √ 应该拒绝缺少版本的配置
+    √ 应该拒绝缺少服务的配置 (1 ms)
+    √ 应该拒绝空服务列表 (1 ms)
+    √ 应该警告缺少必需的服务
+    √ 应该验证服务配置 (1 ms)
+    √ 应该验证环境变量 (1 ms)
+    √ 应该验证端口配置 (1 ms)
+    √ 应该验证健康检查配置 (2 ms)
+  validatePortFormat
+    √ 应该接受单个端口 (1 ms)
+    √ 应该接受端口映射 (1 ms)
+    √ 应该接受带协议的端口映射 (1 ms)
+    √ 应该拒绝无效的端口格式 (1 ms)
+  validateEnvVariableFormat
+    √ 应该接受有效的环境变量键 (1 ms)
+    √ 应该拒绝空键
+    √ 应该拒绝包含空格的键
+    √ 应该拒绝非字符串键 (2 ms)
+  generateConfigSummary
+    √ 应该生成配置摘要 (2 ms)
+    √ 应该处理没有网络和数据卷的配置 (1 ms)
+
+PASS src/__tests__/lib/agent/legal-agent/logic-integration.test.ts
+  logic-integration
+    逻辑连接词与推理链集成
+      √ 推理链应该使用正确的连接词类型 (1 ms)
+      √ 推理链应该增强论点的逻辑性评分 (1 ms)
+      √ 选择连接词应该根据上下文动态调整 (1 ms)
+    因果关系识别集成
+      √ 应该识别复杂的因果关系链 (1 ms)
+      √ 因果关系应该影响逻辑性评分
+    推理深度计算集成
+      √ 推理模式应该与深度评分一致 (1 ms)
+      √ 推理模式描述应该匹配推理类型 (2 ms)
+    综合逻辑性评估
+      √ 强逻辑性论点应该包含多种逻辑元素
+      √ 弱逻辑性论点应该评分较低
+      √ 逻辑性评分应该考虑推理深度 (1 ms)
+    逻辑规则库完整性
+      √ 所有推理类型都应该有对应的模式 (1 ms)
+      √ 所有因果类型都应该有关键词 (1 ms)
+      √ 逻辑连接词应该覆盖所有上下文 (1 ms)
+      √ 每个逻辑连接词应该有强度评分 (6 ms)
+    边界情况处理
+      √ 空文本应该返回undefined因果关系
+      √ 零步骤推理深度应该返回0
+      √ 极大步骤推理深度应该限制为1 (1 ms)
+      √ 不存在的上下文应该返回空连接词列表
+
+PASS src/__tests__/lib/auth/jwt.test.ts
+  JWT 工具函数
+    generateToken
+      √ 应该生成有效的 JWT token (4 ms)
+      √ 应该支持自定义过期时间 (3 ms)
+    verifyToken
+      √ 应该验证有效的 token (4 ms)
+      √ 应该拒绝无效的 token (1 ms)
+      √ 应该拒绝格式错误的 token
+    decodeToken
+      √ 应该解码有效的 token（不验证签名） (1 ms)
+      √ 应该解码无效的 token（不验证签名）
+      √ 应该解码被篡改的 token（不验证签名） (1 ms)
+    extractTokenFromHeader
+      √ 应该从 Authorization header 中提取 Bearer token
+      √ 应该处理没有 Bearer 前缀的 header (1 ms)
+      √ 应该处理 null header (1 ms)
+      √ 应该处理空字符串 header
+      √ 应该处理格式错误的 header（只有 Bearer） (1 ms)
+      √ 应该处理有多个空格的 header
+
+Test Suites: 2 failed, 17 passed, 19 total
+Tests:       10 failed, 466 passed, 476 total
+Snapshots:   0 total
+Time:        47.304 s
+Ran all test suites matching src/__tests__/lib/.
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.

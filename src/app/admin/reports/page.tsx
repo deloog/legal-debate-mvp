@@ -166,10 +166,10 @@ export default function ReportsPage(): React.ReactElement {
   };
 
   return (
-    <div className='container mx-auto px-4 py-8'>
+    <div>
       <div className='mb-6 flex items-center justify-between'>
         <div>
-          <h1 className='text-3xl font-bold text-gray-900'>报告管理</h1>
+          <h2 className='text-2xl font-bold text-gray-900'>报告管理</h2>
           <p className='text-gray-600 mt-2'>管理系统生成的各类报告</p>
         </div>
         <button

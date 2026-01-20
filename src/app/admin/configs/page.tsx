@@ -2,11 +2,8 @@
 
 import React, { useState, useCallback } from 'react';
 import { SystemConfigViewer } from '@/components/admin/SystemConfigViewer';
-import {
-  SystemConfig,
-  CreateConfigRequest,
-  UpdateConfigRequest,
-} from '@/types/config';
+import { SystemConfig } from '@prisma/client';
+import { CreateConfigRequest, UpdateConfigRequest } from '@/types/config';
 
 /**
  * 系统配置管理页面

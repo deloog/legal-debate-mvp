@@ -109,9 +109,20 @@ function setupMocks({
   );
 
   // Mock权限检查
-  (validatePermissions as jest.Mock).mockResolvedValue(
-    hasPermission ? null : Response.json({ error: '权限不足' }, { status: 403 })
-  );
+  if (hasPermission) {
+    (validatePermissions as jest.Mock).mockResolvedValue(null);
+  } else {
+    (validatePermissions as jest.Mock).mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          success: false,
+          message: '无权限访问此资源',
+          error: 'FORBIDDEN',
+        }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      )
+    );
+  }
 
   // Mock数据库查询
   (prisma.user.count as jest.Mock).mockResolvedValue(totalCount);
@@ -149,8 +160,9 @@ describe('用户列表API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe('未认证');
-      expect(data.message).toBe('请先登录');
+      // API返回格式: { success: false, message: string, error: string }
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('UNAUTHORIZED');
     });
 
     test('无权限时应返回403错误', async () => {
@@ -160,7 +172,9 @@ describe('用户列表API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(403);
-      expect(data.error).toBe('权限不足');
+      // API返回格式: { success: false, message: string, error: string }
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('FORBIDDEN');
     });
   });
 
@@ -438,7 +452,9 @@ describe('用户列表API', () => {
       const data = await response.json();
 
       expect(response.status).toBe(500);
-      expect(data.error).toBe('服务器错误');
+      // API返回格式: { success: false, message: string, error: string }
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('INTERNAL_SERVER_ERROR');
       expect(data.message).toBe('获取用户列表失败');
     });
 

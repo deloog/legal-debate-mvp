@@ -1,0 +1,343 @@
+鈼?Validation Warning:
+
+  Unknown option "coverageProvider" with value "v8" was found.
+  This is probably a typing mistake. Fixing it will remove this message.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+FAIL api src/__tests__/api/cases.test.ts
+  Cases API
+    GET /api/v1/cases
+      脳 should return paginated cases list (6 ms)
+      脳 should handle search parameter (1 ms)
+      脳 should handle sort parameter (2 ms)
+      脳 should validate pagination parameters (1 ms)
+      脳 should validate pagination boundaries (1 ms)
+      脳 should use default pagination values (1 ms)
+    POST /api/v1/cases
+      脳 should create a new case (2 ms)
+      脳 should validate required fields (1 ms)
+      脳 should validate title length (1 ms)
+      脳 should validate case type
+      脳 should validate description length (3 ms)
+      脳 should accept valid case types (2 ms)
+      脳 should set default status (1 ms)
+      脳 should handle JSON parsing errors (1 ms)
+    OPTIONS /api/v1/cases
+      脳 should return CORS headers (2 ms)
+    Response structure
+      脳 should return consistent response format (1 ms)
+      脳 should include pagination metadata
+
+  鈼?Cases API 鈥?GET /api/v1/cases 鈥?should return paginated cases list
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 401
+
+      105 |    */
+      106 |   assertSuccess: (response: TestResponse) => {
+    > 107 |     expect(response.status).toBe(200);
+          |                             ^
+      108 |     expect(response.success).toBe(true);
+      109 |     expect(response.error).toBeUndefined();
+      110 |   },
+
+      at Object.assertSuccess (src/__tests__/api/test-utils.ts:107:29)
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:18:18)
+
+  鈼?Cases API 鈥?GET /api/v1/cases 鈥?should handle search parameter
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 401
+
+      105 |    */
+      106 |   assertSuccess: (response: TestResponse) => {
+    > 107 |     expect(response.status).toBe(200);
+          |                             ^
+      108 |     expect(response.success).toBe(true);
+      109 |     expect(response.error).toBeUndefined();
+      110 |   },
+
+      at Object.assertSuccess (src/__tests__/api/test-utils.ts:107:29)
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:31:18)
+
+  鈼?Cases API 鈥?GET /api/v1/cases 鈥?should handle sort parameter
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 401
+
+      105 |    */
+      106 |   assertSuccess: (response: TestResponse) => {
+    > 107 |     expect(response.status).toBe(200);
+          |                             ^
+      108 |     expect(response.success).toBe(true);
+      109 |     expect(response.error).toBeUndefined();
+      110 |   },
+
+      at Object.assertSuccess (src/__tests__/api/test-utils.ts:107:29)
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:42:18)
+
+  鈼?Cases API 鈥?GET /api/v1/cases 鈥?should validate pagination parameters
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 401
+
+      133 |     expect(response.error).toBeDefined();
+      134 |     if (expectedStatus) {
+    > 135 |       expect(response.status).toBe(expectedStatus);
+          |                               ^
+      136 |     }
+      137 |   },
+      138 |
+
+      at Object.assertError (src/__tests__/api/test-utils.ts:135:31)
+      at Object.assertValidationError (src/__tests__/api/test-utils.ts:143:16)
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:53:18)
+
+  鈼?Cases API 鈥?GET /api/v1/cases 鈥?should validate pagination boundaries
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 401
+
+      105 |    */
+      106 |   assertSuccess: (response: TestResponse) => {
+    > 107 |     expect(response.status).toBe(200);
+          |                             ^
+      108 |     expect(response.success).toBe(true);
+      109 |     expect(response.error).toBeUndefined();
+      110 |   },
+
+      at Object.assertSuccess (src/__tests__/api/test-utils.ts:107:29)
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:63:18)
+
+  鈼?Cases API 鈥?GET /api/v1/cases 鈥?should use default pagination values
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 401
+
+      105 |    */
+      106 |   assertSuccess: (response: TestResponse) => {
+    > 107 |     expect(response.status).toBe(200);
+          |                             ^
+      108 |     expect(response.success).toBe(true);
+      109 |     expect(response.error).toBeUndefined();
+      110 |   },
+
+      at Object.assertSuccess (src/__tests__/api/test-utils.ts:107:29)
+      at Object.assertPaginated (src/__tests__/api/test-utils.ts:175:16)
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:79:18)
+
+  鈼?Cases API 鈥?POST /api/v1/cases 鈥?should create a new case
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 401
+
+      114 |    */
+      115 |   assertCreated: (response: TestResponse) => {
+    > 116 |     expect(response.status).toBe(201);
+          |                             ^
+      117 |     expect(response.success).toBe(true);
+      118 |     expect(response.error).toBeUndefined();
+      119 |   },
+
+      at Object.assertCreated (src/__tests__/api/test-utils.ts:116:29)
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:100:18)
+
+  鈼?Cases API 鈥?POST /api/v1/cases 鈥?should validate required fields
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 401
+
+      133 |     expect(response.error).toBeDefined();
+      134 |     if (expectedStatus) {
+    > 135 |       expect(response.status).toBe(expectedStatus);
+          |                               ^
+      136 |     }
+      137 |   },
+      138 |
+
+      at Object.assertError (src/__tests__/api/test-utils.ts:135:31)
+      at Object.assertValidationError (src/__tests__/api/test-utils.ts:143:16)
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:119:18)
+
+  鈼?Cases API 鈥?POST /api/v1/cases 鈥?should validate title length
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 401
+
+      133 |     expect(response.error).toBeDefined();
+      134 |     if (expectedStatus) {
+    > 135 |       expect(response.status).toBe(expectedStatus);
+          |                               ^
+      136 |     }
+      137 |   },
+      138 |
+
+      at Object.assertError (src/__tests__/api/test-utils.ts:135:31)
+      at Object.assertValidationError (src/__tests__/api/test-utils.ts:143:16)
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:136:18)
+
+  鈼?Cases API 鈥?POST /api/v1/cases 鈥?should validate case type
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 401
+
+      133 |     expect(response.error).toBeDefined();
+      134 |     if (expectedStatus) {
+    > 135 |       expect(response.status).toBe(expectedStatus);
+          |                               ^
+      136 |     }
+      137 |   },
+      138 |
+
+      at Object.assertError (src/__tests__/api/test-utils.ts:135:31)
+      at Object.assertValidationError (src/__tests__/api/test-utils.ts:143:16)
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:152:18)
+
+  鈼?Cases API 鈥?POST /api/v1/cases 鈥?should validate description length
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 401
+
+      133 |     expect(response.error).toBeDefined();
+      134 |     if (expectedStatus) {
+    > 135 |       expect(response.status).toBe(expectedStatus);
+          |                               ^
+      136 |     }
+      137 |   },
+      138 |
+
+      at Object.assertError (src/__tests__/api/test-utils.ts:135:31)
+      at Object.assertValidationError (src/__tests__/api/test-utils.ts:143:16)
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:168:18)
+
+  鈼?Cases API 鈥?POST /api/v1/cases 鈥?should accept valid case types
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 401
+
+      114 |    */
+      115 |   assertCreated: (response: TestResponse) => {
+    > 116 |     expect(response.status).toBe(201);
+          |                             ^
+      117 |     expect(response.success).toBe(true);
+      118 |     expect(response.error).toBeUndefined();
+      119 |   },
+
+      at Object.assertCreated (src/__tests__/api/test-utils.ts:116:29)
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:196:20)
+
+  鈼?Cases API 鈥?POST /api/v1/cases 鈥?should set default status
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 401
+
+      114 |    */
+      115 |   assertCreated: (response: TestResponse) => {
+    > 116 |     expect(response.status).toBe(201);
+          |                             ^
+      117 |     expect(response.success).toBe(true);
+      118 |     expect(response.error).toBeUndefined();
+      119 |   },
+
+      at Object.assertCreated (src/__tests__/api/test-utils.ts:116:29)
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:213:18)
+
+  鈼?Cases API 鈥?POST /api/v1/cases 鈥?should handle JSON parsing errors
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 401
+
+      133 |     expect(response.error).toBeDefined();
+      134 |     if (expectedStatus) {
+    > 135 |       expect(response.status).toBe(expectedStatus);
+          |                               ^
+      136 |     }
+      137 |   },
+      138 |
+
+      at Object.assertError (src/__tests__/api/test-utils.ts:135:31)
+      at Object.assertValidationError (src/__tests__/api/test-utils.ts:143:16)
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:229:18)
+
+  鈼?Cases API 鈥?OPTIONS /api/v1/cases 鈥?should return CORS headers
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "Content-Type, Authorization"
+    Received: "Content-Type"
+
+      244 |         'GET, POST, OPTIONS'
+      245 |       );
+    > 246 |       expect(response.headers.get('Access-Control-Allow-Headers')).toBe(
+          |                                                                    ^
+      247 |         'Content-Type, Authorization'
+      248 |       );
+      249 |     });
+
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:246:68)
+
+  鈼?Cases API 鈥?Response structure 鈥?should return consistent response format
+
+    expect(received).toBeDefined()
+
+    Received: undefined
+
+      258 |       expect(testResponse.success).toBeDefined();
+      259 |       expect(testResponse.data).toBeDefined();
+    > 260 |       expect(testResponse.meta).toBeDefined();
+          |                                 ^
+      261 |       expect(testResponse.meta.timestamp).toBeDefined();
+      262 |       expect(testResponse.meta.version).toBe('v1');
+      263 |     });
+
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:260:33)
+
+  鈼?Cases API 鈥?Response structure 鈥?should include pagination metadata
+
+    TypeError: Cannot read properties of undefined (reading 'pagination')
+
+      270 |       const testResponse = await createTestResponse(response);
+      271 |
+    > 272 |       expect(testResponse.meta.pagination).toBeDefined();
+          |                                ^
+      273 |       expect(testResponse.meta.pagination.page).toBe(1);
+      274 |       expect(testResponse.meta.pagination.limit).toBe(5);
+      275 |       expect(testResponse.meta.pagination.total).toBeGreaterThanOrEqual(0);
+
+      at Object.<anonymous> (src/__tests__/api/cases.test.ts:272:32)
+
+Test Suites: 1 failed, 1 total
+Tests:       17 failed, 17 total
+Snapshots:   0 total
+Time:        0.979 s, estimated 1 s
+Ran all test suites matching src/__tests__/api/cases.test.ts.

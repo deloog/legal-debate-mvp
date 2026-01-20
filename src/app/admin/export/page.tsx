@@ -148,9 +148,9 @@ export default function ExportPage(): React.ReactElement {
   };
 
   return (
-    <div className='container mx-auto px-4 py-8'>
+    <div>
       <div className='mb-6'>
-        <h1 className='text-3xl font-bold text-gray-900'>数据导出</h1>
+        <h2 className='text-2xl font-bold text-gray-900'>数据导出</h2>
         <p className='text-gray-600 mt-2'>导出系统数据用于离线分析</p>
       </div>
 

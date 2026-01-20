@@ -407,7 +407,7 @@ export interface MiscConfig {
 }
 
 /**
- * 完整配置接口
+ * 应用配置（完整配置）
  */
 export interface AppConfig {
   environment: Environment;
@@ -425,8 +425,156 @@ export interface AppConfig {
   monitoring: MonitoringConfig;
   performance: PerformanceConfig;
   backup: BackupConfig;
-  socialLogin?: SocialLoginConfig;
+  socialLogin: SocialLoginConfig;
   storage: StorageConfig;
   smtp: SmtpConfig;
   misc: MiscConfig;
+}
+
+/**
+ * 配置类型（从Prisma导出）
+ */
+export type ConfigType = 'STRING' | 'NUMBER' | 'BOOLEAN' | 'ARRAY' | 'OBJECT';
+
+/**
+ * 配置分类
+ */
+export type ConfigCategory =
+  | 'general'
+  | 'ai'
+  | 'storage'
+  | 'security'
+  | 'feature'
+  | 'ui'
+  | 'notification'
+  | 'other';
+
+/**
+ * 配置查询参数
+ */
+export interface ConfigQueryParams {
+  page?: string;
+  limit?: string;
+  category?: string;
+  type?: string;
+  isPublic?: string;
+  search?: string;
+}
+
+/**
+ * 配置响应数据
+ */
+export interface ConfigResponse {
+  configs: unknown[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+/**
+ * 创建配置请求
+ */
+export interface CreateConfigRequest {
+  key: string;
+  value: unknown;
+  type: ConfigType;
+  category: ConfigCategory;
+  description?: string;
+  isPublic?: boolean;
+  isRequired?: boolean;
+  defaultValue?: unknown;
+  validationRules?: Record<string, unknown> | null;
+}
+
+/**
+ * 更新配置请求
+ */
+export interface UpdateConfigRequest {
+  value: unknown;
+  description?: string;
+  isPublic?: boolean;
+  isRequired?: boolean;
+  defaultValue?: unknown;
+  validationRules?: Record<string, unknown> | null;
+}
+
+/**
+ * 批量更新配置请求
+ */
+export interface BatchUpdateConfigRequest {
+  configs: Array<{
+    key: string;
+    value: unknown;
+  }>;
+}
+
+/**
+ * 验证配置类型
+ */
+export function isValidConfigType(type: string): type is ConfigType {
+  return ['STRING', 'NUMBER', 'BOOLEAN', 'ARRAY', 'OBJECT'].includes(type);
+}
+
+/**
+ * 验证配置分类
+ */
+export function isValidConfigCategory(
+  category: string
+): category is ConfigCategory {
+  return [
+    'general',
+    'ai',
+    'storage',
+    'security',
+    'feature',
+    'ui',
+    'notification',
+    'other',
+  ].includes(category);
+}
+
+/**
+ * 解析配置值
+ */
+export function parseConfigValue(value: string, type: ConfigType): unknown {
+  switch (type) {
+    case 'NUMBER':
+      return Number.parseFloat(value);
+    case 'BOOLEAN':
+      return value.toLowerCase() === 'true';
+    case 'ARRAY':
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value.split(',').map(s => s.trim());
+      }
+    case 'OBJECT':
+      try {
+        return JSON.parse(value);
+      } catch {
+        return null;
+      }
+    default:
+      return value;
+  }
+}
+
+/**
+ * 格式化配置值显示
+ */
+export function formatConfigValue(value: unknown, type: ConfigType): string {
+  switch (type) {
+    case 'BOOLEAN':
+      return value === true ? '是' : '否';
+    case 'ARRAY':
+    case 'OBJECT':
+      return typeof value === 'object'
+        ? JSON.stringify(value, null, 2)
+        : String(value);
+    default:
+      return String(value);
+  }
 }

@@ -205,6 +205,16 @@ export const PUT = withErrorHandler(
       );
     }
 
+    // 检查case是否存在
+    const existingCase = await prisma.case.findUnique({
+      where: { id: validatedId },
+    });
+
+    if (!existingCase) {
+      const { NotFoundError } = await import('@/app/api/lib/errors/api-error');
+      throw new NotFoundError('Case');
+    }
+
     // 自动更新updatedAt时间戳
     updateData.updatedAt = new Date();
 
@@ -253,6 +263,16 @@ export const DELETE = withErrorHandler(
       return createPermissionErrorResponse(
         permissionResult.reason ?? '您无权删除此案件'
       );
+    }
+
+    // 检查case是否存在
+    const existingCase = await prisma.case.findUnique({
+      where: { id: validatedId },
+    });
+
+    if (!existingCase) {
+      const { NotFoundError } = await import('@/app/api/lib/errors/api-error');
+      throw new NotFoundError('Case');
     }
 
     // 调用实际的数据库操作（软删除）

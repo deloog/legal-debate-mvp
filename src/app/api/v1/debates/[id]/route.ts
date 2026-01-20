@@ -41,9 +41,14 @@ function createNotFoundResponse(
  * 获取辩论详情
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, context: { params: { id: string } }) => {
+  async (
+    request: NextRequest,
+    context: { params: Promise<{ id: string }> }
+  ) => {
+    // Next.js 15中params是Promise，需要先await
+    const params = await context.params;
     // 验证路径参数
-    const id = validatePathParam(context.params.id, uuidSchema);
+    const id = validatePathParam(params.id, uuidSchema);
 
     // 获取认证用户
     const authUser = await getAuthUser(request);
@@ -114,9 +119,14 @@ export const GET = withErrorHandler(
  * 更新辩论信息
  */
 export const PUT = withErrorHandler(
-  async (request: NextRequest, context: { params: { id: string } }) => {
+  async (
+    request: NextRequest,
+    context: { params: Promise<{ id: string }> }
+  ) => {
+    // Next.js 15中params是Promise，需要先await
+    const params = await context.params;
     // 验证路径参数
-    const id = validatePathParam(context.params.id, uuidSchema);
+    const id = validatePathParam(params.id, uuidSchema);
 
     // 获取认证用户
     const authUser = await getAuthUser(request);
@@ -187,9 +197,14 @@ export const PUT = withErrorHandler(
  * 删除辩论
  */
 export const DELETE = withErrorHandler(
-  async (request: NextRequest, context: { params: { id: string } }) => {
+  async (
+    request: NextRequest,
+    context: { params: Promise<{ id: string }> }
+  ) => {
+    // Next.js 15中params是Promise，需要先await
+    const params = await context.params;
     // 验证路径参数
-    const id = validatePathParam(context.params.id, uuidSchema);
+    const id = validatePathParam(params.id, uuidSchema);
 
     // 获取认证用户
     const authUser = await getAuthUser(request);

@@ -1,0 +1,614 @@
+FAIL src/__tests__/app/admin/law-articles/[id].page.test.tsx
+  娉曟潯璇︽儏椤甸潰
+    椤甸潰鍔犺浇
+      鈭?搴旇鏄剧ず鍔犺浇鐘舵€?(30 ms)
+      鈭?搴旇鎴愬姛鍔犺浇娉曟潯璇︽儏 (60 ms)
+      鈭?搴旇鏄剧ず閿欒淇℃伅褰撳姞杞藉け璐?(30 ms)
+      鈭?搴旇鏄剧ず娉曟潯涓嶅瓨鍦ㄧ殑淇℃伅 (32 ms)
+    娉曟潯淇℃伅灞曠ず
+      鈭?搴旇鏄剧ず娉曟潯鍚嶇О (46 ms)
+      鈭?搴旇鏄剧ず鏉″彿 (45 ms)
+      鈭?搴旇鏄剧ず娉曟潯鍐呭 (25 ms)
+      脳 搴旇鏄剧ず鏍囩 (1020 ms)
+      脳 搴旇鏄剧ず鍏抽敭璇?(1013 ms)
+      鈭?搴旇鏄剧ず缁熻淇℃伅 (27 ms)
+      鈭?搴旇鏄剧ず鐗堟湰淇℃伅 (31 ms)
+    缂栬緫鍔熻兘
+      鈭?搴旇杩涘叆缂栬緫妯″紡鐐瑰嚮缂栬緫鎸夐挳 (63 ms)
+      鈭?搴旇鏄剧ず缂栬緫琛ㄥ崟鍦ㄧ紪杈戞ā寮?(46 ms)
+      鈭?搴旇鑳藉淇敼娉曟潯鍚嶇О (46 ms)
+      鈭?搴旇淇濆瓨淇敼 (77 ms)
+    鍒犻櫎鍔熻兘
+      鈭?搴旇鏄剧ず鍒犻櫎鎸夐挳 (15 ms)
+      鈭?搴旇鑳藉鍒犻櫎娉曟潯 (47 ms)
+      鈭?搴旇涓嶅垹闄ゅ綋鐢ㄦ埛鍙栨秷纭 (25 ms)
+    瀵艰埅鍔熻兘
+      鈭?搴旇鑳藉杩斿洖鍒楄〃 (22 ms)
+    瀹℃牳鍔熻兘
+      鈭?搴旇鏄剧ず瀹℃牳鎸夐挳褰撴硶鏉＄姸鎬佷负鑽夌 (31 ms)
+      鈭?搴旇涓嶆樉绀哄鏍告寜閽綋娉曟潯鐘舵€佷负宸茬敓鏁?(14 ms)
+      鈭?搴旇鑳藉閫氳繃瀹℃牳 (16 ms)
+      鈭?搴旇鑳藉鎷掔粷瀹℃牳 (45 ms)
+    閿欒澶勭悊
+      鈭?搴旇鏄剧ず閿欒鎻愮ず褰撲繚瀛樺け璐?(52 ms)
+
+  鈼?娉曟潯璇︽儏椤甸潰 鈥?娉曟潯淇℃伅灞曠ず 鈥?搴旇鏄剧ず鏍囩
+
+    ReferenceError: const鍚堝悓Elements is not defined
+
+    Ignored nodes: comments, script, style
+    <html>
+      <head />
+      <body>
+        <div>
+          <div
+            class="space-y-6"
+          >
+            <div
+              class="flex flex-wrap gap-4 items-center justify-between border-b pb-4"
+            >
+              <div
+                class="flex items-center gap-2"
+              >
+                <span
+                  class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800"
+                >
+                  VALID
+                </span>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  鐗堟湰
+                  1.0
+                </span>
+              </div>
+              <div
+                class="flex gap-2"
+              >
+                <button
+                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  缂栬緫
+                </button>
+                <button
+                  class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                >
+                  鍒犻櫎
+                </button>
+              </div>
+            </div>
+            <div
+              class="bg-white border border-gray-200 rounded-lg p-6"
+            >
+              <h2
+                class="text-xl font-bold text-gray-900 mb-4"
+              >
+                鍩烘湰淇℃伅
+              </h2>
+              <div
+                class="grid grid-cols-1 md:grid-cols-2 gap-4"
+              >
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    娉曟潯鍚嶇О
+                  </label>
+                  <p
+                    class="text-gray-900"
+                  >
+                    娴嬭瘯娉曟潯
+                  </p>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    鏉″彿
+                  </label>
+                  <p
+                    class="text-gray-900"
+                  >
+                    绗竴鏉?[0m
+                  </p>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    娉曞緥绫诲瀷
+                  </label>
+                  <p
+                    class="text-gray-900"
+                  >
+                    LAW
+                  </p>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    绫诲埆
+                  </label>
+                  <p
+                    class="text-gray-900"
+                  >
+                    CIVIL
+                  </p>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    鐢熸晥鏃ユ湡
+                  </label>
+                  <p
+                    class="text-gray-900"
+                  >
+                    2020/1/1
+                  </p>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    棰佸竷鏈哄叧
+                  </label>
+                  <p
+                    class="text-gray-900"
+                  >
+                    鍏ㄥ浗浜烘皯浠ｈ〃澶т細
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div
+              class="bg-white border border-gray-200 rounded-lg p-6"
+            >
+              <h2
+                class="text-xl font-bold text-gray-900 mb-4"
+              >
+                娉曟潯鍐呭
+              </h2>
+              <div
+                class="prose max-w-none"
+              >
+                <p
+                  class="text-gray-900 whitespace-pre-wrap"
+                >
+                  杩欐槸娴嬭瘯娉曟潯鐨勫唴瀹?[0m
+                </p>
+              </div>
+            </div>
+            <div
+              class="bg-white border border-gray-200 rounded-lg p-6"
+            >
+              <h2
+                class="text-xl font-bold text-gray-900 mb-4"
+              >
+                鏍囩鍜屽叧閿瘝
+              </h2>
+              <div
+                class="grid grid-cols-1 md:grid-cols-2 gap-4"
+              >
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    鏍囩
+                  </label>
+                  <div
+                    class="flex flex-wrap gap-2"
+                  >
+                    <span
+                      class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm"
+                    >
+                      鍚堝悓
+                    </span>
+                    <span
+                      class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm"
+                    >
+                      姘戜簨
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    鍏抽敭璇?[0m
+                  </label>
+                  <div
+                    class="flex flex-wrap gap-2"
+                  >
+                    <span
+                      class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-sm"
+                    >
+                      鍚堝悓娉?[0m
+                    </span>
+                    <span
+                      class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-sm"
+                    >
+                      姘戜簨
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="bg-white border border-gray-200 rounded-lg p-6"
+            >
+              <h2
+                class="text-xl font-bold text-gray-900 mb-4"
+              >
+                缁熻淇℃伅
+              </h2>
+              <div
+                class="grid grid-cols-2 md:grid-cols-4 gap-4"
+              >
+                <div>
+                  <p
+                    class="text-sm text-gray-600"
+                  >
+                    娴忚娆℃暟
+                  </p>
+                  <p
+                    class="text-2xl font-bold text-gray-900"
+                  >
+                    100
+                  </p>
+                </div>
+                <div>
+                  <p
+                    class="text-sm text-gray-600"
+                  >
+                    寮曠敤娆℃暟
+                  </p>
+                  <p
+                    class="text-2xl font-bold text-gray-900"
+                  >
+                    50
+                  </p>
+                </div>
+                <div>
+                  <p
+                    class="text-sm text-gray-600"
+                  >
+                    鍒涘缓鏃堕棿
+                  </p>
+                  <p
+                    class="text-sm text-gray-900"
+                  >
+                    2020/1/1 08:00:00
+                  </p>
+                </div>
+                <div>
+                  <p
+                    class="text-sm text-gray-600"
+                  >
+                    鏇存柊鏃堕棿
+                  </p>
+                  <p
+                    class="text-sm text-gray-900"
+                  >
+                    2020/1/1 08:00:00
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            >
+              杩斿洖鍒楄〃
+            </button>
+          </div>
+        </div>
+      </body>
+    </html>
+
+      200 |       await waitFor(() => {
+      201 |         // 浣跨敤getAllByText鍥犱负鏂囨湰鍦ㄦ爣绛惧拰鍏抽敭璇嶄腑閮藉嚭鐜颁簡
+    > 202 |         const鍚堝悓Elements = screen.getAllByText('鍚堝悓');
+          |                        ^
+      203 |         expect(鍚堝悓Elements.length).toBeGreaterThan(0);
+      204 |       });
+      205 |     });
+
+      at src/__tests__/app/admin/law-articles/[id].page.test.tsx:202:24
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at checkRealTimersCallback (node_modules/@testing-library/dom/dist/wait-for.js:118:16)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:579:19)
+
+  鈼?娉曟潯璇︽儏椤甸潰 鈥?娉曟潯淇℃伅灞曠ず 鈥?搴旇鏄剧ず鍏抽敭璇?
+    ReferenceError: const鍚堝悓娉旹lements is not defined
+
+    Ignored nodes: comments, script, style
+    <html>
+      <head />
+      <body>
+        <div>
+          <div
+            class="space-y-6"
+          >
+            <div
+              class="flex flex-wrap gap-4 items-center justify-between border-b pb-4"
+            >
+              <div
+                class="flex items-center gap-2"
+              >
+                <span
+                  class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800"
+                >
+                  VALID
+                </span>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  鐗堟湰
+                  1.0
+                </span>
+              </div>
+              <div
+                class="flex gap-2"
+              >
+                <button
+                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  缂栬緫
+                </button>
+                <button
+                  class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                >
+                  鍒犻櫎
+                </button>
+              </div>
+            </div>
+            <div
+              class="bg-white border border-gray-200 rounded-lg p-6"
+            >
+              <h2
+                class="text-xl font-bold text-gray-900 mb-4"
+              >
+                鍩烘湰淇℃伅
+              </h2>
+              <div
+                class="grid grid-cols-1 md:grid-cols-2 gap-4"
+              >
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    娉曟潯鍚嶇О
+                  </label>
+                  <p
+                    class="text-gray-900"
+                  >
+                    娴嬭瘯娉曟潯
+                  </p>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    鏉″彿
+                  </label>
+                  <p
+                    class="text-gray-900"
+                  >
+                    绗竴鏉?[0m
+                  </p>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    娉曞緥绫诲瀷
+                  </label>
+                  <p
+                    class="text-gray-900"
+                  >
+                    LAW
+                  </p>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    绫诲埆
+                  </label>
+                  <p
+                    class="text-gray-900"
+                  >
+                    CIVIL
+                  </p>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    鐢熸晥鏃ユ湡
+                  </label>
+                  <p
+                    class="text-gray-900"
+                  >
+                    2020/1/1
+                  </p>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    棰佸竷鏈哄叧
+                  </label>
+                  <p
+                    class="text-gray-900"
+                  >
+                    鍏ㄥ浗浜烘皯浠ｈ〃澶т細
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div
+              class="bg-white border border-gray-200 rounded-lg p-6"
+            >
+              <h2
+                class="text-xl font-bold text-gray-900 mb-4"
+              >
+                娉曟潯鍐呭
+              </h2>
+              <div
+                class="prose max-w-none"
+              >
+                <p
+                  class="text-gray-900 whitespace-pre-wrap"
+                >
+                  杩欐槸娴嬭瘯娉曟潯鐨勫唴瀹?[0m
+                </p>
+              </div>
+            </div>
+            <div
+              class="bg-white border border-gray-200 rounded-lg p-6"
+            >
+              <h2
+                class="text-xl font-bold text-gray-900 mb-4"
+              >
+                鏍囩鍜屽叧閿瘝
+              </h2>
+              <div
+                class="grid grid-cols-1 md:grid-cols-2 gap-4"
+              >
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    鏍囩
+                  </label>
+                  <div
+                    class="flex flex-wrap gap-2"
+                  >
+                    <span
+                      class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm"
+                    >
+                      鍚堝悓
+                    </span>
+                    <span
+                      class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm"
+                    >
+                      姘戜簨
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    鍏抽敭璇?[0m
+                  </label>
+                  <div
+                    class="flex flex-wrap gap-2"
+                  >
+                    <span
+                      class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-sm"
+                    >
+                      鍚堝悓娉?[0m
+                    </span>
+                    <span
+                      class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-sm"
+                    >
+                      姘戜簨
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="bg-white border border-gray-200 rounded-lg p-6"
+            >
+              <h2
+                class="text-xl font-bold text-gray-900 mb-4"
+              >
+                缁熻淇℃伅
+              </h2>
+              <div
+                class="grid grid-cols-2 md:grid-cols-4 gap-4"
+              >
+                <div>
+                  <p
+                    class="text-sm text-gray-600"
+                  >
+                    娴忚娆℃暟
+                  </p>
+                  <p
+                    class="text-2xl font-bold text-gray-900"
+                  >
+                    100
+                  </p>
+                </div>
+                <div>
+                  <p
+                    class="text-sm text-gray-600"
+                  >
+                    寮曠敤娆℃暟
+                  </p>
+                  <p
+                    class="text-2xl font-bold text-gray-900"
+                  >
+                    50
+                  </p>
+                </div>
+                <div>
+                  <p
+                    class="text-sm text-gray-600"
+                  >
+                    鍒涘缓鏃堕棿
+                  </p>
+                  <p
+                    class="text-sm text-gray-900"
+                  >
+                    2020/1/1 08:00:00
+                  </p>
+                </div>
+                <div>
+                  <p
+                    class="text-sm text-gray-600"
+                  >
+                    鏇存柊鏃堕棿
+                  </p>
+                  <p
+                    class="text-sm text-gray-900"
+                  >
+                    2020/1/1 08:00:00
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            >
+              杩斿洖鍒楄〃
+            </button>
+          </div>
+        </div>
+      </body>
+    </html>
+
+      217 |
+      218 |       await waitFor(() => {
+    > 219 |         const鍚堝悓娉旹lements = screen.getAllByText('鍚堝悓娉?);
+          |                         ^
+      220 |         expect(鍚堝悓娉旹lements.length).toBeGreaterThan(0);
+      221 |         const姘戜簨Elements = screen.getAllByText('姘戜簨');
+      222 |         expect(姘戜簨Elements.length).toBeGreaterThan(0);
+
+      at src/__tests__/app/admin/law-articles/[id].page.test.tsx:219:25
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at checkRealTimersCallback (node_modules/@testing-library/dom/dist/wait-for.js:118:16)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:579:19)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 22 passed, 24 total
+Snapshots:   0 total
+Time:        4.586 s
+Ran all test suites matching src/__tests__/app/admin/law-articles.

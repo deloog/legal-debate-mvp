@@ -116,6 +116,15 @@ export function notFoundResponse(
 }
 
 /**
+ * 构建错误请求响应（400）
+ */
+export function badRequestResponse(
+  message: string = '请求格式错误'
+): NextResponse<ErrorResponse> {
+  return errorResponse(message, 400, 'BAD_REQUEST');
+}
+
+/**
  * 构建服务器错误响应（500）
  */
 export function serverErrorResponse(

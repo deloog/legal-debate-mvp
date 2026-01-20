@@ -3,12 +3,18 @@
  * 支持批量导入法条数据
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { LAW_PERMISSIONS } from '@/types/permission';
 import { LawType, LawCategory, LawStatus } from '@prisma/client';
+import {
+  successResponse,
+  unauthorizedResponse,
+  badRequestResponse,
+  serverErrorResponse,
+} from '@/lib/api-response';
 
 // =============================================================================
 // 类型定义
@@ -187,14 +193,11 @@ async function importArticle(
  * POST /api/admin/law-articles/import
  * 批量导入法条（管理员权限）
  */
-export async function POST(request: NextRequest): Promise<Response> {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
   if (!user) {
-    return Response.json(
-      { error: '未认证', message: '请先登录' },
-      { status: 401 }
-    );
+    return unauthorizedResponse();
   }
 
   // 检查权限
@@ -212,50 +215,26 @@ export async function POST(request: NextRequest): Promise<Response> {
     try {
       body = await request.json();
     } catch {
-      return Response.json(
-        { error: '请求格式错误', message: '请提供有效的JSON数据' },
-        { status: 400 }
-      );
+      return badRequestResponse('请提供有效的JSON数据');
     }
 
     // 验证数据格式
     if (!body || typeof body !== 'object') {
-      return Response.json(
-        { error: '请求格式错误', message: '请提供有效的JSON数据' },
-        { status: 400 }
-      );
+      return badRequestResponse('请提供有效的JSON数据');
     }
 
     const importData = body as LawArticleImportRequest;
 
     if (!Array.isArray(importData.articles)) {
-      return Response.json(
-        {
-          error: '请求格式错误',
-          message: 'articles字段必须是数组',
-        },
-        { status: 400 }
-      );
+      return badRequestResponse('articles字段必须是数组');
     }
 
     if (importData.articles.length === 0) {
-      return Response.json(
-        {
-          error: '请求数据为空',
-          message: '至少提供一条法条数据',
-        },
-        { status: 400 }
-      );
+      return badRequestResponse('至少提供一条法条数据');
     }
 
     if (importData.articles.length > 1000) {
-      return Response.json(
-        {
-          error: '请求数据过大',
-          message: '单次最多导入1000条法条',
-        },
-        { status: 400 }
-      );
+      return badRequestResponse('单次最多导入1000条法条');
     }
 
     // 执行导入
@@ -293,12 +272,9 @@ export async function POST(request: NextRequest): Promise<Response> {
       }
     }
 
-    return Response.json({ data: response }, { status: 200 });
+    return successResponse(response, '导入法条成功');
   } catch (error) {
     console.error('导入法条失败:', error);
-    return Response.json(
-      { error: '服务器错误', message: '导入法条失败' },
-      { status: 500 }
-    );
+    return serverErrorResponse('导入法条失败');
   }
 }

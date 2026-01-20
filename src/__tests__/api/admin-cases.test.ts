@@ -3,7 +3,7 @@
  * 测试案件列表接口的分页、筛选、搜索功能
  */
 
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { GET, DELETE } from '@/app/api/admin/cases/route';
 import { prisma } from '@/lib/db/prisma';
 
@@ -174,7 +174,12 @@ function setupMocks({
 
   // Mock权限检查
   (validatePermissions as jest.Mock).mockResolvedValue(
-    hasPermission ? null : Response.json({ error: '权限不足' }, { status: 403 })
+    hasPermission
+      ? null
+      : (Response.json(
+          { error: 'FORBIDDEN', message: '权限不足' },
+          { status: 403 }
+        ) as unknown as NextResponse)
   );
 
   // Mock数据库查询
@@ -220,8 +225,8 @@ describe('案件列表API - GET', () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe('未认证');
-      expect(data.message).toBe('请先登录');
+      expect(data.error).toBe('UNAUTHORIZED');
+      expect(data.message).toBe('未认证，请先登录');
     });
 
     test('无权限时应返回403错误', async () => {
@@ -231,7 +236,7 @@ describe('案件列表API - GET', () => {
       const data = await response.json();
 
       expect(response.status).toBe(403);
-      expect(data.error).toBe('权限不足');
+      expect(data.error).toBe('FORBIDDEN');
     });
   });
 
@@ -546,7 +551,7 @@ describe('案件列表API - GET', () => {
       const data = await response.json();
 
       expect(response.status).toBe(500);
-      expect(data.error).toBe('服务器错误');
+      expect(data.error).toBe('INTERNAL_SERVER_ERROR');
       expect(data.message).toBe('获取案件列表失败');
     });
 
@@ -644,8 +649,8 @@ describe('案件删除API - DELETE', () => {
       const data = await response.json();
 
       expect(response.status).toBe(401);
-      expect(data.error).toBe('未认证');
-      expect(data.message).toBe('请先登录');
+      expect(data.error).toBe('UNAUTHORIZED');
+      expect(data.message).toBe('未认证，请先登录');
     });
 
     test('无权限时应返回403错误', async () => {
@@ -657,7 +662,7 @@ describe('案件删除API - DELETE', () => {
       const data = await response.json();
 
       expect(response.status).toBe(403);
-      expect(data.error).toBe('权限不足');
+      expect(data.error).toBe('FORBIDDEN');
     });
   });
 
@@ -687,8 +692,8 @@ describe('案件删除API - DELETE', () => {
       const data = await response.json();
 
       expect(response.status).toBe(404);
-      expect(data.error).toBe('案件不存在');
-      expect(data.message).toBe('未找到指定案件');
+      expect(data.error).toBe('NOT_FOUND');
+      expect(data.message).toBe('案件不存在');
       expect(prisma.case.update).not.toHaveBeenCalled();
     });
   });
@@ -707,7 +712,7 @@ describe('案件删除API - DELETE', () => {
       const data = await response.json();
 
       expect(response.status).toBe(500);
-      expect(data.error).toBe('服务器错误');
+      expect(data.error).toBe('INTERNAL_SERVER_ERROR');
       expect(data.message).toBe('删除案件失败');
     });
 

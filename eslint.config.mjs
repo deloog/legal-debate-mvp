@@ -30,10 +30,20 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "*.config.js",
     "*.config.mjs",
+    // Test setup files that use CommonJS
+    "jest.polyfill.js",
+    "jest-setup.*",
   ]),
   // Override rules for test files
   {
-    files: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
+    files: [
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
+      '**/__tests__/**/*.ts',
+      '**/__tests__/**/*.tsx',
+    ],
     rules: {
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-explicit-any': 'off',

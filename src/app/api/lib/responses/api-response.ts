@@ -1,28 +1,8 @@
 import { NextResponse } from 'next/server';
 
-// 导入具体函数以避免循环依赖
-import {
-  createSuccessResponse,
-  createPaginatedResponse,
-  createCreatedResponse,
-  createNoContentResponse,
-  createPartialResponse,
-} from './success';
-
 // 导出所有响应相关功能
 export * from './success';
 export * from './pagination';
-
-/**
- * 重新导出常用响应函数以保持向后兼容
- */
-export {
-  createSuccessResponse,
-  createPaginatedResponse,
-  createCreatedResponse,
-  createNoContentResponse,
-  createPartialResponse,
-} from './success';
 
 export type { PaginationMeta } from './pagination';
 export { buildPaginationOptions, calculatePaginationStats } from './pagination';
@@ -74,16 +54,26 @@ export function createDownloadResponse(
     finalContentType = 'application/octet-stream';
   }
 
-  // 2. 创建正确的Headers对象
-  const headers = new Headers(options.headers);
-  headers.set('Content-Type', finalContentType);
-  headers.set('Content-Disposition', `attachment; filename="${filename}"`);
-
-  // 3. 使用NextResponse构造函数，而非NextResponse.json()
-  return new NextResponse(data, {
+  // 2. 创建NextResponse实例
+  const response = new NextResponse(data, {
     status: options.status || 200,
-    headers,
   });
+
+  // 3. 直接设置headers到response对象
+  response.headers.set('Content-Type', finalContentType);
+  response.headers.set(
+    'Content-Disposition',
+    `attachment; filename="${filename}"`
+  );
+
+  // 4. 设置额外的headers
+  if (options.headers) {
+    Object.entries(options.headers).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+  }
+
+  return response;
 }
 
 /**
@@ -94,16 +84,23 @@ export function createStreamResponse(
   contentType: string = 'application/json',
   options: { status?: number; headers?: Record<string, string> } = {}
 ): NextResponse {
-  // 1. 创建正确的Headers对象
-  const headers = new Headers(options.headers);
-  headers.set('Content-Type', contentType);
-  headers.set('Transfer-Encoding', 'chunked');
-
-  // 2. 使用NextResponse构造函数，而非NextResponse.json()
-  return new NextResponse(stream, {
+  // 1. 创建NextResponse实例
+  const response = new NextResponse(stream, {
     status: options.status || 200,
-    headers,
   });
+
+  // 2. 直接设置headers到response对象
+  response.headers.set('Content-Type', contentType);
+  response.headers.set('Transfer-Encoding', 'chunked');
+
+  // 3. 设置额外的headers
+  if (options.headers) {
+    Object.entries(options.headers).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+  }
+
+  return response;
 }
 
 /**
@@ -112,7 +109,7 @@ export function createStreamResponse(
 export function createCachedResponse<T>(
   data: T,
   maxAge: number = 3600,
-  meta?: any
+  meta?: Record<string, unknown>
 ): NextResponse {
   // 直接创建响应而不使用createSuccessResponse，避免自动添加timestamp
   const response = NextResponse.json({
@@ -131,7 +128,7 @@ export function createCachedResponse<T>(
 export function createConditionalResponse<T>(
   data: T,
   etag?: string | null,
-  meta?: any
+  meta?: Record<string, unknown>
 ): NextResponse {
   // 直接创建响应而不使用createSuccessResponse，避免自动添加timestamp
   const response = NextResponse.json({
@@ -154,8 +151,8 @@ export function createConditionalResponse<T>(
  */
 export function createHealthResponse(
   status: 'healthy' | 'unhealthy' | 'degraded',
-  details?: any,
-  meta?: any
+  details?: Record<string, unknown>,
+  meta?: Record<string, unknown>
 ): NextResponse {
   return NextResponse.json(
     {

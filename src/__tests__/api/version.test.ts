@@ -13,12 +13,12 @@ describe('Version API', () => {
       const testResponse = await createTestResponse(response);
 
       assertions.assertSuccess(testResponse);
-      expect(testResponse.data.data.api).toBeDefined();
-      expect(testResponse.data.data.application).toBeDefined();
-      expect(testResponse.data.data.runtime).toBeDefined();
-      expect(testResponse.data.data.endpoints).toBeDefined();
-      expect(testResponse.data.data.documentation).toBeDefined();
-      expect(testResponse.data.data.support).toBeDefined();
+      expect(testResponse.data.api).toBeDefined();
+      expect(testResponse.data.application).toBeDefined();
+      expect(testResponse.data.runtime).toBeDefined();
+      expect(testResponse.data.endpoints).toBeDefined();
+      expect(testResponse.data.documentation).toBeDefined();
+      expect(testResponse.data.support).toBeDefined();
     });
 
     it('should include correct API version', async () => {
@@ -26,9 +26,9 @@ describe('Version API', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.api.version).toBe('v1');
-      expect(testResponse.data.data.api.name).toBe('Legal Debate API');
-      expect(testResponse.data.data.api.description).toBe(
+      expect(testResponse.data.api.version).toBe('v1');
+      expect(testResponse.data.api.name).toBe('Legal Debate API');
+      expect(testResponse.data.api.description).toBe(
         'RESTful API for Legal Debate System'
       );
     });
@@ -38,10 +38,10 @@ describe('Version API', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.application.name).toBeDefined();
-      expect(testResponse.data.data.application.version).toBeDefined();
-      expect(testResponse.data.data.application.description).toBeDefined();
-      expect(typeof testResponse.data.data.application.version).toBe('string');
+      expect(testResponse.data.application.name).toBeDefined();
+      expect(testResponse.data.application.version).toBeDefined();
+      expect(testResponse.data.application.description).toBeDefined();
+      expect(typeof testResponse.data.application.version).toBe('string');
     });
 
     it('should include runtime information', async () => {
@@ -49,11 +49,11 @@ describe('Version API', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.runtime.nodeVersion).toBeDefined();
-      expect(testResponse.data.data.runtime.platform).toBeDefined();
-      expect(testResponse.data.data.runtime.arch).toBeDefined();
-      expect(testResponse.data.data.runtime.uptime).toBeDefined();
-      expect(testResponse.data.data.runtime.uptime).toBeGreaterThanOrEqual(0);
+      expect(testResponse.data.runtime.nodeVersion).toBeDefined();
+      expect(testResponse.data.runtime.platform).toBeDefined();
+      expect(testResponse.data.runtime.arch).toBeDefined();
+      expect(testResponse.data.runtime.uptime).toBeDefined();
+      expect(testResponse.data.runtime.uptime).toBeGreaterThanOrEqual(0);
     });
 
     it('should include endpoints information', async () => {
@@ -61,9 +61,9 @@ describe('Version API', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.endpoints.v1).toBe('/api/v1');
-      expect(testResponse.data.data.endpoints.health).toBe('/api/health');
-      expect(testResponse.data.data.endpoints.version).toBe('/api/version');
+      expect(testResponse.data.endpoints.v1).toBe('/api/v1');
+      expect(testResponse.data.endpoints.health).toBe('/api/health');
+      expect(testResponse.data.endpoints.version).toBe('/api/version');
     });
 
     it('should include documentation information', async () => {
@@ -71,10 +71,8 @@ describe('Version API', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.documentation.swagger).toBe('/api/docs');
-      expect(testResponse.data.data.documentation.postman).toBe(
-        '/api/docs/postman'
-      );
+      expect(testResponse.data.documentation.swagger).toBe('/api/docs');
+      expect(testResponse.data.documentation.postman).toBe('/api/docs/postman');
     });
 
     it('should include support information', async () => {
@@ -82,13 +80,11 @@ describe('Version API', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.support.contact).toBe(
-        'support@legaldebate.com'
-      );
-      expect(testResponse.data.data.support.documentation).toBe(
+      expect(testResponse.data.support.contact).toBe('support@legaldebate.com');
+      expect(testResponse.data.support.documentation).toBe(
         'https://docs.legaldebate.com'
       );
-      expect(testResponse.data.data.support.issues).toBe(
+      expect(testResponse.data.support.issues).toBe(
         'https://github.com/legaldebate/issues'
       );
     });
