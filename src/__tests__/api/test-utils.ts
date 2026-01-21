@@ -29,7 +29,16 @@ export function createMockRequest(
     }
   }
 
-  return new NextRequest(url, requestInit);
+  const request = new NextRequest(url, requestInit);
+
+  // 手动添加 nextUrl 属性，确保 API 代码可以访问 searchParams
+  Object.defineProperty(request, 'nextUrl', {
+    value: new URL(url),
+    writable: false,
+    enumerable: true,
+  });
+
+  return request;
 }
 
 /**

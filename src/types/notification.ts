@@ -80,6 +80,15 @@ export interface SMSSendOptions {
 }
 
 /**
+ * 短信服务提供商枚举
+ */
+export enum SMSProvider {
+  CONSOLE = 'console', // 控制台输出（开发环境）
+  ALIYUN = 'aliyun', // 阿里云短信
+  TENCENT = 'tencent', // 腾讯云短信
+}
+
+/**
  * 短信发送结果接口
  */
 export interface SMSSendResult {
@@ -167,4 +176,129 @@ export interface NotificationStatistics {
   pending: number;
   byChannel: Record<NotificationChannel, number>;
   byType: Record<NotificationType, number>;
+}
+
+/**
+ * 提醒类型枚举（与Prisma schema保持一致）
+ */
+export enum ReminderType {
+  COURT_SCHEDULE = 'COURT_SCHEDULE', // 法庭提醒
+  DEADLINE = 'DEADLINE', // 截止日期提醒
+  FOLLOW_UP = 'FOLLOW_UP', // 跟进提醒
+  CUSTOM = 'CUSTOM', // 自定义提醒
+}
+
+/**
+ * 提醒状态枚举（与Prisma schema保持一致）
+ */
+export enum ReminderStatus {
+  PENDING = 'PENDING', // 待发送
+  SENT = 'SENT', // 已发送
+  READ = 'READ', // 已读
+  DISMISSED = 'DISMISSED', // 已忽略
+}
+
+/**
+ * 提醒接口（与Prisma schema保持一致）
+ */
+export interface Reminder {
+  id: string;
+  userId: string;
+  type: ReminderType;
+  title: string;
+  message: string | null;
+  reminderTime: Date;
+  channels: string[];
+  status: ReminderStatus;
+  relatedType: string | null;
+  relatedId: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * 创建提醒输入接口
+ */
+export interface CreateReminderInput {
+  userId: string;
+  type: ReminderType;
+  title: string;
+  message?: string;
+  reminderTime: Date;
+  channels: NotificationChannel[];
+  relatedType?: string;
+  relatedId?: string;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * 更新提醒输入接口
+ */
+export interface UpdateReminderInput {
+  title?: string;
+  message?: string;
+  reminderTime?: Date;
+  channels?: NotificationChannel[];
+  status?: ReminderStatus;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * 提醒查询参数接口
+ */
+export interface ReminderQueryParams {
+  userId: string;
+  type?: ReminderType;
+  status?: ReminderStatus;
+  startTime?: Date;
+  endTime?: Date;
+  page?: number;
+  limit?: number;
+}
+
+/**
+ * 提醒列表响应接口
+ */
+export interface ReminderListResponse {
+  reminders: Reminder[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+/**
+ * 法庭日程提醒配置接口
+ */
+export interface CourtScheduleReminderConfig {
+  enabled: boolean;
+  hoursBefore: number[]; // 提前提醒时间（小时），例如 [24, 1] 表示提前24小时和1小时
+  channels: NotificationChannel[];
+}
+
+/**
+ * 截止日期提醒配置接口
+ */
+export interface DeadlineReminderConfig {
+  enabled: boolean;
+  daysBefore: number[]; // 提前提醒时间（天），例如 [7, 3, 1]
+  channels: NotificationChannel[];
+}
+
+/**
+ * 跟进提醒配置接口
+ */
+export interface FollowUpReminderConfig {
+  enabled: boolean;
+  hoursBefore: number[];
+  channels: NotificationChannel[];
+}
+
+/**
+ * 提醒配置接口
+ */
+export interface ReminderPreferences {
+  courtSchedule: CourtScheduleReminderConfig;
+  deadline: DeadlineReminderConfig;
+  followUp: FollowUpReminderConfig;
 }

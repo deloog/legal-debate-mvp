@@ -124,3 +124,99 @@ export interface CaseStatistics {
   casesByCause: Record<string, number>;
   averageAmount?: number;
 }
+
+/**
+ * 案件时间线事件类型枚举
+ */
+export enum CaseTimelineEventType {
+  FILING = 'FILING', // 立案
+  PRETRIAL = 'PRETRIAL', // 审前准备
+  TRIAL = 'TRIAL', // 开庭
+  JUDGMENT = 'JUDGMENT', // 判决
+  APPEAL = 'APPEAL', // 上诉
+  EXECUTION = 'EXECUTION', // 执行
+  CLOSED = 'CLOSED', // 结案
+  CUSTOM = 'CUSTOM', // 自定义事件
+}
+
+/**
+ * 创建时间线事件输入接口
+ */
+export interface CreateTimelineEventInput {
+  caseId: string;
+  eventType: CaseTimelineEventType;
+  title: string;
+  description?: string;
+  eventDate: Date;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * 更新时间线事件输入接口
+ */
+export interface UpdateTimelineEventInput {
+  eventType?: CaseTimelineEventType;
+  title?: string;
+  description?: string;
+  eventDate?: Date;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * 时间线事件查询参数接口
+ */
+export interface TimelineEventQueryParams {
+  caseId?: string;
+  eventType?: CaseTimelineEventType;
+  startDate?: Date;
+  endDate?: Date;
+  sortBy?: 'eventDate' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
+}
+
+/**
+ * 时间线事件接口
+ */
+export interface TimelineEvent {
+  id: string;
+  caseId: string;
+  eventType: CaseTimelineEventType;
+  title: string;
+  description: string | null;
+  eventDate: Date;
+  metadata: Record<string, unknown> | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * 时间线事件列表响应接口
+ */
+export interface TimelineEventListResponse {
+  events: TimelineEvent[];
+  total: number;
+  caseId: string;
+}
+
+/**
+ * 案件状态截止日期配置接口
+ */
+export interface CaseStatusDeadlineConfig {
+  caseType: string;
+  fromStatus: string;
+  toStatus: string;
+  deadlineDays: number;
+  reminderDaysBefore: number[];
+  description: string;
+}
+
+/**
+ * 案件状态提醒生成输入接口
+ */
+export interface CaseStatusReminderInput {
+  userId: string;
+  caseId: string;
+  caseTitle: string;
+  config: CaseStatusDeadlineConfig;
+  deadline: Date;
+}

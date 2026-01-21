@@ -50,6 +50,7 @@ model User {
   userMemberships           UserMembership[]
   verificationCodes         VerificationCode[]
   followUpTasks              FollowUpTask[]
+  reminders                 Reminder[]
 
   @@index([email])
   @@index([username])
@@ -108,9 +109,12 @@ model Case {
   clientId        String?
   client          Client?          @relation(fields: [clientId], references: [id])
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timelines       CaseTimeline[]
+  courtSchedules  CourtSchedule[]
   debates         Debate[]
   documents       Document[]
   legalReferences LegalReference[]
+  evidence         Evidence[]
 
   @@index([userId])
   @@index([clientId])
@@ -125,6 +129,92 @@ model Case {
   @@index([status, createdAt])
   @@index([deletedAt])
   @@map("cases")
+}
+
+model CaseTimeline {
+  id                String               @id @default(cuid())
+  caseId            String
+  eventType        CaseTimelineEventType
+  title             String
+  description       String?              @db.Text
+  eventDate         DateTime
+  metadata         Json?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  case              Case                 @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@index([eventType])
+  @@index([eventDate])
+  @@map("case_timelines")
+}
+
+model Evidence {
+  id              String         @id @default(cuid())
+  caseId          String
+  type            EvidenceType   @default(DOCUMENT)
+  name            String
+  description     String?        @db.Text
+  fileUrl         String?
+  submitter       String?
+  source          String?
+  status          EvidenceStatus @default(PENDING)
+  relevanceScore  Float?
+  metadata        Json?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+  case            Case           @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  relations       EvidenceRelation[]
+
+  @@index([caseId])
+  @@index([type])
+  @@index([status])
+  @@index([relevanceScore])
+  @@index([deletedAt])
+  @@map("evidence")
+}
+
+model EvidenceRelation {
+  id           String               @id @default(cuid())
+  evidenceId   String
+  relationType EvidenceRelationType
+  relatedId    String
+  description  String?
+  createdAt    DateTime             @default(now())
+
+  evidence     Evidence             @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+
+  @@index([evidenceId])
+  @@index([relationType])
+  @@index([relatedId])
+  @@map("evidence_relations")
+}
+
+model CourtSchedule {
+  id                String                @id @default(cuid())
+  caseId            String
+  title             String
+  type              CourtScheduleType    @default(TRIAL)
+  startTime         DateTime
+  endTime           DateTime
+  location          String?
+  judge             String?
+  notes             String?               @db.Text
+  status            CourtScheduleStatus   @default(SCHEDULED)
+  metadata          Json?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  case              Case                  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@unique([caseId, startTime])
+  @@index([caseId])
+  @@index([type])
+  @@index([startTime])
+  @@index([status])
+  @@map("court_schedules")
 }
 
 model Document {
@@ -1002,6 +1092,30 @@ model FollowUpTask {
   @@map("follow_up_tasks")
 }
 
+model Reminder {
+  id                String               @id @default(cuid())
+  userId            String
+  type              ReminderType
+  title             String
+  message           String?              @db.Text
+  reminderTime      DateTime
+  channels         String[]             @default([])
+  status           ReminderStatus        @default(PENDING)
+  relatedType       String?
+  relatedId         String?
+  metadata          Json?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([reminderTime])
+  @@index([status])
+  @@map("reminders")
+}
+
 enum UserRole {
   USER
   LAWYER
@@ -1446,4 +1560,68 @@ enum FollowUpTaskPriority {
   HIGH
   MEDIUM
   LOW
+}
+
+enum CourtScheduleType {
+  TRIAL       // 开庭
+  MEDIATION   // 调解
+  ARBITRATION // 仲裁
+  MEETING     // 会谈
+  OTHER       // 其他
+}
+
+enum CourtScheduleStatus {
+  SCHEDULED   // 已安排
+  CONFIRMED   // 已确认
+  COMPLETED   // 已完成
+  CANCELLED   // 已取消
+  RESCHEDULED // 已改期
+}
+
+enum ReminderType {
+  COURT_SCHEDULE   // 法庭提醒
+  DEADLINE        // 截止日期提醒
+  FOLLOW_UP       // 跟进提醒
+  CUSTOM          // 自定义提醒
+}
+
+enum ReminderStatus {
+  PENDING         // 待发送
+  SENT            // 已发送
+  READ            // 已读
+  DISMISSED       // 已忽略
+}
+
+enum CaseTimelineEventType {
+  FILING      // 立案
+  PRETRIAL    // 审前准备
+  TRIAL       // 开庭
+  JUDGMENT    // 判决
+  APPEAL      // 上诉
+  EXECUTION   // 执行
+  CLOSED      // 结案
+  CUSTOM      // 自定义事件
+}
+
+enum EvidenceType {
+  DOCUMENT        // 书证
+  PHYSICAL        // 物证
+  WITNESS        // 证人证言
+  EXPERT_OPINION  // 鉴定意见
+  AUDIO_VIDEO     // 音视频
+  OTHER          // 其他
+}
+
+enum EvidenceStatus {
+  PENDING         // 待审核
+  ACCEPTED       // 已采纳
+  REJECTED       // 已拒绝
+  QUESTIONED     // 存疑
+}
+
+enum EvidenceRelationType {
+  LEGAL_REFERENCE // 关联法条
+  ARGUMENT       // 关联论点
+  FACT           // 关联事实
+  OTHER          // 其他
 }

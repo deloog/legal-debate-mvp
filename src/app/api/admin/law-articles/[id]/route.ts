@@ -192,10 +192,11 @@ export async function GET(
   try {
     // 获取法条ID
     const { id } = await params;
+    const validatedId = validatePathParam(id, uuidSchema);
 
     // 查询法条详情
     const article = await prisma.lawArticle.findUnique({
-      where: { validatedIdfindUnique,
+      where: { id: validatedId },
       include: {
         parent: {
           select: {
@@ -252,10 +253,11 @@ export async function PUT(
   try {
     // 获取法条ID
     const { id } = await params;
+    const validatedId = validatePathParam(id, uuidSchema);
 
     // 验证法条是否存在
     const existingArticle = await prisma.lawArticle.findUnique({
-      where: { validatedIdfindUnique,
+      where: { id: validatedId },
     });
 
     if (!existingArticle) {
@@ -310,7 +312,7 @@ export async function PUT(
 
     // 更新法条
     const updatedArticle = await prisma.lawArticle.update({
-      where: { validatedIdupdate,
+      where: { id: validatedId },
       data: updateData,
       include: {
         parent: {
@@ -364,10 +366,11 @@ export async function DELETE(
   try {
     // 获取法条ID
     const { id } = await params;
+    const validatedId = validatePathParam(id, uuidSchema);
 
     // 验证法条是否存在
     const existingArticle = await prisma.lawArticle.findUnique({
-      where: { validatedIdfindUnique,
+      where: { id: validatedId },
     });
 
     if (!existingArticle) {
@@ -376,7 +379,7 @@ export async function DELETE(
 
     // 删除法条
     await prisma.lawArticle.delete({
-      where: { validatedIddelete,
+      where: { id: validatedId },
     });
 
     return successResponse({ id }, '删除法条成功');
