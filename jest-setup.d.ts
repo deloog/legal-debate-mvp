@@ -4,22 +4,28 @@
  */
 
 import '@testing-library/jest-dom';
+import { testingLibraryMatchers } from '@testing-library/jest-dom/matchers';
 
 // 扩展Jest类型以支持自定义匹配器
-declare namespace jest {
-  interface Matchers<R, T = any> {
-    toBeInTheDocument(): R;
-    toHaveValue(value: unknown): R;
-    toBeDisabled(): R;
-    toHaveTextContent(text: string | RegExp): R;
-  }
-}
-
-// 扩展Window类型
 declare global {
+  namespace jest {
+    interface Matchers<R, T = any> {
+      toBeInTheDocument(): R;
+      toHaveValue(value: unknown): R;
+      toBeDisabled(): R;
+      toHaveTextContent(text: string | RegExp): R;
+      toHaveAttribute(attr: string, value?: unknown): R;
+      toHaveClass(...classNames: string[]): R;
+      toBeVisible(): R;
+      toBeEmpty(): R;
+      toContainElement(element: HTMLElement | null): R;
+      toContainHTML(html: string): R;
+    }
+  }
+
   namespace NodeJS {
     interface Global {
-      fetch: jest.Mock;
+      fetch: jest.Mock<Promise<Response>>;
       confirm: jest.Mock;
     }
   }

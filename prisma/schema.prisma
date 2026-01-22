@@ -51,6 +51,8 @@ model User {
   verificationCodes         VerificationCode[]
   followUpTasks              FollowUpTask[]
   reminders                 Reminder[]
+  caseMembers               CaseTeamMember[]
+  teamMemberships            TeamMember[]
 
   @@index([email])
   @@index([username])
@@ -115,6 +117,9 @@ model Case {
   documents       Document[]
   legalReferences LegalReference[]
   evidence         Evidence[]
+  teamMembers     CaseTeamMember[]
+  ownerType        OwnerType           @default(USER)
+  sharedWithTeam   Boolean             @default(false)
 
   @@index([userId])
   @@index([clientId])
@@ -128,6 +133,8 @@ model Case {
   @@index([userId, type, createdAt])
   @@index([status, createdAt])
   @@index([deletedAt])
+  @@index([ownerType])
+  @@index([sharedWithTeam])
   @@map("cases")
 }
 
@@ -1624,4 +1631,101 @@ enum EvidenceRelationType {
   ARGUMENT       // 关联论点
   FACT           // 关联事实
   OTHER          // 其他
+}
+
+model CaseTeamMember {
+  id                String               @id @default(cuid())
+  caseId            String
+  userId            String
+  role              CaseRole            @default(ASSISTANT)
+  permissions       Json
+  joinedAt         DateTime             @default(now())
+  notes             String?
+  metadata         Json?
+  deletedAt        DateTime?
+
+  case              Case                 @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([caseId, userId])
+  @@index([caseId])
+  @@index([userId])
+  @@index([deletedAt])
+  @@map("case_team_members")
+}
+
+model Team {
+  id                String               @id @default(cuid())
+  name              String
+  type              TeamType            @default(LAW_FIRM)
+  description       String?
+  logo              String?
+  status            TeamStatus           @default(ACTIVE)
+  metadata          Json?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  members           TeamMember[]
+
+  @@index([type])
+  @@index([status])
+  @@map("teams")
+}
+
+model TeamMember {
+  id                String               @id @default(cuid())
+  teamId            String
+  userId            String
+  role              TeamRole            @default(LAWYER)
+  status            MemberStatus         @default(ACTIVE)
+  joinedAt         DateTime             @default(now())
+  notes             String?
+  metadata          Json?
+
+  team              Team                 @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+  @@index([role])
+  @@index([status])
+  @@map("team_members")
+}
+
+enum CaseRole {
+  LEAD            // 主办律师
+  ASSISTANT       // 协办律师
+  PARALEGAL       // 律师助理
+  OBSERVER        // 观察者
+}
+
+enum TeamType {
+  LAW_FIRM        // 律师事务所
+  LEGAL_DEPT      // 企业法务部门
+  OTHER           // 其他
+}
+
+enum TeamStatus {
+  ACTIVE          // 活跃
+  INACTIVE        // 非活跃
+  SUSPENDED      // 已暂停
+}
+
+enum TeamRole {
+  ADMIN           // 团队管理员
+  LAWYER         // 律师
+  PARALEGAL       // 律师助理
+  OTHER           // 其他
+}
+
+enum MemberStatus {
+  ACTIVE          // 活跃
+  INACTIVE        // 非活跃
+  REMOVED        // 已移除
+}
+
+enum OwnerType {
+  USER            // 个人
+  TEAM            // 团队
 }

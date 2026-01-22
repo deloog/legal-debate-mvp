@@ -239,6 +239,8 @@ export const mockData = {
     description: '这是一个测试案件',
     type: 'civil',
     status: 'draft',
+    ownerType: 'user',
+    sharedWithTeam: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...overrides,

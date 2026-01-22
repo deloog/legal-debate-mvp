@@ -7,7 +7,7 @@
     "**/*.mts",
     "**/*.ts",
     "**/*.tsx",
-    "!src/__tests__/**",
+    "!src/__tests__/**/*",
     "!**/*.test.ts",
     "!**/*.test.tsx",
     "!**/*.spec.ts",

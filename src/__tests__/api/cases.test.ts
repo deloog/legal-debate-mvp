@@ -1,5 +1,5 @@
 import { GET, POST } from '@/app/api/v1/cases/route';
-import { CaseType, CaseStatus } from '@prisma/client';
+import { CaseType, CaseStatus, OwnerType } from '@prisma/client';
 import {
   createMockRequest,
   createTestResponse,
@@ -91,6 +91,8 @@ describe('Cases API', () => {
         description: data.data.description,
         type: data.data.type || 'CIVIL',
         status: data.data.status || 'DRAFT',
+        ownerType: data.data.ownerType || OwnerType.USER,
+        sharedWithTeam: data.data.sharedWithTeam || false,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -137,6 +139,45 @@ describe('Cases API', () => {
       // API返回{ cases, total }结构
       expect(testResponse.data.cases).toBeDefined();
       expect(Array.isArray(testResponse.data.cases)).toBe(true);
+    });
+
+    it('should handle ownerType filter', async () => {
+      const request = createMockRequest(
+        'http://localhost:3000/api/v1/cases?ownerType=user'
+      );
+      const response = await GET(request);
+      const testResponse = await createTestResponse(response);
+
+      assertions.assertSuccess(testResponse);
+      expect(testResponse.data.cases).toBeDefined();
+      expect(Array.isArray(testResponse.data.cases)).toBe(true);
+    });
+
+    it('should handle invalid ownerType filter', async () => {
+      const request = createMockRequest(
+        'http://localhost:3000/api/v1/cases?ownerType=invalid'
+      );
+      const response = await GET(request);
+      const testResponse = await createTestResponse(response);
+
+      // API应该忽略无效的ownerType参数
+      assertions.assertSuccess(testResponse);
+    });
+
+    it('should handle sharedWithTeam filter', async () => {
+      const request1 = createMockRequest(
+        'http://localhost:3000/api/v1/cases?sharedWithTeam=true'
+      );
+      const response1 = await GET(request1);
+      const testResponse1 = await createTestResponse(response1);
+      assertions.assertSuccess(testResponse1);
+
+      const request2 = createMockRequest(
+        'http://localhost:3000/api/v1/cases?sharedWithTeam=false'
+      );
+      const response2 = await GET(request2);
+      const testResponse2 = await createTestResponse(response2);
+      assertions.assertSuccess(testResponse2);
     });
 
     it('should validate pagination boundaries', async () => {
@@ -187,6 +228,8 @@ describe('Cases API', () => {
       expect(testResponse.data.description).toBe(caseData.description);
       expect(testResponse.data.type).toBe('CIVIL'); // API转换为大写
       expect(testResponse.data.status).toBe('DRAFT'); // API转换为大写
+      expect(testResponse.data.ownerType).toBe(OwnerType.USER); // 默认为USER
+      expect(testResponse.data.sharedWithTeam).toBe(false); // 默认为false
       expect(testResponse.data.id).toBeDefined();
       expect(testResponse.data.createdAt).toBeDefined();
       expect(testResponse.data.updatedAt).toBeDefined();
@@ -289,6 +332,114 @@ describe('Cases API', () => {
         const expectedType = type.toUpperCase();
         expect(testResponse.data.type).toBe(expectedType);
       }
+    });
+
+    it('should set default ownerType to USER', async () => {
+      const caseData = mockData.case();
+      delete caseData.ownerType;
+
+      const request = createMockRequest('http://localhost:3000/api/v1/cases', {
+        method: 'POST',
+        body: caseData,
+      });
+
+      const response = await POST(request);
+      const testResponse = await createTestResponse(response);
+
+      assertions.assertSuccess(testResponse);
+      expect(testResponse.data.ownerType).toBe(OwnerType.USER);
+    });
+
+    it('should set default sharedWithTeam to false', async () => {
+      const caseData = mockData.case();
+      delete caseData.sharedWithTeam;
+
+      const request = createMockRequest('http://localhost:3000/api/v1/cases', {
+        method: 'POST',
+        body: caseData,
+      });
+
+      const response = await POST(request);
+      const testResponse = await createTestResponse(response);
+
+      assertions.assertSuccess(testResponse);
+      expect(testResponse.data.sharedWithTeam).toBe(false);
+    });
+
+    it('should accept ownerType as user', async () => {
+      const caseData = mockData.case({ ownerType: 'user' });
+
+      const request = createMockRequest('http://localhost:3000/api/v1/cases', {
+        method: 'POST',
+        body: caseData,
+      });
+
+      const response = await POST(request);
+      const testResponse = await createTestResponse(response);
+
+      assertions.assertSuccess(testResponse);
+      expect(testResponse.data.ownerType).toBe(OwnerType.USER);
+    });
+
+    it('should accept ownerType as team', async () => {
+      const caseData = mockData.case({ ownerType: 'team' });
+
+      const request = createMockRequest('http://localhost:3000/api/v1/cases', {
+        method: 'POST',
+        body: caseData,
+      });
+
+      const response = await POST(request);
+      const testResponse = await createTestResponse(response);
+
+      assertions.assertSuccess(testResponse);
+      expect(testResponse.data.ownerType).toBe(OwnerType.TEAM);
+    });
+
+    it('should accept sharedWithTeam as true', async () => {
+      const caseData = mockData.case({ sharedWithTeam: true });
+
+      const request = createMockRequest('http://localhost:3000/api/v1/cases', {
+        method: 'POST',
+        body: caseData,
+      });
+
+      const response = await POST(request);
+      const testResponse = await createTestResponse(response);
+
+      assertions.assertSuccess(testResponse);
+      expect(testResponse.data.sharedWithTeam).toBe(true);
+    });
+
+    it('should accept sharedWithTeam as false', async () => {
+      const caseData = mockData.case({ sharedWithTeam: false });
+
+      const request = createMockRequest('http://localhost:3000/api/v1/cases', {
+        method: 'POST',
+        body: caseData,
+      });
+
+      const response = await POST(request);
+      const testResponse = await createTestResponse(response);
+
+      assertions.assertSuccess(testResponse);
+      expect(testResponse.data.sharedWithTeam).toBe(false);
+    });
+
+    it('should handle invalid ownerType gracefully', async () => {
+      const caseData = mockData.case({ ownerType: 'invalid' });
+
+      const request = createMockRequest('http://localhost:3000/api/v1/cases', {
+        method: 'POST',
+        body: caseData,
+      });
+
+      const response = await POST(request);
+      const testResponse = await createTestResponse(response);
+
+      // API应该将无效的ownerType默认为USER
+      assertions.assertSuccess(testResponse);
+      expect(testResponse.data.ownerType).toBe(OwnerType.USER);
     });
 
     it('should set default status', async () => {

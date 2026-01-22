@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import { createSuccessResponse } from '@/app/api/lib/responses/api-response';
 import { prisma } from '@/lib/db/prisma';
-import { CaseType, CaseStatus, Prisma } from '@prisma/client';
+import { CaseType, CaseStatus, Prisma, OwnerType } from '@prisma/client';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { isAdminRole } from '@/lib/middleware/resource-permission';
 import { UserRole } from '@/types/auth';
+import { isValidOwnerType } from '@/types/case';
 
 /**
  * GET /api/v1/cases
@@ -31,6 +32,8 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const userId = searchParams.get('userId');
   const type = searchParams.get('type') as CaseType | null;
   const status = searchParams.get('status')?.toUpperCase() as CaseStatus | null;
+  const ownerType = searchParams.get('ownerType');
+  const sharedWithTeam = searchParams.get('sharedWithTeam');
   const search = searchParams.get('search');
 
   // 排序
@@ -56,6 +59,14 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
 
   if (status) {
     where.status = status;
+  }
+
+  if (ownerType && isValidOwnerType(ownerType)) {
+    where.ownerType = ownerType as OwnerType;
+  }
+
+  if (sharedWithTeam) {
+    where.sharedWithTeam = sharedWithTeam === 'true';
   }
 
   if (search) {
@@ -175,6 +186,19 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     archived: 'ARCHIVED',
   };
 
+  const ownerTypeMap: Record<string, OwnerType> = {
+    user: 'USER',
+    team: 'TEAM',
+  };
+
+  // 处理ownerType，默认为USER
+  const ownerTypeValue = body.ownerType
+    ? ownerTypeMap[body.ownerType?.toLowerCase()] || 'USER'
+    : 'USER';
+
+  // 处理sharedWithTeam，默认为false
+  const sharedWithTeamValue = body.sharedWithTeam === true;
+
   const caseData = await prisma.case.create({
     data: {
       userId: authUser.userId,
@@ -189,6 +213,8 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       plaintiffName: body.plaintiffName,
       defendantName: body.defendantName,
       metadata: body.metadata || {},
+      ownerType: ownerTypeValue,
+      sharedWithTeam: sharedWithTeamValue,
     },
   });
 

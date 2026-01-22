@@ -1,4 +1,32 @@
-import { Case as PrismaCase } from '@prisma/client';
+import { Case as PrismaCase, OwnerType } from '@prisma/client';
+
+/**
+ * 案件拥有者类型枚举
+ * 从Prisma生成的枚举中导出
+ */
+export type CaseOwnerType = OwnerType;
+
+/**
+ * 拥有者类型标签映射
+ */
+export const OWNER_TYPE_LABELS: Record<OwnerType, string> = {
+  [OwnerType.USER]: '个人',
+  [OwnerType.TEAM]: '团队',
+};
+
+/**
+ * 类型守卫：验证是否为有效的OwnerType
+ */
+export function isValidOwnerType(value: string): value is OwnerType {
+  return Object.values(OwnerType).includes(value as OwnerType);
+}
+
+/**
+ * 获取拥有者类型标签
+ */
+export function getOwnerTypeLabel(type: OwnerType): string {
+  return OWNER_TYPE_LABELS[type] || type;
+}
 
 // DocAnalyzer输出的metadata结构
 export interface CaseMetadata {
@@ -67,6 +95,8 @@ export interface CreateCaseInput {
   court?: string;
   caseNumber?: string;
   metadata?: CaseMetadata;
+  ownerType?: OwnerType;
+  sharedWithTeam?: boolean;
 }
 
 // 更新Case的DTO
@@ -82,6 +112,8 @@ export interface UpdateCaseInput {
   court?: string;
   caseNumber?: string;
   metadata?: CaseMetadata;
+  ownerType?: OwnerType;
+  sharedWithTeam?: boolean;
 }
 
 // 查询Case的参数
@@ -93,6 +125,8 @@ export interface CaseQueryParams {
   defendantName?: string;
   cause?: string;
   court?: string;
+  ownerType?: OwnerType;
+  sharedWithTeam?: boolean;
   page?: number;
   limit?: number;
   sortBy?: 'createdAt' | 'updatedAt' | 'title';

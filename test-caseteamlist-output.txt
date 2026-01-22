@@ -1,0 +1,898 @@
+鈼?Validation Warning:
+
+  Unknown option "coverageProvider" with value "v8" was found.
+  This is probably a typing mistake. Fixing it will remove this message.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+  console.error
+    鍔犺浇鍥㈤槦鎴愬憳澶辫触: TypeError: response.json is not a function
+        at loadMembers (D:\legal_debate_mvp\src\components\case\CaseTeamList.tsx:93:36)
+
+    [0m [90m  97 |[39m       [36mconst[39m message [33m=[39m err [36minstanceof[39m [33mError[39m [33m?[39m err[33m.[39mmessage [33m:[39m [32m'鍔犺浇澶辫触'[39m[33m;[39m
+     [90m  98 |[39m       setError(message)[33m;[39m
+    [31m[1m>[22m[39m[90m  99 |[39m       console[33m.[39merror([32m'鍔犺浇鍥㈤槦鎴愬憳澶辫触:'[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 100 |[39m     } [36mfinally[39m {
+     [90m 101 |[39m       setIsLoading([36mfalse[39m)[33m;[39m
+     [90m 102 |[39m     }[0m
+
+      at loadMembers (src/components/case/CaseTeamList.tsx:99:15)
+
+  console.error
+    鍔犺浇鍥㈤槦鎴愬憳澶辫触: Error: 鍔犺浇鍥㈤槦鎴愬憳澶辫触
+        at loadMembers (D:\legal_debate_mvp\src\components\case\CaseTeamList.tsx:90:15)
+        at runNextTicks (node:internal/process/task_queues:65:5)
+        at listOnTimeout (node:internal/timers:555:9)
+        at processTimers (node:internal/timers:529:7)
+
+    [0m [90m  97 |[39m       [36mconst[39m message [33m=[39m err [36minstanceof[39m [33mError[39m [33m?[39m err[33m.[39mmessage [33m:[39m [32m'鍔犺浇澶辫触'[39m[33m;[39m
+     [90m  98 |[39m       setError(message)[33m;[39m
+    [31m[1m>[22m[39m[90m  99 |[39m       console[33m.[39merror([32m'鍔犺浇鍥㈤槦鎴愬憳澶辫触:'[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 100 |[39m     } [36mfinally[39m {
+     [90m 101 |[39m       setIsLoading([36mfalse[39m)[33m;[39m
+     [90m 102 |[39m     }[0m
+
+      at loadMembers (src/components/case/CaseTeamList.tsx:99:15)
+
+  console.error
+    鍔犺浇鍥㈤槦鎴愬憳澶辫触: Error: 缃戠粶閿欒
+        at Object.<anonymous> (D:\legal_debate_mvp\src\__tests__\components\case\CaseTeamList.test.tsx:553:32)
+        at Promise.finally.completed (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1557:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1497:10)
+        at _callCircusTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1007:40)
+        at _runTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:947:3)
+        at D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:849:7
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:862:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at run (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:761:3)
+        at runAndTransformResultsToJestFormat (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1918:21)
+        at jestAdapter (D:\legal_debate_mvp\node_modules\jest-circus\build\runner.js:101:19)
+        at runTestInternal (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:275:16)
+        at runTest (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:343:7)
+
+    [0m [90m  97 |[39m       [36mconst[39m message [33m=[39m err [36minstanceof[39m [33mError[39m [33m?[39m err[33m.[39mmessage [33m:[39m [32m'鍔犺浇澶辫触'[39m[33m;[39m
+     [90m  98 |[39m       setError(message)[33m;[39m
+    [31m[1m>[22m[39m[90m  99 |[39m       console[33m.[39merror([32m'鍔犺浇鍥㈤槦鎴愬憳澶辫触:'[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 100 |[39m     } [36mfinally[39m {
+     [90m 101 |[39m       setIsLoading([36mfalse[39m)[33m;[39m
+     [90m 102 |[39m     }[0m
+
+      at loadMembers (src/components/case/CaseTeamList.tsx:99:15)
+
+FAIL components src/__tests__/components/case/CaseTeamList.test.tsx (10.308 s)
+  CaseTeamList
+    鍩虹娓叉煋
+      鈭?搴旇姝ｇ‘鍔犺浇骞舵樉绀哄洟闃熸垚鍛樺垪琛?(95 ms)
+      鈭?搴旇鏄剧ず娣诲姞鎴愬憳鎸夐挳锛坈anManage涓簍rue锛?(12 ms)
+      鈭?canManage涓篺alse鏃朵笉鏄剧ず娣诲姞鎴愬憳鎸夐挳 (15 ms)
+      鈭?搴旇鏄剧ず瑙掕壊鏍囩 (15 ms)
+    鎴愬憳淇℃伅鏄剧ず
+      鈭?搴旇鏄剧ず鐢ㄦ埛澶村儚锛堝鏋滄湁锛?(15 ms)
+      鈭?搴旇鏄剧ず鐢ㄦ埛鍚嶉瀛楁瘝澶村儚锛堝鏋滄病鏈夊ご鍍忥級 (30 ms)
+      鈭?搴旇鏄剧ず鐢ㄦ埛閭 (31 ms)
+      鈭?搴旇鏄剧ず澶囨敞淇℃伅 (15 ms)
+      脳 搴旇鏄剧ず鍔犲叆鏃堕棿 (3045 ms)
+    娣诲姞鎴愬憳
+      脳 鐐瑰嚮娣诲姞鎴愬憳鎸夐挳搴旇鏄剧ず琛ㄥ崟 (51 ms)
+    鍒犻櫎鎴愬憳
+      鈭?canManage涓簍rue涓旈潪褰撳墠鐢ㄦ埛搴旇鏄剧ず绉婚櫎鎸夐挳 (22 ms)
+      鈭?canManage涓篺alse涓嶅簲鏄剧ず绉婚櫎鎸夐挳 (15 ms)
+      脳 鐐瑰嚮绉婚櫎鎸夐挳搴旇璋冪敤鍒犻櫎API (3016 ms)
+      脳 鍙栨秷鍒犻櫎涓嶅簲璇ヨ皟鐢ˋPI (3010 ms)
+    绛涢€夊姛鑳?      鈭?搴旇鏄剧ず瑙掕壊绛涢€夐€夐」 (14 ms)
+      鈭?閫夋嫨瑙掕壊绛涢€夊簲璇ヨ皟鐢ˋPI (30 ms)
+    鍒嗛〉鍔熻兘
+      鈭?搴旇鏄剧ず鍒嗛〉鎺т欢锛堝綋鎬绘暟澶т簬闄愬埗鏃讹級 (36 ms)
+      鈭?鐐瑰嚮涓嬩竴椤靛簲璇ユ洿鏂板垎椤?(57 ms)
+    鍔犺浇鐘舵€?      鈭?isLoading鏃跺簲璇ユ樉绀哄姞杞戒腑鐘舵€?(5 ms)
+    绌虹姸鎬?      鈭?娌℃湁鎴愬憳鏃跺簲璇ユ樉绀虹┖鐘舵€佹彁绀?(9 ms)
+      鈭?绌虹姸鎬佹椂搴旇鏄剧ず娣诲姞鎸夐挳锛坈anManage涓簍rue锛?(15 ms)
+    閿欒鐘舵€?      鈭?鍔犺浇澶辫触搴旇鏄剧ず閿欒淇℃伅 (31 ms)
+      鈭?鐐瑰嚮閲嶈瘯搴旇閲嶆柊鍔犺浇 (30 ms)
+    鍥㈤槦鎴愬憳鏁伴噺鏄剧ず
+      鈭?搴旇鍦ㄦ爣棰樹腑鏄剧ず鎴愬憳鎬绘暟 (16 ms)
+
+  鈼?CaseTeamList 鈥?鎴愬憳淇℃伅鏄剧ず 鈥?搴旇鏄剧ず鍔犲叆鏃堕棿
+
+    Found multiple elements with the text: /鍔犲叆鏃堕棿/
+
+    Here are the matching elements:
+
+    Ignored nodes: comments, script, style
+    <span
+      class="text-xs text-gray-400"
+    >
+      鍔犲叆鏃堕棿锛?[0m
+      2024/1/1
+    </span>
+
+    Ignored nodes: comments, script, style
+    <span
+      class="text-xs text-gray-400"
+    >
+      鍔犲叆鏃堕棿锛?[0m
+      2024/1/2
+    </span>
+
+    (If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="space-y-4"
+        >
+          <div
+            class="rounded-lg border bg-white shadow-sm "
+          >
+            <div
+              class="flex flex-col space-y-1.5 p-6 "
+            >
+              <div
+                class="flex items-center justify-between"
+              >
+                <h3
+                  class="text-2xl font-semibold leading-none tracking-tight "
+                >
+                  鍥㈤槦鎴愬憳 (
+                  2
+                  )
+                </h3>
+                <button
+                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-3 py-1.5 text-sm "
+                  type="button"
+                >
+                  娣诲姞鎴愬憳
+                </button>
+              </div>
+            </div>
+            <div
+              class="p-6 pt-0 "
+            >
+              <div
+                class="flex items-center space-x-4 mb-4"
+              >
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  绛涢€夛細
+                </span>
+                <select
+                  class="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option
+                    value=""
+                  >
+                    鍏ㄩ儴瑙掕壊
+                  </option>
+                  <option
+                    value="LEAD"
+                  >
+                    涓诲姙寰嬪笀
+                  </option>
+                  <option
+                    value="ASSISTANT"
+                  >
+                    鍗忓姙寰嬪笀
+                  </option>
+                  <option
+                    value="PARALEGAL"
+                  >
+                    寰嬪笀鍔╃悊
+                  </option>
+                  <option
+                    value="OBSERVER"
+                  >
+                    瑙傚療鑰?[0m
+                  </option>
+                </select>
+              </div>
+              <div
+                class="rounded-lg border bg-white shadow-sm mb-3"
+              >
+                <div
+                  class="p-6 pt-0 p-4"
+                >
+                  <div
+                    class="flex items-center justify-between"
+                  >
+                    <div
+                      class="flex items-center space-x-4"
+                    >
+                      <div
+                        class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center"
+                      >
+                        <span
+                          class="text-lg font-medium text-gray-600"
+                        >
+                          寮?[0m
+                        </span>
+                      </div>
+                      <div>
+                        <div
+                          class="flex items-center space-x-2"
+                        >
+                          <p
+                            class="text-sm font-medium text-gray-900"
+                          >
+                            寮犱笁
+                          </p>
+                          <span
+                            class="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                          >
+                            涓诲姙寰嬪笀
+                          </span>
+                        </div>
+                        <p
+                          class="text-sm text-gray-500"
+                        >
+                          zhangsan@example.com
+                        </p>
+                        <p
+                          class="text-xs text-gray-400 mt-1"
+                        >
+                          涓诲姙寰嬪笀
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      class="flex items-center space-x-2"
+                    >
+                      <span
+                        class="text-xs text-gray-400"
+                      >
+                        鍔犲叆鏃堕棿锛?[0m
+                        2024/1/1
+                      </span>
+                      <button
+                        class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-700 hover:bg-gray-100 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                        type="button"
+                      >
+                        绉婚櫎
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="rounded-lg border bg-white shadow-sm mb-3"
+              >
+                <div
+                  class="p-6 pt-0 p-4"
+                >
+                  <div
+                    class="flex items-center justify-between"
+                  >
+                    <div
+                      class="flex items-center space-x-4"
+                    >
+                      <img
+                        alt="鏉庡洓"
+                        class="h-12 w-12 rounded-full"
+                        src="avatar.jpg"
+                      />
+                      <div>
+                        <div
+                          class="flex items-center space-x-2"
+                        >
+                          <p
+                            class="text-sm font-medium text-gray-900"
+                          >
+                            鏉庡洓
+                          </p>
+                          <span
+                            class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                          >
+                            鍗忓姙寰嬪笀
+                          </span>
+                        </div>
+                        <p
+                          class="text-sm text-gray-500"
+                        >
+                          lisi@example.com
+                        </p>
+                        <p
+                          class="text-xs text-gray-400 mt-1"
+                        >
+                          鍗忓姙寰嬪笀
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      class="flex items-center space-x-2"
+                    >
+                      <span
+                        class="text-xs text-gray-400"
+                      >
+                        鍔犲叆鏃堕棿锛?[0m
+                        2024/1/2
+                      </span>
+                      <button
+                        class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-700 hover:bg-gray-100 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                        type="button"
+                      >
+                        绉婚櫎
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      231 |       );
+      232 |
+    > 233 |       await waitFor(
+          |                    ^
+      234 |         () => {
+      235 |           expect(screen.getByText(/鍔犲叆鏃堕棿/)).toBeInTheDocument();
+      236 |         },
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/components/case/CaseTeamList.test.tsx:233:20)
+
+  鈼?CaseTeamList 鈥?娣诲姞鎴愬憳 鈥?鐐瑰嚮娣诲姞鎴愬憳鎸夐挳搴旇鏄剧ず琛ㄥ崟
+
+    TestingLibraryElementError: Found multiple elements with the text: 娣诲姞鍥㈤槦鎴愬憳
+
+    Here are the matching elements:
+
+    Ignored nodes: comments, script, style
+    <h3
+      class="text-2xl font-semibold leading-none tracking-tight "
+    >
+      娣诲姞鍥㈤槦鎴愬憳
+    </h3>
+
+    Ignored nodes: comments, script, style
+    <label
+      class="flex items-center space-x-2 text-sm text-gray-600"
+    >
+      <input
+        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+        disabled=""
+        type="checkbox"
+      />
+      娣诲姞鍥㈤槦鎴愬憳
+    </label>
+
+    (If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="space-y-4"
+        >
+          <div
+            class="rounded-lg border bg-white shadow-sm "
+          >
+            <div
+              class="flex flex-col space-y-1.5 p-6 "
+            >
+              <div
+                class="flex items-center justify-between"
+              >
+                <h3
+                  class="text-2xl font-semibold leading-none tracking-tight "
+                >
+                  鍥㈤槦鎴愬憳 (
+                  2
+                  )
+                </h3>
+                <button
+                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-3 py-1.5 text-sm "
+                  type="button"
+                >
+                  娣诲姞鎴愬憳
+                </button>
+              </div>
+            </div>
+            <div
+              class="p-6 pt-0 "
+            >
+              <div
+                class="flex items-center space-x-4 mb-4"
+              >
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  绛涢€夛細
+                </span>
+                <select
+                  class="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option
+                    value=""
+                  >
+                    鍏ㄩ儴瑙掕壊
+                  </option>
+                  <option
+                    value="LEAD"
+                  >
+                    涓诲姙寰嬪笀
+                  </option>
+                  <option
+                    value="ASSISTANT"
+                  >
+                    鍗忓姙寰嬪笀
+                  </option>
+                  <option
+                    value="PARALEGAL"
+                  >
+                    寰嬪笀鍔╃悊
+                  </option>
+                  <option
+                    value="OBSERVER"
+                  >
+                    瑙傚療鑰?[0m
+                  </option>
+                </select>
+              </div>
+              <div
+                class="rounded-lg border bg-white shadow-sm mb-3"
+              >
+                <div
+                  class="p-6 pt-0 p-4"
+                >
+                  <div
+                    class="flex items-center justify-between"
+                  >
+                    <div
+                      class="flex items-center space-x-4"
+                    >
+                      <div
+                        class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center"
+                      >
+                        <span
+                          class="text-lg font-medium text-gray-600"
+                        >
+                          寮?[0m
+                        </span>
+                      </div>
+                      <div>
+                        <div
+                          class="flex items-center space-x-2"
+                        >
+                          <p
+                            class="text-sm font-medium text-gray-900"
+                          >
+                            寮犱笁
+                          </p>
+                          <span
+                            class="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                          >
+                            涓诲姙寰嬪笀
+                          </span>
+                        </div>
+                        <p
+                          class="text-sm text-gray-500"
+                        >
+                          zhangsan@example.com
+                        </p>
+                        <p
+                          class="text-xs text-gray-400 mt-1"
+                        >
+                          涓诲姙寰嬪笀
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      class="flex items-center space-x-2"
+                    >
+                      <span
+                        class="text-xs text-gray-400"
+                      >
+                        鍔犲叆鏃堕棿锛?[0m
+                        2024/1/1
+                      </span>
+                      <button
+                        class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-700 hover:bg-gray-100 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                        type="button"
+                      >
+                        绉婚櫎
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="rounded-lg border bg-white shadow-sm mb-3"
+              >
+                <div
+                  class="p-6 pt-0 p-4"
+                >
+                  <div
+                    class="flex items-center justify-between"
+                  >
+                    <div
+                      class="flex items-center space-x-4"
+                    >
+                      <img
+                        alt="鏉庡洓"
+                        class="h-12 w-12 rounded-full"
+                        src="avatar.jpg"
+                      />
+                      <div>
+                        <div
+                          class="flex items-center space-x-2"
+                        >
+                          <p
+                            class="text-sm font-medium text-gray-900"
+                          >
+         ...
+
+      261 |
+      262 |       // 搴旇鏄剧ず娣诲姞鍥㈤槦鎴愬憳琛ㄥ崟
+    > 263 |       expect(screen.getByText('娣诲姞鍥㈤槦鎴愬憳')).toBeInTheDocument();
+          |                     ^
+      264 |     });
+      265 |   });
+      266 |
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at getElementError (node_modules/@testing-library/dom/dist/query-helpers.js:20:35)
+      at getMultipleElementsFoundError (node_modules/@testing-library/dom/dist/query-helpers.js:23:10)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/components/case/CaseTeamList.test.tsx:263:21)
+
+  鈼?CaseTeamList 鈥?鍒犻櫎鎴愬憳 鈥?鐐瑰嚮绉婚櫎鎸夐挳搴旇璋冪敤鍒犻櫎API
+
+    Found multiple elements with the text: 绉婚櫎
+
+    Here are the matching elements:
+
+    Ignored nodes: comments, script, style
+    <button
+      class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-700 hover:bg-gray-100 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+      type="button"
+    >
+      绉婚櫎
+    </button>
+
+    Ignored nodes: comments, script, style
+    <button
+      class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-700 hover:bg-gray-100 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+      type="button"
+    >
+      绉婚櫎
+    </button>
+
+    (If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="space-y-4"
+        >
+          <div
+            class="rounded-lg border bg-white shadow-sm "
+          >
+            <div
+              class="flex flex-col space-y-1.5 p-6 "
+            >
+              <div
+                class="flex items-center justify-between"
+              >
+                <h3
+                  class="text-2xl font-semibold leading-none tracking-tight "
+                >
+                  鍥㈤槦鎴愬憳 (
+                  2
+                  )
+                </h3>
+                <button
+                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-3 py-1.5 text-sm "
+                  type="button"
+                >
+                  娣诲姞鎴愬憳
+                </button>
+              </div>
+            </div>
+            <div
+              class="p-6 pt-0 "
+            >
+              <div
+                class="flex items-center space-x-4 mb-4"
+              >
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  绛涢€夛細
+                </span>
+                <select
+                  class="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option
+                    value=""
+                  >
+                    鍏ㄩ儴瑙掕壊
+                  </option>
+                  <option
+                    value="LEAD"
+                  >
+                    涓诲姙寰嬪笀
+                  </option>
+                  <option
+                    value="ASSISTANT"
+                  >
+                    鍗忓姙寰嬪笀
+                  </option>
+                  <option
+                    value="PARALEGAL"
+                  >
+                    寰嬪笀鍔╃悊
+                  </option>
+                  <option
+                    value="OBSERVER"
+                  >
+                    瑙傚療鑰?[0m
+                  </option>
+                </select>
+              </div>
+              <div
+                class="rounded-lg border bg-white shadow-sm mb-3"
+              >
+                <div
+                  class="p-6 pt-0 p-4"
+                >
+                  <div
+                    class="flex items-center justify-between"
+                  >
+                    <div
+                      class="flex items-center space-x-4"
+                    >
+                      <div
+                        class="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center"
+                      >
+                        <span
+                          class="text-lg font-medium text-gray-600"
+                        >
+                          寮?[0m
+                        </span>
+                      </div>
+                      <div>
+                        <div
+                          class="flex items-center space-x-2"
+                        >
+                          <p
+                            class="text-sm font-medium text-gray-900"
+                          >
+                            寮犱笁
+                          </p>
+                          <span
+                            class="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                          >
+                            涓诲姙寰嬪笀
+                          </span>
+                        </div>
+                        <p
+                          class="text-sm text-gray-500"
+                        >
+                          zhangsan@example.com
+                        </p>
+                        <p
+                          class="text-xs text-gray-400 mt-1"
+                        >
+                          涓诲姙寰嬪笀
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      class="flex items-center space-x-2"
+                    >
+                      <span
+                        class="text-xs text-gray-400"
+                      >
+                        鍔犲叆鏃堕棿锛?[0m
+                        2024/1/1
+                      </span>
+                      <button
+                        class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-700 hover:bg-gray-100 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                        type="button"
+                      >
+                        绉婚櫎
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="rounded-lg border bg-white shadow-sm mb-3"
+              >
+                <div
+                  class="p-6 pt-0 p-4"
+                >
+                  <div
+                    class="flex items-center justify-between"
+                  >
+                    <div
+                      class="flex items-center space-x-4"
+                    >
+                      <img
+                        alt="鏉庡洓"
+                        class="h-12 w-12 rounded-full"
+                        src="avatar.jpg"
+                      />
+                      <div>
+                        <div
+                          class="flex items-center space-x-2"
+                        >
+                          <p
+                            class="text-sm font-medium text-gray-900"
+                          >
+                            鏉庡洓
+                          </p>
+                          <span
+                            class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                          >
+                            鍗忓姙寰嬪笀
+                          </span>
+                        </div>
+                        <p
+                          class="text-sm text-gray-500"
+                        >
+                          lisi@example.com
+                        </p>
+                        <p
+                          class="text-xs text-gray-400 mt-1"
+                        >
+                          鍗忓姙寰嬪笀
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      class="flex items-center space-x-2"
+                    >
+                      <span
+                        class="text-xs text-gray-400"
+                      >
+                        鍔犲叆鏃堕棿锛?[0m
+                        2024/1/2
+                      </span>
+                      <button
+                        class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-700 hover:bg-gray-100 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50"
+                        type="button"
+                      >
+                        绉婚櫎
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      310 |       );
+      311 |
+    > 312 |       await waitFor(
+          |                    ^
+      313 |         () => {
+      314 |           expect(screen.getByText('绉婚櫎')).toBeInTheDocument();
+      315 |         },
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/components/case/CaseTeamList.test.tsx:312:20)
+
+  鈼?CaseTeamList 鈥?鍒犻櫎鎴愬憳 鈥?鍙栨秷鍒犻櫎涓嶅簲璇ヨ皟鐢ˋPI
+
+    Unable to find an element with the text: 绉婚櫎. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="space-y-4"
+        >
+          <div
+            class="rounded-lg border bg-white shadow-sm "
+          >
+            <div
+              class="flex flex-col space-y-1.5 p-6 "
+            >
+              <div
+                class="flex items-center justify-between"
+              >
+                <h3
+                  class="text-2xl font-semibold leading-none tracking-tight "
+                >
+                  鍥㈤槦鎴愬憳 (
+                  0
+                  )
+                </h3>
+                <button
+                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-3 py-1.5 text-sm "
+                  type="button"
+                >
+                  娣诲姞鎴愬憳
+                </button>
+              </div>
+            </div>
+            <div
+              class="p-6 pt-0 "
+            >
+              <div
+                class="flex items-center space-x-4 mb-4"
+              >
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  绛涢€夛細
+                </span>
+                <select
+                  class="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option
+                    value=""
+                  >
+                    鍏ㄩ儴瑙掕壊
+                  </option>
+                  <option
+                    value="LEAD"
+                  >
+                    涓诲姙寰嬪笀
+                  </option>
+                  <option
+                    value="ASSISTANT"
+                  >
+                    鍗忓姙寰嬪笀
+                  </option>
+                  <option
+                    value="PARALEGAL"
+                  >
+                    寰嬪笀鍔╃悊
+                  </option>
+                  <option
+                    value="OBSERVER"
+                  >
+                    瑙傚療鑰?[0m
+                  </option>
+                </select>
+              </div>
+              <div
+                class="px-4 py-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-800 mb-4"
+              >
+                response.json is not a function
+                <button
+                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-700 hover:bg-gray-100 px-3 py-1.5 text-sm ml-2"
+                  type="button"
+                >
+                  閲嶈瘯
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      341 |       );
+      342 |
+    > 343 |       await waitFor(
+          |                    ^
+      344 |         () => {
+      345 |           expect(screen.getByText('绉婚櫎')).toBeInTheDocument();
+      346 |         },
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/components/case/CaseTeamList.test.tsx:343:20)
+
+Test Suites: 1 failed, 1 total
+Tests:       4 failed, 20 passed, 24 total
+Snapshots:   0 total
+Time:        11.183 s
+Ran all test suites matching src/__tests__/components/case/CaseTeamList.test.tsx.

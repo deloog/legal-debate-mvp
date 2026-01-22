@@ -21,6 +21,7 @@ import {
   ArgumentSide,
   ArgumentType,
   LegalReferenceStatus,
+  OwnerType,
 } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
@@ -81,6 +82,7 @@ export const createSession = (overrides: Partial<Session> = {}): Session => ({
 export const createCase = (overrides: Partial<Case> = {}): Case => ({
   id: 'case-123',
   userId: 'user-123',
+  clientId: 'client-123',
   title: '劳动合同纠纷案',
   description: '关于加班费计算的争议案件',
   type: CaseType.LABOR,
@@ -93,6 +95,10 @@ export const createCase = (overrides: Partial<Case> = {}): Case => ({
   amount: new Decimal('50000'),
   court: '北京市朝阳区人民法院',
   caseNumber: '（2024）京0105民初12345号',
+
+  // 拥有者类型和团队共享字段
+  ownerType: OwnerType.USER,
+  sharedWithTeam: false,
 
   // 扩展字段 (JSONB) - 存储完整的DocAnalyzer输出
   metadata: {

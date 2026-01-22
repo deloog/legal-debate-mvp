@@ -36,6 +36,7 @@ export enum PermissionResource {
   STATS = 'stats', // 统计数据
   EXPORT = 'export', // 数据导出
   REPORT = 'report', // 报告管理
+  ALERT = 'alert', // 告警管理
 }
 
 // =============================================================================
@@ -246,6 +247,20 @@ export const ALERT_PERMISSIONS = {
 } as const;
 
 /**
+ * 团队管理权限
+ */
+export const TEAM_PERMISSIONS = {
+  CREATE: 'team:create',
+  READ: 'team:read',
+  UPDATE: 'team:update',
+  DELETE: 'team:delete',
+  MANAGE: 'team:manage',
+  MEMBER_ADD: 'team:member:add',
+  MEMBER_REMOVE: 'team:member:remove',
+  MEMBER_MANAGE: 'team:member:manage',
+} as const;
+
+/**
  * 所有权限集合
  */
 export const ALL_PERMISSIONS = [
@@ -262,6 +277,7 @@ export const ALL_PERMISSIONS = [
   ...Object.values(EXPORT_PERMISSIONS),
   ...Object.values(REPORT_PERMISSIONS),
   ...Object.values(ALERT_PERMISSIONS),
+  ...Object.values(TEAM_PERMISSIONS),
 ] as const;
 
 /**
@@ -592,9 +608,59 @@ export const PERMISSION_DEFINITIONS = [
     action: PermissionAction.DELETE,
   },
   {
-    name: REPORT_PERMISSIONS.MANAGE,
-    description: '管理报告',
-    resource: PermissionResource.REPORT,
+    name: ALERT_PERMISSIONS.MANAGE,
+    description: '管理告警',
+    resource: PermissionResource.ALERT,
+    action: PermissionAction.MANAGE,
+  },
+
+  // 团队管理
+  {
+    name: TEAM_PERMISSIONS.CREATE,
+    description: '创建团队',
+    resource: PermissionResource.USER,
+    action: PermissionAction.CREATE,
+  },
+  {
+    name: TEAM_PERMISSIONS.READ,
+    description: '查看团队',
+    resource: PermissionResource.USER,
+    action: PermissionAction.READ,
+  },
+  {
+    name: TEAM_PERMISSIONS.UPDATE,
+    description: '更新团队',
+    resource: PermissionResource.USER,
+    action: PermissionAction.UPDATE,
+  },
+  {
+    name: TEAM_PERMISSIONS.DELETE,
+    description: '删除团队',
+    resource: PermissionResource.USER,
+    action: PermissionAction.DELETE,
+  },
+  {
+    name: TEAM_PERMISSIONS.MANAGE,
+    description: '管理团队',
+    resource: PermissionResource.USER,
+    action: PermissionAction.MANAGE,
+  },
+  {
+    name: TEAM_PERMISSIONS.MEMBER_ADD,
+    description: '添加团队成员',
+    resource: PermissionResource.USER,
+    action: PermissionAction.CREATE,
+  },
+  {
+    name: TEAM_PERMISSIONS.MEMBER_REMOVE,
+    description: '移除团队成员',
+    resource: PermissionResource.USER,
+    action: PermissionAction.DELETE,
+  },
+  {
+    name: TEAM_PERMISSIONS.MEMBER_MANAGE,
+    description: '管理团队成员',
+    resource: PermissionResource.USER,
     action: PermissionAction.MANAGE,
   },
 ] as const;

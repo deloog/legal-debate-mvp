@@ -26,8 +26,8 @@ module.exports = {
         '<rootDir>/src/__tests__/accuracy/',
         '<rootDir>/src/__tests__/integration/',
       ],
-      setupFiles: ['<rootDir>/jest.polyfill.js'],
-      setupFilesAfterEnv: ['<rootDir>/src/test-utils/setup.ts'],
+      setupFiles: ['<rootDir>/jest.polyfill.js', '<rootDir>/jest-setup.d.ts'],
+      setupFilesAfterEnv: ['<rootDir>/src/test-utils/setup.ts', '<rootDir>/src/__tests__/types/jest-dom.d.ts'],
       moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',
         '^@/lib/debate/stream/(.*)$': '<rootDir>/src/lib/debate/stream/$1',
@@ -203,6 +203,7 @@ module.exports = {
         '<rootDir>/src/__tests__/lib/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/middleware/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/prisma/**/*.{test,spec}.{ts,tsx}',
+        '<rootDir>/src/__tests__/types/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/unit/**/*.{test,spec}.{ts,tsx}',
       ],
       testPathIgnorePatterns: [

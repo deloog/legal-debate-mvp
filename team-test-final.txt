@@ -1,0 +1,50 @@
+
+> legal_debate_mvp@0.1.0 test
+> jest __tests__/components/team-form.test.tsx __tests__/components/team-list.test.tsx
+
+鈼?Validation Warning:
+
+  Unknown option "coverageProvider" with value "v8" was found.
+  This is probably a typing mistake. Fixing it will remove this message.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+PASS components src/__tests__/components/team-list.test.tsx
+  TeamList
+    鈭?搴旇娓叉煋鍥㈤槦鍒楄〃 (64 ms)
+    鈭?搴旇鏄剧ず鍥㈤槦绫诲瀷鏍囩 (28 ms)
+    鈭?搴旇鏄剧ず鍥㈤槦鐘舵€佹爣绛?(31 ms)
+    鈭?搴旇鏄剧ず鍥㈤槦鎴愬憳鏁伴噺 (30 ms)
+    鈭?搴旇鏄剧ず鍥㈤槦鎻忚堪 (31 ms)
+    鈭?搴旇鏄剧ず绌虹姸鎬佸綋娌℃湁鍥㈤槦鏃?(35 ms)
+    鈭?搴旇鏄剧ず鍔犺浇鐘舵€?(48 ms)
+    鈭?搴旇鏄剧ず閿欒鐘舵€?(23 ms)
+    鈭?搴旇鏀寔鍒嗛〉 (41 ms)
+    鈭?搴旇绂佺敤涓婁竴椤垫寜閽湪绗竴椤?(21 ms)
+
+PASS components src/__tests__/components/team-form.test.tsx
+  TeamForm
+    鍒涘缓鍥㈤槦琛ㄥ崟
+      鈭?搴旇娓叉煋鍒涘缓鍥㈤槦琛ㄥ崟 (19 ms)
+      鈭?搴旇鏄剧ず鎵€鏈夊洟闃熺被鍨嬮€夐」 (7 ms)
+      鈭?搴旇鏄剧ず鎵€鏈夊洟闃熺姸鎬侀€夐」 (12 ms)
+      鈭?搴旇楠岃瘉蹇呭～瀛楁 (13 ms)
+      鈭?搴旇鎴愬姛鍒涘缓鍥㈤槦 (31 ms)
+    缂栬緫鍥㈤槦琛ㄥ崟
+      鈭?搴旇娓叉煋缂栬緫鍥㈤槦琛ㄥ崟 (6 ms)
+      鈭?搴旇鎴愬姛鏇存柊鍥㈤槦 (13 ms)
+    琛ㄥ崟楠岃瘉
+      鈭?搴旇楠岃瘉鍥㈤槦鍚嶇О闀垮害 (26 ms)
+      鈭?搴旇楠岃瘉鎻忚堪闀垮害 (21 ms)
+    閿欒澶勭悊
+      鈭?搴旇鏄剧ず鍒涘缓澶辫触閿欒 (38 ms)
+      鈭?搴旇鏄剧ず缃戠粶閿欒 (93 ms)
+    鍙栨秷鎿嶄綔
+      鈭?鐐瑰嚮鍙栨秷搴旇杩斿洖涓婁竴椤?(17 ms)
+
+Test Suites: 2 passed, 2 total
+Tests:       22 passed, 22 total
+Snapshots:   0 total
+Time:        2.504 s, estimated 5 s
+Ran all test suites matching __tests__/components/team-form.test.tsx|__tests__/components/team-list.test.tsx.
