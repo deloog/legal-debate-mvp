@@ -16,11 +16,11 @@ import type {
 import {
   EvidenceChainRelationType,
   EvidenceRelationStrength,
-  EffectivenessLevel,
 } from '../../types/evidence-chain';
 
 import { EvidenceGraphBuilder } from './evidence-graph-builder';
 import { EvidencePathFinder } from './evidence-path-finder';
+import { EvidenceEffectivenessEvaluator } from './evidence-effectiveness-evaluator';
 
 /**
  * 证据链分析器类
@@ -28,10 +28,12 @@ import { EvidencePathFinder } from './evidence-path-finder';
 export class EvidenceChainAnalyzer {
   private readonly graphBuilder: EvidenceGraphBuilder;
   private readonly pathFinder: EvidencePathFinder;
+  private readonly effectivenessEvaluator: EvidenceEffectivenessEvaluator;
 
   constructor() {
     this.graphBuilder = new EvidenceGraphBuilder();
     this.pathFinder = new EvidencePathFinder();
+    this.effectivenessEvaluator = EvidenceEffectivenessEvaluator.getInstance();
   }
 
   /**
@@ -65,8 +67,10 @@ export class EvidenceChainAnalyzer {
     const chains = this.pathFinder.findAllPaths(chainGraph);
 
     // 计算证据效力评估
-    const effectivenessEvaluations =
-      this.calculateEffectivenessEvaluations(chainGraph);
+    const effectivenessEvaluations = this.effectivenessEvaluator.evaluateAll(
+      chainGraph.nodes,
+      chainGraph
+    );
 
     // 生成分析摘要
     const summary = this.generateSummary(
@@ -166,245 +170,6 @@ export class EvidenceChainAnalyzer {
     }
 
     return null;
-  }
-
-  /**
-   * 计算证据效力评估
-   */
-  private calculateEffectivenessEvaluations(
-    chainGraph: EvidenceChainGraph
-  ): Map<string, EvidenceEffectivenessEvaluation> {
-    const evaluations = new Map<string, EvidenceEffectivenessEvaluation>();
-
-    for (const node of chainGraph.nodes) {
-      const evaluation = this.evaluateEvidenceEffectiveness(node, chainGraph);
-      evaluations.set(node.evidenceId, evaluation);
-    }
-
-    return evaluations;
-  }
-
-  /**
-   * 评估单个证据的效力
-   */
-  private evaluateEvidenceEffectiveness(
-    node: {
-      evidenceId: string;
-      evidenceName: string;
-      evidenceType: string;
-      status: string;
-      relevanceScore: number | null;
-      incomingRelations: unknown[];
-      outgoingRelations: unknown[];
-    },
-    chainGraph: EvidenceChainGraph
-  ): EvidenceEffectivenessEvaluation {
-    // 计算相关性评分
-    const relevance = this.calculateRelevanceScore(node);
-
-    // 计算可靠性评分
-    const reliability = this.calculateReliabilityScore(node);
-
-    // 计算完整性评分
-    const completeness = this.calculateCompletenessScore(node, chainGraph);
-
-    // 计算合法性评分（简化版）
-    const legality = this.calculateLegalityScore(node);
-
-    // 计算证据链位置评分
-    const chainPosition = this.calculateChainPositionScore(node, chainGraph);
-
-    // 计算整体效力评分
-    const effectivenessScore = Math.round(
-      (relevance + reliability + completeness + legality + chainPosition) / 5
-    );
-
-    // 确定效力等级
-    const effectivenessLevel =
-      this.determineEffectivenessLevel(effectivenessScore);
-
-    // 生成改进建议
-    const suggestions = this.generateSuggestions(
-      node,
-      relevance,
-      reliability,
-      completeness,
-      legality,
-      chainPosition
-    );
-
-    return {
-      evidenceId: node.evidenceId,
-      effectivenessScore,
-      effectivenessLevel,
-      scores: {
-        relevance,
-        reliability,
-        completeness,
-        legality,
-        chainPosition,
-      },
-      suggestions,
-      legalSupportScore: Math.round(chainPosition * 0.8),
-      caseSupportScore: Math.round(reliability * 0.8),
-    };
-  }
-
-  /**
-   * 计算相关性评分
-   */
-  private calculateRelevanceScore(node: {
-    relevanceScore: number | null;
-  }): number {
-    // 使用证据的相关性评分，如果没有则使用默认值
-    if (node.relevanceScore !== null) {
-      return Math.round(node.relevanceScore * 100);
-    }
-    return 50; // 默认中等相关性
-  }
-
-  /**
-   * 计算可靠性评分
-   */
-  private calculateReliabilityScore(node: {
-    status: string;
-    incomingRelations: unknown[];
-    outgoingRelations: unknown[];
-  }): number {
-    let score = 50; // 基础分
-
-    // 根据证据在链中的位置调整
-    const inDegree = node.incomingRelations.length;
-    const outDegree = node.outgoingRelations.length;
-    const totalConnections = inDegree + outDegree;
-
-    if (totalConnections >= 3) {
-      score += 20;
-    } else if (totalConnections >= 2) {
-      score += 10;
-    }
-
-    return Math.min(100, Math.max(0, score));
-  }
-
-  /**
-   * 计算完整性评分
-   */
-  private calculateCompletenessScore(
-    node: {
-      status: string;
-      incomingRelations: unknown[];
-      outgoingRelations: unknown[];
-    },
-    chainGraph: EvidenceChainGraph
-  ): number {
-    let score = 50; // 基础分
-
-    // 根据证据在证据链中的完整性调整
-    const inDegree = node.incomingRelations.length;
-    const outDegree = node.outgoingRelations.length;
-
-    if (inDegree > 0 && outDegree > 0) {
-      score += 30; // 有输入和输出，完整性高
-    } else if (inDegree > 0 || outDegree > 0) {
-      score += 15; // 有输入或输出
-    }
-
-    // 根据证据链完整性调整
-    score += chainGraph.statistics.chainCompleteness * 0.2;
-
-    return Math.min(100, Math.max(0, score));
-  }
-
-  /**
-   * 计算合法性评分
-   */
-  private calculateLegalityScore(node: { status: string }): number {
-    let score = 50; // 基础分
-
-    // 根据证据状态调整
-    if (node.status === 'APPROVED' || node.status === 'VALIDATED') {
-      score += 30;
-    } else if (node.status === 'PENDING') {
-      score += 10;
-    } else if (node.status === 'REJECTED') {
-      score -= 30;
-    }
-
-    return Math.min(100, Math.max(0, score));
-  }
-
-  /**
-   * 计算证据链位置评分
-   */
-  private calculateChainPositionScore(
-    node: { evidenceId: string },
-    chainGraph: EvidenceChainGraph
-  ): number {
-    let score = 50; // 基础分
-
-    // 如果是核心证据，得分高
-    if (chainGraph.coreEvidences.includes(node.evidenceId)) {
-      score += 40;
-    }
-
-    // 如果是孤证证据，得分低
-    if (chainGraph.isolatedEvidences.includes(node.evidenceId)) {
-      score -= 20;
-    }
-
-    return Math.min(100, Math.max(0, score));
-  }
-
-  /**
-   * 确定效力等级
-   */
-  private determineEffectivenessLevel(score: number): EffectivenessLevel {
-    if (score >= 90) return EffectivenessLevel.VERY_HIGH;
-    if (score >= 70) return EffectivenessLevel.HIGH;
-    if (score >= 50) return EffectivenessLevel.MODERATE;
-    if (score >= 30) return EffectivenessLevel.LOW;
-    return EffectivenessLevel.VERY_LOW;
-  }
-
-  /**
-   * 生成改进建议
-   */
-  private generateSuggestions(
-    node: { evidenceId: string; status: string },
-    relevance: number,
-    reliability: number,
-    completeness: number,
-    legality: number,
-    chainPosition: number
-  ): string[] {
-    const suggestions: string[] = [];
-
-    if (relevance < 50) {
-      suggestions.push('建议提高证据与案件的相关性');
-    }
-
-    if (reliability < 50) {
-      suggestions.push('建议补充证据的来源和可信度信息');
-    }
-
-    if (completeness < 50) {
-      suggestions.push('建议完善证据链，补充相关证据');
-    }
-
-    if (legality < 50) {
-      suggestions.push('建议确保证据的合法性和有效性');
-    }
-
-    if (chainPosition < 50) {
-      suggestions.push('建议加强证据与核心证据的关联');
-    }
-
-    if (node.status === 'PENDING') {
-      suggestions.push('建议尽快完成证据的审核和验证');
-    }
-
-    return suggestions;
   }
 
   /**

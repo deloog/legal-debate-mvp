@@ -7,6 +7,7 @@ export enum NotificationType {
   FOLLOW_UP_TASK = 'FOLLOW_UP_TASK', // 跟进任务提醒
   COURT_SCHEDULE = 'COURT_SCHEDULE', // 法庭日程提醒
   DEADLINE = 'DEADLINE', // 截止日期提醒
+  TASK = 'TASK', // 任务提醒
   CUSTOM = 'CUSTOM', // 自定义提醒
 }
 
@@ -185,6 +186,7 @@ export enum ReminderType {
   COURT_SCHEDULE = 'COURT_SCHEDULE', // 法庭提醒
   DEADLINE = 'DEADLINE', // 截止日期提醒
   FOLLOW_UP = 'FOLLOW_UP', // 跟进提醒
+  TASK = 'TASK', // 任务提醒
   CUSTOM = 'CUSTOM', // 自定义提醒
 }
 
@@ -295,10 +297,31 @@ export interface FollowUpReminderConfig {
 }
 
 /**
+ * 任务提醒配置接口
+ */
+export interface TaskReminderConfig {
+  enabled: boolean;
+  hoursBefore: number[];
+  channels: NotificationChannel[];
+  priorities?: TaskPriority[];
+}
+
+/**
+ * 任务优先级枚举（与任务系统保持一致）
+ */
+export enum TaskPriority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  URGENT = 'URGENT',
+}
+
+/**
  * 提醒配置接口
  */
 export interface ReminderPreferences {
   courtSchedule: CourtScheduleReminderConfig;
   deadline: DeadlineReminderConfig;
   followUp: FollowUpReminderConfig;
+  task: TaskReminderConfig;
 }

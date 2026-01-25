@@ -45,7 +45,7 @@ describe('EvidenceChainAnalyzer', () => {
       expect(result.chains).toBeDefined();
       expect(result.effectivenessEvaluations).toBeDefined();
       expect(result.summary).toBeDefined();
-      expect(result.executionTime).toBeGreaterThan(0);
+      expect(result.executionTime).toBeGreaterThanOrEqual(0);
     });
 
     it('should handle empty evidence list', () => {

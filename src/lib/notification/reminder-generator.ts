@@ -12,7 +12,9 @@ import {
   NotificationChannel,
   ReminderPreferences,
   ReminderType,
+  TaskPriority,
 } from '@/types/notification';
+import { taskReminderGenerator } from '@/lib/task/task-reminder';
 
 // =============================================================================
 // 默认提醒配置
@@ -33,6 +35,12 @@ const DEFAULT_REMINDER_PREFERENCES: ReminderPreferences = {
     enabled: true,
     hoursBefore: [24, 1],
     channels: [NotificationChannel.IN_APP],
+  },
+  task: {
+    enabled: true,
+    hoursBefore: [24, 1], // 提前24小时和1小时
+    channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
+    priorities: [TaskPriority.HIGH, TaskPriority.URGENT], // 只为高优先级和紧急任务生成提醒
   },
 };
 
@@ -423,6 +431,30 @@ class ReminderGenerator {
   }
 
   /**
+   * 为任务生成提醒
+   */
+  async generateTaskReminders(
+    taskId: string,
+    preferences?: Partial<ReminderPreferences>
+  ): Promise<void> {
+    return taskReminderGenerator.generateTaskReminders(taskId, preferences);
+  }
+
+  /**
+   * 批量为所有即将到期的任务生成提醒
+   */
+  async generateAllPendingTaskReminders(): Promise<number> {
+    return taskReminderGenerator.generateAllPendingTaskReminders();
+  }
+
+  /**
+   * 清理已完成任务的相关提醒
+   */
+  async cleanupCompletedTaskReminders(taskId: string): Promise<number> {
+    return taskReminderGenerator.cleanupCompletedTaskReminders(taskId);
+  }
+
+  /**
    * 合并用户自定义配置和默认配置
    */
   mergePreferences(
@@ -440,6 +472,10 @@ class ReminderGenerator {
       followUp: {
         ...DEFAULT_REMINDER_PREFERENCES.followUp,
         ...(userPreferences?.followUp ?? {}),
+      },
+      task: {
+        ...DEFAULT_REMINDER_PREFERENCES.task,
+        ...(userPreferences?.task ?? {}),
       },
     };
   }

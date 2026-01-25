@@ -1,0 +1,783 @@
+
+> legal_debate_mvp@0.1.0 test
+> jest src/__tests__/components/case/CaseShareDialog.test.tsx src/__tests__/components/case/SharedWithList.test.tsx
+
+鈼?Validation Warning:
+
+  Unknown option "coverageProvider" with value "v8" was found.
+  This is probably a typing mistake. Fixing it will remove this message.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+  console.error
+    鍏变韩妗堜欢鏃跺嚭閿? Error: 鍏变韩妗堜欢澶辫触
+        at handleSave (D:\legal_debate_mvp\src\components\case\CaseShareDialog.tsx:64:15)
+
+    [0m [90m 75 |[39m       }
+     [90m 76 |[39m     } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 77 |[39m       console[33m.[39merror([32m'鍏变韩妗堜欢鏃跺嚭閿?'[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 78 |[39m       [36mconst[39m errorMessage [33m=[39m
+     [90m 79 |[39m         error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m'鍏变韩妗堜欢澶辫触'[39m[33m;[39m
+     [90m 80 |[39m       toast[33m.[39merror(errorMessage)[33m;[39m[0m
+
+      at handleSave (src/components/case/CaseShareDialog.tsx:77:15)
+
+  console.error
+    鍏变韩妗堜欢鏃跺嚭閿? Error: 缃戠粶閿欒
+        at Object.<anonymous> (D:\legal_debate_mvp\src\__tests__\components\case\CaseShareDialog.test.tsx:339:57)
+        at Promise.finally.completed (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1557:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1497:10)
+        at _callCircusTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1007:40)
+        at _runTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:947:3)
+        at D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:849:7
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:862:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at run (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:761:3)
+        at runAndTransformResultsToJestFormat (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1918:21)
+        at jestAdapter (D:\legal_debate_mvp\node_modules\jest-circus\build\runner.js:101:19)
+        at runTestInternal (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:275:16)
+        at runTest (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:343:7)
+
+    [0m [90m 75 |[39m       }
+     [90m 76 |[39m     } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 77 |[39m       console[33m.[39merror([32m'鍏变韩妗堜欢鏃跺嚭閿?'[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 78 |[39m       [36mconst[39m errorMessage [33m=[39m
+     [90m 79 |[39m         error [36minstanceof[39m [33mError[39m [33m?[39m error[33m.[39mmessage [33m:[39m [32m'鍏变韩妗堜欢澶辫触'[39m[33m;[39m
+     [90m 80 |[39m       toast[33m.[39merror(errorMessage)[33m;[39m[0m
+
+      at handleSave (src/components/case/CaseShareDialog.tsx:77:15)
+
+PASS components src/__tests__/components/case/CaseShareDialog.test.tsx
+  CaseShareDialog
+    娓叉煋娴嬭瘯
+      鈭?搴旇娓叉煋鍏变韩妗堜欢鎸夐挳 (83 ms)
+      鈭?鐐瑰嚮鎸夐挳鍚庡簲璇ユ墦寮€瀵硅瘽妗?(84 ms)
+      鈭?瀵硅瘽妗嗕腑搴旇鏄剧ず妗堜欢鏍囬 (54 ms)
+      鈭?搴旇鏄剧ず鍏变韩缁欏洟闃熺殑寮€鍏?(61 ms)
+      鈭?搴旇鏄剧ず鏉冮檺璇存槑 (66 ms)
+    鏉冮檺鎺у埗娴嬭瘯
+      鈭?闈炴墍鏈夎€呮椂搴旇鏄剧ず鎻愮ず (83 ms)
+      鈭?闈炴墍鏈夎€呮椂寮€鍏冲簲璇ヨ绂佺敤 (74 ms)
+      鈭?闈炴墍鏈夎€呮椂鏂囨湰妗嗗簲璇ヨ绂佺敤 (57 ms)
+    浜や簰娴嬭瘯
+      鈭?搴旇鑳藉鍒囨崲鍏变韩寮€鍏?(150 ms)
+      鈭?鍏变韩鏃跺簲璇ユ樉绀鸿鏄庢枃鏈 (68 ms)
+      鈭?搴旇鑳藉杈撳叆鍏变韩璇存槑 (282 ms)
+      鈭?搴旇鏄剧ず瀛楃璁℃暟 (182 ms)
+    API璋冪敤娴嬭瘯
+      鈭?搴旇璋冪敤鍏变韩API (150 ms)
+      鈭?鍏变韩鎴愬姛鍚庡簲璇ユ樉绀烘垚鍔熸彁绀?(132 ms)
+      鈭?鍏变韩鎴愬姛鍚庡簲璇ヨ皟鐢╫nShared鍥炶皟 (118 ms)
+      鈭?API澶辫触鏃跺簲璇ユ樉绀洪敊璇彁绀?(148 ms)
+      鈭?缃戠粶閿欒鏃跺簲璇ユ樉绀洪敊璇彁绀?(134 ms)
+    鐘舵€佺鐞嗘祴璇?      鈭?鍏抽棴瀵硅瘽妗嗗悗閲嶆柊鎵撳紑搴旇閲嶇疆鐘舵€?(263 ms)
+    鍔犺浇鐘舵€佹祴璇?      鈭?淇濆瓨鏃跺簲璇ユ樉绀轰繚瀛樹腑鐘舵€?(152 ms)
+    鍙栨秷鎸夐挳娴嬭瘯
+      鈭?搴旇鑳藉鍙栨秷鎿嶄綔 (131 ms)
+
+  console.error
+    An update to SharedWithList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 101 |[39m
+     [90m 102 |[39m     [36mtry[39m {
+    [31m[1m>[22m[39m[90m 103 |[39m       setUnsharing([36mtrue[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 104 |[39m       setError([36mnull[39m)[33m;[39m
+     [90m 105 |[39m       [36mconst[39m response [33m=[39m [36mawait[39m fetch([32m`/api/cases/${caseId}/share`[39m[33m,[39m {
+     [90m 106 |[39m         method[33m:[39m [32m'POST'[39m[33m,[39m[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at handleUnshare (src/components/case/SharedWithList.tsx:103:7)
+      at executeDispatch (node_modules/react-dom/cjs/react-dom-client.development.js:19116:9)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at processDispatchQueue (node_modules/react-dom/cjs/react-dom-client.development.js:19166:19)
+      at node_modules/react-dom/cjs/react-dom-client.development.js:19767:9
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3255:40)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:19320:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23585:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23553:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLButtonElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
+      at fireAnEvent (node_modules/jsdom/lib/jsdom/living/helpers/events.js:18:36)
+      at HTMLButtonElementImpl.click (node_modules/jsdom/lib/jsdom/living/nodes/HTMLElement-impl.js:85:5)
+      at HTMLButtonElement.click (node_modules/jsdom/lib/jsdom/living/generated/HTMLElement.js:108:34)
+      at Object.<anonymous> (src/__tests__/components/case/SharedWithList.test.tsx:206:20)
+
+  console.error
+    An update to SharedWithList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 102 |[39m     [36mtry[39m {
+     [90m 103 |[39m       setUnsharing([36mtrue[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 104 |[39m       setError([36mnull[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 105 |[39m       [36mconst[39m response [33m=[39m [36mawait[39m fetch([32m`/api/cases/${caseId}/share`[39m[33m,[39m {
+     [90m 106 |[39m         method[33m:[39m [32m'POST'[39m[33m,[39m
+     [90m 107 |[39m         headers[33m:[39m {[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at handleUnshare (src/components/case/SharedWithList.tsx:104:7)
+      at executeDispatch (node_modules/react-dom/cjs/react-dom-client.development.js:19116:9)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at processDispatchQueue (node_modules/react-dom/cjs/react-dom-client.development.js:19166:19)
+      at node_modules/react-dom/cjs/react-dom-client.development.js:19767:9
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3255:40)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:19320:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23585:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23553:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLButtonElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
+      at fireAnEvent (node_modules/jsdom/lib/jsdom/living/helpers/events.js:18:36)
+      at HTMLButtonElementImpl.click (node_modules/jsdom/lib/jsdom/living/nodes/HTMLElement-impl.js:85:5)
+      at HTMLButtonElement.click (node_modules/jsdom/lib/jsdom/living/generated/HTMLElement.js:108:34)
+      at Object.<anonymous> (src/__tests__/components/case/SharedWithList.test.tsx:206:20)
+
+  console.error
+    鍙栨秷鍏变韩鏃跺嚭閿? TypeError: Cannot read properties of undefined (reading 'ok')
+        at handleUnshare (D:\legal_debate_mvp\src\components\case\SharedWithList.tsx:116:21)
+
+    [0m [90m 125 |[39m       }
+     [90m 126 |[39m     } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 127 |[39m       console[33m.[39merror([32m'鍙栨秷鍏变韩鏃跺嚭閿?'[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 128 |[39m       setError(err [36minstanceof[39m [33mError[39m [33m?[39m err[33m.[39mmessage [33m:[39m [32m'鏈煡閿欒'[39m)[33m;[39m
+     [90m 129 |[39m     } [36mfinally[39m {
+     [90m 130 |[39m       setUnsharing([36mfalse[39m)[33m;[39m[0m
+
+      at handleUnshare (src/components/case/SharedWithList.tsx:127:15)
+
+  console.error
+    An update to SharedWithList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 126 |[39m     } [36mcatch[39m (err) {
+     [90m 127 |[39m       console[33m.[39merror([32m'鍙栨秷鍏变韩鏃跺嚭閿?'[39m[33m,[39m err)[33m;[39m
+    [31m[1m>[22m[39m[90m 128 |[39m       setError(err [36minstanceof[39m [33mError[39m [33m?[39m err[33m.[39mmessage [33m:[39m [32m'鏈煡閿欒'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 129 |[39m     } [36mfinally[39m {
+     [90m 130 |[39m       setUnsharing([36mfalse[39m)[33m;[39m
+     [90m 131 |[39m     }[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at handleUnshare (src/components/case/SharedWithList.tsx:128:7)
+
+  console.error
+    An update to SharedWithList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 128 |[39m       setError(err [36minstanceof[39m [33mError[39m [33m?[39m err[33m.[39mmessage [33m:[39m [32m'鏈煡閿欒'[39m)[33m;[39m
+     [90m 129 |[39m     } [36mfinally[39m {
+    [31m[1m>[22m[39m[90m 130 |[39m       setUnsharing([36mfalse[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 131 |[39m     }
+     [90m 132 |[39m   }[33m;[39m
+     [90m 133 |[39m[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at handleUnshare (src/components/case/SharedWithList.tsx:130:7)
+
+  console.error
+    An update to SharedWithList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 101 |[39m
+     [90m 102 |[39m     [36mtry[39m {
+    [31m[1m>[22m[39m[90m 103 |[39m       setUnsharing([36mtrue[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 104 |[39m       setError([36mnull[39m)[33m;[39m
+     [90m 105 |[39m       [36mconst[39m response [33m=[39m [36mawait[39m fetch([32m`/api/cases/${caseId}/share`[39m[33m,[39m {
+     [90m 106 |[39m         method[33m:[39m [32m'POST'[39m[33m,[39m[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at handleUnshare (src/components/case/SharedWithList.tsx:103:7)
+      at executeDispatch (node_modules/react-dom/cjs/react-dom-client.development.js:19116:9)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at processDispatchQueue (node_modules/react-dom/cjs/react-dom-client.development.js:19166:19)
+      at node_modules/react-dom/cjs/react-dom-client.development.js:19767:9
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3255:40)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:19320:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23585:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23553:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLButtonElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
+      at fireAnEvent (node_modules/jsdom/lib/jsdom/living/helpers/events.js:18:36)
+      at HTMLButtonElementImpl.click (node_modules/jsdom/lib/jsdom/living/nodes/HTMLElement-impl.js:85:5)
+      at HTMLButtonElement.click (node_modules/jsdom/lib/jsdom/living/generated/HTMLElement.js:108:34)
+      at Object.<anonymous> (src/__tests__/components/case/SharedWithList.test.tsx:237:20)
+
+  console.error
+    An update to SharedWithList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 102 |[39m     [36mtry[39m {
+     [90m 103 |[39m       setUnsharing([36mtrue[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 104 |[39m       setError([36mnull[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 105 |[39m       [36mconst[39m response [33m=[39m [36mawait[39m fetch([32m`/api/cases/${caseId}/share`[39m[33m,[39m {
+     [90m 106 |[39m         method[33m:[39m [32m'POST'[39m[33m,[39m
+     [90m 107 |[39m         headers[33m:[39m {[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at handleUnshare (src/components/case/SharedWithList.tsx:104:7)
+      at executeDispatch (node_modules/react-dom/cjs/react-dom-client.development.js:19116:9)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at processDispatchQueue (node_modules/react-dom/cjs/react-dom-client.development.js:19166:19)
+      at node_modules/react-dom/cjs/react-dom-client.development.js:19767:9
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3255:40)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:19320:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23585:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23553:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLButtonElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
+      at fireAnEvent (node_modules/jsdom/lib/jsdom/living/helpers/events.js:18:36)
+      at HTMLButtonElementImpl.click (node_modules/jsdom/lib/jsdom/living/nodes/HTMLElement-impl.js:85:5)
+      at HTMLButtonElement.click (node_modules/jsdom/lib/jsdom/living/generated/HTMLElement.js:108:34)
+      at Object.<anonymous> (src/__tests__/components/case/SharedWithList.test.tsx:237:20)
+
+  console.error
+    An update to SharedWithList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 101 |[39m
+     [90m 102 |[39m     [36mtry[39m {
+    [31m[1m>[22m[39m[90m 103 |[39m       setUnsharing([36mtrue[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 104 |[39m       setError([36mnull[39m)[33m;[39m
+     [90m 105 |[39m       [36mconst[39m response [33m=[39m [36mawait[39m fetch([32m`/api/cases/${caseId}/share`[39m[33m,[39m {
+     [90m 106 |[39m         method[33m:[39m [32m'POST'[39m[33m,[39m[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at handleUnshare (src/components/case/SharedWithList.tsx:103:7)
+      at executeDispatch (node_modules/react-dom/cjs/react-dom-client.development.js:19116:9)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at processDispatchQueue (node_modules/react-dom/cjs/react-dom-client.development.js:19166:19)
+      at node_modules/react-dom/cjs/react-dom-client.development.js:19767:9
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3255:40)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:19320:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23585:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23553:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLButtonElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
+      at fireAnEvent (node_modules/jsdom/lib/jsdom/living/helpers/events.js:18:36)
+      at HTMLButtonElementImpl.click (node_modules/jsdom/lib/jsdom/living/nodes/HTMLElement-impl.js:85:5)
+      at HTMLButtonElement.click (node_modules/jsdom/lib/jsdom/living/generated/HTMLElement.js:108:34)
+      at Object.<anonymous> (src/__tests__/components/case/SharedWithList.test.tsx:279:20)
+
+  console.error
+    An update to SharedWithList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 102 |[39m     [36mtry[39m {
+     [90m 103 |[39m       setUnsharing([36mtrue[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 104 |[39m       setError([36mnull[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 105 |[39m       [36mconst[39m response [33m=[39m [36mawait[39m fetch([32m`/api/cases/${caseId}/share`[39m[33m,[39m {
+     [90m 106 |[39m         method[33m:[39m [32m'POST'[39m[33m,[39m
+     [90m 107 |[39m         headers[33m:[39m {[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at handleUnshare (src/components/case/SharedWithList.tsx:104:7)
+      at executeDispatch (node_modules/react-dom/cjs/react-dom-client.development.js:19116:9)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at processDispatchQueue (node_modules/react-dom/cjs/react-dom-client.development.js:19166:19)
+      at node_modules/react-dom/cjs/react-dom-client.development.js:19767:9
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3255:40)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:19320:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23585:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23553:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLButtonElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
+      at fireAnEvent (node_modules/jsdom/lib/jsdom/living/helpers/events.js:18:36)
+      at HTMLButtonElementImpl.click (node_modules/jsdom/lib/jsdom/living/nodes/HTMLElement-impl.js:85:5)
+      at HTMLButtonElement.click (node_modules/jsdom/lib/jsdom/living/generated/HTMLElement.js:108:34)
+      at Object.<anonymous> (src/__tests__/components/case/SharedWithList.test.tsx:279:20)
+
+  console.error
+    鑾峰彇鍏变韩淇℃伅鏃跺嚭閿? Error: 鑾峰彇鍏变韩淇℃伅澶辫触
+        at Object.<anonymous> (D:\legal_debate_mvp\src\__tests__\components\case\SharedWithList.test.tsx:308:9)
+        at Promise.finally.completed (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1557:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1497:10)
+        at _callCircusTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1007:40)
+        at _runTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:947:3)
+        at D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:849:7
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:862:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at run (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:761:3)
+        at runAndTransformResultsToJestFormat (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1918:21)
+        at jestAdapter (D:\legal_debate_mvp\node_modules\jest-circus\build\runner.js:101:19)
+        at runTestInternal (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:275:16)
+        at runTest (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:343:7)
+
+    [0m [90m 84 |[39m         }
+     [90m 85 |[39m       } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 86 |[39m         console[33m.[39merror([32m'鑾峰彇鍏变韩淇℃伅鏃跺嚭閿?'[39m[33m,[39m err)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 87 |[39m         setError(err [36minstanceof[39m [33mError[39m [33m?[39m err[33m.[39mmessage [33m:[39m [32m'鏈煡閿欒'[39m)[33m;[39m
+     [90m 88 |[39m       } [36mfinally[39m {
+     [90m 89 |[39m         setLoading([36mfalse[39m)[33m;[39m[0m
+
+      at fetchShareInfo (src/components/case/SharedWithList.tsx:86:17)
+
+  console.error
+    An update to SharedWithList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 101 |[39m
+     [90m 102 |[39m     [36mtry[39m {
+    [31m[1m>[22m[39m[90m 103 |[39m       setUnsharing([36mtrue[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 104 |[39m       setError([36mnull[39m)[33m;[39m
+     [90m 105 |[39m       [36mconst[39m response [33m=[39m [36mawait[39m fetch([32m`/api/cases/${caseId}/share`[39m[33m,[39m {
+     [90m 106 |[39m         method[33m:[39m [32m'POST'[39m[33m,[39m[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at handleUnshare (src/components/case/SharedWithList.tsx:103:7)
+      at executeDispatch (node_modules/react-dom/cjs/react-dom-client.development.js:19116:9)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at processDispatchQueue (node_modules/react-dom/cjs/react-dom-client.development.js:19166:19)
+      at node_modules/react-dom/cjs/react-dom-client.development.js:19767:9
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3255:40)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:19320:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23585:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23553:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLButtonElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
+      at fireAnEvent (node_modules/jsdom/lib/jsdom/living/helpers/events.js:18:36)
+      at HTMLButtonElementImpl.click (node_modules/jsdom/lib/jsdom/living/nodes/HTMLElement-impl.js:85:5)
+      at HTMLButtonElement.click (node_modules/jsdom/lib/jsdom/living/generated/HTMLElement.js:108:34)
+      at Object.<anonymous> (src/__tests__/components/case/SharedWithList.test.tsx:328:20)
+
+  console.error
+    An update to SharedWithList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 102 |[39m     [36mtry[39m {
+     [90m 103 |[39m       setUnsharing([36mtrue[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 104 |[39m       setError([36mnull[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 105 |[39m       [36mconst[39m response [33m=[39m [36mawait[39m fetch([32m`/api/cases/${caseId}/share`[39m[33m,[39m {
+     [90m 106 |[39m         method[33m:[39m [32m'POST'[39m[33m,[39m
+     [90m 107 |[39m         headers[33m:[39m {[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at handleUnshare (src/components/case/SharedWithList.tsx:104:7)
+      at executeDispatch (node_modules/react-dom/cjs/react-dom-client.development.js:19116:9)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at processDispatchQueue (node_modules/react-dom/cjs/react-dom-client.development.js:19166:19)
+      at node_modules/react-dom/cjs/react-dom-client.development.js:19767:9
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3255:40)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:19320:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23585:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23553:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLButtonElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
+      at fireAnEvent (node_modules/jsdom/lib/jsdom/living/helpers/events.js:18:36)
+      at HTMLButtonElementImpl.click (node_modules/jsdom/lib/jsdom/living/nodes/HTMLElement-impl.js:85:5)
+      at HTMLButtonElement.click (node_modules/jsdom/lib/jsdom/living/generated/HTMLElement.js:108:34)
+      at Object.<anonymous> (src/__tests__/components/case/SharedWithList.test.tsx:328:20)
+
+  console.error
+    鍙栨秷鍏变韩鏃跺嚭閿? Error: 鍙栨秷鍏变韩澶辫触
+        at Object.<anonymous> (D:\legal_debate_mvp\src\__tests__\components\case\SharedWithList.test.tsx:321:32)
+        at Promise.finally.completed (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1557:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1497:10)
+        at _callCircusTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1007:40)
+        at _runTest (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:947:3)
+        at D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:849:7
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:862:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at _runTestsForDescribeBlock (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+        at run (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:761:3)
+        at runAndTransformResultsToJestFormat (D:\legal_debate_mvp\node_modules\jest-circus\build\jestAdapterInit.js:1918:21)
+        at jestAdapter (D:\legal_debate_mvp\node_modules\jest-circus\build\runner.js:101:19)
+        at runTestInternal (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:275:16)
+        at runTest (D:\legal_debate_mvp\node_modules\jest-runner\build\index.js:343:7)
+
+    [0m [90m 125 |[39m       }
+     [90m 126 |[39m     } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 127 |[39m       console[33m.[39merror([32m'鍙栨秷鍏变韩鏃跺嚭閿?'[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 128 |[39m       setError(err [36minstanceof[39m [33mError[39m [33m?[39m err[33m.[39mmessage [33m:[39m [32m'鏈煡閿欒'[39m)[33m;[39m
+     [90m 129 |[39m     } [36mfinally[39m {
+     [90m 130 |[39m       setUnsharing([36mfalse[39m)[33m;[39m[0m
+
+      at handleUnshare (src/components/case/SharedWithList.tsx:127:15)
+
+  console.error
+    An update to SharedWithList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 101 |[39m
+     [90m 102 |[39m     [36mtry[39m {
+    [31m[1m>[22m[39m[90m 103 |[39m       setUnsharing([36mtrue[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 104 |[39m       setError([36mnull[39m)[33m;[39m
+     [90m 105 |[39m       [36mconst[39m response [33m=[39m [36mawait[39m fetch([32m`/api/cases/${caseId}/share`[39m[33m,[39m {
+     [90m 106 |[39m         method[33m:[39m [32m'POST'[39m[33m,[39m[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at handleUnshare (src/components/case/SharedWithList.tsx:103:7)
+      at executeDispatch (node_modules/react-dom/cjs/react-dom-client.development.js:19116:9)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at processDispatchQueue (node_modules/react-dom/cjs/react-dom-client.development.js:19166:19)
+      at node_modules/react-dom/cjs/react-dom-client.development.js:19767:9
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3255:40)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:19320:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23585:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23553:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLButtonElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
+      at fireAnEvent (node_modules/jsdom/lib/jsdom/living/helpers/events.js:18:36)
+      at HTMLButtonElementImpl.click (node_modules/jsdom/lib/jsdom/living/nodes/HTMLElement-impl.js:85:5)
+      at HTMLButtonElement.click (node_modules/jsdom/lib/jsdom/living/generated/HTMLElement.js:108:34)
+      at Object.<anonymous> (src/__tests__/components/case/SharedWithList.test.tsx:349:20)
+
+  console.error
+    An update to SharedWithList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 102 |[39m     [36mtry[39m {
+     [90m 103 |[39m       setUnsharing([36mtrue[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 104 |[39m       setError([36mnull[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 105 |[39m       [36mconst[39m response [33m=[39m [36mawait[39m fetch([32m`/api/cases/${caseId}/share`[39m[33m,[39m {
+     [90m 106 |[39m         method[33m:[39m [32m'POST'[39m[33m,[39m
+     [90m 107 |[39m         headers[33m:[39m {[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at handleUnshare (src/components/case/SharedWithList.tsx:104:7)
+      at executeDispatch (node_modules/react-dom/cjs/react-dom-client.development.js:19116:9)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at processDispatchQueue (node_modules/react-dom/cjs/react-dom-client.development.js:19166:19)
+      at node_modules/react-dom/cjs/react-dom-client.development.js:19767:9
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3255:40)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:19320:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23585:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23553:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLButtonElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
+      at fireAnEvent (node_modules/jsdom/lib/jsdom/living/helpers/events.js:18:36)
+      at HTMLButtonElementImpl.click (node_modules/jsdom/lib/jsdom/living/nodes/HTMLElement-impl.js:85:5)
+      at HTMLButtonElement.click (node_modules/jsdom/lib/jsdom/living/generated/HTMLElement.js:108:34)
+      at Object.<anonymous> (src/__tests__/components/case/SharedWithList.test.tsx:349:20)
+
+  console.error
+    鍙栨秷鍏变韩鏃跺嚭閿? Error: 鍙栨秷鍏变韩澶辫触
+        at handleUnshare (D:\legal_debate_mvp\src\components\case\SharedWithList.tsx:117:15)
+
+    [0m [90m 125 |[39m       }
+     [90m 126 |[39m     } [36mcatch[39m (err) {
+    [31m[1m>[22m[39m[90m 127 |[39m       console[33m.[39merror([32m'鍙栨秷鍏变韩鏃跺嚭閿?'[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 128 |[39m       setError(err [36minstanceof[39m [33mError[39m [33m?[39m err[33m.[39mmessage [33m:[39m [32m'鏈煡閿欒'[39m)[33m;[39m
+     [90m 129 |[39m     } [36mfinally[39m {
+     [90m 130 |[39m       setUnsharing([36mfalse[39m)[33m;[39m[0m
+
+      at handleUnshare (src/components/case/SharedWithList.tsx:127:15)
+
+  console.error
+    An update to SharedWithList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 101 |[39m
+     [90m 102 |[39m     [36mtry[39m {
+    [31m[1m>[22m[39m[90m 103 |[39m       setUnsharing([36mtrue[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 104 |[39m       setError([36mnull[39m)[33m;[39m
+     [90m 105 |[39m       [36mconst[39m response [33m=[39m [36mawait[39m fetch([32m`/api/cases/${caseId}/share`[39m[33m,[39m {
+     [90m 106 |[39m         method[33m:[39m [32m'POST'[39m[33m,[39m[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at handleUnshare (src/components/case/SharedWithList.tsx:103:7)
+      at executeDispatch (node_modules/react-dom/cjs/react-dom-client.development.js:19116:9)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at processDispatchQueue (node_modules/react-dom/cjs/react-dom-client.development.js:19166:19)
+      at node_modules/react-dom/cjs/react-dom-client.development.js:19767:9
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3255:40)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:19320:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23585:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23553:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLButtonElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
+      at fireAnEvent (node_modules/jsdom/lib/jsdom/living/helpers/events.js:18:36)
+      at HTMLButtonElementImpl.click (node_modules/jsdom/lib/jsdom/living/nodes/HTMLElement-impl.js:85:5)
+      at HTMLButtonElement.click (node_modules/jsdom/lib/jsdom/living/generated/HTMLElement.js:108:34)
+      at Object.<anonymous> (src/__tests__/components/case/SharedWithList.test.tsx:395:20)
+
+  console.error
+    An update to SharedWithList inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+    [0m [90m 102 |[39m     [36mtry[39m {
+     [90m 103 |[39m       setUnsharing([36mtrue[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 104 |[39m       setError([36mnull[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 105 |[39m       [36mconst[39m response [33m=[39m [36mawait[39m fetch([32m`/api/cases/${caseId}/share`[39m[33m,[39m {
+     [90m 106 |[39m         method[33m:[39m [32m'POST'[39m[33m,[39m
+     [90m 107 |[39m         headers[33m:[39m {[0m
+
+      at node_modules/react-dom/cjs/react-dom-client.development.js:18758:19
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18757:9)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at dispatchSetState (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at handleUnshare (src/components/case/SharedWithList.tsx:104:7)
+      at executeDispatch (node_modules/react-dom/cjs/react-dom-client.development.js:19116:9)
+      at runWithFiberInDEV (node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+      at processDispatchQueue (node_modules/react-dom/cjs/react-dom-client.development.js:19166:19)
+      at node_modules/react-dom/cjs/react-dom-client.development.js:19767:9
+      at batchedUpdates$1 (node_modules/react-dom/cjs/react-dom-client.development.js:3255:40)
+      at dispatchEventForPluginEventSystem (node_modules/react-dom/cjs/react-dom-client.development.js:19320:7)
+      at dispatchEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23585:11)
+      at dispatchDiscreteEvent (node_modules/react-dom/cjs/react-dom-client.development.js:23553:11)
+      at HTMLDivElement.callTheUserObjectsOperation (node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+      at innerInvokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:350:25)
+      at invokeEventListeners (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:286:3)
+      at HTMLButtonElementImpl._dispatch (node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:233:9)
+      at fireAnEvent (node_modules/jsdom/lib/jsdom/living/helpers/events.js:18:36)
+      at HTMLButtonElementImpl.click (node_modules/jsdom/lib/jsdom/living/nodes/HTMLElement-impl.js:85:5)
+      at HTMLButtonElement.click (node_modules/jsdom/lib/jsdom/living/generated/HTMLElement.js:108:34)
+      at Object.<anonymous> (src/__tests__/components/case/SharedWithList.test.tsx:395:20)
+
+PASS components src/__tests__/components/case/SharedWithList.test.tsx
+  SharedWithList
+    娓叉煋娴嬭瘯
+      鈭?搴旇鏄剧ず鍔犺浇鐘舵€?(6 ms)
+      鈭?搴旇鏄剧ず鍏变韩鐘舵€佹爣棰?(52 ms)
+      鈭?搴旇鏄剧ず鎵€鏈夋潈绫诲瀷 (36 ms)
+      鈭?搴旇鏄剧ず鍏变韩鐘舵€佷负宸插叡浜?(32 ms)
+      鈭?搴旇鏄剧ず鍏变韩鏃堕棿 (15 ms)
+      鈭?搴旇鏄剧ず鍏变韩鑰?(35 ms)
+      鈭?搴旇鏄剧ず鍏变韩璇存槑 (34 ms)
+      鈭?鏈叡浜椂涓嶅簲璇ユ樉绀哄叡浜俊鎭?(50 ms)
+      鈭?鍥㈤槦妗堜欢搴旇鏄剧ず姝ｇ‘鐨勭被鍨?(34 ms)
+    鍙栨秷鍏变韩娴嬭瘯
+      鈭?搴旇鏄剧ず鍙栨秷鍏变韩鎸夐挳 (48 ms)
+      鈭?鐐瑰嚮鍙栨秷鍏变韩搴旇鏄剧ず纭瀵硅瘽妗?(51 ms)
+      鈭?鍙栨秷纭鏃跺簲璇ヨ皟鐢ˋPI (33 ms)
+      鈭?鍙栨秷鍏变韩鎴愬姛鍚庡簲璇ユ洿鏂癠I (35 ms)
+      鈭?鍙栨秷纭瀵硅瘽妗嗘椂涓嶅簲璋冪敤API (30 ms)
+    閿欒澶勭悊娴嬭瘯
+      鈭?API澶辫触鏃跺簲璇ユ樉绀洪敊璇俊鎭?(32 ms)
+      鈭?鍙栨秷鍏变韩澶辫触鏃跺簲璇ユ樉绀洪敊璇俊鎭?(67 ms)
+      鈭?鍙栨秷鍏变韩API杩斿洖澶辫触鏃跺簲璇ユ樉绀洪敊璇俊鎭?(49 ms)
+    鏉冮檺娴嬭瘯
+      鈭?闈炴墍鏈夎€呮椂涓嶅簲璇ユ樉绀哄彇娑堝叡浜寜閽?(17 ms)
+    鍔犺浇鐘舵€佹祴璇?      鈭?鍙栨秷鍏变韩鏃跺簲璇ユ樉绀哄彇娑堜腑鐘舵€?(69 ms)
+    绌烘暟鎹祴璇?      鈭?娌℃湁鍏变韩淇℃伅鏃跺簲璇ユ樉绀烘殏鏃犱俊鎭?(31 ms)
+      鈭?鍏变韩鑰呬负null鏃跺簲璇ユ樉绀洪偖绠?(35 ms)
+
+Test Suites: 2 passed, 2 total
+Tests:       41 passed, 41 total
+Snapshots:   0 total
+Time:        5.074 s
+Ran all test suites matching src/__tests__/components/case/CaseShareDialog.test.tsx|src/__tests__/components/case/SharedWithList.test.tsx.

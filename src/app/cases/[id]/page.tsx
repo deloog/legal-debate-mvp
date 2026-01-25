@@ -1,6 +1,6 @@
 /**
  * 案件详情页面
- * 显示案件详细信息，包含团队成员管理功能
+ * 显示案件详细信息，包含团队成员管理和讨论功能
  */
 
 'use client';
@@ -10,6 +10,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { CaseTeamList } from '@/components/case/CaseTeamList';
+import { DiscussionList } from '@/components/discussion/DiscussionList';
+import { WitnessList } from '@/components/witness/WitnessList';
 
 /**
  * 案件详情接口
@@ -28,7 +30,23 @@ interface CaseDetail {
 /**
  * 标签页类型
  */
-type TabType = 'overview' | 'team' | 'timeline' | 'evidence';
+type TabType =
+  | 'overview'
+  | 'team'
+  | 'timeline'
+  | 'evidence'
+  | 'witnesses'
+  | 'discussions';
+
+/**
+ * 案件访问权限接口
+ */
+interface CaseAccessInfo {
+  hasAccess: boolean;
+  isOwner: boolean;
+  accessType?: 'owner' | 'team-member' | 'shared-team';
+  permissions?: string[];
+}
 
 export default function CaseDetailPage() {
   const params = useParams();
@@ -41,6 +59,8 @@ export default function CaseDetailPage() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
 
   const [canManage, setCanManage] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [caseAccessInfo] = useState<CaseAccessInfo | null>(null);
 
   // 加载案件详情
   const loadCaseDetail = useCallback(async (): Promise<void> => {
@@ -72,6 +92,7 @@ export default function CaseDetailPage() {
       if (response.ok) {
         const data = await response.json();
         setCanManage(data.data?.id === caseDetail?.userId);
+        setCurrentUserId(data.data?.id || null);
       }
     } catch (err) {
       console.error('加载用户信息失败:', err);
@@ -114,6 +135,26 @@ export default function CaseDetailPage() {
           <div className='py-8 text-center text-gray-500'>
             证据管理功能开发中...
           </div>
+        );
+      case 'witnesses':
+        return (
+          <WitnessList
+            caseId={caseId}
+            canManage={canManage}
+            currentUserId={currentUserId || ''}
+          />
+        );
+      case 'discussions':
+        return (
+          <DiscussionList
+            caseId={caseId}
+            currentUserId={currentUserId || ''}
+            canViewDiscussions={caseAccessInfo?.hasAccess || false}
+            canCreateDiscussions={caseAccessInfo?.hasAccess || false}
+            canEditDiscussions={canManage || false}
+            canPinDiscussions={canManage || false}
+            canDeleteDiscussions={canManage || false}
+          />
         );
       default:
         return null;
@@ -306,6 +347,26 @@ export default function CaseDetailPage() {
               }`}
             >
               证据
+            </button>
+            <button
+              onClick={() => setActiveTab('witnesses')}
+              className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === 'witnesses'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+              }`}
+            >
+              证人
+            </button>
+            <button
+              onClick={() => setActiveTab('discussions')}
+              className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === 'discussions'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+              }`}
+            >
+              讨论
             </button>
           </nav>
         </div>

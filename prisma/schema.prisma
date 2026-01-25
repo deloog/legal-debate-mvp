@@ -53,6 +53,11 @@ model User {
   reminders                 Reminder[]
   caseMembers               CaseTeamMember[]
   teamMemberships            TeamMember[]
+  discussions                CaseDiscussion[]
+  tasksAssigned              Task[]                 @relation("TasksAssigned")
+  tasksCreated              Task[]                 @relation("TasksCreated")
+  documentTemplates         DocumentTemplate[]
+  feeRateConfigs            FeeRateConfig[]
 
   @@index([email])
   @@index([username])
@@ -118,8 +123,11 @@ model Case {
   legalReferences LegalReference[]
   evidence         Evidence[]
   teamMembers     CaseTeamMember[]
+  discussions    CaseDiscussion[]
   ownerType        OwnerType           @default(USER)
   sharedWithTeam   Boolean             @default(false)
+  tasks           Task[]
+  witnesses       Witness[]
 
   @@index([userId])
   @@index([clientId])
@@ -215,6 +223,7 @@ model CourtSchedule {
   updatedAt         DateTime              @updatedAt
 
   case              Case                  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  witnesses         Witness[]
 
   @@unique([caseId, startTime])
   @@index([caseId])
@@ -222,6 +231,29 @@ model CourtSchedule {
   @@index([startTime])
   @@index([status])
   @@map("court_schedules")
+}
+
+model CaseDiscussion {
+  id                String               @id @default(cuid())
+  caseId            String
+  userId            String
+  content           String              @db.Text
+  mentions          String[]             @default([])
+  isPinned         Boolean             @default(false)
+  metadata          Json?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  deletedAt         DateTime?
+
+  case              Case                 @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([isPinned])
+  @@index([deletedAt])
+  @@map("case_discussions")
 }
 
 model Document {
@@ -1728,4 +1760,165 @@ enum MemberStatus {
 enum OwnerType {
   USER            // 个人
   TEAM            // 团队
+}
+
+model Task {
+  id                String               @id @default(cuid())
+  title             String
+  description       String?              @db.Text
+  status           TaskStatus           @default(TODO)
+  priority         TaskPriority         @default(MEDIUM)
+  caseId           String?
+  assignedTo       String?
+  createdBy       String
+  dueDate          DateTime?
+  completedAt      DateTime?
+  deletedAt        DateTime?
+  tags             String[]              @default([])
+  estimatedHours   Int?
+  actualHours      Int?
+  metadata         Json?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  case              Case?                @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  assignedUser      User?                @relation("TasksAssigned", fields: [assignedTo], references: [id], onDelete: Cascade)
+  createdByUser     User                 @relation("TasksCreated", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@index([assignedTo])
+  @@index([createdBy])
+  @@index([status])
+  @@index([dueDate])
+  @@index([deletedAt])
+  @@index([assignedTo, status, dueDate])
+  @@map("tasks")
+}
+
+enum TaskStatus {
+  TODO            // 待办
+  IN_PROGRESS     // 进行中
+  COMPLETED       // 已完成
+  CANCELLED       // 已取消
+}
+
+enum TaskPriority {
+  LOW             // 低
+  MEDIUM          // 中
+  HIGH            // 高
+  URGENT          // 紧急
+}
+
+enum DocumentTemplateType {
+  INDICTMENT      // 起诉状
+  DEFENSE         // 答辩状
+  APPEARANCE      // 代理词
+  APPEAL          // 上诉状
+  OTHER           // 其他
+}
+
+enum DocumentTemplateCategory {
+  CIVIL           // 民事
+  CRIMINAL        // 刑事
+  ADMINISTRATIVE  // 行政
+  COMMERCIAL      // 商事
+  LABOR           // 劳动
+  INTELLECTUAL    // 知识产权
+  OTHER           // 其他
+}
+
+enum TemplateStatus {
+  DRAFT           // 草稿
+  PUBLISHED       // 已发布
+  ARCHIVED        // 已归档
+}
+
+enum FeeConfigType {
+  LAWYER_FEE      // 律师费
+  LITIGATION_FEE  // 诉讼费
+  TRAVEL_EXPENSE  // 差旅费
+  OTHER_EXPENSE   // 其他费用
+}
+
+enum WitnessStatus {
+  NEED_CONTACT    // 待联系
+  CONTACTED       // 已联系
+  CONFIRMED       // 已确认出庭
+  DECLINED        // 拒绝出庭
+  CANCELLED       // 已取消
+}
+
+model FeeRateConfig {
+  id              String           @id @default(cuid())
+  userId          String
+  configType      FeeConfigType
+  name            String
+  description     String?
+  rateData        Json             // 费率数据
+  isDefault       Boolean          @default(false)
+  isActive        Boolean          @default(true)
+  metadata        Json?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, configType, name])
+  @@index([userId])
+  @@index([configType])
+  @@index([isDefault])
+  @@index([isActive])
+  @@map("fee_rate_configs")
+}
+
+model DocumentTemplate {
+  id                String                    @id @default(cuid())
+  name              String
+  type              DocumentTemplateType      @default(INDICTMENT)
+  category          DocumentTemplateCategory?
+  content           String                    @db.Text
+  variables         Json
+  version           String                    @default("1.0")
+  isSystem          Boolean                   @default(false)
+  isPublic          Boolean                   @default(false)
+  createdBy         String
+  status            TemplateStatus            @default(DRAFT)
+  metadata          Json?
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
+  deletedAt         DateTime?
+
+  user              User                      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@index([type])
+  @@index([category])
+  @@index([createdBy])
+  @@index([status])
+  @@index([isPublic])
+  @@index([deletedAt])
+  @@index([type, category, status])
+  @@map("document_templates")
+}
+
+model Witness {
+  id                String               @id @default(cuid())
+  caseId            String
+  name              String
+  phone             String?
+  address           String?
+  relationship      String?              // 与当事人的关系
+  testimony         String?              @db.Text  // 证词
+  courtScheduleId   String?
+  status            WitnessStatus        @default(NEED_CONTACT)
+  metadata          Json?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  case              Case                 @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  courtSchedule     CourtSchedule?       @relation(fields: [courtScheduleId], references: [id], onDelete: SetNull)
+
+  @@index([caseId])
+  @@index([status])
+  @@index([courtScheduleId])
+  @@map("witnesses")
 }
