@@ -1,0 +1,2200 @@
+
+> legal_debate_mvp@0.1.0 test
+> jest src/__tests__/components/risk/RiskAssessmentViewer.test.tsx
+
+鈼?Validation Warning:
+
+  Unknown option "coverageProvider" with value "v8" was found.
+  This is probably a typing mistake. Fixing it will remove this message.
+
+  Configuration Documentation:
+  https://jestjs.io/docs/configuration
+
+FAIL components src/__tests__/components/risk/RiskAssessmentViewer.test.tsx
+  RiskAssessmentViewer
+    鍔犺浇鐘舵€?      鈭?搴旇鏄剧ず鍔犺浇鐘舵€?(30 ms)
+      鈭?搴旇鍦ㄥ姞杞芥椂闅愯棌鍏朵粬鍐呭 (9 ms)
+    閿欒鐘舵€?      鈭?搴旇鏄剧ず閿欒淇℃伅 (14 ms)
+      鈭?搴旇鏄剧ず閲嶈瘯鎸夐挳 (8 ms)
+      鈭?搴旇鍦ㄩ敊璇椂闅愯棌鍏朵粬鍐呭 (5 ms)
+    鏃犻闄╂儏鍐?      鈭?搴旇鏄剧ず鏃犻闄╂彁绀?(14 ms)
+      鈭?搴旇闅愯棌椋庨櫓鍒楄〃 (10 ms)
+      鈭?搴旇闅愯棌寤鸿鍒楄〃 (12 ms)
+    鏈夐闄╂儏鍐?      脳 搴旇鏄剧ず椋庨櫓姒傝鍗＄墖 (41 ms)
+      鈭?搴旇鏄剧ず璇勪及鑰楁椂 (27 ms)
+      鈭?搴旇鏄剧ず椋庨櫓缁熻鍗＄墖 (33 ms)
+      脳 搴旇姝ｇ‘鏄剧ず椋庨櫓鏁伴噺 (28 ms)
+      鈭?搴旇鏄剧ず椋庨櫓鍒楄〃鏍囬 (25 ms)
+      鈭?搴旇鏄剧ず鎵€鏈夐闄╁崱鐗?(24 ms)
+      鈭?搴旇鏄剧ず寤鸿鍒楄〃鏍囬 (23 ms)
+      鈭?搴旇鏄剧ず鎵€鏈夊缓璁崱鐗?(26 ms)
+    涓嶅悓椋庨櫓绛夌骇
+      脳 搴旇鏄剧ず浣庨闄╃姸鎬?(26 ms)
+      脳 搴旇鏄剧ず涓闄╃姸鎬?(29 ms)
+      脳 搴旇鏄剧ず楂橀闄╃姸鎬?(29 ms)
+      脳 搴旇鏄剧ず涓ラ噸椋庨櫓鐘舵€?(27 ms)
+    鏁版嵁璐ㄩ噺鎻愮ず
+      脳 搴旇鍦ㄦ棤椋庨櫓鏃舵樉绀哄畾鏈熸洿鏂版彁绀?(10 ms)
+      鈭?搴旇鍦ㄥ楂橀闄╂椂鏄剧ず浼樺厛澶勭悊鎻愮ず (31 ms)
+      鈭?搴旇鍦ㄤ綆缃俊搴︽椂鏄剧ず琛ュ厖淇℃伅鎻愮ず (18 ms)
+      鈭?搴旇鍦ㄦ暟鎹川閲忚壇濂芥椂鏄剧ず绉瀬鎻愮ず (16 ms)
+    浜や簰鍔熻兘
+      鈭?搴旇鍦ㄧ偣鍑婚噸璇曟寜閽椂璋冪敤onRefresh (3 ms)
+      脳 搴旇姝ｇ‘鍝嶅簲props鍙樺寲 (27 ms)
+    杈圭晫鏉′欢
+      鈭?搴旇姝ｇ‘澶勭悊绌洪闄╂暟缁?(8 ms)
+      鈭?搴旇姝ｇ‘澶勭悊鏈€澶ч闄╂暟閲?(32 ms)
+      脳 搴旇姝ｇ‘澶勭悊浣庣疆淇″害椋庨櫓 (14 ms)
+    鍙闂€?      鈭?搴旇鏈夋纭殑璇箟鍖栨爣绛?(73 ms)
+      鈭?鎸夐挳搴旇鏈夊彲璁块棶鐨勬枃鏈?(11 ms)
+
+  鈼?RiskAssessmentViewer 鈥?鏈夐闄╂儏鍐?鈥?搴旇鏄剧ず椋庨櫓姒傝鍗＄墖
+
+    TestingLibraryElementError: Unable to find an element with the text: 鏁翠綋椋庨櫓. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="space-y-6"
+        >
+          <div
+            class="p-6 border-2 rounded-lg bg-orange-50 border-orange-200"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <div
+                class="flex items-center gap-4"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert h-6 w-6 text-orange-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <div>
+                  <h3
+                    class="text-xl font-bold text-gray-900"
+                  >
+                    鏁翠綋椋庨櫓锛?[0m
+                    椋庨櫓杈冮珮锛屽缓璁埗瀹氬簲瀵圭瓥鐣?[0m
+                  </h3>
+                  <p
+                    class="text-sm text-orange-600 mt-1"
+                  >
+                    椋庨櫓绛夌骇锛?[0m
+                    high
+                     | 璇勫垎锛?[0m
+                    68
+                    %
+                  </p>
+                </div>
+              </div>
+              <div
+                class="text-right"
+              >
+                <p
+                  class="text-sm text-gray-600"
+                >
+                  璇勪及鑰楁椂
+                </p>
+                <p
+                  class="text-lg font-semibold text-gray-900"
+                >
+                  150
+                  ms
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-2 md:grid-cols-4 gap-4"
+          >
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-octagon-alert h-5 w-5 text-red-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 16h.01"
+                  />
+                  <path
+                    d="M12 8v4"
+                  />
+                  <path
+                    d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  涓ラ噸椋庨櫓
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-red-600"
+              >
+                1
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert h-5 w-5 text-orange-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  楂橀闄?[0m
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-orange-600"
+              >
+                1
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-alert h-5 w-5 text-yellow-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentC...
+
+      426 |
+      427 |       // 楠岃瘉椋庨櫓姒傝
+    > 428 |       expect(screen.getByText('鏁翠綋椋庨櫓')).toBeInTheDocument();
+          |                     ^
+      429 |       expect(screen.getByText(/椋庨櫓绛夌骇锛歨igh/i)).toBeInTheDocument();
+      430 |       expect(screen.getByText(/璇勫垎锛?8%/i)).toBeInTheDocument();
+      431 |     });
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/components/risk/RiskAssessmentViewer.test.tsx:428:21)
+
+  鈼?RiskAssessmentViewer 鈥?鏈夐闄╂儏鍐?鈥?搴旇姝ｇ‘鏄剧ず椋庨櫓鏁伴噺
+
+    TestingLibraryElementError: Found multiple elements with the text: 1
+
+    Here are the matching elements:
+
+    Ignored nodes: comments, script, style
+    <p
+      class="text-2xl font-bold text-red-600"
+    >
+      1
+    </p>
+
+    Ignored nodes: comments, script, style
+    <p
+      class="text-2xl font-bold text-orange-600"
+    >
+      1
+    </p>
+
+    Ignored nodes: comments, script, style
+    <p
+      class="text-2xl font-bold text-yellow-600"
+    >
+      1
+    </p>
+
+    (If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="space-y-6"
+        >
+          <div
+            class="p-6 border-2 rounded-lg bg-orange-50 border-orange-200"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <div
+                class="flex items-center gap-4"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert h-6 w-6 text-orange-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <div>
+                  <h3
+                    class="text-xl font-bold text-gray-900"
+                  >
+                    鏁翠綋椋庨櫓锛?[0m
+                    椋庨櫓杈冮珮锛屽缓璁埗瀹氬簲瀵圭瓥鐣?[0m
+                  </h3>
+                  <p
+                    class="text-sm text-orange-600 mt-1"
+                  >
+                    椋庨櫓绛夌骇锛?[0m
+                    high
+                     | 璇勫垎锛?[0m
+                    68
+                    %
+                  </p>
+                </div>
+              </div>
+              <div
+                class="text-right"
+              >
+                <p
+                  class="text-sm text-gray-600"
+                >
+                  璇勪及鑰楁椂
+                </p>
+                <p
+                  class="text-lg font-semibold text-gray-900"
+                >
+                  150
+                  ms
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-2 md:grid-cols-4 gap-4"
+          >
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-octagon-alert h-5 w-5 text-red-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 16h.01"
+                  />
+                  <path
+                    d="M12 8v4"
+                  />
+                  <path
+                    d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  涓ラ噸椋庨櫓
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-red-600"
+              >
+                1
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert h-5 w-5 text-orange-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  楂橀闄?[0m
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-orange-600"
+              >
+                1
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-alert h-5 w-5 text-yellow-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentC...
+
+      453 |
+      454 |       // 楠岃瘉椋庨櫓鏁伴噺
+    > 455 |       expect(screen.getByText('1')).toBeInTheDocument(); // 涓ラ噸
+          |                     ^
+      456 |       expect(screen.getAllByText('1')).toHaveLength(3); // 涓ラ噸銆侀珮銆佷腑
+      457 |     });
+      458 |
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at getElementError (node_modules/@testing-library/dom/dist/query-helpers.js:20:35)
+      at getMultipleElementsFoundError (node_modules/@testing-library/dom/dist/query-helpers.js:23:10)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/components/risk/RiskAssessmentViewer.test.tsx:455:21)
+
+  鈼?RiskAssessmentViewer 鈥?涓嶅悓椋庨櫓绛夌骇 鈥?搴旇鏄剧ず浣庨闄╃姸鎬?
+    TestingLibraryElementError: Unable to find an element with the text: 鏁翠綋椋庨櫓杈冧綆锛屾浠剁浉瀵瑰畨鍏? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="space-y-6"
+        >
+          <div
+            class="p-6 border-2 rounded-lg bg-green-50 border-green-200"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <div
+                class="flex items-center gap-4"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-check-big h-6 w-6 text-green-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M21.801 10A10 10 0 1 1 17 3.335"
+                  />
+                  <path
+                    d="m9 11 3 3L22 4"
+                  />
+                </svg>
+                <div>
+                  <h3
+                    class="text-xl font-bold text-gray-900"
+                  >
+                    鏁翠綋椋庨櫓锛?[0m
+                    鏁翠綋椋庨櫓杈冧綆锛屾浠剁浉瀵瑰畨鍏?[0m
+                  </h3>
+                  <p
+                    class="text-sm text-green-600 mt-1"
+                  >
+                    椋庨櫓绛夌骇锛?[0m
+                    low
+                     | 璇勫垎锛?[0m
+                    20
+                    %
+                  </p>
+                </div>
+              </div>
+              <div
+                class="text-right"
+              >
+                <p
+                  class="text-sm text-gray-600"
+                >
+                  璇勪及鑰楁椂
+                </p>
+                <p
+                  class="text-lg font-semibold text-gray-900"
+                >
+                  150
+                  ms
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-2 md:grid-cols-4 gap-4"
+          >
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-octagon-alert h-5 w-5 text-red-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 16h.01"
+                  />
+                  <path
+                    d="M12 8v4"
+                  />
+                  <path
+                    d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  涓ラ噸椋庨櫓
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-red-600"
+              >
+                1
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert h-5 w-5 text-orange-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  楂橀闄?[0m
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-orange-600"
+              >
+                1
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-alert h-5 w-5 text-yellow-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  ...
+
+      503 |       // 楠岃瘉浣庨闄╂弿杩?[39m
+      504 |       expect(
+    > 505 |         screen.getByText('鏁翠綋椋庨櫓杈冧綆锛屾浠剁浉瀵瑰畨鍏?)
+          |                ^
+      506 |       ).toBeInTheDocument();
+      507 |       expect(screen.getByText(/璇勫垎锛?0%/i)).toBeInTheDocument();
+      508 |     });
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/components/risk/RiskAssessmentViewer.test.tsx:505:16)
+
+  鈼?RiskAssessmentViewer 鈥?涓嶅悓椋庨櫓绛夌骇 鈥?搴旇鏄剧ず涓闄╃姸鎬?
+    TestingLibraryElementError: Unable to find an element with the text: 瀛樺湪涓瓑椋庨櫓锛岄渶瑕佸叧娉? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="space-y-6"
+        >
+          <div
+            class="p-6 border-2 rounded-lg bg-yellow-50 border-yellow-200"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <div
+                class="flex items-center gap-4"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-alert h-6 w-6 text-yellow-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <line
+                    x1="12"
+                    x2="12"
+                    y1="8"
+                    y2="12"
+                  />
+                  <line
+                    x1="12"
+                    x2="12.01"
+                    y1="16"
+                    y2="16"
+                  />
+                </svg>
+                <div>
+                  <h3
+                    class="text-xl font-bold text-gray-900"
+                  >
+                    鏁翠綋椋庨櫓锛?[0m
+                    瀛樺湪涓瓑椋庨櫓锛岄渶瑕佸叧娉?[0m
+                  </h3>
+                  <p
+                    class="text-sm text-yellow-600 mt-1"
+                  >
+                    椋庨櫓绛夌骇锛?[0m
+                    medium
+                     | 璇勫垎锛?[0m
+                    50
+                    %
+                  </p>
+                </div>
+              </div>
+              <div
+                class="text-right"
+              >
+                <p
+                  class="text-sm text-gray-600"
+                >
+                  璇勪及鑰楁椂
+                </p>
+                <p
+                  class="text-lg font-semibold text-gray-900"
+                >
+                  150
+                  ms
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-2 md:grid-cols-4 gap-4"
+          >
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-octagon-alert h-5 w-5 text-red-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 16h.01"
+                  />
+                  <path
+                    d="M12 8v4"
+                  />
+                  <path
+                    d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  涓ラ噸椋庨櫓
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-red-600"
+              >
+                1
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert h-5 w-5 text-orange-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  楂橀闄?[0m
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-orange-600"
+              >
+                1
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+              ...
+
+      517 |
+      518 |       // 楠岃瘉涓闄╂弿杩?[39m
+    > 519 |       expect(screen.getByText('瀛樺湪涓瓑椋庨櫓锛岄渶瑕佸叧娉?)).toBeInTheDocument();
+          |                     ^
+      520 |       expect(screen.getByText(/璇勫垎锛?0%/i)).toBeInTheDocument();
+      521 |     });
+      522 |
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/components/risk/RiskAssessmentViewer.test.tsx:519:21)
+
+  鈼?RiskAssessmentViewer 鈥?涓嶅悓椋庨櫓绛夌骇 鈥?搴旇鏄剧ず楂橀闄╃姸鎬?
+    TestingLibraryElementError: Unable to find an element with the text: 椋庨櫓杈冮珮锛屽缓璁埗瀹氬簲瀵圭瓥鐣? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="space-y-6"
+        >
+          <div
+            class="p-6 border-2 rounded-lg bg-orange-50 border-orange-200"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <div
+                class="flex items-center gap-4"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert h-6 w-6 text-orange-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <div>
+                  <h3
+                    class="text-xl font-bold text-gray-900"
+                  >
+                    鏁翠綋椋庨櫓锛?[0m
+                    椋庨櫓杈冮珮锛屽缓璁埗瀹氬簲瀵圭瓥鐣?[0m
+                  </h3>
+                  <p
+                    class="text-sm text-orange-600 mt-1"
+                  >
+                    椋庨櫓绛夌骇锛?[0m
+                    high
+                     | 璇勫垎锛?[0m
+                    75
+                    %
+                  </p>
+                </div>
+              </div>
+              <div
+                class="text-right"
+              >
+                <p
+                  class="text-sm text-gray-600"
+                >
+                  璇勪及鑰楁椂
+                </p>
+                <p
+                  class="text-lg font-semibold text-gray-900"
+                >
+                  150
+                  ms
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-2 md:grid-cols-4 gap-4"
+          >
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-octagon-alert h-5 w-5 text-red-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 16h.01"
+                  />
+                  <path
+                    d="M12 8v4"
+                  />
+                  <path
+                    d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  涓ラ噸椋庨櫓
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-red-600"
+              >
+                1
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert h-5 w-5 text-orange-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  楂橀闄?[0m
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-orange-600"
+              >
+                1
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-alert h-5 w-5 text-yellow-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentC...
+
+      531 |       // 楠岃瘉楂橀闄╂弿杩?[39m
+      532 |       expect(
+    > 533 |         screen.getByText('椋庨櫓杈冮珮锛屽缓璁埗瀹氬簲瀵圭瓥鐣?)
+          |                ^
+      534 |       ).toBeInTheDocument();
+      535 |       expect(screen.getByText(/璇勫垎锛?5%/i)).toBeInTheDocument();
+      536 |     });
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/components/risk/RiskAssessmentViewer.test.tsx:533:16)
+
+  鈼?RiskAssessmentViewer 鈥?涓嶅悓椋庨櫓绛夌骇 鈥?搴旇鏄剧ず涓ラ噸椋庨櫓鐘舵€?
+    TestingLibraryElementError: Unable to find an element with the text: 涓ラ噸椋庨櫓锛屽繀椤荤珛鍗抽噰鍙栨帾鏂? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="space-y-6"
+        >
+          <div
+            class="p-6 border-2 rounded-lg bg-red-50 border-red-200"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <div
+                class="flex items-center gap-4"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-octagon-alert h-6 w-6 text-red-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 16h.01"
+                  />
+                  <path
+                    d="M12 8v4"
+                  />
+                  <path
+                    d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"
+                  />
+                </svg>
+                <div>
+                  <h3
+                    class="text-xl font-bold text-gray-900"
+                  >
+                    鏁翠綋椋庨櫓锛?[0m
+                    涓ラ噸椋庨櫓锛屽繀椤荤珛鍗抽噰鍙栨帾鏂?[0m
+                  </h3>
+                  <p
+                    class="text-sm text-red-600 mt-1"
+                  >
+                    椋庨櫓绛夌骇锛?[0m
+                    critical
+                     | 璇勫垎锛?[0m
+                    90
+                    %
+                  </p>
+                </div>
+              </div>
+              <div
+                class="text-right"
+              >
+                <p
+                  class="text-sm text-gray-600"
+                >
+                  璇勪及鑰楁椂
+                </p>
+                <p
+                  class="text-lg font-semibold text-gray-900"
+                >
+                  150
+                  ms
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-2 md:grid-cols-4 gap-4"
+          >
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-octagon-alert h-5 w-5 text-red-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 16h.01"
+                  />
+                  <path
+                    d="M12 8v4"
+                  />
+                  <path
+                    d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  涓ラ噸椋庨櫓
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-red-600"
+              >
+                1
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert h-5 w-5 text-orange-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  楂橀闄?[0m
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-orange-600"
+              >
+                1
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-alert h-5 w-5 tex...
+
+      546 |       // 楠岃瘉涓ラ噸椋庨櫓鎻忚堪
+      547 |       expect(
+    > 548 |         screen.getByText('涓ラ噸椋庨櫓锛屽繀椤荤珛鍗抽噰鍙栨帾鏂?)
+          |                ^
+      549 |       ).toBeInTheDocument();
+      550 |       expect(screen.getByText(/璇勫垎锛?0%/i)).toBeInTheDocument();
+      551 |     });
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/components/risk/RiskAssessmentViewer.test.tsx:548:16)
+
+  鈼?RiskAssessmentViewer 鈥?鏁版嵁璐ㄩ噺鎻愮ず 鈥?搴旇鍦ㄦ棤椋庨櫓鏃舵樉绀哄畾鏈熸洿鏂版彁绀?
+    TestingLibraryElementError: Unable to find an element with the text: 寤鸿瀹氭湡鏇存柊妗堜欢淇℃伅浠ヤ繚鎸佽瘎浼扮殑鍑嗙‘鎬? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="space-y-6"
+        >
+          <div
+            class="p-6 border-2 rounded-lg bg-green-50 border-green-200"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <div
+                class="flex items-center gap-4"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-check-big h-6 w-6 text-green-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M21.801 10A10 10 0 1 1 17 3.335"
+                  />
+                  <path
+                    d="m9 11 3 3L22 4"
+                  />
+                </svg>
+                <div>
+                  <h3
+                    class="text-xl font-bold text-gray-900"
+                  >
+                    鏁翠綋椋庨櫓锛?[0m
+                    鏁翠綋椋庨櫓杈冧綆锛屾浠剁浉瀵瑰畨鍏?[0m
+                  </h3>
+                  <p
+                    class="text-sm text-green-600 mt-1"
+                  >
+                    椋庨櫓绛夌骇锛?[0m
+                    low
+                     | 璇勫垎锛?[0m
+                    15
+                    %
+                  </p>
+                </div>
+              </div>
+              <div
+                class="text-right"
+              >
+                <p
+                  class="text-sm text-gray-600"
+                >
+                  璇勪及鑰楁椂
+                </p>
+                <p
+                  class="text-lg font-semibold text-gray-900"
+                >
+                  150
+                  ms
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-2 md:grid-cols-4 gap-4"
+          >
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-octagon-alert h-5 w-5 text-red-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 16h.01"
+                  />
+                  <path
+                    d="M12 8v4"
+                  />
+                  <path
+                    d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  涓ラ噸椋庨櫓
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-red-600"
+              >
+                0
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert h-5 w-5 text-orange-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  楂橀闄?[0m
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-orange-600"
+              >
+                0
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-alert h-5 w-5 text-yellow-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <line
+                    x1="12"
+                    x2="12"
+                    y1="8"
+                    y2="12"
+                  />
+                  <line
+                    x1="12"
+                    x2="12.01"
+                    y1="16"
+                    y2="16"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  涓闄?[0m
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-yellow-600"
+              >
+                0
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-info h-5 w-5 text-green-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 16v-4"
+                  />
+                  <path
+                    d="M12 8h.01"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  浣庨闄?[0m
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-green-600"
+              >
+                0
+              </p>
+            </div>
+          </div>
+          <div
+            class="p-6 bg-green-50 border border-green-200 rounded-lg"
+          >
+            <div
+              class="flex items-center gap-3"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-circle-check-big h-8 w-8 text-green-600"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M21.801 10A10 10 0 1 1 17 3.335"
+                />
+                <path
+                  d="m9 11 3 3L22 4"
+                />
+              </svg>
+              <div>
+                <p
+                  class="font-medium text-green-900"
+                >
+                  鏈彂鐜版槑鏄鹃闄?[0m
+                </p>
+                <p
+                  class="text-sm text-green-700"
+                >
+                  璇ユ浠舵暣浣撻闄╄緝浣庯紝鍙互缁х画鎺ㄨ繘
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="space-y-2"
+          >
+            <div
+              class="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-info h-4 w-4 text-blue-600"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  d="M12 16v-4"
+                />
+                <path
+                  d="M12 8h.01"
+                />
+              </svg>
+              <p
+                class="text-sm text-blue-900"
+              >
+                鏈彂鐜版槑鏄鹃闄╋紝寤鸿瀹氭湡鏇存柊妗堜欢淇℃伅浠ヤ繚鎸佽瘎浼扮殑鍑嗙‘鎬?[0m
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      564 |       // 楠岃瘉鏁版嵁璐ㄩ噺鎻愮ず
+      565 |       expect(
+    > 566 |         screen.getByText('寤鸿瀹氭湡鏇存柊妗堜欢淇℃伅浠ヤ繚鎸佽瘎浼扮殑鍑嗙‘鎬?)
+          |                ^
+      567 |       ).toBeInTheDocument();
+      568 |     });
+      569 |
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/components/risk/RiskAssessmentViewer.test.tsx:566:16)
+
+  鈼?RiskAssessmentViewer 鈥?浜や簰鍔熻兘 鈥?搴旇姝ｇ‘鍝嶅簲props鍙樺寲
+
+    TestingLibraryElementError: Unable to find an element with the text: 鏁翠綋椋庨櫓. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="space-y-6"
+        >
+          <div
+            class="p-6 border-2 rounded-lg bg-orange-50 border-orange-200"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <div
+                class="flex items-center gap-4"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert h-6 w-6 text-orange-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <div>
+                  <h3
+                    class="text-xl font-bold text-gray-900"
+                  >
+                    鏁翠綋椋庨櫓锛?[0m
+                    椋庨櫓杈冮珮锛屽缓璁埗瀹氬簲瀵圭瓥鐣?[0m
+                  </h3>
+                  <p
+                    class="text-sm text-orange-600 mt-1"
+                  >
+                    椋庨櫓绛夌骇锛?[0m
+                    high
+                     | 璇勫垎锛?[0m
+                    68
+                    %
+                  </p>
+                </div>
+              </div>
+              <div
+                class="text-right"
+              >
+                <p
+                  class="text-sm text-gray-600"
+                >
+                  璇勪及鑰楁椂
+                </p>
+                <p
+                  class="text-lg font-semibold text-gray-900"
+                >
+                  150
+                  ms
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-2 md:grid-cols-4 gap-4"
+          >
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-octagon-alert h-5 w-5 text-red-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 16h.01"
+                  />
+                  <path
+                    d="M12 8v4"
+                  />
+                  <path
+                    d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  涓ラ噸椋庨櫓
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-red-600"
+              >
+                1
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert h-5 w-5 text-orange-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  楂橀闄?[0m
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-orange-600"
+              >
+                1
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-alert h-5 w-5 text-yellow-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentC...
+
+      675 |
+      676 |       // 楠岃瘉鍐呭鏇存柊
+    > 677 |       expect(screen.getByText('鏁翠綋椋庨櫓')).toBeInTheDocument();
+          |                     ^
+      678 |       expect(screen.getByText(/璇勫垎锛?8%/i)).toBeInTheDocument();
+      679 |     });
+      680 |   });
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/components/risk/RiskAssessmentViewer.test.tsx:677:21)
+
+  鈼?RiskAssessmentViewer 鈥?杈圭晫鏉′欢 鈥?搴旇姝ｇ‘澶勭悊浣庣疆淇″害椋庨櫓
+
+    TestingLibraryElementError: Unable to find an element with the text: /缃俊搴︼細30%/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="space-y-6"
+        >
+          <div
+            class="p-6 border-2 rounded-lg bg-yellow-50 border-yellow-200"
+          >
+            <div
+              class="flex items-center justify-between"
+            >
+              <div
+                class="flex items-center gap-4"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-alert h-6 w-6 text-yellow-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <line
+                    x1="12"
+                    x2="12"
+                    y1="8"
+                    y2="12"
+                  />
+                  <line
+                    x1="12"
+                    x2="12.01"
+                    y1="16"
+                    y2="16"
+                  />
+                </svg>
+                <div>
+                  <h3
+                    class="text-xl font-bold text-gray-900"
+                  >
+                    鏁翠綋椋庨櫓锛?[0m
+                    瀛樺湪涓瓑椋庨櫓锛岄渶瑕佸叧娉?[0m
+                  </h3>
+                  <p
+                    class="text-sm text-yellow-600 mt-1"
+                  >
+                    椋庨櫓绛夌骇锛?[0m
+                    medium
+                     | 璇勫垎锛?[0m
+                    50
+                    %
+                  </p>
+                </div>
+              </div>
+              <div
+                class="text-right"
+              >
+                <p
+                  class="text-sm text-gray-600"
+                >
+                  璇勪及鑰楁椂
+                </p>
+                <p
+                  class="text-lg font-semibold text-gray-900"
+                >
+                  150
+                  ms
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-2 md:grid-cols-4 gap-4"
+          >
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-octagon-alert h-5 w-5 text-red-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 16h.01"
+                  />
+                  <path
+                    d="M12 8v4"
+                  />
+                  <path
+                    d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  涓ラ噸椋庨櫓
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-red-600"
+              >
+                0
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-triangle-alert h-5 w-5 text-orange-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path
+                    d="M12 9v4"
+                  />
+                  <path
+                    d="M12 17h.01"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  楂橀闄?[0m
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-orange-600"
+              >
+                0
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-circle-alert h-5 w-5 text-yellow-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <line
+                    x1="12"
+                    x2="12"
+                    y1="8"
+                    y2="12"
+                  />
+                  <line
+                    x1="12"
+                    x2="12.01"
+                    y1="16"
+                    y2="16"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  涓闄?[0m
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-yellow-600"
+              >
+                1
+              </p>
+            </div>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg"
+            >
+              <div
+                class="flex items-center gap-2 mb-2"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-info h-5 w-5 text-green-600"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path
+                    d="M12 16v-4"
+                  />
+                  <path
+                    d="M12 8h.01"
+                  />
+                </svg>
+                <span
+                  class="text-sm text-gray-600"
+                >
+                  浣庨闄?[0m
+                </span>
+              </div>
+              <p
+                class="text-2xl font-bold text-green-600"
+              >
+                0
+              </p>
+            </div>
+          </div>
+          <div
+            class="space-y-4"
+          >
+            <h3
+              class="text-lg font-semibold text-gray-900"
+            >
+              璇嗗埆鍒扮殑椋庨櫓
+            </h3>
+            <div
+              class="p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+            >
+              <div
+                class="flex items-start justify-between mb-3"
+              >
+                <div
+                  class="flex items-center gap-2"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-circle-alert h-6 w-6 text-yellow-600"
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                    />
+                    <line
+                      x1="12"
+                      x2="12"
+                      y1="8"
+                      y2="12"
+                    />
+                    <line
+                      x1="12"
+                      x2="12.01"
+                      y1="16"
+                      y2="16"
+                    />
+                  </svg>
+                  <div>
+                    <h4
+                      class="font-semibold text-gray-900"
+                    >
+                      浜嬪疄鏍稿疄
+                    </h4>
+                    <p
+                      class="text-sm text-gray-600"
+                    >
+                      瀹炰綋鎬?[0m
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="text-right"
+                >
+                  <span
+                    class="inline-block px-2 py-1 text-xs font-medium rounded bg-yellow-50 text-yellow-600"
+                  >
+                    medium
+                  </span>
+                </div>
+              </div>
+              <p
+                class="text-sm text-gray-700 mb-3"
+              >
+                璇佹嵁寮哄害涓嶈冻锛岀己涔忓叧閿敮鎸佹潗鏂?[0m
+              </p>
+              <div
+                class="grid grid-cols-2 gap-2 text-xs text-gray-600 mb-2"
+              >
+                <div>
+                  <span
+                    class="font-medium"
+                  >
+                    椋庨櫓璇勫垎锛?[0m
+                  </span>
+                  <span
+                    class="text-gray-700"
+                  >
+                    50
+                    %
+                  </span>
+                </div>
+                <div>
+                  <span
+                    class="font-medium"
+                  >
+                    缃俊搴︼細
+                  </span>
+                  <span
+                    class="text-yellow-600"
+                  >
+                    30
+                    %
+                  </span>
+                </div>
+              </div>
+              <div
+                class="mt-2"
+              >
+                <p
+                  class="text-xs font-medium text-gray-600 mb-1"
+                >
+                  鏀寔璇佹嵁锛?[0m
+                </p>
+                <ul
+                  class="text-xs text-gray-600 list-disc list-inside"
+                >
+                  <li>
+                    璇佷汉璇佽█缂哄け
+                  </li>
+                  <li>
+                    鐗╄瘉鏁伴噺涓嶈冻
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div
+            class="space-y-2"
+          >
+            <div
+              class="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-circle-alert h-4 w-4 text-yellow-600"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <line
+                  x1="12"
+                  x2="12"
+                  y1="8"
+                  y2="12"
+                />
+                <line
+                  x1="12"
+                  x2="12.01"
+                  y1="16"
+                  y2="16"
+                />
+              </svg>
+              <p
+                class="text-sm text-yellow-900"
+              >
+                閮ㄥ垎椋庨櫓璇勪及鐨勭疆淇″害杈冧綆锛屽缓璁ˉ鍏呮洿澶氫俊鎭互鎻愰珮鍑嗙‘鎬?[0m
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+      788 |
+      789 |       // 楠岃瘉浣庣疆淇″害椋庨櫓鏄剧ず
+    > 790 |       const confidenceText = screen.getByText(/缃俊搴︼細30%/i);
+          |                                     ^
+      791 |       expect(confidenceText).toBeInTheDocument();
+      792 |     });
+      793 |   });
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/components/risk/RiskAssessmentViewer.test.tsx:790:37)
+
+Test Suites: 1 failed, 1 total
+Tests:       9 failed, 22 passed, 31 total
+Snapshots:   0 total
+Time:        2.414 s
+Ran all test suites matching src/__tests__/components/risk/RiskAssessmentViewer.test.tsx.

@@ -14,6 +14,14 @@ import type {
 } from '../../types/evidence-chain';
 
 /**
+ * 节点位置接口
+ */
+interface NodePosition {
+  x: number;
+  y: number;
+}
+
+/**
  * 证据链可视化组件
  */
 export function EvidenceChainVisualizer({
@@ -29,6 +37,8 @@ export function EvidenceChainVisualizer({
   onPathSelect?: (path: EvidenceChainPath) => void;
   onNodeClick?: (nodeId: string) => void;
 }) {
+  const nodePositions = calculateNodePositions(chainGraph);
+
   return (
     <div className='evidence-chain-visualizer'>
       <div className='visualizer-header'>
@@ -54,6 +64,7 @@ export function EvidenceChainVisualizer({
       <div className='visualizer-body'>
         <EvidenceChainGraphComponent
           graph={chainGraph}
+          nodePositions={nodePositions}
           selectedPath={selectedPath}
           onNodeClick={onNodeClick}
         />
@@ -68,14 +79,112 @@ export function EvidenceChainVisualizer({
 }
 
 /**
+ * 计算节点位置（层次布局算法）
+ */
+function calculateNodePositions(
+  graph: EvidenceChainGraph
+): Map<string, NodePosition> {
+  const positions = new Map<string, NodePosition>();
+  const nodesMap = new Map<string, EvidenceChainNode>();
+
+  // 建立节点索引
+  graph.nodes.forEach(node => {
+    nodesMap.set(node.evidenceId, node);
+  });
+
+  // 按入度和出度排序节点
+  const sortedNodes = [...graph.nodes].sort((a, b) => {
+    const aScore = a.incomingRelations.length * 2 + a.outgoingRelations.length;
+    const bScore = b.incomingRelations.length * 2 + b.outgoingRelations.length;
+    return bScore - aScore;
+  });
+
+  // 计算层次
+  const layers: string[][] = [];
+  const placedNodes = new Set<string>();
+  const maxNodesPerLayer = 5;
+  const nodeRadius = 35;
+  const horizontalSpacing = nodeRadius * 2.5;
+  const verticalSpacing = nodeRadius * 3;
+
+  // 第一层：无入边的节点（根节点）
+  const rootNodes = sortedNodes.filter(
+    node => node.incomingRelations.length === 0
+  );
+
+  // 如果没有根节点，使用第一个节点
+  if (rootNodes.length === 0 && sortedNodes.length > 0) {
+    rootNodes.push(sortedNodes[0]);
+  }
+
+  if (rootNodes.length > 0) {
+    layers[0] = rootNodes.map(n => n.evidenceId);
+    rootNodes.forEach(node => placedNodes.add(node.evidenceId));
+  }
+
+  // 后续层次：BFS遍历
+  let currentLayer = 0;
+  while (placedNodes.size < graph.nodes.length) {
+    currentLayer++;
+    const currentLayerNodes = layers[currentLayer - 1] || [];
+
+    // 找出当前层节点指向的未放置节点
+    const nextLayerNodeIds = new Set<string>();
+    currentLayerNodes.forEach(nodeId => {
+      const node = nodesMap.get(nodeId);
+      if (!node) return;
+
+      node.outgoingRelations.forEach(edge => {
+        const targetId = edge.toEvidenceId;
+        if (!placedNodes.has(targetId)) {
+          nextLayerNodeIds.add(targetId);
+        }
+      });
+    });
+
+    if (nextLayerNodeIds.size === 0) {
+      // 没有新节点，放置剩余节点
+      sortedNodes
+        .filter(node => !placedNodes.has(node.evidenceId))
+        .slice(0, maxNodesPerLayer)
+        .forEach(node => nextLayerNodeIds.add(node.evidenceId));
+    }
+
+    const nextLayer = Array.from(nextLayerNodeIds).slice(0, maxNodesPerLayer);
+    layers[currentLayer] = nextLayer;
+    nextLayer.forEach(nodeId => placedNodes.add(nodeId));
+  }
+
+  // 计算每层节点的x坐标
+  const svgWidth = 800;
+
+  layers.forEach((layer, layerIndex) => {
+    const layerY = verticalSpacing + layerIndex * verticalSpacing;
+    const layerWidth = layer.length * horizontalSpacing;
+    const startX = (svgWidth - layerWidth) / 2;
+
+    layer.forEach((nodeId, nodeIndex) => {
+      positions.set(nodeId, {
+        x: startX + nodeIndex * horizontalSpacing + nodeRadius,
+        y: layerY,
+      });
+    });
+  });
+
+  return positions;
+}
+
+/**
  * 证据链图组件
  */
 function EvidenceChainGraphComponent({
   graph,
+  nodePositions,
   selectedPath,
   onNodeClick,
 }: {
   graph: EvidenceChainGraph;
+  nodePositions: Map<string, NodePosition>;
   selectedPath?: EvidenceChainPath | null;
   onNodeClick?: (nodeId: string) => void;
 }) {
@@ -83,10 +192,34 @@ function EvidenceChainGraphComponent({
     <div className='evidence-chain-graph'>
       <h4>证据链图</h4>
       <div className='graph-container'>
-        <svg width='100%' height='400' className='evidence-graph-svg'>
-          <EvidenceChainGraphEdges edges={graph.edges} />
+        <svg
+          width='100%'
+          height='500'
+          viewBox='0 0 800 500'
+          className='evidence-graph-svg'
+        >
+          <defs>
+            <marker
+              id='arrowhead'
+              markerWidth='10'
+              markerHeight='7'
+              refX='28'
+              refY='3.5'
+              orient='auto'
+            >
+              <polygon
+                points='0 0, 10 3.5, 0 7'
+                fill={getEdgeColor('SUPPORTS')}
+              />
+            </marker>
+          </defs>
+          <EvidenceChainGraphEdges
+            edges={graph.edges}
+            nodePositions={nodePositions}
+          />
           <EvidenceChainGraphNodes
             nodes={graph.nodes}
+            nodePositions={nodePositions}
             selectedPath={selectedPath}
             onNodeClick={onNodeClick}
           />
@@ -106,8 +239,12 @@ function EvidenceChainGraphComponent({
           <span>补充关系</span>
         </div>
         <div className='legend-item'>
-          <div className='legend-color core' />
-          <span>核心证据</span>
+          <div className='legend-color contradict' />
+          <span>矛盾关系</span>
+        </div>
+        <div className='legend-item'>
+          <div className='legend-color independent' />
+          <span>独立</span>
         </div>
       </div>
     </div>
@@ -117,11 +254,21 @@ function EvidenceChainGraphComponent({
 /**
  * 证据链边组件
  */
-function EvidenceChainGraphEdges({ edges }: { edges: EvidenceChainEdge[] }) {
+function EvidenceChainGraphEdges({
+  edges,
+  nodePositions,
+}: {
+  edges: EvidenceChainEdge[];
+  nodePositions: Map<string, NodePosition>;
+}) {
   return (
     <g className='edges'>
       {edges.map(edge => (
-        <EvidenceChainEdge key={edge.id} edge={edge} />
+        <EvidenceChainEdge
+          key={edge.id}
+          edge={edge}
+          nodePositions={nodePositions}
+        />
       ))}
     </g>
   );
@@ -130,21 +277,37 @@ function EvidenceChainGraphEdges({ edges }: { edges: EvidenceChainEdge[] }) {
 /**
  * 单个证据链边
  */
-function EvidenceChainEdge({ edge }: { edge: EvidenceChainEdge }) {
+function EvidenceChainEdge({
+  edge,
+  nodePositions,
+}: {
+  edge: EvidenceChainEdge;
+  nodePositions: Map<string, NodePosition>;
+}) {
+  const fromPosition = nodePositions.get(edge.fromEvidenceId);
+  const toPosition = nodePositions.get(edge.toEvidenceId);
+
+  if (!fromPosition || !toPosition) {
+    return null;
+  }
+
   const strokeColor = getEdgeColor(edge.relationType);
-  const strokeWidth = edge.strength;
+  const strokeWidth = Math.max(1, Math.min(5, edge.strength));
 
   return (
-    <line
-      x1='100'
-      y1='200'
-      x2='300'
-      y2='200'
-      stroke={strokeColor}
-      strokeWidth={strokeWidth}
-      strokeOpacity={edge.confidence}
-      className='evidence-edge'
-    />
+    <g>
+      <line
+        x1={fromPosition.x}
+        y1={fromPosition.y}
+        x2={toPosition.x}
+        y2={toPosition.y}
+        stroke={strokeColor}
+        strokeWidth={strokeWidth}
+        strokeOpacity={edge.confidence}
+        markerEnd='url(#arrowhead)'
+        className='evidence-edge'
+      />
+    </g>
   );
 }
 
@@ -153,20 +316,22 @@ function EvidenceChainEdge({ edge }: { edge: EvidenceChainEdge }) {
  */
 function EvidenceChainGraphNodes({
   nodes,
+  nodePositions,
   selectedPath,
   onNodeClick,
 }: {
   nodes: EvidenceChainNode[];
+  nodePositions: Map<string, NodePosition>;
   selectedPath?: EvidenceChainPath | null;
   onNodeClick?: (nodeId: string) => void;
 }) {
   return (
     <g className='nodes'>
-      {nodes.map((node, index) => (
+      {nodes.map(node => (
         <EvidenceChainNode
           key={node.evidenceId}
           node={node}
-          index={index}
+          position={nodePositions.get(node.evidenceId) || { x: 0, y: 0 }}
           isSelected={
             selectedPath?.evidenceIds.includes(node.evidenceId) ?? false
           }
@@ -182,19 +347,18 @@ function EvidenceChainGraphNodes({
  */
 function EvidenceChainNode({
   node,
-  index,
+  position,
   isSelected,
   onClick,
 }: {
   node: EvidenceChainNode;
-  index: number;
+  position: NodePosition;
   isSelected: boolean;
   onClick?: () => void;
 }) {
-  const x = 100 + index * 80;
-  const y = 200;
-  const radius = isSelected ? 35 : 25;
+  const radius = isSelected ? 35 : 28;
   const color = getNodeColor(node);
+  const isCore = node.metadata?.coreEvidence === true;
 
   return (
     <g
@@ -202,17 +366,28 @@ function EvidenceChainNode({
       onClick={onClick}
       style={{ cursor: onClick ? 'pointer' : 'default' }}
     >
+      {isCore && (
+        <circle
+          cx={position.x}
+          cy={position.y}
+          r={radius + 5}
+          fill='none'
+          stroke='#fbbf24'
+          strokeWidth='2'
+          strokeDasharray='4,2'
+        />
+      )}
       <circle
-        cx={x}
-        cy={y}
+        cx={position.x}
+        cy={position.y}
         r={radius}
         fill={color}
         stroke={isSelected ? '#fff' : 'none'}
         strokeWidth='2'
       />
       <text
-        x={x}
-        y={y}
+        x={position.x}
+        y={position.y}
         textAnchor='middle'
         dy='5'
         fill='#fff'
@@ -304,7 +479,6 @@ function getEdgeColor(relationType: string): string {
  * 获取节点颜色
  */
 function getNodeColor(node: EvidenceChainNode): string {
-  // 根据证据类型设置不同颜色
   const typeColorMap: Record<string, string> = {
     DOCUMENTARY_EVIDENCE: '#3b82f6', // blue
     PHYSICAL_EVIDENCE: '#22c55e', // green

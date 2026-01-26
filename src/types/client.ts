@@ -337,3 +337,99 @@ export interface FollowUpTaskListResponse {
 export interface CompleteFollowUpTaskInput {
   notes?: string;
 }
+
+// =============================================================================
+// 客户分析相关类型
+// =============================================================================
+
+/**
+ * 客户价值等级
+ */
+export enum ClientValueLevel {
+  HIGH = 'HIGH', // 高价值
+  MEDIUM = 'MEDIUM', // 中价值
+  LOW = 'LOW', // 低价值
+}
+
+/**
+ * 客户转化漏斗数据
+ */
+export interface ClientConversionFunnel {
+  stage: ClientStatus;
+  count: number;
+  percentage: number;
+  conversionRate: number;
+}
+
+/**
+ * 客户价值分析数据
+ */
+export interface ClientValueAnalysis {
+  totalValue: number;
+  valueLevel: ClientValueLevel;
+  valueScore: number;
+  factors: {
+    caseCount: number;
+    caseRevenue: number;
+    communicationFrequency: number;
+    cooperationDuration: number;
+    referralCount: number;
+  };
+  ranking: number;
+  percentile: number;
+}
+
+/**
+ * 客户分析响应数据
+ */
+export interface ClientAnalyticsResponse {
+  conversionFunnel: ClientConversionFunnel[];
+  valueAnalysis: {
+    highValue: number;
+    mediumValue: number;
+    lowValue: number;
+    totalValue: number;
+    averageValueScore: number;
+  };
+  topClients: Array<{
+    clientId: string;
+    clientName: string;
+    valueLevel: ClientValueLevel;
+    valueScore: number;
+    caseCount: number;
+    totalRevenue: number;
+  }>;
+  lifecycle: {
+    avgDuration: number;
+    longestDuration: number;
+    shortestDuration: number;
+    retentionRate: number;
+  };
+  satisfaction: {
+    avgCommunicationFrequency: number;
+    avgResponseTime: number;
+    satisfactionScore: number;
+  };
+  riskAnalysis: {
+    highRisk: number;
+    mediumRisk: number;
+    lowRisk: number;
+    totalRisk: number;
+  };
+  metadata: {
+    generatedAt: string;
+    timeRange: string;
+    totalClients: number;
+  };
+}
+
+/**
+ * 客户分析查询参数
+ */
+export interface ClientAnalyticsQueryParams {
+  timeRange?: 'LAST_30_DAYS' | 'LAST_90_DAYS' | 'LAST_180_DAYS' | 'ALL';
+  topClientsLimit?: number;
+  includeLifecycle?: boolean;
+  includeSatisfaction?: boolean;
+  includeRiskAnalysis?: boolean;
+}

@@ -36,6 +36,11 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
       hoursBefore: [24],
       channels: [NotificationChannel.IN_APP],
     },
+    task: {
+      enabled: true,
+      hoursBefore: [24, 1],
+      channels: [NotificationChannel.IN_APP],
+    },
   });
 
   useEffect(() => {
@@ -112,6 +117,11 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
       followUp: {
         enabled: true,
         hoursBefore: [24],
+        channels: [NotificationChannel.IN_APP],
+      },
+      task: {
+        enabled: true,
+        hoursBefore: [24, 1],
         channels: [NotificationChannel.IN_APP],
       },
     };

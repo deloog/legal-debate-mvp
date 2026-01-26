@@ -1,43 +1,22 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "strict": false,
-    "noImplicitAny": false,
-    "strictNullChecks": false,
-    "strictFunctionTypes": false,
-    "strictBindCallApply": false,
-    "strictPropertyInitialization": false,
-    "noImplicitThis": false,
-    "alwaysStrict": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noImplicitReturns": false,
-    "noFallthroughCasesInSwitch": false,
-    "allowJs": true,
+    "types": ["jest", "@testing-library/jest-dom", "node"],
     "skipLibCheck": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "noEmit": true,
-    "types": [
-      "@testing-library/jest-dom",
-      "jest",
-      "@types/jest",
-      "node"
-    ]
+    "strict": false,
+    "noImplicitAny": false
   },
   "include": [
     "jest-setup.d.ts",
-    "src/**/*.{ts,tsx}",
-    "**/*.test.{ts,tsx}",
-    "**/*.spec.{ts,tsx}",
+    "jest.polyfill.js",
+    "src/__tests__/**/*.{test,spec}.{ts,tsx}",
     "src/__tests__/types/**/*.d.ts",
-    "src/__types__/**/*.d.ts"
+    "src/test-utils/**/*.{ts,tsx}"
   ],
   "exclude": [
     "node_modules",
     ".next",
-    "dist",
-    "coverage"
+    "coverage",
+    "dist"
   ]
 }

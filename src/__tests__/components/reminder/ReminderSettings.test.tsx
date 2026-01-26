@@ -26,6 +26,11 @@ const mockPreferences: ReminderPreferences = {
     hoursBefore: [24],
     channels: [NotificationChannel.IN_APP],
   },
+  task: {
+    enabled: true,
+    hoursBefore: [24, 1],
+    channels: [NotificationChannel.IN_APP],
+  },
 };
 
 const mockFetch = jest.fn();

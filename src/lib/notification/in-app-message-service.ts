@@ -68,7 +68,7 @@ class InAppMessageService {
       const message = await prisma.reminder.create({
         data: {
           userId: input.userId,
-          type: input.type,
+          type: input.type as never,
           title: input.title,
           message: input.content || null,
           reminderTime: input.reminderTime || new Date(),
@@ -105,7 +105,7 @@ class InAppMessageService {
       const messages = await prisma.reminder.createMany({
         data: inputs.map(input => ({
           userId: input.userId,
-          type: input.type,
+          type: input.type as never,
           title: input.title,
           message: input.content || null,
           reminderTime: input.reminderTime || new Date(),

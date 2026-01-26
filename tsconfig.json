@@ -34,7 +34,8 @@
       }
     ],
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "types": ["jest", "@testing-library/jest-dom"]
   },
   "include": [
     "next-env.d.ts",
@@ -43,13 +44,12 @@
     "**/*.mts",
     "**/*.ts",
     "**/*.tsx",
+    "src/__types__/**/*.d.ts",
     "jest-setup.d.ts",
-    "src/__types__/**/*.d.ts"
+    "src/__tests__/types/**/*.d.ts",
+    "src/__tests__/types/jest.d.ts",
+    "src/__tests__/types/global.d.ts",
+    "**/*.d.ts"
   ],
-  "exclude": [
-    "node_modules",
-    ".next",
-    "coverage",
-    "dist"
-  ]
+  "exclude": ["node_modules", ".next", "coverage", "dist"]
 }

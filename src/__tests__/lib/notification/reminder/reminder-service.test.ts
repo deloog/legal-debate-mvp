@@ -327,6 +327,11 @@ describe('ReminderGenerator', () => {
           hoursBefore: [24],
           channels: [NotificationChannel.IN_APP],
         },
+        task: {
+          enabled: true,
+          hoursBefore: [24, 1],
+          channels: [NotificationChannel.IN_APP],
+        },
       };
 
       mockCreate.mockResolvedValue({ id: 'reminder-1' });

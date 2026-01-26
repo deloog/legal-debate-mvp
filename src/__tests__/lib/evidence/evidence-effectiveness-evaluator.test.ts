@@ -2,16 +2,16 @@
  * EvidenceEffectivenessEvaluator 单元测试
  */
 
-import { EvidenceEffectivenessEvaluator } from '@/lib/evidence/evidence-effectiveness-evaluator';
+import { EvidenceEffectivenessEvaluator } from '../../../lib/evidence/evidence-effectiveness-evaluator';
 import type {
   EvidenceChainNode,
   EvidenceChainGraph,
-} from '@/types/evidence-chain';
+} from '../../../types/evidence-chain';
 import {
   EvidenceChainRelationType,
   EvidenceRelationStrength,
   EffectivenessLevel,
-} from '@/types/evidence-chain';
+} from '../../../types/evidence-chain';
 
 describe('EvidenceEffectivenessEvaluator', () => {
   let evaluator: EvidenceEffectivenessEvaluator;

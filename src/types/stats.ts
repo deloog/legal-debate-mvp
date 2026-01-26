@@ -436,6 +436,236 @@ export interface ErrorRatePoint {
 }
 
 /**
+ * 律师绩效分析相关类型
+ */
+
+/**
+ * 律师绩效分析查询参数
+ */
+export interface LawyerPerformanceQueryParams {
+  timeRange?: TimeRange;
+  granularity?: DateGranularity;
+  customRange?: CustomDateRange;
+  teamId?: string; // 团队ID筛选
+  role?: string; // 角色筛选（LAWYER、PARALEGAL等）
+  sortBy?: 'caseVolume' | 'successRate' | 'revenue' | 'efficiency';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+}
+
+/**
+ * 律师案件量统计
+ */
+export interface LawyerCaseVolumeData {
+  lawyerId: string;
+  lawyerName: string;
+  lawyerRole: string;
+  totalCases: number; // 总案件数
+  activeCases: number; // 活跃案件数
+  completedCases: number; // 已完成案件数
+  archivedCases: number; // 已归档案件数
+}
+
+/**
+ * 律师胜诉率统计
+ */
+export interface LawyerSuccessRateData {
+  lawyerId: string;
+  lawyerName: string;
+  lawyerRole: string;
+  totalCases: number;
+  successfulCases: number;
+  successRate: number; // 胜诉率（百分比）
+  byType: Array<{
+    type: string;
+    totalCases: number;
+    successfulCases: number;
+    successRate: number;
+  }>;
+}
+
+/**
+ * 律师创收统计
+ */
+export interface LawyerRevenueData {
+  lawyerId: string;
+  lawyerName: string;
+  lawyerRole: string;
+  totalRevenue: number; // 总创收
+  averageRevenue: number; // 平均案件金额
+  maxRevenue: number; // 最高案件金额
+  minRevenue: number; // 最低案件金额
+  revenueByType: Array<{
+    type: string;
+    totalRevenue: number;
+    caseCount: number;
+    percentage: number;
+  }>;
+}
+
+/**
+ * 律师效率统计
+ */
+export interface LawyerEfficiencyData {
+  lawyerId: string;
+  lawyerName: string;
+  lawyerRole: string;
+  completedCases: number; // 已完成案件数
+  averageCompletionTime: number; // 平均完成时间（天）
+  medianCompletionTime: number; // 中位数完成时间（天）
+  fastestCompletionTime: number; // 最快完成时间（天）
+  slowestCompletionTime: number; // 最慢完成时间（天）
+  efficiencyRating: 'EXCELLENT' | 'GOOD' | 'AVERAGE' | 'POOR'; // 效率评级
+}
+
+/**
+ * 律师工作时长统计
+ */
+export interface LawyerWorkHoursData {
+  lawyerId: string;
+  lawyerName: string;
+  lawyerRole: string;
+  totalHours: number; // 总工作时长（小时）
+  averageHoursPerCase: number; // 平均每案件工作时长
+  averageHoursPerDay: number; // 平均每日工作时长
+  workDays: number; // 工作天数
+}
+
+/**
+ * 律师绩效综合数据
+ */
+export interface LawyerPerformanceData {
+  caseVolume: LawyerCaseVolumeData[];
+  successRate: LawyerSuccessRateData[];
+  revenue: LawyerRevenueData[];
+  efficiency: LawyerEfficiencyData[];
+  workHours: LawyerWorkHoursData[];
+  summary: {
+    totalLawyers: number;
+    averageCasesPerLawyer: number;
+    averageSuccessRate: number;
+    totalRevenue: number;
+    averageEfficiency: number;
+  };
+  metadata: {
+    timeRange: TimeRange;
+    granularity: DateGranularity;
+    startDate: string;
+    endDate: string;
+    generatedAt: string;
+    dataPoints: number;
+  };
+}
+
+/**
+ * 案件统计相关类型
+ */
+
+/**
+ * 案件分析综合数据
+ */
+export interface CaseAnalyticsData {
+  typeDistribution: CaseTypeDistributionData;
+  efficiency: CaseEfficiencyData;
+  successRate: CaseSuccessRateData;
+  revenueAnalysis: CaseRevenueAnalysisData;
+  activeCasesOverview: ActiveCasesOverview;
+  metadata: CaseAnalyticsMetadata;
+}
+
+/**
+ * 活跃案件概览
+ */
+export interface ActiveCasesOverview {
+  totalActiveCases: number;
+  averageDuration: number; // 平均审理周期（天）
+  expiringSoon: number; // 即将到期案件数（30天内）
+  newThisMonth: number; // 本月新增案件数
+}
+
+/**
+ * 案件成功率数据
+ */
+export interface CaseSuccessRateData {
+  totalCases: number;
+  successfulCases: number;
+  successRate: number; // 百分比
+  byType: Array<{
+    type: string;
+    totalCases: number;
+    successfulCases: number;
+    successRate: number;
+  }>;
+  byCause: Array<{
+    cause: string;
+    totalCases: number;
+    successfulCases: number;
+    successRate: number;
+  }>;
+  trend: Array<{
+    date: string;
+    totalCases: number;
+    successfulCases: number;
+    successRate: number;
+  }>;
+}
+
+/**
+ * 案件收益分析数据
+ */
+export interface CaseRevenueAnalysisData {
+  totalRevenue: number;
+  averageRevenue: number;
+  maxRevenue: number;
+  minRevenue: number;
+  byType: Array<{
+    type: string;
+    totalRevenue: number;
+    averageRevenue: number;
+    caseCount: number;
+    percentage: number;
+  }>;
+  trend: Array<{
+    date: string;
+    revenue: number;
+    caseCount: number;
+    averageRevenue: number;
+  }>;
+}
+
+/**
+ * 案件分析元数据
+ */
+export interface CaseAnalyticsMetadata {
+  timeRange: TimeRange;
+  startDate: string;
+  endDate: string;
+  generatedAt: string;
+  dataPoints: number;
+}
+
+/**
+ * 案件分析查询参数
+ */
+export interface CaseAnalyticsQueryParams {
+  timeRange?: TimeRange;
+  granularity?: DateGranularity;
+  customRange?: CustomDateRange;
+  caseType?: string;
+  status?: string;
+}
+
+/**
+ * 案件类型分布查询参数
+ */
+export interface CaseTypeDistributionQueryParams {
+  timeRange?: TimeRange;
+  customRange?: CustomDateRange;
+  status?: string;
+}
+
+/**
  * 错误类型分布
  */
 export interface ErrorTypeDistribution {

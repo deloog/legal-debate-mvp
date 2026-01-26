@@ -30,7 +30,7 @@ class ReminderService {
       const reminder = await prisma.reminder.create({
         data: {
           userId: input.userId,
-          type: input.type,
+          type: input.type as never,
           title: input.title,
           message: input.message || null,
           reminderTime: input.reminderTime,
@@ -163,8 +163,8 @@ class ReminderService {
 
       const where: Prisma.ReminderWhereInput = {
         userId,
-        ...(type && { type }),
-        ...(status && { status }),
+        ...(type && { type: type as never }),
+        ...(status && { status: status as never }),
         ...(startTime && { reminderTime: { gte: startTime } }),
         ...(endTime && { reminderTime: { lte: endTime } }),
       };

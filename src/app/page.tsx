@@ -1,161 +1,271 @@
+/**
+ * 首页 - Dashboard
+ * 功能：展示数据概览、快速操作、功能导航、近期活动
+ */
+
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { StatCard } from '@/components/dashboard/StatCard';
+import { QuickActions } from '@/components/dashboard/QuickActions';
+import { FeatureModules } from '@/components/dashboard/FeatureModules';
+import { RecentActivities } from '@/components/dashboard/RecentActivities';
+import { getQuickActions, getFeatureModules } from '@/app/api/dashboard/route';
+import type {
+  DashboardData,
+  QuickAction as QuickActionType,
+  FeatureModule as FeatureModuleType,
+} from '@/types/dashboard';
 
-/**
- * 主页面
- * 功能：提供系统导航入口
- */
 export default function Home() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [quickActions, setQuickActions] = useState<QuickActionType[]>([]);
+  const [featureModules, setFeatureModules] = useState<FeatureModuleType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const [dashboardResponse, actions, modules] = await Promise.all([
+          fetch('/api/dashboard'),
+          getQuickActions(),
+          getFeatureModules(),
+        ]);
+
+        const dashboardResult = await dashboardResponse.json();
+        if (dashboardResult.success) {
+          setData(dashboardResult.data);
+        }
+
+        setQuickActions(actions);
+        setFeatureModules(modules);
+      } catch (err) {
+        console.error('加载Dashboard数据失败:', err);
+        setError('加载数据失败，请刷新页面重试');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  // 临时注释掉loading状态以诊断问题
+  // 添加调试日志
+  console.log('当前状态:', { loading, error, hasData: !!data });
+  /*
+  if (loading) {
+    return (
+      <div className='fixed inset-0 flex items-center justify-center bg-zinc-50 font-sans dark:bg-black'>
+        <div className='flex flex-col items-center gap-4 p-8'>
+          <div className='h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600 dark:border-zinc-800 dark:border-t-blue-400' />
+          <p className='text-sm text-gray-600 dark:text-gray-400'>
+            加载中...
+          </p>
+        </div>
+      </div>
+    );
+  }
+  */
+
+  if (error) {
+    return (
+      <div className='flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black'>
+        <div className='max-w-md rounded-lg border border-red-200 bg-red-50 p-6 text-center dark:border-red-900 dark:bg-red-950/20'>
+          <p className='text-sm font-medium text-red-800 dark:text-red-300'>
+            {error}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className='mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700'
+          >
+            重新加载
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className='flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black'>
-      <main className='w-full max-w-4xl px-8 py-16'>
-        {/* 标题区域 */}
-        <div className='mb-12 text-center'>
-          <h1 className='mb-4 text-4xl font-bold text-zinc-900 dark:text-zinc-50'>
-            Legal Debate MVP
-          </h1>
-          <p className='text-lg text-zinc-600 dark:text-zinc-400'>
-            AI驱动的法律辩论系统
+    <div className='min-h-screen bg-zinc-50 font-sans dark:bg-black'>
+      <header className='sticky top-0 z-50 border-b border-gray-200 bg-white px-4 sm:px-6 lg:px-8 dark:border-zinc-800 dark:bg-zinc-950'>
+        <div className='mx-auto flex max-w-7xl items-center justify-between py-4'>
+          <Link href='/' className='flex items-center gap-3'>
+            <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-blue-600 to-blue-700 text-white shadow-md'>
+              <svg
+                className='h-6 w-6'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M3 6l3 1m0 0l-3-1M3 6l18 5M12 6v9m0 0l-3-1m3 1l3-1M6 6l18 5M12 6v9'
+                />
+              </svg>
+            </div>
+            <div className='hidden sm:block'>
+              <h1 className='text-lg font-bold text-gray-900 dark:text-gray-50'>
+                律伴助手
+              </h1>
+              <p className='text-xs text-gray-500 dark:text-gray-400'>
+                AI驱动的法律助手系统
+              </p>
+            </div>
+          </Link>
+
+          <nav className='hidden items-center gap-6 md:flex'>
+            <Link
+              href='/dashboard'
+              className='text-sm font-medium text-gray-700 transition-colors hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400'
+            >
+              Dashboard
+            </Link>
+            <Link
+              href='/cases'
+              className='text-sm font-medium text-gray-700 transition-colors hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400'
+            >
+              案件管理
+            </Link>
+            <Link
+              href='/clients'
+              className='text-sm font-medium text-gray-700 transition-colors hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400'
+            >
+              客户管理
+            </Link>
+            <Link
+              href='/debates'
+              className='text-sm font-medium text-gray-700 transition-colors hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400'
+            >
+              AI辩论
+            </Link>
+          </nav>
+
+          <button className='rounded-lg p-2 text-gray-600 hover:bg-gray-100 md:hidden dark:text-gray-400 dark:hover:bg-zinc-800'>
+            <svg
+              className='h-6 w-6'
+              fill='none'
+              stroke='currentColor'
+              viewBox='0 0 24 24'
+            >
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M4 6h16M4 12h16M4 18h16'
+              />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <main className='mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8'>
+        <div className='mb-6'>
+          <h2 className='text-2xl font-bold text-gray-900 dark:text-gray-50'>
+            欢迎回来
+          </h2>
+          <p className='mt-1 text-sm text-gray-600 dark:text-gray-400'>
+            这里是您的工作台，快速了解系统概况
           </p>
         </div>
 
-        {/* 功能卡片区域 */}
-        <div className='grid gap-6 sm:grid-cols-1 md:grid-cols-2'>
-          {/* 案件管理卡片 */}
-          <Link
-            href='/cases'
-            className='group flex flex-col items-center rounded-lg border border-zinc-200 bg-white p-8 transition-all hover:border-blue-500 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-blue-500'
-          >
-            <div className='mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600 transition-colors group-hover:bg-blue-500 group-hover:text-white dark:bg-zinc-900 dark:text-blue-400'>
-              <svg
-                className='h-8 w-8'
-                width='32'
-                height='32'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
-                />
-              </svg>
-            </div>
-            <h2 className='mb-2 text-xl font-semibold text-zinc-900 dark:text-zinc-50'>
-              案件管理
-            </h2>
-            <p className='text-center text-sm text-zinc-600 dark:text-zinc-400'>
-              管理和查看您的所有法律案件，创建新案件并追踪辩论进展
-            </p>
-          </Link>
+        {data && data.stats && (
+          <div className='mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+            {data.stats.map(stat => (
+              <StatCard key={stat.id} card={stat} />
+            ))}
+          </div>
+        )}
 
-          {/* 文档分析卡片 */}
-          <Link
-            href='/cases'
-            className='group flex flex-col items-center rounded-lg border border-zinc-200 bg-white p-8 transition-all hover:border-green-500 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-green-500'
-          >
-            <div className='mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600 transition-colors group-hover:bg-green-500 group-hover:text-white dark:bg-zinc-900 dark:text-green-400'>
-              <svg
-                className='h-8 w-8'
-                width='32'
-                height='32'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-              >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-                />
-              </svg>
-            </div>
-            <h2 className='mb-2 text-xl font-semibold text-zinc-900 dark:text-zinc-50'>
-              文档分析
-            </h2>
-            <p className='text-center text-sm text-zinc-600 dark:text-zinc-400'>
-              上传并分析法律文档，AI助手自动提取关键信息
-            </p>
-          </Link>
+        {quickActions && quickActions.length > 0 && (
+          <div className='mb-6'>
+            <QuickActions actions={quickActions} />
+          </div>
+        )}
+
+        <div className='grid gap-6 lg:grid-cols-3'>
+          <div className='lg:col-span-2'>
+            {featureModules && featureModules.length > 0 && (
+              <FeatureModules modules={featureModules} />
+            )}
+          </div>
+
+          <div className='lg:col-span-1'>
+            {data &&
+            data.recentActivities &&
+            data.recentActivities.length > 0 ? (
+              <RecentActivities activities={data.recentActivities} />
+            ) : (
+              <div className='rounded-lg border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950'>
+                <h3 className='mb-4 text-lg font-semibold text-gray-900 dark:text-gray-50'>
+                  近期活动
+                </h3>
+                <p className='py-8 text-center text-sm text-gray-500 dark:text-gray-400'>
+                  暂无近期活动
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* 功能说明 */}
-        <div className='mt-12 rounded-lg border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-900'>
-          <h3 className='mb-4 font-semibold text-zinc-900 dark:text-zinc-50'>
-            系统功能
+        <div className='mt-8 rounded-lg border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950'>
+          <h3 className='mb-4 text-sm font-semibold text-gray-900 dark:text-gray-50'>
+            系统信息
           </h3>
-          <ul className='space-y-2 text-sm text-zinc-600 dark:text-zinc-400'>
-            <li className='flex items-start'>
-              <svg
-                className='mr-2 h-5 w-5 shrink-0 text-green-500'
-                width='20'
-                height='20'
-                fill='currentColor'
-                viewBox='0 0 20 20'
-              >
-                <path
-                  fillRule='evenodd'
-                  d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
-                  clipRule='evenodd'
-                />
-              </svg>
-              案件管理与追踪
-            </li>
-            <li className='flex items-start'>
-              <svg
-                className='mr-2 h-5 w-5 shrink-0 text-green-500'
-                width='20'
-                height='20'
-                fill='currentColor'
-                viewBox='0 0 20 20'
-              >
-                <path
-                  fillRule='evenodd'
-                  d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
-                  clipRule='evenodd'
-                />
-              </svg>
-              AI驱动的智能辩论
-            </li>
-            <li className='flex items-start'>
-              <svg
-                className='mr-2 h-5 w-5 shrink-0 text-green-500'
-                width='20'
-                height='20'
-                fill='currentColor'
-                viewBox='0 0 20 20'
-              >
-                <path
-                  fillRule='evenodd'
-                  d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
-                  clipRule='evenodd'
-                />
-              </svg>
-              法律条款智能检索
-            </li>
-            <li className='flex items-start'>
-              <svg
-                className='mr-2 h-5 w-5 shrink-0 text-green-500'
-                width='20'
-                height='20'
-                fill='currentColor'
-                viewBox='0 0 20 20'
-              >
-                <path
-                  fillRule='evenodd'
-                  d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
-                  clipRule='evenodd'
-                />
-              </svg>
-              文档分析与提取
-            </li>
-          </ul>
+          <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+            <div>
+              <p className='text-xs font-medium text-gray-500 dark:text-gray-400'>
+                当前版本
+              </p>
+              <p className='mt-1 text-sm text-gray-900 dark:text-gray-50'>
+                v1.0.0
+              </p>
+            </div>
+            <div>
+              <p className='text-xs font-medium text-gray-500 dark:text-gray-400'>
+                最后更新
+              </p>
+              <p className='mt-1 text-sm text-gray-900 dark:text-gray-50'>
+                2026年1月26日
+              </p>
+            </div>
+            <div>
+              <p className='text-xs font-medium text-gray-500 dark:text-gray-400'>
+                系统状态
+              </p>
+              <div className='mt-1 flex items-center gap-2'>
+                <span className='flex h-2 w-2 shrink-0 rounded-full bg-green-500' />
+                <p className='text-sm text-gray-900 dark:text-gray-50'>
+                  运行正常
+                </p>
+              </div>
+            </div>
+            <div>
+              <p className='text-xs font-medium text-gray-500 dark:text-gray-400'>
+                技术支持
+              </p>
+              <p className='mt-1 text-sm text-gray-900 dark:text-gray-50'>
+                7×24小时在线
+              </p>
+            </div>
+          </div>
         </div>
       </main>
+
+      <footer className='mt-12 border-t border-gray-200 bg-white py-6 dark:border-zinc-800 dark:bg-zinc-950'>
+        <div className='mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8'>
+          <p className='text-sm text-gray-500 dark:text-gray-400'>
+            © 2026 律伴助手. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

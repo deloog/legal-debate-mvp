@@ -27,7 +27,7 @@ module.exports = {
         '<rootDir>/src/__tests__/integration/',
       ],
       setupFiles: ['<rootDir>/jest.polyfill.js', '<rootDir>/jest-setup.d.ts'],
-      setupFilesAfterEnv: ['<rootDir>/src/test-utils/setup.ts', '<rootDir>/src/__tests__/types/jest-dom.d.ts'],
+      setupFilesAfterEnv: ['<rootDir>/src/test-utils/setup.ts'],
       moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',
         '^@/lib/debate/stream/(.*)$': '<rootDir>/src/lib/debate/stream/$1',
@@ -54,6 +54,7 @@ module.exports = {
               strict: false,
               noImplicitAny: false,
               skipLibCheck: true,
+              types: ['jest', '@testing-library/jest-dom'],
             },
             diagnostics: {
               warnOnly: true,
@@ -201,6 +202,7 @@ module.exports = {
       testMatch: [
         '<rootDir>/src/__tests__/debate/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/lib/**/*.{test,spec}.{ts,tsx}',
+        '<rootDir>/src/__tests__/ai/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/middleware/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/prisma/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/types/**/*.{test,spec}.{ts,tsx}',
