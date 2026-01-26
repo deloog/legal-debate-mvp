@@ -312,7 +312,7 @@ private normalizeAmount(amount: any): number {
 **关键代码**：
 
 ```typescript
-import { PrecisionAmountExtractor } from "../extraction/amount-extractor-precision";
+import { PrecisionAmountExtractor } from '../extraction/amount-extractor-precision';
 
 export class DocAnalyzerAgentOptimized extends BaseAgent {
   private amountExtractor: PrecisionAmountExtractor;
@@ -324,11 +324,11 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
   }
 
   private async normalizeAmount(amount: any): Promise<number> {
-    if (typeof amount === "number") {
+    if (typeof amount === 'number') {
       return amount;
     }
 
-    if (typeof amount === "string") {
+    if (typeof amount === 'string') {
       // 1. 优先使用 PrecisionAmountExtractor
       const results = await this.amountExtractor.extractWithPrecision(amount);
       const best = this.amountExtractor.getBestExtraction(results);
@@ -348,7 +348,7 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
    * 增强金额解析（覆盖 PrecisionAmountExtractor 的盲区）
    */
   private enhancedAmountParsing(text: string): number {
-    const normalized = text.replace(/[,，]/g, "");
+    const normalized = text.replace(/[,，]/g, '');
 
     // 模式1："约50万"或"大约100万元"
     const approxMatch = normalized.match(/约|大约.*?(\d+\.?\d*)\s*万/);
@@ -358,7 +358,7 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
 
     // 模式2：混合格式 "100万元（壹佰万元整）"
     const mixedMatch = normalized.match(
-      /(\d+\.?\d*)\s*万?元?.*[壹贰叁肆伍陆柒捌玖]/,
+      /(\d+\.?\d*)\s*万?元?.*[壹贰叁肆伍陆柒捌玖]/
     );
     if (mixedMatch) {
       return parseFloat(mixedMatch[1]) * 10000;
@@ -448,20 +448,20 @@ protected async executeLogic(context: AgentContext): Promise<DocumentAnalysisOut
 **关键代码**：
 
 ```typescript
-import { createHash } from "crypto";
-import { getCacheManager } from "../cache";
+import { createHash } from 'crypto';
+import { getCacheManager } from '../cache';
 
 export class DocAnalyzerAgentOptimized extends BaseAgent {
   private cacheManager = getCacheManager();
 
   protected async executeLogic(
-    context: AgentContext,
+    context: AgentContext
   ): Promise<DocumentAnalysisOutput> {
     const input = context.data as DocumentAnalysisInput;
     const startTime = Date.now();
 
     return await documentConcurrencyController.withConcurrency(
-      "document-analysis",
+      'document-analysis',
       getConfig().maxConcurrentDocuments,
       async () => {
         // 1. 缓存检查（最关键的性能优化）
@@ -469,7 +469,7 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
         const cached =
           await this.cacheManager.get<DocumentAnalysisOutput>(cacheKey);
         if (cached) {
-          logger.info("缓存命中", { documentId: input.documentId, cacheKey });
+          logger.info('缓存命中', { documentId: input.documentId, cacheKey });
           return { ...cached, processingTime: Date.now() - startTime }; // 更新处理时间
         }
 
@@ -479,23 +479,23 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
           let analysisResult;
 
           if (extractedText.length > maxChunkSize) {
-            logger.warn("文档过大，启用分块处理", {
+            logger.warn('文档过大，启用分块处理', {
               documentId: input.documentId,
               length: extractedText.length,
             });
             analysisResult = await this.analyzeLargeDocument(
               extractedText,
-              input.options,
+              input.options
             );
           } else {
             analysisResult = await this.callAIWithTimeout(
-              this.analyzeDocumentWithOptimizedAI(extractedText, input.options),
+              this.analyzeDocumentWithOptimizedAI(extractedText, input.options)
             );
           }
 
           // 3. 并行处理辅助任务
           const [fileSize, wordCount, confidenceBoost] = await Promise.all([
-            input.fileType !== "IMAGE"
+            input.fileType !== 'IMAGE'
               ? this.getFileSizeSecurely(input.filePath)
               : 0,
             this.countWords(extractedText),
@@ -510,7 +510,7 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
         } catch (error) {
           // 5. 降级策略：返回简化版结果而非直接失败
           if (context.retryCount >= getConfig().maxRetries) {
-            logger.error("达到最大重试次数，返回降级结果", {
+            logger.error('达到最大重试次数，返回降级结果', {
               documentId: input.documentId,
             });
             return this.generateFallbackResult(input, extractedText);
@@ -518,7 +518,7 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
 
           // 原有的重试逻辑...
         }
-      },
+      }
     );
   }
 
@@ -527,7 +527,7 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
    */
   private async analyzeLargeDocument(
     text: string,
-    options?: any,
+    options?: any
   ): Promise<any> {
     const chunks = this.splitTextSmart(text, 8000); // 按句子边界分割
     const chunkResults = [];
@@ -535,7 +535,7 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
     for (let i = 0; i < chunks.length; i++) {
       logger.info(`处理文档分块 ${i + 1}/${chunks.length}`);
       const chunkResult = await this.callAIWithTimeout(
-        this.analyzeDocumentWithOptimizedAI(chunks[i].text, options),
+        this.analyzeDocumentWithOptimizedAI(chunks[i].text, options)
       );
       chunkResults.push(chunkResult);
     }
@@ -552,7 +552,7 @@ export class DocAnalyzerAgentOptimized extends BaseAgent {
     return Promise.race([
       promise,
       new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("AI调用超时")), timeoutMs),
+        setTimeout(() => reject(new Error('AI调用超时')), timeoutMs)
       ),
     ]);
   }
@@ -699,17 +699,17 @@ private inferDefendantFromClaims(claims: any[]): string | null {
 // test/bad-cases/litigation-cost-miss.test.ts
 const badCases = [
   {
-    name: "LITIGATION_COST遗漏案例",
-    text: "诉讼请求：1. 判令被告偿还本金100万元；2. 诉讼费用由被告承担",
-    expectedTypes: ["PAY_PRINCIPAL", "LITIGATION_COST"],
-    aiMissed: ["LITIGATION_COST"], // AI历史遗漏的类型
+    name: 'LITIGATION_COST遗漏案例',
+    text: '诉讼请求：1. 判令被告偿还本金100万元；2. 诉讼费用由被告承担',
+    expectedTypes: ['PAY_PRINCIPAL', 'LITIGATION_COST'],
+    aiMissed: ['LITIGATION_COST'], // AI历史遗漏的类型
     expectedAfterPostProcess: true,
   },
   {
-    name: "复合请求未拆解",
-    text: "判令被告偿还本金及利息共计150万元",
-    expectedTypes: ["PAY_PRINCIPAL", "PAY_INTEREST"],
-    aiMissed: ["PAY_INTEREST"],
+    name: '复合请求未拆解',
+    text: '判令被告偿还本金及利息共计150万元',
+    expectedTypes: ['PAY_PRINCIPAL', 'PAY_INTEREST'],
+    aiMissed: ['PAY_INTEREST'],
     expectedAfterPostProcess: true,
   },
 ];
@@ -722,8 +722,8 @@ badCases.forEach((testCase, idx) => {
     });
 
     // 验证后处理效果
-    const hasAllTypes = testCase.expectedTypes.every((t) =>
-      result.extractedData.claims.some((c) => c.type === t),
+    const hasAllTypes = testCase.expectedTypes.every(t =>
+      result.extractedData.claims.some(c => c.type === t)
     );
 
     expect(hasAllTypes).toBe(true);

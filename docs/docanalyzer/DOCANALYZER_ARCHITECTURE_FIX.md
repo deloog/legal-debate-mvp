@@ -94,19 +94,19 @@ class DocAnalyzerAgent {
     // ========== 第二层：AI核心理解（AI，2-5秒） ==========
     const aiResult = await this.aiCoreLayer(
       filterResult.filteredText,
-      filterResult.documentType,
+      filterResult.documentType
     );
 
     // ========== 第三层：规则验证（算法兜底，<100ms） ==========
     const ruleResult = await this.ruleValidationLayer(
       aiResult.extractedData,
-      filterResult.filteredText,
+      filterResult.filteredText
     );
 
     // ========== 第四层：Reviewer审查（AI + 规则，1-2秒） ==========
     const reviewResult = await this.reviewerLayer(
       ruleResult.data,
-      filterResult.filteredText,
+      filterResult.filteredText
     );
 
     // ========== 第五层：缓存（算法 + 存储，<10ms） ==========
@@ -144,7 +144,7 @@ class DocAnalyzerAgent {
 
   private async cacheLayer(
     input: DocumentAnalysisInput,
-    output?: DocumentAnalysisOutput,
+    output?: DocumentAnalysisOutput
   ) {
     // 检查缓存
     // 写入缓存
@@ -188,7 +188,7 @@ export class FilterProcessor {
   async process(text: string): Promise<FilterResult> {
     // OCR质量检查
     if (!this.checkOCRQuality(text)) {
-      return { passed: false, reason: "OCR质量不合格" };
+      return { passed: false, reason: 'OCR质量不合格' };
     }
 
     // 文档类型分类
@@ -220,7 +220,7 @@ export class FilterProcessor {
 
   private validateFormat(
     text: string,
-    docType: DocumentType,
+    docType: DocumentType
   ): FormatCheckResult {
     // 检查必要的字段是否存在
     // 检查格式是否正确
@@ -272,7 +272,7 @@ ${text}
 export class RuleProcessor {
   constructor(
     private amountExtractor: AmountExtractor,
-    private claimExtractor: ClaimExtractor,
+    private claimExtractor: ClaimExtractor
   ) {}
 
   async process(data: ExtractedData, text: string): Promise<RuleProcessResult> {
@@ -280,7 +280,7 @@ export class RuleProcessor {
     for (const claim of data.claims) {
       if (!claim.amount && claim.content) {
         const amountResult = await this.amountExtractor.extractFromText(
-          claim.content,
+          claim.content
         );
         if (amountResult.amounts.length > 0) {
           claim.amount = amountResult.amounts[0].normalizedAmount;

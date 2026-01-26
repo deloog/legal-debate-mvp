@@ -41,10 +41,10 @@ src/test-utils/
 Use the factory functions to create mock data:
 
 ```typescript
-import { createUser, createDocument, createAnalysis } from "@/test-utils";
+import { createUser, createDocument, createAnalysis } from '@/test-utils';
 
-const user = createUser({ email: "custom@example.com" });
-const document = createDocument({ title: "Custom Document" });
+const user = createUser({ email: 'custom@example.com' });
+const document = createDocument({ title: 'Custom Document' });
 const analysis = createAnalysis({ type: AnalysisType.LEGAL_STRUCTURE });
 ```
 
@@ -68,7 +68,7 @@ import {
   setupTestDatabase,
   cleanupTestDatabase,
   testPrisma,
-} from "@/test-utils";
+} from '@/test-utils';
 
 // Setup before tests
 beforeAll(async () => {
@@ -91,13 +91,13 @@ import {
   createMockResponse,
   createMockErrorResponse,
   createMockLocalStorage,
-} from "@/test-utils";
+} from '@/test-utils';
 
 // Wait for async operations
 await waitFor(1000);
 
 // Create mock API responses
-const mockResponse = createMockResponse({ data: "success" });
+const mockResponse = createMockResponse({ data: 'success' });
 
 // Mock browser storage
 const mockStorage = createMockLocalStorage();

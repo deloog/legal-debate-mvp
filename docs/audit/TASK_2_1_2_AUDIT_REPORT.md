@@ -177,7 +177,7 @@ const segments = text.split(/[。！？；，\n]/);
 
 ```typescript
 // 使用toISOString()导致时区转换，日期偏移
-return date.toISOString().split("T")[0];
+return date.toISOString().split('T')[0];
 ```
 
 **改进后**：
@@ -185,8 +185,8 @@ return date.toISOString().split("T")[0];
 ```typescript
 // 使用本地日期格式化，避免时区转换
 const year = parsed.getFullYear();
-const month = String(parsed.getMonth() + 1).padStart(2, "0");
-const day = String(parsed.getDate()).padStart(2, "0");
+const month = String(parsed.getMonth() + 1).padStart(2, '0');
+const day = String(parsed.getDate()).padStart(2, '0');
 return `${year}-${month}-${day}`;
 ```
 
@@ -203,7 +203,7 @@ return `${year}-${month}-${day}`;
 
 ```typescript
 // 只能移除标准化后的日期
-let eventText = sentence.replace(date, "").trim();
+let eventText = sentence.replace(date, '').trim();
 ```
 
 **改进后**：
@@ -212,13 +212,13 @@ let eventText = sentence.replace(date, "").trim();
 // 支持移除原始格式日期
 if (eventText === sentence) {
   eventText = sentence
-    .replace(/\d{4}年\d{1,2}月\d{1,2}日?/g, "")
-    .replace(/\d{4}-\d{1,2}-\d{1,2}/g, "")
-    .replace(/\d{4}\/\d{1,2}\/\d{1,2}/g, "")
-    .replace(/\d{4}\.\d{1,2}\.\d{1,2}/g, "")
-    .replace(/\d{4}年\d{1,2}月/g, "")
-    .replace(/\d{4}年/g, "") // 新增
-    .replace(/\d{1,2}月\d{1,2}日/g, "")
+    .replace(/\d{4}年\d{1,2}月\d{1,2}日?/g, '')
+    .replace(/\d{4}-\d{1,2}-\d{1,2}/g, '')
+    .replace(/\d{4}\/\d{1,2}\/\d{1,2}/g, '')
+    .replace(/\d{4}\.\d{1,2}\.\d{1,2}/g, '')
+    .replace(/\d{4}年\d{1,2}月/g, '')
+    .replace(/\d{4}年/g, '') // 新增
+    .replace(/\d{1,2}月\d{1,2}日/g, '')
     .trim();
 }
 ```

@@ -14,35 +14,41 @@ interface StatCardProps {
 const colorClasses: Record<
   StatCardType['color'],
   {
-    bg: string;
+    gradient: string;
     text: string;
-    icon: string;
+    iconBg: string;
+    iconText: string;
   }
 > = {
   blue: {
-    bg: 'bg-blue-50 dark:bg-blue-950',
-    text: 'text-blue-600 dark:text-blue-400',
-    icon: 'bg-blue-100 dark:bg-blue-900',
+    gradient: 'from-blue-500/10 to-cyan-500/10',
+    text: 'text-blue-600',
+    iconBg: 'bg-gradient-to-br from-blue-500 to-cyan-500',
+    iconText: 'text-white',
   },
   green: {
-    bg: 'bg-green-50 dark:bg-green-950',
-    text: 'text-green-600 dark:text-green-400',
-    icon: 'bg-green-100 dark:bg-green-900',
+    gradient: 'from-green-500/10 to-emerald-500/10',
+    text: 'text-green-600',
+    iconBg: 'bg-gradient-to-br from-green-500 to-emerald-500',
+    iconText: 'text-white',
   },
   yellow: {
-    bg: 'bg-yellow-50 dark:bg-yellow-950',
-    text: 'text-yellow-600 dark:text-yellow-400',
-    icon: 'bg-yellow-100 dark:bg-yellow-900',
+    gradient: 'from-yellow-500/10 to-orange-500/10',
+    text: 'text-yellow-600',
+    iconBg: 'bg-gradient-to-br from-yellow-500 to-orange-500',
+    iconText: 'text-white',
   },
   purple: {
-    bg: 'bg-purple-50 dark:bg-purple-950',
-    text: 'text-purple-600 dark:text-purple-400',
-    icon: 'bg-purple-100 dark:bg-purple-900',
+    gradient: 'from-purple-500/10 to-violet-500/10',
+    text: 'text-purple-600',
+    iconBg: 'bg-gradient-to-br from-purple-500 to-violet-500',
+    iconText: 'text-white',
   },
   red: {
-    bg: 'bg-red-50 dark:bg-red-950',
-    text: 'text-red-600 dark:text-red-400',
-    icon: 'bg-red-100 dark:bg-red-900',
+    gradient: 'from-red-500/10 to-rose-500/10',
+    text: 'text-red-600',
+    iconBg: 'bg-gradient-to-br from-red-500 to-rose-500',
+    iconText: 'text-white',
   },
 };
 
@@ -66,27 +72,25 @@ export function StatCard({ card }: StatCardProps) {
   return (
     <CardWrapper
       {...(card.link && { href: card.link })}
-      className={`group relative overflow-hidden rounded-lg border border-gray-200 bg-white p-6 transition-all duration-200 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-950 ${card.link ? 'cursor-pointer hover:border-blue-300 dark:hover:border-blue-700' : ''}`}
+      className={`group relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br ${colors.gradient} bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-xl ${card.link ? 'cursor-pointer hover:scale-[1.02] hover:border-violet-300' : ''}`}
     >
       <div className='flex items-start justify-between'>
         <div className='flex-1'>
-          <p className='text-sm font-medium text-gray-600 dark:text-gray-400'>
+          <p className='text-sm font-semibold uppercase tracking-wider text-slate-600'>
             {card.title}
           </p>
-          <p className='mt-2 text-3xl font-bold text-gray-900 dark:text-gray-50'>
-            {card.value}
-          </p>
+          <p className='mt-3 text-4xl font-bold text-slate-900'>{card.value}</p>
           {card.change !== undefined && (
             <p
-              className={`mt-2 flex items-center text-sm ${
+              className={`mt-3 flex items-center gap-1 text-sm font-medium ${
                 card.changeType === 'increase'
-                  ? 'text-green-600 dark:text-green-400'
-                  : 'text-red-600 dark:text-red-400'
+                  ? 'text-green-600'
+                  : 'text-red-600'
               }`}
             >
               {card.changeType === 'increase' ? (
                 <svg
-                  className='mr-1 h-4 w-4'
+                  className='h-4 w-4'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
@@ -94,13 +98,13 @@ export function StatCard({ card }: StatCardProps) {
                   <path
                     strokeLinecap='round'
                     strokeLinejoin='round'
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     d='M5 10l7-7m0 0l7 7m-7-7v18'
                   />
                 </svg>
               ) : (
                 <svg
-                  className='mr-1 h-4 w-4'
+                  className='h-4 w-4'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
@@ -108,20 +112,20 @@ export function StatCard({ card }: StatCardProps) {
                   <path
                     strokeLinecap='round'
                     strokeLinejoin='round'
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     d='M19 14l-7 7m0 0l-7-7m7 7V3'
                   />
                 </svg>
               )}
-              {Math.abs(card.change)}%
+              <span>{Math.abs(card.change)}% 较上月</span>
             </p>
           )}
         </div>
         <div
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${colors.icon}`}
+          className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl ${colors.iconBg} shadow-lg`}
         >
           <svg
-            className={`h-6 w-6 ${colors.text}`}
+            className={`h-7 w-7 ${colors.iconText}`}
             fill='none'
             stroke='currentColor'
             viewBox='0 0 24 24'

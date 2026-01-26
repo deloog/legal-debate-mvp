@@ -229,4 +229,5 @@ time_intervals:
       - months: ['october']
         days_of_month: ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th']
       - months: ['december']
-        days_of_month: ['24th', '25th', '26th', '27th', '28th', '29th', '30th', '31st']
+        days_of_month:
+          ['24th', '25th', '26th', '27th', '28th', '29th', '30th', '31st']

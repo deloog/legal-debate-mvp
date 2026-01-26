@@ -90,7 +90,7 @@ export const DEVELOPMENT_AI_CONFIG: AIServiceConfig = {
     enabled: true,
     localProcessing: {
       enabled: true, // ← 开发环境启用本地处理
-      capabilities: ["text_generation", "template_response"],
+      capabilities: ['text_generation', 'template_response'],
     },
   },
   // ...
@@ -407,7 +407,7 @@ const accuracyTestService = await getUnifiedAIService(
     enableGeneralAI: true,
     enableLegalAI: false,
   },
-  true, // ← useRealAPI = true
+  true // ← useRealAPI = true
 );
 ```
 

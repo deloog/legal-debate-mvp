@@ -104,7 +104,7 @@ const [debates, total] = await Promise.all([
       user: { select: { id: true, username: true, name: true } },
       _count: { select: { rounds: true } },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: 'desc' },
     ...options,
   }),
   prisma.debate.count({ where: whereCondition }),
@@ -144,7 +144,7 @@ const result = await prisma.$transaction(async (tx) => {
 export async function transitionRoundStatus(
   roundId: string,
   newStatus: RoundStatus,
-  options?: { userId?: string; reason?: string },
+  options?: { userId?: string; reason?: string }
 ) {
   // 验证状态转换合法性
   // 更新数据库

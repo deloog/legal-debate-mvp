@@ -13,10 +13,5 @@
     "src/__tests__/types/**/*.d.ts",
     "src/test-utils/**/*.{ts,tsx}"
   ],
-  "exclude": [
-    "node_modules",
-    ".next",
-    "coverage",
-    "dist"
-  ]
+  "exclude": ["node_modules", ".next", "coverage", "dist"]
 }

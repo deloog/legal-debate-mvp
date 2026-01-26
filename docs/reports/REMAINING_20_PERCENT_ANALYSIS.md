@@ -99,11 +99,11 @@
 ```typescript
 // 需要实现的状态转换：
 enum RoundStatus {
-  PREPARING = "preparing",
-  IN_PROGRESS = "in_progress",
-  PAUSED = "paused",
-  COMPLETED = "completed",
-  CANCELLED = "cancelled",
+  PREPARING = 'preparing',
+  IN_PROGRESS = 'in_progress',
+  PAUSED = 'paused',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
 }
 
 // 状态转换逻辑

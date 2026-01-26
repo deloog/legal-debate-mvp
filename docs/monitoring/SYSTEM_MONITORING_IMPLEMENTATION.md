@@ -2,15 +2,15 @@
 
 ## 任务信息
 
-| 项目         | 内容                    |
-| ------------ | ----------------------- |
-| **任务ID**   | 14.2.1                 |
-| **任务名称** | 系统监控配置             |
-| **优先级**   | 高                       |
-| **负责人**   | AI助手                   |
-| **开始时间** | 2026/1/17 23:00         |
-| **完成时间** | 2026/1/17 23:20         |
-| **实际耗时** | ~0.3天                    |
+| 项目         | 内容            |
+| ------------ | --------------- |
+| **任务ID**   | 14.2.1          |
+| **任务名称** | 系统监控配置    |
+| **优先级**   | 高              |
+| **负责人**   | AI助手          |
+| **开始时间** | 2026/1/17 23:00 |
+| **完成时间** | 2026/1/17 23:20 |
+| **实际耗时** | ~0.3天          |
 
 ## 实施概述
 
@@ -25,10 +25,10 @@
 
 ### 1. Prometheus指标收集模块
 
-| 文件路径                      | 描述         | 行数  |
-| ------------------------- | ------------ | ----- |
-| `src/lib/monitoring/prometheus-metrics.ts` | Prometheus监控模块 | 450+  |
-| `src/__tests__/lib/monitoring/prometheus-metrics.test.ts` | 单元测试文件 | 470+  |
+| 文件路径                                                  | 描述               | 行数 |
+| --------------------------------------------------------- | ------------------ | ---- |
+| `src/lib/monitoring/prometheus-metrics.ts`                | Prometheus监控模块 | 450+ |
+| `src/__tests__/lib/monitoring/prometheus-metrics.test.ts` | 单元测试文件       | 470+ |
 
 **主要功能**：
 
@@ -43,26 +43,26 @@
 
 **关键方法**：
 
-| 方法名                       | 描述                       |
-| -------------------------- | -------------------------- |
-| `registerCollector()`        | 注册指标收集器              |
-| `unregisterCollector()`      | 取消注册指标收集器          |
-| `incrementCounter()`        | 增加计数器指标            |
-| `setGauge()`              | 设置仪表盘指标              |
-| `recordHistogram()`        | 记录直方图指标            |
-| `recordSummary()`          | 记录摘要指标              |
-| `collectMetrics()`         | 收集所有指标               |
-| `getPrometheusMetrics()`   | 获取Prometheus格式数据     |
-| `startCollecting()`       | 启动定时收集              |
-| `stopCollecting()`        | 停止定时收集              |
+| 方法名                   | 描述                   |
+| ------------------------ | ---------------------- |
+| `registerCollector()`    | 注册指标收集器         |
+| `unregisterCollector()`  | 取消注册指标收集器     |
+| `incrementCounter()`     | 增加计数器指标         |
+| `setGauge()`             | 设置仪表盘指标         |
+| `recordHistogram()`      | 记录直方图指标         |
+| `recordSummary()`        | 记录摘要指标           |
+| `collectMetrics()`       | 收集所有指标           |
+| `getPrometheusMetrics()` | 获取Prometheus格式数据 |
+| `startCollecting()`      | 启动定时收集           |
+| `stopCollecting()`       | 停止定时收集           |
 
 ### 2. Grafana仪表板配置
 
-| 文件路径                                    | 描述                 | 行数  |
-| ----------------------------------- | -------------------- | ----- |
-| `config/grafana/dashboards/api-performance.json`   | API性能监控仪表板    | 120+  |
-| `config/grafana/dashboards/database-performance.json` | 数据库性能监控仪表板  | 140+  |
-| `config/grafana/dashboards/ai-service-monitoring.json` | AI服务监控仪表板     | 150+  |
+| 文件路径                                               | 描述                 | 行数 |
+| ------------------------------------------------------ | -------------------- | ---- |
+| `config/grafana/dashboards/api-performance.json`       | API性能监控仪表板    | 120+ |
+| `config/grafana/dashboards/database-performance.json`  | 数据库性能监控仪表板 | 140+ |
+| `config/grafana/dashboards/ai-service-monitoring.json` | AI服务监控仪表板     | 150+ |
 
 **API性能监控仪表板**：
 
@@ -99,9 +99,9 @@
 
 ### 测试覆盖情况
 
-| 测试套件               | 测试用例数 | 通过数 | 失败数 | 覆盖率 |
-| ------------------ | -------- | ------ | ------ | ------ |
-| PrometheusMonitor测试 | 49       | 49     | 0      | 100%   |
+| 测试套件              | 测试用例数 | 通过数 | 失败数 | 覆盖率 |
+| --------------------- | ---------- | ------ | ------ | ------ |
+| PrometheusMonitor测试 | 49         | 49     | 0      | 100%   |
 
 ### 测试内容
 
@@ -234,13 +234,13 @@ import {
   incrementCounter,
   setGauge,
   recordHistogram,
-  recordSummary
+  recordSummary,
 } from '@/lib/monitoring/prometheus-metrics';
 
 // 增加计数器
 incrementCounter('http_requests_total', 1, {
   method: 'GET',
-  endpoint: '/api/users'
+  endpoint: '/api/users',
 });
 
 // 设置仪表盘
@@ -256,7 +256,11 @@ recordSummary('response_size_bytes', 1024);
 ### 2. 自定义指标收集器
 
 ```typescript
-import { getPrometheusMonitor, MetricCollector, MetricType } from '@/lib/monitoring/prometheus-metrics';
+import {
+  getPrometheusMonitor,
+  MetricCollector,
+  MetricType,
+} from '@/lib/monitoring/prometheus-metrics';
 
 // 定义自定义指标收集器
 const memoryCollector: MetricCollector = {
@@ -264,7 +268,7 @@ const memoryCollector: MetricCollector = {
   type: MetricType.GAUGE,
   help: 'Process memory usage in bytes',
   labels: [],
-  collect: () => process.memoryUsage().heapUsed
+  collect: () => process.memoryUsage().heapUsed,
 };
 
 // 注册收集器
@@ -310,11 +314,11 @@ console.log(prometheusData);
 
 ### 仪表板配置
 
-| 仪表板名称 | JSON文件                            | 刷新间隔 | 时间范围   |
-| ---------- | --------------------------------- | -------- | -------- |
-| API性能监控 | api-performance.json           | 10秒     | 最近1小时 |
-| 数据库性能监控 | database-performance.json | 30秒     | 最近1小时 |
-| AI服务监控 | ai-service-monitoring.json | 30秒     | 最近1小时 |
+| 仪表板名称     | JSON文件                   | 刷新间隔 | 时间范围  |
+| -------------- | -------------------------- | -------- | --------- |
+| API性能监控    | api-performance.json       | 10秒     | 最近1小时 |
+| 数据库性能监控 | database-performance.json  | 30秒     | 最近1小时 |
+| AI服务监控     | ai-service-monitoring.json | 30秒     | 最近1小时 |
 
 ## Prometheus配置示例
 
@@ -345,12 +349,12 @@ PROMETHEUS_LABELS_ENVIRONMENT=production
 
 ## 测试覆盖率
 
-| 指标         | 目标值 | 实际值 | 状态   |
-| ---------- | ------ | ------ | ------ |
-| 单元测试通过率 | ≥80%  | 100%  | ✅     |
-| 代码覆盖率     | ≥90%  | 100%  | ✅     |
-| ESLint检查    | 0错误 | 0错误  | ✅     |
-| TypeScript检查 | 0错误 | 0错误  | ✅     |
+| 指标           | 目标值 | 实际值 | 状态 |
+| -------------- | ------ | ------ | ---- |
+| 单元测试通过率 | ≥80%   | 100%   | ✅   |
+| 代码覆盖率     | ≥90%   | 100%   | ✅   |
+| ESLint检查     | 0错误  | 0错误  | ✅   |
+| TypeScript检查 | 0错误  | 0错误  | ✅   |
 
 ## 验收标准检查清单
 

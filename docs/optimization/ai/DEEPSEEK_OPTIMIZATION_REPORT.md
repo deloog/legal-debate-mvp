@@ -40,13 +40,13 @@ topP: 0.9,        // 添加topP参数控制生成质量
 const prompt = `基于以下案件信息，生成正反双方的辩论论点：
 案件标题：${caseInfo.title}
 案件描述：${caseInfo.description}
-${caseInfo.legalReferences ? `相关法条：\n${caseInfo.legalReferences.join("\n")}` : ""}
+${caseInfo.legalReferences ? `相关法条：\n${caseInfo.legalReferences.join('\n')}` : ''}
 请分别从原告方和被告方的角度，生成各自的核心论点和法律依据。`;
 
 // 优化后：简洁直接的提示词
 const prompt = `案件：${caseInfo.title}
 描述：${caseInfo.description}
-${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join("、")}` : ""}
+${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join('、')}` : ''}
 
 请分别列出原告和被告的3-4个核心论点，每个论点包含：主张、法律依据、事实依据。`;
 ```
@@ -167,14 +167,14 @@ interface PerformanceMetric {
 ```typescript
 const OPTIMIZED_TEST_CASES = [
   {
-    title: "房屋买卖合同纠纷",
-    description: "买方支付定金后卖方违约不办理过户，要求解除合同并赔偿损失",
-    category: "民事纠纷",
+    title: '房屋买卖合同纠纷',
+    description: '买方支付定金后卖方违约不办理过户，要求解除合同并赔偿损失',
+    category: '民事纠纷',
   },
   {
-    title: "商品房买卖纠纷", // 相似案例，测试缓存
-    description: "购房人支付首付款后开发商不交房，要求退款并赔偿",
-    category: "民事纠纷",
+    title: '商品房买卖纠纷', // 相似案例，测试缓存
+    description: '购房人支付首付款后开发商不交房，要求退款并赔偿',
+    category: '民事纠纷',
   },
   // ... 更多测试案例
 ];
@@ -276,9 +276,9 @@ graph TD
 
    ```typescript
    function selectModelForDebate(complexity: number): string {
-     if (complexity < 0.3) return "deepseek-chat-fast";
-     if (complexity < 0.7) return "deepseek-chat";
-     return "deepseek-chat-pro";
+     if (complexity < 0.3) return 'deepseek-chat-fast';
+     if (complexity < 0.7) return 'deepseek-chat';
+     return 'deepseek-chat-pro';
    }
    ```
 

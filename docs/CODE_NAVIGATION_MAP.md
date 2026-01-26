@@ -89,9 +89,9 @@ Layer 5: 缓存层 (CacheProcessor)
 ```typescript
 const docAnalyzer = new DocAnalyzerAgent(useMock);
 const result = await docAnalyzer.execute({
-  documentId: "123",
-  content: "原告张三，被告李四...",
-  fileType: "pdf",
+  documentId: '123',
+  content: '原告张三，被告李四...',
+  fileType: 'pdf',
 });
 ```
 
@@ -134,13 +134,13 @@ await memoryAgent.initialize();
 
 // 存储记忆
 const memoryId = await memoryAgent.storeMemory(
-  { type: "WORKING", value: "用户需求..." },
+  { type: 'WORKING', value: '用户需求...' },
   userId,
-  caseId,
+  caseId
 );
 
 // 获取记忆
-const memory = await memoryAgent.getMemory({ memoryId, type: "WORKING" });
+const memory = await memoryAgent.getMemory({ memoryId, type: 'WORKING' });
 ```
 
 ---
@@ -189,16 +189,16 @@ const memory = await memoryAgent.getMemory({ memoryId, type: "WORKING" });
 const verificationAgent = new VerificationAgent();
 const result = await verificationAgent.verify(
   {
-    parties: { plaintiff: "张三", defendant: "李四" },
-    claims: ["请求赔偿..."],
-    legalBasis: [{ lawName: "民法典", articleNumber: "第xxx条" }],
+    parties: { plaintiff: '张三', defendant: '李四' },
+    claims: ['请求赔偿...'],
+    legalBasis: [{ lawName: '民法典', articleNumber: '第xxx条' }],
   },
-  sourceData,
+  sourceData
 );
 
 if (!result.passed) {
-  console.log("验证未通过，问题数:", result.issues.length);
-  console.log("修复建议:", result.suggestions);
+  console.log('验证未通过，问题数:', result.issues.length);
+  console.log('修复建议:', result.suggestions);
 }
 ```
 
@@ -294,8 +294,8 @@ AIService (统一接口)
 ```typescript
 const aiService = new AIService();
 const response = await aiService.chat({
-  model: "deepseek-chat",
-  messages: [{ role: "user", content: "用户消息" }],
+  model: 'deepseek-chat',
+  messages: [{ role: 'user', content: '用户消息' }],
   maxTokens: 1500,
   timeout: 60000,
 });
@@ -343,7 +343,7 @@ const response = await aiService.chat({
 
 ```typescript
 const client = await createAIClient({
-  provider: "deepseek",
+  provider: 'deepseek',
   config: {
     apiKey: process.env.DEEPSEEK_API_KEY,
   },

@@ -61,9 +61,9 @@
 ```typescript
 // 测试环境缓存控制
 const timestamp =
-  input.documentId.startsWith("bad-case-") || input.documentId.includes("test")
+  input.documentId.startsWith('bad-case-') || input.documentId.includes('test')
     ? Date.now()
-    : "";
+    : '';
 ```
 
 ### 3. 金额提取增强

@@ -241,16 +241,16 @@ export class AIServiceErrorHandler {
 
   static async withTimeout<T>(
     promise: Promise<T>,
-    context: string,
+    context: string
   ): Promise<T> {
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error("AI服务调用超时")), this.TIMEOUT_MS);
+      setTimeout(() => reject(new Error('AI服务调用超时')), this.TIMEOUT_MS);
     });
 
     try {
       return await Promise.race([promise, timeoutPromise]);
     } catch (error) {
-      if (error.message === "AI服务调用超时") {
+      if (error.message === 'AI服务调用超时') {
         throw new AIServiceTimeoutError(context);
       }
       throw new AIServiceFailureError(context, error);

@@ -63,16 +63,19 @@
 **第4阶段修复进展（2026年1月20日 09:42 - 继续修复API测试path验证问题）**:
 
 **当前测试结果**:
+
 - Test Suites: 18 failed, 52 passed, 70 total (通过率: 74.3%)
 - Tests: 67 failed, 1113 passed, 1180 total (通过率: 94.3%)
 
 **进展总结**:
+
 - 测试通过率从92.0%提升到94.3%（+2.3%）
 - 失败测试从96个减少到67个（-29个）
 - 成功修复了8个测试文件，新增88个测试通过
 - 统一了API错误响应格式和headers处理
 
 **已修复的测试文件（2026年1月20日）**:
+
 1. ✅ **admin-law-articles.test.ts**: 25/25 (100%) - 完全修复
    - 修复了法条列表路由的api-response使用
    - 修复了法条导入路由的api-response使用
@@ -94,6 +97,7 @@
 **总计**: 4个API测试文件修复，88个测试全部通过（100%）
 
 **剩余67个失败测试分析**:
+
 - admin-users.test.ts: ✅ 已完全修复 - 24/24 (100%)
 - debates-id-stream-basic.test.ts: ✅ 已完全修复 - 10/10 (100%)
 - admin-law-articles.test.ts: ✅ 已完全修复 - 25/25 (100%)
@@ -110,12 +114,14 @@
 - 其他测试: 约50个失败
 
 **已验证有效的修复方法**:
+
 1. **API响应格式统一**: 使用api-response工具函数（unauthorizedResponse、badRequestResponse、serverErrorResponse、successResponse）
 2. **错误码标准化**: 统一使用英文标准错误码（UNAUTHORIZED、FORBIDDEN、NOT_FOUND、BAD_REQUEST、INTERNAL_SERVER_ERROR）
 3. **NextResponse Headers兼容性**: 在jest环境中，直接在NextResponse实例上设置headers
 4. **测试断言适配**: 根据实际API响应结构调整测试断言（data.xxx vs data.data.xxx）
 
 **建议后续步骤**:
+
 1. 继续应用相同的修复方法到其他API测试文件
 2. 检查所有API路由是否使用了api-response工具
 3. 统一所有错误响应格式
@@ -148,7 +154,7 @@
 | 高优先级 | 6      | 0      | 4      | 10     | 60%     |
 | 中优先级 | 1      | 0      | 6      | 7      | 14.3%   |
 | 低优先级 | 0      | 0      | 3      | 3      | 0%      |
-| **总计** | **7**  | **0**  | **13** | **20** | **35%**  |
+| **总计** | **7**  | **0**  | **13** | **20** | **35%** |
 
 ### 阶段进度
 

@@ -88,7 +88,7 @@ legal_debate_dev_backup_2025-12-20T02-00-00-000Z.sql
 export const scheduleBackup = async (): Promise<void> => {
   const backupManager = createBackupManager();
 
-  console.log("开始定时数据库备份...");
+  console.log('开始定时数据库备份...');
 
   // 创建备份
   const backupInfo = await backupManager.createBackup();
@@ -97,7 +97,7 @@ export const scheduleBackup = async (): Promise<void> => {
     // 验证备份
     const isValid = await backupManager.verifyBackup(backupInfo.filename);
     if (!isValid) {
-      console.error("备份验证失败，删除无效备份文件");
+      console.error('备份验证失败，删除无效备份文件');
       // 删除无效备份文件的逻辑可以在这里添加
     }
   }
@@ -105,7 +105,7 @@ export const scheduleBackup = async (): Promise<void> => {
   // 清理过期备份
   await backupManager.cleanupOldBackups();
 
-  console.log("定时备份完成");
+  console.log('定时备份完成');
 };
 ```
 
@@ -358,8 +358,8 @@ export class BackupMonitor {
     if (failureRate > 0.1) {
       // 失败率 > 10%
       alerts.push({
-        type: "failure",
-        severity: "high",
+        type: 'failure',
+        severity: 'high',
         message: `备份失败率过高: ${(failureRate * 100).toFixed(1)}%`,
         timestamp: new Date(),
       });
@@ -370,8 +370,8 @@ export class BackupMonitor {
     if (storageUsage > 0.85) {
       // 使用率 > 85%
       alerts.push({
-        type: "storage",
-        severity: "medium",
+        type: 'storage',
+        severity: 'medium',
         message: `备份存储使用率过高: ${(storageUsage * 100).toFixed(1)}%`,
         timestamp: new Date(),
       });
@@ -544,7 +544,7 @@ TEST_CLEANUP_AFTER=true
 
 ```typescript
 // 备份功能测试
-test("should create backup successfully", async () => {
+test('should create backup successfully', async () => {
   const backupManager = createBackupManager();
   const backupInfo = await backupManager.createBackup();
 
@@ -553,19 +553,19 @@ test("should create backup successfully", async () => {
 });
 
 // 恢复功能测试
-test("should restore database successfully", async () => {
+test('should restore database successfully', async () => {
   const restoreManager = createRestoreManager();
-  const restoreInfo = await restoreManager.restoreDatabase("test_backup.sql");
+  const restoreInfo = await restoreManager.restoreDatabase('test_backup.sql');
 
   expect(restoreInfo.success).toBe(true);
   expect(restoreInfo.tablesRestored).toBeGreaterThan(0);
 });
 
 // 数据一致性测试
-test("should maintain data consistency", async () => {
-  const originalData = await getDatabaseData("original_db");
-  await restoreDatabase("test_backup.sql");
-  const restoredData = await getDatabaseData("restored_db");
+test('should maintain data consistency', async () => {
+  const originalData = await getDatabaseData('original_db');
+  await restoreDatabase('test_backup.sql');
+  const restoredData = await getDatabaseData('restored_db');
 
   expect(originalData).toEqual(restoredData);
 });

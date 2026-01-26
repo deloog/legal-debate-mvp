@@ -6,13 +6,13 @@
 
 ## 脚本列表
 
-| 脚本 | 说明 |
-|------|------|
-| `config.sh` | 配置文件，定义所有部署相关参数 |
-| `lib.sh` | 公共函数库，包含共享的辅助函数 |
-| `check-environment.sh` | 环境检查脚本，验证部署环境 |
-| `migrate-database.sh` | 数据库迁移脚本，执行数据库升级 |
-| `deploy-app.sh` | 应用部署脚本，构建和部署应用 |
+| 脚本                   | 说明                           |
+| ---------------------- | ------------------------------ |
+| `config.sh`            | 配置文件，定义所有部署相关参数 |
+| `lib.sh`               | 公共函数库，包含共享的辅助函数 |
+| `check-environment.sh` | 环境检查脚本，验证部署环境     |
+| `migrate-database.sh`  | 数据库迁移脚本，执行数据库升级 |
+| `deploy-app.sh`        | 应用部署脚本，构建和部署应用   |
 
 ## 使用方法
 
@@ -26,6 +26,7 @@ cd scripts/deploy
 ```
 
 环境检查包括：
+
 - 配置文件检查
 - 环境变量检查
 - 依赖服务检查（Docker、Docker Compose等）
@@ -45,6 +46,7 @@ cd scripts/deploy
 ```
 
 数据库迁移流程：
+
 1. 备份当前数据库
 2. 执行Prisma迁移
 3. 初始化种子数据
@@ -63,6 +65,7 @@ cd scripts/deploy
 ```
 
 应用部署流程：
+
 1. 构建Next.js应用
 2. 构建Docker镜像
 3. 停止旧容器
@@ -77,35 +80,35 @@ cd scripts/deploy
 
 ### 必需变量
 
-| 变量名 | 说明 |
-|--------|------|
-| `DEPLOY_ENV` | 部署环境：development、staging、production |
-| `DATABASE_URL` | 数据库连接字符串 |
-| `REDIS_HOST` | Redis服务器地址 |
-| `JWT_SECRET` | JWT密钥 |
+| 变量名         | 说明                                       |
+| -------------- | ------------------------------------------ |
+| `DEPLOY_ENV`   | 部署环境：development、staging、production |
+| `DATABASE_URL` | 数据库连接字符串                           |
+| `REDIS_HOST`   | Redis服务器地址                            |
+| `JWT_SECRET`   | JWT密钥                                    |
 
 ### 生产环境必需变量
 
-| 变量名 | 说明 |
-|--------|------|
-| `ZHIPU_API_KEY` | 智谱AI API密钥 |
-| `DEEPSEEK_API_KEY` | DeepSeek API密钥 |
-| `POSTGRES_PASSWORD` | PostgreSQL密码 |
-| `REDIS_PASSWORD` | Redis密码 |
+| 变量名              | 说明             |
+| ------------------- | ---------------- |
+| `ZHIPU_API_KEY`     | 智谱AI API密钥   |
+| `DEEPSEEK_API_KEY`  | DeepSeek API密钥 |
+| `POSTGRES_PASSWORD` | PostgreSQL密码   |
+| `REDIS_PASSWORD`    | Redis密码        |
 
 ### 可选变量
 
-| 变量名 | 默认值 | 说明 |
-|--------|---------|------|
-| `DEBUG` | false | 是否启用调试模式 |
-| `APP_NAME` | legal-debate | 应用名称 |
-| `APP_VERSION` | latest | 应用版本 |
-| `APP_PORT` | 3000 | 应用端口 |
-| `BACKUP_RETENTION_DAYS` | 7 | 备份保留天数 |
-| `HEALTH_CHECK_RETRIES` | 30 | 健康检查重试次数 |
-| `HEALTH_CHECK_INTERVAL` | 2 | 健康检查间隔（秒） |
-| `MIN_DISK_SPACE_MB` | 1000 | 最小磁盘空间（MB） |
-| `MIN_MEMORY_MB` | 1024 | 最小内存（MB） |
+| 变量名                  | 默认值       | 说明               |
+| ----------------------- | ------------ | ------------------ |
+| `DEBUG`                 | false        | 是否启用调试模式   |
+| `APP_NAME`              | legal-debate | 应用名称           |
+| `APP_VERSION`           | latest       | 应用版本           |
+| `APP_PORT`              | 3000         | 应用端口           |
+| `BACKUP_RETENTION_DAYS` | 7            | 备份保留天数       |
+| `HEALTH_CHECK_RETRIES`  | 30           | 健康检查重试次数   |
+| `HEALTH_CHECK_INTERVAL` | 2            | 健康检查间隔（秒） |
+| `MIN_DISK_SPACE_MB`     | 1000         | 最小磁盘空间（MB） |
+| `MIN_MEMORY_MB`         | 1024         | 最小内存（MB）     |
 
 ## 目录结构
 
@@ -190,12 +193,14 @@ cat ../../.previous-version
 ### 问题：Docker命令未找到
 
 **解决方案**：
+
 - 安装Docker：https://docs.docker.com/get-docker/
 - 安装Docker Compose：https://docs.docker.com/compose/install/
 
 ### 问题：环境检查失败
 
 **解决方案**：
+
 - 检查环境变量是否正确设置
 - 查看日志文件：`../../logs/deploy.log`
 - 检查磁盘空间是否充足
@@ -203,6 +208,7 @@ cat ../../.previous-version
 ### 问题：数据库迁移失败
 
 **解决方案**：
+
 - 检查数据库连接是否正常
 - 检查备份文件是否存在
 - 查看详细错误日志
@@ -211,6 +217,7 @@ cat ../../.previous-version
 ### 问题：应用部署失败
 
 **解决方案**：
+
 - 检查Docker容器状态：`docker ps -a`
 - 查看容器日志：`docker logs legal-debate-app`
 - 检查端口是否被占用
@@ -235,12 +242,13 @@ cat ../../.previous-version
 ## 支持和反馈
 
 如果遇到问题，请：
+
 1. 查看日志文件获取详细信息
 2. 检查本文档的故障排查部分
 3. 联系运维团队获取支持
 
 ## 版本历史
 
-| 版本 | 日期 | 说明 |
-|------|------|------|
+| 版本  | 日期       | 说明                       |
+| ----- | ---------- | -------------------------- |
 | 1.0.0 | 2026-01-18 | 初始版本，包含基础部署脚本 |

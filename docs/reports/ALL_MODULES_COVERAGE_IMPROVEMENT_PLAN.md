@@ -330,18 +330,18 @@
 #### 1. 错误处理测试
 
 ```typescript
-describe("错误处理", () => {
-  it("should handle network errors", async () => {
+describe('错误处理', () => {
+  it('should handle network errors', async () => {
     // Mock网络错误
     // 验证错误被正确处理
   });
 
-  it("should handle validation errors", async () => {
+  it('should handle validation errors', async () => {
     // 传入无效参数
     // 验证验证错误
   });
 
-  it("should handle timeout errors", async () => {
+  it('should handle timeout errors', async () => {
     // Mock超时
     // 验证超时处理
   });
@@ -351,16 +351,16 @@ describe("错误处理", () => {
 #### 2. 边界条件测试
 
 ```typescript
-describe("边界条件", () => {
-  it("should handle empty input", async () => {
+describe('边界条件', () => {
+  it('should handle empty input', async () => {
     // 传入空值、undefined、null
   });
 
-  it("should handle maximum limits", async () => {
+  it('should handle maximum limits', async () => {
     // 传入边界值
   });
 
-  it("should handle special characters", async () => {
+  it('should handle special characters', async () => {
     // 传入特殊字符
   });
 });
@@ -369,16 +369,16 @@ describe("边界条件", () => {
 #### 3. 分支覆盖测试
 
 ```typescript
-describe("条件分支", () => {
-  it("should handle condition A", async () => {
+describe('条件分支', () => {
+  it('should handle condition A', async () => {
     // 测试条件A为真的情况
   });
 
-  it("should handle condition B", async () => {
+  it('should handle condition B', async () => {
     // 测试条件B为真的情况
   });
 
-  it("should handle else branch", async () => {
+  it('should handle else branch', async () => {
     // 测试else分支
   });
 });

@@ -17,12 +17,14 @@
 **文件**：`prisma/seed-admin.ts`（~170行）
 
 **功能**：
+
 - 创建默认管理员账户（admin@example.com / Admin@123）
 - 创建测试企业账户（enterprise@example.com / Enterprise@123）
 - 使用bcrypt加密密码
 - 使用upsert操作，不会删除现有数据
 
 **使用方法**：
+
 ```bash
 npx tsx prisma/seed-admin.ts
 ```
@@ -32,6 +34,7 @@ npx tsx prisma/seed-admin.ts
 **文件**：`src/__tests__/e2e/enterprise-helpers.ts`
 
 **修改内容**：
+
 - 修改了`adminLogin`函数，使用seed脚本创建的管理员账户
 - 删除了原`createAdminUser`函数（不再需要）
 
@@ -40,6 +43,7 @@ npx tsx prisma/seed-admin.ts
 **文件**：`src/__tests__/e2e/enterprise.spec.ts`
 
 **新增测试用例**（3个）：
+
 1. **应该成功通过企业审核**：管理员登录并审核通过
 2. **应该成功拒绝企业审核**：管理员登录并拒绝审核
 3. **应该拒绝非管理员用户审核**：权限检查，返回403
@@ -49,6 +53,7 @@ npx tsx prisma/seed-admin.ts
 **文件**：`docs/guides/ADMIN_ACCOUNT_SETUP.md`
 
 **内容**：
+
 - 管理员账户配置说明
 - Seed脚本使用指南
 - E2E测试辅助函数使用方法
@@ -108,6 +113,7 @@ Sprint 9.1.4"用户角色管理"将实现完整的管理后台功能：
 ### 生产环境建议
 
 1. **修改默认密码**：
+
    ```typescript
    const ADMIN_CONFIG = {
      password: 'YourStrongPassword123!', // 生产环境必须修改
@@ -115,6 +121,7 @@ Sprint 9.1.4"用户角色管理"将实现完整的管理后台功能：
    ```
 
 2. **使用环境变量**：
+
    ```typescript
    const ADMIN_CONFIG = {
      email: process.env.ADMIN_EMAIL || 'admin@example.com',
@@ -140,6 +147,6 @@ Sprint 9.1.4"用户角色管理"将实现完整的管理后台功能：
 
 ## 版本历史
 
-| 版本 | 日期 | 说明 |
-|-----|------|------|
-| 1.0 | 2026-01-12 | 初始版本，记录管理员账户提前实现情况 |
+| 版本 | 日期       | 说明                                 |
+| ---- | ---------- | ------------------------------------ |
+| 1.0  | 2026-01-12 | 初始版本，记录管理员账户提前实现情况 |

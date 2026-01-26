@@ -9,23 +9,27 @@
 ### 1. Mock AI模式（默认）
 
 **环境变量设置：**
+
 ```bash
 USE_REAL_AI=false
 ```
 
 **特点：**
+
 - 使用Mock AI服务，不调用真实API
 - 测试速度快（响应时间<1秒）
 - 无API调用费用
 - 测试结果可预测
 
 **适用场景：**
+
 - 开发和日常测试
 - CI/CD流水线快速反馈
 - 功能验证和集成测试
 - 不依赖外部服务稳定性
 
 **注意事项：**
+
 - Mock数据可能与真实AI输出有差异
 - 无法验证AI准确性
 - 无法测试API错误处理逻辑
@@ -33,23 +37,27 @@ USE_REAL_AI=false
 ### 2. 真实AI模式
 
 **环境变量设置：**
+
 ```bash
 USE_REAL_AI=true
 ```
 
 **特点：**
+
 - 使用真实AI API（DeepSeek、智谱等）
 - 响应时间较长（5-30秒）
 - 产生API调用费用
 - 测试结果更接近生产环境
 
 **适用场景：**
+
 - 准确性测试
 - API行为验证
 - 性能基准测试
 - 发布前验证
 
 **注意事项：**
+
 - 需要确保API密钥有效且有足够余额
 - 测试速度较慢
 - 可能触发API限流
@@ -128,22 +136,22 @@ AI服务配置在`src/lib/ai/config.ts`中定义：
 
 ```typescript
 export function getAIConfig(useRealAPI: boolean = false): AIServiceConfig {
-  const nodeEnv = process.env.NODE_ENV || "development";
-  
+  const nodeEnv = process.env.NODE_ENV || 'development';
+
   // 检查环境变量 USE_REAL_AI 是否设置为 true
-  const useRealAIEnv = process.env.USE_REAL_AI === "true";
-  
+  const useRealAIEnv = process.env.USE_REAL_AI === 'true';
+
   // 如果明确指定使用真实API（准确性测试）或通过环境变量设置
   if (useRealAPI || useRealAIEnv) {
     return ACCURACY_TEST_AI_CONFIG;
   }
-  
+
   switch (nodeEnv) {
-    case "production":
+    case 'production':
       return PRODUCTION_AI_CONFIG;
-    case "test":
-      return TEST_AI_CONFIG;  // Mock配置
-    case "development":
+    case 'test':
+      return TEST_AI_CONFIG; // Mock配置
+    case 'development':
     default:
       return DEVELOPMENT_AI_CONFIG;
   }
@@ -152,16 +160,17 @@ export function getAIConfig(useRealAPI: boolean = false): AIServiceConfig {
 
 ### 配置对比
 
-| 配置 | USE_REAL_AI | 描述 | 超时 | 重试次数 |
-|------|-------------|------|--------|----------|
-| TEST_AI_CONFIG | false | Mock模式，使用本地Mock服务 | 10秒 | 1次 |
-| ACCURACY_TEST_AI_CONFIG | true | 真实AI模式，使用DeepSeek/智谱 | 60秒 | 3次 |
+| 配置                    | USE_REAL_AI | 描述                          | 超时 | 重试次数 |
+| ----------------------- | ----------- | ----------------------------- | ---- | -------- |
+| TEST_AI_CONFIG          | false       | Mock模式，使用本地Mock服务    | 10秒 | 1次      |
+| ACCURACY_TEST_AI_CONFIG | true        | 真实AI模式，使用DeepSeek/智谱 | 60秒 | 3次      |
 
 ## 常见问题
 
 ### Q1: 为什么E2E测试默认不使用真实AI？
 
 A: 原因如下：
+
 1. 测试速度：真实AI响应时间5-30秒，Mock模式<1秒
 2. 成本：频繁测试会产生大量API调用费用
 3. 稳定性：Mock模式不依赖外部服务，测试更稳定
@@ -170,6 +179,7 @@ A: 原因如下：
 ### Q2: 什么时候需要使用真实AI？
 
 A: 建议在以下场景使用真实AI：
+
 1. 验证AI准确性和响应质量
 2. 测试API错误处理和重试逻辑
 3. 性能基准测试
@@ -178,6 +188,7 @@ A: 建议在以下场景使用真实AI：
 ### Q3: 如何测试真实AI的错误处理？
 
 A: 真实AI模式下可能遇到：
+
 - 超时错误（网络慢）
 - API限流（请求过多）
 - 配额不足（余额不足）
@@ -188,6 +199,7 @@ A: 真实AI模式下可能遇到：
 ### Q4: 使用真实AI时需要注意什么？
 
 A: 注意事项：
+
 1. 确保API密钥有效且有足够余额
 2. 限制测试频率，避免触发限流
 3. 考虑使用单线程运行（workers=1）
@@ -197,6 +209,7 @@ A: 注意事项：
 ### Q5: 如何控制测试成本？
 
 A: 成本控制建议：
+
 1. 优先使用Mock模式进行功能测试
 2. 真实AI测试仅针对关键路径
 3. 使用测试环境的API密钥（如有折扣）
@@ -212,6 +225,6 @@ A: 成本控制建议：
 
 ## 更新历史
 
-| 日期 | 版本 | 说明 |
-|------|------|------|
-| 2026-01-11 | 1.0 | 初始版本，添加USE_REAL_AI环境变量说明 |
+| 日期       | 版本 | 说明                                  |
+| ---------- | ---- | ------------------------------------- |
+| 2026-01-11 | 1.0  | 初始版本，添加USE_REAL_AI环境变量说明 |

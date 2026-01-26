@@ -64,11 +64,11 @@
 function extractCorrelationId(request: NextRequest): string | undefined {
   // 从请求头获取
   const headerCorrelationId =
-    request.headers.get("X-Correlation-ID") ||
-    request.headers.get("x-correlation-id");
+    request.headers.get('X-Correlation-ID') ||
+    request.headers.get('x-correlation-id');
   // 从查询参数获取
   const url = new URL(request.url);
-  const queryCorrelationId = url.searchParams.get("correlationId");
+  const queryCorrelationId = url.searchParams.get('correlationId');
   return headerCorrelationId || queryCorrelationId;
 }
 ```
@@ -251,19 +251,19 @@ function extractCorrelationId(request: NextRequest): string | undefined {
 #### 创建自定义错误
 
 ```typescript
-import { ApiError, ValidationError } from "@/app/api/lib/errors/api-error";
+import { ApiError, ValidationError } from '@/app/api/lib/errors/api-error';
 
 // 使用预定义错误类型
-throw new ValidationError("Invalid input data", { field: "email" });
+throw new ValidationError('Invalid input data', { field: 'email' });
 
 // 使用通用ApiError
-throw new ApiError(418, "TEAPOT_ERROR", "I'm a teapot");
+throw new ApiError(418, 'TEAPOT_ERROR', "I'm a teapot");
 ```
 
 #### 在API路由中使用
 
 ```typescript
-import { withErrorHandler } from "@/app/api/lib/errors/error-handler";
+import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 
 export const POST = withErrorHandler(async (request: NextRequest) => {
   // 业务逻辑

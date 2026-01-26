@@ -397,7 +397,7 @@ npx playwright test --reporter=html
 
   ```typescript
   // ❌ 错误
-  const dbUrl = "postgresql://user:password@localhost:5432/db";
+  const dbUrl = 'postgresql://user:password@localhost:5432/db';
 
   // ✅ 正确
   const dbUrl = process.env.DATABASE_URL;
@@ -416,7 +416,7 @@ npx playwright test --reporter=html
       const data = await api.getData();
       return data;
     } catch (error) {
-      logger.error("Failed to fetch data", error);
+      logger.error('Failed to fetch data', error);
       throw error;
     }
   }

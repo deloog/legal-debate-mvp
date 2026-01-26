@@ -5,11 +5,13 @@
 **目标**：提升当事人信息提取准确率从90%+提升至95%+
 
 **当前状态**：
+
 - 当事人识别准确率90%+
 - 19个Bad Case测试通过率37%（7/19）
 - 已实现基础三层架构（AI识别+算法兜底+AI审查）
 
 **目标状态**：
+
 - 19个Bad Case通过率≥90%（至少17/19）
 - 当事人识别准确率≥95%
 - 测试通过率100%
@@ -51,6 +53,7 @@ Layer 4.5: 审查结果应用（applyCorrections修正数据）
    - 修改`src/lib/agent/doc-analyzer/prompts/few-shot-library.ts`
 
 **验收标准**：
+
 - AI识别准确率提升5%+
 - 新增5个Few-Shot示例
 
@@ -74,6 +77,7 @@ Layer 4.5: 审查结果应用（applyCorrections修正数据）
    - 修改`src/lib/agent/doc-analyzer/extractors/party-extractor.ts`
 
 **验收标准**：
+
 - 算法兜底准确率提升10%+
 - 新增10条正则表达式规则
 
@@ -97,6 +101,7 @@ Layer 4.5: 审查结果应用（applyCorrections修正数据）
    - 修改`src/lib/agent/verification-agent/verifiers/party-verifier.ts`
 
 **验收标准**：
+
 - 验证准确率≥90%
 - 新增5条验证规则
 
@@ -121,6 +126,7 @@ Layer 4.5: 审查结果应用（applyCorrections修正数据）
    - 创建错误模式分析脚本
 
 **验收标准**：
+
 - 记录所有Bad Case错误模式
 - 生成优化建议报告
 
@@ -131,21 +137,25 @@ Layer 4.5: 审查结果应用（applyCorrections修正数据）
 **测试文件**：`src/__tests__/agent/doc-analyzer/party-extraction-bad-case.test.ts`
 
 **测试用例**：
+
 - 19个Bad Case测试用例（已存在）
 - 新增5个优化验证用例
 
 **验收标准**：
+
 - 测试通过率≥90%（至少17/19）
 - 测试覆盖率≥90%
 
 ### 验证测试
 
 **测试命令**：
+
 ```bash
 npm test -- src/__tests__/agent/doc-analyzer/party-extraction-bad-case.test.ts
 ```
 
 **验收标准**：
+
 - 所有测试通过
 - 无TypeScript编译错误
 - 无ESLint错误

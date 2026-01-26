@@ -21,8 +21,8 @@
 | 证据链分析     | 100%    | 1      | 1      | 0      | 0      |
 | 判例相似度分析 | 100%    | 1      | 1      | 0      | 0      |
 | 法律风险评估   | 100%    | 1      | 1      | 0      | 0      |
-| 客户分析     | 100%    | 1      | 1      | 0      | 0      |
-| 案件分析     | 100%    | 1      | 1      | 0      | 0      |
+| 客户分析       | 100%    | 1      | 1      | 0      | 0      |
+| 案件分析       | 100%    | 1      | 1      | 0      | 0      |
 | 律师绩效分析   | 100%    | 1      | 1      | 0      | 0      |
 | **总计**       | **80%** | **10** | **8**  | **0**  | **2**  |
 
@@ -700,25 +700,25 @@
 
 ### 子任务进度
 
-| 子任务           | 状态    | 完成度 | 说明           |
-| ------------------ | ------- | ------ | -------------- |
+| 子任务             | 状态    | 完成度 | 说明             |
+| ------------------ | ------- | ------ | ---------------- |
 | 6.3.1 类型定义扩展 | ✅ 完成 | 100%   | 扩展律师绩效类型 |
-| 6.3.2 API开发     | ✅ 完成 | 100%   | 创建绩效分析API |
-| 6.3.3 图表组件   | ✅ 完成 | 100%   | 创建图表组件   |
-| 6.3.4 单元测试   | ✅ 完成 | 100%   | 编写单元测试   |
+| 6.3.2 API开发      | ✅ 完成 | 100%   | 创建绩效分析API  |
+| 6.3.3 图表组件     | ✅ 完成 | 100%   | 创建图表组件     |
+| 6.3.4 单元测试     | ✅ 完成 | 100%   | 编写单元测试     |
 
 ### 文件创建清单
 
-| 文件路径                                                     | 状态      | 实际行数 | 说明               |
-| ------------------------------------------------------------ | --------- | -------- | ------------------ |
-| `src/types/stats.ts`                                        | ✅ 已修改 | 1080     | 添加律师绩效类型   |
-| `src/app/api/analytics/lawyers/route.ts`                | ✅ 已创建 | 785      | 律师绩效分析API   |
-| `src/components/analytics/lawyer/LawyerPerformance.tsx`        | ✅ 已创建 | 240      | 律师绩效主组件   |
-| `src/components/analytics/lawyer/LawyerCaseVolumeChart.tsx`    | ✅ 已创建 | 70       | 案件量图表组件   |
-| `src/components/analytics/lawyer/LawyerSuccessRateChart.tsx`   | ✅ 已创建 | 80       | 胜诉率图表组件   |
-| `src/components/analytics/lawyer/LawyerRevenueChart.tsx`       | ✅ 已创建 | 85       | 创收图表组件     |
-| `src/components/analytics/lawyer/LawyerEfficiencyChart.tsx`    | ✅ 已创建 | 80       | 效率图表组件     |
-| `src/__tests__/api/analytics/lawyers/route.test.ts`        | ✅ 已创建 | 265      | API单元测试      |
+| 文件路径                                                     | 状态      | 实际行数 | 说明             |
+| ------------------------------------------------------------ | --------- | -------- | ---------------- |
+| `src/types/stats.ts`                                         | ✅ 已修改 | 1080     | 添加律师绩效类型 |
+| `src/app/api/analytics/lawyers/route.ts`                     | ✅ 已创建 | 785      | 律师绩效分析API  |
+| `src/components/analytics/lawyer/LawyerPerformance.tsx`      | ✅ 已创建 | 240      | 律师绩效主组件   |
+| `src/components/analytics/lawyer/LawyerCaseVolumeChart.tsx`  | ✅ 已创建 | 70       | 案件量图表组件   |
+| `src/components/analytics/lawyer/LawyerSuccessRateChart.tsx` | ✅ 已创建 | 80       | 胜诉率图表组件   |
+| `src/components/analytics/lawyer/LawyerRevenueChart.tsx`     | ✅ 已创建 | 85       | 创收图表组件     |
+| `src/components/analytics/lawyer/LawyerEfficiencyChart.tsx`  | ✅ 已创建 | 80       | 效率图表组件     |
+| `src/__tests__/api/analytics/lawyers/route.test.ts`          | ✅ 已创建 | 265      | API单元测试      |
 
 ### 验收标准
 
@@ -822,7 +822,7 @@
 
 **已完成内容（6.3.4 单元测试）**：
 
-- 创建src/__tests__/api/analytics/lawyers/route.test.ts（265行）：
+- 创建src/**tests**/api/analytics/lawyers/route.test.ts（265行）：
   - 9个测试用例：
     - 应该返回律师绩效数据
     - 应该支持时间范围参数
@@ -861,27 +861,27 @@
 
 ### 子任务进度
 
-| 子任务           | 状态    | 完成度 | 说明           |
-| ------------------ | ------- | ------ | -------------- |
-| 6.2.1 API集成    | ✅ 完成 | 100%   | 创建案件分析API |
-| 6.2.2 图表组件   | ✅ 完成 | 100%   | 创建图表组件   |
-| 6.2.3 主组件     | ✅ 完成 | 100%   | 创建主分析组件 |
-| 6.2.4 单元测试   | ✅ 完成 | 100%   | 编写单元测试   |
+| 子任务         | 状态    | 完成度 | 说明            |
+| -------------- | ------- | ------ | --------------- |
+| 6.2.1 API集成  | ✅ 完成 | 100%   | 创建案件分析API |
+| 6.2.2 图表组件 | ✅ 完成 | 100%   | 创建图表组件    |
+| 6.2.3 主组件   | ✅ 完成 | 100%   | 创建主分析组件  |
+| 6.2.4 单元测试 | ✅ 完成 | 100%   | 编写单元测试    |
 
 ### 文件创建清单
 
-| 文件路径                                                        | 状态      | 实际行数 | 说明               |
-| --------------------------------------------------------------- | --------- | -------- | ------------------ |
-| `src/types/stats.ts`                                        | ✅ 已修改 | 930      | 添加案件分析类型   |
-| `src/app/api/analytics/cases/route.ts`                      | ✅ 已创建 | 715      | 案件分析API       |
-| `src/components/analytics/case/CaseTypeDistributionChart.tsx`  | ✅ 已创建 | 135      | 案件类型分布图表   |
-| `src/components/analytics/case/CaseSuccessRateChart.tsx`      | ✅ 已创建 | 190      | 案件成功率图表     |
-| `src/components/analytics/case/CaseRevenueChart.tsx`          | ✅ 已创建 | 180      | 案件收益分析图表   |
-| `src/components/analytics/case/CaseEfficiencyTrendChart.tsx`  | ✅ 已创建 | 240      | 案件效率趋势图表   |
-| `src/components/analytics/case/CaseAnalytics.tsx`             | ✅ 已修改 | 180      | 案件分析主组件     |
-| `src/__tests__/api/analytics/cases/route.test.ts`           | ✅ 已创建 | 175      | API单元测试        |
-| `src/__tests__/components/analytics/case/CaseAnalytics.test.tsx` | ✅ 已修改 | 195      | 组件单元测试       |
-| `src/__tests__/components/analytics/case/CaseEfficiencyTrendChart.test.tsx` | ✅ 已创建 | 160      | 效率趋势图表测试   |
+| 文件路径                                                                    | 状态      | 实际行数 | 说明             |
+| --------------------------------------------------------------------------- | --------- | -------- | ---------------- |
+| `src/types/stats.ts`                                                        | ✅ 已修改 | 930      | 添加案件分析类型 |
+| `src/app/api/analytics/cases/route.ts`                                      | ✅ 已创建 | 715      | 案件分析API      |
+| `src/components/analytics/case/CaseTypeDistributionChart.tsx`               | ✅ 已创建 | 135      | 案件类型分布图表 |
+| `src/components/analytics/case/CaseSuccessRateChart.tsx`                    | ✅ 已创建 | 190      | 案件成功率图表   |
+| `src/components/analytics/case/CaseRevenueChart.tsx`                        | ✅ 已创建 | 180      | 案件收益分析图表 |
+| `src/components/analytics/case/CaseEfficiencyTrendChart.tsx`                | ✅ 已创建 | 240      | 案件效率趋势图表 |
+| `src/components/analytics/case/CaseAnalytics.tsx`                           | ✅ 已修改 | 180      | 案件分析主组件   |
+| `src/__tests__/api/analytics/cases/route.test.ts`                           | ✅ 已创建 | 175      | API单元测试      |
+| `src/__tests__/components/analytics/case/CaseAnalytics.test.tsx`            | ✅ 已修改 | 195      | 组件单元测试     |
+| `src/__tests__/components/analytics/case/CaseEfficiencyTrendChart.test.tsx` | ✅ 已创建 | 160      | 效率趋势图表测试 |
 
 ### 验收标准
 
@@ -964,7 +964,7 @@
 
 **已完成内容（6.2.4 单元测试）**：
 
-- API测试（src/__tests__/api/analytics/cases/route.test.ts，175行）
+- API测试（src/**tests**/api/analytics/cases/route.test.ts，175行）
   - 身份验证测试（1个测试用例）
   - 权限检查测试（1个测试用例）
   - 成功数据返回测试（1个测试用例）
@@ -973,7 +973,7 @@
   - 状态筛选测试（1个测试用例）
   - 错误处理测试（1个测试用例）
 
-- 组件测试（src/__tests__/components/analytics/case/CaseAnalytics.test.tsx，175行）
+- 组件测试（src/**tests**/components/analytics/case/CaseAnalytics.test.tsx，175行）
   - 加载状态测试（1个测试用例）
   - 数据渲染测试（1个测试用例）
   - 日期范围测试（1个测试用例）
@@ -993,22 +993,22 @@
 
 ### 子任务进度
 
-| 子任务             | 状态    | 完成度 | 说明           |
-| ------------------ | ------- | ------ | -------------- |
-| 6.1.1 类型定义扩展 | ✅ 完成 | 100%   | 扩展客户类型   |
-| 6.1.2 API开发     | ✅ 完成 | 100%   | 创建分析API路由 |
-| 6.1.3 转化漏斗分析 | ✅ 完成 | 100%   | 实现漏斗分析   |
-| 6.1.4 价值分析     | ✅ 完成 | 100%   | 实现价值分析   |
-| 6.1.5 生命周期分析 | ✅ 完成 | 100%   | 实现生命周期   |
-| 6.1.6 单元测试     | ✅ 完成 | 100%   | 编写单元测试   |
+| 子任务             | 状态    | 完成度 | 说明            |
+| ------------------ | ------- | ------ | --------------- |
+| 6.1.1 类型定义扩展 | ✅ 完成 | 100%   | 扩展客户类型    |
+| 6.1.2 API开发      | ✅ 完成 | 100%   | 创建分析API路由 |
+| 6.1.3 转化漏斗分析 | ✅ 完成 | 100%   | 实现漏斗分析    |
+| 6.1.4 价值分析     | ✅ 完成 | 100%   | 实现价值分析    |
+| 6.1.5 生命周期分析 | ✅ 完成 | 100%   | 实现生命周期    |
+| 6.1.6 单元测试     | ✅ 完成 | 100%   | 编写单元测试    |
 
 ### 文件创建清单
 
-| 文件路径                                                | 状态      | 实际行数 | 说明               |
-| ------------------------------------------------------- | --------- | -------- | ------------------ |
-| `src/types/client.ts`                                    | ✅ 已修改 | 180      | 扩展类型定义       |
-| `src/app/api/analytics/clients/route.ts`                 | ✅ 已创建 | 400      | 客户分析API       |
-| `src/__tests__/api/analytics/clients.test.ts`             | ✅ 已创建 | 400      | API单元测试        |
+| 文件路径                                      | 状态      | 实际行数 | 说明         |
+| --------------------------------------------- | --------- | -------- | ------------ |
+| `src/types/client.ts`                         | ✅ 已修改 | 180      | 扩展类型定义 |
+| `src/app/api/analytics/clients/route.ts`      | ✅ 已创建 | 400      | 客户分析API  |
+| `src/__tests__/api/analytics/clients.test.ts` | ✅ 已创建 | 400      | API单元测试  |
 
 ### 验收标准
 
@@ -1092,7 +1092,7 @@
 
 **已完成内容（6.1.6 单元测试）**：
 
-- 创建src/__tests__/api/analytics/clients.test.ts（400行）：
+- 创建src/**tests**/api/analytics/clients.test.ts（400行）：
   - 15个测试用例，100%通过率
   - 测试覆盖：
     - 身份验证（1个测试）
@@ -1157,16 +1157,16 @@
 
 ### 文件创建清单
 
-| 文件路径                                            | 状态      | 实际行数 | 说明        |
-| --------------------------------------------------- | --------- | -------- | ----------- |
-| `src/types/risk.ts`                                 | ✅ 已创建 | 460      | 类型定义    |
-| `src/lib/ai/risk/risk-identifier.ts`                | ✅ 已创建 | 380      | 风险识别    |
-| `src/lib/ai/risk/risk-scorer.ts`                    | ✅ 已创建 | 430      | 风险评分    |
-| `src/__tests__/lib/ai/risk/risk-identifier.test.ts` | ✅ 已创建 | 470      | 识别器测试  |
-| `src/__tests__/lib/ai/risk/risk-scorer.test.ts`     | ✅ 已创建 | 360      | 评分器测试  |
-| `src/lib/ai/risk/risk-advisor.ts`                   | ✅ 已创建 | 230      | 风险建议    |
-| `src/app/api/cases/[id]/risk-assessment/route.ts`   | ✅ 已创建 | 100      | 风险评估API |
-| `src/components/risk/RiskAssessmentViewer.tsx`      | ✅ 已创建 | 440      | 风险查看器  |
+| 文件路径                                            | 状态      | 实际行数 | 说明         |
+| --------------------------------------------------- | --------- | -------- | ------------ |
+| `src/types/risk.ts`                                 | ✅ 已创建 | 460      | 类型定义     |
+| `src/lib/ai/risk/risk-identifier.ts`                | ✅ 已创建 | 380      | 风险识别     |
+| `src/lib/ai/risk/risk-scorer.ts`                    | ✅ 已创建 | 430      | 风险评分     |
+| `src/__tests__/lib/ai/risk/risk-identifier.test.ts` | ✅ 已创建 | 470      | 识别器测试   |
+| `src/__tests__/lib/ai/risk/risk-scorer.test.ts`     | ✅ 已创建 | 360      | 评分器测试   |
+| `src/lib/ai/risk/risk-advisor.ts`                   | ✅ 已创建 | 230      | 风险建议     |
+| `src/app/api/cases/[id]/risk-assessment/route.ts`   | ✅ 已创建 | 100      | 风险评估API  |
+| `src/components/risk/RiskAssessmentViewer.tsx`      | ✅ 已创建 | 440      | 风险查看器   |
 | `src/__tests__/lib/ai/risk/risk-assessment.test.ts` | ✅ 已创建 | 380      | 综合单元测试 |
 
 ### 验收标准
@@ -1366,23 +1366,23 @@
 
 ## 📝 更新记录
 
-| 日期       | 版本 | 更新内容                                                      | 更新人 |
-| ---------- | ---- | ------------------------------------------------------------- | ------ |
-| 2026-01-20 | v1.0 | 初始创建，导入所有专业工具和AI任务                            | AI     |
-| 2026-01-24 | v1.1 | 完成任务4：法律时效计算（TOOL-004）                           | AI     |
-| 2026-01-24 | v1.2 | 修复所有测试，测试通过率100%                                  | AI     |
-| 2026-01-24 | v1.3 | 完成任务5.1.1：证据关系识别（AI-001子任务）                   | AI     |
-| 2026-01-25 | v1.4 | 完成任务5：证据链分析（AI-001）全部子任务                     | AI     |
-| 2026-01-25 | v1.5 | 完成任务6：判例相似度分析（AI-002）全部子任务                 | AI     |
-| 2026-01-25 | v1.6 | 胜败率分析全部测试通过：29个单元测试，11个API测试，100%通过率 | AI     |
-| 2026-01-25 | v1.7 | 前端组件全部测试通过：31个测试用例，100%通过率，覆盖率>90%    | AI     |
-| 2026-01-26 | v1.8 | 完成任务7：法律风险评估（AI-003）全部子任务，43个测试用例100%通过 | AI     |
-| 2026-01-26 | v1.9 | 完成任务8：客户分析（ANALYTICS-001）全部子任务，15个测试用例100%通过 | AI     |
-| 2026-01-26 | v1.10 | 完成任务6.1.2：前端图表并集成，创建11个图表组件和工具函数，25个测试用例100%通过 | AI     |
-| 2026-01-26 | v1.11 | 完成任务6.2.2改进：新增CaseEfficiencyTrendChart组件，27个测试用例100%通过，集成到CaseAnalytics | AI     |
-| 2026-01-26 | v1.12 | 完成任务10：律师绩效分析（ANALYTICS-003）全部子任务，创建8个文件（类型扩展、API、5个组件、测试），预计9个测试用例 | AI     |
-| 2026-01-26 | v1.13 | 完成任务6.3.2第一阶段：响应式图表Hook和Tooltip组件（useResizeObserver: 195行, 10个测试用例100%通过; ChartTooltip: 165行, 12个测试用例100%通过） | AI     |
-| 2026-01-26 | v1.14 | 完成任务6.3.2第二阶段：交互式图表容器和集成测试（InteractiveChartContainer: 230行, 13个测试用例100%通过） | AI     |
+| 日期       | 版本  | 更新内容                                                                                                                                          | 更新人 |
+| ---------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 2026-01-20 | v1.0  | 初始创建，导入所有专业工具和AI任务                                                                                                                | AI     |
+| 2026-01-24 | v1.1  | 完成任务4：法律时效计算（TOOL-004）                                                                                                               | AI     |
+| 2026-01-24 | v1.2  | 修复所有测试，测试通过率100%                                                                                                                      | AI     |
+| 2026-01-24 | v1.3  | 完成任务5.1.1：证据关系识别（AI-001子任务）                                                                                                       | AI     |
+| 2026-01-25 | v1.4  | 完成任务5：证据链分析（AI-001）全部子任务                                                                                                         | AI     |
+| 2026-01-25 | v1.5  | 完成任务6：判例相似度分析（AI-002）全部子任务                                                                                                     | AI     |
+| 2026-01-25 | v1.6  | 胜败率分析全部测试通过：29个单元测试，11个API测试，100%通过率                                                                                     | AI     |
+| 2026-01-25 | v1.7  | 前端组件全部测试通过：31个测试用例，100%通过率，覆盖率>90%                                                                                        | AI     |
+| 2026-01-26 | v1.8  | 完成任务7：法律风险评估（AI-003）全部子任务，43个测试用例100%通过                                                                                 | AI     |
+| 2026-01-26 | v1.9  | 完成任务8：客户分析（ANALYTICS-001）全部子任务，15个测试用例100%通过                                                                              | AI     |
+| 2026-01-26 | v1.10 | 完成任务6.1.2：前端图表并集成，创建11个图表组件和工具函数，25个测试用例100%通过                                                                   | AI     |
+| 2026-01-26 | v1.11 | 完成任务6.2.2改进：新增CaseEfficiencyTrendChart组件，27个测试用例100%通过，集成到CaseAnalytics                                                    | AI     |
+| 2026-01-26 | v1.12 | 完成任务10：律师绩效分析（ANALYTICS-003）全部子任务，创建8个文件（类型扩展、API、5个组件、测试），预计9个测试用例                                 | AI     |
+| 2026-01-26 | v1.13 | 完成任务6.3.2第一阶段：响应式图表Hook和Tooltip组件（useResizeObserver: 195行, 10个测试用例100%通过; ChartTooltip: 165行, 12个测试用例100%通过）   | AI     |
+| 2026-01-26 | v1.14 | 完成任务6.3.2第二阶段：交互式图表容器和集成测试（InteractiveChartContainer: 230行, 13个测试用例100%通过）                                         | AI     |
 | 2026-01-26 | v1.15 | 完成任务6.3.2第三阶段：创建增强图表组件（EnhancedLineChart: 280行, EnhancedBarChart: 220行, EnhancedPieChart: 230行, EnhancedFunnelChart: 260行） | AI     |
-| 2026-01-26 | v1.16 | 完成任务6.3.2第四阶段：编写增强图表测试用例（4个测试文件，32个测试用例，ResizeObserver polyfill已添加） | AI     |
-| 2026-01-26 | v1.18 | 完成任务6.3.2第六阶段：将增强功能集成到现有图表组件（BarChart, LineChart, PieChart, FunnelChart），所有116个测试用例100%通过 | AI     |
+| 2026-01-26 | v1.16 | 完成任务6.3.2第四阶段：编写增强图表测试用例（4个测试文件，32个测试用例，ResizeObserver polyfill已添加）                                           | AI     |
+| 2026-01-26 | v1.18 | 完成任务6.3.2第六阶段：将增强功能集成到现有图表组件（BarChart, LineChart, PieChart, FunnelChart），所有116个测试用例100%通过                      | AI     |

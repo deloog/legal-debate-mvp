@@ -23,12 +23,11 @@ const typeIcons: Record<RecentActivityType['type'], string> = {
 };
 
 const typeColors: Record<RecentActivityType['type'], string> = {
-  case: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950',
-  client: 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-950',
-  team: 'text-purple-600 bg-purple-50 dark:text-purple-400 dark:bg-purple-950',
-  schedule:
-    'text-yellow-600 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-950',
-  reminder: 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-950',
+  case: 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white',
+  client: 'bg-gradient-to-br from-green-500 to-emerald-500 text-white',
+  team: 'bg-gradient-to-br from-purple-500 to-violet-500 text-white',
+  schedule: 'bg-gradient-to-br from-yellow-500 to-orange-500 text-white',
+  reminder: 'bg-gradient-to-br from-red-500 to-rose-500 text-white',
 };
 
 /**
@@ -36,15 +35,28 @@ const typeColors: Record<RecentActivityType['type'], string> = {
  */
 export function RecentActivities({ activities }: RecentActivitiesProps) {
   return (
-    <div className='rounded-lg border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950'>
-      <h3 className='mb-4 text-lg font-semibold text-gray-900 dark:text-gray-50'>
-        近期活动
-      </h3>
-      <div className='space-y-4'>
+    <div className='rounded-2xl border border-slate-200 bg-white p-6 shadow-sm'>
+      <h3 className='mb-6 text-lg font-semibold text-slate-900'>近期活动</h3>
+      <div className='space-y-3'>
         {activities.length === 0 ? (
-          <p className='py-8 text-center text-sm text-gray-500 dark:text-gray-400'>
-            暂无近期活动
-          </p>
+          <div className='flex flex-col items-center justify-center py-12'>
+            <div className='mb-4 rounded-full bg-slate-100 p-4'>
+              <svg
+                className='h-8 w-8 text-slate-400'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
+                />
+              </svg>
+            </div>
+            <p className='text-sm text-slate-500'>暂无近期活动</p>
+          </div>
         ) : (
           activities.map(activity => (
             <ActivityItem key={activity.id} activity={activity} />
@@ -66,13 +78,13 @@ function ActivityItem({ activity }: { activity: RecentActivityType }) {
   return (
     <ActivityWrapper
       {...(activity.link && { href: activity.link })}
-      className={`group flex items-start gap-3 rounded-lg p-3 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-zinc-900 ${activity.link ? 'cursor-pointer' : ''}`}
+      className={`group flex items-start gap-4 rounded-xl border border-slate-100 bg-slate-50 p-4 transition-all duration-200 hover:border-violet-200 hover:bg-violet-50/50 hover:shadow-md ${activity.link ? 'cursor-pointer' : ''}`}
     >
       <div
-        className={`flex shrink-0 items-center justify-center rounded-full p-2 ${iconColor}`}
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg shadow-md ${iconColor}`}
       >
         <svg
-          className='h-4 w-4'
+          className='h-5 w-5'
           fill='none'
           stroke='currentColor'
           viewBox='0 0 24 24'
@@ -85,14 +97,10 @@ function ActivityItem({ activity }: { activity: RecentActivityType }) {
           />
         </svg>
       </div>
-      <div className='flex-1 min-w-0'>
-        <p className='text-sm font-medium text-gray-900 dark:text-gray-50'>
-          {activity.title}
-        </p>
-        <p className='mt-1 text-sm text-gray-600 dark:text-gray-400'>
-          {activity.description}
-        </p>
-        <p className='mt-1 text-xs text-gray-500 dark:text-gray-500'>
+      <div className='min-w-0 flex-1'>
+        <p className='text-sm font-semibold text-slate-900'>{activity.title}</p>
+        <p className='mt-1 text-sm text-slate-600'>{activity.description}</p>
+        <p className='mt-2 text-xs font-medium text-slate-500'>
           {activity.time}
         </p>
       </div>

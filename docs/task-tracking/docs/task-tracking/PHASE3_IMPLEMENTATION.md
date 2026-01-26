@@ -120,12 +120,14 @@
 
 **状态**：🟡 进行中  
 **参与智能体**：
+
 - 🤖 AnalysisAgent（文档解析）
 - ✅ VerificationAgent（三重验证：事实+逻辑+完成度）
 - 💾 MemoryAgent（错误学习与记忆）
 - ⚖️ LegalAgent（法律推理，辅助判断当事人角色）
 
 **协同流程**：
+
 ```
 AnalysisAgent（五层文档解析）
     ↓
@@ -177,12 +179,14 @@ MemoryAgent（记录Bad Case，持续学习优化）
 
 **状态**：✅ 已经完成  
 **参与智能体**：
+
 - 🧠 PlanningAgent（任务分解：识别主请求+从请求+隐藏请求）
 - 🤖 AnalysisAgent（文档解析+证据分析）
 - ✅ VerificationAgent（完整性验证：检查是否遗漏）
 - 💾 MemoryAgent（记录遗漏模式）
 
 **协同流程**：
+
 ```
 PlanningAgent（任务分解：识别复合请求结构）
     ↓
@@ -236,11 +240,13 @@ MemoryAgent（记录遗漏模式，持续优化）
 
 **状态**：⚪ 未开始  
 **参与智能体**：
+
 - 🤖 AnalysisAgent（文档解析+金额提取）
 - ✅ VerificationAgent（事实性验证：检查金额准确性）
 - 💾 MemoryAgent（错误模式学习）
 
 **协同流程**：
+
 ```
 AnalysisAgent（文档解析，提取金额信息）
     ↓
@@ -288,12 +294,14 @@ MemoryAgent（记录错误模式，持续优化）
 
 **状态**：⚪ 未开始  
 **参与智能体**：
+
 - 🤖 AnalysisAgent（综合分析，提取争议焦点）
 - ⚖️ LegalAgent（法律检索，识别法律争议点）
 - ✅ VerificationAgent（逻辑验证，确保争议焦点合理）
 - 💾 MemoryAgent（记录争议焦点模式）
 
 **协同流程**：
+
 ```
 AnalysisAgent（综合分析，提取初步争议焦点）
     ↓
@@ -348,6 +356,7 @@ MemoryAgent（记录优秀争议焦点模式）
 
 **状态**：🟡 准备中  
 **参与智能体**：
+
 - 🤖 AnalysisAgent（文档解析）
 - ✅ VerificationAgent（三重验证）
 - ⚖️ LegalAgent（法律检索）
@@ -355,6 +364,7 @@ MemoryAgent（记录优秀争议焦点模式）
 - 🧠 PlanningAgent（任务规划）
 
 **协同流程**：
+
 ```
 PlanningAgent（任务规划：分解验证任务）
     ↓
@@ -412,12 +422,14 @@ MemoryAgent（记录错误，持续学习优化）
 
 **状态**：⚪ 未开始  
 **参与智能体**：
+
 - ⚖️ LegalAgent（法律推理链，生成论点）
 - 📝 GenerationAgent（内容优化，优化论点表达）
 - ✅ VerificationAgent（逻辑验证）
 - 💾 MemoryAgent（记录优秀论点模式）
 
 **协同流程**：
+
 ```
 LegalAgent（法律推理链，生成论点）
     ↓

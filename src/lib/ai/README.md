@@ -59,18 +59,18 @@ src/lib/ai/
 ### 基础使用
 
 ```typescript
-import AIServiceFactory, { getAIConfig } from "@/lib/ai/service";
+import AIServiceFactory, { getAIConfig } from '@/lib/ai/service';
 
 // 获取配置
 const config = getAIConfig();
 
 // 创建AI服务实例
-const aiService = await AIServiceFactory.getInstance("default", config);
+const aiService = await AIServiceFactory.getInstance('default', config);
 
 // 执行聊天完成
 const response = await aiService.chatCompletion({
-  model: "glm-4-flash",
-  messages: [{ role: "user", content: "你好，请介绍一下自己" }],
+  model: 'glm-4-flash',
+  messages: [{ role: 'user', content: '你好，请介绍一下自己' }],
   temperature: 0.7,
   maxTokens: 1000,
 });
@@ -81,15 +81,15 @@ console.log(response.choices[0].message.content);
 ### 高级配置
 
 ```typescript
-import { AIServiceFactory, PRODUCTION_AI_CONFIG } from "@/lib/ai/config";
+import { AIServiceFactory, PRODUCTION_AI_CONFIG } from '@/lib/ai/config';
 
 // 自定义配置
 const customConfig = {
   ...PRODUCTION_AI_CONFIG,
-  defaultProvider: "deepseek",
+  defaultProvider: 'deepseek',
   loadBalancer: {
     ...PRODUCTION_AI_CONFIG.loadBalancer,
-    strategy: "least_response_time",
+    strategy: 'least_response_time',
     weights: {
       zhipu: 0.4,
       deepseek: 0.6,
@@ -99,8 +99,8 @@ const customConfig = {
 
 // 创建自定义实例
 const aiService = await AIServiceFactory.createCustomInstance(
-  "production",
-  customConfig,
+  'production',
+  customConfig
 );
 ```
 
@@ -109,13 +109,13 @@ const aiService = await AIServiceFactory.createCustomInstance(
 ```typescript
 // 获取服务状态
 const status = aiService.getServiceStatus();
-console.log("服务健康状态:", status.healthy);
-console.log("总请求数:", status.totalRequests);
-console.log("平均响应时间:", status.averageResponseTime);
+console.log('服务健康状态:', status.healthy);
+console.log('总请求数:', status.totalRequests);
+console.log('平均响应时间:', status.averageResponseTime);
 
 // 获取提供商统计
 const providerStats = aiService.getProviderStats();
-providerStats.providerStats.forEach((stat) => {
+providerStats.providerStats.forEach(stat => {
   console.log(`提供商 ${stat.provider}:`);
   console.log(`  健康状态: ${stat.healthy}`);
   console.log(`  平均响应时间: ${stat.averageResponseTime}ms`);
@@ -125,11 +125,11 @@ providerStats.providerStats.forEach((stat) => {
 
 // 获取性能指标
 const metrics = aiService.getMetrics(3600000); // 最近1小时
-console.log("性能指标:", metrics);
+console.log('性能指标:', metrics);
 
 // 获取降级统计
 const fallbackStats = aiService.getFallbackStats(3600000);
-console.log("降级统计:", fallbackStats);
+console.log('降级统计:', fallbackStats);
 ```
 
 ## ⚙️ 配置选项
@@ -238,19 +238,19 @@ AI服务的核心类，提供统一的API接口：
 ### 单元测试
 
 ```typescript
-import AIServiceFactory from "@/lib/ai/service";
+import AIServiceFactory from '@/lib/ai/service';
 
-describe("AIService", () => {
+describe('AIService', () => {
   let aiService: AIService;
 
   beforeAll(async () => {
-    aiService = await AIServiceFactory.getInstance("test", TEST_AI_CONFIG);
+    aiService = await AIServiceFactory.getInstance('test', TEST_AI_CONFIG);
   });
 
-  it("should handle chat completion", async () => {
+  it('should handle chat completion', async () => {
     const response = await aiService.chatCompletion({
-      model: "glm-4-flash",
-      messages: [{ role: "user", content: "Hello" }],
+      model: 'glm-4-flash',
+      messages: [{ role: 'user', content: 'Hello' }],
     });
 
     expect(response.choices).toHaveLength(1);
@@ -262,10 +262,10 @@ describe("AIService", () => {
 ### 集成测试
 
 ```typescript
-import { validateAIConfig } from "@/lib/ai/config";
+import { validateAIConfig } from '@/lib/ai/config';
 
-describe("AI Configuration", () => {
-  it("should validate configuration", () => {
+describe('AI Configuration', () => {
+  it('should validate configuration', () => {
     const validation = validateAIConfig();
     expect(validation.valid).toBe(true);
     expect(validation.errors).toHaveLength(0);
@@ -297,15 +297,15 @@ const debugConfig = {
   ...getAIConfig(),
   monitor: {
     ...getAIConfig().monitor,
-    logLevel: "debug",
+    logLevel: 'debug',
     metricsInterval: 10000, // 10秒间隔
   },
 };
 
 // 查看内部状态
-console.log("负载均衡状态:", aiService.getProviderStats());
-console.log("监控指标:", aiService.getMetrics());
-console.log("降级历史:", aiService.getFallbackStats());
+console.log('负载均衡状态:', aiService.getProviderStats());
+console.log('监控指标:', aiService.getMetrics());
+console.log('降级历史:', aiService.getFallbackStats());
 ```
 
 ## 🚨 故障处理
@@ -318,7 +318,7 @@ console.log("降级历史:", aiService.getFallbackStats());
    // 检查配置
    const validation = validateAIConfig();
    if (!validation.valid) {
-     console.error("配置错误:", validation.errors);
+     console.error('配置错误:', validation.errors);
    }
    ```
 
@@ -328,7 +328,7 @@ console.log("降级历史:", aiService.getFallbackStats());
    // 检查健康状态
    const isHealthy = await aiService.healthCheck();
    if (!isHealthy) {
-     console.warn("部分提供商不可用，已启用降级策略");
+     console.warn('部分提供商不可用，已启用降级策略');
    }
    ```
 
@@ -338,7 +338,7 @@ console.log("降级历史:", aiService.getFallbackStats());
    const configWithTimeout = {
      ...config,
      globalTimeout: 120000, // 2分钟
-     clients: config.clients.map((client) => ({
+     clients: config.clients.map(client => ({
        ...client,
        timeout: 60000, // 1分钟
      })),
@@ -415,37 +415,37 @@ console.log("降级历史:", aiService.getFallbackStats());
 ### 使用方法
 
 ```typescript
-import { getUnifiedAIService } from "@/lib/ai/unified-service";
+import { getUnifiedAIService } from '@/lib/ai/unified-service';
 
 // 获取统一AI服务
 const aiService = await getUnifiedAIService();
 
 // 法规查询
 const regulations = await aiService.searchLegalRegulations({
-  keyword: "合同纠纷",
-  lawType: "民法",
+  keyword: '合同纠纷',
+  lawType: '民法',
   pageSize: 10,
 });
 
 // 向量查询（语义检索）
 const vectorResults = await aiService.searchLegalByVector({
-  query: "房屋买卖合同违约如何处理",
+  query: '房屋买卖合同违约如何处理',
   topK: 5,
   threshold: 0.7,
 });
 
 // 智能法律检索（结合关键词和语义）
 const smartResults = await aiService.smartLegalSearch({
-  keyword: "合同",
-  semanticQuery: "买方违约后卖方可以采取什么措施",
-  lawType: "民法",
+  keyword: '合同',
+  semanticQuery: '买方违约后卖方可以采取什么措施',
+  lawType: '民法',
   topK: 10,
 });
 
 // 完整案件分析流程
 const analysis = await aiService.analyzeCaseComplete({
-  title: "房屋买卖合同纠纷",
-  content: "案件详细描述...",
+  title: '房屋买卖合同纠纷',
+  content: '案件详细描述...',
 });
 ```
 
@@ -497,12 +497,12 @@ LAWSTAR_VECTOR_APP_SECRET=6bB16131b7296bf31E1eC2bd9954e28a
 const lawStarClient = aiService.legalAIService;
 const stats = lawStarClient.getStats();
 
-console.log("法规查询统计:", stats.regulation);
-console.log("向量查询统计:", stats.vector);
+console.log('法规查询统计:', stats.regulation);
+console.log('向量查询统计:', stats.vector);
 
 // 健康检查
 const isHealthy = await lawStarClient.healthCheck();
-console.log("法律之星服务健康:", isHealthy);
+console.log('法律之星服务健康:', isHealthy);
 ```
 
 ## 🤝 贡献指南

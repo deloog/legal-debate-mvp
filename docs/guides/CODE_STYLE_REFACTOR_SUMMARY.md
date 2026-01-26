@@ -110,11 +110,11 @@ node scripts/check-code-style.mjs
 ### 编程接口使用
 
 ```javascript
-import { checkFile } from "./scripts/code-style/checkers/index.mjs";
-import { collectFiles } from "./scripts/code-style/file-collector.mjs";
+import { checkFile } from './scripts/code-style/checkers/index.mjs';
+import { collectFiles } from './scripts/code-style/file-collector.mjs';
 
 // 检查单个文件
-const result = await checkFile("src/app/layout.tsx");
+const result = await checkFile('src/app/layout.tsx');
 
 // 收集所有文件
 const files = await collectFiles();

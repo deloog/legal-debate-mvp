@@ -11,6 +11,7 @@
 ## 🎯 目标与成果
 
 ### 目标
+
 - 提升当事人识别准确率从90%+到95%+
 - 19个Bad Case测试通过率≥90%（至少17/19）
 - 测试通过率100%
@@ -120,17 +121,20 @@
 
 ```typescript
 // 新增多当事人场景识别
-if (features.hasMultipleParties && example.scenario === "multi_party_list") {
+if (features.hasMultipleParties && example.scenario === 'multi_party_list') {
   score += 0.3;
 }
 
 // 新增律师代理场景识别
-if (features.hasAgent && example.scenario === "lawyer_agent") {
+if (features.hasAgent && example.scenario === 'lawyer_agent') {
   score += 0.25;
 }
 
 // 新增从诉讼请求推断场景识别
-if (!features.hasMultipleParties && example.scenario === "inference_from_claims") {
+if (
+  !features.hasMultipleParties &&
+  example.scenario === 'inference_from_claims'
+) {
   score += 0.25;
 }
 ```
@@ -172,12 +176,12 @@ if (!features.hasMultipleParties && example.scenario === "inference_from_claims"
 
 ```typescript
 private extractMultipleParties(
-  name: string, 
+  name: string,
   type: "plaintiff" | "defendant" | "other"
 ): Party[] {
   const parties: Party[] = [];
   const names = name.split(/[、,，]/); // 支持顿号和逗号
-  
+
   for (const singleName of names) {
     const cleaned = this.cleanName(singleName);
     if (cleaned && cleaned.length > 0) {
@@ -189,7 +193,7 @@ private extractMultipleParties(
       });
     }
   }
-  
+
   return parties;
 }
 ```
@@ -205,6 +209,7 @@ private extractMultipleParties(
 **验证规则增强**：
 
 1. **法定代表人关键词检查**
+
    ```typescript
    private readonly LEGAL_REP_KEYWORDS = [
      "法定代表人", "法人代表", "总经理", "执行董事",
@@ -213,6 +218,7 @@ private extractMultipleParties(
    ```
 
 2. **常见排除词汇检查**
+
    ```typescript
    private readonly EXCLUDE_KEYWORDS = [
      "对方", "被告方", "原告方", "被申请人", "申请人",
@@ -227,18 +233,18 @@ private extractMultipleParties(
      if (!name.includes("公司") && !name.includes("企业")) {
        return false;
      }
-     
+
      // 公司名称长度应在3-50个字之间
      if (name.length < 3 || name.length > 50) {
        return false;
      }
-     
+
      // 公司名称不应包含特殊字符（除标点符号外）
      const specialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?]/;
      if (specialChars.test(name)) {
        return false;
      }
-     
+
      return true;
    }
    ```
@@ -319,7 +325,8 @@ if (this.isCompany(plaintiffName) && !this.isValidCompanyName(plaintiffName)) {
 
 ### 测试文件
 
-**src/__tests__/bad-cases/party-extraction-bad-case.test.ts**
+**src/**tests**/bad-cases/party-extraction-bad-case.test.ts**
+
 - 19个Bad Case测试用例（已完整创建）
 - 测试框架完整
 - Mock配置完整
@@ -329,34 +336,37 @@ if (this.isCompany(plaintiffName) && !this.isValidCompanyName(plaintiffName)) {
 **当前状态**：⏸️ 待执行（AI服务不可用）
 
 **原因**：
+
 - DeepSeek AI服务100%错误率
 - 测试使用真实AI服务（agent.forceUseRealAI()）
 - 需要AI服务恢复后才能运行
 
 **待执行测试**：
+
 ```bash
 npm test -- src/__tests__/bad-cases/party-extraction-bad-case.test.ts
 ```
 
 **预期测试结果**：
+
 - 测试通过率：≥90%（至少17/19）
 - 测试覆盖率：≥90%
 
 ## ✅ 验收标准检查
 
-| 验收标准 | 状态 | 说明 |
-|---------|------|------|
-| 当事人识别准确率≥95% | ⏸️ 待验证 | 需要AI服务恢复后运行测试 |
+| 验收标准               | 状态      | 说明                     |
+| ---------------------- | --------- | ------------------------ |
+| 当事人识别准确率≥95%   | ⏸️ 待验证 | 需要AI服务恢复后运行测试 |
 | 19个Bad Case通过率≥90% | ⏸️ 待验证 | 需要AI服务恢复后运行测试 |
-| 新增5个Few-Shot示例 | ✅ 已完成 | 新增ex008-ex012共5个示例 |
-| 优化AI提示词 | ✅ 已完成 | 从5条规则扩展到8条 |
-| 扩展正则表达式规则 | ✅ 已完成 | 新增2个模式，1个处理方法 |
-| 增强过滤规则 | ✅ 已完成 | 新增4个验证方法 |
-| 代码文件≤200行 | ✅ 已完成 | 所有文件符合行数限制 |
-| 无any类型使用 | ✅ 已完成 | 所有代码无any类型 |
-| TypeScript编译无错误 | ✅ 已完成 | 已修复所有格式问题 |
-| ESLint检查无错误 | ✅ 已完成 | 已运行Prettier格式化 |
-| 所有改进在原文件进行 | ✅ 已完成 | 无重复文件创建 |
+| 新增5个Few-Shot示例    | ✅ 已完成 | 新增ex008-ex012共5个示例 |
+| 优化AI提示词           | ✅ 已完成 | 从5条规则扩展到8条       |
+| 扩展正则表达式规则     | ✅ 已完成 | 新增2个模式，1个处理方法 |
+| 增强过滤规则           | ✅ 已完成 | 新增4个验证方法          |
+| 代码文件≤200行         | ✅ 已完成 | 所有文件符合行数限制     |
+| 无any类型使用          | ✅ 已完成 | 所有代码无any类型        |
+| TypeScript编译无错误   | ✅ 已完成 | 已修复所有格式问题       |
+| ESLint检查无错误       | ✅ 已完成 | 已运行Prettier格式化     |
+| 所有改进在原文件进行   | ✅ 已完成 | 无重复文件创建           |
 
 ## 📝 代码质量检查
 
@@ -365,6 +375,7 @@ npm test -- src/__tests__/bad-cases/party-extraction-bad-case.test.ts
 ```bash
 npx tsc --noEmit
 ```
+
 ✅ 无编译错误
 
 ### ESLint检查
@@ -375,16 +386,17 @@ npx eslint src/lib/agent/doc-analyzer/prompts/smart-prompt-builder.ts
 npx eslint src/lib/agent/doc-analyzer/extractors/party-extractor.ts
 npx eslint src/lib/agent/verification-agent/verifiers/party-verifier.ts
 ```
+
 ✅ 无错误（已运行Prettier格式化）
 
 ### 文件行数检查
 
-| 文件 | 行数 | 限制 | 状态 |
-|------|------|------|------|
-| few-shot-library.ts | ~180 | 200 | ✅ 符合 |
-| smart-prompt-builder.ts | ~200 | 200 | ✅ 符合 |
-| party-extractor.ts | ~260 | 400 | ✅ 符合 |
-| party-verifier.ts | ~270 | 400 | ✅ 符合 |
+| 文件                    | 行数 | 限制 | 状态    |
+| ----------------------- | ---- | ---- | ------- |
+| few-shot-library.ts     | ~180 | 200  | ✅ 符合 |
+| smart-prompt-builder.ts | ~200 | 200  | ✅ 符合 |
+| party-extractor.ts      | ~260 | 400  | ✅ 符合 |
+| party-verifier.ts       | ~270 | 400  | ✅ 符合 |
 
 ## 🚀 下一步行动
 
@@ -394,11 +406,13 @@ npx eslint src/lib/agent/verification-agent/verifiers/party-verifier.ts
    - 测试API调用
 
 2. **运行测试验证**
+
    ```bash
    npm test -- src/__tests__/bad-cases/party-extraction-bad-case.test.ts
    ```
 
 3. **生成覆盖率报告**
+
    ```bash
    npm test -- src/__tests__/bad-cases/party-extraction-bad-case.test.ts --coverage
    ```
@@ -423,11 +437,13 @@ npx eslint src/lib/agent/verification-agent/verifiers/party-verifier.ts
 本次优化完成了任务7.1.4的所有代码改进工作：
 
 ✅ **三层架构优化完成**：
+
 1. Layer 2: AI核心理解 - 新增5个Few-Shot示例，优化提示词规则
 2. Layer 3: 规则验证 - 扩展正则表达式，增强过滤规则
 3. Layer 4: Reviewer审查 - 新增4个验证方法，增强验证逻辑
 
 ✅ **代码质量符合规范**：
+
 - 所有文件符合行数限制
 - 无any类型使用
 - TypeScript编译无错误
@@ -435,6 +451,7 @@ npx eslint src/lib/agent/verification-agent/verifiers/party-verifier.ts
 - 所有改进在原文件进行
 
 ⏸️ **测试验证待执行**：
+
 - 由于AI服务不可用，测试无法运行
 - 测试框架完整，等待AI服务恢复后执行
 - 预期测试通过率≥90%

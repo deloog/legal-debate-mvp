@@ -215,11 +215,11 @@ QQ_APP_SECRET=...
 // src/app/api/auth/test/cleanup/[userId]/route.ts
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { userId: string } },
+  { params }: { params: { userId: string } }
 ) {
   // 仅在测试环境执行
-  if (process.env.NODE_ENV !== "test") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (process.env.NODE_ENV !== 'test') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   // 清理用户及相关数据
@@ -254,16 +254,16 @@ async function cleanupTestUser(userId: string) {
 
 ```typescript
 // 使用Mock服务测试OAuth流程
-test.describe("OAuth完整流程", () => {
-  test("微信OAuth完整流程", async () => {
+test.describe('OAuth完整流程', () => {
+  test('微信OAuth完整流程', async () => {
     // 1. 生成授权URL
     const authUrlResponse = await apiContext.get(
-      `${BASE_URL}/api/auth/oauth/wechat/authorize`,
+      `${BASE_URL}/api/auth/oauth/wechat/authorize`
     );
 
     // 2. 模拟用户授权后回调
     const callbackResponse = await apiContext.get(
-      `${BASE_URL}/api/auth/oauth/wechat/callback?code=mock_code&state=test_state`,
+      `${BASE_URL}/api/auth/oauth/wechat/callback?code=mock_code&state=test_state`
     );
 
     // 3. 验证用户已登录
@@ -305,22 +305,22 @@ test.describe("OAuth完整流程", () => {
 **改进方案**:
 
 ```typescript
-test("应该正确处理数据库连接错误", async () => {
+test('应该正确处理数据库连接错误', async () => {
   // Mock数据库错误
   const errorTests = [
     {
-      scenario: "数据库连接失败",
-      mock: "DB_CONNECTION_ERROR",
+      scenario: '数据库连接失败',
+      mock: 'DB_CONNECTION_ERROR',
       expectedStatus: 500,
     },
     {
-      scenario: "数据库查询超时",
-      mock: "DB_TIMEOUT",
+      scenario: '数据库查询超时',
+      mock: 'DB_TIMEOUT',
       expectedStatus: 504,
     },
     {
-      scenario: "数据库约束冲突",
-      mock: "DB_CONSTRAINT_ERROR",
+      scenario: '数据库约束冲突',
+      mock: 'DB_CONSTRAINT_ERROR',
       expectedStatus: 409,
     },
   ];
@@ -344,8 +344,8 @@ test("应该正确处理数据库连接错误", async () => {
 **改进方案**:
 
 ```typescript
-test.describe("性能测试", () => {
-  test("登录API应该在100ms内响应", async () => {
+test.describe('性能测试', () => {
+  test('登录API应该在100ms内响应', async () => {
     const startTime = Date.now();
     await loginUser(apiContext, email, password);
     const duration = Date.now() - startTime;
@@ -353,7 +353,7 @@ test.describe("性能测试", () => {
     expect(duration).toBeLessThan(100);
   });
 
-  test("注册API应该在200ms内响应", async () => {
+  test('注册API应该在200ms内响应', async () => {
     const startTime = Date.now();
     await createTestUser(apiContext);
     const duration = Date.now() - startTime;
@@ -418,24 +418,24 @@ test.describe("性能测试", () => {
 
 ```typescript
 // 邮箱验证测试
-test.describe("邮箱验证", () => {
-  test("应该发送邮箱验证链接");
-  test("应该验证邮箱验证码");
-  test("已验证用户不应重复验证");
+test.describe('邮箱验证', () => {
+  test('应该发送邮箱验证链接');
+  test('应该验证邮箱验证码');
+  test('已验证用户不应重复验证');
 });
 
 // 账号冻结测试
-test.describe("账户管理", () => {
-  test("管理员应该能够冻结账户");
-  test("冻结账户应该无法登录");
-  test("管理员应该能够解冻账户");
+test.describe('账户管理', () => {
+  test('管理员应该能够冻结账户');
+  test('冻结账户应该无法登录');
+  test('管理员应该能够解冻账户');
 });
 
 // 权限变更测试
-test.describe("权限管理", () => {
-  test("管理员应该能够变更用户角色");
-  test("角色变更应该立即生效");
-  test("普通用户不应能变更角色");
+test.describe('权限管理', () => {
+  test('管理员应该能够变更用户角色');
+  test('角色变更应该立即生效');
+  test('普通用户不应能变更角色');
 });
 ```
 

@@ -609,7 +609,7 @@ interface SWOTResult {
 
 interface Workflow {
   workflowId: string;
-  executionMode: "sequential" | "parallel" | "mixed";
+  executionMode: 'sequential' | 'parallel' | 'mixed';
   tasks: WorkflowTask[];
 }
 
@@ -768,7 +768,7 @@ interface LegalAgent {
    */
   analyzeApplicability(
     articles: LawArticle[],
-    caseInfo: CaseInfo,
+    caseInfo: CaseInfo
   ): ApplicabilityResult;
 
   /**
@@ -818,7 +818,7 @@ interface LawBasis {
 }
 
 interface ArgumentSide {
-  side: "PLAINTIFF" | "DEFENDANT" | "NEUTRAL";
+  side: 'PLAINTIFF' | 'DEFENDANT' | 'NEUTRAL';
 }
 
 interface Argument {
@@ -982,7 +982,7 @@ interface VerificationAgent {
    */
   verifyTaskCompleteness(
     data: any,
-    requirements: Requirements,
+    requirements: Requirements
   ): CompletenessResult;
 
   /**
@@ -1035,7 +1035,7 @@ interface CompletenessResult {
 interface RiskAssessment {
   assessmentId: string;
   caseId: string;
-  overallRiskLevel: "HIGH" | "MEDIUM" | "LOW";
+  overallRiskLevel: 'HIGH' | 'MEDIUM' | 'LOW';
   riskFactors: RiskFactor[];
   mitigationStrategies: MitigationStrategy[];
   assessedAt: Date;
@@ -1044,7 +1044,7 @@ interface RiskAssessment {
 interface VerificationIssue {
   issueId: string;
   type: string;
-  severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
   description: string;
   location?: string;
   affectedFields?: string[];
@@ -1052,7 +1052,7 @@ interface VerificationIssue {
 
 interface VerificationSuggestion {
   suggestionId: string;
-  priority: "HIGH" | "MEDIUM" | "LOW";
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
   action: string;
   description: string;
   estimatedImpact: number;
@@ -1087,7 +1087,7 @@ interface MemoryAgent {
   // 记忆管理
   compressMemory(
     memory: Memory,
-    targetRatio?: number,
+    targetRatio?: number
   ): Promise<CompressedMemory>;
   migrateMemory(from: MemoryType, to: MemoryType): Promise<void>;
   getMemoriesByType(memoryType: MemoryType): Promise<Memory[]>;
@@ -1166,14 +1166,14 @@ interface PreventionMeasure {
   estimatedEffectiveness: number;
 }
 
-type MemoryType = "WORKING" | "HOT" | "COLD";
+type MemoryType = 'WORKING' | 'HOT' | 'COLD';
 
 type ErrorType =
-  | "AI_SERVICE_ERROR"
-  | "DATABASE_ERROR"
-  | "VALIDATION_ERROR"
-  | "NETWORK_ERROR"
-  | "UNKNOWN_ERROR";
+  | 'AI_SERVICE_ERROR'
+  | 'DATABASE_ERROR'
+  | 'VALIDATION_ERROR'
+  | 'NETWORK_ERROR'
+  | 'UNKNOWN_ERROR';
 
 interface ErrorContext {
   agentName: string;
@@ -1301,7 +1301,7 @@ interface AgentError {
   fallback?: any;
 }
 
-type ErrorSeverity = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+type ErrorSeverity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
 ```
 
 ---
@@ -1329,10 +1329,10 @@ class AgentCommunicator {
 // 使用示例
 const request: AgentRequest = {
   requestId: uuid(),
-  sourceAgent: "PlanningAgent",
-  targetAgent: "AnalysisAgent",
-  action: "parseDocument",
-  payload: { documentId: "doc123" },
+  sourceAgent: 'PlanningAgent',
+  targetAgent: 'AnalysisAgent',
+  action: 'parseDocument',
+  payload: { documentId: 'doc123' },
   context: executionContext,
   priority: 8,
   timeout: 30000,
@@ -1360,15 +1360,15 @@ class EventBus {
 }
 
 // 使用示例：AnalysisAgent完成后通知PlanningAgent
-eventBus.emit("document.analyzed", {
-  documentId: "doc123",
+eventBus.emit('document.analyzed', {
+  documentId: 'doc123',
   result: analysisResult,
-  nextSteps: ["search_laws", "generate_arguments"],
+  nextSteps: ['search_laws', 'generate_arguments'],
   emittedAt: new Date(),
 });
 
 // PlanningAgent监听事件
-eventBus.on("document.analyzed", async (event) => {
+eventBus.on('document.analyzed', async event => {
   await this.orchestrateNextSteps(event.nextSteps);
 });
 ```
@@ -1453,7 +1453,7 @@ class AgentCommunicator {
   private async retryWithBackoff(
     request: AgentRequest,
     error: AgentError,
-    maxRetries: number = 3,
+    maxRetries: number = 3
   ): Promise<AgentResponse> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -1490,18 +1490,18 @@ class ExecutionContext {
   constructor(
     private memoryAgent: MemoryAgent,
     private workflowId: string,
-    private caseType: string,
+    private caseType: string
   ) {}
 
   async loadContext(): Promise<ContextData> {
     // 1. 从Working Memory加载当前上下文
     const workingContext = await this.memoryAgent.getWorkingMemory(
-      `workflow_${this.workflowId}_context`,
+      `workflow_${this.workflowId}_context`
     );
 
     // 2. 从Hot Memory加载相关经验
     const relevantExperience = await this.memoryAgent.getHotMemory(
-      `case_pattern_${this.caseType}`,
+      `case_pattern_${this.caseType}`
     );
 
     // 3. 合并上下文
@@ -1517,7 +1517,7 @@ class ExecutionContext {
     // 保存到Working Memory
     await this.memoryAgent.storeWorkingMemory(
       `workflow_${this.workflowId}_context`,
-      data,
+      data
     );
   }
 }
@@ -1541,28 +1541,28 @@ await memoryAgent.storeWorkingMemory(
     previousArguments: [],
     storedAt: new Date(),
   },
-  3600, // 1小时TTL
+  3600 // 1小时TTL
 );
 
 // Hot Memory示例：近期案件经验
 await memoryAgent.storeHotMemory(
   `case_pattern_${caseType}`,
   {
-    successfulStrategies: ["strategy_1", "strategy_2"],
-    commonPitfalls: ["pitfall_1"],
+    successfulStrategies: ['strategy_1', 'strategy_2'],
+    commonPitfalls: ['pitfall_1'],
     referenceCount: 15,
     lastUsed: new Date(),
   },
-  0.8, // 重要性评分
+  0.8 // 重要性评分
 );
 
 // Cold Memory示例：长期知识库
 await memoryAgent.storeColdMemory(`legal_knowledge_${lawCategory}`, {
-  frequentArticles: ["article_1", "article_2"],
+  frequentArticles: ['article_1', 'article_2'],
   applicabilityPatterns: {
-    contract_dispute: ["articles_X", "articles_Y"],
+    contract_dispute: ['articles_X', 'articles_Y'],
   },
-  precedents: ["case_1", "case_2"],
+  precedents: ['case_1', 'case_2'],
 });
 ```
 
@@ -1577,12 +1577,12 @@ await memoryAgent.storeColdMemory(`legal_knowledge_${lawCategory}`, {
 class MemoryMigrator {
   constructor(private memoryAgent: MemoryAgent) {
     // 定时任务：每小时执行一次记忆迁移
-    cron.schedule("0 * * * *", async () => {
+    cron.schedule('0 * * * *', async () => {
       await this.migrateWorkingToHot();
     });
 
     // 定时任务：每天执行一次记忆压缩
-    cron.schedule("0 0 * * *", async () => {
+    cron.schedule('0 0 * * *', async () => {
       await this.compressHotToCold();
     });
   }
@@ -1593,7 +1593,7 @@ class MemoryMigrator {
   private async migrateWorkingToHot(): Promise<void> {
     // 1. 获取即将过期的Working Memory
     const expiringMemories =
-      await this.memoryAgent.getMemoriesByType("WORKING");
+      await this.memoryAgent.getMemoriesByType('WORKING');
 
     // 2. 压缩并迁移到Hot Memory
     for (const memory of expiringMemories) {
@@ -1602,7 +1602,7 @@ class MemoryMigrator {
       await this.memoryAgent.storeHotMemory(
         memory.memoryKey,
         compressed,
-        memory.importance,
+        memory.importance
       );
 
       // 3. 删除原Working Memory
@@ -1615,19 +1615,19 @@ class MemoryMigrator {
    */
   private async compressHotToCold(): Promise<void> {
     // 1. 获取低频访问的Hot Memory
-    const hotMemories = await this.memoryAgent.getMemoriesByType("HOT");
-    const lowAccessMemories = hotMemories.filter((m) => m.accessCount < 5);
+    const hotMemories = await this.memoryAgent.getMemoriesByType('HOT');
+    const lowAccessMemories = hotMemories.filter(m => m.accessCount < 5);
 
     // 2. 高度压缩并迁移到Cold Memory
     for (const memory of lowAccessMemories) {
       const highlyCompressed = await this.memoryAgent.compressMemory(
         memory,
-        0.1, // 10%压缩比例
+        0.1 // 10%压缩比例
       );
 
       await this.memoryAgent.storeColdMemory(
         memory.memoryKey,
-        highlyCompressed,
+        highlyCompressed
       );
     }
   }

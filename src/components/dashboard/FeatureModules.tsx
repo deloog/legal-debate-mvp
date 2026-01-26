@@ -31,15 +31,10 @@ const icons: Record<string, string> = {
  */
 export function FeatureModules({ modules }: FeatureModulesProps) {
   return (
-    <div className='rounded-lg border border-gray-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950'>
-      <h3 className='mb-6 text-lg font-semibold text-gray-900 dark:text-gray-50'>
-        功能导航
-      </h3>
-      <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-        {modules.map(module => (
-          <FeatureCard key={module.id} module={module} />
-        ))}
-      </div>
+    <div className='grid gap-5 sm:grid-cols-2 lg:grid-cols-3'>
+      {modules.map(module => (
+        <FeatureCard key={module.id} module={module} />
+      ))}
     </div>
   );
 }
@@ -53,12 +48,46 @@ function FeatureCard({ module }: { module: FeatureModuleType }) {
   return (
     <Link
       href={module.href}
-      className='group flex flex-col rounded-lg border border-gray-200 bg-white p-5 transition-all duration-200 hover:border-blue-400 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-blue-600'
+      className='group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:border-violet-300 hover:shadow-xl'
     >
-      <div className='mb-3 flex items-start justify-between'>
-        <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400'>
+      {/* 背景渐变效果 */}
+      <div className='absolute right-0 top-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full bg-gradient-to-br from-blue-500/10 to-violet-500/10 blur-2xl transition-all duration-300 group-hover:scale-150' />
+
+      <div className='relative'>
+        <div className='mb-4 flex items-start justify-between'>
+          <div className='flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-violet-600 shadow-lg shadow-violet-500/30'>
+            <svg
+              className='h-7 w-7 text-white'
+              fill='none'
+              stroke='currentColor'
+              viewBox='0 0 24 24'
+            >
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d={iconPath}
+              />
+            </svg>
+          </div>
+          {module.badge && (
+            <span className='rounded-full bg-gradient-to-r from-blue-100 to-violet-100 px-3 py-1 text-xs font-semibold text-violet-700'>
+              {module.badge}
+            </span>
+          )}
+        </div>
+        <h4 className='mb-2 text-xl font-bold text-slate-900 transition-colors group-hover:text-violet-600'>
+          {module.title}
+        </h4>
+        <p className='line-clamp-2 text-sm leading-relaxed text-slate-600'>
+          {module.description}
+        </p>
+
+        {/* 箭头指示器 */}
+        <div className='mt-4 flex items-center text-sm font-semibold text-violet-600 opacity-0 transition-all duration-300 group-hover:opacity-100'>
+          <span>了解更多</span>
           <svg
-            className='h-5 w-5'
+            className='ml-1 h-4 w-4 transition-transform group-hover:translate-x-1'
             fill='none'
             stroke='currentColor'
             viewBox='0 0 24 24'
@@ -67,22 +96,11 @@ function FeatureCard({ module }: { module: FeatureModuleType }) {
               strokeLinecap='round'
               strokeLinejoin='round'
               strokeWidth={2}
-              d={iconPath}
+              d='M9 5l7 7-7 7'
             />
           </svg>
         </div>
-        {module.badge && (
-          <span className='rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-600 dark:bg-blue-900 dark:text-blue-400'>
-            {module.badge}
-          </span>
-        )}
       </div>
-      <h4 className='mb-2 text-base font-semibold text-gray-900 dark:text-gray-50 group-hover:text-blue-600 dark:group-hover:text-blue-400'>
-        {module.title}
-      </h4>
-      <p className='line-clamp-2 text-sm text-gray-600 dark:text-gray-400'>
-        {module.description}
-      </p>
     </Link>
   );
 }

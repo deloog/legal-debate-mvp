@@ -22,7 +22,7 @@
 **使用方法**:
 
 ```typescript
-import { prisma, checkDatabaseConnection } from "@/lib/db/prisma";
+import { prisma, checkDatabaseConnection } from '@/lib/db/prisma';
 
 // 使用客户端
 const users = await prisma.user.findMany();
@@ -110,7 +110,7 @@ import {
   checkPoolHealth,
   warmupConnectionPool,
   poolMonitor,
-} from "@/lib/db/connection-pool";
+} from '@/lib/db/connection-pool';
 
 // 获取连接池统计
 const stats = await getPoolStats();
@@ -207,15 +207,15 @@ npm run db:seed
 
 ```typescript
 // 在应用启动时
-import { poolMonitor } from "@/lib/db/connection-pool";
+import { poolMonitor } from '@/lib/db/connection-pool';
 
 // 启动监控（开发环境）
-if (process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === 'development') {
   poolMonitor.start();
 }
 
 // 在应用关闭时
-process.on("SIGINT", async () => {
+process.on('SIGINT', async () => {
   poolMonitor.stop();
   await gracefulShutdown();
 });
@@ -233,8 +233,8 @@ process.on("SIGINT", async () => {
 ### 健康检查
 
 ```typescript
-import { checkDatabaseConnection, checkPoolHealth } from "@/lib/db/prisma";
-import { checkPoolHealth } from "@/lib/db/connection-pool";
+import { checkDatabaseConnection, checkPoolHealth } from '@/lib/db/prisma';
+import { checkPoolHealth } from '@/lib/db/connection-pool';
 
 // 定期健康检查
 setInterval(async () => {
@@ -243,7 +243,7 @@ setInterval(async () => {
 
   if (!dbHealthy || !poolHealthy) {
     // 发送告警
-    console.error("数据库健康检查失败");
+    console.error('数据库健康检查失败');
   }
 }, 60000); // 每分钟检查一次
 ```

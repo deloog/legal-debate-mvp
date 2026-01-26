@@ -98,7 +98,7 @@ actionType: (actionType as ActionType,
 
 // 方案3：扩展Prisma类型定义
 // 在types.ts中定义兼容类型
-type MigrationActionType = "MIGRATE_WORKING_TO_HOT" | "MIGRATE_HOT_TO_COLD";
+type MigrationActionType = 'MIGRATE_WORKING_TO_HOT' | 'MIGRATE_HOT_TO_COLD';
 ```
 
 **优先级**：P1（建议修复，但不紧急）

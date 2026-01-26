@@ -469,15 +469,15 @@ enum LawStatus {
 const articles = await prisma.lawArticle.findMany({
   where: {
     OR: [
-      { searchableText: { contains: "合同" } },
-      { tags: { has: "违约责任" } },
-      { tags: { has: "买卖合同" } },
+      { searchableText: { contains: '合同' } },
+      { tags: { has: '违约责任' } },
+      { tags: { has: '买卖合同' } },
     ],
     category: LawCategory.CIVIL,
     status: LawStatus.VALID,
     effectiveDate: { lte: new Date() },
   },
-  orderBy: [{ referenceCount: "desc" }, { viewCount: "desc" }],
+  orderBy: [{ referenceCount: 'desc' }, { viewCount: 'desc' }],
   take: 20,
 });
 ```
@@ -1228,49 +1228,49 @@ await prisma.argument.create({
 ### 创建法条
 
 ```typescript
-import { prisma } from "@/lib/db/prisma";
-import { LawType, LawCategory, LawStatus } from "@prisma/client";
+import { prisma } from '@/lib/db/prisma';
+import { LawType, LawCategory, LawStatus } from '@prisma/client';
 
 // 创建法条
 const article = await prisma.lawArticle.create({
   data: {
-    lawName: "中华人民共和国民法典",
-    articleNumber: "第一百八十八条",
-    fullText: "民事主体从事民事活动，应当遵循诚信原则，秉持诚实，恪守承诺。",
+    lawName: '中华人民共和国民法典',
+    articleNumber: '第一百八十八条',
+    fullText: '民事主体从事民事活动，应当遵循诚信原则，秉持诚实，恪守承诺。',
     lawType: LawType.LAW,
     category: LawCategory.CIVIL,
-    subCategory: "总则编",
-    tags: ["诚信原则", "民事活动"],
-    keywords: ["诚信", "承诺", "诚实"],
-    version: "1.0",
-    effectiveDate: new Date("2021-01-01"),
+    subCategory: '总则编',
+    tags: ['诚信原则', '民事活动'],
+    keywords: ['诚信', '承诺', '诚实'],
+    version: '1.0',
+    effectiveDate: new Date('2021-01-01'),
     status: LawStatus.VALID,
-    issuingAuthority: "全国人民代表大会",
-    jurisdiction: "全国",
-    chapterNumber: "第一章",
-    sectionNumber: "第一节",
+    issuingAuthority: '全国人民代表大会',
+    jurisdiction: '全国',
+    chapterNumber: '第一章',
+    sectionNumber: '第一节',
     level: 0,
-    searchableText: "民事主体从事民事活动应当遵循诚信原则秉持诚实恪守承诺",
+    searchableText: '民事主体从事民事活动应当遵循诚信原则秉持诚实恪守承诺',
   },
 });
 
 // 创建子法条
 const childArticle = await prisma.lawArticle.create({
   data: {
-    lawName: "中华人民共和国民法典",
-    articleNumber: "第一百八十九条",
-    fullText: "本条第一款所称重大过失，是指行为人因疏忽大意...",
+    lawName: '中华人民共和国民法典',
+    articleNumber: '第一百八十九条',
+    fullText: '本条第一款所称重大过失，是指行为人因疏忽大意...',
     lawType: LawType.LAW,
     category: LawCategory.CIVIL,
-    tags: ["重大过失"],
-    keywords: ["重大过失", "疏忽大意"],
-    version: "1.0",
-    effectiveDate: new Date("2021-01-01"),
+    tags: ['重大过失'],
+    keywords: ['重大过失', '疏忽大意'],
+    version: '1.0',
+    effectiveDate: new Date('2021-01-01'),
     status: LawStatus.VALID,
-    issuingAuthority: "全国人民代表大会",
+    issuingAuthority: '全国人民代表大会',
     parentId: article.id,
     level: 1,
-    searchableText: "本条第一款所称重大过失是指行为人因疏忽大意",
+    searchableText: '本条第一款所称重大过失是指行为人因疏忽大意',
   },
 });
 
@@ -1280,9 +1280,9 @@ const articles = await prisma.lawArticle.findMany({
     lawType: LawType.LAW,
     category: LawCategory.CIVIL,
     status: LawStatus.VALID,
-    tags: { has: "诚信原则" },
+    tags: { has: '诚信原则' },
   },
-  orderBy: { effectiveDate: "desc" },
+  orderBy: { effectiveDate: 'desc' },
   take: 50,
 });
 ```
@@ -1344,21 +1344,21 @@ CREATE INDEX idx_actions_created ON agent_actions(createdAt);
 ### 记忆管理示例
 
 ```typescript
-import { prisma } from "@/lib/db/prisma";
-import { MemoryType } from "@prisma/client";
+import { prisma } from '@/lib/db/prisma';
+import { MemoryType } from '@prisma/client';
 
 // 创建工作记忆
 const workingMemory = await prisma.agentMemory.create({
   data: {
-    userId: "user_123",
-    caseId: "case_456",
+    userId: 'user_123',
+    caseId: 'case_456',
     memoryType: MemoryType.WORKING,
-    agentName: "AnalysisAgent",
-    memoryKey: "current_case_analysis",
+    agentName: 'AnalysisAgent',
+    memoryKey: 'current_case_analysis',
     memoryValue: {
-      parties: ["张三", "李四"],
-      claims: ["支付货款100000元"],
-      status: "in_progress",
+      parties: ['张三', '李四'],
+      claims: ['支付货款100000元'],
+      status: 'in_progress',
     },
     importance: 0.9,
     expiresAt: new Date(Date.now() + 3600000), // 1小时后过期
@@ -1368,14 +1368,14 @@ const workingMemory = await prisma.agentMemory.create({
 // 压缩并转移到热记忆
 const hotMemory = await prisma.agentMemory.create({
   data: {
-    userId: "user_123",
-    caseId: "case_456",
+    userId: 'user_123',
+    caseId: 'case_456',
     memoryType: MemoryType.HOT,
-    agentName: "AnalysisAgent",
-    memoryKey: "case_analysis_summary",
+    agentName: 'AnalysisAgent',
+    memoryKey: 'case_analysis_summary',
     memoryValue: {
-      summary: "合同纠纷案件，涉及违约责任",
-      keyPoints: ["违约", "赔偿"],
+      summary: '合同纠纷案件，涉及违约责任',
+      keyPoints: ['违约', '赔偿'],
       originalMemoryId: workingMemory.id,
     },
     importance: 0.7,
@@ -1389,13 +1389,13 @@ const hotMemory = await prisma.agentMemory.create({
 ### 验证结果示例
 
 ```typescript
-import { VerificationType } from "@prisma/client";
+import { VerificationType } from '@prisma/client';
 
 // 创建综合验证结果
 const verification = await prisma.verificationResult.create({
   data: {
-    entityType: "Document",
-    entityId: "doc_456",
+    entityType: 'Document',
+    entityId: 'doc_456',
     verificationType: VerificationType.COMPREHENSIVE,
     overallScore: 0.88,
     factualAccuracy: 0.92,
@@ -1404,20 +1404,20 @@ const verification = await prisma.verificationResult.create({
     passed: false, // 低于0.9阈值
     issues: [
       {
-        type: "logical_inconsistency",
-        severity: "medium",
-        description: "诉讼请求与事实理由不完全匹配",
+        type: 'logical_inconsistency',
+        severity: 'medium',
+        description: '诉讼请求与事实理由不完全匹配',
       },
     ],
     suggestions: [
       {
-        priority: "high",
-        action: "enhance_fact_description",
-        description: "补充违约事实的详细描述",
+        priority: 'high',
+        action: 'enhance_fact_description',
+        description: '补充违约事实的详细描述',
         estimatedImpact: 0.1,
       },
     ],
-    verifiedBy: "AI",
+    verifiedBy: 'AI',
     verificationTime: 1200,
   },
 });

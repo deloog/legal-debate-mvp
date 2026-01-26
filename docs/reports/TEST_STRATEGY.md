@@ -80,31 +80,31 @@ src/
 
 ```typescript
 // 示例：DocAnalyzer测试
-describe("DocAnalyzer", () => {
-  describe("extractKeyInfo", () => {
-    it("should extract plaintiff information correctly", async () => {
+describe('DocAnalyzer', () => {
+  describe('extractKeyInfo', () => {
+    it('should extract plaintiff information correctly', async () => {
       const document = createTestDocument({
-        content: "原告：张三，被告：李四...",
-        type: "lawsuit",
+        content: '原告：张三，被告：李四...',
+        type: 'lawsuit',
       });
 
       const result = await docAnalyzer.extractKeyInfo(document);
 
-      expect(result.plaintiff.name).toBe("张三");
-      expect(result.defendant.name).toBe("李四");
+      expect(result.plaintiff.name).toBe('张三');
+      expect(result.defendant.name).toBe('李四');
       expect(result.confidence).toBeGreaterThan(0.95);
     });
 
-    it("should handle complex case names", async () => {
+    it('should handle complex case names', async () => {
       const document = createTestDocument({
-        content: "原告：北京某某科技有限公司...",
-        type: "lawsuit",
+        content: '原告：北京某某科技有限公司...',
+        type: 'lawsuit',
       });
 
       const result = await docAnalyzer.extractKeyInfo(document);
 
-      expect(result.plaintiff.type).toBe("company");
-      expect(result.plaintiff.name).toContain("北京");
+      expect(result.plaintiff.type).toBe('company');
+      expect(result.plaintiff.name).toContain('北京');
     });
   });
 });
@@ -114,34 +114,34 @@ describe("DocAnalyzer", () => {
 
 ```typescript
 // 示例：辩论API测试
-describe("/api/v1/debates", () => {
-  describe("POST /api/v1/debates", () => {
-    it("should create a new debate successfully", async () => {
+describe('/api/v1/debates', () => {
+  describe('POST /api/v1/debates', () => {
+    it('should create a new debate successfully', async () => {
       const debateData = {
-        title: "测试辩论",
-        description: "这是一个测试案例",
-        caseId: "test-case-id",
+        title: '测试辩论',
+        description: '这是一个测试案例',
+        caseId: 'test-case-id',
       };
 
       const response = await request(app)
-        .post("/api/v1/debates")
+        .post('/api/v1/debates')
         .send(debateData)
         .expect(201);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.id).toBeDefined();
-      expect(response.body.data.status).toBe("active");
+      expect(response.body.data.status).toBe('active');
     });
 
-    it("should validate required fields", async () => {
-      const invalidData = { title: "" };
+    it('should validate required fields', async () => {
+      const invalidData = { title: '' };
 
       const response = await request(app)
-        .post("/api/v1/debates")
+        .post('/api/v1/debates')
         .send(invalidData)
         .expect(400);
 
-      expect(response.body.error).toContain("title is required");
+      expect(response.body.error).toContain('title is required');
     });
   });
 });
@@ -151,7 +151,7 @@ describe("/api/v1/debates", () => {
 
 ```typescript
 // AI服务Mock
-jest.mock("../lib/ai/unified-service", () => ({
+jest.mock('../lib/ai/unified-service', () => ({
   getUnifiedAIService: jest.fn().mockResolvedValue({
     parseDocument: jest.fn().mockResolvedValue(mockDocumentAnalysis),
     generateDebate: jest.fn().mockResolvedValue(mockDebatePoints),
@@ -160,7 +160,7 @@ jest.mock("../lib/ai/unified-service", () => ({
 }));
 
 // 数据库Mock
-jest.mock("../lib/db/prisma", () => ({
+jest.mock('../lib/db/prisma', () => ({
   prisma: {
     case: {
       create: jest.fn().mockResolvedValue(mockCase),
@@ -194,7 +194,7 @@ jest.mock("../lib/db/prisma", () => ({
 ### 集成测试示例
 
 ```typescript
-describe("Debate Flow Integration", () => {
+describe('Debate Flow Integration', () => {
   let testDatabase: TestDatabase;
   let mockAIService: MockUnifiedAIService;
 
@@ -207,7 +207,7 @@ describe("Debate Flow Integration", () => {
     await testDatabase.cleanup();
   });
 
-  it("should complete full debate flow", async () => {
+  it('should complete full debate flow', async () => {
     // 1. 创建案件
     const caseData = await testDatabase.case.create({
       data: mockCaseData,
@@ -218,7 +218,7 @@ describe("Debate Flow Integration", () => {
       data: {
         caseId: caseData.id,
         content: testDocumentContent,
-        type: "lawsuit",
+        type: 'lawsuit',
       },
     });
 
@@ -226,8 +226,8 @@ describe("Debate Flow Integration", () => {
     const debate = await testDatabase.debate.create({
       data: {
         caseId: caseData.id,
-        title: "测试辩论",
-        status: "active",
+        title: '测试辩论',
+        status: 'active',
       },
     });
 
@@ -246,7 +246,7 @@ describe("Debate Flow Integration", () => {
     const updatedDebate = await testDatabase.debate.findUnique({
       where: { id: debate.id },
     });
-    expect(updatedDebate.status).toBe("completed");
+    expect(updatedDebate.status).toBe('completed');
   });
 });
 ```
@@ -284,23 +284,23 @@ describe("Debate Flow Integration", () => {
 ### E2E测试示例
 
 ```typescript
-import { test, expect } from "@playwright/test";
+import { test, expect } from '@playwright/test';
 
-test.describe("Debate E2E Flow", () => {
-  test("should complete full debate process", async ({ page }) => {
+test.describe('Debate E2E Flow', () => {
+  test('should complete full debate process', async ({ page }) => {
     // 1. 访问应用
-    await page.goto("/");
+    await page.goto('/');
 
     // 2. 创建新案件
     await page.click('[data-testid="create-case-btn"]');
-    await page.fill('[data-testid="case-title"]', "测试案例");
-    await page.fill('[data-testid="case-description"]', "这是一个测试描述");
+    await page.fill('[data-testid="case-title"]', '测试案例');
+    await page.fill('[data-testid="case-description"]', '这是一个测试描述');
     await page.click('[data-testid="save-case-btn"]');
 
     // 3. 上传文档
     await page.setInputFiles(
       '[data-testid="document-upload"]',
-      "test-document.pdf",
+      'test-document.pdf'
     );
     await page.waitForSelector('[data-testid="document-uploaded"]');
 
@@ -311,15 +311,15 @@ test.describe("Debate E2E Flow", () => {
     // 5. 验证辩论结果
     await expect(page.locator('[data-testid="debate-result"]')).toBeVisible();
     await expect(
-      page.locator('[data-testid="plaintiff-arguments"]'),
-    ).toContainText("原告方论点");
+      page.locator('[data-testid="plaintiff-arguments"]')
+    ).toContainText('原告方论点');
     await expect(
-      page.locator('[data-testid="defendant-arguments"]'),
-    ).toContainText("被告方论点");
+      page.locator('[data-testid="defendant-arguments"]')
+    ).toContainText('被告方论点');
 
     // 6. 多轮辩论
     await page.click('[data-testid="add-round-btn"]');
-    await page.fill('[data-testid="additional-info"]', "补充信息");
+    await page.fill('[data-testid="additional-info"]', '补充信息');
     await page.click('[data-testid="submit-round-btn"]');
 
     // 7. 验证第二轮结果
@@ -401,35 +401,35 @@ test.describe("Debate E2E Flow", () => {
 ### 安全测试示例
 
 ```typescript
-describe("Security Tests", () => {
-  describe("Input Validation", () => {
-    it("should reject malicious file uploads", async () => {
-      const maliciousFile = Buffer.from("malicious content");
+describe('Security Tests', () => {
+  describe('Input Validation', () => {
+    it('should reject malicious file uploads', async () => {
+      const maliciousFile = Buffer.from('malicious content');
 
       const response = await request(app)
-        .post("/api/v1/documents/upload")
-        .attach("document", maliciousFile, "malicious.exe")
+        .post('/api/v1/documents/upload')
+        .attach('document', maliciousFile, 'malicious.exe')
         .expect(400);
 
-      expect(response.body.error).toContain("Invalid file type");
+      expect(response.body.error).toContain('Invalid file type');
     });
 
-    it("should prevent SQL injection", async () => {
+    it('should prevent SQL injection', async () => {
       const maliciousInput = "'; DROP TABLE cases; --";
 
       const response = await request(app)
         .get(`/api/v1/cases?search=${encodeURIComponent(maliciousInput)}`)
         .expect(400);
 
-      expect(response.body.error).toContain("Invalid input");
+      expect(response.body.error).toContain('Invalid input');
     });
   });
 
-  describe("Authentication", () => {
-    it("should require authentication for protected routes", async () => {
-      const response = await request(app).get("/api/v1/cases").expect(401);
+  describe('Authentication', () => {
+    it('should require authentication for protected routes', async () => {
+      const response = await request(app).get('/api/v1/cases').expect(401);
 
-      expect(response.body.error).toContain("Authentication required");
+      expect(response.body.error).toContain('Authentication required');
     });
   });
 });
@@ -455,8 +455,8 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: "18"
-          cache: "npm"
+          node-version: '18'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -604,8 +604,8 @@ module.exports = {
 
 ```typescript
 // 1. 红阶段：编写失败的测试
-test("should calculate legal risk score correctly", () => {
-  const caseData = { complexity: "high", precedentCount: 5 };
+test('should calculate legal risk score correctly', () => {
+  const caseData = { complexity: 'high', precedentCount: 5 };
   const riskScore = calculateRiskScore(caseData);
   expect(riskScore).toBe(85); // 测试失败，函数不存在
 });
@@ -617,14 +617,14 @@ function calculateRiskScore(caseData: any): number {
 
 // 3. 重构阶段：完善实现
 function calculateRiskScore(caseData: CaseData): number {
-  const complexityScore = caseData.complexity === "high" ? 50 : 30;
+  const complexityScore = caseData.complexity === 'high' ? 50 : 30;
   const precedentScore = Math.min(caseData.precedentCount * 5, 35);
   return complexityScore + precedentScore;
 }
 
 // 4. 添加更多测试用例
-test("should handle low complexity cases", () => {
-  const caseData = { complexity: "low", precedentCount: 2 };
+test('should handle low complexity cases', () => {
+  const caseData = { complexity: 'low', precedentCount: 2 };
   const riskScore = calculateRiskScore(caseData);
   expect(riskScore).toBe(40);
 });
@@ -645,10 +645,10 @@ test("should handle low complexity cases", () => {
 // 测试工厂
 export const createTestCase = (overrides?: Partial<Case>): Case => ({
   id: generateId(),
-  title: "测试案例",
-  description: "这是一个测试案例描述",
-  type: "civil",
-  status: "active",
+  title: '测试案例',
+  description: '这是一个测试案例描述',
+  type: 'civil',
+  status: 'active',
   createdAt: new Date(),
   updatedAt: new Date(),
   ...overrides,
@@ -656,10 +656,10 @@ export const createTestCase = (overrides?: Partial<Case>): Case => ({
 
 // 测试Fixtures
 export const mockCases = {
-  simpleCase: createTestCase({ title: "简单案例" }),
+  simpleCase: createTestCase({ title: '简单案例' }),
   complexCase: createTestCase({
-    title: "复杂案例",
-    complexity: "high",
+    title: '复杂案例',
+    complexity: 'high',
     precedentCount: 10,
   }),
 };

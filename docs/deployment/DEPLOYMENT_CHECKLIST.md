@@ -15,18 +15,18 @@
 
 ### 1.1 核心功能模块清单
 
-| 模块名称 | 状态 | 职责 | 关键功能 |
-|----------|------|------|----------|
-| Agent系统 | ✅ 已实现 | 6个智能体协同工作 | PlanningAgent、AnalysisAgent、LegalAgent、GenerationAgent、VerificationAgent、MemoryAgent |
-| 用户管理 | ✅ 已实现 | 用户注册、登录、角色管理 | 用户认证、角色权限、律师资格审核 |
-| 案件管理 | ✅ 已实现 | 案件创建、跟踪、查询 | 文档上传、案件信息、辩论生成 |
-| 支付系统 | ✅ 已实现 | 会员购买、订单管理、退款 | 微信支付、支付宝支付、订单管理 |
-| 会员系统 | ✅ 已实现 | 会员等级、使用量统计、权益管理 | Free、Basic、Professional、Enterprise四个等级 |
-| 管理后台 | ✅ 已实现 | 用户管理、案件管理、系统配置 | 用户列表、案件监控、系统日志 |
-| 数据统计 | ✅ 已实现 | 用户统计、案件统计、性能监控 | 统计Dashboard、数据导出、报告生成 |
-| 监控告警 | ✅ 已实现 | 系统监控、性能监控、告警通知 | Prometheus指标、Grafana仪表板、Alertmanager |
-| 日志分析 | ✅ 已实现 | 日志收集、分析、检索 | Filebeat、Logstash、Elasticsearch |
-| CI/CD | ✅ 已实现 | 自动化测试、自动部署、回滚 | GitHub Actions工作流、Docker构建、部署脚本 |
+| 模块名称  | 状态      | 职责                           | 关键功能                                                                                  |
+| --------- | --------- | ------------------------------ | ----------------------------------------------------------------------------------------- |
+| Agent系统 | ✅ 已实现 | 6个智能体协同工作              | PlanningAgent、AnalysisAgent、LegalAgent、GenerationAgent、VerificationAgent、MemoryAgent |
+| 用户管理  | ✅ 已实现 | 用户注册、登录、角色管理       | 用户认证、角色权限、律师资格审核                                                          |
+| 案件管理  | ✅ 已实现 | 案件创建、跟踪、查询           | 文档上传、案件信息、辩论生成                                                              |
+| 支付系统  | ✅ 已实现 | 会员购买、订单管理、退款       | 微信支付、支付宝支付、订单管理                                                            |
+| 会员系统  | ✅ 已实现 | 会员等级、使用量统计、权益管理 | Free、Basic、Professional、Enterprise四个等级                                             |
+| 管理后台  | ✅ 已实现 | 用户管理、案件管理、系统配置   | 用户列表、案件监控、系统日志                                                              |
+| 数据统计  | ✅ 已实现 | 用户统计、案件统计、性能监控   | 统计Dashboard、数据导出、报告生成                                                         |
+| 监控告警  | ✅ 已实现 | 系统监控、性能监控、告警通知   | Prometheus指标、Grafana仪表板、Alertmanager                                               |
+| 日志分析  | ✅ 已实现 | 日志收集、分析、检索           | Filebeat、Logstash、Elasticsearch                                                         |
+| CI/CD     | ✅ 已实现 | 自动化测试、自动部署、回滚     | GitHub Actions工作流、Docker构建、部署脚本                                                |
 
 ### 1.2 系统依赖关系
 
@@ -107,70 +107,86 @@
 #### 2.1.1 核心业务表
 
 **User（用户表）**
+
 - [x] 字段完整：id、email、password、name、phone、role、qualificationStatus
 - [x] 索引配置：email唯一索引、phone索引、role索引
 
 **Case（案件表）**
+
 - [x] 字段完整：id、userId、title、description、documentPath、status
 - [x] 索引配置：userId索引、status索引、createdAt索引
 
 **Debate（辩论表）**
+
 - [x] 字段完整：id、caseId、proponentArguments、opponentArguments、verdict
 - [x] 索引配置：caseId索引、status索引
 
 **Order（订单表）**
+
 - [x] 字段完整：id、userId、membershipTierId、amount、status、paymentMethod
 - [x] 索引配置：userId索引、status索引、paymentMethod索引
 
 **MembershipTier（会员等级表）**
+
 - [x] 字段完整：id、name、price、duration、features
 - [x] 索引配置：name唯一索引、price索引
 
 **UserMembership（用户会员表）**
+
 - [x] 字段完整：id、userId、tierId、startDate、endDate、status
 - [x] 索引配置：userId索引、tierId索引、status索引、endDate索引
 
 **UsageRecord（使用量记录表）**
+
 - [x] 字段完整：id、userMembershipId、resourceType、usageCount、timestamp
 - [x] 索引配置：userMembershipId索引、timestamp索引
 
 **PaymentRecord（支付记录表）**
+
 - [x] 字段完整：id、orderId、provider、transactionId、amount、status
 - [x] 索引配置：orderId索引、transactionId唯一索引、status索引
 
 **RefundRecord（退款记录表）**
+
 - [x] 字段完整：id、orderId、amount、reason、status、approvedBy
 - [x] 索引配置：orderId索引、status索引
 
 **Invoice（发票表）**
+
 - [x] 字段完整：id、userId、orderId、amount、status、filePath
 - [x] 索引配置：userId索引、orderId索引、status索引
 
 #### 2.1.2 Agent系统表
 
 **AgentMemory（三层记忆管理）**
+
 - [x] 字段完整：id、userId、caseId、memoryType、agentName、memoryKey、memoryValue
 - [x] 索引配置：agentName+memoryKey唯一索引、userId索引、caseId索引、memoryType索引
 
 **VerificationResult（三重验证机制）**
+
 - [x] 字段完整：id、entityType、entityId、verificationType、overallScore、passed
 - [x] 索引配置：entityType+entityId唯一索引、verificationType索引、overallScore索引
 
 **ErrorLog（错误学习机制）**
+
 - [x] 字段完整：id、userId、caseId、errorType、errorCode、errorMessage、recovered
 - [x] 索引配置：userId索引、caseId索引、errorType索引、recovered索引、learned索引
 
 #### 2.1.3 监控和日志表
 
 **SystemConfig（系统配置表）**
+
 - [x] 字段完整：id、configKey、configValue、description
 - [x] 索引配置：configKey唯一索引
 
 **ActionLog（操作日志表）**
+
 - [x] 字段完整：id、userId、actionType、resourceType、resourceId、ipAddress
 - [x] 索引配置：userId索引、actionType索引、timestamp索引
 
 **ApiPerformanceLog（API性能日志表）**
+
 - [x] 字段完整：id、endpoint、method、responseTime、statusCode、timestamp
 - [x] 索引配置：endpoint索引、method索引、statusCode索引、timestamp索引
 
@@ -215,6 +231,7 @@ npm run db:seed
 #### 2.3.1 备份策略
 
 **自动备份**（已实现）：
+
 - 脚本：`scripts/backup-database-prod.ts`
 - 备份频率：每日
 - 备份保留：30天
@@ -222,6 +239,7 @@ npm run db:seed
 - 备份加密：支持AES-256-CBC加密
 
 **手动备份**：
+
 ```bash
 # 使用pg_dump备份
 pg_dump $DATABASE_URL > backup_$(date +%Y%m%d).sql
@@ -379,19 +397,19 @@ open coverage/lcov-report/index.html
 
 #### 4.1.2 测试覆盖率要求
 
-| 模块 | 目标覆盖率 | 实际覆盖率 | 状态 |
-|--------|------------|------------|------|
-| Agent系统 | >90% | >95% | ✅ 达标 |
-| 用户管理 | >85% | >90% | ✅ 达标 |
-| 案件管理 | >85% | >90% | ✅ 达标 |
-| 支付系统 | >85% | >90% | ✅ 达标 |
-| 会员系统 | >85% | >90% | ✅ 达标 |
-| 管理后台 | >80% | >85% | ✅ 达标 |
-| 数据统计 | >80% | >85% | ✅ 达标 |
-| 监控系统 | >80% | >90% | ✅ 达标 |
-| 日志系统 | >80% | >90% | ✅ 达标 |
-| 配置管理 | >80% | 100% | ✅ 达标 |
-| 部署脚本 | >80% | 100% | ✅ 达标 |
+| 模块      | 目标覆盖率 | 实际覆盖率 | 状态    |
+| --------- | ---------- | ---------- | ------- |
+| Agent系统 | >90%       | >95%       | ✅ 达标 |
+| 用户管理  | >85%       | >90%       | ✅ 达标 |
+| 案件管理  | >85%       | >90%       | ✅ 达标 |
+| 支付系统  | >85%       | >90%       | ✅ 达标 |
+| 会员系统  | >85%       | >90%       | ✅ 达标 |
+| 管理后台  | >80%       | >85%       | ✅ 达标 |
+| 数据统计  | >80%       | >85%       | ✅ 达标 |
+| 监控系统  | >80%       | >90%       | ✅ 达标 |
+| 日志系统  | >80%       | >90%       | ✅ 达标 |
+| 配置管理  | >80%       | 100%       | ✅ 达标 |
+| 部署脚本  | >80%       | 100%       | ✅ 达标 |
 
 **综合测试覆盖率**：>90%（实际：>95%）✅
 
@@ -416,13 +434,13 @@ npx jest src/__tests__/integration/debate-flow.integration.test.ts
 
 #### 4.2.2 测试覆盖
 
-| 测试文件 | 测试用例数 | 通过数 | 通过率 | 状态 |
-|----------|-----------|--------|--------|------|
-| debate-flow.integration.test.ts | 6 | 6 | 100% | ✅ 完美 |
-| unified-debate-generator.test.ts | 12 | 12 | 100% | ✅ 完美 |
-| payment-integration.test.ts | 15 | 15 | 100% | ✅ 完美 |
-| membership-integration.test.ts | 12 | 12 | 100% | ✅ 完美 |
-| user-auth-integration.test.ts | 10 | 10 | 100% | ✅ 完美 |
+| 测试文件                         | 测试用例数 | 通过数 | 通过率 | 状态    |
+| -------------------------------- | ---------- | ------ | ------ | ------- |
+| debate-flow.integration.test.ts  | 6          | 6      | 100%   | ✅ 完美 |
+| unified-debate-generator.test.ts | 12         | 12     | 100%   | ✅ 完美 |
+| payment-integration.test.ts      | 15         | 15     | 100%   | ✅ 完美 |
+| membership-integration.test.ts   | 12         | 12     | 100%   | ✅ 完美 |
+| user-auth-integration.test.ts    | 10         | 10     | 100%   | ✅ 完美 |
 
 #### 4.2.3 测试通过率要求
 
@@ -451,14 +469,14 @@ npx playwright test --ui
 
 #### 4.3.2 测试覆盖
 
-| 测试文件 | 测试用例数 | 通过数 | 通过率 | 状态 |
-|----------|-----------|--------|--------|------|
-| user-flow.spec.ts | 8 | 8 | 100% | ✅ 完美 |
-| case-flow.spec.ts | 12 | 12 | 100% | ✅ 完美 |
-| payment-flow.spec.ts | 10 | 10 | 100% | ✅ 完美 |
-| membership-flow.spec.ts | 8 | 8 | 100% | ✅ 完美 |
-| admin-dashboard.spec.ts | 6 | 6 | 100% | ✅ 完美 |
-| statistics-dashboard.spec.ts | 5 | 5 | 100% | ✅ 完美 |
+| 测试文件                     | 测试用例数 | 通过数 | 通过率 | 状态    |
+| ---------------------------- | ---------- | ------ | ------ | ------- |
+| user-flow.spec.ts            | 8          | 8      | 100%   | ✅ 完美 |
+| case-flow.spec.ts            | 12         | 12     | 100%   | ✅ 完美 |
+| payment-flow.spec.ts         | 10         | 10     | 100%   | ✅ 完美 |
+| membership-flow.spec.ts      | 8          | 8      | 100%   | ✅ 完美 |
+| admin-dashboard.spec.ts      | 6          | 6      | 100%   | ✅ 完美 |
+| statistics-dashboard.spec.ts | 5          | 5      | 100%   | ✅ 完美 |
 
 #### 4.3.3 测试通过率要求
 
@@ -484,15 +502,15 @@ curl -w "@curl-format.txt" http://localhost:3000/api/health
 
 #### 4.4.2 性能指标要求
 
-| 指标 | 目标值 | 实际值 | 状态 |
-|--------|---------|--------|------|
-| API响应时间（P50） | <1秒 | <0.5秒 | ✅ 达标 |
-| API响应时间（P95） | <2秒 | <1.5秒 | ✅ 达标 |
-| API响应时间（P99） | <5秒 | <3秒 | ✅ 达标 |
+| 指标                  | 目标值 | 实际值 | 状态    |
+| --------------------- | ------ | ------ | ------- |
+| API响应时间（P50）    | <1秒   | <0.5秒 | ✅ 达标 |
+| API响应时间（P95）    | <2秒   | <1.5秒 | ✅ 达标 |
+| API响应时间（P99）    | <5秒   | <3秒   | ✅ 达标 |
 | 数据库查询时间（P95） | <500ms | <300ms | ✅ 达标 |
-| AI服务调用时间（P95） | <10秒 | <8秒 | ✅ 达标 |
-| 页面加载时间（FCP） | <2秒 | <1.5秒 | ✅ 达标 |
-| 页面加载时间（TTI） | <3秒 | <2.5秒 | ✅ 达标 |
+| AI服务调用时间（P95） | <10秒  | <8秒   | ✅ 达标 |
+| 页面加载时间（FCP）   | <2秒   | <1.5秒 | ✅ 达标 |
+| 页面加载时间（TTI）   | <3秒   | <2.5秒 | ✅ 达标 |
 
 ---
 
@@ -567,6 +585,7 @@ docker-compose -f docker-compose.prod.yml down -v
 ```
 
 **Docker Compose配置**：
+
 - [x] `config/docker-compose.yml` - 开发环境配置
 - [x] `config/docker-compose.prod.yml` - 生产环境配置
 - [x] `Dockerfile` - 应用Docker镜像配置
@@ -586,6 +605,7 @@ cd scripts/deploy && ./deploy-app.sh
 ```
 
 **部署脚本**：
+
 - [x] `scripts/deploy/config.sh` - 配置文件
 - [x] `scripts/deploy/lib.sh` - 公共函数库
 - [x] `scripts/deploy/check-environment.sh` - 环境检查脚本
@@ -595,14 +615,17 @@ cd scripts/deploy && ./deploy-app.sh
 #### 5.2.3 CI/CD部署
 
 **GitHub Actions工作流**：
+
 - [x] `.github/workflows/deploy.yml` - CI/CD工作流配置
 
 **触发条件**：
+
 - push到develop分支：自动触发测试
 - pull_request到develop：自动触发测试
 - workflow_dispatch：手动触发部署
 
 **部署流程**：
+
 1. 代码风格检查（lint:check）
 2. TypeScript类型检查（type-check）
 3. 单元测试（test:unit）
@@ -666,6 +689,7 @@ pm2 stop legal-debate
 #### 6.1.1 Prometheus监控
 
 **监控指标**：
+
 - [x] HTTP请求计数器（http_requests_total）
 - [x] HTTP请求持续时间（http_request_duration_seconds）
 - [x] 数据库查询计数器（db_queries_total）
@@ -679,6 +703,7 @@ pm2 stop legal-debate
 - [x] CPU使用率（cpu_usage_percent）
 
 **Grafana仪表板**：
+
 - [x] `config/grafana/dashboards/api-performance.json` - API性能监控仪表板
 - [x] `config/grafana/dashboards/database-performance.json` - 数据库性能监控仪表板
 - [x] `config/grafana/dashboards/ai-service-monitoring.json` - AI服务监控仪表板
@@ -733,10 +758,12 @@ pm2 stop legal-debate
 #### 6.2.1 告警规则配置
 
 **告警规则文件**：
+
 - [x] `config/alertmanager/alert-rules.yml` - 告警规则配置
 - [x] `config/alertmanager/alertmanager.yml` - Alertmanager主配置
 
 **告警规则**：
+
 - [x] API性能告警
   - HighAPIErrorRate：API错误率>5%
   - SlowAPIResponseTime：API响应时间P95>2秒
@@ -781,6 +808,7 @@ pm2 stop legal-debate
 #### 6.3.1 日志系统配置
 
 **日志收集**：
+
 - [x] `config/filebeat/filebeat.yml` - Filebeat日志收集配置
   - 应用日志输入
   - 错误日志输入
@@ -788,6 +816,7 @@ pm2 stop legal-debate
   - 系统日志输入
 
 **日志处理**：
+
 - [x] `config/logstash/pipelines/main.conf` - Logstash主管道配置
 - [x] `config/logstash/pipelines/error-logs.conf` - 错误日志处理管道
 - [x] `config/logstash/pipelines/action-logs.conf` - 操作日志处理管道
@@ -795,6 +824,7 @@ pm2 stop legal-debate
 - [x] `config/logstash/pipelines/application-logs.conf` - 应用日志处理管道
 
 **日志器实现**：
+
 - [x] `config/logger.config.ts` - 日志配置模块
 - [x] `config/winston.config.ts` - 日志器实现
 
@@ -803,10 +833,10 @@ pm2 stop legal-debate
 ```javascript
 // LOG_LEVEL配置
 const LOG_LEVELS = {
-  ERROR: 0,  // 仅错误
-  WARN: 1,   // 警告及以上
-  INFO: 2,   // 信息及以上
-  DEBUG: 3   // 所有日志
+  ERROR: 0, // 仅错误
+  WARN: 1, // 警告及以上
+  INFO: 2, // 信息及以上
+  DEBUG: 3, // 所有日志
 };
 ```
 
@@ -1197,8 +1227,8 @@ cd config && docker-compose -f docker-compose.prod.yml restart app
 - [ ] 安全检查通过
 - [ ] 性能检查通过
 
-**开发人员签名**：________________________  
-**日期**：________________________
+**开发人员签名**：**********\_\_\_\_**********  
+**日期**：**********\_\_\_\_**********
 
 ### 12.2 测试人员确认
 
@@ -1209,8 +1239,8 @@ cd config && docker-compose -f docker-compose.prod.yml restart app
 - [ ] 安全测试已通过
 - [ ] 测试覆盖率达标
 
-**测试人员签名**：________________________  
-**日期**：________________________
+**测试人员签名**：**********\_\_\_\_**********  
+**日期**：**********\_\_\_\_**********
 
 ### 12.3 运维人员确认
 
@@ -1222,8 +1252,8 @@ cd config && docker-compose -f docker-compose.prod.yml restart app
 - [ ] 回滚策略已准备
 - [ ] 应急联系已建立
 
-**运维人员签名**：________________________  
-**日期**：________________________
+**运维人员签名**：**********\_\_\_\_**********  
+**日期**：**********\_\_\_\_**********
 
 ### 12.4 项目负责人确认
 
@@ -1234,8 +1264,8 @@ cd config && docker-compose -f docker-compose.prod.yml restart app
 - [ ] 部署计划已批准
 - [ ] 风险评估已完成
 
-**项目负责人签名**：________________________  
-**日期**：________________________
+**项目负责人签名**：**********\_\_\_\_**********  
+**日期**：**********\_\_\_\_**********
 
 ---
 
@@ -1243,35 +1273,35 @@ cd config && docker-compose -f docker-compose.prod.yml restart app
 
 ### 13.1 快速参考
 
-| 常用命令 | 说明 |
-|----------|------|
-| `npm test` | 运行所有单元测试 |
-| `npm run test:integration` | 运行集成测试 |
-| `npm run test:coverage` | 生成覆盖率报告 |
-| `npm run coverage:check` | 检查覆盖率阈值 |
-| `npx playwright test` | 运行E2E测试 |
-| `npm run build` | 构建项目 |
-| `npx prisma generate` | 生成Prisma客户端 |
-| `npx prisma migrate dev` | 应用开发环境迁移 |
-| `npx prisma migrate deploy` | 应用生产环境迁移 |
-| `npm run db:seed` | 初始化种子数据 |
-| `npm run db:backup` | 备份数据库 |
-| `npm run db:restore` | 恢复数据库 |
-| `ts-node scripts/backup-database-prod.ts` | 生产环境备份 |
-| `cd scripts/deploy && ./check-environment.sh` | 环境检查 |
-| `cd scripts/deploy && ./migrate-database.sh` | 数据库迁移 |
-| `cd scripts/deploy && ./deploy-app.sh` | 应用部署 |
+| 常用命令                                                       | 说明               |
+| -------------------------------------------------------------- | ------------------ |
+| `npm test`                                                     | 运行所有单元测试   |
+| `npm run test:integration`                                     | 运行集成测试       |
+| `npm run test:coverage`                                        | 生成覆盖率报告     |
+| `npm run coverage:check`                                       | 检查覆盖率阈值     |
+| `npx playwright test`                                          | 运行E2E测试        |
+| `npm run build`                                                | 构建项目           |
+| `npx prisma generate`                                          | 生成Prisma客户端   |
+| `npx prisma migrate dev`                                       | 应用开发环境迁移   |
+| `npx prisma migrate deploy`                                    | 应用生产环境迁移   |
+| `npm run db:seed`                                              | 初始化种子数据     |
+| `npm run db:backup`                                            | 备份数据库         |
+| `npm run db:restore`                                           | 恢复数据库         |
+| `ts-node scripts/backup-database-prod.ts`                      | 生产环境备份       |
+| `cd scripts/deploy && ./check-environment.sh`                  | 环境检查           |
+| `cd scripts/deploy && ./migrate-database.sh`                   | 数据库迁移         |
+| `cd scripts/deploy && ./deploy-app.sh`                         | 应用部署           |
 | `cd config && docker-compose -f docker-compose.prod.yml up -d` | Docker Compose部署 |
 
 ### 13.2 联系信息
 
-| 角色 | 姓名 | 联系方式 | 职责 |
-|------|------|----------|------|
-| 项目负责人 | - | - | 项目整体协调 |
-| 开发负责人 | - | - | 技术问题支持 |
-| 测试负责人 | - | - | 测试问题支持 |
-| 运维负责人 | - | - | 部署运维支持 |
-| 应急联系人 | - | - | 紧急情况处理 |
+| 角色       | 姓名 | 联系方式 | 职责         |
+| ---------- | ---- | -------- | ------------ |
+| 项目负责人 | -    | -        | 项目整体协调 |
+| 开发负责人 | -    | -        | 技术问题支持 |
+| 测试负责人 | -    | -        | 测试问题支持 |
+| 运维负责人 | -    | -        | 部署运维支持 |
+| 应急联系人 | -    | -        | 紧急情况处理 |
 
 ### 13.3 参考资料
 
@@ -1288,13 +1318,13 @@ cd config && docker-compose -f docker-compose.prod.yml restart app
 
 ### 13.4 应急联系人
 
-| 问题类型 | 联系人 | 电话 | 邮箱 |
-|----------|---------|------|------|
-| 系统不可用 | - | - | - |
-| 数据库问题 | - | - | - |
-| 支付系统故障 | - | - | - |
-| 安全问题 | - | - | - |
-| 性能问题 | - | - | - |
+| 问题类型     | 联系人 | 电话 | 邮箱 |
+| ------------ | ------ | ---- | ---- |
+| 系统不可用   | -      | -    | -    |
+| 数据库问题   | -      | -    | -    |
+| 支付系统故障 | -      | -    | -    |
+| 安全问题     | -      | -    | -    |
+| 性能问题     | -      | -    | -    |
 
 ### 13.5 回滚流程
 

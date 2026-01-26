@@ -54,7 +54,7 @@
   throw new AnalysisError(
     `文档分析失败 [id=${input.documentId}]: ${error.message}`,
     error,
-    { documentId: input.documentId, processingTime, fileType: input.fileType },
+    { documentId: input.documentId, processingTime, fileType: input.fileType }
   );
   ```
 

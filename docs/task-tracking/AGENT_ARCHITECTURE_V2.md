@@ -157,18 +157,18 @@ class PlanningAgentImpl implements PlanningAgent {
 
     // 2. 根据任务类型分解
     switch (taskType) {
-      case "DEBATE":
+      case 'DEBATE':
         return [
-          { name: "analyze_document", agent: "AnalysisAgent" },
-          { name: "search_laws", agent: "LegalAgent" },
-          { name: "generate_debate", agent: "GenerationAgent" },
-          { name: "verify_result", agent: "VerificationAgent" },
+          { name: 'analyze_document', agent: 'AnalysisAgent' },
+          { name: 'search_laws', agent: 'LegalAgent' },
+          { name: 'generate_debate', agent: 'GenerationAgent' },
+          { name: 'verify_result', agent: 'VerificationAgent' },
         ];
-      case "DOCUMENT_GENERATION":
+      case 'DOCUMENT_GENERATION':
         return [
-          { name: "analyze_case", agent: "AnalysisAgent" },
-          { name: "generate_document", agent: "GenerationAgent" },
-          { name: "verify_document", agent: "VerificationAgent" },
+          { name: 'analyze_case', agent: 'AnalysisAgent' },
+          { name: 'generate_document', agent: 'GenerationAgent' },
+          { name: 'verify_document', agent: 'VerificationAgent' },
         ];
       default:
         throw new Error(`Unknown task type: ${taskType}`);
@@ -322,7 +322,7 @@ interface LegalAgent {
   // 法条适用性分析
   analyzeApplicability(
     articles: LawArticle[],
-    caseInfo: CaseInfo,
+    caseInfo: CaseInfo
   ): ApplicabilityResult;
 
   // 论点生成
@@ -368,7 +368,7 @@ class LegalAgentImpl implements LegalAgent {
 
   async analyzeApplicability(
     articles: LawArticle[],
-    caseInfo: CaseInfo,
+    caseInfo: CaseInfo
   ): Promise<ApplicabilityResult> {
     // 借鉴DocAnalyzer的三层验证理念
 
@@ -386,7 +386,7 @@ class LegalAgentImpl implements LegalAgent {
       articles,
       caseInfo,
       semanticScores,
-      ruleValidation,
+      ruleValidation
     );
 
     return {
@@ -399,7 +399,7 @@ class LegalAgentImpl implements LegalAgent {
 
   async generateArguments(
     legalBasis: LegalBasis,
-    side: ArgumentSide,
+    side: ArgumentSide
   ): Promise<Argument[]> {
     // 1. 生成主要论点
     const mainPoints = await this.generateMainPoints(legalBasis, side);
@@ -468,7 +468,7 @@ interface GenerationAgent {
 class GenerationAgentImpl implements GenerationAgent {
   async generateDocument(
     template: Template,
-    data: CaseData,
+    data: CaseData
   ): Promise<Document> {
     // 1. 模板解析
     const parsed = this.parseTemplate(template);
@@ -487,20 +487,20 @@ class GenerationAgentImpl implements GenerationAgent {
 
   async generateDebate(
     caseInfo: CaseInfo,
-    legalBasis: LegalBasis,
+    legalBasis: LegalBasis
   ): Promise<DebateContent> {
     // 1. 生成正方论点
     const plaintiffArgs = await this.generateSideArguments(
       caseInfo,
       legalBasis,
-      "PLAINTIFF",
+      'PLAINTIFF'
     );
 
     // 2. 生成反方论点
     const defendantArgs = await this.generateSideArguments(
       caseInfo,
       legalBasis,
-      "DEFENDANT",
+      'DEFENDANT'
     );
 
     // 3. 确保论点平衡
@@ -553,7 +553,7 @@ interface VerificationAgent {
   // 任务完成度验证
   verifyTaskCompleteness(
     data: any,
-    requirements: Requirements,
+    requirements: Requirements
   ): CompletenessResult;
 
   // 风险评估
@@ -582,14 +582,14 @@ interface VerificationAgent {
 class VerificationAgentImpl implements VerificationAgent {
   async comprehensiveVerify(
     entity: any,
-    entityType: string,
+    entityType: string
   ): Promise<VerificationResult> {
     // Manus三重验证机制
 
     // 1. 事实准确性验证（最基础）
     const factualResult = await this.verifyFactualAccuracy(
       entity,
-      entity.source,
+      entity.source
     );
 
     // 2. 逻辑一致性验证（中层）
@@ -598,21 +598,21 @@ class VerificationAgentImpl implements VerificationAgent {
     // 3. 任务完成度验证（最高层）
     const completenessResult = await this.verifyTaskCompleteness(
       entity,
-      entity.requirements,
+      entity.requirements
     );
 
     // 4. 综合评分
     const overallScore = this.calculateOverallScore(
       factualResult.score,
       logicalResult.score,
-      completenessResult.score,
+      completenessResult.score
     );
 
     // 5. 生成问题和建议
     const issues = this.collectIssues(
       factualResult,
       logicalResult,
-      completenessResult,
+      completenessResult
     );
     const suggestions = this.generateSuggestions(issues);
 
@@ -629,7 +629,7 @@ class VerificationAgentImpl implements VerificationAgent {
 
   async verifyFactualAccuracy(
     data: any,
-    source: any,
+    source: any
   ): Promise<FactualVerificationResult> {
     // 1. 当事人信息验证
     const partyCheck = this.verifyParties(data.parties, source);
@@ -655,7 +655,7 @@ class VerificationAgentImpl implements VerificationAgent {
   }
 
   async verifyLogicalConsistency(
-    data: any,
+    data: any
   ): Promise<LogicalVerificationResult> {
     // 1. 诉讼请求与事实理由匹配度
     const claimFactMatch = this.checkClaimFactMatch(data);
@@ -682,7 +682,7 @@ class VerificationAgentImpl implements VerificationAgent {
 
   async verifyTaskCompleteness(
     data: any,
-    requirements: Requirements,
+    requirements: Requirements
   ): Promise<CompletenessResult> {
     // 1. 必填字段完整性
     const requiredFields = this.checkRequiredFields(data, requirements);
@@ -769,12 +769,12 @@ class MemoryAgentImpl implements MemoryAgent {
   async storeWorkingMemory(
     key: string,
     value: any,
-    ttl: number = 3600,
+    ttl: number = 3600
   ): Promise<void> {
     // Working Memory: 1小时TTL
     await this.db.agentMemory.create({
       data: {
-        memoryType: "WORKING",
+        memoryType: 'WORKING',
         memoryKey: key,
         memoryValue: value,
         importance: 0.9, // 高重要性
@@ -787,14 +787,14 @@ class MemoryAgentImpl implements MemoryAgent {
   async storeHotMemory(
     key: string,
     value: any,
-    importance: number,
+    importance: number
   ): Promise<void> {
     // Hot Memory: 7天TTL，需要压缩
     const compressed = await this.compressMemory(value);
 
     await this.db.agentMemory.create({
       data: {
-        memoryType: "HOT",
+        memoryType: 'HOT',
         memoryKey: key,
         memoryValue: compressed,
         importance,
@@ -811,7 +811,7 @@ class MemoryAgentImpl implements MemoryAgent {
 
     await this.db.agentMemory.create({
       data: {
-        memoryType: "COLD",
+        memoryType: 'COLD',
         memoryKey: key,
         memoryValue: highlyCompressed,
         importance: 0.5, // 中等重要性
@@ -823,7 +823,7 @@ class MemoryAgentImpl implements MemoryAgent {
 
   async compressMemory(
     memory: Memory,
-    targetRatio: number = 0.2,
+    targetRatio: number = 0.2
   ): Promise<CompressedMemory> {
     // 1. 提取关键信息
     const keyInfo = this.extractKeyInfo(memory);
@@ -845,9 +845,9 @@ class MemoryAgentImpl implements MemoryAgent {
 
   async migrateMemory(from: MemoryType, to: MemoryType): Promise<void> {
     // Working → Hot → Cold 迁移
-    if (from === "WORKING" && to === "HOT") {
+    if (from === 'WORKING' && to === 'HOT') {
       // 1. 获取即将过期的Working Memory
-      const expiring = await this.getExpiringMemories("WORKING");
+      const expiring = await this.getExpiringMemories('WORKING');
 
       // 2. 压缩并迁移到Hot Memory
       for (const memory of expiring) {
@@ -855,12 +855,12 @@ class MemoryAgentImpl implements MemoryAgent {
         await this.storeHotMemory(
           memory.memoryKey,
           compressed,
-          memory.importance,
+          memory.importance
         );
       }
 
       // 3. 删除原Working Memory
-      await this.deleteMemories(expiring.map((m) => m.id));
+      await this.deleteMemories(expiring.map(m => m.id));
     }
   }
 

@@ -70,9 +70,7 @@ module.exports = {
     {
       displayName: 'app',
       testEnvironment: 'jsdom',
-      testMatch: [
-        '<rootDir>/src/__tests__/app/**/*.{test,spec}.{ts,tsx}',
-      ],
+      testMatch: ['<rootDir>/src/__tests__/app/**/*.{test,spec}.{ts,tsx}'],
       testPathIgnorePatterns: [
         '<rootDir>/.next/',
         '<rootDir>/node_modules/',
@@ -142,9 +140,7 @@ module.exports = {
     {
       displayName: 'api',
       testEnvironment: 'node',
-      testMatch: [
-        '<rootDir>/src/__tests__/api/**/*.{test,spec}.{ts,tsx}',
-      ],
+      testMatch: ['<rootDir>/src/__tests__/api/**/*.{test,spec}.{ts,tsx}'],
       testPathIgnorePatterns: [
         '<rootDir>/.next/',
         '<rootDir>/node_modules/',
@@ -154,7 +150,10 @@ module.exports = {
         '<rootDir>/src/__tests__/accuracy/',
         '<rootDir>/src/__tests__/integration/',
       ],
-      setupFiles: ['<rootDir>/src/__tests__/api/setup.js', '<rootDir>/jest.polyfill.js'],
+      setupFiles: [
+        '<rootDir>/src/__tests__/api/setup.js',
+        '<rootDir>/jest.polyfill.js',
+      ],
       setupFilesAfterEnv: ['whatwg-fetch', '<rootDir>/src/test-utils/setup.ts'],
       moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',

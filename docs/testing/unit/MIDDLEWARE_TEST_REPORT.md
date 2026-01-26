@@ -219,7 +219,7 @@ try {
   await rateLimitMiddleware(request, context, response);
 } catch (error) {
   errorThrown = true;
-  expect(error.message).toBe("RATE_LIMIT_EXCEEDED");
+  expect(error.message).toBe('RATE_LIMIT_EXCEEDED');
 }
 expect(errorThrown).toBe(true);
 ```

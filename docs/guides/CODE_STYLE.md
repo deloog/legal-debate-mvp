@@ -45,12 +45,12 @@ export const userService = {};
 
 ```typescript
 // ✅ 推荐：camelCase
-const userName = "john";
+const userName = 'john';
 const getUserInfo = () => {};
 const apiClient = axios.create();
 
 // ❌ 不推荐：snake_case
-const user_name = "john";
+const user_name = 'john';
 const get_user_info = () => {};
 ```
 
@@ -58,11 +58,11 @@ const get_user_info = () => {};
 
 ```typescript
 // ✅ 推荐：UPPER_SNAKE_CASE
-const API_BASE_URL = "https://api.example.com";
+const API_BASE_URL = 'https://api.example.com';
 const MAX_RETRY_COUNT = 3;
 
 // ❌ 不推荐
-const apiUrl = "https://api.example.com";
+const apiUrl = 'https://api.example.com';
 const maxRetryCount = 3;
 ```
 
@@ -141,18 +141,18 @@ const apiKey = process.env.API_KEY;
 const dbPassword = process.env.DB_PASSWORD;
 
 // ❌ 不推荐：硬编码
-const apiKey = "hardcoded-api-key";
-const dbPassword = "hardcoded-password";
+const apiKey = 'hardcoded-api-key';
+const dbPassword = 'hardcoded-password';
 ```
 
 #### URL和配置
 
 ```typescript
 // ✅ 推荐：配置文件或环境变量
-const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
 
 // ❌ 不推荐：硬编码生产URL
-const API_BASE_URL = "https://production-api.example.com";
+const API_BASE_URL = 'https://production-api.example.com';
 ```
 
 ### 7. 文件组织

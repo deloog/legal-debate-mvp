@@ -331,7 +331,7 @@ interface TestDocument {
   caseType: string;
   goldStandard?: {
     parties: Array<{
-      type: "plaintiff" | "defendant" | "other";
+      type: 'plaintiff' | 'defendant' | 'other';
       name: string;
       role?: string;
       contact?: string;

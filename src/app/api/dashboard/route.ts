@@ -118,30 +118,30 @@ export async function getQuickActions(): Promise<QuickAction[]> {
   return [
     {
       id: 'new-case',
-      label: '新建案件',
+      label: '案件管理',
       icon: 'plus',
-      href: '/cases/new',
+      href: '/cases',
       color: 'blue',
     },
     {
       id: 'new-client',
-      label: '新建客户',
+      label: '客户管理',
       icon: 'user-plus',
-      href: '/clients/new',
+      href: '/clients',
       color: 'green',
     },
     {
       id: 'new-schedule',
-      label: '添加日程',
+      label: '法庭日程',
       icon: 'calendar',
-      href: '/court-schedule/new',
+      href: '/court-schedule',
       color: 'purple',
     },
     {
       id: 'new-task',
-      label: '新建任务',
+      label: '待办任务',
       icon: 'check-square',
-      href: '/tasks/new',
+      href: '/tasks',
       color: 'yellow',
     },
   ];
@@ -200,15 +200,16 @@ export async function getFeatureModules(): Promise<FeatureModule[]> {
       title: '数据分析',
       description: '客户分析、案件分析、绩效统计',
       icon: 'bar-chart',
-      href: '/analytics',
+      href: '/dashboard',
     },
-    {
-      id: 'admin',
-      title: '系统管理',
-      description: '用户管理、权限配置、系统设置',
-      icon: 'settings',
-      href: '/admin',
-      badge: 'Admin',
-    },
+    // 系统管理仅对管理员可见，已从首页移除
+    // {
+    //   id: 'admin',
+    //   title: '系统管理',
+    //   description: '用户管理、权限配置、系统设置',
+    //   icon: 'settings',
+    //   href: '/admin',
+    //   badge: 'Admin',
+    // },
   ];
 }

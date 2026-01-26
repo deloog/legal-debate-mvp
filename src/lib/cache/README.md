@@ -60,13 +60,13 @@ CACHE_ENABLE_COMPRESSION=false
 
 ```yaml
 # config/docker-compose.yml
-version: "3.8"
+version: '3.8'
 services:
   redis:
     image: redis:7-alpine
     container_name: legal_debate_redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
@@ -93,63 +93,63 @@ npm install ioredis
 ### 基础使用
 
 ```typescript
-import { cache, initializeCache } from "@/lib/cache";
+import { cache, initializeCache } from '@/lib/cache';
 
 // 初始化缓存系统
 await initializeCache();
 
 // 设置缓存
 await cache.set(
-  "user:123",
-  { name: "张三", age: 25 },
+  'user:123',
+  { name: '张三', age: 25 },
   {
     ttl: 3600, // 1小时
-    namespace: "user_data",
-  },
+    namespace: 'user_data',
+  }
 );
 
 // 获取缓存
-const userData = await cache.get("user:123", {
-  namespace: "user_data",
+const userData = await cache.get('user:123', {
+  namespace: 'user_data',
 });
 
 // 删除缓存
-await cache.delete("user:123", {
-  namespace: "user_data",
+await cache.delete('user:123', {
+  namespace: 'user_data',
 });
 ```
 
 ### 使用预配置缓存实例
 
 ```typescript
-import { userCache, aiCache, configCache } from "@/lib/cache";
+import { userCache, aiCache, configCache } from '@/lib/cache';
 
 // 用户会话缓存
-await userCache.set("session:abc123", { userId: 123, role: "admin" });
+await userCache.set('session:abc123', { userId: 123, role: 'admin' });
 
 // AI响应缓存
 const aiResponse = await aiCache.getOrSet(
-  "query:legal-question-1",
+  'query:legal-question-1',
   async () => {
     // 从AI服务获取数据
-    return await aiService.getLegalAdvice("question-1");
+    return await aiService.getLegalAdvice('question-1');
   },
-  3600, // 1小时
+  3600 // 1小时
 );
 
 // 配置缓存
-const config = await configCache.get("app-settings");
+const config = await configCache.get('app-settings');
 ```
 
 ### 缓存装饰器
 
 ```typescript
-import { Cached } from "@/lib/cache";
+import { Cached } from '@/lib/cache';
 
 class UserService {
   @Cached({
     ttl: 1800, // 30分钟
-    namespace: "user_data",
+    namespace: 'user_data',
   })
   async getUserById(id: string) {
     // 这个方法的结果会被自动缓存
@@ -171,7 +171,7 @@ class UserService {
 ### 缓存策略
 
 ```typescript
-import { cacheStrategyFactory, CacheStrategy } from "@/lib/cache";
+import { cacheStrategyFactory, CacheStrategy } from '@/lib/cache';
 
 // 懒加载策略（默认）
 const lazyStrategy = cacheStrategyFactory.createLazyLoadingStrategy();
@@ -182,7 +182,7 @@ const writeThroughStrategy = cacheStrategyFactory.createWriteThroughStrategy(
     // 写入数据库
     await database.save(key, value);
     return true;
-  },
+  }
 );
 
 // 写回策略
@@ -192,58 +192,58 @@ const writeBehindStrategy = cacheStrategyFactory.createWriteBehindStrategy(
     await database.batchSave(key, value);
     return true;
   },
-  5000, // 5秒批量写入间隔
+  5000 // 5秒批量写入间隔
 );
 
 // 预刷新策略
 const refreshAheadStrategy = cacheStrategyFactory.createRefreshAheadStrategy(
-  async (key) => {
+  async key => {
     // 从数据源重新获取数据
     return await database.get(key);
   },
-  300, // 在TTL剩余5分钟时刷新
+  300 // 在TTL剩余5分钟时刷新
 );
 ```
 
 ### 批量操作
 
 ```typescript
-import { cacheUtils } from "@/lib/cache";
+import { cacheUtils } from '@/lib/cache';
 
 // 批量获取
-const keys = ["user:1", "user:2", "user:3"];
+const keys = ['user:1', 'user:2', 'user:3'];
 const results = await cacheUtils.batchGet<User>(keys, {
-  namespace: "user_data",
+  namespace: 'user_data',
 });
 
 // 批量设置
 const items = [
-  { key: "user:1", value: { name: "用户1" }, ttl: 3600 },
-  { key: "user:2", value: { name: "用户2" }, ttl: 3600 },
-  { key: "user:3", value: { name: "用户3" }, ttl: 3600 },
+  { key: 'user:1', value: { name: '用户1' }, ttl: 3600 },
+  { key: 'user:2', value: { name: '用户2' }, ttl: 3600 },
+  { key: 'user:3', value: { name: '用户3' }, ttl: 3600 },
 ];
 const result = await cacheUtils.batchSet(items, {
-  namespace: "user_data",
+  namespace: 'user_data',
 });
 
 // 批量删除
 const deletedCount = await cacheUtils.batchDelete(keys, {
-  namespace: "user_data",
+  namespace: 'user_data',
 });
 ```
 
 ### 监控和统计
 
 ```typescript
-import { cacheMonitor, cacheUtils } from "@/lib/cache";
+import { cacheMonitor, cacheUtils } from '@/lib/cache';
 
 // 获取健康状态
 const health = await cacheMonitor.getHealthStatus();
-console.log("缓存健康状态:", health);
+console.log('缓存健康状态:', health);
 
 // 获取统计信息
 const stats = cacheUtils.getStats();
-console.log("缓存统计:", {
+console.log('缓存统计:', {
   hitRate: `${stats.hitRate.toFixed(2)}%`,
   totalRequests: stats.totalRequests,
   hits: stats.hits,
@@ -258,18 +258,18 @@ console.log(report);
 ### 命名空间管理
 
 ```typescript
-import { cache, CacheNamespace } from "@/lib/cache";
+import { cache, CacheNamespace } from '@/lib/cache';
 
 // 清空特定命名空间
 const deletedCount = await cache.clearNamespace(CacheNamespace.USER_SESSION);
 
 // 使用命名空间隔离不同类型的数据
-await cache.set("user:123", userData, {
+await cache.set('user:123', userData, {
   namespace: CacheNamespace.USER_DATA,
   ttl: 3600,
 });
 
-await cache.set("config:app", appConfig, {
+await cache.set('config:app', appConfig, {
   namespace: CacheNamespace.CONFIGURATION,
   ttl: 86400,
 });
@@ -298,19 +298,19 @@ await cache.set("config:app", appConfig, {
 
 ```typescript
 // 启动自定义监控
-cacheMonitor.addEventListener((event) => {
-  console.log("缓存事件:", event);
+cacheMonitor.addEventListener(event => {
+  console.log('缓存事件:', event);
 
   // 可以集成到外部监控系统
-  if (event.type === "miss") {
+  if (event.type === 'miss') {
     // 记录缓存未命中
-    monitoring.increment("cache_miss");
+    monitoring.increment('cache_miss');
   }
 });
 
 // 获取性能报告
 const performanceReport = cacheMonitor.getPerformanceReport();
-console.log("性能报告:", performanceReport);
+console.log('性能报告:', performanceReport);
 ```
 
 ## 🛠️ 高级配置
@@ -318,7 +318,7 @@ console.log("性能报告:", performanceReport);
 ### 自定义序列化器
 
 ```typescript
-import { cacheManager } from "@/lib/cache";
+import { cacheManager } from '@/lib/cache';
 
 // 使用自定义序列化器
 cacheManager.setSerializer({
@@ -334,14 +334,14 @@ cacheManager.setSerializer({
 ### 缓存工厂
 
 ```typescript
-import { createCache, CacheNamespace } from "@/lib/cache";
+import { createCache, CacheNamespace } from '@/lib/cache';
 
 // 创建专门的缓存实例
 const productCache = createCache(CacheNamespace.USER_DATA, 7200); // 2小时
 
-productCache.get("product:123");
-productCache.set("product:123", productData);
-productCache.delete("product:123");
+productCache.get('product:123');
+productCache.set('product:123', productData);
+productCache.delete('product:123');
 productCache.clear(); // 清空整个命名空间
 ```
 
@@ -380,11 +380,11 @@ productCache.clear(); // 清空整个命名空间
 ### 连接失败
 
 ```typescript
-import { checkRedisConnection } from "@/lib/cache";
+import { checkRedisConnection } from '@/lib/cache';
 
 const isConnected = await checkRedisConnection();
 if (!isConnected) {
-  console.error("Redis连接失败，请检查配置");
+  console.error('Redis连接失败，请检查配置');
   // 可以降级到内存缓存或直接查询数据库
 }
 ```
@@ -397,7 +397,7 @@ async function getUserData(id: string) {
     // 尝试从缓存获取
     return await userCache.get(`user:${id}`);
   } catch (error) {
-    console.error("缓存不可用，直接查询数据库");
+    console.error('缓存不可用，直接查询数据库');
     return await database.user.findUnique({ where: { id } });
   }
 }
@@ -406,7 +406,7 @@ async function getUserData(id: string) {
 ## 🧪 测试
 
 ```typescript
-import { cache, initializeCache, cleanupCache } from "@/lib/cache";
+import { cache, initializeCache, cleanupCache } from '@/lib/cache';
 
 beforeAll(async () => {
   await initializeCache();
@@ -416,9 +416,9 @@ afterAll(async () => {
   await cleanupCache();
 });
 
-test("缓存基础操作", async () => {
-  const key = "test:key";
-  const value = { test: "data" };
+test('缓存基础操作', async () => {
+  const key = 'test:key';
+  const value = { test: 'data' };
 
   // 设置
   await expect(cache.set(key, value)).resolves.toBe(true);

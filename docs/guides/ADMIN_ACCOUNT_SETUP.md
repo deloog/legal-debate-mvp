@@ -9,6 +9,7 @@
 **注意**：管理员账户功能是提前实现的，原本计划在Sprint 9.1.4任务中实现。
 
 提前实现的原因：
+
 - Sprint 8.3.2（企业认证集成测试）需要管理员账户进行完整测试
 - 企业审核API（`/api/admin/enterprise/[id]/review`）已存在但无法测试（无管理员账户）
 
@@ -16,22 +17,22 @@
 
 ### 默认管理员账户
 
-| 配置项 | 值 |
-|---------|-----|
-| 邮箱 | admin@example.com |
-| 密码 | Admin@123 |
-| 角色 | ADMIN |
-| 状态 | ACTIVE |
+| 配置项 | 值                |
+| ------ | ----------------- |
+| 邮箱   | admin@example.com |
+| 密码   | Admin@123         |
+| 角色   | ADMIN             |
+| 状态   | ACTIVE            |
 
 ### 测试企业账户
 
-| 配置项 | 值 |
-|---------|-----|
-| 邮箱 | enterprise@example.com |
-| 密码 | Enterprise@123 |
-| 角色 | ENTERPRISE |
-| 状态 | ACTIVE |
-| 企业状态 | PENDING（待审核） |
+| 配置项   | 值                     |
+| -------- | ---------------------- |
+| 邮箱     | enterprise@example.com |
+| 密码     | Enterprise@123         |
+| 角色     | ENTERPRISE             |
+| 状态     | ACTIVE                 |
+| 企业状态 | PENDING（待审核）      |
 
 ## 使用方法
 
@@ -51,8 +52,8 @@ npm run seed-admin
 2. 直接修改数据库将用户角色设置为ADMIN
 
 ```sql
-UPDATE users 
-SET role = 'ADMIN', status = 'ACTIVE' 
+UPDATE users
+SET role = 'ADMIN', status = 'ACTIVE'
 WHERE email = 'admin@example.com';
 ```
 
@@ -138,6 +139,7 @@ Sprint 9.1.4"用户角色管理"将实现完整的管理后台功能：
 ### 生产环境
 
 1. **立即修改默认密码**
+
    ```typescript
    // 在prisma/seed-admin.ts中修改
    const ADMIN_CONFIG = {
@@ -146,6 +148,7 @@ Sprint 9.1.4"用户角色管理"将实现完整的管理后台功能：
    ```
 
 2. **使用环境变量**
+
    ```typescript
    const ADMIN_CONFIG = {
      email: process.env.ADMIN_EMAIL || 'admin@example.com',
@@ -161,11 +164,13 @@ Sprint 9.1.4"用户角色管理"将实现完整的管理后台功能：
 ### 问题：Seed脚本执行失败
 
 **可能原因**：
+
 1. DATABASE_URL未配置
 2. bcrypt依赖未安装
 3. 数据库连接失败
 
 **解决方案**：
+
 ```bash
 # 检查.env文件
 cat .env | grep DATABASE_URL
@@ -180,11 +185,13 @@ npx prisma db push
 ### 问题：E2E测试失败
 
 **可能原因**：
+
 1. 管理员账户未创建
 2. 企业审核API未实现或权限配置错误
 3. Token无效或过期
 
 **解决方案**：
+
 1. 先运行seed脚本创建管理员账户
 2. 检查`/api/admin/enterprise/[id]/review`是否存在
 3. 检查权限中间件配置
@@ -197,6 +204,6 @@ npx prisma db push
 
 ## 版本历史
 
-| 版本 | 日期 | 说明 |
-|-----|------|------|
-| 1.0 | 2026-01-12 | 初始版本，提前实现管理员账户功能 |
+| 版本 | 日期       | 说明                             |
+| ---- | ---------- | -------------------------------- |
+| 1.0  | 2026-01-12 | 初始版本，提前实现管理员账户功能 |

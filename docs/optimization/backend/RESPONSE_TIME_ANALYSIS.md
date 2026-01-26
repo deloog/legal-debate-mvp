@@ -138,7 +138,7 @@ for (let i = 0; i < maxRetries; i++) {
     return await client.chat.completions.create(params);
   } catch (error) {
     if (i === maxRetries - 1) throw error;
-    await new Promise((resolve) => setTimeout(resolve, retryDelay * (i + 1)));
+    await new Promise(resolve => setTimeout(resolve, retryDelay * (i + 1)));
   }
 }
 ```

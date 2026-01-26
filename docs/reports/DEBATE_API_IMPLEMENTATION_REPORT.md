@@ -92,7 +92,7 @@ const [debates, total] = await Promise.all([
       user: { select: { id: true, username: true, name: true } },
       _count: { select: { rounds: true } },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: 'desc' },
     ...options,
   }),
   prisma.debate.count({ where: whereCondition }),

@@ -72,7 +72,7 @@ interface DocumentTemplate {
 ```typescript
 // 当事人接口
 interface Party {
-  type: "plaintiff" | "defendant" | "other" | "legal_rep";
+  type: 'plaintiff' | 'defendant' | 'other' | 'legal_rep';
   name: string;
   role?: string;
   contact?: string;
@@ -127,7 +127,7 @@ const parties = (extractedData.parties as string[]) || [];
 
 ```typescript
 const plaintiff = result.extractedData.parties.find(
-  (p: any) => p.type === "plaintiff",
+  (p: any) => p.type === 'plaintiff'
 );
 ```
 
@@ -135,7 +135,7 @@ const plaintiff = result.extractedData.parties.find(
 
 ```typescript
 const plaintiff = result.extractedData.parties?.find(
-  (p) => p.type === "plaintiff",
+  p => p.type === 'plaintiff'
 );
 ```
 
@@ -202,10 +202,10 @@ const user: any = { ... };
 
 ```typescript
 // ✅ 推荐
-type Status = "pending" | "active" | "completed";
+type Status = 'pending' | 'active' | 'completed';
 
 // ❌ 避免
-const status: any = "pending";
+const status: any = 'pending';
 ```
 
 #### 原则 3: 使用泛型增强类型灵活性
@@ -241,7 +241,7 @@ function processData(data: any): any {
 ```typescript
 // ✅ 推荐
 function parseInput(input: unknown): string {
-  if (typeof input === "string") {
+  if (typeof input === 'string') {
     return input;
   }
   return String(input);
@@ -332,7 +332,7 @@ interface ExternalLibData {
 }
 
 const processData = (data: ExternalLibData) => {
-  if (typeof data.value === "string") {
+  if (typeof data.value === 'string') {
     return data.value.toUpperCase();
   }
   return String(data.value);

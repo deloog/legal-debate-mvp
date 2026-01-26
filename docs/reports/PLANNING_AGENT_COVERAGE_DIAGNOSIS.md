@@ -83,22 +83,22 @@ Option "testPathPattern" was replaced by "--testPathPatterns"
 ```javascript
 try {
   execSync(command, {
-    encoding: "utf-8",
-    stdio: "inherit",
+    encoding: 'utf-8',
+    stdio: 'inherit',
   });
   // 即使阈值未达到，只要覆盖率文件生成就算成功
   return fs.existsSync(
-    path.join(process.cwd(), "coverage", "coverage-final.json"),
+    path.join(process.cwd(), 'coverage', 'coverage-final.json')
   );
 } catch (error) {
   // 检查是否只是阈值未达导致的失败
   if (
-    fs.existsSync(path.join(process.cwd(), "coverage", "coverage-final.json"))
+    fs.existsSync(path.join(process.cwd(), 'coverage', 'coverage-final.json'))
   ) {
-    printWarning("覆盖率低于目标阈值，但数据已成功收集");
+    printWarning('覆盖率低于目标阈值，但数据已成功收集');
     return true;
   }
-  printError("覆盖率收集失败");
+  printError('覆盖率收集失败');
   console.error(error.message);
   return false;
 }
@@ -125,7 +125,7 @@ if (normalizedPath.includes('src/lib/agent/planning-agent') && ...) {
 
 ```javascript
 const total = Object.keys(data.s || {}).length;
-const covered = Object.values(data.s || {}).filter((value) => value > 0).length;
+const covered = Object.values(data.s || {}).filter(value => value > 0).length;
 ```
 
 #### 4. 更新Jest命令选项
@@ -232,18 +232,18 @@ coverageThreshold: {
 
 ```javascript
 // 1. 空值和undefined测试
-it("should handle empty input");
+it('should handle empty input');
 
 // 2. 错误场景测试
-it("should handle network errors");
-it("should handle validation errors");
+it('should handle network errors');
+it('should handle validation errors');
 
 // 3. 边界值测试
-it("should handle maximum task limit");
-it("should handle minimum resource allocation");
+it('should handle maximum task limit');
+it('should handle minimum resource allocation');
 
 // 4. 异步超时测试
-it("should handle timeout scenarios");
+it('should handle timeout scenarios');
 ```
 
 ### 3. 提高分支覆盖率

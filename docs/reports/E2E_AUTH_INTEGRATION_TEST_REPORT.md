@@ -78,7 +78,7 @@ interface CurrentUserResponseData {
 
 ```typescript
 // login返回后测试中创建伪造refresh token
-const refreshToken = `refresh_${data.data?.token || ""}`;
+const refreshToken = `refresh_${data.data?.token || ''}`;
 ```
 
 **影响**: 刷新token测试失败，因为refresh API需要数据库验证
@@ -98,7 +98,7 @@ const refreshToken = `refresh_${data.data?.token || ""}`;
 **现状**:
 
 ```typescript
-expect(data.error).toContain("已注册"); // 失败
+expect(data.error).toContain('已注册'); // 失败
 // 实际: "USER_EXISTS"
 ```
 
