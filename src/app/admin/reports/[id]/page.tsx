@@ -1,11 +1,8 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ReportDetailResponse, ReportContent } from '@/types/stats';
-
-export const metadata = {
-  title: '报告详情',
-  description: '查看报告详情',
-};
 
 export default function ReportDetailPage(): React.ReactElement {
   const router = useRouter();

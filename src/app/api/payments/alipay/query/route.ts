@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import { alipay } from '@/lib/payment/alipay';
+import { getAlipay } from '@/lib/payment/alipay';
 import { isPaymentSuccess, isPaymentFailed } from '@/lib/payment/alipay-utils';
 import {
   handlePaymentSuccess,
@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
 
     // 调用支付宝API查询订单
     try {
+      const alipay = getAlipay();
       const queryResponse = await alipay.queryOrder({
         outTradeNo: targetOrderNo,
       });

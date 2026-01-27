@@ -4,9 +4,15 @@ import {
   createDefaultMiddlewareStack,
   createRequestContext,
 } from '@/app/api/lib/middleware';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 // 创建中间件栈
 const middlewareStack = createDefaultMiddlewareStack();
+
+// 读取package.json
+const packageJsonPath = join(process.cwd(), 'package.json');
+const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
 
 /**
  * GET /api/version
@@ -18,8 +24,6 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const middlewareResponse = await middlewareStack.execute(request, context);
 
   // 2. 获取版本信息
-  const packageJson = require('../../../../package.json');
-
   const versionData = {
     api: {
       version: 'v1',

@@ -239,9 +239,19 @@ export class PaymentEnvironmentManager {
     const result = this.validateAlipayEnv();
 
     if (!result.valid) {
-      throw new Error(
-        `支付宝环境变量验证失败: 缺失 [${result.missing.join(', ')}], 无效 [${result.invalid.join(', ')}]`
-      );
+      // 构建时不抛出错误，只记录警告
+      if (
+        process.env.NODE_ENV !== 'production' ||
+        process.env.SKIP_ENV_VALIDATION === 'true'
+      ) {
+        console.warn(
+          `⚠️  支付宝环境变量未完全配置: 缺失 [${result.missing.join(', ')}]`
+        );
+      } else {
+        throw new Error(
+          `支付宝环境变量验证失败: 缺失 [${result.missing.join(', ')}], 无效 [${result.invalid.join(', ')}]`
+        );
+      }
     }
 
     return {

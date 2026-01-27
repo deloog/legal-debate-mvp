@@ -24,10 +24,30 @@ import {
  * 支付宝支付类
  */
 export class AlipayPayment {
-  private config: AlipayConfig;
+  private static instance: AlipayPayment | null = null;
+  private config: AlipayConfig | null = null;
 
-  constructor() {
-    this.config = paymentConfig.getAlipayConfig();
+  private constructor() {
+    // 延迟初始化，避免构建时加载配置
+  }
+
+  /**
+   * 获取单例实例
+   */
+  public static getInstance(): AlipayPayment {
+    if (!AlipayPayment.instance) {
+      AlipayPayment.instance = new AlipayPayment();
+    }
+    return AlipayPayment.instance;
+  }
+
+  /**
+   * 确保配置已加载
+   */
+  private ensureConfig(): void {
+    if (!this.config) {
+      this.config = paymentConfig.getAlipayConfig();
+    }
   }
 
   /**
@@ -60,6 +80,7 @@ export class AlipayPayment {
   public async createOrder(
     request: AlipayCreateOrderRequest
   ): Promise<AlipayCreateOrderResponse> {
+    this.ensureConfig();
     try {
       logPayment('createOrder', { request });
 
@@ -92,7 +113,7 @@ export class AlipayPayment {
 
       // 构建完整的API请求参数
       const requestParams: Record<string, string> = {
-        app_id: this.config.appId,
+        app_id: this.config!.appId,
         method: 'alipay.trade.precreate',
         charset: 'utf-8',
         sign_type: 'RSA2',
@@ -139,6 +160,7 @@ export class AlipayPayment {
   public async queryOrder(
     request: AlipayQueryOrderRequest
   ): Promise<AlipayQueryOrderResponse> {
+    this.ensureConfig();
     try {
       logPayment('queryOrder', { request });
 
@@ -158,7 +180,7 @@ export class AlipayPayment {
 
       // 构建完整的API请求参数
       const requestParams: Record<string, string> = {
-        app_id: this.config.appId,
+        app_id: this.config!.appId,
         method: 'alipay.trade.query',
         charset: 'utf-8',
         sign_type: 'RSA2',
@@ -233,6 +255,9 @@ export class AlipayPayment {
 }
 
 /**
- * 导出支付宝支付实例
+ * 获取支付宝支付实例
+ * 使用延迟初始化，避免构建时验证环境变量
  */
-export const alipay = new AlipayPayment();
+export const getAlipay = (): AlipayPayment => {
+  return AlipayPayment.getInstance();
+};

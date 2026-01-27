@@ -19,6 +19,7 @@ jest.mock('../../../lib/db/prisma', () => ({
   },
 }));
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const prismaMock = require('../../../lib/db/prisma').prisma;
 
 // Test data factories

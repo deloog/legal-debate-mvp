@@ -7,8 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
-import { alipayRefund } from '@/lib/payment/alipay-refund';
-import { wechatRefund } from '@/lib/payment/wechat-refund';
+import { getAlipayRefund } from '@/lib/payment/alipay-refund';
+import { getWechatRefund } from '@/lib/payment/wechat-refund';
 import { PaymentMethod, RefundReason, RefundStatus } from '@/types/payment';
 import { paymentConfig } from '@/lib/payment/payment-config';
 
@@ -184,6 +184,7 @@ export async function POST(request: NextRequest) {
 
       if (order.paymentMethod === PaymentMethod.WECHAT) {
         // 微信退款
+        const wechatRefund = getWechatRefund();
         const wechatResponse = await wechatRefund.refund({
           out_trade_no: order.orderNo,
           out_refund_no: undefined, // 自动生成
@@ -204,6 +205,7 @@ export async function POST(request: NextRequest) {
         };
       } else if (order.paymentMethod === PaymentMethod.ALIPAY) {
         // 支付宝退款
+        const alipayRefund = getAlipayRefund();
         const alipayResponse = await alipayRefund.refund({
           outTradeNo: order.orderNo,
           refundAmount: Number(order.amount),

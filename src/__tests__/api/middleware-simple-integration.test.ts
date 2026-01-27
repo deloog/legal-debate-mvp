@@ -4,30 +4,25 @@
  */
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { NextRequest, NextResponse } from 'next/server';
 import {
-  MockRequest,
-  MockResponse,
-  MockHeaders,
-  MockNextResponse,
-} from './middleware-simple-mocks.test';
-
-// 现在导入和测试中间件
-const {
   createRequestContext,
   MiddlewareStack,
-} = require('../../app/api/lib/middleware/core');
+  Middleware,
+  RequestContext,
+} from '../../app/api/lib/middleware/core';
 
-const {
+import {
   corsMiddleware,
   securityMiddleware,
   rateLimitMiddleware,
-} = require('../../app/api/lib/middleware/security');
+} from '../../app/api/lib/middleware/security';
 
 describe('Middleware Integration Tests', () => {
   describe('组合安全中间件', () => {
     it('应该组合多个安全中间件', async () => {
       const stack = new MiddlewareStack();
-      const request = new global.Request('http://localhost:3000/api/test', {
+      const request = new NextRequest('http://localhost:3000/api/test', {
         method: 'GET',
         headers: {
           origin: 'http://localhost:3000',
@@ -44,7 +39,7 @@ describe('Middleware Integration Tests', () => {
       const response = await stack.execute(request, context);
 
       // CORS头
-      const headers = response.header || response.headers;
+      const headers = response.headers;
 
       // 调试：检查实际可用的头信息
       const realConsole = (global as any).originalConsole || console;
@@ -69,7 +64,7 @@ describe('Middleware Integration Tests', () => {
 
     it('应该演示典型的中间件使用', async () => {
       const stack = new MiddlewareStack();
-      const testRequest = new global.Request('http://localhost:3000/api/test', {
+      const testRequest = new NextRequest('http://localhost:3000/api/test', {
         method: 'GET',
         headers: {
           origin: 'http://localhost:3000',
@@ -79,18 +74,15 @@ describe('Middleware Integration Tests', () => {
       const testContext = createRequestContext(testRequest);
 
       // 认证中间件（模拟）
-      const authMiddleware = jest
-        .fn()
-        .mockImplementation(async (req: any, ctx: any) => {
-          ctx.userId = 'user123';
-          ctx.role = 'user';
-        });
+      const authMiddleware: Middleware = jest.fn(async (req: any, ctx: any) => {
+        ctx.userId = 'user123';
+        ctx.role = 'user';
+      }) as unknown as Middleware;
 
       // 响应中间件
-      const responseMiddleware = jest
-        .fn()
-        .mockImplementation(async (req: any, ctx: any) => {
-          return MockResponse.json({
+      const responseMiddleware: Middleware = jest.fn(
+        async (req: any, ctx: any) => {
+          return NextResponse.json({
             success: true,
             data: {
               userId: ctx.userId,
@@ -99,7 +91,8 @@ describe('Middleware Integration Tests', () => {
               processingTime: Date.now() - ctx.startTime,
             },
           });
-        });
+        }
+      ) as unknown as Middleware;
 
       stack.use(authMiddleware).use(responseMiddleware);
 
@@ -124,15 +117,17 @@ describe('Middleware Integration Tests', () => {
   describe('错误处理集成', () => {
     it('应该处理中间件链中的错误', async () => {
       const stack = new MiddlewareStack();
-      const request = new global.Request('http://localhost:3000/api/test');
+      const request = new NextRequest('http://localhost:3000/api/test');
       const context = createRequestContext(request);
 
       // 模拟抛出错误的中间件
-      const errorMiddleware = jest.fn().mockImplementation(async () => {
+      const errorMiddleware: Middleware = jest.fn(async () => {
         throw new Error('Middleware error');
-      });
+      }) as unknown as Middleware;
 
-      const successMiddleware = jest.fn();
+      const successMiddleware: Middleware = jest.fn(
+        async () => undefined
+      ) as unknown as Middleware;
 
       stack.use(errorMiddleware).use(successMiddleware);
 
@@ -149,20 +144,20 @@ describe('Middleware Integration Tests', () => {
   describe('异步中间件支持', () => {
     it('应该支持异步中间件操作', async () => {
       const stack = new MiddlewareStack();
-      const request = new global.Request('http://localhost:3000/api/test');
+      const request = new NextRequest('http://localhost:3000/api/test');
       const context = createRequestContext(request);
 
-      const executionOrder = [];
+      const executionOrder: number[] = [];
 
-      const asyncMiddleware1 = jest.fn().mockImplementation(async () => {
+      const asyncMiddleware1: Middleware = jest.fn(async () => {
         await new Promise(resolve => setTimeout(resolve, 10));
         executionOrder.push(1);
-      });
+      }) as unknown as Middleware;
 
-      const asyncMiddleware2 = jest.fn().mockImplementation(async () => {
+      const asyncMiddleware2: Middleware = jest.fn(async () => {
         await new Promise(resolve => setTimeout(resolve, 5));
         executionOrder.push(2);
-      });
+      }) as unknown as Middleware;
 
       stack.use(asyncMiddleware1).use(asyncMiddleware2);
 

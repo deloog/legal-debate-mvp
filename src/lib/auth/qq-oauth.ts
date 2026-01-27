@@ -10,14 +10,12 @@ import type { QqUserInfo } from '../../types/oauth';
  * QQ OAuth 提供商
  */
 export class QqOAuthProvider extends OAuthBaseProvider {
-  constructor() {
+  private static instance: QqOAuthProvider | null = null;
+
+  private constructor() {
     const appId = process.env.QQ_APP_ID || '';
     const appKey = process.env.QQ_APP_KEY || '';
     const redirectUri = process.env.QQ_REDIRECT_URI || '';
-
-    if (!appId || !appKey) {
-      throw new Error('QQ_APP_ID and QQ_APP_KEY are required');
-    }
 
     super({
       appId,
@@ -28,6 +26,23 @@ export class QqOAuthProvider extends OAuthBaseProvider {
       tokenUrl: 'https://graph.qq.com/oauth2.0/token',
       userInfoUrl: 'https://graph.qq.com/user/get_user_info',
     });
+  }
+
+  /**
+   * 获取单例实例
+   */
+  public static getInstance(): QqOAuthProvider {
+    if (!QqOAuthProvider.instance) {
+      const appId = process.env.QQ_APP_ID || '';
+      const appKey = process.env.QQ_APP_KEY || '';
+
+      if (!appId || !appKey) {
+        throw new Error('QQ_APP_ID and QQ_APP_KEY are required');
+      }
+
+      QqOAuthProvider.instance = new QqOAuthProvider();
+    }
+    return QqOAuthProvider.instance;
   }
 
   /**
@@ -216,5 +231,10 @@ interface QqTokenResponse {
   scope: string;
 }
 
-// 导出单例
-export const qqOAuth = new QqOAuthProvider();
+/**
+ * 获取 QQ OAuth 实例
+ * 使用延迟初始化，避免构建时验证环境变量
+ */
+export const getQqOAuth = (): QqOAuthProvider => {
+  return QqOAuthProvider.getInstance();
+};

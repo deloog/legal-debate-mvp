@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { wechatPay } from '@/lib/payment/wechat-pay';
+import { getWechatPay } from '@/lib/payment/wechat-pay';
 import {
   handlePaymentSuccess,
   handlePaymentFailure,
@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 解密支付结果
+    const wechatPay = getWechatPay();
     const payResult = wechatPay.decryptNotification(notification);
 
     if (!payResult) {

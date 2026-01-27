@@ -19,7 +19,7 @@ jest.mock('../../../lib/db/prisma', () => ({
   },
 }));
 
-// Get the mocked prisma client after mocking
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const prismaMock = require('../../../lib/db/prisma').prisma;
 
 // Test data factories

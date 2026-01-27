@@ -57,7 +57,7 @@ const STATUS_COLORS: Record<string, string> = {
   SUSPENDED: 'text-orange-600',
 };
 
-export function EnterpriseDetailPage(): React.ReactElement {
+function EnterpriseDetailPage(): React.ReactElement {
   const router = useRouter();
   const params = useParams();
   const enterpriseId = params.id as string;
@@ -407,3 +407,5 @@ export function EnterpriseDetailPage(): React.ReactElement {
     </div>
   );
 }
+
+export default EnterpriseDetailPage;

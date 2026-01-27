@@ -5,26 +5,13 @@ import type {
   AgentContext,
   AgentResult,
   AgentWorkflowConfig,
-  AgentStatus,
-  AgentEvent,
-  AgentEventType,
 } from '../../types/agent';
 
-import {
-  AgentError,
-  AgentErrorType,
-  AgentMetrics,
-  TaskPriority,
-} from '../../types/agent';
+import { AgentError, AgentErrorType, TaskPriority } from '../../types/agent';
 
-import { agentRegistry, AgentDiscoveryOptions } from './registry';
+import { agentRegistry } from './registry';
 
-import {
-  createAgentResult,
-  createAgentError,
-  AgentExecutionState,
-  AgentLogLevel,
-} from './types';
+import { createAgentError, createAgentResult } from './types';
 
 import { EventEmitter } from 'events';
 
@@ -178,13 +165,13 @@ export class AgentManager extends EventEmitter {
   public async execute(
     agentName: string,
     task: string,
-    data: Record<string, any> = {},
+    data: Record<string, unknown> = {},
     options: {
       priority?: TaskPriority;
       timeout?: number;
       enableCache?: boolean;
       retryAttempts?: number;
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
     } = {}
   ): Promise<AgentResult> {
     const executionId = this.generateExecutionId();
@@ -239,7 +226,7 @@ export class AgentManager extends EventEmitter {
     tasks: Array<{
       agentName: string;
       task: string;
-      data?: Record<string, any>;
+      data?: Record<string, unknown>;
       options?: {
         priority?: TaskPriority;
         timeout?: number;
@@ -512,11 +499,7 @@ export class AgentManager extends EventEmitter {
       }
 
       // 执行Agent
-      const result = await this.executeWithTimeout(
-        agent,
-        context,
-        item.timestamp
-      );
+      const result = await this.executeWithTimeout(agent, context);
 
       // 再次检查是否已被取消
       const currentStatus = this.runningExecutions.get(executionId);
@@ -574,8 +557,7 @@ export class AgentManager extends EventEmitter {
    */
   private async executeWithTimeout(
     agent: Agent,
-    context: AgentContext,
-    queueTime: number
+    context: AgentContext
   ): Promise<AgentResult> {
     const timeout = context.options?.timeout || this.config.defaultTimeout;
 
@@ -675,20 +657,22 @@ export class AgentManager extends EventEmitter {
   /**
    * 从异常创建错误
    */
-  private createErrorFromException(error: any): AgentError {
+  private createErrorFromException(error: unknown): AgentError {
     if (error && typeof error === 'object' && 'code' in error) {
+      const errorObj = error as Record<string, unknown>;
       return createAgentError(
-        error.code as string,
-        error.message || 'Unknown error',
-        this.mapErrorType(error.code as string),
+        errorObj.code as string,
+        (errorObj.message as string) || 'Unknown error',
+        this.mapErrorType(errorObj.code as string),
         'agent-manager',
-        this.isRetryableError(error.code as string)
+        this.isRetryableError(errorObj.code as string)
       );
     }
 
+    const errorObj = error as Record<string, unknown> | null | undefined;
     return createAgentError(
       'EXECUTION_ERROR',
-      error?.message || 'Unknown execution error',
+      (errorObj?.message as string) || 'Unknown execution error',
       AgentErrorType.EXECUTION_ERROR,
       'agent-manager'
     );

@@ -24,7 +24,7 @@ const TIME_RANGE_OPTIONS = [
   { value: '7d', label: '近7天' },
 ];
 
-export function PerformanceDashboardPage(): React.ReactElement {
+function PerformanceDashboardPage(): React.ReactElement {
   const router = useRouter();
   const [stats, setStats] = useState<PerformanceStats | null>(null);
   const [trend, setTrend] = useState<PerformanceTrend[]>([]);
@@ -156,3 +156,5 @@ const MetricCard: React.FC<MetricCardProps> = ({
     {subtitle && <p className='mt-1 text-sm text-gray-500'>{subtitle}</p>}
   </div>
 );
+
+export default PerformanceDashboardPage;

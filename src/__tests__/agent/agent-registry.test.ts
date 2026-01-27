@@ -53,7 +53,7 @@ class SimpleAgentRegistry {
     string,
     { metadata: AgentMetadata; instance: Agent; registeredAt: number }
   >();
-  private eventListeners = new Map<string, Function[]>();
+  private eventListeners = new Map<string, ((data: unknown) => void)[]>();
 
   async register(
     agent: Agent,
@@ -138,14 +138,14 @@ class SimpleAgentRegistry {
     });
   }
 
-  on(event: string, listener: Function): void {
+  on(event: string, listener: (data: unknown) => void): void {
     if (!this.eventListeners.has(event)) {
       this.eventListeners.set(event, []);
     }
     this.eventListeners.get(event)!.push(listener);
   }
 
-  off(event: string, listener: Function): void {
+  off(event: string, listener: (data: unknown) => void): void {
     const listeners = this.eventListeners.get(event);
     if (listeners) {
       const index = listeners.indexOf(listener);

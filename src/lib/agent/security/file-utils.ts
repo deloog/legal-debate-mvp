@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as childProcess from 'child_process';
 import { SecurityError } from './errors';
 
 // =============================================================================
@@ -136,8 +137,6 @@ export class SecureFileUtils {
       timeout?: number;
     } = {}
   ): Promise<string> {
-    const { execSync } = require('child_process');
-
     // 验证命令是否在允许列表中
     const allowedCommands = ['antiword', 'file', 'ls'];
     if (!allowedCommands.includes(command)) {
@@ -161,7 +160,8 @@ export class SecureFileUtils {
     }
 
     try {
-      const result = execSync(command, args, {
+      const commandLine = `${command} ${args.join(' ')}`;
+      const result = childProcess.execSync(commandLine, {
         encoding: 'utf8',
         maxBuffer: options.maxBuffer || 10 * 1024 * 1024,
         timeout: options.timeout || 30000,

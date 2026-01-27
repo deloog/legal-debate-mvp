@@ -1,5 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { Middleware, RequestContext } from './core';
+import { Middleware } from './core';
 
 /**
  * 请求日志中间件

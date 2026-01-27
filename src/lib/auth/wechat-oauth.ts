@@ -10,14 +10,12 @@ import type { WechatUserInfo } from '../../types/oauth';
  * 微信 OAuth 提供商
  */
 export class WechatOAuthProvider extends OAuthBaseProvider {
-  constructor() {
+  private static instance: WechatOAuthProvider | null = null;
+
+  private constructor() {
     const appId = process.env.WECHAT_APP_ID || '';
     const appSecret = process.env.WECHAT_APP_SECRET || '';
     const redirectUri = process.env.WECHAT_REDIRECT_URI || '';
-
-    if (!appId || !appSecret) {
-      throw new Error('WECHAT_APP_ID and WECHAT_APP_SECRET are required');
-    }
 
     super({
       appId,
@@ -28,6 +26,23 @@ export class WechatOAuthProvider extends OAuthBaseProvider {
       tokenUrl: 'https://api.weixin.qq.com/sns/oauth2/access_token',
       userInfoUrl: 'https://api.weixin.qq.com/sns/userinfo',
     });
+  }
+
+  /**
+   * 获取单例实例
+   */
+  public static getInstance(): WechatOAuthProvider {
+    if (!WechatOAuthProvider.instance) {
+      const appId = process.env.WECHAT_APP_ID || '';
+      const appSecret = process.env.WECHAT_APP_SECRET || '';
+
+      if (!appId || !appSecret) {
+        throw new Error('WECHAT_APP_ID and WECHAT_APP_SECRET are required');
+      }
+
+      WechatOAuthProvider.instance = new WechatOAuthProvider();
+    }
+    return WechatOAuthProvider.instance;
   }
 
   /**
@@ -198,5 +213,10 @@ interface WechatTokenResponse {
   errcode?: number;
 }
 
-// 导出单例
-export const wechatOAuth = new WechatOAuthProvider();
+/**
+ * 获取微信 OAuth 实例
+ * 使用延迟初始化，避免构建时验证环境变量
+ */
+export const getWechatOAuth = (): WechatOAuthProvider => {
+  return WechatOAuthProvider.getInstance();
+};

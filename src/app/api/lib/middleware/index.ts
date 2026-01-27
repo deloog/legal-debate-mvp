@@ -1,4 +1,4 @@
-import { MiddlewareStack, createRequestContext } from './core';
+import { MiddlewareStack } from './core';
 import {
   corsMiddleware,
   securityMiddleware,

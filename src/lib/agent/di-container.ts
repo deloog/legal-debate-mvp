@@ -1,36 +1,35 @@
 // Agent依赖注入容器
 
 import type { Agent } from '../../types/agent';
-import { AgentType } from '../../types/agent';
 
 // =============================================================================
 // 依赖注入容器接口
 // =============================================================================
 
 // 依赖提供者类型
-export type DependencyProvider<T = any> = T | (() => T);
+export type DependencyProvider<T = unknown> = T | (() => T);
 
 // 依赖工厂函数
-export type DependencyFactory<T = any> = (...args: any[]) => T;
+export type DependencyFactory<T = unknown> = (...args: unknown[]) => T;
 
 // 依赖注册信息
 interface DependencyRegistration {
-  provider: DependencyProvider;
+  provider: DependencyProvider<unknown>;
   singleton: boolean;
-  instance?: any;
-  factory?: DependencyFactory;
+  instance?: unknown;
+  factory?: DependencyFactory<unknown>;
 }
 
 // Agent创建配置
 export interface AgentCreationConfig {
   // 依赖注入
-  dependencies?: Record<string, any>;
+  dependencies?: Record<string, unknown>;
 
   // 构造函数参数
-  constructorArgs?: any[];
+  constructorArgs?: unknown[];
 
   // 配置选项
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 
   // 生命周期管理
   initialize?: boolean;
@@ -116,26 +115,26 @@ export class AgentDIContainer {
 
     // 单例模式
     if (registration.singleton && registration.instance !== undefined) {
-      return registration.instance;
+      return registration.instance as T;
     }
 
     // 创建实例
     let instance: T;
 
     if (registration.factory) {
-      instance = registration.factory();
+      instance = (registration.factory as () => T)();
     } else if (registration.provider) {
       instance =
         typeof registration.provider === 'function'
           ? (registration.provider as () => T)()
-          : registration.provider;
+          : (registration.provider as T);
     } else {
       throw new Error(`Invalid provider for dependency '${token}'`);
     }
 
     // 单例模式缓存实例
     if (registration.singleton) {
-      registration.instance = instance;
+      registration.instance = instance as unknown;
     }
 
     return instance;
@@ -166,9 +165,12 @@ export class AgentDIContainer {
     const registration = this.dependencies.get(token);
     if (
       registration?.instance &&
+      typeof registration.instance === 'object' &&
+      registration.instance !== null &&
+      'cleanup' in registration.instance &&
       typeof registration.instance.cleanup === 'function'
     ) {
-      registration.instance.cleanup();
+      (registration.instance as { cleanup: () => void }).cleanup();
     }
     return this.dependencies.delete(token);
   }
@@ -188,7 +190,7 @@ export class AgentDIContainer {
    * 创建Agent实例
    */
   public createAgent<T extends Agent>(
-    agentClass: new (...args: any[]) => T,
+    agentClass: new (...args: unknown[]) => T,
     agentName: string
   ): T {
     const config = this.getAgentConfig(agentName) || {};
@@ -220,8 +222,8 @@ export class AgentDIContainer {
   /**
    * 准备构造函数参数
    */
-  private prepareConstructorArgs(config: AgentCreationConfig): any[] {
-    const args: any[] = [];
+  private prepareConstructorArgs(config: AgentCreationConfig): unknown[] {
+    const args: unknown[] = [];
 
     // 使用预定义的构造函数参数
     if (config.constructorArgs) {
@@ -230,9 +232,7 @@ export class AgentDIContainer {
 
     // 使用依赖注入
     if (config.dependencies) {
-      for (const [paramName, dependencyToken] of Object.entries(
-        config.dependencies
-      )) {
+      for (const [dependencyToken] of Object.entries(config.dependencies)) {
         const dependency = this.resolve(dependencyToken);
         args.push(dependency);
       }
@@ -249,7 +249,7 @@ export class AgentDIContainer {
    * 批量创建Agent
    */
   public createAgents<T extends Agent>(
-    agentClass: new (...args: any[]) => T,
+    agentClass: new (...args: unknown[]) => T,
     agentNames: string[]
   ): T[] {
     const agents: T[] = [];
@@ -276,11 +276,16 @@ export class AgentDIContainer {
    */
   public clear(): void {
     // 清理所有单例实例
-    for (const [token, registration] of this.dependencies.entries()) {
-      if (registration.singleton && registration.instance) {
-        if (typeof registration.instance.cleanup === 'function') {
-          registration.instance.cleanup();
-        }
+    for (const [, registration] of this.dependencies.entries()) {
+      if (
+        registration.singleton &&
+        registration.instance &&
+        typeof registration.instance === 'object' &&
+        registration.instance !== null &&
+        'cleanup' in registration.instance &&
+        typeof registration.instance.cleanup === 'function'
+      ) {
+        (registration.instance as { cleanup: () => void }).cleanup();
       }
     }
 

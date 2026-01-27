@@ -3,27 +3,38 @@
  * 测试日志记录、响应时间和版本检测功能
  */
 
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import {
-  MockRequest,
-  MockResponse,
-  MockHeaders,
-  MockNextResponse,
-} from './middleware-simple-mocks.test';
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  jest,
+} from '@jest/globals';
+import { NextRequest, NextResponse } from 'next/server';
+import {
+  createRequestContext,
+  RequestContext,
+} from '../../app/api/lib/middleware/core';
 
-// 现在导入和测试中间件
-const { createRequestContext } = require('../../app/api/lib/middleware/core');
-
-const {
+import {
   loggingMiddleware,
   responseTimeMiddleware,
   versionMiddleware,
-} = require('../../app/api/lib/middleware/logging');
+} from '../../app/api/lib/middleware/logging';
 
 describe('Middleware Logging Tests', () => {
+  beforeEach(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   describe('Logging Middleware', () => {
     it('应该记录请求信息', async () => {
-      const request = new global.Request('http://localhost:3000/api/test', {
+      const request = new NextRequest('http://localhost:3000/api/test', {
         method: 'POST',
         headers: {
           'user-agent': 'Test-Agent',
@@ -32,7 +43,7 @@ describe('Middleware Logging Tests', () => {
       });
       const context = createRequestContext(request);
 
-      const response = MockNextResponse.next();
+      const response = NextResponse.next();
       await loggingMiddleware(request, context, response);
 
       expect(response).toBeDefined();
@@ -47,12 +58,12 @@ describe('Middleware Logging Tests', () => {
     });
 
     it('应该优雅处理缺失的头信息', async () => {
-      const request = new global.Request('http://localhost:3000/api/test', {
+      const request = new NextRequest('http://localhost:3000/api/test', {
         method: 'GET',
       });
       const context = createRequestContext(request);
 
-      const response = MockNextResponse.next();
+      const response = NextResponse.next();
       await loggingMiddleware(request, context, response);
 
       expect(response).toBeDefined();
@@ -69,13 +80,13 @@ describe('Middleware Logging Tests', () => {
 
   describe('Response Time Middleware', () => {
     it('应该添加响应时间头', async () => {
-      const request = new global.Request('http://localhost:3000/api/test');
+      const request = new NextRequest('http://localhost:3000/api/test');
       const context = createRequestContext(request);
-      const response = MockNextResponse.next();
+      const response = NextResponse.next();
 
       await responseTimeMiddleware(request, context, response);
 
-      const headers = response.header || response.headers;
+      const headers = response.headers;
       expect(headers.get('X-Response-Time')).toMatch(/^\d+ms$/);
       expect(headers.get('X-Request-ID')).toBe(context.requestId);
     });
@@ -83,9 +94,9 @@ describe('Middleware Logging Tests', () => {
 
   describe('Version Middleware', () => {
     it('应该从v1路径提取版本', async () => {
-      const request = new global.Request('http://localhost:3000/api/v1/test');
+      const request = new NextRequest('http://localhost:3000/api/v1/test');
       const context = createRequestContext(request);
-      const response = MockNextResponse.next();
+      const response = NextResponse.next();
 
       await versionMiddleware(request, context, response);
 
@@ -94,9 +105,9 @@ describe('Middleware Logging Tests', () => {
     });
 
     it('应该从v2路径提取版本', async () => {
-      const request = new global.Request('http://localhost:3000/api/v2/test');
+      const request = new NextRequest('http://localhost:3000/api/v2/test');
       const context = createRequestContext(request);
-      const response = MockNextResponse.next();
+      const response = NextResponse.next();
 
       await versionMiddleware(request, context, response);
 
@@ -105,9 +116,9 @@ describe('Middleware Logging Tests', () => {
     });
 
     it('应该将非版本化路径默认为v1', async () => {
-      const request = new global.Request('http://localhost:3000/api/test');
+      const request = new NextRequest('http://localhost:3000/api/test');
       const context = createRequestContext(request);
-      const response = MockNextResponse.next();
+      const response = NextResponse.next();
 
       await versionMiddleware(request, context, response);
 

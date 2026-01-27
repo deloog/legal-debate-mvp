@@ -243,7 +243,6 @@ global.Response = class Response {
 
 // 立即模拟Next.js模块
 jest.mock('next/server', () => {
-  const MockHeaders = global.Headers;
   const MockRequest = global.Request;
   const MockResponse = global.Response;
 
@@ -257,13 +256,13 @@ jest.mock('next/server', () => {
 });
 
 // 设置基本的Web API polyfills
-const util = require('util');
+import { TextEncoder, TextDecoder } from 'util';
 
 if (!global.TextEncoder) {
-  global.TextEncoder = util.TextEncoder;
+  global.TextEncoder = TextEncoder;
 }
 if (!global.TextDecoder) {
-  global.TextDecoder = util.TextDecoder;
+  global.TextDecoder = TextDecoder;
 }
 
 // 模拟fetch
@@ -346,12 +345,12 @@ global.ReadableStream = class ReadableStream {
     return Promise.resolve();
   }
 
-  pipeThrough(transformStream) {
+  pipeThrough() {
     // 简化实现
     return this;
   }
 
-  pipeTo(writableStream) {
+  pipeTo() {
     // 简化实现
     return Promise.resolve();
   }

@@ -9,7 +9,6 @@
  */
 
 import type { Party, Claim } from '../core/types';
-import { PARTY_ROLE_INDICATORS } from '../core/constants';
 
 export interface RoleIssue {
   severity: 'ERROR' | 'WARNING';

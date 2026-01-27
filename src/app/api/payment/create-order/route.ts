@@ -13,7 +13,7 @@ import {
   OrderStatus,
 } from '@/types/payment';
 import { createOrder } from '@/lib/order/order-service';
-import { wechatPay } from '@/lib/payment/wechat-pay';
+import { getWechatPay } from '@/lib/payment/wechat-pay';
 import {
   convertYuanToFen,
   calculateOrderExpireTime,
@@ -118,6 +118,7 @@ export async function POST(request: NextRequest) {
     // 如果是微信支付，调用微信API创建支付
     if (paymentMethod === PaymentMethod.WECHAT) {
       try {
+        const wechatPay = getWechatPay();
         const expiredAt = calculateOrderExpireTime(120);
 
         const wechatResponse = await wechatPay.createOrder({

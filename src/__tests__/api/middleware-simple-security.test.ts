@@ -4,26 +4,19 @@
  */
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { NextRequest, NextResponse } from 'next/server';
+import { createRequestContext } from '../../app/api/lib/middleware/core';
+
 import {
-  MockRequest,
-  MockResponse,
-  MockHeaders,
-  MockNextResponse,
-} from './middleware-simple-mocks.test';
-
-// 现在导入和测试中间件
-const { createRequestContext } = require('../../app/api/lib/middleware/core');
-
-const {
   corsMiddleware,
   securityMiddleware,
   rateLimitMiddleware,
-} = require('../../app/api/lib/middleware/security');
+} from '../../app/api/lib/middleware/security';
 
 describe('Middleware Security Tests', () => {
   describe('CORS Middleware', () => {
     it('应该处理OPTIONS预检请求', async () => {
-      const request = new global.Request('http://localhost:3000/api/test', {
+      const request = new NextRequest('http://localhost:3000/api/test', {
         method: 'OPTIONS',
         headers: {
           origin: 'http://localhost:3000',
@@ -31,7 +24,7 @@ describe('Middleware Security Tests', () => {
       });
       const context = createRequestContext(request);
 
-      const response = MockNextResponse.next();
+      const response = NextResponse.next();
       await corsMiddleware(request, context, response);
 
       expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
@@ -50,7 +43,7 @@ describe('Middleware Security Tests', () => {
     });
 
     it('应该为常规请求添加CORS头', async () => {
-      const request = new global.Request('http://localhost:3000/api/test', {
+      const request = new NextRequest('http://localhost:3000/api/test', {
         method: 'GET',
         headers: {
           origin: 'http://localhost:3000',
@@ -58,7 +51,7 @@ describe('Middleware Security Tests', () => {
       });
       const context = createRequestContext(request);
 
-      const response = MockNextResponse.next();
+      const response = NextResponse.next();
       await corsMiddleware(request, createRequestContext(request), response);
 
       expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
@@ -70,12 +63,12 @@ describe('Middleware Security Tests', () => {
     });
 
     it('应该处理没有origin头的请求', async () => {
-      const request = new global.Request('http://localhost:3000/api/test', {
+      const request = new NextRequest('http://localhost:3000/api/test', {
         method: 'GET',
       });
       const context = createRequestContext(request);
 
-      const response = MockNextResponse.next();
+      const response = NextResponse.next();
       await corsMiddleware(request, context, response);
 
       expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
@@ -86,10 +79,10 @@ describe('Middleware Security Tests', () => {
 
   describe('Security Middleware', () => {
     it('应该添加安全头', async () => {
-      const request = new global.Request('http://localhost:3000/api/test');
+      const request = new NextRequest('http://localhost:3000/api/test');
       const context = createRequestContext(request);
 
-      const response = MockNextResponse.next();
+      const response = NextResponse.next();
       await securityMiddleware(request, context, response);
 
       expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff');
@@ -108,10 +101,10 @@ describe('Middleware Security Tests', () => {
       const originalEnv = process.env.NODE_ENV;
       (process.env as any).NODE_ENV = 'test';
 
-      const request = new global.Request('http://localhost:3000/api/test');
+      const request = new NextRequest('http://localhost:3000/api/test');
       const context = createRequestContext(request);
 
-      const response = MockNextResponse.next();
+      const response = NextResponse.next();
       await securityMiddleware(request, context, response);
 
       expect(response.headers.get('X-Node-Environment')).toBe('test');
@@ -128,14 +121,14 @@ describe('Middleware Security Tests', () => {
     });
 
     it('应该允许限制内的请求', async () => {
-      const request = new global.Request('http://localhost:3000/api/test', {
+      const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
           'x-forwarded-for': '192.168.1.1',
         },
       });
       const context = createRequestContext(request);
 
-      const response = MockNextResponse.next();
+      const response = NextResponse.next();
       await rateLimitMiddleware(request, context, response);
 
       expect(response.headers.get('X-RateLimit-Limit')).toBe('100');
@@ -146,31 +139,31 @@ describe('Middleware Security Tests', () => {
     });
 
     it('应该在使用x-real-ip头时可用', async () => {
-      const request = new global.Request('http://localhost:3000/api/test', {
+      const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
           'x-real-ip': '10.0.0.1',
         },
       });
       const context = createRequestContext(request);
 
-      const response = MockNextResponse.next();
+      const response = NextResponse.next();
       await rateLimitMiddleware(request, context, response);
 
       expect(response.headers.get('X-RateLimit-Remaining')).toBe('98');
     });
 
     it('应该将IP默认为localhost', async () => {
-      const request = new global.Request('http://localhost:3000/api/test');
+      const request = new NextRequest('http://localhost:3000/api/test');
       const context = createRequestContext(request);
 
-      const response = MockNextResponse.next();
+      const response = NextResponse.next();
       await rateLimitMiddleware(request, context, response);
 
       expect(response.headers.get('X-RateLimit-Remaining')).toBe('98');
     });
 
     it('应该在超过限制时返回429', async () => {
-      const request = new global.Request('http://localhost:3000/api/test', {
+      const request = new NextRequest('http://localhost:3000/api/test', {
         headers: {
           'x-forwarded-for': '192.168.1.2',
         },
@@ -182,7 +175,7 @@ describe('Middleware Security Tests', () => {
       try {
         // 模拟超过速率限制
         for (let i = 0; i < 101; i++) {
-          const response = MockNextResponse.next();
+          const response = NextResponse.next();
           await rateLimitMiddleware(request, context, response);
         }
       } catch (error) {

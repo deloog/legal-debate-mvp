@@ -3,7 +3,7 @@
 import { Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useDebate } from '@/lib/hooks/use-debate';
-import { DebateArena } from './components/debate-arena';
+import { DebateArena } from '../components/debate-arena';
 
 /**
  * 辩论页面主入口

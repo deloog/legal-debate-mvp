@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import {
   ExportFormat,
@@ -8,11 +10,6 @@ import {
   ExportTask,
   ExportTaskStatus,
 } from '@/types/stats';
-
-export const metadata = {
-  title: '数据导出',
-  description: '管理系统数据导出',
-};
 
 interface ExportFormData {
   exportType: 'CASES' | 'STATS';

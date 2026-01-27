@@ -4,9 +4,9 @@
  */
 
 import { PaymentMethod } from '@/types/payment';
-import { alipay } from './alipay';
-import { alipayRefund } from './alipay-refund';
-import { wechatPay } from './wechat-pay';
+import { getAlipay } from './alipay';
+import { getAlipayRefund } from './alipay-refund';
+import { getWechatPay } from './wechat-pay';
 import {
   AlipayCreateOrderRequest,
   AlipayCreateOrderResponse,
@@ -35,9 +35,13 @@ export class PaymentService {
   ): Promise<AlipayCreateOrderResponse | WechatCreateOrderResponse> {
     switch (paymentMethod) {
       case PaymentMethod.ALIPAY:
-        return await alipay.createOrder(request as AlipayCreateOrderRequest);
+        return await getAlipay().createOrder(
+          request as AlipayCreateOrderRequest
+        );
       case PaymentMethod.WECHAT:
-        return await wechatPay.createOrder(request as WechatCreateOrderRequest);
+        return await getWechatPay().createOrder(
+          request as WechatCreateOrderRequest
+        );
       default:
         throw new Error(`不支持的支付方式: ${paymentMethod}`);
     }
@@ -52,9 +56,11 @@ export class PaymentService {
   ): Promise<AlipayQueryOrderResponse | WechatQueryOrderResponse> {
     switch (paymentMethod) {
       case PaymentMethod.ALIPAY:
-        return await alipay.queryOrder(request as AlipayQueryOrderRequest);
+        return await getAlipay().queryOrder(request as AlipayQueryOrderRequest);
       case PaymentMethod.WECHAT:
-        return await wechatPay.queryOrder(request as WechatQueryOrderRequest);
+        return await getWechatPay().queryOrder(
+          request as WechatQueryOrderRequest
+        );
       default:
         throw new Error(`不支持的支付方式: ${paymentMethod}`);
     }
@@ -69,9 +75,9 @@ export class PaymentService {
   ): Promise<AlipayRefundResponse | WechatRefundResponse> {
     switch (paymentMethod) {
       case PaymentMethod.ALIPAY:
-        return await alipayRefund.refund(request as AlipayRefundRequest);
+        return await getAlipayRefund().refund(request as AlipayRefundRequest);
       case PaymentMethod.WECHAT:
-        return await wechatPay.refund(request as WechatRefundRequest);
+        return await getWechatPay().refund(request as WechatRefundRequest);
       default:
         throw new Error(`不支持的支付方式: ${paymentMethod}`);
     }

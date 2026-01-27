@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
-import { alipayRefund } from '@/lib/payment/alipay-refund';
+import { getAlipayRefund } from '@/lib/payment/alipay-refund';
 import { RefundReason } from '@/types/payment';
 
 /**
@@ -110,6 +110,7 @@ export async function POST(request: NextRequest) {
 
     // 调用支付宝API申请退款
     try {
+      const alipayRefund = getAlipayRefund();
       const alipayResponse = await alipayRefund.refund({
         outTradeNo: order.orderNo,
         refundAmount: Number(order.amount),

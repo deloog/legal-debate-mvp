@@ -1,10 +1,7 @@
 import { redis } from './redis';
 import {
-  CacheItem,
   CacheOptions,
   CacheStats,
-  CacheHealth,
-  CacheOperationResult,
   CacheBatchResult,
   CacheEvent,
   CacheEventListener,

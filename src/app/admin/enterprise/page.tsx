@@ -69,7 +69,7 @@ const STATUS_LABELS: Record<string, string> = {
   SUSPENDED: '已暂停',
 };
 
-export function EnterpriseListPage(): React.ReactElement {
+function EnterpriseListPage(): React.ReactElement {
   const [data, setData] = useState<EnterpriseListData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -298,3 +298,5 @@ export function EnterpriseListPage(): React.ReactElement {
     </div>
   );
 }
+
+export default EnterpriseListPage;

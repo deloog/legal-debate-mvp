@@ -1,11 +1,8 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ReportType, ReportStatus, ReportListResponse } from '@/types/stats';
-
-export const metadata = {
-  title: '报告管理',
-  description: '管理系统报告',
-};
 
 interface ReportFilters {
   type?: ReportType;

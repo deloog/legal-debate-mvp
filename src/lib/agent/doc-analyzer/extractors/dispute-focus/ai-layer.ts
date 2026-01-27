@@ -4,19 +4,14 @@
  */
 
 import { getUnifiedAIService } from '@/lib/ai/unified-service';
-import type {
-  DisputeFocus,
-  DisputeFocusCategory,
-  ExtractedData,
-} from '../../core/types';
+import type { DisputeFocus, ExtractedData } from '../../core/types';
 
 /**
  * AI识别层 - 使用DeepSeek进行智能识别
  */
 export async function aiExtractLayer(
   text: string,
-  extractedData?: ExtractedData,
-  rulePatterns?: Map<DisputeFocusCategory, RegExp[]>
+  extractedData?: ExtractedData
 ): Promise<DisputeFocus[]> {
   try {
     const unifiedService = await getUnifiedAIService();
@@ -108,6 +103,19 @@ ${contextInfo}
 5. 只返回JSON格式，不要包含其他说明文字`;
 }
 
+// AI 响应的临时类型定义
+interface AIParsedDisputeFocus {
+  category: string;
+  description?: string;
+  positionA?: string;
+  positionB?: string;
+  coreIssue?: string;
+  importance?: number;
+  confidence?: number;
+  evidence?: string[];
+  legalBasis?: string;
+}
+
 /**
  * 解析AI识别响应
  */
@@ -133,22 +141,24 @@ function parseAIExtractionResponse(aiResponse: string): DisputeFocus[] {
       return [];
     }
 
-    return parsed.disputeFocuses.map((item: any, index: number) => ({
-      id: `ai_focus_${index}`,
-      category: item.category,
-      description: item.description || '',
-      positionA: item.positionA || '未明确',
-      positionB: item.positionB || '未明确',
-      coreIssue:
-        item.coreIssue || item.description?.split(/[，。；；]/)[0] || '',
-      importance: Math.min(10, Math.max(1, Math.round(item.importance || 5))),
-      confidence: Math.min(1, Math.max(0, item.confidence || 0.7)),
-      relatedClaims: [],
-      relatedFacts: [],
-      evidence: item.evidence || [],
-      legalBasis: item.legalBasis,
-      _inferred: (item.confidence || 0.7) < 0.8,
-    }));
+    return parsed.disputeFocuses.map(
+      (item: AIParsedDisputeFocus, index: number) => ({
+        id: `ai_focus_${index}`,
+        category: item.category,
+        description: item.description || '',
+        positionA: item.positionA || '未明确',
+        positionB: item.positionB || '未明确',
+        coreIssue:
+          item.coreIssue || item.description?.split(/[，。；；]/)[0] || '',
+        importance: Math.min(10, Math.max(1, Math.round(item.importance || 5))),
+        confidence: Math.min(1, Math.max(0, item.confidence || 0.7)),
+        relatedClaims: [],
+        relatedFacts: [],
+        evidence: item.evidence || [],
+        legalBasis: item.legalBasis,
+        _inferred: (item.confidence || 0.7) < 0.8,
+      })
+    );
   } catch (error) {
     console.error('解析AI识别响应失败:', error);
     return [];

@@ -4,13 +4,13 @@
  */
 
 // 设置Web API polyfills
-const util = require('util');
+import { TextEncoder, TextDecoder } from 'util';
 
 if (!global.TextEncoder) {
-  global.TextEncoder = util.TextEncoder;
+  global.TextEncoder = TextEncoder;
 }
 if (!global.TextDecoder) {
-  global.TextDecoder = util.TextDecoder;
+  global.TextDecoder = TextDecoder;
 }
 
 // 模拟基本的Web API

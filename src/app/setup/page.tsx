@@ -65,7 +65,11 @@ export default function SetupPage() {
                 文件：
               </p>
               <pre className='rounded-lg bg-slate-900 p-3 text-sm text-slate-100'>
-                <code>DATABASE_URL="postgresql://username:password@localhost:5432/legal_debate_mvp"</code>
+                <code>
+                  DATABASE_URL={'"'}{' '}
+                  postgresql://username:password@localhost:5432/legal_debate_mvp
+                  {'"'}{' '}
+                </code>
               </pre>
             </div>
             <div>
@@ -102,14 +106,17 @@ export default function SetupPage() {
                 1. 配置 NextAuth 密钥
               </p>
               <p className='mb-2 text-sm text-slate-600'>
-                在
-                <code className='rounded bg-slate-100 px-2 py-1'>.env</code>
+                在<code className='rounded bg-slate-100 px-2 py-1'>.env</code>
                 文件中添加：
               </p>
               <pre className='rounded-lg bg-slate-900 p-3 text-sm text-slate-100'>
                 <code>
-                  NEXTAUTH_SECRET="your-secret-key-here"{'\n'}
-                  NEXTAUTH_URL="http://localhost:3000"
+                  NEXTAUTH_SECRET={'"'}
+                  your-secret-key-here
+                  {'"'}
+                  {'\n'}
+                  NEXTAUTH_URL={'"'}
+                  http://localhost:3000{'"'}{' '}
                 </code>
               </pre>
             </div>
@@ -172,7 +179,10 @@ export default function SetupPage() {
                 2. 配置环境变量
               </p>
               <pre className='rounded-lg bg-slate-900 p-3 text-sm text-slate-100'>
-                <code>ANTHROPIC_API_KEY="your-api-key-here"</code>
+                <code>
+                  ANTHROPIC_API_KEY={'"'}
+                  your-api-key-here{'"'}
+                </code>
               </pre>
             </div>
           </div>
@@ -201,7 +211,8 @@ export default function SetupPage() {
                 1. 停止当前服务器
               </p>
               <p className='text-sm text-slate-600'>
-                在终端按 <kbd className='rounded bg-slate-100 px-2 py-1'>Ctrl+C</kbd>
+                在终端按{' '}
+                <kbd className='rounded bg-slate-100 px-2 py-1'>Ctrl+C</kbd>
               </p>
             </div>
             <div>
@@ -283,7 +294,8 @@ export default function SetupPage() {
                 首次使用需要配置
               </h3>
               <p className='text-sm text-blue-700'>
-                系统的案件管理、客户管理、AI辩论等功能需要完成以下配置后才能使用。配置过程预计需要 10-15 分钟。
+                系统的案件管理、客户管理、AI辩论等功能需要完成以下配置后才能使用。配置过程预计需要
+                10-15 分钟。
               </p>
             </div>
           </div>

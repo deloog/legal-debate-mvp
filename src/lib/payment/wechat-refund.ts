@@ -3,7 +3,7 @@
  * 提供微信退款功能
  */
 
-import { wechatPay } from './wechat-pay';
+import { getWechatPay } from './wechat-pay';
 import { WechatRefundRequest, WechatRefundResponse } from '@/types/payment';
 import { generateRefundNo, logPayment } from './wechat-utils';
 
@@ -33,6 +33,7 @@ export class WechatRefund {
       };
 
       // 调用微信支付退款API
+      const wechatPay = getWechatPay();
       const response = await wechatPay.refund(refundRequest);
 
       logPayment('refundSuccess', {
@@ -67,6 +68,7 @@ export class WechatRefund {
       // 微信支付没有专门的退款查询接口，需要通过查询订单获取退款信息
       // 如果需要退款详情，需要保存退款时的响应信息到数据库
 
+      const wechatPay = getWechatPay();
       const response = await wechatPay.refund({
         out_trade_no: outTradeNo,
         out_refund_no: outRefundNo || generateRefundNo('WXP'),
@@ -103,4 +105,10 @@ export class WechatRefund {
 /**
  * 导出微信退款实例
  */
-export const wechatRefund = new WechatRefund();
+/**
+ * 获取微信退款实例
+ * 使用延迟初始化，避免构建时验证环境变量
+ */
+export const getWechatRefund = (): WechatRefund => {
+  return new WechatRefund();
+};

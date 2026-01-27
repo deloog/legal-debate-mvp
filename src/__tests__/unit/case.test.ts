@@ -1,5 +1,5 @@
-const { CaseType, CaseStatus } = require('@prisma/client');
-const { Decimal } = require('@prisma/client/runtime/library');
+import { CaseType, CaseStatus } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 
 // Mock Prisma Client
 const mockPrisma = {

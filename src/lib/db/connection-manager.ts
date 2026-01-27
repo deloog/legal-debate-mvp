@@ -1,17 +1,20 @@
 import { prisma } from './prisma';
+import type { PrismaClient } from '@prisma/client';
 import {
   ConnectionPoolConfig,
   PoolStats,
-  ConnectionStatus,
   connectionPoolConfig,
 } from './connection-pool';
 
+// 数据库连接类型
+export type DatabaseConnection = PrismaClient;
+
 // 连接管理器接口
 export interface IConnectionManager {
-  getConnection(): Promise<any>;
-  releaseConnection(connection: any): Promise<void>;
+  getConnection(): Promise<DatabaseConnection>;
+  releaseConnection(connection: DatabaseConnection): Promise<void>;
   executeWithRetry<T>(
-    operation: (connection: any) => Promise<T>,
+    operation: (connection: DatabaseConnection) => Promise<T>,
     maxRetries?: number
   ): Promise<T>;
 }
@@ -32,7 +35,7 @@ export class ConnectionPoolError extends Error {
 export class ConnectionManager implements IConnectionManager {
   private config: ConnectionPoolConfig;
   private connectionQueue: Array<{
-    resolve: (connection: any) => void;
+    resolve: (connection: DatabaseConnection) => void;
     reject: (error: Error) => void;
     timestamp: number;
   }> = [];
@@ -47,7 +50,7 @@ export class ConnectionManager implements IConnectionManager {
   }
 
   // 获取数据库连接
-  async getConnection(): Promise<any> {
+  async getConnection(): Promise<DatabaseConnection> {
     const startTime = Date.now();
 
     // 检查是否可以获取新连接
@@ -77,7 +80,9 @@ export class ConnectionManager implements IConnectionManager {
   }
 
   // 等待可用连接
-  private async waitForConnection(startTime: number): Promise<any> {
+  private async waitForConnection(
+    startTime: number
+  ): Promise<DatabaseConnection> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         const index = this.connectionQueue.findIndex(
@@ -108,7 +113,7 @@ export class ConnectionManager implements IConnectionManager {
   }
 
   // 创建新连接
-  private async createConnection(): Promise<any> {
+  private async createConnection(): Promise<DatabaseConnection> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         reject(new ConnectionPoolError('连接创建超时', 'CREATE_TIMEOUT', true));
@@ -129,7 +134,7 @@ export class ConnectionManager implements IConnectionManager {
   }
 
   // 重试连接
-  private async retryConnection(): Promise<any> {
+  private async retryConnection(): Promise<DatabaseConnection> {
     let attempts = 0;
     const maxRetries = 3;
 
@@ -164,7 +169,7 @@ export class ConnectionManager implements IConnectionManager {
   }
 
   // 释放连接
-  async releaseConnection(connection: any): Promise<void> {
+  async releaseConnection(connection: DatabaseConnection): Promise<void> {
     try {
       this.activeConnections = Math.max(0, this.activeConnections - 1);
 
@@ -185,7 +190,7 @@ export class ConnectionManager implements IConnectionManager {
 
   // 带重试的执行操作
   async executeWithRetry<T>(
-    operation: (connection: any) => Promise<T>,
+    operation: (connection: DatabaseConnection) => Promise<T>,
     maxRetries: number = 3
   ): Promise<T> {
     let attempts = 0;
@@ -218,7 +223,7 @@ export class ConnectionManager implements IConnectionManager {
   }
 
   // 判断错误是否可重试
-  private isRetryableError(error: any): boolean {
+  private isRetryableError(error: unknown): boolean {
     const errorMessage =
       error instanceof Error ? error.message.toLowerCase() : String(error);
     const retryablePatterns = [
@@ -308,7 +313,7 @@ export const connectionManager = new ConnectionManager();
 
 // 导出便捷函数
 export const executeWithRetry = <T>(
-  operation: (connection: any) => Promise<T>,
+  operation: (connection: DatabaseConnection) => Promise<T>,
   maxRetries?: number
 ): Promise<T> => {
   return connectionManager.executeWithRetry(operation, maxRetries);

@@ -77,7 +77,7 @@ const STATUS_OPTIONS = [
   { value: UserStatus.INACTIVE, label: '未激活' },
 ];
 
-export function UserEditPage(): React.ReactElement {
+function UserEditPage(): React.ReactElement {
   const router = useRouter();
   const params = useParams();
   const userId = params.id as string;
@@ -404,3 +404,5 @@ export function UserEditPage(): React.ReactElement {
     </div>
   );
 }
+
+export default UserEditPage;

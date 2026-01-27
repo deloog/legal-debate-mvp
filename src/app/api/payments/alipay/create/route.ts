@@ -9,7 +9,7 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { PaymentMethod } from '@/types/payment';
 import { createOrder } from '@/lib/order/order-service';
-import { alipay } from '@/lib/payment/alipay';
+import { getAlipay } from '@/lib/payment/alipay';
 import { AlipayProductCode } from '@/types/payment';
 
 /**
@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
 
     // 调用支付宝API创建支付
     try {
+      const alipay = getAlipay();
       const alipayResponse = await alipay.createOrder({
         outTradeNo: order.orderNo,
         totalAmount: Number(order.amount),

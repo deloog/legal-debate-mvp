@@ -1,4 +1,5 @@
 import { redis, getRedisInfo, checkRedisConnection } from './redis';
+import type { RedisInfo } from './redis';
 import { CacheManager } from './manager';
 import {
   CacheStats,
@@ -223,13 +224,6 @@ export class CacheMonitor {
       const stats = this.cacheManager.getStats();
       const redisInfo = await getRedisInfo();
 
-      const metrics = {
-        timestamp: new Date(),
-        cacheStats: stats,
-        redisInfo,
-        healthHistory: this.healthHistory.slice(-10), // 最近10次健康检查
-      };
-
       // 记录指标日志
       console.log('缓存指标:', {
         hitRate: `${stats.hitRate.toFixed(2)}%`,
@@ -259,7 +253,7 @@ export class CacheMonitor {
   async getDetailedStatus(): Promise<{
     health: CacheHealth;
     stats: CacheStats;
-    redisInfo: any;
+    redisInfo: RedisInfo | null;
     isMonitoring: boolean;
   }> {
     const [health, redisInfo] = await Promise.all([
@@ -430,9 +424,7 @@ export const cacheMonitoringUtils = {
   },
 
   // 获取热点键
-  async getHotKeys(
-    limit: number = 10
-  ): Promise<Array<{ key: string; accessCount: number }>> {
+  async getHotKeys(): Promise<Array<{ key: string; accessCount: number }>> {
     // 这里需要实现基于访问频率的热点键统计
     // 由于Redis本身不直接提供访问计数，需要在应用层实现
     console.warn('热点键统计功能需要在应用层实现访问计数');

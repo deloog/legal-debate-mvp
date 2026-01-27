@@ -69,7 +69,7 @@ export function parseCursor(cursor?: string): Record<string, unknown> | null {
 /**
  * 构建游标查询选项
  */
-export function buildCursorOptions<T>(
+export function buildCursorOptions(
   cursor?: string,
   limit: number = 20
 ): {
@@ -87,7 +87,7 @@ export function buildCursorOptions<T>(
 /**
  * 估算查询总数（用于大数据集性能优化）
  */
-export async function estimateTotalCount<T>(
+export async function estimateTotalCount(
   countFunction: () => Promise<number>,
   totalCount?: number
 ): Promise<number> {

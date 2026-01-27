@@ -3,9 +3,8 @@
  */
 
 import { DocAnalyzerLogger } from '@/lib/agent/doc-analyzer/utils/logger-utils';
-import { StructuredLogger } from '@/lib/agent/security/logger';
 
-// Mock the StructuredLogger
+// Mock StructuredLogger
 jest.mock('@/lib/agent/security/logger', () => ({
   logger: {
     debug: jest.fn(),
@@ -16,13 +15,17 @@ jest.mock('@/lib/agent/security/logger', () => ({
   },
 }));
 
+import { StructuredLogger } from '@/lib/agent/security/logger';
+
+jest.unmock('@/lib/agent/security/logger');
+
 describe('DocAnalyzer日志工具', () => {
   let docLogger: DocAnalyzerLogger;
   let mockLogger: any;
 
   beforeEach(() => {
     docLogger = new DocAnalyzerLogger('TestModule');
-    const { logger } = require('@/lib/agent/security/logger');
+    const { logger } = jest.requireMock('@/lib/agent/security/logger');
     mockLogger = logger;
     jest.clearAllMocks();
   });

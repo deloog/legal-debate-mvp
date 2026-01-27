@@ -19,10 +19,30 @@ import {
  * 支付宝退款类
  */
 export class AlipayRefund {
-  private config: unknown;
+  private static instance: AlipayRefund | null = null;
+  private config: unknown | null = null;
 
-  constructor() {
-    this.config = paymentConfig.getAlipayConfig();
+  private constructor() {
+    // 延迟初始化，避免构建时加载配置
+  }
+
+  /**
+   * 获取单例实例
+   */
+  public static getInstance(): AlipayRefund {
+    if (!AlipayRefund.instance) {
+      AlipayRefund.instance = new AlipayRefund();
+    }
+    return AlipayRefund.instance;
+  }
+
+  /**
+   * 确保配置已加载
+   */
+  private ensureConfig(): void {
+    if (!this.config) {
+      this.config = paymentConfig.getAlipayConfig();
+    }
   }
 
   /**
@@ -48,6 +68,7 @@ export class AlipayRefund {
   public async refund(
     request: AlipayRefundRequest
   ): Promise<AlipayRefundResponse> {
+    this.ensureConfig();
     try {
       logPayment('refund', { request });
 
@@ -156,4 +177,10 @@ export class AlipayRefund {
 /**
  * 导出支付宝退款实例
  */
-export const alipayRefund = new AlipayRefund();
+/**
+ * 获取支付宝退款实例
+ * 使用延迟初始化，避免构建时验证环境变量
+ */
+export const getAlipayRefund = (): AlipayRefund => {
+  return AlipayRefund.getInstance();
+};

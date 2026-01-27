@@ -6,10 +6,17 @@ import type {
   AgentMetadata,
   AgentRegistration,
   AgentContext,
-  TaskPriority,
 } from '../../types/agent';
 
 import { AgentStatus, AgentEventType, AgentEvent } from '../../types/agent';
+
+// 辅助类型：可能包含 getMetadata 方法的 Agent
+type AgentWithOptionalMetadata = Agent & {
+  getMetadata?: () => AgentMetadata;
+};
+
+// 排序时可能的值类型
+type SortableValue = string | number;
 
 import {
   AgentEventListener,
@@ -110,12 +117,16 @@ export class AgentRegistry implements AgentEventManager {
    */
   public registerAgent(agent: Agent, updatedBy?: string): boolean {
     if (!isValidAgent(agent)) {
-      throw new Error(`Invalid agent: ${(agent as any).name || 'unknown'}`);
+      const agentRecord = agent as Record<string, unknown>;
+      throw new Error(
+        `Invalid agent: ${(agentRecord.name as string) || 'unknown'}`
+      );
     }
 
     // 检查Agent是否有getMetadata方法，如果没有则创建基本元数据
-    const metadata = (agent as any).getMetadata
-      ? (agent as any).getMetadata()
+    const agentWithMetadata = agent as AgentWithOptionalMetadata;
+    const metadata = agentWithMetadata.getMetadata
+      ? agentWithMetadata.getMetadata()
       : {
           name: agent.name,
           type: agent.type,
@@ -528,7 +539,7 @@ export class AgentRegistry implements AgentEventManager {
    * 使用依赖注入注册Agent
    */
   public registerAgentWithDI<T extends Agent>(
-    agentClass: new (...args: any[]) => T,
+    agentClass: new (...args: unknown[]) => T,
     agentName: string,
     config?: AgentCreationConfig
   ): boolean {
@@ -548,7 +559,7 @@ export class AgentRegistry implements AgentEventManager {
    * 批量注册Agent（支持依赖注入）
    */
   public registerAgentsWithDI<T extends Agent>(
-    agentClass: new (...args: any[]) => T,
+    agentClass: new (...args: unknown[]) => T,
     agentConfigs: Array<{ name: string; config?: AgentCreationConfig }>
   ): number {
     let successCount = 0;
@@ -695,7 +706,7 @@ export class AgentRegistry implements AgentEventManager {
     const recommendations: AgentRecommendation[] = [];
 
     for (const registration of candidates) {
-      const score = this.calculateAgentScore(registration, task, context);
+      const score = this.calculateAgentScore(registration, task);
       if (score > 0) {
         recommendations.push({
           agent: registration.instance,
@@ -831,7 +842,8 @@ export class AgentRegistry implements AgentEventManager {
     sortOrder: 'asc' | 'desc'
   ): AgentRegistration[] {
     return registrations.sort((a, b) => {
-      let valueA: any, valueB: any;
+      let valueA: SortableValue;
+      let valueB: SortableValue;
 
       switch (sortBy) {
         case 'name':
@@ -873,8 +885,7 @@ export class AgentRegistry implements AgentEventManager {
    */
   private calculateAgentScore(
     registration: AgentRegistration,
-    task: string,
-    context?: AgentContext
+    task: string
   ): number {
     let score = 0;
     const metadata = registration.metadata;

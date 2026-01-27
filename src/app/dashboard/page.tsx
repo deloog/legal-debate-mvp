@@ -32,7 +32,7 @@ interface DashboardStats {
   };
 }
 
-export function DashboardPage(): React.ReactElement {
+function DashboardPage(): React.ReactElement {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -285,3 +285,5 @@ const DetailCard: React.FC<DetailCardProps> = ({
     </Link>
   );
 };
+
+export default DashboardPage;

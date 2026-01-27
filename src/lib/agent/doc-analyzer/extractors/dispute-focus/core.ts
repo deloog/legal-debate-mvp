@@ -50,6 +50,7 @@ export class DisputeFocusExtractor {
    */
   private initializeDefaultPatterns(): Map<DisputeFocusCategory, RegExp[]> {
     // 动态导入以避免循环依赖
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { initializeRulePatterns } = require('./rule-layer');
     return initializeRulePatterns();
   }
@@ -76,11 +77,7 @@ export class DisputeFocusExtractor {
 
     // 第一层：AI识别（如果启用）
     if (options.useAIExtraction !== false) {
-      aiExtracted = await aiExtractLayer(
-        text,
-        extractedData,
-        this.rulePatterns
-      );
+      aiExtracted = await aiExtractLayer(text, extractedData);
     }
 
     // 第二层：规则匹配兜底

@@ -175,8 +175,6 @@ export class InputValidator {
     valid: boolean;
     errors: string[];
   } {
-    const errors: string[] = [];
-
     try {
       validateInput(input);
       return { valid: true, errors: [] };

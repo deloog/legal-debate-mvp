@@ -14,6 +14,7 @@ import {
   WechatQueryOrderResponse,
   WechatRefundRequest,
   WechatRefundResponse,
+  WechatPayConfig,
 } from '@/types/payment';
 import { paymentConfig } from './payment-config';
 import {
@@ -33,7 +34,31 @@ const WECHAT_PAY_API = 'api.mch.weixin.qq.com';
  * 微信支付类
  */
 export class WechatPay {
-  private config = paymentConfig.getWechatConfig();
+  private static instance: WechatPay | null = null;
+  private config: WechatPayConfig | null = null;
+
+  private constructor() {
+    // 延迟初始化，避免构建时加载配置
+  }
+
+  /**
+   * 获取单例实例
+   */
+  public static getInstance(): WechatPay {
+    if (!WechatPay.instance) {
+      WechatPay.instance = new WechatPay();
+    }
+    return WechatPay.instance;
+  }
+
+  /**
+   * 确保配置已加载
+   */
+  private ensureConfig(): void {
+    if (!this.config) {
+      this.config = paymentConfig.getWechatConfig();
+    }
+  }
 
   /**
    * 创建支付订单
@@ -41,6 +66,7 @@ export class WechatPay {
   public async createOrder(
     request: WechatCreateOrderRequest
   ): Promise<WechatCreateOrderResponse> {
+    this.ensureConfig();
     try {
       const path = '/v3/pay/transactions/native';
       const method = 'POST';
@@ -92,6 +118,7 @@ export class WechatPay {
   public async queryOrder(
     request: WechatQueryOrderRequest
   ): Promise<WechatQueryOrderResponse> {
+    this.ensureConfig();
     try {
       const outTradeNo = request.out_trade_no;
       const transactionId = request.transaction_id;
@@ -152,6 +179,7 @@ export class WechatPay {
   public async refund(
     request: WechatRefundRequest
   ): Promise<WechatRefundResponse> {
+    this.ensureConfig();
     try {
       const path = '/v3/refund/domestic/refunds';
       const method = 'POST';
@@ -325,4 +353,10 @@ export class WechatPay {
 }
 
 // 导出单例
-export const wechatPay = new WechatPay();
+/**
+ * 获取微信支付实例
+ * 使用延迟初始化，避免构建时验证环境变量
+ */
+export const getWechatPay = (): WechatPay => {
+  return WechatPay.getInstance();
+};

@@ -3,7 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { wechatOAuth } from '@/lib/auth/wechat-oauth';
+import { getWechatOAuth } from '@/lib/auth/wechat-oauth';
 import { OAuthService } from '@/lib/auth/oauth-service';
 
 /**
@@ -18,6 +18,7 @@ function generateState(): string {
  */
 export async function GET(request: NextRequest) {
   try {
+    const wechatOAuth = getWechatOAuth();
     const searchParams = request.nextUrl.searchParams;
     const redirectUri = searchParams.get('redirect_uri');
     const state = generateState();
@@ -49,6 +50,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    const wechatOAuth = getWechatOAuth();
     const body = await request.json();
     const { code, state } = body;
 

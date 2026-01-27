@@ -120,8 +120,17 @@ export const disconnectRedis = async (): Promise<void> => {
   }
 };
 
+// Redis 信息类型定义
+export interface RedisInfo {
+  connected: boolean;
+  server: Record<string, string>;
+  memory: Record<string, string>;
+  stats: Record<string, string>;
+  info: Record<string, string>;
+}
+
 // 获取Redis连接信息
-export const getRedisInfo = async (): Promise<any> => {
+export const getRedisInfo = async (): Promise<RedisInfo | null> => {
   try {
     const info = await redis.info();
     const serverInfo = await redis.info('server');

@@ -25,7 +25,7 @@ const TIME_RANGE_OPTIONS = [
   { value: '90d', label: '近90天' },
 ];
 
-export function DebatesDashboardPage(): React.ReactElement {
+function DebatesDashboardPage(): React.ReactElement {
   const router = useRouter();
   const [stats, setStats] = useState<DebateStats | null>(null);
   const [trend, setTrend] = useState<DebateTrend[]>([]);
@@ -155,3 +155,5 @@ const MetricCard: React.FC<MetricCardProps> = ({
     {subtitle && <p className='mt-1 text-sm text-gray-500'>{subtitle}</p>}
   </div>
 );
+
+export default DebatesDashboardPage;

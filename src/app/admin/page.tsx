@@ -34,9 +34,7 @@ export default function AdminPage() {
             />
           </svg>
         </div>
-        <h1 className='mb-4 text-2xl font-bold text-slate-900'>
-          系统管理后台
-        </h1>
+        <h1 className='mb-4 text-2xl font-bold text-slate-900'>系统管理后台</h1>
         <p className='mb-8 text-slate-600'>正在跳转到管理页面...</p>
 
         <div className='grid gap-3'>

@@ -25,11 +25,6 @@ export {
   type AgentResult,
 };
 
-// 简化的接口定义（如果需要扩展）
-export interface TestAgentContext extends AgentContext {
-  // 可以添加测试特定的属性
-}
-
 export interface TestAgentError extends AgentError {
   // 确保有name属性
   name: string;

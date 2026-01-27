@@ -3,7 +3,7 @@
  * 模拟DeepSeek API响应，用于测试和开发阶段
  */
 
-import type { DisputeFocus, KeyFact, TimelineEvent } from '../../core/types';
+import type { KeyFact, TimelineEvent } from '../../core/types';
 
 // =============================================================================
 // 类型定义
@@ -323,10 +323,9 @@ export function createMockAIService(delayMs?: number): MockAIService {
  * @returns 清除Mock模式的函数
  */
 export function enableMockMode(): () => void {
-  const originalUnifiedService = require('@/lib/ai/unified-service');
-
   // 临时替换unified-service
-  const mockService = getMockAIService();
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require('@/lib/ai/unified-service');
 
   return () => {
     // 恢复原始服务
