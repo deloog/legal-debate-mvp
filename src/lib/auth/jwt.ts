@@ -25,13 +25,32 @@ export function generateToken(payload: JwtPayload, expiresIn?: string): string {
  */
 export function verifyToken(token: string): JwtVerifyResult {
   try {
+    console.log('[verifyToken] 开始验证token:', {
+      tokenPreview: token.substring(0, 30) + '...',
+      secretPreview: JWT_SECRET.substring(0, 10) + '...',
+      secretLength: JWT_SECRET.length,
+    });
+
     const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+
+    console.log('[verifyToken] Token验证成功:', {
+      userId: decoded.userId,
+      email: decoded.email,
+      role: decoded.role,
+    });
+
     return {
       valid: true,
       payload: decoded,
       error: null,
     };
   } catch (error) {
+    console.error('[verifyToken] Token验证失败:', {
+      errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      tokenPreview: token.substring(0, 30) + '...',
+    });
+
     if (error instanceof jwt.TokenExpiredError) {
       return {
         valid: false,

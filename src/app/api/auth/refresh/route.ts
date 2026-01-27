@@ -17,12 +17,19 @@ export async function POST(
   request: NextRequest
 ): Promise<NextResponse<RefreshTokenResponse>> {
   try {
-    const body = await request.json();
-    const { refreshToken } = body as { refreshToken?: string };
+    // 安全优化：优先从cookie中读取refreshToken
+    let refreshToken = request.cookies.get('refreshToken')?.value;
 
-    console.log('[REFRESH] Request body:', {
+    // 如果cookie中没有，则从请求体中读取（向后兼容）
+    if (!refreshToken) {
+      const body = await request.json();
+      refreshToken = body.refreshToken;
+    }
+
+    console.log('[REFRESH] Token source:', {
       hasRefreshToken: !!refreshToken,
       tokenLength: refreshToken?.length,
+      source: request.cookies.get('refreshToken') ? 'cookie' : 'body',
     });
 
     if (!refreshToken) {
@@ -144,7 +151,7 @@ export async function POST(
     // 计算过期时间（秒）
     const expiresIn = 15 * 60; // 15分钟
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: true,
         message: '令牌刷新成功',
@@ -156,6 +163,25 @@ export async function POST(
       },
       { status: 200 }
     );
+
+    // 安全优化：将新token存储到httpOnly cookie
+    response.cookies.set('refreshToken', newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60, // 7天
+      path: '/',
+    });
+
+    response.cookies.set('accessToken', newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60, // 15分钟
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     console.error('[REFRESH] Token refresh error:', error);
     if (error instanceof Error) {

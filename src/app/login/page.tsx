@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 /**
@@ -9,6 +9,9 @@ import Link from 'next/link';
  */
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -36,16 +39,23 @@ export default function LoginPage() {
         return;
       }
 
-      // 保存token到localStorage
-      if (data.data?.token) {
-        localStorage.setItem('token', data.data.token);
-        localStorage.setItem('refreshToken', data.data.refreshToken);
-        localStorage.setItem('user', JSON.stringify(data.data.user));
+      // 安全优化：token已存储在httpOnly cookie中，无需存储到localStorage
+      // 但为了向后兼容，保留sessionStorage存储（仅用于客户端状态管理）
+      if (data.data?.user) {
+        sessionStorage.setItem('user', JSON.stringify(data.data.user));
       }
 
-      // 登录成功，跳转到首页
-      router.push('/');
-      router.refresh();
+      console.log('[Login] 登录成功，准备跳转到:', redirect);
+
+      // 触发自定义事件，通知AuthProvider更新状态
+      window.dispatchEvent(new CustomEvent('login-success'));
+
+      // 延迟跳转，确保cookie已设置并且AuthProvider有时间更新
+      setTimeout(() => {
+        console.log('[Login] 执行页面跳转');
+        router.push(redirect);
+        router.refresh();
+      }, 200);
     } catch (err) {
       console.error('登录错误:', err);
       setError('登录失败，请稍后重试');

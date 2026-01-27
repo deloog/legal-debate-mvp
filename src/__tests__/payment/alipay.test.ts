@@ -3,7 +3,7 @@
  * 测试支付宝支付的创建订单、查询订单功能
  */
 
-import { AlipayPayment } from '@/lib/payment/alipay';
+import { alipay, AlipayPayment } from '@/lib/payment/alipay';
 import { paymentConfig } from '@/lib/payment/payment-config';
 import {
   AlipayCreateOrderRequest,
@@ -75,7 +75,7 @@ describe('AlipayPayment', () => {
       );
       (paymentConfig.isAlipaySandbox as jest.Mock).mockReturnValue(false);
 
-      const alipayPayment = new AlipayPayment();
+      const alipayPayment = alipay;
       const mockResponse = {
         alipay_trade_precreate_response: {
           code: '10000',
@@ -121,7 +121,7 @@ describe('AlipayPayment', () => {
         mockConfig.privateKey
       );
 
-      const alipayPayment = new AlipayPayment();
+      const alipayPayment = alipay;
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         text: async () => 'invalid json',
@@ -157,7 +157,7 @@ describe('AlipayPayment', () => {
       );
       (paymentConfig.isAlipaySandbox as jest.Mock).mockReturnValue(false);
 
-      const alipayPayment = new AlipayPayment();
+      const alipayPayment = alipay;
       const mockResponse = {
         alipay_trade_query_response: {
           code: '10000',
@@ -203,7 +203,7 @@ describe('AlipayPayment', () => {
       );
       (paymentConfig.isAlipaySandbox as jest.Mock).mockReturnValue(false);
 
-      const alipayPayment = new AlipayPayment();
+      const alipayPayment = alipay;
       const mockResponse = {
         alipay_trade_query_response: {
           code: '10000',
@@ -242,7 +242,7 @@ describe('AlipayPayment', () => {
 
       (paymentConfig.getAlipayConfig as jest.Mock).mockReturnValue(mockConfig);
 
-      const alipayPayment = new AlipayPayment();
+      const alipayPayment = alipay;
 
       await expect(alipayPayment.queryOrder(mockRequest)).rejects.toThrow(
         '必须提供out_trade_no或trade_no参数'

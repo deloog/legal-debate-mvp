@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Suspense } from 'react';
+import { AuthProvider } from './providers/AuthProvider';
+import { ToastProvider } from '@/components/providers/ToastProvider';
 import './globals.css';
 
 // 配置字体优化：使用display策略优化字体加载
@@ -83,8 +85,13 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
       <body className='antialiased'>
-        {/* 使用Suspense实现代码分割和懒加载 */}
-        <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
+        {/* 认证提供者 */}
+        <AuthProvider>
+          {/* Toast通知提供者 */}
+          <ToastProvider />
+          {/* 使用Suspense实现代码分割和懒加载 */}
+          <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
+        </AuthProvider>
       </body>
     </html>
   );

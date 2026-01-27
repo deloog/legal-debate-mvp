@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(npm run format:*)",
+      "Bash(curl:*)",
+      "Bash(test:*)",
+      "Bash(psql:*)",
+      "Bash(cut:*)",
+      "Bash(npm run db:push:*)",
+      "Bash(npm run db:seed:*)",
+      "Bash(npx tsx:*)",
+      "Bash(if not exist \"d:\\\\legal_debate_mvp\\\\src\\\\app\\\\login\" mkdir \"d:\\\\legal_debate_mvp\\\\src\\\\app\\\\login\")",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm run build:*)",
+      "Bash(timeout 120 cmd /c \"npm run build 2>&1\")"
+    ]
+  }
+}

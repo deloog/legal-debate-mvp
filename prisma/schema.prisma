@@ -435,6 +435,7 @@ model AIInteraction {
   type       String
   provider   String
   model      String?
+  userId     String?  // 独立userId字段，用于索引优化
   request    Json
   response   Json?
   tokensUsed Int?
@@ -444,6 +445,8 @@ model AIInteraction {
   error      String?
   createdAt  DateTime @default(now())
 
+  @@index([userId])
+  @@index([userId, success, createdAt])
   @@index([type])
   @@index([provider])
   @@index([success])

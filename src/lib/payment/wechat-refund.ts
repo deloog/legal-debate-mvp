@@ -112,3 +112,8 @@ export class WechatRefund {
 export const getWechatRefund = (): WechatRefund => {
   return new WechatRefund();
 };
+
+/**
+ * 微信退款单例实例
+ */
+export const wechatRefund = new WechatRefund();

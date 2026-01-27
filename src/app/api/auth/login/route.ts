@@ -141,7 +141,47 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         expiresIn,
       },
     };
-    return NextResponse.json(response, { status: 200 });
+
+    const jsonResponse = NextResponse.json(response, { status: 200 });
+
+    // 安全优化：将refreshToken存储到httpOnly cookie
+    jsonResponse.cookies.set('refreshToken', refreshToken, {
+      httpOnly: true, // 防止JS访问，防XSS攻击
+      secure: process.env.NODE_ENV === 'production', // 生产环境仅HTTPS
+      sameSite: 'lax', // CSRF保护
+      maxAge: 7 * 24 * 60 * 60, // 7天
+      path: '/',
+      // 确保在开发环境中也能正确设置cookie
+      ...(process.env.NODE_ENV !== 'production' && {
+        sameSite: 'lax',
+      }),
+    });
+
+    // 也可以将accessToken存储到cookie（可选）
+    jsonResponse.cookies.set('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60, // 15分钟
+      path: '/',
+    });
+
+    // 调试日志：确认Cookie已设置
+    console.log('[Login API] 登录成功，Cookie已设置:', {
+      userId: user.id,
+      email: user.email,
+      hasAccessToken: !!accessToken,
+      hasRefreshToken: !!refreshToken,
+      accessTokenPreview: accessToken.substring(0, 30) + '...',
+      cookieSettings: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+      },
+    });
+
+    return jsonResponse;
   } catch (error) {
     console.error('登录失败详情:', {
       error: error instanceof Error ? error.message : 'Unknown error',

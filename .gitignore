@@ -113,5 +113,6 @@ validate-result.json
 # Miscellaneous
 .esl
 .nul
+nul
 DOWNGRADE_TAILWIND.md
 SETUP_COMPLETE.md

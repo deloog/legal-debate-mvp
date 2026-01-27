@@ -83,13 +83,19 @@ export async function POST(
       console.log('[LOGOUT] Deleted session:', deleteResult.count);
     }
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: true,
         message: allDevices ? '已登出所有设备' : '已登出当前设备',
       },
       { status: 200 }
     );
+
+    // 安全优化：清除cookie中的token
+    response.cookies.delete('accessToken');
+    response.cookies.delete('refreshToken');
+
+    return response;
   } catch (error) {
     console.error('Logout error:', error);
 

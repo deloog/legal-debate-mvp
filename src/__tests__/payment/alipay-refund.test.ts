@@ -40,11 +40,8 @@ jest.mock('@/lib/payment/alipay-utils', () => ({
 global.fetch = jest.fn();
 
 describe('AlipayRefund', () => {
-  let alipayRefundInstance: AlipayRefund;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    alipayRefundInstance = new AlipayRefund();
   });
 
   describe('申请退款', () => {
@@ -96,7 +93,7 @@ describe('AlipayRefund', () => {
         alipay_trade_refund_response: mockResponseData,
       });
 
-      const result = await alipayRefundInstance.refund(mockRequest);
+      const result = await alipayRefund.refund(mockRequest);
 
       expect(result).toEqual(mockResponseData);
       expect(global.fetch).toHaveBeenCalledWith(
@@ -163,7 +160,7 @@ describe('AlipayRefund', () => {
         alipay_trade_refund_response: mockResponseData,
       });
 
-      await alipayRefundInstance.refund(mockRequest);
+      await alipayRefund.refund(mockRequest);
 
       expect(global.fetch).toHaveBeenCalledWith(
         'https://openapi.alipaydev.com/gateway.do',
@@ -218,7 +215,7 @@ describe('AlipayRefund', () => {
         alipay_trade_refund_response: mockResponseData,
       });
 
-      const result = await alipayRefundInstance.refund(mockRequest);
+      const result = await alipayRefund.refund(mockRequest);
 
       expect(result.outRequestNo).toBe('CUSTOM-REFUND-123');
     });
@@ -254,7 +251,7 @@ describe('AlipayRefund', () => {
         text: async () => 'Bad Request',
       });
 
-      await expect(alipayRefundInstance.refund(mockRequest)).rejects.toThrow(
+      await expect(alipayRefund.refund(mockRequest)).rejects.toThrow(
         '支付宝退款失败'
       );
     });
@@ -291,7 +288,7 @@ describe('AlipayRefund', () => {
 
       (safeParseJSON as jest.Mock).mockReturnValue(null);
 
-      await expect(alipayRefundInstance.refund(mockRequest)).rejects.toThrow(
+      await expect(alipayRefund.refund(mockRequest)).rejects.toThrow(
         '解析支付宝响应失败'
       );
     });

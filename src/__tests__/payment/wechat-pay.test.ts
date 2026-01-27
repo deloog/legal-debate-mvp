@@ -4,7 +4,7 @@
  */
 
 import https from 'https';
-import { WechatPay } from '@/lib/payment/wechat-pay';
+import { wechatPay, WechatPay } from '@/lib/payment/wechat-pay';
 import { paymentConfig } from '@/lib/payment/payment-config';
 import {
   WechatCreateOrderRequest,
@@ -49,8 +49,6 @@ jest.mock('https', () => ({
 }));
 
 describe('WechatPay', () => {
-  let wechatPayInstance: WechatPay;
-
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -71,14 +69,11 @@ describe('WechatPay', () => {
       '-----BEGIN PRIVATE KEY-----\ntest-key\n-----END PRIVATE KEY-----'
     );
 
-    // 创建实例
-    wechatPayInstance = new WechatPay();
-
     // Mock private方法
-    (wechatPayInstance as any).generateAuthorization = jest.fn(
+    (wechatPay as any).generateAuthorization = jest.fn(
       () => 'mock-authorization'
     );
-    (wechatPayInstance as any).signMessage = jest.fn(() => 'mock-signature');
+    (wechatPay as any).signMessage = jest.fn(() => 'mock-signature');
   });
 
   describe('创建支付订单', () => {
@@ -123,7 +118,7 @@ describe('WechatPay', () => {
 
       (safeParseJSON as jest.Mock).mockReturnValue(mockResponseData);
 
-      const result = await wechatPayInstance.createOrder(mockRequest);
+      const result = await wechatPay.createOrder(mockRequest);
 
       expect(result).toEqual(mockResponseData);
       expect(https.request).toHaveBeenCalled();
@@ -162,7 +157,7 @@ describe('WechatPay', () => {
         }
       );
 
-      await expect(wechatPayInstance.createOrder(mockRequest)).rejects.toThrow(
+      await expect(wechatPay.createOrder(mockRequest)).rejects.toThrow(
         'HTTP 400: Bad Request'
       );
     });
@@ -223,7 +218,7 @@ describe('WechatPay', () => {
 
       (safeParseJSON as jest.Mock).mockReturnValue(mockResponseData);
 
-      const result = await wechatPayInstance.queryOrder(mockRequest);
+      const result = await wechatPay.queryOrder(mockRequest);
 
       expect(result).toEqual(mockResponseData);
     });
@@ -282,7 +277,7 @@ describe('WechatPay', () => {
 
       (safeParseJSON as jest.Mock).mockReturnValue(mockResponseData);
 
-      const result = await wechatPayInstance.queryOrder(mockRequest);
+      const result = await wechatPay.queryOrder(mockRequest);
 
       expect(result).toEqual(mockResponseData);
     });
@@ -292,7 +287,7 @@ describe('WechatPay', () => {
         mchid: 'test-mchid',
       };
 
-      await expect(wechatPayInstance.queryOrder(mockRequest)).rejects.toThrow(
+      await expect(wechatPay.queryOrder(mockRequest)).rejects.toThrow(
         '必须提供out_trade_no或transaction_id'
       );
     });
@@ -352,7 +347,7 @@ describe('WechatPay', () => {
 
       (safeParseJSON as jest.Mock).mockReturnValue(mockResponseData);
 
-      const result = await wechatPayInstance.refund(mockRequest);
+      const result = await wechatPay.refund(mockRequest);
 
       expect(result).toEqual(mockResponseData);
     });
@@ -411,7 +406,7 @@ describe('WechatPay', () => {
       // 由于doMock会影响后续测试，这里我们只能简单地验证方法是否被调用
       // 实际测试解密逻辑比较复杂，需要有效的密钥和加密数据
       // 这里我们只是验证方法不会抛出错误
-      const result = wechatPayInstance.decryptNotification(mockNotification);
+      const result = wechatPay.decryptNotification(mockNotification);
 
       // 解密可能失败，所以结果可能为null
       expect(result !== null || result === null).toBe(true);
@@ -433,7 +428,7 @@ describe('WechatPay', () => {
       };
 
       // 使用无效的密文应该导致解密失败并返回null
-      const result = wechatPayInstance.decryptNotification(mockNotification);
+      const result = wechatPay.decryptNotification(mockNotification);
 
       expect(result).toBeNull();
     });

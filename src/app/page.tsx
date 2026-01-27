@@ -12,6 +12,7 @@ import { QuickActions } from '@/components/dashboard/QuickActions';
 import { FeatureModules } from '@/components/dashboard/FeatureModules';
 import { RecentActivities } from '@/components/dashboard/RecentActivities';
 import { getQuickActions, getFeatureModules } from '@/app/api/dashboard/route';
+import { useAuth } from '@/app/providers/AuthProvider';
 import type {
   DashboardData,
   QuickAction as QuickActionType,
@@ -19,6 +20,7 @@ import type {
 } from '@/types/dashboard';
 
 export default function Home() {
+  const { user, logout } = useAuth();
   const [data, setData] = useState<DashboardData | null>(null);
   const [quickActions, setQuickActions] = useState<QuickActionType[]>([]);
   const [featureModules, setFeatureModules] = useState<FeatureModuleType[]>([]);
@@ -53,20 +55,6 @@ export default function Home() {
 
   // 移除调试日志，避免不断重新渲染导致性能问题
   // console.log('当前状态:', { loading, error, hasData: !!data });
-  /*
-  if (loading) {
-    return (
-      <div className='fixed inset-0 flex items-center justify-center bg-zinc-50 font-sans dark:bg-black'>
-        <div className='flex flex-col items-center gap-4 p-8'>
-          <div className='h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600 dark:border-zinc-800 dark:border-t-blue-400' />
-          <p className='text-sm text-gray-600 dark:text-gray-400'>
-            加载中...
-          </p>
-        </div>
-      </div>
-    );
-  }
-  */
 
   if (error) {
     return (
@@ -82,6 +70,80 @@ export default function Home() {
             重新加载
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // 用户下拉菜单组件
+  function UserMenu() {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+      <div className='relative'>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className='flex items-center gap-3 rounded-lg p-2 hover:bg-slate-100 transition-colors'
+        >
+          <div className='flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-violet-600 text-white font-semibold'>
+            {user?.name?.charAt(0).toUpperCase() ||
+              user?.email.charAt(0).toUpperCase()}
+          </div>
+          <div className='hidden md:block text-left'>
+            <p className='text-sm font-medium text-slate-900'>
+              {user?.name || user?.username || '用户'}
+            </p>
+            <p className='text-xs text-slate-500'>{user?.email}</p>
+          </div>
+          <svg
+            className={`h-5 w-5 text-slate-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            fill='none'
+            stroke='currentColor'
+            viewBox='0 0 24 24'
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M19 9l-7 7-7-7'
+            />
+          </svg>
+        </button>
+
+        {isOpen && (
+          <div className='absolute right-0 mt-2 w-56 rounded-xl border border-slate-200 bg-white shadow-xl py-2'>
+            <div className='px-4 py-2 border-b border-slate-100'>
+              <p className='text-xs font-medium text-slate-500'>角色</p>
+              <p className='text-sm font-semibold text-slate-900'>
+                {user?.role === 'ADMIN' ? '管理员' : '用户'}
+              </p>
+            </div>
+            <Link
+              href='/dashboard'
+              className='block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50'
+              onClick={() => setIsOpen(false)}
+            >
+              工作台
+            </Link>
+            <Link
+              href='/profile'
+              className='block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50'
+              onClick={() => setIsOpen(false)}
+            >
+              个人设置
+            </Link>
+            <div className='border-t border-slate-100 mt-2 pt-2'>
+              <button
+                onClick={() => {
+                  logout();
+                  setIsOpen(false);
+                }}
+                className='w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50'
+              >
+                退出登录
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -145,12 +207,16 @@ export default function Home() {
               </Link>
             </nav>
 
-            <Link
-              href='/login'
-              className='hidden rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-violet-500/30 transition-all hover:shadow-lg md:block'
-            >
-              登录
-            </Link>
+            {user ? (
+              <UserMenu />
+            ) : (
+              <Link
+                href='/login'
+                className='hidden rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-violet-500/30 transition-all hover:shadow-lg md:block'
+              >
+                登录
+              </Link>
+            )}
           </div>
 
           <button className='rounded-xl p-2.5 text-slate-600 hover:bg-slate-100 md:hidden'>

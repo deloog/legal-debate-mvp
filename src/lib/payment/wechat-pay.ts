@@ -360,3 +360,8 @@ export class WechatPay {
 export const getWechatPay = (): WechatPay => {
   return WechatPay.getInstance();
 };
+
+/**
+ * 微信支付单例实例
+ */
+export const wechatPay = WechatPay.getInstance();

@@ -284,27 +284,29 @@ export const createLegalReference = (
 // AIInteraction factory
 export const createAIInteraction = (
   overrides: Partial<AIInteraction> = {}
-): AIInteraction => ({
-  id: 'interaction-123',
-  type: 'debate_generation',
-  provider: 'zhipu',
-  model: 'chatglm3-6b',
-  request: {
-    prompt: '请为原告方生成关于加班费计算的论点',
-    context: '劳动争议案件',
-  },
-  response: {
-    content: '根据劳动合同法...',
-    tokens: 256,
-  },
-  tokensUsed: 256,
-  duration: 1500,
-  cost: 0.05,
-  success: true,
-  error: null,
-  createdAt: new Date(),
-  ...overrides,
-});
+): AIInteraction =>
+  ({
+    id: 'interaction-123',
+    type: 'debate_generation',
+    provider: 'zhipu',
+    model: 'chatglm3-6b',
+    userId: 'user-123',
+    request: {
+      prompt: '请为原告方生成关于加班费计算的论点',
+      context: '劳动争议案件',
+    },
+    response: {
+      content: '根据劳动合同法...',
+      tokens: 256,
+    },
+    tokensUsed: 256,
+    duration: 1500,
+    cost: 0.05,
+    success: true,
+    error: null,
+    createdAt: new Date(),
+    ...overrides,
+  }) as AIInteraction;
 
 // Mock data objects for quick testing
 export const mockUser = createUser();

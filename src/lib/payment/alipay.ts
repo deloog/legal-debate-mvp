@@ -261,3 +261,8 @@ export class AlipayPayment {
 export const getAlipay = (): AlipayPayment => {
   return AlipayPayment.getInstance();
 };
+
+/**
+ * 支付宝支付单例实例
+ */
+export const alipay = AlipayPayment.getInstance();

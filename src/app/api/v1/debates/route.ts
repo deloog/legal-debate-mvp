@@ -18,6 +18,8 @@ import { DebateStatus } from '@prisma/client';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { isAdminRole } from '@/lib/middleware/resource-permission';
 import { UserRole } from '@/types/auth';
+import { checkAIQuota, recordAIUsage } from '@/lib/ai/quota';
+import { logCreateAction } from '@/lib/audit/logger';
 
 /**
  * GET /api/v1/debates
@@ -129,6 +131,24 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     );
   }
 
+  // 检查AI配额
+  const quotaCheck = await checkAIQuota(
+    authUser.userId,
+    authUser.role as string
+  );
+  if (!quotaCheck.allowed) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'QUOTA_EXCEEDED',
+          message: quotaCheck.reason,
+        },
+      },
+      { status: 429 }
+    );
+  }
+
   // 验证请求体
   const body = await validateRequestBody(request, createDebateSchema);
 
@@ -164,6 +184,9 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const debateStatus = bodyInput.status
     ? (bodyInput.status as DebateStatus)
     : DebateStatus.DRAFT;
+
+  const startTime = Date.now();
+
   const newDebate = await prisma.debate.create({
     data: {
       caseId: body.caseId,
@@ -203,6 +226,28 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
         },
       },
     },
+  });
+
+  // 记录AI使用
+  await recordAIUsage({
+    userId,
+    type: 'debate_generation',
+    provider: 'system',
+    tokensUsed: 0,
+    duration: Date.now() - startTime,
+    success: true,
+  });
+
+  // 记录审计日志
+  await logCreateAction({
+    userId,
+    category: 'DEBATE',
+    resourceType: 'DEBATE',
+    resourceId: newDebate.id,
+    description: `创建辩论: ${newDebate.title}`,
+    request,
+    responseStatus: 201,
+    executionTime: Date.now() - startTime,
   });
 
   return createCreatedResponse(newDebate);

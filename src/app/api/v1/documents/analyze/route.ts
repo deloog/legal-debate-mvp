@@ -5,6 +5,8 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { retryDocAnalysis } from '../../../../../lib/ai/retry-handler';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { checkAIQuota, recordAIUsage } from '@/lib/ai/quota';
+import { logAIAction } from '@/lib/audit/logger';
 
 // =============================================================================
 // API处理函数
@@ -18,6 +20,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: '未认证', message: '请先登录' },
         { status: 401 }
+      );
+    }
+
+    // 检查AI配额
+    const quotaCheck = await checkAIQuota(
+      authUser.userId,
+      authUser.role as string
+    );
+    if (!quotaCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: quotaCheck.reason,
+        },
+        { status: 429 }
       );
     }
 
@@ -124,6 +141,28 @@ export async function POST(request: NextRequest) {
     // 返回分析结果
     if (retryResult.success) {
       const result = retryResult.result;
+
+      // 记录AI使用
+      await recordAIUsage({
+        userId: authUser.userId,
+        type: 'document_analysis',
+        provider: 'system',
+        tokensUsed: result.tokensUsed || 0,
+        duration: processingTime,
+        success: true,
+      });
+
+      // 记录审计日志
+      await logAIAction({
+        userId: authUser.userId,
+        actionType: 'ANALYZE_DOCUMENT',
+        resourceId: documentId,
+        description: `分析文档: ${documentId}`,
+        request,
+        responseStatus: 200,
+        executionTime: processingTime,
+      });
+
       return NextResponse.json({
         success: true,
         data: {
@@ -139,10 +178,23 @@ export async function POST(request: NextRequest) {
         },
       });
     } else {
+      const errorMessage = retryResult.error?.message || '文档分析失败';
+
+      // 记录AI使用（失败）
+      await recordAIUsage({
+        userId: authUser.userId,
+        type: 'document_analysis',
+        provider: 'system',
+        tokensUsed: 0,
+        duration: processingTime,
+        success: false,
+        error: errorMessage,
+      });
+
       return NextResponse.json(
         {
           success: false,
-          error: retryResult.error?.message || '文档分析失败',
+          error: errorMessage,
           details: {
             documentId,
             processingTime,

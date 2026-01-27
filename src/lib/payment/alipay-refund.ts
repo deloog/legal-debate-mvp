@@ -184,3 +184,8 @@ export class AlipayRefund {
 export const getAlipayRefund = (): AlipayRefund => {
   return AlipayRefund.getInstance();
 };
+
+/**
+ * 支付宝退款单例实例
+ */
+export const alipayRefund = AlipayRefund.getInstance();
