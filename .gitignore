@@ -58,3 +58,60 @@ public/uploads/
 # Temporary files
 temp-*.ts
 temp-*.txt
+temp_append.txt
+
+# Coverage reports
+coverage-app/
+coverage-components/
+coverage-communications/
+coverage-final/
+playwright-report/
+coverage-api-report.txt
+coverage-comm-detail.json
+coverage-detail.txt
+coverage-output-*.txt
+
+# ESLint reports
+eslint-*.txt
+eslint-*.json
+eslint-analysis-report.md
+eslint-summary-report.md
+eslint修复总结报告.md
+
+# Test reports and outputs
+test-*.txt
+test-*.md
+*-test-*.txt
+*-report.txt
+*-report.json
+*-output.txt
+*-final.txt
+
+# Test results
+test-results/
+test-reports/
+
+# Other temporary files
+admin-*.txt
+day*-*.txt
+deepseek-*.json
+detail-*.txt
+dev-*.log
+evidence-*.txt
+export-*.txt
+final-*.txt
+lib-*.txt
+order-*.txt
+payment-*.txt
+reports-*.txt
+risk-*.txt
+stats-*.txt
+team-*.txt
+type-errors.txt
+validate-result.json
+
+# Miscellaneous
+.esl
+.nul
+DOWNGRADE_TAILWIND.md
+SETUP_COMPLETE.md
