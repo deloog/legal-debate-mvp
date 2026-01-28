@@ -1,8 +1,11 @@
 /**
  * 发票PDF生成模块
- * 生成符合中国税务标准的发票PDF文件
+ * 使用 pdfkit 生成符合中国税务标准的发票PDF文件
  */
 
+import PDFDocument from 'pdfkit';
+import * as fs from 'fs';
+import * as path from 'path';
 import { prisma } from '@/lib/db/prisma';
 import { InvoiceType, OrderStatus, InvoiceStatus } from '@/types/payment';
 import { formatAmountToChinese } from './invoice-utils';
@@ -25,184 +28,6 @@ interface InvoiceData {
   membershipTierDisplayName: string;
   userName: string;
   userEmail: string;
-}
-
-/**
- * 生成发票HTML模板
- * @param data 发票数据
- * @returns HTML字符串
- */
-function generateInvoiceHTML(data: InvoiceData): string {
-  const isEnterprise = data.type === InvoiceType.ENTERPRISE;
-  const issuedAt = data.issuedAt
-    ? new Date(data.issuedAt).toLocaleDateString('zh-CN')
-    : '待开具';
-  const createdAt = new Date(data.createdAt).toLocaleDateString('zh-CN');
-  const amountChinese = formatAmountToChinese(data.amount);
-
-  return `
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>发票 - ${data.invoiceNo}</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Microsoft YaHei', 'SimHei', Arial, sans-serif;
-      font-size: 14px;
-      color: #333;
-      line-height: 1.6;
-    }
-    .invoice-container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 40px;
-      border: 1px solid #ddd;
-    }
-    .invoice-header {
-      text-align: center;
-      margin-bottom: 30px;
-      border-bottom: 2px solid #333;
-      padding-bottom: 20px;
-    }
-    .invoice-title {
-      font-size: 32px;
-      font-weight: bold;
-      color: #333;
-    }
-    .invoice-info {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 30px;
-    }
-    .invoice-no {
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .invoice-date {
-      color: #666;
-    }
-    .invoice-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 30px;
-    }
-    .invoice-table th,
-    .invoice-table td {
-      border: 1px solid #ddd;
-      padding: 12px;
-      text-align: left;
-    }
-    .invoice-table th {
-      background-color: #f5f5f5;
-      font-weight: bold;
-    }
-    .invoice-table .amount {
-      text-align: right;
-      font-weight: bold;
-    }
-    .invoice-total {
-      text-align: right;
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-    .invoice-amount-chinese {
-      font-size: 16px;
-      color: #666;
-      margin-bottom: 10px;
-    }
-    .invoice-amount-numeric {
-      font-size: 24px;
-      color: #e53935;
-    }
-    .invoice-footer {
-      text-align: center;
-      color: #999;
-      font-size: 12px;
-      margin-top: 40px;
-    }
-    .company-info {
-      margin-bottom: 20px;
-    }
-    .company-info h3 {
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
-    .company-info p {
-      color: #666;
-      margin: 5px 0;
-    }
-  </style>
-</head>
-<body>
-  <div class="invoice-container">
-    <div class="invoice-header">
-      <div class="invoice-title">电 子 发 票</div>
-    </div>
-
-    <div class="invoice-info">
-      <div class="invoice-no">发票编号：${data.invoiceNo}</div>
-      <div class="invoice-date">开具日期：${issuedAt}</div>
-    </div>
-
-    <table class="invoice-table">
-      <thead>
-        <tr>
-          <th>购买方信息</th>
-          <th>服务内容</th>
-          <th class="amount">金额</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>
-            <p><strong>${isEnterprise ? data.title : data.userName}</strong></p>
-            ${isEnterprise && data.taxNumber ? `<p>税号：${data.taxNumber}</p>` : ''}
-            <p>邮箱：${data.email || data.userEmail}</p>
-          </td>
-          <td>
-            <p><strong>${data.membershipTierDisplayName}会员服务</strong></p>
-            <p>订单号：${data.orderNo}</p>
-            <p>服务时间：${createdAt}</p>
-          </td>
-          <td class="amount">
-            ¥${data.amount.toFixed(2)}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="invoice-total">
-      <div class="invoice-amount-chinese">
-        （大写：${amountChinese}）
-      </div>
-      <div class="invoice-amount-numeric">
-        合计：¥${data.amount.toFixed(2)}
-      </div>
-    </div>
-
-    <div class="company-info">
-      <h3>律伴助手</h3>
-      <p>地址：北京市朝阳区</p>
-      <p>电话：400-123-4567</p>
-      <p>邮箱：support@lvban.com</p>
-    </div>
-
-    <div class="invoice-footer">
-      <p>本发票为电子发票，具有法律效力</p>
-      <p>发票生成时间：${new Date().toLocaleString('zh-CN')}</p>
-    </div>
-  </div>
-</body>
-</html>
-  `;
 }
 
 /**
@@ -273,25 +98,16 @@ export async function generateInvoicePDF(invoiceId: string): Promise<string> {
     userEmail: invoice.user.email,
   };
 
-  // 生成HTML
-  const html = generateInvoiceHTML(data);
-
-  // 在实际生产环境中，这里应该使用专业的PDF生成库（如puppeteer、playwright、jsPDF等）
-  // 生成PDF文件并保存到指定路径
+  // 生成PDF文件路径
   const filePath = generateInvoiceFilePath(invoiceId);
-
-  // 临时返回HTML，实际应该生成PDF
-  // TODO: 集成PDF生成库
-  const fs = await import('fs');
-  const path = await import('path');
+  const absolutePath = path.join(process.cwd(), 'public', filePath);
 
   // 确保目录存在
-  const dir = path.dirname(filePath);
+  const dir = path.dirname(absolutePath);
   await fs.promises.mkdir(dir, { recursive: true });
 
-  // 暂时保存HTML文件（实际应该生成PDF）
-  const htmlPath = filePath.replace('.pdf', '.html');
-  await fs.promises.writeFile(htmlPath, html, 'utf-8');
+  // 使用 pdfkit 生成 PDF
+  await generatePDFWithPdfkit(data, absolutePath);
 
   // 更新发票状态
   await prisma.invoice.update({
@@ -303,8 +119,136 @@ export async function generateInvoicePDF(invoiceId: string): Promise<string> {
     },
   });
 
-  // TODO: 实际应该返回PDF文件路径
-  return htmlPath;
+  return filePath;
+}
+
+/**
+ * 使用 pdfkit 生成 PDF 文件
+ * @param data 发票数据
+ * @param outputPath 输出文件路径
+ */
+async function generatePDFWithPdfkit(
+  data: InvoiceData,
+  outputPath: string
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument({
+        size: 'A4',
+        margin: 50,
+        info: {
+          Title: `发票 - ${data.invoiceNo}`,
+          Author: '律伴助手',
+          Subject: '电子发票',
+        },
+      });
+
+      // 创建写入流
+      const stream = fs.createWriteStream(outputPath);
+      doc.pipe(stream);
+
+      // 设置中文字体（使用内置字体，中文可能显示为方块）
+      // 生产环境中应该使用中文字体文件
+      const fontPath = path.join(
+        process.cwd(),
+        'fonts',
+        'NotoSansSC-Regular.ttf'
+      );
+      if (fs.existsSync(fontPath)) {
+        doc.font(fontPath);
+      }
+
+      const isEnterprise = data.type === InvoiceType.ENTERPRISE;
+      const issuedAt = data.issuedAt
+        ? new Date(data.issuedAt).toLocaleDateString('zh-CN')
+        : new Date().toLocaleDateString('zh-CN');
+      const createdAt = new Date(data.createdAt).toLocaleDateString('zh-CN');
+      const amountChinese = formatAmountToChinese(data.amount);
+
+      // 标题
+      doc.fontSize(24).text('电 子 发 票', { align: 'center' });
+      doc.moveDown(0.5);
+
+      // 分隔线
+      doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+      doc.moveDown();
+
+      // 发票编号和日期
+      doc.fontSize(12);
+      doc.text(`发票编号：${data.invoiceNo}`, 50);
+      doc.text(`开具日期：${issuedAt}`, 50, doc.y - 14, { align: 'right' });
+      doc.moveDown();
+
+      // 购买方信息
+      doc.fontSize(14).text('购买方信息', { underline: true });
+      doc.moveDown(0.5);
+      doc.fontSize(12);
+      doc.text(`名称：${isEnterprise ? data.title : data.userName}`);
+      if (isEnterprise && data.taxNumber) {
+        doc.text(`税号：${data.taxNumber}`);
+      }
+      doc.text(`邮箱：${data.email || data.userEmail}`);
+      doc.moveDown();
+
+      // 服务内容
+      doc.fontSize(14).text('服务内容', { underline: true });
+      doc.moveDown(0.5);
+      doc.fontSize(12);
+      doc.text(`服务名称：${data.membershipTierDisplayName}会员服务`);
+      doc.text(`订单号：${data.orderNo}`);
+      doc.text(`服务时间：${createdAt}`);
+      doc.moveDown();
+
+      // 分隔线
+      doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+      doc.moveDown();
+
+      // 金额信息
+      doc.fontSize(14).text('金额信息', { underline: true });
+      doc.moveDown(0.5);
+      doc.fontSize(12);
+      doc.text(`金额（大写）：${amountChinese}`);
+      doc
+        .fontSize(18)
+        .fillColor('red')
+        .text(`合计金额：¥${data.amount.toFixed(2)}`, { align: 'right' });
+      doc.fillColor('black');
+      doc.moveDown(2);
+
+      // 销售方信息
+      doc.fontSize(14).text('销售方信息', { underline: true });
+      doc.moveDown(0.5);
+      doc.fontSize(12);
+      doc.text('名称：律伴助手');
+      doc.text('地址：北京市朝阳区');
+      doc.text('电话：400-123-4567');
+      doc.text('邮箱：support@lvban.com');
+      doc.moveDown(2);
+
+      // 页脚
+      doc.fontSize(10).fillColor('gray');
+      doc.text('本发票为电子发票，具有法律效力', { align: 'center' });
+      doc.text(`发票生成时间：${new Date().toLocaleString('zh-CN')}`, {
+        align: 'center',
+      });
+
+      // 完成文档
+      doc.end();
+
+      stream.on('finish', () => {
+        console.log(`[InvoicePDF] PDF 生成成功: ${outputPath}`);
+        resolve();
+      });
+
+      stream.on('error', error => {
+        console.error(`[InvoicePDF] PDF 写入失败:`, error);
+        reject(error);
+      });
+    } catch (error) {
+      console.error(`[InvoicePDF] PDF 生成失败:`, error);
+      reject(error);
+    }
+  });
 }
 
 /**
@@ -336,8 +280,8 @@ export async function batchGenerateInvoicePDF(
  */
 export async function invoiceFileExists(filePath: string): Promise<boolean> {
   try {
-    const fs = await import('fs');
-    await fs.promises.access(filePath);
+    const absolutePath = path.join(process.cwd(), 'public', filePath);
+    await fs.promises.access(absolutePath);
     return true;
   } catch {
     return false;
@@ -350,8 +294,8 @@ export async function invoiceFileExists(filePath: string): Promise<boolean> {
  */
 export async function deleteInvoiceFile(filePath: string): Promise<void> {
   try {
-    const fs = await import('fs');
-    await fs.promises.unlink(filePath);
+    const absolutePath = path.join(process.cwd(), 'public', filePath);
+    await fs.promises.unlink(absolutePath);
   } catch (error) {
     console.error(`删除发票文件失败: ${filePath}`, error);
   }

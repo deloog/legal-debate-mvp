@@ -7,6 +7,7 @@ import {
   ArgumentType,
   RoundStatus,
   DebateStatus,
+  Prisma,
 } from '@prisma/client';
 
 /**
@@ -241,6 +242,16 @@ export const OPTIONS = withErrorHandler(async () => {
 });
 
 /**
+ * 法律依据结构
+ */
+interface LegalBasisItem {
+  lawName: string;
+  articleNumber: string;
+  relevance: number;
+  explanation: string;
+}
+
+/**
  * 生成单方论点
  */
 interface GenerateSideArgumentsInput {
@@ -268,19 +279,21 @@ function generateSideArguments(input: GenerateSideArgumentsInput) {
       p => p.type.toLowerCase() === side.toLowerCase()
     )?.name || sideName;
 
-  const arguments_: Array<{
-    id: string;
-    roundId: string;
-    side: ArgumentSide;
-    content: string;
-    type: ArgumentType;
-    aiProvider: string;
-    confidence: number;
-  }> = [];
+  const arguments_: Prisma.ArgumentCreateManyInput[] = [];
 
   // 为每个法条生成法律依据论点
-  articles.slice(0, Math.min(articles.length, 3)).forEach(article => {
+  articles.slice(0, Math.min(articles.length, 3)).forEach((article, index) => {
     const content = `${sideName}（${partyName}）主张：根据《${article.lawName}》${article.articleNumber}条规定，${article.fullText.substring(0, 50)}...，${side === 'PLAINTIFF' ? '请求法院支持原告诉请' : '请求法院驳回原告诉请'}。`;
+
+    // 构建法律依据数据
+    const legalBasis: LegalBasisItem[] = [
+      {
+        lawName: article.lawName,
+        articleNumber: article.articleNumber,
+        relevance: 0.9 - index * 0.1,
+        explanation: article.fullText.substring(0, 100),
+      },
+    ];
 
     arguments_.push({
       id: `arg-${side}-${Date.now()}-${arguments_.length}`,
@@ -290,8 +303,23 @@ function generateSideArguments(input: GenerateSideArgumentsInput) {
       type: ArgumentType.LEGAL_BASIS,
       aiProvider: 'DEEPSEEK',
       confidence: 0.8,
+      reasoning: `基于${article.lawName}第${article.articleNumber}条的法律规定进行论证`,
+      legalBasis: legalBasis as unknown as Prisma.InputJsonValue,
+      logicScore: 0.85,
+      legalScore: 0.9,
+      overallScore: 0.87,
     });
   });
+
+  // 收集所有引用的法条作为主论点的法律依据
+  const allLegalBasis: LegalBasisItem[] = articles
+    .slice(0, 3)
+    .map((article, index) => ({
+      lawName: article.lawName,
+      articleNumber: article.articleNumber,
+      relevance: 0.8 - index * 0.1,
+      explanation: `支持主张的法律依据`,
+    }));
 
   // 生成主要论点（确保至少有一条论点）
   const claimContent = (claims as Array<{ content: string }>)[0]?.content;
@@ -305,6 +333,14 @@ function generateSideArguments(input: GenerateSideArgumentsInput) {
     type: ArgumentType.MAIN_POINT,
     aiProvider: 'DEEPSEEK',
     confidence: 0.85,
+    reasoning: `综合案件事实和法律规定，提出核心诉讼主张`,
+    legalBasis:
+      allLegalBasis.length > 0
+        ? (allLegalBasis as unknown as Prisma.InputJsonValue)
+        : undefined,
+    logicScore: 0.88,
+    legalScore: allLegalBasis.length > 0 ? 0.85 : 0.6,
+    overallScore: 0.86,
   });
 
   // 生成支持论点（确保至少有两条论点）
@@ -319,6 +355,10 @@ function generateSideArguments(input: GenerateSideArgumentsInput) {
     type: ArgumentType.SUPPORTING,
     aiProvider: 'DEEPSEEK',
     confidence: 0.75,
+    reasoning: `基于案件事实提供支持性论据`,
+    logicScore: 0.8,
+    legalScore: 0.7,
+    overallScore: 0.75,
   });
 
   return arguments_;

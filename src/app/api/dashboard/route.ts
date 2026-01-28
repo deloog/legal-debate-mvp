@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { prisma } from '@/lib/db/prisma';
 import type {
   DashboardData,
   StatCard,
@@ -14,14 +17,114 @@ import type {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(_request: NextRequest) {
   try {
-    // TODO: 从session获取当前用户ID
-    // 模拟数据 - 实际应该从数据库获取
+    // 从session获取当前用户ID
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+
+    if (!userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: '未认证',
+        },
+        { status: 401 }
+      );
+    }
+
+    // 从数据库获取统计数据
+    const [totalCases, totalClients, pendingTasks, todaySchedules] =
+      await Promise.all([
+        // 获取案件总数
+        prisma.case.count({
+          where: {
+            userId,
+            deletedAt: null,
+          },
+        }),
+        // 获取客户总数
+        prisma.client.count({
+          where: {
+            userId,
+            deletedAt: null,
+          },
+        }),
+        // 获取待办任务数
+        prisma.task.count({
+          where: {
+            createdBy: userId,
+            status: 'TODO',
+            deletedAt: null,
+          },
+        }),
+        // 获取今日日程数
+        prisma.courtSchedule.count({
+          where: {
+            case: {
+              userId,
+            },
+            startTime: {
+              gte: new Date(new Date().setHours(0, 0, 0, 0)),
+              lte: new Date(new Date().setHours(23, 59, 59, 999)),
+            },
+          },
+        }),
+      ]);
+
+    // 获取最近活动
+    const recentCases = await prisma.case.findMany({
+      where: {
+        userId,
+        deletedAt: null,
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: 2,
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        updatedAt: true,
+      },
+    });
+
+    const recentClients = await prisma.client.findMany({
+      where: {
+        userId,
+        deletedAt: null,
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 1,
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+      },
+    });
+
+    const recentSchedules = await prisma.courtSchedule.findMany({
+      where: {
+        case: {
+          userId,
+        },
+        startTime: {
+          gte: new Date(),
+        },
+      },
+      orderBy: { startTime: 'asc' },
+      take: 1,
+      select: {
+        id: true,
+        title: true,
+        startTime: true,
+      },
+    });
+
+    // 构建统计数据
     const stats: StatCard[] = [
       {
         id: 'total-cases',
         title: '案件总数',
-        value: 24,
-        change: 12,
+        value: totalCases,
+        change: 0,
         changeType: 'increase',
         icon: 'case',
         color: 'blue',
@@ -30,8 +133,8 @@ export async function GET(_request: NextRequest) {
       {
         id: 'total-clients',
         title: '客户总数',
-        value: 18,
-        change: 5,
+        value: totalClients,
+        change: 0,
         changeType: 'increase',
         icon: 'client',
         color: 'green',
@@ -40,8 +143,8 @@ export async function GET(_request: NextRequest) {
       {
         id: 'pending-tasks',
         title: '待办任务',
-        value: 7,
-        change: 2,
+        value: pendingTasks,
+        change: 0,
         changeType: 'decrease',
         icon: 'task',
         color: 'yellow',
@@ -50,49 +153,53 @@ export async function GET(_request: NextRequest) {
       {
         id: 'today-schedule',
         title: '今日日程',
-        value: 3,
+        value: todaySchedules,
+        change: 0,
+        changeType: 'increase',
         icon: 'schedule',
         color: 'purple',
         link: '/court-schedule',
       },
     ];
 
-    const recentActivities: RecentActivity[] = [
-      {
-        id: '1',
+    // 构建最近活动
+    const activities: RecentActivity[] = [];
+
+    for (const caseItem of recentCases) {
+      activities.push({
+        id: `case-${caseItem.id}`,
         type: 'case',
-        title: '案件 #CASE-001 状态更新',
-        description: '案件已进入庭审阶段',
-        time: '2小时前',
-        link: '/cases/CASE-001',
-      },
-      {
-        id: '2',
+        title: `案件 #${caseItem.id} 状态更新`,
+        description: `案件状态: ${caseItem.status}`,
+        time: getTimeAgo(caseItem.updatedAt),
+        link: `/cases/${caseItem.id}`,
+      });
+    }
+
+    for (const client of recentClients) {
+      activities.push({
+        id: `client-${client.id}`,
         type: 'client',
-        title: '新客户：张某某',
+        title: `新客户：${client.name}`,
         description: '已创建客户档案',
-        time: '5小时前',
-        link: '/clients/CLIENT-001',
-      },
-      {
-        id: '3',
+        time: getTimeAgo(client.createdAt),
+        link: `/clients/${client.id}`,
+      });
+    }
+
+    for (const schedule of recentSchedules) {
+      activities.push({
+        id: `schedule-${schedule.id}`,
         type: 'schedule',
         title: '法庭日程提醒',
-        description: '明日10:00 民事案件开庭',
-        time: '1天前',
-      },
-      {
-        id: '4',
-        type: 'team',
-        title: '团队邀请',
-        description: '李律师已加入"某某律师事务所"',
-        time: '2天前',
-      },
-    ];
+        description: `${schedule.title} - ${formatDateTime(schedule.startTime)}`,
+        time: getTimeAgo(schedule.startTime),
+      });
+    }
 
     const data: DashboardData = {
       stats,
-      recentActivities,
+      recentActivities: activities,
     };
 
     return NextResponse.json({
@@ -109,6 +216,45 @@ export async function GET(_request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * 格式化相对时间
+ */
+function getTimeAgo(date: Date | string): string {
+  const now = new Date();
+  const past = typeof date === 'string' ? new Date(date) : date;
+  const diffMs = now.getTime() - past.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) {
+    return '刚刚';
+  }
+  if (diffMins < 60) {
+    return diffMins + '分钟前';
+  }
+  if (diffHours < 24) {
+    return diffHours + '小时前';
+  }
+  if (diffDays < 7) {
+    return diffDays + '天前';
+  }
+  return past.toLocaleDateString('zh-CN');
+}
+
+/**
+ * 格式化日期时间
+ */
+function formatDateTime(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleString('zh-CN', {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 /**

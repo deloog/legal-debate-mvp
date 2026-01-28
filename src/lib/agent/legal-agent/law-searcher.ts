@@ -5,14 +5,24 @@
  * 1. 本地JSON检索（优先）
  * 2. 关键词全文搜索
  * 3. TF-IDF相关性排序
- * 4. 外部API检索（补充，暂未实现）
+ * 4. 外部API检索（法律之星/北大法宝，已实现）
  * 5. 结果合并去重
+ * 6. 自动降级（外部API失败时使用本地）
+ *
+ * 外部API配置（环境变量）：
+ * - LAW_ARTICLE_PROVIDER: 'lawstar' | 'pkulaw' | 'local'
+ * - LAWSTAR_API_KEY: 法律之星API密钥
+ * - PKULAW_API_KEY: 北大法宝API密钥
  */
 
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { createHash } from 'crypto';
 import type { LegalQuery, LawArticle, SearchResult } from './types';
+import {
+  getExternalAPIClient,
+  type IExternalLawArticleAPI,
+} from '../../law-article/external-api-client';
 
 // =============================================================================
 // 类型定义
@@ -61,9 +71,11 @@ export class LawSearcher {
   private searchIndex: SearchIndex | null = null;
   private dataDir: string;
   private initialized: boolean = false;
+  private externalClient: IExternalLawArticleAPI;
 
   constructor(dataDir: string = path.join(process.cwd(), 'data')) {
     this.dataDir = dataDir;
+    this.externalClient = getExternalAPIClient();
   }
 
   /**
@@ -106,11 +118,27 @@ export class LawSearcher {
     // 1. 本地检索
     const localResults = await this.localSearch(query);
 
-    // 2. 外部检索（如果需要且启用）
-    const externalResults: LawArticle[] = [];
+    // 2. 外部检索（如果本地结果不足且启用外部检索）
+    let externalResults: LawArticle[] = [];
     if (localResults.length < 5 && query.enableVectorSearch !== false) {
-      // 外部API检索暂未实现，返回空数组
-      // TODO: 实现外部API检索
+      try {
+        const searchQuery = query.keywords.join(' ');
+        const externalResult = await this.externalClient.search(searchQuery, {
+          limit: 20,
+          caseType: query.caseType,
+          lawType: query.lawType,
+        });
+
+        if (externalResult.articles.length > 0) {
+          externalResults = externalResult.articles;
+          console.log(
+            `[LawSearcher] 外部检索成功: ${externalResult.articles.length} 条结果 ` +
+              `(来源: ${externalResult.source}, 缓存: ${externalResult.cached})`
+          );
+        }
+      } catch (error) {
+        console.warn('[LawSearcher] 外部检索失败，使用本地结果:', error);
+      }
     }
 
     // 3. 合并去重
@@ -473,5 +501,70 @@ export class LawSearcher {
   cleanup(): void {
     this.searchIndex = null;
     this.initialized = false;
+  }
+
+  /**
+   * 清除指定前缀的缓存文件
+   *
+   * @param prefix 文件前缀（如 'law-articles-'）
+   * @returns 删除的文件数量
+   */
+  async clearCacheByPrefix(prefix: string): Promise<number> {
+    try {
+      const files = await fs.readdir(this.dataDir);
+      const filesToDelete = files.filter(file => file.startsWith(prefix));
+
+      let deletedCount = 0;
+      for (const file of filesToDelete) {
+        const filePath = path.join(this.dataDir, file);
+        try {
+          await fs.unlink(filePath);
+          deletedCount++;
+          console.log(`[LawSearcher] 删除缓存文件: ${file}`);
+        } catch (error) {
+          console.warn(`[LawSearcher] 删除缓存文件失败: ${file}`, error);
+        }
+      }
+
+      // 清除内存中的搜索索引
+      if (deletedCount > 0) {
+        this.cleanup();
+        console.log(`[LawSearcher] 缓存已清除，删除 ${deletedCount} 个文件`);
+      }
+
+      return deletedCount;
+    } catch (error) {
+      console.error('[LawSearcher] 清除缓存失败:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * 清除所有法条缓存文件
+   *
+   * @returns 删除的文件数量
+   */
+  async clearAllCache(): Promise<number> {
+    return this.clearCacheByPrefix('law-articles-');
+  }
+
+  /**
+   * 获取缓存文件列表
+   *
+   * @param prefix 文件前缀（可选）
+   * @returns 缓存文件列表
+   */
+  async getCacheFiles(prefix?: string): Promise<string[]> {
+    try {
+      const files = await fs.readdir(this.dataDir);
+      const cacheFiles = prefix
+        ? files.filter(file => file.startsWith(prefix))
+        : files.filter(file => file.startsWith('law-articles-'));
+
+      return cacheFiles;
+    } catch (error) {
+      console.error('[LawSearcher] 获取缓存文件列表失败:', error);
+      return [];
+    }
   }
 }

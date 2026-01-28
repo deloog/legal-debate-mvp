@@ -37,7 +37,11 @@ export async function getAuthUser(
     const userEmail = request.headers.get('x-user-email');
 
     if (userId && userRole && userEmail) {
-      console.log('[getAuthUser] 从middleware headers读取用户信息:', { userId, userEmail, userRole });
+      console.log('[getAuthUser] 从middleware headers读取用户信息:', {
+        userId,
+        userEmail,
+        userRole,
+      });
       // middleware已经验证过，直接返回payload
       return {
         userId,
@@ -50,7 +54,12 @@ export async function getAuthUser(
     return null;
   }
 
-  console.log('[getAuthUser] Token来源:', tokenSource, '预览:', token.substring(0, 30) + '...');
+  console.log(
+    '[getAuthUser] Token来源:',
+    tokenSource,
+    '预览:',
+    token.substring(0, 30) + '...'
+  );
 
   // 4. 验证token
   const verificationResult = verifyToken(token);

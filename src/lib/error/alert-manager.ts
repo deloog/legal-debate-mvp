@@ -601,9 +601,123 @@ export class AlertManager {
    * @param alert 告警
    */
   private async sendEmailNotification(alert: Alert): Promise<void> {
-    // TODO: 实现邮件发送逻辑
-    // 这里可以集成邮件服务（如SendGrid、AWS SES等）
-    console.log(`[EMAIL] ${alert.message}`);
+    const { getEmailService } = await import('@/lib/auth/email-service');
+    const emailService = getEmailService();
+
+    // 获取告警接收人邮箱（可从环境变量配置）
+    const alertRecipient = process.env.ALERT_EMAIL_TO;
+    if (!alertRecipient) {
+      console.warn('[AlertManager] ALERT_EMAIL_TO 未配置，跳过邮件通知');
+      return;
+    }
+
+    const subject = `[告警] ${alert.severity} - ${alert.ruleName}`;
+    const textContent = this.generateAlertEmailText(alert);
+    const htmlContent = this.generateAlertEmailHtml(alert);
+
+    // 检查邮件服务是否支持通用发送
+    if (emailService.sendEmail) {
+      const result = await emailService.sendEmail({
+        to: alertRecipient,
+        subject,
+        text: textContent,
+        html: htmlContent,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || '邮件发送失败');
+      }
+
+      console.log(
+        `[AlertManager] 告警邮件已发送: ${alertRecipient}, AlertID=${alert.alertId}`
+      );
+    } else {
+      console.log(`[EMAIL] ${alert.message}`);
+    }
+  }
+
+  /**
+   * 生成告警邮件纯文本内容
+   */
+  private generateAlertEmailText(alert: Alert): string {
+    return `
+系统告警通知
+
+告警级别: ${alert.severity}
+规则名称: ${alert.ruleName}
+告警ID: ${alert.alertId}
+
+错误信息:
+${alert.errorMessage}
+
+详细信息:
+${alert.message}
+
+触发时间: ${alert.triggeredAt.toLocaleString('zh-CN')}
+
+---
+律伴助手 系统告警
+    `.trim();
+  }
+
+  /**
+   * 生成告警邮件 HTML 内容
+   */
+  private generateAlertEmailHtml(alert: Alert): string {
+    const severityColor = {
+      [AlertSeverity.CRITICAL]: '#dc3545',
+      [AlertSeverity.HIGH]: '#fd7e14',
+      [AlertSeverity.MEDIUM]: '#ffc107',
+      [AlertSeverity.LOW]: '#17a2b8',
+    }[alert.severity];
+
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>系统告警</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; border-left: 4px solid ${severityColor};">
+    <h2 style="color: ${severityColor}; margin-top: 0;">⚠️ 系统告警通知</h2>
+
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; width: 100px;">告警级别:</td>
+        <td style="padding: 8px 0;"><span style="background: ${severityColor}; color: white; padding: 2px 8px; border-radius: 3px;">${alert.severity}</span></td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold;">规则名称:</td>
+        <td style="padding: 8px 0;">${alert.ruleName}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold;">告警ID:</td>
+        <td style="padding: 8px 0; font-family: monospace;">${alert.alertId}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold;">触发时间:</td>
+        <td style="padding: 8px 0;">${alert.triggeredAt.toLocaleString('zh-CN')}</td>
+      </tr>
+    </table>
+
+    <div style="background: #fff; padding: 15px; border-radius: 5px; margin-top: 15px;">
+      <h4 style="margin-top: 0; color: #666;">错误信息</h4>
+      <p style="margin: 0; color: #dc3545;">${alert.errorMessage}</p>
+    </div>
+
+    <div style="background: #fff; padding: 15px; border-radius: 5px; margin-top: 10px;">
+      <h4 style="margin-top: 0; color: #666;">详细信息</h4>
+      <p style="margin: 0;">${alert.message}</p>
+    </div>
+  </div>
+
+  <p style="font-size: 12px; color: #999; margin-top: 20px; text-align: center;">
+    律伴助手 系统告警服务
+  </p>
+</body>
+</html>
+    `.trim();
   }
 
   /**
@@ -611,7 +725,6 @@ export class AlertManager {
    * @param alert 告警
    */
   private async sendWebhookNotification(alert: Alert): Promise<void> {
-    // TODO: 实现Webhook发送逻辑
     const webhookUrl = process.env.ALERT_WEBHOOK_URL;
     if (!webhookUrl) {
       console.warn('ALERT_WEBHOOK_URL not configured');

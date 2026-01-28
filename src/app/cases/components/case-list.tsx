@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useCases, CaseFilters } from '@/lib/hooks/use-cases';
 import { CaseListItem } from './case-list-item';
 import { CaseSearch } from './case-search';
@@ -11,6 +12,7 @@ import { CaseSearch } from './case-search';
  * 功能：展示案件列表，支持分页
  */
 export function CaseList() {
+  const router = useRouter();
   const [filters] = useState<CaseFilters>({});
   const [searchQuery, setSearchQuery] = useState('');
   const { cases, loading, error, pagination, goToPage, refetch } = useCases(
@@ -43,12 +45,13 @@ export function CaseList() {
   /**
    * 开始辩论（使用useCallback避免子组件重渲染）
    */
-  const handleStartDebate = useCallback((caseId: string) => {
-    // TODO: 实现跳转到辩论创建页面
-    console.log('开始辩论:', caseId);
-    // 暂时跳转到案件详情页
-    window.location.href = `/cases/${caseId}/debates`;
-  }, []);
+  const handleStartDebate = useCallback(
+    (caseId: string) => {
+      // 跳转到辩论创建页面，并携带案件ID
+      router.push(`/debates/create?caseId=${caseId}`);
+    },
+    [router]
+  );
 
   /**
    * 删除案件（使用useCallback避免子组件重渲染）

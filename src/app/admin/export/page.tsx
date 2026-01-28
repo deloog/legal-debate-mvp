@@ -39,8 +39,16 @@ export default function ExportPage(): React.ReactElement {
 
   const loadExportTasks = async () => {
     try {
-      // TODO: 实现从API获取导出任务列表
-      setExportTasks([]);
+      const response = await fetch('/api/admin/export/tasks');
+      if (!response.ok) {
+        throw new Error('加载导出历史失败');
+      }
+      const result = await response.json();
+      if (result.success && result.data?.tasks) {
+        setExportTasks(result.data.tasks);
+      } else {
+        setExportTasks([]);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : '加载导出历史失败');
     }

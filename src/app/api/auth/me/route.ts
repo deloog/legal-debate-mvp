@@ -18,8 +18,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     console.log('[/api/auth/me] 收到请求:', {
       hasCookie: !!accessToken,
       hasAuthHeader: !!authHeader,
-      cookiePreview: accessToken ? accessToken.substring(0, 30) + '...' : 'none',
-      allCookies: request.cookies.getAll().map(c => ({ name: c.name, hasValue: !!c.value })),
+      cookiePreview: accessToken
+        ? accessToken.substring(0, 30) + '...'
+        : 'none',
+      allCookies: request.cookies
+        .getAll()
+        .map(c => ({ name: c.name, hasValue: !!c.value })),
     });
 
     // 验证用户认证

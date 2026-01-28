@@ -67,13 +67,38 @@ export interface SearchResult {
 // =============================================================================
 
 /**
+ * 案件信息
+ */
+export interface CaseInfo {
+  /** 案件描述 */
+  description?: string;
+  /** 争议焦点 */
+  disputeFocus?: string[];
+  /** 证据列表 */
+  evidences?: Array<{
+    id: string;
+    summary: string;
+    type: string;
+  }>;
+  /** 案件地点/地域 */
+  location?: string;
+  /** 案件类型 */
+  caseType?: string;
+  /** 当事人信息 */
+  parties?: {
+    plaintiff?: { name: string; role: string };
+    defendant?: { name: string; role: string };
+  };
+}
+
+/**
  * 适用性分析输入
  */
 export interface ApplicabilityAnalysisInput {
   /** 待分析的法条 */
   articles: LawArticle[];
   /** 案件信息 */
-  caseInfo: unknown;
+  caseInfo: CaseInfo;
   /** 当事人信息 */
   parties?: {
     plaintiff?: { name: string; role: string };

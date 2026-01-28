@@ -1,0 +1,219 @@
+{
+  "claude_code_constraints": {
+    "description": "Claude Code AI助手行为规范",
+    "version": "1.0",
+    "created": "2026-01-28",
+
+    "CRITICAL_RULES": {
+      "description": "违反这些规则将导致严重问题，必须严格遵守",
+      "rules": {
+        "no_duplicate_files": "禁止创建增强版、v2、new_等重复文件，所有改进必须在原文件上进行",
+        "modify_original": "所有改进必须在原文件上进行，禁止创建增强版、备份版等重复文件",
+        "no_false_reporting": "禁止虚构完成度，必须实事求是，所有测试必须真实运行并验证",
+        "respect_existing_structure": "必须遵守项目现有的文件组织结构和命名规范"
+      },
+      "consequences": "违反这些规则将导致代码碎片化、测试不可信、项目混乱"
+    },
+
+    "FILE_ORGANIZATION_RULES": {
+      "description": "文件组织规范 - 最高优先级",
+      "priority": "HIGH",
+      "rules": {
+        "documentation_files": {
+          "location": "docs/",
+          "description": "所有文档文件必须放在docs/目录下",
+          "examples": [
+            "技术文档: docs/TECHNICAL_GUIDE.md",
+            "API文档: docs/API_DOCUMENTATION.md",
+            "完成总结: docs/COMPLETION_SUMMARY.md",
+            "使用指南: docs/USAGE_GUIDE.md",
+            "优化指南: docs/OPTIMIZATION_GUIDE.md"
+          ],
+          "exceptions": [
+            "README.md - 放在根目录",
+            "CHANGELOG.md - 放在根目录",
+            "LICENSE - 放在根目录",
+            "CONTRIBUTING.md - 放在根目录"
+          ]
+        },
+        "test_files": {
+          "location": "src/__tests__/",
+          "description": "所有测试文件必须放在src/__tests__/目录下",
+          "naming_convention": "*.test.ts, *.test.tsx, *.spec.ts",
+          "structure": {
+            "unit_tests": "src/__tests__/unit/",
+            "integration_tests": "src/__tests__/integration/",
+            "e2e_tests": "src/__tests__/e2e/"
+          }
+        },
+        "script_files": {
+          "location": "scripts/",
+          "description": "所有脚本文件必须放在scripts/目录下",
+          "examples": [
+            "scripts/seed.ts - 数据库种子脚本",
+            "scripts/migrate.ts - 数据库迁移脚本",
+            "scripts/deploy.sh - 部署脚本",
+            "scripts/backup.ts - 备份脚本"
+          ]
+        },
+        "config_files": {
+          "location": "根目录或config/",
+          "description": "配置文件放在根目录或config/目录",
+          "examples": [
+            "package.json - 根目录",
+            "tsconfig.json - 根目录",
+            ".env - 根目录",
+            "config/app.config.ts - config目录"
+          ]
+        },
+        "component_files": {
+          "location": "src/components/",
+          "description": "React组件必须放在src/components/目录下",
+          "structure": {
+            "ui_components": "src/components/ui/",
+            "feature_components": "src/components/features/",
+            "layout_components": "src/components/layouts/",
+            "shared_components": "src/components/shared/"
+          }
+        },
+        "api_routes": {
+          "location": "src/app/api/",
+          "description": "Next.js API路由必须放在src/app/api/目录下"
+        },
+        "utility_functions": {
+          "location": "src/lib/",
+          "description": "工具函数和辅助模块必须放在src/lib/目录下",
+          "examples": [
+            "src/lib/db/ - 数据库相关",
+            "src/lib/ai/ - AI相关",
+            "src/lib/auth/ - 认证相关",
+            "src/lib/utils/ - 通用工具"
+          ]
+        },
+        "type_definitions": {
+          "location": "src/types/",
+          "description": "TypeScript类型定义必须放在src/types/目录下"
+        }
+      },
+      "enforcement": "在创建任何文件之前，必须检查文件类型并放置在正确的目录下"
+    },
+
+    "CODE_QUALITY_RULES": {
+      "description": "代码质量规范",
+      "rules": {
+        "max_lines_per_file": "单个文件最多500行，超出必须拆分为多个小文件",
+        "no_hardcoded_values": "禁止硬编码敏感配置（如数据库密码、API密钥）和路径，必须使用环境变量",
+        "no_any_type": "生产代码禁止使用any类型，测试文件允许但不推荐",
+        "typescript_strict": "必须启用TypeScript strict模式",
+        "error_handling": "所有异步操作必须有错误处理",
+        "code_style": {
+          "quotes": "使用单引号",
+          "indentation": "2空格",
+          "semicolons": "使用分号",
+          "trailing_comma": "多行时使用尾逗号"
+        }
+      }
+    },
+
+    "TESTING_RULES": {
+      "description": "测试规范",
+      "rules": {
+        "test_location": "测试文件必须放在 src/__tests__/ 目录",
+        "coverage_target": "测试覆盖率目标 > 80%",
+        "unit_test_required": "核心功能必须有单元测试",
+        "naming_convention": "测试文件命名: *.test.ts 或 *.spec.ts",
+        "mock_ai_by_default": "E2E测试默认使用Mock AI服务，真实AI测试需明确指定"
+      }
+    },
+
+    "DOCUMENTATION_RULES": {
+      "description": "文档编写规范",
+      "rules": {
+        "markdown_format": "使用Markdown格式编写文档",
+        "chinese_language": "项目文档使用中文编写",
+        "structure_requirements": [
+          "必须有明确的标题层次（使用#, ##, ###）",
+          "必须有目录（TOC）对于长文档",
+          "必须有代码示例（使用```代码块）",
+          "必须有清晰的段落划分"
+        ],
+        "update_policy": "修改代码时，必须同步更新相关文档"
+      }
+    },
+
+    "GIT_COMMIT_RULES": {
+      "description": "Git提交规范",
+      "rules": {
+        "commit_message_format": "使用约定式提交格式：<type>: <description>",
+        "commit_types": [
+          "feat: 新功能",
+          "fix: 修复bug",
+          "docs: 文档更新",
+          "style: 代码格式化",
+          "refactor: 重构代码",
+          "test: 测试相关",
+          "chore: 构建/工具相关"
+        ],
+        "never_force_push": "禁止强制推送到main/master分支",
+        "no_commit_without_permission": "只在用户明确要求时创建Git提交"
+      }
+    },
+
+    "PERFORMANCE_RULES": {
+      "description": "性能优化规范",
+      "rules": {
+        "database_optimization": "使用索引优化数据库查询",
+        "lazy_loading": "使用懒加载优化前端性能",
+        "memoization": "重复计算使用缓存或记忆化",
+        "bundle_size": "关注打包大小，避免引入大型依赖"
+      }
+    },
+
+    "SECURITY_RULES": {
+      "description": "安全规范",
+      "rules": {
+        "no_secrets_in_code": "禁止在代码中硬编码密钥、密码等敏感信息",
+        "use_environment_variables": "敏感配置必须使用环境变量",
+        "input_validation": "所有用户输入必须验证",
+        "sql_injection_prevention": "使用ORM防止SQL注入",
+        "xss_prevention": "前端输出必须转义防止XSS攻击"
+      }
+    },
+
+    "BEFORE_TAKING_ACTION": {
+      "description": "执行任何操作之前的检查清单",
+      "checklist": [
+        "文件类型识别：识别要创建的文件类型（文档/测试/脚本/组件等）",
+        "目录确认：根据文件类型确认正确的存放目录",
+        "命名规范：检查文件命名是否符合项目规范",
+        "避免重复：检查是否已存在相似文件，避免创建重复",
+        "结构完整：确保必要的目录结构已存在",
+        "规范遵守：确认操作符合所有CRITICAL_RULES和HIGH_PRIORITY_RULES"
+      ]
+    },
+
+    "COMPLETION_VERIFICATION": {
+      "description": "任务完成度验证清单",
+      "checklist": [
+        "功能实现完整：所有需求功能已实现",
+        "文件位置正确：所有文件放在正确的目录下",
+        "测试通过验证：相关测试全部通过",
+        "代码符合规范：无ESLint/TypeScript错误",
+        "文档已更新：相关文档已同步更新",
+        "无破坏性更改：现有功能不受影响",
+        "真实性验证：所有报告的文件和功能真实存在"
+      ],
+      "no_false_reporting": "禁止虚构完成度，必须实事求是"
+    }
+  },
+
+  "enforcement_level": {
+    "CRITICAL_RULES": "MUST - 必须严格遵守",
+    "FILE_ORGANIZATION_RULES": "MUST - 必须严格遵守",
+    "CODE_QUALITY_RULES": "SHOULD - 强烈建议遵守",
+    "TESTING_RULES": "SHOULD - 强烈建议遵守",
+    "PERFORMANCE_RULES": "MAY - 建议遵守"
+  },
+
+  "note": "此文件用于规范Claude Code AI助手的行为。AI助手在执行任何操作前应检查此文件并严格遵守相关规则。"
+}

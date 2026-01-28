@@ -156,8 +156,7 @@ describe('RoundManager', () => {
         'PLAINTIFF',
         '原告论点内容',
         'MAIN_POINT',
-        'zhipu',
-        0.85
+        { aiProvider: 'zhipu', confidence: 0.85 }
       );
 
       await manager.addArgument(
@@ -165,8 +164,7 @@ describe('RoundManager', () => {
         'DEFENDANT',
         '被告论点内容',
         'MAIN_POINT',
-        'zhipu',
-        0.9
+        { aiProvider: 'zhipu', confidence: 0.9 }
       );
 
       // 完成轮次
@@ -333,8 +331,7 @@ describe('RoundManager', () => {
         'PLAINTIFF',
         '原告主要论点',
         'MAIN_POINT',
-        'zhipu',
-        0.9
+        { aiProvider: 'zhipu', confidence: 0.9 }
       );
 
       const summary = await manager.getRoundSummary(round.id);
@@ -360,8 +357,7 @@ describe('RoundManager', () => {
         'PLAINTIFF',
         '测试论点内容',
         'MAIN_POINT',
-        'zhipu',
-        0.85
+        { aiProvider: 'zhipu', confidence: 0.85 }
       );
 
       expect(result).toBeDefined();

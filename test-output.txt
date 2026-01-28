@@ -1,154 +1,2288 @@
-npm verbose cli C:\nodejs\node.exe C:\nodejs\node_modules\npm\bin\npm-cli.js
-npm info using npm@10.9.2
-npm info using node@v22.14.0
-npm verbose title npm test src/__tests__/ai/case/success-rate-analyzer.test.ts
-npm verbose argv "test" "src/__tests__/ai/case/success-rate-analyzer.test.ts" "--loglevel" "verbose"
-npm verbose logfile logs-max:10 dir:C:\Users\deloo\AppData\Local\npm-cache\_logs\2026-01-25T13_15_46_156Z-
-npm verbose logfile C:\Users\deloo\AppData\Local\npm-cache\_logs\2026-01-25T13_15_46_156Z-debug-0.log
 
 > legal_debate_mvp@0.1.0 test
-> jest src/__tests__/ai/case/success-rate-analyzer.test.ts
+> jest src/__tests__/app/consultations/create/components/consultation-form.test.tsx
 
-鈼?Validation Warning:
+FAIL app src/__tests__/app/consultations/create/components/consultation-form.test.tsx
+  ConsultationForm
+    鍩虹娓叉煋
+      鈭?搴旇姝ｇ‘娓叉煋琛ㄥ崟鏍囬 (64 ms)
+      鈭?搴旇娓叉煋鎵€鏈夎〃鍗曞瓧娈?(47 ms)
+      鈭?搴旇娓叉煋鎻愪氦鍜屽彇娑堟寜閽?(15 ms)
+      鈭?搴旇鏄剧ず鍜ㄨ鏂瑰紡閫夐」 (14 ms)
+    琛ㄥ崟楠岃瘉
+      脳 搴旇楠岃瘉蹇呭～鐨勫挩璇汉濮撳悕 (118 ms)
+      鈭?搴旇楠岃瘉蹇呭～鐨勬鎯呮憳瑕?(27 ms)
+      鈭?搴旇楠岃瘉妗堟儏鎽樿鏈€灏忛暱搴?(31 ms)
+      脳 搴旇鎺ュ彈鏈夋晥鐨勬鎯呮憳瑕侀暱搴?(22 ms)
+      脳 搴旇楠岃瘉妗堟儏鎽樿鏈€澶ч暱搴?(20 ms)
+    琛ㄥ崟杈撳叆
+      鈭?搴旇鑳藉閫夋嫨鍜ㄨ鏂瑰紡 (19 ms)
+      鈭?搴旇鑳藉杈撳叆鍜ㄨ浜哄鍚?(17 ms)
+      鈭?搴旇鑳藉杈撳叆鑱旂郴鐢佃瘽 (22 ms)
+      鈭?搴旇鑳藉杈撳叆鐢靛瓙閭 (17 ms)
+      鈭?搴旇鑳藉杈撳叆鍗曚綅鍚嶇О (18 ms)
+      鈭?搴旇鑳藉杈撳叆妗堜欢绫诲瀷 (18 ms)
+      鈭?搴旇鑳藉杈撳叆妗堟儏鎽樿 (19 ms)
+      鈭?搴旇鑳藉杈撳叆瀹㈡埛璇夋眰 (20 ms)
+      鈭?搴旇鑳藉閫夋嫨璺熻繘鏃ユ湡 (19 ms)
+      鈭?搴旇鑳藉杈撳叆璺熻繘澶囨敞 (17 ms)
+    瀛楃璁℃暟
+      鈭?搴旇鏄剧ず妗堟儏鎽樿瀛楃璁℃暟 (17 ms)
+      鈭?搴旇鏄剧ず瀹㈡埛璇夋眰瀛楃璁℃暟 (18 ms)
+      鈭?搴旇鏄剧ず璺熻繘澶囨敞瀛楃璁℃暟 (18 ms)
+    琛ㄥ崟鎻愪氦
+      脳 搴旇鍦ㄦ彁浜ゆ垚鍔熸椂璋冪敤onSubmit (39 ms)
+      脳 搴旇鍙戦€佹纭殑璇锋眰鏁版嵁 (46 ms)
+      脳 搴旇鍦ㄦ彁浜ゆ椂绂佺敤鎸夐挳骞舵樉绀哄姞杞界姸鎬?(33 ms)
+      脳 搴旇鍦ㄦ彁浜ゅけ璐ユ椂鏄剧ず閿欒淇℃伅 (85 ms)
+      脳 搴旇鍦ㄧ綉缁滈敊璇椂鏄剧ず閿欒淇℃伅 (253 ms)
+    鍙栨秷鎿嶄綔
+      鈭?搴旇鍦ㄧ偣鍑诲彇娑堟寜閽椂璋冪敤onCancel (11 ms)
+      脳 搴旇鍦ㄦ彁浜ゆ椂绂佺敤鍙栨秷鎸夐挳 (39 ms)
+    鍜ㄨ浜哄鍚嶉檺鍒?      鈭?搴旇璁剧疆鍜ㄨ浜哄鍚嶆渶澶ч暱搴﹀睘鎬?(12 ms)
+    鍗曚綅鍚嶇О闄愬埗
+      鈭?搴旇璁剧疆鍗曚綅鍚嶇О鏈€澶ч暱搴﹀睘鎬?(11 ms)
+    妗堜欢绫诲瀷闄愬埗
+      鈭?搴旇璁剧疆妗堜欢绫诲瀷鏈€澶ч暱搴﹀睘鎬?(10 ms)
+    瀹㈡埛璇夋眰闄愬埗
+      鈭?搴旇璁剧疆瀹㈡埛璇夋眰鏈€澶ч暱搴﹀睘鎬?(11 ms)
+    璺熻繘澶囨敞闄愬埗
+      鈭?搴旇璁剧疆璺熻繘澶囨敞鏈€澶ч暱搴﹀睘鎬?(12 ms)
+    榛樿鍊?      鈭?搴旇璁剧疆榛樿鐨勫挩璇㈡椂闂翠负褰撳墠鏃堕棿 (13 ms)
+      鈭?搴旇璁剧疆榛樿鐨勫挩璇㈡柟寮忎负鐢佃瘽鍜ㄨ (10 ms)
+    閿欒鐘舵€佹牱寮?      鈭?搴旇鍦ㄩ獙璇佸け璐ユ椂鏄剧ず閿欒鏍峰紡 (18 ms)
+    蹇呭～瀛楁鏍囪瘑
+      鈭?搴旇鏄剧ず鍜ㄨ鏂瑰紡涓哄繀濉瓧娈?(11 ms)
+      鈭?搴旇鏄剧ず鍜ㄨ鏃堕棿涓哄繀濉瓧娈?(10 ms)
+      鈭?搴旇鏄剧ず鍜ㄨ浜哄鍚嶄负蹇呭～瀛楁 (8 ms)
+      鈭?搴旇鏄剧ず妗堟儏鎽樿涓哄繀濉瓧娈?(12 ms)
 
-  Unknown option "coverageProvider" with value "v8" was found.
-  This is probably a typing mistake. Fixing it will remove this message.
+  鈼?ConsultationForm 鈥?琛ㄥ崟楠岃瘉 鈥?搴旇楠岃瘉蹇呭～鐨勫挩璇汉濮撳悕
 
-  Configuration Documentation:
-  https://jestjs.io/docs/configuration
+    Unable to find an element with the text: 鍜ㄨ浜哄鍚嶄笉鑳戒负绌? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
 
-  console.log
-    [2026-01-25T13:15:49.829Z] [INFO] Success rate analyzer config updated {
-      minSampleSize: 10,
-      confidenceThreshold: 0.8,
-      weightBySimilarity: false
-    }
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="rounded-lg border bg-white shadow-sm w-full"
+        >
+          <div
+            class="flex flex-col space-y-1.5 p-6 "
+          >
+            <h3
+              class="text-2xl font-semibold leading-none tracking-tight "
+            >
+              鍜ㄨ淇℃伅
+            </h3>
+          </div>
+          <form>
+            <div
+              class="p-6 pt-0 space-y-4"
+            >
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="consultType"
+                >
+                  鍜ㄨ鏂瑰紡
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <select
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="consultType"
+                >
+                  <option
+                    value="PHONE"
+                  >
+                    鐢佃瘽鍜ㄨ
+                  </option>
+                  <option
+                    value="VISIT"
+                  >
+                    鏉ヨ鍜ㄨ
+                  </option>
+                  <option
+                    value="ONLINE"
+                  >
+                    鍦ㄧ嚎鍜ㄨ
+                  </option>
+                  <option
+                    value="REFERRAL"
+                  >
+                    杞粙缁?[0m
+                  </option>
+                </select>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="consultTime"
+                >
+                  鍜ㄨ鏃堕棿
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <input
+                  class=""
+                  id="consultTime"
+                  type="datetime-local"
+                  value="2026-01-28T12:36"
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientName"
+                >
+                  鍜ㄨ浜哄鍚?[0m
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <input
+                  class="border-red-500"
+                  id="clientName"
+                  maxlength="50"
+                  placeholder="璇疯緭鍏ュ挩璇汉濮撳悕"
+                  type="text"
+                  value=""
+                />
+                <p
+                  class="text-sm text-red-500"
+                >
+                  璇疯緭鍏ュ挩璇汉濮撳悕
+                </p>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientPhone"
+                >
+                  鑱旂郴鐢佃瘽
+                </label>
+                <input
+                  class="border-red-500"
+                  id="clientPhone"
+                  placeholder="璇疯緭鍏ヨ仈绯荤數璇?
+                  type="tel"
+                  value=""
+                />
+                <p
+                  class="text-sm text-red-500"
+                >
+                  璇疯緭鍏ユ湁鏁堢殑鎵嬫満鍙风爜
+                </p>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientEmail"
+                >
+                  鐢靛瓙閭
+                </label>
+                <input
+                  class="border-red-500"
+                  id="clientEmail"
+                  placeholder="璇疯緭鍏ョ數瀛愰偖绠?
+                  type="email"
+                  value=""
+                />
+                <p
+                  class="text-sm text-red-500"
+                >
+                  璇疯緭鍏ユ湁鏁堢殑閭鍦板潃
+                </p>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientCompany"
+                >
+                  鍗曚綅鍚嶇О
+                </label>
+                <input
+                  class=""
+                  id="clientCompany"
+                  maxlength="100"
+                  placeholder="璇疯緭鍏ュ崟浣嶅悕绉?
+                  type="text"
+                  value=""
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="caseType"
+                >
+                  妗堜欢绫诲瀷
+                </label>
+                <input
+                  class=""
+                  id="caseType"
+                  maxlength="50"
+                  placeholder="璇疯緭鍏ユ浠剁被鍨?
+                  type="text"
+                  value=""
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="caseSummary"
+                >
+                  妗堟儏鎽樿
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <textarea
+                  class="w-full rounded-md border px-3 py-2 text-base focus:outline-none focus:ring-2 border-red-500 ring-red-500"
+                  id="caseSummary"
+                  maxlength="500"
+                  placeholder="璇疯缁嗘弿杩版鎯咃紙鑷冲皯10涓瓧绗︼級"
+                  rows="5"
+                />
+                <div
+                  class="flex justify-between text-xs text-gray-500"
+                >
+                  <span>
+                    鏈€灏?0涓瓧绗?[0m
+                  </span>
+                  <span>
+                    0
+                    /500
+                  </span>
+                </div>
+                <p
+                  class="text-sm text-red-500"
+                >
+                  妗堟儏鎽樿鑷冲皯闇€瑕?0涓瓧绗?[0m
+                </p>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientDemand"
+                >
+                  瀹㈡埛璇夋眰
+                </label>
+                <textarea
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="clientDemand"
+                  maxlength="1000"
+                  placeholder="璇锋弿杩板鎴风殑璇夋眰"
+                  rows="3"
+                />
+                <div
+                  class="text-right text-xs text-gray-500"
+                >
+                  0
+                  /1000
+                </div>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="followUpDate"
+                >
+                  璺熻繘鏃ユ湡
+                </label>
+                <input
+                  class="border-red-500"
+                  id="followUpDate"
+                  type="datetime-local"
+                  value=""
+                />
+                <p
+                  class="text-sm text-red-500"
+                >
+                  Invalid input: expected date, received Date
+                </p>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="followUpNotes"
+                >
+                  璺熻繘澶囨敞
+                </label>
+                <textarea
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="followUpNotes"
+                  maxlength="500"
+                  placeholder="璇疯緭鍏ヨ窡杩涘娉?
+                  rows="3"
+                />
+                <div
+                  class="text-right text-xs text-gray-500"
+                >
+                  0
+                  /500
+                </div>
+              </div>
+            </div>
+            <div
+              class="flex items-center p-6 pt-0 flex justify-end space-x-2"
+            >
+              <button
+                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
+                type="button"
+              >
+                鍙栨秷
+              </button>
+              <button
+                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base "
+                type="submit"
+              >
+                鍒涘缓
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </body>
 
-      at StructuredLogger.addLog (src/lib/agent/security/logger.ts:115:17)
+      85 |       if (form) {
+      86 |         fireEvent.submit(form);
+    > 87 |         await waitFor(() => {
+         |                      ^
+      88 |           expect(screen.getByText('鍜ㄨ浜哄鍚嶄笉鑳戒负绌?)).toBeInTheDocument();
+      89 |         });
+      90 |       }
 
-FAIL unit src/__tests__/ai/case/success-rate-analyzer.test.ts
-  SuccessRateAnalyzer
-    analyze
-      鈭?搴旇杩斿洖瀹屾暣鐨勮儨璐ョ巼鍒嗘瀽缁撴灉 (4 ms)
-      鈭?搴旇杩囨护鐩镐技搴︿綆浜庨槇鍊肩殑妗堜緥 (1 ms)
-      鈭?搴旇闄愬埗鏈€澶ф渚嬫暟閲?(1 ms)
-      鈭?搴旇姝ｇ‘璁＄畻绠€鍗曡儨鐜?(4 ms)
-      脳 搴旇姝ｇ‘璁＄畻鍖呭惈閮ㄥ垎鑳滆瘔鐨勮儨璇夋鐜?(2 ms)
-      鈭?搴旇姝ｇ‘鍒嗘瀽涓婂崌瓒嬪娍
-      鈭?搴旇姝ｇ‘鍒嗘瀽涓嬮檷瓒嬪娍
-      鈭?搴旇姝ｇ‘鍒ゆ柇绋冲畾瓒嬪娍 (1 ms)
-      鈭?搴旇姝ｇ‘鍒ゆ柇浣庨闄?(1 ms)
-      鈭?搴旇姝ｇ‘鍒ゆ柇楂橀闄?(1 ms)
-      脳 搴旇姝ｇ‘鍒ゆ柇涓闄?(4 ms)
-      鈭?缃俊搴︿綆鏃跺簲璇ヨ繑鍥為珮椋庨櫓 (1 ms)
-      鈭?搴旇鐢熸垚鍚堥€傜殑寤鸿 (1 ms)
-      鈭?搴旇澶勭悊绌哄尮閰嶅垪琛?(1 ms)
-      鈭?搴旇璁＄畻鍖呭惈鎾よ瘔鐨勮儨鐜?      脳 搴旇鎺掗櫎鎾よ瘔璁＄畻鑳滅巼 (1 ms)
-      脳 搴旇姝ｇ‘澶勭悊閮ㄥ垎鑳滆瘔 (1 ms)
-      鈭?搴旇澶勭悊妗堜緥鏁伴噺涓嶈冻鐨勬儏鍐?(1 ms)
-      鈭?搴旇澶勭悊缃俊搴︿綆鐨勬儏鍐?      鈭?搴旇鎸夌浉浼煎害鍔犳潈璁＄畻鑳滅巼
-    updateConfig
-      鈭?搴旇鏇存柊閰嶇疆 (31 ms)
-    getConfig
-      鈭?搴旇杩斿洖閰嶇疆 (1 ms)
-  SuccessRateAnalyzerFactory
-    getInstance
-      鈭?搴旇杩斿洖鍗曚緥瀹炰緥 (1 ms)
-      鈭?搴旇涓轰笉鍚屽悕绉板垱寤轰笉鍚屽疄渚?(1 ms)
-      鈭?搴旇浣跨敤榛樿鍚嶇О鍒涘缓瀹炰緥 (10 ms)
-    removeInstance
-      鈭?搴旇绉婚櫎鎸囧畾瀹炰緥
-      鈭?搴旇杩斿洖false濡傛灉瀹炰緥涓嶅瓨鍦?(1 ms)
-    getAllInstances
-      鈭?搴旇杩斿洖鎵€鏈夊疄渚?    clearAllInstances
-      鈭?搴旇娓呴櫎鎵€鏈夊疄渚?(1 ms)
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/consultations/create/components/consultation-form.test.tsx:87:22)
 
-  鈼?SuccessRateAnalyzer 鈥?analyze 鈥?搴旇姝ｇ‘璁＄畻鍖呭惈閮ㄥ垎鑳滆瘔鐨勮儨璇夋鐜?
-    expect(received).toBeCloseTo(expected, precision)
+  鈼?ConsultationForm 鈥?琛ㄥ崟楠岃瘉 鈥?搴旇鎺ュ彈鏈夋晥鐨勬鎯呮憳瑕侀暱搴?
+    TestingLibraryElementError: Unable to find an element with the text: 19/500. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
 
-    Expected: 0.625
-    Received: 1
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="rounded-lg border bg-white shadow-sm w-full"
+        >
+          <div
+            class="flex flex-col space-y-1.5 p-6 "
+          >
+            <h3
+              class="text-2xl font-semibold leading-none tracking-tight "
+            >
+              鍜ㄨ淇℃伅
+            </h3>
+          </div>
+          <form>
+            <div
+              class="p-6 pt-0 space-y-4"
+            >
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="consultType"
+                >
+                  鍜ㄨ鏂瑰紡
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <select
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="consultType"
+                >
+                  <option
+                    value="PHONE"
+                  >
+                    鐢佃瘽鍜ㄨ
+                  </option>
+                  <option
+                    value="VISIT"
+                  >
+                    鏉ヨ鍜ㄨ
+                  </option>
+                  <option
+                    value="ONLINE"
+                  >
+                    鍦ㄧ嚎鍜ㄨ
+                  </option>
+                  <option
+                    value="REFERRAL"
+                  >
+                    杞粙缁?[0m
+                  </option>
+                </select>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="consultTime"
+                >
+                  鍜ㄨ鏃堕棿
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <input
+                  class=""
+                  id="consultTime"
+                  type="datetime-local"
+                  value="2026-01-28T12:36"
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientName"
+                >
+                  鍜ㄨ浜哄鍚?[0m
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <input
+                  class=""
+                  id="clientName"
+                  maxlength="50"
+                  placeholder="璇疯緭鍏ュ挩璇汉濮撳悕"
+                  type="text"
+                  value=""
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientPhone"
+                >
+                  鑱旂郴鐢佃瘽
+                </label>
+                <input
+                  class=""
+                  id="clientPhone"
+                  placeholder="璇疯緭鍏ヨ仈绯荤數璇?
+                  type="tel"
+                  value=""
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientEmail"
+                >
+                  鐢靛瓙閭
+                </label>
+                <input
+                  class=""
+                  id="clientEmail"
+                  placeholder="璇疯緭鍏ョ數瀛愰偖绠?
+                  type="email"
+                  value=""
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientCompany"
+                >
+                  鍗曚綅鍚嶇О
+                </label>
+                <input
+                  class=""
+                  id="clientCompany"
+                  maxlength="100"
+                  placeholder="璇疯緭鍏ュ崟浣嶅悕绉?
+                  type="text"
+                  value=""
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="caseType"
+                >
+                  妗堜欢绫诲瀷
+                </label>
+                <input
+                  class=""
+                  id="caseType"
+                  maxlength="50"
+                  placeholder="璇疯緭鍏ユ浠剁被鍨?
+                  type="text"
+                  value=""
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="caseSummary"
+                >
+                  妗堟儏鎽樿
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <textarea
+                  class="w-full rounded-md border px-3 py-2 text-base focus:outline-none focus:ring-2 border-gray-300 focus:ring-blue-500"
+                  id="caseSummary"
+                  maxlength="500"
+                  placeholder="璇疯缁嗘弿杩版鎯咃紙鑷冲皯10涓瓧绗︼級"
+                  rows="5"
+                >
+                  杩欐槸涓€涓湁鏁堢殑妗堟儏鎽樿鎻忚堪
+                </textarea>
+                <div
+                  class="flex justify-between text-xs text-gray-500"
+                >
+                  <span>
+                    鏈€灏?0涓瓧绗?[0m
+                  </span>
+                  <span>
+                    13
+                    /500
+                  </span>
+                </div>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientDemand"
+                >
+                  瀹㈡埛璇夋眰
+                </label>
+                <textarea
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="clientDemand"
+                  maxlength="1000"
+                  placeholder="璇锋弿杩板鎴风殑璇夋眰"
+                  rows="3"
+                />
+                <div
+                  class="text-right text-xs text-gray-500"
+                >
+                  0
+                  /1000
+                </div>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="followUpDate"
+                >
+                  璺熻繘鏃ユ湡
+                </label>
+                <input
+                  class=""
+                  id="followUpDate"
+                  type="datetime-local"
+                  value=""
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="followUpNotes"
+                >
+                  璺熻繘澶囨敞
+                </label>
+                <textarea
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="followUpNotes"
+                  maxlength="500"
+                  placeholder="璇疯緭鍏ヨ窡杩涘娉?
+                  rows="3"
+                />
+                <div
+                  class="text-right text-xs text-gray-500"
+                >
+                  0
+                  /500
+                </div>
+              </div>
+            </div>
+            <div
+              class="flex items-center p-6 pt-0 flex justify-end space-x-2"
+            >
+              <button
+                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
+                type="button"
+              >
+                鍙栨秷
+              </button>
+              <button
+                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base "
+                type="submit"
+              >
+                鍒涘缓
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </body>
 
-    Expected precision:    2
-    Expected difference: < 0.005
-    Received difference:   0.375
+      134 |       fireEvent.change(caseSummaryTextarea, { target: { value: '杩欐槸涓€涓湁鏁堢殑妗堟儏鎽樿鎻忚堪' } });
+      135 |
+    > 136 |       expect(screen.getByText('19/500')).toBeInTheDocument();
+          |                     ^
+      137 |     });
+      138 |
+      139 |     test('搴旇楠岃瘉妗堟儏鎽樿鏈€澶ч暱搴?, () => {
 
-      105 |       const result = analyzer.analyze(mockParams, mockMatches);
-      106 |
-    > 107 |       expect(result.winProbability).toBeCloseTo(0.625, 2);
-          |                                     ^
-      108 |     });
-      109 |
-      110 |     it('搴旇姝ｇ‘鍒嗘瀽涓婂崌瓒嬪娍', () => {
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/__tests__/app/consultations/create/components/consultation-form.test.tsx:136:21)
 
-      at Object.<anonymous> (src/__tests__/ai/case/success-rate-analyzer.test.ts:107:37)
-
-  鈼?SuccessRateAnalyzer 鈥?analyze 鈥?搴旇姝ｇ‘鍒ゆ柇涓闄?
+  鈼?ConsultationForm 鈥?琛ㄥ崟楠岃瘉 鈥?搴旇楠岃瘉妗堟儏鎽樿鏈€澶ч暱搴?
     expect(received).toBe(expected) // Object.is equality
 
-    Expected: "medium"
-    Received: "low"
+    Expected: 500
+    Received: 501
 
-      190 |       const result = analyzer.analyze(mockParams, mockMatches);
-      191 |
-    > 192 |       expect(result.analysis.riskLevel).toBe('medium');
-          |                                         ^
-      193 |     });
-      194 |
-      195 |     it('缃俊搴︿綆鏃跺簲璇ヨ繑鍥為珮椋庨櫓', () => {
+      144 |       fireEvent.change(caseSummaryTextarea, { target: { value: 'a'.repeat(maxLength + 1) } });
+      145 |
+    > 146 |       expect((caseSummaryTextarea as HTMLTextAreaElement).value.length).toBe(maxLength);
+          |                                                                         ^
+      147 |     });
+      148 |   });
+      149 |
 
-      at Object.<anonymous> (src/__tests__/ai/case/success-rate-analyzer.test.ts:192:41)
+      at Object.<anonymous> (src/__tests__/app/consultations/create/components/consultation-form.test.tsx:146:73)
 
-  鈼?SuccessRateAnalyzer 鈥?analyze 鈥?搴旇鎺掗櫎鎾よ瘔璁＄畻鑳滅巼
+  鈼?ConsultationForm 鈥?琛ㄥ崟鎻愪氦 鈥?搴旇鍦ㄦ彁浜ゆ垚鍔熸椂璋冪敤onSubmit
 
-    expect(received).toBeCloseTo(expected, precision)
+    expect(jest.fn()).toHaveBeenCalledTimes(expected)
 
-    Expected: 0.5
-    Received: 1
+    Expected number of calls: 1
+    Received number of calls: 0
 
-    Expected precision:    2
-    Expected difference: < 0.005
-    Received difference:   0.5
+    Ignored nodes: comments, script, style
+    <html>
+      <head />
+      <body>
+        <div>
+          <div
+            class="rounded-lg border bg-white shadow-sm w-full"
+          >
+            <div
+              class="flex flex-col space-y-1.5 p-6 "
+            >
+              <h3
+                class="text-2xl font-semibold leading-none tracking-tight "
+              >
+                鍜ㄨ淇℃伅
+              </h3>
+            </div>
+            <form>
+              <div
+                class="p-6 pt-0 space-y-4"
+              >
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="consultType"
+                  >
+                    鍜ㄨ鏂瑰紡
+                    <span
+                      class="text-red-500"
+                    >
+                      *
+                    </span>
+                  </label>
+                  <select
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="consultType"
+                  >
+                    <option
+                      value="PHONE"
+                    >
+                      鐢佃瘽鍜ㄨ
+                    </option>
+                    <option
+                      value="VISIT"
+                    >
+                      鏉ヨ鍜ㄨ
+                    </option>
+                    <option
+                      value="ONLINE"
+                    >
+                      鍦ㄧ嚎鍜ㄨ
+                    </option>
+                    <option
+                      value="REFERRAL"
+                    >
+                      杞粙缁?[0m
+                    </option>
+                  </select>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="consultTime"
+                  >
+                    鍜ㄨ鏃堕棿
+                    <span
+                      class="text-red-500"
+                    >
+                      *
+                    </span>
+                  </label>
+                  <input
+                    class=""
+                    id="consultTime"
+                    type="datetime-local"
+                    value="2026-01-28T12:36"
+                  />
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="clientName"
+                  >
+                    鍜ㄨ浜哄鍚?[0m
+                    <span
+                      class="text-red-500"
+                    >
+                      *
+                    </span>
+                  </label>
+                  <input
+                    class=""
+                    id="clientName"
+                    maxlength="50"
+                    placeholder="璇疯緭鍏ュ挩璇汉濮撳悕"
+                    type="text"
+                    value="寮犱笁"
+                  />
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="clientPhone"
+                  >
+                    鑱旂郴鐢佃瘽
+                  </label>
+                  <input
+                    class="border-red-500"
+                    id="clientPhone"
+                    placeholder="璇疯緭鍏ヨ仈绯荤數璇?
+                    type="tel"
+                    value=""
+                  />
+                  <p
+                    class="text-sm text-red-500"
+                  >
+                    璇疯緭鍏ユ湁鏁堢殑鎵嬫満鍙风爜
+                  </p>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="clientEmail"
+                  >
+                    鐢靛瓙閭
+                  </label>
+                  <input
+                    class="border-red-500"
+                    id="clientEmail"
+                    placeholder="璇疯緭鍏ョ數瀛愰偖绠?
+                    type="email"
+                    value=""
+                  />
+                  <p
+                    class="text-sm text-red-500"
+                  >
+                    璇疯緭鍏ユ湁鏁堢殑閭鍦板潃
+                  </p>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="clientCompany"
+                  >
+                    鍗曚綅鍚嶇О
+                  </label>
+                  <input
+                    class=""
+                    id="clientCompany"
+                    maxlength="100"
+                    placeholder="璇疯緭鍏ュ崟浣嶅悕绉?
+                    type="text"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="caseType"
+                  >
+                    妗堜欢绫诲瀷
+                  </label>
+                  <input
+                    class=""
+                    id="caseType"
+                    maxlength="50"
+                    placeholder="璇疯緭鍏ユ浠剁被鍨?
+                    type="text"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="caseSummary"
+                  >
+                    妗堟儏鎽樿
+                    <span
+                      class="text-red-500"
+                    >
+                      *
+                    </span>
+                  </label>
+                  <textarea
+                    class="w-full rounded-md border px-3 py-2 text-base focus:outline-none focus:ring-2 border-gray-300 focus:ring-blue-500"
+                    id="caseSummary"
+                    maxlength="500"
+                    placeholder="璇疯缁嗘弿杩版鎯咃紙鑷冲皯10涓瓧绗︼級"
+                    rows="5"
+                  >
+                    杩欐槸涓€涓湁鏁堢殑妗堟儏鎽樿鎻忚堪锛屽寘鍚冻澶熺殑淇℃伅
+                  </textarea>
+                  <div
+                    class="flex justify-between text-xs text-gray-500"
+                  >
+                    <span>
+                      鏈€灏?0涓瓧绗?[0m
+                    </span>
+                    <span>
+                      21
+                      /500
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="clientDemand"
+                  >
+                    瀹㈡埛璇夋眰
+                  </label>
+                  <textarea
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="clientDemand"
+                    maxlength="1000"
+                    placeholder="璇锋弿杩板鎴风殑璇夋眰"
+                    rows="3"
+                  />
+                  <div
+                    class="text-right text-xs text-gray-500"
+                  >
+                    0
+                    /1000
+                  </div>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="followUpDate"
+                  >
+                    璺熻繘鏃ユ湡
+                  </label>
+                  <input
+                    class="border-red-500"
+                    id="followUpDate"
+                    type="datetime-local"
+                    value=""
+                  />
+                  <p
+                    class="text-sm text-red-500"
+                  >
+                    Invalid input: expected date, received Date
+                  </p>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="followUpNotes"
+                  >
+                    璺熻繘澶囨敞
+                  </label>
+                  <textarea
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="followUpNotes"
+                    maxlength="500"
+                    placeholder="璇疯緭鍏ヨ窡杩涘娉?
+                    rows="3"
+                  />
+                  <div
+                    class="text-right text-xs text-gray-500"
+                  >
+                    0
+                    /500
+                  </div>
+                </div>
+              </div>
+              <div
+                class="flex items-center p-6 pt-0 flex justify-end space-x-2"
+              >
+                <button
+                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
+                  type="button"
+                >
+                  鍙栨秷
+                </button>
+                <button
+                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base "
+                  type="submit"
+                >
+                  鍒涘缓
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </body>
+    </html>
 
-      257 |       expect(result.withdrawCasesCount).toBe(1);
-      258 |       // 鎾よ瘔琚帓闄わ紝鍙绠楄儨璇夊拰璐ヨ瘔
-    > 259 |       expect(result.winProbability).toBeCloseTo(0.5, 2);
-          |                                     ^
-      260 |     });
-      261 |
-      262 |     it('搴旇姝ｇ‘澶勭悊閮ㄥ垎鑳滆瘔', () => {
+      295 |
+      296 |       await waitFor(() => {
+    > 297 |         expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+          |                              ^
+      298 |       });
+      299 |     });
+      300 |
 
-      at Object.<anonymous> (src/__tests__/ai/case/success-rate-analyzer.test.ts:259:37)
+      at src/__tests__/app/consultations/create/components/consultation-form.test.tsx:297:30
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at node_modules/@testing-library/dom/dist/wait-for.js:82:9
 
-  鈼?SuccessRateAnalyzer 鈥?analyze 鈥?搴旇姝ｇ‘澶勭悊閮ㄥ垎鑳滆瘔
+  鈼?ConsultationForm 鈥?琛ㄥ崟鎻愪氦 鈥?搴旇鍙戦€佹纭殑璇锋眰鏁版嵁
 
-    expect(received).toBeCloseTo(expected, precision)
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
 
-    Expected: 0.5
-    Received: 1
+    Expected: "/api/consultations", {"body": StringContaining "\"clientName\":\"寮犱笁\"", "headers": {"Content-Type": "application/json"}, "method": "POST"}
 
-    Expected precision:    2
-    Expected difference: < 0.005
-    Received difference:   0.5
+    Number of calls: 0
 
-      271 |
-      272 |       expect(result.partialCasesCount).toBe(2);
-    > 273 |       expect(result.winProbability).toBeCloseTo(0.5, 2);
-          |                                     ^
-      274 |     });
-      275 |
-      276 |     it('搴旇澶勭悊妗堜緥鏁伴噺涓嶈冻鐨勬儏鍐?, () => {
+    Ignored nodes: comments, script, style
+    <html>
+      <head />
+      <body>
+        <div>
+          <div
+            class="rounded-lg border bg-white shadow-sm w-full"
+          >
+            <div
+              class="flex flex-col space-y-1.5 p-6 "
+            >
+              <h3
+                class="text-2xl font-semibold leading-none tracking-tight "
+              >
+                鍜ㄨ淇℃伅
+              </h3>
+            </div>
+            <form>
+              <div
+                class="p-6 pt-0 space-y-4"
+              >
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="consultType"
+                  >
+                    鍜ㄨ鏂瑰紡
+                    <span
+                      class="text-red-500"
+                    >
+                      *
+                    </span>
+                  </label>
+                  <select
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="consultType"
+                  >
+                    <option
+                      value="PHONE"
+                    >
+                      鐢佃瘽鍜ㄨ
+                    </option>
+                    <option
+                      value="VISIT"
+                    >
+                      鏉ヨ鍜ㄨ
+                    </option>
+                    <option
+                      value="ONLINE"
+                    >
+                      鍦ㄧ嚎鍜ㄨ
+                    </option>
+                    <option
+                      value="REFERRAL"
+                    >
+                      杞粙缁?[0m
+                    </option>
+                  </select>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="consultTime"
+                  >
+                    鍜ㄨ鏃堕棿
+                    <span
+                      class="text-red-500"
+                    >
+                      *
+                    </span>
+                  </label>
+                  <input
+                    class=""
+                    id="consultTime"
+                    type="datetime-local"
+                    value="2026-01-28T12:36"
+                  />
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="clientName"
+                  >
+                    鍜ㄨ浜哄鍚?[0m
+                    <span
+                      class="text-red-500"
+                    >
+                      *
+                    </span>
+                  </label>
+                  <input
+                    class=""
+                    id="clientName"
+                    maxlength="50"
+                    placeholder="璇疯緭鍏ュ挩璇汉濮撳悕"
+                    type="text"
+                    value="寮犱笁"
+                  />
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="clientPhone"
+                  >
+                    鑱旂郴鐢佃瘽
+                  </label>
+                  <input
+                    class=""
+                    id="clientPhone"
+                    placeholder="璇疯緭鍏ヨ仈绯荤數璇?
+                    type="tel"
+                    value="13800138000"
+                  />
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="clientEmail"
+                  >
+                    鐢靛瓙閭
+                  </label>
+                  <input
+                    class="border-red-500"
+                    id="clientEmail"
+                    placeholder="璇疯緭鍏ョ數瀛愰偖绠?
+                    type="email"
+                    value=""
+                  />
+                  <p
+                    class="text-sm text-red-500"
+                  >
+                    璇疯緭鍏ユ湁鏁堢殑閭鍦板潃
+                  </p>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="clientCompany"
+                  >
+                    鍗曚綅鍚嶇О
+                  </label>
+                  <input
+                    class=""
+                    id="clientCompany"
+                    maxlength="100"
+                    placeholder="璇疯緭鍏ュ崟浣嶅悕绉?
+                    type="text"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="caseType"
+                  >
+                    妗堜欢绫诲瀷
+                  </label>
+                  <input
+                    class=""
+                    id="caseType"
+                    maxlength="50"
+                    placeholder="璇疯緭鍏ユ浠剁被鍨?
+                    type="text"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="caseSummary"
+                  >
+                    妗堟儏鎽樿
+                    <span
+                      class="text-red-500"
+                    >
+                      *
+                    </span>
+                  </label>
+                  <textarea
+                    class="w-full rounded-md border px-3 py-2 text-base focus:outline-none focus:ring-2 border-gray-300 focus:ring-blue-500"
+                    id="caseSummary"
+                    maxlength="500"
+                    placeholder="璇疯缁嗘弿杩版鎯咃紙鑷冲皯10涓瓧绗︼級"
+                    rows="5"
+                  >
+                    杩欐槸涓€涓湁鏁堢殑妗堟儏鎽樿鎻忚堪锛屽寘鍚冻澶熺殑淇℃伅
+                  </textarea>
+                  <div
+                    class="flex justify-between text-xs text-gray-500"
+                  >
+                    <span>
+                      鏈€灏?0涓瓧绗?[0m
+                    </span>
+                    <span>
+                      21
+                      /500
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="clientDemand"
+                  >
+                    瀹㈡埛璇夋眰
+                  </label>
+                  <textarea
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="clientDemand"
+                    maxlength="1000"
+                    placeholder="璇锋弿杩板鎴风殑璇夋眰"
+                    rows="3"
+                  />
+                  <div
+                    class="text-right text-xs text-gray-500"
+                  >
+                    0
+                    /1000
+                  </div>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="followUpDate"
+                  >
+                    璺熻繘鏃ユ湡
+                  </label>
+                  <input
+                    class="border-red-500"
+                    id="followUpDate"
+                    type="datetime-local"
+                    value=""
+                  />
+                  <p
+                    class="text-sm text-red-500"
+                  >
+                    Invalid input: expected date, received Date
+                  </p>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="followUpNotes"
+                  >
+                    璺熻繘澶囨敞
+                  </label>
+                  <textarea
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="followUpNotes"
+                    maxlength="500"
+                    placeholder="璇疯緭鍏ヨ窡杩涘娉?
+                    rows="3"
+                  />
+                  <div
+                    class="text-right text-xs text-gray-500"
+                  >
+                    0
+                    /500
+                  </div>
+                </div>
+              </div>
+              <div
+                class="flex items-center p-6 pt-0 flex justify-end space-x-2"
+              >
+                <button
+                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
+                  type="button"
+                >
+                  鍙栨秷
+                </button>
+                <button
+                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base "
+                  type="submit"
+                >
+                  鍒涘缓
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </body>
+    </html>
 
-      at Object.<anonymous> (src/__tests__/ai/case/success-rate-analyzer.test.ts:273:37)
+      322 |
+      323 |       await waitFor(() => {
+    > 324 |         expect(global.fetch).toHaveBeenCalledWith('/api/consultations', {
+          |                              ^
+      325 |           method: 'POST',
+      326 |           headers: {
+      327 |             'Content-Type': 'application/json',
+
+      at src/__tests__/app/consultations/create/components/consultation-form.test.tsx:324:30
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at node_modules/@testing-library/dom/dist/wait-for.js:82:9
+
+  鈼?ConsultationForm 鈥?琛ㄥ崟鎻愪氦 鈥?搴旇鍦ㄦ彁浜ゆ椂绂佺敤鎸夐挳骞舵樉绀哄姞杞界姸鎬?
+    expect(element).toBeDisabled()
+
+    Received element is not disabled:
+      <button class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base " type="submit" />
+
+      346 |       fireEvent.click(submitButton);
+      347 |
+    > 348 |       expect(submitButton).toBeDisabled();
+          |                            ^
+      349 |       expect(screen.getByText('鎻愪氦涓?..')).toBeInTheDocument();
+      350 |     });
+      351 |
+
+      at Object.<anonymous> (src/__tests__/app/consultations/create/components/consultation-form.test.tsx:348:28)
+
+  鈼?ConsultationForm 鈥?琛ㄥ崟鎻愪氦 鈥?搴旇鍦ㄦ彁浜ゅけ璐ユ椂鏄剧ず閿欒淇℃伅
+
+    Unable to find an element with the text: 鍒涘缓澶辫触. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="rounded-lg border bg-white shadow-sm w-full"
+        >
+          <div
+            class="flex flex-col space-y-1.5 p-6 "
+          >
+            <h3
+              class="text-2xl font-semibold leading-none tracking-tight "
+            >
+              鍜ㄨ淇℃伅
+            </h3>
+          </div>
+          <form>
+            <div
+              class="p-6 pt-0 space-y-4"
+            >
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="consultType"
+                >
+                  鍜ㄨ鏂瑰紡
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <select
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="consultType"
+                >
+                  <option
+                    value="PHONE"
+                  >
+                    鐢佃瘽鍜ㄨ
+                  </option>
+                  <option
+                    value="VISIT"
+                  >
+                    鏉ヨ鍜ㄨ
+                  </option>
+                  <option
+                    value="ONLINE"
+                  >
+                    鍦ㄧ嚎鍜ㄨ
+                  </option>
+                  <option
+                    value="REFERRAL"
+                  >
+                    杞粙缁?[0m
+                  </option>
+                </select>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="consultTime"
+                >
+                  鍜ㄨ鏃堕棿
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <input
+                  class=""
+                  id="consultTime"
+                  type="datetime-local"
+                  value="2026-01-28T12:36"
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientName"
+                >
+                  鍜ㄨ浜哄鍚?[0m
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <input
+                  class=""
+                  id="clientName"
+                  maxlength="50"
+                  placeholder="璇疯緭鍏ュ挩璇汉濮撳悕"
+                  type="text"
+                  value="寮犱笁"
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientPhone"
+                >
+                  鑱旂郴鐢佃瘽
+                </label>
+                <input
+                  class="border-red-500"
+                  id="clientPhone"
+                  placeholder="璇疯緭鍏ヨ仈绯荤數璇?
+                  type="tel"
+                  value=""
+                />
+                <p
+                  class="text-sm text-red-500"
+                >
+                  璇疯緭鍏ユ湁鏁堢殑鎵嬫満鍙风爜
+                </p>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientEmail"
+                >
+                  鐢靛瓙閭
+                </label>
+                <input
+                  class="border-red-500"
+                  id="clientEmail"
+                  placeholder="璇疯緭鍏ョ數瀛愰偖绠?
+                  type="email"
+                  value=""
+                />
+                <p
+                  class="text-sm text-red-500"
+                >
+                  璇疯緭鍏ユ湁鏁堢殑閭鍦板潃
+                </p>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientCompany"
+                >
+                  鍗曚綅鍚嶇О
+                </label>
+                <input
+                  class=""
+                  id="clientCompany"
+                  maxlength="100"
+                  placeholder="璇疯緭鍏ュ崟浣嶅悕绉?
+                  type="text"
+                  value=""
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="caseType"
+                >
+                  妗堜欢绫诲瀷
+                </label>
+                <input
+                  class=""
+                  id="caseType"
+                  maxlength="50"
+                  placeholder="璇疯緭鍏ユ浠剁被鍨?
+                  type="text"
+                  value=""
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="caseSummary"
+                >
+                  妗堟儏鎽樿
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <textarea
+                  class="w-full rounded-md border px-3 py-2 text-base focus:outline-none focus:ring-2 border-gray-300 focus:ring-blue-500"
+                  id="caseSummary"
+                  maxlength="500"
+                  placeholder="璇疯缁嗘弿杩版鎯咃紙鑷冲皯10涓瓧绗︼級"
+                  rows="5"
+                >
+                  杩欐槸涓€涓湁鏁堢殑妗堟儏鎽樿鎻忚堪锛屽寘鍚冻澶熺殑淇℃伅
+                </textarea>
+                <div
+                  class="flex justify-between text-xs text-gray-500"
+                >
+                  <span>
+                    鏈€灏?0涓瓧绗?[0m
+                  </span>
+                  <span>
+                    21
+                    /500
+                  </span>
+                </div>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientDemand"
+                >
+                  瀹㈡埛璇夋眰
+                </label>
+                <textarea
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="clientDemand"
+                  maxlength="1000"
+                  placeholder="璇锋弿杩板鎴风殑璇夋眰"
+                  rows="3"
+                />
+                <div
+                  class="text-right text-xs text-gray-500"
+                >
+                  0
+                  /1000
+                </div>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="followUpDate"
+                >
+                  璺熻繘鏃ユ湡
+                </label>
+                <input
+                  class="border-red-500"
+                  id="followUpDate"
+                  type="datetime-local"
+                  value=""
+                />
+                <p
+                  class="text-sm text-red-500"
+                >
+                  Invalid input: expected date, received Date
+                </p>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="followUpNotes"
+                >
+                  璺熻繘澶囨敞
+                </label>
+                <textarea
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="followUpNotes"
+                  maxlength="500"
+                  placeholder="璇疯緭鍏ヨ窡杩涘娉?
+                  rows="3"
+                />
+                <div
+                  class="text-right text-xs text-gray-500"
+                >
+                  0
+                  /500
+                </div>
+              </div>
+            </div>
+            <div
+              class="flex items-center p-6 pt-0 flex justify-end space-x-2"
+            >
+              <button
+                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
+                type="button"
+              >
+                鍙栨秷
+              </button>
+              <button
+                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base "
+                type="submit"
+              >
+                鍒涘缓
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </body>
+
+      369 |       fireEvent.click(submitButton);
+      370 |
+    > 371 |       await waitFor(() => {
+          |                    ^
+      372 |         expect(screen.getByText('鍒涘缓澶辫触')).toBeInTheDocument();
+      373 |       });
+      374 |     });
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/consultations/create/components/consultation-form.test.tsx:371:20)
+
+  鈼?ConsultationForm 鈥?琛ㄥ崟鎻愪氦 鈥?搴旇鍦ㄧ綉缁滈敊璇椂鏄剧ず閿欒淇℃伅
+
+    Unable to find an element with the text: 缃戠粶閿欒锛岃閲嶈瘯. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    <body>
+      <div>
+        <div
+          class="rounded-lg border bg-white shadow-sm w-full"
+        >
+          <div
+            class="flex flex-col space-y-1.5 p-6 "
+          >
+            <h3
+              class="text-2xl font-semibold leading-none tracking-tight "
+            >
+              鍜ㄨ淇℃伅
+            </h3>
+          </div>
+          <form>
+            <div
+              class="p-6 pt-0 space-y-4"
+            >
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="consultType"
+                >
+                  鍜ㄨ鏂瑰紡
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <select
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="consultType"
+                >
+                  <option
+                    value="PHONE"
+                  >
+                    鐢佃瘽鍜ㄨ
+                  </option>
+                  <option
+                    value="VISIT"
+                  >
+                    鏉ヨ鍜ㄨ
+                  </option>
+                  <option
+                    value="ONLINE"
+                  >
+                    鍦ㄧ嚎鍜ㄨ
+                  </option>
+                  <option
+                    value="REFERRAL"
+                  >
+                    杞粙缁?[0m
+                  </option>
+                </select>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="consultTime"
+                >
+                  鍜ㄨ鏃堕棿
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <input
+                  class=""
+                  id="consultTime"
+                  type="datetime-local"
+                  value="2026-01-28T12:36"
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientName"
+                >
+                  鍜ㄨ浜哄鍚?[0m
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <input
+                  class=""
+                  id="clientName"
+                  maxlength="50"
+                  placeholder="璇疯緭鍏ュ挩璇汉濮撳悕"
+                  type="text"
+                  value="寮犱笁"
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientPhone"
+                >
+                  鑱旂郴鐢佃瘽
+                </label>
+                <input
+                  class="border-red-500"
+                  id="clientPhone"
+                  placeholder="璇疯緭鍏ヨ仈绯荤數璇?
+                  type="tel"
+                  value=""
+                />
+                <p
+                  class="text-sm text-red-500"
+                >
+                  璇疯緭鍏ユ湁鏁堢殑鎵嬫満鍙风爜
+                </p>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientEmail"
+                >
+                  鐢靛瓙閭
+                </label>
+                <input
+                  class="border-red-500"
+                  id="clientEmail"
+                  placeholder="璇疯緭鍏ョ數瀛愰偖绠?
+                  type="email"
+                  value=""
+                />
+                <p
+                  class="text-sm text-red-500"
+                >
+                  璇疯緭鍏ユ湁鏁堢殑閭鍦板潃
+                </p>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientCompany"
+                >
+                  鍗曚綅鍚嶇О
+                </label>
+                <input
+                  class=""
+                  id="clientCompany"
+                  maxlength="100"
+                  placeholder="璇疯緭鍏ュ崟浣嶅悕绉?
+                  type="text"
+                  value=""
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="caseType"
+                >
+                  妗堜欢绫诲瀷
+                </label>
+                <input
+                  class=""
+                  id="caseType"
+                  maxlength="50"
+                  placeholder="璇疯緭鍏ユ浠剁被鍨?
+                  type="text"
+                  value=""
+                />
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="caseSummary"
+                >
+                  妗堟儏鎽樿
+                  <span
+                    class="text-red-500"
+                  >
+                    *
+                  </span>
+                </label>
+                <textarea
+                  class="w-full rounded-md border px-3 py-2 text-base focus:outline-none focus:ring-2 border-gray-300 focus:ring-blue-500"
+                  id="caseSummary"
+                  maxlength="500"
+                  placeholder="璇疯缁嗘弿杩版鎯咃紙鑷冲皯10涓瓧绗︼級"
+                  rows="5"
+                >
+                  杩欐槸涓€涓湁鏁堢殑妗堟儏鎽樿鎻忚堪锛屽寘鍚冻澶熺殑淇℃伅
+                </textarea>
+                <div
+                  class="flex justify-between text-xs text-gray-500"
+                >
+                  <span>
+                    鏈€灏?0涓瓧绗?[0m
+                  </span>
+                  <span>
+                    21
+                    /500
+                  </span>
+                </div>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="clientDemand"
+                >
+                  瀹㈡埛璇夋眰
+                </label>
+                <textarea
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="clientDemand"
+                  maxlength="1000"
+                  placeholder="璇锋弿杩板鎴风殑璇夋眰"
+                  rows="3"
+                />
+                <div
+                  class="text-right text-xs text-gray-500"
+                >
+                  0
+                  /1000
+                </div>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="followUpDate"
+                >
+                  璺熻繘鏃ユ湡
+                </label>
+                <input
+                  class="border-red-500"
+                  id="followUpDate"
+                  type="datetime-local"
+                  value=""
+                />
+                <p
+                  class="text-sm text-red-500"
+                >
+                  Invalid input: expected date, received Date
+                </p>
+              </div>
+              <div
+                class="space-y-2"
+              >
+                <label
+                  for="followUpNotes"
+                >
+                  璺熻繘澶囨敞
+                </label>
+                <textarea
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="followUpNotes"
+                  maxlength="500"
+                  placeholder="璇疯緭鍏ヨ窡杩涘娉?
+                  rows="3"
+                />
+                <div
+                  class="text-right text-xs text-gray-500"
+                >
+                  0
+                  /500
+                </div>
+              </div>
+            </div>
+            <div
+              class="flex items-center p-6 pt-0 flex justify-end space-x-2"
+            >
+              <button
+                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
+                type="button"
+              >
+                鍙栨秷
+              </button>
+              <button
+                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base "
+                type="submit"
+              >
+                鍒涘缓
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </body>
+
+      390 |       fireEvent.click(submitButton);
+      391 |
+    > 392 |       await waitFor(
+          |                    ^
+      393 |         () => {
+      394 |           expect(screen.getByText('缃戠粶閿欒锛岃閲嶈瘯')).toBeInTheDocument();
+      395 |         },
+
+      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
+      at Object.<anonymous> (src/__tests__/app/consultations/create/components/consultation-form.test.tsx:392:20)
+
+  鈼?ConsultationForm 鈥?鍙栨秷鎿嶄綔 鈥?搴旇鍦ㄦ彁浜ゆ椂绂佺敤鍙栨秷鎸夐挳
+
+    expect(element).toBeDisabled()
+
+    Received element is not disabled:
+      <button class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base " type="submit" />
+
+    Ignored nodes: comments, script, style
+    <html>
+      <head />
+      <body>
+        <div>
+          <div
+            class="rounded-lg border bg-white shadow-sm w-full"
+          >
+            <div
+              class="flex flex-col space-y-1.5 p-6 "
+            >
+              <h3
+                class="text-2xl font-semibold leading-none tracking-tight "
+              >
+                鍜ㄨ淇℃伅
+              </h3>
+            </div>
+            <form>
+              <div
+                class="p-6 pt-0 space-y-4"
+              >
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="consultType"
+                  >
+                    鍜ㄨ鏂瑰紡
+                    <span
+                      class="text-red-500"
+                    >
+                      *
+                    </span>
+                  </label>
+                  <select
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="consultType"
+                  >
+                    <option
+                      value="PHONE"
+                    >
+                      鐢佃瘽鍜ㄨ
+                    </option>
+                    <option
+                      value="VISIT"
+                    >
+                      鏉ヨ鍜ㄨ
+                    </option>
+                    <option
+                      value="ONLINE"
+                    >
+                      鍦ㄧ嚎鍜ㄨ
+                    </option>
+                    <option
+                      value="REFERRAL"
+                    >
+                      杞粙缁?[0m
+                    </option>
+                  </select>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="consultTime"
+                  >
+                    鍜ㄨ鏃堕棿
+                    <span
+                      class="text-red-500"
+                    >
+                      *
+                    </span>
+                  </label>
+                  <input
+                    class=""
+                    id="consultTime"
+                    type="datetime-local"
+                    value="2026-01-28T12:36"
+                  />
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="clientName"
+                  >
+                    鍜ㄨ浜哄鍚?[0m
+                    <span
+                      class="text-red-500"
+                    >
+                      *
+                    </span>
+                  </label>
+                  <input
+                    class=""
+                    id="clientName"
+                    maxlength="50"
+                    placeholder="璇疯緭鍏ュ挩璇汉濮撳悕"
+                    type="text"
+                    value="寮犱笁"
+                  />
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="clientPhone"
+                  >
+                    鑱旂郴鐢佃瘽
+                  </label>
+                  <input
+                    class="border-red-500"
+                    id="clientPhone"
+                    placeholder="璇疯緭鍏ヨ仈绯荤數璇?
+                    type="tel"
+                    value=""
+                  />
+                  <p
+                    class="text-sm text-red-500"
+                  >
+                    璇疯緭鍏ユ湁鏁堢殑鎵嬫満鍙风爜
+                  </p>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="clientEmail"
+                  >
+                    鐢靛瓙閭
+                  </label>
+                  <input
+                    class="border-red-500"
+                    id="clientEmail"
+                    placeholder="璇疯緭鍏ョ數瀛愰偖绠?
+                    type="email"
+                    value=""
+                  />
+                  <p
+                    class="text-sm text-red-500"
+                  >
+                    璇疯緭鍏ユ湁鏁堢殑閭鍦板潃
+                  </p>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="clientCompany"
+                  >
+                    鍗曚綅鍚嶇О
+                  </label>
+                  <input
+                    class=""
+                    id="clientCompany"
+                    maxlength="100"
+                    placeholder="璇疯緭鍏ュ崟浣嶅悕绉?
+                    type="text"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="caseType"
+                  >
+                    妗堜欢绫诲瀷
+                  </label>
+                  <input
+                    class=""
+                    id="caseType"
+                    maxlength="50"
+                    placeholder="璇疯緭鍏ユ浠剁被鍨?
+                    type="text"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="caseSummary"
+                  >
+                    妗堟儏鎽樿
+                    <span
+                      class="text-red-500"
+                    >
+                      *
+                    </span>
+                  </label>
+                  <textarea
+                    class="w-full rounded-md border px-3 py-2 text-base focus:outline-none focus:ring-2 border-gray-300 focus:ring-blue-500"
+                    id="caseSummary"
+                    maxlength="500"
+                    placeholder="璇疯缁嗘弿杩版鎯咃紙鑷冲皯10涓瓧绗︼級"
+                    rows="5"
+                  >
+                    杩欐槸涓€涓湁鏁堢殑妗堟儏鎽樿鎻忚堪锛屽寘鍚冻澶熺殑淇℃伅
+                  </textarea>
+                  <div
+                    class="flex justify-between text-xs text-gray-500"
+                  >
+                    <span>
+                      鏈€灏?0涓瓧绗?[0m
+                    </span>
+                    <span>
+                      21
+                      /500
+                    </span>
+                  </div>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="clientDemand"
+                  >
+                    瀹㈡埛璇夋眰
+                  </label>
+                  <textarea
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="clientDemand"
+                    maxlength="1000"
+                    placeholder="璇锋弿杩板鎴风殑璇夋眰"
+                    rows="3"
+                  />
+                  <div
+                    class="text-right text-xs text-gray-500"
+                  >
+                    0
+                    /1000
+                  </div>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="followUpDate"
+                  >
+                    璺熻繘鏃ユ湡
+                  </label>
+                  <input
+                    class="border-red-500"
+                    id="followUpDate"
+                    type="datetime-local"
+                    value=""
+                  />
+                  <p
+                    class="text-sm text-red-500"
+                  >
+                    Invalid input: expected date, received Date
+                  </p>
+                </div>
+                <div
+                  class="space-y-2"
+                >
+                  <label
+                    for="followUpNotes"
+                  >
+                    璺熻繘澶囨敞
+                  </label>
+                  <textarea
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="followUpNotes"
+                    maxlength="500"
+                    placeholder="璇疯緭鍏ヨ窡杩涘娉?
+                    rows="3"
+                  />
+                  <div
+                    class="text-right text-xs text-gray-500"
+                  >
+                    0
+                    /500
+                  </div>
+                </div>
+              </div>
+              <div
+                class="flex items-center p-6 pt-0 flex justify-end space-x-2"
+              >
+                <button
+                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
+                  type="button"
+                >
+                  鍙栨秷
+                </button>
+                <button
+                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base "
+                  type="submit"
+                >
+                  鍒涘缓
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </body>
+    </html>
+
+      437 |       // 绛夊緟鎸夐挳鐘舵€佹洿鏂?[39m
+      438 |       await waitFor(() => {
+    > 439 |         expect(submitButton).toBeDisabled();
+          |                              ^
+      440 |       });
+      441 |
+      442 |       const cancelButton = screen.getByText('鍙栨秷');
+
+      at src/__tests__/app/consultations/create/components/consultation-form.test.tsx:439:30
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at node_modules/@testing-library/dom/dist/wait-for.js:82:9
 
 Test Suites: 1 failed, 1 total
-Tests:       4 failed, 25 passed, 29 total
+Tests:       9 failed, 32 passed, 41 total
 Snapshots:   0 total
-Time:        1.008 s
-Ran all test suites matching src/__tests__/ai/case/success-rate-analyzer.test.ts.
-npm verbose cwd D:\legal_debate_mvp
-npm verbose os Windows_NT 10.0.19045
-npm verbose node v22.14.0
-npm verbose npm  v10.9.2
-npm verbose exit 1
-npm verbose code 1
+Time:        3.099 s
+Ran all test suites matching src/__tests__/app/consultations/create/components/consultation-form.test.tsx.

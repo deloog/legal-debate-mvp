@@ -1,10 +1,20 @@
 /**
  * 邮件服务模块
  *
- * 提供邮件发送功能，开发环境使用控制台输出，
- * 生产环境可集成SMTP或邮件服务API。
+ * 提供邮件发送功能：
+ * - 开发环境：控制台输出
+ * - 生产环境：SMTP 发送（nodemailer）
+ *
+ * 配置（环境变量）：
+ * - SMTP_HOST: SMTP 服务器地址
+ * - SMTP_PORT: SMTP 端口（默认 587）
+ * - SMTP_USER: SMTP 用户名
+ * - SMTP_PASS: SMTP 密码
+ * - EMAIL_FROM: 发件人地址
  */
 
+import nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 import type {
   EmailSendOptions,
   EmailSendResult,
@@ -229,54 +239,210 @@ class DevEmailService implements IEmailService {
       devMessage: `[开发模式] 邮件已发送到控制台，收件人：${email}，验证码：${code}`,
     };
   }
+
+  async sendEmail(options: EmailSendOptions): Promise<EmailSendResult> {
+    if (!this.isDevEnvironment()) {
+      return {
+        success: false,
+        error: '非开发环境，请使用生产邮件服务',
+      };
+    }
+
+    this.logEmail(options);
+
+    return {
+      success: true,
+      messageId: `dev-${Date.now()}`,
+      devMessage: `[开发模式] 邮件已发送到控制台，收件人：${options.to}`,
+    };
+  }
 }
 
 // =============================================================================
-// 生产环境邮件服务占位符
+// 生产环境邮件服务
 // =============================================================================
 
 /**
- * 生产环境邮件服务占位符
+ * 生产环境邮件服务
  *
- * 实际生产环境应该集成真实的邮件服务（如SMTP、SendGrid、Mailgun等）
- * 此处仅作为占位符，需要根据实际邮件服务商进行实现
+ * 使用 nodemailer 通过 SMTP 发送邮件
  */
 class ProdEmailService implements IEmailService {
+  private transporter: Transporter | null = null;
+  private initialized: boolean = false;
+
+  /**
+   * 初始化 SMTP 传输器
+   */
+  private async initTransporter(): Promise<boolean> {
+    if (this.initialized) {
+      return this.transporter !== null;
+    }
+
+    this.initialized = true;
+
+    const host = process.env.SMTP_HOST;
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
+
+    if (!host || !user || !pass) {
+      console.warn(
+        '[ProdEmailService] SMTP 配置不完整，请检查 SMTP_HOST, SMTP_USER, SMTP_PASS 环境变量'
+      );
+      return false;
+    }
+
+    try {
+      this.transporter = nodemailer.createTransport({
+        host,
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: process.env.SMTP_PORT === '465', // true for 465, false for others
+        auth: {
+          user,
+          pass,
+        },
+      });
+
+      // 验证连接
+      await this.transporter.verify();
+      console.log('[ProdEmailService] SMTP 连接成功');
+      return true;
+    } catch (error) {
+      console.error('[ProdEmailService] SMTP 连接失败:', error);
+      this.transporter = null;
+      return false;
+    }
+  }
+
+  /**
+   * 获取发件人地址
+   */
+  private getFromAddress(): string {
+    return process.env.EMAIL_FROM || '律伴助手 <noreply@legal-debate.com>';
+  }
+
   async sendPasswordResetEmail(
     email: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _code: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _expiresAt: Date
+    code: string,
+    expiresAt: Date
   ): Promise<EmailSendResult> {
-    // TODO: 集成真实邮件服务
-    // 示例：使用nodemailer
-    // const transporter = nodemailer.createTransport({ ... });
-    // await transporter.sendMail({ ... });
+    const ready = await this.initTransporter();
 
-    console.warn(`[生产环境] 请集成真实邮件服务来发送密码重置邮件到 ${email}`);
+    if (!ready || !this.transporter) {
+      console.warn(
+        `[ProdEmailService] SMTP 未配置，无法发送密码重置邮件到 ${email}`
+      );
+      return {
+        success: false,
+        error: 'SMTP 服务未配置，请联系管理员',
+      };
+    }
 
-    return {
-      success: false,
-      error: '生产邮件服务尚未配置',
-    };
+    const template = getPasswordResetTemplate(code, expiresAt);
+
+    try {
+      const info = await this.transporter.sendMail({
+        from: this.getFromAddress(),
+        to: email,
+        subject: template.subject,
+        text: template.textContent,
+        html: template.htmlContent,
+      });
+
+      console.log(`[ProdEmailService] 密码重置邮件已发送: ${email}`, {
+        messageId: info.messageId,
+      });
+
+      return {
+        success: true,
+        messageId: info.messageId,
+      };
+    } catch (error) {
+      console.error(`[ProdEmailService] 发送密码重置邮件失败:`, error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : '发送失败',
+      };
+    }
   }
 
   async sendVerificationEmail(
     email: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _code: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _expiresAt: Date
+    code: string,
+    expiresAt: Date
   ): Promise<EmailSendResult> {
-    // TODO: 集成真实邮件服务
+    const ready = await this.initTransporter();
 
-    console.warn(`[生产环境] 请集成真实邮件服务来发送验证邮件到 ${email}`);
+    if (!ready || !this.transporter) {
+      console.warn(
+        `[ProdEmailService] SMTP 未配置，无法发送验证邮件到 ${email}`
+      );
+      return {
+        success: false,
+        error: 'SMTP 服务未配置，请联系管理员',
+      };
+    }
 
-    return {
-      success: false,
-      error: '生产邮件服务尚未配置',
-    };
+    const template = getEmailVerificationTemplate(code, expiresAt);
+
+    try {
+      const info = await this.transporter.sendMail({
+        from: this.getFromAddress(),
+        to: email,
+        subject: template.subject,
+        text: template.textContent,
+        html: template.htmlContent,
+      });
+
+      console.log(`[ProdEmailService] 验证邮件已发送: ${email}`, {
+        messageId: info.messageId,
+      });
+
+      return {
+        success: true,
+        messageId: info.messageId,
+      };
+    } catch (error) {
+      console.error(`[ProdEmailService] 发送验证邮件失败:`, error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : '发送失败',
+      };
+    }
+  }
+
+  /**
+   * 发送通用邮件
+   */
+  async sendEmail(options: EmailSendOptions): Promise<EmailSendResult> {
+    const ready = await this.initTransporter();
+
+    if (!ready || !this.transporter) {
+      return {
+        success: false,
+        error: 'SMTP 服务未配置',
+      };
+    }
+
+    try {
+      const info = await this.transporter.sendMail({
+        from: this.getFromAddress(),
+        to: options.to,
+        subject: options.subject,
+        text: options.text,
+        html: options.html,
+      });
+
+      return {
+        success: true,
+        messageId: info.messageId,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : '发送失败',
+      };
+    }
   }
 }
 
@@ -285,17 +451,54 @@ class ProdEmailService implements IEmailService {
 // =============================================================================
 
 /**
+ * 检查 SMTP 是否已配置
+ */
+function isSmtpConfigured(): boolean {
+  return !!(
+    process.env.SMTP_HOST &&
+    process.env.SMTP_USER &&
+    process.env.SMTP_PASS
+  );
+}
+
+/**
  * 获取邮件服务实例
+ *
+ * 选择逻辑：
+ * 1. 开发/测试环境 + 未配置 SMTP → DevEmailService（控制台输出）
+ * 2. 开发/测试环境 + 已配置 SMTP → ProdEmailService（真实发送）
+ * 3. 生产环境 → ProdEmailService
  */
 export function getEmailService(): IEmailService {
   const isDev =
     process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 
-  if (isDev) {
+  // 开发环境下，如果未配置 SMTP，使用控制台输出
+  if (isDev && !isSmtpConfigured()) {
     return new DevEmailService();
   }
 
+  // 其他情况使用生产服务（会自动检测 SMTP 配置）
   return new ProdEmailService();
+}
+
+/**
+ * 获取邮件服务状态
+ */
+export function getEmailServiceStatus(): {
+  type: 'dev' | 'prod';
+  smtpConfigured: boolean;
+  host?: string;
+} {
+  const smtpConfigured = isSmtpConfigured();
+  const isDev =
+    process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
+
+  return {
+    type: isDev && !smtpConfigured ? 'dev' : 'prod',
+    smtpConfigured,
+    host: process.env.SMTP_HOST,
+  };
 }
 
 // =============================================================================

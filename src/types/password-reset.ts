@@ -149,6 +149,10 @@ export interface IEmailService {
     code: string,
     expiresAt: Date
   ): Promise<EmailSendResult>;
+  /**
+   * 发送通用邮件
+   */
+  sendEmail?(options: EmailSendOptions): Promise<EmailSendResult>;
 }
 
 // =============================================================================

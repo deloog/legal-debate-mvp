@@ -3,6 +3,8 @@
  * 确保Web API在Node环境中可用
  */
 
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 // 首先定义Headers类
 global.Headers = class Headers {
   constructor(init = {}) {
@@ -256,7 +258,8 @@ jest.mock('next/server', () => {
 });
 
 // 设置基本的Web API polyfills
-import { TextEncoder, TextDecoder } from 'util';
+
+const { TextEncoder, TextDecoder } = require('util');
 
 if (!global.TextEncoder) {
   global.TextEncoder = TextEncoder;

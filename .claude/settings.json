@@ -1,5 +1,8 @@
 {
   "permissions": {
-    "allow": ["Bash(npm uninstall:*)"]
+    "allow": [
+      "Bash(npm uninstall:*)",
+      "Bash(wc:*)"
+    ]
   }
 }

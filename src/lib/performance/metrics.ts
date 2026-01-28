@@ -111,8 +111,76 @@ class PerformanceCollector {
    * 发送到分析服务
    */
   private sendToAnalytics(metric: PerformanceMetrics): void {
-    // TODO: 实现发送到分析服务
-    console.log('Performance Metric:', metric);
+    try {
+      // 方式1: Google Analytics 4 (如果已配置)
+      if (
+        typeof (window as unknown as Record<string, unknown>).__gtag ===
+        'function'
+      ) {
+        const gtag = (window as unknown as Record<string, unknown>).__gtag as (
+          ...args: unknown[]
+        ) => void;
+        gtag('event', 'web_vitals', {
+          event_category: 'Performance',
+          event_label: 'LCP',
+          value: metric.lcp,
+          non_interaction: true,
+        });
+
+        if (metric.fid !== undefined) {
+          gtag('event', 'web_vitals', {
+            event_category: 'Performance',
+            event_label: 'FID',
+            value: metric.fid,
+            non_interaction: true,
+          });
+        }
+
+        if (metric.cls !== undefined) {
+          gtag('event', 'web_vitals', {
+            event_category: 'Performance',
+            event_label: 'CLS',
+            value: metric.cls,
+            non_interaction: true,
+          });
+        }
+      }
+
+      // 方式2: 发送到自定义API（如果配置）
+      const analyticsApiUrl = process.env.NEXT_PUBLIC_ANALYTICS_API_URL;
+      if (analyticsApiUrl) {
+        fetch(analyticsApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'web_vitals',
+            metrics: metric,
+            page: window.location.pathname,
+            userAgent: navigator.userAgent,
+            timestamp: metric.timestamp,
+          }),
+          keepalive: true, // 使用keepalive确保请求在页面卸载后仍能完成
+        }).catch(error => {
+          console.warn('[Performance] Failed to send metrics to API:', error);
+        });
+      }
+
+      // 方式3: 发送到事件跟踪器（如果存在）
+      if (
+        typeof (window as unknown as Record<string, unknown>).trackEvent ===
+        'function'
+      ) {
+        const trackEvent = (window as unknown as Record<string, unknown>)
+          .trackEvent as (...args: unknown[]) => void;
+        trackEvent('performance_metric', metric);
+      }
+
+      console.log('[Performance] Metric recorded:', metric);
+    } catch (error) {
+      console.error('[Performance] Failed to send metric:', error);
+    }
   }
 
   /**

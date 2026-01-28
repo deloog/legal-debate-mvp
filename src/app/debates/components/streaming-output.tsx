@@ -1,12 +1,15 @@
 'use client';
 
 import { useTypewriter } from '@/lib/hooks/use-debate-stream';
+import { AIThinkingIndicator } from '@/components/ai/AIThinkingIndicator';
 
 export interface StreamingOutputProps {
   content: string;
   isStreaming: boolean;
   side: 'PLAINTIFF' | 'DEFENDANT' | 'NEUTRAL';
   accentColor: 'blue' | 'red' | 'gray';
+  /** 当前AI处理阶段 */
+  stage?: 'analyzing' | 'searching' | 'generating' | 'reviewing';
 }
 
 /**
@@ -51,6 +54,7 @@ export function StreamingOutput({
   isStreaming,
   side,
   accentColor,
+  stage = 'generating',
 }: StreamingOutputProps) {
   const styles = colorStyles[accentColor];
   const { displayedText, isComplete } = useTypewriter({
@@ -101,10 +105,13 @@ export function StreamingOutput({
             )}
           </p>
         ) : (
-          <div className='flex items-center gap-2 text-sm text-zinc-400'>
-            <div className='h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600' />
-            <span>AI正在生成论点...</span>
-          </div>
+          <AIThinkingIndicator
+            isThinking={isStreaming}
+            stage={stage}
+            variant='sm'
+            showProgress={false}
+            message={`${sideLabels[side]}论点生成中`}
+          />
         )}
       </div>
 

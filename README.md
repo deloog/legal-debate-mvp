@@ -78,6 +78,18 @@ legal_debate_mvp/
 └── .clinerules        # AI开发规范（重要！）
 ```
 
+## 📚 文档导航
+
+项目包含完整的文档体系，所有文档已按类型整理到 `docs/` 目录：
+
+- **📖 [文档索引 (docs/INDEX.md)](docs/INDEX.md)** - 完整的文档分类和导航
+- **🎉 [Stage 2 & 3 完成总结](docs/STAGE2_STAGE3_FINAL_SUMMARY.md)** - 最新的项目完成状态
+- **📋 [优化计划](docs/OPTIMIZATION_PLAN.md)** - 整体优化规划
+- **📖 [使用指南](docs/STAGE2_USAGE_GUIDE.md)** - 功能使用说明
+- **🗄️ [数据库优化指南](docs/DATABASE_OPTIMIZATION_GUIDE.md)** - 数据库性能优化
+
+💡 **提示**: 建议从 [docs/INDEX.md](docs/INDEX.md) 开始浏览，可快速定位所需文档。
+
 ## 🚀 快速开始
 
 ### 前置要求

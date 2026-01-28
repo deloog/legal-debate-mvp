@@ -69,16 +69,16 @@ export function CaseDiscussions({ caseId }: CaseDiscussionsProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className='flex flex-col h-full'>
       {/* 头部：显示最后更新时间 */}
-      <div className="flex items-center justify-between p-4 border-b">
-        <h2 className="text-lg font-semibold">案件讨论</h2>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+      <div className='flex items-center justify-between p-4 border-b'>
+        <h2 className='text-lg font-semibold'>案件讨论</h2>
+        <div className='flex items-center gap-2 text-sm text-gray-500'>
           <span>最后更新: {lastUpdateTime.toLocaleTimeString()}</span>
           <button
             onClick={triggerUpdate}
-            className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded"
-            title="手动刷新"
+            className='px-3 py-1 text-blue-600 hover:bg-blue-50 rounded'
+            title='手动刷新'
           >
             🔄 刷新
           </button>
@@ -86,31 +86,28 @@ export function CaseDiscussions({ caseId }: CaseDiscussionsProps) {
       </div>
 
       {/* 讨论列表 */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className='flex-1 overflow-y-auto p-4 space-y-4'>
         {discussions.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
+          <div className='text-center text-gray-500 py-8'>
             暂无讨论，发送第一条消息开始讨论
           </div>
         ) : (
           discussions.map(discussion => (
-            <div
-              key={discussion.id}
-              className="bg-white rounded-lg shadow p-4"
-            >
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
+            <div key={discussion.id} className='bg-white rounded-lg shadow p-4'>
+              <div className='flex items-start gap-3'>
+                <div className='w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold'>
                   {discussion.authorName.charAt(0)}
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold">
+                <div className='flex-1'>
+                  <div className='flex items-center gap-2 mb-1'>
+                    <span className='font-semibold'>
                       {discussion.authorName}
                     </span>
-                    <span className="text-sm text-gray-500">
+                    <span className='text-sm text-gray-500'>
                       {new Date(discussion.createdAt).toLocaleString()}
                     </span>
                   </div>
-                  <p className="text-gray-700">{discussion.content}</p>
+                  <p className='text-gray-700'>{discussion.content}</p>
                 </div>
               </div>
             </div>
@@ -119,26 +116,26 @@ export function CaseDiscussions({ caseId }: CaseDiscussionsProps) {
       </div>
 
       {/* 输入框 */}
-      <div className="border-t p-4">
-        <div className="flex gap-2">
+      <div className='border-t p-4'>
+        <div className='flex gap-2'>
           <input
-            type="text"
+            type='text'
             value={newMessage}
             onChange={e => setNewMessage(e.target.value)}
             onKeyPress={e => e.key === 'Enter' && handleSendMessage()}
-            placeholder="输入讨论内容..."
-            className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder='输入讨论内容...'
+            className='flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
             disabled={isLoading}
           />
           <button
             onClick={handleSendMessage}
             disabled={isLoading || !newMessage.trim()}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className='px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
           >
             {isLoading ? '发送中...' : '发送'}
           </button>
         </div>
-        <p className="text-xs text-gray-500 mt-2">
+        <p className='text-xs text-gray-500 mt-2'>
           💡 提示：消息会自动更新，或点击"刷新"按钮手动更新
         </p>
       </div>

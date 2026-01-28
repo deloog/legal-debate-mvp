@@ -30,6 +30,11 @@ describe('辩论界面组件', () => {
       aiProvider: 'deepseek',
       generationTime: 1500,
       confidence: 0.85,
+      reasoning: null,
+      legalBasis: null,
+      logicScore: null,
+      legalScore: null,
+      overallScore: null,
     };
 
     it('应该正确渲染论点卡片', () => {
@@ -121,6 +126,11 @@ describe('辩论界面组件', () => {
         aiProvider: 'deepseek',
         generationTime: 1000,
         confidence: 0.9,
+        reasoning: null,
+        legalBasis: null,
+        logicScore: null,
+        legalScore: null,
+        overallScore: null,
       },
       {
         id: 'arg2',
@@ -133,6 +143,11 @@ describe('辩论界面组件', () => {
         aiProvider: 'deepseek',
         generationTime: 1000,
         confidence: 0.9,
+        reasoning: null,
+        legalBasis: null,
+        logicScore: null,
+        legalScore: null,
+        overallScore: null,
       },
     ];
 

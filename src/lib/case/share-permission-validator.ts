@@ -313,9 +313,37 @@ export async function validateShareRequest(
     errors.push(sharePermission.reason || '无权限共享案件');
   }
 
-  // 检查团队是否存在（如果指定）
-  if (false) {
-    // TODO: 实现团队共享验证逻辑
+  // 检查案件是否需要团队验证
+  const caseRecord = await prisma.case.findUnique({
+    where: { id: caseId, deletedAt: null },
+    select: { ownerType: true, sharedWithTeam: true },
+  });
+
+  if (caseRecord?.ownerType === OwnerType.TEAM) {
+    // 如果案件属于团队，验证用户是否是团队成员
+    const teamOwner = await prisma.case.findUnique({
+      where: { id: caseId },
+      select: { userId: true },
+    });
+
+    // 查询用户所属的团队
+    const userTeamIds = await prisma.teamMember
+      .findMany({
+        where: {
+          userId,
+          status: 'ACTIVE',
+        },
+        select: { teamId: true },
+      })
+      .then(members => members.map(m => m.teamId));
+
+    // 如果案件所有者是用户，则允许
+    if (teamOwner?.userId === userId) {
+      // 用户是案件所有者，继续
+    } else if (!userTeamIds.includes(teamOwner?.userId || '')) {
+      // 用户不拥有该案件且不是团队成员
+      errors.push('您没有权限操作此团队案件');
+    }
   }
 
   return {

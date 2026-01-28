@@ -370,6 +370,7 @@ export function ReminderList({ userId }: ReminderListProps) {
                                   IN_APP: '站内',
                                   EMAIL: '邮件',
                                   SMS: '短信',
+                                  WEBHOOK: 'Webhook',
                                 };
                                 return channelLabels[channel];
                               })

@@ -311,6 +311,7 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
                             IN_APP: '站内消息',
                             EMAIL: '邮件',
                             SMS: '短信',
+                            WEBHOOK: 'Webhook',
                           };
                           const isSelected =
                             preferences.courtSchedule.channels.includes(

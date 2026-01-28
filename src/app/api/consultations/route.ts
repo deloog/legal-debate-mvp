@@ -1,0 +1,461 @@
+/**
+ * 咨询API路由
+ * GET /api/consultations - 获取咨询列表
+ * POST /api/consultations - 创建咨询记录
+ */
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
+import {
+  ConsultationType,
+  ConsultStatus,
+  isValidConsultationType,
+  isValidConsultStatus,
+  generateConsultNumber,
+} from '@/types/consultation';
+import {
+  validateCreateConsultation,
+  getFirstZodError,
+} from '@/lib/validations/consultation';
+
+/**
+ * 标准成功响应格式
+ */
+interface SuccessResponse<T> {
+  success: true;
+  data: T;
+  pagination?: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+/**
+ * 标准错误响应格式
+ */
+interface ErrorResponse {
+  success: false;
+  error: {
+    code: string;
+    message: string;
+  };
+}
+
+/**
+ * 咨询响应数据接口
+ */
+interface ConsultationResponse {
+  id: string;
+  consultNumber: string;
+  clientName: string;
+  clientPhone: string | null;
+  clientEmail: string | null;
+  consultType: ConsultationType;
+  consultTime: Date;
+  caseType: string | null;
+  status: ConsultStatus;
+  followUpDate: Date | null;
+  winRate: number | null;
+  difficulty: string | null;
+  riskLevel: string | null;
+  suggestedFee: number | null;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * 查询参数接口
+ */
+interface QueryParams {
+  page?: string;
+  pageSize?: string;
+  status?: string;
+  consultType?: string;
+  startDate?: string;
+  endDate?: string;
+  keyword?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
+/**
+ * GET /api/consultations
+ * 获取咨询列表，支持分页、筛选和搜索
+ */
+export async function GET(
+  request: NextRequest
+): Promise<
+  NextResponse<SuccessResponse<ConsultationResponse[]> | ErrorResponse>
+> {
+  try {
+    // 获取查询参数
+    const { searchParams } = new URL(request.url);
+    const params: QueryParams = Object.fromEntries(searchParams);
+
+    // 解析分页参数
+    let page = parseInt(params.page || '1', 10);
+    let pageSize = parseInt(params.pageSize || '20', 10);
+
+    // 限制pageSize范围
+    if (pageSize < 1) pageSize = 1;
+    if (pageSize > 100) pageSize = 100;
+
+    if (page < 1) page = 1;
+
+    // 解析筛选参数
+    const {
+      status,
+      consultType,
+      startDate,
+      endDate,
+      keyword,
+      sortBy,
+      sortOrder,
+    } = params;
+
+    // 验证status参数
+    if (status && !isValidConsultStatus(status)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_STATUS',
+            message: '无效的咨询状态',
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    // 验证consultType参数
+    if (consultType && !isValidConsultationType(consultType)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_CONSULT_TYPE',
+            message: '无效的咨询类型',
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    // 解析日期参数
+    let startDateObj: Date | null = null;
+    let endDateObj: Date | null = null;
+
+    if (startDate) {
+      startDateObj = new Date(startDate);
+      if (isNaN(startDateObj.getTime())) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'INVALID_DATE_FORMAT',
+              message: '开始日期格式无效',
+            },
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (endDate) {
+      endDateObj = new Date(endDate);
+      if (isNaN(endDateObj.getTime())) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'INVALID_DATE_FORMAT',
+              message: '结束日期格式无效',
+            },
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 构建查询条件
+    const where: Record<string, unknown> = {
+      deletedAt: null, // 排除已删除的记录
+    };
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (consultType) {
+      where.consultType = consultType;
+    }
+
+    // 日期范围筛选
+    if (startDateObj || endDateObj) {
+      const consultTimeCondition: Record<string, Date> = {};
+      if (startDateObj) {
+        consultTimeCondition.gte = startDateObj;
+      }
+      if (endDateObj) {
+        consultTimeCondition.lte = endDateObj;
+      }
+      where.consultTime = consultTimeCondition;
+    }
+
+    // 关键词搜索
+    if (keyword) {
+      where.OR = [
+        { clientName: { contains: keyword } },
+        { clientPhone: { contains: keyword } },
+      ];
+    }
+
+    // 构建排序条件
+    const orderByField = sortBy || 'consultTime';
+    const orderDirection = sortOrder === 'asc' ? 'asc' : 'desc';
+
+    const orderBy: Record<string, 'asc' | 'desc'> = {};
+    if (['consultTime', 'createdAt', 'followUpDate'].includes(orderByField)) {
+      orderBy[orderByField] = orderDirection;
+    } else {
+      orderBy.consultTime = 'desc';
+    }
+
+    // 计算跳过数量
+    const skip = (page - 1) * pageSize;
+
+    // 查询总数
+    const total = await prisma.consultation.count({ where });
+
+    // 查询咨询列表
+    const consultations = await prisma.consultation.findMany({
+      where,
+      skip,
+      take: pageSize,
+      orderBy,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    // 计算总页数
+    const totalPages = Math.ceil(total / pageSize);
+
+    // 转换响应数据
+    const responseData: ConsultationResponse[] = consultations.map(
+      consultation => ({
+        id: consultation.id,
+        consultNumber: consultation.consultNumber,
+        clientName: consultation.clientName,
+        clientPhone: consultation.clientPhone,
+        clientEmail: consultation.clientEmail,
+        consultType: consultation.consultType as ConsultationType,
+        consultTime: consultation.consultTime,
+        caseType: consultation.caseType,
+        status: consultation.status as ConsultStatus,
+        followUpDate: consultation.followUpDate,
+        winRate: consultation.winRate,
+        difficulty: consultation.difficulty,
+        riskLevel: consultation.riskLevel,
+        suggestedFee: consultation.suggestedFee
+          ? Number(consultation.suggestedFee)
+          : null,
+        userId: consultation.userId,
+        createdAt: consultation.createdAt,
+        updatedAt: consultation.updatedAt,
+      })
+    );
+
+    // 返回成功响应
+    return NextResponse.json({
+      success: true,
+      data: responseData,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages,
+      },
+    });
+  } catch (error) {
+    console.error('获取咨询列表失败:', error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'INTERNAL_SERVER_ERROR',
+          message: '服务器内部错误',
+        },
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * POST /api/consultations
+ * 创建咨询记录
+ */
+export async function POST(
+  request: NextRequest
+): Promise<
+  | NextResponse<SuccessResponse<ConsultationResponse>>
+  | NextResponse<ErrorResponse>
+> {
+  try {
+    // 解析请求体
+    let body: Record<string, unknown>;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_JSON',
+            message: '请求体格式错误',
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    // 验证请求数据
+    const validationResult = validateCreateConsultation(body);
+    if (!validationResult.success) {
+      const errorMessage = getFirstZodError(validationResult);
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: errorMessage,
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    const data = validationResult.data;
+
+    // 查询当天最大序号
+    const today = new Date();
+    const datePrefix = generateConsultNumber(today, 1).slice(0, -3);
+
+    const latestConsultation = await prisma.consultation.findFirst({
+      where: {
+        consultNumber: {
+          startsWith: datePrefix,
+        },
+        deletedAt: null,
+      },
+      orderBy: {
+        consultNumber: 'desc',
+      },
+    });
+
+    // 生成新的咨询编号
+    let sequence = 1;
+    if (latestConsultation) {
+      const lastNumber = parseInt(
+        latestConsultation.consultNumber.slice(-3),
+        10
+      );
+      sequence = lastNumber + 1;
+    }
+
+    const consultNumber = generateConsultNumber(today, sequence);
+
+    // 创建咨询记录
+    const consultation = await prisma.consultation.create({
+      data: {
+        consultNumber,
+        consultType: data.consultType,
+        consultTime: data.consultTime,
+        clientName: data.clientName,
+        clientPhone: data.clientPhone || null,
+        clientEmail: data.clientEmail || null,
+        clientCompany: data.clientCompany || null,
+        caseType: data.caseType || null,
+        caseSummary: data.caseSummary,
+        clientDemand: data.clientDemand || null,
+        followUpDate: data.followUpDate || null,
+        followUpNotes: data.followUpNotes || null,
+        status: ConsultStatus.PENDING,
+        // TODO: 从session获取真实用户ID
+        userId: 'demo-user-id',
+      },
+    });
+
+    // 转换响应数据
+    const responseData: ConsultationResponse = {
+      id: consultation.id,
+      consultNumber: consultation.consultNumber,
+      clientName: consultation.clientName,
+      clientPhone: consultation.clientPhone,
+      clientEmail: consultation.clientEmail,
+      consultType: consultation.consultType as ConsultationType,
+      consultTime: consultation.consultTime,
+      caseType: consultation.caseType,
+      status: consultation.status as ConsultStatus,
+      followUpDate: consultation.followUpDate,
+      winRate: consultation.winRate,
+      difficulty: consultation.difficulty,
+      riskLevel: consultation.riskLevel,
+      suggestedFee: consultation.suggestedFee
+        ? Number(consultation.suggestedFee)
+        : null,
+      userId: consultation.userId,
+      createdAt: consultation.createdAt,
+      updatedAt: consultation.updatedAt,
+    };
+
+    // 返回成功响应
+    return NextResponse.json(
+      {
+        success: true,
+        data: responseData,
+      },
+      { status: 201, headers: { 'Cache-Control': 'no-cache' } }
+    );
+  } catch (error) {
+    console.error('创建咨询记录失败:', error);
+
+    // 处理Prisma错误
+    if (error && typeof error === 'object' && 'code' in error) {
+      const prismaError = error as { code: string; message: string };
+      if (prismaError.code === 'P2002') {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'DATABASE_ERROR',
+              message: '数据库连接失败',
+            },
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'INTERNAL_SERVER_ERROR',
+          message: '服务器内部错误',
+        },
+      },
+      { status: 500 }
+    );
+  }
+}

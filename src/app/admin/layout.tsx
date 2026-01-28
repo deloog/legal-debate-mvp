@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { AdminNavigation } from '@/components/admin/AdminNavigation';
+import { NotificationBell } from '@/components/notification/NotificationBell';
 
 export const metadata = {
   title: '管理员后台',
@@ -22,6 +23,7 @@ export default function AdminLayout({
               <h1 className='text-xl font-bold text-gray-900'>管理员后台</h1>
             </div>
             <div className='flex items-center gap-4'>
+              <NotificationBell />
               <Link
                 href='/'
                 className='text-sm text-gray-600 hover:text-gray-900'

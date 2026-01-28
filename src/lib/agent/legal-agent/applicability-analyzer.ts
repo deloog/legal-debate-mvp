@@ -9,11 +9,12 @@
  */
 
 import type {
+  AIReviewResult,
   ApplicabilityAnalysisInput,
   ApplicabilityResult,
-  AIReviewResult,
-  RuleValidationResult,
+  CaseInfo,
   LawArticle,
+  RuleValidationResult,
 } from './types';
 
 // =============================================================================
@@ -134,12 +135,55 @@ export class ApplicabilityAnalyzer {
   /**
    * 提取案件关键词
    */
-  private extractCaseKeywords(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    caseInfo: unknown
-  ): string[] {
-    // 简化处理：从案件信息中提取常见法律关键词
-    const commonKeywords = [
+  private extractCaseKeywords(caseInfo: CaseInfo): string[] {
+    const keywords: string[] = [];
+
+    // 从案件描述中提取关键词
+    if (caseInfo.description) {
+      keywords.push(...this.extractKeywordsFromText(caseInfo.description));
+    }
+
+    // 从争议焦点中提取关键词
+    if (caseInfo.disputeFocus) {
+      for (const focus of caseInfo.disputeFocus) {
+        keywords.push(...this.extractKeywordsFromText(focus));
+      }
+    }
+
+    // 从证据摘要中提取关键词
+    if (caseInfo.evidences) {
+      for (const evidence of caseInfo.evidences) {
+        keywords.push(...this.extractKeywordsFromText(evidence.summary));
+      }
+    }
+
+    // 如果没有提取到关键词，返回默认关键词
+    if (keywords.length === 0) {
+      return [
+        '合同',
+        '违约',
+        '赔偿',
+        '履行',
+        '解除',
+        '责任',
+        '损失',
+        '义务',
+        '权利',
+        '支付',
+      ];
+    }
+
+    return [...new Set(keywords)]; // 去重
+  }
+
+  /**
+   * 从文本中提取关键词
+   * @param text 输入文本
+   * @returns 关键词数组
+   */
+  private extractKeywordsFromText(text: string): string[] {
+    const keywords: string[] = [];
+    const commonLegalTerms = [
       '合同',
       '违约',
       '赔偿',
@@ -150,10 +194,25 @@ export class ApplicabilityAnalyzer {
       '义务',
       '权利',
       '支付',
+      '侵权',
+      '损害',
+      '承担',
+      '返还',
+      '交付',
+      '验收',
+      '质量',
+      '期限',
+      '利息',
+      '违约金',
     ];
 
-    // TODO: 实际应根据caseInfo提取
-    return commonKeywords;
+    for (const term of commonLegalTerms) {
+      if (text.includes(term)) {
+        keywords.push(term);
+      }
+    }
+
+    return keywords;
   }
 
   /**
@@ -161,7 +220,7 @@ export class ApplicabilityAnalyzer {
    */
   private validateArticle(
     article: LawArticle,
-    caseInfo: unknown
+    caseInfo: CaseInfo
   ): RuleValidationResult {
     const timeValidity = this.checkTimeValidity(article);
     const scopeValidity = this.checkScopeValidity(article, caseInfo);
@@ -212,19 +271,37 @@ export class ApplicabilityAnalyzer {
    */
   private checkScopeValidity(
     article: LawArticle,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _caseInfo: unknown
+    caseInfo: CaseInfo
   ): { valid: boolean; reason?: string } {
-    // 简化处理：如果有适用范围限制，需要匹配案件所在地域
-    if (article.scope && article.scope.length > 0) {
-      // TODO: 实际应根据caseInfo中的地域信息判断
+    // 如果法条没有适用范围限制，则认为有效
+    if (!article.scope || article.scope.length === 0) {
+      return { valid: true };
+    }
+
+    // 如果案件没有地点信息，无法验证，返回有效（降级策略）
+    if (!caseInfo.location) {
       return {
         valid: true,
-        reason: '适用范围匹配',
+        reason: '案件地点信息缺失，无法验证适用范围',
       };
     }
 
-    return { valid: true };
+    // 检查案件地点是否在法条适用范围内
+    const isApplicable = article.scope.some(scope =>
+      caseInfo.location?.includes(scope)
+    );
+
+    if (isApplicable) {
+      return {
+        valid: true,
+        reason: `案件地点"${caseInfo.location}"在适用范围[${article.scope.join(', ')}]内`,
+      };
+    }
+
+    return {
+      valid: false,
+      reason: `案件地点"${caseInfo.location}"不在适用范围[${article.scope.join(', ')}]内`,
+    };
   }
 
   /**

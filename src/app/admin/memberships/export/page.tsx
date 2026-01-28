@@ -54,11 +54,9 @@ export default function MembershipExportPage(): React.ReactElement {
       setHistoryLoading(true);
       setError(null);
 
-      // TODO: 实现导出历史API
-      // const response = await fetch('/api/admin/memberships/export/history');
-      // const data = await response.json();
-      // setHistory(data.data || []);
-      setHistory([]);
+      const response = await fetch('/api/admin/memberships/export/history');
+      const data = await response.json();
+      setHistory(data.data || []);
     } catch (err) {
       console.error('加载导出历史失败:', err);
       setError(err instanceof Error ? err.message : '加载失败');

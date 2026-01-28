@@ -18,6 +18,7 @@ export enum NotificationChannel {
   IN_APP = 'IN_APP', // 站内提醒
   EMAIL = 'EMAIL', // 邮件提醒
   SMS = 'SMS', // 短信提醒
+  WEBHOOK = 'WEBHOOK', // Webhook通知
 }
 
 /**

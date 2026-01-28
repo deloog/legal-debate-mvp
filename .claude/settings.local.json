@@ -19,7 +19,12 @@
       "Bash(npm run lint:*)",
       "Bash(npx eslint:*)",
       "Bash(npm run build:*)",
-      "Bash(timeout 120 cmd /c \"npm run build 2>&1\")"
+      "Bash(timeout 120 cmd /c \"npm run build 2>&1\")",
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npm ls:*)",
+      "Bash(npx prisma:*)"
     ]
   }
 }

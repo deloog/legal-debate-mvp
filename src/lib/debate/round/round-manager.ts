@@ -4,7 +4,30 @@ import { RoundConfig, RoundSummary, RoundContext } from './types';
 import { RoundValidator } from './round-validator';
 import { ContextInheritanceProcessor } from './context-inheritance';
 import { prisma } from '@/lib/db/prisma';
-import { DebateRound, Argument } from '@prisma/client';
+import { DebateRound, Argument, Prisma } from '@prisma/client';
+
+/**
+ * 法律依据接口
+ */
+export interface LegalBasisItem {
+  lawName: string;
+  articleNumber: string;
+  relevance: number;
+  explanation: string;
+}
+
+/**
+ * 添加论点的额外选项
+ */
+export interface AddArgumentOptions {
+  aiProvider?: string;
+  confidence?: number;
+  reasoning?: string;
+  legalBasis?: LegalBasisItem[];
+  logicScore?: number;
+  legalScore?: number;
+  overallScore?: number;
+}
 
 /**
  * 轮次管理器类
@@ -249,8 +272,7 @@ export class RoundManager {
    * @param side - 正反方
    * @param content - 论点内容
    * @param type - 论点类型
-   * @param aiProvider - AI提供商
-   * @param confidence - 置信度
+   * @param options - 额外选项（AI信息、法律依据等）
    * @returns 论点记录
    */
   async addArgument(
@@ -264,8 +286,7 @@ export class RoundManager {
       | 'EVIDENCE'
       | 'LEGAL_BASIS'
       | 'CONCLUSION',
-    aiProvider?: string,
-    confidence?: number
+    options?: AddArgumentOptions
   ): Promise<{ roundId: string; argumentId: string }> {
     // 验证轮次状态
     const round = await prisma.debateRound.findUnique({
@@ -298,15 +319,22 @@ export class RoundManager {
       historicalArguments
     );
 
-    // 创建论点
+    // 创建论点，包含法律依据信息
     const argument = await prisma.argument.create({
       data: {
         roundId,
         side,
         content,
         type,
-        aiProvider,
-        confidence,
+        aiProvider: options?.aiProvider,
+        confidence: options?.confidence,
+        reasoning: options?.reasoning,
+        legalBasis: options?.legalBasis
+          ? (options.legalBasis as unknown as Prisma.InputJsonValue)
+          : undefined,
+        logicScore: options?.logicScore,
+        legalScore: options?.legalScore,
+        overallScore: options?.overallScore,
       },
     });
 

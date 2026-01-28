@@ -9,7 +9,6 @@ import '@testing-library/jest-dom';
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { CaseTeamList } from '@/components/case/CaseTeamList';
 import { CaseRole } from '@/types/case-collaboration';
-import '@/__tests__/types/jest-dom';
 
 // Mock fetch with proper type
 global.fetch = jest.fn(() =>

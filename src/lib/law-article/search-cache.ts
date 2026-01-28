@@ -115,10 +115,18 @@ export class SearchCacheManager {
    */
   static async clearAllCache(): Promise<void> {
     try {
-      // 注意：这个操作会清除所有以CACHE_PREFIX开头的缓存
-      // 实际实现可能需要根据Redis客户端的API调整
-      console.log(`Clearing all cache with prefix: ${this.CACHE_PREFIX}`);
-      // TODO: 实现按前缀清除缓存
+      // 使用clearNamespace方法清除指定前缀的缓存
+      const deletedCount = await cacheManager.clearNamespace(this.CACHE_PREFIX);
+
+      if (deletedCount > 0) {
+        console.log(
+          `[SearchCache] Cleared ${deletedCount} cache entries with prefix: ${this.CACHE_PREFIX}`
+        );
+      } else {
+        console.log(
+          `[SearchCache] No cache entries found with prefix: ${this.CACHE_PREFIX}`
+        );
+      }
     } catch (error) {
       console.error('Error clearing all search cache:', error);
     }

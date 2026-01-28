@@ -1,5 +1,7 @@
 import { FollowUpTask } from '@/types/client';
 import { logger } from '@/lib/agent/security/logger';
+import { ReminderType } from '@/types/notification';
+import { prisma } from '@/lib/db/prisma';
 
 /**
  * 提醒渠道枚举
@@ -138,10 +140,32 @@ export class FollowUpReminder {
    */
   private static async sendInAppReminder(task: FollowUpTask): Promise<boolean> {
     try {
-      // TODO: 实现站内提醒功能
-      // 可以创建通知表或在现有通知系统中添加记录
-      logger.info(`站内提醒: 用户 ${task.userId} 有跟进任务 ${task.id}`);
-      return true;
+      const { inAppMessageService } =
+        await import('@/lib/notification/in-app-message-service');
+
+      const message = await inAppMessageService.createMessage({
+        userId: task.userId,
+        type: ReminderType.FOLLOW_UP,
+        title: '客户跟进任务提醒',
+        content: this.generateReminderMessage(task),
+        relatedType: 'FollowUpTask',
+        relatedId: task.id,
+        reminderTime: new Date(),
+        metadata: {
+          taskId: task.id,
+          clientId: task.clientId,
+          dueDate: task.dueDate,
+          priority: task.priority,
+        },
+      });
+
+      if (message) {
+        logger.info(`站内提醒已创建: 用户 ${task.userId} 任务 ${task.id}`);
+        return true;
+      } else {
+        logger.warn(`站内提醒创建失败: 用户 ${task.userId} 任务 ${task.id}`);
+        return false;
+      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
@@ -157,17 +181,138 @@ export class FollowUpReminder {
    */
   private static async sendEmailReminder(task: FollowUpTask): Promise<boolean> {
     try {
-      // TODO: 实现邮件提醒功能
-      // 需要配置邮件服务器
-      logger.info(`邮件提醒: 发送邮件提醒给用户 ${task.userId}`);
-      logger.warn('邮件提醒功能暂未实现');
-      return false;
+      const { getEmailService } = await import('@/lib/auth/email-service');
+
+      const emailService = getEmailService();
+
+      // 获取用户邮箱（如果task中没有）
+      const userEmail =
+        task.clientEmail || (await this.getUserEmail(task.userId));
+
+      // 检查邮件服务是否支持通用发送
+      if (emailService.sendEmail) {
+        const subject = '[律伴助手] 客户跟进任务提醒';
+        const message = this.generateReminderMessage(task);
+
+        const result = await emailService.sendEmail({
+          to: userEmail,
+          subject,
+          text: message,
+          html: this.generateEmailHTML(task, message),
+        });
+
+        if (result.success) {
+          logger.info(`邮件提醒已发送: 用户 ${task.userId} 任务 ${task.id}`);
+          return true;
+        } else {
+          logger.warn(`邮件提醒发送失败: 用户 ${task.userId} 任务 ${task.id}`, {
+            error: result.error,
+          } as never);
+          return false;
+        }
+      } else {
+        logger.warn('邮件服务不支持通用发送，使用开发模式输出');
+        logger.info(`[EMAIL] ${userEmail}`);
+        logger.info(`[EMAIL] Subject: [律伴助手] 客户跟进任务提醒`);
+        logger.info(`[EMAIL] ${this.generateReminderMessage(task)}`);
+        return true; // 开发模式下返回成功
+      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       logger.error(`发送邮件提醒失败: ${errorMessage}`, error);
       return false;
     }
+  }
+
+  /**
+   * 获取用户邮箱
+   * @param userId 用户ID
+   * @returns 邮箱地址
+   */
+  private static async getUserEmail(userId: string): Promise<string> {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { email: true },
+      });
+      return user?.email || '';
+    } catch (error) {
+      logger.error(`获取用户邮箱失败: ${userId}`, error as Error);
+      return '';
+    }
+  }
+
+  /**
+   * 生成邮件HTML内容
+   * @param task 跟进任务
+   * @param message 邮件消息
+   * @returns HTML内容
+   */
+  private static generateEmailHTML(
+    task: FollowUpTask,
+    message: string
+  ): string {
+    const dueDate = new Date(task.dueDate);
+    const formattedDate = dueDate.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'long',
+    });
+
+    const priorityColor = {
+      HIGH: '#dc3545',
+      MEDIUM: '#ffc107',
+      LOW: '#28a745',
+    }[task.priority];
+
+    const priorityText = {
+      HIGH: '高优先级',
+      MEDIUM: '中优先级',
+      LOW: '低优先级',
+    }[task.priority];
+
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>客户跟进任务提醒</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; border-left: 4px solid ${priorityColor};">
+    <h2 style="color: #333; margin-top: 0;">🔔 客户跟进任务提醒</h2>
+
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; width: 100px;">优先级:</td>
+        <td style="padding: 8px 0;"><span style="background: ${priorityColor}; color: white; padding: 2px 8px; border-radius: 3px;">${priorityText}</span></td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold;">客户:</td>
+        <td style="padding: 8px 0;">${task.clientName}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold;">任务:</td>
+        <td style="padding: 8px 0;">${task.summary}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold;">截止日期:</td>
+        <td style="padding: 8px 0;">${formattedDate}</td>
+      </tr>
+    </table>
+
+    <div style="background: #fff; padding: 15px; border-radius: 5px; margin-top: 15px;">
+      <h4 style="margin-top: 0; color: #666;">任务详情</h4>
+      <p style="margin: 0; white-space: pre-wrap;">${message}</p>
+    </div>
+  </div>
+
+  <p style="font-size: 12px; color: #999; margin-top: 20px; text-align: center;">
+    此邮件由系统自动发送，请勿回复 | 律伴助手
+  </p>
+</body>
+</html>`;
   }
 
   /**

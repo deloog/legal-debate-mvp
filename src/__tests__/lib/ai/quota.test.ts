@@ -249,6 +249,7 @@ describe('AI配额管理系统', () => {
           type: 'test',
           provider: 'test-provider',
           model: undefined,
+          userId: 'user-1',
           request: {
             userId: 'user-1',
             timestamp: expect.any(String),

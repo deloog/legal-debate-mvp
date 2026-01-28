@@ -287,7 +287,6 @@ module.exports = {
         'json',
         'json-summary',
       ],
-      coverageProvider: 'v8',
     },
   ],
 

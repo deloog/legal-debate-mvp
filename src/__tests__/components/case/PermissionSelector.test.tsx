@@ -8,7 +8,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import '@testing-library/jest-dom';
 import { PermissionSelector } from '@/components/case/PermissionSelector';
-import '@/__tests__/types/jest-dom';
 import {
   CaseRole,
   CasePermission,
