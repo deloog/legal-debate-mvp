@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { seedContractTemplates } from './seed-contracts';
 
 const prisma = new PrismaClient();
 
@@ -203,6 +204,9 @@ async function main() {
 
   console.log('法律依据创建完成');
 
+  // 创建合同模板
+  await seedContractTemplates();
+
   console.log('种子数据创建完成！');
   console.log('\n创建的数据摘要：');
 
@@ -214,6 +218,7 @@ async function main() {
   const legalReferenceCount = await prisma.legalReference.count();
   const accountCount = await prisma.account.count();
   const sessionCount = await prisma.session.count();
+  const contractTemplateCount = await prisma.contractTemplate.count();
 
   console.log(`- 用户: ${userCount} 个`);
   console.log(`- 案例: ${caseCount} 个`);
@@ -223,6 +228,7 @@ async function main() {
   console.log(`- 法律依据: ${legalReferenceCount} 个`);
   console.log(`- OAuth账户: ${accountCount} 个`);
   console.log(`- 会话: ${sessionCount} 个`);
+  console.log(`- 合同模板: ${contractTemplateCount} 个`);
 }
 
 main()

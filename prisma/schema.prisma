@@ -130,6 +130,7 @@ model Case {
   legalReferences LegalReference[]
   tasks           Task[]
   witnesses       Witness[]
+  contracts       Contract[]
 
   @@index([userId])
   @@index([clientId])
@@ -2124,4 +2125,260 @@ model Notification {
   @@index([priority])
   @@index([createdAt])
   @@map("notifications")
+}
+
+// =============================================================================
+// 签约立案模块
+// =============================================================================
+
+// 委托合同
+model Contract {
+  id              String   @id @default(cuid())
+
+  contractNumber  String   @unique  // 合同编号
+
+  // 关联
+  caseId          String?            // 关联案件
+  case            Case?    @relation(fields: [caseId], references: [id])
+  consultationId  String?            // 来源咨询
+
+  // 委托方信息
+  clientType      String             // 委托人类型：个人/企业
+  clientName      String             // 委托人姓名/名称
+  clientIdNumber  String?            // 身份证号/统一社会信用代码
+  clientAddress   String?            // 地址
+  clientContact   String?            // 联系方式
+
+  // 受托方信息（律所/律师）
+  lawFirmName     String             // 律所名称
+  lawyerName      String             // 承办律师
+  lawyerId        String             // 律师ID
+
+  // 委托事项
+  caseType        String             // 案件类型
+  caseSummary     String             // 案情简述
+  scope           String             // 委托范围
+
+  // 收费信息
+  feeType         FeeType            // 收费方式
+  totalFee        Decimal            // 总费用
+  paidAmount      Decimal  @default(0) // 已付金额
+  feeDetails      Json?              // 费用明细
+
+  // 合同条款
+  terms           Json?              // 合同条款（JSON格式存储）
+  specialTerms    String?            // 特别约定
+
+  // 签署信息
+  status          ContractStatus     @default(DRAFT)
+  signedAt        DateTime?          // 签署时间
+  signatureData   Json?              // 签名数据（旧字段，保留兼容）
+
+  // 电子签名信息（新增）
+  clientSignature String?            // 委托人签名（Base64）
+  clientSignedAt  DateTime?          // 委托人签署时间
+  clientSignedIp  String?            // 委托人签署IP
+  lawyerSignature String?            // 律师签名（Base64）
+  lawyerSignedAt  DateTime?          // 律师签署时间
+  lawyerSignedIp  String?            // 律师签署IP
+  signatureDevice String?            // 签署设备信息
+
+  // 文件
+  filePath        String?            // 合同文件路径
+
+  // 时间戳
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // 关联
+  payments        ContractPayment[]
+  versions        ContractVersion[]  // 版本历史
+  approvals       ContractApproval[] // 审批记录
+
+  @@index([caseId])
+  @@index([clientName])
+  @@index([status])
+  @@index([lawyerId])
+  @@index([createdAt])
+  // 复合索引优化常用查询
+  @@index([status, createdAt])
+  @@index([clientName, status])
+  @@index([lawyerId, status])
+  @@index([status, signedAt])
+  @@map("contracts")
+}
+
+enum FeeType {
+  FIXED     // 固定收费
+  RISK      // 风险代理
+  HOURLY    // 计时收费
+  MIXED     // 混合收费
+}
+
+enum ContractStatus {
+  DRAFT       // 草稿
+  PENDING     // 待签署
+  SIGNED      // 已签署
+  EXECUTING   // 履行中
+  COMPLETED   // 已完成
+  TERMINATED  // 已终止
+}
+
+// 合同付款记录
+model ContractPayment {
+  id              String   @id @default(cuid())
+  contractId      String
+  contract        Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  paymentNumber   String   @unique  // 付款编号
+  amount          Decimal            // 付款金额
+  paymentType     String             // 付款类型：首付款/中期款/尾款
+  paymentMethod   String?            // 付款方式：转账/现金/微信/支付宝
+
+  status          ContractPaymentStatus      @default(PENDING)
+  paidAt          DateTime?          // 实际付款时间
+
+  receiptNumber   String?            // 收据编号
+  invoiceId       String?            // 关联发票ID
+
+  note            String?            // 备注
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([contractId])
+  @@index([status])
+  @@index([paidAt])
+  @@map("contract_payments")
+}
+
+enum ContractPaymentStatus {
+  PENDING   // 待付款
+  PAID      // 已付款
+  OVERDUE   // 已逾期
+  CANCELLED // 已取消
+}
+
+// 合同模板
+model ContractTemplate {
+  id              String   @id @default(cuid())
+
+  name            String             // 模板名称
+  code            String   @unique   // 模板代码
+  category        String             // 分类：委托代理/法律顾问/专项服务
+
+  content         String             // 模板内容（支持变量占位符）
+  variables       Json               // 变量列表定义
+
+  isDefault       Boolean  @default(false)
+  isActive        Boolean  @default(true)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+  @@index([isDefault])
+  @@map("contract_templates")
+}
+
+// 合同版本记录
+model ContractVersion {
+  id              String   @id @default(cuid())
+  contractId      String
+  contract        Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  version         Int                // 版本号
+  snapshot        Json               // 合同数据快照
+  changes         Json?              // 变更内容
+  changeType      String             // 变更类型：CREATE/UPDATE/SIGN
+
+  createdBy       String             // 创建人
+  createdAt       DateTime @default(now())
+  comment         String?            // 版本说明
+
+  @@index([contractId])
+  @@index([createdAt])
+  @@map("contract_versions")
+}
+
+// =============================================================================
+// 合同审批流程
+// =============================================================================
+
+// 审批流程模板
+model ApprovalTemplate {
+  id              String   @id @default(cuid())
+  name            String             // 模板名称
+  description     String?            // 描述
+  steps           Json               // 审批步骤配置
+  isActive        Boolean  @default(true)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([isActive])
+  @@map("approval_templates")
+}
+
+// 合同审批记录
+model ContractApproval {
+  id              String   @id @default(cuid())
+  contractId      String
+  contract        Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  templateId      String?            // 使用的模板
+  currentStep     Int      @default(1) // 当前步骤
+  status          ApprovalStatus     // 审批状态
+
+  createdBy       String             // 发起人
+  createdAt       DateTime @default(now())
+  completedAt     DateTime?          // 完成时间
+
+  steps           ApprovalStep[]
+
+  @@index([contractId])
+  @@index([status])
+  @@index([createdBy])
+  @@index([createdAt])
+  @@map("contract_approvals")
+}
+
+// 审批步骤
+model ApprovalStep {
+  id              String   @id @default(cuid())
+  approvalId      String
+  approval        ContractApproval @relation(fields: [approvalId], references: [id], onDelete: Cascade)
+
+  stepNumber      Int                // 步骤序号
+  approverRole    String             // 审批角色
+  approverId      String?            // 审批人ID
+  approverName    String?            // 审批人姓名
+
+  status          StepStatus         // 步骤状态
+  decision        String?            // 审批决定：APPROVE/REJECT/RETURN
+  comment         String?            // 审批意见
+
+  createdAt       DateTime @default(now())
+  completedAt     DateTime?          // 完成时间
+
+  @@index([approvalId])
+  @@index([status])
+  @@index([approverId])
+  @@map("approval_steps")
+}
+
+enum ApprovalStatus {
+  PENDING     // 待审批
+  IN_PROGRESS // 审批中
+  APPROVED    // 已通过
+  REJECTED    // 已拒绝
+  CANCELLED   // 已取消
+}
+
+enum StepStatus {
+  PENDING     // 待审批
+  APPROVED    // 已通过
+  REJECTED    // 已拒绝
+  SKIPPED     // 已跳过
 }

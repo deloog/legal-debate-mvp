@@ -16,6 +16,8 @@ import {
   validateCreateConsultation,
   getFirstZodError,
 } from '@/lib/validations/consultation';
+import { authOptions } from '@/lib/auth/auth-options';
+import { getServerSession } from 'next-auth';
 
 /**
  * 标准成功响应格式
@@ -73,6 +75,7 @@ interface QueryParams {
   pageSize?: string;
   status?: string;
   consultType?: string;
+  caseType?: string;
   startDate?: string;
   endDate?: string;
   keyword?: string;
@@ -108,6 +111,7 @@ export async function GET(
     const {
       status,
       consultType,
+      caseType,
       startDate,
       endDate,
       keyword,
@@ -190,6 +194,10 @@ export async function GET(
 
     if (consultType) {
       where.consultType = consultType;
+    }
+
+    if (caseType) {
+      where.caseType = caseType;
     }
 
     // 日期范围筛选
@@ -312,6 +320,23 @@ export async function POST(
   | NextResponse<ErrorResponse>
 > {
   try {
+    // 获取用户会话
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: '未授权，请先登录',
+          },
+        },
+        { status: 401 }
+      );
+    }
+
+    const userId = session.user.id;
+
     // 解析请求体
     let body: Record<string, unknown>;
     try {
@@ -391,8 +416,7 @@ export async function POST(
         followUpDate: data.followUpDate || null,
         followUpNotes: data.followUpNotes || null,
         status: ConsultStatus.PENDING,
-        // TODO: 从session获取真实用户ID
-        userId: 'demo-user-id',
+        userId,
       },
     });
 

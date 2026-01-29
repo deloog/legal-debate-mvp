@@ -188,6 +188,18 @@ export default function Home() {
                 工作台
               </Link>
               <Link
+                href='/consultations'
+                className='text-sm font-semibold text-slate-700 transition-colors hover:text-violet-600'
+              >
+                接案咨询
+              </Link>
+              <Link
+                href='/contracts'
+                className='text-sm font-semibold text-slate-700 transition-colors hover:text-violet-600'
+              >
+                委托合同
+              </Link>
+              <Link
                 href='/cases'
                 className='text-sm font-semibold text-slate-700 transition-colors hover:text-violet-600'
               >
@@ -441,6 +453,16 @@ export default function Home() {
                 产品
               </h4>
               <ul className='space-y-2 text-sm text-slate-600'>
+                <li>
+                  <Link href='/consultations' className='hover:text-violet-600'>
+                    接案咨询
+                  </Link>
+                </li>
+                <li>
+                  <Link href='/contracts' className='hover:text-violet-600'>
+                    委托合同
+                  </Link>
+                </li>
                 <li>
                   <Link href='/cases' className='hover:text-violet-600'>
                     案件管理

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -14,6 +14,23 @@ import { Label } from '@/components/ui/label';
 import { ConsultationType } from '@/types/consultation';
 import { validateCreateConsultation } from '@/lib/validations/consultation';
 
+/**
+ * 案件类型配置接口
+ */
+interface CaseTypeConfig {
+  id: string;
+  code: string;
+  name: string;
+  category: string;
+  baseFee: number;
+  riskFeeRate: number | null;
+  hourlyRate: number | null;
+  avgDuration: number | null;
+  complexityLevel: number;
+  isActive: boolean;
+  sortOrder: number;
+}
+
 export interface ConsultationFormProps {
   onSubmit: () => Promise<void>;
   onCancel: () => void;
@@ -25,6 +42,9 @@ export function ConsultationForm({
 }: ConsultationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [caseTypes, setCaseTypes] = useState<CaseTypeConfig[]>([]);
+  const [isLoadingCaseTypes, setIsLoadingCaseTypes] = useState(true);
+  const [caseTypeError, setCaseTypeError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     consultType: ConsultationType.PHONE,
@@ -39,6 +59,30 @@ export function ConsultationForm({
     followUpDate: '',
     followUpNotes: '',
   });
+
+  // 获取案件类型列表
+  useEffect(() => {
+    async function fetchCaseTypes() {
+      try {
+        setIsLoadingCaseTypes(true);
+        setCaseTypeError(null);
+        const response = await fetch('/api/case-type-configs?isActive=true');
+        const data = await response.json();
+
+        if (data.success) {
+          setCaseTypes(data.data);
+        } else {
+          setCaseTypeError(data.error?.message || '获取案件类型失败');
+        }
+      } catch {
+        setCaseTypeError('获取案件类型失败，请重试');
+      } finally {
+        setIsLoadingCaseTypes(false);
+      }
+    }
+
+    fetchCaseTypes();
+  }, []);
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -113,6 +157,26 @@ export function ConsultationForm({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // 按大类分组案件类型
+  const groupedCaseTypes = caseTypes.reduce<Record<string, CaseTypeConfig[]>>(
+    (acc, ct) => {
+      if (!acc[ct.category]) {
+        acc[ct.category] = [];
+      }
+      acc[ct.category].push(ct);
+      return acc;
+    },
+    {}
+  );
+
+  // 大类标签映射
+  const categoryLabels: Record<string, string> = {
+    CIVIL: '民事',
+    CRIMINAL: '刑事',
+    ADMINISTRATIVE: '行政',
+    NON_LITIGATION: '非诉',
   };
 
   return (
@@ -228,15 +292,35 @@ export function ConsultationForm({
           {/* 案件类型 */}
           <div className='space-y-2'>
             <Label htmlFor='caseType'>案件类型</Label>
-            <Input
-              id='caseType'
-              type='text'
-              value={formData.caseType}
-              onChange={e => handleChange('caseType', e.target.value)}
-              placeholder='请输入案件类型'
-              maxLength={50}
-              className={errors.caseType ? 'border-red-500' : ''}
-            />
+            {isLoadingCaseTypes ? (
+              <div className='flex items-center space-x-2'>
+                <div className='h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent' />
+                <span className='text-sm text-gray-500'>加载中...</span>
+              </div>
+            ) : caseTypeError ? (
+              <div className='text-sm text-red-500'>{caseTypeError}</div>
+            ) : (
+              <select
+                id='caseType'
+                value={formData.caseType}
+                onChange={e => handleChange('caseType', e.target.value)}
+                className='w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500'
+              >
+                <option value=''>请选择案件类型</option>
+                {Object.entries(groupedCaseTypes).map(([category, types]) => (
+                  <optgroup
+                    key={category}
+                    label={categoryLabels[category] || category}
+                  >
+                    {types.map(ct => (
+                      <option key={ct.id} value={ct.code}>
+                        {ct.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            )}
             {errors.caseType && (
               <p className='text-sm text-red-500'>{errors.caseType}</p>
             )}

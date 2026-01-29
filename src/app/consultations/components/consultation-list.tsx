@@ -5,7 +5,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
   useConsultations,
@@ -13,14 +13,16 @@ import {
 } from '@/lib/hooks/use-consultations';
 import { ConsultationListItem } from './consultation-list-item';
 import { ConsultationSearch } from './consultation-search';
+import { FilterDrawer } from './filter-drawer';
 
 /**
  * 咨询列表组件
  */
 export function ConsultationList() {
   const router = useRouter();
-  const [filters] = useState<ConsultationFilters>({});
+  const [filters, setFilters] = useState<ConsultationFilters>({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const { consultations, loading, error, pagination, goToPage, refetch } =
     useConsultations(filters, searchQuery);
 
@@ -30,6 +32,31 @@ export function ConsultationList() {
   const handleSearchChange = useCallback(
     (query: string) => {
       setSearchQuery(query);
+      goToPage(1);
+    },
+    [goToPage]
+  );
+
+  /**
+   * 处理打开筛选抽屉
+   */
+  const handleOpenFilterDrawer = useCallback(() => {
+    setIsFilterDrawerOpen(true);
+  }, []);
+
+  /**
+   * 处理关闭筛选抽屉
+   */
+  const handleCloseFilterDrawer = useCallback(() => {
+    setIsFilterDrawerOpen(false);
+  }, []);
+
+  /**
+   * 处理应用筛选
+   */
+  const handleApplyFilters = useCallback(
+    (newFilters: ConsultationFilters) => {
+      setFilters(newFilters);
       goToPage(1);
     },
     [goToPage]
@@ -198,11 +225,10 @@ export function ConsultationList() {
           />
         </div>
         <button
-          onClick={() => {
-            console.log('显示筛选抽屉');
-          }}
+          onClick={handleOpenFilterDrawer}
           className='flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
         >
+          <Filter className='h-4 w-4' />
           <span>筛选</span>
         </button>
       </div>
@@ -228,6 +254,14 @@ export function ConsultationList() {
       </div>
 
       {renderPagination()}
+
+      {/* 筛选抽屉 */}
+      <FilterDrawer
+        isOpen={isFilterDrawerOpen}
+        onClose={handleCloseFilterDrawer}
+        onApply={handleApplyFilters}
+        initialFilters={filters}
+      />
     </div>
   );
 }

@@ -13,8 +13,9 @@ import { ConsultationType, ConsultStatus } from '@/types/consultation';
 export interface ConsultationFilters {
   status?: ConsultStatus;
   consultType?: ConsultationType;
-  dateFrom?: Date | null;
-  dateTo?: Date | null;
+  caseType?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 /**
@@ -109,12 +110,17 @@ export function useConsultations(
         params.append('consultType', filters.consultType);
       }
 
-      // 添加日期范围筛选
-      if (filters.dateFrom) {
-        params.append('startDate', filters.dateFrom.toISOString());
+      // 添加案件类型筛选
+      if (filters.caseType) {
+        params.append('caseType', filters.caseType);
       }
-      if (filters.dateTo) {
-        params.append('endDate', filters.dateTo.toISOString());
+
+      // 添加日期范围筛选
+      if (filters.startDate) {
+        params.append('startDate', filters.startDate);
+      }
+      if (filters.endDate) {
+        params.append('endDate', filters.endDate);
       }
 
       // 调用API
