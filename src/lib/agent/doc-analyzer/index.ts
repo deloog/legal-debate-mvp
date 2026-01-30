@@ -22,6 +22,7 @@ export type { ReviewResult } from './core/types';
 export type { ReviewIssue } from './core/types';
 export type { ReviewerConfig } from './core/types';
 export type { DocAnalyzerConfig } from './core/types';
+export type { OptimizationStageResult } from './core/types';
 
 // 导出常量
 export {
@@ -49,3 +50,13 @@ export { ReviewerManager } from './reviewers/reviewer-manager';
 export type { IReviewer } from './reviewers/reviewer-manager';
 export { AIReviewer } from './reviewers/ai-reviewer';
 export { RuleReviewer } from './reviewers/rule-reviewer';
+
+// 导出准确率优化器
+export { AccuracyOptimizer, AccuracyValidator } from './optimizations';
+export type {
+  DocumentInput,
+  QuickAnalysisResult,
+  DeepAnalysisResult,
+  ValidatedResult,
+  AccuracyOptimizerConfig,
+} from './optimizations';

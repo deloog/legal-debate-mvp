@@ -58,9 +58,7 @@ async function generateContractNumber(): Promise<string> {
  * GET /api/contracts
  * 获取合同列表
  */
-export async function GET(
-  request: NextRequest
-): Promise<
+export async function GET(request: NextRequest): Promise<
   NextResponse<
     | SuccessResponse<{
         items: unknown[];

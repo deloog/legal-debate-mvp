@@ -28,7 +28,8 @@ export default function ContractTemplateEditor({
   onCancel,
 }: ContractTemplateEditorProps) {
   const [content, setContent] = useState(initialContent);
-  const [variables, setVariables] = useState<TemplateVariable[]>(initialVariables);
+  const [variables, setVariables] =
+    useState<TemplateVariable[]>(initialVariables);
   const [showVariableDialog, setShowVariableDialog] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [newVariable, setNewVariable] = useState<TemplateVariable>({
@@ -45,7 +46,12 @@ export default function ContractTemplateEditor({
     { name: 'clientAddress', label: '联系地址', type: 'text', required: false },
     { name: 'clientPhone', label: '联系电话', type: 'text', required: true },
     { name: 'caseType', label: '案件类型', type: 'text', required: true },
-    { name: 'caseSummary', label: '案情简述', type: 'textarea', required: true },
+    {
+      name: 'caseSummary',
+      label: '案情简述',
+      type: 'textarea',
+      required: true,
+    },
     { name: 'scope', label: '委托范围', type: 'text', required: true },
     { name: 'totalFee', label: '律师费总额', type: 'number', required: true },
     { name: 'lawFirmName', label: '律所名称', type: 'text', required: true },
@@ -55,7 +61,9 @@ export default function ContractTemplateEditor({
 
   // 插入变量到内容中
   function insertVariable(variableName: string) {
-    const textarea = document.getElementById('template-content') as HTMLTextAreaElement;
+    const textarea = document.getElementById(
+      'template-content'
+    ) as HTMLTextAreaElement;
     if (!textarea) return;
 
     const start = textarea.selectionStart;
@@ -63,9 +71,7 @@ export default function ContractTemplateEditor({
     const variableTag = `{{${variableName}}}`;
 
     const newContent =
-      content.substring(0, start) +
-      variableTag +
-      content.substring(end);
+      content.substring(0, start) + variableTag + content.substring(end);
 
     setContent(newContent);
 
@@ -144,59 +150,57 @@ export default function ContractTemplateEditor({
   }
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {/* 工具栏 */}
-      <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
-        <div className="flex items-center gap-2">
+      <div className='flex items-center justify-between rounded-lg bg-gray-50 p-4'>
+        <div className='flex items-center gap-2'>
           <button
-            type="button"
+            type='button'
             onClick={() => setShowPreview(!showPreview)}
-            className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className='rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
           >
             {showPreview ? '编辑模式' : '预览模式'}
           </button>
           <button
-            type="button"
+            type='button'
             onClick={() => setShowVariableDialog(true)}
-            className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className='rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
           >
             + 添加变量
           </button>
         </div>
-        <div className="flex items-center gap-2">
+        <div className='flex items-center gap-2'>
           <button
-            type="button"
+            type='button'
             onClick={onCancel}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className='rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
           >
             取消
           </button>
           <button
-            type="button"
+            type='button'
             onClick={handleSave}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className='rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700'
           >
             保存模板
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className='grid grid-cols-1 gap-6 lg:grid-cols-3'>
         {/* 左侧：常用变量 */}
-        <div className="rounded-lg bg-white p-4 shadow">
-          <h3 className="mb-3 text-sm font-semibold text-gray-900">
-            常用变量
-          </h3>
-          <div className="space-y-2">
+        <div className='rounded-lg bg-white p-4 shadow'>
+          <h3 className='mb-3 text-sm font-semibold text-gray-900'>常用变量</h3>
+          <div className='space-y-2'>
             {commonVariables.map(variable => (
               <button
                 key={variable.name}
-                type="button"
+                type='button'
                 onClick={() => addCommonVariable(variable)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                className='w-full rounded-lg border border-gray-200 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50'
               >
-                <div className="font-medium">{variable.label}</div>
-                <div className="text-xs text-gray-500">
+                <div className='font-medium'>{variable.label}</div>
+                <div className='text-xs text-gray-500'>
                   {`{{${variable.name}}}`}
                 </div>
               </button>
@@ -205,30 +209,30 @@ export default function ContractTemplateEditor({
         </div>
 
         {/* 中间：编辑器 */}
-        <div className="lg:col-span-2">
-          <div className="rounded-lg bg-white p-6 shadow">
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">
+        <div className='lg:col-span-2'>
+          <div className='rounded-lg bg-white p-6 shadow'>
+            <h3 className='mb-4 text-lg font-semibold text-gray-900'>
               {showPreview ? '模板预览' : '模板内容'}
             </h3>
 
             {showPreview ? (
-              <div className="min-h-[500px] whitespace-pre-wrap rounded-lg border border-gray-300 bg-gray-50 p-4 text-sm">
+              <div className='min-h-[500px] whitespace-pre-wrap rounded-lg border border-gray-300 bg-gray-50 p-4 text-sm'>
                 {renderPreview()}
               </div>
             ) : (
               <textarea
-                id="template-content"
+                id='template-content'
                 value={content}
                 onChange={e => setContent(e.target.value)}
-                placeholder="请输入合同模板内容，使用 {{变量名}} 格式插入变量..."
-                className="min-h-[500px] w-full rounded-lg border border-gray-300 p-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder='请输入合同模板内容，使用 {{变量名}} 格式插入变量...'
+                className='min-h-[500px] w-full rounded-lg border border-gray-300 p-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
               />
             )}
 
             {/* 使用说明 */}
-            <div className="mt-4 rounded-lg bg-blue-50 p-3 text-sm text-blue-800">
-              <p className="font-medium">使用说明：</p>
-              <ul className="mt-2 space-y-1 text-xs">
+            <div className='mt-4 rounded-lg bg-blue-50 p-3 text-sm text-blue-800'>
+              <p className='font-medium'>使用说明：</p>
+              <ul className='mt-2 space-y-1 text-xs'>
                 <li>• 点击左侧常用变量可快速插入</li>
                 <li>• 使用 {`{{变量名}}`} 格式手动插入变量</li>
                 <li>• 点击"预览模式"查看变量替换效果</li>
@@ -241,46 +245,46 @@ export default function ContractTemplateEditor({
 
       {/* 已添加的变量列表 */}
       {variables.length > 0 && (
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h3 className="mb-4 text-lg font-semibold text-gray-900">
+        <div className='rounded-lg bg-white p-6 shadow'>
+          <h3 className='mb-4 text-lg font-semibold text-gray-900'>
             已添加的变量 ({variables.length})
           </h3>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+          <div className='grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3'>
             {variables.map(variable => (
               <div
                 key={variable.name}
-                className="flex items-center justify-between rounded-lg border border-gray-200 p-3"
+                className='flex items-center justify-between rounded-lg border border-gray-200 p-3'
               >
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900">
+                <div className='flex-1'>
+                  <div className='font-medium text-gray-900'>
                     {variable.label}
                     {variable.required && (
-                      <span className="ml-1 text-red-500">*</span>
+                      <span className='ml-1 text-red-500'>*</span>
                     )}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className='text-xs text-gray-500'>
                     {`{{${variable.name}}}`}
                   </div>
-                  <div className="mt-1 text-xs text-gray-400">
+                  <div className='mt-1 text-xs text-gray-400'>
                     类型: {variable.type}
                   </div>
                 </div>
                 <button
-                  type="button"
+                  type='button'
                   onClick={() => removeVariable(variable.name)}
-                  className="ml-2 text-red-600 hover:text-red-700"
+                  className='ml-2 text-red-600 hover:text-red-700'
                 >
                   <svg
-                    className="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                    className='h-5 w-5'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
                   >
                     <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
                       strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
+                      d='M6 18L18 6M6 6l12 12'
                     />
                   </svg>
                 </button>
@@ -292,75 +296,87 @@ export default function ContractTemplateEditor({
 
       {/* 添加变量对话框 */}
       {showVariableDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
+          <div className='w-full max-w-md rounded-lg bg-white p-6 shadow-xl'>
+            <h3 className='mb-4 text-lg font-semibold text-gray-900'>
               添加自定义变量
             </h3>
 
-            <div className="space-y-4">
+            <div className='space-y-4'>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  变量名称 <span className="text-red-500">*</span>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  变量名称 <span className='text-red-500'>*</span>
                 </label>
                 <input
-                  type="text"
+                  type='text'
                   value={newVariable.name}
-                  onChange={e => setNewVariable({ ...newVariable, name: e.target.value })}
-                  placeholder="例如: customField"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  onChange={e =>
+                    setNewVariable({ ...newVariable, name: e.target.value })
+                  }
+                  placeholder='例如: customField'
+                  className='w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
                 />
-                <p className="mt-1 text-xs text-gray-500">
+                <p className='mt-1 text-xs text-gray-500'>
                   只能包含字母、数字和下划线
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  显示标签 <span className="text-red-500">*</span>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  显示标签 <span className='text-red-500'>*</span>
                 </label>
                 <input
-                  type="text"
+                  type='text'
                   value={newVariable.label}
-                  onChange={e => setNewVariable({ ...newVariable, label: e.target.value })}
-                  placeholder="例如: 自定义字段"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  onChange={e =>
+                    setNewVariable({ ...newVariable, label: e.target.value })
+                  }
+                  placeholder='例如: 自定义字段'
+                  className='w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
                   变量类型
                 </label>
                 <select
                   value={newVariable.type}
-                  onChange={e => setNewVariable({ ...newVariable, type: e.target.value as any })}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  onChange={e =>
+                    setNewVariable({
+                      ...newVariable,
+                      type: e.target.value as any,
+                    })
+                  }
+                  className='w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
                 >
-                  <option value="text">文本</option>
-                  <option value="textarea">多行文本</option>
-                  <option value="number">数字</option>
-                  <option value="date">日期</option>
-                  <option value="select">下拉选择</option>
+                  <option value='text'>文本</option>
+                  <option value='textarea'>多行文本</option>
+                  <option value='number'>数字</option>
+                  <option value='date'>日期</option>
+                  <option value='select'>下拉选择</option>
                 </select>
               </div>
 
-              <div className="flex items-center">
+              <div className='flex items-center'>
                 <input
-                  type="checkbox"
+                  type='checkbox'
                   checked={newVariable.required}
-                  onChange={e => setNewVariable({ ...newVariable, required: e.target.checked })}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  onChange={e =>
+                    setNewVariable({
+                      ...newVariable,
+                      required: e.target.checked,
+                    })
+                  }
+                  className='h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500'
                 />
-                <label className="ml-2 text-sm text-gray-700">
-                  必填字段
-                </label>
+                <label className='ml-2 text-sm text-gray-700'>必填字段</label>
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div className='mt-6 flex justify-end gap-3'>
               <button
-                type="button"
+                type='button'
                 onClick={() => {
                   setShowVariableDialog(false);
                   setNewVariable({
@@ -370,14 +386,14 @@ export default function ContractTemplateEditor({
                     required: false,
                   });
                 }}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className='rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
               >
                 取消
               </button>
               <button
-                type="button"
+                type='button'
                 onClick={addCustomVariable}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                className='rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700'
               >
                 添加
               </button>

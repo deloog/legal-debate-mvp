@@ -52,7 +52,9 @@ export default function SignaturePad({
   }, [penColor, penWidth]);
 
   // 开始绘制
-  function startDrawing(e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) {
+  function startDrawing(
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) {
     if (!context) return;
 
     setIsDrawing(true);
@@ -62,23 +64,29 @@ export default function SignaturePad({
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = 'touches' in e ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
-    const y = 'touches' in e ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
+    const x =
+      'touches' in e ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
+    const y =
+      'touches' in e ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
 
     context.beginPath();
     context.moveTo(x, y);
   }
 
   // 绘制中
-  function draw(e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) {
+  function draw(
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) {
     if (!isDrawing || !context) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = 'touches' in e ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
-    const y = 'touches' in e ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
+    const x =
+      'touches' in e ? e.touches[0].clientX - rect.left : e.clientX - rect.left;
+    const y =
+      'touches' in e ? e.touches[0].clientY - rect.top : e.clientY - rect.top;
 
     context.lineTo(x, y);
     context.stroke();
@@ -116,9 +124,9 @@ export default function SignaturePad({
   }
 
   return (
-    <div className="flex flex-col items-center space-y-4">
+    <div className='flex flex-col items-center space-y-4'>
       {/* 签名画布 */}
-      <div className="relative rounded-lg border-2 border-gray-300 bg-white shadow-sm">
+      <div className='relative rounded-lg border-2 border-gray-300 bg-white shadow-sm'>
         <canvas
           ref={canvasRef}
           width={width}
@@ -130,51 +138,51 @@ export default function SignaturePad({
           onTouchStart={startDrawing}
           onTouchMove={draw}
           onTouchEnd={stopDrawing}
-          className="cursor-crosshair touch-none"
+          className='cursor-crosshair touch-none'
           style={{ width: `${width}px`, height: `${height}px` }}
         />
 
         {/* 提示文字（仅在空白时显示） */}
         {isEmpty && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <p className="text-gray-400">请在此处签名</p>
+          <div className='pointer-events-none absolute inset-0 flex items-center justify-center'>
+            <p className='text-gray-400'>请在此处签名</p>
           </div>
         )}
       </div>
 
       {/* 操作按钮 */}
-      <div className="flex gap-3">
+      <div className='flex gap-3'>
         <button
-          type="button"
+          type='button'
           onClick={clearSignature}
           disabled={isEmpty}
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className='rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed'
         >
           清除重签
         </button>
         {onCancel && (
           <button
-            type="button"
+            type='button'
             onClick={onCancel}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className='rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
           >
             取消
           </button>
         )}
         <button
-          type="button"
+          type='button'
           onClick={saveSignature}
           disabled={isEmpty}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className='rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
         >
           确认签名
         </button>
       </div>
 
       {/* 使用提示 */}
-      <div className="rounded-lg bg-blue-50 p-3 text-xs text-blue-800">
-        <p className="font-medium">签名提示：</p>
-        <ul className="mt-1 space-y-1 list-disc list-inside">
+      <div className='rounded-lg bg-blue-50 p-3 text-xs text-blue-800'>
+        <p className='font-medium'>签名提示：</p>
+        <ul className='mt-1 space-y-1 list-disc list-inside'>
           <li>请使用鼠标或触摸屏在上方区域签名</li>
           <li>签名将被保存为电子签名，具有法律效力</li>
           <li>如需重新签名，请点击"清除重签"按钮</li>

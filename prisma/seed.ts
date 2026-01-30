@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { seedContractTemplates } from './seed-contracts';
+import { seedEvidenceCategories } from './seed-evidence-categories';
 
 const prisma = new PrismaClient();
 

@@ -74,9 +74,7 @@ describe('Filing Materials Service Tests', () => {
       expect(result.materials.length).toBeGreaterThan(0);
 
       // 验证包含侵权事实证明
-      const tortProof = result.materials.find(
-        m => m.name === '侵权事实证明'
-      );
+      const tortProof = result.materials.find(m => m.name === '侵权事实证明');
       expect(tortProof).toBeDefined();
       expect(tortProof?.required).toBe(true);
     });

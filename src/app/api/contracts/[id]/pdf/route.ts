@@ -8,7 +8,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { generateContractPDF, contractFileExists } from '@/lib/contract/contract-pdf-generator';
+import {
+  generateContractPDF,
+  contractFileExists,
+} from '@/lib/contract/contract-pdf-generator';
 import * as fs from 'fs';
 import * as path from 'path';
 

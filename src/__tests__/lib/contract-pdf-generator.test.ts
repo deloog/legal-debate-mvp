@@ -74,7 +74,9 @@ describe('Contract PDF Generator Tests', () => {
       const filePath = await generateContractPDF(testContractId);
 
       expect(filePath).toBeTruthy();
-      expect(filePath).toMatch(/^\/uploads\/contracts\/\d{4}\/\d{2}\/\d{2}\/.+\.pdf$/);
+      expect(filePath).toMatch(
+        /^\/uploads\/contracts\/\d{4}\/\d{2}\/\d{2}\/.+\.pdf$/
+      );
 
       // 验证文件是否存在
       const exists = await contractFileExists(filePath);
@@ -88,9 +90,9 @@ describe('Contract PDF Generator Tests', () => {
     });
 
     it('should throw error for non-existent contract', async () => {
-      await expect(
-        generateContractPDF('non-existent-id')
-      ).rejects.toThrow('合同不存在');
+      await expect(generateContractPDF('non-existent-id')).rejects.toThrow(
+        '合同不存在'
+      );
     });
 
     it('should generate valid PDF file', async () => {

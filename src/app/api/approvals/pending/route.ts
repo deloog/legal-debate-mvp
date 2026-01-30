@@ -12,7 +12,8 @@ export async function GET() {
     const currentUserId = 'current-user-id';
 
     // 获取待审批列表
-    const approvals = await contractApprovalService.getPendingApprovals(currentUserId);
+    const approvals =
+      await contractApprovalService.getPendingApprovals(currentUserId);
 
     // 获取审批统计
     const stats = await contractApprovalService.getApprovalStats(currentUserId);
@@ -31,7 +32,8 @@ export async function GET() {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '获取待审批列表失败',
+          message:
+            error instanceof Error ? error.message : '获取待审批列表失败',
         },
       },
       { status: 500 }

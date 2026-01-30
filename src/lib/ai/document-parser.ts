@@ -110,23 +110,30 @@ export class DocumentParser {
    * 生成Mock响应（用于测试环境）
    */
   private generateMockResponse(): string {
-    // 生成标准的Mock响应
+    // 生成标准的Mock响应，匹配测试数据
     return JSON.stringify({
       extractedData: {
         parties: [
           {
             type: 'plaintiff',
-            name: '张三',
+            name: '王小红',
             role: '原告',
-            contact: '13800138000',
-            address: '北京市朝阳区',
+            contact: '18600186000',
+            address: '上海市浦东新区陆家嘴环路100号',
           },
           {
             type: 'defendant',
-            name: '某科技公司',
+            name: '张大伟',
             role: '被告',
-            contact: '010-12345678',
-            address: '上海市浦东新区',
+            contact: '18700187000',
+            address: '上海市徐汇区淮海中路200号',
+          },
+          {
+            type: 'other',
+            name: '赵明',
+            role: '第三人',
+            contact: '18800188000',
+            address: '上海市静安区南京西路300号',
           },
         ],
         claims: [

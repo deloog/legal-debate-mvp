@@ -41,6 +41,8 @@
     "test:all": "jest && playwright test",
     "test:api": "jest --config=jest.config.api.js src/__tests__/api/",
     "test:api:coverage": "jest --config=jest.config.api.js src/__tests__/api/ --coverage",
+    "test:integration": "jest --config=jest.config.integration.js",
+    "test:integration:coverage": "jest --config=jest.config.integration.js --coverage",
     "coverage:check": "tsx scripts/check-coverage-gate.ts",
     "coverage:monitor": "tsx scripts/monitor-test-coverage.ts",
     "coverage:report": "npm run test:coverage && npm run coverage:check",

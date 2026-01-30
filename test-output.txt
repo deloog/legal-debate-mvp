@@ -1,2288 +1,715 @@
+Running one project: deploy
+FAIL deploy scripts/deploy/__tests__/migration-utils.test.ts (5.512 s)
+  MigrationUtils
+    extractDatabaseName
+      鈭?搴旇浠庢爣鍑咲ATABASE_URL鎻愬彇鏁版嵁搴撳悕 (2 ms)
+      鈭?搴旇浠庡甫绔彛鐨凞ATABASE_URL鎻愬彇鏁版嵁搴撳悕
+      鈭?搴旇浠庡甫鏌ヨ鍙傛暟鐨凞ATABASE_URL鎻愬彇鏁版嵁搴撳悕 (1 ms)
+      鈭?搴旇澶勭悊甯︽湁杩炴帴姹犲弬鏁扮殑DATABASE_URL
+      鈭?搴旇杩斿洖榛樿鍊煎綋DATABASE_URL鏍煎紡涓嶆纭椂 (1 ms)
+    generateBackupFilename
+      鈭?搴旇鐢熸垚甯︽椂闂存埑鐨勫浠芥枃浠跺悕 (1 ms)
+      鈭?搴旇浣跨敤姝ｇ‘鐨勬枃浠舵墿灞曞悕
+      脳 搴旇鏇挎崲鏃堕棿鎴充腑鐨勭壒娈婂瓧绗?(1 ms)
+      鈭?搴旇鏍规嵁褰撳墠鏁版嵁搴撳悕鐢熸垚鏂囦欢鍚?(1 ms)
+    executeWithRetry
+      鈭?搴旇鍦ㄧ涓€娆″皾璇曟垚鍔熸椂杩斿洖缁撴灉 (1 ms)
+      鈭?搴旇鍦ㄥけ璐ユ椂閲嶈瘯鐩村埌鎴愬姛 (3010 ms)
+      鈭?瓒呰繃閲嶈瘯娆℃暟鍚庡簲璇ユ姏鍑洪敊璇?(1010 ms)
+      鈭?搴旇浣跨敤鎸囨暟閫€閬跨瓥鐣?(1002 ms)
+    ensureDirectory
+      脳 搴旇鍒涘缓涓嶅瓨鍦ㄧ殑鐩綍 (1 ms)
+      鈭?搴旇璺宠繃宸插瓨鍦ㄧ殑鐩綍 (1 ms)
+      鈭?搴旇澶勭悊鐩綍鍒涘缓閿欒 (2 ms)
+    getFileSize
+      鈭?搴旇杩斿洖鏂囦欢澶у皬锛堝瓧鑺傦級 (4 ms)
+      鈭?搴旇澶勭悊鏂囦欢涓嶅瓨鍦ㄩ敊璇?(1 ms)
+      鈭?搴旇澶勭悊鏉冮檺閿欒 (1 ms)
+    validateBackupFile
+      鈭?搴旇楠岃瘉鏈夋晥鐨勫浠芥枃浠?(1 ms)
+      鈭?搴旇鎷掔粷绌烘枃浠?      鈭?搴旇鎷掔粷楠岃瘉澶辫触鐨勬枃浠?(1 ms)
+      鈭?搴旇澶勭悊鏂囦欢璁块棶閿欒 (1 ms)
+    MigrationError
+      鈭?搴旇鍒涘缓鑷畾涔夐敊璇疄渚?(1 ms)
+      鈭?搴旇浣滀负Error瀹炰緥宸ヤ綔
+      鈭?搴旇鏀寔鍙€夌殑details鍙傛暟 (1 ms)
 
-> legal_debate_mvp@0.1.0 test
-> jest src/__tests__/app/consultations/create/components/consultation-form.test.tsx
+  鈼?MigrationUtils 鈥?generateBackupFilename 鈥?搴旇鏇挎崲鏃堕棿鎴充腑鐨勭壒娈婂瓧绗?
+    expect(received).not.toContain(expected) // indexOf
 
-FAIL app src/__tests__/app/consultations/create/components/consultation-form.test.tsx
-  ConsultationForm
-    鍩虹娓叉煋
-      鈭?搴旇姝ｇ‘娓叉煋琛ㄥ崟鏍囬 (64 ms)
-      鈭?搴旇娓叉煋鎵€鏈夎〃鍗曞瓧娈?(47 ms)
-      鈭?搴旇娓叉煋鎻愪氦鍜屽彇娑堟寜閽?(15 ms)
-      鈭?搴旇鏄剧ず鍜ㄨ鏂瑰紡閫夐」 (14 ms)
-    琛ㄥ崟楠岃瘉
-      脳 搴旇楠岃瘉蹇呭～鐨勫挩璇汉濮撳悕 (118 ms)
-      鈭?搴旇楠岃瘉蹇呭～鐨勬鎯呮憳瑕?(27 ms)
-      鈭?搴旇楠岃瘉妗堟儏鎽樿鏈€灏忛暱搴?(31 ms)
-      脳 搴旇鎺ュ彈鏈夋晥鐨勬鎯呮憳瑕侀暱搴?(22 ms)
-      脳 搴旇楠岃瘉妗堟儏鎽樿鏈€澶ч暱搴?(20 ms)
-    琛ㄥ崟杈撳叆
-      鈭?搴旇鑳藉閫夋嫨鍜ㄨ鏂瑰紡 (19 ms)
-      鈭?搴旇鑳藉杈撳叆鍜ㄨ浜哄鍚?(17 ms)
-      鈭?搴旇鑳藉杈撳叆鑱旂郴鐢佃瘽 (22 ms)
-      鈭?搴旇鑳藉杈撳叆鐢靛瓙閭 (17 ms)
-      鈭?搴旇鑳藉杈撳叆鍗曚綅鍚嶇О (18 ms)
-      鈭?搴旇鑳藉杈撳叆妗堜欢绫诲瀷 (18 ms)
-      鈭?搴旇鑳藉杈撳叆妗堟儏鎽樿 (19 ms)
-      鈭?搴旇鑳藉杈撳叆瀹㈡埛璇夋眰 (20 ms)
-      鈭?搴旇鑳藉閫夋嫨璺熻繘鏃ユ湡 (19 ms)
-      鈭?搴旇鑳藉杈撳叆璺熻繘澶囨敞 (17 ms)
-    瀛楃璁℃暟
-      鈭?搴旇鏄剧ず妗堟儏鎽樿瀛楃璁℃暟 (17 ms)
-      鈭?搴旇鏄剧ず瀹㈡埛璇夋眰瀛楃璁℃暟 (18 ms)
-      鈭?搴旇鏄剧ず璺熻繘澶囨敞瀛楃璁℃暟 (18 ms)
-    琛ㄥ崟鎻愪氦
-      脳 搴旇鍦ㄦ彁浜ゆ垚鍔熸椂璋冪敤onSubmit (39 ms)
-      脳 搴旇鍙戦€佹纭殑璇锋眰鏁版嵁 (46 ms)
-      脳 搴旇鍦ㄦ彁浜ゆ椂绂佺敤鎸夐挳骞舵樉绀哄姞杞界姸鎬?(33 ms)
-      脳 搴旇鍦ㄦ彁浜ゅけ璐ユ椂鏄剧ず閿欒淇℃伅 (85 ms)
-      脳 搴旇鍦ㄧ綉缁滈敊璇椂鏄剧ず閿欒淇℃伅 (253 ms)
-    鍙栨秷鎿嶄綔
-      鈭?搴旇鍦ㄧ偣鍑诲彇娑堟寜閽椂璋冪敤onCancel (11 ms)
-      脳 搴旇鍦ㄦ彁浜ゆ椂绂佺敤鍙栨秷鎸夐挳 (39 ms)
-    鍜ㄨ浜哄鍚嶉檺鍒?      鈭?搴旇璁剧疆鍜ㄨ浜哄鍚嶆渶澶ч暱搴﹀睘鎬?(12 ms)
-    鍗曚綅鍚嶇О闄愬埗
-      鈭?搴旇璁剧疆鍗曚綅鍚嶇О鏈€澶ч暱搴﹀睘鎬?(11 ms)
-    妗堜欢绫诲瀷闄愬埗
-      鈭?搴旇璁剧疆妗堜欢绫诲瀷鏈€澶ч暱搴﹀睘鎬?(10 ms)
-    瀹㈡埛璇夋眰闄愬埗
-      鈭?搴旇璁剧疆瀹㈡埛璇夋眰鏈€澶ч暱搴﹀睘鎬?(11 ms)
-    璺熻繘澶囨敞闄愬埗
-      鈭?搴旇璁剧疆璺熻繘澶囨敞鏈€澶ч暱搴﹀睘鎬?(12 ms)
-    榛樿鍊?      鈭?搴旇璁剧疆榛樿鐨勫挩璇㈡椂闂翠负褰撳墠鏃堕棿 (13 ms)
-      鈭?搴旇璁剧疆榛樿鐨勫挩璇㈡柟寮忎负鐢佃瘽鍜ㄨ (10 ms)
-    閿欒鐘舵€佹牱寮?      鈭?搴旇鍦ㄩ獙璇佸け璐ユ椂鏄剧ず閿欒鏍峰紡 (18 ms)
-    蹇呭～瀛楁鏍囪瘑
-      鈭?搴旇鏄剧ず鍜ㄨ鏂瑰紡涓哄繀濉瓧娈?(11 ms)
-      鈭?搴旇鏄剧ず鍜ㄨ鏃堕棿涓哄繀濉瓧娈?(10 ms)
-      鈭?搴旇鏄剧ず鍜ㄨ浜哄鍚嶄负蹇呭～瀛楁 (8 ms)
-      鈭?搴旇鏄剧ず妗堟儏鎽樿涓哄繀濉瓧娈?(12 ms)
+    Expected substring: not "."
+    Received string:        "legal_debate_db_backup_2026-01-30T10-30-45-123Z.sql"
 
-  鈼?ConsultationForm 鈥?琛ㄥ崟楠岃瘉 鈥?搴旇楠岃瘉蹇呭～鐨勫挩璇汉濮撳悕
+      81 |       const filename = generateBackupFilename(timestamp);
+      82 |       expect(filename).not.toContain(':');
+    > 83 |       expect(filename).not.toContain('.');
+         |                            ^
+      84 |       expect(filename).toMatch(/^[a-z_0-9-]+\.sql$/);
+      85 |     });
+      86 |
 
-    Unable to find an element with the text: 鍜ㄨ浜哄鍚嶄笉鑳戒负绌? This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+      at Object.<anonymous> (scripts/deploy/__tests__/migration-utils.test.ts:83:28)
 
-    Ignored nodes: comments, script, style
-    <body>
-      <div>
-        <div
-          class="rounded-lg border bg-white shadow-sm w-full"
-        >
-          <div
-            class="flex flex-col space-y-1.5 p-6 "
-          >
-            <h3
-              class="text-2xl font-semibold leading-none tracking-tight "
-            >
-              鍜ㄨ淇℃伅
-            </h3>
-          </div>
-          <form>
-            <div
-              class="p-6 pt-0 space-y-4"
-            >
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="consultType"
-                >
-                  鍜ㄨ鏂瑰紡
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <select
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  id="consultType"
-                >
-                  <option
-                    value="PHONE"
-                  >
-                    鐢佃瘽鍜ㄨ
-                  </option>
-                  <option
-                    value="VISIT"
-                  >
-                    鏉ヨ鍜ㄨ
-                  </option>
-                  <option
-                    value="ONLINE"
-                  >
-                    鍦ㄧ嚎鍜ㄨ
-                  </option>
-                  <option
-                    value="REFERRAL"
-                  >
-                    杞粙缁?[0m
-                  </option>
-                </select>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="consultTime"
-                >
-                  鍜ㄨ鏃堕棿
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <input
-                  class=""
-                  id="consultTime"
-                  type="datetime-local"
-                  value="2026-01-28T12:36"
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientName"
-                >
-                  鍜ㄨ浜哄鍚?[0m
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <input
-                  class="border-red-500"
-                  id="clientName"
-                  maxlength="50"
-                  placeholder="璇疯緭鍏ュ挩璇汉濮撳悕"
-                  type="text"
-                  value=""
-                />
-                <p
-                  class="text-sm text-red-500"
-                >
-                  璇疯緭鍏ュ挩璇汉濮撳悕
-                </p>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientPhone"
-                >
-                  鑱旂郴鐢佃瘽
-                </label>
-                <input
-                  class="border-red-500"
-                  id="clientPhone"
-                  placeholder="璇疯緭鍏ヨ仈绯荤數璇?
-                  type="tel"
-                  value=""
-                />
-                <p
-                  class="text-sm text-red-500"
-                >
-                  璇疯緭鍏ユ湁鏁堢殑鎵嬫満鍙风爜
-                </p>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientEmail"
-                >
-                  鐢靛瓙閭
-                </label>
-                <input
-                  class="border-red-500"
-                  id="clientEmail"
-                  placeholder="璇疯緭鍏ョ數瀛愰偖绠?
-                  type="email"
-                  value=""
-                />
-                <p
-                  class="text-sm text-red-500"
-                >
-                  璇疯緭鍏ユ湁鏁堢殑閭鍦板潃
-                </p>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientCompany"
-                >
-                  鍗曚綅鍚嶇О
-                </label>
-                <input
-                  class=""
-                  id="clientCompany"
-                  maxlength="100"
-                  placeholder="璇疯緭鍏ュ崟浣嶅悕绉?
-                  type="text"
-                  value=""
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="caseType"
-                >
-                  妗堜欢绫诲瀷
-                </label>
-                <input
-                  class=""
-                  id="caseType"
-                  maxlength="50"
-                  placeholder="璇疯緭鍏ユ浠剁被鍨?
-                  type="text"
-                  value=""
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="caseSummary"
-                >
-                  妗堟儏鎽樿
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <textarea
-                  class="w-full rounded-md border px-3 py-2 text-base focus:outline-none focus:ring-2 border-red-500 ring-red-500"
-                  id="caseSummary"
-                  maxlength="500"
-                  placeholder="璇疯缁嗘弿杩版鎯咃紙鑷冲皯10涓瓧绗︼級"
-                  rows="5"
-                />
-                <div
-                  class="flex justify-between text-xs text-gray-500"
-                >
-                  <span>
-                    鏈€灏?0涓瓧绗?[0m
-                  </span>
-                  <span>
-                    0
-                    /500
-                  </span>
-                </div>
-                <p
-                  class="text-sm text-red-500"
-                >
-                  妗堟儏鎽樿鑷冲皯闇€瑕?0涓瓧绗?[0m
-                </p>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientDemand"
-                >
-                  瀹㈡埛璇夋眰
-                </label>
-                <textarea
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  id="clientDemand"
-                  maxlength="1000"
-                  placeholder="璇锋弿杩板鎴风殑璇夋眰"
-                  rows="3"
-                />
-                <div
-                  class="text-right text-xs text-gray-500"
-                >
-                  0
-                  /1000
-                </div>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="followUpDate"
-                >
-                  璺熻繘鏃ユ湡
-                </label>
-                <input
-                  class="border-red-500"
-                  id="followUpDate"
-                  type="datetime-local"
-                  value=""
-                />
-                <p
-                  class="text-sm text-red-500"
-                >
-                  Invalid input: expected date, received Date
-                </p>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="followUpNotes"
-                >
-                  璺熻繘澶囨敞
-                </label>
-                <textarea
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  id="followUpNotes"
-                  maxlength="500"
-                  placeholder="璇疯緭鍏ヨ窡杩涘娉?
-                  rows="3"
-                />
-                <div
-                  class="text-right text-xs text-gray-500"
-                >
-                  0
-                  /500
-                </div>
-              </div>
-            </div>
-            <div
-              class="flex items-center p-6 pt-0 flex justify-end space-x-2"
-            >
-              <button
-                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
-                type="button"
-              >
-                鍙栨秷
-              </button>
-              <button
-                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base "
-                type="submit"
-              >
-                鍒涘缓
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </body>
+  鈼?MigrationUtils 鈥?ensureDirectory 鈥?搴旇鍒涘缓涓嶅瓨鍦ㄧ殑鐩綍
 
-      85 |       if (form) {
-      86 |         fireEvent.submit(form);
-    > 87 |         await waitFor(() => {
-         |                      ^
-      88 |           expect(screen.getByText('鍜ㄨ浜哄鍚嶄笉鑳戒负绌?)).toBeInTheDocument();
-      89 |         });
-      90 |       }
+    MigrationError: Failed to access directory
 
-      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
-      at Object.<anonymous> (src/__tests__/app/consultations/create/components/consultation-form.test.tsx:87:22)
+      133 |       });
+      134 |     } else {
+    > 135 |       throw new MigrationError(
+          |             ^
+      136 |         'Failed to access directory',
+      137 |         'DIRECTORY_ACCESS_ERROR',
+      138 |         {
 
-  鈼?ConsultationForm 鈥?琛ㄥ崟楠岃瘉 鈥?搴旇鎺ュ彈鏈夋晥鐨勬鎯呮憳瑕侀暱搴?
-    TestingLibraryElementError: Unable to find an element with the text: 19/500. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+      at ensureDirectory (scripts/deploy/migration-utils.ts:135:13)
+      at Object.<anonymous> (scripts/deploy/__tests__/migration-utils.test.ts:186:7)
 
-    Ignored nodes: comments, script, style
-    <body>
-      <div>
-        <div
-          class="rounded-lg border bg-white shadow-sm w-full"
-        >
-          <div
-            class="flex flex-col space-y-1.5 p-6 "
-          >
-            <h3
-              class="text-2xl font-semibold leading-none tracking-tight "
-            >
-              鍜ㄨ淇℃伅
-            </h3>
-          </div>
-          <form>
-            <div
-              class="p-6 pt-0 space-y-4"
-            >
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="consultType"
-                >
-                  鍜ㄨ鏂瑰紡
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <select
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  id="consultType"
-                >
-                  <option
-                    value="PHONE"
-                  >
-                    鐢佃瘽鍜ㄨ
-                  </option>
-                  <option
-                    value="VISIT"
-                  >
-                    鏉ヨ鍜ㄨ
-                  </option>
-                  <option
-                    value="ONLINE"
-                  >
-                    鍦ㄧ嚎鍜ㄨ
-                  </option>
-                  <option
-                    value="REFERRAL"
-                  >
-                    杞粙缁?[0m
-                  </option>
-                </select>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="consultTime"
-                >
-                  鍜ㄨ鏃堕棿
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <input
-                  class=""
-                  id="consultTime"
-                  type="datetime-local"
-                  value="2026-01-28T12:36"
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientName"
-                >
-                  鍜ㄨ浜哄鍚?[0m
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <input
-                  class=""
-                  id="clientName"
-                  maxlength="50"
-                  placeholder="璇疯緭鍏ュ挩璇汉濮撳悕"
-                  type="text"
-                  value=""
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientPhone"
-                >
-                  鑱旂郴鐢佃瘽
-                </label>
-                <input
-                  class=""
-                  id="clientPhone"
-                  placeholder="璇疯緭鍏ヨ仈绯荤數璇?
-                  type="tel"
-                  value=""
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientEmail"
-                >
-                  鐢靛瓙閭
-                </label>
-                <input
-                  class=""
-                  id="clientEmail"
-                  placeholder="璇疯緭鍏ョ數瀛愰偖绠?
-                  type="email"
-                  value=""
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientCompany"
-                >
-                  鍗曚綅鍚嶇О
-                </label>
-                <input
-                  class=""
-                  id="clientCompany"
-                  maxlength="100"
-                  placeholder="璇疯緭鍏ュ崟浣嶅悕绉?
-                  type="text"
-                  value=""
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="caseType"
-                >
-                  妗堜欢绫诲瀷
-                </label>
-                <input
-                  class=""
-                  id="caseType"
-                  maxlength="50"
-                  placeholder="璇疯緭鍏ユ浠剁被鍨?
-                  type="text"
-                  value=""
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="caseSummary"
-                >
-                  妗堟儏鎽樿
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <textarea
-                  class="w-full rounded-md border px-3 py-2 text-base focus:outline-none focus:ring-2 border-gray-300 focus:ring-blue-500"
-                  id="caseSummary"
-                  maxlength="500"
-                  placeholder="璇疯缁嗘弿杩版鎯咃紙鑷冲皯10涓瓧绗︼級"
-                  rows="5"
-                >
-                  杩欐槸涓€涓湁鏁堢殑妗堟儏鎽樿鎻忚堪
-                </textarea>
-                <div
-                  class="flex justify-between text-xs text-gray-500"
-                >
-                  <span>
-                    鏈€灏?0涓瓧绗?[0m
-                  </span>
-                  <span>
-                    13
-                    /500
-                  </span>
-                </div>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientDemand"
-                >
-                  瀹㈡埛璇夋眰
-                </label>
-                <textarea
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  id="clientDemand"
-                  maxlength="1000"
-                  placeholder="璇锋弿杩板鎴风殑璇夋眰"
-                  rows="3"
-                />
-                <div
-                  class="text-right text-xs text-gray-500"
-                >
-                  0
-                  /1000
-                </div>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="followUpDate"
-                >
-                  璺熻繘鏃ユ湡
-                </label>
-                <input
-                  class=""
-                  id="followUpDate"
-                  type="datetime-local"
-                  value=""
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="followUpNotes"
-                >
-                  璺熻繘澶囨敞
-                </label>
-                <textarea
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  id="followUpNotes"
-                  maxlength="500"
-                  placeholder="璇疯緭鍏ヨ窡杩涘娉?
-                  rows="3"
-                />
-                <div
-                  class="text-right text-xs text-gray-500"
-                >
-                  0
-                  /500
-                </div>
-              </div>
-            </div>
-            <div
-              class="flex items-center p-6 pt-0 flex justify-end space-x-2"
-            >
-              <button
-                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
-                type="button"
-              >
-                鍙栨秷
-              </button>
-              <button
-                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base "
-                type="submit"
-              >
-                鍒涘缓
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </body>
+  console.log
+    [2026-01-30T07:56:03.656Z] [MIGRATION] [INFO] Starting database backup...
 
-      134 |       fireEvent.change(caseSummaryTextarea, { target: { value: '杩欐槸涓€涓湁鏁堢殑妗堟儏鎽樿鎻忚堪' } });
-      135 |
-    > 136 |       expect(screen.getByText('19/500')).toBeInTheDocument();
-          |                     ^
-      137 |     });
-      138 |
-      139 |     test('搴旇楠岃瘉妗堟儏鎽樿鏈€澶ч暱搴?, () => {
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
 
-      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
-      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
-      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
-      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
-      at Object.<anonymous> (src/__tests__/app/consultations/create/components/consultation-form.test.tsx:136:21)
+  console.error
+    [2026-01-30T07:56:03.679Z] [MIGRATION] [ERROR] Backup failed: Failed to access directory
 
-  鈼?ConsultationForm 鈥?琛ㄥ崟楠岃瘉 鈥?搴旇楠岃瘉妗堟儏鎽樿鏈€澶ч暱搴?
+    [0m [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 236 |[39m       [36mbreak[39m[33m;[39m
+     [90m 237 |[39m   }
+     [90m 238 |[39m }[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:235:15)
+      at createBackup (scripts/deploy/database-migration.ts:143:17)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:49:22)
+
+  console.log
+    [2026-01-30T07:56:03.690Z] [MIGRATION] [INFO] Starting database backup...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.error
+    [2026-01-30T07:56:03.691Z] [MIGRATION] [ERROR] Backup failed: Failed to access directory
+
+    [0m [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 236 |[39m       [36mbreak[39m[33m;[39m
+     [90m 237 |[39m   }
+     [90m 238 |[39m }[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:235:15)
+      at createBackup (scripts/deploy/database-migration.ts:143:17)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:65:22)
+
+  console.log
+    [2026-01-30T07:56:03.694Z] [MIGRATION] [INFO] Starting database backup...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.error
+    [2026-01-30T07:56:03.695Z] [MIGRATION] [ERROR] Backup failed: Failed to access directory
+
+    [0m [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 236 |[39m       [36mbreak[39m[33m;[39m
+     [90m 237 |[39m   }
+     [90m 238 |[39m }[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:235:15)
+      at createBackup (scripts/deploy/database-migration.ts:143:17)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:80:22)
+
+  console.log
+    [2026-01-30T07:56:03.697Z] [MIGRATION] [INFO] Starting database backup...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.error
+    [2026-01-30T07:56:03.697Z] [MIGRATION] [ERROR] Backup failed: Failed to access directory
+
+    [0m [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 236 |[39m       [36mbreak[39m[33m;[39m
+     [90m 237 |[39m   }
+     [90m 238 |[39m }[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:235:15)
+      at createBackup (scripts/deploy/database-migration.ts:143:17)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:98:22)
+
+  console.log
+    [2026-01-30T07:56:03.700Z] [MIGRATION] [INFO] Starting database migration...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.log
+    [2026-01-30T07:56:03.701Z] [MIGRATION] [INFO] Creating pre-migration backup...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.log
+    [2026-01-30T07:56:03.702Z] [MIGRATION] [INFO] Starting database backup...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.error
+    [2026-01-30T07:56:03.702Z] [MIGRATION] [ERROR] Backup failed: Failed to access directory
+
+    [0m [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 236 |[39m       [36mbreak[39m[33m;[39m
+     [90m 237 |[39m   }
+     [90m 238 |[39m }[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:235:15)
+      at createBackup (scripts/deploy/database-migration.ts:143:17)
+      at runMigration (scripts/deploy/database-migration.ts:169:20)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:111:22)
+
+  console.log
+    [2026-01-30T07:56:03.705Z] [MIGRATION] [INFO] Starting database migration...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.log
+    [2026-01-30T07:56:03.705Z] [MIGRATION] [INFO] Creating pre-migration backup...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.log
+    [2026-01-30T07:56:03.706Z] [MIGRATION] [INFO] Starting database backup...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.error
+    [2026-01-30T07:56:03.706Z] [MIGRATION] [ERROR] Backup failed: Failed to access directory
+
+    [0m [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 236 |[39m       [36mbreak[39m[33m;[39m
+     [90m 237 |[39m   }
+     [90m 238 |[39m }[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:235:15)
+      at createBackup (scripts/deploy/database-migration.ts:143:17)
+      at runMigration (scripts/deploy/database-migration.ts:169:20)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:124:22)
+
+  console.log
+    [2026-01-30T07:56:03.708Z] [MIGRATION] [INFO] Starting database migration...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.log
+    [2026-01-30T07:56:03.709Z] [MIGRATION] [INFO] Creating pre-migration backup...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.log
+    [2026-01-30T07:56:03.710Z] [MIGRATION] [INFO] Starting database backup...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.error
+    [2026-01-30T07:56:03.710Z] [MIGRATION] [ERROR] Backup failed: Failed to access directory
+
+    [0m [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 236 |[39m       [36mbreak[39m[33m;[39m
+     [90m 237 |[39m   }
+     [90m 238 |[39m }[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:235:15)
+      at createBackup (scripts/deploy/database-migration.ts:143:17)
+      at runMigration (scripts/deploy/database-migration.ts:169:20)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:136:22)
+
+  console.log
+    [2026-01-30T07:56:03.724Z] [MIGRATION] [INFO] Starting database migration...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.log
+    [2026-01-30T07:56:03.725Z] [MIGRATION] [INFO] Creating pre-migration backup...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.log
+    [2026-01-30T07:56:03.726Z] [MIGRATION] [INFO] Starting database backup...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.error
+    [2026-01-30T07:56:03.726Z] [MIGRATION] [ERROR] Backup failed: Failed to access directory
+
+    [0m [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 236 |[39m       [36mbreak[39m[33m;[39m
+     [90m 237 |[39m   }
+     [90m 238 |[39m }[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:235:15)
+      at createBackup (scripts/deploy/database-migration.ts:143:17)
+      at runMigration (scripts/deploy/database-migration.ts:169:20)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:154:22)
+
+  console.log
+    [2026-01-30T07:56:03.728Z] [MIGRATION] [INFO] Validating database schema...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.error
+    [2026-01-30T07:56:03.729Z] [MIGRATION] [ERROR] Schema validation failed: Cannot read properties of undefined (reading 'trim')
+
+    [0m [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 236 |[39m       [36mbreak[39m[33m;[39m
+     [90m 237 |[39m   }
+     [90m 238 |[39m }[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:235:15)
+      at validateSchema (scripts/deploy/database-migration.ts:280:17)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:172:22)
+
+  console.log
+    [2026-01-30T07:56:03.731Z] [MIGRATION] [INFO] Validating database schema...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.error
+    [2026-01-30T07:56:03.732Z] [MIGRATION] [ERROR] Schema validation failed: Cannot read properties of undefined (reading 'trim')
+
+    [0m [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 236 |[39m       [36mbreak[39m[33m;[39m
+     [90m 237 |[39m   }
+     [90m 238 |[39m }[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:235:15)
+      at validateSchema (scripts/deploy/database-migration.ts:280:17)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:185:22)
+
+  console.log
+    [2026-01-30T07:56:03.735Z] [MIGRATION] [INFO] Validating database schema...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.error
+    [2026-01-30T07:56:03.735Z] [MIGRATION] [ERROR] Schema validation failed: Cannot read properties of undefined (reading 'trim')
+
+    [0m [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 236 |[39m       [36mbreak[39m[33m;[39m
+     [90m 237 |[39m   }
+     [90m 238 |[39m }[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:235:15)
+      at validateSchema (scripts/deploy/database-migration.ts:280:17)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:201:22)
+
+  console.log
+    [2026-01-30T07:56:03.737Z] [MIGRATION] [INFO] Checking data integrity...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.error
+    [2026-01-30T07:56:03.738Z] [MIGRATION] [ERROR] Data integrity check failed: Cannot read properties of undefined (reading 'trim')
+
+    [0m [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 236 |[39m       [36mbreak[39m[33m;[39m
+     [90m 237 |[39m   }
+     [90m 238 |[39m }[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:235:15)
+      at checkDataIntegrity (scripts/deploy/database-migration.ts:349:17)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:215:22)
+
+  console.log
+    [2026-01-30T07:56:03.740Z] [MIGRATION] [INFO] Checking data integrity...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.error
+    [2026-01-30T07:56:03.740Z] [MIGRATION] [ERROR] Data integrity check failed: Cannot read properties of undefined (reading 'trim')
+
+    [0m [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 236 |[39m       [36mbreak[39m[33m;[39m
+     [90m 237 |[39m   }
+     [90m 238 |[39m }[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:235:15)
+      at checkDataIntegrity (scripts/deploy/database-migration.ts:349:17)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:231:22)
+
+  console.log
+    [2026-01-30T07:56:03.742Z] [MIGRATION] [INFO] Checking data integrity...
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.error
+    [2026-01-30T07:56:03.743Z] [MIGRATION] [ERROR] Data integrity check failed: Connection failed
+
+    [0m [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 236 |[39m       [36mbreak[39m[33m;[39m
+     [90m 237 |[39m   }
+     [90m 238 |[39m }[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:235:15)
+      at checkDataIntegrity (scripts/deploy/database-migration.ts:349:17)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:244:22)
+
+  console.log
+    [2026-01-30T07:56:03.745Z] [MIGRATION] [INFO] Rollback request: 20260130_100000_backup.sql
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.warn
+    [2026-01-30T07:56:03.746Z] [MIGRATION] [WARN] Rollback request logged: 20260130_100000_backup.sql (size: 1024 bytes)
+
+    [0m [90m 230 |[39m       [36mbreak[39m[33m;[39m
+     [90m 231 |[39m     [36mcase[39m [32m'warn'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 232 |[39m       console[33m.[39mwarn(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+     [90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:232:15)
+      at rollbackMigration (scripts/deploy/database-migration.ts:385:17)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:258:22)
+
+  console.log
+    [2026-01-30T07:56:03.749Z] [MIGRATION] [INFO] Rollback request: nonexistent.sql
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.error
+    [2026-01-30T07:56:03.749Z] [MIGRATION] [ERROR] Backup file not found: nonexistent.sql
+
+    [0m [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 236 |[39m       [36mbreak[39m[33m;[39m
+     [90m 237 |[39m   }
+     [90m 238 |[39m }[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:235:15)
+      at rollbackMigration (scripts/deploy/database-migration.ts:397:19)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:268:22)
+
+  console.log
+    [2026-01-30T07:56:03.752Z] [MIGRATION] [INFO] Rollback request: backup.sql
+
+      at logMigration (scripts/deploy/migration-utils.ts:229:15)
+
+  console.warn
+    [2026-01-30T07:56:03.752Z] [MIGRATION] [WARN] Rollback request logged: backup.sql (size: 1024 bytes)
+
+    [0m [90m 230 |[39m       [36mbreak[39m[33m;[39m
+     [90m 231 |[39m     [36mcase[39m [32m'warn'[39m[33m:[39m
+    [31m[1m>[22m[39m[90m 232 |[39m       console[33m.[39mwarn(logMessage)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 233 |[39m       [36mbreak[39m[33m;[39m
+     [90m 234 |[39m     [36mcase[39m [32m'error'[39m[33m:[39m
+     [90m 235 |[39m       console[33m.[39merror(logMessage)[33m;[39m[0m
+
+      at logMigration (scripts/deploy/migration-utils.ts:232:15)
+      at rollbackMigration (scripts/deploy/database-migration.ts:385:17)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:286:22)
+
+FAIL deploy scripts/deploy/__tests__/database-migration.test.ts
+  DatabaseMigration
+    createBackup
+      脳 搴旇鎴愬姛鍒涘缓鏁版嵁搴撳浠?(29 ms)
+      脳 搴旇鍦ㄥ浠藉け璐ユ椂杩斿洖閿欒 (3 ms)
+      脳 搴旇鍦ㄥ浠界洰褰曚笉瀛樺湪鏃跺垱寤虹洰褰?(2 ms)
+      脳 搴旇楠岃瘉澶囦唤鏂囦欢 (2 ms)
+    runMigration
+      脳 搴旇鎴愬姛鎵цPrisma杩佺Щ (4 ms)
+      脳 搴旇鍦ㄨ縼绉诲け璐ユ椂杩斿洖閿欒 (4 ms)
+      脳 搴旇璺宠繃宸插簲鐢ㄧ殑杩佺Щ (16 ms)
+      脳 搴旇鍦ㄨ縼绉诲墠鑷姩鍒涘缓澶囦唤 (4 ms)
+    validateSchema
+      脳 搴旇楠岃瘉鍏抽敭琛ㄥ瓨鍦?(3 ms)
+      脳 搴旇妫€娴嬬己澶辩殑琛?(3 ms)
+      脳 搴旇妫€鏌ヨ〃璁板綍鏁?(2 ms)
+    checkDataIntegrity
+      脳 搴旇妫€鏌ュ閿害鏉?(2 ms)
+      脳 搴旇妫€娴嬪绔嬭褰?(3 ms)
+      鈭?搴旇澶勭悊鏁版嵁搴撹繛鎺ラ敊璇?(3 ms)
+    rollbackMigration
+      脳 搴旇璁板綍鍥炴粴璇锋眰 (3 ms)
+      鈭?搴旇鎷掔粷鍥炴粴褰撳浠芥枃浠朵笉瀛樺湪鏃?(3 ms)
+      鈭?搴旇楠岃瘉澶囦唤鏂囦欢瀹屾暣鎬?(2 ms)
+    MigrationResult
+      鈭?搴旇鍒濆鍖栭粯璁ゅ€?(1 ms)
+      鈭?搴旇鏀寔鎴愬姛缁撴灉
+
+  鈼?DatabaseMigration 鈥?createBackup 鈥?搴旇鎴愬姛鍒涘缓鏁版嵁搴撳浠?
     expect(received).toBe(expected) // Object.is equality
 
-    Expected: 500
-    Received: 501
+    Expected: true
+    Received: false
 
-      144 |       fireEvent.change(caseSummaryTextarea, { target: { value: 'a'.repeat(maxLength + 1) } });
-      145 |
-    > 146 |       expect((caseSummaryTextarea as HTMLTextAreaElement).value.length).toBe(maxLength);
-          |                                                                         ^
-      147 |     });
-      148 |   });
-      149 |
+      48 |
+      49 |       const result = await createBackup();
+    > 50 |       expect(result.success).toBe(true);
+         |                              ^
+      51 |       expect(result.backupFile).toBeDefined();
+      52 |       expect(result.size).toBeGreaterThan(0);
+      53 |       expect(result.error).toBeUndefined();
 
-      at Object.<anonymous> (src/__tests__/app/consultations/create/components/consultation-form.test.tsx:146:73)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:50:30)
 
-  鈼?ConsultationForm 鈥?琛ㄥ崟鎻愪氦 鈥?搴旇鍦ㄦ彁浜ゆ垚鍔熸椂璋冪敤onSubmit
+  鈼?DatabaseMigration 鈥?createBackup 鈥?搴旇鍦ㄥ浠藉け璐ユ椂杩斿洖閿欒
 
-    expect(jest.fn()).toHaveBeenCalledTimes(expected)
+    expect(received).toContain(expected) // indexOf
 
-    Expected number of calls: 1
-    Received number of calls: 0
+    Expected substring: "Backup failed"
+    Received string:    "Failed to access directory"
 
-    Ignored nodes: comments, script, style
-    <html>
-      <head />
-      <body>
-        <div>
-          <div
-            class="rounded-lg border bg-white shadow-sm w-full"
-          >
-            <div
-              class="flex flex-col space-y-1.5 p-6 "
-            >
-              <h3
-                class="text-2xl font-semibold leading-none tracking-tight "
-              >
-                鍜ㄨ淇℃伅
-              </h3>
-            </div>
-            <form>
-              <div
-                class="p-6 pt-0 space-y-4"
-              >
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="consultType"
-                  >
-                    鍜ㄨ鏂瑰紡
-                    <span
-                      class="text-red-500"
-                    >
-                      *
-                    </span>
-                  </label>
-                  <select
-                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    id="consultType"
-                  >
-                    <option
-                      value="PHONE"
-                    >
-                      鐢佃瘽鍜ㄨ
-                    </option>
-                    <option
-                      value="VISIT"
-                    >
-                      鏉ヨ鍜ㄨ
-                    </option>
-                    <option
-                      value="ONLINE"
-                    >
-                      鍦ㄧ嚎鍜ㄨ
-                    </option>
-                    <option
-                      value="REFERRAL"
-                    >
-                      杞粙缁?[0m
-                    </option>
-                  </select>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="consultTime"
-                  >
-                    鍜ㄨ鏃堕棿
-                    <span
-                      class="text-red-500"
-                    >
-                      *
-                    </span>
-                  </label>
-                  <input
-                    class=""
-                    id="consultTime"
-                    type="datetime-local"
-                    value="2026-01-28T12:36"
-                  />
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="clientName"
-                  >
-                    鍜ㄨ浜哄鍚?[0m
-                    <span
-                      class="text-red-500"
-                    >
-                      *
-                    </span>
-                  </label>
-                  <input
-                    class=""
-                    id="clientName"
-                    maxlength="50"
-                    placeholder="璇疯緭鍏ュ挩璇汉濮撳悕"
-                    type="text"
-                    value="寮犱笁"
-                  />
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="clientPhone"
-                  >
-                    鑱旂郴鐢佃瘽
-                  </label>
-                  <input
-                    class="border-red-500"
-                    id="clientPhone"
-                    placeholder="璇疯緭鍏ヨ仈绯荤數璇?
-                    type="tel"
-                    value=""
-                  />
-                  <p
-                    class="text-sm text-red-500"
-                  >
-                    璇疯緭鍏ユ湁鏁堢殑鎵嬫満鍙风爜
-                  </p>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="clientEmail"
-                  >
-                    鐢靛瓙閭
-                  </label>
-                  <input
-                    class="border-red-500"
-                    id="clientEmail"
-                    placeholder="璇疯緭鍏ョ數瀛愰偖绠?
-                    type="email"
-                    value=""
-                  />
-                  <p
-                    class="text-sm text-red-500"
-                  >
-                    璇疯緭鍏ユ湁鏁堢殑閭鍦板潃
-                  </p>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="clientCompany"
-                  >
-                    鍗曚綅鍚嶇О
-                  </label>
-                  <input
-                    class=""
-                    id="clientCompany"
-                    maxlength="100"
-                    placeholder="璇疯緭鍏ュ崟浣嶅悕绉?
-                    type="text"
-                    value=""
-                  />
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="caseType"
-                  >
-                    妗堜欢绫诲瀷
-                  </label>
-                  <input
-                    class=""
-                    id="caseType"
-                    maxlength="50"
-                    placeholder="璇疯緭鍏ユ浠剁被鍨?
-                    type="text"
-                    value=""
-                  />
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="caseSummary"
-                  >
-                    妗堟儏鎽樿
-                    <span
-                      class="text-red-500"
-                    >
-                      *
-                    </span>
-                  </label>
-                  <textarea
-                    class="w-full rounded-md border px-3 py-2 text-base focus:outline-none focus:ring-2 border-gray-300 focus:ring-blue-500"
-                    id="caseSummary"
-                    maxlength="500"
-                    placeholder="璇疯缁嗘弿杩版鎯咃紙鑷冲皯10涓瓧绗︼級"
-                    rows="5"
-                  >
-                    杩欐槸涓€涓湁鏁堢殑妗堟儏鎽樿鎻忚堪锛屽寘鍚冻澶熺殑淇℃伅
-                  </textarea>
-                  <div
-                    class="flex justify-between text-xs text-gray-500"
-                  >
-                    <span>
-                      鏈€灏?0涓瓧绗?[0m
-                    </span>
-                    <span>
-                      21
-                      /500
-                    </span>
-                  </div>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="clientDemand"
-                  >
-                    瀹㈡埛璇夋眰
-                  </label>
-                  <textarea
-                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    id="clientDemand"
-                    maxlength="1000"
-                    placeholder="璇锋弿杩板鎴风殑璇夋眰"
-                    rows="3"
-                  />
-                  <div
-                    class="text-right text-xs text-gray-500"
-                  >
-                    0
-                    /1000
-                  </div>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="followUpDate"
-                  >
-                    璺熻繘鏃ユ湡
-                  </label>
-                  <input
-                    class="border-red-500"
-                    id="followUpDate"
-                    type="datetime-local"
-                    value=""
-                  />
-                  <p
-                    class="text-sm text-red-500"
-                  >
-                    Invalid input: expected date, received Date
-                  </p>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="followUpNotes"
-                  >
-                    璺熻繘澶囨敞
-                  </label>
-                  <textarea
-                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    id="followUpNotes"
-                    maxlength="500"
-                    placeholder="璇疯緭鍏ヨ窡杩涘娉?
-                    rows="3"
-                  />
-                  <div
-                    class="text-right text-xs text-gray-500"
-                  >
-                    0
-                    /500
-                  </div>
-                </div>
-              </div>
-              <div
-                class="flex items-center p-6 pt-0 flex justify-end space-x-2"
-              >
-                <button
-                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
-                  type="button"
-                >
-                  鍙栨秷
-                </button>
-                <button
-                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base "
-                  type="submit"
-                >
-                  鍒涘缓
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </body>
-    </html>
+      65 |       const result = await createBackup();
+      66 |       expect(result.success).toBe(false);
+    > 67 |       expect(result.error).toContain('Backup failed');
+         |                            ^
+      68 |     });
+      69 |
+      70 |     it('搴旇鍦ㄥ浠界洰褰曚笉瀛樺湪鏃跺垱寤虹洰褰?, async () => {
 
-      295 |
-      296 |       await waitFor(() => {
-    > 297 |         expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:67:28)
+
+  鈼?DatabaseMigration 鈥?createBackup 鈥?搴旇鍦ㄥ浠界洰褰曚笉瀛樺湪鏃跺垱寤虹洰褰?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      79 |
+      80 |       const result = await createBackup();
+    > 81 |       expect(result.success).toBe(true);
+         |                              ^
+      82 |       expect(fs.mkdir).toHaveBeenCalled();
+      83 |     });
+      84 |
+
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:81:30)
+
+  鈼?DatabaseMigration 鈥?createBackup 鈥?搴旇楠岃瘉澶囦唤鏂囦欢
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+       97 |
+       98 |       const result = await createBackup();
+    >  99 |       expect(result.success).toBe(true);
           |                              ^
-      298 |       });
-      299 |     });
-      300 |
+      100 |     });
+      101 |   });
+      102 |
 
-      at src/__tests__/app/consultations/create/components/consultation-form.test.tsx:297:30
-      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
-      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
-      at node_modules/@testing-library/dom/dist/wait-for.js:82:9
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:99:30)
 
-  鈼?ConsultationForm 鈥?琛ㄥ崟鎻愪氦 鈥?搴旇鍙戦€佹纭殑璇锋眰鏁版嵁
+  鈼?DatabaseMigration 鈥?runMigration 鈥?搴旇鎴愬姛鎵цPrisma杩佺Щ
 
-    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+    expect(received).toBe(expected) // Object.is equality
 
-    Expected: "/api/consultations", {"body": StringContaining "\"clientName\":\"寮犱笁\"", "headers": {"Content-Type": "application/json"}, "method": "POST"}
+    Expected: true
+    Received: false
 
-    Number of calls: 0
-
-    Ignored nodes: comments, script, style
-    <html>
-      <head />
-      <body>
-        <div>
-          <div
-            class="rounded-lg border bg-white shadow-sm w-full"
-          >
-            <div
-              class="flex flex-col space-y-1.5 p-6 "
-            >
-              <h3
-                class="text-2xl font-semibold leading-none tracking-tight "
-              >
-                鍜ㄨ淇℃伅
-              </h3>
-            </div>
-            <form>
-              <div
-                class="p-6 pt-0 space-y-4"
-              >
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="consultType"
-                  >
-                    鍜ㄨ鏂瑰紡
-                    <span
-                      class="text-red-500"
-                    >
-                      *
-                    </span>
-                  </label>
-                  <select
-                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    id="consultType"
-                  >
-                    <option
-                      value="PHONE"
-                    >
-                      鐢佃瘽鍜ㄨ
-                    </option>
-                    <option
-                      value="VISIT"
-                    >
-                      鏉ヨ鍜ㄨ
-                    </option>
-                    <option
-                      value="ONLINE"
-                    >
-                      鍦ㄧ嚎鍜ㄨ
-                    </option>
-                    <option
-                      value="REFERRAL"
-                    >
-                      杞粙缁?[0m
-                    </option>
-                  </select>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="consultTime"
-                  >
-                    鍜ㄨ鏃堕棿
-                    <span
-                      class="text-red-500"
-                    >
-                      *
-                    </span>
-                  </label>
-                  <input
-                    class=""
-                    id="consultTime"
-                    type="datetime-local"
-                    value="2026-01-28T12:36"
-                  />
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="clientName"
-                  >
-                    鍜ㄨ浜哄鍚?[0m
-                    <span
-                      class="text-red-500"
-                    >
-                      *
-                    </span>
-                  </label>
-                  <input
-                    class=""
-                    id="clientName"
-                    maxlength="50"
-                    placeholder="璇疯緭鍏ュ挩璇汉濮撳悕"
-                    type="text"
-                    value="寮犱笁"
-                  />
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="clientPhone"
-                  >
-                    鑱旂郴鐢佃瘽
-                  </label>
-                  <input
-                    class=""
-                    id="clientPhone"
-                    placeholder="璇疯緭鍏ヨ仈绯荤數璇?
-                    type="tel"
-                    value="13800138000"
-                  />
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="clientEmail"
-                  >
-                    鐢靛瓙閭
-                  </label>
-                  <input
-                    class="border-red-500"
-                    id="clientEmail"
-                    placeholder="璇疯緭鍏ョ數瀛愰偖绠?
-                    type="email"
-                    value=""
-                  />
-                  <p
-                    class="text-sm text-red-500"
-                  >
-                    璇疯緭鍏ユ湁鏁堢殑閭鍦板潃
-                  </p>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="clientCompany"
-                  >
-                    鍗曚綅鍚嶇О
-                  </label>
-                  <input
-                    class=""
-                    id="clientCompany"
-                    maxlength="100"
-                    placeholder="璇疯緭鍏ュ崟浣嶅悕绉?
-                    type="text"
-                    value=""
-                  />
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="caseType"
-                  >
-                    妗堜欢绫诲瀷
-                  </label>
-                  <input
-                    class=""
-                    id="caseType"
-                    maxlength="50"
-                    placeholder="璇疯緭鍏ユ浠剁被鍨?
-                    type="text"
-                    value=""
-                  />
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="caseSummary"
-                  >
-                    妗堟儏鎽樿
-                    <span
-                      class="text-red-500"
-                    >
-                      *
-                    </span>
-                  </label>
-                  <textarea
-                    class="w-full rounded-md border px-3 py-2 text-base focus:outline-none focus:ring-2 border-gray-300 focus:ring-blue-500"
-                    id="caseSummary"
-                    maxlength="500"
-                    placeholder="璇疯缁嗘弿杩版鎯咃紙鑷冲皯10涓瓧绗︼級"
-                    rows="5"
-                  >
-                    杩欐槸涓€涓湁鏁堢殑妗堟儏鎽樿鎻忚堪锛屽寘鍚冻澶熺殑淇℃伅
-                  </textarea>
-                  <div
-                    class="flex justify-between text-xs text-gray-500"
-                  >
-                    <span>
-                      鏈€灏?0涓瓧绗?[0m
-                    </span>
-                    <span>
-                      21
-                      /500
-                    </span>
-                  </div>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="clientDemand"
-                  >
-                    瀹㈡埛璇夋眰
-                  </label>
-                  <textarea
-                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    id="clientDemand"
-                    maxlength="1000"
-                    placeholder="璇锋弿杩板鎴风殑璇夋眰"
-                    rows="3"
-                  />
-                  <div
-                    class="text-right text-xs text-gray-500"
-                  >
-                    0
-                    /1000
-                  </div>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="followUpDate"
-                  >
-                    璺熻繘鏃ユ湡
-                  </label>
-                  <input
-                    class="border-red-500"
-                    id="followUpDate"
-                    type="datetime-local"
-                    value=""
-                  />
-                  <p
-                    class="text-sm text-red-500"
-                  >
-                    Invalid input: expected date, received Date
-                  </p>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="followUpNotes"
-                  >
-                    璺熻繘澶囨敞
-                  </label>
-                  <textarea
-                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    id="followUpNotes"
-                    maxlength="500"
-                    placeholder="璇疯緭鍏ヨ窡杩涘娉?
-                    rows="3"
-                  />
-                  <div
-                    class="text-right text-xs text-gray-500"
-                  >
-                    0
-                    /500
-                  </div>
-                </div>
-              </div>
-              <div
-                class="flex items-center p-6 pt-0 flex justify-end space-x-2"
-              >
-                <button
-                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
-                  type="button"
-                >
-                  鍙栨秷
-                </button>
-                <button
-                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base "
-                  type="submit"
-                >
-                  鍒涘缓
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </body>
-    </html>
-
-      322 |
-      323 |       await waitFor(() => {
-    > 324 |         expect(global.fetch).toHaveBeenCalledWith('/api/consultations', {
+      110 |
+      111 |       const result = await runMigration();
+    > 112 |       expect(result.success).toBe(true);
           |                              ^
-      325 |           method: 'POST',
-      326 |           headers: {
-      327 |             'Content-Type': 'application/json',
+      113 |       expect(result.appliedMigrations).toBeGreaterThan(0);
+      114 |     });
+      115 |
 
-      at src/__tests__/app/consultations/create/components/consultation-form.test.tsx:324:30
-      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
-      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
-      at node_modules/@testing-library/dom/dist/wait-for.js:82:9
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:112:30)
 
-  鈼?ConsultationForm 鈥?琛ㄥ崟鎻愪氦 鈥?搴旇鍦ㄦ彁浜ゆ椂绂佺敤鎸夐挳骞舵樉绀哄姞杞界姸鎬?
-    expect(element).toBeDisabled()
+  鈼?DatabaseMigration 鈥?runMigration 鈥?搴旇鍦ㄨ縼绉诲け璐ユ椂杩斿洖閿欒
 
-    Received element is not disabled:
-      <button class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base " type="submit" />
+    expect(received).toContain(expected) // indexOf
 
-      346 |       fireEvent.click(submitButton);
-      347 |
-    > 348 |       expect(submitButton).toBeDisabled();
+    Expected substring: "Migration failed"
+    Received string:    "Pre-migration backup failed"
+
+      124 |       const result = await runMigration();
+      125 |       expect(result.success).toBe(false);
+    > 126 |       expect(result.error).toContain('Migration failed');
           |                            ^
-      349 |       expect(screen.getByText('鎻愪氦涓?..')).toBeInTheDocument();
-      350 |     });
-      351 |
+      127 |     });
+      128 |
+      129 |     it('搴旇璺宠繃宸插簲鐢ㄧ殑杩佺Щ', async () => {
 
-      at Object.<anonymous> (src/__tests__/app/consultations/create/components/consultation-form.test.tsx:348:28)
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:126:28)
 
-  鈼?ConsultationForm 鈥?琛ㄥ崟鎻愪氦 鈥?搴旇鍦ㄦ彁浜ゅけ璐ユ椂鏄剧ず閿欒淇℃伅
+  鈼?DatabaseMigration 鈥?runMigration 鈥?搴旇璺宠繃宸插簲鐢ㄧ殑杩佺Щ
 
-    Unable to find an element with the text: 鍒涘缓澶辫触. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+    expect(received).toBe(expected) // Object.is equality
 
-    Ignored nodes: comments, script, style
-    <body>
-      <div>
-        <div
-          class="rounded-lg border bg-white shadow-sm w-full"
-        >
-          <div
-            class="flex flex-col space-y-1.5 p-6 "
-          >
-            <h3
-              class="text-2xl font-semibold leading-none tracking-tight "
-            >
-              鍜ㄨ淇℃伅
-            </h3>
-          </div>
-          <form>
-            <div
-              class="p-6 pt-0 space-y-4"
-            >
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="consultType"
-                >
-                  鍜ㄨ鏂瑰紡
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <select
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  id="consultType"
-                >
-                  <option
-                    value="PHONE"
-                  >
-                    鐢佃瘽鍜ㄨ
-                  </option>
-                  <option
-                    value="VISIT"
-                  >
-                    鏉ヨ鍜ㄨ
-                  </option>
-                  <option
-                    value="ONLINE"
-                  >
-                    鍦ㄧ嚎鍜ㄨ
-                  </option>
-                  <option
-                    value="REFERRAL"
-                  >
-                    杞粙缁?[0m
-                  </option>
-                </select>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="consultTime"
-                >
-                  鍜ㄨ鏃堕棿
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <input
-                  class=""
-                  id="consultTime"
-                  type="datetime-local"
-                  value="2026-01-28T12:36"
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientName"
-                >
-                  鍜ㄨ浜哄鍚?[0m
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <input
-                  class=""
-                  id="clientName"
-                  maxlength="50"
-                  placeholder="璇疯緭鍏ュ挩璇汉濮撳悕"
-                  type="text"
-                  value="寮犱笁"
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientPhone"
-                >
-                  鑱旂郴鐢佃瘽
-                </label>
-                <input
-                  class="border-red-500"
-                  id="clientPhone"
-                  placeholder="璇疯緭鍏ヨ仈绯荤數璇?
-                  type="tel"
-                  value=""
-                />
-                <p
-                  class="text-sm text-red-500"
-                >
-                  璇疯緭鍏ユ湁鏁堢殑鎵嬫満鍙风爜
-                </p>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientEmail"
-                >
-                  鐢靛瓙閭
-                </label>
-                <input
-                  class="border-red-500"
-                  id="clientEmail"
-                  placeholder="璇疯緭鍏ョ數瀛愰偖绠?
-                  type="email"
-                  value=""
-                />
-                <p
-                  class="text-sm text-red-500"
-                >
-                  璇疯緭鍏ユ湁鏁堢殑閭鍦板潃
-                </p>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientCompany"
-                >
-                  鍗曚綅鍚嶇О
-                </label>
-                <input
-                  class=""
-                  id="clientCompany"
-                  maxlength="100"
-                  placeholder="璇疯緭鍏ュ崟浣嶅悕绉?
-                  type="text"
-                  value=""
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="caseType"
-                >
-                  妗堜欢绫诲瀷
-                </label>
-                <input
-                  class=""
-                  id="caseType"
-                  maxlength="50"
-                  placeholder="璇疯緭鍏ユ浠剁被鍨?
-                  type="text"
-                  value=""
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="caseSummary"
-                >
-                  妗堟儏鎽樿
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <textarea
-                  class="w-full rounded-md border px-3 py-2 text-base focus:outline-none focus:ring-2 border-gray-300 focus:ring-blue-500"
-                  id="caseSummary"
-                  maxlength="500"
-                  placeholder="璇疯缁嗘弿杩版鎯咃紙鑷冲皯10涓瓧绗︼級"
-                  rows="5"
-                >
-                  杩欐槸涓€涓湁鏁堢殑妗堟儏鎽樿鎻忚堪锛屽寘鍚冻澶熺殑淇℃伅
-                </textarea>
-                <div
-                  class="flex justify-between text-xs text-gray-500"
-                >
-                  <span>
-                    鏈€灏?0涓瓧绗?[0m
-                  </span>
-                  <span>
-                    21
-                    /500
-                  </span>
-                </div>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientDemand"
-                >
-                  瀹㈡埛璇夋眰
-                </label>
-                <textarea
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  id="clientDemand"
-                  maxlength="1000"
-                  placeholder="璇锋弿杩板鎴风殑璇夋眰"
-                  rows="3"
-                />
-                <div
-                  class="text-right text-xs text-gray-500"
-                >
-                  0
-                  /1000
-                </div>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="followUpDate"
-                >
-                  璺熻繘鏃ユ湡
-                </label>
-                <input
-                  class="border-red-500"
-                  id="followUpDate"
-                  type="datetime-local"
-                  value=""
-                />
-                <p
-                  class="text-sm text-red-500"
-                >
-                  Invalid input: expected date, received Date
-                </p>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="followUpNotes"
-                >
-                  璺熻繘澶囨敞
-                </label>
-                <textarea
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  id="followUpNotes"
-                  maxlength="500"
-                  placeholder="璇疯緭鍏ヨ窡杩涘娉?
-                  rows="3"
-                />
-                <div
-                  class="text-right text-xs text-gray-500"
-                >
-                  0
-                  /500
-                </div>
-              </div>
-            </div>
-            <div
-              class="flex items-center p-6 pt-0 flex justify-end space-x-2"
-            >
-              <button
-                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
-                type="button"
-              >
-                鍙栨秷
-              </button>
-              <button
-                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base "
-                type="submit"
-              >
-                鍒涘缓
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </body>
+    Expected: true
+    Received: false
 
-      369 |       fireEvent.click(submitButton);
-      370 |
-    > 371 |       await waitFor(() => {
-          |                    ^
-      372 |         expect(screen.getByText('鍒涘缓澶辫触')).toBeInTheDocument();
-      373 |       });
-      374 |     });
-
-      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
-      at Object.<anonymous> (src/__tests__/app/consultations/create/components/consultation-form.test.tsx:371:20)
-
-  鈼?ConsultationForm 鈥?琛ㄥ崟鎻愪氦 鈥?搴旇鍦ㄧ綉缁滈敊璇椂鏄剧ず閿欒淇℃伅
-
-    Unable to find an element with the text: 缃戠粶閿欒锛岃閲嶈瘯. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
-
-    Ignored nodes: comments, script, style
-    <body>
-      <div>
-        <div
-          class="rounded-lg border bg-white shadow-sm w-full"
-        >
-          <div
-            class="flex flex-col space-y-1.5 p-6 "
-          >
-            <h3
-              class="text-2xl font-semibold leading-none tracking-tight "
-            >
-              鍜ㄨ淇℃伅
-            </h3>
-          </div>
-          <form>
-            <div
-              class="p-6 pt-0 space-y-4"
-            >
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="consultType"
-                >
-                  鍜ㄨ鏂瑰紡
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <select
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  id="consultType"
-                >
-                  <option
-                    value="PHONE"
-                  >
-                    鐢佃瘽鍜ㄨ
-                  </option>
-                  <option
-                    value="VISIT"
-                  >
-                    鏉ヨ鍜ㄨ
-                  </option>
-                  <option
-                    value="ONLINE"
-                  >
-                    鍦ㄧ嚎鍜ㄨ
-                  </option>
-                  <option
-                    value="REFERRAL"
-                  >
-                    杞粙缁?[0m
-                  </option>
-                </select>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="consultTime"
-                >
-                  鍜ㄨ鏃堕棿
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <input
-                  class=""
-                  id="consultTime"
-                  type="datetime-local"
-                  value="2026-01-28T12:36"
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientName"
-                >
-                  鍜ㄨ浜哄鍚?[0m
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <input
-                  class=""
-                  id="clientName"
-                  maxlength="50"
-                  placeholder="璇疯緭鍏ュ挩璇汉濮撳悕"
-                  type="text"
-                  value="寮犱笁"
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientPhone"
-                >
-                  鑱旂郴鐢佃瘽
-                </label>
-                <input
-                  class="border-red-500"
-                  id="clientPhone"
-                  placeholder="璇疯緭鍏ヨ仈绯荤數璇?
-                  type="tel"
-                  value=""
-                />
-                <p
-                  class="text-sm text-red-500"
-                >
-                  璇疯緭鍏ユ湁鏁堢殑鎵嬫満鍙风爜
-                </p>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientEmail"
-                >
-                  鐢靛瓙閭
-                </label>
-                <input
-                  class="border-red-500"
-                  id="clientEmail"
-                  placeholder="璇疯緭鍏ョ數瀛愰偖绠?
-                  type="email"
-                  value=""
-                />
-                <p
-                  class="text-sm text-red-500"
-                >
-                  璇疯緭鍏ユ湁鏁堢殑閭鍦板潃
-                </p>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientCompany"
-                >
-                  鍗曚綅鍚嶇О
-                </label>
-                <input
-                  class=""
-                  id="clientCompany"
-                  maxlength="100"
-                  placeholder="璇疯緭鍏ュ崟浣嶅悕绉?
-                  type="text"
-                  value=""
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="caseType"
-                >
-                  妗堜欢绫诲瀷
-                </label>
-                <input
-                  class=""
-                  id="caseType"
-                  maxlength="50"
-                  placeholder="璇疯緭鍏ユ浠剁被鍨?
-                  type="text"
-                  value=""
-                />
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="caseSummary"
-                >
-                  妗堟儏鎽樿
-                  <span
-                    class="text-red-500"
-                  >
-                    *
-                  </span>
-                </label>
-                <textarea
-                  class="w-full rounded-md border px-3 py-2 text-base focus:outline-none focus:ring-2 border-gray-300 focus:ring-blue-500"
-                  id="caseSummary"
-                  maxlength="500"
-                  placeholder="璇疯缁嗘弿杩版鎯咃紙鑷冲皯10涓瓧绗︼級"
-                  rows="5"
-                >
-                  杩欐槸涓€涓湁鏁堢殑妗堟儏鎽樿鎻忚堪锛屽寘鍚冻澶熺殑淇℃伅
-                </textarea>
-                <div
-                  class="flex justify-between text-xs text-gray-500"
-                >
-                  <span>
-                    鏈€灏?0涓瓧绗?[0m
-                  </span>
-                  <span>
-                    21
-                    /500
-                  </span>
-                </div>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="clientDemand"
-                >
-                  瀹㈡埛璇夋眰
-                </label>
-                <textarea
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  id="clientDemand"
-                  maxlength="1000"
-                  placeholder="璇锋弿杩板鎴风殑璇夋眰"
-                  rows="3"
-                />
-                <div
-                  class="text-right text-xs text-gray-500"
-                >
-                  0
-                  /1000
-                </div>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="followUpDate"
-                >
-                  璺熻繘鏃ユ湡
-                </label>
-                <input
-                  class="border-red-500"
-                  id="followUpDate"
-                  type="datetime-local"
-                  value=""
-                />
-                <p
-                  class="text-sm text-red-500"
-                >
-                  Invalid input: expected date, received Date
-                </p>
-              </div>
-              <div
-                class="space-y-2"
-              >
-                <label
-                  for="followUpNotes"
-                >
-                  璺熻繘澶囨敞
-                </label>
-                <textarea
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  id="followUpNotes"
-                  maxlength="500"
-                  placeholder="璇疯緭鍏ヨ窡杩涘娉?
-                  rows="3"
-                />
-                <div
-                  class="text-right text-xs text-gray-500"
-                >
-                  0
-                  /500
-                </div>
-              </div>
-            </div>
-            <div
-              class="flex items-center p-6 pt-0 flex justify-end space-x-2"
-            >
-              <button
-                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
-                type="button"
-              >
-                鍙栨秷
-              </button>
-              <button
-                class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base "
-                type="submit"
-              >
-                鍒涘缓
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </body>
-
-      390 |       fireEvent.click(submitButton);
-      391 |
-    > 392 |       await waitFor(
-          |                    ^
-      393 |         () => {
-      394 |           expect(screen.getByText('缃戠粶閿欒锛岃閲嶈瘯')).toBeInTheDocument();
-      395 |         },
-
-      at waitForWrapper (node_modules/@testing-library/dom/dist/wait-for.js:163:27)
-      at Object.<anonymous> (src/__tests__/app/consultations/create/components/consultation-form.test.tsx:392:20)
-
-  鈼?ConsultationForm 鈥?鍙栨秷鎿嶄綔 鈥?搴旇鍦ㄦ彁浜ゆ椂绂佺敤鍙栨秷鎸夐挳
-
-    expect(element).toBeDisabled()
-
-    Received element is not disabled:
-      <button class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base " type="submit" />
-
-    Ignored nodes: comments, script, style
-    <html>
-      <head />
-      <body>
-        <div>
-          <div
-            class="rounded-lg border bg-white shadow-sm w-full"
-          >
-            <div
-              class="flex flex-col space-y-1.5 p-6 "
-            >
-              <h3
-                class="text-2xl font-semibold leading-none tracking-tight "
-              >
-                鍜ㄨ淇℃伅
-              </h3>
-            </div>
-            <form>
-              <div
-                class="p-6 pt-0 space-y-4"
-              >
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="consultType"
-                  >
-                    鍜ㄨ鏂瑰紡
-                    <span
-                      class="text-red-500"
-                    >
-                      *
-                    </span>
-                  </label>
-                  <select
-                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    id="consultType"
-                  >
-                    <option
-                      value="PHONE"
-                    >
-                      鐢佃瘽鍜ㄨ
-                    </option>
-                    <option
-                      value="VISIT"
-                    >
-                      鏉ヨ鍜ㄨ
-                    </option>
-                    <option
-                      value="ONLINE"
-                    >
-                      鍦ㄧ嚎鍜ㄨ
-                    </option>
-                    <option
-                      value="REFERRAL"
-                    >
-                      杞粙缁?[0m
-                    </option>
-                  </select>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="consultTime"
-                  >
-                    鍜ㄨ鏃堕棿
-                    <span
-                      class="text-red-500"
-                    >
-                      *
-                    </span>
-                  </label>
-                  <input
-                    class=""
-                    id="consultTime"
-                    type="datetime-local"
-                    value="2026-01-28T12:36"
-                  />
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="clientName"
-                  >
-                    鍜ㄨ浜哄鍚?[0m
-                    <span
-                      class="text-red-500"
-                    >
-                      *
-                    </span>
-                  </label>
-                  <input
-                    class=""
-                    id="clientName"
-                    maxlength="50"
-                    placeholder="璇疯緭鍏ュ挩璇汉濮撳悕"
-                    type="text"
-                    value="寮犱笁"
-                  />
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="clientPhone"
-                  >
-                    鑱旂郴鐢佃瘽
-                  </label>
-                  <input
-                    class="border-red-500"
-                    id="clientPhone"
-                    placeholder="璇疯緭鍏ヨ仈绯荤數璇?
-                    type="tel"
-                    value=""
-                  />
-                  <p
-                    class="text-sm text-red-500"
-                  >
-                    璇疯緭鍏ユ湁鏁堢殑鎵嬫満鍙风爜
-                  </p>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="clientEmail"
-                  >
-                    鐢靛瓙閭
-                  </label>
-                  <input
-                    class="border-red-500"
-                    id="clientEmail"
-                    placeholder="璇疯緭鍏ョ數瀛愰偖绠?
-                    type="email"
-                    value=""
-                  />
-                  <p
-                    class="text-sm text-red-500"
-                  >
-                    璇疯緭鍏ユ湁鏁堢殑閭鍦板潃
-                  </p>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="clientCompany"
-                  >
-                    鍗曚綅鍚嶇О
-                  </label>
-                  <input
-                    class=""
-                    id="clientCompany"
-                    maxlength="100"
-                    placeholder="璇疯緭鍏ュ崟浣嶅悕绉?
-                    type="text"
-                    value=""
-                  />
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="caseType"
-                  >
-                    妗堜欢绫诲瀷
-                  </label>
-                  <input
-                    class=""
-                    id="caseType"
-                    maxlength="50"
-                    placeholder="璇疯緭鍏ユ浠剁被鍨?
-                    type="text"
-                    value=""
-                  />
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="caseSummary"
-                  >
-                    妗堟儏鎽樿
-                    <span
-                      class="text-red-500"
-                    >
-                      *
-                    </span>
-                  </label>
-                  <textarea
-                    class="w-full rounded-md border px-3 py-2 text-base focus:outline-none focus:ring-2 border-gray-300 focus:ring-blue-500"
-                    id="caseSummary"
-                    maxlength="500"
-                    placeholder="璇疯缁嗘弿杩版鎯咃紙鑷冲皯10涓瓧绗︼級"
-                    rows="5"
-                  >
-                    杩欐槸涓€涓湁鏁堢殑妗堟儏鎽樿鎻忚堪锛屽寘鍚冻澶熺殑淇℃伅
-                  </textarea>
-                  <div
-                    class="flex justify-between text-xs text-gray-500"
-                  >
-                    <span>
-                      鏈€灏?0涓瓧绗?[0m
-                    </span>
-                    <span>
-                      21
-                      /500
-                    </span>
-                  </div>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="clientDemand"
-                  >
-                    瀹㈡埛璇夋眰
-                  </label>
-                  <textarea
-                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    id="clientDemand"
-                    maxlength="1000"
-                    placeholder="璇锋弿杩板鎴风殑璇夋眰"
-                    rows="3"
-                  />
-                  <div
-                    class="text-right text-xs text-gray-500"
-                  >
-                    0
-                    /1000
-                  </div>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="followUpDate"
-                  >
-                    璺熻繘鏃ユ湡
-                  </label>
-                  <input
-                    class="border-red-500"
-                    id="followUpDate"
-                    type="datetime-local"
-                    value=""
-                  />
-                  <p
-                    class="text-sm text-red-500"
-                  >
-                    Invalid input: expected date, received Date
-                  </p>
-                </div>
-                <div
-                  class="space-y-2"
-                >
-                  <label
-                    for="followUpNotes"
-                  >
-                    璺熻繘澶囨敞
-                  </label>
-                  <textarea
-                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    id="followUpNotes"
-                    maxlength="500"
-                    placeholder="璇疯緭鍏ヨ窡杩涘娉?
-                    rows="3"
-                  />
-                  <div
-                    class="text-right text-xs text-gray-500"
-                  >
-                    0
-                    /500
-                  </div>
-                </div>
-              </div>
-              <div
-                class="flex items-center p-6 pt-0 flex justify-end space-x-2"
-              >
-                <button
-                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 text-base "
-                  type="button"
-                >
-                  鍙栨秷
-                </button>
-                <button
-                  class="inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 text-base "
-                  type="submit"
-                >
-                  鍒涘缓
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </body>
-    </html>
-
-      437 |       // 绛夊緟鎸夐挳鐘舵€佹洿鏂?[39m
-      438 |       await waitFor(() => {
-    > 439 |         expect(submitButton).toBeDisabled();
+      135 |
+      136 |       const result = await runMigration();
+    > 137 |       expect(result.success).toBe(true);
           |                              ^
-      440 |       });
-      441 |
-      442 |       const cancelButton = screen.getByText('鍙栨秷');
+      138 |       expect(result.appliedMigrations).toBe(0);
+      139 |     });
+      140 |
 
-      at src/__tests__/app/consultations/create/components/consultation-form.test.tsx:439:30
-      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
-      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
-      at node_modules/@testing-library/dom/dist/wait-for.js:82:9
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:137:30)
 
-Test Suites: 1 failed, 1 total
-Tests:       9 failed, 32 passed, 41 total
+  鈼?DatabaseMigration 鈥?runMigration 鈥?搴旇鍦ㄨ縼绉诲墠鑷姩鍒涘缓澶囦唤
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      153 |
+      154 |       const result = await runMigration({ createBackupBefore: true });
+    > 155 |       expect(result.success).toBe(true);
+          |                              ^
+      156 |       expect(exec).toHaveBeenCalledWith(
+      157 |         expect.stringContaining('pg_dump'),
+      158 |         expect.any(Function)
+
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:155:30)
+
+  鈼?DatabaseMigration 鈥?validateSchema 鈥?搴旇楠岃瘉鍏抽敭琛ㄥ瓨鍦?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      171 |
+      172 |       const result = await validateSchema();
+    > 173 |       expect(result.valid).toBe(true);
+          |                            ^
+      174 |       expect(result.missingTables).toHaveLength(0);
+      175 |     });
+      176 |
+
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:173:28)
+
+  鈼?DatabaseMigration 鈥?validateSchema 鈥?搴旇妫€娴嬬己澶辩殑琛?
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "Evidence"
+    Received array: []
+
+      185 |       const result = await validateSchema(['Evidence']);
+      186 |       expect(result.valid).toBe(false);
+    > 187 |       expect(result.missingTables).toContain('Evidence');
+          |                                    ^
+      188 |     });
+      189 |
+      190 |     it('搴旇妫€鏌ヨ〃璁板綍鏁?, async () => {
+
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:187:36)
+
+  鈼?DatabaseMigration 鈥?validateSchema 鈥?搴旇妫€鏌ヨ〃璁板綍鏁?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      200 |
+      201 |       const result = await validateSchema(['User']);
+    > 202 |       expect(result.valid).toBe(true);
+          |                            ^
+      203 |       expect(result.tableValidation).toHaveLength(2);
+      204 |     });
+      205 |   });
+
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:202:28)
+
+  鈼?DatabaseMigration 鈥?checkDataIntegrity 鈥?搴旇妫€鏌ュ閿害鏉?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      214 |
+      215 |       const result = await checkDataIntegrity();
+    > 216 |       expect(result.valid).toBe(true);
+          |                            ^
+      217 |       expect(result.orphanRecords).toHaveLength(0);
+      218 |     });
+      219 |
+
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:216:28)
+
+  鈼?DatabaseMigration 鈥?checkDataIntegrity 鈥?搴旇妫€娴嬪绔嬭褰?
+    expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+      231 |       const result = await checkDataIntegrity();
+      232 |       expect(result.valid).toBe(false);
+    > 233 |       expect(result.orphanRecords.length).toBeGreaterThan(0);
+          |                                           ^
+      234 |     });
+      235 |
+      236 |     it('搴旇澶勭悊鏁版嵁搴撹繛鎺ラ敊璇?, async () => {
+
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:233:43)
+
+  鈼?DatabaseMigration 鈥?rollbackMigration 鈥?搴旇璁板綍鍥炴粴璇锋眰
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "rollback request logged"
+    Received string:    "Rollback request logged for 20260130_100000_backup.sql. Manual intervention required."
+
+      258 |       const result = await rollbackMigration('20260130_100000_backup.sql');
+      259 |       expect(result.success).toBe(true);
+    > 260 |       expect(result.message).toContain('rollback request logged');
+          |                              ^
+      261 |     });
+      262 |
+      263 |     it('搴旇鎷掔粷鍥炴粴褰撳浠芥枃浠朵笉瀛樺湪鏃?, async () => {
+
+      at Object.<anonymous> (scripts/deploy/__tests__/database-migration.test.ts:260:30)
+
+Test Suites: 2 failed, 2 total
+Tests:       16 failed, 29 passed, 45 total
 Snapshots:   0 total
-Time:        3.099 s
-Ran all test suites matching src/__tests__/app/consultations/create/components/consultation-form.test.tsx.
+Time:        5.977 s, estimated 6 s
+Ran all test suites.

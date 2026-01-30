@@ -320,7 +320,8 @@ export class FilingMaterialsService {
     courtLevel: string = '基层'
   ): FilingMaterialsResult {
     // 获取案件类型对应的材料清单
-    const materials = CASE_TYPE_MATERIALS[caseType] || this.getDefaultMaterials();
+    const materials =
+      CASE_TYPE_MATERIALS[caseType] || this.getDefaultMaterials();
 
     // 获取注意事项
     const notes = CASE_TYPE_NOTES[caseType] || this.getDefaultNotes();

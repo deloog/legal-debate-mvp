@@ -61,9 +61,10 @@ export async function POST(
     }
 
     // 获取客户端IP和设备信息
-    const ip = request.headers.get('x-forwarded-for') ||
-               request.headers.get('x-real-ip') ||
-               'unknown';
+    const ip =
+      request.headers.get('x-forwarded-for') ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     // 准备更新数据
@@ -134,11 +135,13 @@ export async function POST(
     // 如果双方都已签署，发送签署确认邮件
     if (willBeFullySigned) {
       // 异步发送邮件，不阻塞响应
-      import('@/lib/email/contract-email-service').then(({ contractEmailService }) => {
-        contractEmailService.sendSignatureConfirmation(id).catch(error => {
-          console.error('发送签署确认邮件失败:', error);
-        });
-      });
+      import('@/lib/email/contract-email-service').then(
+        ({ contractEmailService }) => {
+          contractEmailService.sendSignatureConfirmation(id).catch(error => {
+            console.error('发送签署确认邮件失败:', error);
+          });
+        }
+      );
     }
 
     return NextResponse.json({

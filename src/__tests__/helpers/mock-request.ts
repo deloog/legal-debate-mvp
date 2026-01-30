@@ -10,31 +10,54 @@ export function createMockRequest(
     body?: any;
     headers?: Record<string, string>;
     correlationId?: string;
+    userId?: string;
+    userRole?: string;
+    userEmail?: string;
   } = {}
 ) {
-  const { method = 'GET', body, headers = {}, correlationId } = options;
+  const {
+    method = 'GET',
+    body,
+    headers = {},
+    correlationId,
+    userId = 'test-user-id-123',
+    userRole = 'USER',
+    userEmail = 'test@example.com',
+  } = options;
 
-  // 创建符合Next.js Request接口的mock
-  const request = new Request(url, {
-    method,
-    headers: new Headers({
-      'content-type': 'application/json',
-      'x-correlation-id': correlationId || 'test-correlation-id',
-      ...headers,
-    }),
-    // 对于POST/PUT，需要序列化body
-    body: body ? JSON.stringify(body) : undefined,
+  // 创建headers对象
+  const requestHeaders = new Headers({
+    'content-type': 'application/json',
+    'x-correlation-id': correlationId || 'test-correlation-id',
+    // 添加mock认证信息
+    'x-user-id': userId,
+    'x-user-role': userRole,
+    'x-user-email': userEmail,
+    ...headers,
   });
 
-  // 确保json()方法正确工作
-  if (!request.json) {
-    Object.defineProperty(request, 'json', {
-      value: async () => body,
-      writable: false,
-    });
-  }
+  // 创建完全的mock请求对象
+  const mockRequest = {
+    url,
+    method: method.toUpperCase(),
+    headers: requestHeaders,
+    nextUrl: new URL(url),
+    cookies: {
+      get: jest.fn().mockReturnValue(null),
+      set: jest.fn(),
+      delete: jest.fn(),
+    },
+    json: async () => body,
+    text: async () => (typeof body === 'string' ? body : JSON.stringify(body)),
+    body: body ? JSON.stringify(body) : undefined,
+    // 添加其他Request接口的必需属性
+    clone: jest.fn(),
+    arrayBuffer: jest.fn(),
+    blob: jest.fn(),
+    formData: jest.fn(),
+  };
 
-  return request as NextRequest;
+  return mockRequest as unknown as NextRequest;
 }
 
 /**

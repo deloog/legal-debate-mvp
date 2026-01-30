@@ -49,7 +49,7 @@ prisma.$on('query' as never, (e: any) => {
  */
 export function getSlowQueries(threshold: number = 100): QueryStats[] {
   return Array.from(queryStats.values())
-    .filter((stats) => stats.avgDuration > threshold)
+    .filter(stats => stats.avgDuration > threshold)
     .sort((a, b) => b.avgDuration - a.avgDuration);
 }
 
@@ -59,7 +59,7 @@ export function getSlowQueries(threshold: number = 100): QueryStats[] {
  */
 export function getFrequentQueries(threshold: number = 10): QueryStats[] {
   return Array.from(queryStats.values())
-    .filter((stats) => stats.count > threshold)
+    .filter(stats => stats.count > threshold)
     .sort((a, b) => b.count - a.count);
 }
 
@@ -72,14 +72,18 @@ export function printQueryReport() {
   console.log('慢查询（>100ms）：');
   const slowQueries = getSlowQueries(100);
   slowQueries.slice(0, 10).forEach((stats, index) => {
-    console.log(`${index + 1}. 平均耗时: ${stats.avgDuration.toFixed(2)}ms, 执行次数: ${stats.count}`);
+    console.log(
+      `${index + 1}. 平均耗时: ${stats.avgDuration.toFixed(2)}ms, 执行次数: ${stats.count}`
+    );
     console.log(`   查询: ${stats.query.substring(0, 100)}...`);
   });
 
   console.log('\n频繁查询（>10次）：');
   const frequentQueries = getFrequentQueries(10);
   frequentQueries.slice(0, 10).forEach((stats, index) => {
-    console.log(`${index + 1}. 执行次数: ${stats.count}, 平均耗时: ${stats.avgDuration.toFixed(2)}ms`);
+    console.log(
+      `${index + 1}. 执行次数: ${stats.count}, 平均耗时: ${stats.avgDuration.toFixed(2)}ms`
+    );
     console.log(`   查询: ${stats.query.substring(0, 100)}...`);
   });
 

@@ -73,7 +73,7 @@ describe('ApprovalFlow', () => {
     render(
       <ApprovalFlow
         approval={mockApproval}
-        currentUserId="user-2"
+        currentUserId='user-2'
         onApprove={jest.fn()}
         onReject={jest.fn()}
       />

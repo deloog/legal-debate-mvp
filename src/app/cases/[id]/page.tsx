@@ -12,6 +12,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { CaseTeamList } from '@/components/case/CaseTeamList';
 import { DiscussionList } from '@/components/discussion/DiscussionList';
 import { WitnessList } from '@/components/witness/WitnessList';
+import { EvidenceTab } from './components/EvidenceTab';
 
 /**
  * 案件详情接口
@@ -132,9 +133,11 @@ export default function CaseDetailPage() {
         );
       case 'evidence':
         return (
-          <div className='py-8 text-center text-gray-500'>
-            证据管理功能开发中...
-          </div>
+          <EvidenceTab
+            caseId={caseId}
+            caseType={caseDetail?.type}
+            canManage={canManage}
+          />
         );
       case 'witnesses':
         return (

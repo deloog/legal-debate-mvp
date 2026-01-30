@@ -29,13 +29,13 @@ class CacheManager {
       port: parseInt(process.env.REDIS_PORT || '6379'),
       password: process.env.REDIS_PASSWORD || undefined,
       db: parseInt(process.env.REDIS_DB || '0'),
-      retryStrategy: (times) => {
+      retryStrategy: times => {
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
     });
 
-    this.redis.on('error', (err) => {
+    this.redis.on('error', err => {
       console.error('Redis连接错误:', err);
       this.stats.errors++;
     });
@@ -120,7 +120,8 @@ class CacheManager {
    */
   getStats(): CacheStats & { hitRate: string } {
     const total = this.stats.hits + this.stats.misses;
-    const hitRate = total > 0 ? ((this.stats.hits / total) * 100).toFixed(2) : '0.00';
+    const hitRate =
+      total > 0 ? ((this.stats.hits / total) * 100).toFixed(2) : '0.00';
     return {
       ...this.stats,
       hitRate: `${hitRate}%`,

@@ -309,6 +309,22 @@ export interface AnalysisMetadata {
   evidenceAnalysis?: EvidenceAnalysisResult;
   comprehensiveAnalysis?: ComprehensiveAnalysisResult;
   warnings?: string[]; // 警告信息数组
+  optimizationStages?: OptimizationStageResult[]; // 优化阶段结果
+}
+
+// 优化阶段结果类型
+export interface OptimizationStageResult {
+  stage:
+    | 'QUICK_ANALYSIS'
+    | 'DEEP_ANALYSIS'
+    | 'CROSS_VALIDATION'
+    | 'AI_CONFIRMATION';
+  success: boolean;
+  duration: number;
+  confidenceBefore: number;
+  confidenceAfter: number;
+  issuesFound: number;
+  issuesFixed: number;
 }
 
 export interface AnalysisProcess {

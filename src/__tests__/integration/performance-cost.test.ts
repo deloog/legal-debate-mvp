@@ -1,5 +1,9 @@
 import { DocAnalyzerAgent } from '@/lib/agent/doc-analyzer/doc-analyzer-agent';
 import { LawSearcher } from '@/lib/agent/legal-agent/law-searcher';
+import {
+  PerformanceMetricsCollector,
+  type ThresholdConfig,
+} from '@/lib/performance/performance-metrics-collector';
 import type { DocumentAnalysisInput } from '@/lib/agent/doc-analyzer/core/types';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
@@ -59,8 +63,13 @@ describe('性能与成本验证 - 性能优化与成本控制', () => {
   let docAnalyzer: DocAnalyzerAgent;
   let lawSearcher: LawSearcher;
 
+  let metricsCollector: PerformanceMetricsCollector;
+
   beforeEach(async () => {
     jest.clearAllMocks();
+
+    // 初始化性能指标收集器
+    metricsCollector = new PerformanceMetricsCollector();
 
     // 初始化各智能体
     docAnalyzer = new DocAnalyzerAgent(false);
@@ -103,7 +112,7 @@ describe('性能与成本验证 - 性能优化与成本控制', () => {
             filePath: `/test/path/test-contract-${i}.txt`,
           };
 
-          await docAnalyzer.execute({
+          const result = await docAnalyzer.execute({
             taskType: 'document-analysis',
             task: '解析合同纠纷起诉状',
             priority: 'HIGH',
@@ -114,11 +123,21 @@ describe('性能与成本验证 - 性能优化与成本控制', () => {
           const testEndTime = Date.now();
           const testResponseTime = testEndTime - testStartTime;
 
+          // 记录性能指标
+          metricsCollector.recordMetric('document-analysis', testResponseTime);
+          if (result.success) {
+            metricsCollector.recordSuccess('document-analysis');
+          } else {
+            metricsCollector.recordFailure('document-analysis');
+          }
+
           // 如果响应时间<500ms，认为缓存命中
           if (testResponseTime < 500) {
             cacheHits.push(1);
+            metricsCollector.recordCacheHit('document-analysis');
           } else {
             cacheHits.push(0);
+            metricsCollector.recordCacheMiss('document-analysis');
           }
         }
 
@@ -133,6 +152,7 @@ describe('性能与成本验证 - 性能优化与成本控制', () => {
         expect(cacheHitRate).toBeGreaterThan(0.5);
       } catch (error) {
         success = false;
+        metricsCollector.recordFailure('document-analysis');
         console.error('缓存性能测试失败:', error);
       }
 
@@ -150,6 +170,86 @@ describe('性能与成本验证 - 性能优化与成本控制', () => {
           `缓存命中率: ${(cacheHitRate * 100).toFixed(1)}% (目标:>60%), ` +
           `平均响应时间: ${(responseTime / 5).toFixed(0)}ms`
       );
+    });
+  });
+
+  describe('响应时间百分位数验证', () => {
+    it('P1.2 应该验证P50/P95/P99响应时间', async () => {
+      const testCases = 20;
+
+      // 执行20次文档分析
+      for (let i = 0; i < testCases; i++) {
+        const testStartTime = Date.now();
+
+        const input: DocumentAnalysisInput = {
+          documentId: `perf-percentile-${i}`,
+          content: `民事起诉状\n\n原告：张三\n被告：李四\n\n诉讼请求：请求判令被告支付合同款项100000元。测试批次：${i}`,
+          fileType: 'TXT',
+          filePath: `/test/path/test-percentile-${i}.txt`,
+        };
+
+        try {
+          const result = await docAnalyzer.execute({
+            taskType: 'document-analysis',
+            task: '解析合同纠纷起诉状',
+            priority: 'HIGH',
+            userId: 'perf-test-user',
+            data: input,
+          } as any);
+
+          const testResponseTime = Date.now() - testStartTime;
+
+          metricsCollector.recordMetric('document-analysis', testResponseTime);
+
+          if (result.success) {
+            metricsCollector.recordSuccess('document-analysis');
+          } else {
+            metricsCollector.recordFailure('document-analysis');
+          }
+        } catch (error) {
+          const testResponseTime = Date.now() - testStartTime;
+          metricsCollector.recordMetric('document-analysis', testResponseTime);
+          metricsCollector.recordFailure('document-analysis');
+        }
+      }
+
+      // 验证百分位数
+      const thresholds: ThresholdConfig = {
+        p50: 2000, // < 2秒
+        p95: 5000, // < 5秒
+        p99: 10000, // < 10秒
+      };
+
+      const validation = metricsCollector.validateThresholds(
+        'document-analysis',
+        thresholds
+      );
+
+      console.log('\n📊 P1.2 百分位数验证结果:');
+      console.log(
+        `  P50: ${validation.p50.value.toFixed(0)}ms (阈值: ${thresholds.p50}ms) ${validation.p50.passed ? '✅' : '❌'}`
+      );
+      console.log(
+        `  P95: ${validation.p95.value.toFixed(0)}ms (阈值: ${thresholds.p95}ms) ${validation.p95.passed ? '✅' : '❌'}`
+      );
+      console.log(
+        `  P99: ${validation.p99.value.toFixed(0)}ms (阈值: ${thresholds.p99}ms) ${validation.p99.passed ? '✅' : '❌'}`
+      );
+
+      // 获取统计信息
+      const stats = metricsCollector.getStats('document-analysis');
+      console.log('\n📊 P1.2 性能统计:');
+      console.log(`  平均响应时间: ${stats.average.toFixed(0)}ms`);
+      console.log(`  最小响应时间: ${stats.min}ms`);
+      console.log(`  最大响应时间: ${stats.max}ms`);
+      console.log(`  数据点数量: ${stats.count}`);
+      console.log(`  成功率: ${(stats.successRate * 100).toFixed(1)}%`);
+      console.log(`  缓存命中率: ${(stats.cacheHitRate * 100).toFixed(1)}%`);
+
+      // 验证阈值
+      expect(validation.p50.passed).toBe(true);
+      expect(validation.p95.passed).toBe(true);
+      expect(validation.p99.passed).toBe(true);
     });
   });
 

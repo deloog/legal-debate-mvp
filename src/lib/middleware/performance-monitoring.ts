@@ -79,7 +79,7 @@ function recordRequest(stats: RequestStats) {
  */
 export function getSlowRequests(threshold: number = 1000): RequestStats[] {
   return requestStats
-    .filter((stats) => stats.duration > threshold)
+    .filter(stats => stats.duration > threshold)
     .sort((a, b) => b.duration - a.duration)
     .slice(0, 20);
 }
@@ -88,9 +88,12 @@ export function getSlowRequests(threshold: number = 1000): RequestStats[] {
  * 获取API性能统计
  */
 export function getApiStats() {
-  const stats = new Map<string, { count: number; totalDuration: number; avgDuration: number }>();
+  const stats = new Map<
+    string,
+    { count: number; totalDuration: number; avgDuration: number }
+  >();
 
-  requestStats.forEach((req) => {
+  requestStats.forEach(req => {
     const key = `${req.method} ${req.path}`;
     if (stats.has(key)) {
       const stat = stats.get(key)!;
@@ -120,13 +123,17 @@ export function printApiReport() {
   const slowRequests = getSlowRequests(1000);
   console.log(`慢请求（>1000ms）: ${slowRequests.length}个`);
   slowRequests.slice(0, 10).forEach((req, index) => {
-    console.log(`${index + 1}. ${req.method} ${req.path} - ${req.duration}ms (${req.status})`);
+    console.log(
+      `${index + 1}. ${req.method} ${req.path} - ${req.duration}ms (${req.status})`
+    );
   });
 
   console.log('\nAPI平均响应时间：');
   const apiStats = getApiStats();
   apiStats.slice(0, 10).forEach((stat, index) => {
-    console.log(`${index + 1}. ${stat.endpoint} - ${stat.avgDuration.toFixed(2)}ms (${stat.count}次)`);
+    console.log(
+      `${index + 1}. ${stat.endpoint} - ${stat.avgDuration.toFixed(2)}ms (${stat.count}次)`
+    );
   });
 
   console.log('\n=== 报告结束 ===\n');

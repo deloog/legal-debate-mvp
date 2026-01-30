@@ -45,6 +45,10 @@ jest.mock('@/lib/db/prisma', () => ({
     user: {
       findFirst: jest.fn(),
     },
+    aIInteraction: {
+      findMany: jest.fn(),
+      create: jest.fn(),
+    },
     $transaction: jest.fn(),
   },
 }));
@@ -124,6 +128,9 @@ describe('Debate Flow Integration Tests', () => {
         username: 'test-user',
         name: 'Test User',
       });
+
+      // Mock AI配额检查
+      mockPrisma.aIInteraction.findMany.mockResolvedValue([]);
 
       // 5. Mock数据库事务
       mockPrisma.$transaction.mockImplementation(async (callback: unknown) => {

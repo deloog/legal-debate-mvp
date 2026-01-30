@@ -194,7 +194,53 @@ module.exports = {
       coverageReporters: ['text', 'text-summary', 'lcov', 'html', 'json'],
     },
 
-    // Project 4: 其他单元测试（node环境）
+    // Project 4: 部署脚本测试（node环境）
+    {
+      displayName: 'deploy',
+      testEnvironment: 'node',
+      testMatch: [
+        '<rootDir>/scripts/deploy/__tests__/**/*.{test,spec}.{ts,tsx}',
+      ],
+      testPathIgnorePatterns: [
+        '<rootDir>/.next/',
+        '<rootDir>/node_modules/',
+        '<rootDir>/coverage/',
+      ],
+      setupFiles: ['<rootDir>/jest.polyfill.js'],
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+      },
+      modulePathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/.next/'],
+      collectCoverageFrom: [
+        'scripts/deploy/**/*.{ts,js}',
+        '!scripts/**/*.d.ts',
+        '!scripts/**/__tests__/**',
+      ],
+      transform: {
+        '^.+\\.(ts|tsx)$': [
+          'ts-jest',
+          {
+            tsconfig: {
+              esModuleInterop: true,
+              baseUrl: '.',
+              strict: false,
+              noImplicitAny: false,
+              skipLibCheck: true,
+              types: ['jest', '@testing-library/jest-dom'],
+            },
+            diagnostics: {
+              warnOnly: true,
+            },
+          },
+        ],
+      },
+      moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'd.ts'],
+      transformIgnorePatterns: ['node_modules/(?!(uuid|@prisma|@swc/core)/)'],
+      coverageDirectory: 'coverage-deploy',
+      coverageReporters: ['text', 'text-summary', 'lcov', 'html', 'json'],
+    },
+
+    // Project 5: 其他单元测试（node环境）
     {
       displayName: 'unit',
       testEnvironment: 'node',
@@ -206,6 +252,8 @@ module.exports = {
         '<rootDir>/src/__tests__/prisma/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/types/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/unit/**/*.{test,spec}.{ts,tsx}',
+        '<rootDir>/src/__tests__/memory/**/*.{test,spec}.{ts,tsx}',
+        '<rootDir>/src/__tests__/config/**/*.{test,spec}.{ts,tsx}',
       ],
       testPathIgnorePatterns: [
         '<rootDir>/.next/',
@@ -357,6 +405,13 @@ module.exports = {
     },
     // 脚本文件 - 实用工具，要求高
     './scripts/': {
+      statements: 90,
+      branches: 85,
+      functions: 90,
+      lines: 90,
+    },
+    // 部署脚本 - 关键部署工具，要求高
+    './scripts/deploy/': {
       statements: 90,
       branches: 85,
       functions: 90,

@@ -14,7 +14,8 @@ export async function GET(
     const contractId = params.id;
 
     // 获取合同的最新审批记录
-    const approvals = await contractApprovalService.getContractApprovals(contractId);
+    const approvals =
+      await contractApprovalService.getContractApprovals(contractId);
 
     if (!approvals || approvals.length === 0) {
       return NextResponse.json(

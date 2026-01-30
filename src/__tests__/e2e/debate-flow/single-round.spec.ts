@@ -3,7 +3,7 @@
  * 验证从文档上传到辩论生成的完整流程
  */
 
-import { test, expect, APIRequestContext } from '@playwright/test';
+import { test, expect, APIRequestContext, Page } from '@playwright/test';
 import {
   createTestCase,
   uploadTestDocument,
@@ -16,16 +16,40 @@ import {
   PerformanceRecorder,
   assertPerformance,
 } from './helpers';
+import { E2EMockConfig } from '../mock-config';
+import { E2ETestHelpers } from '../test-helpers';
 
 test.describe('单轮辩论完整流程', () => {
   let apiContext: APIRequestContext;
   let perfRecorder: PerformanceRecorder;
+  let authToken: string;
 
-  test.beforeAll(async ({ playwright }) => {
+  test.beforeAll(async ({ playwright, browser }) => {
+    perfRecorder = new PerformanceRecorder();
+
+    // 创建一个临时页面用于获取Mock配置中的认证token
+    const page = await browser.newPage();
+    await page.goto('http://localhost:3000');
+
+    // 设置Mock配置
+    await E2EMockConfig.setup(page);
+
+    // 从Mock配置获取认证token
+    const mockAuthResponse = await E2EMockConfig.getAuthMockResponse({
+      url: 'http://localhost:3000/api/auth/login',
+      method: 'POST',
+    });
+    authToken = (mockAuthResponse.data?.token as string) || '';
+
+    await page.close();
+
+    // 使用Mock token设置API context的认证
     apiContext = await playwright.request.newContext({
       baseURL: 'http://localhost:3000',
+      extraHTTPHeaders: {
+        Authorization: `Bearer ${authToken}`,
+      },
     });
-    perfRecorder = new PerformanceRecorder();
   });
 
   test.afterAll(async () => {
@@ -34,23 +58,30 @@ test.describe('单轮辩论完整流程', () => {
     }
   });
 
+  test.beforeEach(async ({ page: testPage }) => {
+    // 每个测试都设置Mock配置
+    await E2EMockConfig.setup(testPage);
+  });
+
   test('完整流程测试：文档上传→解析→检索→分析→辩论', async () => {
     const startTime = Date.now();
 
     // 步骤1: 创建测试案件
     const createStart = Date.now();
-    const testCase = await createTestCase(apiContext);
+    const testCase = await createTestCase(apiContext, undefined, authToken);
     const { caseId } = testCase;
     const createDuration = Date.now() - createStart;
     perfRecorder.record('创建案件', createDuration);
-    assertPerformance(createDuration, 5000, '创建案件', 2.0); // 调整到5秒以适应首次启动
+    assertPerformance(createDuration, 5000, '创建案件', 2.0);
 
     // 步骤2: 上传测试文档
     const uploadStart = Date.now();
+    const pdfContent =
+      '%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Count 1\n/Kids [3 0 R]\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/Resources <<\n/Font <<\n/F1 <<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica\n>>\n>>\n>>\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<<\n/Length 44\n>>\nstream\nBT\n/F1 12 Tf\n50 700 Td\n(Test Document) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000286 00000 n\ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n392\n%%EOF';
     const testDocument = await uploadTestDocument(
       apiContext,
       caseId,
-      '%PDF-1.4%\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Count 1\n/Kids [3 0 R]\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/Resources <<\n/Font <<\n/F1 <<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica\n>>\n>>\n>>\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<<\n/Length 44\n>>\nstream\nBT\n/F1 12 Tf\n50 700 Td\n(Test Document) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000286 00000 n\ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n392\n%%EOF'
+      pdfContent
     );
     const uploadDuration = Date.now() - uploadStart;
     perfRecorder.record('上传文档', uploadDuration);
@@ -60,7 +91,8 @@ test.describe('单轮辩论完整流程', () => {
     const parseStart = Date.now();
     const parseResult = await waitForDocumentParsing(
       apiContext,
-      testDocument.documentId
+      testDocument.documentId,
+      120000
     );
     const parseDuration = Date.now() - parseStart;
     perfRecorder.record('文档解析', parseDuration);
@@ -78,7 +110,7 @@ test.describe('单轮辩论完整流程', () => {
     // 从claims中提取关键词
     const rawKeywords = parseResult.claims
       .map((claim: { text: string }) => claim.text)
-      .filter(t => t && t.length > 0); // 过滤空字符串
+      .filter(t => t && t.length > 0);
     console.log('提取的关键词:', rawKeywords);
 
     // 简单的关键词提取 - 从长句中提取法律相关词汇
@@ -114,7 +146,12 @@ test.describe('单轮辩论完整流程', () => {
     const searchResults = await searchLawArticles(
       apiContext,
       finalKeywords,
-      'CIVIL'
+      'CIVIL',
+      {
+        allowEmpty: true,
+        maxRetries: 1,
+        expandKeywords: true,
+      }
     );
     const searchDuration = Date.now() - searchStart;
     perfRecorder.record('法条检索', searchDuration);
@@ -122,7 +159,7 @@ test.describe('单轮辩论完整流程', () => {
 
     // 验证检索结果
     expect(searchResults).toBeDefined();
-    expect(searchResults.length).toBeGreaterThan(0); // 降低期望值
+    expect(searchResults.length).toBeGreaterThan(0);
 
     // 步骤5: 执行法条适用性分析
     const analysisStart = Date.now();
@@ -136,7 +173,7 @@ test.describe('单轮辩论完整流程', () => {
     );
     const analysisDuration = Date.now() - analysisStart;
     perfRecorder.record('适用性分析', analysisDuration);
-    assertPerformance(analysisDuration, 2000, '适用性分析', 15.0); // 增加容忍度到15.0x以适应AI服务调用
+    assertPerformance(analysisDuration, 2000, '适用性分析', 15.0);
 
     // 验证适用性分析结果
     expect(applicabilityResult).toBeDefined();
@@ -147,7 +184,13 @@ test.describe('单轮辩论完整流程', () => {
 
     // 步骤6: 创建辩论
     const debateStart = Date.now();
-    const debate = await createDebate(apiContext, caseId);
+    const debateConfig = {
+      debateMode: 'standard' as const,
+      maxRounds: 3,
+      timePerRound: 30,
+      allowNewEvidence: true,
+    };
+    const debate = await createDebate(apiContext, caseId, debateConfig);
     const debateDuration = Date.now() - debateStart;
     perfRecorder.record('创建辩论', debateDuration);
     assertPerformance(debateDuration, 1000, '创建辩论', 1.5);
@@ -179,7 +222,7 @@ test.describe('单轮辩论完整流程', () => {
     expect(totalTime).toBeLessThan(60000);
     perfRecorder.record('完整流程', totalTime);
 
-    // 数据一致性验证（generateArguments后不会自动创建下一轮次，所以预期是1轮）
+    // 数据一致性验证
     await verifyDatabaseData(caseId, 1, 1, 1);
 
     // 输出性能报告
@@ -187,14 +230,16 @@ test.describe('单轮辩论完整流程', () => {
     console.log(JSON.stringify(perfRecorder.getAllStats(), null, 2));
   });
 
-  test('验证文档解析结果数据结构', async () => {
-    const testCase = await createTestCase(apiContext);
+  test('验证文档解析结果数据结构', async ({ page }) => {
+    const testCase = await createTestCase(apiContext, undefined, authToken);
     const { caseId } = testCase;
 
+    const pdfContent =
+      '%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Count 1\n/Kids [3 0 R]\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/Resources <<\n/Font <<\n/F1 <<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica\n>>\n>>\n>>\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<<\n/Length 44\n>>\nstream\nBT\n/F1 12 Tf\n50 700 Td\n(Test Document) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000286 00000 n\ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n392\n%%EOF';
     const testDocument = await uploadTestDocument(
       apiContext,
       caseId,
-      '%PDF-1.4%\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Count 1\n/Kids [3 0 R]\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/Resources <<\n/Font <<\n/F1 <<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica\n>>\n>>\n>>\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<<\n/Length 44\n>>\nstream\nBT\n/F1 12 Tf\n50 700 Td\n(Test Document) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000286 00000 n\ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n392\n%%EOF'
+      pdfContent
     );
     const parseResult = await waitForDocumentParsing(
       apiContext,
@@ -219,18 +264,16 @@ test.describe('单轮辩论完整流程', () => {
       expect(parseResult.claims[0]).toHaveProperty('text');
     }
 
-    // 验证关键事实 - 适配新数据结构（keyFacts可能是字符串数组）
+    // 验证关键事实
     expect(parseResult.facts).toBeDefined();
     expect(parseResult.facts).toBeInstanceOf(Array);
-    // facts现在是字符串数组（从keyFacts转换而来），而不是对象数组
     if (parseResult.facts.length > 0) {
-      // 验证是否为字符串类型
       expect(typeof parseResult.facts[0]).toBe('string');
     }
   });
 
   test('验证法条检索结果相关性', async () => {
-    await createTestCase(apiContext);
+    await createTestCase(apiContext, undefined, authToken);
 
     const searchResults = await searchLawArticles(
       apiContext,
@@ -252,7 +295,7 @@ test.describe('单轮辩论完整流程', () => {
   });
 
   test('验证法条适用性分析准确性', async () => {
-    const testCase = await createTestCase(apiContext);
+    const testCase = await createTestCase(apiContext, undefined, authToken);
 
     // 首先检索真实的法条ID
     const searchResults = await searchLawArticles(
@@ -291,7 +334,7 @@ test.describe('单轮辩论完整流程', () => {
   });
 
   test('验证辩论论点质量和平衡性', async () => {
-    const testCase = await createTestCase(apiContext);
+    const testCase = await createTestCase(apiContext, undefined, authToken);
 
     // 检索真实的法条ID
     const searchResults = await searchLawArticles(
@@ -341,12 +384,14 @@ test.describe('单轮辩论完整流程', () => {
   });
 
   test('验证数据库数据一致性', async () => {
-    const testCase = await createTestCase(apiContext);
+    const testCase = await createTestCase(apiContext, undefined, authToken);
 
+    const pdfContent =
+      '%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Count 1\n/Kids [3 0 R]\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/Resources <<\n/Font <<\n/F1 <<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica\n>>\n>>\n>>\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<<\n/Length 44\n>>\nstream\nBT\n/F1 12 Tf\n50 700 Td\n(Test Document) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000286 00000 n\ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n392\n%%EOF';
     const testDocument = await uploadTestDocument(
       apiContext,
       testCase.caseId,
-      '%PDF-1.4%\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Count 1\n/Kids [3 0 R]\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/Resources <<\n/Font <<\n/F1 <<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica\n>>\n>>\n>>\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<<\n/Length 44\n>>\nstream\nBT\n/F1 12 Tf\n50 700 Td\n(Test Document) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000286 00000 n\ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n392\n%%EOF'
+      pdfContent
     );
     await waitForDocumentParsing(apiContext, testDocument.documentId);
 

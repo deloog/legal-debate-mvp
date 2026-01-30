@@ -90,7 +90,8 @@ export class ContractEmailService {
       const mailOptions: nodemailer.SendMailOptions = {
         from: `${process.env.SMTP_FROM_NAME || '律伴律师事务所'} <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
         to: input.recipientEmail,
-        subject: input.subject || `【律伴】委托合同 - ${contract.contractNumber}`,
+        subject:
+          input.subject || `【律伴】委托合同 - ${contract.contractNumber}`,
         html: emailHtml,
       };
 
@@ -186,7 +187,9 @@ export class ContractEmailService {
    * @param contractId 合同ID
    * @returns 发送结果
    */
-  async sendSignatureConfirmation(contractId: string): Promise<EmailSendResult> {
+  async sendSignatureConfirmation(
+    contractId: string
+  ): Promise<EmailSendResult> {
     try {
       const contract = await prisma.contract.findUnique({
         where: { id: contractId },

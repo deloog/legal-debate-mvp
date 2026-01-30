@@ -75,7 +75,7 @@ function generateOptimizationSuggestions() {
     },
   ];
 
-  suggestions.forEach((section) => {
+  suggestions.forEach(section => {
     console.log(`\n${section.category}：`);
     section.items.forEach((item, index) => {
       console.log(`  ${index + 1}. ${item}`);
