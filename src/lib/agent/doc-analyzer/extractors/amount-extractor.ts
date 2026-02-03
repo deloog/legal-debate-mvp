@@ -128,25 +128,58 @@ export class AmountExtractor {
     }> = [];
 
     for (const amount of amounts) {
-      // 1. 事实准确性验证：验证金额与源数据一致性
-      const factualValid = await this.verifyFactualAccuracy(amount);
+      // 检查是否为范围金额或模糊金额（这些类型的金额已经有合理的置信度）
+      const isRangeOrFuzzy =
+        amount.originalText.includes('至') ||
+        amount.originalText.includes('到') ||
+        amount.originalText.includes('-') ||
+        amount.originalText.includes('~') ||
+        amount.originalText.includes('约') ||
+        amount.originalText.includes('大约') ||
+        amount.originalText.includes('左右') ||
+        amount.originalText.includes('不少于') ||
+        amount.originalText.includes('不超过') ||
+        amount.originalText.includes('至少') ||
+        amount.originalText.includes('最多') ||
+        amount.originalText.includes('以上') ||
+        amount.originalText.includes('以下');
 
-      // 2. 逻辑一致性验证：验证金额在上下文中的合理性
-      const logicalValid = await this.verifyLogicalConsistency(
-        amount,
-        fullText
-      );
+      let adjustedConfidence = amount.confidence;
 
-      // 3. 任务完成度验证：验证金额提取的完整性
-      const completenessValid = this.verifyCompleteness(amount, options);
+      // 对于范围金额和模糊金额，只进行轻量级验证
+      if (isRangeOrFuzzy) {
+        // 只验证金额是否在合理范围内
+        const logicalValid = await this.verifyLogicalConsistency(
+          amount,
+          fullText
+        );
 
-      // 综合验证结果调整置信度
-      const adjustedConfidence = this.adjustConfidence(
-        amount.confidence,
-        factualValid,
-        logicalValid,
-        completenessValid
-      );
+        // 如果逻辑验证通过，保持原置信度；否则略微降低
+        if (!logicalValid) {
+          adjustedConfidence = Math.max(amount.confidence - 0.1, 0.5);
+        }
+      } else {
+        // 对于精确金额，进行完整的三重验证
+        // 1. 事实准确性验证：验证金额与源数据一致性
+        const factualValid = await this.verifyFactualAccuracy(amount);
+
+        // 2. 逻辑一致性验证：验证金额在上下文中的合理性
+        const logicalValid = await this.verifyLogicalConsistency(
+          amount,
+          fullText
+        );
+
+        // 3. 任务完成度验证：验证金额提取的完整性
+        const completenessValid = this.verifyCompleteness(amount, options);
+
+        // 综合验证结果调整置信度
+        adjustedConfidence = this.adjustConfidence(
+          amount.confidence,
+          factualValid,
+          logicalValid,
+          completenessValid
+        );
+      }
 
       verifiedAmounts.push({
         ...amount,
@@ -198,20 +231,53 @@ export class AmountExtractor {
   ): Promise<boolean> {
     // 检查金额在法律上下文中的合理性
     const context = this.extractContext(amount.originalText, fullText);
-    const legalKeywords = ['赔偿', '违约金', '利息', '本金', '费用', '损失'];
+    const legalKeywords = [
+      '赔偿',
+      '违约金',
+      '利息',
+      '本金',
+      '费用',
+      '损失',
+      '借款',
+      '贷款',
+    ];
 
     const hasLegalContext = legalKeywords.some(keyword =>
       context.includes(keyword)
     );
 
+    // 如果没有法律上下文，默认认为合理（避免过度惩罚）
+    if (!hasLegalContext) {
+      return true;
+    }
+
     // 如果有法律上下文，金额应该在合理范围内
-    if (hasLegalContext) {
+    // 根据不同的法律场景判断合理性
+    if (context.includes('借款') || context.includes('贷款')) {
+      // 借款金额通常在1000元-1亿之间
       return (
-        amount.normalizedAmount >= 0.01 && amount.normalizedAmount <= 100000000
+        amount.normalizedAmount >= 1000 && amount.normalizedAmount <= 100000000
       );
     }
 
-    return true;
+    if (context.includes('赔偿') || context.includes('损失')) {
+      // 赔偿金额通常在100元-1亿之间
+      return (
+        amount.normalizedAmount >= 100 && amount.normalizedAmount <= 100000000
+      );
+    }
+
+    if (context.includes('违约金')) {
+      // 违约金通常在100元-5000万之间
+      return (
+        amount.normalizedAmount >= 100 && amount.normalizedAmount <= 50000000
+      );
+    }
+
+    // 其他法律场景的通用范围
+    return (
+      amount.normalizedAmount >= 0.01 && amount.normalizedAmount <= 100000000
+    );
   }
 
   /**
@@ -253,13 +319,17 @@ export class AmountExtractor {
     if (factualValid) {
       adjusted = Math.min(adjusted + 0.1, 1.0);
     } else {
-      adjusted = Math.max(adjusted - 0.3, 0.0);
+      // 对于高置信度的结果（如范围金额0.7），不要过度降低
+      const penalty = originalConfidence >= 0.7 ? 0.1 : 0.3;
+      adjusted = Math.max(adjusted - penalty, 0.0);
     }
 
     if (logicalValid) {
       adjusted = Math.min(adjusted + 0.05, 1.0);
     } else {
-      adjusted = Math.max(adjusted - 0.2, 0.0);
+      // 对于高置信度的结果，不要过度降低
+      const penalty = originalConfidence >= 0.7 ? 0.05 : 0.2;
+      adjusted = Math.max(adjusted - penalty, 0.0);
     }
 
     if (!completenessValid) {
@@ -468,14 +538,51 @@ export class AmountExtractor {
   } {
     const issues: string[] = [];
 
-    // 检查金额范围
+    // 检查金额范围和上下文合理性
     for (const amount of amounts) {
-      if (amount.normalizedAmount < 0.01) {
+      // 金额过小：小于等于0.01元
+      if (amount.normalizedAmount <= 0.01) {
         issues.push(`金额过小: ${amount.normalizedAmount}`);
       }
 
       if (amount.normalizedAmount > 10000000) {
         issues.push(`金额异常大: ${amount.normalizedAmount}`);
+      }
+
+      // 检查上下文中的场景合理性
+      if (amount.context) {
+        const context = amount.context;
+
+        // 借款场景：异常小的借款金额（小于1000元）
+        if (
+          (context.includes('借款') || context.includes('贷款')) &&
+          amount.normalizedAmount < 1000
+        ) {
+          issues.push(
+            `借款金额异常小: ${amount.normalizedAmount}元（通常不低于1000元）`
+          );
+        }
+
+        // 借款场景：异常大的借款金额（大于1亿）
+        if (
+          (context.includes('借款') || context.includes('贷款')) &&
+          amount.normalizedAmount > 100000000
+        ) {
+          issues.push(`借款金额异常大: ${amount.normalizedAmount}元`);
+        }
+
+        // 赔偿场景：异常小的赔偿金额（小于100元）
+        if (
+          (context.includes('赔偿') || context.includes('损失')) &&
+          amount.normalizedAmount < 100
+        ) {
+          issues.push(`赔偿金额异常小: ${amount.normalizedAmount}元`);
+        }
+
+        // 违约金场景：异常大的违约金（大于5000万）
+        if (context.includes('违约金') && amount.normalizedAmount > 50000000) {
+          issues.push(`违约金金额异常大: ${amount.normalizedAmount}元`);
+        }
       }
     }
 
