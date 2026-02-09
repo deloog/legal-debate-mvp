@@ -45,6 +45,11 @@ describe('DocumentGenerator', () => {
         referenceCount: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
+        dataSource: 'local',
+        sourceId: null,
+        importedAt: null,
+        lastSyncedAt: null,
+        syncStatus: 'SYNCED',
       },
     ];
   });

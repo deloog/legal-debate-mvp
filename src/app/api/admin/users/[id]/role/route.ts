@@ -3,36 +3,12 @@
  * 提供用户角色的分配和查询操作
  */
 
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
+import type { AssignRoleRequest, UserRoleResponse } from '@/types/admin-user';
 import type { UserRole } from '@/types/auth';
-
-// =============================================================================
-// 类型定义
-// =============================================================================
-
-/**
- * 分配角色请求体
- */
-interface AssignRoleRequest {
-  role: string;
-}
-
-/**
- * 用户角色信息响应
- */
-interface UserRoleResponse {
-  id: string;
-  email: string;
-  username: string | null;
-  name: string | null;
-  role: string;
-  status: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { NextRequest, NextResponse } from 'next/server';
 
 // =============================================================================
 // 辅助函数

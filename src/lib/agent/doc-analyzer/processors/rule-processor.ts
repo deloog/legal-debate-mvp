@@ -18,6 +18,9 @@ import { DisputeFocusExtractor } from '../extractors/dispute-focus-extractor';
 import { TimelineExtractor } from '../extractors/timeline-extractor';
 import { KeyFactExtractor } from '../extractors/key-fact-extractor';
 import { PartyExtractor } from '../extractors/party-extractor';
+import { ConfidenceEvaluator } from './confidence-evaluator';
+import type { ConfidenceScores } from './confidence-evaluator';
+import { HybridFallbackStrategy } from './hybrid-fallback-strategy';
 
 export class RuleProcessor {
   private claimHandler: ClaimRuleHandler;
@@ -28,6 +31,8 @@ export class RuleProcessor {
   private timelineExtractor: TimelineExtractor;
   private keyFactExtractor: KeyFactExtractor;
   private partyExtractor: PartyExtractor;
+  private confidenceEvaluator: ConfidenceEvaluator;
+  private hybridStrategy: HybridFallbackStrategy;
 
   constructor() {
     this.claimHandler = new ClaimRuleHandler();
@@ -38,6 +43,8 @@ export class RuleProcessor {
     this.timelineExtractor = new TimelineExtractor();
     this.keyFactExtractor = new KeyFactExtractor();
     this.partyExtractor = new PartyExtractor();
+    this.confidenceEvaluator = new ConfidenceEvaluator();
+    this.hybridStrategy = new HybridFallbackStrategy();
   }
 
   /**
@@ -49,37 +56,53 @@ export class RuleProcessor {
   ): Promise<{
     data: ExtractedData;
     corrections: Correction[];
+    confidence: ConfidenceScores;
   }> {
     const corrections: Correction[] = [];
-    const processedClaims = [...data.claims];
-    const processedParties = [...data.parties];
 
-    // 检查缺失当事人（添加警告）
-    this.checkMissingParties(processedParties, processedClaims, corrections);
+    // 1. 评估AI结果置信度
+    const confidence = this.confidenceEvaluator.evaluateAIResult(
+      data,
+      fullText
+    );
+    logger.info('AI结果置信度评估', {
+      overall: confidence.overall.toFixed(2),
+      parties: confidence.parties.toFixed(2),
+      claims: confidence.claims.toFixed(2),
+      amount: confidence.amount.toFixed(2),
+    });
 
-    // PartyExtractor算法兜底：补充和修正AI识别的当事人
-    const partyExtractionResult = await this.partyExtractor.extractFromText(
-      fullText,
-      processedParties
+    // 2. 并行执行规则提取（作为兜底）
+    const ruleResult = await this.extractWithRules(fullText);
+
+    // 3. 使用混合策略合并结果
+    const mergedData = await this.hybridStrategy.merge(
+      data,
+      ruleResult,
+      confidence
     );
 
-    if (partyExtractionResult.parties.length > processedParties.length) {
-      const addedCount =
-        partyExtractionResult.parties.length - processedParties.length;
+    // 4. 记录合并信息
+    if (mergedData.parties.length > data.parties.length) {
       corrections.push({
         type: 'ADD_PARTY',
-        description: `算法兜底补充${addedCount}个当事人`,
-        rule: 'PARTY_EXTRACTION_FALLBACK',
+        description: `混合策略补充${mergedData.parties.length - data.parties.length}个当事人`,
+        rule: 'HYBRID_FALLBACK',
       });
-      logger.info('算法兜底补充当事人', {
-        addedCount,
-        total: partyExtractionResult.parties.length,
+    }
+    if (mergedData.claims.length > data.claims.length) {
+      corrections.push({
+        type: 'ADD_CLAIM',
+        description: `混合策略补充${mergedData.claims.length - data.claims.length}个诉讼请求`,
+        rule: 'HYBRID_FALLBACK',
       });
     }
 
-    // 更新处理后的当事人列表
-    processedParties.length = 0;
-    processedParties.push(...partyExtractionResult.parties);
+    const processedClaims = [...mergedData.claims];
+    const processedParties = [...mergedData.parties];
+
+    // 检查缺失当事人（添加警告）
+    this.checkMissingParties(processedParties, processedClaims, corrections);
 
     // 使用AmountExtractor提取和标准化金额
     await this.enrichClaimsWithAmounts(processedClaims, corrections);
@@ -110,12 +133,48 @@ export class RuleProcessor {
 
     return {
       data: {
-        ...data,
+        ...mergedData,
         parties: processedParties,
         claims: processedClaims,
       },
       corrections,
+      confidence,
     };
+  }
+
+  /**
+   * 使用规则提取器提取数据（作为兜底）
+   */
+  private async extractWithRules(fullText: string): Promise<ExtractedData> {
+    const ruleData: ExtractedData = {
+      parties: [],
+      claims: [],
+    };
+
+    try {
+      // 使用PartyExtractor提取当事人
+      const partyResult = await this.partyExtractor.extractFromText(
+        fullText,
+        []
+      );
+      ruleData.parties = partyResult.parties;
+
+      // 使用ClaimExtractor提取诉讼请求
+      const claimResult = await this.claimExtractor.extractFromText(fullText, {
+        decomposeCompound: false,
+        addMissingTypes: false,
+      });
+      ruleData.claims = claimResult.claims;
+
+      logger.debug('规则提取完成', {
+        parties: ruleData.parties.length,
+        claims: ruleData.claims.length,
+      });
+    } catch (error) {
+      logger.warn('规则提取失败', { error });
+    }
+
+    return ruleData;
   }
 
   /**

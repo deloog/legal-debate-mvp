@@ -3,11 +3,12 @@
  * 用户可以升级到更高级别的会员等级
  */
 
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
-import type { MembershipStatus } from '@/types/membership';
+import type { UpgradeRequestBody } from '@/types/admin-membership';
+import { MembershipStatus } from '@prisma/client';
 import { MembershipChangeType, MembershipTier } from '@/types/membership';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * POST /api/memberships/upgrade
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const currentMembership = await prisma.userMembership.findFirst({
       where: {
         userId: authUser.userId,
-        status: 'ACTIVE' as MembershipStatus,
+        status: MembershipStatus.ACTIVE,
       },
       include: {
         tier: true,
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         await prisma.userMembership.update({
           where: { id: currentMembership.id },
           data: {
-            status: 'EXPIRED' as MembershipStatus,
+            status: MembershipStatus.EXPIRED,
           },
         });
       }
@@ -165,7 +166,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         data: {
           userId: authUser.userId,
           tierId: targetTier.id,
-          status: 'ACTIVE' as MembershipStatus,
+          status: MembershipStatus.ACTIVE,
           startDate,
           endDate,
           autoRenew,
@@ -186,7 +187,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             fromTier: currentMembership.tier.tier,
             toTier: targetTier.tier,
             fromStatus: currentMembership.status,
-            toStatus: 'ACTIVE' as MembershipStatus,
+            toStatus: MembershipStatus.ACTIVE,
             reason: `会员升级：从${currentMembership.tier.displayName}升级到${targetTier.displayName}`,
             performedBy: authUser.userId,
             metadata: {
@@ -206,8 +207,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             changeType: 'UPGRADE' as MembershipChangeType,
             fromTier: 'FREE' as MembershipTier,
             toTier: targetTier.tier,
-            fromStatus: 'EXPIRED' as MembershipStatus,
-            toStatus: 'ACTIVE' as MembershipStatus,
+            fromStatus: MembershipStatus.EXPIRED,
+            toStatus: MembershipStatus.ACTIVE,
             reason: `首次开通会员：${targetTier.displayName}`,
             performedBy: authUser.userId,
             metadata: {
@@ -342,13 +343,4 @@ function calculateEndDate(startDate: Date, billingCycle: string): Date {
   }
 
   return endDate;
-}
-
-/**
- * 升级请求体类型
- */
-interface UpgradeRequestBody {
-  tierId: string;
-  billingCycle?: string;
-  autoRenew?: boolean;
 }

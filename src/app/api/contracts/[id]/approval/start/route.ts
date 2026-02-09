@@ -56,7 +56,7 @@ export async function POST(
           error: {
             code: 'VALIDATION_ERROR',
             message: '请求数据格式错误',
-            details: error.errors,
+            details: error.issues,
           },
         },
         { status: 400 }

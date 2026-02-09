@@ -104,6 +104,30 @@ export interface EvidenceListResponse {
 }
 
 /**
+ * 证据列表项接口
+ */
+export interface EvidenceListItem {
+  id: string;
+  title?: string; // 可选，与路由返回匹配
+  name: string;
+  type: string;
+  status: string;
+  description: string | null;
+  fileUrl: string | null;
+  submitter: string | null;
+  source: string | null;
+  relevanceScore: number | null;
+  metadata: Record<string, unknown> | null;
+  caseId: string;
+  caseTitle?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy?: string; // 可选，与路由返回匹配
+  deletedAt: Date | null;
+  relations?: unknown[];
+}
+
+/**
  * 创建证据关联输入接口
  */
 export interface CreateEvidenceRelationInput {

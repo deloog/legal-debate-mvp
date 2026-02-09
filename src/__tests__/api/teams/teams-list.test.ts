@@ -4,7 +4,7 @@
  */
 
 import { GET, OPTIONS as OPTIONS_LIST, POST } from '@/app/api/teams/route';
-import { assertions, createMockRequest } from '../test-utils';
+import { createMockRequest } from '../test-utils';
 
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
@@ -26,7 +26,7 @@ jest.mock('@/lib/middleware/auth', () => ({
 
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
-import { TeamType, TeamStatus } from '@/types/team';
+import { TeamStatusValues, TeamTypeValues } from '@/types/team';
 
 describe('Teams API - List and Create', () => {
   let mockedPrisma: unknown;
@@ -45,10 +45,10 @@ describe('Teams API - List and Create', () => {
       {
         id: 'team-1',
         name: '测试律师事务所',
-        type: TeamType.LAW_FIRM,
+        type: TeamTypeValues.LAW_FIRM,
         description: '专业的法律团队',
         logo: null,
-        status: TeamStatus.ACTIVE,
+        status: TeamStatusValues.ACTIVE,
         metadata: null,
         createdAt: new Date('2024-01-01T10:00:00Z'),
         updatedAt: new Date('2024-01-01T10:00:00Z'),
@@ -64,7 +64,7 @@ describe('Teams API - List and Create', () => {
         type: (data as any).data.type,
         description: (data as any).data.description || null,
         logo: (data as any).data.logo || null,
-        status: (data as any).data.status || TeamStatus.ACTIVE,
+        status: (data as any).data.status || TeamStatusValues.ACTIVE,
         metadata: (data as any).data.metadata || null,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -107,7 +107,7 @@ describe('Teams API - List and Create', () => {
       expect((mockedPrisma as any).team.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            type: TeamType.LAW_FIRM,
+            type: TeamTypeValues.LAW_FIRM,
           }),
         })
       );
@@ -123,7 +123,7 @@ describe('Teams API - List and Create', () => {
       expect((mockedPrisma as any).team.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            status: TeamStatus.ACTIVE,
+            status: TeamStatusValues.ACTIVE,
           }),
         })
       );
@@ -204,7 +204,7 @@ describe('Teams API - List and Create', () => {
     it('应该创建律师事务所类型团队', async () => {
       const teamData = {
         name: '新律师事务所',
-        type: TeamType.LAW_FIRM,
+        type: TeamTypeValues.LAW_FIRM,
         description: '专业的法律服务机构',
       };
 
@@ -219,13 +219,13 @@ describe('Teams API - List and Create', () => {
       expect(response.status).toBe(201);
       expect(testResponse.success).toBe(true);
       expect(testResponse.data.name).toBe('新律师事务所');
-      expect(testResponse.data.type).toBe(TeamType.LAW_FIRM);
+      expect(testResponse.data.type).toBe(TeamTypeValues.LAW_FIRM);
     });
 
     it('应该创建法务部类型团队', async () => {
       const teamData = {
         name: '公司法务部',
-        type: TeamType.LEGAL_DEPT,
+        type: TeamTypeValues.LEGAL_DEPT,
       };
 
       const request = createMockRequest('http://localhost:3000/api/teams', {
@@ -237,13 +237,13 @@ describe('Teams API - List and Create', () => {
       const testResponse = await response.clone().json();
 
       expect(response.status).toBe(201);
-      expect(testResponse.data.type).toBe(TeamType.LEGAL_DEPT);
+      expect(testResponse.data.type).toBe(TeamTypeValues.LEGAL_DEPT);
     });
 
     it('应该自动将创建者添加为管理员', async () => {
       const teamData = {
         name: '新团队',
-        type: TeamType.OTHER,
+        type: TeamTypeValues.OTHER,
       };
 
       const request = createMockRequest('http://localhost:3000/api/teams', {
@@ -281,7 +281,7 @@ describe('Teams API - List and Create', () => {
     it('应该验证团队名称长度', async () => {
       const teamData = {
         name: 'a'.repeat(101),
-        type: TeamType.LAW_FIRM,
+        type: TeamTypeValues.LAW_FIRM,
       };
 
       const request = createMockRequest('http://localhost:3000/api/teams', {
@@ -299,7 +299,7 @@ describe('Teams API - List and Create', () => {
 
       const teamData = {
         name: '测试团队',
-        type: TeamType.LAW_FIRM,
+        type: TeamTypeValues.LAW_FIRM,
       };
 
       const request = createMockRequest('http://localhost:3000/api/teams', {
@@ -315,10 +315,10 @@ describe('Teams API - List and Create', () => {
     it('应该支持可选字段', async () => {
       const teamData = {
         name: '完整团队',
-        type: TeamType.LAW_FIRM,
+        type: TeamTypeValues.LAW_FIRM,
         description: '团队描述',
         logo: 'http://example.com/logo.png',
-        status: TeamStatus.ACTIVE,
+        status: TeamStatusValues.ACTIVE,
         metadata: { key: 'value' },
       };
 

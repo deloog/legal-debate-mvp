@@ -4,9 +4,6 @@ import { useState, useEffect } from 'react';
 import {
   NotificationChannel,
   ReminderPreferences,
-  type CourtScheduleReminderConfig,
-  type DeadlineReminderConfig,
-  type FollowUpReminderConfig,
 } from '@/types/notification';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -21,24 +18,27 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
   const [success, setSuccess] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [preferences, setPreferences] = useState<ReminderPreferences>({
+    channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
+    quietHours: null,
+    disabledTypes: [],
     courtSchedule: {
       enabled: true,
-      hoursBefore: [24, 1],
+      advanceDays: [1],
       channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
     },
     deadline: {
       enabled: true,
-      daysBefore: [7, 3, 1],
+      advanceDays: [7, 3, 1],
       channels: [NotificationChannel.IN_APP],
     },
     followUp: {
       enabled: true,
-      hoursBefore: [24],
+      autoRemind: true,
       channels: [NotificationChannel.IN_APP],
     },
     task: {
       enabled: true,
-      hoursBefore: [24, 1],
+      priorities: ['HIGH', 'URGENT'],
       channels: [NotificationChannel.IN_APP],
     },
   });
@@ -104,24 +104,27 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
 
   const handleReset = async (): Promise<void> => {
     const defaultPreferences: ReminderPreferences = {
+      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
+      quietHours: null,
+      disabledTypes: [],
       courtSchedule: {
         enabled: true,
-        hoursBefore: [24, 1],
+        advanceDays: [1],
         channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       },
       deadline: {
         enabled: true,
-        daysBefore: [7, 3, 1],
+        advanceDays: [7, 3, 1],
         channels: [NotificationChannel.IN_APP],
       },
       followUp: {
         enabled: true,
-        hoursBefore: [24],
+        autoRemind: true,
         channels: [NotificationChannel.IN_APP],
       },
       task: {
         enabled: true,
-        hoursBefore: [24, 1],
+        priorities: ['HIGH', 'URGENT'],
         channels: [NotificationChannel.IN_APP],
       },
     };
@@ -147,18 +150,30 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
     channel: NotificationChannel
   ): void => {
     setPreferences(prev => {
-      const currentChannels = prev[section].channels;
-      const newChannels = currentChannels.includes(channel)
-        ? currentChannels.filter(c => c !== channel)
-        : [...currentChannels, channel];
+      const sectionValue = prev[section];
 
-      return {
-        ...prev,
-        [section]: {
-          ...prev[section],
-          channels: newChannels,
-        },
-      };
+      // 类型守卫：检查是否有 channels 属性
+      if (
+        typeof sectionValue === 'object' &&
+        sectionValue !== null &&
+        'channels' in sectionValue &&
+        Array.isArray(sectionValue.channels)
+      ) {
+        const currentChannels = sectionValue.channels;
+        const newChannels = currentChannels.includes(channel)
+          ? currentChannels.filter(c => c !== channel)
+          : [...currentChannels, channel];
+
+        return {
+          ...prev,
+          [section]: {
+            ...sectionValue,
+            channels: newChannels,
+          },
+        };
+      }
+
+      return prev;
     });
   };
 
@@ -172,8 +187,8 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
 
       if ('hoursBefore' in currentSection) {
         const config = currentSection as unknown as
-          | CourtScheduleReminderConfig
-          | FollowUpReminderConfig;
+          | any
+          | any;
         return {
           ...prev,
           [section]: {
@@ -182,7 +197,7 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
           },
         };
       } else if ('daysBefore' in currentSection) {
-        const config = currentSection as unknown as DeadlineReminderConfig;
+        const config = currentSection as unknown as any;
         return {
           ...prev,
           [section]: {
@@ -205,8 +220,8 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
 
       if ('hoursBefore' in currentSection) {
         const config = currentSection as unknown as
-          | CourtScheduleReminderConfig
-          | FollowUpReminderConfig;
+          | any
+          | any;
         const newHours = [...config.hoursBefore];
         newHours.splice(index, 1);
         return {
@@ -217,7 +232,7 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
           },
         };
       } else if ('daysBefore' in currentSection) {
-        const config = currentSection as unknown as DeadlineReminderConfig;
+        const config = currentSection as unknown as any;
         const newDays = [...config.daysBefore];
         newDays.splice(index, 1);
         return {
@@ -236,8 +251,8 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
     const currentSection = preferences[section];
     if ('hoursBefore' in currentSection) {
       const config = currentSection as unknown as
-        | CourtScheduleReminderConfig
-        | FollowUpReminderConfig;
+        | any
+        | any;
       return config.hoursBefore;
     }
     return [];
@@ -246,7 +261,7 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
   const getDaysBefore = (section: keyof ReminderPreferences): number[] => {
     const currentSection = preferences[section];
     if ('daysBefore' in currentSection) {
-      const config = currentSection as unknown as DeadlineReminderConfig;
+      const config = currentSection as unknown as any;
       return config.daysBefore;
     }
     return [];
@@ -311,10 +326,11 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
                             IN_APP: '站内消息',
                             EMAIL: '邮件',
                             SMS: '短信',
+                            PUSH: '推送',
                             WEBHOOK: 'Webhook',
                           };
                           const isSelected =
-                            preferences.courtSchedule.channels.includes(
+                            preferences.courtSchedule?.channels?.includes(
                               channel
                             );
                           return (

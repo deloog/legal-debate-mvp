@@ -237,7 +237,7 @@ export class ConversionService {
 
         for (const [keyword, type] of Object.entries(typeMapping)) {
           if (consultation.caseType.includes(keyword)) {
-            suggestedCaseType = type;
+            suggestedCaseType = type as any;
             break;
           }
         }

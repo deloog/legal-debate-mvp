@@ -64,15 +64,8 @@ interface AIPreAssessmentResponse {
  * 质证预判服务类
  */
 export class CrossExaminationService {
-  private aiService: AIService;
-
   constructor() {
-    this.aiService = new AIService({
-      apiKey: process.env.DEEPSEEK_API_KEY || '',
-      model: 'deepseek-chat',
-      temperature: 0.4, // 适中温度以平衡创造性和稳定性
-      maxTokens: 3000,
-    });
+    // AIService是静态类，不需要实例化
   }
 
   /**
@@ -89,26 +82,13 @@ export class CrossExaminationService {
 
     try {
       // 调用AI服务
-      const aiResponse = await this.aiService.chat(
-        [
-          {
-            role: 'system',
-            content:
-              '你是一位经验丰富的诉讼律师，擅长预判对方的质证意见并提供应对策略。',
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        {
-          temperature: 0.4,
-          maxTokens: 3000,
-        }
+      const aiResponse = await AIService.analyzeDocument(
+        prompt,
+        'cross-examination'
       );
 
       // 解析AI响应
-      const result = this.parseAIResponse(aiResponse);
+      const result = this.parseAIResponse(aiResponse.content);
 
       return result;
     } catch (error) {

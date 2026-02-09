@@ -4,34 +4,44 @@
  * 测试站内消息的创建、查询、标记已读等功能
  */
 
-import { inAppMessageService } from '@/lib/notification/in-app-message-service';
 import { prisma } from '@/lib/db/prisma';
+import { inAppMessageService } from '@/lib/notification/in-app-message-service';
 import {
-  ReminderType,
-  ReminderStatus,
   NotificationChannel,
+  ReminderStatus,
+  ReminderType,
 } from '@/types/notification';
 import type { Reminder as PrismaReminder } from '@prisma/client';
 
-// Mock dependencies
-const mockPrismaReminder = {
-  create: jest.fn(),
-  createMany: jest.fn(),
-  findMany: jest.fn(),
-  findUnique: jest.fn(),
-  count: jest.fn(),
-  update: jest.fn(),
-  updateMany: jest.fn(),
-  delete: jest.fn(),
-};
-
+// Mock dependencies - 使用内联工厂避免变量提升问题
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
-    reminder: mockPrismaReminder,
+    reminder: {
+      create: jest.fn(),
+      createMany: jest.fn(),
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      count: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
+      delete: jest.fn(),
+    },
   },
 }));
 
 describe('InAppMessageService', () => {
+  // 内联mock对象用于测试断言
+  const mockPrismaReminder = {
+    create: jest.fn(),
+    createMany: jest.fn(),
+    findMany: jest.fn(),
+    findUnique: jest.fn(),
+    count: jest.fn(),
+    update: jest.fn(),
+    updateMany: jest.fn(),
+    delete: jest.fn(),
+  };
+
   const mockReminder: PrismaReminder = {
     id: 'reminder-1',
     userId: 'user-1',

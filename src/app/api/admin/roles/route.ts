@@ -3,59 +3,16 @@
  * 提供角色的CRUD操作
  */
 
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
+import type {
+  CreateRoleRequest,
+  RoleListQueryParams,
+  RoleListResponse,
+} from '@/types/admin-role';
 import type { UserRole } from '@/types/auth';
-
-// =============================================================================
-// 类型定义
-// =============================================================================
-
-/**
- * 角色列表查询参数
- */
-interface RoleListQueryParams {
-  page?: string;
-  limit?: string;
-  search?: string;
-}
-
-/**
- * 创建角色请求体
- */
-interface CreateRoleRequest {
-  name: string;
-  description?: string;
-  isDefault?: boolean;
-}
-
-/**
- * 角色列表响应数据
- */
-interface RoleListResponse {
-  roles: Array<{
-    id: string;
-    name: string;
-    description: string | null;
-    isDefault: boolean;
-    permissions: Array<{
-      id: string;
-      name: string;
-      description: string | null;
-    }>;
-    userCount: number;
-    createdAt: Date;
-    updatedAt: Date;
-  }>;
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-}
+import { NextRequest, NextResponse } from 'next/server';
 
 // =============================================================================
 // 辅助函数
@@ -68,8 +25,12 @@ function parseQueryParams(request: NextRequest): RoleListQueryParams {
   const url = new URL(request.url);
   return {
     page: url.searchParams.get('page') ?? '1',
-    limit: url.searchParams.get('limit') ?? '20',
-    search: url.searchParams.get('search') ?? undefined,
+    pageSize:
+      url.searchParams.get('pageSize') ?? url.searchParams.get('limit') ?? '20',
+    search:
+      url.searchParams.get('search') ??
+      url.searchParams.get('keyword') ??
+      undefined,
   };
 }
 
@@ -117,8 +78,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // 解析查询参数
     const params = parseQueryParams(request);
     const page = Math.max(1, Number.parseInt(params.page, 10));
-    const limit = Math.min(100, Math.max(1, Number.parseInt(params.limit, 10)));
-    const skip = (page - 1) * limit;
+    const pageSize = Math.min(
+      100,
+      Math.max(1, Number.parseInt(params.pageSize, 10))
+    );
+    const skip = (page - 1) * pageSize;
 
     // 构建查询条件
     const where = buildWhereClause(params);
@@ -130,7 +94,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const roles = await prisma.role.findMany({
       where,
       skip,
-      take: limit,
+      take: pageSize,
       include: {
         permissions: {
           include: {
@@ -173,8 +137,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       pagination: {
         total,
         page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
       },
     };
 

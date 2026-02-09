@@ -22,9 +22,9 @@ export function TeamForm({ team }: { team?: TeamDetail }) {
   const isEditing = team !== undefined;
 
   const [name, setName] = useState(team?.name ?? '');
-  const [type, setType] = useState<TeamType>(team?.type ?? TeamType.LAW_FIRM);
+  const [type, setType] = useState<TeamType>((team?.type as TeamType) ?? TeamType.LAW_FIRM);
   const [status, setStatus] = useState<TeamStatus>(
-    team?.status ?? TeamStatus.ACTIVE
+    (team?.status as TeamStatus) ?? TeamStatus.ACTIVE
   );
   const [description, setDescription] = useState(team?.description ?? '');
   const [loading, setLoading] = useState(false);

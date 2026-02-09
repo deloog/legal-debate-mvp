@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   FeeCalculationResult,
-  FeeType,
+  ExpenseCategory,
   LitigationCaseType,
   TravelExpenseItem,
   BillingMode,
@@ -16,7 +16,7 @@ import { TravelExpenseForm } from './TravelExpenseForm';
 import FeeBreakdown from './FeeBreakdown';
 
 export default function FeeCalculator() {
-  const [activeTab, setActiveTab] = useState<FeeType>(FeeType.LAWYER_FEE);
+  const [activeTab, setActiveTab] = useState<ExpenseCategory>(ExpenseCategory.LAWYER_FEE);
   const [result, setResult] = useState<FeeCalculationResult | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -55,13 +55,13 @@ export default function FeeCalculator() {
       let payload: Record<string, unknown> = { type: activeTab };
 
       switch (activeTab) {
-        case FeeType.LAWYER_FEE:
+        case ExpenseCategory.LAWYER_FEE:
           payload = { ...payload, ...lawyerFeeParams };
           break;
-        case FeeType.LITIGATION_FEE:
+        case ExpenseCategory.LITIGATION_FEE:
           payload = { ...payload, ...litigationFeeParams };
           break;
-        case FeeType.TRAVEL_EXPENSE:
+        case ExpenseCategory.TRAVEL_EXPENSE:
           payload = { ...payload, ...travelExpenseParams };
           break;
       }
@@ -92,21 +92,21 @@ export default function FeeCalculator() {
 
       {/* 表单区域 */}
       <div className='mb-6'>
-        {activeTab === FeeType.LAWYER_FEE && (
+        {activeTab === ExpenseCategory.LAWYER_FEE && (
           <LawyerFeeForm
             params={lawyerFeeParams}
             onChange={setLawyerFeeParams}
           />
         )}
 
-        {activeTab === FeeType.LITIGATION_FEE && (
+        {activeTab === ExpenseCategory.LITIGATION_FEE && (
           <LitigationFeeForm
             params={litigationFeeParams}
             onChange={setLitigationFeeParams}
           />
         )}
 
-        {activeTab === FeeType.TRAVEL_EXPENSE && (
+        {activeTab === ExpenseCategory.TRAVEL_EXPENSE && (
           <TravelExpenseForm
             params={travelExpenseParams}
             onChange={setTravelExpenseParams}

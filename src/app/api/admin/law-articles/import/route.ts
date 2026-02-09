@@ -3,18 +3,18 @@
  * 支持批量导入法条数据
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import {
+  badRequestResponse,
+  serverErrorResponse,
+  successResponse,
+  unauthorizedResponse,
+} from '@/lib/api-response';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { LAW_PERMISSIONS } from '@/types/permission';
-import { LawType, LawCategory, LawStatus } from '@prisma/client';
-import {
-  successResponse,
-  unauthorizedResponse,
-  badRequestResponse,
-  serverErrorResponse,
-} from '@/lib/api-response';
+import { LawCategory, LawStatus, LawType } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
 
 // =============================================================================
 // 类型定义
@@ -24,6 +24,7 @@ import {
  * 法条数据导入请求
  */
 interface LawArticleImportRequest {
+  dataSource?: string; // 数据源：'local' | 'judiciary' | 'cail' | 'lawgpt' | 'lawstar' | 'pkulaw'
   articles: Array<{
     lawName: string;
     articleNumber: string;
@@ -35,10 +36,13 @@ interface LawArticleImportRequest {
     keywords?: string[];
     version?: string;
     effectiveDate: string;
+    expiryDate?: string;
     status?: string;
     issuingAuthority?: string;
     jurisdiction?: string;
     searchableText?: string;
+    level?: number;
+    sourceId?: string;
   }>;
 }
 
@@ -124,6 +128,8 @@ async function importArticle(
       },
     });
 
+    const now = new Date();
+
     if (existing) {
       // 更新现有法条
       await prisma.lawArticle.update({
@@ -137,6 +143,9 @@ async function importArticle(
           keywords: article.keywords ?? existing.keywords,
           version: article.version ?? existing.version,
           effectiveDate: new Date(article.effectiveDate),
+          expiryDate: article.expiryDate
+            ? new Date(article.expiryDate)
+            : existing.expiryDate,
           status: article.status
             ? (article.status as LawStatus)
             : existing.status,
@@ -144,6 +153,8 @@ async function importArticle(
             article.issuingAuthority ?? existing.issuingAuthority,
           jurisdiction: article.jurisdiction ?? existing.jurisdiction,
           searchableText: article.searchableText ?? existing.searchableText,
+          level: article.level ?? existing.level,
+          updatedAt: now,
         },
       });
     } else {
@@ -160,12 +171,14 @@ async function importArticle(
           keywords: article.keywords ?? [],
           version: article.version ?? '1.0',
           effectiveDate: new Date(article.effectiveDate),
+          expiryDate: article.expiryDate ? new Date(article.expiryDate) : null,
           status: article.status
             ? (article.status as LawStatus)
             : LawStatus.VALID,
           issuingAuthority: article.issuingAuthority ?? '',
           jurisdiction: article.jurisdiction ?? '',
           searchableText: article.searchableText ?? article.fullText,
+          level: article.level ?? 3,
           viewCount: 0,
           referenceCount: 0,
         },

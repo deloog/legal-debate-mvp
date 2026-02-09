@@ -62,26 +62,16 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const query = queryRemindersSchema.parse(Object.fromEntries(searchParams));
 
   const result = await reminderService.getReminders({
+    ...query,
     userId: authUser.userId,
-    type: query.type as ReminderType,
-    status: query.status as never,
-    startTime: query.startTime,
-    endTime: query.endTime,
-    page: query.page,
-    limit: query.limit,
-  });
+    page: query.page?.toString(),
+    limit: query.limit?.toString(),
+  } as any);
 
   return createSuccessResponse(
     { reminders: result.reminders },
     {
-      pagination: {
-        page: query.page,
-        limit: query.limit,
-        total: result.total,
-        totalPages: Math.ceil(result.total / query.limit),
-        hasNext: (query.page - 1) * query.limit + query.limit < result.total,
-        hasPrevious: query.page > 1,
-      },
+      pagination: result.pagination,
     }
   );
 });
@@ -106,11 +96,9 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     userId: authUser.userId,
     type: validatedData.type as ReminderType,
     title: validatedData.title,
-    message: validatedData.message,
-    reminderTime: validatedData.reminderTime,
+    content: validatedData.message,
+    scheduledAt: validatedData.reminderTime,
     channels: validatedData.channels as NotificationChannel[],
-    relatedType: validatedData.relatedType,
-    relatedId: validatedData.relatedId,
     metadata: validatedData.metadata,
   };
 

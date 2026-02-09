@@ -7,7 +7,7 @@ import {
 import { reminderService } from '@/lib/notification/reminder-service';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { z } from 'zod';
-import { NotificationChannel, ReminderStatus } from '@/types/notification';
+import { NotificationChannel, ReminderStatus, UpdateReminderInput } from '@/types/notification';
 
 const updateReminderSchema = z.object({
   title: z.string().min(1, '标题不能为空').max(200).optional(),
@@ -38,14 +38,7 @@ export const PATCH = withErrorHandler(
     const reminder = await reminderService.updateReminder(
       params.id,
       authUser.userId,
-      {
-        title: validatedData.title,
-        message: validatedData.message,
-        reminderTime: validatedData.reminderTime,
-        channels: validatedData.channels as NotificationChannel[] | undefined,
-        status: validatedData.status as ReminderStatus | undefined,
-        metadata: validatedData.metadata,
-      }
+      validatedData as UpdateReminderInput
     );
 
     return createSuccessResponse(reminder);

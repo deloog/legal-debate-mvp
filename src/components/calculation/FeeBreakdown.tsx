@@ -1,5 +1,5 @@
 import React from 'react';
-import { FeeCalculationResult, FeeItem, FeeType } from '@/types/calculation';
+import { FeeCalculationResult, FeeItem, ExpenseCategory } from '@/types/calculation';
 
 interface FeeBreakdownProps {
   result: FeeCalculationResult;
@@ -15,18 +15,18 @@ export default function FeeBreakdown({ result }: FeeBreakdownProps) {
       acc[item.type].push(item);
       return acc;
     },
-    {} as Record<FeeType, FeeItem[]>
+    {} as Record<ExpenseCategory, FeeItem[]>
   );
 
-  const getTypeName = (type: FeeType) => {
+  const getTypeName = (type: ExpenseCategory) => {
     switch (type) {
-      case FeeType.LAWYER_FEE:
+      case ExpenseCategory.LAWYER_FEE:
         return '律师费';
-      case FeeType.LITIGATION_FEE:
+      case ExpenseCategory.LITIGATION_FEE:
         return '诉讼费';
-      case FeeType.TRAVEL_EXPENSE:
+      case ExpenseCategory.TRAVEL_EXPENSE:
         return '差旅费';
-      case FeeType.OTHER_EXPENSE:
+      case ExpenseCategory.OTHER_EXPENSE:
         return '其他费用';
       default:
         return '未知费用';
@@ -43,7 +43,7 @@ export default function FeeBreakdown({ result }: FeeBreakdownProps) {
         {Object.entries(groupedItems).map(([type, items]) => (
           <div key={type} className='mb-6 last:mb-0'>
             <h4 className='text-sm font-medium text-gray-500 uppercase tracking-wider mb-3'>
-              {getTypeName(type as FeeType)}
+              {getTypeName(type as ExpenseCategory)}
             </h4>
             <div className='bg-gray-50 rounded-md overflow-hidden'>
               <table className='min-w-full divide-y divide-gray-200'>
@@ -89,7 +89,7 @@ export default function FeeBreakdown({ result }: FeeBreakdownProps) {
             <div className='mt-2 text-right'>
               <span className='text-sm text-gray-500 mr-2'>小计:</span>
               <span className='text-sm font-medium text-gray-900'>
-                {result.breakdown[type as FeeType].toLocaleString()}{' '}
+                {result.breakdown[type as ExpenseCategory].toLocaleString()}{' '}
                 {result.currency}
               </span>
             </div>

@@ -1,35 +1,51 @@
-import { render, screen } from '@testing-library/react';
 import { MembershipInfo } from '@/components/membership/MembershipInfo';
 import {
-  UserMembership,
-  TierLimitConfig,
-  MembershipStatus,
+  MembershipStatusValues,
+  MembershipTierValues,
   MembershipTier,
+  MembershipStatus,
+  TierLimitConfig,
+  UserMembership,
 } from '@/types/membership';
+import { render, screen } from '@testing-library/react';
 
 describe('MembershipInfo', () => {
   const mockMembership: UserMembership = {
     id: '1',
     userId: 'user-1',
     tierId: 'tier-1',
-    status: MembershipStatus.ACTIVE,
-    tier: MembershipTier.BASIC,
+    status: MembershipStatusValues.ACTIVE,
+    tier: MembershipTierValues.BASIC,
     startDate: new Date('2024-01-01'),
     endDate: new Date('2025-01-01'),
     autoRenew: true,
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01'),
+    limits: {
+      cases: 50,
+      debates: 20,
+      documents: 100,
+      storage: 1024,
+      aiTokens: 100000,
+      users: 1,
+      features: [],
+    },
+    usage: {},
   };
 
   const mockTierLimit: TierLimitConfig = {
-    tier: MembershipTier.BASIC,
+    cases: 50,
+    debates: 20,
+    documents: 100,
+    storage: 1024,
+    aiTokens: 100000,
+    users: 1,
+    features: [],
     limits: {
       MAX_CASES: 50,
       MAX_DEBATES: 20,
       MAX_DOCUMENTS: 100,
       MAX_AI_TOKENS_MONTHLY: 100000,
       MAX_STORAGE_MB: 1024,
-      MAX_LAW_ARTICLE_SEARCHES: null,
+      MAX_LAW_ARTICLE_SEARCHES: 0,
       MAX_CONCURRENT_REQUESTS: 5,
     },
   };
@@ -189,15 +205,21 @@ describe('MembershipInfo', () => {
 
     it('应该正确显示无限制的使用量', () => {
       const unlimitedTierLimit: TierLimitConfig = {
-        tier: MembershipTier.ENTERPRISE,
+        cases: 0,
+        debates: 0,
+        documents: 0,
+        storage: 0,
+        aiTokens: 0,
+        users: 0,
+        features: [],
         limits: {
-          MAX_CASES: null,
-          MAX_DEBATES: null,
-          MAX_DOCUMENTS: null,
-          MAX_AI_TOKENS_MONTHLY: null,
-          MAX_STORAGE_MB: null,
-          MAX_LAW_ARTICLE_SEARCHES: null,
-          MAX_CONCURRENT_REQUESTS: null,
+          MAX_CASES: 0,
+          MAX_DEBATES: 0,
+          MAX_DOCUMENTS: 0,
+          MAX_AI_TOKENS_MONTHLY: 0,
+          MAX_STORAGE_MB: 0,
+          MAX_LAW_ARTICLE_SEARCHES: 0,
+          MAX_CONCURRENT_REQUESTS: 0,
         },
       };
 
@@ -316,7 +338,13 @@ describe('MembershipInfo', () => {
   describe('边界情况', () => {
     it('应该处理限制为 0 的情况', () => {
       const tierLimitWithZero: TierLimitConfig = {
-        tier: MembershipTier.FREE,
+        cases: 0,
+        debates: 0,
+        documents: 5,
+        storage: 100,
+        aiTokens: 10000,
+        users: 1,
+        features: [],
         limits: {
           MAX_CASES: 0,
           MAX_DEBATES: 0,

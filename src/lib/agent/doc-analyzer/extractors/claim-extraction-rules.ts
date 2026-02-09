@@ -389,6 +389,12 @@ export function shouldInferInterest(text: string): boolean {
   const hasExplicitInterest =
     /支付利息|承担利息|利息.*年利率|年利率.*利息/.test(text);
 
+  // 如果有利率关键词，应该推断利息
+  const hasInterestRate = /年利率|月利率|利率/.test(text);
+  if (hasInterestRate && !hasExplicitInterest) {
+    return true;
+  }
+
   if (hasPrincipal && !hasExplicitInterest) {
     const hasOverdue = /逾期|未按期|迟延/.test(text);
     if (hasOverdue) {
@@ -439,7 +445,7 @@ export function identifyCompoundClaims(text: string): ClaimType[] {
  * 获取诉讼请求类型标签
  */
 export function getClaimTypeLabel(type: ClaimType): string {
-  const labels: Record<ClaimType, string> = {
+  const labels: Partial<Record<ClaimType, string>> = {
     PAY_PRINCIPAL: '偿还本金',
     PAY_INTEREST: '支付利息',
     PAY_PENALTY: '支付违约金',
@@ -448,6 +454,110 @@ export function getClaimTypeLabel(type: ClaimType): string {
     PERFORMANCE: '履行义务',
     TERMINATION: '解除合同',
     OTHER: '其他',
+    // 细分类型
+    PAYMENT_PRINCIPAL: '支付本金',
+    PAYMENT_INTEREST: '支付利息',
+    PAYMENT_PENALTY: '支付违约金',
+    PAYMENT_COMPENSATION: '支付赔偿金',
+    PAYMENT_LIQUIDATED_DAMAGES: '支付损害赔偿金',
+    PERFORM_CONTRACT: '履行合同',
+    PERFORM_DELIVERY: '交付标的物',
+    PERFORM_SERVICE: '提供服务',
+    TERMINATE_CONTRACT: '解除合同',
+    RESCIND_CONTRACT: '撤销合同',
+    CANCEL_CONTRACT: '取消合同',
+    CONFIRM_VALIDITY: '确认合同有效',
+    CONFIRM_INVALIDITY: '确认合同无效',
+    CONFIRM_OWNERSHIP: '确认所有权',
+    LITIGATION_COSTS: '承担诉讼费用',
+    APOLOGY: '赔礼道歉',
+    CEASE_INFRINGEMENT: '停止侵权',
   };
   return labels[type] || type;
+}
+
+/**
+ * 细分请求类型规则
+ */
+export const DETAILED_CLAIM_TYPE_PATTERNS: Array<{
+  type: ClaimType;
+  subType: string;
+  patterns: RegExp[];
+}> = [
+  // 金钱给付类 - 本金细分
+  { type: 'PAY_PRINCIPAL', subType: '货款', patterns: [/货款/gi] },
+  { type: 'PAY_PRINCIPAL', subType: '借款', patterns: [/借款/gi] },
+  { type: 'PAY_PRINCIPAL', subType: '欠款', patterns: [/欠款/gi] },
+  { type: 'PAY_PRINCIPAL', subType: '本金', patterns: [/本金/gi] },
+
+  // 金钱给付类 - 利息细分
+  { type: 'PAY_INTEREST', subType: '资金占用费', patterns: [/资金占用费/gi] },
+  { type: 'PAY_INTEREST', subType: '利息', patterns: [/利息/gi] },
+
+  // 金钱给付类 - 违约金细分
+  { type: 'PAY_PENALTY', subType: '罚息', patterns: [/罚息/gi] },
+  { type: 'PAY_PENALTY', subType: '滞纳金', patterns: [/滞纳金/gi] },
+  { type: 'PAY_PENALTY', subType: '迟延履行金', patterns: [/迟延履行金/gi] },
+  { type: 'PAY_PENALTY', subType: '违约金', patterns: [/违约金/gi] },
+
+  // 诉讼费用类细分
+  {
+    type: 'LITIGATION_COST',
+    subType: '案件受理费',
+    patterns: [/案件受理费/gi],
+  },
+  { type: 'LITIGATION_COST', subType: '律师费', patterns: [/律师费/gi] },
+  { type: 'LITIGATION_COST', subType: '保全费', patterns: [/保全费/gi] },
+  { type: 'LITIGATION_COST', subType: '鉴定费', patterns: [/鉴定费/gi] },
+  { type: 'LITIGATION_COST', subType: '诉讼费用', patterns: [/诉讼费用/gi] },
+];
+
+/**
+ * 细分请求类型识别规则
+ */
+export const DETAILED_CLAIM_PATTERNS: Array<{
+  type: ClaimType;
+  patterns: RegExp[];
+}> = [
+  // 履行类细分
+  {
+    type: 'PERFORM_DELIVERY',
+    patterns: [/交付.*货物|交付.*标的物|交付.*物品/gi],
+  },
+  { type: 'PERFORM_SERVICE', patterns: [/提供.*服务|履行.*服务/gi] },
+  { type: 'PERFORM_CONTRACT', patterns: [/履行.*合同|继续履行/gi] },
+
+  // 解除类细分
+  { type: 'TERMINATE_CONTRACT', patterns: [/解除.*合同/gi] },
+  { type: 'RESCIND_CONTRACT', patterns: [/撤销.*合同/gi] },
+  { type: 'CANCEL_CONTRACT', patterns: [/取消.*合同/gi] },
+
+  // 确认类细分
+  { type: 'CONFIRM_VALIDITY', patterns: [/确认.*合同.*有效/gi] },
+  { type: 'CONFIRM_INVALIDITY', patterns: [/确认.*合同.*无效/gi] },
+  { type: 'CONFIRM_OWNERSHIP', patterns: [/确认.*所有权/gi] },
+
+  // 其他类型
+  { type: 'APOLOGY', patterns: [/赔礼道歉/gi] },
+  { type: 'CEASE_INFRINGEMENT', patterns: [/停止侵权/gi] },
+];
+
+/**
+ * 识别请求的子类型
+ */
+export function identifyClaimSubType(
+  type: ClaimType,
+  content: string
+): string | undefined {
+  const rules = DETAILED_CLAIM_TYPE_PATTERNS.filter(r => r.type === type);
+
+  for (const rule of rules) {
+    for (const pattern of rule.patterns) {
+      if (pattern.test(content)) {
+        return rule.subType;
+      }
+    }
+  }
+
+  return undefined;
 }

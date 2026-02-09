@@ -3,7 +3,7 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { SignaturePad } from '@/components/contract/SignaturePad';
+import SignaturePad from '@/components/contract/SignaturePad';
 
 describe('SignaturePad', () => {
   it('应该渲染签名板', () => {

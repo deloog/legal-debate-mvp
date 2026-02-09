@@ -1,10 +1,11 @@
 // 轮次管理器：管理轮次生命周期和状态
 
-import { RoundConfig, RoundSummary, RoundContext } from './types';
-import { RoundValidator } from './round-validator';
-import { ContextInheritanceProcessor } from './context-inheritance';
 import { prisma } from '@/lib/db/prisma';
-import { DebateRound, Argument, Prisma } from '@prisma/client';
+import { Argument, DebateRound, Prisma } from '@prisma/client';
+import { detectSemanticDisagreement } from '../validators/semantic-disagreement';
+import { ContextInheritanceProcessor } from './context-inheritance';
+import { RoundValidator } from './round-validator';
+import { RoundConfig, RoundContext, RoundSummary } from './types';
 
 /**
  * 法律依据接口
@@ -451,26 +452,11 @@ export class RoundManager {
   }
 
   /**
-   * 判断是否有分歧
+   * 判断是否有分歧（使用语义分析）
    */
   private hasDisagreement(content1: string, content2: string): boolean {
-    const contradictions = [
-      ['同意', '反对'],
-      ['应当', '不应当'],
-      ['符合', '不符合'],
-      ['有效', '无效'],
-    ];
-
-    for (const [word1, word2] of contradictions) {
-      if (
-        (content1.includes(word1) && content2.includes(word2)) ||
-        (content1.includes(word2) && content2.includes(word1))
-      ) {
-        return true;
-      }
-    }
-
-    return false;
+    const result = detectSemanticDisagreement(content1, content2);
+    return result.hasDisagreement;
   }
 
   /**

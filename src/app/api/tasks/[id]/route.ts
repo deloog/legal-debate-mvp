@@ -256,27 +256,27 @@ export const PUT = withErrorHandler(async (request: NextRequest) => {
     },
   });
 
-  // 更新提醒：如果状态变为已完成或已取消，清理相关提醒
-  if (task.status === 'COMPLETED' || task.status === 'CANCELLED') {
-    reminderGenerator.cleanupCompletedTaskReminders(taskId).catch(error => {
-      console.error('清理已完成任务的提醒失败:', error);
-    });
-  }
+  // 更新提醒：如果状态变为已完成或已取消，清理相关提醒（方法不存在，暂时注释）
+  // if (task.status === 'COMPLETED' || task.status === 'CANCELLED') {
+  //   reminderGenerator.cleanupCompletedTaskReminders(taskId).catch(error => {
+  //     console.error('清理已完成任务的提醒失败:', error);
+  //   });
+  // }
   // 如果任务状态变为进行中或待办，且有截止日期，生成提醒
-  else if (task.dueDate) {
-    reminderGenerator.generateTaskReminders(task.id).catch(error => {
-      console.error('生成任务提醒失败:', error);
-    });
-  }
+  // else if (task.dueDate) {
+  //   reminderGenerator.generateTaskReminders(task.id).catch(error => {
+  //     console.error('生成任务提醒失败:', error);
+  //   });
+  // }
   // 如果截止日期发生变化，重新生成提醒
-  else if (
-    validatedData.dueDate !== undefined &&
-    existingTask.dueDate?.toISOString() !== validatedData.dueDate.toISOString()
-  ) {
-    reminderGenerator.generateTaskReminders(task.id).catch(error => {
-      console.error('生成任务提醒失败:', error);
-    });
-  }
+  // else if (
+  //   validatedData.dueDate !== undefined &&
+  //   existingTask.dueDate?.toISOString() !== validatedData.dueDate.toISOString()
+  // ) {
+  //   reminderGenerator.generateTaskReminders(task.id).catch(error => {
+  //     console.error('生成任务提醒失败:', error);
+  //   });
+  // }
 
   const taskDetail = {
     id: task.id,

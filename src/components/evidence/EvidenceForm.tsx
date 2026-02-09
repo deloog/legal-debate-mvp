@@ -545,6 +545,8 @@ export function EvidenceForm({
           <input
             id='file'
             type='file'
+            accept='image/*,application/pdf,.doc,.docx'
+            capture='environment'
             onChange={handleFileSelect}
             disabled={uploading}
             className={errors.fileUrl ? 'error' : ''}

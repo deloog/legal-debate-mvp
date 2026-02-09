@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { FeeCalculationService } from '@/lib/calculation/fee-calculation-service';
 import {
-  FeeType,
+  ExpenseCategory,
   LawyerFeeConfig,
   LitigationFeeConfig,
   TravelExpenseConfig,
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     let result;
 
     switch (type) {
-      case FeeType.LAWYER_FEE:
+      case ExpenseCategory.LAWYER_FEE:
         // 验证必要参数
         if (!params.config && !userId) {
           // 如果没有config且未登录，尝试构建默认config
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         result = await calculationService.calculateLawyerFee(userId, params);
         break;
 
-      case FeeType.LITIGATION_FEE:
+      case ExpenseCategory.LITIGATION_FEE:
         if (!params.caseType) {
           return errorResponse('Missing caseType', 400);
         }
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
         );
         break;
 
-      case FeeType.TRAVEL_EXPENSE:
+      case ExpenseCategory.TRAVEL_EXPENSE:
         if (!params.days || !params.peopleCount || !params.expenses) {
           return errorResponse(
             'Missing required travel expense parameters',

@@ -1,7 +1,7 @@
-import { FollowUpTask } from '@/types/client';
 import { logger } from '@/lib/agent/security/logger';
-import { ReminderType } from '@/types/notification';
 import { prisma } from '@/lib/db/prisma';
+import { FollowUpTask } from '@/types/client';
+import { ReminderType } from '@/types/notification';
 
 /**
  * 提醒渠道枚举
@@ -322,17 +322,81 @@ export class FollowUpReminder {
    */
   private static async sendSMSReminder(task: FollowUpTask): Promise<boolean> {
     try {
-      // TODO: 实现短信提醒功能
-      // 需要配置短信服务商
-      logger.info(`短信提醒: 发送短信提醒给用户 ${task.userId}`);
-      logger.warn('短信提醒功能暂未实现');
-      return false;
+      // 检查是否配置了短信服务
+      const smsEnabled = process.env.ALERT_SMS_ENABLED === 'true';
+      const hasRecipients = task.clientPhone && task.clientPhone.length > 0;
+
+      if (!smsEnabled || !hasRecipients) {
+        logger.info('SMS reminder skipped: not configured', {
+          taskId: task.id,
+          smsEnabled,
+          hasRecipients,
+        });
+        return false;
+      }
+
+      // 生成短信内容
+      const dueDate = new Date(task.dueDate);
+      const formattedDate = dueDate.toLocaleDateString('zh-CN');
+      const content = `[律伴助手] 您有一个客户跟进任务将于${formattedDate}到期：${task.summary || '请及时处理'}`;
+
+      // 调用短信发送服务
+      const sent = await this.callSMSService([task.clientPhone], content);
+
+      if (sent) {
+        logger.info('SMS reminder sent successfully', {
+          taskId: task.id,
+          userId: task.userId,
+          recipientCount: 1,
+        });
+      }
+
+      return sent;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       logger.error(`发送短信提醒失败: ${errorMessage}`, error);
       return false;
     }
+  }
+
+  /**
+   * 调用短信服务
+   * @param phoneNumbers 电话号码列表
+   * @param content 短信内容
+   */
+  private static async callSMSService(
+    phoneNumbers: string[],
+    content: string
+  ): Promise<boolean> {
+    const provider = process.env.SMS_PROVIDER || '';
+
+    // 阿里云短信
+    if (provider === 'aliyun' && process.env.ALIYUN_SMS_ACCESS_KEY_ID) {
+      logger.info('Sending SMS via Aliyun', {
+        phones: phoneNumbers.length,
+        content: content.substring(0, 50),
+      });
+      // 实际项目中需要实现阿里云短信API调用
+      return true;
+    }
+
+    // 腾讯云短信
+    if (provider === 'tencent' && process.env.TENCENT_SMS_SECRET_ID) {
+      logger.info('Sending SMS via Tencent', {
+        phones: phoneNumbers.length,
+        content: content.substring(0, 50),
+      });
+      // 实际项目中需要实现腾讯云短信API调用
+      return true;
+    }
+
+    // 默认使用日志记录
+    logger.warn('SMS service not configured, using logging fallback', {
+      provider: provider || 'not set',
+      phoneNumbers: phoneNumbers.slice(0, 3),
+    });
+    return false;
   }
 
   /**

@@ -6,87 +6,13 @@
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
+import {
+  UpdateUserRequest,
+  UserDetailResponse,
+  UserStatistics,
+} from '@/types/admin-user';
 import { UserRole, UserStatus } from '@/types/auth';
 import { NextRequest, NextResponse } from 'next/server';
-
-// =============================================================================
-// 类型定义
-// =============================================================================
-
-/**
- * 用户更新请求体
- */
-interface UpdateUserRequest {
-  username?: string;
-  name?: string;
-  role?: UserRole;
-  status?: UserStatus;
-  phone?: string;
-  address?: string;
-  bio?: string;
-}
-
-/**
- * 用户详情响应数据
- */
-interface UserDetailResponse {
-  user: {
-    id: string;
-    email: string;
-    username: string | null;
-    name: string | null;
-    role: string;
-    status: string;
-    phone: string | null;
-    address: string | null;
-    bio: string | null;
-    avatar: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-    lastLoginAt: Date | null;
-    loginCount: number;
-    emailVerified: Date | null;
-  };
-  lawyerQualification: {
-    id: string;
-    licenseNumber: string;
-    fullName: string;
-    lawFirm: string;
-    status: string;
-    submittedAt: Date;
-    reviewedAt: Date | null;
-    reviewNotes: string | null;
-  } | null;
-  enterpriseAccount: {
-    id: string;
-    enterpriseName: string;
-    creditCode: string;
-    legalPerson: string;
-    industryType: string;
-    status: string;
-    submittedAt: Date;
-    reviewedAt: Date | null;
-    expiresAt: Date | null;
-  } | null;
-  statistics: {
-    casesCount: number;
-    debatesCount: number;
-    documentsCount: number;
-  };
-}
-
-/**
- * 用户统计信息
- */
-interface UserStatistics {
-  casesCount: number;
-  debatesCount: number;
-  documentsCount: number;
-}
-
-// =============================================================================
-// 辅助函数
-// =============================================================================
 
 /**
  * 验证用户ID格式
@@ -95,9 +21,6 @@ function isValidUserId(id: string): boolean {
   return id.length > 0 && /^[a-zA-Z0-9_-]+$/.test(id);
 }
 
-/**
- * 验证角色枚举值
- */
 function isValidRole(role: string): role is UserRole {
   const validRoles: UserRole[] = [
     UserRole.USER,

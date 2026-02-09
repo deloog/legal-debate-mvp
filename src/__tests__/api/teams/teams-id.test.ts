@@ -33,7 +33,12 @@ jest.mock('@/lib/middleware/auth', () => ({
 
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
-import { TeamType, TeamStatus, TeamRole, MemberStatus } from '@/types/team';
+import {
+  MemberStatusValues,
+  TeamRoleValues,
+  TeamStatusValues,
+  TeamTypeValues,
+} from '@/types/team';
 
 describe('Teams API - Detail, Update, Delete', () => {
   let mockedPrisma: unknown;
@@ -52,17 +57,17 @@ describe('Teams API - Detail, Update, Delete', () => {
       id: 'member-1',
       teamId: 'team-1',
       userId: 'user-123',
-      role: TeamRole.ADMIN,
-      status: MemberStatus.ACTIVE,
+      role: TeamRoleValues.ADMIN,
+      status: MemberStatusValues.ACTIVE,
     });
 
     (mockedPrisma as any).team.findUnique.mockResolvedValue({
       id: 'team-1',
       name: '测试律师事务所',
-      type: TeamType.LAW_FIRM,
+      type: TeamTypeValues.LAW_FIRM,
       description: '专业的法律团队',
       logo: null,
-      status: TeamStatus.ACTIVE,
+      status: TeamStatusValues.ACTIVE,
       metadata: null,
       createdAt: new Date('2024-01-01T10:00:00Z'),
       updatedAt: new Date('2024-01-01T10:00:00Z'),
@@ -74,10 +79,10 @@ describe('Teams API - Detail, Update, Delete', () => {
       Promise.resolve({
         id: (data as any).where.id,
         name: (data as any).data.name || '测试律师事务所',
-        type: (data as any).data.type || TeamType.LAW_FIRM,
+        type: (data as any).data.type || TeamTypeValues.LAW_FIRM,
         description: (data as any).data.description || null,
         logo: (data as any).data.logo || null,
-        status: (data as any).data.status || TeamStatus.ACTIVE,
+        status: (data as any).data.status || TeamStatusValues.ACTIVE,
         metadata: (data as any).data.metadata || null,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -228,7 +233,7 @@ describe('Teams API - Detail, Update, Delete', () => {
 
     it('应该更新团队类型', async () => {
       const updateData = {
-        type: TeamType.LEGAL_DEPT,
+        type: TeamTypeValues.LEGAL_DEPT,
       };
 
       const request = createMockRequest(
@@ -247,7 +252,7 @@ describe('Teams API - Detail, Update, Delete', () => {
 
     it('应该更新团队状态', async () => {
       const updateData = {
-        status: TeamStatus.INACTIVE,
+        status: TeamStatusValues.INACTIVE,
       };
 
       const request = createMockRequest(

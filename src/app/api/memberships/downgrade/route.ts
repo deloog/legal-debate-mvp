@@ -3,11 +3,12 @@
  * 用户可以降级到更低的会员等级
  */
 
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
-import type { MembershipStatus } from '@/types/membership';
+import type { DowngradeRequestBody } from '@/types/admin-membership';
+import { MembershipStatus } from '@prisma/client';
 import { MembershipChangeType, MembershipTier } from '@/types/membership';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * POST /api/memberships/downgrade
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const currentMembership = await prisma.userMembership.findFirst({
       where: {
         userId: authUser.userId,
-        status: 'ACTIVE' as MembershipStatus,
+        status: MembershipStatus.ACTIVE,
       },
       include: {
         tier: true,
@@ -159,7 +160,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       await tx.userMembership.update({
         where: { id: currentMembership.id },
         data: {
-          status: 'EXPIRED' as MembershipStatus,
+          status: MembershipStatus.EXPIRED,
           notes: `降级到${targetTier.displayName}。原原因：${reason || '用户主动降级'}`,
         },
       });
@@ -169,7 +170,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         data: {
           userId: authUser.userId,
           tierId: targetTier.id,
-          status: 'ACTIVE' as MembershipStatus,
+          status: MembershipStatus.ACTIVE,
           startDate: new Date(),
           endDate: calculateEndDate(new Date(), targetTier.billingCycle),
           autoRenew: false, // 降级后默认不自动续费
@@ -189,7 +190,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           fromTier: currentMembership.tier.tier,
           toTier: targetTier.tier,
           fromStatus: currentMembership.status,
-          toStatus: 'ACTIVE' as MembershipStatus,
+          toStatus: MembershipStatus.ACTIVE,
           reason: `会员降级：从${currentMembership.tier.displayName}降级到${targetTier.displayName}。原因：${reason || '用户主动降级'}`,
           performedBy: authUser.userId,
           metadata: {
@@ -299,12 +300,4 @@ function calculateEndDate(startDate: Date, billingCycle: string): Date {
   }
 
   return endDate;
-}
-
-/**
- * 降级请求体类型
- */
-interface DowngradeRequestBody {
-  tierId: string;
-  reason?: string;
 }

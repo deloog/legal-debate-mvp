@@ -3,46 +3,15 @@
  * 支持CSV格式导出会员列表
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { serverErrorResponse, unauthorizedResponse } from '@/lib/api-response';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
-import { unauthorizedResponse, serverErrorResponse } from '@/lib/api-response';
-
-// =============================================================================
-// 类型定义
-// =============================================================================
-
-/**
- * 导出查询参数
- */
-interface ExportQueryParams {
-  tier?: string;
-  status?: string;
-  search?: string;
-}
-
-/**
- * 导出会员数据
- */
-interface ExportMembershipData {
-  userId: string;
-  userEmail: string;
-  userName: string | null;
-  tierName: string;
-  tierDisplayName: string;
-  status: string;
-  startDate: Date;
-  endDate: Date;
-  autoRenew: boolean;
-  cancelledAt: Date | null;
-  cancelledReason: string | null;
-  pausedAt: Date | null;
-  pausedReason: string | null;
-  notes: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import type {
+  ExportMembershipData,
+  ExportQueryParams,
+} from '@/types/admin-membership';
+import { NextRequest, NextResponse } from 'next/server';
 
 // =============================================================================
 // 辅助函数

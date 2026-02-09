@@ -3,31 +3,13 @@
  * GET /api/contracts/[id]/payments - 获取付款记录列表
  * POST /api/contracts/[id]/payments - 创建付款记录
  */
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import {
-  validateCreatePayment,
   getFirstZodError,
+  validateCreatePayment,
 } from '@/lib/validations/contract';
-
-/**
- * 标准成功响应格式
- */
-interface SuccessResponse<T> {
-  success: true;
-  data: T;
-}
-
-/**
- * 标准错误响应格式
- */
-interface ErrorResponse {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-  };
-}
+import type { ErrorResponse, SuccessResponse } from '@/types/api-response';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * GET /api/contracts/[id]/payments

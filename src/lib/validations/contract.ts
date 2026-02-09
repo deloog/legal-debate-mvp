@@ -1,8 +1,8 @@
 /**
  * 合同数据验证规则
  */
+import { ContractStatusValues, FeeTypeValues } from '@/types/contract';
 import { z } from 'zod';
-import { FeeType, ContractStatus } from '@/types/contract';
 
 // 创建合同验证规则
 export const createContractSchema = z.object({
@@ -12,7 +12,7 @@ export const createContractSchema = z.object({
 
   // 委托方信息
   clientType: z.enum(['INDIVIDUAL', 'ENTERPRISE'], {
-    required_error: '请选择委托人类型',
+    message: '请选择委托人类型',
   }),
   clientName: z
     .string()
@@ -57,8 +57,8 @@ export const createContractSchema = z.object({
     .max(500, '委托范围不能超过500个字符'),
 
   // 收费信息
-  feeType: z.nativeEnum(FeeType, {
-    required_error: '请选择收费方式',
+  feeType: z.nativeEnum(FeeTypeValues, {
+    message: '请选择收费方式',
   }),
   totalFee: z
     .number()
@@ -137,7 +137,7 @@ export const updateContractSchema = z.object({
     .optional(),
 
   // 收费信息
-  feeType: z.nativeEnum(FeeType).optional(),
+  feeType: z.nativeEnum(FeeTypeValues).optional(),
   totalFee: z
     .number()
     .min(0, '总费用不能为负数')
@@ -154,7 +154,7 @@ export const updateContractSchema = z.object({
     .nullable(),
 
   // 状态
-  status: z.nativeEnum(ContractStatus).optional(),
+  status: z.nativeEnum(ContractStatusValues).optional(),
 
   // 签署信息
   signedAt: z.coerce.date().optional().nullable(),
@@ -178,7 +178,7 @@ export const createPaymentSchema = z.object({
 export const contractListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
-  status: z.nativeEnum(ContractStatus).optional(),
+  status: z.nativeEnum(ContractStatusValues).optional(),
   keyword: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
@@ -202,11 +202,9 @@ export function validateContractListQuery(data: unknown) {
 }
 
 // 获取第一个验证错误信息
-export function getFirstZodError(
-  result: z.SafeParseReturnType<unknown, unknown>
-): string {
+export function getFirstZodError(result: any): string {
   if (result.success) return '';
 
-  const firstError = result.error.errors[0];
+  const firstError = result.error?.errors?.[0];
   return firstError?.message || '数据验证失败';
 }

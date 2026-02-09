@@ -4,43 +4,52 @@
  * 负责根据法庭日程、截止日期等自动生成提醒。
  */
 
-import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/agent/security/logger';
-import { reminderService } from './reminder-service';
+import { prisma } from '@/lib/db/prisma';
 import {
   CreateReminderInput,
-  NotificationChannel,
+  NotificationChannelValues,
   ReminderPreferences,
-  ReminderType,
-  TaskPriority,
+  ReminderTypeValues,
 } from '@/types/notification';
-import { taskReminderGenerator } from '@/lib/task/task-reminder';
+import { reminderService } from './reminder-service';
 
 // =============================================================================
 // 默认提醒配置
 // =============================================================================
 
 const DEFAULT_REMINDER_PREFERENCES: ReminderPreferences = {
+  channels: [NotificationChannelValues.IN_APP, NotificationChannelValues.EMAIL],
+  quietHours: null,
+  disabledTypes: [],
   courtSchedule: {
     enabled: true,
-    hoursBefore: [24, 1], // 提前24小时和1小时
-    channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
+    advanceDays: 1,
+    channels: [
+      NotificationChannelValues.IN_APP,
+      NotificationChannelValues.EMAIL,
+    ],
   },
   deadline: {
     enabled: true,
-    daysBefore: [7, 3, 1], // 提前7天、3天、1天
-    channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
+    advanceDays: [7, 3, 1],
+    channels: [
+      NotificationChannelValues.IN_APP,
+      NotificationChannelValues.EMAIL,
+    ],
   },
   followUp: {
     enabled: true,
-    hoursBefore: [24, 1],
-    channels: [NotificationChannel.IN_APP],
+    channels: [NotificationChannelValues.IN_APP],
+    autoRemind: true,
   },
   task: {
     enabled: true,
-    hoursBefore: [24, 1], // 提前24小时和1小时
-    channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
-    priorities: [TaskPriority.HIGH, TaskPriority.URGENT], // 只为高优先级和紧急任务生成提醒
+    channels: [
+      NotificationChannelValues.IN_APP,
+      NotificationChannelValues.EMAIL,
+    ],
+    priorities: ['HIGH', 'URGENT'],
   },
 };
 
@@ -77,19 +86,21 @@ class ReminderGenerator {
 
       const inputs: CreateReminderInput[] = [];
 
-      for (const hoursBefore of config.hoursBefore) {
+      // 支持 advanceDays 为数组或单个值
+      const daysArray = Array.isArray(config.advanceDays)
+        ? config.advanceDays
+        : [config.advanceDays];
+
+      for (const days of daysArray) {
         const reminderTime = new Date(courtSchedule.startTime.getTime());
-        reminderTime.setHours(reminderTime.getHours() - hoursBefore);
+        reminderTime.setDate(reminderTime.getDate() - days);
 
         const input: CreateReminderInput = {
-          userId: courtSchedule.case.userId,
-          type: ReminderType.COURT_SCHEDULE,
+          type: ReminderTypeValues.HEARING_DATE,
           title: `法庭提醒: ${courtSchedule.title}`,
-          message: `您的案件"${courtSchedule.case.title}"将于${hoursBefore}小时后开庭，请提前做好准备。\n\n开庭时间：${courtSchedule.startTime.toLocaleString('zh-CN')}\n地点：${courtSchedule.location || '待定'}`,
-          reminderTime,
+          content: `您的案件"${courtSchedule.case.title}"将于${days}天后开庭，请提前做好准备。\n\n开庭时间：${courtSchedule.startTime.toLocaleString('zh-CN')}\n地点：${courtSchedule.location || '待定'}`,
+          scheduledAt: reminderTime,
           channels: config.channels,
-          relatedType: 'CourtSchedule',
-          relatedId: courtScheduleId,
           metadata: {
             courtScheduleId,
             caseId: courtSchedule.caseId,
@@ -122,10 +133,9 @@ class ReminderGenerator {
     preferences?: ReminderPreferences
   ): Promise<void> {
     try {
-      const config =
-        preferences?.followUp ?? DEFAULT_REMINDER_PREFERENCES.followUp;
+      const config = preferences?.task ?? DEFAULT_REMINDER_PREFERENCES.task;
 
-      if (!config.enabled) {
+      if (!config || !config.enabled) {
         return;
       }
 
@@ -141,34 +151,37 @@ class ReminderGenerator {
 
       const inputs: CreateReminderInput[] = [];
 
-      for (const hoursBefore of config.hoursBefore) {
-        const reminderTime = new Date(task.dueDate.getTime());
-        reminderTime.setHours(reminderTime.getHours() - hoursBefore);
+      // 只为指定优先级的任务生成提醒
+      if (task.priority && config.priorities.includes(task.priority)) {
+        if (task.dueDate) {
+          const hoursBefore = 24;
+          const reminderTime = new Date(task.dueDate.getTime());
+          reminderTime.setHours(reminderTime.getHours() - hoursBefore);
 
-        const input: CreateReminderInput = {
-          userId: task.userId,
-          type: ReminderType.FOLLOW_UP,
-          title: `跟进提醒: ${task.summary}`,
-          message: `客户"${task.client.name}"的跟进任务将于${hoursBefore}小时后到期。\n\n任务：${task.summary}\n截止时间：${task.dueDate.toLocaleString('zh-CN')}`,
-          reminderTime,
-          channels: config.channels,
-          relatedType: 'FollowUpTask',
-          relatedId: taskId,
-          metadata: {
-            taskId,
-            clientId: task.clientId,
-            clientName: task.client.name,
-            summary: task.summary,
-          },
-        };
+          const input: CreateReminderInput = {
+            type: ReminderTypeValues.FOLLOW_UP,
+            title: `跟进任务提醒: ${task.summary}`,
+            content: `客户"${task.client.name}"的跟进任务将于${hoursBefore}小时后到期。\n\n任务：${task.summary}\n截止时间：${task.dueDate.toLocaleString('zh-CN')}`,
+            scheduledAt: reminderTime,
+            channels: config.channels,
+            metadata: {
+              taskId,
+              clientId: task.clientId,
+              clientName: task.client.name,
+              priority: task.priority,
+            },
+          };
 
-        inputs.push(input);
+          inputs.push(input);
+        }
       }
 
-      await reminderService.createReminders(inputs);
-      logger.info(`为跟进任务生成提醒成功: ${taskId}`, {
-        reminderCount: inputs.length,
-      } as never);
+      if (inputs.length > 0) {
+        await reminderService.createReminders(inputs);
+        logger.info(`为跟进任务生成提醒成功: ${taskId}`, {
+          reminderCount: inputs.length,
+        } as never);
+      }
     } catch (error) {
       logger.error(
         `为跟进任务生成提醒失败: ${taskId}`,
@@ -178,13 +191,14 @@ class ReminderGenerator {
   }
 
   /**
-   * 为截止日期生成提醒（自定义截止日期）
+   * 为截止日期生成提醒
    */
   async generateDeadlineReminders(
-    userId: string,
     deadline: Date,
     title: string,
-    description?: string,
+    description: string,
+    caseId: string,
+    caseTitle: string,
     preferences?: ReminderPreferences
   ): Promise<void> {
     try {
@@ -197,71 +211,21 @@ class ReminderGenerator {
 
       const inputs: CreateReminderInput[] = [];
 
-      for (const daysBefore of config.daysBefore) {
+      for (const days of config.advanceDays) {
         const reminderTime = new Date(deadline.getTime());
-        reminderTime.setDate(reminderTime.getDate() - daysBefore);
+        reminderTime.setDate(reminderTime.getDate() - days);
 
         const input: CreateReminderInput = {
-          userId,
-          type: ReminderType.DEADLINE,
+          type: ReminderTypeValues.CASE_DEADLINE,
           title: `截止日期提醒: ${title}`,
-          message: description
-            ? `${description}\n\n截止时间：${deadline.toLocaleString('zh-CN')}`
-            : `您有一个截止日期将于${daysBefore}天后到期。\n\n事项：${title}\n截止时间：${deadline.toLocaleString('zh-CN')}`,
-          reminderTime,
+          content: `${description}\n\n案件：${caseTitle}\n截止时间：${deadline.toLocaleString('zh-CN')}`,
+          scheduledAt: reminderTime,
           channels: config.channels,
-          relatedType: 'CustomDeadline',
-          metadata: {
-            deadline: deadline.toISOString(),
-            title,
-            description,
-          },
-        };
-
-        inputs.push(input);
-      }
-
-      await reminderService.createReminders(inputs);
-      logger.info(`为截止日期生成提醒成功: ${title}`, {
-        reminderCount: inputs.length,
-      } as never);
-    } catch (error) {
-      logger.error(`为截止日期生成提醒失败: ${title}`, error as Error as never);
-    }
-  }
-
-  /**
-   * 为案件状态变更生成截止日期提醒
-   */
-  async generateCaseStatusDeadlineReminders(
-    userId: string,
-    caseId: string,
-    caseTitle: string,
-    deadline: Date,
-    description: string
-  ): Promise<void> {
-    try {
-      const inputs: CreateReminderInput[] = [];
-      const reminderDaysBefore = [3, 1];
-
-      for (const daysBefore of reminderDaysBefore) {
-        const reminderTime = new Date(deadline.getTime());
-        reminderTime.setDate(reminderTime.getDate() - daysBefore);
-
-        const input: CreateReminderInput = {
-          userId,
-          type: ReminderType.DEADLINE,
-          title: `案件截止提醒: ${caseTitle}`,
-          message: `${description}\n\n案件：${caseTitle}\n截止时间：${deadline.toLocaleString('zh-CN')}`,
-          reminderTime,
-          channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
-          relatedType: 'CaseStatus',
-          relatedId: caseId,
           metadata: {
             caseId,
             caseTitle,
             deadline: deadline.toISOString(),
-            description,
+            daysBeforeDeadline: days,
           },
         };
 
@@ -269,221 +233,293 @@ class ReminderGenerator {
       }
 
       await reminderService.createReminders(inputs);
-      logger.info(`为案件状态截止日期生成提醒成功: ${caseTitle}`, {
+      logger.info(`为截止日期生成提醒成功: ${caseId}`, {
         reminderCount: inputs.length,
       } as never);
     } catch (error) {
       logger.error(
-        `为案件状态截止日期生成提醒失败: ${caseTitle}`,
+        `为截止日期生成提醒失败: ${caseId}`,
         error as Error as never
       );
     }
   }
 
   /**
-   * 批量为所有即将到来的法庭日程生成提醒
+   * 为案件状态截止日期生成提醒
+   */
+  async generateCaseStatusDeadlineReminders(
+    caseId: string,
+    deadline: Date,
+    statusTitle: string,
+    preferences?: ReminderPreferences
+  ): Promise<void> {
+    try {
+      const config =
+        preferences?.deadline ?? DEFAULT_REMINDER_PREFERENCES.deadline;
+
+      if (!config.enabled) {
+        return;
+      }
+
+      const advanceDays = config.advanceDays;
+
+      for (const daysBefore of Array.isArray(advanceDays) ? advanceDays : [advanceDays]) {
+        const reminderTime = new Date(deadline.getTime());
+        reminderTime.setDate(reminderTime.getDate() - daysBefore);
+
+        try {
+          const input: CreateReminderInput = {
+            type: ReminderTypeValues.CASE_DEADLINE,
+            title: `案件截止提醒: ${statusTitle}`,
+            content: `您的案件截止日期即将到来，请及时处理。\n\n截止时间：${deadline.toLocaleString('zh-CN')}`,
+            scheduledAt: reminderTime,
+            channels: config.channels,
+            metadata: {
+              caseId,
+              statusTitle,
+              deadline: deadline.toISOString(),
+            },
+          };
+
+          await reminderService.createReminder(input);
+          logger.info(`为案件状态截止日期生成提醒成功: ${caseId}`, {
+            reminderDaysBefore: daysBefore,
+          } as never);
+        } catch (innerError) {
+          logger.error(
+            `为案件状态截止日期创建提醒失败: ${caseId}`,
+            innerError as Error as never
+          );
+        }
+      }
+    } catch (error) {
+      logger.error(
+        `为案件状态截止日期生成提醒失败: ${caseId}`,
+        error as Error as never
+      );
+    }
+  }
+
+  /**
+   * 生成所有待处理的法庭日程提醒
    */
   async generateAllPendingCourtScheduleReminders(): Promise<number> {
     try {
       const now = new Date();
-      const futureLimit = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30天后的日期
+      const thirtyDaysFromNow = new Date(
+        now.getTime() + 30 * 24 * 60 * 60 * 1000
+      );
 
-      const courtSchedules = await prisma.courtSchedule.findMany({
+      const pendingSchedules = await prisma.courtSchedule.findMany({
         where: {
-          startTime: { gte: now, lte: futureLimit },
-          status: { in: ['SCHEDULED', 'CONFIRMED'] },
+          startTime: {
+            gte: now,
+            lte: thirtyDaysFromNow,
+          },
+          status: 'SCHEDULED',
         },
-        include: { case: true },
+        include: {
+          case: {
+            select: {
+              id: true,
+              title: true,
+              userId: true,
+            },
+          },
+        },
       });
 
-      let count = 0;
+      let totalReminders = 0;
 
-      for (const schedule of courtSchedules) {
-        // 检查是否已经生成过提醒
-        const existingReminders = await prisma.reminder.count({
-          where: {
-            relatedType: 'CourtSchedule',
-            relatedId: schedule.id,
-            status: { not: 'DISMISSED' },
-          },
-        });
-
-        // 如果没有提醒或提醒数少于配置的提前提醒数，则生成新提醒
-        if (
-          existingReminders <
-          DEFAULT_REMINDER_PREFERENCES.courtSchedule.hoursBefore.length
-        ) {
-          await this.generateCourtScheduleReminders(schedule.id);
-          count++;
-        }
+      for (const schedule of pendingSchedules) {
+        await this.generateCourtScheduleReminders(schedule.id);
+        totalReminders++;
       }
 
-      logger.info(`批量生成法庭日程提醒完成: ${count}条`);
-      return count;
+      logger.info(
+        `生成待处理法庭日程提醒完成，共处理 ${totalReminders} 个日程`,
+        { totalReminders } as never
+      );
+
+      return totalReminders;
     } catch (error) {
-      logger.error('批量生成法庭日程提醒失败', error as Error as never);
+      logger.error('生成待处理法庭日程提醒失败', error as Error as never);
       return 0;
     }
   }
 
   /**
-   * 批量为所有即将到期的跟进任务生成提醒
+   * 生成所有待处理的跟进任务提醒
    */
   async generateAllPendingFollowUpTaskReminders(): Promise<number> {
     try {
       const now = new Date();
-      const futureLimit = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30天后的日期
+      const sevenDaysFromNow = new Date(
+        now.getTime() + 7 * 24 * 60 * 60 * 1000
+      );
 
-      const tasks = await prisma.followUpTask.findMany({
+      const pendingTasks = await prisma.followUpTask.findMany({
         where: {
-          dueDate: { gte: now, lte: futureLimit },
           status: 'PENDING',
+          dueDate: {
+            gte: now,
+            lte: sevenDaysFromNow,
+          },
         },
-        include: { client: true },
+        include: {
+          client: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       });
 
-      let count = 0;
+      let totalReminders = 0;
 
-      for (const task of tasks) {
-        // 检查是否已经生成过提醒
-        const existingReminders = await prisma.reminder.count({
-          where: {
-            relatedType: 'FollowUpTask',
-            relatedId: task.id,
-            status: { not: 'DISMISSED' },
-          },
-        });
-
-        // 如果没有提醒或提醒数少于配置的提前提醒数，则生成新提醒
-        if (
-          existingReminders <
-          DEFAULT_REMINDER_PREFERENCES.followUp.hoursBefore.length
-        ) {
-          await this.generateFollowUpTaskReminders(task.id);
-          count++;
-        }
+      for (const task of pendingTasks) {
+        await this.generateFollowUpTaskReminders(task.id);
+        totalReminders++;
       }
 
-      logger.info(`批量生成跟进任务提醒完成: ${count}条`);
-      return count;
+      logger.info(
+        `生成待处理跟进任务提醒完成，共处理 ${totalReminders} 个任务`,
+        { totalReminders } as never
+      );
+
+      return totalReminders;
     } catch (error) {
-      logger.error('批量生成跟进任务提醒失败', error as Error as never);
+      logger.error('生成待处理跟进任务提醒失败', error as Error as never);
       return 0;
     }
   }
 
   /**
-   * 清理已关联已删除实体的提醒
+   * 清理孤立的提醒（关联的源数据已被删除）
    */
   async cleanupOrphanReminders(): Promise<number> {
     try {
-      let count = 0;
+      const now = new Date();
 
-      // 清理关联到已删除法庭日程的提醒
-      const orphanCourtScheduleReminders = await prisma.reminder.findMany({
+      // 查找状态为 PENDING 但已过期的提醒
+      const orphanReminders = await prisma.reminder.findMany({
         where: {
-          relatedType: 'CourtSchedule',
+          status: 'PENDING',
+          reminderTime: {
+            lt: now,
+          },
         },
       });
 
-      for (const reminder of orphanCourtScheduleReminders) {
-        const courtScheduleExists = await prisma.courtSchedule.findUnique({
-          where: { id: reminder.relatedId || '' },
-        });
+      let cleanedCount = 0;
 
-        if (!courtScheduleExists) {
-          await prisma.reminder.delete({ where: { id: reminder.id } });
-          count++;
+      for (const reminder of orphanReminders) {
+        let isOrphan = false;
+
+        // 根据类型检查关联数据是否存在
+        const reminderType = reminder.type as string;
+        switch (reminderType) {
+          case 'COURT_SCHEDULE':
+            if (reminder.metadata && typeof reminder.metadata === 'object' && 'courtScheduleId' in reminder.metadata) {
+              const schedule = await prisma.courtSchedule.findUnique({
+                where: {
+                  id: reminder.metadata.courtScheduleId as string,
+                },
+              });
+              isOrphan = !schedule;
+            }
+            break;
+          case 'FOLLOW_UP':
+            if (reminder.metadata && typeof reminder.metadata === 'object' && 'taskId' in reminder.metadata) {
+              const task = await prisma.followUpTask.findUnique({
+                where: {
+                  id: reminder.metadata.taskId as string,
+                },
+              });
+              isOrphan = !task;
+            }
+            break;
+          case 'DEADLINE':
+            if (reminder.metadata && typeof reminder.metadata === 'object' && 'caseId' in reminder.metadata) {
+              const caseItem = await prisma.case.findUnique({
+                where: {
+                  id: reminder.metadata.caseId as string,
+                },
+              });
+              isOrphan = !caseItem;
+            }
+            break;
+        }
+
+        if (isOrphan) {
+          await prisma.reminder.update({
+            where: { id: reminder.id },
+            data: { status: 'DISMISSED' },
+          });
+          cleanedCount++;
         }
       }
 
-      // 清理关联到已删除跟进任务的提醒
-      const orphanFollowUpTaskReminders = await prisma.reminder.findMany({
-        where: {
-          relatedType: 'FollowUpTask',
-        },
-      });
+      logger.info(`清理孤立提醒完成，共清理 ${cleanedCount} 个提醒`, {
+        cleanedCount,
+      } as never);
 
-      for (const reminder of orphanFollowUpTaskReminders) {
-        const taskExists = await prisma.followUpTask.findUnique({
-          where: { id: reminder.relatedId || '' },
-        });
-
-        if (!taskExists) {
-          await prisma.reminder.delete({ where: { id: reminder.id } });
-          count++;
-        }
-      }
-
-      logger.info(`清理孤立提醒完成: ${count}条`);
-      return count;
+      return cleanedCount;
     } catch (error) {
       logger.error('清理孤立提醒失败', error as Error as never);
       return 0;
     }
   }
+}
 
-  /**
-   * 获取默认提醒配置
-   */
-  getDefaultPreferences(): ReminderPreferences {
+// 导出提醒生成器实例
+export const reminderGenerator = new ReminderGenerator();
+export const reminderGeneratorInstance = reminderGenerator;
+
+// 任务提醒生成器包装函数
+export async function generateTaskReminders(
+  taskId: string,
+  preferences?: ReminderPreferences
+): Promise<void> {
+  return reminderGenerator.generateFollowUpTaskReminders(taskId, preferences);
+}
+
+// 合并偏好设置的工具函数
+function mergePreferences(
+  base: ReminderPreferences | undefined,
+  override: Partial<ReminderPreferences> | undefined
+): ReminderPreferences {
+  if (!base) {
     return DEFAULT_REMINDER_PREFERENCES;
   }
 
-  /**
-   * 为任务生成提醒
-   */
-  async generateTaskReminders(
-    taskId: string,
-    preferences?: Partial<ReminderPreferences>
-  ): Promise<void> {
-    return taskReminderGenerator.generateTaskReminders(taskId, preferences);
+  if (!override) {
+    return base;
   }
 
-  /**
-   * 批量为所有即将到期的任务生成提醒
-   */
-  async generateAllPendingTaskReminders(): Promise<number> {
-    return taskReminderGenerator.generateAllPendingTaskReminders();
-  }
-
-  /**
-   * 清理已完成任务的相关提醒
-   */
-  async cleanupCompletedTaskReminders(taskId: string): Promise<number> {
-    return taskReminderGenerator.cleanupCompletedTaskReminders(taskId);
-  }
-
-  /**
-   * 合并用户自定义配置和默认配置
-   */
-  mergePreferences(
-    userPreferences?: Partial<ReminderPreferences>
-  ): ReminderPreferences {
-    return {
-      courtSchedule: {
-        ...DEFAULT_REMINDER_PREFERENCES.courtSchedule,
-        ...(userPreferences?.courtSchedule ?? {}),
-      },
-      deadline: {
-        ...DEFAULT_REMINDER_PREFERENCES.deadline,
-        ...(userPreferences?.deadline ?? {}),
-      },
-      followUp: {
-        ...DEFAULT_REMINDER_PREFERENCES.followUp,
-        ...(userPreferences?.followUp ?? {}),
-      },
-      task: {
-        ...DEFAULT_REMINDER_PREFERENCES.task,
-        ...(userPreferences?.task ?? {}),
-      },
-    };
-  }
+  return {
+    ...base,
+    ...override,
+    courtSchedule: {
+      ...base.courtSchedule,
+      ...override.courtSchedule,
+    },
+    deadline: {
+      ...base.deadline,
+      ...override.deadline,
+    },
+    followUp: {
+      ...base.followUp,
+      ...override.followUp,
+    },
+    task: {
+      ...(base.task ?? {
+        enabled: true,
+        channels: [NotificationChannelValues.IN_APP],
+        priorities: ['HIGH', 'URGENT'],
+      }),
+      ...override.task,
+    },
+  };
 }
-
-// =============================================================================
-// 导出
-// =============================================================================
-
-export const reminderGenerator = new ReminderGenerator();
-export default reminderGenerator;

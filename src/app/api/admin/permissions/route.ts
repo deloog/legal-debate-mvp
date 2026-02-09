@@ -3,29 +3,11 @@
  * 提供权限的查询功能
  */
 
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
-
-// =============================================================================
-// 类型定义
-// =============================================================================
-
-/**
- * 权限列表响应数据
- */
-interface PermissionListResponse {
-  permissions: Array<{
-    id: string;
-    name: string;
-    description: string | null;
-    resource: string;
-    action: string;
-    createdAt: Date;
-    updatedAt: Date;
-  }>;
-}
+import type { PermissionListResponse } from '@/types/admin-role';
+import { NextRequest, NextResponse } from 'next/server';
 
 // =============================================================================
 // API处理函数

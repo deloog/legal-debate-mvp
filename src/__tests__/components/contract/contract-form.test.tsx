@@ -3,7 +3,7 @@
  */
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { ContractForm } from '@/app/contracts/new/page';
+import ContractForm from '@/app/contracts/new/page';
 
 describe('ContractForm', () => {
   it('应该渲染所有表单字段', () => {
@@ -28,7 +28,9 @@ describe('ContractForm', () => {
 
   it('应该正确提交表单数据', async () => {
     const mockSubmit = jest.fn();
-    render(<ContractForm onSubmit={mockSubmit} />);
+    // ContractForm 是一个页面组件，不接受 onSubmit 属性
+    // 这个测试需要重新设计或删除
+    render(<ContractForm />);
 
     // 填写表单
     fireEvent.change(screen.getByLabelText(/委托人姓名/i), {

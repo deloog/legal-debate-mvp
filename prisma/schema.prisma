@@ -8,27 +8,27 @@ datasource db {
 }
 
 model User {
-  id                        String                @id @default(cuid())
-  email                     String                @unique
+  id                        String                   @id @default(cuid())
+  email                     String                   @unique
   username                  String?
   name                      String?
-  role                      UserRole              @default(USER)
+  role                      UserRole                 @default(USER)
   permissions               Json?
   organizationId            String?
-  createdAt                 DateTime              @default(now())
-  updatedAt                 DateTime              @updatedAt
+  createdAt                 DateTime                 @default(now())
+  updatedAt                 DateTime                 @updatedAt
   deletedAt                 DateTime?
   address                   String?
   avatar                    String?
   bio                       String?
   emailVerified             DateTime?
   lastLoginAt               DateTime?
-  loginCount                Int                   @default(0)
+  loginCount                Int                      @default(0)
   passwordResetExpires      DateTime?
   passwordResetToken        String?
   phone                     String?
   preferences               Json?
-  status                    UserStatus            @default(ACTIVE)
+  status                    UserStatus               @default(ACTIVE)
   password                  String?
   accounts                  Account[]
   discussions               CaseDiscussion[]
@@ -39,12 +39,12 @@ model User {
   debates                   Debate[]
   documentTemplates         DocumentTemplate[]
   documents                 Document[]
-  enterpriseAccount         EnterpriseAccount?    @relation("UserEnterpriseAccount")
-  reviewedEnterpriseReviews EnterpriseReview[]    @relation("EnterpriseReviews")
+  enterpriseAccount         EnterpriseAccount?       @relation("UserEnterpriseAccount")
+  reviewedEnterpriseReviews EnterpriseReview[]       @relation("EnterpriseReviews")
   feeRateConfigs            FeeRateConfig[]
   followUpTasks             FollowUpTask[]
   invoices                  Invoice[]
-  reviewedQualifications    LawyerQualification[] @relation("QualificationReviews")
+  reviewedQualifications    LawyerQualification[]    @relation("QualificationReviews")
   lawyerQualifications      LawyerQualification[]
   membershipHistoryRecords  MembershipHistory[]
   orders                    Order[]
@@ -52,14 +52,17 @@ model User {
   refundRecords             RefundRecord[]
   reminders                 Reminder[]
   sessions                  Session[]
-  tasksAssigned             Task[]                @relation("TasksAssigned")
-  tasksCreated              Task[]                @relation("TasksCreated")
+  tasksAssigned             Task[]                   @relation("TasksAssigned")
+  tasksCreated              Task[]                   @relation("TasksCreated")
   teamMemberships           TeamMember[]
   usageRecords              UsageRecord[]
   userMemberships           UserMembership[]
   verificationCodes         VerificationCode[]
   notifications             Notification[]
-  consultations            Consultation[]
+  consultations             Consultation[]
+  recommendationFeedbacks   RecommendationFeedback[]
+  relationFeedbacks         RelationFeedback[]
+  ExportTask                ExportTask[]
 
   @@index([email])
   @@index([username])
@@ -335,11 +338,11 @@ model Argument {
   aiProvider     String?
   generationTime Int?
   confidence     Float?
-  reasoning      String?      // 推理逻辑
-  legalBasis     Json?        // 法律依据数组 [{lawName, articleNumber, relevance, explanation}]
-  logicScore     Float?       // 逻辑清晰度评分
-  legalScore     Float?       // 法律准确性评分
-  overallScore   Float?       // 综合评分
+  reasoning      String? // 推理逻辑
+  legalBasis     Json? // 法律依据数组 [{lawName, articleNumber, relevance, explanation}]
+  logicScore     Float? // 逻辑清晰度评分
+  legalScore     Float? // 法律准确性评分
+  overallScore   Float? // 综合评分
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   round          DebateRound  @relation(fields: [roundId], references: [id], onDelete: Cascade)
@@ -421,6 +424,22 @@ model LawArticle {
   parent           LawArticle?  @relation("ArticleHierarchy", fields: [parentId], references: [id])
   children         LawArticle[] @relation("ArticleHierarchy")
 
+  dataSource   String     @default("local") // 'local' | 'judiciary' | 'cail' | 'lawgpt' | 'lawstar' | 'pkulaw'
+  sourceId     String? // 原始数据源ID
+  importedAt   DateTime? // 导入时间
+  lastSyncedAt DateTime? // 最后同步时间
+  syncStatus   SyncStatus @default(SYNCED) // 同步状态
+
+  // 知识图谱关系字段
+  sourceRelations LawArticleRelation[] @relation("SourceRelations")
+  targetRelations LawArticleRelation[] @relation("TargetRelations")
+
+  // 合同关联
+  contracts ContractLawArticle[]
+
+  // 用户反馈
+  recommendationFeedbacks RecommendationFeedback[]
+
   @@unique([lawName, articleNumber])
   @@index([lawType])
   @@index([category])
@@ -431,6 +450,9 @@ model LawArticle {
   @@index([tags])
   @@index([viewCount])
   @@index([referenceCount])
+  @@index([dataSource])
+  @@index([lastSyncedAt])
+  @@index([syncStatus])
   @@map("law_articles")
 }
 
@@ -1316,10 +1338,15 @@ model CaseExample {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
+  dataSource String    @default("cail") // 'cail' | 'local' | 'custom'
+  sourceId   String? // CAIL案件ID
+  importedAt DateTime?
+
   @@index([type])
   @@index([cause])
   @@index([result])
   @@index([judgmentDate])
+  @@index([dataSource])
   @@map("case_examples")
 }
 
@@ -1451,6 +1478,13 @@ enum LawStatus {
   AMENDED
   REPEALED
   EXPIRED
+}
+
+enum SyncStatus {
+  SYNCED
+  PENDING
+  FAILED
+  NEED_UPDATE
 }
 
 enum MemoryType {
@@ -1964,30 +1998,30 @@ enum ConsultStatus {
 // =============================================================================
 
 model CaseTypeConfig {
-  id           String   @id @default(cuid())
-  code         String   @unique  // 类型代码，如: LABOR_DISPUTE
-  name         String             // 类型名称，如: 劳动争议
-  category     String             // 大类：民事/刑事/行政/非诉
+  id       String @id @default(cuid())
+  code     String @unique // 类型代码，如: LABOR_DISPUTE
+  name     String // 类型名称，如: 劳动争议
+  category String // 大类：民事/刑事/行政/非诉
 
   // 收费配置
-  baseFee      Decimal  @db.Decimal(10, 2)  // 基础收费
-  riskFeeRate  Float?             // 风险代理比例
-  hourlyRate   Decimal? @db.Decimal(10, 2)  // 计时收费标准
+  baseFee     Decimal  @db.Decimal(10, 2) // 基础收费
+  riskFeeRate Float? // 风险代理比例
+  hourlyRate  Decimal? @db.Decimal(10, 2) // 计时收费标准
 
   // 材料清单模板
-  requiredDocs Json               // 必要材料清单
-  optionalDocs Json?              // 可选材料清单
+  requiredDocs Json // 必要材料清单
+  optionalDocs Json? // 可选材料清单
 
   // 案件特征
-  avgDuration   Int?               // 平均办案周期（天）
-  complexityLevel Int     @default(2) // 复杂度 1-5
+  avgDuration     Int? // 平均办案周期（天）
+  complexityLevel Int  @default(2) // 复杂度 1-5
 
   // 状态
-  isActive     Boolean  @default(true)
-  sortOrder    Int      @default(0)
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([category])
   @@index([isActive])
@@ -1996,49 +2030,49 @@ model CaseTypeConfig {
 }
 
 model Consultation {
-  id              String   @id @default(cuid())
+  id String @id @default(cuid())
 
   // 基本信息
-  consultNumber   String   @unique  // 咨询编号，如: ZX20260128001
-  clientName      String             // 咨询人姓名
-  clientPhone     String?            // 联系电话
-  clientEmail     String?            // 邮箱
-  clientCompany   String?            // 单位名称（企业客户）
+  consultNumber String  @unique // 咨询编号，如: ZX20260128001
+  clientName    String // 咨询人姓名
+  clientPhone   String? // 联系电话
+  clientEmail   String? // 邮箱
+  clientCompany String? // 单位名称（企业客户）
 
   // 咨询信息
-  consultType     ConsultationType   // 咨询方式：来电/来访/在线/转介绍
-  consultTime     DateTime           // 咨询时间
-  caseType        String?            // 案件类型
-  caseSummary     String             // 案情摘要
-  clientDemand    String?            // 客户诉求
+  consultType  ConsultationType // 咨询方式：来电/来访/在线/转介绍
+  consultTime  DateTime // 咨询时间
+  caseType     String? // 案件类型
+  caseSummary  String // 案情摘要
+  clientDemand String? // 客户诉求
 
   // AI评估结果
-  aiAssessment    Json?              // AI案件评估结果
-  winRate         Float?             // 胜诉率评估 (0-1)
-  difficulty      String?            // 难度评估：简单/中等/复杂
-  riskLevel       String?            // 风险等级：低/中/高
-  suggestedFee    Decimal?   @db.Decimal(10, 2) // 建议收费
+  aiAssessment Json? // AI案件评估结果
+  winRate      Float? // 胜诉率评估 (0-1)
+  difficulty   String? // 难度评估：简单/中等/复杂
+  riskLevel    String? // 风险等级：低/中/高
+  suggestedFee Decimal? @db.Decimal(10, 2) // 建议收费
 
   // 跟进状态
-  status          ConsultStatus      @default(PENDING)
-  followUpDate    DateTime?          // 下次跟进日期
-  followUpNotes   String?            // 跟进备注
+  status        ConsultStatus @default(PENDING)
+  followUpDate  DateTime? // 下次跟进日期
+  followUpNotes String? // 跟进备注
 
   // 转化信息
-  convertedToCaseId String?          // 转化后的案件ID
-  convertedAt       DateTime?        // 转化时间
+  convertedToCaseId String? // 转化后的案件ID
+  convertedAt       DateTime? // 转化时间
 
   // 关联
-  userId          String             // 接待律师ID
-  user            User               @relation(fields: [userId], references: [id])
+  userId String // 接待律师ID
+  user   User   @relation(fields: [userId], references: [id])
 
   // 跟进记录
-  followUps       ConsultationFollowUp[]
+  followUps ConsultationFollowUp[]
 
   // 时间戳
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  deletedAt       DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@index([userId])
   @@index([status])
@@ -2049,18 +2083,18 @@ model Consultation {
 }
 
 model ConsultationFollowUp {
-  id              String       @id @default(cuid())
-  consultationId  String
-  consultation    Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  id             String       @id @default(cuid())
+  consultationId String
+  consultation   Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
 
-  followUpTime    DateTime           // 跟进时间
-  followUpType    String             // 跟进方式：电话/微信/邮件/面谈
-  content         String             // 跟进内容
-  result          String?            // 跟进结果
-  nextFollowUp    DateTime?          // 下次跟进时间
+  followUpTime DateTime // 跟进时间
+  followUpType String // 跟进方式：电话/微信/邮件/面谈
+  content      String // 跟进内容
+  result       String? // 跟进结果
+  nextFollowUp DateTime? // 下次跟进时间
 
-  createdBy       String             // 记录人
-  createdAt       DateTime     @default(now())
+  createdBy String // 记录人
+  createdAt DateTime @default(now())
 
   @@index([consultationId])
   @@index([followUpTime])
@@ -2133,67 +2167,68 @@ model Notification {
 
 // 委托合同
 model Contract {
-  id              String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  contractNumber  String   @unique  // 合同编号
+  contractNumber String @unique // 合同编号
 
   // 关联
-  caseId          String?            // 关联案件
-  case            Case?    @relation(fields: [caseId], references: [id])
-  consultationId  String?            // 来源咨询
+  caseId         String? // 关联案件
+  case           Case?   @relation(fields: [caseId], references: [id])
+  consultationId String? // 来源咨询
 
   // 委托方信息
-  clientType      String             // 委托人类型：个人/企业
-  clientName      String             // 委托人姓名/名称
-  clientIdNumber  String?            // 身份证号/统一社会信用代码
-  clientAddress   String?            // 地址
-  clientContact   String?            // 联系方式
+  clientType     String // 委托人类型：个人/企业
+  clientName     String // 委托人姓名/名称
+  clientIdNumber String? // 身份证号/统一社会信用代码
+  clientAddress  String? // 地址
+  clientContact  String? // 联系方式
 
   // 受托方信息（律所/律师）
-  lawFirmName     String             // 律所名称
-  lawyerName      String             // 承办律师
-  lawyerId        String             // 律师ID
+  lawFirmName String // 律所名称
+  lawyerName  String // 承办律师
+  lawyerId    String // 律师ID
 
   // 委托事项
-  caseType        String             // 案件类型
-  caseSummary     String             // 案情简述
-  scope           String             // 委托范围
+  caseType    String // 案件类型
+  caseSummary String // 案情简述
+  scope       String // 委托范围
 
   // 收费信息
-  feeType         FeeType            // 收费方式
-  totalFee        Decimal            // 总费用
-  paidAmount      Decimal  @default(0) // 已付金额
-  feeDetails      Json?              // 费用明细
+  feeType    FeeType // 收费方式
+  totalFee   Decimal // 总费用
+  paidAmount Decimal @default(0) // 已付金额
+  feeDetails Json? // 费用明细
 
   // 合同条款
-  terms           Json?              // 合同条款（JSON格式存储）
-  specialTerms    String?            // 特别约定
+  terms        Json? // 合同条款（JSON格式存储）
+  specialTerms String? // 特别约定
 
   // 签署信息
-  status          ContractStatus     @default(DRAFT)
-  signedAt        DateTime?          // 签署时间
-  signatureData   Json?              // 签名数据（旧字段，保留兼容）
+  status        ContractStatus @default(DRAFT)
+  signedAt      DateTime? // 签署时间
+  signatureData Json? // 签名数据（旧字段，保留兼容）
 
   // 电子签名信息（新增）
-  clientSignature String?            // 委托人签名（Base64）
-  clientSignedAt  DateTime?          // 委托人签署时间
-  clientSignedIp  String?            // 委托人签署IP
-  lawyerSignature String?            // 律师签名（Base64）
-  lawyerSignedAt  DateTime?          // 律师签署时间
-  lawyerSignedIp  String?            // 律师签署IP
-  signatureDevice String?            // 签署设备信息
+  clientSignature String? // 委托人签名（Base64）
+  clientSignedAt  DateTime? // 委托人签署时间
+  clientSignedIp  String? // 委托人签署IP
+  lawyerSignature String? // 律师签名（Base64）
+  lawyerSignedAt  DateTime? // 律师签署时间
+  lawyerSignedIp  String? // 律师签署IP
+  signatureDevice String? // 签署设备信息
 
   // 文件
-  filePath        String?            // 合同文件路径
+  filePath String? // 合同文件路径
 
   // 时间戳
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // 关联
-  payments        ContractPayment[]
-  versions        ContractVersion[]  // 版本历史
-  approvals       ContractApproval[] // 审批记录
+  payments    ContractPayment[]
+  versions    ContractVersion[] // 版本历史
+  approvals   ContractApproval[] // 审批记录
+  lawArticles ContractLawArticle[] // 关联的法条
 
   @@index([caseId])
   @@index([clientName])
@@ -2209,42 +2244,42 @@ model Contract {
 }
 
 enum FeeType {
-  FIXED     // 固定收费
-  RISK      // 风险代理
-  HOURLY    // 计时收费
-  MIXED     // 混合收费
+  FIXED // 固定收费
+  RISK // 风险代理
+  HOURLY // 计时收费
+  MIXED // 混合收费
 }
 
 enum ContractStatus {
-  DRAFT       // 草稿
-  PENDING     // 待签署
-  SIGNED      // 已签署
-  EXECUTING   // 履行中
-  COMPLETED   // 已完成
-  TERMINATED  // 已终止
+  DRAFT // 草稿
+  PENDING // 待签署
+  SIGNED // 已签署
+  EXECUTING // 履行中
+  COMPLETED // 已完成
+  TERMINATED // 已终止
 }
 
 // 合同付款记录
 model ContractPayment {
-  id              String   @id @default(cuid())
-  contractId      String
-  contract        Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
 
-  paymentNumber   String   @unique  // 付款编号
-  amount          Decimal            // 付款金额
-  paymentType     String             // 付款类型：首付款/中期款/尾款
-  paymentMethod   String?            // 付款方式：转账/现金/微信/支付宝
+  paymentNumber String  @unique // 付款编号
+  amount        Decimal // 付款金额
+  paymentType   String // 付款类型：首付款/中期款/尾款
+  paymentMethod String? // 付款方式：转账/现金/微信/支付宝
 
-  status          ContractPaymentStatus      @default(PENDING)
-  paidAt          DateTime?          // 实际付款时间
+  status ContractPaymentStatus @default(PENDING)
+  paidAt DateTime? // 实际付款时间
 
-  receiptNumber   String?            // 收据编号
-  invoiceId       String?            // 关联发票ID
+  receiptNumber String? // 收据编号
+  invoiceId     String? // 关联发票ID
 
-  note            String?            // 备注
+  note String? // 备注
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([contractId])
   @@index([status])
@@ -2253,28 +2288,50 @@ model ContractPayment {
 }
 
 enum ContractPaymentStatus {
-  PENDING   // 待付款
-  PAID      // 已付款
-  OVERDUE   // 已逾期
+  PENDING // 待付款
+  PAID // 已付款
+  OVERDUE // 已逾期
   CANCELLED // 已取消
+}
+
+// 合同关联法条
+model ContractLawArticle {
+  id           String @id @default(cuid())
+  contractId   String
+  lawArticleId String
+
+  contract   Contract   @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  lawArticle LawArticle @relation(fields: [lawArticleId], references: [id], onDelete: Cascade)
+
+  // 关联元数据
+  addedBy        String // 添加人
+  addedAt        DateTime @default(now())
+  reason         String? // 添加原因/备注
+  relevanceScore Float? // 相关性分数
+
+  @@unique([contractId, lawArticleId])
+  @@index([contractId])
+  @@index([lawArticleId])
+  @@index([addedAt])
+  @@map("contract_law_articles")
 }
 
 // 合同模板
 model ContractTemplate {
-  id              String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  name            String             // 模板名称
-  code            String   @unique   // 模板代码
-  category        String             // 分类：委托代理/法律顾问/专项服务
+  name     String // 模板名称
+  code     String @unique // 模板代码
+  category String // 分类：委托代理/法律顾问/专项服务
 
-  content         String             // 模板内容（支持变量占位符）
-  variables       Json               // 变量列表定义
+  content   String // 模板内容（支持变量占位符）
+  variables Json // 变量列表定义
 
-  isDefault       Boolean  @default(false)
-  isActive        Boolean  @default(true)
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([category])
   @@index([isActive])
@@ -2284,18 +2341,18 @@ model ContractTemplate {
 
 // 合同版本记录
 model ContractVersion {
-  id              String   @id @default(cuid())
-  contractId      String
-  contract        Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
 
-  version         Int                // 版本号
-  snapshot        Json               // 合同数据快照
-  changes         Json?              // 变更内容
-  changeType      String             // 变更类型：CREATE/UPDATE/SIGN
+  version    Int // 版本号
+  snapshot   Json // 合同数据快照
+  changes    Json? // 变更内容
+  changeType String // 变更类型：CREATE/UPDATE/SIGN
 
-  createdBy       String             // 创建人
-  createdAt       DateTime @default(now())
-  comment         String?            // 版本说明
+  createdBy String // 创建人
+  createdAt DateTime @default(now())
+  comment   String? // 版本说明
 
   @@index([contractId])
   @@index([createdAt])
@@ -2308,14 +2365,14 @@ model ContractVersion {
 
 // 审批流程模板
 model ApprovalTemplate {
-  id              String   @id @default(cuid())
-  name            String             // 模板名称
-  description     String?            // 描述
-  steps           Json               // 审批步骤配置
-  isActive        Boolean  @default(true)
+  id          String  @id @default(cuid())
+  name        String // 模板名称
+  description String? // 描述
+  steps       Json // 审批步骤配置
+  isActive    Boolean @default(true)
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([isActive])
   @@map("approval_templates")
@@ -2323,19 +2380,19 @@ model ApprovalTemplate {
 
 // 合同审批记录
 model ContractApproval {
-  id              String   @id @default(cuid())
-  contractId      String
-  contract        Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
 
-  templateId      String?            // 使用的模板
-  currentStep     Int      @default(1) // 当前步骤
-  status          ApprovalStatus     // 审批状态
+  templateId  String? // 使用的模板
+  currentStep Int            @default(1) // 当前步骤
+  status      ApprovalStatus // 审批状态
 
-  createdBy       String             // 发起人
-  createdAt       DateTime @default(now())
-  completedAt     DateTime?          // 完成时间
+  createdBy   String // 发起人
+  createdAt   DateTime  @default(now())
+  completedAt DateTime? // 完成时间
 
-  steps           ApprovalStep[]
+  steps ApprovalStep[]
 
   @@index([contractId])
   @@index([status])
@@ -2346,21 +2403,21 @@ model ContractApproval {
 
 // 审批步骤
 model ApprovalStep {
-  id              String   @id @default(cuid())
-  approvalId      String
-  approval        ContractApproval @relation(fields: [approvalId], references: [id], onDelete: Cascade)
+  id         String           @id @default(cuid())
+  approvalId String
+  approval   ContractApproval @relation(fields: [approvalId], references: [id], onDelete: Cascade)
 
-  stepNumber      Int                // 步骤序号
-  approverRole    String             // 审批角色
-  approverId      String?            // 审批人ID
-  approverName    String?            // 审批人姓名
+  stepNumber   Int // 步骤序号
+  approverRole String // 审批角色
+  approverId   String? // 审批人ID
+  approverName String? // 审批人姓名
 
-  status          StepStatus         // 步骤状态
-  decision        String?            // 审批决定：APPROVE/REJECT/RETURN
-  comment         String?            // 审批意见
+  status   StepStatus // 步骤状态
+  decision String? // 审批决定：APPROVE/REJECT/RETURN
+  comment  String? // 审批意见
 
-  createdAt       DateTime @default(now())
-  completedAt     DateTime?          // 完成时间
+  createdAt   DateTime  @default(now())
+  completedAt DateTime? // 完成时间
 
   @@index([approvalId])
   @@index([status])
@@ -2369,16 +2426,271 @@ model ApprovalStep {
 }
 
 enum ApprovalStatus {
-  PENDING     // 待审批
+  PENDING // 待审批
   IN_PROGRESS // 审批中
-  APPROVED    // 已通过
-  REJECTED    // 已拒绝
-  CANCELLED   // 已取消
+  APPROVED // 已通过
+  REJECTED // 已拒绝
+  CANCELLED // 已取消
 }
 
 enum StepStatus {
-  PENDING     // 待审批
-  APPROVED    // 已通过
-  REJECTED    // 已拒绝
-  SKIPPED     // 已跳过
+  PENDING // 待审批
+  APPROVED // 已通过
+  REJECTED // 已拒绝
+  SKIPPED // 已跳过
+}
+
+// =============================================================================
+// 外部API缓存表
+// =============================================================================
+
+model ExternalCache {
+  id             String    @id @default(cuid())
+  source         String // 'lawstar' | 'pkulaw'
+  query          String
+  queryHash      String    @unique // 查询哈希（用于去重）
+  resultType     String // 'law_article' | 'case_example'
+  resultData     Json // 缓存的结果数据
+  hitCount       Int       @default(0) // 命中次数
+  expiresAt      DateTime // 过期时间
+  createdAt      DateTime  @default(now())
+  lastAccessedAt DateTime?
+
+  @@index([source])
+  @@index([queryHash])
+  @@index([expiresAt])
+  @@index([hitCount])
+  @@map("external_cache")
+}
+
+// =============================================================================
+// 法律知识图谱 - 法条关系表
+// =============================================================================
+
+model LawArticleRelation {
+  id String @id @default(cuid())
+
+  // 关系的两端
+  sourceId String
+  targetId String
+  source   LawArticle @relation("SourceRelations", fields: [sourceId], references: [id], onDelete: Cascade)
+  target   LawArticle @relation("TargetRelations", fields: [targetId], references: [id], onDelete: Cascade)
+
+  // 关系类型
+  relationType RelationType
+
+  // 关系属性
+  strength    Float   @default(1.0) // 关系强度 0-1
+  confidence  Float   @default(1.0) // 置信度 0-1
+  description String? // 关系描述
+  evidence    Json? // 证据（引用的具体文本）
+
+  // 发现方式
+  discoveryMethod DiscoveryMethod @default(MANUAL)
+
+  // 审核状态
+  verificationStatus VerificationStatus @default(PENDING)
+  verifiedBy         String?
+  verifiedAt         DateTime?
+
+  // 元数据
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 用户反馈
+  feedbacks RelationFeedback[]
+
+  // 复合索引用于快速查找和去重
+  @@index([sourceId, targetId, relationType])
+  @@index([sourceId])
+  @@index([targetId])
+  @@index([relationType])
+  @@index([strength])
+  @@index([verificationStatus])
+  @@index([discoveryMethod])
+  @@map("law_article_relations")
+}
+
+// 关系类型枚举（包含正向和反向关系）
+enum RelationType {
+  // 引用关系
+  CITES // 引用关系：A明确引用B
+  CITED_BY // 被引用关系：B被A引用（反向）
+
+  // 冲突关系
+  CONFLICTS // 冲突关系：A与B存在冲突
+
+  // 补全关系
+  COMPLETES // 补全关系：A补充完善B
+  COMPLETED_BY // 被补全关系：B被A补全（反向）
+
+  // 替代关系
+  SUPERSEDES // 替代关系：A替代B（新法替旧法）
+  SUPERSEDED_BY // 被替代关系：B被A替代（反向）
+
+  // 实施关系
+  IMPLEMENTS // 实施关系：A实施B（细则实施原则）
+  IMPLEMENTED_BY // 被实施关系：B被A实施（反向）
+
+  // 一般关联
+  RELATED // 一般关联：相关但不属于上述类型
+}
+
+// 发现方式
+enum DiscoveryMethod {
+  MANUAL // 人工添加
+  RULE_BASED // 规则匹配
+  AI_DETECTED // AI检测
+  CASE_DERIVED // 案例推导
+}
+
+// 审核状态
+enum VerificationStatus {
+  PENDING // 待审核
+  VERIFIED // 已验证
+  REJECTED // 已拒绝
+}
+
+// =============================================================================
+// 用户反馈系统
+// =============================================================================
+
+// 推荐反馈模型
+model RecommendationFeedback {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 被推荐的法条
+  lawArticleId String
+  lawArticle   LawArticle @relation(fields: [lawArticleId], references: [id], onDelete: Cascade)
+
+  // 推荐上下文
+  contextType FeedbackContextType
+  contextId   String? // 辩论ID或合同ID
+
+  // 反馈内容
+  feedbackType RecommendationFeedbackType
+  comment      String? // 可选的文字反馈
+
+  // 元数据
+  metadata Json? // 额外信息（如推荐分数、推荐原因等）
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([lawArticleId])
+  @@index([contextType])
+  @@index([feedbackType])
+  @@index([createdAt])
+  @@index([userId, lawArticleId])
+  @@map("recommendation_feedbacks")
+}
+
+// 关系反馈模型
+model RelationFeedback {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 被反馈的关系
+  relationId String
+  relation   LawArticleRelation @relation(fields: [relationId], references: [id], onDelete: Cascade)
+
+  // 反馈内容
+  feedbackType          RelationFeedbackType
+  suggestedRelationType RelationType? // 如果用户认为关系类型不对，建议的类型
+  comment               String? // 可选的文字反馈
+
+  // 元数据
+  metadata Json? // 额外信息
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([relationId])
+  @@index([feedbackType])
+  @@index([createdAt])
+  @@index([userId, relationId])
+  @@map("relation_feedbacks")
+}
+
+// 反馈上下文类型
+enum FeedbackContextType {
+  DEBATE // 辩论场景
+  CONTRACT // 合同场景
+  GENERAL // 一般场景
+  SEARCH // 搜索场景
+}
+
+// 推荐反馈类型
+enum RecommendationFeedbackType {
+  HELPFUL // 有用
+  NOT_HELPFUL // 无用
+  IRRELEVANT // 不相关
+  EXCELLENT // 非常好
+}
+
+// 导出任务模型
+model ExportTask {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  filename    String
+  exportType  ExportType
+  format      ExportFormat
+  status      ExportTaskStatus @default(PENDING)
+  filePath    String?
+  fileSize    Int?             @default(0)
+  progress    Int              @default(0)
+  error       String?
+  metadata    Json?
+  createdAt   DateTime         @default(now())
+  completedAt DateTime?
+  updatedAt   DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([exportType])
+  @@index([createdAt])
+  @@map("export_tasks")
+}
+
+// 导出类型
+enum ExportType {
+  CASES // 案件
+  CONSULTATIONS // 咨询
+  CONTRACTS // 合同
+  STATS // 统计数据
+  MEMBERSHIPS // 会员数据
+  DOCUMENTS // 文档
+}
+
+// 导出格式
+enum ExportFormat {
+  CSV
+  EXCEL
+  PDF
+  JSON
+}
+
+// 导出任务状态
+enum ExportTaskStatus {
+  PENDING // 待处理
+  PROCESSING // 处理中
+  COMPLETED // 已完成
+  FAILED // 失败
+  CANCELLED // 已取消
+}
+
+// 关系反馈类型
+enum RelationFeedbackType {
+  ACCURATE // 准确
+  INACCURATE // 不准确
+  MISSING // 缺失（应该有这个关系但没有）
+  SHOULD_REMOVE // 应该删除（不应该有这个关系）
+  WRONG_TYPE // 关系类型错误
 }

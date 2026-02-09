@@ -67,15 +67,8 @@ interface AIAnalysisResponse {
  * 证据链分析服务类
  */
 export class EvidenceChainService {
-  private aiService: AIService;
-
   constructor() {
-    this.aiService = new AIService({
-      apiKey: process.env.DEEPSEEK_API_KEY || '',
-      model: 'deepseek-chat',
-      temperature: 0.3, // 较低温度以获得更稳定的分析结果
-      maxTokens: 4000,
-    });
+    // AIService是静态类，不需要实例化
   }
 
   /**
@@ -103,26 +96,13 @@ export class EvidenceChainService {
 
     try {
       // 调用AI服务
-      const aiResponse = await this.aiService.chat(
-        [
-          {
-            role: 'system',
-            content:
-              '你是一位专业的法律证据分析专家，擅长分析证据链的完整性和关联性。',
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        {
-          temperature: 0.3,
-          maxTokens: 4000,
-        }
+      const aiResponse = await AIService.analyzeDocument(
+        prompt,
+        'evidence-chain'
       );
 
       // 解析AI响应
-      const result = this.parseAIResponse(aiResponse);
+      const result = this.parseAIResponse(aiResponse.content);
 
       return result;
     } catch (error) {

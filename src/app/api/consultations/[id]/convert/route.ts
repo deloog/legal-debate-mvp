@@ -3,63 +3,15 @@
  * GET /api/consultations/[id]/convert - 获取转化预览
  * POST /api/consultations/[id]/convert - 执行转化
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentUserId } from '@/lib/auth/get-current-user';
 import {
-  createConversionService,
   ConversionResult,
+  createConversionService,
 } from '@/lib/consultation/conversion-service';
+import { ErrorResponse, SuccessResponse } from '@/types/api-response';
+import { ConversionPreviewData, ConvertRequest } from '@/types/consultation';
 import { CaseType } from '@prisma/client';
-
-/**
- * 标准成功响应格式
- */
-interface SuccessResponse<T> {
-  success: true;
-  data: T;
-}
-
-/**
- * 标准错误响应格式
- */
-interface ErrorResponse {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-  };
-}
-
-/**
- * 转化预览响应数据
- */
-interface ConversionPreviewData {
-  consultNumber: string;
-  clientName: string;
-  clientPhone: string | null;
-  clientEmail: string | null;
-  caseType: string | null;
-  caseSummary: string;
-  clientDemand: string | null;
-  suggestedTitle: string;
-  suggestedCaseType: CaseType;
-  winRate: number | null;
-  difficulty: string | null;
-  riskLevel: string | null;
-  suggestedFee: number | null;
-}
-
-/**
- * 转化请求体接口
- */
-interface ConvertRequest {
-  title?: string;
-  description?: string;
-  caseType?: CaseType;
-  plaintiffName?: string;
-  defendantName?: string;
-  amount?: number;
-  createClient?: boolean;
-}
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * GET /api/consultations/[id]/convert
@@ -161,15 +113,15 @@ export async function POST(
     // 验证案件类型
     if (body.caseType) {
       const validCaseTypes: CaseType[] = [
-        'CIVIL',
-        'CRIMINAL',
-        'ADMINISTRATIVE',
-        'COMMERCIAL',
-        'LABOR',
-        'INTELLECTUAL',
-        'OTHER',
+        'CIVIL' as CaseType,
+        'CRIMINAL' as CaseType,
+        'ADMINISTRATIVE' as CaseType,
+        'COMMERCIAL' as CaseType,
+        'LABOR' as CaseType,
+        'INTELLECTUAL' as CaseType,
+        'OTHER' as CaseType,
       ];
-      if (!validCaseTypes.includes(body.caseType)) {
+      if (!validCaseTypes.includes(body.caseType as CaseType)) {
         return NextResponse.json(
           {
             success: false,
@@ -187,11 +139,11 @@ export async function POST(
     const conversionService = createConversionService();
     const result = await conversionService.convertToCase({
       consultationId: id,
-      // TODO: 从session获取真实用户ID
-      userId: 'demo-user-id',
+      // 从session获取真实用户ID
+      userId: await getCurrentUserId(),
       title: body.title,
       description: body.description,
-      caseType: body.caseType,
+      caseType: body.caseType as CaseType,
       plaintiffName: body.plaintiffName,
       defendantName: body.defendantName,
       amount: body.amount,

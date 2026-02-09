@@ -100,9 +100,13 @@ function getFollowUpTaskTemplate(
   `.trim();
 
   return {
+    id: 'follow-up-reminder',
+    name: '跟进任务提醒',
     subject: '律伴助手 - 跟进任务提醒',
+    content: textContent,
     textContent,
     htmlContent,
+    variables: [],
   };
 }
 
@@ -124,13 +128,20 @@ class DevEmailService {
     console.log('\n' + '='.repeat(60));
     console.log('📧 邮件发送（开发环境）');
     console.log('='.repeat(60));
-    console.log(`收件人: ${options.to}`);
+    const toStr = Array.isArray(options.to) ? options.to.join(', ') : options.to;
+    console.log(`收件人: ${toStr}`);
     console.log(`主题: ${options.subject}`);
-    if (options.cc) console.log(`抄送: ${options.cc.join(', ')}`);
-    if (options.bcc) console.log(`密送: ${options.bcc.join(', ')}`);
+    if (options.cc) {
+      const ccStr = Array.isArray(options.cc) ? options.cc.join(', ') : options.cc;
+      console.log(`抄送: ${ccStr}`);
+    }
+    if (options.bcc) {
+      const bccStr = Array.isArray(options.bcc) ? options.bcc.join(', ') : options.bcc;
+      console.log(`密送: ${bccStr}`);
+    }
     console.log('-'.repeat(60));
     console.log('内容（纯文本）：');
-    console.log(options.text);
+    console.log(options.text || options.content);
     if (options.html) {
       console.log('-'.repeat(60));
       console.log('内容（HTML）：');
@@ -155,6 +166,7 @@ class DevEmailService {
     const options: EmailSendOptions = {
       to: clientEmail,
       subject: template.subject,
+      content: template.content,
       text: template.textContent,
       html: template.htmlContent,
     };

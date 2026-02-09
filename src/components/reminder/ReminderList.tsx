@@ -179,9 +179,11 @@ export function ReminderList({ userId }: ReminderListProps) {
   const getReminderTypeLabel = (type: ReminderType): string => {
     const typeLabels: Record<ReminderType, string> = {
       COURT_SCHEDULE: '法庭日程',
-      DEADLINE: '截止日期',
+      CASE_DEADLINE: '截止日期',
+      TASK_DUE: '任务提醒',
+      HEARING_DATE: '开庭日期',
+      PAYMENT_DUE: '付款提醒',
       FOLLOW_UP: '跟进提醒',
-      TASK: '任务提醒',
       CUSTOM: '自定义提醒',
     };
     return typeLabels[type] || type;
@@ -192,6 +194,8 @@ export function ReminderList({ userId }: ReminderListProps) {
       PENDING: '待发送',
       SENT: '已发送',
       READ: '已读',
+      CANCELLED: '已取消',
+      FAILED: '发送失败',
       DISMISSED: '已忽略',
     };
     return statusLabels[status] || status;
@@ -202,7 +206,9 @@ export function ReminderList({ userId }: ReminderListProps) {
       PENDING: 'bg-yellow-100 text-yellow-800',
       SENT: 'bg-blue-100 text-blue-800',
       READ: 'bg-green-100 text-green-800',
-      DISMISSED: 'bg-gray-100 text-gray-800',
+      CANCELLED: 'bg-gray-100 text-gray-800',
+      FAILED: 'bg-red-100 text-red-800',
+      DISMISSED: 'bg-gray-100 text-gray-600',
     };
     return statusColors[status] || 'bg-gray-100 text-gray-800';
   };
@@ -210,9 +216,11 @@ export function ReminderList({ userId }: ReminderListProps) {
   const getTypeColor = (type: ReminderType): string => {
     const typeColors: Record<ReminderType, string> = {
       COURT_SCHEDULE: 'bg-red-100 text-red-800',
-      DEADLINE: 'bg-orange-100 text-orange-800',
+      CASE_DEADLINE: 'bg-orange-100 text-orange-800',
+      TASK_DUE: 'bg-green-100 text-green-800',
+      HEARING_DATE: 'bg-red-100 text-red-800',
+      PAYMENT_DUE: 'bg-yellow-100 text-yellow-800',
       FOLLOW_UP: 'bg-purple-100 text-purple-800',
-      TASK: 'bg-green-100 text-green-800',
       CUSTOM: 'bg-gray-100 text-gray-800',
     };
     return typeColors[type] || 'bg-gray-100 text-gray-800';
@@ -370,6 +378,7 @@ export function ReminderList({ userId }: ReminderListProps) {
                                   IN_APP: '站内',
                                   EMAIL: '邮件',
                                   SMS: '短信',
+                                  PUSH: '推送',
                                   WEBHOOK: 'Webhook',
                                 };
                                 return channelLabels[channel];

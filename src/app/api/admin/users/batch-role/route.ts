@@ -3,33 +3,16 @@
  * 提供批量分配角色给用户的操作
  */
 
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
+import type {
+  BatchAssignDetailResult,
+  BatchAssignRoleRequest,
+  UserAssignResult,
+} from '@/types/admin-user';
 import type { UserRole } from '@/types/auth';
-
-// =============================================================================
-// 类型定义
-// =============================================================================
-
-/**
- * 批量分配角色请求体
- */
-interface BatchAssignRoleRequest {
-  userIds: string[];
-  role: string;
-}
-
-/**
- * 批量分配结果
- */
-interface BatchAssignResult {
-  success: boolean;
-  userId: string;
-  email: string;
-  message?: string;
-}
+import { NextRequest, NextResponse } from 'next/server';
 
 // =============================================================================
 // 辅助函数
@@ -125,7 +108,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // 批量更新用户角色
-    const results: BatchAssignResult[] = await Promise.all(
+    const results: UserAssignResult[] = await Promise.all(
       users.map(async u => {
         try {
           await prisma.user.update({
@@ -151,15 +134,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const successCount = results.filter(r => r.success).length;
     const failureCount = results.length - successCount;
 
+    const detailResult: BatchAssignDetailResult = {
+      total: results.length,
+      success: successCount,
+      failed: failureCount,
+      results,
+    };
+
     return Response.json(
       {
         message: `成功分配 ${successCount} 个用户的角色，失败 ${failureCount} 个`,
-        data: {
-          total: results.length,
-          success: successCount,
-          failure: failureCount,
-          results,
-        },
+        data: detailResult,
       },
       { status: 200 }
     ) as unknown as NextResponse;

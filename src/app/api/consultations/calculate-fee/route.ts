@@ -2,50 +2,15 @@
  * 律师费计算API路由
  * POST /api/consultations/calculate-fee - 计算律师费
  */
-import { NextRequest, NextResponse } from 'next/server';
 import {
-  FeeCalculatorService,
   createFeeCalculatorService,
   FeeCalculationResult,
+  FeeCalculatorService,
   FeeMode,
 } from '@/lib/consultation/fee-calculator-service';
-
-/**
- * 标准成功响应格式
- */
-interface SuccessResponse<T> {
-  success: true;
-  data: T;
-}
-
-/**
- * 标准错误响应格式
- */
-interface ErrorResponse {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-  };
-}
-
-/**
- * 请求体接口
- */
-interface CalculateFeeRequest {
-  consultationId?: string;
-  caseType?: string;
-  caseAmount?: number;
-  difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
-  feeMode: FeeMode;
-  riskRate?: number;
-  estimatedHours?: number;
-  hourlyRate?: number;
-  stages?: Array<{
-    name: string;
-    percentage: number;
-  }>;
-}
+import { ErrorResponse, SuccessResponse } from '@/types/api-response';
+import { CalculateFeeRequest } from '@/types/consultation';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * POST /api/consultations/calculate-fee
@@ -75,8 +40,13 @@ export async function POST(
     }
 
     // 验证收费模式
-    const validFeeModes: FeeMode[] = ['FIXED', 'RISK', 'HOURLY', 'STAGED'];
-    if (!body.feeMode || !validFeeModes.includes(body.feeMode)) {
+    const validFeeModes: FeeMode[] = [
+      'FIXED' as FeeMode,
+      'RISK' as FeeMode,
+      'HOURLY' as FeeMode,
+      'STAGED' as FeeMode,
+    ];
+    if (!body.feeMode || !validFeeModes.includes(body.feeMode as FeeMode)) {
       return NextResponse.json(
         {
           success: false,
@@ -127,7 +97,7 @@ export async function POST(
       caseType: body.caseType,
       caseAmount: body.caseAmount,
       difficulty: body.difficulty,
-      feeMode: body.feeMode,
+      feeMode: body.feeMode as FeeMode,
       riskRate: body.riskRate,
       estimatedHours: body.estimatedHours,
       hourlyRate: body.hourlyRate,

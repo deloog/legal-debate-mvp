@@ -3,32 +3,29 @@
  * GET /api/contracts - 获取合同列表
  * POST /api/contracts - 创建合同
  */
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { ContractStatus } from '@/types/contract';
 import {
-  validateCreateContract,
-  validateContractListQuery,
   getFirstZodError,
+  validateContractListQuery,
+  validateCreateContract,
 } from '@/lib/validations/contract';
+import type { ErrorResponse, SuccessResponse } from '@/types/api-response';
+import { ContractStatus, FeeType } from '@/types/contract';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * 标准成功响应格式
+ * 转换 Zod 验证后的 feeType 为 Prisma 期望的类型
+ * 兼容处理 CONTINGENCY -> RISK 等映射
  */
-interface SuccessResponse<T> {
-  success: true;
-  data: T;
-}
-
-/**
- * 标准错误响应格式
- */
-interface ErrorResponse {
-  success: false;
-  error: {
-    code: string;
-    message: string;
+function convertFeeTypeForPrisma(feeType: string): FeeType {
+  const mapping: Record<string, FeeType> = {
+    FIXED: 'FIXED',
+    HOURLY: 'HOURLY',
+    CONTINGENCY: 'RISK',
+    RETAINER: 'FIXED', // RETAINER 映射到 FIXED
+    MIXED: 'MIXED',
   };
+  return mapping[feeType] || 'FIXED';
 }
 
 /**
@@ -118,14 +115,14 @@ export async function GET(request: NextRequest): Promise<
 
     // 日期范围筛选
     if (startDate || endDate) {
-      where.createdAt = {};
+      where.createdAt = {} as any;
       if (startDate) {
-        where.createdAt.gte = new Date(startDate);
+        (where.createdAt as any).gte = new Date(startDate);
       }
       if (endDate) {
         const endDateTime = new Date(endDate);
         endDateTime.setHours(23, 59, 59, 999);
-        where.createdAt.lte = endDateTime;
+        (where.createdAt as any).lte = endDateTime;
       }
     }
 
@@ -273,7 +270,7 @@ export async function POST(
         caseType: data.caseType,
         caseSummary: data.caseSummary,
         scope: data.scope,
-        feeType: data.feeType,
+        feeType: convertFeeTypeForPrisma(data.feeType),
         totalFee: data.totalFee,
         feeDetails: data.feeDetails || null,
         terms: data.terms || null,

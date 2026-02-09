@@ -43,9 +43,10 @@ describe('首页路由', () => {
       mockUseAuth.mockReturnValue({
         user: null,
         loading: false,
-        login: jest.fn(),
+        checkAuth: jest.fn(),
+        // login: jest.fn(),
         logout: jest.fn(),
-        register: jest.fn(),
+        // register: jest.fn(),
       });
 
       render(<Home />);
@@ -93,9 +94,10 @@ describe('首页路由', () => {
       mockUseAuth.mockReturnValue({
         user: mockLawyerUser,
         loading: false,
-        login: jest.fn(),
+        checkAuth: jest.fn(),
+        // login: jest.fn(),
         logout: jest.fn(),
-        register: jest.fn(),
+        // register: jest.fn(),
       });
 
       render(<Home />);
@@ -142,9 +144,10 @@ describe('首页路由', () => {
       mockUseAuth.mockReturnValue({
         user: mockEnterpriseUser,
         loading: false,
-        login: jest.fn(),
+        checkAuth: jest.fn(),
+        // login: jest.fn(),
         logout: jest.fn(),
-        register: jest.fn(),
+        // register: jest.fn(),
       });
 
       render(<Home />);
@@ -208,9 +211,10 @@ describe('首页路由', () => {
       mockUseAuth.mockReturnValue({
         user: mockDualRoleUser,
         loading: false,
-        login: jest.fn(),
+        checkAuth: jest.fn(),
+        // login: jest.fn(),
         logout: jest.fn(),
-        register: jest.fn(),
+        // register: jest.fn(),
       });
 
       render(<Home />);
@@ -241,9 +245,10 @@ describe('首页路由', () => {
       mockUseAuth.mockReturnValue({
         user: mockGeneralUser,
         loading: false,
-        login: jest.fn(),
+        checkAuth: jest.fn(),
+        // login: jest.fn(),
         logout: jest.fn(),
-        register: jest.fn(),
+        // register: jest.fn(),
       });
 
       render(<Home />);
@@ -261,9 +266,10 @@ describe('首页路由', () => {
       mockUseAuth.mockReturnValue({
         user: null,
         loading: true,
-        login: jest.fn(),
+        checkAuth: jest.fn(),
+        // login: jest.fn(),
         logout: jest.fn(),
-        register: jest.fn(),
+        // register: jest.fn(),
       });
 
       render(<Home />);
@@ -307,9 +313,10 @@ describe('首页路由', () => {
       mockUseAuth.mockReturnValue({
         user: mockPendingLawyerUser,
         loading: false,
-        login: jest.fn(),
+        checkAuth: jest.fn(),
+        // login: jest.fn(),
         logout: jest.fn(),
-        register: jest.fn(),
+        // register: jest.fn(),
       });
 
       render(<Home />);

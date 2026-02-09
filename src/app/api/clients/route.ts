@@ -1,12 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import {
-  createSuccessResponse,
   createCreatedResponse,
+  createSuccessResponse,
 } from '@/app/api/lib/responses/success';
 import { prisma } from '@/lib/db/prisma';
-import { Prisma } from '@prisma/client';
 import { getAuthUser } from '@/lib/middleware/auth';
+import {
+  ClientDetail,
+  ClientSource,
+  ClientStatus,
+  ClientType,
+} from '@/types/client';
+import { Prisma } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 const createClientSchema = z
@@ -91,32 +97,6 @@ async function getClientCount(clientId: string): Promise<number> {
   return cases + communications;
 }
 
-type ClientDetail = {
-  id: string;
-  userId: string;
-  clientType: 'INDIVIDUAL' | 'ENTERPRISE' | 'POTENTIAL';
-  name: string;
-  gender: string | null;
-  age: number | null;
-  profession: string | null;
-  phone: string | null;
-  email: string | null;
-  address: string | null;
-  idCardNumber: string | null;
-  company: string | null;
-  creditCode: string | null;
-  legalRep: string | null;
-  source: 'REFERRAL' | 'ONLINE' | 'EVENT' | 'ADVERTISING' | 'OTHER' | null;
-  tags: string[];
-  status: 'ACTIVE' | 'INACTIVE' | 'LOST' | 'BLACKLISTED';
-  notes: string | null;
-  metadata: Record<string, unknown> | null;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | undefined;
-  cases?: number;
-};
-
 async function mapClientToDetail(
   client: unknown,
   includeCounts = false
@@ -129,10 +109,7 @@ async function mapClientToDetail(
   const detail: ClientDetail = {
     id: String(clientObj.id || ''),
     userId: String(clientObj.userId || ''),
-    clientType: clientObj.clientType as
-      | 'INDIVIDUAL'
-      | 'ENTERPRISE'
-      | 'POTENTIAL',
+    clientType: clientObj.clientType as ClientType,
     name: String(clientObj.name || ''),
     gender: clientObj.gender as string | null,
     age: clientObj.age as number | null,
@@ -144,22 +121,16 @@ async function mapClientToDetail(
     company: clientObj.company as string | null,
     creditCode: clientObj.creditCode as string | null,
     legalRep: clientObj.legalRep as string | null,
-    source: clientObj.source as
-      | 'REFERRAL'
-      | 'ONLINE'
-      | 'EVENT'
-      | 'ADVERTISING'
-      | 'OTHER'
-      | null,
+    source: clientObj.source as ClientSource | null,
     tags: Array.isArray(clientObj.tags) ? (clientObj.tags as string[]) : [],
-    status: clientObj.status as 'ACTIVE' | 'INACTIVE' | 'LOST' | 'BLACKLISTED',
+    status: clientObj.status as ClientStatus,
     notes: clientObj.notes as string | null,
     metadata: clientObj.metadata as Record<string, unknown> | null,
     createdAt: new Date(clientObj.createdAt as string),
     updatedAt: new Date(clientObj.updatedAt as string),
     deletedAt: clientObj.deletedAt
       ? new Date(clientObj.deletedAt as string)
-      : undefined,
+      : null,
   };
 
   if (includeCounts && clientObj.id) {

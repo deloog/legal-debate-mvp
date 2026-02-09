@@ -66,6 +66,23 @@ export interface Claim {
   evidence?: string[];
   legalBasis?: string;
   _inferred?: boolean; // 标记为推断结果
+  subType?: string; // 细分类型（如"货款"、"借款"、"罚息"等）
+  dependencies?: ClaimDependency[]; // 请求依赖关系
+}
+
+// 请求依赖关系类型
+export interface ClaimDependency {
+  claimId: string; // 依赖的请求ID
+  dependencyType: 'prerequisite' | 'alternative' | 'supplementary'; // 依赖类型
+  description?: string; // 依赖关系描述
+}
+
+// 请求依赖关系详细信息
+export interface ClaimDependencyInfo {
+  claim: Claim;
+  dependsOn: string[]; // 依赖的其他请求ID
+  type: 'prerequisite' | 'alternative' | 'supplementary';
+  description: string;
 }
 
 export type ClaimType =
@@ -76,7 +93,29 @@ export type ClaimType =
   | 'LITIGATION_COST'
   | 'PERFORMANCE'
   | 'TERMINATION'
-  | 'OTHER';
+  | 'OTHER'
+  // 细分类型 - 金钱给付类
+  | 'PAYMENT_PRINCIPAL' // 支付本金
+  | 'PAYMENT_INTEREST' // 支付利息
+  | 'PAYMENT_PENALTY' // 支付违约金
+  | 'PAYMENT_COMPENSATION' // 支付赔偿金
+  | 'PAYMENT_LIQUIDATED_DAMAGES' // 支付损害赔偿金
+  // 细分类型 - 履行类
+  | 'PERFORM_CONTRACT' // 履行合同
+  | 'PERFORM_DELIVERY' // 交付标的物
+  | 'PERFORM_SERVICE' // 提供服务
+  // 细分类型 - 解除类
+  | 'TERMINATE_CONTRACT' // 解除合同
+  | 'RESCIND_CONTRACT' // 撤销合同
+  | 'CANCEL_CONTRACT' // 取消合同
+  // 细分类型 - 确认类
+  | 'CONFIRM_VALIDITY' // 确认合同有效
+  | 'CONFIRM_INVALIDITY' // 确认合同无效
+  | 'CONFIRM_OWNERSHIP' // 确认所有权
+  // 细分类型 - 其他
+  | 'LITIGATION_COSTS' // 承担诉讼费用
+  | 'APOLOGY' // 赔礼道歉
+  | 'CEASE_INFRINGEMENT'; // 停止侵权
 
 export interface TimelineEvent {
   id?: string; // 唯一标识

@@ -5,7 +5,7 @@
 
 import {
   FeeItem,
-  FeeType,
+  ExpenseCategory,
   TravelExpenseCalculationParams,
   FeeCalculationResult,
 } from '../../types/calculation';
@@ -30,7 +30,7 @@ export class TravelExpenseCalculator extends BaseFeeCalculator {
       items.push({
         id: uuidv4(),
         name: '伙食补助',
-        type: FeeType.TRAVEL_EXPENSE,
+        type: ExpenseCategory.TRAVEL_EXPENSE,
         amount: this.formatAmount(allowanceAmount),
         currency,
         description: `标准: ${config.dailyAllowance}/天/人, 天数: ${days}, 人数: ${peopleCount}`,
@@ -86,7 +86,7 @@ export class TravelExpenseCalculator extends BaseFeeCalculator {
       items.push({
         id: uuidv4(),
         name: `${name}-${index + 1}`,
-        type: FeeType.TRAVEL_EXPENSE,
+        type: ExpenseCategory.TRAVEL_EXPENSE,
         amount: this.formatAmount(amount),
         currency,
         description,

@@ -1,13 +1,14 @@
 // 论点生成器：生成正反方论点
 
 import { AIClient } from '@/lib/ai/clients';
+import { PromptBuilder } from './prompt-builder';
 import {
-  DebateInput,
   Argument,
+  DEBATE_MODE_PARAMS,
   DebateGenerationConfig,
+  DebateInput,
   DEFAULT_DEBATE_CONFIG,
 } from './types';
-import { PromptBuilder } from './prompt-builder';
 
 /**
  * AI生成的论点数据结构
@@ -307,17 +308,41 @@ export class ArgumentGenerator {
   }
 
   /**
+   * 获取模式参数
+   */
+  private getModeConfig() {
+    return DEBATE_MODE_PARAMS[this.config.debateMode || 'standard'];
+  }
+
+  /**
    * 获取目标论点数量
    */
   private getTargetArgumentCount(): number {
+    const modeConfig = this.getModeConfig();
     switch (this.config.balanceStrictness) {
       case 'low':
-        return 3;
+        return Math.round(modeConfig.mainPointCount * 0.8);
       case 'medium':
-        return 4;
+        return modeConfig.mainPointCount;
       case 'high':
-        return 5;
+        return Math.round(modeConfig.mainPointCount * 1.2);
     }
+  }
+
+  /**
+   * 获取推理长度限制
+   */
+  private getMaxReasoningLength(): number {
+    const modeConfig = this.getModeConfig();
+    return Math.round(400 * modeConfig.reasoningLengthFactor);
+  }
+
+  /**
+   * 获取目标法律依据数量
+   */
+  private getTargetLegalBasisCount(): number {
+    const modeConfig = this.getModeConfig();
+    return Math.round(2 * modeConfig.legalBasisFactor);
   }
 
   /**

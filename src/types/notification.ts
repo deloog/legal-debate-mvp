@@ -1,328 +1,381 @@
-// 通知相关类型定义
-
 /**
- * 通知类型枚举
+ * 通知类型定义
+ * 集中定义通知相关的类型
  */
-export enum NotificationType {
-  FOLLOW_UP_TASK = 'FOLLOW_UP_TASK', // 跟进任务提醒
-  COURT_SCHEDULE = 'COURT_SCHEDULE', // 法庭日程提醒
-  DEADLINE = 'DEADLINE', // 截止日期提醒
-  TASK = 'TASK', // 任务提醒
-  CUSTOM = 'CUSTOM', // 自定义提醒
-}
 
 /**
- * 通知渠道枚举
+ * 通知类型
  */
-export enum NotificationChannel {
-  IN_APP = 'IN_APP', // 站内提醒
-  EMAIL = 'EMAIL', // 邮件提醒
-  SMS = 'SMS', // 短信提醒
-  WEBHOOK = 'WEBHOOK', // Webhook通知
-}
+export type NotificationType =
+  | 'SYSTEM'
+  | 'CASE'
+  | 'TASK'
+  | 'DEADLINE'
+  | 'DOCUMENT'
+  | 'PAYMENT'
+  | 'MESSAGE';
 
 /**
- * 通知状态枚举
+ * 通知类型常量（运行时可用）
  */
-export enum NotificationStatus {
-  PENDING = 'PENDING', // 待发送
-  SENT = 'SENT', // 已发送
-  FAILED = 'FAILED', // 发送失败
-}
+export const NotificationTypeValues = {
+  SYSTEM: 'SYSTEM',
+  CASE: 'CASE',
+  TASK: 'TASK',
+  DEADLINE: 'DEADLINE',
+  DOCUMENT: 'DOCUMENT',
+  PAYMENT: 'PAYMENT',
+  MESSAGE: 'MESSAGE',
+} as const;
+
+// 导出类型别名作为值（兼容旧代码）
+export const NotificationType = NotificationTypeValues;
 
 /**
- * 邮件发送选项接口
+ * 通知渠道
  */
-export interface EmailSendOptions {
-  to: string;
-  subject: string;
-  text: string;
-  html?: string;
-  cc?: string[];
-  bcc?: string[];
-  attachments?: EmailAttachment[];
-}
+export type NotificationChannel =
+  | 'IN_APP'
+  | 'EMAIL'
+  | 'SMS'
+  | 'PUSH'
+  | 'WEBHOOK';
 
 /**
- * 邮件附件接口
+ * 通知渠道常量（运行时可用）
  */
-export interface EmailAttachment {
-  filename: string;
-  content: string | Buffer;
-  contentType?: string;
-}
+export const NotificationChannelValues = {
+  IN_APP: 'IN_APP',
+  EMAIL: 'EMAIL',
+  SMS: 'SMS',
+  PUSH: 'PUSH',
+  WEBHOOK: 'WEBHOOK',
+} as const;
+
+// 导出类型别名作为值（兼容旧代码）
+export const NotificationChannel = NotificationChannelValues;
 
 /**
- * 邮件发送结果接口
+ * 提醒类型
  */
-export interface EmailSendResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
-  devMessage?: string;
-}
+export type ReminderType =
+  | 'CASE_DEADLINE'
+  | 'TASK_DUE'
+  | 'HEARING_DATE'
+  | 'PAYMENT_DUE'
+  | 'FOLLOW_UP'
+  | 'CUSTOM'
+  | 'COURT_SCHEDULE';
 
 /**
- * 邮件模板接口
+ * 提醒类型常量（运行时可用）
  */
-export interface EmailTemplate {
-  subject: string;
-  textContent: string;
-  htmlContent?: string;
-}
+export const ReminderTypeValues = {
+  CASE_DEADLINE: 'CASE_DEADLINE',
+  TASK_DUE: 'TASK_DUE',
+  HEARING_DATE: 'HEARING_DATE',
+  PAYMENT_DUE: 'PAYMENT_DUE',
+  FOLLOW_UP: 'FOLLOW_UP',
+  CUSTOM: 'CUSTOM',
+  COURT_SCHEDULE: 'COURT_SCHEDULE',
+} as const;
+
+// 导出类型别名作为值（兼容旧代码）
+export const ReminderType = ReminderTypeValues;
 
 /**
- * 短信发送选项接口
+ * 提醒状态
  */
-export interface SMSSendOptions {
-  to: string;
-  content: string;
-  templateCode?: string;
-  templateParams?: Record<string, string>;
-}
+export type ReminderStatus = 'PENDING' | 'SENT' | 'CANCELLED' | 'FAILED' | 'READ' | 'DISMISSED';
 
 /**
- * 短信服务提供商枚举
+ * 提醒状态常量（运行时可用）
  */
-export enum SMSProvider {
-  CONSOLE = 'console', // 控制台输出（开发环境）
-  ALIYUN = 'aliyun', // 阿里云短信
-  TENCENT = 'tencent', // 腾讯云短信
-}
+export const ReminderStatusValues = {
+  PENDING: 'PENDING',
+  SENT: 'SENT',
+  CANCELLED: 'CANCELLED',
+  FAILED: 'FAILED',
+  READ: 'READ',
+  DISMISSED: 'DISMISSED',
+} as const;
+
+// 导出类型别名作为值（兼容旧代码）
+export const ReminderStatus = ReminderStatusValues;
 
 /**
- * 短信发送结果接口
- */
-export interface SMSSendResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
-  devMessage?: string;
-}
-
-/**
- * 通用通知接口
- */
-export interface Notification {
-  id: string;
-  userId: string;
-  type: NotificationType;
-  title: string;
-  content: string;
-  channels: NotificationChannel[];
-  status: NotificationStatus;
-  sentAt?: Date;
-  relatedType?: string;
-  relatedId?: string;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-/**
- * 通知发送结果接口
- */
-export interface NotificationSendResult {
-  success: boolean;
-  channels: NotificationChannel[];
-  errors?: Record<NotificationChannel, string>;
-}
-
-/**
- * 通知配置接口
- */
-export interface NotificationConfig {
-  enabled: boolean;
-  channels: NotificationChannel[];
-  emailConfig?: EmailConfig;
-  smsConfig?: SMSConfig;
-}
-
-/**
- * 邮件配置接口
- */
-export interface EmailConfig {
-  from?: string;
-  fromName?: string;
-  replyTo?: string;
-}
-
-/**
- * 短信配置接口
- */
-export interface SMSConfig {
-  accessKeyId?: string;
-  accessKeySecret?: string;
-  signName?: string;
-  templateCode?: string;
-}
-
-/**
- * 通知队列项接口
- */
-export interface NotificationQueueItem {
-  id: string;
-  notification: Notification;
-  retryCount: number;
-  maxRetries: number;
-  nextRetryAt?: Date;
-}
-
-/**
- * 通知统计接口
- */
-export interface NotificationStatistics {
-  total: number;
-  sent: number;
-  failed: number;
-  pending: number;
-  byChannel: Record<NotificationChannel, number>;
-  byType: Record<NotificationType, number>;
-}
-
-/**
- * 提醒类型枚举（与Prisma schema保持一致）
- */
-export enum ReminderType {
-  COURT_SCHEDULE = 'COURT_SCHEDULE', // 法庭提醒
-  DEADLINE = 'DEADLINE', // 截止日期提醒
-  FOLLOW_UP = 'FOLLOW_UP', // 跟进提醒
-  TASK = 'TASK', // 任务提醒
-  CUSTOM = 'CUSTOM', // 自定义提醒
-}
-
-/**
- * 提醒状态枚举（与Prisma schema保持一致）
- */
-export enum ReminderStatus {
-  PENDING = 'PENDING', // 待发送
-  SENT = 'SENT', // 已发送
-  READ = 'READ', // 已读
-  DISMISSED = 'DISMISSED', // 已忽略
-}
-
-/**
- * 提醒接口（与Prisma schema保持一致）
+ * 提醒详情
  */
 export interface Reminder {
   id: string;
   userId: string;
   type: ReminderType;
   title: string;
-  message: string | null;
-  reminderTime: Date;
-  channels: string[];
+  content: string;
+  scheduledAt: Date;
+  channel: NotificationChannel;
   status: ReminderStatus;
-  relatedType: string | null;
-  relatedId: string | null;
+  sentAt: Date | null;
   metadata: Record<string, unknown> | null;
   createdAt: Date;
   updatedAt: Date;
+  // 兼容旧代码的别名
+  reminderTime?: Date;
+  message?: string;
+  channels?: NotificationChannel[];
+  relatedType?: string;
+  relatedId?: string;
 }
 
 /**
- * 创建提醒输入接口
+ * 创建提醒输入
  */
 export interface CreateReminderInput {
-  userId: string;
+  userId?: string;
   type: ReminderType;
   title: string;
-  message?: string;
-  reminderTime: Date;
-  channels: NotificationChannel[];
-  relatedType?: string;
-  relatedId?: string;
+  content?: string;
+  message?: string; // 兼容旧代码
+  scheduledAt: Date;
+  reminderTime?: Date; // 兼容旧代码
+  channel?: NotificationChannel;
+  channels?: NotificationChannel[];
+  relatedType?: string; // 关联类型
+  relatedId?: string; // 关联ID
   metadata?: Record<string, unknown>;
 }
 
 /**
- * 更新提醒输入接口
+ * 更新提醒输入
  */
 export interface UpdateReminderInput {
   title?: string;
-  message?: string;
-  reminderTime?: Date;
-  channels?: NotificationChannel[];
+  content?: string;
+  scheduledAt?: Date;
+  channel?: NotificationChannel;
   status?: ReminderStatus;
   metadata?: Record<string, unknown>;
 }
 
 /**
- * 提醒查询参数接口
+ * 提醒列表查询参数
  */
 export interface ReminderQueryParams {
-  userId: string;
+  userId?: string;
+  page?: string;
+  pageSize?: string;
+  limit?: string; // 兼容旧代码
   type?: ReminderType;
   status?: ReminderStatus;
-  startTime?: Date;
-  endTime?: Date;
-  page?: number;
-  limit?: number;
+  channel?: NotificationChannel;
+  startDate?: string;
+  endDate?: string;
+  startTime?: string; // 兼容旧代码
+  endTime?: string; // 兼容旧代码
+  sortBy?: string;
+  sortOrder?: string;
 }
 
 /**
- * 提醒列表响应接口
+ * 提醒列表响应
  */
 export interface ReminderListResponse {
   reminders: Reminder[];
-  total: number;
-  page: number;
-  limit: number;
+  total?: number; // 总数
+  page?: number; // 当前页
+  limit?: number; // 每页数量
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 /**
- * 法庭日程提醒配置接口
+ * 短信发送选项
  */
-export interface CourtScheduleReminderConfig {
-  enabled: boolean;
-  hoursBefore: number[]; // 提前提醒时间（小时），例如 [24, 1] 表示提前24小时和1小时
-  channels: NotificationChannel[];
+export interface SMSSendOptions {
+  to: string;
+  content: string;
+  templateId?: string;
+  templateCode?: string; // 兼容旧代码
+  templateParams?: Record<string, string>;
 }
 
 /**
- * 截止日期提醒配置接口
+ * 短信发送结果
  */
-export interface DeadlineReminderConfig {
-  enabled: boolean;
-  daysBefore: number[]; // 提前提醒时间（天），例如 [7, 3, 1]
-  channels: NotificationChannel[];
+export interface SMSSendResult {
+  success: boolean;
+  messageId?: string;
+  error?: string;
+  devMessage?: string; // 开发环境消息
 }
 
 /**
- * 跟进提醒配置接口
+ * 短信提供商
  */
-export interface FollowUpReminderConfig {
-  enabled: boolean;
-  hoursBefore: number[];
-  channels: NotificationChannel[];
-}
+export type SMSProvider = 'ALIYUN' | 'TENCENT' | 'TEMPLATE' | 'CONSOLE';
 
 /**
- * 任务提醒配置接口
+ * 短信提供商常量（运行时可用）
  */
-export interface TaskReminderConfig {
-  enabled: boolean;
-  hoursBefore: number[];
-  channels: NotificationChannel[];
-  priorities?: TaskPriority[];
-}
+export const SMSProviderValues = {
+  ALIYUN: 'ALIYUN',
+  TENCENT: 'TENCENT',
+  TEMPLATE: 'TEMPLATE',
+  CONSOLE: 'CONSOLE',
+} as const;
+
+// 导出类型别名作为值（兼容旧代码）
+export const SMSProvider = SMSProviderValues;
 
 /**
- * 任务优先级枚举（与任务系统保持一致）
- */
-export enum TaskPriority {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  URGENT = 'URGENT',
-}
-
-/**
- * 提醒配置接口
+ * 提醒偏好设置
  */
 export interface ReminderPreferences {
-  courtSchedule: CourtScheduleReminderConfig;
-  deadline: DeadlineReminderConfig;
-  followUp: FollowUpReminderConfig;
-  task: TaskReminderConfig;
+  channels: NotificationChannel[];
+  quietHours: {
+    start: string;
+    end: string;
+  } | null;
+  disabledTypes: ReminderType[];
+  // 新增字段（可选，用于更细粒度的控制）
+  courtSchedule?: {
+    enabled: boolean;
+    channels: NotificationChannel[];
+    advanceDays: number | number[]; // 支持单个值或数组
+    hoursBefore?: number[]; // 兼容旧代码
+  };
+  deadline?: {
+    enabled: boolean;
+    channels: NotificationChannel[];
+    advanceDays: number[];
+    daysBefore?: number[]; // 兼容旧代码
+  };
+  followUp?: {
+    enabled: boolean;
+    channels: NotificationChannel[];
+    autoRemind: boolean;
+    hoursBefore?: number[]; // 兼容旧代码
+  };
+  task?: {
+    enabled: boolean;
+    channels: NotificationChannel[];
+    priorities: string[];
+    hoursBefore?: number[]; // 兼容旧代码
+  };
+}
+
+// Email 相关类型
+/**
+ * 邮件发送选项
+ */
+export interface EmailSendOptions {
+  to: string | string[];
+  subject: string;
+  content: string;
+  html?: string;
+  text?: string; // 纯文本内容
+  from?: string;
+  cc?: string | string[];
+  bcc?: string | string[];
+  attachments?: Array<{
+    filename: string;
+    content: string | Buffer;
+    contentType?: string;
+  }>;
+}
+
+/**
+ * 邮件发送结果
+ */
+export interface EmailSendResult {
+  success: boolean;
+  messageId?: string;
+  error?: string;
+  devMessage?: string; // 开发环境消息
+}
+
+/**
+ * 邮件模板
+ */
+export interface EmailTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  content: string;
+  htmlContent?: string; // HTML 内容
+  textContent?: string; // 纯文本内容
+  variables: string[];
+}
+
+/**
+ * 通知发送结果
+ */
+export interface NotificationSendResult {
+  success: boolean;
+  channel: NotificationChannel;
+  messageId?: string;
+  error?: string;
+  errors?: string[]; // 多个错误
+}
+
+/**
+ * 通知详情
+ */
+export interface NotificationDetail {
+  id: string;
+  userId: string;
+  type: string;
+  title: string;
+  content: string;
+  link: string | null;
+  linkType: string | null;
+  readAt: Date | null;
+  createdAt: Date;
+}
+
+/**
+ * 通知列表响应
+ */
+export interface NotificationListResponse {
+  notifications: NotificationDetail[];
+  unreadCount: number;
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+/**
+ * 通知查询参数
+ */
+export interface NotificationQueryParams {
+  page?: string;
+  pageSize?: string;
+  type?: string;
+  read?: string;
+  startDate?: string;
+  endDate?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
+/**
+ * 标记已读请求
+ */
+export interface MarkReadRequest {
+  notificationIds?: string[];
+}
+
+/**
+ * 批量操作请求
+ */
+export interface BatchActionRequest {
+  action: 'read' | 'unread' | 'delete';
+  notificationIds: string[];
 }

@@ -1,0 +1,22 @@
+// Prisma 测试环境配置文件
+// 此文件用于覆盖默认的Prisma配置，在测试环境下使用更小的连接池
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 测试环境覆盖设置
+// 注意：实际的连接池限制需要在代码中设置或在环境变量中配置
+// DATAB
+ 
+// 生产环境连接池配置示例（在.env.production中设置）：
+// DATABASE_POOL_MAX=20
+//
+// 测试环境连接池配置（在运行测试前设置）：
+// export DATABASE_POOL_MAX=3
+// export DATABASE_POOL_MIN=1

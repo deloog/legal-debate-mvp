@@ -1,0 +1,43 @@
+
+> legal_debate_mvp@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.production, .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+Turbopack build encountered 1 warnings:
+./src/lib/payment/payment-config.ts:145:11
+The file pattern ('/ROOT/' <dynamic> | '/ROOT' <dynamic>) matches 16594 files in [project]/
+[0m [90m 143 |[39m       [36mconst[39m absolutePath [33m=[39m path[33m.[39misAbsolute(privateKeyPath)
+ [90m 144 |[39m         [33m?[39m privateKeyPath
+[31m[1m>[22m[39m[90m 145 |[39m         [33m:[39m path[33m.[39mresolve(process[33m.[39mcwd()[33m,[39m privateKeyPath)[33m;[39m
+ [90m     |[39m           [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 146 |[39m
+ [90m 147 |[39m       [36mconst[39m privateKeyContent [33m=[39m fs[33m.[39mreadFileSync(absolutePath[33m,[39m [32m'utf-8'[39m)[33m;[39m
+ [90m 148 |[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import trace:
+  App Route:
+    ./src/lib/payment/payment-config.ts
+    ./src/app/api/refunds/apply/route.ts
+
+
+✓ Compiled successfully in 15.1s
+  Running TypeScript ...
+Failed to compile.
+
+./src/components/reminder/ReminderList.tsx:182:7
+Type error: Object literal may only specify known properties, and 'DEADLINE' does not exist in type 'Record<ReminderType, string>'.
+
+[0m [90m 180 |[39m     [36mconst[39m typeLabels[33m:[39m [33mRecord[39m[33m<[39m[33mReminderType[39m[33m,[39m string[33m>[39m [33m=[39m {
+ [90m 181 |[39m       [33mCOURT_SCHEDULE[39m[33m:[39m [32m'法庭日程'[39m[33m,[39m
+[31m[1m>[22m[39m[90m 182 |[39m       [33mDEADLINE[39m[33m:[39m [32m'截止日期'[39m[33m,[39m
+ [90m     |[39m       [31m[1m^[22m[39m
+ [90m 183 |[39m       [33mFOLLOW_UP[39m[33m:[39m [32m'跟进提醒'[39m[33m,[39m
+ [90m 184 |[39m       [33mTASK[39m[33m:[39m [32m'任务提醒'[39m[33m,[39m
+ [90m 185 |[39m       [33mCUSTOM[39m[33m:[39m [32m'自定义提醒'[39m[33m,[39m[0m
+Next.js build worker exited with code: 1 and signal: null

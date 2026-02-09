@@ -34,6 +34,10 @@ export interface JwtVerifyResult {
   valid: boolean;
   payload: JwtPayload | null;
   error: string | null;
+  // 便捷访问属性（兼容旧代码）
+  userId?: string;
+  email?: string;
+  role?: string;
 }
 
 // =============================================================================

@@ -77,7 +77,7 @@ export async function POST(
       );
     }
 
-    const { reportId, format } = requestData as ExportReportRequest;
+    const { reportId, format } = requestData as any;
 
     // 导出报表
     const result = await ReportService.exportReport(reportId, format);

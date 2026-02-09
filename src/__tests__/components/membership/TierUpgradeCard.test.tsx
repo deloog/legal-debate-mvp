@@ -13,10 +13,20 @@ describe('TierUpgradeCard', () => {
     displayName: '基础版',
     description: '适合个人用户的基础功能',
     tier: MembershipTier.BASIC,
+    level: 1,
     price: 99,
     currency: 'CNY',
     billingCycle: BillingCycle.MONTHLY,
     features: ['创建案件', '生成辩论', '分析文档', '搜索法条', '数据导出'],
+    limits: {
+      cases: 50,
+      debates: 20,
+      documents: 100,
+      storage: 1024,
+      aiTokens: 100000,
+      users: 1,
+      features: ['创建案件', '生成辩论', '分析文档', '搜索法条', '数据导出'],
+    },
     permissions: {
       canCreateCase: true,
       canCreateDebate: true,
@@ -171,6 +181,7 @@ describe('TierUpgradeCard', () => {
       const enterpriseTier: MembershipTierDef = {
         ...mockTier,
         tier: MembershipTier.ENTERPRISE,
+        level: 3,
       };
 
       const { container } = render(<TierUpgradeCard tier={enterpriseTier} />);
@@ -184,6 +195,7 @@ describe('TierUpgradeCard', () => {
       const professionalTier: MembershipTierDef = {
         ...mockTier,
         tier: MembershipTier.PROFESSIONAL,
+        level: 2,
       };
 
       const { container } = render(<TierUpgradeCard tier={professionalTier} />);
@@ -205,6 +217,7 @@ describe('TierUpgradeCard', () => {
       const freeTier: MembershipTierDef = {
         ...mockTier,
         tier: MembershipTier.FREE,
+        level: 0,
         price: 0,
       };
 

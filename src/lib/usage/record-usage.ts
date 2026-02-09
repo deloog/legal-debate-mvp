@@ -273,6 +273,11 @@ export async function getUsageStats(
     };
 
     return {
+      // 基础字段（兼容旧接口）
+      used: stats.casesCreated + stats.debatesGenerated + stats.documentsAnalyzed,
+      limit: limits.MAX_CASES ?? 0,
+      resetAt: end,
+      // 扩展字段
       userId,
       periodStart: start,
       periodEnd: end,
@@ -283,8 +288,13 @@ export async function getUsageStats(
       aiTokensUsed: stats.aiTokensUsed,
       storageUsedMB: stats.storageUsedMB,
       limits: {
-        tier: activeMembership.tier.tier as unknown as MembershipTier,
-        limits,
+        MAX_CASES: limits.MAX_CASES,
+        MAX_DEBATES: limits.MAX_DEBATES,
+        MAX_DOCUMENTS: limits.MAX_DOCUMENTS,
+        MAX_AI_TOKENS_MONTHLY: limits.MAX_AI_TOKENS_MONTHLY,
+        MAX_STORAGE_MB: limits.MAX_STORAGE_MB,
+        MAX_LAW_ARTICLE_SEARCHES: limits.MAX_LAW_ARTICLE_SEARCHES,
+        MAX_CONCURRENT_REQUESTS: limits.MAX_CONCURRENT_REQUESTS,
       },
       remaining,
     };
@@ -326,28 +336,28 @@ export async function checkUsageLimit(
 
     switch (usageType) {
       case 'CASE_CREATED':
-        limit = stats.limits.limits.MAX_CASES;
-        currentUsage = stats.casesCreated;
+        limit = stats.limits?.MAX_CASES ?? null;
+        currentUsage = stats.casesCreated ?? 0;
         break;
       case 'DEBATE_GENERATED':
-        limit = stats.limits.limits.MAX_DEBATES;
-        currentUsage = stats.debatesGenerated;
+        limit = stats.limits?.MAX_DEBATES ?? null;
+        currentUsage = stats.debatesGenerated ?? 0;
         break;
       case 'DOCUMENT_ANALYZED':
-        limit = stats.limits.limits.MAX_DOCUMENTS;
-        currentUsage = stats.documentsAnalyzed;
+        limit = stats.limits?.MAX_DOCUMENTS ?? null;
+        currentUsage = stats.documentsAnalyzed ?? 0;
         break;
       case 'LAW_ARTICLE_SEARCHED':
-        limit = stats.limits.limits.MAX_LAW_ARTICLE_SEARCHES;
-        currentUsage = stats.lawArticleSearches;
+        limit = stats.limits?.MAX_LAW_ARTICLE_SEARCHES ?? null;
+        currentUsage = stats.lawArticleSearches ?? 0;
         break;
       case 'AI_TOKEN_USED':
-        limit = stats.limits.limits.MAX_AI_TOKENS_MONTHLY;
-        currentUsage = stats.aiTokensUsed;
+        limit = stats.limits?.MAX_AI_TOKENS_MONTHLY ?? null;
+        currentUsage = stats.aiTokensUsed ?? 0;
         break;
       case 'STORAGE_USED':
-        limit = stats.limits.limits.MAX_STORAGE_MB;
-        currentUsage = stats.storageUsedMB;
+        limit = stats.limits?.MAX_STORAGE_MB ?? null;
+        currentUsage = stats.storageUsedMB ?? 0;
         break;
     }
 

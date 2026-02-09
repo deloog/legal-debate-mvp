@@ -49,7 +49,12 @@ export function getDefaultConfig(): PerformanceOptimizerConfig {
       enabled: true,
       level: 6,
       threshold: 1024,
-      types: ['text/html', 'application/json', 'text/css', 'application/javascript'],
+      types: [
+        'text/html',
+        'application/json',
+        'text/css',
+        'application/javascript',
+      ],
     },
     frontend: {
       codeSplitting: {
@@ -100,12 +105,22 @@ export class PerformanceOptimizer {
     }
 
     return {
-      databasePool: { ...defaultConfig.databasePool, ...customConfig.databasePool },
+      databasePool: {
+        ...defaultConfig.databasePool,
+        ...customConfig.databasePool,
+      },
       redisCache: { ...defaultConfig.redisCache, ...customConfig.redisCache },
       cdn: { ...defaultConfig.cdn, ...customConfig.cdn },
-      compression: { ...defaultConfig.compression, ...customConfig.compression },
-      frontend: this.mergeFrontendConfig(defaultConfig.frontend, customConfig.frontend),
-      slowQueryThreshold: customConfig.slowQueryThreshold ?? defaultConfig.slowQueryThreshold,
+      compression: {
+        ...defaultConfig.compression,
+        ...customConfig.compression,
+      },
+      frontend: this.mergeFrontendConfig(
+        defaultConfig.frontend,
+        customConfig.frontend
+      ),
+      slowQueryThreshold:
+        customConfig.slowQueryThreshold ?? defaultConfig.slowQueryThreshold,
     };
   }
 
@@ -121,10 +136,22 @@ export class PerformanceOptimizer {
     }
 
     return {
-      codeSplitting: { ...defaultConfig.codeSplitting, ...customConfig.codeSplitting },
-      lazyLoading: { ...defaultConfig.lazyLoading, ...customConfig.lazyLoading },
-      imageOptimization: { ...defaultConfig.imageOptimization, ...customConfig.imageOptimization },
-      serviceWorker: { ...defaultConfig.serviceWorker, ...customConfig.serviceWorker },
+      codeSplitting: {
+        ...defaultConfig.codeSplitting,
+        ...customConfig.codeSplitting,
+      },
+      lazyLoading: {
+        ...defaultConfig.lazyLoading,
+        ...customConfig.lazyLoading,
+      },
+      imageOptimization: {
+        ...defaultConfig.imageOptimization,
+        ...customConfig.imageOptimization,
+      },
+      serviceWorker: {
+        ...defaultConfig.serviceWorker,
+        ...customConfig.serviceWorker,
+      },
     };
   }
 
@@ -439,7 +466,9 @@ export class PerformanceOptimizer {
    */
   async checkIndexExists(table: string, column: string): Promise<boolean> {
     try {
-      const result = await this.prisma.$queryRawUnsafe<Array<{ exists: boolean }>>(`
+      const result = await this.prisma.$queryRawUnsafe<
+        Array<{ exists: boolean }>
+      >(`
         SELECT EXISTS (
           SELECT 1 FROM pg_indexes
           WHERE tablename = '${table}'
@@ -458,7 +487,12 @@ export class PerformanceOptimizer {
   async createIndex(
     table: string,
     column: string
-  ): Promise<{ success: boolean; indexName: string; skipped?: boolean; error?: string }> {
+  ): Promise<{
+    success: boolean;
+    indexName: string;
+    skipped?: boolean;
+    error?: string;
+  }> {
     const indexName = `idx_${table}_${column}`;
 
     try {
@@ -485,14 +519,19 @@ export class PerformanceOptimizer {
   /**
    * 创建缺失的索引
    */
-  private async createMissingIndexes(slowQueries: SlowQuery[]): Promise<IndexInfo[]> {
+  private async createMissingIndexes(
+    slowQueries: SlowQuery[]
+  ): Promise<IndexInfo[]> {
     const indexes: IndexInfo[] = [];
 
     for (const query of slowQueries) {
       const patterns = this.analyzeQueryPattern(query.query);
 
       for (const pattern of patterns) {
-        const exists = await this.checkIndexExists(pattern.table, pattern.column);
+        const exists = await this.checkIndexExists(
+          pattern.table,
+          pattern.column
+        );
         const indexName = `idx_${pattern.table}_${pattern.column}`;
 
         if (!exists) {
@@ -645,7 +684,13 @@ export class PerformanceOptimizer {
     ];
 
     if (result.overall.errors.length > 0) {
-      lines.splice(5, 0, '', '错误:', ...result.overall.errors.map(e => `  - ${e}`));
+      lines.splice(
+        5,
+        0,
+        '',
+        '错误:',
+        ...result.overall.errors.map(e => `  - ${e}`)
+      );
     }
 
     return lines.join('\n');

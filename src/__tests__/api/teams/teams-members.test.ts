@@ -36,7 +36,12 @@ jest.mock('@/lib/middleware/auth', () => ({
 
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
-import { TeamType, TeamStatus, TeamRole, MemberStatus } from '@/types/team';
+import {
+  MemberStatusValues,
+  TeamRoleValues,
+  TeamStatusValues,
+  TeamTypeValues,
+} from '@/types/team';
 
 describe('Teams API - Members Management', () => {
   let mockedPrisma: unknown;
@@ -55,8 +60,8 @@ describe('Teams API - Members Management', () => {
       id: 'member-1',
       teamId: 'team-1',
       userId: 'user-123',
-      role: TeamRole.ADMIN,
-      status: MemberStatus.ACTIVE,
+      role: TeamRoleValues.ADMIN,
+      status: MemberStatusValues.ACTIVE,
     });
 
     (mockedPrisma as any).teamMember.findMany.mockResolvedValue([
@@ -64,8 +69,8 @@ describe('Teams API - Members Management', () => {
         id: 'member-1',
         teamId: 'team-1',
         userId: 'user-123',
-        role: TeamRole.ADMIN,
-        status: MemberStatus.ACTIVE,
+        role: TeamRoleValues.ADMIN,
+        status: MemberStatusValues.ACTIVE,
         joinedAt: new Date('2024-01-01T10:00:00Z'),
         notes: null,
         metadata: null,
@@ -79,8 +84,8 @@ describe('Teams API - Members Management', () => {
         team: {
           id: 'team-1',
           name: '测试团队',
-          type: TeamType.LAW_FIRM,
-          status: TeamStatus.ACTIVE,
+          type: TeamTypeValues.LAW_FIRM,
+          status: TeamStatusValues.ACTIVE,
         },
       },
     ]);
@@ -98,8 +103,8 @@ describe('Teams API - Members Management', () => {
               id: 'member-1',
               teamId: 'team-1',
               userId: 'user-123',
-              role: TeamRole.ADMIN,
-              status: MemberStatus.ACTIVE,
+              role: TeamRoleValues.ADMIN,
+              status: MemberStatusValues.ACTIVE,
               joinedAt: new Date('2024-01-01T10:00:00Z'),
               notes: null,
               metadata: null,
@@ -113,8 +118,8 @@ describe('Teams API - Members Management', () => {
               team: {
                 id: 'team-1',
                 name: '测试团队',
-                type: TeamType.LAW_FIRM,
-                status: TeamStatus.ACTIVE,
+                type: TeamTypeValues.LAW_FIRM,
+                status: TeamStatusValues.ACTIVE,
               },
             });
           }
@@ -142,8 +147,8 @@ describe('Teams API - Members Management', () => {
           id: (data as any).where.id,
           teamId: (data as any).where.teamId || 'team-1',
           userId: (data as any).where.userId || 'user-123',
-          role: (data as any).data.role || TeamRole.LAWYER,
-          status: (data as any).data.status || MemberStatus.ACTIVE,
+          role: TeamRoleValues.LAWYER,
+          status: MemberStatusValues.ACTIVE,
           notes: (data as any).data.notes || null,
           metadata: (data as any).data.metadata || null,
           joinedAt: new Date('2024-01-01T10:00:00Z'),
@@ -242,7 +247,7 @@ describe('Teams API - Members Management', () => {
     it('应该添加团队成员', async () => {
       const memberData = {
         userId: 'user-456',
-        role: TeamRole.LAWYER,
+        role: TeamRoleValues.LAWYER,
         notes: '资深律师',
       };
 
@@ -261,13 +266,13 @@ describe('Teams API - Members Management', () => {
       expect(response.status).toBe(201);
       expect(testResponse.success).toBe(true);
       expect(testResponse.data.userId).toBe('user-456');
-      expect(testResponse.data.role).toBe(TeamRole.LAWYER);
+      expect(testResponse.data.role).toBe(TeamRoleValues.LAWYER);
     });
 
     it('应该添加律师助理', async () => {
       const memberData = {
         userId: 'user-789',
-        role: TeamRole.PARALEGAL,
+        role: TeamRoleValues.PARALEGAL,
       };
 
       const request = createMockRequest(
@@ -293,7 +298,7 @@ describe('Teams API - Members Management', () => {
 
       const memberData = {
         userId: 'user-456',
-        role: TeamRole.LAWYER,
+        role: TeamRoleValues.LAWYER,
       };
 
       const request = createMockRequest(
@@ -332,7 +337,7 @@ describe('Teams API - Members Management', () => {
 
       const memberData = {
         userId: 'user-456',
-        role: TeamRole.LAWYER,
+        role: TeamRoleValues.LAWYER,
       };
 
       const request = createMockRequest(
@@ -354,7 +359,7 @@ describe('Teams API - Members Management', () => {
 
       const memberData = {
         userId: 'user-456',
-        role: TeamRole.LAWYER,
+        role: TeamRoleValues.LAWYER,
       };
 
       const request = createMockRequest(
@@ -430,7 +435,7 @@ describe('Teams API - Members Management', () => {
   describe('PATCH /api/teams/[id]/members/[userId]', () => {
     it('应该更新成员角色', async () => {
       const updateData = {
-        role: TeamRole.LAWYER,
+        role: TeamRoleValues.LAWYER,
       };
 
       const request = createMockRequest(
@@ -449,7 +454,7 @@ describe('Teams API - Members Management', () => {
 
     it('应该更新成员状态', async () => {
       const updateData = {
-        status: MemberStatus.INACTIVE,
+        status: MemberStatusValues.INACTIVE,
       };
 
       const request = createMockRequest(
@@ -468,8 +473,8 @@ describe('Teams API - Members Management', () => {
 
     it('应该支持更新多个字段', async () => {
       const updateData = {
-        role: TeamRole.PARALEGAL,
-        status: MemberStatus.ACTIVE,
+        role: TeamRoleValues.PARALEGAL,
+        status: MemberStatusValues.ACTIVE,
         notes: '新的备注',
       };
 
@@ -490,7 +495,7 @@ describe('Teams API - Members Management', () => {
     it('应该在成员不存在时返回404错误', async () => {
       (mockedPrisma as any).teamMember.findUnique.mockResolvedValue(null);
 
-      const updateData = { role: TeamRole.LAWYER };
+      const updateData = { role: TeamRoleValues.LAWYER };
 
       const request = createMockRequest(
         'http://localhost:3000/api/teams/team-1/members/not-exist',
@@ -509,7 +514,7 @@ describe('Teams API - Members Management', () => {
     it('应该在未认证时返回401错误', async () => {
       (getAuthUser as jest.Mock).mockResolvedValue(null);
 
-      const updateData = { role: TeamRole.LAWYER };
+      const updateData = { role: TeamRoleValues.LAWYER };
 
       const request = createMockRequest(
         'http://localhost:3000/api/teams/team-1/members/user-123',
@@ -528,7 +533,7 @@ describe('Teams API - Members Management', () => {
     it('应该在权限不足时返回403错误', async () => {
       (mockedPrisma as any).teamMember.findFirst.mockResolvedValue(null);
 
-      const updateData = { role: TeamRole.LAWYER };
+      const updateData = { role: TeamRoleValues.LAWYER };
 
       const request = createMockRequest(
         'http://localhost:3000/api/teams/team-1/members/user-123',

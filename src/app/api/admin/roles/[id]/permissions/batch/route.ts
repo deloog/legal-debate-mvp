@@ -3,28 +3,14 @@
  * 提供角色权限的批量分配和批量撤销操作
  */
 
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
-
-// =============================================================================
-// 类型定义
-// =============================================================================
-
-/**
- * 批量分配权限请求体
- */
-interface BatchAssignPermissionsRequest {
-  permissionIds: string[];
-}
-
-/**
- * 批量撤销权限请求体
- */
-interface BatchRevokePermissionsRequest {
-  permissionIds: string[];
-}
+import type {
+  BatchAssignPermissionsRequest,
+  BatchRevokePermissionsRequest,
+} from '@/types/admin-role';
+import { NextRequest, NextResponse } from 'next/server';
 
 // =============================================================================
 // API处理函数

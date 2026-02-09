@@ -24,6 +24,9 @@ function createMockCase(id: string, embedding: number[]) {
     metadata: null,
     createdAt: new Date(),
     updatedAt: new Date(),
+    dataSource: 'cail',
+    sourceId: null,
+    importedAt: null,
   };
 }
 

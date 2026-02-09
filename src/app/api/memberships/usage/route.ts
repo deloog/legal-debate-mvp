@@ -6,7 +6,6 @@
 import { NextRequest } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { getUsageStats } from '@/lib/usage/record-usage';
-import type { UsageQueryRequest } from '@/types/membership';
 
 // =============================================================================
 // GET /api/memberships/usage - 查询用户使用量
@@ -124,8 +123,8 @@ export async function GET(request: NextRequest): Promise<Response> {
       message: '查询成功',
       data: {
         summary: {
-          periodStart: stats.periodStart,
-          periodEnd: stats.periodEnd,
+          
+          
           casesCreated: stats.casesCreated,
           debatesGenerated: stats.debatesGenerated,
           documentsAnalyzed: stats.documentsAnalyzed,
@@ -180,7 +179,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
 
     // 解析请求体
-    const body: UsageQueryRequest = await request.json();
+    const body = await request.json();
 
     // 验证请求参数
     if (!body || typeof body !== 'object') {
@@ -251,20 +250,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     return Response.json({
       success: true,
       message: '查询成功',
-      data: {
-        summary: {
-          periodStart: stats.periodStart,
-          periodEnd: stats.periodEnd,
-          casesCreated: stats.casesCreated,
-          debatesGenerated: stats.debatesGenerated,
-          documentsAnalyzed: stats.documentsAnalyzed,
-          lawArticleSearches: stats.lawArticleSearches,
-          aiTokensUsed: stats.aiTokensUsed,
-          storageUsedMB: stats.storageUsedMB,
-        },
-        limits: stats.limits,
-        remaining: stats.remaining,
-      },
+      data: stats,
     });
   } catch (error) {
     console.error('[POST /api/memberships/usage/query] 查询失败:', error);

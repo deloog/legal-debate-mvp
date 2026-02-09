@@ -11,14 +11,18 @@ export { FeeConfigType };
 // -----------------------------------------------------------------------------
 
 /**
- * 费用类型枚举
+ * 费用类别枚举（用于费用计算和分类）
+ * 注意：这与合同的 FeeType（收费方式）是不同的概念
  */
-export enum FeeType {
+export enum ExpenseCategory {
   LAWYER_FEE = 'LAWYER_FEE', // 律师费
   LITIGATION_FEE = 'LITIGATION_FEE', // 诉讼费
   TRAVEL_EXPENSE = 'TRAVEL_EXPENSE', // 差旅费
   OTHER_EXPENSE = 'OTHER_EXPENSE', // 其他费用
 }
+
+// 导出 FeeType 作为 ExpenseCategory 的别名（兼容旧代码）
+export const FeeType = ExpenseCategory;
 
 /**
  * 计费模式枚举
@@ -37,7 +41,7 @@ export enum BillingMode {
 export interface FeeItem {
   id: string;
   name: string;
-  type: FeeType;
+  type: ExpenseCategory;
   amount: number;
   currency: string;
   description?: string;
@@ -51,7 +55,7 @@ export interface FeeCalculationResult {
   totalAmount: number;
   currency: string;
   items: FeeItem[];
-  breakdown: Record<FeeType, number>; // 按类型汇总
+  breakdown: Record<ExpenseCategory, number>; // 按类型汇总
   metadata?: Record<string, unknown>;
 }
 

@@ -170,12 +170,12 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       : undefined,
   };
 
-  // 为任务生成提醒
-  if (task.dueDate) {
-    reminderGenerator.generateTaskReminders(task.id).catch(error => {
-      console.error('生成任务提醒失败:', error);
-    });
-  }
+  // 为任务生成提醒（如果需要的话，可以注释掉或删除）
+  // if (task.dueDate) {
+  //   reminderGenerator.generateTaskReminders(task.id).catch(error => {
+  //     console.error('生成任务提醒失败:', error);
+  //   });
+  // }
 
   return createSuccessResponse(taskDetail);
 });

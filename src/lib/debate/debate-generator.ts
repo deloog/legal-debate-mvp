@@ -1,10 +1,16 @@
 // 辩论生成器：协调整个辩论生成流程
 
 import { AIClient } from '@/lib/ai/clients';
-import { DebateInput, DebateResult, DebateGenerationConfig } from './types';
 import { ArgumentGenerator } from './argument-generator';
-import { LogicValidator } from './validators';
 import { QualityAssessor } from './assessors';
+import {
+  Argument,
+  DebateGenerationConfig,
+  DebateInput,
+  DebateResult,
+} from './types';
+import { LogicValidator } from './validators';
+import { DebateAIReviewer, ReviewResult } from './validators/ai-reviewer';
 
 /**
  * 辩论生成器类
@@ -12,6 +18,7 @@ import { QualityAssessor } from './assessors';
 export class DebateGenerator {
   private argumentGenerator: ArgumentGenerator;
   private config: DebateGenerationConfig;
+  private aiReviewer: DebateAIReviewer;
 
   constructor(
     aiClient: AIClient,
@@ -24,9 +31,11 @@ export class DebateGenerator {
       balanceStrictness: 'medium',
       includeLegalAnalysis: true,
       enableReview: true,
+      debateMode: 'standard', // 添加默认值
       ...config,
     };
     this.argumentGenerator = new ArgumentGenerator(aiClient, this.config);
+    this.aiReviewer = new DebateAIReviewer();
   }
 
   /**
@@ -77,9 +86,19 @@ export class DebateGenerator {
         generationStats,
       };
 
-      // 8. 可选：AI审查
+      // 8. AI审查（如果启用）
       if (this.config.enableReview) {
-        await this.performAIReview();
+        const reviewResult = await this.performAIReview(
+          plaintiffArguments,
+          defendantArguments,
+          input
+        );
+        (result as { reviewResult?: ReviewResult }).reviewResult = reviewResult;
+
+        // 如果审查未通过，记录警告
+        if (!reviewResult.passed) {
+          console.warn('AI审查未通过:', reviewResult.issues);
+        }
       }
 
       return result;
@@ -144,13 +163,18 @@ export class DebateGenerator {
   }
 
   /**
-   * 执行AI审查（可选）
+   * 执行AI审查
    */
-  private async performAIReview(): Promise<void> {
-    // AI审查层可以在这里实现
-    // 例如：调用另一个AI模型对生成的论点进行审查
-    // 目前暂不实现，可作为扩展点
-    console.log('AI审查层已启用（当前版本暂未实现）');
+  private async performAIReview(
+    plaintiffArguments: Argument[],
+    defendantArguments: Argument[],
+    input: DebateInput
+  ): Promise<ReviewResult> {
+    return this.aiReviewer.review(
+      plaintiffArguments,
+      defendantArguments,
+      input
+    );
   }
 
   /**

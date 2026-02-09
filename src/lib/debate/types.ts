@@ -165,7 +165,25 @@ export interface DebateGenerationConfig {
   maxTokens: number;
   balanceStrictness: 'low' | 'medium' | 'high';
   includeLegalAnalysis: boolean;
-  enableReview: boolean; // 是否启用AI审查层
+  enableReview: boolean;
+  /**
+   * 辩论模式
+   * - fast: 快速模式，减少论点数量，缩短推理长度
+   * - standard: 标准模式，平衡生成质量和速度
+   * - detailed: 详细模式，增加论点数量，深化推理
+   */
+  debateMode: 'fast' | 'standard' | 'detailed';
+}
+
+/**
+ * 辩论模式参数配置
+ */
+export interface DebateModeConfig {
+  mainPointCount: number;
+  supportingPointCount: number;
+  rebuttalCount: number;
+  reasoningLengthFactor: number;
+  legalBasisFactor: number;
 }
 
 /**
@@ -178,4 +196,35 @@ export const DEFAULT_DEBATE_CONFIG: DebateGenerationConfig = {
   balanceStrictness: 'medium',
   includeLegalAnalysis: true,
   enableReview: true,
+  debateMode: 'standard',
+};
+
+/**
+ * 辩论模式参数映射
+ */
+export const DEBATE_MODE_PARAMS: Record<
+  'fast' | 'standard' | 'detailed',
+  DebateModeConfig
+> = {
+  fast: {
+    mainPointCount: 2,
+    supportingPointCount: 1,
+    rebuttalCount: 1,
+    reasoningLengthFactor: 0.6,
+    legalBasisFactor: 0.5,
+  },
+  standard: {
+    mainPointCount: 3,
+    supportingPointCount: 2,
+    rebuttalCount: 2,
+    reasoningLengthFactor: 1.0,
+    legalBasisFactor: 1.0,
+  },
+  detailed: {
+    mainPointCount: 4,
+    supportingPointCount: 3,
+    rebuttalCount: 3,
+    reasoningLengthFactor: 1.5,
+    legalBasisFactor: 1.3,
+  },
 };

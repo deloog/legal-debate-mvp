@@ -1,13 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import type { Prisma } from '@prisma/client';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import {
-  createSuccessResponse,
   createNoContentResponse,
+  createSuccessResponse,
 } from '@/app/api/lib/responses/success';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
+import type { Prisma } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { WitnessDetail, WitnessStatus } from '../../../../types/witness';
 
 // 更新证人验证模式
 const updateWitnessSchema = z.object({
@@ -32,31 +33,6 @@ const updateWitnessSchema = z.object({
     .optional(),
 });
 
-// 证人详情类型
-type WitnessDetail = {
-  id: string;
-  caseId: string;
-  name: string;
-  phone: string | null;
-  address: string | null;
-  relationship: string | null;
-  testimony: string | null;
-  courtScheduleId: string | null;
-  status: string;
-  metadata: Record<string, unknown> | null;
-  createdAt: Date;
-  updatedAt: Date;
-  case?: {
-    id: string;
-    title: string;
-  };
-  courtSchedule?: {
-    id: string;
-    title: string;
-  } | null;
-};
-
-// 映射证人数据到详情
 async function mapWitnessToDetail(
   witness: unknown,
   includeCase = true,
@@ -76,8 +52,8 @@ async function mapWitnessToDetail(
     relationship: witnessObj.relationship as string | null,
     testimony: witnessObj.testimony as string | null,
     courtScheduleId: witnessObj.courtScheduleId as string | null,
-    status: String(witnessObj.status || ''),
-    metadata: witnessObj.metadata as Record<string, unknown> | null,
+    status: witnessObj.status as WitnessStatus,
+    metadata: witnessObj.metadata as unknown as Prisma.JsonValue,
     createdAt: new Date(witnessObj.createdAt as string),
     updatedAt: new Date(witnessObj.updatedAt as string),
   };

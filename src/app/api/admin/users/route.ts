@@ -3,52 +3,16 @@
  * 支持分页、筛选、搜索
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import {
+  serverErrorResponse,
+  successResponse,
+  unauthorizedResponse,
+} from '@/lib/api-response';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
-import {
-  successResponse,
-  unauthorizedResponse,
-  serverErrorResponse,
-} from '@/lib/api-response';
-
-// =============================================================================
-// 类型定义
-// =============================================================================
-
-/**
- * 用户列表查询参数
- */
-interface UserListQueryParams {
-  page?: string;
-  limit?: string;
-  role?: string;
-  status?: string;
-  search?: string;
-}
-
-/**
- * 用户列表响应数据
- */
-interface UserListResponse {
-  users: Array<{
-    id: string;
-    email: string;
-    username: string | null;
-    name: string | null;
-    role: string;
-    status: string;
-    createdAt: Date;
-    lastLoginAt: Date | null;
-  }>;
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-}
+import type { UserListQueryParams, UserListResponse } from '@/types/admin-user';
+import { NextRequest, NextResponse } from 'next/server';
 
 // =============================================================================
 // 辅助函数
@@ -77,10 +41,14 @@ function parseQueryParams(request: NextRequest): UserListQueryParams {
   const url = new URL(request.url);
   return {
     page: url.searchParams.get('page') ?? '1',
-    limit: url.searchParams.get('limit') ?? '20',
+    pageSize:
+      url.searchParams.get('pageSize') ?? url.searchParams.get('limit') ?? '20',
     role: url.searchParams.get('role') ?? undefined,
     status: url.searchParams.get('status') ?? undefined,
-    search: url.searchParams.get('search') ?? undefined,
+    search:
+      url.searchParams.get('search') ??
+      url.searchParams.get('keyword') ??
+      undefined,
   };
 }
 
@@ -134,8 +102,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // 解析查询参数
     const params = parseQueryParams(request);
     const page = Math.max(1, Number.parseInt(params.page, 10));
-    const limit = Math.min(100, Math.max(1, Number.parseInt(params.limit, 10)));
-    const skip = (page - 1) * limit;
+    const pageSize = Math.min(
+      100,
+      Math.max(1, Number.parseInt(params.pageSize, 10))
+    );
+    const skip = (page - 1) * pageSize;
 
     // 构建查询条件
     const where = buildWhereClause(params);
@@ -147,7 +118,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const users = await prisma.user.findMany({
       where,
       skip,
-      take: limit,
+      take: pageSize,
       select: {
         id: true,
         email: true,
@@ -165,12 +136,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // 构建响应数据
     const responseData: UserListResponse = {
-      users,
+      users: users.map(user => ({
+        ...user,
+        phone: null,
+      })),
       pagination: {
         total,
         page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
       },
     };
 

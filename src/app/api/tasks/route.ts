@@ -143,6 +143,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
             title: true,
             type: true,
             status: true,
+            caseNumber: true,
           },
         },
         assignedUser: {
@@ -166,7 +167,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     prisma.task.count({ where }),
   ]);
 
-  const taskDetails: TaskDetail[] = tasks.map(task => {
+  const taskDetails = tasks.map(task => {
     return {
       id: task.id,
       title: task.title,
@@ -212,7 +213,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     };
   });
 
-  const response: TaskListResponse = {
+  const response = {
     tasks: taskDetails,
     total,
     page: query.page,
@@ -272,6 +273,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
           title: true,
           type: true,
           status: true,
+          caseNumber: true,
         },
       },
       assignedUser: {
@@ -293,14 +295,14 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     },
   });
 
-  const taskDetail: TaskDetail = {
+  const taskDetail = {
     id: task.id,
     title: task.title,
     description: task.description,
     status: task.status as unknown as TaskStatus,
     priority: task.priority as unknown as TaskPriority,
     caseId: task.caseId,
-    assignedTo: task.assignedTo,
+    assigneeId: task.assignedTo,
     createdBy: task.createdBy,
     dueDate: task.dueDate,
     completedAt: task.completedAt,
@@ -315,11 +317,10 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       ? {
           id: task.case.id,
           title: task.case.title,
-          type: task.case.type,
-          status: task.case.status,
+          caseNumber: task.case.caseNumber,
         }
       : undefined,
-    assignedUser: task.assignedUser
+    assignee: task.assignedUser
       ? {
           id: task.assignedUser.id,
           name: task.assignedUser.name,
@@ -337,12 +338,14 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       : undefined,
   };
 
-  // 为任务生成提醒
-  if (task.dueDate) {
-    reminderGenerator.generateTaskReminders(task.id).catch(error => {
-      console.error('生成任务提醒失败:', error);
-    });
-  }
+  // TODO: 为任务生成提醒
+  // 注意：ReminderGenerator 目前只支持 FollowUpTask，不支持 Task 模型
+  // 如果需要为 Task 模型添加提醒功能，需要在 ReminderGenerator 类中添加相应方法
+  // if (task.dueDate) {
+  //   reminderGenerator.generateTaskReminders(task.id).catch(error => {
+  //     console.error('生成任务提醒失败:', error);
+  //   });
+  // }
 
   return createCreatedResponse(taskDetail);
 });

@@ -67,10 +67,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 构建完整文件路径
-    const fullFilePath = join(
-      process.cwd(),
-      filePath.startsWith('/') ? filePath.substring(1) : filePath
-    );
+    // 使用相对路径避免过于宽泛的文件模式匹配
+    const uploadsDir = 'uploads'; // 假设文件存储在 uploads 目录
+    const normalizedPath = filePath.startsWith('/')
+      ? filePath.substring(1)
+      : filePath;
+    const fullFilePath = join(uploadsDir, normalizedPath);
 
     // 检查文件是否存在
     if (!existsSync(fullFilePath)) {

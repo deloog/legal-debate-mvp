@@ -1,14 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import {
-  createSuccessResponse,
   createNoContentResponse,
+  createSuccessResponse,
 } from '@/app/api/lib/responses/success';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
-import { z } from 'zod';
+import {
+  CasePermission,
+  CaseRole,
+  CaseTeamMemberDetail,
+} from '@/types/case-collaboration';
 import { Prisma } from '@prisma/client';
-import { CaseRole } from '@/types/case-collaboration';
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
 /**
  * 更新团队成员的Zod schema
@@ -97,17 +101,18 @@ async function checkTeamManagementPermission(
 async function mapTeamMemberDetail(
   member: unknown,
   includeUserInfo = true
-): Promise<unknown> {
+): Promise<CaseTeamMemberDetail> {
   if (!member || typeof member !== 'object') {
     throw new Error('Invalid team member data');
   }
 
   const memberObj = member as Record<string, unknown>;
-  const detail: Record<string, unknown> = {
+  const detail: CaseTeamMemberDetail = {
     id: String(memberObj.id || ''),
     caseId: String(memberObj.caseId || ''),
     userId: String(memberObj.userId || ''),
-    role: memberObj.role,
+    role: memberObj.role as CaseRole,
+    permissions: (memberObj.permissions as CasePermission[]) || [],
     joinedAt: new Date(memberObj.joinedAt as string),
     notes: memberObj.notes as string | null,
     metadata: memberObj.metadata as Record<string, unknown> | null,
@@ -122,10 +127,6 @@ async function mapTeamMemberDetail(
       avatar: user.avatar as string | null,
       role: user.role as string,
     };
-  }
-
-  if (memberObj.permissions) {
-    detail.permissions = memberObj.permissions;
   }
 
   return detail;

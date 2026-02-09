@@ -32,10 +32,10 @@ export function TaskForm({ task, onCancel, onSuccess }: TaskFormProps) {
   const [title, setTitle] = useState(task?.title ?? '');
   const [description, setDescription] = useState(task?.description ?? '');
   const [status, setStatus] = useState<TaskStatus>(
-    task?.status ?? TaskStatus.TODO
+    (task?.status as TaskStatus) ?? TaskStatus.TODO
   );
   const [priority, setPriority] = useState<TaskPriority>(
-    task?.priority ?? TaskPriority.MEDIUM
+    (task?.priority as TaskPriority) ?? TaskPriority.MEDIUM
   );
   const [caseId, setCaseId] = useState(task?.caseId ?? '');
   const [assignedTo, setAssignedTo] = useState(task?.assignedTo ?? '');

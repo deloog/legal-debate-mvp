@@ -159,7 +159,7 @@ function TeamInfoCard({
             成员数
           </dt>
           <dd className='mt-1 text-sm text-zinc-900 dark:text-zinc-50'>
-            {team.memberCount ?? team.members ?? 0}
+            {team.memberCount ?? team.members?.length ?? 0}
           </dd>
         </div>
         {team.description && (

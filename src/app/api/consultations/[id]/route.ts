@@ -4,82 +4,23 @@
  * PUT /api/consultations/[id] - 更新咨询记录
  * DELETE /api/consultations/[id] - 删除咨询记录（软删除）
  */
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { ConsultationType, ConsultStatus } from '@/types/consultation';
 import {
-  validateUpdateConsultation,
   getFirstZodError,
+  validateUpdateConsultation,
 } from '@/lib/validations/consultation';
+import { ErrorResponse, SuccessResponse } from '@/types/api-response';
+import {
+  ConsultationDetailResponse,
+  ConsultationType,
+  ConsultStatus,
+} from '@/types/consultation';
+import { NextRequest, NextResponse } from 'next/server';
 
-/**
- * 标准成功响应格式
- */
-interface SuccessResponse<T> {
-  success: true;
-  data: T;
-}
+export type { ErrorResponse, SuccessResponse };
 
-/**
- * 标准错误响应格式
- */
-interface ErrorResponse {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-  };
-}
-
-/**
- * 咨询详情响应数据接口
- */
-interface ConsultationDetailResponse {
-  id: string;
-  consultNumber: string;
-  clientName: string;
-  clientPhone: string | null;
-  clientEmail: string | null;
-  clientCompany: string | null;
-  consultType: ConsultationType;
-  consultTime: Date;
-  caseType: string | null;
-  caseSummary: string;
-  clientDemand: string | null;
-  status: ConsultStatus;
-  followUpDate: Date | null;
-  followUpNotes: string | null;
-  // AI评估结果
-  aiAssessment: unknown | null;
-  winRate: number | null;
-  difficulty: string | null;
-  riskLevel: string | null;
-  suggestedFee: number | null;
-  // 转化信息
-  convertedToCaseId: string | null;
-  convertedAt: Date | null;
-  // 关联数据
-  userId: string;
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-  };
-  // 跟进记录
-  followUps: Array<{
-    id: string;
-    followUpTime: Date;
-    followUpType: string;
-    content: string;
-    result: string | null;
-    nextFollowUp: Date | null;
-    createdBy: string;
-    createdAt: Date;
-  }>;
-  // 时间戳
-  createdAt: Date;
-  updatedAt: Date;
-}
+// ConsultationDetailResponse 已从 @/types/consultation 导入
+// 不再需要本地定义
 
 /**
  * GET /api/consultations/[id]

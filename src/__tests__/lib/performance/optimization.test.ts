@@ -199,7 +199,9 @@ describe('PerformanceOptimizer', () => {
     it('数据库不可用时应该返回失败结果', async () => {
       // 创建新的optimizer实例，确保mock生效
       const testOptimizer = new PerformanceOptimizer();
-      mockPrismaQueryRaw.mockRejectedValueOnce(new Error('Database connection failed'));
+      mockPrismaQueryRaw.mockRejectedValueOnce(
+        new Error('Database connection failed')
+      );
 
       const result = await testOptimizer.optimizeDatabaseQueries();
 
@@ -301,9 +303,24 @@ describe('PerformanceOptimizer', () => {
     it('应该按执行时间排序', async () => {
       // 数据库返回的结果已经按mean_exec_time DESC排序
       mockPrismaQueryRaw.mockResolvedValue([
-        { query: 'query2', mean_exec_time: 2000, calls: 5, total_exec_time: 10000 },
-        { query: 'query3', mean_exec_time: 1500, calls: 8, total_exec_time: 12000 },
-        { query: 'query1', mean_exec_time: 1000, calls: 10, total_exec_time: 10000 },
+        {
+          query: 'query2',
+          mean_exec_time: 2000,
+          calls: 5,
+          total_exec_time: 10000,
+        },
+        {
+          query: 'query3',
+          mean_exec_time: 1500,
+          calls: 8,
+          total_exec_time: 12000,
+        },
+        {
+          query: 'query1',
+          mean_exec_time: 1000,
+          calls: 10,
+          total_exec_time: 10000,
+        },
       ]);
 
       const slowQueries = await optimizer.analyzeSlowQueries();
@@ -317,7 +334,12 @@ describe('PerformanceOptimizer', () => {
 
     it('应该使用自定义阈值', async () => {
       mockPrismaQueryRaw.mockResolvedValue([
-        { query: 'query1', mean_exec_time: 600, calls: 10, total_exec_time: 6000 },
+        {
+          query: 'query1',
+          mean_exec_time: 600,
+          calls: 10,
+          total_exec_time: 6000,
+        },
       ]);
 
       const customOptimizer = new PerformanceOptimizer({
@@ -350,7 +372,8 @@ describe('PerformanceOptimizer', () => {
     });
 
     it('应该识别JOIN子句模式', () => {
-      const query = 'SELECT * FROM "Case" JOIN "Evidence" ON "Case".id = "Evidence".caseId';
+      const query =
+        'SELECT * FROM "Case" JOIN "Evidence" ON "Case".id = "Evidence".caseId';
       const patterns = optimizer.analyzeQueryPattern(query);
 
       expect(patterns.some(p => p.type === 'JOIN')).toBe(true);
@@ -578,7 +601,9 @@ describe('性能优化器边界情况', () => {
     });
 
     it('应该处理undefined查询', () => {
-      const patterns = optimizer.analyzeQueryPattern(undefined as unknown as string);
+      const patterns = optimizer.analyzeQueryPattern(
+        undefined as unknown as string
+      );
       expect(patterns).toEqual([]);
     });
 
@@ -638,7 +663,9 @@ describe('查询模式分析详细测试', () => {
       JOIN "User" ON "Case".userId = "User".id
     `;
     const patterns = optimizer.analyzeQueryPattern(query);
-    expect(patterns.filter(p => p.type === 'JOIN').length).toBeGreaterThanOrEqual(1);
+    expect(
+      patterns.filter(p => p.type === 'JOIN').length
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it('应该处理没有FROM子句的查询', () => {

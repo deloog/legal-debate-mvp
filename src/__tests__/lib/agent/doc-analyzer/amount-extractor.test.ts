@@ -441,14 +441,16 @@ describe('AmountExtractor', () => {
     it('应该从诉讼请求中提取金额', async () => {
       const claims = [
         {
-          type: 'payment',
+          type: 'PAY_PRINCIPAL' as const,
           content: '支付本金50000元',
           amount: undefined,
+          currency: 'CNY',
         },
         {
-          type: 'payment',
+          type: 'PAY_PRINCIPAL' as const,
           content: '支付利息10000元',
           amount: undefined,
+          currency: 'CNY',
         },
       ];
 
@@ -462,9 +464,10 @@ describe('AmountExtractor', () => {
     it('应该保留已有的数字金额', async () => {
       const claims = [
         {
-          type: 'payment',
+          type: 'PAY_PRINCIPAL' as const,
           content: '支付本金',
           amount: 50000,
+          currency: 'CNY',
         },
       ];
 
@@ -477,9 +480,10 @@ describe('AmountExtractor', () => {
     it('应该解析金额字符串', async () => {
       const claims = [
         {
-          type: 'payment',
+          type: 'PAY_PRINCIPAL' as const,
           content: '支付本金',
-          amount: '50000元',
+          amount: 50000,
+          currency: 'CNY',
         },
       ];
 
@@ -492,9 +496,10 @@ describe('AmountExtractor', () => {
     it('应该处理没有金额的诉讼请求', async () => {
       const claims = [
         {
-          type: 'other',
+          type: 'OTHER' as const,
           content: '解除合同',
           amount: undefined,
+          currency: 'CNY',
         },
       ];
 
@@ -507,9 +512,10 @@ describe('AmountExtractor', () => {
     it('应该提取外币金额并保留货币单位', async () => {
       const claims = [
         {
-          type: 'payment',
+          type: 'PAY_PRINCIPAL' as const,
           content: '支付100万美元',
           amount: undefined,
+          currency: 'CNY',
         },
       ];
 

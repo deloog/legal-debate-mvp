@@ -6,7 +6,7 @@
 import {
   FeeItem,
   FeeCalculationResult,
-  FeeType,
+  ExpenseCategory,
 } from '../../types/calculation';
 
 /**
@@ -25,12 +25,12 @@ export abstract class BaseFeeCalculator {
    * 按类型汇总费用
    * @param items 费用项列表
    */
-  protected breakdownByType(items: FeeItem[]): Record<FeeType, number> {
+  protected breakdownByType(items: FeeItem[]): Record<ExpenseCategory, number> {
     const breakdown = {
-      [FeeType.LAWYER_FEE]: 0,
-      [FeeType.LITIGATION_FEE]: 0,
-      [FeeType.TRAVEL_EXPENSE]: 0,
-      [FeeType.OTHER_EXPENSE]: 0,
+      [ExpenseCategory.LAWYER_FEE]: 0,
+      [ExpenseCategory.LITIGATION_FEE]: 0,
+      [ExpenseCategory.TRAVEL_EXPENSE]: 0,
+      [ExpenseCategory.OTHER_EXPENSE]: 0,
     };
 
     items.forEach(item => {

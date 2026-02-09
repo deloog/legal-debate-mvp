@@ -5,7 +5,7 @@
 
 import {
   FeeItem,
-  FeeType,
+  ExpenseCategory,
   LitigationCaseType,
   LitigationFeeCalculationParams,
   FeeCalculationResult,
@@ -83,7 +83,7 @@ export class LitigationFeeCalculator extends BaseFeeCalculator {
     items.push({
       id: uuidv4(),
       name: '案件受理费',
-      type: FeeType.LITIGATION_FEE,
+      type: ExpenseCategory.LITIGATION_FEE,
       amount: this.formatAmount(fee),
       currency,
       description: `案件类型: ${caseType}, 争议金额: ${amount}${

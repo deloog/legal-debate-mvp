@@ -80,7 +80,7 @@ export async function POST(
       );
     }
 
-    const { filter } = requestData as GenerateReportRequest;
+    const { filter } = requestData as any;
 
     // 生成报表
     const result = await ReportService.generateReport(filter);

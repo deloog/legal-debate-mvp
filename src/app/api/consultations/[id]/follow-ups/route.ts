@@ -3,53 +3,15 @@
  * GET /api/consultations/[id]/follow-ups - 获取跟进记录列表
  * POST /api/consultations/[id]/follow-ups - 添加跟进记录
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentUserId } from '@/lib/auth/get-current-user';
 import { prisma } from '@/lib/db/prisma';
-import { ConsultStatus } from '@/types/consultation';
-
-/**
- * 标准成功响应格式
- */
-interface SuccessResponse<T> {
-  success: true;
-  data: T;
-}
-
-/**
- * 标准错误响应格式
- */
-interface ErrorResponse {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-  };
-}
-
-/**
- * 跟进记录响应数据接口
- */
-interface FollowUpResponse {
-  id: string;
-  consultationId: string;
-  followUpTime: Date;
-  followUpType: string;
-  content: string;
-  result: string | null;
-  nextFollowUp: Date | null;
-  createdBy: string;
-  createdAt: Date;
-}
-
-/**
- * 创建跟进记录请求接口
- */
-interface CreateFollowUpRequest {
-  followUpType: string;
-  content: string;
-  result?: string;
-  nextFollowUp?: string;
-}
+import { ErrorResponse, SuccessResponse } from '@/types/api-response';
+import {
+  ConsultStatus,
+  CreateFollowUpRequest,
+  FollowUpResponse,
+} from '@/types/consultation';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * GET /api/consultations/[id]/follow-ups
@@ -276,8 +238,8 @@ export async function POST(
         content: body.content,
         result: body.result || null,
         nextFollowUp,
-        // TODO: 从session获取真实用户ID
-        createdBy: 'demo-user-id',
+        // 从session获取真实用户ID
+        createdBy: await getCurrentUserId(),
       },
     });
 

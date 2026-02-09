@@ -1,18 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import {
-  createSuccessResponse,
   createCreatedResponse,
+  createSuccessResponse,
 } from '@/app/api/lib/responses/success';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
-import { z } from 'zod';
 import {
   CourtScheduleDetail,
-  CourtScheduleType,
   CourtScheduleStatus,
+  CourtScheduleType,
+  ScheduleWithCase,
 } from '@/types/court-schedule';
 import { Prisma } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const createScheduleSchema = z
   .object({
@@ -58,27 +59,6 @@ const queryScheduleSchema = z.object({
   sortBy: z.enum(['startTime', 'createdAt', 'updatedAt']).default('startTime'),
   sortOrder: z.enum(['asc', 'desc']).default('asc'),
 });
-
-type ScheduleWithCase = {
-  id: string;
-  caseId: string;
-  title: string;
-  type: string;
-  startTime: Date;
-  endTime: Date;
-  location: string | null;
-  judge: string | null;
-  notes: string | null;
-  status: string;
-  metadata: unknown;
-  createdAt: Date;
-  updatedAt: Date;
-  case?: {
-    id: string;
-    title: string;
-    type: string;
-  };
-};
 
 function mapScheduleToDetail(schedule: ScheduleWithCase): CourtScheduleDetail {
   return {

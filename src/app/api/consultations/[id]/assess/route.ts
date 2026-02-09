@@ -2,29 +2,11 @@
  * 咨询AI评估API路由
  * POST /api/consultations/[id]/assess - 执行AI案件评估
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
 import { createCaseAssessmentService } from '@/lib/consultation/case-assessment-service';
+import { prisma } from '@/lib/db/prisma';
+import { ErrorResponse, SuccessResponse } from '@/types/api-response';
 import { AIAssessment } from '@/types/consultation';
-
-/**
- * 标准成功响应格式
- */
-interface SuccessResponse<T> {
-  success: true;
-  data: T;
-}
-
-/**
- * 标准错误响应格式
- */
-interface ErrorResponse {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-  };
-}
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * POST /api/consultations/[id]/assess
@@ -100,7 +82,7 @@ export async function POST(
     await prisma.consultation.update({
       where: { id },
       data: {
-        aiAssessment: assessment as unknown as Record<string, unknown>,
+        aiAssessment: assessment as any,
         winRate: assessment.winRate,
         difficulty: assessment.difficulty,
         riskLevel: assessment.riskLevel,
@@ -180,7 +162,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: consultation.aiAssessment as AIAssessment | null,
+      data: consultation.aiAssessment as any,
     });
   } catch (error) {
     console.error('获取评估结果失败:', error);

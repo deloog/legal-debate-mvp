@@ -1,12 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import { createSuccessResponse } from '@/app/api/lib/responses/success';
-import { validatePathParam } from '@/app/api/lib/validation/validator';
 import { uuidSchema } from '@/app/api/lib/validation/schemas';
+import { validatePathParam } from '@/app/api/lib/validation/validator';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
+import {
+  EvidenceListItem,
+  EvidenceStatus,
+  EvidenceType,
+} from '@/types/evidence';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { EvidenceType, EvidenceStatus } from '@/types/evidence';
 
 /**
  * 案件证据列表查询参数schema
@@ -42,24 +46,6 @@ const evidenceQuerySchema = z.object({
     .default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
-
-type EvidenceListItem = {
-  id: string;
-  caseId: string;
-  type: string;
-  name: string;
-  description: string | null;
-  fileUrl: string | null;
-  submitter: string | null;
-  source: string | null;
-  status: string;
-  relevanceScore: number | null;
-  metadata: Record<string, unknown> | null;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
-  relations?: unknown[];
-};
 
 async function mapEvidenceToListItem(
   evidence: unknown

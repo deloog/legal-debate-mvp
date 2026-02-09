@@ -3,61 +3,26 @@
  * 支持获取和更新单个会员的详细信息
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import {
+  errorResponse,
+  notFoundResponse,
+  serverErrorResponse,
+  successResponse,
+  unauthorizedResponse,
+} from '@/lib/api-response';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import {
-  successResponse,
-  errorResponse,
-  notFoundResponse,
-  unauthorizedResponse,
-  serverErrorResponse,
-} from '@/lib/api-response';
+  MembershipDetailResponse,
+  UpdateMembershipRequest,
+} from '@/types/admin-membership';
 import {
   MembershipChangeType,
-  MembershipTierType,
   MembershipStatus,
+  MembershipTierType,
 } from '@prisma/client';
-
-// =============================================================================
-// 类型定义
-// =============================================================================
-
-/**
- * 会员详情响应数据
- */
-interface MembershipDetailResponse {
-  id: string;
-  userId: string;
-  userEmail: string;
-  userName: string | null;
-  tierName: string;
-  tierDisplayName: string;
-  status: string;
-  startDate: Date;
-  endDate: Date;
-  autoRenew: boolean;
-  cancelledAt: Date | null;
-  cancelledReason: string | null;
-  pausedAt: Date | null;
-  pausedReason: string | null;
-  notes: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-/**
- * 会员编辑请求体
- */
-interface UpdateMembershipRequest {
-  tierId?: string;
-  status?: string;
-  endDate?: string;
-  autoRenew?: boolean;
-  notes?: string;
-  pausedReason?: string;
-}
+import { NextRequest, NextResponse } from 'next/server';
 
 // =============================================================================
 // 辅助函数

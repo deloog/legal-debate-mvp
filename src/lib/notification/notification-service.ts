@@ -30,8 +30,8 @@ class NotificationService {
   ): Promise<NotificationSendResult> {
     const results: NotificationSendResult = {
       success: true,
-      channels,
-      errors: {} as Record<NotificationChannel, string>,
+      channel: channels[0] || NotificationChannel.IN_APP,
+      errors: [],
     };
 
     // 检查是否包含邮件渠道
@@ -44,8 +44,8 @@ class NotificationService {
 
         if (!emailResult.success) {
           results.success = false;
-          results.errors![NotificationChannel.EMAIL] =
-            emailResult.error || '邮件发送失败';
+          if (!results.errors) results.errors = [];
+          results.errors.push(emailResult.error || '邮件发送失败');
           logger.warn(`跟进任务邮件发送失败: ${task.id}`, {
             emailResult,
           } as never);
@@ -56,8 +56,10 @@ class NotificationService {
         }
       } catch (error) {
         results.success = false;
-        results.errors![NotificationChannel.EMAIL] =
-          error instanceof Error ? error.message : '邮件发送异常';
+        if (!results.errors) results.errors = [];
+        results.errors.push(
+          error instanceof Error ? error.message : '邮件发送异常'
+        );
         logger.error(
           `跟进任务邮件发送异常: ${task.id}`,
           error as Error as never
@@ -75,8 +77,8 @@ class NotificationService {
 
         if (!smsResult.success) {
           results.success = false;
-          results.errors![NotificationChannel.SMS] =
-            smsResult.error || '短信发送失败';
+          if (!results.errors) results.errors = [];
+          results.errors.push(smsResult.error || '短信发送失败');
           logger.warn(`跟进任务短信发送失败: ${task.id}`, {
             smsResult,
           } as never);
@@ -87,8 +89,10 @@ class NotificationService {
         }
       } catch (error) {
         results.success = false;
-        results.errors![NotificationChannel.SMS] =
-          error instanceof Error ? error.message : '短信发送异常';
+        if (!results.errors) results.errors = [];
+        results.errors.push(
+          error instanceof Error ? error.message : '短信发送异常'
+        );
         logger.error(
           `跟进任务短信发送异常: ${task.id}`,
           error as Error as never
@@ -99,13 +103,13 @@ class NotificationService {
     // 如果所有渠道都失败，返回失败
     if (
       !results.success &&
-      Object.keys(results.errors || {}).length === channels.length
+      (results.errors?.length || 0) === channels.length
     ) {
       return results;
     }
 
     // 如果没有错误，删除errors属性
-    if (Object.keys(results.errors || {}).length === 0) {
+    if ((results.errors?.length || 0) === 0) {
       delete results.errors;
     }
 

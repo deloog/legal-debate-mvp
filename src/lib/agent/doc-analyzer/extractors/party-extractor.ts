@@ -97,6 +97,40 @@ export class PartyExtractor {
     },
   ];
 
+  // 特殊组织架构模式
+  private readonly specialOrganizationPatterns: PartyPattern[] = [
+    // 清算组
+    {
+      regex: /(.+?)(清算组|清算委员会)/g,
+      type: 'other',
+      role: '清算组',
+    },
+    // 破产管理人
+    {
+      regex: /(.+?)(破产管理人|破产清算人)/g,
+      type: 'other',
+      role: '破产管理人',
+    },
+    // 联合体
+    {
+      regex: /(.+?)与(.+?)(联合体|共同体)/g,
+      type: 'other',
+      role: '联合体',
+    },
+    // 分支机构
+    {
+      regex: /(.+?)(分公司|分支机构|办事处|代表处)/g,
+      type: 'other',
+      role: '分支机构',
+    },
+    // 临时机构
+    {
+      regex: /(.+?)(筹备组|筹备委员会|临时管理人)/g,
+      type: 'other',
+      role: '临时机构',
+    },
+  ];
+
   // 法定代表人模式（用于过滤）
   private readonly legalRepPattern: RegExp =
     /(?:法定代表人|法人代表)[：:]\s*([^\n]+)/;
@@ -160,6 +194,19 @@ export class PartyExtractor {
       }
     }
 
+    // 提取特殊组织架构
+    const specialOrgs = this.extractSpecialOrganizations(text);
+    for (const org of specialOrgs) {
+      if (!existingNames.has(org.name)) {
+        extractedParties.push(org);
+        existingNames.add(org.name);
+        logger.debug('算法兜底提取特殊组织', {
+          name: org.name,
+          role: org.role,
+        });
+      }
+    }
+
     // 从诉讼请求中推断被告
     const inferredDefendant = this.inferDefendantFromClaims(text);
     if (inferredDefendant && !existingNames.has(inferredDefendant.name)) {
@@ -172,14 +219,17 @@ export class PartyExtractor {
     // 过滤法定代表人和诉讼代理人
     const filteredParties = this.filterNonParties(extractedParties);
 
+    // 验证当事人身份
+    const validatedParties = this.validateParties(filteredParties, text);
+
     // 计算置信度
     const confidence = this.calculateConfidence(
       extractedParties.length,
-      filteredParties.length
+      validatedParties.length
     );
 
     return {
-      parties: filteredParties,
+      parties: validatedParties,
       confidence,
       method: 'regex',
     };
@@ -285,6 +335,10 @@ export class PartyExtractor {
       .replace(/，[^\n]*$/, '') // 移除第一个逗号后的内容（保留地址等信息）
       .replace(/[（\(].*?[）\)]$/, '') // 移除括号内容（保留公司类型信息）
       .replace(/等/g, '') // 移除"等"
+      .replace(/法定代表人/g, '') // 移除职务描述
+      .replace(/委托代理人/g, '') // 移除职务描述
+      .replace(/诉讼代理人/g, '') // 移除职务描述
+      .replace(/，.*$/g, '') // 移除逗号后的所有内容（性别、出生年份等）
       .trim();
   }
 
@@ -512,5 +566,138 @@ export class PartyExtractor {
     }
 
     return false;
+  }
+
+  /**
+   * 提取特殊组织架构
+   */
+  private extractSpecialOrganizations(text: string): Party[] {
+    const parties: Party[] = [];
+    const seenNames = new Set<string>();
+
+    for (const pattern of this.specialOrganizationPatterns) {
+      const regex = new RegExp(pattern.regex.source, pattern.regex.flags);
+      let match: RegExpExecArray | null;
+
+      while ((match = regex.exec(text)) !== null) {
+        // 提取完整匹配的文本
+        const fullMatch = match[0];
+        const cleanedName = fullMatch.trim();
+
+        if (
+          cleanedName &&
+          cleanedName.length >= 2 &&
+          !seenNames.has(cleanedName)
+        ) {
+          // 判断当事人类型（从上下文推断）
+          let type: 'plaintiff' | 'defendant' | 'other' = 'other';
+          const contextBefore = text.substring(
+            Math.max(0, match.index - 50),
+            match.index
+          );
+
+          if (
+            contextBefore.includes('原告') ||
+            contextBefore.includes('申请人')
+          ) {
+            type = 'plaintiff';
+          } else if (
+            contextBefore.includes('被告') ||
+            contextBefore.includes('被申请人')
+          ) {
+            type = 'defendant';
+          }
+
+          parties.push({
+            type,
+            name: cleanedName,
+            role: pattern.role || '其他',
+            _inferred: true,
+          });
+          seenNames.add(cleanedName);
+
+          logger.debug('提取特殊组织架构', {
+            name: cleanedName,
+            role: pattern.role,
+            type,
+          });
+        }
+      }
+    }
+
+    return parties;
+  }
+
+  /**
+   * 验证当事人身份
+   */
+  private validateParties(parties: Party[], text: string): Party[] {
+    const validated: Party[] = [];
+
+    for (const party of parties) {
+      const validation = this.validatePartyIdentity(party, text);
+
+      if (validation.isValid) {
+        validated.push(party);
+      } else {
+        logger.debug('当事人验证失败', {
+          name: party.name,
+          confidence: validation.confidence,
+          issues: validation.issues,
+        });
+      }
+    }
+
+    return validated;
+  }
+
+  /**
+   * 验证单个当事人身份
+   */
+  private validatePartyIdentity(
+    party: Party,
+    text: string
+  ): {
+    isValid: boolean;
+    confidence: number;
+    issues: string[];
+  } {
+    const issues: string[] = [];
+    let confidence = 1.0;
+
+    // 检查必填字段
+    if (!party.name || party.name.trim().length === 0) {
+      issues.push('当事人姓名为空');
+      confidence = 0;
+      return { isValid: false, confidence, issues };
+    }
+
+    // 检查姓名长度合理性
+    if (party.name.length > 50) {
+      issues.push('当事人姓名过长，可能包含多余信息');
+      confidence -= 0.3;
+    }
+
+    // 检查是否包含法定代表人等描述性文字
+    if (
+      party.name.includes('法定代表人') ||
+      party.name.includes('委托代理人') ||
+      party.name.includes('诉讼代理人')
+    ) {
+      issues.push('当事人姓名包含职务描述');
+      confidence -= 0.5;
+    }
+
+    // 检查姓名是否在原文中出现
+    if (!text.includes(party.name)) {
+      issues.push('当事人姓名未在原文中出现');
+      confidence -= 0.2;
+    }
+
+    return {
+      isValid: confidence > 0.5,
+      confidence: Math.max(0, confidence),
+      issues,
+    };
   }
 }

@@ -3,35 +3,12 @@
  * 提供单个角色的查询、更新和删除操作
  */
 
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
+import { RoleDetailResponse } from '@/types/admin-role';
 import type { UserRole } from '@/types/auth';
-
-// =============================================================================
-// 类型定义
-// =============================================================================
-
-/**
- * 角色详情响应数据
- */
-interface RoleDetailResponse {
-  id: string;
-  name: string;
-  description: string | null;
-  isDefault: boolean;
-  permissions: Array<{
-    id: string;
-    name: string;
-    description: string | null;
-    resource: string;
-    action: string;
-  }>;
-  userCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { NextRequest, NextResponse } from 'next/server';
 
 // =============================================================================
 // 辅助函数

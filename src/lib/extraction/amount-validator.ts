@@ -60,16 +60,21 @@ export class AmountValidator {
     }
 
     // 只有阿拉伯数字且包含"万"但不包含中文数字时才需要乘10000
+    // 但如果已经进行过单位转换，则跳过
     if (match.currency === 'CNY' && match.extractionMethod === 'regex') {
       const hasWan = match.originalText.includes('万');
       const hasChineseDigits = /[零壹贰叁肆伍陆柒捌玖]/.test(
         match.originalText
       );
+      const alreadyConverted = match.processingNotes.some(
+        note => note.includes('单位转换') || note.includes('单位已转换')
+      );
 
       if (
         hasWan &&
         !hasChineseDigits &&
-        !match.processingNotes.includes('中文数字识别')
+        !match.processingNotes.includes('中文数字识别') &&
+        !alreadyConverted
       ) {
         match.normalizedAmount *= 10000;
         match.processingNotes.push('万元单位已转换为元');

@@ -1,14 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import {
-  createSuccessResponse,
   createCreatedResponse,
+  createSuccessResponse,
 } from '@/app/api/lib/responses/success';
+import { FollowUpTaskGenerator } from '@/lib/client/follow-up-task-generator';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
-import { FollowUpTaskGenerator } from '@/lib/client/follow-up-task-generator';
-import { z } from 'zod';
+import type { CommunicationRecordDetail } from '@/types/communication';
 import type { Prisma } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const createCommunicationSchema = z
   .object({
@@ -30,23 +31,9 @@ const queryCommunicationSchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
 
-type CommunicationRecord = {
-  id: string;
-  clientId: string;
-  userId: string;
-  type: 'PHONE' | 'EMAIL' | 'MEETING' | 'WECHAT' | 'OTHER';
-  summary: string;
-  content: string | null;
-  nextFollowUpDate: Date | null;
-  isImportant: boolean;
-  metadata: Record<string, unknown> | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
 async function mapCommunicationRecord(
   record: unknown
-): Promise<CommunicationRecord> {
+): Promise<CommunicationRecordDetail> {
   if (!record || typeof record !== 'object') {
     throw new Error('Invalid communication record data');
   }

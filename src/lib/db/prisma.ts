@@ -3,9 +3,12 @@ import { PrismaClient } from '@prisma/client';
 // 全局变量，用于存储Prisma客户端实例
 declare global {
   // 允许在开发热重载时保持单一实例
-
   var __prisma: PrismaClient | undefined;
 }
+
+// 判断是否为测试环境
+const isTestEnv =
+  process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
 
 // 创建Prisma客户端实例
 function createPrismaClient(): PrismaClient {
@@ -21,7 +24,7 @@ function createPrismaClient(): PrismaClient {
 export const prisma = globalThis.__prisma ?? createPrismaClient();
 
 // 开发环境下，将客户端实例保存到全局变量，避免热重载时创建多个实例
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development' && !isTestEnv) {
   globalThis.__prisma = prisma;
 }
 
@@ -51,23 +54,21 @@ export const disconnectDatabase = async (): Promise<void> => {
 export const getConnectionInfo = async () => {
   try {
     if (process.env.DATABASE_URL?.includes('sqlite')) {
-      // SQLite连接信息
       await prisma.$queryRaw`PRAGMA busy_timeout`;
       return {
-        active_connections: 1, // SQLite是单连接
+        active_connections: 1,
         total_connections: 1,
       };
     }
-    // PostgreSQL连接信息
     const result = await prisma.$queryRaw<
-      {
+      Array<{
         active_connections: number;
         total_connections: number;
-      }[]
-    >`SELECT 
+      }>
+    >`SELECT
         count(*) as active_connections,
         (SELECT setting FROM pg_settings WHERE name = 'max_connections') as total_connections
-      FROM pg_stat_activity 
+      FROM pg_stat_activity
       WHERE state = 'active'`;
     return result[0];
   } catch (error) {

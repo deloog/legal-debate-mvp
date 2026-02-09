@@ -2,28 +2,10 @@
  * 案件类型配置API
  * GET /api/case-type-configs - 获取案件类型配置列表
  */
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
+import type { ErrorResponse, SuccessResponse } from '@/types/api-response';
 import { CaseTypeCategory } from '@/types/case-type-config';
-
-/**
- * 标准成功响应格式
- */
-interface SuccessResponse<T> {
-  success: true;
-  data: T;
-}
-
-/**
- * 标准错误响应格式
- */
-interface ErrorResponse {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-  };
-}
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * 案件类型配置响应数据接口

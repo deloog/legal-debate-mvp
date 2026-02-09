@@ -3,87 +3,20 @@
  * 支持查看订单详情、更新订单状态
  */
 
-import { NextRequest } from 'next/server';
+import {
+  notFoundResponse,
+  serverErrorResponse,
+  successResponse,
+  unauthorizedResponse,
+} from '@/lib/api-response';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import {
-  successResponse,
-  unauthorizedResponse,
-  notFoundResponse,
-  serverErrorResponse,
-} from '@/lib/api-response';
-import type { OrderStatus } from '@/types/payment';
-
-// =============================================================================
-// 类型定义
-// =============================================================================
-
-/**
- * 订单详情响应数据
- */
-interface OrderDetailResponse {
-  id: string;
-  orderNo: string;
-  userId: string;
-  userEmail: string;
-  userName: string | null;
-  userPhone: string | null;
-  membershipTierId: string;
-  membershipTierName: string;
-  membershipTierPrice: number;
-  paymentMethod: string;
-  status: string;
-  amount: number;
-  currency: string;
-  description: string;
-  expiredAt: Date;
-  paidAt: Date | null;
-  failedReason: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  metadata: Record<string, unknown>;
-  userMemberships: Array<{
-    id: string;
-    status: string;
-    startDate: Date;
-    endDate: Date;
-    tierName: string;
-  }>;
-  paymentRecords: Array<{
-    id: string;
-    paymentMethod: string;
-    amount: number;
-    status: string;
-    transactionId: string | null;
-    thirdPartyOrderNo: string | null;
-    createdAt: Date;
-  }>;
-  refundRecords: Array<{
-    id: string;
-    amount: number;
-    status: string;
-    reason: string | null;
-    createdAt: Date;
-  }>;
-  invoices: Array<{
-    id: string;
-    title: string | null;
-    status: string;
-    amount: number;
-    issuedAt: Date | null;
-    createdAt: Date;
-  }>;
-}
-
-/**
- * 更新订单状态请求
- */
-interface UpdateOrderStatusRequest {
-  status: OrderStatus;
-  paidAt?: string;
-  failedReason?: string;
-}
+  OrderDetailResponse,
+  UpdateOrderStatusRequest,
+} from '@/types/admin-order';
+import { NextRequest } from 'next/server';
 
 // =============================================================================
 // 辅助函数

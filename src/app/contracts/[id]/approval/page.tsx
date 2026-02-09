@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { ApprovalFlow } from '@/components/contract/ApprovalFlow';
 import { ArrowLeft, FileText, User, DollarSign, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
@@ -46,6 +47,7 @@ interface ApprovalData {
 export default function ContractApprovalPage() {
   const params = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
   const contractId = params.id as string;
 
   const [approval, setApproval] = useState<ApprovalData | null>(null);
@@ -267,12 +269,14 @@ export default function ContractApprovalPage() {
               <ApprovalFlow
                 approval={{
                   ...approval,
+                  status: approval.status as any,
                   createdAt: new Date(approval.createdAt),
                   completedAt: approval.completedAt
                     ? new Date(approval.completedAt)
                     : null,
                   steps: approval.steps.map(step => ({
                     ...step,
+                    status: step.status as any,
                     createdAt: new Date(step.createdAt),
                     completedAt: step.completedAt
                       ? new Date(step.completedAt)
@@ -281,7 +285,7 @@ export default function ContractApprovalPage() {
                 }}
                 onApprove={handleApprove}
                 onReject={handleReject}
-                currentUserId='current-user-id' // TODO: 从session获取
+                currentUserId={session?.user?.id || ''}
               />
             </div>
           </div>

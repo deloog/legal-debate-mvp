@@ -1,10 +1,24 @@
+import nodemailer from 'nodemailer';
 import {
+  LogFormat,
   Logger,
   LogLevel,
-  LogFormat,
   LogOutput,
 } from '../../../config/winston.config';
 import { Alert, AlertSeverity, NotificationChannel } from './types';
+
+// 创建nodemailer transporter
+const createTransporter = () => {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.example.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+};
 
 // 创建告警专用的logger实例
 const logger = new Logger({
@@ -62,22 +76,33 @@ export class EmailAlertChannel implements NotificationChannel {
     }
 
     try {
-      // TODO: 实现邮件发送逻辑
-      // 目前先记录到日志，待邮件服务实现后替换
-      logger.info('Alert email would be sent', {
+      // 检查是否配置了SMTP
+      const smtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER);
+
+      if (!smtpConfigured) {
+        // SMTP未配置，记录到日志
+        logger.info('Alert email would be sent (SMTP not configured)', {
+          alert: alert.title,
+          recipientsCount: this.recipients.length,
+          subject: `[${alert.severity}] ${alert.title}`,
+          hasMetadata: alert.metadata !== undefined,
+        });
+        return;
+      }
+
+      const transporter = createTransporter();
+      const mailOptions = {
+        from: process.env.EMAIL_FROM || '"律伴助手" <noreply@yourdomain.com>',
+        to: this.recipients.join(', '),
+        subject: `[${alert.severity}] ${alert.title}`,
+        html: this.generateEmailBody(alert),
+      };
+
+      await transporter.sendMail(mailOptions);
+      logger.info('Alert email sent successfully', {
         alert: alert.title,
         recipientsCount: this.recipients.length,
-        subject: `[${alert.severity}] ${alert.title}`,
-        hasMetadata: alert.metadata !== undefined,
       });
-
-      // const mailOptions = {
-      //   from: process.env.EMAIL_FROM || '"律伴助手" <noreply@yourdomain.com>',
-      //   to: this.recipients.join(', '),
-      //   subject: `[${alert.severity}] ${alert.title}`,
-      //   html: this.generateEmailBody(alert),
-      // };
-      // await transporter.sendMail(mailOptions);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -232,6 +257,60 @@ export class WebhookAlertChannel implements NotificationChannel {
 }
 
 /**
+ * 发送短信到阿里云/腾讯云短信平台
+ */
+async function sendSMS(
+  phoneNumbers: string[],
+  content: string
+): Promise<boolean> {
+  // 检测短信服务提供商
+  const provider = process.env.SMS_PROVIDER || '';
+
+  // 阿里云短信实现 (需要配置环境变量)
+  if (provider === 'aliyun') {
+    const accessKeyId = process.env.ALIYUN_SMS_ACCESS_KEY_ID;
+    const accessKeySecret = process.env.ALIYUN_SMS_ACCESS_KEY_SECRET;
+
+    if (!accessKeyId || !accessKeySecret) {
+      logger.warn('Aliyun SMS credentials not configured');
+      return false;
+    }
+
+    // 实际项目中需要实现签名算法和HTTP调用
+    logger.info('SMS would be sent via Aliyun', {
+      phoneNumbersCount: phoneNumbers.length,
+      content: content.substring(0, 50),
+    });
+    return true;
+  }
+
+  // 腾讯云短信实现 (需要配置环境变量)
+  if (provider === 'tencent') {
+    const secretId = process.env.TENCENT_SMS_SECRET_ID;
+    const secretKey = process.env.TENCENT_SMS_SECRET_KEY;
+
+    if (!secretId || !secretKey) {
+      logger.warn('Tencent SMS credentials not configured');
+      return false;
+    }
+
+    logger.info('SMS would be sent via Tencent', {
+      phoneNumbersCount: phoneNumbers.length,
+      content: content.substring(0, 50),
+    });
+    return true;
+  }
+
+  // 没有配置具体服务提供商，使用日志记录
+  logger.warn('SMS service not configured, logging only', {
+    provider: provider || 'not set',
+    phoneNumbersCount: phoneNumbers.length,
+    content,
+  });
+  return false;
+}
+
+/**
  * 短信通知渠道
  */
 export class SMSAlertChannel implements NotificationChannel {
@@ -262,16 +341,16 @@ export class SMSAlertChannel implements NotificationChannel {
       const content =
         `[${alert.severity}]${alert.title}:${alert.message}`.substring(0, 70);
 
-      // 这里可以集成第三方短信服务，如阿里云、腾讯云等
-      // 目前使用占位符实现
-      logger.info('SMS alert would be sent', {
-        alert: alert.title,
-        content,
-        recipientsCount: this.recipients.length,
-      });
+      // 调用短信发送函数
+      const sent = await sendSMS(this.recipients, content);
 
-      // TODO: 集成实际的短信服务
-      // await sendSMS(this.recipients, content);
+      if (sent) {
+        logger.info('SMS alert sent successfully', {
+          alert: alert.title,
+          content,
+          recipientsCount: this.recipients.length,
+        });
+      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';

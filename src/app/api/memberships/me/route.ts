@@ -7,7 +7,8 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { getUsageStats } from '@/lib/usage/record-usage';
-import type { MembershipStatus, MembershipTier } from '@/types/membership';
+import { MembershipStatus } from '@prisma/client';
+import type { MembershipTier } from '@/types/membership';
 
 // =============================================================================
 // GET /api/memberships/me - 查询当前会员信息
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     const currentMembership = await prisma.userMembership.findFirst({
       where: {
         userId: authUser.userId,
-        status: 'ACTIVE' as MembershipStatus,
+        status: MembershipStatus.ACTIVE,
       },
       include: {
         tier: true,

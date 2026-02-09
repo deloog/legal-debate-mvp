@@ -54,8 +54,22 @@ export interface ArgumentEventData {
   roundId: string;
   side: 'PLAINTIFF' | 'DEFENDANT';
   content: string;
-  type: 'MAIN_POINT' | 'SUPPORTING' | 'REBUTTAL';
+  type:
+    | 'MAIN_POINT'
+    | 'SUPPORTING'
+    | 'REBUTTAL'
+    | 'EVIDENCE'
+    | 'LEGAL_BASIS'
+    | 'CONCLUSION';
   timestamp: string;
+  reasoning?: string;
+  legalBasis?: Array<{
+    lawName: string;
+    articleNumber: string;
+    relevance: number;
+    explanation: string;
+  }>;
+  confidence?: number;
 }
 
 /**

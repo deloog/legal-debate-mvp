@@ -3,11 +3,12 @@
  * 用户可以取消当前的会员订阅
  */
 
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
-import type { MembershipStatus } from '@/types/membership';
+import type { CancelRequestBody } from '@/types/admin-membership';
+import { MembershipStatus } from '@prisma/client';
 import { MembershipChangeType } from '@/types/membership';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * POST /api/memberships/cancel
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const currentMembership = await prisma.userMembership.findFirst({
       where: {
         userId: authUser.userId,
-        status: 'ACTIVE' as MembershipStatus,
+        status: 'ACTIVE',
       },
       include: {
         tier: true,
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       const updatedMembership = await tx.userMembership.update({
         where: { id: currentMembership.id },
         data: {
-          status: 'CANCELLED' as MembershipStatus,
+          status: MembershipStatus.CANCELLED,
           cancelledAt: new Date(),
           cancelledReason: reason || '用户主动取消',
           notes: `会员取消：${reason || '用户主动取消'}`,
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           fromTier: currentMembership.tier.tier,
           toTier: undefined,
           fromStatus: currentMembership.status,
-          toStatus: 'CANCELLED' as MembershipStatus,
+          toStatus: MembershipStatus.CANCELLED,
           reason: `会员取消：${reason || '用户主动取消'}`,
           performedBy: authUser.userId,
           metadata: {
@@ -217,11 +218,4 @@ function isValidCancelRequest(data: unknown): data is CancelRequestBody {
   }
 
   return true;
-}
-
-/**
- * 取消请求体类型
- */
-interface CancelRequestBody {
-  reason?: string;
 }

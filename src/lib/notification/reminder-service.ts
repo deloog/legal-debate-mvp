@@ -9,6 +9,7 @@ import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/agent/security/logger';
 import {
   CreateReminderInput,
+  NotificationChannel,
   Reminder,
   ReminderListResponse,
   ReminderQueryParams,
@@ -83,15 +84,20 @@ class ReminderService {
     input: UpdateReminderInput
   ): Promise<Reminder> {
     try {
+      const updateData: any = {
+        ...input,
+      };
+
+      if (input.metadata !== undefined) {
+        updateData.metadata = input.metadata as Prisma.InputJsonValue;
+      }
+
       const reminder = await prisma.reminder.update({
         where: {
           id,
           userId,
         },
-        data: {
-          ...input,
-          metadata: input.metadata as Prisma.InputJsonValue,
-        },
+        data: updateData,
       });
 
       logger.info(`更新提醒成功: ${id}`);
@@ -155,9 +161,12 @@ class ReminderService {
         status,
         startTime,
         endTime,
-        page = 1,
-        limit = 20,
+        page: pageStr = '1',
+        limit: limitStr = '20',
       } = params;
+
+      const page = typeof pageStr === 'string' ? parseInt(pageStr, 10) : pageStr;
+      const limit = typeof limitStr === 'string' ? parseInt(limitStr, 10) : limitStr;
 
       const skip = (page - 1) * limit;
 
@@ -184,6 +193,12 @@ class ReminderService {
         total,
         page,
         limit,
+        pagination: {
+          page,
+          pageSize: limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     } catch (error) {
       logger.error('查询提醒列表失败', error as Error as never);
@@ -340,10 +355,14 @@ class ReminderService {
       userId: reminder.userId,
       type: reminder.type as ReminderType,
       title: reminder.title,
+      content: reminder.message || reminder.title,
       message: reminder.message,
+      scheduledAt: reminder.reminderTime,
       reminderTime: reminder.reminderTime,
-      channels: reminder.channels,
+      channel: (reminder.channels[0] || 'IN_APP') as NotificationChannel,
+      channels: reminder.channels as NotificationChannel[],
       status: reminder.status as ReminderStatus,
+      sentAt: null,
       relatedType: reminder.relatedType,
       relatedId: reminder.relatedId,
       metadata: reminder.metadata as Record<string, unknown> | null,

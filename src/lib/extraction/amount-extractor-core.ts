@@ -105,9 +105,95 @@ export class AmountExtractorCore {
           if (match[2]) {
             const num1 = this.parseNumericString(match[1]);
             const num2 = this.parseNumericString(match[2]);
-            result.normalizedAmount = (num1 + num2) / 2;
-            result.processingNotes.push(`范围金额：${num1}至${num2}，取平均值`);
+
+            // 智能识别每个数字的单位
+            // 分析原文，找出每个数字后面的单位
+            const originalText = match[0];
+
+            // 提取第一个数字的单位
+            const num1Str = match[1];
+            const num1Index = originalText.indexOf(num1Str);
+            const afterNum1 = originalText.substring(
+              num1Index + num1Str.length
+            );
+
+            let multiplier1 = 1;
+            if (/^[,\s]*亿/.test(afterNum1)) {
+              multiplier1 = 100000000;
+            } else if (/^[,\s]*千万/.test(afterNum1)) {
+              multiplier1 = 10000000;
+            } else if (/^[,\s]*万/.test(afterNum1)) {
+              multiplier1 = 10000;
+            } else if (
+              /^[,\s]*元/.test(afterNum1) ||
+              /^[,\s]*圆/.test(afterNum1)
+            ) {
+              multiplier1 = 1;
+            }
+
+            // 提取第二个数字的单位
+            const num2Str = match[2];
+            const num2Index = originalText.lastIndexOf(num2Str);
+            const afterNum2 = originalText.substring(
+              num2Index + num2Str.length
+            );
+
+            let multiplier2 = 1;
+            if (/^[,\s]*亿/.test(afterNum2) || /亿/.test(afterNum2)) {
+              multiplier2 = 100000000;
+            } else if (
+              /^[,\s]*千万/.test(afterNum2) ||
+              /千万/.test(afterNum2)
+            ) {
+              multiplier2 = 10000000;
+            } else if (/^[,\s]*万/.test(afterNum2) || /万/.test(afterNum2)) {
+              multiplier2 = 10000;
+            } else if (
+              /^[,\s]*元/.test(afterNum2) ||
+              /^[,\s]*圆/.test(afterNum2) ||
+              /元/.test(afterNum2) ||
+              /圆/.test(afterNum2)
+            ) {
+              multiplier2 = 1;
+            }
+
+            const amount1 = num1 * multiplier1;
+            const amount2 = num2 * multiplier2;
+            result.normalizedAmount = (amount1 + amount2) / 2;
+            result.processingNotes.push(
+              `范围金额：${amount1}至${amount2}，取平均值`
+            );
+            // 标记已进行单位转换，避免 validator 重复转换
+            if (multiplier1 > 1 || multiplier2 > 1) {
+              result.processingNotes.push('单位转换已完成');
+            }
             result.confidence = 0.7;
+          } else {
+            // 非范围金额才进行单位转换
+            // 检查是否有中文单位（万、千万、亿）
+            const hasWan = match[0].includes('万');
+            const hasYi = match[0].includes('亿');
+            const hasQianWan = match[0].includes('千万');
+
+            if (hasYi && !hasQianWan) {
+              const hasNumber = /\d/.test(numberPart);
+              if (hasNumber && result.normalizedAmount < 100000000) {
+                result.normalizedAmount *= 100000000;
+                result.processingNotes.push('亿元单位转换');
+              }
+            } else if (hasQianWan) {
+              const hasNumber = /\d/.test(numberPart);
+              if (hasNumber && result.normalizedAmount < 10000000) {
+                result.normalizedAmount *= 10000000;
+                result.processingNotes.push('千万单位转换');
+              }
+            } else if (hasWan) {
+              const hasNumber = /\d/.test(numberPart);
+              if (hasNumber && result.normalizedAmount < 10000) {
+                result.normalizedAmount *= 10000;
+                result.processingNotes.push('万元单位转换');
+              }
+            }
           }
 
           if (result.normalizedAmount > 0) {
@@ -129,9 +215,17 @@ export class AmountExtractorCore {
       '大概',
       '大约',
       '左右',
+      '上下',
       '差不多',
       '接近',
       '近',
+      '不少于',
+      '至少',
+      '不超过',
+      '最多',
+      '不得超过',
+      '以上',
+      '以下',
     ];
     return fuzzyKeywords.some(keyword => text.includes(keyword));
   }
@@ -267,28 +361,48 @@ export class AmountExtractorCore {
       }
     }
 
+    // 按原文长度和置信度排序，优先保留原文长的结果
+    const sorted = filtered1.sort((a, b) => {
+      // 原文长度优先
+      if (b.originalText.length !== a.originalText.length) {
+        return b.originalText.length - a.originalText.length;
+      }
+      // 置信度次之
+      return b.confidence - a.confidence;
+    });
+
     const deduplicated: AmountExtractionResult[] = [];
-    const processedAmounts = new Set<string>();
+    const processedTexts = new Set<string>();
 
-    for (const match of filtered1.sort((a, b) => b.confidence - a.confidence)) {
-      const amountKey = this.getSimilarityKey(match.normalizedAmount);
-
-      let hasSimilar = false;
-      for (const processedKey of processedAmounts) {
-        if (
-          this.validator.areAmountsSimilar(
-            match.normalizedAmount,
-            parseFloat(processedKey.split('_')[0])
-          )
-        ) {
-          hasSimilar = true;
+    for (const match of sorted) {
+      // 检查是否已经有包含当前文本的更长文本
+      let isSubstring = false;
+      for (const processedText of processedTexts) {
+        if (processedText.includes(match.originalText)) {
+          isSubstring = true;
           break;
         }
       }
 
-      if (!hasSimilar) {
+      if (!isSubstring) {
+        // 移除所有被当前文本包含的已处理文本
+        const toRemove: string[] = [];
+        for (const processedText of processedTexts) {
+          if (match.originalText.includes(processedText)) {
+            toRemove.push(processedText);
+          }
+        }
+        toRemove.forEach(text => processedTexts.delete(text));
+
+        // 移除对应的结果
+        for (let i = deduplicated.length - 1; i >= 0; i--) {
+          if (toRemove.includes(deduplicated[i].originalText)) {
+            deduplicated.splice(i, 1);
+          }
+        }
+
         deduplicated.push(match);
-        processedAmounts.add(amountKey);
+        processedTexts.add(match.originalText);
       }
     }
 

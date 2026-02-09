@@ -5,11 +5,12 @@
 
 import { NextResponse } from 'next/server';
 import { contractApprovalService } from '@/lib/contract/contract-approval-service';
+import { getCurrentUserId } from '@/lib/auth/get-current-user';
 
 export async function GET() {
   try {
-    // TODO: 从session获取当前用户ID
-    const currentUserId = 'current-user-id';
+    // 从session获取当前用户ID
+    const currentUserId = await getCurrentUserId();
 
     // 获取待审批列表
     const approvals =

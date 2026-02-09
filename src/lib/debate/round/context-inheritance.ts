@@ -1,17 +1,18 @@
 // 上下文继承处理器：处理轮次间的上下文继承
 
-import {
-  HistoricalContext,
-  RoundContext,
-  DisputeFocus,
-  PositionSummary,
-  ProgressionGuidance,
-  UncoveredAngle,
-  ArgumentAnalysis,
-  NoveltyScore,
-} from './types';
 import { prisma } from '@/lib/db/prisma';
 import { Argument, DebateRound } from '@prisma/client';
+import { detectSemanticDisagreement } from '../validators/semantic-disagreement';
+import {
+  ArgumentAnalysis,
+  DisputeFocus,
+  HistoricalContext,
+  NoveltyScore,
+  PositionSummary,
+  ProgressionGuidance,
+  RoundContext,
+  UncoveredAngle,
+} from './types';
 
 /**
  * 扩展的轮次类型，包含关联的论点
@@ -261,27 +262,11 @@ export class ContextInheritanceProcessor {
   }
 
   /**
-   * 判断是否有分歧
+   * 判断是否有分歧（使用语义分析）
    */
   private hasDisagreement(content1: string, content2: string): boolean {
-    // 简化的分歧判断：检查是否包含相反的关键词
-    const contradictions = [
-      ['同意', '反对'],
-      ['应当', '不应当'],
-      ['符合', '不符合'],
-      ['有效', '无效'],
-    ];
-
-    for (const [word1, word2] of contradictions) {
-      if (
-        (content1.includes(word1) && content2.includes(word2)) ||
-        (content1.includes(word2) && content2.includes(word1))
-      ) {
-        return true;
-      }
-    }
-
-    return false;
+    const result = detectSemanticDisagreement(content1, content2);
+    return result.hasDisagreement;
   }
 
   /**
@@ -667,7 +652,7 @@ export class ContextInheritanceProcessor {
     newArgument: string,
     historical: Argument[]
   ): number {
-    const newLawMatches =
+    const newLawMatches: string[] =
       newArgument.match(/第[一二三四五六七八九十百]+条/g) || [];
     if (newLawMatches.length === 0) {
       return 0.5; // 没有引用法条，中等新颖度
@@ -675,7 +660,7 @@ export class ContextInheritanceProcessor {
 
     let usedCount = 0;
     for (const arg of historical) {
-      const histMatches =
+      const histMatches: string[] =
         arg.content.match(/第[一二三四五六七八九十百]+条/g) || [];
       if (histMatches.some(m => newLawMatches.includes(m))) {
         usedCount++;
@@ -710,8 +695,10 @@ export class ContextInheritanceProcessor {
     const set1 = new Set<string>(this.extractKeywords(text1));
     const set2 = new Set<string>(this.extractKeywords(text2));
 
-    const intersection = new Set([...set1].filter(x => set2.has(x)));
-    const union = new Set([...set1, ...set2]);
+    const intersection = new Set<string>(
+      Array.from(set1).filter(x => set2.has(x))
+    );
+    const union = new Set<string>(Array.from(set1).concat(Array.from(set2)));
 
     if (union.size === 0) {
       return 0;

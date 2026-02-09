@@ -1,9 +1,9 @@
 import React from 'react';
-import { FeeType } from '@/types/calculation';
+import { ExpenseCategory } from '@/types/calculation';
 
 interface FeeCalculatorTabsProps {
-  activeTab: FeeType;
-  onTabChange: (tab: FeeType) => void;
+  activeTab: ExpenseCategory;
+  onTabChange: (tab: ExpenseCategory) => void;
 }
 
 export function FeeCalculatorTabs({
@@ -11,9 +11,9 @@ export function FeeCalculatorTabs({
   onTabChange,
 }: FeeCalculatorTabsProps) {
   const tabs = [
-    { type: FeeType.LAWYER_FEE, label: '律师费' },
-    { type: FeeType.LITIGATION_FEE, label: '诉讼费' },
-    { type: FeeType.TRAVEL_EXPENSE, label: '差旅费' },
+    { type: ExpenseCategory.LAWYER_FEE, label: '律师费' },
+    { type: ExpenseCategory.LITIGATION_FEE, label: '诉讼费' },
+    { type: ExpenseCategory.TRAVEL_EXPENSE, label: '差旅费' },
   ] as const;
 
   return (

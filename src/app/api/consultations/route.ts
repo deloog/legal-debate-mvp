@@ -3,85 +3,24 @@
  * GET /api/consultations - 获取咨询列表
  * POST /api/consultations - 创建咨询记录
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import {
+  getFirstZodError,
+  validateCreateConsultation,
+} from '@/lib/validations/consultation';
+import { ErrorResponse, SuccessResponse } from '@/types/api-response';
+import {
+  ConsultationListItem,
+  ConsultationQueryParams,
   ConsultationType,
   ConsultStatus,
+  generateConsultNumber,
   isValidConsultationType,
   isValidConsultStatus,
-  generateConsultNumber,
 } from '@/types/consultation';
-import {
-  validateCreateConsultation,
-  getFirstZodError,
-} from '@/lib/validations/consultation';
-import { authOptions } from '@/lib/auth/auth-options';
 import { getServerSession } from 'next-auth';
-
-/**
- * 标准成功响应格式
- */
-interface SuccessResponse<T> {
-  success: true;
-  data: T;
-  pagination?: {
-    page: number;
-    pageSize: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
-/**
- * 标准错误响应格式
- */
-interface ErrorResponse {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-  };
-}
-
-/**
- * 咨询响应数据接口
- */
-interface ConsultationResponse {
-  id: string;
-  consultNumber: string;
-  clientName: string;
-  clientPhone: string | null;
-  clientEmail: string | null;
-  consultType: ConsultationType;
-  consultTime: Date;
-  caseType: string | null;
-  status: ConsultStatus;
-  followUpDate: Date | null;
-  winRate: number | null;
-  difficulty: string | null;
-  riskLevel: string | null;
-  suggestedFee: number | null;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-/**
- * 查询参数接口
- */
-interface QueryParams {
-  page?: string;
-  pageSize?: string;
-  status?: string;
-  consultType?: string;
-  caseType?: string;
-  startDate?: string;
-  endDate?: string;
-  keyword?: string;
-  sortBy?: string;
-  sortOrder?: string;
-}
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * GET /api/consultations
@@ -90,16 +29,20 @@ interface QueryParams {
 export async function GET(
   request: NextRequest
 ): Promise<
-  NextResponse<SuccessResponse<ConsultationResponse[]> | ErrorResponse>
+  NextResponse<
+    | (SuccessResponse<ConsultationListItem[]> & { pagination?: object })
+    | ErrorResponse
+  >
 > {
   try {
     // 获取查询参数
     const { searchParams } = new URL(request.url);
-    const params: QueryParams = Object.fromEntries(searchParams);
+    const params: ConsultationQueryParams & Record<string, string | undefined> =
+      Object.fromEntries(searchParams);
 
     // 解析分页参数
-    let page = parseInt(params.page || '1', 10);
-    let pageSize = parseInt(params.pageSize || '20', 10);
+    let page = parseInt((params.page || '1') as string, 10);
+    let pageSize = parseInt((params.pageSize || '20') as string, 10);
 
     // 限制pageSize范围
     if (pageSize < 1) pageSize = 1;
@@ -258,7 +201,7 @@ export async function GET(
     const totalPages = Math.ceil(total / pageSize);
 
     // 转换响应数据
-    const responseData: ConsultationResponse[] = consultations.map(
+    const responseData: ConsultationListItem[] = consultations.map(
       consultation => ({
         id: consultation.id,
         consultNumber: consultation.consultNumber,
@@ -316,8 +259,7 @@ export async function GET(
 export async function POST(
   request: NextRequest
 ): Promise<
-  | NextResponse<SuccessResponse<ConsultationResponse>>
-  | NextResponse<ErrorResponse>
+  NextResponse<SuccessResponse<ConsultationListItem> | ErrorResponse>
 > {
   try {
     // 获取用户会话
@@ -421,7 +363,7 @@ export async function POST(
     });
 
     // 转换响应数据
-    const responseData: ConsultationResponse = {
+    const responseData: ConsultationListItem = {
       id: consultation.id,
       consultNumber: consultation.consultNumber,
       clientName: consultation.clientName,

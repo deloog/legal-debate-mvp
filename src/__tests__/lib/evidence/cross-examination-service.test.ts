@@ -61,7 +61,7 @@ describe('CrossExaminationService', () => {
         type: 'DOCUMENT',
         description: '与公司签订的劳动合同复印件',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 85,
       };
 
@@ -85,7 +85,7 @@ describe('CrossExaminationService', () => {
         name: '劳动合同',
         type: 'DOCUMENT',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 90,
       };
 
@@ -108,7 +108,7 @@ describe('CrossExaminationService', () => {
         name: '劳动合同',
         type: 'DOCUMENT',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 90,
       };
 
@@ -130,7 +130,7 @@ describe('CrossExaminationService', () => {
         name: '劳动合同',
         type: 'DOCUMENT',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 90,
       };
 
@@ -155,7 +155,7 @@ describe('CrossExaminationService', () => {
         name: '劳动合同',
         type: 'DOCUMENT',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 90,
       };
 
@@ -176,7 +176,7 @@ describe('CrossExaminationService', () => {
         name: '劳动合同',
         type: 'DOCUMENT',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 90,
       };
 
@@ -204,7 +204,7 @@ describe('CrossExaminationService', () => {
         name: '合同',
         type: 'DOCUMENT',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 90,
       };
 
@@ -226,7 +226,7 @@ describe('CrossExaminationService', () => {
         type: 'DOCUMENT',
         description: '复印件',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 85,
       };
 
@@ -246,10 +246,10 @@ describe('CrossExaminationService', () => {
       const evidence: Partial<Evidence> = {
         id: 'evidence-1',
         name: '录音证据',
-        type: 'AUDIO',
+        type: 'AUDIO_VIDEO',
         description: '未经对方同意的录音',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 70,
       };
 
@@ -269,7 +269,7 @@ describe('CrossExaminationService', () => {
         type: 'DOCUMENT',
         description: '与案件无关的文件',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 30,
       };
 
@@ -291,7 +291,7 @@ describe('CrossExaminationService', () => {
         type: 'DOCUMENT',
         description: '双方签字盖章的劳动合同原件',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 95,
       };
 
@@ -312,7 +312,7 @@ describe('CrossExaminationService', () => {
         type: 'PHYSICAL',
         description: '模糊不清的照片',
         caseId: 'case-1',
-        status: 'CHALLENGED',
+        status: 'PENDING',
         relevanceScore: 40,
       };
 
@@ -333,7 +333,7 @@ describe('CrossExaminationService', () => {
         name: '劳动合同',
         type: 'DOCUMENT',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 85,
       };
 
@@ -356,7 +356,7 @@ describe('CrossExaminationService', () => {
         name: '劳动合同复印件',
         type: 'DOCUMENT',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 85,
       };
 
@@ -384,7 +384,7 @@ describe('CrossExaminationService', () => {
         name: '劳动合同',
         type: 'DOCUMENT',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 90,
       };
 
@@ -418,7 +418,7 @@ describe('CrossExaminationService', () => {
         name: '劳动合同',
         type: 'DOCUMENT',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 90,
       };
 
@@ -439,7 +439,7 @@ describe('CrossExaminationService', () => {
         name: '劳动合同',
         type: 'DOCUMENT',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 90,
       };
 
@@ -458,7 +458,7 @@ describe('CrossExaminationService', () => {
         name: '工作证',
         type: 'PHYSICAL',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 80,
       };
 
@@ -475,9 +475,9 @@ describe('CrossExaminationService', () => {
       const evidence: Partial<Evidence> = {
         id: 'evidence-1',
         name: '监控录像',
-        type: 'AUDIO',
+        type: 'AUDIO_VIDEO',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 85,
       };
 
@@ -494,9 +494,9 @@ describe('CrossExaminationService', () => {
       const evidence: Partial<Evidence> = {
         id: 'evidence-1',
         name: '微信聊天记录',
-        type: 'ELECTRONIC',
+        type: 'AUDIO_VIDEO',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 75,
       };
 
@@ -517,7 +517,7 @@ describe('CrossExaminationService', () => {
         name: '劳动合同',
         type: 'DOCUMENT',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 90,
       };
 
@@ -541,7 +541,7 @@ describe('CrossExaminationService', () => {
         name: '劳动合同',
         type: 'DOCUMENT',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: null,
       };
 
@@ -560,7 +560,7 @@ describe('CrossExaminationService', () => {
         name: '劳动合同',
         type: 'DOCUMENT',
         caseId: 'case-1',
-        status: 'CHALLENGED',
+        status: 'PENDING',
         relevanceScore: 85,
       };
 
@@ -603,7 +603,7 @@ describe('CrossExaminationService', () => {
         type: 'DOCUMENT',
         description: '与公司签订的劳动合同',
         caseId: 'case-1',
-        status: 'APPROVED',
+        status: 'ACCEPTED',
         relevanceScore: 90,
       };
 

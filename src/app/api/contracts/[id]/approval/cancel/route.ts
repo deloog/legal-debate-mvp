@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { contractApprovalService } from '@/lib/contract/contract-approval-service';
+import { getCurrentUserId } from '@/lib/auth/get-current-user';
 import { z } from 'zod';
 
 const cancelApprovalSchema = z.object({
@@ -21,8 +22,8 @@ export async function POST(
     // 验证请求数据
     const validatedData = cancelApprovalSchema.parse(body);
 
-    // TODO: 从session获取当前用户ID
-    const currentUserId = 'current-user-id';
+    // 从session获取当前用户ID
+    const currentUserId = await getCurrentUserId();
 
     // 撤回审批
     await contractApprovalService.cancelApproval(
@@ -44,7 +45,7 @@ export async function POST(
           error: {
             code: 'VALIDATION_ERROR',
             message: '请求数据格式错误',
-            details: error.errors,
+            details: error.issues,
           },
         },
         { status: 400 }

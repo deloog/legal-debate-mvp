@@ -59,7 +59,7 @@ describe('EvidenceChainService', () => {
           type: 'DOCUMENT',
           description: '与公司签订的劳动合同',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 90,
         },
         {
@@ -68,7 +68,7 @@ describe('EvidenceChainService', () => {
           type: 'DOCUMENT',
           description: '近12个月工资条',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 85,
         },
       ];
@@ -95,7 +95,7 @@ describe('EvidenceChainService', () => {
           name: '劳动合同',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 90,
         },
       ];
@@ -118,7 +118,7 @@ describe('EvidenceChainService', () => {
           name: '劳动合同',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 90,
         },
       ];
@@ -140,7 +140,7 @@ describe('EvidenceChainService', () => {
           name: '劳动合同',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 90,
         },
       ];
@@ -175,7 +175,7 @@ describe('EvidenceChainService', () => {
           name: '劳动合同',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 90,
         },
       ];
@@ -199,7 +199,7 @@ describe('EvidenceChainService', () => {
           name: '劳动合同',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 90,
         },
         {
@@ -207,7 +207,7 @@ describe('EvidenceChainService', () => {
           name: '工资条',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 85,
         },
       ];
@@ -229,7 +229,7 @@ describe('EvidenceChainService', () => {
           name: '劳动合同',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 90,
         },
         {
@@ -237,7 +237,7 @@ describe('EvidenceChainService', () => {
           name: '工资条',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 85,
         },
       ];
@@ -265,7 +265,7 @@ describe('EvidenceChainService', () => {
           name: '劳动合同',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 90,
         },
       ];
@@ -299,7 +299,7 @@ describe('EvidenceChainService', () => {
           name: '劳动合同',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 90,
         },
       ];
@@ -321,7 +321,7 @@ describe('EvidenceChainService', () => {
           name: '劳动合同',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 90,
         },
         {
@@ -329,7 +329,7 @@ describe('EvidenceChainService', () => {
           name: '工资条',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 85,
         },
         {
@@ -337,7 +337,7 @@ describe('EvidenceChainService', () => {
           name: '社保记录',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 80,
         },
       ];
@@ -368,7 +368,7 @@ describe('EvidenceChainService', () => {
           name: '劳动合同',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 90,
         },
       ];
@@ -406,7 +406,7 @@ describe('EvidenceChainService', () => {
           name: '劳动合同',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 90,
         },
       ];
@@ -430,7 +430,7 @@ describe('EvidenceChainService', () => {
           type: 'DOCUMENT',
           description: '与公司签订的劳动合同',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 90,
         },
       ];
@@ -457,7 +457,7 @@ describe('EvidenceChainService', () => {
           name: `证据${i + 1}`,
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 80 + i,
         })
       );
@@ -484,7 +484,7 @@ describe('EvidenceChainService', () => {
           name: `证据${i + 1}`,
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 80,
         })
       );
@@ -505,7 +505,7 @@ describe('EvidenceChainService', () => {
           name: '劳动合同',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 90,
         },
         {
@@ -513,7 +513,7 @@ describe('EvidenceChainService', () => {
           name: '证人证言',
           type: 'WITNESS',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 75,
         },
         {
@@ -521,7 +521,7 @@ describe('EvidenceChainService', () => {
           name: '现场照片',
           type: 'PHYSICAL',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 70,
         },
       ];
@@ -543,7 +543,7 @@ describe('EvidenceChainService', () => {
           name: '劳动合同',
           type: 'DOCUMENT',
           caseId: 'case-1',
-          status: 'APPROVED',
+          status: 'ACCEPTED',
           relevanceScore: 90,
         },
         {

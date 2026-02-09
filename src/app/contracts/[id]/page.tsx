@@ -5,8 +5,10 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { ContractStatus, ContractPaymentStatus } from '@/types/contract';
+import { ContractRecommendations } from '@/components/contract/ContractRecommendations';
 
 interface ContractDetail {
   id: string;
@@ -61,9 +63,11 @@ const statusColors: Record<ContractStatus, string> = {
 export default function ContractDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
   const [contract, setContract] = useState<ContractDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const userId = session?.user?.id || 'demo-user-id';
 
   useEffect(() => {
     loadContract();
@@ -354,6 +358,17 @@ export default function ContractDetailPage() {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* 推荐法条 */}
+            <div className='rounded-lg bg-white p-6 shadow'>
+              <ContractRecommendations
+                contractId={contract.id}
+                userId={userId}
+                showFilter={true}
+                limit={10}
+                minScore={0}
+              />
             </div>
           </div>
 

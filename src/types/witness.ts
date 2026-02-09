@@ -89,6 +89,10 @@ export interface WitnessQueryParams {
  * 证人详情接口
  */
 export interface WitnessDetail extends PrismaWitness {
+  case?: {
+    id: string;
+    title: string;
+  };
   caseTitle?: string;
   courtScheduleTitle?: string;
   courtSchedule?: {
@@ -332,3 +336,11 @@ export interface WitnessSearchResult {
   query: string;
   searchFields: string[];
 }
+
+/**
+ * 案件证人列表响应接口
+ * 继承 WitnessListResponse 并添加案件ID
+ */
+export type CaseWitnessListResponse = WitnessListResponse & {
+  caseId: string;
+};

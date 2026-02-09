@@ -6,40 +6,9 @@
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
+import type { EnterpriseListData, Pagination } from '@/types/admin-enterprise';
 import { EnterpriseStatus } from '@/types/enterprise';
 import { NextRequest } from 'next/server';
-
-interface Pagination {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
-
-interface EnterpriseListItem {
-  id: string;
-  userId: string;
-  enterpriseName: string;
-  creditCode: string;
-  legalPerson: string;
-  industryType: string;
-  status: EnterpriseStatus;
-  submittedAt: Date;
-  reviewedAt: Date | null;
-  reviewerId: string | null;
-  reviewNotes: string | null;
-  expiresAt: Date | null;
-  user: {
-    email: string;
-    username: string | null;
-    name: string | null;
-  };
-}
-
-interface EnterpriseListData {
-  enterprises: EnterpriseListItem[];
-  pagination: Pagination;
-}
 
 function isValidStatus(status: string): status is EnterpriseStatus {
   const validStatuses: EnterpriseStatus[] = [
@@ -69,9 +38,15 @@ export async function GET(request: NextRequest): Promise<Response> {
 
   const searchParams = request.nextUrl.searchParams;
   const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-  const limit = Math.min(
+  const pageSize = Math.min(
     100,
-    Math.max(1, parseInt(searchParams.get('limit') || '20', 10))
+    Math.max(
+      1,
+      parseInt(
+        searchParams.get('pageSize') || searchParams.get('limit') || '20',
+        10
+      )
+    )
   );
   const status = searchParams.get('status');
   const search = searchParams.get('search');
@@ -114,13 +89,13 @@ export async function GET(request: NextRequest): Promise<Response> {
       }
     }
 
-    const skip = (page - 1) * limit;
+    const skip = (page - 1) * pageSize;
     const [total, enterprises] = await Promise.all([
       prisma.enterpriseAccount.count({ where }),
       prisma.enterpriseAccount.findMany({
         where,
         skip,
-        take: limit,
+        take: pageSize,
         orderBy: { submittedAt: 'desc' },
         include: {
           user: {
@@ -134,7 +109,15 @@ export async function GET(request: NextRequest): Promise<Response> {
       }),
     ]);
 
-    const totalPages = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / pageSize);
+    const pagination: Pagination = {
+      total,
+      page,
+      pageSize,
+      limit: pageSize,
+      totalPages,
+    };
+
     const responseData: EnterpriseListData = {
       enterprises: enterprises.map(enterprise => ({
         id: enterprise.id,
@@ -155,12 +138,7 @@ export async function GET(request: NextRequest): Promise<Response> {
           name: enterprise.user.name,
         },
       })),
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages,
-      },
+      pagination,
     };
 
     return Response.json({ data: responseData }, { status: 200 });

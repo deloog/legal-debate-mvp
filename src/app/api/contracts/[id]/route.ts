@@ -3,32 +3,14 @@
  * GET /api/contracts/[id] - 获取合同详情
  * PUT /api/contracts/[id] - 更新合同记录
  */
-import { NextRequest, NextResponse } from 'next/server';
+import { clearContractPDFCache } from '@/lib/contract/contract-pdf-generator';
 import { prisma } from '@/lib/db/prisma';
 import {
-  validateUpdateContract,
   getFirstZodError,
+  validateUpdateContract,
 } from '@/lib/validations/contract';
-import { clearContractPDFCache } from '@/lib/contract/contract-pdf-generator';
-
-/**
- * 标准成功响应格式
- */
-interface SuccessResponse<T> {
-  success: true;
-  data: T;
-}
-
-/**
- * 标准错误响应格式
- */
-interface ErrorResponse {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-  };
-}
+import type { ErrorResponse, SuccessResponse } from '@/types/api-response';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * GET /api/contracts/[id]

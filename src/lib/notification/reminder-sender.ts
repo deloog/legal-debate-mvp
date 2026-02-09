@@ -72,7 +72,8 @@ class ReminderSender {
           const result = await emailService.sendCustomEmail({
             to: user.email,
             subject: reminder.title,
-            text: reminder.message || reminder.title,
+            content: reminder.message || reminder.content || reminder.title,
+            text: reminder.message || reminder.content || reminder.title,
             html: this.generateReminderEmailHTML(reminder, user),
           });
 
@@ -158,7 +159,8 @@ class ReminderSender {
 
     let content = '';
 
-    switch (reminder.type) {
+    const reminderType = reminder.type as string;
+    switch (reminderType) {
       case 'COURT_SCHEDULE':
         content = this.generateCourtScheduleEmailContent(reminder);
         break;

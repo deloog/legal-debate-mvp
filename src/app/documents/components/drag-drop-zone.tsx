@@ -7,6 +7,8 @@ interface DragDropZoneProps {
   disabled?: boolean;
   maxFiles?: number;
   children?: React.ReactNode;
+  accept?: string;
+  capture?: boolean;
 }
 
 interface DragDropState {
@@ -15,7 +17,14 @@ interface DragDropState {
 }
 
 export const DragDropZone: React.FC<DragDropZoneProps> = props => {
-  const { onDrop, disabled = false, maxFiles = 10, children } = props;
+  const {
+    onDrop,
+    disabled = false,
+    maxFiles = 10,
+    children,
+    accept,
+    capture = false,
+  } = props;
   const [state, setState] = useState<DragDropState>({
     isDragging: false,
     isHovering: false,
@@ -104,6 +113,8 @@ export const DragDropZone: React.FC<DragDropZoneProps> = props => {
         className='hidden'
         onChange={handleInputChange}
         disabled={disabled}
+        accept={accept}
+        capture={capture ? 'environment' : undefined}
       />
       {children || (
         <div className='flex flex-col items-center space-y-4 text-gray-600'>

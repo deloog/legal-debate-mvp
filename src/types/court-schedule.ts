@@ -4,8 +4,8 @@
 
 // 从Prisma导入枚举类型，保持一致性
 import {
-  CourtScheduleType as PrismaCourtScheduleType,
   CourtScheduleStatus as PrismaCourtScheduleStatus,
+  CourtScheduleType as PrismaCourtScheduleType,
 } from '@prisma/client';
 
 export type CourtScheduleType = PrismaCourtScheduleType;
@@ -130,4 +130,29 @@ export interface CalendarSchedule {
   status: CourtScheduleStatus;
   caseId: string;
   caseTitle?: string;
+}
+
+/**
+ * 法庭日程包含案件信息的内部类型
+ * 用于API层数据转换
+ */
+export interface ScheduleWithCase {
+  id: string;
+  caseId: string;
+  title: string;
+  type: string;
+  startTime: Date;
+  endTime: Date;
+  location: string | null;
+  judge: string | null;
+  notes: string | null;
+  status: string;
+  metadata: unknown;
+  createdAt: Date;
+  updatedAt: Date;
+  case?: {
+    id: string;
+    title: string;
+    type: string;
+  };
 }

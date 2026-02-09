@@ -129,12 +129,13 @@ const nextConfig: NextConfig = {
     },
   },
 
-  // 配置头部信息（包括缓存策略）
+  // 配置头部信息（包括缓存策略和安全头）
   async headers() {
     return [
       {
         source: '/(.*)',
         headers: [
+          // 基础安全头
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
@@ -146,6 +147,26 @@ const nextConfig: NextConfig = {
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
+          },
+          // HSTS - 强制HTTPS
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
+          // Referrer Policy
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          // Permissions Policy
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+          },
+          // DNS Prefetch Control
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
           },
         ],
       },

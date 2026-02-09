@@ -158,10 +158,12 @@ class CaseStatusMonitor {
 
       const input: CreateReminderInput = {
         userId: caseData.userId,
-        type: ReminderType.DEADLINE,
+        type: ReminderType.CASE_DEADLINE, // 使用正确的枚举值
         title: `案件截止提醒: ${caseData.title}`,
-        message: `${config.description}\n\n案件：${caseData.title}\n截止时间：${deadline.toLocaleString('zh-CN')}`,
-        reminderTime,
+        content: `${config.description}\n\n案件：${caseData.title}\n截止时间：${deadline.toLocaleString('zh-CN')}`,
+        message: `${config.description}\n\n案件：${caseData.title}\n截止时间：${deadline.toLocaleString('zh-CN')}`, // 兼容旧代码
+        scheduledAt: reminderTime, // 添加必需字段
+        reminderTime, // 兼容旧代码
         channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
         relatedType: 'CaseStatus',
         relatedId: caseData.id,

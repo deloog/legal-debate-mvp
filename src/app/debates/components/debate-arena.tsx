@@ -6,6 +6,7 @@ import { ArgumentColumn } from './argument-column';
 import { RoundSelector } from './round-selector';
 import { StreamingOutput } from './streaming-output';
 import { LawArticleList } from './law-article-list';
+import { DebateRecommendations } from '@/components/debate/DebateRecommendations';
 import { useArgumentsByRound } from '@/lib/hooks/use-debate';
 
 export interface DebateArenaProps {
@@ -77,6 +78,9 @@ export function DebateArena({
               />
             </div>
           )}
+
+          {/* 辩论推荐法条 */}
+          <DebateRecommendations debateId={debateId} showFilter={true} />
 
           {/* 法条推荐列表 */}
           <LawArticleList debateId={debateId} roundId={selectedRoundId} />

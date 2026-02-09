@@ -237,3 +237,185 @@ export function calculateConversionRate(
   }
   return (convertedConsultations / totalConsultations) * 100;
 }
+
+// ============================================================================
+// API 响应类型定义（集中化管理）
+// ============================================================================
+
+/**
+ * 咨询列表响应数据
+ */
+export interface ConsultationListItem {
+  id: string;
+  consultNumber: string;
+  clientName: string;
+  clientPhone: string | null;
+  clientEmail: string | null;
+  consultType: ConsultationType;
+  consultTime: Date;
+  caseType: string | null;
+  status: ConsultStatus;
+  followUpDate: Date | null;
+  winRate: number | null;
+  difficulty: string | null;
+  riskLevel: string | null;
+  suggestedFee: number | null;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * 咨询列表响应（带分页）
+ */
+export interface ConsultationListResponse {
+  items: ConsultationListItem[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+/**
+ * 咨询详情响应数据（包含关联数据）
+ */
+export interface ConsultationDetailResponse {
+  id: string;
+  consultNumber: string;
+  clientName: string;
+  clientPhone: string | null;
+  clientEmail: string | null;
+  clientCompany: string | null;
+  consultType: ConsultationType;
+  consultTime: Date;
+  caseType: string | null;
+  caseSummary: string;
+  clientDemand: string | null;
+  status: ConsultStatus;
+  followUpDate: Date | null;
+  followUpNotes: string | null;
+  aiAssessment: unknown | null;
+  winRate: number | null;
+  difficulty: string | null;
+  riskLevel: string | null;
+  suggestedFee: number | null;
+  convertedToCaseId: string | null;
+  convertedAt: Date | null;
+  userId: string;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+  };
+  followUps: Array<{
+    id: string;
+    followUpTime: Date;
+    followUpType: string;
+    content: string;
+    result: string | null;
+    nextFollowUp: Date | null;
+    createdBy: string;
+    createdAt: Date;
+  }>;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * 跟进记录响应数据
+ */
+export interface FollowUpResponse {
+  id: string;
+  consultationId: string;
+  followUpTime: Date;
+  followUpType: string;
+  content: string;
+  result: string | null;
+  nextFollowUp: Date | null;
+  createdBy: string;
+  createdAt: Date;
+}
+
+/**
+ * 创建跟进记录请求
+ */
+export interface CreateFollowUpRequest {
+  followUpType: string;
+  content: string;
+  result?: string;
+  nextFollowUp?: string;
+}
+
+/**
+ * 转化预览数据
+ */
+export interface ConversionPreviewData {
+  consultNumber: string;
+  clientName: string;
+  clientPhone: string | null;
+  clientEmail: string | null;
+  consultType?: ConsultationType; // 可选，与路由返回匹配
+  caseType: string | null;
+  caseSummary: string;
+  clientDemand: string | null;
+  existingCase?: {
+    // 可选，与路由返回匹配
+    id: string;
+    caseNumber: string;
+    title: string;
+  } | null;
+  suggestedTitle: string;
+  suggestedCaseType: string;
+  winRate: number | null;
+  difficulty: string | null;
+  riskLevel: string | null;
+  suggestedFee: number | null;
+}
+
+/**
+ * 转化请求
+ */
+export interface ConvertRequest {
+  title?: string;
+  description?: string;
+  caseType?: string;
+  plaintiffName?: string;
+  defendantName?: string;
+  amount?: number;
+  createClient?: boolean;
+}
+
+/**
+ * 费用计算请求
+ */
+export interface CalculateFeeRequest {
+  consultationId?: string;
+  caseType?: string;
+  caseAmount?: number;
+  complexity?: 'EASY' | 'MEDIUM' | 'HARD';
+  difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
+  feeMode?: string;
+  riskRate?: number;
+  estimatedHours?: number;
+  hourlyRate?: number;
+  stages?: Array<{
+    name: string;
+    percentage: number;
+  }>;
+}
+
+/**
+ * 费用计算响应
+ */
+export interface FeeCalculationResult {
+  baseFee: number;
+  complexityMultiplier: number;
+  durationMultiplier: number;
+  totalFee: number;
+  feeBreakdown: {
+    item: string;
+    amount: number;
+  }[];
+}

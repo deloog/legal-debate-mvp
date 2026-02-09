@@ -3,37 +3,16 @@
  * 根据姓名或邮箱搜索用户
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { getAuthUser } from '@/lib/middleware/auth';
-import { UserStatus } from '@/types/auth';
 import {
+  serverErrorResponse,
   successResponse,
   unauthorizedResponse,
-  serverErrorResponse,
 } from '@/lib/api-response';
-
-// =============================================================================
-// 类型定义
-// =============================================================================
-
-/**
- * 用户搜索结果
- */
-interface UserSearchResult {
-  id: string;
-  name: string | null;
-  email: string;
-  avatar: string | null;
-  role: string;
-}
-
-/**
- * 搜索响应数据
- */
-interface SearchResponse {
-  users: UserSearchResult[];
-}
+import { prisma } from '@/lib/db/prisma';
+import { getAuthUser } from '@/lib/middleware/auth';
+import type { SearchResponse } from '@/types/admin-user';
+import { UserStatus } from '@/types/auth';
+import { NextRequest, NextResponse } from 'next/server';
 
 // =============================================================================
 // 辅助函数
@@ -100,8 +79,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         id: true,
         name: true,
         email: true,
+        username: true,
         avatar: true,
         role: true,
+        status: true,
       },
       orderBy: { name: 'asc', email: 'asc' },
       take: 20, // 限制返回结果数量
@@ -109,7 +90,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // 构建响应数据
     const responseData: SearchResponse = {
-      users: users.map((u: UserSearchResult) => u),
+      users: users.map(u => ({
+        id: u.id,
+        email: u.email,
+        username: u.username,
+        name: u.name,
+        role: u.role,
+        status: u.status,
+      })),
+      total: users.length,
     };
 
     return successResponse(responseData, '搜索成功');

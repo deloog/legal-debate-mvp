@@ -1,5 +1,5 @@
-import { Middleware } from './core';
 import { ApiError } from '../errors/api-error';
+import { Middleware } from './core';
 
 /**
  * CORS中间件
@@ -63,6 +63,15 @@ export const securityMiddleware: Middleware = async (
     'Permissions-Policy',
     'camera=(), microphone=(), geolocation=()'
   );
+
+  // HSTS - 仅在生产环境启用
+  if (process.env.NODE_ENV === 'production') {
+    response.headers.set(
+      'Strict-Transport-Security',
+      'max-age=31536000; includeSubDomains; preload'
+    );
+  }
+
   response.headers.set('X-API-Version', 'v1');
   response.headers.set(
     'X-Node-Environment',

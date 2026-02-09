@@ -1,25 +1,29 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
 import { Suspense } from 'react';
 import { AuthProvider } from './providers/AuthProvider';
 import { ToastProvider } from '@/components/providers/ToastProvider';
 import { UserModeProvider } from '@/contexts/UserModeContext';
 import './globals.css';
 
-// 配置字体优化：使用display策略优化字体加载
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-  display: 'swap', // 使用swap策略，文本立即显示
-  preload: true,
-});
+// 注意：由于网络问题，暂时移除 Google Fonts
+// 使用系统字体作为后备方案
+// 如果需要 Google Fonts，请确保网络连接正常后取消注释以下代码：
+// import { Geist, Geist_Mono } from 'next/font/google';
+// const geistSans = Geist({
+//   variable: '--font-geist-sans',
+//   subsets: ['latin'],
+//   display: 'swap',
+//   preload: true,
+// });
+// const geistMono = Geist_Mono({
+//   variable: '--font-geist-mono',
+//   subsets: ['latin'],
+//   display: 'swap',
+//   preload: false,
+// });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-  display: 'swap',
-  preload: false, // 等宽字体不预加载，减少首屏加载时间
-});
+// 使用系统字体变量
+const fontVariables = '--font-geist-sans --font-geist-mono';
 
 // 配置元数据优化
 export const metadata: Metadata = {
@@ -81,10 +85,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang='zh-CN'
-      className={`${geistSans.variable} ${geistMono.variable}`}
-    >
+    <html lang='zh-CN'>
       <body className='antialiased'>
         {/* 认证提供者 */}
         <AuthProvider>

@@ -5,7 +5,7 @@
 
 import {
   FeeItem,
-  FeeType,
+  ExpenseCategory,
   BillingMode,
   LawyerFeeCalculationParams,
   FeeCalculationResult,
@@ -29,7 +29,7 @@ export class LawyerFeeCalculator extends BaseFeeCalculator {
           items.push({
             id: uuidv4(),
             name: '计时收费',
-            type: FeeType.LAWYER_FEE,
+            type: ExpenseCategory.LAWYER_FEE,
             amount: this.formatAmount(config.hourlyRate * hours),
             currency: config.currency,
             description: `小时费率: ${config.hourlyRate}/小时, 工作时长: ${hours}小时`,
@@ -43,7 +43,7 @@ export class LawyerFeeCalculator extends BaseFeeCalculator {
           items.push({
             id: uuidv4(),
             name: '固定收费',
-            type: FeeType.LAWYER_FEE,
+            type: ExpenseCategory.LAWYER_FEE,
             amount: this.formatAmount(config.fixedAmount),
             currency: config.currency,
             description: `固定收费: ${config.fixedAmount}`,
@@ -58,7 +58,7 @@ export class LawyerFeeCalculator extends BaseFeeCalculator {
           items.push({
             id: uuidv4(),
             name: '按比例收费',
-            type: FeeType.LAWYER_FEE,
+            type: ExpenseCategory.LAWYER_FEE,
             amount: this.formatAmount(amount),
             currency: config.currency,
             description: `标的金额: ${caseAmount}, 比例: ${config.percentageRate}%`,
@@ -76,7 +76,7 @@ export class LawyerFeeCalculator extends BaseFeeCalculator {
           items.push({
             id: uuidv4(),
             name: '风险代理收费',
-            type: FeeType.LAWYER_FEE,
+            type: ExpenseCategory.LAWYER_FEE,
             amount: this.formatAmount(amount),
             currency: config.currency,
             description: `胜诉金额: ${winAmount}, 比例: ${config.contingencyRate}%`,
@@ -94,7 +94,7 @@ export class LawyerFeeCalculator extends BaseFeeCalculator {
           items.push({
             id: uuidv4(),
             name: '基础代理费',
-            type: FeeType.LAWYER_FEE,
+            type: ExpenseCategory.LAWYER_FEE,
             amount: this.formatAmount(config.baseAmount),
             currency: config.currency,
             description: `基础代理费: ${config.baseAmount}`,
@@ -107,7 +107,7 @@ export class LawyerFeeCalculator extends BaseFeeCalculator {
           items.push({
             id: uuidv4(),
             name: '风险代理费',
-            type: FeeType.LAWYER_FEE,
+            type: ExpenseCategory.LAWYER_FEE,
             amount: this.formatAmount(amount),
             currency: config.currency,
             description: `胜诉金额: ${winAmount}, 比例: ${config.contingencyRate}%`,
@@ -148,7 +148,7 @@ export class LawyerFeeCalculator extends BaseFeeCalculator {
       items.push({
         id: uuidv4(),
         name: limitType === 'MIN' ? '最低收费补差' : '最高收费限额调整',
-        type: FeeType.LAWYER_FEE,
+        type: ExpenseCategory.LAWYER_FEE,
         amount: this.formatAmount(total - originalTotal),
         currency: config.currency,
         description:

@@ -1,237 +1,154 @@
 /**
- * 合同相关类型定义
+ * 合同类型定义
+ * 集中定义合同相关的类型
  */
 
-// 收费方式枚举
-export enum FeeType {
-  FIXED = 'FIXED', // 固定收费
-  RISK = 'RISK', // 风险代理
-  HOURLY = 'HOURLY', // 计时收费
-  MIXED = 'MIXED', // 混合收费
-}
+/**
+ * 合同状态（匹配 Prisma Schema）
+ */
+export type ContractStatus =
+  | 'DRAFT'
+  | 'PENDING'
+  | 'SIGNED'
+  | 'EXECUTING'
+  | 'COMPLETED'
+  | 'TERMINATED';
 
-// 合同状态枚举
-export enum ContractStatus {
-  DRAFT = 'DRAFT', // 草稿
-  PENDING = 'PENDING', // 待签署
-  SIGNED = 'SIGNED', // 已签署
-  EXECUTING = 'EXECUTING', // 履行中
-  COMPLETED = 'COMPLETED', // 已完成
-  TERMINATED = 'TERMINATED', // 已终止
-}
+/**
+ * 合同状态常量（运行时可用）
+ */
+export const ContractStatusValues = {
+  DRAFT: 'DRAFT',
+  PENDING: 'PENDING',
+  SIGNED: 'SIGNED',
+  EXECUTING: 'EXECUTING',
+  COMPLETED: 'COMPLETED',
+  TERMINATED: 'TERMINATED',
+} as const;
 
-// 付款状态枚举
-export enum ContractPaymentStatus {
-  PENDING = 'PENDING', // 待付款
-  PAID = 'PAID', // 已付款
-  OVERDUE = 'OVERDUE', // 已逾期
-  CANCELLED = 'CANCELLED', // 已取消
-}
+// 导出类型别名作为值（兼容旧代码）
+export const ContractStatus = ContractStatusValues;
 
-// 委托人类型
-export type ClientType = 'INDIVIDUAL' | 'ENTERPRISE';
+/**
+ * 费用类型（匹配 Prisma Schema）
+ */
+export type FeeType = 'FIXED' | 'RISK' | 'HOURLY' | 'MIXED';
 
-// 付款类型
-export type PaymentType = 'FIRST' | 'MIDDLE' | 'FINAL';
+/**
+ * 费用类型常量（运行时可用）
+ */
+export const FeeTypeValues = {
+  FIXED: 'FIXED',
+  RISK: 'RISK',
+  HOURLY: 'HOURLY',
+  MIXED: 'MIXED',
+};
 
-// 付款方式
-export type PaymentMethod = 'TRANSFER' | 'CASH' | 'WECHAT' | 'ALIPAY';
+// 导出类型别名作为值（兼容旧代码）
+export const FeeType = FeeTypeValues;
 
-// 合同基本信息接口
-export interface Contract {
+/**
+ * 合同付款状态（匹配 Prisma Schema）
+ */
+export type ContractPaymentStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
+
+/**
+ * 合同付款状态常量（运行时可用）
+ */
+export const ContractPaymentStatusValues = {
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+  OVERDUE: 'OVERDUE',
+  CANCELLED: 'CANCELLED',
+} as const;
+
+// 导出类型别名作为值（兼容旧代码）
+export const ContractPaymentStatus = ContractPaymentStatusValues;
+
+/**
+ * 合同详情
+ */
+export interface ContractDetail {
   id: string;
   contractNumber: string;
-
-  // 关联
-  caseId?: string | null;
-  consultationId?: string | null;
-
-  // 委托方信息
-  clientType: string;
-  clientName: string;
-  clientIdNumber?: string | null;
-  clientAddress?: string | null;
-  clientContact?: string | null;
-
-  // 受托方信息
-  lawFirmName: string;
-  lawyerName: string;
-  lawyerId: string;
-
-  // 委托事项
-  caseType: string;
-  caseSummary: string;
-  scope: string;
-
-  // 收费信息
-  feeType: FeeType;
-  totalFee: number;
-  paidAmount: number;
-  feeDetails?: unknown;
-
-  // 合同条款
-  terms?: unknown;
-  specialTerms?: string | null;
-
-  // 签署信息
-  status: ContractStatus;
-  signedAt?: Date | null;
-  signatureData?: unknown;
-
-  // 文件
-  filePath?: string | null;
-
-  // 时间戳
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// 合同付款记录接口
-export interface ContractPayment {
-  id: string;
-  contractId: string;
-
-  paymentNumber: string;
-  amount: number;
-  paymentType: string;
-  paymentMethod?: string | null;
-
-  status: ContractPaymentStatus;
-  paidAt?: Date | null;
-
-  receiptNumber?: string | null;
-  invoiceId?: string | null;
-
-  note?: string | null;
-
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// 合同模板接口
-export interface ContractTemplate {
-  id: string;
-  name: string;
-  code: string;
-  category: string;
+  title: string;
   content: string;
-  variables: unknown;
-  isDefault: boolean;
-  isActive: boolean;
+  type: string;
+  status: string;
+  partyA: {
+    id: string;
+    name: string;
+    type: string;
+    contact: string;
+  } | null;
+  partyB: {
+    id: string;
+    name: string;
+    type: string;
+    contact: string;
+  } | null;
+  amount: number | null;
+  startDate: Date | null;
+  endDate: Date | null;
+  fileUrl: string | null;
+  signatureStatus: string;
+  signedAt: Date | null;
+  createdBy: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// 创建合同输入
-export interface CreateContractInput {
-  // 关联
-  caseId?: string;
-  consultationId?: string;
-
-  // 委托方信息
-  clientType: string;
-  clientName: string;
-  clientIdNumber?: string;
-  clientAddress?: string;
-  clientContact?: string;
-
-  // 受托方信息
-  lawFirmName: string;
-  lawyerName: string;
-  lawyerId: string;
-
-  // 委托事项
-  caseType: string;
-  caseSummary: string;
-  scope: string;
-
-  // 收费信息
-  feeType: FeeType;
-  totalFee: number;
-  feeDetails?: unknown;
-
-  // 合同条款
-  terms?: unknown;
-  specialTerms?: string;
-
-  // 付款计划（可选）
-  payments?: Array<{
-    paymentType: string;
-    amount: number;
-    dueDate?: Date;
-  }>;
+/**
+ * 合同列表响应
+ */
+export interface ContractListResponse {
+  contracts: ContractDetail[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
-// 更新合同输入
-export interface UpdateContractInput {
-  // 委托方信息
-  clientType?: string;
-  clientName?: string;
-  clientIdNumber?: string;
-  clientAddress?: string;
-  clientContact?: string;
-
-  // 受托方信息
-  lawFirmName?: string;
-  lawyerName?: string;
-
-  // 委托事项
-  caseType?: string;
-  caseSummary?: string;
-  scope?: string;
-
-  // 收费信息
-  feeType?: FeeType;
-  totalFee?: number;
-  feeDetails?: unknown;
-
-  // 合同条款
-  terms?: unknown;
-  specialTerms?: string;
-
-  // 状态
-  status?: ContractStatus;
-
-  // 签署信息
-  signedAt?: Date;
-  signatureData?: unknown;
-}
-
-// 创建付款记录输入
-export interface CreatePaymentInput {
-  contractId: string;
-  amount: number;
-  paymentType: string;
-  paymentMethod?: string;
-  note?: string;
-  paidAt?: Date;
-}
-
-// 合同列表查询参数
-export interface ContractListQuery {
-  page?: number;
-  pageSize?: number;
-  status?: ContractStatus;
-  keyword?: string; // 搜索客户名称或合同编号
+/**
+ * 合同查询参数
+ */
+export interface ContractQueryParams {
+  page?: string;
+  pageSize?: string;
+  status?: string;
+  type?: string;
+  keyword?: string;
   startDate?: string;
   endDate?: string;
+  sortBy?: string;
+  sortOrder?: string;
 }
 
-// 合同详情响应（包含付款记录）
-export interface ContractDetailResponse extends Contract {
-  payments: ContractPayment[];
-  case?: {
-    id: string;
-    title: string;
-    caseNumber?: string | null;
-  } | null;
+/**
+ * 合同创建请求
+ */
+export interface CreateContractInput {
+  title: string;
+  content: string;
+  type: string;
+  partyAId?: string;
+  partyBId?: string;
+  amount?: number;
+  startDate?: Date;
+  endDate?: Date;
 }
 
-// 付款进度信息
-export interface PaymentProgress {
-  totalFee: number;
-  paidAmount: number;
-  unpaidAmount: number;
-  paymentRate: number; // 付款比例 0-100
-  status: 'UNPAID' | 'PARTIAL' | 'FULL'; // 未付/部分/全额
+/**
+ * 合同更新请求
+ */
+export interface UpdateContractInput {
+  title?: string;
+  content?: string;
+  type?: string;
+  status?: string;
+  amount?: number;
+  startDate?: Date;
+  endDate?: Date;
 }

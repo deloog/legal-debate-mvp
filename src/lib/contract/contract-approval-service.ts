@@ -3,7 +3,7 @@
  * 实现合同审批工作流，支持多级审批、审批意见、审批历史
  */
 
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/db';
 import { ApprovalStatus, StepStatus } from '@prisma/client';
 
 export interface StartApprovalInput {

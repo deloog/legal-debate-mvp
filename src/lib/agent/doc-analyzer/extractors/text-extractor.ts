@@ -105,18 +105,13 @@ export class TextExtractor {
     try {
       SecureFileUtils.validateFilePath(filePath);
 
-      // 首先尝试使用antiword（安全版本）
-      try {
-        return await SecureFileUtils.executeCommandSecurely('antiword', [
-          filePath,
-        ]);
-      } catch (antiwordError) {
-        logger.warn('antiword不可用，尝试使用textract', {
-          filePath,
-          error: antiwordError,
-        });
-        return await this.extractDOCWithTextract(filePath);
-      }
+      // DOC格式较老，建议用户转换为DOCX格式
+      // 如果需要支持DOC，可以使用外部服务或命令行工具
+      throw new AnalysisError(
+        'DOC文件格式不支持，请转换为DOCX格式后重试',
+        new Error('DOC format not supported'),
+        { filePath }
+      );
     } catch (error) {
       throw new AnalysisError(
         'DOC文件解析失败',
@@ -127,37 +122,16 @@ export class TextExtractor {
   }
 
   /**
-   * 使用textract提取DOC文本
+   * 使用textract提取DOC文本（已废弃）
+   * 注意：textract包与Next.js Turbopack不兼容，已移除
+   * 建议用户将DOC文件转换为DOCX格式
    */
   private async extractDOCWithTextract(filePath: string): Promise<string> {
-    try {
-      // @ts-expect-error - textract lacks TypeScript definitions
-      const textractModule = await import('textract');
-      const textract = textractModule.default || textractModule;
-
-      return new Promise((resolve, reject) => {
-        (
-          textract as unknown as {
-            fromFileWithPath: (
-              filePath: string,
-              callback: (error: Error | null, text: string) => void
-            ) => void;
-          }
-        ).fromFileWithPath(filePath, (error: Error | null, text: string) => {
-          if (error) {
-            reject(new AnalysisError('Textract解析失败', error, { filePath }));
-          } else {
-            resolve(text.trim());
-          }
-        });
-      });
-    } catch (error) {
-      throw new AnalysisError(
-        'Textract不可用',
-        error instanceof Error ? error : new Error(String(error)),
-        { filePath }
-      );
-    }
+    throw new AnalysisError(
+      'textract已移除，DOC文件不支持。请转换为DOCX格式',
+      new Error('textract removed due to compatibility issues'),
+      { filePath }
+    );
   }
 
   /**
@@ -180,7 +154,6 @@ export class TextExtractor {
    */
   private async extractImageText(filePath: string): Promise<string> {
     try {
-      // @ts-expect-error - tesseract.js lacks TypeScript definitions
       const tesseractModule = await import('tesseract.js');
       const Tesseract = tesseractModule.default || tesseractModule;
 

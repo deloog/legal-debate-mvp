@@ -52,7 +52,9 @@ export async function GET(
     }
 
     // 读取合同文件内容
-    const filePath = join(process.cwd(), contract.filePath);
+    // 使用相对路径避免过于宽泛的文件模式匹配
+    const uploadsDir = 'uploads'; // 假设文件存储在 uploads 目录
+    const filePath = join(uploadsDir, contract.filePath);
     let content = '';
 
     try {

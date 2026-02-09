@@ -1,24 +1,54 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { CaseFilters, useCases } from '@/lib/hooks/use-cases';
+import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCases, CaseFilters } from '@/lib/hooks/use-cases';
+import { useCallback, useState } from 'react';
 import { CaseListItem } from './case-list-item';
 import { CaseSearch } from './case-search';
 
 /**
  * 案件列表组件
- * 功能：展示案件列表，支持分页
+ * 功能：展示案件列表，支持分页和筛选
  */
 export function CaseList() {
   const router = useRouter();
-  const [filters] = useState<CaseFilters>({});
+  const [filters, setFilters] = useState<CaseFilters>({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const { cases, loading, error, pagination, goToPage, refetch } = useCases(
     filters,
     searchQuery
   );
+
+  /**
+   * 处理筛选变化
+   */
+  const handleFilterChange = useCallback(
+    (newFilters: CaseFilters) => {
+      setFilters(newFilters);
+      goToPage(1);
+      setIsFilterOpen(false);
+    },
+    [goToPage]
+  );
+
+  /**
+   * 重置筛选
+   */
+  const handleResetFilters = useCallback(() => {
+    setFilters({});
+    goToPage(1);
+  }, [goToPage]);
 
   /**
    * 处理搜索变化（使用useCallback避免子组件重渲染）
@@ -223,19 +253,108 @@ export function CaseList() {
         <div className='flex-1'>
           <CaseSearch value={searchQuery} onSearch={handleSearchChange} />
         </div>
-        <button
-          onClick={() => {
-            // TODO: 显示筛选抽屉
-            console.log('显示筛选');
-          }}
-          className='flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-        >
-          <span>筛选</span>
-          <span className='text-zinc-400 dark:text-zinc-500'>
-            {(filters.types?.length ?? 0) + (filters.statuses?.length ?? 0) >
-              0 && '（已激活）'}
-          </span>
-        </button>
+        <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+          <DialogTrigger asChild>
+            <Button variant='outline' className='flex items-center gap-2'>
+              <Filter className='w-4 h-4' />
+              <span>筛选</span>
+              <span className='text-zinc-400 dark:text-zinc-500'>
+                {(filters.types?.length ?? 0) +
+                  (filters.statuses?.length ?? 0) >
+                  0 && '（已激活）'}
+              </span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>筛选案件</DialogTitle>
+            </DialogHeader>
+            <div className='space-y-4 py-4'>
+              <div className='space-y-2'>
+                <Label>案件类型</Label>
+                <div className='grid grid-cols-2 gap-2'>
+                  <Button
+                    variant={
+                      filters.types?.includes('CIVIL') ? 'default' : 'outline'
+                    }
+                    size='sm'
+                    onClick={() => {
+                      const currentTypes = filters.types || [];
+                      const newTypes = currentTypes.includes('CIVIL')
+                        ? currentTypes.filter(t => t !== 'CIVIL')
+                        : [...currentTypes, 'CIVIL'];
+                      handleFilterChange({ ...filters, types: newTypes });
+                    }}
+                  >
+                    民事
+                  </Button>
+                  <Button
+                    variant={
+                      filters.types?.includes('CRIMINAL')
+                        ? 'default'
+                        : 'outline'
+                    }
+                    size='sm'
+                    onClick={() => {
+                      const currentTypes = filters.types || [];
+                      const newTypes = currentTypes.includes('CRIMINAL')
+                        ? currentTypes.filter(t => t !== 'CRIMINAL')
+                        : [...currentTypes, 'CRIMINAL'];
+                      handleFilterChange({ ...filters, types: newTypes });
+                    }}
+                  >
+                    刑事
+                  </Button>
+                </div>
+              </div>
+              <div className='space-y-2'>
+                <Label>案件状态</Label>
+                <div className='grid grid-cols-2 gap-2'>
+                  <Button
+                    variant={
+                      filters.statuses?.includes('ACTIVE')
+                        ? 'default'
+                        : 'outline'
+                    }
+                    size='sm'
+                    onClick={() => {
+                      const currentStatuses = filters.statuses || [];
+                      const newStatuses = currentStatuses.includes('ACTIVE')
+                        ? currentStatuses.filter(s => s !== 'ACTIVE')
+                        : [...currentStatuses, 'ACTIVE'];
+                      handleFilterChange({ ...filters, statuses: newStatuses });
+                    }}
+                  >
+                    进行中
+                  </Button>
+                  <Button
+                    variant={
+                      filters.statuses?.includes('CLOSED')
+                        ? 'default'
+                        : 'outline'
+                    }
+                    size='sm'
+                    onClick={() => {
+                      const currentStatuses = filters.statuses || [];
+                      const newStatuses = currentStatuses.includes('CLOSED')
+                        ? currentStatuses.filter(s => s !== 'CLOSED')
+                        : [...currentStatuses, 'CLOSED'];
+                      handleFilterChange({ ...filters, statuses: newStatuses });
+                    }}
+                  >
+                    已关闭
+                  </Button>
+                </div>
+              </div>
+              <div className='flex justify-between pt-4'>
+                <Button variant='outline' onClick={handleResetFilters}>
+                  重置
+                </Button>
+                <Button onClick={() => setIsFilterOpen(false)}>完成</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* 案件统计 */}

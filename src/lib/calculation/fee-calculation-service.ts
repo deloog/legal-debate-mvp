@@ -6,6 +6,7 @@
 import { FeeConfigType, PrismaClient } from '@prisma/client';
 import {
   FeeCalculationResult,
+  ExpenseCategory,
   FeeType,
   LawyerFeeCalculationParams,
   LitigationFeeCalculationParams,
@@ -185,8 +186,8 @@ export class FeeCalculationService {
       totalResult.items.push(...result.items);
 
       Object.keys(result.breakdown).forEach(key => {
-        const type = key as FeeType;
-        totalResult.breakdown[type] += result.breakdown[type];
+        const type = key as keyof typeof FeeType;
+        totalResult.breakdown[FeeType[type]] += result.breakdown[FeeType[type]];
       });
     });
 

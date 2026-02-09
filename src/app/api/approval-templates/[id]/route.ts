@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 
@@ -112,7 +112,7 @@ export async function PUT(
           error: {
             code: 'VALIDATION_ERROR',
             message: '请求数据格式错误',
-            details: error.errors,
+            details: error.issues,
           },
         },
         { status: 400 }

@@ -3,92 +3,21 @@
  * 支持分页、筛选、搜索、批量操作
  */
 
-import { NextRequest } from 'next/server';
+import {
+  serverErrorResponse,
+  successResponse,
+  unauthorizedResponse,
+} from '@/lib/api-response';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
-import {
-  successResponse,
-  unauthorizedResponse,
-  serverErrorResponse,
-} from '@/lib/api-response';
+import type {
+  OrderListQueryParams,
+  OrderListResponse,
+  OrderStatsResponse,
+} from '@/types/admin-order';
 import type { OrderStatus, PaymentMethod } from '@/types/payment';
-
-// =============================================================================
-// 类型定义
-// =============================================================================
-
-/**
- * 订单列表查询参数
- */
-interface OrderListQueryParams {
-  page?: string;
-  limit?: string;
-  status?: string;
-  paymentMethod?: string;
-  userId?: string;
-  membershipTierId?: string;
-  startDate?: string;
-  endDate?: string;
-  search?: string;
-  sortBy?: string;
-  sortOrder?: string;
-}
-
-/**
- * 订单列表响应数据
- */
-interface OrderListResponse {
-  orders: Array<{
-    id: string;
-    orderNo: string;
-    userId: string;
-    userEmail: string;
-    userName: string | null;
-    membershipTierId: string;
-    membershipTierName: string;
-    paymentMethod: string;
-    status: string;
-    amount: number;
-    currency: string;
-    description: string;
-    expiredAt: Date;
-    paidAt: Date | null;
-    failedReason: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-  }>;
-  summary: {
-    total: number;
-    paidCount: number;
-    paidAmount: number;
-    pendingCount: number;
-    pendingAmount: number;
-    failedCount: number;
-    failedAmount: number;
-  };
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-}
-
-/**
- * 订单统计响应数据
- */
-interface OrderStatsResponse {
-  totalOrders: number;
-  paidOrders: number;
-  paidAmount: number;
-  pendingOrders: number;
-  pendingAmount: number;
-  failedOrders: number;
-  failedAmount: number;
-  cancelledOrders: number;
-  refundedOrders: number;
-}
+import { NextRequest } from 'next/server';
 
 // =============================================================================
 // 辅助函数
@@ -124,14 +53,18 @@ function parseQueryParams(request: NextRequest): OrderListQueryParams {
   const url = new URL(request.url);
   return {
     page: url.searchParams.get('page') ?? '1',
-    limit: url.searchParams.get('limit') ?? '20',
+    pageSize:
+      url.searchParams.get('pageSize') ?? url.searchParams.get('limit') ?? '20',
     status: url.searchParams.get('status') ?? undefined,
     paymentMethod: url.searchParams.get('paymentMethod') ?? undefined,
     userId: url.searchParams.get('userId') ?? undefined,
     membershipTierId: url.searchParams.get('membershipTierId') ?? undefined,
     startDate: url.searchParams.get('startDate') ?? undefined,
     endDate: url.searchParams.get('endDate') ?? undefined,
-    search: url.searchParams.get('search') ?? undefined,
+    search:
+      url.searchParams.get('search') ??
+      url.searchParams.get('keyword') ??
+      undefined,
     sortBy: url.searchParams.get('sortBy') ?? 'createdAt',
     sortOrder: url.searchParams.get('sortOrder') ?? 'desc',
   };
@@ -266,8 +199,11 @@ export async function GET(request: NextRequest): Promise<Response> {
     // 解析查询参数
     const params = parseQueryParams(request);
     const page = Math.max(1, Number.parseInt(params.page, 10));
-    const limit = Math.min(100, Math.max(1, Number.parseInt(params.limit, 10)));
-    const skip = (page - 1) * limit;
+    const pageSize = Math.min(
+      100,
+      Math.max(1, Number.parseInt(params.pageSize || params.limit || '20', 10))
+    );
+    const skip = (page - 1) * pageSize;
 
     // 验证排序参数
     const validSortFields = [
@@ -300,7 +236,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     const orders = await prisma.order.findMany({
       where,
       skip,
-      take: limit,
+      take: pageSize,
       include: {
         user: {
           select: {
@@ -359,8 +295,9 @@ export async function GET(request: NextRequest): Promise<Response> {
       pagination: {
         total,
         page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        pageSize,
+        limit: pageSize,
+        totalPages: Math.ceil(total / pageSize),
       },
     };
 
