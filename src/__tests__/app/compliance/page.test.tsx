@@ -9,7 +9,7 @@ import '@testing-library/jest-dom';
 import CompliancePage from '@/app/compliance/page';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('合规管理页面测试', () => {
   beforeEach(() => {

@@ -1,8 +1,11 @@
+// @ts-nocheck
 /**
  * 关系反馈组件测试
  *
  * 测试关系反馈按钮和表单的功能
  */
+
+/// <reference types="@testing-library/jest-dom" />
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -10,7 +13,7 @@ import '@testing-library/jest-dom';
 import { RelationFeedbackButton } from '../../../components/feedback/RelationFeedbackButton';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('RelationFeedbackButton 组件', () => {
   const mockProps = {
@@ -163,7 +166,7 @@ describe('RelationFeedbackButton 组件', () => {
 
   it('应该在提交时禁用按钮', async () => {
     jest.mocked(fetch).mockImplementation(
-      () =>
+      (): Promise<Response> =>
         new Promise(resolve =>
           setTimeout(
             () =>
@@ -182,7 +185,7 @@ describe('RelationFeedbackButton 组件', () => {
     fireEvent.click(accurateButton);
 
     // 按钮应该被禁用
-    expect(accurateButton).toBeDisabled();
+    (expect(accurateButton) as any).toBeDisabled();
 
     await waitFor(() => {
       expect(accurateButton).not.toBeDisabled();
@@ -233,7 +236,7 @@ describe('RelationFeedbackButton 组件', () => {
     fireEvent.click(accurateButton);
 
     await waitFor(() => {
-      expect(accurateButton).toHaveClass('selected');
+      (expect(accurateButton) as any).toHaveClass('selected');
     });
   });
 
@@ -254,14 +257,14 @@ describe('RelationFeedbackButton 组件', () => {
     render(<RelationFeedbackButton {...mockProps} className='custom-class' />);
 
     const container = screen.getByText('准确').closest('div');
-    expect(container).toHaveClass('custom-class');
+    (expect(container) as any).toHaveClass('custom-class');
   });
 
   it('应该在禁用状态下不允许提交', () => {
     render(<RelationFeedbackButton {...mockProps} disabled />);
 
     const accurateButton = screen.getByText('准确');
-    expect(accurateButton).toBeDisabled();
+    (expect(accurateButton) as any).toBeDisabled();
 
     fireEvent.click(accurateButton);
 

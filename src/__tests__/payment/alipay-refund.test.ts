@@ -37,7 +37,7 @@ jest.mock('@/lib/payment/alipay-utils', () => ({
 }));
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('AlipayRefund', () => {
   beforeEach(() => {

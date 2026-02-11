@@ -398,7 +398,12 @@
       "Bash(grep -n \"interface TaskListResponse\\\\|type TaskListResponse\" src/types/*.ts)",
       "Bash(tee build-output.log)",
       "Bash(tee type-errors.log)",
-      "Bash(npx jest \"src/__tests__/components/membership/MembershipInfo.test.tsx\" --passWithNoTests)"
+      "Bash(npx jest \"src/__tests__/components/membership/MembershipInfo.test.tsx\" --passWithNoTests)",
+      "Bash(while read file)",
+      "Bash(do sed -i 's/global\\\\.fetch = jest\\\\.fn\\(\\)/global.fetch = jest.fn\\(\\) as jest.MockedFunction<typeof fetch>/g' \"$file\")",
+      "Bash(done)",
+      "Bash(npm test:*)",
+      "Bash(npx ts-node:*)"
     ]
   }
 }

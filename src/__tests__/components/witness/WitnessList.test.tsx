@@ -10,7 +10,7 @@ import { WitnessList } from '@/components/witness/WitnessList';
 import { type WitnessDetail, type WitnessStatus } from '@/types/witness';
 
 // Setup global fetch for JSDOM
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 const defaultProps = {
   caseId: 'case1',

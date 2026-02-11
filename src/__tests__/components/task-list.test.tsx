@@ -117,7 +117,7 @@ const mockTasks: TaskDetail[] = [
 describe('TaskList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    global.fetch = jest.fn();
+    global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
     mockConfirm.mockReturnValue(true);
   });
 

@@ -17,7 +17,7 @@ import '@testing-library/jest-dom';
 import { KnowledgeGraphBrowser } from '@/components/knowledge-graph/KnowledgeGraphBrowser';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 // Mock LawArticleGraphVisualization 组件
 jest.mock('@/components/law-article/LawArticleGraphVisualization', () => ({

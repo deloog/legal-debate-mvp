@@ -33,16 +33,25 @@ export interface EmailSendResult {
  * 合同邮件服务类
  */
 export class ContractEmailService {
-  private transporter: nodemailer.Transporter;
+  private transporter: nodemailer.Transporter | null;
 
   constructor() {
+    const smtpHost = process.env.SMTP_HOST || '';
+    const smtpUser = process.env.SMTP_USER || '';
+
+    // 如果没有配置SMTP，transporter为null
+    if (!smtpHost || !smtpUser) {
+      this.transporter = null;
+      return;
+    }
+
     // 创建邮件传输器
     this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.example.com',
+      host: smtpHost,
       port: parseInt(process.env.SMTP_PORT || '587'),
       secure: process.env.SMTP_SECURE === 'true',
       auth: {
-        user: process.env.SMTP_USER,
+        user: smtpUser,
         pass: process.env.SMTP_PASS,
       },
     });
@@ -106,6 +115,15 @@ export class ContractEmailService {
         ];
       }
 
+      // 检查transporter是否可用
+      if (!this.transporter) {
+        console.warn('[ContractEmail] SMTP未配置，跳过邮件发送');
+        return {
+          success: false,
+          error: 'SMTP not configured',
+        };
+      }
+
       // 发送邮件
       const info = await this.transporter.sendMail(mailOptions);
 
@@ -164,6 +182,11 @@ export class ContractEmailService {
         subject: `【律伴】合同签署提醒 - ${contract.contractNumber}`,
         html: emailHtml,
       };
+
+      if (!this.transporter) {
+        console.warn('[ContractEmail] SMTP未配置，跳过签署提醒邮件');
+        return { success: false, error: 'SMTP not configured' };
+      }
 
       const info = await this.transporter.sendMail(mailOptions);
 
@@ -234,6 +257,11 @@ export class ContractEmailService {
           },
         ],
       };
+
+      if (!this.transporter) {
+        console.warn('[ContractEmail] SMTP未配置，跳过签署确认邮件');
+        return { success: false, error: 'SMTP not configured' };
+      }
 
       const info = await this.transporter.sendMail(mailOptions);
 

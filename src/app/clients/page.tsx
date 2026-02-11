@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -86,7 +86,9 @@ export default function ClientsPage() {
       setTotal(data.total || 0);
     } catch (error) {
       console.error('获取客户列表失败:', error);
-      alert('获取客户列表失败，请重试');
+      if (typeof window !== 'undefined') {
+        alert('获取客户列表失败，请重试');
+      }
     } finally {
       setLoading(false);
     }
@@ -112,7 +114,9 @@ export default function ClientsPage() {
       await fetchClients();
     } catch (error) {
       console.error('创建客户失败:', error);
-      alert(error instanceof Error ? error.message : '创建客户失败');
+      if (typeof window !== 'undefined') {
+        alert(error instanceof Error ? error.message : '创建客户失败');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -140,7 +144,9 @@ export default function ClientsPage() {
       await fetchClients();
     } catch (error) {
       console.error('更新客户失败:', error);
-      alert(error instanceof Error ? error.message : '更新客户失败');
+      if (typeof window !== 'undefined') {
+        alert(error instanceof Error ? error.message : '更新客户失败');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -159,7 +165,9 @@ export default function ClientsPage() {
       await fetchClients();
     } catch (error) {
       console.error('删除客户失败:', error);
-      alert('删除客户失败，请重试');
+      if (typeof window !== 'undefined') {
+        alert('删除客户失败，请重试');
+      }
       throw error;
     }
   };
@@ -191,9 +199,9 @@ export default function ClientsPage() {
   };
 
   // 初始加载
-  useState(() => {
+  useEffect(() => {
     fetchClients();
-  });
+  }, []);
 
   if (showForm || editingClient) {
     return (

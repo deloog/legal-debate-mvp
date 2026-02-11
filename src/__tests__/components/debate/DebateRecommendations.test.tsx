@@ -9,7 +9,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { DebateRecommendations } from '@/components/debate/DebateRecommendations';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('DebateRecommendations', () => {
   const mockDebateId = 'debate_123';

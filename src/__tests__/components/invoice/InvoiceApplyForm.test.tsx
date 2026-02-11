@@ -37,7 +37,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('InvoiceApplyForm', () => {
   beforeEach(() => {

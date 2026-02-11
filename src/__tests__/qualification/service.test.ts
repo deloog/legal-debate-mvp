@@ -10,7 +10,7 @@ import {
 } from '@/lib/qualification/service';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('verifyLawyerQualification', () => {
   beforeEach(() => {

@@ -9,12 +9,20 @@ import { Alert, AlertSeverity, NotificationChannel } from './types';
 
 // 创建nodemailer transporter
 const createTransporter = () => {
+  const smtpHost = process.env.SMTP_HOST || '';
+  const smtpUser = process.env.SMTP_USER || '';
+
+  // 如果没有配置SMTP，返回null
+  if (!smtpHost || !smtpUser) {
+    return null;
+  }
+
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.example.com',
+    host: smtpHost,
     port: parseInt(process.env.SMTP_PORT || '587'),
     secure: process.env.SMTP_SECURE === 'true',
     auth: {
-      user: process.env.SMTP_USER,
+      user: smtpUser,
       pass: process.env.SMTP_PASS,
     },
   });
@@ -91,6 +99,13 @@ export class EmailAlertChannel implements NotificationChannel {
       }
 
       const transporter = createTransporter();
+
+      // 双重检查transporter
+      if (!transporter) {
+        logger.warn('SMTP not configured, skipping email');
+        return;
+      }
+
       const mailOptions = {
         from: process.env.EMAIL_FROM || '"律伴助手" <noreply@yourdomain.com>',
         to: this.recipients.join(', '),

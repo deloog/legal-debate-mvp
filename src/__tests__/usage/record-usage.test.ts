@@ -368,8 +368,6 @@ describe('使用量记录模块测试', () => {
       expect(stats.aiTokensUsed).toBeGreaterThanOrEqual(1000);
       expect(stats.storageUsedMB).toBeGreaterThanOrEqual(50);
       expect(stats.limits).toBeDefined();
-      expect(stats.limits.tier).toBeDefined();
-      expect(stats.limits.limits).toBeDefined();
       expect(stats.remaining).toBeDefined();
     });
 

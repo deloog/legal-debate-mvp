@@ -8,7 +8,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { UserList } from '@/components/admin/UserList';
 
 // Mock fetch API
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 // 在setup.ts之后重新mock next/navigation，覆盖默认实现
 jest.mock('next/navigation', () => ({

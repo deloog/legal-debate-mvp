@@ -5,6 +5,9 @@
 
 'use client';
 
+// 禁用静态生成，因为需要使用 NextAuth session
+export const dynamic = 'force-dynamic';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -133,7 +136,8 @@ export default function KnowledgeGraphAdminPage() {
   }, []);
 
   // 获取会话信息
-  const { data: session } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
   const userId = session?.user?.id || 'anonymous';
 
   // 审核关系

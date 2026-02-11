@@ -25,7 +25,7 @@ describe('WechatPayCallbackPage', () => {
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
     });
-    global.fetch = jest.fn();
+    global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
   });
 
   afterEach(() => {
@@ -156,7 +156,7 @@ describe('AlipayCallbackPage', () => {
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
     });
-    global.fetch = jest.fn();
+    global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
   });
 
   afterEach(() => {

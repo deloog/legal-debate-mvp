@@ -19,7 +19,7 @@ jest.mock('lucide-react', () => ({
 }));
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('DiscussionForm 组件测试', () => {
   const defaultProps = {

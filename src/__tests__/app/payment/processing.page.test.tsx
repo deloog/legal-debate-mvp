@@ -49,7 +49,7 @@ describe('PaymentProcessingPage', () => {
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
     });
-    global.fetch = jest.fn();
+    global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
   });
 
   afterEach(() => {

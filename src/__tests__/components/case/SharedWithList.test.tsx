@@ -7,7 +7,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { SharedWithList } from '@/components/case/SharedWithList';
 
 // Mock fetch
-global.fetch = jest.fn() as jest.Mock;
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch> as jest.Mock;
 
 // Mock window.confirm
 global.confirm = jest.fn(() => true);

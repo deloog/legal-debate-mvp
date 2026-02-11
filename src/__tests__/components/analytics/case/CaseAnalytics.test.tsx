@@ -9,7 +9,7 @@ import { CaseAnalytics } from '@/components/analytics/case/CaseAnalytics';
 import type { CaseAnalyticsData } from '@/types/stats';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('CaseAnalytics组件', () => {
   const mockData: CaseAnalyticsData = {

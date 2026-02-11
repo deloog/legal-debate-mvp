@@ -11,23 +11,30 @@ import {
 } from '@/types/notification';
 
 const mockPreferences: ReminderPreferences = {
+  channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
+  quietHours: null,
+  disabledTypes: [],
   courtSchedule: {
     enabled: true,
+    advanceDays: [1],
     hoursBefore: [24, 1],
     channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
   },
   deadline: {
     enabled: true,
+    advanceDays: [7, 3, 1],
     daysBefore: [7, 3, 1],
     channels: [NotificationChannel.IN_APP],
   },
   followUp: {
     enabled: true,
+    autoRemind: true,
     hoursBefore: [24],
     channels: [NotificationChannel.IN_APP],
   },
   task: {
     enabled: true,
+    priorities: ['HIGH', 'URGENT'],
     hoursBefore: [24, 1],
     channels: [NotificationChannel.IN_APP],
   },

@@ -368,6 +368,7 @@ export interface MembershipHistory {
  * 会员权限配置
  */
 export interface MembershipPermissionConfig {
+  // 基础功能权限
   canCreateCase: boolean;
   canCreateDebate: boolean;
   canAnalyzeDocument: boolean;
@@ -377,6 +378,21 @@ export interface MembershipPermissionConfig {
   canInviteMembers: boolean;
   canManageTeam: boolean;
   maxTeamMembers: number;
+
+  // 高级功能权限
+  canUseAdvancedFeatures: boolean;
+  canUseBatchProcessing: boolean;
+
+  // AI模型权限
+  canUseDeepSeek: boolean;
+  canUseZhipuAI: boolean;
+  canUseCustomModel: boolean;
+
+  // 支持服务权限
+  prioritySupport: boolean;
+  dedicatedSupport: boolean;
+
+  // 自定义权限
   customPermissions: Record<string, boolean>;
 }
 

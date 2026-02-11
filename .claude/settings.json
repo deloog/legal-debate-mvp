@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npm uninstall:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(node -e:*)"
     ]
   }
 }

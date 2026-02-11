@@ -9,7 +9,7 @@ import '@testing-library/jest-dom';
 import RiskAssessmentPage from '@/app/risk-assessment/page';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('风险评估页面测试', () => {
   beforeEach(() => {

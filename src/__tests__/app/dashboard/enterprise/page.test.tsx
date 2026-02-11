@@ -17,7 +17,7 @@ import '@testing-library/jest-dom';
 import EnterpriseDashboardPage from '@/app/dashboard/enterprise/page';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('企业法务工作台页面', () => {
   beforeEach(() => {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import FeeCalculator from '@/components/calculation/FeeCalculator';
-import { FeeType, LitigationCaseType } from '@/types/calculation';
+import { FeeType, LitigationCaseType, ExpenseCategory } from '@/types/calculation';
 
 // Mock子组件以简化测试
 jest.mock('@/components/calculation/FeeCalculatorTabs', () => ({
@@ -9,8 +9,8 @@ jest.mock('@/components/calculation/FeeCalculatorTabs', () => ({
     activeTab,
     onTabChange,
   }: {
-    activeTab: FeeType;
-    onTabChange: (tab: FeeType) => void;
+    activeTab: ExpenseCategory;
+    onTabChange: (tab: ExpenseCategory) => void;
   }) => (
     <div data-testid='fee-calculator-tabs'>
       <button onClick={() => onTabChange(FeeType.LAWYER_FEE)}>律师费</button>
@@ -54,7 +54,7 @@ jest.mock('@/components/calculation/FeeBreakdown', () => {
 describe('FeeCalculator', () => {
   beforeEach(() => {
     // 重置 fetch mock
-    global.fetch = jest.fn();
+    global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
   });
 
   it('renders correctly with default lawyer fee tab', () => {

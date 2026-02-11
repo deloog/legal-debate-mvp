@@ -5,12 +5,8 @@
  * 注意：使用CommonJS格式，因为Jest globalSetup需要CommonJS模块
  */
 
-// 设置测试环境变量（NODE_ENV在某些环境中是只读的，使用Object.defineProperty）
-Object.defineProperty(process.env, 'NODE_ENV', {
-  value: 'test',
-  writable: true,
-  configurable: true,
-});
+// 设置测试环境变量
+process.env.NODE_ENV = 'test';
 
 // 数据库连接池限制（避免连接耗尽）
 process.env.DATABASE_POOL_MIN = '1';

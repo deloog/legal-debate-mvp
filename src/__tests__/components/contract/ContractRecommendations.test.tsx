@@ -9,7 +9,7 @@ import '@testing-library/jest-dom';
 import { ContractRecommendations } from '@/components/contract/ContractRecommendations';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('ContractRecommendations', () => {
   const mockContractId = 'contract-123';

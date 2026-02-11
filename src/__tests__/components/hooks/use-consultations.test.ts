@@ -6,7 +6,7 @@ import { ConsultStatus, ConsultationType } from '@/types/consultation';
 import { act, renderHook, waitFor } from '@testing-library/react';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('useConsultations', () => {
   beforeEach(() => {

@@ -10,7 +10,7 @@ import {
 import { ConsultationType } from '@/types/consultation';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 // Mock 函数
 const mockOnSubmit = jest.fn().mockResolvedValue(undefined);

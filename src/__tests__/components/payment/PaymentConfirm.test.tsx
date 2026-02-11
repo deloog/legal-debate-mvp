@@ -18,7 +18,7 @@ describe('PaymentConfirm', () => {
   beforeEach(() => {
     mockOnConfirm.mockClear();
     mockOnCancel.mockClear();
-    global.fetch = jest.fn();
+    global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
   });
 
   afterEach(() => {

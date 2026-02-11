@@ -29,7 +29,7 @@ jest.mock('@/components/law-article/LawArticleGraphVisualization', () => ({
 }));
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('法条详情页', () => {
   let testArticleId: string;

@@ -114,12 +114,12 @@ describe('Task Types', () => {
         const input: CreateTaskInput = {
           title: '测试任务',
           description: '测试任务描述',
-          status: TaskStatus.TODO,
+          type: 'GENERAL',
           priority: TaskPriority.MEDIUM,
         };
 
         const result = validateCreateTaskInput(input);
-        expect(result.isValid).toBe(true);
+        expect(result.valid).toBe(true);
         expect(result.errors).toHaveLength(0);
       });
 
@@ -127,7 +127,7 @@ describe('Task Types', () => {
         const input = {} as CreateTaskInput;
 
         const result = validateCreateTaskInput(input);
-        expect(result.isValid).toBe(false);
+        expect(result.valid).toBe(false);
         expect(result.errors).toContainEqual({
           field: 'title',
           message: '任务标题是必填项',
@@ -135,12 +135,12 @@ describe('Task Types', () => {
       });
 
       it('应该拒绝过长的标题', () => {
-        const input: CreateTaskInput = {
+        const input = {
           title: 'a'.repeat(201),
-        };
+        } as any;
 
         const result = validateCreateTaskInput(input);
-        expect(result.isValid).toBe(false);
+        expect(result.valid).toBe(false);
         expect(result.errors).toContainEqual({
           field: 'title',
           message: '任务标题不能超过200个字符',
@@ -148,13 +148,13 @@ describe('Task Types', () => {
       });
 
       it('应该拒绝过长的描述', () => {
-        const input: CreateTaskInput = {
+        const input = {
           title: '测试任务',
           description: 'a'.repeat(2001),
-        };
+        } as any;
 
         const result = validateCreateTaskInput(input);
-        expect(result.isValid).toBe(false);
+        expect(result.valid).toBe(false);
         expect(result.errors).toContainEqual({
           field: 'description',
           message: '任务描述不能超过2000个字符',
@@ -165,10 +165,10 @@ describe('Task Types', () => {
         const input = {
           title: '测试任务',
           status: 'INVALID' as unknown as TaskStatus,
-        };
+        } as any;
 
         const result = validateCreateTaskInput(input);
-        expect(result.isValid).toBe(false);
+        expect(result.valid).toBe(false);
         expect(result.errors).toContainEqual({
           field: 'status',
           message:
@@ -180,10 +180,10 @@ describe('Task Types', () => {
         const input = {
           title: '测试任务',
           priority: 'INVALID' as unknown as TaskPriority,
-        };
+        } as any;
 
         const result = validateCreateTaskInput(input);
-        expect(result.isValid).toBe(false);
+        expect(result.valid).toBe(false);
         expect(result.errors).toContainEqual({
           field: 'priority',
           message: '任务优先级必须是有效的值（LOW、MEDIUM、HIGH、URGENT）',
@@ -191,13 +191,13 @@ describe('Task Types', () => {
       });
 
       it('应该拒绝负数的预估工时', () => {
-        const input: CreateTaskInput = {
+        const input = {
           title: '测试任务',
           estimatedHours: -1,
-        };
+        } as any;
 
         const result = validateCreateTaskInput(input);
-        expect(result.isValid).toBe(false);
+        expect(result.valid).toBe(false);
         expect(result.errors).toContainEqual({
           field: 'estimatedHours',
           message: '预估工时必须是非负数',
@@ -205,13 +205,13 @@ describe('Task Types', () => {
       });
 
       it('应该拒绝过大的预估工时', () => {
-        const input: CreateTaskInput = {
+        const input = {
           title: '测试任务',
           estimatedHours: 1001,
-        };
+        } as any;
 
         const result = validateCreateTaskInput(input);
-        expect(result.isValid).toBe(false);
+        expect(result.valid).toBe(false);
         expect(result.errors).toContainEqual({
           field: 'estimatedHours',
           message: '预估工时不能超过1000小时',
@@ -219,13 +219,13 @@ describe('Task Types', () => {
       });
 
       it('应该接受有效的预估工时', () => {
-        const input: CreateTaskInput = {
+        const input = {
           title: '测试任务',
           estimatedHours: 8,
-        };
+        } as any;
 
         const result = validateCreateTaskInput(input);
-        expect(result.isValid).toBe(true);
+        expect(result.valid).toBe(true);
       });
     });
 
@@ -238,7 +238,7 @@ describe('Task Types', () => {
         };
 
         const result = validateUpdateTaskInput(input);
-        expect(result.isValid).toBe(true);
+        expect(result.valid).toBe(true);
         expect(result.errors).toHaveLength(0);
       });
 
@@ -248,7 +248,7 @@ describe('Task Types', () => {
         };
 
         const result = validateUpdateTaskInput(input);
-        expect(result.isValid).toBe(false);
+        expect(result.valid).toBe(false);
         expect(result.errors).toContainEqual({
           field: 'title',
           message: '任务标题不能为空',
@@ -261,7 +261,7 @@ describe('Task Types', () => {
         };
 
         const result = validateUpdateTaskInput(input);
-        expect(result.isValid).toBe(false);
+        expect(result.valid).toBe(false);
         expect(result.errors).toContainEqual({
           field: 'description',
           message: '任务描述不能超过2000个字符',
@@ -269,12 +269,12 @@ describe('Task Types', () => {
       });
 
       it('应该拒绝负数的实际工时', () => {
-        const input: UpdateTaskInput = {
+        const input = {
           actualHours: -1,
-        };
+        } as any;
 
         const result = validateUpdateTaskInput(input);
-        expect(result.isValid).toBe(false);
+        expect(result.valid).toBe(false);
         expect(result.errors).toContainEqual({
           field: 'actualHours',
           message: '实际工时必须是非负数',
@@ -282,21 +282,21 @@ describe('Task Types', () => {
       });
 
       it('应该接受将完成时间设置为 null', () => {
-        const input: UpdateTaskInput = {
+        const input = {
           completedAt: null,
-        };
+        } as any;
 
         const result = validateUpdateTaskInput(input);
-        expect(result.isValid).toBe(true);
+        expect(result.valid).toBe(true);
       });
 
       it('应该拒绝无效的完成时间对象', () => {
-        const input: UpdateTaskInput = {
+        const input = {
           completedAt: 'invalid' as unknown as Date,
-        };
+        } as any;
 
         const result = validateUpdateTaskInput(input);
-        expect(result.isValid).toBe(false);
+        expect(result.valid).toBe(false);
         expect(result.errors).toContainEqual({
           field: 'completedAt',
           message: '完成时间必须是有效的日期对象',
@@ -307,12 +307,12 @@ describe('Task Types', () => {
     describe('validateAssignTaskInput', () => {
       it('应该验证有效的分配任务输入', () => {
         const input: AssignTaskInput = {
-          assignedTo: 'user-123',
-          priority: TaskPriority.HIGH,
+          taskId: 'task-123',
+          assigneeId: 'user-123',
         };
 
         const result = validateAssignTaskInput(input);
-        expect(result.isValid).toBe(true);
+        expect(result.valid).toBe(true);
         expect(result.errors).toHaveLength(0);
       });
 
@@ -320,7 +320,7 @@ describe('Task Types', () => {
         const input = {} as AssignTaskInput;
 
         const result = validateAssignTaskInput(input);
-        expect(result.isValid).toBe(false);
+        expect(result.valid).toBe(false);
         expect(result.errors).toContainEqual({
           field: 'assignedTo',
           message: '分配人是必填项',
@@ -328,13 +328,14 @@ describe('Task Types', () => {
       });
 
       it('应该拒绝无效的截止日期', () => {
-        const input: AssignTaskInput = {
-          assignedTo: 'user-123',
+        const input = {
+          taskId: 'task-123',
+          assigneeId: 'user-123',
           dueDate: 'invalid' as unknown as Date,
-        };
+        } as any;
 
         const result = validateAssignTaskInput(input);
-        expect(result.isValid).toBe(false);
+        expect(result.valid).toBe(false);
         expect(result.errors).toContainEqual({
           field: 'dueDate',
           message: '截止日期必须是有效的日期对象',
@@ -342,13 +343,14 @@ describe('Task Types', () => {
       });
 
       it('应该接受有效的截止日期', () => {
-        const input: AssignTaskInput = {
-          assignedTo: 'user-123',
+        const input = {
+          taskId: 'task-123',
+          assigneeId: 'user-123',
           dueDate: new Date('2024-12-31'),
-        };
+        } as any;
 
         const result = validateAssignTaskInput(input);
-        expect(result.isValid).toBe(true);
+        expect(result.valid).toBe(true);
       });
     });
   });

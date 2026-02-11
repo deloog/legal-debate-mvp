@@ -1,8 +1,11 @@
+// @ts-nocheck
 /**
  * 推荐反馈组件测试
  *
  * 测试推荐反馈按钮和表单的功能
  */
+
+/// <reference types="@testing-library/jest-dom" />
 
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -10,7 +13,7 @@ import '@testing-library/jest-dom';
 import { RecommendationFeedbackButton } from '../../../components/feedback/RecommendationFeedbackButton';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('RecommendationFeedbackButton 组件', () => {
   const mockProps = {
@@ -134,7 +137,7 @@ describe('RecommendationFeedbackButton 组件', () => {
 
   it('应该在提交时禁用按钮', async () => {
     jest.mocked(fetch).mockImplementation(
-      () =>
+      (): Promise<Response> =>
         new Promise(resolve =>
           setTimeout(
             () =>
@@ -153,7 +156,7 @@ describe('RecommendationFeedbackButton 组件', () => {
     fireEvent.click(helpfulButton);
 
     // 按钮应该被禁用
-    expect(helpfulButton).toBeDisabled();
+    (expect(helpfulButton) as any).toBeDisabled();
 
     await waitFor(() => {
       expect(helpfulButton).not.toBeDisabled();
@@ -204,7 +207,7 @@ describe('RecommendationFeedbackButton 组件', () => {
     fireEvent.click(helpfulButton);
 
     await waitFor(() => {
-      expect(helpfulButton).toHaveClass('selected');
+      (expect(helpfulButton) as any).toHaveClass('selected');
     });
   });
 
@@ -227,14 +230,14 @@ describe('RecommendationFeedbackButton 组件', () => {
     );
 
     const container = screen.getByText('有用').closest('div');
-    expect(container).toHaveClass('custom-class');
+    (expect(container) as any).toHaveClass('custom-class');
   });
 
   it('应该在禁用状态下不允许提交', () => {
     render(<RecommendationFeedbackButton {...mockProps} disabled />);
 
     const helpfulButton = screen.getByText('有用');
-    expect(helpfulButton).toBeDisabled();
+    (expect(helpfulButton) as any).toBeDisabled();
 
     fireEvent.click(helpfulButton);
 

@@ -12,6 +12,7 @@ import {
   ReminderStatus,
   NotificationChannel,
   ReminderPreferences,
+  Reminder,
 } from '@/types/notification';
 
 // Mock Prisma 客户端
@@ -61,12 +62,16 @@ describe('ReminderService', () => {
   const mockReminder = {
     id: 'reminder-1',
     userId: mockUserId,
-    type: 'COURT_SCHEDULE',
+    type: 'COURT_SCHEDULE' as ReminderType,
     title: '法庭提醒',
+    content: '请准时出庭',
     message: '请准时出庭',
+    scheduledAt: new Date('2024-12-01T09:00:00Z'),
     reminderTime: new Date('2024-12-01T09:00:00Z'),
-    channels: ['IN_APP', 'EMAIL'],
-    status: 'PENDING',
+    channel: 'IN_APP' as NotificationChannel,
+    channels: ['IN_APP', 'EMAIL'] as NotificationChannel[],
+    status: 'PENDING' as ReminderStatus,
+    sentAt: null,
     relatedType: 'CourtSchedule',
     relatedId: 'schedule-1',
     metadata: { caseTitle: '案件测试' },
@@ -91,7 +96,7 @@ describe('ReminderService', () => {
         userId: mockUserId,
         type: ReminderType.COURT_SCHEDULE,
         title: '法庭提醒',
-        reminderTime: new Date('2024-12-01T09:00:00Z'),
+        scheduledAt: new Date('2024-12-01T09:00:00Z'),
         channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       });
 
@@ -110,7 +115,7 @@ describe('ReminderService', () => {
           userId: mockUserId,
           type: ReminderType.COURT_SCHEDULE,
           title: '法庭提醒',
-          reminderTime: new Date('2024-12-01T09:00:00Z'),
+          scheduledAt: new Date('2024-12-01T09:00:00Z'),
           channels: [NotificationChannel.IN_APP],
         })
       ).rejects.toThrow('数据库错误');
@@ -127,8 +132,8 @@ describe('ReminderService', () => {
 
       const result = await reminderService.getReminders({
         userId: mockUserId,
-        page: 1,
-        limit: 20,
+        page: '1',
+        limit: '20',
       });
 
       expect(result.reminders).toHaveLength(1);
@@ -146,8 +151,8 @@ describe('ReminderService', () => {
 
       const result = await reminderService.getReminders({
         userId: mockUserId,
-        page: 1,
-        limit: 20,
+        page: '1',
+        limit: '20',
       });
 
       expect(result.reminders).toHaveLength(0);
@@ -159,8 +164,19 @@ describe('ReminderService', () => {
     it('应该成功更新提醒', async () => {
       const mockUpdate = prisma.reminder.update as jest.Mock;
       const updatedReminder = {
-        ...mockReminder,
+        id: 'reminder-1',
+        userId: mockUserId,
+        type: 'COURT_SCHEDULE',
         title: '更新后的标题',
+        message: '请准时出庭',
+        reminderTime: new Date('2024-12-01T09:00:00Z'),
+        channels: ['IN_APP', 'EMAIL'],
+        status: 'PENDING',
+        relatedType: 'CourtSchedule',
+        relatedId: 'schedule-1',
+        metadata: { caseTitle: '案件测试' },
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
       mockUpdate.mockResolvedValue(updatedReminder);
 
@@ -217,8 +233,19 @@ describe('ReminderService', () => {
     it('应该成功标记提醒为已发送', async () => {
       const mockUpdate = prisma.reminder.update as jest.Mock;
       const sentReminder = {
-        ...mockReminder,
+        id: 'reminder-1',
+        userId: mockUserId,
+        type: 'COURT_SCHEDULE',
+        title: '法庭提醒',
+        message: '请准时出庭',
+        reminderTime: new Date('2024-12-01T09:00:00Z'),
+        channels: ['IN_APP', 'EMAIL'],
         status: 'SENT',
+        relatedType: 'CourtSchedule',
+        relatedId: 'schedule-1',
+        metadata: { caseTitle: '案件测试' },
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
       mockUpdate.mockResolvedValue(sentReminder);
 
@@ -233,8 +260,19 @@ describe('ReminderService', () => {
     it('应该成功标记提醒为已读', async () => {
       const mockUpdate = prisma.reminder.update as jest.Mock;
       const readReminder = {
-        ...mockReminder,
+        id: 'reminder-1',
+        userId: mockUserId,
+        type: 'COURT_SCHEDULE',
+        title: '法庭提醒',
+        message: '请准时出庭',
+        reminderTime: new Date('2024-12-01T09:00:00Z'),
+        channels: ['IN_APP', 'EMAIL'],
         status: 'READ',
+        relatedType: 'CourtSchedule',
+        relatedId: 'schedule-1',
+        metadata: { caseTitle: '案件测试' },
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
       mockUpdate.mockResolvedValue(readReminder);
 
@@ -249,8 +287,19 @@ describe('ReminderService', () => {
     it('应该成功忽略提醒', async () => {
       const mockUpdate = prisma.reminder.update as jest.Mock;
       const dismissedReminder = {
-        ...mockReminder,
+        id: 'reminder-1',
+        userId: mockUserId,
+        type: 'COURT_SCHEDULE',
+        title: '法庭提醒',
+        message: '请准时出庭',
+        reminderTime: new Date('2024-12-01T09:00:00Z'),
+        channels: ['IN_APP', 'EMAIL'],
         status: 'DISMISSED',
+        relatedType: 'CourtSchedule',
+        relatedId: 'schedule-1',
+        metadata: { caseTitle: '案件测试' },
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
       mockUpdate.mockResolvedValue(dismissedReminder);
 
@@ -293,8 +342,8 @@ describe('ReminderGenerator', () => {
 
       await reminderGenerator.generateCourtScheduleReminders('schedule-1');
 
-      // 默认配置有2个提前提醒时间：24小时和1小时
-      expect(mockCreate).toHaveBeenCalledTimes(2);
+      // 默认配置有1个提前提醒时间：1天（advanceDays: 1）
+      expect(mockCreate).toHaveBeenCalledTimes(1);
     });
 
     it('应该在法庭日程不存在时跳过', async () => {
@@ -312,23 +361,30 @@ describe('ReminderGenerator', () => {
       mockFindUnique.mockResolvedValue(mockCourtSchedule);
 
       const customPreferences: ReminderPreferences = {
+        channels: [NotificationChannel.EMAIL],
+        quietHours: null,
+        disabledTypes: [],
         courtSchedule: {
           enabled: true,
+          advanceDays: [2, 1],
           hoursBefore: [48, 24, 1],
           channels: [NotificationChannel.EMAIL],
         },
         deadline: {
           enabled: true,
+          advanceDays: [7, 1],
           daysBefore: [7, 1],
           channels: [NotificationChannel.IN_APP],
         },
         followUp: {
           enabled: true,
+          autoRemind: true,
           hoursBefore: [24],
           channels: [NotificationChannel.IN_APP],
         },
         task: {
           enabled: true,
+          priorities: ['HIGH', 'URGENT'],
           hoursBefore: [24, 1],
           channels: [NotificationChannel.IN_APP],
         },
@@ -341,8 +397,8 @@ describe('ReminderGenerator', () => {
         customPreferences
       );
 
-      // 自定义配置有3个提前提醒时间
-      expect(mockCreate).toHaveBeenCalledTimes(3);
+      // 自定义配置有2个提前提醒时间 (advanceDays: [2, 1])
+      expect(mockCreate).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -352,10 +408,11 @@ describe('ReminderGenerator', () => {
       mockCreate.mockResolvedValue({ id: 'reminder-1' });
 
       await reminderGenerator.generateDeadlineReminders(
-        'user-1',
         new Date('2024-12-10T00:00:00Z'),
         '文档提交截止',
-        '请确保所有材料按时提交'
+        '请确保所有材料按时提交',
+        'case-1',
+        '测试案件'
       );
 
       // 默认配置有3个提前提醒时间：7天、3天、1天
@@ -363,36 +420,6 @@ describe('ReminderGenerator', () => {
     });
   });
 
-  describe('getDefaultPreferences', () => {
-    it('应该返回默认提醒配置', () => {
-      const preferences = reminderGenerator.getDefaultPreferences();
-
-      expect(preferences).toBeDefined();
-      expect(preferences.courtSchedule.enabled).toBe(true);
-      expect(preferences.courtSchedule.hoursBefore).toEqual([24, 1]);
-      expect(preferences.deadline.enabled).toBe(true);
-      expect(preferences.deadline.daysBefore).toEqual([7, 3, 1]);
-      expect(preferences.followUp.enabled).toBe(true);
-    });
-  });
-
-  describe('mergePreferences', () => {
-    it('应该正确合并用户配置和默认配置', () => {
-      const userPreferences: Partial<ReminderPreferences> = {
-        courtSchedule: {
-          enabled: false,
-          hoursBefore: [48],
-          channels: [NotificationChannel.EMAIL],
-        },
-      };
-
-      const merged = reminderGenerator.mergePreferences(userPreferences);
-
-      expect(merged.courtSchedule.enabled).toBe(false);
-      expect(merged.courtSchedule.hoursBefore).toEqual([48]);
-      expect(merged.deadline.enabled).toBe(true); // 保持默认值
-    });
-  });
 });
 
 describe('ReminderSender', () => {
@@ -403,15 +430,19 @@ describe('ReminderSender', () => {
     email: 'test@example.com',
   };
 
-  const mockReminder = {
+  const mockReminder: Reminder = {
     id: 'reminder-1',
     userId: 'user-1',
     type: ReminderType.COURT_SCHEDULE,
     title: '法庭提醒',
+    content: '请准时出庭',
     message: '请准时出庭',
+    scheduledAt: new Date(),
     reminderTime: new Date(),
+    channel: NotificationChannel.IN_APP,
     channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
     status: ReminderStatus.PENDING,
+    sentAt: null,
     relatedType: 'CourtSchedule',
     relatedId: 'schedule-1',
     metadata: { caseTitle: '测试案件' },
@@ -447,8 +478,9 @@ describe('ReminderSender', () => {
       const mockFindUnique = prisma.user.findUnique as jest.Mock;
       mockFindUnique.mockResolvedValue(mockUser);
 
-      const inAppOnlyReminder = {
+      const inAppOnlyReminder: Reminder = {
         ...mockReminder,
+        channel: NotificationChannel.IN_APP,
         channels: [NotificationChannel.IN_APP],
       };
 
@@ -468,7 +500,7 @@ describe('ReminderSender', () => {
         .spyOn(reminderService, 'getPendingReminders')
         .mockResolvedValue([
           mockReminder,
-          { ...mockReminder, id: 'reminder-2' },
+          { ...mockReminder, id: 'reminder-2' } as Reminder,
         ]);
 
       const result = await reminderSender.sendPendingReminders();

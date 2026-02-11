@@ -16,7 +16,7 @@ import '@testing-library/jest-dom';
 import ContractReviewPage from '@/app/contracts/review/page';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 describe('合同审查页面', () => {
   beforeEach(() => {

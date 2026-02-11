@@ -9,7 +9,7 @@ import '@testing-library/jest-dom';
 import ReportsPage from '@/app/reports/page';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 // Mock window.open
 global.window.open = jest.fn();

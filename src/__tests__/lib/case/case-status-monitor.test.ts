@@ -277,11 +277,9 @@ describe('ReminderGenerator - Case Status Deadline', () => {
   describe('generateCaseStatusDeadlineReminders', () => {
     it('应该成功生成案件状态截止日期提醒', async () => {
       await reminderGenerator.generateCaseStatusDeadlineReminders(
-        mockUserId,
         mockCaseId,
-        mockCaseTitle,
         mockDeadline,
-        mockDescription
+        mockCaseTitle
       );
 
       expect(reminderService.createReminders).toHaveBeenCalledTimes(1);
@@ -297,11 +295,9 @@ describe('ReminderGenerator - Case Status Deadline', () => {
       );
 
       await reminderGenerator.generateCaseStatusDeadlineReminders(
-        mockUserId,
         mockCaseId,
-        mockCaseTitle,
         mockDeadline,
-        mockDescription
+        mockCaseTitle
       );
 
       // 验证生成了2个提醒（提前3天和1天）
@@ -315,11 +311,9 @@ describe('ReminderGenerator - Case Status Deadline', () => {
 
       await expect(
         reminderGenerator.generateCaseStatusDeadlineReminders(
-          mockUserId,
           mockCaseId,
-          mockCaseTitle,
           mockDeadline,
-          mockDescription
+          mockCaseTitle
         )
       ).resolves.not.toThrow();
     });

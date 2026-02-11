@@ -15,7 +15,7 @@ import '@testing-library/jest-dom';
 import { LawArticleGraphVisualization } from '@/components/law-article/LawArticleGraphVisualization';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
 // Create chainable mock helper
 function createChainableMock(): Record<string, jest.Mock> {
