@@ -19,6 +19,7 @@
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
@@ -61,15 +62,13 @@ temp-*.txt
 temp_append.txt
 
 # Coverage reports
-coverage-app/
-coverage-components/
-coverage-communications/
-coverage-final/
+coverage-*/
 playwright-report/
 coverage-api-report.txt
 coverage-comm-detail.json
 coverage-detail.txt
 coverage-output-*.txt
+coverage-*.txt
 
 # ESLint reports
 eslint-*.txt
@@ -90,6 +89,7 @@ test-*.md
 # Test results
 test-results/
 test-reports/
+/test-output/
 
 # Other temporary files
 admin-*.txt
@@ -114,5 +114,6 @@ validate-result.json
 .esl
 .nul
 nul
+%APPDATA%/
 DOWNGRADE_TAILWIND.md
 SETUP_COMPLETE.md

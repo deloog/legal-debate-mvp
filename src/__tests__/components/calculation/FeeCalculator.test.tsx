@@ -1,7 +1,11 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import FeeCalculator from '@/components/calculation/FeeCalculator';
-import { FeeType, LitigationCaseType, ExpenseCategory } from '@/types/calculation';
+import {
+  FeeType,
+  LitigationCaseType,
+  ExpenseCategory,
+} from '@/types/calculation';
 
 // Mock子组件以简化测试
 jest.mock('@/components/calculation/FeeCalculatorTabs', () => ({

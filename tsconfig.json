@@ -51,5 +51,5 @@
     "src/__tests__/types/global.d.ts",
     "**/*.d.ts"
   ],
-  "exclude": ["node_modules", ".next", "coverage", "dist"]
+  "exclude": ["node_modules", ".next", "coverage", "dist", "test-output"]
 }

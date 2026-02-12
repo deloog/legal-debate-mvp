@@ -1,19 +1,74 @@
 /**
  * 日志操作模块（Logging Operations）
  * 包含：行动记录、输出验证、错误处理功能
- *
- * 注意：由于 Prisma 生成的 ActionType/ErrorType/Severity 枚举类型与实际使用的枚举值不完全兼容，
- * 在代码中需要使用 `as any` 类型断言来解决类型检查问题。
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import type { PrismaClient } from '@prisma/client';
+import {
+  type PrismaClient,
+  type ActionType,
+  type ActionStatus,
+  type ActionLayer,
+  type ErrorType,
+  type ErrorSeverity,
+  Prisma,
+} from '@prisma/client';
 import type {
   LogActionResult,
   VerifyOutputResult,
   HandleErrorResult,
 } from './types';
+
+/**
+ * 将字符串 actionType 映射到 Prisma ActionType 枚举
+ */
+function mapToActionType(actionType: string): ActionType {
+  const validActionTypes: Record<string, ActionType> = {
+    ANALYZE: 'ANALYZE',
+    RETRIEVE: 'RETRIEVE',
+    GENERATE: 'GENERATE',
+    VERIFY: 'VERIFY',
+    TRANSFORM: 'TRANSFORM',
+    COMMUNICATE: 'COMMUNICATE',
+    MIGRATE_WORKING_TO_HOT: 'MIGRATE_WORKING_TO_HOT',
+    MIGRATE_HOT_TO_COLD: 'MIGRATE_HOT_TO_COLD',
+  };
+
+  const upperCaseType = actionType.toUpperCase();
+  return validActionTypes[upperCaseType] || 'GENERATE'; // 默认使用 GENERATE
+}
+
+/**
+ * 将字符串 status 映射到 Prisma ActionStatus 枚举
+ */
+function mapToActionStatus(
+  status: 'success' | 'failure' | 'partial'
+): ActionStatus {
+  const statusMap: Record<string, ActionStatus> = {
+    success: 'COMPLETED',
+    failure: 'FAILED',
+    partial: 'RUNNING',
+  };
+  return statusMap[status] || 'COMPLETED';
+}
+
+/**
+ * 将错误名称映射到 Prisma ErrorType 枚举
+ */
+function mapToErrorType(errorName: string): ErrorType {
+  const errorTypeMap: Record<string, ErrorType> = {
+    Error: 'UNKNOWN_ERROR',
+    TypeError: 'UNKNOWN_ERROR',
+    ReferenceError: 'UNKNOWN_ERROR',
+    RangeError: 'UNKNOWN_ERROR',
+    SyntaxError: 'UNKNOWN_ERROR',
+    NetworkError: 'NETWORK_ERROR',
+    TimeoutError: 'NETWORK_TIMEOUT',
+    ValidationError: 'VALIDATION_ERROR',
+    AIError: 'AI_SERVICE_ERROR',
+    DatabaseError: 'DATABASE_ERROR',
+  };
+  return errorTypeMap[errorName] || 'UNKNOWN_ERROR';
+}
 
 /**
  * log_action - 行动记录
@@ -32,25 +87,21 @@ export async function log_action(
     metadata?: Record<string, unknown>;
   }
 ): Promise<LogActionResult> {
-  const statusMap: Record<string, 'COMPLETED' | 'FAILED' | 'RUNNING'> = {
-    success: 'COMPLETED',
-    failure: 'FAILED',
-    partial: 'RUNNING',
-  };
-
-  const statusValue = statusMap[params.status] || 'COMPLETED';
+  const actionType = mapToActionType(params.actionType);
+  const status = mapToActionStatus(params.status);
+  const actionLayer: ActionLayer = 'CORE';
 
   const record = await prisma.agentAction.create({
     data: {
-      actionType: params.actionType as any,
+      actionType,
       actionName: params.actionName,
       agentName: params.agentName || 'CoreAction',
-      actionLayer: 'CORE' as any,
-      parameters: (params.input ?? null) as any,
-      result: (params.output ?? null) as any,
-      status: statusValue as any,
+      actionLayer,
+      parameters: (params.input ?? null) as Prisma.JsonValue,
+      result: (params.output ?? null) as Prisma.JsonValue,
+      status,
       executionTime: params.executionTime || 0,
-      metadata: (params.metadata ?? {}) as any,
+      metadata: (params.metadata ?? {}) as Prisma.JsonValue,
     },
   });
 
@@ -155,31 +206,19 @@ export async function handle_error(
     metadata?: Record<string, unknown>;
   }
 ): Promise<HandleErrorResult> {
-  const errorTypeMap: Record<string, string> = {
-    Error: 'UNKNOWN_ERROR',
-    TypeError: 'UNKNOWN_ERROR',
-    ReferenceError: 'UNKNOWN_ERROR',
-    RangeError: 'UNKNOWN_ERROR',
-    SyntaxError: 'UNKNOWN_ERROR',
-    NetworkError: 'NETWORK_ERROR',
-    TimeoutError: 'NETWORK_TIMEOUT',
-    ValidationError: 'VALIDATION_ERROR',
-    AIError: 'AI_SERVICE_ERROR',
-    DatabaseError: 'DATABASE_ERROR',
-  };
-
-  const errorType = errorTypeMap[params.error.name] || 'UNKNOWN_ERROR';
+  const errorType = mapToErrorType(params.error.name);
+  const severity: ErrorSeverity = 'MEDIUM';
 
   const errorLog = await prisma.errorLog.create({
     data: {
-      errorType: errorType as any,
+      errorType,
       errorCode: params.error.name,
       errorMessage: params.error.message,
-      attemptedAction: params.actionName || 'unknown',
-      context: params.context as any,
+      attemptedAction: (params.actionName || 'unknown') as Prisma.JsonValue,
+      context: (params.context ?? {}) as Prisma.JsonValue,
       stackTrace: params.error.stack || '',
-      severity: 'MEDIUM' as any,
-      metadata: params.metadata as any,
+      severity,
+      metadata: (params.metadata ?? {}) as Prisma.JsonValue,
     },
   });
 

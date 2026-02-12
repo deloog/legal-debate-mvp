@@ -263,7 +263,9 @@ class ReminderGenerator {
 
       const advanceDays = config.advanceDays;
 
-      for (const daysBefore of Array.isArray(advanceDays) ? advanceDays : [advanceDays]) {
+      for (const daysBefore of Array.isArray(advanceDays)
+        ? advanceDays
+        : [advanceDays]) {
         const reminderTime = new Date(deadline.getTime());
         reminderTime.setDate(reminderTime.getDate() - daysBefore);
 
@@ -421,7 +423,11 @@ class ReminderGenerator {
         const reminderType = reminder.type as string;
         switch (reminderType) {
           case 'COURT_SCHEDULE':
-            if (reminder.metadata && typeof reminder.metadata === 'object' && 'courtScheduleId' in reminder.metadata) {
+            if (
+              reminder.metadata &&
+              typeof reminder.metadata === 'object' &&
+              'courtScheduleId' in reminder.metadata
+            ) {
               const schedule = await prisma.courtSchedule.findUnique({
                 where: {
                   id: reminder.metadata.courtScheduleId as string,
@@ -431,7 +437,11 @@ class ReminderGenerator {
             }
             break;
           case 'FOLLOW_UP':
-            if (reminder.metadata && typeof reminder.metadata === 'object' && 'taskId' in reminder.metadata) {
+            if (
+              reminder.metadata &&
+              typeof reminder.metadata === 'object' &&
+              'taskId' in reminder.metadata
+            ) {
               const task = await prisma.followUpTask.findUnique({
                 where: {
                   id: reminder.metadata.taskId as string,
@@ -441,7 +451,11 @@ class ReminderGenerator {
             }
             break;
           case 'DEADLINE':
-            if (reminder.metadata && typeof reminder.metadata === 'object' && 'caseId' in reminder.metadata) {
+            if (
+              reminder.metadata &&
+              typeof reminder.metadata === 'object' &&
+              'caseId' in reminder.metadata
+            ) {
               const caseItem = await prisma.case.findUnique({
                 where: {
                   id: reminder.metadata.caseId as string,

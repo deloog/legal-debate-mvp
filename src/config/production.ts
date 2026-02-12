@@ -53,10 +53,15 @@ export function loadConfig(): AppConfig {
  * 加载数据库配置
  */
 function loadDatabaseConfig() {
+  // 根据环境设置不同的默认连接池大小
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const defaultPoolMin = isDevelopment ? 2 : 5;
+  const defaultPoolMax = isDevelopment ? 10 : 50; // 生产环境提高到50
+
   return {
     url: getUrlEnv('DATABASE_URL', ''),
-    poolMin: getNumberEnv('DATABASE_POOL_MIN', 2),
-    poolMax: getNumberEnv('DATABASE_POOL_MAX', 10),
+    poolMin: getNumberEnv('DATABASE_POOL_MIN', defaultPoolMin),
+    poolMax: getNumberEnv('DATABASE_POOL_MAX', defaultPoolMax),
     idleTimeout: getNumberEnv('DATABASE_POOL_IDLE_TIMEOUT', 30000),
     connectTimeout: getNumberEnv('DATABASE_POOL_CONNECT_TIMEOUT', 10000),
   };
@@ -250,11 +255,15 @@ function loadNextjsConfig() {
  * 加载安全配置
  */
 function loadSecurityConfig() {
+  // 根据环境设置不同的默认CORS源
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const defaultCorsOrigins = isDevelopment
+    ? ['http://localhost:3000', 'http://localhost:3001'] // 开发环境
+    : []; // 生产环境必须明确配置，不提供默认值
+
   return {
     cors: {
-      allowedOrigins: getArrayEnv('CORS_ALLOWED_ORIGINS', [
-        'http://localhost:3000',
-      ]),
+      allowedOrigins: getArrayEnv('CORS_ALLOWED_ORIGINS', defaultCorsOrigins),
       allowedMethods: getArrayEnv('CORS_ALLOWED_METHODS', [
         'GET',
         'POST',

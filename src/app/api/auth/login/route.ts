@@ -7,15 +7,16 @@ import { prisma } from '@/lib/db/prisma';
 import { verifyPassword } from '@/lib/auth/password';
 import { validateLoginRequest } from '@/lib/auth/validation';
 import { generateAccessToken, generateRefreshToken } from '@/lib/auth/jwt';
+import { withRateLimit, strictRateLimiter } from '@/lib/middleware/rate-limit';
 import type { AuthResponse, LoginRequest } from '@/types/auth';
 import type { JwtPayload } from '@/types/auth';
 import { AuthErrorCode } from '@/types/auth';
 
 /**
  * POST /api/auth/login
- * 用户登录
+ * 用户登录（应用严格速率限制：每分钟5次）
  */
-export async function POST(request: NextRequest): Promise<NextResponse> {
+async function handleLogin(request: NextRequest): Promise<NextResponse> {
   try {
     // 解析请求体
     const body: LoginRequest = await request.json();
@@ -166,20 +167,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       path: '/',
     });
 
-    // 调试日志：确认Cookie已设置
-    console.log('[Login API] 登录成功，Cookie已设置:', {
-      userId: user.id,
-      email: user.email,
-      hasAccessToken: !!accessToken,
-      hasRefreshToken: !!refreshToken,
-      accessTokenPreview: accessToken.substring(0, 30) + '...',
-      cookieSettings: {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-      },
-    });
+    // 调试日志：确认Cookie已设置（仅开发环境）
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Login API] 登录成功，Cookie已设置:', {
+        userId: user.id,
+        email: user.email,
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+        // 不打印token内容，即使在开发环境
+      });
+    }
 
     return jsonResponse;
   } catch (error) {
@@ -196,6 +193,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(response, { status: 500 });
   }
 }
+
+/**
+ * 导出带速率限制的POST处理器
+ */
+export const POST = withRateLimit(strictRateLimiter, handleLogin);
 
 /**
  * 不支持其他 HTTP 方法

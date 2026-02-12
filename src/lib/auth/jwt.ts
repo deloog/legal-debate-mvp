@@ -4,6 +4,7 @@
 
 import type { JwtPayload, JwtVerifyResult } from '@/types/auth';
 import jwt from 'jsonwebtoken';
+import { logError } from '../utils/safe-logger';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -38,19 +39,20 @@ export function generateToken(payload: JwtPayload, expiresIn?: string): string {
  */
 export function verifyToken(token: string): JwtVerifyResult {
   try {
-    console.log('[verifyToken] 开始验证token:', {
-      tokenPreview: token.substring(0, 30) + '...',
-      secretPreview: JWT_SECRET.substring(0, 10) + '...',
-      secretLength: JWT_SECRET.length,
-    });
+    // 仅在开发环境记录（不包含敏感信息）
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[verifyToken] 开始验证token');
+    }
 
     const decoded = jwt.verify(token, EFFECTIVE_JWT_SECRET) as JwtPayload;
 
-    console.log('[verifyToken] Token验证成功:', {
-      userId: decoded.userId,
-      email: decoded.email,
-      role: decoded.role,
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[verifyToken] Token验证成功:', {
+        userId: decoded.userId,
+        email: decoded.email,
+        role: decoded.role,
+      });
+    }
 
     return {
       valid: true,
@@ -58,11 +60,8 @@ export function verifyToken(token: string): JwtVerifyResult {
       error: null,
     };
   } catch (error) {
-    console.error('[verifyToken] Token验证失败:', {
-      errorType: error instanceof Error ? error.constructor.name : 'Unknown',
-      errorMessage: error instanceof Error ? error.message : 'Unknown error',
-      tokenPreview: token.substring(0, 30) + '...',
-    });
+    // 使用安全日志记录错误
+    logError('[verifyToken] Token验证失败', error);
 
     if (error instanceof jwt.TokenExpiredError) {
       return {

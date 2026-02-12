@@ -10,6 +10,7 @@ import {
   unauthorizedResponse,
 } from '@/lib/api-response';
 import { prisma } from '@/lib/db/prisma';
+import { Prisma } from '@prisma/client';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import {
@@ -225,39 +226,65 @@ async function getActivityData(
   const totalUsers = veryActive + active + inactive + dormant;
 
   // 查询活跃度趋势（按天统计）
-  const trendResults = (await prisma.$queryRawUnsafe<
+  // 构建安全的WHERE条件（防止SQL注入）
+  const trendWhereConditions: Prisma.Sql[] = [
+    Prisma.sql`"users"."lastLoginAt" >= ${startDate.toISOString()}::timestamp`,
+    Prisma.sql`"users"."lastLoginAt" <= ${endDate.toISOString()}::timestamp`,
+  ];
+
+  if (whereClause.role) {
+    trendWhereConditions.push(Prisma.sql`"users"."role" = ${whereClause.role}`);
+  }
+  if (whereClause.status) {
+    trendWhereConditions.push(
+      Prisma.sql`"users"."status" = ${whereClause.status}`
+    );
+  }
+
+  const trendWhereSql = Prisma.join(trendWhereConditions, ' AND ');
+
+  const trendResults = (await prisma.$queryRaw<
     Array<{
       date: string;
       active_users: bigint;
     }>
-  >(
-    `SELECT 
+  >(Prisma.sql`
+    SELECT
       TO_CHAR(DATE_TRUNC('day', "users"."lastLoginAt"), 'YYYY-MM-DD') as date,
       COUNT(DISTINCT "users"."id")::bigint as active_users
     FROM "users"
-    WHERE "users"."lastLoginAt" >= '${startDate.toISOString()}'
-      AND "users"."lastLoginAt" <= '${endDate.toISOString()}'
-      ${whereClause.role ? `AND "users"."role" = '${whereClause.role}'` : ''}
-      ${whereClause.status ? `AND "users"."status" = '${whereClause.status}'` : ''}
+    WHERE ${trendWhereSql}
     GROUP BY TO_CHAR(DATE_TRUNC('day', "users"."lastLoginAt"), 'YYYY-MM-DD')
-    ORDER BY TO_CHAR(DATE_TRUNC('day', "users"."lastLoginAt"), 'YYYY-MM-DD')`
-  )) as Array<{ date: string; active_users: bigint }>;
+    ORDER BY TO_CHAR(DATE_TRUNC('day', "users"."lastLoginAt"), 'YYYY-MM-DD')
+  `)) as Array<{ date: string; active_users: bigint }>;
 
   // 查询每日新增用户
-  const newUsersResults = (await prisma.$queryRawUnsafe<
+  // 构建安全的WHERE条件（防止SQL注入）
+  const newUsersWhereConditions: Prisma.Sql[] = [
+    Prisma.sql`"createdAt" >= ${startDate.toISOString()}::timestamp`,
+    Prisma.sql`"createdAt" <= ${endDate.toISOString()}::timestamp`,
+  ];
+
+  if (whereClause.role) {
+    newUsersWhereConditions.push(Prisma.sql`"role" = ${whereClause.role}`);
+  }
+  if (whereClause.status) {
+    newUsersWhereConditions.push(Prisma.sql`"status" = ${whereClause.status}`);
+  }
+
+  const newUsersWhereSql = Prisma.join(newUsersWhereConditions, ' AND ');
+
+  const newUsersResults = (await prisma.$queryRaw<
     Array<{ date: string; new_users: bigint }>
-  >(
-    `SELECT 
+  >(Prisma.sql`
+    SELECT
       TO_CHAR(DATE_TRUNC('day', "users"."createdAt"), 'YYYY-MM-DD') as date,
       COUNT(*)::bigint as new_users
     FROM "users"
-    WHERE "createdAt" >= '${startDate.toISOString()}'
-      AND "createdAt" <= '${endDate.toISOString()}'
-      ${whereClause.role ? `AND "role" = '${whereClause.role}'` : ''}
-      ${whereClause.status ? `AND "status" = '${whereClause.status}'` : ''}
+    WHERE ${newUsersWhereSql}
     GROUP BY TO_CHAR(DATE_TRUNC('day', "users"."createdAt"), 'YYYY-MM-DD')
-    ORDER BY TO_CHAR(DATE_TRUNC('day', "users"."createdAt"), 'YYYY-MM-DD')`
-  )) as Array<{ date: string; new_users: bigint }>;
+    ORDER BY TO_CHAR(DATE_TRUNC('day', "users"."createdAt"), 'YYYY-MM-DD')
+  `)) as Array<{ date: string; new_users: bigint }>;
 
   // 合并趋势数据
   const trendMap = new Map<

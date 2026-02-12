@@ -1,5 +1,9 @@
 import React from 'react';
-import { FeeCalculationResult, FeeItem, ExpenseCategory } from '@/types/calculation';
+import {
+  FeeCalculationResult,
+  FeeItem,
+  ExpenseCategory,
+} from '@/types/calculation';
 
 interface FeeBreakdownProps {
   result: FeeCalculationResult;

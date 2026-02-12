@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db/prisma';
+import { DB_LIMITS, DATA_RETENTION } from '../constants/common';
 
 /**
  * API性能指标接口
@@ -179,6 +180,13 @@ export class APIMonitor {
   }
 
   /**
+   * 类型守卫：检查对象是否包含 entityType 属性
+   */
+  private static hasEntityType(obj: unknown): obj is { entityType?: string } {
+    return typeof obj === 'object' && obj !== null && 'entityType' in obj;
+  }
+
+  /**
    * 获取API性能统计
    */
   static async getAPIStats(timeRange?: { start: Date; end: Date }): Promise<{
@@ -206,7 +214,7 @@ export class APIMonitor {
         type: 'API_REQUEST',
       },
       orderBy: { createdAt: 'desc' },
-      take: 1000, // 限制查询数量
+      take: DB_LIMITS.LARGE, // 限制查询数量
     });
 
     const totalRequests = interactions.length;
@@ -284,7 +292,7 @@ export class APIMonitor {
         type: 'AI_OPERATION',
       },
       orderBy: { createdAt: 'desc' },
-      take: 1000,
+      take: DB_LIMITS.LARGE,
     });
 
     const totalOperations = interactions.length;
@@ -364,7 +372,7 @@ export class APIMonitor {
         type: 'BUSINESS_EVENT',
       },
       orderBy: { createdAt: 'desc' },
-      take: 1000,
+      take: DB_LIMITS.LARGE,
     });
 
     const totalEvents = interactions.length;
@@ -382,8 +390,10 @@ export class APIMonitor {
     // 统计实体类型
     const entityTypeStats = interactions.reduce(
       (acc, interaction) => {
-        const request = interaction.request as any;
-        const entityType = request?.entityType || 'unknown';
+        const request = interaction.request;
+        const entityType = this.hasEntityType(request)
+          ? request.entityType || 'unknown'
+          : 'unknown';
         acc[entityType] = (acc[entityType] || 0) + 1;
         return acc;
       },
@@ -410,7 +420,9 @@ export class APIMonitor {
   /**
    * 清理旧的监控数据
    */
-  static async cleanupOldData(daysToKeep: number = 30): Promise<void> {
+  static async cleanupOldData(
+    daysToKeep: number = DATA_RETENTION.STANDARD
+  ): Promise<void> {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
@@ -478,13 +490,13 @@ export function createPerformanceTracker(endpoint: string, method: string) {
  */
 export function monitorDatabaseQuery(operation: string, table: string) {
   return function (
-    target: any,
+    target: unknown,
     propertyName: string,
     descriptor: PropertyDescriptor
   ) {
     const method = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       const startTime = Date.now();
       let success = true;
       let error: string | undefined;
@@ -517,6 +529,19 @@ export function monitorDatabaseQuery(operation: string, table: string) {
 }
 
 /**
+ * 类型守卫：检查对象是否包含 tokensUsed 和 cost 属性
+ */
+function hasUsageMetrics(
+  obj: unknown
+): obj is { tokensUsed?: number; cost?: number } {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    ('tokensUsed' in obj || 'cost' in obj)
+  );
+}
+
+/**
  * AI服务调用监控装饰器
  */
 export function monitorAICall(
@@ -525,13 +550,13 @@ export function monitorAICall(
   model?: string
 ) {
   return function (
-    target: any,
+    target: unknown,
     propertyName: string,
     descriptor: PropertyDescriptor
   ) {
     const method = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       const startTime = Date.now();
       let success = true;
       let error: string | undefined;
@@ -542,9 +567,9 @@ export function monitorAICall(
         const result = await method.apply(this, args);
 
         // 尝试从结果中提取token和cost信息
-        if (result && typeof result === 'object') {
-          tokensUsed = (result as any).tokensUsed;
-          cost = (result as any).cost;
+        if (hasUsageMetrics(result)) {
+          tokensUsed = result.tokensUsed;
+          cost = result.cost;
         }
 
         return result;

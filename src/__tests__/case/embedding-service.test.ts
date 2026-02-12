@@ -1,4 +1,4 @@
-// @ts-nocheck - 测试文件中需要使用灵活的 mock 类型
+// @ts-nocheck - Jest mock 类型推断复杂，修复成本高且收益有限
 import {
   describe,
   it,

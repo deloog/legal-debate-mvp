@@ -10,6 +10,7 @@ import {
   unauthorizedResponse,
 } from '@/lib/api-response';
 import { prisma } from '@/lib/db/prisma';
+import { Prisma } from '@prisma/client';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import {
@@ -254,30 +255,34 @@ async function getRegistrationTrend(
   // 使用原生SQL查询按时间段分组统计
   const sqlDateGrouping = getDateGroupingFunction(granularity);
 
-  // 构建WHERE子句
-  const whereConditions = [
-    `"createdAt" >= '${startDate.toISOString()}'`,
-    `"createdAt" <= '${endDate.toISOString()}'`,
+  // 构建安全的WHERE子句（使用参数化查询）
+  const whereConditions: Prisma.Sql[] = [
+    Prisma.sql`"createdAt" >= ${startDate.toISOString()}::timestamp`,
+    Prisma.sql`"createdAt" <= ${endDate.toISOString()}::timestamp`,
   ];
+
   if (whereClause.role) {
-    whereConditions.push(`"role" = '${whereClause.role}'`);
+    whereConditions.push(Prisma.sql`"role" = ${whereClause.role}`);
   }
   if (whereClause.status) {
-    whereConditions.push(`"status" = '${whereClause.status}'`);
+    whereConditions.push(Prisma.sql`"status" = ${whereClause.status}`);
   }
-  const whereSql = whereConditions.join(' AND ');
 
-  const rawResults = (await prisma.$queryRawUnsafe<
+  // 使用 Prisma.join 安全地连接条件
+  const whereSql = Prisma.join(whereConditions, ' AND ');
+
+  // 使用 Prisma.sql 模板标签进行参数化查询（防止SQL注入）
+  const rawResults = (await prisma.$queryRaw<
     Array<{ date: string; count: bigint }>
-  >(
-    `SELECT 
-      ${sqlDateGrouping.dateFormat} as date,
+  >(Prisma.sql`
+    SELECT
+      ${Prisma.raw(sqlDateGrouping.dateFormat)} as date,
       COUNT(*) as count
     FROM "users"
     WHERE ${whereSql}
-    GROUP BY ${sqlDateGrouping.groupBy}
-    ORDER BY ${sqlDateGrouping.groupBy}`
-  )) as Array<{ date: string; count: bigint }>;
+    GROUP BY ${Prisma.raw(sqlDateGrouping.groupBy)}
+    ORDER BY ${Prisma.raw(sqlDateGrouping.groupBy)}
+  `)) as Array<{ date: string; count: bigint }>;
 
   // 确保rawResults是数组
   const resultsArray = Array.isArray(rawResults) ? rawResults : [];

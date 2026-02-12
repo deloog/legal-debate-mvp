@@ -7,6 +7,24 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import { isAdminRole } from '@/lib/middleware/resource-permission';
 import { UserRole } from '@/types/auth';
 import { isValidOwnerType } from '@/types/case';
+import {
+  validateSortBy,
+  validateSortOrder,
+  validatePagination,
+  sanitizeSearchKeyword,
+} from '@/lib/validation/query-params';
+
+/**
+ * 允许的排序字段白名单
+ */
+const ALLOWED_SORT_FIELDS = [
+  'createdAt',
+  'updatedAt',
+  'title',
+  'status',
+  'type',
+  'caseNumber',
+] as const;
 
 /**
  * GET /api/v1/cases
@@ -24,8 +42,23 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
 
   // 处理案件列表查询
   const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get('page') || '1', 10);
-  const limit = parseInt(searchParams.get('limit') || '20', 10);
+
+  // 使用验证工具处理分页和排序参数
+  const pagination = validatePagination({
+    page: searchParams.get('page'),
+    limit: searchParams.get('limit'),
+  });
+
+  const sortBy = validateSortBy(
+    searchParams.get('sortBy'),
+    [...ALLOWED_SORT_FIELDS],
+    'createdAt'
+  );
+
+  const sortOrder = validateSortOrder(searchParams.get('sortOrder'), 'desc');
+
+  const page = pagination.page;
+  const limit = pagination.limit;
   const skip = (page - 1) * limit;
 
   // 筛选条件
@@ -34,11 +67,10 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const status = searchParams.get('status')?.toUpperCase() as CaseStatus | null;
   const ownerType = searchParams.get('ownerType');
   const sharedWithTeam = searchParams.get('sharedWithTeam');
-  const search = searchParams.get('search');
 
-  // 排序
-  const sortBy = searchParams.get('sortBy') || 'createdAt';
-  const sortOrder = searchParams.get('sortOrder') || 'desc';
+  // 清理搜索关键词
+  const rawSearch = searchParams.get('search');
+  const search = rawSearch ? sanitizeSearchKeyword(rawSearch) : null;
 
   // 构建查询条件
   const where: Record<string, unknown> = {
@@ -78,18 +110,10 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     ];
   }
 
-  // 构建排序条件
-  const orderBy: Record<string, 'asc' | 'desc'> = {};
-  if (
-    sortBy === 'createdAt' ||
-    sortBy === 'updatedAt' ||
-    sortBy === 'title' ||
-    sortBy === 'status'
-  ) {
-    orderBy[sortBy] = sortOrder as 'asc' | 'desc';
-  } else {
-    orderBy.createdAt = 'desc';
-  }
+  // 构建排序条件（sortBy已经过白名单验证）
+  const orderBy: Record<string, 'asc' | 'desc'> = {
+    [sortBy]: sortOrder,
+  };
 
   // 查询案件列表
   const [cases, total] = await Promise.all([

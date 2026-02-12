@@ -223,61 +223,11 @@ export const assertions = {
 
 /**
  * 模拟数据生成器
+ * 导入并重新导出工厂函数，保持向后兼容
  */
-export const mockData = {
-  /**
-   * 生成UUID
-   */
-  uuid: () => '123e4567-e89b-12d3-a456-426614174000',
+import { mockData as factoryMockData } from '../factories';
 
-  /**
-   * 生成案件数据
-   */
-  case: (overrides: Partial<any> = {}) => ({
-    id: mockData.uuid(),
-    title: '测试案件',
-    description: '这是一个测试案件',
-    type: 'civil',
-    status: 'draft',
-    ownerType: 'user',
-    sharedWithTeam: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    ...overrides,
-  }),
-
-  /**
-   * 生成用户数据
-   */
-  user: (overrides: Partial<any> = {}) => ({
-    id: mockData.uuid(),
-    email: 'test@example.com',
-    username: 'testuser',
-    role: 'lawyer',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    ...overrides,
-  }),
-
-  /**
-   * 生成辩论数据
-   */
-  debate: (overrides: Partial<any> = {}) => ({
-    id: mockData.uuid(),
-    title: '测试辩论',
-    caseId: mockData.uuid(),
-    status: 'active',
-    config: {
-      maxRounds: 3,
-      timePerRound: 30,
-      allowNewEvidence: true,
-      debateMode: 'standard',
-    },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    ...overrides,
-  }),
-};
+export const mockData = factoryMockData;
 
 /**
  * 环境变量模拟

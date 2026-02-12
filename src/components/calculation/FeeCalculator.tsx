@@ -16,7 +16,9 @@ import { TravelExpenseForm } from './TravelExpenseForm';
 import FeeBreakdown from './FeeBreakdown';
 
 export default function FeeCalculator() {
-  const [activeTab, setActiveTab] = useState<ExpenseCategory>(ExpenseCategory.LAWYER_FEE);
+  const [activeTab, setActiveTab] = useState<ExpenseCategory>(
+    ExpenseCategory.LAWYER_FEE
+  );
   const [result, setResult] = useState<FeeCalculationResult | null>(null);
   const [loading, setLoading] = useState(false);
 

@@ -1,10 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  NotificationChannel,
-  ReminderPreferences,
-} from '@/types/notification';
+import { NotificationChannel, ReminderPreferences } from '@/types/notification';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
@@ -186,9 +183,7 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
       const currentSection = prev[sectionKey];
 
       if ('hoursBefore' in currentSection) {
-        const config = currentSection as unknown as
-          | any
-          | any;
+        const config = currentSection as unknown as any | any;
         return {
           ...prev,
           [section]: {
@@ -219,9 +214,7 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
       const currentSection = prev[sectionKey];
 
       if ('hoursBefore' in currentSection) {
-        const config = currentSection as unknown as
-          | any
-          | any;
+        const config = currentSection as unknown as any | any;
         const newHours = [...config.hoursBefore];
         newHours.splice(index, 1);
         return {
@@ -250,9 +243,7 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
   const getHoursBefore = (section: keyof ReminderPreferences): number[] => {
     const currentSection = preferences[section];
     if ('hoursBefore' in currentSection) {
-      const config = currentSection as unknown as
-        | any
-        | any;
+      const config = currentSection as unknown as any | any;
       return config.hoursBefore;
     }
     return [];

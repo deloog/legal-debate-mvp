@@ -274,7 +274,8 @@ export async function getUsageStats(
 
     return {
       // 基础字段（兼容旧接口）
-      used: stats.casesCreated + stats.debatesGenerated + stats.documentsAnalyzed,
+      used:
+        stats.casesCreated + stats.debatesGenerated + stats.documentsAnalyzed,
       limit: limits.MAX_CASES ?? 0,
       resetAt: end,
       // 扩展字段

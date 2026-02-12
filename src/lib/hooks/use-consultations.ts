@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { ConsultationType, ConsultStatus } from '@/types/consultation';
+import { CONSULTATION_API, buildUrl } from '@/lib/constants/api-paths';
 
 /**
  * 咨询筛选参数接口
@@ -124,7 +125,9 @@ export function useConsultations(
       }
 
       // 调用API
-      const response = await fetch(`/api/consultations?${params.toString()}`);
+      const response = await fetch(
+        buildUrl(CONSULTATION_API.LIST, Object.fromEntries(params.entries()))
+      );
       const data = await response.json();
 
       if (data.success) {

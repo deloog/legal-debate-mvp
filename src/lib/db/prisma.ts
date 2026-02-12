@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { logError } from '../utils/safe-logger';
 
 // 全局变量，用于存储Prisma客户端实例
 declare global {
@@ -34,7 +35,8 @@ export const checkDatabaseConnection = async (): Promise<boolean> => {
     await prisma.$queryRaw`SELECT 1`;
     return true;
   } catch (error) {
-    console.error('数据库连接检查失败:', error);
+    // 使用安全日志函数，避免泄露敏感的数据库连接信息
+    logError('数据库连接检查失败', error);
     return false;
   }
 };
@@ -45,7 +47,8 @@ export const disconnectDatabase = async (): Promise<void> => {
     await prisma.$disconnect();
     console.log('数据库连接已断开');
   } catch (error) {
-    console.error('断开数据库连接时出错:', error);
+    // 使用安全日志函数，避免泄露敏感的数据库连接信息
+    logError('断开数据库连接时出错', error);
     throw error;
   }
 };
@@ -72,7 +75,8 @@ export const getConnectionInfo = async () => {
       WHERE state = 'active'`;
     return result[0];
   } catch (error) {
-    console.error('获取连接信息失败:', error);
+    // 使用安全日志函数，避免泄露敏感的数据库连接信息
+    logError('获取连接信息失败', error);
     return null;
   }
 };

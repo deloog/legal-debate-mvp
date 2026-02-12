@@ -101,10 +101,7 @@ class NotificationService {
     }
 
     // 如果所有渠道都失败，返回失败
-    if (
-      !results.success &&
-      (results.errors?.length || 0) === channels.length
-    ) {
+    if (!results.success && (results.errors?.length || 0) === channels.length) {
       return results;
     }
 

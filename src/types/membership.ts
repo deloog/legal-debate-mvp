@@ -6,7 +6,13 @@
 /**
  * 会员状态
  */
-export type MembershipStatus = 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'PAUSED' | 'SUSPENDED' | 'PENDING';
+export type MembershipStatus =
+  | 'ACTIVE'
+  | 'EXPIRED'
+  | 'CANCELLED'
+  | 'PAUSED'
+  | 'SUSPENDED'
+  | 'PENDING';
 
 /**
  * 会员状态常量（运行时可用）

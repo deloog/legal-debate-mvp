@@ -1,4 +1,3 @@
-// @ts-nocheck - 测试文件存在Next.js API params类型问题，不影响生产代码质量
 /**
  * 订单详情API测试
  * GET /api/orders/[id] - 获取订单详情
@@ -29,7 +28,9 @@ describe('GET /api/orders/[id]', () => {
         'http://localhost:3000/api/orders/test-id'
       );
 
-      const response = await GET(request, { params: { id: 'test-id' } });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'test-id' }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(401);
@@ -54,7 +55,9 @@ describe('GET /api/orders/[id]', () => {
         'http://localhost:3000/api/orders/test-id'
       );
 
-      const response = await GET(request, { params: { id: '' } });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: '' }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(400);
@@ -96,7 +99,9 @@ describe('GET /api/orders/[id]', () => {
         'http://localhost:3000/api/orders/test-id'
       );
 
-      const response = await GET(request, { params: { id: mockOrder.id } });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockOrder.id }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(200);
@@ -113,7 +118,9 @@ describe('GET /api/orders/[id]', () => {
         'http://localhost:3000/api/orders/test-id'
       );
 
-      const response = await GET(request, { params: { id: mockData.uuid() } });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockData.uuid() }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(404);
@@ -133,7 +140,9 @@ describe('GET /api/orders/[id]', () => {
         'http://localhost:3000/api/orders/test-id'
       );
 
-      const response = await GET(request, { params: { id: otherOrder.id } });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: otherOrder.id }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(403);
@@ -159,7 +168,9 @@ describe('GET /api/orders/[id]', () => {
         'http://localhost:3000/api/orders/test-id'
       );
 
-      const response = await GET(request, { params: { id: mockData.uuid() } });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockData.uuid() }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(500);
@@ -182,7 +193,9 @@ describe('PUT /api/orders/[id]', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: 'test-id' } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: 'test-id' }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(401);
@@ -211,7 +224,9 @@ describe('PUT /api/orders/[id]', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: '' } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: '' }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(400);
@@ -227,7 +242,9 @@ describe('PUT /api/orders/[id]', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: mockData.uuid() } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: mockData.uuid() }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(400);
@@ -271,7 +288,9 @@ describe('PUT /api/orders/[id]', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: mockOrder.id } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: mockOrder.id }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(200);
@@ -293,7 +312,9 @@ describe('PUT /api/orders/[id]', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: mockData.uuid() } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: mockData.uuid() }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(404);
@@ -317,7 +338,9 @@ describe('PUT /api/orders/[id]', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: otherOrder.id } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: otherOrder.id }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(403);
@@ -352,7 +375,9 @@ describe('PUT /api/orders/[id]', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: mockData.uuid() } });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: mockData.uuid() }),
+      });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(500);

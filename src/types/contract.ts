@@ -50,7 +50,11 @@ export const FeeType = FeeTypeValues;
 /**
  * 合同付款状态（匹配 Prisma Schema）
  */
-export type ContractPaymentStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
+export type ContractPaymentStatus =
+  | 'PENDING'
+  | 'PAID'
+  | 'OVERDUE'
+  | 'CANCELLED';
 
 /**
  * 合同付款状态常量（运行时可用）

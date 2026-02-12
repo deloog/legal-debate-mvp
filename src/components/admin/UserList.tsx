@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { ADMIN_API, buildUrl } from '@/lib/constants/api-paths';
 
 interface User {
   id: string;
@@ -79,7 +80,9 @@ export function UserList(): React.ReactElement {
         ...(filters.search && { search: filters.search }),
       });
 
-      const response = await fetch(`/api/admin/users?${params}`);
+      const response = await fetch(
+        buildUrl(ADMIN_API.USERS.LIST, Object.fromEntries(params.entries()))
+      );
       if (!response.ok) {
         throw new Error('获取用户列表失败');
       }
@@ -114,7 +117,7 @@ export function UserList(): React.ReactElement {
     }
 
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await fetch(ADMIN_API.USERS.delete(userId), {
         method: 'DELETE',
       });
 

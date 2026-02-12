@@ -128,15 +128,21 @@ class DevEmailService {
     console.log('\n' + '='.repeat(60));
     console.log('📧 邮件发送（开发环境）');
     console.log('='.repeat(60));
-    const toStr = Array.isArray(options.to) ? options.to.join(', ') : options.to;
+    const toStr = Array.isArray(options.to)
+      ? options.to.join(', ')
+      : options.to;
     console.log(`收件人: ${toStr}`);
     console.log(`主题: ${options.subject}`);
     if (options.cc) {
-      const ccStr = Array.isArray(options.cc) ? options.cc.join(', ') : options.cc;
+      const ccStr = Array.isArray(options.cc)
+        ? options.cc.join(', ')
+        : options.cc;
       console.log(`抄送: ${ccStr}`);
     }
     if (options.bcc) {
-      const bccStr = Array.isArray(options.bcc) ? options.bcc.join(', ') : options.bcc;
+      const bccStr = Array.isArray(options.bcc)
+        ? options.bcc.join(', ')
+        : options.bcc;
       console.log(`密送: ${bccStr}`);
     }
     console.log('-'.repeat(60));

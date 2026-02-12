@@ -15,15 +15,13 @@ export const DEFAULT_LAWSTAR_CONFIG: LawStarClientConfig = {
     baseURL:
       process.env.LAWSTAR_REGULATION_BASE_URL || 'https://api.law-star.com',
     appId: process.env.LAWSTAR_REGULATION_APP_ID || '',
-    appSecret:
-      process.env.LAWSTAR_REGULATION_APP_SECRET || '',
+    appSecret: process.env.LAWSTAR_REGULATION_APP_SECRET || '',
     timeout: 30000,
   },
   vector: {
     baseURL: process.env.LAWSTAR_VECTOR_BASE_URL || 'https://api.law-star.com',
     appId: process.env.LAWSTAR_VECTOR_APP_ID || '',
-    appSecret:
-      process.env.LAWSTAR_VECTOR_APP_SECRET || '',
+    appSecret: process.env.LAWSTAR_VECTOR_APP_SECRET || '',
     timeout: 30000,
   },
   cache: {

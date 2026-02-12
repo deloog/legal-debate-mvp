@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { CaseWithMetadata } from '@/types/case';
+import { CASE_API, buildUrl } from '@/lib/constants/api-paths';
 
 /**
  * 案件筛选参数接口
@@ -76,7 +77,9 @@ export function useCases(filters: CaseFilters, searchQuery: string) {
       }
 
       // 调用API
-      const response = await fetch(`/api/v1/cases?${params.toString()}`);
+      const response = await fetch(
+        buildUrl(CASE_API.LIST, Object.fromEntries(params.entries()))
+      );
       const data = await response.json();
 
       if (data.success) {

@@ -44,6 +44,10 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
+# 安装curl用于健康检查
+USER root
+RUN apk add --no-cache curl
+
 # 设置权限
 RUN chown -R nextjs:nodejs /app
 
@@ -54,4 +58,15 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+# 健康检查配置
+# --interval=30s: 每30秒检查一次
+# --timeout=10s: 超时时间10秒
+# --start-period=40s: 启动期40秒（容器启动时不计入失败次数）
+# --retries=3: 连续失败3次则标记为unhealthy
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
+
+# 启动应用
+# 使用 --max-old-space-size 限制内存使用
+# 使用 SIGTERM 实现优雅关闭
+CMD ["node", "--max-old-space-size=2048", "server.js"]

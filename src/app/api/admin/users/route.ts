@@ -11,12 +11,31 @@ import {
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
+import {
+  validateSortBy,
+  validateSortOrder,
+  validatePagination,
+  sanitizeSearchKeyword,
+} from '@/lib/validation/query-params';
 import type { UserListQueryParams, UserListResponse } from '@/types/admin-user';
 import { NextRequest, NextResponse } from 'next/server';
 
 // =============================================================================
 // 辅助函数
 // =============================================================================
+
+/**
+ * 允许的排序字段白名单
+ */
+const ALLOWED_SORT_FIELDS = [
+  'createdAt',
+  'lastLoginAt',
+  'email',
+  'username',
+  'name',
+  'role',
+  'status',
+] as const;
 
 /**
  * 验证角色枚举值
@@ -39,16 +58,34 @@ function isValidStatus(status: string): boolean {
  */
 function parseQueryParams(request: NextRequest): UserListQueryParams {
   const url = new URL(request.url);
+  const searchParams = url.searchParams;
+
+  // 使用验证工具处理分页和排序参数
+  const pagination = validatePagination({
+    page: searchParams.get('page'),
+    pageSize: searchParams.get('pageSize') ?? searchParams.get('limit'),
+  });
+
+  const sortBy = validateSortBy(
+    searchParams.get('sortBy'),
+    [...ALLOWED_SORT_FIELDS],
+    'createdAt'
+  );
+
+  const sortOrder = validateSortOrder(searchParams.get('sortOrder'), 'desc');
+
+  // 清理搜索关键词
+  const rawSearch = searchParams.get('search') ?? searchParams.get('keyword');
+  const search = rawSearch ? sanitizeSearchKeyword(rawSearch) : undefined;
+
   return {
-    page: url.searchParams.get('page') ?? '1',
-    pageSize:
-      url.searchParams.get('pageSize') ?? url.searchParams.get('limit') ?? '20',
-    role: url.searchParams.get('role') ?? undefined,
-    status: url.searchParams.get('status') ?? undefined,
-    search:
-      url.searchParams.get('search') ??
-      url.searchParams.get('keyword') ??
-      undefined,
+    page: pagination.page.toString(),
+    pageSize: pagination.limit.toString(),
+    sortBy,
+    sortOrder,
+    role: searchParams.get('role') ?? undefined,
+    status: searchParams.get('status') ?? undefined,
+    search,
   };
 }
 
@@ -99,13 +136,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    // 解析查询参数
+    // 解析查询参数（已包含验证和清理）
     const params = parseQueryParams(request);
-    const page = Math.max(1, Number.parseInt(params.page, 10));
-    const pageSize = Math.min(
-      100,
-      Math.max(1, Number.parseInt(params.pageSize, 10))
-    );
+    const page = Number.parseInt(params.page, 10);
+    const pageSize = Number.parseInt(params.pageSize, 10);
+    const { sortBy, sortOrder } = params;
     const skip = (page - 1) * pageSize;
 
     // 构建查询条件
@@ -130,7 +165,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         lastLoginAt: true,
       },
       orderBy: {
-        createdAt: 'desc',
+        [sortBy]: sortOrder,
       },
     });
 

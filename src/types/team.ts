@@ -7,10 +7,7 @@
  * 团队类型
  * 注意：这个类型必须与 Prisma schema 中的 TeamType 枚举保持一致
  */
-export type TeamType =
-  | 'LAW_FIRM'
-  | 'LEGAL_DEPT'
-  | 'OTHER';
+export type TeamType = 'LAW_FIRM' | 'LEGAL_DEPT' | 'OTHER';
 
 /**
  * 团队类型常量（运行时可用）
@@ -65,11 +62,7 @@ export const TeamStatus = TeamStatusValues;
  * 团队成员角色
  * 注意：这个类型必须与 Prisma schema 中的 TeamRole 枚举保持一致
  */
-export type TeamRole =
-  | 'ADMIN'
-  | 'LAWYER'
-  | 'PARALEGAL'
-  | 'OTHER';
+export type TeamRole = 'ADMIN' | 'LAWYER' | 'PARALEGAL' | 'OTHER';
 
 /**
  * 团队成员角色常量（运行时可用）

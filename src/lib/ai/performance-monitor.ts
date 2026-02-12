@@ -5,6 +5,7 @@
  */
 
 import * as crypto from 'crypto';
+import { MONITORING, PERFORMANCE } from '../constants/common';
 
 // =============================================================================
 // 性能指标类型定义
@@ -69,15 +70,23 @@ export interface PerformanceAlert {
 // 性能监控器
 // =============================================================================
 
+interface PendingRequest {
+  provider: string;
+  model: string;
+  operation: string;
+  startTime: number;
+}
+
 export class PerformanceMonitor {
   private metrics: PerformanceMetric[] = [];
   private alerts: PerformanceAlert[] = [];
-  private maxMetrics: number = 10000; // 最多保留10000条记录
+  private maxMetrics: number = MONITORING.MAX_METRICS;
+  private pendingRequests: Map<string, PendingRequest> = new Map();
   private alertThresholds = {
-    responseTime: 8000, // 8秒
-    errorRate: 0.1, // 10%
-    cacheHitRate: 0.3, // 30%
-    tokenEfficiency: 0.5, // tokens/second
+    responseTime: PERFORMANCE.RESPONSE_TIME_ERROR,
+    errorRate: PERFORMANCE.ERROR_RATE_THRESHOLD,
+    cacheHitRate: PERFORMANCE.CACHE_HIT_RATE_THRESHOLD,
+    tokenEfficiency: PERFORMANCE.TOKEN_EFFICIENCY_THRESHOLD,
   };
 
   constructor(maxMetrics?: number) {
@@ -129,8 +138,7 @@ export class PerformanceMonitor {
     const requestId = this.generateRequestId();
 
     // 记录开始时间到临时存储
-    (this as any).pendingRequests = (this as any).pendingRequests || new Map();
-    (this as any).pendingRequests.set(requestId, {
+    this.pendingRequests.set(requestId, {
       provider,
       model,
       operation,
@@ -150,9 +158,7 @@ export class PerformanceMonitor {
     cached: boolean = false,
     errorType?: string
   ): void {
-    const pendingRequests =
-      ((this as any).pendingRequests as Map<string, any>) || new Map();
-    const pending = pendingRequests.get(requestId);
+    const pending = this.pendingRequests.get(requestId);
 
     if (!pending) {
       console.warn(`No pending request found for ID: ${requestId}`);
@@ -175,7 +181,7 @@ export class PerformanceMonitor {
     };
 
     this.metrics.push(metric);
-    pendingRequests.delete(requestId);
+    this.pendingRequests.delete(requestId);
 
     // 检查告警
     this.checkAlerts(metric);
@@ -234,8 +240,8 @@ export class PerformanceMonitor {
     this.alerts.push(...alerts);
 
     // 限制告警数量
-    if (this.alerts.length > 1000) {
-      this.alerts = this.alerts.slice(-1000);
+    if (this.alerts.length > MONITORING.MAX_ALERTS) {
+      this.alerts = this.alerts.slice(-MONITORING.MAX_ALERTS);
     }
   }
 
@@ -576,7 +582,7 @@ ${
   public reset(): void {
     this.metrics = [];
     this.alerts = [];
-    (this as any).pendingRequests?.clear();
+    this.pendingRequests.clear();
     console.log('Performance monitor reset');
   }
 }

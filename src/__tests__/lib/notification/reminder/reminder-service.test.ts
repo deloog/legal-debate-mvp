@@ -419,7 +419,6 @@ describe('ReminderGenerator', () => {
       expect(mockCreate).toHaveBeenCalledTimes(3);
     });
   });
-
 });
 
 describe('ReminderSender', () => {

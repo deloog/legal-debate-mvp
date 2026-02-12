@@ -4,18 +4,38 @@
  */
 
 import { prisma } from '@/lib/db';
-import { ApprovalStatus, StepStatus } from '@prisma/client';
+import { ApprovalStatus, StepStatus, Prisma } from '@prisma/client';
+
+export type ApproverStep = {
+  stepNumber: number;
+  approverRole: string;
+  approverId?: string;
+  approverName?: string;
+};
 
 export interface StartApprovalInput {
   contractId: string;
   templateId?: string;
   createdBy: string;
-  approvers?: Array<{
-    stepNumber: number;
-    approverRole: string;
-    approverId?: string;
-    approverName?: string;
-  }>;
+  approvers?: ApproverStep[];
+}
+
+/**
+ * 类型守卫：检查 Json 值是否为有效的审批步骤数组
+ */
+function isApproverStepsArray(
+  value: Prisma.JsonValue
+): value is ApproverStep[] {
+  if (!Array.isArray(value)) return false;
+  return value.every(
+    item =>
+      typeof item === 'object' &&
+      item !== null &&
+      'stepNumber' in item &&
+      'approverRole' in item &&
+      typeof item.stepNumber === 'number' &&
+      typeof item.approverRole === 'string'
+  );
 }
 
 export interface SubmitApprovalInput {
@@ -91,7 +111,11 @@ export class ContractApprovalService {
       });
 
       if (template && template.steps) {
-        approvalSteps = template.steps as any;
+        if (isApproverStepsArray(template.steps)) {
+          approvalSteps = template.steps;
+        } else {
+          throw new Error('审批模板步骤格式不正确');
+        }
       }
     }
 
@@ -256,7 +280,7 @@ export class ContractApprovalService {
       },
     });
 
-    return approvals as any;
+    return approvals as unknown as ApprovalInfo[];
   }
 
   /**
@@ -283,7 +307,7 @@ export class ContractApprovalService {
       },
     });
 
-    return approval as any;
+    return approval as unknown as ApprovalInfo | null;
   }
 
   /**
@@ -309,7 +333,7 @@ export class ContractApprovalService {
       },
     });
 
-    return approvals as any;
+    return approvals as unknown as ApprovalInfo[];
   }
 
   /**

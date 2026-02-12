@@ -11,6 +11,11 @@ import {
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
+import {
+  validateSortBy,
+  validateSortOrder,
+  validatePagination,
+} from '@/lib/validation/query-params';
 import type {
   OrderListQueryParams,
   OrderListResponse,
@@ -47,26 +52,54 @@ function isValidPaymentMethod(method: string): method is PaymentMethod {
 }
 
 /**
+ * 允许的排序字段白名单
+ */
+const ALLOWED_SORT_FIELDS = [
+  'createdAt',
+  'updatedAt',
+  'amount',
+  'status',
+  'paymentMethod',
+  'orderNo',
+  'expiredAt',
+  'paidAt',
+] as const;
+
+/**
  * 解析查询参数
  */
 function parseQueryParams(request: NextRequest): OrderListQueryParams {
   const url = new URL(request.url);
+  const searchParams = url.searchParams;
+
+  // 验证分页参数
+  const pagination = validatePagination({
+    page: searchParams.get('page'),
+    limit: searchParams.get('limit'),
+    pageSize: searchParams.get('pageSize'),
+  });
+
+  // 验证排序参数
+  const sortBy = validateSortBy(
+    searchParams.get('sortBy'),
+    [...ALLOWED_SORT_FIELDS],
+    'createdAt'
+  );
+  const sortOrder = validateSortOrder(searchParams.get('sortOrder'), 'desc');
+
   return {
-    page: url.searchParams.get('page') ?? '1',
-    pageSize:
-      url.searchParams.get('pageSize') ?? url.searchParams.get('limit') ?? '20',
-    status: url.searchParams.get('status') ?? undefined,
-    paymentMethod: url.searchParams.get('paymentMethod') ?? undefined,
-    userId: url.searchParams.get('userId') ?? undefined,
-    membershipTierId: url.searchParams.get('membershipTierId') ?? undefined,
-    startDate: url.searchParams.get('startDate') ?? undefined,
-    endDate: url.searchParams.get('endDate') ?? undefined,
+    page: pagination.page.toString(),
+    pageSize: pagination.limit.toString(),
+    status: searchParams.get('status') ?? undefined,
+    paymentMethod: searchParams.get('paymentMethod') ?? undefined,
+    userId: searchParams.get('userId') ?? undefined,
+    membershipTierId: searchParams.get('membershipTierId') ?? undefined,
+    startDate: searchParams.get('startDate') ?? undefined,
+    endDate: searchParams.get('endDate') ?? undefined,
     search:
-      url.searchParams.get('search') ??
-      url.searchParams.get('keyword') ??
-      undefined,
-    sortBy: url.searchParams.get('sortBy') ?? 'createdAt',
-    sortOrder: url.searchParams.get('sortOrder') ?? 'desc',
+      searchParams.get('search') ?? searchParams.get('keyword') ?? undefined,
+    sortBy,
+    sortOrder,
   };
 }
 

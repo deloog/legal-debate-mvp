@@ -45,12 +45,12 @@ export function middleware(request: NextRequest) {
     request.cookies.get('accessToken')?.value ||
     request.headers.get('authorization')?.replace('Bearer ', '');
 
-  // 调试日志：查看请求中的token
-  if (pathname === '/api/auth/me') {
+  // 调试日志：仅在开发环境记录
+  if (process.env.NODE_ENV === 'development' && pathname === '/api/auth/me') {
     console.log('[Middleware] /api/auth/me 请求:', {
       hasCookie: !!request.cookies.get('accessToken')?.value,
       hasAuthHeader: !!request.headers.get('authorization'),
-      tokenValue: accessToken ? `${accessToken.substring(0, 20)}...` : 'none',
+      // 生产环境禁止打印token，即使是部分
       allCookies: request.cookies.getAll().map(c => c.name),
     });
   }

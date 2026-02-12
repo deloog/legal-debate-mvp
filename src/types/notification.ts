@@ -86,7 +86,13 @@ export const ReminderType = ReminderTypeValues;
 /**
  * 提醒状态
  */
-export type ReminderStatus = 'PENDING' | 'SENT' | 'CANCELLED' | 'FAILED' | 'READ' | 'DISMISSED';
+export type ReminderStatus =
+  | 'PENDING'
+  | 'SENT'
+  | 'CANCELLED'
+  | 'FAILED'
+  | 'READ'
+  | 'DISMISSED';
 
 /**
  * 提醒状态常量（运行时可用）

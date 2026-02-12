@@ -1,160 +1,154 @@
 # 📚 项目文档导航
 
-> 本文档提供项目所有文档的分类导航和快速查找索引
+> 法律辩论 MVP 项目文档中心 - 清晰组织，易于查找
+
+**最后更新**: 2026-02-12
+**文档总数**: 273 个（已重组完成）
+**根目录文件**: 1 个（仅此 README）✨
 
 ---
 
-## 🗂️ 文档分类
+## 🗂️ 文档目录结构
 
-### 🏗️ 架构设计 (architecture/)
-
-系统架构相关的设计文档
-
-- **[数据库模型](architecture/database/DATABASE_MODEL_V2.md)** - 数据库模型设计 V2
-- **[数据库设置](architecture/database/DATABASE_SETUP.md)** - 数据库配置和初始化指南
-
----
-
-### 🧪 测试文档 (testing/)
-
-所有测试相关的报告和文档
-
-#### E2E 测试 (testing/e2e/)
-
-- [E2E 详细诊断报告](testing/e2e/E2E_DETAILED_DIAGNOSIS_REPORT.md)
-- [E2E 诊断报告](testing/e2e/E2E_DIAGNOSIS_REPORT.md)
-- [E2E 测试修复和发现](testing/e2e/E2E_TEST_FIXES_AND_DISCOVERIES.md)
-- [E2E 测试改进计划](testing/e2e/E2E_TEST_IMPROVEMENT_PLAN.md)
-- [E2E 测试报告 20251231](testing/e2e/E2E_TEST_REPORT_20251231.md)
-- [E2E 测试报告](testing/e2e/E2E_TEST_REPORT.md)
-- [E2E 测试结果 20241231](testing/e2e/E2E_TEST_RESULTS_20241231.md)
-- [E2E 测试验证报告](testing/e2e/E2E_TEST_VERIFICATION_REPORT.md)
-
-#### 单元测试 (testing/unit/)
-
-- [中间件测试报告](testing/unit/MIDDLEWARE_TEST_REPORT.md)
-- [流测试修复报告](testing/unit/STREAM_TEST_FIX_REPORT.md)
-- [时间线提取器修复报告](testing/unit/TIMELINE_EXTRACTOR_FIX_REPORT.md)
-
-#### 测试覆盖率 (testing/coverage/)
-
-- [测试覆盖率最终报告](testing/coverage/TEST_COVERAGE_FINAL_REPORT.md)
-- [测试覆盖率指南](testing/coverage/TEST_COVERAGE_GUIDE.md)
-- [测试覆盖率优化报告](testing/coverage/TEST_COVERAGE_OPTIMIZATION_REPORT.md)
+```
+docs/
+├── 📖 guides/              # 操作指南（永久参考）
+├── 🎯 features/            # 功能专题文档
+├── 💻 development/         # 开发文档
+├── 🔧 operations/          # 运维文档
+├── 📊 reports/             # 报告存档（按月）
+├── 📦 archive/             # 历史归档
+└── 📋 project-management/  # 项目管理
+```
 
 ---
 
-### ⚡ 性能优化 (optimization/)
+## 📖 操作指南 (guides/)
 
-性能优化相关的报告和结果
+日常开发和运维的参考手册
 
-#### 后端优化 (optimization/backend/)
+### 开发指南 (development/)
+- [AI 助手使用指南](guides/development/ai-assistant-guide.md) - AI 辅助开发最佳实践
+- [API 开发指南](guides/development/api-development.md) - API 设计和实现规范
+- [测试指南](guides/development/testing-guide.md) - 测试策略和最佳实践
+- [AI 行为规则](guides/development/ai-behavior-rules.md) - AI 行为规范
+- [AI 类型安全](guides/development/ai-type-safety.md) - AI 代码类型安全指南
 
-- [后端性能优化报告](optimization/backend/BACKEND_PERFORMANCE_OPTIMIZATION_REPORT.md)
-- [响应时间分析](optimization/backend/RESPONSE_TIME_ANALYSIS.md)
+### 部署指南 (deployment/)
+- [服务器部署](guides/deployment/server-deployment.md) - 服务器部署快速指南
+- [数据迁移](guides/deployment/data-migration.md) - 数据迁移部署指南
 
-#### 前端优化 (optimization/frontend/)
+### 运维指南 (operations/)
+- [数据库优化](guides/operations/database-optimization.md) - 数据库性能优化
+- [数据库查询优化](guides/operations/database-query-optimization.md) - 查询性能优化
+- [备份策略](guides/operations/backup-strategy.md) - 数据备份和恢复
+- [迁移指南](guides/operations/migration-guide.md) - 系统迁移指南
 
-- [前端性能优化报告](optimization/frontend/FRONTEND_PERFORMANCE_OPTIMIZATION_REPORT.md)
-
-#### AI 优化 (optimization/ai/)
-
-- [DeepSeek 优化报告](optimization/ai/DEEPSEEK_OPTIMIZATION_REPORT.md)
-- [Kimi 优化最终结果](optimization/ai/KIMI_OPTIMIZATION_FINAL_RESULTS.md)
-- [Kimi 优化结果](optimization/ai/KIMI_OPTIMIZATION_RESULTS.md)
-- [Kimi 建议分析](optimization/ai/KIMI_SUGGESTIONS_ANALYSIS.md)
-- [法定代表人过滤器评估](optimization/ai/LEGAL_REPRESENTATIVE_FILTER_EVALUATION.md)
-
----
-
-### 📋 任务追踪 (task-tracking/)
-
-任务追踪和进度管理文档
-
-- **[AI 任务追踪](task-tracking/AI_TASK_TRACKING.md)** ⭐ - 主要任务追踪文件
-- **[Manus 集成指南](task-tracking/MANUS_INTEGRATION_GUIDE.md)** - Manus智能体架构集成指南
-- **[Agent 架构 v2.0](task-tracking/AGENT_ARCHITECTURE_V2.md)** - Agent系统架构设计（基于Manus理念）
-- [实施待办清单](task-tracking/IMPLEMENTATION_TODO.md)
-- [Phase 2 实施文档](task-tracking/PHASE2_IMPLEMENTATION.md)
-- [任务归档索引](task-tracking/TASK_ARCHIVE_INDEX.md)
+### 用户手册 (user/)
+- [数据导入](guides/user/data-import.md) - 数据导入用户指南
+- [版本管理](guides/user/version-management.md) - 版本管理快速指南
+- [法律数据下载](guides/user/just-laws-download.md) - Just Laws 下载指南
+- [真实法律数据](guides/user/real-legal-data.md) - 真实法律数据使用指南
 
 ---
 
-### 💼 业务需求 (business/)
+## 🎯 功能专题 (features/)
 
-业务需求和产品文档
+各功能模块的详细文档
 
-- [业务需求文档](business/BUSINESS_REQUIREMENTS.md)
+### 📄 文档分析器 (docanalyzer/)
+- [重构计划](features/docanalyzer/DOC_ANALYZER_REFACTORING_PLAN.md)
+- [安全修复报告](features/docanalyzer/DOC_ANALYZER_SECURITY_FIX_REPORT.md)
+- [准确率评估](features/docanalyzer/DOCANALYZER_ACCURACY_EVALUATION_REPORT.md)
+- [架构修复](features/docanalyzer/DOCANALYZER_ARCHITECTURE_FIX.md)
+- [更多文档...](features/docanalyzer/)
 
----
+### 🔗 知识图谱 (knowledge-graph/)
+- [应用指南](features/knowledge-graph/application-guide.md) - 知识图谱应用指南
+- [实现路线图](features/knowledge-graph/implementation-roadmap.md) - 实现路线图
+- [合同法关联](features/knowledge-graph/contract-law-usage.md) - 合同法条款关联
+- [法律版本管理](features/knowledge-graph/law-version-management.md) - 法律版本管理策略
 
-### 📖 操作指南 (guides/)
-
-开发相关的指南和教程
-
-- [代码风格指南](guides/CODE_STYLE.md)
-- [代码风格重构总结](guides/CODE_STYLE_REFACTOR_SUMMARY.md)
-- [迁移指南](guides/MIGRATION_GUIDE.md)
-- [迁移到新电脑](guides/MIGRATION_TO_NEW_COMPUTER.md)
-- [备份策略](guides/BACKUP_STRATEGY.md)
-
----
-
-### 📊 各类报告 (reports/)
-
-实施报告和总结文档
-
-- [API 错误处理改进报告](reports/API_ERROR_HANDLING_IMPROVEMENT_REPORT.md)
-- [API 框架审计报告](reports/API_FRAMEWORK_AUDIT_REPORT.md)
-- [辩论 API 实施报告](reports/DEBATE_API_IMPLEMENTATION_REPORT.md)
-- [最终完成报告](reports/FINAL_COMPLETION_REPORT.md)
-- [剩余 20% 分析](reports/REMAINING_20_PERCENT_ANALYSIS.md)
-- [测试修复最终报告](reports/TEST_FIX_FINAL_REPORT.md)
-- [测试修复报告](reports/TEST_FIX_REPORT.md)
-- [测试策略](reports/TEST_STRATEGY.md)
-- [密码修复总结](reports/PASSWORD_FIX_SUMMARY.md)
+### ⚖️ 辩论系统 (debate/)
+- [推荐实现](features/debate/recommendation-implementation.md) - 辩论推荐系统实现
 
 ---
 
-### 📄 DocAnalyzer 专项 (docanalyzer/)
+## 💻 开发文档 (development/)
 
-DocAnalyzer 相关的所有文档
+### 环境搭建 (setup/)
+- [环境变量](development/setup/environment-variables.md) - 环境变量配置
 
-- [DocAnalyzer 准确率评估报告](docanalyzer/DOCANALYZER_ACCURACY_EVALUATION_REPORT.md)
-- [DocAnalyzer 架构修复最终报告](docanalyzer/DOCANALYZER_ARCHITECTURE_FIX_FINAL_REPORT.md)
-- [DocAnalyzer 架构修复实施报告](docanalyzer/DOCANALYZER_ARCHITECTURE_FIX_IMPLEMENTATION_REPORT.md)
-- [DocAnalyzer 架构修复](docanalyzer/DOCANALYZER_ARCHITECTURE_FIX.md)
-- [DocAnalyzer Phase 3 最终报告](docanalyzer/DOCANALYZER_PHASE3_FINAL_REPORT.md)
-- [文档分析器重构计划](docanalyzer/DOC_ANALYZER_REFACTORING_PLAN.md)
-- [文档分析器安全修复报告](docanalyzer/DOC_ANALYZER_SECURITY_FIX_REPORT.md)
+### API 文档 (api/)
+- [API 路径迁移](development/api/api-paths-migration.md) - API 路径迁移指南
 
----
+### 测试文档 (testing/)
+- [测试数据工厂](development/testing/test-data-factory.md) - 测试数据生成
+- [E2E AI 配置](development/testing/e2e-ai-config.md) - E2E 测试 AI 配置
+- [测试覆盖率](development/testing/coverage/) - 覆盖率报告
+- [E2E 测试](development/testing/e2e/) - E2E 测试文档
+- [单元测试](development/testing/unit/) - 单元测试文档
 
-### 🔍 审计报告 (audit/)
+### 审计报告 (audit/)
+- [任务审计报告](development/audit/) - 各任务审计结果
 
-代码审计和质量检查报告
-
-- [任务 2.1.1 审计报告](audit/TASK_2_1_1_AUDIT_REPORT.md)
-- [任务 2.1.2 审计报告](audit/TASK_2_1_2_AUDIT_REPORT.md)
-
----
-
-### ✅ 验证文档 (validation/)
-
-验证和 POC 相关文档
-
-- [AI POC 验证报告](validation/AI_POC_VALIDATION_REPORT.md)
+### 验证文档 (validation/)
+- [AI POC 验证](development/validation/AI_POC_VALIDATION_REPORT.md)
 
 ---
 
-### 📦 归档文档 (archive/)
+## 🔧 运维文档 (operations/)
 
-历史归档文档
+### 部署 (deployment/)
+- [部署检查清单](operations/deployment/deployment-checklist.md)
+- [Docker Compose](operations/deployment/docker-compose.md)
+- [生产环境配置](operations/deployment/production-config.md)
 
-- [优化记录](archive/optimization-records.md)
-- [问题和解决方案](archive/problems-and-solutions.md)
-- [Sprint 0 完成](archive/sprint0-completed.md)
-- [Sprint 1 完成](archive/sprint1-completed.md)
+### 监控 (monitoring/)
+- [系统监控](operations/monitoring/system-monitoring.md) - 系统监控实现
+
+---
+
+## 📊 报告存档 (reports/)
+
+按时间组织的项目报告
+
+### 2026年2月 (2026-02/)
+- [Week 1](reports/2026-02/week1/) - 最新完成报告
+  - 完整工作总结、最终总结、生产进度等
+
+### 2026年1月 (2026-01/)
+- [Week 4](reports/2026-01/week4/) - 代码质量修复、关键修复
+- [Week 3](reports/2026-01/week3/) - 知识图谱、类型修复
+- [Week 2](reports/2026-01/week2/) - 数据分析、前后端差距分析
+- [Week 1](reports/2026-01/week1/) - 生产准备、优化计划
+
+---
+
+## 📦 历史归档 (archive/)
+
+过时的历史文档
+
+### 2025年归档 (2025/)
+- [Stages](archive/2025/stages/) - Stage 1-3 完成报告
+- [Sprints](archive/2025/sprints/) - Sprint 0-1 完成记录
+- [优化记录](archive/2025/optimization/) - 历史优化记录
+- [性能优化](archive/2025/optimization/performance/) - 性能优化报告
+
+### 已废弃文档 (deprecated/)
+- [废弃文档](archive/deprecated/) - 不再使用的文档
+
+---
+
+## 📋 项目管理 (project-management/)
+
+### 冲刺管理 (sprints/)
+- [Sprint 11](project-management/sprints/sprint-11/) - 任务追踪和进度
+- [Sprint 12](project-management/sprints/sprint-12/)
+- [当前冲刺](project-management/sprints/current/)
+
+### 业务文档 (business/)
+- [业务需求](project-management/business/BUSINESS_REQUIREMENTS.md) - 业务需求文档
 
 ---
 
@@ -162,71 +156,102 @@ DocAnalyzer 相关的所有文档
 
 ### 我想要...
 
-**📖 了解当前项目进度**
-→ 查看 [AI 任务追踪](task-tracking/AI_TASK_TRACKING.md)
+#### 📖 了解项目
+- **新手入门** → 查看 [业务需求](project-management/business/BUSINESS_REQUIREMENTS.md)
+- **了解架构** → 查看 [架构目录](architecture/)
+- **查看进度** → 查看 [Sprint 11 任务追踪](project-management/sprints/sprint-11/)
 
-**🏗️ 了解系统架构**
-→ 查看 [架构设计](architecture/)
+#### 💻 开始开发
+- **环境配置** → [环境变量](development/setup/environment-variables.md)
+- **API 开发** → [API 开发指南](guides/development/api-development.md)
+- **AI 辅助** → [AI 助手指南](guides/development/ai-assistant-guide.md)
+- **代码规范** → [开发指南](guides/development/)
 
-**🧪 查看测试情况**
-→ 查看 [测试文档](testing/)
+#### 🧪 测试相关
+- **测试策略** → [测试指南](guides/development/testing-guide.md)
+- **E2E 测试** → [E2E 配置](development/testing/e2e-ai-config.md)
+- **测试数据** → [测试数据工厂](development/testing/test-data-factory.md)
 
-**⚡ 查看性能优化**
-→ 查看 [性能优化](optimization/)
+#### 🚀 部署运维
+- **部署服务器** → [服务器部署](guides/deployment/server-deployment.md)
+- **数据库优化** → [数据库优化](guides/operations/database-optimization.md)
+- **系统监控** → [系统监控](operations/monitoring/system-monitoring.md)
 
-**📋 查看业务需求**
-→ 查看 [业务需求文档](business/BUSINESS_REQUIREMENTS.md)
+#### 🎯 功能开发
+- **文档分析** → [DocAnalyzer 文档](features/docanalyzer/)
+- **知识图谱** → [知识图谱文档](features/knowledge-graph/)
+- **辩论系统** → [辩论系统文档](features/debate/)
 
-**📖 查看开发指南**
-→ 查看 [操作指南](guides/)
-
-**📄 了解 DocAnalyzer**
-→ 查看 [DocAnalyzer 专项](docanalyzer/)
-
-**🔍 解决技术问题**
-→ 查看 [归档/问题和解决方案](archive/problems-and-solutions.md)
+#### 📊 查看报告
+- **最新进展** → [2026-02 报告](reports/2026-02/)
+- **历史记录** → [2026-01 报告](reports/2026-01/)
+- **归档文档** → [历史归档](archive/)
 
 ---
 
 ## 📊 文档统计
 
-| 分类           | 文档数量 | 说明             |
-| -------------- | -------- | ---------------- |
-| architecture/  | 2        | 架构设计文档     |
-| testing/       | 14       | 测试相关文档     |
-| optimization/  | 7        | 性能优化报告     |
-| task-tracking/ | 6        | 任务追踪文档     |
-| business/      | 1        | 业务需求文档     |
-| guides/        | 5        | 操作指南         |
-| reports/       | 9        | 各类报告         |
-| docanalyzer/   | 7        | DocAnalyzer 专项 |
-| audit/         | 2        | 审计报告         |
-| validation/    | 1        | 验证文档         |
-| archive/       | 4        | 归档文档         |
-| **总计**       | **58**   | **所有文档**     |
+| 分类 | 文档数 | 说明 |
+|------|--------|------|
+| 📖 guides/ | 15+ | 操作指南和手册 |
+| 🎯 features/ | 15+ | 功能专题文档 |
+| 💻 development/ | 50+ | 开发相关文档 |
+| 🔧 operations/ | 5+ | 运维文档 |
+| 📊 reports/ | 100+ | 按月归档的报告 |
+| 📦 archive/ | 60+ | 历史文档 |
+| 📋 project-management/ | 20+ | 项目管理文档 |
+| **总计** | **266** | **所有文档** |
 
 ---
 
 ## 💡 使用提示
 
-1. **新用户**: 先阅读 [业务需求文档](business/BUSINESS_REQUIREMENTS.md) 了解项目背景
-2. **开发人员**: 查看 [代码风格指南](guides/CODE_STYLE.md) 和 [架构设计](architecture/)
-3. **AI 助手**: 从 [AI 任务追踪](task-tracking/AI_TASK_TRACKING.md) 开始了解当前进度
-4. **遇到问题**: 查看 [归档/问题和解决方案](archive/problems-and-solutions.md)
-5. **查看优化历史**: 浏览 [性能优化](optimization/) 相关文档
+1. **新用户**: 先阅读 [业务需求](project-management/business/BUSINESS_REQUIREMENTS.md) 了解项目背景
+2. **开发人员**: 查看 [guides/development/](guides/development/) 了解开发规范
+3. **AI 助手**: 从 [AI 助手指南](guides/development/ai-assistant-guide.md) 开始
+4. **遇到问题**: 查看 [归档/问题和解决方案](archive/2025/sprints/problems-and-solutions.md)
+5. **查看历史**: 浏览 [reports/](reports/) 和 [archive/](archive/)
+
+---
+
+## 📝 文档维护
+
+### 维护策略
+- **活跃文档**（最近3个月）: 保留在主目录
+- **历史报告**（3-12个月）: 移入 `reports/`
+- **过时文档**（>12个月）: 移入 `archive/`
+- **废弃文档**: 移入 `archive/deprecated/`
+
+### 每月第一周任务
+1. 检查根目录是否有新增文件需要分类
+2. 将上月的临时报告归档到 `reports/`
+3. 更新本 README 的统计数据
 
 ---
 
 ## 🔄 文档更新日志
 
-### 2026-01-01
+### 2026-02-12 ⭐
+- ✨ **完成文档大重组** - 273个文档从混乱到清晰
+- 📁 **新目录结构** - 8个一级分类，清晰易查
+- 🗂️ **按月归档报告** - reports/2026-01/, reports/2026-02/
+- 📦 **历史文档归档** - archive/2025/
+- ✅ **根目录精简** - 从114个文件减少到**仅1个**（README.md）
+- 📋 [查看重组详情](archive/2026/documentation-reorganization/)
 
-- 🎉 完成文档重组，将 53 个文档按类别组织到 11 个目录中
-- ✨ 创建文档导航索引 README.md
-- 📁 新增目录结构：architecture, testing, optimization, task-tracking, business, guides, reports, docanalyzer, audit, validation
+### 2026-01-01
+- 🎉 首次文档重组尝试（不完整）
 
 ---
 
-_文档版本: v2.0_  
-_最后更新: 2026-01-01_  
+## 📞 需要帮助？
+
+- **文档问题**: 查看 [DOCS_REORGANIZATION_SUMMARY.md](DOCS_REORGANIZATION_SUMMARY.md)
+- **重组说明**: 查看 [DOCUMENTATION_REORGANIZATION_PLAN.md](DOCUMENTATION_REORGANIZATION_PLAN.md)
+- **快速开始**: 查看 [REORGANIZATION_QUICK_START.md](REORGANIZATION_QUICK_START.md)
+
+---
+
+_文档版本: v3.0 (重组完成版)_
+_最后更新: 2026-02-12_
 _维护者: AI Assistant_

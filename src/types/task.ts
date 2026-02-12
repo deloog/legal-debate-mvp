@@ -6,11 +6,7 @@
 /**
  * 任务状态（匹配 Prisma Schema）
  */
-export type TaskStatus =
-  | 'TODO'
-  | 'IN_PROGRESS'
-  | 'COMPLETED'
-  | 'CANCELLED';
+export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
 /**
  * 任务状态常量（运行时可用）
@@ -197,7 +193,9 @@ export function isValidTaskStatus(status: string): status is TaskStatus {
 /**
  * 验证任务优先级是否有效
  */
-export function isValidTaskPriority(priority: string): priority is TaskPriority {
+export function isValidTaskPriority(
+  priority: string
+): priority is TaskPriority {
   return Object.values(TaskPriorityValues).includes(priority as TaskPriority);
 }
 

@@ -10,10 +10,15 @@ import {
   generateRefreshToken,
 } from '@/lib/auth/jwt';
 import { prisma } from '@/lib/db/prisma';
+import {
+  withRateLimit,
+  moderateRateLimiter,
+} from '@/lib/middleware/rate-limit';
+import { logError } from '@/lib/utils/safe-logger';
 import type { JwtPayload } from '@/types/auth';
 import type { RefreshTokenResponse } from '@/types/auth';
 
-export async function POST(
+async function handleRefresh(
   request: NextRequest
 ): Promise<NextResponse<RefreshTokenResponse>> {
   try {
@@ -26,11 +31,13 @@ export async function POST(
       refreshToken = body.refreshToken;
     }
 
-    console.log('[REFRESH] Token source:', {
-      hasRefreshToken: !!refreshToken,
-      tokenLength: refreshToken?.length,
-      source: request.cookies.get('refreshToken') ? 'cookie' : 'body',
-    });
+    // 仅在开发环境记录
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[REFRESH] Token source:', {
+        hasRefreshToken: !!refreshToken,
+        source: request.cookies.get('refreshToken') ? 'cookie' : 'body',
+      });
+    }
 
     if (!refreshToken) {
       return NextResponse.json(
@@ -45,10 +52,13 @@ export async function POST(
 
     // 验证刷新令牌
     const verificationResult = verifyToken(refreshToken);
-    console.log('[REFRESH] Token verification:', {
-      valid: verificationResult.valid,
-      error: verificationResult.error,
-    });
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[REFRESH] Token verification:', {
+        valid: verificationResult.valid,
+        error: verificationResult.error,
+      });
+    }
 
     if (!verificationResult.valid || !verificationResult.payload) {
       return NextResponse.json(
@@ -109,12 +119,12 @@ export async function POST(
       },
     });
 
-    console.log('[REFRESH] Session query result:', {
-      found: !!session,
-      userId: user.id,
-      expires: session?.expires,
-      now: new Date().toISOString(),
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[REFRESH] Session query result:', {
+        found: !!session,
+        userId: user.id,
+      });
+    }
 
     if (!session) {
       return NextResponse.json(
@@ -183,11 +193,8 @@ export async function POST(
 
     return response;
   } catch (error) {
-    console.error('[REFRESH] Token refresh error:', error);
-    if (error instanceof Error) {
-      console.error('[REFRESH] Error message:', error.message);
-      console.error('[REFRESH] Error stack:', error.stack);
-    }
+    // 使用安全日志记录错误
+    logError('[REFRESH] Token refresh error', error);
 
     return NextResponse.json(
       {
@@ -199,3 +206,8 @@ export async function POST(
     );
   }
 }
+
+/**
+ * 导出带速率限制的POST处理器（每分钟30次）
+ */
+export const POST = withRateLimit(moderateRateLimiter, handleRefresh);

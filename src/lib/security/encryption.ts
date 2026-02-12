@@ -12,9 +12,7 @@ const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '';
 
 // 生产环境必须配置加密密钥
 if (process.env.NODE_ENV === 'production' && !ENCRYPTION_KEY) {
-  throw new Error(
-    'ENCRYPTION_KEY 环境变量必须在生产环境中配置'
-  );
+  throw new Error('ENCRYPTION_KEY 环境变量必须在生产环境中配置');
 }
 const ALGORITHM = 'aes-256-gcm';
 

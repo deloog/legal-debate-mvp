@@ -7,6 +7,7 @@ import { prisma } from '@/lib/db/prisma';
 import { hashPassword, validatePassword } from '@/lib/auth/password';
 import { validateEmail, validateRegisterRequest } from '@/lib/auth/validation';
 import { generateAccessToken, generateRefreshToken } from '@/lib/auth/jwt';
+import { withRateLimit, strictRateLimiter } from '@/lib/middleware/rate-limit';
 import type { AuthResponse, RegisterRequest } from '@/types/auth';
 import type { JwtPayload } from '@/types/auth';
 import { AuthErrorCode } from '@/types/auth';
@@ -15,7 +16,7 @@ import { AuthErrorCode } from '@/types/auth';
  * POST /api/auth/register
  * 用户注册
  */
-export async function POST(request: NextRequest): Promise<NextResponse> {
+async function handleRegister(request: NextRequest): Promise<NextResponse> {
   try {
     // 解析请求体
     const body: RegisterRequest = await request.json();
@@ -155,6 +156,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(response, { status: 500 });
   }
 }
+
+/**
+ * 导出带速率限制的POST处理器（每分钟5次）
+ */
+export const POST = withRateLimit(strictRateLimiter, handleRegister);
 
 /**
  * 不支持其他 HTTP 方法

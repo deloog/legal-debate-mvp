@@ -4,6 +4,12 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
+import { Prisma, FeeType, ContractStatus } from '@prisma/client';
+
+/**
+ * 合同快照类型（Record类型，用于存储任意 JSON 数据）
+ */
+export type ContractSnapshot = Record<string, unknown>;
 
 /**
  * 版本对比结果
@@ -13,9 +19,16 @@ export interface VersionDiff {
   versionId2: string;
   changes: Array<{
     field: string;
-    oldValue: any;
-    newValue: any;
+    oldValue: unknown;
+    newValue: unknown;
   }>;
+}
+
+/**
+ * 类型守卫：检查 Json 值是否为合同快照
+ */
+function isContractSnapshot(value: unknown): value is ContractSnapshot {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 /**
@@ -102,11 +115,8 @@ export class ContractVersionService {
           where: { contractId, version: lastVersion.version },
         });
 
-        if (previousVersion) {
-          changes = this.calculateChanges(
-            previousVersion.snapshot as any,
-            snapshot
-          );
+        if (previousVersion && isContractSnapshot(previousVersion.snapshot)) {
+          changes = this.calculateChanges(previousVersion.snapshot, snapshot);
         }
       }
 
@@ -184,10 +194,14 @@ export class ContractVersionService {
       throw new Error('版本不存在');
     }
 
-    const changes = this.calculateChanges(
-      version1.snapshot as any,
-      version2.snapshot as any
-    );
+    if (
+      !isContractSnapshot(version1.snapshot) ||
+      !isContractSnapshot(version2.snapshot)
+    ) {
+      throw new Error('版本快照格式不正确');
+    }
+
+    const changes = this.calculateChanges(version1.snapshot, version2.snapshot);
 
     return {
       versionId1,
@@ -215,29 +229,33 @@ export class ContractVersionService {
       throw new Error('版本不存在或不属于该合同');
     }
 
-    const snapshot = version.snapshot as any;
+    if (!isContractSnapshot(version.snapshot)) {
+      throw new Error('版本快照格式不正确');
+    }
 
-    // 更新合同数据
+    const snapshot = version.snapshot;
+
+    // 更新合同数据（使用类型断言处理动态数据）
     await prisma.contract.update({
       where: { id: contractId },
       data: {
-        clientType: snapshot.clientType,
-        clientName: snapshot.clientName,
-        clientIdNumber: snapshot.clientIdNumber,
-        clientAddress: snapshot.clientAddress,
-        clientContact: snapshot.clientContact,
-        lawFirmName: snapshot.lawFirmName,
-        lawyerName: snapshot.lawyerName,
-        lawyerId: snapshot.lawyerId,
-        caseType: snapshot.caseType,
-        caseSummary: snapshot.caseSummary,
-        scope: snapshot.scope,
-        feeType: snapshot.feeType,
-        totalFee: snapshot.totalFee,
-        feeDetails: snapshot.feeDetails,
-        terms: snapshot.terms,
-        specialTerms: snapshot.specialTerms,
-        status: snapshot.status,
+        clientType: snapshot.clientType as string | undefined,
+        clientName: snapshot.clientName as string | undefined,
+        clientIdNumber: snapshot.clientIdNumber as string | undefined,
+        clientAddress: snapshot.clientAddress as string | undefined,
+        clientContact: snapshot.clientContact as string | undefined,
+        lawFirmName: snapshot.lawFirmName as string | undefined,
+        lawyerName: snapshot.lawyerName as string | undefined,
+        lawyerId: snapshot.lawyerId as string | undefined,
+        caseType: snapshot.caseType as string | undefined,
+        caseSummary: snapshot.caseSummary as string | undefined,
+        scope: snapshot.scope as string | undefined,
+        feeType: snapshot.feeType as FeeType | undefined,
+        totalFee: snapshot.totalFee as number | string | undefined,
+        feeDetails: snapshot.feeDetails as Prisma.JsonValue,
+        terms: snapshot.terms as Prisma.JsonValue,
+        specialTerms: snapshot.specialTerms as string | undefined,
+        status: snapshot.status as ContractStatus | undefined,
       },
     });
 
@@ -258,8 +276,15 @@ export class ContractVersionService {
    * @param newSnapshot 新快照
    * @returns 变更列表
    */
-  private calculateChanges(oldSnapshot: any, newSnapshot: any): any[] {
-    const changes: any[] = [];
+  private calculateChanges(
+    oldSnapshot: ContractSnapshot,
+    newSnapshot: ContractSnapshot
+  ): Array<{ field: string; oldValue: unknown; newValue: unknown }> {
+    const changes: Array<{
+      field: string;
+      oldValue: unknown;
+      newValue: unknown;
+    }> = [];
 
     // 需要对比的字段
     const fieldsToCompare = [

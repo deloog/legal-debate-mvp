@@ -165,8 +165,10 @@ class ReminderService {
         limit: limitStr = '20',
       } = params;
 
-      const page = typeof pageStr === 'string' ? parseInt(pageStr, 10) : pageStr;
-      const limit = typeof limitStr === 'string' ? parseInt(limitStr, 10) : limitStr;
+      const page =
+        typeof pageStr === 'string' ? parseInt(pageStr, 10) : pageStr;
+      const limit =
+        typeof limitStr === 'string' ? parseInt(limitStr, 10) : limitStr;
 
       const skip = (page - 1) * limit;
 

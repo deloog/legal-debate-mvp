@@ -68,9 +68,25 @@ export class FollowUpTaskProcessor {
       const whereClause =
         conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-      // 排序
-      const sortBy = params.sortBy || 'dueDate';
-      const sortOrder = params.sortOrder || 'asc';
+      // 排序（使用白名单防止SQL注入）
+      const allowedSortFields = [
+        'dueDate',
+        'createdAt',
+        'updatedAt',
+        'priority',
+        'status',
+      ];
+      const sortBy = allowedSortFields.includes(params.sortBy || '')
+        ? params.sortBy
+        : 'dueDate';
+
+      const allowedSortOrders = ['asc', 'desc'];
+      const sortOrder = allowedSortOrders.includes(
+        params.sortOrder?.toLowerCase() || ''
+      )
+        ? params.sortOrder?.toLowerCase()
+        : 'asc';
+
       const sortClause = `ORDER BY fut."${sortBy}" ${sortOrder.toUpperCase()}`;
 
       // 查询总数

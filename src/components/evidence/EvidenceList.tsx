@@ -15,6 +15,7 @@ import {
   EvidenceStatus,
 } from '@/types/evidence';
 import { Button } from '@/components/ui/button';
+import { EVIDENCE_API, buildUrl } from '@/lib/constants/api-paths';
 
 interface EvidenceListProps {
   /**
@@ -144,9 +145,12 @@ export function EvidenceList({
       params.append('page', (filters.page || 1).toString());
       params.append('limit', (filters.limit || 20).toString());
 
-      const response = await fetch(`/api/evidence?${params.toString()}`, {
-        credentials: 'include',
-      });
+      const response = await fetch(
+        buildUrl(EVIDENCE_API.LIST, Object.fromEntries(params.entries())),
+        {
+          credentials: 'include',
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -232,7 +236,7 @@ export function EvidenceList({
   const handleBulkAction = useCallback(
     async (params: BulkActionParams) => {
       try {
-        const response = await fetch('/api/evidence/bulk', {
+        const response = await fetch(EVIDENCE_API.BULK, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -298,7 +302,7 @@ export function EvidenceList({
       }
 
       try {
-        const response = await fetch(`/api/evidence/${evidenceId}`, {
+        const response = await fetch(EVIDENCE_API.delete(evidenceId), {
           method: 'DELETE',
           credentials: 'include',
         });

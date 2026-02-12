@@ -13,6 +13,7 @@ import type {
   OAuthUserInfo,
   StateValidationResult,
 } from '../../types/oauth';
+import { SECURITY } from '../constants/common';
 
 /**
  * OAuth 基础类
@@ -30,7 +31,7 @@ export abstract class OAuthBaseProvider {
 
   // State 存储键前缀
   private readonly STATE_PREFIX = 'oauth_state_';
-  private readonly STATE_EXPIRY = 10 * 60 * 1000; // 10分钟
+  private readonly STATE_EXPIRY = SECURITY.OAUTH_STATE_EXPIRY;
 
   constructor(config: {
     appId: string;

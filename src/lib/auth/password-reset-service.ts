@@ -18,6 +18,7 @@ import {
   VerificationCodeTypeEnum,
 } from '@/types/password-reset';
 import { getEmailService } from './email-service';
+import { SECURITY } from '../constants/common';
 import { getVerificationCodeService } from './verification-code-service';
 
 // =============================================================================
@@ -127,7 +128,7 @@ class PasswordResetService {
           success: true,
           message: '如果该邮箱已注册，您将收到密码重置验证码',
           data: {
-            expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+            expiresAt: new Date(Date.now() + SECURITY.PASSWORD_RESET_EXPIRY),
             attemptWindow: 60,
             maxAttempts: 5,
             remainingAttempts: 5,

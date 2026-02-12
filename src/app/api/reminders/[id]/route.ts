@@ -7,7 +7,11 @@ import {
 import { reminderService } from '@/lib/notification/reminder-service';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { z } from 'zod';
-import { NotificationChannel, ReminderStatus, UpdateReminderInput } from '@/types/notification';
+import {
+  NotificationChannel,
+  ReminderStatus,
+  UpdateReminderInput,
+} from '@/types/notification';
 
 const updateReminderSchema = z.object({
   title: z.string().min(1, '标题不能为空').max(200).optional(),

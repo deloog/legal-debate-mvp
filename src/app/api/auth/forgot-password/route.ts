@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getPasswordResetService } from '@/lib/auth/password-reset-service';
+import { withRateLimit, strictRateLimiter } from '@/lib/middleware/rate-limit';
 import type {
   ForgotPasswordRequest,
   ForgotPasswordResponse,
@@ -13,7 +14,7 @@ import type {
  * POST /api/auth/forgot-password
  * 请求密码重置验证码
  */
-export async function POST(
+async function handleForgotPassword(
   request: NextRequest
 ): Promise<NextResponse<ForgotPasswordResponse>> {
   try {
@@ -42,6 +43,11 @@ export async function POST(
     return NextResponse.json(errorResponse, { status: 500 });
   }
 }
+
+/**
+ * 导出带速率限制的POST处理器（每分钟5次）
+ */
+export const POST = withRateLimit(strictRateLimiter, handleForgotPassword);
 
 /**
  * 不支持其他 HTTP 方法

@@ -123,8 +123,6 @@ export async function GET(request: NextRequest): Promise<Response> {
       message: '查询成功',
       data: {
         summary: {
-          
-          
           casesCreated: stats.casesCreated,
           debatesGenerated: stats.debatesGenerated,
           documentsAnalyzed: stats.documentsAnalyzed,

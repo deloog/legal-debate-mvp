@@ -268,7 +268,7 @@ describe('Cases API', () => {
 
     it('should validate case type', async () => {
       const caseData = mockData.case({
-        type: 'invalid-type',
+        type: 'invalid-type' as any, // 故意使用无效类型测试验证
       });
 
       const request = createMockRequest('http://localhost:3000/api/v1/cases', {
@@ -313,7 +313,7 @@ describe('Cases API', () => {
       ];
 
       for (const type of validTypes) {
-        const caseData = mockData.case({ type });
+        const caseData = mockData.case({ type: type as any });
 
         const request = createMockRequest(
           'http://localhost:3000/api/v1/cases',
@@ -367,7 +367,7 @@ describe('Cases API', () => {
     });
 
     it('should accept ownerType as user', async () => {
-      const caseData = mockData.case({ ownerType: 'user' });
+      const caseData = mockData.case({ ownerType: 'USER' });
 
       const request = createMockRequest('http://localhost:3000/api/v1/cases', {
         method: 'POST',
@@ -382,7 +382,7 @@ describe('Cases API', () => {
     });
 
     it('should accept ownerType as team', async () => {
-      const caseData = mockData.case({ ownerType: 'team' });
+      const caseData = mockData.case({ ownerType: 'TEAM' });
 
       const request = createMockRequest('http://localhost:3000/api/v1/cases', {
         method: 'POST',
@@ -427,7 +427,7 @@ describe('Cases API', () => {
     });
 
     it('should handle invalid ownerType gracefully', async () => {
-      const caseData = mockData.case({ ownerType: 'invalid' });
+      const caseData = mockData.case({ ownerType: 'invalid' as any }); // 故意使用无效类型测试验证
 
       const request = createMockRequest('http://localhost:3000/api/v1/cases', {
         method: 'POST',

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Debate, DebateRound, Argument } from '@prisma/client';
+import { DEBATE_API } from '@/lib/constants/api-paths';
 
 /**
  * 辩论数据Hook
@@ -37,9 +38,9 @@ export function useDebate(debateId, refreshInterval = 5000): DebateData {
 
         // 并行获取辩论、轮次和论点数据
         const [debateRes, roundsRes, argsRes] = await Promise.all([
-          fetch(`/api/v1/debates/${debateId}`),
-          fetch(`/api/v1/debates/${debateId}/rounds`),
-          fetch(`/api/v1/debates/${debateId}/arguments`),
+          fetch(DEBATE_API.detail(debateId)),
+          fetch(DEBATE_API.rounds(debateId)),
+          fetch(DEBATE_API.arguments(debateId)),
         ]);
 
         if (!debateRes.ok) {
