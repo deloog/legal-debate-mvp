@@ -1,0 +1,121 @@
+{
+  "total": 7,
+  "rows": [
+    {
+      "bbbs": "2c909fdd678bf17901678bf59da8002d",
+      "title": "中华人民共和国宪法修正案（2018年）",
+      "gbrq": "2018-03-11",
+      "sxrq": "2018-03-11",
+      "sxx": 3,
+      "zdjgName": "全国人民代表大会",
+      "xgzlHighLight": null,
+      "flxz": "宪法",
+      "zdjgCodeId": 100,
+      "flfgCodeId": 100,
+      "titleHightLightList": [
+        { "value": "中华人民共和国宪法修正案（2018年）", "highLight": false }
+      ],
+      "score": 0.0
+    },
+    {
+      "bbbs": "2c909fdd678bf17901678bf5a483004b",
+      "title": "中华人民共和国宪法（2018年修正文本）",
+      "gbrq": "2018-03-11",
+      "sxrq": "2018-03-11",
+      "sxx": 3,
+      "zdjgName": "全国人民代表大会",
+      "xgzlHighLight": null,
+      "flxz": "宪法",
+      "zdjgCodeId": 100,
+      "flfgCodeId": 100,
+      "titleHightLightList": [
+        { "value": "中华人民共和国宪法（2018年修正文本）", "highLight": false }
+      ],
+      "score": 0.0
+    },
+    {
+      "bbbs": "2c909fdd678bf17901678bf59d420023",
+      "title": "中华人民共和国宪法修正案（2004年）",
+      "gbrq": "2004-03-14",
+      "sxrq": "2004-03-14",
+      "sxx": 3,
+      "zdjgName": "全国人民代表大会",
+      "xgzlHighLight": null,
+      "flxz": "宪法",
+      "zdjgCodeId": 100,
+      "flfgCodeId": 100,
+      "titleHightLightList": [
+        { "value": "中华人民共和国宪法修正案（2004年）", "highLight": false }
+      ],
+      "score": 0.0
+    },
+    {
+      "bbbs": "2c909fdd678bf17901678bf59c9e0019",
+      "title": "中华人民共和国宪法修正案（1999年）",
+      "gbrq": "1999-03-15",
+      "sxrq": "1999-03-15",
+      "sxx": 3,
+      "zdjgName": "全国人民代表大会",
+      "xgzlHighLight": null,
+      "flxz": "宪法",
+      "zdjgCodeId": 100,
+      "flfgCodeId": 100,
+      "titleHightLightList": [
+        { "value": "中华人民共和国宪法修正案（1999年）", "highLight": false }
+      ],
+      "score": 0.0
+    },
+    {
+      "bbbs": "2c909fdd678bf17901678bf59c0d000f",
+      "title": "中华人民共和国宪法修正案（1993年）",
+      "gbrq": "1993-03-29",
+      "sxrq": "1993-03-29",
+      "sxx": 3,
+      "zdjgName": "全国人民代表大会",
+      "xgzlHighLight": null,
+      "flxz": "宪法",
+      "zdjgCodeId": 100,
+      "flfgCodeId": 100,
+      "titleHightLightList": [
+        { "value": "中华人民共和国宪法修正案（1993年）", "highLight": false }
+      ],
+      "score": 0.0
+    },
+    {
+      "bbbs": "2c909fdd678bf17901678bf594240005",
+      "title": "中华人民共和国宪法修正案（1988年）",
+      "gbrq": "1988-04-12",
+      "sxrq": "1988-04-12",
+      "sxx": 3,
+      "zdjgName": "全国人民代表大会",
+      "xgzlHighLight": null,
+      "flxz": "宪法",
+      "zdjgCodeId": 100,
+      "flfgCodeId": 100,
+      "titleHightLightList": [
+        { "value": "中华人民共和国宪法修正案（1988年）", "highLight": false }
+      ],
+      "score": 0.0
+    },
+    {
+      "bbbs": "2c909fdd678bf17901678bf59eb80037",
+      "title": "中华人民共和国宪法（1982年）",
+      "gbrq": "1982-12-04",
+      "sxrq": "1982-12-04",
+      "sxx": 3,
+      "zdjgName": "全国人民代表大会",
+      "xgzlHighLight": null,
+      "flxz": "宪法",
+      "zdjgCodeId": 100,
+      "flfgCodeId": 100,
+      "titleHightLightList": [
+        { "value": "中华人民共和国宪法（1982年）", "highLight": false }
+      ],
+      "score": 0.0
+    }
+  ],
+  "code": 200,
+  "msg": "查询成功",
+  "searchType": 2,
+  "searchContent": null
+}

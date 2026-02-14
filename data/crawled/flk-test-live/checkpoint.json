@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "startedAt": "2026-02-13T01:16:40.676Z",
+  "lastUpdatedAt": "2026-02-13T01:16:47.186Z",
+  "status": "completed",
+  "types": {
+    "jcfg": {
+      "page": 0,
+      "totalPages": 1,
+      "downloaded": 0,
+      "completed": true
+    }
+  },
+  "items": []
+}
