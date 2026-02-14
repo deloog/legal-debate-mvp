@@ -1,0 +1,387 @@
+{"timestamp":"2026-02-14T09:44:04.038Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff80818187217f6e0187bdc93b514030","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:04.076Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff80818187217f6e0187bdc93b514030","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:04.076Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff80818187217f6e0187bdc93b514030","length":1012,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:04.449Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff8081817f48d6f4017f78ba535910e8","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:04.455Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff8081817f48d6f4017f78ba535910e8","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:04.456Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff8081817f48d6f4017f78ba535910e8","length":1250,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:04.895Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff8081817f48d8de017f78bb46e210ee","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:04.988Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff8081817f48d8de017f78bb46e210ee","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:04.988Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff8081817f48d8de017f78bb46e210ee","length":1250,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:05.392Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff808081774c72b30177709e8cd51b89","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:05.398Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff808081774c72b30177709e8cd51b89","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:05.398Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff808081774c72b30177709e8cd51b89","length":1250,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:05.794Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff8081818d6a4464018e2de2868d1dfa","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:05.798Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff8081818d6a4464018e2de2868d1dfa","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:05.798Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff8081818d6a4464018e2de2868d1dfa","length":910,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:08.213Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff8081818a21dc13018b625b4a68173f","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:08.217Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff8081818a21dc13018b625b4a68173f","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:08.218Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff8081818a21dc13018b625b4a68173f","length":927,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:08.633Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff8081818a21dc13018a51328e0c0c3c","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:08.655Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff8081818a21dc13018a51328e0c0c3c","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:08.656Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff8081818a21dc13018a51328e0c0c3c","length":927,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:09.047Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff80818188d7430b0189019c15ee0943","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:09.052Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff80818188d7430b0189019c15ee0943","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:09.054Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff80818188d7430b0189019c15ee0943","length":893,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:09.510Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff808181927b083b0193fda4bead02ee","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:09.514Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff808181927b083b0193fda4bead02ee","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:09.514Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff808181927b083b0193fda4bead02ee","length":927,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:09.940Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff80818188d7430b0189018493370940","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:09.944Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff80818188d7430b0189018493370940","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:09.944Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff80818188d7430b0189018493370940","length":944,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:12.381Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff8081817f072a2e017f0ae1a7f600f0","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:12.387Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff8081817f072a2e017f0ae1a7f600f0","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:12.388Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff8081817f072a2e017f0ae1a7f600f0","length":859,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:12.800Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff8081817cac3b2d017cac5a6c6f0109","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:12.809Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff8081817cac3b2d017cac5a6c6f0109","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:12.809Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff8081817cac3b2d017cac5a6c6f0109","length":927,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:13.197Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff8081817b6472a3017b6577820f0061","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:13.201Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff8081817b6472a3017b6577820f0061","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:13.202Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff8081817b6472a3017b6577820f0061","length":893,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:13.708Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff80808175265dd40176a88c218f2853","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:13.712Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff80808175265dd40176a88c218f2853","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:13.712Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff80808175265dd40176a88c218f2853","length":961,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:14.218Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff8080816f135f46016f1d16e370133e","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:14.225Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff8080816f135f46016f1d16e370133e","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:14.225Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff8080816f135f46016f1d16e370133e","length":927,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:16.699Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff8080816f135f46016f1d134c88132b","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:16.705Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff8080816f135f46016f1d134c88132b","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:16.706Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff8080816f135f46016f1d134c88132b","length":910,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:17.087Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf88cfe0b09","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:17.091Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf88cfe0b09","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:17.092Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf88cfe0b09","length":1046,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:17.457Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf8867e0ad7","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:17.461Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf8867e0ad7","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:17.462Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf8867e0ad7","length":893,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:17.826Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf8464c09c9","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:17.830Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf8464c09c9","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:17.831Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf8464c09c9","length":893,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:18.356Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf746430681","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:18.359Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf746430681","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:18.360Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf746430681","length":927,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:20.781Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf7f9d60889","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:20.790Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf7f9d60889","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:20.791Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf7f9d60889","length":910,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:21.234Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf7b34f07df","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:21.241Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf7b34f07df","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:21.242Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf7b34f07df","length":893,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:21.609Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf746e4068b","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:21.613Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf746e4068b","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:21.614Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf746e4068b","length":961,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:22.041Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf73e160645","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:22.045Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf73e160645","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:22.046Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf73e160645","length":893,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:22.427Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf6f8a3050f","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:22.432Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf6f8a3050f","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:22.432Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf6f8a3050f","length":859,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:24.809Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf67c74043d","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:24.812Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf67c74043d","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:24.813Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf67c74043d","length":961,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:25.178Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf6b19e04f1","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:25.182Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf6b19e04f1","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:25.182Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf6b19e04f1","length":893,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:25.593Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf6508b03b1","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:25.597Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf6508b03b1","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:25.598Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf6508b03b1","length":910,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:26.012Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf632a90307","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:26.015Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf632a90307","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:26.016Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf632a90307","length":927,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:26.405Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf6149102a3","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:26.409Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf6149102a3","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:26.409Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf6149102a3","length":927,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:28.793Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf608a7022b","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:28.797Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf608a7022b","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:28.797Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf608a7022b","length":927,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:29.260Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff80818187aa32f90187bd2e440b052a","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:29.266Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff80818187aa32f90187bd2e440b052a","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:29.266Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff80818187aa32f90187bd2e440b052a","length":876,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:29.800Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"ff80818182cf5c220182fd54401023d6","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:29.807Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"ff80818182cf5c220182fd54401023d6","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:29.808Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"ff80818182cf5c220182fd54401023d6","length":944,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:30.283Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf78309075d","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:30.291Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf78309075d","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:30.292Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf78309075d","length":876,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:30.640Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf7105c05af","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:30.644Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf7105c05af","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:30.644Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf7105c05af","length":893,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:33.060Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf6726303f7","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:33.063Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf6726303f7","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:33.064Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf6726303f7","length":1063,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:33.458Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf64f28039d","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:33.462Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf64f28039d","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:33.463Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf64f28039d","length":961,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:44:33.828Z","level":"DEBUG","crawler":"FLKCrawler","message":"mammoth 解析失败","data":{"sourceId":"2c909fdd678bf17901678bf60bd90253","error":"Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html"}}
+{"timestamp":"2026-02-14T09:44:33.832Z","level":"DEBUG","crawler":"FLKCrawler","message":"XML 提取失败","data":{"sourceId":"2c909fdd678bf17901678bf60bd90253","error":"jszip.loadAsync is not a function"}}
+{"timestamp":"2026-02-14T09:44:33.832Z","level":"INFO","crawler":"FLKCrawler","message":"使用 docx-parser 解析","data":{"sourceId":"2c909fdd678bf17901678bf60bd90253","length":859,"methods":["docx-parser"]}}
+{"timestamp":"2026-02-14T09:48:33.429Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 宪法 (code: 100)","data":{"fromPage":2,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:33.450Z","level":"INFO","crawler":"FLKCrawler","message":"宪法 下载完成","data":{"downloaded":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:33.454Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 法律 (code: 101)","data":{"fromPage":1,"totalPages":1,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:33.756Z","level":"INFO","crawler":"FLKCrawler","message":"法律 第 1/0 页无数据，跳过"}
+{"timestamp":"2026-02-14T09:48:33.756Z","level":"INFO","crawler":"FLKCrawler","message":"法律 下载完成","data":{"downloaded":0,"totalPages":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:33.761Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 法律 (code: 102)","data":{"fromPage":1,"totalPages":1,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:34.016Z","level":"INFO","crawler":"FLKCrawler","message":"法律 第 1/0 页无数据，跳过"}
+{"timestamp":"2026-02-14T09:48:34.017Z","level":"INFO","crawler":"FLKCrawler","message":"法律 下载完成","data":{"downloaded":0,"totalPages":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:34.020Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 宪法相关法 (code: 110)","data":{"fromPage":5,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:34.021Z","level":"INFO","crawler":"FLKCrawler","message":"宪法相关法 下载完成","data":{"downloaded":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:34.043Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 民法商法 (code: 120)","data":{"fromPage":2,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:34.044Z","level":"INFO","crawler":"FLKCrawler","message":"民法商法 下载完成","data":{"downloaded":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:34.067Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 行政法 (code: 130)","data":{"fromPage":9,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:34.068Z","level":"INFO","crawler":"FLKCrawler","message":"行政法 下载完成","data":{"downloaded":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:34.090Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 经济法 (code: 140)","data":{"fromPage":5,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:34.091Z","level":"INFO","crawler":"FLKCrawler","message":"经济法 下载完成","data":{"downloaded":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:34.115Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 社会法 (code: 150)","data":{"fromPage":4,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:34.116Z","level":"INFO","crawler":"FLKCrawler","message":"社会法 下载完成","data":{"downloaded":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:34.136Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 刑法 (code: 160)","data":{"fromPage":2,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:34.137Z","level":"INFO","crawler":"FLKCrawler","message":"刑法 下载完成","data":{"downloaded":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:34.163Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 诉讼与非诉讼程序法 (code: 170)","data":{"fromPage":2,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:34.164Z","level":"INFO","crawler":"FLKCrawler","message":"诉讼与非诉讼程序法 下载完成","data":{"downloaded":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:34.182Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 法律解释 (code: 180)","data":{"fromPage":3,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:34.183Z","level":"INFO","crawler":"FLKCrawler","message":"法律解释 下载完成","data":{"downloaded":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:34.207Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 有关法律问题的决定 (code: 190)","data":{"fromPage":3,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:34.207Z","level":"INFO","crawler":"FLKCrawler","message":"有关法律问题的决定 下载完成","data":{"downloaded":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:34.229Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 修正案 (code: 195)","data":{"fromPage":2,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:34.229Z","level":"INFO","crawler":"FLKCrawler","message":"修正案 下载完成","data":{"downloaded":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:34.249Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 修改、废止的决定 (code: 200)","data":{"fromPage":3,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:34.250Z","level":"INFO","crawler":"FLKCrawler","message":"修改、废止的决定 下载完成","data":{"downloaded":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:34.265Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 行政法规 (code: 201)","data":{"fromPage":1,"totalPages":1,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:34.530Z","level":"INFO","crawler":"FLKCrawler","message":"行政法规 第 1/0 页无数据，跳过"}
+{"timestamp":"2026-02-14T09:48:34.531Z","level":"INFO","crawler":"FLKCrawler","message":"行政法规 下载完成","data":{"downloaded":0,"totalPages":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:34.535Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 行政法规 (code: 210)","data":{"fromPage":6,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:34.535Z","level":"INFO","crawler":"FLKCrawler","message":"行政法规 下载完成","data":{"downloaded":0,"errors":0}}
+{"timestamp":"2026-02-14T09:48:34.554Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 修改、废止的决定 (code: 215)","data":{"fromPage":1,"totalPages":1,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:48:34.745Z","level":"INFO","crawler":"FLKCrawler","message":"修改、废止的决定 第 1/1 页, 15 条","data":{"progress":"1/1"}}
+{"timestamp":"2026-02-14T09:49:08.509Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 10 个文件","data":{"type":"修改、废止的决定"}}
+{"timestamp":"2026-02-14T09:49:31.758Z","level":"INFO","crawler":"FLKCrawler","message":"修改、废止的决定 第 1/1 页下载完成: 15 个文件, 累计 15 个"}
+{"timestamp":"2026-02-14T09:49:35.040Z","level":"INFO","crawler":"FLKCrawler","message":"修改、废止的决定 下载完成","data":{"downloaded":15,"totalPages":1,"errors":0}}
+{"timestamp":"2026-02-14T09:49:35.043Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 监察法规 (code: 220)","data":{"fromPage":1,"totalPages":1,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:49:35.302Z","level":"INFO","crawler":"FLKCrawler","message":"监察法规 第 1/1 页, 3 条","data":{"progress":"1/1"}}
+{"timestamp":"2026-02-14T09:49:47.053Z","level":"INFO","crawler":"FLKCrawler","message":"监察法规 第 1/1 页下载完成: 3 个文件, 累计 3 个"}
+{"timestamp":"2026-02-14T09:49:50.048Z","level":"INFO","crawler":"FLKCrawler","message":"监察法规 下载完成","data":{"downloaded":3,"totalPages":1,"errors":0}}
+{"timestamp":"2026-02-14T09:49:50.051Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 地方法规 (code: 221)","data":{"fromPage":1,"totalPages":1,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:49:50.271Z","level":"INFO","crawler":"FLKCrawler","message":"地方法规 第 1/0 页无数据，跳过"}
+{"timestamp":"2026-02-14T09:49:50.272Z","level":"INFO","crawler":"FLKCrawler","message":"地方法规 下载完成","data":{"downloaded":0,"totalPages":0,"errors":0}}
+{"timestamp":"2026-02-14T09:49:50.276Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 地方法规 (code: 222)","data":{"fromPage":1,"totalPages":1,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:49:50.490Z","level":"INFO","crawler":"FLKCrawler","message":"地方法规 第 1/0 页无数据，跳过"}
+{"timestamp":"2026-02-14T09:49:50.491Z","level":"INFO","crawler":"FLKCrawler","message":"地方法规 下载完成","data":{"downloaded":0,"totalPages":0,"errors":0}}
+{"timestamp":"2026-02-14T09:49:50.494Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 地方性法规 (code: 230)","data":{"fromPage":1,"totalPages":1,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T09:49:50.709Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 1/1101 页, 20 条","data":{"progress":"1/1101"}}
+{"timestamp":"2026-02-14T09:50:29.244Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 10 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T09:51:14.903Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 20 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T09:51:18.342Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 1/1101 页下载完成: 20 个文件, 累计 20 个"}
+{"timestamp":"2026-02-14T09:51:22.716Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 2/1101 页, 20 条","data":{"progress":"2/1101"}}
+{"timestamp":"2026-02-14T09:51:56.084Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 30 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T09:52:37.184Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 40 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T09:52:40.221Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 2/1101 页下载完成: 20 个文件, 累计 40 个"}
+{"timestamp":"2026-02-14T09:52:42.667Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 3/1101 页, 20 条","data":{"progress":"3/1101"}}
+{"timestamp":"2026-02-14T09:53:18.498Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 50 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T09:53:59.092Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 60 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T09:54:03.757Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 3/1101 页下载完成: 20 个文件, 累计 60 个"}
+{"timestamp":"2026-02-14T09:54:06.994Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 4/1101 页, 20 条","data":{"progress":"4/1101"}}
+{"timestamp":"2026-02-14T09:54:41.633Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 70 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T09:55:17.073Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 80 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T09:55:19.557Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 4/1101 页下载完成: 20 个文件, 累计 80 个"}
+{"timestamp":"2026-02-14T09:55:23.849Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 5/1101 页, 20 条","data":{"progress":"5/1101"}}
+{"timestamp":"2026-02-14T09:55:59.165Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 90 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T09:56:40.367Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 100 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T09:56:44.406Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 5/1101 页下载完成: 20 个文件, 累计 100 个"}
+{"timestamp":"2026-02-14T09:56:48.636Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 6/1101 页, 20 条","data":{"progress":"6/1101"}}
+{"timestamp":"2026-02-14T09:56:48.638Z","level":"DEBUG","crawler":"FLKCrawler","message":"跳过已下载: 无锡市发展规划条例"}
+{"timestamp":"2026-02-14T09:56:48.638Z","level":"DEBUG","crawler":"FLKCrawler","message":"跳过已下载: 无锡市体育经营活动管理条例"}
+{"timestamp":"2026-02-14T09:57:25.136Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 110 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T09:57:54.972Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 6/1101 页下载完成: 18 个文件, 累计 118 个"}
+{"timestamp":"2026-02-14T09:57:58.619Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 7/1101 页, 20 条","data":{"progress":"7/1101"}}
+{"timestamp":"2026-02-14T09:58:02.385Z","level":"DEBUG","crawler":"FLKCrawler","message":"跳过已下载: 珠海市固体废物污染防治区域协同规定"}
+{"timestamp":"2026-02-14T09:58:02.768Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 120 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T09:58:45.824Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 130 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:07:02.246Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 地方性法规 (code: 230)","data":{"fromPage":7,"totalPages":1101,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T10:07:02.636Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 7/1101 页, 20 条","data":{"progress":"7/1101"}}
+{"timestamp":"2026-02-14T10:07:40.145Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 10 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:08:22.813Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 20 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:08:27.698Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 7/1101 页下载完成: 20 个文件, 累计 20 个"}
+{"timestamp":"2026-02-14T10:08:31.104Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 8/1101 页, 20 条","data":{"progress":"8/1101"}}
+{"timestamp":"2026-02-14T10:08:31.104Z","level":"DEBUG","crawler":"FLKCrawler","message":"跳过已下载: 河南省公路管理条例"}
+{"timestamp":"2026-02-14T10:08:31.105Z","level":"DEBUG","crawler":"FLKCrawler","message":"跳过已下载: 河南省供用电条例"}
+{"timestamp":"2026-02-14T10:08:47.998Z","level":"DEBUG","crawler":"FLKCrawler","message":"跳过已下载: 河南省体育发展条例"}
+{"timestamp":"2026-02-14T10:09:06.390Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 30 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:09:38.047Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 8/1101 页下载完成: 17 个文件, 累计 37 个"}
+{"timestamp":"2026-02-14T10:09:42.315Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 9/1101 页, 20 条","data":{"progress":"9/1101"}}
+{"timestamp":"2026-02-14T10:09:42.316Z","level":"DEBUG","crawler":"FLKCrawler","message":"跳过已下载: 吉林省边境管理条例"}
+{"timestamp":"2026-02-14T10:09:50.782Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 40 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:10:34.278Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 50 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:11:01.726Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 9/1101 页下载完成: 19 个文件, 累计 56 个"}
+{"timestamp":"2026-02-14T10:11:05.844Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 10/1101 页, 20 条","data":{"progress":"10/1101"}}
+{"timestamp":"2026-02-14T10:11:18.811Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 60 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:11:56.853Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 70 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:12:28.625Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 10/1101 页下载完成: 20 个文件, 累计 76 个"}
+{"timestamp":"2026-02-14T10:12:31.843Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 11/1101 页, 20 条","data":{"progress":"11/1101"}}
+{"timestamp":"2026-02-14T10:12:43.531Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 80 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:13:21.014Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 90 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:13:45.794Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 11/1101 页下载完成: 20 个文件, 累计 96 个"}
+{"timestamp":"2026-02-14T10:13:48.846Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 12/1101 页, 20 条","data":{"progress":"12/1101"}}
+{"timestamp":"2026-02-14T10:14:06.588Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 100 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:14:44.895Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 110 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:15:08.390Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 12/1101 页下载完成: 20 个文件, 累计 116 个"}
+{"timestamp":"2026-02-14T10:15:12.544Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 13/1101 页, 20 条","data":{"progress":"13/1101"}}
+{"timestamp":"2026-02-14T10:15:24.629Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 120 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:16:05.400Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 130 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:16:31.941Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 13/1101 页下载完成: 20 个文件, 累计 136 个"}
+{"timestamp":"2026-02-14T10:16:35.339Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 14/1101 页, 20 条","data":{"progress":"14/1101"}}
+{"timestamp":"2026-02-14T10:16:47.756Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 140 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:17:30.253Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 150 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:17:57.860Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 14/1101 页下载完成: 20 个文件, 累计 156 个"}
+{"timestamp":"2026-02-14T10:18:00.218Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 15/1101 页, 20 条","data":{"progress":"15/1101"}}
+{"timestamp":"2026-02-14T10:18:12.483Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 160 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:18:49.615Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 170 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:19:15.176Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 15/1101 页下载完成: 20 个文件, 累计 176 个"}
+{"timestamp":"2026-02-14T10:19:17.481Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 16/1101 页, 20 条","data":{"progress":"16/1101"}}
+{"timestamp":"2026-02-14T10:19:17.482Z","level":"DEBUG","crawler":"FLKCrawler","message":"跳过已下载: 广西壮族自治区实施《中华人民共和国工会法》办法"}
+{"timestamp":"2026-02-14T10:19:22.292Z","level":"DEBUG","crawler":"FLKCrawler","message":"跳过已下载: 广西壮族自治区物业管理条例"}
+{"timestamp":"2026-02-14T10:19:31.233Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 180 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:20:11.748Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 190 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:20:35.358Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 16/1101 页下载完成: 18 个文件, 累计 194 个"}
+{"timestamp":"2026-02-14T10:20:38.059Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 17/1101 页, 20 条","data":{"progress":"17/1101"}}
+{"timestamp":"2026-02-14T10:20:55.434Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 200 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:21:36.079Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 210 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:21:58.215Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 17/1101 页下载完成: 20 个文件, 累计 214 个"}
+{"timestamp":"2026-02-14T10:22:01.221Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 18/1101 页, 20 条","data":{"progress":"18/1101"}}
+{"timestamp":"2026-02-14T10:22:22.077Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 220 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:23:03.857Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 230 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:23:20.445Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 18/1101 页下载完成: 20 个文件, 累计 234 个"}
+{"timestamp":"2026-02-14T10:23:22.795Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 19/1101 页, 20 条","data":{"progress":"19/1101"}}
+{"timestamp":"2026-02-14T10:23:22.796Z","level":"DEBUG","crawler":"FLKCrawler","message":"跳过已下载: 东营市全民健身条例"}
+{"timestamp":"2026-02-14T10:23:41.540Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 240 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:24:23.691Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 250 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:24:42.171Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 19/1101 页下载完成: 19 个文件, 累计 253 个"}
+{"timestamp":"2026-02-14T10:24:45.939Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 20/1101 页, 20 条","data":{"progress":"20/1101"}}
+{"timestamp":"2026-02-14T10:25:09.290Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 260 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:25:42.130Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 270 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:25:56.736Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 20/1101 页下载完成: 20 个文件, 累计 273 个"}
+{"timestamp":"2026-02-14T10:26:00.379Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 21/1101 页, 20 条","data":{"progress":"21/1101"}}
+{"timestamp":"2026-02-14T10:26:23.006Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 280 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:27:03.169Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 290 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:27:19.354Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 21/1101 页下载完成: 20 个文件, 累计 293 个"}
+{"timestamp":"2026-02-14T10:27:22.165Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 22/1101 页, 20 条","data":{"progress":"22/1101"}}
+{"timestamp":"2026-02-14T10:27:40.897Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 300 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:28:24.511Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 310 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:28:39.035Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 22/1101 页下载完成: 20 个文件, 累计 313 个"}
+{"timestamp":"2026-02-14T10:28:41.648Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 23/1101 页, 20 条","data":{"progress":"23/1101"}}
+{"timestamp":"2026-02-14T10:29:08.667Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 320 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:29:48.589Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 330 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:30:04.318Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 23/1101 页下载完成: 20 个文件, 累计 333 个"}
+{"timestamp":"2026-02-14T10:30:08.864Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 24/1101 页, 20 条","data":{"progress":"24/1101"}}
+{"timestamp":"2026-02-14T10:30:31.044Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 340 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:31:13.663Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 350 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:31:26.579Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 24/1101 页下载完成: 20 个文件, 累计 353 个"}
+{"timestamp":"2026-02-14T10:31:29.835Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 25/1101 页, 20 条","data":{"progress":"25/1101"}}
+{"timestamp":"2026-02-14T10:31:53.678Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 360 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:32:41.389Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 370 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:33:00.224Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 25/1101 页下载完成: 20 个文件, 累计 373 个"}
+{"timestamp":"2026-02-14T10:33:04.683Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 26/1101 页, 20 条","data":{"progress":"26/1101"}}
+{"timestamp":"2026-02-14T10:33:31.936Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 380 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:34:14.010Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 390 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:34:30.299Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 26/1101 页下载完成: 20 个文件, 累计 393 个"}
+{"timestamp":"2026-02-14T10:34:33.599Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 27/1101 页, 20 条","data":{"progress":"27/1101"}}
+{"timestamp":"2026-02-14T10:34:55.227Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 400 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:35:38.172Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 410 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:35:54.588Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 27/1101 页下载完成: 20 个文件, 累计 413 个"}
+{"timestamp":"2026-02-14T10:35:59.283Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 28/1101 页, 20 条","data":{"progress":"28/1101"}}
+{"timestamp":"2026-02-14T10:36:23.519Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 420 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:37:01.476Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 430 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:37:18.757Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 28/1101 页下载完成: 20 个文件, 累计 433 个"}
+{"timestamp":"2026-02-14T10:37:21.803Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 29/1101 页, 20 条","data":{"progress":"29/1101"}}
+{"timestamp":"2026-02-14T10:37:46.163Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 440 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:38:26.324Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 450 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:38:42.361Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 29/1101 页下载完成: 20 个文件, 累计 453 个"}
+{"timestamp":"2026-02-14T10:38:45.278Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 30/1101 页, 20 条","data":{"progress":"30/1101"}}
+{"timestamp":"2026-02-14T10:39:09.957Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 460 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:39:42.604Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 470 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:40:00.664Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 30/1101 页下载完成: 20 个文件, 累计 473 个"}
+{"timestamp":"2026-02-14T10:40:04.763Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 31/1101 页, 20 条","data":{"progress":"31/1101"}}
+{"timestamp":"2026-02-14T10:40:29.136Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 480 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:41:09.335Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 490 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:41:23.299Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 31/1101 页下载完成: 20 个文件, 累计 493 个"}
+{"timestamp":"2026-02-14T10:41:28.302Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 32/1101 页, 20 条","data":{"progress":"32/1101"}}
+{"timestamp":"2026-02-14T10:41:51.702Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 500 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:42:33.974Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 510 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:42:49.606Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 32/1101 页下载完成: 20 个文件, 累计 513 个"}
+{"timestamp":"2026-02-14T10:42:52.859Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 33/1101 页, 20 条","data":{"progress":"33/1101"}}
+{"timestamp":"2026-02-14T10:43:13.915Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 520 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:43:53.893Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 530 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:44:09.560Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 33/1101 页下载完成: 20 个文件, 累计 533 个"}
+{"timestamp":"2026-02-14T10:44:12.113Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 34/1101 页, 20 条","data":{"progress":"34/1101"}}
+{"timestamp":"2026-02-14T10:44:36.238Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 540 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:45:13.333Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 550 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:45:30.130Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 34/1101 页下载完成: 20 个文件, 累计 553 个"}
+{"timestamp":"2026-02-14T10:45:35.428Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 35/1101 页, 20 条","data":{"progress":"35/1101"}}
+{"timestamp":"2026-02-14T10:46:00.296Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 560 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:46:46.281Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 570 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:47:02.508Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 35/1101 页下载完成: 20 个文件, 累计 573 个"}
+{"timestamp":"2026-02-14T10:47:07.063Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 36/1101 页, 20 条","data":{"progress":"36/1101"}}
+{"timestamp":"2026-02-14T10:47:35.371Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 580 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:48:13.454Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 590 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:48:31.941Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 36/1101 页下载完成: 20 个文件, 累计 593 个"}
+{"timestamp":"2026-02-14T10:48:37.280Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 37/1101 页, 20 条","data":{"progress":"37/1101"}}
+{"timestamp":"2026-02-14T10:48:58.727Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 600 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:49:38.844Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 610 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:49:55.991Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 37/1101 页下载完成: 20 个文件, 累计 613 个"}
+{"timestamp":"2026-02-14T10:49:59.628Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 38/1101 页, 20 条","data":{"progress":"38/1101"}}
+{"timestamp":"2026-02-14T10:50:27.150Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 620 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:51:13.238Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 630 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:51:30.508Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 38/1101 页下载完成: 20 个文件, 累计 633 个"}
+{"timestamp":"2026-02-14T10:51:34.917Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 39/1101 页, 20 条","data":{"progress":"39/1101"}}
+{"timestamp":"2026-02-14T10:52:00.715Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 640 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:52:37.863Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 650 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:52:54.985Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 39/1101 页下载完成: 20 个文件, 累计 653 个"}
+{"timestamp":"2026-02-14T10:52:57.656Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 40/1101 页, 20 条","data":{"progress":"40/1101"}}
+{"timestamp":"2026-02-14T10:53:23.350Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 660 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:54:05.370Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 670 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:54:16.249Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 40/1101 页下载完成: 20 个文件, 累计 673 个"}
+{"timestamp":"2026-02-14T10:54:21.016Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 41/1101 页, 20 条","data":{"progress":"41/1101"}}
+{"timestamp":"2026-02-14T10:54:45.310Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 680 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:55:23.214Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 690 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:55:40.014Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 41/1101 页下载完成: 20 个文件, 累计 693 个"}
+{"timestamp":"2026-02-14T10:55:42.988Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 42/1101 页, 20 条","data":{"progress":"42/1101"}}
+{"timestamp":"2026-02-14T10:56:04.326Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 700 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:56:44.618Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 710 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:56:58.887Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 42/1101 页下载完成: 20 个文件, 累计 713 个"}
+{"timestamp":"2026-02-14T10:57:02.451Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 43/1101 页, 20 条","data":{"progress":"43/1101"}}
+{"timestamp":"2026-02-14T10:57:25.329Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 720 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:58:02.326Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 730 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:58:15.776Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 43/1101 页下载完成: 20 个文件, 累计 733 个"}
+{"timestamp":"2026-02-14T10:58:18.686Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 44/1101 页, 20 条","data":{"progress":"44/1101"}}
+{"timestamp":"2026-02-14T10:58:43.624Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 740 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:59:20.620Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 750 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T10:59:36.616Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 44/1101 页下载完成: 20 个文件, 累计 753 个"}
+{"timestamp":"2026-02-14T10:59:40.823Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 45/1101 页, 20 条","data":{"progress":"45/1101"}}
+{"timestamp":"2026-02-14T11:00:12.859Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 760 个文件","data":{"type":"地方性法规"}}
+                                                                                                                                                     {"timestamp":"2026-02-14T11:09:39.636Z","level":"INFO","crawler":"FLKCrawler","message":"开始下载分类: 地方性法规 (code: 230)","data":{"fromPage":45,"totalPages":1101,"maxPages":"unlimited"}}
+{"timestamp":"2026-02-14T11:09:40.062Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 45/1101 页, 20 条","data":{"progress":"45/1101"}}
+{"timestamp":"2026-02-14T11:10:12.066Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 10 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T11:10:51.226Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 20 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T11:10:55.428Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 45/1101 页下载完成: 20 个文件, 累计 20 个"}
+{"timestamp":"2026-02-14T11:10:58.975Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 46/1101 页, 20 条","data":{"progress":"46/1101"}}
+{"timestamp":"2026-02-14T11:11:35.944Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 30 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T11:12:16.052Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 40 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T11:12:20.625Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 46/1101 页下载完成: 20 个文件, 累计 40 个"}
+{"timestamp":"2026-02-14T11:12:23.166Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 47/1101 页, 20 条","data":{"progress":"47/1101"}}
+{"timestamp":"2026-02-14T11:12:23.167Z","level":"DEBUG","crawler":"FLKCrawler","message":"跳过已下载: 中国（云南）自由贸易试验区条例"}
+{"timestamp":"2026-02-14T11:13:04.149Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 50 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T11:13:46.906Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 47/1101 页下载完成: 19 个文件, 累计 59 个"}
+{"timestamp":"2026-02-14T11:13:50.721Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 48/1101 页, 20 条","data":{"progress":"48/1101"}}
+{"timestamp":"2026-02-14T11:13:51.224Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 60 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T11:14:29.726Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 70 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T11:15:08.039Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 48/1101 页下载完成: 20 个文件, 累计 79 个"}
+{"timestamp":"2026-02-14T11:15:13.236Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 49/1101 页, 20 条","data":{"progress":"49/1101"}}
+{"timestamp":"2026-02-14T11:15:13.715Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 80 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T11:15:55.666Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 90 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T11:16:31.955Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 49/1101 页下载完成: 20 个文件, 累计 99 个"}
+{"timestamp":"2026-02-14T11:16:35.868Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 50/1101 页, 20 条","data":{"progress":"50/1101"}}
+{"timestamp":"2026-02-14T11:16:36.383Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 100 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T11:17:13.036Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 110 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T11:17:51.986Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 50/1101 页下载完成: 20 个文件, 累计 119 个"}
+{"timestamp":"2026-02-14T11:17:55.575Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 51/1101 页, 20 条","data":{"progress":"51/1101"}}
+{"timestamp":"2026-02-14T11:17:56.066Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 120 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T11:18:32.358Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 130 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T11:19:09.536Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 51/1101 页下载完成: 20 个文件, 累计 139 个"}
+{"timestamp":"2026-02-14T11:19:12.265Z","level":"INFO","crawler":"FLKCrawler","message":"地方性法规 第 52/1101 页, 20 条","data":{"progress":"52/1101"}}
+{"timestamp":"2026-02-14T11:19:12.795Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 140 个文件","data":{"type":"地方性法规"}}
+{"timestamp":"2026-02-14T11:19:50.717Z","level":"INFO","crawler":"FLKCrawler","message":"已下载 150 个文件","data":{"type":"地方性法规"}}

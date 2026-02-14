@@ -16,6 +16,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { BaseCrawler, CrawlerResult, LawArticleData } from './base-crawler';
 import { LawCategory, LawType, LawStatus } from '@prisma/client';
+import { getLogger } from './crawler-logger';
 
 // ─── 新版 FLK API 类型定义 ───────────────────────────────────────────
 
@@ -489,6 +490,15 @@ export class FLKCrawler extends BaseCrawler {
   /** 连续失败计数, 用于自适应限速 */
   private consecutiveErrors = 0;
 
+  /** 日志系统 */
+  private logger = getLogger('FLKCrawler');
+
+  /** 连续失败阈值 */
+  private readonly MAX_CONSECUTIVE_ERRORS = 3;
+
+  /** 单页失败阈值 */
+  private readonly MAX_PAGE_FAILURES = 3;
+
   /** User-Agent 池 */
   private static readonly UA_POOL = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -707,6 +717,7 @@ export class FLKCrawler extends BaseCrawler {
   ): Promise<{ downloaded: number; errors: string[] }> {
     let downloaded = 0;
     const errors: string[] = [];
+    let consecutivePageFailures = 0;
 
     // 从断点恢复页码
     const typeProgress = opts.checkpoint.types[typeCode.toString()] || {
@@ -729,8 +740,17 @@ export class FLKCrawler extends BaseCrawler {
         .map(item => item.bbbs)
     );
 
+    this.logger.info(`开始下载分类: ${typeConfig.label} (code: ${typeCode})`, {
+      fromPage: page,
+      totalPages,
+      maxPages: opts.maxPages || 'unlimited',
+    });
+
     while (page <= totalPages) {
-      if (opts.maxPages > 0 && page > opts.maxPages) break;
+      if (opts.maxPages > 0 && page > opts.maxPages) {
+        this.logger.info(`达到最大页数限制 ${opts.maxPages}，停止下载`);
+        break;
+      }
 
       try {
         // 新版列表 API (POST)
@@ -741,13 +761,28 @@ export class FLKCrawler extends BaseCrawler {
           opts.sinceDate
         );
 
+        // 改进：不直接 break，而是记录错误并继续
         if (listResponse.code !== 200 || !listResponse.rows) {
-          errors.push(
-            `[${typeCode}] 列表请求失败: page=${page}, code=${listResponse.code}, msg=${listResponse.msg}`
-          );
-          break;
+          const errorMsg = `列表请求失败: page=${page}, code=${listResponse.code}, msg=${listResponse.msg}`;
+          errors.push(`[${typeCode}] ${errorMsg}`);
+          this.logger.error(errorMsg);
+
+          consecutivePageFailures++;
+
+          // 如果连续失败超过阈值，跳过该分类
+          if (consecutivePageFailures >= this.MAX_PAGE_FAILURES) {
+            this.logger.warn(
+              `连续 ${consecutivePageFailures} 页失败，跳过该分类剩余页面`
+            );
+            break;
+          }
+
+          page++;
+          continue;
         }
 
+        // 成功获取数据，重置失败计数
+        consecutivePageFailures = 0;
         const { rows } = listResponse;
         totalPages = Math.ceil(listResponse.total / opts.pageSize);
 
@@ -757,19 +792,26 @@ export class FLKCrawler extends BaseCrawler {
         });
 
         if (rows.length === 0) {
-          console.log(
-            `[FLKCrawler] ${typeConfig.label} 第 ${page}/${totalPages} 页无数据`
+          this.logger.info(
+            `${typeConfig.label} 第 ${page}/${totalPages} 页无数据，跳过`
           );
           break;
         }
 
-        console.log(
-          `[FLKCrawler] ${typeConfig.label} 第 ${page}/${totalPages} 页, ${rows.length} 条, 开始逐条下载...`
+        this.logger.info(
+          `${typeConfig.label} 第 ${page}/${totalPages} 页, ${rows.length} 条`,
+          {
+            progress: `${page}/${totalPages}`,
+          }
         );
 
+        let pageDownloaded = 0;
         for (const item of rows) {
           // 去重
-          if (downloadedIds.has(item.bbbs)) continue;
+          if (downloadedIds.has(item.bbbs)) {
+            this.logger.debug(`跳过已下载: ${item.title}`);
+            continue;
+          }
 
           try {
             const filePath = await this.downloadSingleItem(
@@ -793,12 +835,20 @@ export class FLKCrawler extends BaseCrawler {
             });
             downloadedIds.add(item.bbbs);
             downloaded++;
-          } catch (err) {
-            const msg = `[${typeCode}] 下载失败 [${item.title}]: ${err instanceof Error ? err.message : err}`;
-            errors.push(msg);
-            this.recordError(msg);
+            pageDownloaded++;
 
-            // 下载失败也记录元数据
+            if (downloaded % 10 === 0) {
+              this.logger.info(`已下载 ${downloaded} 个文件`, {
+                type: typeConfig.label,
+              });
+            }
+          } catch (err) {
+            const errorMsg = `下载失败 [${item.title}]: ${err instanceof Error ? err.message : err}`;
+            const fullMsg = `[${typeCode}] ${errorMsg}`;
+            errors.push(fullMsg);
+            this.logger.error(errorMsg, err instanceof Error ? err : undefined);
+
+            // 下载失败也记录元数据，以便后续重试
             opts.checkpoint.items.push({
               bbbs: item.bbbs,
               title: item.title,
@@ -822,8 +872,8 @@ export class FLKCrawler extends BaseCrawler {
           await this.randomDelay();
         }
 
-        console.log(
-          `[FLKCrawler] ${typeConfig.label} 第 ${page}/${totalPages} 页下载完成, 累计 ${downloaded} 个文件`
+        this.logger.info(
+          `${typeConfig.label} 第 ${page}/${totalPages} 页下载完成: ${pageDownloaded} 个文件, 累计 ${downloaded} 个`
         );
 
         // 更新断点
@@ -839,12 +889,21 @@ export class FLKCrawler extends BaseCrawler {
         page++;
         await this.randomDelay();
       } catch (err) {
-        const msg = `[${typeCode}] 列表页 ${page} 异常: ${err instanceof Error ? err.message : err}`;
-        errors.push(msg);
-        this.recordError(msg);
+        const errorMsg = `列表页 ${page} 异常: ${err instanceof Error ? err.message : err}`;
+        const fullMsg = `[${typeCode}] ${errorMsg}`;
+        errors.push(fullMsg);
+        this.logger.error(errorMsg, err instanceof Error ? err : undefined);
 
-        this.consecutiveErrors++;
-        await this.randomDelay();
+        consecutivePageFailures++;
+
+        // 如果连续失败超过阈值，跳过该分类
+        if (consecutivePageFailures >= this.MAX_PAGE_FAILURES) {
+          this.logger.warn(
+            `连续 ${consecutivePageFailures} 页异常，跳过该分类剩余页面`
+          );
+          break;
+        }
+
         page++;
       }
     }
@@ -853,6 +912,12 @@ export class FLKCrawler extends BaseCrawler {
     typeProgress.completed = true;
     typeProgress.downloaded = downloaded;
     opts.checkpoint.types[typeCode.toString()] = typeProgress;
+
+    this.logger.info(`${typeConfig.label} 下载完成`, {
+      downloaded,
+      totalPages,
+      errors: errors.length,
+    });
 
     return { downloaded, errors };
   }
@@ -878,11 +943,20 @@ export class FLKCrawler extends BaseCrawler {
       detail.data.ossFile.ossWordPath
     );
 
+    // 3. 检查下载响应是否有效
+    const responseText = docxBuffer.toString('utf-8');
+    if (docxBuffer.length === 23 && responseText.startsWith('{"msg"')) {
+      const errorJson = JSON.parse(responseText);
+      throw new Error(
+        `API 返回错误: ${errorJson.msg || `code ${errorJson.code}`}`
+      );
+    }
+
     if (docxBuffer.length < 100) {
       throw new Error(`文件过小 (${docxBuffer.length} bytes), 可能下载失败`);
     }
 
-    // 3. 保存到磁盘
+    // 4. 保存到磁盘
     const safeId = item.bbbs.replace(/[^a-zA-Z0-9_-]/g, '_');
     const filePath = path.join(typeDir, `${safeId}.docx`);
     await fs.promises.writeFile(filePath, docxBuffer);
@@ -1106,31 +1180,71 @@ export class FLKCrawler extends BaseCrawler {
     buffer: Buffer,
     sourceId: string
   ): Promise<string> {
+    const results: { method: string; text: string; length: number }[] = [];
+
+    // 方法 1: 使用增强型 docx-parser
     try {
       const { docxParser } = await import('./docx-parser');
       const doc = await docxParser.parse(buffer, `flk://${sourceId}`);
       if (doc?.fullText && doc.fullText.length > 20) {
-        return doc.fullText;
+        results.push({
+          method: 'docx-parser',
+          text: doc.fullText,
+          length: doc.fullText.length,
+        });
       }
-    } catch {
-      // 降级
+    } catch (error) {
+      this.logger.debug('docx-parser 解析失败', {
+        sourceId,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
 
+    // 方法 2: 使用 mammoth
     try {
       const mammoth = await import('mammoth');
       const result = await mammoth.extractRawText({ buffer });
       if (result.value && result.value.length > 20) {
-        return result.value;
+        results.push({
+          method: 'mammoth',
+          text: result.value,
+          length: result.value.length,
+        });
       }
-    } catch {
-      // 降级
+    } catch (error) {
+      this.logger.debug('mammoth 解析失败', {
+        sourceId,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
 
+    // 方法 3: 直接提取 XML 文本
     try {
       const text = await this.extractTextFromZip(buffer);
-      if (text && text.length > 20) return text;
-    } catch {
-      // 失败
+      if (text && text.length > 20) {
+        results.push({
+          method: 'xml-extraction',
+          text,
+          length: text.length,
+        });
+      }
+    } catch (error) {
+      this.logger.debug('XML 提取失败', {
+        sourceId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    // 选择最长的结果
+    if (results.length > 0) {
+      results.sort((a, b) => b.length - a.length);
+      const bestResult = results[0];
+      this.logger.info(`使用 ${bestResult.method} 解析`, {
+        sourceId,
+        length: bestResult.length,
+        methods: results.map(r => r.method),
+      });
+      return bestResult.text;
     }
 
     throw new Error('所有 DOCX 解析方式均失败');
@@ -1293,7 +1407,8 @@ export class FLKCrawler extends BaseCrawler {
     bbbs: string,
     ossFilePath: string
   ): Promise<Buffer> {
-    const url = `${this.API_DOWNLOAD}?bbbs=${encodeURIComponent(bbbs)}&ossFilePath=${encodeURIComponent(ossFilePath)}`;
+    // 修复：添加 format=docx 参数（关键修复！）
+    const url = `${this.API_DOWNLOAD}?format=docx&bbbs=${encodeURIComponent(bbbs)}&ossFilePath=${encodeURIComponent(ossFilePath)}`;
     const response = await this.fetchWithRetry(url, {
       method: 'GET',
       headers: {
@@ -1401,3 +1516,4 @@ export class FLKCrawler extends BaseCrawler {
 }
 
 export const flkCrawler = new FLKCrawler();
+export { FLK_TYPE_CONFIGS };

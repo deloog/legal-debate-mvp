@@ -304,6 +304,11 @@ export class DOCXParser {
       throw new ParseError('无法提取文本');
     }
 
+    // 验证解析结果 - 检测"题注+条款列表"模式
+    if (this.isParsingFailure(textContent)) {
+      throw new ParseError('解析结果不完整 - 只提取了标题和目录');
+    }
+
     const documentType = this.detectDocumentType(textContent, paragraphs);
     const parsed = await this.parseByStrategy(
       textContent,
@@ -312,6 +317,16 @@ export class DOCXParser {
     );
 
     return parsed;
+  }
+
+  /**
+   * 检测解析失败 - "题注+条款列表"模式
+   */
+  private isParsingFailure(text: string): boolean {
+    // 特征：包含"题注"或"第一条\n第二条"但内容很短
+    const hasHeaders = text.includes('题注') || text.includes('第一条\n第二条');
+    const isShort = text.length < 500;
+    return hasHeaders && isShort;
   }
 
   /**
@@ -351,12 +366,17 @@ export class DOCXParser {
     const parser = new xml2js.Parser({ explicitArray: false });
     const root = await parser.parseStringPromise(xmlContent);
 
-    // 提取文本
-    const textContent = this.extractTextFromXml(root);
+    // 提取文本 - 使用更强大的方法
+    const textContent = this.extractTextFromXmlEnhanced(root);
     const paragraphs = textContent.split('\n').filter(p => p.trim());
 
     if (!paragraphs.length) {
       throw new ParseError('无法提取文本');
+    }
+
+    // 验证解析结果
+    if (this.isParsingFailure(textContent)) {
+      throw new ParseError('解析结果不完整 - 只提取了标题和目录');
     }
 
     const documentType = this.detectDocumentType(textContent, paragraphs);
@@ -367,6 +387,117 @@ export class DOCXParser {
     );
 
     return parsed;
+  }
+
+  /**
+   * 从 XML 提取文本 - 增强版，支持旧格式
+   */
+  private extractTextFromXmlEnhanced(root: any): string {
+    const textParts: string[] = [];
+
+    const extractText = (element: any, depth: number = 0): void => {
+      // 限制递归深度，防止栈溢出
+      if (depth > 100) return;
+
+      // 直接文本
+      if (element.text && typeof element.text === 'string') {
+        const text = element.text.trim();
+        if (text.length > 0) {
+          textParts.push(text);
+        }
+      }
+
+      // 查找 w:t 标签（Word 文本标签）
+      if (element['w:t'] || element.t) {
+        const text = element['w:t'] || element.t;
+        if (typeof text === 'string' && text.trim()) {
+          textParts.push(text.trim());
+        }
+      }
+
+      // 查找 w:r 标签（Word 文本运行）
+      if (element['w:r'] || element.r) {
+        const runs = Array.isArray(element['w:r'])
+          ? element['w:r']
+          : [element['w:r']];
+        const runs2 = Array.isArray(element.r) ? element.r : [element.r];
+        [...runs, ...runs2].forEach((run: any) => {
+          if (run) extractText(run, depth + 1);
+        });
+      }
+
+      // 查找 w:p 标签（Word 段落）
+      if (element['w:p'] || element.p) {
+        const paragraphs = Array.isArray(element['w:p'])
+          ? element['w:p']
+          : [element['w:p']];
+        const paragraphs2 = Array.isArray(element.p) ? element.p : [element.p];
+        [...paragraphs, ...paragraphs2].forEach((para: any) => {
+          if (para) {
+            const paraText = this.extractTextFromParagraph(para);
+            if (paraText) {
+              textParts.push(paraText);
+            }
+          }
+        });
+      }
+
+      // 递归遍历子元素
+      if (element.$$ && Array.isArray(element.$$)) {
+        element.$$.forEach((child: any) => extractText(child, depth + 1));
+      }
+
+      // 查找所有可能的子元素
+      for (const key of Object.keys(element)) {
+        if (key !== '$$' && key !== '$' && key !== 'text') {
+          const child = element[key];
+          if (Array.isArray(child)) {
+            child.forEach((c: any) => extractText(c, depth + 1));
+          } else if (typeof child === 'object' && child !== null) {
+            extractText(child, depth + 1);
+          }
+        }
+      }
+    };
+
+    extractText(root);
+
+    // 过滤空行和过短的行
+    return textParts.filter(t => t.trim().length >= 2).join('\n');
+  }
+
+  /**
+   * 从段落提取文本
+   */
+  private extractTextFromParagraph(para: any): string {
+    const textParts: string[] = [];
+
+    const extractFromRun = (run: any): void => {
+      if (!run) return;
+
+      // w:t 文本
+      if (run['w:t'] || run.t) {
+        const text = run['w:t'] || run.t;
+        if (typeof text === 'string') {
+          textParts.push(text);
+        }
+      }
+
+      // 递归
+      if (run['w:r'] || run.r) {
+        const runs = Array.isArray(run['w:r']) ? run['w:r'] : [run['w:r']];
+        const runs2 = Array.isArray(run.r) ? run.r : [run.r];
+        [...runs, ...runs2].forEach((r: any) => extractFromRun(r));
+      }
+
+      if (run.$$ && Array.isArray(run.$$)) {
+        run.$$.forEach((child: any) => extractFromRun(child));
+      }
+    };
+
+    extractFromRun(para);
+
+    return textParts.join('');
   }
 
   /**
