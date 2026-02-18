@@ -1419,7 +1419,33 @@ export class FLKCrawler extends BaseCrawler {
     });
 
     const arrayBuffer = await response.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+    const buffer = Buffer.from(arrayBuffer);
+
+    // 检查是否是JSON响应（包含下载链接的元数据）
+    const responseText = buffer.toString('utf-8');
+    if (responseText.startsWith('{') || responseText.startsWith('[')) {
+      try {
+        const jsonData = JSON.parse(responseText);
+        if (jsonData.data?.url) {
+          // 如果返回的是包含下载URL的JSON，使用该URL重新下载
+          this.logger.debug('API返回JSON元数据，使用真实URL下载', { url: jsonData.data.url });
+          const realResponse = await this.fetchWithRetry(jsonData.data.url, {
+            method: 'GET',
+            headers: {
+              'User-Agent': this.randomUA(),
+              Accept: '*/*',
+              Referer: 'https://flk.npc.gov.cn/',
+            },
+          });
+          const realBuffer = await realResponse.arrayBuffer();
+          return Buffer.from(realBuffer);
+        }
+      } catch (e) {
+        this.logger.error('解析JSON响应失败', e instanceof Error ? e : new Error(String(e)));
+      }
+    }
+
+    return buffer;
   }
 
   private async fetchWithRetry(
