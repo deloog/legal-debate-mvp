@@ -52,6 +52,15 @@ backups/
 test-data/
 ai-poc-validation-report.json
 
+# Crawler data - downloaded and parsed files
+data/crawled/
+data/download-*.docx
+data/*.json
+data/*.zip
+
+# Crawler logs
+logs/crawler-*.log
+
 # Test artifacts
 playwright-report/data/
 public/uploads/
