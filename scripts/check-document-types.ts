@@ -86,7 +86,7 @@ async function main() {
 
     const lengths = records.map((r: any) => r.fullText ? r.fullText.length : 0).sort((a: number, b: number) => a - b);
     const min = lengths[0] || 0;
-    const max = lengths[lengths - 1] || 0;
+    const max = lengths[lengths.length - 1] || 0;
     const avg = lengths.length > 0 ? lengths.reduce((a: number, b: number) => a + b, 0) / lengths.length : 0;
     const median = lengths[Math.floor(lengths.length / 2)] || 0;
 

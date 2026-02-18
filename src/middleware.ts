@@ -6,8 +6,61 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+/**
+ * 获取允许的 CORS 来源白名单。
+ * 读取顺序：
+ *   1. 开发环境 localhost 默认值
+ *   2. NEXT_PUBLIC_APP_URL（生产域名）
+ *   3. ALLOWED_ORIGINS（逗号分隔的额外域名，适用于多域名/staging环境）
+ */
+function getAllowedOrigins(): string[] {
+  const origins: string[] = ['http://localhost:3000', 'http://localhost:3001'];
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    origins.push(process.env.NEXT_PUBLIC_APP_URL);
+  }
+  if (process.env.ALLOWED_ORIGINS) {
+    process.env.ALLOWED_ORIGINS.split(',')
+      .map(o => o.trim())
+      .filter(Boolean)
+      .forEach(o => origins.push(o));
+  }
+  return origins;
+}
+
+/**
+ * 向响应添加 CORS 头（仅当 origin 在白名单中时）。
+ * 同时写入 Vary: Origin，确保 CDN 按来源分别缓存。
+ */
+function addCorsHeaders(response: NextResponse, corsOrigin: string | null): void {
+  if (corsOrigin) {
+    response.headers.set('Access-Control-Allow-Origin', corsOrigin);
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    response.headers.set('Vary', 'Origin');
+  }
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const origin = request.headers.get('origin');
+  const corsOrigin = origin && getAllowedOrigins().includes(origin) ? origin : null;
+
+  // ─── CORS 预检请求 ────────────────────────────────────────────────────────
+  // OPTIONS 预检必须在鉴权之前处理：浏览器发送预检时不携带凭据，
+  // 若被鉴权中间件拦截会返回 401，导致所有跨域请求失败。
+  if (request.method === 'OPTIONS' && pathname.startsWith('/api/')) {
+    const headers: Record<string, string> = {
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers':
+        'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400',
+    };
+    if (corsOrigin) {
+      headers['Access-Control-Allow-Origin'] = corsOrigin;
+      headers['Access-Control-Allow-Credentials'] = 'true';
+      headers['Vary'] = 'Origin';
+    }
+    return new NextResponse(null, { status: 204, headers });
+  }
 
   // 公开路径（无需登录）
   const publicPaths = [
@@ -37,7 +90,9 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/favicon') ||
     pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|css|js)$/)
   ) {
-    return NextResponse.next();
+    const res = NextResponse.next();
+    addCorsHeaders(res, corsOrigin);
+    return res;
   }
 
   // 从cookie或Authorization header获取token
@@ -59,10 +114,12 @@ export function middleware(request: NextRequest) {
     // API路径返回401 JSON，页面路径重定向到登录页
     if (pathname.startsWith('/api/')) {
       console.log('[Middleware] API请求无token，返回401:', pathname);
-      return NextResponse.json(
+      const errorRes = NextResponse.json(
         { success: false, message: '未认证，请先登录' },
         { status: 401 }
       );
+      addCorsHeaders(errorRes, corsOrigin);
+      return errorRes;
     }
 
     // 页面路径：重定向到登录页
@@ -82,6 +139,9 @@ export function middleware(request: NextRequest) {
 
   // 直接放行，让API路由处理token验证和权限检查
   const response = NextResponse.next();
+
+  // 添加 CORS 头（仅当来源在白名单时）
+  addCorsHeaders(response, corsOrigin);
 
   // 添加安全响应头
   response.headers.set('X-Content-Type-Options', 'nosniff');

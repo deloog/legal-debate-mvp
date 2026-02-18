@@ -2,6 +2,9 @@
  * 调试 API 返回数据
  */
 
+// 声明为模块以避免重复函数名冲突
+export {};
+
 const API_DETAIL = 'https://flk.npc.gov.cn/law-search/search/flfgDetails';
 
 async function fetchDetail(bbbs: string): Promise<any> {

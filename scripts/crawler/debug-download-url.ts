@@ -2,6 +2,9 @@
  * 调试 API 返回的下载 URL
  */
 
+// 声明为模块以避免重复函数名冲突
+export {};
+
 async function main() {
   const API_DETAIL = 'https://flk.npc.gov.cn/law-search/search/flfgDetails';
 

@@ -32,6 +32,13 @@ export interface CrawlerResult {
 
 export interface LawArticleData {
   lawName: string;
+  /**
+   * 条款/文本标识符。
+   * 对于 FLK 来源：存储 bbbs（业务主键），格式为 32 位十六进制字符串，
+   * 代表整部法律文本，非条款级别编号。
+   * 对于未来按条拆分的数据源：可存储「第X条」格式的条款号。
+   * UI 展示时，FLK 数据应显示为「全文」而非原始哈希值。
+   */
   articleNumber: string;
   fullText: string;
   lawType: LawType;
@@ -138,15 +145,19 @@ export abstract class BaseCrawler {
   abstract parseArticle(rawData: any): LawArticleData | null;
 
   /**
-   * 保存法条数据到数据库
+   * 保存法条数据到数据库。
+   * 返回 { saved, isNew } 供调用方统计新增/更新数量，避免外部重复查询。
    */
-  protected async saveArticle(data: LawArticleData): Promise<boolean> {
+  protected async saveArticle(
+    data: LawArticleData
+  ): Promise<{ saved: boolean; isNew: boolean }> {
     try {
       const existing = await prisma.lawArticle.findFirst({
         where: {
           lawName: data.lawName,
           articleNumber: data.articleNumber,
         },
+        select: { id: true },
       });
 
       const articleData = {
@@ -176,7 +187,7 @@ export abstract class BaseCrawler {
           where: { id: existing.id },
           data: articleData,
         });
-        return true;
+        return { saved: true, isNew: false };
       } else {
         await prisma.lawArticle.create({
           data: {
@@ -185,13 +196,13 @@ export abstract class BaseCrawler {
             ...articleData,
           } as Prisma.LawArticleCreateInput,
         });
-        return true;
+        return { saved: true, isNew: true };
       }
     } catch (error) {
       this.recordError(
         `Failed to save article: ${data.lawName} ${data.articleNumber} - ${error}`
       );
-      return false;
+      return { saved: false, isNew: false };
     }
   }
 
@@ -219,7 +230,9 @@ export abstract class BaseCrawler {
   }
 
   /**
-   * 批量保存法条
+   * 批量保存法条。
+   * 每条记录只执行一次 findFirst + update/create（共 2 次查询），
+   * 不在 DB 写入之间施加速率限制延迟（限速仅适用于 HTTP 请求）。
    */
   protected async saveArticles(
     articles: LawArticleData[]
@@ -232,19 +245,12 @@ export abstract class BaseCrawler {
         continue;
       }
 
-      const existing = await prisma.lawArticle.findFirst({
-        where: {
-          lawName: article.lawName,
-          articleNumber: article.articleNumber,
-        },
-      });
-
-      const success = await this.saveArticle(article);
-      if (success) {
-        if (existing) {
-          updated++;
-        } else {
+      const result = await this.saveArticle(article);
+      if (result.saved) {
+        if (result.isNew) {
           created++;
+        } else {
+          updated++;
         }
       }
 
@@ -252,9 +258,6 @@ export abstract class BaseCrawler {
         processedItems: this.progress.processedItems + 1,
         currentItem: `${article.lawName} ${article.articleNumber}`,
       });
-
-      // 遵守速率限制
-      await this.delay(this.config.rateLimitDelay);
     }
 
     return { created, updated };
@@ -274,7 +277,7 @@ export abstract class BaseCrawler {
           provider: this.config.name,
           request: {
             operation,
-            config: this.config,
+            // 仅记录操作名称，不记录 config（可能含敏感凭据）
           } as any,
           response: {
             itemsCrawled: result.itemsCrawled,

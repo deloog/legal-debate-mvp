@@ -25,7 +25,7 @@ describe('NPCCrawler', () => {
       const config = crawler.getConfig();
 
       expect(config.name).toBe('NPCCrawler');
-      expect(config.baseUrl).toBe('http://www.npc.gov.cn');
+      expect(config.baseUrl).toBe('https://www.npc.gov.cn');
       expect(config.rateLimitDelay).toBe(2000);
     });
   });
@@ -50,6 +50,8 @@ describe('NPCCrawler', () => {
         publishDate: '2020-05-28',
         effectiveDate: '2021-01-01',
         category: 'CIVIL',
+        categoryCode: 1,
+        categoryName: '法律',
         lawType: 'LAW',
         issuingAuthority: '全国人民代表大会',
       };
@@ -58,7 +60,7 @@ describe('NPCCrawler', () => {
 
       expect(result).not.toBeNull();
       expect(result?.lawName).toBe('中华人民共和国民法典');
-      expect(result?.articleNumber).toBe('全部');
+      expect(result?.articleNumber).toBe(rawData.lawNumber);
       expect(result?.lawType).toBe(LawType.LAW);
       expect(result?.category).toBe(LawCategory.CIVIL);
     });
@@ -72,6 +74,8 @@ describe('NPCCrawler', () => {
         publishDate: '2020-12-26',
         effectiveDate: '2021-03-01',
         category: 'CRIMINAL',
+        categoryCode: 1,
+        categoryName: '法律',
         lawType: 'LAW',
         issuingAuthority: '全国人民代表大会常务委员会',
       };
@@ -108,6 +112,9 @@ describe('CourtCrawler', () => {
         publishDate: '2020-12-29',
         effectiveDate: '2021-01-01',
         category: 'CIVIL',
+        categoryCode: 1,
+        categoryName: '司法解释',
+        applicableScope: '全国',
         issuingAuthority: '最高人民法院',
       };
 

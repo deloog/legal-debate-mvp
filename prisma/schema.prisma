@@ -1322,6 +1322,44 @@ model DocumentTemplate {
   @@map("document_templates")
 }
 
+// 合同模板模型（用于存储SAMR等来源的合同示范文本）
+model ContractTemplate {
+  id        String             @id @default(cuid())
+  name      String
+  code      String             @unique
+  category  String
+  subCategory String?
+  description String?
+  content   String
+  fullText  String?
+  variables Json
+  clauses   Json
+  riskWarnings Json?
+  usageGuide String?
+  source    String             @default("samr")
+  sourceUrl String?
+  sourceId  String?
+  publishedDate DateTime?
+  effectiveDate DateTime?
+  version   String             @default("1.0")
+  isLatest  Boolean           @default(true)
+  priority  String             @default("P1")
+  tags      String[]
+  keywords  String[]
+  isActive  Boolean           @default(true)
+  isDefault Boolean           @default(false)
+  viewCount Int               @default(0)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([category])
+  @@index([source])
+  @@index([isActive])
+  @@index([isLatest])
+  @@index([priority])
+  @@map("contract_templates")
+}
+
 model CaseExample {
   id           String     @id @default(cuid())
   title        String
@@ -2314,29 +2352,6 @@ model ContractLawArticle {
   @@index([lawArticleId])
   @@index([addedAt])
   @@map("contract_law_articles")
-}
-
-// 合同模板
-model ContractTemplate {
-  id String @id @default(cuid())
-
-  name     String // 模板名称
-  code     String @unique // 模板代码
-  category String // 分类：委托代理/法律顾问/专项服务
-
-  content   String // 模板内容（支持变量占位符）
-  variables Json // 变量列表定义
-
-  isDefault Boolean @default(false)
-  isActive  Boolean @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([category])
-  @@index([isActive])
-  @@index([isDefault])
-  @@map("contract_templates")
 }
 
 // 合同版本记录

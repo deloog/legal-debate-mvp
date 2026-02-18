@@ -4,6 +4,7 @@
 
 // 类型定义
 export * from './types';
+export * from './contract-template-types';
 
 // 基础类
 export { BaseCrawler } from './base-crawler';
@@ -14,6 +15,9 @@ export { LawSyncScheduler, lawSyncScheduler } from './law-sync-scheduler';
 export { NPCCrawler, npcCrawler } from './npc-crawler';
 export { CourtCrawler, courtCrawler } from './court-crawler';
 export { FLKCrawler, flkCrawler } from './flk-crawler';
+
+// 合同模板采集器
+export { SAMRCrawler, samrCrawler } from './samr-crawler';
 
 // DOCX 解析器
 export {

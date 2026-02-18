@@ -1,0 +1,8 @@
+scripts/analyze-samr-structure.ts(174,16): error TS2393: Duplicate function implementation.
+scripts/check-document-types.ts(89,25): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+scripts/crawler/debug-api.ts(19,16): error TS2393: Duplicate function implementation.
+scripts/crawler/debug-download-url.ts(5,16): error TS2393: Duplicate function implementation.
+scripts/test-download-verification.ts(44,16): error TS2393: Duplicate function implementation.
+src/app/api/contract-templates/route.ts(113,7): error TS2322: Type '{ name: any; code: any; category: any; content: any; variables: any; isDefault: any; isActive: any; }' is not assignable to type '(Without<ContractTemplateCreateInput, ContractTemplateUncheckedCreateInput> & ContractTemplateUncheckedCreateInput) | (Without<...> & ContractTemplateCreateInput)'.
+  Type '{ name: any; code: any; category: any; content: any; variables: any; isDefault: any; isActive: any; }' is not assignable to type 'Without<ContractTemplateUncheckedCreateInput, ContractTemplateCreateInput> & ContractTemplateCreateInput'.
+    Property 'clauses' is missing in type '{ name: any; code: any; category: any; content: any; variables: any; isDefault: any; isActive: any; }' but required in type 'ContractTemplateCreateInput'.

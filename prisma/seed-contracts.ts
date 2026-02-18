@@ -19,6 +19,9 @@ export async function seedContractTemplates() {
       category: '委托代理',
       isDefault: true,
       isActive: true,
+      clauses: [],
+      tags: ['委托代理', '律师代理'],
+      keywords: ['委托代理合同', '律师', '代理'],
       variables: [
         {
           name: 'clientName',
@@ -172,6 +175,9 @@ export async function seedContractTemplates() {
       category: '法律顾问',
       isDefault: false,
       isActive: true,
+      clauses: [],
+      tags: ['法律顾问', '常年法律服务'],
+      keywords: ['法律顾问合同', '常年法律顾问', '法律服务'],
       variables: [
         {
           name: 'clientName',

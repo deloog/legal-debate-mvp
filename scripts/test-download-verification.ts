@@ -2,6 +2,9 @@
  * 简单的下载测试 - 验证正确的下载 URL 是否可用
  */
 
+// 声明为模块以避免重复函数名冲突
+export {};
+
 const TEST_BBBS = 'ff8081819c230fa1019c4551f8c8511b'; // 从浏览器控制台获取的示例 ID
 const API_DOWNLOAD = 'https://flk.npc.gov.cn/law-search/download/pc';
 

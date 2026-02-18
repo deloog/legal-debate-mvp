@@ -116,9 +116,12 @@ export async function POST(request: NextRequest) {
         category: body.category,
         content: body.content,
         variables: body.variables || [],
+        clauses: body.clauses || [],
+        tags: body.tags || [],
+        keywords: body.keywords || [],
         isDefault: body.isDefault || false,
         isActive: body.isActive !== undefined ? body.isActive : true,
-      },
+      } as Prisma.ContractTemplateCreateInput,
     });
 
     return NextResponse.json({

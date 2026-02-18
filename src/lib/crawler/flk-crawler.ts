@@ -256,7 +256,7 @@ const FLK_TYPE_CONFIGS: FLKTypeConfig[] = [
     label: '社会法',
     flfgFl: 'flfg',
     lawType: LawType.LAW,
-    category: LawCategory.OTHER,
+    category: LawCategory.LABOR, // 社会法含劳动法、社会保险法等，映射为 LABOR
   },
   {
     code: 160,
@@ -443,6 +443,57 @@ const FLK_TYPE_CONFIGS: FLKTypeConfig[] = [
   },
 ];
 
+// ════════════════════════════════════════════════════════════════════════════
+//  采集优先级配置
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * 高优先级类型 - 全国性法律（权威性高，适用范围广）
+ * 建议优先采集这些类型
+ */
+export const HIGH_PRIORITY_TYPES: FLKTypeCode[] = [
+  100, // 宪法
+  101,
+  102, // 法律
+  110, // 宪法相关法
+  120, // 民法商法
+  130, // 行政法
+  140, // 经济法
+  150, // 社会法
+  160, // 刑法
+  170, // 诉讼与非诉讼程序法
+  180, // 法律解释
+  190, // 有关决定
+  195, // 修正案
+  200, // 修改废止的决定
+  201,
+  210, // 行政法规
+  215, // 行政法规修废
+  220, // 监察法规
+  311,
+  320,
+  330,
+  340, // 司法解释
+  350, // 司法解释修废
+];
+
+/**
+ * 低优先级类型 - 地方性法规（权威性相对较低，按需采集）
+ * 可根据实际需求选择性采集
+ */
+export const LOW_PRIORITY_TYPES: FLKTypeCode[] = [
+  221, // 省会城市法规
+  222, // 自治区/直辖市法规
+  230, // 地方性法规
+  260, // 自治条例
+  270, // 单行条例
+  290, // 经济特区法规
+  295, // 浦东新区法规
+  300, // 海南自由贸易港法规
+  305, // 法规性决定
+  310, // 地方性法规修废
+];
+
 /** 采集选项 */
 export interface FLKCrawlOptions {
   types?: FLKTypeCode[]; // 要采集的分类代码
@@ -574,7 +625,10 @@ export class FLKCrawler extends BaseCrawler {
       articleNumber: rawData.bbbs || '',
       fullText: rawData.content || '',
       lawType: typeConfig?.lawType || LawType.LAW,
-      category: typeConfig?.category || LawCategory.OTHER,
+      category: this.inferCategoryFromName(
+        rawData.title,
+        typeConfig?.category ?? LawCategory.OTHER
+      ),
       issuingAuthority: rawData.zdjgName || '未知',
       effectiveDate: rawData.sxrq
         ? new Date(rawData.sxrq)
@@ -1046,7 +1100,10 @@ export class FLKCrawler extends BaseCrawler {
           articleNumber: item.bbbs,
           fullText,
           lawType: typeConfig?.lawType || LawType.LAW,
-          category: typeConfig?.category || LawCategory.OTHER,
+          category: this.inferCategoryFromName(
+            item.title,
+            typeConfig?.category ?? LawCategory.OTHER
+          ),
           issuingAuthority: item.zdjgName || '未知',
           effectiveDate: item.sxrq ? new Date(item.sxrq) : new Date(item.gbrq),
           searchableText:
@@ -1092,7 +1149,10 @@ export class FLKCrawler extends BaseCrawler {
             articleNumber: item.bbbs,
             fullText: '',
             lawType: typeConfig?.lawType || LawType.LAW,
-            category: typeConfig?.category || LawCategory.OTHER,
+            category: this.inferCategoryFromName(
+              item.title,
+              typeConfig?.category ?? LawCategory.OTHER
+            ),
             issuingAuthority: item.zdjgName || '未知',
             effectiveDate: item.sxrq
               ? new Date(item.sxrq)
@@ -1385,8 +1445,9 @@ export class FLKCrawler extends BaseCrawler {
 
   /**
    * 详情 API (GET /law-search/search/flfgDetails)
+   * 公开方法，用于修复缺失数据
    */
-  private async fetchDetail(bbbs: string): Promise<FLKDetailResponse> {
+  async fetchDetail(bbbs: string): Promise<FLKDetailResponse> {
     const url = `${this.API_DETAIL}?bbbs=${encodeURIComponent(bbbs)}`;
     const response = await this.fetchWithRetry(url, {
       method: 'GET',
@@ -1398,6 +1459,34 @@ export class FLKCrawler extends BaseCrawler {
     });
 
     return response.json();
+  }
+
+  /**
+   * 允许跟随跳转下载 DOCX 的主机名白名单（防止 SSRF）
+   */
+  private static readonly ALLOWED_DOWNLOAD_HOSTS = new Set([
+    'flk.npc.gov.cn',
+    'npc.gov.cn',
+  ]);
+
+  /**
+   * 验证重定向 URL 是否在白名单内（防止 SSRF）
+   */
+  private validateRedirectUrl(rawUrl: string): URL {
+    let parsed: URL;
+    try {
+      parsed = new URL(rawUrl);
+    } catch {
+      throw new Error(`SSRF 防护: 非法 URL 格式 "${rawUrl}"`);
+    }
+    const host = parsed.hostname.toLowerCase();
+    if (!FLKCrawler.ALLOWED_DOWNLOAD_HOSTS.has(host)) {
+      throw new Error(
+        `SSRF 防护: 主机 "${host}" 不在白名单内，拒绝请求。` +
+          `允许的主机: ${[...FLKCrawler.ALLOWED_DOWNLOAD_HOSTS].join(', ')}`
+      );
+    }
+    return parsed;
   }
 
   /**
@@ -1427,9 +1516,12 @@ export class FLKCrawler extends BaseCrawler {
       try {
         const jsonData = JSON.parse(responseText);
         if (jsonData.data?.url) {
-          // 如果返回的是包含下载URL的JSON，使用该URL重新下载
-          this.logger.debug('API返回JSON元数据，使用真实URL下载', { url: jsonData.data.url });
-          const realResponse = await this.fetchWithRetry(jsonData.data.url, {
+          // SSRF 防护：验证重定向 URL 主机名在白名单内
+          const redirectUrl = this.validateRedirectUrl(jsonData.data.url);
+          this.logger.debug('API返回JSON元数据，使用真实URL下载', {
+            url: redirectUrl.href,
+          });
+          const realResponse = await this.fetchWithRetry(redirectUrl.href, {
             method: 'GET',
             headers: {
               'User-Agent': this.randomUA(),
@@ -1441,7 +1533,10 @@ export class FLKCrawler extends BaseCrawler {
           return Buffer.from(realBuffer);
         }
       } catch (e) {
-        this.logger.error('解析JSON响应失败', e instanceof Error ? e : new Error(String(e)));
+        this.logger.error(
+          '解析JSON响应失败',
+          e instanceof Error ? e : new Error(String(e))
+        );
       }
     }
 
@@ -1538,6 +1633,186 @@ export class FLKCrawler extends BaseCrawler {
       default:
         return LawStatus.VALID;
     }
+  }
+
+  /**
+   * 通过法律名称关键词推断学科分类
+   * 优先级：精确匹配 > 模糊匹配 > FLK 类型码映射 > OTHER
+   * @param lawName 法律名称
+   * @param flfgTypeCategory FLK 类型码映射的分类（兜底值）
+   * @returns 推断后的学科分类
+   */
+  private inferCategoryFromName(
+    lawName: string,
+    flfgTypeCategory: LawCategory
+  ): LawCategory {
+    const name = lawName;
+
+    // 刑事
+    if (/刑法|刑事诉讼|治安管理处罚|监狱法|劳动教养/.test(name)) {
+      return LawCategory.CRIMINAL;
+    }
+    // 劳动
+    if (
+      /劳动合同|劳动法|就业促进|工伤保险|职工|工会法|劳动争议|劳动保障|劳动合同|职工代表大会|集体合同/.test(
+        name
+      )
+    ) {
+      return LawCategory.LABOR;
+    }
+    // 知识产权
+    if (/专利法|商标法|著作权|知识产权|反不正当竞争|植物新品种/.test(name)) {
+      return LawCategory.INTELLECTUAL_PROPERTY;
+    }
+    // 商法/经济法
+    if (
+      /公司法|证券法|保险法|银行业|票据法|破产法|期货|企业国有资产|金融|外汇/.test(
+        name
+      )
+    ) {
+      return LawCategory.COMMERCIAL;
+    }
+    // 民法
+    if (
+      /民法典|合同法|物权法|婚姻法|继承法|侵权责任|民事诉讼|收养法|抵押法|质押法|担保法|民法通则|人格权|个人信息保护/.test(
+        name
+      )
+    ) {
+      return LawCategory.CIVIL;
+    }
+    // 行政
+    if (
+      /行政许可|行政处罚|行政复议|行政诉讼|公务员|政府采购|国家赔偿|行政强制|行政管理|城市管理|市容环境卫生|绿化|市政公用/.test(
+        name
+      )
+    ) {
+      return LawCategory.ADMINISTRATIVE;
+    }
+    // 经济管理（环保/食药/安全生产等）
+    if (
+      /环境保护|食品安全|药品管理|安全生产|消费者权益|价格法|反垄断|产品质量|计量|标准化|认证认可|特种设备|危险化学品|消防|道路交通|道路运输|公路|航道|港口/.test(
+        name
+      )
+    ) {
+      return LawCategory.ECONOMIC;
+    }
+    // 程序法
+    if (
+      /诉讼法|仲裁法|司法鉴定|法院组织|检察院组织|人民调解|公证法|仲裁委员会|司法协助|引渡/.test(
+        name
+      )
+    ) {
+      return LawCategory.PROCEDURE;
+    }
+    // 民政社会保障
+    if (
+      /最低生活保障|医疗救助|临时救助|流浪乞讨|收养登记|殡葬管理|婚姻登记|社会团体|民办非企业单位|基金会|志愿服务|老龄工作|残疾人保障|妇女儿童/.test(
+        name
+      )
+    ) {
+      return LawCategory.LABOR;
+    }
+    // 城乡规划建设
+    if (
+      /城乡规划|城市总体规划|控制性详细规划|修建性详细规划|土地利用总体规划|国土空间规划|房地产开发|物业管理|房屋租赁|住宅建筑|公共租赁住房|经济适用房/.test(
+        name
+      )
+    ) {
+      return LawCategory.ADMINISTRATIVE;
+    }
+    // 环境保护（扩展）
+    if (
+      /污染防治|水污染防治|大气污染防治|固体废物|噪声污染防治|辐射污染防治|生态保护|湿地保护|水源地保护|排污许可|环境影响评价/.test(
+        name
+      )
+    ) {
+      return LawCategory.ECONOMIC;
+    }
+    // 农业农村
+    if (
+      /农业|农村|农民|乡村振兴|耕地保护|基本农田|土地管理|林业|森林保护|草原保护|渔业|水产|畜牧|动物防疫|农作物种子|农药管理|兽药管理/.test(
+        name
+      )
+    ) {
+      return LawCategory.ECONOMIC;
+    }
+    // 教育科技
+    if (
+      /教育|学校|教师|义务教育|职业教育|民办教育|科学技术|科技进步|技术创新|科技成果转化/.test(
+        name
+      )
+    ) {
+      return LawCategory.ADMINISTRATIVE;
+    }
+    // 文化卫生
+    if (
+      /文化|文物保护|非物质文化遗产|广播电视|新闻出版|卫生|医疗机构|医疗管理|传染病防治|突发公共卫生事件|人口与计划生育|公共文化服务|文化市场|旅游|文物/.test(
+        name
+      )
+    ) {
+      return LawCategory.ADMINISTRATIVE;
+    }
+    // 公安司法
+    if (
+      /公安机关|人民警察|治安管理|网络安全|禁毒|出境入境|枪支管理|爆炸物品管理|特种行业|司法行政|社区矫正|安置帮教/.test(
+        name
+      )
+    ) {
+      return LawCategory.ADMINISTRATIVE;
+    }
+    // 财政税务
+    if (
+      /财政|税务|税收|非税收入|预算管理|国债|政府采购|会计|注册会计师|国有资产/.test(
+        name
+      )
+    ) {
+      return LawCategory.ECONOMIC;
+    }
+    // 交通运输
+    if (
+      /交通运输|道路运输|水路运输|铁路运输|航空运输|城市公共交通|出租车|网约车|物流|快递|停车场|机动车|非机动车/.test(
+        name
+      )
+    ) {
+      return LawCategory.ECONOMIC;
+    }
+    // 能源水利
+    if (
+      /水利|水资源|防汛抗旱|灌溉|水文|电力|能源|石油|天然气|煤炭|可再生能源|节能/.test(
+        name
+      )
+    ) {
+      return LawCategory.ECONOMIC;
+    }
+    // 房地产建筑
+    if (
+      /房地产|建筑|建筑业|工程勘察|工程设计|施工|监理|造价|招投标|工程质量|安全生产|建筑节能|绿色建筑/.test(
+        name
+      )
+    ) {
+      return LawCategory.ECONOMIC;
+    }
+    // 人事编制
+    if (
+      /人事|编制|事业单位|公务员|干部|工资|职称|专业技术人员|人才流动/.test(
+        name
+      )
+    ) {
+      return LawCategory.ADMINISTRATIVE;
+    }
+    // 海洋渔业
+    if (/海洋|海域|海岛|海岸线|渔业|水产|捕捞|养殖|渔船|渔港/.test(name)) {
+      return LawCategory.ECONOMIC;
+    }
+    // 信息化通信
+    if (
+      /信息化|大数据|云计算|人工智能|5G|通信|无线电|网络|数据安全/.test(name)
+    ) {
+      return LawCategory.ECONOMIC;
+    }
+
+    // 兜底：使用 FLK 类型码映射
+    return flfgTypeCategory;
   }
 }
 

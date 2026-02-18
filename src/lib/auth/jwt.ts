@@ -10,18 +10,33 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
-// 生产环境必须检查JWT_SECRET是否设置
-if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
-  throw new Error(
-    '[JWT配置错误] JWT_SECRET环境变量未设置！\n' +
-      '请在.env.production中设置JWT_SECRET。\n' +
-      "生成强密钥命令：node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
-  );
+// JWT_SECRET 安全检查：
+// - production 或 REQUIRE_JWT_SECRET=true（staging）时必须显式设置，否则启动失败
+// - 开发环境未设置时打印警告，允许使用临时密钥（仅限本地开发）
+// - test 环境静默使用临时密钥，不污染测试输出
+if (!JWT_SECRET) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const isStrictMode = process.env.REQUIRE_JWT_SECRET === 'true';
+
+  if (isProduction || isStrictMode) {
+    throw new Error(
+      '[JWT配置错误] JWT_SECRET环境变量未设置！\n' +
+        '请在环境变量中设置 JWT_SECRET（至少32位随机字符串）。\n' +
+        "生成命令：node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+    );
+  }
+
+  if (process.env.NODE_ENV !== 'test') {
+    console.warn(
+      '[JWT警告] JWT_SECRET 未设置，使用临时开发密钥。\n' +
+        '⚠️  严禁将此配置用于 staging 或生产环境！\n' +
+        '    staging 环境请设置 REQUIRE_JWT_SECRET=true 以强制检查。'
+    );
+  }
 }
 
-// 有效的JWT密钥（生产环境使用环境变量，测试环境使用固定密钥）
-const EFFECTIVE_JWT_SECRET =
-  JWT_SECRET || 'test-secret-key-do-not-use-in-production';
+// 有效的JWT密钥（生产/staging 使用环境变量；本地开发使用临时密钥）
+const EFFECTIVE_JWT_SECRET = JWT_SECRET ?? 'dev-only-jwt-secret-not-for-production';
 
 /**
  * 生成 JWT Token

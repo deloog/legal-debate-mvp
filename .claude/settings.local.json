@@ -422,7 +422,13 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:blog.csdn.net)",
       "Bash(npx jest:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(tee:*)",
+      "Bash(xargs sed:*)",
+      "Bash(git -C \"d:/legal-debate-mvp\" show HEAD:.env)",
+      "Bash(cmd /c \"type d:\\\\legal-debate-mvp\\\\.env\")",
+      "Bash(cmd /c:*)",
+      "Bash(git -C /d/legal-debate-mvp show HEAD:package.json)"
     ]
   }
 }
