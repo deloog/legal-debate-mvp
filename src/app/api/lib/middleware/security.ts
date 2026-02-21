@@ -11,8 +11,9 @@ export const corsMiddleware: Middleware = async (
 ) => {
   const origin = request.headers.get('origin');
   const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:3001',
+    ...(process.env.NODE_ENV !== 'production'
+      ? ['http://localhost:3000', 'http://localhost:3001']
+      : []),
     process.env.NEXT_PUBLIC_APP_URL,
   ].filter(Boolean) as string[];
 
@@ -73,10 +74,6 @@ export const securityMiddleware: Middleware = async (
   }
 
   response.headers.set('X-API-Version', 'v1');
-  response.headers.set(
-    'X-Node-Environment',
-    process.env.NODE_ENV || 'development'
-  );
 };
 
 /**

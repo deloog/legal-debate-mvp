@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import {
   CommunicationType,
   CompleteFollowUpTaskInput,
@@ -31,44 +31,34 @@ export class FollowUpTaskProcessor {
       const limit = Math.min(params.limit || 20, 100);
       const offset = (page - 1) * limit;
 
-      // 构建查询条件
-      const conditions: string[] = [];
-      const values: unknown[] = [];
+      // 构建参数化WHERE条件（防止SQL注入）
+      const sqlConditions: Prisma.Sql[] = [];
 
       if (params.userId) {
-        conditions.push('fut."userId" = $1');
-        values.push(params.userId);
+        sqlConditions.push(Prisma.sql`fut."userId" = ${params.userId}`);
       }
-
       if (params.clientId) {
-        conditions.push(`fut."clientId" = $${values.length + 1}`);
-        values.push(params.clientId);
+        sqlConditions.push(Prisma.sql`fut."clientId" = ${params.clientId}`);
       }
-
       if (params.status) {
-        conditions.push(`fut.status = $${values.length + 1}`);
-        values.push(params.status);
+        sqlConditions.push(Prisma.sql`fut.status = ${params.status}`);
       }
-
       if (params.priority) {
-        conditions.push(`fut.priority = $${values.length + 1}`);
-        values.push(params.priority);
+        sqlConditions.push(Prisma.sql`fut.priority = ${params.priority}`);
       }
-
       if (params.dueDateFrom) {
-        conditions.push(`fut."dueDate" >= $${values.length + 1}`);
-        values.push(params.dueDateFrom);
+        sqlConditions.push(Prisma.sql`fut."dueDate" >= ${params.dueDateFrom}`);
       }
-
       if (params.dueDateTo) {
-        conditions.push(`fut."dueDate" <= $${values.length + 1}`);
-        values.push(params.dueDateTo);
+        sqlConditions.push(Prisma.sql`fut."dueDate" <= ${params.dueDateTo}`);
       }
 
-      const whereClause =
-        conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+      const whereExpr =
+        sqlConditions.length > 0
+          ? Prisma.sql`WHERE ${Prisma.join(sqlConditions, ' AND ')}`
+          : Prisma.sql``;
 
-      // 排序（使用白名单防止SQL注入）
+      // 排序字段和方向使用白名单 + Prisma.raw（服务端控制，无用户插值风险）
       const allowedSortFields = [
         'dueDate',
         'createdAt',
@@ -77,53 +67,26 @@ export class FollowUpTaskProcessor {
         'status',
       ];
       const sortBy = allowedSortFields.includes(params.sortBy || '')
-        ? params.sortBy
+        ? params.sortBy!
         : 'dueDate';
 
-      const allowedSortOrders = ['asc', 'desc'];
-      const sortOrder = allowedSortOrders.includes(
+      const sortOrder = ['asc', 'desc'].includes(
         params.sortOrder?.toLowerCase() || ''
       )
-        ? params.sortOrder?.toLowerCase()
+        ? params.sortOrder!.toLowerCase()
         : 'asc';
 
-      const sortClause = `ORDER BY fut."${sortBy}" ${sortOrder.toUpperCase()}`;
+      const sortExpr = Prisma.raw(`fut."${sortBy}" ${sortOrder.toUpperCase()}`);
 
       // 查询总数
-      const countQuery = `SELECT COUNT(*) as count FROM follow_up_tasks fut ${whereClause}`;
-      const countResult = await prisma.$queryRawUnsafe<
-        Array<{ count: bigint }>
-      >(countQuery, ...values);
+      const countResult = await prisma.$queryRaw<Array<{ count: bigint }>>(
+        Prisma.sql`SELECT COUNT(*) as count FROM follow_up_tasks fut ${whereExpr}`
+      );
       const total = Number(countResult[0].count);
       const totalPages = Math.ceil(total / limit);
 
       // 查询任务列表
-      const tasksQuery = `
-        SELECT
-          fut.id,
-          fut."clientId",
-          fut."communicationId",
-          fut."userId",
-          fut.type,
-          fut.summary,
-          fut."dueDate",
-          fut.priority,
-          fut.status,
-          fut."completedAt",
-          fut.notes,
-          fut.metadata,
-          fut."createdAt",
-          fut."updatedAt",
-          c.name as "clientName",
-          c.phone as "clientPhone",
-          c.email as "clientEmail"
-        FROM follow_up_tasks fut
-        INNER JOIN clients c ON fut."clientId" = c.id
-        ${whereClause}
-        ${sortClause}
-        LIMIT ${limit} OFFSET ${offset}
-      `;
-      const tasks = await prisma.$queryRawUnsafe<
+      const tasks = await prisma.$queryRaw<
         Array<{
           id: string;
           clientId: string;
@@ -143,7 +106,33 @@ export class FollowUpTaskProcessor {
           clientPhone: string | null;
           clientEmail: string | null;
         }>
-      >(tasksQuery, ...values);
+      >(
+        Prisma.sql`
+          SELECT
+            fut.id,
+            fut."clientId",
+            fut."communicationId",
+            fut."userId",
+            fut.type,
+            fut.summary,
+            fut."dueDate",
+            fut.priority,
+            fut.status,
+            fut."completedAt",
+            fut.notes,
+            fut.metadata,
+            fut."createdAt",
+            fut."updatedAt",
+            c.name as "clientName",
+            c.phone as "clientPhone",
+            c.email as "clientEmail"
+          FROM follow_up_tasks fut
+          INNER JOIN clients c ON fut."clientId" = c.id
+          ${whereExpr}
+          ORDER BY ${sortExpr}
+          LIMIT ${limit} OFFSET ${offset}
+        `
+      );
 
       logger.info(`获取跟进任务列表: ${tasks.length} 条记录，共 ${total} 条`);
 
@@ -298,44 +287,39 @@ export class FollowUpTaskProcessor {
         return null;
       }
 
-      // 构建更新字段
-      const updateFields: string[] = [];
-      const values: unknown[] = [];
+      // 构建参数化更新字段（防止SQL注入）
+      const setClauses: Prisma.Sql[] = [];
 
       if (input.status) {
-        updateFields.push(`status = $${values.length + 1}`);
-        values.push(input.status);
+        setClauses.push(Prisma.sql`status = ${input.status}`);
       }
 
       if (input.priority) {
-        updateFields.push(`priority = $${values.length + 1}`);
-        values.push(input.priority);
+        setClauses.push(Prisma.sql`priority = ${input.priority}`);
       }
 
       if (input.notes !== undefined) {
-        updateFields.push(`notes = $${values.length + 1}`);
-        values.push(input.notes);
+        setClauses.push(Prisma.sql`notes = ${input.notes}`);
       }
 
       if (input.completedAt !== undefined) {
-        updateFields.push(`"completedAt" = $${values.length + 1}`);
-        values.push(input.completedAt);
+        setClauses.push(Prisma.sql`"completedAt" = ${input.completedAt}`);
       }
 
-      if (updateFields.length === 0) {
+      if (setClauses.length === 0) {
         return existingTask;
       }
 
-      updateFields.push('"updatedAt" = NOW()');
+      setClauses.push(Prisma.sql`"updatedAt" = NOW()`);
 
       // 执行更新
-      const updateQuery = `
-        UPDATE follow_up_tasks
-        SET ${updateFields.join(', ')}
-        WHERE id = $${values.length + 1}
-      `;
-      values.push(taskId);
-      await prisma.$queryRawUnsafe(updateQuery, ...values);
+      await prisma.$queryRaw(
+        Prisma.sql`
+          UPDATE follow_up_tasks
+          SET ${Prisma.join(setClauses, ', ')}
+          WHERE id = ${taskId}
+        `
+      );
 
       logger.info(`跟进任务已更新: ${taskId}`);
 

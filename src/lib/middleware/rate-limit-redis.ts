@@ -13,6 +13,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimitMonitor } from './rate-limit-monitor';
+import { logger } from '@/lib/logger';
 
 /**
  * Redis客户端类型（避免直接依赖ioredis）
@@ -153,7 +154,9 @@ export function createRedisRateLimiter(
       return null;
     } catch (error) {
       // Redis错误时回退到允许请求（避免Redis故障导致服务不可用）
-      console.error('[RateLimit] Redis error, allowing request:', error);
+      logger.error('[RateLimit] Redis error, allowing request', {
+        error: String(error),
+      });
       return null;
     }
   };

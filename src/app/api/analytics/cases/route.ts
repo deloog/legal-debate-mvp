@@ -9,6 +9,7 @@ import {
   successResponse,
   unauthorizedResponse,
 } from '@/lib/api-response';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
@@ -176,51 +177,45 @@ async function getCaseSuccessRate(
   endDate: Date,
   whereClause: Record<string, unknown>
 ): Promise<CaseSuccessRateData> {
-  // 构建WHERE条件
-  const whereConditions = [
-    `"createdAt" >= '${startDate.toISOString()}'`,
-    `"createdAt" <= '${endDate.toISOString()}'`,
-    `"deletedAt" IS NULL`,
+  const conditions: Prisma.Sql[] = [
+    Prisma.sql`"createdAt" >= ${startDate}`,
+    Prisma.sql`"createdAt" <= ${endDate}`,
+    Prisma.sql`"deletedAt" IS NULL`,
   ];
   if (whereClause.status) {
-    whereConditions.push(`"status" = '${whereClause.status}'`);
+    conditions.push(Prisma.sql`"status" = ${whereClause.status as string}`);
   }
-  const whereSql = whereConditions.join(' AND ');
 
-  // 查询总体案件成功率
-  const totalCasesResult = (await prisma.$queryRawUnsafe<
-    Array<{ count: bigint }>
-  >(`SELECT COUNT(*) as count FROM "cases" WHERE ${whereSql}`)) as Array<{
-    count: bigint;
-  }>;
+  const totalCasesResult = await prisma.$queryRaw<Array<{ count: bigint }>>(
+    Prisma.sql`SELECT COUNT(*) as count FROM "cases" WHERE ${Prisma.join(conditions, ' AND ')}`
+  );
 
   const totalCases = Number(totalCasesResult[0]?.count ?? 0);
 
-  const successfulCasesResult = (await prisma.$queryRawUnsafe<
+  const successConditions = [...conditions, Prisma.sql`"status" = 'COMPLETED'`];
+  const successfulCasesResult = await prisma.$queryRaw<
     Array<{ count: bigint }>
   >(
-    `SELECT COUNT(*) as count FROM "cases" WHERE ${whereSql} AND "status" = 'COMPLETED'`
-  )) as Array<{
-    count: bigint;
-  }>;
+    Prisma.sql`SELECT COUNT(*) as count FROM "cases" WHERE ${Prisma.join(successConditions, ' AND ')}`
+  );
 
   const successfulCases = Number(successfulCasesResult[0]?.count ?? 0);
 
   const successRate = totalCases > 0 ? (successfulCases / totalCases) * 100 : 0;
 
   // 按案件类型统计成功率
-  const byTypeResults = (await prisma.$queryRawUnsafe<
+  const byTypeResults = await prisma.$queryRaw<
     Array<{ type: string; total: bigint; successful: bigint }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       type,
       COUNT(*) as total,
       COUNT(*) FILTER (WHERE "status" = 'COMPLETED') as successful
     FROM "cases"
-    WHERE ${whereSql}
+    WHERE ${Prisma.join(conditions, ' AND ')}
     GROUP BY type
     ORDER BY type`
-  )) as Array<{ type: string; total: bigint; successful: bigint }>;
+  );
 
   const byType = (Array.isArray(byTypeResults) ? byTypeResults : []).map(
     row => ({
@@ -235,19 +230,19 @@ async function getCaseSuccessRate(
   );
 
   // 按案由统计成功率
-  const byCauseResults = (await prisma.$queryRawUnsafe<
+  const byCauseResults = await prisma.$queryRaw<
     Array<{ cause: string; total: bigint; successful: bigint }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       COALESCE(cause, '未分类') as cause,
       COUNT(*) as total,
       COUNT(*) FILTER (WHERE "status" = 'COMPLETED') as successful
     FROM "cases"
-    WHERE ${whereSql}
+    WHERE ${Prisma.join(conditions, ' AND ')}
     GROUP BY cause
     ORDER BY total DESC
     LIMIT 10`
-  )) as Array<{ cause: string; total: bigint; successful: bigint }>;
+  );
 
   const byCause = (Array.isArray(byCauseResults) ? byCauseResults : []).map(
     row => ({
@@ -262,18 +257,18 @@ async function getCaseSuccessRate(
   );
 
   // 趋势数据（按天）
-  const trendResults = (await prisma.$queryRawUnsafe<
+  const trendResults = await prisma.$queryRaw<
     Array<{ date: string; total: bigint; successful: bigint }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       TO_CHAR(DATE_TRUNC('day', "createdAt"), 'YYYY-MM-DD') as date,
       COUNT(*) as total,
       COUNT(*) FILTER (WHERE "status" = 'COMPLETED') as successful
     FROM "cases"
-    WHERE ${whereSql}
+    WHERE ${Prisma.join(conditions, ' AND ')}
     GROUP BY DATE_TRUNC('day', "createdAt")
     ORDER BY date ASC`
-  )) as Array<{ date: string; total: bigint; successful: bigint }>;
+  );
 
   const trend = (Array.isArray(trendResults) ? trendResults : []).map(row => ({
     date: row.date,
@@ -307,29 +302,27 @@ async function getCaseRevenueAnalysis(
   endDate: Date,
   whereClause: Record<string, unknown>
 ): Promise<CaseRevenueAnalysisData> {
-  // 构建WHERE条件
-  const whereConditions = [
-    `"createdAt" >= '${startDate.toISOString()}'`,
-    `"createdAt" <= '${endDate.toISOString()}'`,
-    `"deletedAt" IS NULL`,
+  const conditions: Prisma.Sql[] = [
+    Prisma.sql`"createdAt" >= ${startDate}`,
+    Prisma.sql`"createdAt" <= ${endDate}`,
+    Prisma.sql`"deletedAt" IS NULL`,
   ];
   if (whereClause.status) {
-    whereConditions.push(`"status" = '${whereClause.status}'`);
+    conditions.push(Prisma.sql`"status" = ${whereClause.status as string}`);
   }
-  const whereSql = whereConditions.join(' AND ');
 
   // 查询总体收益
-  const revenueResults = (await prisma.$queryRawUnsafe<
+  const revenueResults = await prisma.$queryRaw<
     Array<{ total: bigint; avg: string; max: string; min: string }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       SUM(amount) as total,
       ROUND(AVG(amount), 2) as avg,
       ROUND(MAX(amount), 2) as max,
       ROUND(MIN(amount), 2) as min
     FROM "cases"
-    WHERE ${whereSql} AND amount IS NOT NULL`
-  )) as Array<{ total: bigint; avg: string; max: string; min: string }>;
+    WHERE ${Prisma.join(conditions, ' AND ')} AND amount IS NOT NULL`
+  );
 
   const totalRevenue = Number(revenueResults[0]?.total ?? 0);
   const averageRevenue = Number(revenueResults[0]?.avg ?? 0);
@@ -337,18 +330,18 @@ async function getCaseRevenueAnalysis(
   const minRevenue = Number(revenueResults[0]?.min ?? 0);
 
   // 按案件类型统计收益
-  const byTypeResults = (await prisma.$queryRawUnsafe<
+  const byTypeResults = await prisma.$queryRaw<
     Array<{ type: string; total: bigint; count: bigint }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       type,
       SUM(amount) as total,
       COUNT(*) as count
     FROM "cases"
-    WHERE ${whereSql} AND amount IS NOT NULL
+    WHERE ${Prisma.join(conditions, ' AND ')} AND amount IS NOT NULL
     GROUP BY type
     ORDER BY total DESC`
-  )) as Array<{ type: string; total: bigint; count: bigint }>;
+  );
 
   const byType = (Array.isArray(byTypeResults) ? byTypeResults : []).map(
     row => ({
@@ -363,7 +356,7 @@ async function getCaseRevenueAnalysis(
   );
 
   // 趋势数据（按天）
-  const trendResults = (await prisma.$queryRawUnsafe<
+  const trendResults = await prisma.$queryRaw<
     Array<{
       date: string;
       revenue: bigint;
@@ -371,21 +364,16 @@ async function getCaseRevenueAnalysis(
       avg: string;
     }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       TO_CHAR(DATE_TRUNC('day', "createdAt"), 'YYYY-MM-DD') as date,
       SUM(amount) as revenue,
       COUNT(*) as count,
       ROUND(AVG(amount), 2) as avg
     FROM "cases"
-    WHERE ${whereSql} AND amount IS NOT NULL
+    WHERE ${Prisma.join(conditions, ' AND ')} AND amount IS NOT NULL
     GROUP BY DATE_TRUNC('day', "createdAt")
     ORDER BY date ASC`
-  )) as Array<{
-    date: string;
-    revenue: bigint;
-    count: bigint;
-    avg: string;
-  }>;
+  );
 
   const trend = (Array.isArray(trendResults) ? trendResults : []).map(row => ({
     date: row.date,
@@ -415,24 +403,19 @@ async function getCaseTypeDistribution(
   startDate: Date,
   endDate: Date
 ): Promise<CaseTypeDistributionData> {
-  const whereConditions = [
-    `"createdAt" >= '${startDate.toISOString()}'`,
-    `"createdAt" <= '${endDate.toISOString()}'`,
-    `"deletedAt" IS NULL`,
-  ];
-  const whereSql = whereConditions.join(' AND ');
-
-  const rawResults = (await prisma.$queryRawUnsafe<
+  const rawResults = await prisma.$queryRaw<
     Array<{ type: string; count: bigint }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       type,
       COUNT(*) as count
     FROM "cases"
-    WHERE ${whereSql}
+    WHERE "createdAt" >= ${startDate}
+      AND "createdAt" <= ${endDate}
+      AND "deletedAt" IS NULL
     GROUP BY type
     ORDER BY count DESC`
-  )) as Array<{ type: string; count: bigint }>;
+  );
 
   const resultsArray = Array.isArray(rawResults) ? rawResults : [];
   const totalCases = resultsArray.reduce(
@@ -507,11 +490,9 @@ async function getActiveCasesOverview(): Promise<ActiveCasesOverview> {
   });
 
   // 查询平均审理周期（已完成案件）
-  const completedCases = await prisma.$queryRawUnsafe<
-    Array<{ avgDuration: string }>
-  >(
-    `SELECT 
-      ROUND(AVG(EXTRACT(EPOCH FROM ("updatedAt" - "createdAt")) / (24 * 3600)), 2) as avgDuration
+  const completedCases = await prisma.$queryRaw<Array<{ avgDuration: string }>>(
+    Prisma.sql`SELECT
+      ROUND(AVG(EXTRACT(EPOCH FROM ("updatedAt" - "createdAt")) / (24 * 3600)), 2) as "avgDuration"
     FROM "cases"
     WHERE "status" = 'COMPLETED' AND "deletedAt" IS NULL`
   );
@@ -561,17 +542,15 @@ async function getCaseEfficiency(
   startDate: Date,
   endDate: Date
 ): Promise<CaseEfficiencyData> {
-  const whereConditions = [
-    `"status" = 'COMPLETED'`,
-    `"createdAt" >= '${startDate.toISOString()}'`,
-    `"createdAt" <= '${endDate.toISOString()}'`,
-    `"deletedAt" IS NULL`,
-  ];
-  const whereSql = whereConditions.join(' AND ');
-
-  const cases = await prisma.$queryRawUnsafe<
+  const cases = await prisma.$queryRaw<
     Array<{ id: string; createdAt: Date; updatedAt: Date }>
-  >(`SELECT id, "createdAt", "updatedAt" FROM "cases" WHERE ${whereSql}`);
+  >(
+    Prisma.sql`SELECT id, "createdAt", "updatedAt" FROM "cases"
+    WHERE "status" = 'COMPLETED'
+      AND "createdAt" >= ${startDate}
+      AND "createdAt" <= ${endDate}
+      AND "deletedAt" IS NULL`
+  );
 
   const casesArray = Array.isArray(cases) ? cases : [];
 
@@ -605,18 +584,21 @@ async function getCaseEfficiency(
     completionTimes.length > 0 ? Math.max(...completionTimes) : 0;
 
   // 趋势数据（按天）
-  const trendResults = (await prisma.$queryRawUnsafe<
+  const trendResults = await prisma.$queryRaw<
     Array<{ date: string; completedCases: bigint; avgTime: string }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       TO_CHAR(DATE_TRUNC('day', "updatedAt"), 'YYYY-MM-DD') as date,
-      COUNT(*) as completedCases,
-      ROUND(AVG(EXTRACT(EPOCH FROM ("updatedAt" - "createdAt")) / 3600), 2) as avgTime
+      COUNT(*) as "completedCases",
+      ROUND(AVG(EXTRACT(EPOCH FROM ("updatedAt" - "createdAt")) / 3600), 2) as "avgTime"
     FROM "cases"
-    WHERE ${whereSql}
+    WHERE "status" = 'COMPLETED'
+      AND "createdAt" >= ${startDate}
+      AND "createdAt" <= ${endDate}
+      AND "deletedAt" IS NULL
     GROUP BY DATE_TRUNC('day', "updatedAt")
     ORDER BY date ASC`
-  )) as Array<{ date: string; completedCases: bigint; avgTime: string }>;
+  );
 
   const trend = (Array.isArray(trendResults) ? trendResults : []).map(row => ({
     date: row.date,

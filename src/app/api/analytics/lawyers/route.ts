@@ -9,6 +9,7 @@ import {
   successResponse,
   unauthorizedResponse,
 } from '@/lib/api-response';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
@@ -191,30 +192,26 @@ async function getLawyerCaseVolume(
   teamId?: string,
   role?: string
 ): Promise<LawyerCaseVolumeData[]> {
-  // 构建WHERE条件
-  const whereConditions = [
-    `"c"."createdAt" >= '${startDate.toISOString()}'`,
-    `"c"."createdAt" <= '${endDate.toISOString()}'`,
-    `"c"."deletedAt" IS NULL`,
+  const conditions: Prisma.Sql[] = [
+    Prisma.sql`"c"."createdAt" >= ${startDate}`,
+    Prisma.sql`"c"."createdAt" <= ${endDate}`,
+    Prisma.sql`"c"."deletedAt" IS NULL`,
   ];
 
-  // 团队筛选
   if (teamId) {
-    whereConditions.push(`"u"."id" IN (
-      SELECT "userId" FROM "team_members" 
-      WHERE "teamId" = '${teamId}' AND "status" = 'ACTIVE'
-    )`);
+    conditions.push(
+      Prisma.sql`"u"."id" IN (
+        SELECT "userId" FROM "team_members"
+        WHERE "teamId" = ${teamId} AND "status" = 'ACTIVE'
+      )`
+    );
   }
 
-  // 角色筛选
   if (role) {
-    whereConditions.push(`"u"."role" = '${role}'`);
+    conditions.push(Prisma.sql`"u"."role" = ${role}`);
   }
 
-  const whereSql = whereConditions.join(' AND ');
-
-  // 查询每个律师的案件量统计
-  const results = await prisma.$queryRawUnsafe<
+  const results = await prisma.$queryRaw<
     Array<{
       lawyerId: string;
       lawyerName: string | null;
@@ -225,7 +222,7 @@ async function getLawyerCaseVolume(
       archivedCases: bigint;
     }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       "u"."id" as "lawyerId",
       "u"."name" as "lawyerName",
       "u"."role" as "lawyerRole",
@@ -235,7 +232,7 @@ async function getLawyerCaseVolume(
       COUNT(*) FILTER (WHERE "c"."status" = 'ARCHIVED') as "archivedCases"
     FROM "users" u
     INNER JOIN "cases" c ON "c"."createdBy" = "u"."id"
-    WHERE ${whereSql}
+    WHERE ${Prisma.join(conditions, ' AND ')}
     GROUP BY "u"."id", "u"."name", "u"."role"
     ORDER BY "totalCases" DESC`
   );
@@ -264,28 +261,26 @@ async function getLawyerSuccessRate(
   teamId?: string,
   role?: string
 ): Promise<LawyerSuccessRateData[]> {
-  // 构建WHERE条件
-  const whereConditions = [
-    `"c"."createdAt" >= '${startDate.toISOString()}'`,
-    `"c"."createdAt" <= '${endDate.toISOString()}'`,
-    `"c"."deletedAt" IS NULL`,
+  const conditions: Prisma.Sql[] = [
+    Prisma.sql`"c"."createdAt" >= ${startDate}`,
+    Prisma.sql`"c"."createdAt" <= ${endDate}`,
+    Prisma.sql`"c"."deletedAt" IS NULL`,
   ];
 
   if (teamId) {
-    whereConditions.push(`"u"."id" IN (
-      SELECT "userId" FROM "team_members" 
-      WHERE "teamId" = '${teamId}' AND "status" = 'ACTIVE'
-    )`);
+    conditions.push(
+      Prisma.sql`"u"."id" IN (
+        SELECT "userId" FROM "team_members"
+        WHERE "teamId" = ${teamId} AND "status" = 'ACTIVE'
+      )`
+    );
   }
 
   if (role) {
-    whereConditions.push(`"u"."role" = '${role}'`);
+    conditions.push(Prisma.sql`"u"."role" = ${role}`);
   }
 
-  const whereSql = whereConditions.join(' AND ');
-
-  // 查询每个律师的胜诉率
-  const results = await prisma.$queryRawUnsafe<
+  const results = await prisma.$queryRaw<
     Array<{
       lawyerId: string;
       lawyerName: string | null;
@@ -294,7 +289,7 @@ async function getLawyerSuccessRate(
       successfulCases: bigint;
     }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       "u"."id" as "lawyerId",
       "u"."name" as "lawyerName",
       "u"."role" as "lawyerRole",
@@ -302,7 +297,7 @@ async function getLawyerSuccessRate(
       COUNT(*) FILTER (WHERE "c"."status" = 'COMPLETED') as "successfulCases"
     FROM "users" u
     INNER JOIN "cases" c ON "c"."createdBy" = "u"."id"
-    WHERE ${whereSql}
+    WHERE ${Prisma.join(conditions, ' AND ')}
     GROUP BY "u"."id", "u"."name", "u"."role"
     HAVING COUNT("c"."id") > 0
     ORDER BY "successfulCases" DESC`
@@ -325,25 +320,25 @@ async function getLawyerSuccessRate(
 
   // 按案件类型统计胜诉率
   for (const lawyer of lawyerSuccessRates) {
-    const byTypeResults = await prisma.$queryRawUnsafe<
+    const byTypeResults = await prisma.$queryRaw<
       Array<{
         type: string;
         totalCases: bigint;
         successfulCases: bigint;
       }>
     >(
-      `SELECT 
+      Prisma.sql`SELECT
         "c"."type",
         COUNT("c"."id") as "totalCases",
         COUNT(*) FILTER (WHERE "c"."status" = 'COMPLETED') as "successfulCases"
       FROM "cases" c
-      WHERE "c"."createdBy" = '${lawyer.lawyerId}'
-        AND "c"."createdAt" >= '${startDate.toISOString()}'
-        AND "c"."createdAt" <= '${endDate.toISOString()}'
+      WHERE "c"."createdBy" = ${lawyer.lawyerId}
+        AND "c"."createdAt" >= ${startDate}
+        AND "c"."createdAt" <= ${endDate}
         AND "c"."deletedAt" IS NULL
       GROUP BY "c"."type"
       ORDER BY "totalCases" DESC
-        LIMIT 5`
+      LIMIT 5`
     );
 
     lawyer.byType = (Array.isArray(byTypeResults) ? byTypeResults : []).map(
@@ -375,29 +370,27 @@ async function getLawyerRevenue(
   teamId?: string,
   role?: string
 ): Promise<LawyerRevenueData[]> {
-  // 构建WHERE条件
-  const whereConditions = [
-    `"c"."createdAt" >= '${startDate.toISOString()}'`,
-    `"c"."createdAt" <= '${endDate.toISOString()}'`,
-    `"c"."deletedAt" IS NULL`,
-    `"c"."amount" IS NOT NULL`,
+  const conditions: Prisma.Sql[] = [
+    Prisma.sql`"c"."createdAt" >= ${startDate}`,
+    Prisma.sql`"c"."createdAt" <= ${endDate}`,
+    Prisma.sql`"c"."deletedAt" IS NULL`,
+    Prisma.sql`"c"."amount" IS NOT NULL`,
   ];
 
   if (teamId) {
-    whereConditions.push(`"u"."id" IN (
-      SELECT "userId" FROM "team_members" 
-      WHERE "teamId" = '${teamId}' AND "status" = 'ACTIVE'
-    )`);
+    conditions.push(
+      Prisma.sql`"u"."id" IN (
+        SELECT "userId" FROM "team_members"
+        WHERE "teamId" = ${teamId} AND "status" = 'ACTIVE'
+      )`
+    );
   }
 
   if (role) {
-    whereConditions.push(`"u"."role" = '${role}'`);
+    conditions.push(Prisma.sql`"u"."role" = ${role}`);
   }
 
-  const whereSql = whereConditions.join(' AND ');
-
-  // 查询每个律师的创收
-  const results = await prisma.$queryRawUnsafe<
+  const results = await prisma.$queryRaw<
     Array<{
       lawyerId: string;
       lawyerName: string | null;
@@ -408,7 +401,7 @@ async function getLawyerRevenue(
       min: string;
     }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       "u"."id" as "lawyerId",
       "u"."name" as "lawyerName",
       "u"."role" as "lawyerRole",
@@ -418,7 +411,7 @@ async function getLawyerRevenue(
       ROUND(MIN("c"."amount"), 2) as "min"
     FROM "users" u
     INNER JOIN "cases" c ON "c"."createdBy" = "u"."id"
-    WHERE ${whereSql}
+    WHERE ${Prisma.join(conditions, ' AND ')}
     GROUP BY "u"."id", "u"."name", "u"."role"
     HAVING SUM("c"."amount") IS NOT NULL
     ORDER BY "totalRevenue" DESC`
@@ -437,26 +430,26 @@ async function getLawyerRevenue(
 
   // 按案件类型统计创收
   for (const lawyer of lawyerRevenues) {
-    const revenueByTypeResults = await prisma.$queryRawUnsafe<
+    const revenueByTypeResults = await prisma.$queryRaw<
       Array<{
         type: string;
         totalRevenue: string;
         count: bigint;
       }>
     >(
-      `SELECT 
+      Prisma.sql`SELECT
         "c"."type",
         ROUND(SUM("c"."amount"), 2) as "totalRevenue",
         COUNT("c"."id") as "count"
       FROM "cases" c
-      WHERE "c"."createdBy" = '${lawyer.lawyerId}'
-        AND "c"."createdAt" >= '${startDate.toISOString()}'
-        AND "c"."createdAt" <= '${endDate.toISOString()}'
+      WHERE "c"."createdBy" = ${lawyer.lawyerId}
+        AND "c"."createdAt" >= ${startDate}
+        AND "c"."createdAt" <= ${endDate}
         AND "c"."deletedAt" IS NULL
         AND "c"."amount" IS NOT NULL
       GROUP BY "c"."type"
       ORDER BY "totalRevenue" DESC
-        LIMIT 5`
+      LIMIT 5`
     );
 
     lawyer.revenueByType = (
@@ -488,29 +481,27 @@ async function getLawyerEfficiency(
   teamId?: string,
   role?: string
 ): Promise<LawyerEfficiencyData[]> {
-  // 构建WHERE条件
-  const whereConditions = [
-    `"c"."status" = 'COMPLETED'`,
-    `"c"."createdAt" >= '${startDate.toISOString()}'`,
-    `"c"."createdAt" <= '${endDate.toISOString()}'`,
-    `"c"."deletedAt" IS NULL`,
+  const conditions: Prisma.Sql[] = [
+    Prisma.sql`"c"."status" = 'COMPLETED'`,
+    Prisma.sql`"c"."createdAt" >= ${startDate}`,
+    Prisma.sql`"c"."createdAt" <= ${endDate}`,
+    Prisma.sql`"c"."deletedAt" IS NULL`,
   ];
 
   if (teamId) {
-    whereConditions.push(`"u"."id" IN (
-      SELECT "userId" FROM "team_members" 
-      WHERE "teamId" = '${teamId}' AND "status" = 'ACTIVE'
-    )`);
+    conditions.push(
+      Prisma.sql`"u"."id" IN (
+        SELECT "userId" FROM "team_members"
+        WHERE "teamId" = ${teamId} AND "status" = 'ACTIVE'
+      )`
+    );
   }
 
   if (role) {
-    whereConditions.push(`"u"."role" = '${role}'`);
+    conditions.push(Prisma.sql`"u"."role" = ${role}`);
   }
 
-  const whereSql = whereConditions.join(' AND ');
-
-  // 查询每个律师的效率
-  const results = await prisma.$queryRawUnsafe<
+  const results = await prisma.$queryRaw<
     Array<{
       lawyerId: string;
       lawyerName: string | null;
@@ -522,18 +513,18 @@ async function getLawyerEfficiency(
       slowestDuration: string;
     }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       "u"."id" as "lawyerId",
       "u"."name" as "lawyerName",
       "u"."role" as "lawyerRole",
       COUNT("c"."id") as "completedCases",
       ROUND(AVG(EXTRACT(EPOCH FROM ("c"."updatedAt" - "c"."createdAt")) / 86400), 2) as "avgDuration",
-      ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (EXTRACT(EPOCH FROM ("c"."updatedAt" - "c"."createdAt")) / 86400), 2) as "medianDuration",
+      ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY EXTRACT(EPOCH FROM ("c"."updatedAt" - "c"."createdAt")) / 86400), 2) as "medianDuration",
       ROUND(MIN(EXTRACT(EPOCH FROM ("c"."updatedAt" - "c"."createdAt")) / 86400), 2) as "fastestDuration",
       ROUND(MAX(EXTRACT(EPOCH FROM ("c"."updatedAt" - "c"."createdAt")) / 86400), 2) as "slowestDuration"
     FROM "users" u
     INNER JOIN "cases" c ON "c"."createdBy" = "u"."id"
-    WHERE ${whereSql}
+    WHERE ${Prisma.join(conditions, ' AND ')}
     GROUP BY "u"."id", "u"."name", "u"."role"
     HAVING COUNT("c"."id") > 0
     ORDER BY "avgDuration" ASC`
@@ -577,29 +568,27 @@ async function getLawyerWorkHours(
   teamId?: string,
   role?: string
 ): Promise<LawyerWorkHoursData[]> {
-  // 构建WHERE条件
-  const whereConditions = [
-    `"c"."status" = 'COMPLETED'`,
-    `"c"."createdAt" >= '${startDate.toISOString()}'`,
-    `"c"."createdAt" <= '${endDate.toISOString()}'`,
-    `"c"."deletedAt" IS NULL`,
+  const conditions: Prisma.Sql[] = [
+    Prisma.sql`"c"."status" = 'COMPLETED'`,
+    Prisma.sql`"c"."createdAt" >= ${startDate}`,
+    Prisma.sql`"c"."createdAt" <= ${endDate}`,
+    Prisma.sql`"c"."deletedAt" IS NULL`,
   ];
 
   if (teamId) {
-    whereConditions.push(`"u"."id" IN (
-      SELECT "userId" FROM "team_members" 
-      WHERE "teamId" = '${teamId}' AND "status" = 'ACTIVE'
-    )`);
+    conditions.push(
+      Prisma.sql`"u"."id" IN (
+        SELECT "userId" FROM "team_members"
+        WHERE "teamId" = ${teamId} AND "status" = 'ACTIVE'
+      )`
+    );
   }
 
   if (role) {
-    whereConditions.push(`"u"."role" = '${role}'`);
+    conditions.push(Prisma.sql`"u"."role" = ${role}`);
   }
 
-  const whereSql = whereConditions.join(' AND ');
-
-  // 查询每个律师的工作时长（基于案件处理时长估算）
-  const results = await prisma.$queryRawUnsafe<
+  const results = await prisma.$queryRaw<
     Array<{
       lawyerId: string;
       lawyerName: string | null;
@@ -609,7 +598,7 @@ async function getLawyerWorkHours(
       workDays: bigint;
     }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       "u"."id" as "lawyerId",
       "u"."name" as "lawyerName",
       "u"."role" as "lawyerRole",
@@ -618,7 +607,7 @@ async function getLawyerWorkHours(
       COUNT(DISTINCT DATE("c"."createdAt")) as "workDays"
     FROM "users" u
     INNER JOIN "cases" c ON "c"."createdBy" = "u"."id"
-    WHERE ${whereSql}
+    WHERE ${Prisma.join(conditions, ' AND ')}
     GROUP BY "u"."id", "u"."name", "u"."role"
     HAVING COUNT("c"."id") > 0
     ORDER BY "workDays" DESC`

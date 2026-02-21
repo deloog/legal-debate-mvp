@@ -10,6 +10,7 @@ import {
   unauthorizedResponse,
 } from '@/lib/api-response';
 import { prisma } from '@/lib/db/prisma';
+import { Prisma } from '@prisma/client';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import {
@@ -181,29 +182,28 @@ async function getCaseTypeDistribution(
   endDate: Date,
   whereClause: Record<string, unknown>
 ): Promise<CaseTypeDistributionData> {
-  // 构建WHERE条件
-  const whereConditions = [
-    `"createdAt" >= '${startDate.toISOString()}'`,
-    `"createdAt" <= '${endDate.toISOString()}'`,
-    `"deletedAt" IS NULL`,
+  // 构建参数化WHERE条件（防止SQL注入）
+  const conditions: Prisma.Sql[] = [
+    Prisma.sql`"createdAt" >= ${startDate}`,
+    Prisma.sql`"createdAt" <= ${endDate}`,
+    Prisma.sql`"deletedAt" IS NULL`,
   ];
   if (whereClause.status) {
-    whereConditions.push(`"status" = '${whereClause.status}'`);
+    conditions.push(Prisma.sql`"status" = ${whereClause.status as string}`);
   }
-  const whereSql = whereConditions.join(' AND ');
 
   // 使用原生SQL查询案件类型分布
-  const rawResults = (await prisma.$queryRawUnsafe<
+  const rawResults = await prisma.$queryRaw<
     Array<{ type: string; count: bigint }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       type,
       COUNT(*) as count
     FROM "cases"
-    WHERE ${whereSql}
+    WHERE ${Prisma.join(conditions, ' AND ')}
     GROUP BY type
     ORDER BY count DESC`
-  )) as Array<{ type: string; count: bigint }>;
+  );
 
   // 确保rawResults是数组
   const resultsArray = Array.isArray(rawResults) ? rawResults : [];

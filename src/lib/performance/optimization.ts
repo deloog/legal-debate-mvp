@@ -3,7 +3,7 @@
  * 提供API响应优化、数据库查询优化、前端性能优化功能
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import type {
   SlowQuery,
   QueryPattern,
@@ -326,14 +326,14 @@ export class PerformanceOptimizer {
   async analyzeSlowQueries(): Promise<SlowQuery[]> {
     try {
       const threshold = this.config.slowQueryThreshold;
-      const results = await this.prisma.$queryRawUnsafe<
+      const results = await this.prisma.$queryRaw<
         Array<{
           query: string;
           mean_exec_time: number;
           calls: number;
           total_exec_time: number;
         }>
-      >(`
+      >(Prisma.sql`
         SELECT
           query,
           mean_exec_time,
@@ -466,13 +466,14 @@ export class PerformanceOptimizer {
    */
   async checkIndexExists(table: string, column: string): Promise<boolean> {
     try {
-      const result = await this.prisma.$queryRawUnsafe<
+      const likePattern = `%${column}%`;
+      const result = await this.prisma.$queryRaw<
         Array<{ exists: boolean }>
-      >(`
+      >(Prisma.sql`
         SELECT EXISTS (
           SELECT 1 FROM pg_indexes
-          WHERE tablename = '${table}'
-          AND indexdef LIKE '%${column}%'
+          WHERE tablename = ${table}
+          AND indexdef LIKE ${likePattern}
         ) as exists
       `);
       return result[0]?.exists ?? false;

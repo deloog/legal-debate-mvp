@@ -9,6 +9,7 @@ import {
   successResponse,
   unauthorizedResponse,
 } from '@/lib/api-response';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
@@ -173,38 +174,40 @@ async function getErrorRateData(
   model: string | undefined,
   errorType: string | undefined
 ): Promise<PerformanceErrorRateData> {
-  // 构建WHERE条件
-  const whereConditions = [
-    `"createdAt" >= '${startDate.toISOString()}'`,
-    `"createdAt" <= '${endDate.toISOString()}'`,
+  const aiConditions: Prisma.Sql[] = [
+    Prisma.sql`"createdAt" >= ${startDate}`,
+    Prisma.sql`"createdAt" <= ${endDate}`,
   ];
   if (provider) {
-    whereConditions.push(`"provider" = '${provider}'`);
+    aiConditions.push(Prisma.sql`"provider" = ${provider}`);
   }
   if (model) {
-    whereConditions.push(`"model" = '${model}'`);
+    aiConditions.push(Prisma.sql`"model" = ${model}`);
   }
-  const whereSql = whereConditions.join(' AND ');
+
+  const errorLogConditions: Prisma.Sql[] = [
+    Prisma.sql`"createdAt" >= ${startDate}`,
+    Prisma.sql`"createdAt" <= ${endDate}`,
+  ];
+  if (errorType) {
+    errorLogConditions.push(Prisma.sql`"errorType" = ${errorType}`);
+  }
 
   // 查询AI交互统计
-  const aiStatsRaw = (await prisma.$queryRawUnsafe<
+  const aiStatsRaw = await prisma.$queryRaw<
     Array<{
       total_requests: bigint;
       success_count: bigint;
       error_count: bigint;
     }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       COUNT(*) as total_requests,
       SUM(CASE WHEN "success" = true THEN 1 ELSE 0 END) as success_count,
       SUM(CASE WHEN "success" = false THEN 1 ELSE 0 END) as error_count
     FROM "ai_interactions"
-    WHERE ${whereSql}`
-  )) as Array<{
-    total_requests: bigint;
-    success_count: bigint;
-    error_count: bigint;
-  }>;
+    WHERE ${Prisma.join(aiConditions, ' AND ')}`
+  );
 
   const aiStats = aiStatsRaw[0] || {
     total_requests: BigInt(0),
@@ -218,30 +221,18 @@ async function getErrorRateData(
   const errorRate = totalRequests > 0 ? (errorCount / totalRequests) * 100 : 0;
 
   // 查询错误日志统计
-  const errorLogsWhereConditions = [
-    `"createdAt" >= '${startDate.toISOString()}'`,
-    `"createdAt" <= '${endDate.toISOString()}'`,
-  ];
-  if (errorType) {
-    errorLogsWhereConditions.push(`"errorType" = '${errorType}'`);
-  }
-  const errorLogsWhereSql = errorLogsWhereConditions.join(' AND ');
-
-  const errorLogsRaw = (await prisma.$queryRawUnsafe<
+  const errorLogsRaw = await prisma.$queryRaw<
     Array<{
       total_errors: bigint;
       recovered_errors: bigint;
     }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       COUNT(*) as total_errors,
       SUM(CASE WHEN "recovered" = true THEN 1 ELSE 0 END) as recovered_errors
     FROM "error_logs"
-    WHERE ${errorLogsWhereSql}`
-  )) as Array<{
-    total_errors: bigint;
-    recovered_errors: bigint;
-  }>;
+    WHERE ${Prisma.join(errorLogConditions, ' AND ')}`
+  );
 
   const errorLogs = errorLogsRaw[0] || {
     total_errors: BigInt(0),
@@ -254,26 +245,22 @@ async function getErrorRateData(
     totalErrors > 0 ? (recoveredCount / totalErrors) * 100 : 0;
 
   // 按服务商统计错误率
-  const byProviderRaw = (await prisma.$queryRawUnsafe<
+  const byProviderRaw = await prisma.$queryRaw<
     Array<{
       provider: string;
       total_requests: bigint;
       error_count: bigint;
     }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       "provider",
       COUNT(*) as total_requests,
       SUM(CASE WHEN "success" = false THEN 1 ELSE 0 END) as error_count
     FROM "ai_interactions"
-    WHERE ${whereSql}
+    WHERE ${Prisma.join(aiConditions, ' AND ')}
     GROUP BY "provider"
     ORDER BY total_requests DESC`
-  )) as Array<{
-    provider: string;
-    total_requests: bigint;
-    error_count: bigint;
-  }>;
+  );
 
   const byProviderResults = Array.isArray(byProviderRaw) ? byProviderRaw : [];
   const byProvider = byProviderResults.map(row => ({
@@ -287,18 +274,18 @@ async function getErrorRateData(
   }));
 
   // 按错误类型分布
-  const byErrorTypeRaw = (await prisma.$queryRawUnsafe<
+  const byErrorTypeRaw = await prisma.$queryRaw<
     Array<{ error_type: string; count: bigint; recovered: bigint }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       "errorType" as error_type,
       COUNT(*) as count,
       SUM(CASE WHEN "recovered" = true THEN 1 ELSE 0 END) as recovered
     FROM "error_logs"
-    WHERE ${errorLogsWhereSql}
+    WHERE ${Prisma.join(errorLogConditions, ' AND ')}
     GROUP BY "errorType"
     ORDER BY count DESC`
-  )) as Array<{ error_type: string; count: bigint; recovered: bigint }>;
+  );
 
   const byErrorTypeResults = Array.isArray(byErrorTypeRaw)
     ? byErrorTypeRaw
@@ -315,17 +302,17 @@ async function getErrorRateData(
   }));
 
   // 按严重程度分布
-  const bySeverityRaw = (await prisma.$queryRawUnsafe<
+  const bySeverityRaw = await prisma.$queryRaw<
     Array<{ severity: string; count: bigint }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       "severity" as severity,
       COUNT(*) as count
     FROM "error_logs"
-    WHERE ${errorLogsWhereSql}
+    WHERE ${Prisma.join(errorLogConditions, ' AND ')}
     GROUP BY "severity"
     ORDER BY count DESC`
-  )) as Array<{ severity: string; count: bigint }>;
+  );
 
   const bySeverityResults = Array.isArray(bySeverityRaw) ? bySeverityRaw : [];
   const bySeverity: SeverityDistribution[] = bySeverityResults.map(row => ({
@@ -335,7 +322,7 @@ async function getErrorRateData(
   }));
 
   // 按天统计错误率趋势
-  const trendRaw = (await prisma.$queryRawUnsafe<
+  const trendRaw = await prisma.$queryRaw<
     Array<{
       date: string;
       total_requests: bigint;
@@ -344,23 +331,17 @@ async function getErrorRateData(
       recovered_count: bigint;
     }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       TO_CHAR(DATE_TRUNC('day', "ai_interactions"."createdAt"), 'YYYY-MM-DD') as date,
       COUNT(*) as total_requests,
       SUM(CASE WHEN "success" = true THEN 1 ELSE 0 END) as success_count,
       SUM(CASE WHEN "success" = false THEN 1 ELSE 0 END) as error_count,
       0 as recovered_count
     FROM "ai_interactions"
-    WHERE ${whereSql}
+    WHERE ${Prisma.join(aiConditions, ' AND ')}
     GROUP BY TO_CHAR(DATE_TRUNC('day', "ai_interactions"."createdAt"), 'YYYY-MM-DD')
     ORDER BY TO_CHAR(DATE_TRUNC('day', "ai_interactions"."createdAt"), 'YYYY-MM-DD')`
-  )) as Array<{
-    date: string;
-    total_requests: bigint;
-    success_count: bigint;
-    error_count: bigint;
-    recovered_count: bigint;
-  }>;
+  );
 
   const trendResults = Array.isArray(trendRaw) ? trendRaw : [];
   const trend: ErrorRatePoint[] = trendResults.map(row => {

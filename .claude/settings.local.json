@@ -466,7 +466,9 @@
       "Bash(npx prettier:*)",
       "Bash(git stash pop:*)",
       "Read(//tmp/**)",
-      "Bash(git stash drop:*)"
+      "Bash(git stash drop:*)",
+      "Bash(git config:*)",
+      "Bash(git rm:*)"
     ]
   }
 }

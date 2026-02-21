@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * 性能指标接口
@@ -60,19 +61,18 @@ class PerformanceLogger {
    * 记录慢速请求
    */
   logSlowMetric(metric: PerformanceMetrics): void {
-    console.warn(`⚠️  慢速请求: ${metric.method} ${metric.url}`);
-    console.warn(`   响应时间: ${metric.responseTime}ms`);
-    console.warn(`   状态码: ${metric.statusCode}`);
-    if (metric.cacheStatus) {
-      console.warn(`   缓存状态: ${metric.cacheStatus}`);
-    }
+    logger.warn(`⚠️  慢速请求: ${metric.method} ${metric.url}`, {
+      responseTime: metric.responseTime,
+      statusCode: metric.statusCode,
+      cacheStatus: metric.cacheStatus,
+    });
   }
 
   /**
    * 记录正常指标
    */
   logNormalMetric(metric: PerformanceMetrics): void {
-    console.log(`✅ ${metric.method} ${metric.url} - ${metric.responseTime}ms`);
+    logger.info(`${metric.method} ${metric.url} - ${metric.responseTime}ms`);
   }
 
   /**
@@ -166,7 +166,7 @@ export function createPerformanceMonitorMiddleware(
     const method = request.method;
 
     // 记录请求开始
-    console.log(`🚀 开始处理: ${method} ${url}`);
+    logger.info(`开始处理: ${method} ${url}`);
 
     // 返回undefined继续处理请求
     return undefined;

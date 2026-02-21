@@ -10,6 +10,7 @@ import {
   unauthorizedResponse,
 } from '@/lib/api-response';
 import { prisma } from '@/lib/db/prisma';
+import { Prisma } from '@prisma/client';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import {
@@ -212,21 +213,21 @@ async function getResponseTimeData(
   provider: string | undefined,
   model: string | undefined
 ): Promise<PerformanceResponseTimeData> {
-  // 构建WHERE条件
-  const whereConditions = [
-    `"createdAt" >= '${startDate.toISOString()}'`,
-    `"createdAt" <= '${endDate.toISOString()}'`,
+  // 构建参数化WHERE条件（防止SQL注入）
+  const conditions: Prisma.Sql[] = [
+    Prisma.sql`"createdAt" >= ${startDate}`,
+    Prisma.sql`"createdAt" <= ${endDate}`,
   ];
   if (provider) {
-    whereConditions.push(`"provider" = '${provider}'`);
+    conditions.push(Prisma.sql`"provider" = ${provider}`);
   }
   if (model) {
-    whereConditions.push(`"model" = '${model}'`);
+    conditions.push(Prisma.sql`"model" = ${model}`);
   }
-  const whereSql = whereConditions.join(' AND ');
+  const whereSql = Prisma.join(conditions, ' AND ');
 
   // 查询总请求数和响应时间统计
-  const summaryRaw = (await prisma.$queryRawUnsafe<
+  const summaryRaw = await prisma.$queryRaw<
     Array<{
       total_requests: bigint;
       avg_duration: number;
@@ -234,7 +235,7 @@ async function getResponseTimeData(
       max_duration: number;
     }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       COUNT(*) as total_requests,
       AVG("duration") as avg_duration,
       MIN("duration") as min_duration,
@@ -242,12 +243,7 @@ async function getResponseTimeData(
     FROM "ai_interactions"
     WHERE ${whereSql}
     AND "duration" IS NOT NULL`
-  )) as Array<{
-    total_requests: bigint;
-    avg_duration: number;
-    min_duration: number;
-    max_duration: number;
-  }>;
+  );
 
   const summary = summaryRaw[0] || {
     total_requests: BigInt(0),
@@ -259,21 +255,21 @@ async function getResponseTimeData(
   const totalRequests = Number(summary.total_requests);
 
   // 查询P95和P99响应时间
-  const percentileRaw = (await prisma.$queryRawUnsafe<
+  const percentileRaw = await prisma.$queryRaw<
     Array<{ p95_duration: number; p99_duration: number }>
   >(
-    `WITH sorted_durations AS (
+    Prisma.sql`WITH sorted_durations AS (
       SELECT "duration",
              NTILE(100) OVER (ORDER BY "duration") as percentile
       FROM "ai_interactions"
       WHERE ${whereSql}
       AND "duration" IS NOT NULL
     )
-    SELECT 
+    SELECT
       MAX(CASE WHEN percentile = 95 THEN "duration" END) as p95_duration,
       MAX(CASE WHEN percentile = 99 THEN "duration" END) as p99_duration
     FROM sorted_durations`
-  )) as Array<{ p95_duration: number; p99_duration: number }>;
+  );
 
   const percentile = percentileRaw[0] || {
     p95_duration: 0,
@@ -281,9 +277,10 @@ async function getResponseTimeData(
   };
 
   // 查询按时间段分组的响应时间趋势
+  // sqlDateGrouping 由服务端 switch 语句生成，不含用户输入，使用 Prisma.raw() 安全嵌入
   const sqlDateGrouping = getDateGroupingFunction(granularity);
 
-  const trendRaw = (await prisma.$queryRawUnsafe<
+  const trendRaw = await prisma.$queryRaw<
     Array<{
       date: string;
       count: bigint;
@@ -292,8 +289,8 @@ async function getResponseTimeData(
       max_duration: number;
     }>
   >(
-    `SELECT 
-      ${sqlDateGrouping.dateFormat} as date,
+    Prisma.sql`SELECT
+      ${Prisma.raw(sqlDateGrouping.dateFormat)} as date,
       COUNT(*) as count,
       AVG("duration") as avg_duration,
       MIN("duration") as min_duration,
@@ -301,15 +298,9 @@ async function getResponseTimeData(
     FROM "ai_interactions"
     WHERE ${whereSql}
     AND "duration" IS NOT NULL
-    GROUP BY ${sqlDateGrouping.groupBy}
-    ORDER BY ${sqlDateGrouping.groupBy}`
-  )) as Array<{
-    date: string;
-    count: bigint;
-    avg_duration: number;
-    min_duration: number;
-    max_duration: number;
-  }>;
+    GROUP BY ${Prisma.raw(sqlDateGrouping.groupBy)}
+    ORDER BY ${Prisma.raw(sqlDateGrouping.groupBy)}`
+  );
 
   const trendResults = Array.isArray(trendRaw) ? trendRaw : [];
 
@@ -326,10 +317,10 @@ async function getResponseTimeData(
   }));
 
   // 按服务商统计
-  const byProviderRaw = (await prisma.$queryRawUnsafe<
+  const byProviderRaw = await prisma.$queryRaw<
     Array<{ provider: string; count: bigint; avg_duration: number }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       "provider",
       COUNT(*) as count,
       AVG("duration") as avg_duration
@@ -338,7 +329,7 @@ async function getResponseTimeData(
     AND "duration" IS NOT NULL
     GROUP BY "provider"
     ORDER BY count DESC`
-  )) as Array<{ provider: string; count: bigint; avg_duration: number }>;
+  );
 
   const byProviderResults = Array.isArray(byProviderRaw) ? byProviderRaw : [];
   const byProvider = byProviderResults.map(row => ({
@@ -348,10 +339,10 @@ async function getResponseTimeData(
   }));
 
   // 按模型统计
-  const byModelRaw = (await prisma.$queryRawUnsafe<
+  const byModelRaw = await prisma.$queryRaw<
     Array<{ model: string | null; count: bigint; avg_duration: number }>
   >(
-    `SELECT 
+    Prisma.sql`SELECT
       COALESCE("model", 'unknown') as model,
       COUNT(*) as count,
       AVG("duration") as avg_duration
@@ -361,7 +352,7 @@ async function getResponseTimeData(
     GROUP BY "model"
     ORDER BY count DESC
     LIMIT 10`
-  )) as Array<{ model: string | null; count: bigint; avg_duration: number }>;
+  );
 
   const byModelResults = Array.isArray(byModelRaw) ? byModelRaw : [];
   const byModel = byModelResults.map(row => ({

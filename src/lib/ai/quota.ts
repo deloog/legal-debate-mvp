@@ -5,6 +5,7 @@
 
 import { prisma } from '@/lib/db/prisma';
 import { Prisma } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 类型定义
@@ -139,16 +140,14 @@ export async function checkAIQuota(
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const dailyInteractions = await prisma.aIInteraction.findMany({
+    const dailyUsed = await prisma.aIInteraction.count({
       where: {
         userId: userId,
         createdAt: { gte: today },
         success: true,
-      } as Prisma.AIInteractionFindManyArgs['where'],
-      select: { id: true },
+      } as Prisma.AIInteractionWhereInput,
     });
 
-    const dailyUsed = dailyInteractions.length;
     const dailyRemaining = config.dailyLimit - dailyUsed;
 
     // 检查每日配额
@@ -165,16 +164,13 @@ export async function checkAIQuota(
     // 检查本月使用量
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    const monthInteractions = await prisma.aIInteraction.findMany({
+    const monthlyUsed = await prisma.aIInteraction.count({
       where: {
         userId: userId,
         createdAt: { gte: monthStart },
         success: true,
-      } as Prisma.AIInteractionFindManyArgs['where'],
-      select: { id: true },
+      } as Prisma.AIInteractionWhereInput,
     });
-
-    const monthlyUsed = monthInteractions.length;
 
     // 检查每月配额
     if (monthlyUsed >= config.monthlyLimit) {
@@ -199,7 +195,7 @@ export async function checkAIQuota(
       monthlyLimit: config.monthlyLimit,
     };
   } catch (error) {
-    console.error('检查AI配额失败:', error);
+    logger.error('检查AI配额失败:', error);
     // 出错时默认允许，但不记录错误
     return {
       allowed: false,
@@ -237,7 +233,7 @@ export async function recordAIUsage(data: AIUsageRecord): Promise<void> {
       } as Prisma.AIInteractionCreateArgs['data'],
     });
   } catch (error) {
-    console.error('记录AI使用失败:', error);
+    logger.error('记录AI使用失败:', error);
     // 不抛出错误，避免影响主流程
   }
 }
@@ -276,27 +272,22 @@ export async function getUserQuotaUsage(
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
 
     // 并行查询每日和每月使用量
-    const [dailyInteractions, monthInteractions] = await Promise.all([
-      prisma.aIInteraction.findMany({
+    const [dailyUsed, monthlyUsed] = await Promise.all([
+      prisma.aIInteraction.count({
         where: {
           userId: userId,
           createdAt: { gte: today },
           success: true,
-        } as Prisma.AIInteractionFindManyArgs['where'],
-        select: { id: true },
+        } as Prisma.AIInteractionWhereInput,
       }),
-      prisma.aIInteraction.findMany({
+      prisma.aIInteraction.count({
         where: {
           userId: userId,
           createdAt: { gte: monthStart },
           success: true,
-        } as Prisma.AIInteractionFindManyArgs['where'],
-        select: { id: true },
+        } as Prisma.AIInteractionWhereInput,
       }),
     ]);
-
-    const dailyUsed = dailyInteractions.length;
-    const monthlyUsed = monthInteractions.length;
 
     return {
       daily: {
@@ -311,7 +302,7 @@ export async function getUserQuotaUsage(
       },
     };
   } catch (error) {
-    console.error('获取用户配额使用情况失败:', error);
+    logger.error('获取用户配额使用情况失败:', error);
     throw new Error('获取配额使用情况失败');
   }
 }

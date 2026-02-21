@@ -10,12 +10,30 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { logger } from '@/lib/logger';
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
 
 const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads', 'qualifications');
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
+const MIME_TO_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+};
+
 export async function POST(request: NextRequest) {
+  // JWT 鉴权
+  const authHeader = request.headers.get('authorization');
+  const token = extractTokenFromHeader(authHeader ?? '');
+  const tokenResult = verifyToken(token ?? '');
+  if (!tokenResult.valid || !tokenResult.payload) {
+    return NextResponse.json(
+      { success: false, message: '未授权' },
+      { status: 401 }
+    );
+  }
+
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
@@ -47,7 +65,8 @@ export async function POST(request: NextRequest) {
 
     const timestamp = Date.now();
     const randomStr = Math.random().toString(36).substring(2, 8);
-    const ext = file.name.split('.').pop() ?? 'jpg';
+    // 扩展名从服务端验证的 MIME 类型派生，不信任客户端文件名
+    const ext = MIME_TO_EXT[file.type] ?? 'jpg';
     const fileName = `qual-${timestamp}-${randomStr}.${ext}`;
     const filePath = join(UPLOAD_DIR, fileName);
 

@@ -189,7 +189,7 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
     const response: AuthResponse = {
       success: false,
       message: '登录失败，请稍后重试',
-      error: error instanceof Error ? error.message : 'SERVER_ERROR',
+      error: 'SERVER_ERROR',
     };
     return NextResponse.json(response, { status: 500 });
   }

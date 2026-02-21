@@ -9,6 +9,7 @@ import {
   successResponse,
   unauthorizedResponse,
 } from '@/lib/api-response';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
@@ -248,32 +249,30 @@ async function getCaseEfficiency(
   granularity: DateGranularity,
   whereClause: Record<string, unknown>
 ): Promise<CaseEfficiencyData> {
-  // 构建WHERE条件
-  const whereConditions = [
-    '"status" = \'COMPLETED\'',
-    `"updatedAt" >= '${startDate.toISOString()}'`,
-    `"updatedAt" <= '${endDate.toISOString()}'`,
-    `"deletedAt" IS NULL`,
+  const conditions: Prisma.Sql[] = [
+    Prisma.sql`"status" = 'COMPLETED'`,
+    Prisma.sql`"updatedAt" >= ${startDate}`,
+    Prisma.sql`"updatedAt" <= ${endDate}`,
+    Prisma.sql`"deletedAt" IS NULL`,
   ];
   if (whereClause.type) {
-    whereConditions.push(`"type" = '${whereClause.type}'`);
+    conditions.push(Prisma.sql`"type" = ${whereClause.type as string}`);
   }
-  const whereSql = whereConditions.join(' AND ');
 
   // 查询所有已完成案件的完成时间
-  const cases = await prisma.$queryRawUnsafe<
+  const cases = await prisma.$queryRaw<
     Array<{
       id: string;
       createdAt: Date;
       updatedAt: Date;
     }>
   >(
-    `SELECT
+    Prisma.sql`SELECT
       id,
       "createdAt",
       "updatedAt"
     FROM "cases"
-    WHERE ${whereSql}`
+    WHERE ${Prisma.join(conditions, ' AND ')}`
   );
 
   // 计算每个案件的完成时间（小时）
@@ -301,26 +300,22 @@ async function getCaseEfficiency(
   // 按时间段分组统计趋势
   const sqlDateGrouping = getDateGroupingFunction(granularity);
 
-  const rawResults = (await prisma.$queryRawUnsafe<
+  const rawResults = await prisma.$queryRaw<
     Array<{
       date: string;
       completedCases: bigint;
       avgCompletionTime: string;
     }>
   >(
-    `SELECT
-      ${sqlDateGrouping.dateFormat} as date,
-      COUNT(*) as completedCases,
-      ROUND(AVG(EXTRACT(EPOCH FROM ("updatedAt" - "createdAt")) / 3600), 2) as avgCompletionTime
+    Prisma.sql`SELECT
+      ${Prisma.raw(sqlDateGrouping.dateFormat)} as date,
+      COUNT(*) as "completedCases",
+      ROUND(AVG(EXTRACT(EPOCH FROM ("updatedAt" - "createdAt")) / 3600), 2) as "avgCompletionTime"
     FROM "cases"
-    WHERE ${whereSql}
-    GROUP BY ${sqlDateGrouping.groupBy}
-    ORDER BY ${sqlDateGrouping.groupBy}`
-  )) as Array<{
-    date: string;
-    completedCases: bigint;
-    avgCompletionTime: string;
-  }>;
+    WHERE ${Prisma.join(conditions, ' AND ')}
+    GROUP BY ${Prisma.raw(sqlDateGrouping.groupBy)}
+    ORDER BY ${Prisma.raw(sqlDateGrouping.groupBy)}`
+  );
 
   // 构建趋势数据
   const trend = (Array.isArray(rawResults) ? rawResults : []).map(row => ({

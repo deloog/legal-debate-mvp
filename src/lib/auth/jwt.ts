@@ -5,6 +5,7 @@
 import type { JwtPayload, JwtVerifyResult } from '@/types/auth';
 import jwt from 'jsonwebtoken';
 import { logError } from '../utils/safe-logger';
+import { logger } from '@/lib/logger';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -27,7 +28,7 @@ if (!JWT_SECRET) {
   }
 
   if (process.env.NODE_ENV !== 'test') {
-    console.warn(
+    logger.warn(
       '[JWT警告] JWT_SECRET 未设置，使用临时开发密钥。\n' +
         '⚠️  严禁将此配置用于 staging 或生产环境！\n' +
         '    staging 环境请设置 REQUIRE_JWT_SECRET=true 以强制检查。'
@@ -57,13 +58,13 @@ export function verifyToken(token: string): JwtVerifyResult {
   try {
     // 仅在开发环境记录（不包含敏感信息）
     if (process.env.NODE_ENV === 'development') {
-      console.log('[verifyToken] 开始验证token');
+      logger.debug('[verifyToken] 开始验证token');
     }
 
     const decoded = jwt.verify(token, EFFECTIVE_JWT_SECRET) as JwtPayload;
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('[verifyToken] Token验证成功:', {
+      logger.debug('[verifyToken] Token验证成功:', {
         userId: decoded.userId,
         email: decoded.email,
         role: decoded.role,

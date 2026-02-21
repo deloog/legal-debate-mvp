@@ -4,7 +4,8 @@
  */
 
 import { prisma } from '@/lib/db';
-import { RelationType } from '@prisma/client';
+import { RelationType, Prisma } from '@prisma/client';
+import { logger } from '@/lib/logger';
 import {
   CoOccurrenceRelation,
   UsagePattern,
@@ -29,7 +30,14 @@ export class CaseDerivedDetector {
     try {
       // SQL查询：查找在案例中共同出现的法条对
       // 使用 LegalReference 表（关联到 Case）
-      const query = `
+      const results = await prisma.$queryRaw<
+        Array<{
+          source_id: string;
+          target_id: string;
+          co_occurrence_count: number;
+          order_score: number;
+        }>
+      >(Prisma.sql`
         SELECT
           a1.id as source_id,
           a2.id as target_id,
@@ -43,16 +51,7 @@ export class CaseDerivedDetector {
         GROUP BY a1.id, a2.id
         HAVING COUNT(DISTINCT lr1."caseId") >= ${minCoOccurrence}
         ORDER BY co_occurrence_count DESC
-      `;
-
-      const results = await prisma.$queryRawUnsafe<
-        Array<{
-          source_id: string;
-          target_id: string;
-          co_occurrence_count: number;
-          order_score: number;
-        }>
-      >(query);
+      `);
 
       // 转换为关系对象
       return results.map(row => {
@@ -70,7 +69,7 @@ export class CaseDerivedDetector {
         };
       });
     } catch (error) {
-      console.error('案例推导失败:', error);
+      logger.error('案例推导失败', { error: String(error) });
       return [];
     }
   }
@@ -88,9 +87,13 @@ export class CaseDerivedDetector {
   ): Promise<UsagePattern> {
     try {
       // SQL查询：分析法条在案例中的使用顺序
-      // 假设 LegalReference 有一个 position 字段表示在案例中的位置
-      // 如果没有，我们需要根据实际情况调整
-      const query = `
+      const results = await prisma.$queryRaw<
+        Array<{
+          related_article_id: string;
+          frequency: number;
+          avg_position: number;
+        }>
+      >(Prisma.sql`
         SELECT
           a2.id as related_article_id,
           COUNT(DISTINCT lr1."caseId") as frequency,
@@ -105,20 +108,12 @@ export class CaseDerivedDetector {
         JOIN legal_references lr2 ON lr1."caseId" = lr2."caseId"
         JOIN law_articles a1 ON lr1.source = a1."lawName" AND lr1."articleNumber" = a1."articleNumber"
         JOIN law_articles a2 ON lr2.source = a2."lawName" AND lr2."articleNumber" = a2."articleNumber"
-        WHERE a1.id = $1
-          AND a2.id != $1
+        WHERE a1.id = ${articleId}
+          AND a2.id != ${articleId}
         GROUP BY a2.id
         HAVING COUNT(DISTINCT lr1."caseId") >= ${minFrequency}
         ORDER BY frequency DESC
-      `;
-
-      const results = await prisma.$queryRawUnsafe<
-        Array<{
-          related_article_id: string;
-          frequency: number;
-          avg_position: number;
-        }>
-      >(query, articleId);
+      `);
 
       // 转换为使用模式对象
       const frequentlyUsedWith = results.map(row => ({
@@ -134,7 +129,7 @@ export class CaseDerivedDetector {
         frequentlyUsedWith,
       };
     } catch (error) {
-      console.error('使用模式分析失败:', error);
+      logger.error('使用模式分析失败', { error: String(error) });
       return {
         articleId,
         frequentlyUsedWith: [],
@@ -149,7 +144,14 @@ export class CaseDerivedDetector {
    */
   static async getCoOccurrenceStats(): Promise<CoOccurrenceStats> {
     try {
-      const query = `
+      const results = await prisma.$queryRaw<
+        Array<{
+          total_pairs: number;
+          avg_co_occurrence: number | null;
+          max_co_occurrence: number | null;
+          min_co_occurrence: number | null;
+        }>
+      >(Prisma.sql`
         SELECT
           COUNT(*) as total_pairs,
           AVG(co_occurrence_count) as avg_co_occurrence,
@@ -168,16 +170,7 @@ export class CaseDerivedDetector {
           GROUP BY a1.id, a2.id
           HAVING COUNT(DISTINCT lr1."caseId") >= 5
         ) subquery
-      `;
-
-      const results = await prisma.$queryRawUnsafe<
-        Array<{
-          total_pairs: number;
-          avg_co_occurrence: number | null;
-          max_co_occurrence: number | null;
-          min_co_occurrence: number | null;
-        }>
-      >(query);
+      `);
 
       const row = results[0];
 
@@ -188,7 +181,7 @@ export class CaseDerivedDetector {
         minCoOccurrence: row?.min_co_occurrence || 0,
       };
     } catch (error) {
-      console.error('获取共现统计失败:', error);
+      logger.error('获取共现统计失败', { error: String(error) });
       return {
         totalPairs: 0,
         avgCoOccurrence: 0,
@@ -212,7 +205,12 @@ export class CaseDerivedDetector {
     try {
       // 这是一个简化的频繁项集挖掘
       // 实际应用中可能需要使用 Apriori 或 FP-Growth 算法
-      const query = `
+      const results = await prisma.$queryRaw<
+        Array<{
+          article_ids: string[];
+          frequency: number;
+        }>
+      >(Prisma.sql`
         SELECT
           ARRAY_AGG(DISTINCT a.id ORDER BY a.id) as article_ids,
           COUNT(DISTINCT lr."caseId") as frequency
@@ -223,19 +221,12 @@ export class CaseDerivedDetector {
           AND COUNT(DISTINCT lr."caseId") >= ${minSupport}
         ORDER BY frequency DESC
         LIMIT 100
-      `;
-
-      const results = await prisma.$queryRawUnsafe<
-        Array<{
-          article_ids: string[];
-          frequency: number;
-        }>
-      >(query);
+      `);
 
       // 计算总案例数用于计算支持度
-      const totalCasesQuery = `SELECT COUNT(DISTINCT "caseId") as total FROM legal_references`;
-      const totalCasesResult =
-        await prisma.$queryRawUnsafe<Array<{ total: number }>>(totalCasesQuery);
+      const totalCasesResult = await prisma.$queryRaw<Array<{ total: number }>>(
+        Prisma.sql`SELECT COUNT(DISTINCT "caseId") as total FROM legal_references`
+      );
       const totalCases = totalCasesResult[0]?.total || 1;
 
       return results.map(row => ({
@@ -244,7 +235,7 @@ export class CaseDerivedDetector {
         support: row.frequency / totalCases,
       }));
     } catch (error) {
-      console.error('发现频繁模式失败:', error);
+      logger.error('发现频繁模式失败', { error: String(error) });
       return [];
     }
   }
