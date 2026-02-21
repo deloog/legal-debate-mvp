@@ -444,7 +444,7 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
     setLoading(true);
 
     try {
-      const response = await fetch('/api/admin/reports/generate', {
+      const response = await fetch('/api/admin/reports', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

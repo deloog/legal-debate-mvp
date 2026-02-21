@@ -6,7 +6,6 @@
 
 import { SecureFileUtils } from '../../../agent/security/file-utils';
 import { AnalysisError } from '../../../agent/security/errors';
-import { logger } from '../../../agent/security/logger';
 import { ERROR_MESSAGES } from '../core/constants';
 
 export class TextExtractor {
@@ -119,19 +118,6 @@ export class TextExtractor {
         { filePath }
       );
     }
-  }
-
-  /**
-   * 使用textract提取DOC文本（已废弃）
-   * 注意：textract包与Next.js Turbopack不兼容，已移除
-   * 建议用户将DOC文件转换为DOCX格式
-   */
-  private async extractDOCWithTextract(filePath: string): Promise<string> {
-    throw new AnalysisError(
-      'textract已移除，DOC文件不支持。请转换为DOCX格式',
-      new Error('textract removed due to compatibility issues'),
-      { filePath }
-    );
   }
 
   /**

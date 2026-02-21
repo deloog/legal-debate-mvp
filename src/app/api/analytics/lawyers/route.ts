@@ -24,6 +24,7 @@ import {
   type LawyerWorkHoursData,
 } from '@/types/stats';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数：参数解析
@@ -799,7 +800,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     return successResponse(data, '获取律师绩效数据成功');
   } catch (error) {
-    console.error('获取律师绩效数据失败:', error);
+    logger.error('获取律师绩效数据失败:', error);
     return serverErrorResponse('获取律师绩效数据失败');
   }
 }

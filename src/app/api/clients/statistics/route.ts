@@ -13,6 +13,7 @@ import {
   type ClientStatistics,
   type ClientDetail,
 } from '@/types/client';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/clients/statistics
@@ -92,7 +93,7 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     return Response.json(statistics);
   } catch (error) {
-    console.error('[GET /api/clients/statistics] Error:', error);
+    logger.error('[GET /api/clients/statistics] Error:', error);
     return Response.json(
       { error: '获取统计数据失败', details: String(error) },
       { status: 500 }
@@ -297,7 +298,8 @@ export async function OPTIONS(): Promise<Response> {
   return new Response(null, {
     status: 204,
     headers: {
-      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      'Access-Control-Allow-Origin':
+        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },

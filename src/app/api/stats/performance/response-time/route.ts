@@ -20,6 +20,7 @@ import {
   type PerformanceMetricPoint,
 } from '@/types/stats';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数：时间范围处理
@@ -436,7 +437,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     return successResponse(data, '获取响应时间统计成功');
   } catch (error) {
-    console.error('获取响应时间统计失败:', error);
+    logger.error('获取响应时间统计失败:', error);
     return serverErrorResponse('获取响应时间统计失败');
   }
 }

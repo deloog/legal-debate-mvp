@@ -9,6 +9,7 @@ import type { CancelRequestBody } from '@/types/admin-membership';
 import { MembershipStatus } from '@prisma/client';
 import { MembershipChangeType } from '@/types/membership';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/memberships/cancel
@@ -176,7 +177,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 200 }
     );
   } catch (error) {
-    console.error('会员取消失败:', {
+    logger.error('会员取消失败:', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
       timestamp: new Date().toISOString(),

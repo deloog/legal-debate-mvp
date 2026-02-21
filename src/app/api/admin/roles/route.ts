@@ -13,6 +13,7 @@ import type {
 } from '@/types/admin-role';
 import type { UserRole } from '@/types/auth';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数
@@ -147,7 +148,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('获取角色列表失败:', error);
+    logger.error('获取角色列表失败:', error);
     return Response.json(
       { error: '服务器错误', message: '获取角色列表失败' },
       { status: 500 }
@@ -220,7 +221,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 201 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('创建角色失败:', error);
+    logger.error('创建角色失败:', error);
     return Response.json(
       { error: '服务器错误', message: '创建角色失败' },
       { status: 500 }

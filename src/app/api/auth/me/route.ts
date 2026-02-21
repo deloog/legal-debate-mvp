@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/auth/me
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // 调试日志：检查请求中的Cookie
     const accessToken = request.cookies.get('accessToken')?.value;
     const authHeader = request.headers.get('authorization');
-    console.log('[/api/auth/me] 收到请求:', {
+    logger.info('[/api/auth/me] 收到请求:', {
       hasCookie: !!accessToken,
       hasAuthHeader: !!authHeader,
       cookiePreview: accessToken
@@ -29,14 +30,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // 验证用户认证
     const user = await getAuthUser(request);
 
-    console.log('[/api/auth/me] getAuthUser结果:', {
+    logger.info('[/api/auth/me] getAuthUser结果:', {
       hasUser: !!user,
       userId: user?.userId,
       userEmail: user?.email,
     });
 
     if (!user) {
-      console.log('[/api/auth/me] 认证失败，返回401');
+      logger.info('[/api/auth/me] 认证失败，返回401');
       return NextResponse.json(
         { success: false, message: '未认证' },
         { status: 401 }
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       { status: 200 }
     );
   } catch (error) {
-    console.error('获取用户信息失败:', error);
+    logger.error('获取用户信息失败:', error);
     return NextResponse.json(
       { success: false, message: '获取失败，请稍后重试' },
       { status: 500 }

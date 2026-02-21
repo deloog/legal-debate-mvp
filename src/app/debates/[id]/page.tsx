@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useDebate } from '@/lib/hooks/use-debate';
 import { DebateArena } from '../components/debate-arena';
@@ -13,6 +13,8 @@ export default function DebatesPage() {
   const params = useParams();
   const router = useRouter();
   const debateId = params.id as string;
+
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   const {
     debate,
@@ -81,10 +83,42 @@ export default function DebatesPage() {
     );
   }
 
+  const isDebateCompleted = debate.status === 'COMPLETED';
+
   return (
-    <div className='min-h-screen bg-zinc-50 dark:bg-black'>
+    <div className='min-h-screen bg-zinc-50 dark:bg-zinc-950'>
+      {/* 辩论已结束横幅 */}
+      {isDebateCompleted && (
+        <div className='border-b border-green-200 bg-green-50 px-6 py-2 dark:border-green-800 dark:bg-green-900/20'>
+          <div className='mx-auto flex max-w-7xl items-center gap-2'>
+            <svg
+              className='h-4 w-4 shrink-0 text-green-600 dark:text-green-400'
+              fill='none'
+              stroke='currentColor'
+              viewBox='0 0 24 24'
+            >
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
+              />
+            </svg>
+            <span className='text-sm font-medium text-green-700 dark:text-green-300'>
+              辩论已完成 · 共 {rounds.length} 轮 · {argumentsList.length} 条论点
+            </span>
+            <button
+              onClick={() => router.push(`/debates/${debateId}/summary`)}
+              className='ml-auto rounded-md bg-green-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600'
+            >
+              查看辩论总结
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 页面头部 */}
-      <header className='border-b border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-950'>
+      <header className='border-b border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-900'>
         <div className='mx-auto max-w-7xl'>
           <div className='flex items-center justify-between'>
             <div>
@@ -92,15 +126,98 @@ export default function DebatesPage() {
                 {debate.title || '辩论'}
               </h1>
               <p className='mt-1 text-sm text-zinc-600 dark:text-zinc-400'>
-                案件辩论展示
+                共 {rounds.length} 轮 · {argumentsList.length} 条论点
               </p>
             </div>
-            <button
-              onClick={() => router.push('/cases')}
-              className='rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-            >
-              返回
-            </button>
+            <div className='flex items-center gap-2'>
+              <button
+                onClick={() => router.push(`/debates/${debateId}/summary`)}
+                className='rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+              >
+                辩论总结
+              </button>
+              {/* 导出下拉按钮 */}
+              <div className='relative'>
+                <button
+                  onClick={() => setShowExportMenu(v => !v)}
+                  className='flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                >
+                  导出
+                  <svg
+                    className={`h-3.5 w-3.5 transition-transform ${showExportMenu ? 'rotate-180' : ''}`}
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M19 9l-7 7-7-7'
+                    />
+                  </svg>
+                </button>
+                {showExportMenu && (
+                  <>
+                    {/* 点击外部关闭 */}
+                    <div
+                      className='fixed inset-0 z-10'
+                      onClick={() => setShowExportMenu(false)}
+                    />
+                    <div className='absolute right-0 z-20 mt-1 w-44 rounded-lg border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900'>
+                      <a
+                        href={`/api/v1/debates/${debateId}/export?format=markdown`}
+                        download
+                        onClick={() => setShowExportMenu(false)}
+                        className='flex items-center gap-2 px-4 py-2.5 text-sm text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800 rounded-t-lg'
+                      >
+                        <svg
+                          className='h-4 w-4 text-zinc-400'
+                          fill='none'
+                          stroke='currentColor'
+                          viewBox='0 0 24 24'
+                        >
+                          <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            strokeWidth={2}
+                            d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+                          />
+                        </svg>
+                        导出 Markdown
+                      </a>
+                      <a
+                        href={`/api/v1/debates/${debateId}/export?format=json`}
+                        download
+                        onClick={() => setShowExportMenu(false)}
+                        className='flex items-center gap-2 px-4 py-2.5 text-sm text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800 rounded-b-lg'
+                      >
+                        <svg
+                          className='h-4 w-4 text-zinc-400'
+                          fill='none'
+                          stroke='currentColor'
+                          viewBox='0 0 24 24'
+                        >
+                          <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            strokeWidth={2}
+                            d='M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582 4-8 4s8 1.79 8 4'
+                          />
+                        </svg>
+                        导出 JSON
+                      </a>
+                    </div>
+                  </>
+                )}
+              </div>
+              <button
+                onClick={() => router.push('/cases')}
+                className='rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+              >
+                返回
+              </button>
+            </div>
           </div>
         </div>
       </header>

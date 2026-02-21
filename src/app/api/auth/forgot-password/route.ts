@@ -9,6 +9,7 @@ import type {
   ForgotPasswordRequest,
   ForgotPasswordResponse,
 } from '@/types/password-reset';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/auth/forgot-password
@@ -34,7 +35,7 @@ async function handleForgotPassword(
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
-    console.error('密码找回 API 错误:', error);
+    logger.error('密码找回 API 错误:', error);
     const errorResponse: ForgotPasswordResponse = {
       success: false,
       message: '服务器内部错误，请稍后重试',

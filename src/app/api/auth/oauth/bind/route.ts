@@ -6,6 +6,7 @@ import { verifyToken } from '@/lib/auth/jwt';
 import { OAuthService } from '@/lib/auth/oauth-service';
 import type { OAuthUserInfo } from '@/types/oauth';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/auth/oauth/bind - 绑定 OAuth 账号
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
       account,
     });
   } catch (error) {
-    console.error('Bind OAuth account error:', error);
+    logger.error('Bind OAuth account error:', error);
     return NextResponse.json(
       {
         error:
@@ -87,7 +88,7 @@ export async function GET(request: NextRequest) {
       accounts,
     });
   } catch (error) {
-    console.error('Get OAuth accounts error:', error);
+    logger.error('Get OAuth accounts error:', error);
     return NextResponse.json(
       {
         error:

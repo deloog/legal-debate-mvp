@@ -201,8 +201,7 @@ export class LegalReasoner {
   private generateConclusion(
     steps: ReasoningStep[],
     facts: Fact[],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    laws: LawArticle[]
+    _laws: LawArticle[]
   ): string {
     if (steps.length === 0) {
       return '由于缺乏足够的法律依据和事实支持，无法得出有效结论。';

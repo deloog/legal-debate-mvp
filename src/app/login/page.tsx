@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { signIn } from 'next-auth/react';
 
 /**
  * 登录页面
@@ -39,23 +40,25 @@ export default function LoginPage() {
         return;
       }
 
-      // 安全优化：token已存储在httpOnly cookie中，无需存储到localStorage
-      // 但为了向后兼容，保留sessionStorage存储（仅用于客户端状态管理）
+      // 保留 sessionStorage，供客户端状态管理使用
       if (data.data?.user) {
         sessionStorage.setItem('user', JSON.stringify(data.data.user));
       }
 
-      console.log('[Login] 登录成功，准备跳转到:', redirect);
+      // 同步建立 NextAuth session，使 getServerSession() 能正常返回用户信息
+      // （不影响自定义 JWT cookie，两套机制并行工作）
+      await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
 
-      // 触发自定义事件，通知AuthProvider更新状态
+      // 触发自定义事件，通知 AuthProvider 更新状态
       window.dispatchEvent(new CustomEvent('login-success'));
 
-      // 延迟跳转，确保cookie已设置并且AuthProvider有时间更新
-      setTimeout(() => {
-        console.log('[Login] 执行页面跳转');
-        router.push(redirect);
-        router.refresh();
-      }, 200);
+      // 跳转目标页
+      router.push(redirect);
+      router.refresh();
     } catch (err) {
       console.error('登录错误:', err);
       setError('登录失败，请稍后重试');

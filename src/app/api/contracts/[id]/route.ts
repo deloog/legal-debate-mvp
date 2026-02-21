@@ -11,6 +11,7 @@ import {
 } from '@/lib/validations/contract';
 import type { ErrorResponse, SuccessResponse } from '@/types/api-response';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/contracts/[id]
@@ -120,7 +121,7 @@ export async function GET(
       data: responseData,
     });
   } catch (error) {
-    console.error('获取合同详情失败:', error);
+    logger.error('获取合同详情失败:', error);
 
     return NextResponse.json(
       {
@@ -266,7 +267,7 @@ export async function PUT(
 
     // 清除PDF缓存（异步执行，不阻塞响应）
     clearContractPDFCache(id).catch(error => {
-      console.error('清除PDF缓存失败:', error);
+      logger.error('清除PDF缓存失败:', error);
     });
 
     // 转换响应数据
@@ -319,7 +320,7 @@ export async function PUT(
       data: responseData,
     });
   } catch (error) {
-    console.error('更新合同记录失败:', error);
+    logger.error('更新合同记录失败:', error);
 
     return NextResponse.json(
       {

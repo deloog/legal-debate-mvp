@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getWechatOAuth } from '@/lib/auth/wechat-oauth';
 import { OAuthService } from '@/lib/auth/oauth-service';
+import { logger } from '@/lib/logger';
 
 /**
  * 生成随机state
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
       state: response.state,
     });
   } catch (error) {
-    console.error('Wechat authorize error:', error);
+    logger.error('Wechat authorize error:', error);
     return NextResponse.json(
       { error: 'Failed to generate authorize URL' },
       { status: 500 }
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
       isNewUser: loginResult.isNewUser,
     });
   } catch (error) {
-    console.error('Wechat callback error:', error);
+    logger.error('Wechat callback error:', error);
     return NextResponse.json(
       { error: 'Failed to handle OAuth callback' },
       { status: 500 }

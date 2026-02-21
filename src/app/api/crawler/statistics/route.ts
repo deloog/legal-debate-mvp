@@ -4,6 +4,7 @@
 
 import { NextResponse } from 'next/server';
 import { crawlTaskManager } from '@/lib/crawler/crawl-task-manager';
+import { logger } from '@/lib/logger';
 
 export async function GET() {
   try {
@@ -26,7 +27,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('获取统计数据失败:', error);
+    logger.error('获取统计数据失败:', error);
     return NextResponse.json({ error: '获取统计数据失败' }, { status: 500 });
   }
 }

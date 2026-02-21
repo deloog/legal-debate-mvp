@@ -36,7 +36,8 @@ if (!JWT_SECRET) {
 }
 
 // 有效的JWT密钥（生产/staging 使用环境变量；本地开发使用临时密钥）
-const EFFECTIVE_JWT_SECRET = JWT_SECRET ?? 'dev-only-jwt-secret-not-for-production';
+const EFFECTIVE_JWT_SECRET =
+  JWT_SECRET ?? 'dev-only-jwt-secret-not-for-production';
 
 /**
  * 生成 JWT Token

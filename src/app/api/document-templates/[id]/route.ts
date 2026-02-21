@@ -6,6 +6,7 @@ import {
   DocumentTemplateCategory,
   TemplateStatus,
 } from '@/types/document-template';
+import { logger } from '@/lib/logger';
 
 /**
  * 验证模板访问权限
@@ -106,7 +107,7 @@ export async function GET(
       creatorName,
     });
   } catch (error) {
-    console.error('获取模板详情失败:', error);
+    logger.error('获取模板详情失败:', error);
     return NextResponse.json({ error: '获取模板详情失败' }, { status: 500 });
   }
 }
@@ -162,7 +163,7 @@ export async function PUT(
       version: updatedTemplate.version,
     });
   } catch (error) {
-    console.error('更新模板失败:', error);
+    logger.error('更新模板失败:', error);
     return NextResponse.json({ error: '更新模板失败' }, { status: 500 });
   }
 }
@@ -206,7 +207,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: '删除成功' });
   } catch (error) {
-    console.error('删除模板失败:', error);
+    logger.error('删除模板失败:', error);
     return NextResponse.json({ error: '删除模板失败' }, { status: 500 });
   }
 }

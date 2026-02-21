@@ -14,6 +14,7 @@ import {
   unauthorizedResponse,
   serverErrorResponse,
 } from '@/lib/api-response';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数
@@ -170,7 +171,7 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     return successResponse(responseData, '获取错误日志列表成功');
   } catch (error) {
-    console.error('获取错误日志列表失败:', error);
+    logger.error('获取错误日志列表失败:', error);
     return serverErrorResponse('获取错误日志列表失败');
   }
 }

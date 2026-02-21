@@ -11,6 +11,7 @@ import {
   checkResourceOwnership,
   ResourceType,
 } from '@/lib/middleware/resource-permission';
+import { logger } from '@/lib/logger';
 
 /**
  * 文件上传API
@@ -140,7 +141,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (isTestPDF) {
       // 虚拟测试PDF，直接使用Mock数据
-      console.log(`检测到虚拟测试PDF [${document.id}]，使用Mock数据`);
+      logger.info(`检测到虚拟测试PDF [${document.id}]，使用Mock数据`);
       const mockAnalysisResult = {
         extractedData: {
           parties: [
@@ -224,7 +225,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     } else {
       // 真实PDF文件，异步触发文档分析
       triggerDocumentAnalysis(document.id, filePath, extension).catch(error => {
-        console.error(`文档分析异步触发失败 [${document.id}]:`, error);
+        logger.error(`文档分析异步触发失败 [${document.id}]:`, error);
         // 更新文档状态为失败
         prisma.document
           .update({
@@ -236,7 +237,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
               }`,
             },
           })
-          .catch(err => console.error('更新文档分析状态失败:', err));
+          .catch(err => logger.error('更新文档分析状态失败:', err));
       });
     }
 
@@ -253,7 +254,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    console.error('文件上传失败:', error);
+    logger.error('文件上传失败:', error);
     return NextResponse.json(
       {
         success: false,
@@ -344,7 +345,7 @@ async function triggerDocumentAnalysis(
           updatedAt: new Date(),
         },
       });
-      console.log(`文档分析完成 [${documentId}]:`, result.data);
+      logger.info(`文档分析完成 [${documentId}]:`, result.data);
     } else {
       await prisma.document.update({
         where: { id: documentId },
@@ -353,10 +354,10 @@ async function triggerDocumentAnalysis(
           analysisError: result.error?.message || '文档分析失败',
         },
       });
-      console.error(`文档分析失败 [${documentId}]:`, result.error);
+      logger.error(`文档分析失败 [${documentId}]:`, result.error);
     }
   } catch (error) {
-    console.error(`文档分析异常 [${documentId}]:`, error);
+    logger.error(`文档分析异常 [${documentId}]:`, error);
     await prisma.document.update({
       where: { id: documentId },
       data: {

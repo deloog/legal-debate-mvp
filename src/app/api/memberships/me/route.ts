@@ -9,6 +9,7 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import { getUsageStats } from '@/lib/usage/record-usage';
 import { MembershipStatus } from '@prisma/client';
 import type { MembershipTier } from '@/types/membership';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // GET /api/memberships/me - 查询当前会员信息
@@ -155,7 +156,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       { status: 200 }
     );
   } catch (error) {
-    console.error('[GET /api/memberships/me] 查询失败:', error);
+    logger.error('[GET /api/memberships/me] 查询失败:', error);
 
     return Response.json(
       {

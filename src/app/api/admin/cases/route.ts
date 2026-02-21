@@ -19,6 +19,7 @@ import {
   serverErrorResponse,
   notFoundResponse,
 } from '@/lib/api-response';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 类型定义
@@ -286,7 +287,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     return successResponse(responseData, '获取案件列表成功');
   } catch (error) {
-    console.error('获取案件列表失败:', error);
+    logger.error('获取案件列表失败:', error);
     return serverErrorResponse('获取案件列表失败');
   }
 }
@@ -333,7 +334,7 @@ export async function DELETE(
 
     return successResponse(undefined, '案件删除成功');
   } catch (error) {
-    console.error('删除案件失败:', error);
+    logger.error('删除案件失败:', error);
     return serverErrorResponse('删除案件失败');
   }
 }
@@ -346,7 +347,8 @@ export async function OPTIONS(): Promise<NextResponse> {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      'Access-Control-Allow-Origin':
+        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
       'Access-Control-Allow-Methods': 'GET, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',

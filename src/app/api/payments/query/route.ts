@@ -20,6 +20,7 @@ import {
   AlipayTradeStatus,
 } from '@/types/payment';
 import { paymentService } from '@/lib/payment/payment-service';
+import { logger } from '@/lib/logger';
 
 /**
  * 将 Prisma Decimal 转换为 number
@@ -207,7 +208,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         }
       } catch (error) {
         // 同步失败，但不影响本地数据的返回
-        console.error('[API] 同步微信支付状态失败:', {
+        logger.error('[API] 同步微信支付状态失败:', {
           orderId: order.id,
           orderNo: order.orderNo,
           error: error instanceof Error ? error.message : String(error),
@@ -294,7 +295,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         }
       } catch (error) {
         // 同步失败，但不影响本地数据的返回
-        console.error('[API] 同步支付宝支付状态失败:', {
+        logger.error('[API] 同步支付宝支付状态失败:', {
           orderId: order.id,
           orderNo: order.orderNo,
           error: error instanceof Error ? error.message : String(error),
@@ -314,7 +315,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     } as QueryPaymentResponse);
   } catch (error) {
-    console.error('[API] 查询订单失败:', error);
+    logger.error('[API] 查询订单失败:', error);
 
     return NextResponse.json(
       {

@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { crawlTaskManager } from '@/lib/crawler/crawl-task-manager';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -23,7 +24,7 @@ export async function GET(
       data: status,
     });
   } catch (error) {
-    console.error('获取任务状态失败:', error);
+    logger.error('获取任务状态失败:', error);
     return NextResponse.json({ error: '获取任务状态失败' }, { status: 500 });
   }
 }

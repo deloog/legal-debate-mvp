@@ -23,12 +23,25 @@ import { SSEConnectionState } from './types';
 export type SSEEventHandler = (data: any) => void;
 
 /**
+ * AI流式事件数据
+ */
+export interface AIStreamEventData {
+  chunkId: number;
+  content: string;
+  accumulatedLength: number;
+  progress: number;
+  roundNumber: number;
+  timestamp: string;
+}
+
+/**
  * SSE客户端配置
  */
 export interface SSEClientConfig extends SSEConnectionConfig {
   url: string;
   onConnected?: (data: ConnectedEventData) => void;
   onRoundStart?: (data: RoundStartEventData) => void;
+  onAIStream?: (data: AIStreamEventData) => void;
   onArgument?: (data: ArgumentEventData) => void;
   onProgress?: (data: ProgressEventData) => void;
   onCompleted?: (data: CompletedEventData) => void;
@@ -187,6 +200,7 @@ export class SSEClient {
     const events: DebateStreamEventType[] = [
       'connected',
       'round-start',
+      'ai_stream',
       'argument',
       'progress',
       'completed',
@@ -248,6 +262,7 @@ export class SSEClient {
     const callbacks: Record<string, ((data: any) => void) | undefined> = {
       connected: this.config.onConnected,
       'round-start': this.config.onRoundStart,
+      ai_stream: this.config.onAIStream,
       argument: this.config.onArgument,
       progress: this.config.onProgress,
       completed: this.config.onCompleted,

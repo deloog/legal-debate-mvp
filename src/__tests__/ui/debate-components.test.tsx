@@ -35,6 +35,7 @@ describe('辩论界面组件', () => {
       logicScore: null,
       legalScore: null,
       overallScore: null,
+      priority: null,
     };
 
     it('应该正确渲染论点卡片', () => {
@@ -131,6 +132,7 @@ describe('辩论界面组件', () => {
         logicScore: null,
         legalScore: null,
         overallScore: null,
+        priority: null,
       },
       {
         id: 'arg2',
@@ -148,6 +150,7 @@ describe('辩论界面组件', () => {
         logicScore: null,
         legalScore: null,
         overallScore: null,
+        priority: null,
       },
     ];
 

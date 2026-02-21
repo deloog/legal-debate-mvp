@@ -11,6 +11,7 @@ import type {
   BatchRevokePermissionsRequest,
 } from '@/types/admin-role';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // API处理函数
@@ -101,7 +102,7 @@ export async function PUT(
       { status: 201 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('批量分配权限失败:', error);
+    logger.error('批量分配权限失败:', error);
     return Response.json(
       { error: '服务器错误', message: '批量分配权限失败' },
       { status: 500 }
@@ -179,7 +180,7 @@ export async function DELETE(
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('批量撤销权限失败:', error);
+    logger.error('批量撤销权限失败:', error);
     return Response.json(
       { error: '服务器错误', message: '批量撤销权限失败' },
       { status: 500 }

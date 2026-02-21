@@ -8,6 +8,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { CrossExaminationService } from '@/lib/evidence/cross-examination-service';
+import { logger } from '@/lib/logger';
 
 /**
  * 请求体接口
@@ -51,7 +52,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     let body: CrossExaminationRequest;
     try {
       body = await request.json();
-    } catch (error) {
+    } catch (_error) {
       return NextResponse.json(
         {
           success: false,
@@ -149,7 +150,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('质证预判API错误:', error);
+    logger.error('质证预判API错误:', error);
 
     // 返回错误响应
     return NextResponse.json(

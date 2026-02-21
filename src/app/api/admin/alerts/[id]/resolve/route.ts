@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db/prisma';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { ALERT_PERMISSIONS } from '@/types/permission';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/admin/alerts/[id]/resolve - 处理告警
@@ -64,7 +65,7 @@ export async function POST(
       data: updatedAlert,
     });
   } catch (error) {
-    console.error('处理告警失败:', error);
+    logger.error('处理告警失败:', error);
     return NextResponse.json(
       {
         success: false,

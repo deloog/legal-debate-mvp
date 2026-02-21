@@ -307,10 +307,7 @@ export class ApplicabilityAnalyzer {
   /**
    * 检查法条层级
    */
-  private checkLevelValidity(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _article: LawArticle
-  ): {
+  private checkLevelValidity(_article: LawArticle): {
     valid: boolean;
     reason?: string;
   } {

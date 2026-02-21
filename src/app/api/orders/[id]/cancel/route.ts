@@ -8,6 +8,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { cancelOrder, isOrderExpired } from '@/lib/order/order-service';
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/orders/[id]/cancel
@@ -128,7 +129,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('[API] 取消订单失败:', error);
+    logger.error('[API] 取消订单失败:', error);
 
     // 处理已知的错误类型
     if (error instanceof Error) {

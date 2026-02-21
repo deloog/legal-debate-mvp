@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { compare } from 'bcryptjs';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/auth/test-session - 测试专用登录端点
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
       message: 'Login successful',
     });
   } catch (error) {
-    console.error('Test session login error:', error);
+    logger.error('Test session login error:', error);
     return NextResponse.json(
       { success: false, error: 'INTERNAL_SERVER_ERROR' },
       { status: 500 }

@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ComplianceService } from '@/lib/compliance/compliance-service';
 import type { GetComplianceReportResponse } from '@/types/compliance';
 import { ComplianceCategory } from '@/types/compliance';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/compliance/report
@@ -39,7 +40,7 @@ export async function GET(
       { status: 200 }
     );
   } catch (error) {
-    console.error('生成合规报告错误:', error);
+    logger.error('生成合规报告错误:', error);
 
     return NextResponse.json(
       {

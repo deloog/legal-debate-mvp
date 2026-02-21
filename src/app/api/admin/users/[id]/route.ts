@@ -13,6 +13,7 @@ import {
 } from '@/types/admin-user';
 import { UserRole, UserStatus } from '@/types/auth';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * 验证用户ID格式
@@ -178,7 +179,7 @@ export async function GET(
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('获取用户详情失败:', error);
+    logger.error('获取用户详情失败:', error);
     return Response.json(
       { error: '服务器错误', message: '获取用户详情失败' },
       { status: 500 }
@@ -290,7 +291,7 @@ export async function PUT(
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('更新用户信息失败:', error);
+    logger.error('更新用户信息失败:', error);
     if (
       error instanceof Error &&
       error.message.includes('Record to update not found')
@@ -363,7 +364,7 @@ export async function DELETE(
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('删除用户失败:', error);
+    logger.error('删除用户失败:', error);
     if (
       error instanceof Error &&
       error.message.includes('Record to update not found')
@@ -388,7 +389,8 @@ export async function OPTIONS(): Promise<NextResponse> {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      'Access-Control-Allow-Origin':
+        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
       'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',

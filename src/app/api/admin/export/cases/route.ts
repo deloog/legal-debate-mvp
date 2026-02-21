@@ -19,6 +19,7 @@ import { validatePermissions } from '@/lib/middleware/permission-check';
 import { TimeRange } from '@/types/stats';
 import type { CaseExportQueryParams, ExportFormat } from '@/types/stats';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数：时间范围处理
@@ -284,7 +285,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    console.error('导出案件数据失败:', error);
+    logger.error('导出案件数据失败:', error);
     return serverErrorResponse('导出案件数据失败');
   }
 }

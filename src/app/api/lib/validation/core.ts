@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { ZodSchema, ZodError } from 'zod';
 import { ValidationError } from '../errors/api-error';
+import { logger } from '@/lib/logger';
 
 /**
  * 验证请求体
@@ -82,14 +83,14 @@ export function validatePathParams<T>(
  */
 export function validatePathParam<T>(param: unknown, schema: ZodSchema<T>): T {
   try {
-    console.log('验证路径参数:', {
+    logger.info('验证路径参数:', {
       param,
       paramType: typeof param,
     });
     return schema.parse(param);
   } catch (error) {
     if (error instanceof ZodError) {
-      console.error('路径参数验证失败:', {
+      logger.error('路径参数验证失败:', {
         param,
         paramType: typeof param,
         schemaIssues: error.issues,

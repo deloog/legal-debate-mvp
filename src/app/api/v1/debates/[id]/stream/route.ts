@@ -4,261 +4,575 @@ import { validatePathParam } from '@/app/api/lib/validation/validator';
 import { uuidSchema } from '@/app/api/lib/validation/schemas';
 import { prisma } from '@/lib/db/prisma';
 import { getUnifiedAIService } from '@/lib/ai/unified-service';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
+import { searchAllLawArticles } from '@/lib/debate/law-search';
+import { computeArgumentScores } from '@/lib/debate/scoring';
 import {
   DebateStatus,
   RoundStatus,
   ArgumentSide,
   ArgumentType,
+  Prisma,
 } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
-// 确保在Node.js环境中可以使用Web Streams API
+// 确保在 Node.js 环境中可以使用 Web Streams API
 const { ReadableStream } = globalThis;
 
+// =============================================================================
+// 辅助函数
+// =============================================================================
+
 /**
- * 从请求中提取关联ID
+ * 从请求中提取关联 ID
  */
 function extractCorrelationId(request: NextRequest): string | undefined {
-  // 从请求头获取
-  const headerCorrelationId =
+  return (
     request.headers.get('X-Correlation-ID') ||
-    request.headers.get('x-correlation-id');
-  if (headerCorrelationId) {
-    return headerCorrelationId;
-  }
-
-  // 从查询参数获取
-  const url = new URL(request.url);
-  const queryCorrelationId = url.searchParams.get('correlationId');
-  if (queryCorrelationId) {
-    return queryCorrelationId;
-  }
-
-  return undefined;
+    request.headers.get('x-correlation-id') ||
+    new URL(request.url).searchParams.get('correlationId') ||
+    undefined
+  );
 }
 
 /**
- * 创建标准化的流式错误事件
+ * 构建标准 SSE 命名事件字符串（符合 W3C SSE 规范）
  */
-function createStreamError(
+function sseEvent(type: string, data: Record<string, unknown>): string {
+  return `event: ${type}\ndata: ${JSON.stringify(data)}\n\n`;
+}
+
+/**
+ * 构建 SSE 错误事件
+ */
+function sseError(
   error: string | Error | ApiError,
   correlationId?: string,
-  statusCode: number = 500,
+  statusCode = 500,
   details?: Record<string, unknown>
 ): string {
   const errorMessage = error instanceof Error ? error.message : error;
   const errorCode = error instanceof ApiError ? error.code : 'STREAM_ERROR';
-
-  return `data: ${JSON.stringify({
-    type: 'error',
-    timestamp: new Date().toISOString(),
+  return sseEvent('error', {
+    code: errorCode,
+    message: errorMessage,
+    httpStatus: statusCode,
+    details,
     correlationId,
-    error: {
-      code: errorCode,
-      message: errorMessage,
-      details,
-      httpStatus: statusCode,
-    },
-  })}\n\n`;
+    timestamp: new Date().toISOString(),
+  });
 }
 
 /**
- * 解析AI生成的辩论论点
- * 这是一个简化的解析器，实际使用时需要根据AI服务的返回格式调整
+ * 构建前轮辩论上下文摘要（截断200字，与 /generate 路由保持一致）
  */
-function parseDebateArguments(
-  content: string
-  // roundNumber: number,
-): Array<{
-  side: ArgumentSide;
-  content: string;
-  confidence: number;
-}> {
-  // 简化的论点解析逻辑
-  // 实际实现中应该根据AI服务的具体返回格式进行解析
-  const plaintiffRegex = /原告[：:]\s*([^。\n]+)[。\n]?/g;
-  const defendantRegex = /被告[：:]\s*([^。\n]+)[。\n]?/g;
+async function buildPreviousRoundsContext(
+  debateId: string,
+  currentRoundNumber: number
+): Promise<string | null> {
+  if (currentRoundNumber <= 1) return null;
 
-  const parsedArguments: Array<{
-    side: ArgumentSide;
-    content: string;
-    confidence: number;
-  }> = [];
+  const previousRounds = await prisma.debateRound.findMany({
+    where: {
+      debateId,
+      roundNumber: { lt: currentRoundNumber },
+      status: 'COMPLETED',
+    },
+    include: {
+      arguments: { orderBy: { createdAt: 'asc' }, take: 10 },
+    },
+    orderBy: { roundNumber: 'asc' },
+  });
 
-  let match;
+  if (previousRounds.length === 0) return null;
 
-  // 解析原告论点
-  while ((match = plaintiffRegex.exec(content)) !== null) {
-    parsedArguments.push({
-      side: ArgumentSide.PLAINTIFF,
-      content: match[1].trim(),
-      confidence: 0.85 + Math.random() * 0.1,
-    });
-  }
+  const contextParts: string[] = [];
+  for (const round of previousRounds) {
+    const plaintiffSummary = round.arguments
+      .filter(a => a.side === 'PLAINTIFF')
+      .map(
+        a =>
+          `  - ${a.content.length > 200 ? a.content.substring(0, 200) + '…' : a.content}`
+      )
+      .join('\n');
+    const defendantSummary = round.arguments
+      .filter(a => a.side === 'DEFENDANT')
+      .map(
+        a =>
+          `  - ${a.content.length > 200 ? a.content.substring(0, 200) + '…' : a.content}`
+      )
+      .join('\n');
 
-  // 解析被告论点
-  while ((match = defendantRegex.exec(content)) !== null) {
-    parsedArguments.push({
-      side: ArgumentSide.DEFENDANT,
-      content: match[1].trim(),
-      confidence: 0.8 + Math.random() * 0.15,
-    });
-  }
-
-  // 如果没有解析到论点，提供默认论点
-  if (parsedArguments.length === 0) {
-    parsedArguments.push(
-      {
-        side: ArgumentSide.PLAINTIFF,
-        content: `基于案件事实和法律依据，原告的诉讼请求应当得到支持。`,
-        confidence: 0.85,
-      },
-      {
-        side: ArgumentSide.DEFENDANT,
-        content: `原告的指控缺乏事实和法律依据，应当驳回其诉讼请求。`,
-        confidence: 0.82,
-      }
+    contextParts.push(
+      `### 第${round.roundNumber}轮\n原告方：\n${plaintiffSummary || '  （无）'}\n被告方：\n${defendantSummary || '  （无）'}`
     );
   }
-
-  return parsedArguments;
+  return contextParts.join('\n\n');
 }
+
+/**
+ * 解析 AI 返回的结构化 JSON 论点（与 /generate 路由保持一致）
+ */
+function parseStructuredDebateArguments(content: string): Array<{
+  side: ArgumentSide;
+  content: string;
+  type: ArgumentType;
+  confidence: number;
+  reasoning?: string;
+  legalBasis: Array<{
+    lawName: string;
+    articleNumber: string;
+    relevance: number;
+    explanation: string;
+  }>;
+}> | null {
+  try {
+    let jsonText = content;
+    const codeBlockMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
+    if (codeBlockMatch) jsonText = codeBlockMatch[1];
+    else {
+      const braceMatch = content.match(
+        /\{[\s\S]*"plaintiff"[\s\S]*"defendant"[\s\S]*\}/
+      );
+      if (braceMatch) jsonText = braceMatch[0];
+    }
+
+    const parsed = JSON.parse(jsonText) as {
+      plaintiff?: Array<{
+        content: string;
+        reasoning?: string;
+        legalBasis?: unknown[];
+      }>;
+      defendant?: Array<{
+        content: string;
+        reasoning?: string;
+        legalBasis?: unknown[];
+      }>;
+    };
+
+    const results: ReturnType<typeof parseStructuredDebateArguments> = [];
+
+    const mapLegalBasis = (
+      raw: unknown[]
+    ): Array<{
+      lawName: string;
+      articleNumber: string;
+      relevance: number;
+      explanation: string;
+    }> =>
+      (
+        raw as Array<{
+          lawName?: string;
+          articleNumber?: string;
+          relevance?: number;
+          explanation?: string;
+        }>
+      )
+        .filter(b => b.lawName)
+        .map(b => ({
+          lawName: String(b.lawName || ''),
+          articleNumber: String(b.articleNumber || ''),
+          relevance: Number(b.relevance ?? 0.8),
+          explanation: String(b.explanation || ''),
+        }));
+
+    if (Array.isArray(parsed.plaintiff)) {
+      for (const arg of parsed.plaintiff) {
+        if (typeof arg.content === 'string' && arg.content.trim()) {
+          results.push({
+            side: ArgumentSide.PLAINTIFF,
+            content: arg.content.trim(),
+            type: ArgumentType.MAIN_POINT,
+            confidence: 0.88,
+            reasoning:
+              typeof arg.reasoning === 'string' ? arg.reasoning : undefined,
+            legalBasis: Array.isArray(arg.legalBasis)
+              ? mapLegalBasis(arg.legalBasis)
+              : [],
+          });
+        }
+      }
+    }
+    if (Array.isArray(parsed.defendant)) {
+      for (const arg of parsed.defendant) {
+        if (typeof arg.content === 'string' && arg.content.trim()) {
+          results.push({
+            side: ArgumentSide.DEFENDANT,
+            content: arg.content.trim(),
+            type: ArgumentType.MAIN_POINT,
+            confidence: 0.85,
+            reasoning:
+              typeof arg.reasoning === 'string' ? arg.reasoning : undefined,
+            legalBasis: Array.isArray(arg.legalBasis)
+              ? mapLegalBasis(arg.legalBasis)
+              : [],
+          });
+        }
+      }
+    }
+
+    return results.length > 0 ? results : null;
+  } catch {
+    return null;
+  }
+}
+
+// =============================================================================
+// GET handler
+// =============================================================================
 
 /**
  * GET /api/v1/debates/[id]/stream
- * 流式获取辩论内容
+ *
+ * SSE 流式推送辩论生成进度。
+ *
+ * 事件序列（均为命名事件，客户端通过 addEventListener('<name>', ...) 接收）：
+ *   connected       → 连接建立确认
+ *   round-start     → 轮次开始
+ *   ai_stream       → AI 原始 token（实时）
+ *   argument        → 单个论点（已解析，含 side/content/reasoning/legalBasis）
+ *   progress        → 进度更新
+ *   completed       → 整体完成
+ *   error           → 错误
  */
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  // 验证路径参数
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { error: '未认证', code: 'UNAUTHORIZED' },
+      { status: 401 }
+    );
+  }
+
   const params = await context.params;
   const debateId = validatePathParam(params.id, uuidSchema);
+  const correlationId = extractCorrelationId(request);
 
-  // 预检：辩论是否存在 - 在流创建前检查
+  // 预检：辩论是否存在，同时取 userId + case.type 用于检索和所有权验证
   const debate = await prisma.debate.findUnique({
     where: { id: debateId },
     include: {
-      case: {
-        select: {
-          title: true,
-          description: true,
-        },
-      },
-      rounds: {
-        include: {
-          arguments: true,
-        },
-        orderBy: { roundNumber: 'desc' },
-        take: 1,
-      },
+      case: { select: { title: true, description: true, type: true } },
     },
   });
 
   if (!debate) {
-    const correlationId = extractCorrelationId(request);
     return NextResponse.json(
       {
         error: 'Debate not found',
         correlationId,
         timestamp: new Date().toISOString(),
       },
-      {
-        status: 404,
-        headers: { 'x-correlation-id': correlationId },
-      }
+      { status: 404, headers: { 'x-correlation-id': correlationId ?? '' } }
     );
   }
 
-  // 设置SSE响应头
+  const isAdmin = (session.user as { role?: string }).role === 'ADMIN';
+  if (debate.userId !== session.user.id && !isAdmin) {
+    return NextResponse.json(
+      { error: '无权访问', code: 'FORBIDDEN', correlationId },
+      { status: 403, headers: { 'x-correlation-id': correlationId ?? '' } }
+    );
+  }
+
+  // ── 速率限制：60秒内完成轮次不超过5个 ──
+  const recentRounds = await prisma.debateRound.count({
+    where: {
+      debate: { userId: session.user.id },
+      completedAt: { gte: new Date(Date.now() - 60_000) },
+    },
+  });
+  if (recentRounds >= 5) {
+    return NextResponse.json(
+      {
+        error: '请求过于频繁，请稍后再试',
+        code: 'RATE_LIMITED',
+        correlationId,
+      },
+      { status: 429 }
+    );
+  }
+
+  const allowedOrigin =
+    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
   const headers = new Headers({
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
     Connection: 'keep-alive',
-    'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'X-Accel-Buffering': 'no', // 禁用 Nginx 缓冲，保证实时推送
   });
 
-  // 创建SSE流
   let isStreamActive = true;
   const stream = new ReadableStream({
     async start(controller) {
+      const enqueue = (chunk: string) => {
+        if (isStreamActive) {
+          try {
+            controller.enqueue(chunk);
+          } catch {
+            // 客户端已断开
+          }
+        }
+      };
+
+      const close = () => {
+        isStreamActive = false;
+        try {
+          controller.close();
+        } catch {
+          /* 已关闭 */
+        }
+      };
+
       try {
-        // 发送连接确认
-        controller.enqueue(
-          `data: ${JSON.stringify({
-            type: 'connected',
-            timestamp: new Date().toISOString(),
+        // 连接确认
+        enqueue(
+          sseEvent('connected', {
             debateId,
-          })}\n\n`
+            timestamp: new Date().toISOString(),
+          })
         );
 
-        // 获取AI服务实例
         const aiService = await getUnifiedAIService();
-
-        // 确定当前轮次
-        const currentRound = debate.currentRound;
         const maxRounds =
           (debate.debateConfig as { maxRounds?: number })?.maxRounds || 3;
+        const startFromRound = debate.currentRound + 1;
 
-        // 生成论点并流式传输
+        // ── 预先检索法条（所有轮次共用同一套法条上下文）──
+        const { articles: lawArticles } = await searchAllLawArticles(
+          debate.case.type ?? null,
+          debate.case.title,
+          debate.case.description,
+          6,
+          4
+        );
+        const legalReferencesForAI = lawArticles.map(
+          a => `《${a.lawName}》${a.articleNumber}`
+        );
+        if (lawArticles.length > 0) {
+          logger.info(
+            `[stream] 检索到 ${lawArticles.length} 条相关法条，注入AI上下文`
+          );
+        }
+
         for (
-          let roundIndex = currentRound + 1;
+          let roundIndex = startFromRound;
           roundIndex <= maxRounds && isStreamActive;
           roundIndex++
         ) {
-          // 发送轮次开始事件
-          if (isStreamActive) {
-            controller.enqueue(
-              `data: ${JSON.stringify({
-                type: 'round_started',
-                timestamp: new Date().toISOString(),
+          // ── 查找或创建轮次（幂等，避免与 /generate 路由冲突）──
+          let roundRecord = await prisma.debateRound.findFirst({
+            where: { debateId, roundNumber: roundIndex },
+          });
+
+          if (!roundRecord) {
+            roundRecord = await prisma.debateRound.create({
+              data: {
                 debateId,
                 roundNumber: roundIndex,
-              })}\n\n`
+                status: RoundStatus.IN_PROGRESS,
+                startedAt: new Date(),
+              },
+            });
+          } else if (roundRecord.status === RoundStatus.COMPLETED) {
+            // 已完成的轮次跳过（避免重复生成）
+            continue;
+          }
+
+          const roundId = roundRecord.id;
+
+          // 发送 round-start 事件
+          enqueue(
+            sseEvent('round-start', {
+              debateId,
+              roundId,
+              roundNumber: roundIndex,
+              timestamp: new Date().toISOString(),
+            })
+          );
+
+          // ── 构建前轮上下文 ──
+          const previousRoundsContext = await buildPreviousRoundsContext(
+            debateId,
+            roundIndex
+          );
+          if (previousRoundsContext) {
+            logger.info(
+              `[stream] 已构建第${roundIndex}轮前置上下文（前${roundIndex - 1}轮）`
             );
           }
 
           try {
-            // 使用AI服务生成辩论论点
-            const debateResponse = await aiService.generateDebate({
+            // ── 调用 AI 流式生成（注入法条引用）──
+            const debateStream = await aiService.generateDebateStreamLegacy({
               title: debate.case.title,
               description: debate.case.description,
-              legalReferences: [], // 可以从案件相关法条中获取
+              legalReferences: legalReferencesForAI,
+              previousRoundsContext: previousRoundsContext || undefined,
             });
 
-            const debateContent =
-              debateResponse.choices?.[0]?.message?.content || '';
+            const reader = debateStream.getReader();
+            const decoder = new TextDecoder();
+            let debateContent = '';
+            let chunkId = 0;
+            const totalEstimate = 3000; // 预估 token 数（用于进度计算）
 
-            // 解析AI生成的论点（这里需要根据实际AI返回格式调整）
-            const generatedArguments = parseDebateArguments(debateContent);
+            // 实时转发 AI token
+            while (isStreamActive) {
+              const { done, value } = await reader.read();
+              if (done) break;
 
-            // 保存轮次到数据库
-            const newRound = await prisma.$transaction(async tx => {
-              const round = await tx.debateRound.create({
-                data: {
-                  debateId,
+              const text = decoder.decode(value, { stream: true });
+              debateContent += text;
+              chunkId++;
+
+              enqueue(
+                sseEvent('ai_stream', {
+                  chunkId,
+                  content: text,
+                  accumulatedLength: debateContent.length,
+                  progress: Math.min(
+                    (debateContent.length / totalEstimate) * 80,
+                    80
+                  ),
                   roundNumber: roundIndex,
-                  status: RoundStatus.IN_PROGRESS,
-                  startedAt: new Date(),
+                  timestamp: new Date().toISOString(),
+                })
+              );
+            }
+
+            // ── 解析论点 ──
+            const structuredArgs = debateContent
+              ? parseStructuredDebateArguments(debateContent)
+              : null;
+
+            type ParsedArg = {
+              side: ArgumentSide;
+              content: string;
+              type: ArgumentType;
+              confidence: number;
+              reasoning?: string;
+              legalBasis: Array<{
+                lawName: string;
+                articleNumber: string;
+                relevance: number;
+                explanation: string;
+              }>;
+            };
+
+            // 解析失败 → 标记轮次 FAILED，不插入任何假内容
+            if (!structuredArgs || structuredArgs.length < 2) {
+              logger.error(
+                `[stream] 第${roundIndex}轮论点解析失败，原始内容前200字:`,
+                debateContent.substring(0, 200)
+              );
+              await prisma.debateRound.update({
+                where: { id: roundId },
+                data: { status: RoundStatus.FAILED },
+              });
+              enqueue(
+                sseError(
+                  new ApiError(
+                    422,
+                    'PARSE_FAILED',
+                    'AI返回内容格式异常，无法解析论点。轮次已标记为失败，请重新生成。',
+                    { roundNumber: roundIndex }
+                  ),
+                  correlationId,
+                  422
+                )
+              );
+              isStreamActive = false;
+              close();
+              return;
+            }
+
+            const generatedArguments: ParsedArg[] = structuredArgs;
+
+            // ── 保存到数据库（事务）+ 推送 argument 事件 ──
+            await prisma.$transaction(async tx => {
+              // 清除该轮次的旧论点（重试场景）
+              await tx.argument.deleteMany({ where: { roundId } });
+
+              for (const arg of generatedArguments) {
+                const scores = computeArgumentScores({
+                  reasoning: arg.reasoning,
+                  legalBasis: arg.legalBasis,
+                  confidence: arg.confidence,
+                });
+
+                const created = await tx.argument.create({
+                  data: {
+                    roundId,
+                    side: arg.side,
+                    content: arg.content,
+                    type: arg.type,
+                    reasoning: arg.reasoning ?? null,
+                    legalBasis:
+                      arg.legalBasis.length > 0
+                        ? (arg.legalBasis as unknown as Prisma.InputJsonValue)
+                        : Prisma.JsonNull,
+                    aiProvider: 'deepseek',
+                    confidence: arg.confidence,
+                    logicScore: scores.logicScore,
+                    legalScore: scores.legalScore,
+                    overallScore: scores.overallScore,
+                  },
+                });
+
+                // 每个论点生成后立即推送 argument 事件
+                enqueue(
+                  sseEvent('argument', {
+                    argumentId: created.id,
+                    roundId,
+                    side: arg.side,
+                    content: arg.content,
+                    type: arg.type,
+                    reasoning: arg.reasoning,
+                    legalBasis: arg.legalBasis,
+                    confidence: arg.confidence,
+                    logicScore: scores.logicScore,
+                    legalScore: scores.legalScore,
+                    overallScore: scores.overallScore,
+                    timestamp: new Date().toISOString(),
+                  })
+                );
+
+                // 每个论点间隔推送进度
+                const argProgress =
+                  80 +
+                  ((generatedArguments.indexOf(arg) + 1) /
+                    generatedArguments.length) *
+                    20;
+                enqueue(
+                  sseEvent('progress', {
+                    debateId,
+                    roundId,
+                    progress: Math.round(argProgress),
+                    currentStep: `生成${arg.side === 'PLAINTIFF' ? '原告' : '被告'}论点`,
+                    totalSteps: generatedArguments.length,
+                    timestamp: new Date().toISOString(),
+                  })
+                );
+              }
+
+              // 更新轮次状态
+              await tx.debateRound.update({
+                where: { id: roundId },
+                data: {
+                  status: RoundStatus.COMPLETED,
+                  completedAt: new Date(),
                 },
               });
 
-              // 创建论点
-              for (const arg of generatedArguments) {
-                await tx.argument.create({
-                  data: {
-                    roundId: round.id,
-                    side: arg.side,
-                    content: arg.content,
-                    type: ArgumentType.MAIN_POINT,
-                    aiProvider: 'deepseek',
-                    confidence: arg.confidence,
-                  },
-                });
-              }
-
-              // 更新辩论状态
+              // 更新辩论当前轮次
               await tx.debate.update({
                 where: { id: debateId },
                 data: {
@@ -267,162 +581,83 @@ export async function GET(
                   updatedAt: new Date(),
                 },
               });
-
-              return round;
             });
-
-            // 流式发送论点
-            for (const arg of generatedArguments) {
-              if (isStreamActive) {
-                controller.enqueue(
-                  `data: ${JSON.stringify({
-                    type: 'argument_generated',
-                    timestamp: new Date().toISOString(),
-                    debateId,
-                    roundNumber: roundIndex,
-                    argument: {
-                      ...arg,
-                      roundId: newRound.id,
-                    },
-                  })}\n\n`
-                );
-              }
-
-              // 添加延迟以模拟真实的处理时间
-              await new Promise(resolve => setTimeout(resolve, 1500));
-            }
-
-            // 完成轮次
-            await prisma.debateRound.update({
-              where: { id: newRound.id },
-              data: {
-                status: RoundStatus.COMPLETED,
-                completedAt: new Date(),
-              },
-            });
-
-            if (isStreamActive) {
-              controller.enqueue(
-                `data: ${JSON.stringify({
-                  type: 'round_completed',
-                  timestamp: new Date().toISOString(),
-                  debateId,
-                  roundNumber: roundIndex,
-                  summary: `第${roundIndex}轮辩论完成`,
-                })}\n\n`
-              );
-            }
           } catch (aiError) {
-            console.error('AI service error:', aiError);
-            const correlationId = extractCorrelationId(request);
-            const errorEvent = createStreamError(
-              new ApiError(
-                503,
-                'AI_SERVICE_ERROR',
-                'Failed to generate arguments',
-                {
-                  roundNumber: roundIndex,
-                  originalError:
-                    aiError instanceof Error
-                      ? aiError.message
-                      : 'Unknown error',
-                }
-              ),
-              correlationId,
-              503
+            logger.error(`[stream] 第${roundIndex}轮 AI 生成失败:`, aiError);
+            enqueue(
+              sseError(
+                new ApiError(
+                  503,
+                  'AI_SERVICE_ERROR',
+                  'Failed to generate arguments',
+                  {
+                    roundNumber: roundIndex,
+                    originalError:
+                      aiError instanceof Error ? aiError.message : 'Unknown',
+                  }
+                ),
+                correlationId,
+                503
+              )
             );
-
-            // 直接发送错误事件
-            if (isStreamActive) {
-              try {
-                controller.enqueue(errorEvent);
-              } catch (enqueueError) {
-                console.warn('Failed to enqueue AI error event:', enqueueError);
-              }
-            }
-
             isStreamActive = false;
-            try {
-              controller.close();
-            } catch (closeError) {
-              console.warn(
-                'Failed to close stream after AI error:',
-                closeError
-              );
-            }
+            close();
             return;
           }
         }
 
-        // 发送完成事件
+        // 全部轮次完成 → 标记辩论为 COMPLETED
         if (isStreamActive) {
-          controller.enqueue(
-            `data: ${JSON.stringify({
-              type: 'completed',
-              timestamp: new Date().toISOString(),
+          await prisma.debate.update({
+            where: { id: debateId },
+            data: { status: DebateStatus.COMPLETED, updatedAt: new Date() },
+          });
+          enqueue(
+            sseEvent('completed', {
               debateId,
               totalRounds: maxRounds,
-            })}\n\n`
+              timestamp: new Date().toISOString(),
+            })
           );
         }
-
-        controller.close();
+        close();
       } catch (error) {
-        console.error('Stream error:', error);
-        const correlationId = extractCorrelationId(request);
-        const errorEvent = createStreamError(
-          new ApiError(
-            500,
-            'STREAM_ERROR',
-            error instanceof Error ? error.message : 'Unknown stream error',
-            {
-              debateId,
-              originalError:
-                error instanceof Error ? error.stack : 'Unknown error',
-            }
-          ),
-          correlationId,
-          500
+        logger.error('[stream] 全局错误:', error);
+        enqueue(
+          sseError(
+            new ApiError(
+              500,
+              'STREAM_ERROR',
+              error instanceof Error ? error.message : 'Unknown stream error',
+              { debateId }
+            ),
+            correlationId,
+            500
+          )
         );
-
-        if (isStreamActive) {
-          try {
-            controller.enqueue(errorEvent);
-          } catch (enqueueError) {
-            console.warn('Failed to enqueue stream error event:', enqueueError);
-          }
-        }
-
-        isStreamActive = false;
-        try {
-          controller.close();
-        } catch (closeError) {
-          console.warn('Failed to close stream:', closeError);
-        }
+        close();
       }
 
-      // 处理客户端断开连接
+      // 客户端断开时清理
       request.signal.addEventListener('abort', () => {
         isStreamActive = false;
-        controller.close();
       });
     },
   });
 
-  return new NextResponse(stream, {
-    headers,
-  });
+  return new NextResponse(stream, { headers });
 }
 
 /**
  * OPTIONS /api/v1/debates/[id]/stream
- * CORS预检请求
  */
 export async function OPTIONS() {
+  const allowedOrigin =
+    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      'Access-Control-Allow-Origin': allowedOrigin,
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',

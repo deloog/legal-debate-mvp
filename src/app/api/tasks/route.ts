@@ -7,7 +7,7 @@ import {
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { z } from 'zod';
-import { type TaskDetail, TaskStatus, TaskPriority } from '@/types/task';
+import { TaskStatus, TaskPriority } from '@/types/task';
 import { Prisma } from '@prisma/client';
 import { reminderGenerator } from '@/lib/notification/reminder-generator';
 
@@ -50,14 +50,6 @@ const queryTaskSchema = z.object({
     .default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
-
-type TaskListResponse = {
-  tasks: TaskDetail[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
 
 /**
  * GET /api/tasks
@@ -338,14 +330,12 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       : undefined,
   };
 
-  // TODO: 为任务生成提醒
-  // 注意：ReminderGenerator 目前只支持 FollowUpTask，不支持 Task 模型
-  // 如果需要为 Task 模型添加提醒功能，需要在 ReminderGenerator 类中添加相应方法
-  // if (task.dueDate) {
-  //   reminderGenerator.generateTaskReminders(task.id).catch(error => {
-  //     console.error('生成任务提醒失败:', error);
-  //   });
-  // }
+  // 为有截止日期的任务异步生成提醒（不阻塞响应）
+  if (task.dueDate) {
+    reminderGenerator.generateTaskItemReminders(task.id).catch(() => {
+      // 提醒生成失败不影响任务创建，错误已在 reminderGenerator 内部记录
+    });
+  }
 
   return createCreatedResponse(taskDetail);
 });
@@ -358,7 +348,8 @@ export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      'Access-Control-Allow-Origin':
+        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Max-Age': '86400',

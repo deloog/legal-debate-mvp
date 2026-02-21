@@ -23,6 +23,7 @@ import {
   MembershipTierType,
 } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数
@@ -158,7 +159,7 @@ export async function GET(
 
     return successResponse(responseData, '获取会员详情成功');
   } catch (error) {
-    console.error('获取会员详情失败:', error);
+    logger.error('获取会员详情失败:', error);
     return serverErrorResponse('获取会员详情失败');
   }
 }
@@ -359,7 +360,7 @@ export async function PATCH(
 
     return successResponse(responseData, '更新会员信息成功');
   } catch (error) {
-    console.error('更新会员信息失败:', error);
+    logger.error('更新会员信息失败:', error);
     return serverErrorResponse('更新会员信息失败');
   }
 }

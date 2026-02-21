@@ -11,9 +11,7 @@ export { BaseCrawler } from './base-crawler';
 export { CrawlTaskManager, crawlTaskManager } from './crawl-task-manager';
 export { LawSyncScheduler, lawSyncScheduler } from './law-sync-scheduler';
 
-// 具体爬虫实现
-export { NPCCrawler, npcCrawler } from './npc-crawler';
-export { CourtCrawler, courtCrawler } from './court-crawler';
+// 具体爬虫实现（NPCCrawler 和 CourtCrawler 已废弃，移至 archive/）
 export { FLKCrawler, flkCrawler } from './flk-crawler';
 
 // 合同模板采集器

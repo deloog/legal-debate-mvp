@@ -9,6 +9,7 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { InvoiceType } from '@/types/payment';
 import { applyInvoice } from '@/lib/invoice/invoice-service';
 import { validateInvoiceFields } from '@/lib/invoice/invoice-utils';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/invoices/apply
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       data: invoice,
     });
   } catch (error) {
-    console.error('[API] 申请发票失败:', error);
+    logger.error('[API] 申请发票失败:', error);
 
     const errorMessage =
       error instanceof Error ? error.message : '申请发票失败，请稍后重试';

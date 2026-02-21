@@ -23,6 +23,7 @@ import {
   serverErrorResponse,
   errorResponse,
 } from '@/lib/api-response';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数
@@ -151,7 +152,7 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     return successResponse(responseData, '获取配置列表成功');
   } catch (error) {
-    console.error('获取配置列表失败:', error);
+    logger.error('获取配置列表失败:', error);
     return serverErrorResponse('获取配置列表失败');
   }
 }
@@ -226,7 +227,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     return createdResponse(newConfig, '配置创建成功');
   } catch (error) {
-    console.error('创建配置失败:', error);
+    logger.error('创建配置失败:', error);
     return serverErrorResponse('创建配置失败');
   }
 }
@@ -300,7 +301,7 @@ export async function PUT(request: NextRequest): Promise<Response> {
 
         updatedConfigs.push(updatedConfig);
       } catch (updateError) {
-        console.error(`更新配置${item.key}失败:`, updateError);
+        logger.error(`更新配置${item.key}失败:`, updateError);
         errors.push({
           key: item.key,
           message: `更新失败：${String(updateError)}`,
@@ -318,7 +319,7 @@ export async function PUT(request: NextRequest): Promise<Response> {
       '批量更新完成'
     );
   } catch (error) {
-    console.error('批量更新配置失败:', error);
+    logger.error('批量更新配置失败:', error);
     return serverErrorResponse('批量更新配置失败');
   }
 }

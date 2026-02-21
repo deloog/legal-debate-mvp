@@ -13,6 +13,7 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import type { SearchResponse } from '@/types/admin-user';
 import { UserStatus } from '@/types/auth';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数
@@ -103,7 +104,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     return successResponse(responseData, '搜索成功');
   } catch (error) {
-    console.error('搜索用户失败:', error);
+    logger.error('搜索用户失败:', error);
     return serverErrorResponse('搜索用户失败');
   }
 }

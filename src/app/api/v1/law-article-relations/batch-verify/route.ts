@@ -12,6 +12,7 @@ import {
   KnowledgeGraphAction,
   KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
+import { logger } from '@/lib/logger';
 
 interface BatchVerifyRequestBody {
   relationIds: string[];
@@ -186,7 +187,7 @@ export async function POST(
         });
         successCount++;
       } catch (error) {
-        console.error(`审核关系 ${relationId} 失败:`, error);
+        logger.error(`审核关系 ${relationId} 失败:`, error);
         results.push({
           relationId,
           success: false,
@@ -221,7 +222,7 @@ export async function POST(
       });
     } catch (logError) {
       // 日志记录失败不应影响主流程
-      console.error('记录批量审核日志失败:', logError);
+      logger.error('记录批量审核日志失败:', logError);
     }
 
     return NextResponse.json({
@@ -233,7 +234,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('批量审核关系失败:', error);
+    logger.error('批量审核关系失败:', error);
     return NextResponse.json(
       {
         success: false,

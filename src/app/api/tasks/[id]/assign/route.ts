@@ -6,7 +6,6 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import { z } from 'zod';
 import { ApiError } from '@/app/api/lib/errors/api-error';
 import { TaskStatus, TaskPriority } from '@/types/task';
-import { reminderGenerator } from '@/lib/notification/reminder-generator';
 
 /**
  * 分配任务Schema
@@ -173,7 +172,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   // 为任务生成提醒（如果需要的话，可以注释掉或删除）
   // if (task.dueDate) {
   //   reminderGenerator.generateTaskReminders(task.id).catch(error => {
-  //     console.error('生成任务提醒失败:', error);
+  //     logger.error('生成任务提醒失败:', error);
   //   });
   // }
 
@@ -188,7 +187,8 @@ export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      'Access-Control-Allow-Origin':
+        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Max-Age': '86400',

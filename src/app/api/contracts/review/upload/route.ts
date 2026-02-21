@@ -8,7 +8,9 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { prisma } from '@/lib/db/prisma';
+import { verifyToken, extractTokenFromHeader } from '@/lib/auth/jwt';
 import type { ContractUploadResponse } from '@/types/contract-review';
+import { logger } from '@/lib/logger';
 
 const UPLOAD_DIR = join(process.cwd(), 'uploads', 'contracts');
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -82,6 +84,15 @@ export async function POST(
     const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(filePath, buffer);
 
+    // 尝试从 Authorization header 获取上传用户 ID
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader ? extractTokenFromHeader(authHeader) : null;
+    const tokenResult = token ? verifyToken(token) : null;
+    const uploaderUserId =
+      tokenResult?.valid && tokenResult.payload
+        ? tokenResult.payload.userId
+        : 'anonymous';
+
     // 创建合同记录
     const contract = await prisma.contract.create({
       data: {
@@ -93,7 +104,7 @@ export async function POST(
         scope: '待确定',
         lawFirmName: '待确定',
         lawyerName: '待确定',
-        lawyerId: 'system',
+        lawyerId: uploaderUserId,
         feeType: 'FIXED',
         totalFee: 0,
         paidAmount: 0,
@@ -112,7 +123,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('上传合同失败:', error);
+    logger.error('上传合同失败:', error);
 
     return NextResponse.json(
       {

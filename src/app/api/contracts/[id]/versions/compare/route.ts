@@ -5,10 +5,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { contractVersionService } from '@/lib/contract/contract-version-service';
+import { logger } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  _context: { params: { id: string } }
 ) {
   try {
     const body = await request.json();
@@ -37,7 +38,7 @@ export async function POST(
       data: diff,
     });
   } catch (error) {
-    console.error('版本对比失败:', error);
+    logger.error('版本对比失败:', error);
     return NextResponse.json(
       {
         success: false,

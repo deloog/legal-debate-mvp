@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { LawArticleRecommendationService } from '@/lib/law-article/recommendation-service';
+import { logger } from '@/lib/logger';
 
 /**
  * 获取法条统计信息
@@ -23,7 +24,7 @@ export async function GET(
 
     return NextResponse.json(stats);
   } catch (error) {
-    console.error('获取统计信息失败:', error);
+    logger.error('获取统计信息失败:', error);
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });
   }
 }

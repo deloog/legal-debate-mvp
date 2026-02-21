@@ -11,6 +11,7 @@ import {
   DiscoveryMethod,
   Prisma,
 } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -151,7 +152,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('获取待审核关系失败:', error);
+    logger.error('获取待审核关系失败:', error);
     return NextResponse.json(
       {
         success: false,

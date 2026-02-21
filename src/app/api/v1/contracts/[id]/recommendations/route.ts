@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { LawArticleRecommendationService } from '@/lib/law-article/recommendation-service';
+import { logger } from '@/lib/logger';
 
 /**
  * 获取合同推荐法条
@@ -110,7 +111,7 @@ export async function GET(
       { status: 200 }
     );
   } catch (error) {
-    console.error('获取合同推荐失败:', error);
+    logger.error('获取合同推荐失败:', error);
     return NextResponse.json(
       {
         success: false,

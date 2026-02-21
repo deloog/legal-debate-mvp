@@ -260,9 +260,7 @@ export class GenerationAgent {
    * 生成被告论点
    */
   private generateDefendantArguments(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _caseInfo: CaseInfo,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _lawArticles: LawArticle[]
   ) {
     return [

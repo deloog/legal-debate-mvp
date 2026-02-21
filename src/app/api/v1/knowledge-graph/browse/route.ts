@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { LawCategory, RelationType, VerificationStatus } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 /**
  * 图节点类型
@@ -222,7 +223,7 @@ export async function GET(
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('获取知识图谱数据失败:', error);
+    logger.error('获取知识图谱数据失败:', error);
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });
   }
 }

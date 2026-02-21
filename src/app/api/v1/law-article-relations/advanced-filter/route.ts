@@ -11,6 +11,7 @@ import {
   VerificationStatus,
   Prisma,
 } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 interface AdvancedFilterParams {
   // 关系类型过滤
@@ -252,7 +253,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('高级过滤查询失败:', error);
+    logger.error('高级过滤查询失败:', error);
     return NextResponse.json(
       {
         success: false,

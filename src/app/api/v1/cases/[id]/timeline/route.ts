@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { z } from 'zod';
 import { TimelineEventListResponse, CaseTimelineEventType } from '@/types/case';
+import { logger } from '@/lib/logger';
 
 const createTimelineEventSchema = z.object({
   eventType: z.enum([
@@ -86,7 +87,7 @@ export const GET = async (
       caseId,
     });
   } catch (error) {
-    console.error('获取时间线失败:', error);
+    logger.error('获取时间线失败:', error);
     return NextResponse.json({ error: '获取时间线失败' }, { status: 500 });
   }
 };
@@ -136,7 +137,7 @@ export const POST = async (
 
     return NextResponse.json(timelineEvent, { status: 201 });
   } catch (error) {
-    console.error('创建时间线事件失败:', error);
+    logger.error('创建时间线事件失败:', error);
     return NextResponse.json({ error: '创建时间线事件失败' }, { status: 500 });
   }
 };

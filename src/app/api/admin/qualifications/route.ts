@@ -9,6 +9,7 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { QualificationErrorCode } from '@/types/qualification';
 import type { QualificationStatus } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 类型定义
@@ -206,7 +207,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('获取资格审核列表失败:', error);
+    logger.error('获取资格审核列表失败:', error);
     return Response.json(
       {
         error: '服务器错误',

@@ -22,6 +22,7 @@ import {
   convertYuanToFen,
   calculateOrderExpireTime,
 } from '@/lib/payment/wechat-utils';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/payments/create
@@ -222,7 +223,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     } catch (error) {
       // 调用支付服务失败
-      console.error('[API] 调用支付服务失败:', {
+      logger.error('[API] 调用支付服务失败:', {
         orderId: order.id,
         orderNo: order.orderNo,
         paymentMethod,
@@ -243,7 +244,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
   } catch (error) {
     // 捕获所有未处理的错误
-    console.error('[API] 创建支付订单失败:', error);
+    logger.error('[API] 创建支付订单失败:', error);
 
     return NextResponse.json(
       {

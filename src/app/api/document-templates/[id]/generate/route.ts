@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 
 /**
  * 验证模板访问权限
@@ -100,7 +101,7 @@ export async function POST(
       templateName: template.name,
     });
   } catch (error) {
-    console.error('生成文档失败:', error);
+    logger.error('生成文档失败:', error);
     return NextResponse.json({ error: '生成文档失败' }, { status: 500 });
   }
 }

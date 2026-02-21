@@ -7,6 +7,7 @@ import { retryDocAnalysis } from '../../../../../lib/ai/retry-handler';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { checkAIQuota, recordAIUsage } from '@/lib/ai/quota';
 import { logAIAction } from '@/lib/audit/logger';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // API处理函数
@@ -133,11 +134,11 @@ export async function POST(request: NextRequest) {
 
     // 记录重试和降级信息（如果适用）
     if (retryResult.isFallback) {
-      console.warn(
+      logger.warn(
         `[文档分析API] 使用Mock降级，重试次数: ${retryResult.attempts}`
       );
     } else if (retryResult.attempts > 1) {
-      console.log(`[文档分析API] 重试成功，总次数: ${retryResult.attempts}`);
+      logger.info(`[文档分析API] 重试成功，总次数: ${retryResult.attempts}`);
     }
 
     // 返回分析结果
@@ -209,7 +210,7 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('文档分析API错误:', error);
+    logger.error('文档分析API错误:', error);
     return NextResponse.json(
       {
         success: false,
@@ -263,7 +264,8 @@ export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      'Access-Control-Allow-Origin':
+        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Max-Age': '86400',

@@ -10,8 +10,7 @@ import type { ReportContent, ReportGenerationConfig } from '@/types/stats';
  */
 export function buildReportContent(
   data: ReportContent,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  config: ReportGenerationConfig
+  _config: ReportGenerationConfig
 ): ReportContent {
   // 如果没有摘要，生成摘要
   if (!data.summary || data.summary.keyMetrics.length === 0) {

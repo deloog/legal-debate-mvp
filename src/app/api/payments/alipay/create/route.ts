@@ -11,6 +11,7 @@ import { PaymentMethod } from '@/types/payment';
 import { createOrder } from '@/lib/order/order-service';
 import { getAlipay } from '@/lib/payment/alipay';
 import { AlipayProductCode } from '@/types/payment';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/payments/alipay/create
@@ -115,7 +116,7 @@ export async function POST(request: NextRequest) {
 
       // 判断响应是否成功
       if (alipayResponse.code !== '10000') {
-        console.error('[API] 支付宝创建订单失败:', alipayResponse);
+        logger.error('[API] 支付宝创建订单失败:', alipayResponse);
         return NextResponse.json(
           {
             success: false,
@@ -142,7 +143,7 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (error) {
-      console.error('[API] 调用支付宝支付失败:', error);
+      logger.error('[API] 调用支付宝支付失败:', error);
       return NextResponse.json(
         {
           success: false,
@@ -153,7 +154,7 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('[API] 创建支付宝订单失败:', error);
+    logger.error('[API] 创建支付宝订单失败:', error);
     return NextResponse.json(
       {
         success: false,

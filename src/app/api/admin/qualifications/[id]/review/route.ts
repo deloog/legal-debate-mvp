@@ -8,6 +8,7 @@ import { verifyToken, extractTokenFromHeader } from '@/lib/auth/jwt';
 import { prisma } from '@/lib/db/prisma';
 import type { ReviewRequest } from '@/types/qualification';
 import { QualificationStatus } from '@/types/qualification';
+import { logger } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
@@ -122,7 +123,7 @@ export async function POST(
       },
     } as const);
   } catch (error) {
-    console.error('审核律师资格失败:', error);
+    logger.error('审核律师资格失败:', error);
     return NextResponse.json(
       {
         success: false,

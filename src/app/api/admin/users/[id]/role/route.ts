@@ -9,6 +9,7 @@ import { validatePermissions } from '@/lib/middleware/permission-check';
 import type { AssignRoleRequest, UserRoleResponse } from '@/types/admin-user';
 import type { UserRole } from '@/types/auth';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数
@@ -129,7 +130,7 @@ export async function PUT(
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('分配角色失败:', error);
+    logger.error('分配角色失败:', error);
     return Response.json(
       { error: '服务器错误', message: '分配角色失败' },
       { status: 500 }

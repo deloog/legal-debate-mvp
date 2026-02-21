@@ -9,6 +9,7 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { getAlipayRefund } from '@/lib/payment/alipay-refund';
 import { RefundReason } from '@/types/payment';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/payments/alipay/refund
@@ -119,7 +120,7 @@ export async function POST(request: NextRequest) {
 
       // 判断响应是否成功
       if (alipayResponse.code !== '10000') {
-        console.error('[API] 支付宝退款失败:', alipayResponse);
+        logger.error('[API] 支付宝退款失败:', alipayResponse);
         return NextResponse.json(
           {
             success: false,
@@ -151,7 +152,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      console.log('[API] 支付宝退款成功:', {
+      logger.info('[API] 支付宝退款成功:', {
         orderId,
         refundId: refund.id,
         refundAmount: refund.refundAmount,
@@ -172,7 +173,7 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (error) {
-      console.error('[API] 调用支付宝退款失败:', error);
+      logger.error('[API] 调用支付宝退款失败:', error);
       return NextResponse.json(
         {
           success: false,
@@ -183,7 +184,7 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('[API] 申请支付宝退款失败:', error);
+    logger.error('[API] 申请支付宝退款失败:', error);
     return NextResponse.json(
       {
         success: false,

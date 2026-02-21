@@ -9,6 +9,7 @@ import type {
   ReviewHistoryResponse,
   ReviewHistoryItem,
 } from '@/types/contract-review';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest
@@ -71,7 +72,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('获取审查历史失败:', error);
+    logger.error('获取审查历史失败:', error);
 
     return NextResponse.json(
       {

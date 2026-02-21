@@ -10,6 +10,7 @@ import {
   DiscoveryMethod,
   VerificationStatus,
 } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/v1/law-articles/[id]/relations
@@ -58,7 +59,7 @@ export async function GET(
 
     return NextResponse.json(relations);
   } catch (error) {
-    console.error('获取关系失败:', error);
+    logger.error('获取关系失败:', error);
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });
   }
 }
@@ -104,7 +105,7 @@ export async function POST(
 
     return NextResponse.json(relation, { status: 201 });
   } catch (error: unknown) {
-    console.error('创建关系失败:', error);
+    logger.error('创建关系失败:', error);
 
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
 

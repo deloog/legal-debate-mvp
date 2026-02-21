@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { OAuthService } from '@/lib/auth/oauth-service';
 import { verifyToken } from '@/lib/auth/jwt';
+import { logger } from '@/lib/logger';
 
 /**
  * DELETE /api/auth/oauth/unbind/[provider] - 解绑 OAuth 账号
@@ -52,7 +53,7 @@ export async function DELETE(
       message: 'Account unbound successfully',
     });
   } catch (error) {
-    console.error('Unbind OAuth account error:', error);
+    logger.error('Unbind OAuth account error:', error);
     return NextResponse.json(
       {
         error:

@@ -386,41 +386,49 @@ export class ContractApprovalService {
    * 获取审批统计
    */
   async getApprovalStats(userId: string) {
-    const [pending, approved, rejected] = await Promise.all([
-      // 待审批数量
-      prisma.contractApproval.count({
-        where: {
-          status: ApprovalStatus.IN_PROGRESS,
-          steps: {
-            some: {
-              approverId: userId,
-              status: StepStatus.PENDING,
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const [pending, approvedToday, rejectedToday, totalHandled] =
+      await Promise.all([
+        // 待审批数量
+        prisma.contractApproval.count({
+          where: {
+            status: ApprovalStatus.IN_PROGRESS,
+            steps: {
+              some: {
+                approverId: userId,
+                status: StepStatus.PENDING,
+              },
             },
           },
-        },
-      }),
-      // 已通过数量
-      prisma.approvalStep.count({
-        where: {
-          approverId: userId,
-          status: StepStatus.APPROVED,
-        },
-      }),
-      // 已拒绝数量
-      prisma.approvalStep.count({
-        where: {
-          approverId: userId,
-          status: StepStatus.REJECTED,
-        },
-      }),
-    ]);
+        }),
+        // 今日通过数量
+        prisma.approvalStep.count({
+          where: {
+            approverId: userId,
+            status: StepStatus.APPROVED,
+            completedAt: { gte: todayStart },
+          },
+        }),
+        // 今日拒绝数量
+        prisma.approvalStep.count({
+          where: {
+            approverId: userId,
+            status: StepStatus.REJECTED,
+            completedAt: { gte: todayStart },
+          },
+        }),
+        // 累计处理数量
+        prisma.approvalStep.count({
+          where: {
+            approverId: userId,
+            status: { in: [StepStatus.APPROVED, StepStatus.REJECTED] },
+          },
+        }),
+      ]);
 
-    return {
-      pending,
-      approved,
-      rejected,
-      total: approved + rejected,
-    };
+    return { pending, approvedToday, rejectedToday, totalHandled };
   }
 }
 

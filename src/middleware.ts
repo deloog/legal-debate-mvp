@@ -31,7 +31,10 @@ function getAllowedOrigins(): string[] {
  * 向响应添加 CORS 头（仅当 origin 在白名单中时）。
  * 同时写入 Vary: Origin，确保 CDN 按来源分别缓存。
  */
-function addCorsHeaders(response: NextResponse, corsOrigin: string | null): void {
+function addCorsHeaders(
+  response: NextResponse,
+  corsOrigin: string | null
+): void {
   if (corsOrigin) {
     response.headers.set('Access-Control-Allow-Origin', corsOrigin);
     response.headers.set('Access-Control-Allow-Credentials', 'true');
@@ -42,7 +45,8 @@ function addCorsHeaders(response: NextResponse, corsOrigin: string | null): void
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const origin = request.headers.get('origin');
-  const corsOrigin = origin && getAllowedOrigins().includes(origin) ? origin : null;
+  const corsOrigin =
+    origin && getAllowedOrigins().includes(origin) ? origin : null;
 
   // ─── CORS 预检请求 ────────────────────────────────────────────────────────
   // OPTIONS 预检必须在鉴权之前处理：浏览器发送预检时不携带凭据，

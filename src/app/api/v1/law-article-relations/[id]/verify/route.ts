@@ -12,6 +12,7 @@ import {
   KnowledgeGraphAction,
   KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
+import { logger } from '@/lib/logger';
 
 interface VerifyRequestBody {
   approved: boolean;
@@ -150,7 +151,7 @@ export async function POST(
       });
     } catch (logError) {
       // 日志记录失败不应影响主流程
-      console.error('记录审核日志失败:', logError);
+      logger.error('记录审核日志失败:', logError);
     }
 
     return NextResponse.json({
@@ -158,7 +159,7 @@ export async function POST(
       data: updatedRelation,
     });
   } catch (error) {
-    console.error('审核关系失败:', error);
+    logger.error('审核关系失败:', error);
     return NextResponse.json(
       {
         success: false,

@@ -485,13 +485,76 @@ class ReminderGenerator {
       return 0;
     }
   }
+  /**
+   * 为 Task 模型生成提醒（区别于 FollowUpTask）
+   */
+  async generateTaskItemReminders(
+    taskId: string,
+    preferences?: ReminderPreferences
+  ): Promise<void> {
+    try {
+      const config = preferences?.task ?? DEFAULT_REMINDER_PREFERENCES.task;
+
+      if (!config || !config.enabled) {
+        return;
+      }
+
+      const task = await prisma.task.findUnique({
+        where: { id: taskId },
+        include: {
+          assignedUser: { select: { id: true, name: true, email: true } },
+          case: { select: { id: true, title: true, caseNumber: true } },
+        },
+      });
+
+      if (!task || !task.dueDate) {
+        return;
+      }
+
+      // 只为指定优先级的任务生成提醒
+      if (!config.priorities.includes(task.priority)) {
+        return;
+      }
+
+      const hoursBefore = 24;
+      const reminderTime = new Date(task.dueDate.getTime());
+      reminderTime.setHours(reminderTime.getHours() - hoursBefore);
+
+      // 提醒时间已过则不生成
+      if (reminderTime <= new Date()) {
+        return;
+      }
+
+      const caseInfo = task.case ? `案件「${task.case.title}」` : '';
+
+      const input: CreateReminderInput = {
+        type: ReminderTypeValues.FOLLOW_UP,
+        title: `任务提醒: ${task.title}`,
+        content: `${caseInfo}的任务将于${hoursBefore}小时后截止。\n\n任务：${task.title}\n截止时间：${task.dueDate.toLocaleString('zh-CN')}`,
+        scheduledAt: reminderTime,
+        channels: config.channels,
+        metadata: {
+          taskId,
+          taskType: 'Task',
+          priority: task.priority,
+          caseId: task.caseId ?? undefined,
+          assignedTo: task.assignedTo ?? undefined,
+        },
+      };
+
+      await reminderService.createReminders([input]);
+      logger.info(`为任务生成提醒成功: ${taskId}`, { taskId } as never);
+    } catch (error) {
+      logger.error(`为任务生成提醒失败: ${taskId}`, error as Error as never);
+    }
+  }
 }
 
 // 导出提醒生成器实例
 export const reminderGenerator = new ReminderGenerator();
 export const reminderGeneratorInstance = reminderGenerator;
 
-// 任务提醒生成器包装函数
+// 任务提醒生成器包装函数（FollowUpTask 版本）
 export async function generateTaskReminders(
   taskId: string,
   preferences?: ReminderPreferences
@@ -499,8 +562,16 @@ export async function generateTaskReminders(
   return reminderGenerator.generateFollowUpTaskReminders(taskId, preferences);
 }
 
+// Task 模型提醒生成器包装函数
+export async function generateTaskItemReminders(
+  taskId: string,
+  preferences?: ReminderPreferences
+): Promise<void> {
+  return reminderGenerator.generateTaskItemReminders(taskId, preferences);
+}
+
 // 合并偏好设置的工具函数
-function mergePreferences(
+function _mergePreferences(
   base: ReminderPreferences | undefined,
   override: Partial<ReminderPreferences> | undefined
 ): ReminderPreferences {

@@ -11,6 +11,7 @@ import {
   handlePaymentFailure,
 } from '@/lib/order/order-service';
 import { WechatPayNotifyType } from '@/types/payment';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/payment/notify
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     // 验证通知类型
     if (notification.event_type !== WechatPayNotifyType.TRANSACTION_SUCCESS) {
-      console.log('[API] 非支付成功通知，跳过处理:', notification.event_type);
+      logger.info('[API] 非支付成功通知，跳过处理:', notification.event_type);
       return NextResponse.json(
         { code: 'SUCCESS', message: '成功' },
         { status: 200 }
@@ -35,14 +36,14 @@ export async function POST(request: NextRequest) {
     const payResult = wechatPay.decryptNotification(notification);
 
     if (!payResult) {
-      console.error('[API] 解密支付结果失败');
+      logger.error('[API] 解密支付结果失败');
       return NextResponse.json(
         { code: 'FAIL', message: '处理失败' },
         { status: 500 }
       );
     }
 
-    console.log('[API] 收到支付成功通知:', {
+    logger.info('[API] 收到支付成功通知:', {
       outTradeNo: payResult.out_trade_no,
       transactionId: payResult.transaction_id,
       tradeState: payResult.trade_state,
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!order) {
-      console.error('[API] 订单不存在:', payResult.out_trade_no);
+      logger.error('[API] 订单不存在:', payResult.out_trade_no);
       return NextResponse.json(
         { code: 'FAIL', message: '订单不存在' },
         { status: 404 }
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     // 如果订单已处理，直接返回成功
     if (order.status === 'PAID') {
-      console.log('[API] 订单已支付，跳过处理:', order.orderNo);
+      logger.info('[API] 订单已支付，跳过处理:', order.orderNo);
       return NextResponse.json(
         { code: 'SUCCESS', message: '成功' },
         { status: 200 }
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      console.log('[API] 支付成功处理完成:', order.orderNo);
+      logger.info('[API] 支付成功处理完成:', order.orderNo);
       return NextResponse.json(
         { code: 'SUCCESS', message: '成功' },
         { status: 200 }
@@ -121,13 +122,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log('[API] 支付失败处理完成:', order.orderNo);
+    logger.info('[API] 支付失败处理完成:', order.orderNo);
     return NextResponse.json(
       { code: 'SUCCESS', message: '成功' },
       { status: 200 }
     );
   } catch (error) {
-    console.error('[API] 处理支付回调失败:', error);
+    logger.error('[API] 处理支付回调失败:', error);
     return NextResponse.json(
       { code: 'FAIL', message: '处理失败' },
       { status: 500 }

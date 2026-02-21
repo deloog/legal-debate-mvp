@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -35,7 +36,7 @@ export async function GET(
       data: template,
     });
   } catch (error) {
-    console.error('获取合同模板详情失败:', error);
+    logger.error('获取合同模板详情失败:', error);
     return NextResponse.json(
       {
         success: false,
@@ -119,7 +120,7 @@ export async function PUT(
       message: '模板更新成功',
     });
   } catch (error) {
-    console.error('更新合同模板失败:', error);
+    logger.error('更新合同模板失败:', error);
     return NextResponse.json(
       {
         success: false,
@@ -186,7 +187,7 @@ export async function DELETE(
       message: '模板删除成功',
     });
   } catch (error) {
-    console.error('删除合同模板失败:', error);
+    logger.error('删除合同模板失败:', error);
     return NextResponse.json(
       {
         success: false,

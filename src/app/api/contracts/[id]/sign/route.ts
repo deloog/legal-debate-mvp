@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { clearContractPDFCache } from '@/lib/contract/contract-pdf-generator';
+import { logger } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
@@ -122,14 +123,14 @@ export async function POST(
     }
 
     // 更新合同
-    const updatedContract = await prisma.contract.update({
+    const _updatedContract = await prisma.contract.update({
       where: { id },
       data: updateData,
     });
 
     // 清除PDF缓存（因为需要包含签名）
     clearContractPDFCache(id).catch(error => {
-      console.error('清除PDF缓存失败:', error);
+      logger.error('清除PDF缓存失败:', error);
     });
 
     // 如果双方都已签署，发送签署确认邮件
@@ -138,7 +139,7 @@ export async function POST(
       import('@/lib/email/contract-email-service').then(
         ({ contractEmailService }) => {
           contractEmailService.sendSignatureConfirmation(id).catch(error => {
-            console.error('发送签署确认邮件失败:', error);
+            logger.error('发送签署确认邮件失败:', error);
           });
         }
       );
@@ -154,7 +155,7 @@ export async function POST(
       message: '签名成功',
     });
   } catch (error) {
-    console.error('提交签名失败:', error);
+    logger.error('提交签名失败:', error);
     return NextResponse.json(
       {
         success: false,

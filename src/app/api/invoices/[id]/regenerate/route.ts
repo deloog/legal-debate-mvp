@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { regenerateInvoicePDF } from '@/lib/invoice/invoice-service';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/invoices/[id]/regenerate
@@ -43,7 +44,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error('[API] 重新生成发票PDF失败:', error);
+    logger.error('[API] 重新生成发票PDF失败:', error);
 
     const errorMessage =
       error instanceof Error

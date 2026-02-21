@@ -8,6 +8,7 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import type { PermissionListResponse } from '@/types/admin-role';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // API处理函数
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('获取权限列表失败:', error);
+    logger.error('获取权限列表失败:', error);
     return Response.json(
       { error: '服务器错误', message: '获取权限列表失败' },
       { status: 500 }

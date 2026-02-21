@@ -10,6 +10,7 @@ import {
 } from '@/lib/validations/contract';
 import type { ErrorResponse, SuccessResponse } from '@/types/api-response';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/contracts/[id]/payments
@@ -86,7 +87,7 @@ export async function GET(
       data: responseData,
     });
   } catch (error) {
-    console.error('获取付款记录失败:', error);
+    logger.error('获取付款记录失败:', error);
 
     return NextResponse.json(
       {
@@ -249,7 +250,7 @@ export async function POST(
       { status: 201 }
     );
   } catch (error) {
-    console.error('创建付款记录失败:', error);
+    logger.error('创建付款记录失败:', error);
 
     return NextResponse.json(
       {

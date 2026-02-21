@@ -1,3 +1,4 @@
+/** @legacy 优先使用 /api/v1/document-templates，此路由保留以向后兼容 */
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
@@ -6,6 +7,7 @@ import {
   DocumentTemplateCategory,
   TemplateStatus,
 } from '@/types/document-template';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/document-templates
@@ -109,7 +111,7 @@ export async function GET(request: NextRequest) {
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error('获取模板列表失败:', error);
+    logger.error('获取模板列表失败:', error);
     return NextResponse.json({ error: '获取模板列表失败' }, { status: 500 });
   }
 }
@@ -170,7 +172,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('创建模板失败:', error);
+    logger.error('创建模板失败:', error);
     return NextResponse.json({ error: '创建模板失败' }, { status: 500 });
   }
 }

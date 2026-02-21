@@ -19,6 +19,7 @@ import {
 } from '@/lib/validation/query-params';
 import type { UserListQueryParams, UserListResponse } from '@/types/admin-user';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数
@@ -185,7 +186,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     return successResponse(responseData, '获取用户列表成功');
   } catch (error) {
-    console.error('获取用户列表失败:', error);
+    logger.error('获取用户列表失败:', error);
     return serverErrorResponse('获取用户列表失败');
   }
 }

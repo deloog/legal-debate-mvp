@@ -1,3 +1,4 @@
+/** @legacy 优先使用 /api/v1/case-type-configs，此路由保留以向后兼容 */
 /**
  * 案件类型配置API
  * GET /api/case-type-configs - 获取案件类型配置列表
@@ -6,6 +7,7 @@ import { prisma } from '@/lib/db/prisma';
 import type { ErrorResponse, SuccessResponse } from '@/types/api-response';
 import { CaseTypeCategory } from '@/types/case-type-config';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * 案件类型配置响应数据接口
@@ -108,7 +110,7 @@ export async function GET(
       data: responseData,
     });
   } catch (error) {
-    console.error('获取案件类型配置失败:', error);
+    logger.error('获取案件类型配置失败:', error);
 
     return NextResponse.json(
       {

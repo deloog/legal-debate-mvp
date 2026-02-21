@@ -12,6 +12,7 @@ import { ErrorResponse, SuccessResponse } from '@/types/api-response';
 import { ConversionPreviewData, ConvertRequest } from '@/types/consultation';
 import { CaseType } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/consultations/[id]/convert
@@ -62,7 +63,7 @@ export async function GET(
       data: result.data,
     });
   } catch (error) {
-    console.error('获取转化预览失败:', error);
+    logger.error('获取转化预览失败:', error);
 
     return NextResponse.json(
       {
@@ -171,7 +172,7 @@ export async function POST(
       { status: 201 }
     );
   } catch (error) {
-    console.error('转化失败:', error);
+    logger.error('转化失败:', error);
 
     return NextResponse.json(
       {

@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 const updateTemplateSchema = z.object({
   name: z.string().min(1, '模板名称不能为空').optional(),
@@ -55,7 +56,7 @@ export async function GET(
       data: template,
     });
   } catch (error) {
-    console.error('获取审批模板失败:', error);
+    logger.error('获取审批模板失败:', error);
     return NextResponse.json(
       {
         success: false,
@@ -103,7 +104,7 @@ export async function PUT(
       message: '审批模板更新成功',
     });
   } catch (error) {
-    console.error('更新审批模板失败:', error);
+    logger.error('更新审批模板失败:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -167,7 +168,7 @@ export async function DELETE(
       message: '审批模板删除成功',
     });
   } catch (error) {
-    console.error('删除审批模板失败:', error);
+    logger.error('删除审批模板失败:', error);
     return NextResponse.json(
       {
         success: false,

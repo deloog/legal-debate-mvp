@@ -7,13 +7,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
 import type { LogoutResponse } from '@/types/auth';
+import { logger } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<LogoutResponse>> {
   try {
     const user = await getAuthUser(request);
-    console.log('[LOGOUT] Auth user:', {
+    logger.info('[LOGOUT] Auth user:', {
       hasUser: !!user,
       userId: user?.userId,
     });
@@ -30,18 +31,18 @@ export async function POST(
 
     const body = await request.json();
     const { allDevices = false } = body as { allDevices?: boolean };
-    console.log('[LOGOUT] Request body:', { allDevices });
+    logger.info('[LOGOUT] Request body:', { allDevices });
 
     if (allDevices) {
       // 登出所有设备：删除用户的所有会话
       const deleteResult = await prisma.session.deleteMany({
         where: { userId: user.userId },
       });
-      console.log('[LOGOUT] Deleted all sessions:', deleteResult.count);
+      logger.info('[LOGOUT] Deleted all sessions:', deleteResult.count);
     } else {
       // 登出当前设备：从Cookie中获取refresh token并删除对应会话
       const cookieHeader = request.headers.get('cookie');
-      console.log('[LOGOUT] Cookie header:', {
+      logger.info('[LOGOUT] Cookie header:', {
         hasCookie: !!cookieHeader,
         cookieValue: cookieHeader || '',
       });
@@ -59,7 +60,7 @@ export async function POST(
       // 从cookie中解析refresh token
       const refreshTokenMatch = cookieHeader.match(/refreshToken=([^;]+)/);
       const refreshToken = refreshTokenMatch ? refreshTokenMatch[1] : null;
-      console.log('[LOGOUT] Parsed refresh token:', {
+      logger.info('[LOGOUT] Parsed refresh token:', {
         found: !!refreshToken,
         tokenLength: refreshToken?.length || 0,
       });
@@ -80,7 +81,7 @@ export async function POST(
           sessionToken: refreshToken,
         },
       });
-      console.log('[LOGOUT] Deleted session:', deleteResult.count);
+      logger.info('[LOGOUT] Deleted session:', deleteResult.count);
     }
 
     const response = NextResponse.json(
@@ -97,7 +98,7 @@ export async function POST(
 
     return response;
   } catch (error) {
-    console.error('Logout error:', error);
+    logger.error('Logout error:', error);
 
     return NextResponse.json(
       {

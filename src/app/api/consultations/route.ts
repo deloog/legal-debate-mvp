@@ -1,3 +1,4 @@
+/** @legacy 优先使用 /api/v1/consultations，此路由保留以向后兼容 */
 /**
  * 咨询API路由
  * GET /api/consultations - 获取咨询列表
@@ -21,6 +22,7 @@ import {
 } from '@/types/consultation';
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/consultations
@@ -237,7 +239,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('获取咨询列表失败:', error);
+    logger.error('获取咨询列表失败:', error);
 
     return NextResponse.json(
       {
@@ -394,7 +396,7 @@ export async function POST(
       { status: 201, headers: { 'Cache-Control': 'no-cache' } }
     );
   } catch (error) {
-    console.error('创建咨询记录失败:', error);
+    logger.error('创建咨询记录失败:', error);
 
     // 处理Prisma错误
     if (error && typeof error === 'object' && 'code' in error) {

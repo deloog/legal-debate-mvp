@@ -9,6 +9,7 @@ import { validatePermissions } from '@/lib/middleware/permission-check';
 import { RoleDetailResponse } from '@/types/admin-role';
 import type { UserRole } from '@/types/auth';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数
@@ -105,7 +106,7 @@ export async function GET(
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('获取角色详情失败:', error);
+    logger.error('获取角色详情失败:', error);
     return Response.json(
       { error: '服务器错误', message: '获取角色详情失败' },
       { status: 500 }
@@ -195,7 +196,7 @@ export async function PUT(
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('更新角色失败:', error);
+    logger.error('更新角色失败:', error);
     return Response.json(
       { error: '服务器错误', message: '更新角色失败' },
       { status: 500 }
@@ -279,7 +280,7 @@ export async function DELETE(
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('删除角色失败:', error);
+    logger.error('删除角色失败:', error);
     return Response.json(
       { error: '服务器错误', message: '删除角色失败' },
       { status: 500 }

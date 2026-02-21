@@ -294,6 +294,7 @@ model Debate {
   status       DebateStatus  @default(DRAFT)
   currentRound Int           @default(0)
   debateConfig Json?
+  summary      Json? // AI生成的辩论总结 {verdict, analysis, keyPoints, generatedAt}
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   deletedAt    DateTime?
@@ -343,12 +344,14 @@ model Argument {
   logicScore     Float? // 逻辑清晰度评分
   legalScore     Float? // 法律准确性评分
   overallScore   Float? // 综合评分
+  priority       String? // 律师标记优先级：'primary' | 'secondary' | null
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   round          DebateRound  @relation(fields: [roundId], references: [id], onDelete: Cascade)
 
   @@index([roundId])
   @@index([side])
+  @@index([priority])
   @@map("arguments")
 }
 

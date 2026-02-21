@@ -5,6 +5,7 @@ import { FeeConfigType } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { successResponse, errorResponse } from '@/lib/api-response';
+import { logger } from '@/lib/logger';
 
 const configManager = new FeeConfigManager(prisma);
 
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
 
     return successResponse(config);
   } catch (error) {
-    console.error('Create fee config error:', error);
+    logger.error('Create fee config error:', error);
     return errorResponse(
       error instanceof Error ? error.message : 'Failed to create configuration',
       500
@@ -71,7 +72,7 @@ export async function GET(req: NextRequest) {
 
     return successResponse(configs);
   } catch (error) {
-    console.error('Get fee configs error:', error);
+    logger.error('Get fee configs error:', error);
     return errorResponse('Failed to retrieve configurations', 500);
   }
 }
@@ -96,7 +97,7 @@ export async function DELETE(req: NextRequest) {
 
     return successResponse({ success: true });
   } catch (error) {
-    console.error('Delete fee config error:', error);
+    logger.error('Delete fee config error:', error);
     return errorResponse('Failed to delete configuration', 500);
   }
 }

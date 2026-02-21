@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { contractApprovalService } from '@/lib/contract/contract-approval-service';
 import { z } from 'zod';
+import { logger } from '@/lib/logger';
 
 const startApprovalSchema = z.object({
   templateId: z.string().optional(),
@@ -47,7 +48,7 @@ export async function POST(
       message: '审批流程已发起',
     });
   } catch (error) {
-    console.error('发起审批失败:', error);
+    logger.error('发起审批失败:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

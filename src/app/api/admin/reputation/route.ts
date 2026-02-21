@@ -12,6 +12,7 @@ import {
   adaptiveRateLimit,
   UserReputationLevel,
 } from '@/lib/middleware/adaptive-rate-limit';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/admin/reputation
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    console.error('[Reputation] GET Error:', error);
+    logger.error('[Reputation] GET Error:', error);
     return NextResponse.json(
       { success: false, error: '获取信誉数据失败' },
       { status: 500 }
@@ -117,7 +118,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       data: updatedReputation,
     });
   } catch (error) {
-    console.error('[Reputation] PUT Error:', error);
+    logger.error('[Reputation] PUT Error:', error);
     return NextResponse.json(
       { success: false, error: '更新信誉等级失败' },
       { status: 500 }
@@ -163,7 +164,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: `用户信誉已重置: ${identifier}`,
     });
   } catch (error) {
-    console.error('[Reputation] DELETE Error:', error);
+    logger.error('[Reputation] DELETE Error:', error);
     return NextResponse.json(
       { success: false, error: '重置信誉失败' },
       { status: 500 }

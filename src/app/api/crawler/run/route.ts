@@ -11,10 +11,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { crawlTaskManager } from '@/lib/crawler/crawl-task-manager';
-import { npcCrawler } from '@/lib/crawler/npc-crawler';
-import { courtCrawler } from '@/lib/crawler/court-crawler';
 import { flkCrawler } from '@/lib/crawler/flk-crawler';
+// npcCrawler / courtCrawler 已废弃，移至 archive/ 目录
 import { DataSource } from '@/lib/crawler/types';
+import { logger } from '@/lib/agent/security/logger';
 
 /**
  * 启动采集任务
@@ -31,14 +31,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validSources: DataSource[] = [
-      'npc',
-      'flk',
-      'court',
-      'cail',
-      'pkulaw',
-      'wikass',
-    ];
+    const validSources: DataSource[] = ['flk', 'cail', 'pkulaw', 'wikass'];
+    const deprecatedSources = ['npc', 'court'];
+    if (deprecatedSources.includes(source)) {
+      return NextResponse.json(
+        { error: `数据源 ${source} 爬虫已废弃，请使用 flk 数据源` },
+        { status: 410 }
+      );
+    }
     if (!validSources.includes(source)) {
       return NextResponse.json(
         { error: `不支持的数据源: ${source}` },
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       message: `已启动 ${source} 数据源的${phaseLabel}任务`,
     });
   } catch (error) {
-    console.error('启动采集任务失败:', error);
+    logger.error('启动采集任务失败', { error } as never);
     return NextResponse.json({ error: '启动采集任务失败' }, { status: 500 });
   }
 }
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
       data: history,
     });
   } catch (error) {
-    console.error('获取采集历史失败:', error);
+    logger.error('获取采集历史失败', { error } as never);
     return NextResponse.json({ error: '获取采集历史失败' }, { status: 500 });
   }
 }
@@ -159,26 +159,7 @@ async function runCrawler(
           }
       }
     } else {
-      // 非 FLK 数据源 (保持原逻辑)
-      let crawler;
-      switch (source) {
-        case 'npc':
-          crawler = npcCrawler;
-          break;
-        case 'court':
-          crawler = courtCrawler;
-          break;
-        default:
-          throw new Error(`不支持的数据源: ${source}`);
-      }
-
-      if (crawlType === 'full') {
-        result = await crawler.crawl();
-      } else {
-        const since = new Date();
-        since.setDate(since.getDate() - 7);
-        result = await (crawler as any).incrementalCrawl(since);
-      }
+      throw new Error(`不支持的数据源: ${source}`);
     }
 
     await crawlTaskManager.completeTask(taskId, {
@@ -188,11 +169,11 @@ async function runCrawler(
       errors: result.errors,
     });
 
-    console.log(
+    logger.info(
       `采集任务完成: ${source}${phase ? `[${phase}]` : ''}, 创建: ${result.itemsCreated}, 更新: ${result.itemsUpdated}`
     );
   } catch (error) {
-    console.error(`采集任务失败: ${source}`, error);
+    logger.error(`采集任务失败: ${source}`, { error } as never);
 
     await crawlTaskManager.updateTaskProgress(taskId, {
       status: 'failed',

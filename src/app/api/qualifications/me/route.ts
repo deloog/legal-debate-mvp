@@ -5,6 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken, extractTokenFromHeader } from '@/lib/auth/jwt';
+import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -46,17 +48,32 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 查询用户资格认证记录
-    // 注意：这里需要等待 Prisma generate 完成后才能使用
+    const { userId } = tokenResult.payload;
+
+    const qualification = await prisma.lawyerQualification.findFirst({
+      where: { userId },
+      orderBy: { submittedAt: 'desc' },
+      select: {
+        id: true,
+        licenseNumber: true,
+        fullName: true,
+        idCardNumber: true,
+        lawFirm: true,
+        licensePhoto: true,
+        status: true,
+        submittedAt: true,
+        reviewedAt: true,
+        reviewNotes: true,
+      },
+    });
+
     return NextResponse.json({
       success: true,
       message: '获取资格状态成功',
-      data: {
-        qualification: null,
-      },
+      data: { qualification },
     } as const);
   } catch (error) {
-    console.error('获取资格状态失败:', error);
+    logger.error('获取资格状态失败:', error);
     return NextResponse.json(
       {
         success: false,

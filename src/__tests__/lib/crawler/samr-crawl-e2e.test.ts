@@ -4,7 +4,11 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { SAMRCrawler, SAMR_CONFIG, KNOWN_CONTRACT_TEMPLATES } from '@/lib/crawler/samr-crawler';
+import {
+  SAMRCrawler,
+  SAMR_CONFIG,
+  KNOWN_CONTRACT_TEMPLATES,
+} from '@/lib/crawler/samr-crawler';
 
 describe('SAMR合同模板采集 E2E测试', () => {
   it('应该支持新的 samr.gov.cn 数据源配置', () => {
@@ -21,7 +25,9 @@ describe('SAMR合同模板采集 E2E测试', () => {
   it('每个模板应该有正确的URL格式', () => {
     for (const template of KNOWN_CONTRACT_TEMPLATES) {
       // 2026-02-18 更新: 使用 samr.gov.cn URL
-      expect(template.sourceUrl).toMatch(/^https:\/\/www\.samr\.gov\.cn\/View\?id=.+$/);
+      expect(template.sourceUrl).toMatch(
+        /^https:\/\/www\.samr\.gov\.cn\/View\?id=.+$/
+      );
     }
   });
 

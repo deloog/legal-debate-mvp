@@ -9,6 +9,7 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { prisma } from '@/lib/db/prisma';
 import fs from 'fs/promises';
+import { logger } from '@/lib/logger';
 
 // 辅助响应函数
 function unauthorizedResponse(): NextResponse {
@@ -70,7 +71,7 @@ export async function GET(
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : '获取报告详情失败';
-    console.error('获取报告详情失败:', error);
+    logger.error('获取报告详情失败:', error);
 
     return NextResponse.json(
       { success: false, message: errorMessage },
@@ -119,7 +120,7 @@ export async function DELETE(
       try {
         await fs.unlink(report.filePath);
       } catch (fileError) {
-        console.error('删除报告文件失败:', fileError);
+        logger.error('删除报告文件失败:', fileError);
         // 继续删除数据库记录
       }
     }
@@ -136,7 +137,7 @@ export async function DELETE(
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : '删除报告失败';
-    console.error('删除报告失败:', error);
+    logger.error('删除报告失败:', error);
 
     return NextResponse.json(
       { success: false, message: errorMessage },

@@ -12,6 +12,7 @@ import {
   FollowUpResponse,
 } from '@/types/consultation';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/consultations/[id]/follow-ups
@@ -87,7 +88,7 @@ export async function GET(
       data: responseData,
     });
   } catch (error) {
-    console.error('获取跟进记录失败:', error);
+    logger.error('获取跟进记录失败:', error);
 
     return NextResponse.json(
       {
@@ -286,7 +287,7 @@ export async function POST(
       { status: 201 }
     );
   } catch (error) {
-    console.error('创建跟进记录失败:', error);
+    logger.error('创建跟进记录失败:', error);
 
     return NextResponse.json(
       {

@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { getOrderByOrderNo } from '@/lib/order/order-service';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/orders/by-order-no/[orderNo]
@@ -76,7 +77,7 @@ export async function GET(
       data: order,
     });
   } catch (error) {
-    console.error('[API] 通过订单号查询订单失败:', error);
+    logger.error('[API] 通过订单号查询订单失败:', error);
 
     return NextResponse.json(
       {

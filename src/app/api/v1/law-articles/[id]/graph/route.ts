@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GraphBuilder } from '@/lib/law-article/graph-builder';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 /**
  * 获取法条关系图谱
@@ -55,7 +56,7 @@ export async function GET(
 
     return NextResponse.json(graph);
   } catch (error) {
-    console.error('获取图谱数据失败:', error);
+    logger.error('获取图谱数据失败:', error);
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });
   }
 }

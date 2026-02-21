@@ -1,3 +1,4 @@
+/** @legacy 优先使用 /api/v1/health，此路由保留以向后兼容 */
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import {

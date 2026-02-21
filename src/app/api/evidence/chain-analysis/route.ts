@@ -8,6 +8,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { EvidenceChainService } from '@/lib/evidence/evidence-chain-service';
+import { logger } from '@/lib/logger';
 
 /**
  * 请求体接口
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
     let body: ChainAnalysisRequest;
     try {
       body = await request.json();
-    } catch (error) {
+    } catch (_error) {
       return NextResponse.json(
         {
           success: false,
@@ -159,7 +160,7 @@ export async function POST(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('证据链分析API错误:', error);
+    logger.error('证据链分析API错误:', error);
 
     // 返回错误响应
     return NextResponse.json(

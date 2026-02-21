@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/admin/memberships/export/history
@@ -85,7 +86,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[ExportHistory] 获取导出历史失败:', error);
+    logger.error('[ExportHistory] 获取导出历史失败:', error);
     return NextResponse.json(
       {
         success: false,

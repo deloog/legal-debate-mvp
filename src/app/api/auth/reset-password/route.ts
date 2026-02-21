@@ -9,6 +9,7 @@ import type {
   ResetPasswordRequest,
   ResetPasswordResponse,
 } from '@/types/password-reset';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/auth/reset-password
@@ -34,7 +35,7 @@ async function handleResetPassword(
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
-    console.error('密码重置 API 错误:', error);
+    logger.error('密码重置 API 错误:', error);
     const errorResponse: ResetPasswordResponse = {
       success: false,
       message: '服务器内部错误，请稍后重试',

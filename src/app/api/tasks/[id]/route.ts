@@ -9,7 +9,6 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import { z } from 'zod';
 import { ApiError } from '@/app/api/lib/errors/api-error';
 import { TaskStatus, TaskPriority } from '@/types/task';
-import { reminderGenerator } from '@/lib/notification/reminder-generator';
 
 /**
  * 更新任务Schema
@@ -259,13 +258,13 @@ export const PUT = withErrorHandler(async (request: NextRequest) => {
   // 更新提醒：如果状态变为已完成或已取消，清理相关提醒（方法不存在，暂时注释）
   // if (task.status === 'COMPLETED' || task.status === 'CANCELLED') {
   //   reminderGenerator.cleanupCompletedTaskReminders(taskId).catch(error => {
-  //     console.error('清理已完成任务的提醒失败:', error);
+  //     logger.error('清理已完成任务的提醒失败:', error);
   //   });
   // }
   // 如果任务状态变为进行中或待办，且有截止日期，生成提醒
   // else if (task.dueDate) {
   //   reminderGenerator.generateTaskReminders(task.id).catch(error => {
-  //     console.error('生成任务提醒失败:', error);
+  //     logger.error('生成任务提醒失败:', error);
   //   });
   // }
   // 如果截止日期发生变化，重新生成提醒
@@ -274,7 +273,7 @@ export const PUT = withErrorHandler(async (request: NextRequest) => {
   //   existingTask.dueDate?.toISOString() !== validatedData.dueDate.toISOString()
   // ) {
   //   reminderGenerator.generateTaskReminders(task.id).catch(error => {
-  //     console.error('生成任务提醒失败:', error);
+  //     logger.error('生成任务提醒失败:', error);
   //   });
   // }
 
@@ -377,7 +376,8 @@ export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      'Access-Control-Allow-Origin':
+        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
       'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Max-Age': '86400',

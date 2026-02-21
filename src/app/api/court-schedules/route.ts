@@ -1,3 +1,4 @@
+/** @legacy 优先使用 /api/v1/court-schedules，此路由保留以向后兼容 */
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import {
   createCreatedResponse,
@@ -262,7 +263,8 @@ export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      'Access-Control-Allow-Origin':
+        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Max-Age': '86400',

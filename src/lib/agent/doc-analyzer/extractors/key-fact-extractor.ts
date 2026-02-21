@@ -16,7 +16,6 @@ import type {
 // 用于处理 AI 返回的动态 JSON 数据
 // =============================================================================
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 interface AIParsedKeyFact {
   category?: string;
   description?: string;
@@ -36,16 +35,6 @@ interface AIParsedReviewedFact {
   confidence?: number;
   factType?: string;
   evidence?: string[];
-}
-
-interface TimelineEvent {
-  id?: string;
-  event: string;
-}
-
-interface DisputeFocusItem {
-  id?: string;
-  description: string;
 }
 
 // =============================================================================

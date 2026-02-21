@@ -9,6 +9,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { VerificationStatus } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 /**
  * 获取知识图谱统计
@@ -72,7 +73,7 @@ export async function GET() {
       recommendationAccuracy,
     });
   } catch (error) {
-    console.error('获取知识图谱统计失败:', error);
+    logger.error('获取知识图谱统计失败:', error);
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });
   }
 }

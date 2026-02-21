@@ -33,8 +33,7 @@ export class DateVerifier {
    */
   async verify(
     data: DataToVerify,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    source?: SourceData
+    _source?: SourceData
   ): Promise<DateVerification> {
     const issues: string[] = [];
     const details = {

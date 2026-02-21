@@ -10,6 +10,7 @@ import { rateLimitMonitor } from '@/lib/middleware/rate-limit-monitor';
 import { rateLimitConfig } from '@/lib/middleware/rate-limit-config';
 import { adaptiveRateLimit } from '@/lib/middleware/adaptive-rate-limit';
 import { ipFilter } from '@/lib/middleware/ip-filter';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/admin/rate-limit/stats
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       data: stats,
     });
   } catch (error) {
-    console.error('[RateLimit Stats] Error:', error);
+    logger.error('[RateLimit Stats] Error:', error);
     return NextResponse.json(
       {
         success: false,

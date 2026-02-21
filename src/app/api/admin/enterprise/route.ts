@@ -9,6 +9,7 @@ import { validatePermissions } from '@/lib/middleware/permission-check';
 import type { EnterpriseListData, Pagination } from '@/types/admin-enterprise';
 import { EnterpriseStatus } from '@/types/enterprise';
 import { NextRequest } from 'next/server';
+import { logger } from '@/lib/logger';
 
 function isValidStatus(status: string): status is EnterpriseStatus {
   const validStatuses: EnterpriseStatus[] = [
@@ -143,7 +144,7 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     return Response.json({ data: responseData }, { status: 200 });
   } catch (error) {
-    console.error('获取企业认证列表失败:', error);
+    logger.error('获取企业认证列表失败:', error);
     return Response.json(
       { error: '服务器错误', message: '获取企业认证列表失败' },
       { status: 500 }
@@ -155,7 +156,8 @@ export async function OPTIONS(): Promise<Response> {
   return new Response(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      'Access-Control-Allow-Origin':
+        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',

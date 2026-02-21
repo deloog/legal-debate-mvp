@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { LawArticleRelationService } from '@/lib/law-article/relation-service';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/v1/law-article-relations/[id]
@@ -41,7 +42,7 @@ export async function POST(
 
     return NextResponse.json(relation);
   } catch (error: unknown) {
-    console.error('验证关系失败:', error);
+    logger.error('验证关系失败:', error);
 
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
 
@@ -65,7 +66,7 @@ export async function DELETE(
       id: params.id,
     });
   } catch (error: unknown) {
-    console.error('删除关系失败:', error);
+    logger.error('删除关系失败:', error);
 
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
 

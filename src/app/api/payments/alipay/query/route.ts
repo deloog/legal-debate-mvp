@@ -13,6 +13,7 @@ import {
   handlePaymentFailure,
 } from '@/lib/order/order-service';
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/payments/alipay/query
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
 
       // 判断响应是否成功
       if (queryResponse.code !== '10000') {
-        console.error('[API] 支付宝查询订单失败:', queryResponse);
+        logger.error('[API] 支付宝查询订单失败:', queryResponse);
         return NextResponse.json(
           {
             success: false,
@@ -121,9 +122,9 @@ export async function POST(request: NextRequest) {
             queryResponse.tradeNo,
             queryResponse.tradeNo
           );
-          console.log('[API] 支付宝订单状态更新成功:', targetOrderNo);
+          logger.info('[API] 支付宝订单状态更新成功:', targetOrderNo);
         } catch (error) {
-          console.error('[API] 更新支付宝订单状态失败:', error);
+          logger.error('[API] 更新支付宝订单状态失败:', error);
         }
       }
       // 如果订单已关闭但数据库未更新
@@ -134,9 +135,9 @@ export async function POST(request: NextRequest) {
       ) {
         try {
           await handlePaymentFailure(order.id, 'TRADE_CLOSED', '交易已关闭');
-          console.log('[API] 支付宝订单状态更新成功:', targetOrderNo);
+          logger.info('[API] 支付宝订单状态更新成功:', targetOrderNo);
         } catch (error) {
-          console.error('[API] 更新支付宝订单状态失败:', error);
+          logger.error('[API] 更新支付宝订单状态失败:', error);
         }
       }
 
@@ -167,7 +168,7 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (error) {
-      console.error('[API] 调用支付宝查询失败:', error);
+      logger.error('[API] 调用支付宝查询失败:', error);
       return NextResponse.json(
         {
           success: false,
@@ -178,7 +179,7 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('[API] 查询支付宝订单失败:', error);
+    logger.error('[API] 查询支付宝订单失败:', error);
     return NextResponse.json(
       {
         success: false,

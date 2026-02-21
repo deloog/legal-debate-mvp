@@ -14,6 +14,7 @@ import {
   unauthorizedResponse,
   serverErrorResponse,
 } from '@/lib/api-response';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 类型定义
@@ -207,7 +208,7 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     return successResponse(responseData, '获取法条列表成功');
   } catch (error) {
-    console.error('获取法条列表失败:', error);
+    logger.error('获取法条列表失败:', error);
     return serverErrorResponse('获取法条列表失败');
   }
 }

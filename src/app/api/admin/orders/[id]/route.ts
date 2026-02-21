@@ -17,6 +17,7 @@ import {
   UpdateOrderStatusRequest,
 } from '@/types/admin-order';
 import { NextRequest } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数
@@ -132,7 +133,7 @@ async function getOrderDetail(
       })),
     };
   } catch (error) {
-    console.error('[API] 获取订单详情失败:', error);
+    logger.error('[API] 获取订单详情失败:', error);
     return null;
   }
 }
@@ -173,7 +174,7 @@ export async function GET(
 
     return successResponse(order, '获取订单详情成功');
   } catch (error) {
-    console.error('[API] 获取订单详情失败:', error);
+    logger.error('[API] 获取订单详情失败:', error);
     return serverErrorResponse('获取订单详情失败');
   }
 }
@@ -268,7 +269,7 @@ export async function PATCH(
       },
     });
 
-    console.log('[API] 订单状态已更新:', {
+    logger.info('[API] 订单状态已更新:', {
       orderId: id,
       newStatus: body.status,
       updatedBy: user.userId,
@@ -284,7 +285,7 @@ export async function PATCH(
       '订单状态更新成功'
     );
   } catch (error) {
-    console.error('[API] 更新订单状态失败:', error);
+    logger.error('[API] 更新订单状态失败:', error);
     return serverErrorResponse('更新订单状态失败');
   }
 }

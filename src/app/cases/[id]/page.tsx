@@ -49,6 +49,32 @@ interface CaseAccessInfo {
   permissions?: string[];
 }
 
+/** 案件类型中文映射 */
+const caseTypeLabels: Record<string, string> = {
+  CIVIL: '民事案件',
+  CRIMINAL: '刑事案件',
+  ADMINISTRATIVE: '行政案件',
+  COMMERCIAL: '商事案件',
+  LABOR: '劳动案件',
+  INTELLECTUAL_PROPERTY: '知识产权案件',
+};
+
+/** 案件状态中文映射 */
+const caseStatusLabels: Record<string, string> = {
+  ACTIVE: '进行中',
+  PENDING: '待处理',
+  CLOSED: '已结案',
+  ARCHIVED: '已归档',
+};
+
+const TAB_LIST: { key: TabType; label: string }[] = [
+  { key: 'overview', label: '概览' },
+  { key: 'team', label: '团队成员' },
+  { key: 'evidence', label: '证据' },
+  { key: 'witnesses', label: '证人' },
+  { key: 'discussions', label: '讨论' },
+];
+
 export default function CaseDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -69,7 +95,7 @@ export default function CaseDetailPage() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/cases/${caseId}`);
+      const response = await fetch(`/api/v1/cases/${caseId}`);
 
       if (!response.ok) {
         throw new Error('加载案件详情失败');
@@ -126,11 +152,7 @@ export default function CaseDetailPage() {
           />
         );
       case 'timeline':
-        return (
-          <div className='py-8 text-center text-gray-500'>
-            时间线功能开发中...
-          </div>
-        );
+        return null; // 不再显示，已从导航移除
       case 'evidence':
         return (
           <EvidenceTab
@@ -182,36 +204,63 @@ export default function CaseDetailPage() {
           <CardContent>
             <dl className='grid grid-cols-1 gap-4 md:grid-cols-2'>
               <div>
-                <dt className='text-sm font-medium text-gray-500'>案件标题</dt>
-                <dd className='mt-1 text-sm text-gray-900'>
+                <dt className='text-sm font-medium text-gray-500 dark:text-zinc-400'>
+                  案件标题
+                </dt>
+                <dd className='mt-1 text-sm text-gray-900 dark:text-zinc-100'>
                   {caseDetail.title}
                 </dd>
               </div>
               <div>
-                <dt className='text-sm font-medium text-gray-500'>案件类型</dt>
-                <dd className='mt-1 text-sm text-gray-900'>
-                  {caseDetail.type}
+                <dt className='text-sm font-medium text-gray-500 dark:text-zinc-400'>
+                  案件类型
+                </dt>
+                <dd className='mt-1 text-sm text-gray-900 dark:text-zinc-100'>
+                  {caseTypeLabels[caseDetail.type] ?? caseDetail.type}
                 </dd>
               </div>
               <div>
-                <dt className='text-sm font-medium text-gray-500'>状态</dt>
-                <dd className='mt-1 text-sm text-gray-900'>
-                  {caseDetail.status}
+                <dt className='text-sm font-medium text-gray-500 dark:text-zinc-400'>
+                  状态
+                </dt>
+                <dd className='mt-1'>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      caseDetail.status === 'ACTIVE'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                        : caseDetail.status === 'CLOSED'
+                          ? 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
+                          : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                    }`}
+                  >
+                    {caseStatusLabels[caseDetail.status] ?? caseDetail.status}
+                  </span>
                 </dd>
               </div>
               <div>
-                <dt className='text-sm font-medium text-gray-500'>创建时间</dt>
-                <dd className='mt-1 text-sm text-gray-900'>
+                <dt className='text-sm font-medium text-gray-500 dark:text-zinc-400'>
+                  创建时间
+                </dt>
+                <dd className='mt-1 text-sm text-gray-900 dark:text-zinc-100'>
                   {new Date(caseDetail.createdAt).toLocaleString('zh-CN')}
                 </dd>
               </div>
-              {caseDetail.description && (
+              {caseDetail.description ? (
                 <div className='md:col-span-2'>
-                  <dt className='text-sm font-medium text-gray-500'>
+                  <dt className='text-sm font-medium text-gray-500 dark:text-zinc-400'>
                     案件描述
                   </dt>
-                  <dd className='mt-1 text-sm text-gray-900 whitespace-pre-wrap'>
+                  <dd className='mt-1 text-sm text-gray-900 dark:text-zinc-100 whitespace-pre-wrap'>
                     {caseDetail.description}
+                  </dd>
+                </div>
+              ) : (
+                <div className='md:col-span-2'>
+                  <dt className='text-sm font-medium text-gray-500 dark:text-zinc-400'>
+                    案件描述
+                  </dt>
+                  <dd className='mt-1 text-sm italic text-gray-400 dark:text-zinc-500'>
+                    暂无描述
                   </dd>
                 </div>
               )}
@@ -229,10 +278,18 @@ export default function CaseDetailPage() {
               <Button variant='outline' size='sm'>
                 编辑案件
               </Button>
-              <Button variant='outline' size='sm'>
+              <Button
+                variant='primary'
+                size='sm'
+                onClick={() => router.push(`/cases/${caseId}/debates`)}
+              >
                 开始辩论
               </Button>
-              <Button variant='outline' size='sm'>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => setActiveTab('evidence')}
+              >
                 添加证据
               </Button>
             </div>
@@ -244,16 +301,16 @@ export default function CaseDetailPage() {
 
   if (isLoading) {
     return (
-      <div className='min-h-screen bg-gray-50'>
+      <div className='min-h-screen bg-gray-50 dark:bg-zinc-950'>
         <div className='mx-auto max-w-7xl px-6 py-6'>
           <div className='animate-pulse'>
-            <div className='h-8 w-1/3 rounded bg-gray-200 mb-6' />
-            <div className='h-96 rounded-lg bg-white p-6'>
-              <div className='h-6 w-1/4 rounded bg-gray-200 mb-4' />
+            <div className='mb-6 h-8 w-1/3 rounded bg-gray-200 dark:bg-zinc-700' />
+            <div className='rounded-lg bg-white p-6 dark:bg-zinc-900'>
+              <div className='mb-4 h-6 w-1/4 rounded bg-gray-200 dark:bg-zinc-700' />
               <div className='space-y-3'>
-                <div className='h-4 w-full rounded bg-gray-200' />
-                <div className='h-4 w-2/3 rounded bg-gray-200' />
-                <div className='h-4 w-full rounded bg-gray-200' />
+                <div className='h-4 w-full rounded bg-gray-200 dark:bg-zinc-700' />
+                <div className='h-4 w-2/3 rounded bg-gray-200 dark:bg-zinc-700' />
+                <div className='h-4 w-full rounded bg-gray-200 dark:bg-zinc-700' />
               </div>
             </div>
           </div>
@@ -264,12 +321,17 @@ export default function CaseDetailPage() {
 
   if (error) {
     return (
-      <div className='min-h-screen bg-gray-50'>
+      <div className='min-h-screen bg-gray-50 dark:bg-zinc-950'>
         <div className='mx-auto max-w-7xl px-6 py-6'>
-          <div className='rounded-lg border border-red-200 bg-red-50 p-6 text-red-800'>
-            <h2 className='text-lg font-semibold mb-2'>加载失败</h2>
+          <div className='rounded-lg border border-red-200 bg-red-50 p-6 text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300'>
+            <h2 className='mb-2 text-lg font-semibold'>加载失败</h2>
             <p className='mb-4'>{error}</p>
-            <Button onClick={() => router.back()}>返回</Button>
+            <div className='flex gap-3'>
+              <Button onClick={() => void loadCaseDetail()}>重试</Button>
+              <Button variant='ghost' onClick={() => router.back()}>
+                返回
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -277,23 +339,28 @@ export default function CaseDetailPage() {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50'>
+    <div className='min-h-screen bg-gray-50 dark:bg-zinc-950'>
       {/* 页面头部 */}
-      <header className='border-b border-gray-200 bg-white px-6 py-4'>
+      <header className='border-b border-gray-200 bg-white px-6 py-4 dark:border-zinc-700 dark:bg-zinc-900'>
         <div className='mx-auto max-w-7xl'>
           <div className='flex items-center justify-between'>
             <div>
               <Button
                 variant='ghost'
                 onClick={() => router.back()}
-                className='mb-2'
+                className='mb-2 text-sm'
               >
                 ← 返回
               </Button>
-              <h1 className='text-2xl font-semibold text-gray-900'>
+              <h1 className='text-2xl font-semibold text-gray-900 dark:text-zinc-100'>
                 {caseDetail?.title}
               </h1>
-              <p className='mt-1 text-sm text-gray-600'>案件ID: {caseId}</p>
+              <p className='mt-1 text-sm text-gray-500 dark:text-zinc-400'>
+                创建于{' '}
+                {caseDetail
+                  ? new Date(caseDetail.createdAt).toLocaleDateString('zh-CN')
+                  : '—'}
+              </p>
             </div>
             <div className='flex gap-3'>
               {canManage && (
@@ -309,68 +376,21 @@ export default function CaseDetailPage() {
       {/* 主内容区 */}
       <main className='mx-auto max-w-7xl px-6 py-6'>
         {/* 标签页导航 */}
-        <div className='mb-6 border-b border-gray-200'>
-          <nav className='-mb-px flex space-x-8'>
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === 'overview'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-              }`}
-            >
-              概览
-            </button>
-            <button
-              onClick={() => setActiveTab('team')}
-              className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === 'team'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-              }`}
-            >
-              团队成员
-            </button>
-            <button
-              onClick={() => setActiveTab('timeline')}
-              className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === 'timeline'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-              }`}
-            >
-              时间线
-            </button>
-            <button
-              onClick={() => setActiveTab('evidence')}
-              className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === 'evidence'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-              }`}
-            >
-              证据
-            </button>
-            <button
-              onClick={() => setActiveTab('witnesses')}
-              className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === 'witnesses'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-              }`}
-            >
-              证人
-            </button>
-            <button
-              onClick={() => setActiveTab('discussions')}
-              className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === 'discussions'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-              }`}
-            >
-              讨论
-            </button>
+        <div className='mb-6 border-b border-gray-200 dark:border-zinc-700'>
+          <nav className='-mb-px flex space-x-1'>
+            {TAB_LIST.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+                  activeTab === tab.key
+                    ? 'border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-300'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </nav>
         </div>
 

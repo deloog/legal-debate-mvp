@@ -1,3 +1,4 @@
+/** @legacy 优先使用 /api/v1/invoices，此路由保留以向后兼容 */
 /**
  * 发票列表API
  * GET /api/invoices - 查询发票列表
@@ -11,6 +12,7 @@ import {
   getUserInvoices,
   getInvoiceStats,
 } from '@/lib/invoice/invoice-service';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/invoices
@@ -150,7 +152,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    console.error('[API] 查询发票列表失败:', error);
+    logger.error('[API] 查询发票列表失败:', error);
 
     return NextResponse.json(
       {

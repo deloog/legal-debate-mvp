@@ -156,7 +156,6 @@ export function createPerformanceMonitorMiddleware(
 
   return async function performanceMonitorMiddleware(
     request: Request,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _context: { params?: Record<string, string> }
   ): Promise<NextResponse | undefined> {
     if (!finalConfig.enabled) {

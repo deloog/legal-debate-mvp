@@ -394,3 +394,34 @@ export type RequireFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
 // 省略并扩展类型
 export type OmitAndExtend<T, K extends keyof T, E> = Omit<T, K> & E;
+
+// =============================================================================
+// 流式响应类型定义
+// =============================================================================
+
+// 流式块类型
+export interface AIStreamChunk {
+  id: string;
+  object: string;
+  created: number;
+  model: string;
+  choices: AIStreamChoice[];
+}
+
+// 流式选择
+export interface AIStreamChoice {
+  index: number;
+  delta: AIMessage;
+  finishReason: 'stop' | 'length' | 'function_call' | 'content_filter' | null;
+}
+
+// 流式事件数据
+export interface AIStreamEventData {
+  type: 'content' | 'complete' | 'error' | 'progress';
+  chunkId: string;
+  content: string;
+  isComplete: boolean;
+  progress: number;
+  totalTokens?: number;
+  error?: string;
+}

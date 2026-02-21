@@ -11,6 +11,7 @@ import {
   getAllCaseTypes,
   searchCategories,
 } from '@/lib/evidence/evidence-category-config';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/evidence/categories
@@ -84,7 +85,7 @@ export async function GET(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('证据分类配置API错误:', error);
+    logger.error('证据分类配置API错误:', error);
 
     return NextResponse.json(
       {

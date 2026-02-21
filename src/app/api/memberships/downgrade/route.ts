@@ -9,6 +9,7 @@ import type { DowngradeRequestBody } from '@/types/admin-membership';
 import { MembershipStatus } from '@prisma/client';
 import { MembershipChangeType, MembershipTier } from '@/types/membership';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/memberships/downgrade
@@ -228,7 +229,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 200 }
     );
   } catch (error) {
-    console.error('会员降级失败:', {
+    logger.error('会员降级失败:', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
       timestamp: new Date().toISOString(),

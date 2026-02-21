@@ -1,3 +1,4 @@
+/** @legacy 优先使用 /api/v1/notifications，此路由保留以向后兼容 */
 /**
  * 通知 API 路由
  *
@@ -17,6 +18,7 @@ import {
   NotificationType,
   NotificationPriority,
 } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/notifications
@@ -81,7 +83,7 @@ export async function GET(request: NextRequest) {
       data: result,
     });
   } catch (error) {
-    console.error('获取通知列表失败:', error);
+    logger.error('获取通知列表失败:', error);
     return NextResponse.json({ error: '获取通知列表失败' }, { status: 500 });
   }
 }
@@ -169,7 +171,7 @@ export async function POST(request: NextRequest) {
       data: notification,
     });
   } catch (error) {
-    console.error('创建通知失败:', error);
+    logger.error('创建通知失败:', error);
     return NextResponse.json({ error: '创建通知失败' }, { status: 500 });
   }
 }

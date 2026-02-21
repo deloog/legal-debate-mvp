@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { contractApprovalService } from '@/lib/contract/contract-approval-service';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -38,7 +39,7 @@ export async function GET(
       data: latestApproval,
     });
   } catch (error) {
-    console.error('获取审批信息失败:', error);
+    logger.error('获取审批信息失败:', error);
     return NextResponse.json(
       {
         success: false,

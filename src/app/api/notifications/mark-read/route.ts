@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { getUserNotificationService } from '@/lib/notification/user-notification-service';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/notifications/mark-read
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
       message: '已标记为已读',
     });
   } catch (error) {
-    console.error('标记通知已读失败:', error);
+    logger.error('标记通知已读失败:', error);
     return NextResponse.json({ error: '标记通知已读失败' }, { status: 500 });
   }
 }

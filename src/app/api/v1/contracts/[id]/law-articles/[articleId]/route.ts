@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 /**
  * 删除合同法条关联
@@ -70,7 +71,7 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
-    console.error('删除法条关联失败:', error);
+    logger.error('删除法条关联失败:', error);
     return NextResponse.json(
       {
         success: false,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { ALERT_PERMISSIONS } from '@/types/permission';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/admin/alerts/[id] - 获取告警详情
@@ -42,7 +43,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('获取告警详情失败:', error);
+    logger.error('获取告警详情失败:', error);
     return NextResponse.json(
       {
         success: false,

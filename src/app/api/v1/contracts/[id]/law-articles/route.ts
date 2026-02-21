@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 /**
  * 获取合同已关联的法条
@@ -78,7 +79,7 @@ export async function GET(
       { status: 200 }
     );
   } catch (error) {
-    console.error('获取合同关联法条失败:', error);
+    logger.error('获取合同关联法条失败:', error);
     return NextResponse.json(
       {
         success: false,
@@ -233,7 +234,7 @@ export async function POST(
       { status: 201 }
     );
   } catch (error) {
-    console.error('添加法条关联失败:', error);
+    logger.error('添加法条关联失败:', error);
     return NextResponse.json(
       {
         success: false,

@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server';
 import { contractApprovalService } from '@/lib/contract/contract-approval-service';
 import { getCurrentUserId } from '@/lib/auth/get-current-user';
+import { logger } from '@/lib/logger';
 
 export async function GET() {
   try {
@@ -27,7 +28,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('获取待审批列表失败:', error);
+    logger.error('获取待审批列表失败:', error);
     return NextResponse.json(
       {
         success: false,

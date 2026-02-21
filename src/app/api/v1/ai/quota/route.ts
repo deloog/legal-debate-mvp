@@ -5,6 +5,7 @@ import {
   calculateQuotaPercentage,
   getQuotaStatusMessage,
 } from '@/lib/ai/quota';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/v1/ai/quota
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('获取配额信息失败:', error);
+    logger.error('获取配额信息失败:', error);
     return NextResponse.json(
       {
         success: false,
@@ -82,7 +83,8 @@ export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      'Access-Control-Allow-Origin':
+        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',

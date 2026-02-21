@@ -18,6 +18,7 @@ import {
   serverErrorResponse,
   badRequestResponse,
 } from '@/lib/api-response';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 类型定义
@@ -222,7 +223,7 @@ export async function GET(
 
     return successResponse(article, '获取法条详情成功');
   } catch (error) {
-    console.error('获取法条详情失败:', error);
+    logger.error('获取法条详情失败:', error);
     return serverErrorResponse('获取法条详情失败');
   }
 }
@@ -335,7 +336,7 @@ export async function PUT(
 
     return successResponse(updatedArticle, '更新法条成功');
   } catch (error) {
-    console.error('更新法条失败:', error);
+    logger.error('更新法条失败:', error);
     return serverErrorResponse('更新法条失败');
   }
 }
@@ -384,7 +385,7 @@ export async function DELETE(
 
     return successResponse({ id }, '删除法条成功');
   } catch (error) {
-    console.error('删除法条失败:', error);
+    logger.error('删除法条失败:', error);
     return serverErrorResponse('删除法条失败');
   }
 }

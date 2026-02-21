@@ -20,6 +20,7 @@ import {
   type RegistrationTrendQueryParams,
 } from '@/types/stats';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数：时间范围处理
@@ -390,7 +391,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     return successResponse(data, '获取注册趋势成功');
   } catch (error) {
-    console.error('获取注册趋势失败:', error);
+    logger.error('获取注册趋势失败:', error);
     return serverErrorResponse('获取注册趋势失败');
   }
 }

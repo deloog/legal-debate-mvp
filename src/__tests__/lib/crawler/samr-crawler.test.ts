@@ -5,7 +5,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import { SAMRCrawler, SAMR_CONFIG, CONTRACT_CATEGORIES, KNOWN_CONTRACT_TEMPLATES } from '@/lib/crawler/samr-crawler';
+import {
+  SAMRCrawler,
+  SAMR_CONFIG,
+  CONTRACT_CATEGORIES,
+  KNOWN_CONTRACT_TEMPLATES,
+} from '@/lib/crawler/samr-crawler';
 
 describe('SAMRCrawler', () => {
   let crawler: SAMRCrawler;
@@ -94,19 +99,33 @@ describe('SAMRCrawler', () => {
     it('应包含甲乙方信息变量', () => {
       const variables = (crawler as any).generateVariables('测试合同', 'CIVIL');
 
-      expect(variables.find((v: any) => v.key === 'party_a_name')).toBeDefined();
-      expect(variables.find((v: any) => v.key === 'party_b_name')).toBeDefined();
+      expect(
+        variables.find((v: any) => v.key === 'party_a_name')
+      ).toBeDefined();
+      expect(
+        variables.find((v: any) => v.key === 'party_b_name')
+      ).toBeDefined();
     });
 
     it('应根据合同类型生成不同变量', () => {
-      const laborVariables = (crawler as any).generateVariables('劳动合同', 'LABOR');
-      const civilVariables = (crawler as any).generateVariables('买卖合同', 'CIVIL');
+      const laborVariables = (crawler as any).generateVariables(
+        '劳动合同',
+        'LABOR'
+      );
+      const civilVariables = (crawler as any).generateVariables(
+        '买卖合同',
+        'CIVIL'
+      );
 
       // 劳动合同应该有岗位变量
-      expect(laborVariables.find((v: any) => v.key === 'position')).toBeDefined();
+      expect(
+        laborVariables.find((v: any) => v.key === 'position')
+      ).toBeDefined();
 
       // 买卖合同应该有标的物变量
-      expect(civilVariables.find((v: any) => v.key === 'subject_matter')).toBeDefined();
+      expect(
+        civilVariables.find((v: any) => v.key === 'subject_matter')
+      ).toBeDefined();
     });
   });
 
@@ -152,48 +171,79 @@ describe('SAMRCrawler', () => {
 
   describe('风险提示生成测试', () => {
     it('应生成正确的风险提示列表', () => {
-      const warnings = (crawler as any).generateRiskWarnings('测试合同', 'CIVIL');
+      const warnings = (crawler as any).generateRiskWarnings(
+        '测试合同',
+        'CIVIL'
+      );
 
       expect(Array.isArray(warnings)).toBe(true);
       expect(warnings.length).toBeGreaterThan(0);
     });
 
     it('应包含高风险提示', () => {
-      const warnings = (crawler as any).generateRiskWarnings('测试合同', 'CIVIL');
+      const warnings = (crawler as any).generateRiskWarnings(
+        '测试合同',
+        'CIVIL'
+      );
       const highRiskWarning = warnings.find((w: any) => w.level === 'HIGH');
 
       expect(highRiskWarning).toBeDefined();
     });
 
     it('应包含法律依据', () => {
-      const warnings = (crawler as any).generateRiskWarnings('测试合同', 'CIVIL');
+      const warnings = (crawler as any).generateRiskWarnings(
+        '测试合同',
+        'CIVIL'
+      );
       const warningWithLegalBasis = warnings.find((w: any) => w.legalBasis);
 
       expect(warningWithLegalBasis).toBeDefined();
     });
 
     it('应根据合同类型生成特定风险提示', () => {
-      const laborWarnings = (crawler as any).generateRiskWarnings('劳动合同', 'LABOR');
-      const constructionWarnings = (crawler as any).generateRiskWarnings('建设工程施工合同', 'CONSTRUCTION');
+      const laborWarnings = (crawler as any).generateRiskWarnings(
+        '劳动合同',
+        'LABOR'
+      );
+      const constructionWarnings = (crawler as any).generateRiskWarnings(
+        '建设工程施工合同',
+        'CONSTRUCTION'
+      );
 
       // 劳动合同应该有试用期相关风险提示
-      expect(laborWarnings.find((w: any) => w.title.includes('试用期') || w.title.includes('必备条款'))).toBeDefined();
+      expect(
+        laborWarnings.find(
+          (w: any) => w.title.includes('试用期') || w.title.includes('必备条款')
+        )
+      ).toBeDefined();
 
       // 建设工程应该有资质相关风险提示
-      expect(constructionWarnings.find((w: any) => w.title.includes('资质') || w.title.includes('工程款'))).toBeDefined();
+      expect(
+        constructionWarnings.find(
+          (w: any) => w.title.includes('资质') || w.title.includes('工程款')
+        )
+      ).toBeDefined();
     });
   });
 
   describe('模板文本生成测试', () => {
     it('应生成包含标题的模板文本', () => {
-      const item = { title: '测试合同（示范文本）', category: '买卖', publishDate: '2024-01-01' };
+      const item = {
+        title: '测试合同（示范文本）',
+        category: '买卖',
+        publishDate: '2024-01-01',
+      };
       const text = (crawler as any).generateTemplateText(item);
 
       expect(text).toContain('测试合同（示范文本）');
     });
 
     it('应生成包含当事人信息的模板', () => {
-      const item = { title: '测试合同', category: '买卖', publishDate: '2024-01-01' };
+      const item = {
+        title: '测试合同',
+        category: '买卖',
+        publishDate: '2024-01-01',
+      };
       const text = (crawler as any).generateTemplateText(item);
 
       expect(text).toContain('甲方');
@@ -201,7 +251,11 @@ describe('SAMRCrawler', () => {
     });
 
     it('应生成包含主要条款的模板', () => {
-      const item = { title: '测试合同', category: '买卖', publishDate: '2024-01-01' };
+      const item = {
+        title: '测试合同',
+        category: '买卖',
+        publishDate: '2024-01-01',
+      };
       const text = (crawler as any).generateTemplateText(item);
 
       expect(text).toContain('合同标的');
@@ -210,8 +264,16 @@ describe('SAMRCrawler', () => {
     });
 
     it('应根据合同类型生成特定条款', () => {
-      const laborItem = { title: '劳动合同', category: '劳动合同', publishDate: '2024-01-01' };
-      const civilItem = { title: '买卖合同', category: '买卖', publishDate: '2024-01-01' };
+      const laborItem = {
+        title: '劳动合同',
+        category: '劳动合同',
+        publishDate: '2024-01-01',
+      };
+      const civilItem = {
+        title: '买卖合同',
+        category: '买卖',
+        publishDate: '2024-01-01',
+      };
 
       const laborText = (crawler as any).generateTemplateText(laborItem);
       const civilText = (crawler as any).generateTemplateText(civilItem);
@@ -239,8 +301,14 @@ describe('SAMRCrawler', () => {
     });
 
     it('应根据合同类型生成不同指南', () => {
-      const laborGuide = (crawler as any).generateUsageGuide('劳动合同', 'LABOR');
-      const realEstateGuide = (crawler as any).generateUsageGuide('房屋买卖合同', 'REAL_ESTATE');
+      const laborGuide = (crawler as any).generateUsageGuide(
+        '劳动合同',
+        'LABOR'
+      );
+      const realEstateGuide = (crawler as any).generateUsageGuide(
+        '房屋买卖合同',
+        'REAL_ESTATE'
+      );
 
       expect(laborGuide).toContain('劳动法');
       expect(realEstateGuide).toContain('房地产管理法');
@@ -249,7 +317,10 @@ describe('SAMRCrawler', () => {
 
   describe('分页采集测试', () => {
     it('应支持分页获取模板列表', async () => {
-      const result = await (crawler as any).fetchContractListWithPagination(1, 5);
+      const result = await (crawler as any).fetchContractListWithPagination(
+        1,
+        5
+      );
 
       expect(result).toHaveProperty('items');
       expect(result).toHaveProperty('total');
@@ -259,10 +330,19 @@ describe('SAMRCrawler', () => {
     });
 
     it('应支持按分类筛选', async () => {
-      const result = await (crawler as any).fetchContractListWithPagination(1, 100, '劳动');
+      const result = await (crawler as any).fetchContractListWithPagination(
+        1,
+        100,
+        '劳动'
+      );
 
       expect(result.items.length).toBeGreaterThan(0);
-      expect(result.items.every((item: any) => item.category.includes('劳动') || item.title.includes('劳动'))).toBe(true);
+      expect(
+        result.items.every(
+          (item: any) =>
+            item.category.includes('劳动') || item.title.includes('劳动')
+        )
+      ).toBe(true);
     });
   });
 
@@ -325,7 +405,7 @@ describe('KNOWN_CONTRACT_TEMPLATES常量', () => {
   });
 
   it('每个模板应有必需字段', () => {
-    KNOWN_CONTRACT_TEMPLATES.forEach((template) => {
+    KNOWN_CONTRACT_TEMPLATES.forEach(template => {
       expect(template).toHaveProperty('id');
       expect(template).toHaveProperty('title');
       expect(template).toHaveProperty('category');

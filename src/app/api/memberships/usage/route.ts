@@ -6,6 +6,7 @@
 import { NextRequest } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { getUsageStats } from '@/lib/usage/record-usage';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // GET /api/memberships/usage - 查询用户使用量
@@ -135,7 +136,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       },
     });
   } catch (error) {
-    console.error('[GET /api/memberships/usage] 查询失败:', error);
+    logger.error('[GET /api/memberships/usage] 查询失败:', error);
 
     if (error instanceof Error) {
       return Response.json(
@@ -251,7 +252,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       data: stats,
     });
   } catch (error) {
-    console.error('[POST /api/memberships/usage/query] 查询失败:', error);
+    logger.error('[POST /api/memberships/usage/query] 查询失败:', error);
 
     if (error instanceof Error) {
       return Response.json(

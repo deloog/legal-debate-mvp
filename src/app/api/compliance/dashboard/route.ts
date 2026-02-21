@@ -6,13 +6,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ComplianceService } from '@/lib/compliance/compliance-service';
 import type { GetComplianceDashboardResponse } from '@/types/compliance';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/compliance/dashboard
  * 获取合规仪表盘数据
  */
 export async function GET(
-  request: NextRequest
+  _request: NextRequest
 ): Promise<NextResponse<GetComplianceDashboardResponse>> {
   try {
     const dashboard = await ComplianceService.getDashboard();
@@ -25,7 +26,7 @@ export async function GET(
       { status: 200 }
     );
   } catch (error) {
-    console.error('获取合规仪表盘错误:', error);
+    logger.error('获取合规仪表盘错误:', error);
 
     return NextResponse.json(
       {

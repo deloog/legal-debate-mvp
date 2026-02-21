@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { createSuccessResponse } from '@/app/api/lib/responses/api-response';
+import { logger } from '@/lib/logger';
 
 const prisma = new PrismaClient();
 
@@ -85,7 +86,7 @@ export async function PUT(
 
     return createSuccessResponse(updatedLegalReference);
   } catch (error) {
-    console.error('更新法条反馈失败：', error);
+    logger.error('更新法条反馈失败：', error);
 
     return NextResponse.json(
       {

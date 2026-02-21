@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError } from './api-error';
+import { logger } from '@/lib/logger';
 
 /**
  * 从请求中提取关联ID
@@ -56,7 +57,7 @@ export function handleApiError(
   const isProduction = process.env.NODE_ENV === 'production';
 
   // 记录错误日志
-  console.error('API Error:', {
+  logger.error('API Error:', {
     error: error instanceof Error ? error.message : 'Unknown error',
     stack: error instanceof Error ? error.stack : undefined,
     url: request.url,

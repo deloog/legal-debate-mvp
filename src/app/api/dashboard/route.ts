@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+/** @legacy 优先使用 /api/v1/dashboard，此路由保留以向后兼容 */
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
@@ -9,13 +10,13 @@ import type {
   FeatureModule,
   RecentActivity,
 } from '@/types/dashboard';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/dashboard
  * 获取Dashboard数据
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
     // 从session获取当前用户ID
     const session = await getServerSession(authOptions);
@@ -207,7 +208,7 @@ export async function GET(_request: NextRequest) {
       data,
     });
   } catch (error) {
-    console.error('获取Dashboard数据失败:', error);
+    logger.error('获取Dashboard数据失败:', error);
     return NextResponse.json(
       {
         success: false,

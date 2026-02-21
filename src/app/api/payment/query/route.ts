@@ -8,6 +8,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { QueryPaymentResponse, Order, PaymentRecord } from '@/types/payment';
+import { logger } from '@/lib/logger';
 
 /**
  * 将 Prisma Decimal 转换为 number
@@ -114,7 +115,7 @@ export async function GET(request: NextRequest) {
       },
     } as QueryPaymentResponse);
   } catch (error) {
-    console.error('[API] 查询订单失败:', error);
+    logger.error('[API] 查询订单失败:', error);
     return NextResponse.json(
       {
         success: false,

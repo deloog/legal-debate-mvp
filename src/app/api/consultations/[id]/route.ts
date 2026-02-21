@@ -16,6 +16,7 @@ import {
   ConsultStatus,
 } from '@/types/consultation';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 export type { ErrorResponse, SuccessResponse };
 
@@ -131,7 +132,7 @@ export async function GET(
       data: responseData,
     });
   } catch (error) {
-    console.error('获取咨询详情失败:', error);
+    logger.error('获取咨询详情失败:', error);
 
     return NextResponse.json(
       {
@@ -328,7 +329,7 @@ export async function PUT(
       data: responseData,
     });
   } catch (error) {
-    console.error('更新咨询记录失败:', error);
+    logger.error('更新咨询记录失败:', error);
 
     return NextResponse.json(
       {
@@ -402,7 +403,7 @@ export async function DELETE(
       data: { id },
     });
   } catch (error) {
-    console.error('删除咨询记录失败:', error);
+    logger.error('删除咨询记录失败:', error);
 
     return NextResponse.json(
       {

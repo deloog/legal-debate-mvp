@@ -10,6 +10,7 @@ import {
   DiscoveryMethod,
   VerificationStatus,
 } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 interface VisualizationDataResponse {
   success: boolean;
@@ -141,7 +142,7 @@ export async function GET(
       data: chartData,
     });
   } catch (error) {
-    console.error('获取可视化数据失败:', error);
+    logger.error('获取可视化数据失败:', error);
     return NextResponse.json(
       {
         success: false,

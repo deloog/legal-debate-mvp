@@ -1,3 +1,4 @@
+/** @legacy 优先使用 /api/v1/filing-materials，此路由保留以向后兼容 */
 /**
  * GET /api/filing-materials
  * 获取立案材料清单
@@ -5,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { filingMaterialsService } from '@/lib/case/filing-materials-service';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,7 +38,7 @@ export async function GET(request: NextRequest) {
       data: materials,
     });
   } catch (error) {
-    console.error('获取立案材料清单失败:', error);
+    logger.error('获取立案材料清单失败:', error);
     return NextResponse.json(
       {
         success: false,

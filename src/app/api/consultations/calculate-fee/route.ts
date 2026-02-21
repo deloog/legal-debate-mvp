@@ -11,6 +11,7 @@ import {
 import { ErrorResponse, SuccessResponse } from '@/types/api-response';
 import { CalculateFeeRequest } from '@/types/consultation';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/consultations/calculate-fee
@@ -109,7 +110,7 @@ export async function POST(
       data: result,
     });
   } catch (error) {
-    console.error('费用计算失败:', error);
+    logger.error('费用计算失败:', error);
 
     return NextResponse.json(
       {
@@ -141,7 +142,7 @@ export async function GET(): Promise<
       data: feeModes,
     });
   } catch (error) {
-    console.error('获取收费模式失败:', error);
+    logger.error('获取收费模式失败:', error);
 
     return NextResponse.json(
       {

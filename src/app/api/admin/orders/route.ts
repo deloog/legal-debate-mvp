@@ -23,6 +23,7 @@ import type {
 } from '@/types/admin-order';
 import type { OrderStatus, PaymentMethod } from '@/types/payment';
 import { NextRequest } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数
@@ -336,7 +337,7 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     return successResponse(responseData, '获取订单列表成功');
   } catch (error) {
-    console.error('[API] 获取订单列表失败:', error);
+    logger.error('[API] 获取订单列表失败:', error);
     return serverErrorResponse('获取订单列表失败');
   }
 }

@@ -11,6 +11,7 @@ import { getAlipayRefund } from '@/lib/payment/alipay-refund';
 import { getWechatRefund } from '@/lib/payment/wechat-refund';
 import { PaymentMethod, RefundReason, RefundStatus } from '@/types/payment';
 import { paymentConfig } from '@/lib/payment/payment-config';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/refunds/apply
@@ -214,7 +215,7 @@ export async function POST(request: NextRequest) {
         });
 
         if (alipayResponse.code !== '10000') {
-          console.error('[API] 支付宝退款失败:', alipayResponse);
+          logger.error('[API] 支付宝退款失败:', alipayResponse);
           return NextResponse.json(
             {
               success: false,
@@ -256,7 +257,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      console.log('[API] 退款成功:', {
+      logger.info('[API] 退款成功:', {
         orderId,
         refundId: refund.id,
         refundAmount: refund.refundAmount,
@@ -278,7 +279,7 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (error) {
-      console.error('[API] 退款失败:', error);
+      logger.error('[API] 退款失败:', error);
 
       // 创建退款失败记录
       try {
@@ -302,7 +303,7 @@ export async function POST(request: NextRequest) {
           },
         });
       } catch (recordError) {
-        console.error('[API] 创建退款失败记录失败:', recordError);
+        logger.error('[API] 创建退款失败记录失败:', recordError);
       }
 
       return NextResponse.json(
@@ -315,7 +316,7 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('[API] 申请退款失败:', error);
+    logger.error('[API] 申请退款失败:', error);
     return NextResponse.json(
       {
         success: false,

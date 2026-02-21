@@ -181,6 +181,7 @@ export const debateFactory = {
       allowNewEvidence: true,
       debateMode: 'standard',
     },
+    summary: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,

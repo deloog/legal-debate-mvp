@@ -86,7 +86,10 @@ const eslintConfig = defineConfig([
       
       // Generated files
       '/src/generated/prisma/**',
-      
+
+      // Archived/deprecated crawler code (not part of runtime)
+      'src/lib/crawler/archive/**',
+
       // Additional temporary files
       'esl',
       'nul',
@@ -103,7 +106,15 @@ const eslintConfig = defineConfig([
       ...prettierConfig.rules,
       'prettier/prettier': 'error',
       // TypeScript specific rules
-      '@typescript-eslint/no-unused-vars': 'error',
+      // 以 _ 开头的参数/变量表示"有意不使用"，不触发 no-unused-vars
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
@@ -136,6 +147,8 @@ const eslintConfig = defineConfig([
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/triple-slash-reference': 'off',
     },
   },
 ]);

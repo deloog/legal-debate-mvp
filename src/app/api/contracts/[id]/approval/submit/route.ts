@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { contractApprovalService } from '@/lib/contract/contract-approval-service';
 import { getCurrentUserId } from '@/lib/auth/get-current-user';
 import { z } from 'zod';
+import { logger } from '@/lib/logger';
 
 const submitApprovalSchema = z.object({
   stepId: z.string(),
@@ -16,7 +17,7 @@ const submitApprovalSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  _context: { params: { id: string } }
 ) {
   try {
     const body = await request.json();
@@ -40,7 +41,7 @@ export async function POST(
       message: '审批意见已提交',
     });
   } catch (error) {
-    console.error('提交审批失败:', error);
+    logger.error('提交审批失败:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

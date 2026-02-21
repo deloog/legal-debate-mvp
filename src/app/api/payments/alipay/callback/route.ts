@@ -15,6 +15,7 @@ import {
   handlePaymentFailure,
 } from '@/lib/order/order-service';
 import { AlipayNotifyRequest } from '@/types/payment';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/payments/alipay/callback
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
       params[key] = value as string;
     }
 
-    console.log('[API] 支付宝回调参数:', params);
+    logger.info('[API] 支付宝回调参数:', params);
 
     // 验证必填参数
     const requiredParams = [
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     for (const param of requiredParams) {
       if (!params[param]) {
-        console.error('[API] 支付宝回调缺少必填参数:', param);
+        logger.error('[API] 支付宝回调缺少必填参数:', param);
         return NextResponse.json(
           {
             success: false,
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
     // 验证应用ID
     const config = paymentConfig.getAlipayConfig();
     if (params.app_id !== config.appId) {
-      console.error('[API] 支付宝回调应用ID不匹配');
+      logger.error('[API] 支付宝回调应用ID不匹配');
       return NextResponse.json(
         {
           success: false,
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (!isValid) {
-      console.error('[API] 支付宝回调验签失败');
+      logger.error('[API] 支付宝回调验签失败');
       return NextResponse.json(
         {
           success: false,
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!order) {
-      console.error('[API] 支付宝回调订单不存在:', orderNo);
+      logger.error('[API] 支付宝回调订单不存在:', orderNo);
       return NextResponse.json(
         {
           success: false,
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
 
     // 幂等性处理：如果订单已支付，直接返回成功
     if (order.status === 'PAID') {
-      console.log('[API] 订单已支付，忽略重复回调:', orderNo);
+      logger.info('[API] 订单已支付，忽略重复回调:', orderNo);
       return new NextResponse('success', { status: 200 });
     }
 
@@ -119,9 +120,9 @@ export async function POST(request: NextRequest) {
       // 支付成功
       try {
         await handlePaymentSuccess(order.id, params.trade_no, params.trade_no);
-        console.log('[API] 支付宝支付成功处理完成:', orderNo);
+        logger.info('[API] 支付宝支付成功处理完成:', orderNo);
       } catch (error) {
-        console.error('[API] 处理支付宝支付成功失败:', error);
+        logger.error('[API] 处理支付宝支付成功失败:', error);
         // 即使处理失败也返回成功，避免重复通知
         return new NextResponse('success', { status: 200 });
       }
@@ -129,22 +130,22 @@ export async function POST(request: NextRequest) {
       // 交易关闭（支付失败）
       try {
         await handlePaymentFailure(order.id, 'TRADE_CLOSED', '交易已关闭');
-        console.log('[API] 支付宝支付失败处理完成:', orderNo);
+        logger.info('[API] 支付宝支付失败处理完成:', orderNo);
       } catch (error) {
-        console.error('[API] 处理支付宝支付失败错误:', error);
+        logger.error('[API] 处理支付宝支付失败错误:', error);
       }
     } else if (tradeStatus === 'WAIT_BUYER_PAY') {
       // 等待买家付款
-      console.log('[API] 支付宝支付等待付款:', orderNo);
+      logger.info('[API] 支付宝支付等待付款:', orderNo);
       // 不做处理，等待下次通知
     } else {
-      console.log('[API] 支付宝未知交易状态:', tradeStatus);
+      logger.info('[API] 支付宝未知交易状态:', tradeStatus);
     }
 
     // 返回success给支付宝
     return new NextResponse('success', { status: 200 });
   } catch (error) {
-    console.error('[API] 处理支付宝回调失败:', error);
+    logger.error('[API] 处理支付宝回调失败:', error);
     // 即使出错也返回success，避免支付宝重复通知
     return new NextResponse('success', { status: 200 });
   }

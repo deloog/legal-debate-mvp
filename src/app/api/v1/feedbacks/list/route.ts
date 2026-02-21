@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 /**
  * 获取反馈列表
@@ -151,7 +152,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('获取反馈列表失败:', error);
+    logger.error('获取反馈列表失败:', error);
     return NextResponse.json(
       { success: false, error: '获取反馈列表失败' },
       { status: 500 }

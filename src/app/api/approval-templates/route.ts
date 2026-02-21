@@ -1,3 +1,4 @@
+/** @legacy 优先使用 /api/v1/approval-templates，此路由保留以向后兼容 */
 /**
  * 审批模板API
  * GET - 获取审批模板列表
@@ -8,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 const createTemplateSchema = z.object({
   name: z.string().min(1, '模板名称不能为空'),
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
       data: templates,
     });
   } catch (error) {
-    console.error('获取审批模板失败:', error);
+    logger.error('获取审批模板失败:', error);
     return NextResponse.json(
       {
         success: false,
@@ -77,7 +79,7 @@ export async function POST(request: NextRequest) {
       message: '审批模板创建成功',
     });
   } catch (error) {
-    console.error('创建审批模板失败:', error);
+    logger.error('创建审批模板失败:', error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

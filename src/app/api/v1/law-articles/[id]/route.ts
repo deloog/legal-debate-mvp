@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 /**
  * 获取法条详情
@@ -27,7 +28,7 @@ export async function GET(
 
     return NextResponse.json(article);
   } catch (error) {
-    console.error('获取法条详情失败:', error);
+    logger.error('获取法条详情失败:', error);
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });
   }
 }

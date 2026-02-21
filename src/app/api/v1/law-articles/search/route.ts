@@ -6,6 +6,7 @@ import type { SearchQuery } from '@/lib/law-article/types';
 import { LawCategory, LawStatus } from '@prisma/client';
 import { cache } from '@/lib/cache/manager';
 import { measurePerformance } from '@/lib/middleware/performance-monitor';
+import { logger } from '@/lib/logger';
 
 /**
  * 有效的法条分类枚举值
@@ -104,7 +105,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 
   const keywords: string[] = body.keywords || [];
 
-  console.log('法条搜索请求参数:', {
+  logger.info('法条搜索请求参数:', {
     keywords,
     category: body.category,
     tags: body.tags,
@@ -144,7 +145,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     );
 
     if (!isValid) {
-      console.warn('缓存数据格式不匹配，重新查询');
+      logger.warn('缓存数据格式不匹配，重新查询');
     } else {
       const response = createSuccessResponse(
         cachedResponse.data,
@@ -216,7 +217,8 @@ export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      'Access-Control-Allow-Origin':
+        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Max-Age': '86400',

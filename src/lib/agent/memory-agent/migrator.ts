@@ -6,8 +6,6 @@
  * 在代码中需要使用 `as any` 类型断言来解决类型检查问题。
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import * as cron from 'node-cron';
 import { PrismaClient } from '@prisma/client';
 
@@ -53,6 +51,7 @@ export class MemoryMigrator {
       await prisma.agentAction.create({
         data: {
           agentName: 'MemoryAgent',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           actionType: actionType as any,
           actionName:
             actionType === 'MIGRATE_WORKING_TO_HOT'

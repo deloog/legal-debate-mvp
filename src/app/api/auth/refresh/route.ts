@@ -17,6 +17,7 @@ import {
 import { logError } from '@/lib/utils/safe-logger';
 import type { JwtPayload } from '@/types/auth';
 import type { RefreshTokenResponse } from '@/types/auth';
+import { logger } from '@/lib/logger';
 
 async function handleRefresh(
   request: NextRequest
@@ -33,7 +34,7 @@ async function handleRefresh(
 
     // 仅在开发环境记录
     if (process.env.NODE_ENV === 'development') {
-      console.log('[REFRESH] Token source:', {
+      logger.info('[REFRESH] Token source:', {
         hasRefreshToken: !!refreshToken,
         source: request.cookies.get('refreshToken') ? 'cookie' : 'body',
       });
@@ -54,7 +55,7 @@ async function handleRefresh(
     const verificationResult = verifyToken(refreshToken);
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('[REFRESH] Token verification:', {
+      logger.info('[REFRESH] Token verification:', {
         valid: verificationResult.valid,
         error: verificationResult.error,
       });
@@ -120,7 +121,7 @@ async function handleRefresh(
     });
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('[REFRESH] Session query result:', {
+      logger.info('[REFRESH] Session query result:', {
         found: !!session,
         userId: user.id,
       });

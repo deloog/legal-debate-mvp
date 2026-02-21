@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { getOrder, cancelOrder } from '@/lib/order/order-service';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/orders/[id]
@@ -79,7 +80,7 @@ export async function GET(
       data: order,
     });
   } catch (error) {
-    console.error('[API] 查询订单详情失败:', error);
+    logger.error('[API] 查询订单详情失败:', error);
 
     return NextResponse.json(
       {
@@ -180,7 +181,7 @@ export async function PUT(
       data: updatedOrder,
     });
   } catch (error) {
-    console.error('[API] 更新订单失败:', error);
+    logger.error('[API] 更新订单失败:', error);
 
     return NextResponse.json(
       {

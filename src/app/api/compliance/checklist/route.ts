@@ -16,6 +16,7 @@ import {
   isValidComplianceCategory,
   isValidComplianceCheckStatus,
 } from '@/types/compliance';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/compliance/checklist
@@ -54,7 +55,7 @@ export async function GET(
       { status: 200 }
     );
   } catch (error) {
-    console.error('获取检查清单错误:', error);
+    logger.error('获取检查清单错误:', error);
 
     return NextResponse.json(
       {
@@ -81,7 +82,7 @@ export async function PUT(
     let body: unknown;
     try {
       body = await request.json();
-    } catch (error) {
+    } catch (_error) {
       return NextResponse.json(
         {
           success: false,
@@ -172,7 +173,7 @@ export async function PUT(
       { status: 200 }
     );
   } catch (error) {
-    console.error('更新检查项错误:', error);
+    logger.error('更新检查项错误:', error);
 
     return NextResponse.json(
       {

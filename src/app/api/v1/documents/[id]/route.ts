@@ -7,6 +7,7 @@ import {
   checkResourceOwnership,
   ResourceType,
 } from '@/lib/middleware/resource-permission';
+import { logger } from '@/lib/logger';
 
 /**
  * 获取文档详情
@@ -44,7 +45,7 @@ export async function GET(
       );
     }
 
-    console.log(`查询文档详情 [${documentId}]`);
+    logger.info(`查询文档详情 [${documentId}]`);
     const document = await prisma.document.findUnique({
       where: { id: documentId },
       include: {
@@ -57,7 +58,7 @@ export async function GET(
       },
     });
 
-    console.log(`查询文档结果:`, document?.id, document?.analysisStatus);
+    logger.info(`查询文档结果:`, document?.id, document?.analysisStatus);
 
     if (!document) {
       return NextResponse.json(
@@ -70,7 +71,7 @@ export async function GET(
     let analysisResult: Record<string, unknown> | null = null;
     if (document.analysisResult && document.analysisStatus === 'COMPLETED') {
       try {
-        console.log(
+        logger.info(
           '处理文档分析结果:',
           JSON.stringify(document.analysisResult, null, 2)
         );
@@ -103,13 +104,13 @@ export async function GET(
           },
         } as Record<string, unknown>;
 
-        console.log(
+        logger.info(
           '格式化后的analysisResult:',
           JSON.stringify(analysisResult, null, 2)
         );
       } catch (error) {
-        console.error('处理analysisResult时出错:', error);
-        console.error(
+        logger.error('处理analysisResult时出错:', error);
+        logger.error(
           '错误详情:',
           error instanceof Error ? error.message : String(error)
         );
@@ -136,7 +137,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('获取文档详情失败:', error);
+    logger.error('获取文档详情失败:', error);
     return NextResponse.json(
       {
         success: false,
@@ -199,7 +200,7 @@ export async function DELETE(
     try {
       await unlink(filePath);
     } catch (error) {
-      console.warn('删除物理文件失败:', error);
+      logger.warn('删除物理文件失败:', error);
     }
 
     // 软删除（设置deletedAt字段）
@@ -213,7 +214,7 @@ export async function DELETE(
       { status: 204 }
     );
   } catch (error) {
-    console.error('删除文档失败:', error);
+    logger.error('删除文档失败:', error);
     return NextResponse.json(
       {
         success: false,

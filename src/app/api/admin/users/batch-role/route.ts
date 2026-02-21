@@ -13,6 +13,7 @@ import type {
 } from '@/types/admin-user';
 import type { UserRole } from '@/types/auth';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数
@@ -149,7 +150,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('批量分配角色失败:', error);
+    logger.error('批量分配角色失败:', error);
     return Response.json(
       { error: '服务器错误', message: '批量分配角色失败' },
       { status: 500 }

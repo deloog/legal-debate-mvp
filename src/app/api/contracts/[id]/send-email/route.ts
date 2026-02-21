@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { contractEmailService } from '@/lib/email/contract-email-service';
+import { logger } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
@@ -72,7 +73,7 @@ export async function POST(
       message: '邮件发送成功',
     });
   } catch (error) {
-    console.error('发送合同邮件失败:', error);
+    logger.error('发送合同邮件失败:', error);
     return NextResponse.json(
       {
         success: false,

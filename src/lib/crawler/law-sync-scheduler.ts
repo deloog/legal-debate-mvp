@@ -3,9 +3,8 @@
  * 定时执行法律法规数据同步
  */
 
-import { npcCrawler } from './npc-crawler';
-import { courtCrawler } from './court-crawler';
 import { flkCrawler, HIGH_PRIORITY_TYPES } from './flk-crawler';
+// npcCrawler 和 courtCrawler 已废弃，移至 archive/ 目录，仅使用 flk 数据源
 import { DataSource } from './types';
 import { prisma } from '@/lib/db/prisma';
 
@@ -178,15 +177,10 @@ export class LawSyncScheduler {
               : await flkCrawler.incrementalCrawl(since);
           break;
         case 'npc':
-          result =
-            crawlType === 'full'
-              ? await npcCrawler.crawl()
-              : await (npcCrawler as any).incrementalCrawl(since);
-          break;
         case 'court':
-          // court 爬虫尚未实现 incrementalCrawl，全量/增量均走 crawl()
-          result = await courtCrawler.crawl();
-          break;
+          // npc/court 爬虫已废弃（数据已由 FLK 覆盖），不再执行采集
+          throw new Error(`数据源 ${source} 爬虫已废弃，请使用 flk 数据源`);
+
         default:
           throw new Error(`不支持的数据源: ${source}`);
       }

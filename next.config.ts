@@ -96,6 +96,22 @@ const nextConfig: NextConfig = {
       );
     }
 
+    // 抑制服务端专用模块（payment-config / flk-crawler）因动态路径产生的
+    // Critical dependency 警告——这些模块仅在 Node.js 运行时使用，路径在运行时确定
+    if (isServer) {
+      config.ignoreWarnings = [
+        ...(config.ignoreWarnings ?? []),
+        {
+          module: /payment[-_]config/,
+          message: /Critical dependency|overly broad/,
+        },
+        {
+          module: /flk[-_]crawler/,
+          message: /Critical dependency|overly broad/,
+        },
+      ];
+    }
+
     return config;
   },
 
@@ -120,6 +136,21 @@ const nextConfig: NextConfig = {
   experimental: {
     // 启用优化包导入
     optimizePackageImports: ['lucide-react', 'axios'],
+  },
+
+  // 排除大型动态目录，避免 output file tracing 追踪过多文件产生警告
+  // - data/crawled/**   爬虫输出目录（28578+ 文件）
+  // - 证书/私钥文件由运行时环境变量指定，不需纳入 standalone 追踪
+  // （Next.js 13+ 此项已升至顶层，不属于 experimental）
+  outputFileTracingExcludes: {
+    '*': [
+      'data/**',
+      'public/uploads/**',
+      '**/*.pem',
+      '**/*.key',
+      '**/*.p12',
+      '**/*.pfx',
+    ],
   },
 
   // 配置 Turbopack（Next.js 16 默认使用）

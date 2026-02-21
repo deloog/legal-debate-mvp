@@ -207,6 +207,8 @@ ${options?.identifyLegalIssues ? '- 识别法律问题和争议焦点' : ''}`;
     title: string;
     description: string;
     legalReferences?: string[];
+    /** 前轮辩论摘要，用于轮次间上下文感知生成 */
+    previousRoundsContext?: string;
   }): Promise<AIResponse>;
   public async generateDebate(
     caseInfo: CaseInfo,
@@ -215,7 +217,12 @@ ${options?.identifyLegalIssues ? '- 识别法律问题和争议焦点' : ''}`;
   public async generateDebate(
     caseInfo:
       | CaseInfo
-      | { title: string; description: string; legalReferences?: string[] },
+      | {
+          title: string;
+          description: string;
+          legalReferences?: string[];
+          previousRoundsContext?: string;
+        },
     legalReferences?: LegalReference[] | undefined
   ): Promise<AIResponse | DebateGenerationResult> {
     this.ensureInitialized();
@@ -244,6 +251,7 @@ ${options?.identifyLegalIssues ? '- 识别法律问题和争议焦点' : ''}`;
           title: string;
           description: string;
           legalReferences?: string[];
+          previousRoundsContext?: string;
         }
       );
     }
@@ -263,8 +271,9 @@ ${options?.identifyLegalIssues ? '- 识别法律问题和争议焦点' : ''}`;
     title: string;
     description: string;
     legalReferences?: string[];
+    previousRoundsContext?: string;
   }): Promise<AIResponse> {
-    // 1. 首先检查缓存
+    // 1. 首先检查缓存（含前轮上下文，不同轮次有不同缓存键）
     const cachedResponse = await this.cacheManager.checkDebateCache(caseInfo);
     if (cachedResponse) {
       console.log('Using cached debate response');
@@ -275,25 +284,73 @@ ${options?.identifyLegalIssues ? '- 识别法律问题和争议焦点' : ''}`;
       };
     }
 
+    // 2. 构建用户提示词（包含前轮上下文）
+    const contextSection = caseInfo.previousRoundsContext
+      ? `\n## 前轮辩论摘要\n${caseInfo.previousRoundsContext}\n\n**本轮要求**：必须针对以上前轮论点进行正面回应或深化论证，不得简单重复已有论点。\n`
+      : '';
+
+    const userPrompt = `案件信息如下：
+
+**案件**：${caseInfo.title}
+**描述**：${caseInfo.description}
+${caseInfo.legalReferences?.length ? `**参考法条**：${caseInfo.legalReferences.join('、')}` : ''}
+${contextSection}
+请分别为原告和被告各生成3-4个核心论点，直接以JSON格式输出（不要包含其他任何文字）。
+
+【法条引用强制规则】
+- 每个论点的 legalBasis 必须至少包含1条，禁止为空数组
+- lawName 必须是中国现行有效法律的全称，如"中华人民共和国民法典"
+- articleNumber 必须写明具体条款，如"第1165条第1款"或"第577条"
+- explanation 说明该条款具体如何适用于本论点
+
+输出格式：
+
+{
+  "plaintiff": [
+    {
+      "content": "论点主张（清晰简洁，直接陈述核心观点）",
+      "reasoning": "推理过程（从法律事实出发，运用法律规定得出结论，50-200字）",
+      "legalBasis": [
+        {
+          "lawName": "中华人民共和国民法典",
+          "articleNumber": "第1165条第1款",
+          "relevance": 0.9,
+          "explanation": "该条款确立过错责任原则，本案被告的行为符合侵权构成要件"
+        }
+      ]
+    }
+  ],
+  "defendant": [
+    {
+      "content": "...",
+      "reasoning": "...",
+      "legalBasis": [{ "lawName": "...", "articleNumber": "第X条", "relevance": 0.8, "explanation": "..." }]
+    }
+  ]
+}`;
+
     const response = await this.generalAIService!.chatCompletion({
       model: 'deepseek-chat',
       provider: 'deepseek',
       messages: [
         {
           role: 'system',
-          content: '你是一个专业的法律辩论助手，请提供简洁、结构化的辩论论点。',
+          content: `你是一位在中国执业超过20年的资深律师，擅长诉讼辩论与法律检索。
+
+【严格要求】
+1. 每个论点必须引用至少一条中国现行有效的法律法规或司法解释，禁止捏造或使用已废止的法律
+2. 法律引用格式必须精确：《法律全称》第X条[第X款][第X项]，例如《中华人民共和国民法典》第1165条第1款
+3. legalBasis数组不得为空，每条引用必须写明具体条款号（articleNumber），不得只写法律名称
+4. 常用法律范围：民法典、合同法、侵权责任法、劳动合同法、公司法、刑法、刑事诉讼法、民事诉讼法、行政诉讼法及最高人民法院相关司法解释
+5. 仅输出JSON格式，不得包含任何其他文字`,
         },
         {
           role: 'user',
-          content: `案件：${caseInfo.title}
-描述：${caseInfo.description}
-${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join('、')}` : ''}
-
-请分别列出原告和被告的3-4个核心论点，每个论点包含：主张、法律依据、事实依据。`,
+          content: userPrompt,
         },
       ],
-      temperature: 0.5,
-      maxTokens: 2000,
+      temperature: 0.7,
+      maxTokens: 3000,
       topP: 0.9,
     });
 
@@ -390,7 +447,7 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join('、')}` 
           content: this.debateConfig.usePromptOptimizer
             ? (await this.promptOptimizer?.generateOptimizedPrompt(caseInfo))
                 .systemPrompt
-            : '你是专业的法律辩论生成助手，擅长生成逻辑清晰、法律依据准确的辩论论点。',
+            : `你是一位在中国执业超过20年的资深律师，擅长诉讼辩论与法律检索。每个论点必须引用至少一条中国现行有效的法律法规，法律引用格式须精确到具体条款号（如第X条第X款），禁止捏造不存在的法律条款，仅输出JSON。`,
         },
         { role: 'user', content: prompt },
       ],
@@ -422,32 +479,41 @@ ${caseInfo.legalReferences ? `法条：${caseInfo.legalReferences.join('、')}` 
     return `案件：${caseInfo.title}
 案情描述：${caseInfo.description}
 
-相关法条：
+参考法条全文：
 ${legalTexts}
 
-请分别列出原告和被告的3-4个核心论点，每个论点包含：
-1. 论点内容
-2. 法律依据
-3. 事实依据
-4. 推理过程
+请分别列出原告和被告各3-4个核心论点，以JSON格式返回。
 
-请确保：
-- 论点逻辑清晰，推理完整
-- 法律依据准确，引用具体法条
-- 事实依据与案情一致
-- 正反方论点平衡
+【法条引用强制规则】
+- 每个论点必须引用至少一条中国现行有效的法律法规或司法解释
+- lawName：使用法律全称，如"中华人民共和国劳动合同法"
+- articleNumber：必须写明具体条款号，如"第39条第2项"，禁止只写法律名称
+- 禁止捏造不存在的法律条款
 
-请以JSON格式返回：
 {
   "plaintiffArguments": [
     {
       "side": "plaintiff",
-      "content": "论点内容",
-      "legalBasis": "法律依据",
-      "reasoning": "推理过程"
+      "content": "论点主张",
+      "reasoning": "从法律事实出发，运用法律规定推导结论（50-200字）",
+      "legalBasis": [
+        {
+          "lawName": "中华人民共和国民法典",
+          "articleNumber": "第577条",
+          "relevance": 0.9,
+          "explanation": "该条款规定违约责任，被告违反合同义务应承担赔偿责任"
+        }
+      ]
     }
   ],
-  "defendantArguments": [...]
+  "defendantArguments": [
+    {
+      "side": "defendant",
+      "content": "...",
+      "reasoning": "...",
+      "legalBasis": [{ "lawName": "...", "articleNumber": "第X条", "relevance": 0.8, "explanation": "..." }]
+    }
+  ]
 }`;
   }
 
@@ -1173,6 +1239,251 @@ ${legalTexts}
     }
     this.initialized = false;
     console.log('Unified AI Service shut down');
+  }
+
+  // =============================================================================
+  // 流式辩论生成方法
+  // =============================================================================
+
+  /**
+   * 流式辩论生成（实时推送token）
+   * @param caseInfo 案件信息
+   * @param legalReferences 法律依据
+   * @returns ReadableStream 用于流式传输
+   */
+  public async generateDebateStream(
+    caseInfo: CaseInfo,
+    legalReferences: LegalReference[]
+  ): Promise<ReadableStream> {
+    this.ensureInitialized();
+    this.ensureGeneralAIAvailable();
+
+    const prompt = await this.buildPrompt(
+      caseInfo,
+      legalReferences.map(ref => ref.fullText).join('\n\n')
+    );
+
+    // 构建请求配置
+    const requestConfig: AIRequestConfig = {
+      model: 'deepseek-chat',
+      provider: 'deepseek',
+      messages: [
+        {
+          role: 'system',
+          content:
+            '你是一位经验丰富的专业律师，擅长法律辩论。请仅输出JSON格式，不要添加任何解释文字。确保论点逻辑严密，法条引用准确。',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.7,
+      maxTokens: 3000,
+      topP: 0.9,
+      stream: true,
+    };
+
+    // 获取AI客户端
+    const client = this.generalAIService as any;
+    if (!client) {
+      throw new Error('AI client not available');
+    }
+
+    // 创建ReadableStream
+    return new ReadableStream({
+      async start(controller) {
+        try {
+          // 发送开始事件
+          controller.enqueue(
+            `data: ${JSON.stringify({ type: 'started', timestamp: new Date().toISOString() })}\n\n`
+          );
+
+          // 调用AI流式API
+          const stream = await client.chat.completions.create(requestConfig);
+
+          let accumulatedContent = '';
+          let chunkId = 0;
+
+          // 逐块读取流式响应
+          for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content || '';
+            accumulatedContent += content;
+
+            // 计算进度（估算总长度为5000 tokens）
+            const progress = Math.min(
+              (accumulatedContent.length / 5000) * 100,
+              99
+            );
+
+            // 发送内容块
+            const eventData = {
+              type: 'content',
+              chunkId: ++chunkId,
+              content: content,
+              isComplete: false,
+              progress: Math.round(progress),
+              timestamp: new Date().toISOString(),
+            };
+            controller.enqueue(`data: ${JSON.stringify(eventData)}\n\n`);
+          }
+
+          // 发送完成事件
+          const completeEventData = {
+            type: 'complete',
+            content: accumulatedContent,
+            isComplete: true,
+            progress: 100,
+            totalChunks: chunkId,
+            timestamp: new Date().toISOString(),
+          };
+          controller.enqueue(`data: ${JSON.stringify(completeEventData)}\n\n`);
+
+          controller.close();
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+          const errorEvent = {
+            type: 'error',
+            error: errorMessage,
+            timestamp: new Date().toISOString(),
+          };
+          controller.enqueue(`data: ${JSON.stringify(errorEvent)}\n\n`);
+          controller.error(error);
+        }
+      },
+    });
+  }
+
+  /**
+   * 简化的流式辩论生成（旧API兼容）
+   */
+  public async generateDebateStreamLegacy(params: {
+    title: string;
+    description: string;
+    legalReferences?: string[];
+    previousRoundsContext?: string;
+  }): Promise<ReadableStream> {
+    this.ensureInitialized();
+    this.ensureGeneralAIAvailable();
+
+    const contextSection = params.previousRoundsContext
+      ? `\n## 前轮辩论摘要\n${params.previousRoundsContext}\n\n**本轮要求**：必须针对以上前轮论点进行正面回应或深化论证，不得简单重复已有论点。\n`
+      : '';
+
+    const userPrompt = `你是专业的法律辩论助手。案件信息如下：
+
+**案件**：${params.title}
+**描述**：${params.description}
+${params.legalReferences?.length ? `**相关法条**：${params.legalReferences.join('、')}` : ''}
+${contextSection}
+请分别为原告和被告生成3-4个核心论点，直接以JSON格式输出（不要包含其他任何文字）：
+
+{
+  "plaintiff": [
+    {
+      "content": "论点主张（清晰简洁，直接陈述核心观点）",
+      "reasoning": "推理过程（从事实到结论的完整逻辑，50-200字）",
+      "legalBasis": [
+        {
+          "lawName": "法律名称",
+          "articleNumber": "条款号",
+          "relevance": 0.9,
+          "explanation": "该条款如何支持此论点"
+        }
+      ]
+    }
+  ],
+  "defendant": [
+    {
+      "content": "...",
+      "reasoning": "...",
+      "legalBasis": [...]
+    }
+  ]
+}`;
+
+    const requestConfig: AIRequestConfig = {
+      model: 'deepseek-chat',
+      provider: 'deepseek',
+      messages: [
+        {
+          role: 'system',
+          content:
+            '你是一位经验丰富的专业律师，擅长法律辩论。请仅输出JSON格式，不要添加任何解释文字。确保论点逻辑严密，法条引用准确。',
+        },
+        {
+          role: 'user',
+          content: userPrompt,
+        },
+      ],
+      temperature: 0.7,
+      maxTokens: 3000,
+      topP: 0.9,
+      stream: true,
+    };
+
+    const client = this.generalAIService as any;
+    if (!client) {
+      throw new Error('AI client not available');
+    }
+
+    return new ReadableStream({
+      async start(controller) {
+        try {
+          controller.enqueue(
+            `data: ${JSON.stringify({ type: 'started', timestamp: new Date().toISOString() })}\n\n`
+          );
+
+          const stream = await client.chat.completions.create(requestConfig);
+
+          let accumulatedContent = '';
+          let chunkId = 0;
+
+          for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content || '';
+            accumulatedContent += content;
+
+            const progress = Math.min(
+              (accumulatedContent.length / 5000) * 100,
+              99
+            );
+
+            const eventData = {
+              type: 'content',
+              chunkId: ++chunkId,
+              content: content,
+              isComplete: false,
+              progress: Math.round(progress),
+              timestamp: new Date().toISOString(),
+            };
+            controller.enqueue(`data: ${JSON.stringify(eventData)}\n\n`);
+          }
+
+          const completeEventData = {
+            type: 'complete',
+            content: accumulatedContent,
+            isComplete: true,
+            progress: 100,
+            totalChunks: chunkId,
+            timestamp: new Date().toISOString(),
+          };
+          controller.enqueue(`data: ${JSON.stringify(completeEventData)}\n\n`);
+
+          controller.close();
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+          const errorEvent = {
+            type: 'error',
+            error: errorMessage,
+            timestamp: new Date().toISOString(),
+          };
+          controller.enqueue(`data: ${JSON.stringify(errorEvent)}\n\n`);
+          controller.error(error);
+        }
+      },
+    });
   }
 }
 

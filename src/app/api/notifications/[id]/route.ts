@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { getUserNotificationService } from '@/lib/notification/user-notification-service';
+import { logger } from '@/lib/logger';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       data: notification,
     });
   } catch (error) {
-    console.error('获取通知详情失败:', error);
+    logger.error('获取通知详情失败:', error);
     return NextResponse.json({ error: '获取通知详情失败' }, { status: 500 });
   }
 }
@@ -72,7 +73,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       message: '通知已删除',
     });
   } catch (error) {
-    console.error('删除通知失败:', error);
+    logger.error('删除通知失败:', error);
     return NextResponse.json({ error: '删除通知失败' }, { status: 500 });
   }
 }
@@ -126,7 +127,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ error: '不支持的操作' }, { status: 400 });
   } catch (error) {
-    console.error('更新通知失败:', error);
+    logger.error('更新通知失败:', error);
     return NextResponse.json({ error: '更新通知失败' }, { status: 500 });
   }
 }

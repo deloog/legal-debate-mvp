@@ -5,11 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { ReportService } from '@/lib/reports/report-service';
-import type {
-  GenerateReportRequest,
-  GenerateReportResponse,
-} from '@/types/report';
+import type { GenerateReportResponse } from '@/types/report';
 import { isValidReportFilter } from '@/types/report';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/reports
@@ -23,7 +21,7 @@ export async function POST(
     let body: unknown;
     try {
       body = await request.json();
-    } catch (error) {
+    } catch (_error) {
       return NextResponse.json(
         {
           success: false,
@@ -93,7 +91,7 @@ export async function POST(
       { status: 200 }
     );
   } catch (error) {
-    console.error('生成报表错误:', error);
+    logger.error('生成报表错误:', error);
 
     return NextResponse.json(
       {

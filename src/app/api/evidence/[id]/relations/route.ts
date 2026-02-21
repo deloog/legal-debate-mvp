@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { z } from 'zod';
 import { EvidenceRelationType } from '@/types/evidence';
+import { logger } from '@/lib/logger';
 
 /**
  * 创建证据关联的验证schema
@@ -113,7 +114,7 @@ export const POST = withErrorHandler(
       // 可以扩展其他类型的查询
     } catch (error) {
       // 忽略查询related信息的错误，不影响主流程
-      console.error('查询关联信息失败:', error);
+      logger.error('查询关联信息失败:', error);
     }
 
     const relationDetail = {
@@ -140,7 +141,8 @@ export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      'Access-Control-Allow-Origin':
+        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',

@@ -17,6 +17,7 @@ import {
 } from '@/types/stats';
 import { triggerWeeklyReportGeneration } from '@/lib/cron/generate-weekly-report';
 import { triggerMonthlyReportGeneration } from '@/lib/cron/generate-monthly-report';
+import { logger } from '@/lib/logger';
 
 // 辅助响应函数
 function unauthorizedResponse(): NextResponse {
@@ -114,7 +115,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : '获取报告列表失败';
-    console.error('获取报告列表失败:', error);
+    logger.error('获取报告列表失败:', error);
 
     return NextResponse.json(
       { success: false, message: errorMessage },
@@ -249,7 +250,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : '创建报告失败';
-    console.error('创建报告失败:', error);
+    logger.error('创建报告失败:', error);
 
     return NextResponse.json(
       { success: false, message: errorMessage },

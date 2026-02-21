@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { contractVersionService } from '@/lib/contract/contract-version-service';
 import { clearContractPDFCache } from '@/lib/contract/contract-pdf-generator';
+import { logger } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
@@ -50,7 +51,7 @@ export async function POST(
 
     // 清除PDF缓存
     clearContractPDFCache(id).catch(error => {
-      console.error('清除PDF缓存失败:', error);
+      logger.error('清除PDF缓存失败:', error);
     });
 
     return NextResponse.json({
@@ -58,7 +59,7 @@ export async function POST(
       message: '版本回滚成功',
     });
   } catch (error) {
-    console.error('版本回滚失败:', error);
+    logger.error('版本回滚失败:', error);
     return NextResponse.json(
       {
         success: false,

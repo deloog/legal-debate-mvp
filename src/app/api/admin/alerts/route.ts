@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db/prisma';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { ALERT_PERMISSIONS } from '@/types/permission';
 import { ALERT_SEVERITY, ALERT_STATUS } from '@/types/log';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/admin/alerts - 获取告警列表
@@ -86,7 +87,7 @@ export async function GET(request: NextRequest) {
       total,
     });
   } catch (error) {
-    console.error('获取告警列表失败:', error);
+    logger.error('获取告警列表失败:', error);
     return NextResponse.json(
       {
         success: false,

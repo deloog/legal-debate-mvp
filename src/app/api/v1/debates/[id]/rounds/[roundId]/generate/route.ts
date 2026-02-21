@@ -10,8 +10,205 @@ import {
 } from '@/app/api/lib/validation/validator';
 import { getUnifiedAIService } from '@/lib/ai/unified-service';
 import { prisma } from '@/lib/db/prisma';
-import { ArgumentSide, ArgumentType, RoundStatus } from '@prisma/client';
+import { searchAllLawArticles } from '@/lib/debate/law-search';
+import { computeArgumentScores } from '@/lib/debate/scoring';
+import {
+  ArgumentSide,
+  ArgumentType,
+  Prisma,
+  RoundStatus,
+} from '@prisma/client';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
+
+// =============================================================================
+// 案件类型特化辩论指引（仅 generate 路由使用）
+// =============================================================================
+const CASE_TYPE_DEBATE_GUIDANCE: Record<string, string> = {
+  CIVIL: `【民事案件辩论要点】
+- 原告须证明：权利存在、被告侵权行为、损害结果、因果关系（四要件）
+- 举证责任：谁主张谁举证（民诉法第67条）
+- 重点法律：民法典、民事诉讼法、相关司法解释`,
+
+  CRIMINAL: `【刑事案件辩论要点】
+- 控方须证明：犯罪主体、主观故意/过失、客观行为、危害结果（四构成要件）
+- 疑罪从无原则：证据不足不得定罪（刑诉法第200条）
+- 辩护重点：无罪辩护或罪轻辩护，证据合法性
+- 重点法律：刑法、刑事诉讼法、最高法相关司法解释`,
+
+  ADMINISTRATIVE: `【行政案件辩论要点】
+- 被告（行政机关）承担举证责任（行政诉讼法第34条）
+- 审查重点：具体行政行为合法性、程序正当性、证据充分性
+- 重点法律：行政诉讼法、行政处罚法、行政许可法`,
+
+  LABOR: `【劳动争议辩论要点】
+- 举证责任部分倒置：劳动关系存续期间的证据由用人单位提供
+- 关键事项：劳动关系认定、解除/终止合法性、工资报酬计算
+- 重点法律：劳动合同法、劳动法、工伤保险条例、最高法劳动争议司法解释`,
+
+  COMMERCIAL: `【商事案件辩论要点】
+- 合同效力、违约认定、损失计算是核心
+- 商事惯例和交易习惯可作为补充依据
+- 重点法律：民法典合同编、公司法、担保法、票据法`,
+
+  INTELLECTUAL_PROPERTY: `【知识产权案件辩论要点】
+- 权利归属、侵权认定、赔偿计算（实际损失/违法所得/法定赔偿）
+- 举证：权利人证明权利存在及侵权事实
+- 重点法律：著作权法、专利法、商标法、反不正当竞争法`,
+};
+
+// =============================================================================
+// 工具函数
+// =============================================================================
+
+/**
+ * 构建前轮辩论上下文摘要（截断200字，加强针对性反驳指引）
+ */
+async function buildPreviousRoundsContext(
+  debateId: string,
+  currentRoundNumber: number
+): Promise<string | null> {
+  if (currentRoundNumber <= 1) return null;
+
+  const previousRounds = await prisma.debateRound.findMany({
+    where: {
+      debateId,
+      roundNumber: { lt: currentRoundNumber },
+      status: 'COMPLETED',
+    },
+    include: {
+      arguments: {
+        orderBy: { createdAt: 'asc' },
+        take: 10,
+      },
+    },
+    orderBy: { roundNumber: 'asc' },
+  });
+
+  if (previousRounds.length === 0) return null;
+
+  const contextParts: string[] = [];
+  for (const round of previousRounds) {
+    const plaintiffSummary = round.arguments
+      .filter(a => a.side === 'PLAINTIFF')
+      .map(
+        (a, i) =>
+          `  ${i + 1}. ${a.content.length > 200 ? a.content.substring(0, 200) + '…' : a.content}`
+      )
+      .join('\n');
+    const defendantSummary = round.arguments
+      .filter(a => a.side === 'DEFENDANT')
+      .map(
+        (a, i) =>
+          `  ${i + 1}. ${a.content.length > 200 ? a.content.substring(0, 200) + '…' : a.content}`
+      )
+      .join('\n');
+
+    contextParts.push(
+      `### 第${round.roundNumber}轮\n原告方论点：\n${plaintiffSummary || '  （无）'}\n被告方论点：\n${defendantSummary || '  （无）'}`
+    );
+  }
+  return contextParts.join('\n\n');
+}
+
+/**
+ * 解析AI返回的JSON格式辩论论点（结构化解析）
+ */
+function parseStructuredDebateArguments(content: string): Array<{
+  side: ArgumentSide;
+  content: string;
+  type: ArgumentType;
+  confidence: number;
+  reasoning?: string;
+  legalBasis: Array<{
+    lawName: string;
+    articleNumber: string;
+    relevance: number;
+    explanation: string;
+  }>;
+}> | null {
+  try {
+    let jsonText = content;
+    const codeBlockMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
+    if (codeBlockMatch) jsonText = codeBlockMatch[1];
+    else {
+      const braceMatch = content.match(
+        /\{[\s\S]*"plaintiff"[\s\S]*"defendant"[\s\S]*\}/
+      );
+      if (braceMatch) jsonText = braceMatch[0];
+    }
+
+    const parsed = JSON.parse(jsonText) as {
+      plaintiff?: Array<{
+        content: string;
+        reasoning?: string;
+        legalBasis?: unknown[];
+      }>;
+      defendant?: Array<{
+        content: string;
+        reasoning?: string;
+        legalBasis?: unknown[];
+      }>;
+    };
+
+    const results: ReturnType<typeof parseStructuredDebateArguments> = [];
+
+    const mapArgs = (
+      args: Array<{
+        content: string;
+        reasoning?: string;
+        legalBasis?: unknown[];
+      }>,
+      side: ArgumentSide,
+      baseConfidence: number
+    ) => {
+      for (const arg of args) {
+        if (typeof arg.content === 'string' && arg.content.trim()) {
+          results.push({
+            side,
+            content: arg.content.trim(),
+            type: ArgumentType.MAIN_POINT,
+            confidence: baseConfidence,
+            reasoning:
+              typeof arg.reasoning === 'string' ? arg.reasoning : undefined,
+            legalBasis: Array.isArray(arg.legalBasis)
+              ? (
+                  arg.legalBasis as Array<{
+                    lawName?: string;
+                    articleNumber?: string;
+                    relevance?: number;
+                    explanation?: string;
+                  }>
+                )
+                  .filter(b => b.lawName && b.articleNumber)
+                  .map(b => ({
+                    lawName: String(b.lawName),
+                    articleNumber: String(b.articleNumber),
+                    relevance: Number(b.relevance ?? 0.8),
+                    explanation: String(b.explanation || ''),
+                  }))
+              : [],
+          });
+        }
+      }
+    };
+
+    if (Array.isArray(parsed.plaintiff))
+      mapArgs(parsed.plaintiff, ArgumentSide.PLAINTIFF, 0.88);
+    if (Array.isArray(parsed.defendant))
+      mapArgs(parsed.defendant, ArgumentSide.DEFENDANT, 0.85);
+
+    return results.length >= 2 ? results : null;
+  } catch {
+    return null;
+  }
+}
+
+// =============================================================================
+// POST handler
+// =============================================================================
 
 /**
  * POST /api/v1/debates/[id]/rounds/[roundId]/generate
@@ -22,113 +219,297 @@ export const POST = withErrorHandler(
     request: NextRequest,
     context: { params: Promise<{ id: string; roundId: string }> }
   ) => {
-    // Next.js 15+ requires awaiting params
-    const resolvedParams = await context.params;
+    // ── 认证 ──
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: '未认证', code: 'UNAUTHORIZED' },
+        { status: 401 }
+      );
+    }
 
-    // 验证路径参数
+    const resolvedParams = await context.params;
     const debateId = validatePathParam(resolvedParams.id, uuidSchema);
     const roundId = validatePathParam(resolvedParams.roundId, uuidSchema);
-
-    // 验证请求体
     const body = await validateRequestBody(request, generateArgumentsSchema);
     const { applicableArticles } = body;
 
-    // 使用事务确保数据一致性，设置更长的超时时间（120秒）
-    const result = await prisma.$transaction(
-      async tx => {
-        // 1. 获取辩论轮次信息
-        const round = await tx.debateRound.findUnique({
-          where: { id: roundId },
+    // ── 速率限制：60秒内完成轮次不超过5个 ──
+    const recentRounds = await prisma.debateRound.count({
+      where: {
+        debate: { userId: session.user.id },
+        completedAt: { gte: new Date(Date.now() - 60_000) },
+      },
+    });
+    if (recentRounds >= 5) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: '请求过于频繁，请稍后再试',
+          code: 'RATE_LIMITED',
+        },
+        { status: 429 }
+      );
+    }
+
+    // 1. 获取轮次 + 案件信息
+    const round = await prisma.debateRound.findUnique({
+      where: { id: roundId },
+      include: {
+        debate: {
           include: {
-            debate: {
-              include: {
-                case: {
-                  include: {
-                    documents: true,
-                  },
-                },
+            case: {
+              select: {
+                title: true,
+                description: true,
+                type: true,
               },
             },
           },
+        },
+      },
+    });
+
+    if (!round) throw new Error('Round not found');
+    if (round.debateId !== debateId)
+      throw new Error('Round does not belong to this debate');
+
+    // ── 所有权验证 ──
+    const isAdmin = (session.user as { role?: string }).role === 'ADMIN';
+    if (round.debate.userId !== session.user.id && !isAdmin) {
+      return NextResponse.json(
+        { success: false, error: '无权访问', code: 'FORBIDDEN' },
+        { status: 403 }
+      );
+    }
+
+    if (round.status !== RoundStatus.IN_PROGRESS) {
+      throw new Error(
+        `Cannot generate arguments for round with status: ${round.status}`
+      );
+    }
+
+    // ── 生成软锁：防止同一轮次被并发双重生成 ──
+    // 条件：startedAt 为 null（由 PATCH 重置）或超过3分钟（旧锁过期清理）
+    // stream 路由创建轮次时会设置 startedAt=now，3分钟内阻止 /generate 重复触发
+    const lockClaimed = await prisma.debateRound.updateMany({
+      where: {
+        id: roundId,
+        status: RoundStatus.IN_PROGRESS,
+        OR: [
+          { startedAt: null },
+          { startedAt: { lt: new Date(Date.now() - 180_000) } },
+        ],
+      },
+      data: { startedAt: new Date() },
+    });
+
+    if (lockClaimed.count === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: '该轮次正在生成中，请稍后再试',
+          code: 'GENERATION_IN_PROGRESS',
+        },
+        { status: 409 }
+      );
+    }
+
+    const caseInfo = round.debate.case;
+    const caseType = caseInfo.type ?? null;
+
+    // 2. 构建前轮上下文
+    const previousRoundsContext = await buildPreviousRoundsContext(
+      debateId,
+      round.roundNumber
+    );
+    if (previousRoundsContext) {
+      logger.info(`已构建前${round.roundNumber - 1}轮辩论上下文`);
+    }
+
+    // 3. 检索相关法条（本地优先，LawStar备用）
+    const {
+      articles: allArticles,
+      localCount: _localCount,
+      lawstarCount,
+    } = await searchAllLawArticles(
+      caseType,
+      caseInfo.title,
+      caseInfo.description,
+      6,
+      4
+    );
+    if (allArticles.length === 0) {
+      logger.info('本地DB及LawStar均未检索到匹配法条，AI将依赖自身知识库');
+    } else if (lawstarCount > 0) {
+      logger.info(
+        `LawStar 补充了 ${lawstarCount} 条法条，合计 ${allArticles.length} 条`
+      );
+    }
+
+    const localLawContext =
+      allArticles.length > 0
+        ? allArticles
+            .map(
+              a =>
+                `《${a.lawName}》${a.articleNumber}：${a.fullText.substring(0, 300)}`
+            )
+            .join('\n\n')
+        : '';
+
+    // 4. 构建案件类型特化指引
+    const caseTypeGuidance = caseType
+      ? (CASE_TYPE_DEBATE_GUIDANCE[caseType] ?? '')
+      : '';
+
+    // 5. 构建多轮对抗提示词
+    const isMultiRound = round.roundNumber > 1 && !!previousRoundsContext;
+    const contextSection = isMultiRound
+      ? `\n## 前轮辩论记录\n${previousRoundsContext}\n\n` +
+        `## 本轮要求（第${round.roundNumber}轮 — 针对性反驳）\n` +
+        `- 原告方：必须逐条回应被告方第${round.roundNumber - 1}轮的具体论点，明确指出其逻辑漏洞或法律适用错误\n` +
+        `- 被告方：必须逐条回应原告方第${round.roundNumber - 1}轮的具体论点，提出反证或不同的法律解释\n` +
+        `- 禁止重复前轮已有论点，本轮论点必须在前轮基础上深化或推进\n`
+      : '';
+
+    // 6. 构建完整用户提示词
+    const userPrompt = `案件信息：
+**标题**：${caseInfo.title}
+**描述**：${caseInfo.description ?? '（无）'}
+**案件类型**：${caseType ?? '未知'}
+${caseTypeGuidance}
+${
+  allArticles.length > 0
+    ? `## 法条库检索结果（仅可引用以下法条，不得引用此列表以外的法条）\n${localLawContext}\n\n` +
+      `**重要：legalBasis 中的法条必须来自上方列表，不得自行补充其他法条**`
+    : `## 法条引用要求\n请从您熟悉的中国现行有效法律中引用，必须精确到具体条款号（如第1165条第1款），禁止捏造`
+}
+${contextSection}
+请分别为原告和被告各生成3-4个核心论点，直接以JSON格式输出：
+
+{
+  "plaintiff": [
+    {
+      "content": "论点主张（针对本案事实，清晰陈述核心观点）",
+      "reasoning": "法律推理过程（从案件事实出发，引用法律规定，推导出结论，100-300字）",
+      "legalBasis": [
+        {
+          "lawName": "中华人民共和国民法典",
+          "articleNumber": "第1165条第1款",
+          "relevance": 0.9,
+          "explanation": "该条款确立过错责任原则，本案被告存在明显过错"
+        }
+      ]
+    }
+  ],
+  "defendant": [...]
+}`;
+
+    // 7. 调用AI服务（带重试）
+    const aiService = await getUnifiedAIService();
+    let debateContent = '';
+    const maxRetries = 3;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const debateResponse = await aiService.generateDebate({
+          title: caseInfo.title,
+          description: caseInfo.description,
+          legalReferences: applicableArticles,
+          previousRoundsContext: userPrompt,
         });
-
-        if (!round) {
-          throw new Error('Round not found');
-        }
-
-        // 验证轮次归属
-        if (round.debateId !== debateId) {
-          throw new Error('Round does not belong to this debate');
-        }
-
-        // 验证轮次状态
-        if (round.status !== RoundStatus.IN_PROGRESS) {
-          throw new Error(
-            `Cannot generate arguments for round with status: ${round.status}`
+        debateContent = debateResponse.choices?.[0]?.message?.content || '';
+        logger.info(`AI调用成功（第${attempt}次）`);
+        break;
+      } catch (aiError) {
+        logger.error(`AI调用失败（第${attempt}/${maxRetries}次）:`, aiError);
+        if (attempt === maxRetries) {
+          await prisma.debateRound.update({
+            where: { id: roundId },
+            data: { status: RoundStatus.FAILED },
+          });
+          return NextResponse.json(
+            {
+              success: false,
+              error: 'AI_SERVICE_UNAVAILABLE',
+              message:
+                'AI服务暂时不可用，请稍后重试。轮次已标记为失败，您可以重新生成。',
+            },
+            { status: 503 }
           );
         }
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
 
-        // 2. 准备法律参考文献
-        const legalReferences = applicableArticles.map((id: string) => ({
-          id,
-          content: `法条 ${id}`,
-          relevance: 0.8,
-        }));
+    // 8. 解析失败直接标记失败
+    const structuredArgs = debateContent
+      ? parseStructuredDebateArguments(debateContent)
+      : null;
 
-        // 3. 使用AI服务生成辩论论点（带重试机制）
-        const aiService = await getUnifiedAIService();
+    if (!structuredArgs || structuredArgs.length < 2) {
+      logger.error('论点解析失败，原始内容:', debateContent.substring(0, 500));
+      await prisma.debateRound.update({
+        where: { id: roundId },
+        data: { status: RoundStatus.FAILED },
+      });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'PARSE_FAILED',
+          message:
+            'AI返回内容格式异常，无法解析论点。轮次已标记为失败，请重新生成。',
+          rawContent: debateContent.substring(0, 200),
+        },
+        { status: 422 }
+      );
+    }
 
-        let debateContent = '';
-        const maxRetries = 3;
-        const retryDelay = 2000; // 2秒
+    logger.info(`解析成功，共 ${structuredArgs.length} 个论点`);
 
-        for (let attempt = 1; attempt <= maxRetries; attempt++) {
-          try {
-            const debateResponse = await aiService.generateDebate({
-              title: round.debate.case.title,
-              description: round.debate.case.description,
-              legalReferences: legalReferences.map(lr => lr.id),
-            });
-            debateContent = debateResponse.choices?.[0]?.message?.content || '';
-            console.log(`AI服务调用成功 (尝试 ${attempt}/${maxRetries})`);
-            break;
-          } catch (aiError) {
-            console.error(
-              `AI服务调用失败 (尝试 ${attempt}/${maxRetries}):`,
-              aiError
-            );
-            if (attempt < maxRetries) {
-              console.log(`等待 ${retryDelay}ms 后重试...`);
-              await new Promise(resolve => setTimeout(resolve, retryDelay));
-            } else {
-              console.error('AI服务调用重试次数已达上限，使用默认内容继续');
-              debateContent = '';
-            }
-          }
-        }
+    // 9. 保存论点并完成轮次（事务）
+    const result = await prisma.$transaction(
+      async tx => {
+        // 先删除本轮已有论点（重试时防止累积）
+        await tx.argument.deleteMany({ where: { roundId } });
 
-        // 4. 解析AI生成的论点
-        const generatedArguments = parseDebateArguments(
-          debateContent,
-          round.roundNumber
-        );
-
-        // 5. 创建论点记录
         const createdArguments = await tx.argument.createMany({
-          data: generatedArguments.map(arg => ({
-            roundId,
-            side: arg.side,
-            content: arg.content,
-            type: arg.type,
-            aiProvider: 'deepseek',
-            confidence: arg.confidence,
-          })),
+          data: structuredArgs.map(arg => {
+            const scores = computeArgumentScores({
+              reasoning: arg.reasoning,
+              legalBasis: arg.legalBasis,
+              confidence: arg.confidence,
+            });
+            return {
+              roundId,
+              side: arg.side,
+              content: arg.content,
+              type: arg.type,
+              reasoning: arg.reasoning ?? null,
+              legalBasis:
+                arg.legalBasis.length > 0
+                  ? (arg.legalBasis as unknown as Prisma.InputJsonValue)
+                  : Prisma.JsonNull,
+              aiProvider: 'deepseek',
+              confidence: arg.confidence,
+              logicScore: scores.logicScore,
+              legalScore: scores.legalScore,
+              overallScore: scores.overallScore,
+            };
+          }),
         });
 
-        // 6. 更新轮次状态为已完成，同时更新辩论的当前轮次
+        const maxRounds =
+          (round.debate.debateConfig as { maxRounds?: number } | null)
+            ?.maxRounds ?? 3;
+        const isLastRound = round.roundNumber >= maxRounds;
+
         await tx.debate.update({
           where: { id: debateId },
-          data: { currentRound: round.roundNumber },
+          data: {
+            currentRound: round.roundNumber,
+            ...(isLastRound ? { status: 'COMPLETED' } : {}),
+          },
         });
 
         await tx.debateRound.update({
@@ -139,37 +520,38 @@ export const POST = withErrorHandler(
           },
         });
 
-        // 7. 返回生成的论点
         return {
           plaintiff: {
-            arguments: generatedArguments
-              .filter(arg => arg.side === ArgumentSide.PLAINTIFF)
-              .map(arg => ({
-                type: arg.type,
-                content: arg.content,
-                references: arg.references || [],
-                legalBasis: arg.legalBasis || [],
+            arguments: structuredArgs
+              .filter(a => a.side === ArgumentSide.PLAINTIFF)
+              .map(a => ({
+                type: a.type,
+                content: a.content,
+                reasoning: a.reasoning,
+                legalBasis: a.legalBasis,
               })),
           },
           defendant: {
-            arguments: generatedArguments
-              .filter(arg => arg.side === ArgumentSide.DEFENDANT)
-              .map(arg => ({
-                type: arg.type,
-                content: arg.content,
-                references: arg.references || [],
-                legalBasis: arg.legalBasis || [],
+            arguments: structuredArgs
+              .filter(a => a.side === ArgumentSide.DEFENDANT)
+              .map(a => ({
+                type: a.type,
+                content: a.content,
+                reasoning: a.reasoning,
+                legalBasis: a.legalBasis,
               })),
           },
           totalArguments: createdArguments.count,
           roundId,
           roundNumber: round.roundNumber,
+          aiGenerationFailed: false,
+          usedPreviousContext: !!previousRoundsContext,
+          localLawArticlesUsed: allArticles.length,
+          lawstarFallbackUsed: lawstarCount > 0,
+          debateCompleted: isLastRound,
         };
       },
-      {
-        timeout: 120000, // 120秒超时，适应AI服务重试
-        maxWait: 120000,
-      }
+      { timeout: 30000, maxWait: 30000 }
     );
 
     return createSuccessResponse(result);
@@ -178,151 +560,16 @@ export const POST = withErrorHandler(
 
 /**
  * OPTIONS /api/v1/debates/[id]/rounds/[roundId]/generate
- * CORS预检请求
  */
 export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      'Access-Control-Allow-Origin':
+        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',
     },
   });
 });
-
-/**
- * 解析AI生成的辩论论点
- */
-function parseDebateArguments(
-  content: string,
-  roundNumber: number
-): Array<{
-  side: ArgumentSide;
-  content: string;
-  type: ArgumentType;
-  confidence: number;
-  legalBasis?: Array<{ articleId: string }>;
-  references?: Array<{ roundNumber: number }>;
-}> {
-  // 简化的论点解析逻辑
-  const plaintiffRegex = /原告[：:]\s*([^。\n]+)[。\n]?/g;
-  const defendantRegex = /被告[：:]\s*([^。\n]+)[。\n]?/g;
-
-  const parsedArguments: Array<{
-    side: ArgumentSide;
-    content: string;
-    type: ArgumentType;
-    confidence: number;
-    legalBasis?: Array<{ articleId: string }>;
-    references?: Array<{ roundNumber: number }>;
-  }> = [];
-
-  let match;
-
-  // 解析原告论点
-  while ((match = plaintiffRegex.exec(content)) !== null) {
-    parsedArguments.push({
-      side: ArgumentSide.PLAINTIFF,
-      content: match[1].trim(),
-      type: ArgumentType.MAIN_POINT,
-      confidence: 0.85 + Math.random() * 0.1,
-      legalBasis: [],
-      references: roundNumber > 1 ? [{ roundNumber: roundNumber - 1 }] : [],
-    });
-  }
-
-  // 解析被告论点
-  while ((match = defendantRegex.exec(content)) !== null) {
-    parsedArguments.push({
-      side: ArgumentSide.DEFENDANT,
-      content: match[1].trim(),
-      type: ArgumentType.MAIN_POINT,
-      confidence: 0.8 + Math.random() * 0.15,
-      legalBasis: [],
-      references: roundNumber > 1 ? [{ roundNumber: roundNumber - 1 }] : [],
-    });
-  }
-
-  // 如果没有解析到论点，提供默认论点（多种类型）
-  if (parsedArguments.length === 0) {
-    const round1Content = [
-      {
-        side: ArgumentSide.PLAINTIFF,
-        content: `基于案件事实和法律依据，原告的诉讼请求应当得到支持。`,
-        type: ArgumentType.MAIN_POINT,
-        confidence: 0.85,
-        legalBasis: [],
-        references: [],
-      },
-      {
-        side: ArgumentSide.PLAINTIFF,
-        content: `根据相关法律条款，被告应当履行合同义务，支付货款。`,
-        type: ArgumentType.LEGAL_BASIS,
-        confidence: 0.88,
-        legalBasis: [],
-        references: [],
-      },
-      {
-        side: ArgumentSide.DEFENDANT,
-        content: `原告的指控缺乏事实和法律依据，应当驳回其诉讼请求。`,
-        type: ArgumentType.MAIN_POINT,
-        confidence: 0.82,
-        legalBasis: [],
-        references: [],
-      },
-      {
-        side: ArgumentSide.DEFENDANT,
-        content: `合同中并未约定明确的履行期限，原告的主张缺乏依据。`,
-        type: ArgumentType.LEGAL_BASIS,
-        confidence: 0.8,
-        legalBasis: [],
-        references: [],
-      },
-    ];
-
-    // 第二轮：更长的论点，引用第一轮
-    if (roundNumber > 1) {
-      parsedArguments.push(
-        {
-          side: ArgumentSide.PLAINTIFF,
-          content: `针对被告在第一轮中关于合同履行期限的抗辩，原告认为，根据合同法相关规定及双方交易习惯，合理期限应当予以认定。原告在第一轮提出的诉讼请求具有充分的法律依据和事实支撑，被告应当立即履行付款义务，并承担迟延履行期间产生的利息损失。`,
-          type: ArgumentType.MAIN_POINT,
-          confidence: 0.87,
-          legalBasis: [],
-          references: [{ roundNumber: 1 }],
-        },
-        {
-          side: ArgumentSide.PLAINTIFF,
-          content: `第一轮中原告主张被告违约的事实，有双方签订的合同协议、付款凭证以及相关通讯记录作为充分证据。被告在上一轮未能提供有效证据反驳原告的主张，根据民事诉讼证据规则，应当认定被告存在违约行为，依法承担违约责任。`,
-          type: ArgumentType.EVIDENCE,
-          confidence: 0.91,
-          legalBasis: [],
-          references: [{ roundNumber: 1 }],
-        },
-        {
-          side: ArgumentSide.DEFENDANT,
-          content: `针对原告第一轮的指控，被告认为，原告在上一轮中未就合同约定的具体履行期限提供明确证据。根据合同法规定，当事人对履行期限约定不明确的，应当协议补充；不能达成补充协议的，按照合同相关条款或者交易习惯确定。原告未履行补充协议义务，其主张缺乏法律依据。`,
-          type: ArgumentType.MAIN_POINT,
-          confidence: 0.83,
-          legalBasis: [],
-          references: [{ roundNumber: 1 }],
-        },
-        {
-          side: ArgumentSide.DEFENDANT,
-          content: `原告在第一轮中提供的证据仅能证明双方存在合同关系，但不足以证明被告存在违约行为。被告已按照合同约定和交易习惯履行了相关义务，原告提供的付款凭证恰恰证明了被告的履约行为，而非违约行为。原告主张违约的事实不存在。`,
-          type: ArgumentType.EVIDENCE,
-          confidence: 0.85,
-          legalBasis: [],
-          references: [{ roundNumber: 1 }],
-        }
-      );
-    } else {
-      // 第一轮
-      parsedArguments.push(...round1Content);
-    }
-  }
-
-  return parsedArguments;
-}

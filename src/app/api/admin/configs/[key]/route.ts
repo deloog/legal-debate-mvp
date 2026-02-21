@@ -8,6 +8,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { UpdateConfigRequest } from '@/types/config';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数
@@ -79,7 +80,7 @@ export async function GET(
 
     return Response.json({ data: config }, { status: 200 });
   } catch (error) {
-    console.error('获取配置失败:', error);
+    logger.error('获取配置失败:', error);
     return Response.json(
       { error: '服务器错误', message: '获取配置失败' },
       { status: 500 }
@@ -178,7 +179,7 @@ export async function PUT(
       { status: 200 }
     );
   } catch (error) {
-    console.error('更新配置失败:', error);
+    logger.error('更新配置失败:', error);
     return Response.json(
       { error: '服务器错误', message: '更新配置失败' },
       { status: 500 }
@@ -248,7 +249,7 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
-    console.error('删除配置失败:', error);
+    logger.error('删除配置失败:', error);
     return Response.json(
       { error: '服务器错误', message: '删除配置失败' },
       { status: 500 }

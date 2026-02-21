@@ -11,6 +11,7 @@ import { withRateLimit, strictRateLimiter } from '@/lib/middleware/rate-limit';
 import type { AuthResponse, LoginRequest } from '@/types/auth';
 import type { JwtPayload } from '@/types/auth';
 import { AuthErrorCode } from '@/types/auth';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/auth/login
@@ -169,7 +170,7 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
 
     // 调试日志：确认Cookie已设置（仅开发环境）
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Login API] 登录成功，Cookie已设置:', {
+      logger.info('[Login API] 登录成功，Cookie已设置:', {
         userId: user.id,
         email: user.email,
         hasAccessToken: !!accessToken,
@@ -180,7 +181,7 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
 
     return jsonResponse;
   } catch (error) {
-    console.error('登录失败详情:', {
+    logger.error('登录失败详情:', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
       timestamp: new Date().toISOString(),

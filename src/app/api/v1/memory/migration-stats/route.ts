@@ -6,10 +6,9 @@
  * 在代码中需要使用 `as any` 类型断言来解决类型检查问题。
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 const prisma = new PrismaClient();
 
@@ -27,6 +26,7 @@ export async function GET() {
     const workingToHotActions = await prisma.agentAction.findMany({
       where: {
         agentName: 'MemoryAgent',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         actionType: 'MIGRATE_WORKING_TO_HOT' as any,
         createdAt: {
           gte: sevenDaysAgo,
@@ -53,6 +53,7 @@ export async function GET() {
     const hotToColdActions = await prisma.agentAction.findMany({
       where: {
         agentName: 'MemoryAgent',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         actionType: 'MIGRATE_HOT_TO_COLD' as any,
         createdAt: {
           gte: sevenDaysAgo,
@@ -102,6 +103,7 @@ export async function GET() {
       where: {
         agentName: 'MemoryAgent',
         actionType: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           in: ['MIGRATE_WORKING_TO_HOT', 'MIGRATE_HOT_TO_COLD'] as any,
         },
       },
@@ -149,6 +151,7 @@ export async function GET() {
         where: {
           agentName: 'MemoryAgent',
           actionType: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             in: ['MIGRATE_WORKING_TO_HOT', 'MIGRATE_HOT_TO_COLD'] as any,
           },
           createdAt: {
@@ -189,7 +192,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('Error fetching migration stats:', error);
+    logger.error('Error fetching migration stats:', error);
     return NextResponse.json(
       {
         success: false,

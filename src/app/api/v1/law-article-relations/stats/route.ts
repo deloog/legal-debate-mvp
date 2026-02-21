@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { VerificationStatus, Prisma } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -143,7 +144,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('获取关系统计失败:', error);
+    logger.error('获取关系统计失败:', error);
     return NextResponse.json(
       {
         success: false,

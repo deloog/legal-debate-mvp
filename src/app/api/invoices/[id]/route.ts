@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { getInvoice, cancelInvoice } from '@/lib/invoice/invoice-service';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/invoices/[id]
@@ -66,7 +67,7 @@ export async function GET(
       data: invoice,
     });
   } catch (error) {
-    console.error('[API] 查询发票详情失败:', error);
+    logger.error('[API] 查询发票详情失败:', error);
 
     return NextResponse.json(
       {
@@ -118,7 +119,7 @@ export async function DELETE(
       data: invoice,
     });
   } catch (error) {
-    console.error('[API] 取消发票失败:', error);
+    logger.error('[API] 取消发票失败:', error);
 
     const errorMessage =
       error instanceof Error ? error.message : '取消发票失败，请稍后重试';

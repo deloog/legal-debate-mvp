@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { ipFilter } from '@/lib/middleware/ip-filter';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/admin/ip-filter
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    console.error('[IP Filter] GET Error:', error);
+    logger.error('[IP Filter] GET Error:', error);
     return NextResponse.json(
       { success: false, error: '获取IP列表失败' },
       { status: 500 }
@@ -103,7 +104,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       message: `IP ${ip} 已添加到${listType === 'blacklist' ? '黑' : '白'}名单`,
     });
   } catch (error) {
-    console.error('[IP Filter] POST Error:', error);
+    logger.error('[IP Filter] POST Error:', error);
     return NextResponse.json(
       { success: false, error: '添加IP失败' },
       { status: 500 }
@@ -170,7 +171,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: `IP ${ip} 已从${listType === 'blacklist' ? '黑' : '白'}名单移除`,
     });
   } catch (error) {
-    console.error('[IP Filter] DELETE Error:', error);
+    logger.error('[IP Filter] DELETE Error:', error);
     return NextResponse.json(
       { success: false, error: '移除IP失败' },
       { status: 500 }
@@ -217,7 +218,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       data: { mode },
     });
   } catch (error) {
-    console.error('[IP Filter] PUT Error:', error);
+    logger.error('[IP Filter] PUT Error:', error);
     return NextResponse.json(
       { success: false, error: '切换模式失败' },
       { status: 500 }

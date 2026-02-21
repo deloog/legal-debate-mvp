@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { contractVersionService } from '@/lib/contract/contract-version-service';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -21,7 +22,7 @@ export async function GET(
       data: versions,
     });
   } catch (error) {
-    console.error('获取版本列表失败:', error);
+    logger.error('获取版本列表失败:', error);
     return NextResponse.json(
       {
         success: false,

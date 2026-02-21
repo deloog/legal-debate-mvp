@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getQqOAuth } from '@/lib/auth/qq-oauth';
 import { OAuthService } from '@/lib/auth/oauth-service';
+import { logger } from '@/lib/logger';
 
 /**
  * 生成随机state
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
       state: response.state,
     });
   } catch (error) {
-    console.error('QQ authorize error:', error);
+    logger.error('QQ authorize error:', error);
     return NextResponse.json(
       { error: 'Failed to generate authorize URL' },
       { status: 500 }
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
       isNewUser: loginResult.isNewUser,
     });
   } catch (error) {
-    console.error('QQ callback error:', error);
+    logger.error('QQ callback error:', error);
     return NextResponse.json(
       { error: 'Failed to handle OAuth callback' },
       { status: 500 }

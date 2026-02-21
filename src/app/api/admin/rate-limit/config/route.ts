@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { rateLimitConfig } from '@/lib/middleware/rate-limit-config';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/admin/rate-limit/config
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    console.error('[RateLimit Config] GET Error:', error);
+    logger.error('[RateLimit Config] GET Error:', error);
     return NextResponse.json(
       { success: false, error: '获取配置失败' },
       { status: 500 }
@@ -131,7 +132,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 400 }
     );
   } catch (error) {
-    console.error('[RateLimit Config] POST Error:', error);
+    logger.error('[RateLimit Config] POST Error:', error);
     return NextResponse.json(
       { success: false, error: '更新配置失败' },
       { status: 500 }
@@ -184,7 +185,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: `端点 ${endpoint} 的配置已删除`,
     });
   } catch (error) {
-    console.error('[RateLimit Config] DELETE Error:', error);
+    logger.error('[RateLimit Config] DELETE Error:', error);
     return NextResponse.json(
       { success: false, error: '删除配置失败' },
       { status: 500 }
@@ -238,7 +239,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
       data: rateLimitConfig.getConfig(endpoint),
     });
   } catch (error) {
-    console.error('[RateLimit Config] PATCH Error:', error);
+    logger.error('[RateLimit Config] PATCH Error:', error);
     return NextResponse.json(
       { success: false, error: '切换状态失败' },
       { status: 500 }

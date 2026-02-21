@@ -12,6 +12,7 @@ import type {
   ContractReviewResponse,
   ReviewReport,
 } from '@/types/contract-review';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -61,7 +62,7 @@ export async function GET(
       const buffer = await readFile(filePath);
       content = buffer.toString('utf-8');
     } catch (error) {
-      console.error('读取合同文件失败:', error);
+      logger.error('读取合同文件失败:', error);
       // 如果文件读取失败，使用空内容继续（用于测试）
       content = '';
     }
@@ -90,7 +91,7 @@ export async function GET(
       data: report,
     });
   } catch (error) {
-    console.error('审查合同失败:', error);
+    logger.error('审查合同失败:', error);
 
     return NextResponse.json(
       {

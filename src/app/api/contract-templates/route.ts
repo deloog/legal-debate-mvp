@@ -1,3 +1,4 @@
+/** @legacy 优先使用 /api/v1/contract-templates，此路由保留以向后兼容 */
 /**
  * GET /api/contract-templates
  * 获取合同模板列表
@@ -6,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { Prisma } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
       data: templates,
     });
   } catch (error) {
-    console.error('获取合同模板列表失败:', error);
+    logger.error('获取合同模板列表失败:', error);
     return NextResponse.json(
       {
         success: false,
@@ -130,7 +132,7 @@ export async function POST(request: NextRequest) {
       message: '模板创建成功',
     });
   } catch (error) {
-    console.error('创建合同模板失败:', error);
+    logger.error('创建合同模板失败:', error);
     return NextResponse.json(
       {
         success: false,

@@ -13,6 +13,7 @@ import {
   PaymentMethod,
 } from '@/types/payment';
 import { createOrder } from '@/lib/order/order-service';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/orders/create
@@ -139,7 +140,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     } as CreateOrderResponse);
   } catch (error) {
-    console.error('[API] 创建订单失败:', error);
+    logger.error('[API] 创建订单失败:', error);
 
     return NextResponse.json(
       {

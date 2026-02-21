@@ -11,6 +11,7 @@ import type {
   PermissionsListResponse,
 } from '@/types/admin-role';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数
@@ -107,7 +108,7 @@ export async function GET(
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('获取角色权限失败:', error);
+    logger.error('获取角色权限失败:', error);
     return Response.json(
       { error: '服务器错误', message: '获取角色权限失败' },
       { status: 500 }
@@ -199,7 +200,7 @@ export async function POST(
       { status: 201 }
     ) as unknown as NextResponse;
   } catch (error) {
-    console.error('分配权限失败:', error);
+    logger.error('分配权限失败:', error);
     return Response.json(
       { error: '服务器错误', message: '分配权限失败' },
       { status: 500 }

@@ -16,6 +16,7 @@ import {
   notFoundResponse,
   serverErrorResponse,
 } from '@/lib/api-response';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 类型定义
@@ -137,7 +138,7 @@ export async function POST(
 
     return successResponse(response, '审核法条成功');
   } catch (error) {
-    console.error('审核法条失败:', error);
+    logger.error('审核法条失败:', error);
     return serverErrorResponse('审核法条失败');
   }
 }

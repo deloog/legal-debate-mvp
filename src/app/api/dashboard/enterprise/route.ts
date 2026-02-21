@@ -12,6 +12,7 @@ import type {
   ComplianceStatus,
   UpcomingTask,
 } from '@/types/dashboard';
+import { logger } from '@/lib/logger';
 
 /**
  * 计算合规评分
@@ -70,7 +71,7 @@ function generateRiskAlerts(
  * 获取企业法务工作台数据
  */
 export async function GET(
-  request: NextRequest
+  _request: NextRequest
 ): Promise<NextResponse<EnterpriseDashboardResponse>> {
   try {
     // 1. 获取统计数据
@@ -214,7 +215,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('获取企业法务工作台数据失败:', error);
+    logger.error('获取企业法务工作台数据失败:', error);
 
     return NextResponse.json(
       {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { z } from 'zod';
+import { logger } from '@/lib/logger';
 
 const updateTimelineEventSchema = z.object({
   eventType: z
@@ -59,7 +60,7 @@ export const GET = async (
 
     return NextResponse.json(event);
   } catch (error) {
-    console.error('获取时间线事件失败:', error);
+    logger.error('获取时间线事件失败:', error);
     return NextResponse.json({ error: '获取时间线事件失败' }, { status: 500 });
   }
 };
@@ -119,7 +120,7 @@ export const PUT = async (
 
     return NextResponse.json(updatedEvent);
   } catch (error) {
-    console.error('更新时间线事件失败:', error);
+    logger.error('更新时间线事件失败:', error);
     return NextResponse.json({ error: '更新时间线事件失败' }, { status: 500 });
   }
 };
@@ -166,7 +167,7 @@ export const DELETE = async (
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('删除时间线事件失败:', error);
+    logger.error('删除时间线事件失败:', error);
     return NextResponse.json({ error: '删除时间线事件失败' }, { status: 500 });
   }
 };

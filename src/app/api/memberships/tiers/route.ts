@@ -7,6 +7,7 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import type { MembershipTier } from '@/types/membership';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // GET /api/memberships/tiers - 查询会员等级列表
@@ -72,7 +73,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       { status: 200 }
     );
   } catch (error) {
-    console.error('[GET /api/memberships/tiers] 查询失败:', error);
+    logger.error('[GET /api/memberships/tiers] 查询失败:', error);
 
     return Response.json(
       {

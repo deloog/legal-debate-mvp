@@ -19,6 +19,7 @@ import type { QualificationUploadRequest } from '@/types/qualification';
 import type { Prisma } from '@prisma/client';
 
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 
 // TypeScript 重新加载触发点
 export async function POST(request: NextRequest) {
@@ -183,7 +184,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('律师资格上传失败:', error);
+    logger.error('律师资格上传失败:', error);
     return NextResponse.json(
       {
         success: false,

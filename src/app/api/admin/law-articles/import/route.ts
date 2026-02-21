@@ -15,6 +15,7 @@ import { validatePermissions } from '@/lib/middleware/permission-check';
 import { LAW_PERMISSIONS } from '@/types/permission';
 import { LawCategory, LawStatus, LawType } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 类型定义
@@ -187,7 +188,7 @@ async function importArticle(
 
     return { success: true };
   } catch (error) {
-    console.error(
+    logger.error(
       `导入法条失败: ${article.lawName} ${article.articleNumber}`,
       error
     );
@@ -287,7 +288,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return successResponse(response, '导入法条成功');
   } catch (error) {
-    console.error('导入法条失败:', error);
+    logger.error('导入法条失败:', error);
     return serverErrorResponse('导入法条失败');
   }
 }

@@ -11,6 +11,7 @@ import { withRateLimit, strictRateLimiter } from '@/lib/middleware/rate-limit';
 import type { AuthResponse, RegisterRequest } from '@/types/auth';
 import type { JwtPayload } from '@/types/auth';
 import { AuthErrorCode } from '@/types/auth';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/auth/register
@@ -103,7 +104,7 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
 
-    console.log('[REGISTER] Generated tokens:', {
+    logger.info('[REGISTER] Generated tokens:', {
       accessTokenLength: accessToken.length,
       refreshTokenLength: refreshToken.length,
       userId: user.id,
@@ -119,7 +120,7 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
       },
     });
 
-    console.log('[REGISTER] Created session:', {
+    logger.info('[REGISTER] Created session:', {
       sessionId: session.id,
       tokenLength: session.sessionToken.length,
       expires: session.expires,
@@ -147,7 +148,7 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
     };
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
-    console.error('注册失败:', error);
+    logger.error('注册失败:', error);
     const response: AuthResponse = {
       success: false,
       message: '注册失败，请稍后重试',

@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // 反馈类型枚举
 const FEEDBACK_TYPES = [
@@ -172,7 +173,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('创建关系反馈失败:', error);
+    logger.error('创建关系反馈失败:', error);
     return NextResponse.json(
       {
         success: false,
@@ -300,7 +301,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('查询关系反馈失败:', error);
+    logger.error('查询关系反馈失败:', error);
     return NextResponse.json(
       {
         success: false,

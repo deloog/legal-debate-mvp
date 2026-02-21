@@ -1,3 +1,4 @@
+/** @legacy 优先使用 /api/v1/orders，此路由保留以向后兼容 */
 /**
  * 订单列表API
  * GET /api/orders
@@ -8,6 +9,7 @@ import { getUserOrders } from '@/lib/order/order-service';
 import { Order, OrderStatus } from '@/types/payment';
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/orders
@@ -148,7 +150,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    console.error('[API] 查询订单列表失败:', error);
+    logger.error('[API] 查询订单列表失败:', error);
 
     return NextResponse.json(
       {

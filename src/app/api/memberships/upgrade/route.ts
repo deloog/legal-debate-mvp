@@ -9,6 +9,7 @@ import type { UpgradeRequestBody } from '@/types/admin-membership';
 import { MembershipStatus } from '@prisma/client';
 import { MembershipChangeType, MembershipTier } from '@/types/membership';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/memberships/upgrade
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     });
 
-    console.log('[UPGRADE] 当前会员信息:', {
+    logger.info('[UPGRADE] 当前会员信息:', {
       userId: authUser.userId,
       currentMembership: currentMembership
         ? {
@@ -151,7 +152,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const startDate = new Date();
     const endDate = calculateEndDate(startDate, billingCycle);
 
-    console.log('[UPGRADE] 准备创建会员:', {
+    logger.info('[UPGRADE] 准备创建会员:', {
       userId: authUser.userId,
       targetTier: targetTier.tier,
       startDate,
@@ -225,7 +226,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
 
     // 返回成功响应
-    console.log('[UPGRADE] 会员升级成功:', {
+    logger.info('[UPGRADE] 会员升级成功:', {
       membershipId: result.id,
       tier: result.tier.tier,
       status: result.status,
@@ -260,7 +261,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 200 }
     );
   } catch (error) {
-    console.error('会员升级失败:', {
+    logger.error('会员升级失败:', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
       timestamp: new Date().toISOString(),

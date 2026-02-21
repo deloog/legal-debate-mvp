@@ -14,6 +14,7 @@ import {
 } from '@/lib/contract/contract-pdf-generator';
 import * as fs from 'fs';
 import * as path from 'path';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
@@ -54,7 +55,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('生成合同PDF失败:', error);
+    logger.error('生成合同PDF失败:', error);
     return NextResponse.json(
       {
         success: false,

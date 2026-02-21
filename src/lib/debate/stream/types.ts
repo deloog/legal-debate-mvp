@@ -19,6 +19,7 @@ export interface SSEEvent {
 export type DebateStreamEventType =
   | 'connected' // 连接确认
   | 'round-start' // 轮次开始
+  | 'ai_stream' // AI流式内容（实时token）
   | 'argument' // 论点生成
   | 'progress' // 进度更新
   | 'completed' // 完成
@@ -124,6 +125,47 @@ export interface PingEventData {
 export interface DisconnectedEventData {
   reason: string;
   code?: number;
+  timestamp: string;
+}
+
+/**
+ * AI流式内容事件数据（实时token）
+ */
+export interface AIStreamEventData {
+  chunkId: number;
+  content: string; // 新增的token内容
+  accumulatedLength: number;
+  progress: number; // 0-100
+  roundNumber: number;
+  timestamp: string;
+}
+
+/**
+ * AI流开始事件数据
+ */
+export interface AIStreamStartedEventData {
+  type: 'started';
+  timestamp: string;
+}
+
+/**
+ * AI流完成事件数据
+ */
+export interface AIStreamCompleteEventData {
+  type: 'complete';
+  content: string;
+  isComplete: true;
+  progress: number;
+  totalChunks: number;
+  timestamp: string;
+}
+
+/**
+ * AI流错误事件数据
+ */
+export interface AIStreamErrorEventData {
+  type: 'error';
+  error: string;
   timestamp: string;
 }
 

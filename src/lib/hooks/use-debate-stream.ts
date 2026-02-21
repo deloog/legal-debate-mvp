@@ -14,6 +14,7 @@ export interface UseDebateStreamOptions {
   roundId: string | null;
   enabled?: boolean;
   onMessage?: (message: StreamMessage) => void;
+  onAIStream?: (content: string, progress: number) => void;
   onError?: (error: Error | unknown) => void;
   onComplete?: () => void;
 }
@@ -21,6 +22,7 @@ export interface UseDebateStreamOptions {
 export interface StreamState {
   isStreaming: boolean;
   messages: StreamMessage[];
+  accumulatedContent: string;
   error: Error | null;
   progress: number;
   connect: () => void;
@@ -37,12 +39,14 @@ export function useDebateStream(options: UseDebateStreamOptions): StreamState {
     roundId,
     enabled = true,
     onMessage,
+    onAIStream,
     onError,
     onComplete,
   } = options;
 
   const [isStreaming, setIsStreaming] = useState(false);
   const [messages, setMessages] = useState<StreamMessage[]>([]);
+  const [accumulatedContent, setAccumulatedContent] = useState('');
   const [error, setError] = useState<Error | null>(null);
   const [progress, setProgress] = useState(0);
 
@@ -59,6 +63,24 @@ export function useDebateStream(options: UseDebateStreamOptions): StreamState {
 
       if (onMessage) {
         onMessage(message);
+      }
+
+      // 处理AI流式内容事件
+      if (
+        eventType === 'ai_stream' &&
+        typeof eventData === 'object' &&
+        eventData !== null
+      ) {
+        const streamData = eventData as { content?: string; progress?: number };
+        if (streamData.content) {
+          setAccumulatedContent(prev => prev + streamData.content);
+        }
+        if (typeof streamData.progress === 'number') {
+          setProgress(streamData.progress);
+        }
+        if (onAIStream && streamData.content) {
+          onAIStream(streamData.content, streamData.progress || 0);
+        }
       }
 
       // 根据事件类型更新进度
@@ -80,7 +102,7 @@ export function useDebateStream(options: UseDebateStreamOptions): StreamState {
         }
       }
     },
-    [onMessage, onComplete]
+    [onMessage, onAIStream, onComplete]
   );
 
   // 处理SSE错误
@@ -119,6 +141,9 @@ export function useDebateStream(options: UseDebateStreamOptions): StreamState {
       onConnected: () => {
         console.log('SSE已连接');
         setIsStreaming(true);
+      },
+      onAIStream: eventData => {
+        handleSSEMessage('ai_stream', eventData);
       },
       onArgument: eventData => {
         handleSSEMessage('argument', eventData);
@@ -177,6 +202,7 @@ export function useDebateStream(options: UseDebateStreamOptions): StreamState {
   return {
     isStreaming,
     messages,
+    accumulatedContent,
     error,
     progress,
     connect,
