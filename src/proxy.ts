@@ -1,6 +1,6 @@
 /**
- * Next.js Middleware - 路由保护和权限控制
- * 优化目标：安全性增强，防止未授权访问
+ * Next.js Proxy (原 Middleware) - 路由保护和权限控制
+ * 注意：运行在 Edge Runtime，不能使用 Node.js 模块（如 logger）
  */
 
 import { NextResponse } from 'next/server';
@@ -42,7 +42,7 @@ function addCorsHeaders(
   }
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const origin = request.headers.get('origin');
   const corsOrigin =
@@ -80,14 +80,12 @@ export function middleware(request: NextRequest) {
     '/api/dashboard', // 首页dashboard数据允许匿名访问
   ];
 
-  // 注意：/api/auth/me 需要认证，不应该在公开路径中
-
   // 检查是否是公开路径
   const isPublicPath = publicPaths.some(
     path => pathname === path || pathname.startsWith(`${path}/`)
   );
 
-  // 静态资源和API健康检查不需要认证
+  // 静态资源和公开路径不需要认证
   if (
     isPublicPath ||
     pathname.startsWith('/_next') ||
@@ -104,20 +102,9 @@ export function middleware(request: NextRequest) {
     request.cookies.get('accessToken')?.value ||
     request.headers.get('authorization')?.replace('Bearer ', '');
 
-  // 调试日志：仅在开发环境记录
-  if (process.env.NODE_ENV === 'development' && pathname === '/api/auth/me') {
-    console.log('[Middleware] /api/auth/me 请求:', {
-      hasCookie: !!request.cookies.get('accessToken')?.value,
-      hasAuthHeader: !!request.headers.get('authorization'),
-      // 生产环境禁止打印token，即使是部分
-      allCookies: request.cookies.getAll().map(c => c.name),
-    });
-  }
-
   if (!accessToken) {
     // API路径返回401 JSON，页面路径重定向到登录页
     if (pathname.startsWith('/api/')) {
-      console.log('[Middleware] API请求无token，返回401:', pathname);
       const errorRes = NextResponse.json(
         { success: false, message: '未认证，请先登录' },
         { status: 401 }
@@ -132,16 +119,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Edge Runtime不支持Node.js的crypto模块，无法验证JWT
-  // Token验证将在API路由中通过getAuthUser()函数进行（API路由运行在Node.js runtime中）
-  // 这里只检查token是否存在，具体验证由API路由负责
+  // Edge Runtime 不支持 Node.js crypto 模块，无法在此验证 JWT 签名。
+  // Token 的签名验证由各 API 路由中的 getAuthUser() 负责（运行在 Node.js runtime）。
+  // 此处仅检查 token 是否存在，防止完全未认证的请求进入业务逻辑。
 
-  // 调试日志：Token存在，放行到API路由进行验证
-  if (pathname === '/api/auth/me') {
-    console.log('[Middleware] Token存在，放行到API路由进行验证');
-  }
-
-  // 直接放行，让API路由处理token验证和权限检查
   const response = NextResponse.next();
 
   // 添加 CORS 头（仅当来源在白名单时）
