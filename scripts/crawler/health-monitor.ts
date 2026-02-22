@@ -57,10 +57,7 @@ class HealthMonitor {
   private lastProcessedCount: number;
   private running = false;
 
-  constructor(
-    outputDir: string,
-    config: Partial<MonitorConfig> = {}
-  ) {
+  constructor(outputDir: string, config: Partial<MonitorConfig> = {}) {
     this.outputDir = outputDir || path.resolve('data/crawled/flk');
     this.config = {
       checkInterval: 30000, // 30 seconds
@@ -156,7 +153,9 @@ class HealthMonitor {
         : 0;
 
     // 获取最近错误
-    const recentErrors = this.crawlerLogger.getErrorSummary().errors.slice(0, 10);
+    const recentErrors = this.crawlerLogger
+      .getErrorSummary()
+      .errors.slice(0, 10);
 
     return {
       status: this.determineStatus(noProgressTime, errorRate, memory.heapUsed),
@@ -167,7 +166,9 @@ class HealthMonitor {
         processed: progress.processedItems,
         total: progress.totalItems,
         percentage: Math.round(percentage * 100) / 100,
-        lastUpdate: progress.startedAt ? new Date(progress.startedAt).toISOString() : '',
+        lastUpdate: progress.startedAt
+          ? new Date(progress.startedAt).toISOString()
+          : '',
       },
       errors: {
         recent: recentErrors,
@@ -213,7 +214,12 @@ class HealthMonitor {
    * 记录状态
    */
   private logStatus(status: HealthStatus): void {
-    const statusEmoji = status.status === 'healthy' ? '✅' : status.status === 'warning' ? '⚠️' : '🚨';
+    const statusEmoji =
+      status.status === 'healthy'
+        ? '✅'
+        : status.status === 'warning'
+          ? '⚠️'
+          : '🚨';
 
     this.logger.info(`${statusEmoji} 健康检查`, {
       status: status.status,
@@ -301,7 +307,10 @@ class HealthMonitor {
         this.logger.warn('Webhook 警报发送失败', { status: response.status });
       }
     } catch (error) {
-      this.logger.warn('Webhook 警报发送异常', error instanceof Error ? error : undefined);
+      this.logger.warn(
+        'Webhook 警报发送异常',
+        error instanceof Error ? error : undefined
+      );
     }
   }
 
@@ -313,7 +322,10 @@ class HealthMonitor {
       const statusFile = path.join(this.outputDir, 'health-status.json');
       fs.writeFileSync(statusFile, JSON.stringify(status, null, 2), 'utf-8');
     } catch (error) {
-      this.logger.warn('保存健康状态失败', error instanceof Error ? error : undefined);
+      this.logger.warn(
+        '保存健康状态失败',
+        error instanceof Error ? error : undefined
+      );
     }
   }
 
@@ -354,7 +366,10 @@ class HealthMonitor {
 错误数: ${status.errors.count}
 错误率: ${status.errors.rate}%
 最近错误:
-${status.errors.recent.slice(0, 5).map(e => `  - ${e}`).join('\n')}
+${status.errors.recent
+  .slice(0, 5)
+  .map(e => `  - ${e}`)
+  .join('\n')}
 
 --- 下载统计 ---
 总数: ${stats.download.total}
@@ -430,9 +445,15 @@ if (require.main === module) {
       break;
     default:
       console.log('用法:');
-      console.log('  npm run health-monitor monitor [output-dir]  - 启动持续监控');
-      console.log('  npm run health-monitor status [output-dir]   - 获取当前状态');
-      console.log('  npm run health-monitor report [output-dir]   - 生成健康报告');
+      console.log(
+        '  npm run health-monitor monitor [output-dir]  - 启动持续监控'
+      );
+      console.log(
+        '  npm run health-monitor status [output-dir]   - 获取当前状态'
+      );
+      console.log(
+        '  npm run health-monitor report [output-dir]   - 生成健康报告'
+      );
       break;
   }
 }

@@ -1,6 +1,6 @@
 /**
  * 从 API content 字段恢复失败的记录
- * 
+ *
  * 问题分析：
  * - 详情 API 返回成功，包含完整的 content 结构
  * - 下载 DOCX 失败，返回 500 错误
@@ -19,15 +19,15 @@ function extractTextFromContent(content: any): string {
   if (!content) return '';
 
   const lines: string[] = [];
-  
+
   function traverse(node: any) {
     if (!node) return;
-    
+
     // 添加标题
     if (node.title) {
       lines.push(node.title);
     }
-    
+
     // 递归处理子节点
     if (node.children && Array.isArray(node.children)) {
       for (const child of node.children) {
@@ -35,9 +35,9 @@ function extractTextFromContent(content: any): string {
       }
     }
   }
-  
+
   traverse(content);
-  
+
   return lines.join('\n');
 }
 
@@ -88,14 +88,14 @@ async function main() {
     try {
       // 获取详情
       const detail = await crawler['fetchDetail'](record.articleNumber);
-      
+
       if (!detail?.data?.content) {
         throw new Error('API 没有返回 content');
       }
 
       // 从 content 提取文本
       const extractedText = extractTextFromContent(detail.data.content);
-      
+
       if (extractedText.length <= 500) {
         throw new Error(`提取的文本过短 (${extractedText.length} 字符)`);
       }

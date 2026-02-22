@@ -1,6 +1,6 @@
 /**
  * 检查不同类型文档的特征
- * 
+ *
  * 分析：
  * - 司法解释、决定、批复、决议、规定等不同类型文档的内容长度
  * - 早期 DOCX 格式的解析情况
@@ -35,18 +35,23 @@ async function main() {
 
   // 2. 按文档类型分类（通过 lawName 判断）
   const typeKeywords = {
-    '司法解释': [
-      '解释', '最高人民法院关于', '最高人民检察院关于', 
-      '司法解释', '批复', '答复', '复函'
+    司法解释: [
+      '解释',
+      '最高人民法院关于',
+      '最高人民检察院关于',
+      '司法解释',
+      '批复',
+      '答复',
+      '复函',
     ],
-    '决定': ['决定', '全国人民代表大会关于', '全国人大常委会关于'],
-    '批复': ['批复', '答复', '函'],
-    '决议': ['决议'],
-    '规定': ['规定'],
-    '办法': ['办法'],
-    '通知': ['通知'],
-    '法律': ['法'],
-    '行政法规': ['条例', '实施细则'],
+    决定: ['决定', '全国人民代表大会关于', '全国人大常委会关于'],
+    批复: ['批复', '答复', '函'],
+    决议: ['决议'],
+    规定: ['规定'],
+    办法: ['办法'],
+    通知: ['通知'],
+    法律: ['法'],
+    行政法规: ['条例', '实施细则'],
   };
 
   const classifyDocument = (lawName: string): string => {
@@ -73,21 +78,38 @@ async function main() {
   console.log('📊 各类型文档的内容长度分布：');
   console.log();
   console.log(
-    '类型'.padEnd(12) + '| 数量'.padStart(6) + 
-    '| 最小'.padStart(8) + '| 最大'.padStart(8) + 
-    '| 平均'.padStart(8) + '| 中位数'.padStart(8)
+    '类型'.padEnd(12) +
+      '| 数量'.padStart(6) +
+      '| 最小'.padStart(8) +
+      '| 最大'.padStart(8) +
+      '| 平均'.padStart(8) +
+      '| 中位数'.padStart(8)
   );
   console.log('-'.repeat(70));
 
-  const typeStats: { type: string; count: number; min: number; max: number; avg: number; median: number }[] = [];
+  const typeStats: {
+    type: string;
+    count: number;
+    min: number;
+    max: number;
+    avg: number;
+    median: number;
+  }[] = [];
 
-  for (const [type, records] of Array.from(byType.entries()).sort((a: [string, any[]], b: [string, any[]]) => b[1].length - a[1].length)) {
+  for (const [type, records] of Array.from(byType.entries()).sort(
+    (a: [string, any[]], b: [string, any[]]) => b[1].length - a[1].length
+  )) {
     if (!records || records.length === 0) continue;
 
-    const lengths = records.map((r: any) => r.fullText ? r.fullText.length : 0).sort((a: number, b: number) => a - b);
+    const lengths = records
+      .map((r: any) => (r.fullText ? r.fullText.length : 0))
+      .sort((a: number, b: number) => a - b);
     const min = lengths[0] || 0;
     const max = lengths[lengths.length - 1] || 0;
-    const avg = lengths.length > 0 ? lengths.reduce((a: number, b: number) => a + b, 0) / lengths.length : 0;
+    const avg =
+      lengths.length > 0
+        ? lengths.reduce((a: number, b: number) => a + b, 0) / lengths.length
+        : 0;
     const median = lengths[Math.floor(lengths.length / 2)] || 0;
 
     typeStats.push({ type, count: records.length, min, max, avg, median });
@@ -103,7 +125,9 @@ async function main() {
   console.log('🔍 可能解析失败的记录（内容异常短）：');
   console.log();
 
-  const possiblyFailed = allRecords.filter(r => r.fullText.length < 50 && r.dataSource === 'flk');
+  const possiblyFailed = allRecords.filter(
+    r => r.fullText.length < 50 && r.dataSource === 'flk'
+  );
 
   if (possiblyFailed.length === 0) {
     console.log('✅ 没有发现明显解析失败的记录');
@@ -122,7 +146,6 @@ async function main() {
       console.log(`... 还有 ${possiblyFailed.length - 10} 条\n`);
     }
   }
-
 
   // 7. 按分类统计
   console.log('� 按分类统计：');
@@ -151,7 +174,9 @@ async function main() {
 
   console.log('1. 不同类型文档的内容长度特征：');
   typeStats.slice(0, 5).forEach(({ type, min, max, avg, median }) => {
-    console.log(`   ${type}: 最小 ${min} 字符, 最大 ${max} 字符, 平均 ${Math.round(avg)} 字符`);
+    console.log(
+      `   ${type}: 最小 ${min} 字符, 最大 ${max} 字符, 平均 ${Math.round(avg)} 字符`
+    );
   });
   console.log();
 

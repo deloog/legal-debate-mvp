@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { seedContractTemplates } from './seed-contracts';
-import { seedEvidenceCategories } from './seed-evidence-categories';
 
 const prisma = new PrismaClient();
 
@@ -83,7 +82,7 @@ async function main() {
   console.log('文档创建完成');
 
   // 创建示例辩论
-  const testDebate = await prisma.debate.create({
+  const _testDebate = await prisma.debate.create({
     data: {
       caseId: testCase.id,
       userId: testUser.id,
@@ -196,7 +195,7 @@ async function main() {
   console.log('会话创建完成');
 
   // 创建示例法律依据
-  const testLegalReference = await prisma.legalReference.create({
+  const _testLegalReference = await prisma.legalReference.create({
     data: {
       caseId: testCase.id,
       source: '民法典',

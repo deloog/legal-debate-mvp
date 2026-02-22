@@ -10,7 +10,6 @@ import type {
   ComplianceDashboard,
   ComplianceChecklist,
   ComplianceReport,
-  ComplianceCheckItem,
 } from '@/types/compliance';
 import {
   ComplianceCheckStatus,
@@ -46,11 +45,11 @@ export default function CompliancePage() {
 
     try {
       const response = await fetch('/api/compliance/dashboard');
-      
+
       if (!response.ok) {
         throw new Error(`请求失败: ${response.status}`);
       }
-      
+
       const data = await response.json();
 
       if (!data.success) {
@@ -72,11 +71,11 @@ export default function CompliancePage() {
 
     try {
       const response = await fetch('/api/compliance/checklist');
-      
+
       if (!response.ok) {
         throw new Error(`请求失败: ${response.status}`);
       }
-      
+
       const data = await response.json();
 
       if (!data.success) {

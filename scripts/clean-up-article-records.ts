@@ -1,11 +1,11 @@
 /**
  * 清理条款级别的记录
- * 
+ *
  * 问题分析：
  * 数据库中存在大量条款级别的记录（articleNumber 是中文条款号，如"第五百零九条"）
  * 这些记录的 content 很短（15-156 字符），数据源是 'local'
  * 完整的法规记录应该有长的 content 和 UUID 格式的 articleNumber
- * 
+ *
  * 解决方案：
  * 1. 识别条款级记录（articleNumber 匹配中文条款号）
  * 2. 统计这些记录的数量和来源
@@ -42,7 +42,9 @@ async function main() {
     },
   });
 
-  const articleRecords = allRecords.filter(r => isArticleLevelRecord(r.articleNumber));
+  const articleRecords = allRecords.filter(r =>
+    isArticleLevelRecord(r.articleNumber)
+  );
 
   console.log(`📊 统计结果：`);
   console.log(`   总记录数: ${allRecords.length}`);
@@ -59,8 +61,9 @@ async function main() {
   });
 
   // 3. 显示有条款级记录的法律
-  const lawsWithArticles = Array.from(byLawName.entries())
-    .sort((a, b) => b[1].length - a[1].length);
+  const lawsWithArticles = Array.from(byLawName.entries()).sort(
+    (a, b) => b[1].length - a[1].length
+  );
 
   console.log(`📋 有条款级记录的法律（前30部）：`);
   console.log();
@@ -68,7 +71,9 @@ async function main() {
     console.log(`${idx + 1}. ${lawName}`);
     console.log(`   条款级记录: ${records.length} 条`);
     console.log(`   数据源: ${records[0].dataSource}`);
-    console.log(`   示例条款: ${records[0].articleNumber} (${records[0].fullText.length} 字符)`);
+    console.log(
+      `   示例条款: ${records[0].articleNumber} (${records[0].fullText.length} 字符)`
+    );
     console.log();
   });
 
@@ -78,13 +83,18 @@ async function main() {
   console.log(`🔍 检查是否有对应的完整法规记录：`);
   console.log();
 
-  const hasCompleteRecord: { lawName: string; hasComplete: boolean; articleCount: number }[] = [];
+  const hasCompleteRecord: {
+    lawName: string;
+    hasComplete: boolean;
+    articleCount: number;
+  }[] = [];
 
   for (const [lawName, articleRecords] of lawsWithArticles.slice(0, 20)) {
-    const completeRecord = allRecords.find(r => 
-      r.lawName === lawName && 
-      !isArticleLevelRecord(r.articleNumber) &&
-      r.fullText.length > 1000
+    const completeRecord = allRecords.find(
+      r =>
+        r.lawName === lawName &&
+        !isArticleLevelRecord(r.articleNumber) &&
+        r.fullText.length > 1000
     );
 
     hasCompleteRecord.push({
@@ -94,7 +104,9 @@ async function main() {
     });
   }
 
-  console.log(`法律名称                                    | 有完整记录 | 条款数`);
+  console.log(
+    `法律名称                                    | 有完整记录 | 条款数`
+  );
   console.log('-'.repeat(70));
   hasCompleteRecord.forEach(({ lawName, hasComplete, articleCount }) => {
     const status = hasComplete ? '✅' : '❌';

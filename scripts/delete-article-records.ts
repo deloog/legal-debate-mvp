@@ -1,6 +1,6 @@
 /**
  * 删除条款级记录
- * 
+ *
  * 识别并删除 articleNumber 是中文条款号的记录
  */
 
@@ -34,7 +34,9 @@ async function main() {
   });
 
   // 在内存中过滤条款级记录
-  const toDelete = articleRecords.filter(r => ARTICLE_PATTERN.test(r.articleNumber));
+  const toDelete = articleRecords.filter(r =>
+    ARTICLE_PATTERN.test(r.articleNumber)
+  );
 
   console.log(`📊 分析结果：`);
   console.log(`   数据库总记录: ${articleRecords.length}`);
@@ -112,7 +114,7 @@ main()
     console.log('✅ 操作完成');
     console.log('='.repeat(70));
   })
-  .catch((error) => {
+  .catch(error => {
     console.error('❌ 删除失败:', error);
     process.exit(1);
   });

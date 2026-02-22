@@ -63,7 +63,9 @@ async function main() {
     const cpCount = cpProgress?.downloaded || 0;
     const status = cpProgress ? '✓' : ' ';
 
-    console.log(`${status} ${type.label.padEnd(20)}  数据库: ${dbCount} 条,  断点: ${cpCount} 条`);
+    console.log(
+      `${status} ${type.label.padEnd(20)}  数据库: ${dbCount} 条,  断点: ${cpCount} 条`
+    );
   });
 
   console.log('='.repeat(70));

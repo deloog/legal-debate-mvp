@@ -16,7 +16,12 @@ const TEST_URLS = [
   'https://cont.12315.cn/',
 ];
 
-async function testConnection(url: string): Promise<{ url: string; status: number; accessible: boolean; error?: string }> {
+async function testConnection(url: string): Promise<{
+  url: string;
+  status: number;
+  accessible: boolean;
+  error?: string;
+}> {
   try {
     const response = await axios.get(url, {
       timeout: 10000,

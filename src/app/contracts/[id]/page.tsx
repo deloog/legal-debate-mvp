@@ -71,6 +71,7 @@ export default function ContractDetailPage() {
 
   useEffect(() => {
     loadContract();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   async function loadContract() {

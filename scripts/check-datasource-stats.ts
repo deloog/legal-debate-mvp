@@ -12,7 +12,7 @@ async function main() {
     _count: true,
   });
 
-  const table = result.map((r) => ({
+  const table = result.map(r => ({
     dataSource: r.dataSource,
     count: r._count,
   }));
@@ -26,7 +26,7 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('Error:', e);
   })
   .finally(async () => {

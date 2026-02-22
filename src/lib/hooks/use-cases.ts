@@ -102,8 +102,14 @@ export function useCases(filters: CaseFilters, searchQuery: string) {
         if (data.pagination && typeof data.pagination === 'object') {
           setPagination(prev => ({
             ...prev,
-            total: typeof data.pagination.total === 'number' ? data.pagination.total : prev.total,
-            totalPages: typeof data.pagination.totalPages === 'number' ? data.pagination.totalPages : prev.totalPages,
+            total:
+              typeof data.pagination.total === 'number'
+                ? data.pagination.total
+                : prev.total,
+            totalPages:
+              typeof data.pagination.totalPages === 'number'
+                ? data.pagination.totalPages
+                : prev.totalPages,
           }));
         }
       } else {

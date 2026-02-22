@@ -35,7 +35,9 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError('邮箱或密码错误，如果你还没有注册，请点击下方"注册账户"进行注册');
+        setError(
+          '邮箱或密码错误，如果你还没有注册，请点击下方"注册账户"进行注册'
+        );
         setLoading(false);
         return;
       }

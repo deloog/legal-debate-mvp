@@ -19,6 +19,7 @@ export default function SignContractPage({ params }: SignContractPageProps) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [contract, setContract] = useState<any>(null);
   const [signatureRole, setSignatureRole] = useState<'client' | 'lawyer'>(
     'client'
@@ -28,6 +29,7 @@ export default function SignContractPage({ params }: SignContractPageProps) {
   // 加载合同信息
   useEffect(() => {
     loadContract();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   async function loadContract() {
@@ -221,6 +223,7 @@ export default function SignContractPage({ params }: SignContractPageProps) {
                 </div>
               </div>
               {isClientSigned ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={contract.clientSignature}
                   alt='委托人签名'
@@ -290,6 +293,7 @@ export default function SignContractPage({ params }: SignContractPageProps) {
                 </div>
               </div>
               {isLawyerSigned ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={contract.lawyerSignature}
                   alt='律师签名'

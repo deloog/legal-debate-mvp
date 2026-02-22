@@ -17,9 +17,10 @@ async function downloadDocx(bbbs) {
   try {
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/octet-stream, */*',
-        'Referer': `https://flk.npc.gov.cn/detail?bbbs=${bbbs}`,
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        Accept: 'application/octet-stream, */*',
+        Referer: `https://flk.npc.gov.cn/detail?bbbs=${bbbs}`,
       },
     });
 
@@ -35,7 +36,7 @@ async function downloadDocx(bbbs) {
     const buffer = Buffer.from(await response.arrayBuffer());
     lines.push(`Downloaded: ${buffer.length.toLocaleString()} bytes`);
 
-    if (buffer.length > 4 && buffer[0] === 0x50 && buffer[1] === 0x4B) {
+    if (buffer.length > 4 && buffer[0] === 0x50 && buffer[1] === 0x4b) {
       lines.push('Valid DOCX format (ZIP) - SUCCESS!');
       return { success: true, buffer, lines };
     } else {

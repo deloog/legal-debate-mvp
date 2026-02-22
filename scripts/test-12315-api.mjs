@@ -11,10 +11,11 @@ async function testEndpoint(url, options = {}) {
     const response = await fetch(url, {
       ...options,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/json, text/html, */*',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        Accept: 'application/json, text/html, */*',
         'Accept-Language': 'zh-CN,zh;q=0.9',
-        'Referer': BASE_URL,
+        Referer: BASE_URL,
         ...options.headers,
       },
       signal: AbortSignal.timeout(30000),
@@ -27,7 +28,11 @@ async function testEndpoint(url, options = {}) {
       return { ok: response.ok, status: response.status, data };
     } else {
       const text = await response.text();
-      return { ok: response.ok, status: response.status, data: { html: text.substring(0, 500) } };
+      return {
+        ok: response.ok,
+        status: response.status,
+        data: { html: text.substring(0, 500) },
+      };
     }
   } catch (error) {
     return { ok: false, status: 0, error: String(error) };
@@ -50,11 +55,19 @@ async function analyzeApiStructure() {
     response: homeResult.data,
     error: homeResult.error,
   };
-  console.log(`   状态: ${homeResult.ok ? '✓ 成功' : '✗ 失败'} (${homeResult.status})`);
+  console.log(
+    `   状态: ${homeResult.ok ? '✓ 成功' : '✗ 失败'} (${homeResult.status})`
+  );
 
   // 2. 测试URL规律: View页面
   console.log('\n2. 测试View页面URL规律...');
-  const testIds = ['WTT20240612001', 'HT20240101001', 'test-001', '1001', '2024'];
+  const testIds = [
+    'WTT20240612001',
+    'HT20240101001',
+    'test-001',
+    '1001',
+    '2024',
+  ];
   for (const id of testIds) {
     const url = `${BASE_URL}/View?id=${id}`;
     const result = await testEndpoint(url);
@@ -74,16 +87,32 @@ async function analyzeApiStructure() {
 
   const possibleEndpoints = [
     // 合同列表API
-    { url: `${BASE_URL}/api/contract/list`, method: 'POST', desc: '合同列表API' },
+    {
+      url: `${BASE_URL}/api/contract/list`,
+      method: 'POST',
+      desc: '合同列表API',
+    },
     { url: `${BASE_URL}/api/contracts`, method: 'GET', desc: '合同列表' },
     { url: `${BASE_URL}/api/list`, method: 'POST', desc: '通用列表API' },
     { url: `${BASE_URL}/api/templates`, method: 'GET', desc: '模板列表' },
     { url: `${BASE_URL}/api/template/list`, method: 'POST', desc: '模板列表' },
 
     // 详情API
-    { url: `${BASE_URL}/api/contract/detail?id=WTT20240612001`, method: 'GET', desc: '合同详情API' },
-    { url: `${BASE_URL}/api/detail?id=WTT20240612001`, method: 'GET', desc: '详情API' },
-    { url: `${BASE_URL}/api/template?id=WTT20240612001`, method: 'GET', desc: '模板详情' },
+    {
+      url: `${BASE_URL}/api/contract/detail?id=WTT20240612001`,
+      method: 'GET',
+      desc: '合同详情API',
+    },
+    {
+      url: `${BASE_URL}/api/detail?id=WTT20240612001`,
+      method: 'GET',
+      desc: '详情API',
+    },
+    {
+      url: `${BASE_URL}/api/template?id=WTT20240612001`,
+      method: 'GET',
+      desc: '模板详情',
+    },
 
     // 分类API
     { url: `${BASE_URL}/api/category/list`, method: 'GET', desc: '分类列表' },
@@ -91,17 +120,35 @@ async function analyzeApiStructure() {
     { url: `${BASE_URL}/api/types`, method: 'GET', desc: '类型' },
 
     // 下载API
-    { url: `${BASE_URL}/api/download?id=WTT20240612001&format=docx`, method: 'GET', desc: '下载DOCX' },
-    { url: `${BASE_URL}/api/download?id=WTT20240612001&format=pdf`, method: 'GET', desc: '下载PDF' },
-    { url: `${BASE_URL}/api/export?id=WTT20240612001`, method: 'GET', desc: '导出' },
+    {
+      url: `${BASE_URL}/api/download?id=WTT20240612001&format=docx`,
+      method: 'GET',
+      desc: '下载DOCX',
+    },
+    {
+      url: `${BASE_URL}/api/download?id=WTT20240612001&format=pdf`,
+      method: 'GET',
+      desc: '下载PDF',
+    },
+    {
+      url: `${BASE_URL}/api/export?id=WTT20240612001`,
+      method: 'GET',
+      desc: '导出',
+    },
 
     // 搜索API
-    { url: `${BASE_URL}/api/search?keyword=劳动合同`, method: 'GET', desc: '搜索' },
+    {
+      url: `${BASE_URL}/api/search?keyword=劳动合同`,
+      method: 'GET',
+      desc: '搜索',
+    },
     { url: `${BASE_URL}/api/search`, method: 'POST', desc: '搜索Post' },
   ];
 
   for (const endpoint of possibleEndpoints) {
-    const result = await testEndpoint(endpoint.url, { method: endpoint.method });
+    const result = await testEndpoint(endpoint.url, {
+      method: endpoint.method,
+    });
     results[endpoint.url] = {
       url: endpoint.url,
       method: endpoint.method,
@@ -110,7 +157,9 @@ async function analyzeApiStructure() {
       response: result.data,
       error: result.error,
     };
-    console.log(`   ${endpoint.desc}: ${result.ok ? '✓' : '✗'} ${endpoint.url}`);
+    console.log(
+      `   ${endpoint.desc}: ${result.ok ? '✓' : '✗'} ${endpoint.url}`
+    );
   }
 
   // 4. 保存结果
@@ -136,11 +185,15 @@ async function analyzeApiStructure() {
 
   // 5. 总结
   console.log('\n=== 分析结果总结 ===');
-  const successCount = Object.values(results).filter(r => r.status === 'success').length;
+  const successCount = Object.values(results).filter(
+    r => r.status === 'success'
+  ).length;
   const totalCount = Object.values(results).length;
   console.log(`成功: ${successCount}/${totalCount}`);
 
-  const successfulApis = Object.values(results).filter(r => r.status === 'success');
+  const successfulApis = Object.values(results).filter(
+    r => r.status === 'success'
+  );
   if (successfulApis.length > 0) {
     console.log('\n可用的API端点:');
     for (const api of successfulApis) {
@@ -159,7 +212,7 @@ analyzeApiStructure()
     console.log('\n分析完成!');
     process.exit(0);
   })
-  .catch((error) => {
+  .catch(error => {
     console.error('分析失败:', error);
     process.exit(1);
   });

@@ -95,7 +95,9 @@ function withTimeout<T>(
 ): Promise<T> {
   return Promise.race([
     promise,
-    new Promise<T>(resolve => setTimeout(() => resolve(fallbackValue), timeoutMs)),
+    new Promise<T>(resolve =>
+      setTimeout(() => resolve(fallbackValue), timeoutMs)
+    ),
   ]) as Promise<T>;
 }
 
@@ -133,7 +135,9 @@ async function searchByKeywords(
  */
 async function findConflictingArticles(
   articleIds: string[]
-): Promise<{ source: LawArticleWithRelations; target: LawArticleWithRelations }[]> {
+): Promise<
+  { source: LawArticleWithRelations; target: LawArticleWithRelations }[]
+> {
   if (articleIds.length === 0) return [];
 
   try {
@@ -193,7 +197,9 @@ async function findConflictingArticles(
  */
 async function findComplementArticles(
   articleIds: string[]
-): Promise<{ source: LawArticleWithRelations; target: LawArticleWithRelations }[]> {
+): Promise<
+  { source: LawArticleWithRelations; target: LawArticleWithRelations }[]
+> {
   if (articleIds.length === 0) return [];
 
   try {
@@ -343,9 +349,7 @@ async function discoverAttackPaths(
     });
 
     for (const rel of relations) {
-      const sourceArticle = opposingArticles.find(
-        a => a.id === rel.source.id
-      );
+      const sourceArticle = opposingArticles.find(a => a.id === rel.source.id);
       const targetArticle = supportingArticles.find(
         a => a.id === rel.target.id
       );
@@ -355,7 +359,11 @@ async function discoverAttackPaths(
           sourceArticle,
           targetArticle,
           relationType: rel.relationType,
-          explanation: getAttackPathExplanation(rel.relationType, sourceArticle, targetArticle),
+          explanation: getAttackPathExplanation(
+            rel.relationType,
+            sourceArticle,
+            targetArticle
+          ),
         });
       }
     }
@@ -400,15 +408,16 @@ export async function graphEnhancedSearch(
     includeAttackPaths?: boolean;
   } = {}
 ): Promise<GraphEnhancedSearchResult> {
-  const { timeoutMs = GRAPH_QUERY_TIMEOUT_MS, includeAttackPaths = false } = options;
+  const { timeoutMs = GRAPH_QUERY_TIMEOUT_MS, includeAttackPaths = false } =
+    options;
 
   // 1. 关键词搜索（不设超时，始终执行）
   const keywordResults = await searchByKeywords(caseType, keywords);
 
   // 2. 准备图谱搜索
   const articleIds = keywordResults.map(a => a.id);
-  const categories = caseType
-    ? CASE_TYPE_TO_LAW_CATEGORIES[caseType] ?? []
+  const _categories = caseType
+    ? (CASE_TYPE_TO_LAW_CATEGORIES[caseType] ?? [])
     : [];
 
   // 3. 异步执行图谱查询（带超时）
@@ -421,8 +430,8 @@ export async function graphEnhancedSearch(
     ]);
 
     // 分类：己方支持 vs 对方可能引用
-    const conflictSourceIds = new Set(conflicts.map(c => c.source.id));
-    const complementSourceIds = new Set(complements.map(c => c.source.id));
+    const _conflictSourceIds = new Set(conflicts.map(c => c.source.id));
+    const _complementSourceIds = new Set(complements.map(c => c.source.id));
 
     // 己方支持法条 = 关键词结果 + 补充关系
     const supportingArticles: LawArticleWithRelations[] = [
@@ -461,11 +470,7 @@ export async function graphEnhancedSearch(
   // 等待图谱查询结果（带超时）
   let graphData;
   try {
-    graphData = await withTimeout(
-      graphQueryPromise,
-      timeoutMs,
-      null
-    );
+    graphData = await withTimeout(graphQueryPromise, timeoutMs, null);
   } catch (error) {
     logger.error('图谱查询异常:', error);
     graphData = null;

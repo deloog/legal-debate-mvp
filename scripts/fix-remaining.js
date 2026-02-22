@@ -8,9 +8,21 @@ const prisma = new PrismaClient();
 const MISSING_DATE = new Date('1970-01-01T00:00:00Z');
 
 function cnToNumber(cn) {
-  const cnNums = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+  const cnNums = [
+    '零',
+    '一',
+    '二',
+    '三',
+    '四',
+    '五',
+    '六',
+    '七',
+    '八',
+    '九',
+    '十',
+  ];
   const mapping = {};
-  cnNums.forEach((v, i) => mapping[v] = i);
+  cnNums.forEach((v, i) => (mapping[v] = i));
 
   const yearMatch = cn.match(/([一二三四五六七八九十]+)年/);
   if (yearMatch) {
@@ -45,7 +57,8 @@ function extractAllDates(text) {
   }
 
   // 中文数字格式
-  const cnDateRegex = /([一二三四五六七八九十]+)年([一二三四五六七八九十]+)月([一二三四五六七八九十]+)日/g;
+  const cnDateRegex =
+    /([一二三四五六七八九十]+)年([一二三四五六七八九十]+)月([一二三四五六七八九十]+)日/g;
   while ((match = cnDateRegex.exec(text)) !== null) {
     const year = cnToNumber(match[1]);
     const month = cnToNumber(match[2]);
@@ -80,7 +93,9 @@ async function fix() {
         data: { effectiveDate: best.date, updatedAt: new Date() },
       });
 
-      console.log(`✅ ${article.lawName}: ${best.date.toISOString().split('T')[0]}`);
+      console.log(
+        `✅ ${article.lawName}: ${best.date.toISOString().split('T')[0]}`
+      );
     } else {
       console.log(`❌ ${article.lawName}: 无法提取日期`);
     }
@@ -91,7 +106,11 @@ async function fix() {
     where: { effectiveDate: MISSING_DATE },
   });
   const total = await prisma.lawArticle.count();
-  console.log(`\n最终: ${missing}/${total} 缺失, 完整性: ${((total - missing) / total * 100).toFixed(2)}/100`);
+  console.log(
+    `\n最终: ${missing}/${total} 缺失, 完整性: ${(((total - missing) / total) * 100).toFixed(2)}/100`
+  );
 }
 
-fix().catch(console.error).finally(() => prisma.$disconnect());
+fix()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

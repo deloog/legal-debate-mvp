@@ -10,7 +10,7 @@ async function main() {
     where: {
       dataSource: 'flk',
       articleNumber: {
-        startsWith: '2c909fdd678bf17901678bf59',  // 宪法的ID前缀
+        startsWith: '2c909fdd678bf17901678bf59', // 宪法的ID前缀
       },
     },
     select: {
@@ -52,7 +52,9 @@ async function main() {
   console.log('='.repeat(80));
   console.log(`总计: ${laws.length} 部宪法相关文件`);
   console.log();
-  console.log('说明: 这些是不同历史时期的宪法及宪法修正案，每部都是完整的独立文件。');
+  console.log(
+    '说明: 这些是不同历史时期的宪法及宪法修正案，每部都是完整的独立文件。'
+  );
 }
 
 main()

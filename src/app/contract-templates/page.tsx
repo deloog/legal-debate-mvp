@@ -14,6 +14,7 @@ interface ContractTemplate {
   code: string;
   category: string;
   content: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   variables: any[];
   isDefault: boolean;
   isActive: boolean;
@@ -22,7 +23,7 @@ interface ContractTemplate {
 }
 
 export default function ContractTemplatesPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const [loading, setLoading] = useState(true);
   const [templates, setTemplates] = useState<ContractTemplate[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +35,7 @@ export default function ContractTemplatesPage() {
   // 加载模板列表
   useEffect(() => {
     loadTemplates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterCategory]);
 
   async function loadTemplates() {
@@ -78,6 +80,7 @@ export default function ContractTemplatesPage() {
   }
 
   // 保存模板
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function handleSave(content: string, variables: any[]) {
     try {
       const templateData = {
@@ -371,7 +374,7 @@ export default function ContractTemplatesPage() {
             </svg>
             <h3 className='mt-4 text-lg font-medium text-gray-900'>暂无模板</h3>
             <p className='mt-2 text-sm text-gray-500'>
-              点击"创建新模板"按钮开始创建您的第一个合同模板
+              点击&quot;创建新模板&quot;按钮开始创建您的第一个合同模板
             </p>
           </div>
         )}

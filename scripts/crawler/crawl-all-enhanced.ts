@@ -25,58 +25,256 @@ const CONFIG = {
   API_LIST: 'https://flk.npc.gov.cn/law-search/search/list',
   API_DETAIL: 'https://flk.npc.gov.cn/law-search/search/flfgDetails',
   API_DOWNLOAD: 'https://flk.npc.gov.cn/law-search/download/pc',
-  MIN_DELAY_MS: 2000,    // 最小延迟
-  MAX_DELAY_MS: 5000,    // 最大延迟（随机2-5秒）
-  MAX_RETRIES: 5,        // 最大重试次数（增加）
-  TIMEOUT_MS: 45000,     // 请求超时（增加）
+  MIN_DELAY_MS: 2000, // 最小延迟
+  MAX_DELAY_MS: 5000, // 最大延迟（随机2-5秒）
+  MAX_RETRIES: 5, // 最大重试次数（增加）
+  TIMEOUT_MS: 45000, // 请求超时（增加）
 };
 
 // 法律分类配置（完整版）
 const TYPE_CONFIGS = [
   // 宪法相关
-  { code: 100, label: '宪法', flfgFl: 'flfg', lawType: 'CONSTITUTION', category: 'OTHER' },
+  {
+    code: 100,
+    label: '宪法',
+    flfgFl: 'flfg',
+    lawType: 'CONSTITUTION',
+    category: 'OTHER',
+  },
 
   // 法律 (101-195)
-  { code: 101, label: '法律', flfgFl: 'flfg', lawType: 'LAW', category: 'OTHER' },
-  { code: 102, label: '法律', flfgFl: 'flfg', lawType: 'LAW', category: 'OTHER' },
-  { code: 110, label: '宪法相关法', flfgFl: 'flfg', lawType: 'LAW', category: 'OTHER' },
-  { code: 120, label: '民法商法', flfgFl: 'flfg', lawType: 'LAW', category: 'CIVIL' },
-  { code: 130, label: '行政法', flfgFl: 'flfg', lawType: 'LAW', category: 'ADMINISTRATIVE' },
-  { code: 140, label: '经济法', flfgFl: 'flfg', lawType: 'LAW', category: 'ECONOMIC' },
-  { code: 150, label: '社会法', flfgFl: 'flfg', lawType: 'LAW', category: 'OTHER' },
-  { code: 160, label: '刑法', flfgFl: 'flfg', lawType: 'LAW', category: 'CRIMINAL' },
-  { code: 170, label: '诉讼与非诉讼程序法', flfgFl: 'flfg', lawType: 'LAW', category: 'PROCEDURE' },
-  { code: 180, label: '法律解释', flfgFl: 'flfg', lawType: 'LAW', category: 'OTHER' },
-  { code: 190, label: '有关法律问题的决定', flfgFl: 'flfg', lawType: 'LAW', category: 'OTHER' },
-  { code: 195, label: '修正案', flfgFl: 'flfg', lawType: 'LAW', category: 'OTHER' },
-  { code: 200, label: '修改、废止的决定', flfgFl: 'flfg', lawType: 'LAW', category: 'OTHER' },
+  {
+    code: 101,
+    label: '法律',
+    flfgFl: 'flfg',
+    lawType: 'LAW',
+    category: 'OTHER',
+  },
+  {
+    code: 102,
+    label: '法律',
+    flfgFl: 'flfg',
+    lawType: 'LAW',
+    category: 'OTHER',
+  },
+  {
+    code: 110,
+    label: '宪法相关法',
+    flfgFl: 'flfg',
+    lawType: 'LAW',
+    category: 'OTHER',
+  },
+  {
+    code: 120,
+    label: '民法商法',
+    flfgFl: 'flfg',
+    lawType: 'LAW',
+    category: 'CIVIL',
+  },
+  {
+    code: 130,
+    label: '行政法',
+    flfgFl: 'flfg',
+    lawType: 'LAW',
+    category: 'ADMINISTRATIVE',
+  },
+  {
+    code: 140,
+    label: '经济法',
+    flfgFl: 'flfg',
+    lawType: 'LAW',
+    category: 'ECONOMIC',
+  },
+  {
+    code: 150,
+    label: '社会法',
+    flfgFl: 'flfg',
+    lawType: 'LAW',
+    category: 'OTHER',
+  },
+  {
+    code: 160,
+    label: '刑法',
+    flfgFl: 'flfg',
+    lawType: 'LAW',
+    category: 'CRIMINAL',
+  },
+  {
+    code: 170,
+    label: '诉讼与非诉讼程序法',
+    flfgFl: 'flfg',
+    lawType: 'LAW',
+    category: 'PROCEDURE',
+  },
+  {
+    code: 180,
+    label: '法律解释',
+    flfgFl: 'flfg',
+    lawType: 'LAW',
+    category: 'OTHER',
+  },
+  {
+    code: 190,
+    label: '有关法律问题的决定',
+    flfgFl: 'flfg',
+    lawType: 'LAW',
+    category: 'OTHER',
+  },
+  {
+    code: 195,
+    label: '修正案',
+    flfgFl: 'flfg',
+    lawType: 'LAW',
+    category: 'OTHER',
+  },
+  {
+    code: 200,
+    label: '修改、废止的决定',
+    flfgFl: 'flfg',
+    lawType: 'LAW',
+    category: 'OTHER',
+  },
 
   // 行政法规 (201-215)
-  { code: 201, label: '行政法规', flfgFl: 'xzfg', lawType: 'ADMINISTRATIVE_REGULATION', category: 'ADMINISTRATIVE' },
-  { code: 210, label: '行政法规', flfgFl: 'xzfg', lawType: 'ADMINISTRATIVE_REGULATION', category: 'ADMINISTRATIVE' },
-  { code: 215, label: '修改、废止的决定', flfgFl: 'xzfg', lawType: 'ADMINISTRATIVE_REGULATION', category: 'ADMINISTRATIVE' },
+  {
+    code: 201,
+    label: '行政法规',
+    flfgFl: 'xzfg',
+    lawType: 'ADMINISTRATIVE_REGULATION',
+    category: 'ADMINISTRATIVE',
+  },
+  {
+    code: 210,
+    label: '行政法规',
+    flfgFl: 'xzfg',
+    lawType: 'ADMINISTRATIVE_REGULATION',
+    category: 'ADMINISTRATIVE',
+  },
+  {
+    code: 215,
+    label: '修改、废止的决定',
+    flfgFl: 'xzfg',
+    lawType: 'ADMINISTRATIVE_REGULATION',
+    category: 'ADMINISTRATIVE',
+  },
 
   // 监察法规 (220)
-  { code: 220, label: '监察法规', flfgFl: 'jcfg', lawType: 'LAW', category: 'ADMINISTRATIVE' },
+  {
+    code: 220,
+    label: '监察法规',
+    flfgFl: 'jcfg',
+    lawType: 'LAW',
+    category: 'ADMINISTRATIVE',
+  },
 
   // 地方法规 (221-310)
-  { code: 221, label: '地方法规', flfgFl: 'dfxfg', lawType: 'LOCAL_REGULATION', category: 'OTHER' },
-  { code: 222, label: '地方法规', flfgFl: 'dfxfg', lawType: 'LOCAL_REGULATION', category: 'OTHER' },
-  { code: 230, label: '地方性法规', flfgFl: 'dfxfg', lawType: 'LOCAL_REGULATION', category: 'OTHER' },
-  { code: 260, label: '自治条例', flfgFl: 'dfxfg', lawType: 'LOCAL_REGULATION', category: 'OTHER' },
-  { code: 270, label: '单行条例', flfgFl: 'dfxfg', lawType: 'LOCAL_REGULATION', category: 'OTHER' },
-  { code: 290, label: '经济特区法规', flfgFl: 'dfxfg', lawType: 'LOCAL_REGULATION', category: 'OTHER' },
-  { code: 295, label: '浦东新区法规', flfgFl: 'dfxfg', lawType: 'LOCAL_REGULATION', category: 'OTHER' },
-  { code: 300, label: '海南自由贸易港法规', flfgFl: 'dfxfg', lawType: 'LOCAL_REGULATION', category: 'OTHER' },
-  { code: 305, label: '法规性决定', flfgFl: 'dfxfg', lawType: 'LOCAL_REGULATION', category: 'OTHER' },
-  { code: 310, label: '修改、废止的决定', flfgFl: 'dfxfg', lawType: 'LOCAL_REGULATION', category: 'OTHER' },
+  {
+    code: 221,
+    label: '地方法规',
+    flfgFl: 'dfxfg',
+    lawType: 'LOCAL_REGULATION',
+    category: 'OTHER',
+  },
+  {
+    code: 222,
+    label: '地方法规',
+    flfgFl: 'dfxfg',
+    lawType: 'LOCAL_REGULATION',
+    category: 'OTHER',
+  },
+  {
+    code: 230,
+    label: '地方性法规',
+    flfgFl: 'dfxfg',
+    lawType: 'LOCAL_REGULATION',
+    category: 'OTHER',
+  },
+  {
+    code: 260,
+    label: '自治条例',
+    flfgFl: 'dfxfg',
+    lawType: 'LOCAL_REGULATION',
+    category: 'OTHER',
+  },
+  {
+    code: 270,
+    label: '单行条例',
+    flfgFl: 'dfxfg',
+    lawType: 'LOCAL_REGULATION',
+    category: 'OTHER',
+  },
+  {
+    code: 290,
+    label: '经济特区法规',
+    flfgFl: 'dfxfg',
+    lawType: 'LOCAL_REGULATION',
+    category: 'OTHER',
+  },
+  {
+    code: 295,
+    label: '浦东新区法规',
+    flfgFl: 'dfxfg',
+    lawType: 'LOCAL_REGULATION',
+    category: 'OTHER',
+  },
+  {
+    code: 300,
+    label: '海南自由贸易港法规',
+    flfgFl: 'dfxfg',
+    lawType: 'LOCAL_REGULATION',
+    category: 'OTHER',
+  },
+  {
+    code: 305,
+    label: '法规性决定',
+    flfgFl: 'dfxfg',
+    lawType: 'LOCAL_REGULATION',
+    category: 'OTHER',
+  },
+  {
+    code: 310,
+    label: '修改、废止的决定',
+    flfgFl: 'dfxfg',
+    lawType: 'LOCAL_REGULATION',
+    category: 'OTHER',
+  },
 
   // 司法解释 (311-350)
-  { code: 311, label: '司法解释', flfgFl: 'sfjs', lawType: 'JUDICIAL_INTERPRETATION', category: 'PROCEDURE' },
-  { code: 320, label: '高法司法解释', flfgFl: 'sfjs', lawType: 'JUDICIAL_INTERPRETATION', category: 'PROCEDURE' },
-  { code: 330, label: '高检司法解释', flfgFl: 'sfjs', lawType: 'JUDICIAL_INTERPRETATION', category: 'PROCEDURE' },
-  { code: 340, label: '联合发布司法解释', flfgFl: 'sfjs', lawType: 'JUDICIAL_INTERPRETATION', category: 'PROCEDURE' },
-  { code: 350, label: '修改、废止的决定', flfgFl: 'sfjs', lawType: 'JUDICIAL_INTERPRETATION', category: 'PROCEDURE' },
+  {
+    code: 311,
+    label: '司法解释',
+    flfgFl: 'sfjs',
+    lawType: 'JUDICIAL_INTERPRETATION',
+    category: 'PROCEDURE',
+  },
+  {
+    code: 320,
+    label: '高法司法解释',
+    flfgFl: 'sfjs',
+    lawType: 'JUDICIAL_INTERPRETATION',
+    category: 'PROCEDURE',
+  },
+  {
+    code: 330,
+    label: '高检司法解释',
+    flfgFl: 'sfjs',
+    lawType: 'JUDICIAL_INTERPRETATION',
+    category: 'PROCEDURE',
+  },
+  {
+    code: 340,
+    label: '联合发布司法解释',
+    flfgFl: 'sfjs',
+    lawType: 'JUDICIAL_INTERPRETATION',
+    category: 'PROCEDURE',
+  },
+  {
+    code: 350,
+    label: '修改、废止的决定',
+    flfgFl: 'sfjs',
+    lawType: 'JUDICIAL_INTERPRETATION',
+    category: 'PROCEDURE',
+  },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════════════
@@ -97,7 +295,9 @@ function randomUA(): string {
 }
 
 function randomDelay(): Promise<void> {
-  const delay = CONFIG.MIN_DELAY_MS + Math.random() * (CONFIG.MAX_DELAY_MS - CONFIG.MIN_DELAY_MS);
+  const delay =
+    CONFIG.MIN_DELAY_MS +
+    Math.random() * (CONFIG.MAX_DELAY_MS - CONFIG.MIN_DELAY_MS);
   return new Promise(resolve => setTimeout(resolve, delay));
 }
 
@@ -115,10 +315,10 @@ async function fetchJson(url: string, options?: RequestInit): Promise<any> {
       signal: controller.signal,
       headers: {
         'User-Agent': randomUA(),
-        'Accept': 'application/json, text/plain, */*',
+        Accept: 'application/json, text/plain, */*',
         'Content-Type': 'application/json;charset=utf-8',
-        'Referer': CONFIG.API_BASE + '/',
-        'Origin': CONFIG.API_BASE,
+        Referer: CONFIG.API_BASE + '/',
+        Origin: CONFIG.API_BASE,
         ...options?.headers,
       },
     });
@@ -136,7 +336,12 @@ async function fetchJson(url: string, options?: RequestInit): Promise<any> {
   }
 }
 
-async function fetchList(typeCode: number, page: number, pageSize: number, sinceDate?: string): Promise<any> {
+async function fetchList(
+  typeCode: number,
+  page: number,
+  pageSize: number,
+  sinceDate?: string
+): Promise<any> {
   const body = {
     searchRange: 1,
     sxrq: sinceDate ? [sinceDate, new Date().toISOString().split('T')[0]] : [],
@@ -164,15 +369,18 @@ async function fetchDetail(bbbs: string): Promise<any> {
 /**
  * 获取下载 URL（两步获取，带重试）
  */
-async function getDownloadUrl(bbbs: string, retryCount = 0): Promise<string | null> {
+async function getDownloadUrl(
+  bbbs: string,
+  retryCount = 0
+): Promise<string | null> {
   const url = `${CONFIG.API_DOWNLOAD}?format=docx&bbbs=${encodeURIComponent(bbbs)}`;
 
   try {
     const response = await fetch(url, {
       headers: {
         'User-Agent': randomUA(),
-        'Accept': 'application/json',
-        'Referer': CONFIG.API_BASE + '/',
+        Accept: 'application/json',
+        Referer: CONFIG.API_BASE + '/',
       },
     });
 
@@ -188,7 +396,9 @@ async function getDownloadUrl(bbbs: string, retryCount = 0): Promise<string | nu
     return json.data.url;
   } catch (error: any) {
     if (retryCount < CONFIG.MAX_RETRIES) {
-      await new Promise(resolve => setTimeout(resolve, 3000 * (retryCount + 1)));
+      await new Promise(resolve =>
+        setTimeout(resolve, 3000 * (retryCount + 1))
+      );
       return getDownloadUrl(bbbs, retryCount + 1);
     }
     return null;
@@ -198,12 +408,15 @@ async function getDownloadUrl(bbbs: string, retryCount = 0): Promise<string | nu
 /**
  * 下载 DOCX 文件（带重试）
  */
-async function downloadDocx(downloadUrl: string, retryCount = 0): Promise<Buffer | null> {
+async function downloadDocx(
+  downloadUrl: string,
+  retryCount = 0
+): Promise<Buffer | null> {
   try {
     const response = await fetch(downloadUrl, {
       headers: {
         'User-Agent': randomUA(),
-        'Accept': '*/*',
+        Accept: '*/*',
       },
     });
 
@@ -215,7 +428,9 @@ async function downloadDocx(downloadUrl: string, retryCount = 0): Promise<Buffer
     return Buffer.from(buffer);
   } catch (error: any) {
     if (retryCount < CONFIG.MAX_RETRIES) {
-      await new Promise(resolve => setTimeout(resolve, 2000 * (retryCount + 1)));
+      await new Promise(resolve =>
+        setTimeout(resolve, 2000 * (retryCount + 1))
+      );
       return downloadDocx(downloadUrl, retryCount + 1);
     }
     return null;
@@ -260,10 +475,15 @@ function extractTextFromContent(content: any): string {
 
 function getStatus(sxx: number): LawStatus {
   switch (sxx) {
-    case 1: return LawStatus.REPEALED;
-    case 2: return LawStatus.AMENDED;
-    case 4: return LawStatus.DRAFT;
-    case 3: default: return LawStatus.VALID;
+    case 1:
+      return LawStatus.REPEALED;
+    case 2:
+      return LawStatus.AMENDED;
+    case 4:
+      return LawStatus.DRAFT;
+    case 3:
+    default:
+      return LawStatus.VALID;
   }
 }
 
@@ -344,9 +564,14 @@ async function main() {
 
   // 加载或创建断点
   let checkpoint = {
-    version: '5.0',  // 增强版 + 失败记录
+    version: '5.0', // 增强版 + 失败记录
     items: [] as any[],
-    failedItems: [] as Array<{ bbbs: string; title: string; error: string; timestamp: string }>,
+    failedItems: [] as Array<{
+      bbbs: string;
+      title: string;
+      error: string;
+      timestamp: string;
+    }>,
     types: {} as Record<string, { page: number; downloaded: number }>,
     startedAt: '',
     lastUpdatedAt: '',
@@ -421,7 +646,9 @@ async function main() {
         // 处理每条记录
         for (const item of rows) {
           // 检查是否已存在
-          const existing = checkpoint.items.find((i: any) => i.bbbs === item.bbbs);
+          const existing = checkpoint.items.find(
+            (i: any) => i.bbbs === item.bbbs
+          );
           if (existing && !existing.error && !args.incremental) {
             totalSkipped++;
             continue;
@@ -457,15 +684,23 @@ async function main() {
                       docxDownloaded++;
                       contentParsed++;
                       downloadSuccess = true;
-                      console.log(`    ✓ DOCX: ${buffer.length} bytes, ${parsedText.length} chars`);
+                      console.log(
+                        `    ✓ DOCX: ${buffer.length} bytes, ${parsedText.length} chars`
+                      );
                     } else {
-                      console.log(`    ⚠ DOCX 解析失败 (尝试 ${docxRetryCount + 1}/5)`);
+                      console.log(
+                        `    ⚠ DOCX 解析失败 (尝试 ${docxRetryCount + 1}/5)`
+                      );
                     }
                   } else {
-                    console.log(`    ⚠ DOCX 下载失败 (尝试 ${docxRetryCount + 1}/5)`);
+                    console.log(
+                      `    ⚠ DOCX 下载失败 (尝试 ${docxRetryCount + 1}/5)`
+                    );
                   }
                 } else {
-                  console.log(`    ⚠ 获取下载 URL 失败 (尝试 ${docxRetryCount + 1}/5)`);
+                  console.log(
+                    `    ⚠ 获取下载 URL 失败 (尝试 ${docxRetryCount + 1}/5)`
+                  );
                 }
 
                 docxRetryCount++;
@@ -508,7 +743,11 @@ async function main() {
                 status: getStatus(item.sxx),
                 version: '1.0',
                 tags: [item.flxz, type.label].filter(Boolean) as string[],
-                searchableText: `${item.title} ${item.zdjgName || ''} ${item.flxz || ''} ${fullText}`.substring(0, 50000),
+                searchableText:
+                  `${item.title} ${item.zdjgName || ''} ${item.flxz || ''} ${fullText}`.substring(
+                    0,
+                    50000
+                  ),
                 dataSource: 'flk' as const,
                 sourceId: item.bbbs,
               };
@@ -532,7 +771,9 @@ async function main() {
             }
 
             // 更新断点
-            const idx = checkpoint.items.findIndex((i: any) => i.bbbs === item.bbbs);
+            const idx = checkpoint.items.findIndex(
+              (i: any) => i.bbbs === item.bbbs
+            );
             const itemData = {
               bbbs: item.bbbs,
               title: item.title,
@@ -553,7 +794,6 @@ async function main() {
             }
 
             typeDownloaded++;
-
           } catch (err: any) {
             console.log(`    ⚠ 处理失败: ${err.message}`);
             totalErrors++;
@@ -568,7 +808,7 @@ async function main() {
             checkpoint.failedItems.push(failedItem);
           }
 
-            await randomDelay();
+          await randomDelay();
         }
 
         // 更新分类进度
@@ -579,7 +819,11 @@ async function main() {
 
         // 保存断点
         checkpoint.lastUpdatedAt = new Date().toISOString();
-        fs.writeFileSync(checkpointPath, JSON.stringify(checkpoint, null, 2), 'utf-8');
+        fs.writeFileSync(
+          checkpointPath,
+          JSON.stringify(checkpoint, null, 2),
+          'utf-8'
+        );
 
         totalPages++;
         totalItems += rows.length;
@@ -589,7 +833,6 @@ async function main() {
         } else {
           page++;
         }
-
       } catch (err: any) {
         console.log(`  ⚠ 页 ${page} 请求失败: ${err.message}`);
         totalErrors++;
@@ -617,7 +860,11 @@ async function main() {
   // 完成
   checkpoint.status = 'completed';
   checkpoint.lastUpdatedAt = new Date().toISOString();
-  fs.writeFileSync(checkpointPath, JSON.stringify(checkpoint, null, 2), 'utf-8');
+  fs.writeFileSync(
+    checkpointPath,
+    JSON.stringify(checkpoint, null, 2),
+    'utf-8'
+  );
 
   console.log('\n' + '='.repeat(70));
   console.log('采集完成!');
@@ -636,7 +883,7 @@ async function main() {
     console.log('\n' + '⚠️ 失败记录详情:');
     console.log('='.repeat(70));
     console.log(`共 ${checkpoint.failedItems.length} 条记录采集失败\n`);
-    
+
     // 按错误类型分组
     const errorGroups: Record<string, any[]> = {};
     checkpoint.failedItems.forEach(item => {
@@ -657,7 +904,9 @@ async function main() {
     });
 
     console.log('\n提示: 可以运行以下命令重试失败的记录:');
-    console.log(`npx tsx scripts/crawler/retry-failed-items.ts --checkpoint=${checkpointPath}`);
+    console.log(
+      `npx tsx scripts/crawler/retry-failed-items.ts --checkpoint=${checkpointPath}`
+    );
   }
 
   console.log('='.repeat(70));

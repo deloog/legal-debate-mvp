@@ -70,7 +70,6 @@ async function main(): Promise<void> {
     console.log();
 
     logger.info('SAMR采集完成', result);
-
   } catch (error) {
     console.error('采集过程中发生错误:', error);
     process.exit(1);
@@ -81,7 +80,7 @@ async function main(): Promise<void> {
   console.log('='.repeat(70));
 }
 
-main().catch((error) => {
+main().catch(error => {
   console.error('脚本执行失败:', error);
   process.exit(1);
 });

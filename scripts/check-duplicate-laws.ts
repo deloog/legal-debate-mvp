@@ -69,8 +69,12 @@ async function main() {
   duplicateLaws.slice(0, 30).forEach(([name, data], idx) => {
     console.log(`${idx + 1}. ${name} - ${data.count} 条记录`);
     // 显示最短的记录
-    const shortest = data.records.sort((a, b) => a.textLength - b.textLength)[0];
-    console.log(`   最短: ${shortest.textLength} 字符, ID: ${shortest.articleNumber.substring(0, 30)}...`);
+    const shortest = data.records.sort(
+      (a, b) => a.textLength - b.textLength
+    )[0];
+    console.log(
+      `   最短: ${shortest.textLength} 字符, ID: ${shortest.articleNumber.substring(0, 30)}...`
+    );
   });
 
   console.log(`\n... 还有 ${duplicateLaws.length - 30} 部`);

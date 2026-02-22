@@ -27,11 +27,11 @@ export default function EnterpriseDashboardPage() {
       setError(null);
 
       const response = await fetch('/api/dashboard/enterprise');
-      
+
       if (!response.ok) {
         throw new Error(`请求失败: ${response.status}`);
       }
-      
+
       const result = await response.json();
 
       if (result.success && result.data) {
@@ -41,7 +41,9 @@ export default function EnterpriseDashboardPage() {
       }
     } catch (err) {
       console.error('加载工作台数据失败:', err);
-      setError(err instanceof Error ? err.message : '加载数据失败，请刷新页面重试');
+      setError(
+        err instanceof Error ? err.message : '加载数据失败，请刷新页面重试'
+      );
     } finally {
       setLoading(false);
     }

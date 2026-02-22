@@ -5,13 +5,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { FileText, RefreshCw, ArrowRight, Sparkles, FileStack } from 'lucide-react';
+  FileText,
+  RefreshCw,
+  ArrowRight,
+  Sparkles,
+  FileStack,
+} from 'lucide-react';
 
 /**
  * 案件类型代码映射（用于案号生成）
@@ -38,165 +39,205 @@ const statusCodes: Record<string, string> = {
 /**
  * 案件描述模板（按案件类型分类）
  */
-const caseDescriptionTemplates: Record<string, { title: string; template: string }[]> = {
+const caseDescriptionTemplates: Record<
+  string,
+  { title: string; template: string }[]
+> = {
   CIVIL: [
     {
       title: '合同纠纷',
-      template: '原告{plaintiff}与被告{defendant}因{cause}合同发生纠纷。原告认为被告未按合同约定履行义务，造成原告损失。现依据《中华人民共和国民法典》相关规定，向贵院提起诉讼，请求判令被告{plaintiff}。',
+      template:
+        '原告{plaintiff}与被告{defendant}因{cause}合同发生纠纷。原告认为被告未按合同约定履行义务，造成原告损失。现依据《中华人民共和国民法典》相关规定，向贵院提起诉讼，请求判令被告{plaintiff}。',
     },
     {
       title: '债务纠纷',
-      template: '被告{defendant}向原告{plaintiff}借款人民币{amount}元，双方约定还款日期为{date}。到期后，被告未按时还款，经原告多次催讨，被告仍拒不偿还。为维护原告合法权益，特向贵院提起诉讼。',
+      template:
+        '被告{defendant}向原告{plaintiff}借款人民币{amount}元，双方约定还款日期为{date}。到期后，被告未按时还款，经原告多次催讨，被告仍拒不偿还。为维护原告合法权益，特向贵院提起诉讼。',
     },
     {
       title: '房产纠纷',
-      template: '原告{plaintiff}与被告{defendant}就位于{location}的房产发生权属争议。原告依据相关证据认为该房产应归其所有，但被告坚持认为该房产归其所有。双方多次协商未果，现向贵院提起诉讼。',
+      template:
+        '原告{plaintiff}与被告{defendant}就位于{location}的房产发生权属争议。原告依据相关证据认为该房产应归其所有，但被告坚持认为该房产归其所有。双方多次协商未果，现向贵院提起诉讼。',
     },
     {
       title: '婚姻家庭',
-      template: '原告{plaintiff}与被告{defendant}系夫妻关系，因{cause}导致感情破裂。双方就子女抚养、财产分割等问题无法达成一致。现原告依据《中华人民共和国民法典》相关规定，向贵院提起离婚诉讼。',
+      template:
+        '原告{plaintiff}与被告{defendant}系夫妻关系，因{cause}导致感情破裂。双方就子女抚养、财产分割等问题无法达成一致。现原告依据《中华人民共和国民法典》相关规定，向贵院提起离婚诉讼。',
     },
     {
       title: '侵权责任',
-      template: '被告{defendant}的行为造成原告{plaintiff}人身损害/财产损失。经{location}事故认定，被告负主要/全部责任。原告要求被告赔偿医疗费、误工费、护理费等各项损失共计{amount}元。',
+      template:
+        '被告{defendant}的行为造成原告{plaintiff}人身损害/财产损失。经{location}事故认定，被告负主要/全部责任。原告要求被告赔偿医疗费、误工费、护理费等各项损失共计{amount}元。',
     },
     {
       title: '邻里纠纷',
-      template: '原告{plaintiff}与被告{defendant}系邻里关系，因{cause}发生纠纷。原告认为被告的行为严重影响了原告的正常生活，双方经居委会/物业调解未果，现向贵院提起诉讼。',
+      template:
+        '原告{plaintiff}与被告{defendant}系邻里关系，因{cause}发生纠纷。原告认为被告的行为严重影响了原告的正常生活，双方经居委会/物业调解未果，现向贵院提起诉讼。',
     },
     {
       title: '继承纠纷',
-      template: '被继承人{location}于{date}去世，留有遗产{amount}元及房产一处。原告{plaintiff}作为法定继承人/遗嘱受益人，要求依法继承相应份额。被告{defendant}对遗产分配提出异议，双方协商未果。',
+      template:
+        '被继承人{location}于{date}去世，留有遗产{amount}元及房产一处。原告{plaintiff}作为法定继承人/遗嘱受益人，要求依法继承相应份额。被告{defendant}对遗产分配提出异议，双方协商未果。',
     },
     {
       title: '借贷纠纷',
-      template: '原告{plaintiff}与被告{defendant}于{date}签订借款合同，约定被告向原告借款{amount}元，期限为{location}。合同签订后，原告按约支付了借款，但被告未按期还款。',
+      template:
+        '原告{plaintiff}与被告{defendant}于{date}签订借款合同，约定被告向原告借款{amount}元，期限为{location}。合同签订后，原告按约支付了借款，但被告未按期还款。',
     },
     {
       title: '物业纠纷',
-      template: '原告{plaintiff}系{location}小区业主，被告{defendant}作为物业管理公司，未按合同约定提供物业服务，导致小区环境脏乱差、安保缺失。原告要求被告履行合同义务并赔偿损失。',
+      template:
+        '原告{plaintiff}系{location}小区业主，被告{defendant}作为物业管理公司，未按合同约定提供物业服务，导致小区环境脏乱差、安保缺失。原告要求被告履行合同义务并赔偿损失。',
     },
     {
       title: '交通事故',
-      template: '{date}，被告{defendant}驾驶机动车与原告{plaintiff}发生交通事故，造成原告人身损害。经交警部门认定，被告负事故{result}责任。原告要求被告赔偿医疗费等各项费用。',
+      template:
+        '{date}，被告{defendant}驾驶机动车与原告{plaintiff}发生交通事故，造成原告人身损害。经交警部门认定，被告负事故{result}责任。原告要求被告赔偿医疗费等各项费用。',
     },
   ],
   CRIMINAL: [
     {
       title: '故意伤害',
-      template: '犯罪嫌疑人{defendant}因{cause}与被害人{plaintiff}发生冲突，后持凶器对被害人实施伤害，造成被害人{result}。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第二百三十四条之规定，涉嫌故意伤害罪。',
+      template:
+        '犯罪嫌疑人{defendant}因{cause}与被害人{plaintiff}发生冲突，后持凶器对被害人实施伤害，造成被害人{result}。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第二百三十四条之规定，涉嫌故意伤害罪。',
     },
     {
       title: '盗窃',
-      template: '犯罪嫌疑人{defendant}于{date}，在{location}秘密窃取被害人{plaintiff}财物，涉案金额约{amount}元。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第二百六十四条之规定，涉嫌盗窃罪。',
+      template:
+        '犯罪嫌疑人{defendant}于{date}，在{location}秘密窃取被害人{plaintiff}财物，涉案金额约{amount}元。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第二百六十四条之规定，涉嫌盗窃罪。',
     },
     {
       title: '诈骗',
-      template: '犯罪嫌疑人{defendant}以非法占有为目的，通过{means}方式骗取被害人{plaintiff}人民币{amount}元。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第二百六十六条之规定，涉嫌诈骗罪。',
+      template:
+        '犯罪嫌疑人{defendant}以非法占有为目的，通过{means}方式骗取被害人{plaintiff}人民币{amount}元。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第二百六十六条之规定，涉嫌诈骗罪。',
     },
     {
       title: '危险驾驶',
-      template: '犯罪嫌疑人{defendant}于{date}在{location}醉酒驾驶/追逐竞驶，造成{result}。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第一百三十三条之一之规定，涉嫌危险驾驶罪。',
+      template:
+        '犯罪嫌疑人{defendant}于{date}在{location}醉酒驾驶/追逐竞驶，造成{result}。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第一百三十三条之一之规定，涉嫌危险驾驶罪。',
     },
     {
       title: '寻衅滋事',
-      template: '犯罪嫌疑人{defendant}于{date}在{location}随意殴打被害人{plaintiff}，造成{result}。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第二百九十三条之规定，涉嫌寻衅滋事罪。',
+      template:
+        '犯罪嫌疑人{defendant}于{date}在{location}随意殴打被害人{plaintiff}，造成{result}。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第二百九十三条之规定，涉嫌寻衅滋事罪。',
     },
     {
       title: '非法拘禁',
-      template: '犯罪嫌疑人{defendant}为索取债务/发泄不满，于{date}将被害人{plaintiff}非法拘禁在{location}，限制其人身自由{result}。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第二百三十八条之规定。',
+      template:
+        '犯罪嫌疑人{defendant}为索取债务/发泄不满，于{date}将被害人{plaintiff}非法拘禁在{location}，限制其人身自由{result}。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第二百三十八条之规定。',
     },
     {
       title: '交通肇事',
-      template: '犯罪嫌疑人{defendant}于{date}驾驶机动车在{location}发生交通事故，造成{result}。经交警部门认定，犯罪嫌疑人负事故主要/全部责任。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第一百三十三条之规定。',
+      template:
+        '犯罪嫌疑人{defendant}于{date}驾驶机动车在{location}发生交通事故，造成{result}。经交警部门认定，犯罪嫌疑人负事故主要/全部责任。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第一百三十三条之规定。',
     },
   ],
   LABOR: [
     {
       title: '劳动争议',
-      template: '申请人{plaintiff}与被申请人{defendant}因{cause}发生劳动争议。申请人认为被申请人违法解除劳动合同，要求支付违法解除赔偿金{amount}元及其他相关待遇。经劳动仲裁前置后，现向贵院提起诉讼。',
+      template:
+        '申请人{plaintiff}与被申请人{defendant}因{cause}发生劳动争议。申请人认为被申请人违法解除劳动合同，要求支付违法解除赔偿金{amount}元及其他相关待遇。经劳动仲裁前置后，现向贵院提起诉讼。',
     },
     {
       title: '工伤赔偿',
-      template: '申请人{plaintiff}系被申请人{defendant}职工，在工作中因{cause}受伤，经认定为工伤。申请人要求被申请人支付一次性伤残补助金、一次性工伤医疗补助金等共计{amount}元。',
+      template:
+        '申请人{plaintiff}系被申请人{defendant}职工，在工作中因{cause}受伤，经认定为工伤。申请人要求被申请人支付一次性伤残补助金、一次性工伤医疗补助金等共计{amount}元。',
     },
     {
       title: '拖欠工资',
-      template: '申请人{plaintiff}在被申请人{defendant}处工作期间，被申请人拖欠申请人工资{amount}元，经申请人多次催讨，被申请人仍拒不支付。申请人要求被申请人支付拖欠工资及经济补偿金。',
+      template:
+        '申请人{plaintiff}在被申请人{defendant}处工作期间，被申请人拖欠申请人工资{amount}元，经申请人多次催讨，被申请人仍拒不支付。申请人要求被申请人支付拖欠工资及经济补偿金。',
     },
     {
       title: '社保争议',
-      template: '申请人{plaintiff}在被申请人{defendant}工作期间，被申请人未依法为申请人缴纳社会保险。申请人要求被申请人补缴社会保险费或赔偿相应损失。',
+      template:
+        '申请人{plaintiff}在被申请人{defendant}工作期间，被申请人未依法为申请人缴纳社会保险。申请人要求被申请人补缴社会保险费或赔偿相应损失。',
     },
     {
       title: '经济补偿金',
-      template: '申请人{plaintiff}与被申请人{defendant}协商解除劳动合同/合同期满，被申请人未依法支付经济补偿金{amount}元。申请人要求被申请人支付经济补偿金。',
+      template:
+        '申请人{plaintiff}与被申请人{defendant}协商解除劳动合同/合同期满，被申请人未依法支付经济补偿金{amount}元。申请人要求被申请人支付经济补偿金。',
     },
     {
       title: '加班费',
-      template: '申请人在被申请人{defendant}处工作期间，存在大量加班事实，但被申请人未支付加班费。申请人要求被申请人支付加班费共计{amount}元。',
+      template:
+        '申请人在被申请人{defendant}处工作期间，存在大量加班事实，但被申请人未支付加班费。申请人要求被申请人支付加班费共计{amount}元。',
     },
   ],
   COMMERCIAL: [
     {
       title: '商业合同违约',
-      template: '原告{plaintiff}与被告{defendant}签订《{contract_type}合同》，约定{content}。合同签订后，原告已履行合同义务，但被告未按约定{action}，构成违约。原告因此遭受损失{amount}元。',
+      template:
+        '原告{plaintiff}与被告{defendant}签订《{contract_type}合同》，约定{content}。合同签订后，原告已履行合同义务，但被告未按约定{action}，构成违约。原告因此遭受损失{amount}元。',
     },
     {
       title: '股权纠纷',
-      template: '原告{plaintiff}与被告{defendant}因{cause}股权问题发生争议。原告认为被告侵害了其股东权益，要求被告{claim}。双方协商未果，现向贵院提起诉讼。',
+      template:
+        '原告{plaintiff}与被告{defendant}因{cause}股权问题发生争议。原告认为被告侵害了其股东权益，要求被告{claim}。双方协商未果，现向贵院提起诉讼。',
     },
     {
       title: '公司决议效力',
-      template: '原告{plaintiff}作为公司股东，认为被告{defendant}主持召开的股东会所做出的决议违反公司章程/法律规定，请求法院确认该决议无效/予以撤销。',
+      template:
+        '原告{plaintiff}作为公司股东，认为被告{defendant}主持召开的股东会所做出的决议违反公司章程/法律规定，请求法院确认该决议无效/予以撤销。',
     },
     {
       title: '合伙纠纷',
-      template: '原告{plaintiff}与被告{defendant}签订《合伙协议》，约定共同经营{location}。现因{cause}产生分歧，双方无法达成一致意见，原告要求解除合伙关系并进行清算。',
+      template:
+        '原告{plaintiff}与被告{defendant}签订《合伙协议》，约定共同经营{location}。现因{cause}产生分歧，双方无法达成一致意见，原告要求解除合伙关系并进行清算。',
     },
     {
       title: '保险合同纠纷',
-      template: '原告{plaintiff}在被告{defendant}处投保{contract_type}保险，保险期间发生保险事故。被告以{cause}为由拒绝/少陪保险金。原告要求被告依约赔付保险金{amount}元。',
+      template:
+        '原告{plaintiff}在被告{defendant}处投保{contract_type}保险，保险期间发生保险事故。被告以{cause}为由拒绝/少陪保险金。原告要求被告依约赔付保险金{amount}元。',
     },
     {
       title: '票据纠纷',
-      template: '原告{plaintiff}合法持有票据，被告{defendant}作为付款人/承兑人拒绝支付票款{amount}元。原告要求被告支付票款及利息。',
+      template:
+        '原告{plaintiff}合法持有票据，被告{defendant}作为付款人/承兑人拒绝支付票款{amount}元。原告要求被告支付票款及利息。',
     },
     {
       title: '金融借款',
-      template: '被告{defendant}向原告{plaintiff}借款{amount}元，用于{location}。被告未按期还本付息，原告要求被告偿还本金、利息及违约金。',
+      template:
+        '被告{defendant}向原告{plaintiff}借款{amount}元，用于{location}。被告未按期还本付息，原告要求被告偿还本金、利息及违约金。',
     },
   ],
   ADMINISTRATIVE: [
     {
       title: '行政处罚异议',
-      template: '原告{plaintiff}对{department}作出的{penalty_type}决定不服，认为该处罚决定认定事实不清、适用法律错误。原告要求撤销该行政处罚决定，或减轻处罚。',
+      template:
+        '原告{plaintiff}对{department}作出的{penalty_type}决定不服，认为该处罚决定认定事实不清、适用法律错误。原告要求撤销该行政处罚决定，或减轻处罚。',
     },
     {
       title: '行政强制',
-      template: '原告{plaintiff}对{department}采取的{action}行政强制措施不服，认为该措施违反法定程序，侵害了原告合法权益。现依法提起行政诉讼。',
+      template:
+        '原告{plaintiff}对{department}采取的{action}行政强制措施不服，认为该措施违反法定程序，侵害了原告合法权益。现依法提起行政诉讼。',
     },
     {
       title: '信息公开',
-      template: '原告{plaintiff}向{department}申请公开{location}相关信息，{department}未在法定期限内予以答复/拒绝公开。原告要求{department}依法公开相关信息。',
+      template:
+        '原告{plaintiff}向{department}申请公开{location}相关信息，{department}未在法定期限内予以答复/拒绝公开。原告要求{department}依法公开相关信息。',
     },
     {
       title: '行政许可',
-      template: '原告{plaintiff}向{department}申请{location}行政许可，{department}不予许可/不予答复。原告认为{department}的决定违反法律规定，要求其履行许可职责。',
+      template:
+        '原告{plaintiff}向{department}申请{location}行政许可，{department}不予许可/不予答复。原告认为{department}的决定违反法律规定，要求其履行许可职责。',
     },
     {
       title: '行政赔偿',
-      template: '原告{plaintiff}的合法财产被{department}违法采取行政强制措施造成损失，要求{department}行政赔偿{amount}元。',
+      template:
+        '原告{plaintiff}的合法财产被{department}违法采取行政强制措施造成损失，要求{department}行政赔偿{amount}元。',
     },
   ],
   INTELLECTUAL_PROPERTY: [
     {
       title: '著作权侵权',
-      template: '原告{plaintiff}依法享有"{work}"作品的著作权。被告{defendant}未经原告许可，擅自{action}该作品，侵犯了原告的著作权。原告要求被告停止侵权并赔偿损失{amount}元。',
+      template:
+        '原告{plaintiff}依法享有"{work}"作品的著作权。被告{defendant}未经原告许可，擅自{action}该作品，侵犯了原告的著作权。原告要求被告停止侵权并赔偿损失{amount}元。',
     },
     {
       title: '专利侵权',
-      template: '原告{plaintiff}依法享有专利号{patent}的专利权。被告{defendant}生产、销售的产品{product}落入原告专利保护范围，构成专利侵权。原告要求被告停止侵权并赔偿损失。',
+      template:
+        '原告{plaintiff}依法享有专利号{patent}的专利权。被告{defendant}生产、销售的产品{product}落入原告专利保护范围，构成专利侵权。原告要求被告停止侵权并赔偿损失。',
     },
   ],
 };
@@ -207,7 +248,8 @@ const caseDescriptionTemplates: Record<string, { title: string; template: string
 const commonTemplates = [
   {
     title: '通用模板',
-    template: '本案系{type}案件。原告{plaintiff}与被告{defendant}因{cause}发生争议，请求法院依法判决。',
+    template:
+      '本案系{type}案件。原告{plaintiff}与被告{defendant}因{cause}发生争议，请求法院依法判决。',
   },
 ];
 
@@ -320,7 +362,7 @@ export default function CreateCasePage() {
 
   // 应用模板
   const applyTemplate = (template: string) => {
-    let filledTemplate = template
+    const filledTemplate = template
       .replace(/{plaintiff}/g, formData.plaintiffName || '原告')
       .replace(/{defendant}/g, formData.defendantName || '被告')
       .replace(/{cause}/g, formData.cause || '相关')
@@ -338,7 +380,20 @@ export default function CreateCasePage() {
       .replace(/{work}/g, '待定作品')
       .replace(/{patent}/g, '待定专利')
       .replace(/{product}/g, '待定产品')
-      .replace(/{type}/g, formData.type === 'CIVIL' ? '民事' : formData.type === 'CRIMINAL' ? '刑事' : formData.type === 'LABOR' ? '劳动' : formData.type === 'COMMERCIAL' ? '商事' : formData.type === 'ADMINISTRATIVE' ? '行政' : '知识产权');
+      .replace(
+        /{type}/g,
+        formData.type === 'CIVIL'
+          ? '民事'
+          : formData.type === 'CRIMINAL'
+            ? '刑事'
+            : formData.type === 'LABOR'
+              ? '劳动'
+              : formData.type === 'COMMERCIAL'
+                ? '商事'
+                : formData.type === 'ADMINISTRATIVE'
+                  ? '行政'
+                  : '知识产权'
+      );
 
     setFormData(prev => ({ ...prev, description: filledTemplate }));
     setShowTemplates(false);
@@ -369,15 +424,19 @@ export default function CreateCasePage() {
         setFormData(prev => ({ ...prev, description: data.data.description }));
       } else {
         // AI 生成失败，使用模板
-        const templates = caseDescriptionTemplates[formData.type] || commonTemplates;
-        const fallbackTemplate = templates[0]?.template || commonTemplates[0].template;
+        const templates =
+          caseDescriptionTemplates[formData.type] || commonTemplates;
+        const fallbackTemplate =
+          templates[0]?.template || commonTemplates[0].template;
         applyTemplate(fallbackTemplate);
       }
     } catch (error) {
       console.error('AI生成失败:', error);
       // 降级使用模板
-      const templates = caseDescriptionTemplates[formData.type] || commonTemplates;
-      const fallbackTemplate = templates[0]?.template || commonTemplates[0].template;
+      const templates =
+        caseDescriptionTemplates[formData.type] || commonTemplates;
+      const fallbackTemplate =
+        templates[0]?.template || commonTemplates[0].template;
       applyTemplate(fallbackTemplate);
     } finally {
       setIsGeneratingAI(false);
@@ -561,7 +620,9 @@ export default function CreateCasePage() {
                       <option value='ADMINISTRATIVE'>行政案件</option>
                       <option value='COMMERCIAL'>商事案件</option>
                       <option value='LABOR'>劳动案件</option>
-                      <option value='INTELLECTUAL_PROPERTY'>知识产权案件</option>
+                      <option value='INTELLECTUAL_PROPERTY'>
+                        知识产权案件
+                      </option>
                     </select>
                   </div>
 
@@ -632,7 +693,9 @@ export default function CreateCasePage() {
                         disabled={isGeneratingAI}
                         className='flex items-center gap-1 text-purple-600 hover:text-purple-700'
                       >
-                        <Sparkles className={`h-3 w-3 ${isGeneratingAI ? 'animate-spin' : ''}`} />
+                        <Sparkles
+                          className={`h-3 w-3 ${isGeneratingAI ? 'animate-spin' : ''}`}
+                        />
                         {isGeneratingAI ? '生成中...' : 'AI生成'}
                       </Button>
                     </div>
@@ -644,16 +707,18 @@ export default function CreateCasePage() {
                         选择模板（将自动填充已填写的当事人信息）：
                       </p>
                       <div className='flex flex-wrap gap-2'>
-                        {(caseDescriptionTemplates[formData.type] || []).map((tpl, idx) => (
-                          <button
-                            key={idx}
-                            type='button'
-                            onClick={() => applyTemplate(tpl.template)}
-                            className='rounded-full border border-zinc-300 px-3 py-1 text-xs hover:border-blue-500 hover:bg-blue-50 dark:border-zinc-600 dark:hover:bg-blue-900'
-                          >
-                            {tpl.title}
-                          </button>
-                        ))}
+                        {(caseDescriptionTemplates[formData.type] || []).map(
+                          (tpl, idx) => (
+                            <button
+                              key={idx}
+                              type='button'
+                              onClick={() => applyTemplate(tpl.template)}
+                              className='rounded-full border border-zinc-300 px-3 py-1 text-xs hover:border-blue-500 hover:bg-blue-50 dark:border-zinc-600 dark:hover:bg-blue-900'
+                            >
+                              {tpl.title}
+                            </button>
+                          )
+                        )}
                         {commonTemplates.map((tpl, idx) => (
                           <button
                             key={`common-${idx}`}
@@ -671,7 +736,10 @@ export default function CreateCasePage() {
                     id='description'
                     value={formData.description}
                     onChange={e => handleChange('description', e.target.value)}
-                    placeholder={consultationData?.caseSummary || '请详细描述案件情况...（您也可以点击上方"模板"或"AI生成"来快速创建）'}
+                    placeholder={
+                      consultationData?.caseSummary ||
+                      '请详细描述案件情况...（您也可以点击上方"模板"或"AI生成"来快速创建）'
+                    }
                     rows={5}
                     className='flex w-full rounded-md border border-zinc-300 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-950'
                   />

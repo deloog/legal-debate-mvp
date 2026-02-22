@@ -1,6 +1,6 @@
 /**
  * 分析解析问题
- * 
+ *
  * 发现的问题：
  * 1. 短记录（<500字符）的内容格式显示为"题注\n第一条\n第二条..."
  * 2. 这些记录只提取了标题和目录，没有提取完整内容
@@ -50,7 +50,9 @@ async function main() {
     console.log(`   类型: ${record.lawType}`);
     console.log(`   分类: ${record.category}`);
     console.log(`   内容长度: ${record.fullText.length} 字符`);
-    console.log(`   内容特征: ${record.fullText.includes('题注') ? '有题注' : '无题注'}, ${record.fullText.includes('第一条\n第二条') ? '有条款列表' : '无条款列表'}`);
+    console.log(
+      `   内容特征: ${record.fullText.includes('题注') ? '有题注' : '无题注'}, ${record.fullText.includes('第一条\n第二条') ? '有条款列表' : '无条款列表'}`
+    );
     console.log(`   内容预览: ${record.fullText.substring(0, 100)}...`);
     console.log();
   });
@@ -94,8 +96,12 @@ async function main() {
   console.log();
 
   const withTizhu = failedRecords.filter(r => r.fullText.includes('题注'));
-  const withTiaomu = failedRecords.filter(r => r.fullText.includes('第一条\n第二条'));
-  const withBoth = failedRecords.filter(r => r.fullText.includes('题注') && r.fullText.includes('第一条\n第二条'));
+  const withTiaomu = failedRecords.filter(r =>
+    r.fullText.includes('第一条\n第二条')
+  );
+  const withBoth = failedRecords.filter(
+    r => r.fullText.includes('题注') && r.fullText.includes('第一条\n第二条')
+  );
 
   console.log(`   包含"题注"的记录: ${withTizhu.length} 条`);
   console.log(`   包含"第一条\n第二条"的记录: ${withTiaomu.length} 条`);
@@ -127,7 +133,9 @@ async function main() {
     duplicateLaws.slice(0, 20).forEach(([lawName, records], idx) => {
       console.log(`${idx + 1}. ${lawName}`);
       console.log(`   重复数量: ${records.length} 条`);
-      console.log(`   内容长度范围: ${Math.min(...records.map(r => r.fullText.length))} - ${Math.max(...records.map(r => r.fullText.length))} 字符`);
+      console.log(
+        `   内容长度范围: ${Math.min(...records.map(r => r.fullText.length))} - ${Math.max(...records.map(r => r.fullText.length))} 字符`
+      );
       console.log();
     });
 

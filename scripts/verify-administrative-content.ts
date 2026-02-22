@@ -24,7 +24,9 @@ async function main() {
 
   // 按内容长度分类
   const shortContent = laws.filter(l => l.fullText.length < 500);
-  const mediumContent = laws.filter(l => l.fullText.length >= 500 && l.fullText.length < 2000);
+  const mediumContent = laws.filter(
+    l => l.fullText.length >= 500 && l.fullText.length < 2000
+  );
   const longContent = laws.filter(l => l.fullText.length >= 2000);
 
   console.log('内容长度分布:');

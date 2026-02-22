@@ -41,7 +41,9 @@ async function manualFix() {
       console.log(`✅ ${article.lawName}: ${date.toISOString().split('T')[0]}`);
     } else {
       console.log(`❌ ${article.lawName}: 仍无法处理`);
-      console.log(`   fullText预览: ${text.substring(0, 200).replace(/\s+/g, ' ')}`);
+      console.log(
+        `   fullText预览: ${text.substring(0, 200).replace(/\s+/g, ' ')}`
+      );
     }
   }
 
@@ -51,11 +53,15 @@ async function manualFix() {
   });
   const total = await prisma.lawArticle.count();
   console.log(`\n最终结果: ${missing}/${total} 缺失`);
-  console.log(`完整性评分: ${((total - missing) / total * 100).toFixed(2)}/100`);
+  console.log(
+    `完整性评分: ${(((total - missing) / total) * 100).toFixed(2)}/100`
+  );
 
   if (missing === 0) {
     console.log('\n🎉 所有法条都已修复！完整性评分达到100分！');
   }
 }
 
-manualFix().catch(console.error).finally(() => prisma.$disconnect());
+manualFix()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

@@ -18,7 +18,11 @@ const prisma = new PrismaClient();
  * 关键词 → 分类 映射表（按优先级排序，靠前的优先匹配）
  * 优先级高的规则放在前面，确保更精确的分类先被匹配
  */
-const KEYWORD_RULES: Array<{ pattern: RegExp; category: LawCategory; description: string }> = [
+const KEYWORD_RULES: Array<{
+  pattern: RegExp;
+  category: LawCategory;
+  description: string;
+}> = [
   // 刑事类（优先级最高，因为刑事法通常有明确的"刑法"标识）
   {
     pattern: /刑法|刑事诉讼|治安管理处罚|监狱法|劳动教养/,
@@ -27,109 +31,127 @@ const KEYWORD_RULES: Array<{ pattern: RegExp; category: LawCategory; description
   },
   // 劳动类
   {
-    pattern: /劳动合同法|劳动法|就业促进法|工伤保险条例|职工|工会法|劳动争议|劳动保障|劳动合同|职工代表大会|集体合同|最低工资|工作时间和休息休假|女职工保护|未成年工保护/,
+    pattern:
+      /劳动合同法|劳动法|就业促进法|工伤保险条例|职工|工会法|劳动争议|劳动保障|劳动合同|职工代表大会|集体合同|最低工资|工作时间和休息休假|女职工保护|未成年工保护/,
     category: LawCategory.LABOR,
     description: '劳动法律法规',
   },
   // 知识产权类
   {
-    pattern: /专利法|商标法|著作权法|知识产权|反不正当竞争法|植物新品种保护条例/,
+    pattern:
+      /专利法|商标法|著作权法|知识产权|反不正当竞争法|植物新品种保护条例/,
     category: LawCategory.INTELLECTUAL_PROPERTY,
     description: '知识产权法',
   },
   // 商事/经济法类
   {
-    pattern: /公司法|证券法|保险法|银行业监督管理|票据法|破产法|期货交易管理|企业国有资产|金融|外汇|公司登记|企业登记|合伙企业|个人独资企业/,
+    pattern:
+      /公司法|证券法|保险法|银行业监督管理|票据法|破产法|期货交易管理|企业国有资产|金融|外汇|公司登记|企业登记|合伙企业|个人独资企业/,
     category: LawCategory.COMMERCIAL,
     description: '商法',
   },
   // 民法类
   {
-    pattern: /民法典|合同法|物权法|婚姻法|继承法|侵权责任法|民事诉讼法|收养法|抵押法|质押法|担保法|民法通则|人格权|个人信息保护|债权|所有权|用益物权|担保物权/,
+    pattern:
+      /民法典|合同法|物权法|婚姻法|继承法|侵权责任法|民事诉讼法|收养法|抵押法|质押法|担保法|民法通则|人格权|个人信息保护|债权|所有权|用益物权|担保物权/,
     category: LawCategory.CIVIL,
     description: '民事法律',
   },
   // 行政类
   {
-    pattern: /行政许可法|行政处罚法|行政复议法|行政诉讼法|公务员法|政府采购法|国家赔偿法|行政强制法|行政处罚|行政管理|城市管理|市容环境卫生|绿化|市政公用|行政执法|行政检查/,
+    pattern:
+      /行政许可法|行政处罚法|行政复议法|行政诉讼法|公务员法|政府采购法|国家赔偿法|行政强制法|行政处罚|行政管理|城市管理|市容环境卫生|绿化|市政公用|行政执法|行政检查/,
     category: LawCategory.ADMINISTRATIVE,
     description: '行政法',
   },
   // 经济管理类（环保/食药/安全生产等）
   {
-    pattern: /环境保护法|食品安全法|药品管理法|安全生产法|消费者权益保护法|价格法|反垄断法|反洗钱法|电信条例|互联网信息服务|产品质量|计量|标准化|认证认可|特种设备|危险化学品|消防|道路交通|道路运输|公路|航道|港口|市场监管/,
+    pattern:
+      /环境保护法|食品安全法|药品管理法|安全生产法|消费者权益保护法|价格法|反垄断法|反洗钱法|电信条例|互联网信息服务|产品质量|计量|标准化|认证认可|特种设备|危险化学品|消防|道路交通|道路运输|公路|航道|港口|市场监管/,
     category: LawCategory.ECONOMIC,
     description: '经济管理法',
   },
   // 程序法类
   {
-    pattern: /诉讼法|仲裁法|司法鉴定|法院组织法|检察院组织法|人民调解法|公证法|仲裁委员会|人民调解|司法协助|引渡|法律援助|律师|公证/,
+    pattern:
+      /诉讼法|仲裁法|司法鉴定|法院组织法|检察院组织法|人民调解法|公证法|仲裁委员会|人民调解|司法协助|引渡|法律援助|律师|公证/,
     category: LawCategory.PROCEDURE,
     description: '程序法',
   },
   // 地方性法规 - 民政/社会保障类
   {
-    pattern: /最低生活保障|医疗救助|临时救助|流浪乞讨人员|收养登记|殡葬管理|婚姻登记|社会团体|民办非企业单位|基金会|志愿服务|老龄工作|残疾人保障|妇女儿童|社会救助|社会福利|慈善事业/,
+    pattern:
+      /最低生活保障|医疗救助|临时救助|流浪乞讨人员|收养登记|殡葬管理|婚姻登记|社会团体|民办非企业单位|基金会|志愿服务|老龄工作|残疾人保障|妇女儿童|社会救助|社会福利|慈善事业/,
     category: LawCategory.LABOR,
     description: '民政社会保障',
   },
   // 地方性法规 - 城市建设/规划类
   {
-    pattern: /城乡规划|城市总体规划|控制性详细规划|修建性详细规划|土地利用总体规划|国土空间规划|房地产开发|物业管理|房屋租赁|住宅建筑|公共租赁住房|经济适用房|城市建设|市政工程|供水|供热|供气|污水处理/,
+    pattern:
+      /城乡规划|城市总体规划|控制性详细规划|修建性详细规划|土地利用总体规划|国土空间规划|房地产开发|物业管理|房屋租赁|住宅建筑|公共租赁住房|经济适用房|城市建设|市政工程|供水|供热|供气|污水处理/,
     category: LawCategory.ADMINISTRATIVE,
     description: '城乡规划建设',
   },
   // 地方性法规 - 环境保护类
   {
-    pattern: /污染防治|水污染防治|大气污染防治|固体废物|噪声污染防治|辐射污染防治|生态保护|湿地保护|水源地保护|排污许可|环境影响评价|环境监测|自然保护地|生物多样性保护/,
+    pattern:
+      /污染防治|水污染防治|大气污染防治|固体废物|噪声污染防治|辐射污染防治|生态保护|湿地保护|水源地保护|排污许可|环境影响评价|环境监测|自然保护地|生物多样性保护/,
     category: LawCategory.ECONOMIC,
     description: '环境保护',
   },
   // 地方性法规 - 农林牧渔类
   {
-    pattern: /农业|农村|农民|乡村振兴|耕地保护|基本农田|土地管理|林业|森林保护|草原保护|渔业|水产|畜牧|动物防疫|农作物种子|农药管理|兽药管理|种畜禽管理|饲料|饲料添加剂/,
+    pattern:
+      /农业|农村|农民|乡村振兴|耕地保护|基本农田|土地管理|林业|森林保护|草原保护|渔业|水产|畜牧|动物防疫|农作物种子|农药管理|兽药管理|种畜禽管理|饲料|饲料添加剂/,
     category: LawCategory.ECONOMIC,
     description: '农业农村',
   },
   // 地方性法规 - 教育科技类
   {
-    pattern: /教育|学校|教师|义务教育|职业教育|民办教育|科学技术|科技进步|技术创新|科技成果转化|高等教育|基础教育|学前教育|特殊教育/,
+    pattern:
+      /教育|学校|教师|义务教育|职业教育|民办教育|科学技术|科技进步|技术创新|科技成果转化|高等教育|基础教育|学前教育|特殊教育/,
     category: LawCategory.ADMINISTRATIVE,
     description: '教育科技',
   },
   // 地方性法规 - 文化卫生类
   {
-    pattern: /文化|文物保护|非物质文化遗产|广播电视|新闻出版|卫生|医疗机构|医疗管理|传染病防治|突发公共卫生事件|人口与计划生育|公共文化服务|文化市场|旅游|文物/,
+    pattern:
+      /文化|文物保护|非物质文化遗产|广播电视|新闻出版|卫生|医疗机构|医疗管理|传染病防治|突发公共卫生事件|人口与计划生育|公共文化服务|文化市场|旅游|文物/,
     category: LawCategory.ADMINISTRATIVE,
     description: '文化卫生',
   },
   // 地方性法规 - 公安/司法行政类
   {
-    pattern: /公安机关|人民警察|治安管理|网络安全|禁毒|出境入境|枪支管理|爆炸物品管理|特种行业|司法行政|社区矫正|安置帮教/,
+    pattern:
+      /公安机关|人民警察|治安管理|网络安全|禁毒|出境入境|枪支管理|爆炸物品管理|特种行业|司法行政|社区矫正|安置帮教/,
     category: LawCategory.ADMINISTRATIVE,
     description: '公安司法',
   },
   // 地方性法规 - 财政/税务类
   {
-    pattern: /财政|税务|税收|非税收入|预算管理|国债|政府采购|会计|注册会计师|国有资产/,
+    pattern:
+      /财政|税务|税收|非税收入|预算管理|国债|政府采购|会计|注册会计师|国有资产/,
     category: LawCategory.ECONOMIC,
     description: '财政税务',
   },
   // 地方性法规 - 交通/物流类
   {
-    pattern: /交通运输|道路运输|水路运输|铁路运输|航空运输|城市公共交通|出租车|网约车|物流|快递|停车场|机动车|非机动车/,
+    pattern:
+      /交通运输|道路运输|水路运输|铁路运输|航空运输|城市公共交通|出租车|网约车|物流|快递|停车场|机动车|非机动车/,
     category: LawCategory.ECONOMIC,
     description: '交通运输',
   },
   // 地方性法规 - 水利/电力/能源类
   {
-    pattern: /水利|水资源|防汛抗旱|灌溉|水文|电力|能源|石油|天然气|煤炭|可再生能源|节能/,
+    pattern:
+      /水利|水资源|防汛抗旱|灌溉|水文|电力|能源|石油|天然气|煤炭|可再生能源|节能/,
     category: LawCategory.ECONOMIC,
     description: '能源水利',
   },
   // 地方性法规 - 房地产/建筑类
   {
-    pattern: /房地产|建筑|建筑业|工程勘察|工程设计|施工|监理|造价|招投标|工程质量|安全生产|建筑节能|绿色建筑/,
+    pattern:
+      /房地产|建筑|建筑业|工程勘察|工程设计|施工|监理|造价|招投标|工程质量|安全生产|建筑节能|绿色建筑/,
     category: LawCategory.ECONOMIC,
     description: '房地产建筑',
   },
@@ -153,7 +175,8 @@ const KEYWORD_RULES: Array<{ pattern: RegExp; category: LawCategory; description
   },
   // 地方性法规 - 信息化/通信类
   {
-    pattern: /信息化|大数据|云计算|人工智能|5G|通信|无线电|网络|数据安全|个人信息保护/,
+    pattern:
+      /信息化|大数据|云计算|人工智能|5G|通信|无线电|网络|数据安全|个人信息保护/,
     category: LawCategory.ECONOMIC,
     description: '信息化通信',
   },
@@ -177,7 +200,8 @@ const KEYWORD_RULES: Array<{ pattern: RegExp; category: LawCategory; description
   },
   // 地方性法规 - 自然保护区/风景名胜区
   {
-    pattern: /自然保护区|风景名胜区|地质公园|森林公园|湿地公园|自然遗产|文化遗产保护/,
+    pattern:
+      /自然保护区|风景名胜区|地质公园|森林公园|湿地公园|自然遗产|文化遗产保护/,
     category: LawCategory.ECONOMIC,
     description: '自然保护地',
   },
@@ -5876,12 +5900,14 @@ const KEYWORD_RULES: Array<{ pattern: RegExp; category: LawCategory; description
     description: '基本法附件修正案',
   },
   {
-    pattern: /全国人民代表大会.*关于设立.*的决定|全国人民代表大会.*关于建立.*的决定/,
+    pattern:
+      /全国人民代表大会.*关于设立.*的决定|全国人民代表大会.*关于建立.*的决定/,
     category: LawCategory.PROCEDURE,
     description: '设立建立决定',
   },
   {
-    pattern: /关于.*国都.*决议|关于.*纪年.*决议|关于.*国庆.*决议|关于.*国歌.*决议|关于.*国旗.*决议/,
+    pattern:
+      /关于.*国都.*决议|关于.*纪年.*决议|关于.*国庆.*决议|关于.*国歌.*决议|关于.*国旗.*决议/,
     category: LawCategory.PROCEDURE,
     description: '宪制性决议',
   },
@@ -6920,7 +6946,8 @@ const KEYWORD_RULES: Array<{ pattern: RegExp; category: LawCategory; description
     description: '矿山安全法',
   },
   {
-    pattern: /.*人民代表大会.*主席团工作.*条例|.*人民代表大会.*主席团工作.*规定/,
+    pattern:
+      /.*人民代表大会.*主席团工作.*条例|.*人民代表大会.*主席团工作.*规定/,
     category: LawCategory.PROCEDURE,
     description: '主席团工作',
   },
@@ -8379,7 +8406,8 @@ const KEYWORD_RULES: Array<{ pattern: RegExp; category: LawCategory; description
   },
   // 国家级基本法律（国界法、监察法等）
   {
-    pattern: /陆地国界法|监察官法|反外国制裁法|外国中央银行财产司法强制措施豁免法/,
+    pattern:
+      /陆地国界法|监察官法|反外国制裁法|外国中央银行财产司法强制措施豁免法/,
     category: LawCategory.PROCEDURE,
     description: '国家级基本法律',
   },
@@ -9360,7 +9388,8 @@ async function main(): Promise<void> {
             });
 
             stats.totalFixed++;
-            stats.byCategory[newCategory] = (stats.byCategory[newCategory] ?? 0) + 1;
+            stats.byCategory[newCategory] =
+              (stats.byCategory[newCategory] ?? 0) + 1;
 
             console.log(
               `  ✓ "${article.lawName.substring(0, 40)}..." → ${newCategory}`
@@ -9394,7 +9423,9 @@ async function main(): Promise<void> {
     console.log();
     console.log(`总计处理: ${stats.totalProcessed} 条`);
     console.log(`成功修正: ${stats.totalFixed} 条`);
-    console.log(`修正率: ${((stats.totalFixed / stats.totalProcessed) * 100).toFixed(2)}%`);
+    console.log(
+      `修正率: ${((stats.totalFixed / stats.totalProcessed) * 100).toFixed(2)}%`
+    );
     console.log();
     console.log('[分类分布变化]');
     for (const [category, count] of Object.entries(stats.byCategory)) {
@@ -9435,7 +9466,7 @@ main()
     console.log('[fix-law-categories] 脚本执行完毕');
     process.exit(0);
   })
-  .catch((error) => {
+  .catch(error => {
     console.error('[fix-law-categories] 脚本执行失败:', error);
     process.exit(1);
   });

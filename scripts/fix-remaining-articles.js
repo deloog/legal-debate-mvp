@@ -13,9 +13,21 @@ const MISSING_DATE = new Date('1970-01-01T00:00:00Z');
  * 中文数字转阿拉伯数字
  */
 function cnToNumber(cn) {
-  const cnNums = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+  const cnNums = [
+    '零',
+    '一',
+    '二',
+    '三',
+    '四',
+    '五',
+    '六',
+    '七',
+    '八',
+    '九',
+    '十',
+  ];
   const mapping = {};
-  cnNums.forEach((v, i) => mapping[v] = i);
+  cnNums.forEach((v, i) => (mapping[v] = i));
 
   // 处理 "一九八六" 格式
   if (/^[一二三四五六七八九十]+$/.test(cn)) {
@@ -57,7 +69,7 @@ function extractAllDates(text) {
 
   // 1. 先清理空格和特殊字符
   const cleanedText = text
-    .replace(/\s+/g, '')  // 移除所有空格
+    .replace(/\s+/g, '') // 移除所有空格
     .replace(/[　]/g, ''); // 移除全角空格
 
   // 2. 标准格式: 2023年1月15日
@@ -74,7 +86,8 @@ function extractAllDates(text) {
   }
 
   // 3. 中文数字格式: 一九八六年七月十二日
-  const cnDateRegex = /([一二三四五六七八九十]+)年([一二三四五六七八九十]+)月([一二三四五六七八九十]+)日/g;
+  const cnDateRegex =
+    /([一二三四五六七八九十]+)年([一二三四五六七八九十]+)月([一二三四五六七八九十]+)日/g;
   while ((match = cnDateRegex.exec(text)) !== null) {
     const year = cnToNumber(match[1]);
     const month = cnToNumber(match[2]);
@@ -150,7 +163,9 @@ async function fixRemaining() {
     if (dates.length > 0) {
       console.log(`   找到 ${dates.length} 个日期:`);
       dates.forEach(d => {
-        console.log(`   - ${d.date.toISOString().split('T')[0]} (${d.match}, ${d.type})`);
+        console.log(
+          `   - ${d.date.toISOString().split('T')[0]} (${d.match}, ${d.type})`
+        );
       });
     }
 
@@ -167,7 +182,9 @@ async function fixRemaining() {
       });
 
       stats.success++;
-      console.log(`   ✅ 修复成功: ${dateResult.date.toISOString().split('T')[0]}\n`);
+      console.log(
+        `   ✅ 修复成功: ${dateResult.date.toISOString().split('T')[0]}\n`
+      );
     } else {
       stats.failed++;
       stats.errors.push(article.lawName);

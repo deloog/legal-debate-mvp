@@ -15,7 +15,7 @@ async function main() {
 
   // 查询当前数据库记录数
   const currentCount = await prisma.lawArticle.count({
-    where: { dataSource: 'flk' }
+    where: { dataSource: 'flk' },
   });
 
   console.log(`当前数据库记录数: ${currentCount} 条`);
@@ -24,7 +24,7 @@ async function main() {
   // 检查是否有正在运行的任务
   console.log('检查是否有正在运行的采集任务...');
   const crawler = new FLKCrawler();
-  
+
   console.log('开始全量采集...');
   console.log('预计采集量: 约 28,960 条记录');
   console.log('预计耗时: 数小时到数天（取决于网络速度）');
@@ -48,7 +48,7 @@ async function main() {
   console.log(`更新数: ${result.itemsUpdated}`);
   console.log(`错误数: ${result.errors.length}`);
   console.log(`耗时: ${(result.duration / 1000 / 60).toFixed(2)} 分钟`);
-  
+
   if (result.errors.length > 0) {
     console.log();
     console.log('错误列表:');
@@ -60,10 +60,12 @@ async function main() {
 
   // 查询采集后的记录数
   const finalCount = await prisma.lawArticle.count({
-    where: { dataSource: 'flk' }
+    where: { dataSource: 'flk' },
   });
   console.log();
-  console.log(`数据库总记录数: ${currentCount} → ${finalCount} (+${finalCount - currentCount})`);
+  console.log(
+    `数据库总记录数: ${currentCount} → ${finalCount} (+${finalCount - currentCount})`
+  );
 
   await prisma.$disconnect();
 }

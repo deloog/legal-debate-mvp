@@ -78,7 +78,7 @@ export default function EditContractPage({ params }: EditContractPageProps) {
             specialTerms: contract.specialTerms || '',
             payments:
               contract.payments?.length > 0
-                ? contract.payments.map((p: any) => ({
+                ? contract.payments.map((p: unknown) => ({
                     paymentType: p.paymentType || '',
                     amount: parseFloat(p.amount) || 0,
                   }))

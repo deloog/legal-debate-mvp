@@ -1,6 +1,6 @@
 /**
  * 重新解析失败的记录 - 从在线重新下载
- * 
+ *
  * 针对 38 条解析失败的记录：
  * - 从国家法律法规库重新下载 DOCX 文件
  * - 使用改进的 DOCX 解析器
@@ -85,13 +85,16 @@ async function main() {
 
       // 获取详情
       const detail = await crawler['fetchDetail'](docId);
-      
+
       if (!detail?.data?.ossFile?.ossWordPath) {
         throw new Error('无法获取 DOCX 下载路径');
       }
 
       // 下载 DOCX
-      const docxBuffer = await crawler['downloadDocx'](docId, detail.data.ossFile.ossWordPath);
+      const docxBuffer = await crawler['downloadDocx'](
+        docId,
+        detail.data.ossFile.ossWordPath
+      );
 
       if (docxBuffer.length < 100) {
         throw new Error(`文件过小 (${docxBuffer.length} bytes)`);
@@ -101,7 +104,7 @@ async function main() {
 
       // 解析
       const doc = await docxParser.parse(docxBuffer, `flk://${docId}`);
-      
+
       if (!doc || !doc.fullText || doc.fullText.length <= 500) {
         throw new Error('解析结果不完整');
       }

@@ -37,10 +37,7 @@ async function main(): Promise<void> {
   const shortRecords = await prisma.lawArticle.findMany({
     where: {
       dataSource: 'flk',
-      OR: [
-        { fullText: { equals: '' } },
-        { fullText: { equals: ' ' } },
-      ],
+      OR: [{ fullText: { equals: '' } }, { fullText: { equals: ' ' } }],
     },
     take: 100,
     orderBy: { fullText: 'asc' },
@@ -71,7 +68,9 @@ async function main(): Promise<void> {
 
   for (let i = 0; i < shortRecords.length; i++) {
     const record = shortRecords[i];
-    console.log(`  [${i + 1}/${shortRecords.length}] ${record.lawName.substring(0, 40)}...`);
+    console.log(
+      `  [${i + 1}/${shortRecords.length}] ${record.lawName.substring(0, 40)}...`
+    );
 
     try {
       if (!record.sourceId) {
@@ -93,7 +92,9 @@ async function main(): Promise<void> {
             lastSyncedAt: new Date(),
           },
         });
-        console.log(`    - 成功: 从 API 获取新内容，${detail.data.content.length} 字符`);
+        console.log(
+          `    - 成功: 从 API 获取新内容，${detail.data.content.length} 字符`
+        );
         fixedCount++;
       } else {
         // 无法恢复，标记为需要更新

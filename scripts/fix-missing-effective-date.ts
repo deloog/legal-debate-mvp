@@ -44,25 +44,30 @@ function fetchDetail(bbbs: string): Promise<any> {
   return new Promise((resolve, reject) => {
     const url = `${API_DETAIL}?bbbs=${encodeURIComponent(bbbs)}`;
 
-    const req = https.request(url, {
-      method: 'GET',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/json, text/plain, */*',
-        'Referer': 'https://flk.npc.gov.cn/',
+    const req = https.request(
+      url,
+      {
+        method: 'GET',
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          Accept: 'application/json, text/plain, */*',
+          Referer: 'https://flk.npc.gov.cn/',
+        },
+        agent: insecureAgent,
       },
-      agent: insecureAgent,
-    }, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try {
-          resolve(JSON.parse(data));
-        } catch (e) {
-          reject(new Error('解析JSON失败'));
-        }
-      });
-    });
+      res => {
+        let data = '';
+        res.on('data', chunk => (data += chunk));
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            reject(new Error('解析JSON失败'));
+          }
+        });
+      }
+    );
 
     req.on('error', reject);
     req.setTimeout(30000, () => {
@@ -102,7 +107,11 @@ function extractDateFromText(text: string): Date | null {
 
 async function fixMissingEffectiveDate(): Promise<FixStats> {
   console.log('='.repeat(70));
-  console.log(isTestMode ? '🧪 测试模式: 修复缺少有效日期的法条数据' : '🚀 修复缺少有效日期的法条数据');
+  console.log(
+    isTestMode
+      ? '🧪 测试模式: 修复缺少有效日期的法条数据'
+      : '🚀 修复缺少有效日期的法条数据'
+  );
   console.log('='.repeat(70) + '\n');
 
   const stats: FixStats = {
@@ -130,7 +139,9 @@ async function fixMissingEffectiveDate(): Promise<FixStats> {
   });
 
   stats.total = missingArticles.length;
-  console.log(`📊 需要修复的法条数量: ${stats.total}${isTestMode ? ' (测试模式)' : ''}\n`);
+  console.log(
+    `📊 需要修复的法条数量: ${stats.total}${isTestMode ? ' (测试模式)' : ''}\n`
+  );
 
   // 2. 创建修复日志记录
   const fixLogId = `fix-effective-date-${Date.now()}`;
@@ -167,7 +178,9 @@ async function fixMissingEffectiveDate(): Promise<FixStats> {
         continue;
       }
 
-      console.log(`   API响应: code=${detail.code}, data exists=${!!detail.data}`);
+      console.log(
+        `   API响应: code=${detail.code}, data exists=${!!detail.data}`
+      );
 
       // 确定有效日期
       let effectiveDate: Date | null = null;
@@ -187,7 +200,9 @@ async function fixMissingEffectiveDate(): Promise<FixStats> {
         const extractedDate = extractDateFromText(detail.data.title);
         if (extractedDate) {
           effectiveDate = extractedDate;
-          console.log(`   从标题推断日期: ${extractedDate.toISOString().split('T')[0]}`);
+          console.log(
+            `   从标题推断日期: ${extractedDate.toISOString().split('T')[0]}`
+          );
         }
       }
 
@@ -212,16 +227,23 @@ async function fixMissingEffectiveDate(): Promise<FixStats> {
       });
 
       stats.success++;
-      console.log(`${progress}   ✅ 修复成功: effectiveDate = ${effectiveDate.toISOString().split('T')[0]}`);
+      console.log(
+        `${progress}   ✅ 修复成功: effectiveDate = ${effectiveDate.toISOString().split('T')[0]}`
+      );
 
       // 记录修复日志
-      await logFixOperation(fixLogId, article.id, article.lawName, effectiveDate);
+      await logFixOperation(
+        fixLogId,
+        article.id,
+        article.lawName,
+        effectiveDate
+      );
 
       // 限速：避免请求过快
       await new Promise(resolve => setTimeout(resolve, isTestMode ? 200 : 500));
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       stats.failed++;
       stats.errors.push({
         id: article.id,
@@ -296,7 +318,9 @@ async function verifyFix(): Promise<void> {
 }
 
 async function main() {
-  console.log(`\n🚀 开始${isTestMode ? '测试' : ''}修复缺少有效日期的法条数据...\n`);
+  console.log(
+    `\n🚀 开始${isTestMode ? '测试' : ''}修复缺少有效日期的法条数据...\n`
+  );
 
   try {
     // 执行修复
@@ -322,9 +346,10 @@ async function main() {
 
     if (isTestMode && stats.success > 0) {
       console.log('\n✅ 测试成功！API 可用，可以运行完整修复。');
-      console.log('运行命令: npx ts-node scripts/fix-missing-effective-date.ts');
+      console.log(
+        '运行命令: npx ts-node scripts/fix-missing-effective-date.ts'
+      );
     }
-
   } catch (error) {
     console.error('修复过程出错:', error);
     throw error;

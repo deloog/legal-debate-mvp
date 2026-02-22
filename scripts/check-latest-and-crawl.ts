@@ -39,8 +39,8 @@ async function main() {
   console.log('开始采集...');
   console.log();
 
-  const sinceDate = latestRecord?.effectiveDate 
-    ? new Date(latestRecord.effectiveDate) 
+  const sinceDate = latestRecord?.effectiveDate
+    ? new Date(latestRecord.effectiveDate)
     : undefined;
 
   const result = await crawler.incrementalCrawl(

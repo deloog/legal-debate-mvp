@@ -32,7 +32,9 @@ async function main() {
     ORDER BY count DESC
   `;
   console.log('\n[3] 按学科分类统计:');
-  categoryStats.forEach(s => console.log('   ', s.category + ':', s.count, '条'));
+  categoryStats.forEach(s =>
+    console.log('   ', s.category + ':', s.count, '条')
+  );
 
   // 4. 全文长度分布
   const lengthStats = await prisma.$queryRaw`
@@ -50,7 +52,9 @@ async function main() {
     GROUP BY range
   `;
   console.log('\n[4] 全文长度分布:');
-  lengthStats.forEach(s => console.log('   ', (s.range + '').padEnd(10), ':', s.count, '条'));
+  lengthStats.forEach(s =>
+    console.log('   ', (s.range + '').padEnd(10), ':', s.count, '条')
+  );
 
   // 5. 随机样本
   console.log('\n[5] 随机样本（5条）:');
@@ -63,7 +67,15 @@ async function main() {
   `;
   samples.forEach(s => {
     console.log('   -', s.law_name.substring(0, 50));
-    console.log('     类型:', s.law_type, '| 分类:', s.category, '| 长度:', s.len, '字符');
+    console.log(
+      '     类型:',
+      s.law_type,
+      '| 分类:',
+      s.category,
+      '| 长度:',
+      s.len,
+      '字符'
+    );
   });
 
   // 6. 可疑记录
@@ -77,10 +89,7 @@ async function main() {
   const unknownAuth = await prisma.lawArticle.count({
     where: {
       dataSource: 'flk',
-      OR: [
-        { issuingAuthority: '未知' },
-        { issuingAuthority: '' },
-      ],
+      OR: [{ issuingAuthority: '未知' }, { issuingAuthority: '' }],
     },
   });
   console.log('   缺失发布机关:', unknownAuth, '条');
@@ -88,4 +97,6 @@ async function main() {
   console.log('\n' + '='.repeat(70));
 }
 
-main().catch(console.error).finally(() => prisma.$disconnect());
+main()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

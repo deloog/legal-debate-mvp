@@ -1,12 +1,12 @@
 /**
  * 通用 API 数据处理 Hook
- * 
+ *
  * 提供统一的 API 调用逻辑，自动处理：
  * - 响应状态检查
  * - 数据格式验证
  * - 错误处理
  * - 加载状态
- * 
+ *
  * 使用方式：
  * const { data, loading, error, execute } = useApiData<MyType>('/api/items');
  * await execute();
@@ -97,7 +97,9 @@ export function createUseApiData<T = unknown>(
               'Content-Type': 'application/json',
               ...fetchOptions.headers,
             },
-            body: fetchOptions.body ? JSON.stringify(fetchOptions.body) : undefined,
+            body: fetchOptions.body
+              ? JSON.stringify(fetchOptions.body)
+              : undefined,
           });
 
           // 检查响应状态
@@ -105,7 +107,11 @@ export function createUseApiData<T = unknown>(
             let errorMessage = `请求失败: ${response.status}`;
             try {
               const errorData = await response.json();
-              errorMessage = errorData.error?.message || errorData.message || errorData.error || errorMessage;
+              errorMessage =
+                errorData.error?.message ||
+                errorData.message ||
+                errorData.error ||
+                errorMessage;
             } catch {
               // 忽略 JSON 解析错误
             }
@@ -119,7 +125,9 @@ export function createUseApiData<T = unknown>(
 
           // 检查业务成功状态
           if (responseData.success === false) {
-            const err = new Error(responseData.error?.message || '业务处理失败');
+            const err = new Error(
+              responseData.error?.message || '业务处理失败'
+            );
             setError(err);
             options.onError?.(err);
             return null;
@@ -158,14 +166,14 @@ export function createUseApiData<T = unknown>(
           setLoading(false);
         }
       },
-      [defaultUrl, options]
+      []
     );
 
     const reset = useCallback(() => {
       setData(options.initialData as T | null);
       setError(null);
       setLoading(false);
-    }, [options.initialData]);
+    }, []);
 
     const handleSetData = useCallback((newData: T | null) => {
       setData(newData);
@@ -209,7 +217,7 @@ export function createListHook<T>(url: string) {
 
 /**
  * 安全提取 API 响应数据
- * 
+ *
  * @param response API 响应对象
  * @param dataPath 数据路径，如 'data.items' 或 'data'
  * @param fallback 降级值
@@ -224,7 +232,7 @@ export function safeExtractData<T>(
   }
 
   const value = getNestedValue(response, dataPath);
-  
+
   if (value === undefined || value === null) {
     return fallback;
   }
