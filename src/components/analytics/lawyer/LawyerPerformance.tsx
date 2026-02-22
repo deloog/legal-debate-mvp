@@ -55,6 +55,9 @@ export default function LawyerPerformance({
       url.searchParams.set('limit', '10');
 
       const response = await fetch(url.toString());
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: 获取律师绩效数据失败`);
+      }
       const result = await response.json();
 
       if (result.success) {

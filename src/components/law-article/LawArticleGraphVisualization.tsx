@@ -42,10 +42,29 @@ export function LawArticleGraphVisualization({
         const response = await fetch(
           `/api/v1/law-articles/${centerArticleId}/graph?depth=${depth}`
         );
+
+        // 检查响应状态
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `请求失败: ${response.status}`);
+        }
+
         const data = await response.json();
-        setGraphData(data);
+
+        // 验证数据结构，确保 nodes 和 links 是数组
+        if (!data || typeof data !== 'object') {
+          throw new Error('无效的图谱数据格式');
+        }
+
+        const graphData = {
+          nodes: Array.isArray(data.nodes) ? data.nodes : [],
+          links: Array.isArray(data.links) ? data.links : [],
+        };
+
+        setGraphData(graphData);
       } catch (error) {
         console.error('加载图谱失败:', error);
+        setGraphData({ nodes: [], links: [] });
       } finally {
         setLoading(false);
       }
@@ -55,7 +74,15 @@ export function LawArticleGraphVisualization({
 
   // 渲染图谱
   useEffect(() => {
-    if (!graphData || !svgRef.current) return;
+    // 检查数据是否存在且包含有效的 nodes 和 links 数组
+    if (
+      !graphData ||
+      !svgRef.current ||
+      !Array.isArray(graphData.nodes) ||
+      !Array.isArray(graphData.links)
+    ) {
+      return;
+    }
 
     const width = 1200;
     const height = 800;
@@ -229,9 +256,21 @@ export function LawArticleGraphVisualization({
     );
   }
 
+  // 检查是否有数据
+  const hasData = graphData && graphData.nodes && graphData.nodes.length > 0;
+
   return (
     <div className='relative'>
-      <svg ref={svgRef} className='border rounded-lg w-full' role='img' />
+      {!hasData && !loading && (
+        <div className='flex items-center justify-center h-96 text-gray-500'>
+          暂无图谱数据
+        </div>
+      )}
+      <svg
+        ref={svgRef}
+        className={`border rounded-lg w-full ${!hasData ? 'hidden' : ''}`}
+        role='img'
+      />
 
       {/* 图例 */}
       <div className='absolute top-4 right-4 bg-white p-4 rounded shadow-lg'>

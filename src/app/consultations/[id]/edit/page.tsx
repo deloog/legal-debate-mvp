@@ -63,6 +63,11 @@ export default function EditConsultationPage({
       try {
         setLoading(true);
         const response = await fetch(`/api/consultations/${id}`);
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: 获取咨询详情失败`);
+        }
+
         const data = await response.json();
 
         if (data.success) {

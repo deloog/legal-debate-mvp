@@ -9,6 +9,10 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { searchAllLawArticles } from '@/lib/debate/law-search';
 import { computeArgumentScores } from '@/lib/debate/scoring';
 import {
+  graphEnhancedSearch,
+  formatGraphAnalysisForPrompt,
+} from '@/lib/debate/graph-enhanced-law-search';
+import {
   DebateStatus,
   RoundStatus,
   ArgumentSide,
@@ -346,6 +350,7 @@ export async function GET(
         const startFromRound = debate.currentRound + 1;
 
         // ── 预先检索法条（所有轮次共用同一套法条上下文）──
+        // 1. 先执行关键词搜索
         const { articles: lawArticles } = await searchAllLawArticles(
           debate.case.type ?? null,
           debate.case.title,
@@ -361,6 +366,33 @@ export async function GET(
             `[stream] 检索到 ${lawArticles.length} 条相关法条，注入AI上下文`
           );
         }
+
+        // 2. 并行执行图谱增强搜索（带500ms超时）
+        const graphSearchResult = await graphEnhancedSearch(
+          debate.case.type ?? null,
+          debate.case.title,
+          { timeoutMs: 500, includeAttackPaths: true }
+        );
+
+        // 3. 如果图谱分析完成，注入额外信息
+        let graphAnalysisPrompt = '';
+        if (graphSearchResult.graphAnalysisCompleted) {
+          graphAnalysisPrompt = formatGraphAnalysisForPrompt(graphSearchResult);
+          logger.info(
+            `[stream] 图谱分析完成，支持法条: ${graphSearchResult.supportingArticles.length}, 对方法条: ${graphSearchResult.opposingArticles.length}`
+          );
+        } else {
+          logger.warn(`[stream] 图谱分析超时，仅使用关键词检索`);
+        }
+
+        // 4. 将图谱分析结果添加到description中（用于AI理解法条关系）
+        let enhancedDescription = debate.case.description || '';
+        if (graphAnalysisPrompt) {
+          enhancedDescription = `${enhancedDescription}\n\n${graphAnalysisPrompt}`;
+        }
+
+        // 5. 标记信息来源（用于前端显示）
+        const sourceAttribution = graphSearchResult.sourceAttribution;
 
         for (
           let roundIndex = startFromRound;
@@ -410,10 +442,10 @@ export async function GET(
           }
 
           try {
-            // ── 调用 AI 流式生成（注入法条引用）──
+            // ── 调用 AI 流式生成（注入法条引用 + 图谱分析）──
             const debateStream = await aiService.generateDebateStreamLegacy({
               title: debate.case.title,
-              description: debate.case.description,
+              description: enhancedDescription,
               legalReferences: legalReferencesForAI,
               previousRoundsContext: previousRoundsContext || undefined,
             });

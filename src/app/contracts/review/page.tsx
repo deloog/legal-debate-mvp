@@ -34,6 +34,10 @@ export default function ContractReviewPage() {
         body: formData,
       });
 
+      if (!uploadRes.ok) {
+        throw new Error(`HTTP ${uploadRes.status}: 上传失败`);
+      }
+
       const uploadData = await uploadRes.json();
 
       if (!uploadData.success) {
@@ -56,6 +60,11 @@ export default function ContractReviewPage() {
 
     try {
       const res = await fetch(`/api/contracts/review/${contractId}`);
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 审查失败`);
+      }
+
       const data = await res.json();
 
       if (!data.success) {

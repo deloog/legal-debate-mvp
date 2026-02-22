@@ -28,6 +28,9 @@ export default function ConfigsPage() {
       const response = await fetch(
         `/api/admin/configs?page=${pageNum}&limit=20`
       );
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: 获取配置列表失败`);
+      }
       const result = await response.json();
       if (result.data) {
         setConfigs(result.data.configs);
@@ -54,6 +57,9 @@ export default function ConfigsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: 创建配置失败`);
+      }
       const result = await response.json();
       if (response.ok) {
         showNotification('success', '配置创建成功');
@@ -77,6 +83,9 @@ export default function ConfigsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: 更新配置失败`);
+      }
       const result = await response.json();
       if (response.ok) {
         showNotification('success', '配置更新成功');
@@ -98,6 +107,9 @@ export default function ConfigsPage() {
       const response = await fetch(`/api/admin/configs/${key}`, {
         method: 'DELETE',
       });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: 删除配置失败`);
+      }
       const result = await response.json();
       if (response.ok) {
         showNotification('success', '配置删除成功');

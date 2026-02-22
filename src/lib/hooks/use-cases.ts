@@ -80,16 +80,30 @@ export function useCases(filters: CaseFilters, searchQuery: string) {
       const response = await fetch(
         buildUrl(CASE_API.LIST, Object.fromEntries(params.entries()))
       );
+
+      // 检查响应状态
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `请求失败: ${response.status}`);
+      }
+
       const data = await response.json();
 
+      // 验证数据结构
+      if (!data || typeof data !== 'object') {
+        throw new Error('无效的响应数据格式');
+      }
+
       if (data.success) {
-        setCases(data.data);
+        // 确保 data.data 是数组
+        const casesData = Array.isArray(data.data) ? data.data : [];
+        setCases(casesData);
         // 安全检查pagination对象是否存在
-        if (data.pagination) {
+        if (data.pagination && typeof data.pagination === 'object') {
           setPagination(prev => ({
             ...prev,
-            total: data.pagination.total ?? prev.total,
-            totalPages: data.pagination.totalPages ?? prev.totalPages,
+            total: typeof data.pagination.total === 'number' ? data.pagination.total : prev.total,
+            totalPages: typeof data.pagination.totalPages === 'number' ? data.pagination.totalPages : prev.totalPages,
           }));
         }
       } else {

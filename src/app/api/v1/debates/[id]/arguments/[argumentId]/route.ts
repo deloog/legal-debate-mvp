@@ -35,7 +35,7 @@ async function resolveAccess(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string; argumentId: string } }
+  { params }: { params: Promise<{ id: string; argumentId: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -45,7 +45,7 @@ export async function PATCH(
     );
   }
 
-  const { id: debateId, argumentId } = params;
+  const { id: debateId, argumentId } = await params;
 
   try {
     const body = await request.json();
@@ -96,7 +96,7 @@ export async function PATCH(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string; argumentId: string } }
+  { params }: { params: Promise<{ id: string; argumentId: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -106,7 +106,7 @@ export async function DELETE(
     );
   }
 
-  const { id: debateId, argumentId } = params;
+  const { id: debateId, argumentId } = await params;
 
   try {
     const role = (session.user as { role?: string }).role;

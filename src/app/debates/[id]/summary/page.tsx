@@ -79,7 +79,7 @@ function confColor(v: number | null): string {
 export default function DebateSummaryPage() {
   const params = useParams();
   const router = useRouter();
-  const debateId = params.id as string;
+  const debateId = typeof params?.id === 'string' ? params.id : '';
 
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [isLoading, setIsLoading] = useState(true);

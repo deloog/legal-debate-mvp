@@ -45,6 +45,11 @@ export default function ContractTemplatesPage() {
           : `/api/contract-templates?category=${filterCategory}`;
 
       const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: 加载模板列表失败`);
+      }
+
       const result = await response.json();
 
       if (result.success) {
@@ -97,6 +102,10 @@ export default function ContractTemplatesPage() {
         body: JSON.stringify(templateData),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: 保存失败`);
+      }
+
       const result = await response.json();
 
       if (result.success) {
@@ -128,6 +137,10 @@ export default function ContractTemplatesPage() {
       const response = await fetch(`/api/contract-templates/${template.id}`, {
         method: 'DELETE',
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: 删除失败`);
+      }
 
       const result = await response.json();
 

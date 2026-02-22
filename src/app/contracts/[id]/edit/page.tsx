@@ -52,6 +52,11 @@ export default function EditContractPage({ params }: EditContractPageProps) {
     async function loadContract() {
       try {
         const response = await fetch(`/api/contracts/${params.id}`);
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: 加载合同数据失败`);
+        }
+
         const result = await response.json();
 
         if (result.success) {

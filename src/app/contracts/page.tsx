@@ -85,11 +85,16 @@ export default function ContractsPage() {
       if (keyword) params.append('keyword', keyword);
 
       const response = await fetch(`/api/contracts?${params}`);
-      const result: ContractListResponse = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(`请求失败: ${response.status}`);
+      }
+      
+      const result = await response.json();
 
-      if (result.success) {
+      if (result.success && result.data?.items) {
         setContracts(result.data.items);
-        setTotal(result.data.total);
+        setTotal(result.data.total || 0);
       } else {
         setError('加载合同列表失败');
       }

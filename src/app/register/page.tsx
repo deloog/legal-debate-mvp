@@ -1,20 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { signIn } from 'next-auth/react';
 
 /**
- * 登录页面
+ * 注册页面
  */
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -24,44 +22,24 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name }),
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError('邮箱或密码错误，如果你还没有注册，请点击下方"注册账户"进行注册');
+        setError(data.message || data.error?.message || '注册失败');
         setLoading(false);
         return;
       }
 
-      // 保留 sessionStorage，供客户端状态管理使用
-      if (data.data?.user) {
-        sessionStorage.setItem('user', JSON.stringify(data.data.user));
-      }
-
-      // 同步建立 NextAuth session，使 getServerSession() 能正常返回用户信息
-      // （不影响自定义 JWT cookie，两套机制并行工作）
-      await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
-
-      // 触发自定义事件，通知 AuthProvider 更新状态
-      window.dispatchEvent(new CustomEvent('login-success'));
-
-      // 跳转目标页
-      router.push(redirect);
-      router.refresh();
-    } catch (err) {
-      console.error('登录错误:', err);
-      setError('登录失败，请稍后重试');
+      // 注册成功后跳转到登录页
+      router.push('/login?registered=1');
+    } catch {
+      setError('注册失败，请稍后重试');
       setLoading(false);
     }
   };
@@ -89,10 +67,10 @@ export default function LoginPage() {
           <h1 className='mb-2 text-3xl font-bold text-slate-900'>
             法律助手系统
           </h1>
-          <p className='text-sm text-slate-600'>登录您的账户</p>
+          <p className='text-sm text-slate-600'>创建您的账户</p>
         </div>
 
-        {/* Login Card */}
+        {/* Register Card */}
         <div className='rounded-2xl border border-slate-200 bg-white p-8 shadow-xl'>
           <form onSubmit={handleSubmit} className='space-y-6'>
             {/* Error Message */}
@@ -116,6 +94,24 @@ export default function LoginPage() {
                 </div>
               </div>
             )}
+
+            {/* Name Input */}
+            <div>
+              <label
+                htmlFor='name'
+                className='mb-2 block text-sm font-medium text-slate-700'
+              >
+                姓名
+              </label>
+              <input
+                id='name'
+                type='text'
+                value={name}
+                onChange={e => setName(e.target.value)}
+                className='w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-900 transition-colors focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20'
+                placeholder='您的姓名（可选）'
+              />
+            </div>
 
             {/* Email Input */}
             <div>
@@ -151,8 +147,11 @@ export default function LoginPage() {
                 onChange={e => setPassword(e.target.value)}
                 required
                 className='w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-900 transition-colors focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20'
-                placeholder='••••••••'
+                placeholder='至少6位，需包含字母和数字'
               />
+              <p className='mt-1 text-xs text-slate-500'>
+                至少 6 位，需包含字母和数字
+              </p>
             </div>
 
             {/* Submit Button */}
@@ -161,40 +160,26 @@ export default function LoginPage() {
               disabled={loading}
               className='w-full rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-6 py-3 font-semibold text-white shadow-lg shadow-violet-500/30 transition-all hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60'
             >
-              {loading ? '登录中...' : '登录'}
+              {loading ? '注册中...' : '立即注册'}
             </button>
           </form>
 
-          {/* Test Accounts Info */}
-          <div className='mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4'>
-            <h3 className='mb-2 text-sm font-semibold text-blue-900'>
-              测试账户信息
-            </h3>
-            <div className='space-y-2 text-xs text-blue-800'>
-              <div>
-                <p className='font-medium'>测试用户:</p>
-                <p>邮箱: test@example.com</p>
-                <p>密码: test123</p>
-              </div>
-              <div className='border-t border-blue-200 pt-2'>
-                <p className='font-medium'>管理员:</p>
-                <p>邮箱: admin@example.com</p>
-                <p>密码: admin123</p>
-              </div>
-            </div>
+          {/* Login Link */}
+          <div className='mt-6 text-center text-sm text-slate-600'>
+            已有账号？{' '}
+            <Link
+              href='/login'
+              className='font-medium text-violet-600 transition-colors hover:text-violet-700 hover:underline'
+            >
+              立即登录
+            </Link>
           </div>
 
-          {/* Footer Links */}
-          <div className='mt-6 flex flex-col items-center gap-3 text-center'>
-            <Link
-              href='/register'
-              className='text-sm font-medium text-violet-600 transition-colors hover:text-violet-700 hover:underline'
-            >
-              还没有账户？点击注册
-            </Link>
+          {/* Back to Home */}
+          <div className='mt-3 text-center'>
             <Link
               href='/'
-              className='text-sm text-slate-500 transition-colors hover:text-slate-600 hover:underline'
+              className='text-sm text-slate-500 transition-colors hover:text-slate-700 hover:underline'
             >
               返回首页
             </Link>

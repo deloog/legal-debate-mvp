@@ -13,6 +13,10 @@ import { prisma } from '@/lib/db/prisma';
 import { searchAllLawArticles } from '@/lib/debate/law-search';
 import { computeArgumentScores } from '@/lib/debate/scoring';
 import {
+  graphEnhancedSearch,
+  formatGraphAnalysisForPrompt,
+} from '@/lib/debate/graph-enhanced-law-search';
+import {
   ArgumentSide,
   ArgumentType,
   Prisma,
@@ -357,7 +361,25 @@ export const POST = withErrorHandler(
             .join('\n\n')
         : '';
 
-    // 4. 构建案件类型特化指引
+    // 4. 并行执行图谱增强搜索（带500ms超时）
+    const graphSearchResult = await graphEnhancedSearch(
+      caseType,
+      caseInfo.title,
+      { timeoutMs: 500, includeAttackPaths: true }
+    );
+
+    // 5. 如果图谱分析完成，注入额外信息
+    let graphAnalysisPrompt = '';
+    if (graphSearchResult.graphAnalysisCompleted) {
+      graphAnalysisPrompt = formatGraphAnalysisForPrompt(graphSearchResult);
+      logger.info(
+        `图谱分析完成，支持法条: ${graphSearchResult.supportingArticles.length}, 对方法条: ${graphSearchResult.opposingArticles.length}`
+      );
+    } else {
+      logger.warn(`图谱分析超时，仅使用关键词检索`);
+    }
+
+    // 6. 构建案件类型特化指引
     const caseTypeGuidance = caseType
       ? (CASE_TYPE_DEBATE_GUIDANCE[caseType] ?? '')
       : '';
@@ -373,11 +395,15 @@ export const POST = withErrorHandler(
       : '';
 
     // 6. 构建完整用户提示词
+    const graphSection = graphAnalysisPrompt
+      ? `\n${graphAnalysisPrompt}\n`
+      : '';
     const userPrompt = `案件信息：
 **标题**：${caseInfo.title}
 **描述**：${caseInfo.description ?? '（无）'}
 **案件类型**：${caseType ?? '未知'}
 ${caseTypeGuidance}
+${graphSection}
 ${
   allArticles.length > 0
     ? `## 法条库检索结果（仅可引用以下法条，不得引用此列表以外的法条）\n${localLawContext}\n\n` +

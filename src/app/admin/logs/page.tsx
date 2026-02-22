@@ -26,6 +26,9 @@ export default function LogsPage() {
             ? '/api/admin/error-logs'
             : '/api/admin/action-logs';
         const response = await fetch(`${apiPath}?page=${pageNum}&limit=20`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: 获取日志失败`);
+        }
         const result = await response.json();
         if (result.data) {
           if (activeTab === 'error') {

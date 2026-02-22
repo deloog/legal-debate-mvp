@@ -69,6 +69,9 @@ export default function FilingMaterialsPage() {
     try {
       const params = new URLSearchParams({ caseType, courtLevel });
       const res = await fetch(`/api/filing-materials?${params}`);
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 获取材料清单失败`);
+      }
       const data = await res.json();
       if (data.success) {
         setMaterials(data.data);
@@ -81,8 +84,8 @@ export default function FilingMaterialsPage() {
       } else {
         setError(data.error?.message || '获取材料清单失败');
       }
-    } catch {
-      setError('获取失败，请重试');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '获取失败，请重试');
     } finally {
       setLoading(false);
     }

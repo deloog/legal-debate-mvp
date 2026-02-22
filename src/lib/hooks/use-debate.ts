@@ -22,7 +22,10 @@ export interface UseDebateOptions {
   refreshInterval?: number;
 }
 
-export function useDebate(debateId, refreshInterval = 5000): DebateData {
+export function useDebate(
+  debateId: string,
+  refreshInterval = 5000
+): DebateData {
   const [debate, setDebate] = useState<Debate | null>(null);
   const [rounds, setRounds] = useState<DebateRound[]>([]);
   const [currentRound, setCurrentRound] = useState<DebateRound | null>(null);
@@ -47,11 +50,13 @@ export function useDebate(debateId, refreshInterval = 5000): DebateData {
           throw new Error('获取辩论信息失败');
         }
 
-        const debateData: Debate = await debateRes.json();
+        const debateResponse = await debateRes.json();
+        const debateData: Debate = debateResponse.data;
         setDebate(debateData);
 
         if (roundsRes.ok) {
-          const roundsData: DebateRound[] = await roundsRes.json();
+          const roundsResponse = await roundsRes.json();
+          const roundsData: DebateRound[] = roundsResponse.data || [];
           setRounds(roundsData);
 
           // 找到当前轮次（状态为IN_PROGRESS的最新轮次）
@@ -60,7 +65,8 @@ export function useDebate(debateId, refreshInterval = 5000): DebateData {
         }
 
         if (argsRes.ok) {
-          const argsData: Argument[] = await argsRes.json();
+          const argsResponse = await argsRes.json();
+          const argsData: Argument[] = argsResponse.data || [];
           setArgumentList(argsData);
         }
       } catch (err) {

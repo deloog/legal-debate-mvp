@@ -75,11 +75,46 @@ export function CaseList() {
 
   /**
    * 开始辩论（使用useCallback避免子组件重渲染）
+   * 如果案件已有辩论则跳转到该辩论，否则创建新辩论
    */
   const handleStartDebate = useCallback(
-    (caseId: string) => {
-      // 跳转到辩论创建页面，并携带案件ID
-      router.push(`/debates/create?caseId=${caseId}`);
+    async (caseId: string) => {
+      try {
+        // 先获取案件详情，检查是否已有辩论
+        const response = await fetch(`/api/v1/cases/${caseId}`);
+        if (!response.ok) {
+          throw new Error('获取案件信息失败');
+        }
+
+        const data = await response.json();
+        const caseDetail = data.data;
+
+        // 如果已有辩论，跳转到第一个辩论
+        if (caseDetail.debates && caseDetail.debates.length > 0) {
+          router.push(`/debates/${caseDetail.debates[0].id}`);
+          return;
+        }
+
+        // 创建新辩论
+        const createResponse = await fetch('/api/v1/debates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            caseId: caseId,
+            title: `${caseDetail.title || '案件'}辩论`,
+          }),
+        });
+
+        if (!createResponse.ok) {
+          throw new Error('创建辩论失败');
+        }
+
+        const createData = await createResponse.json();
+        router.push(`/debates/${createData.data.id}`);
+      } catch (err) {
+        console.error('开始辩论失败:', err);
+        alert('操作失败，请重试');
+      }
     },
     [router]
   );

@@ -95,12 +95,15 @@ export default function QualificationsPage() {
     setError(null);
     try {
       const res = await fetch('/api/qualifications/me');
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 获取资质信息失败`);
+      }
       const data = await res.json();
       if (data.success) {
         setQualification(data.data?.qualification ?? null);
       }
-    } catch {
-      setError('获取资质信息失败');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '获取资质信息失败');
     } finally {
       setLoading(false);
     }
@@ -118,6 +121,9 @@ export default function QualificationsPage() {
         method: 'POST',
         body: formData,
       });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 上传失败`);
+      }
       const data = await res.json();
       if (data.success && data.data?.url) {
         setForm(prev => ({ ...prev, licensePhoto: data.data.url }));
@@ -125,8 +131,8 @@ export default function QualificationsPage() {
       } else {
         setError(data.message || '上传失败');
       }
-    } catch {
-      setError('上传失败，请重试');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '上传失败，请重试');
     }
   };
 
@@ -150,6 +156,9 @@ export default function QualificationsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 提交失败`);
+      }
       const data = await res.json();
       if (data.success) {
         setSuccess('资质认证申请已提交，请等待审核');
@@ -157,8 +166,8 @@ export default function QualificationsPage() {
       } else {
         setError(data.message || '提交失败');
       }
-    } catch {
-      setError('提交失败，请重试');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '提交失败，请重试');
     } finally {
       setSubmitting(false);
     }

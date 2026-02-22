@@ -94,15 +94,20 @@ export default function ConsultationDetailPage({
       try {
         setLoading(true);
         const response = await fetch(`/api/consultations/${id}`);
+        
+        if (!response.ok) {
+          throw new Error(`请求失败: ${response.status}`);
+        }
+        
         const data = await response.json();
 
-        if (data.success) {
+        if (data.success && data.data) {
           setConsultation(data.data);
         } else {
           setError(data.error?.message || '获取咨询详情失败');
         }
-      } catch {
-        setError('网络错误，请重试');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '网络错误，请重试');
       } finally {
         setLoading(false);
       }

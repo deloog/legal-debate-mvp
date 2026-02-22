@@ -70,12 +70,15 @@ export default function RefundsPage() {
     setError(null);
     try {
       const res = await fetch('/api/orders?status=PAID&limit=20');
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 获取订单失败`);
+      }
       const data = await res.json();
       if (data.success) {
         setOrders(data.data?.orders ?? data.data ?? []);
       }
-    } catch {
-      setError('获取订单失败');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '获取订单失败');
     } finally {
       setLoading(false);
     }
@@ -86,14 +89,17 @@ export default function RefundsPage() {
     setError(null);
     try {
       const res = await fetch('/api/refunds');
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 获取退款记录失败`);
+      }
       const data = await res.json();
       if (data.success) {
         setRefunds(data.data?.refunds ?? []);
       } else {
         setError(data.message || '获取退款记录失败');
       }
-    } catch {
-      setError('获取退款记录失败');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '获取退款记录失败');
     } finally {
       setLoading(false);
     }
@@ -120,6 +126,9 @@ export default function RefundsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId, reason, description }),
       });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 申请失败`);
+      }
       const data = await res.json();
       if (data.success) {
         setSuccess('退款申请已提交，预计 3-5 个工作日处理');
@@ -129,8 +138,8 @@ export default function RefundsPage() {
       } else {
         setError(data.message || '申请失败');
       }
-    } catch {
-      setError('申请失败，请重试');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '申请失败，请重试');
     } finally {
       setSubmitting(null);
     }
