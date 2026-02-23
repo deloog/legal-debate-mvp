@@ -263,7 +263,7 @@ function checkMetadataBoolean(caseData: unknown, prop: string): boolean {
  */
 export async function generateTimelineEventFromCaseChange(
   caseId: string,
-  previousStatus: CaseStatus | null,
+  _previousStatus: CaseStatus | null,
   currentStatus: CaseStatus,
   eventType?: CaseTimelineEventType,
   additionalData?: Prisma.InputJsonValue

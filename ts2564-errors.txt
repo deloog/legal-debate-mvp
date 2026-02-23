@@ -1,0 +1,35 @@
+﻿
+scripts/evaluate-accuracy-direct.ts(209,11): error TS2564: Property '_claimExtractor' has no initializer and is not def
+initely assigned in the constructor.
+scripts/test-optimization-effects.ts(94,11): error TS2564: Property '_claimClassifier' has no initializer and is not de
+finitely assigned in the constructor.
+scripts/test-optimization-effects.ts(95,11): error TS2564: Property '_amountExtractor' has no initializer and is not de
+finitely assigned in the constructor.
+src/lib/agent/doc-analyzer/prompts/smart-prompt-builder.ts(38,11): error TS2564: Property 'minimalTemplate' has no init
+ializer and is not definitely assigned in the constructor.
+src/lib/agent/doc-analyzer/prompts/smart-prompt-builder.ts(39,11): error TS2564: Property 'standardTemplate' has no ini
+tializer and is not definitely assigned in the constructor.
+src/lib/agent/doc-analyzer/prompts/smart-prompt-builder.ts(40,11): error TS2564: Property 'comprehensiveTemplate' has n
+o initializer and is not definitely assigned in the constructor.
+src/lib/ai/case/case-embedder.ts(17,11): error TS2564: Property 'aiService' has no initializer and is not definitely as
+signed in the constructor.
+src/lib/ai/service-refactored.ts(53,11): error TS2564: Property 'loadBalancer' has no initializer and is not definitely
+ assigned in the constructor.
+src/lib/ai/service-refactored.ts(54,11): error TS2564: Property 'monitor' has no initializer and is not definitely assi
+gned in the constructor.
+src/lib/ai/service-refactored.ts(55,11): error TS2564: Property 'fallbackManager' has no initializer and is not definit
+ely assigned in the constructor.
+src/lib/ai/service-refactored.ts(59,11): error TS2564: Property 'requestExecutor' has no initializer and is not definit
+ely assigned in the constructor.
+src/lib/law-article/applicability/ai-reviewer.ts(20,11): error TS2564: Property 'aiService' has no initializer and is n
+ot definitely assigned in the constructor.
+src/lib/law-article/applicability/applicability-analyzer.ts(23,11): error TS2564: Property 'semanticMatcher' has no ini
+tializer and is not definitely assigned in the constructor.
+src/lib/law-article/applicability/applicability-analyzer.ts(24,11): error TS2564: Property 'ruleValidator' has no initi
+alizer and is not definitely assigned in the constructor.
+src/lib/law-article/applicability/applicability-analyzer.ts(25,11): error TS2564: Property 'aiReviewer' has no initiali
+zer and is not definitely assigned in the constructor.
+src/lib/law-article/applicability/semantic-matcher.ts(16,11): error TS2564: Property 'aiService' has no initializer and
+ is not definitely assigned in the constructor.
+
+

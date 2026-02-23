@@ -50,13 +50,13 @@ interface ErrorSummary {
 
 export class AIService {
   private config: AIServiceConfig;
-  private loadBalancer: ReturnType<typeof LoadBalancerFactory.getInstance>;
-  private monitor: ReturnType<typeof MonitorFactory.getInstance>;
-  private fallbackManager: ReturnType<
+  private loadBalancer!: ReturnType<typeof LoadBalancerFactory.getInstance>;
+  private monitor!: ReturnType<typeof MonitorFactory.getInstance>;
+  private fallbackManager!: ReturnType<
     typeof FallbackManagerFactory.getInstance
   >;
   private cacheManager: AICacheManager;
-  private requestExecutor: AIRequestExecutor;
+  private requestExecutor!: AIRequestExecutor;
   private clients: Map<AIProvider, AIClient>;
   private initialized: boolean = false;
 

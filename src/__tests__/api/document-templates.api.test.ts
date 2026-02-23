@@ -8,7 +8,7 @@ import {
   DELETE as deleteTemplate,
 } from '@/app/api/document-templates/[id]/route';
 import { POST as generateDocument } from '@/app/api/document-templates/[id]/generate/route';
-import { NextRequest, _NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import {
   DocumentTemplateType,

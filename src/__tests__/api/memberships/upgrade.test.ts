@@ -32,7 +32,7 @@ jest.mock('@/lib/middleware/auth', () => ({
 describe('/api/memberships/upgrade', () => {
   let mockGetAuthUser: jest.Mock;
   let mockFindFirst: jest.Mock;
-  let _mockUpdate: jest.Mock;
+  let __mockUpdate: jest.Mock;
   let mockFindUnique: jest.Mock;
   let mockCreateHistory: jest.Mock;
   let mockTransaction: jest.Mock;

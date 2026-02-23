@@ -11,7 +11,7 @@ import {
 
 describe('Validation Utils', () => {
   describe('validatePagination', () => {
-    let _mockRequest: NextRequest;
+    let __mockRequest: NextRequest;
 
     beforeEach(() => {
       mockRequest = new NextRequest('http://localhost:3000/api/test', {

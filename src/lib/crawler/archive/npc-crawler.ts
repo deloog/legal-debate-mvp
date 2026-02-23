@@ -154,7 +154,7 @@ export class NPCCrawler extends BaseCrawler {
   private readonly DEFAULT_OUTPUT_DIR = path.resolve('data/crawled/npc');
 
   private consecutiveErrors = 0;
-  private readonly _MAX_CONSECUTIVE_ERRORS = 3;
+  private readonly __MAX_CONSECUTIVE_ERRORS = 3;
 
   private logger = getLogger('NPCCrawler');
 
@@ -190,7 +190,7 @@ export class NPCCrawler extends BaseCrawler {
       outputDir,
     } = options || {};
 
-    const outDir = outputDir || this.DEFAULT_OUTPUT_DIR;
+    const _outDir = outputDir || this.DEFAULT_OUTPUT_DIR;
     const startTime = Date.now();
     let totalProcessed = 0;
     let created = 0;

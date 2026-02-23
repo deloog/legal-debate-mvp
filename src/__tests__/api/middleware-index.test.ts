@@ -135,7 +135,7 @@ describe('Middleware Index', () => {
     });
 
     it('should execute middlewares in the correct order', async () => {
-      const _stack = createDefaultMiddlewareStack();
+      const __stack = createDefaultMiddlewareStack();
       const executionOrder: string[] = [];
 
       // 模拟中间件执行顺序检查

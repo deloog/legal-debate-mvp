@@ -13,7 +13,7 @@ import type { AIService } from '@/lib/ai/service-refactored';
  * 分析法条与案情的语义相关性
  */
 export class SemanticMatcher {
-  private aiService: AIService;
+  private aiService!: AIService;
   private initialized: boolean = false;
 
   /**

@@ -4,7 +4,7 @@
  */
 
 import https from 'https';
-import { wechatPay, _WechatPay } from '@/lib/payment/wechat-pay';
+import { wechatPay, WechatPay } from '@/lib/payment/wechat-pay';
 import { paymentConfig } from '@/lib/payment/payment-config';
 import {
   WechatCreateOrderRequest,

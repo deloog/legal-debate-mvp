@@ -211,7 +211,7 @@ class DirectAccuracyEvaluator {
 
   constructor() {
     this.amountExtractor = new AmountExtractor();
-    this.claimExtractor = new ClaimExtractor();
+    this._claimExtractor = new ClaimExtractor();
     this.legalRepFilter = new LegalRepresentativeFilter();
   }
 

@@ -7,7 +7,7 @@ import {
   generateWeeklyReport,
   generateMonthlyReport,
 } from '@/lib/report/report-generator';
-import { ReportType, ReportFormat, _ReportStatus } from '@/types/stats';
+import { ReportType, ReportFormat, ReportStatus } from '@/types/stats';
 import { prisma } from '@/lib/db/prisma';
 
 // Mock Prisma

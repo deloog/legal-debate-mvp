@@ -269,7 +269,7 @@ describe('API Error Handling', () => {
 
     it('should hide error details in production', async () => {
       // 使用 Jest mock 来模拟环境变量
-      const _originalNodeEnv = process.env.NODE_ENV;
+      const __originalNodeEnv = process.env.NODE_ENV;
 
       // Mock process.env.NODE_ENV
       const mockProcessEnv = {
@@ -295,7 +295,7 @@ describe('API Error Handling', () => {
 
     it('should show error details in development', async () => {
       // 使用 Jest mock 来模拟环境变量
-      const _originalNodeEnv = process.env.NODE_ENV;
+      const __originalNodeEnv = process.env.NODE_ENV;
 
       // Mock process.env.NODE_ENV
       const mockProcessEnv = {

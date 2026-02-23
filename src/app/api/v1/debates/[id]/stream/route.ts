@@ -392,7 +392,7 @@ export async function GET(
         }
 
         // 5. 标记信息来源（用于前端显示）
-        const __sourceAttribution = graphSearchResult.sourceAttribution;
+        const ___sourceAttribution = graphSearchResult.sourceAttribution;
 
         for (
           let roundIndex = startFromRound;

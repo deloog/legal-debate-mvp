@@ -60,20 +60,20 @@ export interface AttackPath {
 export interface GraphEnhancedSearchResult {
   /** 关键词搜索结果 */
   keywordResults: LawArticleWithRelations[];
-  /** 己方支持法条（图谱） */
+  /** 原告方支持法条（图谱） */
   supportingArticles: LawArticleWithRelations[];
-  /** 对方可能引用的法条（图谱） */
+  /** 被告方可能引用的法条（图谱） */
   opposingArticles: LawArticleWithRelations[];
   /** 冲突关系 */
   conflictRelations: Array<{
     source: LawArticleWithRelations;
     target: LawArticleWithRelations;
-  }>;
+  }> | null;
   /** 补充关系 */
   complementRelations: Array<{
     source: LawArticleWithRelations;
     target: LawArticleWithRelations;
-  }>;
+  }> | null;
   /** 攻击路径 */
   attackPaths: AttackPath[];
   /** 图谱分析是否完成 */
@@ -86,7 +86,7 @@ export interface GraphEnhancedSearchResult {
 }
 
 /**
- * 带超时的Promise执行
+ * 带超时的 Promise 执行
  */
 function withTimeout<T>(
   promise: Promise<T>,
@@ -131,13 +131,11 @@ async function searchByKeywords(
 
 /**
  * 获取冲突/限制关系法条
- * 找到CONFLICTS关系的法条，对方可能引用来反驳
+ * 找到 CONFLICTS 关系的法条，对方可能引用来反驳
  */
 async function findConflictingArticles(
   articleIds: string[]
-): Promise<
-  { source: LawArticleWithRelations; target: LawArticleWithRelations }[]
-> {
+): Promise<{ source: LawArticleWithRelations; target: LawArticleWithRelations }[]> {
   if (articleIds.length === 0) return [];
 
   try {
@@ -193,13 +191,11 @@ async function findConflictingArticles(
 
 /**
  * 获取补充关系法条
- * 找到COMPLETES关系的法条，需要同时引用
+ * 找到 COMPLETES 关系的法条，需要同时引用
  */
 async function findComplementArticles(
   articleIds: string[]
-): Promise<
-  { source: LawArticleWithRelations; target: LawArticleWithRelations }[]
-> {
+): Promise<{ source: LawArticleWithRelations; target: LawArticleWithRelations }[]> {
   if (articleIds.length === 0) return [];
 
   try {
@@ -281,7 +277,7 @@ async function findRelatedArticles(
     const articleMap = new Map<string, LawArticleWithRelations>();
 
     for (const rel of relations) {
-      // 添加source
+      // 添加 source
       if (!articleMap.has(rel.source.id)) {
         articleMap.set(rel.source.id, {
           id: rel.source.id,
@@ -291,7 +287,7 @@ async function findRelatedArticles(
           category: rel.source.category,
         });
       }
-      // 添加target
+      // 添加 target
       if (!articleMap.has(rel.target.id)) {
         articleMap.set(rel.target.id, {
           id: rel.target.id,
@@ -326,7 +322,7 @@ async function discoverAttackPaths(
   const opposingIds = opposingArticles.map(a => a.id);
 
   try {
-    // 查找从对方法条到己方法条的冲突/限制关系
+    // 查找从对方法条到己方法条的冲突/替代关系
     const relations = await prisma.lawArticleRelation.findMany({
       where: {
         OR: [
@@ -416,7 +412,7 @@ export async function graphEnhancedSearch(
 
   // 2. 准备图谱搜索
   const articleIds = keywordResults.map(a => a.id);
-  const _categories = caseType
+  const categories = caseType
     ? (CASE_TYPE_TO_LAW_CATEGORIES[caseType] ?? [])
     : [];
 
@@ -430,8 +426,8 @@ export async function graphEnhancedSearch(
     ]);
 
     // 分类：己方支持 vs 对方可能引用
-    const _conflictSourceIds = new Set(conflicts.map(c => c.source.id));
-    const _complementSourceIds = new Set(complements.map(c => c.source.id));
+    const conflictSourceIds = new Set(conflicts.map(c => c.source.id));
+    const complementSourceIds = new Set(complements.map(c => c.source.id));
 
     // 己方支持法条 = 关键词结果 + 补充关系
     const supportingArticles: LawArticleWithRelations[] = [
@@ -510,7 +506,7 @@ export async function graphEnhancedSearch(
 }
 
 /**
- * 格式化图谱分析结果为Prompt注入文本
+ * 格式化图谱分析结果为 Prompt 注入文本
  */
 export function formatGraphAnalysisForPrompt(
   result: GraphEnhancedSearchResult
@@ -524,7 +520,7 @@ export function formatGraphAnalysisForPrompt(
     return lines.join('\n');
   }
 
-  // 己方支持法条
+  // 原告方支持法条
   if (result.supportingArticles.length > 0) {
     lines.push('己方支持法条:');
     result.supportingArticles.forEach(article => {
@@ -532,7 +528,7 @@ export function formatGraphAnalysisForPrompt(
     });
   }
 
-  // 对方可能引用法条
+  // 被告方可能引用法条
   if (result.opposingArticles.length > 0) {
     lines.push('对方可能引用的法条:');
     result.opposingArticles.forEach(article => {

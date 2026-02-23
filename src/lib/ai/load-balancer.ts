@@ -1,7 +1,6 @@
 import type {
   AIProvider,
   LoadBalancerConfig,
-  LoadBalancingStrategy,
   HealthStatus,
   ProviderStats,
   LoadBalancerStatus,
@@ -16,7 +15,7 @@ export class LoadBalancer {
   private providerStats: Map<AIProvider, ProviderStats>;
   private currentProviderIndex: number;
   private healthStatus: Map<AIProvider, HealthStatus>;
-  private lastHealthCheck: number = 0;
+  private _lastHealthCheck: number = 0;
 
   constructor(config: LoadBalancerConfig) {
     this.config = config;
@@ -385,7 +384,7 @@ export class LoadBalancer {
   public reset(): void {
     this.initializeProviderStats();
     this.currentProviderIndex = 0;
-    this.lastHealthCheck = 0;
+    this._lastHealthCheck = 0;
   }
 
   public resetProviderStats(provider: AIProvider): void {

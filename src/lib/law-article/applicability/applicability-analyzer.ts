@@ -20,9 +20,9 @@ import AIReviewer from './ai-reviewer';
  * 五层架构主类，整合所有分析层
  */
 export class ApplicabilityAnalyzer {
-  private semanticMatcher: SemanticMatcher;
-  private ruleValidator: RuleValidator;
-  private aiReviewer: AIReviewer;
+  private semanticMatcher!: SemanticMatcher;
+  private ruleValidator!: RuleValidator;
+  private aiReviewer!: AIReviewer;
   private initialized: boolean = false;
 
   /**
@@ -309,7 +309,7 @@ export class ApplicabilityAnalyzer {
    * 收集警告信息
    */
   private collectWarnings(
-    semanticMatch: SemanticMatchResult | undefined,
+    _semanticMatch: SemanticMatchResult | undefined,
     ruleValidation: RuleValidationResult | undefined,
     aiReview: AIReviewResult | undefined
   ): string[] {

@@ -1,0 +1,42 @@
+src/__tests__/report-generator.test.ts(105,63): error TS1002: Unterminated string literal.
+src/__tests__/report-generator.test.ts(106,9): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(106,60): error TS1002: Unterminated string literal.
+src/__tests__/report-generator.test.ts(107,9): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(107,60): error TS1002: Unterminated string literal.
+src/__tests__/report-generator.test.ts(108,9): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(108,62): error TS1002: Unterminated string literal.
+src/__tests__/report-generator.test.ts(109,7): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(110,37): error TS1002: Unterminated string literal.
+src/__tests__/report-generator.test.ts(111,7): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(111,13): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(112,22): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(113,5): error TS1137: Expression or comma expected.
+src/__tests__/report-generator.test.ts(206,65): error TS1002: Unterminated string literal.
+src/__tests__/report-generator.test.ts(207,11): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(207,62): error TS1002: Unterminated string literal.
+src/__tests__/report-generator.test.ts(208,11): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(208,62): error TS1002: Unterminated string literal.
+src/__tests__/report-generator.test.ts(209,11): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(209,64): error TS1002: Unterminated string literal.
+src/__tests__/report-generator.test.ts(210,9): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(211,39): error TS1002: Unterminated string literal.
+src/__tests__/report-generator.test.ts(212,9): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(212,15): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(213,24): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(214,7): error TS1137: Expression or comma expected.
+src/__tests__/report-generator.test.ts(261,39): error TS1002: Unterminated string literal.
+src/__tests__/report-generator.test.ts(262,7): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(325,40): error TS1002: Unterminated string literal.
+src/__tests__/report-generator.test.ts(326,7): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(352,3): error TS1128: Declaration or statement expected.
+src/__tests__/report-generator.test.ts(352,4): error TS1128: Declaration or statement expected.
+src/__tests__/report-generator.test.ts(385,40): error TS1002: Unterminated string literal.
+src/__tests__/report-generator.test.ts(386,7): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(412,3): error TS1128: Declaration or statement expected.
+src/__tests__/report-generator.test.ts(412,4): error TS1128: Declaration or statement expected.
+src/__tests__/report-generator.test.ts(416,74): error TS1002: Unterminated string literal.
+src/__tests__/report-generator.test.ts(418,7): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(428,44): error TS1002: Unterminated string literal.
+src/__tests__/report-generator.test.ts(429,5): error TS1005: ',' expected.
+src/__tests__/report-generator.test.ts(459,1): error TS1128: Declaration or statement expected.
+src/__tests__/report-generator.test.ts(459,2): error TS1128: Declaration or statement expected.

@@ -6,7 +6,7 @@
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/analytics/clients/route';
 import { prisma } from '@/lib/db/prisma';
-import { ClientStatus, _ClientValueLevel } from '@/types/client';
+import { ClientStatus, ClientValueLevel } from '@/types/client';
 
 // Mock prisma
 jest.mock('@/lib/db/prisma', () => ({

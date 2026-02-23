@@ -1,5 +1,5 @@
 import { DocAnalyzerAgent } from '@/lib/agent/doc-analyzer';
-import { _TaskPriority } from '@/types/agent';
+import { TaskPriority } from '@/types/agent';
 
 describe('DocAnalyzer Agent - 基础测试', () => {
   let agent: DocAnalyzerAgent;

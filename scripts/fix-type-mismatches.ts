@@ -34,7 +34,7 @@ const FIX_RULES = [
       // 匹配未初始化的属性（没有初始值）
       return !match.includes('=') && !match.includes('!');
     },
-    fix: (match: string, className: string) => {
+    fix: (match: string, _className: string) => {
       // 尝试添加默认值或definite assignment
       if (match.match(/:\s*string\s*;$/)) {
         return match.replace(/(\w+):\s*string\s*;/, '$1: string = "";');
@@ -100,7 +100,7 @@ function fixFile(filePath: string): FixResult {
             // TS2564特殊处理
             fixed = rule.fix(match[0], match[1] || '');
           } else {
-            fixed = rule.fix(match[0]);
+            fixed = rule.fix(match[0], '');
           }
           
           if (fixed !== original) {

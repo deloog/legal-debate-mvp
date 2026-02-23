@@ -126,7 +126,7 @@ describe('Middleware Core', () => {
 
         stack.use(middleware1).use(middleware2);
 
-        const _result = await stack.execute(mockRequest, context);
+        const __result = await stack.execute(mockRequest, context);
 
         expect(executionOrder).toEqual([1, 2]);
         expect(middleware1).toHaveBeenCalledWith(
@@ -143,7 +143,7 @@ describe('Middleware Core', () => {
 
       it('should pass updated context through middleware chain', async () => {
         const stack = new MiddlewareStack();
-        const _contextReceived: RequestContext | null = null;
+        const __contextReceived: RequestContext | null = null;
 
         const middleware1 = jest
           .fn()
@@ -161,7 +161,7 @@ describe('Middleware Core', () => {
 
         stack.use(middleware1).use(middleware2);
 
-        const _result = await stack.execute(mockRequest, context);
+        const __result = await stack.execute(mockRequest, context);
 
         expect(middleware2).toHaveBeenCalledWith(
           mockRequest,

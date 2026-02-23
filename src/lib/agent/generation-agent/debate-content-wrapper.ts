@@ -69,7 +69,7 @@ export class DebateContentWrapper {
    * 包装单方论点
    */
   wrapSideArguments(
-    side: 'plaintiff' | 'defendant',
+    _side: 'plaintiff' | 'defendant',
     argumentsList: Argument[],
     lawArticles: LawArticle[]
   ): Argument[] {

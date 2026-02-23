@@ -4,7 +4,7 @@
 
 import { AIEvidenceRelationshipIdentifier } from '@/lib/ai/evidence-relationship-identifier';
 import type { AIResponse } from '@/types/ai-service';
-import type { _AIEvidenceRelationshipResult } from '@/types/evidence-chain';
+import type { AIEvidenceRelationshipResult } from '@/types/evidence-chain';
 import {
   EvidenceChainRelationType,
   EvidenceRelationStrength,

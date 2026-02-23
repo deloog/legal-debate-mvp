@@ -82,7 +82,7 @@ async function main() {
   console.log('文档创建完成');
 
   // 创建示例辩论
-  const __testDebate = await prisma.debate.create({
+  const ___testDebate = await prisma.debate.create({
     data: {
       caseId: testCase.id,
       userId: testUser.id,
@@ -195,7 +195,7 @@ async function main() {
   console.log('会话创建完成');
 
   // 创建示例法律依据
-  const __testLegalReference = await prisma.legalReference.create({
+  const ___testLegalReference = await prisma.legalReference.create({
     data: {
       caseId: testCase.id,
       source: '民法典',

@@ -15,7 +15,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { LawArticleGraphVisualization } from '@/components/law-article/LawArticleGraphVisualization';
 import { RecommendationFeedbackButton } from '@/components/feedback/RecommendationFeedbackButton';
-import { _RelationFeedbackButton } from '@/components/feedback/RelationFeedbackButton';
+import { RelationFeedbackButton } from '@/components/feedback/RelationFeedbackButton';
 import type { LawArticle } from '@prisma/client';
 import type {
   RecommendationResult,

@@ -12,7 +12,7 @@
 
 import { AIDetector } from '@/lib/law-article/relation-discovery/ai-detector';
 import { AICostMonitor } from '@/lib/law-article/relation-discovery/ai-cost-monitor';
-import { LawArticle, _RelationType } from '@prisma/client';
+import { LawArticle, RelationType } from '@prisma/client';
 
 // Mock AI client
 jest.mock('@/lib/ai/openai-client', () => ({

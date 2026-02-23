@@ -1,0 +1,738 @@
+prisma/seed-case-type-config.ts(302,9): error TS2322: Type 'null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+prisma/seed-demo.ts(486,20): error TS2322: Type 'string | null' is not assignable to type 'string'.
+scripts/accuracy-test-data-manager.ts(145,6): error TS7053: Element implicitly has an 'any' type because expression of type '0' can't be used to index type '{}'.
+scripts/accuracy-test-data-manager.ts(153,6): error TS7053: Element implicitly has an 'any' type because expression of type '1' can't be used to index type '{}'.
+scripts/accuracy-test-data-manager.ts(171,7): error TS7053: Element implicitly has an 'any' type because expression of type '0' can't be used to index type '{}'.
+scripts/check-data-sources.ts(28,13): error TS2322: Type 'null' is not assignable to type 'string | StringFilter<"LawArticle"> | undefined'.
+scripts/check-data-sources.ts(43,15): error TS2322: Type 'null' is not assignable to type 'string | StringFilter<"LawArticle"> | undefined'.
+scripts/check-document-types.ts(10,24): error TS2724: '"@prisma/client"' has no exported member named '_LawType'. Did you mean 'LawType'?
+scripts/check-document-types.ts(10,34): error TS2724: '"@prisma/client"' has no exported member named '_LawCategory'. Did you mean 'LawCategory'?
+scripts/check-laws-status.ts(5,24): error TS2724: '"@prisma/client"' has no exported member named '_LawStatus'. Did you mean 'LawStatus'?
+scripts/crawler/health-monitor.ts(405,37): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+scripts/crawler/health-monitor.ts(414,37): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+scripts/crawler/health-monitor.ts(422,37): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+scripts/deploy/__tests__/migration-utils.test.ts(119,13): error TS2345: Argument of type 'null' is not assignable to parameter of type 'string'.
+scripts/deploy/__tests__/migration-utils.test.ts(145,48): error TS2345: Argument of type 'null' is not assignable to parameter of type 'string'.
+scripts/deploy/__tests__/migration-utils.test.ts(153,32): error TS2345: Argument of type 'null' is not assignable to parameter of type 'string'.
+scripts/deploy/__tests__/migration-utils.test.ts(173,13): error TS2345: Argument of type 'null' is not assignable to parameter of type 'string'.
+scripts/deploy/__tests__/migration-utils.test.ts(201,40): error TS2345: Argument of type 'null' is not assignable to parameter of type 'string'.
+scripts/deploy/__tests__/migration-utils.test.ts(209,32): error TS2345: Argument of type 'null' is not assignable to parameter of type 'string'.
+scripts/evaluate-accuracy-direct.ts(209,11): error TS2564: Property '_claimExtractor' has no initializer and is not definitely assigned in the constructor.
+scripts/evaluate-accuracy-direct.ts(214,10): error TS2551: Property 'claimExtractor' does not exist on type 'DirectAccuracyEvaluator'. Did you mean '_claimExtractor'?
+scripts/expand-law-articles.ts(526,7): error TS2322: Type '{ lawName: string; articleNumber: string; fullText: string; lawType: string; category: string; subCategory: string; tags: string[]; keywords: string[]; version: string; effectiveDate: string; status: string; ... 4 more ...; referenceCount: number; }[]' is not assignable to type 'LawArticleCreateManyInput | LawArticleCreateManyInput[]'.
+scripts/fix-law-categories.ts(9378,13): error TS2304: Cannot find name 'matchedRule'.
+scripts/fix-type-mismatches.ts(103,26): error TS2554: Expected 2 arguments, but got 1.
+  Try `npm i --save-dev @types/better-sqlite3` if it exists or add a new declaration (.d.ts) file containing `declare module 'better-sqlite3';`
+  Try `npm i --save-dev @types/better-sqlite3` if it exists or add a new declaration (.d.ts) file containing `declare module 'better-sqlite3';`
+scripts/import-law-articles.ts(70,10): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'LawArticleData'.
+scripts/migrate-ai-interaction-user-id.ts(42,13): error TS2322: Type 'unknown' is not assignable to type '(Without<AIInteractionUpdateInput, AIInteractionUncheckedUpdateInput> & AIInteractionUncheckedUpdateInput) | (Without<...> & AIInteractionUpdateInput)'.
+scripts/recover-parsing-failed-online.ts(11,24): error TS2724: '"@prisma/client"' has no exported member named '_LawType'. Did you mean 'LawType'?
+scripts/recover-parsing-failed-online.ts(11,34): error TS2724: '"@prisma/client"' has no exported member named '_LawCategory'. Did you mean 'LawCategory'?
+scripts/recover-parsing-failed.ts(10,24): error TS2724: '"@prisma/client"' has no exported member named '_LawType'. Did you mean 'LawType'?
+scripts/recover-parsing-failed.ts(10,34): error TS2724: '"@prisma/client"' has no exported member named '_LawCategory'. Did you mean 'LawCategory'?
+scripts/recover-parsing-failed.ts(90,15): error TS2339: Property '__flkCrawler' does not exist on type 'typeof import("d:/legal-debate-mvp/src/lib/crawler/flk-crawler")'.
+scripts/run-accuracy-batch-test.ts(211,22): error TS18048: 'testDoc.goldStandard' is possibly 'undefined'.
+scripts/run-accuracy-batch-test.ts(212,21): error TS18048: 'testDoc.goldStandard' is possibly 'undefined'.
+scripts/run-crawler.ts(156,9): error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
+scripts/show-constitution.ts(1,24): error TS2724: '"@prisma/client"' has no exported member named '_LawStatus'. Did you mean 'LawStatus'?
+scripts/test-backup-recovery.ts(5,10): error TS2724: '"./backup-database"' has no exported member named '_DatabaseBackupManager'. Did you mean 'DatabaseBackupManager'?
+scripts/test-connection-pool.ts(11,10): error TS2724: '"../src/lib/db/prisma"' has no exported member named '_prisma'. Did you mean 'prisma'?
+scripts/test-database-performance.ts(143,33): error TS18047: 'poolStats' is possibly 'null'.
+scripts/test-database-performance.ts(144,33): error TS18047: 'poolStats' is possibly 'null'.
+scripts/test-database-performance.ts(145,32): error TS18047: 'poolStats' is possibly 'null'.
+scripts/test-docanalyzer-performance.ts(6,10): error TS2724: '"../src/lib/agent/doc-analyzer/doc-analyzer-agent"' has no exported member named '_DocAnalyzerAgent'. Did you mean 'DocAnalyzerAgent'?
+scripts/test-document-accuracy.ts(299,31): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+scripts/test-document-accuracy.ts(300,34): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+scripts/test-migration-rollback.ts(70,12): error TS2551: Property 'originalMigrationState' does not exist on type 'MigrationRollbackTester'. Did you mean '__originalMigrationState'?
+scripts/test-optimization-effects.ts(94,11): error TS2564: Property '_claimClassifier' has no initializer and is not definitely assigned in the constructor.
+scripts/test-optimization-effects.ts(95,11): error TS2564: Property '_amountExtractor' has no initializer and is not definitely assigned in the constructor.
+scripts/test-optimization-effects.ts(99,10): error TS2551: Property 'claimClassifier' does not exist on type 'OptimizationTester'. Did you mean '_claimClassifier'?
+scripts/test-optimization-effects.ts(100,10): error TS2551: Property 'amountExtractor' does not exist on type 'OptimizationTester'. Did you mean '_amountExtractor'?
+scripts/test-optimization-effects.ts(428,31): error TS2532: Object is possibly 'undefined'.
+scripts/test-optimization-effects.ts(474,29): error TS2532: Object is possibly 'undefined'.
+scripts/track-coverage-history.ts(381,25): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'CoverageData'.
+scripts/track-coverage-history.ts(382,27): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'CoverageData'.
+  Try `npm i --save-dev @types/js-yaml` if it exists or add a new declaration (.d.ts) file containing `declare module 'js-yaml';`
+scripts/validate-cicd-config.ts(82,16): error TS2551: Property 'continue-on-error' does not exist on type 'WorkflowStep'. Did you mean 'continue_on_error'?
+scripts/validate-cicd-config.ts(83,39): error TS2551: Property 'continue-on-error' does not exist on type 'WorkflowStep'. Did you mean 'continue_on_error'?
+scripts/validate-cicd-config.ts(369,20): error TS2571: Object is of type 'unknown'.
+src/__tests__/agent/agent-manager.test.ts(13,10): error TS2724: '"../../types/agent"' has no exported member named '_AgentStatus'. Did you mean 'AgentStatus'?
+src/__tests__/agent/agent-manager.test.ts(13,24): error TS2724: '"../../types/agent"' has no exported member named '_AgentErrorType'. Did you mean 'AgentErrorType'?
+src/__tests__/agent/agent-registry-enhanced.test.ts(22,10): error TS2724: '"./test-utils"' has no exported member named '_createMockAgent'. Did you mean 'createMockAgent'?
+src/__tests__/agent/doc-analyzer.test.ts(2,10): error TS2724: '"@/types/agent"' has no exported member named '_TaskPriority'. Did you mean 'TaskPriority'?
+src/__tests__/agent/doc-analyzer/analyzers/evidence-completeness-analyzer.test.ts(892,9): error TS2322: Type 'undefined' is not assignable to type 'Party[]'.
+src/__tests__/agent/doc-analyzer/analyzers/evidence-relation-analyzer.test.ts(173,9): error TS2322: Type 'undefined' is not assignable to type 'Party[]'.
+src/__tests__/agent/doc-analyzer/utils/logger-utils.test.ts(18,10): error TS2724: '"@/lib/agent/security/logger"' has no exported member named '_StructuredLogger'. Did you mean 'StructuredLogger'?
+src/__tests__/agent/legal-agent/applicability-analyzer.test.ts(395,9): error TS2322: Type 'unknown' is not assignable to type 'CaseInfo'.
+src/__tests__/agent/legal-agent/law-searcher.test.ts(382,30): error TS2551: Property 'calculateTFIDF' does not exist on type 'LawSearcher'. Did you mean '__calculateTFIDF'?
+src/__tests__/agent/legal-agent/law-searcher.test.ts(393,30): error TS2551: Property 'calculateTFIDF' does not exist on type 'LawSearcher'. Did you mean '__calculateTFIDF'?
+src/__tests__/api/admin-law-articles.test.ts(364,14): error TS7006: Parameter 'data' implicitly has an 'any' type.
+src/__tests__/api/admin-law-articles.test.ts(366,28): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/__tests__/api/admin/alerts.test.ts(338,20): error TS2322: Type 'null' is not assignable to type '{ alertId: string; ruleName: string; severity: string; status: string; errorMessage: string; errorType: string; errorLogId: string; triggeredAt: string; acknowledgedAt?: undefined; acknowledgedBy?: undefined; resolvedAt?: undefined; resolutionNotes?: undefined; } | { ...; } | { ...; } | undefined'.
+src/__tests__/api/admin/alerts.test.ts(424,20): error TS2322: Type 'null' is not assignable to type '{ alertId: string; ruleName: string; severity: string; status: string; errorMessage: string; errorType: string; errorLogId: string; triggeredAt: string; acknowledgedAt?: undefined; acknowledgedBy?: undefined; resolvedAt?: undefined; resolutionNotes?: undefined; } | { ...; } | { ...; } | undefined'.
+src/__tests__/api/admin/alerts.test.ts(551,20): error TS2322: Type 'null' is not assignable to type '{ alertId: string; ruleName: string; severity: string; status: string; errorMessage: string; errorType: string; errorLogId: string; triggeredAt: string; acknowledgedAt?: undefined; acknowledgedBy?: undefined; resolvedAt?: undefined; resolutionNotes?: undefined; } | { ...; } | { ...; } | undefined'.
+src/__tests__/api/admin/export/cases.test.ts(7,10): error TS2724: '"@/lib/api-response"' has no exported member named '_unauthorizedResponse'. Did you mean 'unauthorizedResponse'?
+src/__tests__/api/analytics/cases/route.test.ts(92,55): error TS2345: Argument of type 'null' is not assignable to parameter of type 'NextResponse<unknown> | Promise<NextResponse<unknown>>'.
+src/__tests__/api/analytics/cases/route.test.ts(110,55): error TS2345: Argument of type 'null' is not assignable to parameter of type 'NextResponse<unknown> | Promise<NextResponse<unknown>>'.
+src/__tests__/api/analytics/cases/route.test.ts(120,55): error TS2345: Argument of type 'null' is not assignable to parameter of type 'NextResponse<unknown> | Promise<NextResponse<unknown>>'.
+src/__tests__/api/analytics/cases/route.test.ts(133,55): error TS2345: Argument of type 'null' is not assignable to parameter of type 'NextResponse<unknown> | Promise<NextResponse<unknown>>'.
+src/__tests__/api/analytics/cases/route.test.ts(146,55): error TS2345: Argument of type 'null' is not assignable to parameter of type 'NextResponse<unknown> | Promise<NextResponse<unknown>>'.
+src/__tests__/api/analytics/clients.test.ts(9,24): error TS2724: '"@/types/client"' has no exported member named '_ClientValueLevel'. Did you mean 'ClientValueLevel'?
+src/__tests__/api/cases-id.test.ts(10,20): error TS2724: '"@/app/api/v1/cases/[id]/route"' has no exported member named '_DELETE'. Did you mean 'DELETE'?
+src/__tests__/api/cases-id.test.ts(10,29): error TS2724: '"@/app/api/v1/cases/[id]/route"' has no exported member named '_OPTIONS'. Did you mean 'OPTIONS'?
+src/__tests__/api/cases-id.test.ts(36,54): error TS2345: Argument of type '(reason: string) => Response' is not assignable to parameter of type 'UnknownFunction'.
+src/__tests__/api/cases.test.ts(2,10): error TS2724: '"@prisma/client"' has no exported member named '_CaseType'. Did you mean 'CaseType'?
+src/__tests__/api/cases.test.ts(2,21): error TS2724: '"@prisma/client"' has no exported member named '_CaseStatus'. Did you mean 'CaseStatus'?
+src/__tests__/api/cases.test.ts(213,14): error TS2790: The operand of a 'delete' operator must be optional.
+src/__tests__/api/cases.test.ts(214,14): error TS2790: The operand of a 'delete' operator must be optional.
+src/__tests__/api/cases.test.ts(215,14): error TS2790: The operand of a 'delete' operator must be optional.
+src/__tests__/api/cases.test.ts(339,14): error TS2790: The operand of a 'delete' operator must be optional.
+src/__tests__/api/cases.test.ts(355,14): error TS2790: The operand of a 'delete' operator must be optional.
+src/__tests__/api/cases.test.ts(447,14): error TS2790: The operand of a 'delete' operator must be optional.
+src/__tests__/api/court-schedules.test.ts(99,7): error TS2552: Cannot find name 'testScheduleId'. Did you mean '__testScheduleId'?
+src/__tests__/api/debates-id-stream-basic.test.ts(285,22): error TS18047: 'response.body' is possibly 'null'.
+src/__tests__/api/debates-id.test.ts(30,54): error TS2345: Argument of type '(reason: string) => Response' is not assignable to parameter of type 'UnknownFunction'.
+src/__tests__/api/document-templates.api.test.ts(11,23): error TS2724: '"next/server"' has no exported member named '_NextResponse'. Did you mean 'NextResponse'?
+src/__tests__/api/error-handling-database.test.ts(34,54): error TS2345: Argument of type '(reason: string) => Response' is not assignable to parameter of type 'UnknownFunction'.
+src/__tests__/api/errors.test.ts(394,14): error TS18047: 'error' is possibly 'null'.
+src/__tests__/api/errors.test.ts(402,14): error TS18047: 'error' is possibly 'null'.
+src/__tests__/api/errors.test.ts(403,34): error TS18047: 'error' is possibly 'null'.
+src/__tests__/api/memberships/upgrade.test.ts(44,5): error TS2552: Cannot find name 'mockUpdate'. Did you mean '__mockUpdate'?
+src/__tests__/api/memberships/upgrade.test.ts(531,8): error TS2352: Conversion of type 'null' to type 'Date' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+src/__tests__/api/memberships/upgrade.test.ts(532,8): error TS2352: Conversion of type 'null' to type 'Date' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+src/__tests__/api/memberships/upgrade.test.ts(596,8): error TS2352: Conversion of type 'null' to type 'Date' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+src/__tests__/api/memberships/upgrade.test.ts(597,8): error TS2352: Conversion of type 'null' to type 'Date' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+src/__tests__/api/middleware-core.test.ts(152,13): error TS2552: Cannot find name 'contextReceived'. Did you mean '__contextReceived'?
+src/__tests__/api/middleware-integration.test.ts(301,29): error TS7030: Not all code paths return a value.
+src/__tests__/api/middleware-integration.test.ts(376,29): error TS7030: Not all code paths return a value.
+src/__tests__/api/middleware-simple-integration.test.ts(6,32): error TS2724: '"@jest/globals"' has no exported member named '_beforeEach'. Did you mean 'beforeEach'?
+src/__tests__/api/middleware-simple-mocks.test.ts(243,10): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'MockResponse'.
+src/__tests__/api/pagination-core.test.ts(178,14): error TS18048: 'result.where.OR' is possibly 'undefined'.
+src/__tests__/api/pagination-core.test.ts(194,14): error TS18048: 'result.where.OR' is possibly 'undefined'.
+src/__tests__/api/responses.test.ts(1,10): error TS2724: '"next/server"' has no exported member named '_NextResponse'. Did you mean 'NextResponse'?
+src/__tests__/api/test-utils.ts(27,10): error TS7053: Element implicitly has an 'any' type because expression of type '"Content-Type"' can't be used to index type 'HeadersInit'.
+src/__tests__/api/test-utils.ts(28,7): error TS7053: Element implicitly has an 'any' type because expression of type '"Content-Type"' can't be used to index type 'HeadersInit'.
+    Type 'AbortSignal | null | undefined' is not assignable to type 'AbortSignal | undefined'.
+      Type 'null' is not assignable to type 'AbortSignal | undefined'.
+src/__tests__/api/validation-core.test.ts(239,27): error TS2352: Conversion of type '{ url: null; }' to type 'NextRequest' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+src/__tests__/api/validation.test.ts(17,7): error TS2552: Cannot find name 'mockRequest'. Did you mean '__mockRequest'?
+src/__tests__/app/api/admin/law-articles/import/route.test.ts(17,23): error TS2724: '"@prisma/client"' has no exported member named '_LawStatus'. Did you mean 'LawStatus'?
+src/__tests__/app/api/risk-assessment/history/route.test.ts(6,10): error TS2724: '"next/server"' has no exported member named '_NextRequest'. Did you mean 'NextRequest'?
+src/__tests__/app/api/v1/feedbacks/recommendation.test.ts(336,7): error TS2578: Unused '@ts-expect-error' directive.
+src/__tests__/app/api/v1/feedbacks/relation.test.ts(343,7): error TS2578: Unused '@ts-expect-error' directive.
+src/__tests__/app/api/v1/law-article-relations/recommendation-stats.test.ts(10,10): error TS2724: '"@prisma/client"' has no exported member named '_VerificationStatus'. Did you mean 'VerificationStatus'?
+src/__tests__/app/api/v1/law-article-relations/stats.test.ts(43,7): error TS2578: Unused '@ts-expect-error' directive.
+src/__tests__/app/internal-homepage.test.tsx(8,10): error TS2724: '"@/lib/db"' has no exported member named '_prisma'. Did you mean 'prisma'?
+src/__tests__/app/payment/processing.page.test.tsx(9,10): error TS2724: '"@/components/payment/PaymentProcessing"' has no exported member named '_PaymentProcessing'. Did you mean 'PaymentProcessing'?
+src/__tests__/app/payment/processing.page.test.tsx(10,10): error TS2724: '"@/types/payment"' has no exported member named '_PaymentMethod'. Did you mean 'PaymentMethod'?
+src/__tests__/bad-cases/claim-extraction-bad-case.test.ts(210,14): error TS18048: 'principal' is possibly 'undefined'.
+src/__tests__/bad-cases/claim-extraction-bad-case.test.ts(306,14): error TS18048: 'interest' is possibly 'undefined'.
+src/__tests__/bad-cases/party-extraction-bad-case.test.ts(113,14): error TS18048: 'plaintiff' is possibly 'undefined'.
+src/__tests__/bad-cases/party-extraction-bad-case.test.ts(130,14): error TS18048: 'plaintiff' is possibly 'undefined'.
+src/__tests__/bad-cases/party-extraction-bad-case.test.ts(146,14): error TS18048: 'applicant' is possibly 'undefined'.
+src/__tests__/bad-cases/party-extraction-bad-case.test.ts(180,14): error TS18048: 'defendant' is possibly 'undefined'.
+src/__tests__/bad-cases/party-extraction-bad-case.test.ts(196,14): error TS18048: 'defendant' is possibly 'undefined'.
+src/__tests__/bad-cases/party-extraction-bad-case.test.ts(211,14): error TS18048: 'defendant' is possibly 'undefined'.
+src/__tests__/bad-cases/party-extraction-bad-case.test.ts(246,14): error TS18048: 'thirdParty' is possibly 'undefined'.
+src/__tests__/cache/cache-preload.test.ts(21,10): error TS2724: '"@/lib/cache/manager"' has no exported member named '_cache'. Did you mean 'cache'?
+src/__tests__/cache/index.test.ts(24,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(25,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(35,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(42,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(49,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(58,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(65,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(75,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(86,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(98,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(107,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(108,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(117,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(126,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(132,14): error TS18047: 'redis' is possibly 'null'.
+src/__tests__/cache/index.test.ts(138,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(139,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(150,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(161,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(173,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(181,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(190,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(200,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(213,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(214,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(227,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(243,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(254,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(268,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(269,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(292,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(310,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(311,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(28,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(30,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(44,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(46,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(60,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(69,37): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(78,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(89,37): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(98,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(107,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(113,9): error TS2554: Expected 1 arguments, but got 3.
+src/__tests__/cache/manager.test.ts(124,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(139,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(156,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(168,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(190,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(192,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(205,35): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(217,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(225,9): error TS2554: Expected 1 arguments, but got 3.
+src/__tests__/cache/manager.test.ts(235,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(236,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(251,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(267,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(283,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(296,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(308,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(321,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(339,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(340,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(359,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(377,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(390,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(404,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(420,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(421,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(448,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/components/case/CaseShareDialog.test.tsx(393,9): error TS2552: Cannot find name 'resolvePromise'. Did you mean '__resolvePromise'?
+src/__tests__/components/case/CaseTimeline.basic.test.tsx(7,26): error TS2724: '"@testing-library/react"' has no exported member named '_fireEvent'. Did you mean 'fireEvent'?
+src/__tests__/components/case/SimilarCasesViewer.test.tsx(7,26): error TS2724: '"@testing-library/react"' has no exported member named '_fireEvent'. Did you mean 'fireEvent'?
+src/__tests__/components/client/CommunicationRecordList.test.tsx(1,26): error TS2724: '"@testing-library/react"' has no exported member named '_within'. Did you mean 'within'?
+src/__tests__/components/court/CourtCalendar.test.tsx(7,35): error TS2724: '"@testing-library/react"' has no exported member named '_within'. Did you mean 'within'?
+src/__tests__/components/membership/UsageHistory.test.tsx(144,23): error TS2345: Argument of type 'HTMLButtonElement | null' is not assignable to parameter of type 'Element | Node | Window | Document'.
+src/__tests__/components/membership/UsageHistory.test.tsx(153,23): error TS2345: Argument of type 'HTMLButtonElement | null' is not assignable to parameter of type 'Element | Node | Window | Document'.
+src/__tests__/components/membership/UsageHistory.test.tsx(163,23): error TS2345: Argument of type 'HTMLButtonElement | null' is not assignable to parameter of type 'Element | Node | Window | Document'.
+src/__tests__/components/membership/UsageHistory.test.tsx(173,23): error TS2345: Argument of type 'HTMLButtonElement | null' is not assignable to parameter of type 'Element | Node | Window | Document'.
+src/__tests__/components/membership/UsageHistory.test.tsx(176,23): error TS2345: Argument of type 'HTMLButtonElement | null' is not assignable to parameter of type 'Element | Node | Window | Document'.
+src/__tests__/components/order/OrderDetailModal.test.tsx(33,5): error TS2322: Type 'null' is not assignable to type 'Date | undefined'.
+src/__tests__/components/order/OrderList.test.tsx(56,7): error TS2322: Type 'null' is not assignable to type 'Date | undefined'.
+src/__tests__/components/order/OrderList.test.tsx(174,45): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(predicate: (value: HTMLElement, index: number, obj: HTMLElement[]) => value is HTMLElement, thisArg?: any): HTMLElement | undefined', gave the following error.
+  Overload 2 of 2, '(predicate: (value: HTMLElement, index: number, obj: HTMLElement[]) => unknown, thisArg?: any): HTMLElement | undefined', gave the following error.
+src/__tests__/components/order/OrderList.test.tsx(216,41): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(predicate: (value: HTMLElement, index: number, obj: HTMLElement[]) => value is HTMLElement, thisArg?: any): HTMLElement | undefined', gave the following error.
+  Overload 2 of 2, '(predicate: (value: HTMLElement, index: number, obj: HTMLElement[]) => unknown, thisArg?: any): HTMLElement | undefined', gave the following error.
+src/__tests__/components/payment/PaymentMethodSelector.test.tsx(7,10): error TS2724: '"lucide-react"' has no exported member named '_Check'. Did you mean 'Check'?
+src/__tests__/components/reminder/ReminderList.test.tsx(55,7): error TS2322: Type 'null' is not assignable to type 'string | undefined'.
+src/__tests__/components/reminder/ReminderList.test.tsx(56,7): error TS2322: Type 'null' is not assignable to type 'string | undefined'.
+src/__tests__/components/reminder/ReminderSettings.test.tsx(5,26): error TS2724: '"@testing-library/react"' has no exported member named '_fireEvent'. Did you mean 'fireEvent'?
+src/__tests__/components/task/TaskForm.test.tsx(6,26): error TS2724: '"@testing-library/react"' has no exported member named '_fireEvent'. Did you mean 'fireEvent'?
+  Try `npm i --save-dev @types/js-yaml` if it exists or add a new declaration (.d.ts) file containing `declare module 'js-yaml';`
+src/__tests__/config/alertmanager/alert-rules.test.ts(397,51): error TS2345: Argument of type 'AlertSeverity | undefined' is not assignable to parameter of type 'AlertSeverity'.
+  Type 'undefined' is not assignable to type 'AlertSeverity'.
+src/__tests__/config/alertmanager/alert-rules.test.ts(409,51): error TS2345: Argument of type 'AlertCategory | undefined' is not assignable to parameter of type 'AlertCategory'.
+  Try `npm i --save-dev @types/js-yaml` if it exists or add a new declaration (.d.ts) file containing `declare module 'js-yaml';`
+src/__tests__/debate/round-manager.test.ts(44,7): error TS2322: Type '{ id: undefined; userId: string; status: $Enums.CaseStatus; type: $Enums.CaseType; title: string; description: string; amount: Decimal | null; ... 11 more ...; sharedWithTeam: boolean; }' is not assignable to type '(Without<CaseCreateInput, CaseUncheckedCreateInput> & CaseUncheckedCreateInput) | (Without<...> & CaseCreateInput)'.
+src/__tests__/debate/round-manager.test.ts(52,7): error TS2322: Type '{ id: undefined; caseId: string; userId: string; status: $Enums.DebateStatus; title: string; summary: JsonValue | null; createdAt: Date; updatedAt: Date; deletedAt: Date | null; currentRound: number; debateConfig: JsonValue | null; }' is not assignable to type '(Without<DebateCreateInput, DebateUncheckedCreateInput> & DebateUncheckedCreateInput) | (Without<...> & DebateCreateInput)'.
+src/__tests__/debate/round-validator.test.ts(43,7): error TS2322: Type '{ id: undefined; userId: string; status: $Enums.CaseStatus; type: $Enums.CaseType; title: string; description: string; amount: Decimal | null; ... 11 more ...; sharedWithTeam: boolean; }' is not assignable to type '(Without<CaseCreateInput, CaseUncheckedCreateInput> & CaseUncheckedCreateInput) | (Without<...> & CaseCreateInput)'.
+src/__tests__/debate/round-validator.test.ts(51,7): error TS2322: Type '{ id: undefined; caseId: string; userId: string; status: $Enums.DebateStatus; title: string; summary: JsonValue | null; createdAt: Date; updatedAt: Date; deletedAt: Date | null; currentRound: number; debateConfig: JsonValue | null; }' is not assignable to type '(Without<DebateCreateInput, DebateUncheckedCreateInput> & DebateUncheckedCreateInput) | (Without<...> & DebateCreateInput)'.
+src/__tests__/e2e/debate-flow/data-consistency.spec.ts(61,12): error TS18047: 'dbDocument' is possibly 'null'.
+src/__tests__/e2e/debate-flow/data-consistency.spec.ts(62,12): error TS18047: 'dbDocument' is possibly 'null'.
+src/__tests__/e2e/debate-flow/data-consistency.spec.ts(65,22): error TS18047: 'dbDocument' is possibly 'null'.
+src/__tests__/e2e/debate-flow/data-consistency.spec.ts(146,12): error TS18047: 'dbRound' is possibly 'null'.
+src/__tests__/e2e/debate-flow/data-consistency.spec.ts(149,5): error TS18047: 'dbRound' is possibly 'null'.
+src/__tests__/e2e/debate-flow/data-consistency.spec.ts(247,12): error TS18047: 'caseData' is possibly 'null'.
+src/__tests__/e2e/debate-flow/data-consistency.spec.ts(248,12): error TS18047: 'caseData' is possibly 'null'.
+src/__tests__/e2e/debate-flow/data-consistency.spec.ts(251,12): error TS18047: 'caseData' is possibly 'null'.
+src/__tests__/e2e/debate-flow/data-consistency.spec.ts(252,7): error TS18047: 'caseData' is possibly 'null'.
+src/__tests__/e2e/debate-flow/data-consistency.spec.ts(274,12): error TS18047: 'round1Check' is possibly 'null'.
+src/__tests__/e2e/debate-flow/data-consistency.spec.ts(275,12): error TS18047: 'round1Check' is possibly 'null'.
+src/__tests__/e2e/debate-flow/data-consistency.spec.ts(282,12): error TS18047: 'round2Check' is possibly 'null'.
+src/__tests__/e2e/debate-flow/data-consistency.spec.ts(431,12): error TS18047: 'dbDebate' is possibly 'null'.
+src/__tests__/e2e/debate-flow/data-consistency.spec.ts(434,5): error TS18047: 'dbDebate' is possibly 'null'.
+src/__tests__/e2e/debate-flow/data-consistency.spec.ts(439,28): error TS18047: 'dbDebate' is possibly 'null'.
+src/__tests__/e2e/debate-flow/single-round.spec.ts(6,43): error TS2724: '"@playwright/test"' has no exported member named '_Page'. Did you mean 'Page'?
+src/__tests__/e2e/debate-flow/single-round.spec.ts(20,10): error TS2724: '"../test-helpers"' has no exported member named '_E2ETestHelpers'. Did you mean 'E2ETestHelpers'?
+src/__tests__/e2e/mock-config.spec.ts(203,24): error TS18048: 'response.data' is possibly 'undefined'.
+src/__tests__/e2e/mock-config.spec.ts(214,14): error TS18048: 'response.data' is possibly 'undefined'.
+src/__tests__/e2e/mock-config.spec.ts(227,14): error TS18048: 'response.data' is possibly 'undefined'.
+src/__tests__/e2e/mock-config.spec.ts(228,14): error TS18048: 'response.data' is possibly 'undefined'.
+src/__tests__/e2e/mock-config.spec.ts(229,14): error TS18048: 'response.data' is possibly 'undefined'.
+src/__tests__/e2e/mock-config.spec.ts(242,14): error TS18048: 'response.data' is possibly 'undefined'.
+src/__tests__/e2e/mock-config.spec.ts(243,26): error TS18048: 'response.data' is possibly 'undefined'.
+src/__tests__/e2e/mock-config.spec.ts(254,20): error TS18048: 'response.data' is possibly 'undefined'.
+src/__tests__/e2e/payment.spec.ts(566,5): error TS2552: Cannot find name 'createdOrderId'. Did you mean '__createdOrderId'?
+src/__tests__/e2e/reports/test-reporter.ts(185,7): error TS2322: Type '{ name: string | undefined; status: "passed" | "failed" | "skipped"; duration: number; error: string | undefined; }[]' is not assignable to type 'TestCaseResult[]'.
+  Type '{ name: string | undefined; status: "passed" | "failed" | "skipped"; duration: number; error: string | undefined; }' is not assignable to type 'TestCaseResult'.
+src/__tests__/e2e/reports/test-reporter.ts(200,7): error TS2322: Type '{ name: string | undefined; status: "passed" | "failed"; message: string; }[]' is not assignable to type 'ConsistencyCheck[]'.
+src/__tests__/e2e/reports/test-reporter.ts(253,27): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+src/__tests__/e2e/reports/test-reporter.ts(260,27): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+src/__tests__/e2e/reports/test-reporter.ts(267,27): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(78,14): error TS18048: 'result.data' is possibly 'undefined'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(79,14): error TS18048: 'result.data' is possibly 'undefined'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(80,14): error TS18048: 'result.data' is possibly 'undefined'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(94,23): error TS18048: 'result.data' is possibly 'undefined'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(112,14): error TS18048: 'plaintiff' is possibly 'undefined'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(125,22): error TS18048: 'result.data' is possibly 'undefined'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(157,22): error TS18048: 'result.data' is possibly 'undefined'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(209,22): error TS18048: 'result.data' is possibly 'undefined'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(217,14): error TS18048: 'litigationCost' is possibly 'undefined'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(232,22): error TS18048: 'result.data' is possibly 'undefined'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(252,14): error TS18048: 'result.data' is possibly 'undefined'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(328,14): error TS18048: 'result1.data' is possibly 'undefined'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(328,50): error TS18048: 'result2.data' is possibly 'undefined'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(329,14): error TS18048: 'result1.data' is possibly 'undefined'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(329,44): error TS18048: 'result2.data' is possibly 'undefined'.
+src/__tests__/integration/doc-analyzer-integration.test.ts(332,9): error TS18048: 'result1.executionTime' is possibly 'undefined'.
+src/__tests__/integration/stability-integration.test.ts(18,10): error TS2724: '"@/lib/ai/retry-strategy"' has no exported member named '_RetryStrategy'. Did you mean 'RetryStrategy'?
+src/__tests__/law-article/search-cache.test.ts(318,37): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+src/__tests__/law-article/search-performance.test.ts(1,32): error TS2724: '"@jest/globals"' has no exported member named '_beforeAll'. Did you mean 'beforeAll'?
+src/__tests__/law-article/search-performance.test.ts(1,44): error TS2724: '"@jest/globals"' has no exported member named '_afterAll'. Did you mean 'afterAll'?
+src/__tests__/law-article/search-service.test.ts(1,32): error TS2724: '"@jest/globals"' has no exported member named '_beforeEach'. Did you mean 'beforeEach'?
+src/__tests__/law-article/search-service.test.ts(1,45): error TS2724: '"@jest/globals"' has no exported member named '_afterEach'. Did you mean 'afterEach'?
+src/__tests__/lib/agent/core-actions/core.test.ts(754,56): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number | bigint'.
+src/__tests__/lib/agent/core-actions/integration.test.ts(202,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'Error'.
+src/__tests__/lib/ai/evidence-relationship-identifier.test.ts(7,15): error TS2724: '"@/types/evidence-chain"' has no exported member named '_AIEvidenceRelationshipResult'. Did you mean 'AIEvidenceRelationshipResult'?
+src/__tests__/lib/ai/quota.test.ts(25,10): error TS2724: '"@/lib/db/prisma"' has no exported member named '_prisma'. Did you mean 'prisma'?
+src/__tests__/lib/crawler/crawler.test.ts(9,32): error TS2724: '"@prisma/client"' has no exported member named '_LawStatus'. Did you mean 'LawStatus'?
+src/__tests__/lib/db/connection-manager.test.ts(222,46): error TS2345: Argument of type 'null' is not assignable to parameter of type 'DatabaseConnection'.
+src/__tests__/lib/debate/debate-with-recommendation.test.ts(6,10): error TS2724: '"@/lib/debate/debate-generator"' has no exported member named '_DebateGenerator'. Did you mean 'DebateGenerator'?
+src/__tests__/lib/debate/debate-with-recommendation.test.ts(8,10): error TS2724: '"@/lib/ai/clients"' has no exported member named '_AIClient'. Did you mean 'AIClient'?
+src/__tests__/lib/knowledge-graph-e2e.test.ts(14,10): error TS2724: '"@/lib/law-article/relation-discovery/ai-detector"' has no exported member named '_AIDetector'. Did you mean 'AIDetector'?
+src/__tests__/lib/knowledge-graph-e2e.test.ts(15,10): error TS2724: '"@/lib/law-article/relation-discovery/case-derived-detector"' has no exported member named '_CaseDerivedDetector'. Did you mean 'CaseDerivedDetector'?
+src/__tests__/lib/law-article-verifier.test.ts(568,44): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'string'.
+src/__tests__/lib/law-article/relation-discovery/ai-detector.test.ts(15,22): error TS2724: '"@prisma/client"' has no exported member named '_RelationType'. Did you mean 'RelationType'?
+src/__tests__/lib/task/task-reminder.test.ts(49,31): error TS2724: '"@/types/notification"' has no exported member named '_ReminderType'. Did you mean 'ReminderType'?
+src/__tests__/membership/admin-membership-api.test.ts(65,5): error TS2552: Cannot find name 'mockFindUniqueUser'. Did you mean '__mockFindUniqueUser'?
+src/__tests__/membership/admin-membership-api.test.ts(66,5): error TS2552: Cannot find name 'mockFindFirstTier'. Did you mean '__mockFindFirstTier'?
+src/__tests__/memory/migrator.test.ts(12,15): error TS2724: '"@/lib/agent/memory-agent/types"' has no exported member named '_Memory'. Did you mean 'Memory'?
+src/__tests__/memory/migrator.test.ts(146,9): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/memory/migrator.test.ts(187,9): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/memory/migrator.test.ts(247,9): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/memory/migrator.test.ts(313,9): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/memory/migrator.test.ts(333,9): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/memory/migrator.test.ts(403,9): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/memory/migrator.test.ts(474,9): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/memory/migrator.test.ts(508,9): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/memory/migrator.test.ts(542,9): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/memory/migrator.test.ts(576,9): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/memory/migrator.test.ts(619,9): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/memory/migrator.test.ts(639,9): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/memory/migrator.test.ts(677,9): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/memory/migrator.test.ts(714,11): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/memory/migrator.test.ts(749,9): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/memory/migrator.test.ts(782,9): error TS2322: Type 'Date | undefined' is not assignable to type 'Date | null'.
+src/__tests__/middleware/ai-error-handler.test.ts(198,27): error TS2345: Argument of type '(callback: () => void, delay: number) => NodeJS.Timeout' is not assignable to parameter of type '(callback: (_: void) => void, delay?: number | undefined) => Timeout'.
+src/__tests__/middleware/check-usage-limit.test.ts(60,5): error TS2552: Cannot find name 'testMembershipId'. Did you mean '__testMembershipId'?
+src/__tests__/order/update-order-paid.test.ts(12,23): error TS2724: '"@/types/payment"' has no exported member named '_PaymentMethod'. Did you mean 'PaymentMethod'?
+src/__tests__/payment/alipay-refund.test.ts(8,31): error TS2724: '"@/types/payment"' has no exported member named '_AlipayRefundResponse'. Did you mean 'AlipayRefundResponse'?
+src/__tests__/payment/alipay.test.ts(6,18): error TS2724: '"@/lib/payment/alipay"' has no exported member named '_AlipayPayment'. Did you mean 'AlipayPayment'?
+src/__tests__/payment/payment-api.test.ts(7,25): error TS2724: '"@/types/payment"' has no exported member named '_CreateOrderResponse'. Did you mean 'CreateOrderResponse'?
+src/__tests__/payment/wechat-pay.test.ts(7,21): error TS2724: '"@/lib/payment/wechat-pay"' has no exported member named '_WechatPay'. Did you mean 'WechatPay'?
+src/__tests__/performance/doc-analyzer-performance.test.ts(79,14): error TS18048: 'result.data' is possibly 'undefined'.
+src/__tests__/performance/doc-analyzer-performance.test.ts(84,13): error TS18048: 'result.data' is possibly 'undefined'.
+src/__tests__/performance/doc-analyzer-performance.test.ts(85,14): error TS18048: 'result.data' is possibly 'undefined'.
+src/__tests__/report-generator.test.ts(10,36): error TS2724: '"@/types/stats"' has no exported member named '_ReportStatus'. Did you mean 'ReportStatus'?
+  Try `npm i --save-dev @types/js-yaml` if it exists or add a new declaration (.d.ts) file containing `declare module 'js-yaml';`
+src/__tests__/types/case-type-config.test.ts(382,11): error TS2322: Type 'null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/__tests__/types/case-type-config.test.ts(419,11): error TS2322: Type 'null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/__tests__/types/case-type-config.test.ts(446,11): error TS2322: Type 'null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/__tests__/types/case-type-config.test.ts(459,13): error TS2322: Type 'null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/__tests__/types/case-type-config.test.ts(501,11): error TS2322: Type '{ code: string; name: string; category: CaseTypeCategory; baseFee: number; requiredDocs: never; optionalDocs: null; complexityLevel: number; isActive: boolean; sortOrder: number; }' is not assignable to type '(Without<CaseTypeConfigCreateInput, CaseTypeConfigUncheckedCreateInput> & CaseTypeConfigUncheckedCreateInput) | (Without<...> & CaseTypeConfigCreateInput)'.
+src/__tests__/types/case-type-config.test.ts(550,11): error TS2322: Type 'null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/__tests__/types/case-type-config.test.ts(583,11): error TS2322: Type 'null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/__tests__/types/case-type-config.test.ts(621,11): error TS2322: Type 'null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/__tests__/unit/agent/memory-agent/compressor.test.ts(154,14): error TS18048: 'result.keyInfo' is possibly 'undefined'.
+src/__tests__/unit/agent/memory-agent/compressor.test.ts(196,14): error TS18048: 'result.summary' is possibly 'undefined'.
+src/__tests__/unit/case.test.ts(272,27): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(122,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(157,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(180,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(222,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(269,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(312,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(355,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(400,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(414,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(435,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(470,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(504,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(538,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/document.crud.test.ts(213,27): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/__tests__/unit/document/document.crud.test.ts(232,22): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/__tests__/unit/document/document.crud.test.ts(248,27): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/__tests__/unit/document/document.relations.test.ts(145,25): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/__tests__/unit/document/document.upload.test.ts(93,23): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/__tests__/unit/legal-reference/legal-reference.applicability.test.ts(1,24): error TS2724: '"@prisma/client"' has no exported member named '_LegalReferenceStatus'. Did you mean 'LegalReferenceStatus'?
+src/__tests__/unit/legal-reference/legal-reference.applicability.test.ts(422,14): error TS2531: Object is possibly 'null'.
+src/__tests__/unit/legal-reference/legal-reference.cache.test.ts(1,24): error TS2724: '"@prisma/client"' has no exported member named '_LegalReferenceStatus'. Did you mean 'LegalReferenceStatus'?
+src/__tests__/unit/legal-reference/legal-reference.crud.test.ts(435,14): error TS18047: 'refWithCase.case' is possibly 'null'.
+src/__tests__/unit/stats/activity-api.test.ts(32,10): error TS2724: '"@/types/stats"' has no exported member named '_TimeRange'. Did you mean 'TimeRange'?
+src/__tests__/unit/stats/debate-quality-score-api.test.ts(28,10): error TS2724: '"@/types/stats"' has no exported member named '_TimeRange'. Did you mean 'TimeRange'?
+src/__tests__/usage/record-usage.test.ts(108,5): error TS2552: Cannot find name 'testMembershipId'. Did you mean '__testMembershipId'?
+src/__tests__/usage/record-usage.test.ts(381,14): error TS18048: 'stats.periodStart' is possibly 'undefined'.
+src/__tests__/usage/record-usage.test.ts(382,14): error TS18048: 'stats.periodEnd' is possibly 'undefined'.
+src/__tests__/usage/record-usage.test.ts(433,14): error TS18048: 'stats.remaining' is possibly 'undefined'.
+src/__tests__/usage/record-usage.test.ts(434,14): error TS18048: 'stats.remaining' is possibly 'undefined'.
+src/__tests__/usage/record-usage.test.ts(435,14): error TS18048: 'stats.remaining' is possibly 'undefined'.
+src/app/admin/enterprise/[id]/page.tsx(166,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/app/admin/reports/[id]/page.tsx(144,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/app/api/admin/configs/route.ts(121,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/configs/route.ts(122,61): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/enterprise/route.ts(69,19): error TS2367: This comparison appears to be unintentional because the types 'EnterpriseStatus' and '""' have no overlap.
+src/app/api/admin/export/cases/route.ts(248,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/admin/export/stats/route.ts(533,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/admin/law-articles/route.ts(164,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/law-articles/route.ts(165,61): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/memberships/export/route.ts(213,11): error TS2322: Type '{ userId: string; userEmail: string; userName: string | null; tierName: string; tierDisplayName: string; status: MembershipStatus; startDate: Date; endDate: Date; ... 7 more ...; updatedAt: Date; }[]' is not assignable to type 'ExportMembershipData[]'.
+src/app/api/admin/memberships/route.ts(121,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/memberships/route.ts(124,35): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/orders/route.ts(235,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/orders/route.ts(295,9): error TS2464: A computed property name must be of type 'string', 'number', 'symbol', or 'any'.
+src/app/api/admin/qualifications/route.ts(153,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/qualifications/route.ts(154,61): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/roles/[id]/permissions/route.ts(102,7): error TS2322: Type '{ id: string; name: string; description: string | null; resource: string; action: string; }[]' is not assignable to type '{ id: string; name: string; resource: string; action: string; description: string; }[]'.
+src/app/api/admin/roles/route.ts(81,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/roles/route.ts(84,35): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/users/route.ts(142,34): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/users/route.ts(143,38): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/users/route.ts(169,9): error TS2464: A computed property name must be of type 'string', 'number', 'symbol', or 'any'.
+src/app/api/analytics/cases/route.ts(664,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/analytics/lawyers/route.ts(344,5): error TS2322: Type '{ type: string; totalCases: number; successfulCases: number; successRate: number; }[]' is not assignable to type 'never[]'.
+src/app/api/analytics/lawyers/route.ts(455,5): error TS2322: Type '{ type: string; totalRevenue: number; caseCount: number; percentage: number; }[]' is not assignable to type 'never[]'.
+src/app/api/analytics/lawyers/route.ts(671,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/analytics/lawyers/route.ts(725,25): error TS18048: 'params.page' is possibly 'undefined'.
+src/app/api/analytics/lawyers/route.ts(725,44): error TS18048: 'params.limit' is possibly 'undefined'.
+src/app/api/analytics/lawyers/route.ts(726,35): error TS18048: 'params.limit' is possibly 'undefined'.
+src/app/api/auth/refresh/route.ts(65,7): error TS2322: Type 'NextResponse<{ success: false; message: string; error: string | null; }>' is not assignable to type 'NextResponse<RefreshTokenResponse>'.
+  Type '{ success: false; message: string; error: string | null; }' is not assignable to type 'RefreshTokenResponse'.
+    Types of property 'error' are incompatible.
+src/app/api/auth/register/route.ts(43,9): error TS2322: Type 'string | null' is not assignable to type 'string | undefined'.
+src/app/api/auth/test-session/route.ts(44,53): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(password: string, hash: string): Promise<boolean>', gave the following error.
+  Overload 2 of 2, '(password: string, hash: string, callback?: Callback<boolean> | undefined, progressCallback?: ProgressCallback | undefined): void', gave the following error.
+src/app/api/cases/[id]/discussions/route.ts(229,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/cases/[id]/discussions/route.ts(244,38): error TS2339: Property 'user' does not exist on type '{ content: string; metadata: JsonValue; userId: string; caseId: string; createdAt: Date; updatedAt: Date; id: string; deletedAt: Date | null; isPinned: boolean; mentions: string[]; }'.
+src/app/api/cases/[id]/discussions/route.ts(244,62): error TS2339: Property 'user' does not exist on type '{ content: string; metadata: JsonValue; userId: string; caseId: string; createdAt: Date; updatedAt: Date; id: string; deletedAt: Date | null; isPinned: boolean; mentions: string[]; }'.
+src/app/api/cases/[id]/team-members/route.ts(322,9): error TS2322: Type 'JsonValue' is not assignable to type 'JsonNull | InputJsonValue'.
+src/app/api/cases/[id]/team-members/route.ts(325,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/clients/[id]/communications/route.ts(155,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/clients/[id]/route.ts(268,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/clients/route.ts(260,7): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/communications/[id]/route.ts(132,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/communications/route.ts(174,7): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/crawler/run/route.ts(70,9): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ download: string; parse: string; reparse: string; }'.
+src/app/api/follow-up-tasks/send-reminder/route.ts(49,9): error TS2322: Type 'string | undefined' is not assignable to type 'string | null'.
+src/app/api/follow-up-tasks/send-reminder/route.ts(50,9): error TS2322: Type 'string | undefined' is not assignable to type 'string | null'.
+src/app/api/follow-up-tasks/send-reminder/route.ts(105,9): error TS2322: Type 'string | undefined' is not assignable to type 'string | null'.
+src/app/api/follow-up-tasks/send-reminder/route.ts(106,9): error TS2322: Type 'string | undefined' is not assignable to type 'string | null'.
+src/app/api/lib/middleware/security.ts(24,7): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+src/app/api/lib/middleware/security.ts(45,5): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+src/app/api/lib/responses/pagination-utils.ts(82,5): error TS2322: Type 'Record<string, unknown> | null' is not assignable to type 'Record<string, unknown> | undefined'.
+src/app/api/orders/[id]/cancel/route.ts(85,9): error TS2339: Property 'PENDING' does not exist on type '{ PAID: string; FAILED: string; CANCELLED: string; REFUNDED: string; EXPIRED: string; }'.
+src/app/api/payment/query/route.ts(81,9): error TS2322: Type '{ id: string; }[] | { orderNo: string | null; }[]' is not assignable to type 'OrderWhereInput[] | undefined'.
+src/app/api/payment/query/route.ts(104,13): error TS2339: Property 'paymentRecords' does not exist on type '{ status: OrderStatus; currency: string; description: string; amount: Decimal; metadata: JsonValue; userId: string; createdAt: Date; updatedAt: Date; ... 6 more ...; failedReason: string | null; }'.
+src/app/api/payment/query/route.ts(104,47): error TS2339: Property 'paymentRecords' does not exist on type '{ status: OrderStatus; currency: string; description: string; amount: Decimal; metadata: JsonValue; userId: string; createdAt: Date; updatedAt: Date; ... 6 more ...; failedReason: string | null; }'.
+src/app/api/refunds/apply/route.ts(191,11): error TS2322: Type 'undefined' is not assignable to type 'string'.
+src/app/api/refunds/apply/route.ts(247,25): error TS2454: Variable 'refundResult' is used before being assigned.
+src/app/api/refunds/apply/route.ts(249,26): error TS2454: Variable 'refundResult' is used before being assigned.
+src/app/api/refunds/apply/route.ts(250,31): error TS2454: Variable 'refundResult' is used before being assigned.
+src/app/api/refunds/apply/route.ts(253,26): error TS2454: Variable 'refundResult' is used before being assigned.
+src/app/api/stats/cases/efficiency/route.ts(382,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/cases/type-distribution/route.ts(304,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/debates/generation-count/route.ts(374,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/debates/generation-count/route.ts(381,7): error TS2345: Argument of type 'DateGranularity | undefined' is not assignable to parameter of type 'DateGranularity'.
+src/app/api/stats/debates/quality-score/route.ts(372,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/performance/error-rate/route.ts(417,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/performance/response-time/route.ts(419,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/performance/response-time/route.ts(424,7): error TS2345: Argument of type 'DateGranularity | undefined' is not assignable to parameter of type 'DateGranularity'.
+src/app/api/stats/users/activity/route.ts(407,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/users/registration-trend/route.ts(381,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/users/registration-trend/route.ts(388,7): error TS2345: Argument of type 'DateGranularity | undefined' is not assignable to parameter of type 'DateGranularity'.
+src/app/api/tasks/route.ts(256,7): error TS2322: Type 'NullableJsonNullValueInput | InputJsonValue | null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/tasks/route.ts(308,16): error TS2339: Property 'case' does not exist on type '{ status: TaskStatus; title: string; description: string | null; metadata: JsonValue; caseId: string | null; createdAt: Date; updatedAt: Date; id: string; ... 8 more ...; actualHours: number | null; }'.
+src/app/api/tasks/route.ts(310,20): error TS2339: Property 'case' does not exist on type '{ status: TaskStatus; title: string; description: string | null; metadata: JsonValue; caseId: string | null; createdAt: Date; updatedAt: Date; id: string; ... 8 more ...; actualHours: number | null; }'.
+src/app/api/tasks/route.ts(311,23): error TS2339: Property 'case' does not exist on type '{ status: TaskStatus; title: string; description: string | null; metadata: JsonValue; caseId: string | null; createdAt: Date; updatedAt: Date; id: string; ... 8 more ...; actualHours: number | null; }'.
+src/app/api/tasks/route.ts(312,28): error TS2339: Property 'case' does not exist on type '{ status: TaskStatus; title: string; description: string | null; metadata: JsonValue; caseId: string | null; createdAt: Date; updatedAt: Date; id: string; ... 8 more ...; actualHours: number | null; }'.
+src/app/api/tasks/route.ts(315,20): error TS2339: Property 'assignedUser' does not exist on type '{ status: TaskStatus; title: string; description: string | null; metadata: JsonValue; caseId: string | null; createdAt: Date; updatedAt: Date; id: string; ... 8 more ...; actualHours: number | null; }'.
+src/app/api/tasks/route.ts(317,20): error TS2339: Property 'assignedUser' does not exist on type '{ status: TaskStatus; title: string; description: string | null; metadata: JsonValue; caseId: string | null; createdAt: Date; updatedAt: Date; id: string; ... 8 more ...; actualHours: number | null; }'.
+src/app/api/tasks/route.ts(318,22): error TS2339: Property 'assignedUser' does not exist on type '{ status: TaskStatus; title: string; description: string | null; metadata: JsonValue; caseId: string | null; createdAt: Date; updatedAt: Date; id: string; ... 8 more ...; actualHours: number | null; }'.
+src/app/api/tasks/route.ts(319,23): error TS2339: Property 'assignedUser' does not exist on type '{ status: TaskStatus; title: string; description: string | null; metadata: JsonValue; caseId: string | null; createdAt: Date; updatedAt: Date; id: string; ... 8 more ...; actualHours: number | null; }'.
+src/app/api/tasks/route.ts(320,24): error TS2339: Property 'assignedUser' does not exist on type '{ status: TaskStatus; title: string; description: string | null; metadata: JsonValue; caseId: string | null; createdAt: Date; updatedAt: Date; id: string; ... 8 more ...; actualHours: number | null; }'.
+src/app/api/tasks/route.ts(323,25): error TS2551: Property 'createdByUser' does not exist on type '{ status: TaskStatus; title: string; description: string | null; metadata: JsonValue; caseId: string | null; createdAt: Date; updatedAt: Date; id: string; ... 8 more ...; actualHours: number | null; }'. Did you mean 'createdBy'?
+src/app/api/tasks/route.ts(325,20): error TS2551: Property 'createdByUser' does not exist on type '{ status: TaskStatus; title: string; description: string | null; metadata: JsonValue; caseId: string | null; createdAt: Date; updatedAt: Date; id: string; ... 8 more ...; actualHours: number | null; }'. Did you mean 'createdBy'?
+src/app/api/tasks/route.ts(326,22): error TS2551: Property 'createdByUser' does not exist on type '{ status: TaskStatus; title: string; description: string | null; metadata: JsonValue; caseId: string | null; createdAt: Date; updatedAt: Date; id: string; ... 8 more ...; actualHours: number | null; }'. Did you mean 'createdBy'?
+src/app/api/tasks/route.ts(327,23): error TS2551: Property 'createdByUser' does not exist on type '{ status: TaskStatus; title: string; description: string | null; metadata: JsonValue; caseId: string | null; createdAt: Date; updatedAt: Date; id: string; ... 8 more ...; actualHours: number | null; }'. Did you mean 'createdBy'?
+src/app/api/tasks/route.ts(328,24): error TS2551: Property 'createdByUser' does not exist on type '{ status: TaskStatus; title: string; description: string | null; metadata: JsonValue; caseId: string | null; createdAt: Date; updatedAt: Date; id: string; ... 8 more ...; actualHours: number | null; }'. Did you mean 'createdBy'?
+src/app/api/teams/[id]/members/[userId]/route.ts(192,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/teams/[id]/members/route.ts(225,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/teams/[id]/route.ts(173,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/teams/route.ts(192,7): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/v1/debates/route.ts(97,7): error TS2783: 'orderBy' is specified more than once, so this usage will be overwritten.
+src/app/api/v1/documents/upload/route.ts(221,11): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/v1/documents/upload/route.ts(343,11): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/v1/law-articles/search/route.ts(193,7): error TS18048: 'query.pagination' is possibly 'undefined'.
+src/app/api/v1/memory/compress-preview/route.ts(98,7): error TS2322: Type 'null' is not assignable to type 'Date | undefined'.
+src/app/api/v1/memory/compress-preview/route.ts(119,11): error TS18048: 'compressionResult.summary' is possibly 'undefined'.
+src/app/cases/[id]/components/EvidenceTab.tsx(11,10): error TS2724: '"@/components/ui/badge"' has no exported member named '_Badge'. Did you mean 'Badge'?
+src/app/cases/[id]/loading.tsx(1,10): error TS2724: '"@/components/ui/Skeleton"' has no exported member named '_DetailSkeleton'. Did you mean 'DetailSkeleton'?
+src/app/clients/page.tsx(221,13): error TS2322: Type 'ClientDetail | undefined' is not assignable to type 'UpdateClientInput | undefined'.
+src/app/clients/page.tsx(223,13): error TS2322: Type '((data: CreateClientInput) => Promise<void>) | ((data: UpdateClientInput) => Promise<void>)' is not assignable to type '(data: CreateClientInput | UpdateClientInput) => Promise<void>'.
+src/app/contracts/[id]/approval/page.tsx(13,10): error TS2724: '"date-fns"' has no exported member named '_format'. Did you mean 'format'?
+src/app/contracts/[id]/approval/page.tsx(14,10): error TS2724: '"date-fns/locale"' has no exported member named '_zhCN'. Did you mean 'zhCN'?
+src/app/contracts/[id]/edit/page.tsx(83,40): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'string'.
+src/app/dashboard/cases/page.tsx(65,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/app/dashboard/debates/page.tsx(65,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/app/dashboard/loading.tsx(1,10): error TS2724: '"@/components/ui/Skeleton"' has no exported member named '_CardSkeleton'. Did you mean 'CardSkeleton'?
+src/app/dashboard/page.tsx(100,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/app/dashboard/performance/page.tsx(64,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/app/dashboard/users/page.tsx(65,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/app/law-articles/[id]/page.tsx(18,10): error TS2724: '"@/components/feedback/RelationFeedbackButton"' has no exported member named '_RelationFeedbackButton'. Did you mean 'RelationFeedbackButton'?
+src/app/law-articles/[id]/page.tsx(240,21): error TS2322: Type 'string | null' is not assignable to type 'string'.
+src/app/membership/upgrade/confirm/page.tsx(72,9): error TS7006: Parameter 'tier' implicitly has an 'any' type.
+src/app/membership/upgrade/confirm/page.tsx(212,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/app/tasks/components/task-list.tsx(310,39): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'Record<TaskPriority, string>'.
+src/app/tasks/components/task-list.tsx(313,39): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'Record<TaskStatus, string>'.
+src/components/admin/ActionLogViewer.tsx(246,21): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/admin/AdminMembershipDetail.tsx(118,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/components/admin/AlertStatistics.tsx(85,42): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'Record<"HIGH" | "MEDIUM" | "LOW" | "CRITICAL", string>'.
+src/components/admin/ErrorLogViewer.tsx(168,21): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/analytics/charts/BarChart.tsx(28,5): error TS2322: Type 'RefObject<HTMLDivElement | null>' is not assignable to type 'RefObject<Element>'.
+src/components/analytics/charts/FunnelChart.tsx(33,5): error TS2322: Type 'RefObject<HTMLDivElement | null>' is not assignable to type 'RefObject<Element>'.
+src/components/analytics/charts/LineChart.tsx(32,5): error TS2322: Type 'RefObject<HTMLDivElement | null>' is not assignable to type 'RefObject<Element>'.
+src/components/analytics/charts/PieChart.tsx(35,5): error TS2322: Type 'RefObject<HTMLDivElement | null>' is not assignable to type 'RefObject<Element>'.
+src/components/analytics/lawyer/LawyerPerformance.tsx(110,13): error TS2322: Type '(value: TimeRange) => void' is not assignable to type '(value: string) => void'.
+src/components/analytics/lawyer/LawyerPerformance.tsx(130,13): error TS2322: Type '(value: "caseVolume" | "successRate" | "revenue" | "efficiency") => void' is not assignable to type '(value: string) => void'.
+src/components/analytics/lawyer/LawyerPerformance.tsx(147,13): error TS2322: Type '(value: "asc" | "desc") => void' is not assignable to type '(value: string) => void'.
+src/components/analytics/ui/InteractiveChartContainer.tsx(70,5): error TS2322: Type 'RefObject<HTMLDivElement | null>' is not assignable to type 'RefObject<Element>'.
+src/components/client/ClientList.tsx(218,55): error TS2345: Argument of type 'ClientSource | null | undefined' is not assignable to parameter of type 'ClientSource | undefined'.
+  Type 'null' is not assignable to type 'ClientSource | undefined'.
+src/components/dashboard/RecentActivities.tsx(79,6): error TS2322: Type '{ children: Element[]; className: string; href?: string | undefined; }' is not assignable to type 'LinkProps<any>'.
+src/components/dashboard/StatCard.tsx(73,6): error TS2322: Type '{ children: Element; className: string; href?: string | undefined; }' is not assignable to type 'LinkProps<any>'.
+src/components/law-article/LawArticleGraphVisualization.tsx(184,21): error TS2345: Argument of type '(d: GraphNode & { x: number; }) => number' is not assignable to parameter of type 'string | number | boolean | readonly (string | number)[] | ValueFn<SVGCircleElement, GraphNode, string | number | boolean | readonly (string | number)[] | null> | null'.
+src/components/law-article/LawArticleGraphVisualization.tsx(185,21): error TS2345: Argument of type '(d: GraphNode & { y: number; }) => number' is not assignable to parameter of type 'string | number | boolean | readonly (string | number)[] | ValueFn<SVGCircleElement, GraphNode, string | number | boolean | readonly (string | number)[] | null> | null'.
+src/components/law-article/LawArticleGraphVisualization.tsx(188,20): error TS2345: Argument of type '(d: GraphNode & { x: number; }) => number' is not assignable to parameter of type 'string | number | boolean | readonly (string | number)[] | ValueFn<SVGTextElement, GraphNode, string | number | boolean | readonly (string | number)[] | null> | null'.
+src/components/law-article/LawArticleGraphVisualization.tsx(189,20): error TS2345: Argument of type '(d: GraphNode & { y: number; }) => number' is not assignable to parameter of type 'string | number | boolean | readonly (string | number)[] | ValueFn<SVGTextElement, GraphNode, string | number | boolean | readonly (string | number)[] | null> | null'.
+src/components/law-article/LawArticleGraphVisualization.tsx(215,7): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/components/law-article/LawArticleGraphVisualization.tsx(216,7): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/components/membership/MembershipInfo.tsx(195,15): error TS18048: 'tierLimit.limits' is possibly 'undefined'.
+src/components/membership/MembershipInfo.tsx(201,15): error TS18048: 'tierLimit.limits' is possibly 'undefined'.
+src/components/membership/MembershipInfo.tsx(207,15): error TS18048: 'tierLimit.limits' is possibly 'undefined'.
+src/components/membership/MembershipInfo.tsx(213,15): error TS18048: 'tierLimit.limits' is possibly 'undefined'.
+src/components/membership/MembershipInfo.tsx(219,15): error TS18048: 'tierLimit.limits' is possibly 'undefined'.
+src/components/membership/MembershipInfo.tsx(225,15): error TS18048: 'tierLimit.limits' is possibly 'undefined'.
+src/components/membership/TierUpgradeCard.tsx(123,13): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/membership/TierUpgradeCard.tsx(123,14): error TS18048: 'tier.permissions' is possibly 'undefined'.
+src/components/membership/TierUpgradeCard.tsx(129,13): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/membership/TierUpgradeCard.tsx(129,14): error TS18048: 'tier.permissions' is possibly 'undefined'.
+src/components/membership/TierUpgradeCard.tsx(135,13): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/membership/TierUpgradeCard.tsx(135,14): error TS18048: 'tier.permissions' is possibly 'undefined'.
+src/components/membership/TierUpgradeCard.tsx(141,13): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/membership/TierUpgradeCard.tsx(141,14): error TS18048: 'tier.permissions' is possibly 'undefined'.
+src/components/membership/TierUpgradeCard.tsx(147,13): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/membership/TierUpgradeCard.tsx(147,14): error TS18048: 'tier.permissions' is possibly 'undefined'.
+src/components/membership/TierUpgradeCard.tsx(153,13): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/membership/TierUpgradeCard.tsx(153,14): error TS18048: 'tier.permissions' is possibly 'undefined'.
+src/components/membership/TierUpgradeCard.tsx(159,13): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/membership/TierUpgradeCard.tsx(159,14): error TS18048: 'tier.permissions' is possibly 'undefined'.
+src/components/membership/TierUpgradeCard.tsx(165,13): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/membership/TierUpgradeCard.tsx(165,14): error TS18048: 'tier.permissions' is possibly 'undefined'.
+src/components/membership/TierUpgradeCard.tsx(171,13): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/membership/TierUpgradeCard.tsx(171,14): error TS18048: 'tier.permissions' is possibly 'undefined'.
+src/components/membership/TierUpgradeCard.tsx(177,13): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/membership/TierUpgradeCard.tsx(177,14): error TS18048: 'tier.permissions' is possibly 'undefined'.
+src/components/order/OrderDetailModal.tsx(303,33): error TS2345: Argument of type 'Date | undefined' is not assignable to parameter of type 'string | Date'.
+src/components/order/OrderDetailModal.tsx(434,77): error TS18048: 'order.paymentRecords' is possibly 'undefined'.
+src/components/reminder/ReminderList.tsx(347,54): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+src/components/reminder/ReminderList.tsx(365,37): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+src/components/reminder/ReminderList.tsx(369,26): error TS18048: 'reminder.channels' is possibly 'undefined'.
+src/components/reminder/ReminderList.tsx(372,30): error TS18048: 'reminder.channels' is possibly 'undefined'.
+src/components/reminder/ReminderSettings.tsx(185,28): error TS18049: 'currentSection' is possibly 'null' or 'undefined'.
+src/components/reminder/ReminderSettings.tsx(194,34): error TS18049: 'currentSection' is possibly 'null' or 'undefined'.
+src/components/reminder/ReminderSettings.tsx(216,28): error TS18049: 'currentSection' is possibly 'null' or 'undefined'.
+src/components/reminder/ReminderSettings.tsx(227,34): error TS18049: 'currentSection' is possibly 'null' or 'undefined'.
+src/components/reminder/ReminderSettings.tsx(245,26): error TS18049: 'currentSection' is possibly 'null' or 'undefined'.
+src/components/reminder/ReminderSettings.tsx(254,25): error TS18049: 'currentSection' is possibly 'null' or 'undefined'.
+src/components/reminder/ReminderSettings.tsx(294,34): error TS18048: 'preferences.courtSchedule' is possibly 'undefined'.
+src/components/reminder/ReminderSettings.tsx(305,18): error TS18048: 'preferences.courtSchedule' is possibly 'undefined'.
+src/components/reminder/ReminderSettings.tsx(392,34): error TS18048: 'preferences.deadline' is possibly 'undefined'.
+src/components/reminder/ReminderSettings.tsx(403,18): error TS18048: 'preferences.deadline' is possibly 'undefined'.
+src/components/reminder/ReminderSettings.tsx(412,29): error TS18048: 'preferences.deadline' is possibly 'undefined'.
+src/components/reminder/ReminderSettings.tsx(480,34): error TS18048: 'preferences.followUp' is possibly 'undefined'.
+src/components/reminder/ReminderSettings.tsx(491,18): error TS18048: 'preferences.followUp' is possibly 'undefined'.
+src/components/reminder/ReminderSettings.tsx(500,29): error TS18048: 'preferences.followUp' is possibly 'undefined'.
+src/components/witness/WitnessForm.tsx(158,20): error TS2345: Argument of type '{ caseId: string; name: string; phone: string | undefined; address: string | undefined; relationship: string | undefined; testimony: string | undefined; courtScheduleId: string | undefined; ... 8 more ...; id: string; }' is not assignable to parameter of type 'CreateWitnessInput | WitnessDetail'.
+  Type '{ caseId: string; name: string; phone: string | undefined; address: string | undefined; relationship: string | undefined; testimony: string | undefined; courtScheduleId: string | undefined; ... 8 more ...; id: string; }' is not assignable to type 'WitnessDetail'.
+src/config/production.ts(45,5): error TS2322: Type '{ wechat: { appId: string; appSecret: string; redirectUri: string; } | undefined; qq: { appId: string; appKey: string; redirectUri: string; } | undefined; } | undefined' is not assignable to type 'SocialLoginConfig'.
+src/lib/accuracy/accuracy-calculator.ts(130,7): error TS2322: Type '{ document?: number | undefined; law?: number | undefined; debate?: number | undefined; }' is not assignable to type '{ document: number; law: number; debate: number; }'.
+src/lib/accuracy/accuracy-calculator.ts(487,26): error TS18048: 'weights' is possibly 'undefined'.
+src/lib/accuracy/accuracy-calculator.ts(488,30): error TS18048: 'weights' is possibly 'undefined'.
+src/lib/accuracy/accuracy-calculator.ts(489,34): error TS18048: 'weights' is possibly 'undefined'.
+src/lib/agent/core-actions/logging-operations.ts(100,7): error TS2322: Type 'JsonValue' is not assignable to type 'JsonNull | InputJsonValue'.
+src/lib/agent/core-actions/logging-operations.ts(101,7): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/agent/core-actions/logging-operations.ts(104,7): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/agent/core-actions/logging-operations.ts(217,7): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/agent/core-actions/logging-operations.ts(218,7): error TS2322: Type 'JsonValue' is not assignable to type 'JsonNull | InputJsonValue'.
+src/lib/agent/core-actions/logging-operations.ts(221,7): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/agent/di-container.ts(336,7): error TS2322: Type '{ agentName: string; hasDependencies: boolean | undefined; hasOptions: boolean | undefined; }[]' is not assignable to type '{ agentName: string; hasDependencies: boolean; hasOptions: boolean; }[]'.
+src/lib/agent/doc-analyzer/analyzers/timeline-extractor.ts(23,20): error TS2564: Property '_eventPatterns' has no initializer and is not definitely assigned in the constructor.
+src/lib/agent/doc-analyzer/analyzers/timeline-extractor.ts(27,10): error TS2551: Property 'eventPatterns' does not exist on type 'TimelineExtractor'. Did you mean '_eventPatterns'?
+src/lib/agent/doc-analyzer/doc-analyzer-agent.ts(91,11): error TS2564: Property '_useMock' has no initializer and is not definitely assigned in the constructor.
+src/lib/agent/doc-analyzer/doc-analyzer-agent.ts(124,10): error TS2551: Property 'useMock' does not exist on type 'DocAnalyzerAgent'. Did you mean '_useMock'?
+src/lib/agent/doc-analyzer/doc-analyzer-agent.ts(211,3): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseAgent'.
+src/lib/agent/doc-analyzer/doc-analyzer-agent.ts(226,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseAgent'.
+src/lib/agent/doc-analyzer/doc-analyzer-agent.ts(534,31): error TS18048: 'typedCorrection.correctedValue' is possibly 'undefined'.
+src/lib/agent/doc-analyzer/doc-analyzer-agent.ts(592,31): error TS18048: 'typedCorrection.correctedValue' is possibly 'undefined'.
+src/lib/agent/doc-analyzer/doc-analyzer-agent.ts(617,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseAgent'.
+src/lib/agent/doc-analyzer/doc-analyzer-agent.ts(631,13): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'BaseAgent'.
+src/lib/agent/doc-analyzer/extractors/dispute-focus-extractor.ts(89,30): error TS18048: 'options.minConfidence' is possibly 'undefined'.
+src/lib/agent/doc-analyzer/extractors/dispute-focus-extractor.ts(872,17): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/lib/agent/doc-analyzer/extractors/dispute-focus/core.ts(108,30): error TS18048: 'options.minConfidence' is possibly 'undefined'.
+src/lib/agent/doc-analyzer/extractors/dispute-focus/review-layer.ts(163,15): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/lib/agent/doc-analyzer/extractors/key-fact-extractor.ts(125,30): error TS18048: 'options.minConfidence' is possibly 'undefined'.
+src/lib/agent/doc-analyzer/extractors/key-fact-extractor.ts(131,30): error TS18048: 'options.minImportance' is possibly 'undefined'.
+src/lib/agent/doc-analyzer/extractors/key-fact-extractor.ts(719,17): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/lib/agent/doc-analyzer/extractors/key-fact-extractor.ts(738,18): error TS18048: 'fact.relatedTimeline' is possibly 'undefined'.
+src/lib/agent/doc-analyzer/extractors/key-fact-extractor.ts(739,15): error TS18048: 'fact.relatedTimeline' is possibly 'undefined'.
+src/lib/agent/doc-analyzer/extractors/timeline/index.ts(80,37): error TS18048: 'options.minImportance' is possibly 'undefined'.
+src/lib/agent/doc-analyzer/extractors/timeline/timeline-ai-reviewer.ts(157,15): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/lib/agent/doc-analyzer/extractors/timeline/timeline-event-builder.ts(105,12): error TS2532: Object is possibly 'undefined'.
+src/lib/agent/doc-analyzer/processors/rules/claim-rule-handler.ts(48,9): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/lib/agent/doc-analyzer/processors/rules/claim-rule-handler.ts(78,9): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/lib/agent/doc-analyzer/processors/rules/claim-rule-handler.ts(108,9): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/lib/agent/doc-analyzer/processors/rules/claim-rule-handler.ts(138,9): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/lib/agent/doc-analyzer/processors/rules/claim-rule-handler.ts(188,17): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/lib/agent/legal-agent/applicability-analyzer.ts(120,51): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'CaseInfo'.
+src/lib/agent/legal-agent/legal-agent.ts(171,7): error TS2322: Type 'unknown' is not assignable to type 'CaseInfo'.
+src/lib/agent/memory-agent/memory-manager/helpers.ts(40,5): error TS2322: Type 'Date | null' is not assignable to type 'Date'.
+src/lib/agent/security/errors.ts(8,5): error TS4115: This parameter property must have an 'override' modifier because it overrides a member in base class 'Error'.
+src/lib/agent/types.ts(151,5): error TS2322: Type 'unknown' is not assignable to type '{ inputSummary?: string | undefined; processingSteps?: string[] | undefined; warnings?: string[] | undefined; } | undefined'.
+src/lib/agent/verification-agent/verifiers/business-rules-checker.ts(29,5): error TS2322: Type '(data: Record<string, unknown>) => unknown' is not assignable to type '(data: Record<string, unknown>) => boolean | Promise<boolean>'.
+src/lib/agent/verification-agent/verifiers/consistency-verifier.ts(74,21): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ plaintiff?: string | { name: string; } | undefined; defendant?: string | { name: string; } | undefined; }'.
+src/lib/ai/document-parser.ts(386,50): error TS2339: Property 'extractedData' does not exist on type '{ extractedData: { parties: { type: "other" | "plaintiff" | "defendant"; name: string; role?: string | undefined; contact?: string | undefined; address?: string | undefined; }[]; claims: { ...; }[]; timeline?: { ...; }[] | undefined; summary?: string | undefined; caseType?: "other" | ... 6 more ... | undefined; keyF...'.
+src/lib/ai/fallback.ts(353,5): error TS7027: Unreachable code detected.
+src/lib/ai/lawstar-client.ts(83,7): error TS2322: Type 'string | null' is not assignable to type 'string'.
+src/lib/ai/risk/risk-advisor.ts(49,20): error TS2564: Property '_confidenceThreshold' has no initializer and is not definitely assigned in the constructor.
+src/lib/ai/risk/risk-advisor.ts(54,10): error TS2551: Property 'confidenceThreshold' does not exist on type 'AIRiskAdvisor'. Did you mean '_confidenceThreshold'?
+src/lib/ai/risk/risk-scorer.ts(155,28): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'Record<RiskCategory, { score: number; weight: number; risks: RiskIdentificationResult[]; }>'.
+src/lib/ai/risk/risk-scorer.ts(159,12): error TS7006: Parameter 'total' implicitly has an 'any' type.
+src/lib/ai/risk/risk-scorer.ts(159,19): error TS7006: Parameter 'risk' implicitly has an 'any' type.
+src/lib/ai/unified-service.ts(448,15): error TS2532: Object is possibly 'undefined'.
+src/lib/ai/unified-service.ts(688,42): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+src/lib/ai/unified-service.ts(707,32): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+src/lib/ai/unified-service.ts(1099,7): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(caseInfo: { title: string; description: string; legalReferences?: string[] | undefined; previousRoundsContext?: string | undefined; }): Promise<AIResponse>', gave the following error.
+  Overload 2 of 2, '(caseInfo: CaseInfo, legalReferences?: LegalReference[] | undefined): Promise<DebateGenerationResult>', gave the following error.
+src/lib/auth/qq-oauth.ts(181,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'OAuthBaseProvider'.
+src/lib/auth/wechat-oauth.ts(153,9): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'OAuthBaseProvider'.
+src/lib/cache/cache-config.ts(115,19): error TS2339: Property 'KNOWLEDGE_GRAPH' does not exist on type 'typeof CacheNamespace'.
+src/lib/cache/cache-config.ts(116,31): error TS2339: Property 'KNOWLEDGE_GRAPH' does not exist on type 'typeof CacheNamespace'.
+src/lib/cache/manager.ts(144,27): error TS18047: 'redis' is possibly 'null'.
+src/lib/cache/manager.ts(201,28): error TS18047: 'redis' is possibly 'null'.
+src/lib/cache/manager.ts(227,28): error TS18047: 'redis' is possibly 'null'.
+src/lib/cache/manager.ts(252,28): error TS18047: 'redis' is possibly 'null'.
+src/lib/cache/manager.ts(268,28): error TS18047: 'redis' is possibly 'null'.
+src/lib/cache/manager.ts(280,20): error TS18047: 'redis' is possibly 'null'.
+src/lib/cache/manager.ts(295,28): error TS18047: 'redis' is possibly 'null'.
+src/lib/cache/manager.ts(374,28): error TS18047: 'redis' is possibly 'null'.
+src/lib/cache/manager.ts(386,26): error TS18047: 'redis' is possibly 'null'.
+src/lib/cache/manager.ts(392,28): error TS18047: 'redis' is possibly 'null'.
+src/lib/cache/monitor.ts(387,26): error TS18047: 'redis' is possibly 'null'.
+src/lib/cache/monitor.ts(399,54): error TS18047: 'redis' is possibly 'null'.
+src/lib/calculation/statute-reminder-generator.ts(297,7): error TS2322: Type '{ id: string; title: string; message: string | null; reminderTime: Date; remainingDays: number; priority: "HIGH" | "MEDIUM" | "LOW"; }[]' is not assignable to type '{ id: string; title: string; message: string; reminderTime: Date; remainingDays: number; priority: "HIGH" | "MEDIUM" | "LOW"; }[]'.
+src/lib/case/case-permission-manager.ts(277,9): error TS2322: Type 'null' is not assignable to type 'CaseRole | undefined'.
+src/lib/case/case-permission-manager.ts(286,9): error TS2322: Type 'null' is not assignable to type 'CaseRole | undefined'.
+src/lib/case/case-permission-manager.ts(309,7): error TS2322: Type 'CaseRole | null' is not assignable to type 'CaseRole | undefined'.
+src/lib/case/embedding-service.ts(188,17): error TS2322: Type 'null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/case/embedding-service.ts(289,15): error TS2322: Type 'null' is not assignable to type 'InputJsonValue | JsonNullValueFilter | FieldRef<"CaseExample", "Json"> | undefined'.
+src/lib/case/similar-case-service.ts(89,24): error TS2322: Type 'null' is not assignable to type 'InputJsonValue | JsonNullValueFilter | FieldRef<"CaseExample", "Json"> | undefined'.
+src/lib/client/follow-up-reminder.ts(344,47): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+src/lib/contract/contract-version-service.ts(129,11): error TS2322: Type '{ field: string; oldValue: unknown; newValue: unknown; }[] | null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/contract/contract-version-service.ts(255,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/contract/contract-version-service.ts(256,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/crawler/archive/npc-crawler.ts(17,43): error TS2724: '"@prisma/client"' has no exported member named '_SyncStatus'. Did you mean 'SyncStatus'?
+src/lib/crawler/docx-parser.ts(684,12): error TS2454: Variable 'text' is used before being assigned.
+src/lib/crawler/docx-parser.ts(705,5): error TS2322: Type 'LawDocument | null' is not assignable to type 'LawDocument'.
+src/lib/crawler/samr-crawler.ts(672,3): error TS7008: Member 'async' implicitly has an 'any' type.
+src/lib/debate/config-validator.ts(249,20): error TS2532: Object is possibly 'undefined'.
+src/lib/debate/config-validator.ts(280,5): error TS2532: Object is possibly 'undefined'.
+src/lib/debate/config-validator.ts(281,27): error TS18048: 'totalRounds' is possibly 'undefined'.
+src/lib/debate/stream/sse-client.ts(339,35): error TS18048: 'maxRetryAttempts' is possibly 'undefined'.
+src/lib/docker/validate-config.ts(143,24): error TS18048: 'healthcheck' is possibly 'undefined'.
+src/lib/docker/validate-config.ts(146,16): error TS18048: 'healthcheck' is possibly 'undefined'.
+src/lib/docker/validate-config.ts(149,16): error TS18048: 'healthcheck' is possibly 'undefined'.
+src/lib/docker/validate-config.ts(152,16): error TS18048: 'healthcheck' is possibly 'undefined'.
+src/lib/error/error-logger.ts(159,9): error TS7053: Element implicitly has an 'any' type because expression of type 'ErrorType' can't be used to index type '{ AI_TIMEOUT: ErrorSeverity; AI_RATE_LIMIT: ErrorSeverity; AI_QUOTA_EXCEEDED: ErrorSeverity; DATABASE_CONNECTION_ERROR: ErrorSeverity; DATABASE_CONSTRAINT_ERROR: ErrorSeverity; AGENT_NOT_FOUND: ErrorSeverity; MEMORY_EXPIRED: ErrorSeverity; MEMORY_NOT_FOUND: ErrorSeverity; }'.
+  Property '[ErrorType.AI_SERVICE_ERROR]' does not exist on type '{ AI_TIMEOUT: ErrorSeverity; AI_RATE_LIMIT: ErrorSeverity; AI_QUOTA_EXCEEDED: ErrorSeverity; DATABASE_CONNECTION_ERROR: ErrorSeverity; DATABASE_CONSTRAINT_ERROR: ErrorSeverity; AGENT_NOT_FOUND: ErrorSeverity; MEMORY_EXPIRED: ErrorSeverity; MEMORY_NOT_FOUND: ErrorSeverity; }'.
+src/lib/error/error-logger.ts(160,14): error TS7053: Element implicitly has an 'any' type because expression of type 'ErrorType' can't be used to index type '{ AI_TIMEOUT: ErrorSeverity; AI_RATE_LIMIT: ErrorSeverity; AI_QUOTA_EXCEEDED: ErrorSeverity; DATABASE_CONNECTION_ERROR: ErrorSeverity; DATABASE_CONSTRAINT_ERROR: ErrorSeverity; AGENT_NOT_FOUND: ErrorSeverity; MEMORY_EXPIRED: ErrorSeverity; MEMORY_NOT_FOUND: ErrorSeverity; }'.
+  Property '[ErrorType.AI_SERVICE_ERROR]' does not exist on type '{ AI_TIMEOUT: ErrorSeverity; AI_RATE_LIMIT: ErrorSeverity; AI_QUOTA_EXCEEDED: ErrorSeverity; DATABASE_CONNECTION_ERROR: ErrorSeverity; DATABASE_CONSTRAINT_ERROR: ErrorSeverity; AGENT_NOT_FOUND: ErrorSeverity; MEMORY_EXPIRED: ErrorSeverity; MEMORY_NOT_FOUND: ErrorSeverity; }'.
+src/lib/hooks/use-debate-stream.ts(190,9): error TS2322: Type '(() => void) | undefined' is not assignable to type '(() => void) | null'.
+src/lib/law-article/api-cache.ts(224,28): error TS18047: 'redis' is possibly 'null'.
+src/lib/law-article/api-cache.ts(226,17): error TS18047: 'redis' is possibly 'null'.
+src/lib/law-article/api-cache.ts(248,28): error TS18047: 'redis' is possibly 'null'.
+src/lib/law-article/api-cache.ts(250,17): error TS18047: 'redis' is possibly 'null'.
+src/lib/law-article/api-cache.ts(429,27): error TS18047: 'redis' is possibly 'null'.
+src/lib/law-article/api-cache.ts(447,13): error TS18047: 'redis' is possibly 'null'.
+src/lib/law-article/api-cache.ts(457,13): error TS18047: 'redis' is possibly 'null'.
+src/lib/law-article/graph-builder.ts(12,10): error TS2724: '"@prisma/client"' has no exported member named '_LawArticleRelation'. Did you mean 'LawArticleRelation'?
+src/lib/middleware/response-cache.ts(222,24): error TS18047: 'redis' is possibly 'null'.
+src/lib/middleware/response-cache.ts(225,29): error TS18047: 'redis' is possibly 'null'.
+src/lib/monitoring/api-monitor.ts(87,11): error TS2322: Type '{ error: string; } | null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/monitoring/api-monitor.ts(116,11): error TS2322: Type '{ error: string; } | null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/monitoring/api-monitor.ts(142,11): error TS2322: Type '{ error: string; } | null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/monitoring/notification-channels.ts(234,36): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(input: string | Request | URL, init?: RequestInit | undefined): Promise<Response>', gave the following error.
+  Overload 2 of 2, '(input: URL | RequestInfo, init?: RequestInit | undefined): Promise<Response>', gave the following error.
+src/lib/notification/notification-service.ts(42,11): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/lib/notification/notification-service.ts(75,11): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/lib/notification/reminder-generator.ts(73,12): error TS18048: 'config' is possibly 'undefined'.
+src/lib/notification/reminder-generator.ts(90,39): error TS18048: 'config' is possibly 'undefined'.
+src/lib/notification/reminder-generator.ts(91,11): error TS18048: 'config' is possibly 'undefined'.
+src/lib/notification/reminder-generator.ts(92,12): error TS18048: 'config' is possibly 'undefined'.
+src/lib/notification/reminder-generator.ts(103,21): error TS18048: 'config' is possibly 'undefined'.
+src/lib/notification/reminder-generator.ts(208,12): error TS18048: 'config' is possibly 'undefined'.
+src/lib/notification/reminder-generator.ts(214,26): error TS18048: 'config' is possibly 'undefined'.
+src/lib/notification/reminder-generator.ts(223,21): error TS18048: 'config' is possibly 'undefined'.
+src/lib/notification/reminder-generator.ts(260,12): error TS18048: 'config' is possibly 'undefined'.
+src/lib/notification/reminder-generator.ts(264,27): error TS18048: 'config' is possibly 'undefined'.
+src/lib/notification/reminder-generator.ts(278,23): error TS18048: 'config' is possibly 'undefined'.
+src/lib/notification/reminder-generator.ts(589,5): error TS2322: Type '{ enabled?: boolean | undefined; channels?: NotificationChannel[] | undefined; advanceDays?: number | number[] | undefined; hoursBefore?: number[]; }' is not assignable to type '{ enabled: boolean; channels: NotificationChannel[]; advanceDays: number | number[]; hoursBefore?: number[] | undefined; }'.
+src/lib/notification/reminder-generator.ts(593,5): error TS2322: Type '{ enabled?: boolean | undefined; channels?: NotificationChannel[] | undefined; advanceDays?: number[] | undefined; daysBefore?: number[]; }' is not assignable to type '{ enabled: boolean; channels: NotificationChannel[]; advanceDays: number[]; daysBefore?: number[] | undefined; }'.
+src/lib/notification/reminder-generator.ts(597,5): error TS2322: Type '{ enabled?: boolean | undefined; channels?: NotificationChannel[] | undefined; autoRemind?: boolean | undefined; hoursBefore?: number[]; }' is not assignable to type '{ enabled: boolean; channels: NotificationChannel[]; autoRemind: boolean; hoursBefore?: number[] | undefined; }'.
+src/lib/notification/reminder-sender.ts(37,24): error TS18048: 'reminder.channels' is possibly 'undefined'.
+src/lib/notification/reminder-sender.ts(156,35): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+src/lib/notification/reminder-service.ts(37,11): error TS2322: Type 'Date | undefined' is not assignable to type 'string | Date'.
+src/lib/notification/reminder-service.ts(361,7): error TS2322: Type 'string | null' is not assignable to type 'string | undefined'.
+src/lib/notification/reminder-service.ts(368,7): error TS2322: Type 'string | null' is not assignable to type 'string | undefined'.
+src/lib/notification/reminder-service.ts(369,7): error TS2322: Type 'string | null' is not assignable to type 'string | undefined'.
+src/lib/payment/wechat-pay.ts(237,31): error TS2531: Object is possibly 'null'.
+src/lib/payment/wechat-pay.ts(281,32): error TS2531: Object is possibly 'null'.
+src/lib/payment/wechat-pay.ts(281,114): error TS2531: Object is possibly 'null'.
+src/lib/performance/metrics.ts(270,25): error TS2345: Argument of type '(entry: FIDEntry) => void' is not assignable to parameter of type '(value: PerformanceEntry, index: number, array: PerformanceEntry[]) => void'.
+src/lib/performance/metrics.ts(288,25): error TS2345: Argument of type '(entry: CLSEntry) => void' is not assignable to parameter of type '(value: PerformanceEntry, index: number, array: PerformanceEntry[]) => void'.
+src/lib/task/task-reminder.ts(85,33): error TS18048: 'config.hoursBefore' is possibly 'undefined'.
+src/lib/usage/record-usage.ts(292,9): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+src/lib/usage/record-usage.ts(293,9): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+src/lib/usage/record-usage.ts(294,9): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+src/lib/usage/record-usage.ts(295,9): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+src/lib/usage/record-usage.ts(296,9): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+src/lib/usage/record-usage.ts(297,9): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+src/lib/usage/record-usage.ts(298,9): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+src/test-utils/setup.ts(54,5): error TS2322: Type 'BodyInit | null | undefined' is not assignable to type 'BodyInit | undefined'.
+src/test-utils/setup.ts(55,5): error TS2322: Type 'AbortSignal | null | undefined' is not assignable to type 'AbortSignal | undefined'.
+  Type 'null' is not assignable to type 'AbortSignal | undefined'.
+src/test-utils/setup.ts(215,25): error TS2345: Argument of type 'null' is not assignable to parameter of type 'BodyInit | undefined'.
+src/test-utils/setup.ts(222,25): error TS2345: Argument of type 'null' is not assignable to parameter of type 'BodyInit | undefined'.
+src/types/alertmanager.ts(37,3): error TS2411: Property 'instance' of type 'string | undefined' is not assignable to 'string' index type 'string'.
+src/types/alertmanager.ts(38,3): error TS2411: Property 'job' of type 'string | undefined' is not assignable to 'string' index type 'string'.
+src/types/alertmanager.ts(48,3): error TS2411: Property 'dashboard' of type 'string | undefined' is not assignable to 'string' index type 'string'.
+src/types/alertmanager.ts(49,3): error TS2411: Property 'runbook_url' of type 'string | undefined' is not assignable to 'string' index type 'string'.

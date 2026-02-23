@@ -57,23 +57,23 @@ describe('Statistics API', () => {
       const mockInactiveClients = 20;
       const mockLostClients = 10;
       const mockBlacklistedClients = 5;
-      const _mockClientsByType = {
+      const __mockClientsByType = {
         INDIVIDUAL: 50,
         ENTERPRISE: 30,
         POTENTIAL: 20,
       };
-      const _mockClientsBySource = {
+      const __mockClientsBySource = {
         REFERRAL: 30,
         ONLINE: 40,
         EVENT: 20,
         ADVERTISING: 10,
       };
-      const _mockClientsByTags = {
+      const __mockClientsByTags = {
         VIP: 15,
         普通: 50,
         新客户: 35,
       };
-      const _mockMonthlyGrowth = [
+      const __mockMonthlyGrowth = [
         { month: '2025-02', count: 10 },
         { month: '2025-03', count: 15 },
         { month: '2025-04', count: 20 },

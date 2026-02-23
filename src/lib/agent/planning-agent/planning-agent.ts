@@ -113,7 +113,7 @@ export class PlanningAgent {
   private generateMetadata(
     decomposition: unknown,
     planning: unknown,
-    orchestration: unknown,
+    _orchestration: unknown,
     allocation: unknown
   ): PlanningMetadata {
     // 计算总任务数
@@ -255,7 +255,7 @@ export class PlanningAgent {
   }
 
   // 生成选择原因
-  private _generateSelectionReason(planning: unknown): string {
+  private __generateSelectionReason(planning: unknown): string {
     const reasons: string[] = [];
 
     if (planning && typeof planning === 'object') {

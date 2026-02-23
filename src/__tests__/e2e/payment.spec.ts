@@ -538,7 +538,7 @@ test.describe('支付回调处理（模拟）', () => {
   let testUser: TestUser;
   let tiers: MembershipTierResponseData;
   let validTierId: string;
-  let _createdOrderId: string;
+  let __createdOrderId: string;
 
   test.beforeAll(async ({ request }) => {
     // 创建测试用户

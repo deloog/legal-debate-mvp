@@ -2,7 +2,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs/promises';
 import path from 'path';
-import { _DatabaseBackupManager, createBackupManager } from './backup-database';
+import { DatabaseBackupManager, createBackupManager } from './backup-database';
 import {
   DatabaseRestoreManager,
   createRestoreManager,
@@ -168,7 +168,7 @@ export class BackupRecoveryTester {
   // 测试3: 恢复功能测试
   private async testRestoreFunctionality(): Promise<void> {
     const backupManager = createBackupManager();
-    const _restoreManager = createRestoreManager();
+    const __restoreManager = createRestoreManager();
 
     // 创建备份
     const backupInfo = await backupManager.createBackup();

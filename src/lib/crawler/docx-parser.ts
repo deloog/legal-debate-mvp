@@ -503,7 +503,7 @@ export class DOCXParser {
   /**
    * 从 XML 提取文本
    */
-  private _extractTextFromXml(root: any): string {
+  private __extractTextFromXml(root: any): string {
     const textParts: string[] = [];
 
     const extractText = (element: any): void => {

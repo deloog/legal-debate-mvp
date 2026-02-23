@@ -331,7 +331,7 @@ describe('Tasks API', () => {
       (getAuthUser as jest.Mock).mockResolvedValue(null);
       const request = createMockRequest('http://localhost:3000/api/tasks');
       const response = await GET(request);
-      const _testResponse = await createTestResponse(response);
+      const __testResponse = await createTestResponse(response);
 
       expect(response.status).toBe(401);
       const result = await response.json();

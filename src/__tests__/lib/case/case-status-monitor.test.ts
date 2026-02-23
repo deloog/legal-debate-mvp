@@ -260,11 +260,11 @@ describe('CaseStatusMonitor', () => {
 });
 
 describe('ReminderGenerator - Case Status Deadline', () => {
-  const _mockUserId = 'test-user-id';
+  const __mockUserId = 'test-user-id';
   const mockCaseId = 'test-case-id';
   const mockCaseTitle = '测试案件';
   const mockDeadline = new Date('2024-12-31T00:00:00Z');
-  const _mockDescription = '从草稿转为活动状态后7天内需要提交正式材料';
+  const __mockDescription = '从草稿转为活动状态后7天内需要提交正式材料';
 
   beforeEach(() => {
     jest.clearAllMocks();

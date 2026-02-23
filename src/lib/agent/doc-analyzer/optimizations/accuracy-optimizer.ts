@@ -530,7 +530,7 @@ export class AccuracyOptimizer {
   /**
    * 丰富诉讼请求信息
    */
-  private enrichClaims(claims: Claim[], content: string): DetailedClaim[] {
+  private enrichClaims(claims: Claim[], _content: string): DetailedClaim[] {
     return claims.map(claim => ({
       ...claim,
       extractionMethod: 'RULE' as const,
@@ -542,7 +542,7 @@ export class AccuracyOptimizer {
   /**
    * 提取事实
    */
-  private extractFacts(content: string, parties: Party[]): ExtractedFact[] {
+  private extractFacts(content: string, _parties: Party[]): ExtractedFact[] {
     const facts: ExtractedFact[] = [];
 
     // 简单的事实提取
@@ -694,8 +694,8 @@ export class AccuracyOptimizer {
    * 请求AI确认
    */
   private async requestAIConfirmation(
-    content: string,
-    uncertainItems: UncertainItem[]
+    _content: string,
+    _uncertainItems: UncertainItem[]
   ): Promise<Map<string, unknown>> {
     // 实际实现中会调用AI服务
     return new Map();
@@ -706,7 +706,7 @@ export class AccuracyOptimizer {
    */
   private applyConfirmations(
     validatedResult: ValidatedResult,
-    confirmations: Map<string, unknown>
+    _confirmations: Map<string, unknown>
   ): ValidatedResult {
     // 应用AI确认的修正
     return validatedResult;

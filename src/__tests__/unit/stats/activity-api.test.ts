@@ -29,7 +29,7 @@ jest.mock('@/lib/middleware/permission-check', () => ({
 
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
-import { _TimeRange } from '@/types/stats';
+import { TimeRange } from '@/types/stats';
 
 describe('用户活跃度API', () => {
   const mockGetAuthUser = getAuthUser as jest.Mock;

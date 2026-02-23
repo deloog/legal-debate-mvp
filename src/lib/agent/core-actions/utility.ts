@@ -38,7 +38,7 @@ import type {
  */
 export async function parse_document(
   prisma: PrismaClient,
-  memoryManager: MemoryManager,
+  _memoryManager: MemoryManager,
   params: ParseDocumentParams
 ): Promise<ParseDocumentResult> {
   const startTime = Date.now();

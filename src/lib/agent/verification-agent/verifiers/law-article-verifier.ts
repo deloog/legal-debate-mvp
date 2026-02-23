@@ -39,7 +39,7 @@ export class LawArticleVerifier {
    * 验证法律条文引用
    */
   async verify(
-    content: string,
+    _content: string,
     context: VerificationContext
   ): Promise<VerificationResult> {
     const startTime = Date.now();

@@ -46,7 +46,7 @@ jest.mock('@/lib/notification/reminder-service', () => ({
 }));
 
 import { taskReminderGenerator } from '@/lib/task/task-reminder';
-import { NotificationChannel, _ReminderType } from '@/types/notification';
+import { NotificationChannel, ReminderType } from '@/types/notification';
 import { TaskPriority } from '@/types/task';
 
 describe('TaskReminderGenerator', () => {

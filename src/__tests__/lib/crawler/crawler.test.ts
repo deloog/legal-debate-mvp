@@ -6,7 +6,7 @@ import { describe, it, expect, beforeAll } from '@jest/globals';
 // npc-crawler / court-crawler 已废弃，移至 archive/ 目录
 import { NPCCrawler } from '@/lib/crawler/archive/npc-crawler';
 import { CourtCrawler } from '@/lib/crawler/archive/court-crawler';
-import { LawCategory, LawType, _LawStatus } from '@prisma/client';
+import { LawCategory, LawType, LawStatus } from '@prisma/client';
 
 describe('NPCCrawler', () => {
   let crawler: NPCCrawler;

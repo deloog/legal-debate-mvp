@@ -20,7 +20,7 @@ interface RollbackTest {
 class MigrationRollbackTester {
   private prisma: PrismaClient;
   private testResults: RollbackTest[] = [];
-  private _originalMigrationState: string = '';
+  private __originalMigrationState: string = '';
 
   constructor() {
     this.prisma = new PrismaClient();

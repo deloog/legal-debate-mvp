@@ -46,7 +46,7 @@ interface AIRiskAdviceResult {
 export class AIRiskAdvisor {
   private readonly aiService: AIService;
   private readonly enableFallback: boolean;
-  private readonly confidenceThreshold: number;
+  private readonly _confidenceThreshold: number;
 
   constructor(config: RiskAdvisorConfig) {
     this.aiService = config.aiService;

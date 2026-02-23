@@ -21,7 +21,7 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
-const ___dirname = path.dirname(__filename);
+const ____dirname = path.dirname(__filename);
 
 interface CoverageHistory {
   timestamp: string;
@@ -290,7 +290,7 @@ function compareCoverage(
  */
 function formatChange(change: number): string {
   const arrow = change > 0 ? '↑' : '↓';
-  const _color =
+  const __color =
     change > 0 ? 'green' : change < CONFIG.warningThreshold ? 'red' : 'yellow';
   return `${change > 0 ? '+' : ''}${change.toFixed(2)}% ${arrow}`;
 }
@@ -323,7 +323,7 @@ function generateReport(
     if (comparison.moduleChanges.length > 0) {
       console.log('\n📦 模块变化:');
       comparison.moduleChanges.forEach(change => {
-        const _arrow = change.change > 0 ? '↑' : '↓';
+        const __arrow = change.change > 0 ? '↑' : '↓';
         console.log(
           `   ${change.module}: ${change.newCoverage.toFixed(2)}% (${formatChange(change.change)})`
         );

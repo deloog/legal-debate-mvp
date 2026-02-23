@@ -1,4 +1,4 @@
-import { describe, it, expect, _beforeAll, _afterAll } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { LawArticleSearchService } from '../../lib/law-article/search-service';
 import type { SearchQuery } from '../../lib/law-article/types';
 
@@ -316,7 +316,7 @@ describe('LawArticleSearchService 性能测试', () => {
       };
 
       const startTime = Date.now();
-      const _result = await LawArticleSearchService.search(query);
+      const __result = await LawArticleSearchService.search(query);
       const executionTime = Date.now() - startTime;
 
       console.log(`复杂查询耗时: ${executionTime}ms`);

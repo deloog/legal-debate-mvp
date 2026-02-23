@@ -68,7 +68,7 @@ export interface LogKnowledgeGraphActionParams {
 export async function checkKnowledgeGraphPermission(
   userId: string,
   action: KnowledgeGraphAction,
-  resource: KnowledgeGraphResource
+  _resource: KnowledgeGraphResource
 ): Promise<KnowledgeGraphPermissionResult> {
   try {
     // 检查用户是否存在

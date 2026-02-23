@@ -58,6 +58,7 @@ export enum CacheNamespace {
   CONFIGURATION = 'configuration',
   DATABASE_QUERY = 'database_query',
   API_RESPONSE = 'api_response',
+  KNOWLEDGE_GRAPH = 'knowledge_graph',
   TEMPORARY = 'temporary',
   SYSTEM = 'system',
 }

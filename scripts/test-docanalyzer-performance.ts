@@ -3,7 +3,7 @@
  * 测试各处理层的处理时间
  */
 
-import { _DocAnalyzerAgent } from '../src/lib/agent/doc-analyzer/doc-analyzer-agent';
+import { DocAnalyzerAgent } from '../src/lib/agent/doc-analyzer/doc-analyzer-agent';
 import { FilterProcessor } from '../src/lib/agent/doc-analyzer/processors/filter-processor';
 import { LegalRepresentativeFilter } from '../src/lib/agent/doc-analyzer/processors/legal-representative-filter';
 import { AmountExtractor } from '../src/lib/agent/doc-analyzer/extractors/amount-extractor';

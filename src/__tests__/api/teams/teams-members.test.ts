@@ -204,7 +204,7 @@ describe('Teams API - Members Management', () => {
       const request = createMockRequest(
         'http://localhost:3000/api/teams/team-1/members?page=2&limit=10'
       );
-      const _response = await GET_MEMBERS(request, {
+      const __response = await GET_MEMBERS(request, {
         params: { id: 'team-1' },
       });
 

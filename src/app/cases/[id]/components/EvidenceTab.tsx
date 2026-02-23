@@ -8,7 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { _Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 import { EvidenceList } from '@/components/evidence/EvidenceList';
 import { CrossExaminationCard } from '@/components/evidence/CrossExaminationCard';
 import { EvidenceCategoryPanel } from '@/components/evidence/EvidenceCategoryPanel';

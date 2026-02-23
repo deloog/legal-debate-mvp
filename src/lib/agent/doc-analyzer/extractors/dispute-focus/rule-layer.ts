@@ -208,7 +208,7 @@ function buildRuleBasedFocus(
  */
 function extractPositionA(
   text: string,
-  matchedText: string,
+  _matchedText: string,
   matchIndex: number
 ): string {
   const patterns = [/原告认为|原告主张|原告称/gi, /原告方面/gi, /起诉方认为/gi];

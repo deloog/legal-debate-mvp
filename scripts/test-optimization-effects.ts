@@ -96,8 +96,8 @@ class OptimizationTester {
 
   constructor() {
     this.analyzer = new DocAnalyzerAgent();
-    this.claimClassifier = new LawsuitRequestClassifier();
-    this.amountExtractor = new PrecisionAmountExtractor();
+    this._claimClassifier = new LawsuitRequestClassifier();
+    this._amountExtractor = new PrecisionAmountExtractor();
   }
 
   /**

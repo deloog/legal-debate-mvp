@@ -98,7 +98,7 @@ function fixFile(fileErrors: FileErrors): { fixed: number; skipped: number } {
     }
 
     const line = lines[lineIndex];
-    const beforeFix = line;
+    const _beforeFix = line;
 
     // 尝试修复
     const fixedLine = fixLine(line, error);
@@ -144,7 +144,7 @@ function fixLine(line: string, error: ErrorDetail): string {
     }
 
     // 匹配模式: 变量直接使用
-    const directUsagePattern = new RegExp(`(^|[^\\w$])${variable}([^\\w$])`, 'g');
+    const _directUsagePattern = new RegExp(`(^|[^\\w$])${variable}([^\\w$])`, 'g');
     // 只在某些上下文中添加?，避免过度修复
     const safeDirectPatterns = [
       new RegExp(`\\[\\s*${variable}\\s*\\]`), // [variable]

@@ -256,7 +256,7 @@ export class ConcurrencyControl {
   private updateStats(
     waitTime: number,
     executionTime: number,
-    success: boolean,
+    _success: boolean,
     attempts: number
   ): void {
     const totalTasks = this.stats.successfulTasks + this.stats.failedTasks;

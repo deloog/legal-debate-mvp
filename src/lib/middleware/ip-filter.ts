@@ -358,16 +358,16 @@ export function withIPFilter<
  * 与速率限制监控集成 - 自动封禁频繁违规的IP
  */
 export function autoBlockOffenders(
-  monitor: {
+  _monitor: {
     isPotentialAttacker: (
       identifier: string,
       timeWindow: number,
       threshold: number
     ) => boolean;
   },
-  timeWindowMinutes: number = 10,
-  threshold: number = 10,
-  banDurationMinutes: number = 60
+  _timeWindowMinutes: number = 10,
+  _threshold: number = 10,
+  _banDurationMinutes: number = 60
 ): void {
   // 这个函数可以被定期调用（例如每5分钟）
   // 检查监控系统中的潜在攻击者并自动添加到黑名单

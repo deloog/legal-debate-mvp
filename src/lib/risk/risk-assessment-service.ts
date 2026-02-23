@@ -388,7 +388,7 @@ export class RiskAssessmentService {
    * 生成时间线
    */
   private static generateTimeline(
-    formData: RiskAssessmentFormData,
+    _formData: RiskAssessmentFormData,
     risks: RiskIdentificationResult[]
   ): RiskTimelineItem[] {
     const timeline: RiskTimelineItem[] = [];

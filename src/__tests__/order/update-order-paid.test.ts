@@ -9,7 +9,7 @@ import {
   getOrderPaymentStatus,
   isValidOrderStatusTransition,
 } from '@/lib/order/update-order-paid';
-import { OrderStatus, _PaymentMethod } from '@/types/payment';
+import { OrderStatus, PaymentMethod } from '@/types/payment';
 
 // Mock prisma
 jest.mock('@/lib/db/prisma', () => ({

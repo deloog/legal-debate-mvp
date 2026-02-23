@@ -110,7 +110,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   // 检查权限
-  const permissionError = await validatePermissions(request, 'user:read');
+  const permissionError = await validatePermissions(
+    request,
+    'user:read',
+  );
   if (permissionError) {
     return permissionError;
   }

@@ -136,7 +136,7 @@ describe('Middleware Integration Tests', () => {
           'x-forwarded-for': '192.168.1.200',
         },
       });
-      const _testContext = createRequestContext(testRequest);
+      const __testContext = createRequestContext(testRequest);
 
       // Simple response middleware for testing
       const responseMiddleware = jest

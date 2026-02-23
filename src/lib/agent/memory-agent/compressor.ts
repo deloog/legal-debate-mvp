@@ -63,7 +63,7 @@ export class MemoryCompressor {
   /**
    * 确定目标压缩比
    */
-  private _determineTargetRatio(memory: Memory): number {
+  private __determineTargetRatio(memory: Memory): number {
     // 根据记忆类型确定
     if (memory.memoryType === 'WORKING') {
       return COMPRESSION_RATIO_CONFIG.WORKING_TO_HOT;

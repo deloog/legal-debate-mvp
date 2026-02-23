@@ -468,7 +468,7 @@ export class LawSearcher {
   /**
    * 计算TF-IDF
    */
-  private _calculateTFIDF(
+  private __calculateTFIDF(
     doc: TFIDFDocument,
     term: string,
     documentFrequency: Map<string, number>,

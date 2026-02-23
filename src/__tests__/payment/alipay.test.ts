@@ -3,7 +3,7 @@
  * 测试支付宝支付的创建订单、查询订单功能
  */
 
-import { alipay, _AlipayPayment } from '@/lib/payment/alipay';
+import { alipay, AlipayPayment } from '@/lib/payment/alipay';
 import { paymentConfig } from '@/lib/payment/payment-config';
 import {
   AlipayCreateOrderRequest,

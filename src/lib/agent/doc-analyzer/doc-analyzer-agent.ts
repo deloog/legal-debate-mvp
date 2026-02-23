@@ -88,7 +88,7 @@ export class DocAnalyzerAgent extends BaseAgent {
   private reviewerManager: ReviewerManager;
   private aiReviewer: AIReviewer | null = null;
   private ruleReviewer: RuleReviewer | null = null;
-  private useMock: boolean;
+  private _useMock: boolean;
   private evidenceAnalyzer: EvidenceAnalyzer;
   private timelineExtractor: TimelineExtractor;
   private comprehensiveAnalyzer: ComprehensiveAnalyzer;

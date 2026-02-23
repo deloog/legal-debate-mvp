@@ -7,7 +7,7 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/v1/law-article-relations/recommendation-stats/route';
 import { prisma } from '@/lib/db';
-import { _VerificationStatus } from '@prisma/client';
+import { VerificationStatus } from '@prisma/client';
 
 // Mock Prisma
 jest.mock('@/lib/db', () => ({

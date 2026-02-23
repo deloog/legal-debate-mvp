@@ -11,8 +11,8 @@
 
 import { prisma } from '@/lib/db';
 import { RuleBasedDetector } from '@/lib/law-article/relation-discovery/rule-based-detector';
-import { _AIDetector } from '@/lib/law-article/relation-discovery/ai-detector';
-import { _CaseDerivedDetector } from '@/lib/law-article/relation-discovery/case-derived-detector';
+import { AIDetector } from '@/lib/law-article/relation-discovery/ai-detector';
+import { CaseDerivedDetector } from '@/lib/law-article/relation-discovery/case-derived-detector';
 import { LawArticleRelationService } from '@/lib/law-article/relation-service';
 import { GraphBuilder } from '@/lib/law-article/graph-builder';
 import {

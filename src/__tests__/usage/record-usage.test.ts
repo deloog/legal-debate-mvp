@@ -17,7 +17,7 @@ const prisma = new PrismaClient();
 
 describe('使用量记录模块测试', () => {
   let testUserId: string;
-  let _testMembershipId: string;
+  let __testMembershipId: string;
   let testTierId: string;
 
   beforeAll(async () => {

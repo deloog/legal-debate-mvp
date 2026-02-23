@@ -15,7 +15,7 @@ jest.mock('@/lib/agent/security/logger', () => ({
   },
 }));
 
-import { _StructuredLogger } from '@/lib/agent/security/logger';
+import { StructuredLogger } from '@/lib/agent/security/logger';
 
 jest.unmock('@/lib/agent/security/logger');
 

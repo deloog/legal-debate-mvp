@@ -9,7 +9,7 @@ import { MemoryMigrator } from '@/lib/agent/memory-agent/migrator';
 import { PrismaClient } from '@prisma/client';
 import { createMockAIService } from './__mocks__/ai-service-mock';
 import { createTestMemory } from './test-helpers';
-import type { _Memory } from '@/lib/agent/memory-agent/types';
+import type { Memory } from '@/lib/agent/memory-agent/types';
 import type { AIService } from '@/lib/ai/service-refactored';
 import type { AgentMemory } from '@prisma/client';
 

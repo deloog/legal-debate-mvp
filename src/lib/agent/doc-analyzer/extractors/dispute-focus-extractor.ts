@@ -465,7 +465,7 @@ ${contextInfo}
    */
   private extractPositionA(
     text: string,
-    matchedText: string,
+    _matchedText: string,
     matchIndex: number
   ): string {
     const patterns = [

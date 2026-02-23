@@ -9370,12 +9370,12 @@ async function main(): Promise<void> {
 
       for (const article of batch) {
         let newCategory: LawCategory | null = null;
-        let _matchedRule: (typeof KEYWORD_RULES)[0] | null = null;
+        let __matchedRule: (typeof KEYWORD_RULES)[0] | null = null;
 
         for (const rule of KEYWORD_RULES) {
           if (rule.pattern.test(article.lawName)) {
             newCategory = rule.category;
-            matchedRule = rule;
+            __matchedRule = rule;
             break;
           }
         }

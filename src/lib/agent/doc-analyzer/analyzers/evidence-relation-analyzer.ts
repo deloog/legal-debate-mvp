@@ -146,7 +146,7 @@ export class EvidenceRelationAnalyzer {
    * 计算关联强度
    */
   calculateRelationStrength(
-    evidence: ClassifiedEvidence,
+    _evidence: ClassifiedEvidence,
     relations: EvidenceRelation[]
   ): number {
     if (relations.length === 0) return 0;

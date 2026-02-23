@@ -4,7 +4,7 @@
 
 import { POST } from '@/app/api/payments/create/route';
 import { GET } from '@/app/api/payments/query/route';
-import { PaymentMethod, _CreateOrderResponse } from '@/types/payment';
+import { PaymentMethod, CreateOrderResponse } from '@/types/payment';
 
 // Mock dependencies
 jest.mock('next-auth/next', () => ({

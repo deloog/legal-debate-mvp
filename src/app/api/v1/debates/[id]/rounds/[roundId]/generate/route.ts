@@ -96,14 +96,14 @@ async function buildPreviousRoundsContext(
   const contextParts: string[] = [];
   for (const round of previousRounds) {
     const plaintiffSummary = round.arguments
-      .filter(a => a.side === 'PLAINTIFF')
+      .filter((a) => a.side === ArgumentSide.PLAINTIFF)
       .map(
         (a, i) =>
           `  ${i + 1}. ${a.content.length > 200 ? a.content.substring(0, 200) + '…' : a.content}`
       )
       .join('\n');
     const defendantSummary = round.arguments
-      .filter(a => a.side === 'DEFENDANT')
+      .filter((a) => a.side === ArgumentSide.DEFENDANT)
       .map(
         (a, i) =>
           `  ${i + 1}. ${a.content.length > 200 ? a.content.substring(0, 200) + '…' : a.content}`
@@ -186,12 +186,12 @@ function parseStructuredDebateArguments(content: string): Array<{
                     explanation?: string;
                   }>
                 )
-                  .filter(b => b.lawName && b.articleNumber)
-                  .map(b => ({
-                    lawName: String(b.lawName),
-                    articleNumber: String(b.articleNumber),
+                  .filter((b) => b.lawName && b.articleNumber)
+                  .map((b) => ({
+                    lawName: String(b.lawName ?? ''),
+                    articleNumber: String(b.articleNumber ?? ''),
                     relevance: Number(b.relevance ?? 0.8),
-                    explanation: String(b.explanation || ''),
+                    explanation: String(b.explanation ?? ''),
                   }))
               : [],
           });
@@ -278,7 +278,7 @@ export const POST = withErrorHandler(
     if (round.debateId !== debateId)
       throw new Error('Round does not belong to this debate');
 
-    // ── 所有权验证 ──
+    // ── 权限验证 ──
     const isAdmin = (session.user as { role?: string }).role === 'ADMIN';
     if (round.debate.userId !== session.user.id && !isAdmin) {
       return NextResponse.json(
@@ -295,7 +295,7 @@ export const POST = withErrorHandler(
 
     // ── 生成软锁：防止同一轮次被并发双重生成 ──
     // 条件：startedAt 为 null（由 PATCH 重置）或超过3分钟（旧锁过期清理）
-    // stream 路由创建轮次时会设置 startedAt=now，3分钟内阻止 /generate 重复触发
+    // stream 路由由创建轮次时会设置 startedAt=now，3分钟内阻止 /generate 重复触发
     const lockClaimed = await prisma.debateRound.updateMany({
       where: {
         id: roundId,
@@ -355,7 +355,7 @@ export const POST = withErrorHandler(
       allArticles.length > 0
         ? allArticles
             .map(
-              a =>
+              (a) =>
                 `《${a.lawName}》${a.articleNumber}：${a.fullText.substring(0, 300)}`
             )
             .join('\n\n')
@@ -384,17 +384,17 @@ export const POST = withErrorHandler(
       ? (CASE_TYPE_DEBATE_GUIDANCE[caseType] ?? '')
       : '';
 
-    // 5. 构建多轮对抗提示词
+    // 7. 构建多轮对抗提示词
     const isMultiRound = round.roundNumber > 1 && !!previousRoundsContext;
     const contextSection = isMultiRound
       ? `\n## 前轮辩论记录\n${previousRoundsContext}\n\n` +
-        `## 本轮要求（第${round.roundNumber}轮 — 针对性反驳）\n` +
+        `## 本轮要求（第${round.roundNumber}轮 — 对抗性反驳）\n` +
         `- 原告方：必须逐条回应被告方第${round.roundNumber - 1}轮的具体论点，明确指出其逻辑漏洞或法律适用错误\n` +
         `- 被告方：必须逐条回应原告方第${round.roundNumber - 1}轮的具体论点，提出反证或不同的法律解释\n` +
         `- 禁止重复前轮已有论点，本轮论点必须在前轮基础上深化或推进\n`
       : '';
 
-    // 6. 构建完整用户提示词
+    // 8. 构建完整用户提示词
     const graphSection = graphAnalysisPrompt
       ? `\n${graphAnalysisPrompt}\n`
       : '';
@@ -431,7 +431,7 @@ ${contextSection}
   "defendant": [...]
 }`;
 
-    // 7. 调用AI服务（带重试）
+    // 9. 调用AI服务（带重试）
     const aiService = await getUnifiedAIService();
     let debateContent = '';
     const maxRetries = 3;
@@ -444,11 +444,11 @@ ${contextSection}
           legalReferences: applicableArticles,
           previousRoundsContext: userPrompt,
         });
-        debateContent = debateResponse.choices?.[0]?.message?.content || '';
+        debateContent = debateResponse.choices?.[0]?.message?.content ?? '';
         logger.info(`AI调用成功（第${attempt}次）`);
         break;
       } catch (aiError) {
-        logger.error(`AI调用失败（第${attempt}/${maxRetries}次）:`, aiError);
+        logger.error(`AI调用失败（第${attempt}/${maxRetries}次）`, aiError);
         if (attempt === maxRetries) {
           await prisma.debateRound.update({
             where: { id: roundId },
@@ -464,16 +464,16 @@ ${contextSection}
             { status: 503 }
           );
         }
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     }
 
-    // 8. 解析失败直接标记失败
+    // 10. 解析失败直接标记失败
     const structuredArgs = debateContent
       ? parseStructuredDebateArguments(debateContent)
       : null;
 
-    if (!structuredArgs || structuredArgs.length < 2) {
+    if (!structuredArgs || !Array.isArray(structuredArgs) || structuredArgs.length < 2) {
       logger.error('论点解析失败，原始内容:', debateContent.substring(0, 500));
       await prisma.debateRound.update({
         where: { id: roundId },
@@ -493,14 +493,14 @@ ${contextSection}
 
     logger.info(`解析成功，共 ${structuredArgs.length} 个论点`);
 
-    // 9. 保存论点并完成轮次（事务）
+    // 11. 保存论点并完成轮次（事务）
     const result = await prisma.$transaction(
-      async tx => {
+      async (tx) => {
         // 先删除本轮已有论点（重试时防止累积）
         await tx.argument.deleteMany({ where: { roundId } });
 
         const createdArguments = await tx.argument.createMany({
-          data: structuredArgs.map(arg => {
+          data: structuredArgs.map((arg) => {
             const scores = computeArgumentScores({
               reasoning: arg.reasoning,
               legalBasis: arg.legalBasis,
@@ -549,8 +549,8 @@ ${contextSection}
         return {
           plaintiff: {
             arguments: structuredArgs
-              .filter(a => a.side === ArgumentSide.PLAINTIFF)
-              .map(a => ({
+              .filter((a) => a.side === ArgumentSide.PLAINTIFF)
+              .map((a) => ({
                 type: a.type,
                 content: a.content,
                 reasoning: a.reasoning,
@@ -559,8 +559,8 @@ ${contextSection}
           },
           defendant: {
             arguments: structuredArgs
-              .filter(a => a.side === ArgumentSide.DEFENDANT)
-              .map(a => ({
+              .filter((a) => a.side === ArgumentSide.DEFENDANT)
+              .map((a) => ({
                 type: a.type,
                 content: a.content,
                 reasoning: a.reasoning,

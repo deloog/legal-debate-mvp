@@ -278,7 +278,7 @@ export class AccuracyValidator implements AccuracyValidatorInterface {
    * 验证诉讼请求与文档内容的一致性
    */
   async validateClaims(
-    content: string,
+    _content: string,
     claims: Claim[]
   ): Promise<ValidationIssue[]> {
     const issues: ValidationIssue[] = [];

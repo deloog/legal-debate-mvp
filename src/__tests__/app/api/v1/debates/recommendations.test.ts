@@ -364,7 +364,7 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
 
       // Act
       const response = await GET(request, params);
-      const _data = await response.json();
+      const __data = await response.json();
 
       // Assert
       expect(response.status).toBe(200);

@@ -17,7 +17,7 @@ import type { AIService } from '@/lib/ai/service-refactored';
  * 生成适用性报告和置信度
  */
 export class AIReviewer {
-  private aiService: AIService;
+  private aiService!: AIService;
   private initialized: boolean = false;
 
   /**

@@ -19,7 +19,7 @@ import {
   AgentEventType,
 } from '../../types/agent';
 
-import { _createMockAgent, createMockAgentClass } from './test-utils';
+import { createMockAgent, createMockAgentClass } from './test-utils';
 
 // 创建测试用的Mock Agent类
 class MockLegalAgent {

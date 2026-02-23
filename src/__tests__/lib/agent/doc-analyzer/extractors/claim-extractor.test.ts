@@ -330,7 +330,7 @@ describe('ClaimExtractor - 细分请求类型', () => {
     it('应该识别解除合同请求', async () => {
       const result = await extractor.extractFromText('判令解除双方签订的合同');
 
-      const _terminationClaim = result.claims.find(
+      const __terminationClaim = result.claims.find(
         c => c.type === 'TERMINATION'
       );
       // 解除合同的识别可能需要更明确的关键词
@@ -978,10 +978,10 @@ describe('ClaimExtractor - 请求依赖关系识别', () => {
       const principalClaim = result.claims.find(
         c => c.type === 'PAY_PRINCIPAL' || c.type === 'PAYMENT_PRINCIPAL'
       );
-      const _interestClaim = result.claims.find(
+      const __interestClaim = result.claims.find(
         c => c.type === 'PAY_INTEREST' || c.type === 'PAYMENT_INTEREST'
       );
-      const _costClaim = result.claims.find(
+      const __costClaim = result.claims.find(
         c => c.type === 'LITIGATION_COST' || c.type === 'LITIGATION_COSTS'
       );
 

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, _fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CaseTimeline } from '../../../components/case/CaseTimeline';
 import { TimelineEvent, CaseTimelineEventType } from '../../../types/case';
 

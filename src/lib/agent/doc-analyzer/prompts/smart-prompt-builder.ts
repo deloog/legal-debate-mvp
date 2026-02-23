@@ -35,9 +35,9 @@ export class SmartPromptBuilder {
   private fewShotLibrary: FewShotLibrary;
 
   // 三层提示词模板
-  private minimalTemplate: string;
-  private standardTemplate: string;
-  private comprehensiveTemplate: string;
+  private minimalTemplate!: string;
+  private standardTemplate!: string;
+  private comprehensiveTemplate!: string;
 
   constructor() {
     this.fewShotLibrary = new FewShotLibrary();

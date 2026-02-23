@@ -215,7 +215,7 @@ async function testConvenienceFunctions(): Promise<void> {
   console.log('测试便捷函数');
   console.log('========================================');
 
-  const _monitor = getDocAnalyzerMonitor();
+  const __monitor = getDocAnalyzerMonitor();
 
   // 记录新指标
   recordDocAnalyzerMetric({

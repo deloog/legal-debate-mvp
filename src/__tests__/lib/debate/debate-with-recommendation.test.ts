@@ -3,9 +3,9 @@
  * 测试在辩论生成时推荐相关法条的功能
  */
 
-import { _DebateGenerator } from '@/lib/debate/debate-generator';
+import { DebateGenerator } from '@/lib/debate/debate-generator';
 import { LawArticleRecommendationService } from '@/lib/law-article/recommendation-service';
-import { _AIClient } from '@/lib/ai/clients';
+import { AIClient } from '@/lib/ai/clients';
 import { prisma } from '@/lib/db';
 
 // Mock AI Client

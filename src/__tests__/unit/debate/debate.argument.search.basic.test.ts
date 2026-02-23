@@ -191,7 +191,7 @@ describe('Argument Basic Search and Filtering', () => {
         },
       });
 
-      const _lowercaseResults = await testPrisma.argument.findMany({
+      const __lowercaseResults = await testPrisma.argument.findMany({
         where: {
           content: {
             contains: 'letter',

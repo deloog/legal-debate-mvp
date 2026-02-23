@@ -132,11 +132,11 @@ export class PartyExtractor {
   ];
 
   // 法定代表人模式（用于过滤）
-  private readonly legalRepPattern: RegExp =
+  private readonly _legalRepPattern: RegExp =
     /(?:法定代表人|法人代表)[：:]\s*([^\n]+)/;
 
   // 诉讼代理人模式（用于过滤）
-  private readonly agentPattern: RegExp =
+  private readonly _agentPattern: RegExp =
     /(?:委托代理人|诉讼代理人|代理律师|律师)[：:]\s*([^\n]+)/;
 
   /**
@@ -345,7 +345,7 @@ export class PartyExtractor {
   /**
    * 处理多当事人（使用顿号或逗号分隔）
    */
-  private _extractMultipleParties(
+  private __extractMultipleParties(
     name: string,
     type: 'plaintiff' | 'defendant' | 'other'
   ): Party[] {

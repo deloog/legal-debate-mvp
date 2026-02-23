@@ -507,7 +507,7 @@ describe('企业法务工作台页面', () => {
       const { container } = render(<EnterpriseDashboardPage />);
 
       await waitFor(() => {
-        const _complianceSection = container.querySelector(
+        const __complianceSection = container.querySelector(
           '.rounded-lg.bg-white.p-6.shadow:has(h2:contains("合规状态"))'
         );
         expect(screen.getByText('合规状态')).toBeInTheDocument();

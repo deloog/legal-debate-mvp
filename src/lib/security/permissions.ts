@@ -399,7 +399,7 @@ export async function checkResourceOwnership(
  */
 export function requireOwnershipOrAdmin(
   resourceType: 'case' | 'contract' | 'debate',
-  resourceIdParam: string = 'id'
+  _resourceIdParam: string = 'id'
 ) {
   return async (req: NextRequest) => {
     try {

@@ -27,7 +27,7 @@ export class DiffDetector {
   /**
    * 计算内容指纹（MD5哈希）
    */
-  private _calculateFingerprint(content: string): string {
+  private __calculateFingerprint(content: string): string {
     return createHash('md5').update(content).digest('hex');
   }
 

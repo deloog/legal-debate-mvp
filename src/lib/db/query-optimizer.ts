@@ -72,7 +72,7 @@ export function buildSearchCondition(
  * 构建时间范围过滤条件
  */
 export function buildDateRangeFilter(
-  fieldName: string,
+  _fieldName: string,
   startDate?: string | Date,
   endDate?: string | Date
 ): Prisma.DateTimeFilter {
@@ -211,7 +211,7 @@ export interface QueryOptimizationSuggestion {
  * 分析查询并提供建议
  */
 export function analyzeQueryOptimization(
-  queryType: string,
+  _queryType: string,
   queryStats: {
     executionTime: number;
     resultCount: number;

@@ -420,7 +420,7 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
       );
 
       const response = await GET(request);
-      const _data = await response.json();
+      const __data = await response.json();
 
       // 应该忽略无效参数，返回所有数据
       expect(response.status).toBe(200);

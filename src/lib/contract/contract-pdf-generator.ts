@@ -165,7 +165,7 @@ function generateContentHash(contract: any): string {
  */
 async function checkPDFCache(
   contractId: string,
-  currentHash: string
+  _currentHash: string
 ): Promise<string | null> {
   try {
     // 从数据库获取合同的filePath和updatedAt
