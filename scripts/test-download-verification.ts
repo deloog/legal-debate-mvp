@@ -39,8 +39,8 @@ async function downloadDocx(bbbs: string): Promise<Buffer | null> {
     }
 
     return buffer;
-  } catch (err) {
-    console.error(`Error: ${err}`);
+  } catch (err: unknown) {
+    console.error(`Error: ${err instanceof Error ? err.message : String(err)}`);
     return null;
   }
 }

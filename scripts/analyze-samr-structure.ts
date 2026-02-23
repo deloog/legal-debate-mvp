@@ -200,4 +200,4 @@ async function main(): Promise<void> {
   console.log('='.repeat(60));
 }
 
-main().catch(console.error);
+main().catch((error) => console.error(error));
