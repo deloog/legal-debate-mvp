@@ -3,7 +3,7 @@
  * 验证从文档上传到辩论生成的完整流程
  */
 
-import { test, expect, APIRequestContext, Page } from '@playwright/test';
+import { test, expect, APIRequestContext, _Page } from '@playwright/test';
 import {
   createTestCase,
   uploadTestDocument,
@@ -17,7 +17,7 @@ import {
   assertPerformance,
 } from './helpers';
 import { E2EMockConfig } from '../mock-config';
-import { E2ETestHelpers } from '../test-helpers';
+import { _E2ETestHelpers } from '../test-helpers';
 
 test.describe('单轮辩论完整流程', () => {
   let apiContext: APIRequestContext;

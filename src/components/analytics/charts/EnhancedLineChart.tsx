@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import _React, { useState } from 'react';
 import type { LineChartData, LineChartDataPoint } from '@/types/chart';
 import {
   InteractiveChartContainer,

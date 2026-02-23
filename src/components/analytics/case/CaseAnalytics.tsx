@@ -4,7 +4,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import _React, { useEffect, useState } from 'react';
 import { CaseTypeDistributionChart } from './CaseTypeDistributionChart';
 import { CaseSuccessRateChart } from './CaseSuccessRateChart';
 import { CaseRevenueChart } from './CaseRevenueChart';

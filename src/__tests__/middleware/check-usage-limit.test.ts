@@ -20,7 +20,7 @@ const prisma = new PrismaClient();
 
 describe('使用量限制检查中间件测试', () => {
   let testUserId: string;
-  let testMembershipId: string;
+  let _testMembershipId: string;
   let testTierId: string;
 
   beforeAll(async () => {

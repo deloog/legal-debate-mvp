@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
  */
 
 describe('法条查询测试', () => {
-  let testArticleId: string;
+  let _testArticleId: string;
 
   beforeAll(async () => {
     // 确保测试数据已导入

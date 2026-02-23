@@ -3,7 +3,7 @@
  * 测试任务表单的创建、编辑、验证和提交功能
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, _fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { TaskForm } from '@/components/task/TaskForm';

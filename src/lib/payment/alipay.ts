@@ -70,7 +70,7 @@ export class AlipayPayment {
   /**
    * 获取支付宝公钥
    */
-  private getPublicKey(): string {
+  private _getPublicKey(): string {
     return paymentConfig.getAlipayPublicKey();
   }
 

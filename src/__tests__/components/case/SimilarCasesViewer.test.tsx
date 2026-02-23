@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, _fireEvent } from '@testing-library/react';
 import { SimilarCasesViewer } from '../../../components/case/SimilarCasesViewer';
 import type {
   SimilaritySearchResult,

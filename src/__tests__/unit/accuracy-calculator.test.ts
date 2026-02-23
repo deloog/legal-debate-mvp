@@ -143,7 +143,7 @@ describe('AccuracyCalculator - 单元测试', () => {
         { type: 'PAY_DAMAGES' },
       ];
 
-      const recall = calculator.calculateClaimRecall(extracted, expected);
+      const _recall = calculator.calculateClaimRecall(extracted, expected);
       // 类型相同，没有期望内容，只有类型匹配0.4
       // 需要超过默认阈值0.7，所以需要降低阈值
       const lowThresholdCalculator = new AccuracyCalculator({
@@ -348,7 +348,7 @@ describe('AccuracyCalculator - 单元测试', () => {
         claims: [{ type: 'PAY_PRINCIPAL', amount: 100000 }],
       };
 
-      const accuracy = calculator.calculateDocumentAccuracy(
+      const _accuracy = calculator.calculateDocumentAccuracy(
         extracted,
         expected
       );

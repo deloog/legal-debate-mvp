@@ -22,7 +22,7 @@ jest.mock('@/lib/db/prisma', () => ({
 }));
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import { prisma } from '@/lib/db/prisma';
+import { _prisma } from '@/lib/db/prisma';
 import {
   getUserQuotaConfig,
   checkAIQuota,

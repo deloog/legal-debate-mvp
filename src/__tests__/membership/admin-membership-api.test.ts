@@ -50,8 +50,8 @@ describe('会员管理API测试', () => {
   let mockFindMany: jest.Mock;
   let mockFindUniqueMembership: jest.Mock;
   let mockUpdate: jest.Mock;
-  let mockFindUniqueUser: jest.Mock;
-  let mockFindFirstTier: jest.Mock;
+  let _mockFindUniqueUser: jest.Mock;
+  let _mockFindFirstTier: jest.Mock;
   let mockCreateHistory: jest.Mock;
 
   beforeEach(() => {

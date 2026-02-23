@@ -80,7 +80,7 @@ interface ResourceResponseData {
  * 注意：此函数使用数据库直接操作而非API注册，以便创建不同角色的测试用户
  */
 export async function createTestUser(
-  apiContext: APIRequestContext,
+  _apiContext: APIRequestContext,
   role: 'USER' | 'LAWYER' | 'ADMIN' | 'SUPER_ADMIN' = 'USER'
 ): Promise<PermissionTestUser> {
   const timestamp = Date.now();

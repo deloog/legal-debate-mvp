@@ -18,7 +18,7 @@ import {
   generatePreloadReport,
   cleanupPreload,
 } from '@/lib/cache/cache-preload';
-import { cache } from '@/lib/cache/manager';
+import { _cache } from '@/lib/cache/manager';
 
 // Mock缓存
 jest.mock('@/lib/cache/manager', () => ({

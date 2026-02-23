@@ -228,7 +228,7 @@ describe('TaskForm', () => {
     });
 
     it('应该在创建任务时显示保存中状态', async () => {
-      const mockFetch = jest.spyOn(global, 'fetch').mockImplementation(
+      const _mockFetch = jest.spyOn(global, 'fetch').mockImplementation(
         () =>
           new Promise(resolve => {
             setTimeout(() => {
@@ -254,7 +254,7 @@ describe('TaskForm', () => {
     });
 
     it('应该处理创建任务失败', async () => {
-      const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValue({
+      const _mockFetch = jest.spyOn(global, 'fetch').mockResolvedValue({
         ok: false,
         json: async () => ({ message: '服务器错误' }),
       } as never);
@@ -406,7 +406,7 @@ describe('TaskForm', () => {
 
   describe('边界情况测试', () => {
     it('应该处理空描述', async () => {
-      const mockFetch = mockFetchSuccess();
+      const _mockFetch = mockFetchSuccess();
       const onCancel = jest.fn();
       const onSuccess = jest.fn();
 
@@ -424,7 +424,7 @@ describe('TaskForm', () => {
     });
 
     it('应该处理空案件ID', async () => {
-      const mockFetch = mockFetchSuccess();
+      const _mockFetch = mockFetchSuccess();
       const onCancel = jest.fn();
       const onSuccess = jest.fn();
 
@@ -442,7 +442,7 @@ describe('TaskForm', () => {
     });
 
     it('应该处理无效的预估工时', async () => {
-      const mockFetch = mockFetchSuccess();
+      const _mockFetch = mockFetchSuccess();
       const onCancel = jest.fn();
       const onSuccess = jest.fn();
 

@@ -288,7 +288,7 @@ export class ClaimExtractor {
   /**
    * 去重诉讼请求（按类型去重，保留金额最大的）
    */
-  private deduplicateClaims(claims: Claim[]): Claim[] {
+  private _deduplicateClaims(claims: Claim[]): Claim[] {
     const byType = new Map<ClaimType, Claim>();
 
     for (const claim of claims) {

@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import _React, { useState, useEffect } from 'react';
 import type {
   ComplianceDashboard,
   ComplianceChecklist,

@@ -3,7 +3,7 @@
  * 注意：由于项目中不存在@/lib/db模块，此测试暂时跳过数据库Mock
  */
 
-import { NextRequest } from 'next/server';
+import { _NextRequest } from 'next/server';
 import { RiskLevel } from '@/types/risk';
 
 describe('风险评估历史API测试', () => {

@@ -4,7 +4,7 @@
 
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/admin/export/cases/route';
-import { unauthorizedResponse, forbiddenResponse } from '@/lib/api-response';
+import { _unauthorizedResponse, forbiddenResponse } from '@/lib/api-response';
 
 // =============================================================================
 // Mock依赖

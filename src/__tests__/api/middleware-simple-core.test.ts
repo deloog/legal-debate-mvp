@@ -114,7 +114,7 @@ describe('Middleware Core Tests', () => {
 
       stack.use(middleware1).use(middleware2);
 
-      const result = await stack.execute(mockRequest, context);
+      const _result = await stack.execute(mockRequest, context);
 
       expect(executionOrder).toEqual([1, 2]);
       expect(middleware1).toHaveBeenCalledWith(

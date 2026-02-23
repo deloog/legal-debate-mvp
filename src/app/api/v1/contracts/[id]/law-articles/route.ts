@@ -12,7 +12,7 @@ import { logger } from '@/lib/logger';
  * 获取合同已关联的法条
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   try {

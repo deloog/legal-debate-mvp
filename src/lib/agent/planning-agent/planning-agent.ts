@@ -255,7 +255,7 @@ export class PlanningAgent {
   }
 
   // 生成选择原因
-  private generateSelectionReason(planning: unknown): string {
+  private _generateSelectionReason(planning: unknown): string {
     const reasons: string[] = [];
 
     if (planning && typeof planning === 'object') {

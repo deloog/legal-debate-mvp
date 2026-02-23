@@ -30,7 +30,7 @@ describe('Middleware Integration Tests', () => {
       // Authentication middleware
       const authMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           ctx.userId = 'user123';
           ctx.role = 'admin';
         });
@@ -38,14 +38,14 @@ describe('Middleware Integration Tests', () => {
       // Request logging middleware
       const loggingMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           response.headers.set('X-Request-ID', ctx.requestId);
         });
 
       // Response middleware
       const responseMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           return NextResponse.json({
             success: true,
             data: {
@@ -136,12 +136,12 @@ describe('Middleware Integration Tests', () => {
           'x-forwarded-for': '192.168.1.200',
         },
       });
-      const testContext = createRequestContext(testRequest);
+      const _testContext = createRequestContext(testRequest);
 
       // Simple response middleware for testing
       const responseMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           return NextResponse.json({ message: 'OK' });
         });
 
@@ -181,14 +181,14 @@ describe('Middleware Integration Tests', () => {
       // Context modification middleware
       const contextMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           ctx.userId = `user_${ctx.requestId}`;
           ctx.customData = 'test';
         });
 
       const responseMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           return NextResponse.json({
             requestId: ctx.requestId,
             userId: ctx.userId,
@@ -222,13 +222,13 @@ describe('Middleware Integration Tests', () => {
       // Early termination middleware
       const terminationMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           return NextResponse.json({ message: 'Early termination' });
         });
 
       const shouldNotExecuteMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           // This should never be called
           throw new Error('Should not execute');
         });
@@ -252,13 +252,13 @@ describe('Middleware Integration Tests', () => {
       // Error throwing middleware
       const errorMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           throw new Error('Test error');
         });
 
       const shouldNotExecuteMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           // This should never be called
           throw new Error('Should not execute after error');
         });
@@ -322,7 +322,7 @@ describe('Middleware Integration Tests', () => {
       // Profile middleware
       const profileMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           if (!ctx.userId) {
             return NextResponse.json(
               { error: 'Authentication required' },
@@ -389,7 +389,7 @@ describe('Middleware Integration Tests', () => {
       // Upload processing middleware
       const uploadMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           if (!ctx.fileName) {
             return NextResponse.json(
               { error: 'No file provided' },

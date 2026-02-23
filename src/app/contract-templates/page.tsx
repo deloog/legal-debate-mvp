@@ -23,7 +23,7 @@ interface ContractTemplate {
 }
 
 export default function ContractTemplatesPage() {
-  const _router = useRouter();
+  const __router = useRouter();
   const [loading, setLoading] = useState(true);
   const [templates, setTemplates] = useState<ContractTemplate[]>([]);
   const [error, setError] = useState<string | null>(null);

@@ -125,7 +125,7 @@ export class ContextMerger {
   /**
    * 解决冲突
    */
-  private resolveConflict():
+  private _resolveConflict():
     | 'new-priority'
     | 'old-priority'
     | 'merged'

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { prisma } from '@/lib/db';
+import { _prisma } from '@/lib/db';
 
 // Mock Next.js相关模块
 jest.mock('next/navigation', () => ({

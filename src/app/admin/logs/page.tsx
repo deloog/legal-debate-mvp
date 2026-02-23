@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import _React, { useState, useEffect, useCallback } from 'react';
 import { ErrorLogViewer } from '@/components/admin/ErrorLogViewer';
 import { ActionLogViewer } from '@/components/admin/ActionLogViewer';
 import type { ErrorLogItem, ActionLogItem } from '@/types/log';

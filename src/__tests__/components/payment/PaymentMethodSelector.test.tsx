@@ -4,7 +4,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import { PaymentMethodSelector } from '@/components/payment/PaymentMethodSelector';
-import { Check } from 'lucide-react';
+import { _Check } from 'lucide-react';
 
 describe('PaymentMethodSelector', () => {
   it('should render correctly with given props', () => {

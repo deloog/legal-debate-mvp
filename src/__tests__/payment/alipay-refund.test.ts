@@ -5,7 +5,7 @@
 
 import { AlipayRefund, alipayRefund } from '@/lib/payment/alipay-refund';
 import { paymentConfig } from '@/lib/payment/payment-config';
-import { AlipayRefundRequest, AlipayRefundResponse } from '@/types/payment';
+import { AlipayRefundRequest, _AlipayRefundResponse } from '@/types/payment';
 import {
   formatAmount,
   generateTimestamp,

@@ -123,7 +123,7 @@ export async function POST(
     }
 
     // 更新合同
-    const _updatedContract = await prisma.contract.update({
+    const __updatedContract = await prisma.contract.update({
       where: { id },
       data: updateData,
     });

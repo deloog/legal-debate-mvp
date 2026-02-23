@@ -14,7 +14,7 @@ import { POST } from '@/app/api/admin/law-articles/import/route';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
-import { LawCategory, LawStatus, LawType } from '@prisma/client';
+import { LawCategory, _LawStatus, LawType } from '@prisma/client';
 import { NextRequest } from 'next/server';
 
 // Mock依赖

@@ -16,7 +16,7 @@ import { logger } from '@/lib/logger';
  * 通过 debate -> case -> legalReferences 关联获取
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string; roundId: string }> }
 ) {
   const session = await getServerSession(authOptions);

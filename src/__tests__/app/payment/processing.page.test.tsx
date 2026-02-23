@@ -6,8 +6,8 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PaymentProcessingPage from '@/app/payment/processing/page';
-import { PaymentProcessing } from '@/components/payment/PaymentProcessing';
-import { PaymentMethod } from '@/types/payment';
+import { _PaymentProcessing } from '@/components/payment/PaymentProcessing';
+import { _PaymentMethod } from '@/types/payment';
 
 // Mock dependencies
 jest.mock('next/navigation', () => ({

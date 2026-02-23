@@ -143,7 +143,7 @@ describe('Debates Stream API - AI Service Error Handling', () => {
           .fn()
           .mockImplementation(
             () =>
-              new Promise((resolve, reject) =>
+              new Promise((_resolve, reject) =>
                 setTimeout(() => reject(new Error('AI service timeout')), 100)
               )
           ) as any,

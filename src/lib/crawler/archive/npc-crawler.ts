@@ -154,7 +154,7 @@ export class NPCCrawler extends BaseCrawler {
   private readonly DEFAULT_OUTPUT_DIR = path.resolve('data/crawled/npc');
 
   private consecutiveErrors = 0;
-  private readonly MAX_CONSECUTIVE_ERRORS = 3;
+  private readonly _MAX_CONSECUTIVE_ERRORS = 3;
 
   private logger = getLogger('NPCCrawler');
 

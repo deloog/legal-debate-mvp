@@ -25,7 +25,7 @@ jest.mock('@/lib/middleware/permission-check', () => ({
 
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
-import { TimeRange } from '@/types/stats';
+import { _TimeRange } from '@/types/stats';
 
 describe('辩论质量评分统计API', () => {
   const mockGetAuthUser = getAuthUser as jest.Mock;

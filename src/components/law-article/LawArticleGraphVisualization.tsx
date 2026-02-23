@@ -10,7 +10,7 @@
 
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import _React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { GraphNode, GraphLink } from '@/lib/law-article/graph-builder';
 

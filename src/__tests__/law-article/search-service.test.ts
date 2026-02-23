@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, _beforeEach, _afterEach } from '@jest/globals';
 import { LawArticleSearchService } from '../../lib/law-article/search-service';
 import type { SearchQuery } from '../../lib/law-article/types';
 

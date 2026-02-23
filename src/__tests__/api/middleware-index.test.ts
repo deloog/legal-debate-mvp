@@ -122,7 +122,7 @@ describe('Middleware Index', () => {
       // 添加一个最终的响应中间件来测试栈执行
       const finalMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           return mockNextResponse.json({ success: true });
         });
       stack.use(finalMiddleware);
@@ -135,7 +135,7 @@ describe('Middleware Index', () => {
     });
 
     it('should execute middlewares in the correct order', async () => {
-      const stack = createDefaultMiddlewareStack();
+      const _stack = createDefaultMiddlewareStack();
       const executionOrder: string[] = [];
 
       // 模拟中间件执行顺序检查
@@ -148,7 +148,7 @@ describe('Middleware Index', () => {
 
       const finalMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           executionOrder.push('final');
           return mockNextResponse.json({ success: true });
         });
@@ -318,7 +318,7 @@ describe('Middleware Index', () => {
 
         const finalMiddleware = jest
           .fn()
-          .mockImplementation(async (req, ctx, response) => {
+          .mockImplementation(async (_req, ctx, response) => {
             return mockNextResponse.json({ method });
           });
         stack.use(finalMiddleware);
@@ -335,7 +335,7 @@ describe('Middleware Index', () => {
 
       const finalMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           capturedContext = { ...ctx };
           return mockNextResponse.json({
             requestId: ctx.requestId,
@@ -358,7 +358,7 @@ describe('Middleware Index', () => {
 
       const finalMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           return mockNextResponse.json({ success: true });
         });
       stack.use(finalMiddleware);
@@ -373,7 +373,7 @@ describe('Middleware Index', () => {
 
       const finalMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           return mockNextResponse.json({ success: true });
         });
       stack.use(finalMiddleware);
@@ -398,7 +398,7 @@ describe('Middleware Index', () => {
 
       const finalMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           metadata.requestId = ctx.requestId;
           metadata.startTime = ctx.startTime;
           return mockNextResponse.json(metadata);

@@ -17,7 +17,7 @@ const prisma = new PrismaClient();
 
 describe('CourtSchedule Database Model', () => {
   let testCaseId: string;
-  let testScheduleId: string;
+  let _testScheduleId: string;
 
   beforeAll(async () => {
     // 创建测试用户
@@ -226,7 +226,7 @@ describe('CourtSchedule Database Model', () => {
     });
 
     it('应该能够查询案件的所有日程', async () => {
-      const schedules = await Promise.all([
+      const _schedules = await Promise.all([
         prisma.courtSchedule.create({
           data: {
             caseId: testCaseId,
@@ -486,7 +486,7 @@ describe('CourtSchedule Database Model', () => {
 
   describe('CourtSchedule Model Indexes', () => {
     it('应该能够使用caseId索引查询', async () => {
-      const created = await prisma.courtSchedule.create({
+      const _created = await prisma.courtSchedule.create({
         data: {
           caseId: testCaseId,
           title: '索引测试',
@@ -506,7 +506,7 @@ describe('CourtSchedule Database Model', () => {
     });
 
     it('应该能够使用type索引查询', async () => {
-      const created = await prisma.courtSchedule.create({
+      const _created = await prisma.courtSchedule.create({
         data: {
           caseId: testCaseId,
           title: '类型索引测试',
@@ -526,7 +526,7 @@ describe('CourtSchedule Database Model', () => {
 
     it('应该能够使用startTime索引查询', async () => {
       const startTime = new Date('2026-01-25T09:00:00');
-      const created = await prisma.courtSchedule.create({
+      const _created = await prisma.courtSchedule.create({
         data: {
           caseId: testCaseId,
           title: '时间索引测试',
@@ -547,7 +547,7 @@ describe('CourtSchedule Database Model', () => {
     });
 
     it('应该能够使用status索引查询', async () => {
-      const created = await prisma.courtSchedule.create({
+      const _created = await prisma.courtSchedule.create({
         data: {
           caseId: testCaseId,
           title: '状态索引测试',

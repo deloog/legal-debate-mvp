@@ -15,7 +15,7 @@ import {
   BatchProcessor,
   BatchProcessorFactory,
 } from '@/lib/ai/batch-processor';
-import { RetryStrategy, RetryStrategyFactory } from '@/lib/ai/retry-strategy';
+import { _RetryStrategy, RetryStrategyFactory } from '@/lib/ai/retry-strategy';
 import {
   CircuitBreaker,
   CircuitBreakerFactory,
@@ -314,7 +314,7 @@ describe('稳定性集成测试', () => {
     });
 
     it('应该支持告警规则管理', async () => {
-      const ruleId = 'STABILITY_TEST_RULE';
+      const _ruleId = 'STABILITY_TEST_RULE';
       // AlertManager没有公开的getRule方法，这里测试告警处理功能
       const testErrorLog: ErrorLog = {
         id: 'test-error-rule',

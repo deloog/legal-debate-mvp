@@ -101,7 +101,7 @@ test.describe('合同完整流程', () => {
     await page.waitForURL('**/contracts/*');
 
     const contractUrl = page.url();
-    const contractId = contractUrl.split('/').pop();
+    const _contractId = contractUrl.split('/').pop();
 
     // 2. 编辑合同
     await page.click('text=编辑');

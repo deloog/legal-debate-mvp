@@ -23,7 +23,7 @@ import './globals.css';
 // });
 
 // 使用系统字体变量
-const fontVariables = '--font-geist-sans --font-geist-mono';
+const _fontVariables = '--font-geist-sans --font-geist-mono';
 
 // 配置元数据优化
 export const metadata: Metadata = {

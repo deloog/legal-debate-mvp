@@ -6,7 +6,7 @@ import { CaseEmbeddingServiceFactory } from '@/lib/case/embedding-service';
  * 获取案例的向量嵌入
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -38,7 +38,7 @@ export async function GET(
  * 为案例生成向量嵌入
  */
 export async function POST(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -71,7 +71,7 @@ export async function POST(
  * 删除案例的向量嵌入
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {

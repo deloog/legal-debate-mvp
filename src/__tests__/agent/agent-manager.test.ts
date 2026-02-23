@@ -10,7 +10,7 @@ import type {
   AgentType,
   AgentWorkflowConfig,
 } from '../../types/agent';
-import { AgentStatus, AgentErrorType, TaskPriority } from '../../types/agent';
+import { _AgentStatus, _AgentErrorType, TaskPriority } from '../../types/agent';
 
 // =============================================================================
 // 测试用的Mock Agent

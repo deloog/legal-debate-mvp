@@ -100,7 +100,7 @@ export class CourtCrawler extends BaseCrawler {
   private readonly API_DETAIL: string;
 
   private consecutiveErrors = 0;
-  private readonly MAX_CONSECUTIVE_ERRORS = 3;
+  private readonly _MAX_CONSECUTIVE_ERRORS = 3;
 
   private logger = getLogger('CourtCrawler');
 

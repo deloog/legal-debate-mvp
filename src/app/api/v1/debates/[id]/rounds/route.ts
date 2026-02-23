@@ -98,7 +98,7 @@ export const POST = withErrorHandler(
  */
 export const GET = withErrorHandler(
   async (
-    request: NextRequest,
+    _request: NextRequest,
     context: { params: Promise<{ id: string }> }
   ) => {
     // Next.js 15+ requires awaiting params

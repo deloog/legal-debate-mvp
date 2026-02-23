@@ -332,7 +332,7 @@ export class ArgumentGenerator {
   /**
    * 获取推理长度限制
    */
-  private getMaxReasoningLength(): number {
+  private _getMaxReasoningLength(): number {
     const modeConfig = this.getModeConfig();
     return Math.round(400 * modeConfig.reasoningLengthFactor);
   }
@@ -340,7 +340,7 @@ export class ArgumentGenerator {
   /**
    * 获取目标法律依据数量
    */
-  private getTargetLegalBasisCount(): number {
+  private _getTargetLegalBasisCount(): number {
     const modeConfig = this.getModeConfig();
     return Math.round(2 * modeConfig.legalBasisFactor);
   }
@@ -348,7 +348,7 @@ export class ArgumentGenerator {
   /**
    * 生成随机ID
    */
-  private generateId(): string {
+  private _generateId(): string {
     this.seed = (this.seed * 9301 + 49297) % 233280;
     return `arg_${this.seed}`;
   }

@@ -3,7 +3,7 @@
  * 测试多个中间件的组合使用
  */
 
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, expect, _beforeEach, jest } from '@jest/globals';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   createRequestContext,

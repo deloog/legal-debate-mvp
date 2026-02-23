@@ -127,7 +127,7 @@ export class RuleBasedDetector {
     }
 
     // 对每组法律，按生效日期排序，建立替代关系
-    for (const [lawName, versions] of grouped.entries()) {
+    for (const [_lawName, versions] of grouped.entries()) {
       // 过滤掉没有生效日期的法律
       const validVersions = versions.filter(v => v.effectiveDate);
 

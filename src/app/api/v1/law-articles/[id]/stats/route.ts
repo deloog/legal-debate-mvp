@@ -14,7 +14,7 @@ import { logger } from '@/lib/logger';
  * 获取法条统计信息
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {

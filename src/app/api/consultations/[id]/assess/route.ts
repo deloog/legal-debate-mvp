@@ -14,7 +14,7 @@ import { logger } from '@/lib/logger';
  * 执行AI案件评估
  */
 export async function POST(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<AIAssessment> | ErrorResponse>> {
   try {
@@ -116,7 +116,7 @@ export async function POST(
  * 获取已有的评估结果
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<AIAssessment | null> | ErrorResponse>> {
   try {

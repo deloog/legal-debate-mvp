@@ -23,9 +23,9 @@ class MockReviewer implements IReviewer {
   }
 
   public async review(
-    data: ExtractedData,
-    fullText: string,
-    config: ReviewerConfig
+    _data: ExtractedData,
+    _fullText: string,
+    _config: ReviewerConfig
   ): Promise<ReviewResult> {
     return this.result;
   }
@@ -239,9 +239,9 @@ describe('ReviewerManager', () => {
         public readonly name = 'FailingReviewer';
 
         public async review(
-          data: ExtractedData,
-          fullText: string,
-          config: ReviewerConfig
+          _data: ExtractedData,
+          _fullText: string,
+          _config: ReviewerConfig
         ): Promise<ReviewResult> {
           throw new Error('测试错误');
         }

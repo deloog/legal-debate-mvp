@@ -8,7 +8,7 @@ import { contractVersionService } from '@/lib/contract/contract-version-service'
 import { logger } from '@/lib/logger';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {

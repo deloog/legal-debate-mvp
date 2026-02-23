@@ -388,7 +388,7 @@ describe('CaseShareDialog', () => {
 
   describe('加载状态测试', () => {
     it('保存时应该显示保存中状态', async () => {
-      let resolvePromise: (value: unknown) => void;
+      let _resolvePromise: (value: unknown) => void;
       const mockResponse = new Promise(resolve => {
         resolvePromise = resolve;
       });

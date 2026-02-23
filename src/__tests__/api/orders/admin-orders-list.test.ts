@@ -223,7 +223,7 @@ describe('GET /api/admin/orders', () => {
         'http://localhost:3000/api/admin/orders?limit=200'
       );
 
-      const response = await GET(request);
+      const _response = await GET(request);
 
       expect(prisma.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -237,7 +237,7 @@ describe('GET /api/admin/orders', () => {
         'http://localhost:3000/api/admin/orders?status=PAID'
       );
 
-      const response = await GET(request);
+      const _response = await GET(request);
 
       expect(prisma.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -253,7 +253,7 @@ describe('GET /api/admin/orders', () => {
         'http://localhost:3000/api/admin/orders?paymentMethod=WECHAT'
       );
 
-      const response = await GET(request);
+      const _response = await GET(request);
 
       expect(prisma.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -270,7 +270,7 @@ describe('GET /api/admin/orders', () => {
         `http://localhost:3000/api/admin/orders?userId=${userId}`
       );
 
-      const response = await GET(request);
+      const _response = await GET(request);
 
       expect(prisma.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -287,7 +287,7 @@ describe('GET /api/admin/orders', () => {
         `http://localhost:3000/api/admin/orders?membershipTierId=${tierId}`
       );
 
-      const response = await GET(request);
+      const _response = await GET(request);
 
       expect(prisma.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -303,7 +303,7 @@ describe('GET /api/admin/orders', () => {
         'http://localhost:3000/api/admin/orders?startDate=2024-01-01&endDate=2024-01-31'
       );
 
-      const response = await GET(request);
+      const _response = await GET(request);
 
       expect(prisma.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -322,7 +322,7 @@ describe('GET /api/admin/orders', () => {
         'http://localhost:3000/api/admin/orders?search=ORD20240101001'
       );
 
-      const response = await GET(request);
+      const _response = await GET(request);
 
       expect(prisma.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -345,7 +345,7 @@ describe('GET /api/admin/orders', () => {
         'http://localhost:3000/api/admin/orders?search=user1@example.com'
       );
 
-      const response = await GET(request);
+      const _response = await GET(request);
 
       expect(prisma.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -370,7 +370,7 @@ describe('GET /api/admin/orders', () => {
         'http://localhost:3000/api/admin/orders?sortBy=createdAt&sortOrder=desc'
       );
 
-      const response = await GET(request);
+      const _response = await GET(request);
 
       expect(prisma.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -386,7 +386,7 @@ describe('GET /api/admin/orders', () => {
         'http://localhost:3000/api/admin/orders?sortBy=amount&sortOrder=asc'
       );
 
-      const response = await GET(request);
+      const _response = await GET(request);
 
       expect(prisma.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -402,7 +402,7 @@ describe('GET /api/admin/orders', () => {
         'http://localhost:3000/api/admin/orders?sortBy=invalid'
       );
 
-      const response = await GET(request);
+      const _response = await GET(request);
 
       expect(prisma.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -418,7 +418,7 @@ describe('GET /api/admin/orders', () => {
         'http://localhost:3000/api/admin/orders?sortOrder=invalid'
       );
 
-      const response = await GET(request);
+      const _response = await GET(request);
 
       expect(prisma.order.findMany).toHaveBeenCalledWith(
         expect.objectContaining({

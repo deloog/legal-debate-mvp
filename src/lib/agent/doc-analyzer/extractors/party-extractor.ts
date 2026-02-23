@@ -345,7 +345,7 @@ export class PartyExtractor {
   /**
    * 处理多当事人（使用顿号或逗号分隔）
    */
-  private extractMultipleParties(
+  private _extractMultipleParties(
     name: string,
     type: 'plaintiff' | 'defendant' | 'other'
   ): Party[] {

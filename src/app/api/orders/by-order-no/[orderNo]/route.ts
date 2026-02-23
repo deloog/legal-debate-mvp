@@ -14,7 +14,7 @@ import { logger } from '@/lib/logger';
  * 通过订单号获取订单详情
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { orderNo: string } }
 ): Promise<NextResponse> {
   try {

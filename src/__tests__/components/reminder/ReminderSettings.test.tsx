@@ -2,7 +2,7 @@
  * ReminderSettings 组件单元测试
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, _fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ReminderSettings } from '@/components/reminder/ReminderSettings';
 import {

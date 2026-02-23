@@ -214,7 +214,7 @@ describe('GET /api/admin/configs', () => {
     (prisma.systemConfig.count as jest.Mock).mockResolvedValue(0);
     (prisma.systemConfig.findMany as jest.Mock).mockResolvedValue([]);
 
-    const response = await GET(mockRequest('/api/admin/configs?category=ai'));
+    const _response = await GET(mockRequest('/api/admin/configs?category=ai'));
 
     expect(prisma.systemConfig.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -229,7 +229,7 @@ describe('GET /api/admin/configs', () => {
     (prisma.systemConfig.count as jest.Mock).mockResolvedValue(0);
     (prisma.systemConfig.findMany as jest.Mock).mockResolvedValue([]);
 
-    const response = await GET(mockRequest('/api/admin/configs?type=BOOLEAN'));
+    const _response = await GET(mockRequest('/api/admin/configs?type=BOOLEAN'));
 
     expect(prisma.systemConfig.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -244,7 +244,7 @@ describe('GET /api/admin/configs', () => {
     (prisma.systemConfig.count as jest.Mock).mockResolvedValue(0);
     (prisma.systemConfig.findMany as jest.Mock).mockResolvedValue([]);
 
-    const response = await GET(mockRequest('/api/admin/configs?search=test'));
+    const _response = await GET(mockRequest('/api/admin/configs?search=test'));
 
     expect(prisma.systemConfig.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -274,7 +274,7 @@ describe('GET /api/admin/configs', () => {
       Response.json({ error: '权限不足' }, { status: 403 }) as never
     );
 
-    const response = await GET(mockRequest('/api/admin/configs'));
+    const _response = await GET(mockRequest('/api/admin/configs'));
 
     expect(validatePermissions).toHaveBeenCalled();
   });

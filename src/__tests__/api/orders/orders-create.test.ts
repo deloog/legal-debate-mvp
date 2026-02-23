@@ -312,7 +312,7 @@ describe('POST /api/orders/create', () => {
         }
       );
 
-      const response = await POST(request);
+      const _response = await POST(request);
 
       expect(createOrder).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -334,7 +334,7 @@ describe('POST /api/orders/create', () => {
         }
       );
 
-      const response = await POST(request);
+      const _response = await POST(request);
 
       expect(createOrder).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -361,7 +361,7 @@ describe('POST /api/orders/create', () => {
         }
       );
 
-      const response = await POST(request);
+      const _response = await POST(request);
 
       expect(createOrder).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -382,7 +382,7 @@ describe('POST /api/orders/create', () => {
         }
       );
 
-      const response = await POST(request);
+      const _response = await POST(request);
 
       expect(createOrder).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -403,7 +403,7 @@ describe('POST /api/orders/create', () => {
         }
       );
 
-      const response = await POST(request);
+      const _response = await POST(request);
 
       expect(createOrder).toHaveBeenCalledWith(
         expect.objectContaining({

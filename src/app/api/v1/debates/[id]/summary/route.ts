@@ -11,7 +11,7 @@ import { logger } from '@/lib/logger';
  * 获取辩论摘要数据（各轮次得分统计、双方论点数量、整体结论）
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);

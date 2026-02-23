@@ -1,5 +1,5 @@
 import { GET, POST } from '@/app/api/v1/cases/route';
-import { CaseType, CaseStatus, OwnerType } from '@prisma/client';
+import { _CaseType, _CaseStatus, OwnerType } from '@prisma/client';
 import {
   createMockRequest,
   createTestResponse,

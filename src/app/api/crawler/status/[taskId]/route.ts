@@ -7,7 +7,7 @@ import { crawlTaskManager } from '@/lib/crawler/crawl-task-manager';
 import { logger } from '@/lib/logger';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { taskId: string } }
 ) {
   try {

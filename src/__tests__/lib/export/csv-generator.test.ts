@@ -67,7 +67,7 @@ describe('CsvGenerator', () => {
       const data = [{ value: null }, { value: undefined }];
       const generator = new CsvGenerator(['value'], data);
       const content = generator.generate();
-      const lines = content.split('\n');
+      const _lines = content.split('\n');
       // 不应该有错误，但空值会导致数据行变为空字符串
       expect(content).toBeTruthy();
       // 应该包含表头

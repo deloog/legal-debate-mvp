@@ -412,7 +412,7 @@ export class AmountExtractorCore {
   /**
    * 获取金额相似性key
    */
-  private getSimilarityKey(amount: number): string {
+  private _getSimilarityKey(amount: number): string {
     if (amount < 1000) {
       return `${amount.toFixed(0)}_small`;
     } else if (amount < 10000) {

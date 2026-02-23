@@ -79,7 +79,7 @@ describe('合规检查清单API测试', () => {
       );
 
       const response = await GET(request);
-      const data = await response.json();
+      const _data = await response.json();
 
       expect(response.status).toBe(200);
       expect(ComplianceService.getChecklists).toHaveBeenCalledWith({

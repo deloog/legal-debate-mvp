@@ -4,7 +4,7 @@
  */
 
 import https from 'https';
-import { wechatPay, WechatPay } from '@/lib/payment/wechat-pay';
+import { wechatPay, _WechatPay } from '@/lib/payment/wechat-pay';
 import { paymentConfig } from '@/lib/payment/payment-config';
 import {
   WechatCreateOrderRequest,
@@ -95,7 +95,7 @@ describe('WechatPay', () => {
       const mockResponse = JSON.stringify(mockResponseData);
 
       (https.request as jest.Mock).mockImplementationOnce(
-        (options, callback) => {
+        (_options, callback) => {
           const res = {
             statusCode: 200,
             on: (event: string, handler: (data: string) => void) => {
@@ -136,7 +136,7 @@ describe('WechatPay', () => {
       };
 
       (https.request as jest.Mock).mockImplementationOnce(
-        (options, callback) => {
+        (_options, callback) => {
           const res = {
             statusCode: 400,
             on: (event: string, handler: (data: string) => void) => {
@@ -195,7 +195,7 @@ describe('WechatPay', () => {
       const mockResponse = JSON.stringify(mockResponseData);
 
       (https.request as jest.Mock).mockImplementationOnce(
-        (options, callback) => {
+        (_options, callback) => {
           const res = {
             statusCode: 200,
             on: (event: string, handler: (data: string) => void) => {
@@ -254,7 +254,7 @@ describe('WechatPay', () => {
       const mockResponse = JSON.stringify(mockResponseData);
 
       (https.request as jest.Mock).mockImplementationOnce(
-        (options, callback) => {
+        (_options, callback) => {
           const res = {
             statusCode: 200,
             on: (event: string, handler: (data: string) => void) => {
@@ -324,7 +324,7 @@ describe('WechatPay', () => {
       const mockResponse = JSON.stringify(mockResponseData);
 
       (https.request as jest.Mock).mockImplementationOnce(
-        (options, callback) => {
+        (_options, callback) => {
           const res = {
             statusCode: 200,
             on: (event: string, handler: (data: string) => void) => {

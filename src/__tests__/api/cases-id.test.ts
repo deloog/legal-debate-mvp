@@ -7,7 +7,7 @@ import {
   jest,
 } from '@jest/globals';
 
-import { GET, PUT, DELETE, OPTIONS } from '@/app/api/v1/cases/[id]/route';
+import { GET, PUT, _DELETE, _OPTIONS } from '@/app/api/v1/cases/[id]/route';
 import {
   createMockRequest,
   createTestResponse,

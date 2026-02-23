@@ -98,7 +98,7 @@ describe('AI响应时间集成测试', () => {
       for (let i = 0; i < sampleCount; i++) {
         const startTime = Date.now();
 
-        const result = await agent.execute({
+        const _result = await agent.execute({
           data: {
             documentId: `test-doc-batch-${i}`,
             fileType: 'txt',

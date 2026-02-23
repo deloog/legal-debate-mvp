@@ -633,7 +633,7 @@ export class SAMRCrawler extends BaseCrawler {
   private readonly PRIMARY_API_BASE = 'https://www.samr.gov.cn';
   // 备用数据源: 合同服务网
   private readonly FALLBACK_API_BASE = 'https://htsfwb.samr.gov.cn';
-  private readonly DEFAULT_OUTPUT_DIR = path.resolve('data/crawled/samr');
+  private readonly _DEFAULT_OUTPUT_DIR = path.resolve('data/crawled/samr');
 
   /** 日志系统 */
   private logger = getLogger('SAMRCrawler');
@@ -663,7 +663,7 @@ export class SAMRCrawler extends BaseCrawler {
    * 获取当前使用的API基础URL
    * 优先使用主要数据源(12315.cn)，失败时回退到备用数据源
    */
-  private getApiBaseUrl(): string {
+  private _getApiBaseUrl(): string {
     return this.PRIMARY_API_BASE;
   }
 

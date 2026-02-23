@@ -55,7 +55,7 @@ export async function POST(
  * 删除关系
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
