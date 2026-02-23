@@ -206,7 +206,7 @@ interface AccuracyResult {
 
 class DirectAccuracyEvaluator {
   private amountExtractor: AmountExtractor;
-  private claimExtractor: ClaimExtractor;
+  private _claimExtractor: ClaimExtractor;
   private legalRepFilter: LegalRepresentativeFilter;
 
   constructor() {

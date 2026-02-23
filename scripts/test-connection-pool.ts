@@ -8,7 +8,7 @@ import {
   checkPoolHealth,
   warmupConnectionPool,
 } from '../src/lib/db/connection-pool';
-import { prisma } from '../src/lib/db/prisma';
+import { _prisma } from '../src/lib/db/prisma';
 
 interface StressTestResult {
   testName: string;

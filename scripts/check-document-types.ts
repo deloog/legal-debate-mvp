@@ -7,7 +7,7 @@
  * - 找出可能的解析失败案例
  */
 
-import { PrismaClient, LawType, LawCategory } from '@prisma/client';
+import { PrismaClient, _LawType, _LawCategory } from '@prisma/client';
 
 const prisma = new PrismaClient();
 

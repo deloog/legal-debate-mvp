@@ -67,7 +67,7 @@ async function importFile(
     console.log('  Total: ' + laws.length);
 
     let created = 0;
-    const updated = 0;
+    const _updated = 0;
     let errors = 0;
 
     for (const law of laws) {

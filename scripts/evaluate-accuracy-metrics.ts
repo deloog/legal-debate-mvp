@@ -205,7 +205,7 @@ interface AccuracyResult {
 
 class AccuracyEvaluator {
   private agent: DocAnalyzerAgentAdapter;
-  private results: Map<string, AccuracyResult> = new Map();
+  private _results: Map<string, AccuracyResult> = new Map();
 
   constructor() {
     this.agent = new DocAnalyzerAgentAdapter();

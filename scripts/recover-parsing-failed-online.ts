@@ -8,7 +8,7 @@
  * - 多方法解析降级
  */
 
-import { PrismaClient, LawType, LawCategory } from '@prisma/client';
+import { PrismaClient, _LawType, _LawCategory } from '@prisma/client';
 import { docxParser } from '../src/lib/crawler/docx-parser';
 import { FLKCrawler } from '../src/lib/crawler/flk-crawler';
 

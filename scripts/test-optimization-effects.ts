@@ -91,8 +91,8 @@ interface OptimizationReport {
 
 class OptimizationTester {
   private analyzer: DocAnalyzerAgent;
-  private claimClassifier: LawsuitRequestClassifier;
-  private amountExtractor: PrecisionAmountExtractor;
+  private _claimClassifier: LawsuitRequestClassifier;
+  private _amountExtractor: PrecisionAmountExtractor;
 
   constructor() {
     this.analyzer = new DocAnalyzerAgent();

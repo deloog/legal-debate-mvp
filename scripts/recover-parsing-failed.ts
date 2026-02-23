@@ -7,7 +7,7 @@
  * - 多方法解析降级
  */
 
-import { PrismaClient, LawType, LawCategory } from '@prisma/client';
+import { PrismaClient, _LawType, _LawCategory } from '@prisma/client';
 import { docxParser } from '../src/lib/crawler/docx-parser';
 
 const prisma = new PrismaClient();
@@ -87,7 +87,7 @@ async function main() {
 
       // 使用 FLK crawler 的 reparseFailed 方法
       // 先确保文件已下载到磁盘
-      const { flkCrawler } = await import('../src/lib/crawler/flk-crawler');
+      const { _flkCrawler } = await import('../src/lib/crawler/flk-crawler');
 
       // 使用 crawler-daemon 的重新解析逻辑
       // 直接从磁盘文件重新解析

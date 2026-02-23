@@ -281,7 +281,7 @@ export async function batchCrawl(
  */
 export async function retryFailedDownloads(
   options: FLKCrawlOptions = {},
-  batchConfig: Partial<BatchConfig> = {}
+  _batchConfig: Partial<BatchConfig> = {}
 ): Promise<void> {
   const outputDir = options.outputDir || path.resolve('data/crawled/flk');
   const types = options.types || FLK_TYPE_CONFIGS.map(c => c.code);
@@ -293,8 +293,8 @@ export async function retryFailedDownloads(
     if (!typeConfig) continue;
 
     // 检查该分类是否有失败的项
-    const stats = flkCrawler.getStats(outputDir);
-    const checkpointPath = path.join(outputDir, 'checkpoint.json');
+    const _stats = flkCrawler.getStats(outputDir);
+    const _checkpointPath = path.join(outputDir, 'checkpoint.json');
 
     // 这里需要读取 checkpoint 查找失败的项
     // 简化处理：重新执行下载，会自动跳过已完成的

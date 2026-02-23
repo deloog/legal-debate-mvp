@@ -96,7 +96,7 @@ async function testCacheKeyLengthFix(): Promise<boolean> {
   console.log('🧪 测试缓存键长度限制修复...');
 
   try {
-    const service = await AIServiceFactory.getInstance('test', TEST_CONFIG);
+    const _service = await AIServiceFactory.getInstance('test', TEST_CONFIG);
 
     // 创建一个长消息来测试缓存键生成
     const longMessage =
