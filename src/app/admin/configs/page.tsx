@@ -1,3 +1,18 @@
+/**
+ * 系统配置管理页面
+ *
+ * 功能：
+ * 1. 查看和管理系统全局配置项（AI服务、存储、安全等）
+ * 2. 支持创建、更新、删除配置项
+ * 3. 实时显示操作结果通知（成功/失败）
+ * 4. 分页展示配置列表
+ * 5. 支持刷新和翻页操作
+ *
+ * 页面组件使用 SystemConfigViewer 子组件进行配置展示和操作
+ *
+ * @page /admin/configs
+ */
+
 'use client';
 
 import React, { useState, useCallback } from 'react';

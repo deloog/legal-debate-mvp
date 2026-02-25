@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 import {
   VerificationStatus,
   NotificationType,
@@ -70,7 +71,7 @@ export async function checkPendingRelationsThreshold(
       threshold: config.threshold,
     };
   } catch (error) {
-    console.error('检查待审核关系阈值失败:', error);
+    logger.error('检查待审核关系阈值失败', { error });
     return {
       shouldNotify: false,
       pendingCount: 0,
@@ -112,7 +113,7 @@ export async function sendPendingRelationsNotification(
 
     // 如果已存在未读通知，则不重复发送
     if (existingNotification) {
-      console.log(`用户 ${userId} 已有未读的待审核通知，跳过发送`);
+      logger.info(`用户 ${userId} 已有未读的待审核通知，跳过发送`);
       return;
     }
 
@@ -136,9 +137,9 @@ export async function sendPendingRelationsNotification(
       },
     });
 
-    console.log(`已向用户 ${userId} 发送待审核关系通知`);
+    logger.info(`已向用户 ${userId} 发送待审核关系通知`);
   } catch (error) {
-    console.error('发送待审核关系通知失败:', error);
+    logger.error('发送待审核关系通知失败', { error, userId });
     throw new Error('发送通知失败');
   }
 }
@@ -166,6 +167,8 @@ export async function notifyAllAdmins(
       },
     });
 
+    const adminCount = admins.length;
+
     // 向所有管理员发送通知
     await Promise.all(
       admins.map(admin =>
@@ -173,9 +176,9 @@ export async function notifyAllAdmins(
       )
     );
 
-    console.log(`已向 ${admins.length} 位管理员发送待审核关系通知`);
+    logger.info(`已向 ${adminCount} 位管理员发送待审核关系通知`);
   } catch (error) {
-    console.error('向管理员发送通知失败:', error);
+    logger.error('向管理员发送通知失败', { error });
     throw new Error('向管理员发送通知失败');
   }
 }
@@ -216,7 +219,7 @@ export async function sendVerificationCompletedNotification(
     });
 
     if (!relation) {
-      console.error(`关系 ${relationId} 不存在`);
+      logger.warn(`关系 ${relationId} 不存在`, { relationId });
       return;
     }
 
@@ -240,9 +243,9 @@ export async function sendVerificationCompletedNotification(
       },
     });
 
-    console.log(`已向用户 ${userId} 发送审核完成通知`);
+    logger.info(`已向用户 ${userId} 发送审核完成通知`);
   } catch (error) {
-    console.error('发送审核完成通知失败:', error);
+    logger.error('发送审核完成通知失败', { error, userId, relationId });
     // 审核完成通知失败不应影响主流程，只记录日志
   }
 }
@@ -260,27 +263,27 @@ export async function scheduledPendingRelationsCheck(
   config: NotificationThresholdConfig
 ): Promise<void> {
   try {
-    console.log('开始检查待审核关系数量...');
+    logger.info('开始检查待审核关系数量...');
 
     // 检查阈值
     const result = await checkPendingRelationsThreshold(config);
 
     if (result.shouldNotify) {
-      console.log(
+      logger.info(
         `待审核关系数量 ${result.pendingCount} 超过阈值 ${result.threshold}，发送通知...`
       );
 
       // 向所有管理员发送通知
       await notifyAllAdmins(result.pendingCount, result.threshold);
 
-      console.log('通知发送完成');
+      logger.info('通知发送完成');
     } else {
-      console.log(
+      logger.info(
         `待审核关系数量 ${result.pendingCount} 未超过阈值 ${result.threshold}，无需发送通知`
       );
     }
   } catch (error) {
-    console.error('定时检查待审核关系失败:', error);
+    logger.error('定时检查待审核关系失败', { error });
   }
 }
 
@@ -310,7 +313,7 @@ export async function getUnreadKnowledgeGraphNotificationCount(
 
     return count;
   } catch (error) {
-    console.error('获取未读通知数量失败:', error);
+    logger.error('获取未读通知数量失败', { error, userId });
     return 0;
   }
 }
@@ -336,9 +339,9 @@ export async function markKnowledgeGraphNotificationAsRead(
       },
     });
 
-    console.log(`通知 ${notificationId} 已标记为已读`);
+    logger.info(`通知 ${notificationId} 已标记为已读`);
   } catch (error) {
-    console.error('标记通知为已读失败:', error);
+    logger.error('标记通知为已读失败', { error, userId, notificationId });
     throw new Error('标记通知为已读失败');
   }
 }

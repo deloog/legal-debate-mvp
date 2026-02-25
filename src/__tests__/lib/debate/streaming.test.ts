@@ -1,6 +1,18 @@
 /**
- * 流式输出功能测试
- * 测试真正的AI流式输出功能
+ * 辩论流式输出功能测试
+ *
+ * 测试范围：
+ * 1. AI流式事件数据类型（AIStreamEventData）的验证
+ * 2. 流式事件类型的完整性检查
+ * 3. useDebateStream Hook的状态管理
+ * 4. useTypewriter Hook的打字机效果
+ * 5. 流式事件的正确解析和处理（ai_stream、complete、error等）
+ * 6. SSE客户端配置和回调函数
+ * 7. 进度计算逻辑
+ * 8. 累积内容管理
+ *
+ * 注意：这些测试专注于类型和逻辑验证，不涉及真实AI服务调用
+ * 真实的AI集成测试应使用USE_REAL_AI=true环境变量运行
  */
 
 import { describe, it, expect } from '@jest/globals';

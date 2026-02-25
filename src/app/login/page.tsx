@@ -1,13 +1,22 @@
+/**
+ * 用户登录页面
+ *
+ * 功能：
+ * 1. 提供用户登录表单（邮箱和密码）
+ * 2. 支持登录后跳转到指定页面（通过redirect参数）
+ * 3. 登录成功后同步NextAuth session
+ * 4. 显示测试账户信息供开发测试使用
+ * 5. 错误提示和加载状态处理
+ *
+ * @page /login
+ */
+
 'use client';
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
-
-/**
- * 登录页面
- */
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();

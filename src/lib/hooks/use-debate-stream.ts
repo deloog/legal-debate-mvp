@@ -1,5 +1,15 @@
 'use client';
 
+/**
+ * 辩论流式输出相关Hooks
+ *
+ * 本模块提供辩论流式输出的React Hooks，主要用于：
+ * 1. useDebateStream - 通过SSE接收流式辩论内容，实时显示AI生成的辩论文本
+ * 2. useTypewriter - 将长文本以打字机效果逐字显示，提升用户体验
+ *
+ * @module use-debate-stream
+ */
+
 import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import { SSEClient } from '@/lib/debate/stream/sse-client';
 

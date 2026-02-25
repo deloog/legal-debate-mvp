@@ -1,13 +1,40 @@
+/**
+ * 系统日志查看页面（管理员专用）
+ *
+ * 功能：
+ * 1. 错误日志查看
+ *    - 展示系统错误日志列表
+ *    - 显示错误级别（ERROR/WARN/INFO/DEBUG）
+ *    - 显示错误消息、堆栈信息
+ *    - 显示发生时间、相关用户
+ *    - 支持刷新日志和分页浏览
+ * 2. 操作日志查看
+ *    - 展示用户操作日志列表
+ *    - 显示操作类型（登录/登出/创建/更新/删除等）
+ *    - 显示操作详情、IP地址、User-Agent
+ *    - 显示操作时间、操作用户
+ *    - 支持刷新日志和分页浏览
+ * 3. 日志管理
+ *    - 切换"错误日志"和"操作日志"标签页
+ *    - 自动加载日志数据
+ *    - 分页浏览（每页20条）
+ *    - 显示总记录数和总页数
+ * 4. 错误处理
+ *    - 加载状态提示
+ *    - 错误消息处理
+ *    - 日志查看器组件集成
+ *
+ * @page /admin/logs
+ * @access Admin only
+ */
+
 'use client';
 
-import _React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ErrorLogViewer } from '@/components/admin/ErrorLogViewer';
 import { ActionLogViewer } from '@/components/admin/ActionLogViewer';
 import type { ErrorLogItem, ActionLogItem } from '@/types/log';
 
-/**
- * 日志查看页面
- */
 export default function LogsPage() {
   const [activeTab, setActiveTab] = useState<'error' | 'action'>('error');
   const [errorLogs, setErrorLogs] = useState<ErrorLogItem[]>([]);

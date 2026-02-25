@@ -28,7 +28,9 @@ interface ErrorDetail {
 function readTscOutput(): FileErrors[] {
   const errorsFile = path.join(__dirname, '..', 'tsc-errors-strict.txt');
   if (!fs.existsSync(errorsFile)) {
-    console.error('错误文件不存在，请先运行: npx tsc --noEmit -p tsconfig.strict.json > tsc-errors-strict.txt 2>&1');
+    console.error(
+      '错误文件不存在，请先运行: npx tsc --noEmit -p tsconfig.strict.json > tsc-errors-strict.txt 2>&1'
+    );
     process.exit(1);
   }
 
@@ -42,11 +44,9 @@ function readTscOutput(): FileErrors[] {
     if (!match) continue;
 
     const [, file, lineNum, colNum, errorType, description] = match;
-    
+
     // 只处理TS2532、TS18048、TS18047错误
-    if (
-!['TS2532', 'TS18048', 'TS18047'].includes(errorType)
-) {
+    if (!['TS2532', 'TS18048', 'TS18047'].includes(errorType)) {
       continue;
     }
 
@@ -83,7 +83,7 @@ function fixFile(fileErrors: FileErrors): { fixed: number; skipped: number } {
     return { fixed: 0, skipped: 0 };
   }
 
-  let content = fs.readFileSync(filePath, 'utf-8');
+  const content = fs.readFileSync(filePath, 'utf-8');
   const lines = content.split('\n');
   const sortedErrors = [...fileErrors.errors].sort((a, b) => b.line - a.line);
 
@@ -132,7 +132,10 @@ function fixLine(line: string, error: ErrorDetail): string {
     }
 
     // 匹配模式: object.property.property
-    const nestedPropertyPattern = new RegExp(`(^|\\s)${variable}\\.(\\w+)\\.(\\w+)`, 'g');
+    const nestedPropertyPattern = new RegExp(
+      `(^|\\s)${variable}\\.(\\w+)\\.(\\w+)`,
+      'g'
+    );
     if (nestedPropertyPattern.test(line)) {
       return line.replace(nestedPropertyPattern, `$1${variable}.$2?.$3`);
     }
@@ -144,7 +147,10 @@ function fixLine(line: string, error: ErrorDetail): string {
     }
 
     // 匹配模式: 变量直接使用
-    const _directUsagePattern = new RegExp(`(^|[^\\w$])${variable}([^\\w$])`, 'g');
+    const _directUsagePattern = new RegExp(
+      `(^|[^\\w$])${variable}([^\\w$])`,
+      'g'
+    );
     // 只在某些上下文中添加?，避免过度修复
     const safeDirectPatterns = [
       new RegExp(`\\[\\s*${variable}\\s*\\]`), // [variable]

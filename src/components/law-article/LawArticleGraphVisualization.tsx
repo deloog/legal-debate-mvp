@@ -15,7 +15,11 @@ import * as d3 from 'd3';
 import { GraphNode, GraphLink } from '@/lib/law-article/graph-builder';
 
 interface Props {
-  centerArticleId: string;
+  // 优化功能：直接传入完整的图谱数据，避免重复API调用
+  graphData?: { nodes: GraphNode[]; links: GraphLink[] };
+
+  // 原有功能：传入中心法条ID，组件自动获取数据（向后兼容）
+  centerArticleId?: string;
   depth?: number;
 }
 
@@ -23,6 +27,7 @@ interface Props {
  * 法条关系图谱可视化组件
  */
 export function LawArticleGraphVisualization({
+  graphData: propsGraphData,
   centerArticleId,
   depth = 2,
 }: Props) {
@@ -36,41 +41,56 @@ export function LawArticleGraphVisualization({
 
   // 加载图谱数据
   useEffect(() => {
-    async function loadGraph() {
-      setLoading(true);
-      try {
-        const response = await fetch(
-          `/api/v1/law-articles/${centerArticleId}/graph?depth=${depth}`
-        );
-
-        // 检查响应状态
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || `请求失败: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // 验证数据结构，确保 nodes 和 links 是数组
-        if (!data || typeof data !== 'object') {
-          throw new Error('无效的图谱数据格式');
-        }
-
-        const graphData = {
-          nodes: Array.isArray(data.nodes) ? data.nodes : [],
-          links: Array.isArray(data.links) ? data.links : [],
-        };
-
-        setGraphData(graphData);
-      } catch (error) {
-        console.error('加载图谱失败:', error);
-        setGraphData({ nodes: [], links: [] });
-      } finally {
-        setLoading(false);
-      }
+    // 如果传入了 graphData，直接使用，无需API调用
+    if (propsGraphData) {
+      setGraphData(propsGraphData);
+      setLoading(false);
+      return;
     }
-    loadGraph();
-  }, [centerArticleId, depth]);
+
+    // 如果没有传入 graphData，但有 centerArticleId，则调用API
+    if (centerArticleId) {
+      async function loadGraph() {
+        setLoading(true);
+        try {
+          const response = await fetch(
+            `/api/v1/law-articles/${centerArticleId}/graph?depth=${depth}`
+          );
+
+          // 检查响应状态
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `请求失败: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          // 验证数据结构，确保 nodes 和 links 是数组
+          if (!data || typeof data !== 'object') {
+            throw new Error('无效的图谱数据格式');
+          }
+
+          const graphData = {
+            nodes: Array.isArray(data.nodes) ? data.nodes : [],
+            links: Array.isArray(data.links) ? data.links : [],
+          };
+
+          setGraphData(graphData);
+        } catch (error) {
+          // 客户端错误处理：显示空数据而非使用console
+          setGraphData({ nodes: [], links: [] });
+        } finally {
+          setLoading(false);
+        }
+      }
+      loadGraph();
+      return;
+    }
+
+    // 如果两者都没有，显示空状态
+    setGraphData({ nodes: [], links: [] });
+    setLoading(false);
+  }, [propsGraphData, centerArticleId, depth]);
 
   // 渲染图谱
   useEffect(() => {

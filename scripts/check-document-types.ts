@@ -31,7 +31,9 @@ async function main() {
   });
 
   // 按内容长度排序
-  allRecords.sort((a, b) => (a.fullText?.length || 0) - (b.fullText?.length || 0));
+  allRecords.sort(
+    (a, b) => (a.fullText?.length || 0) - (b.fullText?.length || 0)
+  );
 
   // 2. 按文档类型分类（通过 lawName 判断）
   const typeKeywords = {

@@ -8,6 +8,7 @@
  * 4. 提供统计信息
  */
 
+import { logger } from '@/lib/logger';
 import { AI_DETECTOR_CONFIG } from './ai-detector-config';
 
 /**
@@ -43,13 +44,20 @@ export class AICostMonitor {
 
     // 检查请求次数限制
     if (this.dailyRequestCount >= AI_DETECTOR_CONFIG.maxDailyRequests) {
-      console.warn('达到每日API调用限制');
+      logger.warn('达到每日API调用限制', {
+        currentCount: this.dailyRequestCount,
+        maxCount: AI_DETECTOR_CONFIG.maxDailyRequests,
+      });
       return false;
     }
 
     // 检查成本限制
     if (this.dailyCost + cost > AI_DETECTOR_CONFIG.maxCostPerDay) {
-      console.warn('达到每日成本预算');
+      logger.warn('达到每日成本预算', {
+        currentCost: this.dailyCost,
+        estimatedCost: this.dailyCost + cost,
+        maxCost: AI_DETECTOR_CONFIG.maxCostPerDay,
+      });
       return false;
     }
 

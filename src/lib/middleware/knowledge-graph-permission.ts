@@ -5,6 +5,7 @@
 
 import { prisma } from '@/lib/db';
 import { UserRole, ActionLogType, ActionLogCategory } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 类型定义
@@ -114,7 +115,7 @@ export async function checkKnowledgeGraphPermission(
       userRole: user.role,
     };
   } catch (error) {
-    console.error('检查知识图谱权限时出错:', error);
+    logger.error('检查知识图谱权限时出错', { error });
     return {
       hasPermission: false,
       reason: '权限检查失败',
@@ -187,7 +188,7 @@ export async function logKnowledgeGraphAction(
       },
     });
   } catch (error) {
-    console.error('记录知识图谱操作日志失败:', error);
+    logger.error('记录知识图谱操作日志失败', { error });
     throw new Error('记录操作日志失败');
   }
 }
@@ -199,12 +200,12 @@ export async function logKnowledgeGraphAction(
  */
 function mapActionToLogType(action: KnowledgeGraphAction): ActionLogType {
   const mapping: Record<KnowledgeGraphAction, ActionLogType> = {
-    [KnowledgeGraphAction.VIEW_RELATIONS]: ActionLogType.UNKNOWN,
-    [KnowledgeGraphAction.VIEW_STATS]: ActionLogType.UNKNOWN,
-    [KnowledgeGraphAction.VERIFY_RELATION]: ActionLogType.UNKNOWN,
-    [KnowledgeGraphAction.BATCH_VERIFY]: ActionLogType.UNKNOWN,
+    [KnowledgeGraphAction.VIEW_RELATIONS]: ActionLogType.VIEW_KNOWLEDGE_GRAPH,
+    [KnowledgeGraphAction.VIEW_STATS]: ActionLogType.VIEW_KNOWLEDGE_GRAPH,
+    [KnowledgeGraphAction.VERIFY_RELATION]: ActionLogType.VERIFY_RELATION,
+    [KnowledgeGraphAction.BATCH_VERIFY]: ActionLogType.BATCH_VERIFY_RELATION,
     [KnowledgeGraphAction.EXPORT_DATA]: ActionLogType.EXPORT_DATA,
-    [KnowledgeGraphAction.MANAGE_RELATIONS]: ActionLogType.UNKNOWN,
+    [KnowledgeGraphAction.MANAGE_RELATIONS]: ActionLogType.MANAGE_RELATIONS,
   };
 
   return mapping[action] || ActionLogType.UNKNOWN;
@@ -221,6 +222,10 @@ function mapActionToLogType(action: KnowledgeGraphAction): ActionLogType {
  */
 export async function isKnowledgeGraphAdmin(userId: string): Promise<boolean> {
   try {
+    if (!userId || userId.trim() === '') {
+      return false;
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true, deletedAt: true },
@@ -232,7 +237,7 @@ export async function isKnowledgeGraphAdmin(userId: string): Promise<boolean> {
 
     return user.role === UserRole.ADMIN || user.role === UserRole.SUPER_ADMIN;
   } catch (error) {
-    console.error('检查管理员权限时出错:', error);
+    logger.error('检查管理员权限时出错', { error });
     return false;
   }
 }

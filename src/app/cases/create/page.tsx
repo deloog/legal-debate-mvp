@@ -1,3 +1,17 @@
+/**
+ * 创建案件页面
+ *
+ * 功能：
+ * 1. 提供案件信息录入表单（基本信息、当事人信息、案件信息）
+ * 2. 支持从咨询转化案件（通过consultationId参数）
+ * 3. 自动生成连续案号（调用后端API）
+ * 4. 提供多种案件描述模板（按案件类型分类）
+ * 5. 支持AI生成案情描述
+ * 6. 表单验证和错误提示
+ *
+ * @page /cases/create
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';

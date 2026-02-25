@@ -390,7 +390,7 @@ describe('CaseShareDialog', () => {
     it('保存时应该显示保存中状态', async () => {
       let __resolvePromise: (value: unknown) => void;
       const mockResponse = new Promise(resolve => {
-        resolvePromise = resolve;
+        __resolvePromise = resolve;
       });
 
       (global.fetch as jest.Mock).mockReturnValueOnce(mockResponse);

@@ -229,7 +229,9 @@ describe('GET /api/admin/configs', () => {
     (prisma.systemConfig.count as jest.Mock).mockResolvedValue(0);
     (prisma.systemConfig.findMany as jest.Mock).mockResolvedValue([]);
 
-    const __response = await GET(mockRequest('/api/admin/configs?type=BOOLEAN'));
+    const __response = await GET(
+      mockRequest('/api/admin/configs?type=BOOLEAN')
+    );
 
     expect(prisma.systemConfig.findMany).toHaveBeenCalledWith(
       expect.objectContaining({

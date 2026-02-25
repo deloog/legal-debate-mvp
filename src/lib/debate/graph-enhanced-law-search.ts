@@ -135,7 +135,9 @@ async function searchByKeywords(
  */
 async function findConflictingArticles(
   articleIds: string[]
-): Promise<{ source: LawArticleWithRelations; target: LawArticleWithRelations }[]> {
+): Promise<
+  { source: LawArticleWithRelations; target: LawArticleWithRelations }[]
+> {
   if (articleIds.length === 0) return [];
 
   try {
@@ -195,7 +197,9 @@ async function findConflictingArticles(
  */
 async function findComplementArticles(
   articleIds: string[]
-): Promise<{ source: LawArticleWithRelations; target: LawArticleWithRelations }[]> {
+): Promise<
+  { source: LawArticleWithRelations; target: LawArticleWithRelations }[]
+> {
   if (articleIds.length === 0) return [];
 
   try {

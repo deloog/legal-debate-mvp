@@ -105,7 +105,7 @@ describe('使用量记录模块测试', () => {
         autoRenew: false,
       },
     });
-    testMembershipId = membership.id;
+    __testMembershipId = membership.id;
   });
 
   afterAll(async () => {

@@ -1,9 +1,42 @@
+/**
+ * 合同模板种子数据脚本
+ *
+ * 功能：
+ * 1. 创建默认合同模板
+ *    - 委托代理合同模板（默认激活）
+ *    - 法律顾问合同模板（默认不激活）
+ * 2. 委托代理合同模板
+ *    - 包含17个变量字段（委托人信息、案件信息、费用信息、签约信息等）
+ *    - 标准化合同条款（委托事项、费用、权利义务、违约责任等）
+ *    - 支持中文大写金额转换（totalFeeChinese、annualFeeChinese）
+ *    - 适用场景：个人/企业委托律师代理诉讼案件
+ * 3. 法律顾问合同模板
+ *    - 包含11个变量字段（委托人信息、服务范围、费用信息等）
+ *    - 标准化合同条款（服务内容、费用、权利义务、保密条款等）
+ *    - 支持中文大写金额转换（totalFeeChinese、annualFeeChinese）
+ *    - 适用场景：企业聘请常年法律顾问
+ * 4. 数据管理
+ *    - 使用 upsert 确保幂等性，可重复运行
+ *    - 通过 code 字段唯一标识模板
+ *    - 支持更新已存在的模板
+ *
+ * 使用方法：
+ *   - 独立运行：npx ts-node prisma/seed-contracts.ts
+ *   - 在 seed.ts 中调用：await seedContractTemplates()
+ *
+ * 输出：
+ *   - 创建两个合同模板记录到 contract_template 表
+ *   - 控制台输出创建结果
+ *
+ * @module seed-contracts
+ */
+
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 /**
- * 合同模板种子数据
+ * 创建合同模板种子数据
  * 包含委托代理合同和法律顾问合同模板
  */
 export async function seedContractTemplates() {

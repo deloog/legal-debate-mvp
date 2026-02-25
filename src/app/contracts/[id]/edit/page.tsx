@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FeeType } from '@/types/contract';
+import type { FeeType } from '@/types/contract';
 
 interface EditContractPageProps {
   params: {
@@ -19,8 +19,32 @@ export default function EditContractPage({ params }: EditContractPageProps) {
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 表单数据类型定义
+  interface Payment {
+    paymentType: string;
+    amount: string;
+  }
+
+  interface FormData {
+    clientType: string;
+    clientName: string;
+    clientIdNumber: string;
+    clientAddress: string;
+    clientContact: string;
+    lawFirmName: string;
+    lawyerName: string;
+    lawyerId: string;
+    caseType: string;
+    caseSummary: string;
+    scope: string;
+    feeType: FeeType;
+    totalFee: string;
+    specialTerms: string;
+    payments: Payment[];
+  }
+
   // 表单数据
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     // 委托方信息
     clientType: 'INDIVIDUAL',
     clientName: '',
@@ -39,12 +63,12 @@ export default function EditContractPage({ params }: EditContractPageProps) {
     scope: '',
 
     // 收费信息
-    feeType: FeeType.FIXED,
-    totalFee: 0,
+    feeType: 'FIXED',
+    totalFee: '0',
     specialTerms: '',
 
     // 付款计划
-    payments: [{ paymentType: '首付款', amount: 0 }],
+    payments: [{ paymentType: '首付款', amount: '0' }],
   });
 
   // 加载现有合同数据
@@ -65,7 +89,8 @@ export default function EditContractPage({ params }: EditContractPageProps) {
             clientType: contract.clientType || 'INDIVIDUAL',
             clientName: contract.clientName || '',
             clientIdNumber: contract.clientIdNumber || '',
-            clientAddress: contract.clientAddress || '',
+            clientAddress:
+              contract.contractAddress || contract.clientAddress || '',
             clientContact: contract.clientContact || '',
             lawFirmName: contract.lawFirmName || '律伴律师事务所',
             lawyerName: contract.lawyerName || '',
@@ -73,16 +98,18 @@ export default function EditContractPage({ params }: EditContractPageProps) {
             caseType: contract.caseType || '',
             caseSummary: contract.caseSummary || '',
             scope: contract.scope || '',
-            feeType: contract.feeType || FeeType.FIXED,
-            totalFee: parseFloat(contract.totalFee) || 0,
+            feeType: 'FIXED' as FeeType,
+            totalFee: '0',
             specialTerms: contract.specialTerms || '',
             payments:
               contract.payments?.length > 0
-                ? contract.payments.map((p: { paymentType?: string; amount?: number }) => ({
-                    paymentType: p.paymentType || '',
-                    amount: parseFloat(p.amount) || 0,
-                  }))
-                : [{ paymentType: '首付款', amount: 0 }],
+                ? contract.payments.map(
+                    (p: { paymentType?: string; amount?: number }) => ({
+                      paymentType: p.paymentType || '',
+                      amount: String(Number(p.amount) || 0),
+                    })
+                  )
+                : [{ paymentType: '首付款', amount: '0' }],
           });
         } else {
           setError('加载合同数据失败');
@@ -98,14 +125,14 @@ export default function EditContractPage({ params }: EditContractPageProps) {
     loadContract();
   }, [params.id]);
 
-  function handleChange(field: string, value: unknown) {
+  function handleChange(field: string, value: string | FeeType) {
     setFormData(prev => ({ ...prev, [field]: value }));
   }
 
   function addPayment() {
     setFormData(prev => ({
       ...prev,
-      payments: [...prev.payments, { paymentType: '中期款', amount: 0 }],
+      payments: [...prev.payments, { paymentType: '中期款', amount: '0' }],
     }));
   }
 
@@ -120,7 +147,7 @@ export default function EditContractPage({ params }: EditContractPageProps) {
     setFormData(prev => ({
       ...prev,
       payments: prev.payments.map((p, i) =>
-        i === index ? { ...p, [field]: value } : p
+        i === index ? { ...p, [field]: String(value || '0') } : p
       ),
     }));
   }
@@ -366,13 +393,15 @@ export default function EditContractPage({ params }: EditContractPageProps) {
                 </label>
                 <select
                   value={formData.feeType}
-                  onChange={e => handleChange('feeType', e.target.value)}
+                  onChange={e =>
+                    handleChange('feeType', e.currentTarget.value as FeeType)
+                  }
                   className='w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
                 >
-                  <option value={FeeType.FIXED}>固定收费</option>
-                  <option value={FeeType.RISK}>风险代理</option>
-                  <option value={FeeType.HOURLY}>计时收费</option>
-                  <option value={FeeType.MIXED}>混合收费</option>
+                  <option value='FIXED'>固定收费</option>
+                  <option value='RISK'>风险代理</option>
+                  <option value='HOURLY'>计时收费</option>
+                  <option value='MIXED'>混合收费</option>
                 </select>
               </div>
 
@@ -383,9 +412,7 @@ export default function EditContractPage({ params }: EditContractPageProps) {
                 <input
                   type='number'
                   value={formData.totalFee}
-                  onChange={e =>
-                    handleChange('totalFee', parseFloat(e.target.value) || 0)
-                  }
+                  onChange={e => handleChange('totalFee', e.target.value)}
                   required
                   min='0'
                   step='0.01'
@@ -423,11 +450,7 @@ export default function EditContractPage({ params }: EditContractPageProps) {
                         type='number'
                         value={payment.amount}
                         onChange={e =>
-                          updatePayment(
-                            index,
-                            'amount',
-                            parseFloat(e.target.value) || 0
-                          )
+                          updatePayment(index, 'amount', e.target.value)
                         }
                         placeholder='金额'
                         min='0'

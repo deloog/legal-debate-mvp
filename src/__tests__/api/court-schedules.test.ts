@@ -96,7 +96,7 @@ describe('CourtSchedule Database Model', () => {
       expect(schedule.status).toBe('SCHEDULED');
       expect(schedule.location).toBe('第一法庭');
       expect(schedule.judge).toBe('张法官');
-      testScheduleId = schedule.id;
+      __testScheduleId = schedule.id;
     });
 
     it('应该支持所有法庭日程类型', async () => {

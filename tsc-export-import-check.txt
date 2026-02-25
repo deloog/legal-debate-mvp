@@ -1,0 +1,6 @@
+src/__tests__/lib/knowledge-graph/export-import/services/export-service.test.ts(18,5): error TS2322: Type 'TransactionClient' is not assignable to type 'Mocked<TransactionClient>'.
+  Type 'TransactionClient' is not assignable to type '{ [x: symbol]: { types: { payload: any; operations: { $executeRaw: { args: [query: TemplateStringsArray | Sql, ...values: any[]]; result: any; }; $executeRawUnsafe: { args: [query: string, ...values: any[]]; result: any; }; $queryRaw: { ...; }; $queryRawUnsafe: { ...; }; }; }; }; ... 80 more ...; readonly knowledgeG...'.
+    Types of property '$executeRaw' are incompatible.
+      Type '<T = unknown>(query: TemplateStringsArray | Sql, ...values: any[]) => PrismaPromise<number>' is not assignable to type 'MockInstance<PrismaPromise<number>, [query: TemplateStringsArray | Sql, ...values: any[]], unknown>'.
+src/__tests__/lib/knowledge-graph/export-import/services/import-service.test.ts(114,19): error TS2339: Property '$transaction' does not exist on type 'TransactionClient'.
+src/__tests__/lib/knowledge-graph/export-import/services/import-service.test.ts(141,19): error TS2339: Property '$transaction' does not exist on type 'TransactionClient'.

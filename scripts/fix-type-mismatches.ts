@@ -76,40 +76,43 @@ interface FixResult {
  */
 function fixFile(filePath: string): FixResult {
   console.log(`\n处理文件: ${filePath}`);
-  
+
   let content = fs.readFileSync(filePath, 'utf-8');
   let fixes = 0;
   const errors: string[] = [];
-  
+
   // 应用所有修复规则
   for (const rule of FIX_RULES) {
     let match;
     const regex = new RegExp(rule.pattern.source, rule.pattern.flags);
-    
+
     // 重置正则表达式状态
     rule.pattern.lastIndex = 0;
-    
+
     while ((match = regex.exec(content)) !== null) {
       try {
         // 测试是否应该修复
         if (rule.test(match[0], content, match.index || 0)) {
           const original = match[0];
           let fixed: string;
-          
+
           if (rule.name.includes('TS2564')) {
             // TS2564特殊处理
             fixed = rule.fix(match[0], match[1] || '');
           } else {
             fixed = rule.fix(match[0], '');
           }
-          
+
           if (fixed !== original) {
             if (CONFIG.dryRun) {
               console.log(`  [预览] ${rule.name}`);
               console.log(`    原始: ${original}`);
               console.log(`    修复: ${fixed}`);
             } else {
-              content = content.substring(0, match.index) + fixed + content.substring(match.index + match[0].length);
+              content =
+                content.substring(0, match.index) +
+                fixed +
+                content.substring(match.index + match[0].length);
               // 重新设置正则位置
               regex.lastIndex = match.index + fixed.length;
             }
@@ -121,7 +124,7 @@ function fixFile(filePath: string): FixResult {
       }
     }
   }
-  
+
   // 写回文件
   if (fixes > 0 && !CONFIG.dryRun) {
     fs.writeFileSync(filePath, content, 'utf-8');
@@ -129,11 +132,11 @@ function fixFile(filePath: string): FixResult {
   } else if (fixes > 0) {
     console.log(`  [预览] 将修复 ${fixes} 处`);
   }
-  
+
   if (errors.length > 0) {
     console.log(`  ⚠️  ${errors.length} 个错误:`, errors);
   }
-  
+
   return { file: filePath, fixes, errors };
 }
 
@@ -143,20 +146,20 @@ function fixFile(filePath: string): FixResult {
 async function main() {
   console.log('=== TypeScript 类型不匹配修复工具 ===');
   console.log(`模式: ${CONFIG.dryRun ? '预览' : '修复'}\n`);
-  
+
   // 获取所有文件
   const files = await glob(CONFIG.include, {
     ignore: CONFIG.exclude,
     cwd: process.cwd(),
   });
-  
+
   console.log(`找到 ${files.length} 个文件\n`);
-  
+
   // 统计
   let totalFixes = 0;
   let totalErrors = 0;
   const results: FixResult[] = [];
-  
+
   // 处理每个文件
   for (const file of files) {
     try {
@@ -169,20 +172,20 @@ async function main() {
       console.error(error);
     }
   }
-  
+
   // 输出统计
   console.log('\n=== 统计结果 ===');
   console.log(`处理文件数: ${files.length}`);
   console.log(`修复处数: ${totalFixes}`);
   console.log(`错误数: ${totalErrors}`);
-  
+
   if (CONFIG.dryRun) {
     console.log('\n⚠️  这是预览模式，没有实际修改文件');
     console.log('   要实际修复，请将 CONFIG.dryRun 设为 false\n');
   } else {
     console.log('\n✅ 修复完成！建议运行测试验证\n');
   }
-  
+
   return { totalFixes, totalErrors };
 }
 
@@ -191,7 +194,7 @@ main()
   .then(({ totalFixes, totalErrors }) => {
     process.exit(totalErrors > 0 ? 1 : 0);
   })
-  .catch((error) => {
+  .catch(error => {
     console.error('Fatal error:', error);
     process.exit(1);
   });

@@ -152,7 +152,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   // 检查权限
   const permissionError = await validatePermissions(
     request,
-    LAW_PERMISSIONS.READ ?? 'law:read',
+    LAW_PERMISSIONS.READ ?? 'law:read'
   );
   if (permissionError) {
     return permissionError;

@@ -563,7 +563,7 @@ test.describe('支付回调处理（模拟）', () => {
       validTierId,
       'WECHAT'
     );
-    createdOrderId = createResponse.data?.orderId || '';
+    __createdOrderId = createResponse.data?.orderId || '';
   });
 
   test('微信支付回调端点应该可访问', async ({ request }) => {

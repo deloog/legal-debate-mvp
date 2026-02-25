@@ -67,7 +67,7 @@ class MigrationRollbackTester {
       const result = execSync('npx prisma migrate status', {
         encoding: 'utf8',
       });
-      this.originalMigrationState = result;
+      this.__originalMigrationState = result;
       console.log('📋 已备份当前迁移状态');
       this.addTestResult('备份迁移状态', 'PASSED', '当前迁移状态已备份');
     } catch (error) {

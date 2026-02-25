@@ -57,7 +57,7 @@ describe('使用量限制检查中间件测试', () => {
         autoRenew: false,
       },
     });
-    testMembershipId = membership.id;
+    __testMembershipId = membership.id;
   });
 
   afterAll(async () => {

@@ -1,3 +1,35 @@
+/**
+ * 辩论流式生成API路由
+ *
+ * GET /api/v1/debates/[id]/stream
+ *
+ * 功能：
+ * 1. 通过SSE (Server-Sent Events) 实时流式推送辩论生成进度
+ * 2. 支持多轮次辩论的连续生成
+ * 3. 集成关键词搜索和图谱增强搜索获取相关法条
+ * 4. 实时推送AI生成的原始token和解析后的论点
+ * 5. 自动计算和保存论点评分（逻辑分、法律分、综合分）
+ *
+ * SSE事件类型：
+ * - connected: 连接建立确认
+ * - round-start: 轮次开始
+ * - ai_stream: AI原始token（实时）
+ * - argument: 单个论点（已解析，含side/content/reasoning/legalBasis/scores）
+ * - progress: 进度更新（0-100%）
+ * - completed: 整体完成
+ * - error: 错误信息
+ *
+ * 安全机制：
+ * - 用户认证和授权检查
+ * - 所有权验证（仅允许访问自己的辩论）
+ * - 速率限制（60秒内最多5个轮次）
+ *
+ * 法条检索策略：
+ * 1. 关键词搜索（6条）
+ * 2. 图谱增强搜索（500ms超时）
+ * 3. 将图谱分析结果注入AI上下文
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError } from '@/app/api/lib/errors/api-error';
 import { validatePathParam } from '@/app/api/lib/validation/validator';

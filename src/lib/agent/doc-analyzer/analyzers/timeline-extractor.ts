@@ -24,7 +24,6 @@ export class TimelineExtractor {
 
   constructor() {
     this.datePatterns = this.initializeDatePatterns();
-    this.eventPatterns = this.initializeEventPatterns();
   }
 
   /**

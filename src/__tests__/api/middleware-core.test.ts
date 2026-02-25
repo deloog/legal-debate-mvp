@@ -143,7 +143,7 @@ describe('Middleware Core', () => {
 
       it('should pass updated context through middleware chain', async () => {
         const stack = new MiddlewareStack();
-        const __contextReceived: RequestContext | null = null;
+        let contextReceived: RequestContext | null = null;
 
         const middleware1 = jest
           .fn()

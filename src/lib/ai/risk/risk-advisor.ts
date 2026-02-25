@@ -51,7 +51,7 @@ export class AIRiskAdvisor {
   constructor(config: RiskAdvisorConfig) {
     this.aiService = config.aiService;
     this.enableFallback = config.enableFallback ?? true;
-    this.confidenceThreshold = config.confidenceThreshold ?? 0.6;
+    this._confidenceThreshold = config.confidenceThreshold ?? 0.6;
   }
 
   /**

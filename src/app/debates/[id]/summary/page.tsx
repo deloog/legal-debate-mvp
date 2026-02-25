@@ -244,8 +244,7 @@ export default function DebateSummaryPage() {
                     day: '2-digit',
                     hour: '2-digit',
                     minute: '2-digit',
-                  })}
-                  {' '}
+                  })}{' '}
                   生成
                 </span>
               )}
@@ -581,8 +580,7 @@ export default function DebateSummaryPage() {
                   </div>
                   <div className='flex gap-3 text-xs'>
                     <span className='text-zinc-500'>
-                      综合分
-                      {' '}
+                      综合分{' '}
                       <span
                         className={confColor(round.plaintiff.avgConfidence)}
                       >
@@ -609,8 +607,7 @@ export default function DebateSummaryPage() {
                   </div>
                   <div className='flex gap-3 text-xs'>
                     <span className='text-zinc-500'>
-                      综合分
-                      {' '}
+                      综合分{' '}
                       <span
                         className={confColor(round.defendant.avgConfidence)}
                       >

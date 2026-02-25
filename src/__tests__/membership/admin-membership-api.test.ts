@@ -62,8 +62,8 @@ describe('会员管理API测试', () => {
     mockFindMany = prisma.userMembership.findMany as jest.Mock;
     mockFindUniqueMembership = prisma.userMembership.findUnique as jest.Mock;
     mockUpdate = prisma.userMembership.update as jest.Mock;
-    mockFindUniqueUser = prisma.user.findUnique as jest.Mock;
-    mockFindFirstTier = prisma.membershipTier.findFirst as jest.Mock;
+    __mockFindUniqueUser = prisma.user.findUnique as jest.Mock;
+    __mockFindFirstTier = prisma.membershipTier.findFirst as jest.Mock;
     mockCreateHistory = prisma.membershipHistory.create as jest.Mock;
 
     // 默认mock返回已认证管理员

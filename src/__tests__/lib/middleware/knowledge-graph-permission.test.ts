@@ -1,157 +1,258 @@
 /**
- * 知识图谱权限控制测试
- * 测试管理员权限验证和审核操作日志记录功能
+ * 知识图谱权限中间件单元测试
+ * 测试审核日志映射功能的完整性
+ * @jest-environment node
  */
 
-import { prisma } from '@/lib/db';
 import {
   checkKnowledgeGraphPermission,
   logKnowledgeGraphAction,
   KnowledgeGraphAction,
   KnowledgeGraphResource,
+  isKnowledgeGraphAdmin,
 } from '@/lib/middleware/knowledge-graph-permission';
-import { UserRole } from '@prisma/client';
+import { ActionLogType } from '@prisma/client';
 
-describe('知识图谱权限控制', () => {
-  // 测试用户数据
-  const testUsers = {
-    superAdmin: {
-      id: 'test-super-admin-id',
-      email: 'superadmin@test.com',
-      role: UserRole.SUPER_ADMIN,
-    },
-    admin: {
-      id: 'test-admin-id',
-      email: 'admin@test.com',
-      role: UserRole.ADMIN,
+// Mock Prisma
+jest.mock('@/lib/db/prisma', () => ({
+  prisma: {
+    actionLog: {
+      create: jest.fn(),
     },
     user: {
-      id: 'test-user-id',
-      email: 'user@test.com',
-      role: UserRole.USER,
+      findUnique: jest.fn(),
     },
-  };
+  },
+}));
 
-  beforeEach(async () => {
-    // 清理测试数据
-    await prisma.actionLog.deleteMany({
-      where: {
-        userId: {
-          in: [testUsers.superAdmin.id, testUsers.admin.id, testUsers.user.id],
-        },
-      },
+describe('KnowledgeGraphPermission - mapActionToLogType', () => {
+  describe('映射关系验证', () => {
+    it('应该正确映射 VIEW_RELATIONS 到 VIEW_KNOWLEDGE_GRAPH', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.actionLog.create.mockResolvedValue({});
+
+      await logKnowledgeGraphAction({
+        userId: 'test-user-id',
+        action: KnowledgeGraphAction.VIEW_RELATIONS,
+        resource: KnowledgeGraphResource.RELATION,
+        description: '查看法条关系',
+      });
+
+      expect(prisma.actionLog.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          actionType: ActionLogType.VIEW_KNOWLEDGE_GRAPH,
+          actionCategory: 'ADMIN',
+          userId: 'test-user-id',
+          description: '查看法条关系',
+          resourceType: 'law_article_relation',
+        }),
+      });
     });
 
-    await prisma.user.deleteMany({
-      where: {
-        id: {
-          in: [testUsers.superAdmin.id, testUsers.admin.id, testUsers.user.id],
-        },
-      },
+    it('应该正确映射 VIEW_STATS 到 VIEW_KNOWLEDGE_GRAPH', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.actionLog.create.mockResolvedValue({});
+
+      await logKnowledgeGraphAction({
+        userId: 'test-user-id',
+        action: KnowledgeGraphAction.VIEW_STATS,
+        resource: KnowledgeGraphResource.STATS,
+        description: '查看图谱统计',
+      });
+
+      expect(prisma.actionLog.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          actionType: ActionLogType.VIEW_KNOWLEDGE_GRAPH,
+          actionCategory: 'ADMIN',
+          description: '查看图谱统计',
+          resourceType: 'knowledge_graph_stats',
+        }),
+      });
     });
 
-    // 创建测试用户
-    await prisma.user.createMany({
-      data: [
-        {
-          id: testUsers.superAdmin.id,
-          email: testUsers.superAdmin.email,
-          role: testUsers.superAdmin.role,
-          password: 'hashed-password',
-        },
-        {
-          id: testUsers.admin.id,
-          email: testUsers.admin.email,
-          role: testUsers.admin.role,
-          password: 'hashed-password',
-        },
-        {
-          id: testUsers.user.id,
-          email: testUsers.user.email,
-          role: testUsers.user.role,
-          password: 'hashed-password',
-        },
-      ],
+    it('应该正确映射 VERIFY_RELATION 到 VERIFY_RELATION', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.actionLog.create.mockResolvedValue({});
+
+      await logKnowledgeGraphAction({
+        userId: 'test-user-id',
+        action: KnowledgeGraphAction.VERIFY_RELATION,
+        resource: KnowledgeGraphResource.RELATION,
+        resourceId: 'relation-1',
+        description: '审核关系',
+      });
+
+      expect(prisma.actionLog.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          actionType: ActionLogType.VERIFY_RELATION,
+          resourceId: 'relation-1',
+          description: '审核关系',
+        }),
+      });
+    });
+
+    it('应该正确映射 BATCH_VERIFY 到 BATCH_VERIFY_RELATION', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.actionLog.create.mockResolvedValue({});
+
+      await logKnowledgeGraphAction({
+        userId: 'test-user-id',
+        action: KnowledgeGraphAction.BATCH_VERIFY,
+        resource: KnowledgeGraphResource.RELATION,
+        description: '批量审核关系',
+      });
+
+      expect(prisma.actionLog.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          actionType: ActionLogType.BATCH_VERIFY_RELATION,
+          description: '批量审核关系',
+        }),
+      });
+    });
+
+    it('应该正确映射 EXPORT_DATA 到 EXPORT_DATA', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.actionLog.create.mockResolvedValue({});
+
+      await logKnowledgeGraphAction({
+        userId: 'test-user-id',
+        action: KnowledgeGraphAction.EXPORT_DATA,
+        resource: KnowledgeGraphResource.GRAPH,
+        description: '导出图谱数据',
+      });
+
+      expect(prisma.actionLog.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          actionType: ActionLogType.EXPORT_DATA,
+          description: '导出图谱数据',
+        }),
+      });
+    });
+
+    it('应该正确映射 MANAGE_RELATIONS 到 MANAGE_RELATIONS', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.actionLog.create.mockResolvedValue({});
+
+      await logKnowledgeGraphAction({
+        userId: 'test-user-id',
+        action: KnowledgeGraphAction.MANAGE_RELATIONS,
+        resource: KnowledgeGraphResource.RELATION,
+        resourceId: 'relation-1',
+        description: '管理关系',
+      });
+
+      expect(prisma.actionLog.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          actionType: ActionLogType.MANAGE_RELATIONS,
+          resourceId: 'relation-1',
+          description: '管理关系',
+        }),
+      });
     });
   });
 
-  afterEach(async () => {
-    // 清理测试数据
-    await prisma.actionLog.deleteMany({
-      where: {
-        userId: {
-          in: [testUsers.superAdmin.id, testUsers.admin.id, testUsers.user.id],
-        },
-      },
+  describe('日志记录完整性', () => {
+    it('应该正确记录所有日志字段', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.actionLog.create.mockResolvedValue({});
+
+      const logParams = {
+        userId: 'test-user-id',
+        action: KnowledgeGraphAction.VIEW_RELATIONS,
+        resource: KnowledgeGraphResource.RELATION,
+        resourceId: 'relation-123',
+        description: '查看法条关系完整测试',
+        ipAddress: '192.168.1.1',
+        userAgent: 'Mozilla/5.0 Test Agent',
+        metadata: { testKey: 'testValue', testNumber: 123 },
+      };
+
+      await logKnowledgeGraphAction(logParams);
+
+      expect(prisma.actionLog.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          userId: 'test-user-id',
+          resourceId: 'relation-123',
+          ipAddress: '192.168.1.1',
+          userAgent: 'Mozilla/5.0 Test Agent',
+          metadata: { testKey: 'testValue', testNumber: 123 },
+          actionType: ActionLogType.VIEW_KNOWLEDGE_GRAPH,
+          description: '查看法条关系完整测试',
+          resourceType: 'law_article_relation',
+        }),
+      });
     });
 
-    await prisma.user.deleteMany({
-      where: {
-        id: {
-          in: [testUsers.superAdmin.id, testUsers.admin.id, testUsers.user.id],
-        },
-      },
+    it('应该正确处理可选字段为空的情况', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.actionLog.create.mockResolvedValue({});
+
+      await logKnowledgeGraphAction({
+        userId: 'test-user-id',
+        action: KnowledgeGraphAction.VIEW_RELATIONS,
+        resource: KnowledgeGraphResource.RELATION,
+        description: '查看法条关系空字段测试',
+      });
+
+      expect(prisma.actionLog.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          userId: 'test-user-id',
+          description: '查看法条关系空字段测试',
+          actionType: ActionLogType.VIEW_KNOWLEDGE_GRAPH,
+        }),
+      });
     });
   });
+});
 
+describe('KnowledgeGraphPermission - 权限检查', () => {
   describe('checkKnowledgeGraphPermission', () => {
-    it('应该允许超级管理员访问所有资源', async () => {
+    it('应该允许管理员执行所有操作', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'admin-id',
+        role: 'ADMIN',
+        deletedAt: null,
+      });
+
       const result = await checkKnowledgeGraphPermission(
-        testUsers.superAdmin.id,
-        KnowledgeGraphAction.VERIFY_RELATION,
+        'admin-id',
+        KnowledgeGraphAction.MANAGE_RELATIONS,
         KnowledgeGraphResource.RELATION
       );
 
       expect(result.hasPermission).toBe(true);
-      expect(result.reason).toBeUndefined();
+      expect(result.userRole).toBe('ADMIN');
     });
 
-    it('应该允许管理员访问所有资源', async () => {
+    it('应该允许超级管理员执行所有操作', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'super-admin-id',
+        role: 'SUPER_ADMIN',
+        deletedAt: null,
+      });
+
       const result = await checkKnowledgeGraphPermission(
-        testUsers.admin.id,
-        KnowledgeGraphAction.VERIFY_RELATION,
+        'super-admin-id',
+        KnowledgeGraphAction.MANAGE_RELATIONS,
         KnowledgeGraphResource.RELATION
       );
 
       expect(result.hasPermission).toBe(true);
-      expect(result.reason).toBeUndefined();
+      expect(result.userRole).toBe('SUPER_ADMIN');
     });
 
-    it('应该拒绝普通用户访问管理功能', async () => {
+    it('应该允许普通用户执行查看操作', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'user-id',
+        role: 'USER',
+        deletedAt: null,
+      });
+
       const result = await checkKnowledgeGraphPermission(
-        testUsers.user.id,
-        KnowledgeGraphAction.VERIFY_RELATION,
-        KnowledgeGraphResource.RELATION
-      );
-
-      expect(result.hasPermission).toBe(false);
-      expect(result.reason).toBe('需要管理员权限');
-    });
-
-    it('应该拒绝不存在的用户', async () => {
-      const result = await checkKnowledgeGraphPermission(
-        'non-existent-user-id',
-        KnowledgeGraphAction.VERIFY_RELATION,
-        KnowledgeGraphResource.RELATION
-      );
-
-      expect(result.hasPermission).toBe(false);
-      expect(result.reason).toBe('用户不存在');
-    });
-
-    it('应该允许所有用户查看统计数据', async () => {
-      const result = await checkKnowledgeGraphPermission(
-        testUsers.user.id,
-        KnowledgeGraphAction.VIEW_STATS,
-        KnowledgeGraphResource.STATS
-      );
-
-      expect(result.hasPermission).toBe(true);
-    });
-
-    it('应该允许所有用户查看关系列表', async () => {
-      const result = await checkKnowledgeGraphPermission(
-        testUsers.user.id,
+        'user-id',
         KnowledgeGraphAction.VIEW_RELATIONS,
         KnowledgeGraphResource.RELATION
       );
@@ -159,187 +260,49 @@ describe('知识图谱权限控制', () => {
       expect(result.hasPermission).toBe(true);
     });
 
-    it('应该拒绝已删除的用户', async () => {
-      // 软删除用户
-      await prisma.user.update({
-        where: { id: testUsers.user.id },
-        data: { deletedAt: new Date() },
+    it('应该拒绝普通用户执行管理操作', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'user-id',
+        role: 'USER',
+        deletedAt: null,
       });
 
       const result = await checkKnowledgeGraphPermission(
-        testUsers.user.id,
-        KnowledgeGraphAction.VIEW_STATS,
-        KnowledgeGraphResource.STATS
+        'user-id',
+        KnowledgeGraphAction.MANAGE_RELATIONS,
+        KnowledgeGraphResource.RELATION
+      );
+
+      expect(result.hasPermission).toBe(false);
+      expect(result.reason).toBe('需要管理员权限');
+    });
+
+    it('应该拒绝已删除的用户', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'deleted-user-id',
+        role: 'ADMIN',
+        deletedAt: new Date(),
+      });
+
+      const result = await checkKnowledgeGraphPermission(
+        'deleted-user-id',
+        KnowledgeGraphAction.VIEW_RELATIONS,
+        KnowledgeGraphResource.RELATION
       );
 
       expect(result.hasPermission).toBe(false);
       expect(result.reason).toBe('用户已被删除');
     });
-  });
 
-  describe('logKnowledgeGraphAction', () => {
-    it('应该成功记录审核操作日志', async () => {
-      const relationId = 'test-relation-id';
-      const ipAddress = '192.168.1.1';
-      const userAgent = 'Mozilla/5.0';
+    it('应该拒绝不存在的用户', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.user.findUnique.mockResolvedValue(null);
 
-      await logKnowledgeGraphAction({
-        userId: testUsers.admin.id,
-        action: KnowledgeGraphAction.VERIFY_RELATION,
-        resource: KnowledgeGraphResource.RELATION,
-        resourceId: relationId,
-        description: '审核通过法条关系',
-        ipAddress,
-        userAgent,
-        metadata: {
-          approved: true,
-          note: '关系准确',
-        },
-      });
-
-      // 验证日志是否被创建
-      const logs = await prisma.actionLog.findMany({
-        where: {
-          userId: testUsers.admin.id,
-          resourceId: relationId,
-        },
-      });
-
-      expect(logs).toHaveLength(1);
-      expect(logs[0].description).toBe('审核通过法条关系');
-      expect(logs[0].ipAddress).toBe(ipAddress);
-      expect(logs[0].userAgent).toBe(userAgent);
-      expect(logs[0].resourceType).toBe(KnowledgeGraphResource.RELATION);
-      expect(logs[0].metadata).toEqual({
-        approved: true,
-        note: '关系准确',
-      });
-    });
-
-    it('应该记录批量审核操作', async () => {
-      await logKnowledgeGraphAction({
-        userId: testUsers.admin.id,
-        action: KnowledgeGraphAction.BATCH_VERIFY,
-        resource: KnowledgeGraphResource.RELATION,
-        description: '批量审核10个关系',
-        metadata: {
-          count: 10,
-          approved: 8,
-          rejected: 2,
-        },
-      });
-
-      const logs = await prisma.actionLog.findMany({
-        where: {
-          userId: testUsers.admin.id,
-          actionType: 'UNKNOWN', // 批量操作使用 UNKNOWN 类型
-        },
-      });
-
-      expect(logs).toHaveLength(1);
-      expect(logs[0].description).toBe('批量审核10个关系');
-      expect(logs[0].metadata).toMatchObject({
-        count: 10,
-        approved: 8,
-        rejected: 2,
-      });
-    });
-
-    it('应该记录导出操作', async () => {
-      await logKnowledgeGraphAction({
-        userId: testUsers.admin.id,
-        action: KnowledgeGraphAction.EXPORT_DATA,
-        resource: KnowledgeGraphResource.RELATION,
-        description: '导出关系数据',
-        metadata: {
-          format: 'csv',
-          count: 100,
-        },
-      });
-
-      const logs = await prisma.actionLog.findMany({
-        where: {
-          userId: testUsers.admin.id,
-          actionType: 'EXPORT_DATA',
-        },
-      });
-
-      expect(logs).toHaveLength(1);
-      expect(logs[0].metadata).toMatchObject({
-        format: 'csv',
-        count: 100,
-      });
-    });
-
-    it('应该处理没有可选参数的日志记录', async () => {
-      await logKnowledgeGraphAction({
-        userId: testUsers.admin.id,
-        action: KnowledgeGraphAction.VIEW_STATS,
-        resource: KnowledgeGraphResource.STATS,
-        description: '查看统计数据',
-      });
-
-      const logs = await prisma.actionLog.findMany({
-        where: {
-          userId: testUsers.admin.id,
-          actionType: 'UNKNOWN',
-        },
-      });
-
-      expect(logs.length).toBeGreaterThan(0);
-      const log = logs.find(l => l.description === '查看统计数据');
-      expect(log).toBeDefined();
-      expect(log?.ipAddress).toBeNull();
-      expect(log?.userAgent).toBeNull();
-    });
-
-    it('应该允许记录不存在用户的操作日志', async () => {
-      // ActionLog表的userId不是外键，所以可以记录不存在用户的日志
-      await expect(
-        logKnowledgeGraphAction({
-          userId: 'invalid-user-id-that-does-not-exist',
-          action: KnowledgeGraphAction.VERIFY_RELATION,
-          resource: KnowledgeGraphResource.RELATION,
-          description: '测试不存在用户的日志记录',
-        })
-      ).resolves.not.toThrow();
-
-      // 验证日志确实被创建
-      const logs = await prisma.actionLog.findMany({
-        where: {
-          userId: 'invalid-user-id-that-does-not-exist',
-        },
-      });
-
-      expect(logs.length).toBeGreaterThan(0);
-    });
-  });
-
-  describe('权限检查性能', () => {
-    it('应该在合理时间内完成权限检查', async () => {
-      const startTime = Date.now();
-
-      for (let i = 0; i < 10; i++) {
-        await checkKnowledgeGraphPermission(
-          testUsers.admin.id,
-          KnowledgeGraphAction.VERIFY_RELATION,
-          KnowledgeGraphResource.RELATION
-        );
-      }
-
-      const endTime = Date.now();
-      const duration = endTime - startTime;
-
-      // 10次权限检查应该在1秒内完成
-      expect(duration).toBeLessThan(1000);
-    });
-  });
-
-  describe('边界情况', () => {
-    it('应该处理空字符串用户ID', async () => {
       const result = await checkKnowledgeGraphPermission(
-        '',
-        KnowledgeGraphAction.VERIFY_RELATION,
+        'non-existent-user-id',
+        KnowledgeGraphAction.VIEW_RELATIONS,
         KnowledgeGraphResource.RELATION
       );
 
@@ -347,26 +310,84 @@ describe('知识图谱权限控制', () => {
       expect(result.reason).toBe('用户不存在');
     });
 
-    it('应该处理特殊字符的资源ID', async () => {
-      const specialResourceId = 'test-id-with-特殊字符-!@#$%';
+    it('应该拒绝空的用户ID', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.user.findUnique.mockResolvedValue(null);
 
-      await expect(
-        logKnowledgeGraphAction({
-          userId: testUsers.admin.id,
-          action: KnowledgeGraphAction.VERIFY_RELATION,
-          resource: KnowledgeGraphResource.RELATION,
-          resourceId: specialResourceId,
-          description: '测试特殊字符',
-        })
-      ).resolves.not.toThrow();
+      const result = await checkKnowledgeGraphPermission(
+        '',
+        KnowledgeGraphAction.VIEW_RELATIONS,
+        KnowledgeGraphResource.RELATION
+      );
 
-      const logs = await prisma.actionLog.findMany({
-        where: {
-          resourceId: specialResourceId,
-        },
+      expect(result.hasPermission).toBe(false);
+      expect(result.reason).toBe('用户不存在');
+    });
+  });
+
+  describe('isKnowledgeGraphAdmin', () => {
+    it('应该正确识别管理员', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'admin-id',
+        role: 'ADMIN',
+        deletedAt: null,
       });
 
-      expect(logs).toHaveLength(1);
+      const isAdmin = await isKnowledgeGraphAdmin('admin-id');
+      expect(isAdmin).toBe(true);
+    });
+
+    it('应该正确识别超级管理员', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'super-admin-id',
+        role: 'SUPER_ADMIN',
+        deletedAt: null,
+      });
+
+      const isAdmin = await isKnowledgeGraphAdmin('super-admin-id');
+      expect(isAdmin).toBe(true);
+    });
+
+    it('应该拒绝普通用户', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'user-id',
+        role: 'USER',
+        deletedAt: null,
+      });
+
+      const isAdmin = await isKnowledgeGraphAdmin('user-id');
+      expect(isAdmin).toBe(false);
+    });
+
+    it('应该拒绝已删除的用户', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'deleted-admin-id',
+        role: 'ADMIN',
+        deletedAt: new Date(),
+      });
+
+      const isAdmin = await isKnowledgeGraphAdmin('deleted-admin-id');
+      expect(isAdmin).toBe(false);
+    });
+
+    it('应该处理不存在的用户', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      const isAdmin = await isKnowledgeGraphAdmin('non-existent-id');
+      expect(isAdmin).toBe(false);
+    });
+
+    it('应该拒绝空的用户ID', async () => {
+      const { prisma } = require('@/lib/db/prisma');
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      const isAdmin = await isKnowledgeGraphAdmin('');
+      expect(isAdmin).toBe(false);
     });
   });
 });

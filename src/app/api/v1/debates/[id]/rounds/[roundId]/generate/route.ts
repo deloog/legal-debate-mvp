@@ -96,14 +96,14 @@ async function buildPreviousRoundsContext(
   const contextParts: string[] = [];
   for (const round of previousRounds) {
     const plaintiffSummary = round.arguments
-      .filter((a) => a.side === ArgumentSide.PLAINTIFF)
+      .filter(a => a.side === ArgumentSide.PLAINTIFF)
       .map(
         (a, i) =>
           `  ${i + 1}. ${a.content.length > 200 ? a.content.substring(0, 200) + '…' : a.content}`
       )
       .join('\n');
     const defendantSummary = round.arguments
-      .filter((a) => a.side === ArgumentSide.DEFENDANT)
+      .filter(a => a.side === ArgumentSide.DEFENDANT)
       .map(
         (a, i) =>
           `  ${i + 1}. ${a.content.length > 200 ? a.content.substring(0, 200) + '…' : a.content}`
@@ -186,8 +186,8 @@ function parseStructuredDebateArguments(content: string): Array<{
                     explanation?: string;
                   }>
                 )
-                  .filter((b) => b.lawName && b.articleNumber)
-                  .map((b) => ({
+                  .filter(b => b.lawName && b.articleNumber)
+                  .map(b => ({
                     lawName: String(b.lawName ?? ''),
                     articleNumber: String(b.articleNumber ?? ''),
                     relevance: Number(b.relevance ?? 0.8),
@@ -355,7 +355,7 @@ export const POST = withErrorHandler(
       allArticles.length > 0
         ? allArticles
             .map(
-              (a) =>
+              a =>
                 `《${a.lawName}》${a.articleNumber}：${a.fullText.substring(0, 300)}`
             )
             .join('\n\n')
@@ -464,7 +464,7 @@ ${contextSection}
             { status: 503 }
           );
         }
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }
 
@@ -473,7 +473,11 @@ ${contextSection}
       ? parseStructuredDebateArguments(debateContent)
       : null;
 
-    if (!structuredArgs || !Array.isArray(structuredArgs) || structuredArgs.length < 2) {
+    if (
+      !structuredArgs ||
+      !Array.isArray(structuredArgs) ||
+      structuredArgs.length < 2
+    ) {
       logger.error('论点解析失败，原始内容:', debateContent.substring(0, 500));
       await prisma.debateRound.update({
         where: { id: roundId },
@@ -495,12 +499,12 @@ ${contextSection}
 
     // 11. 保存论点并完成轮次（事务）
     const result = await prisma.$transaction(
-      async (tx) => {
+      async tx => {
         // 先删除本轮已有论点（重试时防止累积）
         await tx.argument.deleteMany({ where: { roundId } });
 
         const createdArguments = await tx.argument.createMany({
-          data: structuredArgs.map((arg) => {
+          data: structuredArgs.map(arg => {
             const scores = computeArgumentScores({
               reasoning: arg.reasoning,
               legalBasis: arg.legalBasis,
@@ -549,8 +553,8 @@ ${contextSection}
         return {
           plaintiff: {
             arguments: structuredArgs
-              .filter((a) => a.side === ArgumentSide.PLAINTIFF)
-              .map((a) => ({
+              .filter(a => a.side === ArgumentSide.PLAINTIFF)
+              .map(a => ({
                 type: a.type,
                 content: a.content,
                 reasoning: a.reasoning,
@@ -559,8 +563,8 @@ ${contextSection}
           },
           defendant: {
             arguments: structuredArgs
-              .filter((a) => a.side === ArgumentSide.DEFENDANT)
-              .map((a) => ({
+              .filter(a => a.side === ArgumentSide.DEFENDANT)
+              .map(a => ({
                 type: a.type,
                 content: a.content,
                 reasoning: a.reasoning,

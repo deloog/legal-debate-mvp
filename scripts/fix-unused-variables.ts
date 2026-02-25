@@ -19,18 +19,23 @@ const errorFile = path.join(process.cwd(), 'ts6133-errors.txt');
 const content = fs.readFileSync(errorFile, 'utf-8');
 
 // 解析错误信息
-const errors: ErrorInfo[] = content.split('\n').filter(line => line.trim()).map(line => {
-  const match = line.match(/^(.+)\((\d+),(\d+)\): error TS6133: '(.+)' is declared but its value is never read\.$/);
-  if (!match) {
-    throw new Error(`无法解析错误行: ${line}`);
-  }
-  return {
-    file: match[1],
-    line: parseInt(match[2], 10),
-    column: parseInt(match[3], 10),
-    variable: match[4],
-  };
-});
+const errors: ErrorInfo[] = content
+  .split('\n')
+  .filter(line => line.trim())
+  .map(line => {
+    const match = line.match(
+      /^(.+)\((\d+),(\d+)\): error TS6133: '(.+)' is declared but its value is never read\.$/
+    );
+    if (!match) {
+      throw new Error(`无法解析错误行: ${line}`);
+    }
+    return {
+      file: match[1],
+      line: parseInt(match[2], 10),
+      column: parseInt(match[3], 10),
+      variable: match[4],
+    };
+  });
 
 console.log(`找到 ${errors.length} 个TS6133错误`);
 
@@ -71,7 +76,10 @@ for (const [filePath, fileErrors] of errorsByFile.entries()) {
     let fixed = false;
 
     // 模式1: 函数参数 - function foo(param) -> function foo(_param)
-    if (line.includes(`function ${variable}(`) || line.includes(` ${variable}:`)) {
+    if (
+      line.includes(`function ${variable}(`) ||
+      line.includes(` ${variable}:`)
+    ) {
       // 在参数定义中添加下划线前缀
       if (line.includes(` ${variable}:`)) {
         line = line.replace(` ${variable}:`, ` _${variable}:`);
@@ -104,7 +112,10 @@ for (const [filePath, fileErrors] of errorsByFile.entries()) {
 
       for (const pattern of patterns) {
         if (line.includes(pattern)) {
-          line = line.replace(pattern, pattern.replace(variable, `_${variable}`));
+          line = line.replace(
+            pattern,
+            pattern.replace(variable, `_${variable}`)
+          );
           fixed = true;
           break;
         }

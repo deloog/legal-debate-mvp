@@ -121,7 +121,7 @@ export class DocAnalyzerAgent extends BaseAgent {
     };
 
     super(undefined, undefined, faultToleranceConfig);
-    this.useMock = useMock;
+    this._useMock = useMock;
     this.textExtractor = new TextExtractor();
     this.filterProcessor = new FilterProcessor();
     this.aiProcessor = new AIProcessor(DEFAULT_CONFIG, useMock);

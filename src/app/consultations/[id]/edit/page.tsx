@@ -1,3 +1,38 @@
+/**
+ * 咨询记录编辑页面
+ *
+ * 功能：
+ * 1. 咨询信息编辑
+ *    - 修改咨询状态（待处理/跟进中/已转化/已关闭）
+ *    - 修改咨询方式（线上/电话/线下）
+ *    - 修改咨询时间、咨询人信息
+ *    - 修改联系方式（电话、邮箱、单位）
+ *    - 修改案件类型、案情摘要
+ *    - 修改客户诉求
+ * 2. 跟进信息管理
+ *    - 设置跟进日期
+ *    - 填写跟进备注
+ * 3. 表单验证
+ *    - 咨询人姓名必填（最多50字符）
+ *    - 咨询时间必填
+ *    - 案情摘要必填（10-500字符）
+ *    - 联系电话格式验证
+ *    - 电子邮箱格式验证
+ * 4. 数据管理
+ *    - 自动加载现有咨询数据
+ *    - 检测未保存更改（取消时提示）
+ *    - 支持保存修改和取消编辑
+ * 5. 删除功能
+ *    - 删除咨询记录（需二次确认）
+ *    - 删除后返回列表页
+ * 6. 错误处理
+ *    - 加载失败提示
+ *    - 保存失败提示
+ *    - 表单验证错误提示
+ *
+ * @page /consultations/[id]/edit
+ */
+
 'use client';
 
 import { useEffect, useState, use } from 'react';
@@ -22,9 +57,6 @@ import {
 } from '@/types/consultation';
 import { validateUpdateConsultation } from '@/lib/validations/consultation';
 
-/**
- * 咨询编辑页面
- */
 export default function EditConsultationPage({
   params,
 }: {
