@@ -9,7 +9,7 @@
 
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
-import { RelationType } from '@prisma/client';
+import { Prisma, RelationType } from '@prisma/client';
 
 /**
  * AI反馈类型（临时定义，运行prisma generate后使用枚举）
@@ -120,7 +120,7 @@ export class AIFeedbackService {
 
     // 创建反馈记录（临时使用prisma.lawArticleRelation）
     // 等待运行prisma generate后使用prisma.aIFeedback
-    const feedback = await (prisma as any).aIFeedback.create({
+    const feedback = await prisma.aIFeedback.create({
       data: {
         relationId,
         userId,
@@ -133,7 +133,7 @@ export class AIFeedbackService {
         suggestedConfidence,
         aiProvider: aiProvider ?? relation.aiProvider,
         aiModel: aiModel ?? relation.aiModel,
-        metadata: metadata as any,
+        metadata: metadata as Prisma.InputJsonValue,
       },
     });
 
@@ -185,7 +185,7 @@ export class AIFeedbackService {
     fromDate?: Date;
     toDate?: Date;
   }): Promise<FeedbackStats> {
-    const where: Record<string, unknown> = {};
+    const where: Prisma.AIFeedbackWhereInput = {};
 
     if (options?.relationId) {
       where.relationId = options.relationId;
@@ -206,15 +206,15 @@ export class AIFeedbackService {
     if (options?.fromDate || options?.toDate) {
       where.createdAt = {};
       if (options.fromDate) {
-        (where.createdAt as any).gte = options.fromDate;
+        where.createdAt.gte = options.fromDate;
       }
       if (options.toDate) {
-        (where.createdAt as any).lte = options.toDate;
+        where.createdAt.lte = options.toDate;
       }
     }
 
     // 获取所有反馈
-    const feedbacks = await (prisma as any).aIFeedback.findMany({
+    const feedbacks = await prisma.aIFeedback.findMany({
       where,
       include: {
         relation: {
@@ -336,7 +336,7 @@ export class AIFeedbackService {
     }
 
     // 获取相关反馈
-    const feedbacks = await (prisma as any).aIFeedback.findMany({
+    const feedbacks = await prisma.aIFeedback.findMany({
       where,
       include: {
         relation: {
@@ -418,7 +418,7 @@ export class AIFeedbackService {
     const limit = options?.limit ?? 100;
 
     // 找出被标记为INCORRECT的关系
-    const incorrectFeedbacks = await (prisma as any).aIFeedback.findMany({
+    const incorrectFeedbacks = await prisma.aIFeedback.findMany({
       where: {
         actualCorrectness: 'INCORRECT',
         aiProvider: options?.aiProvider,
@@ -444,7 +444,7 @@ export class AIFeedbackService {
    * @param feedbackId 反馈ID
    */
   static async deleteFeedback(feedbackId: string): Promise<void> {
-    await (prisma as any).aIFeedback.delete({
+    await prisma.aIFeedback.delete({
       where: { id: feedbackId },
     });
 

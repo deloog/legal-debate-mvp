@@ -8,7 +8,7 @@
  * 4. 记录完整的AI元数据
  */
 
-import { LawArticle, RelationType, VerificationStatus } from '@prisma/client';
+import { DiscoveryMethod, LawArticle, RelationType } from '@prisma/client';
 import { logger } from '@/lib/logger';
 import { AIDetector } from './ai-detector';
 import {
@@ -154,7 +154,7 @@ export class AIRelationValidator {
         confidence: detectedRelation.confidence,
         description: detectedRelation.reason,
         evidence: { text: detectedRelation.evidence },
-        discoveryMethod: 'AI' as any,
+        discoveryMethod: DiscoveryMethod.AI_DETECTED,
         userId,
 
         // AI相关字段

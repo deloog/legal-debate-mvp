@@ -295,7 +295,7 @@ export class AIConfidenceConfig {
     }
 
     // 覆盖自定义配置
-    for (const [key, value] of this.customThresholds) {
+    for (const [_key, value] of this.customThresholds) {
       allThresholds.set(value.relationType, value);
     }
 
@@ -323,7 +323,7 @@ export class AIConfidenceConfig {
    * @param config 配置JSON
    */
   static importConfig(config: Record<string, ConfidenceThresholdConfig>): void {
-    for (const [key, value] of Object.entries(config)) {
+    for (const [_key, value] of Object.entries(config)) {
       this.setThreshold(value);
     }
   }

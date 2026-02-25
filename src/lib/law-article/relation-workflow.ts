@@ -127,7 +127,7 @@ export class RelationWorkflow {
     });
 
     // 步骤1: AI检测
-    const step1Status: WorkflowStatus = {
+    const _step1Status: WorkflowStatus = {
       currentStep: WorkflowStep.AI_DETECTION,
       progress: 20,
       canProceedToNextStep: true,
@@ -147,7 +147,7 @@ export class RelationWorkflow {
       aiModel,
     });
 
-    const step2Status: WorkflowStatus = {
+    const _step2Status: WorkflowStatus = {
       currentStep: WorkflowStep.VALIDATION,
       progress: 60,
       canProceedToNextStep: true,

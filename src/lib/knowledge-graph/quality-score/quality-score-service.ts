@@ -92,7 +92,7 @@ export class QualityScoreService {
       });
 
       // 保存或更新质量分数
-      const qualityScore = await prisma.knowledgeGraphQualityScore.upsert({
+      await prisma.knowledgeGraphQualityScore.upsert({
         where: { relationId },
         update: {
           aiConfidence,
