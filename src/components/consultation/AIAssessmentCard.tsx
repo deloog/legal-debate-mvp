@@ -12,12 +12,13 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { AIAssessment } from '@/types/consultation';
+import { AIAssessmentBadge } from '@/components/ai/AIAssessmentBadge';
 
 /**
  * AI评估卡片组件属性
  */
 interface AIAssessmentCardProps {
-  consultationId: string;
+  consultationId?: string;
   assessment: AIAssessment | null;
   onRefresh?: () => void;
   isLoading?: boolean;
@@ -27,7 +28,6 @@ interface AIAssessmentCardProps {
  * AI案件评估展示卡片组件
  */
 export function AIAssessmentCard({
-  consultationId,
   assessment,
   onRefresh,
   isLoading = false,
@@ -180,10 +180,20 @@ export function AIAssessmentCard({
   return (
     <div className='rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950'>
       {/* 头部 */}
-      <div className='mb-4 flex items-center justify-between'>
-        <h2 className='text-lg font-semibold text-zinc-900 dark:text-zinc-50'>
-          AI案件评估
-        </h2>
+      <div className='mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
+        <div className='flex items-center gap-2'>
+          <h2 className='text-lg font-semibold text-zinc-900 dark:text-zinc-50'>
+            AI案件评估
+          </h2>
+          {/* AI生成标识 */}
+          <AIAssessmentBadge
+            assessment={assessment}
+            showBadge
+            showConfidence
+            showVerificationStatus
+            verificationStatus={assessment.verifiedStatus || 'pending'}
+          />
+        </div>
         <button
           onClick={handleRefresh}
           disabled={isRefreshing}

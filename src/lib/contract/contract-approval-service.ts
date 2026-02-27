@@ -67,7 +67,7 @@ export interface ApprovalInfo {
   contract: {
     contractNumber: string;
     clientName: string;
-    totalFee: any;
+    totalFee: Prisma.Decimal;
   };
 }
 

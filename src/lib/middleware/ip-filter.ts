@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * IP过滤规则类型
@@ -64,7 +65,7 @@ class IPFilter {
     this.blacklist.set(ip, rule);
 
     if (process.env.NODE_ENV !== 'test') {
-      console.warn('[IPFilter] IP added to blacklist:', {
+      logger.warn('[IPFilter] IP added to blacklist:', {
         ip,
         reason,
         expires: rule.expiresAt?.toISOString(),
@@ -78,7 +79,7 @@ class IPFilter {
   removeFromBlacklist(ip: string): boolean {
     const removed = this.blacklist.delete(ip);
     if (removed && process.env.NODE_ENV !== 'test') {
-      console.log('[IPFilter] IP removed from blacklist:', ip);
+      logger.info('[IPFilter] IP removed from blacklist:', { ip });
     }
     return removed;
   }
@@ -96,7 +97,7 @@ class IPFilter {
     this.whitelist.set(ip, rule);
 
     if (process.env.NODE_ENV !== 'test') {
-      console.log('[IPFilter] IP added to whitelist:', { ip, reason });
+      logger.info('[IPFilter] IP added to whitelist:', { ip, reason });
     }
   }
 
@@ -209,7 +210,7 @@ class IPFilter {
   clearBlacklist(): void {
     this.blacklist.clear();
     if (process.env.NODE_ENV !== 'test') {
-      console.log('[IPFilter] Blacklist cleared');
+      logger.info('[IPFilter] Blacklist cleared');
     }
   }
 
@@ -219,7 +220,7 @@ class IPFilter {
   clearWhitelist(): void {
     this.whitelist.clear();
     if (process.env.NODE_ENV !== 'test') {
-      console.log('[IPFilter] Whitelist cleared');
+      logger.info('[IPFilter] Whitelist cleared');
     }
   }
 
@@ -238,9 +239,7 @@ class IPFilter {
     }
 
     if (cleanedCount > 0 && process.env.NODE_ENV === 'development') {
-      console.log(
-        `[IPFilter] Cleaned up ${cleanedCount} expired blacklist entries`
-      );
+      logger.info('[IPFilter] Cleaned up expired blacklist entries', { cleanedCount });
     }
   }
 
@@ -314,7 +313,7 @@ export function createIPFilterMiddleware(config?: Partial<IPFilterConfig>) {
       const message = config?.blockMessage || result.reason || '访问被拒绝';
 
       if (process.env.NODE_ENV !== 'test') {
-        console.warn('[IPFilter] Blocked request from:', {
+        logger.warn('[IPFilter] Blocked request from:', {
           ip,
           reason: result.reason,
           path: new URL(request.url).pathname,
@@ -341,11 +340,12 @@ export function createIPFilterMiddleware(config?: Partial<IPFilterConfig>) {
  * 应用IP过滤到API路由
  */
 export function withIPFilter<
-  T extends (...args: any[]) => Promise<NextResponse>,
+  TArgs extends unknown[],
+  T extends (request: NextRequest, ...args: TArgs) => Promise<NextResponse>,
 >(handler: T, config?: Partial<IPFilterConfig>): T {
   const middleware = createIPFilterMiddleware(config);
 
-  return (async (request: NextRequest, ...args: any[]) => {
+  return (async (request: NextRequest, ...args: TArgs) => {
     const filterResponse = await middleware(request);
     if (filterResponse) {
       return filterResponse;
@@ -375,7 +375,7 @@ export function autoBlockOffenders(
   // 注意：这需要从监控系统获取所有唯一标识符
   // 这里只是一个框架，实际实现需要根据监控系统的API调整
   if (process.env.NODE_ENV === 'development') {
-    console.log('[IPFilter] Auto-block check running...');
+    logger.info('[IPFilter] Auto-block check running...');
   }
 }
 

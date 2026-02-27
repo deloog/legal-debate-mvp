@@ -8,6 +8,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 import { ConsultStatus } from '@/types/consultation';
 import { CaseType, CaseStatus } from '@prisma/client';
 
@@ -167,7 +168,7 @@ export class ConversionService {
         message: '转化成功',
       };
     } catch (error) {
-      console.error('转化失败:', error);
+      logger.error('转化失败', { error });
       return {
         success: false,
         message: error instanceof Error ? error.message : '转化失败',
@@ -220,7 +221,7 @@ export class ConversionService {
       }
 
       // 推断案件类型
-      let suggestedCaseType = CaseType.CIVIL;
+      let suggestedCaseType: CaseType = CaseType.CIVIL;
       if (consultation.caseType) {
         const typeMapping: Record<string, CaseType> = {
           劳动争议: CaseType.LABOR,
@@ -237,7 +238,7 @@ export class ConversionService {
 
         for (const [keyword, type] of Object.entries(typeMapping)) {
           if (consultation.caseType.includes(keyword)) {
-            suggestedCaseType = type as any;
+            suggestedCaseType = type;
             break;
           }
         }
@@ -264,7 +265,7 @@ export class ConversionService {
         },
       };
     } catch (error) {
-      console.error('获取转化预览失败:', error);
+      logger.error('获取转化预览失败', { error });
       return {
         success: false,
         message: '获取转化预览失败',

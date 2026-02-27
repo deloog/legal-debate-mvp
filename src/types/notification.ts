@@ -65,7 +65,8 @@ export type ReminderType =
   | 'PAYMENT_DUE'
   | 'FOLLOW_UP'
   | 'CUSTOM'
-  | 'COURT_SCHEDULE';
+  | 'COURT_SCHEDULE'
+  | 'CONTRACT_MILESTONE';
 
 /**
  * 提醒类型常量（运行时可用）
@@ -78,6 +79,7 @@ export const ReminderTypeValues = {
   FOLLOW_UP: 'FOLLOW_UP',
   CUSTOM: 'CUSTOM',
   COURT_SCHEDULE: 'COURT_SCHEDULE',
+  CONTRACT_MILESTONE: 'CONTRACT_MILESTONE',
 } as const;
 
 // 导出类型别名作为值（兼容旧代码）

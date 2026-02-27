@@ -3,7 +3,8 @@
  * 提供查询分析和优化建议
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 const prisma = new PrismaClient({
   log: [
@@ -24,7 +25,7 @@ interface QueryStats {
 const queryStats = new Map<string, QueryStats>();
 
 // 监听查询事件
-prisma.$on('query' as never, (e: any) => {
+prisma.$on('query' as never, (e: Prisma.QueryEvent) => {
   const query = e.query;
   const duration = e.duration;
 
@@ -67,27 +68,23 @@ export function getFrequentQueries(threshold: number = 10): QueryStats[] {
  * 打印查询统计报告
  */
 export function printQueryReport() {
-  console.log('\n=== 数据库查询性能报告 ===\n');
-
-  console.log('慢查询（>100ms）：');
   const slowQueries = getSlowQueries(100);
-  slowQueries.slice(0, 10).forEach((stats, index) => {
-    console.log(
-      `${index + 1}. 平均耗时: ${stats.avgDuration.toFixed(2)}ms, 执行次数: ${stats.count}`
-    );
-    console.log(`   查询: ${stats.query.substring(0, 100)}...`);
-  });
-
-  console.log('\n频繁查询（>10次）：');
   const frequentQueries = getFrequentQueries(10);
-  frequentQueries.slice(0, 10).forEach((stats, index) => {
-    console.log(
-      `${index + 1}. 执行次数: ${stats.count}, 平均耗时: ${stats.avgDuration.toFixed(2)}ms`
-    );
-    console.log(`   查询: ${stats.query.substring(0, 100)}...`);
-  });
 
-  console.log('\n=== 报告结束 ===\n');
+  logger.info('数据库查询性能报告', {
+    slowQueries: slowQueries.slice(0, 10).map((stats, index) => ({
+      rank: index + 1,
+      avgDuration: `${stats.avgDuration.toFixed(2)}ms`,
+      count: stats.count,
+      query: stats.query.substring(0, 100),
+    })),
+    frequentQueries: frequentQueries.slice(0, 10).map((stats, index) => ({
+      rank: index + 1,
+      count: stats.count,
+      avgDuration: `${stats.avgDuration.toFixed(2)}ms`,
+      query: stats.query.substring(0, 100),
+    })),
+  });
 }
 
 /**

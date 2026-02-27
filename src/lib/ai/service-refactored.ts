@@ -57,7 +57,7 @@ export class AIService {
   >;
   private cacheManager: AICacheManager;
   private requestExecutor!: AIRequestExecutor;
-  private clients: Map<AIProvider, AIClient>;
+  private clients: Map<AIProvider, unknown>;
   private initialized: boolean = false;
 
   constructor(config: AIServiceConfig) {

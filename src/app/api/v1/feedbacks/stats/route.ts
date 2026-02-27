@@ -5,8 +5,23 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+
+type RecommendationFeedbackWithArticle = Prisma.RecommendationFeedbackGetPayload<{
+  include: { lawArticle: { select: { id: true; lawName: true; articleNumber: true } } };
+}>;
+
+type RelationFeedbackWithRelation = Prisma.RelationFeedbackGetPayload<{
+  include: {
+    relation: { select: { id: true; sourceId: true; targetId: true; relationType: true } };
+  };
+}>;
+
+// GroupBy result item shapes (matching Prisma's actual returned field names)
+type FeedbackTypeGroupItem = { feedbackType: string; _count: { feedbackType: number } };
+type TrendGroupItem = { createdAt: Date; _count: { id: number } };
 
 /**
  * 获取反馈统计
@@ -78,21 +93,26 @@ export async function GET(request: NextRequest) {
       where.contextType = contextType;
     }
 
-    // 根据类型选择数据表并获取统计数据
+    // 根据类型选择数据表并获取统计数据（每个分支分别推断类型，避免 any）
     let total: number;
-    let byType: any[];
-    let recentFeedbacks: any[];
+    let byTypeFormatted: Array<{ feedbackType: string; count: number; percentage: number }>;
+    let recentFeedbacks: RecommendationFeedbackWithArticle[] | RelationFeedbackWithRelation[];
 
     if (type === 'recommendation') {
       total = await prisma.recommendationFeedback.count({ where });
 
-      byType = (await prisma.recommendationFeedback.groupBy({
+      const byType = await prisma.recommendationFeedback.groupBy({
         by: ['feedbackType'],
         where,
         _count: {
           feedbackType: true,
         },
-      })) as any;
+      });
+      byTypeFormatted = (byType as FeedbackTypeGroupItem[]).map(item => ({
+        feedbackType: item.feedbackType,
+        count: item._count.feedbackType,
+        percentage: total > 0 ? (item._count.feedbackType / total) * 100 : 0,
+      }));
 
       recentFeedbacks = await prisma.recommendationFeedback.findMany({
         where,
@@ -111,13 +131,18 @@ export async function GET(request: NextRequest) {
     } else {
       total = await prisma.relationFeedback.count({ where });
 
-      byType = (await prisma.relationFeedback.groupBy({
+      const byType = await prisma.relationFeedback.groupBy({
         by: ['feedbackType'],
         where,
         _count: {
           feedbackType: true,
         },
-      })) as any;
+      });
+      byTypeFormatted = (byType as FeedbackTypeGroupItem[]).map(item => ({
+        feedbackType: item.feedbackType,
+        count: item._count.feedbackType,
+        percentage: total > 0 ? (item._count.feedbackType / total) * 100 : 0,
+      }));
 
       recentFeedbacks = await prisma.relationFeedback.findMany({
         where,
@@ -136,12 +161,6 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const byTypeFormatted = byType.map(item => ({
-      feedbackType: item.feedbackType,
-      count: item._count.feedbackType,
-      percentage: total > 0 ? (item._count.feedbackType / total) * 100 : 0,
-    }));
-
     // 构建响应数据
     const responseData: {
       total: number;
@@ -150,7 +169,7 @@ export async function GET(request: NextRequest) {
         count: number;
         percentage: number;
       }>;
-      recentFeedbacks: any[];
+      recentFeedbacks: RecommendationFeedbackWithArticle[] | RelationFeedbackWithRelation[];
       trend?: Array<{ date: string; count: number }>;
     } = {
       total,
@@ -160,9 +179,8 @@ export async function GET(request: NextRequest) {
 
     // 如果需要趋势数据
     if (includeTrend) {
-      let trendData: any[];
       if (type === 'recommendation') {
-        trendData = (await prisma.recommendationFeedback.groupBy({
+        const trendData = await prisma.recommendationFeedback.groupBy({
           by: ['createdAt'],
           where,
           _count: {
@@ -171,9 +189,13 @@ export async function GET(request: NextRequest) {
           orderBy: {
             createdAt: 'asc',
           },
-        })) as any;
+        });
+        responseData.trend = (trendData as TrendGroupItem[]).map(item => ({
+          date: item.createdAt.toISOString().split('T')[0],
+          count: item._count.id,
+        }));
       } else {
-        trendData = (await prisma.relationFeedback.groupBy({
+        const trendData = await prisma.relationFeedback.groupBy({
           by: ['createdAt'],
           where,
           _count: {
@@ -182,13 +204,12 @@ export async function GET(request: NextRequest) {
           orderBy: {
             createdAt: 'asc',
           },
-        })) as any;
+        });
+        responseData.trend = (trendData as TrendGroupItem[]).map(item => ({
+          date: item.createdAt.toISOString().split('T')[0],
+          count: item._count.id,
+        }));
       }
-
-      responseData.trend = trendData.map(item => ({
-        date: item.createdAt.toISOString().split('T')[0],
-        count: item._count.id,
-      }));
     }
 
     return NextResponse.json({

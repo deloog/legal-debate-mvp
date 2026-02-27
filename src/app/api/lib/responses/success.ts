@@ -5,23 +5,23 @@ import type { PaginationMeta } from './pagination';
 /**
  * 成功响应接口
  */
-export interface SuccessResponse<T = any> {
+export interface SuccessResponse<T = unknown> {
   success: true;
   data: T;
   meta?: {
     timestamp: string;
     version?: string;
     pagination?: PaginationMeta;
-    [key: string]: any;
   };
 }
 
 /**
  * 创建成功响应
+ * meta 参数接受任意对象，以便各路由传递扩展元数据（如 hasPrevious、labels、pagination 等）
  */
 export function createSuccessResponse<T>(
   data: T,
-  meta?: Omit<SuccessResponse<T>['meta'], 'timestamp' | 'version'>
+  meta?: object
 ): NextResponse {
   const responseBody = {
     success: true as const,
@@ -60,7 +60,7 @@ export function createPaginatedResponse<T>(
  */
 export function createCreatedResponse<T>(
   data: T,
-  meta?: Omit<SuccessResponse<T>['meta'], 'timestamp' | 'version'>
+  meta?: object
 ): NextResponse {
   const response = createSuccessResponse(data, meta);
   return new NextResponse(response.body, {
@@ -85,7 +85,7 @@ export function createNoContentResponse(): NextResponse {
  */
 export function createPartialResponse<T>(
   data: T,
-  meta?: Omit<SuccessResponse<T>['meta'], 'timestamp' | 'version'>
+  meta?: object
 ): NextResponse {
   const response = createSuccessResponse(data, meta);
   return new NextResponse(response.body, {

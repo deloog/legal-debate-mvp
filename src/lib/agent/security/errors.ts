@@ -6,7 +6,7 @@ export class AnalysisError extends Error {
   constructor(
     message: string,
     public readonly cause: Error,
-    public readonly context: Record<string, any>
+    public readonly context: Record<string, unknown>
   ) {
     super(message);
     this.name = 'AnalysisError';
@@ -16,18 +16,18 @@ export class AnalysisError extends Error {
 export class SecurityError extends Error {
   constructor(
     message: string,
-    public readonly context?: Record<string, any>
+    public readonly context?: Record<string, unknown>
   ) {
     super(message);
     this.name = 'SecurityError';
   }
 }
 
-export class ValidationError extends Error {
+export class ValidationError<T = unknown> extends Error {
   constructor(
     message: string,
     public readonly field?: string,
-    public readonly value?: any
+    public readonly value?: T
   ) {
     super(message);
     this.name = 'ValidationError';

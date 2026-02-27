@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { z } from 'zod';
 import { ApiError } from '@/app/api/lib/errors/api-error';
+import type { TaskStatus, TaskPriority } from '@/types/task';
 
 /**
  * 完成任务Schema
@@ -116,8 +117,8 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     id: task.id,
     title: task.title,
     description: task.description,
-    status: task.status as any,
-    priority: task.priority as any,
+    status: task.status as TaskStatus,
+    priority: task.priority as TaskPriority,
     caseId: task.caseId,
     assignedTo: task.assignedTo,
     createdBy: task.createdBy,

@@ -8,6 +8,7 @@ import { ErrorResponse, SuccessResponse } from '@/types/api-response';
 import { AIAssessment } from '@/types/consultation';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import type { Prisma } from '@prisma/client';
 
 /**
  * POST /api/consultations/[id]/assess
@@ -83,7 +84,7 @@ export async function POST(
     await prisma.consultation.update({
       where: { id },
       data: {
-        aiAssessment: assessment as any,
+        aiAssessment: assessment as unknown as Prisma.InputJsonValue,
         winRate: assessment.winRate,
         difficulty: assessment.difficulty,
         riskLevel: assessment.riskLevel,
@@ -163,7 +164,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: consultation.aiAssessment as any,
+      data: consultation.aiAssessment as unknown as AIAssessment,
     });
   } catch (error) {
     logger.error('获取评估结果失败:', error);

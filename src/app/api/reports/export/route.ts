@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ReportService } from '@/lib/reports/report-service';
 import type { ExportReportResponse } from '@/types/report';
-import { isValidExportFormat } from '@/types/report';
+import { isValidExportFormat, ExportFormat } from '@/types/report';
 import { logger } from '@/lib/logger';
 
 /**
@@ -78,7 +78,8 @@ export async function POST(
       );
     }
 
-    const { reportId, format } = requestData as any;
+    const reportId = requestData.reportId as string;
+    const format = requestData.format as ExportFormat;
 
     // 导出报表
     const result = await ReportService.exportReport(reportId, format);

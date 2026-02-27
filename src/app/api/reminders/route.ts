@@ -11,6 +11,7 @@ import { z } from 'zod';
 import {
   CreateReminderInput,
   NotificationChannel,
+  ReminderStatus,
   ReminderType,
 } from '@/types/notification';
 
@@ -63,11 +64,14 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const query = queryRemindersSchema.parse(Object.fromEntries(searchParams));
 
   const result = await reminderService.getReminders({
-    ...query,
     userId: authUser.userId,
+    type: query.type as ReminderType | undefined,
+    status: query.status as ReminderStatus | undefined,
     page: query.page?.toString(),
     limit: query.limit?.toString(),
-  } as any);
+    startTime: undefined,
+    endTime: undefined,
+  });
 
   return createSuccessResponse(
     { reminders: result.reminders },

@@ -11,7 +11,7 @@ export class Semaphore {
   private permits: number;
   private waitQueue: Array<{
     resolve: (value: boolean) => void;
-    reject: (reason?: any) => void;
+    reject: (reason?: unknown) => void;
     timeout?: ReturnType<typeof setTimeout>;
   }> = [];
 
@@ -30,7 +30,7 @@ export class Semaphore {
       }
 
       // 添加到等待队列
-      const waitItem: any = { resolve, reject };
+      const waitItem: { resolve: (value: boolean) => void; reject: (reason?: unknown) => void; timeout?: ReturnType<typeof setTimeout> } = { resolve, reject };
       this.waitQueue.push(waitItem);
 
       // 设置超时

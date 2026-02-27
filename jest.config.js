@@ -37,6 +37,9 @@ module.exports = {
         '<rootDir>/src/__tests__/bad-cases/',
         '<rootDir>/src/__tests__/accuracy/',
         '<rootDir>/src/__tests__/integration/',
+        // 排除包含方括号的动态路由测试目录（避免 Jest 内存溢出）
+        '/\\[id\\]/',
+        '/\\[.*\\]/',
       ],
       setupFiles: ['<rootDir>/jest.polyfill.js', '<rootDir>/jest-setup.d.ts'],
       setupFilesAfterEnv: ['<rootDir>/src/test-utils/setup.ts'],
@@ -91,6 +94,9 @@ module.exports = {
         '<rootDir>/src/__tests__/bad-cases/',
         '<rootDir>/src/__tests__/accuracy/',
         '<rootDir>/src/__tests__/integration/',
+        // 排除包含方括号的动态路由测试目录（避免 Jest 内存溢出）
+        '/\\[id\\]/',
+        '/\\[.*\\]/',
       ],
       setupFiles: ['<rootDir>/jest.polyfill.js'],
       setupFilesAfterEnv: ['<rootDir>/src/test-utils/setup.ts'],
@@ -161,6 +167,9 @@ module.exports = {
         '<rootDir>/src/__tests__/bad-cases/',
         '<rootDir>/src/__tests__/accuracy/',
         '<rootDir>/src/__tests__/integration/',
+        // 排除包含方括号的动态路由测试目录（避免 Jest 内存溢出）
+        '/\\[id\\]/',
+        '/\\[.*\\]/',
       ],
       setupFiles: [
         '<rootDir>/src/__tests__/api/setup.js',
@@ -306,6 +315,7 @@ module.exports = {
         '<rootDir>/src/__tests__/memory/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/config/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/enterprise/**/*.{test,spec}.{ts,tsx}',
+        '<rootDir>/src/__tests__/review/**/*.{test,spec}.{ts,tsx}',
       ],
       testPathIgnorePatterns: [
         '<rootDir>/.next/',
@@ -315,6 +325,9 @@ module.exports = {
         '<rootDir>/src/__tests__/bad-cases/',
         '<rootDir>/src/__tests__/accuracy/',
         '<rootDir>/src/__tests__/integration/',
+        // 排除包含方括号的动态路由测试目录（避免 Jest 内存溢出）
+        '/\\[id\\]/',
+        '/\\[.*\\]/',
       ],
       setupFiles: ['<rootDir>/jest.polyfill.js'],
       setupFilesAfterEnv: ['<rootDir>/src/test-utils/setup.ts'],

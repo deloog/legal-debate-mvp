@@ -2,12 +2,13 @@
  * MemoryMigrator - 记忆迁移逻辑
  * 实现Working→Hot→Cold的自动迁移机制
  *
- * 注意：由于 Prisma 生成的 ActionType 枚举类型与实际使用的枚举值不完全兼容，
- * 在代码中需要使用 `as any` 类型断言来解决类型检查问题。
+ * 注意：ActionType 枚举已包含 MIGRATE_WORKING_TO_HOT 和 MIGRATE_HOT_TO_COLD，
+ * 可直接使用字符串字面量联合类型无需类型断言。
  */
 
 import * as cron from 'node-cron';
 import { PrismaClient } from '@prisma/client';
+import { logger } from '../security/logger';
 
 import { MemoryManager } from './memory-manager';
 import { MemoryCompressor } from './compressor';
@@ -51,8 +52,7 @@ export class MemoryMigrator {
       await prisma.agentAction.create({
         data: {
           agentName: 'MemoryAgent',
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          actionType: actionType as any,
+          actionType,
           actionName:
             actionType === 'MIGRATE_WORKING_TO_HOT'
               ? 'Working→Hot Migration'
@@ -73,7 +73,7 @@ export class MemoryMigrator {
         },
       });
     } catch (error) {
-      console.error('Failed to log migration action:', error);
+      logger.error('Failed to log migration action', error instanceof Error ? error : new Error(String(error)));
       // 不影响迁移流程
     }
   }
@@ -83,24 +83,24 @@ export class MemoryMigrator {
    */
   start(): void {
     if (this.workingToHotCron) {
-      console.log('MemoryMigrator already started');
+      logger.info('MemoryMigrator already started');
       return;
     }
 
-    console.log('Starting MemoryMigrator cron jobs...');
+    logger.info('Starting MemoryMigrator cron jobs...');
 
     // Working→Hot迁移（每小时）
     this.workingToHotCron = cron.schedule(
       MIGRATION_CONFIG.WORKING_TO_HOT_CRON,
-      () => this.migrateWorkingToHot().catch(console.error)
+      () => this.migrateWorkingToHot().catch((err: unknown) => logger.error('Working→Hot migration error', err instanceof Error ? err : new Error(String(err))))
     );
 
     // Hot→Cold归档（每天）
     this.hotToColdCron = cron.schedule(MIGRATION_CONFIG.HOT_TO_COLD_CRON, () =>
-      this.compressHotToCold().catch(console.error)
+      this.compressHotToCold().catch((err: unknown) => logger.error('Hot→Cold archiving error', err instanceof Error ? err : new Error(String(err))))
     );
 
-    console.log('MemoryMigrator cron jobs started successfully');
+    logger.info('MemoryMigrator cron jobs started successfully');
   }
 
   /**
@@ -117,7 +117,7 @@ export class MemoryMigrator {
       this.hotToColdCron = undefined;
     }
 
-    console.log('MemoryMigrator cron jobs stopped');
+    logger.info('MemoryMigrator cron jobs stopped');
   }
 
   /**
@@ -134,14 +134,12 @@ export class MemoryMigrator {
       const workingMemories =
         await this.memoryManager.getMemoriesByType('WORKING');
 
-      console.log(
-        `Found ${workingMemories.length} Working Memories to migrate`
-      );
+      logger.info(`Found ${workingMemories.length} Working Memories to migrate`);
 
       // 过滤候选记忆
       const candidates = this.filterWorkingCandidates(workingMemories);
 
-      console.log(`Found ${candidates.length} candidates for migration`);
+      logger.info(`Found ${candidates.length} candidates for migration`);
 
       // 限制迁移数量
       const toMigrate = candidates.slice(
@@ -154,18 +152,16 @@ export class MemoryMigrator {
           await this.migrateSingleMemory(memory, 'HOT');
           migratedCount++;
         } catch (error) {
-          console.error(`Failed to migrate memory ${memory.memoryId}:`, error);
+          logger.error(`Failed to migrate memory ${memory.memoryId}`, error instanceof Error ? error : new Error(String(error)));
           failedCount++;
         }
       }
 
       skippedCount = workingMemories.length - toMigrate.length;
 
-      console.log(
-        `Working→Hot migration completed: ${migratedCount} migrated, ${skippedCount} skipped, ${failedCount} failed`
-      );
+      logger.info(`Working→Hot migration completed: ${migratedCount} migrated, ${skippedCount} skipped, ${failedCount} failed`);
     } catch (error) {
-      console.error('Error during Working→Hot migration:', error);
+      logger.error('Error during Working→Hot migration', error instanceof Error ? error : new Error(String(error)));
       failedCount++;
     }
 
@@ -190,12 +186,12 @@ export class MemoryMigrator {
       // 获取所有Hot Memory
       const hotMemories = await this.memoryManager.getMemoriesByType('HOT');
 
-      console.log(`Found ${hotMemories.length} Hot Memories to archive`);
+      logger.info(`Found ${hotMemories.length} Hot Memories to archive`);
 
       // 过滤候选记忆
       const candidates = this.filterHotCandidates(hotMemories);
 
-      console.log(`Found ${candidates.length} candidates for archiving`);
+      logger.info(`Found ${candidates.length} candidates for archiving`);
 
       // 限制迁移数量
       const toCompress = candidates.slice(
@@ -208,18 +204,16 @@ export class MemoryMigrator {
           await this.compressAndArchive(memory);
           migratedCount++;
         } catch (error) {
-          console.error(`Failed to archive memory ${memory.memoryId}:`, error);
+          logger.error(`Failed to archive memory ${memory.memoryId}`, error instanceof Error ? error : new Error(String(error)));
           failedCount++;
         }
       }
 
       skippedCount = hotMemories.length - toCompress.length;
 
-      console.log(
-        `Hot→Cold archiving completed: ${migratedCount} migrated, ${skippedCount} skipped, ${failedCount} failed`
-      );
+      logger.info(`Hot→Cold archiving completed: ${migratedCount} migrated, ${skippedCount} skipped, ${failedCount} failed`);
     } catch (error) {
-      console.error('Error during Hot→Cold archiving:', error);
+      logger.error('Error during Hot→Cold archiving', error instanceof Error ? error : new Error(String(error)));
       failedCount++;
     }
 

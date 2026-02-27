@@ -183,13 +183,14 @@ export async function GET(
 
     // 时间范围过滤
     if (params.startDate || params.endDate) {
-      where.createdAt = {} as any;
+      const createdAtFilter: Prisma.DateTimeFilter = {};
       if (params.startDate) {
-        (where.createdAt as any).gte = new Date(params.startDate);
+        createdAtFilter.gte = new Date(params.startDate);
       }
       if (params.endDate) {
-        (where.createdAt as any).lte = new Date(params.endDate);
+        createdAtFilter.lte = new Date(params.endDate);
       }
+      where.createdAt = createdAtFilter;
     }
 
     // 构建排序条件

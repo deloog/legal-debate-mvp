@@ -11,8 +11,42 @@
 import { GET as GETCases } from '@/app/api/v1/cases/route';
 import { GET as GETCaseById } from '@/app/api/v1/cases/[id]/route';
 import { NextRequest } from 'next/server';
+import type { JwtPayload } from '@/types/auth';
+
+// Mock auth middleware
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
+import { getAuthUser } from '@/lib/middleware/auth';
+
+// Mock prisma
+jest.mock('@/lib/db/prisma', () => ({
+  prisma: {
+    case: {
+      findMany: jest.fn(),
+      count: jest.fn(),
+      findUnique: jest.fn(),
+    },
+  },
+}));
+import { prisma } from '@/lib/db/prisma';
+
+const mockUser: JwtPayload = {
+  userId: 'user-1',
+  email: 'user@example.com',
+  role: 'USER',
+  iat: 1000000000,
+  exp: 2000000000,
+};
 
 describe('案件路由 - 主路由单个案件查询禁用测试', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (getAuthUser as jest.Mock).mockResolvedValue(mockUser);
+    (prisma.case.findMany as jest.Mock).mockResolvedValue([]);
+    (prisma.case.count as jest.Mock).mockResolvedValue(0);
+  });
+
   describe('主路由 /api/v1/cases 不应处理单个案件查询', () => {
     /**
      * 测试目的：验证主路由不再通过路径匹配处理单个案件查询
@@ -170,7 +204,7 @@ describe('案件路由 - 主路由单个案件查询禁用测试', () => {
 
       try {
         const response = await GETCaseById(request, {
-          params: { id: validId },
+          params: Promise.resolve({ id: validId }),
         });
         const data = await response.json();
 

@@ -1,4 +1,5 @@
 import type { AIError, AIErrorType, AIProvider } from '../../types/ai-service';
+import { logger } from '../agent/security/logger';
 
 /**
  * AI错误序列化工具
@@ -46,7 +47,7 @@ export interface SerializedError {
   timestamp: number;
   retryable: boolean;
   context?: ErrorContext;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   serializedAt: number;
   version: string;
 }
@@ -130,9 +131,7 @@ export class AIErrorSerializer {
 
       // 验证版本兼容性
       if (parsed.version !== this.VERSION) {
-        console.warn(
-          `Error serialization version mismatch: expected ${this.VERSION}, got ${parsed.version}`
-        );
+        logger.warn(`Error serialization version mismatch: expected ${this.VERSION}, got ${parsed.version}`);
       }
 
       return parsed as SerializedError;
@@ -264,9 +263,9 @@ export class AIErrorSerializer {
   /**
    * 检查是否为AI错误
    */
-  private static isAIError(error: any): error is AIError {
+  private static isAIError(error: unknown): error is AIError {
     return (
-      error &&
+      error !== null &&
       typeof error === 'object' &&
       'type' in error &&
       'provider' in error
@@ -330,8 +329,8 @@ export class AIErrorSerializer {
   private static extractErrorDetails(
     error: unknown,
     config: ErrorSerializationConfig
-  ): Record<string, any> | undefined {
-    const details: Record<string, any> = {};
+  ): Record<string, unknown> | undefined {
+    const details: Record<string, unknown> = {};
 
     // 添加堆栈跟踪
     if (config.includeStackTrace && error instanceof Error && error.stack) {
@@ -360,7 +359,7 @@ export class AIErrorSerializer {
 
     // 清理详情中的敏感信息
     if (sanitized.details) {
-      sanitized.details = this.sanitizeObject(sanitized.details);
+      sanitized.details = this.sanitizeObject(sanitized.details) as Record<string, unknown>;
     }
 
     return sanitized;
@@ -380,7 +379,7 @@ export class AIErrorSerializer {
   /**
    * 递归清理对象中的敏感信息
    */
-  private static sanitizeObject(obj: any): any {
+  private static sanitizeObject(obj: unknown): unknown {
     if (typeof obj !== 'object' || obj === null) {
       return obj;
     }
@@ -389,8 +388,8 @@ export class AIErrorSerializer {
       return obj.map(item => this.sanitizeObject(item));
     }
 
-    const sanitized: any = {};
-    for (const [key, value] of Object.entries(obj)) {
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
       if (this.isSensitiveKey(key)) {
         sanitized[key] = '***';
       } else {

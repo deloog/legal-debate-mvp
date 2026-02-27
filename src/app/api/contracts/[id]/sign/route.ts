@@ -69,7 +69,18 @@ export async function POST(
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     // 准备更新数据
-    const updateData: any = {};
+    type SignUpdateData = {
+      clientSignature?: string;
+      clientSignedAt?: Date;
+      clientSignedIp?: string;
+      signatureDevice?: string;
+      lawyerSignature?: string;
+      lawyerSignedAt?: Date;
+      lawyerSignedIp?: string;
+      status?: string;
+      signedAt?: Date;
+    };
+    const updateData: SignUpdateData = {};
     const now = new Date();
 
     if (body.role === 'client') {

@@ -8,7 +8,9 @@ import PDFDocument from 'pdfkit';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 
 /**
  * 合同数据接口
@@ -135,7 +137,11 @@ function getFeeTypeName(feeType: string): string {
  * @param contract 合同数据
  * @returns 内容哈希值
  */
-function generateContentHash(contract: any): string {
+type ContractWithPayments = Prisma.ContractGetPayload<{
+  include: { payments: true };
+}>;
+
+function generateContentHash(contract: ContractWithPayments): string {
   const content = JSON.stringify({
     contractNumber: contract.contractNumber,
     clientType: contract.clientType,
@@ -183,7 +189,7 @@ async function checkPDFCache(
     const fileExists = await contractFileExists(contract.filePath);
 
     if (!fileExists) {
-      console.log(`[PDFCache] 缓存文件不存在: ${contract.filePath}`);
+      logger.info(`[PDFCache] 缓存文件不存在: ${contract.filePath}`);
       return null;
     }
 
@@ -194,14 +200,14 @@ async function checkPDFCache(
 
     // 如果合同更新时间晚于文件修改时间，说明缓存已过期
     if (contractUpdatedTime > fileModifiedTime) {
-      console.log(`[PDFCache] 缓存已过期，合同已更新`);
+      logger.info('[PDFCache] 缓存已过期，合同已更新');
       return null;
     }
 
-    console.log(`[PDFCache] 使用缓存的PDF: ${contract.filePath}`);
+    logger.info(`[PDFCache] 使用缓存的PDF: ${contract.filePath}`);
     return contract.filePath;
   } catch (error) {
-    console.error(`[PDFCache] 检查缓存失败:`, error);
+    logger.error('[PDFCache] 检查缓存失败', { error });
     return null;
   }
 }
@@ -236,12 +242,12 @@ export async function generateContractPDF(
   if (!forceRegenerate) {
     const cachedPath = await checkPDFCache(contractId, contentHash);
     if (cachedPath) {
-      console.log(`[ContractPDF] 使用缓存，跳过生成`);
+      logger.info('[ContractPDF] 使用缓存，跳过生成');
       return cachedPath;
     }
   }
 
-  console.log(`[ContractPDF] 开始生成新PDF...`);
+  logger.info('[ContractPDF] 开始生成新PDF...');
 
   // 准备合同数据
   const data: ContractData = {
@@ -288,7 +294,7 @@ export async function generateContractPDF(
     },
   });
 
-  console.log(`[ContractPDF] PDF生成完成: ${filePath}`);
+  logger.info(`[ContractPDF] PDF生成完成: ${filePath}`);
   return filePath;
 }
 
@@ -479,7 +485,7 @@ async function generatePDFWithPdfkit(
             height: 40,
           });
         } catch (error) {
-          console.error('嵌入委托人签名失败:', error);
+          logger.error('嵌入委托人签名失败', { error });
           doc.text('________________', 200, clientSignY);
         }
       } else {
@@ -514,7 +520,7 @@ async function generatePDFWithPdfkit(
             height: 40,
           });
         } catch (error) {
-          console.error('嵌入律师签名失败:', error);
+          logger.error('嵌入律师签名失败', { error });
           doc.text('________________', 200, lawyerSignY);
         }
       } else {
@@ -538,16 +544,16 @@ async function generatePDFWithPdfkit(
       doc.end();
 
       stream.on('finish', () => {
-        console.log(`[ContractPDF] PDF 生成成功: ${outputPath}`);
+        logger.info(`[ContractPDF] PDF 生成成功: ${outputPath}`);
         resolve();
       });
 
-      stream.on('error', error => {
-        console.error(`[ContractPDF] PDF 写入失败:`, error);
+      stream.on('error', (error: Error) => {
+        logger.error('[ContractPDF] PDF 写入失败', error);
         reject(error);
       });
     } catch (error) {
-      console.error(`[ContractPDF] PDF 生成失败:`, error);
+      logger.error('[ContractPDF] PDF 生成失败', { error });
       reject(error);
     }
   });
@@ -576,9 +582,9 @@ export async function deleteContractFile(filePath: string): Promise<void> {
   try {
     const absolutePath = path.join(process.cwd(), 'public', filePath);
     await fs.promises.unlink(absolutePath);
-    console.log(`[ContractPDF] PDF文件已删除: ${filePath}`);
+    logger.info(`[ContractPDF] PDF文件已删除: ${filePath}`);
   } catch (error) {
-    console.error(`删除合同文件失败: ${filePath}`, error);
+    logger.error(`删除合同文件失败: ${filePath}`, { error });
   }
 }
 
@@ -603,10 +609,10 @@ export async function clearContractPDFCache(contractId: string): Promise<void> {
         data: { filePath: null },
       });
 
-      console.log(`[PDFCache] 缓存已清除: ${contractId}`);
+      logger.info(`[PDFCache] 缓存已清除: ${contractId}`);
     }
   } catch (error) {
-    console.error(`[PDFCache] 清除缓存失败:`, error);
+    logger.error('[PDFCache] 清除缓存失败', { error });
   }
 }
 
@@ -650,17 +656,17 @@ export async function cleanupOldPDFCache(
           if (stats.atime < cutoffDate) {
             await fs.promises.unlink(fullPath);
             deletedCount++;
-            console.log(`[PDFCache] 删除过期文件: ${fullPath}`);
+            logger.info(`[PDFCache] 删除过期文件: ${fullPath}`);
           }
         }
       }
     }
 
     await processDirectory(uploadsDir);
-    console.log(`[PDFCache] 清理完成，删除了 ${deletedCount} 个过期文件`);
+    logger.info(`[PDFCache] 清理完成，删除了 ${deletedCount} 个过期文件`);
     return deletedCount;
   } catch (error) {
-    console.error(`[PDFCache] 清理过期缓存失败:`, error);
+    logger.error('[PDFCache] 清理过期缓存失败', { error });
     return 0;
   }
 }

@@ -129,7 +129,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         'http://localhost:3000/api/v1/debates/cmjtg7np100axc0zgwiwpwt1a'
       );
       const response = await GET(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(401);
@@ -148,7 +148,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         'http://localhost:3000/api/v1/debates/cmjtg7np100axc0zgwiwpwt1a'
       );
       const response = await GET(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(200);
@@ -165,7 +165,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         'http://localhost:3000/api/v1/debates/cmjtg7np100axc0zgwiwpwt1a'
       );
       const response = await GET(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(500);
@@ -188,7 +188,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         'http://localhost:3000/api/v1/debates/cmjtg7np100axc0zgwiwpwt1a'
       );
       const response = await GET(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(200);
@@ -207,7 +207,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         'http://localhost:3000/api/v1/debates/cmjtg7np100axc0zgwiwpwt1a'
       );
       const response = await GET(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(403);
@@ -227,7 +227,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         'http://localhost:3000/api/v1/debates/cmjtg7np100axc0zgwiwpwt1a'
       );
       const response = await GET(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(404);
@@ -244,7 +244,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         'http://localhost:3000/api/v1/debates/cmjtg7np100axc0zgwiwpwt1a'
       );
       const response = await GET(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(200);
@@ -264,7 +264,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         { method: 'PUT', body: { title: '新标题' } }
       );
       const response = await PUT(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(401);
@@ -290,7 +290,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         { method: 'PUT', body: { title: '新标题' } }
       );
       const response = await PUT(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(200);
@@ -320,7 +320,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         { method: 'PUT', body: { title: '新标题' } }
       );
       const response = await PUT(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(200);
@@ -339,7 +339,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         { method: 'PUT', body: { title: '新标题' } }
       );
       const response = await PUT(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(403);
@@ -364,7 +364,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         { method: 'PUT', body: { title: '新标题' } }
       );
       const response = await PUT(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(200);
@@ -384,7 +384,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         { method: 'DELETE' }
       );
       const response = await DELETE(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(401);
@@ -410,7 +410,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         { method: 'DELETE' }
       );
       const response = await DELETE(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(204);
@@ -440,7 +440,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         { method: 'DELETE' }
       );
       const response = await DELETE(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(204);
@@ -462,7 +462,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         { method: 'DELETE' }
       );
       const response = await DELETE(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(403);
@@ -487,7 +487,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         { method: 'DELETE' }
       );
       const response = await DELETE(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(204);
@@ -506,7 +506,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         'http://localhost:3000/api/v1/debates/cmjtg7np100axc0zgwiwpwt1a'
       );
       const response = await GET(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(401);
@@ -522,7 +522,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         { method: 'PUT', body: { title: '新标题' } }
       );
       const response = await PUT(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(401);
@@ -538,7 +538,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         { method: 'DELETE' }
       );
       const response = await DELETE(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(401);
@@ -561,7 +561,7 @@ describe('辩论单个API - 认证和权限测试', () => {
       const request = createMockRequest(
         'http://localhost:3000/api/v1/debates/cmjtg7np100axc0zgwiwpwt1a'
       );
-      await GET(request, { params: { id: 'cmjtg7np100axc0zgwiwpwt1a' } });
+      await GET(request, { params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }) });
 
       expect(checkResourceOwnership).toHaveBeenCalledWith(
         mockAuthUser.userId,
@@ -586,7 +586,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         'http://localhost:3000/api/v1/debates/cmjtg7np100axc0zgwiwpwt1a'
       );
       const response = await GET(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(403);
@@ -606,7 +606,7 @@ describe('辩论单个API - 认证和权限测试', () => {
         'http://localhost:3000/api/v1/debates/cmjtg7np100axc0zgwiwpwt1a'
       );
       const response = await GET(request, {
-        params: { id: 'cmjtg7np100axc0zgwiwpwt1a' },
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
       });
 
       expect(response.status).toBe(403);

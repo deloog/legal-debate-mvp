@@ -206,12 +206,13 @@ export function createRedisLimiters(redisClient: RedisClient) {
  * 应用速率限制到API路由（与内存版本兼容）
  */
 export function withRateLimit<
-  T extends (...args: any[]) => Promise<NextResponse>,
+  TArgs extends unknown[],
+  T extends (request: NextRequest, ...args: TArgs) => Promise<NextResponse>,
 >(
   rateLimiter: (request: NextRequest) => Promise<NextResponse | null>,
   handler: T
 ): T {
-  return (async (request: NextRequest, ...args: any[]) => {
+  return (async (request: NextRequest, ...args: TArgs) => {
     const limitResponse = await rateLimiter(request);
     if (limitResponse) {
       return limitResponse;

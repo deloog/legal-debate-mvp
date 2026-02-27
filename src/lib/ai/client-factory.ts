@@ -1,8 +1,29 @@
 import type { AIProvider, AIClientConfig } from '../../types/ai-service';
+import { logger } from '../agent/security/logger';
 
 // =============================================================================
 // AI客户端工厂
 // =============================================================================
+
+/**
+ * 通用AI提供商客户端接口（兼容 OpenAI SDK 和 Anthropic SDK 的公共形状）。
+ * 工厂方法通过 `unknown` 中转断言来兼容各 SDK 的具体类型。
+ */
+export interface AIProviderClient {
+  chat: {
+    completions: {
+      create: (params: Record<string, unknown>) => Promise<unknown>;
+    };
+  };
+  embeddings: {
+    create: (params: Record<string, unknown>) => Promise<unknown>;
+  };
+  /** Anthropic SDK 风格的消息接口（可选，仅 Anthropic 客户端实现） */
+  messages?: {
+    create: (params: Record<string, unknown>) => Promise<unknown>;
+  };
+}
+
 
 /**
  * 创建不同AI提供商的客户端
@@ -11,7 +32,7 @@ export class AIClientFactory {
   /**
    * 创建AI客户端
    */
-  public static async createClient(config: AIClientConfig): Promise<any> {
+  public static async createClient(config: AIClientConfig): Promise<unknown> {
     switch (config.provider) {
       case 'zhipu':
         return this.createZhipuClient(config);
@@ -29,7 +50,7 @@ export class AIClientFactory {
   /**
    * 创建智谱清言客户端（使用OpenAI兼容格式）
    */
-  private static async createZhipuClient(config: AIClientConfig): Promise<any> {
+  private static async createZhipuClient(config: AIClientConfig): Promise<AIProviderClient> {
     try {
       // 使用OpenAI兼容格式调用智谱清言API
       const { OpenAI } = await import('openai');
@@ -38,12 +59,9 @@ export class AIClientFactory {
         apiKey: config.apiKey,
         baseURL: config.baseURL || 'https://open.bigmodel.cn/api/paas/v4/',
         timeout: config.timeout || 30000,
-      });
+      }) as unknown as AIProviderClient;
     } catch (error) {
-      console.warn(
-        'OpenAI client not available for Zhipu, using mock client. Error:',
-        error
-      );
+      logger.warn('OpenAI client not available for Zhipu, using mock client', { error: error instanceof Error ? error.message : String(error) });
       return this.createMockClient('zhipu');
     }
   }
@@ -53,7 +71,7 @@ export class AIClientFactory {
    */
   private static async createDeepSeekClient(
     config: AIClientConfig
-  ): Promise<any> {
+  ): Promise<AIProviderClient> {
     try {
       // DeepSeek API兼容OpenAI格式，直接使用OpenAI客户端
       const { OpenAI } = await import('openai');
@@ -62,12 +80,9 @@ export class AIClientFactory {
         apiKey: config.apiKey,
         baseURL: config.baseURL || 'https://api.deepseek.com/v1',
         timeout: config.timeout || 30000,
-      });
+      }) as unknown as AIProviderClient;
     } catch (error) {
-      console.warn(
-        'DeepSeek client not available, using mock client. Error:',
-        error
-      );
+      logger.warn('DeepSeek client not available, using mock client', { error: error instanceof Error ? error.message : String(error) });
       return this.createMockClient('deepseek');
     }
   }
@@ -77,7 +92,7 @@ export class AIClientFactory {
    */
   private static async createOpenAIClient(
     config: AIClientConfig
-  ): Promise<any> {
+  ): Promise<AIProviderClient> {
     try {
       const { OpenAI } = await import('openai');
 
@@ -85,12 +100,9 @@ export class AIClientFactory {
         apiKey: config.apiKey,
         baseURL: config.baseURL,
         timeout: config.timeout || 30000,
-      });
+      }) as unknown as AIProviderClient;
     } catch (error) {
-      console.warn(
-        'OpenAI client not available, using mock client. Error:',
-        error
-      );
+      logger.warn('OpenAI client not available, using mock client', { error: error instanceof Error ? error.message : String(error) });
       return this.createMockClient('openai');
     }
   }
@@ -100,7 +112,7 @@ export class AIClientFactory {
    */
   private static async createAnthropicClient(
     config: AIClientConfig
-  ): Promise<any> {
+  ): Promise<AIProviderClient> {
     try {
       const Anthropic = await import('@anthropic-ai/sdk');
 
@@ -108,12 +120,9 @@ export class AIClientFactory {
         apiKey: config.apiKey,
         baseURL: config.baseURL,
         timeout: config.timeout || 30000,
-      });
+      }) as unknown as AIProviderClient;
     } catch (error) {
-      console.warn(
-        'Anthropic client not available, using mock client. Error:',
-        error
-      );
+      logger.warn('Anthropic client not available, using mock client', { error: error instanceof Error ? error.message : String(error) });
       return this.createMockClient('anthropic');
     }
   }
@@ -121,13 +130,14 @@ export class AIClientFactory {
   /**
    * 创建模拟客户端用于开发测试
    */
-  private static createMockClient(provider: AIProvider): any {
+  private static createMockClient(provider: AIProvider): AIProviderClient {
     return {
       chat: {
         completions: {
-          create: async (params: any) => {
+          create: async (params: Record<string, unknown>) => {
+            const messages = params.messages as Array<{ content?: string }>;
             const userMessage =
-              params.messages[params.messages.length - 1]?.content || '';
+              messages[messages.length - 1]?.content || '';
 
             // 检查是否是文档分析请求
             if (
@@ -259,7 +269,7 @@ export class AIClientFactory {
         },
       },
       embeddings: {
-        create: async (params: any) => ({
+        create: async (params: Record<string, unknown>) => ({
           object: 'list',
           data: [
             {

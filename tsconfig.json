@@ -44,6 +44,8 @@
     "**/*.mts",
     "**/*.ts",
     "**/*.tsx",
+    // 显式包含动态路由目录（排除会导致模块解析失败）
+    "src/app/api/v1/integrations/[id]/**/*.ts",
     "src/__types__/**/*.d.ts",
     "jest-setup.d.ts",
     "src/__tests__/types/**/*.d.ts",
@@ -51,5 +53,25 @@
     "src/__tests__/types/global.d.ts",
     "**/*.d.ts"
   ],
-  "exclude": ["node_modules", ".next", "coverage", "dist", "test-output"]
+  "exclude": [
+    "node_modules",
+    ".next",
+    "coverage",
+    "dist",
+    "test-output",
+    // 排除包含方括号的动态路由目录（避免 TypeScript 编译器内存溢出）
+    // 注意：src/app/api/v1/integrations/[id] 需要在 include 中单独包含
+    "src/app/api/**/[id]",
+    "src/app/api/**/[key]",
+    "src/app/api/**/[userId]",
+    "src/app/api/**/[expertId]",
+    "src/app/api/**/[provider]",
+    "src/app/api/**/[orderNo]",
+    "src/app/api/**/[taskId]",
+    "src/app/api/**/[articleId]",
+    "src/app/api/**/[roundId]",
+    "src/app/api/**/[argumentId]",
+    "src/app/**/[id]",
+    "src/__tests__/**/[id]"
+  ]
 }

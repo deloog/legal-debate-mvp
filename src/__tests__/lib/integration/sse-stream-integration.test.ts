@@ -251,7 +251,7 @@ describe('SSE流式输出集成测试', () => {
       const client = new SSEClient(clientConfig);
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       // 模拟服务器发送事件
@@ -332,7 +332,7 @@ describe('SSE流式输出集成测试', () => {
       const client = new SSEClient(clientConfig);
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       // 模拟断线
@@ -430,7 +430,7 @@ describe('SSE流式输出集成测试', () => {
       const client = new SSEClient(clientConfig);
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       // 发送一些论点

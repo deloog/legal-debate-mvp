@@ -20,7 +20,7 @@ import { SSEConnectionState } from './types';
 /**
  * 事件回调类型
  */
-export type SSEEventHandler = (data: any) => void;
+export type SSEEventHandler = (data: unknown) => void;
 
 /**
  * AI流式事件数据
@@ -59,7 +59,7 @@ export interface SSEClientConfig extends SSEConnectionConfig {
 export class SSEClient {
   private config: SSEClientConfig;
   private state: SSEConnectionState = SSEConnectionState.CONNECTING;
-  private eventSource: any = null;
+  private eventSource: EventSource | null = null;
   private reconnectTimer?: NodeJS.Timeout;
   private reconnectAttempts = 0;
   private lastEventId = '';
@@ -184,7 +184,7 @@ export class SSEClient {
       this.log('SSE连接已建立');
     };
 
-    this.eventSource.onerror = (error: any) => {
+    this.eventSource.onerror = (error: Event) => {
       this.log('SSE连接错误:', error);
       this.handleConnectionError();
     };
@@ -257,30 +257,45 @@ export class SSEClient {
    */
   private callConfigCallback(
     eventType: DebateStreamEventType,
-    data: any
+    data: unknown
   ): void {
-    const callbacks: Record<string, ((data: any) => void) | undefined> = {
-      connected: this.config.onConnected,
-      'round-start': this.config.onRoundStart,
-      ai_stream: this.config.onAIStream,
-      argument: this.config.onArgument,
-      progress: this.config.onProgress,
-      completed: this.config.onCompleted,
-      error: this.config.onError,
-      ping: this.config.onPing,
-      disconnected: this.config.onDisconnected,
-    };
-
-    const callback = callbacks[eventType];
-    if (callback) {
-      callback(data);
+    // Each callback is called with the parsed event data.
+    // The data originates from JSON.parse and is typed by the event type at runtime.
+    switch (eventType) {
+      case 'connected':
+        this.config.onConnected?.(data as ConnectedEventData);
+        break;
+      case 'round-start':
+        this.config.onRoundStart?.(data as RoundStartEventData);
+        break;
+      case 'ai_stream':
+        this.config.onAIStream?.(data as AIStreamEventData);
+        break;
+      case 'argument':
+        this.config.onArgument?.(data as ArgumentEventData);
+        break;
+      case 'progress':
+        this.config.onProgress?.(data as ProgressEventData);
+        break;
+      case 'completed':
+        this.config.onCompleted?.(data as CompletedEventData);
+        break;
+      case 'error':
+        this.config.onError?.(data as ErrorEventData);
+        break;
+      case 'ping':
+        this.config.onPing?.(data as PingEventData);
+        break;
+      case 'disconnected':
+        this.config.onDisconnected?.(data as DisconnectedEventData);
+        break;
     }
   }
 
   /**
    * 发射事件
    */
-  private emit(eventType: DebateStreamEventType, data: any): void {
+  private emit(eventType: DebateStreamEventType, data: unknown): void {
     const handlers = this.eventHandlers.get(eventType);
     if (handlers) {
       handlers.forEach(handler => {
@@ -307,7 +322,7 @@ export class SSEClient {
   /**
    * 处理错误
    */
-  private handleError(error: any): void {
+  private handleError(error: unknown): void {
     this.log('错误:', error);
     this.state = SSEConnectionState.ERROR;
 
@@ -401,7 +416,7 @@ export class SSEClient {
   /**
    * 日志输出
    */
-  private log(...args: any[]): void {
+  private log(...args: unknown[]): void {
     if (this.config.enableLogging) {
       console.log(`[SSEClient]`, ...args);
     }

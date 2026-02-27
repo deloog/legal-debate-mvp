@@ -136,11 +136,20 @@ export type {
 export type {
   ContractDetail,
   ContractListResponse,
+  ContractPerformanceQueryParams,
+  ContractPerformanceResponse,
   ContractQueryParams,
   ContractStatus,
   CreateContractInput,
+  CreateContractPerformanceInput,
+  CreateReminderConfigInput,
   FeeType,
+  MilestoneStatus,
+  AnomalyType,
+  ReminderConfigResponse,
   UpdateContractInput,
+  UpdateContractPerformanceInput,
+  UpdateReminderConfigInput,
 } from './contract';
 
 // 会员类型
