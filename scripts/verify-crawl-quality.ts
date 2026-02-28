@@ -61,7 +61,9 @@ async function main() {
   console.log('质量统计:');
   console.log(`  ✓ 完整内容: ${hasFullContent} 条`);
   console.log(`  ⚠ 仅有元数据: ${hasMetadataOnly} 条`);
-  console.log(`  完整率: ${(hasFullContent / recentLaws.length * 100).toFixed(1)}%`);
+  console.log(
+    `  完整率: ${((hasFullContent / recentLaws.length) * 100).toFixed(1)}%`
+  );
   console.log('='.repeat(70));
 }
 

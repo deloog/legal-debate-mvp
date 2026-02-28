@@ -64,8 +64,12 @@ async function checkFailedArticles() {
   console.log('='.repeat(70));
 
   const noSourceId = failedArticles.filter(a => !a.sourceId).length;
-  const noFullText = failedArticles.filter(a => !a.fullText || a.fullText.length < 10).length;
-  const noDateInText = failedArticles.filter(a => a.fullText && a.fullText.length >= 10).length;
+  const noFullText = failedArticles.filter(
+    a => !a.fullText || a.fullText.length < 10
+  ).length;
+  const noDateInText = failedArticles.filter(
+    a => a.fullText && a.fullText.length >= 10
+  ).length;
 
   console.log(`无 sourceId: ${noSourceId}`);
   console.log(`无 fullText 或内容过短: ${noFullText}`);

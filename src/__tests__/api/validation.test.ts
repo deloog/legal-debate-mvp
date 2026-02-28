@@ -11,10 +11,10 @@ import {
 
 describe('Validation Utils', () => {
   describe('validatePagination', () => {
-    let mockRequest: NextRequest;
+    let __mockRequest: NextRequest;
 
     beforeEach(() => {
-      mockRequest = new NextRequest('http://localhost:3000/api/test', {
+      __mockRequest = new NextRequest('http://localhost:3000/api/test', {
         method: 'GET',
       });
     });

@@ -490,8 +490,8 @@ export function createPerformanceTracker(endpoint: string, method: string) {
  */
 export function monitorDatabaseQuery(operation: string, table: string) {
   return function (
-    target: unknown,
-    propertyName: string,
+    _target: unknown,
+    _propertyName: string,
     descriptor: PropertyDescriptor
   ) {
     const method = descriptor.value;
@@ -550,8 +550,8 @@ export function monitorAICall(
   model?: string
 ) {
   return function (
-    target: unknown,
-    propertyName: string,
+    _target: unknown,
+    _propertyName: string,
     descriptor: PropertyDescriptor
   ) {
     const method = descriptor.value;

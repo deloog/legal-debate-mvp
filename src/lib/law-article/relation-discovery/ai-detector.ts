@@ -10,14 +10,22 @@
 
 import { LawArticle, RelationType } from '@prisma/client';
 import { getOpenAICompletion } from '@/lib/ai/openai-client';
+import { logger } from '@/lib/logger';
 import { AI_DETECTOR_CONFIG } from './ai-detector-config';
 import { AICostMonitor } from './ai-cost-monitor';
+import {
+  AIConfidenceConfig,
+  ThresholdValidationResult,
+} from '@/lib/law-article/ai-confidence-config';
 
 /**
  * 关系分析结果
  */
 export interface RelationAnalysis {
   relations: RelationInfo[];
+  aiProvider: string;
+  aiModel: string;
+  aiConfidence: number;
 }
 
 /**
@@ -28,6 +36,7 @@ export interface RelationInfo {
   confidence: number;
   reason: string;
   evidence: string;
+  validation?: ThresholdValidationResult;
 }
 
 /**
@@ -39,12 +48,20 @@ export class AIDetector {
    *
    * @param article1 法条1
    * @param article2 法条2
+   * @param options 可选参数
    * @returns 关系分析结果
    */
   static async detectRelations(
     article1: LawArticle,
-    article2: LawArticle
+    article2: LawArticle,
+    options?: {
+      aiProvider?: string;
+      aiModel?: string;
+      skipValidation?: boolean;
+    }
   ): Promise<RelationAnalysis> {
+    const aiProvider = options?.aiProvider || 'openai';
+    const aiModel = options?.aiModel || 'gpt-4';
     const prompt = `分析以下两个法条之间的关系：
 
 【法条A】
@@ -86,23 +103,85 @@ export class AIDetector {
 
       const result = JSON.parse(response) as RelationAnalysis;
 
-      // 过滤掉低置信度和无关系的结果
+      // 过滤掉无关系的结果
       result.relations = result.relations.filter(
-        (r: RelationInfo) =>
-          r.confidence >= AI_DETECTOR_CONFIG.minConfidenceThreshold &&
-          r.type !== 'NONE'
+        (r: RelationInfo) => r.type !== 'NONE'
       );
+
+      // 如果不跳过验证，进行置信度阈值验证
+      if (!options?.skipValidation) {
+        for (const relation of result.relations) {
+          if (relation.type !== 'NONE') {
+            const validation = AIConfidenceConfig.validateThreshold(
+              relation.confidence,
+              relation.type as RelationType,
+              {
+                aiProvider,
+                aiModel,
+              }
+            );
+            relation.validation = validation;
+
+            // 标记低于最小阈值的关系
+            if (validation.action === 'REJECT') {
+              logger.warn(`AI检测关系置信度过低，将被过滤`, {
+                article1Id: article1.id,
+                article2Id: article2.id,
+                relationType: relation.type,
+                confidence: relation.confidence,
+                threshold: validation.threshold,
+              });
+            }
+          }
+        }
+
+        // 过滤掉被拒绝的关系
+        result.relations = result.relations.filter(
+          r => r.validation?.action !== 'REJECT'
+        );
+      } else {
+        // 跳过验证时，仍然过滤低于最小阈值的
+        result.relations = result.relations.filter(
+          (r: RelationInfo) =>
+            r.confidence >= AI_DETECTOR_CONFIG.minConfidenceThreshold
+        );
+      }
+
+      // 添加AI元数据
+      result.aiProvider = aiProvider;
+      result.aiModel = aiModel;
+      result.aiConfidence =
+        result.relations.length > 0
+          ? Math.max(...result.relations.map(r => r.confidence))
+          : 0;
+
+      logger.info('AI关系检测完成', {
+        article1Id: article1.id,
+        article2Id: article2.id,
+        relationsCount: result.relations.length,
+        aiProvider,
+        aiModel,
+      });
 
       return result;
     } catch (error) {
-      console.error('AI关系检测失败:', error);
+      logger.error('AI关系检测失败', {
+        error,
+        article1Id: article1.id,
+        article2Id: article2.id,
+      });
 
       // 降级处理
       if (AI_DETECTOR_CONFIG.fallbackToRuleBasedOnError) {
-        console.log('AI服务失败，使用规则匹配降级');
+        logger.info('AI服务失败，使用规则匹配降级');
       }
 
-      return { relations: [] };
+      return {
+        relations: [],
+        aiProvider,
+        aiModel,
+        aiConfidence: 0,
+      };
     }
   }
 
@@ -111,11 +190,17 @@ export class AIDetector {
    *
    * @param sourceArticle 源法条
    * @param candidateArticles 候选法条列表
+   * @param options 可选参数
    * @returns 关系分析结果映射
    */
   static async batchDetectRelations(
     sourceArticle: LawArticle,
-    candidateArticles: LawArticle[]
+    candidateArticles: LawArticle[],
+    options?: {
+      aiProvider?: string;
+      aiModel?: string;
+      skipValidation?: boolean;
+    }
   ): Promise<Map<string, RelationAnalysis>> {
     // 先用规则过滤，只对可能相关的法条调用AI
     const filtered = candidateArticles.filter(candidate =>
@@ -125,7 +210,10 @@ export class AIDetector {
     // 检查成本限制
     const estimatedCost = 0.05 * filtered.length;
     if (!(await AICostMonitor.trackCall(estimatedCost))) {
-      console.log('AI成本限制，跳过批量检测');
+      logger.info('AI成本限制，跳过批量检测', {
+        estimatedCost,
+        filteredCount: filtered.length,
+      });
       return new Map();
     }
 
@@ -133,14 +221,34 @@ export class AIDetector {
 
     // 批量调用AI
     const batchSize = AI_DETECTOR_CONFIG.maxBatchSize;
+    let totalRelations = 0;
+    let totalRejected = 0;
+
     for (let i = 0; i < filtered.length; i += batchSize) {
       const batch = filtered.slice(i, i + batchSize);
       const promises = batch.map(candidate =>
-        this.detectRelations(sourceArticle, candidate)
-          .then(result => ({ id: candidate.id, result }))
+        this.detectRelations(sourceArticle, candidate, options)
+          .then(result => {
+            totalRelations += result.relations.length;
+            totalRejected += result.relations.filter(
+              r => r.validation?.action === 'REJECT'
+            ).length;
+            return { id: candidate.id, result };
+          })
           .catch(error => {
-            console.error(`分析法条 ${candidate.id} 失败:`, error);
-            return { id: candidate.id, result: { relations: [] } };
+            logger.error(`分析法条 ${candidate.id} 失败`, {
+              error,
+              candidateId: candidate.id,
+            });
+            return {
+              id: candidate.id,
+              result: {
+                relations: [],
+                aiProvider: options?.aiProvider || 'openai',
+                aiModel: options?.aiModel || 'gpt-4',
+                aiConfidence: 0,
+              },
+            };
           })
       );
 
@@ -149,6 +257,16 @@ export class AIDetector {
         results.set(id, result);
       }
     }
+
+    logger.info('批量AI关系检测完成', {
+      sourceArticleId: sourceArticle.id,
+      candidateCount: candidateArticles.length,
+      filteredCount: filtered.length,
+      resultsCount: results.size,
+      totalRelations,
+      totalRejected,
+      skipValidation: options?.skipValidation,
+    });
 
     return results;
   }

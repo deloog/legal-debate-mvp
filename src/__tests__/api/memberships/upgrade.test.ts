@@ -32,7 +32,7 @@ jest.mock('@/lib/middleware/auth', () => ({
 describe('/api/memberships/upgrade', () => {
   let mockGetAuthUser: jest.Mock;
   let mockFindFirst: jest.Mock;
-  let mockUpdate: jest.Mock;
+  let __mockUpdate: jest.Mock;
   let mockFindUnique: jest.Mock;
   let mockCreateHistory: jest.Mock;
   let mockTransaction: jest.Mock;
@@ -41,7 +41,7 @@ describe('/api/memberships/upgrade', () => {
     jest.clearAllMocks();
     mockGetAuthUser = getAuthUserImported as jest.Mock;
     mockFindFirst = prisma.userMembership.findFirst as jest.Mock;
-    mockUpdate = prisma.userMembership.update as jest.Mock;
+    __mockUpdate = prisma.userMembership.update as jest.Mock;
     mockFindUnique = prisma.membershipTier.findUnique as jest.Mock;
     mockCreateHistory = prisma.membershipHistory.create as jest.Mock;
     mockTransaction = prisma.$transaction as jest.Mock;

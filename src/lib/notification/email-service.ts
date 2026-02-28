@@ -216,7 +216,7 @@ class DevEmailService {
  */
 class ProdEmailService {
   async sendFollowUpTaskEmail(
-    task: FollowUpTask,
+    _task: FollowUpTask,
     clientEmail: string
   ): Promise<EmailSendResult> {
     logger.warn(

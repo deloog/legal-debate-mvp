@@ -9,7 +9,7 @@
 
 import * as d3 from 'd3';
 import { prisma } from '@/lib/db';
-import { LawArticleRelation, VerificationStatus } from '@prisma/client';
+import { VerificationStatus } from '@prisma/client';
 
 /**
  * 图节点

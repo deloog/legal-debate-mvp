@@ -1,5 +1,9 @@
 import { DocumentParser } from '../../ai/document-parser';
-import { PrecisionAmountExtractor } from '../../extraction/amount-extractor-precision';
+import {
+  PrecisionAmountExtractor,
+  type AmountExtractionResult,
+  type AmountValidationResult,
+} from '../../extraction/amount-extractor-precision';
 
 // =============================================================================
 // 依赖注入容器
@@ -10,14 +14,24 @@ export interface IDocumentParser {
 }
 
 export interface IAmountExtractor {
-  extractWithPrecision(text: string): Promise<any[]>;
-  validateAmountConsistency(amounts: any[]): any;
+  extractWithPrecision(text: string): Promise<AmountExtractionResult[]>;
+  validateAmountConsistency(amounts: AmountExtractionResult[]): AmountValidationResult;
+}
+
+export interface AppConfig {
+  maxConcurrentDocuments: number;
+  defaultTimeout: number;
+  enableDebugLogging: boolean;
+  security: {
+    maxFileSize: number;
+    allowedPaths: string[];
+  };
 }
 
 export class ServiceContainer {
   private static instance: ServiceContainer;
-  private services: Map<string, any> = new Map();
-  private factories: Map<string, () => any> = new Map();
+  private services: Map<string, unknown> = new Map();
+  private factories: Map<string, () => unknown> = new Map();
 
   static getInstance(): ServiceContainer {
     if (!ServiceContainer.instance) {
@@ -37,7 +51,7 @@ export class ServiceContainer {
   get<T>(key: string): T {
     // 如果已有实例，直接返回
     if (this.services.has(key)) {
-      return this.services.get(key);
+      return this.services.get(key) as T;
     }
 
     // 如果有工厂方法，创建新实例
@@ -45,7 +59,7 @@ export class ServiceContainer {
       const factory = this.factories.get(key)!;
       const instance = factory();
       this.services.set(key, instance);
-      return instance;
+      return instance as T;
     }
 
     throw new Error(`服务未注册: ${key}`);
@@ -103,8 +117,8 @@ export function getAmountExtractor(): IAmountExtractor {
   );
 }
 
-export function getConfig(): any {
-  return ServiceContainer.getInstance().get('config');
+export function getConfig(): AppConfig {
+  return ServiceContainer.getInstance().get<AppConfig>('config');
 }
 
 // 初始化默认服务

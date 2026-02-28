@@ -179,7 +179,7 @@ describe('法条审核API', () => {
       );
       const params = Promise.resolve({ id: mockArticleId });
 
-      const response = await POST(request, { params });
+      const __response = await POST(request, { params });
 
       expect(consoleSpy).toHaveBeenCalledWith(
         `审核法条 ${mockArticleId}: ${reviewData.status}, 备注: ${reviewData.comment}`

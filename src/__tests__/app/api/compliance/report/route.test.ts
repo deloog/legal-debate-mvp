@@ -142,7 +142,7 @@ describe('合规报告API测试', () => {
       );
 
       const response = await GET(request);
-      const data = await response.json();
+      const __data = await response.json();
 
       expect(response.status).toBe(200);
       expect(ComplianceService.generateReport).toHaveBeenCalledWith(

@@ -11,7 +11,10 @@ interface AnalysisResult {
   totalArticles: number;
   missingEffectiveDate: number;
   missingPercentage: number;
-  byDataSource: Record<string, { total: number; missing: number; percentage: number }>;
+  byDataSource: Record<
+    string,
+    { total: number; missing: number; percentage: number }
+  >;
   byStatus: Record<string, { total: number; missing: number }>;
   sampleMissingArticles: Array<{
     id: string;
@@ -61,7 +64,9 @@ async function analyzeMissingEffectiveDate(): Promise<AnalysisResult> {
   result.missingPercentage =
     (result.missingEffectiveDate / result.totalArticles) * 100;
 
-  console.log(`❌ 缺少有效日期的法条: ${result.missingEffectiveDate} (${result.missingPercentage.toFixed(2)}%)`);
+  console.log(
+    `❌ 缺少有效日期的法条: ${result.missingEffectiveDate} (${result.missingPercentage.toFixed(2)}%)`
+  );
 
   // 3. 按数据源分析
   console.log('\n📁 按数据源统计缺失情况:');
@@ -112,9 +117,7 @@ async function analyzeMissingEffectiveDate(): Promise<AnalysisResult> {
       missing: statusMissing,
     };
 
-    console.log(
-      `   ${status.status}: ${statusMissing}/${statusTotal} 缺失`
-    );
+    console.log(`   ${status.status}: ${statusMissing}/${statusTotal} 缺失`);
   }
 
   // 5. 分析样本数据
@@ -141,7 +144,9 @@ async function analyzeMissingEffectiveDate(): Promise<AnalysisResult> {
   for (const article of missingArticles) {
     console.log(`   - [${article.id}] ${article.lawName}`);
     console.log(`     法条编号: ${article.articleNumber}`);
-    console.log(`     数据源: ${article.dataSource}, sourceId: ${article.sourceId || '无'}`);
+    console.log(
+      `     数据源: ${article.dataSource}, sourceId: ${article.sourceId || '无'}`
+    );
     console.log(`     状态: ${article.status}, 创建时间: ${article.createdAt}`);
     console.log('');
 
@@ -176,7 +181,9 @@ async function analyzeMissingEffectiveDate(): Promise<AnalysisResult> {
     },
   });
   result.potentialFixes.fromBackupFields = withFullText - withSourceId;
-  console.log(`   可从 fullText 推导: ${result.potentialFixes.fromBackupFields} 条`);
+  console.log(
+    `   可从 fullText 推导: ${result.potentialFixes.fromBackupFields} 条`
+  );
 
   // 6.3 完全缺失数据的
   const needManual = await prisma.lawArticle.count({
@@ -225,7 +232,9 @@ async function generateFixStrategy(result: AnalysisResult): Promise<void> {
 
   console.log('\n📋 修复策略:');
   console.log('1. 优先处理有 sourceId 的法条');
-  console.log('   - 通过 sourceId 查询 FLK API 获取 sxrq (生效日期) 和 gbrq (公布日期)');
+  console.log(
+    '   - 通过 sourceId 查询 FLK API 获取 sxrq (生效日期) 和 gbrq (公布日期)'
+  );
   console.log('   - 如果 sxrq 存在，使用 sxrq');
   console.log('   - 否则使用 gbrq');
 
@@ -244,7 +253,9 @@ async function generateFixStrategy(result: AnalysisResult): Promise<void> {
 
   // 统计各种情况的数量
   console.log('\n📊 修复工作量预估:');
-  console.log(`   可自动修复: ${result.potentialFixes.fromSourceId + result.potentialFixes.fromBackupFields} 条`);
+  console.log(
+    `   可自动修复: ${result.potentialFixes.fromSourceId + result.potentialFixes.fromBackupFields} 条`
+  );
   console.log(`   需手动处理: ${result.potentialFixes.needManual} 条`);
 }
 

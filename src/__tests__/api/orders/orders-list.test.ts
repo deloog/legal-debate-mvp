@@ -203,7 +203,7 @@ describe('GET /api/orders', () => {
         'http://localhost:3000/api/orders?status=PAID'
       );
 
-      const response = await GET(request);
+      const __response = await GET(request);
 
       expect(getUserOrders as jest.Mock).toHaveBeenCalledWith(
         mockSession.user.id,
@@ -218,7 +218,7 @@ describe('GET /api/orders', () => {
         'http://localhost:3000/api/orders?page=2&limit=10'
       );
 
-      const response = await GET(request);
+      const __response = await GET(request);
 
       expect(getUserOrders as jest.Mock).toHaveBeenCalledWith(
         mockSession.user.id,

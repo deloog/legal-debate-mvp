@@ -1097,7 +1097,7 @@ describe('AIEvidenceChainBuilder', () => {
     });
 
     it('should handle report with no key findings', () => {
-      const request: EvidenceChainAnalysisRequest = {
+      const __request: EvidenceChainAnalysisRequest = {
         caseId: 'case-024',
         evidences: [
           {

@@ -1,13 +1,27 @@
+/**
+ * 辩论数据管理Hook集合
+ *
+ * 提供以下Hook：
+ * 1. useDebate: 获取辩论详情、轮次和论点数据
+ *    - 支持定时刷新（默认5秒）
+ *    - 自动查找当前进行中的轮次
+ *    - 并行请求多个API提升性能
+ *
+ * 2. useGroupedArguments: 将论点按正反方分组
+ *    - 支持PLAINTIFF（原告）、DEFENDANT（被告）
+ *    - NEUTRAL类型默认分配给原告方
+ *
+ * 3. useArgumentsByRound: 根据轮次ID筛选论点
+ *    - 用于展示特定轮次的论点列表
+ *
+ * @module useDebate
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Debate, DebateRound, Argument } from '@prisma/client';
 import { DEBATE_API } from '@/lib/constants/api-paths';
-
-/**
- * 辩论数据Hook
- * 功能：获取辩论详情、轮次和论点数据
- */
 export interface DebateData {
   debate: Debate | null;
   rounds: DebateRound[];
@@ -22,7 +36,10 @@ export interface UseDebateOptions {
   refreshInterval?: number;
 }
 
-export function useDebate(debateId, refreshInterval = 5000): DebateData {
+export function useDebate(
+  debateId: string,
+  refreshInterval = 5000
+): DebateData {
   const [debate, setDebate] = useState<Debate | null>(null);
   const [rounds, setRounds] = useState<DebateRound[]>([]);
   const [currentRound, setCurrentRound] = useState<DebateRound | null>(null);
@@ -47,11 +64,13 @@ export function useDebate(debateId, refreshInterval = 5000): DebateData {
           throw new Error('获取辩论信息失败');
         }
 
-        const debateData: Debate = await debateRes.json();
+        const debateResponse = await debateRes.json();
+        const debateData: Debate = debateResponse.data;
         setDebate(debateData);
 
         if (roundsRes.ok) {
-          const roundsData: DebateRound[] = await roundsRes.json();
+          const roundsResponse = await roundsRes.json();
+          const roundsData: DebateRound[] = roundsResponse.data || [];
           setRounds(roundsData);
 
           // 找到当前轮次（状态为IN_PROGRESS的最新轮次）
@@ -60,7 +79,8 @@ export function useDebate(debateId, refreshInterval = 5000): DebateData {
         }
 
         if (argsRes.ok) {
-          const argsData: Argument[] = await argsRes.json();
+          const argsResponse = await argsRes.json();
+          const argsData: Argument[] = argsResponse.data || [];
           setArgumentList(argsData);
         }
       } catch (err) {

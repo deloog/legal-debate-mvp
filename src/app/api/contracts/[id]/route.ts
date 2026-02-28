@@ -18,7 +18,7 @@ import { logger } from '@/lib/logger';
  * 获取合同详情
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<unknown> | ErrorResponse>> {
   try {

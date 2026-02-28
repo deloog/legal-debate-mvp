@@ -99,7 +99,7 @@ export class ReportService {
     format: ExportFormat
   ): Promise<{ downloadUrl: string; fileName: string }> {
     // 模拟导出逻辑
-    const timestamp = Date.now();
+    const _timestamp = Date.now();
     const extension = this.getFileExtension(format);
     const fileName = `${reportId}.${extension}`;
     const downloadUrl = `/downloads/${fileName}`;

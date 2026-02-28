@@ -156,3 +156,189 @@ export interface UpdateContractInput {
   startDate?: Date;
   endDate?: Date;
 }
+
+// =============================================================================
+// 合同履约监控类型
+// =============================================================================
+
+/**
+ * 履约节点状态
+ */
+export type MilestoneStatus =
+  | 'PENDING'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'OVERDUE'
+  | 'CANCELLED';
+
+/**
+ * 履约节点状态常量
+ */
+export const MilestoneStatusValues = {
+  PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  OVERDUE: 'OVERDUE',
+  CANCELLED: 'CANCELLED',
+} as const;
+
+/**
+ * 异常类型
+ */
+export type AnomalyType =
+  | 'EARLY_PAYMENT'
+  | 'LATE_PAYMENT'
+  | 'UNVERIFIED_PAYMENT'
+  | 'EARLY_DELIVERY'
+  | 'LATE_DELIVERY'
+  | 'QUALITY_ISSUE'
+  | 'OTHER';
+
+/**
+ * 异常类型常量
+ */
+export const AnomalyTypeValues = {
+  EARLY_PAYMENT: 'EARLY_PAYMENT',
+  LATE_PAYMENT: 'LATE_PAYMENT',
+  UNVERIFIED_PAYMENT: 'UNVERIFIED_PAYMENT',
+  EARLY_DELIVERY: 'EARLY_DELIVERY',
+  LATE_DELIVERY: 'LATE_DELIVERY',
+  QUALITY_ISSUE: 'QUALITY_ISSUE',
+  OTHER: 'OTHER',
+} as const;
+
+/**
+ * 创建合同履约节点请求
+ */
+export interface CreateContractPerformanceInput {
+  contractId: string;
+  milestone: string;
+  milestoneDate: Date;
+  description?: string;
+  milestoneType?: 'payment' | 'delivery' | 'milestone' | 'deadline';
+  responsibleParty?: string;
+  responsibleRole?: string;
+  caseId?: string;
+  notes?: string;
+  reminderEnabled?: boolean;
+  reminderDays?: number[];
+}
+
+/**
+ * 更新合同履约节点请求
+ */
+export interface UpdateContractPerformanceInput {
+  milestone?: string;
+  milestoneDate?: Date;
+  description?: string;
+  milestoneType?: string;
+  actualDate?: Date;
+  actualAmount?: number;
+  variance?: number;
+  varianceReason?: string;
+  milestoneStatus?: MilestoneStatus;
+  isAnomalous?: boolean;
+  anomalyType?: AnomalyType;
+  anomalyDescription?: string;
+  recommendedAction?: string;
+  responsibleParty?: string;
+  responsibleRole?: string;
+  notes?: string;
+  reminderEnabled?: boolean;
+  reminderDays?: number[];
+}
+
+/**
+ * 合同履约节点查询参数
+ */
+export interface ContractPerformanceQueryParams {
+  contractId?: string;
+  milestoneStatus?: MilestoneStatus;
+  isAnomalous?: boolean;
+  caseId?: string;
+  startDate?: Date;
+  endDate?: Date;
+  page?: number;
+  limit?: number;
+}
+
+/**
+ * 合同履约节点响应
+ */
+export interface ContractPerformanceResponse {
+  id: string;
+  contractId: string;
+  milestone: string;
+  milestoneDate: Date;
+  milestoneStatus: MilestoneStatus;
+  description?: string;
+  milestoneType?: string;
+  actualDate?: Date;
+  actualAmount?: number;
+  variance?: number;
+  varianceReason?: string;
+  isAnomalous: boolean;
+  anomalyType?: AnomalyType;
+  anomalyDescription?: string;
+  recommendedAction?: string;
+  reminderEnabled: boolean;
+  reminderDays: number[];
+  reminderSent: boolean;
+  reminderCount: number;
+  lastReminderAt?: Date;
+  responsibleParty?: string;
+  responsibleRole?: string;
+  caseId?: string;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * 创建提醒配置请求
+ */
+export interface CreateReminderConfigInput {
+  enterpriseId?: string;
+  userId?: string;
+  reminderType: string;
+  enabled?: boolean;
+  channels?: string[];
+  advanceDays?: number[];
+  timeOfDay?: string;
+  isRecurring?: boolean;
+  recurringPattern?: string;
+}
+
+/**
+ * 更新提醒配置请求
+ */
+export interface UpdateReminderConfigInput {
+  enabled?: boolean;
+  channels?: string[];
+  advanceDays?: number[];
+  timeOfDay?: string;
+  isRecurring?: boolean;
+  recurringPattern?: string;
+  isActive?: boolean;
+}
+
+/**
+ * 提醒配置响应
+ */
+export interface ReminderConfigResponse {
+  id: string;
+  enterpriseId?: string;
+  userId?: string;
+  reminderType: string;
+  enabled: boolean;
+  channels: string[];
+  advanceDays: number[];
+  timeOfDay?: string;
+  isRecurring: boolean;
+  recurringPattern?: string;
+  isActive: boolean;
+  totalRemindersSent: number;
+  lastSentAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}

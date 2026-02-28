@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    /**
+     * TypeScript Strict Mode Configuration
+     *
+     * This configuration enables strict type checking to improve code quality and catch potential bugs.
+     *
+     * USAGE:
+     * 1. For development/testing: Use this config to check code with strict mode
+     *    npx tsc --noEmit --project tsconfig.strict.json
+     *
+     * 2. Before enabling: Fix all errors found by strict mode
+     *
+     * 3. To enable in production: Remove strict overrides from tsconfig.json
+     *    and copy these compilerOptions to the main config.
+     *
+     * MIGRATION PLAN: See docs/plans/typescript-strict-migration.md
+     */
+
+    /**
+     * Enable all strict type checking options
+     */
+    "strict": true,
+
+    /**
+     * Disallow implicit 'any' types
+     * Variables, parameters, and return types must have explicit types
+     *
+     * Example:
+     * ❌ function add(a, b) { return a + b; }
+     * ✅ function add(a: number, b: number): number { return a + b; }
+     */
+    "noImplicitAny": true,
+
+    /**
+     * Strict null checking
+     * Null and undefined must be explicitly handled
+     *
+     * Example:
+     * ❌ const name: string = getName(); // May be undefined
+     * ✅ const name: string | undefined = getName();
+     * ✅ if (name) { console.log(name); }
+     */
+    "strictNullChecks": true,
+
+    /**
+     * Strict function types
+     * Function parameter bivariance is disabled
+     * Prevents unsafe function type assignments
+     */
+    "strictFunctionTypes": true,
+
+    /**
+     * Strict bind call apply
+     * Checks if call(), bind(), and apply() are used correctly
+     */
+    "strictBindCallApply": true,
+
+    /**
+     * Strict property initialization
+     * Class properties must be initialized in the constructor
+     *
+     * Example:
+     * ❌ class User { name: string; }
+     * ✅ class User { name: string; constructor(name: string) { this.name = name; } }
+     * ✅ class User { name!: string; } // Definite assignment assertion
+     */
+    "strictPropertyInitialization": true,
+
+    /**
+     * No implicit 'this'
+     * 'this' must be explicitly typed when used in functions
+     *
+     * Example:
+     * ❌ function getName() { return this.name; }
+     * ✅ function getName(this: { name: string }) { return this.name; }
+     */
+    "noImplicitThis": true,
+
+    /**
+     * Always strict
+     * Parse in strict mode and emit "use strict" for each source file
+     */
+    "alwaysStrict": true,
+
+    /**
+     * Additional type safety options (recommended)
+     */
+
+    /**
+     * No unused locals
+     * Report errors on unused local variables
+     */
+    "noUnusedLocals": true,
+
+    /**
+     * No unused parameters
+     * Report errors on unused parameters
+     * Note: Prefix with _ to intentionally ignore: function test(_unused: string)
+     */
+    "noUnusedParameters": true,
+
+    /**
+     * No implicit returns
+     * Report error when not all code paths return a value
+     */
+    "noImplicitReturns": true,
+
+    /**
+     * No fallthrough cases in switch
+     * Report errors for fallthrough cases in switch statements
+     */
+    "noFallthroughCasesInSwitch": true,
+
+    /**
+     * No unchecked indexed access
+     * Report errors when accessing array/object indices that might be undefined
+     */
+    "noUncheckedIndexedAccess": true,
+
+    /**
+     * No implicit override
+     * Require explicit @override annotation for overridden methods
+     */
+    "noImplicitOverride": true,
+
+    /**
+     * No property access from index signature
+     * Disallow access to properties of index signatures using . notation
+     */
+    "noPropertyAccessFromIndexSignature": false,
+
+    /**
+     * Allow unused labels
+     * Allow unused labels (continue labels, etc.)
+     */
+    "allowUnusedLabels": false,
+
+    /**
+     * Allow unreachable code
+     * Report errors for unreachable code
+     */
+    "allowUnreachableCode": false,
+
+    /**
+     * Exact optional property types
+     * Make optional properties exact (no matching undefined properties)
+     */
+    "exactOptionalPropertyTypes": false,
+
+    /**
+     * Skip lib check
+     * Skip type checking of declaration files
+     * Useful when third-party type definitions have issues
+     */
+    "skipLibCheck": true
+  },
+
+  /**
+   * Exclude patterns
+   * These patterns are excluded from type checking
+   */
+  "exclude": [
+    "node_modules",
+    ".next",
+    "out",
+    "build",
+    "coverage",
+    "test-results",
+    "playwright-report",
+    "*.config.js",
+    "*.config.mjs",
+    "dist",
+    "data",
+    "backups",
+    "public/uploads",
+    "scripts/archive",
+    "scripts/crawler/archive"
+  ],
+
+  /**
+   * Include patterns
+   * Only these files are included in type checking
+   */
+  "include": ["src/**/*", "prisma/**/*", "scripts/**/*.ts"]
+}

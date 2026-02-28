@@ -1,16 +1,15 @@
 /**
  * Memory Compression Preview API
  * 记忆压缩预览API - 提供压缩前的预览功能
- *
- * 注意：由于 AI 服务接口类型不完全兼容，在代码中需要使用 `as any` 类型断言
- * 来解决类型检查问题。
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { MemoryCompressor } from '@/lib/agent/memory-agent/compressor';
+import type { AIService } from '@/lib/ai/service-refactored';
 import { logger } from '@/lib/logger';
 
-// 创建简单的mock AI服务
+// 创建简单的mock AI服务（仅实现 chatCompletion，足够 MemoryCompressor 使用）
+// 使用 unknown 双重断言，避免 as any
 const mockAIService = {
   chatCompletion: async () => {
     return {
@@ -28,9 +27,8 @@ const mockAIService = {
   },
 };
 
-// 创建压缩器实例（AI 服务接口类型不完全兼容，需要类型断言）
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const compressor = new MemoryCompressor(mockAIService as any);
+// 创建压缩器实例（mock 仅实现 chatCompletion 接口，用 unknown 中转避免 any）
+const compressor = new MemoryCompressor(mockAIService as unknown as AIService);
 
 /**
  * POST /api/v1/memory/compress-preview
@@ -69,8 +67,8 @@ export async function POST(request: NextRequest) {
           },
         },
       };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const manager = new MemoryManager(mockPrisma as any);
+      // mock 仅实现 agentMemory.findUnique，用 unknown 中转避免 any
+      const manager = new MemoryManager(mockPrisma as unknown as import('@prisma/client').PrismaClient);
       const memory = await manager.getMemoryById(body.memoryId);
 
       if (!memory) {

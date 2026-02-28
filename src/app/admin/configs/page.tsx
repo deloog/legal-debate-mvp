@@ -1,3 +1,18 @@
+/**
+ * 系统配置管理页面
+ *
+ * 功能：
+ * 1. 查看和管理系统全局配置项（AI服务、存储、安全等）
+ * 2. 支持创建、更新、删除配置项
+ * 3. 实时显示操作结果通知（成功/失败）
+ * 4. 分页展示配置列表
+ * 5. 支持刷新和翻页操作
+ *
+ * 页面组件使用 SystemConfigViewer 子组件进行配置展示和操作
+ *
+ * @page /admin/configs
+ */
+
 'use client';
 
 import React, { useState, useCallback } from 'react';
@@ -28,6 +43,9 @@ export default function ConfigsPage() {
       const response = await fetch(
         `/api/admin/configs?page=${pageNum}&limit=20`
       );
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: 获取配置列表失败`);
+      }
       const result = await response.json();
       if (result.data) {
         setConfigs(result.data.configs);
@@ -54,6 +72,9 @@ export default function ConfigsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: 创建配置失败`);
+      }
       const result = await response.json();
       if (response.ok) {
         showNotification('success', '配置创建成功');
@@ -77,6 +98,9 @@ export default function ConfigsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: 更新配置失败`);
+      }
       const result = await response.json();
       if (response.ok) {
         showNotification('success', '配置更新成功');
@@ -98,6 +122,9 @@ export default function ConfigsPage() {
       const response = await fetch(`/api/admin/configs/${key}`, {
         method: 'DELETE',
       });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: 删除配置失败`);
+      }
       const result = await response.json();
       if (response.ok) {
         showNotification('success', '配置删除成功');

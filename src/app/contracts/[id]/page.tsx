@@ -71,6 +71,7 @@ export default function ContractDetailPage() {
 
   useEffect(() => {
     loadContract();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   async function loadContract() {
@@ -79,6 +80,11 @@ export default function ContractDetailPage() {
       setError(null);
 
       const response = await fetch(`/api/contracts/${params.id}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: 加载合同详情失败`);
+      }
+
       const result = await response.json();
 
       if (result.success) {

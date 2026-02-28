@@ -65,8 +65,8 @@ interface TestResult {
 // =============================================================================
 
 function evaluateDebateQuality(
-  title: string,
-  description: string,
+  _title: string,
+  _description: string,
   debateContent: string
 ): DebateQuality {
   // 简单的启发式评估

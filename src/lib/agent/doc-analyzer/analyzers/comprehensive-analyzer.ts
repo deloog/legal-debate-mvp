@@ -528,8 +528,8 @@ export class ComprehensiveAnalyzer {
    * 计算当事人-诉讼请求得分
    */
   private calculatePartyClaimScore(
-    parties: Party[],
-    claims: Claim[],
+    _parties: Party[],
+    _claims: Claim[],
     issues: ConsistencyIssue[]
   ): number {
     let score = 1;
@@ -578,7 +578,7 @@ export class ComprehensiveAnalyzer {
    * 计算证据得分
    */
   private calculateEvidenceScore(
-    claims: Claim[],
+    _claims: Claim[],
     issues: ConsistencyIssue[]
   ): number {
     let score = 1;

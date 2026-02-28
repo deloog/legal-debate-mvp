@@ -61,7 +61,7 @@ async function main(): Promise<void> {
 
   // 4. 全文长度分布
   console.log('\n[4] 全文长度分布');
-  const lengthStats = await prisma.$queryRaw`
+  const lengthStats = (await prisma.$queryRaw`
     SELECT
       CASE
         WHEN LENGTH(full_text) <= 100 THEN '0-100'
@@ -75,7 +75,7 @@ async function main(): Promise<void> {
     WHERE data_source = 'flk'
     GROUP BY range
     ORDER BY MIN(LENGTH(full_text))
-  ` as Array<{ range: string; count: bigint }>;
+  `) as Array<{ range: string; count: bigint }>;
   lengthStats.forEach(stat => {
     console.log(`    ${stat.range.padEnd(10)}: ${stat.count} 条`);
   });
@@ -107,14 +107,17 @@ async function main(): Promise<void> {
 
     console.log(`\n  【${category}】共 ${samples.length} 条样本:`);
     for (const sample of samples) {
-      const textPreview = sample.fullText.length > 100
-        ? sample.fullText.substring(0, 100) + '...'
-        : sample.fullText;
+      const textPreview =
+        sample.fullText.length > 100
+          ? sample.fullText.substring(0, 100) + '...'
+          : sample.fullText;
       console.log(`    ─────────────────────────────────────────────────────`);
       console.log(`    名称: ${sample.lawName}`);
       console.log(`    类型: ${sample.lawType} | 分类: ${sample.category}`);
       console.log(`    发布机关: ${sample.issuingAuthority}`);
-      console.log(`    生效日期: ${sample.effectiveDate?.toISOString().split('T')[0] || 'N/A'}`);
+      console.log(
+        `    生效日期: ${sample.effectiveDate?.toISOString().split('T')[0] || 'N/A'}`
+      );
       console.log(`    全文长度: ${sample.fullText.length} 字符`);
       console.log(`    状态: ${sample.status}`);
       console.log(`    预览: ${textPreview.replace(/\n/g, ' ')}`);
@@ -127,14 +130,14 @@ async function main(): Promise<void> {
   console.log('='.repeat(70));
 
   // 6.1 过短全文（使用原生 SQL）
-  const shortRecords = await prisma.$queryRaw`
+  const shortRecords = (await prisma.$queryRaw`
     SELECT id, law_name, full_text, law_type, category, issuing_authority, effective_date, status
     FROM law_articles
     WHERE data_source = 'flk'
       AND (LENGTH(full_text) <= 50 OR full_text = '' OR full_text = ' ')
     ORDER BY LENGTH(full_text) ASC
     LIMIT 5
-  ` as Array<{
+  `) as Array<{
     id: string;
     law_name: string;
     full_text: string;
@@ -147,17 +150,16 @@ async function main(): Promise<void> {
 
   console.log(`\n  [6.1] 全文过短记录 (<=50字符): ${shortRecords.length} 条`);
   shortRecords.forEach(rec => {
-    console.log(`    - ${rec.law_name.substring(0, 40)} (${rec.full_text.length}字符)`);
+    console.log(
+      `    - ${rec.law_name.substring(0, 40)} (${rec.full_text.length}字符)`
+    );
   });
 
   // 6.2 缺失字段
   const missingAuthority = await prisma.lawArticle.count({
     where: {
       dataSource: 'flk',
-      OR: [
-        { issuingAuthority: { equals: '未知' } },
-        { issuingAuthority: '' },
-      ],
+      OR: [{ issuingAuthority: { equals: '未知' } }, { issuingAuthority: '' }],
     },
   });
   console.log(`\n  [6.2] 缺失发布机关: ${missingAuthority} 条`);

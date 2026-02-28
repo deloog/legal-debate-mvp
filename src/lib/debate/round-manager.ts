@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/db/prisma';
 import { RoundStatus, DebateStatus } from '@prisma/client';
 
@@ -47,7 +48,12 @@ export async function transitionRoundStatus(
   }
 
   // 更新轮次状态
-  const updateData: any = {
+  const updateData: {
+    status: RoundStatus;
+    updatedAt: Date;
+    startedAt?: Date;
+    completedAt?: Date;
+  } = {
     status: newStatus,
     updatedAt: new Date(),
   };
@@ -155,7 +161,7 @@ async function logRoundStatusChange(
     });
   } catch (error) {
     // 日志记录失败不影响主要流程
-    console.warn('Failed to log round status change:', error);
+    logger.warn('Failed to log round status change:', error);
   }
 }
 
@@ -184,7 +190,8 @@ export async function startNewRound(
     throw new Error(`辩论 ${debateId} 不存在`);
   }
 
-  const maxRounds = (debate.debateConfig as any)?.maxRounds || 3;
+  const debateConfig = debate.debateConfig as unknown as { maxRounds?: number } | null;
+  const maxRounds = debateConfig?.maxRounds ?? 3;
   if (roundNumber > maxRounds) {
     throw new Error(`轮次 ${roundNumber} 超过最大限制 ${maxRounds}`);
   }

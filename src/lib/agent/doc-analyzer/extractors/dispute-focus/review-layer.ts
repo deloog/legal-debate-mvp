@@ -4,7 +4,8 @@
  */
 
 import { getUnifiedAIService } from '@/lib/ai/unified-service';
-import type { DisputeFocus } from '../../core/types';
+import type { DisputeFocus, DisputeFocusCategory } from '../../core/types';
+import { logger } from '../../../security/logger';
 
 /**
  * AI审查层 - 对争议焦点进行审查和修正
@@ -45,7 +46,7 @@ export async function aiReviewLayer(
 
     return focuses;
   } catch (error) {
-    console.error('AI审查层失败:', error);
+    logger.error('AI审查层失败', error instanceof Error ? error : new Error(String(error)));
     return focuses;
   }
 }
@@ -138,31 +139,38 @@ function parseAIReviewResponse(
     const reviewedItems = parsed.reviewedFocuses || [];
 
     return reviewedItems
-      .map((item: any) => {
+      .map((item: Record<string, unknown>) => {
         const original = originalFocuses.find(f => f.id === item.id);
+        const importance =
+          typeof item.importance === 'number' ? item.importance : 5;
+        const confidence =
+          typeof item.confidence === 'number' ? item.confidence : 0.8;
 
         return {
-          id: item.id,
-          category: item.category,
-          description: item.description || original?.description || '',
-          positionA: item.positionA || original?.positionA || '未明确',
-          positionB: item.positionB || original?.positionB || '未明确',
-          coreIssue: item.coreIssue || original?.coreIssue || '',
-          importance: Math.min(
-            10,
-            Math.max(1, Math.round(item.importance || 5))
-          ),
-          confidence: Math.min(1, Math.max(0, item.confidence || 0.8)),
+          id: item.id as string,
+          category: item.category as DisputeFocusCategory,
+          description:
+            (item.description as string) || original?.description || '',
+          positionA:
+            (item.positionA as string) || original?.positionA || '未明确',
+          positionB:
+            (item.positionB as string) || original?.positionB || '未明确',
+          coreIssue:
+            (item.coreIssue as string) || original?.coreIssue || '',
+          importance: Math.min(10, Math.max(1, Math.round(importance))),
+          confidence: Math.min(1, Math.max(0, confidence)),
           relatedClaims: original?.relatedClaims || [],
           relatedFacts: original?.relatedFacts || [],
-          evidence: item.evidence || original?.evidence || [],
-          legalBasis: item.legalBasis || original?.legalBasis,
-          _inferred: (item.confidence || 0.8) < 0.9,
+          evidence:
+            (item.evidence as string[]) || original?.evidence || [],
+          legalBasis:
+            (item.legalBasis as string | undefined) || original?.legalBasis,
+          _inferred: confidence < 0.9,
         };
       })
       .filter(item => !invalidIds.has(item.id));
   } catch (error) {
-    console.error('解析AI审查响应失败:', error);
+    logger.error('解析AI审查响应失败', error instanceof Error ? error : new Error(String(error)));
     return originalFocuses;
   }
 }

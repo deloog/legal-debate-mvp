@@ -49,7 +49,7 @@ describe('Middleware Security Tests', () => {
           origin: 'http://localhost:3000',
         },
       });
-      const context = createRequestContext(request);
+      const __context = createRequestContext(request);
 
       const response = NextResponse.next();
       await corsMiddleware(request, createRequestContext(request), response);

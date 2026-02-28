@@ -3,7 +3,12 @@
  * 按分类分批采集，避免内存溢出
  */
 
-import { flkCrawler, FLKCrawlOptions, FLKTypeCode, FLK_TYPE_CONFIGS } from '../../src/lib/crawler/flk-crawler';
+import {
+  flkCrawler,
+  FLKCrawlOptions,
+  FLKTypeCode,
+  FLK_TYPE_CONFIGS,
+} from '../../src/lib/crawler/flk-crawler';
 import { getLogger } from '../../src/lib/crawler/crawler-logger';
 import * as path from 'path';
 
@@ -73,7 +78,9 @@ export async function batchDownload(
     logger.info(`当前内存使用: ${memoryBefore}MB`);
 
     if (memoryBefore > config.maxMemoryUsage) {
-      logger.warn(`内存使用超过阈值 (${memoryBefore}MB > ${config.maxMemoryUsage}MB)，触发 GC`);
+      logger.warn(
+        `内存使用超过阈值 (${memoryBefore}MB > ${config.maxMemoryUsage}MB)，触发 GC`
+      );
       await waitForGC();
       const memoryAfter = await checkMemoryUsage();
       logger.info(`GC 后内存使用: ${memoryAfter}MB`);
@@ -108,16 +115,23 @@ export async function batchDownload(
 
       // 批次间延迟和清理
       if (i + config.batchSize < types.length) {
-        logger.info(`等待 ${config.delayBetweenBatches / 1000} 秒后处理下一批...`);
-        await new Promise(resolve => setTimeout(resolve, config.delayBetweenBatches));
-        
+        logger.info(
+          `等待 ${config.delayBetweenBatches / 1000} 秒后处理下一批...`
+        );
+        await new Promise(resolve =>
+          setTimeout(resolve, config.delayBetweenBatches)
+        );
+
         // 强制垃圾回收
         await waitForGC();
       }
     } catch (error) {
-      logger.error(`第 ${batchNumber}/${totalBatches} 批处理失败`, error instanceof Error ? error : undefined);
+      logger.error(
+        `第 ${batchNumber}/${totalBatches} 批处理失败`,
+        error instanceof Error ? error : undefined
+      );
       totalErrors++;
-      
+
       // 继续处理下一批，而不是中断
       continue;
     }
@@ -204,12 +218,19 @@ export async function batchParse(
 
       // 批次间延迟
       if (i + config.batchSize < types.length) {
-        logger.info(`等待 ${config.delayBetweenBatches / 1000} 秒后处理下一批...`);
-        await new Promise(resolve => setTimeout(resolve, config.delayBetweenBatches));
+        logger.info(
+          `等待 ${config.delayBetweenBatches / 1000} 秒后处理下一批...`
+        );
+        await new Promise(resolve =>
+          setTimeout(resolve, config.delayBetweenBatches)
+        );
         await waitForGC();
       }
     } catch (error) {
-      logger.error(`第 ${batchNumber}/${totalBatches} 批解析失败`, error instanceof Error ? error : undefined);
+      logger.error(
+        `第 ${batchNumber}/${totalBatches} 批解析失败`,
+        error instanceof Error ? error : undefined
+      );
       totalFailed++;
       continue;
     }
@@ -260,7 +281,7 @@ export async function batchCrawl(
  */
 export async function retryFailedDownloads(
   options: FLKCrawlOptions = {},
-  batchConfig: Partial<BatchConfig> = {}
+  _batchConfig: Partial<BatchConfig> = {}
 ): Promise<void> {
   const outputDir = options.outputDir || path.resolve('data/crawled/flk');
   const types = options.types || FLK_TYPE_CONFIGS.map(c => c.code);
@@ -272,9 +293,9 @@ export async function retryFailedDownloads(
     if (!typeConfig) continue;
 
     // 检查该分类是否有失败的项
-    const stats = flkCrawler.getStats(outputDir);
-    const checkpointPath = path.join(outputDir, 'checkpoint.json');
-    
+    const __stats = flkCrawler.getStats(outputDir);
+    const __checkpointPath = path.join(outputDir, 'checkpoint.json');
+
     // 这里需要读取 checkpoint 查找失败的项
     // 简化处理：重新执行下载，会自动跳过已完成的
     logger.info(`重试分类: ${typeConfig.label}`);

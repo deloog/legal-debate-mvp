@@ -105,7 +105,7 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/debates/${mockDebateId}/recommendations`
       );
-      const params = { params: { id: mockDebateId } };
+      const params = { params: Promise.resolve({ id: mockDebateId }) };
 
       // Act
       const response = await GET(request, params);
@@ -150,7 +150,7 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/debates/${mockDebateId}/recommendations?limit=5`
       );
-      const params = { params: { id: mockDebateId } };
+      const params = { params: Promise.resolve({ id: mockDebateId }) };
 
       // Act
       const response = await GET(request, params);
@@ -175,7 +175,7 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/debates/${mockDebateId}/recommendations?minScore=0.9`
       );
-      const params = { params: { id: mockDebateId } };
+      const params = { params: Promise.resolve({ id: mockDebateId }) };
 
       // Act
       const response = await GET(request, params);
@@ -200,7 +200,7 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/debates/${mockDebateId}/recommendations`
       );
-      const params = { params: { id: mockDebateId } };
+      const params = { params: Promise.resolve({ id: mockDebateId }) };
 
       // Act
       const response = await GET(request, params);
@@ -221,7 +221,7 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/debates/${mockDebateId}/recommendations`
       );
-      const params = { params: { id: mockDebateId } };
+      const params = { params: Promise.resolve({ id: mockDebateId }) };
 
       // Act
       const response = await GET(request, params);
@@ -241,7 +241,7 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/debates/${mockDebateId}/recommendations`
       );
-      const params = { params: { id: mockDebateId } };
+      const params = { params: Promise.resolve({ id: mockDebateId }) };
 
       // Act
       const response = await GET(request, params);
@@ -258,7 +258,7 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/debates/${mockDebateId}/recommendations?limit=-1`
       );
-      const params = { params: { id: mockDebateId } };
+      const params = { params: Promise.resolve({ id: mockDebateId }) };
 
       // Act
       const response = await GET(request, params);
@@ -275,7 +275,7 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/debates/${mockDebateId}/recommendations?minScore=1.5`
       );
-      const params = { params: { id: mockDebateId } };
+      const params = { params: Promise.resolve({ id: mockDebateId }) };
 
       // Act
       const response = await GET(request, params);
@@ -296,7 +296,7 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/debates/${mockDebateId}/recommendations`
       );
-      const params = { params: { id: mockDebateId } };
+      const params = { params: Promise.resolve({ id: mockDebateId }) };
 
       // Act
       const response = await GET(request, params);
@@ -319,7 +319,7 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/debates/${mockDebateId}/recommendations`
       );
-      const params = { params: { id: mockDebateId } };
+      const params = { params: Promise.resolve({ id: mockDebateId }) };
 
       // Act
       const response = await GET(request, params);
@@ -338,7 +338,7 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/debates/${mockDebateId}/recommendations?limit=0`
       );
-      const params = { params: { id: mockDebateId } };
+      const params = { params: Promise.resolve({ id: mockDebateId }) };
 
       // Act
       const response = await GET(request, params);
@@ -360,11 +360,11 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/debates/${mockDebateId}/recommendations?limit=1000`
       );
-      const params = { params: { id: mockDebateId } };
+      const params = { params: Promise.resolve({ id: mockDebateId }) };
 
       // Act
       const response = await GET(request, params);
-      const data = await response.json();
+      const __data = await response.json();
 
       // Assert
       expect(response.status).toBe(200);
@@ -385,7 +385,7 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/debates/${mockDebateId}/recommendations?minScore=0`
       );
-      const params = { params: { id: mockDebateId } };
+      const params = { params: Promise.resolve({ id: mockDebateId }) };
 
       // Act
       const response = await GET(request, params);
@@ -407,7 +407,7 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/debates/${mockDebateId}/recommendations?minScore=1`
       );
-      const params = { params: { id: mockDebateId } };
+      const params = { params: Promise.resolve({ id: mockDebateId }) };
 
       // Act
       const response = await GET(request, params);
@@ -432,7 +432,7 @@ describe('GET /api/v1/debates/[id]/recommendations', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/debates/${mockDebateId}/recommendations`
       );
-      const params = { params: { id: mockDebateId } };
+      const params = { params: Promise.resolve({ id: mockDebateId }) };
 
       // Act
       const startTime = Date.now();

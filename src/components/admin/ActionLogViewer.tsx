@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import _React, { useState } from 'react';
 import type { ActionLogItem } from '@/types/log';
 
 /**

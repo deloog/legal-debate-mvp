@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { ReportService } from '@/lib/reports/report-service';
-import type { GenerateReportResponse } from '@/types/report';
+import type { GenerateReportResponse, ReportFilter } from '@/types/report';
 import { isValidReportFilter } from '@/types/report';
 import { logger } from '@/lib/logger';
 
@@ -78,7 +78,7 @@ export async function POST(
       );
     }
 
-    const { filter } = requestData as any;
+    const filter = requestData.filter as ReportFilter;
 
     // 生成报表
     const result = await ReportService.generateReport(filter);

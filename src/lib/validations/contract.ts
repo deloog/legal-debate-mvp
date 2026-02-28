@@ -202,9 +202,13 @@ export function validateContractListQuery(data: unknown) {
 }
 
 // 获取第一个验证错误信息
-export function getFirstZodError(result: any): string {
+type ZodSafeParseResult =
+  | { success: true; error?: never }
+  | { success: false; error: { issues: Array<{ message: string }> } };
+
+export function getFirstZodError(result: ZodSafeParseResult): string {
   if (result.success) return '';
 
-  const firstError = result.error?.errors?.[0];
+  const firstError = result.error.issues[0];
   return firstError?.message || '数据验证失败';
 }

@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest) {
         contextId: body.contextId,
         feedbackType: body.feedbackType,
         comment: body.comment,
-        metadata: (body.metadata || {}) as any,
+        metadata: (body.metadata || {}) as unknown as Prisma.InputJsonValue,
       },
       include: {
         lawArticle: {

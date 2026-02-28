@@ -14,27 +14,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { LawArticleGraphVisualization } from '@/components/law-article/LawArticleGraphVisualization';
-
-/**
- * 图节点类型
- */
-interface GraphNode {
-  id: string;
-  lawName: string;
-  articleNumber: string;
-  category: string;
-}
-
-/**
- * 图边类型
- */
-interface GraphLink {
-  source: string;
-  target: string;
-  relationType: string;
-  strength: number;
-  confidence: number;
-}
+import { GraphNode, GraphLink } from '@/lib/law-article/graph-builder';
 
 /**
  * 分页信息类型
@@ -278,10 +258,7 @@ export function KnowledgeGraphBrowser() {
       {/* 图谱可视化 */}
       {graphData && graphData.nodes.length > 0 && (
         <div className='bg-white p-4 rounded-lg shadow'>
-          <LawArticleGraphVisualization
-            centerArticleId={graphData.nodes[0].id}
-            depth={2}
-          />
+          <LawArticleGraphVisualization graphData={graphData} />
         </div>
       )}
 

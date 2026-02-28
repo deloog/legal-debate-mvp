@@ -5,8 +5,10 @@
 
 import { jest } from '@jest/globals';
 
-// 创建共享的 mock 函数工厂
-const createMockFn = () => jest.fn();
+// 创建共享的 mock 函数工厂 - 使用 ReturnType 来获取正确的 jest mock 类型
+type MockFn = ReturnType<typeof jest.fn>;
+
+const createMockFn = (): MockFn => jest.fn();
 
 // 完整的 Mock Prisma 客户端
 const mockPrisma = {
@@ -218,6 +220,33 @@ const mockPrisma = {
     findMany: createMockFn(),
     count: createMockFn(),
     upsert: createMockFn(),
+  },
+
+  // 知识图谱专家相关
+  knowledgeGraphExpert: {
+    create: createMockFn(),
+    findUnique: createMockFn(),
+    findFirst: createMockFn(),
+    update: createMockFn(),
+    delete: createMockFn(),
+    deleteMany: createMockFn(),
+    findMany: createMockFn(),
+    count: createMockFn(),
+    upsert: createMockFn(),
+  },
+
+  // 法律条文关系相关
+  lawArticleRelation: {
+    create: createMockFn(),
+    findUnique: createMockFn(),
+    findFirst: createMockFn(),
+    update: createMockFn(),
+    delete: createMockFn(),
+    deleteMany: createMockFn(),
+    findMany: createMockFn(),
+    count: createMockFn(),
+    upsert: createMockFn(),
+    aggregate: createMockFn(),
   },
 
   // 订单相关

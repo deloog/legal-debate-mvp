@@ -2,7 +2,7 @@
  * 检查数据库中法律状态统计
  */
 
-import { PrismaClient, LawStatus } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 

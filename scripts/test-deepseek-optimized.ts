@@ -152,8 +152,8 @@ class PerformanceMonitor {
 // =============================================================================
 
 function evaluateDebateQuality(
-  title: string,
-  description: string,
+  _title: string,
+  _description: string,
   debateContent: string
 ): OptimizedTestResult['quality'] {
   let clarity = 7;

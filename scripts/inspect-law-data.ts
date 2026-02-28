@@ -74,7 +74,10 @@ async function main() {
     select: { fullText: true },
   });
   const lengths = articles.map(a => a.fullText.length);
-  const avgLen = lengths.length > 0 ? Math.round(lengths.reduce((a, b) => a + b, 0) / lengths.length) : 0;
+  const avgLen =
+    lengths.length > 0
+      ? Math.round(lengths.reduce((a, b) => a + b, 0) / lengths.length)
+      : 0;
   const minLen = lengths.length > 0 ? Math.min(...lengths) : 0;
   const maxLen = lengths.length > 0 ? Math.max(...lengths) : 0;
   console.log(`\n全文长度统计:`);
@@ -95,8 +98,10 @@ async function main() {
     orderBy: { lastSyncedAt: 'asc' },
     take: 1,
   });
-  if (recentSync[0]) console.log(`\n最近同步时间: ${recentSync[0].lastSyncedAt?.toISOString()}`);
-  if (oldestSync[0]) console.log(`最早同步时间: ${oldestSync[0].lastSyncedAt?.toISOString()}`);
+  if (recentSync[0])
+    console.log(`\n最近同步时间: ${recentSync[0].lastSyncedAt?.toISOString()}`);
+  if (oldestSync[0])
+    console.log(`最早同步时间: ${oldestSync[0].lastSyncedAt?.toISOString()}`);
 
   // 10. effectiveDate 分布（按年份）
   const allDates = await prisma.lawArticle.findMany({

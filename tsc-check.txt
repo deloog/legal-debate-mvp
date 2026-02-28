@@ -1,0 +1,16 @@
+scripts/test-migration-rollback.ts(70,12): error TS2551: Property 'originalMigrationState' does not exist on type 'MigrationRollbackTester'. Did you mean '__originalMigrationState'?
+src/__tests__/api/court-schedules.test.ts(99,7): error TS2552: Cannot find name 'testScheduleId'. Did you mean '__testScheduleId'?
+src/__tests__/api/memberships/upgrade.test.ts(44,5): error TS2552: Cannot find name 'mockUpdate'. Did you mean '__mockUpdate'?
+src/__tests__/api/middleware-core.test.ts(152,13): error TS2552: Cannot find name 'contextReceived'. Did you mean '__contextReceived'?
+src/__tests__/api/validation.test.ts(17,7): error TS2552: Cannot find name 'mockRequest'. Did you mean '__mockRequest'?
+src/__tests__/components/case/CaseShareDialog.test.tsx(393,9): error TS2304: Cannot find name 'resolvePromise'.
+src/__tests__/e2e/payment.spec.ts(566,5): error TS2552: Cannot find name 'createdOrderId'. Did you mean '__createdOrderId'?
+src/__tests__/membership/admin-membership-api.test.ts(65,5): error TS2552: Cannot find name 'mockFindUniqueUser'. Did you mean '__mockFindUniqueUser'?
+src/__tests__/membership/admin-membership-api.test.ts(66,5): error TS2552: Cannot find name 'mockFindFirstTier'. Did you mean '__mockFindFirstTier'?
+src/__tests__/middleware/check-usage-limit.test.ts(60,5): error TS2552: Cannot find name 'testMembershipId'. Did you mean '__testMembershipId'?
+src/__tests__/usage/record-usage.test.ts(108,5): error TS2552: Cannot find name 'testMembershipId'. Did you mean '__testMembershipId'?
+src/app/contracts/[id]/edit/page.tsx(84,42): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/lib/agent/doc-analyzer/analyzers/timeline-extractor.ts(27,10): error TS2551: Property 'eventPatterns' does not exist on type 'TimelineExtractor'. Did you mean '_eventPatterns'?
+src/lib/agent/doc-analyzer/doc-analyzer-agent.ts(124,10): error TS2551: Property 'useMock' does not exist on type 'DocAnalyzerAgent'. Did you mean '_useMock'?
+src/lib/ai/risk/risk-advisor.ts(54,10): error TS2551: Property 'confidenceThreshold' does not exist on type 'AIRiskAdvisor'. Did you mean '_confidenceThreshold'?
+src/lib/knowledge-graph/agent-tools/index.ts(16,3): error TS1205: Re-exporting a type when 'isolatedModules' is enabled requires using 'export type'.

@@ -24,6 +24,7 @@ interface GraphNode {
   lawName: string;
   articleNumber: string;
   category: string;
+  level: number;
 }
 
 /**
@@ -155,6 +156,7 @@ export async function GET(
       lawName: article.lawName,
       articleNumber: article.articleNumber,
       category: article.category,
+      level: 0, // 浏览模式下所有节点为同一层级
     }));
 
     // 获取节点ID集合

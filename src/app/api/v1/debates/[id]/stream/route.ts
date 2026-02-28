@@ -1,3 +1,35 @@
+/**
+ * 辩论流式生成API路由
+ *
+ * GET /api/v1/debates/[id]/stream
+ *
+ * 功能：
+ * 1. 通过SSE (Server-Sent Events) 实时流式推送辩论生成进度
+ * 2. 支持多轮次辩论的连续生成
+ * 3. 集成关键词搜索和图谱增强搜索获取相关法条
+ * 4. 实时推送AI生成的原始token和解析后的论点
+ * 5. 自动计算和保存论点评分（逻辑分、法律分、综合分）
+ *
+ * SSE事件类型：
+ * - connected: 连接建立确认
+ * - round-start: 轮次开始
+ * - ai_stream: AI原始token（实时）
+ * - argument: 单个论点（已解析，含side/content/reasoning/legalBasis/scores）
+ * - progress: 进度更新（0-100%）
+ * - completed: 整体完成
+ * - error: 错误信息
+ *
+ * 安全机制：
+ * - 用户认证和授权检查
+ * - 所有权验证（仅允许访问自己的辩论）
+ * - 速率限制（60秒内最多5个轮次）
+ *
+ * 法条检索策略：
+ * 1. 关键词搜索（6条）
+ * 2. 图谱增强搜索（500ms超时）
+ * 3. 将图谱分析结果注入AI上下文
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError } from '@/app/api/lib/errors/api-error';
 import { validatePathParam } from '@/app/api/lib/validation/validator';
@@ -8,6 +40,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { searchAllLawArticles } from '@/lib/debate/law-search';
 import { computeArgumentScores } from '@/lib/debate/scoring';
+import {
+  graphEnhancedSearch,
+  formatGraphAnalysisForPrompt,
+} from '@/lib/debate/graph-enhanced-law-search';
 import {
   DebateStatus,
   RoundStatus,
@@ -346,6 +382,7 @@ export async function GET(
         const startFromRound = debate.currentRound + 1;
 
         // ── 预先检索法条（所有轮次共用同一套法条上下文）──
+        // 1. 先执行关键词搜索
         const { articles: lawArticles } = await searchAllLawArticles(
           debate.case.type ?? null,
           debate.case.title,
@@ -361,6 +398,33 @@ export async function GET(
             `[stream] 检索到 ${lawArticles.length} 条相关法条，注入AI上下文`
           );
         }
+
+        // 2. 并行执行图谱增强搜索（带500ms超时）
+        const graphSearchResult = await graphEnhancedSearch(
+          debate.case.type ?? null,
+          debate.case.title,
+          { timeoutMs: 500, includeAttackPaths: true }
+        );
+
+        // 3. 如果图谱分析完成，注入额外信息
+        let graphAnalysisPrompt = '';
+        if (graphSearchResult.graphAnalysisCompleted) {
+          graphAnalysisPrompt = formatGraphAnalysisForPrompt(graphSearchResult);
+          logger.info(
+            `[stream] 图谱分析完成，支持法条: ${graphSearchResult.supportingArticles.length}, 对方法条: ${graphSearchResult.opposingArticles.length}`
+          );
+        } else {
+          logger.warn(`[stream] 图谱分析超时，仅使用关键词检索`);
+        }
+
+        // 4. 将图谱分析结果添加到description中（用于AI理解法条关系）
+        let enhancedDescription = debate.case.description || '';
+        if (graphAnalysisPrompt) {
+          enhancedDescription = `${enhancedDescription}\n\n${graphAnalysisPrompt}`;
+        }
+
+        // 5. 标记信息来源（用于前端显示）
+        const ___sourceAttribution = graphSearchResult.sourceAttribution;
 
         for (
           let roundIndex = startFromRound;
@@ -410,10 +474,10 @@ export async function GET(
           }
 
           try {
-            // ── 调用 AI 流式生成（注入法条引用）──
+            // ── 调用 AI 流式生成（注入法条引用 + 图谱分析）──
             const debateStream = await aiService.generateDebateStreamLegacy({
               title: debate.case.title,
-              description: debate.case.description,
+              description: enhancedDescription,
               legalReferences: legalReferencesForAI,
               previousRoundsContext: previousRoundsContext || undefined,
             });

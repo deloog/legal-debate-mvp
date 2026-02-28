@@ -274,14 +274,13 @@ export const lenientRateLimiter = createRateLimiter({
  * ```
  */
 export function withRateLimit<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  T extends (...args: any[]) => Promise<NextResponse>,
+  TArgs extends unknown[],
+  T extends (request: NextRequest, ...args: TArgs) => Promise<NextResponse>,
 >(
   rateLimiter: (request: NextRequest) => Promise<NextResponse | null>,
   handler: T
 ): T {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (async (request: NextRequest, ...args: any[]) => {
+  return (async (request: NextRequest, ...args: TArgs) => {
     // 先进行速率限制检查
     const limitResponse = await rateLimiter(request);
     if (limitResponse) {

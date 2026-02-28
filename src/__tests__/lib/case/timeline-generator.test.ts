@@ -38,7 +38,7 @@ jest.mock('@/lib/db/prisma', () => ({
 import { prisma } from '@/lib/db/prisma';
 
 const mockedFindUnique = prisma.case.findUnique as jest.Mock;
-const mockedFindMany = prisma.case.findMany as jest.Mock;
+const __mockedFindMany = prisma.case.findMany as jest.Mock;
 const mockedTimelineFindFirst = prisma.caseTimeline.findFirst as jest.Mock;
 const mockedTimelineFindMany = prisma.caseTimeline.findMany as jest.Mock;
 const mockedTimelineCreate = prisma.caseTimeline.create as jest.Mock;

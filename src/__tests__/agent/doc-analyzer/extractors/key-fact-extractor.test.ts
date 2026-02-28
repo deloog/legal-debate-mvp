@@ -267,7 +267,7 @@ describe('KeyFactExtractor', () => {
       const text = '原告按照约定已履行义务，完成了货物交付。';
       const result = await extractor.extractFromText(text);
 
-      const performanceFacts = result.facts.filter(
+      const __performanceFacts = result.facts.filter(
         f => f.category === 'PERFORMANCE_ACT'
       );
       expect(result.facts.length).toBeGreaterThanOrEqual(0);
@@ -277,7 +277,7 @@ describe('KeyFactExtractor', () => {
       const text = '被告未按约定付款，构成违约。';
       const result = await extractor.extractFromText(text);
 
-      const breachFacts = result.facts.filter(
+      const __breachFacts = result.facts.filter(
         f => f.category === 'BREACH_BEHAVIOR'
       );
       // 规则层可能无法识别某些违约事实
@@ -298,7 +298,7 @@ describe('KeyFactExtractor', () => {
       const text = '原告于2024年4月20日向法院提起诉讼，双方形成诉讼法律关系。';
       const result = await extractor.extractFromText(text);
 
-      const lawsuitFacts = result.facts.filter(
+      const __lawsuitFacts = result.facts.filter(
         f => f.category === 'LEGAL_RELATION'
       );
       expect(result.facts.length).toBeGreaterThanOrEqual(0);

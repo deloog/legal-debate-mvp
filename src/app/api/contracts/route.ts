@@ -117,15 +117,16 @@ export async function GET(request: NextRequest): Promise<
 
     // 日期范围筛选
     if (startDate || endDate) {
-      where.createdAt = {} as any;
+      const createdAtFilter: Record<string, unknown> = {};
       if (startDate) {
-        (where.createdAt as any).gte = new Date(startDate);
+        createdAtFilter.gte = new Date(startDate);
       }
       if (endDate) {
         const endDateTime = new Date(endDate);
         endDateTime.setHours(23, 59, 59, 999);
-        (where.createdAt as any).lte = endDateTime;
+        createdAtFilter.lte = endDateTime;
       }
+      where.createdAt = createdAtFilter;
     }
 
     // 查询总数

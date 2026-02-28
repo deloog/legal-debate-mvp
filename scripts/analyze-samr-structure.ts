@@ -23,8 +23,10 @@ async function fetchPage(url: string): Promise<PageInfo> {
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        Accept:
+          'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
       },
       signal: AbortSignal.timeout(15000),
@@ -43,7 +45,9 @@ async function fetchPage(url: string): Promise<PageInfo> {
         // 补全相对路径
         let fullUrl = href;
         if (!href.startsWith('http')) {
-          fullUrl = href.startsWith('/') ? `${SAMR_BASE_URL}${href}` : `${SAMR_BASE_URL}/${href}`;
+          fullUrl = href.startsWith('/')
+            ? `${SAMR_BASE_URL}${href}`
+            : `${SAMR_BASE_URL}/${href}`;
         }
         links.push({ url: fullUrl, text });
       }
@@ -78,21 +82,26 @@ async function analyzeHomepage(): Promise<void> {
 
   const page = await fetchPage(SAMR_BASE_URL);
 
-  console.log(`状态: ${page.status} (${page.accessible ? '✅ 可访问' : '❌ 不可访问'})`);
+  console.log(
+    `状态: ${page.status} (${page.accessible ? '✅ 可访问' : '❌ 不可访问'})`
+  );
   console.log(`标题: ${page.title || 'N/A'}`);
 
   // 查找合同相关链接
-  const contractLinks = page.links.filter(link =>
-    link.text.includes('合同') ||
-    link.text.includes('示范文本') ||
-    link.text.includes('模板') ||
-    link.url.includes('htsfwb') ||
-    link.url.includes('contract')
+  const contractLinks = page.links.filter(
+    link =>
+      link.text.includes('合同') ||
+      link.text.includes('示范文本') ||
+      link.text.includes('模板') ||
+      link.url.includes('htsfwb') ||
+      link.url.includes('contract')
   );
 
   console.log(`\n找到 ${contractLinks.length} 个合同相关链接:`);
   contractLinks.slice(0, 15).forEach((link, index) => {
-    console.log(`  ${index + 1}. [${link.text}](${link.url.substring(0, 80)}...)`);
+    console.log(
+      `  ${index + 1}. [${link.text}](${link.url.substring(0, 80)}...)`
+    );
   });
 }
 
@@ -103,7 +112,9 @@ async function analyzeHtsfwb(): Promise<void> {
 
   const page = await fetchPage(HTSFWB_URL);
 
-  console.log(`状态: ${page.status} (${page.accessible ? '✅ 可访问' : '❌ 不可访问'})`);
+  console.log(
+    `状态: ${page.status} (${page.accessible ? '✅ 可访问' : '❌ 不可访问'})`
+  );
   console.log(`标题: ${page.title || 'N/A'}`);
 
   if (page.accessible) {
@@ -154,7 +165,7 @@ async function testCrawlEndpoint(): Promise<void> {
         method: 'GET',
         headers: {
           'User-Agent': 'Mozilla/5.0',
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
         signal: AbortSignal.timeout(10000),
       });
@@ -189,4 +200,4 @@ async function main(): Promise<void> {
   console.log('='.repeat(60));
 }
 
-main().catch(console.error);
+main().catch(error => console.error(error));

@@ -12,7 +12,7 @@ import { DebateArena } from '../components/debate-arena';
 export default function DebatesPage() {
   const params = useParams();
   const router = useRouter();
-  const debateId = params.id as string;
+  const debateId = typeof params?.id === 'string' ? params.id : '';
 
   const [showExportMenu, setShowExportMenu] = useState(false);
 
@@ -23,7 +23,7 @@ export default function DebatesPage() {
     arguments: argumentsList,
     isLoading,
     error,
-  } = useDebate({ debateId, refreshInterval: 5000 });
+  } = useDebate(debateId, 5000);
 
   // 处理轮次切换（空函数，DebateArena内部管理状态）
   const handleRoundChange = () => {

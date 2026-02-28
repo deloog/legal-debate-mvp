@@ -108,7 +108,7 @@ export function createMockErrorAnalysis(
  * Mock AI服务生成摘要
  */
 export async function mockGenerateSummary(
-  text: string,
+  _text: string,
   result?: MockSummaryResult
 ): Promise<MockSummaryResult> {
   return result || createMockSummaryResult();
@@ -118,7 +118,7 @@ export async function mockGenerateSummary(
  * Mock AI服务分析错误
  */
 export async function mockAnalyzeError(
-  errorId: string,
+  _errorId: string,
   result?: MockErrorAnalysis
 ): Promise<MockErrorAnalysis> {
   return result || createMockErrorAnalysis();

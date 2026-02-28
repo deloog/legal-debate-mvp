@@ -14,7 +14,7 @@ import { logger } from '@/lib/logger';
  * 查询发票详情
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {

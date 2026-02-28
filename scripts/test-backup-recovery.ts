@@ -168,7 +168,7 @@ export class BackupRecoveryTester {
   // 测试3: 恢复功能测试
   private async testRestoreFunctionality(): Promise<void> {
     const backupManager = createBackupManager();
-    const restoreManager = createRestoreManager();
+    const __restoreManager = createRestoreManager();
 
     // 创建备份
     const backupInfo = await backupManager.createBackup();

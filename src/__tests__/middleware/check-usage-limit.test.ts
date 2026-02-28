@@ -20,7 +20,7 @@ const prisma = new PrismaClient();
 
 describe('使用量限制检查中间件测试', () => {
   let testUserId: string;
-  let testMembershipId: string;
+  let __testMembershipId: string;
   let testTierId: string;
 
   beforeAll(async () => {
@@ -57,7 +57,7 @@ describe('使用量限制检查中间件测试', () => {
         autoRenew: false,
       },
     });
-    testMembershipId = membership.id;
+    __testMembershipId = membership.id;
   });
 
   afterAll(async () => {

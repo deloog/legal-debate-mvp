@@ -1,6 +1,6 @@
 /**
  * 使用修复后的 downloadDocx 重新下载并解析失败的记录
- * 
+ *
  * 关键修复：添加 format=docx 参数
  * 原始 URL: https://flk.npc.gov.cn/law-search/download/pc?bbbs={bbbs}&ossFilePath={path}
  * 修复后 URL: https://flk.npc.gov.cn/law-search/download/pc?format=docx&bbbs={bbbs}&ossFilePath={path}
@@ -58,7 +58,7 @@ async function main() {
     try {
       // 1. 获取详情（使用修复后的方法）
       const detail = await crawler['fetchDetail'](record.articleNumber);
-      
+
       if (!detail?.data?.ossFile?.ossWordPath) {
         throw new Error('API 没有返回 DOCX 下载路径');
       }
@@ -68,7 +68,7 @@ async function main() {
         record.articleNumber,
         detail.data.ossFile.ossWordPath
       );
-      
+
       console.log(`  下载大小: ${docxBuffer.length} bytes`);
 
       // 3. 检查文件大小
@@ -81,8 +81,11 @@ async function main() {
       }
 
       // 4. 解析 DOCX（使用多方法解析）
-      const fullText = await crawler['parseDocxFile'](docxBuffer, record.articleNumber);
-      
+      const fullText = await crawler['parseDocxFile'](
+        docxBuffer,
+        record.articleNumber
+      );
+
       if (fullText.length <= 500) {
         throw new Error(`解析的文本过短 (${fullText.length} 字符)`);
       }

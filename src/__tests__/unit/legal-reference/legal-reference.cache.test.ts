@@ -1,4 +1,4 @@
-import { PrismaClient, LegalReferenceStatus } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { beforeEach, describe, expect, it, afterEach } from '@jest/globals';
 
 const prisma = new PrismaClient({
@@ -291,7 +291,7 @@ describe('Legal Reference Cache Management', () => {
     });
 
     it('should maintain cache statistics', async () => {
-      const refs = await prisma.legalReference.createMany({
+      const __refs = await prisma.legalReference.createMany({
         data: [
           {
             source: 'cache-test-stats-1《统计法条1》',

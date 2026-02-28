@@ -9,7 +9,7 @@
  * - 拆解复合请求
  */
 
-import type { Claim, Correction } from '../../core/types';
+import type { Claim, ClaimType, Correction } from '../../core/types';
 import { POST_PROCESSING_RULES, CLAIM_TYPE_LABELS } from '../../core/constants';
 import { logger } from '../../../../agent/security/logger';
 
@@ -183,7 +183,7 @@ export class ClaimRuleHandler {
           pattern.types.forEach(type => {
             if (!claims.some(c => c.type === type)) {
               claims.push({
-                type: type as any,
+                type: type as ClaimType,
                 content: `${CLAIM_TYPE_LABELS[type] || type}（从复合请求拆解）`,
                 amount: null,
                 currency: 'CNY',

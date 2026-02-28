@@ -11,7 +11,7 @@ import { logger } from '@/lib/logger';
  * 删除合同法条关联
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string; articleId: string } }
 ): Promise<NextResponse> {
   try {

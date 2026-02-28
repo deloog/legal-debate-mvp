@@ -261,7 +261,7 @@ export class ContentOptimizer {
    * 检测问题
    */
   private detectIssues(
-    content: string,
+    _content: string,
     metrics: QualityMetrics
   ): QualityAssessment['issues'] {
     const issues: QualityAssessment['issues'] = [];

@@ -23,7 +23,7 @@ async function main() {
     // 1. 获取详情
     console.log('步骤 1: 获取详情...');
     const detail = await crawler['fetchDetail'](testId);
-    
+
     console.log('详情响应:');
     console.log(`  Code: ${detail.code}`);
     console.log(`  Msg: ${detail.msg}`);
@@ -39,23 +39,30 @@ async function main() {
     // 2. 下载 DOCX
     console.log('步骤 2: 下载 DOCX...');
     console.log(`  下载路径: ${detail.data.ossFile.ossWordPath}`);
-    
-    const docxBuffer = await crawler['downloadDocx'](testId, detail.data.ossFile.ossWordPath);
-    
+
+    const docxBuffer = await crawler['downloadDocx'](
+      testId,
+      detail.data.ossFile.ossWordPath
+    );
+
     console.log(`  下载大小: ${docxBuffer.length} bytes`);
     console.log();
 
     // 3. 显示前 100 bytes
     console.log('步骤 3: 分析内容...');
-    console.log(`  前 100 bytes (hex): ${docxBuffer.subarray(0, 100).toString('hex')}`);
-    console.log(`  前 100 bytes (text): ${docxBuffer.subarray(0, 100).toString('utf-8')}`);
+    console.log(
+      `  前 100 bytes (hex): ${docxBuffer.subarray(0, 100).toString('hex')}`
+    );
+    console.log(
+      `  前 100 bytes (text): ${docxBuffer.subarray(0, 100).toString('utf-8')}`
+    );
     console.log();
 
     // 4. 检查是否是有效的 DOCX
     if (docxBuffer.length >= 4) {
       const header = docxBuffer.subarray(0, 4).toString('hex');
       console.log(`  文件头: ${header}`);
-      
+
       if (header === '504b0304') {
         console.log('  ✅ 有效的 ZIP/DOCX 文件');
       } else if (header === 'd0cf11e0') {
@@ -86,7 +93,6 @@ async function main() {
       console.log('完整内容:');
       console.log(text);
     }
-
   } catch (error) {
     console.log('❌ 错误:');
     console.log(error);

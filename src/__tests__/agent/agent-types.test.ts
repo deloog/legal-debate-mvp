@@ -171,7 +171,7 @@ describe('Agent Types', () => {
       });
 
       it('should create a failed agent result', () => {
-        const error = createAgentError(
+        const __error = createAgentError(
           'TEST_ERROR',
           'Test error',
           AgentErrorType.EXECUTION_ERROR,

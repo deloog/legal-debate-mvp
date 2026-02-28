@@ -1,6 +1,18 @@
 /**
  * 企业法务工作台页面
+ *
+ * 功能：
+ * 1. 展示企业法务工作台的统计数据（待审查合同、高风险合同、合规评分、待处理任务）
+ * 2. 显示风险告警列表（按严重程度分级：严重/高/中/低）
+ * 3. 展示合规状态（总检查项、通过项、未通过项、评分）
+ * 4. 显示最近审查的合同列表
+ * 5. 显示即将到期的任务列表（按优先级：紧急/高/中/低）
+ * 6. 支持数据加载状态和错误处理
+ * 7. 提供快速导航到相关详情页面
+ *
+ * @page /dashboard/enterprise
  */
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -27,16 +39,23 @@ export default function EnterpriseDashboardPage() {
       setError(null);
 
       const response = await fetch('/api/dashboard/enterprise');
+
+      if (!response.ok) {
+        throw new Error(`请求失败: ${response.status}`);
+      }
+
       const result = await response.json();
 
-      if (result.success) {
+      if (result.success && result.data) {
         setData(result.data);
       } else {
-        setError('加载数据失败');
+        setError(result.error?.message || '加载数据失败');
       }
     } catch (err) {
       console.error('加载工作台数据失败:', err);
-      setError('加载数据失败，请刷新页面重试');
+      setError(
+        err instanceof Error ? err.message : '加载数据失败，请刷新页面重试'
+      );
     } finally {
       setLoading(false);
     }

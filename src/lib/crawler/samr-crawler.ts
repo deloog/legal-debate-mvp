@@ -22,10 +22,9 @@
  * - 切换到 samr.gov.cn 作为主要数据源
  */
 
-import * as fs from 'fs';
 import * as path from 'path';
 import type { Prisma } from '@prisma/client';
-import { BaseCrawler, CrawlerResult } from './base-crawler';
+import { BaseCrawler, CrawlerResult, LawArticleData } from './base-crawler';
 import type {
   ContractTemplateData,
   ContractTemplateSource,
@@ -633,7 +632,7 @@ export class SAMRCrawler extends BaseCrawler {
   private readonly PRIMARY_API_BASE = 'https://www.samr.gov.cn';
   // 备用数据源: 合同服务网
   private readonly FALLBACK_API_BASE = 'https://htsfwb.samr.gov.cn';
-  private readonly DEFAULT_OUTPUT_DIR = path.resolve('data/crawled/samr');
+  private readonly __DEFAULT_OUTPUT_DIR = path.resolve('data/crawled/samr');
 
   /** 日志系统 */
   private logger = getLogger('SAMRCrawler');
@@ -663,7 +662,7 @@ export class SAMRCrawler extends BaseCrawler {
    * 获取当前使用的API基础URL
    * 优先使用主要数据源(12315.cn)，失败时回退到备用数据源
    */
-  private getApiBaseUrl(): string {
+  private __getApiBaseUrl(): string {
     return this.PRIMARY_API_BASE;
   }
 
@@ -1524,7 +1523,7 @@ ${categoryInfo.miscellaneous}
    * 生成变量定义
    */
   private generateVariables(
-    title: string,
+    _title: string,
     category: string
   ): TemplateVariable[] {
     const baseVariables: TemplateVariable[] = [
@@ -1957,7 +1956,7 @@ ${categoryInfo.miscellaneous}
   /**
    * 生成条款结构
    */
-  private generateClauses(title: string, category: string): TemplateClause[] {
+  private generateClauses(_title: string, _category: string): TemplateClause[] {
     return [
       {
         type: 'PARTIES' as ClauseType,
@@ -2340,7 +2339,7 @@ ${categoryInfo.miscellaneous}
    * 解析单条法规数据（接口实现）
    * SAMR采集器主要用于合同模板，此方法返回null
    */
-  parseArticle(rawData: any): any {
+  parseArticle(_rawData: unknown): LawArticleData | null {
     return null;
   }
 

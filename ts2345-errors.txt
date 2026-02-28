@@ -1,0 +1,158 @@
+scripts/crawler/health-monitor.ts(405,37): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+scripts/crawler/health-monitor.ts(414,37): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+scripts/crawler/health-monitor.ts(422,37): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+scripts/deploy/__tests__/migration-utils.test.ts(119,13): error TS2345: Argument of type 'null' is not assignable to parameter of type 'string'.
+scripts/deploy/__tests__/migration-utils.test.ts(145,48): error TS2345: Argument of type 'null' is not assignable to parameter of type 'string'.
+scripts/deploy/__tests__/migration-utils.test.ts(153,32): error TS2345: Argument of type 'null' is not assignable to parameter of type 'string'.
+scripts/deploy/__tests__/migration-utils.test.ts(173,13): error TS2345: Argument of type 'null' is not assignable to parameter of type 'string'.
+scripts/deploy/__tests__/migration-utils.test.ts(201,40): error TS2345: Argument of type 'null' is not assignable to parameter of type 'string'.
+scripts/deploy/__tests__/migration-utils.test.ts(209,32): error TS2345: Argument of type 'null' is not assignable to parameter of type 'string'.
+scripts/test-document-accuracy.ts(299,31): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+scripts/test-document-accuracy.ts(300,34): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/__tests__/api/analytics/cases/route.test.ts(92,55): error TS2345: Argument of type 'null' is not assignable to parameter of type 'NextResponse<unknown> | Promise<NextResponse<unknown>>'.
+src/__tests__/api/analytics/cases/route.test.ts(110,55): error TS2345: Argument of type 'null' is not assignable to parameter of type 'NextResponse<unknown> | Promise<NextResponse<unknown>>'.
+src/__tests__/api/analytics/cases/route.test.ts(120,55): error TS2345: Argument of type 'null' is not assignable to parameter of type 'NextResponse<unknown> | Promise<NextResponse<unknown>>'.
+src/__tests__/api/analytics/cases/route.test.ts(133,55): error TS2345: Argument of type 'null' is not assignable to parameter of type 'NextResponse<unknown> | Promise<NextResponse<unknown>>'.
+src/__tests__/api/analytics/cases/route.test.ts(146,55): error TS2345: Argument of type 'null' is not assignable to parameter of type 'NextResponse<unknown> | Promise<NextResponse<unknown>>'.
+src/__tests__/api/cases-id.test.ts(36,54): error TS2345: Argument of type '(reason: string) => Response' is not assignable to parameter of type 'UnknownFunction'.
+src/__tests__/api/debates-id.test.ts(30,54): error TS2345: Argument of type '(reason: string) => Response' is not assignable to parameter of type 'UnknownFunction'.
+src/__tests__/api/error-handling-database.test.ts(34,54): error TS2345: Argument of type '(reason: string) => Response' is not assignable to parameter of type 'UnknownFunction'.
+src/__tests__/api/test-utils.ts(32,40): error TS2345: Argument of type 'RequestInit' is not assignable to parameter of type 'import("d:/legal-debate-mvp/node_modules/next/dist/server/web/spec-extension/request").RequestInit'.
+src/__tests__/cache/index.test.ts(24,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(25,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(35,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(42,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(49,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(58,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(65,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(75,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(86,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(98,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(107,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(108,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(117,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(126,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(138,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(139,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(150,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(161,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(173,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(181,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(190,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(200,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(213,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(214,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(227,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(243,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(254,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(268,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(269,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(292,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(310,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/index.test.ts(311,18): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(28,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(30,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(44,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(46,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(60,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(69,37): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(78,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(89,37): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(98,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(107,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(124,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(139,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(156,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(168,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(190,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(192,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(205,35): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(217,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(235,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(236,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(251,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(267,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(283,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(296,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(308,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(321,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(339,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(340,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(359,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(377,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(390,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(404,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(420,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(421,34): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/cache/manager.test.ts(448,16): error TS2345: Argument of type 'Redis | null' is not assignable to parameter of type 'object'.
+src/__tests__/components/membership/UsageHistory.test.tsx(144,23): error TS2345: Argument of type 'HTMLButtonElement | null' is not assignable to parameter of type 'Element | Node | Window | Document'.
+src/__tests__/components/membership/UsageHistory.test.tsx(153,23): error TS2345: Argument of type 'HTMLButtonElement | null' is not assignable to parameter of type 'Element | Node | Window | Document'.
+src/__tests__/components/membership/UsageHistory.test.tsx(163,23): error TS2345: Argument of type 'HTMLButtonElement | null' is not assignable to parameter of type 'Element | Node | Window | Document'.
+src/__tests__/components/membership/UsageHistory.test.tsx(173,23): error TS2345: Argument of type 'HTMLButtonElement | null' is not assignable to parameter of type 'Element | Node | Window | Document'.
+src/__tests__/components/membership/UsageHistory.test.tsx(176,23): error TS2345: Argument of type 'HTMLButtonElement | null' is not assignable to parameter of type 'Element | Node | Window | Document'.
+src/__tests__/config/alertmanager/alert-rules.test.ts(397,51): error TS2345: Argument of type 'AlertSeverity | undefined' is not assignable to parameter of type 'AlertSeverity'.
+src/__tests__/config/alertmanager/alert-rules.test.ts(409,51): error TS2345: Argument of type 'AlertCategory | undefined' is not assignable to parameter of type 'AlertCategory'.
+src/__tests__/lib/agent/core-actions/core.test.ts(754,56): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number | bigint'.
+src/__tests__/lib/db/connection-manager.test.ts(222,46): error TS2345: Argument of type 'null' is not assignable to parameter of type 'DatabaseConnection'.
+src/__tests__/lib/law-article-verifier.test.ts(568,44): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'string'.
+src/__tests__/middleware/ai-error-handler.test.ts(198,27): error TS2345: Argument of type '(callback: () => void, delay: number) => NodeJS.Timeout' is not assignable to parameter of type '(callback: (_: void) => void, delay?: number | undefined) => Timeout'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(122,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(157,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(180,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(222,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(269,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(312,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(355,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(400,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(414,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(435,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(470,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(504,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/__tests__/unit/document/dispute-focus-extractor.test.ts(538,9): error TS2345: Argument of type '{ claims: ({ type: "PAY_PRINCIPAL"; content: string; amount: number; currency: string; _inferred: boolean; } | { type: "PAY_INTEREST"; content: string; amount: null; currency: string; _inferred: boolean; })[]; parties: ({ ...; } | { ...; })[]; }' is not assignable to parameter of type 'ExtractedData'.
+src/app/api/admin/configs/route.ts(121,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/configs/route.ts(122,61): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/export/cases/route.ts(248,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/admin/export/stats/route.ts(533,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/admin/law-articles/route.ts(164,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/law-articles/route.ts(165,61): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/memberships/route.ts(121,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/memberships/route.ts(124,35): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/orders/route.ts(235,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/qualifications/route.ts(153,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/qualifications/route.ts(154,61): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/roles/route.ts(81,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/roles/route.ts(84,35): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/users/route.ts(142,34): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/users/route.ts(143,38): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/analytics/cases/route.ts(664,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/analytics/lawyers/route.ts(671,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/lib/middleware/security.ts(24,7): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+src/app/api/lib/middleware/security.ts(45,5): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+src/app/api/stats/cases/efficiency/route.ts(382,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/cases/type-distribution/route.ts(304,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/debates/generation-count/route.ts(374,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/debates/generation-count/route.ts(381,7): error TS2345: Argument of type 'DateGranularity | undefined' is not assignable to parameter of type 'DateGranularity'.
+src/app/api/stats/debates/quality-score/route.ts(372,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/performance/error-rate/route.ts(417,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/performance/response-time/route.ts(419,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/performance/response-time/route.ts(424,7): error TS2345: Argument of type 'DateGranularity | undefined' is not assignable to parameter of type 'DateGranularity'.
+src/app/api/stats/users/activity/route.ts(407,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/users/registration-trend/route.ts(381,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/users/registration-trend/route.ts(388,7): error TS2345: Argument of type 'DateGranularity | undefined' is not assignable to parameter of type 'DateGranularity'.
+src/app/contracts/[id]/edit/page.tsx(83,40): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'string'.
+src/components/client/ClientList.tsx(218,55): error TS2345: Argument of type 'ClientSource | null | undefined' is not assignable to parameter of type 'ClientSource | undefined'.
+src/components/law-article/LawArticleGraphVisualization.tsx(184,21): error TS2345: Argument of type '(d: GraphNode & { x: number; }) => number' is not assignable to parameter of type 'string | number | boolean | readonly (string | number)[] | ValueFn<SVGCircleElement, GraphNode, string | number | boolean | readonly (string | number)[] | null> | null'.
+src/components/law-article/LawArticleGraphVisualization.tsx(185,21): error TS2345: Argument of type '(d: GraphNode & { y: number; }) => number' is not assignable to parameter of type 'string | number | boolean | readonly (string | number)[] | ValueFn<SVGCircleElement, GraphNode, string | number | boolean | readonly (string | number)[] | null> | null'.
+src/components/law-article/LawArticleGraphVisualization.tsx(188,20): error TS2345: Argument of type '(d: GraphNode & { x: number; }) => number' is not assignable to parameter of type 'string | number | boolean | readonly (string | number)[] | ValueFn<SVGTextElement, GraphNode, string | number | boolean | readonly (string | number)[] | null> | null'.
+src/components/law-article/LawArticleGraphVisualization.tsx(189,20): error TS2345: Argument of type '(d: GraphNode & { y: number; }) => number' is not assignable to parameter of type 'string | number | boolean | readonly (string | number)[] | ValueFn<SVGTextElement, GraphNode, string | number | boolean | readonly (string | number)[] | null> | null'.
+src/components/order/OrderDetailModal.tsx(303,33): error TS2345: Argument of type 'Date | undefined' is not assignable to parameter of type 'string | Date'.
+src/components/witness/WitnessForm.tsx(158,20): error TS2345: Argument of type '{ caseId: string; name: string; phone: string | undefined; address: string | undefined; relationship: string | undefined; testimony: string | undefined; courtScheduleId: string | undefined; ... 8 more ...; id: string; }' is not assignable to parameter of type 'CreateWitnessInput | WitnessDetail'.
+src/lib/agent/legal-agent/applicability-analyzer.ts(120,51): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'CaseInfo'.
+src/lib/ai/unified-service.ts(688,42): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+src/lib/ai/unified-service.ts(707,32): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+src/lib/notification/notification-service.ts(42,11): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/lib/notification/notification-service.ts(75,11): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/lib/performance/metrics.ts(270,25): error TS2345: Argument of type '(entry: FIDEntry) => void' is not assignable to parameter of type '(value: PerformanceEntry, index: number, array: PerformanceEntry[]) => void'.
+src/lib/performance/metrics.ts(288,25): error TS2345: Argument of type '(entry: CLSEntry) => void' is not assignable to parameter of type '(value: PerformanceEntry, index: number, array: PerformanceEntry[]) => void'.
+src/test-utils/setup.ts(215,25): error TS2345: Argument of type 'null' is not assignable to parameter of type 'BodyInit | undefined'.
+src/test-utils/setup.ts(222,25): error TS2345: Argument of type 'null' is not assignable to parameter of type 'BodyInit | undefined'.

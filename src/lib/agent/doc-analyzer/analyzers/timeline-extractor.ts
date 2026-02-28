@@ -20,11 +20,10 @@ import type {
 
 export class TimelineExtractor {
   private readonly datePatterns: RegExp[];
-  private readonly eventPatterns: Map<RegExp, string>;
+  private readonly _eventPatterns: Map<RegExp, string>;
 
   constructor() {
     this.datePatterns = this.initializeDatePatterns();
-    this.eventPatterns = this.initializeEventPatterns();
   }
 
   /**

@@ -183,12 +183,12 @@ export function handleApiError(
 /**
  * API路由包装器，统一处理错误
  */
-export function withErrorHandler(
-  handler: (request: NextRequest, ...args: any[]) => Promise<NextResponse>
+export function withErrorHandler<TArgs extends unknown[]>(
+  handler: (request: NextRequest, ...args: TArgs) => Promise<NextResponse>
 ) {
   return async (
     request: NextRequest,
-    ...args: any[]
+    ...args: TArgs
   ): Promise<NextResponse> => {
     try {
       return await handler(request, ...args);

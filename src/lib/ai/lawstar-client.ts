@@ -17,6 +17,7 @@ import type {
 
 import cacheManager from '../cache/manager';
 import * as crypto from 'crypto';
+import { logger } from '../agent/security/logger';
 
 // =============================================================================
 // 法律之星客户端类
@@ -89,7 +90,7 @@ export class LawStarClient {
   /**
    * 执行认证
    */
-  private async authenticate(): Promise<any> {
+  private async authenticate(): Promise<{ Authorization: string }> {
     const authConfig = this.config.regulation; // 使用regulation配置进行认证
     const url = `${authConfig.baseURL}/api/auth/login`;
 
@@ -120,10 +121,7 @@ export class LawStarClient {
       const data = await response.json();
 
       // 调试日志
-      console.log(
-        'LawStar authentication response:',
-        JSON.stringify(data, null, 2)
-      );
+      logger.info('LawStar authentication response', { response: JSON.stringify(data) });
 
       // 检查响应状态码 - 支持数字和字符串格式
       if (data.code !== 200 && data.code !== '200') {
@@ -230,7 +228,7 @@ export class LawStarClient {
     if (request.depName) params.append('depName', request.depName);
     if (request.fileNum) params.append('fileNum', request.fileNum);
 
-    return this.makeRequest(
+    return this.makeRequest<LawStarRegulationResponse>(
       `${url}?${params.toString()}`,
       authToken,
       config.timeout || 30000
@@ -303,7 +301,7 @@ export class LawStarClient {
     if (request.includeContent !== undefined)
       params.append('includeContent', String(request.includeContent));
 
-    return this.makeRequest(
+    return this.makeRequest<LawStarVectorResponse>(
       `${url}?${params.toString()}`,
       authToken,
       config.timeout || 30000
@@ -317,11 +315,11 @@ export class LawStarClient {
   /**
    * 执行HTTP请求（带重试机制）
    */
-  private async makeRequest(
+  private async makeRequest<T = unknown>(
     url: string,
     authToken: string | null,
     timeout: number
-  ): Promise<any> {
+  ): Promise<T> {
     // 检查authToken是否有效
     if (!authToken) {
       throw new Error('Authentication token is required but not available');
@@ -361,7 +359,7 @@ export class LawStarClient {
           );
         }
 
-        return data;
+        return data as T;
       } catch (error) {
         lastError = error as Error;
 
@@ -413,13 +411,13 @@ export class LawStarClient {
    */
   private async getFromCache(
     type: 'regulation' | 'vector',
-    request: any
-  ): Promise<any | null> {
+    request: LawStarRegulationRequest | LawStarVectorRequest
+  ): Promise<unknown> {
     try {
       const cacheKey = this.generateCacheKey(type, request);
       return await cacheManager.get(cacheKey);
     } catch (error) {
-      console.warn('Cache get failed:', error);
+      logger.warn('Cache get failed', { error: error instanceof Error ? error.message : String(error) });
       return null;
     }
   }
@@ -429,15 +427,15 @@ export class LawStarClient {
    */
   private async saveToCache(
     type: 'regulation' | 'vector',
-    request: any,
-    response: any
+    request: LawStarRegulationRequest | LawStarVectorRequest,
+    response: LawStarRegulationResponse | LawStarVectorResponse
   ): Promise<void> {
     try {
       const cacheKey = this.generateCacheKey(type, request);
       const ttl = this.config.cache?.ttl || 3600;
       await cacheManager.set(cacheKey, response, { ttl });
     } catch (error) {
-      console.warn('Cache set failed:', error);
+      logger.warn('Cache set failed', { error: error instanceof Error ? error.message : String(error) });
     }
   }
 
@@ -446,7 +444,7 @@ export class LawStarClient {
    */
   private generateCacheKey(
     type: 'regulation' | 'vector',
-    request: any
+    request: LawStarRegulationRequest | LawStarVectorRequest
   ): string {
     const keyData = { type, ...request };
     // 使用SHA256哈希替代Base64编码，避免长文本导致的键长度问题

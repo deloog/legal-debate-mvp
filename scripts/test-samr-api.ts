@@ -37,10 +37,10 @@ async function fetchWithRetry(
         ...options,
         headers: {
           'User-Agent': randomUA(),
-          'Accept': 'application/json, text/plain, */*',
+          Accept: 'application/json, text/plain, */*',
           'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-          'Referer': SAMR_BASE_URL,
-          'Origin': SAMR_BASE_URL,
+          Referer: SAMR_BASE_URL,
+          Origin: SAMR_BASE_URL,
           ...options?.headers,
         },
         signal: AbortSignal.timeout(30000),
@@ -117,7 +117,10 @@ async function analyzeAPI(): Promise<void> {
       results.endpoints[endpoint || 'root'] = {
         status: 'reachable',
         responseType: typeof response,
-        sample: typeof response === 'object' ? JSON.stringify(response).substring(0, 500) : response,
+        sample:
+          typeof response === 'object'
+            ? JSON.stringify(response).substring(0, 500)
+            : response,
       };
       console.log(`    ✓ 可访问`);
     } catch (error) {
@@ -205,7 +208,10 @@ async function analyzeAPI(): Promise<void> {
         results.endpoints[`${endpoint}-POST`] = {
           status: 'reachable',
           payload,
-          response: typeof response === 'object' ? JSON.stringify(response).substring(0, 500) : response,
+          response:
+            typeof response === 'object'
+              ? JSON.stringify(response).substring(0, 500)
+              : response,
         };
         console.log(`    ✓ 响应: ${typeof response}`);
       } catch (error) {
@@ -220,7 +226,15 @@ async function analyzeAPI(): Promise<void> {
   console.log('4. 分析可能的分类接口...');
 
   // 合同分类
-  const categories = ['劳动', '买卖', '租赁', '借款', '建设', '服务', '知识产权'];
+  const categories = [
+    '劳动',
+    '买卖',
+    '租赁',
+    '借款',
+    '建设',
+    '服务',
+    '知识产权',
+  ];
   for (const category of categories) {
     const url = `${SAMR_BASE_URL}/api/htlb/list?category=${encodeURIComponent(category)}`;
     console.log(`  分类 ${category}:`);

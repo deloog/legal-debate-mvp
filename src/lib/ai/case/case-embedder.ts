@@ -14,7 +14,7 @@ import { AIServiceFactory } from '../service-refactored';
  * 负责生成案例的向量嵌入
  */
 export class CaseEmbedder {
-  private aiService: Awaited<ReturnType<typeof AIServiceFactory.getInstance>>;
+  private aiService!: Awaited<ReturnType<typeof AIServiceFactory.getInstance>>;
   private config: EmbeddingConfig;
   private cache: Map<string, number[]>;
 

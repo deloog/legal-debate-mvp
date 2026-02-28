@@ -185,7 +185,7 @@ export class StatuteCalculator {
    */
   private buildMetadata(
     params: StatuteCalculationParams,
-    primaryRule: { id: string; statutePeriod: number },
+    _primaryRule: { id: string; statutePeriod: number },
     applicableRules: { id: string }[],
     remainingDays: number
   ): StatuteMetadata {

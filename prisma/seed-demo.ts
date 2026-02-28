@@ -344,7 +344,7 @@ async function main() {
     // 为每个案件创建完整的数据
     for (const caseData of allCases) {
       // 创建文档
-      const document = await prisma.document.create({
+      const __document = await prisma.document.create({
         data: {
           caseId: caseData.id,
           userId: demoUser.id,

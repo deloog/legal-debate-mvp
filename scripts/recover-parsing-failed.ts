@@ -1,6 +1,6 @@
 /**
  * 重新解析失败的记录
- * 
+ *
  * 针对 38 条解析失败的记录：
  * - 使用改进的 DOCX 解析器
  * - 支持旧格式 DOCX
@@ -85,28 +85,29 @@ async function main() {
       // articleNumber 格式: flk-{id}
       const docId = record.articleNumber;
 
-      // 使用 FLK crawler 的 reparseFailed 方法
-      // 先确保文件已下载到磁盘
-      const { flkCrawler } = await import('../src/lib/crawler/flk-crawler');
-      
-      // 使用 crawler-daemon 的重新解析逻辑
       // 直接从磁盘文件重新解析
       const fs = await import('fs');
       const path = await import('path');
-      
+
       // 检查是否有已下载的 DOCX 文件
-      const docxPath = path.join('data', 'crawled', 'flk', 'flfg', `${docId}.docx`);
-      
+      const docxPath = path.join(
+        'data',
+        'crawled',
+        'flk',
+        'flfg',
+        `${docId}.docx`
+      );
+
       if (!fs.existsSync(docxPath)) {
         throw new Error(`文件不存在: ${docxPath}`);
       }
-      
+
       // 读取文件
       const buffer = fs.readFileSync(docxPath);
-      
+
       // 使用改进的解析器解析
       const doc = await docxParser.parse(buffer, `flk://${docId}`);
-      
+
       if (!doc || !doc.fullText || doc.fullText.length <= 500) {
         throw new Error('解析结果不完整');
       }
@@ -122,7 +123,9 @@ async function main() {
           },
         });
 
-        console.log(`${progress} ✅ 成功 - 新长度: ${result.fullText.length} 字符`);
+        console.log(
+          `${progress} ✅ 成功 - 新长度: ${result.fullText.length} 字符`
+        );
         successCount++;
       } else {
         console.log(`${progress} ❌ 失败 - 解析结果仍然不完整`);

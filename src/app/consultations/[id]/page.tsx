@@ -1,3 +1,35 @@
+/**
+ * 咨询详情页面
+ *
+ * 功能：
+ * 1. 展示咨询详情信息
+ *    - 基本信息（咨询人、联系方式、单位、咨询时间、案件类型）
+ *    - 案情摘要和客户诉求
+ * 2. AI案件评估显示
+ *    - 胜诉率评估（进度条可视化）
+ *    - 案件难度（简单/中等/复杂）
+ *    - 风险等级（低/中/高）
+ *    - 建议收费金额
+ * 3. 跟进记录管理
+ *    - 显示历史跟进记录（时间线形式）
+ *    - 支持添加新的跟进记录
+ * 4. 跟进提醒
+ *    - 显示计划的跟进日期
+ *    - 显示跟进备注
+ * 5. 转化为案件功能
+ *    - 支持将咨询转化为案件
+ *    - 显示转化状态和转化后的案件链接
+ * 6. 编辑功能
+ *    - 支持编辑咨询详情
+ *    - 支持刷新AI评估
+ * 7. 状态展示
+ *    - 显示咨询状态（待处理/跟进中/已转化/已关闭）
+ *    - 显示咨询类型（线上/电话/线下）
+ * 8. 加载状态和错误处理
+ *
+ * @page /consultations/[id]
+ */
+
 'use client';
 
 import { useEffect, useState, use } from 'react';
@@ -94,15 +126,20 @@ export default function ConsultationDetailPage({
       try {
         setLoading(true);
         const response = await fetch(`/api/consultations/${id}`);
+
+        if (!response.ok) {
+          throw new Error(`请求失败: ${response.status}`);
+        }
+
         const data = await response.json();
 
-        if (data.success) {
+        if (data.success && data.data) {
           setConsultation(data.data);
         } else {
           setError(data.error?.message || '获取咨询详情失败');
         }
-      } catch {
-        setError('网络错误，请重试');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '网络错误，请重试');
       } finally {
         setLoading(false);
       }

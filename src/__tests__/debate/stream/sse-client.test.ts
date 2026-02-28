@@ -106,7 +106,7 @@ describe('SSEClient', () => {
       client.connect();
 
       // 手动触发连接打开
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       expect(client.getState()).toBe(SSEConnectionState.CONNECTED);
@@ -116,7 +116,7 @@ describe('SSEClient', () => {
       client = new SSEClient(config);
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       const stateBefore = client.getState();
@@ -131,7 +131,7 @@ describe('SSEClient', () => {
       client = new SSEClient(config);
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       client.disconnect();
@@ -149,7 +149,7 @@ describe('SSEClient', () => {
       });
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
       eventSource.emitEvent('connected', {
         debateId: 'debate-123',
@@ -170,7 +170,7 @@ describe('SSEClient', () => {
       });
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       eventSource.emitEvent('round-start', {
@@ -191,7 +191,7 @@ describe('SSEClient', () => {
       });
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       eventSource.emitEvent('argument', {
@@ -215,7 +215,7 @@ describe('SSEClient', () => {
       });
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       eventSource.emitEvent('progress', {
@@ -239,7 +239,7 @@ describe('SSEClient', () => {
       });
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       eventSource.emitEvent('completed', {
@@ -263,7 +263,7 @@ describe('SSEClient', () => {
       });
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       eventSource.emitEvent('error', {
@@ -285,7 +285,7 @@ describe('SSEClient', () => {
       });
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       eventSource.emitEvent('ping', {
@@ -304,7 +304,7 @@ describe('SSEClient', () => {
       });
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       eventSource.emitEvent('disconnected', {
@@ -325,7 +325,7 @@ describe('SSEClient', () => {
 
       client.on('argument', handler);
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       jest.advanceTimersByTime(100);
 
       eventSource.emitEvent('argument', {
@@ -348,7 +348,7 @@ describe('SSEClient', () => {
       client.on('argument', handler);
       client.off('argument', handler);
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       jest.advanceTimersByTime(100);
 
       eventSource.emitEvent('argument', {
@@ -373,7 +373,7 @@ describe('SSEClient', () => {
       });
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       jest.advanceTimersByTime(100);
 
       // 模拟连接错误
@@ -398,7 +398,7 @@ describe('SSEClient', () => {
       });
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       jest.advanceTimersByTime(100);
 
       // 模拟多次连接失败
@@ -420,7 +420,7 @@ describe('SSEClient', () => {
       });
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       jest.runAllTimers();
 
       // 模拟达到最大重连次数（需要触发maxRetryAttempts + 1次错误才能放弃）
@@ -440,7 +440,7 @@ describe('SSEClient', () => {
       client = new SSEClient(config);
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       // 保存初始重连计数
@@ -455,7 +455,7 @@ describe('SSEClient', () => {
       // 运行所有定时器以完成重连
       jest.runAllTimers();
       // 手动触发新连接的打开
-      const newEventSource = client['eventSource'] as MockEventSource;
+      const newEventSource = client['eventSource'] as unknown as MockEventSource;
       newEventSource.triggerOpen();
 
       // 重连成功后重连计数应该重置
@@ -467,14 +467,14 @@ describe('SSEClient', () => {
       client = new SSEClient(config);
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       client.disconnect();
       expect(client.getState()).toBe(SSEConnectionState.DISCONNECTED);
 
       client.reconnect();
-      const newEventSource = client['eventSource'] as MockEventSource;
+      const newEventSource = client['eventSource'] as unknown as MockEventSource;
       newEventSource.triggerOpen();
 
       expect(client.getState()).toBe(SSEConnectionState.CONNECTED);
@@ -486,7 +486,7 @@ describe('SSEClient', () => {
       client = new SSEClient(config);
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       eventSource.emitEvent(
@@ -507,7 +507,7 @@ describe('SSEClient', () => {
       client = new SSEClient(config);
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       eventSource.emitEvent(
@@ -543,7 +543,7 @@ describe('SSEClient', () => {
       });
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       // 模拟连接错误
@@ -561,7 +561,7 @@ describe('SSEClient', () => {
       client = new SSEClient(config);
       client.connect();
 
-      const eventSource = client['eventSource'] as MockEventSource;
+      const eventSource = client['eventSource'] as unknown as MockEventSource;
       eventSource.triggerOpen();
 
       client.on('argument', handler);

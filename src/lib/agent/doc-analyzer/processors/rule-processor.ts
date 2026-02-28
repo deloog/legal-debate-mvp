@@ -465,7 +465,7 @@ export class RuleProcessor {
    */
   private async enrichWithExtractors(
     data: ExtractedData,
-    claims: Claim[],
+    _claims: Claim[],
     fullText: string,
     corrections: Correction[]
   ): Promise<void> {

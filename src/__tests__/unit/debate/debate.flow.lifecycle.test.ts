@@ -99,7 +99,7 @@ describe('Debate Flow Lifecycle', () => {
       });
 
       // 4. 创建第一轮论点
-      const plaintiffArg1 = await testPrisma.argument.create({
+      const __plaintiffArg1 = await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: round1.id },
@@ -113,7 +113,7 @@ describe('Debate Flow Lifecycle', () => {
         },
       });
 
-      const defendantArg1 = await testPrisma.argument.create({
+      const __defendantArg1 = await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: round1.id },
@@ -127,7 +127,7 @@ describe('Debate Flow Lifecycle', () => {
         },
       });
 
-      const legalBasis1 = await testPrisma.argument.create({
+      const __legalBasis1 = await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: round1.id },
@@ -167,7 +167,7 @@ describe('Debate Flow Lifecycle', () => {
       });
 
       // 8. 创建第二轮论点（反驳和支持）
-      const plaintiffRebuttal = await testPrisma.argument.create({
+      const __plaintiffRebuttal = await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: round2.id },
@@ -182,7 +182,7 @@ describe('Debate Flow Lifecycle', () => {
         },
       });
 
-      const defendantSupporting = await testPrisma.argument.create({
+      const __defendantSupporting = await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: round2.id },
@@ -223,7 +223,7 @@ describe('Debate Flow Lifecycle', () => {
         },
       });
 
-      const plaintiffConclusion = await testPrisma.argument.create({
+      const __plaintiffConclusion = await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: round3.id },
@@ -238,7 +238,7 @@ describe('Debate Flow Lifecycle', () => {
         },
       });
 
-      const defendantConclusion = await testPrisma.argument.create({
+      const __defendantConclusion = await testPrisma.argument.create({
         data: {
           round: {
             connect: { id: round3.id },

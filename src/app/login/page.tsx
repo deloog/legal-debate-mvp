@@ -1,13 +1,22 @@
+/**
+ * 用户登录页面
+ *
+ * 功能：
+ * 1. 提供用户登录表单（邮箱和密码）
+ * 2. 支持登录后跳转到指定页面（通过redirect参数）
+ * 3. 登录成功后同步NextAuth session
+ * 4. 显示测试账户信息供开发测试使用
+ * 5. 错误提示和加载状态处理
+ *
+ * @page /login
+ */
+
 'use client';
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
-
-/**
- * 登录页面
- */
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -35,7 +44,9 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError(data.message || '登录失败');
+        setError(
+          '邮箱或密码错误，如果你还没有注册，请点击下方"注册账户"进行注册'
+        );
         setLoading(false);
         return;
       }
@@ -185,10 +196,16 @@ export default function LoginPage() {
           </div>
 
           {/* Footer Links */}
-          <div className='mt-6 text-center'>
+          <div className='mt-6 flex flex-col items-center gap-3 text-center'>
+            <Link
+              href='/register'
+              className='text-sm font-medium text-violet-600 transition-colors hover:text-violet-700 hover:underline'
+            >
+              还没有账户？点击注册
+            </Link>
             <Link
               href='/'
-              className='text-sm text-violet-600 transition-colors hover:text-violet-700 hover:underline'
+              className='text-sm text-slate-500 transition-colors hover:text-slate-600 hover:underline'
             >
               返回首页
             </Link>

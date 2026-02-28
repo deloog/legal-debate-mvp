@@ -6,7 +6,7 @@ import { authOptions } from '@/lib/auth/auth-options';
 import { logger } from '@/lib/logger';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string; roundId: string }> }
 ) {
   const session = await getServerSession(authOptions);

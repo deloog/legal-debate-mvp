@@ -1,3 +1,31 @@
+/**
+ * 立案材料清单页面
+ *
+ * 功能：
+ * 1. 案件信息选择
+ *    - 选择案件类型（民事/刑事/行政/商事/劳动/知识产权）
+ *    - 选择法院级别（基层/中级/高级/最高）
+ *    - 根据选择生成对应的材料清单
+ * 2. 材料清单展示
+ *    - 按分类分组展示立案材料
+ *    - 显示材料名称、描述、备注
+ *    - 标记必填材料（红色"必须"标签）
+ *    - 显示份数要求
+ * 3. 备齐进度跟踪
+ *    - 勾选已准备的材料
+ *    - 实时计算必填材料完成率
+ *    - 进度条可视化展示
+ * 4. 交互功能
+ *    - 展开/折叠分类
+ *    - 打印清单功能
+ *    - 响应式布局
+ * 5. 注意事项提示
+ *    - 显示案件相关的注意事项
+ *    - 黄色提示卡片突出显示
+ *
+ * @page /filing-materials
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -69,6 +97,9 @@ export default function FilingMaterialsPage() {
     try {
       const params = new URLSearchParams({ caseType, courtLevel });
       const res = await fetch(`/api/filing-materials?${params}`);
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 获取材料清单失败`);
+      }
       const data = await res.json();
       if (data.success) {
         setMaterials(data.data);
@@ -81,8 +112,8 @@ export default function FilingMaterialsPage() {
       } else {
         setError(data.error?.message || '获取材料清单失败');
       }
-    } catch {
-      setError('获取失败，请重试');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '获取失败，请重试');
     } finally {
       setLoading(false);
     }

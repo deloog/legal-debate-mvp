@@ -1,3 +1,32 @@
+/**
+ * 退款管理页面
+ *
+ * 功能：
+ * 1. 申请退款
+ *    - 展示可退款的已支付订单
+ *    - 选择退款原因（用户申请/系统错误/重复付款/服务问题/其他）
+ *    - 填写退款说明（选择"其他原因"时必填）
+ *    - 提交退款申请（预计3-5个工作日处理）
+ * 2. 退款记录
+ *    - 展示历史退款记录
+ *    - 显示退款状态（待处理/处理中/已退款/退款失败/已取消）
+ *    - 显示退款金额、原因、申请时间
+ * 3. 订单管理
+ *    - 显示订单号、会员等级、支付金额、创建时间
+ *    - 标记已支付状态
+ * 4. 状态管理
+ *    - 切换"申请退款"和"退款记录"标签页
+ *    - 自动加载订单和退款记录
+ *    - 支持提交申请、刷新数据
+ *    - 成功和错误提示
+ * 5. 退款政策说明
+ *    - 7天内可申请退款
+ *    - 原路返回，3-5个工作日到账
+ *    - 已使用会员权益按比例扣除
+ *
+ * @page /refunds
+ */
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -70,12 +99,15 @@ export default function RefundsPage() {
     setError(null);
     try {
       const res = await fetch('/api/orders?status=PAID&limit=20');
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 获取订单失败`);
+      }
       const data = await res.json();
       if (data.success) {
         setOrders(data.data?.orders ?? data.data ?? []);
       }
-    } catch {
-      setError('获取订单失败');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '获取订单失败');
     } finally {
       setLoading(false);
     }
@@ -86,14 +118,17 @@ export default function RefundsPage() {
     setError(null);
     try {
       const res = await fetch('/api/refunds');
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 获取退款记录失败`);
+      }
       const data = await res.json();
       if (data.success) {
         setRefunds(data.data?.refunds ?? []);
       } else {
         setError(data.message || '获取退款记录失败');
       }
-    } catch {
-      setError('获取退款记录失败');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '获取退款记录失败');
     } finally {
       setLoading(false);
     }
@@ -120,6 +155,9 @@ export default function RefundsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId, reason, description }),
       });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 申请失败`);
+      }
       const data = await res.json();
       if (data.success) {
         setSuccess('退款申请已提交，预计 3-5 个工作日处理');
@@ -129,8 +167,8 @@ export default function RefundsPage() {
       } else {
         setError(data.message || '申请失败');
       }
-    } catch {
-      setError('申请失败，请重试');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '申请失败，请重试');
     } finally {
       setSubmitting(null);
     }

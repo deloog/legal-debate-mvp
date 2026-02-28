@@ -347,7 +347,7 @@ describe('企业法务工作台API', () => {
         'http://localhost:3000/api/dashboard/enterprise'
       );
       const response = await GET(request);
-      const data = await response.json();
+      const __data = await response.json();
 
       // 验证调用了正确的排序参数
       expect(prisma.contract.findMany).toHaveBeenCalledWith(
@@ -381,7 +381,7 @@ describe('企业法务工作台API', () => {
         'http://localhost:3000/api/dashboard/enterprise'
       );
       const response = await GET(request);
-      const data = await response.json();
+      const __data = await response.json();
 
       // 验证调用了正确的排序参数
       expect(prisma.task.findMany).toHaveBeenCalledWith(

@@ -5,12 +5,11 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import _React, { useState, useEffect } from 'react';
 import type {
   ComplianceDashboard,
   ComplianceChecklist,
   ComplianceReport,
-  ComplianceCheckItem,
 } from '@/types/compliance';
 import {
   ComplianceCheckStatus,
@@ -46,13 +45,18 @@ export default function CompliancePage() {
 
     try {
       const response = await fetch('/api/compliance/dashboard');
+
+      if (!response.ok) {
+        throw new Error(`请求失败: ${response.status}`);
+      }
+
       const data = await response.json();
 
-      if (!response.ok || !data.success) {
+      if (!data.success) {
         throw new Error(data.error?.message || '加载失败');
       }
 
-      setDashboard(data.data);
+      setDashboard(data.data || null);
     } catch (err) {
       setError(err instanceof Error ? err.message : '加载失败');
     } finally {
@@ -67,9 +71,14 @@ export default function CompliancePage() {
 
     try {
       const response = await fetch('/api/compliance/checklist');
+
+      if (!response.ok) {
+        throw new Error(`请求失败: ${response.status}`);
+      }
+
       const data = await response.json();
 
-      if (!response.ok || !data.success) {
+      if (!data.success) {
         throw new Error(data.error?.message || '加载失败');
       }
 

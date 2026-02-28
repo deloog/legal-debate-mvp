@@ -1,28 +1,37 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 import { seedContractTemplates } from './seed-contracts';
-import { seedEvidenceCategories } from './seed-evidence-categories';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('开始种子数据创建...');
 
+  // 预先哈希测试密码（salt rounds = 12，与 src/lib/auth/password.ts 保持一致）
+  const testPasswordHash = await bcrypt.hash('test123', 12);
+  const adminPasswordHash = await bcrypt.hash('admin123', 12);
+
   // 创建测试用户
   const testUser = await prisma.user.upsert({
     where: { email: 'test@example.com' },
-    update: {},
+    update: { password: testPasswordHash, status: 'ACTIVE' },
     create: {
       email: 'test@example.com',
       name: '测试用户',
+      password: testPasswordHash,
+      status: 'ACTIVE',
     },
   });
 
   await prisma.user.upsert({
     where: { email: 'admin@example.com' },
-    update: {},
+    update: { password: adminPasswordHash, status: 'ACTIVE', role: 'ADMIN' },
     create: {
       email: 'admin@example.com',
       name: '管理员',
+      password: adminPasswordHash,
+      status: 'ACTIVE',
+      role: 'ADMIN',
     },
   });
 
@@ -73,7 +82,7 @@ async function main() {
   console.log('文档创建完成');
 
   // 创建示例辩论
-  const testDebate = await prisma.debate.create({
+  const ___testDebate = await prisma.debate.create({
     data: {
       caseId: testCase.id,
       userId: testUser.id,
@@ -186,7 +195,7 @@ async function main() {
   console.log('会话创建完成');
 
   // 创建示例法律依据
-  const testLegalReference = await prisma.legalReference.create({
+  const ___testLegalReference = await prisma.legalReference.create({
     data: {
       caseId: testCase.id,
       source: '民法典',

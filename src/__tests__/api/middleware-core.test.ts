@@ -112,21 +112,21 @@ describe('Middleware Core', () => {
 
         const middleware1 = jest
           .fn()
-          .mockImplementation(async (req, ctx, response) => {
+          .mockImplementation(async (_req, ctx, response) => {
             executionOrder.push(1);
             // Don't return response to continue to next
           });
 
         const middleware2 = jest
           .fn()
-          .mockImplementation(async (req, ctx, response) => {
+          .mockImplementation(async (_req, ctx, response) => {
             executionOrder.push(2);
             return NextResponse.json({ middleware: 2 });
           });
 
         stack.use(middleware1).use(middleware2);
 
-        const result = await stack.execute(mockRequest, context);
+        const __result = await stack.execute(mockRequest, context);
 
         expect(executionOrder).toEqual([1, 2]);
         expect(middleware1).toHaveBeenCalledWith(
@@ -147,21 +147,21 @@ describe('Middleware Core', () => {
 
         const middleware1 = jest
           .fn()
-          .mockImplementation(async (req, ctx, response) => {
+          .mockImplementation(async (_req, ctx, response) => {
             ctx.userId = 'user123';
             contextReceived = { ...ctx };
           });
 
         const middleware2 = jest
           .fn()
-          .mockImplementation(async (req, ctx, response) => {
+          .mockImplementation(async (_req, ctx, response) => {
             expect(ctx.userId).toBe('user123');
             return NextResponse.json({ userId: ctx.userId });
           });
 
         stack.use(middleware1).use(middleware2);
 
-        const result = await stack.execute(mockRequest, context);
+        const __result = await stack.execute(mockRequest, context);
 
         expect(middleware2).toHaveBeenCalledWith(
           mockRequest,
@@ -317,14 +317,14 @@ describe('Middleware Core', () => {
 
         const middleware1 = jest
           .fn()
-          .mockImplementation(async (req, ctx, response) => {
+          .mockImplementation(async (_req, ctx, response) => {
             middlewareContexts.push({ ...ctx });
             ctx.userId = 'user1';
           });
 
         const middleware2 = jest
           .fn()
-          .mockImplementation(async (req, ctx, response) => {
+          .mockImplementation(async (_req, ctx, response) => {
             middlewareContexts.push({ ...ctx });
             ctx.userId = 'user2';
             return NextResponse.json({ finalUserId: ctx.userId });
@@ -346,14 +346,14 @@ describe('Middleware Core', () => {
 
         const middleware1 = jest
           .fn()
-          .mockImplementation(async (req, ctx, response) => {
+          .mockImplementation(async (_req, ctx, response) => {
             await new Promise(resolve => setTimeout(resolve, 10));
             ctx.asyncOperation = 'completed';
           });
 
         const middleware2 = jest
           .fn()
-          .mockImplementation(async (req, ctx, response) => {
+          .mockImplementation(async (_req, ctx, response) => {
             expect(ctx.asyncOperation).toBe('completed');
             return NextResponse.json({ async: true });
           });
@@ -382,7 +382,7 @@ describe('Middleware Core', () => {
       // Authentication middleware
       const authMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           ctx.userId = 'user123';
           ctx.role = 'user';
         });
@@ -390,14 +390,14 @@ describe('Middleware Core', () => {
       // Logging middleware
       const loggingMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           ctx.requestId = `custom_${ctx.requestId}`;
         });
 
       // Response middleware
       const responseMiddleware = jest
         .fn()
-        .mockImplementation(async (req, ctx, response) => {
+        .mockImplementation(async (_req, ctx, response) => {
           return NextResponse.json({
             success: true,
             data: {

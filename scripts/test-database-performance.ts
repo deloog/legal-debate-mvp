@@ -175,7 +175,7 @@ class DatabasePerformanceTester {
           const startTime = Date.now();
 
           // 创建案件
-          const caseData = {
+          const __caseData = {
             userId: user.id,
             title: '测试案件',
             description: '性能测试案件',

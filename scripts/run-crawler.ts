@@ -13,8 +13,8 @@ const insecureAgent = new https.Agent({ rejectUnauthorized: false });
 
 // API配置（正确的FLK API）
 const API_BASE = 'https://flk.npc.gov.cn';
-const API_LIST = `${API_BASE}/law-search/search/list`;     // POST列表
-const API_DETAIL = `${API_BASE}/law-search/search/flfgDetails`;  // GET详情
+const API_LIST = `${API_BASE}/law-search/search/list`; // POST列表
+const API_DETAIL = `${API_BASE}/law-search/search/flfgDetails`; // GET详情
 const OSS_HOST = 'wb.flk.npc.gov.cn';
 
 function randomUA() {
@@ -28,35 +28,51 @@ async function delay(ms: number) {
 /**
  * 获取法规列表（POST请求）
  */
-function fetchList(typeCode: number, page: number, pageSize: number): Promise<any> {
+function fetchList(
+  typeCode: number,
+  page: number,
+  pageSize: number
+): Promise<any> {
   const body = JSON.stringify({
-    searchRange: 1, sxrq: [], gbrq: [], searchType: 2, sxx: [],
-    gbrqYear: [], flfgCodeId: [typeCode], zdjgCodeId: [],
-    searchContent: '', pageNum: page, pageSize,
+    searchRange: 1,
+    sxrq: [],
+    gbrq: [],
+    searchType: 2,
+    sxx: [],
+    gbrqYear: [],
+    flfgCodeId: [typeCode],
+    zdjgCodeId: [],
+    searchContent: '',
+    pageNum: page,
+    pageSize,
   });
 
   return new Promise((resolve, reject) => {
-    const req = https.request(API_LIST, {
-      method: 'POST',
-      headers: {
-        'User-Agent': randomUA(),
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(body),
-        'Origin': API_BASE,
-        'Referer': `${API_BASE}/`,
+    const req = https.request(
+      API_LIST,
+      {
+        method: 'POST',
+        headers: {
+          'User-Agent': randomUA(),
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(body),
+          Origin: API_BASE,
+          Referer: `${API_BASE}/`,
+        },
+        agent: insecureAgent,
       },
-      agent: insecureAgent,
-    }, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try {
-          resolve(JSON.parse(data));
-        } catch (e) {
-          reject(new Error(`列表JSON解析失败: ${data.substring(0, 200)}`));
-        }
-      });
-    });
+      res => {
+        let data = '';
+        res.on('data', chunk => (data += chunk));
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            reject(new Error(`列表JSON解析失败: ${data.substring(0, 200)}`));
+          }
+        });
+      }
+    );
     req.on('error', reject);
     req.write(body);
     req.end();
@@ -70,20 +86,26 @@ function fetchDetail(bbbs: string): Promise<any> {
   const url = `${API_DETAIL}?bbbs=${encodeURIComponent(bbbs)}`;
 
   return new Promise((resolve, reject) => {
-    https.get(url, {
-      headers: { 'User-Agent': randomUA(), 'Referer': API_BASE },
-      agent: insecureAgent,
-    }, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try {
-          resolve(JSON.parse(data));
-        } catch (e) {
-          reject(new Error(`详情JSON解析失败: ${data.substring(0, 200)}`));
+    https
+      .get(
+        url,
+        {
+          headers: { 'User-Agent': randomUA(), Referer: API_BASE },
+          agent: insecureAgent,
+        },
+        res => {
+          let data = '';
+          res.on('data', chunk => (data += chunk));
+          res.on('end', () => {
+            try {
+              resolve(JSON.parse(data));
+            } catch (e) {
+              reject(new Error(`详情JSON解析失败: ${data.substring(0, 200)}`));
+            }
+          });
         }
-      });
-    }).on('error', reject);
+      )
+      .on('error', reject);
   });
 }
 
@@ -93,40 +115,47 @@ function fetchDetail(bbbs: string): Promise<any> {
 async function downloadDocx(ossPath: string): Promise<Buffer | null> {
   const url = `https://${OSS_HOST}/${ossPath}`;
 
-  return new Promise((resolve) => {
-    https.get(url, {
-      headers: {
-        'User-Agent': randomUA(),
-        'Accept': '*/*',
-        'Referer': API_BASE,
-      },
-      agent: insecureAgent,
-      timeout: 30000,
-    }, (res) => {
-      if (res.statusCode !== 200) {
-        console.log(`    ⚠ HTTP ${res.statusCode}`);
-        resolve(null);
-        return;
-      }
+  return new Promise(resolve => {
+    https
+      .get(
+        url,
+        {
+          headers: {
+            'User-Agent': randomUA(),
+            Accept: '*/*',
+            Referer: API_BASE,
+          },
+          agent: insecureAgent,
+          timeout: 30000,
+        },
+        res => {
+          if (res.statusCode !== 200) {
+            console.log(`    ⚠ HTTP ${res.statusCode}`);
+            resolve(null);
+            return;
+          }
 
-      const chunks: Buffer[] = [];
-      res.on('data', chunk => chunks.push(chunk));
-      res.on('end', () => {
-        const buffer = Buffer.concat(chunks);
-        console.log(`    ✓ 下载成功: ${buffer.length} bytes`);
-        resolve(buffer);
-      });
-      res.on('error', (err) => {
-        console.log(`    ⚠ 下载错误: ${err.message}`);
+          const chunks: Buffer[] = [];
+          res.on('data', chunk => chunks.push(chunk));
+          res.on('end', () => {
+            const buffer = Buffer.concat(chunks);
+            console.log(`    ✓ 下载成功: ${buffer.length} bytes`);
+            resolve(buffer);
+          });
+          res.on('error', err => {
+            console.log(`    ⚠ 下载错误: ${err.message}`);
+            resolve(null);
+          });
+        }
+      )
+      .on('error', err => {
+        console.log(`    ⚠ 请求错误: ${err.message}`);
+        resolve(null);
+      })
+      .setTimeout(30000, function () {
+        this.destroy();
         resolve(null);
       });
-    }).on('error', (err) => {
-      console.log(`    ⚠ 请求错误: ${err.message}`);
-      resolve(null);
-    }).setTimeout(30000, function() {
-      this.destroy();
-      resolve(null);
-    });
   });
 }
 
@@ -206,7 +235,8 @@ async function main() {
   }
 
   const args = process.argv.slice(2);
-  const forceRedownload = args.includes('--force') || args.includes('--download');
+  const forceRedownload =
+    args.includes('--force') || args.includes('--download');
   const forceParse = args.includes('--force') || args.includes('--parse');
   const parseOnly = args.includes('--parse-only');
 
@@ -271,7 +301,9 @@ async function main() {
               if (det.data.content) {
                 apiContent = extractApiContent(det.data.content);
               }
-              console.log(`    ✓ OSS: ${ossPath || '无'} | Content: ${apiContent.length} chars`);
+              console.log(
+                `    ✓ OSS: ${ossPath || '无'} | Content: ${apiContent.length} chars`
+              );
             }
           } catch (e) {
             console.log(`    ⚠ 详情获取失败: ${e}`);
@@ -306,7 +338,11 @@ async function main() {
             count: checkpoint.items.filter(i => i.flfgCodeId === t.code).length,
           };
 
-          fs.writeFileSync(checkpointPath, JSON.stringify(checkpoint, null, 2), 'utf-8');
+          fs.writeFileSync(
+            checkpointPath,
+            JSON.stringify(checkpoint, null, 2),
+            'utf-8'
+          );
           await delay(300 + Math.random() * 500);
         }
       } catch (e) {
@@ -357,7 +393,11 @@ async function main() {
         console.log(`    ⚠ 下载失败: ${e}`);
       }
 
-      fs.writeFileSync(checkpointPath, JSON.stringify(checkpoint, null, 2), 'utf-8');
+      fs.writeFileSync(
+        checkpointPath,
+        JSON.stringify(checkpoint, null, 2),
+        'utf-8'
+      );
       await delay(500 + Math.random() * 1000);
     }
 
@@ -381,7 +421,9 @@ async function main() {
         item.content = existingContent;
         item.contentLength = existingContent.length;
         item.downloadStatus = 'success';
-        console.log(`  ✓ ${item.title} (已解析: ${existingContent.length} chars)`);
+        console.log(
+          `  ✓ ${item.title} (已解析: ${existingContent.length} chars)`
+        );
         parseCount++;
         continue;
       }
@@ -403,7 +445,9 @@ async function main() {
           console.log(`    ✓ DOCX解析: ${content.length} chars`);
           parseCount++;
         } else if (item.content && item.content.length > 50) {
-          console.log(`    ⚠ DOCX为空，使用API content: ${item.content.length} chars`);
+          console.log(
+            `    ⚠ DOCX为空，使用API content: ${item.content.length} chars`
+          );
           fs.writeFileSync(parsedPath, item.content);
           apiOnlyCount++;
         } else {
@@ -422,7 +466,11 @@ async function main() {
       console.log(`  ⊘ ${item.title} (无内容)`);
     }
 
-    fs.writeFileSync(checkpointPath, JSON.stringify(checkpoint, null, 2), 'utf-8');
+    fs.writeFileSync(
+      checkpointPath,
+      JSON.stringify(checkpoint, null, 2),
+      'utf-8'
+    );
   }
 
   // 阶段4: 导出数据
@@ -431,12 +479,17 @@ async function main() {
   const exportData = {
     exportedAt: new Date().toISOString(),
     totalItems: checkpoint.items.length,
-    totalContentLength: checkpoint.items.reduce((s, i) => s + (i.contentLength || 0), 0),
+    totalContentLength: checkpoint.items.reduce(
+      (s, i) => s + (i.contentLength || 0),
+      0
+    ),
     stats: {
       parsed: parseCount,
       apiOnly: apiOnlyCount,
-      failed: checkpoint.items.filter(i => i.downloadStatus === 'failed').length,
-      skipped: checkpoint.items.filter(i => i.downloadStatus === 'skipped').length,
+      failed: checkpoint.items.filter(i => i.downloadStatus === 'failed')
+        .length,
+      skipped: checkpoint.items.filter(i => i.downloadStatus === 'skipped')
+        .length,
     },
     items: checkpoint.items.map(i => ({
       source: 'flk',
@@ -447,7 +500,14 @@ async function main() {
       issuingAuthority: i.zdjgName,
       publishDate: i.gbrq,
       effectiveDate: i.sxrq,
-      status: i.sxx === 1 ? 'repealed' : i.sxx === 2 ? 'amended' : i.sxx === 4 ? 'draft' : 'valid',
+      status:
+        i.sxx === 1
+          ? 'repealed'
+          : i.sxx === 2
+            ? 'amended'
+            : i.sxx === 4
+              ? 'draft'
+              : 'valid',
       content: i.content || '',
       contentLength: i.contentLength || 0,
     })),

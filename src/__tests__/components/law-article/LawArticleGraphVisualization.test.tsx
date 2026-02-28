@@ -85,8 +85,160 @@ jest.mock('d3', () => {
 });
 
 describe('LawArticleGraphVisualization', () => {
+  const mockGraphData = {
+    nodes: [
+      {
+        id: 'article-1',
+        lawName: '民法典',
+        articleNumber: '1',
+        category: 'CIVIL',
+        level: 0,
+      },
+      {
+        id: 'article-2',
+        lawName: '民法典',
+        articleNumber: '2',
+        category: 'CIVIL',
+        level: 1,
+      },
+    ],
+    links: [
+      {
+        source: 'article-1',
+        target: 'article-2',
+        relationType: 'CITES',
+        strength: 0.9,
+        confidence: 0.95,
+      },
+    ],
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('graphData prop（优化功能）', () => {
+    it('应该直接使用传入的graphData而不调用API', async () => {
+      // 渲染组件（传入graphData）
+      const { container } = render(
+        <LawArticleGraphVisualization graphData={mockGraphData} />
+      );
+
+      // 等待渲染完成
+      await waitFor(() => {
+        expect(screen.queryByText('加载中...')).not.toBeInTheDocument();
+      });
+
+      // 验证没有调用fetch（直接使用传入的graphData）
+      expect(global.fetch).not.toHaveBeenCalled();
+
+      // 验证SVG元素存在
+      const svg = container.querySelector('svg');
+      expect(svg).toBeInTheDocument();
+    });
+
+    it('应该正确显示传入的graphData中的节点', async () => {
+      // 渲染组件（传入graphData）
+      const { container } = render(
+        <LawArticleGraphVisualization graphData={mockGraphData} />
+      );
+
+      // 等待渲染完成
+      await waitFor(() => {
+        expect(screen.queryByText('加载中...')).not.toBeInTheDocument();
+      });
+
+      // 验证SVG元素存在
+      const svg = container.querySelector('svg');
+      expect(svg).toBeInTheDocument();
+    });
+
+    it('应该正确处理空的graphData', async () => {
+      // 渲染组件（传入空graphData）
+      const { container } = render(
+        <LawArticleGraphVisualization graphData={{ nodes: [], links: [] }} />
+      );
+
+      // 等待渲染完成
+      await waitFor(() => {
+        expect(screen.queryByText('加载中...')).not.toBeInTheDocument();
+      });
+
+      // 验证显示"暂无图谱数据"
+      expect(screen.getByText('暂无图谱数据')).toBeInTheDocument();
+    });
+
+    it('当graphData和centerArticleId都传入时，优先使用graphData', async () => {
+      // Mock fetch
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          nodes: [
+            {
+              id: 'article-3',
+              lawName: '测试法',
+              articleNumber: '3',
+              category: 'CRIMINAL',
+              level: 0,
+            },
+          ],
+          links: [],
+        }),
+      });
+
+      // 渲染组件（两者都传入）
+      render(
+        <LawArticleGraphVisualization
+          graphData={mockGraphData}
+          centerArticleId='article-3'
+        />
+      );
+
+      // 等待渲染完成
+      await waitFor(() => {
+        expect(screen.queryByText('加载中...')).not.toBeInTheDocument();
+      });
+
+      // 验证没有调用fetch（优先使用graphData）
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('应该处理graphData为undefined的情况（回退到API调用）', async () => {
+      // Mock fetch
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          nodes: [
+            {
+              id: 'article-1',
+              lawName: '民法典',
+              articleNumber: '1',
+              category: 'CIVIL',
+              level: 0,
+            },
+          ],
+          links: [],
+        }),
+      });
+
+      // 渲染组件（graphData为undefined）
+      render(
+        <LawArticleGraphVisualization
+          graphData={undefined}
+          centerArticleId='article-1'
+        />
+      );
+
+      // 等待渲染完成
+      await waitFor(() => {
+        expect(screen.queryByText('加载中...')).not.toBeInTheDocument();
+      });
+
+      // 验证调用了API
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/api/v1/law-articles/article-1/graph?depth=2'
+      );
+    });
   });
 
   describe('组件渲染', () => {
@@ -291,24 +443,21 @@ describe('LawArticleGraphVisualization', () => {
       // Mock fetch - 网络错误
       (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
-      // Mock console.error
-      const consoleError = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
       // 渲染组件
-      render(<LawArticleGraphVisualization centerArticleId='article-1' />);
+      const { container } = render(
+        <LawArticleGraphVisualization centerArticleId='article-1' />
+      );
 
-      // 等待错误处理
+      // 等待错误处理完成（组件会显示空状态）
       await waitFor(() => {
-        expect(consoleError).toHaveBeenCalledWith(
-          '加载图谱失败:',
-          expect.any(Error)
-        );
+        expect(screen.queryByText('加载中...')).not.toBeInTheDocument();
       });
 
-      // 清理
-      consoleError.mockRestore();
+      // 验证显示空状态而非错误
+      expect(screen.getByText('暂无图谱数据')).toBeInTheDocument();
+      // SVG应该被隐藏
+      const svg = container.querySelector('svg');
+      expect(svg).toHaveClass('hidden');
     });
 
     it('应该处理API错误响应', async () => {
@@ -319,21 +468,21 @@ describe('LawArticleGraphVisualization', () => {
         json: async () => ({ error: '法条不存在' }),
       });
 
-      // Mock console.error
-      const consoleError = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
       // 渲染组件
-      render(<LawArticleGraphVisualization centerArticleId='non-existent' />);
+      const { container } = render(
+        <LawArticleGraphVisualization centerArticleId='non-existent' />
+      );
 
-      // 等待错误处理
+      // 等待错误处理完成（组件会显示空状态）
       await waitFor(() => {
-        expect(consoleError).toHaveBeenCalled();
+        expect(screen.queryByText('加载中...')).not.toBeInTheDocument();
       });
 
-      // 清理
-      consoleError.mockRestore();
+      // 验证显示空状态而非错误
+      expect(screen.getByText('暂无图谱数据')).toBeInTheDocument();
+      // SVG应该被隐藏
+      const svg = container.querySelector('svg');
+      expect(svg).toHaveClass('hidden');
     });
 
     it('应该处理空数据', async () => {

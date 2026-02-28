@@ -698,6 +698,9 @@ jest.mock('@/lib/db/prisma', () => {
     filingMaterials: {},
     similarCase: {},
     timeline: {},
+    approvalTemplate: {},
+    contractApproval: {},
+    approvalStep: {},
     $transaction: jest.fn(),
     $connect: jest.fn(),
     $disconnect: jest.fn(),
@@ -747,6 +750,9 @@ jest.mock('@/lib/db/prisma', () => {
     'filingMaterials',
     'similarCase',
     'timeline',
+    'approvalTemplate',
+    'contractApproval',
+    'approvalStep',
   ];
 
   models.forEach(model => {

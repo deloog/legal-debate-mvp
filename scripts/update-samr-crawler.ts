@@ -147,13 +147,18 @@ async function applyUpdates(): Promise<void> {
   // 批量替换 URL
   const urlCount = (content.match(/cont\.12315\.cn/g) || []).length;
   if (urlCount > 0) {
-    content = content.replace(/https:\/\/cont\.12315\.cn\//g, 'https://www.samr.gov.cn/');
+    content = content.replace(
+      /https:\/\/cont\.12315\.cn\//g,
+      'https://www.samr.gov.cn/'
+    );
     console.log(`✅ 替换了 ${urlCount} 个 cont.12315.cn URL`);
   }
 
   // 写入文件
   fs.writeFileSync(filePath, content, 'utf-8');
-  console.log(`\n✅ 更新完成！共应用 ${updateCount + (urlCount > 0 ? 1 : 0)} 个更改`);
+  console.log(
+    `\n✅ 更新完成！共应用 ${updateCount + (urlCount > 0 ? 1 : 0)} 个更改`
+  );
 
   // 验证更新
   const updatedContent = fs.readFileSync(filePath, 'utf-8');

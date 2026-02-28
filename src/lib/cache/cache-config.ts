@@ -112,6 +112,13 @@ const namespaceConfigs: Record<CacheNamespace, NamespaceConfig> = {
     preloadEnabled: false,
     preloadKeys: [],
   },
+  [CacheNamespace.KNOWLEDGE_GRAPH]: {
+    namespace: CacheNamespace.KNOWLEDGE_GRAPH,
+    ttl: parseInt(process.env.CACHE_KNOWLEDGE_GRAPH_TTL || '3600', 10), // 1小时
+    description: '知识图谱缓存',
+    preloadEnabled: false,
+    preloadKeys: [],
+  },
   [CacheNamespace.TEMPORARY]: {
     namespace: CacheNamespace.TEMPORARY,
     ttl: parseInt(process.env.CACHE_TEMP_TTL || '60', 10), // 1分钟

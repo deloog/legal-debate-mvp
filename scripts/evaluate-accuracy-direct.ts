@@ -206,12 +206,12 @@ interface AccuracyResult {
 
 class DirectAccuracyEvaluator {
   private amountExtractor: AmountExtractor;
-  private claimExtractor: ClaimExtractor;
+  private _claimExtractor: ClaimExtractor;
   private legalRepFilter: LegalRepresentativeFilter;
 
   constructor() {
     this.amountExtractor = new AmountExtractor();
-    this.claimExtractor = new ClaimExtractor();
+    this._claimExtractor = new ClaimExtractor();
     this.legalRepFilter = new LegalRepresentativeFilter();
   }
 

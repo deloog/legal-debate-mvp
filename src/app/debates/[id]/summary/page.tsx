@@ -79,7 +79,7 @@ function confColor(v: number | null): string {
 export default function DebateSummaryPage() {
   const params = useParams();
   const router = useRouter();
-  const debateId = params.id as string;
+  const debateId = typeof params?.id === 'string' ? params.id : '';
 
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -231,7 +231,7 @@ export default function DebateSummaryPage() {
                   strokeLinecap='round'
                   strokeLinejoin='round'
                   strokeWidth={2}
-                  d='M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'
+                  d='M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11.4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'
                 />
               </svg>
               <h2 className='text-sm font-semibold text-violet-800 dark:text-violet-300'>
@@ -272,7 +272,7 @@ export default function DebateSummaryPage() {
                     <path
                       className='opacity-75'
                       fill='currentColor'
-                      d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z'
+                      d='M4 12a8 8 0 018 8V0C5.373 0 0 5.373 0 12h4z'
                     />
                   </svg>
                   生成中…
@@ -425,7 +425,7 @@ export default function DebateSummaryPage() {
                     strokeLinecap='round'
                     strokeLinejoin='round'
                     strokeWidth={1.5}
-                    d='M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'
+                    d='M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11.4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'
                   />
                 </svg>
                 <p>点击上方按钮生成 AI 专家分析报告</p>

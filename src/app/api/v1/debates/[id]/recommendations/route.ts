@@ -15,10 +15,10 @@ import { logger } from '@/lib/logger';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const { id: debateId } = params;
+    const { id: debateId } = await params;
     const { searchParams } = new URL(request.url);
 
     // 解析查询参数

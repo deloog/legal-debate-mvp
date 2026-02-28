@@ -1,0 +1,169 @@
+[96mscripts/fix-law-categories.ts[0m:[93m9378[0m:[93m13[0m - [91merror[0m[90m TS2552: [0mCannot find name 'matchedRule'. Did you mean '__matchedRule'?
+
+[7m9378[0m             matchedRule = rule;
+[7m    [0m [91m            ~~~~~~~~~~~[0m
+
+  [96mscripts/fix-law-categories.ts[0m:[93m9373[0m:[93m13[0m
+    [7m9373[0m         let __matchedRule: (typeof KEYWORD_RULES)[0] | null = null;
+    [7m    [0m [96m            ~~~~~~~~~~~~~[0m
+    '__matchedRule' is declared here.
+
+[96mscripts/test-migration-rollback.ts[0m:[93m70[0m:[93m12[0m - [91merror[0m[90m TS2551: [0mProperty 'originalMigrationState' does not exist on type 'MigrationRollbackTester'. Did you mean '__originalMigrationState'?
+
+[7m70[0m       this.originalMigrationState = result;
+[7m  [0m [91m           ~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96mscripts/test-migration-rollback.ts[0m:[93m23[0m:[93m11[0m
+    [7m23[0m   private __originalMigrationState: string = '';
+    [7m  [0m [96m          ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    '__originalMigrationState' is declared here.
+
+[96msrc/__tests__/api/court-schedules.test.ts[0m:[93m99[0m:[93m7[0m - [91merror[0m[90m TS2552: [0mCannot find name 'testScheduleId'. Did you mean '__testScheduleId'?
+
+[7m99[0m       testScheduleId = schedule.id;
+[7m  [0m [91m      ~~~~~~~~~~~~~~[0m
+
+  [96msrc/__tests__/api/court-schedules.test.ts[0m:[93m20[0m:[93m7[0m
+    [7m20[0m   let __testScheduleId: string;
+    [7m  [0m [96m      ~~~~~~~~~~~~~~~~[0m
+    '__testScheduleId' is declared here.
+
+[96msrc/__tests__/api/memberships/upgrade.test.ts[0m:[93m44[0m:[93m5[0m - [91merror[0m[90m TS2552: [0mCannot find name 'mockUpdate'. Did you mean '__mockUpdate'?
+
+[7m44[0m     mockUpdate = prisma.userMembership.update as jest.Mock;
+[7m  [0m [91m    ~~~~~~~~~~[0m
+
+  [96msrc/__tests__/api/memberships/upgrade.test.ts[0m:[93m35[0m:[93m7[0m
+    [7m35[0m   let __mockUpdate: jest.Mock;
+    [7m  [0m [96m      ~~~~~~~~~~~~[0m
+    '__mockUpdate' is declared here.
+
+[96msrc/__tests__/api/middleware-core.test.ts[0m:[93m152[0m:[93m13[0m - [91merror[0m[90m TS2552: [0mCannot find name 'contextReceived'. Did you mean '__contextReceived'?
+
+[7m152[0m             contextReceived = { ...ctx };
+[7m   [0m [91m            ~~~~~~~~~~~~~~~[0m
+
+  [96msrc/__tests__/api/middleware-core.test.ts[0m:[93m146[0m:[93m15[0m
+    [7m146[0m         const __contextReceived: RequestContext | null = null;
+    [7m   [0m [96m              ~~~~~~~~~~~~~~~~~[0m
+    '__contextReceived' is declared here.
+
+[96msrc/__tests__/api/validation.test.ts[0m:[93m17[0m:[93m7[0m - [91merror[0m[90m TS2552: [0mCannot find name 'mockRequest'. Did you mean '__mockRequest'?
+
+[7m17[0m       mockRequest = new NextRequest('http://localhost:3000/api/test', {
+[7m  [0m [91m      ~~~~~~~~~~~[0m
+
+  [96msrc/__tests__/api/validation.test.ts[0m:[93m14[0m:[93m9[0m
+    [7m14[0m     let __mockRequest: NextRequest;
+    [7m  [0m [96m        ~~~~~~~~~~~~~[0m
+    '__mockRequest' is declared here.
+
+[96msrc/__tests__/components/case/CaseShareDialog.test.tsx[0m:[93m393[0m:[93m9[0m - [91merror[0m[90m TS2304: [0mCannot find name 'resolvePromise'.
+
+[7m393[0m         resolvePromise = resolve;
+[7m   [0m [91m        ~~~~~~~~~~~~~~[0m
+
+[96msrc/__tests__/e2e/payment.spec.ts[0m:[93m566[0m:[93m5[0m - [91merror[0m[90m TS2552: [0mCannot find name 'createdOrderId'. Did you mean '__createdOrderId'?
+
+[7m566[0m     createdOrderId = createResponse.data?.orderId || '';
+[7m   [0m [91m    ~~~~~~~~~~~~~~[0m
+
+  [96msrc/__tests__/e2e/payment.spec.ts[0m:[93m541[0m:[93m7[0m
+    [7m541[0m   let __createdOrderId: string;
+    [7m   [0m [96m      ~~~~~~~~~~~~~~~~[0m
+    '__createdOrderId' is declared here.
+
+[96msrc/__tests__/membership/admin-membership-api.test.ts[0m:[93m65[0m:[93m5[0m - [91merror[0m[90m TS2552: [0mCannot find name 'mockFindUniqueUser'. Did you mean '__mockFindUniqueUser'?
+
+[7m65[0m     mockFindUniqueUser = prisma.user.findUnique as jest.Mock;
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/__tests__/membership/admin-membership-api.test.ts[0m:[93m53[0m:[93m7[0m
+    [7m53[0m   let __mockFindUniqueUser: jest.Mock;
+    [7m  [0m [96m      ~~~~~~~~~~~~~~~~~~~~[0m
+    '__mockFindUniqueUser' is declared here.
+
+[96msrc/__tests__/membership/admin-membership-api.test.ts[0m:[93m66[0m:[93m5[0m - [91merror[0m[90m TS2552: [0mCannot find name 'mockFindFirstTier'. Did you mean '__mockFindFirstTier'?
+
+[7m66[0m     mockFindFirstTier = prisma.membershipTier.findFirst as jest.Mock;
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/__tests__/membership/admin-membership-api.test.ts[0m:[93m54[0m:[93m7[0m
+    [7m54[0m   let __mockFindFirstTier: jest.Mock;
+    [7m  [0m [96m      ~~~~~~~~~~~~~~~~~~~[0m
+    '__mockFindFirstTier' is declared here.
+
+[96msrc/__tests__/middleware/check-usage-limit.test.ts[0m:[93m60[0m:[93m5[0m - [91merror[0m[90m TS2552: [0mCannot find name 'testMembershipId'. Did you mean '__testMembershipId'?
+
+[7m60[0m     testMembershipId = membership.id;
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/__tests__/middleware/check-usage-limit.test.ts[0m:[93m23[0m:[93m7[0m
+    [7m23[0m   let __testMembershipId: string;
+    [7m  [0m [96m      ~~~~~~~~~~~~~~~~~~[0m
+    '__testMembershipId' is declared here.
+
+[96msrc/__tests__/usage/record-usage.test.ts[0m:[93m108[0m:[93m5[0m - [91merror[0m[90m TS2552: [0mCannot find name 'testMembershipId'. Did you mean '__testMembershipId'?
+
+[7m108[0m     testMembershipId = membership.id;
+[7m   [0m [91m    ~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/__tests__/usage/record-usage.test.ts[0m:[93m20[0m:[93m7[0m
+    [7m20[0m   let __testMembershipId: string;
+    [7m  [0m [96m      ~~~~~~~~~~~~~~~~~~[0m
+    '__testMembershipId' is declared here.
+
+[96msrc/app/contracts/[id]/edit/page.tsx[0m:[93m83[0m:[93m40[0m - [91merror[0m[90m TS2345: [0mArgument of type 'number' is not assignable to parameter of type 'string'.
+
+[7m83[0m                     amount: parseFloat(p.amount) || 0,
+[7m  [0m [91m                                       ~~~~~~~~[0m
+
+[96msrc/lib/agent/doc-analyzer/analyzers/timeline-extractor.ts[0m:[93m27[0m:[93m10[0m - [91merror[0m[90m TS2551: [0mProperty 'eventPatterns' does not exist on type 'TimelineExtractor'. Did you mean '_eventPatterns'?
+
+[7m27[0m     this.eventPatterns = this.initializeEventPatterns();
+[7m  [0m [91m         ~~~~~~~~~~~~~[0m
+
+  [96msrc/lib/agent/doc-analyzer/analyzers/timeline-extractor.ts[0m:[93m23[0m:[93m20[0m
+    [7m23[0m   private readonly _eventPatterns: Map<RegExp, string>;
+    [7m  [0m [96m                   ~~~~~~~~~~~~~~[0m
+    '_eventPatterns' is declared here.
+
+[96msrc/lib/agent/doc-analyzer/doc-analyzer-agent.ts[0m:[93m124[0m:[93m10[0m - [91merror[0m[90m TS2551: [0mProperty 'useMock' does not exist on type 'DocAnalyzerAgent'. Did you mean '_useMock'?
+
+[7m124[0m     this.useMock = useMock;
+[7m   [0m [91m         ~~~~~~~[0m
+
+  [96msrc/lib/agent/doc-analyzer/doc-analyzer-agent.ts[0m:[93m91[0m:[93m11[0m
+    [7m91[0m   private _useMock: boolean;
+    [7m  [0m [96m          ~~~~~~~~[0m
+    '_useMock' is declared here.
+
+[96msrc/lib/ai/risk/risk-advisor.ts[0m:[93m54[0m:[93m10[0m - [91merror[0m[90m TS2551: [0mProperty 'confidenceThreshold' does not exist on type 'AIRiskAdvisor'. Did you mean '_confidenceThreshold'?
+
+[7m54[0m     this.confidenceThreshold = config.confidenceThreshold ?? 0.6;
+[7m  [0m [91m         ~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/lib/ai/risk/risk-advisor.ts[0m:[93m49[0m:[93m20[0m
+    [7m49[0m   private readonly _confidenceThreshold: number;
+    [7m  [0m [96m                   ~~~~~~~~~~~~~~~~~~~~[0m
+    '_confidenceThreshold' is declared here.
+
+
+Found 16 errors in 15 files.
+
+Errors  Files
+     1  scripts/fix-law-categories.ts[90m:9378[0m
+     1  scripts/test-migration-rollback.ts[90m:70[0m
+     1  src/__tests__/api/court-schedules.test.ts[90m:99[0m
+     1  src/__tests__/api/memberships/upgrade.test.ts[90m:44[0m
+     1  src/__tests__/api/middleware-core.test.ts[90m:152[0m
+     1  src/__tests__/api/validation.test.ts[90m:17[0m
+     1  src/__tests__/components/case/CaseShareDialog.test.tsx[90m:393[0m
+     1  src/__tests__/e2e/payment.spec.ts[90m:566[0m
+     2  src/__tests__/membership/admin-membership-api.test.ts[90m:65[0m
+     1  src/__tests__/middleware/check-usage-limit.test.ts[90m:60[0m
+     1  src/__tests__/usage/record-usage.test.ts[90m:108[0m
+     1  src/app/contracts/[id]/edit/page.tsx[90m:83[0m
+     1  src/lib/agent/doc-analyzer/analyzers/timeline-extractor.ts[90m:27[0m
+     1  src/lib/agent/doc-analyzer/doc-analyzer-agent.ts[90m:124[0m
+     1  src/lib/ai/risk/risk-advisor.ts[90m:54[0m

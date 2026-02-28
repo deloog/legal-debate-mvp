@@ -31,7 +31,7 @@ jest.mock('@/lib/db/prisma', () => ({
 
 describe('InAppMessageService', () => {
   // 内联mock对象用于测试断言
-  const mockPrismaReminder = {
+  const __mockPrismaReminder = {
     create: jest.fn(),
     createMany: jest.fn(),
     findMany: jest.fn(),
@@ -179,7 +179,7 @@ describe('InAppMessageService', () => {
       (prisma.reminder.count as jest.Mock).mockResolvedValue(5);
       (prisma.reminder.findMany as jest.Mock).mockResolvedValue([mockReminder]);
 
-      const result = await inAppMessageService.getMessages({
+      const __result = await inAppMessageService.getMessages({
         userId: 'user-1',
         isRead: false,
       });

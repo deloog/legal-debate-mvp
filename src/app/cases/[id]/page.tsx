@@ -26,6 +26,7 @@ interface CaseDetail {
   createdAt: string;
   updatedAt: string;
   userId: string;
+  debates?: Array<{ id: string; status: string }>;
 }
 
 /**
@@ -78,7 +79,11 @@ const TAB_LIST: { key: TabType; label: string }[] = [
 export default function CaseDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const caseId = params.id as string;
+  const caseId = typeof params?.id === 'string' ? params.id : '';
+
+  // 验证 caseId 是否有效（不能是 'create' 或其他特殊路径）
+  const isValidCaseId =
+    caseId && !['create', 'new'].includes(caseId.toLowerCase());
 
   const [caseDetail, setCaseDetail] = useState<CaseDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,8 +94,47 @@ export default function CaseDetailPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [caseAccessInfo] = useState<CaseAccessInfo | null>(null);
 
+  // 处理开始辩论按钮点击
+  const handleStartDebate = useCallback(async () => {
+    // 如果案件已有辩论，跳转到第一个辩论
+    if (caseDetail?.debates && caseDetail.debates.length > 0) {
+      const firstDebate = caseDetail.debates[0];
+      router.push(`/debates/${firstDebate.id}`);
+      return;
+    }
+
+    // 如果没有辩论，创建新辩论
+    try {
+      const response = await fetch('/api/v1/debates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          caseId: caseId,
+          title: `${caseDetail?.title || '案件'}辩论`,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('创建辩论失败');
+      }
+
+      const data = await response.json();
+      router.push(`/debates/${data.data.id}`);
+    } catch (err) {
+      console.error('创建辩论失败:', err);
+      alert('创建辩论失败，请重试');
+    }
+  }, [caseId, caseDetail, router]);
+
   // 加载案件详情
   const loadCaseDetail = useCallback(async (): Promise<void> => {
+    // 跳过无效的 caseId
+    if (!isValidCaseId) {
+      setError('无效的案件ID');
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -102,6 +146,12 @@ export default function CaseDetailPage() {
       }
 
       const data = (await response.json()) as { data: CaseDetail };
+
+      // 验证返回的数据结构
+      if (!data.data || !data.data.id) {
+        throw new Error('案件数据格式无效');
+      }
+
       setCaseDetail(data.data);
     } catch (err) {
       const message = err instanceof Error ? err.message : '加载失败';
@@ -110,7 +160,7 @@ export default function CaseDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [caseId]);
+  }, [caseId, isValidCaseId]);
 
   // 加载当前用户信息，判断是否可以管理
   const loadCurrentUser = useCallback(async (): Promise<void> => {
@@ -281,7 +331,8 @@ export default function CaseDetailPage() {
               <Button
                 variant='primary'
                 size='sm'
-                onClick={() => router.push(`/cases/${caseId}/debates`)}
+                onClick={handleStartDebate}
+                disabled={!caseDetail}
               >
                 开始辩论
               </Button>

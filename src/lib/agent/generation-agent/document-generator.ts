@@ -327,7 +327,7 @@ export class DocumentGenerator {
    * 创建元数据
    */
   private createMetadata(
-    type: DocumentType,
+    _type: DocumentType,
     startTime: number
   ): GenerationMetadata {
     const generationTime = Date.now() - startTime;

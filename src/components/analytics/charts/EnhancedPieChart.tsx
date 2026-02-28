@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import _React, { useState, useMemo } from 'react';
 import type { PieChartData } from '@/types/chart';
 import { InteractiveChartContainer } from '@/components/analytics/ui/InteractiveChartContainer';
 import { ChartTooltip } from '@/components/analytics/ui/ChartTooltip';

@@ -113,7 +113,7 @@ describe('DiscussionForm 组件测试', () => {
     });
 
     it('超出限制时应显示"超限"标记', async () => {
-      const user = userEvent.setup();
+      const __user = userEvent.setup();
       render(<DiscussionForm {...defaultProps} />);
 
       const textarea = screen.getByRole('textbox');

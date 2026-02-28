@@ -379,7 +379,7 @@ export class GenerationAgent {
   /**
    * 验证输入
    */
-  private validateInput(input: GenerationInput): void {
+  private __validateInput(input: GenerationInput): void {
     if (!input.caseInfo) {
       throw new Error('案件信息不能为空');
     }

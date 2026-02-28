@@ -52,6 +52,11 @@ export const CONSULT_STATUS_COLORS: Record<ConsultStatus, string> = {
 };
 
 /**
+ * AI内容验证状态
+ */
+export type AIVerificationStatus = 'pending' | 'verified' | 'rejected';
+
+/**
  * AI评估结果接口
  */
 export interface AIAssessment {
@@ -74,6 +79,10 @@ export interface AIAssessment {
     result: string;
     similarity: number;
   }>;
+  // AI内容标识相关字段
+  confidence?: number;
+  verifiedStatus?: AIVerificationStatus;
+  sourceUrl?: string;
 }
 
 /**

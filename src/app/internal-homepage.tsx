@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import _React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/providers/AuthProvider';
 import {
@@ -602,7 +602,7 @@ function WorkspacePage() {
               </h2>
               <div className='space-y-1.5'>
                 <button
-                  onClick={() => router.push('/cases/new')}
+                  onClick={() => router.push('/cases/create')}
                   className='flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-zinc-700 transition-colors hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800'
                 >
                   <div className='flex h-7 w-7 items-center justify-center rounded-md bg-blue-100 dark:bg-blue-900/40'>
@@ -611,7 +611,7 @@ function WorkspacePage() {
                   新建案件
                 </button>
                 <button
-                  onClick={() => router.push('/debates/new')}
+                  onClick={() => router.push('/cases/create')}
                   className='flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-zinc-700 transition-colors hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800'
                 >
                   <div className='flex h-7 w-7 items-center justify-center rounded-md bg-violet-100 dark:bg-violet-900/40'>
@@ -667,7 +667,7 @@ function WorkspacePage() {
                     暂无辩论记录
                   </p>
                   <button
-                    onClick={() => router.push('/debates/new')}
+                    onClick={() => router.push('/cases/create')}
                     className='mt-3 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700'
                   >
                     发起第一场辩论

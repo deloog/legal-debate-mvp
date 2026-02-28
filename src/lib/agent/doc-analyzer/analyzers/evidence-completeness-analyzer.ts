@@ -148,7 +148,7 @@ export class EvidenceCompletenessAnalyzer {
    */
   generateReport(
     classifiedEvidence: ClassifiedEvidence[],
-    strengthReport: EvidenceStrengthReport,
+    _strengthReport: EvidenceStrengthReport,
     missingEvidenceTypes: EvidenceType[]
   ): {
     completenessScore: number;

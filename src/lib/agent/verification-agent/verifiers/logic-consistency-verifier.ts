@@ -527,7 +527,7 @@ export class LogicConsistencyVerifier {
     evidenceCompleteness: number,
     causalRelations: CausalRelation[],
     arguments_: string[],
-    evidence: string[],
+    _evidence: string[],
     issues: Issue[]
   ): void {
     // 矛盾问题

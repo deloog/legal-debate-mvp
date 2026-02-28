@@ -185,6 +185,7 @@ export function ReminderList({ userId }: ReminderListProps) {
       PAYMENT_DUE: '付款提醒',
       FOLLOW_UP: '跟进提醒',
       CUSTOM: '自定义提醒',
+      CONTRACT_MILESTONE: '合同里程碑',
     };
     return typeLabels[type] || type;
   };
@@ -222,6 +223,7 @@ export function ReminderList({ userId }: ReminderListProps) {
       PAYMENT_DUE: 'bg-yellow-100 text-yellow-800',
       FOLLOW_UP: 'bg-purple-100 text-purple-800',
       CUSTOM: 'bg-gray-100 text-gray-800',
+      CONTRACT_MILESTONE: 'bg-blue-100 text-blue-800',
     };
     return typeColors[type] || 'bg-gray-100 text-gray-800';
   };

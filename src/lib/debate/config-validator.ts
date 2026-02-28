@@ -25,9 +25,21 @@ export const DEFAULT_DEBATE_CONFIG: DebateConfig = {
 };
 
 /**
+ * 配置验证规则项类型
+ */
+interface ConfigRule {
+  required: boolean;
+  type?: 'boolean' | 'string' | 'enum';
+  values?: string[];
+  min?: number;
+  max?: number;
+  pattern?: RegExp;
+}
+
+/**
  * 配置验证规则
  */
-const CONFIG_RULES = {
+const CONFIG_RULES: Record<string, ConfigRule> = {
   maxRounds: {
     min: 1,
     max: 10,
@@ -67,8 +79,8 @@ const CONFIG_RULES = {
  */
 function validateConfigField(
   key: string,
-  value: any,
-  rule: any
+  value: unknown,
+  rule: ConfigRule
 ): { valid: boolean; error?: string } {
   // 检查必填项
   if (rule.required && (value === undefined || value === null)) {
@@ -93,25 +105,27 @@ function validateConfigField(
       }
       break;
     case 'enum':
-      if (!rule.values.includes(value)) {
+      if (typeof value !== 'string' || !rule.values?.includes(value)) {
         return {
           valid: false,
-          error: `${key} 必须是以下值之一: ${rule.values.join(', ')}`,
+          error: `${key} 必须是以下值之一: ${rule.values?.join(', ')}`,
         };
       }
       break;
   }
 
   // 范围验证
-  if (rule.min !== undefined && value < rule.min) {
-    return { valid: false, error: `${key} 不能小于 ${rule.min}` };
-  }
-  if (rule.max !== undefined && value > rule.max) {
-    return { valid: false, error: `${key} 不能大于 ${rule.max}` };
+  if (typeof value === 'number') {
+    if (rule.min !== undefined && value < rule.min) {
+      return { valid: false, error: `${key} 不能小于 ${rule.min}` };
+    }
+    if (rule.max !== undefined && value > rule.max) {
+      return { valid: false, error: `${key} 不能大于 ${rule.max}` };
+    }
   }
 
   // 正则验证
-  if (rule.pattern && !rule.pattern.test(value)) {
+  if (rule.pattern && typeof value === 'string' && !rule.pattern.test(value)) {
     return {
       valid: false,
       error: `${key} 格式不正确`,

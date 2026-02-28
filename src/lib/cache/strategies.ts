@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { CacheManager } from './manager';
 import {
   CacheOptions,
@@ -53,11 +54,11 @@ export class LazyLoadingStrategy extends BaseCacheStrategy {
 
 // 写穿透策略（Write-Through Pattern）
 export class WriteThroughStrategy extends BaseCacheStrategy {
-  private dataWriter: (key: string, value: any) => Promise<boolean>;
+  private dataWriter: (key: string, value: unknown) => Promise<boolean>;
 
   constructor(
     cacheManager: CacheManager,
-    dataWriter: (key: string, value: any) => Promise<boolean>
+    dataWriter: (key: string, value: unknown) => Promise<boolean>
   ) {
     super(cacheManager);
     this.dataWriter = dataWriter;
@@ -83,14 +84,14 @@ export class WriteThroughStrategy extends BaseCacheStrategy {
       // 先写入数据源
       const dataWriteSuccess = await this.dataWriter(key, value);
       if (!dataWriteSuccess) {
-        console.warn(`数据源写入失败 [${key}], 缓存写入已跳过`);
+        logger.warn(`数据源写入失败 [${key}], 缓存写入已跳过`);
         return false;
       }
 
       // 数据源写入成功后，再写入缓存
       return await this.cacheManager.set<T>(key, value, options);
     } catch (error) {
-      console.error(`写穿透策略执行失败 [${key}]:`, error);
+      logger.error(`写穿透策略执行失败 [${key}]:`, error);
       return false;
     }
   }
@@ -103,7 +104,7 @@ export class WriteThroughStrategy extends BaseCacheStrategy {
 
       return cacheDeleteResult;
     } catch (error) {
-      console.error(`写穿透删除失败 [${key}]:`, error);
+      logger.error(`写穿透删除失败 [${key}]:`, error);
       return false;
     }
   }
@@ -111,15 +112,15 @@ export class WriteThroughStrategy extends BaseCacheStrategy {
 
 // 写回策略（Write-Behind Pattern）
 export class WriteBehindStrategy extends BaseCacheStrategy {
-  private dataWriter: (key: string, value: any) => Promise<boolean>;
-  private writeQueue: Map<string, { value: any; timestamp: number }> =
+  private dataWriter: (key: string, value: unknown) => Promise<boolean>;
+  private writeQueue: Map<string, { value: unknown; timestamp: number }> =
     new Map();
   private batchWriteDelay: number = 5000; // 5秒批量写入
   private batchWriteTimer?: NodeJS.Timeout;
 
   constructor(
     cacheManager: CacheManager,
-    dataWriter: (key: string, value: any) => Promise<boolean>,
+    dataWriter: (key: string, value: unknown) => Promise<boolean>,
     batchWriteDelay: number = 5000
   ) {
     super(cacheManager);
@@ -164,7 +165,7 @@ export class WriteBehindStrategy extends BaseCacheStrategy {
 
       return cacheSetSuccess;
     } catch (error) {
-      console.error(`写回策略设置失败 [${key}]:`, error);
+      logger.error(`写回策略设置失败 [${key}]:`, error);
       return false;
     }
   }
@@ -177,7 +178,7 @@ export class WriteBehindStrategy extends BaseCacheStrategy {
       // 从缓存中删除
       return await this.cacheManager.delete(key, options);
     } catch (error) {
-      console.error(`写回策略删除失败 [${key}]:`, error);
+      logger.error(`写回策略删除失败 [${key}]:`, error);
       return false;
     }
   }
@@ -218,7 +219,7 @@ export class WriteBehindStrategy extends BaseCacheStrategy {
       try {
         return await this.dataWriter(key, data.value);
       } catch (error) {
-        console.error(`批量写入失败 [${key}]:`, error);
+        logger.error(`批量写入失败 [${key}]:`, error);
         return false;
       }
     });
@@ -230,7 +231,7 @@ export class WriteBehindStrategy extends BaseCacheStrategy {
     const failureCount = results.length - successCount;
 
     if (failureCount > 0) {
-      console.warn(`批量写入完成: 成功 ${successCount}, 失败 ${failureCount}`);
+      logger.warn(`批量写入完成: 成功 ${successCount}, 失败 ${failureCount}`);
     }
   }
 
@@ -262,12 +263,12 @@ export class WriteBehindStrategy extends BaseCacheStrategy {
 // 预刷新策略（Refresh-Ahead Pattern）
 export class RefreshAheadStrategy extends BaseCacheStrategy {
   private refreshThreshold: number; // 在TTL剩余多少秒时刷新
-  private dataProvider: (key: string) => Promise<any>;
+  private dataProvider: (key: string) => Promise<unknown>;
   private refreshJobs: Map<string, NodeJS.Timeout> = new Map();
 
   constructor(
     cacheManager: CacheManager,
-    dataProvider: (key: string) => Promise<any>,
+    dataProvider: (key: string) => Promise<unknown>,
     refreshThreshold: number = 300 // 默认5分钟
   ) {
     super(cacheManager);
@@ -316,10 +317,10 @@ export class RefreshAheadStrategy extends BaseCacheStrategy {
         const newValue = await this.dataProvider(key);
         if (newValue !== null && newValue !== undefined) {
           await this.cacheManager.set(key, newValue, options);
-          console.log(`预刷新缓存成功: ${key}`);
+          logger.info(`预刷新缓存成功: ${key}`);
         }
       } catch (error) {
-        console.error(`预刷新缓存失败 [${key}]:`, error);
+        logger.error(`预刷新缓存失败 [${key}]:`, error);
       } finally {
         this.refreshJobs.delete(key);
       }
@@ -368,14 +369,14 @@ export class CacheStrategyFactory {
 
   // 创建写穿透策略
   createWriteThroughStrategy(
-    dataWriter: (key: string, value: any) => Promise<boolean>
+    dataWriter: (key: string, value: unknown) => Promise<boolean>
   ): WriteThroughStrategy {
     return new WriteThroughStrategy(this.cacheManager, dataWriter);
   }
 
   // 创建写回策略
   createWriteBehindStrategy(
-    dataWriter: (key: string, value: any) => Promise<boolean>,
+    dataWriter: (key: string, value: unknown) => Promise<boolean>,
     batchWriteDelay?: number
   ): WriteBehindStrategy {
     return new WriteBehindStrategy(
@@ -387,7 +388,7 @@ export class CacheStrategyFactory {
 
   // 创建预刷新策略
   createRefreshAheadStrategy(
-    dataProvider: (key: string) => Promise<any>,
+    dataProvider: (key: string) => Promise<unknown>,
     refreshThreshold?: number
   ): RefreshAheadStrategy {
     return new RefreshAheadStrategy(
@@ -400,8 +401,8 @@ export class CacheStrategyFactory {
   // 根据策略类型创建策略
   createStrategy(
     strategy: CacheStrategy,
-    dataWriter?: (key: string, value: any) => Promise<boolean>,
-    dataProvider?: (key: string) => Promise<any>,
+    dataWriter?: (key: string, value: unknown) => Promise<boolean>,
+    dataProvider?: (key: string) => Promise<unknown>,
     options?: {
       batchWriteDelay?: number;
       refreshThreshold?: number;

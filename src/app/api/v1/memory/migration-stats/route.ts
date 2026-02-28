@@ -1,13 +1,10 @@
 /**
  * 记忆迁移统计API
  * GET /api/v1/memory/migration-stats - 获取迁移统计数据
- *
- * 注意：由于 Prisma 生成的 ActionType 枚举类型与实际使用的枚举值不完全兼容，
- * 在代码中需要使用 `as any` 类型断言来解决类型检查问题。
  */
 
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ActionType } from '@prisma/client';
 import { logger } from '@/lib/logger';
 
 const prisma = new PrismaClient();
@@ -26,8 +23,7 @@ export async function GET() {
     const workingToHotActions = await prisma.agentAction.findMany({
       where: {
         agentName: 'MemoryAgent',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        actionType: 'MIGRATE_WORKING_TO_HOT' as any,
+        actionType: ActionType.MIGRATE_WORKING_TO_HOT,
         createdAt: {
           gte: sevenDaysAgo,
         },
@@ -53,8 +49,7 @@ export async function GET() {
     const hotToColdActions = await prisma.agentAction.findMany({
       where: {
         agentName: 'MemoryAgent',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        actionType: 'MIGRATE_HOT_TO_COLD' as any,
+        actionType: ActionType.MIGRATE_HOT_TO_COLD,
         createdAt: {
           gte: sevenDaysAgo,
         },
@@ -103,8 +98,7 @@ export async function GET() {
       where: {
         agentName: 'MemoryAgent',
         actionType: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          in: ['MIGRATE_WORKING_TO_HOT', 'MIGRATE_HOT_TO_COLD'] as any,
+          in: [ActionType.MIGRATE_WORKING_TO_HOT, ActionType.MIGRATE_HOT_TO_COLD],
         },
       },
       orderBy: {
@@ -151,8 +145,7 @@ export async function GET() {
         where: {
           agentName: 'MemoryAgent',
           actionType: {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            in: ['MIGRATE_WORKING_TO_HOT', 'MIGRATE_HOT_TO_COLD'] as any,
+            in: [ActionType.MIGRATE_WORKING_TO_HOT, ActionType.MIGRATE_HOT_TO_COLD],
           },
           createdAt: {
             gte: dayStart,

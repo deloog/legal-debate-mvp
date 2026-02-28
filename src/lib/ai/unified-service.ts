@@ -26,6 +26,15 @@ import type {
   LawStarVectorResponse,
 } from '../../types/lawstar-api';
 
+/** 支持流式输出的 OpenAI 兼容客户端（duck-typing 接口） */
+interface StreamingAIClient {
+  chat: {
+    completions: {
+      create: (params: AIRequestConfig) => Promise<AsyncIterable<{ choices: Array<{ delta: { content?: string } }> }>>;
+    };
+  };
+}
+
 // =============================================================================
 // 统一服务类型定义
 // =============================================================================
@@ -1285,7 +1294,7 @@ ${legalTexts}
     };
 
     // 获取AI客户端
-    const client = this.generalAIService as any;
+    const client = this.generalAIService as unknown as StreamingAIClient;
     if (!client) {
       throw new Error('AI client not available');
     }
@@ -1423,7 +1432,7 @@ ${contextSection}
       stream: true,
     };
 
-    const client = this.generalAIService as any;
+    const client = this.generalAIService as unknown as StreamingAIClient;
     if (!client) {
       throw new Error('AI client not available');
     }

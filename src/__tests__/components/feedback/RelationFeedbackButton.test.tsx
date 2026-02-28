@@ -7,9 +7,9 @@
 
 /// <reference types="@testing-library/jest-dom" />
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import '@testing-library/jest-dom';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RelationFeedbackButton } from '../../../components/feedback/RelationFeedbackButton';
 
 // Mock fetch
@@ -181,11 +181,11 @@ describe('RelationFeedbackButton 组件', () => {
 
     render(<RelationFeedbackButton {...mockProps} />);
 
-    const accurateButton = screen.getByText('准确');
+    const accurateButton = screen.getByRole('button', { name: /^准确$/ });
     fireEvent.click(accurateButton);
 
     // 按钮应该被禁用
-    (expect(accurateButton) as any).toBeDisabled();
+    expect(accurateButton).toBeDisabled();
 
     await waitFor(() => {
       expect(accurateButton).not.toBeDisabled();
@@ -232,11 +232,11 @@ describe('RelationFeedbackButton 组件', () => {
 
     render(<RelationFeedbackButton {...mockProps} />);
 
-    const accurateButton = screen.getByText('准确');
+    const accurateButton = screen.getByRole('button', { name: /^准确$/ });
     fireEvent.click(accurateButton);
 
     await waitFor(() => {
-      (expect(accurateButton) as any).toHaveClass('selected');
+      expect(accurateButton).toHaveClass('selected');
     });
   });
 
@@ -256,15 +256,17 @@ describe('RelationFeedbackButton 组件', () => {
   it('应该支持自定义样式', () => {
     render(<RelationFeedbackButton {...mockProps} className='custom-class' />);
 
-    const container = screen.getByText('准确').closest('div');
-    (expect(container) as any).toHaveClass('custom-class');
+    const container = screen
+      .getByRole('button', { name: /^准确$/ })
+      .closest('.relation-feedback');
+    expect(container).toHaveClass('custom-class');
   });
 
   it('应该在禁用状态下不允许提交', () => {
     render(<RelationFeedbackButton {...mockProps} disabled />);
 
-    const accurateButton = screen.getByText('准确');
-    (expect(accurateButton) as any).toBeDisabled();
+    const accurateButton = screen.getByRole('button', { name: /^准确$/ });
+    expect(accurateButton).toBeDisabled();
 
     fireEvent.click(accurateButton);
 

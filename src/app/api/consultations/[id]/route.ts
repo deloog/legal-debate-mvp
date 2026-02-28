@@ -28,7 +28,7 @@ export type { ErrorResponse, SuccessResponse };
  * 获取咨询详情
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<
   NextResponse<SuccessResponse<ConsultationDetailResponse> | ErrorResponse>
@@ -349,7 +349,7 @@ export async function PUT(
  * 删除咨询记录（软删除）
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<{ id: string }> | ErrorResponse>> {
   try {

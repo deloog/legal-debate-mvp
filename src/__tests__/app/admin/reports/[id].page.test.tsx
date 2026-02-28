@@ -552,7 +552,7 @@ describe('报告详情页面', () => {
 
     it('删除成功应该返回列表页', async () => {
       const push = jest.fn();
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
+
       jest.spyOn(require('next/navigation'), 'useRouter').mockReturnValue({
         push,
       });

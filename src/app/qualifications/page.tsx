@@ -1,3 +1,32 @@
+/**
+ * 律师资质认证页面
+ *
+ * 功能：
+ * 1. 律师资质认证申请
+ *    - 填写执业证号、真实姓名、身份证号、律师事务所信息
+ *    - 上传执照照片（支持JPG、PNG格式，不超过5MB）
+ *    - 表单验证（所有必填项必须填写）
+ * 2. 资质认证状态展示
+ *    - 待审核（黄色，显示提交时间）
+ *    - 审核中（蓝色，显示审核进度）
+ *    - 已认证（绿色，显示认证标识）
+ *    - 已拒绝（红色，显示审核意见，支持重新申请）
+ *    - 已过期（灰色，支持重新申请）
+ * 3. 资质信息展示
+ *    - 姓名、执照编号、律师事务所
+ *    - 提交时间、审核时间
+ *    - 审核意见（如有）
+ * 4. 状态管理
+ *    - 自动加载当前用户的资质状态
+ *    - 支持提交申请、上传照片、刷新状态
+ *    - 成功和错误提示
+ * 5. 辅助组件
+ *    - InfoRow：展示资质信息行
+ *    - FormField：表单字段包装器
+ *
+ * @page /qualifications
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -95,12 +124,15 @@ export default function QualificationsPage() {
     setError(null);
     try {
       const res = await fetch('/api/qualifications/me');
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 获取资质信息失败`);
+      }
       const data = await res.json();
       if (data.success) {
         setQualification(data.data?.qualification ?? null);
       }
-    } catch {
-      setError('获取资质信息失败');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '获取资质信息失败');
     } finally {
       setLoading(false);
     }
@@ -118,6 +150,9 @@ export default function QualificationsPage() {
         method: 'POST',
         body: formData,
       });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 上传失败`);
+      }
       const data = await res.json();
       if (data.success && data.data?.url) {
         setForm(prev => ({ ...prev, licensePhoto: data.data.url }));
@@ -125,8 +160,8 @@ export default function QualificationsPage() {
       } else {
         setError(data.message || '上传失败');
       }
-    } catch {
-      setError('上传失败，请重试');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '上传失败，请重试');
     }
   };
 
@@ -150,6 +185,9 @@ export default function QualificationsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 提交失败`);
+      }
       const data = await res.json();
       if (data.success) {
         setSuccess('资质认证申请已提交，请等待审核');
@@ -157,8 +195,8 @@ export default function QualificationsPage() {
       } else {
         setError(data.message || '提交失败');
       }
-    } catch {
-      setError('提交失败，请重试');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '提交失败，请重试');
     } finally {
       setSubmitting(false);
     }

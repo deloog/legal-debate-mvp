@@ -1,3 +1,20 @@
+/**
+ * 案件数据管理Hook
+ *
+ * 功能：
+ * 1. 获取案件列表，支持分页浏览（默认每页20条）
+ * 2. 支持筛选功能
+ *    - 案件类型筛选（如民事、刑事、行政等）
+ *    - 案件状态筛选（如草稿、进行中、已关闭等）
+ *    - 日期范围筛选（创建日期从/到）
+ * 3. 支持搜索功能（按标题/案号/描述搜索）
+ * 4. 自动监听筛选和搜索变化，重新获取数据
+ * 5. 提供页面切换和刷新功能
+ * 6. 完善的错误处理和数据验证
+ *
+ * @module useCases
+ */
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -80,16 +97,36 @@ export function useCases(filters: CaseFilters, searchQuery: string) {
       const response = await fetch(
         buildUrl(CASE_API.LIST, Object.fromEntries(params.entries()))
       );
+
+      // 检查响应状态
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `请求失败: ${response.status}`);
+      }
+
       const data = await response.json();
 
+      // 验证数据结构
+      if (!data || typeof data !== 'object') {
+        throw new Error('无效的响应数据格式');
+      }
+
       if (data.success) {
-        setCases(data.data);
+        // 确保 data.data 是数组
+        const casesData = Array.isArray(data.data) ? data.data : [];
+        setCases(casesData);
         // 安全检查pagination对象是否存在
-        if (data.pagination) {
+        if (data.pagination && typeof data.pagination === 'object') {
           setPagination(prev => ({
             ...prev,
-            total: data.pagination.total ?? prev.total,
-            totalPages: data.pagination.totalPages ?? prev.totalPages,
+            total:
+              typeof data.pagination.total === 'number'
+                ? data.pagination.total
+                : prev.total,
+            totalPages:
+              typeof data.pagination.totalPages === 'number'
+                ? data.pagination.totalPages
+                : prev.totalPages,
           }));
         }
       } else {

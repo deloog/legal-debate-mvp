@@ -84,13 +84,13 @@ class ReminderService {
     input: UpdateReminderInput
   ): Promise<Reminder> {
     try {
-      const updateData: any = {
-        ...input,
+      const updateData: Prisma.ReminderUpdateInput = {
+        ...(input.title !== undefined && { title: input.title }),
+        ...(input.status !== undefined && { status: input.status as never }),
+        ...(input.metadata !== undefined && {
+          metadata: input.metadata as Prisma.InputJsonValue,
+        }),
       };
-
-      if (input.metadata !== undefined) {
-        updateData.metadata = input.metadata as Prisma.InputJsonValue;
-      }
 
       const reminder = await prisma.reminder.update({
         where: {

@@ -37,7 +37,7 @@ export class FollowUpTaskGenerator {
    * @returns 任务优先级
    */
   static determinePriority(
-    communicationType: CommunicationType,
+    _communicationType: CommunicationType,
     isImportant: boolean,
     daysUntilDue: number
   ): FollowUpTaskPriority {

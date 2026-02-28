@@ -8,7 +8,7 @@ import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -139,7 +139,7 @@ export async function PUT(
  * 删除合同模板
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {

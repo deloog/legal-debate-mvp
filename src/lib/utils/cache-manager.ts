@@ -4,6 +4,7 @@
  */
 
 import Redis from 'ioredis';
+import { logger } from '@/lib/logger';
 
 interface CacheStats {
   hits: number;
@@ -35,8 +36,8 @@ class CacheManager {
       },
     });
 
-    this.redis.on('error', err => {
-      console.error('Redis连接错误:', err);
+    this.redis.on('error', (err: Error) => {
+      logger.error('Redis连接错误', err);
       this.stats.errors++;
     });
   }
@@ -55,7 +56,7 @@ class CacheManager {
         return null;
       }
     } catch (error) {
-      console.error('获取缓存失败:', error);
+      logger.error('获取缓存失败', { error });
       this.stats.errors++;
       return null;
     }
@@ -64,7 +65,7 @@ class CacheManager {
   /**
    * 设置缓存
    */
-  async set(key: string, value: any, ttl?: number): Promise<boolean> {
+  async set(key: string, value: unknown, ttl?: number): Promise<boolean> {
     try {
       const serialized = JSON.stringify(value);
       if (ttl) {
@@ -75,7 +76,7 @@ class CacheManager {
       this.stats.sets++;
       return true;
     } catch (error) {
-      console.error('设置缓存失败:', error);
+      logger.error('设置缓存失败', { error });
       this.stats.errors++;
       return false;
     }
@@ -90,7 +91,7 @@ class CacheManager {
       this.stats.deletes++;
       return true;
     } catch (error) {
-      console.error('删除缓存失败:', error);
+      logger.error('删除缓存失败', { error });
       this.stats.errors++;
       return false;
     }
@@ -109,7 +110,7 @@ class CacheManager {
       }
       return 0;
     } catch (error) {
-      console.error('批量删除缓存失败:', error);
+      logger.error('批量删除缓存失败', { error });
       this.stats.errors++;
       return 0;
     }
@@ -133,14 +134,14 @@ class CacheManager {
    */
   printReport() {
     const stats = this.getStats();
-    console.log('\n=== Redis缓存性能报告 ===\n');
-    console.log(`缓存命中: ${stats.hits}`);
-    console.log(`缓存未命中: ${stats.misses}`);
-    console.log(`命中率: ${stats.hitRate}`);
-    console.log(`设置次数: ${stats.sets}`);
-    console.log(`删除次数: ${stats.deletes}`);
-    console.log(`错误次数: ${stats.errors}`);
-    console.log('\n=== 报告结束 ===\n');
+    logger.info('Redis缓存性能报告', {
+      hits: stats.hits,
+      misses: stats.misses,
+      hitRate: stats.hitRate,
+      sets: stats.sets,
+      deletes: stats.deletes,
+      errors: stats.errors,
+    });
   }
 
   /**

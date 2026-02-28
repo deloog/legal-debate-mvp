@@ -273,7 +273,7 @@ export class AIMonitor {
 
   private evaluateHealth(
     provider: AIProvider,
-    success: boolean,
+    _success: boolean,
     responseTime: number,
     errorType?: string
   ): boolean {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import _React, { useState, useEffect } from 'react';
 import { SystemConfig } from '@prisma/client';
 import { ConfigValueInput } from '@/components/admin/ConfigValueInput';
 

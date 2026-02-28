@@ -214,7 +214,7 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
 
       // Act
       const response = await GET(request, { params: { id: mockContractId } });
-      const data = await response.json();
+      const __data = await response.json();
 
       // Assert
       expect(response.status).toBe(200);

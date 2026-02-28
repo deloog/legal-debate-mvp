@@ -46,7 +46,7 @@ async function checkCrawlerQuality(): Promise<void> {
     _count: { id: true },
   });
   console.log('\n📁 按数据源统计:');
-  bySource.forEach((s) => {
+  bySource.forEach(s => {
     console.log(`   ${s.dataSource}: ${s._count.id} 条`);
   });
 
@@ -56,7 +56,7 @@ async function checkCrawlerQuality(): Promise<void> {
     _count: { id: true },
   });
   console.log('\n📋 按状态统计:');
-  byStatus.forEach((s) => {
+  byStatus.forEach(s => {
     console.log(`   ${s.status}: ${s._count.id} 条`);
   });
 
@@ -66,7 +66,7 @@ async function checkCrawlerQuality(): Promise<void> {
     _count: { id: true },
   });
   console.log('\n🔄 按同步状态统计:');
-  bySyncStatus.forEach((s) => {
+  bySyncStatus.forEach(s => {
     console.log(`   ${s.syncStatus}: ${s._count.id} 条`);
   });
 
@@ -82,28 +82,36 @@ async function checkCrawlerQuality(): Promise<void> {
       },
     },
   });
-  console.log(`✅ 有完整内容的法条: ${hasFullText} (${((hasFullText / totalArticles) * 100).toFixed(2)}%)`);
+  console.log(
+    `✅ 有完整内容的法条: ${hasFullText} (${((hasFullText / totalArticles) * 100).toFixed(2)}%)`
+  );
 
   const hasSourceId = await prisma.lawArticle.count({
     where: {
       sourceId: { not: null },
     },
   });
-  console.log(`🔗 有源ID的法条: ${hasSourceId} (${((hasSourceId / totalArticles) * 100).toFixed(2)}%)`);
+  console.log(
+    `🔗 有源ID的法条: ${hasSourceId} (${((hasSourceId / totalArticles) * 100).toFixed(2)}%)`
+  );
 
   const hasArticleNumber = await prisma.lawArticle.count({
     where: {
       articleNumber: { not: '' },
     },
   });
-  console.log(`🏷️  有法条编号的法条: ${hasArticleNumber} (${((hasArticleNumber / totalArticles) * 100).toFixed(2)}%)`);
+  console.log(
+    `🏷️  有法条编号的法条: ${hasArticleNumber} (${((hasArticleNumber / totalArticles) * 100).toFixed(2)}%)`
+  );
 
   const hasEffectiveDate = await prisma.lawArticle.count({
     where: {
       effectiveDate: { not: new Date('1970-01-01T00:00:00Z') },
     },
   });
-  console.log(`📅 有效日期已设置的法条: ${hasEffectiveDate} (${((hasEffectiveDate / totalArticles) * 100).toFixed(2)}%)`);
+  console.log(
+    `📅 有效日期已设置的法条: ${hasEffectiveDate} (${((hasEffectiveDate / totalArticles) * 100).toFixed(2)}%)`
+  );
 
   // 6. 内容质量检查
   console.log('\n============================================================');
@@ -119,7 +127,7 @@ async function checkCrawlerQuality(): Promise<void> {
   let longContent = 0;
   let totalLength = 0;
 
-  articles.forEach((a) => {
+  articles.forEach(a => {
     const length = a.fullText?.length || 0;
     totalLength += length;
     if (length < 50) {
@@ -152,10 +160,18 @@ async function checkCrawlerQuality(): Promise<void> {
     where: { syncStatus: 'FAILED' },
   });
 
-  console.log(`🔄 已同步 (SYNCED): ${synced} 条 (${((synced / totalArticles) * 100).toFixed(2)}%)`);
-  console.log(`⏳ 待同步 (PENDING): ${pending} 条 (${((pending / totalArticles) * 100).toFixed(2)}%)`);
-  console.log(`📝 需要更新 (NEED_UPDATE): ${needUpdate} 条 (${((needUpdate / totalArticles) * 100).toFixed(2)}%)`);
-  console.log(`❌ 同步失败 (FAILED): ${failed} 条 (${((failed / totalArticles) * 100).toFixed(2)}%)`);
+  console.log(
+    `🔄 已同步 (SYNCED): ${synced} 条 (${((synced / totalArticles) * 100).toFixed(2)}%)`
+  );
+  console.log(
+    `⏳ 待同步 (PENDING): ${pending} 条 (${((pending / totalArticles) * 100).toFixed(2)}%)`
+  );
+  console.log(
+    `📝 需要更新 (NEED_UPDATE): ${needUpdate} 条 (${((needUpdate / totalArticles) * 100).toFixed(2)}%)`
+  );
+  console.log(
+    `❌ 同步失败 (FAILED): ${failed} 条 (${((failed / totalArticles) * 100).toFixed(2)}%)`
+  );
 
   // 8. 采集任务历史
   console.log('\n============================================================');
@@ -171,9 +187,11 @@ async function checkCrawlerQuality(): Promise<void> {
   });
 
   console.log('最近10个采集任务:');
-  tasks.forEach((t) => {
+  tasks.forEach(t => {
     const value = t.value as any;
-    console.log(`  - ${value.source || 'unknown'}: ${value.status} | 成功: ${value.itemsSucceeded || 0} | 失败: ${value.itemsFailed || 0}`);
+    console.log(
+      `  - ${value.source || 'unknown'}: ${value.status} | 成功: ${value.itemsSucceeded || 0} | 失败: ${value.itemsFailed || 0}`
+    );
   });
 
   // 9. 质量评分
@@ -181,14 +199,16 @@ async function checkCrawlerQuality(): Promise<void> {
   console.log('质量评分总结');
   console.log('============================================================\n');
 
-  const completenessScore = ((hasFullText / totalArticles) * 0.3 +
-    (hasSourceId / totalArticles) * 0.2 +
-    (hasArticleNumber / totalArticles) * 0.2 +
-    (hasEffectiveDate / totalArticles) * 0.3) * 100;
+  const completenessScore =
+    ((hasFullText / totalArticles) * 0.3 +
+      (hasSourceId / totalArticles) * 0.2 +
+      (hasArticleNumber / totalArticles) * 0.2 +
+      (hasEffectiveDate / totalArticles) * 0.3) *
+    100;
 
   const syncScore = (synced / totalArticles) * 100;
 
-  const overallScore = (completenessScore * 0.5 + syncScore * 0.5);
+  const overallScore = completenessScore * 0.5 + syncScore * 0.5;
 
   console.log(`📈 完整性评分: ${completenessScore.toFixed(2)}/100`);
   console.log(`🔄 同步评分: ${syncScore.toFixed(2)}/100`);

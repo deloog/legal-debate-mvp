@@ -13,8 +13,8 @@ import type {
  * 实际项目中应该调用真实的AI服务
  */
 export async function reviewContract(
-  contractId: string,
-  filePath: string,
+  _contractId: string,
+  _filePath: string,
   content: string
 ): Promise<
   Omit<

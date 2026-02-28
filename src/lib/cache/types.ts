@@ -1,5 +1,5 @@
 // 缓存项接口
-export interface CacheItem<T = any> {
+export interface CacheItem<T = unknown> {
   key: string;
   value: T;
   ttl?: number; // 生存时间（秒）
@@ -58,6 +58,7 @@ export enum CacheNamespace {
   CONFIGURATION = 'configuration',
   DATABASE_QUERY = 'database_query',
   API_RESPONSE = 'api_response',
+  KNOWLEDGE_GRAPH = 'knowledge_graph',
   TEMPORARY = 'temporary',
   SYSTEM = 'system',
 }
@@ -74,14 +75,14 @@ export enum CacheStrategy {
 export interface CacheOperationResult {
   success: boolean;
   key?: string;
-  value?: any;
+  value?: unknown;
   error?: Error;
   operation: 'get' | 'set' | 'delete' | 'clear' | 'exists';
   timestamp: Date;
 }
 
 // 批量操作结果接口
-export interface CacheBatchResult<T = any> {
+export interface CacheBatchResult<T = unknown> {
   results: Array<{
     key: string;
     success: boolean;
@@ -99,7 +100,7 @@ export interface CacheEvent {
   key: string;
   namespace?: string;
   timestamp: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // 缓存监听器类型

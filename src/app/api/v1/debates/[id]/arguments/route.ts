@@ -11,14 +11,14 @@ import { logger } from '@/lib/logger';
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return Response.json({ success: false, error: '未认证' }, { status: 401 });
   }
 
-  const { id: debateId } = params;
+  const { id: debateId } = await params;
 
   try {
     // 验证辩论存在且属于当前用户（或管理员）

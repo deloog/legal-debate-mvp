@@ -265,7 +265,7 @@ export function ContractRecommendations({
   };
 
   // 处理选择（保留向后兼容）
-  const handleSelect = (article: LawArticle) => {
+  const __handleSelect = (article: LawArticle) => {
     if (onSelect) {
       onSelect(article);
     }

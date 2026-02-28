@@ -37,8 +37,8 @@ export function RequirePermission(
   options: RequirePermissionDecoratorOptions = {}
 ): MethodDecorator {
   return function (
-    target: unknown,
-    propertyKey: string | symbol,
+    _target: unknown,
+    _propertyKey: string | symbol,
     descriptor: PropertyDescriptor
   ): PropertyDescriptor {
     // 防御性编程：如果 descriptor 不存在，直接返回
@@ -146,7 +146,7 @@ function getUserIdFromArgs(args: unknown[]): string | null {
  * @returns 权限错误对象
  */
 function createPermissionError(
-  error: string,
+  _error: string,
   message: string,
   requiredPermission?: string
 ): Error {

@@ -74,13 +74,17 @@ async function checkFullTextDates() {
     console.log(`   sourceId: ${article.sourceId}`);
 
     // 检查 fullText 前500字符
-    const textPreview = article.fullText ? article.fullText.substring(0, 500) : '';
+    const textPreview = article.fullText
+      ? article.fullText.substring(0, 500)
+      : '';
     console.log(`   内容预览: ${textPreview.substring(0, 200)}...`);
 
     // 尝试提取日期
     const result = extractDateFromText(article.fullText || '');
     if (result) {
-      console.log(`   ✅ 从fullText中找到日期: ${result.date.toISOString().split('T')[0]} (匹配: "${result.match}")`);
+      console.log(
+        `   ✅ 从fullText中找到日期: ${result.date.toISOString().split('T')[0]} (匹配: "${result.match}")`
+      );
       foundInFullText++;
     } else {
       console.log(`   ❌ 未在fullText中找到日期`);

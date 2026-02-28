@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import { createSuccessResponse } from '@/app/api/lib/responses/api-response';
 import { prisma } from '@/lib/db/prisma';
 import { ApplicabilityAnalyzer } from '@/lib/law-article/applicability/applicability-analyzer';
 import type { ApplicabilityInput } from '@/lib/law-article/applicability/types';
-import type { DocumentAnalysisOutput } from '@/lib/agent/doc-analyzer/core/types';
+import type {
+  DocumentAnalysisOutput,
+  Party,
+  Claim,
+  KeyFact,
+  DisputeFocus,
+  TimelineEvent,
+} from '@/lib/agent/doc-analyzer/core/types';
 
 /**
  * POST /api/v1/legal-analysis/applicability
@@ -120,16 +128,11 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const caseInfo: DocumentAnalysisOutput = {
     success: true,
     extractedData: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      parties: parties as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      claims: claims as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      keyFacts: keyFacts as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      disputeFocuses: disputeFocuses as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      timeline: timeline as any,
+      parties: parties as unknown as Party[],
+      claims: claims as unknown as Claim[],
+      keyFacts: keyFacts as unknown as KeyFact[],
+      disputeFocuses: disputeFocuses as unknown as DisputeFocus[],
+      timeline: timeline as unknown as TimelineEvent[],
     },
     confidence: 0.8,
     processingTime: 0,
@@ -188,8 +191,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       update: {
         applicabilityScore: result.score,
         applicabilityReason: result.reasons?.join('; ') || null,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        analysisResult: result as any,
+        analysisResult: result as unknown as Prisma.InputJsonValue,
         analyzedAt: timestamp,
         status: result.applicable ? 'VALID' : 'EXPIRED',
       },
@@ -201,8 +203,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
         category: article?.category || 'OTHER',
         applicabilityScore: result.score,
         applicabilityReason: result.reasons?.join('; ') || null,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        analysisResult: result as any,
+        analysisResult: result as unknown as Prisma.InputJsonValue,
         analyzedAt: timestamp,
         status: result.applicable ? 'VALID' : 'EXPIRED',
         caseId,

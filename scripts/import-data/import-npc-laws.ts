@@ -40,7 +40,7 @@ const LAW_TYPE_MAP: Record<string, LawType> = {
 };
 
 // 法律分类映射（根据标题关键词推断）
-function inferLawCategory(title: string, type: string): LawCategory {
+function inferLawCategory(title: string, _type: string): LawCategory {
   if (
     title.includes('民法') ||
     title.includes('合同') ||

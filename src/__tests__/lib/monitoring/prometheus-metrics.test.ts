@@ -336,7 +336,7 @@ describe('PrometheusMonitor', () => {
   describe('formatLabels', () => {
     test('应该格式化空标签', () => {
       monitor.incrementCounter('test', 1);
-      const metrics = monitor.getMetricsByName('test');
+      const __metrics = monitor.getMetricsByName('test');
       const prometheusFormat = monitor.getPrometheusMetrics();
 
       expect(prometheusFormat).toContain('service="test-service"');

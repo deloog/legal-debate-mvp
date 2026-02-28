@@ -15,12 +15,12 @@ async function main() {
 
   // 国家法律法规库网站显示的数据量
   const websiteData = {
-    '宪法': 1,
-    '法律': 716,
-    '行政法规': 813,
-    '监察法规': 3,
-    '地方法规': 26607,
-    '司法解释': 871,
+    宪法: 1,
+    法律: 716,
+    行政法规: 813,
+    监察法规: 3,
+    地方法规: 26607,
+    司法解释: 871,
   };
 
   console.log('国家法律法规库网站显示的数据量：');
@@ -43,7 +43,7 @@ async function main() {
   });
 
   const flkRecords = allRecords.filter(r => r.dataSource === 'flk');
-  
+
   // 按分类统计
   const categoryStats = new Map<string, number>();
   flkRecords.forEach(r => {
@@ -80,22 +80,24 @@ async function main() {
   // 使用 crawler 获取实际可采集的数据量
   console.log('从 API 获取的各分类总记录数：');
   console.log();
-  
+
   const { FLK_TYPE_CONFIGS } = await import('../src/lib/crawler/flk-crawler');
   const crawler = new FLKCrawler();
-  
+
   // 获取每个分类的总记录数
   for (const config of FLK_TYPE_CONFIGS) {
     try {
       const listResponse = await crawler['fetchList'](config.code, 1, 20);
       const totalRecords = listResponse.total;
       const totalPages = Math.ceil(listResponse.total / 20);
-      
+
       console.log(`  ${config.label} (code: ${config.code}):`);
       console.log(`    总记录数: ${totalRecords}`);
       console.log(`    总页数: ${totalPages}`);
     } catch (error) {
-      console.log(`  ${config.label} (code: ${config.code}): 获取失败 - ${error instanceof Error ? error.message : String(error)}`);
+      console.log(
+        `  ${config.label} (code: ${config.code}): 获取失败 - ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 

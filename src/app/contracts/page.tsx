@@ -27,7 +27,7 @@ interface Contract {
   paidPaymentCount: number;
 }
 
-interface ContractListResponse {
+interface _ContractListResponse {
   success: boolean;
   data: {
     items: Contract[];
@@ -69,6 +69,7 @@ export default function ContractsPage() {
 
   useEffect(() => {
     loadContracts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, status]);
 
   async function loadContracts() {
@@ -85,11 +86,16 @@ export default function ContractsPage() {
       if (keyword) params.append('keyword', keyword);
 
       const response = await fetch(`/api/contracts?${params}`);
-      const result: ContractListResponse = await response.json();
 
-      if (result.success) {
+      if (!response.ok) {
+        throw new Error(`请求失败: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.data?.items) {
         setContracts(result.data.items);
-        setTotal(result.data.total);
+        setTotal(result.data.total || 0);
       } else {
         setError('加载合同列表失败');
       }

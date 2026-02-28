@@ -1,4 +1,4 @@
-import { PrismaClient, LegalReferenceStatus } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { beforeEach, describe, expect, it, afterEach } from '@jest/globals';
 
 const prisma = new PrismaClient({

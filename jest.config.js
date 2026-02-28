@@ -37,6 +37,9 @@ module.exports = {
         '<rootDir>/src/__tests__/bad-cases/',
         '<rootDir>/src/__tests__/accuracy/',
         '<rootDir>/src/__tests__/integration/',
+        // 排除包含方括号的动态路由测试目录（避免 Jest 内存溢出）
+        '/\\[id\\]/',
+        '/\\[.*\\]/',
       ],
       setupFiles: ['<rootDir>/jest.polyfill.js', '<rootDir>/jest-setup.d.ts'],
       setupFilesAfterEnv: ['<rootDir>/src/test-utils/setup.ts'],
@@ -91,6 +94,9 @@ module.exports = {
         '<rootDir>/src/__tests__/bad-cases/',
         '<rootDir>/src/__tests__/accuracy/',
         '<rootDir>/src/__tests__/integration/',
+        // 排除包含方括号的动态路由测试目录（避免 Jest 内存溢出）
+        '/\\[id\\]/',
+        '/\\[.*\\]/',
       ],
       setupFiles: ['<rootDir>/jest.polyfill.js'],
       setupFilesAfterEnv: ['<rootDir>/src/test-utils/setup.ts'],
@@ -161,6 +167,9 @@ module.exports = {
         '<rootDir>/src/__tests__/bad-cases/',
         '<rootDir>/src/__tests__/accuracy/',
         '<rootDir>/src/__tests__/integration/',
+        // 排除包含方括号的动态路由测试目录（避免 Jest 内存溢出）
+        '/\\[id\\]/',
+        '/\\[.*\\]/',
       ],
       setupFiles: [
         '<rootDir>/src/__tests__/api/setup.js',
@@ -252,7 +261,46 @@ module.exports = {
       coverageReporters: ['text', 'text-summary', 'lcov', 'html', 'json'],
     },
 
-    // Project 5: 其他单元测试（node环境）
+    // Project 5: 图数据库评估脚本测试（node环境）
+    {
+      displayName: 'graphdb-evaluation',
+      testEnvironment: 'node',
+      testMatch: [
+        '<rootDir>/scripts/graphdb-evaluation/**/*.{test,spec}.{ts,tsx}',
+      ],
+      testPathIgnorePatterns: [
+        '<rootDir>/.next/',
+        '<rootDir>/node_modules/',
+        '<rootDir>/coverage/',
+      ],
+      setupFiles: ['<rootDir>/jest.polyfill.js'],
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+      },
+      modulePathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/.next/'],
+      collectCoverageFrom: [
+        'scripts/graphdb-evaluation/**/*.ts',
+        '!scripts/graphdb-evaluation/**/*.d.ts',
+        '!scripts/graphdb-evaluation/**/__tests__/**',
+      ],
+      transform: {
+        '^.+\\.(ts|tsx)$': [
+          'ts-jest',
+          {
+            tsconfig: '<rootDir>/scripts/tsconfig.json',
+            diagnostics: {
+              warnOnly: true,
+            },
+          },
+        ],
+      },
+      moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'd.ts'],
+      transformIgnorePatterns: ['node_modules/(?!(uuid)/)'],
+      coverageDirectory: 'coverage-graphdb-evaluation',
+      coverageReporters: ['text', 'text-summary', 'lcov', 'html', 'json'],
+    },
+
+    // Project 6: 其他单元测试（node环境）
     {
       displayName: 'unit',
       testEnvironment: 'node',
@@ -266,6 +314,8 @@ module.exports = {
         '<rootDir>/src/__tests__/unit/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/memory/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/config/**/*.{test,spec}.{ts,tsx}',
+        '<rootDir>/src/__tests__/enterprise/**/*.{test,spec}.{ts,tsx}',
+        '<rootDir>/src/__tests__/review/**/*.{test,spec}.{ts,tsx}',
       ],
       testPathIgnorePatterns: [
         '<rootDir>/.next/',
@@ -275,6 +325,9 @@ module.exports = {
         '<rootDir>/src/__tests__/bad-cases/',
         '<rootDir>/src/__tests__/accuracy/',
         '<rootDir>/src/__tests__/integration/',
+        // 排除包含方括号的动态路由测试目录（避免 Jest 内存溢出）
+        '/\\[id\\]/',
+        '/\\[.*\\]/',
       ],
       setupFiles: ['<rootDir>/jest.polyfill.js'],
       setupFilesAfterEnv: ['<rootDir>/src/test-utils/setup.ts'],
@@ -286,6 +339,7 @@ module.exports = {
       collectCoverageFrom: [
         // 核心业务逻辑 - 高优先级
         'src/lib/debate/**/*.{ts,tsx}',
+        'src/services/enterprise/**/*.{ts,tsx}',
         '!src/lib/debate/**/__tests__/**',
         '!src/lib/debate/**/*.test.ts',
 

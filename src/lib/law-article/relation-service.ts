@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '../db/prisma';
+import { logger } from '../logger';
 import {
   LawArticleRelation,
   RelationType,
@@ -25,6 +26,28 @@ export interface CreateRelationInput {
   evidence?: Prisma.JsonValue;
   discoveryMethod?: DiscoveryMethod;
   userId?: string;
+
+  // AI相关字段
+  aiProvider?: string;
+  aiModel?: string;
+  aiConfidence?: number;
+  aiReasoning?: string;
+  aiCreatedAt?: Date;
+
+  // 审核历史
+  reviewHistory?: Prisma.JsonValue;
+}
+
+/**
+ * 审核历史的记录项
+ */
+export interface ReviewHistoryItem {
+  userId: string;
+  action: 'VERIFIED' | 'REJECTED' | 'MODIFIED';
+  comment?: string;
+  timestamp: string;
+  previousStatus?: VerificationStatus;
+  newStatus?: VerificationStatus;
 }
 
 /**
@@ -91,6 +114,16 @@ export class LawArticleRelationService {
         evidence: data.evidence ?? Prisma.JsonNull,
         discoveryMethod: data.discoveryMethod ?? DiscoveryMethod.MANUAL,
         createdBy: data.userId,
+
+        // AI相关字段
+        aiProvider: data.aiProvider,
+        aiModel: data.aiModel,
+        aiConfidence: data.aiConfidence,
+        aiReasoning: data.aiReasoning,
+        aiCreatedAt: data.aiCreatedAt,
+
+        // 审核历史
+        reviewHistory: data.reviewHistory ?? Prisma.JsonNull,
       },
     });
 
@@ -110,10 +143,11 @@ export class LawArticleRelationService {
         const relation = await this.createRelation(relationData);
         results.push(relation);
       } catch (error) {
-        console.error(
-          `创建关系失败: ${relationData.sourceId} -> ${relationData.targetId}`,
-          error
-        );
+        logger.error('创建关系失败', {
+          error,
+          sourceId: relationData.sourceId,
+          targetId: relationData.targetId,
+        });
       }
     }
 
@@ -263,8 +297,35 @@ export class LawArticleRelationService {
   static async verifyRelation(
     relationId: string,
     verifiedBy: string,
-    isApproved: boolean
+    isApproved: boolean,
+    comment?: string
   ): Promise<LawArticleRelation> {
+    // 获取当前关系
+    const currentRelation = await prisma.lawArticleRelation.findUnique({
+      where: { id: relationId },
+    });
+
+    if (!currentRelation) {
+      throw new Error(`关系不存在: ${relationId}`);
+    }
+
+    // 构建审核历史记录
+    const reviewItem: ReviewHistoryItem = {
+      userId: verifiedBy,
+      action: isApproved ? 'VERIFIED' : 'REJECTED',
+      comment,
+      timestamp: new Date().toISOString(),
+      previousStatus: currentRelation.verificationStatus,
+      newStatus: isApproved
+        ? VerificationStatus.VERIFIED
+        : VerificationStatus.REJECTED,
+    };
+
+    // 更新审核历史
+    const currentHistory =
+      (currentRelation.reviewHistory as unknown as ReviewHistoryItem[]) ?? [];
+    const newReviewHistory = [...currentHistory, reviewItem];
+
     return prisma.lawArticleRelation.update({
       where: { id: relationId },
       data: {
@@ -273,6 +334,8 @@ export class LawArticleRelationService {
           : VerificationStatus.REJECTED,
         verifiedBy,
         verifiedAt: new Date(),
+        rejectionReason: isApproved ? null : (comment ?? null),
+        reviewHistory: newReviewHistory as unknown as Prisma.JsonValue,
       },
     });
   }
@@ -283,6 +346,30 @@ export class LawArticleRelationService {
   static async deleteRelation(relationId: string): Promise<void> {
     await prisma.lawArticleRelation.delete({
       where: { id: relationId },
+    });
+  }
+
+  /**
+   * 根据ID获取关系
+   */
+  static async getRelationById(
+    relationId: string
+  ): Promise<LawArticleRelation | null> {
+    return prisma.lawArticleRelation.findUnique({
+      where: { id: relationId },
+    });
+  }
+
+  /**
+   * 更新关系
+   */
+  static async updateRelation(
+    relationId: string,
+    data: Prisma.LawArticleRelationUpdateInput
+  ): Promise<LawArticleRelation> {
+    return prisma.lawArticleRelation.update({
+      where: { id: relationId },
+      data,
     });
   }
 

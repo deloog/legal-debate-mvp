@@ -10,7 +10,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import _React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { LawArticleGraphVisualization } from '@/components/law-article/LawArticleGraphVisualization';

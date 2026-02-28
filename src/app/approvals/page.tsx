@@ -1,3 +1,31 @@
+/**
+ * 审批中心页面
+ *
+ * 功能：
+ * 1. 待我审批
+ *    - 展示待审批事项列表（合同审批等）
+ *    - 显示审批事项信息（标题、编号、提交人、提交时间）
+ *    - 通过操作：一键同意，记录审批意见
+ *    - 拒绝操作：填写拒绝原因，记录审批意见
+ *    - 查看详情：跳转到对应的合同详情页
+ * 2. 已处理记录
+ *    - 展示历史审批记录
+ *    - 显示审批结果（已通过/已拒绝）
+ *    - 显示审批意见（如有）
+ * 3. 审批统计
+ *    - 待审批数量
+ *    - 今日通过数量
+ *    - 今日拒绝数量
+ *    - 累计处理数量
+ * 4. 状态管理
+ *    - 切换"待我审批"和"已处理"标签页
+ *    - 自动加载审批列表和统计数据
+ *    - 支持刷新数据
+ *    - 成功和错误提示
+ *
+ * @page /approvals
+ */
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -49,6 +77,9 @@ export default function ApprovalsPage() {
     setError(null);
     try {
       const res = await fetch('/api/approvals/pending');
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 获取审批列表失败`);
+      }
       const data = await res.json();
       if (data.success) {
         setApprovals(data.data?.approvals ?? []);
@@ -76,14 +107,17 @@ export default function ApprovalsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'APPROVE', comment: '同意' }),
       });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 审批失败`);
+      }
       const data = await res.json();
       if (data.success) {
         fetchApprovals();
       } else {
         setError(data.message || '审批失败');
       }
-    } catch {
-      setError('操作失败，请重试');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '操作失败，请重试');
     } finally {
       setActionLoading(null);
     }
@@ -102,6 +136,9 @@ export default function ApprovalsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'REJECT', comment: rejectComment }),
       });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: 拒绝失败`);
+      }
       const data = await res.json();
       if (data.success) {
         setShowRejectDialog(null);
@@ -110,8 +147,8 @@ export default function ApprovalsPage() {
       } else {
         setError(data.message || '拒绝失败');
       }
-    } catch {
-      setError('操作失败，请重试');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '操作失败，请重试');
     } finally {
       setActionLoading(null);
     }

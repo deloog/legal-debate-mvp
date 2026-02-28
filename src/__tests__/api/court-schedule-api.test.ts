@@ -527,7 +527,7 @@ describe('Court Schedule API', () => {
         },
       });
 
-      const schedule2 = await prisma.courtSchedule.create({
+      const __schedule2 = await prisma.courtSchedule.create({
         data: {
           caseId: testCaseId,
           title: '下午开庭',
@@ -549,7 +549,7 @@ describe('Court Schedule API', () => {
         updateData
       );
       const response = await updateSchedule(request);
-      const data = await response.json();
+      const __data = await response.json();
 
       // 时间冲突检测需要修正API中的逻辑
       // 当前API只在updateData.startTime存在时检测冲突
@@ -628,7 +628,7 @@ describe('Court Schedule API', () => {
         },
       });
 
-      const schedule2 = await prisma.courtSchedule.create({
+      const __schedule2 = await prisma.courtSchedule.create({
         data: {
           caseId: testCaseId,
           title: '上午调解',

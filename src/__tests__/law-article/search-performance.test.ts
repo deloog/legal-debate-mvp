@@ -316,7 +316,7 @@ describe('LawArticleSearchService 性能测试', () => {
       };
 
       const startTime = Date.now();
-      const result = await LawArticleSearchService.search(query);
+      const __result = await LawArticleSearchService.search(query);
       const executionTime = Date.now() - startTime;
 
       console.log(`复杂查询耗时: ${executionTime}ms`);
