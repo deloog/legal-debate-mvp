@@ -471,7 +471,8 @@
       "Bash(git rm:*)",
       "Bash(find:*)",
       "Bash(git stash)",
-      "Bash(head -30 src/app/api/v1/debates/[id]/route.ts)"
+      "Bash(head -30 src/app/api/v1/debates/[id]/route.ts)",
+      "Bash(sed 's/.*error //')"
     ]
   }
 }

@@ -7,9 +7,9 @@
 
 /// <reference types="@testing-library/jest-dom" />
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import '@testing-library/jest-dom';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RecommendationFeedbackButton } from '../../../components/feedback/RecommendationFeedbackButton';
 
 // Mock fetch
@@ -152,11 +152,11 @@ describe('RecommendationFeedbackButton 组件', () => {
 
     render(<RecommendationFeedbackButton {...mockProps} />);
 
-    const helpfulButton = screen.getByText('有用');
+    const helpfulButton = screen.getByRole('button', { name: /有用/ });
     fireEvent.click(helpfulButton);
 
     // 按钮应该被禁用
-    (expect(helpfulButton) as any).toBeDisabled();
+    expect(helpfulButton).toBeDisabled();
 
     await waitFor(() => {
       expect(helpfulButton).not.toBeDisabled();
@@ -203,11 +203,11 @@ describe('RecommendationFeedbackButton 组件', () => {
 
     render(<RecommendationFeedbackButton {...mockProps} />);
 
-    const helpfulButton = screen.getByText('有用');
+    const helpfulButton = screen.getByRole('button', { name: /有用/ });
     fireEvent.click(helpfulButton);
 
     await waitFor(() => {
-      (expect(helpfulButton) as any).toHaveClass('selected');
+      expect(helpfulButton).toHaveClass('selected');
     });
   });
 
@@ -229,15 +229,17 @@ describe('RecommendationFeedbackButton 组件', () => {
       <RecommendationFeedbackButton {...mockProps} className='custom-class' />
     );
 
-    const container = screen.getByText('有用').closest('div');
-    (expect(container) as any).toHaveClass('custom-class');
+    const container = screen
+      .getByRole('button', { name: /有用/ })
+      .closest('.recommendation-feedback');
+    expect(container).toHaveClass('custom-class');
   });
 
   it('应该在禁用状态下不允许提交', () => {
     render(<RecommendationFeedbackButton {...mockProps} disabled />);
 
-    const helpfulButton = screen.getByText('有用');
-    (expect(helpfulButton) as any).toBeDisabled();
+    const helpfulButton = screen.getByRole('button', { name: /有用/ });
+    expect(helpfulButton).toBeDisabled();
 
     fireEvent.click(helpfulButton);
 
