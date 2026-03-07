@@ -443,7 +443,7 @@ model LawArticle {
   children                LawArticle[]             @relation("ArticleHierarchy")
   recommendationFeedbacks RecommendationFeedback[]
 
-  @@unique([lawName, articleNumber])
+  @@unique([lawName, articleNumber, effectiveDate])
   @@index([lawType])
   @@index([category])
   @@index([status])
