@@ -320,7 +320,13 @@ class BusinessSystemIntegrationService {
     params: IntegrationQueryParams
   ): Promise<{ items: IntegrationResponse[]; total: number }> {
     try {
-      const { enterpriseId, systemType, status, page = 1, pageSize = 20 } = params;
+      const {
+        enterpriseId,
+        systemType,
+        status,
+        page = 1,
+        pageSize = 20,
+      } = params;
 
       const where: Prisma.BusinessSystemIntegrationWhereInput = {};
 
@@ -353,7 +359,7 @@ class BusinessSystemIntegrationService {
       ]);
 
       return {
-        items: items.map((item) => this.toIntegrationResponse(item)),
+        items: items.map(item => this.toIntegrationResponse(item)),
         total,
       };
     } catch (error) {
@@ -365,7 +371,9 @@ class BusinessSystemIntegrationService {
   /**
    * 测试集成连接
    */
-  async testConnection(id: string): Promise<{ success: boolean; message: string }> {
+  async testConnection(
+    id: string
+  ): Promise<{ success: boolean; message: string }> {
     try {
       const integration = await prisma.businessSystemIntegration.findUnique({
         where: { id },
@@ -543,7 +551,7 @@ class BusinessSystemIntegrationService {
       ]);
 
       return {
-        items: items.map((item) => this.toSyncLogResponse(item)),
+        items: items.map(item => this.toSyncLogResponse(item)),
         total,
       };
     } catch (error) {
@@ -558,7 +566,7 @@ class BusinessSystemIntegrationService {
   async sendWebhookEvent(
     integrationId: string,
     eventType: string,
-    payload: Record<string, unknown>
+    _payload: Record<string, unknown>
   ): Promise<{ success: boolean; message: string }> {
     try {
       const integration = await prisma.businessSystemIntegration.findUnique({
@@ -603,9 +611,11 @@ class BusinessSystemIntegrationService {
   /**
    * 解密敏感信息（仅供内部使用）
    */
-  async getDecryptedCredentials(
-    id: string
-  ): Promise<{ authToken?: string; apiKey?: string; refreshToken?: string } | null> {
+  async getDecryptedCredentials(id: string): Promise<{
+    authToken?: string;
+    apiKey?: string;
+    refreshToken?: string;
+  } | null> {
     try {
       const integration = await prisma.businessSystemIntegration.findUnique({
         where: { id },
@@ -615,7 +625,11 @@ class BusinessSystemIntegrationService {
         return null;
       }
 
-      const result: { authToken?: string; apiKey?: string; refreshToken?: string } = {};
+      const result: {
+        authToken?: string;
+        apiKey?: string;
+        refreshToken?: string;
+      } = {};
 
       if (integration.authToken && integration.authTokenEncrypted) {
         result.authToken = decrypt(integration.authToken);
@@ -644,7 +658,9 @@ class BusinessSystemIntegrationService {
    * 转换为响应对象
    */
   private toIntegrationResponse(
-    integration: Awaited<ReturnType<typeof prisma.businessSystemIntegration.findUnique>>
+    integration: Awaited<
+      ReturnType<typeof prisma.businessSystemIntegration.findUnique>
+    >
   ): IntegrationResponse {
     return {
       id: integration.id,

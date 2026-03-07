@@ -12,7 +12,12 @@
 
 import { LawReferenceValidator } from '@/lib/law-article/law-reference-validator';
 import { prisma } from '@/lib/db';
-import { LawArticle, LegalReference, LegalReferenceStatus, LawStatus } from '@prisma/client';
+import {
+  LawArticle,
+  LegalReference,
+  LegalReferenceStatus,
+  LawStatus,
+} from '@prisma/client';
 
 describe('LawReferenceValidator', () => {
   let validator: LawReferenceValidator;
@@ -22,7 +27,8 @@ describe('LawReferenceValidator', () => {
     id: 'valid-article-1',
     lawName: '中华人民共和国民法典',
     articleNumber: '第一千一百七十三条',
-    fullText: '被侵权人对同一损害的发生或者扩大有过错的，可以减轻侵权人的责任。',
+    fullText:
+      '被侵权人对同一损害的发生或者扩大有过错的，可以减轻侵权人的责任。',
     lawType: 'LAW' as const,
     category: 'CIVIL' as const,
     subCategory: null,
@@ -58,7 +64,8 @@ describe('LawReferenceValidator', () => {
     id: 'repealed-article-1',
     lawName: '中华人民共和国民法通则',
     articleNumber: '第一百三十五条',
-    fullText: '向人民法院请求保护民事权利的诉讼时效期间为二年，法律另有规定的除外。',
+    fullText:
+      '向人民法院请求保护民事权利的诉讼时效期间为二年，法律另有规定的除外。',
     status: LawStatus.REPEALED,
     effectiveDate: new Date('1987-01-01'),
     expiryDate: new Date('2021-01-01'),
@@ -69,7 +76,8 @@ describe('LawReferenceValidator', () => {
     id: 'amended-article-1',
     lawName: '中华人民共和国刑法',
     articleNumber: '第六十五条',
-    fullText: '被判处有期徒刑以上刑罚的犯罪分子，刑罚执行完毕或者赦免以后，在五年以内再犯应当判处有期徒刑以上刑罚之罪的，是累犯，应当从重处罚，但是过失犯罪和不满十八周岁的人犯罪的除外。',
+    fullText:
+      '被判处有期徒刑以上刑罚的犯罪分子，刑罚执行完毕或者赦免以后，在五年以内再犯应当判处有期徒刑以上刑罚之罪的，是累犯，应当从重处罚，但是过失犯罪和不满十八周岁的人犯罪的除外。',
     status: LawStatus.AMENDED,
     effectiveDate: new Date('2015-08-29'),
     expiryDate: null,
@@ -118,16 +126,21 @@ describe('LawReferenceValidator', () => {
   describe('1. 法条存在性验证', () => {
     it('应该验证通过：存在的有效法条引用', async () => {
       // Mock数据库返回存在的法条
-      jest.spyOn(prisma.lawArticle, 'findFirst').mockResolvedValue(validLawArticle);
+      jest
+        .spyOn(prisma.lawArticle, 'findFirst')
+        .mockResolvedValue(validLawArticle);
 
       const reference: Partial<LegalReference> = {
         id: 'ref-1',
         lawType: 'LAW',
         articleNumber: '第一千一百七十三条',
-        content: '被侵权人对同一损害的发生或者扩大有过错的，可以减轻侵权人的责任。',
+        content:
+          '被侵权人对同一损害的发生或者扩大有过错的，可以减轻侵权人的责任。',
       };
 
-      const result = await validator.validateReference(reference as LegalReference);
+      const result = await validator.validateReference(
+        reference as LegalReference
+      );
 
       expect(result.isValid).toBe(true);
       expect(result.validationStatus).toBe('VERIFIED');
@@ -146,7 +159,9 @@ describe('LawReferenceValidator', () => {
         content: '一些法条内容',
       };
 
-      const result = await validator.validateReference(reference as LegalReference);
+      const result = await validator.validateReference(
+        reference as LegalReference
+      );
 
       expect(result.isValid).toBe(false);
       expect(result.validationStatus).toBe('UNVERIFIED');
@@ -161,7 +176,9 @@ describe('LawReferenceValidator', () => {
         content: '一些法条内容',
       };
 
-      const result = await validator.validateReference(reference as LegalReference);
+      const result = await validator.validateReference(
+        reference as LegalReference
+      );
 
       expect(result.isValid).toBe(false);
       expect(result.validationStatus).toBe('INVALID');
@@ -171,7 +188,9 @@ describe('LawReferenceValidator', () => {
 
   describe('2. 法条效力状态验证', () => {
     it('应该验证通过：有效法条', async () => {
-      jest.spyOn(prisma.lawArticle, 'findFirst').mockResolvedValue(validLawArticle);
+      jest
+        .spyOn(prisma.lawArticle, 'findFirst')
+        .mockResolvedValue(validLawArticle);
 
       const reference: Partial<LegalReference> = {
         id: 'ref-4',
@@ -180,14 +199,18 @@ describe('LawReferenceValidator', () => {
         content: validLawArticle.fullText,
       };
 
-      const result = await validator.validateReference(reference as LegalReference);
+      const result = await validator.validateReference(
+        reference as LegalReference
+      );
 
       expect(result.isValid).toBe(true);
       expect(result.lawStatus).toBe('VALID');
     });
 
     it('应该验证失败：已废止法条', async () => {
-      jest.spyOn(prisma.lawArticle, 'findFirst').mockResolvedValue(repealedLawArticle);
+      jest
+        .spyOn(prisma.lawArticle, 'findFirst')
+        .mockResolvedValue(repealedLawArticle);
 
       const reference: Partial<LegalReference> = {
         id: 'ref-5',
@@ -196,7 +219,9 @@ describe('LawReferenceValidator', () => {
         content: repealedLawArticle.fullText,
       };
 
-      const result = await validator.validateReference(reference as LegalReference);
+      const result = await validator.validateReference(
+        reference as LegalReference
+      );
 
       expect(result.isValid).toBe(false);
       expect(result.lawStatus).toBe('REPEALED');
@@ -204,7 +229,9 @@ describe('LawReferenceValidator', () => {
     });
 
     it('应该验证失败：已修订法条', async () => {
-      jest.spyOn(prisma.lawArticle, 'findFirst').mockResolvedValue(amendedLawArticle);
+      jest
+        .spyOn(prisma.lawArticle, 'findFirst')
+        .mockResolvedValue(amendedLawArticle);
 
       const reference: Partial<LegalReference> = {
         id: 'ref-6',
@@ -213,7 +240,9 @@ describe('LawReferenceValidator', () => {
         content: amendedLawArticle.fullText,
       };
 
-      const result = await validator.validateReference(reference as LegalReference);
+      const result = await validator.validateReference(
+        reference as LegalReference
+      );
 
       expect(result.isValid).toBe(false);
       expect(result.lawStatus).toBe('AMENDED');
@@ -221,7 +250,9 @@ describe('LawReferenceValidator', () => {
     });
 
     it('应该验证失败：已过期法条', async () => {
-      jest.spyOn(prisma.lawArticle, 'findFirst').mockResolvedValue(expiredLawArticle);
+      jest
+        .spyOn(prisma.lawArticle, 'findFirst')
+        .mockResolvedValue(expiredLawArticle);
 
       const reference: Partial<LegalReference> = {
         id: 'ref-7',
@@ -230,7 +261,9 @@ describe('LawReferenceValidator', () => {
         content: expiredLawArticle.fullText,
       };
 
-      const result = await validator.validateReference(reference as LegalReference);
+      const result = await validator.validateReference(
+        reference as LegalReference
+      );
 
       expect(result.isValid).toBe(false);
       expect(result.lawStatus).toBe('EXPIRED');
@@ -238,7 +271,9 @@ describe('LawReferenceValidator', () => {
     });
 
     it('应该验证失败：草案法条', async () => {
-      jest.spyOn(prisma.lawArticle, 'findFirst').mockResolvedValue(draftLawArticle);
+      jest
+        .spyOn(prisma.lawArticle, 'findFirst')
+        .mockResolvedValue(draftLawArticle);
 
       const reference: Partial<LegalReference> = {
         id: 'ref-draft',
@@ -247,7 +282,9 @@ describe('LawReferenceValidator', () => {
         content: draftLawArticle.fullText,
       };
 
-      const result = await validator.validateReference(reference as LegalReference);
+      const result = await validator.validateReference(
+        reference as LegalReference
+      );
 
       expect(result.isValid).toBe(false);
       expect(result.lawStatus).toBe('DRAFT');
@@ -255,7 +292,9 @@ describe('LawReferenceValidator', () => {
     });
 
     it('应该验证失败：未知状态法条', async () => {
-      jest.spyOn(prisma.lawArticle, 'findFirst').mockResolvedValue(unknownStatusArticle);
+      jest
+        .spyOn(prisma.lawArticle, 'findFirst')
+        .mockResolvedValue(unknownStatusArticle);
 
       const reference: Partial<LegalReference> = {
         id: 'ref-unknown',
@@ -264,7 +303,9 @@ describe('LawReferenceValidator', () => {
         content: unknownStatusArticle.fullText,
       };
 
-      const result = await validator.validateReference(reference as LegalReference);
+      const result = await validator.validateReference(
+        reference as LegalReference
+      );
 
       expect(result.isValid).toBe(false);
       expect(result.errorMessage).toContain('未知');
@@ -273,7 +314,9 @@ describe('LawReferenceValidator', () => {
 
   describe('3. 法条内容准确性验证', () => {
     it('应该验证通过：内容完全匹配', async () => {
-      jest.spyOn(prisma.lawArticle, 'findFirst').mockResolvedValue(validLawArticle);
+      jest
+        .spyOn(prisma.lawArticle, 'findFirst')
+        .mockResolvedValue(validLawArticle);
 
       const reference: Partial<LegalReference> = {
         id: 'ref-8',
@@ -282,14 +325,18 @@ describe('LawReferenceValidator', () => {
         content: validLawArticle.fullText,
       };
 
-      const result = await validator.validateReference(reference as LegalReference);
+      const result = await validator.validateReference(
+        reference as LegalReference
+      );
 
       expect(result.contentMatch).toBe(true);
       expect(result.similarityScore).toBe(1.0);
     });
 
     it('应该验证通过：内容部分匹配（相似度>0.8）', async () => {
-      jest.spyOn(prisma.lawArticle, 'findFirst').mockResolvedValue(validLawArticle);
+      jest
+        .spyOn(prisma.lawArticle, 'findFirst')
+        .mockResolvedValue(validLawArticle);
 
       const reference: Partial<LegalReference> = {
         id: 'ref-9',
@@ -298,14 +345,18 @@ describe('LawReferenceValidator', () => {
         content: '被侵权人对同一损害的发生有过错的，可以减轻侵权人的责任。', // 简化版本
       };
 
-      const result = await validator.validateReference(reference as LegalReference);
+      const result = await validator.validateReference(
+        reference as LegalReference
+      );
 
       expect(result.contentMatch).toBe(true);
       expect(result.similarityScore).toBeGreaterThan(0.8);
     });
 
     it('应该验证失败：内容不匹配（相似度<0.5）', async () => {
-      jest.spyOn(prisma.lawArticle, 'findFirst').mockResolvedValue(validLawArticle);
+      jest
+        .spyOn(prisma.lawArticle, 'findFirst')
+        .mockResolvedValue(validLawArticle);
 
       const reference: Partial<LegalReference> = {
         id: 'ref-10',
@@ -314,7 +365,9 @@ describe('LawReferenceValidator', () => {
         content: '这是完全不同的法条内容，关于合同违约责任的规定。',
       };
 
-      const result = await validator.validateReference(reference as LegalReference);
+      const result = await validator.validateReference(
+        reference as LegalReference
+      );
 
       expect(result.contentMatch).toBe(false);
       expect(result.similarityScore).toBeLessThan(0.5);
@@ -324,7 +377,8 @@ describe('LawReferenceValidator', () => {
 
   describe('4. 批量验证', () => {
     it('应该批量验证多个法条引用', async () => {
-      jest.spyOn(prisma.lawArticle, 'findFirst')
+      jest
+        .spyOn(prisma.lawArticle, 'findFirst')
         .mockResolvedValueOnce(validLawArticle)
         .mockResolvedValueOnce(null);
 
@@ -343,7 +397,9 @@ describe('LawReferenceValidator', () => {
         },
       ];
 
-      const results = await validator.validateReferences(references as LegalReference[]);
+      const results = await validator.validateReferences(
+        references as LegalReference[]
+      );
 
       expect(results).toHaveLength(2);
       expect(results[0].isValid).toBe(true);
@@ -357,12 +413,13 @@ describe('LawReferenceValidator', () => {
       // 3. ref-14: 模糊匹配 -> 返回repealedLawArticle -> 找到，停止
       // 4. ref-15: 精确匹配articleNumber="不存在" -> 返回null -> 继续模糊匹配
       // 5. ref-15: 模糊匹配 -> 返回null -> 没找到
-      jest.spyOn(prisma.lawArticle, 'findFirst')
-        .mockResolvedValueOnce(validLawArticle)   // ref-13 精确
-        .mockResolvedValueOnce(null)              // ref-14 精确
+      jest
+        .spyOn(prisma.lawArticle, 'findFirst')
+        .mockResolvedValueOnce(validLawArticle) // ref-13 精确
+        .mockResolvedValueOnce(null) // ref-14 精确
         .mockResolvedValueOnce(repealedLawArticle) // ref-14 模糊
-        .mockResolvedValueOnce(null)              // ref-15 精确
-        .mockResolvedValueOnce(null);             // ref-15 模糊
+        .mockResolvedValueOnce(null) // ref-15 精确
+        .mockResolvedValueOnce(null); // ref-15 模糊
 
       const references: Partial<LegalReference>[] = [
         {
@@ -385,7 +442,9 @@ describe('LawReferenceValidator', () => {
         },
       ];
 
-      const stats = await validator.getValidationStats(references as LegalReference[]);
+      const stats = await validator.getValidationStats(
+        references as LegalReference[]
+      );
 
       // 验证统计结果
       // ref-13: 有效法条 -> valid
@@ -401,7 +460,9 @@ describe('LawReferenceValidator', () => {
 
   describe('5. 错误处理', () => {
     it('应该处理数据库查询异常', async () => {
-      jest.spyOn(prisma.lawArticle, 'findFirst').mockRejectedValue(new Error('数据库错误'));
+      jest
+        .spyOn(prisma.lawArticle, 'findFirst')
+        .mockRejectedValue(new Error('数据库错误'));
 
       const reference: Partial<LegalReference> = {
         id: 'ref-16',
@@ -410,7 +471,9 @@ describe('LawReferenceValidator', () => {
         content: '内容',
       };
 
-      await expect(validator.validateReference(reference as LegalReference)).rejects.toThrow('数据库错误');
+      await expect(
+        validator.validateReference(reference as LegalReference)
+      ).rejects.toThrow('数据库错误');
     });
 
     it('应该处理空引用对象', async () => {
@@ -418,7 +481,9 @@ describe('LawReferenceValidator', () => {
         id: 'ref-17',
       };
 
-      const result = await validator.validateReference(reference as LegalReference);
+      const result = await validator.validateReference(
+        reference as LegalReference
+      );
 
       expect(result.isValid).toBe(false);
       expect(result.validationStatus).toBe('INVALID');

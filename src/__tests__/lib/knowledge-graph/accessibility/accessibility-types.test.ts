@@ -128,7 +128,7 @@ describe('defaultAccessibilityConfig', () => {
       const config = defaultAccessibilityConfig;
       // TypeScript在编译时阻止修改，运行时Object.freeze阻止修改
     }).not.toThrow();
-    
+
     // 原始配置应该保持不变
     expect(defaultAccessibilityConfig.mode).toBe(AccessibilityMode.NORMAL);
   });

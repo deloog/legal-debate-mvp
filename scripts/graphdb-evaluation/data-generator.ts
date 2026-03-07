@@ -4,11 +4,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import {
-  TestArticle,
-  TestRelation,
-  DataScale,
-} from './types';
+import { TestArticle, TestRelation, DataScale } from './types';
 
 // 导出类型供测试使用
 export type { TestArticle, TestRelation };
@@ -127,15 +123,12 @@ export class DataGenerator {
         article = this.generateSingleArticle();
         attempts++;
       } while (
-        usedCombinations.has(
-          `${article.lawName}-${article.articleNumber}`
-        ) && attempts < 10
+        usedCombinations.has(`${article.lawName}-${article.articleNumber}`) &&
+        attempts < 10
       );
 
       articles.push(article);
-      usedCombinations.add(
-        `${article.lawName}-${article.articleNumber}`
-      );
+      usedCombinations.add(`${article.lawName}-${article.articleNumber}`);
     }
 
     return articles;
@@ -168,7 +161,10 @@ export class DataGenerator {
     while (names.size < count) {
       const prefix = this.randomChoice(LAW_NAME_PREFIXES);
       const template = this.randomChoice(LAW_NAME_TEMPLATES);
-      const name = template.replace('{name}', prefix.replace('中华人民共和国', ''));
+      const name = template.replace(
+        '{name}',
+        prefix.replace('中华人民共和国', '')
+      );
       names.add(name);
     }
 

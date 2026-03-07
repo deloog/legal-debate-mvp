@@ -15,9 +15,6 @@ import {
 } from './types';
 import { getPalette } from './color-palettes';
 import {
-  generateNodeAriaLabel,
-  generateLinkAriaLabel,
-  generateGraphAriaDescription,
   announceNodeSelection,
   announceGraphUpdate,
   announceNodeDetailsOpen,
@@ -119,13 +116,13 @@ export class AccessibilityManager {
   setHighContrast(enabled: boolean): void {
     try {
       this.config.highContrast = enabled;
-      
+
       if (enabled) {
         this.setMode(AccessibilityMode.HIGH_CONTRAST);
       } else {
         this.setMode(AccessibilityMode.NORMAL);
       }
-      
+
       logger.info('高对比度已设置', { enabled });
     } catch (error) {
       logger.error('设置高对比度失败', { error, enabled });
@@ -143,12 +140,12 @@ export class AccessibilityManager {
         ...this.config.keyboardNavigation,
         ...config,
       };
-      
+
       this.keyboardManager.setConfig({
         ...this.config.keyboardNavigation!,
         enabled: true,
       });
-      
+
       logger.info('键盘导航配置已更新', { config });
     } catch (error) {
       logger.error('更新键盘导航配置失败', { error, config });
@@ -179,7 +176,7 @@ export class AccessibilityManager {
     if (!this.currentPalette) {
       this.updatePalette();
     }
-    
+
     return this.currentPalette as ColorPalette | ColorBlindPalette;
   }
 
@@ -203,7 +200,11 @@ export class AccessibilityManager {
   /**
    * 获取连线ARIA属性
    */
-  getLinkAriaProps(link: GraphLink, source: GraphNode, target: GraphNode): Record<string, string> {
+  getLinkAriaProps(
+    link: GraphLink,
+    source: GraphNode,
+    target: GraphNode
+  ): Record<string, string> {
     return getLinkAriaProps(link, source, target);
   }
 
@@ -386,13 +387,13 @@ export class AccessibilityManager {
       highContrast: defaultAccessibilityConfig.highContrast,
       colorBlindType: defaultAccessibilityConfig.colorBlindType,
     };
-    
+
     this.updatePalette();
     this.keyboardManager.setConfig({
       ...this.config.keyboardNavigation!,
       enabled: true,
     });
-    
+
     logger.info('可访问性配置已重置为默认值');
   }
 
@@ -442,7 +443,7 @@ export function getAccessibilityState(
   manager: AccessibilityManager
 ): AccessibilityState {
   const config = manager.getConfig();
-  
+
   return {
     mode: config.mode,
     colorBlindType: config.colorBlindType || null,

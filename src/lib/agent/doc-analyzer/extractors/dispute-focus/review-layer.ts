@@ -46,7 +46,10 @@ export async function aiReviewLayer(
 
     return focuses;
   } catch (error) {
-    logger.error('AI审查层失败', error instanceof Error ? error : new Error(String(error)));
+    logger.error(
+      'AI审查层失败',
+      error instanceof Error ? error : new Error(String(error))
+    );
     return focuses;
   }
 }
@@ -155,14 +158,12 @@ function parseAIReviewResponse(
             (item.positionA as string) || original?.positionA || '未明确',
           positionB:
             (item.positionB as string) || original?.positionB || '未明确',
-          coreIssue:
-            (item.coreIssue as string) || original?.coreIssue || '',
+          coreIssue: (item.coreIssue as string) || original?.coreIssue || '',
           importance: Math.min(10, Math.max(1, Math.round(importance))),
           confidence: Math.min(1, Math.max(0, confidence)),
           relatedClaims: original?.relatedClaims || [],
           relatedFacts: original?.relatedFacts || [],
-          evidence:
-            (item.evidence as string[]) || original?.evidence || [],
+          evidence: (item.evidence as string[]) || original?.evidence || [],
           legalBasis:
             (item.legalBasis as string | undefined) || original?.legalBasis,
           _inferred: confidence < 0.9,
@@ -170,7 +171,10 @@ function parseAIReviewResponse(
       })
       .filter(item => !invalidIds.has(item.id));
   } catch (error) {
-    logger.error('解析AI审查响应失败', error instanceof Error ? error : new Error(String(error)));
+    logger.error(
+      '解析AI审查响应失败',
+      error instanceof Error ? error : new Error(String(error))
+    );
     return originalFocuses;
   }
 }

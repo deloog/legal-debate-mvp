@@ -84,7 +84,7 @@ describe('Debate Flow Integration Tests', () => {
     mockPrisma.debateRound.count.mockResolvedValue(0);
     // Mock getServerSession from next-auth
     // Use a variable typed as 'any' to bypass strict type checking on next-auth's complex types
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const mockNextAuth: any = require('next-auth/next');
     mockNextAuth.getServerSession.mockResolvedValue({
       user: { id: 'test-user-id-123', email: 'test@example.com', role: 'USER' },

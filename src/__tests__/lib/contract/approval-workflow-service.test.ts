@@ -688,9 +688,7 @@ describe('ApprovalWorkflowService', () => {
       const result = await service.listWorkflowTemplates({
         category: '合同审批',
       });
-      expect(
-        mockPrisma.approvalTemplate.findMany
-      ).toHaveBeenCalledWith(
+      expect(mockPrisma.approvalTemplate.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({ category: '合同审批' }),
         })
@@ -934,7 +932,9 @@ describe('ApprovalWorkflowService', () => {
 
       const result = service.validateWorkflowDefinition(definition);
       // 应该有警告（条件为空）
-      expect(result.warnings.some(w => w.includes('node-condition'))).toBe(true);
+      expect(result.warnings.some(w => w.includes('node-condition'))).toBe(
+        true
+      );
     });
 
     it('应该拒绝条件节点中引用不存在目标节点的工作流', () => {
@@ -976,9 +976,9 @@ describe('ApprovalWorkflowService', () => {
 
       const result = service.validateWorkflowDefinition(definition);
       expect(result.valid).toBe(false);
-      expect(
-        result.errors.some(e => e.includes('non-existent-target'))
-      ).toBe(true);
+      expect(result.errors.some(e => e.includes('non-existent-target'))).toBe(
+        true
+      );
     });
 
     it('应该对缺少parallelType的并行网关产生警告', () => {
@@ -1198,7 +1198,9 @@ describe('ApprovalWorkflowService', () => {
         name: '已更新流程',
         description: null,
         category: null,
-        steps: [{ stepNumber: 1, approverRole: '总经理', nodeId: 'node-approval' }],
+        steps: [
+          { stepNumber: 1, approverRole: '总经理', nodeId: 'node-approval' },
+        ],
         flowDefinition: validDefinition,
         isActive: true,
         createdAt: new Date(),

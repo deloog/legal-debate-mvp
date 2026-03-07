@@ -9,11 +9,12 @@ import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 
-type RecommendationFeedbackWithArticle = Prisma.RecommendationFeedbackGetPayload<{
-  include: {
-    lawArticle: { select: { id: true; lawName: true; articleNumber: true } };
-  };
-}>;
+type RecommendationFeedbackWithArticle =
+  Prisma.RecommendationFeedbackGetPayload<{
+    include: {
+      lawArticle: { select: { id: true; lawName: true; articleNumber: true } };
+    };
+  }>;
 
 type RelationFeedbackWithRelation = Prisma.RelationFeedbackGetPayload<{
   include: {
@@ -110,7 +111,9 @@ export async function GET(request: NextRequest) {
 
     // 根据类型选择数据表并获取数据
     let total: number;
-    let feedbacks: RecommendationFeedbackWithArticle[] | RelationFeedbackWithRelation[];
+    let feedbacks:
+      | RecommendationFeedbackWithArticle[]
+      | RelationFeedbackWithRelation[];
 
     if (type === 'recommendation') {
       total = await prisma.recommendationFeedback.count({ where });

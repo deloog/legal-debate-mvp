@@ -28,7 +28,9 @@ async function main() {
     .sort((a, b) => b._count - a._count)
     .forEach(stat => {
       const percentage = ((stat._count / total) * 100).toFixed(1);
-      console.log(`  ${stat.category.padEnd(25)} ${stat._count.toString().padStart(6)} (${percentage}%)`);
+      console.log(
+        `  ${stat.category.padEnd(25)} ${stat._count.toString().padStart(6)} (${percentage}%)`
+      );
     });
 
   // 3. 按法律类型统计
@@ -42,7 +44,9 @@ async function main() {
     .sort((a, b) => b._count - a._count)
     .forEach(stat => {
       const percentage = ((stat._count / total) * 100).toFixed(1);
-      console.log(`  ${stat.lawType.padEnd(25)} ${stat._count.toString().padStart(6)} (${percentage}%)`);
+      console.log(
+        `  ${stat.lawType.padEnd(25)} ${stat._count.toString().padStart(6)} (${percentage}%)`
+      );
     });
 
   // 4. 按数据源统计
@@ -54,11 +58,14 @@ async function main() {
   console.log('\n[4] 按数据源统计:');
   sourceStats.forEach(stat => {
     const percentage = ((stat._count / total) * 100).toFixed(1);
-    console.log(`  ${stat.dataSource.padEnd(25)} ${stat._count.toString().padStart(6)} (${percentage}%)`);
+    console.log(
+      `  ${stat.dataSource.padEnd(25)} ${stat._count.toString().padStart(6)} (${percentage}%)`
+    );
   });
 
   // 5. OTHER 分类详情
-  const otherCount = categoryStats.find(s => s.category === 'OTHER')?._count || 0;
+  const otherCount =
+    categoryStats.find(s => s.category === 'OTHER')?._count || 0;
   if (otherCount > 0) {
     console.log(`\n[5] OTHER 分类详情 (共 ${otherCount} 条):`);
 
@@ -71,7 +78,9 @@ async function main() {
 
     console.log('  样本（前10条）:');
     otherSamples.forEach((sample, i) => {
-      console.log(`    ${i + 1}. [${sample.lawType}] ${sample.lawName.substring(0, 50)}`);
+      console.log(
+        `    ${i + 1}. [${sample.lawType}] ${sample.lawName.substring(0, 50)}`
+      );
     });
   }
 

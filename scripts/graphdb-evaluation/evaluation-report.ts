@@ -30,18 +30,18 @@ export interface EvaluationMetrics {
   minQueryTime: number; // 最小查询时间
   maxQueryTime: number; // 最大查询时间
   queryTimeStdDev: number; // 查询时间标准差
-  
+
   // 吞吐量
   queriesPerSecond: number; // 每秒查询数
   totalQueries: number; // 总查询数
-  
+
   // 稳定性
   successRate: number; // 成功率
   stabilityScore: number; // 稳定性评分（0-100）
-  
+
   // 扩展性
   scalabilityScore: number; // 扩展性评分（0-100）
-  
+
   // 综合评分
   overallScore: number; // 综合评分（0-100）
 }
@@ -87,7 +87,10 @@ export class EvaluationReportGenerator {
   ): EvaluationReport {
     const metrics = this.calculateMetrics(results);
     const queryPerformances = this.analyzeQueryPerformance(results);
-    const recommendations = this.generateRecommendations(metrics, queryPerformances);
+    const recommendations = this.generateRecommendations(
+      metrics,
+      queryPerformances
+    );
 
     return {
       config,
@@ -132,15 +135,23 @@ export class EvaluationReportGenerator {
 
     // 吞吐量计算
     const totalQueries = results.reduce((sum, r) => sum + r.totalRuns, 0);
-    const totalTimeMs = results.reduce((sum, r) => sum + r.meanTime * r.totalRuns, 0);
-    const queriesPerSecond = totalTimeMs > 0 ? (totalQueries / totalTimeMs) * 1000 : 0;
+    const totalTimeMs = results.reduce(
+      (sum, r) => sum + r.meanTime * r.totalRuns,
+      0
+    );
+    const queriesPerSecond =
+      totalTimeMs > 0 ? (totalQueries / totalTimeMs) * 1000 : 0;
 
     // 成功率
     const totalSuccess = results.reduce((sum, r) => sum + r.successRuns, 0);
-    const successRate = totalQueries > 0 ? (totalSuccess / totalQueries) * 100 : 0;
+    const successRate =
+      totalQueries > 0 ? (totalSuccess / totalQueries) * 100 : 0;
 
     // 稳定性评分（基于标准差）
-    const stabilityScore = this.calculateStabilityScore(queryTimeStdDev, avgQueryTime);
+    const stabilityScore = this.calculateStabilityScore(
+      queryTimeStdDev,
+      avgQueryTime
+    );
 
     // 扩展性评分（基于查询类型多样性）
     const scalabilityScore = this.calculateScalabilityScore(results);
@@ -170,7 +181,9 @@ export class EvaluationReportGenerator {
   /**
    * 分析查询性能
    */
-  private analyzeQueryPerformance(results: BenchmarkResult[]): QueryPerformance[] {
+  private analyzeQueryPerformance(
+    results: BenchmarkResult[]
+  ): QueryPerformance[] {
     const performances: QueryPerformance[] = results.map((r, index) => ({
       queryName: r.name,
       queryType: r.type,
@@ -236,7 +249,9 @@ export class EvaluationReportGenerator {
       );
     }
 
-    const unstableQueries = performances.filter(p => p.stdDev > p.avgTime * 0.5);
+    const unstableQueries = performances.filter(
+      p => p.stdDev > p.avgTime * 0.5
+    );
     if (unstableQueries.length > 0) {
       recommendations.push(
         `以下查询时间波动较大，建议检查：${unstableQueries.map(q => q.queryName).join(', ')}`
@@ -262,7 +277,8 @@ export class EvaluationReportGenerator {
   private calculateStdDev(values: number[], mean: number): number {
     if (values.length === 0) return 0;
     const squareDiffs = values.map(v => Math.pow(v - mean, 2));
-    const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / values.length;
+    const avgSquareDiff =
+      squareDiffs.reduce((a, b) => a + b, 0) / values.length;
     return Math.sqrt(avgSquareDiff);
   }
 
@@ -295,7 +311,10 @@ export class EvaluationReportGenerator {
 
     // 基于结果规模多样性评分
     const resultSizes = results.map(r => r.avgResultCount);
-    const sizeVariance = this.calculateStdDev(resultSizes, this.mean(resultSizes));
+    const sizeVariance = this.calculateStdDev(
+      resultSizes,
+      this.mean(resultSizes)
+    );
     const sizeDiversityScore = Math.min(100, sizeVariance * 10);
 
     return (typeDiversityScore + sizeDiversityScore) / 2;

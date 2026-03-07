@@ -46,7 +46,9 @@ export function getNormalPalette(): ColorPalette {
  * 色盲友好色板
  * 使用高对比度颜色和形状区分
  */
-export function getColorBlindPalette(colorBlindType: ColorBlindType): ColorBlindPalette {
+export function getColorBlindPalette(
+  colorBlindType: ColorBlindType
+): ColorBlindPalette {
   const basePalette: ColorPalette = {
     relationColors: {
       [RelationType.CITES]: '#0066cc', // 深蓝
@@ -157,7 +159,10 @@ export function getHighContrastPalette(): ColorPalette {
 /**
  * 根据可访问性模式获取色板
  */
-export function getPalette(mode: string, colorBlindType?: ColorBlindType | null): ColorPalette | ColorBlindPalette {
+export function getPalette(
+  mode: string,
+  colorBlindType?: ColorBlindType | null
+): ColorPalette | ColorBlindPalette {
   try {
     switch (mode) {
       case 'normal':
@@ -196,7 +201,10 @@ export function validateColorContrast(
  * 计算颜色对比度
  * 基于 WCAG 2.1 标准
  */
-function calculateContrastRatio(foreground: string, background: string): number {
+function calculateContrastRatio(
+  foreground: string,
+  background: string
+): number {
   const lum1 = getLuminance(foreground);
   const lum2 = getLuminance(background);
 
@@ -213,7 +221,7 @@ function getLuminance(hex: string): number {
   const rgb = hexToRgb(hex);
   const { r, g, b } = rgb;
 
-  const srgb = [r, g, b].map((c) => {
+  const srgb = [r, g, b].map(c => {
     c = c / 255;
     return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
   });

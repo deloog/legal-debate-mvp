@@ -4,7 +4,14 @@
  * 测试合同关键节点的创建、更新、查询和自动提醒功能。
  */
 
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  jest,
+} from '@jest/globals';
 
 // Mock logger
 const mockLoggerInfo = jest.fn();
@@ -97,7 +104,9 @@ describe('ContractPerformanceService', () => {
         },
       };
 
-      (mockPrisma.contractPerformance.create as any).mockResolvedValue(mockPerformance);
+      (mockPrisma.contractPerformance.create as any).mockResolvedValue(
+        mockPerformance
+      );
 
       const input = {
         contractId: 'contract-1',
@@ -176,7 +185,9 @@ describe('ContractPerformanceService', () => {
         },
       };
 
-      (mockPrisma.contractPerformance.create as any).mockResolvedValue(mockPerformance);
+      (mockPrisma.contractPerformance.create as any).mockResolvedValue(
+        mockPerformance
+      );
 
       const input = {
         contractId: 'contract-1',
@@ -226,7 +237,9 @@ describe('ContractPerformanceService', () => {
         },
       };
 
-      (mockPrisma.contractPerformance.create as any).mockResolvedValue(mockPerformance);
+      (mockPrisma.contractPerformance.create as any).mockResolvedValue(
+        mockPerformance
+      );
 
       const input = {
         contractId: 'contract-1',
@@ -237,9 +250,7 @@ describe('ContractPerformanceService', () => {
 
       const result = await contractPerformanceService.createPerformance(input);
 
-      expect(
-        mockPrisma.contractPerformance.create
-      ).toHaveBeenCalledWith(
+      expect(mockPrisma.contractPerformance.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             reminderDays: [14, 7, 3],
@@ -267,12 +278,10 @@ describe('ContractPerformanceService', () => {
         actualDate: new Date('2026-03-01'),
       };
 
-      (
-        mockPrisma.contractPerformance.findFirst as any
-      ).mockResolvedValue(mockExisting);
-      (
-        mockPrisma.contractPerformance.update as any
-      ).mockResolvedValue({
+      (mockPrisma.contractPerformance.findFirst as any).mockResolvedValue(
+        mockExisting
+      );
+      (mockPrisma.contractPerformance.update as any).mockResolvedValue({
         ...mockUpdated,
         contract: {
           id: 'contract-1',
@@ -312,14 +321,16 @@ describe('ContractPerformanceService', () => {
     });
 
     it('应该拒绝未授权用户更新', async () => {
-      (
-        mockPrisma.contractPerformance.findFirst as any
-      ).mockResolvedValue(null);
+      (mockPrisma.contractPerformance.findFirst as any).mockResolvedValue(null);
 
       await expect(
-        contractPerformanceService.updatePerformance('perf-1', 'unauthorized-user', {
-          milestoneStatus: 'COMPLETED' as any,
-        })
+        contractPerformanceService.updatePerformance(
+          'perf-1',
+          'unauthorized-user',
+          {
+            milestoneStatus: 'COMPLETED' as any,
+          }
+        )
       ).rejects.toThrow('无权更新此履约节点');
     });
   });
@@ -343,12 +354,10 @@ describe('ContractPerformanceService', () => {
         },
       ];
 
-      (
-        mockPrisma.contractPerformance.findMany as any
-      ).mockResolvedValue(mockPerformances);
-      (
-        mockPrisma.contractPerformance.count as any
-      ).mockResolvedValue(2);
+      (mockPrisma.contractPerformance.findMany as any).mockResolvedValue(
+        mockPerformances
+      );
+      (mockPrisma.contractPerformance.count as any).mockResolvedValue(2);
 
       const result = await contractPerformanceService.queryPerformances({
         contractId: 'contract-1',
@@ -373,12 +382,10 @@ describe('ContractPerformanceService', () => {
         },
       ];
 
-      (
-        mockPrisma.contractPerformance.findMany as any
-      ).mockResolvedValue(mockPerformances);
-      (
-        mockPrisma.contractPerformance.count as any
-      ).mockResolvedValue(1);
+      (mockPrisma.contractPerformance.findMany as any).mockResolvedValue(
+        mockPerformances
+      );
+      (mockPrisma.contractPerformance.count as any).mockResolvedValue(1);
 
       await contractPerformanceService.queryPerformances({
         milestoneStatus: 'COMPLETED' as any,
@@ -397,12 +404,8 @@ describe('ContractPerformanceService', () => {
       const startDate = new Date('2026-01-01');
       const endDate = new Date('2026-12-31');
 
-      (
-        mockPrisma.contractPerformance.findMany as any
-      ).mockResolvedValue([]);
-      (
-        mockPrisma.contractPerformance.count as any
-      ).mockResolvedValue(0);
+      (mockPrisma.contractPerformance.findMany as any).mockResolvedValue([]);
+      (mockPrisma.contractPerformance.count as any).mockResolvedValue(0);
 
       await contractPerformanceService.queryPerformances({
         startDate,
@@ -440,12 +443,11 @@ describe('ContractPerformanceService', () => {
         },
       ];
 
-      (
-        mockPrisma.contractPerformance.findMany as any
-      ).mockResolvedValue(mockPerformances);
+      (mockPrisma.contractPerformance.findMany as any).mockResolvedValue(
+        mockPerformances
+      );
 
-      const result =
-        await contractPerformanceService.getNodesForReminder();
+      const result = await contractPerformanceService.getNodesForReminder();
 
       expect(result).toHaveLength(1);
       expect(result[0].reminderSent).toBe(false);
@@ -460,9 +462,9 @@ describe('ContractPerformanceService', () => {
         reminderCount: 1,
       };
 
-      (
-        mockPrisma.contractPerformance.update as any
-      ).mockResolvedValue(mockUpdated);
+      (mockPrisma.contractPerformance.update as any).mockResolvedValue(
+        mockUpdated
+      );
 
       await contractPerformanceService.markReminderSent('perf-1');
 
@@ -503,9 +505,7 @@ describe('ReminderConfigService', () => {
         updatedAt: new Date(),
       };
 
-      (mockPrisma.reminderConfig.create as any).mockResolvedValue(
-        mockConfig
-      );
+      (mockPrisma.reminderConfig.create as any).mockResolvedValue(mockConfig);
 
       const input = {
         enterpriseId: 'enterprise-1',
@@ -543,9 +543,7 @@ describe('ReminderConfigService', () => {
         updatedAt: new Date(),
       };
 
-      (mockPrisma.reminderConfig.update as any).mockResolvedValue(
-        mockConfig
-      );
+      (mockPrisma.reminderConfig.update as any).mockResolvedValue(mockConfig);
 
       const result = await reminderConfigService.updateConfig('config-1', {
         enabled: false,
@@ -574,9 +572,8 @@ describe('ReminderConfigService', () => {
         mockConfigs
       );
 
-      const result = await reminderConfigService.getConfigsByEntity(
-        'enterprise-1'
-      );
+      const result =
+        await reminderConfigService.getConfigsByEntity('enterprise-1');
 
       expect(result).toHaveLength(2);
       expect(mockPrisma.reminderConfig.findMany).toHaveBeenCalledWith(

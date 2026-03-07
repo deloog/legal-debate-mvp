@@ -1,10 +1,6 @@
 import { logger } from '@/lib/logger';
 
-import type {
-  GraphNode,
-  GraphEdge,
-  GraphData,
-} from '../types';
+import type { GraphNode, GraphEdge, GraphData } from '../types';
 
 /**
  * GML格式化器
@@ -20,8 +16,12 @@ export class GMLFormatter {
     });
 
     const header = 'graph [\n  directed 1\n';
-    const nodesGml = graphData.nodes.map((node) => '  ' + this.formatNode(node)).join('\n');
-    const edgesGml = graphData.edges.map((edge) => '  ' + this.formatEdge(edge)).join('\n');
+    const nodesGml = graphData.nodes
+      .map(node => '  ' + this.formatNode(node))
+      .join('\n');
+    const edgesGml = graphData.edges
+      .map(edge => '  ' + this.formatEdge(edge))
+      .join('\n');
     const footer = ']';
 
     const gml = header + nodesGml + '\n' + edgesGml + '\n' + footer;
@@ -37,7 +37,7 @@ export class GMLFormatter {
    * 格式化节点
    */
   private formatNode(node: GraphNode): string {
-    const tags = node.tags.map((tag) => `"${tag}"`).join(' ');
+    const tags = node.tags.map(tag => `"${tag}"`).join(' ');
     const effectiveDate = node.effectiveDate.toISOString();
 
     return `node [

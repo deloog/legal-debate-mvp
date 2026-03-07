@@ -71,7 +71,10 @@ interface RiskThresholds {
 /**
  * 计算风险等级
  */
-function calculateRiskLevel(score: number, thresholds: RiskThresholds): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
+function calculateRiskLevel(
+  score: number,
+  thresholds: RiskThresholds
+): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
   if (score < thresholds.LOW) return 'LOW';
   if (score < thresholds.MEDIUM) return 'MEDIUM';
   if (score < thresholds.HIGH) return 'HIGH';
@@ -133,9 +136,12 @@ async function analyzeContractRisk(enterpriseId: string): Promise<{
   }
 
   // 计算合同风险分数 (0-100)
-  const score = totalContracts > 0
-    ? Math.round((highRisk * 80 + mediumRisk * 50 + lowRisk * 20) / totalContracts)
-    : 0;
+  const score =
+    totalContracts > 0
+      ? Math.round(
+          (highRisk * 80 + mediumRisk * 50 + lowRisk * 20) / totalContracts
+        )
+      : 0;
 
   return {
     score,
@@ -276,11 +282,12 @@ export const enterpriseRiskProfileService = {
       where: { industryCode: enterprise.industryType },
     });
 
-    const thresholds: RiskThresholds = (industryFeature?.riskThresholds as unknown as RiskThresholds) || {
-      LOW: 30,
-      MEDIUM: 60,
-      HIGH: 80,
-    };
+    const thresholds: RiskThresholds =
+      (industryFeature?.riskThresholds as unknown as RiskThresholds) || {
+        LOW: 30,
+        MEDIUM: 60,
+        HIGH: 80,
+      };
 
     // 分析各类风险
     const contractRisk = await analyzeContractRisk(enterpriseId);
@@ -290,8 +297,8 @@ export const enterpriseRiskProfileService = {
     // 计算综合风险分数 (加权平均)
     const overallScore = Math.round(
       contractRisk.score * 0.4 +
-      legalRisk.score * 0.3 +
-      complianceRisk.score * 0.3
+        legalRisk.score * 0.3 +
+        complianceRisk.score * 0.3
     );
 
     const riskLevel = calculateRiskLevel(overallScore, thresholds);
@@ -402,14 +409,17 @@ export const enterpriseRiskProfileService = {
   /**
    * 获取风险趋势
    */
-  async getRiskTrend(enterpriseId: string, limit: number = 6): Promise<RiskTrendPoint[]> {
+  async getRiskTrend(
+    enterpriseId: string,
+    limit: number = 6
+  ): Promise<RiskTrendPoint[]> {
     const profiles = await prisma.enterpriseRiskProfile.findMany({
       where: { enterpriseId },
       orderBy: { assessedAt: 'desc' },
       take: limit,
     });
 
-    return profiles.map((profile) => ({
+    return profiles.map(profile => ({
       assessedAt: profile.assessedAt,
       overallRiskScore: profile.overallRiskScore,
       riskLevel: profile.riskLevel,
@@ -438,7 +448,9 @@ export const enterpriseRiskProfileService = {
   /**
    * 批量分析企业风险
    */
-  async batchAnalyzeRisk(enterpriseIds: string[]): Promise<RiskAnalysisResult[]> {
+  async batchAnalyzeRisk(
+    enterpriseIds: string[]
+  ): Promise<RiskAnalysisResult[]> {
     const results: RiskAnalysisResult[] = [];
 
     for (const enterpriseId of enterpriseIds) {

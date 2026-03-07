@@ -121,7 +121,9 @@ export class LawStarClient {
       const data = await response.json();
 
       // 调试日志
-      logger.info('LawStar authentication response', { response: JSON.stringify(data) });
+      logger.info('LawStar authentication response', {
+        response: JSON.stringify(data),
+      });
 
       // 检查响应状态码 - 支持数字和字符串格式
       if (data.code !== 200 && data.code !== '200') {
@@ -417,7 +419,9 @@ export class LawStarClient {
       const cacheKey = this.generateCacheKey(type, request);
       return await cacheManager.get(cacheKey);
     } catch (error) {
-      logger.warn('Cache get failed', { error: error instanceof Error ? error.message : String(error) });
+      logger.warn('Cache get failed', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   }
@@ -435,7 +439,9 @@ export class LawStarClient {
       const ttl = this.config.cache?.ttl || 3600;
       await cacheManager.set(cacheKey, response, { ttl });
     } catch (error) {
-      logger.warn('Cache set failed', { error: error instanceof Error ? error.message : String(error) });
+      logger.warn('Cache set failed', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 

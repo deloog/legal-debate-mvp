@@ -14,9 +14,9 @@ import { logger } from '@/lib/logger';
 
 /** 验证状态枚举 */
 export enum ValidationStatus {
-  VERIFIED = 'VERIFIED',      // 已验证通过
-  INVALID = 'INVALID',        // 验证无效（参数错误等）
-  UNVERIFIED = 'UNVERIFIED',  // 未经核实（法条不存在）
+  VERIFIED = 'VERIFIED', // 已验证通过
+  INVALID = 'INVALID', // 验证无效（参数错误等）
+  UNVERIFIED = 'UNVERIFIED', // 未经核实（法条不存在）
 }
 
 /** 验证结果类型 */
@@ -90,7 +90,9 @@ export class LawReferenceValidator {
   /**
    * 验证单个法条引用
    */
-  async validateReference(reference: LegalReference): Promise<ValidationResult> {
+  async validateReference(
+    reference: LegalReference
+  ): Promise<ValidationResult> {
     const startTime = Date.now();
     const result: ValidationResult = {
       isValid: false,
@@ -109,7 +111,9 @@ export class LawReferenceValidator {
       if (!reference.articleNumber || reference.articleNumber.trim() === '') {
         result.errorMessage = '法条编号不能为空';
         result.validationStatus = ValidationStatus.INVALID;
-        logger.warn('法条引用验证失败：法条编号为空', { referenceId: reference.id });
+        logger.warn('法条引用验证失败：法条编号为空', {
+          referenceId: reference.id,
+        });
         return result;
       }
 
@@ -192,7 +196,9 @@ export class LawReferenceValidator {
   /**
    * 批量验证多个法条引用
    */
-  async validateReferences(references: LegalReference[]): Promise<ValidationResult[]> {
+  async validateReferences(
+    references: LegalReference[]
+  ): Promise<ValidationResult[]> {
     const results: ValidationResult[] = [];
 
     for (const reference of references) {
@@ -206,7 +212,9 @@ export class LawReferenceValidator {
   /**
    * 获取批量验证统计信息
    */
-  async getValidationStats(references: LegalReference[]): Promise<ValidationStats> {
+  async getValidationStats(
+    references: LegalReference[]
+  ): Promise<ValidationStats> {
     const results = await this.validateReferences(references);
 
     const stats: ValidationStats = {
@@ -218,7 +226,10 @@ export class LawReferenceValidator {
     };
 
     for (const result of results) {
-      if (result.validationStatus === ValidationStatus.VERIFIED && result.isValid) {
+      if (
+        result.validationStatus === ValidationStatus.VERIFIED &&
+        result.isValid
+      ) {
         stats.valid++;
       } else if (result.validationStatus === ValidationStatus.UNVERIFIED) {
         stats.unverified++;
@@ -227,7 +238,8 @@ export class LawReferenceValidator {
       }
     }
 
-    stats.verificationRate = stats.total > 0 ? (stats.valid / stats.total) * 100 : 0;
+    stats.verificationRate =
+      stats.total > 0 ? (stats.valid / stats.total) * 100 : 0;
 
     return stats;
   }
@@ -235,7 +247,9 @@ export class LawReferenceValidator {
   /**
    * 查找法条
    */
-  private async findLawArticle(reference: LegalReference): Promise<LawArticle | null> {
+  private async findLawArticle(
+    reference: LegalReference
+  ): Promise<LawArticle | null> {
     const query: LawArticleQueryParams = {};
 
     if (reference.articleNumber) {
@@ -273,7 +287,10 @@ export class LawReferenceValidator {
   /**
    * 验证法条效力状态
    */
-  private validateLawStatus(article: LawArticle): { isValid: boolean; errorMessage: string | null } {
+  private validateLawStatus(article: LawArticle): {
+    isValid: boolean;
+    errorMessage: string | null;
+  } {
     switch (article.status) {
       case LawStatus.VALID:
         return { isValid: true, errorMessage: null };
@@ -333,8 +350,12 @@ export class LawReferenceValidator {
     }
 
     // 计算相似度
-    const similarity = this.calculateSimilarity(referenceContent, articleContent);
-    const isMatch = similarity >= (this.options.contentSimilarityThreshold || 0.5);
+    const similarity = this.calculateSimilarity(
+      referenceContent,
+      articleContent
+    );
+    const isMatch =
+      similarity >= (this.options.contentSimilarityThreshold || 0.5);
 
     return {
       score: similarity,
@@ -377,7 +398,10 @@ export class LawReferenceValidator {
     const jaccardSimilarity = intersection.size / union.size;
 
     // 结合基于子字符串的相似度
-    const substringSimilarity = this.calculateSubstringSimilarity(normalized1, normalized2);
+    const substringSimilarity = this.calculateSubstringSimilarity(
+      normalized1,
+      normalized2
+    );
 
     // 综合相似度：70%子字符串相似度 + 30%字符集相似度
     return substringSimilarity * 0.7 + jaccardSimilarity * 0.3;

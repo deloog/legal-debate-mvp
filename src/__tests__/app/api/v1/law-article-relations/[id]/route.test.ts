@@ -82,7 +82,9 @@ describe('/api/v1/law-article-relations/[id]', () => {
     });
 
     it('应该拒绝权限不足的删除请求', async () => {
-      const { checkKnowledgeGraphPermission } = require('@/lib/middleware/knowledge-graph-permission');
+      const {
+        checkKnowledgeGraphPermission,
+      } = require('@/lib/middleware/knowledge-graph-permission');
       (checkKnowledgeGraphPermission as jest.Mock).mockResolvedValue({
         hasPermission: false,
         reason: '权限不足',
@@ -120,7 +122,9 @@ describe('/api/v1/law-article-relations/[id]', () => {
       const { params } = { params: { id: 'relation-1' } };
       await DELETE(request as any, params as any);
 
-      const { logKnowledgeGraphAction } = require('@/lib/middleware/knowledge-graph-permission');
+      const {
+        logKnowledgeGraphAction,
+      } = require('@/lib/middleware/knowledge-graph-permission');
       expect(logKnowledgeGraphAction).toHaveBeenCalledWith({
         userId: 'user-123',
         action: 'MANAGE_RELATIONS',
@@ -333,7 +337,9 @@ describe('/api/v1/law-article-relations/[id]', () => {
     });
 
     it('应该拒绝权限不足的验证请求', async () => {
-      const { checkKnowledgeGraphPermission } = require('@/lib/middleware/knowledge-graph-permission');
+      const {
+        checkKnowledgeGraphPermission,
+      } = require('@/lib/middleware/knowledge-graph-permission');
       (checkKnowledgeGraphPermission as jest.Mock).mockResolvedValue({
         hasPermission: false,
         reason: '权限不足',
@@ -379,7 +385,9 @@ describe('/api/v1/law-article-relations/[id]', () => {
       const { params } = { params: { id: 'relation-1' } };
       await POST(request as any, params as any);
 
-      const { logKnowledgeGraphAction } = require('@/lib/middleware/knowledge-graph-permission');
+      const {
+        logKnowledgeGraphAction,
+      } = require('@/lib/middleware/knowledge-graph-permission');
       expect(logKnowledgeGraphAction).toHaveBeenCalledWith({
         userId: 'admin-123',
         action: 'VERIFY_RELATION',
@@ -396,7 +404,9 @@ describe('/api/v1/law-article-relations/[id]', () => {
     });
 
     it('应该处理关系不存在的情况', async () => {
-      (prisma.lawArticleRelation.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.lawArticleRelation.findUnique as jest.Mock).mockResolvedValue(
+        null
+      );
 
       const request = new Request(
         'http://localhost:3000/api/v1/law-article-relations/relation-1',
@@ -444,7 +454,9 @@ describe('/api/v1/law-article-relations/[id]', () => {
     });
 
     it('应该在日志记录失败时不影响主流程', async () => {
-      const { logKnowledgeGraphAction } = require('@/lib/middleware/knowledge-graph-permission');
+      const {
+        logKnowledgeGraphAction,
+      } = require('@/lib/middleware/knowledge-graph-permission');
       (logKnowledgeGraphAction as jest.Mock).mockRejectedValue(
         new Error('日志记录失败')
       );

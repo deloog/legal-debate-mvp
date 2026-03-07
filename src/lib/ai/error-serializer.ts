@@ -131,7 +131,9 @@ export class AIErrorSerializer {
 
       // 验证版本兼容性
       if (parsed.version !== this.VERSION) {
-        logger.warn(`Error serialization version mismatch: expected ${this.VERSION}, got ${parsed.version}`);
+        logger.warn(
+          `Error serialization version mismatch: expected ${this.VERSION}, got ${parsed.version}`
+        );
       }
 
       return parsed as SerializedError;
@@ -359,7 +361,10 @@ export class AIErrorSerializer {
 
     // 清理详情中的敏感信息
     if (sanitized.details) {
-      sanitized.details = this.sanitizeObject(sanitized.details) as Record<string, unknown>;
+      sanitized.details = this.sanitizeObject(sanitized.details) as Record<
+        string,
+        unknown
+      >;
     }
 
     return sanitized;

@@ -12,7 +12,10 @@ import {
   KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
 import { QualityScoreService } from '@/lib/knowledge-graph/quality-score/quality-score-service';
-import { LowQualityRelationsInput, QualityLevel } from '@/lib/knowledge-graph/quality-score/types';
+import {
+  LowQualityRelationsInput,
+  QualityLevel,
+} from '@/lib/knowledge-graph/quality-score/types';
 
 /**
  * GET /api/v1/knowledge-graph/quality-score/low-quality
@@ -41,7 +44,8 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const input: LowQualityRelationsInput = {
-      qualityLevel: (searchParams.get('qualityLevel') as QualityLevel | null) ?? 'low',
+      qualityLevel:
+        (searchParams.get('qualityLevel') as QualityLevel | null) ?? 'low',
       limit: parseInt(searchParams.get('limit') || '10', 10),
       offset: parseInt(searchParams.get('offset') || '0', 10),
     };

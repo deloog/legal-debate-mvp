@@ -1,10 +1,6 @@
 import { logger } from '@/lib/logger';
 
-import type {
-  GraphNode,
-  GraphEdge,
-  GraphData,
-} from '../types';
+import type { GraphNode, GraphEdge, GraphData } from '../types';
 
 /**
  * JSON-LD格式化器
@@ -21,7 +17,10 @@ export class JsonLdFormatter {
 
     const jsonLd = {
       '@context': this.createContext(),
-      '@graph': [...graphData.nodes.map((node) => this.formatNode(node)), ...graphData.edges.map((edge) => this.formatEdge(edge))],
+      '@graph': [
+        ...graphData.nodes.map(node => this.formatNode(node)),
+        ...graphData.edges.map(edge => this.formatEdge(edge)),
+      ],
       exportedAt: graphData.exportedAt.toISOString(),
     };
 

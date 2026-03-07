@@ -66,7 +66,9 @@ describe('ApprovalAnalyticsDashboard', () => {
       render(<ApprovalAnalyticsDashboard analytics={mockAnalytics} />);
 
       expect(screen.getByTestId('stat-total-approvals')).toBeInTheDocument();
-      expect(screen.getByTestId('stat-completed-approvals')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('stat-completed-approvals')
+      ).toBeInTheDocument();
       expect(screen.getByTestId('stat-pass-rate')).toBeInTheDocument();
       expect(screen.getByTestId('stat-avg-time')).toBeInTheDocument();
     });
@@ -145,9 +147,10 @@ describe('ApprovalAnalyticsDashboard', () => {
     it('应该标识高严重程度的瓶颈', () => {
       render(<ApprovalAnalyticsDashboard analytics={mockAnalytics} />);
 
-      expect(
-        screen.getByTestId('bottleneck-severity-总经理')
-      ).toHaveAttribute('data-severity', 'high');
+      expect(screen.getByTestId('bottleneck-severity-总经理')).toHaveAttribute(
+        'data-severity',
+        'high'
+      );
     });
 
     it('当没有瓶颈时应该显示正向信息', () => {
@@ -156,9 +159,7 @@ describe('ApprovalAnalyticsDashboard', () => {
         bottlenecks: [],
       };
 
-      render(
-        <ApprovalAnalyticsDashboard analytics={noBottleneckAnalytics} />
-      );
+      render(<ApprovalAnalyticsDashboard analytics={noBottleneckAnalytics} />);
 
       expect(screen.getByTestId('no-bottleneck-message')).toBeInTheDocument();
     });
@@ -176,12 +177,8 @@ describe('ApprovalAnalyticsDashboard', () => {
     it('应该显示所有优化建议', () => {
       render(<ApprovalAnalyticsDashboard analytics={mockAnalytics} />);
 
-      expect(
-        screen.getByText(/【审批瓶颈】总经理/)
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/【效率优化】/)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/【审批瓶颈】总经理/)).toBeInTheDocument();
+      expect(screen.getByText(/【效率优化】/)).toBeInTheDocument();
     });
 
     it('当没有建议时应该显示提示信息', () => {
@@ -190,9 +187,7 @@ describe('ApprovalAnalyticsDashboard', () => {
         suggestions: [],
       };
 
-      render(
-        <ApprovalAnalyticsDashboard analytics={noSuggestionsAnalytics} />
-      );
+      render(<ApprovalAnalyticsDashboard analytics={noSuggestionsAnalytics} />);
 
       expect(screen.getByTestId('no-suggestions-message')).toBeInTheDocument();
     });

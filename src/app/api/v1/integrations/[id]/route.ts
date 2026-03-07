@@ -82,7 +82,9 @@ export async function PUT(
       authToken: body.authToken,
       apiKey: body.apiKey,
       refreshToken: body.refreshToken,
-      tokenExpiresAt: body.tokenExpiresAt ? new Date(body.tokenExpiresAt) : undefined,
+      tokenExpiresAt: body.tokenExpiresAt
+        ? new Date(body.tokenExpiresAt)
+        : undefined,
       syncConfig: body.syncConfig,
       syncEnabled: body.syncEnabled,
       syncInterval: body.syncInterval,

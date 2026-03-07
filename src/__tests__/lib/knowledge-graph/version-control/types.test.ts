@@ -1,6 +1,6 @@
 /**
  * 知识图谱版本控制 - 类型定义测试
- * 
+ *
  * 测试范围：
  * - SnapshotVersion 枚举
  * - SnapshotStatus 枚举
@@ -36,8 +36,13 @@ describe('Version Control Types', () => {
     });
 
     it('应该支持所有版本类型的字符串值', () => {
-      const versions = [SnapshotVersion.DAILY, SnapshotVersion.WEEKLY, SnapshotVersion.MONTHLY, SnapshotVersion.MANUAL];
-      versions.forEach((version) => {
+      const versions = [
+        SnapshotVersion.DAILY,
+        SnapshotVersion.WEEKLY,
+        SnapshotVersion.MONTHLY,
+        SnapshotVersion.MANUAL,
+      ];
+      versions.forEach(version => {
         expect(Object.values(SnapshotVersion)).toContain(version);
       });
     });
@@ -52,7 +57,7 @@ describe('Version Control Types', () => {
 
     it('应该支持所有状态类型的字符串值', () => {
       const statuses: SnapshotStatus[] = ['COMPLETED', 'IN_PROGRESS', 'FAILED'];
-      statuses.forEach((status) => {
+      statuses.forEach(status => {
         expect(Object.values(SnapshotStatus)).toContain(status);
       });
     });
@@ -95,7 +100,7 @@ describe('Version Control Types', () => {
           totalRelations: 4000,
           verifiedRelations: 3500,
           pendingRelations: 500,
-          averageConfidence: 0.80,
+          averageConfidence: 0.8,
         },
         status: 'COMPLETED',
         createdAt: new Date(),
@@ -351,7 +356,7 @@ describe('Version Control Types', () => {
           totalRelations: 4500,
           verifiedRelations: 4000,
           pendingRelations: 500,
-          averageConfidence: 0.80,
+          averageConfidence: 0.8,
         },
         status: 'COMPLETED',
         createdAt: new Date(),

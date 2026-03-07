@@ -36,11 +36,21 @@ describe('GraphDatabaseEvaluation Types', () => {
     });
 
     it('应该包含基准测试操作列表', () => {
-      expect(DEFAULT_EVALUATION_CONFIG.benchmarkOperations).toContain('shortestPath');
-      expect(DEFAULT_EVALUATION_CONFIG.benchmarkOperations).toContain('pageRank');
-      expect(DEFAULT_EVALUATION_CONFIG.benchmarkOperations).toContain('connectedComponents');
-      expect(DEFAULT_EVALUATION_CONFIG.benchmarkOperations).toContain('neighbors');
-      expect(DEFAULT_EVALUATION_CONFIG.benchmarkOperations).toContain('batchQuery');
+      expect(DEFAULT_EVALUATION_CONFIG.benchmarkOperations).toContain(
+        'shortestPath'
+      );
+      expect(DEFAULT_EVALUATION_CONFIG.benchmarkOperations).toContain(
+        'pageRank'
+      );
+      expect(DEFAULT_EVALUATION_CONFIG.benchmarkOperations).toContain(
+        'connectedComponents'
+      );
+      expect(DEFAULT_EVALUATION_CONFIG.benchmarkOperations).toContain(
+        'neighbors'
+      );
+      expect(DEFAULT_EVALUATION_CONFIG.benchmarkOperations).toContain(
+        'batchQuery'
+      );
     });
   });
 

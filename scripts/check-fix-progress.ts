@@ -18,7 +18,9 @@ async function main() {
     .sort((a, b) => b._count - a._count)
     .forEach(stat => {
       const percentage = ((stat._count / total) * 100).toFixed(1);
-      console.log(`  ${stat.category.padEnd(25)} ${stat._count.toString().padStart(7)} (${percentage}%)`);
+      console.log(
+        `  ${stat.category.padEnd(25)} ${stat._count.toString().padStart(7)} (${percentage}%)`
+      );
     });
 
   console.log(`\n总计: ${total} 条`);

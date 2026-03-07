@@ -54,31 +54,31 @@ export interface BenchmarkResult {
   name: string;
   type: BenchmarkQueryType;
   query: string;
-  
+
   // 时间指标
   meanTime: number; // 平均时间（毫秒）
   minTime: number; // 最小时间（毫秒）
   maxTime: number; // 最大时间（毫秒）
   medianTime: number; // 中位数时间（毫秒）
   stdDev: number; // 标准差（毫秒）
-  
+
   // 百分位数
   p50?: number;
   p90?: number;
   p95?: number;
   p99?: number;
-  
+
   // 执行信息
   totalRuns: number; // 总运行次数
   successRuns: number; // 成功运行次数
   failedRuns: number; // 失败运行次数
-  
+
   // 结果信息
   avgResultCount: number; // 平均返回结果数量
-  
+
   // 详细运行记录
   detailedRuns?: SingleRunResult[];
-  
+
   // 时间戳
   timestamp: string;
 }
@@ -100,7 +100,10 @@ export interface BenchmarkConfig {
  * 抽象接口，支持多种图数据库
  */
 export interface GraphDatabaseConnection {
-  executeQuery(query: string, params?: Record<string, unknown>): Promise<{
+  executeQuery(
+    query: string,
+    params?: Record<string, unknown>
+  ): Promise<{
     records: Array<Record<string, unknown>>;
     resultAvailableAfter: number;
   }>;
@@ -191,7 +194,9 @@ export class BenchmarkRunner {
         runResults.push(result);
 
         if (config.verbose) {
-          console.log(`  运行 ${i + 1}/${config.benchmarkRuns}: ${result.time}ms`);
+          console.log(
+            `  运行 ${i + 1}/${config.benchmarkRuns}: ${result.time}ms`
+          );
         }
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
@@ -205,7 +210,7 @@ export class BenchmarkRunner {
 
     // 计算统计指标
     const successfulRuns = runResults.filter(r => !r.error);
-    
+
     // 如果所有运行都失败，抛出最后一个错误
     if (successfulRuns.length === 0 && lastError) {
       throw lastError;
@@ -239,7 +244,10 @@ export class BenchmarkRunner {
   /**
    * 预热运行
    */
-  private async runWarmup(query: BenchmarkQuery, warmupRuns: number): Promise<void> {
+  private async runWarmup(
+    query: BenchmarkQuery,
+    warmupRuns: number
+  ): Promise<void> {
     for (let i = 0; i < warmupRuns; i++) {
       try {
         await this.runSingleQuery(query, 5000); // 5秒超时
@@ -391,7 +399,10 @@ export class BenchmarkRunner {
   /**
    * 比较两个基准测试结果
    */
-  compareResults(result1: BenchmarkResult, result2: BenchmarkResult): {
+  compareResults(
+    result1: BenchmarkResult,
+    result2: BenchmarkResult
+  ): {
     speedup: number;
     improvement: string;
   } {
@@ -400,9 +411,8 @@ export class BenchmarkRunner {
     }
 
     const speedup = result2.meanTime / result1.meanTime;
-    const improvement = speedup > 1
-      ? `快 ${(speedup - 1) * 100}%`
-      : `慢 ${(1 - speedup) * 100}%`;
+    const improvement =
+      speedup > 1 ? `快 ${(speedup - 1) * 100}%` : `慢 ${(1 - speedup) * 100}%`;
 
     return { speedup, improvement };
   }

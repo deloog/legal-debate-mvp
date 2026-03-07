@@ -162,7 +162,10 @@ describe('屏幕阅读器工具', () => {
     it('应该能够调用announceNodeSelection', () => {
       // 测试函数存在且可以被调用
       expect(() => {
-        announceNodeSelection({ lawName: '民法典', articleNumber: '123' } as GraphNode);
+        announceNodeSelection({
+          lawName: '民法典',
+          articleNumber: '123',
+        } as GraphNode);
       }).not.toThrow();
     });
   });

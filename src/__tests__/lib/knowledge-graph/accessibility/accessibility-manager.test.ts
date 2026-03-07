@@ -8,7 +8,10 @@
 
 import { AccessibilityManager } from '@/lib/knowledge-graph/accessibility/accessibility-manager';
 import { GraphNode, GraphLink } from '@/lib/law-article/graph-builder';
-import { AccessibilityMode, ColorBlindType } from '@/lib/knowledge-graph/accessibility/types';
+import {
+  AccessibilityMode,
+  ColorBlindType,
+} from '@/lib/knowledge-graph/accessibility/types';
 
 describe('可访问性管理器', () => {
   let manager: AccessibilityManager;
@@ -18,12 +21,30 @@ describe('可访问性管理器', () => {
 
   beforeEach(() => {
     mockNodes = [
-      { id: 'node-1', lawName: '民法典', articleNumber: '123', category: 'CIVIL', level: 0 },
-      { id: 'node-2', lawName: '刑法', articleNumber: '456', category: 'CRIMINAL', level: 1 },
+      {
+        id: 'node-1',
+        lawName: '民法典',
+        articleNumber: '123',
+        category: 'CIVIL',
+        level: 0,
+      },
+      {
+        id: 'node-2',
+        lawName: '刑法',
+        articleNumber: '456',
+        category: 'CRIMINAL',
+        level: 1,
+      },
     ];
 
     mockLinks = [
-      { source: 'node-1', target: 'node-2', relationType: 'CITES', strength: 0.8, confidence: 0.9 },
+      {
+        source: 'node-1',
+        target: 'node-2',
+        relationType: 'CITES',
+        strength: 0.8,
+        confidence: 0.9,
+      },
     ];
 
     mockHandlers = {
@@ -72,7 +93,9 @@ describe('可访问性管理器', () => {
     it('应该能够设置色盲类型', () => {
       manager.setMode(AccessibilityMode.COLOR_BLIND);
       manager.setColorBlindType(ColorBlindType.PROTANOPIA);
-      expect(manager.getConfig().colorBlindType).toBe(ColorBlindType.PROTANOPIA);
+      expect(manager.getConfig().colorBlindType).toBe(
+        ColorBlindType.PROTANOPIA
+      );
     });
 
     it('应该能够设置高对比度', () => {
@@ -126,7 +149,11 @@ describe('可访问性管理器', () => {
     });
 
     it('应该生成连线ARIA属性', () => {
-      const props = manager.getLinkAriaProps(mockLinks[0], mockNodes[0], mockNodes[1]);
+      const props = manager.getLinkAriaProps(
+        mockLinks[0],
+        mockNodes[0],
+        mockNodes[1]
+      );
       expect(props).toHaveProperty('aria-label');
       expect(props).toHaveProperty('role', 'presentation');
     });
@@ -200,7 +227,13 @@ describe('可访问性管理器', () => {
   describe('图谱数据更新', () => {
     it('应该能够更新节点', () => {
       const newNodes = [
-        { id: 'node-3', lawName: '新法', articleNumber: '1', category: 'CIVIL', level: 0 },
+        {
+          id: 'node-3',
+          lawName: '新法',
+          articleNumber: '1',
+          category: 'CIVIL',
+          level: 0,
+        },
       ];
       manager.updateNodes(newNodes);
       expect(() => manager.updateNodes(newNodes)).not.toThrow();
@@ -208,7 +241,13 @@ describe('可访问性管理器', () => {
 
     it('应该能够更新连线', () => {
       const newLinks = [
-        { source: 'node-3', target: 'node-4', relationType: 'CITES', strength: 0.5, confidence: 0.6 },
+        {
+          source: 'node-3',
+          target: 'node-4',
+          relationType: 'CITES',
+          strength: 0.5,
+          confidence: 0.6,
+        },
       ];
       manager.updateLinks(newLinks);
       expect(() => manager.updateLinks(newLinks)).not.toThrow();
@@ -242,14 +281,16 @@ describe('可访问性管理器', () => {
       const palette1 = manager.getPalette();
       manager.setMode(AccessibilityMode.HIGH_CONTRAST);
       const palette2 = manager.getPalette();
-      
+
       expect(palette1.backgroundColor).not.toBe(palette2.backgroundColor);
     });
 
     it('切换到色盲模式应该保留色盲类型', () => {
       manager.setColorBlindType(ColorBlindType.PROTANOPIA);
       manager.setMode(AccessibilityMode.COLOR_BLIND);
-      expect(manager.getConfig().colorBlindType).toBe(ColorBlindType.PROTANOPIA);
+      expect(manager.getConfig().colorBlindType).toBe(
+        ColorBlindType.PROTANOPIA
+      );
     });
   });
 
@@ -268,7 +309,9 @@ describe('可访问性管理器', () => {
 
   describe('错误处理', () => {
     it('应该处理无效的模式', () => {
-      expect(() => manager.setMode('invalid' as AccessibilityMode)).not.toThrow();
+      expect(() =>
+        manager.setMode('invalid' as AccessibilityMode)
+      ).not.toThrow();
     });
 
     it('应该处理无效的节点ID', () => {

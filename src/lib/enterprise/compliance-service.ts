@@ -6,7 +6,12 @@
 
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
-import type { ComplianceRuleType, ComplianceRuleSource, ComplianceCheckResult, Prisma } from '@prisma/client';
+import type {
+  ComplianceRuleType,
+  ComplianceRuleSource,
+  ComplianceCheckResult,
+  Prisma,
+} from '@prisma/client';
 
 // =============================================================================
 // 类型定义
@@ -89,7 +94,8 @@ export const complianceService = {
         expiryDate: input.expiryDate,
         businessProcesses: input.businessProcesses,
         controlPoints: input.controlPoints,
-        checklistItems: input.checklistItems as unknown as Prisma.InputJsonValue[],
+        checklistItems:
+          input.checklistItems as unknown as Prisma.InputJsonValue[],
       },
     });
 
@@ -104,12 +110,16 @@ export const complianceService = {
   /**
    * 更新合规规则
    */
-  async updateComplianceRule(id: string, data: Partial<CreateComplianceRuleInput>) {
+  async updateComplianceRule(
+    id: string,
+    data: Partial<CreateComplianceRuleInput>
+  ) {
     return prisma.complianceRule.update({
       where: { id },
       data: {
         ...data,
-        checklistItems: data.checklistItems as unknown as Prisma.InputJsonValue[],
+        checklistItems:
+          data.checklistItems as unknown as Prisma.InputJsonValue[],
         lastUpdated: new Date(),
       },
     });
@@ -175,11 +185,15 @@ export const complianceService = {
         ruleId: input.ruleId,
         checkDate: input.checkDate,
         checkResult: input.checkResult,
-        checklistResults: input.checklistResults as unknown as Prisma.InputJsonValue[],
-        nonCompliances: (input.nonCompliances ?? []) as unknown as Prisma.InputJsonValue[],
+        checklistResults:
+          input.checklistResults as unknown as Prisma.InputJsonValue[],
+        nonCompliances: (input.nonCompliances ??
+          []) as unknown as Prisma.InputJsonValue[],
         remediationPlan: input.remediationPlan,
         remediationDeadline: input.remediationDeadline,
-        remediationStatus: input.nonCompliances?.length ? 'pending' : 'completed',
+        remediationStatus: input.nonCompliances?.length
+          ? 'pending'
+          : 'completed',
         reviewerId: input.reviewerId,
         reviewerNotes: input.reviewerNotes,
       },
@@ -197,13 +211,18 @@ export const complianceService = {
   /**
    * 更新合规检查记录
    */
-  async updateComplianceCheck(id: string, data: Partial<CreateComplianceCheckInput>) {
+  async updateComplianceCheck(
+    id: string,
+    data: Partial<CreateComplianceCheckInput>
+  ) {
     return prisma.enterpriseComplianceCheck.update({
       where: { id },
       data: {
         ...data,
-        checklistResults: data.checklistResults as unknown as Prisma.InputJsonValue[],
-        nonCompliances: data.nonCompliances as unknown as Prisma.InputJsonValue[],
+        checklistResults:
+          data.checklistResults as unknown as Prisma.InputJsonValue[],
+        nonCompliances:
+          data.nonCompliances as unknown as Prisma.InputJsonValue[],
       },
     });
   },
@@ -232,7 +251,9 @@ export const complianceService = {
   /**
    * 获取合规统计数据
    */
-  async getComplianceStatistics(enterpriseId: string): Promise<ComplianceStatistics> {
+  async getComplianceStatistics(
+    enterpriseId: string
+  ): Promise<ComplianceStatistics> {
     const total = await prisma.enterpriseComplianceCheck.count({
       where: { enterpriseId },
     });

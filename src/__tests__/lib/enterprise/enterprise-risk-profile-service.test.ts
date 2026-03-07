@@ -105,9 +105,12 @@ describe('EnterpriseRiskProfileService', () => {
       };
 
       mockPrisma.enterpriseAccount.findUnique.mockResolvedValue(mockEnterprise);
-      mockPrisma.enterpriseRiskProfile.create.mockResolvedValue(mockRiskProfile);
+      mockPrisma.enterpriseRiskProfile.create.mockResolvedValue(
+        mockRiskProfile
+      );
 
-      const result = await enterpriseRiskProfileService.createRiskProfile(mockInput);
+      const result =
+        await enterpriseRiskProfileService.createRiskProfile(mockInput);
 
       expect(result).toEqual(mockRiskProfile);
       expect(mockPrisma.enterpriseRiskProfile.create).toHaveBeenCalled();
@@ -172,14 +175,18 @@ describe('EnterpriseRiskProfileService', () => {
       };
 
       mockPrisma.enterpriseAccount.findUnique.mockResolvedValue(mockEnterprise);
-      mockPrisma.industryRiskFeature.findUnique.mockResolvedValue(mockIndustryFeature);
+      mockPrisma.industryRiskFeature.findUnique.mockResolvedValue(
+        mockIndustryFeature
+      );
       mockPrisma.contract.findMany.mockResolvedValue(mockContracts);
       mockPrisma.contract.count.mockResolvedValue(2);
       mockPrisma.contractClauseRisk.count.mockResolvedValueOnce(1); // high
       mockPrisma.contractClauseRisk.count.mockResolvedValueOnce(1); // medium
       mockPrisma.contractClauseRisk.count.mockResolvedValueOnce(0); // low
       mockPrisma.case.count.mockResolvedValue(1);
-      mockPrisma.enterpriseRiskProfile.create.mockResolvedValue(mockRiskProfile);
+      mockPrisma.enterpriseRiskProfile.create.mockResolvedValue(
+        mockRiskProfile
+      );
 
       const result = await enterpriseRiskProfileService.analyzeRisk('ent-1');
 
@@ -207,7 +214,9 @@ describe('EnterpriseRiskProfileService', () => {
         riskLevel: 'MEDIUM',
       };
 
-      mockPrisma.enterpriseRiskProfile.findFirst.mockResolvedValue(mockRiskProfile);
+      mockPrisma.enterpriseRiskProfile.findFirst.mockResolvedValue(
+        mockRiskProfile
+      );
 
       const result = await enterpriseRiskProfileService.getRiskProfile('ent-1');
 
@@ -237,7 +246,10 @@ describe('EnterpriseRiskProfileService', () => {
 
       mockPrisma.enterpriseRiskProfile.findMany.mockResolvedValue(mockProfiles);
 
-      const result = await enterpriseRiskProfileService.getRiskTrend('ent-1', 3);
+      const result = await enterpriseRiskProfileService.getRiskTrend(
+        'ent-1',
+        3
+      );
 
       expect(result.length).toBe(3);
       expect(result[0].overallRiskScore).toBe(50);
@@ -253,9 +265,12 @@ describe('EnterpriseRiskProfileService', () => {
 
       mockPrisma.enterpriseRiskProfile.update.mockResolvedValue(mockUpdated);
 
-      const result = await enterpriseRiskProfileService.updateRiskProfile('profile-1', {
-        industryType: 'manufacturing',
-      });
+      const result = await enterpriseRiskProfileService.updateRiskProfile(
+        'profile-1',
+        {
+          industryType: 'manufacturing',
+        }
+      );
 
       expect(result.industryType).toBe('manufacturing');
     });
@@ -269,7 +284,8 @@ describe('EnterpriseRiskProfileService', () => {
 
       mockPrisma.enterpriseRiskProfile.delete.mockResolvedValue(mockDeleted);
 
-      const result = await enterpriseRiskProfileService.deleteRiskProfile('profile-1');
+      const result =
+        await enterpriseRiskProfileService.deleteRiskProfile('profile-1');
 
       expect(result.id).toBe('profile-1');
     });
@@ -295,9 +311,13 @@ describe('EnterpriseRiskProfileService', () => {
       mockPrisma.contract.findMany.mockResolvedValue([]);
       mockPrisma.case.count.mockResolvedValue(0);
       mockPrisma.enterpriseComplianceCheck.count.mockResolvedValue(0);
-      mockPrisma.enterpriseRiskProfile.create.mockResolvedValue(mockRiskProfile);
+      mockPrisma.enterpriseRiskProfile.create.mockResolvedValue(
+        mockRiskProfile
+      );
 
-      const result = await enterpriseRiskProfileService.batchAnalyzeRisk(['ent-1']);
+      const result = await enterpriseRiskProfileService.batchAnalyzeRisk([
+        'ent-1',
+      ]);
 
       expect(result.length).toBe(1);
     });
@@ -305,7 +325,9 @@ describe('EnterpriseRiskProfileService', () => {
     it('应该处理批量分析中的错误', async () => {
       mockPrisma.enterpriseAccount.findUnique.mockResolvedValue(null);
 
-      const result = await enterpriseRiskProfileService.batchAnalyzeRisk(['non-existent']);
+      const result = await enterpriseRiskProfileService.batchAnalyzeRisk([
+        'non-existent',
+      ]);
 
       expect(result.length).toBe(0);
     });

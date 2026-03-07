@@ -9,18 +9,26 @@ import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 
-type RecommendationFeedbackWithArticle = Prisma.RecommendationFeedbackGetPayload<{
-  include: { lawArticle: { select: { id: true; lawName: true; articleNumber: true } } };
-}>;
+type RecommendationFeedbackWithArticle =
+  Prisma.RecommendationFeedbackGetPayload<{
+    include: {
+      lawArticle: { select: { id: true; lawName: true; articleNumber: true } };
+    };
+  }>;
 
 type RelationFeedbackWithRelation = Prisma.RelationFeedbackGetPayload<{
   include: {
-    relation: { select: { id: true; sourceId: true; targetId: true; relationType: true } };
+    relation: {
+      select: { id: true; sourceId: true; targetId: true; relationType: true };
+    };
   };
 }>;
 
 // GroupBy result item shapes (matching Prisma's actual returned field names)
-type FeedbackTypeGroupItem = { feedbackType: string; _count: { feedbackType: number } };
+type FeedbackTypeGroupItem = {
+  feedbackType: string;
+  _count: { feedbackType: number };
+};
 type TrendGroupItem = { createdAt: Date; _count: { id: number } };
 
 /**
@@ -95,8 +103,14 @@ export async function GET(request: NextRequest) {
 
     // 根据类型选择数据表并获取统计数据（每个分支分别推断类型，避免 any）
     let total: number;
-    let byTypeFormatted: Array<{ feedbackType: string; count: number; percentage: number }>;
-    let recentFeedbacks: RecommendationFeedbackWithArticle[] | RelationFeedbackWithRelation[];
+    let byTypeFormatted: Array<{
+      feedbackType: string;
+      count: number;
+      percentage: number;
+    }>;
+    let recentFeedbacks:
+      | RecommendationFeedbackWithArticle[]
+      | RelationFeedbackWithRelation[];
 
     if (type === 'recommendation') {
       total = await prisma.recommendationFeedback.count({ where });
@@ -169,7 +183,9 @@ export async function GET(request: NextRequest) {
         count: number;
         percentage: number;
       }>;
-      recentFeedbacks: RecommendationFeedbackWithArticle[] | RelationFeedbackWithRelation[];
+      recentFeedbacks:
+        | RecommendationFeedbackWithArticle[]
+        | RelationFeedbackWithRelation[];
       trend?: Array<{ date: string; count: number }>;
     } = {
       total,

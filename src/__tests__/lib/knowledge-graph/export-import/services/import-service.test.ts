@@ -72,14 +72,24 @@ describe('ImportService', () => {
       };
 
       (mockPrisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(null);
-      (mockPrisma.lawArticleRelation.findUnique as jest.Mock).mockResolvedValue(null);
-      (mockPrisma.lawArticle.findUnique as jest.Mock).mockResolvedValue({ id: 'article-2' });
-
-      ((mockPrisma as any).$transaction as jest.Mock).mockImplementation(async (callback) => {
-        return callback(mockPrisma);
+      (mockPrisma.lawArticleRelation.findUnique as jest.Mock).mockResolvedValue(
+        null
+      );
+      (mockPrisma.lawArticle.findUnique as jest.Mock).mockResolvedValue({
+        id: 'article-2',
       });
 
-      const result = await importService.importData(mockPrisma, graphData, options);
+      ((mockPrisma as any).$transaction as jest.Mock).mockImplementation(
+        async callback => {
+          return callback(mockPrisma);
+        }
+      );
+
+      const result = await importService.importData(
+        mockPrisma,
+        graphData,
+        options
+      );
 
       expect(result.success).toBe(true);
       expect(result.importedNodes).toBe(1);
@@ -106,13 +116,19 @@ describe('ImportService', () => {
         validate: false,
       };
 
-      (mockPrisma.lawArticle.findUnique as jest.Mock).mockResolvedValue({ id: 'article-1' });
+      (mockPrisma.lawArticle.findUnique as jest.Mock).mockResolvedValue({
+        id: 'article-1',
+      });
 
-      mockPrisma.$transaction.mockImplementation(async (callback) => {
+      mockPrisma.$transaction.mockImplementation(async callback => {
         return callback(mockPrisma);
       });
 
-      const result = await importService.importData(mockPrisma, graphData, options);
+      const result = await importService.importData(
+        mockPrisma,
+        graphData,
+        options
+      );
 
       expect(result.importedNodes).toBe(1); // 仍然计数为导入成功
       expect(result.skippedEdges).toBe(0);
@@ -135,7 +151,7 @@ describe('ImportService', () => {
         validate: false,
       };
 
-      mockPrisma.$transaction.mockImplementation(async (callback) => {
+      mockPrisma.$transaction.mockImplementation(async callback => {
         return callback(mockPrisma);
       });
 
@@ -143,7 +159,11 @@ describe('ImportService', () => {
         new Error('数据库错误')
       );
 
-      const result = await importService.importData(mockPrisma, graphData, options);
+      const result = await importService.importData(
+        mockPrisma,
+        graphData,
+        options
+      );
 
       expect(result.success).toBe(false);
       expect(result.errors).toHaveLength(1);
@@ -215,9 +235,9 @@ describe('ImportService', () => {
     it('应该拒绝无效的数据格式', () => {
       const invalidData = null;
 
-      expect(() =>
-        (importService as any).validateData(invalidData)
-      ).toThrow('导入数据格式无效');
+      expect(() => (importService as any).validateData(invalidData)).toThrow(
+        '导入数据格式无效'
+      );
     });
 
     it('应该拒绝缺少nodes的数据', () => {
@@ -225,9 +245,9 @@ describe('ImportService', () => {
         edges: [],
       };
 
-      expect(() =>
-        (importService as any).validateData(invalidData)
-      ).toThrow('导入数据缺少nodes数组');
+      expect(() => (importService as any).validateData(invalidData)).toThrow(
+        '导入数据缺少nodes数组'
+      );
     });
 
     it('应该拒绝缺少edges的数据', () => {
@@ -235,9 +255,9 @@ describe('ImportService', () => {
         nodes: [],
       };
 
-      expect(() =>
-        (importService as any).validateData(invalidData)
-      ).toThrow('导入数据缺少edges数组');
+      expect(() => (importService as any).validateData(invalidData)).toThrow(
+        '导入数据缺少edges数组'
+      );
     });
 
     it('应该拒绝缺少id的节点', () => {
@@ -246,9 +266,9 @@ describe('ImportService', () => {
         edges: [],
       };
 
-      expect(() =>
-        (importService as any).validateData(invalidData)
-      ).toThrow('第1个节点缺少id');
+      expect(() => (importService as any).validateData(invalidData)).toThrow(
+        '第1个节点缺少id'
+      );
     });
 
     it('应该拒绝缺少id的边', () => {
@@ -257,9 +277,9 @@ describe('ImportService', () => {
         edges: [{ source: 'node-1', target: 'node-2' }],
       };
 
-      expect(() =>
-        (importService as any).validateData(invalidData)
-      ).toThrow('第1条边缺少id');
+      expect(() => (importService as any).validateData(invalidData)).toThrow(
+        '第1条边缺少id'
+      );
     });
   });
 });

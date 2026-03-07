@@ -21,7 +21,7 @@ export class ExportService {
    */
   async exportData(
     prisma: Prisma.TransactionClient | PrismaClient,
-    options: ExportOptions,
+    options: ExportOptions
   ): Promise<GraphData> {
     const startTime = Date.now();
 
@@ -75,7 +75,7 @@ export class ExportService {
       });
 
       // 转换为图节点
-      const nodes: GraphNode[] = articles.map((article) => ({
+      const nodes: GraphNode[] = articles.map(article => ({
         id: article.id,
         label: `${article.lawName} ${article.articleNumber}`,
         lawName: article.lawName,
@@ -89,7 +89,7 @@ export class ExportService {
       }));
 
       // 转换为图边
-      const edges: GraphEdge[] = relations.map((relation) => ({
+      const edges: GraphEdge[] = relations.map(relation => ({
         id: relation.id,
         source: relation.sourceId,
         target: relation.targetId,
@@ -158,7 +158,9 @@ export class ExportService {
   /**
    * 构建关系查询条件
    */
-  private buildRelationWhere(filter?: ExportFilterOptions): Prisma.LawArticleRelationWhereInput {
+  private buildRelationWhere(
+    filter?: ExportFilterOptions
+  ): Prisma.LawArticleRelationWhereInput {
     const where: Prisma.LawArticleRelationWhereInput = {};
 
     if (!filter) {
@@ -179,7 +181,18 @@ export class ExportService {
     // 关系类型过滤
     if (filter.relationTypes && filter.relationTypes.length > 0) {
       where.relationType = {
-        in: filter.relationTypes as unknown as ('CITES' | 'CITED_BY' | 'CONFLICTS' | 'COMPLETES' | 'COMPLETED_BY' | 'SUPERSEDES' | 'SUPERSEDED_BY' | 'IMPLEMENTS' | 'IMPLEMENTED_BY' | 'RELATED')[],
+        in: filter.relationTypes as unknown as (
+          | 'CITES'
+          | 'CITED_BY'
+          | 'CONFLICTS'
+          | 'COMPLETES'
+          | 'COMPLETED_BY'
+          | 'SUPERSEDES'
+          | 'SUPERSEDED_BY'
+          | 'IMPLEMENTS'
+          | 'IMPLEMENTED_BY'
+          | 'RELATED'
+        )[],
       };
     }
 
@@ -197,14 +210,23 @@ export class ExportService {
     // 验证状态过滤
     if (filter.verificationStatus && filter.verificationStatus.length > 0) {
       where.verificationStatus = {
-        in: filter.verificationStatus as unknown as ('PENDING' | 'VERIFIED' | 'REJECTED')[],
+        in: filter.verificationStatus as unknown as (
+          | 'PENDING'
+          | 'VERIFIED'
+          | 'REJECTED'
+        )[],
       };
     }
 
     // 发现方法过滤
     if (filter.discoveryMethod && filter.discoveryMethod.length > 0) {
       where.discoveryMethod = {
-        in: filter.discoveryMethod as unknown as ('MANUAL' | 'RULE_BASED' | 'AI_DETECTED' | 'CASE_DERIVED')[],
+        in: filter.discoveryMethod as unknown as (
+          | 'MANUAL'
+          | 'RULE_BASED'
+          | 'AI_DETECTED'
+          | 'CASE_DERIVED'
+        )[],
       };
     }
 
@@ -215,7 +237,10 @@ export class ExportService {
    * 生成导出文件名
    */
   generateFilename(format: ExportFormat): string {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[:.]/g, '-')
+      .slice(0, -5);
     const extension = this.getFileExtension(format);
     return `knowledge-graph-${timestamp}.${extension}`;
   }

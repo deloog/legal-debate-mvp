@@ -1,8 +1,8 @@
 /**
  * 合规规则服务 (ComplianceRuleService)
- * 
+ *
  * 提供合规规则的CRUD操作和查询功能
- * 
+ *
  * ## 功能列表
  * - 创建合规规则
  * - 查询合规规则（支持按类型/来源/状态/业务流程过滤）
@@ -10,17 +10,17 @@
  * - 删除合规规则
  * - 批量创建规则
  * - 获取规则统计信息
- * 
+ *
  * ## 关联模型
  * - ComplianceRule: 合规规则
  * - EnterpriseComplianceCheck: 企业合规检查记录
- * 
+ *
  * ## 使用示例
  * ```typescript
  * const service = new ComplianceRuleService(prisma);
  * const rules = await service.queryRules({ ruleType: 'REGULATORY', status: 'active' });
  * ```
- * 
+ *
  * @see docs/long-term-evolution-guide.md P0-8 建立合规规则库基础
  */
 
@@ -144,7 +144,9 @@ export class ComplianceRuleService {
   /**
    * 查询合规规则列表（支持分页和过滤）
    */
-  async queryRules(filter: ComplianceRuleFilter): Promise<PaginatedResult<ComplianceRule>> {
+  async queryRules(
+    filter: ComplianceRuleFilter
+  ): Promise<PaginatedResult<ComplianceRule>> {
     try {
       const page = filter.page || 1;
       const pageSize = filter.pageSize || 20;
@@ -175,7 +177,12 @@ export class ComplianceRuleService {
         where.OR = [
           { ruleName: { contains: filter.searchKeyword, mode: 'insensitive' } },
           { ruleCode: { contains: filter.searchKeyword, mode: 'insensitive' } },
-          { description: { contains: filter.searchKeyword, mode: 'insensitive' } },
+          {
+            description: {
+              contains: filter.searchKeyword,
+              mode: 'insensitive',
+            },
+          },
         ];
       }
 
@@ -218,10 +225,14 @@ export class ComplianceRuleService {
           ...(data.ruleType && { ruleType: data.ruleType }),
           ...(data.source && { source: data.source }),
           ...(data.sourceUrl !== undefined && { sourceUrl: data.sourceUrl }),
-          ...(data.description !== undefined && { description: data.description }),
+          ...(data.description !== undefined && {
+            description: data.description,
+          }),
           ...(data.effectiveDate && { effectiveDate: data.effectiveDate }),
           ...(data.expiryDate !== undefined && { expiryDate: data.expiryDate }),
-          ...(data.businessProcesses && { businessProcesses: data.businessProcesses }),
+          ...(data.businessProcesses && {
+            businessProcesses: data.businessProcesses,
+          }),
           ...(data.controlPoints && { controlPoints: data.controlPoints }),
           ...(data.checklistItems && { checklistItems: data.checklistItems }),
           ...(data.status && { status: data.status }),
@@ -304,7 +315,9 @@ export class ComplianceRuleService {
   /**
    * 批量创建合规规则
    */
-  async bulkCreateRules(dataList: ComplianceRuleData[]): Promise<ComplianceRule[]> {
+  async bulkCreateRules(
+    dataList: ComplianceRuleData[]
+  ): Promise<ComplianceRule[]> {
     try {
       const rules = await this.prisma.complianceRule.createManyAndReturn({
         data: dataList.map(data => ({
@@ -338,7 +351,9 @@ export class ComplianceRuleService {
   /**
    * 根据业务流程获取相关规则
    */
-  async getRulesByBusinessProcess(businessProcess: string): Promise<ComplianceRule[]> {
+  async getRulesByBusinessProcess(
+    businessProcess: string
+  ): Promise<ComplianceRule[]> {
     try {
       return await this.prisma.complianceRule.findMany({
         where: {

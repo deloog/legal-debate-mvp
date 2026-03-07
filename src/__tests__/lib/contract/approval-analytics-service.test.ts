@@ -384,7 +384,9 @@ describe('ApprovalAnalyticsService', () => {
 
       const suggestions = service.generateOptimizationSuggestions(analytics);
 
-      expect(suggestions.some(s => s.includes('通过率') || s.includes('标准'))).toBe(true);
+      expect(
+        suggestions.some(s => s.includes('通过率') || s.includes('标准'))
+      ).toBe(true);
     });
 
     it('应该在效率良好时给出正向反馈', () => {

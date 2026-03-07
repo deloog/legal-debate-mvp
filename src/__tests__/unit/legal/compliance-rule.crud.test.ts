@@ -1,4 +1,8 @@
-import { PrismaClient, ComplianceRuleType, ComplianceRuleSource } from '@prisma/client';
+import {
+  PrismaClient,
+  ComplianceRuleType,
+  ComplianceRuleSource,
+} from '@prisma/client';
 import { beforeEach, describe, expect, it, afterEach } from '@jest/globals';
 
 const prisma = new PrismaClient({
@@ -46,9 +50,11 @@ describe('ComplianceRule CRUD Operations', () => {
   afterEach(async () => {
     // 清理测试数据
     if (testRuleId) {
-      await prisma.complianceRule.delete({
-        where: { id: testRuleId },
-      }).catch(() => {});
+      await prisma.complianceRule
+        .delete({
+          where: { id: testRuleId },
+        })
+        .catch(() => {});
     }
   });
 

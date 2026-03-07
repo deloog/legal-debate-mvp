@@ -98,7 +98,10 @@ export async function GET() {
       where: {
         agentName: 'MemoryAgent',
         actionType: {
-          in: [ActionType.MIGRATE_WORKING_TO_HOT, ActionType.MIGRATE_HOT_TO_COLD],
+          in: [
+            ActionType.MIGRATE_WORKING_TO_HOT,
+            ActionType.MIGRATE_HOT_TO_COLD,
+          ],
         },
       },
       orderBy: {
@@ -145,7 +148,10 @@ export async function GET() {
         where: {
           agentName: 'MemoryAgent',
           actionType: {
-            in: [ActionType.MIGRATE_WORKING_TO_HOT, ActionType.MIGRATE_HOT_TO_COLD],
+            in: [
+              ActionType.MIGRATE_WORKING_TO_HOT,
+              ActionType.MIGRATE_HOT_TO_COLD,
+            ],
           },
           createdAt: {
             gte: dayStart,

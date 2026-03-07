@@ -10,7 +10,10 @@
 import { describe, it, expect } from '@jest/globals';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { AIAssessmentBadge, AIContentIndicator } from '../../../components/ai/AIAssessmentBadge';
+import {
+  AIAssessmentBadge,
+  AIContentIndicator,
+} from '../../../components/ai/AIAssessmentBadge';
 import type { AIAssessment } from '@/types/consultation';
 
 describe('AIAssessmentBadge 组件', () => {
@@ -53,7 +56,7 @@ describe('AIAssessmentBadge 组件', () => {
       <AIAssessmentBadge
         assessment={mockAssessment}
         showVerificationStatus
-        verificationStatus="verified"
+        verificationStatus='verified'
       />
     );
 
@@ -65,7 +68,7 @@ describe('AIAssessmentBadge 组件', () => {
       <AIAssessmentBadge
         assessment={mockAssessment}
         showVerificationStatus
-        verificationStatus="pending"
+        verificationStatus='pending'
       />
     );
 
@@ -77,7 +80,7 @@ describe('AIAssessmentBadge 组件', () => {
       <AIAssessmentBadge
         assessment={mockAssessment}
         showVerificationStatus
-        verificationStatus="rejected"
+        verificationStatus='rejected'
       />
     );
 
@@ -89,7 +92,7 @@ describe('AIAssessmentBadge 组件', () => {
       <AIAssessmentBadge
         assessment={mockAssessment}
         showSourceLink
-        sourceUrl="https://example.com/source"
+        sourceUrl='https://example.com/source'
       />
     );
 
@@ -105,25 +108,25 @@ describe('AIContentIndicator 组件', () => {
   });
 
   it('应该渲染指定内容类型的标识', () => {
-    render(<AIContentIndicator contentType="assessment" />);
+    render(<AIContentIndicator contentType='assessment' />);
 
     expect(screen.getByText(/AI评估/)).toBeInTheDocument();
   });
 
   it('应该渲染法律分析类型的标识', () => {
-    render(<AIContentIndicator contentType="legal_analysis" />);
+    render(<AIContentIndicator contentType='legal_analysis' />);
 
     expect(screen.getByText(/AI法律分析/)).toBeInTheDocument();
   });
 
   it('应该渲染文书生成类型的标识', () => {
-    render(<AIContentIndicator contentType="document" />);
+    render(<AIContentIndicator contentType='document' />);
 
     expect(screen.getByText(/AI文书生成/)).toBeInTheDocument();
   });
 
   it('应该渲染法条推荐类型的标识', () => {
-    render(<AIContentIndicator contentType="recommendation" />);
+    render(<AIContentIndicator contentType='recommendation' />);
 
     expect(screen.getByText(/AI推荐/)).toBeInTheDocument();
   });
@@ -151,7 +154,10 @@ describe('AIContentIndicator 组件', () => {
 
   it('应该显示验证状态徽章', () => {
     render(
-      <AIContentIndicator verificationStatus="verified" showVerificationStatus />
+      <AIContentIndicator
+        verificationStatus='verified'
+        showVerificationStatus
+      />
     );
 
     expect(screen.getByText(/已验证/)).toBeInTheDocument();
@@ -159,7 +165,7 @@ describe('AIContentIndicator 组件', () => {
 
   it('应该支持自定义类名', () => {
     const { container } = render(
-      <AIContentIndicator className="custom-indicator" />
+      <AIContentIndicator className='custom-indicator' />
     );
 
     expect(container.firstChild).toHaveClass('custom-indicator');

@@ -301,7 +301,10 @@ describe('EvaluationReportGenerator', () => {
         },
       ];
 
-      const report = reportGenerator.generateReport(highPerfResults, testConfig);
+      const report = reportGenerator.generateReport(
+        highPerfResults,
+        testConfig
+      );
 
       expect(report.metrics.avgQueryTime).toBeLessThan(20);
       expect(report.metrics.successRate).toBe(100);
@@ -361,7 +364,10 @@ describe('EvaluationReportGenerator', () => {
         },
       ];
 
-      const report = reportGenerator.generateReport(excellentResults, testConfig);
+      const report = reportGenerator.generateReport(
+        excellentResults,
+        testConfig
+      );
       const markdown = reportGenerator.generateMarkdownReport(report);
 
       // 验证性能指标优秀

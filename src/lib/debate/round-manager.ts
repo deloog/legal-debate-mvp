@@ -190,7 +190,9 @@ export async function startNewRound(
     throw new Error(`辩论 ${debateId} 不存在`);
   }
 
-  const debateConfig = debate.debateConfig as unknown as { maxRounds?: number } | null;
+  const debateConfig = debate.debateConfig as unknown as {
+    maxRounds?: number;
+  } | null;
   const maxRounds = debateConfig?.maxRounds ?? 3;
   if (roundNumber > maxRounds) {
     throw new Error(`轮次 ${roundNumber} 超过最大限制 ${maxRounds}`);

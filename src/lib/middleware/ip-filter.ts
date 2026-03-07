@@ -239,7 +239,9 @@ class IPFilter {
     }
 
     if (cleanedCount > 0 && process.env.NODE_ENV === 'development') {
-      logger.info('[IPFilter] Cleaned up expired blacklist entries', { cleanedCount });
+      logger.info('[IPFilter] Cleaned up expired blacklist entries', {
+        cleanedCount,
+      });
     }
   }
 

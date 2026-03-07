@@ -15,7 +15,9 @@ export interface IDocumentParser {
 
 export interface IAmountExtractor {
   extractWithPrecision(text: string): Promise<AmountExtractionResult[]>;
-  validateAmountConsistency(amounts: AmountExtractionResult[]): AmountValidationResult;
+  validateAmountConsistency(
+    amounts: AmountExtractionResult[]
+  ): AmountValidationResult;
 }
 
 export interface AppConfig {

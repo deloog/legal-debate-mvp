@@ -6,7 +6,6 @@
 
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
-import type { ExecutiveReportType } from '@prisma/client';
 
 // =============================================================================
 // 类型定义
@@ -33,7 +32,10 @@ export const executiveReportService = {
   /**
    * 创建风险概览报表
    */
-  async createRiskOverviewReport(enterpriseId: string, params: CreateReportParams) {
+  async createRiskOverviewReport(
+    enterpriseId: string,
+    params: CreateReportParams
+  ) {
     // 验证企业存在
     const enterprise = await prisma.enterpriseAccount.findUnique({
       where: { id: enterpriseId },
@@ -61,7 +63,9 @@ export const executiveReportService = {
       }
 
       if (riskProfile.highRiskContracts > 0) {
-        insights.push(`存在 ${riskProfile.highRiskContracts} 份高风险合同需要关注`);
+        insights.push(
+          `存在 ${riskProfile.highRiskContracts} 份高风险合同需要关注`
+        );
       }
     }
 
@@ -102,7 +106,10 @@ export const executiveReportService = {
   /**
    * 创建合规状态报表
    */
-  async createComplianceStatusReport(enterpriseId: string, params: CreateReportParams) {
+  async createComplianceStatusReport(
+    enterpriseId: string,
+    params: CreateReportParams
+  ) {
     // 验证企业存在
     const enterprise = await prisma.enterpriseAccount.findUnique({
       where: { id: enterpriseId },
@@ -131,7 +138,8 @@ export const executiveReportService = {
           totalChecks,
           compliantCount,
           nonCompliantCount: totalChecks - compliantCount,
-          complianceRate: totalChecks > 0 ? (compliantCount / totalChecks) * 100 : 0,
+          complianceRate:
+            totalChecks > 0 ? (compliantCount / totalChecks) * 100 : 0,
         },
         charts: [],
         insights: [

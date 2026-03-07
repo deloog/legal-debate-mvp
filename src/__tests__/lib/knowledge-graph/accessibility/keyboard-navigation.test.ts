@@ -19,9 +19,27 @@ describe('键盘导航管理器', () => {
 
   beforeEach(() => {
     mockNodes = [
-      { id: 'node-1', lawName: '民法典', articleNumber: '123', category: 'CIVIL', level: 0 },
-      { id: 'node-2', lawName: '刑法', articleNumber: '456', category: 'CRIMINAL', level: 1 },
-      { id: 'node-3', lawName: '行政法', articleNumber: '789', category: 'ADMINISTRATIVE', level: 1 },
+      {
+        id: 'node-1',
+        lawName: '民法典',
+        articleNumber: '123',
+        category: 'CIVIL',
+        level: 0,
+      },
+      {
+        id: 'node-2',
+        lawName: '刑法',
+        articleNumber: '456',
+        category: 'CRIMINAL',
+        level: 1,
+      },
+      {
+        id: 'node-3',
+        lawName: '行政法',
+        articleNumber: '789',
+        category: 'ADMINISTRATIVE',
+        level: 1,
+      },
     ];
 
     mockHandlers = {
@@ -72,7 +90,7 @@ describe('键盘导航管理器', () => {
     it('禁用后不应该处理键盘事件', () => {
       manager.disable();
       const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
-      
+
       expect(() => manager.handleKeyDown(event)).not.toThrow();
     });
   });
@@ -117,20 +135,23 @@ describe('键盘导航管理器', () => {
         manager.setFocusedNode('node-1');
         const event = new KeyboardEvent('keydown', { key: 'Tab' });
         Object.defineProperty(event, 'preventDefault', { value: jest.fn() });
-        
+
         manager.handleKeyDown(event);
-        
+
         expect(event.preventDefault).toHaveBeenCalled();
         expect(manager['focusedNodeId']).toBe('node-2');
       });
 
       it('Shift+Tab应该切换到上一个节点', () => {
         manager.setFocusedNode('node-2');
-        const event = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true });
+        const event = new KeyboardEvent('keydown', {
+          key: 'Tab',
+          shiftKey: true,
+        });
         Object.defineProperty(event, 'preventDefault', { value: jest.fn() });
-        
+
         manager.handleKeyDown(event);
-        
+
         expect(event.preventDefault).toHaveBeenCalled();
         expect(manager['focusedNodeId']).toBe('node-1');
       });
@@ -139,9 +160,9 @@ describe('键盘导航管理器', () => {
         manager.setFocusedNode('node-3');
         const event = new KeyboardEvent('keydown', { key: 'Tab' });
         Object.defineProperty(event, 'preventDefault', { value: jest.fn() });
-        
+
         manager.handleKeyDown(event);
-        
+
         expect(manager['focusedNodeId']).toBe('node-1');
       });
     });
@@ -151,9 +172,9 @@ describe('键盘导航管理器', () => {
         manager.setFocusedNode('node-1');
         const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
         Object.defineProperty(event, 'preventDefault', { value: jest.fn() });
-        
+
         manager.handleKeyDown(event);
-        
+
         expect(event.preventDefault).toHaveBeenCalled();
         expect(mockHandlers.onNodeSelect).toHaveBeenCalledWith(mockNodes[1]);
       });
@@ -162,9 +183,9 @@ describe('键盘导航管理器', () => {
         manager.setFocusedNode('node-2');
         const event = new KeyboardEvent('keydown', { key: 'ArrowLeft' });
         Object.defineProperty(event, 'preventDefault', { value: jest.fn() });
-        
+
         manager.handleKeyDown(event);
-        
+
         expect(event.preventDefault).toHaveBeenCalled();
         expect(mockHandlers.onNodeSelect).toHaveBeenCalledWith(mockNodes[0]);
       });
@@ -175,9 +196,9 @@ describe('键盘导航管理器', () => {
         manager.setFocusedNode('node-1');
         const event = new KeyboardEvent('keydown', { key: 'Enter' });
         Object.defineProperty(event, 'preventDefault', { value: jest.fn() });
-        
+
         manager.handleKeyDown(event);
-        
+
         expect(event.preventDefault).toHaveBeenCalled();
         expect(mockHandlers.onDetailsToggle).toHaveBeenCalledWith(mockNodes[0]);
       });
@@ -188,9 +209,9 @@ describe('键盘导航管理器', () => {
         manager.setFocusedNode('node-1');
         const event = new KeyboardEvent('keydown', { key: 'Escape' });
         Object.defineProperty(event, 'preventDefault', { value: jest.fn() });
-        
+
         manager.handleKeyDown(event);
-        
+
         expect(event.preventDefault).toHaveBeenCalled();
         expect(mockHandlers.onDetailsToggle).toHaveBeenCalledWith(null);
         expect(manager['focusedNodeId']).toBeNull();
@@ -201,9 +222,9 @@ describe('键盘导航管理器', () => {
       it('未处理的键不应该阻止默认行为', () => {
         const event = new KeyboardEvent('keydown', { key: 'a' });
         Object.defineProperty(event, 'preventDefault', { value: jest.fn() });
-        
+
         manager.handleKeyDown(event);
-        
+
         expect(event.preventDefault).not.toHaveBeenCalled();
       });
     });
@@ -212,9 +233,15 @@ describe('键盘导航管理器', () => {
   describe('节点列表更新', () => {
     it('应该能够更新节点列表', () => {
       const newNodes = [
-        { id: 'node-4', lawName: '新法', articleNumber: '1', category: 'CIVIL', level: 0 },
+        {
+          id: 'node-4',
+          lawName: '新法',
+          articleNumber: '1',
+          category: 'CIVIL',
+          level: 0,
+        },
       ];
-      
+
       manager.updateNodes(newNodes);
       expect(manager['nodes']).toEqual(newNodes);
     });
@@ -222,7 +249,7 @@ describe('键盘导航管理器', () => {
     it('更新节点列表应该清除焦点', () => {
       manager.setFocusedNode('node-1');
       manager.updateNodes([]);
-      
+
       expect(manager['focusedNodeId']).toBeNull();
     });
   });
@@ -233,7 +260,7 @@ describe('键盘导航管理器', () => {
         ...mockHandlers,
         onNodeSelect: jest.fn(),
       };
-      
+
       manager.updateHandlers(newHandlers);
       expect(manager['handlers']).toEqual(newHandlers);
     });
@@ -249,7 +276,7 @@ describe('键盘导航管理器', () => {
         enterToActivate: true,
         escapeToClose: true,
       };
-      
+
       manager.setConfig(config);
       expect(manager['config']).toEqual(config);
     });
@@ -259,13 +286,13 @@ describe('键盘导航管理器', () => {
         enabled: true,
         tabThroughNodes: false,
       } as any);
-      
+
       manager.setFocusedNode('node-1');
       const event = new KeyboardEvent('keydown', { key: 'Tab' });
       Object.defineProperty(event, 'preventDefault', { value: jest.fn() });
-      
+
       manager.handleKeyDown(event);
-      
+
       expect(manager['focusedNodeId']).toBe('node-1');
     });
   });
@@ -274,7 +301,7 @@ describe('键盘导航管理器', () => {
     it('destroy应该清除所有状态', () => {
       manager.setFocusedNode('node-1');
       manager.destroy();
-      
+
       expect(manager['enabled']).toBe(false);
       expect(manager['nodes']).toEqual([]);
       expect(manager['handlers']).toBeNull();

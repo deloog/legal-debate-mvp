@@ -7,7 +7,11 @@ import {
   getColorBlindPalette,
   getHighContrastPalette,
 } from '@/lib/knowledge-graph/accessibility/color-palettes';
-import { RelationType, ArticleCategory, ColorBlindType } from '@/lib/knowledge-graph/accessibility/types';
+import {
+  RelationType,
+  ArticleCategory,
+  ColorBlindType,
+} from '@/lib/knowledge-graph/accessibility/types';
 
 describe('色板定义', () => {
   describe('getNormalPalette', () => {
@@ -24,7 +28,7 @@ describe('色板定义', () => {
     it('应该包含所有关系类型颜色', () => {
       const palette = getNormalPalette();
 
-      Object.values(RelationType).forEach((type) => {
+      Object.values(RelationType).forEach(type => {
         expect(palette.relationColors[type]).toBeDefined();
         expect(typeof palette.relationColors[type]).toBe('string');
       });
@@ -33,7 +37,7 @@ describe('色板定义', () => {
     it('应该包含所有分类颜色', () => {
       const palette = getNormalPalette();
 
-      Object.values(ArticleCategory).forEach((category) => {
+      Object.values(ArticleCategory).forEach(category => {
         expect(palette.categoryColors[category]).toBeDefined();
         expect(typeof palette.categoryColors[category]).toBe('string');
       });
@@ -50,7 +54,7 @@ describe('色板定义', () => {
         palette.focusColor,
       ];
 
-      allColors.forEach((color) => {
+      allColors.forEach(color => {
         expect(color).toMatch(/^#[0-9A-Fa-f]{6}$/);
       });
     });
@@ -77,7 +81,7 @@ describe('色板定义', () => {
         ColorBlindType.MONOCHROMACY,
       ];
 
-      types.forEach((type) => {
+      types.forEach(type => {
         const palette = getColorBlindPalette(type);
         expect(palette).toBeDefined();
       });
@@ -86,7 +90,7 @@ describe('色板定义', () => {
     it('应该包含所有关系类型形状', () => {
       const palette = getColorBlindPalette(ColorBlindType.PROTANOPIA);
 
-      Object.values(RelationType).forEach((type) => {
+      Object.values(RelationType).forEach(type => {
         expect(palette.relationShapes[type]).toBeDefined();
         expect(typeof palette.relationShapes[type]).toBe('string');
       });
@@ -95,7 +99,7 @@ describe('色板定义', () => {
     it('应该包含所有分类形状', () => {
       const palette = getColorBlindPalette(ColorBlindType.PROTANOPIA);
 
-      Object.values(ArticleCategory).forEach((category) => {
+      Object.values(ArticleCategory).forEach(category => {
         expect(palette.categoryShapes[category]).toBeDefined();
         expect(typeof palette.categoryShapes[category]).toBe('string');
       });
@@ -109,8 +113,19 @@ describe('色板定义', () => {
         ...Object.values(palette.categoryShapes),
       ];
 
-      const validShapes = ['circle', 'square', 'triangle', 'diamond', 'star', 'hexagon', 'pentagon', 'circle-outline', 'square-outline', 'diamond-outline'];
-      allShapes.forEach((shape) => {
+      const validShapes = [
+        'circle',
+        'square',
+        'triangle',
+        'diamond',
+        'star',
+        'hexagon',
+        'pentagon',
+        'circle-outline',
+        'square-outline',
+        'diamond-outline',
+      ];
+      allShapes.forEach(shape => {
         expect(validShapes).toContain(shape);
       });
     });
@@ -151,14 +166,20 @@ describe('色板定义', () => {
       const palette = getNormalPalette();
 
       // 检查文本颜色和背景色的对比度
-      const contrast = calculateContrastRatio(palette.textColor, palette.backgroundColor);
+      const contrast = calculateContrastRatio(
+        palette.textColor,
+        palette.backgroundColor
+      );
       expect(contrast).toBeGreaterThanOrEqual(4.5);
     });
 
     it('高对比度模式颜色应该满足WCAG AAA级（对比度≥7:1）', () => {
       const palette = getHighContrastPalette();
 
-      const contrast = calculateContrastRatio(palette.textColor, palette.backgroundColor);
+      const contrast = calculateContrastRatio(
+        palette.textColor,
+        palette.backgroundColor
+      );
       expect(contrast).toBeGreaterThanOrEqual(7);
     });
   });
@@ -168,7 +189,10 @@ describe('色板定义', () => {
  * 计算颜色对比度（用于测试）
  * 基于 WCAG 2.1 标准的对比度计算公式
  */
-function calculateContrastRatio(foreground: string, background: string): number {
+function calculateContrastRatio(
+  foreground: string,
+  background: string
+): number {
   const lum1 = getLuminance(foreground);
   const lum2 = getLuminance(background);
 
@@ -182,7 +206,7 @@ function getLuminance(hex: string): number {
   const rgb = hexToRgb(hex);
   const { r, g, b } = rgb;
 
-  const srgb = [r, g, b].map((c) => {
+  const srgb = [r, g, b].map(c => {
     c = c / 255;
     return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
   });

@@ -561,7 +561,9 @@ describe('辩论单个API - 认证和权限测试', () => {
       const request = createMockRequest(
         'http://localhost:3000/api/v1/debates/cmjtg7np100axc0zgwiwpwt1a'
       );
-      await GET(request, { params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }) });
+      await GET(request, {
+        params: Promise.resolve({ id: 'cmjtg7np100axc0zgwiwpwt1a' }),
+      });
 
       expect(checkResourceOwnership).toHaveBeenCalledWith(
         mockAuthUser.userId,

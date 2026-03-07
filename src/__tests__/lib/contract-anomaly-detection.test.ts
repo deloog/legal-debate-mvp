@@ -7,7 +7,14 @@
  * - 主动预警和推荐处理措施
  */
 
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  jest,
+} from '@jest/globals';
 
 // Mock logger
 const mockLoggerInfo = jest.fn();
@@ -23,21 +30,21 @@ jest.mock('@/lib/logger', () => ({
 }));
 
 // Mock notification service
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const mockNotificationService: any = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createNotification: (jest.fn() as any).mockResolvedValue({ id: 'notif-1' }),
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockGetUserNotificationService: any = jest.fn().mockReturnValue(mockNotificationService);
+const mockGetUserNotificationService: any = jest
+  .fn()
+  .mockReturnValue(mockNotificationService);
 
 jest.mock('@/lib/notification/user-notification-service', () => ({
   getUserNotificationService: mockGetUserNotificationService,
 }));
 
 // Mock Prisma - 使用 any 类型绕过类型检查
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const mockPrisma: any = {
   contractPerformance: {
     create: jest.fn(),
@@ -53,7 +60,7 @@ const mockPrisma: any = {
     findUnique: jest.fn(),
     findMany: jest.fn(),
     update: jest.fn(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     count: (jest.fn() as any).mockResolvedValue(10),
   },
   reminderConfig: {
@@ -109,7 +116,9 @@ describe('AnomalyDetectionService', () => {
         },
       };
 
-      mockPrisma.contractPerformance.findUnique.mockResolvedValue(mockPerformance);
+      mockPrisma.contractPerformance.findUnique.mockResolvedValue(
+        mockPerformance
+      );
       mockPrisma.contractPerformance.update.mockResolvedValue({
         ...mockPerformance,
         milestoneStatus: 'OVERDUE',
@@ -160,7 +169,9 @@ describe('AnomalyDetectionService', () => {
         },
       };
 
-      mockPrisma.contractPerformance.findUnique.mockResolvedValue(mockPerformance);
+      mockPrisma.contractPerformance.findUnique.mockResolvedValue(
+        mockPerformance
+      );
       mockPrisma.contractPerformance.update.mockResolvedValue({
         ...mockPerformance,
         isAnomalous: true,
@@ -197,15 +208,21 @@ describe('AnomalyDetectionService', () => {
       };
 
       // 模拟没有后续的结算记录
-      mockPrisma.contractPerformance.findUnique.mockResolvedValue(mockPerformance);
+      mockPrisma.contractPerformance.findUnique.mockResolvedValue(
+        mockPerformance
+      );
       mockPrisma.contract.findUnique.mockResolvedValue({
         ...mockPerformance.contract,
         payments: [], // 没有付款记录
       });
-      
+
       // 模拟查询付款节点
       mockPrisma.contractPerformance.findMany.mockResolvedValue([
-        { id: 'payment-1', milestoneType: 'payment', milestoneStatus: 'PENDING' }
+        {
+          id: 'payment-1',
+          milestoneType: 'payment',
+          milestoneStatus: 'PENDING',
+        },
       ]);
 
       // 更新为标记需要结算
@@ -245,7 +262,9 @@ describe('AnomalyDetectionService', () => {
         },
       };
 
-      mockPrisma.contractPerformance.findUnique.mockResolvedValue(mockPerformance);
+      mockPrisma.contractPerformance.findUnique.mockResolvedValue(
+        mockPerformance
+      );
       mockPrisma.contractPerformance.update.mockResolvedValue({
         ...mockPerformance,
         isAnomalous: true,
@@ -295,7 +314,9 @@ describe('AnomalyDetectionService', () => {
         },
       };
 
-      mockPrisma.contractPerformance.findUnique.mockResolvedValue(mockPerformance);
+      mockPrisma.contractPerformance.findUnique.mockResolvedValue(
+        mockPerformance
+      );
       mockPrisma.contractPerformance.update.mockResolvedValue({
         ...mockPerformance,
         milestoneStatus: 'OVERDUE',
@@ -349,8 +370,10 @@ describe('AnomalyDetectionService', () => {
         },
       ];
 
-      mockPrisma.contractPerformance.findMany.mockResolvedValue(mockPerformances);
-      
+      mockPrisma.contractPerformance.findMany.mockResolvedValue(
+        mockPerformances
+      );
+
       // 模拟每次检测都更新为异常
       for (const perf of mockPerformances) {
         mockPrisma.contractPerformance.update.mockResolvedValueOnce({
@@ -396,8 +419,9 @@ describe('AnomalyDetectionService', () => {
 
   describe('getAnomalyRecommendations - 获取异常处理建议', () => {
     it('应该为特定异常类型返回处理建议', async () => {
-      const recommendations = anomalyDetectionService.getAnomalyRecommendations('LATE_PAYMENT');
-      
+      const recommendations =
+        anomalyDetectionService.getAnomalyRecommendations('LATE_PAYMENT');
+
       expect(recommendations).toBeDefined();
       expect(recommendations.length).toBeGreaterThan(0);
       expect(recommendations[0]).toHaveProperty('action');
@@ -405,15 +429,18 @@ describe('AnomalyDetectionService', () => {
     });
 
     it('应该为不同异常类型返回不同建议', async () => {
-      const earlyPaymentRecs = anomalyDetectionService.getAnomalyRecommendations('EARLY_PAYMENT');
-      const lateDeliveryRecs = anomalyDetectionService.getAnomalyRecommendations('LATE_DELIVERY');
-      
+      const earlyPaymentRecs =
+        anomalyDetectionService.getAnomalyRecommendations('EARLY_PAYMENT');
+      const lateDeliveryRecs =
+        anomalyDetectionService.getAnomalyRecommendations('LATE_DELIVERY');
+
       expect(earlyPaymentRecs).not.toEqual(lateDeliveryRecs);
     });
 
     it('应该为未知异常类型返回通用建议', async () => {
-      const unknownRecs = anomalyDetectionService.getAnomalyRecommendations('UNKNOWN_TYPE');
-      
+      const unknownRecs =
+        anomalyDetectionService.getAnomalyRecommendations('UNKNOWN_TYPE');
+
       expect(unknownRecs).toBeDefined();
       expect(unknownRecs.length).toBeGreaterThan(0);
     });
@@ -439,7 +466,9 @@ describe('AnomalyDetectionService', () => {
         },
       ];
 
-      mockPrisma.contractPerformance.findMany.mockResolvedValue(mockPerformances);
+      mockPrisma.contractPerformance.findMany.mockResolvedValue(
+        mockPerformances
+      );
       mockPrisma.notification.create.mockResolvedValue({ id: 'notif-1' });
 
       await anomalyDetectionService.autoDetectAndNotify('lawyer-1');
@@ -456,7 +485,12 @@ describe('AnomalyDetectionService', () => {
           milestoneDate: new Date(),
           milestoneStatus: 'OVERDUE',
           isAnomalous: true,
-          contract: { id: 'contract-1', lawyerId: 'lawyer-1', contractNumber: 'C1', clientName: '客户1' },
+          contract: {
+            id: 'contract-1',
+            lawyerId: 'lawyer-1',
+            contractNumber: 'C1',
+            clientName: '客户1',
+          },
         },
         {
           id: 'perf-2',
@@ -465,11 +499,18 @@ describe('AnomalyDetectionService', () => {
           milestoneDate: new Date(),
           milestoneStatus: 'OVERDUE',
           isAnomalous: true,
-          contract: { id: 'contract-2', lawyerId: 'lawyer-other', contractNumber: 'C2', clientName: '客户2' },
+          contract: {
+            id: 'contract-2',
+            lawyerId: 'lawyer-other',
+            contractNumber: 'C2',
+            clientName: '客户2',
+          },
         },
       ];
 
-      mockPrisma.contractPerformance.findMany.mockResolvedValue(mockPerformances);
+      mockPrisma.contractPerformance.findMany.mockResolvedValue(
+        mockPerformances
+      );
 
       await anomalyDetectionService.autoDetectAndNotify('lawyer-1');
 
@@ -489,7 +530,9 @@ describe('AnomalyDetectionService', () => {
         anomalyDescription: '已逾期',
       };
 
-      mockPrisma.contractPerformance.findUnique.mockResolvedValue(mockPerformance);
+      mockPrisma.contractPerformance.findUnique.mockResolvedValue(
+        mockPerformance
+      );
       mockPrisma.contractPerformance.update.mockResolvedValue({
         ...mockPerformance,
         isAnomalous: false,
@@ -564,8 +607,11 @@ describe('ContractPerformanceService - 增强异常检测集成', () => {
         anomalyType: 'EARLY_PAYMENT',
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contractPerformanceService.updatePerformance(performanceId, userId, input as any);
+      await contractPerformanceService.updatePerformance(
+        performanceId,
+        userId,
+        input as any
+      );
 
       // 验证异常检测被调用
       expect(mockPrisma.contractPerformance.update).toHaveBeenCalled();

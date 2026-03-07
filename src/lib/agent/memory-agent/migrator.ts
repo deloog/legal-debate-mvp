@@ -73,7 +73,10 @@ export class MemoryMigrator {
         },
       });
     } catch (error) {
-      logger.error('Failed to log migration action', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Failed to log migration action',
+        error instanceof Error ? error : new Error(String(error))
+      );
       // 不影响迁移流程
     }
   }
@@ -92,12 +95,23 @@ export class MemoryMigrator {
     // Working→Hot迁移（每小时）
     this.workingToHotCron = cron.schedule(
       MIGRATION_CONFIG.WORKING_TO_HOT_CRON,
-      () => this.migrateWorkingToHot().catch((err: unknown) => logger.error('Working→Hot migration error', err instanceof Error ? err : new Error(String(err))))
+      () =>
+        this.migrateWorkingToHot().catch((err: unknown) =>
+          logger.error(
+            'Working→Hot migration error',
+            err instanceof Error ? err : new Error(String(err))
+          )
+        )
     );
 
     // Hot→Cold归档（每天）
     this.hotToColdCron = cron.schedule(MIGRATION_CONFIG.HOT_TO_COLD_CRON, () =>
-      this.compressHotToCold().catch((err: unknown) => logger.error('Hot→Cold archiving error', err instanceof Error ? err : new Error(String(err))))
+      this.compressHotToCold().catch((err: unknown) =>
+        logger.error(
+          'Hot→Cold archiving error',
+          err instanceof Error ? err : new Error(String(err))
+        )
+      )
     );
 
     logger.info('MemoryMigrator cron jobs started successfully');
@@ -134,7 +148,9 @@ export class MemoryMigrator {
       const workingMemories =
         await this.memoryManager.getMemoriesByType('WORKING');
 
-      logger.info(`Found ${workingMemories.length} Working Memories to migrate`);
+      logger.info(
+        `Found ${workingMemories.length} Working Memories to migrate`
+      );
 
       // 过滤候选记忆
       const candidates = this.filterWorkingCandidates(workingMemories);
@@ -152,16 +168,24 @@ export class MemoryMigrator {
           await this.migrateSingleMemory(memory, 'HOT');
           migratedCount++;
         } catch (error) {
-          logger.error(`Failed to migrate memory ${memory.memoryId}`, error instanceof Error ? error : new Error(String(error)));
+          logger.error(
+            `Failed to migrate memory ${memory.memoryId}`,
+            error instanceof Error ? error : new Error(String(error))
+          );
           failedCount++;
         }
       }
 
       skippedCount = workingMemories.length - toMigrate.length;
 
-      logger.info(`Working→Hot migration completed: ${migratedCount} migrated, ${skippedCount} skipped, ${failedCount} failed`);
+      logger.info(
+        `Working→Hot migration completed: ${migratedCount} migrated, ${skippedCount} skipped, ${failedCount} failed`
+      );
     } catch (error) {
-      logger.error('Error during Working→Hot migration', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Error during Working→Hot migration',
+        error instanceof Error ? error : new Error(String(error))
+      );
       failedCount++;
     }
 
@@ -204,16 +228,24 @@ export class MemoryMigrator {
           await this.compressAndArchive(memory);
           migratedCount++;
         } catch (error) {
-          logger.error(`Failed to archive memory ${memory.memoryId}`, error instanceof Error ? error : new Error(String(error)));
+          logger.error(
+            `Failed to archive memory ${memory.memoryId}`,
+            error instanceof Error ? error : new Error(String(error))
+          );
           failedCount++;
         }
       }
 
       skippedCount = hotMemories.length - toCompress.length;
 
-      logger.info(`Hot→Cold archiving completed: ${migratedCount} migrated, ${skippedCount} skipped, ${failedCount} failed`);
+      logger.info(
+        `Hot→Cold archiving completed: ${migratedCount} migrated, ${skippedCount} skipped, ${failedCount} failed`
+      );
     } catch (error) {
-      logger.error('Error during Hot→Cold archiving', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Error during Hot→Cold archiving',
+        error instanceof Error ? error : new Error(String(error))
+      );
       failedCount++;
     }
 

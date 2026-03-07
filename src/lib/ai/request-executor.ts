@@ -161,9 +161,13 @@ export class AIRequestExecutor {
           message: (r.message as AIResponse['choices'][number]['message']) ||
             (r.content as AIResponse['choices'][number]['message']) || {
               role: 'assistant' as const,
-              content: ((r.content as Record<string, unknown>)?.text as string) || (r.content as string),
+              content:
+                ((r.content as Record<string, unknown>)?.text as string) ||
+                (r.content as string),
             },
-          finishReason: ((r.finish_reason as AIResponse['choices'][number]['finishReason']) || 'stop'),
+          finishReason:
+            (r.finish_reason as AIResponse['choices'][number]['finishReason']) ||
+            'stop',
           logprobs: (r.logprobs as null) || null,
         },
       ],
@@ -200,8 +204,7 @@ export class AIRequestExecutor {
       usage: {
         prompt_tokens: usage?.input_tokens,
         completion_tokens: usage?.output_tokens,
-        total_tokens:
-          (usage?.input_tokens ?? 0) + (usage?.output_tokens ?? 0),
+        total_tokens: (usage?.input_tokens ?? 0) + (usage?.output_tokens ?? 0),
       },
     };
   }

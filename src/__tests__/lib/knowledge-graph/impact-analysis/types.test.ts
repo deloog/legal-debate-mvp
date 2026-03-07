@@ -114,7 +114,7 @@ describe('Impact Analysis Types', () => {
         ImpactStatus.AFFECTED,
       ];
 
-      statuses.forEach((status) => {
+      statuses.forEach(status => {
         const relation: ImpactedRelation = {
           relationId: 'rel123',
           sourceId: 'article1',
@@ -156,9 +156,13 @@ describe('Impact Analysis Types', () => {
     });
 
     it('应该支持所有优先级', () => {
-      const priorities: Array<'high' | 'medium' | 'low'> = ['high', 'medium', 'low'];
+      const priorities: Array<'high' | 'medium' | 'low'> = [
+        'high',
+        'medium',
+        'low',
+      ];
 
-      priorities.forEach((priority) => {
+      priorities.forEach(priority => {
         const recommendation: ImpactRecommendation = {
           recommendationId: 'rec123',
           relationId: 'rel123',
@@ -176,7 +180,7 @@ describe('Impact Analysis Types', () => {
     it('应该支持所有建议操作', () => {
       const actions = Object.values(RecommendationAction);
 
-      actions.forEach((action) => {
+      actions.forEach(action => {
         const recommendation: ImpactRecommendation = {
           recommendationId: 'rec123',
           relationId: 'rel123',
@@ -184,7 +188,8 @@ describe('Impact Analysis Types', () => {
           reason: '测试建议',
           priority: 'medium',
           impactScope: '直接影响',
-          requiresHumanConfirmation: action !== RecommendationAction.AUTO_VERIFY,
+          requiresHumanConfirmation:
+            action !== RecommendationAction.AUTO_VERIFY,
         };
 
         expect(recommendation.action).toBe(action);
@@ -317,7 +322,9 @@ describe('Impact Analysis Types', () => {
       };
 
       expect(statistics.totalImpacted).toBe(15);
-      expect(statistics.byImpactStatus[ImpactStatus.POTENTIALLY_INVALID]).toBe(8);
+      expect(statistics.byImpactStatus[ImpactStatus.POTENTIALLY_INVALID]).toBe(
+        8
+      );
       expect(statistics.highPriorityCount).toBe(5);
     });
 
@@ -349,7 +356,10 @@ describe('Impact Analysis Types', () => {
         lowPriorityCount: 2,
       };
 
-      const sum = statistics.highPriorityCount + statistics.mediumPriorityCount + statistics.lowPriorityCount;
+      const sum =
+        statistics.highPriorityCount +
+        statistics.mediumPriorityCount +
+        statistics.lowPriorityCount;
       expect(sum).toBe(10);
       expect(statistics.totalImpacted).toBe(sum);
     });
@@ -390,7 +400,7 @@ describe('Impact Analysis Types', () => {
         VerificationStatus.REJECTED,
       ];
 
-      statuses.forEach((status) => {
+      statuses.forEach(status => {
         const update: RelationUpdateInput = {
           relationId: 'rel123',
           verificationStatus: status,
@@ -434,7 +444,7 @@ describe('Impact Analysis Types', () => {
 
       expect(result.successCount).toBe(3);
       expect(result.failedCount).toBe(0);
-      result.results.forEach((r) => expect(r.success).toBe(true));
+      result.results.forEach(r => expect(r.success).toBe(true));
     });
 
     it('应该允许所有更新都失败', () => {
@@ -450,7 +460,7 @@ describe('Impact Analysis Types', () => {
 
       expect(result.successCount).toBe(0);
       expect(result.failedCount).toBe(3);
-      result.results.forEach((r) => {
+      result.results.forEach(r => {
         expect(r.success).toBe(false);
         expect(r.error).toBeDefined();
       });

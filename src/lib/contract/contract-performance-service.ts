@@ -16,7 +16,6 @@ import {
   CreateReminderConfigInput,
   UpdateReminderConfigInput,
   ReminderConfigResponse,
-  AnomalyType,
 } from '@/types/contract';
 import { NotificationType as PrismaNotificationType } from '@prisma/client';
 import { getUserNotificationService } from '@/lib/notification/user-notification-service';
@@ -33,40 +32,128 @@ interface AnomalyRecommendation {
 
 const ANOMALY_RECOMMENDATIONS: Record<string, AnomalyRecommendation[]> = {
   LATE_PAYMENT: [
-    { action: '联系客户确认付款计划', priority: 'HIGH', description: '逾期未付款，需立即跟进' },
-    { action: '发送催款通知', priority: 'HIGH', description: '通过邮件或短信发送正式催款通知' },
-    { action: '评估是否需要终止合同', priority: 'MEDIUM', description: '根据逾期时长评估合同是否继续执行' },
+    {
+      action: '联系客户确认付款计划',
+      priority: 'HIGH',
+      description: '逾期未付款，需立即跟进',
+    },
+    {
+      action: '发送催款通知',
+      priority: 'HIGH',
+      description: '通过邮件或短信发送正式催款通知',
+    },
+    {
+      action: '评估是否需要终止合同',
+      priority: 'MEDIUM',
+      description: '根据逾期时长评估合同是否继续执行',
+    },
   ],
   EARLY_PAYMENT: [
-    { action: '核实付款金额与合同约定', priority: 'HIGH', description: '确认是否为多付款项' },
-    { action: '联系对方确认付款意图', priority: 'HIGH', description: '确认是否为预付款项或有特殊安排' },
-    { action: '如为多付，安排退款或调整', priority: 'MEDIUM', description: '处理多付款项的退款或抵扣' },
+    {
+      action: '核实付款金额与合同约定',
+      priority: 'HIGH',
+      description: '确认是否为多付款项',
+    },
+    {
+      action: '联系对方确认付款意图',
+      priority: 'HIGH',
+      description: '确认是否为预付款项或有特殊安排',
+    },
+    {
+      action: '如为多付，安排退款或调整',
+      priority: 'MEDIUM',
+      description: '处理多付款项的退款或抵扣',
+    },
   ],
   LATE_DELIVERY: [
-    { action: '联系责任方确认延迟原因', priority: 'HIGH', description: '了解延迟交付的具体原因' },
-    { action: '评估对项目进度的影响', priority: 'HIGH', description: '评估延迟对整体项目的影响' },
-    { action: '协商新的交付时间', priority: 'MEDIUM', description: '与对方协商新的交付时间并记录' },
-    { action: '如影响重大，考虑合同条款', priority: 'MEDIUM', description: '评估是否触发合同中的违约条款' },
+    {
+      action: '联系责任方确认延迟原因',
+      priority: 'HIGH',
+      description: '了解延迟交付的具体原因',
+    },
+    {
+      action: '评估对项目进度的影响',
+      priority: 'HIGH',
+      description: '评估延迟对整体项目的影响',
+    },
+    {
+      action: '协商新的交付时间',
+      priority: 'MEDIUM',
+      description: '与对方协商新的交付时间并记录',
+    },
+    {
+      action: '如影响重大，考虑合同条款',
+      priority: 'MEDIUM',
+      description: '评估是否触发合同中的违约条款',
+    },
   ],
   EARLY_DELIVERY: [
-    { action: '确认提前交付是否可接收', priority: 'MEDIUM', description: '确认提前交付是否符合项目需求' },
-    { action: '如不可接收，协商调整', priority: 'MEDIUM', description: '与对方协商调整交付时间' },
+    {
+      action: '确认提前交付是否可接收',
+      priority: 'MEDIUM',
+      description: '确认提前交付是否符合项目需求',
+    },
+    {
+      action: '如不可接收，协商调整',
+      priority: 'MEDIUM',
+      description: '与对方协商调整交付时间',
+    },
   ],
   UNVERIFIED_PAYMENT: [
-    { action: '核实付款是否已完成', priority: 'HIGH', description: '确认付款是否实际到账' },
-    { action: '联系财务核对账目', priority: 'HIGH', description: '与财务部门确认付款记录' },
-    { action: '如未付款，发送催款通知', priority: 'HIGH', description: '确认付款状态并跟进' },
+    {
+      action: '核实付款是否已完成',
+      priority: 'HIGH',
+      description: '确认付款是否实际到账',
+    },
+    {
+      action: '联系财务核对账目',
+      priority: 'HIGH',
+      description: '与财务部门确认付款记录',
+    },
+    {
+      action: '如未付款，发送催款通知',
+      priority: 'HIGH',
+      description: '确认付款状态并跟进',
+    },
   ],
   QUALITY_ISSUE: [
-    { action: '记录具体质量问题', priority: 'HIGH', description: '详细记录发现的质量问题' },
-    { action: '要求责任方提供解决方案', priority: 'HIGH', description: '要求对方提供质量问题的解决方案' },
-    { action: '安排质量复检', priority: 'MEDIUM', description: '安排时间进行质量复检' },
-    { action: '根据合同条款处理', priority: 'MEDIUM', description: '根据合同中的质量条款进行处理' },
+    {
+      action: '记录具体质量问题',
+      priority: 'HIGH',
+      description: '详细记录发现的质量问题',
+    },
+    {
+      action: '要求责任方提供解决方案',
+      priority: 'HIGH',
+      description: '要求对方提供质量问题的解决方案',
+    },
+    {
+      action: '安排质量复检',
+      priority: 'MEDIUM',
+      description: '安排时间进行质量复检',
+    },
+    {
+      action: '根据合同条款处理',
+      priority: 'MEDIUM',
+      description: '根据合同中的质量条款进行处理',
+    },
   ],
   OTHER: [
-    { action: '记录异常详情', priority: 'MEDIUM', description: '详细记录异常情况' },
-    { action: '分析异常原因', priority: 'MEDIUM', description: '分析异常产生的根本原因' },
-    { action: '制定处理计划', priority: 'MEDIUM', description: '制定异常处理计划' },
+    {
+      action: '记录异常详情',
+      priority: 'MEDIUM',
+      description: '详细记录异常情况',
+    },
+    {
+      action: '分析异常原因',
+      priority: 'MEDIUM',
+      description: '分析异常产生的根本原因',
+    },
+    {
+      action: '制定处理计划',
+      priority: 'MEDIUM',
+      description: '制定异常处理计划',
+    },
   ],
 };
 
@@ -264,7 +351,9 @@ class ContractPerformanceService {
   /**
    * 获取单个合同履约节点
    */
-  async getPerformance(id: string): Promise<ContractPerformanceResponse | null> {
+  async getPerformance(
+    id: string
+  ): Promise<ContractPerformanceResponse | null> {
     try {
       const performance = await prisma.contractPerformance.findUnique({
         where: { id },
@@ -294,16 +383,23 @@ class ContractPerformanceService {
   /**
    * 查询合同履约节点列表
    */
-  async queryPerformances(
-    params: ContractPerformanceQueryParams
-  ): Promise<{
+  async queryPerformances(params: ContractPerformanceQueryParams): Promise<{
     data: ContractPerformanceResponse[];
     total: number;
     page: number;
     limit: number;
   }> {
     try {
-      const { contractId, milestoneStatus, isAnomalous, caseId, startDate, endDate, page = 1, limit = 20 } = params;
+      const {
+        contractId,
+        milestoneStatus,
+        isAnomalous,
+        caseId,
+        startDate,
+        endDate,
+        page = 1,
+        limit = 20,
+      } = params;
 
       const where: Prisma.ContractPerformanceWhereInput = {};
 
@@ -314,8 +410,10 @@ class ContractPerformanceService {
 
       if (startDate || endDate) {
         where.milestoneDate = {};
-        if (startDate) (where.milestoneDate as Record<string, Date>).gte = startDate;
-        if (endDate) (where.milestoneDate as Record<string, Date>).lte = endDate;
+        if (startDate)
+          (where.milestoneDate as Record<string, Date>).gte = startDate;
+        if (endDate)
+          (where.milestoneDate as Record<string, Date>).lte = endDate;
       }
 
       const [data, total] = await Promise.all([
@@ -339,7 +437,7 @@ class ContractPerformanceService {
       ]);
 
       return {
-        data: data.map((item) => this.toPerformanceResponse(item)),
+        data: data.map(item => this.toPerformanceResponse(item)),
         total,
         page,
         limit,
@@ -378,7 +476,7 @@ class ContractPerformanceService {
         orderBy: { milestoneDate: 'asc' },
       });
 
-      return performances.map((item) => this.toPerformanceResponse(item));
+      return performances.map(item => this.toPerformanceResponse(item));
     } catch (error) {
       logger.error('获取待提醒节点失败', error as Error);
       throw error;
@@ -399,7 +497,10 @@ class ContractPerformanceService {
         },
       });
 
-      logger.info('标记提醒已发送', { id, reminderCount: performance.reminderCount });
+      logger.info('标记提醒已发送', {
+        id,
+        reminderCount: performance.reminderCount,
+      });
     } catch (error) {
       logger.error('标记提醒发送状态失败', error as Error);
       throw error;
@@ -490,7 +591,8 @@ class ContractPerformanceService {
       contractId: performance.contractId,
       milestone: performance.milestone,
       milestoneDate: performance.milestoneDate,
-      milestoneStatus: performance.milestoneStatus as ContractPerformanceResponse['milestoneStatus'],
+      milestoneStatus:
+        performance.milestoneStatus as ContractPerformanceResponse['milestoneStatus'],
       description: performance.description || undefined,
       milestoneType: performance.milestoneType || undefined,
       actualDate: performance.actualDate || undefined,
@@ -498,7 +600,9 @@ class ContractPerformanceService {
       variance: performance.variance?.toNumber() || undefined,
       varianceReason: performance.varianceReason || undefined,
       isAnomalous: performance.isAnomalous,
-      anomalyType: performance.anomalyType as ContractPerformanceResponse['anomalyType'] || undefined,
+      anomalyType:
+        (performance.anomalyType as ContractPerformanceResponse['anomalyType']) ||
+        undefined,
       anomalyDescription: performance.anomalyDescription || undefined,
       recommendedAction: performance.recommendedAction || undefined,
       reminderEnabled: performance.reminderEnabled,
@@ -543,7 +647,10 @@ class ReminderConfigService {
         },
       });
 
-      logger.info('创建提醒配置成功', { id: config.id, reminderType: config.reminderType });
+      logger.info('创建提醒配置成功', {
+        id: config.id,
+        reminderType: config.reminderType,
+      });
 
       return this.toConfigResponse(config);
     } catch (error) {
@@ -564,9 +671,11 @@ class ReminderConfigService {
 
       if (input.enabled !== undefined) updateData.enabled = input.enabled;
       if (input.channels !== undefined) updateData.channels = input.channels;
-      if (input.advanceDays !== undefined) updateData.advanceDays = input.advanceDays;
+      if (input.advanceDays !== undefined)
+        updateData.advanceDays = input.advanceDays;
       if (input.timeOfDay !== undefined) updateData.timeOfDay = input.timeOfDay;
-      if (input.isRecurring !== undefined) updateData.isRecurring = input.isRecurring;
+      if (input.isRecurring !== undefined)
+        updateData.isRecurring = input.isRecurring;
       if (input.recurringPattern !== undefined)
         updateData.recurringPattern = input.recurringPattern;
       if (input.isActive !== undefined) updateData.isActive = input.isActive;
@@ -626,7 +735,7 @@ class ReminderConfigService {
         orderBy: { createdAt: 'desc' },
       });
 
-      return configs.map((config) => this.toConfigResponse(config));
+      return configs.map(config => this.toConfigResponse(config));
     } catch (error) {
       logger.error('获取提醒配置列表失败', error as Error);
       throw error;
@@ -741,13 +850,19 @@ class AnomalyDetectionService {
 
       // 1. 检测逾期未完成
       const isOverdue =
-        (performance.milestoneStatus === 'PENDING' || performance.milestoneStatus === 'IN_PROGRESS') &&
+        (performance.milestoneStatus === 'PENDING' ||
+          performance.milestoneStatus === 'IN_PROGRESS') &&
         new Date() > performance.milestoneDate;
 
       if (isOverdue) {
-        const anomalyType = performance.milestoneType === 'payment' ? 'LATE_PAYMENT' : 'LATE_DELIVERY';
+        const anomalyType =
+          performance.milestoneType === 'payment'
+            ? 'LATE_PAYMENT'
+            : 'LATE_DELIVERY';
         const description =
-          performance.milestoneType === 'payment' ? '付款节点已逾期未完成' : '交付节点已逾期未完成';
+          performance.milestoneType === 'payment'
+            ? '付款节点已逾期未完成'
+            : '交付节点已逾期未完成';
 
         await prisma.contractPerformance.update({
           where: { id: performanceId },
@@ -756,7 +871,9 @@ class AnomalyDetectionService {
             isAnomalous: true,
             anomalyType,
             anomalyDescription: description,
-            recommendedAction: this.getAnomalyRecommendations(anomalyType)[0]?.action || '联系责任方确认情况',
+            recommendedAction:
+              this.getAnomalyRecommendations(anomalyType)[0]?.action ||
+              '联系责任方确认情况',
           },
         });
         logger.info('检测到逾期异常', { performanceId, anomalyType });
@@ -764,7 +881,11 @@ class AnomalyDetectionService {
       }
 
       // 2. 检测超进度付款
-      if (performance.milestoneType === 'payment' && performance.actualAmount && performance.actualDate) {
+      if (
+        performance.milestoneType === 'payment' &&
+        performance.actualAmount &&
+        performance.actualDate
+      ) {
         const expectedAmountNum = performance.contract.totalFee.toNumber();
         const actualAmountNum = performance.actualAmount.toNumber();
 
@@ -777,7 +898,9 @@ class AnomalyDetectionService {
               anomalyType: 'EARLY_PAYMENT',
               anomalyDescription: `实际付款金额${actualAmountNum}元超出合同约定金额${expectedAmountNum}元`,
               variance,
-              recommendedAction: this.getAnomalyRecommendations('EARLY_PAYMENT')[0]?.action || '核实付款意图',
+              recommendedAction:
+                this.getAnomalyRecommendations('EARLY_PAYMENT')[0]?.action ||
+                '核实付款意图',
             },
           });
           logger.info('检测到超进度付款异常', { performanceId, variance });
@@ -785,9 +908,14 @@ class AnomalyDetectionService {
         }
 
         // 3. 检测延迟付款
-        if (performance.milestoneStatus === 'COMPLETED' && performance.actualDate > performance.milestoneDate) {
+        if (
+          performance.milestoneStatus === 'COMPLETED' &&
+          performance.actualDate > performance.milestoneDate
+        ) {
           const delayDays = Math.floor(
-            (performance.actualDate.getTime() - performance.milestoneDate.getTime()) / (1000 * 60 * 60 * 24)
+            (performance.actualDate.getTime() -
+              performance.milestoneDate.getTime()) /
+              (1000 * 60 * 60 * 24)
           );
           if (delayDays > 7) {
             // 延迟超过7天视为异常
@@ -798,7 +926,9 @@ class AnomalyDetectionService {
                 anomalyType: 'LATE_PAYMENT',
                 anomalyDescription: `付款延迟${delayDays}天`,
                 variance: performance.actualAmount || undefined,
-                recommendedAction: this.getAnomalyRecommendations('LATE_PAYMENT')[0]?.action || '联系客户确认',
+                recommendedAction:
+                  this.getAnomalyRecommendations('LATE_PAYMENT')[0]?.action ||
+                  '联系客户确认',
               },
             });
             logger.info('检测到延迟付款异常', { performanceId, delayDays });
@@ -810,7 +940,9 @@ class AnomalyDetectionService {
       if (performance.milestoneType === 'delivery' && performance.actualDate) {
         if (performance.actualDate > performance.milestoneDate) {
           const delayDays = Math.floor(
-            (performance.actualDate.getTime() - performance.milestoneDate.getTime()) / (1000 * 60 * 60 * 24)
+            (performance.actualDate.getTime() -
+              performance.milestoneDate.getTime()) /
+              (1000 * 60 * 60 * 24)
           );
           await prisma.contractPerformance.update({
             where: { id: performanceId },
@@ -818,7 +950,9 @@ class AnomalyDetectionService {
               isAnomalous: true,
               anomalyType: 'LATE_DELIVERY',
               anomalyDescription: `交付延迟${delayDays}天`,
-              recommendedAction: this.getAnomalyRecommendations('LATE_DELIVERY')[0]?.action || '联系责任方确认',
+              recommendedAction:
+                this.getAnomalyRecommendations('LATE_DELIVERY')[0]?.action ||
+                '联系责任方确认',
             },
           });
           logger.info('检测到交付延迟异常', { performanceId, delayDays });
@@ -848,7 +982,9 @@ class AnomalyDetectionService {
               isAnomalous: true,
               anomalyType: 'UNVERIFIED_PAYMENT',
               anomalyDescription: '已完成交付但相关付款节点未完成',
-              recommendedAction: this.getAnomalyRecommendations('UNVERIFIED_PAYMENT')[0]?.action || '核实付款状态',
+              recommendedAction:
+                this.getAnomalyRecommendations('UNVERIFIED_PAYMENT')[0]
+                  ?.action || '核实付款状态',
             },
           });
           logger.info('检测到未验收结算异常', { performanceId });
@@ -883,7 +1019,11 @@ class AnomalyDetectionService {
       });
 
       let anomaliesFound = 0;
-      const details: Array<{ performanceId: string; anomalyType: string; description: string }> = [];
+      const details: Array<{
+        performanceId: string;
+        anomalyType: string;
+        description: string;
+      }> = [];
 
       for (const performance of performances) {
         await this.detectAnomalies(performance.id);
@@ -891,7 +1031,11 @@ class AnomalyDetectionService {
         // 检查是否被标记为异常
         const updated = await prisma.contractPerformance.findUnique({
           where: { id: performance.id },
-          select: { isAnomalous: true, anomalyType: true, anomalyDescription: true },
+          select: {
+            isAnomalous: true,
+            anomalyType: true,
+            anomalyDescription: true,
+          },
         });
 
         if (updated?.isAnomalous && updated.anomalyType) {
@@ -904,7 +1048,10 @@ class AnomalyDetectionService {
         }
       }
 
-      logger.info('批量异常检测完成', { total: performances.length, anomalies: anomaliesFound });
+      logger.info('批量异常检测完成', {
+        total: performances.length,
+        anomalies: anomaliesFound,
+      });
 
       return {
         totalChecked: performances.length,
@@ -932,7 +1079,9 @@ class AnomalyDetectionService {
       });
 
       // 获取唯一的合同ID
-      const uniqueContractIds = [...new Set(anomalousPerformances.map((p) => p.contractId))];
+      const uniqueContractIds = [
+        ...new Set(anomalousPerformances.map(p => p.contractId)),
+      ];
       const totalContracts = await prisma.contract.count();
 
       const anomalyTypes: Record<string, number> = {};
@@ -956,7 +1105,9 @@ class AnomalyDetectionService {
    * 获取异常处理建议
    */
   getAnomalyRecommendations(anomalyType: string): AnomalyRecommendation[] {
-    return ANOMALY_RECOMMENDATIONS[anomalyType] || ANOMALY_RECOMMENDATIONS.OTHER;
+    return (
+      ANOMALY_RECOMMENDATIONS[anomalyType] || ANOMALY_RECOMMENDATIONS.OTHER
+    );
   }
 
   /**
@@ -1012,7 +1163,10 @@ class AnomalyDetectionService {
   /**
    * 解决异常
    */
-  async resolveAnomaly(performanceId: string, resolutionNote: string): Promise<void> {
+  async resolveAnomaly(
+    performanceId: string,
+    resolutionNote: string
+  ): Promise<void> {
     try {
       const performance = await prisma.contractPerformance.findUnique({
         where: { id: performanceId },

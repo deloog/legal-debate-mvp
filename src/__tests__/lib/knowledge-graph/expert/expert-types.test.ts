@@ -32,7 +32,7 @@ describe('Expert Types', () => {
         '行政诉讼法',
         '其他',
       ];
-      
+
       expect(validAreas).toHaveLength(14);
     });
 

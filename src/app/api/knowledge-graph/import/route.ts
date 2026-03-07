@@ -9,7 +9,11 @@ import { PrismaClient } from '@prisma/client';
 import { authOptions } from '@/lib/auth/auth-options';
 import { logger } from '@/lib/logger';
 import { ImportService } from '@/lib/knowledge-graph/export-import/services';
-import type { ExportFormat, ImportOptions, MergeStrategy } from '@/lib/knowledge-graph/export-import/types';
+import type {
+  ExportFormat,
+  ImportOptions,
+  MergeStrategy,
+} from '@/lib/knowledge-graph/export-import/types';
 
 const prisma = new PrismaClient();
 
@@ -50,7 +54,10 @@ export async function POST(request: NextRequest) {
 
     // 验证合并策略
     const validStrategies: MergeStrategy[] = ['skip', 'update', 'replace'];
-    if (mergeStrategy && !validStrategies.includes(mergeStrategy as MergeStrategy)) {
+    if (
+      mergeStrategy &&
+      !validStrategies.includes(mergeStrategy as MergeStrategy)
+    ) {
       return NextResponse.json(
         { success: false, error: `不支持的合并策略: ${mergeStrategy}` },
         { status: 400 }

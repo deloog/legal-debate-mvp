@@ -2,7 +2,10 @@
  * 图数据库评估服务测试
  */
 
-import { GraphDatabaseEvaluationService, createGraphDatabaseEvaluationService } from '@/lib/knowledge-graph/graph-db-evaluation/service';
+import {
+  GraphDatabaseEvaluationService,
+  createGraphDatabaseEvaluationService,
+} from '@/lib/knowledge-graph/graph-db-evaluation/service';
 import { GraphDatabaseType } from '@/lib/knowledge-graph/graph-db-evaluation/types';
 
 // Mock Prisma
@@ -71,7 +74,9 @@ describe('GraphDatabaseEvaluationService', () => {
       expect(result.projectedDataSize).toBeDefined();
       expect(result.projectedDataSize.nodes1Year).toBeGreaterThan(0);
       expect(result.projectedDataSize.edges1Year).toBeGreaterThan(0);
-      expect(result.projectedDataSize.nodes3Year).toBeGreaterThan(result.projectedDataSize.nodes1Year);
+      expect(result.projectedDataSize.nodes3Year).toBeGreaterThan(
+        result.projectedDataSize.nodes1Year
+      );
     });
 
     it('应该包含算法基准测试', async () => {
@@ -86,7 +91,7 @@ describe('GraphDatabaseEvaluationService', () => {
 
       expect(result.benchmarks.storage).toBeDefined();
       expect(result.benchmarks.storage.length).toBe(3); // PostgreSQL, Neo4j, ArangoDB
-      
+
       const postgresCost = result.benchmarks.storage.find(
         s => s.databaseType === GraphDatabaseType.POSTGRESQL
       );
@@ -106,7 +111,7 @@ describe('GraphDatabaseEvaluationService', () => {
 
       expect(result.featureSupport).toBeDefined();
       expect(result.featureSupport.length).toBeGreaterThan(0);
-      
+
       // 验证关键特性
       const shortestPathFeature = result.featureSupport.find(
         f => f.feature === '最短路径查询'
@@ -128,7 +133,7 @@ describe('GraphDatabaseEvaluationService', () => {
 
       expect(result.recommendations).toBeDefined();
       expect(result.recommendations.length).toBeGreaterThan(0);
-      
+
       // 验证建议格式
       const firstRecommendation = result.recommendations[0];
       expect(firstRecommendation.id).toBeDefined();
@@ -148,23 +153,43 @@ describe('GraphDatabaseEvaluationService', () => {
     it('当前规模较小时应该建议保持当前架构', async () => {
       // 使用小数据规模配置
       const smallDataService = new GraphDatabaseEvaluationService();
-      
+
       const result = await smallDataService.runComprehensiveEvaluation();
 
       // 当前数据规模为100000边，超过50000阈值
       // 需要根据实际返回值判断
-      expect(['keep_current', GraphDatabaseType.NEO4J]).toContain(result.finalVerdict.recommendedDatabase);
+      expect(['keep_current', GraphDatabaseType.NEO4J]).toContain(
+        result.finalVerdict.recommendedDatabase
+      );
     });
   });
 
   describe('runPerformanceTest', () => {
     it('应该成功运行最短路径性能测试', async () => {
       const nodes = [
-        { id: '1', lawName: '法1', articleNumber: '1', category: 'CIVIL', level: 0 },
-        { id: '2', lawName: '法2', articleNumber: '2', category: 'CIVIL', level: 0 },
+        {
+          id: '1',
+          lawName: '法1',
+          articleNumber: '1',
+          category: 'CIVIL',
+          level: 0,
+        },
+        {
+          id: '2',
+          lawName: '法2',
+          articleNumber: '2',
+          category: 'CIVIL',
+          level: 0,
+        },
       ];
       const links = [
-        { source: '1', target: '2', relationType: 'CITES', strength: 0.8, confidence: 0.9 },
+        {
+          source: '1',
+          target: '2',
+          relationType: 'CITES',
+          strength: 0.8,
+          confidence: 0.9,
+        },
       ];
 
       const result = await service.runPerformanceTest({
@@ -190,8 +215,20 @@ describe('GraphDatabaseEvaluationService', () => {
         level: 0,
       }));
       const links = [
-        { source: '0', target: '1', relationType: 'CITES', strength: 0.8, confidence: 0.9 },
-        { source: '1', target: '2', relationType: 'CITES', strength: 0.8, confidence: 0.9 },
+        {
+          source: '0',
+          target: '1',
+          relationType: 'CITES',
+          strength: 0.8,
+          confidence: 0.9,
+        },
+        {
+          source: '1',
+          target: '2',
+          relationType: 'CITES',
+          strength: 0.8,
+          confidence: 0.9,
+        },
       ];
 
       const result = await service.runPerformanceTest({
@@ -208,11 +245,29 @@ describe('GraphDatabaseEvaluationService', () => {
 
     it('应该成功运行连通分量性能测试', async () => {
       const nodes = [
-        { id: '1', lawName: '法1', articleNumber: '1', category: 'CIVIL', level: 0 },
-        { id: '2', lawName: '法2', articleNumber: '2', category: 'CIVIL', level: 0 },
+        {
+          id: '1',
+          lawName: '法1',
+          articleNumber: '1',
+          category: 'CIVIL',
+          level: 0,
+        },
+        {
+          id: '2',
+          lawName: '法2',
+          articleNumber: '2',
+          category: 'CIVIL',
+          level: 0,
+        },
       ];
       const links = [
-        { source: '1', target: '2', relationType: 'CITES', strength: 0.8, confidence: 0.9 },
+        {
+          source: '1',
+          target: '2',
+          relationType: 'CITES',
+          strength: 0.8,
+          confidence: 0.9,
+        },
       ];
 
       const result = await service.runPerformanceTest({
@@ -228,11 +283,29 @@ describe('GraphDatabaseEvaluationService', () => {
 
     it('应该成功运行度中心性性能测试', async () => {
       const nodes = [
-        { id: '1', lawName: '法1', articleNumber: '1', category: 'CIVIL', level: 0 },
-        { id: '2', lawName: '法2', articleNumber: '2', category: 'CIVIL', level: 0 },
+        {
+          id: '1',
+          lawName: '法1',
+          articleNumber: '1',
+          category: 'CIVIL',
+          level: 0,
+        },
+        {
+          id: '2',
+          lawName: '法2',
+          articleNumber: '2',
+          category: 'CIVIL',
+          level: 0,
+        },
       ];
       const links = [
-        { source: '1', target: '2', relationType: 'CITES', strength: 0.8, confidence: 0.9 },
+        {
+          source: '1',
+          target: '2',
+          relationType: 'CITES',
+          strength: 0.8,
+          confidence: 0.9,
+        },
       ];
 
       const result = await service.runPerformanceTest({
@@ -276,11 +349,11 @@ describe('性能基准测试验证', () => {
 
   it('基准测试应该产生有效结果', async () => {
     const result = await service.runComprehensiveEvaluation();
-    
+
     const shortestPathBenchmarks = result.benchmarks.algorithm.filter(
       b => b.algorithm === 'shortestPath'
     );
-    
+
     expect(shortestPathBenchmarks.length).toBeGreaterThan(0);
     shortestPathBenchmarks.forEach(benchmark => {
       expect(benchmark.inMemoryTime).toBeGreaterThanOrEqual(0);
@@ -292,10 +365,10 @@ describe('性能基准测试验证', () => {
 
   it('不同数据规模应该有不同性能特征', async () => {
     const result = await service.runComprehensiveEvaluation();
-    
+
     const benchmarks = result.benchmarks.algorithm;
     const uniqueSizes = [...new Set(benchmarks.map(b => b.dataSize))];
-    
+
     expect(uniqueSizes.length).toBeGreaterThan(0);
   });
 });
@@ -313,7 +386,7 @@ describe('成本估算验证', () => {
 
   it('PostgreSQL存储成本应该最低', async () => {
     const result = await service.runComprehensiveEvaluation();
-    
+
     const storageCosts = result.benchmarks.storage;
     const postgresCost = storageCosts.find(
       s => s.databaseType === GraphDatabaseType.POSTGRESQL
@@ -321,7 +394,7 @@ describe('成本估算验证', () => {
     const neo4jCost = storageCosts.find(
       s => s.databaseType === GraphDatabaseType.NEO4J
     );
-    
+
     expect(postgresCost?.estimatedMonthlyCost).toBeLessThan(
       neo4jCost?.estimatedMonthlyCost || Infinity
     );
@@ -329,9 +402,9 @@ describe('成本估算验证', () => {
 
   it('运维成本估算应该合理', async () => {
     const result = await service.runComprehensiveEvaluation();
-    
+
     const operationalCosts = result.benchmarks.operational;
-    
+
     operationalCosts.forEach(cost => {
       expect(cost.setupComplexity).toMatch(/low|medium|high/);
       expect(cost.maintenanceEffort).toMatch(/low|medium|high/);
@@ -354,9 +427,9 @@ describe('迁移复杂度验证', () => {
 
   it('所有迁移方面应该有评估', async () => {
     const result = await service.runComprehensiveEvaluation();
-    
+
     const aspects = result.migrationComplexity.map(m => m.aspect);
-    
+
     expect(aspects).toContain('数据模型转换');
     expect(aspects).toContain('数据迁移');
     expect(aspects).toContain('API适配');
@@ -364,7 +437,7 @@ describe('迁移复杂度验证', () => {
 
   it('迁移复杂度应该有合理的努力估算', async () => {
     const result = await service.runComprehensiveEvaluation();
-    
+
     result.migrationComplexity.forEach(assessment => {
       expect(assessment.effortDays).toBeGreaterThan(0);
       expect(assessment.complexity).toMatch(/low|medium|high/);

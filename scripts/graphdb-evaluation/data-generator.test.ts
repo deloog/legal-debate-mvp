@@ -4,11 +4,7 @@
  */
 
 import { DataGenerator } from './data-generator';
-import {
-  TestArticle,
-  TestRelation,
-  DataScale,
-} from './types';
+import { TestArticle, TestRelation, DataScale } from './types';
 
 describe('DataGenerator', () => {
   describe('generateArticles', () => {
@@ -101,7 +97,9 @@ describe('DataGenerator', () => {
 
     it('应该使用存在的法条ID', () => {
       const relations = DataGenerator.generateRelations(100, testArticles);
-      const articleIds = new Set(testArticles.map((art: TestArticle) => art.id));
+      const articleIds = new Set(
+        testArticles.map((art: TestArticle) => art.id)
+      );
 
       relations.forEach((relation: TestRelation) => {
         expect(articleIds.has(relation.sourceId)).toBeTruthy();
@@ -197,7 +195,9 @@ describe('DataGenerator', () => {
         degreeMap.set(rel.targetId, (degreeMap.get(rel.targetId) || 0) + 1);
       });
 
-      const avgDegree = Array.from(degreeMap.values()).reduce((sum, deg) => sum + deg, 0) / degreeMap.size;
+      const avgDegree =
+        Array.from(degreeMap.values()).reduce((sum, deg) => sum + deg, 0) /
+        degreeMap.size;
 
       // 允许一定的误差范围
       expect(Math.abs(avgDegree - scale.averageDegree)).toBeLessThan(2);
@@ -235,7 +235,15 @@ describe('DataGenerator', () => {
 
     it('应该生成包含法律术语的全文', () => {
       const fullText = DataGenerator.generateFullText();
-      const legalTerms = ['应当', '不得', '可以', '必须', '禁止', '依照', '按照'];
+      const legalTerms = [
+        '应当',
+        '不得',
+        '可以',
+        '必须',
+        '禁止',
+        '依照',
+        '按照',
+      ];
 
       const hasLegalTerm = legalTerms.some(term => fullText.includes(term));
       expect(hasLegalTerm).toBeTruthy();

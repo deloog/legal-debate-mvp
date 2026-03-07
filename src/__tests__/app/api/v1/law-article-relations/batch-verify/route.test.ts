@@ -322,7 +322,9 @@ describe('POST /api/v1/law-article-relations/batch-verify', () => {
 
   describe('权限验证', () => {
     it('应该拒绝权限不足的请求', async () => {
-      const { checkKnowledgeGraphPermission } = require('@/lib/middleware/knowledge-graph-permission');
+      const {
+        checkKnowledgeGraphPermission,
+      } = require('@/lib/middleware/knowledge-graph-permission');
       (checkKnowledgeGraphPermission as jest.Mock).mockResolvedValue({
         hasPermission: false,
         reason: '权限不足',
@@ -371,7 +373,9 @@ describe('POST /api/v1/law-article-relations/batch-verify', () => {
 
       await POST(request as any);
 
-      const { logKnowledgeGraphAction } = require('@/lib/middleware/knowledge-graph-permission');
+      const {
+        logKnowledgeGraphAction,
+      } = require('@/lib/middleware/knowledge-graph-permission');
       expect(logKnowledgeGraphAction).toHaveBeenCalledWith({
         userId: 'admin-123',
         action: 'BATCH_VERIFY',
@@ -409,7 +413,9 @@ describe('POST /api/v1/law-article-relations/batch-verify', () => {
 
       await POST(request as any);
 
-      const { logKnowledgeGraphAction } = require('@/lib/middleware/knowledge-graph-permission');
+      const {
+        logKnowledgeGraphAction,
+      } = require('@/lib/middleware/knowledge-graph-permission');
       expect(logKnowledgeGraphAction).toHaveBeenCalledWith({
         userId: 'admin-123',
         action: 'BATCH_VERIFY',
@@ -424,7 +430,9 @@ describe('POST /api/v1/law-article-relations/batch-verify', () => {
 
   describe('错误处理', () => {
     it('应该处理关系不存在的情况', async () => {
-      (prisma.lawArticleRelation.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.lawArticleRelation.findUnique as jest.Mock).mockResolvedValue(
+        null
+      );
 
       const request = new Request(
         'http://localhost:3000/api/v1/law-article-relations/batch-verify',
@@ -515,7 +523,11 @@ describe('POST /api/v1/law-article-relations/batch-verify', () => {
       const response = await POST(request as any);
       const data = (await response.json()) as {
         success: boolean;
-        data?: { successCount: number; failedCount: number; results: unknown[] };
+        data?: {
+          successCount: number;
+          failedCount: number;
+          results: unknown[];
+        };
       };
 
       expect(response.status).toBe(200);
@@ -575,7 +587,9 @@ describe('POST /api/v1/law-article-relations/batch-verify', () => {
     });
 
     it('应该在日志记录失败时不影响主流程', async () => {
-      const { logKnowledgeGraphAction } = require('@/lib/middleware/knowledge-graph-permission');
+      const {
+        logKnowledgeGraphAction,
+      } = require('@/lib/middleware/knowledge-graph-permission');
       (logKnowledgeGraphAction as jest.Mock).mockRejectedValue(
         new Error('日志记录失败')
       );

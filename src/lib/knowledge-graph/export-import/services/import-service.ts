@@ -14,7 +14,7 @@ export class ImportService {
   async importData(
     prisma: Prisma.TransactionClient | PrismaClient,
     data: unknown,
-    options: ImportOptions,
+    options: ImportOptions
   ): Promise<ImportResult> {
     const startTime = Date.now();
 
@@ -31,7 +31,12 @@ export class ImportService {
       this.validateData(graphData);
 
       // 导入数据
-      const result = await this.importGraphData(prisma, graphData, options, startTime);
+      const result = await this.importGraphData(
+        prisma,
+        graphData,
+        options,
+        startTime
+      );
 
       logger.info('知识图谱数据导入完成', {
         nodeCount: result.importedNodes,
@@ -104,7 +109,9 @@ export class ImportService {
   /**
    * 验证数据
    */
-  private validateData(data: unknown): asserts data is { nodes: unknown[]; edges: unknown[] } {
+  private validateData(
+    data: unknown
+  ): asserts data is { nodes: unknown[]; edges: unknown[] } {
     if (!data || typeof data !== 'object') {
       throw new Error('导入数据格式无效');
     }
@@ -163,7 +170,7 @@ export class ImportService {
     prisma: Prisma.TransactionClient | PrismaClient,
     graphData: { nodes: unknown[]; edges: unknown[] },
     options: ImportOptions,
-    startTime: number,
+    startTime: number
   ): Promise<ImportResult> {
     let importedNodes = 0;
     let importedEdges = 0;
@@ -173,14 +180,15 @@ export class ImportService {
     const warnings: ImportError[] = [];
 
     // 使用事务确保数据一致性
-    const result = await (prisma as PrismaClient).$transaction(async (tx) => {
+    const result = await (prisma as PrismaClient).$transaction(async tx => {
       // 导入节点
       for (const node of graphData.nodes) {
         try {
           await this.importNode(tx, node as Record<string, unknown>, options);
           importedNodes++;
         } catch (error) {
-          const errorMsg = error instanceof Error ? error.message : String(error);
+          const errorMsg =
+            error instanceof Error ? error.message : String(error);
           errors.push({
             type: 'INVALID_DATA',
             entity: 'node',
@@ -202,7 +210,11 @@ export class ImportService {
       // 导入边
       for (const edge of graphData.edges) {
         try {
-          const importResult = await this.importEdge(tx, edge as Record<string, unknown>, options);
+          const importResult = await this.importEdge(
+            tx,
+            edge as Record<string, unknown>,
+            options
+          );
           if (importResult === 'created') {
             importedEdges++;
           } else if (importResult === 'skipped') {
@@ -211,7 +223,8 @@ export class ImportService {
             updatedEdges++;
           }
         } catch (error) {
-          const errorMsg = error instanceof Error ? error.message : String(error);
+          const errorMsg =
+            error instanceof Error ? error.message : String(error);
           errors.push({
             type: 'INVALID_DATA',
             entity: 'edge',
@@ -255,7 +268,7 @@ export class ImportService {
   private async importNode(
     prisma: Prisma.TransactionClient | PrismaClient,
     node: Record<string, unknown>,
-    options: ImportOptions,
+    options: ImportOptions
   ): Promise<void> {
     const nodeId = node.id as string;
 
@@ -271,16 +284,42 @@ export class ImportService {
 
     const nodeData: Prisma.LawArticleCreateInput = {
       id: nodeId,
-      lawName: (node.lawName as string) || node.label as string,
+      lawName: (node.lawName as string) || (node.label as string),
       articleNumber: (node.articleNumber as string) || '',
       fullText: (node.fullText as string) || '',
-      lawType: (node.lawType as string) as 'CONSTITUTION' | 'LAW' | 'ADMINISTRATIVE_REGULATION' | 'LOCAL_REGULATION' | 'JUDICIAL_INTERPRETATION' | 'DEPARTMENTAL_RULE' | 'OTHER' || 'LAW',
-      category: (node.category as string) as 'CIVIL' | 'CRIMINAL' | 'ADMINISTRATIVE' | 'COMMERCIAL' | 'ECONOMIC' | 'LABOR' | 'INTELLECTUAL_PROPERTY' | 'PROCEDURE' | 'OTHER' || 'OTHER',
+      lawType:
+        (node.lawType as string as
+          | 'CONSTITUTION'
+          | 'LAW'
+          | 'ADMINISTRATIVE_REGULATION'
+          | 'LOCAL_REGULATION'
+          | 'JUDICIAL_INTERPRETATION'
+          | 'DEPARTMENTAL_RULE'
+          | 'OTHER') || 'LAW',
+      category:
+        (node.category as string as
+          | 'CIVIL'
+          | 'CRIMINAL'
+          | 'ADMINISTRATIVE'
+          | 'COMMERCIAL'
+          | 'ECONOMIC'
+          | 'LABOR'
+          | 'INTELLECTUAL_PROPERTY'
+          | 'PROCEDURE'
+          | 'OTHER') || 'OTHER',
       tags: (node.tags as string[]) || [],
-      effectiveDate: node.effectiveDate ? new Date(node.effectiveDate as string) : new Date(),
-      status: (node.status as string) as 'DRAFT' | 'VALID' | 'AMENDED' | 'REPEALED' | 'EXPIRED' || 'VALID',
+      effectiveDate: node.effectiveDate
+        ? new Date(node.effectiveDate as string)
+        : new Date(),
+      status:
+        (node.status as string as
+          | 'DRAFT'
+          | 'VALID'
+          | 'AMENDED'
+          | 'REPEALED'
+          | 'EXPIRED') || 'VALID',
       issuingAuthority: 'UNKNOWN',
-      searchableText: (node.fullText as string) || node.label as string,
+      searchableText: (node.fullText as string) || (node.label as string),
     };
 
     if (existingNode && options.mergeStrategy === 'update') {
@@ -306,7 +345,7 @@ export class ImportService {
   private async importEdge(
     prisma: Prisma.TransactionClient | PrismaClient,
     edge: Record<string, unknown>,
-    options: ImportOptions,
+    options: ImportOptions
   ): Promise<'created' | 'skipped' | 'updated'> {
     const edgeId = edge.id as string;
     const sourceId = edge.source as string;
@@ -344,12 +383,34 @@ export class ImportService {
       id: edgeId,
       source: { connect: { id: sourceId } },
       target: { connect: { id: targetId } },
-      relationType: (edge.relationType as string) as 'CITES' | 'CITED_BY' | 'CONFLICTS' | 'COMPLETES' | 'COMPLETED_BY' | 'SUPERSEDES' | 'SUPERSEDED_BY' | 'IMPLEMENTS' | 'IMPLEMENTED_BY' | 'RELATED' || 'RELATED',
+      relationType:
+        (edge.relationType as string as
+          | 'CITES'
+          | 'CITED_BY'
+          | 'CONFLICTS'
+          | 'COMPLETES'
+          | 'COMPLETED_BY'
+          | 'SUPERSEDES'
+          | 'SUPERSEDED_BY'
+          | 'IMPLEMENTS'
+          | 'IMPLEMENTED_BY'
+          | 'RELATED') || 'RELATED',
       strength: (edge.strength as number) ?? 1.0,
       confidence: (edge.confidence as number) ?? 1.0,
-      discoveryMethod: (edge.discoveryMethod as string) as 'MANUAL' | 'RULE_BASED' | 'AI_DETECTED' | 'CASE_DERIVED' || 'MANUAL',
-      verificationStatus: (edge.verificationStatus as string) as 'PENDING' | 'VERIFIED' | 'REJECTED' || 'PENDING',
-      createdAt: edge.createdAt ? new Date(edge.createdAt as string) : new Date(),
+      discoveryMethod:
+        (edge.discoveryMethod as string as
+          | 'MANUAL'
+          | 'RULE_BASED'
+          | 'AI_DETECTED'
+          | 'CASE_DERIVED') || 'MANUAL',
+      verificationStatus:
+        (edge.verificationStatus as string as
+          | 'PENDING'
+          | 'VERIFIED'
+          | 'REJECTED') || 'PENDING',
+      createdAt: edge.createdAt
+        ? new Date(edge.createdAt as string)
+        : new Date(),
     };
 
     // 可选字段

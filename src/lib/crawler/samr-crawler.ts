@@ -22,20 +22,22 @@
  * - 切换到 samr.gov.cn 作为主要数据源
  */
 
-import * as path from 'path';
 import type { Prisma } from '@prisma/client';
+import * as path from 'path';
 import { BaseCrawler, CrawlerResult, LawArticleData } from './base-crawler';
 import type {
+  ClauseType,
+  ContractCategory,
   ContractTemplateData,
   ContractTemplateSource,
-  TemplatePriority,
-  ClauseType,
   RiskLevel,
-  TemplateVariable,
-  TemplateClause,
   RiskWarning,
+  TemplateClause,
+  TemplatePriority,
+  TemplateVariable,
 } from './contract-template-types';
 import { getLogger } from './crawler-logger';
+import { SAMRPlaywrightCrawler } from './samr-playwright';
 
 // 数据源配置
 export const SAMR_CONFIG = {
@@ -115,6 +117,14 @@ interface SAMRCrawlOptions {
   maxItems?: number;
   outputDir?: string;
   useRealApi?: boolean; // 是否使用真实API
+  usePlaywright?: boolean; // 是否使用 Playwright
+}
+
+// 解析选项
+interface SAMRParseOptions {
+  types?: string[];
+  maxAttempts?: number;
+  outputDir?: string;
 }
 
 // 统计信息
@@ -123,6 +133,69 @@ interface SAMRStats {
   success: number;
   failed: number;
   byCategory: Record<string, number>;
+}
+
+// 下载检查点 - 用于两阶段架构
+interface SAMRDownloadCheckpoint {
+  timestamp: string;
+  templates: SAMRDownloadedItem[];
+}
+
+interface SAMRDownloadedItem {
+  id: string;
+  title: string;
+  category: string;
+  filePath: string;
+  fileType: 'docx' | 'pdf' | 'html' | 'content';
+  sourceUrl: string;
+  downloadedAt: string;
+  content?: string; // 直接从网页提取的内容
+}
+
+// 解析结果 - 用于两阶段架构
+interface SAMRParseResults {
+  timestamp: string;
+  items: SAMRParseResultItem[];
+}
+
+interface SAMRParseResultItem {
+  id: string;
+  title: string;
+  content: string;
+  parseMethod: string;
+  parsedAt: string;
+  success: boolean;
+  error?: string;
+}
+
+// 错误统计信息
+interface SAMRErrorStats {
+  totalErrors: number;
+  errorsByType: Record<string, number>;
+  errorsByItem: Record<string, string>;
+  lastErrorAt: string;
+  consecutiveFailures: number;
+  recoveryAttempts: number;
+}
+
+// API响应数据类型
+interface SAMRApiResponseItem {
+  id?: string;
+  htlbId?: string;
+  contractId?: string;
+  title?: string;
+  htlbName?: string;
+  contractName?: string;
+  category?: string;
+  htlbCategory?: string;
+  publishDate?: string;
+  gbrq?: string;
+  downloadCount?: number;
+  xzCount?: number;
+  sourceUrl?: string;
+  detailUrl?: string;
+  docxUrl?: string;
+  fileUrl?: string;
 }
 
 // API响应类型
@@ -637,6 +710,22 @@ export class SAMRCrawler extends BaseCrawler {
   /** 日志系统 */
   private logger = getLogger('SAMRCrawler');
 
+  /** 错误统计 */
+  private errorStats: SAMRErrorStats = {
+    totalErrors: 0,
+    errorsByType: {},
+    errorsByItem: {},
+    lastErrorAt: '',
+    consecutiveFailures: 0,
+    recoveryAttempts: 0,
+  };
+
+  /** 最大连续失败次数，超过则触发告警 */
+  private readonly MAX_CONSECUTIVE_FAILURES = 5;
+
+  /** 错误告警回调 */
+  private errorAlertCallback?: (stats: SAMRErrorStats) => void;
+
   /** User-Agent 池 */
   private static readonly UA_POOL = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -782,6 +871,300 @@ export class SAMRCrawler extends BaseCrawler {
   }
 
   /**
+   * 两阶段架构 - Phase 1: 下载阶段
+   * 从 API/Playwright 获取数据并下载到磁盘
+   */
+  async downloadAll(options?: SAMRCrawlOptions): Promise<CrawlerResult> {
+    const startTime = Date.now();
+    const outputDir = options?.outputDir || this.__DEFAULT_OUTPUT_DIR;
+    const allErrors: string[] = [];
+    const downloadedItems: SAMRDownloadedItem[] = [];
+
+    this.updateProgress({
+      status: 'running',
+      startedAt: new Date(),
+      errors: [],
+    });
+
+    try {
+      let templates: SAMRContractListItem[] = [];
+
+      // 根据配置选择采集方式
+      if (options?.usePlaywright) {
+        // 使用 Playwright 采集（真实网站数据）
+        const playwright = new SAMRPlaywrightCrawler({
+          downloadDir: path.join(outputDir, 'downloads'),
+          rateLimitDelay: this.config.rateLimitDelay,
+        });
+
+        try {
+          // 获取列表
+          const nationalResult = await playwright.gotoNationalList(1);
+          const localResult = await playwright.gotoLocalList(1);
+          templates = [...nationalResult.items, ...localResult.items];
+
+          this.logger.info(`下载阶段: 获取 ${templates.length} 个模板`);
+          this.updateProgress({
+            totalItems: templates.length,
+            currentItem: '开始下载文件',
+          });
+
+          // 下载每个模板的文件
+          for (let i = 0; i < templates.length; i++) {
+            const template = templates[i];
+            this.updateProgress({
+              processedItems: i,
+              currentItem: `下载 ${template.title}`,
+            });
+
+            try {
+              // 访问详情页获取内容
+              if (template.sourceUrl) {
+                const detailResult = await playwright.gotoDetail(
+                  template.sourceUrl
+                );
+
+                // 新版网站直接将内容渲染在HTML中，提取内容
+                if (detailResult.content) {
+                  // 保存内容到文件
+                  const fs = await import('fs');
+                  const contentDir = path.join(outputDir, 'content');
+                  if (!fs.existsSync(contentDir)) {
+                    fs.mkdirSync(contentDir, { recursive: true });
+                  }
+                  const fileName = `${template.id}-${template.title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')}.txt`;
+                  const filePath = path.join(contentDir, fileName);
+                  fs.writeFileSync(filePath, detailResult.content, 'utf-8');
+
+                  downloadedItems.push({
+                    id: template.id,
+                    title: template.title,
+                    category: template.category,
+                    filePath,
+                    fileType: 'content',
+                    sourceUrl: template.sourceUrl,
+                    downloadedAt: new Date().toISOString(),
+                    content: detailResult.content,
+                  });
+                }
+              }
+
+              // 添加延迟避免请求过快
+              await this.randomDelay();
+            } catch (downloadError) {
+              const errorMsg = `获取内容失败 [${template.title}]: ${downloadError}`;
+              allErrors.push(errorMsg);
+              this.logger.warn(errorMsg);
+            }
+          }
+        } finally {
+          await playwright.close();
+        }
+      } else {
+        // 使用种子数据（后备方案）- 不下载真实文件
+        templates = await this.fetchContractList(options);
+        this.logger.info(
+          `下载阶段: 获取 ${templates.length} 个模板（种子数据模式）`
+        );
+      }
+
+      // 保存检查点
+      const checkpoint: SAMRDownloadCheckpoint = {
+        timestamp: new Date().toISOString(),
+        templates: downloadedItems,
+      };
+      await this.saveDownloadCheckpoint(outputDir, checkpoint);
+
+      const duration = Date.now() - startTime;
+
+      return {
+        success: allErrors.length === 0,
+        itemsCrawled: templates.length,
+        itemsCreated: downloadedItems.length,
+        itemsUpdated: 0,
+        errors: allErrors,
+        duration,
+      };
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
+      return {
+        success: false,
+        itemsCrawled: 0,
+        itemsCreated: 0,
+        itemsUpdated: 0,
+        errors: [errorMessage],
+        duration,
+      };
+    }
+  }
+
+  /**
+   * 两阶段架构 - Phase 2: 解析阶段
+   * 从磁盘读取文件并使用多方法解析后写入数据库
+   */
+  async parseAll(options?: SAMRParseOptions): Promise<CrawlerResult> {
+    const startTime = Date.now();
+    const outputDir = options?.outputDir || this.__DEFAULT_OUTPUT_DIR;
+
+    this.updateProgress({
+      status: 'running',
+      startedAt: new Date(),
+      errors: [],
+    });
+
+    // 加载下载检查点
+    const checkpoint = await this.loadDownloadCheckpoint(outputDir);
+
+    if (!checkpoint || checkpoint.templates.length === 0) {
+      this.logger.warn('未找到下载文件，检查点为空，将使用种子数据模式');
+      // 回退到种子数据模式 - 简化处理，直接返回空结果
+      return {
+        success: true,
+        itemsCrawled: 0,
+        itemsCreated: 0,
+        itemsUpdated: 0,
+        errors: [],
+        duration: Date.now() - startTime,
+      };
+    }
+
+    let successCount = 0;
+    const allErrors: string[] = [];
+    const parseResults: SAMRParseResultItem[] = [];
+    const fs = await import('fs');
+
+    this.updateProgress({
+      totalItems: checkpoint.templates.length,
+      currentItem: '开始解析文件',
+    });
+
+    for (let i = 0; i < checkpoint.templates.length; i++) {
+      const item = checkpoint.templates[i];
+      this.updateProgress({
+        processedItems: i,
+        currentItem: `解析 ${item.title}`,
+      });
+
+      try {
+        // 检查文件是否存在
+        if (!fs.existsSync(item.filePath)) {
+          throw new Error(`文件不存在: ${item.filePath}`);
+        }
+
+        let content = '';
+        let parseMethod = '';
+
+        // 根据文件类型使用多方法解析
+        if (item.fileType === 'docx') {
+          const fileBuffer = await fs.promises.readFile(item.filePath);
+          content = await this.parseDocxFile(fileBuffer, item.id);
+          parseMethod = 'multi-method-docx';
+        } else if (item.fileType === 'pdf') {
+          const fileBuffer = await fs.promises.readFile(item.filePath);
+          content = await this.parsePdfFile(fileBuffer);
+          parseMethod = 'pdf-parse';
+        } else if (item.fileType === 'content') {
+          // 新版网站：直接从文件读取内容
+          content = await fs.promises.readFile(item.filePath, 'utf-8');
+          parseMethod = 'direct-content';
+        } else {
+          // HTML 文件直接读取内容
+          const fileBuffer = await fs.promises.readFile(item.filePath);
+          content = fileBuffer.toString('utf-8');
+          parseMethod = 'raw-text';
+        }
+
+        if (!content || content.length < 20) {
+          throw new Error('解析结果内容过短');
+        }
+
+        // 使用解析内容生成模板数据
+        const category = this.mapCategory(item.category);
+        const templateData: ContractTemplateData = {
+          name: item.title,
+          code: item.id,
+          category: category as ContractCategory,
+          subCategory: item.category,
+          description: `${item.category}合同示范文本`,
+          source: SAMR_CONFIG.source,
+          sourceUrl: item.sourceUrl,
+          sourceId: item.id,
+          publishedDate: new Date(),
+          effectiveDate: new Date(),
+          version: '1.0',
+          isLatest: true,
+          priority: this.determinePriority(item.category),
+          fullText: content,
+          content: this.extractMainContent(content),
+          variables: this.generateVariables(item.title, category),
+          clauses: this.generateClauses(item.title, category),
+          riskWarnings: this.generateRiskWarnings(item.title, category),
+          usageGuide: this.generateUsageGuide(item.title, category),
+        };
+
+        // 保存到数据库
+        await this.saveTemplate(templateData);
+        successCount++;
+
+        parseResults.push({
+          id: item.id,
+          title: item.title,
+          content: content.substring(0, 100), // 只保存前100字符用于记录
+          parseMethod,
+          parsedAt: new Date().toISOString(),
+          success: true,
+        });
+      } catch (error) {
+        const errorMsg = `解析失败 [${item.title}]: ${error}`;
+        allErrors.push(errorMsg);
+        this.logger.error(errorMsg, error);
+
+        parseResults.push({
+          id: item.id,
+          title: item.title,
+          content: '',
+          parseMethod: 'failed',
+          parsedAt: new Date().toISOString(),
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+
+      // 添加延迟避免解析过快
+      await this.randomDelay();
+    }
+
+    // 保存解析结果
+    const results: SAMRParseResults = {
+      timestamp: new Date().toISOString(),
+      items: parseResults,
+    };
+    await this.saveParseResults(outputDir, results);
+
+    const duration = Date.now() - startTime;
+    this.updateProgress({ status: 'completed', completedAt: new Date() });
+
+    return {
+      success: allErrors.length === 0,
+      itemsCrawled: checkpoint.templates.length,
+      itemsCreated: successCount,
+      itemsUpdated: 0,
+      errors: allErrors,
+      duration,
+    };
+  }
+
+  /**
+   * 重新解析失败的文件
+   */
+  async reparseFailed(options?: SAMRParseOptions): Promise<CrawlerResult> {
+    return this.parseAll({ ...options, maxAttempts: 1 });
+  }
+
+  /**
    * 分页获取合同模板列表
    */
   async fetchContractListWithPagination(
@@ -893,7 +1276,7 @@ export class SAMRCrawler extends BaseCrawler {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(searchPayload),
         });
-        const response = rawResponse as SAMRApiResponse<any>;
+        const response = rawResponse as SAMRApiResponse<SAMRApiResponseItem>;
 
         if (response.code === 200 && response.data) {
           this.logger.info('使用12315.cn API获取数据');
@@ -913,7 +1296,7 @@ export class SAMRCrawler extends BaseCrawler {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(searchPayload),
         });
-        const response = rawResponse as SAMRApiResponse<any>;
+        const response = rawResponse as SAMRApiResponse<SAMRApiResponseItem>;
 
         if (response.code === 200 && response.data) {
           this.logger.info('使用SAMR备用API获取数据');
@@ -931,10 +1314,10 @@ export class SAMRCrawler extends BaseCrawler {
    * 解析API响应
    */
   private parseApiResponse(
-    response: SAMRApiResponse<any>
+    response: SAMRApiResponse<SAMRApiResponseItem>
   ): SAMRContractListItem[] {
     if (response.rows) {
-      return response.rows.map((item: any) => ({
+      return response.rows.map((item: SAMRApiResponseItem) => ({
         id: item.id || item.htlbId || item.contractId,
         title: item.title || item.htlbName || item.contractName,
         category: item.category || item.htlbCategory || '',
@@ -987,7 +1370,8 @@ export class SAMRCrawler extends BaseCrawler {
       } catch (error) {
         lastError = error as Error;
         if (attempt < maxRetries) {
-          const waitTime = attempt * 2000;
+          // 重试间隔：2-5秒之间随机
+          const waitTime = 2000 + Math.random() * 3000;
           await this.delay(waitTime);
         }
       }
@@ -1012,7 +1396,7 @@ export class SAMRCrawler extends BaseCrawler {
       // 基本信息
       name: item.title.replace('（示范文本）', ''),
       code: item.id,
-      category: category as any,
+      category: category as ContractCategory,
       subCategory: item.category,
       description: `${item.category}合同示范文本，由国家市场监督管理总局发布。${item.title}是官方提供的标准合同范本，适用于${item.category}场景。`,
 
@@ -2362,7 +2746,7 @@ ${categoryInfo.miscellaneous}
       where: { code: data.code },
     });
 
-    const templateData = {
+    const templateData: Prisma.ContractTemplateCreateInput = {
       name: data.name,
       code: data.code,
       category: data.category,
@@ -2393,7 +2777,7 @@ ${categoryInfo.miscellaneous}
       });
     } else {
       await prisma.contractTemplate.create({
-        data: templateData as any,
+        data: templateData,
       });
     }
   }
@@ -2443,6 +2827,303 @@ ${categoryInfo.miscellaneous}
         ).length,
       },
     };
+  }
+
+  /**
+   * 多方法解析 DOCX 文件
+   * 尝试多种解析方法，选择结果最好的一个
+   */
+  async parseDocxFile(buffer: Buffer, sourceId: string): Promise<string> {
+    const results: { method: string; text: string; length: number }[] = [];
+
+    // 方法 1: 使用增强型 docx-parser
+    try {
+      const { docxParser } = await import('./docx-parser');
+      const doc = await docxParser.parse(buffer, `samr://${sourceId}`);
+      if (doc?.fullText && doc.fullText.length > 20) {
+        results.push({
+          method: 'docx-parser',
+          text: doc.fullText,
+          length: doc.fullText.length,
+        });
+      }
+    } catch (error) {
+      this.logger.warn('docx-parser 解析失败', {
+        sourceId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    // 方法 2: 使用 mammoth
+    try {
+      const mammoth = await import('mammoth');
+      const result = await mammoth.extractRawText({ buffer });
+      if (result.value && result.value.length > 20) {
+        results.push({
+          method: 'mammoth',
+          text: result.value,
+          length: result.value.length,
+        });
+      }
+    } catch (error) {
+      this.logger.warn('mammoth 解析失败', {
+        sourceId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    // 方法 3: 直接提取 XML 文本
+    try {
+      const text = await this.extractTextFromZip(buffer);
+      if (text && text.length > 20) {
+        results.push({
+          method: 'xml-extraction',
+          text,
+          length: text.length,
+        });
+      }
+    } catch (error) {
+      this.logger.warn('XML 提取失败', {
+        sourceId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    // 选择最长的结果
+    if (results.length > 0) {
+      results.sort((a, b) => b.length - a.length);
+      const bestResult = results[0];
+      this.logger.info(`使用 ${bestResult.method} 解析`, {
+        sourceId,
+        length: bestResult.length,
+        methods: results.map(r => r.method),
+      });
+      return bestResult.text;
+    }
+
+    throw new Error('所有 DOCX 解析方式均失败');
+  }
+
+  /**
+   * 从 DOCX ZIP 包中直接提取文本
+   */
+  private async extractTextFromZip(buffer: Buffer): Promise<string> {
+    const jszip = await import('jszip');
+    const zip = await jszip.loadAsync(buffer);
+    const docXml = zip.file('word/document.xml');
+    if (!docXml) return '';
+
+    const xmlContent = await docXml.async('string');
+
+    // 简单的 XML 文本提取：去除标签，保留文本内容
+    const text = xmlContent
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&apos;/g, "'")
+      .replace(/&quot;/g, '"')
+      .trim();
+
+    return text;
+  }
+
+  /**
+   * 解析 PDF 文件（使用 pdf-parse）
+   * 如果解析失败，返回空字符串
+   */
+  async parsePdfFile(buffer: Buffer): Promise<string> {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const pdfParse = require('pdf-parse') as (
+        buffer: Buffer
+      ) => Promise<{ text: string }>;
+      const data = await pdfParse(buffer);
+      return data.text || '';
+    } catch (error) {
+      this.logger.error('PDF 解析失败', error);
+      return '';
+    }
+  }
+
+  /**
+   * 保存下载检查点
+   */
+  private async saveDownloadCheckpoint(
+    outDir: string,
+    checkpoint: SAMRDownloadCheckpoint
+  ): Promise<void> {
+    const fs = await import('fs');
+    const checkpointPath = path.join(outDir, 'samr-download-checkpoint.json');
+    fs.writeFileSync(
+      checkpointPath,
+      JSON.stringify(checkpoint, null, 2),
+      'utf-8'
+    );
+  }
+
+  /**
+   * 加载下载检查点
+   */
+  private async loadDownloadCheckpoint(
+    outDir: string
+  ): Promise<SAMRDownloadCheckpoint | null> {
+    const fs = await import('fs');
+    const checkpointPath = path.join(outDir, 'samr-download-checkpoint.json');
+    if (!fs.existsSync(checkpointPath)) {
+      return null;
+    }
+    try {
+      const content = fs.readFileSync(checkpointPath, 'utf-8');
+      return JSON.parse(content) as SAMRDownloadCheckpoint;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * 保存解析结果
+   */
+  private async saveParseResults(
+    outDir: string,
+    results: SAMRParseResults
+  ): Promise<void> {
+    const fs = await import('fs');
+    const resultsPath = path.join(outDir, 'samr-parse-results.json');
+    fs.writeFileSync(resultsPath, JSON.stringify(results, null, 2), 'utf-8');
+  }
+
+  /**
+   * 加载解析结果
+   */
+  private async loadParseResults(
+    outDir: string
+  ): Promise<SAMRParseResults | null> {
+    const fs = await import('fs');
+    const resultsPath = path.join(outDir, 'samr-parse-results.json');
+    if (!fs.existsSync(resultsPath)) {
+      return null;
+    }
+    try {
+      const content = fs.readFileSync(resultsPath, 'utf-8');
+      return JSON.parse(content) as SAMRParseResults;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * 记录错误并更新统计
+   */
+  private trackError(
+    errorType: string,
+    itemId: string,
+    errorMessage: string
+  ): void {
+    this.errorStats.totalErrors++;
+    this.errorStats.errorsByType[errorType] =
+      (this.errorStats.errorsByType[errorType] || 0) + 1;
+    this.errorStats.errorsByItem[itemId] = errorMessage;
+    this.errorStats.lastErrorAt = new Date().toISOString();
+    this.errorStats.consecutiveFailures++;
+
+    // 检查是否超过连续失败阈值
+    if (this.errorStats.consecutiveFailures >= this.MAX_CONSECUTIVE_FAILURES) {
+      this.triggerErrorAlert();
+    }
+  }
+
+  /**
+   * 记录成功，重置连续失败计数
+   */
+  private trackSuccess(): void {
+    this.errorStats.consecutiveFailures = 0;
+  }
+
+  /**
+   * 触发错误告警
+   */
+  private triggerErrorAlert(): void {
+    const message = `⚠️ SAMRCrawler 错误告警：连续 ${this.errorStats.consecutiveFailures} 次失败！`;
+    this.logger.error(message);
+
+    // 调用告警回调
+    if (this.errorAlertCallback) {
+      this.errorAlertCallback(this.errorStats);
+    }
+  }
+
+  /**
+   * 设置错误告警回调
+   */
+  setErrorAlertCallback(callback: (stats: SAMRErrorStats) => void): void {
+    this.errorAlertCallback = callback;
+  }
+
+  /**
+   * 获取错误统计信息
+   */
+  getErrorStats(): SAMRErrorStats {
+    return { ...this.errorStats };
+  }
+
+  /**
+   * 重置错误统计
+   */
+  resetErrorStats(): void {
+    this.errorStats = {
+      totalErrors: 0,
+      errorsByType: {},
+      errorsByItem: {},
+      lastErrorAt: '',
+      consecutiveFailures: 0,
+      recoveryAttempts: 0,
+    };
+  }
+
+  /**
+   * 手动触发恢复重试
+   */
+  async retryFailedItems(options?: SAMRParseOptions): Promise<CrawlerResult> {
+    this.errorStats.recoveryAttempts++;
+    this.logger.info(
+      `开始重试失败项，第 ${this.errorStats.recoveryAttempts} 次尝试`
+    );
+
+    // 使用 parseAll 进行重试
+    return this.parseAll(options);
+  }
+
+  /**
+   * 保存错误统计到文件
+   */
+  async saveErrorStats(outputDir: string): Promise<void> {
+    const fs = await import('fs');
+    const statsPath = path.join(outputDir, 'samr-error-stats.json');
+    fs.writeFileSync(
+      statsPath,
+      JSON.stringify(this.errorStats, null, 2),
+      'utf-8'
+    );
+  }
+
+  /**
+   * 从文件加载错误统计
+   */
+  async loadErrorStats(outputDir: string): Promise<boolean> {
+    const fs = await import('fs');
+    const statsPath = path.join(outputDir, 'samr-error-stats.json');
+    if (!fs.existsSync(statsPath)) {
+      return false;
+    }
+    try {
+      const content = fs.readFileSync(statsPath, 'utf-8');
+      this.errorStats = JSON.parse(content);
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 

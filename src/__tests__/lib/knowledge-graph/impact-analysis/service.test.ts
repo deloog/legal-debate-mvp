@@ -14,7 +14,12 @@ import {
   type RelationUpdateInput,
   type BatchUpdateResult,
 } from '@/lib/knowledge-graph/impact-analysis/types';
-import { RelationType, VerificationStatus, DiscoveryMethod, LawStatus } from '@prisma/client';
+import {
+  RelationType,
+  VerificationStatus,
+  DiscoveryMethod,
+  LawStatus,
+} from '@prisma/client';
 
 // Mock Prisma client
 jest.mock('@/lib/db/prisma', () => ({
@@ -93,7 +98,9 @@ describe('ImpactAnalysisService', () => {
       ];
 
       mockPrisma.lawArticle.findUnique.mockResolvedValue(mockArticle as never);
-      mockPrisma.lawArticleRelation.findMany.mockResolvedValue(mockRelations as never);
+      mockPrisma.lawArticleRelation.findMany.mockResolvedValue(
+        mockRelations as never
+      );
 
       const result = await ImpactAnalysisService.analyzeImpact(input);
 
@@ -141,7 +148,9 @@ describe('ImpactAnalysisService', () => {
       ];
 
       mockPrisma.lawArticle.findUnique.mockResolvedValue(mockArticle as never);
-      mockPrisma.lawArticleRelation.findMany.mockResolvedValue(mockRelations as never);
+      mockPrisma.lawArticleRelation.findMany.mockResolvedValue(
+        mockRelations as never
+      );
 
       const result = await ImpactAnalysisService.analyzeImpact(input);
 
@@ -149,7 +158,9 @@ describe('ImpactAnalysisService', () => {
       expect(result.changeType).toBe(ChangeType.AMENDED);
       expect(result.impactedRelations).toHaveLength(1);
       // 修改时关系应该标记为需要重新审查
-      expect(result.impactedRelations[0].impactStatus).toBe(ImpactStatus.NEEDS_REVIEW);
+      expect(result.impactedRelations[0].impactStatus).toBe(
+        ImpactStatus.NEEDS_REVIEW
+      );
     });
 
     it('当法条不存在时应该抛出错误', async () => {
@@ -160,7 +171,9 @@ describe('ImpactAnalysisService', () => {
 
       mockPrisma.lawArticle.findUnique.mockResolvedValue(null);
 
-      await expect(ImpactAnalysisService.analyzeImpact(input)).rejects.toThrow('法条不存在');
+      await expect(ImpactAnalysisService.analyzeImpact(input)).rejects.toThrow(
+        '法条不存在'
+      );
     });
 
     it('当没有受影响的关系时应该返回空结果', async () => {
@@ -241,7 +254,9 @@ describe('ImpactAnalysisService', () => {
       ];
 
       mockPrisma.lawArticle.findUnique.mockResolvedValue(mockArticle as never);
-      mockPrisma.lawArticleRelation.findMany.mockResolvedValue(mockRelations as never);
+      mockPrisma.lawArticleRelation.findMany.mockResolvedValue(
+        mockRelations as never
+      );
 
       const result = await ImpactAnalysisService.analyzeImpact(input);
 
@@ -292,19 +307,21 @@ describe('ImpactAnalysisService', () => {
         },
       ];
 
-      mockPrisma.lawArticleRelation.findMany.mockResolvedValue(mockRelations as never);
+      mockPrisma.lawArticleRelation.findMany.mockResolvedValue(
+        mockRelations as never
+      );
 
-      const relations = await ImpactAnalysisService.getImpactedRelations('article123', ChangeType.REPEALED);
+      const relations = await ImpactAnalysisService.getImpactedRelations(
+        'article123',
+        ChangeType.REPEALED
+      );
 
       expect(relations).toHaveLength(1);
       expect(relations[0].relationId).toBe('rel1');
       expect(relations[0].impactStatus).toBe(ImpactStatus.POTENTIALLY_INVALID);
       expect(mockPrisma.lawArticleRelation.findMany).toHaveBeenCalledWith({
         where: {
-          OR: [
-            { sourceId: 'article123' },
-            { targetId: 'article123' },
-          ],
+          OR: [{ sourceId: 'article123' }, { targetId: 'article123' }],
         },
         include: {
           source: true,
@@ -329,14 +346,19 @@ describe('ImpactAnalysisService', () => {
         },
       ];
 
-      mockPrisma.lawArticleRelation.findMany.mockResolvedValue(mockRelations as never);
+      mockPrisma.lawArticleRelation.findMany.mockResolvedValue(
+        mockRelations as never
+      );
 
       // 测试废止时的影响状态
-      const repealedRelations = await ImpactAnalysisService.getImpactedRelations(
-        'article123',
-        ChangeType.REPEALED
+      const repealedRelations =
+        await ImpactAnalysisService.getImpactedRelations(
+          'article123',
+          ChangeType.REPEALED
+        );
+      expect(repealedRelations[0].impactStatus).toBe(
+        ImpactStatus.POTENTIALLY_INVALID
       );
-      expect(repealedRelations[0].impactStatus).toBe(ImpactStatus.POTENTIALLY_INVALID);
 
       // 测试修改时的影响状态
       const amendedRelations = await ImpactAnalysisService.getImpactedRelations(
@@ -404,7 +426,9 @@ describe('ImpactAnalysisService', () => {
 
       expect(recommendations).toHaveLength(1);
       // 不满足自动验证条件：未验证，应该标记为失效
-      expect(recommendations[0].action).toBe(RecommendationAction.MARK_AS_INVALID);
+      expect(recommendations[0].action).toBe(
+        RecommendationAction.MARK_AS_INVALID
+      );
       // 优先级为low，因此不需要人工确认
       expect(recommendations[0].priority).toBe('low');
       expect(recommendations[0].requiresHumanConfirmation).toBe(false);
@@ -465,7 +489,9 @@ describe('ImpactAnalysisService', () => {
 
       expect(recommendations).toHaveLength(1);
       // 不满足自动验证条件：未验证，应该请求审核
-      expect(recommendations[0].action).toBe(RecommendationAction.REQUEST_REVIEW);
+      expect(recommendations[0].action).toBe(
+        RecommendationAction.REQUEST_REVIEW
+      );
     });
 
     it('应该根据关系类型和置信度确定优先级', () => {
@@ -509,9 +535,9 @@ describe('ImpactAnalysisService', () => {
 
       expect(recommendations).toHaveLength(2);
       // CONFLICTS关系应该有更高的优先级
-      const conflictRec = recommendations.find((r) => r.relationId === 'rel1');
-      const relatedRec = recommendations.find((r) => r.relationId === 'rel2');
-      
+      const conflictRec = recommendations.find(r => r.relationId === 'rel1');
+      const relatedRec = recommendations.find(r => r.relationId === 'rel2');
+
       expect(conflictRec?.priority).toBe('high');
       expect(relatedRec?.priority).toBe('low');
     });
@@ -555,8 +581,8 @@ describe('ImpactAnalysisService', () => {
         ChangeType.REPEALED
       );
 
-      const verifiedRec = recommendations.find((r) => r.relationId === 'rel1');
-      const pendingRec = recommendations.find((r) => r.relationId === 'rel2');
+      const verifiedRec = recommendations.find(r => r.relationId === 'rel1');
+      const pendingRec = recommendations.find(r => r.relationId === 'rel2');
 
       // 已验证的高置信度CITES关系在废止时应该是高优先级
       expect(verifiedRec?.priority).toBe('high');
@@ -640,7 +666,7 @@ describe('ImpactAnalysisService', () => {
 
       expect(result.successCount).toBe(0);
       expect(result.failedCount).toBe(2);
-      expect(result.results.every((r) => !r.success)).toBe(true);
+      expect(result.results.every(r => !r.success)).toBe(true);
     });
 
     it('应该正确更新验证状态和原因', async () => {
@@ -654,7 +680,9 @@ describe('ImpactAnalysisService', () => {
         },
       ];
 
-      mockPrisma.lawArticleRelation.update.mockResolvedValueOnce({ id: 'rel1' } as never);
+      mockPrisma.lawArticleRelation.update.mockResolvedValueOnce({
+        id: 'rel1',
+      } as never);
 
       await ImpactAnalysisService.batchUpdateRelations(updates);
 
@@ -726,10 +754,15 @@ describe('ImpactAnalysisService', () => {
         },
       ];
 
-      const statistics = ImpactAnalysisService.calculateStatistics(impactedRelations, recommendations);
+      const statistics = ImpactAnalysisService.calculateStatistics(
+        impactedRelations,
+        recommendations
+      );
 
       expect(statistics.totalImpacted).toBe(2);
-      expect(statistics.byImpactStatus[ImpactStatus.POTENTIALLY_INVALID]).toBe(1);
+      expect(statistics.byImpactStatus[ImpactStatus.POTENTIALLY_INVALID]).toBe(
+        1
+      );
       expect(statistics.byImpactStatus[ImpactStatus.NEEDS_REVIEW]).toBe(1);
       expect(statistics.byRelationType[RelationType.CITES]).toBe(1);
       expect(statistics.byRelationType[RelationType.CONFLICTS]).toBe(1);
@@ -766,7 +799,10 @@ describe('ImpactAnalysisService', () => {
         discoveryMethod: 'MANUAL',
       };
 
-      const priority = ImpactAnalysisService.determinePriority(relation, ChangeType.REPEALED);
+      const priority = ImpactAnalysisService.determinePriority(
+        relation,
+        ChangeType.REPEALED
+      );
       expect(priority).toBe('high');
     });
 
@@ -787,7 +823,10 @@ describe('ImpactAnalysisService', () => {
         discoveryMethod: 'AI_DETECTED',
       };
 
-      const priority = ImpactAnalysisService.determinePriority(relation, ChangeType.REPEALED);
+      const priority = ImpactAnalysisService.determinePriority(
+        relation,
+        ChangeType.REPEALED
+      );
       expect(priority).toBe('low');
     });
 
@@ -808,7 +847,10 @@ describe('ImpactAnalysisService', () => {
         discoveryMethod: 'MANUAL',
       };
 
-      const priority = ImpactAnalysisService.determinePriority(relation, ChangeType.AMENDED);
+      const priority = ImpactAnalysisService.determinePriority(
+        relation,
+        ChangeType.AMENDED
+      );
       expect(priority).toBe('medium');
     });
   });

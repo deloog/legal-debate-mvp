@@ -91,10 +91,12 @@ class AIOutputReviewService {
   /**
    * 批量创建AI输出审核记录
    */
-  async batchCreateReview(inputs: CreateAIOutputReviewInput[]): Promise<number> {
+  async batchCreateReview(
+    inputs: CreateAIOutputReviewInput[]
+  ): Promise<number> {
     try {
       const reviews = await prisma.aIOutputReview.createMany({
-        data: inputs.map((input) => ({
+        data: inputs.map(input => ({
           outputType: input.outputType,
           outputId: input.outputId,
           content: input.content,
@@ -157,10 +159,7 @@ class AIOutputReviewService {
           where,
           skip,
           take: pageSize,
-          orderBy: [
-            { priority: 'desc' },
-            { createdAt: 'asc' },
-          ],
+          orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }],
           include: {
             reviewer: {
               include: {
@@ -204,10 +203,7 @@ class AIOutputReviewService {
           ...(outputType && { outputType }),
         },
         take: limit,
-        orderBy: [
-          { priority: 'desc' },
-          { createdAt: 'asc' },
-        ],
+        orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }],
       });
     } catch (error) {
       logger.error('获取待审核项目失败', error as Error);
@@ -218,10 +214,7 @@ class AIOutputReviewService {
   /**
    * 认领审核任务（分配给审核员）
    */
-  async claimReview(
-    reviewId: string,
-    reviewerId: string
-  ): Promise<unknown> {
+  async claimReview(reviewId: string, reviewerId: string): Promise<unknown> {
     try {
       const review = await prisma.aIOutputReview.update({
         where: { id: reviewId },

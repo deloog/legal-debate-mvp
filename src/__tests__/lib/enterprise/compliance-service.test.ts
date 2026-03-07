@@ -65,9 +65,7 @@ describe('ComplianceService', () => {
         effectiveDate: new Date('2026-01-01'),
         businessProcesses: ['数据收集', '数据存储'],
         controlPoints: ['加密存储', '访问控制'],
-        checklistItems: [
-          { name: '是否加密存储', status: 'pending' },
-        ],
+        checklistItems: [{ name: '是否加密存储', status: 'pending' }],
       };
 
       const mockRule = {
@@ -168,9 +166,12 @@ describe('ComplianceService', () => {
         { id: 'check-2', checkResult: 'NON_COMPLIANT' },
       ];
 
-      mockPrisma.enterpriseComplianceCheck.findMany.mockResolvedValue(mockChecks);
+      mockPrisma.enterpriseComplianceCheck.findMany.mockResolvedValue(
+        mockChecks
+      );
 
-      const result = await complianceService.getEnterpriseComplianceChecks('ent-1');
+      const result =
+        await complianceService.getEnterpriseComplianceChecks('ent-1');
 
       expect(result.length).toBe(2);
     });

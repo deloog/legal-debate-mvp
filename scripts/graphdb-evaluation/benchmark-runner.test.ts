@@ -22,7 +22,10 @@ class MockGraphDatabaseConnection implements GraphDatabaseConnection {
     this.latency = latency;
   }
 
-  async executeQuery(query: string, params?: Record<string, unknown>): Promise<{
+  async executeQuery(
+    query: string,
+    params?: Record<string, unknown>
+  ): Promise<{
     records: Array<Record<string, unknown>>;
     resultAvailableAfter: number;
   }> {
@@ -31,12 +34,12 @@ class MockGraphDatabaseConnection implements GraphDatabaseConnection {
 
     // 模拟返回结果
     const records: Array<Record<string, unknown>> = [];
-    
+
     // 根据查询类型生成不同数量的结果
     if (query.includes('INVALID SYNTAX')) {
       throw new Error('查询语法错误');
     }
-    
+
     if (query.includes('count')) {
       records.push({ count: 100 });
     } else if (query.includes('LIMIT')) {

@@ -73,7 +73,11 @@ export interface GraphData {
  * 导入验证错误
  */
 export interface ImportError {
-  type: 'NODE_NOT_FOUND' | 'INVALID_RELATION_TYPE' | 'MISSING_FIELD' | 'INVALID_DATA';
+  type:
+    | 'NODE_NOT_FOUND'
+    | 'INVALID_RELATION_TYPE'
+    | 'MISSING_FIELD'
+    | 'INVALID_DATA';
   entity: 'node' | 'edge';
   entityId?: string;
   field?: string;

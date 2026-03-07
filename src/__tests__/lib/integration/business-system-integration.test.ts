@@ -106,9 +106,8 @@ describe('BusinessSystemIntegrationService', () => {
       );
 
       // Act
-      const result = await businessSystemIntegrationService.createIntegration(
-        mockInput
-      );
+      const result =
+        await businessSystemIntegrationService.createIntegration(mockInput);
 
       // Assert
       expect(result).toBeDefined();
@@ -129,9 +128,8 @@ describe('BusinessSystemIntegrationService', () => {
 
       // Mock 会返回成功结果，因为服务层不验证字段
       // 这个测试主要是确保服务层能够处理不完整的输入
-      const result = await businessSystemIntegrationService.createIntegration(
-        invalidInput
-      );
+      const result =
+        await businessSystemIntegrationService.createIntegration(invalidInput);
 
       // 验证结果
       expect(result).toBeDefined();
@@ -175,11 +173,10 @@ describe('BusinessSystemIntegrationService', () => {
       );
 
       // Act
-      const result =
-        await businessSystemIntegrationService.updateIntegration(
-          'int_123',
-          mockUpdateInput
-        );
+      const result = await businessSystemIntegrationService.updateIntegration(
+        'int_123',
+        mockUpdateInput
+      );
 
       // Assert
       expect(result).toBeDefined();
@@ -228,9 +225,8 @@ describe('BusinessSystemIntegrationService', () => {
       ).mockResolvedValue(mockIntegration);
 
       // Act
-      const result = await businessSystemIntegrationService.getIntegration(
-        'int_123'
-      );
+      const result =
+        await businessSystemIntegrationService.getIntegration('int_123');
 
       // Assert
       expect(result).toBeDefined();
@@ -245,9 +241,8 @@ describe('BusinessSystemIntegrationService', () => {
       ).mockResolvedValue(null);
 
       // Act
-      const result = await businessSystemIntegrationService.getIntegration(
-        'non_existent'
-      );
+      const result =
+        await businessSystemIntegrationService.getIntegration('non_existent');
 
       // Assert
       expect(result).toBeNull();
@@ -286,15 +281,16 @@ describe('BusinessSystemIntegrationService', () => {
       (
         prisma.businessSystemIntegration.findMany as jest.Mock
       ).mockResolvedValue(mockIntegrations);
-      (prisma.businessSystemIntegration.count as jest.Mock).mockResolvedValue(1);
+      (prisma.businessSystemIntegration.count as jest.Mock).mockResolvedValue(
+        1
+      );
 
       // Act
-      const result =
-        await businessSystemIntegrationService.queryIntegrations({
-          enterpriseId: 'ent_123',
-          page: 1,
-          pageSize: 20,
-        });
+      const result = await businessSystemIntegrationService.queryIntegrations({
+        enterpriseId: 'ent_123',
+        page: 1,
+        pageSize: 20,
+      });
 
       // Assert
       expect(result.items).toHaveLength(1);
@@ -336,14 +332,14 @@ describe('BusinessSystemIntegrationService', () => {
       (
         prisma.businessSystemIntegration.findUnique as jest.Mock
       ).mockResolvedValue(mockIntegration);
-      (
-        prisma.businessSystemIntegration.update as jest.Mock
-      ).mockResolvedValue({ ...mockIntegration, connectionStatus: 'success' });
+      (prisma.businessSystemIntegration.update as jest.Mock).mockResolvedValue({
+        ...mockIntegration,
+        connectionStatus: 'success',
+      });
 
       // Act
-      const result = await businessSystemIntegrationService.testConnection(
-        'int_123'
-      );
+      const result =
+        await businessSystemIntegrationService.testConnection('int_123');
 
       // Assert
       expect(result.success).toBe(true);
@@ -357,9 +353,8 @@ describe('BusinessSystemIntegrationService', () => {
       ).mockResolvedValue(null);
 
       // Act
-      const result = await businessSystemIntegrationService.testConnection(
-        'non_existent'
-      );
+      const result =
+        await businessSystemIntegrationService.testConnection('non_existent');
 
       // Assert
       expect(result.success).toBe(false);
@@ -409,9 +404,9 @@ describe('BusinessSystemIntegrationService', () => {
       (prisma.integrationSyncLog.update as jest.Mock).mockResolvedValue(
         mockUpdatedLog
       );
-      (
-        prisma.businessSystemIntegration.update as jest.Mock
-      ).mockResolvedValue({});
+      (prisma.businessSystemIntegration.update as jest.Mock).mockResolvedValue(
+        {}
+      );
 
       // Act
       const result = await businessSystemIntegrationService.performSync(
@@ -469,12 +464,11 @@ describe('BusinessSystemIntegrationService', () => {
       ).mockResolvedValue(mockIntegration);
 
       // Act
-      const result =
-        await businessSystemIntegrationService.sendWebhookEvent(
-          'int_123',
-          'CONTRACT_CREATED',
-          { contractId: 'cnt_123' }
-        );
+      const result = await businessSystemIntegrationService.sendWebhookEvent(
+        'int_123',
+        'CONTRACT_CREATED',
+        { contractId: 'cnt_123' }
+      );
 
       // Assert
       expect(result.success).toBe(true);
@@ -493,12 +487,11 @@ describe('BusinessSystemIntegrationService', () => {
       ).mockResolvedValue(mockIntegration);
 
       // Act
-      const result =
-        await businessSystemIntegrationService.sendWebhookEvent(
-          'int_123',
-          'CONTRACT_CREATED',
-          {}
-        );
+      const result = await businessSystemIntegrationService.sendWebhookEvent(
+        'int_123',
+        'CONTRACT_CREATED',
+        {}
+      );
 
       // Assert
       expect(result.success).toBe(false);
@@ -519,12 +512,11 @@ describe('BusinessSystemIntegrationService', () => {
       ).mockResolvedValue(mockIntegration);
 
       // Act
-      const result =
-        await businessSystemIntegrationService.sendWebhookEvent(
-          'int_123',
-          'PAYMENT_RECEIVED',
-          {}
-        );
+      const result = await businessSystemIntegrationService.sendWebhookEvent(
+        'int_123',
+        'PAYMENT_RECEIVED',
+        {}
+      );
 
       // Assert
       expect(result.success).toBe(false);

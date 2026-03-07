@@ -30,7 +30,11 @@ export class Semaphore {
       }
 
       // 添加到等待队列
-      const waitItem: { resolve: (value: boolean) => void; reject: (reason?: unknown) => void; timeout?: ReturnType<typeof setTimeout> } = { resolve, reject };
+      const waitItem: {
+        resolve: (value: boolean) => void;
+        reject: (reason?: unknown) => void;
+        timeout?: ReturnType<typeof setTimeout>;
+      } = { resolve, reject };
       this.waitQueue.push(waitItem);
 
       // 设置超时

@@ -455,7 +455,9 @@ describe('SSEClient', () => {
       // 运行所有定时器以完成重连
       jest.runAllTimers();
       // 手动触发新连接的打开
-      const newEventSource = client['eventSource'] as unknown as MockEventSource;
+      const newEventSource = client[
+        'eventSource'
+      ] as unknown as MockEventSource;
       newEventSource.triggerOpen();
 
       // 重连成功后重连计数应该重置
@@ -474,7 +476,9 @@ describe('SSEClient', () => {
       expect(client.getState()).toBe(SSEConnectionState.DISCONNECTED);
 
       client.reconnect();
-      const newEventSource = client['eventSource'] as unknown as MockEventSource;
+      const newEventSource = client[
+        'eventSource'
+      ] as unknown as MockEventSource;
       newEventSource.triggerOpen();
 
       expect(client.getState()).toBe(SSEConnectionState.CONNECTED);

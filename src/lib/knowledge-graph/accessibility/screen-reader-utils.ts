@@ -82,7 +82,10 @@ export function generateLinkAriaLabel(
 /**
  * 生成图谱ARIA描述
  */
-export function generateGraphAriaDescription(nodes: GraphNode[], links: GraphLink[]): string {
+export function generateGraphAriaDescription(
+  nodes: GraphNode[],
+  links: GraphLink[]
+): string {
   try {
     const nodeCount = nodes.length;
     const linkCount = links.length;
@@ -93,7 +96,7 @@ export function generateGraphAriaDescription(nodes: GraphNode[], links: GraphLin
 
     // 统计关系类型
     const relationTypes = new Map<string, number>();
-    links.forEach((link) => {
+    links.forEach(link => {
       const count = relationTypes.get(link.relationType) || 0;
       relationTypes.set(link.relationType, count + 1);
     });
@@ -109,7 +112,11 @@ export function generateGraphAriaDescription(nodes: GraphNode[], links: GraphLin
 
     return `包含${nodeCount}个法条，${linkCount}条关系${relationDesc}`;
   } catch (error) {
-    logger.error('生成图谱ARIA描述失败', { error, nodeCount: nodes.length, linkCount: links.length });
+    logger.error('生成图谱ARIA描述失败', {
+      error,
+      nodeCount: nodes.length,
+      linkCount: links.length,
+    });
     return '法条关系图谱';
   }
 }
@@ -120,7 +127,7 @@ export function generateGraphAriaDescription(nodes: GraphNode[], links: GraphLin
 function initAnnounceRegion(): HTMLElement | null {
   try {
     let region = document.getElementById(ANNOUNCE_REGION_ID);
-    
+
     if (!region) {
       region = document.createElement('div');
       region.id = ANNOUNCE_REGION_ID;
@@ -178,7 +185,10 @@ export function announceNodeSelection(node: GraphNode): void {
 /**
  * 宣布图谱更新
  */
-export function announceGraphUpdate(nodeCount: number, linkCount: number): void {
+export function announceGraphUpdate(
+  nodeCount: number,
+  linkCount: number
+): void {
   try {
     announce(`图谱已更新，包含${nodeCount}个法条，${linkCount}条关系`);
   } catch (error) {
@@ -226,27 +236,34 @@ export function announceGraphZoom(level: number): void {
 export function getNodeAriaProps(node: GraphNode): Record<string, string> {
   return {
     'aria-label': generateNodeAriaLabel(node),
-    'role': 'button',
-    'tabindex': '0',
+    role: 'button',
+    tabindex: '0',
   };
 }
 
 /**
  * 获取连线的ARIA属性
  */
-export function getLinkAriaProps(link: GraphLink, source: GraphNode, target: GraphNode): Record<string, string> {
+export function getLinkAriaProps(
+  link: GraphLink,
+  source: GraphNode,
+  target: GraphNode
+): Record<string, string> {
   return {
     'aria-label': generateLinkAriaLabel(link, source, target),
-    'role': 'presentation',
+    role: 'presentation',
   };
 }
 
 /**
  * 获取图谱容器的ARIA属性
  */
-export function getGraphContainerAriaProps(nodes: GraphNode[], links: GraphLink[]): Record<string, string> {
+export function getGraphContainerAriaProps(
+  nodes: GraphNode[],
+  links: GraphLink[]
+): Record<string, string> {
   return {
-    'role': 'region',
+    role: 'region',
     'aria-label': '法条关系图谱',
     'aria-description': generateGraphAriaDescription(nodes, links),
   };

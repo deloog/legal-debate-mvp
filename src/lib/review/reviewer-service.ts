@@ -148,7 +148,10 @@ class ReviewerService {
   /**
    * 更新审核员信息
    */
-  async updateReviewer(id: string, input: UpdateReviewerInput): Promise<unknown> {
+  async updateReviewer(
+    id: string,
+    input: UpdateReviewerInput
+  ): Promise<unknown> {
     try {
       const reviewer = await prisma.reviewer.update({
         where: { id },
@@ -317,9 +320,7 @@ class ReviewerService {
   /**
    * 获取可用审核员（考虑并发限制）
    */
-  async getAvailableReviewer(
-    specialty?: string[]
-  ): Promise<unknown | null> {
+  async getAvailableReviewer(specialty?: string[]): Promise<unknown | null> {
     try {
       // 查找当前待处理数量未达到上限的活跃审核员
       const reviewers = await prisma.reviewer.findMany({
@@ -351,7 +352,7 @@ class ReviewerService {
 
       // 过滤出未达到并发上限的审核员
       const availableReviewers = reviewers.filter(
-        (r) => r._count.reviews < r.maxConcurrentReviews
+        r => r._count.reviews < r.maxConcurrentReviews
       );
 
       if (availableReviewers.length === 0) {
@@ -360,8 +361,8 @@ class ReviewerService {
 
       // 如果指定了专业领域，优先选择匹配的审核员
       if (specialty && specialty.length > 0) {
-        const matchedReviewers = availableReviewers.filter((r) =>
-          r.specialty.some((s) => specialty.includes(s))
+        const matchedReviewers = availableReviewers.filter(r =>
+          r.specialty.some(s => specialty.includes(s))
         );
 
         if (matchedReviewers.length > 0) {

@@ -1,10 +1,6 @@
 import { logger } from '@/lib/logger';
 
-import type {
-  GraphNode,
-  GraphEdge,
-  GraphData,
-} from '../types';
+import type { GraphNode, GraphEdge, GraphData } from '../types';
 
 /**
  * GraphML格式化器
@@ -48,8 +44,12 @@ export class GraphMLFormatter {
   <graph id="G" edgedefault="directed">
 `;
 
-    const nodesXml = graphData.nodes.map((node) => this.formatNode(node)).join('\n    ');
-    const edgesXml = graphData.edges.map((edge) => this.formatEdge(edge)).join('\n    ');
+    const nodesXml = graphData.nodes
+      .map(node => this.formatNode(node))
+      .join('\n    ');
+    const edgesXml = graphData.edges
+      .map(edge => this.formatEdge(edge))
+      .join('\n    ');
 
     const xmlFooter = `
   </graph>

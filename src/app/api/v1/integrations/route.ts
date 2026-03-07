@@ -21,14 +21,17 @@ import type { ErrorResponse, SuccessResponse } from '@/types/api-response';
  * GET /api/v1/integrations
  * 获取业务系统集成列表
  */
-export async function GET(
-  request: NextRequest
-): Promise<NextResponse<SuccessResponse<{
-  items: unknown[];
-  total: number;
-  page: number;
-  pageSize: number;
-}> | ErrorResponse>> {
+export async function GET(request: NextRequest): Promise<
+  NextResponse<
+    | SuccessResponse<{
+        items: unknown[];
+        total: number;
+        page: number;
+        pageSize: number;
+      }>
+    | ErrorResponse
+  >
+> {
   try {
     const searchParams = request.nextUrl.searchParams;
     const params: IntegrationQueryParams = {
@@ -39,7 +42,8 @@ export async function GET(
       pageSize: parseInt(searchParams.get('pageSize') || '20', 10),
     };
 
-    const result = await businessSystemIntegrationService.queryIntegrations(params);
+    const result =
+      await businessSystemIntegrationService.queryIntegrations(params);
 
     return NextResponse.json({
       success: true,

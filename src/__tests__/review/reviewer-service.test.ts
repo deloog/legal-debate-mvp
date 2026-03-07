@@ -109,9 +109,7 @@ describe('ReviewerService', () => {
         reviewerLevel: ReviewerLevel.SENIOR,
       };
 
-      (prisma.reviewer.findUnique as jest.Mock).mockResolvedValue(
-        mockReviewer
-      );
+      (prisma.reviewer.findUnique as jest.Mock).mockResolvedValue(mockReviewer);
 
       const result = await reviewerService.getReviewerByUserId('user-1');
 
@@ -313,11 +311,7 @@ describe('ReviewerService', () => {
       (prisma.reviewer.findUnique as jest.Mock).mockResolvedValue(mockReviewer);
       (prisma.reviewer.update as jest.Mock).mockResolvedValue({});
 
-      await reviewerService.updateReviewerStats(
-        'reviewer-1',
-        'approve',
-        120
-      );
+      await reviewerService.updateReviewerStats('reviewer-1', 'approve', 120);
 
       expect(prisma.reviewer.update).toHaveBeenCalledWith({
         where: { id: 'reviewer-1' },
@@ -341,11 +335,7 @@ describe('ReviewerService', () => {
       (prisma.reviewer.findUnique as jest.Mock).mockResolvedValue(mockReviewer);
       (prisma.reviewer.update as jest.Mock).mockResolvedValue({});
 
-      await reviewerService.updateReviewerStats(
-        'reviewer-1',
-        'reject',
-        150
-      );
+      await reviewerService.updateReviewerStats('reviewer-1', 'reject', 150);
 
       expect(prisma.reviewer.update).toHaveBeenCalledWith({
         where: { id: 'reviewer-1' },
@@ -369,11 +359,7 @@ describe('ReviewerService', () => {
       (prisma.reviewer.findUnique as jest.Mock).mockResolvedValue(mockReviewer);
       (prisma.reviewer.update as jest.Mock).mockResolvedValue({});
 
-      await reviewerService.updateReviewerStats(
-        'reviewer-1',
-        'approve',
-        60
-      );
+      await reviewerService.updateReviewerStats('reviewer-1', 'approve', 60);
 
       expect(prisma.reviewer.update).toHaveBeenCalledWith({
         where: { id: 'reviewer-1' },

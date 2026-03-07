@@ -17,12 +17,12 @@ const mockRelationCount = jest.fn();
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
     lawArticle: {
-      findUnique: jest.fn((args) => mockFindUnique(args)),
-      findMany: jest.fn((args) => mockFindMany(args)),
+      findUnique: jest.fn(args => mockFindUnique(args)),
+      findMany: jest.fn(args => mockFindMany(args)),
     },
     lawArticleRelation: {
-      findMany: jest.fn((args) => mockRelationFindMany(args)),
-      count: jest.fn((args) => mockRelationCount(args)),
+      findMany: jest.fn(args => mockRelationFindMany(args)),
+      count: jest.fn(args => mockRelationCount(args)),
     },
   },
 }));

@@ -3,7 +3,10 @@
  */
 
 import { ExportService } from '@/lib/knowledge-graph/export-import/services/export-service';
-import type { GraphNode, GraphEdge } from '@/lib/knowledge-graph/export-import/types';
+import type {
+  GraphNode,
+  GraphEdge,
+} from '@/lib/knowledge-graph/export-import/types';
 
 describe('ExportService', () => {
   let exportService: ExportService;
@@ -63,8 +66,12 @@ describe('ExportService', () => {
         },
       ];
 
-      (mockPrisma.lawArticle.findMany as jest.Mock).mockResolvedValue(mockArticles);
-      (mockPrisma.lawArticleRelation.findMany as jest.Mock).mockResolvedValue(mockRelations);
+      (mockPrisma.lawArticle.findMany as jest.Mock).mockResolvedValue(
+        mockArticles
+      );
+      (mockPrisma.lawArticleRelation.findMany as jest.Mock).mockResolvedValue(
+        mockRelations
+      );
 
       const result = await exportService.exportData(mockPrisma, {
         format: 'json-ld',
@@ -81,8 +88,12 @@ describe('ExportService', () => {
       const mockArticles: unknown[] = [];
       const mockRelations: unknown[] = [];
 
-      (mockPrisma.lawArticle.findMany as jest.Mock).mockResolvedValue(mockArticles);
-      (mockPrisma.lawArticleRelation.findMany as jest.Mock).mockResolvedValue(mockRelations);
+      (mockPrisma.lawArticle.findMany as jest.Mock).mockResolvedValue(
+        mockArticles
+      );
+      (mockPrisma.lawArticleRelation.findMany as jest.Mock).mockResolvedValue(
+        mockRelations
+      );
 
       const filter = {
         format: 'json-ld' as const,
@@ -113,8 +124,12 @@ describe('ExportService', () => {
       const mockArticles: unknown[] = [];
       const mockRelations: unknown[] = [];
 
-      (mockPrisma.lawArticle.findMany as jest.Mock).mockResolvedValue(mockArticles);
-      (mockPrisma.lawArticleRelation.findMany as jest.Mock).mockResolvedValue(mockRelations);
+      (mockPrisma.lawArticle.findMany as jest.Mock).mockResolvedValue(
+        mockArticles
+      );
+      (mockPrisma.lawArticleRelation.findMany as jest.Mock).mockResolvedValue(
+        mockRelations
+      );
 
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-12-31');
@@ -240,23 +255,29 @@ describe('ExportService', () => {
   describe('generateFilename', () => {
     it('应该生成GraphML文件名', () => {
       const filename = exportService.generateFilename('graphml');
-      expect(filename).toMatch(/knowledge-graph-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.graphml$/);
+      expect(filename).toMatch(
+        /knowledge-graph-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.graphml$/
+      );
     });
 
     it('应该生成GML文件名', () => {
       const filename = exportService.generateFilename('gml');
-      expect(filename).toMatch(/knowledge-graph-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.gml$/);
+      expect(filename).toMatch(
+        /knowledge-graph-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.gml$/
+      );
     });
 
     it('应该生成JSON-LD文件名', () => {
       const filename = exportService.generateFilename('json-ld');
-      expect(filename).toMatch(/knowledge-graph-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.jsonld$/);
+      expect(filename).toMatch(
+        /knowledge-graph-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.jsonld$/
+      );
     });
 
     it('不支持的格式应该抛出错误', () => {
-      expect(() =>
-        exportService.generateFilename('invalid' as never)
-      ).toThrow('不支持的导出格式: invalid');
+      expect(() => exportService.generateFilename('invalid' as never)).toThrow(
+        '不支持的导出格式: invalid'
+      );
     });
   });
 });

@@ -6,11 +6,11 @@
 import { MemoryAgent } from '@/lib/agent/memory-agent/memory-agent';
 import { MemoryManager } from '@/lib/agent/memory-agent/memory-manager';
 import {
-  PrismaClient,
-  MemoryType,
   AgentMemory,
-  ErrorType,
   ErrorSeverity,
+  ErrorType,
+  MemoryType,
+  PrismaClient,
 } from '@prisma/client';
 import { mockDeep } from 'jest-mock-extended';
 
@@ -48,6 +48,17 @@ describe('MemoryAgent', () => {
     };
 
     memoryAgent = new MemoryAgent(mockPrisma, mockAIService as never);
+  });
+
+  afterEach(async () => {
+    // 停止 migrator 定时任务，避免测试完成后仍在运行
+    if (memoryAgent) {
+      try {
+        await memoryAgent.shutdown();
+      } catch {
+        // 忽略关闭错误
+      }
+    }
   });
 
   describe('初始化和关闭', () => {

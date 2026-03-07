@@ -40,11 +40,17 @@ export class KeyboardNavigationManager {
     this.enabled = true;
     this.config = {
       enabled: true,
-      focusVisible: defaultAccessibilityConfig.keyboardNavigation?.focusVisible ?? true,
-      tabThroughNodes: defaultAccessibilityConfig.keyboardNavigation?.tabThroughNodes ?? true,
-      arrowKeyNavigation: defaultAccessibilityConfig.keyboardNavigation?.arrowKeyNavigation ?? true,
-      enterToActivate: defaultAccessibilityConfig.keyboardNavigation?.enterToActivate ?? true,
-      escapeToClose: defaultAccessibilityConfig.keyboardNavigation?.escapeToClose ?? true,
+      focusVisible:
+        defaultAccessibilityConfig.keyboardNavigation?.focusVisible ?? true,
+      tabThroughNodes:
+        defaultAccessibilityConfig.keyboardNavigation?.tabThroughNodes ?? true,
+      arrowKeyNavigation:
+        defaultAccessibilityConfig.keyboardNavigation?.arrowKeyNavigation ??
+        true,
+      enterToActivate:
+        defaultAccessibilityConfig.keyboardNavigation?.enterToActivate ?? true,
+      escapeToClose:
+        defaultAccessibilityConfig.keyboardNavigation?.escapeToClose ?? true,
     };
   }
 
@@ -78,7 +84,7 @@ export class KeyboardNavigationManager {
    */
   setFocusedNode(nodeId: string): void {
     try {
-      const node = this.nodes.find((n) => n.id === nodeId);
+      const node = this.nodes.find(n => n.id === nodeId);
       if (!node) {
         logger.warn('节点不存在', { nodeId });
         return;
@@ -102,7 +108,7 @@ export class KeyboardNavigationManager {
       return null;
     }
 
-    return this.nodes.find((n) => n.id === this.focusedNodeId) || null;
+    return this.nodes.find(n => n.id === this.focusedNodeId) || null;
   }
 
   /**
@@ -205,7 +211,7 @@ export class KeyboardNavigationManager {
       return;
     }
 
-    const currentIndex = this.nodes.findIndex((n) => n.id === this.focusedNodeId);
+    const currentIndex = this.nodes.findIndex(n => n.id === this.focusedNodeId);
     if (currentIndex === -1) {
       this.setFocusedNode(this.nodes[0].id);
       return;
@@ -213,11 +219,13 @@ export class KeyboardNavigationManager {
 
     if (event.shiftKey) {
       // Shift+Tab：上一个节点
-      const newIndex = currentIndex === 0 ? this.nodes.length - 1 : currentIndex - 1;
+      const newIndex =
+        currentIndex === 0 ? this.nodes.length - 1 : currentIndex - 1;
       this.setFocusedNode(this.nodes[newIndex].id);
     } else {
       // Tab：下一个节点
-      const newIndex = currentIndex === this.nodes.length - 1 ? 0 : currentIndex + 1;
+      const newIndex =
+        currentIndex === this.nodes.length - 1 ? 0 : currentIndex + 1;
       this.setFocusedNode(this.nodes[newIndex].id);
     }
   }
@@ -236,7 +244,7 @@ export class KeyboardNavigationManager {
       return;
     }
 
-    const currentIndex = this.nodes.findIndex((n) => n.id === this.focusedNodeId);
+    const currentIndex = this.nodes.findIndex(n => n.id === this.focusedNodeId);
     if (currentIndex === -1 || currentIndex === this.nodes.length - 1) {
       return;
     }
@@ -263,7 +271,7 @@ export class KeyboardNavigationManager {
       return;
     }
 
-    const currentIndex = this.nodes.findIndex((n) => n.id === this.focusedNodeId);
+    const currentIndex = this.nodes.findIndex(n => n.id === this.focusedNodeId);
     if (currentIndex === -1 || currentIndex === 0) {
       return;
     }

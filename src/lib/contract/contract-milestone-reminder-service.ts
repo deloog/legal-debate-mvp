@@ -91,7 +91,7 @@ class ContractMilestoneReminderService {
     }
 
     // 检查是否在提醒天数列表中
-    return node.reminderDays.some((day) => daysUntilMilestone <= day);
+    return node.reminderDays.some(day => daysUntilMilestone <= day);
   }
 
   /**
@@ -113,7 +113,9 @@ class ContractMilestoneReminderService {
     );
 
     const isOverdue = daysUntilMilestone < 0;
-    const urgencyLevel = isOverdue ? '紧急' : this.getUrgencyLevel(daysUntilMilestone);
+    const urgencyLevel = isOverdue
+      ? '紧急'
+      : this.getUrgencyLevel(daysUntilMilestone);
 
     const title = isOverdue
       ? `【逾期提醒】合同履约节点已逾期：${node.milestone}`
@@ -163,7 +165,10 @@ class ContractMilestoneReminderService {
     if (node.responsibleParty) {
       const responsibleUser = await prisma.user.findFirst({
         where: {
-          OR: [{ name: node.responsibleParty }, { email: node.responsibleParty }],
+          OR: [
+            { name: node.responsibleParty },
+            { email: node.responsibleParty },
+          ],
         },
       });
 
@@ -214,7 +219,9 @@ class ContractMilestoneReminderService {
     daysUntilMilestone: number,
     isOverdue: boolean
   ): string {
-    const milestoneDateStr = new Date(node.milestoneDate).toLocaleDateString('zh-CN');
+    const milestoneDateStr = new Date(node.milestoneDate).toLocaleDateString(
+      'zh-CN'
+    );
     let content = `合同编号：${node.contractNumber}\n`;
     content += `客户名称：${node.clientName}\n`;
     content += `负责律师：${node.lawyerName}\n`;
@@ -409,7 +416,9 @@ class ContractMilestoneReminderService {
             milestone: `付款节点 - ${payment.stage}`,
             milestoneDate: new Date(payment.date),
             milestoneType: 'payment',
-            description: payment.amount ? `计划金额：${payment.amount}` : undefined,
+            description: payment.amount
+              ? `计划金额：${payment.amount}`
+              : undefined,
           });
         }
       }
@@ -438,4 +447,5 @@ class ContractMilestoneReminderService {
 }
 
 // 导出服务实例
-export const contractMilestoneReminderService = new ContractMilestoneReminderService();
+export const contractMilestoneReminderService =
+  new ContractMilestoneReminderService();

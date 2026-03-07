@@ -77,24 +77,25 @@ export interface AccessibilityConfig {
 /**
  * 默认可访问性配置
  */
-export const defaultAccessibilityConfig: Readonly<AccessibilityConfig> = Object.freeze({
-  mode: AccessibilityMode.NORMAL,
-  keyboardNavigation: {
-    enabled: true,
-    focusVisible: true,
-    tabThroughNodes: true,
-    arrowKeyNavigation: true,
-    enterToActivate: true,
-    escapeToClose: true,
-  },
-  screenReader: {
-    enabled: true,
-    announceChanges: true,
-    verboseMode: false,
-  },
-  highContrast: false,
-  colorBlindType: null,
-});
+export const defaultAccessibilityConfig: Readonly<AccessibilityConfig> =
+  Object.freeze({
+    mode: AccessibilityMode.NORMAL,
+    keyboardNavigation: {
+      enabled: true,
+      focusVisible: true,
+      tabThroughNodes: true,
+      arrowKeyNavigation: true,
+      enterToActivate: true,
+      escapeToClose: true,
+    },
+    screenReader: {
+      enabled: true,
+      announceChanges: true,
+      verboseMode: false,
+    },
+    highContrast: false,
+    colorBlindType: null,
+  });
 
 /**
  * 关系类型枚举（用于颜色映射）

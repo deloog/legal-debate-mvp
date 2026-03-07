@@ -194,7 +194,8 @@ describe('ExpertService', () => {
         mockRelations as any
       );
 
-      const result = await expertService.calculateExpertAccuracyRate(mockUserId);
+      const result =
+        await expertService.calculateExpertAccuracyRate(mockUserId);
 
       expect(result).toEqual({
         userId: mockUserId,
@@ -211,7 +212,8 @@ describe('ExpertService', () => {
       mockPrisma.knowledgeGraphExpert.findUnique.mockResolvedValue(mockExpert);
       mockPrisma.lawArticleRelation.findMany.mockResolvedValue([]);
 
-      const result = await expertService.calculateExpertAccuracyRate(mockUserId);
+      const result =
+        await expertService.calculateExpertAccuracyRate(mockUserId);
 
       expect(result).toEqual({
         userId: mockUserId,
@@ -237,7 +239,8 @@ describe('ExpertService', () => {
         mockRelations as any
       );
 
-      const result = await expertService.calculateExpertAccuracyRate(mockUserId);
+      const result =
+        await expertService.calculateExpertAccuracyRate(mockUserId);
 
       expect(result.confidenceLevel).toBe('HIGH');
     });
@@ -272,7 +275,9 @@ describe('ExpertService', () => {
         },
       ];
 
-      mockPrisma.knowledgeGraphExpert.findMany.mockResolvedValue(mockExperts as any);
+      mockPrisma.knowledgeGraphExpert.findMany.mockResolvedValue(
+        mockExperts as any
+      );
       mockPrisma.knowledgeGraphExpert.count.mockResolvedValue(2);
 
       const result = await expertService.getExpertList({
@@ -337,7 +342,10 @@ describe('ExpertService', () => {
 
       mockPrisma.knowledgeGraphExpert.findUnique.mockResolvedValue(mockExpert);
 
-      const result = await expertService.verifyExpertLevel(mockUserId, 'JUNIOR');
+      const result = await expertService.verifyExpertLevel(
+        mockUserId,
+        'JUNIOR'
+      );
 
       expect(result).toBe(true); // SENIOR >= JUNIOR
     });
@@ -368,7 +376,10 @@ describe('ExpertService', () => {
 
       mockPrisma.knowledgeGraphExpert.findUnique.mockResolvedValue(mockExpert);
 
-      const result = await expertService.verifyExpertLevel(mockUserId, 'SENIOR');
+      const result = await expertService.verifyExpertLevel(
+        mockUserId,
+        'SENIOR'
+      );
 
       expect(result).toBe(false); // JUNIOR < SENIOR
     });

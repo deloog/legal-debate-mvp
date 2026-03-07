@@ -113,7 +113,9 @@ describe('AIOutputReviewService', () => {
         { id: 'review-2', status: AIOutputReviewStatus.PENDING },
       ];
 
-      (prisma.aIOutputReview.findMany as jest.Mock).mockResolvedValue(mockItems);
+      (prisma.aIOutputReview.findMany as jest.Mock).mockResolvedValue(
+        mockItems
+      );
       (prisma.aIOutputReview.count as jest.Mock).mockResolvedValue(2);
 
       const result = await aiOutputReviewService.getReviewQueue({
@@ -135,7 +137,9 @@ describe('AIOutputReviewService', () => {
         { id: 'review-1', status: AIOutputReviewStatus.PENDING },
       ];
 
-      (prisma.aIOutputReview.findMany as jest.Mock).mockResolvedValue(mockReviews);
+      (prisma.aIOutputReview.findMany as jest.Mock).mockResolvedValue(
+        mockReviews
+      );
 
       const result = await aiOutputReviewService.getPendingReviews();
 

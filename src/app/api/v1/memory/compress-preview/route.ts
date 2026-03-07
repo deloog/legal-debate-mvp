@@ -68,7 +68,9 @@ export async function POST(request: NextRequest) {
         },
       };
       // mock 仅实现 agentMemory.findUnique，用 unknown 中转避免 any
-      const manager = new MemoryManager(mockPrisma as unknown as import('@prisma/client').PrismaClient);
+      const manager = new MemoryManager(
+        mockPrisma as unknown as import('@prisma/client').PrismaClient
+      );
       const memory = await manager.getMemoryById(body.memoryId);
 
       if (!memory) {

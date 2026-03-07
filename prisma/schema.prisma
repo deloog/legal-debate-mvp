@@ -1339,8 +1339,8 @@ model ContractTemplate {
   description   String?
   content       String
   fullText      String?
-  variables     Json
-  clauses       Json
+  variables     Json?
+  clauses       Json?
   riskWarnings  Json?
   usageGuide    String?
   source        String    @default("samr")

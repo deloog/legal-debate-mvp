@@ -63,7 +63,11 @@ describe('MemoryAgent', () => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // 停止 migrator 定时任务，避免测试完成后仍在运行
+    if (memoryAgent) {
+      await memoryAgent.shutdown();
+    }
     if (logSpy) {
       logSpy.mockRestore();
     }

@@ -1,6 +1,6 @@
 /**
  * 可访问性模块
- * 
+ *
  * 提供知识图谱的可访问性支持，包括：
  * - 色盲友好模式
  * - 高对比度模式
@@ -56,9 +56,7 @@ export {
   generateFocusStyle,
 } from './keyboard-navigation';
 
-export type {
-  KeyboardEventHandlers,
-} from './keyboard-navigation';
+export type { KeyboardEventHandlers } from './keyboard-navigation';
 
 // 可访问性管理器
 export {

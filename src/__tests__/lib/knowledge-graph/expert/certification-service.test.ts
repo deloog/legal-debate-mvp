@@ -140,8 +140,8 @@ describe('CertificationService', () => {
 
       await expect(
         certificationService.certifyExpert({
-        expertId: mockExpertId,
-        adminId: mockNormalUser.id,
+          expertId: mockExpertId,
+          adminId: mockNormalUser.id,
           notes: '测试认证',
         })
       ).rejects.toThrow('无权限进行专家认证');
@@ -280,9 +280,8 @@ describe('CertificationService', () => {
         lastUpdated: new Date(),
       });
 
-      const result = await certificationService.evaluateExpertLevelSuggestion(
-        mockUserId
-      );
+      const result =
+        await certificationService.evaluateExpertLevelSuggestion(mockUserId);
 
       expect(result.suggestedLevel).toBe('MASTER');
       expect(result.currentLevel).toBe('SENIOR');
@@ -323,9 +322,8 @@ describe('CertificationService', () => {
         lastUpdated: new Date(),
       });
 
-      const result = await certificationService.evaluateExpertLevelSuggestion(
-        mockUserId
-      );
+      const result =
+        await certificationService.evaluateExpertLevelSuggestion(mockUserId);
 
       expect(result.suggestedLevel).toBe('SENIOR');
       expect(result.currentLevel).toBe('JUNIOR');
@@ -365,9 +363,8 @@ describe('CertificationService', () => {
         lastUpdated: new Date(),
       });
 
-      const result = await certificationService.evaluateExpertLevelSuggestion(
-        mockUserId
-      );
+      const result =
+        await certificationService.evaluateExpertLevelSuggestion(mockUserId);
 
       expect(result.suggestedLevel).toBe('SENIOR');
     });
@@ -389,9 +386,8 @@ describe('CertificationService', () => {
 
       mockPrisma.knowledgeGraphExpert.findUnique.mockResolvedValue(mockExpert);
 
-      const result = await certificationService.getExpertCertificationHistory(
-        mockExpertId
-      );
+      const result =
+        await certificationService.getExpertCertificationHistory(mockExpertId);
 
       expect(result).toEqual({
         certifiedAt: expect.any(Date),

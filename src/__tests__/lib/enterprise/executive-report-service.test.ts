@@ -44,9 +44,7 @@ jest.mock('@/lib/db/prisma', () => ({
   prisma: mockPrisma,
 }));
 
-import {
-  executiveReportService,
-} from '@/lib/enterprise/executive-report-service';
+import { executiveReportService } from '@/lib/enterprise/executive-report-service';
 
 describe('ExecutiveReportService', () => {
   beforeEach(() => {
@@ -88,13 +86,18 @@ describe('ExecutiveReportService', () => {
       };
 
       mockPrisma.enterpriseAccount.findUnique.mockResolvedValue(mockEnterprise);
-      mockPrisma.enterpriseRiskProfile.findFirst.mockResolvedValue(mockRiskProfile);
+      mockPrisma.enterpriseRiskProfile.findFirst.mockResolvedValue(
+        mockRiskProfile
+      );
       mockPrisma.executiveReport.create.mockResolvedValue(mockReport);
 
-      const result = await executiveReportService.createRiskOverviewReport('ent-1', {
-        periodStart: new Date('2026-01-01'),
-        periodEnd: new Date('2026-02-25'),
-      });
+      const result = await executiveReportService.createRiskOverviewReport(
+        'ent-1',
+        {
+          periodStart: new Date('2026-01-01'),
+          periodEnd: new Date('2026-02-25'),
+        }
+      );
 
       expect(result.reportType).toBe('RISK_OVERVIEW');
     });
@@ -131,10 +134,13 @@ describe('ExecutiveReportService', () => {
 
       mockPrisma.executiveReport.create.mockResolvedValue(mockReport);
 
-      const result = await executiveReportService.createComplianceStatusReport('ent-1', {
-        periodStart: new Date('2026-01-01'),
-        periodEnd: new Date('2026-02-25'),
-      });
+      const result = await executiveReportService.createComplianceStatusReport(
+        'ent-1',
+        {
+          periodStart: new Date('2026-01-01'),
+          periodEnd: new Date('2026-02-25'),
+        }
+      );
 
       expect(result.reportType).toBe('COMPLIANCE_STATUS');
     });

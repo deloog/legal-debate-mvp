@@ -19,10 +19,7 @@ export interface SuccessResponse<T = unknown> {
  * 创建成功响应
  * meta 参数接受任意对象，以便各路由传递扩展元数据（如 hasPrevious、labels、pagination 等）
  */
-export function createSuccessResponse<T>(
-  data: T,
-  meta?: object
-): NextResponse {
+export function createSuccessResponse<T>(data: T, meta?: object): NextResponse {
   const responseBody = {
     success: true as const,
     data,
@@ -58,10 +55,7 @@ export function createPaginatedResponse<T>(
 /**
  * 创建创建成功响应（201状态码）
  */
-export function createCreatedResponse<T>(
-  data: T,
-  meta?: object
-): NextResponse {
+export function createCreatedResponse<T>(data: T, meta?: object): NextResponse {
   const response = createSuccessResponse(data, meta);
   return new NextResponse(response.body, {
     status: 201,
@@ -83,10 +77,7 @@ export function createNoContentResponse(): NextResponse {
 /**
  * 创建部分内容响应（206状态码）
  */
-export function createPartialResponse<T>(
-  data: T,
-  meta?: object
-): NextResponse {
+export function createPartialResponse<T>(data: T, meta?: object): NextResponse {
   const response = createSuccessResponse(data, meta);
   return new NextResponse(response.body, {
     status: 206,

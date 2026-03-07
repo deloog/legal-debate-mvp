@@ -30,7 +30,11 @@ import type {
 interface StreamingAIClient {
   chat: {
     completions: {
-      create: (params: AIRequestConfig) => Promise<AsyncIterable<{ choices: Array<{ delta: { content?: string } }> }>>;
+      create: (
+        params: AIRequestConfig
+      ) => Promise<
+        AsyncIterable<{ choices: Array<{ delta: { content?: string } }> }>
+      >;
     };
   };
 }
