@@ -127,3 +127,9 @@ nul
 %APPDATA%/
 DOWNGRADE_TAILWIND.md
 SETUP_COMPLETE.md
+
+# 数据导出和数据库备份文件（体积过大，不入库）
+data/export/
+*.backup
+*.dump
+flk_export.dump
