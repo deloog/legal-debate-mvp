@@ -2,15 +2,15 @@ import { defineConfig, devices } from '@playwright/test';
 import { config as dotenvConfig } from 'dotenv';
 import { resolve } from 'path';
 
-// Load environment variables - prioritize root .env for AI keys
-dotenvConfig({ path: resolve(__dirname, '../.env') });
-dotenvConfig({ path: resolve(__dirname, '../.env.development') });
+// Load environment variables
+dotenvConfig({ path: resolve(__dirname, '.env') });
+dotenvConfig({ path: resolve(__dirname, '.env.development') });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: resolve(__dirname, '../src/__tests__/e2e'),
+  testDir: resolve(__dirname, 'src/__tests__/e2e'),
   testIgnore: [
     '../src/__tests__/**/*.test.ts',
     '../src/__tests__/**/*.test.tsx',
