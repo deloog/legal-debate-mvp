@@ -3,6 +3,7 @@ import { SearchQueryBuilder } from './search-query-builder';
 import { RelevanceScorer } from './relevance-scorer';
 import { SearchCacheManager } from './search-cache';
 import { LawCategory } from '@prisma/client';
+import { logger } from '@/lib/logger';
 import type {
   SearchQuery,
   SearchResult,
@@ -207,13 +208,10 @@ export class LawArticleSearchService {
     articleNumber: string
   ) {
     try {
-      const article = await prisma.lawArticle.findUnique({
-        where: {
-          lawName_articleNumber: {
-            lawName,
-            articleNumber,
-          },
-        },
+      // 唯一约束已变更为 (lawName, articleNumber, effectiveDate)，取最新有效版本
+      const article = await prisma.lawArticle.findFirst({
+        where: { lawName, articleNumber },
+        orderBy: { effectiveDate: 'desc' },
         include: {
           children: true,
           parent: true,
@@ -226,7 +224,7 @@ export class LawArticleSearchService {
 
       return article;
     } catch (error) {
-      console.error('获取法条详情失败:', error);
+      logger.error('获取法条详情失败', { error });
       throw error;
     }
   }
