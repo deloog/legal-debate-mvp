@@ -3,6 +3,8 @@
  * 用于记录和分析速率限制事件
  */
 
+import { logger } from '@/lib/logger';
+
 export interface RateLimitEvent {
   timestamp: Date;
   identifier: string;
@@ -71,7 +73,7 @@ class RateLimitMonitor {
 
     // 如果是被阻止的请求，记录到日志
     if (event.blocked && process.env.NODE_ENV !== 'test') {
-      console.warn('[RateLimit] Request blocked:', {
+      logger.warn('[RateLimit] Request blocked:', {
         identifier: event.identifier.substring(0, 20) + '...',
         endpoint: event.endpoint,
         limitType: event.limitType,
@@ -194,7 +196,7 @@ class RateLimitMonitor {
     this.events = this.events.filter(e => e.timestamp >= cutoffTime);
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(
+      logger.info(
         `[RateLimitMonitor] Cleaned up old events. Current count: ${this.events.length}`
       );
     }

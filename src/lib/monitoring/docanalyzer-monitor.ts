@@ -3,6 +3,8 @@
  * 提供质量评分趋势分析、异常告警等功能
  */
 
+import { logger } from '@/lib/logger';
+
 export interface QualityMetrics {
   timestamp: number;
   documentId?: string;
@@ -335,7 +337,7 @@ export class DocAnalyzerMonitor {
   ): void {
     switch (channel) {
       case 'console':
-        console.warn(
+        logger.warn(
           `[DocAnalyzer Alert] [${alert.level.toUpperCase()}] ${alert.message}`,
           alert.details || ''
         );

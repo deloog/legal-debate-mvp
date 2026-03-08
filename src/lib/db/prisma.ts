@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { PrismaClient } from '@prisma/client';
 import { logError } from '../utils/safe-logger';
 
@@ -45,7 +46,7 @@ export const checkDatabaseConnection = async (): Promise<boolean> => {
 export const disconnectDatabase = async (): Promise<void> => {
   try {
     await prisma.$disconnect();
-    console.log('数据库连接已断开');
+    logger.info('数据库连接已断开');
   } catch (error) {
     // 使用安全日志函数，避免泄露敏感的数据库连接信息
     logError('断开数据库连接时出错', error);

@@ -3,9 +3,10 @@
  * 用于实现资源级权限控制（基于所有权的访问控制）
  */
 
-import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 import type { UserRole } from '@/types/auth';
+import { NextResponse } from 'next/server';
 
 // =============================================================================
 // 资源类型枚举
@@ -95,7 +96,7 @@ export async function checkResourceOwnership(
         };
     }
   } catch (error) {
-    console.error(`检查资源权限时出错: ${error}`);
+    logger.error(`检查资源权限时出错: ${error}`);
     return {
       hasPermission: false,
       reason: '权限检查失败',

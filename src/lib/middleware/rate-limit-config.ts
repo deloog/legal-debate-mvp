@@ -3,6 +3,8 @@
  * 支持动态调整速率限制参数，无需重启服务
  */
 
+import { logger } from '@/lib/logger';
+
 /**
  * 速率限制配置
  */
@@ -123,7 +125,7 @@ class RateLimitConfigManager {
     });
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('[RateLimitConfig] Updated config for:', endpoint);
+      logger.info('[RateLimitConfig] Updated config for:', endpoint);
     }
   }
 
@@ -195,7 +197,7 @@ class RateLimitConfigManager {
     };
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(
+      logger.info(
         '[RateLimitConfig] Global settings updated:',
         this.globalSettings
       );
@@ -277,7 +279,7 @@ class RateLimitConfigManager {
     }
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('[RateLimitConfig] Configuration imported');
+      logger.info('[RateLimitConfig] Configuration imported');
     }
   }
 
@@ -297,7 +299,7 @@ class RateLimitConfigManager {
     this.initializeDefaults();
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('[RateLimitConfig] Reset to defaults');
+      logger.info('[RateLimitConfig] Reset to defaults');
     }
   }
 
@@ -331,7 +333,7 @@ class RateLimitConfigManager {
     }
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[RateLimitConfig] Adjusted all limits by ${multiplier}x`);
+      logger.info(`[RateLimitConfig] Adjusted all limits by ${multiplier}x`);
     }
   }
 
@@ -371,7 +373,7 @@ export const rateLimitConfig = new RateLimitConfigManager();
  * ```typescript
  * // 1. 获取端点配置
  * const config = rateLimitConfig.getConfig('/api/auth/login');
- * console.log(config?.maxRequests); // 5
+ * logger.info(config?.maxRequests); // 5
  *
  * // 2. 动态调整配置
  * rateLimitConfig.setConfig('/api/auth/login', {

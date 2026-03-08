@@ -23,9 +23,10 @@ import { logger } from '@/lib/logger';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { searchParams } = new URL(request.url);
     let depth = parseInt(searchParams.get('depth') || '2');
 
@@ -44,7 +45,7 @@ export async function GET(
 
     // 验证法条存在
     const article = await prisma.lawArticle.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!article) {
@@ -52,7 +53,7 @@ export async function GET(
     }
 
     // 构建图谱数据
-    const graph = await GraphBuilder.buildGraph(params.id, depth);
+    const graph = await GraphBuilder.buildGraph(id, depth);
 
     return NextResponse.json(graph);
   } catch (error) {

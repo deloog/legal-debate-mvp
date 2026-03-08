@@ -3,18 +3,19 @@
  * 提供支付相关配置的获取和验证
  */
 
+import { logger } from '@/lib/logger';
+import {
+  AlipayConfig,
+  AlipayEnvironment,
+  WechatPayConfig,
+} from '@/types/payment';
 import fs from 'fs';
 import path from 'path';
 import {
-  WechatPayConfig,
-  AlipayConfig,
-  AlipayEnvironment,
-} from '@/types/payment';
-import {
-  paymentEnvManager,
-  getWechatPayEnv,
   getAlipayEnv,
   getAlipayEnvironment,
+  getWechatPayEnv,
+  paymentEnvManager,
 } from './payment-env';
 
 /**
@@ -153,7 +154,7 @@ class PaymentConfig {
 
       return privateKeyContent;
     } catch (error) {
-      console.error('[PaymentConfig] 读取微信私钥失败:', error);
+      logger.error('[PaymentConfig] 读取微信私钥失败:', error);
       throw new Error(
         `读取微信私钥失败: ${
           error instanceof Error ? error.message : String(error)
@@ -181,7 +182,7 @@ class PaymentConfig {
 
       return privateKey;
     } catch (error) {
-      console.error('[PaymentConfig] 获取支付宝私钥失败:', error);
+      logger.error('[PaymentConfig] 获取支付宝私钥失败:', error);
       throw new Error(
         `获取支付宝私钥失败: ${
           error instanceof Error ? error.message : String(error)
@@ -209,7 +210,7 @@ class PaymentConfig {
 
       return publicKey;
     } catch (error) {
-      console.error('[PaymentConfig] 获取支付宝公钥失败:', error);
+      logger.error('[PaymentConfig] 获取支付宝公钥失败:', error);
       throw new Error(
         `获取支付宝公钥失败: ${
           error instanceof Error ? error.message : String(error)

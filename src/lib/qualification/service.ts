@@ -3,6 +3,7 @@
  * 提供资格验证、第三方核验接口
  */
 
+import { logger } from '@/lib/logger';
 import type { ThirdPartyVerificationResult } from '@/types/qualification';
 
 /**
@@ -88,7 +89,7 @@ async function callMoJVerificationApi(
       verified: false,
     };
   } catch (error) {
-    console.error('司法部API调用失败:', error);
+    logger.error('司法部API调用失败:', error);
     return {
       success: true,
       verified: false,

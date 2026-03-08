@@ -3,6 +3,8 @@
  * 提供支付相关环境变量的验证、获取和转换
  */
 
+import { logger } from '@/lib/logger';
+
 /**
  * 应用环境类型
  */
@@ -244,7 +246,7 @@ export class PaymentEnvironmentManager {
         process.env.NODE_ENV !== 'production' ||
         process.env.SKIP_ENV_VALIDATION === 'true'
       ) {
-        console.warn(
+        logger.warn(
           `⚠️  支付宝环境变量未完全配置: 缺失 [${result.missing.join(', ')}]`
         );
       } else {

@@ -9,6 +9,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 
 /**
  * 收费模式类型
@@ -434,7 +435,7 @@ export class FeeCalculatorService {
         },
       });
     } catch (error) {
-      console.error('获取案件类型配置失败:', error);
+      logger.error('获取案件类型配置失败:', error);
       return null;
     }
   }

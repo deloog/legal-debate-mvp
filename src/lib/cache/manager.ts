@@ -137,6 +137,7 @@ export class CacheManager {
 
   // 获取缓存值
   async get<T>(key: string, options?: CacheOptions): Promise<T | null> {
+    if (!redis) return null; // Redis 未连接时静默降级
     try {
       const fullKey = this.generateKey(key, options?.namespace);
       const startTime = Date.now();
@@ -186,6 +187,7 @@ export class CacheManager {
     value: T,
     options?: CacheOptions
   ): Promise<boolean> {
+    if (!redis) return false; // Redis 未连接时静默跳过
     try {
       const fullKey = this.generateKey(key, options?.namespace);
       const serializedValue = this.serializeValue(value, options);
@@ -222,6 +224,7 @@ export class CacheManager {
 
   // 删除缓存值
   async delete(key: string, options?: CacheOptions): Promise<boolean> {
+    if (!redis) return false;
     try {
       const fullKey = this.generateKey(key, options?.namespace);
       const result = await redis.del(fullKey);
@@ -247,6 +250,7 @@ export class CacheManager {
 
   // 检查缓存是否存在
   async exists(key: string, options?: CacheOptions): Promise<boolean> {
+    if (!redis) return false;
     try {
       const fullKey = this.generateKey(key, options?.namespace);
       const result = await redis.exists(fullKey);
@@ -263,6 +267,7 @@ export class CacheManager {
     ttl: number,
     options?: CacheOptions
   ): Promise<boolean> {
+    if (!redis) return false;
     try {
       const fullKey = this.generateKey(key, options?.namespace);
       const result = await redis.expire(fullKey, ttl);
@@ -275,6 +280,7 @@ export class CacheManager {
 
   // 获取TTL
   async ttl(key: string, options?: CacheOptions): Promise<number> {
+    if (!redis) return -1;
     try {
       const fullKey = this.generateKey(key, options?.namespace);
       return await redis.ttl(fullKey);
@@ -289,6 +295,7 @@ export class CacheManager {
     keys: string[],
     options?: CacheOptions
   ): Promise<Map<string, T | null>> {
+    if (!redis) return new Map(keys.map(k => [k, null]));
     const fullKeys = keys.map(key => this.generateKey(key, options?.namespace));
 
     try {
@@ -368,6 +375,7 @@ export class CacheManager {
 
   // 批量删除
   async mdelete(keys: string[], options?: CacheOptions): Promise<number> {
+    if (!redis) return 0;
     const fullKeys = keys.map(key => this.generateKey(key, options?.namespace));
 
     try {
@@ -381,6 +389,7 @@ export class CacheManager {
 
   // 清空命名空间
   async clearNamespace(namespace: CacheNamespace | string): Promise<number> {
+    if (!redis) return 0;
     try {
       const pattern = `${this.config.keyPrefix}${namespace}:*`;
       const keys = await redis.keys(pattern);

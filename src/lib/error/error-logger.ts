@@ -5,7 +5,8 @@
  * 负责捕获所有类型错误、评估严重程度、存储到数据库
  */
 
-import { ErrorLog, ErrorContext, ErrorType, ErrorSeverity } from './types';
+import { logger } from '@/lib/logger';
+import { ErrorContext, ErrorLog, ErrorSeverity, ErrorType } from './types';
 
 /**
  * 错误日志记录器
@@ -37,7 +38,7 @@ export class ErrorLogger {
     // 1. 防止重复记录
     const cacheKey = this.getCacheKey(error, context);
     if (this.isDuplicateError(cacheKey)) {
-      console.warn(`Duplicate error detected: ${cacheKey}`);
+      logger.warn(`Duplicate error detected: ${cacheKey}`);
       throw new Error(`Duplicate error: ${cacheKey}`);
     }
 
@@ -366,7 +367,7 @@ export class ErrorLogger {
       // 更新错误日志ID
       errorLog.id = result.id;
     } catch (dbError) {
-      console.error('Failed to save error to database:', dbError);
+      logger.error('Failed to save error to database:', dbError);
       // 不抛出异常，避免错误记录失败影响主流程
     }
   }
@@ -396,7 +397,7 @@ export class ErrorLogger {
         },
       });
     } catch (dbError) {
-      console.error(`Failed to update error log ${errorId}:`, dbError);
+      logger.error(`Failed to update error log ${errorId}:`, dbError);
     }
   }
 }

@@ -4,7 +4,8 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
-import type { UsageType, UsageStats, MembershipTier } from '@/types/membership';
+import { logger } from '@/lib/logger';
+import type { UsageStats, UsageType } from '@/types/membership';
 import { LimitType, MembershipStatus } from '@prisma/client';
 
 // =============================================================================
@@ -101,10 +102,10 @@ export async function recordUsage(params: RecordUsageParams): Promise<string> {
     return usageRecord.id;
   } catch (error) {
     if (error instanceof Error) {
-      console.error(`[recordUsage] 记录使用量失败: ${error.message}`);
+      logger.error(`[recordUsage] 记录使用量失败: ${error.message}`);
       throw new Error(`记录使用量失败: ${error.message}`);
     }
-    console.error('[recordUsage] 记录使用量失败: 未知错误');
+    logger.error('[recordUsage] 记录使用量失败: 未知错误');
     throw new Error('记录使用量失败: 未知错误');
   }
 }
@@ -125,10 +126,10 @@ export async function batchRecordUsage(
     return results.length;
   } catch (error) {
     if (error instanceof Error) {
-      console.error(`[batchRecordUsage] 批量记录失败: ${error.message}`);
+      logger.error(`[batchRecordUsage] 批量记录失败: ${error.message}`);
       throw new Error(`批量记录失败: ${error.message}`);
     }
-    console.error('[batchRecordUsage] 批量记录失败: 未知错误');
+    logger.error('[batchRecordUsage] 批量记录失败: 未知错误');
     throw new Error('批量记录失败: 未知错误');
   }
 }
@@ -301,10 +302,10 @@ export async function getUsageStats(
     };
   } catch (error) {
     if (error instanceof Error) {
-      console.error(`[getUsageStats] 获取使用量统计失败: ${error.message}`);
+      logger.error(`[getUsageStats] 获取使用量统计失败: ${error.message}`);
       throw error;
     }
-    console.error('[getUsageStats] 获取使用量统计失败: 未知错误');
+    logger.error('[getUsageStats] 获取使用量统计失败: 未知错误');
     throw new Error('获取使用量统计失败: 未知错误');
   }
 }
@@ -384,10 +385,10 @@ export async function checkUsageLimit(
     };
   } catch (error) {
     if (error instanceof Error) {
-      console.error(`[checkUsageLimit] 检查使用量限制失败: ${error.message}`);
+      logger.error(`[checkUsageLimit] 检查使用量限制失败: ${error.message}`);
       throw error;
     }
-    console.error('[checkUsageLimit] 检查使用量限制失败: 未知错误');
+    logger.error('[checkUsageLimit] 检查使用量限制失败: 未知错误');
     throw new Error('检查使用量限制失败: 未知错误');
   }
 }

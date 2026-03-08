@@ -5,6 +5,7 @@
  * 使用 AES-256-GCM 加密算法
  */
 
+import { logger } from '@/lib/logger';
 import crypto from 'crypto';
 
 // 从环境变量获取加密密钥
@@ -48,7 +49,7 @@ export function encrypt(text: string): string {
     // 返回格式：iv:authTag:encrypted
     return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
   } catch (error) {
-    console.error('加密失败:', error);
+    logger.error('加密失败:', error);
     throw new Error('数据加密失败');
   }
 }
@@ -81,7 +82,7 @@ export function decrypt(encryptedText: string): string {
 
     return decrypted;
   } catch (error) {
-    console.error('解密失败:', error);
+    logger.error('解密失败:', error);
     throw new Error('数据解密失败');
   }
 }

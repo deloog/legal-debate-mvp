@@ -3,8 +3,9 @@
  * 提供签名、验签、金额转换等工具函数
  */
 
-import crypto from 'crypto';
+import { logger } from '@/lib/logger';
 import { AlipayNotifyRequest, AlipayReturnParams } from '@/types/payment';
+import crypto from 'crypto';
 
 /**
  * 生成随机字符串
@@ -58,7 +59,7 @@ export function safeParseJSON<T>(jsonString: string): T | null {
   try {
     return JSON.parse(jsonString) as T;
   } catch (error) {
-    console.error('[AlipayUtils] JSON解析失败:', error);
+    logger.error('[AlipayUtils] JSON解析失败:', error);
     return null;
   }
 }
@@ -70,7 +71,7 @@ export function safeStringifyJSON(obj: unknown): string {
   try {
     return JSON.stringify(obj);
   } catch (error) {
-    console.error('[AlipayUtils] JSON序列化失败:', error);
+    logger.error('[AlipayUtils] JSON序列化失败:', error);
     return '{}';
   }
 }
@@ -111,7 +112,7 @@ export function alipaySign(
 
     return sign;
   } catch (error) {
-    console.error('[AlipayUtils] 支付宝签名失败:', error);
+    logger.error('[AlipayUtils] 支付宝签名失败:', error);
     throw new Error(
       `支付宝签名失败: ${error instanceof Error ? error.message : String(error)}`
     );
@@ -164,7 +165,7 @@ export function alipayVerify(
 
     return isValid;
   } catch (error) {
-    console.error('[AlipayUtils] 支付宝验签失败:', error);
+    logger.error('[AlipayUtils] 支付宝验签失败:', error);
     return false;
   }
 }
@@ -203,7 +204,7 @@ export function logPayment(
     }),
   };
 
-  console.log(`[AlipayPayment] ${action}:`, JSON.stringify(logData));
+  logger.info(`[AlipayPayment] ${action}:`, JSON.stringify(logData));
 }
 
 /**
@@ -220,7 +221,7 @@ export function verifyAlipayNotify(
     };
 
     if (!sign) {
-      console.error('[AlipayUtils] 回调缺少sign参数');
+      logger.error('[AlipayUtils] 回调缺少sign参数');
       return false;
     }
 
@@ -231,7 +232,7 @@ export function verifyAlipayNotify(
       sign
     );
   } catch (error) {
-    console.error('[AlipayUtils] 验证支付宝回调失败:', error);
+    logger.error('[AlipayUtils] 验证支付宝回调失败:', error);
     return false;
   }
 }
@@ -250,7 +251,7 @@ export function verifyAlipayReturn(
     };
 
     if (!sign) {
-      console.error('[AlipayUtils] 同步返回缺少sign参数');
+      logger.error('[AlipayUtils] 同步返回缺少sign参数');
       return false;
     }
 
@@ -261,7 +262,7 @@ export function verifyAlipayReturn(
       sign
     );
   } catch (error) {
-    console.error('[AlipayUtils] 验证支付宝返回失败:', error);
+    logger.error('[AlipayUtils] 验证支付宝返回失败:', error);
     return false;
   }
 }

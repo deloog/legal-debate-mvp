@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 import { Order, OrderStatus, PaymentMethod } from '@/types/payment';
 import type { MembershipTierType } from '@prisma/client';
 
@@ -67,7 +68,7 @@ export async function updateOrderPaid(
   thirdPartyOrderNo?: string
 ): Promise<Order> {
   try {
-    console.log('[UpdateOrderPaid] 开始更新订单为已支付:', {
+    logger.info('[UpdateOrderPaid] 开始更新订单为已支付:', {
       orderId,
       transactionId,
       thirdPartyOrderNo,
@@ -93,7 +94,7 @@ export async function updateOrderPaid(
 
     // 如果订单已经是 PAID 状态，直接返回
     if (order.status === 'PAID') {
-      console.log('[UpdateOrderPaid] 订单已支付，直接返回:', {
+      logger.info('[UpdateOrderPaid] 订单已支付，直接返回:', {
         orderId,
         status: order.status,
       });
@@ -125,7 +126,7 @@ export async function updateOrderPaid(
         },
       });
 
-      console.log('[UpdateOrderPaid] 订单状态已更新:', {
+      logger.info('[UpdateOrderPaid] 订单状态已更新:', {
         orderId,
         orderNo: orderResult.orderNo,
         status: orderResult.status,
@@ -146,7 +147,7 @@ export async function updateOrderPaid(
         },
       });
 
-      console.log('[UpdateOrderPaid] 支付记录已创建:', {
+      logger.info('[UpdateOrderPaid] 支付记录已创建:', {
         paymentRecordId: paymentRecord.id,
         orderId,
         transactionId,
@@ -194,7 +195,7 @@ export async function updateOrderPaid(
         endDate = new Date(
           Math.max(endDate.getTime(), currentEndDate.getTime())
         );
-        console.log('[UpdateOrderPaid] 延长会员到期时间:', {
+        logger.info('[UpdateOrderPaid] 延长会员到期时间:', {
           currentEndDate,
           newEndDate: endDate,
         });
@@ -216,7 +217,7 @@ export async function updateOrderPaid(
         },
       });
 
-      console.log('[UpdateOrderPaid] 会员记录已创建:', {
+      logger.info('[UpdateOrderPaid] 会员记录已创建:', {
         membershipId: membershipResult.id,
         tier: membershipResult.tier?.tier,
         startDate: membershipResult.startDate,
@@ -246,12 +247,12 @@ export async function updateOrderPaid(
         },
       });
 
-      console.log('[UpdateOrderPaid] 会员历史记录已创建');
+      logger.info('[UpdateOrderPaid] 会员历史记录已创建');
 
       return orderResult;
     });
 
-    console.log('[UpdateOrderPaid] 订单支付完成处理成功:', {
+    logger.info('[UpdateOrderPaid] 订单支付完成处理成功:', {
       orderId,
       orderNo: updatedOrder.orderNo,
       userId: updatedOrder.userId,
@@ -259,7 +260,7 @@ export async function updateOrderPaid(
 
     return createOrderObject(updatedOrder);
   } catch (error) {
-    console.error('[UpdateOrderPaid] 更新订单支付状态失败:', error);
+    logger.error('[UpdateOrderPaid] 更新订单支付状态失败:', error);
     throw error;
   }
 }
@@ -299,7 +300,7 @@ export async function batchUpdateOrdersPaid(
     }
   }
 
-  console.log('[UpdateOrderPaid] 批量更新订单支付状态完成:', results);
+  logger.info('[UpdateOrderPaid] 批量更新订单支付状态完成:', results);
 
   return results;
 }
@@ -340,7 +341,7 @@ export async function getOrderPaymentStatus(orderId: string): Promise<{
       canPay: canPay && !isExpired,
     };
   } catch (error) {
-    console.error('[UpdateOrderPaid] 查询订单支付状态失败:', error);
+    logger.error('[UpdateOrderPaid] 查询订单支付状态失败:', error);
     throw error;
   }
 }

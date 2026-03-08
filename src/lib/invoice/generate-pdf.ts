@@ -3,11 +3,12 @@
  * 使用 pdfkit 生成符合中国税务标准的发票PDF文件
  */
 
-import PDFDocument from 'pdfkit';
+import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
+import { InvoiceStatus, InvoiceType, OrderStatus } from '@/types/payment';
 import * as fs from 'fs';
 import * as path from 'path';
-import { prisma } from '@/lib/db/prisma';
-import { InvoiceType, OrderStatus, InvoiceStatus } from '@/types/payment';
+import PDFDocument from 'pdfkit';
 import { formatAmountToChinese } from './invoice-utils';
 
 /**
@@ -236,16 +237,16 @@ async function generatePDFWithPdfkit(
       doc.end();
 
       stream.on('finish', () => {
-        console.log(`[InvoicePDF] PDF 生成成功: ${outputPath}`);
+        logger.info(`[InvoicePDF] PDF 生成成功: ${outputPath}`);
         resolve();
       });
 
       stream.on('error', error => {
-        console.error(`[InvoicePDF] PDF 写入失败:`, error);
+        logger.error(`[InvoicePDF] PDF 写入失败:`, error);
         reject(error);
       });
     } catch (error) {
-      console.error(`[InvoicePDF] PDF 生成失败:`, error);
+      logger.error(`[InvoicePDF] PDF 生成失败:`, error);
       reject(error);
     }
   });
@@ -265,7 +266,7 @@ export async function batchGenerateInvoicePDF(
     try {
       await generateInvoicePDF(invoiceId);
     } catch (error) {
-      console.error(`生成发票PDF失败: ${invoiceId}`, error);
+      logger.error(`生成发票PDF失败: ${invoiceId}`, error);
       failedInvoices.push(invoiceId);
     }
   }
@@ -297,6 +298,6 @@ export async function deleteInvoiceFile(filePath: string): Promise<void> {
     const absolutePath = path.join(process.cwd(), 'public', filePath);
     await fs.promises.unlink(absolutePath);
   } catch (error) {
-    console.error(`删除发票文件失败: ${filePath}`, error);
+    logger.error(`删除发票文件失败: ${filePath}`, error);
   }
 }

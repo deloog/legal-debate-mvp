@@ -2,6 +2,7 @@
  * API响应时间监控中间件
  */
 
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface RequestStats {
@@ -44,7 +45,7 @@ export function withPerformanceMonitoring(
 
       // 如果响应时间过长，记录警告
       if (duration > 1000) {
-        console.warn(`慢请求警告: ${method} ${path} - ${duration}ms`);
+        logger.warn(`慢请求警告: ${method} ${path} - ${duration}ms`);
       }
 
       return response;
@@ -118,25 +119,25 @@ export function getApiStats() {
  * 打印API性能报告
  */
 export function printApiReport() {
-  console.log('\n=== API性能报告 ===\n');
+  logger.info('\n=== API性能报告 ===\n');
 
   const slowRequests = getSlowRequests(1000);
-  console.log(`慢请求（>1000ms）: ${slowRequests.length}个`);
+  logger.info(`慢请求（>1000ms）: ${slowRequests.length}个`);
   slowRequests.slice(0, 10).forEach((req, index) => {
-    console.log(
+    logger.info(
       `${index + 1}. ${req.method} ${req.path} - ${req.duration}ms (${req.status})`
     );
   });
 
-  console.log('\nAPI平均响应时间：');
+  logger.info('\nAPI平均响应时间：');
   const apiStats = getApiStats();
   apiStats.slice(0, 10).forEach((stat, index) => {
-    console.log(
+    logger.info(
       `${index + 1}. ${stat.endpoint} - ${stat.avgDuration.toFixed(2)}ms (${stat.count}次)`
     );
   });
 
-  console.log('\n=== 报告结束 ===\n');
+  logger.info('\n=== 报告结束 ===\n');
 }
 
 /**

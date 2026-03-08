@@ -48,7 +48,7 @@ const LAWTYPE_MAP: Record<number, string> = {
 
 // FLK 类别 → LawCategory
 const CATEGORY_MAP: Record<string, string> = {
-  '宪法': 'CONSTITUTIONAL',
+  '宪法': 'OTHER',
   '民法': 'CIVIL',
   '刑法': 'CRIMINAL',
   '行政法': 'ADMINISTRATIVE',

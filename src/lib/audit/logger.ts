@@ -3,10 +3,10 @@
  * 记录系统重要操作，用于安全追踪和问题排查
  */
 
-import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import type { ActionLogType, ActionLogCategory } from '@prisma/client';
-import type { Prisma } from '@prisma/client';
+import { logger } from '@/lib/logger';
+import type { ActionLogCategory, ActionLogType, Prisma } from '@prisma/client';
+import { NextRequest } from 'next/server';
 
 // =============================================================================
 // 类型定义
@@ -58,7 +58,7 @@ export async function createAuditLog(data: AuditLogData): Promise<void> {
       },
     });
   } catch (error) {
-    console.error('创建审计日志失败:', error);
+    logger.error('创建审计日志失败:', error);
     // 不抛出错误，避免影响主流程
   }
 }

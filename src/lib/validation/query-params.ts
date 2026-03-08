@@ -1,3 +1,5 @@
+import { logger } from '@/lib/logger';
+
 /**
  * 查询参数验证工具
  * 防止SQL注入和恶意参数
@@ -15,7 +17,7 @@ export function validateSortBy(
 
   // 白名单验证
   if (!allowedFields.includes(sortBy)) {
-    console.warn(
+    logger.warn(
       `[Security] Invalid sortBy field: ${sortBy}, using default: ${defaultField}`
     );
     return defaultField;
@@ -23,7 +25,7 @@ export function validateSortBy(
 
   // 防止SQL注入：只允许字母、数字和下划线
   if (!/^[a-zA-Z0-9_]+$/.test(sortBy)) {
-    console.warn(`[Security] Potentially malicious sortBy field: ${sortBy}`);
+    logger.warn(`[Security] Potentially malicious sortBy field: ${sortBy}`);
     return defaultField;
   }
 
@@ -41,7 +43,7 @@ export function validateSortOrder(
 
   const normalized = sortOrder.toLowerCase();
   if (normalized !== 'asc' && normalized !== 'desc') {
-    console.warn(`[Security] Invalid sortOrder: ${sortOrder}`);
+    logger.warn(`[Security] Invalid sortOrder: ${sortOrder}`);
     return defaultOrder;
   }
 
@@ -64,11 +66,11 @@ export function validatePagination(params: {
   // 解析page
   let parsedPage = parseInt(page || '1', 10);
   if (isNaN(parsedPage) || parsedPage < 1) {
-    console.warn(`[Security] Invalid page number: ${page}`);
+    logger.warn(`[Security] Invalid page number: ${page}`);
     parsedPage = 1;
   }
   if (parsedPage > 10000) {
-    console.warn(`[Security] Page number too large: ${parsedPage}`);
+    logger.warn(`[Security] Page number too large: ${parsedPage}`);
     parsedPage = 10000; // 最大页数限制
   }
 
@@ -76,11 +78,11 @@ export function validatePagination(params: {
   const limitValue = limit || pageSize || '20';
   let parsedLimit = parseInt(limitValue, 10);
   if (isNaN(parsedLimit) || parsedLimit < 1) {
-    console.warn(`[Security] Invalid limit: ${limitValue}`);
+    logger.warn(`[Security] Invalid limit: ${limitValue}`);
     parsedLimit = 20;
   }
   if (parsedLimit > 100) {
-    console.warn(`[Security] Limit too large: ${parsedLimit}`);
+    logger.warn(`[Security] Limit too large: ${parsedLimit}`);
     parsedLimit = 100; // 最大每页数量
   }
 
@@ -101,7 +103,7 @@ export function validateEnum<T extends string>(
   if (!value) return defaultValue;
 
   if (!allowedValues.includes(value as T)) {
-    console.warn(
+    logger.warn(
       `[Security] Invalid enum value: ${value}, allowed: ${allowedValues.join(', ')}`
     );
     return defaultValue;
@@ -126,14 +128,14 @@ export function validateStringLength(
   const { minLength = 0, maxLength = 1000, fieldName = 'field' } = options;
 
   if (value.length < minLength) {
-    console.warn(
+    logger.warn(
       `[Security] ${fieldName} too short: ${value.length} < ${minLength}`
     );
     return undefined;
   }
 
   if (value.length > maxLength) {
-    console.warn(
+    logger.warn(
       `[Security] ${fieldName} too long: ${value.length} > ${maxLength}`
     );
     return value.substring(0, maxLength); // 截断
@@ -154,20 +156,20 @@ export function validateDateString(
   try {
     const date = new Date(value);
     if (isNaN(date.getTime())) {
-      console.warn(`[Security] Invalid ${fieldName}: ${value}`);
+      logger.warn(`[Security] Invalid ${fieldName}: ${value}`);
       return undefined;
     }
 
     // 验证日期范围（1900-2100）
     const year = date.getFullYear();
     if (year < 1900 || year > 2100) {
-      console.warn(`[Security] ${fieldName} out of range: ${year}`);
+      logger.warn(`[Security] ${fieldName} out of range: ${year}`);
       return undefined;
     }
 
     return date;
-  } catch (error) {
-    console.warn(`[Security] Failed to parse ${fieldName}: ${value}`);
+  } catch (_error) {
+    logger.warn(`[Security] Failed to parse ${fieldName}: ${value}`);
     return undefined;
   }
 }
@@ -188,7 +190,7 @@ export function validateUUID(
   const cuidRegex = /^c[0-9a-z]{24}$/i;
 
   if (!uuidRegex.test(value) && !cuidRegex.test(value)) {
-    console.warn(`[Security] Invalid ${fieldName} format: ${value}`);
+    logger.warn(`[Security] Invalid ${fieldName} format: ${value}`);
     return undefined;
   }
 

@@ -2,9 +2,10 @@
  * 认证中间件
  */
 
-import type { NextRequest } from 'next/server';
-import { verifyToken, extractTokenFromHeader } from '../auth/jwt';
+import { logger } from '@/lib/logger';
 import type { JwtPayload } from '@/types/auth';
+import type { NextRequest } from 'next/server';
+import { extractTokenFromHeader, verifyToken } from '../auth/jwt';
 
 /**
  * 获取认证用户信息
@@ -37,7 +38,7 @@ export async function getAuthUser(
     const userEmail = request.headers.get('x-user-email');
 
     if (userId && userRole && userEmail) {
-      console.log('[getAuthUser] 从middleware headers读取用户信息:', {
+      logger.info('[getAuthUser] 从middleware headers读取用户信息:', {
         userId,
         userEmail,
         userRole,
@@ -50,11 +51,11 @@ export async function getAuthUser(
       };
     }
 
-    console.log('[getAuthUser] 未找到token，所有来源都为空');
+    logger.info('[getAuthUser] 未找到token，所有来源都为空');
     return null;
   }
 
-  console.log(
+  logger.info(
     '[getAuthUser] Token来源:',
     tokenSource,
     '预览:',
@@ -64,7 +65,7 @@ export async function getAuthUser(
   // 4. 验证token
   const verificationResult = verifyToken(token);
 
-  console.log('[getAuthUser] Token验证结果:', {
+  logger.info('[getAuthUser] Token验证结果:', {
     valid: verificationResult.valid,
     hasPayload: !!verificationResult.payload,
     error: verificationResult.error,

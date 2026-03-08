@@ -3,10 +3,11 @@
  * 用于在API请求前检查用户使用量是否超过限制
  */
 
-import type { NextRequest, NextResponse } from 'next/server';
-import { getAuthUser } from './auth';
-import { checkUsageLimit, recordUsage } from '../usage/record-usage';
+import { logger } from '@/lib/logger';
 import type { UsageType } from '@/types/membership';
+import type { NextRequest, NextResponse } from 'next/server';
+import { checkUsageLimit, recordUsage } from '../usage/record-usage';
+import { getAuthUser } from './auth';
 
 // =============================================================================
 // 使用量限制检查结果
@@ -74,7 +75,7 @@ export async function checkUsageLimitForRequest(
     };
   } catch (error) {
     if (error instanceof Error) {
-      console.error(`[checkUsageLimitForRequest] 检查失败: ${error.message}`);
+      logger.error(`[checkUsageLimitForRequest] 检查失败: ${error.message}`);
       return {
         allowed: false,
         currentUsage: 0,
@@ -83,7 +84,7 @@ export async function checkUsageLimitForRequest(
         reason: `检查使用量限制失败: ${error.message}`,
       };
     }
-    console.error('[checkUsageLimitForRequest] 检查失败: 未知错误');
+    logger.error('[checkUsageLimitForRequest] 检查失败: 未知错误');
     return {
       allowed: false,
       currentUsage: 0,
@@ -153,7 +154,7 @@ export function enforceUsageLimit(
           quantity,
         });
       } catch (error) {
-        console.error(`[enforceUsageLimit] 记录使用量失败: ${error}`);
+        logger.error(`[enforceUsageLimit] 记录使用量失败: ${error}`);
         // 记录失败不影响请求继续
       }
     }
@@ -273,7 +274,7 @@ export async function checkAndRecordUsage(
       resourceType,
     });
   } catch (error) {
-    console.error(`[checkAndRecordUsage] 记录使用量失败: ${error}`);
+    logger.error(`[checkAndRecordUsage] 记录使用量失败: ${error}`);
     // 记录失败不影响请求继续
   }
 

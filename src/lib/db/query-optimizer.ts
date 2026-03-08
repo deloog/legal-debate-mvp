@@ -3,6 +3,7 @@
  * 提供常用的查询优化模式
  */
 
+import { logger } from '@/lib/logger';
 import type { Prisma } from '@prisma/client';
 
 /**
@@ -188,7 +189,7 @@ export class QueryCounter {
    */
   logStats(): void {
     const stats = this.getAllCounts();
-    console.log('查询统计:', JSON.stringify(stats, null, 2));
+    logger.info('查询统计:', JSON.stringify(stats, null, 2));
   }
 }
 

@@ -4,17 +4,18 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 import type {
   ReportContent,
   ReportGenerationConfig,
   ReportType,
 } from '@/types/stats';
-import { ReportStatus, ReportFormat, ReportSection } from '@/types/stats';
-import { collectReportData } from './report-data-collector';
-import { buildReportContent } from './report-content-builder';
-import { formatReport } from './report-formatter';
-import fs from 'fs/promises';
+import { ReportFormat, ReportSection, ReportStatus } from '@/types/stats';
 import type { Prisma } from '@prisma/client';
+import fs from 'fs/promises';
+import { buildReportContent } from './report-content-builder';
+import { collectReportData } from './report-data-collector';
+import { formatReport } from './report-formatter';
 
 /**
  * 报告生成结果
@@ -104,7 +105,7 @@ export async function generateReport(
           },
         });
       } catch (updateError) {
-        console.error('Failed to update report status:', updateError);
+        logger.error('Failed to update report status:', updateError);
       }
     }
 

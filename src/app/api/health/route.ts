@@ -62,11 +62,11 @@ async function checkDatabaseHealth(): Promise<DatabaseHealth> {
     // 获取连接信息
     const connectionInfo = await getConnectionInfo();
 
-    // 转换字段名以匹配类型定义
+    // 转换字段名，BigInt → Number 避免 JSON 序列化失败
     const normalizedConnectionInfo = connectionInfo
       ? {
-          activeConnections: connectionInfo.active_connections || 0,
-          totalConnections: connectionInfo.total_connections,
+          activeConnections: Number(connectionInfo.active_connections) || 0,
+          totalConnections: Number(connectionInfo.total_connections) || 0,
         }
       : {
           activeConnections: 0,

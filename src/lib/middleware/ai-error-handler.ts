@@ -3,6 +3,8 @@
  * 提供超时控制、重试机制和友好的错误提示
  */
 
+import { logger } from '@/lib/logger';
+
 // =============================================================================
 // 错误类型定义
 // =============================================================================
@@ -159,13 +161,10 @@ export class AIServiceErrorHandler {
         // 等待后再重试
         await new Promise(resolve => setTimeout(resolve, delay));
 
-        console.warn(
-          `操作重试 (第${attempt + 1}/${maxRetries}次): ${context}`,
-          {
-            error: (error as Error).message,
-            delay: `${delay}ms`,
-          }
-        );
+        logger.warn(`操作重试 (第${attempt + 1}/${maxRetries}次): ${context}`, {
+          error: (error as Error).message,
+          delay: `${delay}ms`,
+        });
       }
     }
 

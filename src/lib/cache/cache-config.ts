@@ -3,6 +3,7 @@
  * 集中管理所有缓存相关配置，支持环境变量覆盖和类型安全
  */
 
+import { logger } from '@/lib/logger';
 import { CacheNamespace, defaultCacheConfig } from './types';
 
 /**
@@ -207,12 +208,12 @@ export function setNamespaceTTL(
 ): boolean {
   const config = namespaceConfigs[namespace];
   if (!config) {
-    console.warn(`未找到命名空间配置: ${namespace}`);
+    logger.warn(`未找到命名空间配置: ${namespace}`);
     return false;
   }
 
   config.ttl = ttl;
-  console.log(`更新命名空间TTL: ${namespace} = ${ttl}秒`);
+  logger.info(`更新命名空间TTL: ${namespace} = ${ttl}秒`);
   return true;
 }
 

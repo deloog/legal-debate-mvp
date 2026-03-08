@@ -3,6 +3,7 @@
  * 提供签名、加密、解密等工具函数
  */
 
+import { logger } from '@/lib/logger';
 import crypto from 'crypto';
 
 /**
@@ -220,13 +221,13 @@ export function logPayment(
   };
 
   if (error) {
-    console.error(`[WechatPay] ${action}`, {
+    logger.error(`[WechatPay] ${action}`, {
       ...logData,
       error: error.message,
       stack: error.stack,
     });
   } else {
-    console.log(`[WechatPay] ${action}`, logData);
+    logger.info(`[WechatPay] ${action}`, logData);
   }
 }
 
@@ -237,7 +238,7 @@ export function safeParseJSON<T = unknown>(json: string): T | null {
   try {
     return JSON.parse(json) as T;
   } catch (error) {
-    console.error('[WechatPay] JSON解析失败', {
+    logger.error('[WechatPay] JSON解析失败', {
       json,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
@@ -252,7 +253,7 @@ export function safeStringifyJSON(data: unknown): string {
   try {
     return JSON.stringify(data);
   } catch (error) {
-    console.error('[WechatPay] JSON序列化失败', {
+    logger.error('[WechatPay] JSON序列化失败', {
       data,
       error: error instanceof Error ? error.message : 'Unknown error',
     });

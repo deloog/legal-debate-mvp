@@ -4,10 +4,15 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
-import { Invoice, InvoiceType, InvoiceStatus } from '@/types/payment';
-import { validateInvoiceFields } from './invoice-utils';
+import { logger } from '@/lib/logger';
+import {
+  Invoice,
+  InvoiceStatus,
+  InvoiceType,
+  OrderStatus,
+} from '@/types/payment';
 import { generateInvoicePDF } from './generate-pdf';
-import { OrderStatus } from '@/types/payment';
+import { validateInvoiceFields } from './invoice-utils';
 
 /**
  * 将 Prisma Decimal 转换为 number
@@ -112,7 +117,7 @@ export async function applyInvoice(
       },
     });
 
-    console.log('[InvoiceService] 申请发票成功:', {
+    logger.info('[InvoiceService] 申请发票成功:', {
       invoiceId: invoice.id,
       userId,
       orderId,
@@ -121,19 +126,19 @@ export async function applyInvoice(
 
     // 异步生成PDF（不阻塞响应）
     generateInvoicePDF(invoice.id).catch(error => {
-      console.error('[InvoiceService] 生成发票PDF失败:', error);
+      logger.error('[InvoiceService] 生成发票PDF失败:', error);
       // 更新发票状态为失败
       prisma.invoice
         .update({
           where: { id: invoice.id },
           data: { status: 'FAILED' },
         })
-        .catch(err => console.error('[InvoiceService] 更新发票状态失败:', err));
+        .catch(err => logger.error('[InvoiceService] 更新发票状态失败:', err));
     });
 
     return createInvoiceObject(invoice);
   } catch (error) {
-    console.error('[InvoiceService] 申请发票失败:', error);
+    logger.error('[InvoiceService] 申请发票失败:', error);
     throw error;
   }
 }
@@ -163,7 +168,7 @@ export async function getInvoice(invoiceId: string): Promise<Invoice | null> {
 
     return createInvoiceObject(invoice);
   } catch (error) {
-    console.error('[InvoiceService] 查询发票失败:', error);
+    logger.error('[InvoiceService] 查询发票失败:', error);
     throw error;
   }
 }
@@ -195,7 +200,7 @@ export async function getInvoiceByOrderNo(
 
     return createInvoiceObject(invoice);
   } catch (error) {
-    console.error('[InvoiceService] 查询发票失败:', error);
+    logger.error('[InvoiceService] 查询发票失败:', error);
     throw error;
   }
 }
@@ -272,7 +277,7 @@ export async function getUserInvoices(
       total,
     };
   } catch (error) {
-    console.error('[InvoiceService] 查询用户发票失败:', error);
+    logger.error('[InvoiceService] 查询用户发票失败:', error);
     throw error;
   }
 }
@@ -308,14 +313,14 @@ export async function updateInvoiceStatus(
       },
     });
 
-    console.log('[InvoiceService] 更新发票状态:', {
+    logger.info('[InvoiceService] 更新发票状态:', {
       invoiceId,
       status,
     });
 
     return createInvoiceObject(invoice);
   } catch (error) {
-    console.error('[InvoiceService] 更新发票状态失败:', error);
+    logger.error('[InvoiceService] 更新发票状态失败:', error);
     throw error;
   }
 }
@@ -385,7 +390,7 @@ export async function cancelInvoice(
       },
     });
 
-    console.log('[InvoiceService] 取消发票:', {
+    logger.info('[InvoiceService] 取消发票:', {
       invoiceId,
       userId,
       reason,
@@ -393,7 +398,7 @@ export async function cancelInvoice(
 
     return createInvoiceObject(updatedInvoice);
   } catch (error) {
-    console.error('[InvoiceService] 取消发票失败:', error);
+    logger.error('[InvoiceService] 取消发票失败:', error);
     throw error;
   }
 }
@@ -432,14 +437,14 @@ export async function regenerateInvoicePDF(
     // 重新生成PDF
     const filePath = await generateInvoicePDF(invoiceId);
 
-    console.log('[InvoiceService] 重新生成发票PDF:', {
+    logger.info('[InvoiceService] 重新生成发票PDF:', {
       invoiceId,
       filePath,
     });
 
     return filePath;
   } catch (error) {
-    console.error('[InvoiceService] 重新生成发票PDF失败:', error);
+    logger.error('[InvoiceService] 重新生成发票PDF失败:', error);
     throw error;
   }
 }
@@ -477,7 +482,7 @@ export async function getInvoiceStats(userId: string): Promise<{
       cancelled,
     };
   } catch (error) {
-    console.error('[InvoiceService] 获取发票统计失败:', error);
+    logger.error('[InvoiceService] 获取发票统计失败:', error);
     throw error;
   }
 }

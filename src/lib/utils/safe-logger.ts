@@ -3,6 +3,8 @@
  * 防止敏感信息（如密码、token、数据库连接字符串等）泄露到日志中
  */
 
+import { logger } from '@/lib/logger';
+
 /**
  * 敏感字段列表（不区分大小写）
  */
@@ -83,7 +85,7 @@ export function sanitizeError(error: unknown): {
  */
 export function logError(message: string, error: unknown): void {
   const sanitized = sanitizeError(error);
-  console.error(`${message}:`, {
+  logger.error(`${message}:`, {
     type: sanitized.type,
     message: sanitized.message,
     ...(sanitized.code && { code: sanitized.code }),
@@ -100,9 +102,9 @@ export function logObject(
 ): void {
   if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
     const sanitized = sanitizeObject(obj as Record<string, unknown>);
-    console[level](label, sanitized);
+    logger[level](label, sanitized);
   } else {
-    console[level](label, obj);
+    logger[level](label, obj);
   }
 }
 
@@ -112,9 +114,9 @@ export function logObject(
 export function logWarning(message: string, data?: unknown): void {
   if (data && typeof data === 'object') {
     const sanitized = sanitizeObject(data as Record<string, unknown>);
-    console.warn(message, sanitized);
+    logger.warn(message, sanitized);
   } else {
-    console.warn(message, data);
+    logger.warn(message, data);
   }
 }
 
@@ -125,9 +127,9 @@ export function logInfo(message: string, data?: unknown): void {
   if (process.env.NODE_ENV !== 'production') {
     if (data && typeof data === 'object') {
       const sanitized = sanitizeObject(data as Record<string, unknown>);
-      console.log(message, sanitized);
+      logger.info(message, sanitized);
     } else {
-      console.log(message, data);
+      logger.info(message, data);
     }
   }
 }

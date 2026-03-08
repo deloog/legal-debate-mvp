@@ -3,9 +3,10 @@
  * 根据服务器负载、用户信誉等因素动态调整速率限制
  */
 
+import { logger } from '@/lib/logger';
 import { NextRequest } from 'next/server';
-import { rateLimitConfig } from './rate-limit-config';
 import os from 'os';
+import { rateLimitConfig } from './rate-limit-config';
 
 /**
  * 用户信誉等级
@@ -132,7 +133,7 @@ class AdaptiveRateLimitManager {
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('[AdaptiveRateLimit] Error updating server load:', error);
+        logger.error('[AdaptiveRateLimit] Error updating server load:', error);
       }
     }
   }
@@ -205,7 +206,7 @@ class AdaptiveRateLimitManager {
     this.updateReputationLevel(reputation);
 
     if (process.env.NODE_ENV !== 'test') {
-      console.warn('[AdaptiveRateLimit] Violation recorded:', {
+      logger.warn('[AdaptiveRateLimit] Violation recorded:', {
         identifier: identifier.substring(0, 20) + '...',
         violationCount: reputation.violationCount,
         score: reputation.score,
@@ -318,7 +319,7 @@ class AdaptiveRateLimitManager {
     }
 
     if (cleanedCount > 0 && process.env.NODE_ENV === 'development') {
-      console.log(
+      logger.info(
         `[AdaptiveRateLimit] Cleaned up ${cleanedCount} old reputation records`
       );
     }
@@ -436,7 +437,7 @@ export function getIdentifier(request: NextRequest): string {
  *   baseLimit
  * );
  *
- * console.log(`用户限制: ${maxRequests} (${multiplier}x, ${reason})`);
+ * logger.info(`用户限制: ${maxRequests} (${multiplier}x, ${reason})`);
  *
  * // 2. 记录成功请求
  * adaptiveRateLimit.recordSuccess(identifier);
@@ -446,11 +447,11 @@ export function getIdentifier(request: NextRequest): string {
  *
  * // 4. 查看服务器负载
  * const load = adaptiveRateLimit.getServerLoad();
- * console.log('CPU使用率:', load.cpuUsage + '%');
+ * logger.info('CPU使用率:', load.cpuUsage + '%');
  *
  * // 5. 查看用户信誉
  * const reputation = adaptiveRateLimit.getReputation(identifier);
- * console.log('用户等级:', reputation.level);
- * console.log('信誉分数:', reputation.score);
+ * logger.info('用户等级:', reputation.level);
+ * logger.info('信誉分数:', reputation.score);
  * ```
  */

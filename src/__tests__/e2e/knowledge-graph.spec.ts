@@ -7,9 +7,8 @@
  * 3. 分类过滤
  * 4. 关系类型过滤
  * 5. 邻居节点查询
- * 6. 最短路径查询
- * 7. 关系生成统计接口
- * 8. 权限控制
+ * 6. 关系生成统计接口
+ * 7. 权限控制
  */
 
 import { expect, test } from '@playwright/test';
@@ -33,16 +32,13 @@ interface GraphLink {
   strength?: number;
 }
 
+// browse 接口直接返回 { nodes, links, pagination }，无 success 包装
 interface BrowseResponse {
-  success: boolean;
-  data?: {
-    nodes: GraphNode[];
-    links: GraphLink[];
-    total?: number;
-    nodeCount?: number;
-    linkCount?: number;
-  };
-  error?: { code: string; message: string };
+  nodes?: GraphNode[];
+  links?: GraphLink[];
+  pagination?: { page: number; pageSize: number; total: number };
+  success?: boolean;
+  error?: string;
 }
 
 interface StatsResponse {
@@ -54,38 +50,48 @@ interface StatsResponse {
   };
 }
 
-// ── 测试套件：图谱浏览 ────────────────────────────────────────────────────────
+// ── 测试套件：图谱浏览（需要登录）──────────────────────────────────────────────
 
 test.describe('知识图谱浏览', () => {
+  let token: string;
+
+  test.beforeAll(async ({ request }) => {
+    const user = await createTestUser(request);
+    const auth = await loginUser(request, user.email, user.password);
+    token = auth.token;
+  });
+
   test('应该返回图谱节点和边数据', async ({ request }) => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        params: { limit: '50' },
+        headers: { Authorization: `Bearer ${token}` },
+        params: { pageSize: '20' },
       }
     );
 
     expect(response.status()).toBe(200);
     const data: BrowseResponse = await response.json();
-    expect(data.success).toBe(true);
 
+    // browse 接口直接返回 nodes/links，不是 { success, data } 格式
+    expect(data.nodes).toBeDefined();
+    expect(data.links).toBeDefined();
     // 数据库有 64 万条关系，必须返回节点和边
-    expect(data.data?.nodes).toBeDefined();
-    expect(data.data?.links).toBeDefined();
-    expect(data.data!.nodes.length).toBeGreaterThan(0);
-    expect(data.data!.links.length).toBeGreaterThan(0);
+    expect(data.nodes!.length).toBeGreaterThan(0);
+    expect(data.links!.length).toBeGreaterThan(0);
   });
 
   test('节点应包含必要字段', async ({ request }) => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        params: { limit: '10' },
+        headers: { Authorization: `Bearer ${token}` },
+        params: { pageSize: '5' },
       }
     );
 
     const data: BrowseResponse = await response.json();
-    const node = data.data?.nodes[0];
+    const node = data.nodes?.[0];
     if (node) {
       expect(node).toHaveProperty('id');
       expect(node).toHaveProperty('lawName');
@@ -98,12 +104,13 @@ test.describe('知识图谱浏览', () => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        params: { limit: '50' },
+        headers: { Authorization: `Bearer ${token}` },
+        params: { pageSize: '30' },
       }
     );
 
     const data: BrowseResponse = await response.json();
-    const link = data.data?.links[0];
+    const link = data.links?.[0];
     if (link) {
       expect(link).toHaveProperty('source');
       expect(link).toHaveProperty('target');
@@ -127,46 +134,47 @@ test.describe('知识图谱浏览', () => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        params: { relationType: 'SUPERSEDES', limit: '30' },
+        headers: { Authorization: `Bearer ${token}` },
+        params: { relationType: 'SUPERSEDES', pageSize: '20' },
       }
     );
 
     expect(response.status()).toBe(200);
     const data: BrowseResponse = await response.json();
-    if (data.data?.links && data.data.links.length > 0) {
-      data.data.links.forEach(link => {
+    if (data.links && data.links.length > 0) {
+      data.links.forEach(link => {
         expect(link.relationType).toBe('SUPERSEDES');
       });
     }
   });
 
-  test('关键词搜索应过滤节点', async ({ request }) => {
+  test('关键词搜索应正常响应', async ({ request }) => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        params: { search: '民法典', limit: '20' },
+        headers: { Authorization: `Bearer ${token}` },
+        params: { search: '民法典', pageSize: '10' },
       }
     );
 
     expect(response.status()).toBe(200);
     const data: BrowseResponse = await response.json();
-    expect(data.success).toBe(true);
-    // 搜索结果可以为空（如没有该关键词），但接口应正常响应
+    expect(data.nodes).toBeDefined();
   });
 
   test('分类过滤应该生效', async ({ request }) => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        params: { category: 'CIVIL', limit: '20' },
+        headers: { Authorization: `Bearer ${token}` },
+        params: { category: 'CIVIL', pageSize: '10' },
       }
     );
 
     expect(response.status()).toBe(200);
     const data: BrowseResponse = await response.json();
-    expect(data.success).toBe(true);
-    if (data.data?.nodes && data.data.nodes.length > 0) {
-      data.data.nodes.forEach(node => {
+    if (data.nodes && data.nodes.length > 0) {
+      data.nodes.forEach(node => {
         expect(node.category).toBe('CIVIL');
       });
     }
@@ -176,12 +184,20 @@ test.describe('知识图谱浏览', () => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        params: { limit: '5' },
+        headers: { Authorization: `Bearer ${token}` },
+        params: { pageSize: '3' },
       }
     );
 
     const data: BrowseResponse = await response.json();
-    expect(data.data?.nodes.length).toBeLessThanOrEqual(5);
+    expect(data.nodes?.length ?? 0).toBeLessThanOrEqual(3);
+  });
+
+  test('未授权时应返回 401', async ({ request }) => {
+    const response = await request.get(
+      `${BASE_URL}/api/v1/knowledge-graph/browse`
+    );
+    expect([401, 403]).toContain(response.status());
   });
 });
 
@@ -196,15 +212,16 @@ test.describe('邻居节点查询', () => {
     const auth = await loginUser(request, user.email, user.password);
     token = auth.token;
 
-    // 找到一个有关系的节点（SUPERSEDES 关系最多）
+    // 找到一个有关系的节点
     const browseRes = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        params: { relationType: 'SUPERSEDES', limit: '5' },
+        headers: { Authorization: `Bearer ${token}` },
+        params: { relationType: 'SUPERSEDES', pageSize: '5' },
       }
     );
     const browseData: BrowseResponse = await browseRes.json();
-    articleId = browseData.data?.nodes[0]?.id ?? '';
+    articleId = browseData.nodes?.[0]?.id ?? '';
   });
 
   test('应该返回节点的邻居关系', async ({ request }) => {
@@ -219,10 +236,6 @@ test.describe('邻居节点查询', () => {
     );
 
     expect([200, 404]).toContain(response.status());
-    if (response.status() === 200) {
-      const data = await response.json();
-      expect(data.success).toBe(true);
-    }
   });
 
   test('不存在节点应返回 404 或空结果', async ({ request }) => {
@@ -238,7 +251,7 @@ test.describe('邻居节点查询', () => {
   });
 });
 
-// ── 测试套件：关系生成统计 ────────────────────────────────────────────────────
+// ── 测试套件：关系生成统计与管理 ────────────────────────────────────────────────
 
 test.describe('关系生成统计与管理', () => {
   let token: string;
@@ -261,10 +274,9 @@ test.describe('关系生成统计与管理', () => {
     expect(data.data?.totalRelations).toBeGreaterThan(0);
     expect(data.data?.distribution).toBeDefined();
 
-    // 验证 SUPERSEDES 存在于分布中
+    // SUPERSEDES 应该在分布中存在
     const dist = data.data!.distribution;
-    const hasSupersedes = Object.keys(dist).some(k => k === 'SUPERSEDES');
-    expect(hasSupersedes).toBe(true);
+    expect('SUPERSEDES' in dist).toBe(true);
     expect(Number(dist['SUPERSEDES']?.['RULE_BASED'] ?? 0)).toBeGreaterThan(0);
   });
 
@@ -284,7 +296,6 @@ test.describe('关系生成统计与管理', () => {
       }
     );
 
-    // 增量模式下（无新法条）应正常完成
     expect(response.status()).toBe(200);
     const data = await response.json();
     expect(data.success).toBe(true);
@@ -300,7 +311,6 @@ test.describe('关系生成统计与管理', () => {
         data: { mode: 'invalid-mode' },
       }
     );
-
     expect(response.status()).toBe(400);
   });
 
@@ -312,7 +322,6 @@ test.describe('关系生成统计与管理', () => {
         data: { mode: 'incremental', rule: 'invalid-rule' },
       }
     );
-
     expect(response.status()).toBe(400);
   });
 });

@@ -4,11 +4,12 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
-import { Order, OrderStatus, PaymentMethod } from '@/types/payment';
+import { logger } from '@/lib/logger';
 import {
-  generateOrderNo,
   calculateOrderExpireTime,
+  generateOrderNo,
 } from '@/lib/payment/wechat-utils';
+import { Order, OrderStatus, PaymentMethod } from '@/types/payment';
 import type { MembershipTierType } from '@prisma/client';
 
 /**
@@ -110,7 +111,7 @@ export async function createOrder(request: CreateOrderRequest): Promise<Order> {
       },
     });
 
-    console.log('[OrderService] 创建订单成功:', {
+    logger.info('[OrderService] 创建订单成功:', {
       orderId: order.id,
       orderNo: order.orderNo,
       userId: order.userId,
@@ -119,7 +120,7 @@ export async function createOrder(request: CreateOrderRequest): Promise<Order> {
 
     return createOrderObject(order);
   } catch (error) {
-    console.error('[OrderService] 创建订单失败:', error);
+    logger.error('[OrderService] 创建订单失败:', error);
     throw error;
   }
 }
@@ -144,7 +145,7 @@ export async function getOrder(orderId: string): Promise<Order | null> {
 
     return createOrderObject(order);
   } catch (error) {
-    console.error('[OrderService] 查询订单失败:', error);
+    logger.error('[OrderService] 查询订单失败:', error);
     throw error;
   }
 }
@@ -171,7 +172,7 @@ export async function getOrderByOrderNo(
 
     return createOrderObject(order);
   } catch (error) {
-    console.error('[OrderService] 查询订单失败:', error);
+    logger.error('[OrderService] 查询订单失败:', error);
     throw error;
   }
 }
@@ -214,7 +215,7 @@ export async function getUserOrders(
       total,
     };
   } catch (error) {
-    console.error('[OrderService] 查询用户订单失败:', error);
+    logger.error('[OrderService] 查询用户订单失败:', error);
     throw error;
   }
 }
@@ -243,14 +244,14 @@ export async function updateOrderStatus(
       },
     });
 
-    console.log('[OrderService] 更新订单状态:', {
+    logger.info('[OrderService] 更新订单状态:', {
       orderId,
       status,
     });
 
     return createOrderObject(order);
   } catch (error) {
-    console.error('[OrderService] 更新订单状态失败:', error);
+    logger.error('[OrderService] 更新订单状态失败:', error);
     throw error;
   }
 }
@@ -287,14 +288,14 @@ export async function cancelOrder(
       },
     });
 
-    console.log('[OrderService] 取消订单:', {
+    logger.info('[OrderService] 取消订单:', {
       orderId,
       reason,
     });
 
     return createOrderObject(updatedOrder);
   } catch (error) {
-    console.error('[OrderService] 取消订单失败:', error);
+    logger.error('[OrderService] 取消订单失败:', error);
     throw error;
   }
 }
@@ -314,7 +315,7 @@ export async function handlePaymentSuccess(
   transactionId: string,
   _thirdPartyOrderNo: string
 ): Promise<Order> {
-  console.log('[OrderService] 第三方订单号（未使用）:', _thirdPartyOrderNo);
+  logger.info('[OrderService] 第三方订单号（未使用）:', _thirdPartyOrderNo);
   try {
     // 查询订单
     const order = await prisma.order.findUnique({
@@ -435,14 +436,14 @@ export async function handlePaymentSuccess(
       return orderResult;
     });
 
-    console.log('[OrderService] 处理支付成功:', {
+    logger.info('[OrderService] 处理支付成功:', {
       orderId,
       transactionId,
     });
 
     return createOrderObject(updatedOrder);
   } catch (error) {
-    console.error('[OrderService] 处理支付成功失败:', error);
+    logger.error('[OrderService] 处理支付成功失败:', error);
     throw error;
   }
 }
@@ -468,7 +469,7 @@ export async function handlePaymentFailure(
       },
     });
 
-    console.log('[OrderService] 处理支付失败:', {
+    logger.info('[OrderService] 处理支付失败:', {
       orderId,
       errorCode,
       errorMessage,
@@ -476,7 +477,7 @@ export async function handlePaymentFailure(
 
     return createOrderObject(order);
   } catch (error) {
-    console.error('[OrderService] 处理支付失败错误:', error);
+    logger.error('[OrderService] 处理支付失败错误:', error);
     throw error;
   }
 }

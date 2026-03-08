@@ -3,6 +3,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 import type { UserRole } from '@/types/auth';
 import type { PermissionCheckResult } from '@/types/permission';
 
@@ -122,7 +123,7 @@ export async function hasPermission(
       actualPermissions: allPermissions.filter((p): p is string => !!p),
     };
   } catch (error) {
-    console.error('检查权限时出错:', error);
+    logger.error('检查权限时出错:', error);
     return {
       hasPermission: false,
       reason: '权限检查失败',
@@ -182,7 +183,7 @@ export async function getUserPermissions(userId: string): Promise<string[]> {
     // 去重
     return Array.from(new Set(permissions));
   } catch (error) {
-    console.error('获取用户权限时出错:', error);
+    logger.error('获取用户权限时出错:', error);
     return [];
   }
 }
@@ -243,7 +244,7 @@ export async function assignPermissionToRole(
       },
     });
   } catch (error) {
-    console.error('为角色分配权限时出错:', error);
+    logger.error('为角色分配权限时出错:', error);
     throw new Error('为角色分配权限失败');
   }
 }
@@ -267,7 +268,7 @@ export async function assignPermissionsToRole(
       skipDuplicates: true,
     });
   } catch (error) {
-    console.error('批量为角色分配权限时出错:', error);
+    logger.error('批量为角色分配权限时出错:', error);
     throw new Error('批量为角色分配权限失败');
   }
 }
@@ -290,7 +291,7 @@ export async function revokePermissionFromRole(
       },
     });
   } catch (error) {
-    console.error('撤销角色权限时出错:', error);
+    logger.error('撤销角色权限时出错:', error);
     throw new Error('撤销角色权限失败');
   }
 }
@@ -311,7 +312,7 @@ export async function getRolePermissions(roleId: string): Promise<unknown[]> {
 
     return rolePermissions.map(rp => rp.permission);
   } catch (error) {
-    console.error('获取角色权限时出错:', error);
+    logger.error('获取角色权限时出错:', error);
     return [];
   }
 }

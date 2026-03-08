@@ -5,16 +5,17 @@
  * 整合所有模块，提供统一的错误处理接口
  */
 
+import { logger as appLogger } from '@/lib/logger';
+import { alertManager } from './alert-manager';
+import { circuitBreakerManager } from './circuit-breaker';
+import { ErrorAnalyzer } from './error-analyzer';
 import { ErrorLogger } from './error-logger';
 import { ErrorRecovery } from './error-recovery';
-import { ErrorAnalyzer } from './error-analyzer';
-import { circuitBreakerManager } from './circuit-breaker';
-import { alertManager } from './alert-manager';
 import {
-  ErrorLog,
   ErrorContext,
   ErrorHandlingOptions,
   ErrorHandlingResult,
+  ErrorLog,
   RecoveryMethod,
   TimeRange,
 } from './types';
@@ -58,7 +59,7 @@ export class ErrorLogSystem {
         await alertManager.processError(errorLog);
       } catch (alertError) {
         // 告警处理失败不应影响主流程
-        console.error('Failed to process alert:', alertError);
+        appLogger.error('Failed to process alert:', alertError);
       }
     }
 

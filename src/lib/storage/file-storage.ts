@@ -1,4 +1,5 @@
-import { writeFile, unlink, mkdir } from 'fs/promises';
+import { logger } from '@/lib/logger';
+import { mkdir, unlink, writeFile } from 'fs/promises';
 import { join } from 'path';
 
 export interface FileMetadata {
@@ -54,7 +55,7 @@ export class FileStorage {
     try {
       await unlink(fullPath);
     } catch (error) {
-      console.warn(`删除文件失败: ${fullPath}`, error);
+      logger.warn(`删除文件失败: ${fullPath}`, error);
     }
   }
 

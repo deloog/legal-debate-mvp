@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
 import { cache } from '@/lib/cache/manager';
 import { CacheNamespace } from '@/lib/cache/types';
+import { logger } from '@/lib/logger';
+import { NextResponse } from 'next/server';
 
 /**
  * 响应缓存配置
@@ -161,7 +162,7 @@ export function createResponseCacheMiddleware(config?: Partial<CacheConfig>) {
       // 缓存未命中，继续处理
       return undefined;
     } catch (error) {
-      console.error('缓存中间件错误:', error);
+      logger.error('缓存中间件错误:', error);
       // 缓存失败时继续处理请求
       return undefined;
     }
@@ -203,7 +204,7 @@ export async function cacheResponse(
       ttl: finalConfig.ttl,
     });
   } catch (error) {
-    console.error('缓存响应错误:', error);
+    logger.error('缓存响应错误:', error);
   }
 }
 
@@ -228,7 +229,7 @@ export async function clearApiCache(
 
     return 0;
   } catch (error) {
-    console.error('清除缓存失败:', error);
+    logger.error('清除缓存失败:', error);
     return 0;
   }
 }
