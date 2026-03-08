@@ -63,9 +63,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       success: true,
       pending: true,
       message: '支付处理中，请稍候…',
-      redirectUrl: `/payment/pending?orderId=${order.id}&orderNo=${outTradeNo}`,
-      pollUrl: `/api/v1/orders/${order.id}/status`,
-      delay: 2000,
+      redirectUrl: `/payment/processing?orderId=${order.id}&orderNo=${outTradeNo}&paymentMethod=WECHAT`,
+      delay: 1000,
     });
   } catch (error) {
     logger.error('[微信支付跳转回调] 处理失败:', { error });
