@@ -618,24 +618,36 @@ test.describe('支付回调处理（模拟）', () => {
     expect([200, 400, 401]).toContain(response.status());
   });
 
-  test('应该验证回调签名的完整性', async ({ request }) => {
-    // 发送没有签名的回调请求
+  test('缺少订单号时应返回 400', async ({ request }) => {
+    // 前端跳转回调缺少 out_trade_no 参数
     const response = await request.post(
       `${BASE_URL}/api/payments/wechat/callback`,
       {
         data: {
           id: 'test-callback-id',
           event_type: 'TRANSACTION.SUCCESS',
+          // 故意不传 out_trade_no
         },
       }
     );
 
-    // 应该返回验证失败
-    const data: WechatCallbackResponseData = await response.json();
-    expect([400, 401]).toContain(response.status());
-    if (response.status() === 400) {
-      expect(data.code).toBe('FAIL');
-    }
+    // 安全修复后：此接口仅做状态查询，不修改支付状态
+    // 缺少 out_trade_no 应返回 400
+    expect(response.status()).toBe(400);
+    const data = await response.json();
+    expect(data.success).toBe(false);
+  });
+
+  test('不存在的订单号应返回 404', async ({ request }) => {
+    const response = await request.post(
+      `${BASE_URL}/api/payments/wechat/callback`,
+      {
+        data: { out_trade_no: 'NON_EXISTENT_ORDER_12345' },
+      }
+    );
+    expect(response.status()).toBe(404);
+    const data = await response.json();
+    expect(data.success).toBe(false);
   });
 });
 
