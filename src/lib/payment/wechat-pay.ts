@@ -3,19 +3,20 @@
  * 实现微信支付V3 API的核心功能
  */
 
-import https from 'https';
-import crypto from 'crypto';
+import { logger } from '@/lib/logger';
 import {
   WechatCreateOrderRequest,
   WechatCreateOrderResponse,
+  WechatPayConfig,
   WechatPayNotification,
   WechatPayResult,
   WechatQueryOrderRequest,
   WechatQueryOrderResponse,
   WechatRefundRequest,
   WechatRefundResponse,
-  WechatPayConfig,
 } from '@/types/payment';
+import crypto from 'crypto';
+import https from 'https';
 import { paymentConfig } from './payment-config';
 import {
   generateNonceStr,
@@ -232,16 +233,26 @@ export class WechatPay {
     notification: WechatPayNotification
   ): WechatPayResult | null {
     try {
-      const { ciphertext, nonce } = notification.resource;
+      const { ciphertext, nonce, associated_data } = notification.resource;
 
-      const key = Buffer.from(this.config.apiKeyV3, 'base64');
+      // apiKeyV3 是 32 字节 ASCII 字符串（非 Base64），微信文档明确说明
+      const key = Buffer.from(this.config.apiKeyV3, 'utf8');
       const iv = Buffer.from(nonce, 'utf8');
       const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
-      decipher.setAuthTag(Buffer.from(ciphertext.slice(-32), 'hex'));
 
-      const encrypted = ciphertext.slice(0, -32);
+      // AES-GCM 需要设置 associated_data 才能正确验证 tag
+      if (associated_data) {
+        decipher.setAAD(Buffer.from(associated_data, 'utf8'));
+      }
+
+      // 微信规范：ciphertext 是 Base64，最后 16 字节（Base64 解码后）是 auth tag
+      const ciphertextBuf = Buffer.from(ciphertext, 'base64');
+      const authTag = ciphertextBuf.slice(-16);
+      const encrypted = ciphertextBuf.slice(0, -16);
+
+      decipher.setAuthTag(authTag);
       const decrypted = Buffer.concat([
-        decipher.update(Buffer.from(encrypted, 'base64')),
+        decipher.update(encrypted),
         decipher.final(),
       ]);
 
@@ -298,7 +309,7 @@ export class WechatPay {
 
       return signature;
     } catch (error) {
-      console.error('[WechatPay] 签名失败:', error);
+      logger.error('[WechatPay] 签名失败:', error);
       throw new Error(
         `签名失败: ${error instanceof Error ? error.message : String(error)}`
       );
