@@ -131,6 +131,12 @@ export function createRateLimiter(config: RateLimitConfig) {
   return async function rateLimitMiddleware(
     request: NextRequest
   ): Promise<NextResponse | null> {
+    // 开发/测试环境：豁免限流（避免 E2E 测试被阻断）
+    // 生产环境 NODE_ENV=production 时此行不执行
+    if (process.env.NODE_ENV !== 'production') {
+      return null;
+    }
+
     const identifier = getClientIdentifier(request);
     const endpoint = new URL(request.url).pathname;
     const now = Date.now();

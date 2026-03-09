@@ -13,6 +13,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
 import {
   checkKnowledgeGraphPermission,
   logKnowledgeGraphAction,
@@ -68,9 +69,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         .filter(type => type.length > 0);
     }
 
+    // 从 JWT 中提取用户 ID
+    const authHeader = request.headers.get('authorization');
+    const token = extractTokenFromHeader(authHeader);
+    const tokenResult = verifyToken(token ?? '');
+    const userId = tokenResult.valid ? (tokenResult.payload?.userId ?? '') : '';
+
     // 权限检查
     const permissionResult = await checkKnowledgeGraphPermission(
-      '', // 用户ID从header中获取
+      userId,
       KnowledgeGraphAction.VIEW_RELATIONS,
       'RELATION' as never
     );

@@ -173,7 +173,10 @@ async function mapClientToDetail(
  * 支持include参数：include=cases 表示包含案件历史
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: { id: string } | Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -182,7 +185,7 @@ export const GET = withErrorHandler(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // 安全地获取searchParams
     let includeCases = false;
@@ -217,7 +220,10 @@ export const GET = withErrorHandler(
  * 更新客户信息
  */
 export const PATCH = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: { id: string } | Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -226,7 +232,7 @@ export const PATCH = withErrorHandler(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const validatedData = updateClientSchema.parse(body);
 
@@ -280,7 +286,10 @@ export const PATCH = withErrorHandler(
  * 删除客户
  */
 export const DELETE = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: { id: string } | Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -289,7 +298,7 @@ export const DELETE = withErrorHandler(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     const client = await prisma.client.findFirst({
       where: {

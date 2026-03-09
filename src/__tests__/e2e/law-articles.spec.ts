@@ -12,7 +12,10 @@
  */
 
 import { expect, test } from '@playwright/test';
-import { createTestUser, loginUser } from './auth-helpers';
+import { createTestUser } from './auth-helpers';
+
+// ── 文件级共享用户（只注册一次，避免触发限流）───────────────────────────────────
+let sharedToken = '';
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
@@ -59,20 +62,18 @@ interface DetailResponse {
   error?: { code: string; message: string };
 }
 
+// ── 文件级：注册一次共享用户 ──────────────────────────────────────────────────
+test.beforeAll(async ({ request }) => {
+  const user = await createTestUser(request);
+  sharedToken = user.token ?? '';
+});
+
 // ── 测试套件：法条列表 ────────────────────────────────────────────────────────
 
 test.describe('法条列表查询', () => {
-  let token: string;
-
-  test.beforeAll(async ({ request }) => {
-    const user = await createTestUser(request);
-    const auth = await loginUser(request, user.email, user.password);
-    token = auth.token;
-  });
-
   test('应该返回分页法条列表', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/v1/law-articles`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${sharedToken}` },
       params: { page: '1', limit: '10' },
     });
 
@@ -96,11 +97,11 @@ test.describe('法条列表查询', () => {
   test('分页参数应该生效', async ({ request }) => {
     const [res1, res2] = await Promise.all([
       request.get(`${BASE_URL}/api/v1/law-articles`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         params: { page: '1', limit: '5' },
       }),
       request.get(`${BASE_URL}/api/v1/law-articles`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         params: { page: '2', limit: '5' },
       }),
     ]);
@@ -120,7 +121,7 @@ test.describe('法条列表查询', () => {
 
   test('按分类过滤应该生效', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/v1/law-articles`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${sharedToken}` },
       params: { category: 'CIVIL', limit: '10' },
     });
 
@@ -132,7 +133,7 @@ test.describe('法条列表查询', () => {
 
   test('分页上限应不超过 100', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/api/v1/law-articles`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${sharedToken}` },
       params: { limit: '9999' },
     });
 
@@ -150,19 +151,11 @@ test.describe('法条列表查询', () => {
 // ── 测试套件：法条搜索 ────────────────────────────────────────────────────────
 
 test.describe('法条关键词搜索', () => {
-  let token: string;
-
-  test.beforeAll(async ({ request }) => {
-    const user = await createTestUser(request);
-    const auth = await loginUser(request, user.email, user.password);
-    token = auth.token;
-  });
-
   test('单关键词搜索应返回相关法条', async ({ request }) => {
     const response = await request.post(
       `${BASE_URL}/api/v1/law-articles/search`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         data: { keywords: ['合同'], page: 1, limit: 10 },
       }
     );
@@ -179,7 +172,7 @@ test.describe('法条关键词搜索', () => {
     const response = await request.post(
       `${BASE_URL}/api/v1/law-articles/search`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         data: { keywords: ['劳动', '合同'], page: 1, limit: 10 },
       }
     );
@@ -194,7 +187,7 @@ test.describe('法条关键词搜索', () => {
     const response = await request.post(
       `${BASE_URL}/api/v1/law-articles/search`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         data: { keywords: ['侵权'], page: 1, limit: 5 },
       }
     );
@@ -213,7 +206,7 @@ test.describe('法条关键词搜索', () => {
     const response = await request.post(
       `${BASE_URL}/api/v1/law-articles/search`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         data: { page: 1, limit: 10 },
       }
     );
@@ -227,7 +220,7 @@ test.describe('法条关键词搜索', () => {
     const response = await request.post(
       `${BASE_URL}/api/v1/law-articles/search`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         data: { keywords: [], page: 1, limit: 10 },
       }
     );
@@ -239,7 +232,7 @@ test.describe('法条关键词搜索', () => {
     const response = await request.post(
       `${BASE_URL}/api/v1/law-articles/search`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         data: { keywords: ['法律'], page: 1, limit: 200 },
       }
     );
@@ -264,17 +257,12 @@ test.describe('法条关键词搜索', () => {
 // ── 测试套件：法条详情 ────────────────────────────────────────────────────────
 
 test.describe('法条详情查询', () => {
-  let token: string;
-  let articleId: string;
+  let articleId = '';
 
   test.beforeAll(async ({ request }) => {
-    const user = await createTestUser(request);
-    const auth = await loginUser(request, user.email, user.password);
-    token = auth.token;
-
-    // 获取一个真实的法条 ID
+    // 获取一个真实的法条 ID（使用文件级 sharedToken）
     const listRes = await request.get(`${BASE_URL}/api/v1/law-articles`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${sharedToken}` },
       params: { limit: '1' },
     });
     const listData: ListResponse = await listRes.json();
@@ -288,7 +276,7 @@ test.describe('法条详情查询', () => {
     const response = await request.get(
       `${BASE_URL}/api/v1/law-articles/${articleId}`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
       }
     );
 
@@ -304,7 +292,7 @@ test.describe('法条详情查询', () => {
   test('不存在的 ID 应返回 404', async ({ request }) => {
     const response = await request.get(
       `${BASE_URL}/api/v1/law-articles/non-existent-id-00000`,
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${sharedToken}` } }
     );
     expect([404, 400]).toContain(response.status());
   });
@@ -314,7 +302,7 @@ test.describe('法条详情查询', () => {
 
     const response = await request.get(
       `${BASE_URL}/api/v1/law-articles/${articleId}/graph?depth=1`,
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${sharedToken}` } }
     );
 
     // graph 接口直接返回 { nodes, links } 对象（无 success 包装）

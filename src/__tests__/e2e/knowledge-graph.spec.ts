@@ -12,9 +12,12 @@
  */
 
 import { expect, test } from '@playwright/test';
-import { createTestUser, loginUser } from './auth-helpers';
+import { createTestUser } from './auth-helpers';
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+
+// ── 文件级共享用户（只注册一次，避免多次注册触发限流） ─────────────────────────
+let sharedToken = '';
 
 // ── 辅助类型 ──────────────────────────────────────────────────────────────────
 
@@ -50,22 +53,20 @@ interface StatsResponse {
   };
 }
 
+// ── 文件级：注册一次共享用户 ──────────────────────────────────────────────────
+test.beforeAll(async ({ request }) => {
+  const user = await createTestUser(request);
+  sharedToken = user.token ?? '';
+});
+
 // ── 测试套件：图谱浏览（需要登录）──────────────────────────────────────────────
 
 test.describe('知识图谱浏览', () => {
-  let token: string;
-
-  test.beforeAll(async ({ request }) => {
-    const user = await createTestUser(request);
-    const auth = await loginUser(request, user.email, user.password);
-    token = auth.token;
-  });
-
   test('应该返回图谱节点和边数据', async ({ request }) => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         params: { pageSize: '20' },
       }
     );
@@ -75,17 +76,17 @@ test.describe('知识图谱浏览', () => {
 
     // browse 接口直接返回 nodes/links，不是 { success, data } 格式
     expect(data.nodes).toBeDefined();
-    expect(data.links).toBeDefined();
-    // 数据库有 64 万条关系，必须返回节点和边
+    expect(Array.isArray(data.links)).toBe(true);
+    // 数据库有 110 万条法条，必须返回节点
     expect(data.nodes!.length).toBeGreaterThan(0);
-    expect(data.links!.length).toBeGreaterThan(0);
+    // links 可能为空（只显示同页两端都存在的关系对）
   });
 
   test('节点应包含必要字段', async ({ request }) => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         params: { pageSize: '5' },
       }
     );
@@ -104,7 +105,7 @@ test.describe('知识图谱浏览', () => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         params: { pageSize: '30' },
       }
     );
@@ -134,7 +135,7 @@ test.describe('知识图谱浏览', () => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         params: { relationType: 'SUPERSEDES', pageSize: '20' },
       }
     );
@@ -152,7 +153,7 @@ test.describe('知识图谱浏览', () => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         params: { search: '民法典', pageSize: '10' },
       }
     );
@@ -166,7 +167,7 @@ test.describe('知识图谱浏览', () => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         params: { category: 'CIVIL', pageSize: '10' },
       }
     );
@@ -184,7 +185,7 @@ test.describe('知识图谱浏览', () => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         params: { pageSize: '3' },
       }
     );
@@ -204,19 +205,14 @@ test.describe('知识图谱浏览', () => {
 // ── 测试套件：邻居节点查询 ────────────────────────────────────────────────────
 
 test.describe('邻居节点查询', () => {
-  let token: string;
-  let articleId: string;
+  let articleId = '';
 
   test.beforeAll(async ({ request }) => {
-    const user = await createTestUser(request);
-    const auth = await loginUser(request, user.email, user.password);
-    token = auth.token;
-
-    // 找到一个有关系的节点
+    // 使用文件级 sharedToken 找一个有关系的节点
     const browseRes = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/browse`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         params: { relationType: 'SUPERSEDES', pageSize: '5' },
       }
     );
@@ -230,7 +226,7 @@ test.describe('邻居节点查询', () => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/neighbors`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         params: { nodeId: articleId, depth: '1' },
       }
     );
@@ -242,7 +238,7 @@ test.describe('邻居节点查询', () => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/neighbors`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         params: { nodeId: 'non-existent-node-id', depth: '1' },
       }
     );
@@ -254,18 +250,10 @@ test.describe('邻居节点查询', () => {
 // ── 测试套件：关系生成统计与管理 ────────────────────────────────────────────────
 
 test.describe('关系生成统计与管理', () => {
-  let token: string;
-
-  test.beforeAll(async ({ request }) => {
-    const user = await createTestUser(request);
-    const auth = await loginUser(request, user.email, user.password);
-    token = auth.token;
-  });
-
   test('GET 统计接口应返回关系分布数据', async ({ request }) => {
     const response = await request.get(
       `${BASE_URL}/api/v1/knowledge-graph/generate-relations`,
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${sharedToken}` } }
     );
 
     expect(response.status()).toBe(200);
@@ -291,7 +279,7 @@ test.describe('关系生成统计与管理', () => {
     const response = await request.post(
       `${BASE_URL}/api/v1/knowledge-graph/generate-relations`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         data: { mode: 'incremental', rule: 'implements' },
       }
     );
@@ -307,7 +295,7 @@ test.describe('关系生成统计与管理', () => {
     const response = await request.post(
       `${BASE_URL}/api/v1/knowledge-graph/generate-relations`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         data: { mode: 'invalid-mode' },
       }
     );
@@ -318,7 +306,7 @@ test.describe('关系生成统计与管理', () => {
     const response = await request.post(
       `${BASE_URL}/api/v1/knowledge-graph/generate-relations`,
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${sharedToken}` },
         data: { mode: 'incremental', rule: 'invalid-rule' },
       }
     );

@@ -76,7 +76,9 @@ export function proxy(request: NextRequest) {
     '/api/auth/forgot-password',
     '/api/auth/reset-password',
     '/api/health',
+    '/api/v1/health', // v1 健康检查也公开
     '/api/version',
+    '/api/v1/version',
     '/api/dashboard', // 首页dashboard数据允许匿名访问
   ];
 

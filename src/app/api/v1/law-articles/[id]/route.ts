@@ -15,11 +15,12 @@ import { logger } from '@/lib/logger';
  */
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } | Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const article = await prisma.lawArticle.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!article) {
