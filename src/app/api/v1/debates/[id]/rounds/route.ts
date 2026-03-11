@@ -55,13 +55,12 @@ export const POST = withErrorHandler(
       // 2. 计算新轮次号
       const newRoundNumber = debate.currentRound + 1;
 
-      // 3. 创建新轮次
+      // 3. 创建新轮次（startedAt 不在此处设置，由 generate 路由在实际生成时设置以作软锁）
       const newRound = await tx.debateRound.create({
         data: {
           debateId,
           roundNumber: newRoundNumber,
           status: RoundStatus.IN_PROGRESS,
-          startedAt: new Date(),
         },
         include: {
           debate: {

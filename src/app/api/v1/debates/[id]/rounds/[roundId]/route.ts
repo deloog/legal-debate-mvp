@@ -3,18 +3,32 @@ import { prisma } from '@/lib/db/prisma';
 import { RoundStatus } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
 import { logger } from '@/lib/logger';
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string; roundId: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json(
-      { success: false, error: '未认证' },
-      { status: 401 }
-    );
+  // 认证：优先 JWT Bearer，回退到 NextAuth session
+  let userId: string | undefined;
+  let userRole: string | undefined;
+  const authHeader = request.headers.get('authorization');
+  const jwtToken = extractTokenFromHeader(authHeader ?? '');
+  const tokenResult = verifyToken(jwtToken ?? '');
+  if (tokenResult.valid && tokenResult.payload) {
+    userId = tokenResult.payload.userId;
+    userRole = tokenResult.payload.role;
+  } else {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: '未认证' },
+        { status: 401 }
+      );
+    }
+    userId = session.user.id;
+    userRole = (session.user as { role?: string }).role;
   }
 
   try {
@@ -39,8 +53,8 @@ export async function GET(
       );
     }
 
-    const isAdmin = (session.user as { role?: string }).role === 'ADMIN';
-    if (debate.userId !== session.user.id && !isAdmin) {
+    const isAdmin = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
+    if (debate.userId !== userId && !isAdmin) {
       return NextResponse.json(
         { success: false, error: '无权访问' },
         { status: 403 }

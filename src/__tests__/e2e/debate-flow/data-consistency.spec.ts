@@ -5,6 +5,7 @@
 
 import { test, expect, APIRequestContext } from '@playwright/test';
 import {
+  e2eLogin,
   createTestCase,
   uploadTestDocument,
   waitForDocumentParsing,
@@ -20,11 +21,23 @@ import { prisma } from '@/lib/db/prisma';
 test.describe('数据一致性测试', () => {
   let apiContext: APIRequestContext;
   const testUserId = 'test-e2e-data-consistency';
+  let actualUserId: string; // JWT登录后的实际数据库userId
   let caseId: string;
 
   test.beforeAll(async ({ playwright }) => {
+    const loginContext = await playwright.request.newContext({
+      baseURL: 'http://localhost:3000',
+    });
+    const loginResult = await e2eLogin(loginContext);
+    const { token } = loginResult;
+    actualUserId = loginResult.userId;
+    await loginContext.dispose();
+
     apiContext = await playwright.request.newContext({
       baseURL: 'http://localhost:3000',
+      extraHTTPHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
     });
   });
 
@@ -286,9 +299,9 @@ test.describe('数据一致性测试', () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
-    // 记录初始数据
+    // 记录初始数据（使用实际登录用户的ID，而非测试字符串）
     const initialCases = await prisma.case.findMany({
-      where: { userId: testUserId },
+      where: { userId: actualUserId },
     });
 
     // 软删除案件
@@ -302,7 +315,7 @@ test.describe('数据一致性测试', () => {
     // 验证软删除后不在列表中
     const casesAfterDelete = await prisma.case.findMany({
       where: {
-        userId: testUserId,
+        userId: actualUserId,
         deletedAt: null,
       },
     });
@@ -311,7 +324,7 @@ test.describe('数据一致性测试', () => {
 
     // 验证软删除的数据仍在数据库中
     const allCases = await prisma.case.findMany({
-      where: { userId: testUserId },
+      where: { userId: actualUserId },
     });
 
     expect(allCases.length).toBe(initialCases.length);

@@ -24,6 +24,7 @@ import {
 } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 
@@ -223,13 +224,25 @@ export const POST = withErrorHandler(
     request: NextRequest,
     context: { params: Promise<{ id: string; roundId: string }> }
   ) => {
-    // ── 认证 ──
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { success: false, error: '未认证', code: 'UNAUTHORIZED' },
-        { status: 401 }
-      );
+    // ── 认证：优先 JWT Bearer，回退到 NextAuth session ──
+    let userId: string | undefined;
+    let userRole: string | undefined;
+    const authHeader = request.headers.get('authorization');
+    const jwtToken = extractTokenFromHeader(authHeader ?? '');
+    const tokenResult = verifyToken(jwtToken ?? '');
+    if (tokenResult.valid && tokenResult.payload) {
+      userId = tokenResult.payload.userId;
+      userRole = tokenResult.payload.role;
+    } else {
+      const session = await getServerSession(authOptions);
+      if (!session?.user?.id) {
+        return NextResponse.json(
+          { success: false, error: '未认证', code: 'UNAUTHORIZED' },
+          { status: 401 }
+        );
+      }
+      userId = session.user.id;
+      userRole = (session.user as { role?: string }).role;
     }
 
     const resolvedParams = await context.params;
@@ -238,14 +251,15 @@ export const POST = withErrorHandler(
     const body = await validateRequestBody(request, generateArgumentsSchema);
     const { applicableArticles } = body;
 
-    // ── 速率限制：60秒内完成轮次不超过5个 ──
+    // ── 速率限制：60秒内完成轮次不超过N个（测试环境放宽至50，生产环境为5）──
+    const rateLimit = process.env.NODE_ENV === 'production' ? 5 : 50;
     const recentRounds = await prisma.debateRound.count({
       where: {
-        debate: { userId: session.user.id },
+        debate: { userId },
         completedAt: { gte: new Date(Date.now() - 60_000) },
       },
     });
-    if (recentRounds >= 5) {
+    if (recentRounds >= rateLimit) {
       return NextResponse.json(
         {
           success: false,
@@ -279,8 +293,8 @@ export const POST = withErrorHandler(
       throw new Error('Round does not belong to this debate');
 
     // ── 权限验证 ──
-    const isAdmin = (session.user as { role?: string }).role === 'ADMIN';
-    if (round.debate.userId !== session.user.id && !isAdmin) {
+    const isAdmin = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
+    if (round.debate.userId !== userId && !isAdmin) {
       return NextResponse.json(
         { success: false, error: '无权访问', code: 'FORBIDDEN' },
         { status: 403 }

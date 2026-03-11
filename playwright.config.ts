@@ -10,6 +10,8 @@ dotenvConfig({ path: resolve(__dirname, '.env.development') });
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+  globalSetup: resolve(__dirname, 'src/__tests__/e2e/global-setup.ts'),
+  globalTeardown: resolve(__dirname, 'src/__tests__/e2e/global-teardown.ts'),
   testDir: resolve(__dirname, 'src/__tests__/e2e'),
   testIgnore: [
     '../src/__tests__/**/*.test.ts',
@@ -19,7 +21,7 @@ export default defineConfig({
     '../src/__tests__/**/*.test.*',
   ],
   /* Run tests in files in parallel */
-  fullyParallel: true,
+  fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
