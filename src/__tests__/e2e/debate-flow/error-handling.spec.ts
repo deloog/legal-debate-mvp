@@ -229,9 +229,6 @@ test.describe('异常处理流程', () => {
     // 当前实现只有基本的SSE流式输出
     // 这个测试暂时跳过，标记为TODO
 
-    console.log('SSE断线重连功能尚未实现，跳过此测试');
-    test.skip(true, 'SSE断线重连是高级功能，作为后续优化项');
-
     let connectionCount = 0;
 
     page.route('/api/v1/debates/*/stream', route => {

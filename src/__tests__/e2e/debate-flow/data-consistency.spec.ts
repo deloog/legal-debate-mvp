@@ -17,6 +17,7 @@ import {
   cleanupTestData,
 } from './helpers';
 import { prisma } from '@/lib/db/prisma';
+import { E2E_LAW_ARTICLE_1_ID, E2E_LAW_ARTICLE_2_ID } from '../global-setup';
 
 test.describe('数据一致性测试', () => {
   let apiContext: APIRequestContext;
@@ -338,16 +339,13 @@ test.describe('数据一致性测试', () => {
     });
   });
 
-  test.skip('验证法条适用性分析结果存储正确 (API未实现)', async () => {
-    // 注意：法条适用性分析API可能不存在或功能未实现
-    // 暂时跳过此测试
-
+  test('验证法条适用性分析结果存储正确', async () => {
     const testCase = await createTestCase(apiContext, testUserId);
     caseId = testCase.caseId;
 
     const applicabilityResult = await analyzeApplicability(apiContext, caseId, [
-      'test-article-1',
-      'test-article-2',
+      E2E_LAW_ARTICLE_1_ID,
+      E2E_LAW_ARTICLE_2_ID,
     ]);
 
     // 验证结果数据结构

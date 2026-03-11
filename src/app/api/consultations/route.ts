@@ -23,6 +23,21 @@ import {
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
+
+/**
+ * 从请求中解析用户ID（优先 JWT Bearer，回退到 NextAuth session）
+ */
+async function resolveUserId(request: NextRequest): Promise<string | null> {
+  const authHeader = request.headers.get('authorization');
+  const jwtToken = extractTokenFromHeader(authHeader ?? '');
+  const tokenResult = verifyToken(jwtToken ?? '');
+  if (tokenResult.valid && tokenResult.payload) {
+    return tokenResult.payload.userId;
+  }
+  const session = await getServerSession(authOptions);
+  return session?.user?.id ?? null;
+}
 
 /**
  * GET /api/consultations
@@ -37,6 +52,18 @@ export async function GET(
   >
 > {
   try {
+    // 认证：JWT Bearer 或 NextAuth session
+    const userId = await resolveUserId(request);
+    if (!userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '未授权，请先登录' },
+        },
+        { status: 401 }
+      );
+    }
+
     // 获取查询参数
     const { searchParams } = new URL(request.url);
     const params: ConsultationQueryParams & Record<string, string | undefined> =
@@ -131,6 +158,7 @@ export async function GET(
     // 构建查询条件
     const where: Record<string, unknown> = {
       deletedAt: null, // 排除已删除的记录
+      userId, // 只返回当前用户的咨询
     };
 
     if (status) {
@@ -264,9 +292,9 @@ export async function POST(
   NextResponse<SuccessResponse<ConsultationListItem> | ErrorResponse>
 > {
   try {
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    // 认证：JWT Bearer 或 NextAuth session
+    const userId = await resolveUserId(request);
+    if (!userId) {
       return NextResponse.json(
         {
           success: false,
@@ -278,8 +306,6 @@ export async function POST(
         { status: 401 }
       );
     }
-
-    const userId = session.user.id;
 
     // 解析请求体
     let body: Record<string, unknown>;

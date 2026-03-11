@@ -34,6 +34,7 @@ import {
   getQualificationsList,
   reviewQualification,
 } from './admin-helpers';
+import { E2E_ADMIN_EMAIL, E2E_ADMIN_PASSWORD } from './global-setup';
 
 // =============================================================================
 // 测试基础URL
@@ -89,8 +90,8 @@ test.describe('管理后台 - 用户管理', () => {
     // 使用seed-admin.ts创建的管理员账户
     const { token } = await loginAdminUser(
       request,
-      'admin@example.com',
-      'Admin@123'
+      E2E_ADMIN_EMAIL,
+      E2E_ADMIN_PASSWORD
     );
     adminToken = token;
 
@@ -173,8 +174,8 @@ test.describe('管理后台 - 案件管理', () => {
     // 使用seed-admin.ts创建的管理员账户
     const { token } = await loginAdminUser(
       request,
-      'admin@example.com',
-      'Admin@123'
+      E2E_ADMIN_EMAIL,
+      E2E_ADMIN_PASSWORD
     );
     adminToken = token;
   });
@@ -221,9 +222,27 @@ test.describe('管理后台 - 案件管理', () => {
     expect(response.data?.pagination.limit).toBe(10);
   });
 
-  test.skip('应该能够删除案件（需要先创建案件）', () => {
-    // 跳过此测试，因为需要先创建案件
-    // 实际场景中应该先创建案件，然后测试删除功能
+  test('应该能够删除案件', async ({ request }) => {
+    // 1. 先以管理员身份创建案件
+    const createRes = await request.post(`${BASE_URL}/api/v1/cases`, {
+      headers: {
+        Authorization: `Bearer ${adminToken}`,
+        'Content-Type': 'application/json',
+      },
+      data: {
+        title: 'E2E管理员删除测试案件',
+        description: '用于测试管理员删除功能',
+        type: 'CIVIL_CONTRACT',
+      },
+    });
+    expect([200, 201]).toContain(createRes.status());
+    const createData = await createRes.json();
+    const caseId = createData.data?.id;
+    expect(caseId).toBeTruthy();
+
+    // 2. 管理员删除该案件
+    const deleteResponse = await deleteCase(request, adminToken, caseId);
+    expect(deleteResponse.success).toBe(true);
   });
 });
 
@@ -238,8 +257,8 @@ test.describe('管理后台 - 法条管理', () => {
     // 使用seed-admin.ts创建的管理员账户
     const { token } = await loginAdminUser(
       request,
-      'admin@example.com',
-      'Admin@123'
+      E2E_ADMIN_EMAIL,
+      E2E_ADMIN_PASSWORD
     );
     adminToken = token;
   });
@@ -306,10 +325,9 @@ test.describe('管理后台 - 法条管理', () => {
       'test-article-id',
       true
     );
-    // 由于我们没有真实的法条ID，这个测试可能会失败
-    // 但代码逻辑是正确的
+    // 由于我们没有真实的法条ID，期望返回404 (NOT_FOUND) 或成功
     expect(
-      response.success === true || response.error === '法条不存在'
+      response.success === true || response.error === 'NOT_FOUND'
     ).toBeTruthy();
   });
 });
@@ -325,8 +343,8 @@ test.describe('管理后台 - 系统日志', () => {
     // 使用seed-admin.ts创建的管理员账户
     const { token } = await loginAdminUser(
       request,
-      'admin@example.com',
-      'Admin@123'
+      E2E_ADMIN_EMAIL,
+      E2E_ADMIN_PASSWORD
     );
     adminToken = token;
   });
@@ -430,8 +448,8 @@ test.describe('管理后台 - 系统配置', () => {
     // 使用seed-admin.ts创建的管理员账户
     const { token } = await loginAdminUser(
       request,
-      'admin@example.com',
-      'Admin@123'
+      E2E_ADMIN_EMAIL,
+      E2E_ADMIN_PASSWORD
     );
     adminToken = token;
   });
