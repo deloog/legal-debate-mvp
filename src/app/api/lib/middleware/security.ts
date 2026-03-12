@@ -78,7 +78,10 @@ export const securityMiddleware: Middleware = async (
   }
 
   response.headers.set('X-API-Version', 'v1');
-  response.headers.set('X-Node-Environment', process.env.NODE_ENV || 'development');
+  response.headers.set(
+    'X-Node-Environment',
+    process.env.NODE_ENV || 'development'
+  );
 };
 
 /**
