@@ -3,9 +3,9 @@
  * 用于优化测试时的数据库连接池和其他资源限制
  */
 
-// 测试环境数据库URL（使用内存SQLite或轻量级配置）
+// 测试环境数据库URL（与 CI 环境一致）
 process.env.DATABASE_URL =
-  'postgresql://postgres:postgres@localhost:5432/legal_debate_test';
+  process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/test_db';
 
 // 测试环境数据库连接池限制（避免连接耗尽）
 process.env.DATABASE_POOL_MIN = '1';
