@@ -27,7 +27,7 @@ describe('SharedWithList', () => {
       id: 'user-123',
       name: '张三',
       email: 'zhangsan@example.com',
-      avatar: 'avatar.jpg',
+      avatar: '/avatar.jpg',
     },
     sharedNotes: '需要团队协作完成此案件',
   };

@@ -88,7 +88,7 @@ describe('Case Team Members API', () => {
           id: testTargetUserId,
           name: '协办律师',
           email: 'assistant@example.com',
-          avatar: 'avatar.jpg',
+          avatar: '/avatar.jpg',
           role: 'lawyer',
         },
       },
@@ -107,7 +107,7 @@ describe('Case Team Members API', () => {
         id: testTargetUserId,
         name: '协办律师',
         email: 'assistant@example.com',
-        avatar: 'avatar.jpg',
+        avatar: '/avatar.jpg',
         role: 'lawyer',
       },
     });
@@ -124,7 +124,7 @@ describe('Case Team Members API', () => {
         id: testTargetUserId,
         name: '协办律师',
         email: 'assistant@example.com',
-        avatar: 'avatar.jpg',
+        avatar: '/avatar.jpg',
         role: 'lawyer',
       },
     });
@@ -142,7 +142,7 @@ describe('Case Team Members API', () => {
           id: testTargetUserId,
           name: '协办律师',
           email: 'assistant@example.com',
-          avatar: 'avatar.jpg',
+          avatar: '/avatar.jpg',
           role: 'lawyer',
         },
       });
@@ -350,7 +350,7 @@ describe('Case Team Members API', () => {
           id: testTargetUserId,
           name: '协办律师',
           email: 'assistant@example.com',
-          avatar: 'avatar.jpg',
+          avatar: '/avatar.jpg',
           role: 'lawyer',
         },
       });

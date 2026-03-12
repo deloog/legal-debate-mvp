@@ -96,7 +96,7 @@ describe('CaseTeamList', () => {
         id: 'user-2',
         name: '李四',
         email: 'lisi@example.com',
-        avatar: 'avatar.jpg',
+        avatar: '/avatar.jpg',
         role: 'LAWYER',
       },
     },
@@ -256,7 +256,7 @@ describe('CaseTeamList', () => {
         () => {
           const avatar = screen.getByAltText('李四');
           expect(avatar).toBeInTheDocument();
-          expect(avatar).toHaveAttribute('src', 'avatar.jpg');
+          expect(avatar).toHaveAttribute('src', '/avatar.jpg');
         },
         { timeout: 3000 }
       );

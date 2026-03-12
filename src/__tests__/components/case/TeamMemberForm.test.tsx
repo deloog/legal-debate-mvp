@@ -159,7 +159,7 @@ describe('TeamMemberForm', () => {
           id: 'user-2',
           name: '李四',
           email: 'lisi@example.com',
-          avatar: 'avatar.jpg',
+          avatar: '/avatar.jpg',
           role: 'USER',
         },
       ];
@@ -212,7 +212,7 @@ describe('TeamMemberForm', () => {
             id: 'user-1',
             name: '张三',
             email: 'zhangsan@example.com',
-            avatar: 'avatar.jpg',
+            avatar: '/avatar.jpg',
             role: 'LAWYER',
           },
         ])
