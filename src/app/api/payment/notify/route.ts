@@ -68,7 +68,11 @@ async function verifyWechatSignature(
     // RSA-SHA256 验签
     const verify = crypto.createVerify('RSA-SHA256');
     verify.update(message);
-    const isValid = verify.verify((config as { publicKey?: string }).publicKey!, signature, 'base64');
+    const isValid = verify.verify(
+      (config as { publicKey?: string }).publicKey!,
+      signature,
+      'base64'
+    );
 
     if (!isValid) {
       logger.warn('[微信支付通知] RSA签名验证失败');
