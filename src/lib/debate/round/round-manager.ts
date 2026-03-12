@@ -6,6 +6,7 @@ import { detectSemanticDisagreement } from '../validators/semantic-disagreement'
 import { ContextInheritanceProcessor } from './context-inheritance';
 import { RoundValidator } from './round-validator';
 import { RoundConfig, RoundContext, RoundSummary } from './types';
+import { logger } from '@/lib/logger';
 
 /**
  * 法律依据接口
@@ -86,7 +87,7 @@ export class RoundManager {
       data: { currentRound: newRoundNumber },
     });
 
-    console.log(
+    logger.info(
       `[RoundManager] 轮次 ${newRoundNumber} 已开始，ID: ${round.id}`
     );
     return round;
@@ -123,7 +124,7 @@ export class RoundManager {
     const completenessValidation =
       await this.validator.validateRoundCompleteness(roundId);
     if (!completenessValidation.valid) {
-      console.warn(
+      logger.warn(
         `[RoundManager] 轮次完整性验证警告：${this.validator.getWarningSummary(
           completenessValidation
         )}`
@@ -144,7 +145,7 @@ export class RoundManager {
 
     // 生成轮次摘要
     const summary = this.generateRoundSummary(updatedRound);
-    console.log(
+    logger.info(
       `[RoundManager] 轮次 ${summary.roundNumber} 已完成，原告论点：${summary.plaintiffSummary.argumentCount}，被告论点：${summary.defendantSummary.argumentCount}`
     );
 
@@ -179,7 +180,7 @@ export class RoundManager {
       },
     });
 
-    console.warn(
+    logger.warn(
       `[RoundManager] 轮次 ${round.roundNumber} 失败，原因：${reason || '未知'}`
     );
   }
@@ -221,7 +222,7 @@ export class RoundManager {
       },
     });
 
-    console.log(`[RoundManager] 轮次 ${round.roundNumber} 已重试`);
+    logger.info(`[RoundManager] 轮次 ${round.roundNumber} 已重试`);
     return updatedRound;
   }
 
@@ -339,7 +340,7 @@ export class RoundManager {
       },
     });
 
-    console.log(
+    logger.info(
       `[RoundManager] 已添加${side === 'PLAINTIFF' ? '原告' : '被告'}论点，新颖度：${noveltyScore.rating} (${noveltyScore.score.toFixed(2)})`
     );
 

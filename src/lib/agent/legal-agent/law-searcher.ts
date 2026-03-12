@@ -15,6 +15,7 @@
  * - PKULAW_API_KEY: 北大法宝API密钥
  */
 
+import { logger } from '@/lib/logger';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { createHash } from 'crypto';
@@ -90,7 +91,7 @@ export class LawSearcher {
       await this.buildSearchIndex();
       this.initialized = true;
     } catch (error) {
-      console.error('LawSearcher initialization failed:', error);
+      logger.error('LawSearcher initialization failed:', error);
       throw error;
     }
   }
@@ -131,13 +132,13 @@ export class LawSearcher {
 
         if (externalResult.articles.length > 0) {
           externalResults = externalResult.articles;
-          console.log(
+          logger.info(
             `[LawSearcher] 外部检索成功: ${externalResult.articles.length} 条结果 ` +
               `(来源: ${externalResult.source}, 缓存: ${externalResult.cached})`
           );
         }
       } catch (error) {
-        console.warn('[LawSearcher] 外部检索失败，使用本地结果:', error);
+        logger.warn('[LawSearcher] 外部检索失败，使用本地结果:', error);
       }
     }
 
@@ -393,7 +394,7 @@ export class LawSearcher {
       const data = JSON.parse(content) as LawArticleData;
       return data.data || [];
     } catch (error) {
-      console.error(`Failed to load law file: ${filePath}`, error);
+      logger.error(`Failed to load law file: ${filePath}`, error);
       return [];
     }
   }
@@ -520,21 +521,21 @@ export class LawSearcher {
         try {
           await fs.unlink(filePath);
           deletedCount++;
-          console.log(`[LawSearcher] 删除缓存文件: ${file}`);
+          logger.info(`[LawSearcher] 删除缓存文件: ${file}`);
         } catch (error) {
-          console.warn(`[LawSearcher] 删除缓存文件失败: ${file}`, error);
+          logger.warn(`[LawSearcher] 删除缓存文件失败: ${file}`, error);
         }
       }
 
       // 清除内存中的搜索索引
       if (deletedCount > 0) {
         this.cleanup();
-        console.log(`[LawSearcher] 缓存已清除，删除 ${deletedCount} 个文件`);
+        logger.info(`[LawSearcher] 缓存已清除，删除 ${deletedCount} 个文件`);
       }
 
       return deletedCount;
     } catch (error) {
-      console.error('[LawSearcher] 清除缓存失败:', error);
+      logger.error('[LawSearcher] 清除缓存失败:', error);
       return 0;
     }
   }
@@ -563,7 +564,7 @@ export class LawSearcher {
 
       return cacheFiles;
     } catch (error) {
-      console.error('[LawSearcher] 获取缓存文件列表失败:', error);
+      logger.error('[LawSearcher] 获取缓存文件列表失败:', error);
       return [];
     }
   }

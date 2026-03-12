@@ -13,28 +13,34 @@ import {
   KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 interface VerifyRequestBody {
   approved: boolean;
-  verifiedBy: string;
   note?: string;
 }
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // 从 JWT 获取用户身份，防止用户 ID 注入
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: '请先登录' },
+        { status: 401 }
+      );
+    }
+
     // 解析请求体
     let body: VerifyRequestBody;
     try {
       body = await request.json();
     } catch {
       return NextResponse.json(
-        {
-          success: false,
-          error: '无效的请求体',
-        },
+        { success: false, error: '无效的请求体' },
         { status: 400 }
       );
     }
@@ -42,62 +48,35 @@ export async function POST(
     // 参数验证
     if (typeof body.approved !== 'boolean') {
       return NextResponse.json(
-        {
-          success: false,
-          error: 'approved参数是必需的且必须是布尔值',
-        },
+        { success: false, error: 'approved参数是必需的且必须是布尔值' },
         { status: 400 }
       );
     }
 
-    if (!body.verifiedBy || typeof body.verifiedBy !== 'string') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'verifiedBy参数是必需的',
-        },
-        { status: 400 }
-      );
-    }
-
-    if (body.verifiedBy.trim() === '') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'verifiedBy不能为空',
-        },
-        { status: 400 }
-      );
-    }
-
-    // 权限检查
+    // 权限检查（使用 JWT 中的 userId）
     const permissionResult = await checkKnowledgeGraphPermission(
-      body.verifiedBy,
+      authUser.userId,
       KnowledgeGraphAction.VERIFY_RELATION,
       KnowledgeGraphResource.RELATION
     );
 
     if (!permissionResult.hasPermission) {
       return NextResponse.json(
-        {
-          success: false,
-          error: permissionResult.reason || '权限不足',
-        },
+        { success: false, error: permissionResult.reason || '权限不足' },
         { status: 403 }
       );
     }
 
+    const relationId = (await params).id;
+
     // 查询关系是否存在
     const relation = await prisma.lawArticleRelation.findUnique({
-      where: { id: params.id },
+      where: { id: relationId },
     });
 
     if (!relation) {
       return NextResponse.json(
-        {
-          success: false,
-          error: '关系不存在',
-        },
+        { success: false, error: '关系不存在' },
         { status: 404 }
       );
     }
@@ -105,22 +84,19 @@ export async function POST(
     // 检查是否已经被审核
     if (relation.verificationStatus !== VerificationStatus.PENDING) {
       return NextResponse.json(
-        {
-          success: false,
-          error: '该关系已经被审核',
-        },
+        { success: false, error: '该关系已经被审核' },
         { status: 400 }
       );
     }
 
-    // 更新审核状态
+    // 更新审核状态（使用 JWT 中的 userId）
     const updatedRelation = await prisma.lawArticleRelation.update({
-      where: { id: params.id },
+      where: { id: relationId },
       data: {
         verificationStatus: body.approved
           ? VerificationStatus.VERIFIED
           : VerificationStatus.REJECTED,
-        verifiedBy: body.verifiedBy,
+        verifiedBy: authUser.userId,
         verifiedAt: new Date(),
       },
     });
@@ -134,10 +110,10 @@ export async function POST(
       const userAgent = request.headers.get('user-agent') || 'unknown';
 
       await logKnowledgeGraphAction({
-        userId: body.verifiedBy,
+        userId: authUser.userId,
         action: KnowledgeGraphAction.VERIFY_RELATION,
         resource: KnowledgeGraphResource.RELATION,
-        resourceId: params.id,
+        resourceId: relationId,
         description: `${body.approved ? '通过' : '拒绝'}法条关系审核`,
         ipAddress,
         userAgent,
@@ -161,10 +137,7 @@ export async function POST(
   } catch (error) {
     logger.error('审核关系失败:', error);
     return NextResponse.json(
-      {
-        success: false,
-        error: '审核关系失败',
-      },
+      { success: false, error: '审核关系失败' },
       { status: 500 }
     );
   }

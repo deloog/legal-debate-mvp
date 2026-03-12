@@ -120,61 +120,61 @@ export function TierUpgradeCard({
         <div className='mb-6'>
           <h4 className='mb-3 font-semibold text-gray-900'>权限说明</h4>
           <div className='space-y-1 text-sm text-gray-600'>
-            {tier.permissions.canCreateCase && (
+            {tier.permissions?.canCreateCase && (
               <div className='flex items-center gap-2'>
                 <Check className='h-3 w-3 text-green-600' />
                 <span>创建案件</span>
               </div>
             )}
-            {tier.permissions.canCreateDebate && (
+            {tier.permissions?.canCreateDebate && (
               <div className='flex items-center gap-2'>
                 <Check className='h-3 w-3 text-green-600' />
                 <span>创建辩论</span>
               </div>
             )}
-            {tier.permissions.canAnalyzeDocument && (
+            {tier.permissions?.canAnalyzeDocument && (
               <div className='flex items-center gap-2'>
                 <Check className='h-3 w-3 text-green-600' />
                 <span>分析文档</span>
               </div>
             )}
-            {tier.permissions.canSearchLawArticle && (
+            {tier.permissions?.canSearchLawArticle && (
               <div className='flex items-center gap-2'>
                 <Check className='h-3 w-3 text-green-600' />
                 <span>搜索法条</span>
               </div>
             )}
-            {tier.permissions.canUseAdvancedFeatures && (
+            {tier.permissions?.canUseAdvancedFeatures && (
               <div className='flex items-center gap-2'>
                 <Check className='h-3 w-3 text-green-600' />
                 <span>高级功能</span>
               </div>
             )}
-            {tier.permissions.canExportData && (
+            {tier.permissions?.canExportData && (
               <div className='flex items-center gap-2'>
                 <Check className='h-3 w-3 text-green-600' />
                 <span>数据导出</span>
               </div>
             )}
-            {tier.permissions.canUseBatchProcessing && (
+            {tier.permissions?.canUseBatchProcessing && (
               <div className='flex items-center gap-2'>
                 <Check className='h-3 w-3 text-green-600' />
                 <span>批量处理</span>
               </div>
             )}
-            {tier.permissions.canUseCustomModel && (
+            {tier.permissions?.canUseCustomModel && (
               <div className='flex items-center gap-2'>
                 <Check className='h-3 w-3 text-green-600' />
                 <span>自定义模型</span>
               </div>
             )}
-            {tier.permissions.prioritySupport && (
+            {tier.permissions?.prioritySupport && (
               <div className='flex items-center gap-2'>
                 <Check className='h-3 w-3 text-green-600' />
                 <span>优先支持</span>
               </div>
             )}
-            {tier.permissions.dedicatedSupport && (
+            {tier.permissions?.dedicatedSupport && (
               <div className='flex items-center gap-2'>
                 <Check className='h-3 w-3 text-green-600' />
                 <span>专属客服</span>

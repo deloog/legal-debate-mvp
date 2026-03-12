@@ -3,12 +3,12 @@
  * GET /api/payment/query
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
-import { QueryPaymentResponse, Order, PaymentRecord } from '@/types/payment';
 import { logger } from '@/lib/logger';
+import { Order, PaymentRecord, QueryPaymentResponse } from '@/types/payment';
+import { getServerSession } from 'next-auth';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * 将 Prisma Decimal 转换为 number
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
     // 查询订单
     const order = await prisma.order.findFirst({
       where: {
-        OR: orderId ? [{ id: orderId }] : [{ orderNo: orderNo }],
+        OR: orderId ? [{ id: orderId }] : orderNo ? [{ orderNo: orderNo }] : [],
         userId: session.user.id,
       },
       include: {

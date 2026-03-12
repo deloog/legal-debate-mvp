@@ -1,6 +1,7 @@
 import { getUnifiedAIService } from './unified-service';
 import { AIProvider } from '../../types/ai-service';
 import { Party, Claim } from '../agent/doc-analyzer/core/types';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // AI验证服务 - 使用AI来验证AI的输出质量
@@ -70,11 +71,11 @@ export class AIVerificationService {
 
       const verificationPrompt = this.buildVerificationPrompt(request);
 
-      console.log(
+      logger.info(
         '[AI验证] 请求的当事人数量:',
         request.extractedData.parties?.length || 0
       );
-      console.log(
+      logger.info(
         '[AI验证] 请求的诉讼请求数量:',
         request.extractedData.claims?.length || 0
       );
@@ -108,11 +109,11 @@ export class AIVerificationService {
       }
 
       const aiResponse = response.choices[0].message.content;
-      console.log('[AI验证] 原始响应长度:', aiResponse.length);
-      console.log('[AI验证] 原始响应预览:', aiResponse.substring(0, 200));
+      logger.info('[AI验证] 原始响应长度:', aiResponse.length);
+      logger.info('[AI验证] 原始响应预览:', aiResponse.substring(0, 200));
       return this.parseVerificationResponse(aiResponse);
     } catch (error) {
-      console.error('AI验证失败:', error);
+      logger.error('AI验证失败:', error);
       // 降级到基础验证
       return this.fallbackVerification(request);
     }
@@ -239,8 +240,8 @@ AI提取结果：
 
       return parsed as VerificationResult;
     } catch (error) {
-      console.error('解析AI验证响应失败:', error);
-      console.error('原始响应:', response);
+      logger.error('解析AI验证响应失败:', error);
+      logger.error('原始响应:', response);
       throw new Error(
         `AI验证响应解析失败: ${error instanceof Error ? error.message : String(error)}`
       );
@@ -296,12 +297,12 @@ AI提取结果：
   private fallbackVerification(
     request: VerificationRequest
   ): VerificationResult {
-    console.warn('使用降级验证机制');
-    console.log(
+    logger.warn('使用降级验证机制');
+    logger.info(
       '提取的当事人数量:',
       request.extractedData.parties?.length || 0
     );
-    console.log(
+    logger.info(
       '提取的诉讼请求数量:',
       request.extractedData.claims?.length || 0
     );

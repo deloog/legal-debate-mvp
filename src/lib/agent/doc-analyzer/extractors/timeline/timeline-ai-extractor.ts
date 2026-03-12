@@ -6,6 +6,7 @@
 import type { ExtractedData, TimelineEvent } from '../../core/types';
 import { getUnifiedAIService } from '@/lib/ai/unified-service';
 import { parseAIExtractionResponse } from './timeline-parser';
+import { logger } from '@/lib/logger';
 
 /**
  * AI识别层 - 使用DeepSeek进行智能识别
@@ -45,7 +46,7 @@ export async function aiExtractLayer(
 
     return [];
   } catch (error) {
-    console.error('AI识别层失败:', error);
+    logger.error('AI识别层失败:', error);
     return [];
   }
 }

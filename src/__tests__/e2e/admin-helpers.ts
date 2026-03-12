@@ -881,7 +881,7 @@ export async function createConfig(
 
   const data = await response.json();
 
-  if (response.status() !== 200) {
+  if (response.status() >= 300) {
     return {
       success: false,
       message: data.message || '请求失败',

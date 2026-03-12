@@ -162,7 +162,7 @@ describe('Case Team Members API', () => {
       const request = createMockRequest(
         `http://localhost:3000/api/cases/${testCaseId}/team-members`
       );
-      const response = await GET_LIST(request, { params: { id: testCaseId } });
+      const response = await GET_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
       const testResponse = await createTestResponse(response);
 
       assertions.assertSuccess(testResponse);
@@ -199,7 +199,7 @@ describe('Case Team Members API', () => {
       const request = createMockRequest(
         `http://localhost:3000/api/cases/${testCaseId}/team-members`
       );
-      const response = await GET_LIST(request, { params: { id: testCaseId } });
+      const response = await GET_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
       const testResponse = await createTestResponse(response);
 
       assertions.assertSuccess(testResponse);
@@ -210,7 +210,7 @@ describe('Case Team Members API', () => {
       const request = createMockRequest(
         `http://localhost:3000/api/cases/${testCaseId}/team-members?page=1&limit=10`
       );
-      const response = await GET_LIST(request, { params: { id: testCaseId } });
+      const response = await GET_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.status).toBe(200);
@@ -225,7 +225,7 @@ describe('Case Team Members API', () => {
       const request = createMockRequest(
         `http://localhost:3000/api/cases/${testCaseId}/team-members?role=ASSISTANT`
       );
-      const response = await GET_LIST(request, { params: { id: testCaseId } });
+      const response = await GET_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
       const testResponse = await createTestResponse(response);
 
       assertions.assertSuccess(testResponse);
@@ -242,7 +242,7 @@ describe('Case Team Members API', () => {
       const request = createMockRequest(
         `http://localhost:3000/api/cases/${testCaseId}/team-members?sortBy=role&sortOrder=desc`
       );
-      const response = await GET_LIST(request, { params: { id: testCaseId } });
+      const response = await GET_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
 
       expect(response.status).toBe(200);
     });
@@ -253,7 +253,7 @@ describe('Case Team Members API', () => {
       const request = createMockRequest(
         `http://localhost:3000/api/cases/${testCaseId}/team-members`
       );
-      const response = await GET_LIST(request, { params: { id: testCaseId } });
+      const response = await GET_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
 
       expect(response.status).toBe(401);
     });
@@ -270,7 +270,7 @@ describe('Case Team Members API', () => {
       const request = createMockRequest(
         `http://localhost:3000/api/cases/${testCaseId}/team-members`
       );
-      const response = await GET_LIST(request, { params: { id: testCaseId } });
+      const response = await GET_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
 
       expect(response.status).toBe(403);
     });
@@ -281,7 +281,7 @@ describe('Case Team Members API', () => {
       const request = createMockRequest(
         `http://localhost:3000/api/cases/${testCaseId}/team-members`
       );
-      const response = await GET_LIST(request, { params: { id: testCaseId } });
+      const response = await GET_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
 
       expect(response.status).toBe(403);
     });
@@ -307,7 +307,7 @@ describe('Case Team Members API', () => {
         }
       );
 
-      const response = await POST_LIST(request, { params: { id: testCaseId } });
+      const response = await POST_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
       const testResponse = await createTestResponse(response);
 
       assertions.assertCreated(testResponse);
@@ -350,7 +350,7 @@ describe('Case Team Members API', () => {
         }
       );
 
-      const response = await POST_LIST(request, { params: { id: testCaseId } });
+      const response = await POST_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
       const testResponse = await createTestResponse(response);
 
       assertions.assertCreated(testResponse);
@@ -370,7 +370,7 @@ describe('Case Team Members API', () => {
         }
       );
 
-      const response = await POST_LIST(request, { params: { id: testCaseId } });
+      const response = await POST_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
 
       expect(response.status).toBe(400);
     });
@@ -391,7 +391,7 @@ describe('Case Team Members API', () => {
         }
       );
 
-      const response = await POST_LIST(request, { params: { id: testCaseId } });
+      const response = await POST_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
 
       expect(response.status).toBe(404);
     });
@@ -416,7 +416,7 @@ describe('Case Team Members API', () => {
         }
       );
 
-      const response = await POST_LIST(request, { params: { id: testCaseId } });
+      const response = await POST_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
 
       expect(response.status).toBe(409);
     });
@@ -441,7 +441,7 @@ describe('Case Team Members API', () => {
         }
       );
 
-      const response = await POST_LIST(request, { params: { id: testCaseId } });
+      const response = await POST_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
 
       expect(response.status).toBe(403);
     });
@@ -460,7 +460,7 @@ describe('Case Team Members API', () => {
         }
       );
 
-      const response = await POST_LIST(request, { params: { id: testCaseId } });
+      const response = await POST_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
 
       expect(response.status).toBe(400);
     });
@@ -491,7 +491,7 @@ describe('Case Team Members API', () => {
         );
 
         const response = await POST_LIST(request, {
-          params: { id: testCaseId },
+          params: Promise.resolve({ id: testCaseId }),
         });
         const testResponse = await createTestResponse(response);
 
@@ -506,7 +506,7 @@ describe('Case Team Members API', () => {
         `http://localhost:3000/api/cases/${testCaseId}/team-members/${testTargetUserId}`
       );
       const response = await GET_MEMBER(request, {
-        params: { id: testCaseId, userId: testTargetUserId },
+        params: Promise.resolve({ id: testCaseId, userId: testTargetUserId }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -520,7 +520,7 @@ describe('Case Team Members API', () => {
         `http://localhost:3000/api/cases/${testCaseId}/team-members/${testTargetUserId}`
       );
       const response = await GET_MEMBER(request, {
-        params: { id: testCaseId, userId: testTargetUserId },
+        params: Promise.resolve({ id: testCaseId, userId: testTargetUserId }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -536,7 +536,7 @@ describe('Case Team Members API', () => {
         `http://localhost:3000/api/cases/${testCaseId}/team-members/non-existent`
       );
       const response = await GET_MEMBER(request, {
-        params: { id: testCaseId, userId: 'non-existent' },
+        params: Promise.resolve({ id: testCaseId, userId: 'non-existent' }),
       });
 
       expect(response.status).toBe(404);
@@ -554,7 +554,7 @@ describe('Case Team Members API', () => {
         `http://localhost:3000/api/cases/${testCaseId}/team-members/${testTargetUserId}`
       );
       const response = await GET_MEMBER(request, {
-        params: { id: testCaseId, userId: testTargetUserId },
+        params: Promise.resolve({ id: testCaseId, userId: testTargetUserId }),
       });
 
       expect(response.status).toBe(403);
@@ -567,7 +567,7 @@ describe('Case Team Members API', () => {
         `http://localhost:3000/api/cases/${testCaseId}/team-members/${testTargetUserId}`
       );
       const response = await GET_MEMBER(request, {
-        params: { id: testCaseId, userId: testTargetUserId },
+        params: Promise.resolve({ id: testCaseId, userId: testTargetUserId }),
       });
 
       expect(response.status).toBe(401);
@@ -589,7 +589,7 @@ describe('Case Team Members API', () => {
       );
 
       const response = await PUT_MEMBER(request, {
-        params: { id: testCaseId, userId: testTargetUserId },
+        params: Promise.resolve({ id: testCaseId, userId: testTargetUserId }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -611,7 +611,7 @@ describe('Case Team Members API', () => {
       );
 
       const response = await PUT_MEMBER(request, {
-        params: { id: testCaseId, userId: testTargetUserId },
+        params: Promise.resolve({ id: testCaseId, userId: testTargetUserId }),
       });
 
       expect(response.status).toBe(200);
@@ -631,7 +631,7 @@ describe('Case Team Members API', () => {
       );
 
       const response = await PUT_MEMBER(request, {
-        params: { id: testCaseId, userId: testTargetUserId },
+        params: Promise.resolve({ id: testCaseId, userId: testTargetUserId }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -655,7 +655,7 @@ describe('Case Team Members API', () => {
       );
 
       const response = await PUT_MEMBER(request, {
-        params: { id: testCaseId, userId: testTargetUserId },
+        params: Promise.resolve({ id: testCaseId, userId: testTargetUserId }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -680,7 +680,7 @@ describe('Case Team Members API', () => {
       );
 
       const response = await PUT_MEMBER(request, {
-        params: { id: testCaseId, userId: 'non-existent' },
+        params: Promise.resolve({ id: testCaseId, userId: 'non-existent' }),
       });
 
       expect(response.status).toBe(404);
@@ -706,7 +706,7 @@ describe('Case Team Members API', () => {
       );
 
       const response = await PUT_MEMBER(request, {
-        params: { id: testCaseId, userId: testTargetUserId },
+        params: Promise.resolve({ id: testCaseId, userId: testTargetUserId }),
       });
 
       expect(response.status).toBe(403);
@@ -726,7 +726,7 @@ describe('Case Team Members API', () => {
       );
 
       const response = await PUT_MEMBER(request, {
-        params: { id: testCaseId, userId: testTargetUserId },
+        params: Promise.resolve({ id: testCaseId, userId: testTargetUserId }),
       });
 
       expect(response.status).toBe(400);
@@ -743,7 +743,7 @@ describe('Case Team Members API', () => {
       );
 
       const response = await DELETE_MEMBER(request, {
-        params: { id: testCaseId, userId: testTargetUserId },
+        params: Promise.resolve({ id: testCaseId, userId: testTargetUserId }),
       });
 
       expect(response.status).toBe(204);
@@ -765,7 +765,7 @@ describe('Case Team Members API', () => {
       );
 
       const response = await DELETE_MEMBER(request, {
-        params: { id: testCaseId, userId: testUserId },
+        params: Promise.resolve({ id: testCaseId, userId: testUserId }),
       });
 
       expect(response.status).toBe(400);
@@ -782,7 +782,7 @@ describe('Case Team Members API', () => {
       );
 
       const response = await DELETE_MEMBER(request, {
-        params: { id: testCaseId, userId: 'non-existent' },
+        params: Promise.resolve({ id: testCaseId, userId: 'non-existent' }),
       });
 
       expect(response.status).toBe(404);
@@ -803,7 +803,7 @@ describe('Case Team Members API', () => {
       );
 
       const response = await DELETE_MEMBER(request, {
-        params: { id: testCaseId, userId: testTargetUserId },
+        params: Promise.resolve({ id: testCaseId, userId: testTargetUserId }),
       });
 
       expect(response.status).toBe(403);
@@ -820,7 +820,7 @@ describe('Case Team Members API', () => {
       );
 
       const response = await DELETE_MEMBER(request, {
-        params: { id: testCaseId, userId: testTargetUserId },
+        params: Promise.resolve({ id: testCaseId, userId: testTargetUserId }),
       });
 
       expect(response.status).toBe(401);
@@ -874,7 +874,7 @@ describe('Case Team Members API', () => {
       const request = createMockRequest(
         `http://localhost:3000/api/cases/${testCaseId}/team-members`
       );
-      const response = await GET_LIST(request, { params: { id: testCaseId } });
+      const response = await GET_LIST(request, { params: Promise.resolve({ id: testCaseId }) });
       const testResponse = await createTestResponse(response);
 
       expect(testResponse.success).toBeDefined();
@@ -889,7 +889,7 @@ describe('Case Team Members API', () => {
         `http://localhost:3000/api/cases/${testCaseId}/team-members/${testTargetUserId}`
       );
       const response = await GET_MEMBER(request, {
-        params: { id: testCaseId, userId: testTargetUserId },
+        params: Promise.resolve({ id: testCaseId, userId: testTargetUserId }),
       });
       const testResponse = await createTestResponse(response);
 

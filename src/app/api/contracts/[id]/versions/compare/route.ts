@@ -9,7 +9,7 @@ import { logger } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
-  _context: { params: { id: string } }
+  _context: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await request.json();

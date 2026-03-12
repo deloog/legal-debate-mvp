@@ -24,6 +24,7 @@ import { DocAnalyzerAgent } from '../../agent/doc-analyzer';
 import { ApplicabilityAnalyzer } from '../../agent/legal-agent/applicability-analyzer';
 import { EvidenceChainAnalyzer } from '../../evidence/evidence-chain-analyzer';
 import { AgentContext, TaskPriority } from '../../../types/agent';
+import { logger } from '@/lib/logger';
 
 /**
  * 增量分析器类
@@ -147,7 +148,7 @@ export class IncrementalAnalyzer {
       // 转换输出格式
       return this.convertDocAnalyzerOutput(result);
     } catch (error) {
-      console.error(`文档分析失败 (${material.id}):`, error);
+      logger.error(`文档分析失败 (${material.id}):`, error);
       // 降级返回基础结果
       return this.createFallbackDocumentOutput(material);
     }
@@ -275,7 +276,7 @@ export class IncrementalAnalyzer {
       // 转换输出格式
       return this.convertApplicabilityOutput(material, result);
     } catch (error) {
-      console.error(`法条适用性分析失败 (${material.id}):`, error);
+      logger.error(`法条适用性分析失败 (${material.id}):`, error);
       // 降级返回基础结果
       return this.createFallbackLawArticleOutput(material);
     }
@@ -396,7 +397,7 @@ export class IncrementalAnalyzer {
       // 转换输出格式
       return this.convertEvidenceOutput(material, result);
     } catch (error) {
-      console.error(`证据分析失败 (${material.id}):`, error);
+      logger.error(`证据分析失败 (${material.id}):`, error);
       // 降级返回基础结果
       return this.createFallbackEvidenceOutput(material);
     }
@@ -553,12 +554,12 @@ export class IncrementalAnalyzer {
 
       const elapsed = Date.now() - startTime;
       if (elapsed > this.config.analysis.timeout) {
-        console.warn(`任务 ${task.id} 超时: ${elapsed}ms`);
+        logger.warn(`任务 ${task.id} 超时: ${elapsed}ms`);
       }
 
       return result;
     } catch (error) {
-      console.error(`任务 ${task.id} 分析失败:`, error);
+      logger.error(`任务 ${task.id} 分析失败:`, error);
       throw error;
     }
   }
@@ -580,7 +581,7 @@ export class IncrementalAnalyzer {
         if (result.status === 'fulfilled') {
           results.push(result.value);
         } else {
-          console.error('任务执行失败:', result.reason);
+          logger.error('任务执行失败:', result.reason);
         }
       }
     }

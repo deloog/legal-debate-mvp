@@ -5,6 +5,7 @@
 
 import { prisma } from '@/lib/db/prisma';
 import type { SessionCleanupConfig } from '@/types/auth';
+import { logger } from '@/lib/logger';
 
 const DEFAULT_CONFIG: SessionCleanupConfig = {
   inactiveDays: 30, // 清理30天未活动的会话
@@ -27,7 +28,7 @@ export async function cleanupExpiredSessions(): Promise<number> {
 
     return result.count;
   } catch (error) {
-    console.error('Cleanup expired sessions error:', error);
+    logger.error('Cleanup expired sessions error:', error);
     throw new Error('清理过期会话失败');
   }
 }
@@ -48,7 +49,7 @@ export async function cleanupInactiveSessions(
     // 这里仅返回0作为占位
     return 0;
   } catch (error) {
-    console.error('Cleanup inactive sessions error:', error);
+    logger.error('Cleanup inactive sessions error:', error);
     throw new Error('清理未活动会话失败');
   }
 }
@@ -65,7 +66,7 @@ export async function cleanupUserSessions(userId: string): Promise<number> {
 
     return result.count;
   } catch (error) {
-    console.error('Cleanup user sessions error:', error);
+    logger.error('Cleanup user sessions error:', error);
     throw new Error('清理用户会话失败');
   }
 }
@@ -85,7 +86,7 @@ export async function getExpiredSessionsCount(): Promise<number> {
 
     return count;
   } catch (error) {
-    console.error('Get expired sessions count error:', error);
+    logger.error('Get expired sessions count error:', error);
     return 0;
   }
 }
@@ -105,7 +106,7 @@ export async function getActiveSessionsCount(): Promise<number> {
 
     return count;
   } catch (error) {
-    console.error('Get active sessions count error:', error);
+    logger.error('Get active sessions count error:', error);
     return 0;
   }
 }
@@ -133,7 +134,7 @@ export async function executeSessionCleanup(): Promise<{
       activeCount,
     };
   } catch (error) {
-    console.error('Execute session cleanup error:', error);
+    logger.error('Execute session cleanup error:', error);
     throw new Error('执行会话清理失败');
   }
 }

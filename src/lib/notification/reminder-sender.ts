@@ -12,8 +12,8 @@ import {
   ReminderType,
 } from '@/types/notification';
 import { getEmailService } from './email-service';
-import { reminderService } from './reminder-service';
 import { inAppMessageService } from './in-app-message-service';
+import { reminderService } from './reminder-service';
 
 // =============================================================================
 // 提醒发送器
@@ -34,7 +34,9 @@ class ReminderSender {
         return false;
       }
 
-      const channels = reminder.channels.map(ch => ch as NotificationChannel);
+      const channels = (reminder.channels ?? []).map(
+        ch => ch as NotificationChannel
+      );
 
       let emailSent = false;
       let inAppSent = false;
@@ -153,9 +155,9 @@ class ReminderSender {
     }
   ): string {
     const displayName = user.name || user.username || user.email;
-    const reminderTime = new Date(reminder.reminderTime).toLocaleString(
-      'zh-CN'
-    );
+    const reminderTime = new Date(
+      reminder.reminderTime ?? Date.now()
+    ).toLocaleString('zh-CN');
 
     let content = '';
 

@@ -12,7 +12,8 @@ export class PromptBuilder {
   static buildDebatePrompt(
     input: DebateInput,
     side: 'plaintiff' | 'defendant',
-    options?: Partial<PromptOptions>
+    options?: Partial<PromptOptions>,
+    reasoningAnalysis?: string
   ): PromptOptions {
     const temperature =
       options?.temperature ??
@@ -23,7 +24,7 @@ export class PromptBuilder {
       input.config?.maxTokens ??
       DEFAULT_DEBATE_CONFIG.maxTokens;
 
-    const userPrompt = this.buildUserPrompt(input, side, input.config);
+    const userPrompt = this.buildUserPrompt(input, side, input.config, reasoningAnalysis);
 
     return {
       systemPrompt: options?.systemPrompt || this.getSystemPrompt(),
@@ -61,11 +62,13 @@ export class PromptBuilder {
 
   /**
    * 构建用户提示词
+   * @param reasoningAnalysis 可选的推理链分析文本（来自知识图谱推理引擎）
    */
   private static buildUserPrompt(
     input: DebateInput,
     side: 'plaintiff' | 'defendant',
-    config?: DebateInput['config'] | undefined
+    config?: DebateInput['config'] | undefined,
+    reasoningAnalysis?: string
   ): string {
     const { caseInfo, lawArticles } = input;
     const { includeLegalAnalysis } = config ?? DEFAULT_DEBATE_CONFIG;
@@ -109,6 +112,13 @@ export class PromptBuilder {
         promptParts.push(article.content);
         promptParts.push('\n');
       });
+    }
+
+    // 知识图谱推理链分析（如果有）
+    if (reasoningAnalysis) {
+      promptParts.push('\n');
+      promptParts.push(reasoningAnalysis);
+      promptParts.push('\n');
     }
 
     // 法律分析

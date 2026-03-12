@@ -185,18 +185,166 @@ function TeamInfoCard({
   );
 }
 
+/** 成员角色标签 */
+const ROLE_LABELS: Record<string, string> = {
+  ADMIN: '管理员',
+  LAWYER: '律师',
+  PARALEGAL: '律师助理',
+  OTHER: '其他',
+};
+
+/** 成员状态标签 */
+const STATUS_LABELS: Record<string, string> = {
+  ACTIVE: '活跃',
+  INACTIVE: '不活跃',
+  REMOVED: '已移除',
+};
+
+/** 单行成员数据类型 */
+interface MemberRow {
+  id: string;
+  userId: string;
+  role: string;
+  status: string;
+  joinedAt: string;
+  notes: string | null;
+  user?: {
+    id: string;
+    name: string | null;
+    email: string;
+    avatar: string | null;
+    role: string;
+  };
+}
+
 /**
- * 成员列表占位符
+ * 团队成员列表
+ * 从 /api/teams/[teamId]/members 加载数据
  */
-function TeamMemberList({}: { teamId: string }) {
+function TeamMemberList({ teamId }: { teamId: string }) {
+  const [members, setMembers] = useState<MemberRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    fetch(`/api/teams/${teamId}/members?limit=50`)
+      .then(r => r.json())
+      .then((data: { members?: MemberRow[]; total?: number }) => {
+        if (cancelled) return;
+        setMembers(data.members ?? []);
+        setTotal(data.total ?? 0);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : '加载成员列表失败');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [teamId]);
+
   return (
     <div className='rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950'>
-      <h2 className='mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50'>
-        团队成员
-      </h2>
-      <div className='text-center text-sm text-zinc-600 dark:text-zinc-400'>
-        成员列表组件待实现
+      <div className='mb-4 flex items-center justify-between'>
+        <h2 className='text-lg font-semibold text-zinc-900 dark:text-zinc-50'>
+          团队成员
+        </h2>
+        {!loading && (
+          <span className='text-sm text-zinc-500 dark:text-zinc-400'>
+            共 {total} 人
+          </span>
+        )}
       </div>
+
+      {loading && (
+        <div className='space-y-2'>
+          {[1, 2, 3].map(i => (
+            <div
+              key={i}
+              className='h-12 animate-pulse rounded bg-zinc-100 dark:bg-zinc-800'
+            />
+          ))}
+        </div>
+      )}
+
+      {error && (
+        <div className='rounded border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-950 dark:text-red-400'>
+          {error}
+        </div>
+      )}
+
+      {!loading && !error && members.length === 0 && (
+        <div className='py-8 text-center text-sm text-zinc-500 dark:text-zinc-400'>
+          暂无团队成员
+        </div>
+      )}
+
+      {!loading && !error && members.length > 0 && (
+        <div className='overflow-x-auto'>
+          <table className='w-full text-sm'>
+            <thead>
+              <tr className='border-b border-zinc-100 dark:border-zinc-800'>
+                <th className='pb-2 text-left font-medium text-zinc-600 dark:text-zinc-400'>
+                  成员
+                </th>
+                <th className='pb-2 text-left font-medium text-zinc-600 dark:text-zinc-400'>
+                  角色
+                </th>
+                <th className='pb-2 text-left font-medium text-zinc-600 dark:text-zinc-400'>
+                  状态
+                </th>
+                <th className='pb-2 text-left font-medium text-zinc-600 dark:text-zinc-400'>
+                  加入时间
+                </th>
+              </tr>
+            </thead>
+            <tbody className='divide-y divide-zinc-100 dark:divide-zinc-800'>
+              {members.map(member => (
+                <tr key={member.id}>
+                  <td className='py-3 pr-4'>
+                    <div className='font-medium text-zinc-900 dark:text-zinc-50'>
+                      {member.user?.name ?? member.userId}
+                    </div>
+                    {member.user?.email && (
+                      <div className='text-xs text-zinc-500 dark:text-zinc-400'>
+                        {member.user.email}
+                      </div>
+                    )}
+                  </td>
+                  <td className='py-3 pr-4'>
+                    <span className='rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'>
+                      {ROLE_LABELS[member.role] ?? member.role}
+                    </span>
+                  </td>
+                  <td className='py-3 pr-4'>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        member.status === 'ACTIVE'
+                          ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                          : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
+                      }`}
+                    >
+                      {STATUS_LABELS[member.status] ?? member.status}
+                    </span>
+                  </td>
+                  <td className='py-3 text-zinc-600 dark:text-zinc-400'>
+                    {new Date(member.joinedAt).toLocaleDateString('zh-CN')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

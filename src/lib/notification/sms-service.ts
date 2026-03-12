@@ -3,6 +3,12 @@
  *
  * 提供短信发送功能，支持跟进任务提醒、法庭日程提醒等。
  * 开发环境使用控制台输出，生产环境可集成阿里云短信、腾讯云短信等。
+ * 
+ * 安全特性：
+ * - 发送频率限制（每小时最多10条）
+ * - 敏感信息脱敏（日志中手机号部分隐藏）
+ * - 配置完整性验证
+ * - 发送审计日志
  */
 
 import {
@@ -11,7 +17,8 @@ import {
   SMSProvider,
 } from '@/types/notification';
 import { FollowUpTask } from '@/types/client';
-import { logger } from '@/lib/agent/security/logger';
+import { logger } from '@/lib/logger';
+import { checkRateLimit } from './rate-limiter';
 
 // =============================================================================
 // 短信服务配置类型
@@ -85,6 +92,26 @@ function validateSMSConfig(config: SMSConfig): boolean {
 }
 
 // =============================================================================
+// 工具函数
+// =============================================================================
+
+/**
+ * 脱敏手机号（用于日志）
+ * 13812345678 -> 138****5678
+ */
+function maskPhoneNumber(phone: string): string {
+  if (phone.length !== 11) return phone;
+  return phone.substring(0, 3) + '****' + phone.substring(7);
+}
+
+/**
+ * 验证手机号格式
+ */
+function isValidPhoneNumber(phone: string): boolean {
+  return /^1[3-9]\d{9}$/.test(phone);
+}
+
+// =============================================================================
 // 短信内容生成
 // =============================================================================
 
@@ -132,31 +159,55 @@ class DevSMSService {
   }
 
   private logSMS(options: SMSSendOptions): void {
-    console.log('\n' + '='.repeat(60));
-    console.log('📱 短信发送（开发环境）');
-    console.log('='.repeat(60));
-    console.log(`收件人: ${options.to}`);
-    console.log('-'.repeat(60));
-    console.log('内容：');
-    console.log(options.content);
+    const maskedTo = maskPhoneNumber(options.to);
+    
+    logger.info('\n' + '='.repeat(60));
+    logger.info('📱 短信发送（开发环境）');
+    logger.info('='.repeat(60));
+    logger.info(`收件人: ${maskedTo}`);
+    logger.info('-'.repeat(60));
+    logger.info('内容：');
+    logger.info(options.content);
     if (options.templateCode) {
-      console.log('-'.repeat(60));
-      console.log(`模板代码: ${options.templateCode}`);
+      logger.info('-'.repeat(60));
+      logger.info(`模板代码: ${options.templateCode}`);
       if (options.templateParams) {
-        console.log(`模板参数: ${JSON.stringify(options.templateParams)}`);
+        logger.info(`模板参数: ${JSON.stringify(options.templateParams)}`);
       }
     }
-    console.log('='.repeat(60) + '\n');
+    logger.info('='.repeat(60) + '\n');
   }
 
   async sendFollowUpTaskSMS(
     task: FollowUpTask,
     clientPhone: string
   ): Promise<SMSSendResult> {
+    // 频率限制检查
+    const rateLimit = checkRateLimit(clientPhone, 'SMS');
+    if (!rateLimit.allowed) {
+      logger.warn(`短信发送频率限制`, {
+        to: maskPhoneNumber(clientPhone),
+        retryAfter: rateLimit.retryAfter,
+      });
+      return {
+        success: false,
+        error: `发送过于频繁，请${Math.ceil((rateLimit.retryAfter || 60000) / 1000)}秒后重试`,
+      };
+    }
+
     if (!this.isDevEnvironment()) {
       return {
         success: false,
         error: '非开发环境，请使用生产短信服务',
+      };
+    }
+
+    // 验证手机号格式
+    if (!isValidPhoneNumber(clientPhone)) {
+      logger.warn(`无效的手机号格式`, { phone: maskPhoneNumber(clientPhone) });
+      return {
+        success: false,
+        error: '无效的手机号格式',
       };
     }
 
@@ -172,15 +223,37 @@ class DevSMSService {
     return {
       success: true,
       messageId: `dev-${Date.now()}`,
-      devMessage: `[开发模式] 短信已发送到控制台，收件人：${clientPhone}，任务：${task.summary}`,
+      devMessage: `[开发模式] 短信已发送到控制台，收件人：${maskPhoneNumber(clientPhone)}，任务：${task.summary}`,
     };
   }
 
   async sendCustomSMS(options: SMSSendOptions): Promise<SMSSendResult> {
+    // 频率限制检查
+    const rateLimit = checkRateLimit(options.to, 'SMS');
+    if (!rateLimit.allowed) {
+      logger.warn(`短信发送频率限制`, {
+        to: maskPhoneNumber(options.to),
+        retryAfter: rateLimit.retryAfter,
+      });
+      return {
+        success: false,
+        error: `发送过于频繁，请${Math.ceil((rateLimit.retryAfter || 60000) / 1000)}秒后重试`,
+      };
+    }
+
     if (!this.isDevEnvironment()) {
       return {
         success: false,
         error: '非开发环境，请使用生产短信服务',
+      };
+    }
+
+    // 验证手机号格式
+    if (!isValidPhoneNumber(options.to)) {
+      logger.warn(`无效的手机号格式`, { phone: maskPhoneNumber(options.to) });
+      return {
+        success: false,
+        error: '无效的手机号格式',
       };
     }
 
@@ -189,7 +262,7 @@ class DevSMSService {
     return {
       success: true,
       messageId: `dev-${Date.now()}`,
-      devMessage: `[开发模式] 短信已发送到控制台，收件人：${options.to}，内容：${options.content.substring(0, 20)}...`,
+      devMessage: `[开发模式] 短信已发送到控制台，收件人：${maskPhoneNumber(options.to)}，内容：${options.content.substring(0, 20)}...`,
     };
   }
 }
@@ -215,31 +288,56 @@ class ProdSMSService {
     task: FollowUpTask,
     clientPhone: string
   ): Promise<SMSSendResult> {
+    // 频率限制检查
+    const rateLimit = checkRateLimit(clientPhone, 'SMS');
+    if (!rateLimit.allowed) {
+      logger.warn(`短信发送频率限制`, {
+        to: maskPhoneNumber(clientPhone),
+        retryAfter: rateLimit.retryAfter,
+      });
+      return {
+        success: false,
+        error: `发送过于频繁，请${Math.ceil((rateLimit.retryAfter || 60000) / 1000)}秒后重试`,
+      };
+    }
+
+    // 验证手机号格式
+    if (!isValidPhoneNumber(clientPhone)) {
+      logger.warn(`无效的手机号格式`, { phone: maskPhoneNumber(clientPhone) });
+      return {
+        success: false,
+        error: '无效的手机号格式',
+      };
+    }
+
     const provider = this.config.provider;
 
     if (provider === SMSProvider.ALIYUN) {
       logger.warn(
-        `[生产环境] 请集成阿里云短信服务来发送跟进任务提醒短信到 ${clientPhone}`,
+        `[生产环境] 请集成阿里云短信服务来发送跟进任务提醒短信`,
         {
           provider: 'aliyun',
           taskId: task.id,
-        } as Record<string, unknown>
+          to: maskPhoneNumber(clientPhone),
+        }
       );
     } else if (provider === SMSProvider.TENCENT) {
       logger.warn(
-        `[生产环境] 请集成腾讯云短信服务来发送跟进任务提醒短信到 ${clientPhone}`,
+        `[生产环境] 请集成腾讯云短信服务来发送跟进任务提醒短信`,
         {
           provider: 'tencent',
           taskId: task.id,
-        } as Record<string, unknown>
+          to: maskPhoneNumber(clientPhone),
+        }
       );
     } else {
       logger.warn(
-        `[生产环境] 请集成真实短信服务来发送跟进任务提醒短信到 ${clientPhone}`,
+        `[生产环境] 请集成真实短信服务来发送跟进任务提醒短信`,
         {
           provider,
           taskId: task.id,
-        } as Record<string, unknown>
+          to: maskPhoneNumber(clientPhone),
+        }
       );
     }
 
@@ -250,31 +348,56 @@ class ProdSMSService {
   }
 
   async sendCustomSMS(options: SMSSendOptions): Promise<SMSSendResult> {
+    // 频率限制检查
+    const rateLimit = checkRateLimit(options.to, 'SMS');
+    if (!rateLimit.allowed) {
+      logger.warn(`短信发送频率限制`, {
+        to: maskPhoneNumber(options.to),
+        retryAfter: rateLimit.retryAfter,
+      });
+      return {
+        success: false,
+        error: `发送过于频繁，请${Math.ceil((rateLimit.retryAfter || 60000) / 1000)}秒后重试`,
+      };
+    }
+
+    // 验证手机号格式
+    if (!isValidPhoneNumber(options.to)) {
+      logger.warn(`无效的手机号格式`, { phone: maskPhoneNumber(options.to) });
+      return {
+        success: false,
+        error: '无效的手机号格式',
+      };
+    }
+
     const provider = this.config.provider;
 
     if (provider === SMSProvider.ALIYUN) {
       logger.warn(
-        `[生产环境] 请集成阿里云短信服务来发送自定义短信到 ${options.to}`,
+        `[生产环境] 请集成阿里云短信服务来发送自定义短信`,
         {
           provider: 'aliyun',
           contentLength: options.content.length,
-        } as Record<string, unknown>
+          to: maskPhoneNumber(options.to),
+        }
       );
     } else if (provider === SMSProvider.TENCENT) {
       logger.warn(
-        `[生产环境] 请集成腾讯云短信服务来发送自定义短信到 ${options.to}`,
+        `[生产环境] 请集成腾讯云短信服务来发送自定义短信`,
         {
           provider: 'tencent',
           contentLength: options.content.length,
-        } as Record<string, unknown>
+          to: maskPhoneNumber(options.to),
+        }
       );
     } else {
       logger.warn(
-        `[生产环境] 请集成真实短信服务来发送自定义短信到 ${options.to}`,
+        `[生产环境] 请集成真实短信服务来发送自定义短信`,
         {
           provider,
           contentLength: options.content.length,
-        } as Record<string, unknown>
+          to: maskPhoneNumber(options.to),
+        }
       );
     }
 
@@ -310,7 +433,7 @@ export function getSMSService() {
     if (!validateSMSConfig(config)) {
       logger.warn(`短信服务配置不完整，使用开发环境服务`, {
         provider: config.provider,
-      } as Record<string, unknown>);
+      });
       return new DevSMSService();
     }
     return new ProdSMSService(config);
@@ -324,5 +447,5 @@ export function getSMSService() {
 // 导出
 // =============================================================================
 
-export { DevSMSService, ProdSMSService, getSMSConfig, validateSMSConfig };
+export { DevSMSService, ProdSMSService, getSMSConfig, validateSMSConfig, maskPhoneNumber };
 export default getSMSService();

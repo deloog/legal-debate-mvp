@@ -24,7 +24,7 @@ function unauthorizedResponse(): NextResponse {
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 验证用户身份
@@ -39,7 +39,7 @@ export async function GET(
       return permissionError;
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // 查询报告详情
     const report = await prisma.report.findUnique({
@@ -85,7 +85,7 @@ export async function GET(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 验证用户身份
@@ -100,7 +100,7 @@ export async function DELETE(
       return permissionError;
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // 查询报告
     const report = await prisma.report.findUnique({

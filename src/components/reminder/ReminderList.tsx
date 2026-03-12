@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import {
-  Reminder,
-  ReminderType,
-  ReminderStatus,
-  NotificationChannel,
-} from '@/types/notification';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  NotificationChannel,
+  Reminder,
+  ReminderStatus,
+  ReminderType,
+} from '@/types/notification';
+import { useCallback, useEffect, useState } from 'react';
 
 interface ReminderListProps {
   userId: string;
@@ -346,7 +346,9 @@ export function ReminderList({ userId }: ReminderListProps) {
                         {getReminderStatusLabel(reminder.status)}
                       </span>
                       <span className='text-sm text-gray-500'>
-                        {formatReminderTime(new Date(reminder.reminderTime))}
+                        {formatReminderTime(
+                          new Date(reminder.reminderTime ?? Date.now())
+                        )}
                       </span>
                     </div>
 
@@ -364,14 +366,14 @@ export function ReminderList({ userId }: ReminderListProps) {
                       <div className='flex items-center space-x-4'>
                         <span>
                           提醒时间:{' '}
-                          {new Date(reminder.reminderTime).toLocaleString(
-                            'zh-CN'
-                          )}
+                          {new Date(
+                            reminder.reminderTime ?? Date.now()
+                          ).toLocaleString('zh-CN')}
                         </span>
-                        {reminder.channels.length > 0 && (
+                        {(reminder.channels?.length ?? 0) > 0 && (
                           <span>
                             通知渠道:{' '}
-                            {reminder.channels
+                            {(reminder.channels ?? [])
                               .map(channel => {
                                 const channelLabels: Record<
                                   NotificationChannel,

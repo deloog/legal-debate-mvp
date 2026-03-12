@@ -5,6 +5,7 @@
 
 import { getUnifiedAIService } from '@/lib/ai/unified-service';
 import type { DisputeFocus, ExtractedData } from '../../core/types';
+import { logger } from '@/lib/logger';
 
 /**
  * AI识别层 - 使用DeepSeek进行智能识别
@@ -44,7 +45,7 @@ export async function aiExtractLayer(
 
     return [];
   } catch (error) {
-    console.error('AI识别层失败:', error);
+    logger.error('AI识别层失败:', error);
     return [];
   }
 }
@@ -160,7 +161,7 @@ function parseAIExtractionResponse(aiResponse: string): DisputeFocus[] {
       })
     );
   } catch (error) {
-    console.error('解析AI识别响应失败:', error);
+    logger.error('解析AI识别响应失败:', error);
     return [];
   }
 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import crypto from 'crypto';
 import { cacheManager } from '../cache/manager';
 import type {
@@ -75,7 +76,7 @@ export class SearchCacheManager {
 
       return null;
     } catch (error) {
-      console.error('Error getting search cache:', error);
+      logger.error('Error getting search cache:', error);
       return null;
     }
   }
@@ -94,7 +95,7 @@ export class SearchCacheManager {
 
       await cacheManager.set(cacheKey, value, { ttl: cacheTTL });
     } catch (error) {
-      console.error('Error setting search cache:', error);
+      logger.error('Error setting search cache:', error);
     }
   }
 
@@ -106,7 +107,7 @@ export class SearchCacheManager {
       const cacheKey = this.generateCacheKey(key);
       await cacheManager.delete(cacheKey);
     } catch (error) {
-      console.error('Error deleting search cache:', error);
+      logger.error('Error deleting search cache:', error);
     }
   }
 
@@ -119,16 +120,16 @@ export class SearchCacheManager {
       const deletedCount = await cacheManager.clearNamespace(this.CACHE_PREFIX);
 
       if (deletedCount > 0) {
-        console.log(
+        logger.info(
           `[SearchCache] Cleared ${deletedCount} cache entries with prefix: ${this.CACHE_PREFIX}`
         );
       } else {
-        console.log(
+        logger.info(
           `[SearchCache] No cache entries found with prefix: ${this.CACHE_PREFIX}`
         );
       }
     } catch (error) {
-      console.error('Error clearing all search cache:', error);
+      logger.error('Error clearing all search cache:', error);
     }
   }
 
@@ -142,7 +143,7 @@ export class SearchCacheManager {
 
       await cacheManager.set(viewKey, currentViews + 1, { ttl: 60 * 60 });
     } catch (error) {
-      console.error('Error incrementing view count:', error);
+      logger.error('Error incrementing view count:', error);
     }
   }
 
@@ -154,7 +155,7 @@ export class SearchCacheManager {
       const viewKey = `${this.CACHE_PREFIX}:views:${articleId}`;
       return (await cacheManager.get<number>(viewKey)) || 0;
     } catch (error) {
-      console.error('Error getting view count:', error);
+      logger.error('Error getting view count:', error);
       return 0;
     }
   }
@@ -200,7 +201,7 @@ export class SearchCacheManager {
 
       await cacheManager.set(statsKey, newStats, { ttl: 60 * 60 });
     } catch (error) {
-      console.error('Error recording search stats:', error);
+      logger.error('Error recording search stats:', error);
     }
   }
 
@@ -225,7 +226,7 @@ export class SearchCacheManager {
         await cacheManager.set(statsKey, newStats, { ttl: 60 * 60 });
       }
     } catch (error) {
-      console.error('Error recording cache hit:', error);
+      logger.error('Error recording cache hit:', error);
     }
   }
 
@@ -237,7 +238,7 @@ export class SearchCacheManager {
       const statsKey = `${this.CACHE_PREFIX}:stats`;
       return await cacheManager.get<SearchStatistics>(statsKey);
     } catch (error) {
-      console.error('Error getting search statistics:', error);
+      logger.error('Error getting search statistics:', error);
       return null;
     }
   }
@@ -250,7 +251,7 @@ export class SearchCacheManager {
       const statsKey = `${this.CACHE_PREFIX}:stats`;
       await cacheManager.delete(statsKey);
     } catch (error) {
-      console.error('Error resetting search statistics:', error);
+      logger.error('Error resetting search statistics:', error);
     }
   }
 
@@ -268,7 +269,7 @@ export class SearchCacheManager {
 
       await Promise.all(promises);
     } catch (error) {
-      console.error('Error warming up cache:', error);
+      logger.error('Error warming up cache:', error);
     }
   }
 }

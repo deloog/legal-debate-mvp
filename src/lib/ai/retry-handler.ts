@@ -6,6 +6,7 @@
  */
 
 import { fallbackDocAnalysis, validateMockResult } from './mock-doc-analyzer';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 类型定义
@@ -142,7 +143,7 @@ export async function retryWithFallback<T>(
 
     try {
       if (verboseLogging) {
-        console.log(
+        logger.info(
           `[重试处理] 第${attempts + 1}/${maxAttempts}次尝试，超时${timeout}ms`
         );
       }
@@ -156,7 +157,7 @@ export async function retryWithFallback<T>(
       const duration = Date.now() - startTime;
 
       if (verboseLogging) {
-        console.log(
+        logger.info(
           `[重试处理] 第${attempts + 1}次尝试成功，耗时${duration}ms`
         );
       }
@@ -173,7 +174,7 @@ export async function retryWithFallback<T>(
       const attemptDuration = Date.now() - attemptStartTime;
 
       if (verboseLogging) {
-        console.error(
+        logger.error(
           `[重试处理] 第${attempts + 1}次尝试失败: ${lastError.message}，耗时${attemptDuration}ms`
         );
       }
@@ -185,7 +186,7 @@ export async function retryWithFallback<T>(
       if (!shouldContinue) {
         // 最后一次失败，检查是否启用降级
         if (enableFallback) {
-          console.warn('[重试处理] 所有重试失败，启用Mock降级');
+          logger.warn('[重试处理] 所有重试失败，启用Mock降级');
           const totalDuration = Date.now() - startTime;
 
           try {
@@ -203,7 +204,7 @@ export async function retryWithFallback<T>(
               duration: totalDuration,
             };
           } catch (fallbackError) {
-            console.error(`[重试处理] Mock降级失败: ${fallbackError}`);
+            logger.error(`[重试处理] Mock降级失败: ${fallbackError}`);
 
             return {
               result: null as unknown as T,
@@ -229,7 +230,7 @@ export async function retryWithFallback<T>(
 
       // 等待后重试
       if (verboseLogging) {
-        console.log(`[重试处理] 等待${retryDelay}ms后重试`);
+        logger.info(`[重试处理] 等待${retryDelay}ms后重试`);
       }
 
       await sleep(retryDelay);

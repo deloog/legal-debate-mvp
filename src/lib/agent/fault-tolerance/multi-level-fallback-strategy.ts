@@ -5,6 +5,7 @@
 
 import { FallbackQualityEvaluator } from './fallback-quality-evaluator';
 import type { QualityEvaluation } from './fallback-quality-evaluator';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 类型定义
@@ -80,11 +81,11 @@ export class MultiLevelFallbackStrategy {
       }
 
       // AI结果质量不佳，尝试降级
-      console.warn('[MultiLevelFallbackStrategy] AI结果质量不佳，尝试降级', {
+      logger.warn('[MultiLevelFallbackStrategy] AI结果质量不佳，尝试降级', {
         quality,
       });
     } catch (error) {
-      console.error('[MultiLevelFallbackStrategy] AI执行失败，尝试降级', {
+      logger.error('[MultiLevelFallbackStrategy] AI执行失败，尝试降级', {
         error,
       });
     }
@@ -99,14 +100,14 @@ export class MultiLevelFallbackStrategy {
           return { result, level: 'rule', quality };
         }
 
-        console.warn(
+        logger.warn(
           '[MultiLevelFallbackStrategy] 规则降级质量不佳，继续降级',
           {
             quality,
           }
         );
       } catch (error) {
-        console.error('[MultiLevelFallbackStrategy] 规则降级失败', { error });
+        logger.error('[MultiLevelFallbackStrategy] 规则降级失败', { error });
       }
     }
 
@@ -120,14 +121,14 @@ export class MultiLevelFallbackStrategy {
           return { result, level: 'cache', quality };
         }
 
-        console.warn(
+        logger.warn(
           '[MultiLevelFallbackStrategy] 缓存降级质量不佳，继续降级',
           {
             quality,
           }
         );
       } catch (error) {
-        console.error('[MultiLevelFallbackStrategy] 缓存降级失败', { error });
+        logger.error('[MultiLevelFallbackStrategy] 缓存降级失败', { error });
       }
     }
 
@@ -138,13 +139,13 @@ export class MultiLevelFallbackStrategy {
 
         // 检查结果是否为null或undefined
         if (result === null || result === undefined) {
-          console.warn('[MultiLevelFallbackStrategy] 模板降级返回空结果');
+          logger.warn('[MultiLevelFallbackStrategy] 模板降级返回空结果');
         } else {
           const quality = this.qualityEvaluator.evaluate(result, 'TEMPLATE');
           return { result, level: 'template', quality };
         }
       } catch (error) {
-        console.error('[MultiLevelFallbackStrategy] 模板降级失败', { error });
+        logger.error('[MultiLevelFallbackStrategy] 模板降级失败', { error });
       }
     }
 

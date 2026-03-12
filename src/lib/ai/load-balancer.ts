@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import type {
   AIProvider,
   LoadBalancerConfig,
@@ -77,7 +78,7 @@ export class LoadBalancer {
     const healthyProviders = this.getHealthyProviders();
 
     if (healthyProviders.length === 0) {
-      console.warn(
+      logger.warn(
         'No healthy providers available, falling back to all providers'
       );
       return this.getFallbackProvider();
@@ -235,7 +236,7 @@ export class LoadBalancer {
     const now = Date.now();
 
     if (healthy !== health.healthy) {
-      console.log(
+      logger.info(
         `Provider ${provider} health changed from ${health.healthy} to ${healthy}`
       );
     }
@@ -258,7 +259,7 @@ export class LoadBalancer {
     // 检查是否需要标记为不健康
     if (health.consecutiveFailures >= this.config.failureThreshold) {
       health.healthy = false;
-      console.warn(
+      logger.warn(
         `Provider ${provider} marked as unhealthy after ${health.consecutiveFailures} failures`
       );
     }
@@ -269,7 +270,7 @@ export class LoadBalancer {
       health.consecutiveSuccesses >= this.config.recoveryThreshold
     ) {
       health.healthy = true;
-      console.log(`Provider ${provider} recovered and marked as healthy`);
+      logger.info(`Provider ${provider} recovered and marked as healthy`);
     }
   }
 

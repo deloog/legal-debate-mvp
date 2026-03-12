@@ -1,6 +1,7 @@
 import type { AIRequestConfig, AIResponse } from '../../types/ai-service';
 import cacheManager from '../cache/manager';
 import * as crypto from 'crypto';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // AI缓存管理器
@@ -36,7 +37,7 @@ export class AICacheManager {
 
       return null;
     } catch (error) {
-      console.warn('Cache check failed:', error);
+      logger.warn('Cache check failed:', error);
       return null;
     }
   }
@@ -59,7 +60,7 @@ export class AICacheManager {
 
       await this.cacheManager.set(cacheKey, response, { ttl: defaultTtl });
     } catch (error) {
-      console.warn('Cache storage failed:', error);
+      logger.warn('Cache storage failed:', error);
     }
   }
 
@@ -128,7 +129,7 @@ export class AICacheManager {
       const exactKey = this.generateDebateCacheKey(caseInfo);
       const exactMatch = await this.cacheManager.get(exactKey);
       if (exactMatch) {
-        console.log('Found exact debate cache match');
+        logger.info('Found exact debate cache match');
         return exactMatch as AIResponse;
       }
 
@@ -137,7 +138,7 @@ export class AICacheManager {
       const similarMatches = await this.findSimilarDebates(similarKey);
 
       if (similarMatches.length > 0) {
-        console.log(
+        logger.info(
           `Found ${similarMatches.length} similar debate cache matches`
         );
         // 返回最相似的缓存结果
@@ -146,7 +147,7 @@ export class AICacheManager {
 
       return null;
     } catch (error) {
-      console.warn('Debate cache check failed:', error);
+      logger.warn('Debate cache check failed:', error);
       return null;
     }
   }
@@ -173,7 +174,7 @@ export class AICacheManager {
       const similarKey = this.generateSimilarCaseKey(caseInfo);
       await this.addToSimilarCaseIndex(similarKey, cacheKey);
     } catch (error) {
-      console.warn('Debate cache storage failed:', error);
+      logger.warn('Debate cache storage failed:', error);
     }
   }
 
@@ -265,7 +266,7 @@ export class AICacheManager {
       const results = await Promise.all(promises);
       return results.filter(result => result !== null);
     } catch (error) {
-      console.warn('Find similar debates failed:', error);
+      logger.warn('Find similar debates failed:', error);
       return [];
     }
   }
@@ -285,7 +286,7 @@ export class AICacheManager {
 
       await this.cacheManager.set(similarKey, updatedKeys, { ttl: 3600 }); // 索引缓存1小时
     } catch (error) {
-      console.warn('Add to similar case index failed:', error);
+      logger.warn('Add to similar case index failed:', error);
     }
   }
 
@@ -304,7 +305,7 @@ export class AICacheManager {
         await this.cacheManager.mdelete(aiKeys);
       }
     } catch (error) {
-      console.warn('Cache clear failed:', error);
+      logger.warn('Cache clear failed:', error);
     }
   }
 

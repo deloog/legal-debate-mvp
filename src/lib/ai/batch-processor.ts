@@ -6,6 +6,7 @@ import type {
   BatchProcessFunction,
 } from '../../types/ai-service-batch';
 import type { AIRequestConfig, AIResponse } from '../../types/ai-service';
+import { logger } from '@/lib/logger';
 
 /**
  * 批量处理器类
@@ -250,7 +251,7 @@ export class BatchProcessorFactory {
     const shutdownPromises = Array.from(this.instances.values()).map(
       instance => {
         return instance.shutdown().catch(error => {
-          console.error('Error shutting down batch processor:', error);
+          logger.error('Error shutting down batch processor:', error);
         });
       }
     );

@@ -17,6 +17,7 @@ import * as path from 'path';
 import { BaseCrawler, CrawlerResult, LawArticleData } from './base-crawler';
 import { LawCategory, LawType, LawStatus } from '@prisma/client';
 import { getLogger } from './crawler-logger';
+import { logger } from '@/lib/logger';
 
 // ─── 新版 FLK API 类型定义 ───────────────────────────────────────────
 
@@ -618,22 +619,25 @@ export class FLKCrawler extends BaseCrawler {
       c => c.code === rawData.flfgCodeId
     );
 
+    // 兼容处理：FLK API 使用 bbbs，但测试数据使用 id
+    const sourceId = rawData.bbbs || rawData.id || '';
+
     return {
-      sourceId: rawData.bbbs || '',
-      sourceUrl: `${this.API_BASE}/detail2.html?${rawData.bbbs}`,
+      sourceId,
+      sourceUrl: `${this.API_BASE}/detail2.html?${sourceId}`,
       lawName: rawData.title,
-      articleNumber: rawData.bbbs || '',
+      articleNumber: sourceId,
       fullText: rawData.content || '',
       lawType: typeConfig?.lawType || LawType.LAW,
       category: this.inferCategoryFromName(
         rawData.title,
         typeConfig?.category ?? LawCategory.OTHER
       ),
-      issuingAuthority: rawData.zdjgName || '未知',
+      issuingAuthority: rawData.zdjgName || rawData.office || '未知',
       effectiveDate: rawData.sxrq
         ? new Date(rawData.sxrq)
-        : new Date(rawData.gbrq),
-      searchableText: `${rawData.title} ${rawData.zdjgName || ''} ${rawData.flxz || ''}`,
+        : new Date(rawData.gbrq || rawData.publish || Date.now()),
+      searchableText: `${rawData.title} ${rawData.zdjgName || rawData.office || ''} ${rawData.flxz || ''}`,
       status: this.determineStatus(rawData.sxx),
       version: '1.0',
       tags: [rawData.flxz, typeConfig?.label].filter(Boolean) as string[],
@@ -683,12 +687,12 @@ export class FLKCrawler extends BaseCrawler {
         // 跳过已完成的分类
         const typeProgress = checkpoint.types[typeCode.toString()];
         if (typeProgress?.completed) {
-          console.log(`[FLKCrawler] 跳过已完成的分类: ${typeConfig.label}`);
+          logger.info(`[FLKCrawler] 跳过已完成的分类: ${typeConfig.label}`);
           totalDownloaded += typeProgress.downloaded;
           continue;
         }
 
-        console.log(
+        logger.info(
           `[FLKCrawler] 下载阶段 - ${typeConfig.label} (code: ${typeCode})`
         );
 
@@ -704,7 +708,7 @@ export class FLKCrawler extends BaseCrawler {
         allErrors.push(...result.errors);
         this.saveCheckpoint(outDir, checkpoint);
 
-        console.log(
+        logger.info(
           `[FLKCrawler] ${typeConfig.label} 下载完成: ${result.downloaded} 个文件`
         );
       }
@@ -1044,7 +1048,7 @@ export class FLKCrawler extends BaseCrawler {
 
     const checkpoint = this.loadCheckpoint(outDir);
     if (checkpoint.items.length === 0) {
-      console.log('[FLKCrawler] 没有已下载的文件，请先执行 downloadAll()');
+      logger.info('[FLKCrawler] 没有已下载的文件，请先执行 downloadAll()');
       return {
         success: true,
         itemsCrawled: 0,
@@ -1071,7 +1075,7 @@ export class FLKCrawler extends BaseCrawler {
       return true;
     });
 
-    console.log(
+    logger.info(
       `[FLKCrawler] 解析阶段 - 待处理 ${itemsToProcess.length} 个文件 (共 ${checkpoint.items.length} 个)`
     );
 
@@ -1182,7 +1186,7 @@ export class FLKCrawler extends BaseCrawler {
     const duration = Date.now() - startTime;
     this.updateProgress({ status: 'completed', completedAt: new Date() });
 
-    console.log(
+    logger.info(
       `[FLKCrawler] 解析完成: 成功 ${parseResults.stats.success}, 失败 ${parseResults.stats.failed}, 新增 ${created}, 更新 ${updated}`
     );
 
@@ -1346,7 +1350,7 @@ export class FLKCrawler extends BaseCrawler {
         return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
       }
     } catch {
-      console.warn(`[FLKCrawler] 读取断点文件失败, 将重新开始`);
+      logger.warn(`[FLKCrawler] 读取断点文件失败, 将重新开始`);
     }
 
     return {
@@ -1372,7 +1376,7 @@ export class FLKCrawler extends BaseCrawler {
         return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
       }
     } catch {
-      console.warn(`[FLKCrawler] 读取解析状态失败`);
+      logger.warn(`[FLKCrawler] 读取解析状态失败`);
     }
 
     return {
@@ -1572,7 +1576,7 @@ export class FLKCrawler extends BaseCrawler {
           ) {
             this.consecutiveErrors++;
             const backoff = this.backoffWithJitter(attempt);
-            console.log(
+            logger.info(
               `[FLKCrawler] HTTP ${response.status}, ${backoff}ms 后重试 (${attempt + 1}/${maxRetries})`
             );
             await this.delay(backoff);
@@ -1592,7 +1596,7 @@ export class FLKCrawler extends BaseCrawler {
 
         const isTimeout = error instanceof Error && error.name === 'AbortError';
         const backoff = this.backoffWithJitter(attempt);
-        console.log(
+        logger.info(
           `[FLKCrawler] ${isTimeout ? '超时' : '网络错误'}, ${backoff}ms 后重试 (${attempt + 1}/${maxRetries})`
         );
         await this.delay(backoff);

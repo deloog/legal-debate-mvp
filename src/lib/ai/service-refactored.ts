@@ -17,6 +17,7 @@ import { AIClientFactory } from './client-factory';
 import { AICacheManager } from './cache-manager';
 import { AIRequestExecutor } from './request-executor';
 import AIErrorSerializer from './error-serializer';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 类型定义
@@ -94,9 +95,9 @@ export class AIService {
       this.requestExecutor = new AIRequestExecutor(this.clients);
 
       this.initialized = true;
-      console.log('AI Service initialized successfully');
+      logger.info('AI Service initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize AI Service:', error);
+      logger.error('Failed to initialize AI Service:', error);
       throw error;
     }
   }
@@ -110,7 +111,7 @@ export class AIService {
         // 记录客户端初始化
         this.monitor.recordHealthCheck(clientConfig.provider, true, 0);
       } catch (error) {
-        console.error(
+        logger.error(
           `Failed to initialize client for ${clientConfig.provider}:`,
           error
         );
@@ -372,9 +373,9 @@ export class AIService {
       this.loadBalancer.reset();
 
       this.initialized = false;
-      console.log('AI Service shut down successfully');
+      logger.info('AI Service shut down successfully');
     } catch (error) {
-      console.error('Error during AI Service shutdown:', error);
+      logger.error('Error during AI Service shutdown:', error);
       throw error;
     }
   }
@@ -508,7 +509,7 @@ export class AIServiceFactory {
     const shutdownPromises = Array.from(this.instances.values()).map(instance =>
       instance
         .shutdown()
-        .catch(error => console.error('Error shutting down instance:', error))
+        .catch(error => logger.error('Error shutting down instance:', error))
     );
 
     await Promise.allSettled(shutdownPromises);

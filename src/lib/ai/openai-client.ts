@@ -8,6 +8,7 @@
  */
 
 import OpenAI from 'openai';
+import { logger } from '@/lib/logger';
 
 /**
  * OpenAI完成选项
@@ -62,7 +63,7 @@ export async function getOpenAICompletion(
 
     return response.choices[0]?.message?.content || '';
   } catch (error) {
-    console.error('OpenAI API调用失败:', error);
+    logger.error('OpenAI API调用失败:', error);
     throw error;
   }
 }

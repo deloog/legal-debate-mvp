@@ -15,10 +15,10 @@ import { logger } from '@/lib/agent/security/logger';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const caseId = params.id;
+    const caseId = (await params).id;
 
     // 解析请求体
     const body = await request.json();
@@ -97,7 +97,7 @@ export async function POST(
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error';
     logger.error('Failed to assess risk', new Error(errorMessage), {
-      caseId: params.id,
+      caseId: (await params).id,
     });
 
     return NextResponse.json(

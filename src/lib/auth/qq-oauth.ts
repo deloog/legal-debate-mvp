@@ -5,6 +5,7 @@
 import { OAuthBaseProvider } from './oauth-base';
 import type { OAuthTokenResponse, OAuthUserInfo } from '../../types/oauth';
 import type { QqUserInfo } from '../../types/oauth';
+import { logger } from '@/lib/logger';
 
 /**
  * QQ OAuth 提供商
@@ -93,7 +94,7 @@ export class QqOAuthProvider extends OAuthBaseProvider {
         scope: response.scope,
       };
     } catch (error) {
-      console.error('QQ exchangeToken error:', error);
+      logger.error('QQ exchangeToken error:', error);
       throw new Error(
         `Failed to exchange token: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -132,7 +133,7 @@ export class QqOAuthProvider extends OAuthBaseProvider {
         rawUserInfo: response,
       };
     } catch (error) {
-      console.error('QQ getUserInfo error:', error);
+      logger.error('QQ getUserInfo error:', error);
       throw new Error(
         `Failed to get user info: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -168,7 +169,7 @@ export class QqOAuthProvider extends OAuthBaseProvider {
 
       return match[1];
     } catch (error) {
-      console.error('QQ getQqOpenId error:', error);
+      logger.error('QQ getQqOpenId error:', error);
       throw new Error(
         `Failed to get OpenID: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -200,7 +201,7 @@ export class QqOAuthProvider extends OAuthBaseProvider {
         scope: response.scope,
       };
     } catch (error) {
-      console.error('QQ refreshAccessToken error:', error);
+      logger.error('QQ refreshAccessToken error:', error);
       throw new Error(
         `Failed to refresh token: ${error instanceof Error ? error.message : 'Unknown error'}`
       );

@@ -1,5 +1,6 @@
 // Agent注册系统
 
+import { logger } from '@/lib/logger';
 import type {
   Agent,
   AgentType,
@@ -425,7 +426,7 @@ export class AgentRegistry implements AgentEventManager {
       try {
         listener(event);
       } catch (error) {
-        console.error(`Error in event listener for ${event.type}:`, error);
+        logger.error(`Error in event listener for ${event.type}:`, error);
       }
     }
   }
@@ -452,7 +453,7 @@ export class AgentRegistry implements AgentEventManager {
     }
 
     if (errors.length > 0) {
-      console.warn('Batch registration errors:', errors);
+      logger.warn('Batch registration errors:', errors);
     }
 
     return successCount;
@@ -502,7 +503,7 @@ export class AgentRegistry implements AgentEventManager {
           (await registration.instance.healthCheck?.()) ?? true;
       } catch (error) {
         results[agentName] = false;
-        console.error(`Health check failed for agent '${agentName}':`, error);
+        logger.error(`Health check failed for agent '${agentName}':`, error);
       }
     }
 
@@ -550,7 +551,7 @@ export class AgentRegistry implements AgentEventManager {
       // 注册到注册表
       return this.registerAgent(agent, config?.updatedBy);
     } catch (error) {
-      console.error(`Failed to register agent '${agentName}' with DI:`, error);
+      logger.error(`Failed to register agent '${agentName}' with DI:`, error);
       throw error;
     }
   }
@@ -576,7 +577,7 @@ export class AgentRegistry implements AgentEventManager {
     }
 
     if (errors.length > 0) {
-      console.warn('Batch registration with DI errors:', errors);
+      logger.warn('Batch registration with DI errors:', errors);
     }
 
     return successCount;
@@ -986,7 +987,7 @@ export class AgentRegistry implements AgentEventManager {
     issues: string[];
     suggestions: string[];
   }> {
-    const recommendations = [];
+    const recommendations: { agentName: string; issues: string[]; suggestions: string[] }[] = [];
 
     for (const registration of this.getAllRegistrations()) {
       const issues: string[] = [];

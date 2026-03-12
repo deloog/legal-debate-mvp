@@ -158,7 +158,7 @@ export function WitnessForm({
           onSubmit({
             ...witness,
             ...submitData,
-          });
+          } as WitnessDetail);
         } else {
           // 创建操作
           onSubmit(submitData);

@@ -1,12 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import { createSuccessResponse } from '@/app/api/lib/responses/api-response';
+import { cache } from '@/lib/cache/manager';
 import { LawArticleSearchService } from '@/lib/law-article/search-service';
 import type { SearchQuery } from '@/lib/law-article/types';
-import { LawCategory, LawStatus } from '@prisma/client';
-import { cache } from '@/lib/cache/manager';
-import { measurePerformance } from '@/lib/middleware/performance-monitor';
 import { logger } from '@/lib/logger';
+import { measurePerformance } from '@/lib/middleware/performance-monitor';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { LawCategory, LawStatus } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * 有效的法条分类枚举值
@@ -65,6 +66,15 @@ interface CachedResponse {
  * 法条检索API - 优化版本
  */
 export const POST = withErrorHandler(async (request: NextRequest) => {
+  // 认证检查
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+      { status: 401 }
+    );
+  }
+
   const startTime = Date.now();
   const body = await request.json();
 
@@ -190,7 +200,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   };
 
   // 缓存结果（仅缓存第一页，避免缓存过多数据）
-  if (query.pagination.page === 1) {
+  if ((query.pagination?.page ?? 1) === 1) {
     await cache.set(
       cacheKey,
       {

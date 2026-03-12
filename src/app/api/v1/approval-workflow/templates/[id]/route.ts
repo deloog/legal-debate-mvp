@@ -12,11 +12,12 @@ import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/db/prisma';
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params;
     const authHeader = request.headers.get('authorization');
     const token = extractTokenFromHeader(authHeader ?? '');
     const tokenResult = verifyToken(token ?? '');
@@ -28,9 +29,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const template = await approvalWorkflowService.getWorkflowTemplate(
-      params.id
-    );
+    const template = await approvalWorkflowService.getWorkflowTemplate(id);
 
     if (!template) {
       return NextResponse.json(
@@ -44,7 +43,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ success: true, data: { template } });
   } catch (error) {
-    logger.error('获取工作流模板详情失败', { error, id: params.id });
+    logger.error('获取工作流模板详情失败', { error });
     return NextResponse.json(
       {
         success: false,
@@ -57,6 +56,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params;
     const authHeader = request.headers.get('authorization');
     const token = extractTokenFromHeader(authHeader ?? '');
     const tokenResult = verifyToken(token ?? '');
@@ -76,22 +76,19 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       isActive?: boolean;
     };
 
-    const template = await approvalWorkflowService.updateWorkflowTemplate(
-      params.id,
-      {
-        name: body.name,
-        description: body.description,
-        category: body.category,
-        isActive: body.isActive,
-        flowDefinition: body.flowDefinition as Parameters<
-          typeof approvalWorkflowService.updateWorkflowTemplate
-        >[1]['flowDefinition'],
-      }
-    );
+    const template = await approvalWorkflowService.updateWorkflowTemplate(id, {
+      name: body.name,
+      description: body.description,
+      category: body.category,
+      isActive: body.isActive,
+      flowDefinition: body.flowDefinition as Parameters<
+        typeof approvalWorkflowService.updateWorkflowTemplate
+      >[1]['flowDefinition'],
+    });
 
     return NextResponse.json({ success: true, data: { template } });
   } catch (error) {
-    logger.error('更新工作流模板失败', { error, id: params.id });
+    logger.error('更新工作流模板失败', { error });
 
     const message = error instanceof Error ? error.message : '服务器内部错误';
     const isValidationError = message.includes('工作流定义无效');
@@ -111,6 +108,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params;
     const authHeader = request.headers.get('authorization');
     const token = extractTokenFromHeader(authHeader ?? '');
     const tokenResult = verifyToken(token ?? '');
@@ -123,9 +121,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     // 检查模板是否存在
-    const template = await approvalWorkflowService.getWorkflowTemplate(
-      params.id
-    );
+    const template = await approvalWorkflowService.getWorkflowTemplate(id);
 
     if (!template) {
       return NextResponse.json(
@@ -139,13 +135,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     // 软删除：设置为非活跃状态
     await prisma.approvalTemplate.update({
-      where: { id: params.id },
+      where: { id },
       data: { isActive: false },
     });
 
     return NextResponse.json({ success: true, data: { deleted: true } });
   } catch (error) {
-    logger.error('删除工作流模板失败', { error, id: params.id });
+    logger.error('删除工作流模板失败', { error });
     return NextResponse.json(
       {
         success: false,

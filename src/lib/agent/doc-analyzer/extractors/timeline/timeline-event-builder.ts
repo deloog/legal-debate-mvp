@@ -102,7 +102,7 @@ export function calculateImportance(
     EVIDENCE: 3,
     OTHER: 2,
   };
-  score += typeWeights[eventType || 'OTHER'];
+  score += typeWeights[eventType ?? 'OTHER'] ?? 0;
 
   const highImportanceKeywords = [
     '签订',

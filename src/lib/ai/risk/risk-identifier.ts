@@ -4,6 +4,7 @@
  * 功能：基于案件事实和法条，使用AI识别潜在法律风险
  */
 
+import { logger } from '@/lib/logger';
 import type { AIService } from '../service';
 import type { AIRequestConfig } from '../../../types/ai-service';
 import type {
@@ -102,7 +103,7 @@ export class AIRiskIdentifier {
         input
       );
     } catch (error) {
-      console.error('AI风险识别失败，使用规则引擎:', error);
+      logger.error('AI风险识别失败，使用规则引擎:', error);
 
       // 规则回退
       if (this.enableFallback) {
@@ -238,7 +239,7 @@ export class AIRiskIdentifier {
           }
         }
       } catch (error) {
-        console.error('解析AI响应失败:', error);
+        logger.error('解析AI响应失败:', error);
       }
     }
 

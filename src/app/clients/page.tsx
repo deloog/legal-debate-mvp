@@ -218,9 +218,9 @@ export default function ClientsPage() {
             返回列表
           </Button>
           <ClientForm
-            initialData={editingClient}
+            initialData={editingClient as UpdateClientInput | undefined}
             userId={editingClient?.userId || ''}
-            onSubmit={editingClient ? handleUpdateClient : handleCreateClient}
+            onSubmit={(editingClient ? handleUpdateClient : handleCreateClient) as (data: CreateClientInput | UpdateClientInput) => Promise<void>}
             onCancel={() => {
               setShowForm(false);
               setEditingClient(undefined);

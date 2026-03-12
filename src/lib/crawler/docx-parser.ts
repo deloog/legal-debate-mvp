@@ -12,29 +12,46 @@
  * 3. AI 辅助解析（可选）
  */
 
+import { exec } from 'child_process';
+import crypto from 'crypto';
 import * as fs from 'fs';
+import * as jszip from 'jszip';
+import mammoth from 'mammoth';
 import * as os from 'os';
 import * as path from 'path';
-import { exec } from 'child_process';
 import { promisify } from 'util';
-import mammoth from 'mammoth';
-import * as jszip from 'jszip';
 import * as xml2js from 'xml2js';
-import crypto from 'crypto';
+import { logger } from '@/lib/logger';
 
 const execAsync = promisify(exec);
+
+/**
+ * XML 元素类型 - 用于解析 xml2js 返回的动态对象
+ */
+interface XmlElement {
+  text?: string;
+  'w:t'?: string | string[];
+  t?: string | string[];
+  'w:r'?: XmlElement | XmlElement[];
+  r?: XmlElement | XmlElement[];
+  'w:p'?: XmlElement | XmlElement[];
+  p?: XmlElement | XmlElement[];
+  $$?: XmlElement[];
+  $?: Record<string, string>;
+  [key: string]: unknown;
+}
 
 /**
  * 简单的日志函数
  */
 function debug(message: string): void {
   if (process.env.DEBUG === 'true') {
-    console.log(`[DEBUG] DOCXParser: ${message}`);
+    logger.info(`[DEBUG] DOCXParser: ${message}`);
   }
 }
 
 function warn(message: string): void {
-  console.log(`[WARN] DOCXParser: ${message}`);
+  logger.info(`[WARN] DOCXParser: ${message}`);
 }
 
 /**
@@ -392,10 +409,10 @@ export class DOCXParser {
   /**
    * 从 XML 提取文本 - 增强版，支持旧格式
    */
-  private extractTextFromXmlEnhanced(root: any): string {
+  private extractTextFromXmlEnhanced(root: unknown): string {
     const textParts: string[] = [];
 
-    const extractText = (element: any, depth: number = 0): void => {
+    const extractText = (element: XmlElement, depth: number = 0): void => {
       // 限制递归深度，防止栈溢出
       if (depth > 100) return;
 
@@ -421,7 +438,7 @@ export class DOCXParser {
           ? element['w:r']
           : [element['w:r']];
         const runs2 = Array.isArray(element.r) ? element.r : [element.r];
-        [...runs, ...runs2].forEach((run: any) => {
+        [...runs, ...runs2].forEach((run: XmlElement | undefined) => {
           if (run) extractText(run, depth + 1);
         });
       }
@@ -432,19 +449,23 @@ export class DOCXParser {
           ? element['w:p']
           : [element['w:p']];
         const paragraphs2 = Array.isArray(element.p) ? element.p : [element.p];
-        [...paragraphs, ...paragraphs2].forEach((para: any) => {
-          if (para) {
-            const paraText = this.extractTextFromParagraph(para);
-            if (paraText) {
-              textParts.push(paraText);
+        [...paragraphs, ...paragraphs2].forEach(
+          (para: XmlElement | undefined) => {
+            if (para) {
+              const paraText = this.extractTextFromParagraph(para);
+              if (paraText) {
+                textParts.push(paraText);
+              }
             }
           }
-        });
+        );
       }
 
       // 递归遍历子元素
       if (element.$$ && Array.isArray(element.$$)) {
-        element.$$.forEach((child: any) => extractText(child, depth + 1));
+        element.$$.forEach((child: XmlElement) =>
+          extractText(child, depth + 1)
+        );
       }
 
       // 查找所有可能的子元素
@@ -452,15 +473,17 @@ export class DOCXParser {
         if (key !== '$$' && key !== '$' && key !== 'text') {
           const child = element[key];
           if (Array.isArray(child)) {
-            child.forEach((c: any) => extractText(c, depth + 1));
+            child.forEach((c: unknown) =>
+              extractText(c as XmlElement, depth + 1)
+            );
           } else if (typeof child === 'object' && child !== null) {
-            extractText(child, depth + 1);
+            extractText(child as XmlElement, depth + 1);
           }
         }
       }
     };
 
-    extractText(root);
+    extractText(root as XmlElement);
 
     // 过滤空行和过短的行
     return textParts.filter(t => t.trim().length >= 2).join('\n');
@@ -469,10 +492,10 @@ export class DOCXParser {
   /**
    * 从段落提取文本
    */
-  private extractTextFromParagraph(para: any): string {
+  private extractTextFromParagraph(para: XmlElement): string {
     const textParts: string[] = [];
 
-    const extractFromRun = (run: any): void => {
+    const extractFromRun = (run: XmlElement): void => {
       if (!run) return;
 
       // w:t 文本
@@ -487,11 +510,13 @@ export class DOCXParser {
       if (run['w:r'] || run.r) {
         const runs = Array.isArray(run['w:r']) ? run['w:r'] : [run['w:r']];
         const runs2 = Array.isArray(run.r) ? run.r : [run.r];
-        [...runs, ...runs2].forEach((r: any) => extractFromRun(r));
+        [...runs, ...runs2].forEach((r: XmlElement | undefined) => {
+          if (r) extractFromRun(r);
+        });
       }
 
       if (run.$$ && Array.isArray(run.$$)) {
-        run.$$.forEach((child: any) => extractFromRun(child));
+        run.$$.forEach((child: XmlElement) => extractFromRun(child));
       }
     };
 
@@ -503,19 +528,19 @@ export class DOCXParser {
   /**
    * 从 XML 提取文本
    */
-  private __extractTextFromXml(root: any): string {
+  private __extractTextFromXml(root: unknown): string {
     const textParts: string[] = [];
 
-    const extractText = (element: any): void => {
+    const extractText = (element: XmlElement): void => {
       if (element.text) {
         textParts.push(element.text);
       }
       if (element.$$ && Array.isArray(element.$$)) {
-        element.$$.forEach((child: any) => extractText(child));
+        element.$$.forEach((child: XmlElement) => extractText(child));
       }
     };
 
-    extractText(root);
+    extractText(root as XmlElement);
 
     // 过滤空行
     return textParts.filter(t => t.trim()).join('\n');
@@ -652,7 +677,7 @@ export class DOCXParser {
     content: Buffer | string,
     sourceUrl: string
   ): Promise<LawDocument> {
-    let text: string;
+    let text = '';
 
     if (Buffer.isBuffer(content)) {
       // 尝试多种编码
@@ -702,6 +727,9 @@ export class DOCXParser {
       sourceUrl
     );
 
+    if (!parsed) {
+      throw new Error('无法解析文档内容');
+    }
     return parsed;
   }
 

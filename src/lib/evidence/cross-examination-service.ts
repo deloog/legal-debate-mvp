@@ -12,6 +12,7 @@
 
 import type { Evidence } from '@prisma/client';
 import { AIService } from '@/lib/ai/clients';
+import { logger } from '@/lib/logger';
 
 /**
  * 质证预判输入
@@ -92,7 +93,7 @@ export class CrossExaminationService {
 
       return result;
     } catch (error) {
-      console.error('质证预判失败:', error);
+      logger.error('质证预判失败:', error);
       throw new Error(
         `质证预判失败: ${error instanceof Error ? error.message : '未知错误'}`
       );
@@ -268,8 +269,8 @@ export class CrossExaminationService {
         riskNote: parsed.riskNote,
       };
     } catch (error) {
-      console.error('解析AI响应失败:', error);
-      console.error('原始响应:', response);
+      logger.error('解析AI响应失败:', error);
+      logger.error('原始响应:', response);
       throw new Error(
         `解析AI响应失败: ${error instanceof Error ? error.message : '未知错误'}`
       );

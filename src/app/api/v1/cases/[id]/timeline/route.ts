@@ -28,7 +28,7 @@ const createTimelineEventSchema = z.object({
  */
 export const GET = async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<TimelineEventListResponse | { error: string }>> => {
   try {
     const authUser = await getAuthUser(request);
@@ -36,7 +36,7 @@ export const GET = async (
       return NextResponse.json({ error: '未授权' }, { status: 401 });
     }
 
-    const caseId = params.id;
+    const caseId = (await params).id;
 
     // 验证案件是否存在且属于当前用户
     const existingCase = await prisma.case.findFirst({
@@ -98,7 +98,7 @@ export const GET = async (
  */
 export const POST = async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse | { error: string }> => {
   try {
     const authUser = await getAuthUser(request);
@@ -106,7 +106,7 @@ export const POST = async (
       return NextResponse.json({ error: '未授权' }, { status: 401 });
     }
 
-    const caseId = params.id;
+    const caseId = (await params).id;
 
     // 验证案件是否存在且属于当前用户
     const existingCase = await prisma.case.findFirst({

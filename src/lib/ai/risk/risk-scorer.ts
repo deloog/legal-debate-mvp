@@ -152,7 +152,7 @@ export class RiskScorer {
 
     // 计算各类别平均风险评分
     for (const category in categoryScores) {
-      const categoryData = categoryScores[category];
+      const categoryData = categoryScores[category as RiskCategory];
       if (categoryData.risks.length > 0) {
         // 使用风险评分的加权平均
         const sum = categoryData.risks.reduce(

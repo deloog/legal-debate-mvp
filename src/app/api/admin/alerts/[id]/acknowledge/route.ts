@@ -10,7 +10,7 @@ import { logger } from '@/lib/logger';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authCheck = await validatePermissions(
@@ -32,7 +32,7 @@ export async function POST(
     await request.json().catch(() => ({}));
 
     const alert = await prisma.alert.findUnique({
-      where: { alertId: params.id },
+      where: { alertId: (await params).id },
     });
 
     if (!alert) {
@@ -50,7 +50,7 @@ export async function POST(
     }
 
     const updatedAlert = await prisma.alert.update({
-      where: { alertId: params.id },
+      where: { alertId: (await params).id },
       data: {
         status: 'ACKNOWLEDGED',
         acknowledgedBy: user.userId,

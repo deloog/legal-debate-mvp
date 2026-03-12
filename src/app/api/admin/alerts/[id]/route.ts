@@ -9,7 +9,7 @@ import { logger } from '@/lib/logger';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authCheck = await validatePermissions(
@@ -21,7 +21,7 @@ export async function GET(
     }
 
     const alert = await prisma.alert.findUnique({
-      where: { alertId: params.id },
+      where: { alertId: (await params).id },
     });
 
     if (!alert) {

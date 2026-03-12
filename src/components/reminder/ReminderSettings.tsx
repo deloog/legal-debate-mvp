@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { NotificationChannel, ReminderPreferences } from '@/types/notification';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { NotificationChannel, ReminderPreferences } from '@/types/notification';
+import { useEffect, useState } from 'react';
 
 interface ReminderSettingsProps {
   userId: string;
@@ -182,8 +182,8 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
       const sectionKey = section as keyof ReminderPreferences;
       const currentSection = prev[sectionKey];
 
-      if ('hoursBefore' in currentSection) {
-        const config = currentSection as unknown as any | any;
+      if (currentSection && 'hoursBefore' in currentSection) {
+        const config = currentSection as { hoursBefore: number[] };
         return {
           ...prev,
           [section]: {
@@ -191,8 +191,8 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
             hoursBefore: [...config.hoursBefore, value],
           },
         };
-      } else if ('daysBefore' in currentSection) {
-        const config = currentSection as unknown as any;
+      } else if (currentSection && 'daysBefore' in currentSection) {
+        const config = currentSection as { daysBefore: number[] };
         return {
           ...prev,
           [section]: {
@@ -213,8 +213,8 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
       const sectionKey = section as keyof ReminderPreferences;
       const currentSection = prev[sectionKey];
 
-      if ('hoursBefore' in currentSection) {
-        const config = currentSection as unknown as any | any;
+      if (currentSection && 'hoursBefore' in currentSection) {
+        const config = currentSection as { hoursBefore: number[] };
         const newHours = [...config.hoursBefore];
         newHours.splice(index, 1);
         return {
@@ -224,8 +224,8 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
             hoursBefore: newHours,
           },
         };
-      } else if ('daysBefore' in currentSection) {
-        const config = currentSection as unknown as any;
+      } else if (currentSection && 'daysBefore' in currentSection) {
+        const config = currentSection as { daysBefore: number[] };
         const newDays = [...config.daysBefore];
         newDays.splice(index, 1);
         return {
@@ -242,18 +242,18 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
 
   const getHoursBefore = (section: keyof ReminderPreferences): number[] => {
     const currentSection = preferences[section];
-    if ('hoursBefore' in currentSection) {
-      const config = currentSection as unknown as any | any;
-      return config.hoursBefore;
+    if (currentSection && 'hoursBefore' in currentSection) {
+      const config = currentSection as { hoursBefore: number[] };
+      return config.hoursBefore ?? [];
     }
     return [];
   };
 
   const getDaysBefore = (section: keyof ReminderPreferences): number[] => {
     const currentSection = preferences[section];
-    if ('daysBefore' in currentSection) {
-      const config = currentSection as unknown as any;
-      return config.daysBefore;
+    if (currentSection && 'daysBefore' in currentSection) {
+      const config = currentSection as { daysBefore: number[] };
+      return config.daysBefore ?? [];
     }
     return [];
   };
@@ -291,7 +291,7 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
                     <label className='relative inline-flex items-center cursor-pointer'>
                       <input
                         type='checkbox'
-                        checked={preferences.courtSchedule.enabled}
+                        checked={preferences.courtSchedule?.enabled ?? true}
                         onChange={e =>
                           handleToggleEnabled('courtSchedule', e.target.checked)
                         }
@@ -302,7 +302,7 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
                   </div>
                 </div>
 
-                {preferences.courtSchedule.enabled && (
+                {preferences.courtSchedule?.enabled && (
                   <div className='space-y-3 pl-4'>
                     <div>
                       <label className='block text-sm font-medium text-gray-700 mb-1'>
@@ -389,7 +389,7 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
                     <label className='relative inline-flex items-center cursor-pointer'>
                       <input
                         type='checkbox'
-                        checked={preferences.deadline.enabled}
+                        checked={preferences.deadline?.enabled ?? true}
                         onChange={e =>
                           handleToggleEnabled('deadline', e.target.checked)
                         }
@@ -400,7 +400,7 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
                   </div>
                 </div>
 
-                {preferences.deadline.enabled && (
+                {preferences.deadline?.enabled && (
                   <div className='space-y-3 pl-4'>
                     <div>
                       <label className='block text-sm font-medium text-gray-700 mb-1'>
@@ -409,7 +409,8 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
                       <div className='flex flex-wrap gap-2'>
                         {Object.values(NotificationChannel).map(channel => {
                           const isSelected =
-                            preferences.deadline.channels.includes(channel);
+                            preferences.deadline?.channels?.includes(channel) ??
+                            false;
                           return (
                             <button
                               key={`deadline-${channel}`}
@@ -477,7 +478,7 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
                     <label className='relative inline-flex items-center cursor-pointer'>
                       <input
                         type='checkbox'
-                        checked={preferences.followUp.enabled}
+                        checked={preferences.followUp?.enabled ?? true}
                         onChange={e =>
                           handleToggleEnabled('followUp', e.target.checked)
                         }
@@ -488,7 +489,7 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
                   </div>
                 </div>
 
-                {preferences.followUp.enabled && (
+                {preferences.followUp?.enabled && (
                   <div className='space-y-3 pl-4'>
                     <div>
                       <label className='block text-sm font-medium text-gray-700 mb-1'>
@@ -497,7 +498,8 @@ export function ReminderSettings({ userId }: ReminderSettingsProps) {
                       <div className='flex flex-wrap gap-2'>
                         {Object.values(NotificationChannel).map(channel => {
                           const isSelected =
-                            preferences.followUp.channels.includes(channel);
+                            preferences.followUp?.channels?.includes(channel) ??
+                            false;
                           return (
                             <button
                               key={`followup-${channel}`}

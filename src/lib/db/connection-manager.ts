@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { prisma } from './prisma';
 import type { PrismaClient } from '@prisma/client';
 import {
@@ -184,7 +185,7 @@ export class ConnectionManager implements IConnectionManager {
     } catch (error) {
       this.connectionErrors++;
       this.lastError = error instanceof Error ? error.message : String(error);
-      console.error('释放连接时出错:', error);
+      logger.error('释放连接时出错:', error);
     }
   }
 
@@ -272,7 +273,7 @@ export class ConnectionManager implements IConnectionManager {
       });
       return true;
     } catch (error) {
-      console.error('连接管理器健康检查失败:', error);
+      logger.error('连接管理器健康检查失败:', error);
       return false;
     }
   }
@@ -300,9 +301,9 @@ export class ConnectionManager implements IConnectionManager {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      console.log('连接管理器已优雅关闭');
+      logger.info('连接管理器已优雅关闭');
     } catch (error) {
-      console.error('关闭连接管理器时出错:', error);
+      logger.error('关闭连接管理器时出错:', error);
       throw error;
     }
   }

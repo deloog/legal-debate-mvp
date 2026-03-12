@@ -98,7 +98,10 @@ export class FollowUpReminder {
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        logger.error(`发送提醒失败 (${channel}): ${errorMessage}`, error);
+        logger.error(
+          `发送提醒失败 (${channel}): ${errorMessage}`,
+          error instanceof Error ? error : undefined
+        );
       }
     }
 
@@ -169,7 +172,10 @@ export class FollowUpReminder {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      logger.error(`发送站内提醒失败: ${errorMessage}`, error);
+      logger.error(
+        `发送站内提醒失败: ${errorMessage}`,
+        error instanceof Error ? error : undefined
+      );
       return false;
     }
   }
@@ -220,7 +226,10 @@ export class FollowUpReminder {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      logger.error(`发送邮件提醒失败: ${errorMessage}`, error);
+      logger.error(
+        `发送邮件提醒失败: ${errorMessage}`,
+        error instanceof Error ? error : undefined
+      );
       return false;
     }
   }
@@ -341,7 +350,7 @@ export class FollowUpReminder {
       const content = `[律伴助手] 您有一个客户跟进任务将于${formattedDate}到期：${task.summary || '请及时处理'}`;
 
       // 调用短信发送服务
-      const sent = await this.callSMSService([task.clientPhone], content);
+      const sent = await this.callSMSService([task.clientPhone ?? ''], content);
 
       if (sent) {
         logger.info('SMS reminder sent successfully', {
@@ -355,7 +364,10 @@ export class FollowUpReminder {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      logger.error(`发送短信提醒失败: ${errorMessage}`, error);
+      logger.error(
+        `发送短信提醒失败: ${errorMessage}`,
+        error instanceof Error ? error : undefined
+      );
       return false;
     }
   }
@@ -423,7 +435,10 @@ export class FollowUpReminder {
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        logger.error(`批量发送提醒失败 (${task.id}): ${errorMessage}`, error);
+        logger.error(
+          `批量发送提醒失败 (${task.id}): ${errorMessage}`,
+          error instanceof Error ? error : undefined
+        );
         failedCount++;
       }
     }

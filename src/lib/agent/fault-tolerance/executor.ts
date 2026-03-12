@@ -1,6 +1,7 @@
 // 容错执行器
 // 实现Agent容错机制的核心逻辑：重试、降级、熔断
 
+import { logger } from '@/lib/logger';
 import { ErrorLogger } from '../../error/error-logger';
 import { CircuitBreakerManager } from '../../error/circuit-breaker';
 import type {
@@ -262,7 +263,7 @@ export class FaultTolerantExecutor {
       });
     } catch (logError) {
       // 错误日志记录失败不影响主流程
-      console.error('[FaultTolerantExecutor] Failed to log error:', logError);
+      logger.error('[FaultTolerantExecutor] Failed to log error:', logError);
     }
   }
 

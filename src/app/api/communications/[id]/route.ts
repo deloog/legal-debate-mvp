@@ -54,7 +54,10 @@ async function mapCommunicationRecord(
  * 获取沟通记录详情
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -63,7 +66,7 @@ export const GET = withErrorHandler(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     const communication = await prisma.communicationRecord.findFirst({
       where: {
@@ -90,7 +93,10 @@ export const GET = withErrorHandler(
  * 更新沟通记录
  */
 export const PATCH = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -99,7 +105,7 @@ export const PATCH = withErrorHandler(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const validatedData = updateCommunicationSchema.parse(body);
 
@@ -129,7 +135,7 @@ export const PATCH = withErrorHandler(
           ? new Date(validatedData.nextFollowUpDate)
           : undefined,
         isImportant: validatedData.isImportant,
-        metadata: validatedData.metadata as Prisma.JsonValue,
+        metadata: validatedData.metadata as Prisma.InputJsonValue,
       },
     });
 
@@ -145,7 +151,10 @@ export const PATCH = withErrorHandler(
  * 删除沟通记录
  */
 export const DELETE = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -154,7 +163,7 @@ export const DELETE = withErrorHandler(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     const communication = await prisma.communicationRecord.findFirst({
       where: {

@@ -40,7 +40,7 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
       const response: AuthResponse = {
         success: false,
         message: '邮箱格式不正确',
-        error: emailValidation.error,
+        error: emailValidation.error ?? undefined,
       };
       return NextResponse.json(response, { status: 400 });
     }

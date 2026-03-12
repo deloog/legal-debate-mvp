@@ -6,6 +6,7 @@
  */
 
 import { ErrorLog, ErrorType, ErrorSeverity } from './types';
+import { logger } from '@/lib/logger';
 
 /**
  * 告警状态枚举
@@ -558,14 +559,14 @@ export class AlertManager {
           await this.sendWebhookNotification(alert);
           break;
         default:
-          console.warn(`Unsupported alert channel: ${channel}`);
+          logger.warn(`Unsupported alert channel: ${channel}`);
       }
 
       record.success = true;
     } catch (error) {
       record.errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      console.error(
+      logger.error(
         `Failed to send ${channel} notification:`,
         record.errorMessage
       );
@@ -582,16 +583,16 @@ export class AlertManager {
     const logMessage = `[ALERT] ${alert.severity} | ${alert.message} | AlertID=${alert.alertId}`;
     switch (alert.severity) {
       case AlertSeverity.CRITICAL:
-        console.error(logMessage);
+        logger.error(logMessage);
         break;
       case AlertSeverity.HIGH:
-        console.error(logMessage);
+        logger.error(logMessage);
         break;
       case AlertSeverity.MEDIUM:
-        console.warn(logMessage);
+        logger.warn(logMessage);
         break;
       case AlertSeverity.LOW:
-        console.log(logMessage);
+        logger.info(logMessage);
         break;
     }
   }
@@ -607,7 +608,7 @@ export class AlertManager {
     // 获取告警接收人邮箱（可从环境变量配置）
     const alertRecipient = process.env.ALERT_EMAIL_TO;
     if (!alertRecipient) {
-      console.warn('[AlertManager] ALERT_EMAIL_TO 未配置，跳过邮件通知');
+      logger.warn('[AlertManager] ALERT_EMAIL_TO 未配置，跳过邮件通知');
       return;
     }
 
@@ -628,11 +629,11 @@ export class AlertManager {
         throw new Error(result.error || '邮件发送失败');
       }
 
-      console.log(
+      logger.info(
         `[AlertManager] 告警邮件已发送: ${alertRecipient}, AlertID=${alert.alertId}`
       );
     } else {
-      console.log(`[EMAIL] ${alert.message}`);
+      logger.info(`[EMAIL] ${alert.message}`);
     }
   }
 
@@ -727,7 +728,7 @@ ${alert.message}
   private async sendWebhookNotification(alert: Alert): Promise<void> {
     const webhookUrl = process.env.ALERT_WEBHOOK_URL;
     if (!webhookUrl) {
-      console.warn('ALERT_WEBHOOK_URL not configured');
+      logger.warn('ALERT_WEBHOOK_URL not configured');
       return;
     }
 
@@ -782,7 +783,7 @@ ${alert.message}
         });
       });
     } catch (error) {
-      console.error('Failed to save alert to database:', error);
+      logger.error('Failed to save alert to database:', error);
       // 不抛出异常，避免告警保存失败影响主流程
     }
   }

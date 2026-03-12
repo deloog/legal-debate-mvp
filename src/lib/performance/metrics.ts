@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * 性能监控模块
  * 功能：收集和记录Web Vitals性能指标
@@ -163,7 +164,7 @@ class PerformanceCollector {
           }),
           keepalive: true, // 使用keepalive确保请求在页面卸载后仍能完成
         }).catch(error => {
-          console.warn('[Performance] Failed to send metrics to API:', error);
+          logger.warn('[Performance] Failed to send metrics to API:', error);
         });
       }
 
@@ -177,9 +178,9 @@ class PerformanceCollector {
         trackEvent('performance_metric', metric);
       }
 
-      console.log('[Performance] Metric recorded:', metric);
+      logger.info('[Performance] Metric recorded:', metric);
     } catch (error) {
-      console.error('[Performance] Failed to send metric:', error);
+      logger.error('[Performance] Failed to send metric:', error);
     }
   }
 
@@ -260,24 +261,25 @@ export function initPerformanceObservers(): void {
       });
       lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
     } catch (e) {
-      console.warn('LCP Observer setup failed:', e);
+      logger.warn('LCP Observer setup failed:', e);
     }
 
     // 收集FID
     try {
       const fidObserver = new PerformanceObserver(list => {
         const entries = list.getEntries();
-        entries.forEach((entry: FIDEntry) => {
-          if (entry.processingStart) {
+        entries.forEach((entry: PerformanceEntry) => {
+          const fidEntry = entry as FIDEntry;
+          if (fidEntry.processingStart) {
             performanceCollector.collectFID(
-              entry.processingStart - entry.startTime
+              fidEntry.processingStart - fidEntry.startTime
             );
           }
         });
       });
       fidObserver.observe({ type: 'first-input', buffered: true });
     } catch (e) {
-      console.warn('FID Observer setup failed:', e);
+      logger.warn('FID Observer setup failed:', e);
     }
 
     // 收集CLS
@@ -285,16 +287,17 @@ export function initPerformanceObservers(): void {
       const clsObserver = new PerformanceObserver(list => {
         const entries = list.getEntries();
         let clsValue = 0;
-        entries.forEach((entry: CLSEntry) => {
-          if (!entry.hadRecentInput) {
-            clsValue += entry.value;
+        entries.forEach((entry: PerformanceEntry) => {
+          const clsEntry = entry as CLSEntry;
+          if (!clsEntry.hadRecentInput) {
+            clsValue += clsEntry.value;
           }
         });
         performanceCollector.collectCLS(clsValue);
       });
       clsObserver.observe({ type: 'layout-shift', buffered: true });
     } catch (e) {
-      console.warn('CLS Observer setup failed:', e);
+      logger.warn('CLS Observer setup failed:', e);
     }
   }
 
@@ -323,7 +326,7 @@ export function recordInteractionTime(
   const endTime = Date.now();
   const duration = endTime - startTime;
 
-  console.log(`Interaction [${interactionName}]: ${duration}ms`);
+  logger.info(`Interaction [${interactionName}]: ${duration}ms`);
 
   return duration;
 }

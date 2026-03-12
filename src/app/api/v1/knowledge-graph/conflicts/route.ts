@@ -11,10 +11,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 import {
   checkKnowledgeGraphPermission,
   logKnowledgeGraphAction,
   KnowledgeGraphAction,
+  KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
 
 /**
@@ -77,23 +79,36 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (lawArticleIds.length > 10) {
       return NextResponse.json(
-        { error: 'lawArticleIds最多支持10个' },
+        { success: false, error: { code: 'TOO_MANY_IDS', message: 'lawArticleIds最多支持10个' } },
         { status: 400 }
+      );
+    }
+
+    // 认证检查
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        { status: 401 }
       );
     }
 
     // 权限检查（查看权限）
     const permissionResult = await checkKnowledgeGraphPermission(
-      '', // 用户ID从header中获取（实际实现中需要）
+      authUser.userId,
       KnowledgeGraphAction.VIEW_RELATIONS,
-      'RELATION' as never
+      KnowledgeGraphResource.GRAPH
     );
 
     if (!permissionResult.hasPermission) {
       logger.warn('用户无权限查看冲突检测', {
+        userId: authUser.userId,
         reason: permissionResult.reason,
       });
-      return NextResponse.json({ error: '权限不足' }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: { code: 'FORBIDDEN', message: '权限不足' } },
+        { status: 403 }
+      );
     }
 
     // 查询法条数据
@@ -214,9 +229,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // 记录操作日志
     await logKnowledgeGraphAction({
-      userId: '', // 从header获取
+      userId: authUser.userId,
       action: KnowledgeGraphAction.VIEW_RELATIONS,
-      resource: 'RELATION' as never,
+      resource: KnowledgeGraphResource.GRAPH,
       description: `冲突检测查询，涉及${lawArticleIds.length}个法条`,
       metadata: {
         lawArticleIds,
@@ -225,12 +240,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
 
     return NextResponse.json({
-      conflicts: results,
-      total: results.length,
+      success: true,
+      data: {
+        conflicts: results,
+        total: results.length,
+      },
     });
   } catch (error: unknown) {
     logger.error('冲突检测失败', { error });
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { code: 'INTERNAL_ERROR', message: errorMessage } },
+      { status: 500 }
+    );
   }
 }

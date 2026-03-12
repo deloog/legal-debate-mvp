@@ -3,10 +3,10 @@
  * 记忆压缩预览API - 提供压缩前的预览功能
  */
 
-import { NextRequest, NextResponse } from 'next/server';
 import { MemoryCompressor } from '@/lib/agent/memory-agent/compressor';
 import type { AIService } from '@/lib/ai/service-refactored';
 import { logger } from '@/lib/logger';
+import { NextRequest, NextResponse } from 'next/server';
 
 // 创建简单的mock AI服务（仅实现 chatCompletion，足够 MemoryCompressor 使用）
 // 使用 unknown 双重断言，避免 as any
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       accessCount: 0,
       lastAccessedAt: new Date(),
       createdAt: new Date(),
-      expiresAt: null,
+      expiresAt: undefined,
       compressed: false,
     });
 
@@ -113,11 +113,11 @@ export async function POST(request: NextRequest) {
         length: memoryContent.length,
       },
       compressed: {
-        summary: compressionResult.summary,
+        summary: compressionResult.summary ?? '',
         keyInfo: compressionResult.keyInfo,
         length:
-          compressionResult.summary.length +
-          JSON.stringify(compressionResult.keyInfo).length,
+          (compressionResult.summary?.length ?? 0) +
+          JSON.stringify(compressionResult.keyInfo ?? {}).length,
       },
       metrics: {
         compressionRatio: compressionResult.ratio,

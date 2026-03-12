@@ -29,10 +29,10 @@ const updateTemplateSchema = z.object({
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const templateId = params.id;
+    const templateId = (await params).id;
 
     const template = await prisma.approvalTemplate.findUnique({
       where: { id: templateId },
@@ -72,10 +72,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const templateId = params.id;
+    const templateId = (await params).id;
     const body = await request.json();
 
     // 验证请求数据
@@ -135,10 +135,10 @@ export async function PUT(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const templateId = params.id;
+    const templateId = (await params).id;
 
     // 检查模板是否被使用
     const usageCount = await prisma.contractApproval.count({

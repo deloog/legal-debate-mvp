@@ -58,7 +58,7 @@ const STATUS_LABELS: Record<string, string> = {
 export function AdminMembershipDetail({
   membershipId,
   onClose,
-}: Props): React.ReactElement {
+}: Props): React.ReactElement | null {
   const [membership, setMembership] = useState<MembershipDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

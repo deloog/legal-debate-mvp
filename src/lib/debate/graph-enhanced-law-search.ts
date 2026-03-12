@@ -9,26 +9,23 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
-import { LawCategory, RelationType, VerificationStatus } from '@prisma/client';
-import { searchAllLawArticles } from '@/lib/debate/law-search';
+import {
+  searchAllLawArticles,
+  CASE_TYPE_TO_LAW_CATEGORIES,
+} from '@/lib/debate/law-search';
 import { logger } from '@/lib/logger';
+import { LawCategory, RelationType, VerificationStatus } from '@prisma/client';
+import {
+  runDebateReasoning,
+  formatReasoningForPrompt,
+  extractKeyInferences,
+} from './reasoning-bridge';
+import type { InferenceResult } from '@/lib/knowledge-graph/reasoning/types';
 
 /**
  * 超时时间（毫秒）
  */
 const GRAPH_QUERY_TIMEOUT_MS = 500;
-
-/**
- * 案件类型 → 法条分类映射
- */
-const CASE_TYPE_TO_LAW_CATEGORIES: Record<string, LawCategory[]> = {
-  CIVIL: [LawCategory.CIVIL, LawCategory.PROCEDURE],
-  CRIMINAL: [LawCategory.CRIMINAL, LawCategory.PROCEDURE],
-  ADMINISTRATIVE: [LawCategory.ADMINISTRATIVE, LawCategory.PROCEDURE],
-  COMMERCIAL: [LawCategory.COMMERCIAL, LawCategory.CIVIL],
-  LABOR: [LawCategory.LABOR, LawCategory.CIVIL],
-  INTELLECTUAL_PROPERTY: [LawCategory.INTELLECTUAL_PROPERTY, LawCategory.CIVIL],
-};
 
 /**
  * 法条信息（带关系）
@@ -83,6 +80,10 @@ export interface GraphEnhancedSearchResult {
     keyword: boolean;
     graph: boolean;
   };
+  /** 推理引擎分析结果（可直接注入 Prompt） */
+  reasoningAnalysis: string;
+  /** 关键推理结论（用于前端展示） */
+  keyInferences: InferenceResult[];
 }
 
 /**
@@ -116,13 +117,15 @@ async function searchByKeywords(
       null, // caseDescription
       limit
     );
-    return result.articles.map(article => ({
-      id: `${article.lawName}-${article.articleNumber}`,
-      lawName: article.lawName,
-      articleNumber: article.articleNumber,
-      fullText: article.fullText,
-      category: article.category,
-    }));
+    return result.articles
+      .filter(article => !!article.id) // only include articles with real DB IDs for graph queries
+      .map(article => ({
+        id: article.id!,
+        lawName: article.lawName,
+        articleNumber: article.articleNumber,
+        fullText: article.fullText,
+        category: article.category,
+      }));
   } catch (error) {
     logger.error('关键词搜索失败:', error);
     return [];
@@ -448,7 +451,7 @@ export async function graphEnhancedSearch(
     // 去重
     const uniqueSupporting = Array.from(
       new Map(supportingArticles.map(a => [a.id, a])).values()
-    ).filter(a => !articleIds.includes(a.id) || articleIds.includes(a.id));
+    );
 
     // 发现攻击路径
     const attackPaths = includeAttackPaths
@@ -476,9 +479,17 @@ export async function graphEnhancedSearch(
     graphData = null;
   }
 
-  // 4. 构建结果
+  // 4. 并行运行推理引擎（带独立超时，不阻塞主流程）
+  const sourceId = articleIds[0] ?? '';
+  const reasoningResult = sourceId
+    ? await runDebateReasoning(articleIds.slice(0, 15), sourceId)
+    : null;
+  const reasoningAnalysis = formatReasoningForPrompt(reasoningResult);
+  const keyInferences = extractKeyInferences(reasoningResult);
+
+  // 5. 构建结果
   if (!graphData) {
-    // 图谱查询超时或失败，返回关键词结果
+    // 图谱查询超时或失败，返回关键词结果（推理结果仍然保留）
     return {
       keywordResults,
       supportingArticles: [],
@@ -491,6 +502,8 @@ export async function graphEnhancedSearch(
         keyword: true,
         graph: false,
       },
+      reasoningAnalysis,
+      keyInferences,
     };
   }
 
@@ -506,6 +519,8 @@ export async function graphEnhancedSearch(
       keyword: true,
       graph: true,
     },
+    reasoningAnalysis,
+    keyInferences,
   };
 }
 
@@ -541,7 +556,7 @@ export function formatGraphAnalysisForPrompt(
   }
 
   // 冲突关系
-  if (result.conflictRelations.length > 0) {
+  if (result.conflictRelations && result.conflictRelations.length > 0) {
     lines.push('冲突关系（需特别注意）:');
     result.conflictRelations.forEach(rel => {
       lines.push(
@@ -551,7 +566,7 @@ export function formatGraphAnalysisForPrompt(
   }
 
   // 补充关系
-  if (result.complementRelations.length > 0) {
+  if (result.complementRelations && result.complementRelations.length > 0) {
     lines.push('补充关系（建议同时引用）:');
     result.complementRelations.forEach(rel => {
       lines.push(

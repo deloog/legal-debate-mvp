@@ -3,9 +3,10 @@
  * POST /api/payment/notify
  *
  * 安全机制：
- * 1. 验证请求头中的微信签名（Wechatpay-Signature）
- * 2. 通过 AES-256-GCM 解密通知内容（apiKeyV3 必须正确）
- * 3. 幂等处理：已支付订单直接返回成功
+ * 1. 验证请求头中的微信签名（Wechatpay-Signature）- RSA平台证书验签
+ * 2. 验证时间戳防止重放攻击
+ * 3. 通过 AES-256-GCM 解密通知内容
+ * 4. 幂等处理：已支付订单直接返回成功
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -18,12 +19,16 @@ import {
 import { WechatPayNotifyType } from '@/types/payment';
 import { logger } from '@/lib/logger';
 import crypto from 'crypto';
+import { paymentConfig } from '@/lib/payment/payment-config';
 
 /**
  * 验证微信支付请求头签名（APIv3 规范）
  * https://pay.weixin.qq.com/docs/merchant/development/interface-rules/signature-verification.html
  */
-function verifyWechatSignature(request: NextRequest, rawBody: string): boolean {
+async function verifyWechatSignature(
+  request: NextRequest,
+  rawBody: string
+): Promise<boolean> {
   try {
     const timestamp = request.headers.get('Wechatpay-Timestamp') ?? '';
     const nonce = request.headers.get('Wechatpay-Nonce') ?? '';
@@ -41,7 +46,8 @@ function verifyWechatSignature(request: NextRequest, rawBody: string): boolean {
 
     // 时间戳有效期：±5 分钟
     const now = Math.floor(Date.now() / 1000);
-    if (Math.abs(now - parseInt(timestamp, 10)) > 300) {
+    const timestampNum = parseInt(timestamp, 10);
+    if (isNaN(timestampNum) || Math.abs(now - timestampNum) > 300) {
       logger.warn('[微信支付通知] 时间戳过期', { timestamp, now });
       return false;
     }
@@ -49,21 +55,27 @@ function verifyWechatSignature(request: NextRequest, rawBody: string): boolean {
     // 构造验签消息
     const message = `${timestamp}\n${nonce}\n${rawBody}\n`;
 
-    // 使用微信平台证书公钥验签（生产环境需要从微信获取平台证书）
-    // 此处验证方式：使用 HMAC-SHA256 做简单验证（完整方案需维护平台证书）
-    // TODO: 生产环境升级为 RSA 公钥验签
-    const apiKeyV3 = process.env.WECHAT_API_KEY_V3 ?? '';
-    // TODO: 集成平台证书后用 RSA 公钥验签（当前仅做请求头存在性检查）
-    void crypto.createHmac('sha256', apiKeyV3).update(message).digest('hex');
+    // 获取平台证书（实际生产环境应该从微信支付API获取或缓存）
+    // 这里使用配置的公钥进行验证
+    const config = paymentConfig.getWechatConfig();
+    if (!config.publicKey) {
+      logger.error('[微信支付通知] 微信支付公钥未配置');
+      // 如果没有配置公钥，跳过验签（依赖AES解密作为安全屏障）
+      logger.warn('[微信支付通知] 跳过RSA验签，依赖AES-GCM解密验证');
+      return true;
+    }
 
-    // 微信 APIv3 签名为 Base64，此处比较 hex（简化版，正式应用需用 RSA 验签）
-    logger.info('[微信支付通知] 签名验证', {
-      serial,
-      hasSignature: !!signature,
-    });
+    // RSA-SHA256 验签
+    const verify = crypto.createVerify('RSA-SHA256');
+    verify.update(message);
+    const isValid = verify.verify(config.publicKey, signature, 'base64');
 
-    // 暂时记录但不强制拒绝（等平台证书集成后启用）
-    // 解密失败时会自然拒绝伪造请求
+    if (!isValid) {
+      logger.warn('[微信支付通知] RSA签名验证失败');
+      return false;
+    }
+
+    logger.info('[微信支付通知] RSA签名验证通过');
     return true;
   } catch (err) {
     logger.error('[微信支付通知] 签名验证异常', { error: err });
@@ -80,8 +92,14 @@ export async function POST(request: NextRequest) {
   try {
     rawBody = await request.text();
 
-    // 签名预检（记录日志，等平台证书就绪后可改为 return 403）
-    verifyWechatSignature(request, rawBody);
+    // 签名验证：时间戳过期或必要请求头缺失直接拒绝
+    if (!(await verifyWechatSignature(request, rawBody))) {
+      logger.warn('[微信支付通知] 签名验证未通过，拒绝请求');
+      return NextResponse.json(
+        { code: 'FAIL', message: '签名验证失败' },
+        { status: 401 }
+      );
+    }
 
     const notification = JSON.parse(rawBody) as Record<string, unknown>;
 
@@ -133,6 +151,21 @@ export async function POST(request: NextRequest) {
     if (order.status === 'PAID') {
       logger.info('[微信支付通知] 订单已支付，跳过:', order.orderNo);
       return NextResponse.json({ code: 'SUCCESS', message: '成功' });
+    }
+
+    // 验证金额（防止篡改）
+    const orderAmount = order.amount.toNumber();
+    const notifyAmount = (payResult.amount?.total ?? 0) / 100; // 分转元
+    if (Math.abs(orderAmount - notifyAmount) > 0.01) {
+      logger.error('[微信支付通知] 金额不匹配:', {
+        orderAmount,
+        notifyAmount,
+        orderNo: payResult.out_trade_no,
+      });
+      return NextResponse.json(
+        { code: 'FAIL', message: '金额不匹配' },
+        { status: 400 }
+      );
     }
 
     if (payResult.trade_state === 'SUCCESS') {

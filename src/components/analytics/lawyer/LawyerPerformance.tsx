@@ -107,7 +107,7 @@ export default function LawyerPerformance({
           <label className='text-sm font-medium'>时间范围:</label>
           <Select
             value={timeRange}
-            onValueChange={(value: TimeRange) => setTimeRange(value)}
+            onValueChange={(value: string) => setTimeRange(value as TimeRange)}
           >
             <SelectTrigger className='w-45'>
               <SelectValue />
@@ -127,9 +127,7 @@ export default function LawyerPerformance({
           <label className='text-sm font-medium'>排序:</label>
           <Select
             value={sortBy}
-            onValueChange={(
-              value: 'caseVolume' | 'successRate' | 'revenue' | 'efficiency'
-            ) => setSortBy(value)}
+            onValueChange={(value: string) => setSortBy(value as 'caseVolume' | 'successRate' | 'revenue' | 'efficiency')}
           >
             <SelectTrigger className='w-37.5'>
               <SelectValue />
@@ -144,7 +142,7 @@ export default function LawyerPerformance({
 
           <Select
             value={sortOrder}
-            onValueChange={(value: 'asc' | 'desc') => setSortOrder(value)}
+            onValueChange={(value: string) => setSortOrder(value as 'asc' | 'desc')}
           >
             <SelectTrigger className='w-30'>
               <SelectValue />

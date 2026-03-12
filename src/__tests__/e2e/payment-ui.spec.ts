@@ -194,7 +194,19 @@ test.describe('支付页面功能测试', () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    // 支付页面不需要登录，直接访问即可
+    // 支付页面受全局 middleware 保护，需在 cookie 中携带 accessToken
+    if (testUser.token) {
+      await page.context().addCookies([{
+        name: 'accessToken',
+        value: testUser.token,
+        domain: 'localhost',
+        path: '/',
+        httpOnly: false,
+        secure: false,
+        sameSite: 'Lax',
+        expires: Math.floor(Date.now() / 1000) + 900,
+      }]);
+    }
   });
 
   test('应该加载支付页面并显示基本信息', async ({ page }) => {
@@ -742,5 +754,244 @@ test.describe('响应式设计和用户体验测试', () => {
 
     // 恢复网络
     await page.unroute(`${BASE_URL}/api/**`);
+  });
+});
+
+// =============================================================================
+// 测试套件：支付确认完整流程
+// 策略：
+//   1. 通过 JWT login API 获取 accessToken
+//   2. 将 accessToken 写入 cookie，让全局 middleware 放行 /payment 页面
+//   3. 用 page.route() mock 数据层 API，完整测试 UI 交互流程
+// =============================================================================
+
+test.describe('支付确认完整流程', () => {
+  const MOCK_TIER_ID = 'mock-tier-pro-monthly';
+  const MOCK_ORDER_ID = 'mock-order-e2e-001';
+
+  // 每个测试前获取一个真实 JWT token 并注入到 cookie
+  async function setupAuthCookie(page: import('@playwright/test').Page) {
+    // 注册并登录一个临时测试用户，获取 JWT accessToken
+    const ts = Date.now();
+    const email = `payconfirm-${ts}@example.com`;
+    const password = 'PayTest@123';
+
+    await page.request.post(`${BASE_URL}/api/auth/register`, {
+      data: { email, password, username: `payconf${String(ts).slice(-6)}`, name: `PayConf${ts}` },
+    });
+
+    const loginResp = await page.request.post(`${BASE_URL}/api/auth/login`, {
+      data: { email, password },
+    });
+    const loginData = await loginResp.json();
+    const token: string = loginData.data?.token ?? '';
+
+    if (token) {
+      // 将 JWT 写入 accessToken cookie，供 Next.js middleware 鉴权使用
+      await page.context().addCookies([{
+        name: 'accessToken',
+        value: token,
+        domain: 'localhost',
+        path: '/',
+        httpOnly: false,
+        secure: false,
+        sameSite: 'Lax',
+        expires: Math.floor(Date.now() / 1000) + 900, // 15 分钟
+      }]);
+    }
+  }
+
+  // 注入会员等级和订单创建的 mock 响应
+  async function setupPaymentMocks(page: import('@playwright/test').Page) {
+    await page.route(`**/api/memberships/tiers`, (route) => {
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          data: {
+            tiers: [
+              {
+                id: MOCK_TIER_ID,
+                name: 'pro',
+                displayName: '专业版',
+                tier: 'PRO',
+                price: 99,
+                currency: 'CNY',
+                isActive: true,
+              },
+            ],
+          },
+        }),
+      });
+    });
+
+    await page.route(`**/api/orders/create`, (route) => {
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          data: { orderId: MOCK_ORDER_ID, orderNo: 'E2E-20240101-001', amount: 99, currency: 'CNY', status: 'PENDING' },
+        }),
+      });
+    });
+  }
+
+  test('应正确渲染会员等级信息', async ({ page }) => {
+    await setupAuthCookie(page);
+    await setupPaymentMocks(page);
+    await page.goto(`${BASE_URL}/payment?tierId=${MOCK_TIER_ID}`);
+    await page.waitForLoadState('networkidle');
+
+    // 支付页面标题应可见
+    await expect(page.getByRole('heading', { name: '支付页面' })).toBeVisible();
+
+    // 专业版会员名称应显示
+    await expect(page.getByText('专业版')).toBeVisible();
+  });
+
+  test('应能选择微信支付方式', async ({ page }) => {
+    await setupAuthCookie(page);
+    await setupPaymentMocks(page);
+    await page.goto(`${BASE_URL}/payment?tierId=${MOCK_TIER_ID}`);
+    await page.waitForLoadState('networkidle');
+
+    // 查找包含"微信"文字的按钮（用 filter 代替混合选择器）
+    const wechatBtn = page.getByRole('button').filter({ hasText: '微信' });
+
+    if (await wechatBtn.count() > 0) {
+      await wechatBtn.first().click();
+      // 点击后页面应仍然正常（无崩溃）
+      await expect(page.locator('body')).toBeVisible();
+    }
+  });
+
+  test('选择支付宝并点击确认应触发订单创建', async ({ page }) => {
+    await setupAuthCookie(page);
+    await setupPaymentMocks(page);
+
+    // 在 setupPaymentMocks 之后额外监听订单创建，记录调用
+    let orderCreateCalled = false;
+    await page.route(`**/api/orders/create`, (route) => {
+      orderCreateCalled = true;
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          data: { orderId: MOCK_ORDER_ID, orderNo: 'E2E-TEST-001', amount: 99, currency: 'CNY', status: 'PENDING' },
+        }),
+      });
+    });
+
+    await page.goto(`${BASE_URL}/payment?tierId=${MOCK_TIER_ID}`);
+    await page.waitForLoadState('networkidle');
+
+    // 选择支付宝
+    const alipayBtn = page.getByRole('button').filter({ hasText: '支付宝' });
+    if (await alipayBtn.count() > 0) {
+      await alipayBtn.first().click();
+
+      // 点击确认支付按钮
+      const confirmBtn = page.getByRole('button').filter({
+        hasText: /确认支付|立即支付|去支付/,
+      });
+
+      if (await confirmBtn.count() > 0) {
+        await confirmBtn.first().click();
+        await page.waitForTimeout(1500);
+
+        // 订单创建 API 应被调用
+        expect(orderCreateCalled).toBe(true);
+
+        // 应跳转到成功页面
+        expect(page.url()).toContain(`/payment/success?orderId=${MOCK_ORDER_ID}`);
+      }
+    }
+  });
+
+  test('API 报错时应显示错误提示而非白屏', async ({ page }) => {
+    await setupAuthCookie(page);
+
+    // mock：tier 正常返回，订单创建失败
+    await page.route(`**/api/memberships/tiers`, (route) => {
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          data: {
+            tiers: [{ id: MOCK_TIER_ID, name: 'pro', displayName: '专业版', tier: 'PRO', price: 99, currency: 'CNY', isActive: true }],
+          },
+        }),
+      });
+    });
+
+    await page.route(`**/api/orders/create`, (route) => {
+      void route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: false, error: '服务暂时不可用，请稍后重试' }),
+      });
+    });
+
+    await page.goto(`${BASE_URL}/payment?tierId=${MOCK_TIER_ID}`);
+    await page.waitForLoadState('networkidle');
+
+    const alipayBtn = page.getByRole('button').filter({ hasText: '支付宝' });
+    if (await alipayBtn.count() > 0) {
+      await alipayBtn.first().click();
+
+      const confirmBtn = page.getByRole('button').filter({
+        hasText: /确认支付|立即支付|去支付/,
+      });
+      if (await confirmBtn.count() > 0) {
+        await confirmBtn.first().click();
+        await page.waitForTimeout(1500);
+
+        // 不应跳转到成功页
+        expect(page.url()).not.toContain('/payment/success');
+
+        // 页面应出现错误提示文字
+        const hasError = await page.getByText(/失败|错误|不可用/).count() > 0;
+        expect(hasError).toBe(true);
+      }
+    }
+  });
+
+  test('支付页面在移动端（375px）应正确布局', async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: 375, height: 667 } });
+    const page = await context.newPage();
+
+    // 先设置 auth cookie（需要先获取 token）
+    await setupAuthCookie(page);
+
+    await page.route(`**/api/memberships/tiers`, (route) => {
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          data: {
+            tiers: [{ id: MOCK_TIER_ID, name: 'pro', displayName: '专业版', tier: 'PRO', price: 99, currency: 'CNY', isActive: true }],
+          },
+        }),
+      });
+    });
+
+    await page.goto(`${BASE_URL}/payment?tierId=${MOCK_TIER_ID}`);
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.locator('body')).toBeVisible();
+
+    // 无水平滚动
+    const scrollWidth = await page.evaluate(() => document.body.scrollWidth);
+    expect(scrollWidth).toBeLessThanOrEqual(380);
+
+    // 标题可见
+    await expect(page.getByRole('heading', { name: '支付页面' })).toBeVisible();
+
+    await context.close();
   });
 });

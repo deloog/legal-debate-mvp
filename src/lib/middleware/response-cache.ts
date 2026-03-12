@@ -218,7 +218,12 @@ export async function clearApiCache(
 ): Promise<number> {
   try {
     // Redis支持模式匹配删除
-    const redis = await import('@/lib/cache/redis').then(m => m.redis);
+    const redisModule = await import('@/lib/cache/redis');
+    const redis = redisModule.redis;
+    if (!redis) {
+      return 0;
+    }
+
     const keyPattern = `${namespace}:${pattern || '*'}`;
     const keys = await redis.keys(keyPattern);
 

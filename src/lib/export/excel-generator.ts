@@ -34,6 +34,7 @@ export class ExcelGenerator {
 
   /**
    * 转义Excel字段
+   * 防止CSV/Excel公式注入攻击
    * @param field 字段值
    * @returns 转义后的字符串
    */
@@ -42,11 +43,14 @@ export class ExcelGenerator {
       return '';
     }
 
-    const stringValue = String(field);
+    let stringValue = String(field);
 
-    // 如果以=开头，在前面加单引号防止Excel将其识别为公式
-    if (stringValue.startsWith('=')) {
-      return `'${stringValue}`;
+    // 防止CSV/Excel公式注入攻击
+    // 如果以=, +, -, @, \t, \r 开头，在前面加单引号
+    // 这些字符在Excel中可能被解释为公式
+    const dangerousPrefixes = ['=', '+', '-', '@', '\t', '\r'];
+    if (dangerousPrefixes.some(prefix => stringValue.startsWith(prefix))) {
+      stringValue = "'" + stringValue;
     }
 
     // 如果包含逗号、双引号或换行符，需要转义
@@ -122,8 +126,8 @@ export class ExcelGenerator {
         }
         if (
           header.toLowerCase().includes('date') ||
-          header.toLowerCase().includes('time') ||
-          header.toLowerCase().includes('at')
+          header.endsWith('At') ||
+          header.endsWith('Time')
         ) {
           return this.escapeField(this.formatDate(value));
         }
@@ -205,6 +209,29 @@ export class ExcelGenerator {
 }
 
 /**
+ * 验证导出类型是否安全（防止路径遍历）
+ * @param exportType 导出类型
+ * @returns 是否安全
+ */
+function isSafeExportType(exportType: string): boolean {
+  // 只允许字母、数字、下划线和连字符
+  return /^[a-zA-Z0-9_-]+$/.test(exportType);
+}
+
+/**
+ * 清理文件名中的危险字符
+ * @param filename 原始文件名
+ * @returns 清理后的文件名
+ */
+function sanitizeFilename(filename: string): string {
+  // 移除路径分隔符和危险字符
+  return filename
+    .replace(/[<>:"/\\|?*]/g, '')
+    .replace(/\.\./g, '')
+    .replace(/^[\s.]+|[\s.]+$/g, '');
+}
+
+/**
  * 辅助函数：生成导出文件名
  * @param exportType 导出类型
  * @param format 导出格式
@@ -214,6 +241,11 @@ export function generateExportFilename(
   exportType: string,
   format: ExportFormat
 ): string {
+  // 验证导出类型安全性
+  if (!isSafeExportType(exportType)) {
+    exportType = 'export';
+  }
+
   const now = new Date();
   const date = now.toISOString().split('T')[0]; // YYYY-MM-DD
   const time = now.toTimeString().split(' ')[0].replace(/:/g, ''); // HHMMSS
@@ -226,7 +258,9 @@ export function generateExportFilename(
   };
 
   const extension = extensionMap[format] || 'csv';
-  return `${exportType}_${date}_${time}.${extension}`;
+  const filename = `${exportType}_${date}_${time}.${extension}`;
+  
+  return sanitizeFilename(filename);
 }
 
 /**

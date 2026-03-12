@@ -28,22 +28,22 @@ const shareCaseSchema = z.object({
  * 共享案件给团队
  */
 export const POST = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
-        { error: '未认证', message: '请先登录' },
+        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
         { status: 401 }
       );
     }
 
-    const caseId = params.id;
+    const caseId = (await params).id;
 
     // 检查是否有权限共享案件
-    const sharePermission = await canShareCase(caseId, authUser.userId);
+    const sharePermission = await canShareCase(authUser.userId, caseId);
     if (!sharePermission.hasPermission) {
       return NextResponse.json(
-        { error: '无权限', message: sharePermission.reason },
+        { success: false, error: { code: 'FORBIDDEN', message: sharePermission.reason ?? '无权共享此案件' } },
         { status: 403 }
       );
     }
@@ -64,7 +64,7 @@ export const POST = withErrorHandler(
 
     if (!caseRecord) {
       return NextResponse.json(
-        { error: '案件不存在', message: '指定的案件不存在' },
+        { success: false, error: { code: 'NOT_FOUND', message: '案件不存在' } },
         { status: 404 }
       );
     }
@@ -111,22 +111,22 @@ export const POST = withErrorHandler(
  * 获取案件共享状态
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
-        { error: '未认证', message: '请先登录' },
+        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
         { status: 401 }
       );
     }
 
-    const caseId = params.id;
+    const caseId = (await params).id;
 
     // 检查是否有权限访问案件
     const accessPermission = await canAccessSharedCase(caseId, authUser.userId);
     if (!accessPermission.hasAccess) {
       return NextResponse.json(
-        { error: '无权限', message: accessPermission.reason },
+        { success: false, error: { code: 'FORBIDDEN', message: accessPermission.reason ?? '无权访问此案件' } },
         { status: 403 }
       );
     }
@@ -151,7 +151,7 @@ export const GET = withErrorHandler(
 
     if (!caseRecord) {
       return NextResponse.json(
-        { error: '案件不存在', message: '指定的案件不存在' },
+        { success: false, error: { code: 'NOT_FOUND', message: '案件不存在' } },
         { status: 404 }
       );
     }
@@ -175,7 +175,7 @@ export const GET = withErrorHandler(
         : undefined;
 
     // 查询共享者信息
-    let sharedByUser = null;
+    let sharedByUser: { id: string; name: string | null; email: string; avatar: string | null } | null = null;
     if (sharedBy) {
       const sharedByUserRecord = await prisma.user.findUnique({
         where: { id: sharedBy },

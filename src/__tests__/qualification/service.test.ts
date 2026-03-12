@@ -118,10 +118,21 @@ describe('verifyLawyerQualification', () => {
 });
 
 describe('recognizeLicensePhoto', () => {
-  it('应该返回暂未实现的错误', async () => {
+  it('未提供图片时应返回错误', async () => {
     const result = await recognizeLicensePhoto();
     expect(result.success).toBe(false);
-    expect(result.error).toBe('OCR功能暂未实现，请手动输入执业证信息');
+    expect(result.error).toMatch(/请提供执业证照片/);
+  });
+
+  it('未配置 AI 服务时应返回配置错误', async () => {
+    const originalKey = process.env.ZHIPU_API_KEY;
+    delete process.env.ZHIPU_API_KEY;
+    const result = await recognizeLicensePhoto({
+      url: 'https://example.com/license.jpg',
+    });
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/AI 服务未配置|请手动输入/);
+    process.env.ZHIPU_API_KEY = originalKey;
   });
 });
 

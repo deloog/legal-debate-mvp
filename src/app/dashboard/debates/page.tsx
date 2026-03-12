@@ -25,7 +25,7 @@ const TIME_RANGE_OPTIONS = [
   { value: '90d', label: '近90天' },
 ];
 
-function DebatesDashboardPage(): React.ReactElement {
+function DebatesDashboardPage(): React.ReactElement | null {
   const router = useRouter();
   const [stats, setStats] = useState<DebateStats | null>(null);
   const [trend, setTrend] = useState<DebateTrend[]>([]);

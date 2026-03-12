@@ -10,27 +10,27 @@ import type {
 } from './timeline-types';
 
 import { aiExtractLayer } from './timeline-ai-extractor';
-import { ruleMatchLayer } from './timeline-rule-matcher';
 import { aiReviewLayer } from './timeline-ai-reviewer';
 import {
-  mergeAndDeduplicate,
-  enrichEventsWithExtractedData,
-} from './timeline-event-builder';
-import {
-  sortEvents,
   detectAndFillGaps,
   generateSummary,
+  sortEvents,
 } from './timeline-analyzer';
+import {
+  enrichEventsWithExtractedData,
+  mergeAndDeduplicate,
+} from './timeline-event-builder';
+import { ruleMatchLayer } from './timeline-rule-matcher';
 
 // 导出所有类型
 export type {
-  TimelineExtractionOptions,
-  TimelineExtractionOutput,
-  TimelineSummary,
-  GapInfo,
   AIExtractionResponse,
   AIReviewResponse,
   DateEventPair,
+  GapInfo,
+  TimelineExtractionOptions,
+  TimelineExtractionOutput,
+  TimelineSummary,
 } from './timeline-types';
 
 /**
@@ -76,9 +76,8 @@ export class TimelineExtractor {
 
     // 过滤低重要性事件
     if (options.minImportance !== undefined) {
-      mergedEvents = mergedEvents.filter(
-        e => (e.importance || 1) >= options.minImportance
-      );
+      const minImp = options.minImportance;
+      mergedEvents = mergedEvents.filter(e => (e.importance || 1) >= minImp);
     }
 
     // 排序事件

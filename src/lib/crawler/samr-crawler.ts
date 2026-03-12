@@ -758,7 +758,7 @@ export class SAMRCrawler extends BaseCrawler {
   /**
    * 检查主要数据源是否可用
    */
-  async; /**
+  /**
    * 检查主要数据源是否可用
    * 2026-02-18 更新: 检查 samr.gov.cn
    */
@@ -814,7 +814,7 @@ export class SAMRCrawler extends BaseCrawler {
         } catch (error) {
           const errorMsg = `采集失败 [${template.title}]: ${error}`;
           allErrors.push(errorMsg);
-          this.logger.error(errorMsg, error);
+          this.logger.error(errorMsg, error instanceof Error ? error : undefined);
           failCount++;
         }
 
@@ -1120,7 +1120,7 @@ export class SAMRCrawler extends BaseCrawler {
       } catch (error) {
         const errorMsg = `解析失败 [${item.title}]: ${error}`;
         allErrors.push(errorMsg);
-        this.logger.error(errorMsg, error);
+        this.logger.error(errorMsg, error instanceof Error ? error : undefined);
 
         parseResults.push({
           id: item.id,
@@ -1318,8 +1318,8 @@ export class SAMRCrawler extends BaseCrawler {
   ): SAMRContractListItem[] {
     if (response.rows) {
       return response.rows.map((item: SAMRApiResponseItem) => ({
-        id: item.id || item.htlbId || item.contractId,
-        title: item.title || item.htlbName || item.contractName,
+        id: item.id || item.htlbId || item.contractId || '',
+        title: item.title || item.htlbName || item.contractName || '',
         category: item.category || item.htlbCategory || '',
         publishDate:
           item.publishDate ||
@@ -2942,7 +2942,7 @@ ${categoryInfo.miscellaneous}
       const data = await pdfParse(buffer);
       return data.text || '';
     } catch (error) {
-      this.logger.error('PDF 解析失败', error);
+      this.logger.error('PDF 解析失败', error instanceof Error ? error : undefined);
       return '';
     }
   }

@@ -46,7 +46,7 @@ function validateConfigValue(value: unknown, type: string): boolean {
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { key: string } }
+  { params }: { params: Promise<{ key: string }> }
 ): Promise<Response> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -64,7 +64,7 @@ export async function GET(
   }
 
   try {
-    const { key } = params;
+    const { key } = await params;
 
     // 查询配置
     const config = await prisma.systemConfig.findUnique({
@@ -94,7 +94,7 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { key: string } }
+  { params }: { params: Promise<{ key: string }> }
 ): Promise<Response> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -112,7 +112,7 @@ export async function PUT(
   }
 
   try {
-    const { key } = params;
+    const { key } = await params;
     const body: UpdateConfigRequest = await request.json();
 
     // 查找配置
@@ -173,6 +173,7 @@ export async function PUT(
 
     return Response.json(
       {
+        success: true,
         message: '配置更新成功',
         data: updatedConfig,
       },
@@ -193,7 +194,7 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { key: string } }
+  { params }: { params: Promise<{ key: string }> }
 ): Promise<Response> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -211,7 +212,7 @@ export async function DELETE(
   }
 
   try {
-    const { key } = params;
+    const { key } = await params;
 
     // 查找配置
     const existingConfig = await prisma.systemConfig.findUnique({

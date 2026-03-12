@@ -378,4 +378,96 @@ export class GraphAlgorithms {
 
     return components;
   }
+
+  /**
+   * 标签传播算法（Label Propagation）— 社区检测
+   *
+   * 每个节点初始标签为自身ID，迭代时将标签更新为邻居中出现最多的标签。
+   * 收敛后，同一标签的节点属于同一社区。
+   *
+   * @param nodes 图节点
+   * @param links 图边
+   * @param maxIterations 最大迭代次数（默认20）
+   * @returns 节点ID -> 社区ID 的映射
+   */
+  static labelPropagation(
+    nodes: GraphNode[],
+    links: GraphLink[],
+    maxIterations: number = 20
+  ): Map<string, number> {
+    if (nodes.length === 0) {
+      return new Map();
+    }
+
+    // 限制最大迭代次数防止无限循环
+    const MAX_ITERATIONS = Math.min(maxIterations, 100);
+
+    const adjList = buildUndirectedAdjacencyList(links);
+
+    // 初始化：每个节点标签 = 节点在数组中的索引
+    const labels = new Map<string, number>();
+    nodes.forEach((n, i) => labels.set(n.id, i));
+
+    // 节点ID列表（使用确定性顺序而非随机）
+    const nodeIds = nodes.map(n => n.id).sort();
+
+    for (let iter = 0; iter < MAX_ITERATIONS; iter++) {
+      let changed = false;
+
+      // 使用确定性顺序（按节点ID排序）而非随机，确保结果可重现
+      for (const nodeId of nodeIds) {
+        const neighbors = adjList.get(nodeId);
+        if (!neighbors || neighbors.length === 0) continue;
+
+        // 统计邻居标签频次
+        const labelCount = new Map<number, number>();
+        for (const neighbor of neighbors) {
+          const lbl = labels.get(neighbor.target);
+          if (lbl !== undefined) {
+            labelCount.set(lbl, (labelCount.get(lbl) ?? 0) + 1);
+          }
+        }
+
+        if (labelCount.size === 0) continue;
+
+        // 找出最高频次的标签（如有并列取最小值确保确定性）
+        let maxCount = -1;
+        let bestLabel = labels.get(nodeId) ?? 0;
+        
+        // 按标签值排序遍历，确保确定性
+        const sortedLabels = Array.from(labelCount.entries()).sort((a, b) => a[0] - b[0]);
+        
+        for (const [lbl, count] of sortedLabels) {
+          if (count > maxCount) {
+            maxCount = count;
+            bestLabel = lbl;
+          }
+        }
+
+        if (bestLabel !== labels.get(nodeId)) {
+          labels.set(nodeId, bestLabel);
+          changed = true;
+        }
+      }
+
+      // 如果本轮没有标签变化，算法收敛，提前退出
+      if (!changed) {
+        logger.debug(`Label propagation converged after ${iter + 1} iterations`);
+        break;
+      }
+    }
+
+    // 将标签重新编号为连续整数（0, 1, 2, ...）
+    const uniqueLabels = Array.from(new Set(labels.values())).sort((a, b) => a - b);
+    const labelRemap = new Map<number, number>(
+      uniqueLabels.map((lbl, i) => [lbl, i])
+    );
+
+    const communityMap = new Map<string, number>();
+    for (const [nodeId, lbl] of Array.from(labels.entries())) {
+      communityMap.set(nodeId, labelRemap.get(lbl) ?? 0);
+    }
+
+    return communityMap;
+  }
 }

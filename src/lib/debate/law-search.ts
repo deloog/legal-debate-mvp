@@ -8,6 +8,7 @@ import { getLawStarConfig, isLawStarAvailable } from '@/lib/ai/lawstar-config';
 import { prisma } from '@/lib/db/prisma';
 import { LawCategory, LawStatus, Prisma } from '@prisma/client';
 import { createHash } from 'crypto';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 案件类型 → 法条分类映射
@@ -23,6 +24,7 @@ export const CASE_TYPE_TO_LAW_CATEGORIES: Record<string, LawCategory[]> = {
 };
 
 export type LocalArticle = {
+  id?: string; // real DB UUID (present for local articles, absent for LawStar results)
   lawName: string;
   articleNumber: string;
   fullText: string;
@@ -68,6 +70,7 @@ export async function searchLocalLawArticles(
           : {}),
       },
       select: {
+        id: true,
         lawName: true,
         articleNumber: true,
         fullText: true,
@@ -80,7 +83,7 @@ export async function searchLocalLawArticles(
 
     return articles;
   } catch (err) {
-    console.error('本地法条检索失败:', err);
+    logger.error('本地法条检索失败:', err);
     return [];
   }
 }
@@ -141,7 +144,7 @@ export async function saveLawStarToCache(
       },
     });
   } catch (err) {
-    console.warn('LawStar 缓存写入失败:', err);
+    logger.warn('LawStar 缓存写入失败:', err);
   }
 }
 
@@ -155,7 +158,7 @@ export async function searchLawStarFallback(
   limit = 4
 ): Promise<LocalArticle[]> {
   if (!isLawStarAvailable()) {
-    console.log('LawStar 未配置，跳过二级备用检索');
+    logger.info('LawStar 未配置，跳过二级备用检索');
     return [];
   }
 
@@ -166,7 +169,7 @@ export async function searchLawStarFallback(
 
   const cached = await getLawStarFromCache(queryHash);
   if (cached) {
-    console.log(`LawStar 缓存命中，返回 ${cached.length} 条法条`);
+    logger.info(`LawStar 缓存命中，返回 ${cached.length} 条法条`);
     return cached;
   }
 
@@ -196,12 +199,12 @@ export async function searchLawStarFallback(
 
     if (articles.length > 0) {
       await saveLawStarToCache(queryHash, query, articles);
-      console.log(`LawStar 检索成功，获取 ${articles.length} 条法条（已缓存）`);
+      logger.info(`LawStar 检索成功，获取 ${articles.length} 条法条（已缓存）`);
     }
 
     return articles;
   } catch (err) {
-    console.error('LawStar 二级备用检索失败:', err);
+    logger.error('LawStar 二级备用检索失败:', err);
     return [];
   }
 }
@@ -232,7 +235,7 @@ export async function searchAllLawArticles(
   );
 
   if (localArticles.length >= 2) {
-    console.log(`本地DB检索到 ${localArticles.length} 条相关法条`);
+    logger.info(`本地DB检索到 ${localArticles.length} 条相关法条`);
     return {
       articles: localArticles,
       localCount: localArticles.length,
@@ -240,7 +243,7 @@ export async function searchAllLawArticles(
     };
   }
 
-  console.log(
+  logger.info(
     `本地DB仅检索到 ${localArticles.length} 条法条，触发 LawStar 二级备用检索…`
   );
   const lawstarArticles = await searchLawStarFallback(
@@ -262,7 +265,7 @@ export async function searchAllLawArticles(
   }
 
   if (lawstarArticles.length > 0) {
-    console.log(
+    logger.info(
       `LawStar 补充了 ${lawstarArticles.length} 条法条，合计 ${merged.length} 条`
     );
   }

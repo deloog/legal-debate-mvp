@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ReportDetailResponse, ReportContent } from '@/types/stats';
 
-export default function ReportDetailPage(): React.ReactElement {
+export default function ReportDetailPage(): React.ReactElement | null {
   const router = useRouter();
   const params = useParams();
   const reportId = params.id as string;

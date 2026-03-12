@@ -335,7 +335,7 @@ export class LawArticleRelationService {
         verifiedBy,
         verifiedAt: new Date(),
         rejectionReason: isApproved ? null : (comment ?? null),
-        reviewHistory: newReviewHistory as unknown as Prisma.JsonValue,
+        reviewHistory: newReviewHistory as unknown as Prisma.InputJsonValue,
       },
     });
   }

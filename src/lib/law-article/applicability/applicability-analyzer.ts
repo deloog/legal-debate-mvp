@@ -1,402 +1,270 @@
+import { LawArticle } from '@prisma/client';
+import { DocumentAnalysisOutput } from '@/lib/agent/doc-analyzer/core/types';
 import {
   ApplicabilityInput,
-  ApplicabilityAnalysisReport,
-  ArticleApplicabilityResult,
   ApplicabilityConfig,
-  AnalysisStatistics,
+  ArticleApplicabilityResult,
+  ApplicabilityAnalysisReport,
   DEFAULT_APPLICABILITY_CONFIG,
-  SemanticMatchResult,
-  RuleValidationResult,
-  AIReviewResult,
 } from './types';
-import { LawArticle, LawStatus } from '@prisma/client';
-import SemanticMatcher from './semantic-matcher';
-import RuleValidator from './rule-validator';
-import AIReviewer from './ai-reviewer';
+import { RuleValidator } from './rule-validator';
+import { AIReviewer } from './ai-reviewer';
 
 /**
  * 法条适用性分析器
  *
- * 五层架构主类，整合所有分析层
+ * 两阶段流水线：
+ *
+ * Phase 0 — 硬性规则过滤（同步，0 AI 成本）
+ *   基于客观事实过滤明显无效法条：已废止、草案、未生效、已过期。
+ *   AMENDED（已修订）法条通过过滤，附带警告由 AI 层综合判断。
+ *
+ * Phase 1 — AI 适用性分析（并行，受 concurrency 参数控制）
+ *   每条通过过滤的法条发起一次 AI 调用，在单个 prompt 中完成：
+ *   语义相关性评估 + 适用性判断 + 评分 + 原因 + 风险警告。
+ *   所有 AI 调用按批次并行执行，避免串行等待。
  */
 export class ApplicabilityAnalyzer {
-  private semanticMatcher!: SemanticMatcher;
-  private ruleValidator!: RuleValidator;
-  private aiReviewer!: AIReviewer;
-  private initialized: boolean = false;
+  private ruleValidator: RuleValidator;
+  private aiReviewer: AIReviewer;
+  private initialized = false;
 
-  /**
-   * 初始化分析器
-   */
-  public async initialize(): Promise<void> {
-    if (this.initialized) {
-      return;
-    }
-
-    this.semanticMatcher = new SemanticMatcher();
+  constructor() {
     this.ruleValidator = new RuleValidator();
     this.aiReviewer = new AIReviewer();
+  }
 
-    await Promise.all([
-      this.semanticMatcher.initialize(),
-      // RuleValidator不需要初始化
-      this.aiReviewer.initialize(),
-    ]);
-
+  public async initialize(): Promise<void> {
+    if (this.initialized) return;
+    await this.aiReviewer.initialize();
     this.initialized = true;
   }
 
-  /**
-   * 分析法条适用性（主入口）
-   */
-  public async analyze(
-    input: ApplicabilityInput
-  ): Promise<ApplicabilityAnalysisReport> {
+  public async analyze(input: ApplicabilityInput): Promise<ApplicabilityAnalysisReport> {
     const config: Required<ApplicabilityConfig> = {
       ...DEFAULT_APPLICABILITY_CONFIG,
       ...input.config,
     };
     const startTime = Date.now();
+    const results: ArticleApplicabilityResult[] = [];
 
-    // 使用配置的阈值
-    const thresholds = {
-      minExclusionScore: config.minExclusionScore,
-      aiLowConfidenceThreshold: config.aiLowConfidenceThreshold,
-      defaultApplicabilityThreshold: config.defaultApplicabilityThreshold,
-    };
+    // ─── Phase 0: 硬性规则过滤 ───────────────────────────────────────────────
+    const filterStart = Date.now();
+    const filterResults = this.ruleValidator.validateArticles(input.articles);
+    const ruleValidationTime = Date.now() - filterStart;
 
-    // 记录各阶段耗时
-    const timings = {
-      semanticMatching: 0,
-      ruleValidation: 0,
-      aiReview: 0,
-    };
+    const passedArticles: LawArticle[] = [];
 
-    // Layer 1: AI语义匹配
-    let semanticMatches = new Map<string, SemanticMatchResult>();
-    if (config.useAI) {
-      const semanticStart = Date.now();
-      semanticMatches = await this.semanticMatcher.matchArticles(
-        input.articles,
-        input.caseInfo
-      );
-      timings.semanticMatching = Date.now() - semanticStart;
+    for (const article of input.articles) {
+      const filterResult = filterResults.get(article.id)!;
+      if (!filterResult.passed) {
+        results.push({
+          articleId: article.id,
+          articleNumber: article.articleNumber,
+          lawName: article.lawName,
+          applicable: false,
+          score: 0,
+          semanticScore: 0,
+          ruleScore: 0,
+          reasons: [filterResult.reason ?? '法条未通过有效性检查'],
+          warnings: filterResult.warnings,
+          ruleValidation: filterResult,
+        });
+      } else {
+        passedArticles.push(article);
+      }
     }
 
-    // Layer 2: 规则验证
-    let ruleValidations = new Map<string, RuleValidationResult>();
-    if (config.useRuleValidation) {
-      const ruleStart = Date.now();
-      ruleValidations = this.ruleValidator.validateArticles(
-        input.articles,
-        input.caseInfo
+    // ─── Phase 1: AI 适用性分析（并行） ───────────────────────────────────────
+    const aiStart = Date.now();
+    const useAI = config.useAI !== false && config.useAIReview !== false;
+
+    if (useAI && passedArticles.length > 0) {
+      const caseContext = this.buildCaseContext(input.caseInfo);
+      const concurrency = config.concurrency ?? 5;
+      const aiResults = await this.aiReviewer.analyzeArticles(
+        passedArticles,
+        caseContext,
+        concurrency
       );
-      timings.ruleValidation = Date.now() - ruleStart;
+
+      for (const article of passedArticles) {
+        const filterResult = filterResults.get(article.id)!;
+        const aiResult = aiResults.get(article.id) ?? {
+          applicable: false,
+          score: 0.3,
+          confidence: 0.3,
+          reasons: ['AI分析结果缺失，需要人工确认'],
+          warnings: [],
+        };
+        results.push({
+          articleId: article.id,
+          articleNumber: article.articleNumber,
+          lawName: article.lawName,
+          applicable: aiResult.applicable && aiResult.score >= config.minApplicabilityScore,
+          score: aiResult.score,
+          semanticScore: aiResult.score,
+          ruleScore: 1.0,
+          aiConfidence: aiResult.confidence,
+          reasons: aiResult.reasons,
+          warnings: [...filterResult.warnings, ...aiResult.warnings],
+          ruleValidation: filterResult,
+        });
+      }
+    } else {
+      // AI 禁用：用法条层级评分作为 fallback
+      for (const article of passedArticles) {
+        const filterResult = filterResults.get(article.id)!;
+        const levelScore = this.getLevelScore(article.lawType);
+        results.push({
+          articleId: article.id,
+          articleNumber: article.articleNumber,
+          lawName: article.lawName,
+          applicable: levelScore >= config.minApplicabilityScore,
+          score: levelScore,
+          semanticScore: 0,
+          ruleScore: levelScore,
+          reasons: ['基于法条层级的规则评分（AI分析未启用）'],
+          warnings: filterResult.warnings,
+          ruleValidation: filterResult,
+        });
+      }
     }
 
-    // Layer 3: AI审查
-    let aiReviews = new Map<string, AIReviewResult>();
-    if (config.useAIReview) {
-      const aiStart = Date.now();
-      aiReviews = await this.aiReviewer.reviewArticles(
-        input.articles,
-        input.caseInfo,
-        semanticMatches,
-        ruleValidations
-      );
-      timings.aiReview = Date.now() - aiStart;
-    }
+    const semanticMatchingTime = Date.now() - aiStart;
 
-    // 综合分析结果
-    const results = this.synthesizeResults(
-      input.articles,
-      semanticMatches,
-      ruleValidations,
-      aiReviews,
-      thresholds
-    );
+    // ─── 排序 + 统计 ─────────────────────────────────────────────────────────
+    results.sort((a, b) => b.score - a.score);
 
-    // 计算统计信息
-    const statistics = this.calculateStatistics(results, timings, startTime);
+    const applicableCount = results.filter(r => r.applicable).length;
+    const scores = results.map(r => r.score);
 
-    // 生成报告
     return {
       analyzedAt: new Date(),
       totalArticles: input.articles.length,
-      applicableArticles: results.filter(r => r.applicable).length,
-      notApplicableArticles: results.filter(r => !r.applicable).length,
+      applicableArticles: applicableCount,
+      notApplicableArticles: results.length - applicableCount,
       results,
-      statistics,
+      statistics: {
+        averageScore: scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0,
+        maxScore: scores.length > 0 ? Math.max(...scores) : 0,
+        minScore: scores.length > 0 ? Math.min(...scores) : 0,
+        executionTime: Date.now() - startTime,
+        ruleValidationTime,
+        semanticMatchingTime,
+        aiReviewTime: 0,
+        applicableRatio: results.length > 0 ? applicableCount / results.length : 0,
+        byType: this.groupByType(results, input.articles),
+        byCategory: this.groupByCategory(results, input.articles),
+      },
       config,
     };
   }
 
   /**
-   * 综合分析结果
+   * 将案情信息构建为 AI prompt 的文本上下文
    */
-  private synthesizeResults(
-    articles: LawArticle[],
-    semanticMatches: Map<string, SemanticMatchResult>,
-    ruleValidations: Map<string, RuleValidationResult>,
-    aiReviews: Map<string, AIReviewResult>,
-    thresholds: {
-      minExclusionScore: number;
-      aiLowConfidenceThreshold: number;
-      defaultApplicabilityThreshold: number;
+  private buildCaseContext(caseInfo: DocumentAnalysisOutput): string {
+    const { extractedData } = caseInfo;
+    const parts: string[] = [];
+
+    if (extractedData.caseType) {
+      parts.push(`案件类型：${extractedData.caseType}`);
     }
-  ): ArticleApplicabilityResult[] {
-    return articles.map(article => {
-      const semanticMatch = semanticMatches.get(article.id);
-      const ruleValidation = ruleValidations.get(article.id);
-      const aiReview = aiReviews.get(article.id);
+    if (extractedData.parties?.length) {
+      const plaintiff = extractedData.parties
+        .filter(p => p.type === 'plaintiff')
+        .map(p => p.name)
+        .join('、');
+      const defendant = extractedData.parties
+        .filter(p => p.type === 'defendant')
+        .map(p => p.name)
+        .join('、');
+      if (plaintiff) parts.push(`原告：${plaintiff}`);
+      if (defendant) parts.push(`被告：${defendant}`);
+    }
+    if (extractedData.claims?.length) {
+      const claimTexts = extractedData.claims
+        .slice(0, 5)
+        .map(c => c.content)
+        .join('；');
+      parts.push(`诉讼请求：${claimTexts}`);
+    }
+    if (extractedData.keyFacts?.length) {
+      const factTexts = extractedData.keyFacts
+        .slice(0, 5)
+        .map(f => f.description)
+        .join('；');
+      parts.push(`关键事实：${factTexts}`);
+    }
+    if (extractedData.disputeFocuses?.length) {
+      const focusTexts = extractedData.disputeFocuses
+        .slice(0, 3)
+        .map(d => d.coreIssue)
+        .join('；');
+      parts.push(`争议焦点：${focusTexts}`);
+    }
+    if (extractedData.summary) {
+      parts.push(`案件摘要：${extractedData.summary}`);
+    }
 
-      const semanticScore = semanticMatch?.semanticRelevance || 0;
-      const ruleScore = ruleValidation?.overallScore || 0;
-
-      // 综合评分计算
-      const score = this.calculateFinalScore(
-        semanticScore,
-        ruleScore,
-        aiReview
-      );
-
-      // 判断是否适用
-      const applicable = this.determineApplicability(
-        score,
-        aiReview,
-        thresholds
-      );
-
-      // 添加法条状态警告
-      const statusWarning = this.addStatusWarning(article);
-
-      // 收集原因和警告
-      const reasons = this.collectReasons(
-        semanticMatch,
-        ruleValidation,
-        aiReview
-      );
-      const warnings = this.collectWarnings(
-        semanticMatch,
-        ruleValidation,
-        aiReview
-      );
-
-      return {
-        articleId: article.id,
-        articleNumber: article.articleNumber,
-        lawName: article.lawName,
-        applicable,
-        score,
-        semanticScore,
-        ruleScore,
-        aiConfidence: aiReview?.confidence,
-        reasons,
-        warnings,
-        statusWarning,
-        semanticMatch,
-        ruleValidation,
-      };
-    });
+    return parts.join('\n') || '（案情信息不完整，请根据法条内容综合判断）';
   }
 
   /**
-   * 添加法条状态警告
+   * 根据法条类型返回层级基准评分（AI 禁用时的 fallback）
    */
-  private addStatusWarning(
-    article: LawArticle
-  ): { level: 'error' | 'warning' | 'info'; message: string } | undefined {
-    if (article.status === LawStatus.REPEALED) {
-      return {
-        level: 'error',
-        message: '⚠️ 已废止 - 该法条已失效，不建议引用',
-      };
-    }
-    if (article.status === LawStatus.AMENDED) {
-      return {
-        level: 'warning',
-        message: '⚠️ 已修订 - 请确认使用最新版本',
-      };
-    }
-    if (article.status === LawStatus.EXPIRED) {
-      return {
-        level: 'warning',
-        message: '⚠️ 已过期 - 法条已超过有效期',
-      };
-    }
-    return undefined;
-  }
-
-  /**
-   * 计算最终适用性评分
-   */
-  private calculateFinalScore(
-    semanticScore: number,
-    ruleScore: number,
-    aiReview: AIReviewResult | undefined
-  ): number {
-    if (aiReview && aiReview.confidence !== undefined) {
-      // 有AI审查结果，综合三者
-      return semanticScore * 0.3 + ruleScore * 0.3 + aiReview.confidence * 0.4;
-    }
-    // 无AI审查结果，综合语义和规则
-    return semanticScore * 0.4 + ruleScore * 0.6;
-  }
-
-  /**
-   * 判断是否适用
-   * 使用配置的阈值
-   */
-  private determineApplicability(
-    score: number,
-    aiReview: AIReviewResult | undefined,
-    thresholds: {
-      minExclusionScore: number;
-      aiLowConfidenceThreshold: number;
-      defaultApplicabilityThreshold: number;
-    }
-  ): boolean {
-    // 评分低于排除阈值的直接排除
-    if (score < thresholds.minExclusionScore) {
-      return false;
-    }
-
-    // 如果AI明确判断不适用，且评分也低，返回false
-    if (
-      aiReview &&
-      aiReview.applicable === false &&
-      score < thresholds.aiLowConfidenceThreshold
-    ) {
-      return false;
-    }
-
-    // 如果AI明确判断适用，返回true
-    if (aiReview && aiReview.applicable === true) {
-      return true;
-    }
-
-    // 否则根据配置的默认适用性阈值判断
-    return score >= thresholds.defaultApplicabilityThreshold;
-  }
-
-  /**
-   * 收集适用原因
-   */
-  private collectReasons(
-    semanticMatch: SemanticMatchResult | undefined,
-    ruleValidation: RuleValidationResult | undefined,
-    aiReview: AIReviewResult | undefined
-  ): string[] {
-    const reasons: string[] = [];
-
-    if (semanticMatch?.relevanceReason) {
-      reasons.push(semanticMatch.relevanceReason);
-    }
-    if (ruleValidation?.validity?.reason) {
-      reasons.push(ruleValidation.validity.reason);
-    }
-    if (ruleValidation?.scope?.reason) {
-      reasons.push(ruleValidation.scope.reason);
-    }
-    if (aiReview?.reasons && aiReview.reasons.length > 0) {
-      reasons.push(...aiReview.reasons);
-    }
-
-    return reasons;
-  }
-
-  /**
-   * 收集警告信息
-   */
-  private collectWarnings(
-    _semanticMatch: SemanticMatchResult | undefined,
-    ruleValidation: RuleValidationResult | undefined,
-    aiReview: AIReviewResult | undefined
-  ): string[] {
-    const warnings: string[] = [];
-
-    if (!ruleValidation?.validity?.passed && ruleValidation?.validity?.reason) {
-      warnings.push(ruleValidation.validity.reason);
-    }
-    if (!ruleValidation?.scope?.passed && ruleValidation?.scope?.reason) {
-      warnings.push(ruleValidation.scope.reason);
-    }
-    if (aiReview?.warnings && aiReview.warnings.length > 0) {
-      warnings.push(...aiReview.warnings);
-    }
-
-    return warnings;
-  }
-
-  /**
-   * 计算统计信息
-   */
-  private calculateStatistics(
-    results: ArticleApplicabilityResult[],
-    timings: {
-      semanticMatching: number;
-      ruleValidation: number;
-      aiReview: number;
-    },
-    startTime: number
-  ): AnalysisStatistics {
-    const executionTime = Date.now() - startTime;
-    const scores = results.map(r => r.score);
-    const applicableCount = results.filter(r => r.applicable).length;
-
-    return {
-      averageScore: scores.reduce((a, b) => a + b, 0) / results.length,
-      maxScore: Math.max(...scores),
-      minScore: Math.min(...scores),
-      executionTime,
-      semanticMatchingTime: timings.semanticMatching,
-      ruleValidationTime: timings.ruleValidation,
-      aiReviewTime: timings.aiReview,
-      applicableRatio: applicableCount / results.length,
-      byType: this.groupByType(results),
-      byCategory: this.groupByCategory(results),
+  private getLevelScore(lawType: string): number {
+    const scores: Record<string, number> = {
+      CONSTITUTION: 0.9,
+      LAW: 1.0,
+      ADMINISTRATIVE_REGULATION: 0.85,
+      JUDICIAL_INTERPRETATION: 0.8,
+      LOCAL_REGULATION: 0.7,
+      DEPARTMENTAL_RULE: 0.65,
+      OTHER: 0.5,
     };
+    return scores[lawType] ?? 0.5;
   }
 
   /**
-   * 按法条类型分组统计
+   * 按法条类型统计适用数量（实际数据，非硬编码空值）
    */
   private groupByType(
-    results: ArticleApplicabilityResult[]
+    results: ArticleApplicabilityResult[],
+    articles: LawArticle[]
   ): Record<string, number> {
-    return {
-      applicable: results.filter(r => r.applicable).length,
-      notApplicable: results.filter(r => !r.applicable).length,
-    };
+    const map: Record<string, number> = {};
+    for (const article of articles) {
+      const result = results.find(r => r.articleId === article.id);
+      if (result?.applicable) {
+        map[article.lawType] = (map[article.lawType] ?? 0) + 1;
+      }
+    }
+    return map;
   }
 
   /**
-   * 按法律分类分组统计
+   * 按法律分类统计适用数量（实际数据，非硬编码空值）
    */
   private groupByCategory(
-    results: ArticleApplicabilityResult[]
+    results: ArticleApplicabilityResult[],
+    articles: LawArticle[]
   ): Record<string, number> {
-    return {
-      total: results.length,
-    };
+    const map: Record<string, number> = {};
+    for (const article of articles) {
+      const result = results.find(r => r.articleId === article.id);
+      if (result?.applicable && article.category) {
+        map[article.category] = (map[article.category] ?? 0) + 1;
+      }
+    }
+    return map;
   }
 
-  /**
-   * 清理资源
-   */
   public async destroy(): Promise<void> {
-    if (!this.initialized) {
-      return;
-    }
-
-    await Promise.all([
-      this.semanticMatcher?.destroy(),
-      this.aiReviewer?.destroy(),
-    ]);
-
+    await this.aiReviewer.destroy();
     this.initialized = false;
   }
 }
 
-// 默认导出
 export default ApplicabilityAnalyzer;

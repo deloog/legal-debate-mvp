@@ -6,11 +6,11 @@
  */
 
 import { logger } from '@/lib/agent/security/logger';
-import { notificationService } from '@/lib/notification/notification-service';
 import { FollowUpTaskProcessor } from '@/lib/client/follow-up-task-processor';
+import { prisma } from '@/lib/db/prisma';
+import { notificationService } from '@/lib/notification/notification-service';
 import { FollowUpTaskStatus } from '@/types/client';
 import { NotificationChannel } from '@/types/notification';
-import { prisma } from '@/lib/db/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
 // 设置为Cron任务，每小时执行一次
@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
       const task = FollowUpTaskProcessor['transformTask']({
         ...prismaTask,
         clientName: prismaTask.client?.name,
-        clientPhone: prismaTask.client?.phone || undefined,
-        clientEmail: prismaTask.client?.email || undefined,
+        clientPhone: prismaTask.client?.phone ?? null,
+        clientEmail: prismaTask.client?.email ?? null,
       });
 
       const channels = notificationService.getNotificationChannelsForTask(task);
@@ -102,8 +102,8 @@ export async function POST(request: NextRequest) {
       const task = FollowUpTaskProcessor['transformTask']({
         ...pendingTask,
         clientName: pendingTask.client?.name,
-        clientPhone: pendingTask.client?.phone || undefined,
-        clientEmail: pendingTask.client?.email || undefined,
+        clientPhone: pendingTask.client?.phone ?? null,
+        clientEmail: pendingTask.client?.email ?? null,
       });
 
       const channels = notificationService.getNotificationChannelsForTask(task);

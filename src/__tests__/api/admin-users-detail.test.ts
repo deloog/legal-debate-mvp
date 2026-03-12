@@ -175,7 +175,7 @@ describe('Admin Users Detail API', () => {
       const request = createTestRequest(
         `http://localhost:3000/api/admin/users/${mockUserId}`
       );
-      const response = await GET(request, { params: { id: mockUserId } });
+      const response = await GET(request, { params: Promise.resolve({ id: mockUserId }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -189,7 +189,7 @@ describe('Admin Users Detail API', () => {
       const request = createTestRequest(
         `http://localhost:3000/api/admin/users/${mockUserId}`
       );
-      const response = await GET(request, { params: { id: mockUserId } });
+      const response = await GET(request, { params: Promise.resolve({ id: mockUserId }) });
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -201,7 +201,7 @@ describe('Admin Users Detail API', () => {
       const request = createTestRequest(
         `http://localhost:3000/api/admin/users/${mockUserId}`
       );
-      const response = await GET(request, { params: { id: mockUserId } });
+      const response = await GET(request, { params: Promise.resolve({ id: mockUserId }) });
       const data = await response.json();
 
       expect(response.status).toBe(403);
@@ -213,7 +213,7 @@ describe('Admin Users Detail API', () => {
       const request = createTestRequest(
         'http://localhost:3000/api/admin/users/invalid@id'
       );
-      const response = await GET(request, { params: { id: 'invalid@id' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'invalid@id' }) });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -226,7 +226,7 @@ describe('Admin Users Detail API', () => {
         'http://localhost:3000/api/admin/users/cmnonexistent123'
       );
       const response = await GET(request, {
-        params: { id: 'cmnonexistent123' },
+        params: Promise.resolve({ id: 'cmnonexistent123' }),
       });
       const data = await response.json();
 
@@ -239,7 +239,7 @@ describe('Admin Users Detail API', () => {
       const request = createTestRequest(
         `http://localhost:3000/api/admin/users/${mockUserId}`
       );
-      const response = await GET(request, { params: { id: mockUserId } });
+      const response = await GET(request, { params: Promise.resolve({ id: mockUserId }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -253,7 +253,7 @@ describe('Admin Users Detail API', () => {
       const request = createTestRequest(
         `http://localhost:3000/api/admin/users/${mockUserId}`
       );
-      const response = await GET(request, { params: { id: mockUserId } });
+      const response = await GET(request, { params: Promise.resolve({ id: mockUserId }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -281,7 +281,7 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: mockUserId } });
+      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -307,7 +307,7 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: mockUserId } });
+      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -331,7 +331,7 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: mockUserId } });
+      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -348,7 +348,7 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: mockUserId } });
+      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -365,7 +365,7 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: mockUserId } });
+      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
       const data = await response.json();
 
       expect(response.status).toBe(403);
@@ -382,7 +382,7 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: mockUserId } });
+      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -399,7 +399,7 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await PUT(request, { params: { id: mockUserId } });
+      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -420,7 +420,7 @@ describe('Admin Users Detail API', () => {
       );
 
       const response = await PUT(request, {
-        params: { id: 'cmnonexistent' },
+        params: Promise.resolve({ id: 'cmnonexistent' }),
       });
       const data = await response.json();
 
@@ -439,7 +439,7 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await DELETE(request, { params: { id: mockUserId } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: mockUserId }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -464,7 +464,7 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await DELETE(request, { params: { id: mockUserId } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: mockUserId }) });
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -480,7 +480,7 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await DELETE(request, { params: { id: mockUserId } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: mockUserId }) });
       const data = await response.json();
 
       expect(response.status).toBe(403);
@@ -497,7 +497,7 @@ describe('Admin Users Detail API', () => {
       );
 
       const response = await DELETE(request, {
-        params: { id: mockAdminId },
+        params: Promise.resolve({ id: mockAdminId }),
       });
       const data = await response.json();
 
@@ -514,7 +514,7 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await DELETE(request, { params: { id: 'invalid@id' } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: 'invalid@id' }) });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -534,7 +534,7 @@ describe('Admin Users Detail API', () => {
       );
 
       const response = await DELETE(request, {
-        params: { id: 'cmnonexistent' },
+        params: Promise.resolve({ id: 'cmnonexistent' }),
       });
       const data = await response.json();
 
@@ -573,7 +573,7 @@ describe('Admin Users Detail API', () => {
         `http://localhost:3000/api/admin/users/${mockUserId}`
       );
       const getResponse = await GET(getRequest, {
-        params: { id: mockUserId },
+        params: Promise.resolve({ id: mockUserId }),
       });
       const getData = await getResponse.json();
 
@@ -598,7 +598,7 @@ describe('Admin Users Detail API', () => {
         }
       );
       const putResponse = await PUT(putRequest, {
-        params: { id: mockUserId },
+        params: Promise.resolve({ id: mockUserId }),
       });
       const putData = await putResponse.json();
 
@@ -616,7 +616,7 @@ describe('Admin Users Detail API', () => {
         }
       );
       const deleteResponse = await DELETE(deleteRequest, {
-        params: { id: mockUserId },
+        params: Promise.resolve({ id: mockUserId }),
       });
       const deleteData = await deleteResponse.json();
 
@@ -631,7 +631,7 @@ describe('Admin Users Detail API', () => {
       const request = createTestRequest(
         `http://localhost:3000/api/admin/users/${mockUserId}`
       );
-      const response = await GET(request, { params: { id: mockUserId } });
+      const response = await GET(request, { params: Promise.resolve({ id: mockUserId }) });
 
       expect(response.headers.get('Content-Type')).toBe('application/json');
     });
@@ -648,7 +648,7 @@ describe('Admin Users Detail API', () => {
           body: { name: '测试' },
         }
       );
-      const response = await PUT(request, { params: { id: mockUserId } });
+      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
 
       expect(response.headers.get('Content-Type')).toBe('application/json');
     });
@@ -661,7 +661,7 @@ describe('Admin Users Detail API', () => {
           method: 'DELETE',
         }
       );
-      const response = await DELETE(request, { params: { id: mockUserId } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: mockUserId }) });
 
       expect(response.headers.get('Content-Type')).toBe('application/json');
     });

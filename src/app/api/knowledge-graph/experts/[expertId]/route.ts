@@ -16,7 +16,7 @@ import { expertService } from '@/lib/knowledge-graph/expert/expert-service';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { expertId: string } }
+  { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -31,7 +31,7 @@ export async function GET(
     // 从Prisma获取专家详情
     const { prisma } = await import('@/lib/db/prisma');
     const expert = await prisma.knowledgeGraphExpert.findUnique({
-      where: { id: params.expertId },
+      where: { id: (await params).expertId },
       include: {
         user: {
           select: {
@@ -52,7 +52,7 @@ export async function GET(
 
     logger.info('Expert detail fetched successfully', {
       userId: session.user.id,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
     });
 
     return NextResponse.json({
@@ -62,7 +62,7 @@ export async function GET(
   } catch (error) {
     logger.error('获取专家详情失败', {
       error,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
     });
 
     return NextResponse.json(
@@ -80,7 +80,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { expertId: string } }
+  { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -97,7 +97,7 @@ export async function PATCH(
     // 检查权限：只能更新自己的档案，或者管理员可以更新任何档案
     const { prisma } = await import('@/lib/db/prisma');
     const expert = await prisma.knowledgeGraphExpert.findUnique({
-      where: { id: params.expertId },
+      where: { id: (await params).expertId },
     });
 
     if (!expert) {
@@ -138,7 +138,7 @@ export async function PATCH(
 
     logger.info('Expert profile updated successfully', {
       userId: session.user.id,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
     });
 
     return NextResponse.json({
@@ -148,7 +148,7 @@ export async function PATCH(
   } catch (error) {
     logger.error('更新专家档案失败', {
       error,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
     });
 
     return NextResponse.json(
@@ -166,7 +166,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { expertId: string } }
+  { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -193,7 +193,7 @@ export async function DELETE(
 
     // 获取专家信息
     const expert = await prisma.knowledgeGraphExpert.findUnique({
-      where: { id: params.expertId },
+      where: { id: (await params).expertId },
     });
 
     if (!expert) {
@@ -208,7 +208,7 @@ export async function DELETE(
 
     logger.info('Expert profile deleted successfully', {
       userId: session.user.id,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
     });
 
     return NextResponse.json({
@@ -218,7 +218,7 @@ export async function DELETE(
   } catch (error) {
     logger.error('删除专家档案失败', {
       error,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
     });
 
     return NextResponse.json(

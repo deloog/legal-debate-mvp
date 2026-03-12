@@ -149,7 +149,7 @@ export class AIServiceErrorHandler {
         lastError = error as Error;
 
         // 如果这是最后一次尝试，或者错误不可重试，直接抛出
-        if (attempt >= maxRetries || !shouldRetry(error)) {
+        if (attempt >= maxRetries || !shouldRetry(lastError)) {
           throw lastError;
         }
 

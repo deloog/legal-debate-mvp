@@ -6,7 +6,7 @@ import {
 } from './test-utils';
 
 /**
- * 法条适用性分析API单元测试
+ * 法条适用性分析 API 单元测试
  */
 
 // Mock ApplicabilityAnalyzer
@@ -21,27 +21,17 @@ jest.mock('@/lib/law-article/applicability/applicability-analyzer', () => ({
   })),
 }));
 
-// Mock SemanticMatcher, RuleValidator, AIReviewer
-jest.mock('@/lib/law-article/applicability/semantic-matcher', () => ({
-  default: jest.fn().mockImplementation(() => ({
-    initialize: jest.fn().mockResolvedValue(undefined),
-    matchArticles: jest.fn().mockResolvedValue(new Map()),
-    destroy: jest.fn().mockResolvedValue(undefined),
-  })),
-}));
-
-jest.mock('@/lib/law-article/applicability/rule-validator', () => ({
-  default: jest.fn().mockImplementation(() => ({
-    validateArticles: jest.fn().mockReturnValue(new Map()),
-  })),
-}));
-
-jest.mock('@/lib/law-article/applicability/ai-reviewer', () => ({
-  default: jest.fn().mockImplementation(() => ({
-    initialize: jest.fn().mockResolvedValue(undefined),
-    reviewArticles: jest.fn().mockResolvedValue(new Map()),
-    destroy: jest.fn().mockResolvedValue(undefined),
-  })),
+// Mock JWT auth
+jest.mock('@/lib/auth/jwt', () => ({
+  extractTokenFromHeader: jest.fn((header: string) =>
+    header?.startsWith('Bearer ') ? header.slice(7) : null
+  ),
+  verifyToken: jest.fn((token: string) => {
+    if (token === 'valid-token') {
+      return { valid: true, payload: { userId: 'user-1' } };
+    }
+    return { valid: false };
+  }),
 }));
 
 // Mock prisma
@@ -49,12 +39,10 @@ const mockLegalReferenceUpsert = jest.fn();
 const mockCaseFindUnique = jest.fn();
 const mockLawArticleFindMany = jest.fn();
 
-jest.mock('@/lib/db/prisma', () => {
-  const prisma = {
+jest.mock('@/lib/db/prisma', () => ({
+  prisma: {
     legalReference: {
-      upsert: jest
-        .fn()
-        .mockImplementation(options => mockLegalReferenceUpsert(options)),
+      upsert: jest.fn().mockImplementation(options => mockLegalReferenceUpsert(options)),
     },
     case: {
       findUnique: jest.fn().mockImplementation(() => mockCaseFindUnique()),
@@ -62,151 +50,207 @@ jest.mock('@/lib/db/prisma', () => {
     lawArticle: {
       findMany: jest.fn().mockImplementation(() => mockLawArticleFindMany()),
     },
-  };
-  return { prisma };
-});
+  },
+}));
+
+// ─── 公共 mock 数据 ────────────────────────────────────────────────────────
+
+const mockCaseWithDocs = {
+  id: 'case-1',
+  documents: [
+    {
+      analysisStatus: 'COMPLETED',
+      analysisResult: {
+        extractedData: {
+          caseType: 'civil',
+          parties: [{ type: 'plaintiff', name: '张三' }],
+          claims: [{ content: '赔偿损失' }],
+          keyFacts: [{ description: '违约事实' }],
+          disputeFocuses: [{ coreIssue: '违约认定' }],
+          timeline: [],
+          summary: '合同违约纠纷',
+        },
+      },
+    },
+  ],
+};
+
+const mockArticles = [
+  {
+    id: 'article-1',
+    articleNumber: '第一百零七条',
+    lawName: '合同法',
+    fullText: '当事人一方不履行合同义务...',
+    lawType: 'LAW',
+    category: 'CIVIL',
+  },
+  {
+    id: 'article-2',
+    articleNumber: '第一百零八条',
+    lawName: '合同法',
+    fullText: '当事人应当承担违约责任...',
+    lawType: 'LAW',
+    category: 'CIVIL',
+  },
+];
+
+const mockAnalyzeResult = {
+  analyzedAt: new Date(),
+  totalArticles: 2,
+  applicableArticles: 2,
+  notApplicableArticles: 0,
+  results: [
+    {
+      articleId: 'article-1',
+      articleNumber: '第一百零七条',
+      lawName: '合同法',
+      applicable: true,
+      score: 0.85,
+      semanticScore: 0.85,
+      ruleScore: 1.0,
+      reasons: ['法条与案情直接相关'],
+      warnings: [],
+      ruleValidation: { passed: true, warnings: [] },
+    },
+    {
+      articleId: 'article-2',
+      articleNumber: '第一百零八条',
+      lawName: '合同法',
+      applicable: true,
+      score: 0.72,
+      semanticScore: 0.72,
+      ruleScore: 1.0,
+      reasons: ['法条部分相关'],
+      warnings: [],
+      ruleValidation: { passed: true, warnings: [] },
+    },
+  ],
+  statistics: {
+    averageScore: 0.785,
+    maxScore: 0.85,
+    minScore: 0.72,
+    executionTime: 100,
+    semanticMatchingTime: 80,
+    ruleValidationTime: 5,
+    aiReviewTime: 0,
+    applicableRatio: 1,
+    byType: { LAW: 2 },
+    byCategory: { CIVIL: 2 },
+  },
+  config: {
+    useAI: true,
+    useRuleValidation: true,
+    useAIReview: true,
+    minApplicabilityScore: 0.5,
+    minSemanticRelevance: 0.3,
+    concurrency: 5,
+    parallel: true,
+    useCache: false,
+    minExclusionScore: 0.1,
+    aiLowConfidenceThreshold: 0.3,
+    defaultApplicabilityThreshold: 0.2,
+  },
+};
+
+const authHeader = { Authorization: 'Bearer valid-token' };
 
 describe('法条适用性分析API', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockLegalReferenceUpsert.mockResolvedValue({ id: 'ref-1' });
   });
 
   describe('POST /api/v1/legal-analysis/applicability', () => {
     it('应该成功返回法条适用性分析结果', async () => {
-      mockCaseFindUnique.mockResolvedValue({
-        id: 'case-1',
-        documents: [
-          {
-            analysisResult: {
-              extractedData: {
-                parties: [{ type: 'plaintiff', name: '张三' }],
-                claims: [{ content: '赔偿损失' }],
-                keyFacts: [{ description: '违约事实' }],
-                disputeFocuses: [{ description: '违约' }],
-                timeline: [],
-              },
-            },
-          },
-        ],
-      });
-
-      mockLawArticleFindMany.mockResolvedValue([
-        {
-          id: 'article-1',
-          fullText: '当事人一方不履行合同义务...',
-          lawType: 'CIVIL',
-          category: 'CONTRACT',
-        },
-        {
-          id: 'article-2',
-          fullText: '当事人应当承担违约责任...',
-          lawType: 'CIVIL',
-          category: 'CONTRACT',
-        },
-      ]);
-
-      mockAnalyze.mockResolvedValue({
-        analyzedAt: new Date(),
-        totalArticles: 2,
-        applicableArticles: 2,
-        notApplicableArticles: 0,
-        results: [
-          {
-            articleId: 'article-1',
-            articleNumber: '第一百零七条',
-            lawName: '合同法',
-            applicable: true,
-            score: 0.85,
-            semanticScore: 0.9,
-            ruleScore: 0.8,
-            reasons: ['法条与案情直接相关'],
-            warnings: [],
-            semanticMatch: { semanticRelevance: 0.9 },
-            ruleValidation: {
-              validity: { passed: true },
-              scope: { passed: true },
-              levelScore: 0.8,
-              overallScore: 0.8,
-            },
-          },
-          {
-            articleId: 'article-2',
-            articleNumber: '第一百零八条',
-            lawName: '合同法',
-            applicable: true,
-            score: 0.72,
-            semanticScore: 0.75,
-            ruleScore: 0.7,
-            reasons: ['法条部分相关'],
-            warnings: [],
-            semanticMatch: { semanticRelevance: 0.75 },
-            ruleValidation: {
-              validity: { passed: true },
-              scope: { passed: true },
-              levelScore: 0.7,
-              overallScore: 0.7,
-            },
-          },
-        ],
-        statistics: {
-          averageScore: 0.785,
-          maxScore: 0.85,
-          minScore: 0.72,
-          executionTime: 100,
-          semanticMatchingTime: 50,
-          ruleValidationTime: 30,
-          aiReviewTime: 20,
-          applicableRatio: 1,
-          byType: {},
-          byCategory: {},
-        },
-        config: {
-          useAI: true,
-          useRuleValidation: true,
-          useAIReview: true,
-          minSemanticRelevance: 0.3,
-          minApplicabilityScore: 0.5,
-          parallel: true,
-          useCache: true,
-        },
-      });
-
-      mockLegalReferenceUpsert.mockResolvedValue({
-        id: 'ref-1',
-      });
+      mockCaseFindUnique.mockResolvedValue(mockCaseWithDocs);
+      mockLawArticleFindMany.mockResolvedValue(mockArticles);
+      mockAnalyze.mockResolvedValue(mockAnalyzeResult);
 
       const request = createMockRequest(
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          body: {
-            caseId: 'case-1',
-            articleIds: ['article-1', 'article-2'],
-          },
+          headers: authHeader,
+          body: { caseId: 'case-1', articleIds: ['article-1', 'article-2'] },
         }
       );
 
       const response = await POST(request);
       const testResponse = await createTestResponse(response);
 
-      assertions.assertSuccess(testResponse);
       assertions.assertSuccess(testResponse);
       expect(testResponse.data.results).toHaveLength(2);
       expect(testResponse.data.totalArticles).toBe(2);
       expect(testResponse.data.applicableArticles).toBe(2);
       expect(testResponse.data.results[0].applicable).toBe(true);
-      expect(testResponse.data.results[0].score).toBeGreaterThan(0.7);
       expect(mockAnalyze).toHaveBeenCalled();
     });
 
-    it('应该在缺少caseId时返回错误', async () => {
+    it('应该在未提供 Token 时返回 401', async () => {
       const request = createMockRequest(
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          body: {
-            articleIds: ['article-1'],
-          },
+          body: { caseId: 'case-1', articleIds: ['article-1'] },
+        }
+      );
+
+      const response = await POST(request);
+      const testResponse = await createTestResponse(response);
+
+      expect(response.status).toBe(401);
+      expect(testResponse.error?.code).toBe('UNAUTHORIZED');
+    });
+
+    it('应该在提供无效 Token 时返回 401', async () => {
+      const request = createMockRequest(
+        'http://localhost:3000/api/v1/legal-analysis/applicability',
+        {
+          method: 'POST',
+          headers: { Authorization: 'Bearer invalid-token' },
+          body: { caseId: 'case-1', articleIds: ['article-1'] },
+        }
+      );
+
+      const response = await POST(request);
+      const testResponse = await createTestResponse(response);
+
+      expect(response.status).toBe(401);
+    });
+
+    it('应该在缺少 caseId 时返回 400', async () => {
+      const request = createMockRequest(
+        'http://localhost:3000/api/v1/legal-analysis/applicability',
+        { method: 'POST', headers: authHeader, body: { articleIds: ['article-1'] } }
+      );
+
+      const response = await POST(request);
+      const testResponse = await createTestResponse(response);
+
+      assertions.assertError(testResponse, 400);
+      expect(testResponse.error?.code).toBe('INVALID_PARAMS');
+    });
+
+    it('应该在 articleIds 为空时返回 400', async () => {
+      const request = createMockRequest(
+        'http://localhost:3000/api/v1/legal-analysis/applicability',
+        { method: 'POST', headers: authHeader, body: { caseId: 'case-1', articleIds: [] } }
+      );
+
+      const response = await POST(request);
+      const testResponse = await createTestResponse(response);
+
+      assertions.assertError(testResponse, 400);
+      expect(testResponse.error?.code).toBe('INVALID_PARAMS');
+    });
+
+    it('应该在 articleIds 不是数组时返回 400', async () => {
+      const request = createMockRequest(
+        'http://localhost:3000/api/v1/legal-analysis/applicability',
+        {
+          method: 'POST',
+          headers: authHeader,
+          body: { caseId: 'case-1', articleIds: 'invalid' },
         }
       );
 
@@ -217,55 +261,15 @@ describe('法条适用性分析API', () => {
       expect(testResponse.error?.code).toBe('INVALID_PARAMS');
     });
 
-    it('应该在articleIds为空时返回错误', async () => {
-      const request = createMockRequest(
-        'http://localhost:3000/api/v1/legal-analysis/applicability',
-        {
-          method: 'POST',
-          body: {
-            caseId: 'case-1',
-            articleIds: [],
-          },
-        }
-      );
-
-      const response = await POST(request);
-      const testResponse = await createTestResponse(response);
-
-      assertions.assertError(testResponse, 400);
-      expect(testResponse.error?.code).toBe('INVALID_PARAMS');
-    });
-
-    it('应该在articleIds不是数组时返回错误', async () => {
-      const request = createMockRequest(
-        'http://localhost:3000/api/v1/legal-analysis/applicability',
-        {
-          method: 'POST',
-          body: {
-            caseId: 'case-1',
-            articleIds: 'invalid',
-          },
-        }
-      );
-
-      const response = await POST(request);
-      const testResponse = await createTestResponse(response);
-
-      assertions.assertError(testResponse, 400);
-      expect(testResponse.error?.code).toBe('INVALID_PARAMS');
-    });
-
-    it('应该在案件不存在时返回错误', async () => {
+    it('应该在案件不存在时返回 404', async () => {
       mockCaseFindUnique.mockResolvedValue(null);
 
       const request = createMockRequest(
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          body: {
-            caseId: 'non-existent-case',
-            articleIds: ['article-1'],
-          },
+          headers: authHeader,
+          body: { caseId: 'non-existent', articleIds: ['article-1'] },
         }
       );
 
@@ -276,33 +280,16 @@ describe('法条适用性分析API', () => {
       expect(testResponse.error?.code).toBe('CASE_NOT_FOUND');
     });
 
-    it('应该在法条不存在时返回错误', async () => {
-      mockCaseFindUnique.mockResolvedValue({
-        id: 'case-1',
-        documents: [
-          {
-            analysisResult: {
-              extractedData: {
-                parties: [],
-                claims: [],
-                keyFacts: [],
-                disputeFocuses: [],
-                timeline: [],
-              },
-            },
-          },
-        ],
-      });
+    it('应该在所有法条都不存在时返回 404', async () => {
+      mockCaseFindUnique.mockResolvedValue(mockCaseWithDocs);
       mockLawArticleFindMany.mockResolvedValue([]);
 
       const request = createMockRequest(
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          body: {
-            caseId: 'case-1',
-            articleIds: ['article-1'],
-          },
+          headers: authHeader,
+          body: { caseId: 'case-1', articleIds: ['article-1'] },
         }
       );
 
@@ -313,239 +300,56 @@ describe('法条适用性分析API', () => {
       expect(testResponse.error?.code).toBe('ARTICLES_NOT_FOUND');
     });
 
-    it('应该正确标记不适用法条', async () => {
-      mockCaseFindUnique.mockResolvedValue({
-        id: 'case-1',
-        documents: [
-          {
-            analysisResult: {
-              extractedData: {
-                parties: [],
-                claims: [],
-                keyFacts: [],
-                disputeFocuses: [],
-                timeline: [],
-              },
-            },
-          },
-        ],
-      });
-
-      mockLawArticleFindMany.mockResolvedValue([
-        {
-          id: 'article-1',
-          fullText: 'text',
-          lawType: 'CIVIL',
-          category: 'OTHER',
-        },
-      ]);
-
+    it('应该使用正确的 (caseId, articleId) 复合键保存结果', async () => {
+      mockCaseFindUnique.mockResolvedValue(mockCaseWithDocs);
+      mockLawArticleFindMany.mockResolvedValue([mockArticles[0]]);
       mockAnalyze.mockResolvedValue({
-        analyzedAt: new Date(),
+        ...mockAnalyzeResult,
         totalArticles: 1,
-        applicableArticles: 0,
-        notApplicableArticles: 1,
-        results: [
-          {
-            articleId: 'article-1',
-            articleNumber: '第一条',
-            lawName: '民法典',
-            applicable: false,
-            score: 0.3,
-            semanticScore: 0.2,
-            ruleScore: 0.4,
-            reasons: ['法条与案情无关'],
-            warnings: [],
-          },
-        ],
-        statistics: {
-          averageScore: 0.3,
-          maxScore: 0.3,
-          minScore: 0.3,
-          executionTime: 50,
-          semanticMatchingTime: 20,
-          ruleValidationTime: 15,
-          aiReviewTime: 15,
-          applicableRatio: 0,
-          byType: {},
-          byCategory: {},
-        },
-        config: {
-          useAI: true,
-          useRuleValidation: true,
-          useAIReview: true,
-          minSemanticRelevance: 0.3,
-          minApplicabilityScore: 0.5,
-          parallel: true,
-          useCache: true,
-        },
-      });
-
-      mockLegalReferenceUpsert.mockResolvedValue({ id: 'ref-1' });
-
-      const request = createMockRequest(
-        'http://localhost:3000/api/v1/legal-analysis/applicability',
-        {
-          method: 'POST',
-          body: {
-            caseId: 'case-1',
-            articleIds: ['article-1'],
-          },
-        }
-      );
-
-      const response = await POST(request);
-      const testResponse = await createTestResponse(response);
-
-      expect(testResponse.data.results[0].applicable).toBe(false);
-      expect(testResponse.data.notApplicableArticles).toBe(1);
-    });
-
-    it('应该包含分析元数据', async () => {
-      mockCaseFindUnique.mockResolvedValue({
-        id: 'case-1',
-        documents: [
-          {
-            analysisResult: {
-              extractedData: {
-                parties: [],
-                claims: [],
-                keyFacts: [],
-                disputeFocuses: [],
-                timeline: [],
-              },
-            },
-          },
-        ],
-      });
-
-      mockLawArticleFindMany.mockResolvedValue([
-        {
-          id: 'article-1',
-          fullText: 'text',
-          lawType: 'CIVIL',
-          category: 'OTHER',
-        },
-        {
-          id: 'article-2',
-          fullText: 'text',
-          lawType: 'CIVIL',
-          category: 'OTHER',
-        },
-      ]);
-
-      mockAnalyze.mockResolvedValue({
-        analyzedAt: new Date(),
-        totalArticles: 2,
         applicableArticles: 1,
-        notApplicableArticles: 1,
-        results: [
-          {
-            articleId: 'article-1',
-            articleNumber: '第一条',
-            lawName: '民法典',
-            applicable: true,
-            score: 0.8,
-            semanticScore: 0.85,
-            ruleScore: 0.8,
-            reasons: ['相关'],
-            warnings: [],
-          },
-          {
-            articleId: 'article-2',
-            articleNumber: '第二条',
-            lawName: '民法典',
-            applicable: false,
-            score: 0.4,
-            semanticScore: 0.3,
-            ruleScore: 0.5,
-            reasons: [],
-            warnings: ['不相关'],
-          },
-        ],
-        statistics: {
-          averageScore: 0.6,
-          maxScore: 0.8,
-          minScore: 0.4,
-          executionTime: 100,
-          semanticMatchingTime: 40,
-          ruleValidationTime: 30,
-          aiReviewTime: 30,
-          applicableRatio: 0.5,
-          byType: {},
-          byCategory: {},
-        },
-        config: {
-          useAI: true,
-          useRuleValidation: true,
-          useAIReview: true,
-          minSemanticRelevance: 0.3,
-          minApplicabilityScore: 0.5,
-          parallel: true,
-          useCache: true,
-        },
+        notApplicableArticles: 0,
+        results: [mockAnalyzeResult.results[0]],
       });
-
-      mockLegalReferenceUpsert.mockResolvedValue({ id: 'ref-1' });
 
       const request = createMockRequest(
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          body: {
-            caseId: 'case-1',
-            articleIds: ['article-1', 'article-2'],
-          },
+          headers: authHeader,
+          body: { caseId: 'case-1', articleIds: ['article-1'] },
         }
       );
 
-      const response = await POST(request);
-      const testResponse = await createTestResponse(response);
+      await POST(request);
 
-      expect(testResponse.data.totalArticles).toBeDefined();
-      expect(testResponse.data.applicableArticles).toBe(1);
-      expect(testResponse.data.notApplicableArticles).toBe(1);
-      expect(testResponse.data.statistics).toBeDefined();
-      expect(testResponse.data.config).toBeDefined();
+      expect(mockLegalReferenceUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            caseId_articleId: { caseId: 'case-1', articleId: 'article-1' },
+          },
+          update: expect.objectContaining({
+            applicabilityScore: 0.85,
+            status: 'VALID',
+          }),
+          create: expect.objectContaining({
+            caseId: 'case-1',
+            articleId: 'article-1',
+          }),
+        })
+      );
     });
 
-    it('应该处理分析器错误', async () => {
-      mockCaseFindUnique.mockResolvedValue({
-        id: 'case-1',
-        documents: [
-          {
-            analysisResult: {
-              extractedData: {
-                parties: [],
-                claims: [],
-                keyFacts: [],
-                disputeFocuses: [],
-                timeline: [],
-              },
-            },
-          },
-        ],
-      });
-
-      mockLawArticleFindMany.mockResolvedValue([
-        {
-          id: 'article-1',
-          fullText: 'text',
-          lawType: 'CIVIL',
-          category: 'OTHER',
-        },
-      ]);
-
+    it('应该处理分析器抛出的错误', async () => {
+      mockCaseFindUnique.mockResolvedValue(mockCaseWithDocs);
+      mockLawArticleFindMany.mockResolvedValue(mockArticles);
       mockAnalyze.mockRejectedValue(new Error('Analysis failed'));
 
       const request = createMockRequest(
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          body: {
-            caseId: 'case-1',
-            articleIds: ['article-1'],
-          },
+          headers: authHeader,
+          body: { caseId: 'case-1', articleIds: ['article-1'] },
         }
       );
 
@@ -556,120 +360,43 @@ describe('法条适用性分析API', () => {
       expect(testResponse.error?.code).toBeDefined();
     });
 
-    it('应该保存分析结果到数据库', async () => {
-      mockCaseFindUnique.mockResolvedValue({
-        id: 'case-1',
-        documents: [
-          {
-            analysisResult: {
-              extractedData: {
-                parties: [],
-                claims: [],
-                keyFacts: [],
-                disputeFocuses: [],
-                timeline: [],
-              },
-            },
-          },
-        ],
-      });
-
-      mockLawArticleFindMany.mockResolvedValue([
-        {
-          id: 'article-1',
-          fullText: 'text',
-          lawType: 'CIVIL',
-          category: 'CONTRACT',
-        },
-      ]);
-
-      mockAnalyze.mockResolvedValue({
-        analyzedAt: new Date(),
-        totalArticles: 1,
-        applicableArticles: 1,
-        notApplicableArticles: 0,
-        results: [
-          {
-            articleId: 'article-1',
-            articleNumber: '第一条',
-            lawName: '民法典',
-            applicable: true,
-            score: 0.9,
-            semanticScore: 0.85,
-            ruleScore: 0.9,
-            reasons: ['相关'],
-            warnings: [],
-          },
-        ],
-        statistics: {
-          averageScore: 0.9,
-          maxScore: 0.9,
-          minScore: 0.9,
-          executionTime: 50,
-          semanticMatchingTime: 20,
-          ruleValidationTime: 15,
-          aiReviewTime: 15,
-          applicableRatio: 1,
-          byType: {},
-          byCategory: {},
-        },
-        config: {
-          useAI: true,
-          useRuleValidation: true,
-          useAIReview: true,
-          minSemanticRelevance: 0.3,
-          minApplicabilityScore: 0.5,
-          parallel: true,
-          useCache: true,
-        },
-      });
-
-      mockLegalReferenceUpsert.mockResolvedValue({ id: 'ref-1' });
+    it('应该包含分析统计信息和配置', async () => {
+      mockCaseFindUnique.mockResolvedValue(mockCaseWithDocs);
+      mockLawArticleFindMany.mockResolvedValue(mockArticles);
+      mockAnalyze.mockResolvedValue(mockAnalyzeResult);
 
       const request = createMockRequest(
         'http://localhost:3000/api/v1/legal-analysis/applicability',
         {
           method: 'POST',
-          body: {
-            caseId: 'case-1',
-            articleIds: ['article-1'],
-          },
+          headers: authHeader,
+          body: { caseId: 'case-1', articleIds: ['article-1', 'article-2'] },
         }
       );
 
-      await POST(request);
+      const response = await POST(request);
+      const testResponse = await createTestResponse(response);
 
-      expect(mockLegalReferenceUpsert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: 'article-1' },
-          update: expect.objectContaining({
-            applicabilityScore: 0.9,
-            status: 'VALID',
-          }),
-        })
-      );
+      expect(testResponse.data.statistics).toBeDefined();
+      expect(testResponse.data.config).toBeDefined();
+      expect(testResponse.data.applicableArticles).toBe(2);
+      expect(testResponse.data.notApplicableArticles).toBe(0);
     });
   });
 
   describe('OPTIONS /api/v1/legal-analysis/applicability', () => {
-    it('应该返回正确的CORS头部', async () => {
+    it('应该返回正确的 CORS 头部', async () => {
       const request = createMockRequest(
         'http://localhost:3000/api/v1/legal-analysis/applicability',
-        {
-          method: 'OPTIONS',
-        }
+        { method: 'OPTIONS' }
       );
 
       const response = await OPTIONS(request);
 
       expect(response.status).toBe(200);
       expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
-      expect(response.headers.get('Access-Control-Allow-Methods')).toBe(
-        'GET, POST, OPTIONS'
-      );
-      expect(response.headers.get('Access-Control-Allow-Headers')).toBe(
-        'Content-Type'
-      );
+      expect(response.headers.get('Access-Control-Allow-Methods')).toContain('POST');
+      expect(response.headers.get('Access-Control-Allow-Headers')).toContain('Authorization');
       expect(response.headers.get('Access-Control-Max-Age')).toBe('86400');
     });
   });

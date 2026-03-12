@@ -3,6 +3,7 @@
  * 实现团队角色到系统权限的映射和继承
  */
 
+import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/db/prisma';
 import { TeamRole } from '@prisma/client';
 import {
@@ -162,7 +163,7 @@ export async function getUserTeamPermissions(
 
     return rolePermissions;
   } catch (error) {
-    console.error('获取用户团队权限时出错:', error);
+    logger.error('获取用户团队权限时出错:', error);
     return [];
   }
 }
@@ -228,7 +229,7 @@ export async function getUserAllTeamPermissions(
 
     return uniquePermissions;
   } catch (error) {
-    console.error('获取用户所有团队权限时出错:', error);
+    logger.error('获取用户所有团队权限时出错:', error);
     return [];
   }
 }
@@ -281,7 +282,7 @@ export async function setTeamMemberCustomPermissions(
 
     return true;
   } catch (error) {
-    console.error('设置团队成员自定义权限时出错:', error);
+    logger.error('设置团队成员自定义权限时出错:', error);
     return false;
   }
 }
@@ -378,7 +379,7 @@ export async function getUserEffectivePermissions(
     // 去重并返回
     return [...new Set(effectivePermissions)];
   } catch (error) {
-    console.error('获取用户有效权限时出错:', error);
+    logger.error('获取用户有效权限时出错:', error);
     return [];
   }
 }

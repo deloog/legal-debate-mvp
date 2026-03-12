@@ -142,7 +142,7 @@ export const GET = withErrorHandler(
     {
       params,
     }: {
-      params: { id: string; userId: string };
+      params: Promise<{ id: string; userId: string }>;
     }
   ) => {
     const authUser = await getAuthUser(request);
@@ -153,7 +153,7 @@ export const GET = withErrorHandler(
       );
     }
 
-    const { id: caseId, userId: targetUserId } = params;
+    const { id: caseId, userId: targetUserId } = await params;
 
     const hasAccess = await checkCaseAccess(caseId, authUser.userId);
     if (!hasAccess) {
@@ -205,7 +205,7 @@ export const PUT = withErrorHandler(
     {
       params,
     }: {
-      params: { id: string; userId: string };
+      params: Promise<{ id: string; userId: string }>;
     }
   ) => {
     const authUser = await getAuthUser(request);
@@ -216,7 +216,7 @@ export const PUT = withErrorHandler(
       );
     }
 
-    const { id: caseId, userId: targetUserId } = params;
+    const { id: caseId, userId: targetUserId } = await params;
 
     const { hasPermission } = await checkTeamManagementPermission(
       caseId,
@@ -305,7 +305,7 @@ export const DELETE = withErrorHandler(
     {
       params,
     }: {
-      params: { id: string; userId: string };
+      params: Promise<{ id: string; userId: string }>;
     }
   ) => {
     const authUser = await getAuthUser(request);
@@ -316,7 +316,7 @@ export const DELETE = withErrorHandler(
       );
     }
 
-    const { id: caseId, userId: targetUserId } = params;
+    const { id: caseId, userId: targetUserId } = await params;
 
     const { hasPermission } = await checkTeamManagementPermission(
       caseId,

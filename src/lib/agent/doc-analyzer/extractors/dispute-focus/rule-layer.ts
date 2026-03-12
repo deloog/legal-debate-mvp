@@ -3,6 +3,7 @@
  * 第二层：使用多种规则模式进行匹配
  */
 
+import { logger } from '@/lib/logger';
 import type {
   DisputeFocus,
   DisputeFocusCategory,
@@ -106,11 +107,11 @@ export function ruleMatchLayer(
   const patternsMap = rulePatterns || initializeRulePatterns();
 
   // 调试日志
-  console.log('[规则匹配层] 开始匹配文本长度:', text.length);
-  console.log('[规则匹配层] 模式数量:', patternsMap.size);
+  logger.info('[规则匹配层] 开始匹配文本长度:', text.length);
+  logger.info('[规则匹配层] 模式数量:', patternsMap.size);
 
   for (const [category, patterns] of patternsMap) {
-    console.log(
+    logger.info(
       `[规则匹配层] 处理类别: ${category}, 模式数量: ${patterns.length}`
     );
     for (const pattern of patterns) {

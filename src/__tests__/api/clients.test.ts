@@ -286,7 +286,7 @@ describe('Clients API', () => {
         'http://localhost:3000/api/clients/client-1'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'client-1' },
+        params: Promise.resolve({ id: 'client-1' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -300,7 +300,7 @@ describe('Clients API', () => {
         'http://localhost:3000/api/clients/client-1'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'client-1' },
+        params: Promise.resolve({ id: 'client-1' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -315,7 +315,7 @@ describe('Clients API', () => {
         'http://localhost:3000/api/clients/not-exist'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'not-exist' },
+        params: Promise.resolve({ id: 'not-exist' }),
       });
 
       expect(response.status).toBe(404);
@@ -328,7 +328,7 @@ describe('Clients API', () => {
         'http://localhost:3000/api/clients/client-1'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'client-1' },
+        params: Promise.resolve({ id: 'client-1' }),
       });
 
       expect(response.status).toBe(401);
@@ -341,7 +341,7 @@ describe('Clients API', () => {
         'http://localhost:3000/api/clients/client-1'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'client-1' },
+        params: Promise.resolve({ id: 'client-1' }),
       });
 
       expect(response.status).toBe(404);
@@ -363,7 +363,7 @@ describe('Clients API', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'client-1' },
+        params: Promise.resolve({ id: 'client-1' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -382,7 +382,7 @@ describe('Clients API', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'not-exist' },
+        params: Promise.resolve({ id: 'not-exist' }),
       });
 
       expect(response.status).toBe(404);
@@ -399,7 +399,7 @@ describe('Clients API', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'client-1' },
+        params: Promise.resolve({ id: 'client-1' }),
       });
 
       expect(response.status).toBe(401);
@@ -416,7 +416,7 @@ describe('Clients API', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'client-1' },
+        params: Promise.resolve({ id: 'client-1' }),
       });
 
       expect(response.status).toBe(404);
@@ -432,7 +432,7 @@ describe('Clients API', () => {
         }
       );
       const response = await DELETE(request, {
-        params: { id: 'client-1' },
+        params: Promise.resolve({ id: 'client-1' }),
       });
 
       assertions.assertNoContent(response);
@@ -454,7 +454,7 @@ describe('Clients API', () => {
         }
       );
       const response = await DELETE(request, {
-        params: { id: 'not-exist' },
+        params: Promise.resolve({ id: 'not-exist' }),
       });
 
       expect(response.status).toBe(404);
@@ -470,7 +470,7 @@ describe('Clients API', () => {
         }
       );
       const response = await DELETE(request, {
-        params: { id: 'client-1' },
+        params: Promise.resolve({ id: 'client-1' }),
       });
 
       expect(response.status).toBe(401);
@@ -486,7 +486,7 @@ describe('Clients API', () => {
         }
       );
       const response = await DELETE(request, {
-        params: { id: 'client-1' },
+        params: Promise.resolve({ id: 'client-1' }),
       });
 
       expect(response.status).toBe(404);
@@ -501,7 +501,9 @@ describe('Clients API', () => {
       const response = await OPTIONS_LIST(request);
 
       expect(response.status).toBe(200);
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+        'http://localhost:3000'
+      );
       expect(response.headers.get('Access-Control-Allow-Methods')).toBe(
         'GET, POST, OPTIONS'
       );
@@ -522,7 +524,9 @@ describe('Clients API', () => {
       const response = await OPTIONS_BY_ID(request);
 
       expect(response.status).toBe(200);
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+        'http://localhost:3000'
+      );
       expect(response.headers.get('Access-Control-Allow-Methods')).toBe(
         'GET, PATCH, DELETE, OPTIONS'
       );

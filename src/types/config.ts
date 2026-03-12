@@ -425,7 +425,7 @@ export interface AppConfig {
   monitoring: MonitoringConfig;
   performance: PerformanceConfig;
   backup: BackupConfig;
-  socialLogin: SocialLoginConfig;
+  socialLogin?: SocialLoginConfig;
   storage: StorageConfig;
   smtp: SmtpConfig;
   misc: MiscConfig;

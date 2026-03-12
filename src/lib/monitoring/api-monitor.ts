@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/db/prisma';
-import { DB_LIMITS, DATA_RETENTION } from '../constants/common';
+import { Prisma } from '@prisma/client';
+import { DATA_RETENTION, DB_LIMITS } from '../constants/common';
+import { logger } from '@/lib/logger';
 
 /**
  * API性能指标接口
@@ -53,7 +55,7 @@ export interface BusinessMetrics {
   entityType: string;
   entityId: string;
   userId?: string;
-  details: Record<string, any>;
+  details: Prisma.InputJsonValue;
   timestamp: Date;
 }
 
@@ -84,7 +86,7 @@ export class APIMonitor {
             userAgent: metrics.userAgent,
             ip: metrics.ip,
           },
-          response: metrics.error ? { error: metrics.error } : null,
+          response: metrics.error ? { error: metrics.error } : undefined,
           tokensUsed: Math.round(metrics.responseTime), // 复用字段存储响应时间
           duration: metrics.responseTime,
           success: metrics.statusCode < 400,
@@ -92,7 +94,7 @@ export class APIMonitor {
         },
       });
     } catch (error) {
-      console.error('Failed to log API metrics:', error);
+      logger.error('Failed to log API metrics:', error);
     }
   }
 
@@ -113,14 +115,14 @@ export class APIMonitor {
             table: metrics.table,
             query: metrics.query,
           },
-          response: metrics.error ? { error: metrics.error } : null,
+          response: metrics.error ? { error: metrics.error } : undefined,
           duration: metrics.duration,
           success: metrics.success,
           createdAt: new Date(),
         },
       });
     } catch (error) {
-      console.error('Failed to log database metrics:', error);
+      logger.error('Failed to log database metrics:', error);
     }
   }
 
@@ -139,7 +141,7 @@ export class APIMonitor {
           request: {
             operation: metrics.operation,
           },
-          response: metrics.error ? { error: metrics.error } : null,
+          response: metrics.error ? { error: metrics.error } : undefined,
           tokensUsed: metrics.tokensUsed,
           duration: metrics.duration,
           cost: metrics.cost,
@@ -148,7 +150,7 @@ export class APIMonitor {
         },
       });
     } catch (error) {
-      console.error('Failed to log AI metrics:', error);
+      logger.error('Failed to log AI metrics:', error);
     }
   }
 
@@ -175,7 +177,7 @@ export class APIMonitor {
         },
       });
     } catch (error) {
-      console.error('Failed to log business metrics:', error);
+      logger.error('Failed to log business metrics:', error);
     }
   }
 
@@ -443,9 +445,9 @@ export class APIMonitor {
         },
       });
 
-      console.log(`Cleaned up monitoring data older than ${daysToKeep} days`);
+      logger.info(`Cleaned up monitoring data older than ${daysToKeep} days`);
     } catch (error) {
-      console.error('Failed to cleanup old monitoring data:', error);
+      logger.error('Failed to cleanup old monitoring data:', error);
     }
   }
 }
@@ -519,7 +521,7 @@ export function monitorDatabaseQuery(operation: string, table: string) {
           success,
           error,
         }).catch(logError => {
-          console.error('Failed to log database operation:', logError);
+          logger.error('Failed to log database operation:', logError);
         });
       }
     };
@@ -591,7 +593,7 @@ export function monitorAICall(
           success,
           error,
         }).catch(logError => {
-          console.error('Failed to log AI operation:', logError);
+          logger.error('Failed to log AI operation:', logError);
         });
       }
     };

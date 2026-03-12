@@ -93,7 +93,7 @@ export class ApplicabilityAnalyzer {
    */
   private analyzeSemanticMatch(
     articles: LawArticle[],
-    caseInfo: unknown
+    caseInfo: CaseInfo
   ): Map<string, number> {
     const scores = new Map<string, number>();
 
@@ -110,7 +110,7 @@ export class ApplicabilityAnalyzer {
    */
   private calculateSemanticScore(
     article: LawArticle,
-    caseInfo: unknown
+    caseInfo: CaseInfo
   ): number {
     // 模拟语义匹配：基于关键词匹配度
     const articleKeywords = article.keywords || [];

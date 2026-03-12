@@ -218,7 +218,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         where: { id: document.id },
         data: {
           analysisStatus: 'COMPLETED',
-          analysisResult: mockAnalysisResult as unknown as Prisma.JsonValue,
+          analysisResult: mockAnalysisResult as Prisma.InputJsonValue,
           updatedAt: new Date(),
         },
       });
@@ -340,7 +340,7 @@ async function triggerDocumentAnalysis(
         where: { id: documentId },
         data: {
           analysisStatus: 'COMPLETED',
-          analysisResult: result.data as unknown as Prisma.JsonValue,
+          analysisResult: result.data as unknown as Prisma.InputJsonValue,
           analysisError: null,
           updatedAt: new Date(),
         },

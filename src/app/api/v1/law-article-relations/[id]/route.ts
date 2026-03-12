@@ -12,6 +12,7 @@ import {
   KnowledgeGraphAction,
   KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * POST /api/v1/law-article-relations/[id]
@@ -19,54 +20,58 @@ import {
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // 从 JWT 获取用户身份，防止用户 ID 注入
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: '请先登录' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     // 验证必需字段
-    if (!body.verifiedBy) {
-      return NextResponse.json(
-        { error: '缺少必需字段: verifiedBy' },
-        { status: 400 }
-      );
-    }
-
     if (typeof body.isApproved !== 'boolean') {
       return NextResponse.json(
-        { error: '缺少必需字段: isApproved' },
+        { success: false, error: '缺少必需字段: isApproved' },
         { status: 400 }
       );
     }
 
-    // 验证权限
+    // 验证权限（使用 JWT 中的 userId）
     const permissionCheck = await checkKnowledgeGraphPermission(
-      body.verifiedBy,
+      authUser.userId,
       KnowledgeGraphAction.MANAGE_RELATIONS,
       KnowledgeGraphResource.RELATION
     );
 
     if (!permissionCheck.hasPermission) {
       return NextResponse.json(
-        { error: permissionCheck.reason || '权限不足' },
+        { success: false, error: permissionCheck.reason || '权限不足' },
         { status: 403 }
       );
     }
 
+    const relationId = (await params).id;
+
     // 验证关系
     const relation = await LawArticleRelationService.verifyRelation(
-      params.id,
-      body.verifiedBy,
+      relationId,
+      authUser.userId,
       body.isApproved
     );
 
     // 记录操作日志（异步，不影响主流程）
     try {
       await logKnowledgeGraphAction({
-        userId: body.verifiedBy,
+        userId: authUser.userId,
         action: KnowledgeGraphAction.VERIFY_RELATION,
         resource: KnowledgeGraphResource.RELATION,
-        resourceId: params.id,
+        resourceId: relationId,
         description: body.isApproved ? '验证关系通过' : '验证关系拒绝',
         ipAddress: request.headers.get('x-forwarded-for') || undefined,
         userAgent: request.headers.get('user-agent') || undefined,
@@ -80,13 +85,16 @@ export async function POST(
       logger.error('记录操作日志失败:', logError);
     }
 
-    return NextResponse.json(relation);
+    return NextResponse.json({ success: true, data: relation });
   } catch (error: unknown) {
     logger.error('验证关系失败:', error);
 
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
 
-    return NextResponse.json({ error: errorMessage }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: errorMessage },
+      { status: 400 }
+    );
   }
 }
 
@@ -96,48 +104,49 @@ export async function POST(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // 从请求头获取用户ID
-    const verifiedBy = request.headers.get('x-verified-by');
-
-    if (!verifiedBy) {
+    // 从 JWT 获取用户身份，防止用户 ID 注入
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
-        { error: '缺少必需字段: x-verified-by' },
-        { status: 400 }
+        { success: false, error: '请先登录' },
+        { status: 401 }
       );
     }
 
-    // 验证权限
+    const relationId = (await params).id;
+
+    // 验证权限（使用 JWT 中的 userId）
     const permissionCheck = await checkKnowledgeGraphPermission(
-      verifiedBy,
+      authUser.userId,
       KnowledgeGraphAction.MANAGE_RELATIONS,
       KnowledgeGraphResource.RELATION
     );
 
     if (!permissionCheck.hasPermission) {
       return NextResponse.json(
-        { error: permissionCheck.reason || '权限不足' },
+        { success: false, error: permissionCheck.reason || '权限不足' },
         { status: 403 }
       );
     }
 
     // 删除关系
-    await LawArticleRelationService.deleteRelation(params.id);
+    await LawArticleRelationService.deleteRelation(relationId);
 
     // 记录操作日志（异步，不影响主流程）
     try {
       await logKnowledgeGraphAction({
-        userId: verifiedBy,
+        userId: authUser.userId,
         action: KnowledgeGraphAction.MANAGE_RELATIONS,
         resource: KnowledgeGraphResource.RELATION,
-        resourceId: params.id,
+        resourceId: relationId,
         description: '删除关系',
         ipAddress: request.headers.get('x-forwarded-for') || undefined,
         userAgent: request.headers.get('user-agent') || undefined,
         metadata: {
-          relationId: params.id,
+          relationId,
         },
       });
     } catch (logError) {
@@ -146,14 +155,18 @@ export async function DELETE(
     }
 
     return NextResponse.json({
+      success: true,
       message: '成功删除关系',
-      id: params.id,
+      id: relationId,
     });
   } catch (error: unknown) {
     logger.error('删除关系失败:', error);
 
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
 
-    return NextResponse.json({ error: errorMessage }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: errorMessage },
+      { status: 400 }
+    );
   }
 }

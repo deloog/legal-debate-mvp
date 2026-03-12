@@ -17,7 +17,7 @@ const completeTaskSchema = z.object({
  * 获取跟进任务详情
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -27,7 +27,7 @@ export const GET = withErrorHandler(
     }
 
     const task = await FollowUpTaskProcessor.getTask(
-      params.id,
+      (await params).id,
       authUser.userId
     );
 
@@ -47,7 +47,7 @@ export const GET = withErrorHandler(
  * 标记任务为完成
  */
 export const PATCH = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -60,7 +60,7 @@ export const PATCH = withErrorHandler(
     const validatedData = completeTaskSchema.parse(body);
 
     const task = await FollowUpTaskProcessor.completeTask(
-      params.id,
+      (await params).id,
       authUser.userId,
       validatedData
     );
@@ -81,7 +81,7 @@ export const PATCH = withErrorHandler(
  * 取消跟进任务
  */
 export const DELETE = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -91,7 +91,7 @@ export const DELETE = withErrorHandler(
     }
 
     const success = await FollowUpTaskProcessor.cancelTask(
-      params.id,
+      (await params).id,
       authUser.userId
     );
 

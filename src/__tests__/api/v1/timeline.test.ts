@@ -87,7 +87,7 @@ describe('Timeline API', () => {
         'http://localhost:3000/api/v1/cases/case-123/timeline'
       );
       const response = await GETTimeline(request, {
-        params: { id: 'case-123' },
+        params: Promise.resolve({ id: 'case-123' }),
       });
 
       expect(response.status).toBe(200);
@@ -103,7 +103,7 @@ describe('Timeline API', () => {
         'http://localhost:3000/api/v1/cases/case-123/timeline?eventType=FILING'
       );
       const response = await GETTimeline(request, {
-        params: { id: 'case-123' },
+        params: Promise.resolve({ id: 'case-123' }),
       });
 
       expect(response.status).toBe(200);
@@ -122,7 +122,7 @@ describe('Timeline API', () => {
         'http://localhost:3000/api/v1/cases/case-123/timeline?sortBy=eventDate&sortOrder=desc'
       );
       const response = await GETTimeline(request, {
-        params: { id: 'case-123' },
+        params: Promise.resolve({ id: 'case-123' }),
       });
 
       expect(response.status).toBe(200);
@@ -140,7 +140,7 @@ describe('Timeline API', () => {
         'http://localhost:3000/api/v1/cases/case-123/timeline'
       );
       const response = await GETTimeline(request, {
-        params: { id: 'case-123' },
+        params: Promise.resolve({ id: 'case-123' }),
       });
 
       const isNextResponse = 'status' in response && 'json' in response;
@@ -162,7 +162,7 @@ describe('Timeline API', () => {
         'http://localhost:3000/api/v1/cases/case-999/timeline'
       );
       const response = await GETTimeline(request, {
-        params: { id: 'case-999' },
+        params: Promise.resolve({ id: 'case-999' }),
       });
 
       const isNextResponse = 'status' in response && 'json' in response;
@@ -204,7 +204,7 @@ describe('Timeline API', () => {
           body: validEvent,
         }
       );
-      const response = await POST(request, { params: { id: 'case-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'case-123' }) });
 
       const isNextResponse = 'status' in response && 'json' in response;
       expect(isNextResponse).toBe(true);
@@ -230,7 +230,7 @@ describe('Timeline API', () => {
           body: invalidEvent,
         }
       );
-      const response = await POST(request, { params: { id: 'case-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'case-123' }) });
 
       const isNextResponse = 'status' in response && 'json' in response;
       if (isNextResponse) {
@@ -256,7 +256,7 @@ describe('Timeline API', () => {
           body: invalidEvent,
         }
       );
-      const response = await POST(request, { params: { id: 'case-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'case-123' }) });
 
       const isNextResponse = 'status' in response && 'json' in response;
       if (isNextResponse) {
@@ -283,7 +283,7 @@ describe('Timeline API', () => {
           body: invalidEvent,
         }
       );
-      const response = await POST(request, { params: { id: 'case-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'case-123' }) });
 
       const isNextResponse = 'status' in response && 'json' in response;
       if (isNextResponse) {
@@ -309,7 +309,7 @@ describe('Timeline API', () => {
           body: invalidEvent,
         }
       );
-      const response = await POST(request, { params: { id: 'case-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'case-123' }) });
 
       const isNextResponse = 'status' in response && 'json' in response;
       if (isNextResponse) {
@@ -331,7 +331,7 @@ describe('Timeline API', () => {
           body: validEvent,
         }
       );
-      const response = await POST(request, { params: { id: 'case-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'case-123' }) });
 
       const isNextResponse = 'status' in response && 'json' in response;
       if (isNextResponse) {
@@ -370,7 +370,7 @@ describe('Timeline API', () => {
         'http://localhost:3000/api/v1/timeline-events/event-1'
       );
       const response = await GETTimelineEvent(request, {
-        params: { id: 'event-1' },
+        params: Promise.resolve({ id: 'event-1' }),
       });
 
       expect(response.status).toBe(200);
@@ -385,7 +385,7 @@ describe('Timeline API', () => {
         'http://localhost:3000/api/v1/timeline-events/event-999'
       );
       const response = await GETTimelineEvent(request, {
-        params: { id: 'event-999' },
+        params: Promise.resolve({ id: 'event-999' }),
       });
 
       const isNextResponse = 'status' in response && 'json' in response;
@@ -423,7 +423,7 @@ describe('Timeline API', () => {
         'http://localhost:3000/api/v1/timeline-events/event-1'
       );
       const response = await GETTimelineEvent(request, {
-        params: { id: 'event-1' },
+        params: Promise.resolve({ id: 'event-1' }),
       });
 
       const isNextResponse = 'status' in response && 'json' in response;
@@ -473,7 +473,7 @@ describe('Timeline API', () => {
           body: updateData,
         }
       );
-      const response = await PUT(request, { params: { id: 'event-1' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'event-1' }) });
 
       expect(response.status).toBe(200);
       expect(mockedPrisma.caseTimeline.update).toHaveBeenCalledWith({
@@ -511,7 +511,7 @@ describe('Timeline API', () => {
           body: partialUpdate,
         }
       );
-      const response = await PUT(request, { params: { id: 'event-1' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'event-1' }) });
 
       expect(response.status).toBe(200);
     });
@@ -537,7 +537,7 @@ describe('Timeline API', () => {
           method: 'DELETE',
         }
       );
-      const response = await DELETE(request, { params: { id: 'event-1' } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: 'event-1' }) });
 
       expect(response.status).toBe(200);
       expect(mockedPrisma.caseTimeline.delete).toHaveBeenCalledWith({
@@ -554,7 +554,7 @@ describe('Timeline API', () => {
           method: 'DELETE',
         }
       );
-      const response = await DELETE(request, { params: { id: 'event-999' } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: 'event-999' }) });
 
       const isNextResponse = 'status' in response && 'json' in response;
       if (isNextResponse) {
@@ -582,7 +582,7 @@ describe('Timeline API', () => {
           method: 'DELETE',
         }
       );
-      const response = await DELETE(request, { params: { id: 'event-1' } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: 'event-1' }) });
 
       const isNextResponse = 'status' in response && 'json' in response;
       if (isNextResponse) {
@@ -601,7 +601,7 @@ describe('Timeline API', () => {
         'http://localhost:3000/api/v1/cases/case-123/timeline'
       );
       const response = await GETTimeline(request, {
-        params: { id: 'case-123' },
+        params: Promise.resolve({ id: 'case-123' }),
       });
 
       expect(response.status).toBe(200);

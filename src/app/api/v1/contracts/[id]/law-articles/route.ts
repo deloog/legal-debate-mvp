@@ -7,16 +7,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import {
+  resolveContractUserId,
+  unauthorizedResponse,
+} from '@/app/api/lib/middleware/contract-auth';
 
 /**
  * 获取合同已关联的法条
  */
 export async function GET(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
+  // ─── 认证 ─────────────────────────────────────────────────────────────────
+  const userId = resolveContractUserId(request);
+  if (!userId) return unauthorizedResponse();
+
   try {
-    const { id: contractId } = params;
+    const { id: contractId } = await params;
 
     // 验证合同是否存在
     const contract = await prisma.contract.findUnique({
@@ -28,7 +36,7 @@ export async function GET(
       return NextResponse.json(
         {
           success: false,
-          error: '合同不存在',
+          error: { code: 'CONTRACT_NOT_FOUND', message: '合同不存在' },
         },
         { status: 404 }
       );
@@ -83,7 +91,7 @@ export async function GET(
     return NextResponse.json(
       {
         success: false,
-        error: '获取关联法条失败',
+        error: { code: 'INTERNAL_ERROR', message: '获取关联法条失败' },
       },
       { status: 500 }
     );
@@ -95,30 +103,24 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
+  // ─── 认证 ─────────────────────────────────────────────────────────────────
+  const userId = resolveContractUserId(request);
+  if (!userId) return unauthorizedResponse();
+
   try {
-    const { id: contractId } = params;
+    const { id: contractId } = await params;
     const body = await request.json();
 
-    // 验证请求体
-    const { lawArticleId, addedBy, reason, relevanceScore } = body;
+    // 验证请求体（addedBy 不再从请求体读取，由 JWT token 提供）
+    const { lawArticleId, reason, relevanceScore } = body;
 
     if (!lawArticleId) {
       return NextResponse.json(
         {
           success: false,
-          error: 'lawArticleId是必需的',
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!addedBy) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'addedBy是必需的',
+          error: { code: 'MISSING_PARAMS', message: 'lawArticleId是必需的' },
         },
         { status: 400 }
       );
@@ -134,7 +136,7 @@ export async function POST(
         return NextResponse.json(
           {
             success: false,
-            error: 'relevanceScore必须是0到1之间的数字',
+            error: { code: 'INVALID_PARAMS', message: 'relevanceScore必须是0到1之间的数字' },
           },
           { status: 400 }
         );
@@ -151,7 +153,7 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          error: '合同不存在',
+          error: { code: 'CONTRACT_NOT_FOUND', message: '合同不存在' },
         },
         { status: 404 }
       );
@@ -167,7 +169,7 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          error: '法条不存在',
+          error: { code: 'ARTICLE_NOT_FOUND', message: '法条不存在' },
         },
         { status: 404 }
       );
@@ -187,18 +189,18 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          error: '该法条已经关联到此合同',
+          error: { code: 'ALREADY_ASSOCIATED', message: '该法条已经关联到此合同' },
         },
         { status: 409 }
       );
     }
 
-    // 创建关联
+    // 创建关联（addedBy 使用来自 JWT 的 userId，保证审计链准确）
     const association = await prisma.contractLawArticle.create({
       data: {
         contractId,
         lawArticleId,
-        addedBy,
+        addedBy: userId,
         reason: reason || null,
         relevanceScore: relevanceScore || null,
       },
@@ -238,7 +240,7 @@ export async function POST(
     return NextResponse.json(
       {
         success: false,
-        error: '添加关联失败',
+        error: { code: 'INTERNAL_ERROR', message: '添加关联失败' },
       },
       { status: 500 }
     );

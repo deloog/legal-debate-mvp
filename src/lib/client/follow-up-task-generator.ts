@@ -123,7 +123,10 @@ export class FollowUpTaskGenerator {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      logger.error(`生成跟进任务失败: ${errorMessage}`, error);
+      logger.error(
+        `生成跟进任务失败: ${errorMessage}`,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -196,7 +199,7 @@ export class FollowUpTaskGenerator {
           error instanceof Error ? error.message : String(error);
         logger.error(
           `批量生成跟进任务失败 (${communicationId}): ${errorMessage}`,
-          error
+          error instanceof Error ? error : undefined
         );
       }
     }
@@ -236,7 +239,10 @@ export class FollowUpTaskGenerator {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      logger.error(`自动生成跟进任务失败: ${errorMessage}`, error);
+      logger.error(
+        `自动生成跟进任务失败: ${errorMessage}`,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -272,7 +278,10 @@ export class FollowUpTaskGenerator {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      logger.error(`按日期范围生成跟进任务失败: ${errorMessage}`, error);
+      logger.error(
+        `按日期范围生成跟进任务失败: ${errorMessage}`,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }

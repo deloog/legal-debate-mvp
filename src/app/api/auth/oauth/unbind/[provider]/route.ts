@@ -12,7 +12,7 @@ import { logger } from '@/lib/logger';
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { provider: string } }
+  { params }: { params: Promise<{ provider: string }> }
 ) {
   try {
     // 验证用户身份
@@ -28,7 +28,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const { provider } = params;
+    const { provider } = await params;
 
     // 检查是否可以解绑
     const canUnbind = await OAuthService.canUnbindAccount(

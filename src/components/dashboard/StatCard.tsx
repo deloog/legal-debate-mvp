@@ -4,6 +4,7 @@
 
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import type { StatCard as StatCardType } from '@/types/dashboard';
 
@@ -67,7 +68,7 @@ const icons: Record<string, string> = {
 export function StatCard({ card }: StatCardProps) {
   const colors = colorClasses[card.color];
   const iconPath = icons[card.icon] || icons.case;
-  const CardWrapper = card.link ? Link : 'div';
+  const CardWrapper = (card.link ? Link : 'div') as React.ElementType;
 
   return (
     <CardWrapper

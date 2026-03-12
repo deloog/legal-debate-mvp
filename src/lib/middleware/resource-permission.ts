@@ -259,6 +259,7 @@ async function checkDocumentOwnership(
 
 /**
  * 批量检查多个资源权限
+ * 单次用户查询 + 并行资源检查，避免 O(N) 串行 DB round-trips
  * @param userId 用户ID
  * @param resourceIds 资源ID数组
  * @param resourceType 资源类型
@@ -269,18 +270,54 @@ export async function checkMultipleResourcePermissions(
   resourceIds: string[],
   resourceType: ResourceType
 ): Promise<Record<string, boolean>> {
-  const results: Record<string, boolean> = {};
+  if (resourceIds.length === 0) return {};
 
-  for (const resourceId of resourceIds) {
-    const result = await checkResourceOwnership(
-      userId,
-      resourceId,
-      resourceType
-    );
-    results[resourceId] = result.hasPermission;
+  // 单次用户查询，共享给所有资源检查
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true, deletedAt: true },
+  });
+
+  // 用户无效时，所有资源均无权限
+  if (!user || user.deletedAt) {
+    return Object.fromEntries(resourceIds.map(id => [id, false]));
   }
 
-  return results;
+  // 管理员/超级管理员拥有所有资源权限，无需逐一查询
+  if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+    return Object.fromEntries(resourceIds.map(id => [id, true]));
+  }
+
+  // 并行查询所有资源的所有权
+  const checks = await Promise.all(
+    resourceIds.map(async resourceId => {
+      let hasAccess = false;
+      try {
+        switch (resourceType) {
+          case ResourceType.CASE: {
+            const result = await checkCaseOwnership(userId, resourceId);
+            hasAccess = result.hasPermission;
+            break;
+          }
+          case ResourceType.DEBATE: {
+            const result = await checkDebateOwnership(userId, resourceId);
+            hasAccess = result.hasPermission;
+            break;
+          }
+          case ResourceType.DOCUMENT: {
+            const result = await checkDocumentOwnership(userId, resourceId);
+            hasAccess = result.hasPermission;
+            break;
+          }
+        }
+      } catch (error) {
+        logger.error(`批量权限检查失败 [resourceId=${resourceId}]: ${error}`);
+      }
+      return [resourceId, hasAccess] as [string, boolean];
+    })
+  );
+
+  return Object.fromEntries(checks);
 }
 
 /**

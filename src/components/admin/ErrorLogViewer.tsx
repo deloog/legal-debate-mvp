@@ -165,7 +165,7 @@ export function ErrorLogViewer({
                         </pre>
                       </div>
                     )}
-                    {log.context && Object.keys(log.context).length > 0 && (
+                    {!!log.context && Object.keys(log.context as Record<string, unknown>).length > 0 && (
                       <div>
                         <div className='text-xs font-medium text-gray-700 mb-1'>
                           上下文信息：

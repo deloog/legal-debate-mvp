@@ -10,6 +10,7 @@ import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { z } from 'zod';
 import { EvidenceStatus } from '@/types/evidence';
+import { logger } from '@/lib/logger';
 
 const createEvidenceSchema = z.object({
   caseId: z.string().min(1, '案件ID不能为空'),
@@ -150,12 +151,46 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
   const query = queryEvidenceSchema.parse(Object.fromEntries(searchParams));
 
+  // 构建基础查询条件
   const where: Record<string, unknown> = {
     deletedAt: null,
   };
 
+  // 如果指定了案件ID，需要验证用户是否有权限访问该案件
   if (query.caseId) {
+    const caseExists = await prisma.case.findFirst({
+      where: {
+        id: query.caseId,
+        userId: authUser.userId,
+        deletedAt: null,
+      },
+    });
+
+    if (!caseExists) {
+      logger.warn('用户尝试访问无权访问的案件证据:', {
+        userId: authUser.userId,
+        caseId: query.caseId,
+      });
+      return NextResponse.json(
+        { error: '案件不存在或无权限', message: '案件不存在或您没有权限访问' },
+        { status: 404 }
+      );
+    }
+
     where.caseId = query.caseId;
+  } else {
+    // 如果没有指定案件ID，只返回用户有权限的案件证据
+    const userCases = await prisma.case.findMany({
+      where: {
+        userId: authUser.userId,
+        deletedAt: null,
+      },
+      select: { id: true },
+    });
+
+    where.caseId = {
+      in: userCases.map(c => c.id),
+    };
   }
 
   if (query.type) {
@@ -265,6 +300,10 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   });
 
   if (!caseExists) {
+    logger.warn('用户尝试为无权访问的案件创建证据:', {
+      userId: authUser.userId,
+      caseId: validatedData.caseId,
+    });
     return NextResponse.json(
       { error: '案件不存在或无权限', message: '案件不存在或您没有权限访问' },
       { status: 404 }
@@ -292,6 +331,12 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
         },
       },
     },
+  });
+
+  logger.info('证据创建成功:', {
+    userId: authUser.userId,
+    caseId: validatedData.caseId,
+    evidenceId: (evidence as { id: string }).id,
   });
 
   const evidenceDetail = await mapEvidenceToDetail(evidence, true);

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import type {
   CircuitState,
   CircuitBreakerConfig,
@@ -306,7 +307,7 @@ export class CircuitBreaker {
       try {
         listener(event, state);
       } catch (error) {
-        console.error('Error in circuit breaker event listener:', error);
+        logger.error('Error in circuit breaker event listener:', error);
       }
     });
   }

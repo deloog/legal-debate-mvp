@@ -1,5 +1,6 @@
 import { logger } from '@/lib/agent/security/logger';
 import { prisma } from '../db/prisma';
+import { Prisma } from '@prisma/client';
 import { SimilaritySearcherFactory } from '../ai/case/similarity-searcher';
 import { CaseEmbeddingServiceFactory } from './embedding-service';
 import { SuccessRateAnalyzerFactory } from '../ai/case/success-rate-analyzer';
@@ -86,7 +87,7 @@ export class SimilarCaseService {
         where: {
           ...where,
           id: { not: params.caseId }, // 排除自己
-          embedding: { not: null }, // 只检索有向量的案例
+          embedding: { not: Prisma.DbNull }, // 只检索有向量的案例
         },
       });
 

@@ -148,7 +148,7 @@ async function getOrderDetail(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<Response> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -163,7 +163,7 @@ export async function GET(
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // 获取订单详情
     const order = await getOrderDetail(id);
@@ -185,7 +185,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<Response> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -200,7 +200,7 @@ export async function PATCH(
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = (await request.json()) as UpdateOrderStatusRequest;
 
     // 验证订单是否存在

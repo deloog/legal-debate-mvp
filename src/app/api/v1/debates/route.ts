@@ -94,10 +94,10 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
           },
         },
       },
+      ...options,
       orderBy: {
         createdAt: 'desc',
       },
-      ...options,
     }),
     prisma.debate.count({
       where: whereCondition,

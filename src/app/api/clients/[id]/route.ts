@@ -271,7 +271,7 @@ export const PATCH = withErrorHandler(
         tags: validatedData.tags,
         status: validatedData.status,
         notes: validatedData.notes,
-        metadata: validatedData.metadata as Prisma.JsonValue,
+        metadata: validatedData.metadata as Prisma.InputJsonValue,
       },
     });
 

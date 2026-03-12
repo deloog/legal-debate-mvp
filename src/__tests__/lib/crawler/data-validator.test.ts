@@ -28,6 +28,9 @@ describe('LawDataValidator', () => {
         category: LawCategory.CIVIL,
         status: LawStatus.VALID,
         issuingAuthority: '全国人民代表大会',
+        jurisdiction: '全国',
+        keywords: ['民法', '民事主体', '合法权益'],
+        tags: ['基本法律', '民法典'],
         effectiveDate: new Date('2021-01-01'),
         crawledAt: new Date(),
       };
@@ -36,7 +39,7 @@ describe('LawDataValidator', () => {
 
       expect(result.isValid).toBe(true);
       expect(result.errors.length).toBe(0);
-      expect(result.quality.completeness).toBeGreaterThan(0.9);
+      expect(result.quality.completeness).toBe(1.0);
     });
 
     it('应该拒绝缺少必填字段的数据', () => {

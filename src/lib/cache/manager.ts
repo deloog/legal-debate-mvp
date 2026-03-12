@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { redis } from './redis';
 import {
   CacheOptions,
@@ -86,7 +87,7 @@ export class CacheManager {
       try {
         listener(event);
       } catch (error) {
-        console.error('缓存事件监听器执行失败:', error);
+        logger.error('缓存事件监听器执行失败:', error);
       }
     });
   }
@@ -167,7 +168,7 @@ export class CacheManager {
 
       return this.deserializeValue<T>(value, options);
     } catch (error) {
-      console.error(`获取缓存失败 [${key}]:`, error);
+      logger.error(`获取缓存失败 [${key}]:`, error);
       this.emitEvent({
         type: 'miss',
         key,
@@ -217,7 +218,7 @@ export class CacheManager {
 
       return success;
     } catch (error) {
-      console.error(`设置缓存失败 [${key}]:`, error);
+      logger.error(`设置缓存失败 [${key}]:`, error);
       return false;
     }
   }
@@ -243,7 +244,7 @@ export class CacheManager {
 
       return success;
     } catch (error) {
-      console.error(`删除缓存失败 [${key}]:`, error);
+      logger.error(`删除缓存失败 [${key}]:`, error);
       return false;
     }
   }
@@ -256,7 +257,7 @@ export class CacheManager {
       const result = await redis.exists(fullKey);
       return result === 1;
     } catch (error) {
-      console.error(`检查缓存存在性失败 [${key}]:`, error);
+      logger.error(`检查缓存存在性失败 [${key}]:`, error);
       return false;
     }
   }
@@ -273,7 +274,7 @@ export class CacheManager {
       const result = await redis.expire(fullKey, ttl);
       return result === 1;
     } catch (error) {
-      console.error(`设置缓存TTL失败 [${key}]:`, error);
+      logger.error(`设置缓存TTL失败 [${key}]:`, error);
       return false;
     }
   }
@@ -285,7 +286,7 @@ export class CacheManager {
       const fullKey = this.generateKey(key, options?.namespace);
       return await redis.ttl(fullKey);
     } catch (error) {
-      console.error(`获取缓存TTL失败 [${key}]:`, error);
+      logger.error(`获取缓存TTL失败 [${key}]:`, error);
       return -1;
     }
   }
@@ -310,7 +311,7 @@ export class CacheManager {
           try {
             result.set(key, this.deserializeValue<T>(value, options));
           } catch (error) {
-            console.error(`反序列化缓存值失败 [${key}]:`, error);
+            logger.error(`反序列化缓存值失败 [${key}]:`, error);
             result.set(key, null);
           }
         }
@@ -318,7 +319,7 @@ export class CacheManager {
 
       return result;
     } catch (error) {
-      console.error('批量获取缓存失败:', error);
+      logger.error('批量获取缓存失败:', error);
       return new Map(keys.map(key => [key, null]));
     }
   }
@@ -382,7 +383,7 @@ export class CacheManager {
       const result = await redis.del(...fullKeys);
       return result;
     } catch (error) {
-      console.error('批量删除缓存失败:', error);
+      logger.error('批量删除缓存失败:', error);
       return 0;
     }
   }
@@ -405,7 +406,7 @@ export class CacheManager {
 
       return result;
     } catch (error) {
-      console.error(`清空缓存命名空间失败 [${namespace}]:`, error);
+      logger.error(`清空缓存命名空间失败 [${namespace}]:`, error);
       return 0;
     }
   }
@@ -461,7 +462,7 @@ export class CacheManager {
 
       return value;
     } catch (error) {
-      console.error(`获取新值失败 [${key}]:`, error);
+      logger.error(`获取新值失败 [${key}]:`, error);
       return null;
     }
   }

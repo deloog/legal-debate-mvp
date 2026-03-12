@@ -189,7 +189,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       description: validatedData.description,
       logo: validatedData.logo,
       status: validatedData.status || TeamStatus.ACTIVE,
-      metadata: validatedData.metadata as Prisma.JsonValue,
+      metadata: validatedData.metadata as Prisma.InputJsonValue,
     },
   });
 

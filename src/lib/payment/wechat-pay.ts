@@ -233,6 +233,11 @@ export class WechatPay {
     notification: WechatPayNotification
   ): WechatPayResult | null {
     try {
+      this.ensureConfig();
+      if (!this.config) {
+        return null;
+      }
+
       const { ciphertext, nonce, associated_data } = notification.resource;
 
       // apiKeyV3 是 32 字节 ASCII 字符串（非 Base64），微信文档明确说明
@@ -281,6 +286,11 @@ export class WechatPay {
     nonceStr: string,
     body: string
   ): string {
+    this.ensureConfig();
+    if (!this.config) {
+      throw new Error('微信支付配置未初始化');
+    }
+
     const schema = 'WECHATPAY2-SHA256-RSA2048';
     const nonce = nonceStr;
     const timestampStr = String(timestamp);

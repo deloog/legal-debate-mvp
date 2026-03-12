@@ -278,7 +278,7 @@ describe('会员管理API测试', () => {
       );
 
       const response = await GET_MEMBERSHIP_DETAIL(request as any, {
-        params: { id: testMembershipId },
+        params: Promise.resolve({ id: testMembershipId }),
       });
 
       const data = await response.json();
@@ -302,7 +302,7 @@ describe('会员管理API测试', () => {
       );
 
       const response = await GET_MEMBERSHIP_DETAIL(request as any, {
-        params: { id: 'non-existent-id' },
+        params: Promise.resolve({ id: 'non-existent-id' }),
       });
 
       expect(response.status).toBe(404);
@@ -319,7 +319,7 @@ describe('会员管理API测试', () => {
       );
 
       const response = await GET_MEMBERSHIP_DETAIL(request as any, {
-        params: { id: testMembershipId },
+        params: Promise.resolve({ id: testMembershipId }),
       });
 
       expect(response.status).toBe(401);
@@ -379,7 +379,7 @@ describe('会员管理API测试', () => {
       );
 
       const response = await UPDATE_MEMBERSHIP(request as any, {
-        params: { id: testMembershipId },
+        params: Promise.resolve({ id: testMembershipId }),
       });
 
       const data = await response.json();
@@ -450,7 +450,7 @@ describe('会员管理API测试', () => {
       );
 
       const response = await UPDATE_MEMBERSHIP(request as any, {
-        params: { id: testMembershipId },
+        params: Promise.resolve({ id: testMembershipId }),
       });
 
       const data = await response.json();
@@ -506,7 +506,7 @@ describe('会员管理API测试', () => {
       );
 
       const response = await UPDATE_MEMBERSHIP(request as any, {
-        params: { id: testMembershipId },
+        params: Promise.resolve({ id: testMembershipId }),
       });
 
       const data = await response.json();
@@ -561,7 +561,7 @@ describe('会员管理API测试', () => {
       );
 
       const response = await UPDATE_MEMBERSHIP(request as any, {
-        params: { id: testMembershipId },
+        params: Promise.resolve({ id: testMembershipId }),
       });
 
       const data = await response.json();
@@ -621,7 +621,7 @@ describe('会员管理API测试', () => {
       );
 
       const response = await UPDATE_MEMBERSHIP(request as any, {
-        params: { id: testMembershipId },
+        params: Promise.resolve({ id: testMembershipId }),
       });
 
       const data = await response.json();
@@ -663,7 +663,7 @@ describe('会员管理API测试', () => {
       );
 
       const response = await UPDATE_MEMBERSHIP(request as any, {
-        params: { id: testMembershipId },
+        params: Promise.resolve({ id: testMembershipId }),
       });
 
       expect(response.status).toBe(400);
@@ -697,7 +697,7 @@ describe('会员管理API测试', () => {
       );
 
       const response = await UPDATE_MEMBERSHIP(request as any, {
-        params: { id: testMembershipId },
+        params: Promise.resolve({ id: testMembershipId }),
       });
 
       expect(response.status).toBe(400);
@@ -715,7 +715,7 @@ describe('会员管理API测试', () => {
       );
 
       const response = await UPDATE_MEMBERSHIP(request as any, {
-        params: { id: testMembershipId },
+        params: Promise.resolve({ id: testMembershipId }),
       });
 
       expect(response.status).toBe(401);
@@ -733,7 +733,7 @@ describe('会员管理API测试', () => {
       );
 
       const response = await UPDATE_MEMBERSHIP(request as any, {
-        params: { id: testMembershipId },
+        params: Promise.resolve({ id: testMembershipId }),
       });
 
       expect(response.status).toBe(404);

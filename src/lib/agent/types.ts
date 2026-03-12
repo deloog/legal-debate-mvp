@@ -148,7 +148,7 @@ export function createAgentResult(
     confidence: options.confidence,
     tokensUsed: options.tokensUsed,
     cost: options.cost,
-    context: options.context,
+    context: options.context as { inputSummary?: string; processingSteps?: string[]; warnings?: string[] } | undefined,
     cached: options.cached,
     cacheKey: options.cacheKey,
     error: options.error,

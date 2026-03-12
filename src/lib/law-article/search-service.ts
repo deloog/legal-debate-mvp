@@ -170,7 +170,7 @@ export class LawArticleSearchService {
         cached: false,
       };
     } catch (error) {
-      console.error('法条检索失败:', error);
+      logger.error('法条检索失败:', error);
       throw error;
     }
   }
@@ -195,7 +195,7 @@ export class LawArticleSearchService {
 
       return article;
     } catch (error) {
-      console.error('获取法条详情失败:', error);
+      logger.error('获取法条详情失败:', error);
       throw error;
     }
   }
@@ -286,7 +286,7 @@ export class LawArticleSearchService {
 
       return similarArticles;
     } catch (error) {
-      console.error('查找相似法条失败:', error);
+      logger.error('查找相似法条失败:', error);
       throw error;
     }
   }
@@ -304,7 +304,7 @@ export class LawArticleSearchService {
         take: limit,
       });
     } catch (error) {
-      console.error('获取热门法条失败:', error);
+      logger.error('获取热门法条失败:', error);
       throw error;
     }
   }
@@ -331,7 +331,7 @@ export class LawArticleSearchService {
         count: item._count.id,
       }));
     } catch (error) {
-      console.error('获取分类统计失败:', error);
+      logger.error('获取分类统计失败:', error);
       throw error;
     }
   }
@@ -347,7 +347,7 @@ export class LawArticleSearchService {
         },
       });
     } catch (error) {
-      console.error('批量获取法条失败:', error);
+      logger.error('批量获取法条失败:', error);
       throw error;
     }
   }
@@ -393,7 +393,7 @@ export class LawArticleSearchService {
         category: article.category,
       }));
     } catch (error) {
-      console.error('获取搜索建议失败:', error);
+      logger.error('获取搜索建议失败:', error);
       throw error;
     }
   }

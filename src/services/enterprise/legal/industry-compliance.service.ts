@@ -365,7 +365,7 @@ export class IndustryComplianceService {
 
     return {
       contractId: contract.id,
-      contractNumber: contract.contractNumber,
+      contractNumber: contract.contractNumber ?? undefined,
       industryType,
       totalRules,
       passedRules,

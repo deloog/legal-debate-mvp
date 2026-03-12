@@ -13,6 +13,7 @@ import {
 
 import type { AIRequestConfig } from '../../types/ai-service';
 import type { AIService } from './service';
+import { logger } from '@/lib/logger';
 
 /**
  * 证据关系识别器类
@@ -209,7 +210,7 @@ export class AIEvidenceRelationshipIdentifier {
           reasoning: parsed.reasoning || '',
         };
       } catch (error) {
-        console.error('解析JSON失败，使用规则:', error);
+        logger.error('解析JSON失败，使用规则:', error);
       }
     }
 

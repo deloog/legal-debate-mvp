@@ -25,7 +25,7 @@ const TIME_RANGE_OPTIONS = [
   { value: '90d', label: '近90天' },
 ];
 
-function UsersDashboardPage(): React.ReactElement {
+function UsersDashboardPage(): React.ReactElement | null {
   const router = useRouter();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [trend, setTrend] = useState<UserTrend[]>([]);

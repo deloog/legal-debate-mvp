@@ -9,22 +9,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { LawArticleRecommendationService } from '@/lib/law-article/recommendation-service';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * 获取法条统计信息
  */
 export async function GET(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+      { status: 401 }
+    );
+  }
+
   try {
     const stats = await LawArticleRecommendationService.getRecommendationStats(
-      params.id
+      (await params).id
     );
 
-    return NextResponse.json(stats);
+    return NextResponse.json({ success: true, data: stats });
   } catch (error) {
     logger.error('获取统计信息失败:', error);
-    return NextResponse.json({ error: '服务器错误' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { code: 'INTERNAL_ERROR', message: '服务器错误' } },
+      { status: 500 }
+    );
   }
 }

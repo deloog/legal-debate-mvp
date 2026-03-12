@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 // 反馈类型枚举
 const FEEDBACK_TYPES = [
@@ -23,7 +24,6 @@ type FeedbackType = (typeof FEEDBACK_TYPES)[number];
 type ContextType = (typeof CONTEXT_TYPES)[number];
 
 interface CreateFeedbackRequest {
-  userId: string;
   lawArticleId: string;
   contextType: ContextType;
   contextId?: string;
@@ -37,16 +37,18 @@ interface CreateFeedbackRequest {
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as CreateFeedbackRequest;
-
-    // 验证必填字段
-    if (!body.userId) {
+    // 从 JWT 获取用户身份，防止用户 ID 注入
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
-        { success: false, error: '缺少必填字段: userId' },
-        { status: 400 }
+        { success: false, error: '请先登录' },
+        { status: 401 }
       );
     }
 
+    const body = (await request.json()) as CreateFeedbackRequest;
+
+    // 验证必填字段
     if (!body.lawArticleId) {
       return NextResponse.json(
         { success: false, error: '缺少必填字段: lawArticleId' },
@@ -103,10 +105,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 创建反馈
+    // 创建反馈（使用 JWT 中的 userId）
     const feedback = await prisma.recommendationFeedback.create({
       data: {
-        userId: body.userId,
+        userId: authUser.userId,
         lawArticleId: body.lawArticleId,
         contextType: body.contextType,
         contextId: body.contextId,
@@ -152,10 +154,18 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
+    // 从 JWT 获取用户身份
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: '请先登录' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
 
     // 获取查询参数
-    const userId = searchParams.get('userId');
     const lawArticleId = searchParams.get('lawArticleId');
     const contextType = searchParams.get('contextType');
     const contextId = searchParams.get('contextId');
@@ -169,10 +179,6 @@ export async function GET(request: NextRequest) {
 
     // 构建查询条件
     const where: Record<string, unknown> = {};
-
-    if (userId) {
-      where.userId = userId;
-    }
 
     if (lawArticleId) {
       where.lawArticleId = lawArticleId;

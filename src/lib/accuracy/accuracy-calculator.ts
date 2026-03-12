@@ -130,7 +130,7 @@ export class AccuracyCalculator {
       weights: {
         ...this.defaultOptions.weights,
         ...options.weights,
-      },
+      } as { document: number; law: number; debate: number },
     };
   }
 
@@ -483,10 +483,11 @@ export class AccuracyCalculator {
     const lawRetrievalAccuracy = metrics.lawRetrievalAccuracy || 0;
     const debateGenerationAccuracy = metrics.debateGenerationAccuracy || 0;
 
+    const w = weights ?? { document: 0.4, law: 0.3, debate: 0.3 };
     const overall =
-      documentAccuracy * weights.document +
-      lawRetrievalAccuracy * weights.law +
-      debateGenerationAccuracy * weights.debate;
+      documentAccuracy * w.document +
+      lawRetrievalAccuracy * w.law +
+      debateGenerationAccuracy * w.debate;
 
     // 四舍五入到2位小数
     return Math.round(overall * 100) / 100;

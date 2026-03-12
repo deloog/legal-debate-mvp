@@ -3,6 +3,7 @@
  * 提供通用的爬虫功能和方法
  */
 
+import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/db/prisma';
 import {
   LawCategory,
@@ -119,7 +120,7 @@ export abstract class BaseCrawler {
   protected recordError(error: string): void {
     this.progress.errors.push(`[${new Date().toISOString()}] ${error}`);
     this.progress.lastError = error;
-    console.error(`[${this.config.name}] Error:`, error);
+    logger.error(`[${this.config.name}] Error:`, error);
   }
 
   /**
@@ -290,7 +291,7 @@ export abstract class BaseCrawler {
         },
       });
     } catch (error) {
-      console.error('Failed to log crawl operation:', error);
+      logger.error('Failed to log crawl operation:', error);
     }
   }
 }

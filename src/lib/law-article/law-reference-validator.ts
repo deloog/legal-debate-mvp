@@ -263,7 +263,7 @@ export class LawReferenceValidator {
     // 优先精确匹配
     let article = await prisma.lawArticle.findFirst({
       where: {
-        articleNumber: query.articleNumber,
+        articleNumber: query.articleNumber ?? undefined,
       },
       orderBy: { effectiveDate: 'desc' },
     });

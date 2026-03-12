@@ -68,12 +68,12 @@ async function collectUserStats(
     }>
   >`
     SELECT
-      DATE(created_at) as date,
+      DATE("createdAt") as date,
       COUNT(*) as count
     FROM users
-    WHERE created_at >= ${new Date(config.periodStart)}
-      AND created_at <= ${new Date(config.periodEnd)}
-    GROUP BY DATE(created_at)
+    WHERE "createdAt" >= ${new Date(config.periodStart)}
+      AND "createdAt" <= ${new Date(config.periodEnd)}
+    GROUP BY DATE("createdAt")
     ORDER BY date ASC
   `;
 
@@ -150,8 +150,8 @@ async function collectCaseStats(
   >`
     SELECT type, COUNT(*) as count
     FROM cases
-    WHERE created_at >= ${new Date(config.periodStart)}
-      AND created_at <= ${new Date(config.periodEnd)}
+    WHERE "createdAt" >= ${new Date(config.periodStart)}
+      AND "createdAt" <= ${new Date(config.periodEnd)}
     GROUP BY type
   `;
 

@@ -7,6 +7,7 @@ import {
 } from '../../../config/winston.config';
 import { getMetricsCollector } from './metrics-collector';
 import { createNotificationChannels } from './notification-channels';
+import { alertStormProtection } from './alert-storm-protection';
 import {
   Alert,
   AlertRule,
@@ -285,7 +286,7 @@ export class AlertManager {
 
       return results;
     } catch (error) {
-      logger.error('Failed to check alerts', error);
+      logger.error('Failed to check alerts', error instanceof Error ? error : undefined);
       return [];
     } finally {
       this.isChecking = false;
@@ -326,8 +327,29 @@ export class AlertManager {
 
   /**
    * 发送告警通知
+   * 集成告警风暴防护
    */
   private async sendAlert(alert: Alert): Promise<void> {
+    // 检查告警风暴防护
+    const stormCheck = alertStormProtection.shouldSendAlert(
+      alert.ruleId || 'unknown',
+      alert.severity,
+      alert.message
+    );
+
+    if (!stormCheck.allowed) {
+      logger.warn(`告警被风暴防护抑制: ${stormCheck.reason}`, {
+        title: alert.title,
+        severity: alert.severity,
+      });
+      return;
+    }
+
+    // 如果是聚合告警，添加聚合信息
+    if (stormCheck.aggregated && stormCheck.aggregatedCount) {
+      alert.message += ` (包含 ${stormCheck.aggregatedCount} 个相似告警)`;
+    }
+
     logger.info(`Sending alert: ${alert.title}`, {
       severity: alert.severity,
       message: alert.message,
@@ -350,6 +372,13 @@ export class AlertManager {
         );
       }
     });
+
+    // 记录已发送
+    alertStormProtection.recordSent(
+      alert.ruleId || 'unknown',
+      alert.severity,
+      alert.message
+    );
   }
 
   /**
@@ -386,7 +415,7 @@ export class AlertManager {
         },
       });
     } catch (error) {
-      logger.error('Failed to record alert to database', error);
+      logger.error('Failed to record alert to database', error instanceof Error ? error : undefined);
     }
   }
 
@@ -438,7 +467,7 @@ export class AlertManager {
         bySeverity,
       };
     } catch (error) {
-      logger.error('Failed to get alert stats', error);
+      logger.error('Failed to get alert stats', error instanceof Error ? error : undefined);
       return {
         totalAlerts: 0,
         triggeredAlerts: 0,
@@ -468,7 +497,7 @@ export class AlertManager {
       });
       return true;
     } catch (error) {
-      logger.error(`Failed to acknowledge alert ${alertId}`, error);
+      logger.error(`Failed to acknowledge alert ${alertId}`, error instanceof Error ? error : undefined);
       return false;
     }
   }
@@ -487,7 +516,7 @@ export class AlertManager {
       });
       return true;
     } catch (error) {
-      logger.error(`Failed to resolve alert ${alertId}`, error);
+      logger.error(`Failed to resolve alert ${alertId}`, error instanceof Error ? error : undefined);
       return false;
     }
   }
@@ -511,7 +540,7 @@ export class AlertManager {
 
       logger.info(`Cleaned up ${result.count} old alerts`);
     } catch (error) {
-      logger.error('Failed to cleanup old alerts', error);
+      logger.error('Failed to cleanup old alerts', error instanceof Error ? error : undefined);
     }
   }
 

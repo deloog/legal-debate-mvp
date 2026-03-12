@@ -1,12 +1,12 @@
 import { prisma } from '@/lib/db/prisma';
-import { Prisma } from '@prisma/client';
 import { logger } from '@/lib/logger';
+import { Prisma } from '@prisma/client';
 import type {
-  ExpertProfile,
-  ExpertContributionStats,
   ExpertAccuracyRate,
+  ExpertContributionStats,
   ExpertListFilters,
   ExpertListResult,
+  ExpertProfile,
 } from './types';
 
 /**
@@ -226,7 +226,7 @@ export class ExpertService {
 
       // 计算准确率：质量分 >= 0.8 的视为正确
       const correctCount = verifiedRelations.filter(
-        r => r.qualityScore?.qualityScore >= 0.8
+        r => (r.qualityScore?.qualityScore ?? 0) >= 0.8
       ).length;
 
       const accuracyRate = correctCount / verifiedRelations.length;

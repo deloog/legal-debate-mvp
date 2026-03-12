@@ -19,7 +19,7 @@ import {
 } from '@/types/client';
 import { notificationService } from '@/lib/notification/notification-service';
 import { NotificationChannel } from '@/types/notification';
-import { logger } from '@/lib/agent/security/logger';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 类型定义
@@ -200,6 +200,55 @@ async function getTasksNeedingReminders(): Promise<
 }
 
 /**
+ * 检查任务是否已发送过提醒（幂等性检查）
+ * 通过查询通知记录表判断
+ */
+async function hasReminderBeenSent(taskId: string): Promise<boolean> {
+  try {
+    // 查询近期是否已发送过提醒（24小时内）
+    const recentNotification = await prisma.notificationLog.findFirst({
+      where: {
+        relatedId: taskId,
+        relatedType: 'FOLLOW_UP_TASK',
+        createdAt: {
+          gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // 24小时内
+        },
+      },
+    });
+    return !!recentNotification;
+  } catch (error) {
+    logger.error(`检查提醒状态失败: ${taskId}`, error as Error);
+    return false; // 出错时默认允许发送（避免阻塞）
+  }
+}
+
+/**
+ * 记录提醒发送日志
+ */
+async function logReminderSent(
+  taskId: string,
+  userId: string,
+  channels: NotificationChannel[],
+  success: boolean
+): Promise<void> {
+  try {
+    await prisma.notificationLog.create({
+      data: {
+        userId,
+        type: 'FOLLOW_UP_REMINDER',
+        channels: channels as string[],
+        relatedType: 'FOLLOW_UP_TASK',
+        relatedId: taskId,
+        status: success ? 'SENT' : 'FAILED',
+        createdAt: new Date(),
+      },
+    });
+  } catch (error) {
+    logger.error(`记录提醒日志失败: ${taskId}`, error as Error);
+  }
+}
+
+/**
  * 为单个任务发送提醒
  * @param task 跟进任务
  * @returns 提醒结果
@@ -237,6 +286,23 @@ async function sendReminderForTask(task: {
     };
   }
 
+  // 幂等性检查：检查是否已发送过提醒
+  const alreadySent = await hasReminderBeenSent(task.id);
+  if (alreadySent) {
+    logger.info(`提醒已发送过，跳过: ${task.id}`);
+    return {
+      taskId: task.id,
+      clientId: task.clientId,
+      clientName: task.client.name,
+      summary: task.summary,
+      dueDate: task.dueDate,
+      priority: task.priority,
+      sent: false,
+      channels: [],
+      error: '提醒已发送过',
+    };
+  }
+
   // 获取应该使用的通知渠道
   const channels = notificationService.getNotificationChannelsForTask(
     task as unknown as never
@@ -269,12 +335,15 @@ async function sendReminderForTask(task: {
     );
 
     if (result.success) {
+      // 记录发送日志（幂等性保证）
+      await logReminderSent(task.id, task.userId, channels, true);
+      
       logger.info(`跟进任务提醒发送成功: ${task.id}`, {
         clientId: task.clientId,
         clientName: task.client.name,
         channels,
         dueDate: task.dueDate,
-      } as never);
+      });
 
       return {
         taskId: task.id,
@@ -287,12 +356,15 @@ async function sendReminderForTask(task: {
         channels,
       };
     } else {
+      // 记录发送失败日志
+      await logReminderSent(task.id, task.userId, channels, false);
+      
       logger.warn(`跟进任务提醒发送失败: ${task.id}`, {
         clientId: task.clientId,
         clientName: task.client.name,
         channels,
         errors: result.errors,
-      } as never);
+      });
 
       return {
         taskId: task.id,
@@ -336,14 +408,14 @@ async function sendReminderForTask(task: {
  * @returns 发送结果
  */
 export async function sendFollowUpReminders(): Promise<SendRemindersResult> {
-  console.log('[SendFollowUpReminders] 开始检查跟进任务提醒...');
+  logger.info('[SendFollowUpReminders] 开始检查跟进任务提醒...');
 
   try {
     // 查询需要检查的跟进任务
     const tasks = await getTasksNeedingReminders();
 
     if (tasks.length === 0) {
-      console.log('[SendFollowUpReminders] 没有待处理的跟进任务');
+      logger.info('[SendFollowUpReminders] 没有待处理的跟进任务');
       return {
         totalTasksChecked: 0,
         tasksWithRemindersSent: 0,
@@ -353,7 +425,7 @@ export async function sendFollowUpReminders(): Promise<SendRemindersResult> {
       };
     }
 
-    console.log(
+    logger.info(
       `[SendFollowUpReminders] 找到 ${tasks.length} 个待处理的跟进任务`
     );
 
@@ -381,7 +453,7 @@ export async function sendFollowUpReminders(): Promise<SendRemindersResult> {
     const tasksWithRemindersSent = results.filter(r => r.sent).length;
     const tasksFailedToSend = errors.length;
 
-    console.log('[SendFollowUpReminders] 跟进提醒发送完成:', {
+    logger.info('[SendFollowUpReminders] 跟进提醒发送完成:', {
       totalTasksChecked: tasks.length,
       tasksWithRemindersSent,
       tasksFailedToSend,
@@ -395,7 +467,7 @@ export async function sendFollowUpReminders(): Promise<SendRemindersResult> {
       errors,
     };
   } catch (error) {
-    console.error('[SendFollowUpReminders] 发送跟进提醒时发生错误:', error);
+    logger.error('[SendFollowUpReminders] 发送跟进提醒时发生错误:', error instanceof Error ? error : undefined);
     throw error;
   }
 }
@@ -410,7 +482,7 @@ export async function manuallySendFollowUpReminders(): Promise<{
   result: SendRemindersResult;
 }> {
   try {
-    console.log('[SendFollowUpReminders] 手动触发跟进提醒...');
+    logger.info('[SendFollowUpReminders] 手动触发跟进提醒...');
     const result = await sendFollowUpReminders();
 
     return {
@@ -419,7 +491,7 @@ export async function manuallySendFollowUpReminders(): Promise<{
       result,
     };
   } catch (error) {
-    console.error('[SendFollowUpReminders] 手动发送跟进提醒失败:', error);
+    logger.error('[SendFollowUpReminders] 手动发送跟进提醒失败:', error instanceof Error ? error : undefined);
 
     return {
       success: false,
@@ -524,7 +596,7 @@ export async function getFollowUpRemindersStats(): Promise<RemindersStats> {
       })),
     };
   } catch (error) {
-    console.error('[SendFollowUpReminders] 获取跟进提醒统计失败:', error);
+    logger.error('[SendFollowUpReminders] 获取跟进提醒统计失败:', error instanceof Error ? error : undefined);
     throw error;
   }
 }
@@ -588,7 +660,7 @@ export async function getTasksExpiringSoon(
       ),
     }));
   } catch (error) {
-    console.error('[SendFollowUpReminders] 获取即将到期任务失败:', error);
+    logger.error('[SendFollowUpReminders] 获取即将到期任务失败:', error instanceof Error ? error : undefined);
     throw error;
   }
 }
@@ -618,7 +690,7 @@ export async function markExpiredFollowUpTasks(): Promise<{
       },
     });
 
-    console.log('[SendFollowUpReminders] 标记过期任务完成:', {
+    logger.info('[SendFollowUpReminders] 标记过期任务完成:', {
       cancelledCount: expiredTasks.count,
     } as never);
 
@@ -626,7 +698,7 @@ export async function markExpiredFollowUpTasks(): Promise<{
       cancelledCount: expiredTasks.count,
     };
   } catch (error) {
-    console.error('[SendFollowUpReminders] 标记过期任务失败:', error);
+    logger.error('[SendFollowUpReminders] 标记过期任务失败:', error instanceof Error ? error : undefined);
     throw error;
   }
 }

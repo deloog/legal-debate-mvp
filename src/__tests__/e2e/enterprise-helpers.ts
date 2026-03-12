@@ -3,6 +3,7 @@
  */
 
 import type { APIRequestContext } from '@playwright/test';
+import { E2E_ADMIN_EMAIL, E2E_ADMIN_PASSWORD } from './global-setup';
 
 // =============================================================================
 // 测试基础URL
@@ -213,8 +214,8 @@ export async function reviewEnterprise(
 export async function adminLogin(
   apiContext: APIRequestContext
 ): Promise<{ userId: string; token: string; email: string }> {
-  const email = 'admin@example.com';
-  const password = 'Admin@123';
+  const email = E2E_ADMIN_EMAIL;
+  const password = E2E_ADMIN_PASSWORD;
 
   const response = await apiContext.post(`${getBaseUrl()}/api/auth/login`, {
     data: {

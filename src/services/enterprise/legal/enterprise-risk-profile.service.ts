@@ -1,10 +1,11 @@
+import { logger } from '@/lib/logger';
+import { ContractStatus } from '@/types/contract';
 import {
-  Prisma,
-  PrismaClient,
   Contract,
   ContractClauseRisk,
+  Prisma,
+  PrismaClient,
 } from '@prisma/client';
-import { logger } from '@/lib/logger';
 
 // 类型定义
 interface RiskFactor {
@@ -77,7 +78,7 @@ export class EnterpriseRiskProfileService {
       const contracts = await this.prisma.contract.findMany({
         where: {
           clientName: enterprise.enterpriseName,
-          status: { notIn: ['DRAFT', 'TERMINATED'] as any },
+          status: { notIn: ['DRAFT', 'TERMINATED'] as ContractStatus[] },
         },
       });
 
@@ -120,9 +121,10 @@ export class EnterpriseRiskProfileService {
           complianceRiskScore: scores.complianceRiskScore,
           overallRiskScore: scores.overallRiskScore,
           riskLevel,
-          riskFactors: riskFactors as Prisma.JsonValue,
-          topRisks: topRisks as Prisma.JsonArray,
-          recommendations: recommendations as Prisma.JsonArray,
+          riskFactors: riskFactors as unknown as Prisma.InputJsonValue,
+          topRisks: topRisks as unknown as Prisma.InputJsonValue[],
+          recommendations:
+            recommendations as unknown as Prisma.InputJsonValue[],
           totalContractsAnalyzed: contracts.length,
           ...riskDistribution,
         },
@@ -367,17 +369,19 @@ export class EnterpriseRiskProfileService {
         }
 
         const data = factorMap.get(key);
-        data.count++;
+        if (data) {
+          data.count++;
 
-        const severityScore = {
-          low: 1,
-          medium: 2,
-          high: 3,
-          critical: 4,
-        };
-        data.severities.push(
-          severityScore[factor.severity as keyof typeof severityScore] || 2
-        );
+          const severityScore = {
+            low: 1,
+            medium: 2,
+            high: 3,
+            critical: 4,
+          };
+          data.severities.push(
+            severityScore[factor.severity as keyof typeof severityScore] || 2
+          );
+        }
       });
     });
 
@@ -431,7 +435,7 @@ export class EnterpriseRiskProfileService {
 
     return highRiskContracts.map(risk => ({
       contractId: risk.contractId,
-      clauseNumber: risk.clauseNumber,
+      clauseNumber: risk.clauseNumber ?? undefined,
       riskLevel: risk.riskLevel,
       riskDescription: risk.riskDescription,
     }));

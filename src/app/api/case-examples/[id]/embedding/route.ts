@@ -7,10 +7,10 @@ import { CaseEmbeddingServiceFactory } from '@/lib/case/embedding-service';
  */
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const embeddingService = CaseEmbeddingServiceFactory.getInstance();
     const result = await embeddingService.getEmbedding(id);
@@ -39,10 +39,10 @@ export async function GET(
  */
 export async function POST(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const embeddingService = CaseEmbeddingServiceFactory.getInstance();
     const result = await embeddingService.generateAndStoreEmbedding(id);
@@ -72,10 +72,10 @@ export async function POST(
  */
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const embeddingService = CaseEmbeddingServiceFactory.getInstance();
     const result = await embeddingService.deleteEmbedding(id);

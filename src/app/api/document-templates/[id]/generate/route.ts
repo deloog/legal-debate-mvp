@@ -57,7 +57,7 @@ function replaceVariables(
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authUser = await getAuthUser(request);
@@ -65,7 +65,7 @@ export async function POST(
       return NextResponse.json({ error: '未授权' }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const { template, hasAccess } = await verifyTemplateAccess(
       id,
       authUser.userId

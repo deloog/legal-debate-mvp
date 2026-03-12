@@ -52,7 +52,7 @@ export const executiveReportService = {
     });
 
     // 生成洞察建议
-    const insights = [];
+    const insights: string[] = [];
     if (riskProfile) {
       if (riskProfile.overallRiskScore >= 60) {
         insights.push('企业整体风险水平较高，建议优先处理高风险领域');

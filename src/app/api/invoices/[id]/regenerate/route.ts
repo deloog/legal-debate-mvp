@@ -15,7 +15,7 @@ import { logger } from '@/lib/logger';
  */
 export async function POST(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
     // 获取用户会话
@@ -31,7 +31,7 @@ export async function POST(
       );
     }
 
-    const invoiceId = params.id;
+    const invoiceId = (await params).id;
 
     // 重新生成发票PDF
     const filePath = await regenerateInvoicePDF(invoiceId, session.user.id);

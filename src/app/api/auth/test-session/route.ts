@@ -14,8 +14,13 @@ import { logger } from '@/lib/logger';
  * POST /api/auth/test-session - 测试专用登录端点
  *
  * 用于E2E测试快速登录，返回会话信息供Playwright使用
+ * 仅在非生产环境可用。
  */
 export async function POST(request: NextRequest) {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ success: false, error: 'NOT_FOUND' }, { status: 404 });
+  }
+
   try {
     const body = await request.json();
     const { email, password } = body;
@@ -41,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 验证密码
-    const isValidPassword = await compare(password, user.password);
+    const isValidPassword = await compare(password, user.password ?? '');
     if (!isValidPassword) {
       return NextResponse.json(
         { success: false, error: 'INVALID_CREDENTIALS' },
@@ -84,10 +89,11 @@ export async function POST(request: NextRequest) {
  * GET /api/auth/test-session - 获取当前会话状态
  */
 export async function GET() {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ success: false, error: 'NOT_FOUND' }, { status: 404 });
+  }
   return NextResponse.json({
     success: true,
-    data: {
-      message: 'Test session endpoint is available',
-    },
+    data: { message: 'Test session endpoint is available' },
   });
 }

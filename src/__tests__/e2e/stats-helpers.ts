@@ -4,6 +4,7 @@
 
 import type { APIRequestContext } from '@playwright/test';
 import jwt from 'jsonwebtoken';
+import { E2E_ADMIN_EMAIL, E2E_ADMIN_PASSWORD } from './global-setup';
 
 // =============================================================================
 // 测试基础URL
@@ -68,8 +69,8 @@ export async function loginAdminUser(
 ): Promise<{ token: string }> {
   const response = await apiContext.post(`${BASE_URL}/api/auth/login`, {
     data: {
-      email: 'admin@example.com',
-      password: 'Admin@123',
+      email: E2E_ADMIN_EMAIL,
+      password: E2E_ADMIN_PASSWORD,
     },
   });
 
@@ -105,7 +106,7 @@ export async function getAdminToken(
 
     const payload = {
       userId: 'cmkcffmfr00004yc4h9ijh3lj',
-      email: 'admin@example.com',
+      email: E2E_ADMIN_EMAIL,
       role: 'ADMIN',
     };
 

@@ -20,6 +20,7 @@ import type {
   LogicValidationResult,
   LegalBasis,
   Argument,
+  CaseInfo,
 } from './types';
 
 // =============================================================================
@@ -140,7 +141,7 @@ export class LegalAgent {
     /** 法律类型 */
     lawType?: string;
     /** 案件信息 */
-    caseInfo: unknown;
+    caseInfo: CaseInfo;
     /** 事实列表 */
     facts: Fact[];
     /** 论点方向 */
@@ -220,12 +221,12 @@ export class LegalAgent {
       keywords: string[];
       caseType?: string;
       lawType?: string;
-      caseInfo: unknown;
+      caseInfo: CaseInfo;
       facts: Fact[];
       side?: 'PLAINTIFF' | 'DEFENDANT';
     }>
   ) {
-    const results = [];
+    const results: Awaited<ReturnType<LegalAgent['analyzeCase']>>[] = [];
 
     for (const input of inputs) {
       const result = await this.analyzeCase(input);

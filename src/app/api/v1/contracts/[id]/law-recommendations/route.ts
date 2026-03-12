@@ -11,16 +11,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { graphEnhancedSearch } from '@/lib/debate/graph-enhanced-law-search';
 import { logger } from '@/lib/logger';
+import {
+  resolveContractUserId,
+  unauthorizedResponse,
+} from '@/app/api/lib/middleware/contract-auth';
 
 /**
  * 获取合同法条推荐
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
+  // ─── 认证 ─────────────────────────────────────────────────────────────────
+  const userId = resolveContractUserId(request);
+  if (!userId) return unauthorizedResponse();
+
   try {
-    const contractId = params.id;
+    const contractId = (await params).id;
 
     // 解析查询参数
     const { searchParams } = new URL(request.url);
@@ -41,13 +49,15 @@ export async function GET(
       );
     }
 
-    // 查找合同
+    // 查找合同（获取语义字段用于搜索）
     const contract = await prisma.contract.findUnique({
       where: { id: contractId },
       select: {
         id: true,
-        contractNumber: true,
         caseId: true,
+        caseType: true,
+        caseSummary: true,
+        scope: true,
       },
     });
 
@@ -64,8 +74,8 @@ export async function GET(
       );
     }
 
-    // 确定案件类型（如果有关联案件，从案件获取类型）
-    let resolvedCaseType = caseType;
+    // 确定案件类型：优先使用查询参数 → 合同字段 → 关联案件
+    let resolvedCaseType = caseType ?? contract.caseType;
     if (!resolvedCaseType && contract.caseId) {
       const relatedCase = await prisma.case.findUnique({
         where: { id: contract.caseId },
@@ -76,8 +86,8 @@ export async function GET(
       }
     }
 
-    // 使用合同编号作为关键词进行图谱搜索
-    const searchKeywords = contract.contractNumber || '合同';
+    // 使用合同摘要作为搜索关键词（有实际语义），降级到委托范围
+    const searchKeywords = contract.caseSummary || contract.scope || '合同';
 
     // 调用图谱增强搜索
     const graphResult = await graphEnhancedSearch(

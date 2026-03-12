@@ -109,6 +109,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 查询关联的支付记录
+    const paymentRecord = await prisma.paymentRecord.findFirst({
+      where: {
+        orderId: order.id,
+        status: 'SUCCESS',
+        paymentMethod: 'ALIPAY',
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!paymentRecord) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: '未找到支付宝支付记录，无法发起退款',
+          error: 'PAYMENT_RECORD_NOT_FOUND',
+        },
+        { status: 400 }
+      );
+    }
+
     // 调用支付宝API申请退款
     try {
       const alipayRefund = getAlipayRefund();
@@ -135,7 +156,7 @@ export async function POST(request: NextRequest) {
       const refund = await prisma.refundRecord.create({
         data: {
           orderId: order.id,
-          paymentRecordId: '', // 支付记录ID（待完善）
+          paymentRecordId: paymentRecord.id,
           userId: order.userId,
           paymentMethod: order.paymentMethod,
           status: 'SUCCESS',

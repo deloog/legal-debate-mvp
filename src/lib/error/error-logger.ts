@@ -157,8 +157,9 @@ export class ErrorLogger {
    */
   private assessSeverity(error: Error, errorType: ErrorType): ErrorSeverity {
     // 1. 使用预定义规则
-    if (this.SEVERITY_RULES[errorType]) {
-      return this.SEVERITY_RULES[errorType];
+    const severityKey = errorType as keyof typeof this.SEVERITY_RULES;
+    if (this.SEVERITY_RULES[severityKey]) {
+      return this.SEVERITY_RULES[severityKey];
     }
 
     // 2. 根据错误消息判断
@@ -295,37 +296,167 @@ export class ErrorLogger {
   }
 
   /**
-   * 脱敏输入数据
+   * 脱敏输入数据（递归处理嵌套对象和数组）
    * @param data 输入数据
    * @returns 脱敏后的数据
    */
-  private sanitizeInputData(
-    data: Record<string, unknown>
-  ): Record<string, unknown> {
-    const sanitized: Record<string, unknown> = {};
-
+  private sanitizeInputData(data: unknown): unknown {
+    // 敏感关键字列表
     const sensitiveKeys = [
       'password',
       'token',
       'secret',
       'api_key',
       'apikey',
-      'key',
+      'api_secret',
+      'apisecret',
+      'access_token',
+      'accesstoken',
+      'refresh_token',
+      'refreshtoken',
+      'auth_token',
+      'authtoken',
+      'jwt',
+      'credential',
+      'credentials',
+      'private_key',
+      'privatekey',
+      'ssh_key',
+      'sshkey',
+      'credit_card',
+      'creditcard',
+      'card_number',
+      'cvv',
+      'ssn',
+      'social_security',
+      'phone',
+      'mobile',
+      'email',
+      'address',
+      'id_card',
+      'idcard',
+      'passport',
+      'license_number',
     ];
 
-    for (const [key, value] of Object.entries(data)) {
-      const lowerKey = key.toLowerCase();
-      if (sensitiveKeys.some(k => lowerKey.includes(k))) {
-        sanitized[key] = '[REDACTED]';
-      } else if (typeof value === 'string' && value.length > 500) {
-        // 限制字符串长度
-        sanitized[key] = value.substring(0, 500) + '...';
-      } else {
-        sanitized[key] = value;
-      }
+    // 处理null/undefined
+    if (data === null || data === undefined) {
+      return data;
     }
 
-    return sanitized;
+    // 处理字符串
+    if (typeof data === 'string') {
+      // 限制字符串长度
+      if (data.length > 500) {
+        return data.substring(0, 500) + '...';
+      }
+      return data;
+    }
+
+    // 处理数组
+    if (Array.isArray(data)) {
+      return data.map(item => this.sanitizeInputData(item));
+    }
+
+    // 处理对象
+    if (typeof data === 'object') {
+      const sanitized: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+        const lowerKey = key.toLowerCase();
+        
+        // 检查是否为敏感字段
+        if (sensitiveKeys.some(k => lowerKey.includes(k))) {
+          if (typeof value === 'string') {
+            // 对敏感字段进行部分脱敏
+            sanitized[key] = this.maskSensitiveValue(value, key);
+          } else {
+            sanitized[key] = '[REDACTED]';
+          }
+        } else if (typeof value === 'object' && value !== null) {
+          // 递归处理嵌套对象
+          sanitized[key] = this.sanitizeInputData(value);
+        } else if (typeof value === 'string' && value.length > 500) {
+          // 限制字符串长度
+          sanitized[key] = value.substring(0, 500) + '...';
+        } else {
+          sanitized[key] = value;
+        }
+      }
+      return sanitized;
+    }
+
+    // 其他类型直接返回
+    return data;
+  }
+
+  /**
+   * 对敏感值进行部分脱敏
+   * @param value 敏感值
+   * @param key 字段名
+   * @returns 脱敏后的值
+   */
+  private maskSensitiveValue(value: string, key: string): string {
+    if (!value || value.length === 0) {
+      return '[EMPTY]';
+    }
+
+    const lowerKey = key.toLowerCase();
+
+    // 邮箱脱敏
+    if (lowerKey.includes('email')) {
+      return this.maskEmail(value);
+    }
+
+    // 手机号脱敏
+    if (lowerKey.includes('phone') || lowerKey.includes('mobile')) {
+      return this.maskPhone(value);
+    }
+
+    // 短值完全隐藏
+    if (value.length <= 8) {
+      return '***';
+    }
+
+    // 长值显示前后各2个字符
+    return value.substring(0, 2) + '***' + value.substring(value.length - 2);
+  }
+
+  /**
+   * 脱敏邮箱地址
+   * @param email 邮箱地址
+   * @returns 脱敏后的邮箱
+   */
+  private maskEmail(email: string): string {
+    const atIndex = email.indexOf('@');
+    if (atIndex === -1) return '***';
+    
+    const local = email.substring(0, atIndex);
+    const domain = email.substring(atIndex);
+    
+    if (local.length <= 2) {
+      return '***' + domain;
+    }
+    
+    return local.charAt(0) + '***' + local.charAt(local.length - 1) + domain;
+  }
+
+  /**
+   * 脱敏手机号
+   * @param phone 手机号
+   * @returns 脱敏后的手机号
+   */
+  private maskPhone(phone: string): string {
+    // 移除所有非数字字符
+    const digits = phone.replace(/\D/g, '');
+    
+    if (digits.length !== 11) {
+      // 非标准手机号，只显示前3后2
+      if (digits.length <= 5) return '***';
+      return digits.substring(0, 3) + '***' + digits.substring(digits.length - 2);
+    }
+    
+    // 标准11位手机号：138****5678
+    return digits.substring(0, 3) + '****' + digits.substring(7);
   }
 
   /**

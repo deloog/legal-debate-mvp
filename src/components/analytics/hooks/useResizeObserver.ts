@@ -6,7 +6,7 @@
 import { useState, useEffect, useRef } from 'react';
 
 interface ResizeObserverOptions {
-  element?: React.RefObject<Element>;
+  element?: React.RefObject<Element | null>;
   enabled?: boolean;
 }
 
@@ -58,7 +58,7 @@ export function useChartDimensions({
   maxWidth = 800,
   maxHeight = 600,
 }: {
-  element?: React.RefObject<Element>;
+  element?: React.RefObject<Element | null>;
   enabled?: boolean;
   baseWidth?: number;
   baseHeight?: number;

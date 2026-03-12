@@ -20,6 +20,7 @@ import {
 import { getEmailService } from './email-service';
 import { SECURITY } from '../constants/common';
 import { getVerificationCodeService } from './verification-code-service';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 验证 Schema
@@ -185,7 +186,7 @@ class PasswordResetService {
         };
       }
 
-      console.error('密码找回失败:', error);
+      logger.error('密码找回失败:', error);
       return {
         success: false,
         message: '密码找回失败，请稍后重试',
@@ -294,7 +295,7 @@ class PasswordResetService {
         };
       }
 
-      console.error('密码重置失败:', error);
+      logger.error('密码重置失败:', error);
       return {
         success: false,
         message: '密码重置失败，请稍后重试',

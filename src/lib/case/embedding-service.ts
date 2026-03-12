@@ -185,7 +185,7 @@ export class CaseEmbeddingService {
     try {
       await this.prisma.caseExample.update({
         where: { id: caseId },
-        data: { embedding: null },
+        data: { embedding: Prisma.DbNull },
       });
 
       logger.info('Embedding deleted', { caseId });
@@ -286,7 +286,7 @@ export class CaseEmbeddingService {
         this.prisma.caseExample.count({
           where: {
             embedding: {
-              not: null,
+              not: Prisma.DbNull,
             },
           },
         }),

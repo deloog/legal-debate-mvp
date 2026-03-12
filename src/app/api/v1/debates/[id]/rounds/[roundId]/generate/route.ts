@@ -22,9 +22,7 @@ import {
   Prisma,
   RoundStatus,
 } from '@prisma/client';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 
@@ -224,26 +222,16 @@ export const POST = withErrorHandler(
     request: NextRequest,
     context: { params: Promise<{ id: string; roundId: string }> }
   ) => {
-    // ── 认证：优先 JWT Bearer，回退到 NextAuth session ──
-    let userId: string | undefined;
-    let userRole: string | undefined;
-    const authHeader = request.headers.get('authorization');
-    const jwtToken = extractTokenFromHeader(authHeader ?? '');
-    const tokenResult = verifyToken(jwtToken ?? '');
-    if (tokenResult.valid && tokenResult.payload) {
-      userId = tokenResult.payload.userId;
-      userRole = tokenResult.payload.role;
-    } else {
-      const session = await getServerSession(authOptions);
-      if (!session?.user?.id) {
-        return NextResponse.json(
-          { success: false, error: '未认证', code: 'UNAUTHORIZED' },
-          { status: 401 }
-        );
-      }
-      userId = session.user.id;
-      userRole = (session.user as { role?: string }).role;
+    // ── 认证 ──
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        { status: 401 }
+      );
     }
+    const userId = authUser.userId;
+    const userRole = authUser.role as string | undefined;
 
     const resolvedParams = await context.params;
     const debateId = validatePathParam(resolvedParams.id, uuidSchema);
@@ -263,8 +251,7 @@ export const POST = withErrorHandler(
       return NextResponse.json(
         {
           success: false,
-          error: '请求过于频繁，请稍后再试',
-          code: 'RATE_LIMITED',
+          error: { code: 'RATE_LIMITED', message: '请求过于频繁，请稍后再试' },
         },
         { status: 429 }
       );
@@ -288,22 +275,38 @@ export const POST = withErrorHandler(
       },
     });
 
-    if (!round) throw new Error('Round not found');
-    if (round.debateId !== debateId)
-      throw new Error('Round does not belong to this debate');
+    if (!round) {
+      return NextResponse.json(
+        { success: false, error: { code: 'ROUND_NOT_FOUND', message: '轮次不存在' } },
+        { status: 404 }
+      );
+    }
+    if (round.debateId !== debateId) {
+      return NextResponse.json(
+        { success: false, error: { code: 'INVALID_ROUND', message: '轮次不属于该辩论' } },
+        { status: 400 }
+      );
+    }
 
     // ── 权限验证 ──
     const isAdmin = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
     if (round.debate.userId !== userId && !isAdmin) {
       return NextResponse.json(
-        { success: false, error: '无权访问', code: 'FORBIDDEN' },
+        { success: false, error: { code: 'FORBIDDEN', message: '无权访问' } },
         { status: 403 }
       );
     }
 
     if (round.status !== RoundStatus.IN_PROGRESS) {
-      throw new Error(
-        `Cannot generate arguments for round with status: ${round.status}`
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_ROUND_STATUS',
+            message: `轮次状态为 ${round.status}，无法生成论点`,
+          },
+        },
+        { status: 409 }
       );
     }
 
@@ -326,8 +329,7 @@ export const POST = withErrorHandler(
       return NextResponse.json(
         {
           success: false,
-          error: '该轮次正在生成中，请稍后再试',
-          code: 'GENERATION_IN_PROGRESS',
+          error: { code: 'GENERATION_IN_PROGRESS', message: '该轮次正在生成中，请稍后再试' },
         },
         { status: 409 }
       );
@@ -471,9 +473,10 @@ ${contextSection}
           return NextResponse.json(
             {
               success: false,
-              error: 'AI_SERVICE_UNAVAILABLE',
-              message:
-                'AI服务暂时不可用，请稍后重试。轮次已标记为失败，您可以重新生成。',
+              error: {
+                code: 'AI_SERVICE_UNAVAILABLE',
+                message: 'AI服务暂时不可用，请稍后重试。轮次已标记为失败，您可以重新生成。',
+              },
             },
             { status: 503 }
           );
@@ -500,10 +503,10 @@ ${contextSection}
       return NextResponse.json(
         {
           success: false,
-          error: 'PARSE_FAILED',
-          message:
-            'AI返回内容格式异常，无法解析论点。轮次已标记为失败，请重新生成。',
-          rawContent: debateContent.substring(0, 200),
+          error: {
+            code: 'PARSE_FAILED',
+            message: 'AI返回内容格式异常，无法解析论点。轮次已标记为失败，请重新生成。',
+          },
         },
         { status: 422 }
       );

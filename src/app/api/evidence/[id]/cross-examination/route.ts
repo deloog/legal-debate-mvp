@@ -5,10 +5,11 @@
  * 预判对方可能的质证意见，提供应对建议
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { CrossExaminationService } from '@/lib/evidence/cross-examination-service';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * 请求体接口
@@ -22,19 +23,34 @@ interface CrossExaminationRequest {
  * 路由参数接口
  */
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 /**
  * POST /api/evidence/[id]/cross-examination
  * 质证预判
  */
-export async function POST(request: Request, { params }: RouteParams) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
+    // 认证检查
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'UNAUTHORIZED',
+            message: '请先登录',
+          },
+        },
+        { status: 401 }
+      );
+    }
+
     // 验证证据ID
-    const evidenceId = params.id;
+    const { id: evidenceId } = await params;
     if (!evidenceId || evidenceId.trim() === '') {
       return NextResponse.json(
         {
@@ -94,9 +110,14 @@ export async function POST(request: Request, { params }: RouteParams) {
       );
     }
 
-    // 查询证据
-    const evidence = await prisma.evidence.findUnique({
-      where: { id: evidenceId },
+    // 查询证据（包含案件信息用于权限检查）
+    const evidence = await prisma.evidence.findFirst({
+      where: { id: evidenceId, deletedAt: null },
+      include: {
+        case: {
+          select: { id: true, type: true, userId: true },
+        },
+      },
     });
 
     if (!evidence) {
@@ -112,32 +133,32 @@ export async function POST(request: Request, { params }: RouteParams) {
       );
     }
 
-    // 检查证据是否已删除
-    if (evidence.deletedAt) {
+    // 权限检查：用户只能访问自己案件的证据
+    if (evidence.case?.userId !== authUser.userId) {
+      logger.warn('用户尝试访问无权访问的证据:', {
+        userId: authUser.userId,
+        evidenceId,
+        caseId: evidence.case?.id,
+        ownerId: evidence.case?.userId,
+      });
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: 'EVIDENCE_DELETED',
-            message: '证据已被删除',
+            code: 'FORBIDDEN',
+            message: '您没有权限访问此证据',
           },
         },
-        { status: 404 }
+        { status: 403 }
       );
     }
 
-    // 查询案件信息（可选，用于获取案件类型）
-    const caseInfo = await prisma.case.findUnique({
-      where: { id: evidence.caseId },
-      select: { id: true, type: true },
-    });
-
     // 调用质证预判服务
-    const service = new CrossExaminationService();
+    const service = CrossExaminationService.getInstance();
     const result = await service.preAssess({
       evidence,
       ourPosition,
-      caseType: caseType || caseInfo?.type,
+      caseType: caseType || evidence.case?.type,
     });
 
     // 返回成功响应

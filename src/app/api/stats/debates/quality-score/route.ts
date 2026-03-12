@@ -369,7 +369,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const { startDate, endDate } = getDateRange(params.timeRange);
+    const { startDate, endDate } = getDateRange(params.timeRange ?? TimeRange.LAST_30_DAYS);
 
     // 查询辩论质量评分数据
     const data = await getDebateQualityScore(startDate, endDate, params);

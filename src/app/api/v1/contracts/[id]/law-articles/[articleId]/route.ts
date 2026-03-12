@@ -6,16 +6,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import {
+  resolveContractUserId,
+  unauthorizedResponse,
+} from '@/app/api/lib/middleware/contract-auth';
 
 /**
  * 删除合同法条关联
  */
 export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: { id: string; articleId: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string; articleId: string }> }
 ): Promise<NextResponse> {
+  // ─── 认证 ─────────────────────────────────────────────────────────────────
+  const userId = resolveContractUserId(request);
+  if (!userId) return unauthorizedResponse();
+
   try {
-    const { id: contractId, articleId: lawArticleId } = params;
+    const { id: contractId, articleId: lawArticleId } = await params;
 
     // 验证合同是否存在
     const contract = await prisma.contract.findUnique({
@@ -27,7 +35,7 @@ export async function DELETE(
       return NextResponse.json(
         {
           success: false,
-          error: '合同不存在',
+          error: { code: 'CONTRACT_NOT_FOUND', message: '合同不存在' },
         },
         { status: 404 }
       );
@@ -47,7 +55,7 @@ export async function DELETE(
       return NextResponse.json(
         {
           success: false,
-          error: '关联记录不存在',
+          error: { code: 'ASSOCIATION_NOT_FOUND', message: '关联记录不存在' },
         },
         { status: 404 }
       );
@@ -75,7 +83,7 @@ export async function DELETE(
     return NextResponse.json(
       {
         success: false,
-        error: '删除关联失败',
+        error: { code: 'INTERNAL_ERROR', message: '删除关联失败' },
       },
       { status: 500 }
     );

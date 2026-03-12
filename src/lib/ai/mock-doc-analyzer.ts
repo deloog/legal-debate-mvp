@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 /**
  * Mock文档分析器
  *
@@ -70,7 +71,7 @@ export interface AnalysisMetadata {
  * @returns Mock分析结果
  */
 export function fallbackDocAnalysis(): DocAnalysisResult {
-  console.warn('[Mock] 使用Mock文档分析结果');
+  logger.warn('[Mock] 使用Mock文档分析结果');
 
   return {
     document_type: 'unknown',
@@ -136,14 +137,14 @@ export function validateMockResult(
 
   for (const field of requiredFields) {
     if (!(field in typedResult)) {
-      console.error(`[Mock] 缺少必需字段: ${field}`);
+      logger.error(`[Mock] 缺少必需字段: ${field}`);
       return false;
     }
   }
 
   // 验证metadata
   if (!typedResult.metadata || typeof typedResult.metadata !== 'object') {
-    console.error('[Mock] metadata格式错误');
+    logger.error('[Mock] metadata格式错误');
     return false;
   }
 
@@ -158,17 +159,17 @@ export function validateMockResult(
     !Array.isArray(typedResult.procedural_history) ||
     !Array.isArray(typedResult.relevant_laws)
   ) {
-    console.error('[Mock] 数组字段类型错误');
+    logger.error('[Mock] 数组字段类型错误');
     return false;
   }
 
   if (typeof typedResult.analysis_confidence !== 'number') {
-    console.error('[Mock] analysis_confidence应为数字类型');
+    logger.error('[Mock] analysis_confidence应为数字类型');
     return false;
   }
 
   if (typeof typedResult.raw_response !== 'string') {
-    console.error('[Mock] raw_response应为字符串类型');
+    logger.error('[Mock] raw_response应为字符串类型');
     return false;
   }
 

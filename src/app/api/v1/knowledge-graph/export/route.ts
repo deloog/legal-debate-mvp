@@ -13,10 +13,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 import {
   checkKnowledgeGraphPermission,
   logKnowledgeGraphAction,
   KnowledgeGraphAction,
+  KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
 
 /**
@@ -40,6 +42,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const searchParams = request.nextUrl.searchParams;
 
   try {
+    // 认证检查
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        { status: 401 }
+      );
+    }
+
     // 参数验证
     const format = searchParams.get('format') || 'json';
     const startDateParam = searchParams.get('startDate');
@@ -47,23 +58,48 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (!['json'].includes(format)) {
       return NextResponse.json(
-        { error: `不支持的导出格式: ${format}` },
+        { success: false, error: { code: 'INVALID_FORMAT', message: `不支持的导出格式: ${format}` } },
         { status: 400 }
       );
     }
 
+    // 验证日期格式
+    if (startDateParam) {
+      const startDate = new Date(startDateParam);
+      if (isNaN(startDate.getTime())) {
+        return NextResponse.json(
+          { success: false, error: { code: 'INVALID_DATE', message: '开始日期格式无效' } },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (endDateParam) {
+      const endDate = new Date(endDateParam);
+      if (isNaN(endDate.getTime())) {
+        return NextResponse.json(
+          { success: false, error: { code: 'INVALID_DATE', message: '结束日期格式无效' } },
+          { status: 400 }
+        );
+      }
+    }
+
     // 权限检查
     const permissionResult = await checkKnowledgeGraphPermission(
-      '', // 用户ID从header中获取
+      authUser.userId,
       KnowledgeGraphAction.EXPORT_DATA,
-      'RELATION' as never
+      KnowledgeGraphResource.GRAPH
     );
 
     if (!permissionResult.hasPermission) {
       logger.warn('用户无权限导出图谱', {
+        userId: authUser.userId,
         reason: permissionResult.reason,
       });
-      return NextResponse.json({ error: '权限不足' }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: { code: 'FORBIDDEN', message: '权限不足' } },
+        { status: 403 }
+      );
     }
 
     // 构建查询条件
@@ -83,6 +119,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       relationWhere.createdAt = createdAt;
     }
 
+    // 限制导出数量防止内存溢出
+    const MAX_NODES = 10000;
+    const MAX_LINKS = 50000;
+
     // 查询节点
     const nodes = await prisma.lawArticle.findMany({
       select: {
@@ -93,6 +133,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         status: true,
         effectiveDate: true,
       },
+      take: MAX_NODES,
     });
 
     // 查询关系
@@ -108,7 +149,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         discoveryMethod: true,
         createdAt: true,
       },
+      take: MAX_LINKS,
     });
+
+    // 如果数据被截断，记录警告
+    if (nodes.length === MAX_NODES) {
+      logger.warn('导出节点数量达到上限', { userId: authUser.userId, limit: MAX_NODES });
+    }
+    if (relations.length === MAX_LINKS) {
+      logger.warn('导出关系数量达到上限', { userId: authUser.userId, limit: MAX_LINKS });
+    }
 
     // 构建导出数据
     const exportNodes = nodes.map(node => ({
@@ -148,26 +198,34 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // 记录操作日志
     await logKnowledgeGraphAction({
-      userId: '', // 从header获取
+      userId: authUser.userId,
       action: KnowledgeGraphAction.EXPORT_DATA,
-      resource: 'RELATION' as never,
+      resource: KnowledgeGraphResource.GRAPH,
       description: `导出图谱数据，${exportNodes.length}个节点，${exportLinks.length}个关系`,
       metadata: {
         format,
         nodeCount: exportNodes.length,
         linkCount: exportLinks.length,
+        startDate: startDateParam,
+        endDate: endDateParam,
       },
     });
 
     return NextResponse.json({
-      format,
-      metadata,
-      nodes: exportNodes,
-      links: exportLinks,
+      success: true,
+      data: {
+        format,
+        metadata,
+        nodes: exportNodes,
+        links: exportLinks,
+      },
     });
   } catch (error: unknown) {
     logger.error('图谱导出失败', { error });
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { code: 'INTERNAL_ERROR', message: errorMessage } },
+      { status: 500 }
+    );
   }
 }

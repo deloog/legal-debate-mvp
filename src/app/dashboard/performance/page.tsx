@@ -24,7 +24,7 @@ const TIME_RANGE_OPTIONS = [
   { value: '7d', label: '近7天' },
 ];
 
-function PerformanceDashboardPage(): React.ReactElement {
+function PerformanceDashboardPage(): React.ReactElement | null {
   const router = useRouter();
   const [stats, setStats] = useState<PerformanceStats | null>(null);
   const [trend, setTrend] = useState<PerformanceTrend[]>([]);

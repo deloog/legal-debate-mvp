@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient, RiskLevel } from '@prisma/client';
+import { Prisma, PrismaClient, RiskLevel, RelationType } from '@prisma/client';
 import { logger } from '@/lib/logger';
 
 interface ClauseRiskInput {
@@ -114,7 +114,7 @@ export class ContractClauseRiskService {
           clauseType,
           relatedLawArticleIds,
           riskLevel,
-          riskFactors: { set: riskFactors as unknown as Prisma.JsonValue[] },
+          riskFactors: riskFactors as unknown as Prisma.InputJsonValue[],
           riskDescription,
           conflictRelations,
           obsoleteRelations,
@@ -159,19 +159,19 @@ export class ContractClauseRiskService {
     aiProvider?: string
   ): Promise<ClauseRiskAnalysis[]> {
     try {
-      const results: ClauseRiskAnalysis[] = [];
-
-      for (const clause of clauses) {
-        const result = await this.analyzeClauseRisk(
-          contractId,
-          userId,
-          clause.text,
-          clause.number,
-          clause.type,
-          aiProvider
-        );
-        results.push(result);
-      }
+      // 并行处理所有条款，避免串行等待
+      const results = await Promise.all(
+        clauses.map(clause =>
+          this.analyzeClauseRisk(
+            contractId,
+            userId,
+            clause.text,
+            clause.number,
+            clause.type,
+            aiProvider
+          )
+        )
+      );
 
       return results;
     } catch (error) {
@@ -221,7 +221,7 @@ export class ContractClauseRiskService {
 
       const topRisks = risks.slice(0, 10).map(risk => ({
         id: risk.id,
-        clauseNumber: risk.clauseNumber,
+        clauseNumber: risk.clauseNumber ?? undefined,
         riskLevel: risk.riskLevel,
         riskDescription: risk.riskDescription,
       }));
@@ -288,19 +288,15 @@ export class ContractClauseRiskService {
   ): Promise<ClauseRiskAnalysis> {
     try {
       // 处理 Json 数组字段
-      const updateDataWithJson = {
-        ...updateData,
-        ...(updateData.riskFactors && {
-          riskFactors: {
-            set: updateData.riskFactors as unknown as Prisma.JsonValue[],
-          },
-        }),
-      };
-
       const updated = await this.prisma.contractClauseRisk.update({
         where: { id },
         data: {
-          ...updateDataWithJson,
+          ...(updateData.riskLevel && { riskLevel: updateData.riskLevel }),
+          ...(updateData.riskDescription && { riskDescription: updateData.riskDescription }),
+          ...(updateData.analyzedBy && { analyzedBy: updateData.analyzedBy }),
+          ...(updateData.riskFactors && {
+            riskFactors: updateData.riskFactors as unknown as Prisma.InputJsonValue[],
+          }),
           analyzedAt: new Date(),
         },
       });
@@ -423,7 +419,7 @@ export class ContractClauseRiskService {
     const relations = await this.prisma.lawArticleRelation.findMany({
       where: {
         sourceId: { in: lawArticleIds },
-        relationType: { in: ['SUPERSEDED_BY', 'SUPERSEDES'] as any },
+        relationType: { in: [RelationType.SUPERSEDED_BY, RelationType.SUPERSEDES] },
         confidence: { gte: 0.7 },
       },
     });

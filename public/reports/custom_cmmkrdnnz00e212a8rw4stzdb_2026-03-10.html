@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>系统统计报告</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f5f5f5;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      font-size: 32px;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+      border-bottom: 3px solid #1890ff;
+      padding-bottom: 10px;
+    }
+    h2 {
+      font-size: 24px;
+      color: #1a1a1a;
+      margin-top: 40px;
+      margin-bottom: 20px;
+      border-left: 4px solid #1890ff;
+      padding-left: 12px;
+    }
+    h3 {
+      font-size: 18px;
+      color: #1a1a1a;
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+    .summary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 24px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    .summary h2 {
+      color: white;
+      border-left-color: rgba(255, 255, 255, 0.5);
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .metric-card {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 16px;
+    }
+    .metric-label {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+    .metric-value {
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .metric-unit {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-left: 4px;
+    }
+    .metric-change {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .metric-change.positive {
+      color: #52c41a;
+    }
+    .metric-change.negative {
+      color: #ff4d4f;
+    }
+    .section {
+      background-color: #fafafa;
+      border-radius: 6px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background-color: white;
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .stat-label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1a1a1a;
+    }
+    .highlights,
+    .issues,
+    .recommendations {
+      margin-top: 20px;
+    }
+    .highlights ul,
+    .issues ul,
+    .recommendations ul {
+      list-style: none;
+      padding: 0;
+    }
+    .highlights li,
+    .issues li,
+    .recommendations li {
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+    }
+    .highlights li {
+      background-color: #f6ffed;
+      border-left: 3px solid #52c41a;
+      color: #389e0d;
+    }
+    .issues li {
+      background-color: #fff1f0;
+      border-left: 3px solid #ff4d4f;
+      color: #cf1322;
+    }
+    .recommendations li {
+      background-color: #e6f7ff;
+      border-left: 3px solid #1890ff;
+      color: #0958d9;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      background-color: white;
+    }
+    thead {
+      background-color: #fafafa;
+    }
+    th,
+    td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    th {
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+    tr:hover {
+      background-color: #fafafa;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #f0f0f0;
+      text-align: center;
+      color: #999;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <div class="summary">
+      <h2>📊 报告摘要</h2>
+      <div class="metrics">
+        
+    <div class="metric-card">
+      <div class="metric-label">新增用户</div>
+      <div>
+        <span class="metric-value">274</span>
+        <span class="metric-unit">人</span>
+      </div>
+      <div class="metric-change positive">
+        ↑ 28.48%
+      </div>
+    </div>
+  
+    <div class="metric-card">
+      <div class="metric-label">新增案件</div>
+      <div>
+        <span class="metric-value">17</span>
+        <span class="metric-unit">件</span>
+      </div>
+      <div class="metric-change positive">
+        ↑ 0.00%
+      </div>
+    </div>
+  
+    <div class="metric-card">
+      <div class="metric-label">生成辩论</div>
+      <div>
+        <span class="metric-value">0</span>
+        <span class="metric-unit">次</span>
+      </div>
+      <div class="metric-change positive">
+        ↑ 0.00%
+      </div>
+    </div>
+  
+    <div class="metric-card">
+      <div class="metric-label">系统错误率</div>
+      <div>
+        <span class="metric-value">50</span>
+        <span class="metric-unit">%</span>
+      </div>
+      <div class="metric-change positive">
+        ↑ 0.00%
+      </div>
+    </div>
+  
+      </div>
+      
+      
+      
+    </div>
+  
+    
+    <div class="section">
+      <h2>👥 用户统计</h2>
+      <div class="summary-stats">
+        <div class="stat-card">
+          <div class="stat-label">总用户数</div>
+          <div class="stat-value">962</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">新增用户</div>
+          <div class="stat-value">274</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">活跃用户</div>
+          <div class="stat-value">333</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">增长率</div>
+          <div class="stat-value">28.48%</div>
+        </div>
+      </div>
+      <h3>用户活跃度分布</h3>
+      
+    <table>
+      <thead>
+        <tr>
+          <th>活跃度分类</th>
+          <th>用户数</th>
+          <th>占比</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>非常活跃</td>
+          <td>0</td>
+          <td>0.00%</td>
+        </tr>
+        <tr>
+          <td>活跃</td>
+          <td>333</td>
+          <td>34.62%</td>
+        </tr>
+        <tr>
+          <td>不活跃</td>
+          <td>0</td>
+          <td>0.00%</td>
+        </tr>
+        <tr>
+          <td>沉默</td>
+          <td>0</td>
+          <td>0.00%</td>
+        </tr>
+      </tbody>
+    </table>
+  
+    </div>
+  
+    
+    <div class="section">
+      <h2>📁 案件统计</h2>
+      <div class="summary-stats">
+        <div class="stat-card">
+          <div class="stat-label">总案件数</div>
+          <div class="stat-value">17</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">已完成</div>
+          <div class="stat-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">进行中</div>
+          <div class="stat-value">17</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">平均处理时间</div>
+          <div class="stat-value">0.00</div>
+        </div>
+      </div>
+      <h3>案件类型分布</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>案件类型</th>
+            <th>数量</th>
+            <th>占比</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td>CIVIL</td>
+              <td>18</td>
+              <td>100.00%</td>
+            </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  
+    
+    <div class="section">
+      <h2>💬 辩论统计</h2>
+      <div class="summary-stats">
+        <div class="stat-card">
+          <div class="stat-label">总辩论数</div>
+          <div class="stat-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">总论点数</div>
+          <div class="stat-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">平均论点数</div>
+          <div class="stat-value">0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">平均质量评分</div>
+          <div class="stat-value">0.0000</div>
+        </div>
+      </div>
+    </div>
+  
+    
+    <div class="section">
+      <h2>⚡ 性能统计</h2>
+      <div class="summary-stats">
+        <div class="stat-card">
+          <div class="stat-label">总请求数</div>
+          <div class="stat-value">2</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">平均响应时间</div>
+          <div class="stat-value">0.00ms</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">P95响应时间</div>
+          <div class="stat-value">0.00ms</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">错误率</div>
+          <div class="stat-value">50.00%</div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="footer">
+      <p>报告生成时间：2026/3/10 23:22:11</p>
+      <p>法律诉讼智能分析系统</p>
+    </div>
+  </div>
+</body>
+</html>

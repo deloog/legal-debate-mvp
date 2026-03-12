@@ -29,7 +29,7 @@ const updateTimelineEventSchema = z.object({
  */
 export const GET = async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> => {
   try {
     const authUser = await getAuthUser(request);
@@ -37,7 +37,7 @@ export const GET = async (
       return NextResponse.json({ error: '未授权' }, { status: 401 });
     }
 
-    const eventId = params.id;
+    const eventId = (await params).id;
 
     // 获取时间线事件并验证权限
     const event = await prisma.caseTimeline.findFirst({
@@ -71,7 +71,7 @@ export const GET = async (
  */
 export const PUT = async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> => {
   try {
     const authUser = await getAuthUser(request);
@@ -79,7 +79,7 @@ export const PUT = async (
       return NextResponse.json({ error: '未授权' }, { status: 401 });
     }
 
-    const eventId = params.id;
+    const eventId = (await params).id;
 
     // 获取时间线事件并验证权限
     const existingEvent = await prisma.caseTimeline.findFirst({
@@ -131,7 +131,7 @@ export const PUT = async (
  */
 export const DELETE = async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> => {
   try {
     const authUser = await getAuthUser(request);
@@ -139,7 +139,7 @@ export const DELETE = async (
       return NextResponse.json({ error: '未授权' }, { status: 401 });
     }
 
-    const eventId = params.id;
+    const eventId = (await params).id;
 
     // 获取时间线事件并验证权限
     const existingEvent = await prisma.caseTimeline.findFirst({

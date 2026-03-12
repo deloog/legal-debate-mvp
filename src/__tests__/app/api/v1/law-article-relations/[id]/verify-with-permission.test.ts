@@ -162,7 +162,7 @@ describe('关系审核API权限测试', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testRelation.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testRelation.id }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -188,7 +188,7 @@ describe('关系审核API权限测试', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testRelation.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testRelation.id }) });
       const data = await response.json();
 
       expect(response.status).toBe(403);
@@ -213,7 +213,7 @@ describe('关系审核API权限测试', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testRelation.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testRelation.id }) });
       const data = await response.json();
 
       expect(response.status).toBe(403);
@@ -242,7 +242,7 @@ describe('关系审核API权限测试', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testRelation.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testRelation.id }) });
       expect(response.status).toBe(200);
 
       // 验证日志是否被创建
@@ -282,7 +282,7 @@ describe('关系审核API权限测试', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testRelation.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testRelation.id }) });
       expect(response.status).toBe(200);
 
       // 验证日志
@@ -320,7 +320,7 @@ describe('关系审核API权限测试', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testRelation.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testRelation.id }) });
       const data = await response.json();
 
       // 审核应该成功
@@ -348,7 +348,7 @@ describe('关系审核API权限测试', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testRelation.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testRelation.id }) });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -372,7 +372,7 @@ describe('关系审核API权限测试', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testRelation.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testRelation.id }) });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -397,7 +397,7 @@ describe('关系审核API权限测试', () => {
       );
 
       const response = await POST(request, {
-        params: { id: 'non-existent-id' },
+        params: Promise.resolve({ id: 'non-existent-id' }),
       });
       const data = await response.json();
 
@@ -421,7 +421,7 @@ describe('关系审核API权限测试', () => {
         }
       );
 
-      await POST(firstRequest, { params: { id: testRelation.id } });
+      await POST(firstRequest, { params: Promise.resolve({ id: testRelation.id }) });
 
       // 尝试再次审核
       const secondRequest = new NextRequest(
@@ -439,7 +439,7 @@ describe('关系审核API权限测试', () => {
       );
 
       const response = await POST(secondRequest, {
-        params: { id: testRelation.id },
+        params: Promise.resolve({ id: testRelation.id }),
       });
       const data = await response.json();
 

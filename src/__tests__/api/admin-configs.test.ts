@@ -540,7 +540,7 @@ describe('GET /api/admin/configs/[key]', () => {
     const response = await GET_BY_KEY(
       mockRequest('/api/admin/configs/test.config1'),
       {
-        params: { key: 'test.config1' },
+        params: Promise.resolve({ key: 'test.config1' }),
       }
     );
 
@@ -556,7 +556,7 @@ describe('GET /api/admin/configs/[key]', () => {
     const response = await GET_BY_KEY(
       mockRequest('/api/admin/configs/nonexistent'),
       {
-        params: { key: 'nonexistent' },
+        params: Promise.resolve({ key: 'nonexistent' }),
       }
     );
 
@@ -606,7 +606,7 @@ describe('PUT /api/admin/configs/[key]', () => {
         value: 'new value',
         description: '更新后的描述',
       }),
-      { params: { key: 'test.config1' } }
+      { params: Promise.resolve({ key: 'test.config1' }) }
     );
 
     const data = await response.json();
@@ -623,7 +623,7 @@ describe('PUT /api/admin/configs/[key]', () => {
       mockRequest('/api/admin/configs/nonexistent', 'PUT', {
         value: 'new value',
       }),
-      { params: { key: 'nonexistent' } }
+      { params: Promise.resolve({ key: 'nonexistent' }) }
     );
 
     const data = await response.json();
@@ -648,7 +648,7 @@ describe('PUT /api/admin/configs/[key]', () => {
       mockRequest('/api/admin/configs/test.config1', 'PUT', {
         value: 'not-a-number',
       }),
-      { params: { key: 'test.config1' } }
+      { params: Promise.resolve({ key: 'test.config1' }) }
     );
 
     const data = await response.json();
@@ -686,7 +686,7 @@ describe('DELETE /api/admin/configs/[key]', () => {
 
     const response = await DELETE(
       mockRequest('/api/admin/configs/test.config1', 'DELETE'),
-      { params: { key: 'test.config1' } }
+      { params: Promise.resolve({ key: 'test.config1' }) }
     );
 
     const data = await response.json();
@@ -703,7 +703,7 @@ describe('DELETE /api/admin/configs/[key]', () => {
 
     const response = await DELETE(
       mockRequest('/api/admin/configs/nonexistent', 'DELETE'),
-      { params: { key: 'nonexistent' } }
+      { params: Promise.resolve({ key: 'nonexistent' }) }
     );
 
     const data = await response.json();
@@ -724,7 +724,7 @@ describe('DELETE /api/admin/configs/[key]', () => {
 
     const response = await DELETE(
       mockRequest('/api/admin/configs/test.config1', 'DELETE'),
-      { params: { key: 'test.config1' } }
+      { params: Promise.resolve({ key: 'test.config1' }) }
     );
 
     const data = await response.json();

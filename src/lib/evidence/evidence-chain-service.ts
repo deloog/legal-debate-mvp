@@ -2,15 +2,16 @@
  * 证据链分析服务
  *
  * 功能：
- * - 使用AI分析证据之间的关联性
- * - 构建完整证据链结构
- * - 计算证据链完整性
+ * - AI分析证据关联性
+ * - 构建证据链图谱
  * - 识别证据链缺口
- * - 提供证据收集建议
+ * - 生成证据链可视化数据
+ * - AI解析失败时提供降级方案
  */
 
 import type { Evidence } from '@prisma/client';
 import { AIService } from '@/lib/ai/clients';
+import { logger } from '@/lib/logger';
 
 /**
  * 证据链分析输入
@@ -18,7 +19,7 @@ import { AIService } from '@/lib/ai/clients';
 export interface EvidenceChainAnalysisInput {
   caseId: string;
   evidences: Evidence[];
-  targetFact: string; // 待证明的事实
+  targetFact: string;
 }
 
 /**
@@ -27,37 +28,47 @@ export interface EvidenceChainAnalysisInput {
 export interface EvidenceChainNode {
   evidenceId: string;
   evidenceName: string;
-  role: string; // 在证据链中的作用
-  proves: string; // 证明什么
-  strength: 'strong' | 'medium' | 'weak'; // 证据强度
+  role: 'key' | 'supporting' | 'peripheral';
+  description: string;
 }
 
 /**
- * 证据关联关系
+ * 证据链连接
  */
 export interface EvidenceConnection {
-  from: string; // 证据A ID
-  to: string; // 证据B ID
-  relationship: string; // 关联关系描述
+  from: string;
+  to: string;
+  relation: string;
+  strength: number; // 0-1
 }
 
 /**
  * 证据链分析结果
  */
 export interface EvidenceChainAnalysisResult {
-  chains: EvidenceChainNode[]; // 证据链结构
-  connections: EvidenceConnection[]; // 关联关系
-  completeness: number; // 完整性 0-100
-  gaps: string[]; // 证据链缺口
-  suggestions: string[]; // 建议
+  chains: EvidenceChainNode[];
+  connections: EvidenceConnection[];
+  completeness: number; // 0-100
+  gaps: string[];
+  suggestions: string[];
 }
 
 /**
- * AI响应结构
+ * AI分析响应结构
  */
 interface AIAnalysisResponse {
-  chains: EvidenceChainNode[];
-  connections: EvidenceConnection[];
+  chains: Array<{
+    evidenceId: string;
+    evidenceName: string;
+    role: string;
+    description: string;
+  }>;
+  connections: Array<{
+    from: string;
+    to: string;
+    relation: string;
+    strength: number;
+  }>;
   completeness: number;
   gaps: string[];
   suggestions: string[];
@@ -80,15 +91,9 @@ export class EvidenceChainService {
     // 验证输入
     this.validateInput(input);
 
-    // 处理空证据列表
+    // 空证据列表降级处理
     if (input.evidences.length === 0) {
-      return {
-        chains: [],
-        connections: [],
-        completeness: 0,
-        gaps: ['缺少任何证据材料'],
-        suggestions: ['请上传相关证据材料以建立证据链'],
-      };
+      return this.getEmptyEvidenceResult();
     }
 
     // 生成AI提示词
@@ -102,14 +107,11 @@ export class EvidenceChainService {
       );
 
       // 解析AI响应
-      const result = this.parseAIResponse(aiResponse.content);
-
-      return result;
+      return this.parseAIResponse(aiResponse.content);
     } catch (error) {
-      console.error('证据链分析失败:', error);
-      throw new Error(
-        `证据链分析失败: ${error instanceof Error ? error.message : '未知错误'}`
-      );
+      logger.error('证据链分析失败:', error);
+      // AI解析失败时返回降级结果
+      return this.getFallbackResult(input.evidences);
     }
   }
 
@@ -123,6 +125,10 @@ export class EvidenceChainService {
 
     if (!input.targetFact || input.targetFact.trim() === '') {
       throw new Error('待证明事实不能为空');
+    }
+
+    if (input.targetFact.length > 5000) {
+      throw new Error('待证明事实过长，最多5000字符');
     }
 
     if (!Array.isArray(input.evidences)) {
@@ -143,30 +149,37 @@ export class EvidenceChainService {
   private buildAnalysisPrompt(input: EvidenceChainAnalysisInput): string {
     const { evidences, targetFact } = input;
 
-    // 构建证据列表描述
     const evidenceList = evidences
-      .map((e, index) => {
-        return `${index + 1}. 【${e.name}】
-   - 类型: ${this.getEvidenceTypeLabel(e.type)}
-   - 描述: ${e.description || '无'}
-   - 状态: ${this.getEvidenceStatusLabel(e.status)}
-   - 相关性评分: ${e.relevanceScore || '未评分'}`;
-      })
-      .join('\n\n');
+      .map(
+        (e, index) =>
+          `${index + 1}. ${e.name} (${e.type}) - ${e.description || '无描述'}`
+      )
+      .join('\n');
 
-    return `请分析以下证据链，目标是证明：${targetFact}
+    return `请作为一位经验丰富的诉讼律师，分析以下证据链的完整性和关联性。
+
+## 待证明事实
+${targetFact}
 
 ## 证据列表
 ${evidenceList}
 
 ## 分析要求
-请从以下几个方面进行分析：
+1. **证据链节点分析**
+   - 识别关键证据（key）
+   - 识别支持性证据（supporting）
+   - 识别边缘证据（peripheral）
+   - 说明每个证据在链中的作用
 
-1. **证据链结构**：分析每个证据在证据链中的作用和地位
-2. **证据关联**：识别证据之间的关联关系（相互印证、补充、矛盾等）
-3. **完整性评估**：评估证据链的完整性（0-100分）
-4. **缺口识别**：指出证据链中存在的缺口
-5. **收集建议**：提供补充证据的建议
+2. **证据关联性分析**
+   - 识别证据之间的逻辑关系
+   - 评估关联强度（0-1）
+   - 描述关联类型（支持、补充、印证等）
+
+3. **完整性评估**
+   - 评估证据链整体完整性（0-100）
+   - 识别证据链缺口
+   - 提出补充证据建议
 
 ## 输出格式
 请严格按照以下JSON格式输出（不要包含任何其他文字）：
@@ -177,35 +190,30 @@ ${evidenceList}
     {
       "evidenceId": "证据ID",
       "evidenceName": "证据名称",
-      "role": "在证据链中的作用",
-      "proves": "证明什么事实",
-      "strength": "strong|medium|weak"
+      "role": "key|supporting|peripheral",
+      "description": "该证据在证据链中的作用描述"
     }
   ],
   "connections": [
     {
-      "from": "证据A的ID",
-      "to": "证据B的ID",
-      "relationship": "关联关系描述"
+      "from": "源证据ID",
+      "to": "目标证据ID",
+      "relation": "关系描述",
+      "strength": 0.8
     }
   ],
-  "completeness": 85,
-  "gaps": [
-    "缺口描述1",
-    "缺口描述2"
-  ],
-  "suggestions": [
-    "建议1",
-    "建议2"
-  ]
+  "completeness": 75,
+  "gaps": ["证据链缺口1", "证据链缺口2"],
+  "suggestions": ["补充证据建议1", "补充证据建议2"]
 }
 \`\`\`
 
 注意：
-- chains数组应包含所有证据的分析
-- connections数组描述证据之间的关联
-- completeness是0-100的整数
-- gaps和suggestions应具体明确
+- completeness必须是0-100之间的整数
+- chains数组应包含所有证据
+- connections数组描述证据之间的关系
+- gaps数组列出证据链的不足之处
+- suggestions数组提供具体的改进建议
 - 必须返回有效的JSON格式`;
   }
 
@@ -240,27 +248,44 @@ ${evidenceList}
         throw new Error('AI响应缺少completeness字段');
       }
 
-      if (!parsed.gaps || !Array.isArray(parsed.gaps)) {
-        throw new Error('AI响应缺少gaps字段');
-      }
+      // 验证并规范化质证意见
+      const validatedChains = parsed.chains.map(chain => {
+        // 验证role
+        if (!['key', 'supporting', 'peripheral'].includes(chain.role)) {
+          chain.role = 'peripheral'; // 默认降级
+        }
 
-      if (!parsed.suggestions || !Array.isArray(parsed.suggestions)) {
-        throw new Error('AI响应缺少suggestions字段');
-      }
+        return {
+          evidenceId: String(chain.evidenceId),
+          evidenceName: String(chain.evidenceName),
+          role: chain.role as 'key' | 'supporting' | 'peripheral',
+          description: String(chain.description || ''),
+        };
+      });
+
+      // 验证并规范化connections
+      const validatedConnections = parsed.connections.map(conn => ({
+        from: String(conn.from),
+        to: String(conn.to),
+        relation: String(conn.relation || '关联'),
+        strength: Math.max(0, Math.min(1, conn.strength || 0.5)),
+      }));
 
       // 确保completeness在0-100范围内
       const completeness = Math.max(0, Math.min(100, parsed.completeness));
 
       return {
-        chains: parsed.chains,
-        connections: parsed.connections,
+        chains: validatedChains,
+        connections: validatedConnections,
         completeness,
-        gaps: parsed.gaps,
-        suggestions: parsed.suggestions,
+        gaps: Array.isArray(parsed.gaps) ? parsed.gaps.map(String) : [],
+        suggestions: Array.isArray(parsed.suggestions)
+          ? parsed.suggestions.map(String)
+          : [],
       };
     } catch (error) {
-      console.error('解析AI响应失败:', error);
-      console.error('原始响应:', response);
+      logger.error('解析AI响应失败:', error);
+      logger.error('原始响应:', response);
       throw new Error(
         `解析AI响应失败: ${error instanceof Error ? error.message : '未知错误'}`
       );
@@ -268,34 +293,39 @@ ${evidenceList}
   }
 
   /**
-   * 获取证据类型标签
+   * 空证据列表的降级结果
    */
-  private getEvidenceTypeLabel(type: string): string {
-    const typeMap: Record<string, string> = {
-      DOCUMENT: '书证',
-      PHYSICAL: '物证',
-      WITNESS: '证人证言',
-      AUDIO: '视听资料',
-      ELECTRONIC: '电子数据',
-      APPRAISAL: '鉴定意见',
-      INSPECTION: '勘验笔录',
+  private getEmptyEvidenceResult(): EvidenceChainAnalysisResult {
+    return {
+      chains: [],
+      connections: [],
+      completeness: 0,
+      gaps: ['缺少任何证据材料'],
+      suggestions: ['请上传相关证据材料以建立证据链'],
     };
-
-    return typeMap[type] || type;
   }
 
   /**
-   * 获取证据状态标签
+   * AI解析失败时的降级结果
    */
-  private getEvidenceStatusLabel(status: string): string {
-    const statusMap: Record<string, string> = {
-      PENDING: '待审核',
-      APPROVED: '已采纳',
-      REJECTED: '已驳回',
-      CHALLENGED: '被质疑',
-    };
+  private getFallbackResult(
+    evidences: Evidence[]
+  ): EvidenceChainAnalysisResult {
+    // 基于简单规则生成降级结果
+    const chains: EvidenceChainNode[] = evidences.map((evidence, index) => ({
+      evidenceId: evidence.id,
+      evidenceName: evidence.name,
+      role: index === 0 ? 'key' : 'supporting',
+      description: `${evidence.name} (${evidence.type}) - 需要进一步分析`,
+    }));
 
-    return statusMap[status] || status;
+    return {
+      chains,
+      connections: [],
+      completeness: Math.min(30, evidences.length * 10), // 简单估计
+      gaps: ['AI分析服务暂时不可用，无法评估证据链完整性'],
+      suggestions: ['请稍后重试证据链分析', '检查证据材料的完整性'],
+    };
   }
 
   /**

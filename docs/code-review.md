@@ -801,13 +801,13 @@
 
 ## 问题统计
 
-| 问题类型                  | 数量      |
-| ------------------------- | --------- |
-| 已修复                    | 7 个文件  |
-| 待修复: console.\* 滥用   | 79 个文件 |
-| 待修复: 超大文件 (>500行) | 3 个      |
-| 待修复: any 类型使用      | 4 个文件  |
-| 待修复: 方法命名不规范    | 1 个文件  |
+| 问题类型                  | 数量        |
+| ------------------------- | ----------- |
+| 已修复                    | 29 个文件   |
+| 待修复: console.\* 滥用   | ~60+ 个文件 |
+| 待修复: 超大文件 (>500行) | 3 个        |
+| 待修复: any 类型使用      | 4 个文件    |
+| 待修复: 方法命名不规范    | 1 个文件    |
 
 ## 符合规范的文件 (未列出问题)
 
@@ -819,3 +819,25 @@
 ---
 
 **注意**: 大文件拆分 (samr-crawler.ts, alert-manager.ts, flk-crawler.ts) 暂不处理
+
+---
+
+## 重要说明 (2025-03-10 更新)
+
+1. **ESLint 配置状态**: 当前项目的 `eslint.config.mjs` 中**未启用 `no-console` 规则**，因此 ESLint 不会将 `console.*` 报错为错误。这意味着这些 console.\* 调用不会阻止代码构建或 CI/CD。
+
+2. **已确认修复的文件** (29个) - 详见上方列表
+
+3. **仍然存在 console.\* 问题的目录**:
+   - src/lib/ai/ (约20个文件)
+   - src/lib/auth/ (约10个文件)
+   - src/lib/cron/ (4个文件)
+   - src/lib/law-article/ (5个文件)
+   - src/lib/debate/ (6个文件)
+   - src/lib/cache/ (4个文件)
+   - src/lib/notification/ (2个文件)
+   - 其他: case, calculation, contract, email, evidence, invoice, order, performance, security, team 等
+
+4. **是否需要修复**: console.\* 问题不会导致 ESLint 报错，是否需要修复取决于项目规范要求。如需修复，可以：
+   - 在 eslint.config.mjs 中添加 `'no-console': 'error'` 规则
+   - 或者逐文件替换 `console.*` 为 `logger.\*

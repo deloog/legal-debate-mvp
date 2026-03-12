@@ -14,6 +14,7 @@ import {
   ExcelGenerator,
   generateExportFilename,
 } from '@/lib/export/excel-generator';
+import { checkExportRateLimit, logExportComplete } from '@/lib/export/export-rate-limiter';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { TimeRange } from '@/types/stats';
@@ -239,13 +240,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return forbiddenResponse('无权限导出数据');
   }
 
+  // 检查导出频率限制
+  const rateLimit = checkExportRateLimit(user.userId, 'cases');
+  if (!rateLimit.allowed) {
+    return errorResponse(rateLimit.message || '导出过于频繁，请稍后再试', 429);
+  }
+
   try {
     const params = parseQueryParams(request);
     if (!params) {
       return errorResponse('无效的查询参数', 400);
     }
 
-    const { startDate, endDate } = getDateRange(params.timeRange);
+    const { startDate, endDate } = getDateRange(params.timeRange ?? TimeRange.LAST_30_DAYS);
 
     const data = await getCaseExportData(
       startDate,
@@ -276,6 +283,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const blob = generator.toBlob();
 
     const filename = generateExportFilename('cases', params.format);
+
+    // 记录导出完成
+    logExportComplete(user.userId, 'cases', data.length, blob.size);
 
     return new NextResponse(blob, {
       status: 200,

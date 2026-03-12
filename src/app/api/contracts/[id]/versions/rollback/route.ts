@@ -6,14 +6,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { contractVersionService } from '@/lib/contract/contract-version-service';
 import { clearContractPDFCache } from '@/lib/contract/contract-pdf-generator';
+import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
+import {
+  resolveContractUserId,
+  unauthorizedResponse,
+  forbiddenResponse,
+} from '@/app/api/lib/middleware/contract-auth';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  // ─── 认证 ─────────────────────────────────────────────────────────────────
+  const userId = resolveContractUserId(request);
+  if (!userId) return unauthorizedResponse();
+
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     if (!body.versionId) {
@@ -29,24 +39,28 @@ export async function POST(
       );
     }
 
-    if (!body.createdBy) {
+    // ─── 合同存在性 + 所有权检查 ──────────────────────────────────────────────
+    const contract = await prisma.contract.findUnique({
+      where: { id },
+      select: { lawyerId: true },
+    });
+
+    if (!contract) {
       return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'MISSING_CREATED_BY',
-            message: '缺少操作人信息',
-          },
-        },
-        { status: 400 }
+        { success: false, error: { code: 'CONTRACT_NOT_FOUND', message: '合同不存在' } },
+        { status: 404 }
       );
     }
 
-    // 执行回滚
+    if (contract.lawyerId !== userId) {
+      return forbiddenResponse();
+    }
+
+    // 执行回滚（createdBy 使用来自 JWT 的 userId，不再信任请求体）
     await contractVersionService.rollbackToVersion(
       id,
       body.versionId,
-      body.createdBy
+      userId
     );
 
     // 清除PDF缓存

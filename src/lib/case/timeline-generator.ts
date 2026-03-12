@@ -9,6 +9,7 @@ import {
   isBoolean,
 } from '@/types/timeline-generator';
 import { CaseStatus, Prisma } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 /**
  * 自动时间线生成器
@@ -274,7 +275,7 @@ export async function generateTimelineEventFromCaseChange(
     });
 
     if (!caseData) {
-      console.error(`案件 ${caseId} 不存在`);
+      logger.error(`案件 ${caseId} 不存在`);
       return;
     }
 
@@ -325,7 +326,7 @@ export async function generateTimelineEventFromCaseChange(
       }
     }
   } catch (error) {
-    console.error('生成时间线事件失败:', error);
+    logger.error('生成时间线事件失败:', error);
     throw error;
   }
 }
@@ -358,7 +359,7 @@ async function createTimelineEvent(
     },
   });
 
-  console.info(`已创建时间线事件: ${eventType}`);
+  logger.info(`已创建时间线事件: ${eventType}`);
 }
 
 /**
@@ -372,7 +373,7 @@ export async function generateTimelineForCase(caseId: string): Promise<void> {
     });
 
     if (!caseData) {
-      console.error(`案件 ${caseId} 不存在`);
+      logger.error(`案件 ${caseId} 不存在`);
       return;
     }
 
@@ -383,13 +384,13 @@ export async function generateTimelineForCase(caseId: string): Promise<void> {
     });
 
     if (existingTimeline.length > 0) {
-      console.info(`案件 ${caseId} 已有时间线事件，跳过生成`);
+      logger.info(`案件 ${caseId} 已有时间线事件，跳过生成`);
       return;
     }
 
     await generateTimelineEventFromCaseChange(caseId, null, caseData.status);
   } catch (error) {
-    console.error(`为案件 ${caseId} 生成时间线失败:`, error);
+    logger.error(`为案件 ${caseId} 生成时间线失败:`, error);
     throw error;
   }
 }

@@ -11,6 +11,7 @@ import {
 } from './types';
 import { LogicValidator } from './validators';
 import { DebateAIReviewer, ReviewResult } from './validators/ai-reviewer';
+import { logger } from '@/lib/logger';
 
 /**
  * 辩论生成器类
@@ -97,13 +98,13 @@ export class DebateGenerator {
 
         // 如果审查未通过，记录警告
         if (!reviewResult.passed) {
-          console.warn('AI审查未通过:', reviewResult.issues);
+          logger.warn('AI审查未通过:', reviewResult.issues);
         }
       }
 
       return result;
     } catch (error) {
-      console.error('辩论生成失败:', error);
+      logger.error('辩论生成失败:', error);
       throw new Error(
         `辩论生成失败: ${error instanceof Error ? error.message : String(error)}`
       );

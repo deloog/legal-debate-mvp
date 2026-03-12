@@ -107,7 +107,7 @@ export interface UserListResponse {
   }>;
   pagination: {
     page: number;
-    pageSize: number;
+    limit: number;
     total: number;
     totalPages: number;
   };

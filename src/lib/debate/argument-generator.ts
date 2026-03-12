@@ -1,5 +1,6 @@
 // 论点生成器：生成正反方论点
 
+import { logger } from '@/lib/logger';
 import { AIClient } from '@/lib/ai/clients';
 import { PromptBuilder } from './prompt-builder';
 import {
@@ -38,7 +39,6 @@ interface AIResponseData {
 export class ArgumentGenerator {
   private aiClient: AIClient;
   private config: DebateGenerationConfig;
-  private seed: number = 0;
 
   constructor(
     aiClient: AIClient,
@@ -116,7 +116,7 @@ export class ArgumentGenerator {
         maxTokens: promptOptions.maxTokens ?? this.config.maxTokens,
       });
     } catch (error) {
-      console.error('AI调用失败:', error);
+      logger.error('AI调用失败:', error);
       throw new Error(
         `论点生成失败: ${error instanceof Error ? error.message : String(error)}`
       );
@@ -159,7 +159,7 @@ export class ArgumentGenerator {
       }
 
       // 所有解析方式都失败，返回默认空数组
-      console.warn('AI响应解析失败，返回空数组');
+      logger.warn('AI响应解析失败，返回空数组');
       return { arguments: [] };
     }
   }
@@ -173,7 +173,7 @@ export class ArgumentGenerator {
     generationTime: number
   ): Argument[] {
     if (!data.arguments || !Array.isArray(data.arguments)) {
-      console.warn('AI响应中缺少有效的arguments数组');
+      logger.warn('AI响应中缺少有效的arguments数组');
       return [];
     }
 
@@ -296,7 +296,7 @@ export class ArgumentGenerator {
 
     // 如果论点数量不足，补充论点
     if (arguments_.length < targetCount) {
-      console.warn(
+      logger.warn(
         `${side}论点数量不足（${arguments_.length}/${targetCount}），建议增加`
       );
     }
@@ -329,27 +329,4 @@ export class ArgumentGenerator {
     }
   }
 
-  /**
-   * 获取推理长度限制
-   */
-  private __getMaxReasoningLength(): number {
-    const modeConfig = this.getModeConfig();
-    return Math.round(400 * modeConfig.reasoningLengthFactor);
-  }
-
-  /**
-   * 获取目标法律依据数量
-   */
-  private __getTargetLegalBasisCount(): number {
-    const modeConfig = this.getModeConfig();
-    return Math.round(2 * modeConfig.legalBasisFactor);
-  }
-
-  /**
-   * 生成随机ID
-   */
-  private __generateId(): string {
-    this.seed = (this.seed * 9301 + 49297) % 233280;
-    return `arg_${this.seed}`;
-  }
 }

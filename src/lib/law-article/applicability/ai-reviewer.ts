@@ -1,224 +1,179 @@
 import { LawArticle } from '@prisma/client';
-import { DocumentAnalysisOutput } from '@/lib/agent/doc-analyzer/core/types';
-import {
-  AIReviewResult,
-  SemanticMatchResult,
-  RuleValidationResult,
-} from './types';
 import { AIServiceFactory } from '@/lib/ai/service-refactored';
 import { getAIConfig } from '@/lib/ai/config';
 import type { AIRequestConfig } from '@/types/ai-service';
 import type { AIService } from '@/lib/ai/service-refactored';
+import { logger } from '@/lib/logger';
+import type { AIReviewResult } from './types';
 
 /**
- * AI审查器
+ * AI适用性分析器 — Phase 1
  *
- * Layer 3: AI审查
- * 生成适用性报告和置信度
+ * 每条法条发起一次 AI 调用，在同一个 prompt 中完成：
+ * 1. 语义相关性评估
+ * 2. 适用性判断（是否可作为法律依据）
+ * 3. 综合评分 + 原因 + 风险警告
+ *
+ * 批量处理时并行执行，通过 concurrency 参数限制同时进行的 AI 调用数量。
  */
 export class AIReviewer {
   private aiService!: AIService;
-  private initialized: boolean = false;
+  private initialized = false;
 
-  /**
-   * 初始化AI审查器
-   */
   public async initialize(): Promise<void> {
-    if (this.initialized) {
-      return;
-    }
-
+    if (this.initialized) return;
     try {
       const config = getAIConfig();
-      this.aiService = await AIServiceFactory.getInstance(
-        'ai-reviewer',
-        config
-      );
+      this.aiService = await AIServiceFactory.getInstance('applicability-analyzer', config);
       this.initialized = true;
     } catch (error) {
-      console.error('Failed to initialize AIReviewer:', error);
+      logger.error('Failed to initialize AIReviewer:', error);
       throw error;
     }
   }
 
   /**
-   * 审查单条法条
+   * 分析单条法条的适用性（语义 + 适用性，单次 AI 调用）
    */
-  public async reviewArticle(
+  public async analyzeArticle(
     article: LawArticle,
-    caseInfo: DocumentAnalysisOutput,
-    semanticMatch: SemanticMatchResult,
-    ruleValidation: RuleValidationResult
+    caseContext: string
   ): Promise<AIReviewResult> {
-    const caseContext = this.buildCaseContext(caseInfo);
-    const articleContext = this.buildArticleContext(article);
-    const analysisContext = this.buildAnalysisContext(
-      semanticMatch,
-      ruleValidation
-    );
+    try {
+      const config = getAIConfig();
+      const request: AIRequestConfig = {
+        model: config.defaultModel ?? 'glm-4-flash',
+        messages: [
+          {
+            role: 'system',
+            content: '你是专业的法律适用性分析专家，擅长综合评估法条对案件的语义相关性和实际适用性。',
+          },
+          {
+            role: 'user',
+            content: this.buildPrompt(article, caseContext),
+          },
+        ],
+        temperature: 0.2,
+        maxTokens: 600,
+      };
 
-    // 使用AI进行综合分析
-    const aiResult = await this.performAIAnalysis(
-      caseContext,
-      articleContext,
-      analysisContext
-    );
-
-    return aiResult;
+      const response = await this.aiService.chatCompletion(request);
+      const raw = response.choices[0].message.content;
+      return this.parseResponse(raw);
+    } catch (error) {
+      logger.error(`AI applicability analysis failed for article ${article.id}:`, error);
+      return {
+        applicable: false,
+        score: 0.3,
+        confidence: 0.3,
+        reasons: ['AI分析失败，需要人工确认'],
+        warnings: ['AI分析失败'],
+      };
+    }
   }
 
   /**
-   * 批量审查法条
+   * 批量分析法条（并行，受 concurrency 限制）
    */
-  public async reviewArticles(
+  public async analyzeArticles(
     articles: LawArticle[],
-    caseInfo: DocumentAnalysisOutput,
-    semanticMatches: Map<string, SemanticMatchResult>,
-    ruleValidations: Map<string, RuleValidationResult>
+    caseContext: string,
+    concurrency = 5
   ): Promise<Map<string, AIReviewResult>> {
     const results = new Map<string, AIReviewResult>();
 
-    for (const article of articles) {
-      const semanticMatch = semanticMatches.get(article.id);
-      const ruleValidation = ruleValidations.get(article.id);
-
-      if (!semanticMatch || !ruleValidation) {
-        console.warn(
-          `Missing semantic match or rule validation for article ${article.id}`
-        );
-        continue;
-      }
-
-      const result = await this.reviewArticle(
-        article,
-        caseInfo,
-        semanticMatch,
-        ruleValidation
+    // 按 concurrency 分批并行处理
+    for (let i = 0; i < articles.length; i += concurrency) {
+      const batch = articles.slice(i, i + concurrency);
+      const batchResults = await Promise.all(
+        batch.map(article =>
+          this.analyzeArticle(article, caseContext).then(result => ({
+            id: article.id,
+            result,
+          }))
+        )
       );
-      results.set(article.id, result);
+      for (const { id, result } of batchResults) {
+        results.set(id, result);
+      }
     }
 
     return results;
   }
 
   /**
-   * 执行AI综合分析
+   * 构建单次综合分析 prompt
    */
-  private async performAIAnalysis(
-    caseContext: string,
-    articleContext: string,
-    analysisContext: string
-  ): Promise<AIReviewResult> {
-    try {
-      const prompt = this.buildReviewPrompt(
-        caseContext,
-        articleContext,
-        analysisContext
-      );
+  private buildPrompt(article: LawArticle, caseContext: string): string {
+    const lawLines = [
+      `法律名称：${article.lawName}`,
+      `法条编号：${article.articleNumber}`,
+      article.chapterNumber ? `章节：${article.chapterNumber}` : null,
+      `法条内容：${article.fullText}`,
+      article.legalBasis ? `法律依据：${article.legalBasis}` : null,
+      article.category ? `法律分类：${article.category}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n');
 
-      const request: AIRequestConfig = {
-        model: 'glm-4-flash',
-        messages: [
-          {
-            role: 'system',
-            content:
-              '你是专业的法律适用性审查专家，擅长评估法条对案件情况的适用性。',
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        temperature: 0.3,
-        maxTokens: 800,
-      };
-
-      const response = await this.aiService.chatCompletion(request);
-      const result = response.choices[0].message.content;
-
-      return this.parseAIResponse(result);
-    } catch (error) {
-      console.error('AI review failed:', error);
-      // 返回保守结果
-      return {
-        applicable: false,
-        confidence: 0.3,
-        reasons: ['AI审查失败，需要人工确认'],
-        warnings: ['AI审查失败'],
-      };
-    }
-  }
-
-  /**
-   * 构建审查提示词
-   */
-  private buildReviewPrompt(
-    caseContext: string,
-    articleContext: string,
-    analysisContext: string
-  ): string {
-    return `作为专业的法律适用性审查专家，请综合评估法条对案件的适用性并给出明确判断。
+    return `请综合评估以下法条对案件的适用性，给出明确判断。
 
 【案件情况】
 ${caseContext}
 
 【法条信息】
-${articleContext}
+${lawLines}
 
-【前期分析结果】
-${analysisContext}
+【评估要求】
+1. 评估法条与案件事实、法律关系、诉讼请求的语义相关性
+2. 判断法条能否作为本案的主要或补充法律依据
+3. 识别使用该法条的潜在风险或限制条件
 
-【评估维度】
-1. 语义相关性：结合前期分析结果，评估法条与案件的语义匹配程度
-2. 规则符合性：验证时效性、适用范围、法条层级是否符合要求
-3. 实际适用性：判断法条在实际案件中能否作为有效法律依据
-4. 风险评估：识别使用该法条可能存在的风险或限制条件
+【评分标准】
+- score 0.7~1.0：高度相关，可直接适用
+- score 0.5~0.7：有一定相关性，可作补充依据（applicable=true 的分界）
+- score 0.3~0.5：相关性较弱
+- score 0~0.3：基本不适用
 
-【判断标准】
-- 适用（applicable=true）：
-  * 语义相关性评分>0.6
-  * 规则验证通过（时效性、适用范围、层级）
-  * 能够作为案件的主要或补充法律依据
-  * 置信度>0.7
-
-- 不适用（applicable=false）：
-  * 语义相关性评分<0.4
-  * 规则验证存在严重问题（如已废止、适用范围不符）
-  * 与案件事实或请求无直接关联
-  * 存在显著风险或不适用情形
-
-【输出要求】
-请严格按以下JSON格式返回（只返回JSON，不要任何其他内容）：
+【输出格式】（只返回 JSON，不要任何其他内容）
 {
-  "applicable": true/false（是否适用，必须明确选择），
-  "confidence": 数字（0-1之间的置信度，保留2位小数），
-  "reasons": ["适用原因1", "适用原因2", ...]（适用原因列表，最多5条，每条20-50字），
-  "warnings": ["警告信息1", "警告信息2", ...]（警告信息列表，如有风险必须列出，无警告则为空数组）
+  "applicable": true或false（score≥0.5时为true），
+  "score": 0到1之间的数字（保留2位小数），
+  "confidence": 0到1之间的置信度（保留2位小数），
+  "reasons": ["原因1", "原因2"]（最多5条，每条20~50字），
+  "warnings": ["警告1"]（如有风险必须列出，无则为空数组）
 }`;
   }
 
   /**
-   * 解析AI响应
+   * 解析 AI 响应 JSON
    */
-  private parseAIResponse(response: string): AIReviewResult {
+  private parseResponse(response: string): AIReviewResult {
     try {
-      // 尝试提取JSON部分
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('No JSON found in response');
-      }
+      // 提取 JSON：先尝试精确匹配，再回退到宽松匹配
+      const jsonMatch =
+        response.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)?\}/s) ??
+        response.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON found in AI response');
 
-      const result = JSON.parse(jsonMatch[0]);
+      const parsed: Record<string, unknown> = JSON.parse(jsonMatch[0]);
+      const score = Math.min(Math.max(Number(parsed.score) || 0, 0), 1);
       return {
-        applicable: result.applicable || false,
-        confidence: Math.min(Math.max(result.confidence || 0, 0), 1),
-        reasons: Array.isArray(result.reasons) ? result.reasons : [],
-        warnings: Array.isArray(result.warnings) ? result.warnings : [],
+        applicable: Boolean(parsed.applicable),
+        score,
+        confidence: Math.min(Math.max(Number(parsed.confidence) || score, 0), 1),
+        reasons: Array.isArray(parsed.reasons)
+          ? (parsed.reasons as unknown[]).filter((r): r is string => typeof r === 'string')
+          : [],
+        warnings: Array.isArray(parsed.warnings)
+          ? (parsed.warnings as unknown[]).filter((w): w is string => typeof w === 'string')
+          : [],
       };
     } catch (error) {
-      console.error('Failed to parse AI response:', error);
+      logger.error('Failed to parse AI applicability response:', error);
       return {
         applicable: false,
+        score: 0.3,
         confidence: 0.3,
         reasons: [],
         warnings: ['AI响应解析失败'],
@@ -226,197 +181,9 @@ ${analysisContext}
     }
   }
 
-  /**
-   * 构建案情上下文
-   */
-  private buildCaseContext(caseInfo: DocumentAnalysisOutput): string {
-    const { extractedData } = caseInfo;
-    const parts: string[] = [];
-
-    // 案件类型
-    if (extractedData.caseType) {
-      parts.push(`案件类型：${this.translateCaseType(extractedData.caseType)}`);
-    }
-
-    // 当事人
-    if (extractedData.parties && extractedData.parties.length > 0) {
-      const plaintiffNames = extractedData.parties
-        .filter(p => p.type === 'plaintiff')
-        .map(p => p.name)
-        .join('、');
-      const defendantNames = extractedData.parties
-        .filter(p => p.type === 'defendant')
-        .map(p => p.name)
-        .join('、');
-      parts.push(`原告：${plaintiffNames || '未明确'}`);
-      parts.push(`被告：${defendantNames || '未明确'}`);
-    }
-
-    // 诉讼请求
-    if (extractedData.claims && extractedData.claims.length > 0) {
-      const claimTexts = extractedData.claims
-        .map(c => `【${this.translateClaimType(c.type)}】${c.content}`)
-        .join('；');
-      parts.push(`诉讼请求：${claimTexts}`);
-    }
-
-    // 关键事实
-    if (extractedData.keyFacts && extractedData.keyFacts.length > 0) {
-      const factTexts = extractedData.keyFacts
-        .slice(0, 5)
-        .map(f => f.description)
-        .join('；');
-      parts.push(`关键事实：${factTexts}`);
-    }
-
-    // 争议焦点
-    if (
-      extractedData.disputeFocuses &&
-      extractedData.disputeFocuses.length > 0
-    ) {
-      const disputeTexts = extractedData.disputeFocuses
-        .slice(0, 3)
-        .map(d => d.coreIssue)
-        .join('；');
-      parts.push(`争议焦点：${disputeTexts}`);
-    }
-
-    return parts.join('\n');
-  }
-
-  /**
-   * 构建法条上下文
-   */
-  private buildArticleContext(article: LawArticle): string {
-    const parts: string[] = [];
-
-    parts.push(`法律名称：${article.lawName}`);
-    parts.push(`法条编号：${article.articleNumber}`);
-
-    if (article.chapterNumber) {
-      parts.push(`章节编号：${article.chapterNumber}`);
-    }
-
-    if (article.sectionNumber) {
-      parts.push(`节编号：${article.sectionNumber}`);
-    }
-
-    parts.push(`法条内容：${article.fullText}`);
-
-    if (article.legalBasis) {
-      parts.push(`法律依据：${article.legalBasis}`);
-    }
-
-    if (article.category) {
-      parts.push(`法律分类：${this.translateLawCategory(article.category)}`);
-    }
-
-    return parts.join('\n');
-  }
-
-  /**
-   * 构建分析上下文
-   */
-  private buildAnalysisContext(
-    semanticMatch: SemanticMatchResult,
-    ruleValidation: RuleValidationResult
-  ): string {
-    const parts: string[] = [];
-
-    // 语义匹配结果
-    parts.push(
-      `【语义匹配】\n相关性评分：${(
-        semanticMatch.semanticRelevance * 100
-      ).toFixed(1)}%`
-    );
-    if (semanticMatch.relevanceReason) {
-      parts.push(`原因：${semanticMatch.relevanceReason}`);
-    }
-    if (
-      semanticMatch.matchedKeywords &&
-      semanticMatch.matchedKeywords.length > 0
-    ) {
-      parts.push(`匹配关键词：${semanticMatch.matchedKeywords.join('、')}`);
-    }
-
-    // 规则验证结果
-    parts.push(
-      `\n【规则验证】\n综合评分：${(ruleValidation.overallScore * 100).toFixed(
-        1
-      )}%`
-    );
-    parts.push(`时效性：${ruleValidation.validity.passed ? '通过' : '未通过'}`);
-    if (ruleValidation.validity.reason) {
-      parts.push(`  原因：${ruleValidation.validity.reason}`);
-    }
-    parts.push(`适用范围：${ruleValidation.scope.passed ? '通过' : '未通过'}`);
-    if (ruleValidation.scope.reason) {
-      parts.push(`  原因：${ruleValidation.scope.reason}`);
-    }
-
-    return parts.join('\n');
-  }
-
-  /**
-   * 翻译案件类型
-   */
-  private translateCaseType(type: string): string {
-    const translations: Record<string, string> = {
-      civil: '民事案件',
-      criminal: '刑事案件',
-      administrative: '行政案件',
-      commercial: '商事案件',
-      labor: '劳动案件',
-      intellectual: '知识产权案件',
-      other: '其他案件',
-    };
-    return translations[type] || type;
-  }
-
-  /**
-   * 翻译诉讼请求类型
-   */
-  private translateClaimType(type: string): string {
-    const translations: Record<string, string> = {
-      PAY_PRINCIPAL: '支付本金',
-      PAY_INTEREST: '支付利息',
-      PAY_PENALTY: '支付违约金',
-      PAY_DAMAGES: '赔偿损失',
-      LITIGATION_COST: '诉讼费用',
-      PERFORMANCE: '履行义务',
-      TERMINATION: '解除合同',
-      OTHER: '其他请求',
-    };
-    return translations[type] || type;
-  }
-
-  /**
-   * 翻译法律分类
-   */
-  private translateLawCategory(category: string): string {
-    const translations: Record<string, string> = {
-      CIVIL: '民事',
-      CRIMINAL: '刑事',
-      ADMINISTRATIVE: '行政',
-      COMMERCIAL: '商事',
-      ECONOMIC: '经济',
-      LABOR: '劳动',
-      INTELLECTUAL_PROPERTY: '知识产权',
-      PROCEDURE: '程序',
-      OTHER: '其他',
-    };
-    return translations[category] || category;
-  }
-
-  /**
-   * 清理资源
-   */
   public async destroy(): Promise<void> {
-    if (this.initialized) {
-      this.initialized = false;
-    }
+    this.initialized = false;
   }
 }
 
-// 默认导出
 export default AIReviewer;

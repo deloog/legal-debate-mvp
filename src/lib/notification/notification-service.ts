@@ -39,7 +39,7 @@ class NotificationService {
       try {
         const emailResult = await this.emailService.sendFollowUpTaskEmail(
           task,
-          task.clientEmail
+          task.clientEmail ?? ''
         );
 
         if (!emailResult.success) {
@@ -72,7 +72,7 @@ class NotificationService {
       try {
         const smsResult = await this.smsService.sendFollowUpTaskSMS(
           task,
-          task.clientPhone
+          task.clientPhone ?? ''
         );
 
         if (!smsResult.success) {

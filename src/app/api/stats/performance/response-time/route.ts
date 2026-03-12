@@ -416,12 +416,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const { startDate, endDate } = getDateRange(params.timeRange);
+    const { startDate, endDate } = getDateRange(params.timeRange ?? TimeRange.LAST_30_DAYS);
 
     const data = await getResponseTimeData(
       startDate,
       endDate,
-      params.granularity,
+      params.granularity ?? DateGranularity.DAY,
       params.provider,
       params.model
     );

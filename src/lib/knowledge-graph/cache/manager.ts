@@ -8,19 +8,19 @@
  * 4. 缓存统计
  */
 
-import crypto from 'crypto';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { Prisma } from '@prisma/client';
+import crypto from 'crypto';
 import {
+  CacheConfig,
+  CacheData,
+  CacheStats,
   CacheType,
+  ClearCacheOptions,
   NeighborsQueryParams,
   ShortestPathQueryParams,
   SubgraphQueryParams,
-  CacheData,
-  CacheConfig,
-  CacheStats,
-  ClearCacheOptions,
 } from './types';
 
 /**
@@ -159,7 +159,7 @@ export class KnowledgeGraphCacheManager {
         data: {
           cacheType: CacheType.NODE_NEIGHBORS,
           cacheKey,
-          cacheData: data as Prisma.JsonValue,
+          cacheData: data as Prisma.InputJsonValue,
           hitCount: 0,
           expiresAt,
         },
@@ -256,7 +256,7 @@ export class KnowledgeGraphCacheManager {
         data: {
           cacheType: CacheType.SHORTEST_PATH,
           cacheKey,
-          cacheData: data as Prisma.JsonValue,
+          cacheData: data as Prisma.InputJsonValue,
           hitCount: 0,
           expiresAt,
         },
@@ -348,7 +348,7 @@ export class KnowledgeGraphCacheManager {
         data: {
           cacheType: CacheType.SUBGRAPH,
           cacheKey,
-          cacheData: data as Prisma.JsonValue,
+          cacheData: data as Prisma.InputJsonValue,
           hitCount: 0,
           expiresAt,
         },
@@ -386,7 +386,7 @@ export class KnowledgeGraphCacheManager {
     await prisma.knowledgeGraphCache.update({
       where: { cacheKey },
       data: {
-        cacheData: data as Prisma.JsonValue,
+        cacheData: data as Prisma.InputJsonValue,
         expiresAt,
         createdAt: new Date(),
       },

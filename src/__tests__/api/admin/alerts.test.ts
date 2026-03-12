@@ -324,7 +324,7 @@ describe('告警API', () => {
       const request = createAlertRequest('/api/admin/alerts/alert-1');
 
       const response = await getAlertDetail(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
       const result = await response.json();
 
@@ -339,7 +339,7 @@ describe('告警API', () => {
       const request = createAlertRequest('/api/admin/alerts/non-existent');
 
       const response = await getAlertDetail(request, {
-        params: { id: 'non-existent' },
+        params: Promise.resolve({ id: 'non-existent' }),
       });
       const data = await response.json();
 
@@ -353,7 +353,7 @@ describe('告警API', () => {
       const request = createAlertRequest('/api/admin/alerts/alert-1');
 
       const response = await getAlertDetail(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
 
       expect(response.status).toBe(403);
@@ -368,7 +368,7 @@ describe('告警API', () => {
       const request = createAlertRequest('/api/admin/alerts/alert-1');
 
       const response = await getAlertDetail(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
       const data = await response.json();
 
@@ -394,7 +394,7 @@ describe('告警API', () => {
         '/api/admin/alerts/alert-1/acknowledge'
       );
       const response = await acknowledgeAlert(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
       const result = await response.json();
 
@@ -411,7 +411,7 @@ describe('告警API', () => {
         '/api/admin/alerts/alert-2/acknowledge'
       );
       const response = await acknowledgeAlert(request, {
-        params: { id: 'alert-2' },
+        params: Promise.resolve({ id: 'alert-2' }),
       });
       const data = await response.json();
 
@@ -427,7 +427,7 @@ describe('告警API', () => {
         '/api/admin/alerts/non-existent/acknowledge'
       );
       const response = await acknowledgeAlert(request, {
-        params: { id: 'non-existent' },
+        params: Promise.resolve({ id: 'non-existent' }),
       });
       const data = await response.json();
 
@@ -442,7 +442,7 @@ describe('告警API', () => {
         '/api/admin/alerts/alert-1/acknowledge'
       );
       const response = await acknowledgeAlert(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
 
       expect(response.status).toBe(403);
@@ -458,7 +458,7 @@ describe('告警API', () => {
         '/api/admin/alerts/alert-1/acknowledge'
       );
       const response = await acknowledgeAlert(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
       const data = await response.json();
 
@@ -478,7 +478,7 @@ describe('告警API', () => {
         '/api/admin/alerts/alert-1/acknowledge'
       );
       await acknowledgeAlert(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -503,7 +503,7 @@ describe('告警API', () => {
 
       const request = createAlertRequest('/api/admin/alerts/alert-1/resolve');
       const response = await resolveAlert(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
       const result = await response.json();
 
@@ -518,7 +518,7 @@ describe('告警API', () => {
 
       const request = createAlertRequest('/api/admin/alerts/alert-3/resolve');
       const response = await resolveAlert(request, {
-        params: { id: 'alert-3' },
+        params: Promise.resolve({ id: 'alert-3' }),
       });
       const data = await response.json();
 
@@ -540,7 +540,7 @@ describe('告警API', () => {
 
       const request = createAlertRequest('/api/admin/alerts/alert-2/resolve');
       const response = await resolveAlert(request, {
-        params: { id: 'alert-2' },
+        params: Promise.resolve({ id: 'alert-2' }),
       });
 
       expect(response.status).toBe(200);
@@ -554,7 +554,7 @@ describe('告警API', () => {
         '/api/admin/alerts/non-existent/resolve'
       );
       const response = await resolveAlert(request, {
-        params: { id: 'non-existent' },
+        params: Promise.resolve({ id: 'non-existent' }),
       });
       const data = await response.json();
 
@@ -567,7 +567,7 @@ describe('告警API', () => {
 
       const request = createAlertRequest('/api/admin/alerts/alert-1/resolve');
       const response = await resolveAlert(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
 
       expect(response.status).toBe(403);
@@ -581,7 +581,7 @@ describe('告警API', () => {
 
       const request = createAlertRequest('/api/admin/alerts/alert-1/resolve');
       const response = await resolveAlert(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
       const data = await response.json();
 
@@ -599,7 +599,7 @@ describe('告警API', () => {
 
       const request = createAlertRequest('/api/admin/alerts/alert-1/resolve');
       await resolveAlert(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -622,7 +622,7 @@ describe('告警API', () => {
 
       const request = createAlertRequest('/api/admin/alerts/alert-1/resolve');
       const response = await resolveAlert(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
 
       expect(response.status).toBe(200);
@@ -641,7 +641,7 @@ describe('告警API', () => {
 
       const request = createAlertRequest('/api/admin/alerts/alert-1/resolve');
       const response = await resolveAlert(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
 
       expect(response.status).toBe(200);
@@ -660,21 +660,21 @@ describe('告警API', () => {
       // Test detail endpoint
       request = createAlertRequest('/api/admin/alerts/alert-1');
       response = await getAlertDetail(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
       expect(response.status).toBe(403);
 
       // Test acknowledge endpoint
       request = createAlertRequest('/api/admin/alerts/alert-1/acknowledge');
       response = await acknowledgeAlert(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
       expect(response.status).toBe(403);
 
       // Test resolve endpoint
       request = createAlertRequest('/api/admin/alerts/alert-1/resolve');
       response = await resolveAlert(request, {
-        params: { id: 'alert-1' },
+        params: Promise.resolve({ id: 'alert-1' }),
       });
       expect(response.status).toBe(403);
     });

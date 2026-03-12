@@ -169,7 +169,7 @@ function parseAIReviewResponse(
           _inferred: confidence < 0.9,
         };
       })
-      .filter(item => !invalidIds.has(item.id));
+      .filter((item: { id: string }) => !invalidIds.has(item.id));
   } catch (error) {
     logger.error(
       '解析AI审查响应失败',

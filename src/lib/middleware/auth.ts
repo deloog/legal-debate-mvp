@@ -9,67 +9,34 @@ import { extractTokenFromHeader, verifyToken } from '../auth/jwt';
 
 /**
  * 获取认证用户信息
- * 安全优化：支持从Cookie和Authorization header读取token
+ * 支持 Authorization header（API 调用）和 httpOnly Cookie（浏览器请求）两种来源。
+ * 安全说明：不信任任何客户端可伪造的请求头（如 x-user-id / x-user-role）。
  */
 export async function getAuthUser(
   request: NextRequest
 ): Promise<JwtPayload | null> {
-  // 1. 优先从Authorization header读取（用于API调用）
+  // 1. 优先从 Authorization header 读取（API 调用）
   const authHeader = request.headers.get('authorization');
   let token = extractTokenFromHeader(authHeader);
-  let tokenSource = '';
 
-  if (token) {
-    tokenSource = 'Authorization header';
-  }
-
-  // 2. 如果header没有，从Cookie读取（用于浏览器请求）
+  // 2. 回退到 httpOnly Cookie（浏览器请求）
   if (!token) {
     token = request.cookies.get('accessToken')?.value || null;
-    if (token) {
-      tokenSource = 'Cookie';
-    }
   }
 
-  // 3. 如果还是没有，尝试从middleware传递的headers读取用户信息
   if (!token) {
-    const userId = request.headers.get('x-user-id');
-    const userRole = request.headers.get('x-user-role');
-    const userEmail = request.headers.get('x-user-email');
-
-    if (userId && userRole && userEmail) {
-      logger.info('[getAuthUser] 从middleware headers读取用户信息:', {
-        userId,
-        userEmail,
-        userRole,
-      });
-      // middleware已经验证过，直接返回payload
-      return {
-        userId,
-        role: userRole,
-        email: userEmail,
-      };
-    }
-
-    logger.info('[getAuthUser] 未找到token，所有来源都为空');
     return null;
   }
 
-  logger.info(
-    '[getAuthUser] Token来源:',
-    tokenSource,
-    '预览:',
-    token.substring(0, 30) + '...'
-  );
-
-  // 4. 验证token
+  // 3. 验证 token
   const verificationResult = verifyToken(token);
 
-  logger.info('[getAuthUser] Token验证结果:', {
-    valid: verificationResult.valid,
-    hasPayload: !!verificationResult.payload,
-    error: verificationResult.error,
-  });
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug('[getAuthUser] Token验证结果:', {
+      valid: verificationResult.valid,
+      error: verificationResult.error,
+    });
+  }
 
   if (!verificationResult.valid || !verificationResult.payload) {
     return null;

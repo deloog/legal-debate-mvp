@@ -4,9 +4,8 @@
  * 负责提醒的创建、更新、查询和状态管理。
  */
 
-import { Prisma } from '@prisma/client';
-import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/agent/security/logger';
+import { prisma } from '@/lib/db/prisma';
 import {
   CreateReminderInput,
   NotificationChannel,
@@ -17,6 +16,7 @@ import {
   ReminderType,
   UpdateReminderInput,
 } from '@/types/notification';
+import { Prisma } from '@prisma/client';
 
 // =============================================================================
 // 提醒服务
@@ -30,15 +30,15 @@ class ReminderService {
     try {
       const reminder = await prisma.reminder.create({
         data: {
-          userId: input.userId,
+          userId: input.userId!,
           type: input.type as never,
           title: input.title,
-          message: input.message || null,
-          reminderTime: input.reminderTime,
-          channels: input.channels,
-          relatedType: input.relatedType || null,
-          relatedId: input.relatedId || null,
-          metadata: input.metadata as Prisma.InputJsonValue,
+          message: input.message ?? null,
+          reminderTime: input.reminderTime ?? new Date(),
+          channels: input.channels ?? [],
+          relatedType: input.relatedType ?? null,
+          relatedId: input.relatedId ?? null,
+          metadata: (input.metadata ?? {}) as Prisma.InputJsonValue,
         },
       });
 
@@ -358,15 +358,15 @@ class ReminderService {
       type: reminder.type as ReminderType,
       title: reminder.title,
       content: reminder.message || reminder.title,
-      message: reminder.message,
+      message: reminder.message ?? undefined,
       scheduledAt: reminder.reminderTime,
       reminderTime: reminder.reminderTime,
       channel: (reminder.channels[0] || 'IN_APP') as NotificationChannel,
       channels: reminder.channels as NotificationChannel[],
       status: reminder.status as ReminderStatus,
       sentAt: null,
-      relatedType: reminder.relatedType,
-      relatedId: reminder.relatedId,
+      relatedType: reminder.relatedType ?? undefined,
+      relatedId: reminder.relatedId ?? undefined,
       metadata: reminder.metadata as Record<string, unknown> | null,
       createdAt: reminder.createdAt,
       updatedAt: reminder.updatedAt,

@@ -15,7 +15,7 @@ import { certificationService } from '@/lib/knowledge-graph/expert/certification
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { expertId: string } }
+  { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -44,14 +44,14 @@ export async function POST(
 
     // 认证专家
     await certificationService.certifyExpert({
-      expertId: params.expertId,
+      expertId: (await params).expertId,
       adminId: session.user.id,
       notes: body.notes,
     });
 
     logger.info('Expert certified successfully', {
       userId: session.user.id,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
     });
 
     return NextResponse.json({
@@ -61,7 +61,7 @@ export async function POST(
   } catch (error) {
     logger.error('认证专家失败', {
       error,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
     });
 
     return NextResponse.json(
@@ -79,7 +79,7 @@ export async function POST(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { expertId: string } }
+  { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -108,14 +108,14 @@ export async function DELETE(
 
     // 撤销认证
     await certificationService.revokeExpertCertification(
-      params.expertId,
+      (await params).expertId,
       session.user.id,
       body.reason || '管理员撤销认证'
     );
 
     logger.info('Expert certification revoked successfully', {
       userId: session.user.id,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
     });
 
     return NextResponse.json({
@@ -125,7 +125,7 @@ export async function DELETE(
   } catch (error) {
     logger.error('撤销专家认证失败', {
       error,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
     });
 
     return NextResponse.json(

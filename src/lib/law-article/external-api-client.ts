@@ -14,6 +14,7 @@
  */
 
 import { LawArticle } from '../agent/legal-agent/types';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 类型定义
@@ -80,7 +81,7 @@ class LawStarClient implements IExternalLawArticleAPI {
     const startTime = Date.now();
 
     if (!this.apiKey) {
-      console.warn('[LawStar] API 密钥未配置，跳过外部检索');
+      logger.warn('[LawStar] API 密钥未配置，跳过外部检索');
       return this.emptyResult('lawstar', startTime);
     }
 
@@ -123,7 +124,7 @@ class LawStarClient implements IExternalLawArticleAPI {
         executionTime: Date.now() - startTime,
       };
     } catch (error) {
-      console.error('[LawStar] 检索失败:', error);
+      logger.error('[LawStar] 检索失败:', error);
       return this.emptyResult('lawstar', startTime);
     }
   }
@@ -147,7 +148,7 @@ class LawStarClient implements IExternalLawArticleAPI {
       const data = await response.json();
       return this.transformArticle(data);
     } catch (error) {
-      console.error('[LawStar] 获取法条失败:', error);
+      logger.error('[LawStar] 获取法条失败:', error);
       return null;
     }
   }
@@ -269,7 +270,7 @@ class PKULawClient implements IExternalLawArticleAPI {
     const startTime = Date.now();
 
     if (!this.apiKey) {
-      console.warn('[PKULaw] API 密钥未配置，跳过外部检索');
+      logger.warn('[PKULaw] API 密钥未配置，跳过外部检索');
       return this.emptyResult(startTime);
     }
 
@@ -308,7 +309,7 @@ class PKULawClient implements IExternalLawArticleAPI {
         executionTime: Date.now() - startTime,
       };
     } catch (error) {
-      console.error('[PKULaw] 检索失败:', error);
+      logger.error('[PKULaw] 检索失败:', error);
       return this.emptyResult(startTime);
     }
   }
@@ -332,7 +333,7 @@ class PKULawClient implements IExternalLawArticleAPI {
       const data = await response.json();
       return this.transformArticle(data);
     } catch (error) {
-      console.error('[PKULaw] 获取法条失败:', error);
+      logger.error('[PKULaw] 获取法条失败:', error);
       return null;
     }
   }

@@ -5,6 +5,7 @@
 
 import { MemoryManager } from '../memory-manager';
 import type { ErrorPattern, PreventionMeasure } from '../types';
+import { logger } from '@/lib/logger';
 
 /**
  * KnowledgeBaseUpdater - 知识库更新类
@@ -49,7 +50,7 @@ export class KnowledgeBaseUpdater {
 
       return true;
     } catch (error) {
-      console.error('Failed to update knowledge base:', error);
+      logger.error('Failed to update knowledge base:', error);
       return false;
     }
   }

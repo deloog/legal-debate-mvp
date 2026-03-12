@@ -9,6 +9,7 @@ import type {
   DisputeFocusCategory,
   ExtractedData,
 } from '../core/types';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 接口定义
@@ -85,9 +86,8 @@ export class DisputeFocusExtractor {
 
     // 过滤低置信度结果
     if (options.minConfidence !== undefined) {
-      mergedFocuses = mergedFocuses.filter(
-        f => f.confidence >= options.minConfidence
-      );
+      const minConf = options.minConfidence;
+      mergedFocuses = mergedFocuses.filter(f => f.confidence >= minConf);
     }
 
     const summary = this.generateSummary(
@@ -142,7 +142,7 @@ export class DisputeFocusExtractor {
 
       return [];
     } catch (error) {
-      console.error('AI识别层失败:', error);
+      logger.error('AI识别层失败:', error);
       // AI失败时返回空数组，不影响规则匹配层
       return [];
     }
@@ -256,7 +256,7 @@ ${contextInfo}
         };
       });
     } catch (error) {
-      console.error('解析AI识别响应失败:', error);
+      logger.error('解析AI识别响应失败:', error);
       return [];
     }
   }
@@ -745,7 +745,7 @@ ${contextInfo}
 
       return focuses;
     } catch (error) {
-      console.error('AI审查层失败:', error);
+      logger.error('AI审查层失败:', error);
       // 审查失败时返回原始结果
       return focuses;
     }
@@ -869,9 +869,9 @@ ${focusList}
             _inferred: ((item.confidence as number) || 0.8) < 0.9,
           };
         })
-        .filter(item => !invalidIds.has(item.id));
+        .filter((item: { id: string }) => !invalidIds.has(item.id));
     } catch (error) {
-      console.error('解析AI审查响应失败:', error);
+      logger.error('解析AI审查响应失败:', error);
       return originalFocuses;
     }
   }

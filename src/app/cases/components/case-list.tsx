@@ -173,7 +173,7 @@ export function CaseList() {
     if (totalPages <= 1) return null;
 
     const getPageNumbers = () => {
-      const pages = [];
+      const pages: number[] = [];
       const maxVisible = 5;
       const startPage = Math.max(1, page - Math.floor(maxVisible / 2));
       const endPage = Math.min(totalPages, startPage + maxVisible - 1);

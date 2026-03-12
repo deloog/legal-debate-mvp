@@ -27,7 +27,7 @@ interface MembershipInfoResponse {
 // 主页面组件
 // =============================================================================
 
-export default function MembershipUpgradeConfirmPage(): React.ReactElement {
+export default function MembershipUpgradeConfirmPage(): React.ReactElement | null {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tierId = searchParams.get('tierId');
@@ -59,7 +59,7 @@ export default function MembershipUpgradeConfirmPage(): React.ReactElement {
       setError(null);
 
       const response = await fetch('/api/memberships/tiers');
-      const data = await response.json();
+      const data = await response.json() as MembershipInfoResponse;
 
       if (!response.ok || !data.success) {
         throw new Error(data.error || '获取会员信息失败');

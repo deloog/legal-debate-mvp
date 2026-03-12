@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { logger } from '@/lib/logger';
 
 // AI Models Configuration
 export const AI_MODELS = {
@@ -67,7 +68,7 @@ export class ZhipuClient implements AIClient {
 
       return response.choices[0]?.message?.content || '';
     } catch (error) {
-      console.error('Zhipu AI Chat Error:', error);
+      logger.error('Zhipu AI Chat Error:', error);
       throw new Error(`Zhipu AI chat failed: ${error}`);
     }
   }
@@ -81,7 +82,7 @@ export class ZhipuClient implements AIClient {
 
       return response.data[0]?.embedding || [];
     } catch (error) {
-      console.error('Zhipu AI Embedding Error:', error);
+      logger.error('Zhipu AI Embedding Error:', error);
       throw new Error(`Zhipu AI embedding failed: ${error}`);
     }
   }
@@ -126,7 +127,7 @@ export class DeepSeekClient implements AIClient {
 
       return response.choices[0]?.message?.content || '';
     } catch (error) {
-      console.error('DeepSeek AI Chat Error:', error);
+      logger.error('DeepSeek AI Chat Error:', error);
       throw new Error(`DeepSeek AI chat failed: ${error}`);
     }
   }

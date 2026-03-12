@@ -2,6 +2,7 @@
 
 import { agentRegistry } from './registry';
 import { DocAnalyzerAgent } from './doc-analyzer/doc-analyzer-agent';
+import { logger } from '@/lib/logger';
 
 /**
  * 初始化并注册所有Agent
@@ -14,12 +15,12 @@ export async function initAgents(): Promise<void> {
       docAnalyzerAgent.initialize();
       agentRegistry.registerAgent(docAnalyzerAgent, 'system-init');
     } catch (error) {
-      console.warn('DocAnalyzer Agent初始化失败:', error);
+      logger.warn('DocAnalyzer Agent初始化失败:', error);
     }
 
     // 输出注册统计信息
     const stats = agentRegistry.getStatistics();
-    console.log('Agent初始化完成:', {
+    logger.info('Agent初始化完成:', {
       总数: stats.totalAgents,
       活跃: stats.activeAgents,
       禁用: stats.disabledAgents,
@@ -28,9 +29,9 @@ export async function initAgents(): Promise<void> {
 
     // 执行健康检查
     const healthResults = await agentRegistry.performHealthCheck();
-    console.log('Agent健康检查结果:', healthResults);
+    logger.info('Agent健康检查结果:', healthResults);
   } catch (error) {
-    console.error('Agent初始化失败:', error);
+    logger.error('Agent初始化失败:', error);
     throw error;
   }
 }
@@ -59,15 +60,15 @@ export async function cleanupAgents(): Promise<void> {
           await agent.cleanup();
         }
       } catch (error) {
-        console.error(`清理Agent '${agent.name}'失败:`, error);
+        logger.error(`清理Agent '${agent.name}'失败:`, error);
       }
     }
 
     // 清空注册表
     agentRegistry.clear();
-    console.log('Agent清理完成');
+    logger.info('Agent清理完成');
   } catch (error) {
-    console.error('Agent清理失败:', error);
+    logger.error('Agent清理失败:', error);
     throw error;
   }
 }

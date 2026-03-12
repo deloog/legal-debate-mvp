@@ -14,6 +14,10 @@ import type { ErrorResponse, SuccessResponse } from '@/types/api-response';
 import { ContractStatus, FeeType } from '@/types/contract';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import {
+  resolveContractUserId,
+  unauthorizedResponse,
+} from '@/app/api/lib/middleware/contract-auth';
 
 /**
  * 转换 Zod 验证后的 feeType 为 Prisma 期望的类型
@@ -217,6 +221,10 @@ export async function GET(request: NextRequest): Promise<
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<SuccessResponse<unknown> | ErrorResponse>> {
+  // ─── 认证 ─────────────────────────────────────────────────────────────────
+  const userId = resolveContractUserId(request);
+  if (!userId) return unauthorizedResponse();
+
   try {
     // 解析请求体
     let body: Record<string, unknown>;

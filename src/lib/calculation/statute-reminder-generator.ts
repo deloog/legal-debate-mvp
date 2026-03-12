@@ -4,6 +4,7 @@
  * 根据时效计算结果生成提醒消息和提醒记录
  */
 
+import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/db/prisma';
 import type {
   StatuteCalculationResult,
@@ -199,7 +200,7 @@ export class StatuteReminderGenerator {
         });
       }
     } catch (error) {
-      console.error('创建时效提醒失败:', error);
+      logger.error('创建时效提醒失败:', error);
       throw new Error(
         `创建时效提醒失败: ${error instanceof Error ? error.message : '未知错误'}`
       );
@@ -226,7 +227,7 @@ export class StatuteReminderGenerator {
 
       return result.count > 0;
     } catch (error) {
-      console.error('发送提醒通知失败:', error);
+      logger.error('发送提醒通知失败:', error);
       return false;
     }
   }
@@ -261,7 +262,7 @@ export class StatuteReminderGenerator {
 
       return { sent, failed };
     } catch (error) {
-      console.error('批量发送到期提醒失败:', error);
+      logger.error('批量发送到期提醒失败:', error);
       return { sent: 0, failed: 0 };
     }
   }
@@ -299,7 +300,7 @@ export class StatuteReminderGenerator {
         return {
           id: reminder.id,
           title: reminder.title,
-          message: reminder.message,
+          message: reminder.message ?? '',
           reminderTime: reminder.reminderTime,
           remainingDays:
             (metadata.remainingDays as number) ||
@@ -311,7 +312,7 @@ export class StatuteReminderGenerator {
         };
       });
     } catch (error) {
-      console.error('获取待发送提醒失败:', error);
+      logger.error('获取待发送提醒失败:', error);
       return [];
     }
   }
@@ -331,7 +332,7 @@ export class StatuteReminderGenerator {
 
       return result.count > 0;
     } catch (error) {
-      console.error('删除提醒失败:', error);
+      logger.error('删除提醒失败:', error);
       return false;
     }
   }

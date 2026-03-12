@@ -14,6 +14,7 @@ import type {
   StateValidationResult,
 } from '../../types/oauth';
 import { SECURITY } from '../constants/common';
+import { logger } from '@/lib/logger';
 
 /**
  * OAuth 基础类
@@ -92,7 +93,7 @@ export abstract class OAuthBaseProvider {
         state: stateData.state,
       };
     } catch (error) {
-      console.error('OAuth authorize error:', error);
+      logger.error('OAuth authorize error:', error);
       return {
         success: false,
         authorizeUrl: '',
@@ -143,7 +144,7 @@ export abstract class OAuthBaseProvider {
         refreshToken: tokenResponse.refresh_token,
       };
     } catch (error) {
-      console.error('OAuth callback error:', error);
+      logger.error('OAuth callback error:', error);
       return {
         success: false,
         isNewUser: false,
@@ -185,20 +186,20 @@ export abstract class OAuthBaseProvider {
 
   /**
    * 保存 state 到存储
-   * 注意：生产环境应使用 Redis 或数据库
+   * TODO: 服务端应使用 Redis 或数据库存储，当前基类实现仅支持浏览器环境（前端 OAuth 场景）。
+   * 服务端 OAuth 回调必须在子类中覆盖 saveState/validateState，或直接绕开 callback()。
    */
   private saveState(stateData: OAuthState): void {
-    const key = `${this.STATE_PREFIX}${stateData.state}`;
-    const value = JSON.stringify(stateData);
-
-    // 简单实现：使用 sessionStorage（前端）或 内存存储（后端）
-    // 在实际应用中，应该使用 Redis 或数据库
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem(key, value);
-      setTimeout(() => {
-        sessionStorage.removeItem(key);
-      }, this.STATE_EXPIRY);
+    if (typeof window === 'undefined') {
+      // 服务端环境：基类无法持久化 state，子类必须覆盖此行为
+      logger.warn('[OAuthBase] saveState 在服务端环境被调用，state 未持久化。子类应覆盖此方法以使用 Redis/DB。');
+      return;
     }
+    const key = `${this.STATE_PREFIX}${stateData.state}`;
+    sessionStorage.setItem(key, JSON.stringify(stateData));
+    setTimeout(() => {
+      sessionStorage.removeItem(key);
+    }, this.STATE_EXPIRY);
   }
 
   /**
@@ -206,12 +207,15 @@ export abstract class OAuthBaseProvider {
    */
   private validateState(state: string): StateValidationResult {
     try {
-      const key = `${this.STATE_PREFIX}${state}`;
-      let stateStr = '';
-      if (typeof window !== 'undefined') {
-        stateStr = sessionStorage.getItem(key) || '';
-        sessionStorage.removeItem(key);
+      if (typeof window === 'undefined') {
+        // 服务端环境：基类无法读取 state，CSRF 验证失败
+        logger.warn('[OAuthBase] validateState 在服务端环境被调用，基类无法验证 state。子类应覆盖此方法。');
+        return { valid: false, stateData: null, error: 'Server-side state validation not implemented in base class' };
       }
+
+      const key = `${this.STATE_PREFIX}${state}`;
+      const stateStr = sessionStorage.getItem(key) || '';
+      sessionStorage.removeItem(key);
 
       if (!stateStr) {
         return {

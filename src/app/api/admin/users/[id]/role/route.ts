@@ -49,7 +49,7 @@ async function checkUserExists(userId: string): Promise<boolean> {
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -67,7 +67,7 @@ export async function PUT(
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = (await request.json()) as AssignRoleRequest;
 
     // 验证必填字段
@@ -124,6 +124,7 @@ export async function PUT(
 
     return Response.json(
       {
+        success: true,
         message: '角色分配成功',
         data: responseData,
       },

@@ -10,10 +10,10 @@ import { logger } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // 验证必填字段
@@ -58,6 +58,24 @@ export async function POST(
           },
         },
         { status: 404 }
+      );
+    }
+
+    // ─── 状态机检查：只有 DRAFT / PENDING 允许签署 ──────────────────────────
+    if (
+      contract.status === 'SIGNED' ||
+      contract.status === 'TERMINATED' ||
+      contract.status === 'COMPLETED'
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_STATUS',
+            message: `合同当前状态（${contract.status}）不允许签署`,
+          },
+        },
+        { status: 400 }
       );
     }
 
@@ -134,7 +152,7 @@ export async function POST(
     }
 
     // 更新合同
-    const ___updatedContract = await prisma.contract.update({
+    await prisma.contract.update({
       where: { id },
       data: updateData,
     });

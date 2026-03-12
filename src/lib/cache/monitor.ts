@@ -1,12 +1,12 @@
-import { redis, getRedisInfo, checkRedisConnection } from './redis';
-import type { RedisInfo } from './redis';
 import { CacheManager } from './manager';
+import type { RedisInfo } from './redis';
+import { checkRedisConnection, getRedisInfo, redis } from './redis';
 import {
-  CacheStats,
-  CacheHealth,
-  CacheEventListener,
   CacheEvent,
+  CacheEventListener,
+  CacheHealth,
   CacheNamespace,
+  CacheStats,
 } from './types';
 
 // 缓存监控器类
@@ -37,7 +37,7 @@ export class CacheMonitor {
       try {
         listener(event);
       } catch (error) {
-        console.error('缓存监控事件监听器执行失败:', error);
+        logger.error('缓存监控事件监听器执行失败:', error);
       }
     });
   }
@@ -48,7 +48,7 @@ export class CacheMonitor {
     metricsInterval?: number; // 指标收集间隔（毫秒）
   }): void {
     if (this.isMonitoring) {
-      console.warn('缓存监控器已经在运行');
+      logger.warn('缓存监控器已经在运行');
       return;
     }
 
@@ -58,7 +58,7 @@ export class CacheMonitor {
     } = options || {};
 
     this.isMonitoring = true;
-    console.log('启动缓存监控器');
+    logger.info('启动缓存监控器');
 
     // 启动健康检查
     this.healthCheckInterval = setInterval(async () => {
@@ -78,12 +78,12 @@ export class CacheMonitor {
   // 停止监控
   stop(): void {
     if (!this.isMonitoring) {
-      console.warn('缓存监控器未在运行');
+      logger.warn('缓存监控器未在运行');
       return;
     }
 
     this.isMonitoring = false;
-    console.log('停止缓存监控器');
+    logger.info('停止缓存监控器');
 
     if (this.healthCheckInterval) {
       clearInterval(this.healthCheckInterval);
@@ -124,7 +124,7 @@ export class CacheMonitor {
               parseInt(redisInfo.stats.keyspace_misses || '0', 10);
           }
         } catch (error) {
-          console.error('获取Redis信息失败:', error);
+          logger.error('获取Redis信息失败:', error);
         }
       }
 
@@ -153,7 +153,7 @@ export class CacheMonitor {
       };
 
       this.addToHealthHistory(health);
-      console.error('缓存健康检查失败:', error);
+      logger.error('缓存健康检查失败:', error);
 
       return health;
     }
@@ -172,14 +172,14 @@ export class CacheMonitor {
   // 检查健康阈值
   private checkHealthThresholds(health: CacheHealth): void {
     if (!health.connected) {
-      console.error('缓存连接中断！');
+      logger.error('缓存连接中断！');
       this.triggerAlert('DISCONNECTED', '缓存连接中断', health);
       return;
     }
 
     if (health.responseTime > 1000) {
       // 响应时间超过1秒
-      console.warn(`缓存响应时间过慢: ${health.responseTime}ms`);
+      logger.warn(`缓存响应时间过慢: ${health.responseTime}ms`);
       this.triggerAlert(
         'SLOW_RESPONSE',
         `缓存响应时间过慢: ${health.responseTime}ms`,
@@ -190,7 +190,7 @@ export class CacheMonitor {
     const memoryMB = health.memoryUsage / (1024 * 1024);
     if (memoryMB > 1000) {
       // 内存使用超过1GB
-      console.warn(`缓存内存使用过高: ${memoryMB.toFixed(2)}MB`);
+      logger.warn(`缓存内存使用过高: ${memoryMB.toFixed(2)}MB`);
       this.triggerAlert(
         'HIGH_MEMORY',
         `缓存内存使用过高: ${memoryMB.toFixed(2)}MB`,
@@ -212,7 +212,7 @@ export class CacheMonitor {
       health,
     };
 
-    console.error('缓存告警:', alert);
+    logger.error('缓存告警:', alert);
 
     // 这里可以集成外部告警系统（如邮件、短信、Slack等）
     // this.sendAlert(alert);
@@ -225,7 +225,7 @@ export class CacheMonitor {
       const redisInfo = await getRedisInfo();
 
       // 记录指标日志
-      console.log('缓存指标:', {
+      logger.info('缓存指标:', {
         hitRate: `${stats.hitRate.toFixed(2)}%`,
         totalRequests: stats.totalRequests,
         memoryUsage: redisInfo?.memory?.used_memory || '0',
@@ -235,7 +235,7 @@ export class CacheMonitor {
       // 这里可以发送指标到监控系统（如Prometheus、InfluxDB等）
       // this.sendMetrics(metrics);
     } catch (error) {
-      console.error('收集缓存指标失败:', error);
+      logger.error('收集缓存指标失败:', error);
     }
   }
 
@@ -335,7 +335,7 @@ export class CacheMonitor {
   reset(): void {
     this.healthHistory = [];
     this.cacheManager.resetStats();
-    console.log('缓存监控数据已重置');
+    logger.info('缓存监控数据已重置');
   }
 
   // 清理资源
@@ -343,7 +343,7 @@ export class CacheMonitor {
     this.stop();
     this.eventListeners = [];
     this.healthHistory = [];
-    console.log('缓存监控器已清理');
+    logger.info('缓存监控器已清理');
   }
 }
 
@@ -360,6 +360,7 @@ export const getCacheMonitor = (cacheManager: CacheManager): CacheMonitor => {
 
 // 创建缓存监控器的便捷函数
 import { cacheManager } from './manager';
+import { logger } from '@/lib/logger';
 export const cacheMonitorInstance = getCacheMonitor(cacheManager);
 
 // 自动启动监控（仅在开发环境）
@@ -383,6 +384,15 @@ export const cacheMonitoringUtils = {
     avgTtl: number;
   }> {
     try {
+      if (!redis) {
+        return {
+          namespace,
+          keyCount: 0,
+          memoryUsage: 0,
+          avgTtl: 0,
+        };
+      }
+
       const pattern = `legal_debate:${namespace}:*`;
       const keys = await redis.keys(pattern);
 
@@ -396,7 +406,8 @@ export const cacheMonitoringUtils = {
       }
 
       // 获取所有键的TTL
-      const ttls = await Promise.all(keys.map(key => redis.ttl(key)));
+      const r = redis;
+      const ttls = await Promise.all(keys.map(key => r.ttl(key)));
       const validTtls = ttls.filter(ttl => ttl > 0);
       const avgTtl =
         validTtls.length > 0
@@ -413,7 +424,7 @@ export const cacheMonitoringUtils = {
         avgTtl,
       };
     } catch (error) {
-      console.error(`检查命名空间健康状态失败 [${namespace}]:`, error);
+      logger.error(`检查命名空间健康状态失败 [${namespace}]:`, error);
       return {
         namespace,
         keyCount: 0,
@@ -427,7 +438,7 @@ export const cacheMonitoringUtils = {
   async getHotKeys(): Promise<Array<{ key: string; accessCount: number }>> {
     // 这里需要实现基于访问频率的热点键统计
     // 由于Redis本身不直接提供访问计数，需要在应用层实现
-    console.warn('热点键统计功能需要在应用层实现访问计数');
+    logger.warn('热点键统计功能需要在应用层实现访问计数');
     return [];
   },
 
@@ -435,10 +446,10 @@ export const cacheMonitoringUtils = {
   async cleanupExpiredKeys(): Promise<number> {
     try {
       // Redis会自动清理过期键，这里只是记录日志
-      console.log('Redis自动清理过期键中...');
+      logger.info('Redis自动清理过期键中...');
       return 0;
     } catch (error) {
-      console.error('清理过期键失败:', error);
+      logger.error('清理过期键失败:', error);
       return 0;
     }
   },

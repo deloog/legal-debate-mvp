@@ -23,7 +23,7 @@ const updateReminderSchema = z.object({
  * 更新提醒
  */
 export const PATCH = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -36,7 +36,7 @@ export const PATCH = withErrorHandler(
     const validatedData = updateReminderSchema.parse(body);
 
     const reminder = await reminderService.updateReminder(
-      params.id,
+      (await params).id,
       authUser.userId,
       validatedData as UpdateReminderInput
     );
@@ -50,7 +50,7 @@ export const PATCH = withErrorHandler(
  * 删除提醒
  */
 export const DELETE = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -60,7 +60,7 @@ export const DELETE = withErrorHandler(
     }
 
     const success = await reminderService.deleteReminder(
-      params.id,
+      (await params).id,
       authUser.userId
     );
 

@@ -112,11 +112,10 @@ export function enforceUsageLimit(
   recordAfterCheck: boolean = false
 ) {
   return async function (
-    request: NextRequest,
-    userId?: string
+    request: NextRequest
   ): Promise<NextResponse | null> {
-    // 如果传入了userId，直接使用，否则从请求中获取
-    const targetUserId = userId ?? (await getAuthUser(request))?.userId;
+    // 始终从请求中获取用户ID，防止外部传入userId导致配额绕过
+    const targetUserId = (await getAuthUser(request))?.userId;
 
     if (!targetUserId) {
       return Response.json(

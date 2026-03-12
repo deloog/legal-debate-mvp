@@ -4,6 +4,7 @@
 
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import type { RecentActivity as RecentActivityType } from '@/types/dashboard';
 
@@ -73,7 +74,7 @@ export function RecentActivities({ activities }: RecentActivitiesProps) {
 function ActivityItem({ activity }: { activity: RecentActivityType }) {
   const iconPath = typeIcons[activity.type];
   const iconColor = typeColors[activity.type];
-  const ActivityWrapper = activity.link ? Link : 'div';
+  const ActivityWrapper = (activity.link ? Link : 'div') as React.ElementType;
 
   return (
     <ActivityWrapper

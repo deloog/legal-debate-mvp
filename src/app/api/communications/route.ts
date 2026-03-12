@@ -6,6 +6,7 @@ import {
 } from '@/app/api/lib/responses/success';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { logger } from '@/lib/logger';
 import {
   CommunicationRecordDetail,
   CommunicationType,
@@ -64,6 +65,27 @@ async function mapCommunicationRecord(
 }
 
 /**
+ * 验证客户所有权
+ * @param clientId 客户ID
+ * @param userId 用户ID
+ * @returns 客户是否存在且属于该用户
+ */
+async function verifyClientOwnership(
+  clientId: string,
+  userId: string
+): Promise<boolean> {
+  const client = await prisma.client.findFirst({
+    where: {
+      id: clientId,
+      userId,
+      deletedAt: null,
+    },
+    select: { id: true },
+  });
+  return !!client;
+}
+
+/**
  * GET /api/communications
  * 获取沟通记录列表
  */
@@ -80,6 +102,24 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const query = queryCommunicationSchema.parse(
     Object.fromEntries(searchParams)
   );
+
+  // 如果指定了clientId，验证客户所有权
+  if (query.clientId) {
+    const hasOwnership = await verifyClientOwnership(
+      query.clientId,
+      authUser.userId
+    );
+    if (!hasOwnership) {
+      logger.warn('用户尝试查询无权限的客户沟通记录:', {
+        userId: authUser.userId,
+        clientId: query.clientId,
+      });
+      return NextResponse.json(
+        { error: '无权限', message: '您没有权限访问此客户的沟通记录' },
+        { status: 403 }
+      );
+    }
+  }
 
   const where: Record<string, unknown> = {
     userId: authUser.userId,
@@ -160,6 +200,22 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const body = await request.json();
   const validatedData = createCommunicationSchema.parse(body);
 
+  // 验证客户所有权（关键安全验证）
+  const hasOwnership = await verifyClientOwnership(
+    validatedData.clientId,
+    authUser.userId
+  );
+  if (!hasOwnership) {
+    logger.warn('用户尝试为无权限的客户创建沟通记录:', {
+      userId: authUser.userId,
+      clientId: validatedData.clientId,
+    });
+    return NextResponse.json(
+      { error: '无权限', message: '您没有权限为此客户创建沟通记录' },
+      { status: 403 }
+    );
+  }
+
   const communication = await prisma.communicationRecord.create({
     data: {
       clientId: validatedData.clientId,
@@ -171,11 +227,17 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
         ? new Date(validatedData.nextFollowUpDate)
         : undefined,
       isImportant: validatedData.isImportant || false,
-      metadata: validatedData.metadata as Prisma.JsonValue,
+      metadata: validatedData.metadata as Prisma.InputJsonValue,
     },
   });
 
   const communicationDetail = await mapCommunicationRecord(communication);
+
+  logger.info('沟通记录创建成功:', {
+    userId: authUser.userId,
+    clientId: validatedData.clientId,
+    communicationId: communication.id,
+  });
 
   return createCreatedResponse(communicationDetail);
 });

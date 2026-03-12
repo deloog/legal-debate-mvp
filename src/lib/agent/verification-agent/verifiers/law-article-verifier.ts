@@ -12,6 +12,7 @@ import {
   SuggestionPriority,
 } from '../types';
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 
 /**
  * 验证上下文接口
@@ -91,7 +92,7 @@ export class LawArticleVerifier {
         verificationTime,
       };
     } catch (error) {
-      console.error('法律条文验证失败:', error);
+      logger.error('法律条文验证失败:', error);
 
       return {
         overallScore: 0,
@@ -146,7 +147,7 @@ export class LawArticleVerifier {
           });
         }
       } catch (error) {
-        console.error(
+        logger.error(
           `查询法条失败: ${legal.lawName} ${legal.articleNumber}`,
           error
         );
@@ -234,7 +235,7 @@ export class LawArticleVerifier {
           }
         }
       } catch (error) {
-        console.error(
+        logger.error(
           `检查法条适用性失败: ${legal.lawName} ${legal.articleNumber}`,
           error
         );
@@ -320,7 +321,7 @@ export class LawArticleVerifier {
         });
       }
     } catch (error) {
-      console.error('检查引用完整性失败:', error);
+      logger.error('检查引用完整性失败:', error);
     }
 
     return issues;

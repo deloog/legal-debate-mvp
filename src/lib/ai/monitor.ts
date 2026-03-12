@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import type {
   AIProvider,
   MonitorConfig,
@@ -364,16 +365,16 @@ export class AIMonitor {
 
     switch (alert.severity) {
       case 'critical':
-        console.error(`🚨 CRITICAL: ${message}`);
+        logger.error(`🚨 CRITICAL: ${message}`);
         break;
       case 'warning':
-        console.warn(`⚠️  WARNING: ${message}`);
+        logger.warn(`⚠️  WARNING: ${message}`);
         break;
       case 'info':
-        console.info(`ℹ️  INFO: ${message}`);
+        logger.info(`ℹ️  INFO: ${message}`);
         break;
       default:
-        console.log(`📋 LOG: ${message}`);
+        logger.info(`📋 LOG: ${message}`);
     }
   }
 
@@ -433,16 +434,16 @@ export class AIMonitor {
 
     switch (logLevel) {
       case 'debug':
-        console.debug(message);
+        logger.debug(message);
         break;
       case 'info':
-        console.info(message);
+        logger.info(message);
         break;
       case 'warn':
-        console.warn(message);
+        logger.warn(message);
         break;
       case 'error':
-        console.error(message);
+        logger.error(message);
         break;
     }
   }

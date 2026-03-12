@@ -71,7 +71,7 @@ async function checkTeamAccess(
 export const GET = withErrorHandler(
   async (
     request: NextRequest,
-    { params }: { params: { id: string; userId: string } }
+    { params }: { params: Promise<{ id: string; userId: string }> }
   ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
@@ -81,7 +81,7 @@ export const GET = withErrorHandler(
       );
     }
 
-    const { id: teamId, userId: memberUserId } = params;
+    const { id: teamId, userId: memberUserId } = await params;
 
     const hasAccess = await checkTeamAccess(teamId, authUser.userId);
     if (!hasAccess) {
@@ -139,7 +139,7 @@ export const GET = withErrorHandler(
 export const PATCH = withErrorHandler(
   async (
     request: NextRequest,
-    { params }: { params: { id: string; userId: string } }
+    { params }: { params: Promise<{ id: string; userId: string }> }
   ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
@@ -149,7 +149,7 @@ export const PATCH = withErrorHandler(
       );
     }
 
-    const { id: teamId, userId: memberUserId } = params;
+    const { id: teamId, userId: memberUserId } = await params;
 
     const hasAccess = await checkTeamAccess(teamId, authUser.userId);
     if (!hasAccess) {
@@ -189,7 +189,7 @@ export const PATCH = withErrorHandler(
         role: validatedData.role,
         status: validatedData.status,
         notes: validatedData.notes,
-        metadata: validatedData.metadata as Prisma.JsonValue,
+        metadata: validatedData.metadata as Prisma.InputJsonValue,
       },
       include: {
         user: {
@@ -225,7 +225,7 @@ export const PATCH = withErrorHandler(
 export const DELETE = withErrorHandler(
   async (
     request: NextRequest,
-    { params }: { params: { id: string; userId: string } }
+    { params }: { params: Promise<{ id: string; userId: string }> }
   ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
@@ -235,7 +235,7 @@ export const DELETE = withErrorHandler(
       );
     }
 
-    const { id: teamId, userId: memberUserId } = params;
+    const { id: teamId, userId: memberUserId } = await params;
 
     const hasAccess = await checkTeamAccess(teamId, authUser.userId);
     if (!hasAccess) {

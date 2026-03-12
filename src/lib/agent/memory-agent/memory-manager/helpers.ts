@@ -37,7 +37,7 @@ export function toMemoryEntity(
     memoryValue: JSON.parse(record.memoryValue as string),
     importance: record.importance,
     accessCount: record.accessCount,
-    lastAccessedAt: record.lastAccessedAt,
+    lastAccessedAt: record.lastAccessedAt ?? new Date(),
     expiresAt: record.expiresAt || undefined,
     compressed: record.compressed,
     compressionRatio: record.compressionRatio || undefined,

@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const expertLevelParam = searchParams.get('expertLevel');
     const filters: ExpertListFilters = {
-      expertLevel: expertLevelParam as 'JUNIOR' | 'SENIOR' | 'MASTER' | null,
+      expertLevel: expertLevelParam ? (expertLevelParam as 'JUNIOR' | 'SENIOR' | 'MASTER') : undefined,
       expertiseArea: searchParams.get('expertiseArea') || undefined,
       page: parseInt(searchParams.get('page') || '1', 10),
       pageSize: parseInt(searchParams.get('pageSize') || '20', 10),

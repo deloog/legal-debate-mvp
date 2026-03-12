@@ -9,9 +9,9 @@
  * - 拆解复合请求
  */
 
-import type { Claim, ClaimType, Correction } from '../../core/types';
-import { POST_PROCESSING_RULES, CLAIM_TYPE_LABELS } from '../../core/constants';
 import { logger } from '../../../../agent/security/logger';
+import { CLAIM_TYPE_LABELS, POST_PROCESSING_RULES } from '../../core/constants';
+import type { Claim, ClaimType, Correction } from '../../core/types';
 
 export class ClaimRuleHandler {
   /**
@@ -45,7 +45,7 @@ export class ClaimRuleHandler {
       claims.push({
         type: 'LITIGATION_COST',
         content: '诉讼费用由被告承担',
-        amount: null,
+        amount: undefined,
         currency: 'CNY',
         evidence: [],
         legalBasis: '民事诉讼法',
@@ -75,7 +75,7 @@ export class ClaimRuleHandler {
       claims.push({
         type: 'PAY_PRINCIPAL',
         content: '偿还本金（从文本推断）',
-        amount: null,
+        amount: undefined,
         currency: 'CNY',
         evidence: [],
         legalBasis: '',
@@ -105,7 +105,7 @@ export class ClaimRuleHandler {
       claims.push({
         type: 'PAY_INTEREST',
         content: '支付利息（从文本推断）',
-        amount: null,
+        amount: undefined,
         currency: 'CNY',
         evidence: [],
         legalBasis: '',
@@ -135,7 +135,7 @@ export class ClaimRuleHandler {
       claims.push({
         type: 'PAY_PENALTY',
         content: '支付违约金（从文本推断）',
-        amount: null,
+        amount: undefined,
         currency: 'CNY',
         evidence: [],
         legalBasis: '',
@@ -185,7 +185,7 @@ export class ClaimRuleHandler {
               claims.push({
                 type: type as ClaimType,
                 content: `${CLAIM_TYPE_LABELS[type] || type}（从复合请求拆解）`,
-                amount: null,
+                amount: undefined,
                 currency: 'CNY',
                 evidence: [],
                 legalBasis: '',

@@ -14,7 +14,7 @@ import { expertService } from '@/lib/knowledge-graph/expert/expert-service';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { expertId: string } }
+  { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -30,7 +30,7 @@ export async function GET(
 
     // 获取专家信息
     const expert = await prisma.knowledgeGraphExpert.findUnique({
-      where: { id: params.expertId },
+      where: { id: (await params).expertId },
     });
 
     if (!expert) {
@@ -48,7 +48,7 @@ export async function GET(
 
     logger.info('Expert stats fetched successfully', {
       userId: session.user.id,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
     });
 
     return NextResponse.json({
@@ -61,7 +61,7 @@ export async function GET(
   } catch (error) {
     logger.error('获取专家统计失败', {
       error,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
     });
 
     return NextResponse.json(

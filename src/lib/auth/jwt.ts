@@ -4,6 +4,7 @@
 
 import type { JwtPayload, JwtVerifyResult } from '@/types/auth';
 import jwt from 'jsonwebtoken';
+import { randomUUID } from 'crypto';
 import { logError } from '../utils/safe-logger';
 import { logger } from '@/lib/logger';
 
@@ -23,7 +24,7 @@ if (!JWT_SECRET) {
     throw new Error(
       '[JWT配置错误] JWT_SECRET环境变量未设置！\n' +
         '请在环境变量中设置 JWT_SECRET（至少32位随机字符串）。\n' +
-        "生成命令：node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+        "生成命令：node -e \"logger.info(require('crypto').randomBytes(32).toString('hex'))\""
     );
   }
 
@@ -139,10 +140,10 @@ export function generateRefreshToken(
   payload: JwtPayload,
   expiresIn?: string
 ): string {
-  // 添加jti确保每次生成的token都不同（避免并发冲突）
+  // 添加 jti 确保每次生成的 token 都不同（使用密码学安全随机 UUID）
   const refreshTokenPayload: JwtPayload = {
     ...payload,
-    jti: `${Date.now()}_${Math.random().toString(36).substring(2, 15)}`, // JWT ID，确保唯一性
+    jti: randomUUID(),
   };
 
   const options: jwt.SignOptions = {

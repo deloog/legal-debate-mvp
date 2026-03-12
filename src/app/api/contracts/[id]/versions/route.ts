@@ -9,10 +9,10 @@ import { logger } from '@/lib/logger';
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // 获取版本列表
     const versions = await contractVersionService.getVersions(id);

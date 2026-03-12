@@ -5,6 +5,7 @@
 import { OAuthBaseProvider } from './oauth-base';
 import type { OAuthTokenResponse, OAuthUserInfo } from '../../types/oauth';
 import type { WechatUserInfo } from '../../types/oauth';
+import { logger } from '@/lib/logger';
 
 /**
  * 微信 OAuth 提供商
@@ -100,7 +101,7 @@ export class WechatOAuthProvider extends OAuthBaseProvider {
         unionid: response.unionid,
       };
     } catch (error) {
-      console.error('Wechat exchangeToken error:', error);
+      logger.error('Wechat exchangeToken error:', error);
       throw new Error(
         `Failed to exchange token: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -140,7 +141,7 @@ export class WechatOAuthProvider extends OAuthBaseProvider {
         rawUserInfo: response,
       };
     } catch (error) {
-      console.error('Wechat getUserInfo error:', error);
+      logger.error('Wechat getUserInfo error:', error);
       throw new Error(
         `Failed to get user info: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -178,7 +179,7 @@ export class WechatOAuthProvider extends OAuthBaseProvider {
         unionid: response.unionid,
       };
     } catch (error) {
-      console.error('Wechat refreshAccessToken error:', error);
+      logger.error('Wechat refreshAccessToken error:', error);
       throw new Error(
         `Failed to refresh token: ${error instanceof Error ? error.message : 'Unknown error'}`
       );

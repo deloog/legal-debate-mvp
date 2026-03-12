@@ -45,38 +45,38 @@
  * - 性能目标：<2秒（首次），<500ms（缓存命中）
  */
 
+import { AgentContext, AgentType } from '../../../types/agent';
+import { AnalysisError } from '../../agent/security/errors';
+import { logger } from '../../agent/security/logger';
 import { BaseAgent } from '../base-agent';
-import { AgentType, AgentContext } from '../../../types/agent';
 import {
-  DocumentAnalysisOutput,
-  DocumentAnalysisInput,
-  AnalysisProcess,
-  Correction,
-} from './core/types';
-import { DEFAULT_CONFIG } from './core/constants';
-import {
+  createCircuitBreakerConfig,
+  createFallbackConfig,
   createFaultToleranceConfig,
   createRetryConfig,
-  createFallbackConfig,
-  createCircuitBreakerConfig,
   type AgentFaultToleranceConfig,
 } from '../fault-tolerance/config';
-import { TextExtractor } from './extractors/text-extractor';
-import { FilterProcessor } from './processors/filter-processor';
-import { AIProcessor } from './processors/ai-processor';
-import { RuleProcessor } from './processors/rule-processor';
-import { CacheProcessor } from './processors/cache-processor';
-import { LegalRepresentativeFilter } from './processors/legal-representative-filter';
-import { ReviewerManager } from './reviewers/reviewer-manager';
-import { AIReviewer } from './reviewers/ai-reviewer';
-import { RuleReviewer } from './reviewers/rule-reviewer';
 import {
+  ComprehensiveAnalyzer,
   EvidenceAnalyzer,
   TimelineExtractor,
-  ComprehensiveAnalyzer,
 } from './analyzers';
-import { logger } from '../../agent/security/logger';
-import { AnalysisError } from '../../agent/security/errors';
+import { DEFAULT_CONFIG } from './core/constants';
+import {
+  AnalysisProcess,
+  Correction,
+  DocumentAnalysisInput,
+  DocumentAnalysisOutput,
+} from './core/types';
+import { TextExtractor } from './extractors/text-extractor';
+import { AIProcessor } from './processors/ai-processor';
+import { CacheProcessor } from './processors/cache-processor';
+import { FilterProcessor } from './processors/filter-processor';
+import { LegalRepresentativeFilter } from './processors/legal-representative-filter';
+import { RuleProcessor } from './processors/rule-processor';
+import { AIReviewer } from './reviewers/ai-reviewer';
+import { ReviewerManager } from './reviewers/reviewer-manager';
+import { RuleReviewer } from './reviewers/rule-reviewer';
 
 export class DocAnalyzerAgent extends BaseAgent {
   private textExtractor: TextExtractor;
@@ -260,7 +260,7 @@ export class DocAnalyzerAgent extends BaseAgent {
         logger.info('AIReviewer初始化成功');
       }
     } catch (error) {
-      logger.warn('AIReviewer初始化失败', error);
+      logger.warn('AIReviewer初始化失败', { error: String(error) });
     }
   }
 
@@ -455,7 +455,7 @@ export class DocAnalyzerAgent extends BaseAgent {
       return output;
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      logger.error('文档分析失败', error, {
+      logger.error('文档分析失败', error instanceof Error ? error : undefined, {
         documentId: input.documentId,
         processingTime,
       });
@@ -530,18 +530,19 @@ export class DocAnalyzerAgent extends BaseAgent {
             typedCorrection.correctedValue &&
             typedCorrection.correctedValue.name
           ) {
+            const corrected = typedCorrection.correctedValue;
             const partyIndex = result.parties.findIndex(
-              p => p.name === typedCorrection.correctedValue.name
+              p => p.name === corrected.name
             );
             if (partyIndex >= 0) {
               result.parties[partyIndex] = {
                 ...result.parties[partyIndex],
-                role: typedCorrection.correctedValue.role,
+                role: corrected.role,
               };
               logger.debug('应用修正：修正角色', {
-                name: typedCorrection.correctedValue.name,
+                name: corrected.name,
                 oldRole: result.parties[partyIndex].role,
-                newRole: typedCorrection.correctedValue.role,
+                newRole: corrected.role,
               });
             }
           }
@@ -588,18 +589,19 @@ export class DocAnalyzerAgent extends BaseAgent {
             typedCorrection.correctedValue &&
             typedCorrection.correctedValue.type
           ) {
+            const corrected = typedCorrection.correctedValue;
             const claimIndex = result.claims.findIndex(
-              c => c.type === typedCorrection.correctedValue.type
+              c => c.type === corrected.type
             );
             if (claimIndex >= 0) {
               result.claims[claimIndex] = {
                 ...result.claims[claimIndex],
-                amount: typedCorrection.correctedValue.amount,
+                amount: corrected.amount,
               };
               logger.debug('应用修正：修正金额', {
-                type: typedCorrection.correctedValue.type,
+                type: corrected.type,
                 oldAmount: result.claims[claimIndex].amount,
-                newAmount: typedCorrection.correctedValue.amount,
+                newAmount: corrected.amount,
               });
             }
           }

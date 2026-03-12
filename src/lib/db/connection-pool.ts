@@ -1,4 +1,5 @@
 import { prisma, getConnectionInfo } from './prisma';
+import { logger } from '@/lib/logger';
 
 // 连接池配置接口
 export interface ConnectionPoolConfig {
@@ -76,7 +77,7 @@ export const getPoolStats = async (): Promise<PoolStats | null> => {
       connectionErrors: 0, // 需要从错误计数器获取
     };
   } catch (error) {
-    console.error('获取连接池统计信息失败:', error);
+    logger.error('获取连接池统计信息失败:', error);
     return null;
   }
 };
@@ -96,12 +97,12 @@ export const checkPoolHealth = async (): Promise<boolean> => {
     const connectionUtilization =
       stats.activeConnections / stats.maxConnections;
     if (connectionUtilization > 0.8) {
-      console.warn('连接池使用率过高:', connectionUtilization);
+      logger.warn('连接池使用率过高:', connectionUtilization);
     }
 
     return true;
   } catch (error) {
-    console.error('连接池健康检查失败:', error);
+    logger.error('连接池健康检查失败:', error);
     return false;
   }
 };
@@ -117,18 +118,18 @@ export const warmupConnectionPool = async (): Promise<void> => {
     }
 
     await Promise.all(promises);
-    console.log(
+    logger.info(
       `连接池预热完成，创建了 ${defaultPoolConfig.minConnections} 个连接`
     );
   } catch (error) {
-    console.error('连接池预热失败:', error);
+    logger.error('连接池预热失败:', error);
   }
 };
 
 // 优雅关闭连接池
 export const gracefulShutdown = async (): Promise<void> => {
   try {
-    console.log('开始优雅关闭数据库连接池...');
+    logger.info('开始优雅关闭数据库连接池...');
 
     // 等待所有活跃操作完成
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -136,9 +137,9 @@ export const gracefulShutdown = async (): Promise<void> => {
     // 关闭所有连接
     await prisma.$disconnect();
 
-    console.log('数据库连接池已优雅关闭');
+    logger.info('数据库连接池已优雅关闭');
   } catch (error) {
-    console.error('关闭连接池时出错:', error);
+    logger.error('关闭连接池时出错:', error);
     throw error;
   }
 };
@@ -153,11 +154,11 @@ export class ConnectionPoolMonitor {
       return;
     }
 
-    console.log('启动连接池监控器');
+    logger.info('启动连接池监控器');
     this.interval = setInterval(async () => {
       const stats = await getPoolStats();
       if (stats) {
-        console.log('连接池状态:', {
+        logger.info('连接池状态:', {
           active: stats.activeConnections,
           total: stats.totalConnections,
           utilization: `${((stats.activeConnections / stats.maxConnections) * 100).toFixed(1)}%`,
@@ -166,7 +167,7 @@ export class ConnectionPoolMonitor {
 
       const isHealthy = await checkPoolHealth();
       if (!isHealthy) {
-        console.error('连接池健康检查失败');
+        logger.error('连接池健康检查失败');
       }
     }, this.checkIntervalMs);
   }
@@ -175,7 +176,7 @@ export class ConnectionPoolMonitor {
     if (this.interval) {
       clearInterval(this.interval);
       this.interval = null;
-      console.log('连接池监控器已停止');
+      logger.info('连接池监控器已停止');
     }
   }
 }

@@ -36,7 +36,7 @@ export interface AlertLabels {
   category: AlertCategory;
   instance?: string;
   job?: string;
-  [key: string]: string;
+  [key: string]: string | undefined;
 }
 
 /**
@@ -47,7 +47,7 @@ export interface AlertAnnotations {
   description: string;
   dashboard?: string;
   runbook_url?: string;
-  [key: string]: string;
+  [key: string]: string | undefined;
 }
 
 /**

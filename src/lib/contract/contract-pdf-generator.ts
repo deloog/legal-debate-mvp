@@ -4,13 +4,13 @@
  * 支持PDF缓存机制，提升生成速度
  */
 
-import PDFDocument from 'pdfkit';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as crypto from 'crypto';
-import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
+import { Prisma } from '@prisma/client';
+import * as crypto from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
+import PDFDocument from 'pdfkit';
 
 /**
  * 合同数据接口
@@ -77,7 +77,7 @@ function formatAmountToChinese(amount: number): string {
     Math.ceil(integerPart.length / 4) * 4,
     '0'
   );
-  const groups = [];
+  const groups: string[] = [];
   for (let i = 0; i < integerStr.length; i += 4) {
     groups.push(integerStr.slice(i, i + 4));
   }

@@ -30,6 +30,7 @@ import {
 } from './fault-tolerance';
 import { ErrorLogger } from '../error/error-logger';
 import { CircuitBreakerManager } from '../error/circuit-breaker';
+import { logger as appLogger } from '@/lib/logger';
 
 // =============================================================================
 // BaseAgent抽象类
@@ -217,7 +218,7 @@ export abstract class BaseAgent implements Agent {
           processingSteps: this.getProcessingSteps(),
           // 从result中提取warnings（如果存在）- 增强调试
           warnings: (() => {
-            console.log('[DEBUG] BaseAgent.execute 开始提取warnings', {
+            appLogger.info('[DEBUG] BaseAgent.execute 开始提取warnings', {
               resultType: typeof result,
               hasMetadata:
                 result && typeof result === 'object' && 'metadata' in result,
@@ -227,19 +228,19 @@ export abstract class BaseAgent implements Agent {
             const res = result as Record<string, unknown>;
 
             if (!res.metadata || typeof res.metadata !== 'object') {
-              console.warn('[WARNING] metadata不存在或不是对象');
+              appLogger.warn('[WARNING] metadata不存在或不是对象');
               return [];
             }
 
             const metadata = res.metadata as Record<string, unknown>;
             if (!Array.isArray(metadata.warnings)) {
-              console.warn('[WARNING] metadata.warnings不是数组', {
+              appLogger.warn('[WARNING] metadata.warnings不是数组', {
                 warnings: metadata.warnings,
               });
               return [];
             }
 
-            console.log('[DEBUG] 提取到warnings', {
+            appLogger.info('[DEBUG] 提取到warnings', {
               count: metadata.warnings.length,
               warnings: metadata.warnings,
             });
@@ -442,13 +443,13 @@ export abstract class BaseAgent implements Agent {
       switch (entry.level) {
         case AgentLogLevel.DEBUG:
         case AgentLogLevel.INFO:
-          console.log(message, entry.data || '');
+          appLogger.info(message, entry.data || '');
           break;
         case AgentLogLevel.WARN:
-          console.warn(message, entry.data || '');
+          appLogger.warn(message, entry.data || '');
           break;
         case AgentLogLevel.ERROR:
-          console.error(message, entry.error || entry.data || '');
+          appLogger.error(message, entry.error || entry.data || '');
           break;
       }
     }

@@ -9,17 +9,17 @@ import {
   unauthorizedResponse,
 } from '@/lib/api-response';
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import {
+  sanitizeSearchKeyword,
+  validatePagination,
   validateSortBy,
   validateSortOrder,
-  validatePagination,
-  sanitizeSearchKeyword,
 } from '@/lib/validation/query-params';
 import type { UserListQueryParams, UserListResponse } from '@/types/admin-user';
 import { NextRequest, NextResponse } from 'next/server';
-import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数
@@ -139,8 +139,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // 解析查询参数（已包含验证和清理）
     const params = parseQueryParams(request);
-    const page = Number.parseInt(params.page, 10);
-    const pageSize = Number.parseInt(params.pageSize, 10);
+    const page = Number.parseInt(params.page ?? '1', 10);
+    const pageSize = Number.parseInt(params.pageSize ?? '20', 10);
     const { sortBy, sortOrder } = params;
     const skip = (page - 1) * pageSize;
 
@@ -166,7 +166,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         lastLoginAt: true,
       },
       orderBy: {
-        [sortBy]: sortOrder,
+        [sortBy as string]: sortOrder,
       },
     });
 
@@ -179,7 +179,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       pagination: {
         total,
         page,
-        pageSize,
+        limit: pageSize,
         totalPages: Math.ceil(total / pageSize),
       },
     };

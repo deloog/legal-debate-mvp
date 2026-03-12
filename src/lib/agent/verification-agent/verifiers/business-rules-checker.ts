@@ -28,7 +28,7 @@ const DEFAULT_BUSINESS_RULES: BusinessRuleConfig[] = [
     name: 'has_mandatory_party_info',
     validator: data => {
       const parties = data.parties as Record<string, unknown> | undefined;
-      return (
+      return !!(
         parties?.plaintiff &&
         parties?.defendant &&
         parties.plaintiff !== parties.defendant

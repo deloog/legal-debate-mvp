@@ -13,11 +13,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
+import { getAuthUser } from '@/lib/middleware/auth';
 import {
   checkKnowledgeGraphPermission,
   logKnowledgeGraphAction,
   KnowledgeGraphAction,
+  KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
 
 /**
@@ -69,24 +70,31 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         .filter(type => type.length > 0);
     }
 
-    // 从 JWT 中提取用户 ID
-    const authHeader = request.headers.get('authorization');
-    const token = extractTokenFromHeader(authHeader);
-    const tokenResult = verifyToken(token ?? '');
-    const userId = tokenResult.valid ? (tokenResult.payload?.userId ?? '') : '';
+    // 认证检查
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        { status: 401 }
+      );
+    }
 
     // 权限检查
     const permissionResult = await checkKnowledgeGraphPermission(
-      userId,
+      authUser.userId,
       KnowledgeGraphAction.VIEW_RELATIONS,
-      'RELATION' as never
+      KnowledgeGraphResource.GRAPH
     );
 
     if (!permissionResult.hasPermission) {
       logger.warn('用户无权限查看邻居节点', {
+        userId: authUser.userId,
         reason: permissionResult.reason,
       });
-      return NextResponse.json({ error: '权限不足' }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: { code: 'FORBIDDEN', message: '权限不足' } },
+        { status: 403 }
+      );
     }
 
     // 查询源节点
@@ -112,9 +120,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // 记录操作日志
     await logKnowledgeGraphAction({
-      userId: '', // 从header获取
+      userId: authUser.userId,
       action: KnowledgeGraphAction.VIEW_RELATIONS,
-      resource: 'RELATION' as never,
+      resource: KnowledgeGraphResource.GRAPH,
       resourceId: nodeId,
       description: `查询${depth}度邻居节点`,
       metadata: {
@@ -125,13 +133,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
 
     return NextResponse.json({
-      nodeId,
-      neighbors,
+      success: true,
+      data: {
+        nodeId,
+        neighbors,
+      },
     });
   } catch (error: unknown) {
     logger.error('邻居查询失败', { error, nodeId: searchParams.get('nodeId') });
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { code: 'INTERNAL_ERROR', message: errorMessage } },
+      { status: 500 }
+    );
   }
 }
 

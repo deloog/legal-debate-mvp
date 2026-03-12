@@ -157,7 +157,7 @@ async function mapTeamMemberDetail(
  * 获取案件的团队成员列表
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -166,7 +166,7 @@ export const GET = withErrorHandler(
       );
     }
 
-    const caseId = params.id;
+    const caseId = (await params).id;
 
     // 检查是否有权限访问案件
     const hasAccess = await checkCaseAccess(caseId, authUser.userId);
@@ -241,7 +241,7 @@ export const GET = withErrorHandler(
  * 添加团队成员
  */
 export const POST = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -250,7 +250,7 @@ export const POST = withErrorHandler(
       );
     }
 
-    const caseId = params.id;
+    const caseId = (await params).id;
 
     // 检查是否有权限添加团队成员
     const { hasPermission } = await checkTeamManagementPermission(
@@ -320,10 +320,10 @@ export const POST = withErrorHandler(
         userId: validatedData.userId,
         role: validatedData.role,
         permissions: (validatedData.permissions ||
-          []) as unknown as Prisma.JsonValue,
+          []) as Prisma.InputJsonValue,
         notes: validatedData.notes,
         metadata: (validatedData.metadata ||
-          null) as unknown as Prisma.JsonValue,
+          null) as Prisma.InputJsonValue,
       },
       include: {
         user: {

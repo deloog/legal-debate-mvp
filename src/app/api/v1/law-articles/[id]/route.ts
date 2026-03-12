@@ -9,14 +9,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * 获取法条详情
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } | Promise<{ id: string }> }
 ) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+      { status: 401 }
+    );
+  }
+
   try {
     const { id } = await params;
     const article = await prisma.lawArticle.findUnique({
@@ -24,12 +33,18 @@ export async function GET(
     });
 
     if (!article) {
-      return NextResponse.json({ error: '法条不存在' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: { code: 'NOT_FOUND', message: '法条不存在' } },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json(article);
+    return NextResponse.json({ success: true, data: article });
   } catch (error) {
     logger.error('获取法条详情失败:', error);
-    return NextResponse.json({ error: '服务器错误' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { code: 'INTERNAL_ERROR', message: '服务器错误' } },
+      { status: 500 }
+    );
   }
 }

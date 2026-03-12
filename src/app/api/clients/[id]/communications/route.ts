@@ -6,6 +6,7 @@ import {
 import { FollowUpTaskGenerator } from '@/lib/client/follow-up-task-generator';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { logger } from '@/lib/logger';
 import type { CommunicationRecordDetail } from '@/types/communication';
 import type { Prisma } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
@@ -57,11 +58,35 @@ async function mapCommunicationRecord(
 }
 
 /**
+ * 验证客户所有权
+ * @param clientId 客户ID
+ * @param userId 用户ID
+ * @returns 客户是否存在且属于该用户
+ */
+async function verifyClientOwnership(
+  clientId: string,
+  userId: string
+): Promise<boolean> {
+  const client = await prisma.client.findFirst({
+    where: {
+      id: clientId,
+      userId,
+      deletedAt: null,
+    },
+    select: { id: true },
+  });
+  return !!client;
+}
+
+/**
  * GET /api/clients/[id]/communications
  * 获取客户沟通记录列表
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -70,14 +95,28 @@ export const GET = withErrorHandler(
       );
     }
 
-    const { id } = params;
+    const { id: clientId } = await params;
+
+    // 验证客户所有权
+    const hasOwnership = await verifyClientOwnership(clientId, authUser.userId);
+    if (!hasOwnership) {
+      logger.warn('用户尝试访问无权限的客户沟通记录:', {
+        userId: authUser.userId,
+        clientId,
+      });
+      return NextResponse.json(
+        { error: '无权限', message: '您没有权限访问此客户的沟通记录' },
+        { status: 403 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const query = queryCommunicationSchema.parse(
       Object.fromEntries(searchParams)
     );
 
     const where: Record<string, unknown> = {
-      clientId: id,
+      clientId,
       userId: authUser.userId,
     };
 
@@ -128,7 +167,10 @@ export const GET = withErrorHandler(
  * 创建客户沟通记录
  */
 export const POST = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -137,13 +179,26 @@ export const POST = withErrorHandler(
       );
     }
 
-    const { id } = params;
+    const { id: clientId } = await params;
     const body = await request.json();
     const validatedData = createCommunicationSchema.parse(body);
 
+    // 验证客户所有权（关键安全验证）
+    const hasOwnership = await verifyClientOwnership(clientId, authUser.userId);
+    if (!hasOwnership) {
+      logger.warn('用户尝试为无权限的客户创建沟通记录:', {
+        userId: authUser.userId,
+        clientId,
+      });
+      return NextResponse.json(
+        { error: '无权限', message: '您没有权限为此客户创建沟通记录' },
+        { status: 403 }
+      );
+    }
+
     const communication = await prisma.communicationRecord.create({
       data: {
-        clientId: id,
+        clientId,
         userId: authUser.userId,
         type: validatedData.type,
         summary: validatedData.summary,
@@ -162,6 +217,12 @@ export const POST = withErrorHandler(
     if (validatedData.nextFollowUpDate) {
       await FollowUpTaskGenerator.generateFromCommunication(communication.id);
     }
+
+    logger.info('沟通记录创建成功:', {
+      userId: authUser.userId,
+      clientId,
+      communicationId: communication.id,
+    });
 
     return createCreatedResponse(communicationDetail);
   }

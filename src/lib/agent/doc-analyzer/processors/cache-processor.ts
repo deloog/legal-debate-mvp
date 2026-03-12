@@ -73,7 +73,7 @@ export class CacheProcessor {
       return null;
     } catch (error) {
       this.stats.errors++;
-      logger.error('缓存获取失败', error);
+      logger.error('缓存获取失败', error instanceof Error ? error : undefined);
       return null;
     }
   }
@@ -104,7 +104,7 @@ export class CacheProcessor {
       return true;
     } catch (error) {
       this.stats.errors++;
-      logger.error('缓存设置失败', error);
+      logger.error('缓存设置失败', error instanceof Error ? error : undefined);
       return false;
     }
   }
@@ -191,7 +191,7 @@ export class CacheProcessor {
         return true;
       }
     } catch (error) {
-      logger.error('清除缓存失败', error);
+      logger.error('清除缓存失败', error instanceof Error ? error : undefined);
       return false;
     }
   }

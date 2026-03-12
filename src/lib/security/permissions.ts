@@ -6,6 +6,7 @@
 
 import { NextRequest } from 'next/server';
 import { verifyToken } from '@/lib/auth/jwt';
+import { logger } from '@/lib/logger';
 
 // 权限枚举
 export enum Permission {
@@ -245,7 +246,7 @@ export function requirePermission(permission: Permission) {
       // 权限检查通过，返回null表示继续处理
       return null;
     } catch (error) {
-      console.error('权限检查失败:', error);
+      logger.error('权限检查失败:', error);
       return Response.json(
         { success: false, error: '权限检查失败' },
         { status: 500 }
@@ -293,7 +294,7 @@ export function requireAnyPermission(permissions: Permission[]) {
 
       return null;
     } catch (error) {
-      console.error('权限检查失败:', error);
+      logger.error('权限检查失败:', error);
       return Response.json(
         { success: false, error: '权限检查失败' },
         { status: 500 }
@@ -341,7 +342,7 @@ export function requireAllPermissions(permissions: Permission[]) {
 
       return null;
     } catch (error) {
-      console.error('权限检查失败:', error);
+      logger.error('权限检查失败:', error);
       return Response.json(
         { success: false, error: '权限检查失败' },
         { status: 500 }
@@ -389,7 +390,7 @@ export async function checkResourceOwnership(
         return false;
     }
   } catch (error) {
-    console.error('资源所有权检查失败:', error);
+    logger.error('资源所有权检查失败:', error);
     return false;
   }
 }
@@ -456,7 +457,7 @@ export function requireOwnershipOrAdmin(
 
       return null;
     } catch (error) {
-      console.error('权限检查失败:', error);
+      logger.error('权限检查失败:', error);
       return Response.json(
         { success: false, error: '权限检查失败' },
         { status: 500 }

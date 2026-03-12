@@ -6,6 +6,7 @@
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
+import { logRoleChange } from '@/lib/membership/audit-logger';
 import type {
   AssignPermissionRequest,
   PermissionsListResponse,
@@ -47,7 +48,7 @@ async function checkPermissionExists(permissionId: string): Promise<boolean> {
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -58,14 +59,14 @@ export async function GET(
     ) as unknown as NextResponse;
   }
 
-  // 检查权限
-  const permissionError = await validatePermissions(request, 'user:read');
+  // 检查权限 - 使用 role:read 权限
+  const permissionError = await validatePermissions(request, 'role:read');
   if (permissionError) {
     return permissionError;
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // 检查角色是否存在
     const roleExists = await checkRoleExists(id);
@@ -122,7 +123,7 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -133,14 +134,14 @@ export async function POST(
     ) as unknown as NextResponse;
   }
 
-  // 检查权限
-  const permissionError = await validatePermissions(request, 'user:update');
+  // 检查权限 - 使用 role:update 权限（分配权限需要更新角色权限）
+  const permissionError = await validatePermissions(request, 'role:update');
   if (permissionError) {
     return permissionError;
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = (await request.json()) as AssignPermissionRequest;
 
     // 验证必填字段
@@ -194,6 +195,17 @@ export async function POST(
         permissionId,
       },
     });
+
+    // 记录审计日志
+    await logRoleChange(
+      id,
+      'assign_permission',
+      {
+        permissionId,
+        permissionName: permissionExists,
+      },
+      user.userId
+    );
 
     return Response.json(
       { message: '权限分配成功' },

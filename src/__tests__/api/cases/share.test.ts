@@ -48,7 +48,7 @@ describe('案件共享API - POST /api/cases/[id]/share', () => {
         method: 'POST',
       }
     );
-    const response = await POST(request, { params: { id: 'test-id' } });
+    const response = await POST(request, { params: Promise.resolve({ id: 'test-id' }) });
 
     expect(response.status).toBe(401);
   });
@@ -70,7 +70,7 @@ describe('案件共享API - POST /api/cases/[id]/share', () => {
         body: JSON.stringify({ sharedWithTeam: true }),
       }
     );
-    const response = await POST(request, { params: { id: 'test-id' } });
+    const response = await POST(request, { params: Promise.resolve({ id: 'test-id' }) });
 
     expect(response.status).toBe(403);
   });
@@ -92,7 +92,7 @@ describe('案件共享API - POST /api/cases/[id]/share', () => {
         body: JSON.stringify({ sharedWithTeam: true }),
       }
     );
-    const response = await POST(request, { params: { id: 'test-id' } });
+    const response = await POST(request, { params: Promise.resolve({ id: 'test-id' }) });
 
     expect(response.status).toBe(404);
   });
@@ -131,7 +131,7 @@ describe('案件共享API - POST /api/cases/[id]/share', () => {
         }),
       }
     );
-    const response = await POST(request, { params: { id: 'test-id' } });
+    const response = await POST(request, { params: Promise.resolve({ id: 'test-id' }) });
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -173,7 +173,7 @@ describe('案件共享API - POST /api/cases/[id]/share', () => {
         }),
       }
     );
-    const response = await POST(request, { params: { id: 'test-id' } });
+    const response = await POST(request, { params: Promise.resolve({ id: 'test-id' }) });
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -196,7 +196,7 @@ describe('案件共享API - GET /api/cases/[id]/share', () => {
         method: 'GET',
       }
     );
-    const response = await GET(request, { params: { id: 'test-id' } });
+    const response = await GET(request, { params: Promise.resolve({ id: 'test-id' }) });
 
     expect(response.status).toBe(401);
   });
@@ -217,7 +217,7 @@ describe('案件共享API - GET /api/cases/[id]/share', () => {
         method: 'GET',
       }
     );
-    const response = await GET(request, { params: { id: 'test-id' } });
+    const response = await GET(request, { params: Promise.resolve({ id: 'test-id' }) });
 
     expect(response.status).toBe(403);
   });
@@ -263,7 +263,7 @@ describe('案件共享API - GET /api/cases/[id]/share', () => {
         method: 'GET',
       }
     );
-    const response = await GET(request, { params: { id: 'test-id' } });
+    const response = await GET(request, { params: Promise.resolve({ id: 'test-id' }) });
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -289,7 +289,7 @@ describe('案件共享API - GET /api/cases/[id]/share', () => {
         method: 'GET',
       }
     );
-    const response = await GET(request, { params: { id: 'test-id' } });
+    const response = await GET(request, { params: Promise.resolve({ id: 'test-id' }) });
 
     expect(response.status).toBe(404);
   });

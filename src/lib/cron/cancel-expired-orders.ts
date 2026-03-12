@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 
 /**
  * 取消过期订单
@@ -14,7 +15,7 @@ export async function cancelExpiredOrders(): Promise<{
   failedCount: number;
   errors: Array<{ orderId: string; error: string }>;
 }> {
-  console.log('[CancelExpiredOrders] 开始处理过期订单...');
+  logger.info('[CancelExpiredOrders] 开始处理过期订单...');
 
   const now = new Date();
 
@@ -34,7 +35,7 @@ export async function cancelExpiredOrders(): Promise<{
     });
 
     if (expiredOrders.length === 0) {
-      console.log('[CancelExpiredOrders] 没有需要取消的过期订单');
+      logger.info('[CancelExpiredOrders] 没有需要取消的过期订单');
       return {
         cancelledCount: 0,
         failedCount: 0,
@@ -42,7 +43,7 @@ export async function cancelExpiredOrders(): Promise<{
       };
     }
 
-    console.log(
+    logger.info(
       `[CancelExpiredOrders] 找到 ${expiredOrders.length} 个过期订单`
     );
 
@@ -61,7 +62,7 @@ export async function cancelExpiredOrders(): Promise<{
           },
         });
 
-        console.log('[CancelExpiredOrders] 订单已过期:', {
+        logger.info('[CancelExpiredOrders] 订单已过期:', {
           orderId: order.id,
           orderNo: order.orderNo,
           userId: order.userId,
@@ -72,7 +73,7 @@ export async function cancelExpiredOrders(): Promise<{
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        console.error('[CancelExpiredOrders] 取消过期订单失败:', {
+        logger.error('[CancelExpiredOrders] 取消过期订单失败:', {
           orderId: order.id,
           orderNo: order.orderNo,
           error: errorMessage,
@@ -85,7 +86,7 @@ export async function cancelExpiredOrders(): Promise<{
       }
     }
 
-    console.log('[CancelExpiredOrders] 过期订单处理完成:', {
+    logger.info('[CancelExpiredOrders] 过期订单处理完成:', {
       totalCount: expiredOrders.length,
       cancelledCount: cancelledOrderIds.length,
       failedCount: failedOrders.length,
@@ -97,7 +98,7 @@ export async function cancelExpiredOrders(): Promise<{
       errors: failedOrders,
     };
   } catch (error) {
-    console.error('[CancelExpiredOrders] 处理过期订单时发生错误:', error);
+    logger.error('[CancelExpiredOrders] 处理过期订单时发生错误:', error);
     throw error;
   }
 }
@@ -115,7 +116,7 @@ export async function manuallyCancelExpiredOrders(): Promise<{
   };
 }> {
   try {
-    console.log('[CancelExpiredOrders] 手动触发过期订单取消...');
+    logger.info('[CancelExpiredOrders] 手动触发过期订单取消...');
     const result = await cancelExpiredOrders();
 
     return {
@@ -124,7 +125,7 @@ export async function manuallyCancelExpiredOrders(): Promise<{
       result,
     };
   } catch (error) {
-    console.error('[CancelExpiredOrders] 手动取消过期订单失败:', error);
+    logger.error('[CancelExpiredOrders] 手动取消过期订单失败:', error);
 
     return {
       success: false,
@@ -181,7 +182,7 @@ export async function getExpiredOrdersStats(): Promise<{
       soonToExpireCount,
     };
   } catch (error) {
-    console.error('[CancelExpiredOrders] 获取过期订单统计失败:', error);
+    logger.error('[CancelExpiredOrders] 获取过期订单统计失败:', error);
     throw error;
   }
 }
@@ -236,7 +237,7 @@ export async function getOrdersExpiringSoon(hours = 1): Promise<
       userEmail: order.user?.email,
     }));
   } catch (error) {
-    console.error('[CancelExpiredOrders] 获取即将过期订单失败:', error);
+    logger.error('[CancelExpiredOrders] 获取即将过期订单失败:', error);
     throw error;
   }
 }
@@ -262,7 +263,7 @@ export async function cleanupOldExpiredOrders(days = 30): Promise<{
       },
     });
 
-    console.log('[CancelExpiredOrders] 清理历史过期订单:', {
+    logger.info('[CancelExpiredOrders] 清理历史过期订单:', {
       deletedCount: result.count,
       cutoffDate,
     });
@@ -271,7 +272,7 @@ export async function cleanupOldExpiredOrders(days = 30): Promise<{
       deletedCount: result.count,
     };
   } catch (error) {
-    console.error('[CancelExpiredOrders] 清理历史过期订单失败:', error);
+    logger.error('[CancelExpiredOrders] 清理历史过期订单失败:', error);
     throw error;
   }
 }

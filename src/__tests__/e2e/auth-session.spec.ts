@@ -8,19 +8,15 @@ import { createTestUser, loginUser } from './auth-helpers';
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 test.describe('用户会话管理', () => {
-  test.skip('应该成功刷新访问令牌', async ({ request }) => {
+  test('应该成功刷新访问令牌', async ({ request }) => {
     const testUser = await createTestUser(request);
-    // 使用login而不是register返回的token，避免register创建session问题
+    // register 和 login 均已正确写入 session 记录，直接用 login 返回的 refreshToken
     const { token, refreshToken: refreshTokenValue } = await loginUser(
       request,
       testUser.email,
       testUser.password
     );
-    console.log('[TEST] Got tokens from login:', {
-      hasToken: !!token,
-      hasRefreshToken: !!refreshTokenValue,
-      refreshTokenLength: refreshTokenValue.length,
-    });
+    void token; // 注册时已验证 token 可用，此处仅用 refreshToken
 
     const refreshResponse = await request.post(`${BASE_URL}/api/auth/refresh`, {
       data: { refreshToken: refreshTokenValue },

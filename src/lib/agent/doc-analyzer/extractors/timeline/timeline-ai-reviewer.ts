@@ -6,6 +6,7 @@
 import type { TimelineEvent, TimelineEventType } from '../../core/types';
 import { getUnifiedAIService } from '@/lib/ai/unified-service';
 import { extractJSONFromText, cleanJSONString } from './timeline-parser';
+import { logger } from '@/lib/logger';
 
 /**
  * AI审查层 - 对时间线事件进行审查和修正
@@ -46,7 +47,7 @@ export async function aiReviewLayer(
 
     return events;
   } catch (error) {
-    console.error('AI审查层失败:', error);
+    logger.error('AI审查层失败:', error);
     return events;
   }
 }
@@ -115,13 +116,13 @@ function parseAIReviewResponse(
     let cleanedResponse = aiResponse.trim();
 
     const responsePreview = cleanedResponse.substring(0, 1000);
-    console.log('[AI审查响应解析] 原始响应预览:', responsePreview);
+    logger.info('[AI审查响应解析] 原始响应预览:', responsePreview);
 
     cleanedResponse = extractJSONFromText(cleanedResponse);
     cleanedResponse = cleanJSONString(cleanedResponse);
 
     const parsed = JSON.parse(cleanedResponse);
-    console.log('[AI审查响应解析] JSON解析成功');
+    logger.info('[AI审查响应解析] JSON解析成功');
 
     const invalidIds = new Set(parsed.invalidIds || []);
     const reviewedItems = parsed.reviewedEvents || [];
@@ -154,19 +155,19 @@ function parseAIReviewResponse(
           source: original?.source || 'explicit',
         };
       })
-      .filter(item => !invalidIds.has(item.id));
+      .filter((item: { id: string }) => !invalidIds.has(item.id));
 
-    console.log(
+    logger.info(
       `[AI审查响应解析] 成功解析${result.length}个事件，删除${invalidIds.size}个无效事件`
     );
     return result;
   } catch (error) {
-    console.error('[AI审查响应解析] 完整解析失败:', {
+    logger.error('[AI审查响应解析] 完整解析失败:', {
       error: error instanceof Error ? error.message : String(error),
       responsePreview: aiResponse.substring(0, 500),
     });
 
-    console.log('[AI审查响应解析] 使用原始事件');
+    logger.info('[AI审查响应解析] 使用原始事件');
     return originalEvents;
   }
 }

@@ -7,6 +7,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { snapshotService } from '@/lib/knowledge-graph/version-control';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/v1/knowledge-graph/snapshots/[snapshotId]
@@ -32,7 +33,7 @@ export async function GET(
       data: snapshot,
     });
   } catch (error) {
-    console.error('获取快照详情失败:', error);
+    logger.error('获取快照详情失败:', error);
     return NextResponse.json(
       { success: false, error: '获取快照详情失败' },
       { status: 500 }

@@ -3,6 +3,7 @@
  * 在应用启动时预加载热点数据，提升系统性能
  */
 
+import { logger } from '@/lib/logger';
 import { cache } from './manager';
 import { CacheNamespace, CacheOptions } from './types';
 import {
@@ -111,7 +112,7 @@ export function schedulePreload(
       // 由调用者自行处理
       preloadTimers.delete(key);
     } catch (error) {
-      console.error(`定时预加载失败 [${key}]:`, error);
+      logger.error(`定时预加载失败 [${key}]:`, error);
       preloadTimers.delete(key);
     }
   }, delay);
@@ -164,7 +165,7 @@ export async function executePreload(options?: {
   };
 
   if (isPreloading) {
-    console.warn('预加载正在进行中，跳过此次请求');
+    logger.warn('预加载正在进行中，跳过此次请求');
     result.skipped = preloadQueue.length;
     result.total = preloadQueue.length;
     result.duration = Date.now() - startTime;
@@ -196,7 +197,7 @@ export async function executePreload(options?: {
           });
 
           if (cached) {
-            console.log(`缓存已存在，跳过预加载: ${item.key}`);
+            logger.info(`缓存已存在，跳过预加载: ${item.key}`);
             result.skipped++;
             return;
           }
@@ -212,7 +213,7 @@ export async function executePreload(options?: {
           }
 
           if (data === null || data === undefined) {
-            console.warn(`数据为空，跳过缓存: ${item.key}`);
+            logger.warn(`数据为空，跳过缓存: ${item.key}`);
             result.skipped++;
             return;
           }
@@ -227,7 +228,7 @@ export async function executePreload(options?: {
 
           if (setSuccess) {
             result.success++;
-            console.log(`预加载成功: ${item.key}`);
+            logger.info(`预加载成功: ${item.key}`);
           } else {
             throw new Error('缓存设置失败');
           }
@@ -236,7 +237,7 @@ export async function executePreload(options?: {
           const errorObj =
             error instanceof Error ? error : new Error(String(error));
           result.errors.push({ key: item.key, error: errorObj });
-          console.error(`预加载失败 [${item.key}]:`, error);
+          logger.error(`预加载失败 [${item.key}]:`, error);
         }
       });
 
@@ -262,7 +263,7 @@ export async function executePreload(options?: {
     isPreloading = false;
   }
 
-  console.log(
+  logger.info(
     `预加载完成: 成功 ${result.success}, 失败 ${result.failed}, 跳过 ${result.skipped}, 耗时 ${result.duration}ms`
   );
 
@@ -275,7 +276,7 @@ export async function executePreload(options?: {
 export function initializePreloadFromConfig(): void {
   const preloadKeys = getAllPreloadKeys();
 
-  console.log(`初始化预加载，共 ${preloadKeys.length} 个命名空间`);
+  logger.info(`初始化预加载，共 ${preloadKeys.length} 个命名空间`);
 
   for (const item of preloadKeys) {
     for (const key of item.keys) {
@@ -301,24 +302,24 @@ export function initializePreloadFromConfig(): void {
  */
 export function autoStartPreload(): void {
   if (!cacheSystemConfig.preload.enabled) {
-    console.log('预加载已禁用');
+    logger.info('预加载已禁用');
     return;
   }
 
   const delay = cacheSystemConfig.preload.delayAfterStart;
-  console.log(`预加载将在 ${delay}ms 后自动启动`);
+  logger.info(`预加载将在 ${delay}ms 后自动启动`);
 
   setTimeout(async () => {
     try {
       const result = await executePreload({
         onProgress: progress => {
-          console.log(`预加载进度: ${progress.success}/${progress.total}`);
+          logger.info(`预加载进度: ${progress.success}/${progress.total}`);
         },
       });
 
-      console.log(`自动预加载完成`, result);
+      logger.info(`自动预加载完成`, result);
     } catch (error) {
-      console.error('自动预加载失败:', error);
+      logger.error('自动预加载失败:', error);
     }
   }, delay);
 }
@@ -332,7 +333,7 @@ export function scheduleCacheRefresh(
   interval: number
 ): NodeJS.Timeout {
   return setInterval(async () => {
-    console.log(`定时刷新缓存: ${namespace}`);
+    logger.info(`定时刷新缓存: ${namespace}`);
 
     for (const key of keys) {
       const provider = dataProviders.get(key);
@@ -342,10 +343,10 @@ export function scheduleCacheRefresh(
           const config = getNamespaceConfig(namespace);
           if (config) {
             await cache.set(key, data, { namespace, ttl: config.ttl });
-            console.log(`刷新缓存成功: ${key}`);
+            logger.info(`刷新缓存成功: ${key}`);
           }
         } catch (error) {
-          console.error(`刷新缓存失败 [${key}]:`, error);
+          logger.error(`刷新缓存失败 [${key}]:`, error);
         }
       }
     }
@@ -404,7 +405,7 @@ export function cleanupPreload(): void {
   cancelAllPreloads();
   clearPreloadQueue();
   dataProviders.clear();
-  console.log('预加载资源已清理');
+  logger.info('预加载资源已清理');
 }
 
 /**

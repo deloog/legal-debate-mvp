@@ -6,6 +6,7 @@
 import { generateWeeklyReport } from '@/lib/report/report-generator';
 import { prisma } from '@/lib/db/prisma';
 import { ReportStatus } from '@/types/stats';
+import { logger } from '@/lib/logger';
 
 /**
  * 执行周报生成任务
@@ -18,7 +19,7 @@ export async function executeWeeklyReportGeneration(): Promise<{
   const startTime = Date.now();
 
   try {
-    console.log('开始执行周报生成任务...');
+    logger.info('开始执行周报生成任务...');
 
     // 检查本周是否已生成报告
     const now = new Date();
@@ -38,7 +39,7 @@ export async function executeWeeklyReportGeneration(): Promise<{
     });
 
     if (existingReport) {
-      console.log('本周报告已存在，跳过生成');
+      logger.info('本周报告已存在，跳过生成');
       return {
         success: true,
         reportId: existingReport.id,
@@ -50,7 +51,7 @@ export async function executeWeeklyReportGeneration(): Promise<{
 
     if (result.success) {
       const duration = Date.now() - startTime;
-      console.log(
+      logger.info(
         `周报生成成功，报告ID: ${result.reportId}，耗时: ${duration}ms`
       );
 
@@ -59,7 +60,7 @@ export async function executeWeeklyReportGeneration(): Promise<{
         reportId: result.reportId,
       };
     } else {
-      console.error('周报生成失败:', result.error);
+      logger.error('周报生成失败:', result.error);
       return {
         success: false,
         error: result.error,
@@ -67,7 +68,7 @@ export async function executeWeeklyReportGeneration(): Promise<{
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('周报生成任务执行异常:', errorMessage);
+    logger.error('周报生成任务执行异常:', errorMessage);
 
     return {
       success: false,

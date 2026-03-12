@@ -1,0 +1,223 @@
+src/app/admin/reports/[id]/page.tsx(144,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/app/api/admin/configs/route.ts(121,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/configs/route.ts(122,61): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/configs/route.ts(302,29): error TS2345: Argument of type '{ id: string; createdAt: Date; key: string; value: JsonValue; category: string; updatedAt: Date; description: string | null; type: ConfigType; isPublic: boolean; isRequired: boolean; defaultValue: JsonValue; validationRules: JsonValue; }' is not assignable to parameter of type 'never'.
+src/app/api/admin/enterprise/route.ts(69,19): error TS2367: This comparison appears to be unintentional because the types 'EnterpriseStatus' and '""' have no overlap.
+src/app/api/admin/export/cases/route.ts(248,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/admin/export/stats/route.ts(533,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/admin/law-articles/route.ts(164,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/law-articles/route.ts(165,61): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/memberships/export/route.ts(213,11): error TS2322: Type '{ userId: string; userEmail: string; userName: string | null; tierName: string; tierDisplayName: string; status: MembershipStatus; startDate: Date; endDate: Date; ... 7 more ...; updatedAt: Date; }[]' is not assignable to type 'ExportMembershipData[]'.
+src/app/api/admin/memberships/route.ts(121,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/memberships/route.ts(124,35): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/orders/route.ts(235,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/orders/route.ts(295,9): error TS2464: A computed property name must be of type 'string', 'number', 'symbol', or 'any'.
+src/app/api/admin/qualifications/route.ts(153,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/qualifications/route.ts(154,61): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/roles/route.ts(81,46): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/roles/route.ts(84,35): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/users/route.ts(142,34): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/users/route.ts(143,38): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/app/api/admin/users/route.ts(169,9): error TS2464: A computed property name must be of type 'string', 'number', 'symbol', or 'any'.
+src/app/api/analytics/cases/route.ts(664,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/analytics/lawyers/route.ts(344,5): error TS2322: Type '{ type: string; totalCases: number; successfulCases: number; successRate: number; }[]' is not assignable to type 'never[]'.
+src/app/api/analytics/lawyers/route.ts(455,5): error TS2322: Type '{ type: string; totalRevenue: number; caseCount: number; percentage: number; }[]' is not assignable to type 'never[]'.
+src/app/api/analytics/lawyers/route.ts(671,49): error TS2345: Argument of type 'TimeRange | "month"' is not assignable to parameter of type 'TimeRange'.
+src/app/api/auth/refresh/route.ts(65,7): error TS2322: Type 'NextResponse<{ success: false; message: string; error: string | null; }>' is not assignable to type 'NextResponse<RefreshTokenResponse>'.
+src/app/api/auth/register/route.ts(43,9): error TS2322: Type 'string | null' is not assignable to type 'string | undefined'.
+src/app/api/auth/test-session/route.ts(44,53): error TS2769: No overload matches this call.
+src/app/api/cases/[id]/discussions/route.ts(229,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/cases/[id]/discussions/route.ts(244,38): error TS2339: Property 'user' does not exist on type '{ id: string; createdAt: Date; userId: string; caseId: string; updatedAt: Date; deletedAt: Date | null; metadata: JsonValue; content: string; isPinned: boolean; mentions: string[]; }'.
+src/app/api/cases/[id]/discussions/route.ts(244,62): error TS2339: Property 'user' does not exist on type '{ id: string; createdAt: Date; userId: string; caseId: string; updatedAt: Date; deletedAt: Date | null; metadata: JsonValue; content: string; isPinned: boolean; mentions: string[]; }'.
+src/app/api/cases/[id]/share/route.ts(190,9): error TS2322: Type '{ id: string; name: string | null; email: string; avatar: string | null; }' is not assignable to type 'null'.
+src/app/api/cases/[id]/team-members/route.ts(322,9): error TS2322: Type 'JsonValue' is not assignable to type 'JsonNull | InputJsonValue'.
+src/app/api/cases/[id]/team-members/route.ts(325,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/clients/[id]/route.ts(274,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/clients/route.ts(260,7): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/communications/[id]/route.ts(132,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/communications/route.ts(174,7): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/document-templates/[id]/route.ts(83,7): error TS2322: Type 'string | null | undefined' is not assignable to type 'null'.
+src/app/api/follow-up-tasks/send-reminder/route.ts(49,9): error TS2322: Type 'string | undefined' is not assignable to type 'string | null'.
+src/app/api/follow-up-tasks/send-reminder/route.ts(50,9): error TS2322: Type 'string | undefined' is not assignable to type 'string | null'.
+src/app/api/follow-up-tasks/send-reminder/route.ts(105,9): error TS2322: Type 'string | undefined' is not assignable to type 'string | null'.
+src/app/api/follow-up-tasks/send-reminder/route.ts(106,9): error TS2322: Type 'string | undefined' is not assignable to type 'string | null'.
+src/app/api/knowledge-graph/experts/route.ts(32,7): error TS2322: Type '"JUNIOR" | "SENIOR" | "MASTER" | null' is not assignable to type 'ExpertLevel | undefined'.
+src/app/api/knowledge-graph/quality-monitor/route.ts(29,7): error TS2322: Type '{ minCoverageRate: number; maxOrphanArticles?: number | undefined; }' is not assignable to type '{ minCoverageRate: number; maxOrphanArticles: number; }'.
+src/app/api/knowledge-graph/quality-monitor/route.ts(36,7): error TS2322: Type '{ maxOrphanArticles: number; minCoverageRate?: number | undefined; }' is not assignable to type '{ minCoverageRate: number; maxOrphanArticles: number; }'.
+src/app/api/knowledge-graph/quality-monitor/route.ts(43,7): error TS2322: Type '{ lowQualityThreshold: number; minFeedbackCount?: number | undefined; }' is not assignable to type '{ lowQualityThreshold: number; minFeedbackCount: number; }'.
+src/app/api/knowledge-graph/quality-monitor/route.ts(50,7): error TS2322: Type '{ minFeedbackCount: number; lowQualityThreshold?: number | undefined; }' is not assignable to type '{ lowQualityThreshold: number; minFeedbackCount: number; }'.
+src/app/api/knowledge-graph/quality-monitor/route.ts(57,7): error TS2322: Type '{ staleThresholdDays: number; pendingThresholdDays?: number | undefined; }' is not assignable to type '{ staleThresholdDays: number; pendingThresholdDays: number; }'.
+src/app/api/knowledge-graph/quality-monitor/route.ts(64,7): error TS2322: Type '{ pendingThresholdDays: number; staleThresholdDays?: number | undefined; }' is not assignable to type '{ staleThresholdDays: number; pendingThresholdDays: number; }'.
+src/app/api/lib/middleware/security.ts(24,7): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+src/app/api/lib/middleware/security.ts(45,5): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+src/app/api/lib/responses/pagination-utils.ts(82,5): error TS2322: Type 'Record<string, unknown> | null' is not assignable to type 'Record<string, unknown> | undefined'.
+src/app/api/payment/query/route.ts(81,9): error TS2322: Type '{ id: string; }[] | { orderNo: string | null; }[]' is not assignable to type 'OrderWhereInput[] | undefined'.
+src/app/api/payment/query/route.ts(104,13): error TS2339: Property 'paymentRecords' does not exist on type '{ id: string; status: OrderStatus; amount: Decimal; createdAt: Date; userId: string; updatedAt: Date; metadata: JsonValue; description: string; ... 6 more ...; failedReason: string | null; }'.
+src/app/api/payment/query/route.ts(104,47): error TS2339: Property 'paymentRecords' does not exist on type '{ id: string; status: OrderStatus; amount: Decimal; createdAt: Date; userId: string; updatedAt: Date; metadata: JsonValue; description: string; ... 6 more ...; failedReason: string | null; }'.
+src/app/api/refunds/apply/route.ts(193,11): error TS2322: Type 'undefined' is not assignable to type 'string'.
+src/app/api/stats/cases/efficiency/route.ts(382,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/cases/type-distribution/route.ts(304,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/debates/generation-count/route.ts(374,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/debates/generation-count/route.ts(381,7): error TS2345: Argument of type 'DateGranularity | undefined' is not assignable to parameter of type 'DateGranularity'.
+src/app/api/stats/debates/quality-score/route.ts(372,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/performance/error-rate/route.ts(417,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/performance/response-time/route.ts(419,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/performance/response-time/route.ts(424,7): error TS2345: Argument of type 'DateGranularity | undefined' is not assignable to parameter of type 'DateGranularity'.
+src/app/api/stats/users/activity/route.ts(407,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/users/registration-trend/route.ts(381,49): error TS2345: Argument of type 'TimeRange | undefined' is not assignable to parameter of type 'TimeRange'.
+src/app/api/stats/users/registration-trend/route.ts(388,7): error TS2345: Argument of type 'DateGranularity | undefined' is not assignable to parameter of type 'DateGranularity'.
+src/app/api/teams/[id]/members/[userId]/route.ts(192,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/teams/[id]/members/route.ts(225,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/teams/[id]/route.ts(173,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/teams/route.ts(192,7): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/app/api/v1/documents/upload/route.ts(221,11): error TS2322: Type 'JsonValue' is not assignable to type 'InputJsonValue | NullableJsonNullValueInput | undefined'.
+src/app/api/v1/documents/upload/route.ts(343,11): error TS2322: Type 'JsonValue' is not assignable to type 'InputJsonValue | NullableJsonNullValueInput | undefined'.
+src/app/cases/components/case-list.tsx(187,20): error TS2345: Argument of type 'number' is not assignable to parameter of type 'never'.
+src/app/clients/page.tsx(221,13): error TS2322: Type 'ClientDetail | undefined' is not assignable to type 'UpdateClientInput | undefined'.
+src/app/consultations/components/consultation-list.tsx(118,20): error TS2345: Argument of type 'number' is not assignable to parameter of type 'never'.
+src/app/dashboard/cases/page.tsx(65,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/app/dashboard/debates/page.tsx(65,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/app/dashboard/page.tsx(100,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/app/dashboard/performance/page.tsx(64,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/app/dashboard/users/page.tsx(65,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/app/law-articles/[id]/page.tsx(240,21): error TS2322: Type 'string | null' is not assignable to type 'string'.
+src/app/membership/upgrade/confirm/page.tsx(212,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/components/admin/ActionLogViewer.tsx(246,21): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/admin/AdminMembershipDetail.tsx(118,5): error TS2322: Type 'null' is not assignable to type 'ReactElement<unknown, string | JSXElementConstructor<any>>'.
+src/components/admin/ErrorLogViewer.tsx(168,21): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/components/analytics/charts/BarChart.tsx(28,5): error TS2322: Type 'RefObject<HTMLDivElement | null>' is not assignable to type 'RefObject<Element>'.
+src/components/analytics/charts/FunnelChart.tsx(33,5): error TS2322: Type 'RefObject<HTMLDivElement | null>' is not assignable to type 'RefObject<Element>'.
+src/components/analytics/charts/LineChart.tsx(32,5): error TS2322: Type 'RefObject<HTMLDivElement | null>' is not assignable to type 'RefObject<Element>'.
+src/components/analytics/charts/PieChart.tsx(35,5): error TS2322: Type 'RefObject<HTMLDivElement | null>' is not assignable to type 'RefObject<Element>'.
+src/components/analytics/ui/InteractiveChartContainer.tsx(70,5): error TS2322: Type 'RefObject<HTMLDivElement | null>' is not assignable to type 'RefObject<Element>'.
+src/components/case/CaseExampleList.tsx(266,16): error TS2345: Argument of type 'number' is not assignable to parameter of type 'never'.
+src/components/client/ClientList.tsx(218,55): error TS2345: Argument of type 'ClientSource | null | undefined' is not assignable to parameter of type 'ClientSource | undefined'.
+src/components/dashboard/RecentActivities.tsx(79,6): error TS2322: Type '{ children: Element[]; className: string; href?: string | undefined; }' is not assignable to type 'LinkProps<any>'.
+src/components/dashboard/StatCard.tsx(73,6): error TS2322: Type '{ children: Element; className: string; href?: string | undefined; }' is not assignable to type 'LinkProps<any>'.
+src/components/knowledge-graph/GraphVisualizer.tsx(284,7): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/components/knowledge-graph/GraphVisualizer.tsx(285,7): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/components/law-article/LawArticleGraphVisualization.tsx(235,7): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/components/law-article/LawArticleGraphVisualization.tsx(236,7): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/components/order/OrderDetailModal.tsx(303,33): error TS2345: Argument of type 'Date | undefined' is not assignable to parameter of type 'string | Date'.
+src/components/reminder/ReminderList.tsx(349,54): error TS2769: No overload matches this call.
+src/components/reminder/ReminderList.tsx(367,37): error TS2769: No overload matches this call.
+src/components/witness/WitnessForm.tsx(158,20): error TS2345: Argument of type '{ caseId: string; name: string; phone: string | undefined; address: string | undefined; relationship: string | undefined; testimony: string | undefined; courtScheduleId: string | undefined; ... 8 more ...; metadata: JsonValue | null; }' is not assignable to parameter of type 'CreateWitnessInput | WitnessDetail'.
+src/lib/accuracy/accuracy-calculator.ts(130,7): error TS2322: Type '{ document?: number | undefined; law?: number | undefined; debate?: number | undefined; }' is not assignable to type '{ document: number; law: number; debate: number; }'.
+src/lib/agent/core-actions/logging-operations.ts(100,7): error TS2322: Type 'JsonValue' is not assignable to type 'JsonNull | InputJsonValue'.
+src/lib/agent/core-actions/logging-operations.ts(101,7): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/agent/core-actions/logging-operations.ts(104,7): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/agent/core-actions/logging-operations.ts(217,7): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/agent/core-actions/logging-operations.ts(218,7): error TS2322: Type 'JsonValue' is not assignable to type 'JsonNull | InputJsonValue'.
+src/lib/agent/core-actions/logging-operations.ts(221,7): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/agent/di-container.ts(336,7): error TS2322: Type '{ agentName: string; hasDependencies: boolean | undefined; hasOptions: boolean | undefined; }[]' is not assignable to type '{ agentName: string; hasDependencies: boolean; hasOptions: boolean; }[]'.
+src/lib/agent/doc-analyzer/processors/ai-processor.ts(232,20): error TS2345: Argument of type 'AIAnalysisResponse' is not assignable to parameter of type 'never'.
+src/lib/agent/doc-analyzer/processors/rules/claim-rule-handler.ts(48,9): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/lib/agent/doc-analyzer/processors/rules/claim-rule-handler.ts(78,9): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/lib/agent/doc-analyzer/processors/rules/claim-rule-handler.ts(108,9): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/lib/agent/doc-analyzer/processors/rules/claim-rule-handler.ts(138,9): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/lib/agent/doc-analyzer/processors/rules/claim-rule-handler.ts(188,17): error TS2322: Type 'null' is not assignable to type 'number | undefined'.
+src/lib/agent/doc-analyzer/utils/prompt-builder.ts(53,17): error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+src/lib/agent/doc-analyzer/utils/prompt-builder.ts(56,15): error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+src/lib/agent/doc-analyzer/utils/prompt-builder.ts(57,15): error TS2345: Argument of type '"\n文档内容："' is not assignable to parameter of type 'never'.
+src/lib/agent/doc-analyzer/utils/prompt-builder.ts(58,15): error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+src/lib/agent/doc-analyzer/utils/prompt-builder.ts(59,15): error TS2345: Argument of type '"\n【输出要求】"' is not assignable to parameter of type 'never'.
+src/lib/agent/doc-analyzer/utils/prompt-builder.ts(62,17): error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+src/lib/agent/doc-analyzer/utils/prompt-builder.ts(66,17): error TS2345: Argument of type '"要求："' is not assignable to parameter of type 'never'.
+src/lib/agent/doc-analyzer/utils/prompt-builder.ts(68,19): error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+src/lib/agent/doc-analyzer/utils/prompt-builder.ts(72,15): error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+src/lib/agent/legal-agent/applicability-analyzer.ts(120,51): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'CaseInfo'.
+src/lib/agent/legal-agent/legal-agent.ts(171,7): error TS2322: Type 'unknown' is not assignable to type 'CaseInfo'.
+src/lib/agent/legal-agent/legal-agent.ts(232,20): error TS2345: Argument of type '{ searchResult: SearchResult; applicabilityResult: null; argumentResult: null; reasoningChain: null; validation: null; error: string; } | { searchResult: SearchResult; ... 4 more ...; error: string; } | { ...; }' is not assignable to parameter of type 'never'.
+src/lib/agent/memory-agent/memory-manager/helpers.ts(40,5): error TS2322: Type 'Date | null' is not assignable to type 'Date'.
+src/lib/agent/registry.ts(1024,30): error TS2345: Argument of type '{ agentName: string; issues: string[]; suggestions: string[]; }' is not assignable to parameter of type 'never'.
+src/lib/agent/types.ts(151,5): error TS2322: Type 'unknown' is not assignable to type '{ inputSummary?: string | undefined; processingSteps?: string[] | undefined; warnings?: string[] | undefined; } | undefined'.
+src/lib/agent/verification-agent/verifiers/business-rules-checker.ts(29,5): error TS2322: Type '(data: Record<string, unknown>) => unknown' is not assignable to type '(data: Record<string, unknown>) => boolean | Promise<boolean>'.
+src/lib/ai/document-parser.ts(315,26): error TS2345: Argument of type '"当事人信息提取"' is not assignable to parameter of type 'never'.
+src/lib/ai/document-parser.ts(319,26): error TS2345: Argument of type '"诉讼请求识别"' is not assignable to parameter of type 'never'.
+src/lib/ai/document-parser.ts(323,26): error TS2345: Argument of type '"时间线整理"' is not assignable to parameter of type 'never'.
+src/lib/ai/document-parser.ts(327,26): error TS2345: Argument of type '"案件摘要生成"' is not assignable to parameter of type 'never'.
+src/lib/ai/document-parser.ts(386,50): error TS2339: Property 'extractedData' does not exist on type '{ extractedData: { parties: { type: "other" | "plaintiff" | "defendant"; name: string; role?: string | undefined; contact?: string | undefined; address?: string | undefined; }[]; claims: { ...; }[]; timeline?: { ...; }[] | undefined; summary?: string | undefined; caseType?: "other" | ... 6 more ... | undefined; keyF...'.
+src/lib/ai/unified-service.ts(701,42): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+src/lib/ai/unified-service.ts(720,32): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+src/lib/ai/unified-service.ts(1112,7): error TS2769: No overload matches this call.
+src/lib/calculation/statute-reminder-generator.ts(297,7): error TS2322: Type '{ id: string; title: string; message: string | null; reminderTime: Date; remainingDays: number; priority: "LOW" | "MEDIUM" | "HIGH"; }[]' is not assignable to type '{ id: string; title: string; message: string; reminderTime: Date; remainingDays: number; priority: "LOW" | "MEDIUM" | "HIGH"; }[]'.
+src/lib/case/case-permission-manager.ts(277,9): error TS2322: Type 'null' is not assignable to type 'CaseRole | undefined'.
+src/lib/case/case-permission-manager.ts(286,9): error TS2322: Type 'null' is not assignable to type 'CaseRole | undefined'.
+src/lib/case/case-permission-manager.ts(309,7): error TS2322: Type 'CaseRole | null' is not assignable to type 'CaseRole | undefined'.
+src/lib/case/embedding-service.ts(188,17): error TS2322: Type 'null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/case/embedding-service.ts(289,15): error TS2322: Type 'null' is not assignable to type 'InputJsonValue | JsonNullValueFilter | FieldRef<"CaseExample", "Json"> | undefined'.
+src/lib/case/similar-case-service.ts(89,24): error TS2322: Type 'null' is not assignable to type 'InputJsonValue | JsonNullValueFilter | FieldRef<"CaseExample", "Json"> | undefined'.
+src/lib/client/follow-up-reminder.ts(344,47): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+src/lib/contract/contract-pdf-generator.ts(82,17): error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+src/lib/contract/contract-pdf-generator.ts(89,31): error TS2339: Property 'length' does not exist on type 'never'.
+src/lib/contract/contract-pdf-generator.ts(92,52): error TS2339: Property 'length' does not exist on type 'never'.
+src/lib/contract/contract-pdf-generator.ts(94,42): error TS2339: Property 'length' does not exist on type 'never'.
+src/lib/contract/contract-version-service.ts(119,11): error TS2322: Type '{ field: string; oldValue: unknown; newValue: unknown; }[]' is not assignable to type 'null'.
+src/lib/contract/contract-version-service.ts(129,11): error TS2322: Type 'null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/contract/contract-version-service.ts(255,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/contract/contract-version-service.ts(256,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/crawler/docx-parser.ts(705,5): error TS2322: Type 'LawDocument | null' is not assignable to type 'LawDocument'.
+src/lib/crawler/samr-crawler.ts(1320,7): error TS2322: Type '{ id: string | undefined; title: string | undefined; category: string; publishDate: string; downloadCount: number; sourceUrl: string; docxUrl: string; }[]' is not assignable to type 'SAMRContractListItem[]'.
+src/lib/enterprise/compliance-service.ts(331,22): error TS2345: Argument of type '{ success: boolean; data: any; }' is not assignable to parameter of type 'never'.
+src/lib/enterprise/compliance-service.ts(337,22): error TS2345: Argument of type '{ success: boolean; error: string; }' is not assignable to parameter of type 'never'.
+src/lib/enterprise/enterprise-risk-profile-service.ts(328,21): error TS2345: Argument of type '{ type: string; description: string; severity: string; recommendation: string; }' is not assignable to parameter of type 'never'.
+src/lib/enterprise/enterprise-risk-profile-service.ts(336,21): error TS2345: Argument of type '{ type: string; description: string; severity: string; recommendation: string; }' is not assignable to parameter of type 'never'.
+src/lib/enterprise/enterprise-risk-profile-service.ts(344,21): error TS2345: Argument of type '{ type: string; description: string; severity: string; recommendation: string; }' is not assignable to parameter of type 'never'.
+src/lib/enterprise/enterprise-risk-profile-service.ts(355,28): error TS2345: Argument of type '"建议立即开展风险专项评估"' is not assignable to parameter of type 'never'.
+src/lib/enterprise/enterprise-risk-profile-service.ts(358,28): error TS2345: Argument of type '"优先处理高风险合同"' is not assignable to parameter of type 'never'.
+src/lib/enterprise/enterprise-risk-profile-service.ts(361,28): error TS2345: Argument of type '"建立案件追踪机制"' is not assignable to parameter of type 'never'.
+src/lib/enterprise/enterprise-risk-profile-service.ts(364,28): error TS2345: Argument of type '"制定合规整改计划"' is not assignable to parameter of type 'never'.
+src/lib/enterprise/enterprise-risk-profile-service.ts(367,28): error TS2345: Argument of type '"继续保持当前风险管理水平"' is not assignable to parameter of type 'never'.
+src/lib/enterprise/executive-report-service.ts(58,23): error TS2345: Argument of type '"企业整体风险水平较高，建议优先处理高风险领域"' is not assignable to parameter of type 'never'.
+src/lib/enterprise/executive-report-service.ts(60,23): error TS2345: Argument of type '"企业风险水平中等，建议持续关注并加强风险防控"' is not assignable to parameter of type 'never'.
+src/lib/enterprise/executive-report-service.ts(62,23): error TS2345: Argument of type '"企业风险水平较低，建议保持现有风险管理策略"' is not assignable to parameter of type 'never'.
+src/lib/enterprise/executive-report-service.ts(67,11): error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+src/lib/hooks/use-debate-stream.ts(200,9): error TS2322: Type '(() => void) | undefined' is not assignable to type '(() => void) | null'.
+src/lib/knowledge-graph/agent-tools/path-finder-tool.ts(466,26): error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
+src/lib/knowledge-graph/audit-report/change-audit-generator.ts(184,7): error TS2322: Type '{ userId: string; userName: string | undefined; count: number; }[]' is not assignable to type '{ userId: string; userName: string; count: number; }[]'.
+src/lib/knowledge-graph/cache/manager.ts(162,11): error TS2322: Type 'JsonValue' is not assignable to type 'JsonNull | InputJsonValue'.
+src/lib/knowledge-graph/cache/manager.ts(259,11): error TS2322: Type 'JsonValue' is not assignable to type 'JsonNull | InputJsonValue'.
+src/lib/knowledge-graph/cache/manager.ts(351,11): error TS2322: Type 'JsonValue' is not assignable to type 'JsonNull | InputJsonValue'.
+src/lib/knowledge-graph/cache/manager.ts(389,9): error TS2322: Type 'JsonValue' is not assignable to type 'JsonNull | InputJsonValue | undefined'.
+src/lib/knowledge-graph/graph-db-evaluation/service.ts(310,18): error TS2345: Argument of type '{ id: string; lawName: string; articleNumber: string; category: string; level: number; }' is not assignable to parameter of type 'never'.
+src/lib/knowledge-graph/graph-db-evaluation/service.ts(336,18): error TS2345: Argument of type '{ source: any; target: any; relationType: string; strength: number; confidence: number; }' is not assignable to parameter of type 'never'.
+src/lib/knowledge-graph/graph-db-evaluation/service.ts(337,36): error TS2339: Property 'id' does not exist on type 'never'.
+src/lib/knowledge-graph/graph-db-evaluation/service.ts(338,36): error TS2339: Property 'id' does not exist on type 'never'.
+src/lib/knowledge-graph/query/types.ts(202,5): error TS2322: Type '{ relationType?: string | undefined; minStrength?: number | undefined; verificationStatus?: string | undefined; discoveryMethod?: string | undefined; } | undefined' is not assignable to type 'GraphQueryFilter'.
+src/lib/knowledge-graph/query/types.ts(203,5): error TS2322: Type '"min" | "max" | "count" | "avg" | "sum" | undefined' is not assignable to type 'GraphQueryAggregate'.
+src/lib/knowledge-graph/version-control/service.ts(60,11): error TS2322: Type '{ nodes: { id: string; label: string; }[]; edges: { source: string; target: string; relationType: string; }[]; } | null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/knowledge-graph/version-control/service.ts(63,11): error TS2322: Type '{ type: string; entityType: string; entityId: string; description: string; }[] | null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/law-article/ai-feedback-service.ts(161,22): error TS2345: Argument of type '{ id: string; createdAt: Date; userId: string; updatedAt: Date; metadata: JsonValue; aiProvider: string | null; aiModel: string | null; relationId: string; feedbackType: AIFeedbackType; ... 5 more ...; suggestedConfidence: number | null; }' is not assignable to parameter of type 'never'.
+src/lib/law-article/law-reference-validator.ts(266,9): error TS2322: Type 'string | null | undefined' is not assignable to type 'string | StringFilter<"LawArticle"> | undefined'.
+src/lib/law-article/relation-service.ts(338,9): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/law-article/relation-workflow.ts(430,7): error TS2322: Type 'JsonValue' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/monitoring/api-monitor.ts(87,11): error TS2322: Type '{ error: string; } | null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/monitoring/api-monitor.ts(116,11): error TS2322: Type '{ error: string; } | null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/monitoring/api-monitor.ts(142,11): error TS2322: Type '{ error: string; } | null' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue | undefined'.
+src/lib/monitoring/notification-channels.ts(234,36): error TS2769: No overload matches this call.
+src/lib/notification/notification-service.ts(42,11): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/lib/notification/notification-service.ts(75,11): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+src/lib/notification/reminder-sender.ts(158,35): error TS2769: No overload matches this call.
+src/lib/notification/reminder-service.ts(37,11): error TS2322: Type 'Date | undefined' is not assignable to type 'string | Date'.
+src/lib/notification/reminder-service.ts(361,7): error TS2322: Type 'string | null' is not assignable to type 'string | undefined'.
+src/lib/notification/reminder-service.ts(368,7): error TS2322: Type 'string | null' is not assignable to type 'string | undefined'.
+src/lib/notification/reminder-service.ts(369,7): error TS2322: Type 'string | null' is not assignable to type 'string | undefined'.
+src/lib/usage/record-usage.ts(293,9): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+src/lib/usage/record-usage.ts(294,9): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+src/lib/usage/record-usage.ts(295,9): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+src/lib/usage/record-usage.ts(296,9): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+src/lib/usage/record-usage.ts(297,9): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+src/lib/usage/record-usage.ts(298,9): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+src/lib/usage/record-usage.ts(299,9): error TS2322: Type 'number | null' is not assignable to type 'number | undefined'.
+src/services/enterprise/legal/compliance-check.service.ts(228,13): error TS2322: Type 'JsonArray' is not assignable to type 'EnterpriseComplianceCheckCreatechecklistResultsInput | InputJsonValue[] | undefined'.
+src/services/enterprise/legal/compliance-rule.service.ts(95,11): error TS2322: Type 'JsonValue[]' is not assignable to type 'InputJsonValue[] | ComplianceRuleCreatechecklistItemsInput | undefined'.
+src/services/enterprise/legal/compliance-rule.service.ts(223,9): error TS2322: Type '{ lastUpdated: Date; version?: string | undefined; status?: string | undefined; checklistItems?: Prisma.JsonValue[] | undefined; controlPoints?: string[] | undefined; businessProcesses?: string[] | undefined; ... 6 more ...; ruleName?: string | undefined; }' is not assignable to type '(Without<ComplianceRuleUpdateInput, ComplianceRuleUncheckedUpdateInput> & ComplianceRuleUncheckedUpdateInput) | (Without<...> & ComplianceRuleUpdateInput)'.
+src/services/enterprise/legal/compliance-rule.service.ts(323,9): error TS2322: Type '{ ruleCode: string; ruleName: string; ruleType: ComplianceRuleType; source: ComplianceRuleSource; sourceUrl: string | undefined; description: string | undefined; ... 6 more ...; version: string; }[]' is not assignable to type 'ComplianceRuleCreateManyInput | ComplianceRuleCreateManyInput[]'.
+src/services/enterprise/legal/contract-clause-risk.service.ts(117,11): error TS2322: Type '{ set: Prisma.JsonValue[]; }' is not assignable to type 'ContractClauseRiskCreateriskFactorsInput | InputJsonValue[] | undefined'.
+src/services/enterprise/legal/contract-clause-risk.service.ts(234,9): error TS2322: Type '{ id: string; clauseNumber: string | null; riskLevel: RiskLevel; riskDescription: string; }[]' is not assignable to type '{ id: string; clauseNumber?: string | undefined; riskLevel: RiskLevel; riskDescription: string; }[]'.
+src/services/enterprise/legal/contract-clause-risk.service.ts(302,9): error TS2322: Type '{ analyzedAt: Date; riskFactors?: RiskFactor[] | { set: Prisma.JsonValue[]; } | undefined; riskLevel?: $Enums.RiskLevel | undefined; riskDescription?: string | undefined; analyzedBy?: string | undefined; }' is not assignable to type '(Without<ContractClauseRiskUpdateInput, ContractClauseRiskUncheckedUpdateInput> & ContractClauseRiskUncheckedUpdateInput) | (Without<...> & ContractClauseRiskUpdateInput)'.
+src/services/enterprise/legal/enterprise-risk-profile.service.ts(123,11): error TS2322: Type 'JsonValue' is not assignable to type 'JsonNull | InputJsonValue'.
+src/services/enterprise/legal/enterprise-risk-profile.service.ts(124,11): error TS2322: Type 'JsonArray' is not assignable to type 'EnterpriseRiskProfileCreatetopRisksInput | InputJsonValue[] | undefined'.
+src/services/enterprise/legal/enterprise-risk-profile.service.ts(125,11): error TS2322: Type 'JsonArray' is not assignable to type 'InputJsonValue[] | EnterpriseRiskProfileCreaterecommendationsInput | undefined'.
+src/services/enterprise/legal/enterprise-risk-profile.service.ts(434,5): error TS2322: Type '{ contractId: string; clauseNumber: string | null; riskLevel: RiskLevel; riskDescription: string; }[]' is not assignable to type '{ contractId: string; clauseNumber?: string | undefined; riskLevel: string; riskDescription: string; }[]'.
+src/services/enterprise/legal/industry-compliance.service.ts(368,7): error TS2322: Type 'string | null | undefined' is not assignable to type 'string | undefined'.

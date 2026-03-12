@@ -6,6 +6,7 @@
  */
 
 import Redis from 'ioredis';
+import { logger } from '@/lib/logger';
 
 // Redis客户端实例
 let redis: Redis | null = null;
@@ -33,11 +34,11 @@ export function getRedisClient(): Redis {
     });
 
     redis.on('error', err => {
-      console.error('Redis连接错误:', err);
+      logger.error('Redis连接错误:', err);
     });
 
     redis.on('connect', () => {
-      console.log('✅ Redis连接成功');
+      logger.info('✅ Redis连接成功');
     });
   }
 
@@ -88,7 +89,7 @@ export async function getCached<T>(key: string): Promise<T | null> {
 
     return JSON.parse(cached) as T;
   } catch (error) {
-    console.error('获取缓存失败:', error);
+    logger.error('获取缓存失败:', error);
     return null;
   }
 }
@@ -105,7 +106,7 @@ export async function setCached<T>(
     const client = getRedisClient();
     await client.setex(key, ttl, JSON.stringify(data));
   } catch (error) {
-    console.error('设置缓存失败:', error);
+    logger.error('设置缓存失败:', error);
   }
 }
 
@@ -176,7 +177,7 @@ export async function getRedisInfo(): Promise<RedisInfo | null> {
       version: versionMatch ? versionMatch[1] : 'unknown',
     };
   } catch (error) {
-    console.error('获取Redis信息失败:', error);
+    logger.error('获取Redis信息失败:', error);
     return null;
   }
 }
@@ -190,7 +191,7 @@ export async function checkRedisConnection(): Promise<boolean> {
     const result = await client.ping();
     return result === 'PONG';
   } catch (error) {
-    console.error('Redis连接检查失败:', error);
+    logger.error('Redis连接检查失败:', error);
     return false;
   }
 }
@@ -204,7 +205,7 @@ export async function connectRedis(): Promise<boolean> {
     await client.ping();
     return true;
   } catch (error) {
-    console.error('Redis连接失败:', error);
+    logger.error('Redis连接失败:', error);
     return false;
   }
 }

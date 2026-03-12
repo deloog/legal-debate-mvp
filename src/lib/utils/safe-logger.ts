@@ -98,7 +98,7 @@ export function logError(message: string, error: unknown): void {
 export function logObject(
   label: string,
   obj: unknown,
-  level: 'log' | 'info' | 'warn' | 'error' = 'log'
+  level: 'info' | 'warn' | 'error' = 'info'
 ): void {
   if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
     const sanitized = sanitizeObject(obj as Record<string, unknown>);

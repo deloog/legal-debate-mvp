@@ -99,6 +99,7 @@ import type { CacheHealth, CacheOptions, CacheStats } from './types';
 import { CacheNamespace, CacheStrategy, defaultCacheConfig } from './types';
 import { cacheSystemConfig } from './cache-config';
 import { cachePreload } from './cache-preload';
+import { logger } from '@/lib/logger';
 
 // 类型别名
 export type CacheNamespaceType = CacheNamespace;
@@ -255,9 +256,9 @@ export async function initializeCache(): Promise<void> {
       throw new Error('Redis连接失败');
     }
 
-    console.log('✅ 缓存系统初始化成功');
+    logger.info('✅ 缓存系统初始化成功');
   } catch (error) {
-    console.error('❌ 缓存系统初始化失败:', error);
+    logger.error('❌ 缓存系统初始化失败:', error);
     throw error;
   }
 }
@@ -271,9 +272,9 @@ export async function cleanupCache(): Promise<void> {
     // 断开连接
     await disconnectRedis();
 
-    console.log('✅ 缓存系统清理完成');
+    logger.info('✅ 缓存系统清理完成');
   } catch (error) {
-    console.error('❌ 缓存系统清理失败:', error);
+    logger.error('❌ 缓存系统清理失败:', error);
     throw error;
   }
 }
@@ -282,7 +283,7 @@ export async function cleanupCache(): Promise<void> {
 if (process.env.NODE_ENV === 'development' && typeof window === 'undefined') {
   // 服务端开发环境下自动初始化
   initializeCache().catch(error => {
-    console.error('开发环境缓存自动初始化失败:', error);
+    logger.error('开发环境缓存自动初始化失败:', error);
   });
 }
 

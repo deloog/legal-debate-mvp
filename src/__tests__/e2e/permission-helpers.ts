@@ -287,10 +287,22 @@ export async function deleteUserInfo(
 /**
  * 验证响应是否为权限错误
  * 返回true表示是权限错误，false表示不是权限错误
+ * API实际返回格式：{ success: false, error: { code: 'FORBIDDEN', message: '...' } }
  */
 export function isPermissionError(data: PermissionResponseData): boolean {
-  const isError = data.error === '权限不足' || data.message?.includes('权限');
-  return isError === true;
+  if (!data) return false;
+  // 字符串格式（旧式）
+  if (data.error === '权限不足') return true;
+  if (data.message?.includes('权限')) return true;
+  // 对象格式（新式）：{ code: 'FORBIDDEN', message: '...' }
+  const errObj = data.error as unknown;
+  if (errObj !== null && typeof errObj === 'object') {
+    const err = errObj as { code?: string; message?: string };
+    if (err.code === 'FORBIDDEN' || err.message?.includes('权限')) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**

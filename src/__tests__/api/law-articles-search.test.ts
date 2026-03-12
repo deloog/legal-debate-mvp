@@ -1,4 +1,5 @@
 import { POST, OPTIONS } from '@/app/api/v1/law-articles/search/route';
+import { getAuthUser } from '@/lib/middleware/auth';
 import {
   createMockRequest,
   createTestResponse,
@@ -8,6 +9,11 @@ import {
 /**
  * 法条检索API单元测试
  */
+
+// Mock getAuthUser
+jest.mock('@/lib/middleware/auth');
+const mockGetAuthUser = getAuthUser as jest.Mock;
+const AUTHED_USER = { userId: 'user-1', role: 'USER', email: 'user@test.com' };
 
 // Mock LawArticleSearchService
 const mockSearch = jest.fn();
@@ -20,6 +26,25 @@ jest.mock('@/lib/law-article/search-service', () => ({
 describe('法条检索API', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetAuthUser.mockResolvedValue(AUTHED_USER);
+  });
+
+  describe('认证', () => {
+    it('未认证时应该返回401', async () => {
+      mockGetAuthUser.mockResolvedValue(null);
+      const request = createMockRequest(
+        'http://localhost:3000/api/v1/law-articles/search',
+        {
+          method: 'POST',
+          body: { keywords: ['合同'] },
+        }
+      );
+
+      const response = await POST(request);
+      const testResponse = await createTestResponse(response);
+
+      assertions.assertUnauthorized(testResponse);
+    });
   });
 
   describe('POST /api/v1/law-articles/search', () => {

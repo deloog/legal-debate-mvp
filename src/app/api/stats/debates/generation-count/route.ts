@@ -371,14 +371,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const { startDate, endDate } = getDateRange(params.timeRange);
+    const { startDate, endDate } = getDateRange(params.timeRange ?? TimeRange.LAST_30_DAYS);
     const whereClause = buildWhereClause(params);
 
     // 查询辩论生成次数数据
     const data = await getDebateGenerationCount(
       startDate,
       endDate,
-      params.granularity,
+      params.granularity ?? DateGranularity.DAY,
       whereClause
     );
 

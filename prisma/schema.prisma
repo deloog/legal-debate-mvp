@@ -365,6 +365,7 @@ model Argument {
 model LegalReference {
   id                  String               @id @default(cuid())
   caseId              String?
+  articleId           String?
   source              String
   content             String
   lawType             String?
@@ -392,7 +393,9 @@ model LegalReference {
   version             String?
   case                Case?                @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
+  @@unique([caseId, articleId])
   @@index([caseId])
+  @@index([articleId])
   @@index([lawType])
   @@index([relevanceScore])
   @@index([applicabilityScore])

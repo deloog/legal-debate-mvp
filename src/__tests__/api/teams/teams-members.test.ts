@@ -168,7 +168,7 @@ describe('Teams API - Members Management', () => {
         'http://localhost:3000/api/teams/team-1/members'
       );
       const response = await GET_MEMBERS(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
       const testResponse = await response.clone().json();
 
@@ -183,7 +183,7 @@ describe('Teams API - Members Management', () => {
         'http://localhost:3000/api/teams/team-1/members?role=ADMIN'
       );
       const response = await GET_MEMBERS(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(200);
@@ -194,7 +194,7 @@ describe('Teams API - Members Management', () => {
         'http://localhost:3000/api/teams/team-1/members?status=ACTIVE'
       );
       const response = await GET_MEMBERS(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(200);
@@ -205,7 +205,7 @@ describe('Teams API - Members Management', () => {
         'http://localhost:3000/api/teams/team-1/members?page=2&limit=10'
       );
       const __response = await GET_MEMBERS(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect((mockedPrisma as any).teamMember.findMany).toHaveBeenCalledWith(
@@ -223,7 +223,7 @@ describe('Teams API - Members Management', () => {
         'http://localhost:3000/api/teams/team-1/members'
       );
       const response = await GET_MEMBERS(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(401);
@@ -236,7 +236,7 @@ describe('Teams API - Members Management', () => {
         'http://localhost:3000/api/teams/team-1/members'
       );
       const response = await GET_MEMBERS(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(403);
@@ -259,7 +259,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await POST(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
       const testResponse = await response.clone().json();
 
@@ -283,7 +283,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await POST(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(201);
@@ -309,7 +309,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await POST(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(409);
@@ -326,7 +326,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await POST(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(400);
@@ -348,7 +348,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await POST(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(401);
@@ -370,7 +370,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await POST(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(403);
@@ -383,7 +383,7 @@ describe('Teams API - Members Management', () => {
         'http://localhost:3000/api/teams/team-1/members/user-123'
       );
       const response = await GET_MEMBER_BY_ID(request, {
-        params: { id: 'team-1', userId: 'user-123' },
+        params: Promise.resolve({ id: 'team-1', userId: 'user-123' }),
       });
       const testResponse = await response.clone().json();
 
@@ -399,7 +399,7 @@ describe('Teams API - Members Management', () => {
         'http://localhost:3000/api/teams/team-1/members/not-exist'
       );
       const response = await GET_MEMBER_BY_ID(request, {
-        params: { id: 'team-1', userId: 'not-exist' },
+        params: Promise.resolve({ id: 'team-1', userId: 'not-exist' }),
       });
 
       expect(response.status).toBe(404);
@@ -412,7 +412,7 @@ describe('Teams API - Members Management', () => {
         'http://localhost:3000/api/teams/team-1/members/user-123'
       );
       const response = await GET_MEMBER_BY_ID(request, {
-        params: { id: 'team-1', userId: 'user-123' },
+        params: Promise.resolve({ id: 'team-1', userId: 'user-123' }),
       });
 
       expect(response.status).toBe(401);
@@ -425,7 +425,7 @@ describe('Teams API - Members Management', () => {
         'http://localhost:3000/api/teams/team-1/members/user-123'
       );
       const response = await GET_MEMBER_BY_ID(request, {
-        params: { id: 'team-1', userId: 'user-123' },
+        params: Promise.resolve({ id: 'team-1', userId: 'user-123' }),
       });
 
       expect(response.status).toBe(403);
@@ -446,7 +446,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await PATCH_MEMBER(request, {
-        params: { id: 'team-1', userId: 'user-123' },
+        params: Promise.resolve({ id: 'team-1', userId: 'user-123' }),
       });
 
       expect(response.status).toBe(200);
@@ -465,7 +465,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await PATCH_MEMBER(request, {
-        params: { id: 'team-1', userId: 'user-123' },
+        params: Promise.resolve({ id: 'team-1', userId: 'user-123' }),
       });
 
       expect(response.status).toBe(200);
@@ -486,7 +486,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await PATCH_MEMBER(request, {
-        params: { id: 'team-1', userId: 'user-123' },
+        params: Promise.resolve({ id: 'team-1', userId: 'user-123' }),
       });
 
       expect(response.status).toBe(200);
@@ -505,7 +505,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await PATCH_MEMBER(request, {
-        params: { id: 'team-1', userId: 'not-exist' },
+        params: Promise.resolve({ id: 'team-1', userId: 'not-exist' }),
       });
 
       expect(response.status).toBe(404);
@@ -524,7 +524,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await PATCH_MEMBER(request, {
-        params: { id: 'team-1', userId: 'user-123' },
+        params: Promise.resolve({ id: 'team-1', userId: 'user-123' }),
       });
 
       expect(response.status).toBe(401);
@@ -543,7 +543,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await PATCH_MEMBER(request, {
-        params: { id: 'team-1', userId: 'user-123' },
+        params: Promise.resolve({ id: 'team-1', userId: 'user-123' }),
       });
 
       expect(response.status).toBe(403);
@@ -559,7 +559,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await DELETE_MEMBER(request, {
-        params: { id: 'team-1', userId: 'user-123' },
+        params: Promise.resolve({ id: 'team-1', userId: 'user-123' }),
       });
 
       expect(response.status).toBe(204);
@@ -575,7 +575,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await DELETE_MEMBER(request, {
-        params: { id: 'team-1', userId: 'not-exist' },
+        params: Promise.resolve({ id: 'team-1', userId: 'not-exist' }),
       });
 
       expect(response.status).toBe(404);
@@ -591,7 +591,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await DELETE_MEMBER(request, {
-        params: { id: 'team-1', userId: 'user-123' },
+        params: Promise.resolve({ id: 'team-1', userId: 'user-123' }),
       });
 
       expect(response.status).toBe(401);
@@ -607,7 +607,7 @@ describe('Teams API - Members Management', () => {
         }
       );
       const response = await DELETE_MEMBER(request, {
-        params: { id: 'team-1', userId: 'user-123' },
+        params: Promise.resolve({ id: 'team-1', userId: 'user-123' }),
       });
 
       expect(response.status).toBe(403);

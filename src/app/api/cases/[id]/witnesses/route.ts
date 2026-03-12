@@ -77,7 +77,7 @@ async function mapWitnessToDetail(
  * GET /api/cases/[id]/witnesses - 获取案件证人列表
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -86,7 +86,7 @@ export const GET = withErrorHandler(
       );
     }
 
-    const caseId = params.id;
+    const caseId = (await params).id;
 
     // 验证案件是否存在且属于当前用户
     const caseExists = await prisma.case.findFirst({

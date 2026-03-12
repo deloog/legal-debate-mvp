@@ -8,7 +8,7 @@
  * - 比较快照差异
  * - 清理过期快照
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { logger } from '@/lib/logger';
 import {
   GraphSnapshot,
@@ -58,9 +58,9 @@ export class SnapshotService {
           pendingRelations: statistics.pendingRelations,
           averageConfidence: statistics.averageConfidence,
           snapshotData: input.includeFullData
-            ? await this.gatherFullData()
-            : null,
-          changes: input.includeChanges ? await this.calculateChanges() : null,
+            ? (await this.gatherFullData() as Prisma.InputJsonValue)
+            : Prisma.DbNull,
+          changes: input.includeChanges ? (await this.calculateChanges() as Prisma.InputJsonValue) : Prisma.DbNull,
           status: SnapshotStatus.COMPLETED,
           description: input.description,
           createdBy: userId,

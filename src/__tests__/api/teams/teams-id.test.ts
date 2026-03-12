@@ -132,7 +132,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         'http://localhost:3000/api/teams/team-1'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
       const testResponse = await response.clone().json();
 
@@ -147,7 +147,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         'http://localhost:3000/api/teams/team-1'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
       const testResponse = await response.clone().json();
 
@@ -161,7 +161,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         'http://localhost:3000/api/teams/not-exist'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'not-exist' },
+        params: Promise.resolve({ id: 'not-exist' }),
       });
 
       expect(response.status).toBe(404);
@@ -174,7 +174,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         'http://localhost:3000/api/teams/team-1'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(401);
@@ -187,7 +187,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         'http://localhost:3000/api/teams/team-1'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(403);
@@ -201,7 +201,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         'http://localhost:3000/api/teams/team-1'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(403);
@@ -222,7 +222,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
       const testResponse = await response.clone().json();
 
@@ -244,7 +244,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(200);
@@ -263,7 +263,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(200);
@@ -284,7 +284,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
       const testResponse = await response.clone().json();
 
@@ -306,7 +306,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'not-exist' },
+        params: Promise.resolve({ id: 'not-exist' }),
       });
 
       expect(response.status).toBe(404);
@@ -323,7 +323,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(401);
@@ -340,7 +340,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(403);
@@ -356,7 +356,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         }
       );
       const response = await DELETE(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(204);
@@ -375,7 +375,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         }
       );
       const response = await DELETE(request, {
-        params: { id: 'not-exist' },
+        params: Promise.resolve({ id: 'not-exist' }),
       });
 
       expect(response.status).toBe(404);
@@ -391,7 +391,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         }
       );
       const response = await DELETE(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(401);
@@ -407,7 +407,7 @@ describe('Teams API - Detail, Update, Delete', () => {
         }
       );
       const response = await DELETE(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect(response.status).toBe(403);
@@ -422,7 +422,7 @@ describe('Teams API - Detail, Update, Delete', () => {
       );
 
       await DELETE(request, {
-        params: { id: 'team-1' },
+        params: Promise.resolve({ id: 'team-1' }),
       });
 
       expect((mockedPrisma as any).$transaction).toHaveBeenCalled();

@@ -13,6 +13,7 @@ import { CaseTeamList } from '@/components/case/CaseTeamList';
 import { DiscussionList } from '@/components/discussion/DiscussionList';
 import { WitnessList } from '@/components/witness/WitnessList';
 import { EvidenceTab } from './components/EvidenceTab';
+import { LawGraphTab } from './components/LawGraphTab';
 
 /**
  * 案件详情接口
@@ -38,7 +39,8 @@ type TabType =
   | 'timeline'
   | 'evidence'
   | 'witnesses'
-  | 'discussions';
+  | 'discussions'
+  | 'law-graph';
 
 /**
  * 案件访问权限接口
@@ -74,6 +76,7 @@ const TAB_LIST: { key: TabType; label: string }[] = [
   { key: 'evidence', label: '证据' },
   { key: 'witnesses', label: '证人' },
   { key: 'discussions', label: '讨论' },
+  { key: 'law-graph', label: '⚡ 法条图谱' },
 ];
 
 export default function CaseDetailPage() {
@@ -203,6 +206,8 @@ export default function CaseDetailPage() {
         );
       case 'timeline':
         return null; // 不再显示，已从导航移除
+      case 'law-graph':
+        return <LawGraphTab caseId={caseId} />;
       case 'evidence':
         return (
           <EvidenceTab

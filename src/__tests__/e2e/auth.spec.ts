@@ -10,7 +10,9 @@
  * 6. 第三方认证
  */
 
+import { readFileSync, existsSync } from 'fs';
 import { APIRequestContext, expect, test } from '@playwright/test';
+import { TEST_STATE_FILE } from './global-setup';
 
 // 测试基础URL
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
@@ -607,9 +609,81 @@ test.describe('律师资格验证流程', () => {
     expect(data.success).toBe(true);
   });
 
-  test.skip('管理员应该能够审核资格申请', () => {
-    // TODO: 需要真实的管理员账户才能测试此功能
-    // 当前注册的普通用户没有管理员权限
+  test('管理员应该能够审核资格申请', async ({ request }) => {
+    // 读取 global-setup 写入的测试状态（包含 admin 账号和预建资格记录 ID）
+    if (!existsSync(TEST_STATE_FILE)) {
+      throw new Error(
+        `测试状态文件不存在 (${TEST_STATE_FILE})，请确保 global-setup 正确运行`
+      );
+    }
+    const testState = JSON.parse(readFileSync(TEST_STATE_FILE, 'utf-8')) as {
+      adminEmail: string;
+      adminPassword: string;
+      qualificationId: string;
+    };
+
+    // Step 1: 用管理员账号登录，获取 admin token
+    const loginResponse = await request.post(`${BASE_URL}/api/auth/login`, {
+      data: {
+        email: testState.adminEmail,
+        password: testState.adminPassword,
+      },
+    });
+    const loginData = await loginResponse.json();
+    expect(loginData.success).toBe(true);
+    const adminToken: string = loginData.data?.token;
+    expect(adminToken).toBeTruthy();
+
+    // Step 2: 用 admin token 审核资格申请（通过）
+    const reviewResponse = await request.post(
+      `${BASE_URL}/api/admin/qualifications/${testState.qualificationId}/review`,
+      {
+        headers: { Authorization: `Bearer ${adminToken}` },
+        data: {
+          approved: true,
+          reviewNotes: 'E2E自动化测试：资格审核通过',
+        },
+      }
+    );
+
+    const reviewData = await reviewResponse.json();
+    expect(reviewResponse.ok()).toBeTruthy();
+    expect(reviewData.success).toBe(true);
+    expect(reviewData.data?.qualification.status).toBe('APPROVED');
+
+    // Step 3: 验证拒绝场景——global-setup 每次运行都会重置到 PENDING，
+    //         此处直接创建另一条记录以测试拒绝路径会与 upload API 的第三方验证耦合，
+    //         因此只验证：已通过的记录无法被二次审核（返回 500 或 400）
+    const reReviewResponse = await request.post(
+      `${BASE_URL}/api/admin/qualifications/${testState.qualificationId}/review`,
+      {
+        headers: { Authorization: `Bearer ${adminToken}` },
+        data: {
+          approved: false,
+          reviewNotes: '重复审核验证',
+        },
+      }
+    );
+    // 已是 APPROVED 状态，二次审核不影响核心断言；只要 API 正常响应（不崩溃）即可
+    expect([200, 400, 409]).toContain(reReviewResponse.status());
+
+    // Step 4: 验证普通用户无法调用管理员审核接口
+    const normalUser = await createTestUser(request);
+    const normalLoginResponse = await request.post(
+      `${BASE_URL}/api/auth/login`,
+      { data: { email: normalUser.email, password: normalUser.password } }
+    );
+    const normalLoginData = await normalLoginResponse.json();
+    const normalToken: string = normalLoginData.data?.token;
+
+    const unauthorizedResponse = await request.post(
+      `${BASE_URL}/api/admin/qualifications/${testState.qualificationId}/review`,
+      {
+        headers: { Authorization: `Bearer ${normalToken}` },
+        data: { approved: true, reviewNotes: '普通用户非法审核' },
+      }
+    );
+    expect(unauthorizedResponse.status()).toBe(403);
   });
 });
 
@@ -866,10 +940,28 @@ test.describe('安全和边界情况测试', () => {
     expect(response.status()).toBe(401);
   });
 
-  test.skip('应该处理过大的请求体', async () => {
-    // TODO: 当前API会忽略额外字段并正常返回200
-    // 这是合理的行为，测试需要重新设计或添加请求体大小限制中间件
-    // Next.js会自动处理过大的请求体（默认限制），无需额外处理
+  test('应该处理过大的请求体', async ({ request }) => {
+    // 发送包含 2MB 超大字段值的请求，验证 API 不会崩溃
+    // 该测试覆盖 DoS 攻击场景：攻击者发送超大 JSON 字段拖垮服务器
+    const twoMB = 'x'.repeat(2 * 1024 * 1024);
+
+    const response = await request.post(`${BASE_URL}/api/auth/login`, {
+      data: { email: twoMB, password: 'TestPass123' },
+    });
+
+    // 应返回 400（字段验证失败）或 413（框架/代理层拦截请求体过大）
+    // 不接受 5xx（崩溃）或 200（成功处理了超大输入）
+    expect([400, 413]).toContain(response.status());
+
+    // 注册接口同样需要防范
+    const regResponse = await request.post(`${BASE_URL}/api/auth/register`, {
+      data: {
+        email: `test-${Date.now()}@example.com`,
+        password: twoMB,
+        username: 'test-oversized',
+      },
+    });
+    expect([400, 413]).toContain(regResponse.status());
   });
 
   test('应该处理缺失必填字段的请求', async ({ request }) => {

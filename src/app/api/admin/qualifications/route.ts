@@ -150,8 +150,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // 解析查询参数
     const params = parseQueryParams(request);
-    const page = Math.max(1, Number.parseInt(params.page, 10));
-    const limit = Math.min(100, Math.max(1, Number.parseInt(params.limit, 10)));
+    const page = Math.max(1, Number.parseInt(params.page ?? '1', 10));
+    const limit = Math.min(100, Math.max(1, Number.parseInt(params.limit ?? '20', 10)));
     const skip = (page - 1) * limit;
 
     // 构建查询条件

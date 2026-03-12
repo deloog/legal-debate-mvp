@@ -104,9 +104,8 @@ export class DisputeFocusExtractor {
 
     // 过滤低置信度结果
     if (options.minConfidence !== undefined) {
-      mergedFocuses = mergedFocuses.filter(
-        f => f.confidence >= options.minConfidence
-      );
+      const minConf = options.minConfidence;
+      mergedFocuses = mergedFocuses.filter(f => f.confidence >= minConf);
     }
 
     const { generateSummary } = await import('./utils');

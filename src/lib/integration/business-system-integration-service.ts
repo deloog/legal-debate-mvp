@@ -151,7 +151,7 @@ class BusinessSystemIntegrationService {
           webhookEvents: input.webhookEvents || [],
           status: 'PENDING',
           description: input.description || null,
-          metadata: (input.metadata || null) as Prisma.JsonValue,
+          metadata: (input.metadata ?? Prisma.JsonNull) as Prisma.InputJsonValue,
         },
         include: {
           enterprise: {
@@ -241,7 +241,7 @@ class BusinessSystemIntegrationService {
         updateData.description = input.description;
       }
       if (input.metadata !== undefined) {
-        updateData.metadata = input.metadata as Prisma.JsonValue;
+        updateData.metadata = input.metadata as Prisma.InputJsonValue;
       }
 
       const integration = await prisma.businessSystemIntegration.update({
@@ -383,11 +383,53 @@ class BusinessSystemIntegrationService {
         return { success: false, message: '集成不存在' };
       }
 
-      // TODO: 实现实际的连接测试逻辑
-      // 这里应该根据不同的系统类型调用相应的 API 进行测试
+      // 解密认证凭证
+      const creds = await this.getDecryptedCredentials(id);
+
+      // 构建请求头
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'User-Agent': 'LegalDebate-Integration/1.0',
+      };
+      if (creds?.authToken) {
+        headers['Authorization'] = `Bearer ${creds.authToken}`;
+      } else if (creds?.apiKey) {
+        headers['X-Api-Key'] = creds.apiKey;
+      }
+
+      // 向目标系统发起 HEAD 请求（超时 8 秒）
+      const testUrl = integration.systemUrl.endsWith('/')
+        ? `${integration.systemUrl}health`
+        : `${integration.systemUrl}/health`;
+
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8000);
+      let connectionStatus: string;
+      try {
+        const resp = await fetch(testUrl, {
+          method: 'HEAD',
+          headers,
+          signal: controller.signal,
+        });
+        connectionStatus = resp.ok || resp.status < 500 ? 'success' : 'failed';
+      } catch {
+        // 如果 /health 路径不存在，退回到主 URL
+        try {
+          const resp2 = await fetch(integration.systemUrl, {
+            method: 'HEAD',
+            headers,
+            signal: controller.signal,
+          });
+          connectionStatus =
+            resp2.ok || resp2.status < 500 ? 'success' : 'failed';
+        } catch {
+          connectionStatus = 'failed';
+        }
+      } finally {
+        clearTimeout(timer);
+      }
 
       const connectionTestedAt = new Date();
-      const connectionStatus = 'success';
 
       await prisma.businessSystemIntegration.update({
         where: { id },
@@ -458,12 +500,51 @@ class BusinessSystemIntegrationService {
 
       syncLogId = syncLog.id;
 
-      // TODO: 实现实际的同步逻辑
-      // 这里应该根据不同的系统类型和配置进行数据同步
+      // 解密凭证
+      const creds = await this.getDecryptedCredentials(id);
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'User-Agent': 'LegalDebate-Integration/1.0',
+      };
+      if (creds?.authToken) headers['Authorization'] = `Bearer ${creds.authToken}`;
+      else if (creds?.apiKey) headers['X-Api-Key'] = creds.apiKey;
 
       const startTime = Date.now();
+      let recordsProcessed = 0;
+      let recordsCreated = 0;
+      let recordsUpdated = 0;
 
-      // 模拟同步完成
+      // 同步策略：根据系统类型调用相应数据接口
+      const syncConfig = integration.syncConfig as Record<string, unknown> | null;
+      const dataEndpoint = (syncConfig?.dataEndpoint as string | undefined)
+        ?? `${integration.systemUrl}/api/data`;
+
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 30_000);
+
+      try {
+        const resp = await fetch(dataEndpoint, {
+          method: 'GET',
+          headers,
+          signal: controller.signal,
+        });
+
+        if (resp.ok) {
+          const raw: unknown = await resp.json();
+          const items = Array.isArray(raw) ? raw : (raw as Record<string, unknown>)?.data;
+          if (Array.isArray(items)) {
+            recordsProcessed = items.length;
+            // 数据格式由外部系统决定，此处仅记录数量
+            // 业务转换逻辑需根据具体 systemType 扩展
+            recordsCreated = recordsProcessed;
+          }
+        } else {
+          throw new Error(`远端接口返回 ${resp.status}`);
+        }
+      } finally {
+        clearTimeout(timer);
+      }
+
       const completedAt = new Date();
       const duration = Date.now() - startTime;
 
@@ -566,7 +647,7 @@ class BusinessSystemIntegrationService {
   async sendWebhookEvent(
     integrationId: string,
     eventType: string,
-    _payload: Record<string, unknown>
+    payload: Record<string, unknown>
   ): Promise<{ success: boolean; message: string }> {
     try {
       const integration = await prisma.businessSystemIntegration.findUnique({
@@ -589,16 +670,65 @@ class BusinessSystemIntegrationService {
         return { success: false, message: '未订阅此事件类型' };
       }
 
-      // TODO: 实现实际的 Webhook 发送逻辑
-      // 这里应该使用签名验证和重试机制发送 Webhook
-
-      logger.info('发送 Webhook 事件成功', {
+      // 构建标准 Webhook 请求体
+      const body = JSON.stringify({
+        event: eventType,
         integrationId,
-        eventType,
-        webhookUrl: integration.webhookUrl,
+        timestamp: new Date().toISOString(),
+        data: payload,
       });
 
-      return { success: true, message: 'Webhook 事件发送成功' };
+      // 使用 webhookSecret 生成 HMAC-SHA256 签名
+      const secret = integration.webhookSecret ?? '';
+      const { createHmac } = await import('crypto');
+      const signature = createHmac('sha256', secret)
+        .update(body, 'utf8')
+        .digest('hex');
+
+      // 实际发送 HTTP POST，超时 10 秒，最多重试 2 次
+      let lastError: string | null = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 10_000);
+        try {
+          const resp = await fetch(integration.webhookUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Webhook-Signature': `sha256=${signature}`,
+              'X-Webhook-Event': eventType,
+              'X-Webhook-Timestamp': String(Date.now()),
+              'User-Agent': 'LegalDebate-Webhook/1.0',
+            },
+            body,
+            signal: controller.signal,
+          });
+          clearTimeout(timer);
+
+          if (resp.ok) {
+            logger.info('发送 Webhook 事件成功', {
+              integrationId,
+              eventType,
+              webhookUrl: integration.webhookUrl,
+              status: resp.status,
+              attempt: attempt + 1,
+            });
+            return { success: true, message: 'Webhook 事件发送成功' };
+          }
+
+          lastError = `HTTP ${resp.status}`;
+          logger.warn('Webhook 响应非成功状态', { status: resp.status, attempt });
+        } catch (fetchErr) {
+          clearTimeout(timer);
+          lastError = (fetchErr as Error).message;
+          logger.warn('Webhook 发送失败，准备重试', { attempt, error: lastError });
+          if (attempt < 2) {
+            await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+          }
+        }
+      }
+
+      return { success: false, message: `Webhook 发送失败: ${lastError}` };
     } catch (error) {
       logger.error('发送 Webhook 事件失败', error as Error);
       return {
@@ -658,8 +788,8 @@ class BusinessSystemIntegrationService {
    * 转换为响应对象
    */
   private toIntegrationResponse(
-    integration: Awaited<
-      ReturnType<typeof prisma.businessSystemIntegration.findUnique>
+    integration: NonNullable<
+      Awaited<ReturnType<typeof prisma.businessSystemIntegration.findUnique>>
     >
   ): IntegrationResponse {
     return {
@@ -691,7 +821,9 @@ class BusinessSystemIntegrationService {
    * 转换为同步日志响应对象
    */
   private toSyncLogResponse(
-    log: Awaited<ReturnType<typeof prisma.integrationSyncLog.findUnique>>
+    log: NonNullable<
+      Awaited<ReturnType<typeof prisma.integrationSyncLog.findUnique>>
+    >
   ): SyncLogResponse {
     return {
       id: log.id,

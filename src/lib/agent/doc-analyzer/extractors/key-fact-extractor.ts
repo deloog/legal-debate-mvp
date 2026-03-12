@@ -10,6 +10,7 @@ import type {
   FactType,
   KeyFact,
 } from '../core/types';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // AI 响应的临时类型定义
@@ -121,15 +122,13 @@ export class KeyFactExtractor {
 
     // 过滤低置信度和低重要性结果
     if (options.minConfidence !== undefined) {
-      mergedFacts = mergedFacts.filter(
-        f => f.confidence >= options.minConfidence
-      );
+      const minConf = options.minConfidence;
+      mergedFacts = mergedFacts.filter(f => f.confidence >= minConf);
     }
 
     if (options.minImportance !== undefined) {
-      mergedFacts = mergedFacts.filter(
-        f => f.importance >= options.minImportance
-      );
+      const minImp = options.minImportance;
+      mergedFacts = mergedFacts.filter(f => f.importance >= minImp);
     }
 
     const summary = this.generateSummary(
@@ -184,7 +183,7 @@ export class KeyFactExtractor {
 
       return [];
     } catch (error) {
-      console.error('AI识别层失败:', error);
+      logger.error('AI识别层失败:', error);
       return [];
     }
   }
@@ -289,7 +288,7 @@ ${contextInfo}
         };
       });
     } catch (error) {
-      console.error('解析AI识别响应失败:', error);
+      logger.error('解析AI识别响应失败:', error);
       return [];
     }
   }
@@ -602,7 +601,7 @@ ${contextInfo}
 
       return facts;
     } catch (error) {
-      console.error('AI审查层失败:', error);
+      logger.error('AI审查层失败:', error);
       return facts;
     }
   }
@@ -716,9 +715,9 @@ ${factList}
             factType: fact.factType || original?.factType || 'EXPLICIT',
           };
         })
-        .filter(item => !invalidIds.has(item.id));
+        .filter((item: { id: string }) => !invalidIds.has(item.id));
     } catch (error) {
-      console.error('解析AI审查响应失败:', error);
+      logger.error('解析AI审查响应失败:', error);
       return originalFacts;
     }
   }
@@ -735,8 +734,10 @@ ${factList}
       if (extractedData.timeline) {
         for (const event of extractedData.timeline) {
           if (this.isFactRelatedToEvent(fact, event)) {
-            if (!fact.relatedTimeline.includes(event.id || '')) {
-              fact.relatedTimeline.push(event.id || '');
+            const timeline = fact.relatedTimeline ?? [];
+            if (!timeline.includes(event.id || '')) {
+              timeline.push(event.id || '');
+              fact.relatedTimeline = timeline;
             }
           }
         }

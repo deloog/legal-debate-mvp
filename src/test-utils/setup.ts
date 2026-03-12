@@ -51,8 +51,8 @@ jest.mock('next/dynamic', () => () => {
       }
     }
 
-    this.body = init.body;
-    this.signal = init.signal;
+    this.body = init.body ?? undefined;
+    this.signal = init.signal ?? undefined;
     this.credentials = init.credentials || 'same-origin';
     this.cache = init.cache || 'default';
     this.redirect = init.redirect || 'follow';
@@ -212,14 +212,14 @@ jest.mock('next/dynamic', () => () => {
   }
 
   static redirect(url: string, status: number = 302): Response {
-    return new Response(null, {
+    return new Response(undefined, {
       status,
       headers: { Location: url },
     });
   }
 
   static error(): Response {
-    return new Response(null, {
+    return new Response(undefined, {
       status: 500,
       statusText: 'Internal Server Error',
     });

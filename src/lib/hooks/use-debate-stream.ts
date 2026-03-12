@@ -197,7 +197,7 @@ export function useDebateStream(options: UseDebateStreamOptions): StreamState {
     // 使用setTimeout避免在effect中直接调用setState
     const timer = setTimeout(() => {
       if (enabled) {
-        disconnectFn = connect();
+        disconnectFn = connect() ?? null;
       }
     }, 0);
 

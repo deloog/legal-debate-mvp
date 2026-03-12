@@ -7,6 +7,7 @@ import nodemailer from 'nodemailer';
 import * as path from 'path';
 import { prisma } from '@/lib/db/prisma';
 import { generateContractPDF } from '../contract/contract-pdf-generator';
+import { logger } from '@/lib/logger';
 
 /**
  * 发送合同邮件输入参数
@@ -117,7 +118,7 @@ export class ContractEmailService {
 
       // 检查transporter是否可用
       if (!this.transporter) {
-        console.warn('[ContractEmail] SMTP未配置，跳过邮件发送');
+        logger.warn('[ContractEmail] SMTP未配置，跳过邮件发送');
         return {
           success: false,
           error: 'SMTP not configured',
@@ -127,14 +128,14 @@ export class ContractEmailService {
       // 发送邮件
       const info = await this.transporter.sendMail(mailOptions);
 
-      console.log(`[ContractEmail] 邮件发送成功: ${info.messageId}`);
+      logger.info(`[ContractEmail] 邮件发送成功: ${info.messageId}`);
 
       return {
         success: true,
         messageId: info.messageId,
       };
     } catch (error) {
-      console.error('[ContractEmail] 邮件发送失败:', error);
+      logger.error('[ContractEmail] 邮件发送失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '发送失败',
@@ -184,20 +185,20 @@ export class ContractEmailService {
       };
 
       if (!this.transporter) {
-        console.warn('[ContractEmail] SMTP未配置，跳过签署提醒邮件');
+        logger.warn('[ContractEmail] SMTP未配置，跳过签署提醒邮件');
         return { success: false, error: 'SMTP not configured' };
       }
 
       const info = await this.transporter.sendMail(mailOptions);
 
-      console.log(`[ContractEmail] 签署提醒发送成功: ${info.messageId}`);
+      logger.info(`[ContractEmail] 签署提醒发送成功: ${info.messageId}`);
 
       return {
         success: true,
         messageId: info.messageId,
       };
     } catch (error) {
-      console.error('[ContractEmail] 签署提醒发送失败:', error);
+      logger.error('[ContractEmail] 签署提醒发送失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '发送失败',
@@ -259,20 +260,20 @@ export class ContractEmailService {
       };
 
       if (!this.transporter) {
-        console.warn('[ContractEmail] SMTP未配置，跳过签署确认邮件');
+        logger.warn('[ContractEmail] SMTP未配置，跳过签署确认邮件');
         return { success: false, error: 'SMTP not configured' };
       }
 
       const info = await this.transporter.sendMail(mailOptions);
 
-      console.log(`[ContractEmail] 签署确认发送成功: ${info.messageId}`);
+      logger.info(`[ContractEmail] 签署确认发送成功: ${info.messageId}`);
 
       return {
         success: true,
         messageId: info.messageId,
       };
     } catch (error) {
-      console.error('[ContractEmail] 签署确认发送失败:', error);
+      logger.error('[ContractEmail] 签署确认发送失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '发送失败',

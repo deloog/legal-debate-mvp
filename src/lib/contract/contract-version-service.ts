@@ -4,7 +4,8 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
-import { Prisma, FeeType, ContractStatus } from '@prisma/client';
+import { ContractStatus, FeeType, Prisma } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 /**
  * 合同快照类型（Record类型，用于存储任意 JSON 数据）
@@ -109,7 +110,9 @@ export class ContractVersionService {
       };
 
       // 计算变更内容（与上一版本对比）
-      let changes = null;
+      let changes:
+        | { field: string; oldValue: unknown; newValue: unknown }[]
+        | null = null;
       if (lastVersion) {
         const previousVersion = await prisma.contractVersion.findFirst({
           where: { contractId, version: lastVersion.version },
@@ -126,16 +129,16 @@ export class ContractVersionService {
           contractId,
           version: newVersion,
           snapshot,
-          changes,
+          changes: changes as Prisma.InputJsonValue,
           changeType,
           createdBy,
           comment,
         },
       });
 
-      console.log(`[ContractVersion] 版本 ${newVersion} 创建成功`);
+      logger.info(`[ContractVersion] 版本 ${newVersion} 创建成功`);
     } catch (error) {
-      console.error('[ContractVersion] 创建版本失败:', error);
+      logger.error('[ContractVersion] 创建版本失败:', error);
       throw error;
     }
   }
@@ -252,8 +255,8 @@ export class ContractVersionService {
         scope: snapshot.scope as string | undefined,
         feeType: snapshot.feeType as FeeType | undefined,
         totalFee: snapshot.totalFee as number | string | undefined,
-        feeDetails: snapshot.feeDetails as Prisma.JsonValue,
-        terms: snapshot.terms as Prisma.JsonValue,
+        feeDetails: snapshot.feeDetails as Prisma.InputJsonValue,
+        terms: snapshot.terms as Prisma.InputJsonValue,
         specialTerms: snapshot.specialTerms as string | undefined,
         status: snapshot.status as ContractStatus | undefined,
       },
@@ -267,7 +270,7 @@ export class ContractVersionService {
       `回滚到版本 ${version.version}`
     );
 
-    console.log(`[ContractVersion] 回滚到版本 ${version.version} 成功`);
+    logger.info(`[ContractVersion] 回滚到版本 ${version.version} 成功`);
   }
 
   /**

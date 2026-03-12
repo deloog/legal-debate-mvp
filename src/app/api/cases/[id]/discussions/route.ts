@@ -1,21 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import {
-  createSuccessResponse,
   createCreatedResponse,
+  createSuccessResponse,
 } from '@/app/api/lib/responses/success';
-import { prisma } from '@/lib/db/prisma';
-import { Prisma } from '@prisma/client';
-import { getAuthUser } from '@/lib/middleware/auth';
-import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
-import { mentionParser } from '@/lib/discussion/mention-parser';
-import { mentionNotificationService } from '@/lib/discussion/mention-notification-service';
 import { logger } from '@/lib/agent/security/logger';
-import { z } from 'zod';
+import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
+import { prisma } from '@/lib/db/prisma';
+import { mentionNotificationService } from '@/lib/discussion/mention-notification-service';
+import { mentionParser } from '@/lib/discussion/mention-parser';
+import { getAuthUser } from '@/lib/middleware/auth';
 import type {
   DiscussionListResponse,
   DiscussionWithAuthor,
 } from '@/types/discussion';
+import { Prisma } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const createDiscussionSchema = z.object({
   content: z.string().min(1, '讨论内容不能为空').max(10000),
@@ -226,7 +226,7 @@ export const POST = withErrorHandler(
         userId: authUser.userId,
         content: validatedData.content,
         mentions: finalMentions,
-        metadata: validatedData.metadata as Prisma.JsonValue,
+        metadata: validatedData.metadata as Prisma.InputJsonValue,
       },
       include: {
         user: {
@@ -241,7 +241,8 @@ export const POST = withErrorHandler(
     });
 
     // 获取提及者的名称
-    const mentionerName = discussion.user.name || discussion.user.email;
+    const mentionerName =
+      discussion.user?.name || discussion.user?.email || '未知用户';
 
     // 异步发送提及通知
     if (finalMentions.length > 0) {

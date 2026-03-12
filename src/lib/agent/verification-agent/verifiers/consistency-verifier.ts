@@ -71,7 +71,7 @@ export class ConsistencyVerifier {
         // 检查必填字段是否完整
         const requiredFields = ['plaintiff', 'defendant'];
         const missingFields = requiredFields.filter(
-          field => !data.parties![field]
+          field => !data.parties![field as keyof typeof data.parties]
         );
 
         if (missingFields.length > 0) {

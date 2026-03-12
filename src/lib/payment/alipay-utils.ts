@@ -336,3 +336,49 @@ export function isPaymentSuccess(tradeStatus: string): boolean {
 export function isPaymentFailed(tradeStatus: string): boolean {
   return tradeStatus === 'TRADE_CLOSED';
 }
+
+/**
+ * 支付宝签名验证（简化版）
+ * 用于回调通知签名验证
+ */
+export function alipaySignVerify(
+  params: Record<string, string>,
+  sign: string,
+  publicKey: string,
+  signType: string = 'RSA2'
+): boolean {
+  try {
+    // 移除sign和sign_type参数
+    const { sign: _sign, sign_type: _signType, ...filteredParams } = params;
+    void _sign;
+    void _signType;
+
+    // 参数排序
+    const sortedKeys = Object.keys(filteredParams).sort();
+    const sortedParams: string[] = [];
+
+    // 过滤空值并拼接
+    for (const key of sortedKeys) {
+      const value = filteredParams[key];
+      if (
+        value !== null &&
+        value !== undefined &&
+        value !== ''
+      ) {
+        sortedParams.push(`${key}=${String(value)}`);
+      }
+    }
+
+    // 拼接成字符串
+    const signContent = sortedParams.join('&');
+
+    // RSA验签
+    const verify = crypto.createVerify(signType === 'RSA2' ? 'RSA-SHA256' : 'RSA-SHA1');
+    verify.update(signContent, 'utf8');
+
+    return verify.verify(publicKey, sign, 'base64');
+  } catch (error) {
+    logger.error('[AlipayUtils] 签名验证失败:', error);
+    return false;
+  }
+}

@@ -49,7 +49,7 @@ describe('DELETE /api/v1/contracts/[id]/law-articles/[articleId]', () => {
     );
 
     const response = await DELETE(request, {
-      params: { id: mockContractId, articleId: mockArticleId },
+      params: Promise.resolve({ id: mockContractId, articleId: mockArticleId }),
     });
     const data = await response.json();
 
@@ -75,7 +75,7 @@ describe('DELETE /api/v1/contracts/[id]/law-articles/[articleId]', () => {
     );
 
     const response = await DELETE(request, {
-      params: { id: mockContractId, articleId: mockArticleId },
+      params: Promise.resolve({ id: mockContractId, articleId: mockArticleId }),
     });
     const data = await response.json();
 
@@ -96,7 +96,7 @@ describe('DELETE /api/v1/contracts/[id]/law-articles/[articleId]', () => {
     );
 
     const response = await DELETE(request, {
-      params: { id: mockContractId, articleId: mockArticleId },
+      params: Promise.resolve({ id: mockContractId, articleId: mockArticleId }),
     });
     const data = await response.json();
 
@@ -116,7 +116,7 @@ describe('DELETE /api/v1/contracts/[id]/law-articles/[articleId]', () => {
     );
 
     const response = await DELETE(request, {
-      params: { id: mockContractId, articleId: mockArticleId },
+      params: Promise.resolve({ id: mockContractId, articleId: mockArticleId }),
     });
     const data = await response.json();
 

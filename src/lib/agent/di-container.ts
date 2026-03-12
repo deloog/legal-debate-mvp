@@ -1,6 +1,7 @@
 // Agent依赖注入容器
 
 import type { Agent } from '../../types/agent';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 依赖注入容器接口
@@ -265,7 +266,7 @@ export class AgentDIContainer {
     }
 
     if (errors.length > 0) {
-      console.warn('Batch agent creation errors:', errors);
+      logger.warn('Batch agent creation errors:', errors);
     }
 
     return agents;
@@ -325,8 +326,8 @@ export class AgentDIContainer {
       ([agentName, config]) => ({
         agentName,
         hasDependencies:
-          config.dependencies && Object.keys(config.dependencies).length > 0,
-        hasOptions: config.options && Object.keys(config.options).length > 0,
+          !!(config.dependencies && Object.keys(config.dependencies).length > 0),
+        hasOptions: !!(config.options && Object.keys(config.options).length > 0),
       })
     );
 

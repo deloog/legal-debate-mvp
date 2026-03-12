@@ -82,7 +82,7 @@ export function AlertStatistics({ statistics }: AlertStatisticsProps) {
                       className='h-2 rounded-full'
                       style={{
                         width: `${calculatePercentage(count, statistics.total)}%`,
-                        backgroundColor: severityColors[severity] ?? '#6c757d',
+                        backgroundColor: severityColors[severity as keyof typeof severityColors] ?? '#6c757d',
                       }}
                     />
                   </div>

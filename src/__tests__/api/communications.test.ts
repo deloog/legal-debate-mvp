@@ -16,6 +16,9 @@ import {
 
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
+    client: {
+      findFirst: jest.fn(),
+    },
     communicationRecord: {
       findMany: jest.fn(),
       count: jest.fn(),
@@ -42,6 +45,12 @@ describe('Communications API', () => {
       userId: 'user-123',
       email: 'test@example.com',
       role: 'USER',
+    });
+
+    // Mock client.findFirst 用于客户所有权验证（默认验证通过）
+    (mockedPrisma as any).client.findFirst.mockResolvedValue({
+      id: 'client-1',
+      userId: 'user-123',
     });
 
     (mockedPrisma as any).communicationRecord.findMany.mockResolvedValue([
@@ -460,7 +469,9 @@ describe('Communications API', () => {
       const response = await OPTIONS_LIST(request);
 
       expect(response.status).toBe(200);
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+        'http://localhost:3000'
+      );
       expect(response.headers.get('Access-Control-Allow-Methods')).toBe(
         'GET, POST, OPTIONS'
       );
@@ -826,6 +837,130 @@ describe('Communications API', () => {
 
       assertions.assertSuccess(testResponse);
       expect(testResponse.meta.pagination.limit).toBe(100);
+    });
+  });
+
+  describe('Security - Client Ownership Verification', () => {
+    it('应该拒绝访问不属于当前用户的客户沟通记录(GET)', async () => {
+      // Mock client.findFirst 返回 null，表示客户不属于当前用户
+      (mockedPrisma as any).client.findFirst.mockResolvedValue(null);
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/communications?clientId=unauthorized-client'
+      );
+      const response = await GET(request);
+
+      expect(response.status).toBe(403);
+      const data = await response.json();
+      expect(data.error).toBe('无权限');
+    });
+
+    it('应该拒绝为不属于当前用户的客户创建沟通记录(POST)', async () => {
+      // Mock client.findFirst 返回 null，表示客户不属于当前用户
+      (mockedPrisma as any).client.findFirst.mockResolvedValue(null);
+
+      const commData = {
+        clientId: 'unauthorized-client',
+        type: 'PHONE',
+        summary: '电话沟通',
+      };
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/communications',
+        {
+          method: 'POST',
+          body: commData,
+        }
+      );
+
+      const response = await POST(request);
+
+      expect(response.status).toBe(403);
+      const data = await response.json();
+      expect(data.error).toBe('无权限');
+    });
+
+    it('应该在验证客户所有权后才允许访问(GET)', async () => {
+      // Mock client.findFirst 返回正确的客户
+      (mockedPrisma as any).client.findFirst.mockResolvedValue({
+        id: 'client-1',
+        userId: 'user-123',
+      });
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/communications?clientId=client-1'
+      );
+      const response = await GET(request);
+      const testResponse = await createTestResponse(response);
+
+      assertions.assertSuccess(testResponse);
+      // 验证 client.findFirst 被正确调用
+      expect((mockedPrisma as any).client.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: 'client-1',
+          userId: 'user-123',
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+    });
+
+    it('应该在验证客户所有权后才允许创建(POST)', async () => {
+      // Mock client.findFirst 返回正确的客户
+      (mockedPrisma as any).client.findFirst.mockResolvedValue({
+        id: 'client-1',
+        userId: 'user-123',
+      });
+
+      const commData = {
+        clientId: 'client-1',
+        type: 'PHONE',
+        summary: '电话沟通案件',
+      };
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/communications',
+        {
+          method: 'POST',
+          body: commData,
+        }
+      );
+
+      const response = await POST(request);
+      const testResponse = await createTestResponse(response);
+
+      assertions.assertCreated(testResponse);
+      // 验证 client.findFirst 被正确调用
+      expect((mockedPrisma as any).client.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: 'client-1',
+          userId: 'user-123',
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+    });
+
+    it('应该处理已删除客户的访问请求', async () => {
+      // Mock client.findFirst 返回 null（已删除的客户）
+      (mockedPrisma as any).client.findFirst.mockResolvedValue(null);
+
+      const commData = {
+        clientId: 'deleted-client',
+        type: 'PHONE',
+        summary: '电话沟通',
+      };
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/communications',
+        {
+          method: 'POST',
+          body: commData,
+        }
+      );
+
+      const response = await POST(request);
+      expect(response.status).toBe(403);
     });
   });
 });

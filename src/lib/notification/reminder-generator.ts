@@ -18,39 +18,42 @@ import { reminderService } from './reminder-service';
 // 默认提醒配置
 // =============================================================================
 
+const DEFAULT_COURT_SCHEDULE_CONFIG: NonNullable<
+  ReminderPreferences['courtSchedule']
+> = {
+  enabled: true,
+  advanceDays: 1,
+  channels: [NotificationChannelValues.IN_APP, NotificationChannelValues.EMAIL],
+};
+
+const DEFAULT_DEADLINE_CONFIG: NonNullable<ReminderPreferences['deadline']> = {
+  enabled: true,
+  advanceDays: [7, 3, 1],
+  channels: [NotificationChannelValues.IN_APP, NotificationChannelValues.EMAIL],
+};
+
+const DEFAULT_FOLLOW_UP_CONFIG: NonNullable<
+  ReminderPreferences['followUp']
+> = {
+  enabled: true,
+  channels: [NotificationChannelValues.IN_APP],
+  autoRemind: true,
+};
+
+const DEFAULT_TASK_CONFIG: NonNullable<ReminderPreferences['task']> = {
+  enabled: true,
+  channels: [NotificationChannelValues.IN_APP, NotificationChannelValues.EMAIL],
+  priorities: ['HIGH', 'URGENT'],
+};
+
 const DEFAULT_REMINDER_PREFERENCES: ReminderPreferences = {
   channels: [NotificationChannelValues.IN_APP, NotificationChannelValues.EMAIL],
   quietHours: null,
   disabledTypes: [],
-  courtSchedule: {
-    enabled: true,
-    advanceDays: 1,
-    channels: [
-      NotificationChannelValues.IN_APP,
-      NotificationChannelValues.EMAIL,
-    ],
-  },
-  deadline: {
-    enabled: true,
-    advanceDays: [7, 3, 1],
-    channels: [
-      NotificationChannelValues.IN_APP,
-      NotificationChannelValues.EMAIL,
-    ],
-  },
-  followUp: {
-    enabled: true,
-    channels: [NotificationChannelValues.IN_APP],
-    autoRemind: true,
-  },
-  task: {
-    enabled: true,
-    channels: [
-      NotificationChannelValues.IN_APP,
-      NotificationChannelValues.EMAIL,
-    ],
-    priorities: ['HIGH', 'URGENT'],
-  },
+  courtSchedule: DEFAULT_COURT_SCHEDULE_CONFIG,
+  deadline: DEFAULT_DEADLINE_CONFIG,
+  followUp: DEFAULT_FOLLOW_UP_CONFIG,
+  task: DEFAULT_TASK_CONFIG,
 };
 
 // =============================================================================
@@ -67,8 +70,7 @@ class ReminderGenerator {
   ): Promise<void> {
     try {
       const config =
-        preferences?.courtSchedule ??
-        DEFAULT_REMINDER_PREFERENCES.courtSchedule;
+        preferences?.courtSchedule ?? DEFAULT_COURT_SCHEDULE_CONFIG;
 
       if (!config.enabled) {
         return;
@@ -202,8 +204,7 @@ class ReminderGenerator {
     preferences?: ReminderPreferences
   ): Promise<void> {
     try {
-      const config =
-        preferences?.deadline ?? DEFAULT_REMINDER_PREFERENCES.deadline;
+      const config = preferences?.deadline ?? DEFAULT_DEADLINE_CONFIG;
 
       if (!config.enabled) {
         return;
@@ -254,8 +255,7 @@ class ReminderGenerator {
     preferences?: ReminderPreferences
   ): Promise<void> {
     try {
-      const config =
-        preferences?.deadline ?? DEFAULT_REMINDER_PREFERENCES.deadline;
+      const config = preferences?.deadline ?? DEFAULT_DEADLINE_CONFIG;
 
       if (!config.enabled) {
         return;
@@ -587,24 +587,20 @@ function _mergePreferences(
     ...base,
     ...override,
     courtSchedule: {
-      ...base.courtSchedule,
+      ...(base.courtSchedule ?? DEFAULT_COURT_SCHEDULE_CONFIG),
       ...override.courtSchedule,
-    },
+    } as NonNullable<ReminderPreferences['courtSchedule']>,
     deadline: {
-      ...base.deadline,
+      ...(base.deadline ?? DEFAULT_DEADLINE_CONFIG),
       ...override.deadline,
-    },
+    } as NonNullable<ReminderPreferences['deadline']>,
     followUp: {
-      ...base.followUp,
+      ...(base.followUp ?? DEFAULT_FOLLOW_UP_CONFIG),
       ...override.followUp,
-    },
+    } as NonNullable<ReminderPreferences['followUp']>,
     task: {
-      ...(base.task ?? {
-        enabled: true,
-        channels: [NotificationChannelValues.IN_APP],
-        priorities: ['HIGH', 'URGENT'],
-      }),
+      ...(base.task ?? DEFAULT_TASK_CONFIG),
       ...override.task,
-    },
+    } as NonNullable<ReminderPreferences['task']>,
   };
 }

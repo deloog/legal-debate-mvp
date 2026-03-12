@@ -55,7 +55,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const response = await DELETE(request as any, params as any);
       const data = await response.json();
 
@@ -73,7 +73,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         { method: 'DELETE' }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const response = await DELETE(request as any, params as any);
       const data = await response.json();
 
@@ -98,7 +98,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const response = await DELETE(request as any, params as any);
       const data = await response.json();
 
@@ -119,7 +119,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       await DELETE(request as any, params as any);
 
       const {
@@ -152,7 +152,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const response = await DELETE(request as any, params as any);
       const data = await response.json();
 
@@ -198,7 +198,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const response = await POST(request as any, params as any);
       const data = await response.json();
 
@@ -240,7 +240,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const response = await POST(request as any, params as any);
       const data = await response.json();
 
@@ -262,7 +262,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       await POST(request as any, params as any);
 
       expect(prisma.lawArticleRelation.update).toHaveBeenCalledWith(
@@ -287,7 +287,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const response = await POST(request as any, params as any);
       const data = await response.json();
 
@@ -307,7 +307,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const response = await POST(request as any, params as any);
       const data = await response.json();
 
@@ -328,7 +328,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const response = await POST(request as any, params as any);
       const data = await response.json();
 
@@ -357,7 +357,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const response = await POST(request as any, params as any);
       const data = await response.json();
 
@@ -382,7 +382,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       await POST(request as any, params as any);
 
       const {
@@ -420,7 +420,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const response = await POST(request as any, params as any);
       const data = await response.json();
 
@@ -445,7 +445,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const response = await POST(request as any, params as any);
       const data = await response.json();
 
@@ -473,7 +473,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const response = await POST(request as any, params as any);
 
       // 日志失败不应影响主流程
@@ -495,7 +495,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const createResponse = await POST(createRequest as any, params as any);
       const createData = await createResponse.json();
 
@@ -519,7 +519,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const rejectResponse = await POST(rejectRequest as any, params as any);
       const rejectData = await rejectResponse.json();
 
@@ -553,7 +553,7 @@ describe('/api/v1/law-article-relations/[id]', () => {
         }
       );
 
-      const { params } = { params: { id: 'relation-1' } };
+      const { params } = { params: Promise.resolve({ id: 'relation-1' }) };
       const firstResponse = await POST(firstRequest as any, params as any);
       const firstData = await firstResponse.json();
 

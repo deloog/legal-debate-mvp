@@ -4,18 +4,18 @@
  */
 
 import {
-  type PrismaClient,
-  type ActionType,
-  type ActionStatus,
   type ActionLayer,
-  type ErrorType,
+  type ActionStatus,
+  type ActionType,
   type ErrorSeverity,
+  type ErrorType,
   Prisma,
+  type PrismaClient,
 } from '@prisma/client';
 import type {
+  HandleErrorResult,
   LogActionResult,
   VerifyOutputResult,
-  HandleErrorResult,
 } from './types';
 
 /**
@@ -97,11 +97,11 @@ export async function log_action(
       actionName: params.actionName,
       agentName: params.agentName || 'CoreAction',
       actionLayer,
-      parameters: (params.input ?? null) as Prisma.JsonValue,
-      result: (params.output ?? null) as Prisma.JsonValue,
+      parameters: (params.input ?? null) as Prisma.InputJsonValue,
+      result: (params.output ?? null) as Prisma.InputJsonValue,
       status,
       executionTime: params.executionTime || 0,
-      metadata: (params.metadata ?? {}) as Prisma.JsonValue,
+      metadata: (params.metadata ?? {}) as Prisma.InputJsonValue,
     },
   });
 
@@ -214,11 +214,12 @@ export async function handle_error(
       errorType,
       errorCode: params.error.name,
       errorMessage: params.error.message,
-      attemptedAction: (params.actionName || 'unknown') as Prisma.JsonValue,
-      context: (params.context ?? {}) as Prisma.JsonValue,
+      attemptedAction: (params.actionName ||
+        'unknown') as Prisma.InputJsonValue,
+      context: (params.context ?? {}) as Prisma.InputJsonValue,
       stackTrace: params.error.stack || '',
       severity,
-      metadata: (params.metadata ?? {}) as Prisma.JsonValue,
+      metadata: (params.metadata ?? {}) as Prisma.InputJsonValue,
     },
   });
 

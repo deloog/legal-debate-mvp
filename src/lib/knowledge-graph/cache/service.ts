@@ -13,6 +13,7 @@ import { GraphAlgorithms } from '@/lib/knowledge-graph/graph-algorithms';
 import { GraphData } from '@/lib/law-article/graph-builder';
 import { kgCache } from './manager';
 import { logger } from '@/lib/logger';
+import { prisma } from '@/lib/db/prisma';
 import {
   NeighborsQueryParams,
   ShortestPathQueryParams,
@@ -276,26 +277,49 @@ export class KnowledgeGraphCacheService {
    */
   static async warmUpCache(): Promise<number> {
     const startTime = Date.now();
-    const warmedCount = 0;
+    let warmedCount = 0;
 
     try {
-      // 获取常用的节点（可以通过访问统计获取）
-      // 这里简化处理：获取前100个法条
+      logger.info('开始预热知识图谱缓存');
 
-      logger.info('开始预热缓存');
+      // 1. 获取关系数最多的前 50 个法条（作为高频热点节点）
+      const hotArticles = await prisma.$queryRaw<Array<{ id: string }>>`
+        SELECT a.id
+        FROM "law_articles" a
+        JOIN "law_article_relations" r
+          ON r."sourceId" = a.id OR r."targetId" = a.id
+        WHERE r."verificationStatus" = 'VERIFIED'
+        GROUP BY a.id
+        ORDER BY COUNT(r.id) DESC
+        LIMIT 50
+      `;
 
-      // TODO: 实现实际的预热逻辑
-      // 1. 获取高频访问的节点
-      // 2. 对每个节点预计算邻居数据
-      // 3. 对常用节点对预计算最短路径
+      // 2. 对每个热点节点预计算 1-hop 邻居并写入缓存
+      for (const { id } of hotArticles) {
+        try {
+          const params: NeighborsQueryParams = { nodeId: id, depth: 1 };
+          const cached = await kgCache.neighbors.get(params);
+          if (!cached) {
+            const graphData = await GraphBuilder.buildGraph(id, 1);
+            await kgCache.neighbors.set(params, {
+              nodes: graphData.nodes,
+              links: graphData.links,
+            });
+            warmedCount++;
+          }
+        } catch {
+          // 单节点预热失败不影响整体
+        }
+      }
 
       logger.info('缓存预热完成', {
         warmedCount,
+        total: hotArticles.length,
         timeMs: Date.now() - startTime,
       });
       return warmedCount;
     } catch (error) {
-      logger.error('缓存预热失败', { error });
+      logger.error('缓存预热失败', error instanceof Error ? error : undefined);
       return warmedCount;
     }
   }

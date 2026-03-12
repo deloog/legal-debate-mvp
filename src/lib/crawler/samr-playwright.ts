@@ -401,6 +401,12 @@ export class SAMRPlaywrightCrawler {
 
     await this.delay(2000);
 
+    // 等待内容元素出现（最多 3 秒，超时则继续提取当前内容）
+    await this.page!.waitForSelector(
+      'article, .article-content, .contract-content, main',
+      { timeout: 3000 }
+    ).catch(() => {});
+
     const result = await this.page!.evaluate(() => {
       // 标题 - 从页面标题中提取
       const pageTitle = document.title || '';
@@ -409,13 +415,15 @@ export class SAMRPlaywrightCrawler {
         ? titleMatch[1].trim()
         : pageTitle.split('-')[0].trim();
 
-      // 内容 - 从 article 元素中提取
-      const articleEl = document.querySelector('article');
-      let content = '';
-      if (articleEl) {
-        // 获取所有文本内容
-        content = articleEl.textContent?.trim() || '';
-      }
+      // 内容 - 多选择器降级策略
+      const contentEl =
+        document.querySelector('article') ||
+        document.querySelector('.article-content') ||
+        document.querySelector('.contract-content') ||
+        document.querySelector('main .content') ||
+        document.querySelector('[class*="content"]') ||
+        document.querySelector('main');
+      const content = contentEl?.textContent?.trim() || '';
 
       // 尝试查找发布时间
       const dateEl = document.querySelector(

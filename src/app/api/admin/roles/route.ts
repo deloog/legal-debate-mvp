@@ -6,6 +6,7 @@
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
+import { logRoleChange } from '@/lib/membership/audit-logger';
 import type {
   CreateRoleRequest,
   RoleListQueryParams,
@@ -69,8 +70,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     ) as unknown as NextResponse;
   }
 
-  // 检查权限
-  const permissionError = await validatePermissions(request, 'user:read');
+  // 检查权限 - 使用 role:read 权限
+  const permissionError = await validatePermissions(request, 'role:read');
   if (permissionError) {
     return permissionError;
   }
@@ -78,10 +79,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // 解析查询参数
     const params = parseQueryParams(request);
-    const page = Math.max(1, Number.parseInt(params.page, 10));
+    const page = Math.max(1, Number.parseInt(params.page ?? '1', 10));
     const pageSize = Math.min(
       100,
-      Math.max(1, Number.parseInt(params.pageSize, 10))
+      Math.max(1, Number.parseInt(params.pageSize ?? '20', 10))
     );
     const skip = (page - 1) * pageSize;
 
@@ -170,8 +171,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     ) as unknown as NextResponse;
   }
 
-  // 检查权限
-  const permissionError = await validatePermissions(request, 'user:create');
+  // 检查权限 - 使用 role:create 权限
+  const permissionError = await validatePermissions(request, 'role:create');
   if (permissionError) {
     return permissionError;
   }
@@ -207,6 +208,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         isDefault: body.isDefault ?? false,
       },
     });
+
+    // 记录审计日志
+    await logRoleChange(
+      newRole.id,
+      'create',
+      {
+        name: newRole.name,
+        description: newRole.description,
+        isDefault: newRole.isDefault,
+      },
+      user.userId
+    );
 
     return Response.json(
       {

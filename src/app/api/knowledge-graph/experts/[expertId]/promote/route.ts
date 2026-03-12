@@ -15,7 +15,7 @@ import { certificationService } from '@/lib/knowledge-graph/expert/certification
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { expertId: string } }
+  { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -44,14 +44,14 @@ export async function POST(
 
     // 升级专家
     await certificationService.promoteExpert({
-      expertId: params.expertId,
+      expertId: (await params).expertId,
       newLevel: body.newLevel,
       reason: body.reason,
     });
 
     logger.info('Expert promoted successfully', {
       userId: session.user.id,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
       newLevel: body.newLevel,
     });
 
@@ -62,7 +62,7 @@ export async function POST(
   } catch (error) {
     logger.error('升级专家等级失败', {
       error,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
     });
 
     return NextResponse.json(
@@ -80,7 +80,7 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { expertId: string } }
+  { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -96,7 +96,7 @@ export async function GET(
 
     // 获取专家信息
     const expert = await prisma.knowledgeGraphExpert.findUnique({
-      where: { id: params.expertId },
+      where: { id: (await params).expertId },
     });
 
     if (!expert) {
@@ -113,7 +113,7 @@ export async function GET(
 
     logger.info('Expert level suggestion evaluated', {
       userId: session.user.id,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
     });
 
     return NextResponse.json({
@@ -123,7 +123,7 @@ export async function GET(
   } catch (error) {
     logger.error('获取专家等级建议失败', {
       error,
-      expertId: params.expertId,
+      expertId: (await params).expertId,
     });
 
     return NextResponse.json(

@@ -14,6 +14,7 @@ import type {
   StatuteCalculationListResponse,
 } from '@/types/statute';
 import { StatuteType, getRiskLevel } from '@/types/statute';
+import { logger } from '@/lib/logger';
 
 /**
  * 时效计算服务
@@ -36,7 +37,7 @@ export class StatuteCalculationService {
 
       return result;
     } catch (error) {
-      console.error('时效计算失败:', error);
+      logger.error('时效计算失败:', error);
       throw new Error(
         `时效计算失败: ${error instanceof Error ? error.message : '未知错误'}`
       );
@@ -60,7 +61,7 @@ export class StatuteCalculationService {
 
       return results;
     } catch (error) {
-      console.error('批量时效计算失败:', error);
+      logger.error('批量时效计算失败:', error);
       throw new Error(
         `批量时效计算失败: ${
           error instanceof Error ? error.message : '未知错误'
@@ -148,7 +149,7 @@ export class StatuteCalculationService {
         statistics,
       };
     } catch (error) {
-      console.error('获取计算结果列表失败:', error);
+      logger.error('获取计算结果列表失败:', error);
       throw new Error(
         `获取计算结果列表失败: ${
           error instanceof Error ? error.message : '未知错误'
@@ -206,7 +207,7 @@ export class StatuteCalculationService {
         updatedAt: reminder.updatedAt,
       };
     } catch (error) {
-      console.error('获取计算结果失败:', error);
+      logger.error('获取计算结果失败:', error);
       throw new Error(
         `获取计算结果失败: ${error instanceof Error ? error.message : '未知错误'}`
       );
@@ -228,7 +229,7 @@ export class StatuteCalculationService {
 
       return result.count > 0;
     } catch (error) {
-      console.error('删除计算结果失败:', error);
+      logger.error('删除计算结果失败:', error);
       throw new Error(
         `删除计算结果失败: ${error instanceof Error ? error.message : '未知错误'}`
       );
@@ -273,7 +274,7 @@ export class StatuteCalculationService {
         }>
       );
     } catch (error) {
-      console.error('获取统计数据失败:', error);
+      logger.error('获取统计数据失败:', error);
       throw new Error(
         `获取统计数据失败: ${error instanceof Error ? error.message : '未知错误'}`
       );

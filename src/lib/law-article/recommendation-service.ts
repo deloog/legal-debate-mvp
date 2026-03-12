@@ -5,6 +5,11 @@
 
 import { prisma } from '../db';
 import { LawArticle, RelationType, VerificationStatus } from '@prisma/client';
+import { logger } from '@/lib/logger';
+import {
+  GraphDistanceRecommender,
+  type GraphDistanceRecommendation,
+} from './graph-distance-recommender';
 
 /**
  * 推荐选项
@@ -120,7 +125,7 @@ export class LawArticleRecommendationService {
 
       return results;
     } catch (error) {
-      console.error('基于关系推荐失败:', error);
+      logger.error('基于关系推荐失败', error instanceof Error ? error : undefined);
       return [];
     }
   }
@@ -180,7 +185,7 @@ export class LawArticleRecommendationService {
 
       return results;
     } catch (error) {
-      console.error('基于相似度推荐失败:', error);
+      logger.error('基于相似度推荐失败', error instanceof Error ? error : undefined);
       return [];
     }
   }
@@ -242,7 +247,7 @@ export class LawArticleRecommendationService {
 
       return results;
     } catch (error) {
-      console.error('为辩论推荐失败:', error);
+      logger.error('为辩论推荐失败', error instanceof Error ? error : undefined);
       return [];
     }
   }
@@ -311,7 +316,7 @@ export class LawArticleRecommendationService {
         .sort((a, b) => b.score - a.score)
         .slice(0, limit);
     } catch (error) {
-      console.error('为合同推荐失败:', error);
+      logger.error('为合同推荐失败', error instanceof Error ? error : undefined);
       return [];
     }
   }
@@ -351,7 +356,7 @@ export class LawArticleRecommendationService {
         recommendationScore,
       };
     } catch (error) {
-      console.error('获取推荐统计失败:', error);
+      logger.error('获取推荐统计失败', error instanceof Error ? error : undefined);
       return {
         articleId,
         totalRelations: 0,
@@ -585,7 +590,7 @@ export class LawArticleRecommendationService {
 
       return adjustedScore;
     } catch (error) {
-      console.error('调整分数失败:', error);
+      logger.error('调整分数失败', error instanceof Error ? error : undefined);
       return baseScore;
     }
   }
@@ -610,7 +615,7 @@ export class LawArticleRecommendationService {
 
       return helpfulCount / feedbacks.length;
     } catch (error) {
-      console.error('获取反馈质量分数失败:', error);
+      logger.error('获取反馈质量分数失败', error instanceof Error ? error : undefined);
       return 0.5;
     }
   }
@@ -684,4 +689,21 @@ export class LawArticleRecommendationService {
 
     return optimized;
   }
+
+  /**
+   * 基于图谱多跳距离推荐相关法条
+   *
+   * 相比 recommendByRelations（仅查直接邻居），此方法沿关系链
+   * 最多走 3 步，发现更丰富的间接相关法条，并附带路径说明。
+   */
+  static async recommendByGraphDistance(
+    articleId: string,
+    options: RecommendationOptions = {}
+  ): Promise<GraphDistanceRecommendation[]> {
+    const { limit = 10 } = options;
+    return GraphDistanceRecommender.recommend(articleId, limit);
+  }
 }
+
+// 导出 GraphDistanceRecommendation 类型，供 API 和前端使用
+export type { GraphDistanceRecommendation };

@@ -3,13 +3,14 @@
  * 用于案件级权限控制，基于团队成员角色和自定义权限
  */
 
+import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/db/prisma';
+import { isAdmin, isSuperAdmin } from '@/lib/middleware/permissions';
 import {
-  CaseRole,
   CasePermission,
+  CaseRole,
   ROLE_DEFAULT_PERMISSIONS,
 } from '@/types/case-collaboration';
-import { isAdmin, isSuperAdmin } from '@/lib/middleware/permissions';
 
 // =============================================================================
 // 类型定义
@@ -232,7 +233,7 @@ async function getUserCasePermissionsAndRole(
 
     return { permissions, role };
   } catch (error) {
-    console.error('获取用户案件权限时出错:', error);
+    logger.error('获取用户案件权限时出错:', error);
     return { permissions: [], role: null };
   }
 }
@@ -274,7 +275,7 @@ export async function checkPermission(
       return {
         hasPermission: true,
         requiredPermission: permission,
-        memberRole: null,
+        memberRole: undefined,
       };
     }
 
@@ -283,7 +284,7 @@ export async function checkPermission(
       return {
         hasPermission: true,
         requiredPermission: permission,
-        memberRole: null,
+        memberRole: undefined,
       };
     }
 
@@ -306,10 +307,10 @@ export async function checkPermission(
       reason: permissions.includes(permission) ? undefined : '缺少该权限',
       requiredPermission: permission,
       actualPermissions: permissions,
-      memberRole,
+      memberRole: memberRole ?? undefined,
     };
   } catch (error) {
-    console.error('检查案件权限时出错:', error);
+    logger.error('检查案件权限时出错:', error);
     return {
       hasPermission: false,
       reason: '权限检查失败',
@@ -401,7 +402,7 @@ export async function validateAction(
       ],
     };
   } catch (error) {
-    console.error('验证操作权限时出错:', error);
+    logger.error('验证操作权限时出错:', error);
     return {
       isValid: false,
       errors: [

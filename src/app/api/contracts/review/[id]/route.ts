@@ -4,8 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
+import { readFile, stat } from 'fs/promises';
+import { resolve, sep } from 'path';
 import { prisma } from '@/lib/db/prisma';
 import { reviewContract } from '@/lib/ai/contract-reviewer';
 import type {
@@ -13,13 +13,23 @@ import type {
   ReviewReport,
 } from '@/types/contract-review';
 import { logger } from '@/lib/logger';
+import {
+  resolveContractUserId,
+  unauthorizedResponse,
+} from '@/app/api/lib/middleware/contract-auth';
 
 export async function GET(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ContractReviewResponse>> {
+  // ─── 认证 ─────────────────────────────────────────────────────────────────
+  const userId = resolveContractUserId(request);
+  if (!userId) {
+    return unauthorizedResponse() as NextResponse<ContractReviewResponse>;
+  }
+
   try {
-    const contractId = params.id;
+    const contractId = (await params).id;
 
     // 查找合同
     const contract = await prisma.contract.findUnique({
@@ -52,19 +62,45 @@ export async function GET(
       );
     }
 
-    // 读取合同文件内容
-    // 使用相对路径避免过于宽泛的文件模式匹配
-    const uploadsDir = 'uploads'; // 假设文件存储在 uploads 目录
-    const filePath = join(uploadsDir, contract.filePath);
-    let content = '';
+    // ─── 路径安全验证（防路径穿越） ───────────────────────────────────────────
+    const uploadsDir = resolve(process.cwd(), 'uploads');
+    const resolvedFilePath = resolve(uploadsDir, contract.filePath);
+    if (!resolvedFilePath.startsWith(uploadsDir + sep)) {
+      logger.warn('路径穿越尝试被拦截', { contractId, filePath: contract.filePath });
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_FILE_PATH',
+            message: '文件路径无效',
+          },
+        },
+        { status: 400 }
+      );
+    }
 
+    // ─── 读取合同文件内容 ─────────────────────────────────────────────────────
+    let content: string;
+    let fileSize: number;
     try {
-      const buffer = await readFile(filePath);
+      const [buffer, fileStats] = await Promise.all([
+        readFile(resolvedFilePath),
+        stat(resolvedFilePath),
+      ]);
       content = buffer.toString('utf-8');
+      fileSize = fileStats.size;
     } catch (error) {
       logger.error('读取合同文件失败:', error);
-      // 如果文件读取失败，使用空内容继续（用于测试）
-      content = '';
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'FILE_READ_ERROR',
+            message: '合同文件读取失败，请确认文件是否存在',
+          },
+        },
+        { status: 500 }
+      );
     }
 
     // 调用AI审查服务
@@ -79,7 +115,7 @@ export async function GET(
       id: `review-${Date.now()}`,
       contractId: contract.id,
       fileName: contract.filePath.split('/').pop() || 'unknown',
-      fileSize: 0, // 实际项目中应该获取真实文件大小
+      fileSize,
       uploadedAt: contract.createdAt,
       reviewedAt: new Date(),
       status: 'COMPLETED',

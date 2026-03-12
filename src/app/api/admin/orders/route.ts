@@ -232,7 +232,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   try {
     // 解析查询参数
     const params = parseQueryParams(request);
-    const page = Math.max(1, Number.parseInt(params.page, 10));
+    const page = Math.max(1, Number.parseInt(params.page ?? '1', 10));
     const pageSize = Math.min(
       100,
       Math.max(1, Number.parseInt(params.pageSize || params.limit || '20', 10))
@@ -249,7 +249,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       'orderNo',
     ];
     const sortBy = validSortFields.includes(params.sortBy ?? 'createdAt')
-      ? params.sortBy
+      ? (params.sortBy ?? 'createdAt')
       : 'createdAt';
 
     const validSortOrders = ['asc', 'desc'];

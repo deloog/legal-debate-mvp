@@ -118,7 +118,7 @@ describe('关系验证API', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testRelation.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testRelation.id }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -141,7 +141,7 @@ describe('关系验证API', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testRelation.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testRelation.id }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -162,7 +162,7 @@ describe('关系验证API', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testRelation.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testRelation.id }) });
 
       expect(response.status).toBe(400);
     });
@@ -182,7 +182,7 @@ describe('关系验证API', () => {
       );
 
       const response = await POST(request, {
-        params: { id: 'non-existent-id' },
+        params: Promise.resolve({ id: 'non-existent-id' }),
       });
 
       expect(response.status).toBe(400);
@@ -199,7 +199,7 @@ describe('关系验证API', () => {
       );
 
       const response = await DELETE(request, {
-        params: { id: testRelation.id },
+        params: Promise.resolve({ id: testRelation.id }),
       });
       const data = await response.json();
 
@@ -222,7 +222,7 @@ describe('关系验证API', () => {
       );
 
       const response = await DELETE(request, {
-        params: { id: 'non-existent-id' },
+        params: Promise.resolve({ id: 'non-existent-id' }),
       });
 
       expect(response.status).toBe(400);

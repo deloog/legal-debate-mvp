@@ -85,7 +85,7 @@ async function mapWitnessToDetail(
  * GET /api/witnesses/[id] - 获取证人详情
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -94,7 +94,7 @@ export const GET = withErrorHandler(
       );
     }
 
-    const witnessId = params.id;
+    const witnessId = (await params).id;
 
     // 获取证人详情
     const witness = await prisma.witness.findFirst({
@@ -137,7 +137,7 @@ export const GET = withErrorHandler(
  * PATCH /api/witnesses/[id] - 更新证人
  */
 export const PATCH = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -146,7 +146,7 @@ export const PATCH = withErrorHandler(
       );
     }
 
-    const witnessId = params.id;
+    const witnessId = (await params).id;
 
     // 验证证人是否存在且属于当前用户
     const existingWitness = await prisma.witness.findFirst({
@@ -224,7 +224,7 @@ export const PATCH = withErrorHandler(
  * DELETE /api/witnesses/[id] - 删除证人
  */
 export const DELETE = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -233,7 +233,7 @@ export const DELETE = withErrorHandler(
       );
     }
 
-    const witnessId = params.id;
+    const witnessId = (await params).id;
 
     // 验证证人是否存在且属于当前用户
     const existingWitness = await prisma.witness.findFirst({

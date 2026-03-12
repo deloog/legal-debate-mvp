@@ -146,7 +146,10 @@ export class FollowUpTaskProcessor {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      logger.error(`获取跟进任务列表失败: ${errorMessage}`, error);
+      logger.error(
+        `获取跟进任务列表失败: ${errorMessage}`,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -215,7 +218,10 @@ export class FollowUpTaskProcessor {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      logger.error(`获取跟进任务失败: ${errorMessage}`, error);
+      logger.error(
+        `获取跟进任务失败: ${errorMessage}`,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -262,7 +268,10 @@ export class FollowUpTaskProcessor {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      logger.error(`完成跟进任务失败: ${errorMessage}`, error);
+      logger.error(
+        `完成跟进任务失败: ${errorMessage}`,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -328,7 +337,10 @@ export class FollowUpTaskProcessor {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      logger.error(`更新跟进任务失败: ${errorMessage}`, error);
+      logger.error(
+        `更新跟进任务失败: ${errorMessage}`,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -366,7 +378,10 @@ export class FollowUpTaskProcessor {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      logger.error(`取消跟进任务失败: ${errorMessage}`, error);
+      logger.error(
+        `取消跟进任务失败: ${errorMessage}`,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -389,7 +404,10 @@ export class FollowUpTaskProcessor {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      logger.error(`获取待处理任务数量失败: ${errorMessage}`, error);
+      logger.error(
+        `获取待处理任务数量失败: ${errorMessage}`,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }
@@ -457,7 +475,10 @@ export class FollowUpTaskProcessor {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      logger.error(`获取即将到期任务失败: ${errorMessage}`, error);
+      logger.error(
+        `获取即将到期任务失败: ${errorMessage}`,
+        error instanceof Error ? error : undefined
+      );
       throw error;
     }
   }

@@ -6,6 +6,7 @@
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
+import { logRoleChange } from '@/lib/membership/audit-logger';
 import { RoleDetailResponse } from '@/types/admin-role';
 import type { UserRole } from '@/types/auth';
 import { NextRequest, NextResponse } from 'next/server';
@@ -33,7 +34,7 @@ function isSystemRole(roleName: string): boolean {
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -44,14 +45,14 @@ export async function GET(
     ) as unknown as NextResponse;
   }
 
-  // 检查权限
-  const permissionError = await validatePermissions(request, 'user:read');
+  // 检查权限 - 使用 role:read 权限
+  const permissionError = await validatePermissions(request, 'role:read');
   if (permissionError) {
     return permissionError;
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // 查询角色详情
     const role = await prisma.role.findUnique({
@@ -120,7 +121,7 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -131,14 +132,14 @@ export async function PUT(
     ) as unknown as NextResponse;
   }
 
-  // 检查权限
-  const permissionError = await validatePermissions(request, 'user:update');
+  // 检查权限 - 使用 role:update 权限
+  const permissionError = await validatePermissions(request, 'role:update');
   if (permissionError) {
     return permissionError;
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = (await request.json()) as {
       name?: string;
       description?: string;
@@ -183,6 +184,18 @@ export async function PUT(
       },
     });
 
+    // 记录审计日志
+    await logRoleChange(
+      id,
+      'update',
+      {
+        name: updatedRole.name,
+        description: updatedRole.description,
+        isDefault: updatedRole.isDefault,
+      },
+      user.userId
+    );
+
     return Response.json(
       {
         message: '角色更新成功',
@@ -210,7 +223,7 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -221,14 +234,14 @@ export async function DELETE(
     ) as unknown as NextResponse;
   }
 
-  // 检查权限
-  const permissionError = await validatePermissions(request, 'user:delete');
+  // 检查权限 - 使用 role:delete 权限
+  const permissionError = await validatePermissions(request, 'role:delete');
   if (permissionError) {
     return permissionError;
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // 检查角色是否存在
     const existingRole = await prisma.role.findUnique({
@@ -264,6 +277,17 @@ export async function DELETE(
         { status: 409 }
       ) as unknown as NextResponse;
     }
+
+    // 记录审计日志（在删除前记录）
+    await logRoleChange(
+      id,
+      'delete',
+      {
+        name: existingRole.name,
+        description: existingRole.description,
+      },
+      user.userId
+    );
 
     // 删除角色的所有权限关联
     await prisma.rolePermission.deleteMany({

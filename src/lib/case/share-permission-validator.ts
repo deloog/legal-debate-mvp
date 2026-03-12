@@ -11,6 +11,7 @@ import {
   getRoleDefaultPermissions,
 } from '@/types/case-collaboration';
 import { OwnerType } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 /**
  * 案件共享权限检查结果
@@ -102,7 +103,7 @@ export async function canShareCase(
       isOwner: true,
     };
   } catch (error) {
-    console.error('检查案件共享权限时出错:', error);
+    logger.error('检查案件共享权限时出错:', error);
     return {
       hasPermission: false,
       isOwner: false,
@@ -265,7 +266,7 @@ export async function canAccessSharedCase(
       reason: '无权访问此案件',
     };
   } catch (error) {
-    console.error('检查案件访问权限时出错:', error);
+    logger.error('检查案件访问权限时出错:', error);
     return {
       hasAccess: false,
       isOwner: false,

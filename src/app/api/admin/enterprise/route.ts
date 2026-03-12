@@ -66,7 +66,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       deletedAt: null,
     };
 
-    if (status && status !== '') {
+    if (status) {
       where.status = status;
     }
 

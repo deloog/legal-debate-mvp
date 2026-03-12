@@ -12,15 +12,24 @@ import {
 import type { ErrorResponse, SuccessResponse } from '@/types/api-response';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import {
+  resolveContractUserId,
+  unauthorizedResponse,
+  forbiddenResponse,
+} from '@/app/api/lib/middleware/contract-auth';
 
 /**
  * GET /api/contracts/[id]
  * 获取合同详情
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<unknown> | ErrorResponse>> {
+  // ─── 认证 ─────────────────────────────────────────────────────────────────
+  const userId = resolveContractUserId(request);
+  if (!userId) return unauthorizedResponse();
+
   try {
     const { id } = await params;
 
@@ -144,6 +153,10 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<unknown> | ErrorResponse>> {
+  // ─── 认证 ─────────────────────────────────────────────────────────────────
+  const userId = resolveContractUserId(request);
+  if (!userId) return unauthorizedResponse();
+
   try {
     const { id } = await params;
 
@@ -161,7 +174,7 @@ export async function PUT(
       );
     }
 
-    // 检查记录是否存在
+    // 检查记录是否存在，并验证所有权（lawyerId === userId）
     const existing = await prisma.contract.findUnique({
       where: { id },
     });
@@ -177,6 +190,11 @@ export async function PUT(
         },
         { status: 404 }
       );
+    }
+
+    // ─── 所有权检查（只有合同归属律师可以修改） ─────────────────────────────
+    if (existing.lawyerId !== userId) {
+      return forbiddenResponse();
     }
 
     // 解析请求体

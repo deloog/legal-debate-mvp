@@ -300,7 +300,7 @@ export function OrderDetailModal({
                     支付时间
                   </div>
                   <div className='mt-1 text-sm font-medium text-gray-900'>
-                    {formatDate(order.paidAt)}
+                    {order.paidAt ? formatDate(order.paidAt) : '-'}
                   </div>
                 </div>
                 <div>
@@ -431,7 +431,7 @@ export function OrderDetailModal({
                   {order.paymentRecords.map((record, index) => (
                     <div
                       key={index}
-                      className={`border-b border-gray-200 pb-2 ${index === order.paymentRecords.length - 1 ? 'border-b-0' : ''}`}
+                      className={`border-b border-gray-200 pb-2 ${index === (order.paymentRecords?.length ?? 0) - 1 ? 'border-b-0' : ''}`}
                     >
                       <div className='grid gap-2 sm:grid-cols-2'>
                         <div>

@@ -27,24 +27,57 @@ import {
   validateQueryInput,
 } from '@/lib/knowledge-graph/query/types';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 import {
   checkKnowledgeGraphPermission,
   logKnowledgeGraphAction,
   KnowledgeGraphAction,
+  KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
+
+// 查询深度限制
+const MAX_QUERY_DEPTH = 5;
+const MAX_RESULT_LIMIT = 1000;
 
 /**
  * POST /api/v1/knowledge-graph/query
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // 认证检查
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        { status: 401 }
+      );
+    }
+
+    // 权限检查
+    const permissionResult = await checkKnowledgeGraphPermission(
+      authUser.userId,
+      KnowledgeGraphAction.VIEW_RELATIONS,
+      KnowledgeGraphResource.GRAPH
+    );
+
+    if (!permissionResult.hasPermission) {
+      logger.warn('用户无权限执行图查询', {
+        userId: authUser.userId,
+        reason: permissionResult.reason,
+      });
+      return NextResponse.json(
+        { success: false, error: { code: 'FORBIDDEN', message: '权限不足' } },
+        { status: 403 }
+      );
+    }
+
     // 解析请求体
     const body = await request.json();
 
     // 检查是否包含query字段
     if (!body.query) {
       return NextResponse.json(
-        { error: '请求体必须包含query字段' },
+        { success: false, error: { code: 'MISSING_PARAM', message: '请求体必须包含query字段' } },
         { status: 400 }
       );
     }
@@ -54,25 +87,39 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // 验证查询输入
     const errors = validateQueryInput(queryInput);
     if (errors.length > 0) {
-      logger.warn('查询输入验证失败', { errors });
+      logger.warn('查询输入验证失败', { userId: authUser.userId, errors });
       return NextResponse.json(
-        { error: '查询参数验证失败', details: errors },
+        { success: false, error: { code: 'VALIDATION_ERROR', message: '查询参数验证失败', details: errors } },
         { status: 400 }
       );
     }
 
-    // 权限检查
-    const permissionResult = await checkKnowledgeGraphPermission(
-      '',
-      KnowledgeGraphAction.VIEW_RELATIONS,
-      'RELATION' as never
-    );
+    // 限制查询深度防止DoS
+    if (queryInput.depth && queryInput.depth > MAX_QUERY_DEPTH) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: { 
+            code: 'DEPTH_EXCEEDED', 
+            message: `查询深度不能超过${MAX_QUERY_DEPTH}` 
+          } 
+        },
+        { status: 400 }
+      );
+    }
 
-    if (!permissionResult.hasPermission) {
-      logger.warn('用户无权限执行图查询', {
-        reason: permissionResult.reason,
-      });
-      return NextResponse.json({ error: '权限不足' }, { status: 403 });
+    // 限制返回结果数量
+    if (queryInput.limit && queryInput.limit > MAX_RESULT_LIMIT) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: { 
+            code: 'LIMIT_EXCEEDED', 
+            message: `返回结果数量不能超过${MAX_RESULT_LIMIT}` 
+          } 
+        },
+        { status: 400 }
+      );
     }
 
     // 执行查询
@@ -81,9 +128,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // 记录操作日志
     await logKnowledgeGraphAction({
-      userId: '',
+      userId: authUser.userId,
       action: KnowledgeGraphAction.VIEW_RELATIONS,
-      resource: 'RELATION' as never,
+      resource: KnowledgeGraphResource.GRAPH,
       description: `执行图查询: ${queryInput.startNode}`,
       metadata: {
         startNode: queryInput.startNode,
@@ -91,25 +138,32 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         depth: queryInput.depth,
         filter: queryInput.filter,
         aggregate: queryInput.aggregate,
-        resultNodeCount: result.nodes.length,
-        resultLinkCount: result.links.length,
+        resultNodeCount: result.nodes?.length || 0,
+        resultLinkCount: result.links?.length || 0,
       },
     });
 
-    return NextResponse.json(result);
-  } catch (error: unknown) {
-    logger.error('图查询执行失败', {
-      error,
+    return NextResponse.json({
+      success: true,
+      data: result,
     });
+  } catch (error: unknown) {
+    logger.error('图查询执行失败', { error });
 
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
 
     // 区分不同类型的错误
     if (error instanceof Error && error.message.includes('不存在')) {
-      return NextResponse.json({ error: errorMessage }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: { code: 'NOT_FOUND', message: errorMessage } },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { code: 'INTERNAL_ERROR', message: errorMessage } },
+      { status: 500 }
+    );
   }
 }
 
@@ -124,6 +178,7 @@ export async function GET(): Promise<NextResponse> {
     version: '1.0.0',
     description: '提供灵活的图谱查询接口',
     endpoint: 'POST /api/v1/knowledge-graph/query',
+    authentication: '需要JWT认证',
     parameters: {
       startNode: {
         type: 'string',
@@ -141,9 +196,9 @@ export async function GET(): Promise<NextResponse> {
         type: 'number',
         required: false,
         default: 1,
-        description: '查询深度（1-10）',
+        description: `查询深度（1-${MAX_QUERY_DEPTH}）`,
         min: 1,
-        max: 10,
+        max: MAX_QUERY_DEPTH,
       },
       filter: {
         type: 'object',
@@ -193,9 +248,9 @@ export async function GET(): Promise<NextResponse> {
         type: 'number',
         required: false,
         default: 50,
-        description: '返回结果数量限制（1-100）',
+        description: `返回结果数量限制（1-${MAX_RESULT_LIMIT}）`,
         min: 1,
-        max: 100,
+        max: MAX_RESULT_LIMIT,
       },
       offset: {
         type: 'number',

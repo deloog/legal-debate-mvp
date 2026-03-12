@@ -15,7 +15,7 @@ import { logger } from '@/lib/logger';
  */
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { orderNo: string } }
+  { params }: { params: Promise<{ orderNo: string }> }
 ): Promise<NextResponse> {
   try {
     // 获取用户会话
@@ -31,7 +31,7 @@ export async function GET(
       );
     }
 
-    const { orderNo } = params;
+    const { orderNo } = await params;
 
     // 验证订单号
     if (!orderNo) {

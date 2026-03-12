@@ -257,7 +257,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       source: validatedData.source,
       tags: validatedData.tags || [],
       notes: validatedData.notes,
-      metadata: validatedData.metadata as Prisma.JsonValue,
+      metadata: validatedData.metadata as Prisma.InputJsonValue,
     },
   });
 

@@ -1,5 +1,6 @@
 import { getUnifiedAIService } from './unified-service';
 import { AIProvider } from '../../types/ai-service';
+import { logger } from '@/lib/logger';
 
 // 定义模型类型枚举
 export enum AIModelType {
@@ -191,7 +192,7 @@ export class DocumentParser {
   async analyzeWithAI(prompt: string): Promise<string> {
     // 如果是Mock模式，直接返回预设的Mock响应
     if (this.shouldUseMock()) {
-      console.log('使用Mock模式进行文档分析');
+      logger.info('使用Mock模式进行文档分析');
       return this.generateMockResponse();
     }
 
@@ -200,7 +201,7 @@ export class DocumentParser {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`🔄 [尝试 ${attempt}/${maxRetries}] 调用AI服务...`);
+        logger.info(`🔄 [尝试 ${attempt}/${maxRetries}] 调用AI服务...`);
 
         const unifiedService = await getUnifiedAIService(
           undefined,
@@ -226,14 +227,14 @@ export class DocumentParser {
         });
 
         if (response.choices && response.choices.length > 0) {
-          console.log(`✅ [尝试 ${attempt}/${maxRetries}] AI调用成功`);
+          logger.info(`✅ [尝试 ${attempt}/${maxRetries}] AI调用成功`);
           return response.choices[0].message.content;
         } else {
           throw new Error('AI服务返回了空响应');
         }
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        console.error(
+        logger.error(
           `❌ [尝试 ${attempt}/${maxRetries}] AI调用失败:`,
           lastError.message
         );
@@ -241,7 +242,7 @@ export class DocumentParser {
         // 如果不是最后一次尝试，等待后重试
         if (attempt < maxRetries) {
           const waitTime = attempt * 1000; // 递增等待时间：1秒、2秒、3秒
-          console.log(`⏳ 等待 ${waitTime}ms 后重试...`);
+          logger.info(`⏳ 等待 ${waitTime}ms 后重试...`);
           await new Promise(resolve => setTimeout(resolve, waitTime));
         }
       }
@@ -309,7 +310,7 @@ export class DocumentParser {
     textContent: string,
     options?: DocumentParseRequest['extractOptions']
   ): string {
-    const analysisTasks = [];
+    const analysisTasks: string[] = [];
 
     if (options?.extractParties !== false) {
       analysisTasks.push('当事人信息提取');
@@ -383,7 +384,7 @@ ${textContent}
   // =============================================================================
 
   private parseAIResponse(aiResponse: string): {
-    extractedData: DocumentParseResponse['data']['extractedData'];
+    extractedData: NonNullable<DocumentParseResponse['data']>['extractedData'];
     confidence: number;
     tokenUsed: number;
   } {
@@ -427,8 +428,8 @@ ${textContent}
         tokenUsed: this.estimateTokenUsage(aiResponse),
       };
     } catch (error) {
-      console.error('AI响应解析失败:', error);
-      console.error('原始响应:', aiResponse);
+      logger.error('AI响应解析失败:', error);
+      logger.error('原始响应:', aiResponse);
 
       // JSON解析失败时的降级处理
       return {

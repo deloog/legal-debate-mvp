@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { validatePermissions } from '@/lib/middleware/permission-check';
 
 /**
  * GET /api/admin/memberships/export/history
@@ -10,10 +10,9 @@ import { logger } from '@/lib/logger';
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    const userId = session?.user?.id;
-
-    if (!userId) {
+    // 验证用户身份
+    const user = await getAuthUser(request);
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
@@ -23,20 +22,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 检查管理员权限
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    });
-
-    if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: '权限不足',
-        },
-        { status: 403 }
-      );
+    // 检查权限 - 使用 membership:read 权限
+    const permissionError = await validatePermissions(request, 'membership:read');
+    if (permissionError) {
+      return permissionError;
     }
 
     const { searchParams } = new URL(request.url);

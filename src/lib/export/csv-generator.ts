@@ -1,6 +1,11 @@
 /**
  * CSV生成工具
  * 提供CSV文件的生成和导出功能
+ * 
+ * 安全特性：
+ * - 防止CSV/Excel公式注入攻击（以=,+,-,@开头的字段前加单引号）
+ * - 正确处理包含特殊字符的字段
+ * - 添加BOM以支持Excel正确显示中文
  */
 
 /**
@@ -37,7 +42,15 @@ export class CsvGenerator {
       return '';
     }
 
-    const stringValue = String(field);
+    let stringValue = String(field);
+
+    // 防止CSV/Excel公式注入攻击
+    // 如果以=, +, -, @, \t, \r 开头，在前面加单引号
+    // 这些字符在Excel中可能被解释为公式
+    const dangerousPrefixes = ['=', '+', '-', '@', '\t', '\r'];
+    if (dangerousPrefixes.some(prefix => stringValue.startsWith(prefix))) {
+      stringValue = "'" + stringValue;
+    }
 
     // 如果包含分隔符、引号或换行符，需要转义
     if (
@@ -181,4 +194,21 @@ export function formatDate(date: Date | string): string {
  */
 export function formatNumber(value: number, decimals: number = 2): string {
   return value.toFixed(decimals);
+}
+
+/**
+ * 检测并清理潜在的CSV注入攻击
+ * @param value 要检测的值
+ * @returns 清理后的值
+ */
+export function sanitizeCsvValue(value: string): string {
+  if (!value) return value;
+  
+  // 检测危险前缀
+  const dangerousPrefixes = ['=', '+', '-', '@', '\t', '\r'];
+  if (dangerousPrefixes.some(prefix => value.startsWith(prefix))) {
+    return "'" + value;
+  }
+  
+  return value;
 }

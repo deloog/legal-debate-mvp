@@ -323,7 +323,12 @@ export const enterpriseRiskProfileService = {
     };
 
     // 生成主要风险列表
-    const topRisks = [];
+    const topRisks: Array<{
+      type: string;
+      description: string;
+      severity: string;
+      recommendation: string;
+    }> = [];
     if (contractRisk.highRisk > 0) {
       topRisks.push({
         type: 'contract',
@@ -350,7 +355,7 @@ export const enterpriseRiskProfileService = {
     }
 
     // 生成建议
-    const recommendations = [];
+    const recommendations: string[] = [];
     if (overallScore >= 60) {
       recommendations.push('建议立即开展风险专项评估');
     }

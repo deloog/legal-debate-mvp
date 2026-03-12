@@ -4,18 +4,19 @@
  */
 
 import type {
-  DebateStreamEventType,
-  SSEConnectionConfig,
-  ConnectedEventData,
-  RoundStartEventData,
   ArgumentEventData,
-  ProgressEventData,
   CompletedEventData,
+  ConnectedEventData,
+  DebateStreamEventType,
+  DisconnectedEventData,
   ErrorEventData,
   PingEventData,
-  DisconnectedEventData,
+  ProgressEventData,
+  RoundStartEventData,
+  SSEConnectionConfig,
 } from './types';
 import { SSEConnectionState } from './types';
+import { logger } from '@/lib/logger';
 
 /**
  * 事件回调类型
@@ -344,7 +345,8 @@ export class SSEClient {
   private scheduleReconnect(): void {
     this.clearReconnectTimer();
 
-    const { maxRetryAttempts, enableReconnection } = this.config;
+    const maxRetryAttempts = this.config.maxRetryAttempts ?? 5;
+    const enableReconnection = this.config.enableReconnection ?? true;
 
     if (!enableReconnection) {
       this.log('自动重连已禁用');
@@ -418,7 +420,7 @@ export class SSEClient {
    */
   private log(...args: unknown[]): void {
     if (this.config.enableLogging) {
-      console.log(`[SSEClient]`, ...args);
+      logger.info(`[SSEClient]`, ...args);
     }
   }
 }

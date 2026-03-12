@@ -75,7 +75,7 @@ async function getUserStatistics(userId: string): Promise<UserStatistics> {
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -92,7 +92,7 @@ export async function GET(
     return permissionError;
   }
 
-  const userId = params.id;
+  const userId = (await params).id;
 
   // 验证用户ID
   if (!isValidUserId(userId)) {
@@ -175,7 +175,7 @@ export async function GET(
     };
 
     return Response.json(
-      { data: responseData },
+      { success: true, data: responseData },
       { status: 200 }
     ) as unknown as NextResponse;
   } catch (error) {
@@ -193,7 +193,7 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -210,7 +210,7 @@ export async function PUT(
     return permissionError;
   }
 
-  const userId = params.id;
+  const userId = (await params).id;
 
   // 验证用户ID
   if (!isValidUserId(userId)) {
@@ -314,7 +314,7 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   // 验证用户身份
   const currentUser = await getAuthUser(request);
@@ -331,7 +331,7 @@ export async function DELETE(
     return permissionError;
   }
 
-  const userId = params.id;
+  const userId = (await params).id;
 
   // 验证用户ID
   if (!isValidUserId(userId)) {

@@ -18,6 +18,8 @@ import {
   convertYuanToFen,
   calculateOrderExpireTime,
 } from '@/lib/payment/wechat-utils';
+import { getAlipay } from '@/lib/payment/alipay';
+import { AlipayProductCode } from '@/types/payment';
 import { logger } from '@/lib/logger';
 
 /**
@@ -160,7 +162,47 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 其他支付方式（预留）
+    // 支付宝扫码支付
+    if (paymentMethod === PaymentMethod.ALIPAY) {
+      try {
+        const alipayClient = getAlipay();
+        const expiredAt = calculateOrderExpireTime(120);
+
+        const alipayResponse = await alipayClient.createOrder({
+          outTradeNo: order.orderNo,
+          subject: order.description,
+          totalAmount: Number(order.amount),
+          productCode: AlipayProductCode.FAST_INSTANT_TRADE_PAY,
+          timeExpire: 120, // 分钟
+        });
+
+        return NextResponse.json({
+          success: true,
+          message: '订单创建成功',
+          data: {
+            orderId: order.id,
+            orderNo: order.orderNo,
+            amount: Number(order.amount),
+            currency: order.currency,
+            status: order.status as OrderStatus,
+            expiredAt: order.expiredAt,
+            qrCode: alipayResponse.qrCode,
+          },
+        } as CreateOrderResponse);
+      } catch (error) {
+        logger.error('[API] 调用支付宝失败:', error);
+        return NextResponse.json(
+          {
+            success: false,
+            message: '创建支付宝订单失败',
+            error: 'ALIPAY_ERROR',
+          } as CreateOrderResponse,
+          { status: 500 }
+        );
+      }
+    }
+
+    // 其他支付方式暂不支持
     return NextResponse.json(
       {
         success: false,

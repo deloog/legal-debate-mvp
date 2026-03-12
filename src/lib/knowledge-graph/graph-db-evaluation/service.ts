@@ -9,21 +9,21 @@
  * 5. 综合建议生成
  */
 
-import { logger } from '@/lib/logger';
 import { GraphAlgorithms } from '@/lib/knowledge-graph/graph-algorithms';
+import { logger } from '@/lib/logger';
 import {
-  GraphDatabaseType,
-  BenchmarkResult,
   AlgorithmBenchmarkResult,
-  StorageCostEstimate,
-  OperationalCostEstimate,
-  FeatureSupportAssessment,
-  MigrationComplexityAssessment,
+  BenchmarkResult,
   ComprehensiveEvaluationResult,
-  Recommendation,
-  EvaluationConfig,
   DEFAULT_EVALUATION_CONFIG,
+  EvaluationConfig,
+  FeatureSupportAssessment,
+  GraphDatabaseType,
+  MigrationComplexityAssessment,
+  OperationalCostEstimate,
   PerformanceTestInput,
+  Recommendation,
+  StorageCostEstimate,
 } from './types';
 
 /**
@@ -302,8 +302,20 @@ export class GraphDatabaseEvaluationService {
       confidence: number;
     }[];
   } {
-    const nodes = [];
-    const links = [];
+    const nodes: {
+      id: string;
+      lawName: string;
+      articleNumber: string;
+      category: string;
+      level: number;
+    }[] = [];
+    const links: {
+      source: string;
+      target: string;
+      relationType: string;
+      strength: number;
+      confidence: number;
+    }[] = [];
 
     // 生成节点
     for (let i = 0; i < size; i++) {

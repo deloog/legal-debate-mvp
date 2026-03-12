@@ -7,7 +7,6 @@ import {
   checkPermissions,
   requirePermission,
   isValidPermissionName,
-  extractUserIdFromRequest,
   PermissionCheckMode,
 } from '@/lib/middleware/permission-check';
 import type { NextRequest } from 'next/server';
@@ -234,33 +233,5 @@ describe('权限检查中间件', () => {
       expect(isValidPermissionName('')).toBe(false);
     });
 
-    it('应该从请求中提取用户ID', () => {
-      const request = {
-        headers: {
-          get: jest.fn((name: string) => {
-            if (name === 'x-user-id') {
-              return 'user-123';
-            }
-            return null;
-          }),
-        },
-      } as unknown as NextRequest;
-
-      const userId = extractUserIdFromRequest(request);
-
-      expect(userId).toBe('user-123');
-    });
-
-    it('应该返回null当没有用户ID', () => {
-      const request = {
-        headers: {
-          get: jest.fn(() => null),
-        },
-      } as unknown as NextRequest;
-
-      const userId = extractUserIdFromRequest(request);
-
-      expect(userId).toBeNull();
-    });
   });
 });

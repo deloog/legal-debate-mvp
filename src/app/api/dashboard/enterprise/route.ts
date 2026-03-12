@@ -34,6 +34,7 @@ function calculateComplianceScore(
 
 /**
  * 生成风险告警
+ * 使用稳定ID（非Date.now()），确保同一状态下前端无闪烁去重问题
  */
 function generateRiskAlerts(
   highRiskContracts: number,
@@ -43,7 +44,7 @@ function generateRiskAlerts(
 
   if (highRiskContracts > 0) {
     alerts.push({
-      id: `alert-high-risk-${Date.now()}`,
+      id: 'alert-high-risk',
       type: 'HIGH_RISK',
       title: '高风险合同待审查',
       description: `当前有 ${highRiskContracts} 份高风险合同需要审查`,
@@ -54,7 +55,7 @@ function generateRiskAlerts(
 
   if (pendingReviewContracts > 10) {
     alerts.push({
-      id: `alert-pending-review-${Date.now()}`,
+      id: 'alert-pending-review',
       type: 'COMPLIANCE',
       title: '待审查合同积压',
       description: `当前有 ${pendingReviewContracts} 份合同待审查，请及时处理`,
@@ -83,22 +84,19 @@ export async function GET(
     ] = await Promise.all([
       // 待审查合同数（状态为PENDING）
       prisma.contract.count({
-        where: {
-          status: 'PENDING',
-        },
+        where: { status: 'PENDING' },
       }),
-      // 高风险合同数（这里简化处理，实际应该根据风险评估结果）
-      // 暂时用DRAFT状态的合同数量模拟
+      // 高风险合同数：含有 HIGH 或 CRITICAL 级别条款风险的合同
       prisma.contract.count({
         where: {
-          status: 'DRAFT',
+          clauseRisks: {
+            some: { riskLevel: { in: ['HIGH', 'CRITICAL'] } },
+          },
         },
       }),
       // 待处理任务数
       prisma.task.count({
-        where: {
-          status: 'TODO',
-        },
+        where: { status: 'TODO' },
       }),
       // 总合同数
       prisma.contract.count(),
@@ -157,10 +155,16 @@ export async function GET(
       })
     );
 
-    // 4. 计算合规状态（简化处理）
-    const totalChecks = 10; // 假设有10个检查项
-    const passedChecks = Math.floor((complianceScore / 100) * totalChecks);
-    const failedChecks = totalChecks - passedChecks;
+    // 4. 合规状态：从真实的企业合规检查记录聚合
+    const [totalChecks, passedChecks, failedChecks] = await Promise.all([
+      prisma.enterpriseComplianceCheck.count(),
+      prisma.enterpriseComplianceCheck.count({
+        where: { checkResult: 'COMPLIANT' },
+      }),
+      prisma.enterpriseComplianceCheck.count({
+        where: { checkResult: 'NON_COMPLIANT' },
+      }),
+    ]);
 
     const complianceStatus: ComplianceStatus = {
       totalChecks,

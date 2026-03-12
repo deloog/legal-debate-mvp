@@ -269,7 +269,7 @@ describe('Document Templates API', () => {
       } as unknown as NextRequest;
 
       const response = await getTemplate(request, {
-        params: { id: 'template-1' },
+        params: Promise.resolve({ id: 'template-1' }),
       });
       const data = await response.json();
 
@@ -298,7 +298,7 @@ describe('Document Templates API', () => {
       } as unknown as NextRequest;
 
       const response = await getTemplate(request, {
-        params: { id: 'template-not-exist' },
+        params: Promise.resolve({ id: 'template-not-exist' }),
       });
       const data = await response.json();
 
@@ -355,7 +355,7 @@ describe('Document Templates API', () => {
       } as unknown as NextRequest;
 
       const response = await updateTemplate(request, {
-        params: { id: 'template-1' },
+        params: Promise.resolve({ id: 'template-1' }),
       });
       const data = await response.json();
 
@@ -399,7 +399,7 @@ describe('Document Templates API', () => {
       } as unknown as NextRequest;
 
       const response = await updateTemplate(request, {
-        params: { id: 'template-1' },
+        params: Promise.resolve({ id: 'template-1' }),
       });
       const data = await response.json();
 
@@ -447,7 +447,7 @@ describe('Document Templates API', () => {
       } as unknown as NextRequest;
 
       const response = await deleteTemplate(request, {
-        params: { id: 'template-1' },
+        params: Promise.resolve({ id: 'template-1' }),
       });
       const data = await response.json();
 
@@ -490,7 +490,7 @@ describe('Document Templates API', () => {
       } as unknown as NextRequest;
 
       const response = await deleteTemplate(request, {
-        params: { id: 'template-1' },
+        params: Promise.resolve({ id: 'template-1' }),
       });
       const data = await response.json();
 
@@ -538,7 +538,7 @@ describe('Document Templates API', () => {
       } as unknown as NextRequest;
 
       const response = await generateDocument(request, {
-        params: { id: 'template-1' },
+        params: Promise.resolve({ id: 'template-1' }),
       });
       const data = await response.json();
 
@@ -582,7 +582,7 @@ describe('Document Templates API', () => {
       } as unknown as NextRequest;
 
       const response = await generateDocument(request, {
-        params: { id: 'template-1' },
+        params: Promise.resolve({ id: 'template-1' }),
       });
       const data = await response.json();
 

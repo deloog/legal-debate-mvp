@@ -3,10 +3,10 @@
  * GET /api/knowledge-graph/quality-monitor
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { logger } from '@/lib/logger';
 import { generateDataQualityReport } from '@/lib/knowledge-graph/quality-monitor/data-quality-monitor';
 import { QualityMonitorConfig } from '@/lib/knowledge-graph/quality-monitor/types';
+import { logger } from '@/lib/logger';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * GET 获取数据质量报告
@@ -23,49 +23,30 @@ export async function GET(request: NextRequest) {
     const pendingThresholdDays = searchParams.get('pendingThresholdDays');
 
     // 构建配置
-    const config: Partial<QualityMonitorConfig> = {};
-
-    if (minCoverageRate !== null) {
-      config.coverage = {
-        ...config.coverage,
-        minCoverageRate: parseFloat(minCoverageRate),
-      };
-    }
-
-    if (maxOrphanArticles !== null) {
-      config.coverage = {
-        ...config.coverage,
-        maxOrphanArticles: parseInt(maxOrphanArticles, 10),
-      };
-    }
-
-    if (lowQualityThreshold !== null) {
-      config.accuracy = {
-        ...config.accuracy,
-        lowQualityThreshold: parseFloat(lowQualityThreshold),
-      };
-    }
-
-    if (minFeedbackCount !== null) {
-      config.accuracy = {
-        ...config.accuracy,
-        minFeedbackCount: parseInt(minFeedbackCount, 10),
-      };
-    }
-
-    if (staleThresholdDays !== null) {
-      config.timeliness = {
-        ...config.timeliness,
-        staleThresholdDays: parseInt(staleThresholdDays, 10),
-      };
-    }
-
-    if (pendingThresholdDays !== null) {
-      config.timeliness = {
-        ...config.timeliness,
-        pendingThresholdDays: parseInt(pendingThresholdDays, 10),
-      };
-    }
+    const config: QualityMonitorConfig = {
+      coverage: {
+        minCoverageRate: minCoverageRate ? parseFloat(minCoverageRate) : 0.8,
+        maxOrphanArticles: maxOrphanArticles
+          ? parseInt(maxOrphanArticles, 10)
+          : 100,
+      },
+      accuracy: {
+        lowQualityThreshold: lowQualityThreshold
+          ? parseFloat(lowQualityThreshold)
+          : 0.5,
+        minFeedbackCount: minFeedbackCount
+          ? parseInt(minFeedbackCount, 10)
+          : 10,
+      },
+      timeliness: {
+        staleThresholdDays: staleThresholdDays
+          ? parseInt(staleThresholdDays, 10)
+          : 30,
+        pendingThresholdDays: pendingThresholdDays
+          ? parseInt(pendingThresholdDays, 10)
+          : 7,
+      },
+    };
 
     // 生成数据质量报告
     const report = await generateDataQualityReport(config);

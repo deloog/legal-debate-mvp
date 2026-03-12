@@ -127,10 +127,11 @@ function createPermissionErrorResponse(
 ): NextResponse {
   return Response.json(
     {
-      error: '权限不足',
-      message: result.reason ?? '您没有执行此操作的权限',
-      requiredPermission: result.requiredPermission,
-      actualPermissions: result.actualPermissions ?? [],
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: result.reason ?? '您没有执行此操作的权限',
+      },
     },
     { status: 403 }
   ) as unknown as NextResponse;
@@ -148,16 +149,6 @@ function createPermissionErrorResponse(
 export function isValidPermissionName(permission: string): boolean {
   const regex = /^[a-z_]+:[a-z_]+$/;
   return regex.test(permission);
-}
-
-/**
- * 从请求中提取用户ID
- * @param request NextRequest对象
- * @returns 用户ID或null
- */
-export function extractUserIdFromRequest(request: NextRequest): string | null {
-  const userId = request.headers.get('x-user-id');
-  return userId ?? null;
 }
 
 /**

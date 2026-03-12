@@ -168,7 +168,7 @@ export class ChangeAuditGenerator implements ReportGenerator<ChangeAuditSummary>
     const topOperators = Array.from(operatorCounts.entries())
       .map(([userId, data]) => ({
         userId,
-        userName: data.userName,
+        userName: data.userName ?? '',
         count: data.count,
       }))
       .sort((a, b) => b.count - a.count)

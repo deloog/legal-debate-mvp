@@ -67,7 +67,7 @@ describe('GET /api/v1/contracts/[id]/law-articles', () => {
     );
 
     // 调用API
-    const response = await GET(request, { params: { id: mockContractId } });
+    const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
     const data = await response.json();
 
     // 验证
@@ -86,7 +86,7 @@ describe('GET /api/v1/contracts/[id]/law-articles', () => {
       `http://localhost:3000/api/v1/contracts/${mockContractId}/law-articles`
     );
 
-    const response = await GET(request, { params: { id: mockContractId } });
+    const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -103,7 +103,7 @@ describe('GET /api/v1/contracts/[id]/law-articles', () => {
       `http://localhost:3000/api/v1/contracts/${mockContractId}/law-articles`
     );
 
-    const response = await GET(request, { params: { id: mockContractId } });
+    const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -167,7 +167,7 @@ describe('POST /api/v1/contracts/[id]/law-articles', () => {
       }
     );
 
-    const response = await POST(request, { params: { id: mockContractId } });
+    const response = await POST(request, { params: Promise.resolve({ id: mockContractId }) });
     const data = await response.json();
 
     expect(response.status).toBe(201);
@@ -185,7 +185,7 @@ describe('POST /api/v1/contracts/[id]/law-articles', () => {
       }
     );
 
-    const response = await POST(request, { params: { id: mockContractId } });
+    const response = await POST(request, { params: Promise.resolve({ id: mockContractId }) });
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -206,7 +206,7 @@ describe('POST /api/v1/contracts/[id]/law-articles', () => {
       }
     );
 
-    const response = await POST(request, { params: { id: mockContractId } });
+    const response = await POST(request, { params: Promise.resolve({ id: mockContractId }) });
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -228,7 +228,7 @@ describe('POST /api/v1/contracts/[id]/law-articles', () => {
       }
     );
 
-    const response = await POST(request, { params: { id: mockContractId } });
+    const response = await POST(request, { params: Promise.resolve({ id: mockContractId }) });
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -253,7 +253,7 @@ describe('POST /api/v1/contracts/[id]/law-articles', () => {
       }
     );
 
-    const response = await POST(request, { params: { id: mockContractId } });
+    const response = await POST(request, { params: Promise.resolve({ id: mockContractId }) });
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -285,7 +285,7 @@ describe('POST /api/v1/contracts/[id]/law-articles', () => {
       }
     );
 
-    const response = await POST(request, { params: { id: mockContractId } });
+    const response = await POST(request, { params: Promise.resolve({ id: mockContractId }) });
     const data = await response.json();
 
     expect(response.status).toBe(409);

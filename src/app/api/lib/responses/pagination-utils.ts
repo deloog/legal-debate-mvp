@@ -79,7 +79,7 @@ export function buildCursorOptions(
   const parsedCursor = parseCursor(cursor);
 
   return {
-    cursor: parsedCursor,
+    cursor: parsedCursor ?? undefined,
     take: limit + 1, // 多取一个来判断是否还有更多数据
   };
 }

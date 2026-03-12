@@ -83,7 +83,7 @@ describe('Communications [id] API', () => {
         'http://localhost:3000/api/communications/comm-1'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'comm-1' },
+        params: Promise.resolve({ id: 'comm-1' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -112,7 +112,7 @@ describe('Communications [id] API', () => {
         'http://localhost:3000/api/communications/comm-2'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'comm-2' },
+        params: Promise.resolve({ id: 'comm-2' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -140,7 +140,7 @@ describe('Communications [id] API', () => {
         'http://localhost:3000/api/communications/comm-4'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'comm-4' },
+        params: Promise.resolve({ id: 'comm-4' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -167,7 +167,7 @@ describe('Communications [id] API', () => {
         'http://localhost:3000/api/communications/comm-3'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'comm-3' },
+        params: Promise.resolve({ id: 'comm-3' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -184,7 +184,7 @@ describe('Communications [id] API', () => {
         'http://localhost:3000/api/communications/not-exist'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'not-exist' },
+        params: Promise.resolve({ id: 'not-exist' }),
       });
 
       expect(response.status).toBe(404);
@@ -197,7 +197,7 @@ describe('Communications [id] API', () => {
         'http://localhost:3000/api/communications/comm-1'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'comm-1' },
+        params: Promise.resolve({ id: 'comm-1' }),
       });
 
       expect(response.status).toBe(401);
@@ -212,7 +212,7 @@ describe('Communications [id] API', () => {
         'http://localhost:3000/api/communications/comm-1'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'comm-1' },
+        params: Promise.resolve({ id: 'comm-1' }),
       });
 
       expect(response.status).toBe(404);
@@ -227,7 +227,7 @@ describe('Communications [id] API', () => {
         'http://localhost:3000/api/communications/comm-1'
       );
       const response = await GET_BY_ID(request, {
-        params: { id: 'comm-1' },
+        params: Promise.resolve({ id: 'comm-1' }),
       });
 
       expect(response.status).toBe(500);
@@ -249,7 +249,7 @@ describe('Communications [id] API', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'comm-1' },
+        params: Promise.resolve({ id: 'comm-1' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -274,7 +274,7 @@ describe('Communications [id] API', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'comm-1' },
+        params: Promise.resolve({ id: 'comm-1' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -296,7 +296,7 @@ describe('Communications [id] API', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'not-exist' },
+        params: Promise.resolve({ id: 'not-exist' }),
       });
 
       expect(response.status).toBe(404);
@@ -313,7 +313,7 @@ describe('Communications [id] API', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'comm-1' },
+        params: Promise.resolve({ id: 'comm-1' }),
       });
 
       expect(response.status).toBe(401);
@@ -332,7 +332,7 @@ describe('Communications [id] API', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'comm-1' },
+        params: Promise.resolve({ id: 'comm-1' }),
       });
 
       expect(response.status).toBe(404);
@@ -365,7 +365,7 @@ describe('Communications [id] API', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'comm-1' },
+        params: Promise.resolve({ id: 'comm-1' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -401,7 +401,7 @@ describe('Communications [id] API', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'comm-1' },
+        params: Promise.resolve({ id: 'comm-1' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -446,7 +446,7 @@ describe('Communications [id] API', () => {
         }
       );
       const response = await PATCH(request, {
-        params: { id: 'comm-1' },
+        params: Promise.resolve({ id: 'comm-1' }),
       });
       const testResponse = await createTestResponse(response);
 
@@ -468,7 +468,7 @@ describe('Communications [id] API', () => {
         }
       );
       const response = await DELETE(request, {
-        params: { id: 'comm-1' },
+        params: Promise.resolve({ id: 'comm-1' }),
       });
 
       assertions.assertNoContent(response);
@@ -486,7 +486,7 @@ describe('Communications [id] API', () => {
         }
       );
       const response = await DELETE(request, {
-        params: { id: 'not-exist' },
+        params: Promise.resolve({ id: 'not-exist' }),
       });
 
       expect(response.status).toBe(404);
@@ -502,7 +502,7 @@ describe('Communications [id] API', () => {
         }
       );
       const response = await DELETE(request, {
-        params: { id: 'comm-1' },
+        params: Promise.resolve({ id: 'comm-1' }),
       });
 
       expect(response.status).toBe(401);
@@ -520,7 +520,7 @@ describe('Communications [id] API', () => {
         }
       );
       const response = await DELETE(request, {
-        params: { id: 'comm-1' },
+        params: Promise.resolve({ id: 'comm-1' }),
       });
 
       expect(response.status).toBe(404);

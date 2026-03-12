@@ -109,8 +109,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return unauthorizedResponse();
   }
 
-  // 检查权限
-  const permissionError = await validatePermissions(request, 'user:read');
+  // 检查权限 - 使用 membership:read 权限
+  const permissionError = await validatePermissions(request, 'membership:read');
   if (permissionError) {
     return permissionError;
   }
@@ -118,10 +118,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // 解析查询参数
     const params = parseQueryParams(request);
-    const page = Math.max(1, Number.parseInt(params.page, 10));
+    const page = Math.max(1, Number.parseInt(params.page ?? '1', 10));
     const pageSize = Math.min(
       100,
-      Math.max(1, Number.parseInt(params.pageSize, 10))
+      Math.max(1, Number.parseInt(params.pageSize ?? '20', 10))
     );
     const skip = (page - 1) * pageSize;
 

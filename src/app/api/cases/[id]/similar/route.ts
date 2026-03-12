@@ -3,6 +3,8 @@ import { SimilarCaseServiceFactory } from '@/lib/case/similar-case-service';
 import type { SimilaritySearchParams } from '@/types/case-example';
 import type { CaseType, CaseResult } from '@prisma/client';
 import { logger } from '@/lib/agent/security/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 
 /**
  * GET /api/cases/[id]/similar
@@ -10,15 +12,44 @@ import { logger } from '@/lib/agent/security/logger';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const caseId = params.id;
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        { status: 401 }
+      );
+    }
 
-    // 获取查询参数
+    const caseId = (await params).id;
+
+    // 验证用户是否有权访问该案件（所有者或管理员）
+    const caseRecord = await prisma.case.findUnique({
+      where: { id: caseId, deletedAt: null },
+      select: { userId: true },
+    });
+    if (!caseRecord) {
+      return NextResponse.json(
+        { success: false, error: { code: 'NOT_FOUND', message: '案件不存在' } },
+        { status: 404 }
+      );
+    }
+    const isAdmin = authUser.role === 'ADMIN' || authUser.role === 'SUPER_ADMIN';
+    if (caseRecord.userId !== authUser.userId && !isAdmin) {
+      return NextResponse.json(
+        { success: false, error: { code: 'FORBIDDEN', message: '无权访问此案件' } },
+        { status: 403 }
+      );
+    }
+
+    // 获取查询参数（带范围校验，防止 DoS）
     const { searchParams } = new URL(request.url);
-    const topK = parseInt(searchParams.get('topK') || '10', 10);
-    const threshold = parseFloat(searchParams.get('threshold') || '0.7');
+    const topKRaw = parseInt(searchParams.get('topK') || '10', 10);
+    const topK = isNaN(topKRaw) || topKRaw < 1 || topKRaw > 50 ? 10 : topKRaw;
+    const thresholdRaw = parseFloat(searchParams.get('threshold') || '0.7');
+    const threshold = isNaN(thresholdRaw) || thresholdRaw < 0 || thresholdRaw > 1 ? 0.7 : thresholdRaw;
     const caseType = searchParams.get('caseType');
     const result = searchParams.get('result');
     const startDateStr = searchParams.get('startDate');
@@ -47,13 +78,13 @@ export async function GET(
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error';
     logger.error('Failed to search similar cases', new Error(errorMessage), {
-      caseId: params.id,
+      caseId: (await params).id,
     });
 
     return NextResponse.json(
       {
         success: false,
-        error: errorMessage,
+        error: { code: 'INTERNAL_ERROR', message: '检索失败，请稍后重试' },
       },
       { status: 500 }
     );

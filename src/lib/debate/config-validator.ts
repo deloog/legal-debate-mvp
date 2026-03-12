@@ -258,13 +258,13 @@ export function validateRoundStart(
   currentRound: number,
   lastRoundStatus?: string
 ): { valid: boolean; reason?: string } {
+  const maxRounds =
+    debateConfig.maxRounds ?? DEFAULT_DEBATE_CONFIG.maxRounds ?? 5;
   // 检查最大轮次限制
-  if (
-    currentRound > (debateConfig.maxRounds || DEFAULT_DEBATE_CONFIG.maxRounds)
-  ) {
+  if (currentRound > maxRounds) {
     return {
       valid: false,
-      reason: `已达到最大轮次限制 ${debateConfig.maxRounds}`,
+      reason: `已达到最大轮次限制 ${maxRounds}`,
     };
   }
 
@@ -289,12 +289,13 @@ export function calculateEstimatedCompletion(
   currentRound: number,
   startedAt?: Date
 ): { estimatedEnd: Date; remaining: number } {
-  const totalRounds = config.maxRounds || DEFAULT_DEBATE_CONFIG.maxRounds;
-  const roundTime =
-    (config.timePerRound || DEFAULT_DEBATE_CONFIG.timePerRound) * 60 * 1000; // 转换为毫秒
+  const totalRounds = config.maxRounds ?? DEFAULT_DEBATE_CONFIG.maxRounds ?? 5;
+  const roundTimeMs =
+    config.timePerRound ?? DEFAULT_DEBATE_CONFIG.timePerRound ?? 5;
+  const roundTime = roundTimeMs * 60 * 1000; // 转换为毫秒
   const remainingRounds = totalRounds - currentRound + 1; // 包括当前轮次
 
-  const now = startedAt || new Date();
+  const now = startedAt ?? new Date();
   const estimatedEnd = new Date(now.getTime() + remainingRounds * roundTime);
   const remaining = estimatedEnd.getTime() - now.getTime();
 

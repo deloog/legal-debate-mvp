@@ -7,6 +7,7 @@
 import { NextRequest } from 'next/server';
 import { GET, POST } from '@/app/api/v1/law-articles/[id]/relations/route';
 import { prisma } from '@/lib/db/prisma';
+import { getAuthUser } from '@/lib/middleware/auth';
 import {
   RelationType,
   DiscoveryMethod,
@@ -15,6 +16,12 @@ import {
   LawStatus,
 } from '@prisma/client';
 import type { LawArticle } from '@prisma/client';
+
+// Mock auth middleware
+jest.mock('@/lib/middleware/auth');
+
+const mockGetAuthUser = getAuthUser as jest.Mock;
+const AUTHED_USER = { userId: 'user-1', role: 'USER', email: 'user@test.com' };
 
 describe('关系管理API', () => {
   let testArticle1: LawArticle;
@@ -74,6 +81,11 @@ describe('关系管理API', () => {
     });
   });
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetAuthUser.mockResolvedValue(AUTHED_USER);
+  });
+
   afterEach(async () => {
     // 每个测试后清理关系
     await prisma.lawArticleRelation.deleteMany({
@@ -83,6 +95,44 @@ describe('关系管理API', () => {
           { targetId: { in: [testArticle1.id, testArticle2.id] } },
         ],
       },
+    });
+  });
+
+  describe('认证', () => {
+    it('未认证时GET应该返回401', async () => {
+      mockGetAuthUser.mockResolvedValue(null);
+      const request = new NextRequest(
+        `http://localhost:3000/api/v1/law-articles/${testArticle1.id}/relations`
+      );
+      const response = await GET(request, { params: Promise.resolve({ id: testArticle1.id }) });
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.success).toBe(false);
+      expect(data.error.code).toBe('UNAUTHORIZED');
+    });
+
+    it('未认证时POST应该返回401', async () => {
+      mockGetAuthUser.mockResolvedValue(null);
+      const requestBody = {
+        targetId: testArticle2.id,
+        relationType: RelationType.CITES,
+      };
+
+      const request = new NextRequest(
+        `http://localhost:3000/api/v1/law-articles/${testArticle1.id}/relations`,
+        {
+          method: 'POST',
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      const response = await POST(request, { params: Promise.resolve({ id: testArticle1.id }) });
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.success).toBe(false);
+      expect(data.error.code).toBe('UNAUTHORIZED');
     });
   });
 
@@ -116,14 +166,15 @@ describe('关系管理API', () => {
         `http://localhost:3000/api/v1/law-articles/${testArticle1.id}/relations`
       );
 
-      const response = await GET(request, { params: { id: testArticle1.id } });
+      const response = await GET(request, { params: Promise.resolve({ id: testArticle1.id }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.articleId).toBe(testArticle1.id);
-      expect(data.totalRelations).toBe(2);
-      expect(data.outgoingRelations).toHaveLength(1);
-      expect(data.incomingRelations).toHaveLength(1);
+      expect(data.success).toBe(true);
+      expect(data.data.articleId).toBe(testArticle1.id);
+      expect(data.data.totalRelations).toBe(2);
+      expect(data.data.outgoingRelations).toHaveLength(1);
+      expect(data.data.incomingRelations).toHaveLength(1);
     });
 
     it('应该支持按关系类型过滤', async () => {
@@ -131,12 +182,13 @@ describe('关系管理API', () => {
         `http://localhost:3000/api/v1/law-articles/${testArticle1.id}/relations?relationType=CITES`
       );
 
-      const response = await GET(request, { params: { id: testArticle1.id } });
+      const response = await GET(request, { params: Promise.resolve({ id: testArticle1.id }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.outgoingRelations).toHaveLength(1);
-      expect(data.outgoingRelations[0].relationType).toBe(RelationType.CITES);
+      expect(data.success).toBe(true);
+      expect(data.data.outgoingRelations).toHaveLength(1);
+      expect(data.data.outgoingRelations[0].relationType).toBe(RelationType.CITES);
     });
 
     it('应该支持按方向过滤', async () => {
@@ -144,12 +196,13 @@ describe('关系管理API', () => {
         `http://localhost:3000/api/v1/law-articles/${testArticle1.id}/relations?direction=outgoing`
       );
 
-      const response = await GET(request, { params: { id: testArticle1.id } });
+      const response = await GET(request, { params: Promise.resolve({ id: testArticle1.id }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.outgoingRelations).toHaveLength(1);
-      expect(data.incomingRelations).toHaveLength(0);
+      expect(data.success).toBe(true);
+      expect(data.data.outgoingRelations).toHaveLength(1);
+      expect(data.data.incomingRelations).toHaveLength(0);
     });
 
     it('应该支持按最小强度过滤', async () => {
@@ -157,12 +210,13 @@ describe('关系管理API', () => {
         `http://localhost:3000/api/v1/law-articles/${testArticle1.id}/relations?minStrength=0.8`
       );
 
-      const response = await GET(request, { params: { id: testArticle1.id } });
+      const response = await GET(request, { params: Promise.resolve({ id: testArticle1.id }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.outgoingRelations).toHaveLength(1);
-      expect(data.outgoingRelations[0].strength).toBeGreaterThanOrEqual(0.8);
+      expect(data.success).toBe(true);
+      expect(data.data.outgoingRelations).toHaveLength(1);
+      expect(data.data.outgoingRelations[0].strength).toBeGreaterThanOrEqual(0.8);
     });
 
     it('应该处理不存在的法条ID', async () => {
@@ -171,12 +225,13 @@ describe('关系管理API', () => {
       );
 
       const response = await GET(request, {
-        params: { id: 'non-existent-id' },
+        params: Promise.resolve({ id: 'non-existent-id' }),
       });
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.totalRelations).toBe(0);
+      expect(data.success).toBe(true);
+      expect(data.data.totalRelations).toBe(0);
     });
   });
 
@@ -199,14 +254,15 @@ describe('关系管理API', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testArticle1.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testArticle1.id }) });
       const data = await response.json();
 
       expect(response.status).toBe(201);
-      expect(data.sourceId).toBe(testArticle1.id);
-      expect(data.targetId).toBe(testArticle2.id);
-      expect(data.relationType).toBe(RelationType.CITES);
-      expect(data.confidence).toBe(0.95);
+      expect(data.success).toBe(true);
+      expect(data.data.sourceId).toBe(testArticle1.id);
+      expect(data.data.targetId).toBe(testArticle2.id);
+      expect(data.data.relationType).toBe(RelationType.CITES);
+      expect(data.data.confidence).toBe(0.95);
     });
 
     it('应该拒绝自引用关系', async () => {
@@ -223,11 +279,12 @@ describe('关系管理API', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testArticle1.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testArticle1.id }) });
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('禁止自引用');
+      expect(data.success).toBe(false);
+      expect(data.error.message).toContain('禁止自引用');
     });
 
     it('应该拒绝不存在的目标法条', async () => {
@@ -244,11 +301,12 @@ describe('关系管理API', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testArticle1.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testArticle1.id }) });
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toContain('目标法条不存在');
+      expect(data.success).toBe(false);
+      expect(data.error.message).toContain('目标法条不存在');
     });
 
     it('应该处理缺少必需字段的请求', async () => {
@@ -265,9 +323,12 @@ describe('关系管理API', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testArticle1.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testArticle1.id }) });
+      const data = await response.json();
 
       expect(response.status).toBe(400);
+      expect(data.success).toBe(false);
+      expect(data.error.code).toBe('MISSING_FIELD');
     });
 
     it('应该支持创建带证据的关系', async () => {
@@ -288,11 +349,12 @@ describe('关系管理API', () => {
         }
       );
 
-      const response = await POST(request, { params: { id: testArticle1.id } });
+      const response = await POST(request, { params: Promise.resolve({ id: testArticle1.id }) });
       const data = await response.json();
 
       expect(response.status).toBe(201);
-      expect(data.evidence).toEqual(requestBody.evidence);
+      expect(data.success).toBe(true);
+      expect(data.data.evidence).toEqual(requestBody.evidence);
     });
   });
 });

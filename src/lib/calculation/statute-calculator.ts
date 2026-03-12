@@ -11,6 +11,7 @@ import {
   SpecialCircumstances,
 } from '@/types/statute';
 import { getApplicableRules, isRuleValid } from './statute-rules';
+import { logger } from '@/lib/logger';
 
 /**
  * 时效计算器类
@@ -297,7 +298,7 @@ export class StatuteCalculator {
     }
 
     if (errors.length > 0) {
-      console.warn('批量计算部分失败:', errors);
+      logger.warn('批量计算部分失败:', errors);
     }
 
     return results;

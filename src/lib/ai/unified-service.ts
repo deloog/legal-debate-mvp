@@ -5,6 +5,7 @@
  * 提供统一的接口供上层业务调用
  */
 
+import { logger } from '@/lib/logger';
 import type {
   Argument,
   CaseInfo,
@@ -137,9 +138,9 @@ export class UnifiedAIService {
       }
 
       this.initialized = true;
-      console.log('Unified AI Service initialized successfully');
+      logger.info('Unified AI Service initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize Unified AI Service:', error);
+      logger.error('Failed to initialize Unified AI Service:', error);
       throw error;
     }
   }
@@ -152,9 +153,9 @@ export class UnifiedAIService {
         aiConfig,
         this.useRealAPI
       );
-      console.log('General AI Service initialized');
+      logger.info('General AI Service initialized');
     } catch (error) {
-      console.error('Failed to initialize General AI Service:', error);
+      logger.error('Failed to initialize General AI Service:', error);
       throw error;
     }
   }
@@ -163,9 +164,9 @@ export class UnifiedAIService {
     try {
       const lawStarConfig = getLawStarConfig();
       this.legalAIService = createLawStarClient(lawStarConfig);
-      console.log('Legal AI Service (Law Star) initialized');
+      logger.info('Legal AI Service (Law Star) initialized');
     } catch (error) {
-      console.error('Failed to initialize Legal AI Service:', error);
+      logger.error('Failed to initialize Legal AI Service:', error);
       throw error;
     }
   }
@@ -289,7 +290,7 @@ ${options?.identifyLegalIssues ? '- 识别法律问题和争议焦点' : ''}`;
     // 1. 首先检查缓存（含前轮上下文，不同轮次有不同缓存键）
     const cachedResponse = await this.cacheManager.checkDebateCache(caseInfo);
     if (cachedResponse) {
-      console.log('Using cached debate response');
+      logger.info('Using cached debate response');
       return {
         ...cachedResponse,
         cached: true,
@@ -458,8 +459,8 @@ ${contextSection}
         {
           role: 'system',
           content: this.debateConfig.usePromptOptimizer
-            ? (await this.promptOptimizer?.generateOptimizedPrompt(caseInfo))
-                .systemPrompt
+            ? ((await this.promptOptimizer?.generateOptimizedPrompt(caseInfo))
+                ?.systemPrompt ?? '')
             : `你是一位在中国执业超过20年的资深律师，擅长诉讼辩论与法律检索。每个论点必须引用至少一条中国现行有效的法律法规，法律引用格式须精确到具体条款号（如第X条第X款），禁止捏造不存在的法律条款，仅输出JSON。`,
         },
         { role: 'user', content: prompt },
@@ -549,7 +550,7 @@ ${legalTexts}
           parsed.plaintiffArguments?.every(this.isValidArgument) &&
           parsed.defendantArguments?.every(this.isValidArgument)
         ) {
-          console.log('JSON解析成功');
+          logger.info('JSON解析成功');
           return {
             plaintiffArguments: parsed.plaintiffArguments || [],
             defendantArguments: parsed.defendantArguments || [],
@@ -563,11 +564,11 @@ ${legalTexts}
           };
         }
       } catch (error) {
-        console.error('JSON解析失败，尝试其他解析方法:', error);
+        logger.error('JSON解析失败，尝试其他解析方法:', error);
       }
     }
 
-    console.log('尝试从文本提取论点');
+    logger.info('尝试从文本提取论点');
     return this.extractArgumentsFromText(response, legalReferences);
   }
 
@@ -637,7 +638,7 @@ ${legalTexts}
       }
     }
 
-    console.log(
+    logger.info(
       `提取到 ${plaintiffArguments.length} 个原告论点，${defendantArguments.length} 个被告论点`
     );
 
@@ -697,8 +698,8 @@ ${legalTexts}
       /根据|依据|依照|按照.+?(?:法|条例|规定|解释)/
     );
 
-    if (legalMatch) {
-      const sentence = content.substring(legalMatch.index);
+    if (legalMatch && legalMatch.index !== undefined) {
+      const sentence = content.substring(legalMatch.index as number);
       const endIndex = sentence.search(/[。\n]/);
       return endIndex >= 0
         ? sentence.substring(0, endIndex).trim()
@@ -716,8 +717,8 @@ ${legalTexts}
       /(因此|所以|基于此|由此可见|综上所述)/
     );
 
-    if (connectorMatch) {
-      return content.substring(connectorMatch.index).trim();
+    if (connectorMatch && connectorMatch.index !== undefined) {
+      return content.substring(connectorMatch.index as number).trim();
     }
 
     return undefined;
@@ -1110,7 +1111,7 @@ ${legalTexts}
       title: document.title,
       description: documentAnalysis.choices[0].message.content,
       legalReferences: legalReferences.combined.map(
-        ref => ref.lawName || ref.title
+        ref => ref.lawName || ref.title || ''
       ),
     });
 
@@ -1182,7 +1183,7 @@ ${legalTexts}
           this.generalAIService.getAvailableProviders();
         status.generalAI.healthy = aiStatus.healthy;
       } catch (error) {
-        console.error('Failed to get general AI status:', error);
+        logger.error('Failed to get general AI status:', error);
       }
     }
 
@@ -1195,7 +1196,7 @@ ${legalTexts}
         status.legalAI.vector = true;
         status.legalAI.healthy = lawStarHealthy;
       } catch (error) {
-        console.error('Failed to get legal AI status:', error);
+        logger.error('Failed to get legal AI status:', error);
       }
     }
 
@@ -1251,7 +1252,7 @@ ${legalTexts}
       await this.generalAIService.shutdown();
     }
     this.initialized = false;
-    console.log('Unified AI Service shut down');
+    logger.info('Unified AI Service shut down');
   }
 
   // =============================================================================

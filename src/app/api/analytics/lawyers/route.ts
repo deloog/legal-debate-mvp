@@ -9,8 +9,8 @@ import {
   successResponse,
   unauthorizedResponse,
 } from '@/lib/api-response';
-import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import {
@@ -24,8 +24,8 @@ import {
   type LawyerSuccessRateData,
   type LawyerWorkHoursData,
 } from '@/types/stats';
+import { Prisma } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
-import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 辅助函数：参数解析
@@ -314,7 +314,12 @@ async function getLawyerSuccessRate(
         Number(row.totalCases) > 0
           ? (Number(row.successfulCases) / Number(row.totalCases)) * 100
           : 0,
-      byType: [],
+      byType: [] as Array<{
+        type: string;
+        totalCases: number;
+        successfulCases: number;
+        successRate: number;
+      }>,
     })
   );
 
@@ -425,7 +430,12 @@ async function getLawyerRevenue(
     averageRevenue: Number(row.avg),
     maxRevenue: Number(row.max),
     minRevenue: Number(row.min),
-    revenueByType: [],
+    revenueByType: [] as Array<{
+      type: string;
+      totalRevenue: number;
+      caseCount: number;
+      percentage: number;
+    }>,
   }));
 
   // 按案件类型统计创收
@@ -668,7 +678,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const { startDate, endDate } = getDateRange(params.timeRange);
+    const { startDate, endDate } = getDateRange(
+      params.timeRange ?? TimeRange.LAST_30_DAYS
+    );
 
     // 并行查询所有绩效数据
     const [caseVolume, successRate, revenue, efficiency, workHours] =
@@ -722,8 +734,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     // 分页处理
-    const startIndex = (params.page - 1) * params.limit;
-    const endIndex = startIndex + params.limit;
+    const page = params.page ?? 1;
+    const limit = params.limit ?? 10;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
 
     const pagedCaseVolume = sortedCaseVolume.slice(startIndex, endIndex);
     const pagedSuccessRate = sortedSuccessRate.slice(startIndex, endIndex);

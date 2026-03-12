@@ -89,7 +89,7 @@ async function mapTeamToDetail(
  * 获取团队详情
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -98,7 +98,7 @@ export const GET = withErrorHandler(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     const hasAccess = await checkTeamAccess(id, authUser.userId);
     if (!hasAccess) {
@@ -130,7 +130,7 @@ export const GET = withErrorHandler(
  * 更新团队信息
  */
 export const PATCH = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -139,7 +139,7 @@ export const PATCH = withErrorHandler(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const validatedData = updateTeamSchema.parse(body);
 
@@ -170,7 +170,7 @@ export const PATCH = withErrorHandler(
         description: validatedData.description,
         logo: validatedData.logo,
         status: validatedData.status,
-        metadata: validatedData.metadata as Prisma.JsonValue,
+        metadata: validatedData.metadata as Prisma.InputJsonValue,
       },
     });
 
@@ -185,7 +185,7 @@ export const PATCH = withErrorHandler(
  * 删除团队
  */
 export const DELETE = withErrorHandler(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -194,7 +194,7 @@ export const DELETE = withErrorHandler(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     const hasAccess = await checkTeamAccess(id, authUser.userId);
     if (!hasAccess) {

@@ -124,7 +124,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
 
   const [tasks, total] = await Promise.all([
     prisma.task.findMany({
-      where,
+      where: where as Prisma.TaskWhereInput,
       skip: (query.page - 1) * query.limit,
       take: query.limit,
       orderBy,
@@ -156,7 +156,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
         },
       },
     }),
-    prisma.task.count({ where }),
+    prisma.task.count({ where: where as Prisma.TaskWhereInput }),
   ]);
 
   const taskDetails = tasks.map(task => {
@@ -253,10 +253,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       dueDate: validatedData.dueDate,
       tags: validatedData.tags || [],
       estimatedHours: validatedData.estimatedHours,
-      metadata: validatedData.metadata as
-        | Prisma.InputJsonValue
-        | Prisma.NullableJsonNullValueInput
-        | null,
+      metadata: validatedData.metadata as Prisma.InputJsonValue | undefined,
     },
     include: {
       case: {

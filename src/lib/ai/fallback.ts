@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import type {
   AIError,
   AIProvider,
@@ -98,7 +99,7 @@ export class FallbackManager {
             return result;
           }
         } catch (strategyError) {
-          console.warn(
+          logger.warn(
             `Fallback strategy ${strategy.action} failed:`,
             strategyError
           );
@@ -110,7 +111,7 @@ export class FallbackManager {
       this.recordFallbackEvent(event);
       return null;
     } catch (fallbackError) {
-      console.error('Fallback manager failed:', fallbackError);
+      logger.error('Fallback manager failed:', fallbackError);
       this.recordFallbackEvent(event);
       return null;
     }
@@ -187,7 +188,7 @@ export class FallbackManager {
   private async switchProvider(): Promise<AIResponse | null> {
     // 这个方法需要与负载均衡器配合
     // 这里只是模拟实现
-    console.log('Switching to alternative provider...');
+    logger.info('Switching to alternative provider...');
 
     // 返回null表示需要外部系统处理提供商切换
     return null;
@@ -197,7 +198,7 @@ export class FallbackManager {
     originalRequest: AIRequestConfig
   ): Promise<AIResponse | null> {
     if (!this.config.cacheFallback.enabled || !this.cacheManager) {
-      console.warn('Cache fallback not enabled or cache manager not available');
+      logger.warn('Cache fallback not enabled or cache manager not available');
       return null;
     }
 
@@ -209,7 +210,7 @@ export class FallbackManager {
       const cachedResponse = await this.cacheManager.get(cacheKey);
 
       if (cachedResponse && typeof cachedResponse === 'object') {
-        console.log('Using cached response as fallback');
+        logger.info('Using cached response as fallback');
 
         // 转换为标准AI响应格式
         return {
@@ -241,7 +242,7 @@ export class FallbackManager {
 
       return null;
     } catch (cacheError) {
-      console.error('Cache fallback failed:', cacheError);
+      logger.error('Cache fallback failed:', cacheError);
       return null;
     }
   }
@@ -250,12 +251,12 @@ export class FallbackManager {
     originalRequest: AIRequestConfig
   ): Promise<AIResponse | null> {
     if (!this.config.simplifiedMode.enabled) {
-      console.warn('Simplified mode fallback not enabled');
+      logger.warn('Simplified mode fallback not enabled');
       return null;
     }
 
     try {
-      console.log('Using simplified request as fallback');
+      logger.info('Using simplified request as fallback');
 
       // 创建简化的请求配置
       const simplifiedConfig: AIRequestConfig = {
@@ -277,7 +278,7 @@ export class FallbackManager {
       // 这里可以集成具体的AI客户端调用
       return null;
     } catch (simplifyError) {
-      console.error('Simplified request fallback failed:', simplifyError);
+      logger.error('Simplified request fallback failed:', simplifyError);
       return null;
     }
   }
@@ -286,12 +287,12 @@ export class FallbackManager {
     originalRequest: AIRequestConfig
   ): Promise<AIResponse | null> {
     if (!this.config.localProcessing.enabled) {
-      console.warn('Local processing fallback not enabled');
+      logger.warn('Local processing fallback not enabled');
       return null;
     }
 
     try {
-      console.log('Using local processing as fallback');
+      logger.info('Using local processing as fallback');
 
       // 根据请求类型进行本地处理
       const lastMessage =
@@ -334,7 +335,7 @@ export class FallbackManager {
         cached: false,
       };
     } catch (localError) {
-      console.error('Local processing fallback failed:', localError);
+      logger.error('Local processing fallback failed:', localError);
       return null;
     }
   }
@@ -342,7 +343,7 @@ export class FallbackManager {
   private async returnError(
     originalRequest: AIRequestConfig
   ): Promise<AIResponse | null> {
-    console.log('Returning error response as fallback');
+    logger.info('Returning error response as fallback');
 
     const errorMessage =
       'I apologize, but I am currently unable to process your request due to service limitations. Please try again later.';
@@ -447,7 +448,7 @@ export class FallbackManager {
     }
 
     // 记录日志
-    console.log('Fallback event recorded:', {
+    logger.info('Fallback event recorded:', {
       success: event.success,
       strategy: event.successfulStrategy?.action,
       error: event.originalError.type,

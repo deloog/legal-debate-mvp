@@ -7,17 +7,24 @@
  * 参数:
  *   - sourceId: 源法条ID
  *   - targetId: 目标法条ID
+ *   - maxDepth: 最大深度（可选，默认5，最大10）
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { GraphBuilder } from '@/lib/law-article/graph-builder';
 import { GraphAlgorithms } from '@/lib/knowledge-graph/graph-algorithms';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 import {
   checkKnowledgeGraphPermission,
   logKnowledgeGraphAction,
   KnowledgeGraphAction,
+  KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
+
+// 最大路径深度限制
+const MAX_PATH_DEPTH = 10;
+const DEFAULT_MAX_DEPTH = 5;
 
 /**
  * GET /api/v1/knowledge-graph/paths
@@ -26,58 +33,103 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const searchParams = new URL(request.url).searchParams;
 
   try {
+    // 认证检查
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        { status: 401 }
+      );
+    }
+
+    // 权限检查
+    const permissionResult = await checkKnowledgeGraphPermission(
+      authUser.userId,
+      KnowledgeGraphAction.VIEW_RELATIONS,
+      KnowledgeGraphResource.GRAPH
+    );
+
+    if (!permissionResult.hasPermission) {
+      logger.warn('用户无权限查询路径', {
+        userId: authUser.userId,
+        reason: permissionResult.reason,
+      });
+      return NextResponse.json(
+        { success: false, error: { code: 'FORBIDDEN', message: '权限不足' } },
+        { status: 403 }
+      );
+    }
+
     // 参数验证
     const sourceId = searchParams.get('sourceId');
+    const targetId = searchParams.get('targetId');
 
     if (!sourceId) {
       return NextResponse.json(
-        { error: '缺少必需参数: sourceId' },
+        { success: false, error: { code: 'MISSING_PARAM', message: '缺少必需参数: sourceId' } },
         { status: 400 }
       );
     }
 
-    const targetId = searchParams.get('targetId');
-
     if (!targetId) {
       return NextResponse.json(
-        { error: '缺少必需参数: targetId' },
+        { success: false, error: { code: 'MISSING_PARAM', message: '缺少必需参数: targetId' } },
+        { status: 400 }
+      );
+    }
+
+    // 验证节点ID格式（防止注入）
+    const idPattern = /^[a-zA-Z0-9_-]+$/;
+    if (!idPattern.test(sourceId) || !idPattern.test(targetId)) {
+      return NextResponse.json(
+        { success: false, error: { code: 'INVALID_PARAM', message: '节点ID格式无效' } },
         { status: 400 }
       );
     }
 
     const maxDepthParam = searchParams.get('maxDepth');
-    let maxDepth = 5; // 默认深度
+    let maxDepth = DEFAULT_MAX_DEPTH;
 
     if (maxDepthParam) {
       maxDepth = parseInt(maxDepthParam, 10);
 
-      if (isNaN(maxDepth) || maxDepth < 1 || maxDepth > 10) {
+      if (isNaN(maxDepth) || maxDepth < 1 || maxDepth > MAX_PATH_DEPTH) {
         return NextResponse.json(
-          { error: 'maxDepth参数必须在1-10之间' },
+          { 
+            success: false, 
+            error: { 
+              code: 'INVALID_PARAM', 
+              message: `maxDepth参数必须在1-${MAX_PATH_DEPTH}之间` 
+            } 
+          },
           { status: 400 }
         );
       }
-    }
-
-    // 权限检查
-    const permissionResult = await checkKnowledgeGraphPermission(
-      '', // 用户ID从header中获取
-      KnowledgeGraphAction.VIEW_RELATIONS,
-      'RELATION' as never
-    );
-
-    if (!permissionResult.hasPermission) {
-      logger.warn('用户无权限查询路径', {
-        reason: permissionResult.reason,
-      });
-      return NextResponse.json({ error: '权限不足' }, { status: 403 });
     }
 
     // 获取图谱数据
     const graphData = await GraphBuilder.buildFullGraph();
 
     if (graphData.nodes.length === 0) {
-      return NextResponse.json({ error: '图谱数据为空' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: { code: 'EMPTY_GRAPH', message: '图谱数据为空' } },
+        { status: 404 }
+      );
+    }
+
+    // 验证节点是否存在
+    const nodeIds = new Set(graphData.nodes.map(n => n.id));
+    if (!nodeIds.has(sourceId)) {
+      return NextResponse.json(
+        { success: false, error: { code: 'NODE_NOT_FOUND', message: `源节点不存在: ${sourceId}` } },
+        { status: 404 }
+      );
+    }
+    if (!nodeIds.has(targetId)) {
+      return NextResponse.json(
+        { success: false, error: { code: 'NODE_NOT_FOUND', message: `目标节点不存在: ${targetId}` } },
+        { status: 404 }
+      );
     }
 
     // 执行最短路径算法
@@ -88,34 +140,59 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       targetId
     );
 
+    // 如果路径长度超过限制，返回提示
+    if (result.exists && result.pathLength > maxDepth) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          sourceId,
+          targetId,
+          path: [],
+          pathLength: -1,
+          relationTypes: [],
+          exists: false,
+          message: `路径长度(${result.pathLength})超过最大深度限制(${maxDepth})`,
+        },
+      });
+    }
+
     // 记录操作日志
     await logKnowledgeGraphAction({
-      userId: '', // 从header获取
+      userId: authUser.userId,
       action: KnowledgeGraphAction.VIEW_RELATIONS,
-      resource: 'RELATION' as never,
+      resource: KnowledgeGraphResource.GRAPH,
       description: `查询法条路径: ${sourceId} -> ${targetId}`,
       metadata: {
         sourceId,
         targetId,
+        maxDepth,
         pathLength: result.pathLength,
         exists: result.exists,
       },
     });
 
     return NextResponse.json({
-      sourceId,
-      targetId,
-      path: result.path,
-      pathLength: result.pathLength,
-      relationTypes: result.relationTypes,
-      exists: result.exists,
+      success: true,
+      data: {
+        sourceId,
+        targetId,
+        maxDepth,
+        path: result.path,
+        pathLength: result.pathLength,
+        relationTypes: result.relationTypes,
+        exists: result.exists,
+      },
     });
   } catch (error: unknown) {
     logger.error('路径查询失败', {
       error,
       sourceId: searchParams.get('sourceId'),
+      targetId: searchParams.get('targetId'),
     });
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: { code: 'INTERNAL_ERROR', message: errorMessage } },
+      { status: 500 }
+    );
   }
 }

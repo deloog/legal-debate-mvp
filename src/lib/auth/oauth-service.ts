@@ -2,12 +2,11 @@
  * OAuth 服务 - 处理用户登录、创建和账号管理
  */
 
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db/prisma';
 import { generateToken } from './jwt';
 import type { OAuthUserInfo } from '../../types/oauth';
 import type { OAuthAccount } from '../../types/oauth';
-
-const prisma = new PrismaClient();
+import { logger } from '@/lib/logger';
 
 /**
  * OAuth 登录结果
@@ -103,7 +102,7 @@ export class OAuthService {
         isNewUser: true,
       };
     } catch (error) {
-      console.error('OAuth login error:', error);
+      logger.error('OAuth login error:', error);
       throw new Error(
         `Failed to handle OAuth login: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -199,7 +198,7 @@ export class OAuthService {
         createdAt: new Date(), // 使用当前时间作为占位符
       };
     } catch (error) {
-      console.error('Bind OAuth account error:', error);
+      logger.error('Bind OAuth account error:', error);
       throw new Error(
         `Failed to bind OAuth account: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -240,7 +239,7 @@ export class OAuthService {
         },
       });
     } catch (error) {
-      console.error('Unbind OAuth account error:', error);
+      logger.error('Unbind OAuth account error:', error);
       throw new Error(
         `Failed to unbind OAuth account: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -270,7 +269,7 @@ export class OAuthService {
         createdAt: new Date(), // 使用当前时间作为占位符
       }));
     } catch (error) {
-      console.error('Get user OAuth accounts error:', error);
+      logger.error('Get user OAuth accounts error:', error);
       throw new Error(
         `Failed to get OAuth accounts: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -301,10 +300,9 @@ export class OAuthService {
 
       return hasPassword || hasOtherOAuth;
     } catch (error) {
-      console.error('Check can unbind error:', error);
+      logger.error('Check can unbind error:', error);
       return false;
     }
   }
 }
 
-export { prisma };

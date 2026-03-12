@@ -3,6 +3,7 @@
 import { RoundConfig, RoundValidationResult } from './types';
 import { prisma } from '@/lib/db/prisma';
 import { RoundStatus } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 /**
  * 辩论配置类型
@@ -97,7 +98,7 @@ export class RoundValidator {
         warnings,
       };
     } catch (error) {
-      console.error('验证轮次开始时出错：', error);
+      logger.error('验证轮次开始时出错：', error);
       return {
         valid: false,
         errors: [
@@ -273,7 +274,7 @@ export class RoundValidator {
         warnings,
       };
     } catch (error) {
-      console.error('验证轮次完整性时出错：', error);
+      logger.error('验证轮次完整性时出错：', error);
       return {
         valid: false,
         errors: [

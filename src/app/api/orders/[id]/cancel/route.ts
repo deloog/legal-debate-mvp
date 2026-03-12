@@ -16,7 +16,7 @@ import { logger } from '@/lib/logger';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
     // 获取用户会话
@@ -32,7 +32,7 @@ export async function POST(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // 验证订单ID
     if (!id) {

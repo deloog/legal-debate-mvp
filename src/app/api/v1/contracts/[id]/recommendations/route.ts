@@ -9,16 +9,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { LawArticleRecommendationService } from '@/lib/law-article/recommendation-service';
 import { logger } from '@/lib/logger';
+import {
+  resolveContractUserId,
+  unauthorizedResponse,
+} from '@/app/api/lib/middleware/contract-auth';
 
 /**
  * 获取合同推荐法条
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
+  // ─── 认证 ─────────────────────────────────────────────────────────────────
+  const userId = resolveContractUserId(request);
+  if (!userId) return unauthorizedResponse();
+
   try {
-    const { id: contractId } = params;
+    const { id: contractId } = await params;
     const { searchParams } = new URL(request.url);
 
     // 解析查询参数
@@ -59,28 +67,36 @@ export async function GET(
       }
     }
 
-    // 获取合同信息
-    const contract = await prisma.contract.findUnique({
-      where: { id: contractId },
-      select: {
-        id: true,
-        contractNumber: true,
-        caseType: true,
-        caseSummary: true,
-        scope: true,
-        status: true,
-      },
-    });
+    // 获取合同信息（同时查询已关联法条 ID，用于排除重复推荐）
+    const [contract, existingAssociations] = await Promise.all([
+      prisma.contract.findUnique({
+        where: { id: contractId },
+        select: {
+          id: true,
+          contractNumber: true,
+          caseType: true,
+          caseSummary: true,
+          scope: true,
+          status: true,
+        },
+      }),
+      prisma.contractLawArticle.findMany({
+        where: { contractId },
+        select: { lawArticleId: true },
+      }),
+    ]);
 
     if (!contract) {
       return NextResponse.json(
         {
           success: false,
-          error: '合同不存在',
+          error: { code: 'CONTRACT_NOT_FOUND', message: '合同不存在' },
         },
         { status: 404 }
       );
     }
+
+    const existingArticleIds = existingAssociations.map(a => a.lawArticleId);
 
     // 调用推荐服务
     const recommendations =
@@ -88,7 +104,7 @@ export async function GET(
         {
           type: contract.caseType,
           content: contract.caseSummary,
-          existingArticles: [], // 可以后续扩展，从合同中提取已有法条
+          existingArticles: existingArticleIds,
         },
         {
           limit,
@@ -115,7 +131,7 @@ export async function GET(
     return NextResponse.json(
       {
         success: false,
-        error: '获取推荐失败',
+        error: { code: 'INTERNAL_ERROR', message: '获取推荐失败' },
       },
       { status: 500 }
     );

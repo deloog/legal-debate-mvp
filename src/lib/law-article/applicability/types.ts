@@ -17,30 +17,60 @@ export interface ApplicabilityInput {
  * 适用性分析配置接口
  */
 export interface ApplicabilityConfig {
-  /** 是否启用AI语义匹配（默认：true） */
+  /** 是否启用AI分析（默认：true） */
   useAI?: boolean;
-  /** 是否启用规则验证（默认：true） */
+  /** 是否启用规则验证（hard filter，始终启用，此字段保留兼容性） */
   useRuleValidation?: boolean;
-  /** 是否启用AI审查（默认：true） */
+  /** 是否启用AI审查（与useAI含义相同，保留兼容性） */
   useAIReview?: boolean;
-  /** 语义相关性最小阈值（默认：0.3） */
-  minSemanticRelevance?: number;
   /** 最终适用性评分最小阈值（默认：0.5） */
   minApplicabilityScore?: number;
-  /** 最低评分直接排除阈值（默认：0.1） */
-  minExclusionScore?: number;
-  /** AI不适用且评分低时的阈值（默认：0.3） */
-  aiLowConfidenceThreshold?: number;
-  /** 默认适用性阈值（默认：0.2） */
-  defaultApplicabilityThreshold?: number;
-  /** 是否并行处理（默认：true） */
+  /** 语义相关性最小阈值（兼容性，新版由 minApplicabilityScore 统一控制） */
+  minSemanticRelevance?: number;
+  /** AI并发数量（默认：5） */
+  concurrency?: number;
+  /** 是否并行处理（兼容性，新版始终并行） */
   parallel?: boolean;
-  /** 是否使用缓存（默认：true） */
+  /** 是否使用缓存（预留） */
   useCache?: boolean;
+  /** 最低评分直接排除阈值（兼容性） */
+  minExclusionScore?: number;
+  /** AI不适用且评分低时的阈值（兼容性） */
+  aiLowConfidenceThreshold?: number;
+  /** 默认适用性阈值（兼容性） */
+  defaultApplicabilityThreshold?: number;
 }
 
 /**
- * 语义匹配结果接口
+ * 规则验证结果接口（Phase 0 硬性过滤结果）
+ */
+export interface RuleValidationResult {
+  /** 是否通过硬性过滤 */
+  passed: boolean;
+  /** 不通过的原因（未通过时必填） */
+  reason?: string;
+  /** 警告信息列表（通过但有潜在风险时填写，如已修订） */
+  warnings: string[];
+}
+
+/**
+ * AI分析结果接口（Phase 1 单次 AI 调用返回）
+ */
+export interface AIReviewResult {
+  /** 是否适用 */
+  applicable: boolean;
+  /** 综合适用性评分（0-1） */
+  score: number;
+  /** 审查置信度（0-1） */
+  confidence: number;
+  /** 适用原因列表 */
+  reasons: string[];
+  /** 警告信息列表 */
+  warnings: string[];
+}
+
+/**
+ * 语义匹配结果接口（保留兼容性）
  */
 export interface SemanticMatchResult {
   /** 语义相关性评分（0-1） */
@@ -49,40 +79,6 @@ export interface SemanticMatchResult {
   relevanceReason?: string;
   /** 关键词匹配列表 */
   matchedKeywords?: string[];
-}
-
-/**
- * 规则验证结果接口
- */
-export interface RuleValidationResult {
-  /** 是否通过时效性检查 */
-  validity: {
-    passed: boolean;
-    reason?: string;
-  };
-  /** 是否通过适用范围检查 */
-  scope: {
-    passed: boolean;
-    reason?: string;
-  };
-  /** 法条层级评分（0-1） */
-  levelScore: number;
-  /** 综合规则评分（0-1） */
-  overallScore: number;
-}
-
-/**
- * AI审查结果接口
- */
-export interface AIReviewResult {
-  /** 是否适用 */
-  applicable: boolean;
-  /** 审查置信度（0-1） */
-  confidence: number;
-  /** 适用原因列表 */
-  reasons: string[];
-  /** 警告信息列表 */
-  warnings: string[];
 }
 
 /**
@@ -109,9 +105,9 @@ export interface ArticleApplicabilityResult {
   applicable: boolean;
   /** 适用性综合评分（0-1） */
   score: number;
-  /** 语义相关性评分 */
+  /** 语义相关性评分（新版中为AI综合评分） */
   semanticScore: number;
-  /** 规则验证评分 */
+  /** 规则评分（通过硬性过滤为1.0，未通过为0） */
   ruleScore: number;
   /** AI审查置信度 */
   aiConfidence?: number;
@@ -119,10 +115,8 @@ export interface ArticleApplicabilityResult {
   reasons: string[];
   /** 警告信息列表 */
   warnings: string[];
-  /** 法条状态警告（废止/修订等） */
+  /** 法条状态警告（废止/修订等，保留兼容性） */
   statusWarning?: StatusWarning;
-  /** 语义匹配详情 */
-  semanticMatch?: SemanticMatchResult;
   /** 规则验证详情 */
   ruleValidation?: RuleValidationResult;
 }
@@ -139,7 +133,7 @@ export interface ApplicabilityAnalysisReport {
   applicableArticles: number;
   /** 不适用法条数 */
   notApplicableArticles: number;
-  /** 法条适用性结果列表 */
+  /** 法条适用性结果列表（按评分降序排列） */
   results: ArticleApplicabilityResult[];
   /** 分析统计信息 */
   statistics: AnalysisStatistics;
@@ -157,19 +151,19 @@ export interface AnalysisStatistics {
   maxScore: number;
   /** 最低适用性评分 */
   minScore: number;
-  /** 执行耗时（毫秒） */
+  /** 总执行耗时（毫秒） */
   executionTime: number;
-  /** 语义匹配耗时（毫秒） */
-  semanticMatchingTime: number;
-  /** 规则验证耗时（毫秒） */
+  /** Phase 0 硬性过滤耗时（毫秒） */
   ruleValidationTime: number;
-  /** AI审查耗时（毫秒） */
+  /** Phase 1 AI分析耗时（毫秒，含并行等待） */
+  semanticMatchingTime: number;
+  /** 保留兼容性，始终为0 */
   aiReviewTime: number;
   /** 适用法条占比 */
   applicableRatio: number;
-  /** 按法条类型统计 */
+  /** 按法条类型统计适用数量 */
   byType: Record<string, number>;
-  /** 按法律分类统计 */
+  /** 按法律分类统计适用数量 */
   byCategory: Record<string, number>;
 }
 
@@ -180,11 +174,12 @@ export const DEFAULT_APPLICABILITY_CONFIG: Required<ApplicabilityConfig> = {
   useAI: true,
   useRuleValidation: true,
   useAIReview: true,
-  minSemanticRelevance: 0.3,
   minApplicabilityScore: 0.5,
+  minSemanticRelevance: 0.3,
+  concurrency: 5,
+  parallel: true,
+  useCache: false,
   minExclusionScore: 0.1,
   aiLowConfidenceThreshold: 0.3,
   defaultApplicabilityThreshold: 0.2,
-  parallel: true,
-  useCache: true,
 };

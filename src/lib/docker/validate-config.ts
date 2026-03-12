@@ -4,8 +4,8 @@
 
 import type {
   DockerComposeConfig,
-  DockerComposeValidationResult,
   DockerComposeService,
+  DockerComposeValidationResult,
 } from '@/types/docker-compose';
 
 /**
@@ -140,16 +140,15 @@ function validateService(
   // 检查健康检查
   if ('healthcheck' in serviceConfig) {
     const healthcheck = serviceConfig.healthcheck;
-    if (!Array.isArray(healthcheck.test)) {
+    if (!healthcheck) {
+      errors.push(`服务 ${serviceName} 的 healthcheck 配置无效`);
+    } else if (!Array.isArray(healthcheck.test)) {
       errors.push(`服务 ${serviceName} 的 healthcheck.test 必须是一个数组`);
-    }
-    if (typeof healthcheck.interval !== 'string') {
+    } else if (typeof healthcheck.interval !== 'string') {
       errors.push(`服务 ${serviceName} 的 healthcheck.interval 必须是字符串`);
-    }
-    if (typeof healthcheck.timeout !== 'string') {
+    } else if (typeof healthcheck.timeout !== 'string') {
       errors.push(`服务 ${serviceName} 的 healthcheck.timeout 必须是字符串`);
-    }
-    if (typeof healthcheck.retries !== 'number') {
+    } else if (typeof healthcheck.retries !== 'number') {
       errors.push(`服务 ${serviceName} 的 healthcheck.retries 必须是数字`);
     }
   }

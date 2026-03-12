@@ -12,6 +12,7 @@
 
 import { prisma } from '@/lib/db/prisma';
 import { AIAssessment } from '@/types/consultation';
+import { logger } from '@/lib/logger';
 
 /**
  * 案件评估输入参数
@@ -86,7 +87,7 @@ export class CaseAssessmentService {
         similarCases,
       };
     } catch (error) {
-      console.error('案件评估失败:', error);
+      logger.error('案件评估失败:', error);
       throw new Error('案件评估失败，请重试');
     }
   }
@@ -455,7 +456,7 @@ export class CaseAssessmentService {
         similarity: 0.7, // 简化处理，实际应计算相似度
       }));
     } catch (error) {
-      console.error('查找类似案例失败:', error);
+      logger.error('查找类似案例失败:', error);
       return [];
     }
   }

@@ -2,6 +2,7 @@
 // 为各个Agent定义降级处理逻辑
 
 import type { AgentContext } from '../../../types/agent';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 降级策略返回类型定义
@@ -133,7 +134,7 @@ export interface CoordinatorFallbackResult {
  */
 export function createDocAnalyzerFallbackStrategy() {
   return async (error: unknown): Promise<DocAnalyzerFallbackResult> => {
-    console.warn('[DocAnalyzer] AI分析失败，使用降级策略:', error);
+    logger.warn('[DocAnalyzer] AI分析失败，使用降级策略:', error);
 
     // 返回基础分析结果
     return {
@@ -160,7 +161,7 @@ export function createDocAnalyzerFallbackStrategy() {
  */
 export function createEvidenceAnalyzerFallbackStrategy() {
   return async (error: unknown): Promise<EvidenceAnalyzerFallbackResult> => {
-    console.warn('[EvidenceAnalyzer] 证据分析失败，使用降级策略:', error);
+    logger.warn('[EvidenceAnalyzer] 证据分析失败，使用降级策略:', error);
 
     return {
       credibility: '未知',
@@ -179,7 +180,7 @@ export function createEvidenceAnalyzerFallbackStrategy() {
  */
 export function createResearcherFallbackStrategy() {
   return async (error: unknown): Promise<ResearcherFallbackResult> => {
-    console.warn('[Researcher] 法律检索失败，使用降级策略:', error);
+    logger.warn('[Researcher] 法律检索失败，使用降级策略:', error);
 
     return {
       sources: [],
@@ -197,7 +198,7 @@ export function createResearcherFallbackStrategy() {
  */
 export function createStrategistFallbackStrategy() {
   return async (error: unknown): Promise<StrategistFallbackResult> => {
-    console.warn('[Strategist] 策略生成失败，使用降级策略:', error);
+    logger.warn('[Strategist] 策略生成失败，使用降级策略:', error);
 
     return {
       strategy: '基础策略',
@@ -227,7 +228,7 @@ export function createWriterFallbackStrategy() {
     error: unknown,
     context: AgentContext
   ): Promise<WriterFallbackResult> => {
-    console.warn('[Writer] 文书生成失败，使用降级策略:', error);
+    logger.warn('[Writer] 文书生成失败，使用降级策略:', error);
 
     const caseType = context.data?.caseType || '通用';
     return {
@@ -246,7 +247,7 @@ export function createWriterFallbackStrategy() {
  */
 export function createReviewerFallbackStrategy() {
   return async (error: unknown): Promise<ReviewerFallbackResult> => {
-    console.warn('[Reviewer] 文书审查失败，使用降级策略:', error);
+    logger.warn('[Reviewer] 文书审查失败，使用降级策略:', error);
 
     return {
       issues: [],
@@ -271,7 +272,7 @@ export function createReviewerFallbackStrategy() {
  */
 export function createSchedulerFallbackStrategy() {
   return async (error: unknown): Promise<SchedulerFallbackResult> => {
-    console.warn('[Scheduler] 任务调度失败，使用降级策略:', error);
+    logger.warn('[Scheduler] 任务调度失败，使用降级策略:', error);
 
     return {
       schedule: [],
@@ -289,7 +290,7 @@ export function createSchedulerFallbackStrategy() {
  */
 export function createReporterFallbackStrategy() {
   return async (error: unknown): Promise<ReporterFallbackResult> => {
-    console.warn('[Reporter] 汇报生成失败，使用降级策略:', error);
+    logger.warn('[Reporter] 汇报生成失败，使用降级策略:', error);
 
     return {
       summary: '基础汇报',
@@ -307,7 +308,7 @@ export function createReporterFallbackStrategy() {
  */
 export function createSummarizerFallbackStrategy() {
   return async (error: unknown): Promise<SummarizerFallbackResult> => {
-    console.warn('[Summarizer] 总结生成失败，使用降级策略:', error);
+    logger.warn('[Summarizer] 总结生成失败，使用降级策略:', error);
 
     return {
       summary: 'AI总结服务暂不可用',
@@ -324,7 +325,7 @@ export function createSummarizerFallbackStrategy() {
  */
 export function createCoordinatorFallbackStrategy() {
   return async (error: unknown): Promise<CoordinatorFallbackResult> => {
-    console.warn('[Coordinator] 任务协调失败，使用降级策略:', error);
+    logger.warn('[Coordinator] 任务协调失败，使用降级策略:', error);
 
     return {
       plan: [],

@@ -436,7 +436,7 @@ export class PathFinderTool {
       linkMap.set(key, link);
     });
 
-    const nodeDetails = [];
+    const nodeDetails: Path['nodeDetails'] = [];
     let totalStrength = 0;
 
     for (let i = 0; i < path.length; i++) {
@@ -444,7 +444,7 @@ export class PathFinderTool {
       const node = nodeMap.get(nodeId);
 
       if (node) {
-        const detail: Path['nodeDetails'][number] = {
+        const detail: NonNullable<Path['nodeDetails']>[number] = {
           articleId: nodeId,
           title: `${node.lawName} 第${node.articleNumber}条`,
           category: node.category,

@@ -6,6 +6,7 @@
 
 import * as crypto from 'crypto';
 import { MONITORING, PERFORMANCE } from '../constants/common';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 性能指标类型定义
@@ -120,7 +121,7 @@ export class PerformanceMonitor {
     // 检查告警
     this.checkAlerts(fullMetric);
 
-    console.log(
+    logger.info(
       `📊 Performance: ${metric.provider}/${metric.model} - ${metric.operation}: ${metric.duration}ms (${metric.cached ? 'cached' : 'generated'})`
     );
 
@@ -161,7 +162,7 @@ export class PerformanceMonitor {
     const pending = this.pendingRequests.get(requestId);
 
     if (!pending) {
-      console.warn(`No pending request found for ID: ${requestId}`);
+      logger.warn(`No pending request found for ID: ${requestId}`);
       return;
     }
 
@@ -186,7 +187,7 @@ export class PerformanceMonitor {
     // 检查告警
     this.checkAlerts(metric);
 
-    console.log(
+    logger.info(
       `📊 Performance Complete: ${pending.provider}/${pending.model} - ${pending.operation}: ${duration}ms (${cached ? 'cached' : 'generated'})`
     );
   }
@@ -572,7 +573,7 @@ ${
     const cleared = originalLength - this.metrics.length;
 
     if (cleared > 0) {
-      console.log(`Cleared ${cleared} old performance metrics`);
+      logger.info(`Cleared ${cleared} old performance metrics`);
     }
   }
 
@@ -583,7 +584,7 @@ ${
     this.metrics = [];
     this.alerts = [];
     this.pendingRequests.clear();
-    console.log('Performance monitor reset');
+    logger.info('Performance monitor reset');
   }
 }
 

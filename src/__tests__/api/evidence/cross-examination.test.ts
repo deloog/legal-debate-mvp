@@ -113,7 +113,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       });
 
       const response = await POST(mockRequest, {
-        params: { id: 'evidence-1' },
+        params: Promise.resolve({ id: 'evidence-1' }),
       });
       const data = await response.json();
 
@@ -168,7 +168,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       });
 
       const response = await POST(mockRequest, {
-        params: { id: 'evidence-1' },
+        params: Promise.resolve({ id: 'evidence-1' }),
       });
       const data = await response.json();
 
@@ -234,7 +234,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       });
 
       const response = await POST(mockRequest, {
-        params: { id: 'evidence-1' },
+        params: Promise.resolve({ id: 'evidence-1' }),
       });
       const data = await response.json();
 
@@ -259,7 +259,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       );
 
       const response = await POST(mockRequest, {
-        params: { id: 'evidence-1' },
+        params: Promise.resolve({ id: 'evidence-1' }),
       });
       const data = await response.json();
 
@@ -285,7 +285,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       );
 
       const response = await POST(mockRequest, {
-        params: { id: 'evidence-1' },
+        params: Promise.resolve({ id: 'evidence-1' }),
       });
       const data = await response.json();
 
@@ -309,7 +309,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
         }
       );
 
-      const response = await POST(mockRequest, { params: { id: '' } });
+      const response = await POST(mockRequest, { params: Promise.resolve({ id: '' }) });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -338,7 +338,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       prisma.evidence.findUnique.mockResolvedValue(null);
 
       const response = await POST(mockRequest, {
-        params: { id: 'non-existent' },
+        params: Promise.resolve({ id: 'non-existent' }),
       });
       const data = await response.json();
 
@@ -376,7 +376,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       });
 
       const response = await POST(mockRequest, {
-        params: { id: 'evidence-1' },
+        params: Promise.resolve({ id: 'evidence-1' }),
       });
       const data = await response.json();
 
@@ -420,7 +420,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       mockPreAssess.mockRejectedValue(new Error('AI服务不可用'));
 
       const response = await POST(mockRequest, {
-        params: { id: 'evidence-1' },
+        params: Promise.resolve({ id: 'evidence-1' }),
       });
       const data = await response.json();
 
@@ -442,7 +442,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       );
 
       const response = await POST(mockRequest, {
-        params: { id: 'evidence-1' },
+        params: Promise.resolve({ id: 'evidence-1' }),
       });
       const data = await response.json();
 
@@ -470,7 +470,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       prisma.evidence.findUnique.mockRejectedValue(new Error('数据库连接失败'));
 
       const response = await POST(mockRequest, {
-        params: { id: 'evidence-1' },
+        params: Promise.resolve({ id: 'evidence-1' }),
       });
       const data = await response.json();
 
@@ -522,7 +522,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       });
 
       const response = await POST(mockRequest, {
-        params: { id: 'evidence-1' },
+        params: Promise.resolve({ id: 'evidence-1' }),
       });
       const data = await response.json();
 
@@ -578,7 +578,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       });
 
       const response = await POST(mockRequest, {
-        params: { id: 'evidence-1' },
+        params: Promise.resolve({ id: 'evidence-1' }),
       });
 
       expect(response.status).toBe(200);
@@ -626,7 +626,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       });
 
       const response = await POST(mockRequest, {
-        params: { id: 'evidence-1' },
+        params: Promise.resolve({ id: 'evidence-1' }),
       });
 
       expect(response.status).toBe(200);
@@ -681,7 +681,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       });
 
       const response = await POST(mockRequest, {
-        params: { id: 'evidence-1' },
+        params: Promise.resolve({ id: 'evidence-1' }),
       });
       const data = await response.json();
 
@@ -736,7 +736,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       });
 
       const response = await POST(mockRequest, {
-        params: { id: 'evidence-1' },
+        params: Promise.resolve({ id: 'evidence-1' }),
       });
       const data = await response.json();
 
@@ -791,7 +791,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       });
 
       const response = await POST(mockRequest, {
-        params: { id: 'evidence-1' },
+        params: Promise.resolve({ id: 'evidence-1' }),
       });
       const data = await response.json();
 

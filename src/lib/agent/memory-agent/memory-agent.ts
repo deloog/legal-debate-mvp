@@ -62,6 +62,7 @@
  * - 查询性能：<100ms（Working），<500ms（Hot），<1s（Cold）
  */
 
+import { logger } from '@/lib/logger';
 import { PrismaClient } from '@prisma/client';
 
 import type { AIService } from '../../ai/service-refactored';
@@ -107,13 +108,13 @@ export class MemoryAgent {
       return;
     }
 
-    console.log('Initializing MemoryAgent...');
+    logger.info('Initializing MemoryAgent...');
 
     // 启动记忆迁移定时任务
     this.migrator.start();
 
     this.initialized = true;
-    console.log('MemoryAgent initialized successfully');
+    logger.info('MemoryAgent initialized successfully');
   }
 
   /**
@@ -124,13 +125,13 @@ export class MemoryAgent {
       return;
     }
 
-    console.log('Shutting down MemoryAgent...');
+    logger.info('Shutting down MemoryAgent...');
 
     // 停止定时任务
     this.migrator.stop();
 
     this.initialized = false;
-    console.log('MemoryAgent shut down successfully');
+    logger.info('MemoryAgent shut down successfully');
   }
 
   /**

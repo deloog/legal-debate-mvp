@@ -10,9 +10,10 @@
 
 'use client';
 
-import _React, { useEffect, useRef, useState } from 'react';
+import _React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { GraphNode, GraphLink } from '@/lib/law-article/graph-builder';
+import type { CommunityColorResult } from '@/lib/knowledge-graph/community/community-service';
 
 interface Props {
   // 优化功能：直接传入完整的图谱数据，避免重复API调用
@@ -38,6 +39,11 @@ export function LawArticleGraphVisualization({
   }>();
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // 社区着色状态
+  const [showCommunityColors, setShowCommunityColors] = useState(false);
+  const [communityData, setCommunityData] = useState<CommunityColorResult | null>(null);
+  const [communityLoading, setCommunityLoading] = useState(false);
 
   // 加载图谱数据
   useEffect(() => {
@@ -91,6 +97,33 @@ export function LawArticleGraphVisualization({
     setGraphData({ nodes: [], links: [] });
     setLoading(false);
   }, [propsGraphData, centerArticleId, depth]);
+
+  // 加载社区颜色（懒加载，仅当 toggle 开启且尚未加载时）
+  const loadCommunityColors = useCallback(async () => {
+    const id = centerArticleId;
+    if (!id || communityData) return;
+    setCommunityLoading(true);
+    try {
+      const res = await fetch(
+        `/api/knowledge-graph/communities?articleId=${id}&depth=${depth}`
+      );
+      if (res.ok) {
+        const json = await res.json() as { success: boolean; data: CommunityColorResult };
+        if (json.success) {
+          setCommunityData(json.data);
+        }
+      }
+    } finally {
+      setCommunityLoading(false);
+    }
+  }, [centerArticleId, depth, communityData]);
+
+  // 当 toggle 开启时触发加载
+  useEffect(() => {
+    if (showCommunityColors && !communityData && !communityLoading) {
+      void loadCommunityColors();
+    }
+  }, [showCommunityColors, communityData, communityLoading, loadCommunityColors]);
 
   // 渲染图谱
   useEffect(() => {
@@ -152,7 +185,11 @@ export function LawArticleGraphVisualization({
       .enter()
       .append('circle')
       .attr('r', (d: GraphNode) => (d.id === centerArticleId ? 15 : 10))
-      .attr('fill', (d: GraphNode) => getCategoryColor(d.category))
+      .attr('fill', (d: GraphNode) =>
+        showCommunityColors && communityData?.nodeColors[d.id]
+          ? communityData.nodeColors[d.id]
+          : getCategoryColor(d.category)
+      )
       .attr('stroke', '#fff')
       .attr('stroke-width', 2)
       .style('cursor', 'pointer')
@@ -201,12 +238,12 @@ export function LawArticleGraphVisualization({
         });
 
       node
-        .attr('cx', (d: GraphNode & { x: number }) => d.x)
-        .attr('cy', (d: GraphNode & { y: number }) => d.y);
+        .attr('cx', (d: GraphNode) => (d as GraphNode & { x: number }).x)
+        .attr('cy', (d: GraphNode) => (d as GraphNode & { y: number }).y);
 
       label
-        .attr('x', (d: GraphNode & { x: number }) => d.x)
-        .attr('y', (d: GraphNode & { y: number }) => d.y);
+        .attr('x', (d: GraphNode) => (d as GraphNode & { x: number }).x)
+        .attr('y', (d: GraphNode) => (d as GraphNode & { y: number }).y);
     });
 
     // 拖拽函数
@@ -214,7 +251,7 @@ export function LawArticleGraphVisualization({
       event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>
     ) {
       if (!event.active) simulation.alphaTarget(0.3).restart();
-      const subject = event.subject as GraphNode & { fx?: number; fy?: number };
+      const subject = event.subject as GraphNode & { fx?: number | null; fy?: number | null };
       subject.fx = (event.subject as GraphNode & { x: number }).x;
       subject.fy = (event.subject as GraphNode & { y: number }).y;
     }
@@ -222,7 +259,7 @@ export function LawArticleGraphVisualization({
     function dragged(
       event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>
     ) {
-      const subject = event.subject as GraphNode & { fx?: number; fy?: number };
+      const subject = event.subject as GraphNode & { fx?: number | null; fy?: number | null };
       subject.fx = event.x;
       subject.fy = event.y;
     }
@@ -231,7 +268,7 @@ export function LawArticleGraphVisualization({
       event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>
     ) {
       if (!event.active) simulation.alphaTarget(0);
-      const subject = event.subject as GraphNode & { fx?: number; fy?: number };
+      const subject = event.subject as GraphNode & { fx?: number | null; fy?: number | null };
       subject.fx = null;
       subject.fy = null;
     }
@@ -239,7 +276,7 @@ export function LawArticleGraphVisualization({
     return () => {
       simulation.stop();
     };
-  }, [graphData, centerArticleId]);
+  }, [graphData, centerArticleId, showCommunityColors, communityData]);
 
   // 关系类型颜色映射
   function getRelationColor(type: string): string {
@@ -281,6 +318,28 @@ export function LawArticleGraphVisualization({
 
   return (
     <div className='relative'>
+      {/* 社区着色切换按钮（仅在有 centerArticleId 时显示） */}
+      {centerArticleId && (
+        <div className='flex items-center gap-2 mb-2'>
+          <button
+            onClick={() => setShowCommunityColors(v => !v)}
+            disabled={communityLoading}
+            className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${
+              showCommunityColors
+                ? 'bg-indigo-600 text-white border-indigo-600'
+                : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400 hover:text-indigo-600'
+            }`}
+          >
+            {communityLoading ? '分析中...' : showCommunityColors ? '✦ 社区着色 已开启' : '✦ 社区着色'}
+          </button>
+          {showCommunityColors && communityData && (
+            <span className='text-xs text-gray-500'>
+              检测到 {communityData.communityCount} 个法律社区
+            </span>
+          )}
+        </div>
+      )}
+
       {!hasData && !loading && (
         <div className='flex items-center justify-center h-96 text-gray-500'>
           暂无图谱数据
@@ -293,30 +352,50 @@ export function LawArticleGraphVisualization({
       />
 
       {/* 图例 */}
-      <div className='absolute top-4 right-4 bg-white p-4 rounded shadow-lg'>
-        <h3 className='font-bold mb-2'>关系类型</h3>
-        <div className='space-y-1 text-sm'>
-          <div>
-            <span className='inline-block w-4 h-1 bg-blue-500 mr-2'></span>
-            引用
-          </div>
-          <div>
-            <span className='inline-block w-4 h-1 bg-red-500 mr-2'></span>
-            冲突
-          </div>
-          <div>
-            <span className='inline-block w-4 h-1 bg-green-500 mr-2'></span>
-            补全
-          </div>
-          <div>
-            <span className='inline-block w-4 h-1 bg-purple-500 mr-2'></span>
-            替代
-          </div>
-          <div>
-            <span className='inline-block w-4 h-1 bg-orange-500 mr-2'></span>
-            实施
-          </div>
-        </div>
+      <div className='absolute top-12 right-4 bg-white p-4 rounded shadow-lg'>
+        {showCommunityColors && communityData && communityData.communityLegend.length > 0 ? (
+          <>
+            <h3 className='font-bold mb-2 text-sm'>法律社区</h3>
+            <div className='space-y-1 text-xs max-h-48 overflow-y-auto'>
+              {communityData.communityLegend.slice(0, 10).map(item => (
+                <div key={item.communityId} className='flex items-center gap-2'>
+                  <span
+                    className='inline-block w-3 h-3 rounded-full flex-shrink-0'
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className='text-gray-600'>社区 {item.communityId + 1}</span>
+                  <span className='text-gray-400'>({item.count} 条)</span>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            <h3 className='font-bold mb-2 text-sm'>关系类型</h3>
+            <div className='space-y-1 text-sm'>
+              <div>
+                <span className='inline-block w-4 h-1 bg-blue-500 mr-2'></span>
+                引用
+              </div>
+              <div>
+                <span className='inline-block w-4 h-1 bg-red-500 mr-2'></span>
+                冲突
+              </div>
+              <div>
+                <span className='inline-block w-4 h-1 bg-green-500 mr-2'></span>
+                补全
+              </div>
+              <div>
+                <span className='inline-block w-4 h-1 bg-purple-500 mr-2'></span>
+                替代
+              </div>
+              <div>
+                <span className='inline-block w-4 h-1 bg-orange-500 mr-2'></span>
+                实施
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* 节点详情 */}

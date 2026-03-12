@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import ApplicabilityAnalyzer from '@/lib/law-article/applicability/applicability-analyzer';
 import { LawArticle, LawStatus, LawType, LawCategory } from '@prisma/client';
 import type {
@@ -6,7 +7,17 @@ import type {
   KeyFact,
 } from '@/lib/agent/doc-analyzer/core/types';
 
-describe('ApplicabilityAnalyzer - 状态警告功能', () => {
+/**
+ * ApplicabilityAnalyzer — 法条状态处理测试
+ *
+ * Phase 0 硬性过滤对不同法条状态的处理：
+ * - REPEALED / EXPIRED / DRAFT → applicable=false，reasons 包含原因
+ * - AMENDED → 通过过滤，warnings 包含修订提示，由 AI 最终判断适用性
+ * - VALID → 通过过滤，无状态警告
+ *
+ * 所有测试使用 useAI: false 以避免依赖外部 AI 服务，保证结果确定性。
+ */
+describe('ApplicabilityAnalyzer - 法条状态处理', () => {
   let analyzer: ApplicabilityAnalyzer;
   let mockCaseInfo: DocumentAnalysisOutput;
 
@@ -14,14 +25,12 @@ describe('ApplicabilityAnalyzer - 状态警告功能', () => {
     analyzer = new ApplicabilityAnalyzer();
     await analyzer.initialize();
 
-    // 创建完整的Claim对象
     const mockClaim: Claim = {
       type: 'PAY_PRINCIPAL',
       content: '支付货款100000元',
       currency: 'CNY',
     };
 
-    // 创建完整的KeyFact对象
     const mockKeyFacts: KeyFact[] = [
       {
         id: 'fact-1',
@@ -30,16 +39,6 @@ describe('ApplicabilityAnalyzer - 状态警告功能', () => {
         details: '双方签订买卖合同',
         importance: 8,
         confidence: 0.9,
-        factType: 'EXPLICIT',
-        relatedDisputes: [],
-      },
-      {
-        id: 'fact-2',
-        category: 'BREACH_BEHAVIOR',
-        description: '2024年6月违约',
-        details: '被告未按期付款',
-        importance: 9,
-        confidence: 0.95,
         factType: 'EXPLICIT',
         relatedDisputes: [],
       },
@@ -75,8 +74,8 @@ describe('ApplicabilityAnalyzer - 状态警告功能', () => {
     await analyzer.destroy();
   });
 
-  const createMockArticle = (overrides: Partial<LawArticle>): LawArticle => {
-    return {
+  const createMockArticle = (overrides: Partial<LawArticle>): LawArticle =>
+    ({
       id: 'test-article-id',
       lawName: '测试法',
       articleNumber: '第1条',
@@ -105,167 +104,110 @@ describe('ApplicabilityAnalyzer - 状态警告功能', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       ...overrides,
-    } as LawArticle;
-  };
+    } as LawArticle);
 
-  describe('废止法条状态警告', () => {
-    it('应该为废止法条添加error级别警告', async () => {
-      const articles: LawArticle[] = [
-        createMockArticle({
-          id: 'test-article-1',
-          articleNumber: '第1条',
-          status: LawStatus.REPEALED,
-        }),
+  // 所有测试禁用 AI，使用规则层级评分，保证确定性
+  const noAIConfig = { useAI: false };
+
+  describe('废止法条', () => {
+    it('应该将 REPEALED 法条标记为不适用', async () => {
+      const articles = [
+        createMockArticle({ id: 'art-1', status: LawStatus.REPEALED }),
       ];
 
-      const result = await analyzer.analyze({
-        caseInfo: mockCaseInfo,
-        articles,
-      });
+      const result = await analyzer.analyze({ caseInfo: mockCaseInfo, articles, config: noAIConfig });
 
-      expect(result.results).toHaveLength(1);
-      const articleResult = result.results[0];
-
-      expect(articleResult.statusWarning).toBeDefined();
-      expect(articleResult.statusWarning?.level).toBe('error');
-      expect(articleResult.statusWarning?.message).toContain('已废止');
-      expect(articleResult.statusWarning?.message).toContain('已失效');
+      const articleResult = result.results.find(r => r.articleId === 'art-1');
+      expect(articleResult?.applicable).toBe(false);
+      expect(articleResult?.score).toBe(0);
+      expect(articleResult?.reasons.some(r => r.includes('废止'))).toBe(true);
     });
   });
 
-  describe('修订法条状态警告', () => {
-    it('应该为修订法条添加warning级别警告', async () => {
-      const articles: LawArticle[] = [
-        createMockArticle({
-          id: 'test-article-2',
-          articleNumber: '第2条',
-          version: '2.0',
-          status: LawStatus.AMENDED,
-        }),
+  describe('修订法条', () => {
+    it('AMENDED 法条应通过过滤并附加修订警告', async () => {
+      const articles = [
+        createMockArticle({ id: 'art-2', status: LawStatus.AMENDED }),
       ];
 
-      const result = await analyzer.analyze({
-        caseInfo: mockCaseInfo,
-        articles,
-      });
+      const result = await analyzer.analyze({ caseInfo: mockCaseInfo, articles, config: noAIConfig });
 
-      expect(result.results).toHaveLength(1);
-      const articleResult = result.results[0];
-
-      expect(articleResult.statusWarning).toBeDefined();
-      expect(articleResult.statusWarning?.level).toBe('warning');
-      expect(articleResult.statusWarning?.message).toContain('已修订');
-      expect(articleResult.statusWarning?.message).toContain('最新版本');
+      const articleResult = result.results.find(r => r.articleId === 'art-2');
+      // 通过过滤，由法条层级分数决定是否适用
+      expect(articleResult?.ruleValidation?.passed).toBe(true);
+      // warnings 包含修订提示
+      expect(articleResult?.warnings.some(w => w.includes('修订'))).toBe(true);
     });
   });
 
-  describe('过期法条状态警告', () => {
-    it('应该为过期法条添加warning级别警告', async () => {
-      const articles: LawArticle[] = [
+  describe('过期法条', () => {
+    it('应该将 EXPIRED 状态法条标记为不适用', async () => {
+      const articles = [
         createMockArticle({
-          id: 'test-article-3',
-          articleNumber: '第3条',
-          effectiveDate: new Date('2020-01-01'),
-          expiryDate: new Date('2023-12-31'),
+          id: 'art-3',
           status: LawStatus.EXPIRED,
+          expiryDate: new Date('2023-12-31'),
         }),
       ];
 
-      const result = await analyzer.analyze({
-        caseInfo: mockCaseInfo,
-        articles,
-      });
+      const result = await analyzer.analyze({ caseInfo: mockCaseInfo, articles, config: noAIConfig });
 
-      expect(result.results).toHaveLength(1);
-      const articleResult = result.results[0];
+      const articleResult = result.results.find(r => r.articleId === 'art-3');
+      expect(articleResult?.applicable).toBe(false);
+    });
 
-      expect(articleResult.statusWarning).toBeDefined();
-      expect(articleResult.statusWarning?.level).toBe('warning');
-      expect(articleResult.statusWarning?.message).toContain('已过期');
-      expect(articleResult.statusWarning?.message).toContain('超过有效期');
+    it('应该将已超过 expiryDate 的 VALID 法条标记为不适用', async () => {
+      const pastDate = new Date();
+      pastDate.setFullYear(pastDate.getFullYear() - 1);
+
+      const articles = [
+        createMockArticle({
+          id: 'art-expired-date',
+          status: LawStatus.VALID,
+          expiryDate: pastDate,
+        }),
+      ];
+
+      const result = await analyzer.analyze({ caseInfo: mockCaseInfo, articles, config: noAIConfig });
+
+      const articleResult = result.results.find(r => r.articleId === 'art-expired-date');
+      expect(articleResult?.applicable).toBe(false);
+      expect(articleResult?.ruleValidation?.passed).toBe(false);
     });
   });
 
-  describe('有效法条无警告', () => {
-    it('应该不为有效法条添加状态警告', async () => {
-      const articles: LawArticle[] = [
+  describe('有效法条', () => {
+    it('应该正确处理有效法条（无状态警告）', async () => {
+      const articles = [
         createMockArticle({
-          id: 'test-article-4',
-          articleNumber: '第4条',
-          fullText: '合同当事人应当履行合同义务',
-          searchableText: '合同当事人应当履行合同义务',
+          id: 'art-4',
           status: LawStatus.VALID,
         }),
       ];
 
-      const result = await analyzer.analyze({
-        caseInfo: mockCaseInfo,
-        articles,
-      });
+      const result = await analyzer.analyze({ caseInfo: mockCaseInfo, articles, config: noAIConfig });
 
-      expect(result.results).toHaveLength(1);
-      const articleResult = result.results[0];
-
-      expect(articleResult.statusWarning).toBeUndefined();
+      const articleResult = result.results.find(r => r.articleId === 'art-4');
+      expect(articleResult?.ruleValidation?.passed).toBe(true);
+      expect(articleResult?.ruleValidation?.warnings).toEqual([]);
     });
   });
 
   describe('混合状态法条', () => {
-    it('应该正确处理混合状态法条', async () => {
-      const articles: LawArticle[] = [
-        createMockArticle({
-          id: 'test-article-valid',
-          articleNumber: '第5条',
-          fullText: '有效法条内容',
-          searchableText: '有效法条内容',
-          status: LawStatus.VALID,
-        }),
-        createMockArticle({
-          id: 'test-article-repealed',
-          articleNumber: '第6条',
-          fullText: '废止法条内容',
-          searchableText: '废止法条内容',
-          status: LawStatus.REPEALED,
-        }),
-        createMockArticle({
-          id: 'test-article-amended',
-          articleNumber: '第7条',
-          fullText: '修订法条内容',
-          searchableText: '修订法条内容',
-          version: '2.0',
-          status: LawStatus.AMENDED,
-        }),
+    it('应该正确处理混合状态的法条集合', async () => {
+      const articles = [
+        createMockArticle({ id: 'valid', status: LawStatus.VALID }),
+        createMockArticle({ id: 'repealed', status: LawStatus.REPEALED }),
+        createMockArticle({ id: 'amended', status: LawStatus.AMENDED }),
       ];
 
-      const result = await analyzer.analyze({
-        caseInfo: mockCaseInfo,
-        articles,
-      });
+      const result = await analyzer.analyze({ caseInfo: mockCaseInfo, articles, config: noAIConfig });
 
       expect(result.results).toHaveLength(3);
-
-      const validArticle = result.results.find(
-        r => r.articleId === 'test-article-valid'
-      );
-      const repealedArticle = result.results.find(
-        r => r.articleId === 'test-article-repealed'
-      );
-      const amendedArticle = result.results.find(
-        r => r.articleId === 'test-article-amended'
-      );
-
-      // 验证有效法条无警告
-      expect(validArticle?.statusWarning).toBeUndefined();
-
-      // 验证废止法条有error警告
-      expect(repealedArticle?.statusWarning).toBeDefined();
-      expect(repealedArticle?.statusWarning?.level).toBe('error');
-      expect(repealedArticle?.statusWarning?.message).toContain('已废止');
-
-      // 验证修订法条有warning警告
-      expect(amendedArticle?.statusWarning).toBeDefined();
-      expect(amendedArticle?.statusWarning?.level).toBe('warning');
-      expect(amendedArticle?.statusWarning?.message).toContain('已修订');
+      expect(result.results.find(r => r.articleId === 'repealed')?.applicable).toBe(false);
+      expect(result.results.find(r => r.articleId === 'amended')?.ruleValidation?.passed).toBe(true);
+      expect(result.results.find(r => r.articleId === 'amended')?.warnings.length).toBeGreaterThan(0);
+      expect(result.results.find(r => r.articleId === 'valid')?.ruleValidation?.warnings).toEqual([]);
     });
   });
 });

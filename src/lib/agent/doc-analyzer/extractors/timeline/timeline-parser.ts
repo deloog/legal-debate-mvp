@@ -6,6 +6,7 @@
 import type { TimelineEvent, TimelineEventType } from '../../core/types';
 import { normalizeDate } from './timeline-utils';
 import { getEventTypePatterns } from './timeline-utils';
+import { logger } from '@/lib/logger';
 
 /**
  * 从文本中提取日期
@@ -150,19 +151,19 @@ export function parseAIExtractionResponse(aiResponse: string): TimelineEvent[] {
     let cleanedResponse = aiResponse.trim();
 
     const responsePreview = cleanedResponse.substring(0, 1000);
-    console.log('[AI响应解析] 原始响应预览:', responsePreview);
+    logger.info('[AI响应解析] 原始响应预览:', responsePreview);
 
     cleanedResponse = extractJSONFromText(cleanedResponse);
     cleanedResponse = cleanJSONString(cleanedResponse);
 
     const parsed = JSON.parse(cleanedResponse);
-    console.log(
+    logger.info(
       '[AI响应解析] JSON解析成功，字段数:',
       Object.keys(parsed).length
     );
 
     if (!parsed.timelineEvents || !Array.isArray(parsed.timelineEvents)) {
-      console.warn('[AI响应解析] timelineEvents字段缺失或类型错误');
+      logger.warn('[AI响应解析] timelineEvents字段缺失或类型错误');
       return [];
     }
 
@@ -176,7 +177,7 @@ export function parseAIExtractionResponse(aiResponse: string): TimelineEvent[] {
       };
 
       if (!eventItem.date && !eventItem.event) {
-        console.warn(`[AI响应解析] 事件${index}缺少必需字段`, item);
+        logger.warn(`[AI响应解析] 事件${index}缺少必需字段`, item);
       }
 
       return {
@@ -193,15 +194,15 @@ export function parseAIExtractionResponse(aiResponse: string): TimelineEvent[] {
       };
     });
 
-    console.log('[AI响应解析] 成功解析事件数:', events.length);
+    logger.info('[AI响应解析] 成功解析事件数:', events.length);
     return events;
   } catch (error) {
-    console.error('[AI响应解析] 完整解析失败:', {
+    logger.error('[AI响应解析] 完整解析失败:', {
       error: error instanceof Error ? error.message : String(error),
       responsePreview: aiResponse.substring(0, 500),
     });
 
-    console.log('[AI响应解析] 尝试部分解析...');
+    logger.info('[AI响应解析] 尝试部分解析...');
     return parsePartialAIExtraction(aiResponse);
   }
 }
@@ -210,7 +211,7 @@ export function parseAIExtractionResponse(aiResponse: string): TimelineEvent[] {
  * 部分解析AI提取响应（容错机制）
  */
 export function parsePartialAIExtraction(aiResponse: string): TimelineEvent[] {
-  console.log('[AI响应解析] 部分解析模式启动');
+  logger.info('[AI响应解析] 部分解析模式启动');
   const events: TimelineEvent[] = [];
 
   try {
@@ -256,12 +257,12 @@ export function parsePartialAIExtraction(aiResponse: string): TimelineEvent[] {
         }
       }
 
-      console.log(`[AI响应解析] 部分解析成功，提取${events.length}个事件`);
+      logger.info(`[AI响应解析] 部分解析成功，提取${events.length}个事件`);
     } else {
-      console.warn('[AI响应解析] 部分解析失败，未找到有效的事件数据');
+      logger.warn('[AI响应解析] 部分解析失败，未找到有效的事件数据');
     }
   } catch (error) {
-    console.error('[AI响应解析] 部分解析异常:', error);
+    logger.error('[AI响应解析] 部分解析异常:', error);
   }
 
   return events;

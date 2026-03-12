@@ -23,7 +23,7 @@ import { logger } from '@/lib/logger';
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -34,14 +34,14 @@ export async function PUT(
     ) as unknown as NextResponse;
   }
 
-  // 检查权限
-  const permissionError = await validatePermissions(request, 'user:update');
+  // 检查权限 - 使用 role:update 权限（批量分配/撤销权限需要更新角色权限）
+  const permissionError = await validatePermissions(request, 'role:update');
   if (permissionError) {
     return permissionError;
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = (await request.json()) as BatchAssignPermissionsRequest;
 
     // 验证必填字段
@@ -116,7 +116,7 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -127,14 +127,14 @@ export async function DELETE(
     ) as unknown as NextResponse;
   }
 
-  // 检查权限
-  const permissionError = await validatePermissions(request, 'user:update');
+  // 检查权限 - 使用 role:update 权限（批量分配/撤销权限需要更新角色权限）
+  const permissionError = await validatePermissions(request, 'role:update');
   if (permissionError) {
     return permissionError;
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = (await request.json()) as BatchRevokePermissionsRequest;
 
     // 验证必填字段

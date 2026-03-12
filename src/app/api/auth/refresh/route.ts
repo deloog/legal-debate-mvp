@@ -66,7 +66,7 @@ async function handleRefresh(
         {
           success: false,
           message: '无效或过期的刷新令牌',
-          error: verificationResult.error,
+          error: verificationResult.error ?? undefined,
         },
         { status: 401 }
       );

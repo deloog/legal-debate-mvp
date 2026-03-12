@@ -427,7 +427,7 @@ export class RelationWorkflow {
     // 更新关系状态
     await LawArticleRelationService.updateRelation(relationId, {
       verificationStatus: VerificationStatus.PENDING,
-      reviewHistory: newReviewHistory as unknown as Prisma.JsonValue,
+      reviewHistory: newReviewHistory as unknown as Prisma.InputJsonValue,
       rejectionReason: null,
     });
 

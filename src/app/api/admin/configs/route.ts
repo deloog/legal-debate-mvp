@@ -3,27 +3,27 @@
  * 支持分页、筛选、搜索、创建、批量更新
  */
 
-import { NextRequest } from 'next/server';
-import { Prisma } from '@prisma/client';
+import {
+  createdResponse,
+  errorResponse,
+  serverErrorResponse,
+  successResponse,
+  unauthorizedResponse,
+} from '@/lib/api-response';
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import {
+  BatchUpdateConfigRequest,
   ConfigQueryParams,
   ConfigResponse,
   CreateConfigRequest,
-  BatchUpdateConfigRequest,
-  isValidConfigType,
   isValidConfigCategory,
+  isValidConfigType,
 } from '@/types/config';
-import {
-  successResponse,
-  createdResponse,
-  unauthorizedResponse,
-  serverErrorResponse,
-  errorResponse,
-} from '@/lib/api-response';
-import { logger } from '@/lib/logger';
+import { Prisma } from '@prisma/client';
+import { NextRequest } from 'next/server';
 
 // =============================================================================
 // 辅助函数
@@ -118,8 +118,11 @@ export async function GET(request: NextRequest): Promise<Response> {
   try {
     // 解析查询参数
     const params = parseQueryParams(request);
-    const page = Math.max(1, Number.parseInt(params.page, 10));
-    const limit = Math.min(100, Math.max(1, Number.parseInt(params.limit, 10)));
+    const page = Math.max(1, Number.parseInt(params.page ?? '1', 10));
+    const limit = Math.min(
+      100,
+      Math.max(1, Number.parseInt(params.limit ?? '20', 10))
+    );
     const skip = (page - 1) * limit;
 
     // 构建查询条件
@@ -133,10 +136,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       where,
       skip,
       take: limit,
-      orderBy: {
-        category: 'asc',
-        key: 'asc',
-      },
+      orderBy: [{ category: 'asc' }, { key: 'asc' }],
     });
 
     // 构建响应数据
@@ -261,7 +261,20 @@ export async function PUT(request: NextRequest): Promise<Response> {
       return errorResponse('configs数组不能为空', 400);
     }
 
-    const updatedConfigs = [];
+    const updatedConfigs: Array<{
+      id: string;
+      createdAt: Date;
+      key: string;
+      value: Prisma.JsonValue;
+      category: string;
+      updatedAt: Date;
+      description: string | null;
+      type: string;
+      isPublic: boolean;
+      isRequired: boolean;
+      defaultValue: Prisma.JsonValue;
+      validationRules: Prisma.JsonValue;
+    }> = [];
     const errors: Array<{ key: string; message: string }> = [];
 
     // 遍历更新每个配置

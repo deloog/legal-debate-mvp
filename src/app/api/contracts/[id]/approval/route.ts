@@ -6,13 +6,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { contractApprovalService } from '@/lib/contract/contract-approval-service';
 import { logger } from '@/lib/logger';
+import {
+  resolveContractUserId,
+  unauthorizedResponse,
+} from '@/app/api/lib/middleware/contract-auth';
 
 export async function GET(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  // ─── 认证 ─────────────────────────────────────────────────────────────────
+  const userId = resolveContractUserId(request);
+  if (!userId) return unauthorizedResponse();
+
   try {
-    const contractId = params.id;
+    const contractId = (await params).id;
 
     // 获取合同的最新审批记录
     const approvals =

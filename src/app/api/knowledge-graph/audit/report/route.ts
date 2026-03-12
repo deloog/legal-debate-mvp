@@ -78,6 +78,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // PDF 格式暂不可用（需集成 pdfkit 等依赖）
+    if (format === AuditReportFormat.PDF) {
+      return NextResponse.json(
+        {
+          error: 'FORMAT_NOT_SUPPORTED',
+          message: 'PDF 格式暂不支持，请使用 JSON 格式',
+        },
+        { status: 501 }
+      );
+    }
+
     // 获取用户ID
     const userId = getUserId(request);
     if (!userId) {
@@ -210,7 +221,8 @@ export async function GET(request: NextRequest) {
             description:
               format === AuditReportFormat.JSON
                 ? '结构化JSON数据'
-                : 'PDF文档（暂未实现）',
+                : 'PDF文档（需安装 pdfkit 依赖后启用）',
+            available: format === AuditReportFormat.JSON,
           })),
         },
       },

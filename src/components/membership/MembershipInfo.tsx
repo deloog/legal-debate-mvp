@@ -1,8 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { TierLimitConfig, UserMembership } from '@/types/membership';
 import { Calendar, Crown, User } from 'lucide-react';
-import { UserMembership, TierLimitConfig } from '@/types/membership';
 
 interface MembershipInfoProps {
   membership: UserMembership | null;
@@ -189,42 +189,53 @@ export function MembershipInfo({
         <div className='space-y-2'>
           <h4 className='font-semibold text-gray-900'>使用量统计</h4>
           <div className='rounded-lg bg-gray-50 p-4'>
-            {renderProgressBar(
-              '案件创建',
-              usageStats.casesCreated,
-              tierLimit.limits.MAX_CASES,
-              '个'
-            )}
-            {renderProgressBar(
-              '辩论生成',
-              usageStats.debatesGenerated,
-              tierLimit.limits.MAX_DEBATES,
-              '个'
-            )}
-            {renderProgressBar(
-              '文档分析',
-              usageStats.documentsAnalyzed,
-              tierLimit.limits.MAX_DOCUMENTS,
-              '个'
-            )}
-            {renderProgressBar(
-              '法条搜索',
-              usageStats.lawArticleSearches,
-              tierLimit.limits.MAX_LAW_ARTICLE_SEARCHES,
-              '次'
-            )}
-            {renderProgressBar(
-              'AI 令牌',
-              usageStats.aiTokensUsed,
-              tierLimit.limits.MAX_AI_TOKENS_MONTHLY,
-              '个'
-            )}
-            {renderProgressBar(
-              '存储空间',
-              usageStats.storageUsedMB,
-              tierLimit.limits.MAX_STORAGE_MB,
-              'MB'
-            )}
+            {(() => {
+              const limits = tierLimit.limits;
+              return (
+                <>
+                  {renderProgressBar(
+                    '案件创建',
+                    usageStats.casesCreated,
+                    limits?.MAX_CASES ?? tierLimit.MAX_CASES ?? 0,
+                    '个'
+                  )}
+                  {renderProgressBar(
+                    '辩论生成',
+                    usageStats.debatesGenerated,
+                    limits?.MAX_DEBATES ?? tierLimit.MAX_DEBATES ?? 0,
+                    '个'
+                  )}
+                  {renderProgressBar(
+                    '文档分析',
+                    usageStats.documentsAnalyzed,
+                    limits?.MAX_DOCUMENTS ?? tierLimit.MAX_DOCUMENTS ?? 0,
+                    '个'
+                  )}
+                  {renderProgressBar(
+                    '法条搜索',
+                    usageStats.lawArticleSearches,
+                    limits?.MAX_LAW_ARTICLE_SEARCHES ??
+                      tierLimit.MAX_LAW_ARTICLE_SEARCHES ??
+                      0,
+                    '次'
+                  )}
+                  {renderProgressBar(
+                    'AI 令牌',
+                    usageStats.aiTokensUsed,
+                    limits?.MAX_AI_TOKENS_MONTHLY ??
+                      tierLimit.MAX_AI_TOKENS_MONTHLY ??
+                      0,
+                    '个'
+                  )}
+                  {renderProgressBar(
+                    '存储空间',
+                    usageStats.storageUsedMB,
+                    limits?.MAX_STORAGE_MB ?? tierLimit.MAX_STORAGE_MB ?? 0,
+                    'MB'
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
 

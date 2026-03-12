@@ -13,6 +13,7 @@
  * - EMAIL_FROM: 发件人地址
  */
 
+import { logger } from '@/lib/logger';
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 import type {
@@ -164,20 +165,20 @@ class DevEmailService implements IEmailService {
   }
 
   private logEmail(options: EmailSendOptions): void {
-    console.log('\n' + '='.repeat(60));
-    console.log('📧 邮件发送（开发环境）');
-    console.log('='.repeat(60));
-    console.log(`收件人: ${options.to}`);
-    console.log(`主题: ${options.subject}`);
-    console.log('-'.repeat(60));
-    console.log('内容（纯文本）：');
-    console.log(options.text);
+    logger.info('\n' + '='.repeat(60));
+    logger.info('📧 邮件发送（开发环境）');
+    logger.info('='.repeat(60));
+    logger.info(`收件人: ${options.to}`);
+    logger.info(`主题: ${options.subject}`);
+    logger.info('-'.repeat(60));
+    logger.info('内容（纯文本）：');
+    logger.info(options.text);
     if (options.html) {
-      console.log('-'.repeat(60));
-      console.log('内容（HTML）：');
-      console.log(options.html);
+      logger.info('-'.repeat(60));
+      logger.info('内容（HTML）：');
+      logger.info(options.html);
     }
-    console.log('='.repeat(60) + '\n');
+    logger.info('='.repeat(60) + '\n');
   }
 
   async sendPasswordResetEmail(
@@ -286,7 +287,7 @@ class ProdEmailService implements IEmailService {
     const pass = process.env.SMTP_PASS;
 
     if (!host || !user || !pass) {
-      console.warn(
+      logger.warn(
         '[ProdEmailService] SMTP 配置不完整，请检查 SMTP_HOST, SMTP_USER, SMTP_PASS 环境变量'
       );
       return false;
@@ -305,10 +306,10 @@ class ProdEmailService implements IEmailService {
 
       // 验证连接
       await this.transporter.verify();
-      console.log('[ProdEmailService] SMTP 连接成功');
+      logger.info('[ProdEmailService] SMTP 连接成功');
       return true;
     } catch (error) {
-      console.error('[ProdEmailService] SMTP 连接失败:', error);
+      logger.error('[ProdEmailService] SMTP 连接失败:', error);
       this.transporter = null;
       return false;
     }
@@ -329,7 +330,7 @@ class ProdEmailService implements IEmailService {
     const ready = await this.initTransporter();
 
     if (!ready || !this.transporter) {
-      console.warn(
+      logger.warn(
         `[ProdEmailService] SMTP 未配置，无法发送密码重置邮件到 ${email}`
       );
       return {
@@ -349,7 +350,7 @@ class ProdEmailService implements IEmailService {
         html: template.htmlContent,
       });
 
-      console.log(`[ProdEmailService] 密码重置邮件已发送: ${email}`, {
+      logger.info(`[ProdEmailService] 密码重置邮件已发送: ${email}`, {
         messageId: info.messageId,
       });
 
@@ -358,7 +359,7 @@ class ProdEmailService implements IEmailService {
         messageId: info.messageId,
       };
     } catch (error) {
-      console.error(`[ProdEmailService] 发送密码重置邮件失败:`, error);
+      logger.error(`[ProdEmailService] 发送密码重置邮件失败:`, error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '发送失败',
@@ -374,7 +375,7 @@ class ProdEmailService implements IEmailService {
     const ready = await this.initTransporter();
 
     if (!ready || !this.transporter) {
-      console.warn(
+      logger.warn(
         `[ProdEmailService] SMTP 未配置，无法发送验证邮件到 ${email}`
       );
       return {
@@ -394,7 +395,7 @@ class ProdEmailService implements IEmailService {
         html: template.htmlContent,
       });
 
-      console.log(`[ProdEmailService] 验证邮件已发送: ${email}`, {
+      logger.info(`[ProdEmailService] 验证邮件已发送: ${email}`, {
         messageId: info.messageId,
       });
 
@@ -403,7 +404,7 @@ class ProdEmailService implements IEmailService {
         messageId: info.messageId,
       };
     } catch (error) {
-      console.error(`[ProdEmailService] 发送验证邮件失败:`, error);
+      logger.error(`[ProdEmailService] 发送验证邮件失败:`, error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '发送失败',

@@ -213,7 +213,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const exportData: ExportMembershipData[] = memberships.map(m => ({
       userId: m.userId,
       userEmail: m.user.email,
-      userName: m.user.name ?? m.user.username,
+      userName: m.user.name ?? m.user.username ?? '',
       tierName: m.tier.name,
       tierDisplayName: m.tier.displayName,
       status: m.status,

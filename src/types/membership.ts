@@ -340,7 +340,7 @@ export interface MembershipTierDef {
   billingCycle: BillingCycle;
   features: string[];
   limits: TierLimitConfig;
-  permissions?: Record<string, unknown>;
+  permissions?: MembershipPermissionConfig;
   // 兼容旧代码的额外字段
   isActive?: boolean;
   sortOrder?: number;

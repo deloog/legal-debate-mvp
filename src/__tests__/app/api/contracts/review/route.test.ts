@@ -187,7 +187,7 @@ describe('合同审查API', () => {
         'http://localhost:3000/api/contracts/review/contract-1'
       );
       const response = await reviewGET(request, {
-        params: { id: 'contract-1' },
+        params: Promise.resolve({ id: 'contract-1' }),
       });
       const data = await response.json();
 
@@ -206,7 +206,7 @@ describe('合同审查API', () => {
         'http://localhost:3000/api/contracts/review/non-existent'
       );
       const response = await reviewGET(request, {
-        params: { id: 'non-existent' },
+        params: Promise.resolve({ id: 'non-existent' }),
       });
       const data = await response.json();
 
@@ -267,7 +267,7 @@ describe('合同审查API', () => {
         'http://localhost:3000/api/contracts/review/contract-1'
       );
       const response = await reviewGET(request, {
-        params: { id: 'contract-1' },
+        params: Promise.resolve({ id: 'contract-1' }),
       });
       const data = await response.json();
 
@@ -332,7 +332,7 @@ describe('合同审查API', () => {
         'http://localhost:3000/api/contracts/review/contract-1'
       );
       const response = await reviewGET(request, {
-        params: { id: 'contract-1' },
+        params: Promise.resolve({ id: 'contract-1' }),
       });
       const data = await response.json();
 

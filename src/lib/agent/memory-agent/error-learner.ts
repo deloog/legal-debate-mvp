@@ -12,6 +12,7 @@ import { ErrorPatternAnalyzer } from './error-learner/analyzer';
 import { AIHelpers } from './error-learner/ai-helpers';
 import { KnowledgeBaseUpdater } from './error-learner/knowledge-base';
 import type { LearningResult, ErrorAnalysis } from './types';
+import { logger } from '@/lib/logger';
 
 /**
  * ErrorLearner - 错误学习类
@@ -115,8 +116,8 @@ export class ErrorLearner {
       try {
         const result = await this.learnFromError(error.id);
         results.push(result);
-      } catch (error) {
-        console.error(`Failed to learn from error ${error.id}:`, error);
+      } catch (learnErr) {
+        logger.error(`Failed to learn from error ${error.id}:`, learnErr);
       }
     }
 

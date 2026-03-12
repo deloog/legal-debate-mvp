@@ -4,6 +4,7 @@
  * 功能：基于识别的风险提供具体的风险规避建议
  */
 
+import { logger } from '@/lib/logger';
 import type { AIService } from '../service';
 import type { AIRequestConfig } from '../../../types/ai-service.d';
 import type {
@@ -79,7 +80,7 @@ export class AIRiskAdvisor {
     try {
       return await this.adviseByAI(highPriorityRisks, assessment);
     } catch (error) {
-      console.error('AI建议生成失败，使用规则引擎:', error);
+      logger.error('AI建议生成失败，使用规则引擎:', error);
 
       if (this.enableFallback) {
         return this.adviseByRules(assessment);
@@ -199,7 +200,7 @@ export class AIRiskAdvisor {
           }
         }
       } catch (error) {
-        console.error('解析AI建议响应失败:', error);
+        logger.error('解析AI建议响应失败:', error);
       }
     }
 

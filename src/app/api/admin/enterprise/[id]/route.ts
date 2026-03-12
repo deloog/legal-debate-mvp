@@ -49,7 +49,7 @@ function isValidEnterpriseId(id: string): boolean {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<Response> {
   const user = await getAuthUser(request);
   if (!user) {
@@ -64,7 +64,7 @@ export async function GET(
     return permissionError;
   }
 
-  const enterpriseId = params.id;
+  const enterpriseId = (await params).id;
 
   if (!isValidEnterpriseId(enterpriseId)) {
     return Response.json(

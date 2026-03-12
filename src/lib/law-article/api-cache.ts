@@ -8,7 +8,8 @@
  * - LRU淘汰策略
  */
 
-import { redis, checkRedisConnection } from '../cache/redis';
+import { checkRedisConnection, redis } from '../cache/redis';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 类型定义
@@ -219,7 +220,7 @@ export class LawArticleAPICache {
     }
 
     // 删除Redis缓存
-    if (this.config.mode !== 'memory') {
+    if (this.config.mode !== 'memory' && redis) {
       try {
         const keys = await redis.keys(fullPattern);
         if (keys.length > 0) {
@@ -227,7 +228,7 @@ export class LawArticleAPICache {
           deletedCount = Math.max(deletedCount, keys.length);
         }
       } catch (error) {
-        console.error('[APICache] 批量删除Redis缓存失败:', error);
+        logger.error('[APICache] 批量删除Redis缓存失败:', error);
       }
     }
 
@@ -242,7 +243,7 @@ export class LawArticleAPICache {
     this.memoryCache.clear();
 
     // 清空Redis缓存
-    if (this.config.mode !== 'memory') {
+    if (this.config.mode !== 'memory' && redis) {
       try {
         const pattern = `${this.config.keyPrefix}*`;
         const keys = await redis.keys(pattern);
@@ -250,7 +251,7 @@ export class LawArticleAPICache {
           await redis.del(...keys);
         }
       } catch (error) {
-        console.error('[APICache] 清空Redis缓存失败:', error);
+        logger.error('[APICache] 清空Redis缓存失败:', error);
       }
     }
   }
@@ -275,7 +276,7 @@ export class LawArticleAPICache {
       await this.set(key, value, ttl);
       return value;
     } catch (error) {
-      console.error('[APICache] 获取数据失败:', error);
+      logger.error('[APICache] 获取数据失败:', error);
       return null;
     }
   }
@@ -425,6 +426,9 @@ export class LawArticleAPICache {
   // ---------------------------------------------------------------------------
 
   private async getFromRedis<T>(key: string): Promise<T | null> {
+    if (!redis) {
+      return null;
+    }
     try {
       const value = await redis.get(key);
       if (value === null) {
@@ -432,7 +436,7 @@ export class LawArticleAPICache {
       }
       return JSON.parse(value) as T;
     } catch (error) {
-      console.error('[APICache] Redis读取失败:', error);
+      logger.error('[APICache] Redis读取失败:', error);
       return null;
     }
   }
@@ -442,21 +446,27 @@ export class LawArticleAPICache {
     value: T,
     ttl: number
   ): Promise<boolean> {
+    if (!redis) {
+      return false;
+    }
     try {
       const serialized = JSON.stringify(value);
       await redis.setex(key, ttl, serialized);
       return true;
     } catch (error) {
-      console.error('[APICache] Redis写入失败:', error);
+      logger.error('[APICache] Redis写入失败:', error);
       return false;
     }
   }
 
   private async deleteFromRedis(key: string): Promise<void> {
+    if (!redis) {
+      return;
+    }
     try {
       await redis.del(key);
     } catch (error) {
-      console.error('[APICache] Redis删除失败:', error);
+      logger.error('[APICache] Redis删除失败:', error);
     }
   }
 

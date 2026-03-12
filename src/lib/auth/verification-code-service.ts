@@ -4,6 +4,7 @@
  * 处理验证码的生成、验证和管理，支持密码重置、邮箱验证等场景。
  */
 
+import { logger } from '@/lib/logger';
 import { PrismaClient } from '@prisma/client';
 import type {
   VerifyCodeResult,
@@ -173,7 +174,7 @@ class VerificationCodeService {
         expiresAt,
       };
     } catch (error) {
-      console.error('创建验证码失败:', error);
+      logger.error('创建验证码失败:', error);
       return {
         success: false,
         code: '',
@@ -242,7 +243,7 @@ class VerificationCodeService {
         error: null,
       };
     } catch (error) {
-      console.error('验证验证码失败:', error);
+      logger.error('验证验证码失败:', error);
       return {
         valid: false,
         userId: null,
@@ -266,7 +267,7 @@ class VerificationCodeService {
 
       return result.count;
     } catch (error) {
-      console.error('清理过期验证码失败:', error);
+      logger.error('清理过期验证码失败:', error);
       return 0;
     }
   }

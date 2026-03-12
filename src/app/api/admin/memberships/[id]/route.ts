@@ -24,6 +24,7 @@ import {
 } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import { logMembershipChange } from '@/lib/membership/audit-logger';
 
 // =============================================================================
 // 辅助函数
@@ -93,7 +94,7 @@ async function recordMembershipHistory(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   // 验证用户身份
   const user = await getAuthUser(request);
@@ -101,13 +102,13 @@ export async function GET(
     return unauthorizedResponse();
   }
 
-  // 检查权限
-  const permissionError = await validatePermissions(request, 'user:read');
+  // 检查权限 - 使用 membership:read 权限
+  const permissionError = await validatePermissions(request, 'membership:read');
   if (permissionError) {
     return permissionError;
   }
 
-  const { id } = params;
+  const { id } = await params;
 
   try {
     // 查询会员详情
@@ -170,7 +171,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   // 验证用户身份
   const adminUser = await getAuthUser(request);
@@ -178,13 +179,13 @@ export async function PATCH(
     return unauthorizedResponse();
   }
 
-  // 检查权限
-  const permissionError = await validatePermissions(request, 'user:write');
+  // 检查权限 - 使用 membership:write 权限
+  const permissionError = await validatePermissions(request, 'membership:write');
   if (permissionError) {
     return permissionError;
   }
 
-  const { id } = params;
+  const { id } = await params;
 
   try {
     // 解析请求体
@@ -335,6 +336,22 @@ export async function PATCH(
           adminUser.userId
         )
       )
+    );
+
+    // 记录审计日志
+    await logMembershipChange(
+      id,
+      currentMembership.userId,
+      updateData.status === 'SUSPENDED' ? 'suspend' : 
+        updateData.status && currentMembership.status === 'SUSPENDED' ? 'resume' :
+        updateData.tierId ? 'upgrade' : 'update',
+      {
+        tier: updateData.tierId ? { from: currentMembership.tier.tier, to: updatedMembership.tier.tier } : undefined,
+        status: updateData.status ? { from: currentMembership.status, to: updateData.status } : undefined,
+        endDate: updateData.endDate ? { from: currentMembership.endDate, to: updateData.endDate } : undefined,
+        autoRenew: typeof updateData.autoRenew === 'boolean' ? { from: currentMembership.autoRenew, to: updateData.autoRenew } : undefined,
+      },
+      adminUser.userId
     );
 
     // 构建响应数据

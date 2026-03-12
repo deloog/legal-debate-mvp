@@ -47,7 +47,7 @@ export function buildPrompt(
   options?: DocumentAnalysisOptions
 ): string {
   const tasks = config.task || buildTaskList(options);
-  const prompt = [];
+  const prompt: string[] = [];
 
   if (config.role) {
     prompt.push(`角色：${config.role}`);

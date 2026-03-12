@@ -7,6 +7,7 @@
 
 import type { AIService } from '@/lib/ai/service-refactored';
 import type { Argument, CaseInfo } from '@/types/debate';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 类型定义
@@ -323,7 +324,7 @@ ${example.defendant.content}
         suggestions: ['请确保论点结构完整'],
       };
     } catch (error) {
-      console.error('论点验证失败:', error);
+      logger.error('论点验证失败:', error);
       return {
         score: 0.7,
         issues: ['验证服务不可用'],

@@ -4,8 +4,8 @@
  * 负责为任务管理功能生成提醒。
  */
 
-import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/agent/security/logger';
+import { prisma } from '@/lib/db/prisma';
 import { reminderService } from '@/lib/notification/reminder-service';
 import {
   CreateReminderInput,
@@ -82,7 +82,7 @@ class TaskReminderGenerator {
       const now = new Date();
       const inputs: CreateReminderInput[] = [];
 
-      for (const hoursBefore of config.hoursBefore) {
+      for (const hoursBefore of config.hoursBefore ?? []) {
         const reminderTime = new Date(task.dueDate.getTime());
         reminderTime.setHours(reminderTime.getHours() - hoursBefore);
 
