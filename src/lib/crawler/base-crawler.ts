@@ -143,7 +143,7 @@ export abstract class BaseCrawler {
   /**
    * 抽象方法：解析单个法条数据
    */
-  abstract parseArticle(rawData: any): LawArticleData | null;
+  abstract parseArticle(rawData: unknown): LawArticleData | null;
 
   /**
    * 保存法条数据到数据库。
@@ -279,13 +279,13 @@ export abstract class BaseCrawler {
           request: {
             operation,
             // 仅记录操作名称，不记录 config（可能含敏感凭据）
-          } as any,
+          } as Record<string, string>,
           response: {
             itemsCrawled: result.itemsCrawled,
             itemsCreated: result.itemsCreated,
             itemsUpdated: result.itemsUpdated,
             duration: result.duration,
-          } as any,
+          } as Record<string, number>,
           success: result.success,
           createdAt: new Date(),
         },

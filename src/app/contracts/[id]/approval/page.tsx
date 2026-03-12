@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ApprovalFlow } from '@/components/contract/ApprovalFlow';
@@ -60,11 +60,7 @@ export default function ContractApprovalPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // 获取审批信息
-  useEffect(() => {
-    fetchApproval();
-  }, [contractId]);
-
-  const fetchApproval = async () => {
+  const fetchApproval = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/contracts/${contractId}/approval`);
@@ -80,7 +76,11 @@ export default function ContractApprovalPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [contractId]);
+
+  useEffect(() => {
+    fetchApproval();
+  }, [fetchApproval]);
 
   const handleApprove = (stepId: string) => {
     setSelectedStepId(stepId);
@@ -267,14 +267,17 @@ export default function ContractApprovalPage() {
               <ApprovalFlow
                 approval={{
                   ...approval,
-                  status: approval.status as any,
+                  status: approval.status as
+                    | 'PENDING'
+                    | 'APPROVED'
+                    | 'REJECTED',
                   createdAt: new Date(approval.createdAt),
                   completedAt: approval.completedAt
                     ? new Date(approval.completedAt)
                     : null,
                   steps: approval.steps.map(step => ({
                     ...step,
-                    status: step.status as any,
+                    status: step.status as 'PENDING' | 'APPROVED' | 'REJECTED',
                     createdAt: new Date(step.createdAt),
                     completedAt: step.completedAt
                       ? new Date(step.completedAt)

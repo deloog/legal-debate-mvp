@@ -169,7 +169,7 @@ export interface LawStarVectorMatch {
   /** 条号 */
   rawnumber?: string;
   /** 法规沿革 */
-  hisgroup?: any[];
+  hisgroup?: Array<Record<string, unknown>>;
   /** 文号 */
   filenum?: string;
   /** 行业分类 */

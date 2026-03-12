@@ -370,7 +370,7 @@ export class SuccessRateAnalyzer {
    */
   public updateConfig(config: Partial<SuccessRateAnalyzerConfig>): void {
     this.config = { ...this.config, ...config };
-    logger.info('Success rate analyzer config updated', this.config);
+    logger.info('Success rate analyzer config updated', { ...this.config });
   }
 
   /**

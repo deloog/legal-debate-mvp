@@ -255,7 +255,7 @@ export function getLawStarStatus() {
 // 默认导出
 // =============================================================================
 
-export default {
+const lawstarConfig = {
   DEFAULT_LAWSTAR_CONFIG,
   DEVELOPMENT_LAWSTAR_CONFIG,
   PRODUCTION_LAWSTAR_CONFIG,
@@ -267,3 +267,5 @@ export default {
   isLawStarAvailable,
   getLawStarStatus,
 };
+
+export default lawstarConfig;

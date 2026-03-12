@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -43,7 +43,7 @@ export default function ClientsPage() {
   const [total, setTotal] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fetchClients = async () => {
+  const fetchClients = useCallback(async () => {
     setLoading(true);
     try {
       const params: ClientQueryParams = {
@@ -92,7 +92,7 @@ export default function ClientsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, limit, searchTerm, filterType, filterStatus, filterSource]);
 
   const handleCreateClient = async (data: CreateClientInput) => {
     setIsSubmitting(true);
@@ -201,7 +201,7 @@ export default function ClientsPage() {
   // 初始加载
   useEffect(() => {
     fetchClients();
-  }, []);
+  }, [fetchClients]);
 
   if (showForm || editingClient) {
     return (

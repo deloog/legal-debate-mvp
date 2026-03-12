@@ -7,6 +7,7 @@ import { flkCrawler, HIGH_PRIORITY_TYPES } from './flk-crawler';
 // npcCrawler 和 courtCrawler 已废弃，移至 archive/ 目录，仅使用 flk 数据源
 import { DataSource } from './types';
 import { prisma } from '@/lib/db/prisma';
+import { Prisma } from '@prisma/client';
 
 interface SyncResult {
   source: DataSource;
@@ -38,8 +39,8 @@ export class LawSyncScheduler {
     });
 
     if (existing) {
-      const value = existing.value as any;
-      const lockedAt: number = value?.lockedAt ?? 0;
+      const value = existing.value as Record<string, unknown>;
+      const lockedAt: number = (value?.lockedAt as number) ?? 0;
       if (now - lockedAt < LOCK_TTL_MS) {
         // 锁仍在有效期内，拒绝
         return false;
@@ -49,10 +50,12 @@ export class LawSyncScheduler {
 
     await prisma.systemConfig.upsert({
       where: { key: LOCK_KEY },
-      update: { value: { lockedAt: now, pid: process.pid } as any },
+      update: {
+        value: { lockedAt: now, pid: process.pid } as Prisma.InputJsonValue,
+      },
       create: {
         key: LOCK_KEY,
-        value: { lockedAt: now, pid: process.pid } as any,
+        value: { lockedAt: now, pid: process.pid } as Prisma.InputJsonValue,
         type: 'OBJECT',
         category: 'crawler',
       },
@@ -75,8 +78,8 @@ export class LawSyncScheduler {
       where: { key: LOCK_KEY },
     });
     if (!existing) return false;
-    const value = existing.value as any;
-    return Date.now() - (value?.lockedAt ?? 0) < LOCK_TTL_MS;
+    const value = existing.value as Record<string, unknown>;
+    return Date.now() - ((value?.lockedAt as number) ?? 0) < LOCK_TTL_MS;
   }
 
   /**
@@ -233,8 +236,8 @@ export class LawSyncScheduler {
       return ['flk'];
     }
 
-    const value = config.value as any;
-    return value?.sources || ['flk'];
+    const value = config.value as Record<string, unknown>;
+    return ((value?.sources as string[]) || ['flk']) as DataSource[];
   }
 
   /**
@@ -255,14 +258,14 @@ export class LawSyncScheduler {
         value: {
           ...summary,
           syncedAt: new Date().toISOString(),
-        } as any,
+        } as Prisma.InputJsonValue,
       },
       create: {
         key: 'last_sync_result',
         value: {
           ...summary,
           syncedAt: new Date().toISOString(),
-        } as any,
+        } as Prisma.InputJsonValue,
         type: 'OBJECT',
         category: 'crawler',
       },
@@ -276,11 +279,11 @@ export class LawSyncScheduler {
     await prisma.systemConfig.upsert({
       where: { key: 'crawler_enabled_sources' },
       update: {
-        value: { sources } as any,
+        value: { sources } as Prisma.InputJsonValue,
       },
       create: {
         key: 'crawler_enabled_sources',
-        value: { sources } as any,
+        value: { sources } as Prisma.InputJsonValue,
         type: 'OBJECT',
         category: 'crawler',
       },
@@ -290,7 +293,7 @@ export class LawSyncScheduler {
   /**
    * 获取同步配置
    */
-  async getSyncConfig(): Promise<any> {
+  async getSyncConfig(): Promise<Record<string, unknown>> {
     const [enabledSources, lastSyncResult] = await Promise.all([
       this.getEnabledSources(),
       prisma.systemConfig.findUnique({
@@ -301,7 +304,7 @@ export class LawSyncScheduler {
     return {
       enabledSources,
       lastSyncTime: this.lastSyncTime,
-      lastSyncResult: lastSyncResult?.value as any,
+      lastSyncResult: lastSyncResult?.value as Record<string, unknown>,
       isRunning: await this.isSyncInProgress(),
     };
   }

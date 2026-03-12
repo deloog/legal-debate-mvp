@@ -178,7 +178,7 @@ async function main() {
     console.log(`📥 开始批量导入 ${laws.length} 部法律...\n`);
 
     let totalArticles = 0;
-    let batchData: any[] = [];
+    let batchData: Array<Record<string, unknown>> = [];
 
     for (let i = 0; i < laws.length; i++) {
       const law = laws[i];

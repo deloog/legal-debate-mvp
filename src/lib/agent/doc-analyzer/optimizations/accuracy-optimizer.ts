@@ -310,10 +310,9 @@ export class AccuracyOptimizer {
       );
       return this.buildOutput(finalResult, [], 0);
     } catch (error) {
-      logger.warn(
-        'AI确认失败，使用原始结果',
-        error instanceof Error ? error : new Error(String(error))
-      );
+      logger.warn('AI确认失败，使用原始结果', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return this.buildOutput(validatedResult, [], 0);
     }
   }

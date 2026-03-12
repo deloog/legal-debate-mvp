@@ -24,7 +24,7 @@ export class CrawlTaskManager {
           status: 'pending',
           options: params.options,
           createdAt: new Date().toISOString(),
-        } as any,
+        } as Prisma.InputJsonValue,
       },
       create: {
         key: `crawl_task_${taskId}`,
@@ -34,7 +34,7 @@ export class CrawlTaskManager {
           status: 'pending',
           options: params.options,
           createdAt: new Date().toISOString(),
-        } as any,
+        } as Prisma.InputJsonValue,
         type: 'OBJECT',
         category: 'crawler',
       },
@@ -46,7 +46,7 @@ export class CrawlTaskManager {
   /**
    * 获取任务状态
    */
-  async getTaskStatus(taskId: string): Promise<any> {
+  async getTaskStatus(taskId: string): Promise<Record<string, unknown> | null> {
     const config = await prisma.systemConfig.findUnique({
       where: { key: `crawl_task_${taskId}` },
     });
@@ -55,7 +55,7 @@ export class CrawlTaskManager {
       return null;
     }
 
-    const value = config.value as any;
+    const value = config.value as Record<string, unknown>;
     return {
       id: taskId,
       source: value.source,
@@ -120,7 +120,7 @@ export class CrawlTaskManager {
   async getArticlesNeedingSync(
     source: DataSource,
     limit: number = 100
-  ): Promise<any[]> {
+  ): Promise<Record<string, unknown>[]> {
     return prisma.lawArticle.findMany({
       where: {
         dataSource: source,
@@ -168,7 +168,7 @@ export class CrawlTaskManager {
       limit?: number;
       offset?: number;
     } = {}
-  ): Promise<any[]> {
+  ): Promise<Record<string, unknown>[]> {
     const { source, limit = 20, offset = 0 } = options;
 
     // 从系统配置中获取采集任务记录
@@ -185,18 +185,18 @@ export class CrawlTaskManager {
     });
 
     return configs.map(config => {
-      const value = config.value as any;
+      const value = config.value as Record<string, unknown>;
       return {
         id: config.key.replace('crawl_task_', ''),
-        source: value.source,
-        status: value.status,
-        crawlType: value.crawlType,
-        itemsProcessed: value.itemsProcessed || 0,
-        itemsSucceeded: value.itemsSucceeded || 0,
-        itemsFailed: value.itemsFailed || 0,
-        errors: value.errors || [],
-        startedAt: value.startedAt,
-        completedAt: value.completedAt,
+        source: value.source as string,
+        status: value.status as string,
+        crawlType: value.crawlType as string,
+        itemsProcessed: (value.itemsProcessed as number) || 0,
+        itemsSucceeded: (value.itemsSucceeded as number) || 0,
+        itemsFailed: (value.itemsFailed as number) || 0,
+        errors: (value.errors as string[]) || [],
+        startedAt: value.startedAt as string | undefined,
+        completedAt: value.completedAt as string | undefined,
         createdAt: config.createdAt,
       };
     });
@@ -224,7 +224,7 @@ export class CrawlTaskManager {
       return;
     }
 
-    const value = config.value as any;
+    const value = config.value as Record<string, unknown>;
     const updatedValue = {
       ...value,
       ...progress,
@@ -233,7 +233,7 @@ export class CrawlTaskManager {
 
     await prisma.systemConfig.update({
       where: { key: `crawl_task_${taskId}` },
-      data: { value: updatedValue as any },
+      data: { value: updatedValue as Prisma.InputJsonValue },
     });
   }
 
@@ -259,7 +259,7 @@ export class CrawlTaskManager {
           itemsFailed: result.itemsFailed,
           errors: result.errors || [],
           completedAt: new Date().toISOString(),
-        } as any,
+        } as Prisma.InputJsonValue,
       },
     });
   }
@@ -267,7 +267,7 @@ export class CrawlTaskManager {
   /**
    * 获取数据源配置
    */
-  async getSourceConfig(): Promise<any[]> {
+  async getSourceConfig(): Promise<Record<string, unknown>[]> {
     const stats = await this.getSourceStatistics();
 
     return stats.map(stat => ({

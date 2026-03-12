@@ -19,28 +19,32 @@ export class DocAnalyzerLogger {
   /**
    * 记录调试信息
    */
-  debug(message: string, context?: Record<string, any>): void {
+  debug(message: string, context?: Record<string, unknown>): void {
     logger.debug(message, { module: this.module, ...context });
   }
 
   /**
    * 记录一般信息
    */
-  info(message: string, context?: Record<string, any>): void {
+  info(message: string, context?: Record<string, unknown>): void {
     logger.info(message, { module: this.module, ...context });
   }
 
   /**
    * 记录警告信息
    */
-  warn(message: string, context?: Record<string, any>): void {
+  warn(message: string, context?: Record<string, unknown>): void {
     logger.warn(message, { module: this.module, ...context });
   }
 
   /**
    * 记录错误信息
    */
-  error(message: string, error?: Error, context?: Record<string, any>): void {
+  error(
+    message: string,
+    error?: Error,
+    context?: Record<string, unknown>
+  ): void {
     logger.error(message, error, { module: this.module, ...context });
   }
 

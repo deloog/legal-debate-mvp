@@ -18,7 +18,7 @@ interface LogEntry {
   level: LogLevel;
   crawler: string;
   message: string;
-  data?: any;
+  data?: unknown;
   error?: {
     message: string;
     stack?: string;
@@ -101,7 +101,7 @@ export class CrawlerLogger {
   private log(
     level: LogLevel,
     message: string,
-    data?: any,
+    data?: unknown,
     error?: Error
   ): void {
     const entry: LogEntry = {
@@ -123,19 +123,19 @@ export class CrawlerLogger {
     this.writeToFile(entry);
   }
 
-  debug(message: string, data?: any): void {
+  debug(message: string, data?: unknown): void {
     this.log(LogLevel.DEBUG, message, data);
   }
 
-  info(message: string, data?: any): void {
+  info(message: string, data?: unknown): void {
     this.log(LogLevel.INFO, message, data);
   }
 
-  warn(message: string, data?: any): void {
+  warn(message: string, data?: unknown): void {
     this.log(LogLevel.WARN, message, data);
   }
 
-  error(message: string, error?: Error, data?: any): void {
+  error(message: string, error?: Error, data?: unknown): void {
     this.log(LogLevel.ERROR, message, data, error);
   }
 

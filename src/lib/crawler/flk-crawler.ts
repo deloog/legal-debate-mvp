@@ -612,35 +612,37 @@ export class FLKCrawler extends BaseCrawler {
   /**
    * 解析单条法规数据
    */
-  parseArticle(rawData: any): LawArticleData | null {
-    if (!rawData || !rawData.title) return null;
+  parseArticle(rawData: unknown): LawArticleData | null {
+    const raw = rawData as Record<string, unknown>;
+    if (!raw || !raw.title) return null;
 
-    const typeConfig = FLK_TYPE_CONFIGS.find(
-      c => c.code === rawData.flfgCodeId
-    );
+    const typeConfig = FLK_TYPE_CONFIGS.find(c => c.code === raw.flfgCodeId);
 
     // 兼容处理：FLK API 使用 bbbs，但测试数据使用 id
-    const sourceId = rawData.bbbs || rawData.id || '';
+    const sourceId = (raw.bbbs as string) || (raw.id as string) || '';
 
     return {
       sourceId,
       sourceUrl: `${this.API_BASE}/detail2.html?${sourceId}`,
-      lawName: rawData.title,
+      lawName: raw.title as string,
       articleNumber: sourceId,
-      fullText: rawData.content || '',
+      fullText: (raw.content as string) || '',
       lawType: typeConfig?.lawType || LawType.LAW,
       category: this.inferCategoryFromName(
-        rawData.title,
+        raw.title as string,
         typeConfig?.category ?? LawCategory.OTHER
       ),
-      issuingAuthority: rawData.zdjgName || rawData.office || '未知',
-      effectiveDate: rawData.sxrq
-        ? new Date(rawData.sxrq)
-        : new Date(rawData.gbrq || rawData.publish || Date.now()),
-      searchableText: `${rawData.title} ${rawData.zdjgName || rawData.office || ''} ${rawData.flxz || ''}`,
-      status: this.determineStatus(rawData.sxx),
+      issuingAuthority:
+        (raw.zdjgName as string) || (raw.office as string) || '未知',
+      effectiveDate: raw.sxrq
+        ? new Date(raw.sxrq as string)
+        : new Date(
+            (raw.gbrq as string) || (raw.publish as string) || Date.now()
+          ),
+      searchableText: `${raw.title as string} ${(raw.zdjgName as string) || (raw.office as string) || ''} ${(raw.flxz as string) || ''}`,
+      status: this.determineStatus(Number(raw.sxx)),
       version: '1.0',
-      tags: [rawData.flxz, typeConfig?.label].filter(Boolean) as string[],
+      tags: [raw.flxz as string, typeConfig?.label].filter(Boolean) as string[],
     };
   }
 

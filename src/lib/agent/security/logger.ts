@@ -6,7 +6,7 @@ export interface LogEntry {
   timestamp: string;
   level: 'debug' | 'info' | 'warn' | 'error';
   message: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   error?: Error;
 }
 
@@ -67,7 +67,7 @@ export class StructuredLogger {
   private createLogEntry(
     level: LogEntry['level'],
     message: string,
-    context?: Record<string, any>,
+    context?: Record<string, unknown>,
     error?: Error
   ): LogEntry {
     return {
@@ -79,22 +79,26 @@ export class StructuredLogger {
     };
   }
 
-  debug(message: string, context?: Record<string, any>): void {
+  debug(message: string, context?: Record<string, unknown>): void {
     const entry = this.createLogEntry('debug', message, context);
     this.addLog(entry);
   }
 
-  info(message: string, context?: Record<string, any>): void {
+  info(message: string, context?: Record<string, unknown>): void {
     const entry = this.createLogEntry('info', message, context);
     this.addLog(entry);
   }
 
-  warn(message: string, context?: Record<string, any>): void {
+  warn(message: string, context?: Record<string, unknown>): void {
     const entry = this.createLogEntry('warn', message, context);
     this.addLog(entry);
   }
 
-  error(message: string, error?: Error, context?: Record<string, any>): void {
+  error(
+    message: string,
+    error?: Error,
+    context?: Record<string, unknown>
+  ): void {
     const entry = this.createLogEntry('error', message, context, error);
     this.addLog(entry);
     this.updateErrorMetrics(error);

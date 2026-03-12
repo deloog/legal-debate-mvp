@@ -140,7 +140,7 @@ export interface CrawlLog {
   source: DataSource;
   level: 'info' | 'warning' | 'error';
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   timestamp: Date;
 }
 

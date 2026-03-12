@@ -297,7 +297,7 @@ async function main() {
         name: '演示律师',
         username: 'demo.lawyer',
         role: UserRole.LAWYER,
-        status: 'ACTIVE' as any,
+        status: 'ACTIVE' as const,
         organizationId: 'demo-law-firm',
         phone: '13800138000',
         address: '北京市朝阳区某某律师事务所',
