@@ -17,7 +17,10 @@ export async function GET(
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
         { status: 401 }
       );
     }
@@ -35,10 +38,14 @@ export async function GET(
         { status: 404 }
       );
     }
-    const isAdmin = authUser.role === 'ADMIN' || authUser.role === 'SUPER_ADMIN';
+    const isAdmin =
+      authUser.role === 'ADMIN' || authUser.role === 'SUPER_ADMIN';
     if (caseRecord.userId !== authUser.userId && !isAdmin) {
       return NextResponse.json(
-        { success: false, error: { code: 'FORBIDDEN', message: '无权访问此案件' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: '无权访问此案件' },
+        },
         { status: 403 }
       );
     }
@@ -50,15 +57,21 @@ export async function GET(
     const includePartialStr = searchParams.get('includePartial');
     const includeWithdrawStr = searchParams.get('includeWithdraw');
 
-    const minSimilarityParsed = minSimilarityRaw ? parseFloat(minSimilarityRaw) : 0.6;
+    const minSimilarityParsed = minSimilarityRaw
+      ? parseFloat(minSimilarityRaw)
+      : 0.6;
     const minSimilarity =
-      isNaN(minSimilarityParsed) || minSimilarityParsed < 0 || minSimilarityParsed > 1
+      isNaN(minSimilarityParsed) ||
+      minSimilarityParsed < 0 ||
+      minSimilarityParsed > 1
         ? 0.6
         : minSimilarityParsed;
 
     const maxCasesParsed = maxCasesRaw ? parseInt(maxCasesRaw, 10) : 20;
     const maxCases =
-      isNaN(maxCasesParsed) || maxCasesParsed < 1 || maxCasesParsed > 200 ? 20 : maxCasesParsed;
+      isNaN(maxCasesParsed) || maxCasesParsed < 1 || maxCasesParsed > 200
+        ? 20
+        : maxCasesParsed;
 
     const includePartial = includePartialStr === 'true';
     const includeWithdraw = includeWithdrawStr === 'true';

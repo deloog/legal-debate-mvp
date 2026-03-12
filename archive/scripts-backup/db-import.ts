@@ -36,7 +36,7 @@ function readJsonlFile(filePath: string): Promise<any[]> {
       input: fs.createReadStream(filePath, { encoding: 'utf8' }),
       crlfDelay: Infinity,
     });
-    rl.on('line', (line) => {
+    rl.on('line', line => {
       const trimmed = line.trim();
       if (trimmed) {
         try {
@@ -79,7 +79,7 @@ async function importLawArticles() {
   let done = 0;
   for (const batch of chunks(records, BATCH_SIZE)) {
     await prisma.$transaction(
-      batch.map((r) =>
+      batch.map(r =>
         prisma.lawArticle.upsert({
           where: {
             lawName_articleNumber: {
@@ -131,21 +131,23 @@ async function importLawArticles() {
   console.log('\n  阶段 1 完成');
 
   // 第二阶段：更新 parentId
-  const withParent = records.filter((r) => r.parentId);
+  const withParent = records.filter(r => r.parentId);
   if (withParent.length > 0) {
     console.log(`\n阶段 2/2：更新 parentId（${withParent.length} 条）...`);
     let updated = 0;
     for (const batch of chunks(withParent, BATCH_SIZE)) {
-      await prisma.$transaction(
-        batch.map((r) =>
-          prisma.lawArticle.update({
-            where: { id: r.id },
-            data: { parentId: r.parentId },
-          })
+      await prisma
+        .$transaction(
+          batch.map(r =>
+            prisma.lawArticle.update({
+              where: { id: r.id },
+              data: { parentId: r.parentId },
+            })
+          )
         )
-      ).catch(() => {
-        // 部分父节点不存在时逐条重试
-      });
+        .catch(() => {
+          // 部分父节点不存在时逐条重试
+        });
       updated += batch.length;
       process.stdout.write(`\r  ${updated}/${withParent.length}`);
     }
@@ -166,7 +168,7 @@ async function importLawArticleRelations() {
   let done = 0;
   for (const batch of chunks(records, BATCH_SIZE)) {
     await prisma.$transaction(
-      batch.map((r) =>
+      batch.map(r =>
         prisma.lawArticleRelation.upsert({
           where: { id: r.id },
           create: {
@@ -214,7 +216,7 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('\n导入失败：', e);
     process.exit(1);
   })

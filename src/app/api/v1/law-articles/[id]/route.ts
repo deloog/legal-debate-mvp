@@ -43,7 +43,10 @@ export async function GET(
   } catch (error) {
     logger.error('获取法条详情失败:', error);
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: '服务器错误' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: '服务器错误' },
+      },
       { status: 500 }
     );
   }

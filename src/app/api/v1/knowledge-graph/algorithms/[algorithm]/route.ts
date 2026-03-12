@@ -31,7 +31,7 @@ const SUPPORTED_ALGORITHMS = [
   'label-propagation',
 ] as const;
 
-type AlgorithmType = typeof SUPPORTED_ALGORITHMS[number];
+type AlgorithmType = (typeof SUPPORTED_ALGORITHMS)[number];
 
 /**
  * GET /api/v1/knowledge-graph/algorithms/[algorithm]
@@ -45,7 +45,10 @@ export async function GET(
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
         { status: 401 }
       );
     }
@@ -55,12 +58,12 @@ export async function GET(
     // 验证算法类型
     if (!SUPPORTED_ALGORITHMS.includes(algorithm)) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: { 
-            code: 'INVALID_ALGORITHM', 
-            message: `不支持的算法: ${algorithm}。支持的算法: ${SUPPORTED_ALGORITHMS.join(', ')}` 
-          } 
+        {
+          success: false,
+          error: {
+            code: 'INVALID_ALGORITHM',
+            message: `不支持的算法: ${algorithm}。支持的算法: ${SUPPORTED_ALGORITHMS.join(', ')}`,
+          },
         },
         { status: 400 }
       );
@@ -87,7 +90,10 @@ export async function GET(
 
     if (graphData.nodes.length === 0) {
       return NextResponse.json(
-        { success: false, error: { code: 'EMPTY_GRAPH', message: '图谱数据为空' } },
+        {
+          success: false,
+          error: { code: 'EMPTY_GRAPH', message: '图谱数据为空' },
+        },
         { status: 404 }
       );
     }
@@ -95,18 +101,18 @@ export async function GET(
     // 限制节点数量防止DoS
     const MAX_NODES = 10000;
     if (graphData.nodes.length > MAX_NODES) {
-      logger.warn('图谱节点数量超过限制', { 
-        nodeCount: graphData.nodes.length, 
+      logger.warn('图谱节点数量超过限制', {
+        nodeCount: graphData.nodes.length,
         maxNodes: MAX_NODES,
-        userId: authUser.userId 
+        userId: authUser.userId,
       });
       return NextResponse.json(
-        { 
-          success: false, 
-          error: { 
-            code: 'GRAPH_TOO_LARGE', 
-            message: `图谱节点数量(${graphData.nodes.length})超过限制(${MAX_NODES})，请使用更具体的查询` 
-          } 
+        {
+          success: false,
+          error: {
+            code: 'GRAPH_TOO_LARGE',
+            message: `图谱节点数量(${graphData.nodes.length})超过限制(${MAX_NODES})，请使用更具体的查询`,
+          },
         },
         { status: 400 }
       );
@@ -116,11 +122,19 @@ export async function GET(
     let result: unknown;
     switch (algorithm) {
       case 'shortest-path':
-        result = await handleShortestPath(searchParams, graphData, authUser.userId);
+        result = await handleShortestPath(
+          searchParams,
+          graphData,
+          authUser.userId
+        );
         break;
 
       case 'degree-centrality':
-        result = await handleDegreeCentrality(searchParams, graphData, authUser.userId);
+        result = await handleDegreeCentrality(
+          searchParams,
+          graphData,
+          authUser.userId
+        );
         break;
 
       case 'pagerank':
@@ -132,12 +146,22 @@ export async function GET(
         break;
 
       case 'label-propagation':
-        result = await handleLabelPropagation(searchParams, graphData, authUser.userId);
+        result = await handleLabelPropagation(
+          searchParams,
+          graphData,
+          authUser.userId
+        );
         break;
 
       default:
         return NextResponse.json(
-          { success: false, error: { code: 'INVALID_ALGORITHM', message: `不支持的算法: ${algorithm}` } },
+          {
+            success: false,
+            error: {
+              code: 'INVALID_ALGORITHM',
+              message: `不支持的算法: ${algorithm}`,
+            },
+          },
           { status: 400 }
         );
     }
@@ -159,13 +183,15 @@ export async function GET(
       success: true,
       data: result,
     });
-
   } catch (error: unknown) {
     const algorithm = (await params).algorithm;
     logger.error('执行图算法失败', { algorithm, error });
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: errorMessage } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: errorMessage },
+      },
       { status: 500 }
     );
   }
@@ -260,7 +286,9 @@ async function handlePageRank(
 
   const limit = limitParam ? parseInt(limitParam, 10) : 20;
   const iterations = iterationsParam ? parseInt(iterationsParam, 10) : 20;
-  const dampingFactor = dampingFactorParam ? parseFloat(dampingFactorParam) : 0.85;
+  const dampingFactor = dampingFactorParam
+    ? parseFloat(dampingFactorParam)
+    : 0.85;
 
   // 参数验证
   if (isNaN(limit) || limit < 1 || limit > 100) {
@@ -330,7 +358,9 @@ async function handleLabelPropagation(
   userId: string
 ): Promise<unknown> {
   const maxIterationsParam = searchParams.get('maxIterations');
-  const maxIterations = maxIterationsParam ? parseInt(maxIterationsParam, 10) : 20;
+  const maxIterations = maxIterationsParam
+    ? parseInt(maxIterationsParam, 10)
+    : 20;
 
   if (isNaN(maxIterations) || maxIterations < 1 || maxIterations > 100) {
     return { error: 'maxIterations参数必须在1-100之间', code: 'INVALID_PARAM' };

@@ -57,7 +57,7 @@ describe('Usage Limit Security Tests', () => {
   function createMockRequest(): NextRequest {
     return new NextRequest('http://localhost:3000/api/test', {
       headers: {
-        'Authorization': 'Bearer test-token',
+        Authorization: 'Bearer test-token',
       },
     });
   }
@@ -68,19 +68,17 @@ describe('Usage Limit Security Tests', () => {
       mockPrisma.userMembership.findFirst.mockResolvedValue({
         id: 'm-123',
         tier: {
-          tierLimits: [
-            { limitType: 'MAX_CASES', limitValue: 10 },
-          ],
+          tierLimits: [{ limitType: 'MAX_CASES', limitValue: 10 }],
         },
       });
       mockPrisma.usageRecord.findMany.mockResolvedValue([]);
 
       const request = createMockRequest();
       const middleware = enforceUsageLimit('CASE_CREATED', 1, false);
-      
+
       // 中间件只接受 request 参数，不接受 userId 参数
       const result = await middleware(request);
-      
+
       // 验证 getAuthUser 被调用，而不是使用外部传入的 userId
       expect(mockGetAuthUser).toHaveBeenCalledWith(request);
       expect(result).toBeNull(); // 检查通过返回 null
@@ -102,9 +100,7 @@ describe('Usage Limit Security Tests', () => {
       mockPrisma.userMembership.findFirst.mockResolvedValue({
         id: 'm-123',
         tier: {
-          tierLimits: [
-            { limitType: 'MAX_CASES', limitValue: 5 },
-          ],
+          tierLimits: [{ limitType: 'MAX_CASES', limitValue: 5 }],
         },
       });
       // 已使用 5 次，达到限制
@@ -129,9 +125,7 @@ describe('Usage Limit Security Tests', () => {
       mockPrisma.userMembership.findFirst.mockResolvedValue({
         id: 'm-123',
         tier: {
-          tierLimits: [
-            { limitType: 'MAX_CASES', limitValue: 10 },
-          ],
+          tierLimits: [{ limitType: 'MAX_CASES', limitValue: 10 }],
         },
       });
       // 已使用 3 次，未达限制
@@ -172,9 +166,7 @@ describe('Usage Limit Security Tests', () => {
       mockPrisma.userMembership.findFirst.mockResolvedValue({
         id: 'm-123',
         tier: {
-          tierLimits: [
-            { limitType: 'MAX_CASES', limitValue: 10 },
-          ],
+          tierLimits: [{ limitType: 'MAX_CASES', limitValue: 10 }],
         },
       });
       mockPrisma.usageRecord.findMany.mockResolvedValue([]);
@@ -204,9 +196,7 @@ describe('Usage Limit Security Tests', () => {
       mockPrisma.userMembership.findFirst.mockResolvedValue({
         id: 'm-123',
         tier: {
-          tierLimits: [
-            { limitType: 'MAX_CASES', limitValue: 10 },
-          ],
+          tierLimits: [{ limitType: 'MAX_CASES', limitValue: 10 }],
         },
       });
       mockPrisma.usageRecord.findMany.mockResolvedValue([
@@ -229,9 +219,7 @@ describe('Usage Limit Security Tests', () => {
       mockPrisma.userMembership.findFirst.mockResolvedValue({
         id: 'm-123',
         tier: {
-          tierLimits: [
-            { limitType: 'MAX_CASES', limitValue: 5 },
-          ],
+          tierLimits: [{ limitType: 'MAX_CASES', limitValue: 5 }],
         },
       });
       mockPrisma.usageRecord.findMany.mockResolvedValue([
@@ -252,16 +240,20 @@ describe('Usage Limit Security Tests', () => {
       mockPrisma.userMembership.findFirst.mockResolvedValue({
         id: 'm-123',
         tier: {
-          tierLimits: [
-            { limitType: 'MAX_CASES', limitValue: 10 },
-          ],
+          tierLimits: [{ limitType: 'MAX_CASES', limitValue: 10 }],
         },
       });
       mockPrisma.usageRecord.findMany.mockResolvedValue([]);
       mockPrisma.usageRecord.create.mockResolvedValue({ id: 'ur-123' });
 
       const request = createMockRequest();
-      const result = await checkAndRecordUsage(request, 'CASE_CREATED', 1, 'case-123', 'Case');
+      const result = await checkAndRecordUsage(
+        request,
+        'CASE_CREATED',
+        1,
+        'case-123',
+        'Case'
+      );
 
       expect(result).toBeNull();
       expect(mockPrisma.usageRecord.create).toHaveBeenCalledWith(
@@ -282,9 +274,7 @@ describe('Usage Limit Security Tests', () => {
       mockPrisma.userMembership.findFirst.mockResolvedValue({
         id: 'm-123',
         tier: {
-          tierLimits: [
-            { limitType: 'MAX_CASES', limitValue: 1 },
-          ],
+          tierLimits: [{ limitType: 'MAX_CASES', limitValue: 1 }],
         },
       });
       mockPrisma.usageRecord.findMany.mockResolvedValue([
@@ -305,9 +295,7 @@ describe('Usage Limit Security Tests', () => {
       mockPrisma.userMembership.findFirst.mockResolvedValue({
         id: 'm-123',
         tier: {
-          tierLimits: [
-            { limitType: 'MAX_CASES', limitValue: 10 },
-          ],
+          tierLimits: [{ limitType: 'MAX_CASES', limitValue: 10 }],
         },
       });
       mockPrisma.usageRecord.findMany.mockResolvedValue([]);
@@ -323,9 +311,7 @@ describe('Usage Limit Security Tests', () => {
       mockPrisma.userMembership.findFirst.mockResolvedValue({
         id: 'm-123',
         tier: {
-          tierLimits: [
-            { limitType: 'MAX_CASES', limitValue: 0 },
-          ],
+          tierLimits: [{ limitType: 'MAX_CASES', limitValue: 0 }],
         },
       });
       mockPrisma.usageRecord.findMany.mockResolvedValue([]);

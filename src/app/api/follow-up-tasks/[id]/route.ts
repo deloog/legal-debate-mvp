@@ -17,7 +17,10 @@ const completeTaskSchema = z.object({
  * 获取跟进任务详情
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -47,7 +50,10 @@ export const GET = withErrorHandler(
  * 标记任务为完成
  */
 export const PATCH = withErrorHandler(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -81,7 +87,10 @@ export const PATCH = withErrorHandler(
  * 取消跟进任务
  */
 export const DELETE = withErrorHandler(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(

@@ -36,10 +36,7 @@ export async function GET(
     const caseRecord = await prisma.cases.findFirst({
       where: {
         id: caseId,
-        OR: [
-          { userId },
-          { case_team_members: { some: { userId } } },
-        ],
+        OR: [{ userId }, { case_team_members: { some: { userId } } }],
         deletedAt: null,
       },
       select: { id: true },

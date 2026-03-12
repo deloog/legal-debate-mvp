@@ -292,10 +292,13 @@ export class ContractClauseRiskService {
         where: { id },
         data: {
           ...(updateData.riskLevel && { riskLevel: updateData.riskLevel }),
-          ...(updateData.riskDescription && { riskDescription: updateData.riskDescription }),
+          ...(updateData.riskDescription && {
+            riskDescription: updateData.riskDescription,
+          }),
           ...(updateData.analyzedBy && { analyzedBy: updateData.analyzedBy }),
           ...(updateData.riskFactors && {
-            riskFactors: updateData.riskFactors as unknown as Prisma.InputJsonValue[],
+            riskFactors:
+              updateData.riskFactors as unknown as Prisma.InputJsonValue[],
           }),
           analyzedAt: new Date(),
         },
@@ -419,7 +422,9 @@ export class ContractClauseRiskService {
     const relations = await this.prisma.lawArticleRelation.findMany({
       where: {
         sourceId: { in: lawArticleIds },
-        relationType: { in: [RelationType.SUPERSEDED_BY, RelationType.SUPERSEDES] },
+        relationType: {
+          in: [RelationType.SUPERSEDED_BY, RelationType.SUPERSEDES],
+        },
         confidence: { gte: 0.7 },
       },
     });

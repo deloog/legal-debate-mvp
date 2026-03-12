@@ -48,7 +48,10 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 
   if (!body.caseId) {
     return NextResponse.json(
-      { success: false, error: { code: 'INVALID_PARAMS', message: 'caseId参数必填' } },
+      {
+        success: false,
+        error: { code: 'INVALID_PARAMS', message: 'caseId参数必填' },
+      },
       { status: 400 }
     );
   }
@@ -61,21 +64,28 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     return NextResponse.json(
       {
         success: false,
-        error: { code: 'INVALID_PARAMS', message: 'articleIds参数必填且必须是数组' },
+        error: {
+          code: 'INVALID_PARAMS',
+          message: 'articleIds参数必填且必须是数组',
+        },
       },
       { status: 400 }
     );
   }
 
   const caseId = String(body.caseId);
-  const articleIds: string[] = (body.articleIds as unknown[])
-    .filter((id): id is string => typeof id === 'string');
+  const articleIds: string[] = (body.articleIds as unknown[]).filter(
+    (id): id is string => typeof id === 'string'
+  );
 
   if (articleIds.length === 0) {
     return NextResponse.json(
       {
         success: false,
-        error: { code: 'INVALID_PARAMS', message: 'articleIds 必须包含字符串元素' },
+        error: {
+          code: 'INVALID_PARAMS',
+          message: 'articleIds 必须包含字符串元素',
+        },
       },
       { status: 400 }
     );
@@ -93,7 +103,10 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 
   if (!caseData) {
     return NextResponse.json(
-      { success: false, error: { code: 'CASE_NOT_FOUND', message: '案件不存在' } },
+      {
+        success: false,
+        error: { code: 'CASE_NOT_FOUND', message: '案件不存在' },
+      },
       { status: 404 }
     );
   }
@@ -121,9 +134,15 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 
   const parties = analysisResults.flatMap(r => r?.extractedData?.parties ?? []);
   const claims = analysisResults.flatMap(r => r?.extractedData?.claims ?? []);
-  const keyFacts = analysisResults.flatMap(r => r?.extractedData?.keyFacts ?? []);
-  const disputeFocuses = analysisResults.flatMap(r => r?.extractedData?.disputeFocuses ?? []);
-  const timeline = analysisResults.flatMap(r => r?.extractedData?.timeline ?? []);
+  const keyFacts = analysisResults.flatMap(
+    r => r?.extractedData?.keyFacts ?? []
+  );
+  const disputeFocuses = analysisResults.flatMap(
+    r => r?.extractedData?.disputeFocuses ?? []
+  );
+  const timeline = analysisResults.flatMap(
+    r => r?.extractedData?.timeline ?? []
+  );
   const summary = analysisResults
     .map(r => r?.extractedData?.summary)
     .find((s): s is string => Boolean(s));
@@ -151,7 +170,10 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 
   if (articles.length === 0) {
     return NextResponse.json(
-      { success: false, error: { code: 'ARTICLES_NOT_FOUND', message: '未找到指定的法条' } },
+      {
+        success: false,
+        error: { code: 'ARTICLES_NOT_FOUND', message: '未找到指定的法条' },
+      },
       { status: 404 }
     );
   }

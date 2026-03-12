@@ -361,9 +361,11 @@ export class ErrorLogger {
     // 处理对象
     if (typeof data === 'object') {
       const sanitized: Record<string, unknown> = {};
-      for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+      for (const [key, value] of Object.entries(
+        data as Record<string, unknown>
+      )) {
         const lowerKey = key.toLowerCase();
-        
+
         // 检查是否为敏感字段
         if (sensitiveKeys.some(k => lowerKey.includes(k))) {
           if (typeof value === 'string') {
@@ -429,14 +431,14 @@ export class ErrorLogger {
   private maskEmail(email: string): string {
     const atIndex = email.indexOf('@');
     if (atIndex === -1) return '***';
-    
+
     const local = email.substring(0, atIndex);
     const domain = email.substring(atIndex);
-    
+
     if (local.length <= 2) {
       return '***' + domain;
     }
-    
+
     return local.charAt(0) + '***' + local.charAt(local.length - 1) + domain;
   }
 
@@ -448,13 +450,15 @@ export class ErrorLogger {
   private maskPhone(phone: string): string {
     // 移除所有非数字字符
     const digits = phone.replace(/\D/g, '');
-    
+
     if (digits.length !== 11) {
       // 非标准手机号，只显示前3后2
       if (digits.length <= 5) return '***';
-      return digits.substring(0, 3) + '***' + digits.substring(digits.length - 2);
+      return (
+        digits.substring(0, 3) + '***' + digits.substring(digits.length - 2)
+      );
     }
-    
+
     // 标准11位手机号：138****5678
     return digits.substring(0, 3) + '****' + digits.substring(7);
   }

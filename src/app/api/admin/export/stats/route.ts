@@ -839,7 +839,8 @@ async function getUserActivityData(
     summary: {
       totalUsers: total,
       activeUsers,
-      activeRate: total > 0 ? Math.round((activeUsers / total) * 10000) / 100 : 0,
+      activeRate:
+        total > 0 ? Math.round((activeUsers / total) * 10000) / 100 : 0,
     },
     metadata: {
       timeRange: TimeRange.LAST_30_DAYS,

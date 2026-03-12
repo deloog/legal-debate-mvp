@@ -325,9 +325,12 @@ export class AgentDIContainer {
     const agentConfigs = Array.from(this.agentConfigs.entries()).map(
       ([agentName, config]) => ({
         agentName,
-        hasDependencies:
-          !!(config.dependencies && Object.keys(config.dependencies).length > 0),
-        hasOptions: !!(config.options && Object.keys(config.options).length > 0),
+        hasDependencies: !!(
+          config.dependencies && Object.keys(config.dependencies).length > 0
+        ),
+        hasOptions: !!(
+          config.options && Object.keys(config.options).length > 0
+        ),
       })
     );
 

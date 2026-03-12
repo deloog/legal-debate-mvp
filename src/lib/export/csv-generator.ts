@@ -1,7 +1,7 @@
 /**
  * CSV生成工具
  * 提供CSV文件的生成和导出功能
- * 
+ *
  * 安全特性：
  * - 防止CSV/Excel公式注入攻击（以=,+,-,@开头的字段前加单引号）
  * - 正确处理包含特殊字符的字段
@@ -203,12 +203,12 @@ export function formatNumber(value: number, decimals: number = 2): string {
  */
 export function sanitizeCsvValue(value: string): string {
   if (!value) return value;
-  
+
   // 检测危险前缀
   const dangerousPrefixes = ['=', '+', '-', '@', '\t', '\r'];
   if (dangerousPrefixes.some(prefix => value.startsWith(prefix))) {
     return "'" + value;
   }
-  
+
   return value;
 }

@@ -323,7 +323,8 @@ export const complianceService = {
    * 批量创建合规规则
    */
   async batchCreateRules(rules: CreateComplianceRuleInput[]) {
-    const results: Array<{ success: boolean; data?: unknown; error?: string }> = [];
+    const results: Array<{ success: boolean; data?: unknown; error?: string }> =
+      [];
 
     for (const rule of rules) {
       try {

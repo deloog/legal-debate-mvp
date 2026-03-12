@@ -404,7 +404,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // 解析查询参数
     const params = parseQueryParams(request);
-    const { startDate, endDate } = getDateRange(params.timeRange ?? TimeRange.LAST_30_DAYS);
+    const { startDate, endDate } = getDateRange(
+      params.timeRange ?? TimeRange.LAST_30_DAYS
+    );
     const whereClause = buildWhereClause(params);
 
     // 查询活跃度数据

@@ -64,7 +64,10 @@ export class AIProcessor {
       logger.warn('AI服务缺少chatCompletion方法');
       return null;
     } catch (error) {
-      logger.error('获取AI服务失败', error instanceof Error ? error : undefined);
+      logger.error(
+        '获取AI服务失败',
+        error instanceof Error ? error : undefined
+      );
       return null;
     }
   }

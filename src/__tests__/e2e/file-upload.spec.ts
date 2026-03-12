@@ -29,14 +29,75 @@ function minimalJpegBuffer(): Buffer {
 /** 最小 PNG（8 字节签名 + IHDR + IDAT + IEND） */
 function minimalPngBuffer(): Buffer {
   return Buffer.from([
-    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, // PNG signature
-    0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, // IHDR chunk
-    0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, // 1×1
-    0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, 0xde, // bit/type/CRC
-    0x00, 0x00, 0x00, 0x0c, 0x49, 0x44, 0x41, 0x54, // IDAT chunk
-    0x08, 0xd7, 0x63, 0xf8, 0xcf, 0xc0, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01,
-    0xe2, 0x21, 0xbc, 0x33, // CRC
-    0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82, // IEND
+    0x89,
+    0x50,
+    0x4e,
+    0x47,
+    0x0d,
+    0x0a,
+    0x1a,
+    0x0a, // PNG signature
+    0x00,
+    0x00,
+    0x00,
+    0x0d,
+    0x49,
+    0x48,
+    0x44,
+    0x52, // IHDR chunk
+    0x00,
+    0x00,
+    0x00,
+    0x01,
+    0x00,
+    0x00,
+    0x00,
+    0x01, // 1×1
+    0x08,
+    0x02,
+    0x00,
+    0x00,
+    0x00,
+    0x90,
+    0x77,
+    0x53,
+    0xde, // bit/type/CRC
+    0x00,
+    0x00,
+    0x00,
+    0x0c,
+    0x49,
+    0x44,
+    0x41,
+    0x54, // IDAT chunk
+    0x08,
+    0xd7,
+    0x63,
+    0xf8,
+    0xcf,
+    0xc0,
+    0x00,
+    0x00,
+    0x00,
+    0x02,
+    0x00,
+    0x01,
+    0xe2,
+    0x21,
+    0xbc,
+    0x33, // CRC
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x49,
+    0x45,
+    0x4e,
+    0x44,
+    0xae,
+    0x42,
+    0x60,
+    0x82, // IEND
   ]);
 }
 
@@ -66,36 +127,44 @@ test.describe('律师资质证件照上传', () => {
   test('应该成功上传 JPEG 证件照', async ({ request }) => {
     const { token } = await setupTestUser(request);
 
-    const response = await request.post(`${BASE_URL}/api/qualifications/photo`, {
-      headers: { Authorization: `Bearer ${token}` },
-      multipart: {
-        file: {
-          name: 'qualification.jpg',
-          mimeType: 'image/jpeg',
-          buffer: minimalJpegBuffer(),
+    const response = await request.post(
+      `${BASE_URL}/api/qualifications/photo`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        multipart: {
+          file: {
+            name: 'qualification.jpg',
+            mimeType: 'image/jpeg',
+            buffer: minimalJpegBuffer(),
+          },
         },
-      },
-    });
+      }
+    );
 
     const data = await response.json();
     expect(response.ok()).toBeTruthy();
     expect(data.success).toBe(true);
-    expect(data.data?.url).toMatch(/^\/uploads\/qualifications\/.+\.(jpg|jpeg)$/);
+    expect(data.data?.url).toMatch(
+      /^\/uploads\/qualifications\/.+\.(jpg|jpeg)$/
+    );
   });
 
   test('应该成功上传 PNG 证件照', async ({ request }) => {
     const { token } = await setupTestUser(request);
 
-    const response = await request.post(`${BASE_URL}/api/qualifications/photo`, {
-      headers: { Authorization: `Bearer ${token}` },
-      multipart: {
-        file: {
-          name: 'qualification.png',
-          mimeType: 'image/png',
-          buffer: minimalPngBuffer(),
+    const response = await request.post(
+      `${BASE_URL}/api/qualifications/photo`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        multipart: {
+          file: {
+            name: 'qualification.png',
+            mimeType: 'image/png',
+            buffer: minimalPngBuffer(),
+          },
         },
-      },
-    });
+      }
+    );
 
     const data = await response.json();
     expect(response.ok()).toBeTruthy();
@@ -106,16 +175,19 @@ test.describe('律师资质证件照上传', () => {
   test('应该拒绝不支持的文件类型（PDF）', async ({ request }) => {
     const { token } = await setupTestUser(request);
 
-    const response = await request.post(`${BASE_URL}/api/qualifications/photo`, {
-      headers: { Authorization: `Bearer ${token}` },
-      multipart: {
-        file: {
-          name: 'document.pdf',
-          mimeType: 'application/pdf',
-          buffer: minimalPdfBuffer(),
+    const response = await request.post(
+      `${BASE_URL}/api/qualifications/photo`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        multipart: {
+          file: {
+            name: 'document.pdf',
+            mimeType: 'application/pdf',
+            buffer: minimalPdfBuffer(),
+          },
         },
-      },
-    });
+      }
+    );
 
     expect(response.status()).toBe(400);
     const data = await response.json();
@@ -128,16 +200,19 @@ test.describe('律师资质证件照上传', () => {
     // 生成 5.1MB 数据（超出 5MB 限制）
     const oversizedBuffer = Buffer.alloc(5.1 * 1024 * 1024, 0xff);
 
-    const response = await request.post(`${BASE_URL}/api/qualifications/photo`, {
-      headers: { Authorization: `Bearer ${token}` },
-      multipart: {
-        file: {
-          name: 'oversized.jpg',
-          mimeType: 'image/jpeg',
-          buffer: oversizedBuffer,
+    const response = await request.post(
+      `${BASE_URL}/api/qualifications/photo`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        multipart: {
+          file: {
+            name: 'oversized.jpg',
+            mimeType: 'image/jpeg',
+            buffer: oversizedBuffer,
+          },
         },
-      },
-    });
+      }
+    );
 
     expect(response.status()).toBe(400);
     const data = await response.json();
@@ -146,15 +221,18 @@ test.describe('律师资质证件照上传', () => {
   });
 
   test('应该拒绝未携带 Token 的请求', async ({ request }) => {
-    const response = await request.post(`${BASE_URL}/api/qualifications/photo`, {
-      multipart: {
-        file: {
-          name: 'photo.jpg',
-          mimeType: 'image/jpeg',
-          buffer: minimalJpegBuffer(),
+    const response = await request.post(
+      `${BASE_URL}/api/qualifications/photo`,
+      {
+        multipart: {
+          file: {
+            name: 'photo.jpg',
+            mimeType: 'image/jpeg',
+            buffer: minimalJpegBuffer(),
+          },
         },
-      },
-    });
+      }
+    );
 
     expect(response.status()).toBe(401);
     const data = await response.json();
@@ -164,10 +242,13 @@ test.describe('律师资质证件照上传', () => {
   test('应该拒绝未上传文件的请求', async ({ request }) => {
     const { token } = await setupTestUser(request);
 
-    const response = await request.post(`${BASE_URL}/api/qualifications/photo`, {
-      headers: { Authorization: `Bearer ${token}` },
-      multipart: {},
-    });
+    const response = await request.post(
+      `${BASE_URL}/api/qualifications/photo`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        multipart: {},
+      }
+    );
 
     expect(response.status()).toBe(400);
     const data = await response.json();
@@ -215,21 +296,18 @@ test.describe('案件文档上传', () => {
   test('应该成功上传 PDF 文档', async ({ request }) => {
     const fileId = `file-${Date.now()}`;
 
-    const response = await request.post(
-      `${BASE_URL}/api/v1/documents/upload`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        multipart: {
-          file: {
-            name: 'test-document.pdf', // 触发服务器 Mock 分析逻辑
-            mimeType: 'application/pdf',
-            buffer: minimalPdfBuffer(),
-          },
-          caseId,
-          fileId,
+    const response = await request.post(`${BASE_URL}/api/v1/documents/upload`, {
+      headers: { Authorization: `Bearer ${token}` },
+      multipart: {
+        file: {
+          name: 'test-document.pdf', // 触发服务器 Mock 分析逻辑
+          mimeType: 'application/pdf',
+          buffer: minimalPdfBuffer(),
         },
-      }
-    );
+        caseId,
+        fileId,
+      },
+    });
 
     const data = await response.json();
     expect(response.ok()).toBeTruthy();
@@ -240,21 +318,18 @@ test.describe('案件文档上传', () => {
   });
 
   test('应该拒绝不支持的文件类型', async ({ request }) => {
-    const response = await request.post(
-      `${BASE_URL}/api/v1/documents/upload`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        multipart: {
-          file: {
-            name: 'malware.exe',
-            mimeType: 'application/octet-stream',
-            buffer: Buffer.from('fake exe'),
-          },
-          caseId,
-          fileId: `file-${Date.now()}`,
+    const response = await request.post(`${BASE_URL}/api/v1/documents/upload`, {
+      headers: { Authorization: `Bearer ${token}` },
+      multipart: {
+        file: {
+          name: 'malware.exe',
+          mimeType: 'application/octet-stream',
+          buffer: Buffer.from('fake exe'),
         },
-      }
-    );
+        caseId,
+        fileId: `file-${Date.now()}`,
+      },
+    });
 
     expect(response.status()).toBe(400);
     const data = await response.json();
@@ -265,21 +340,18 @@ test.describe('案件文档上传', () => {
   test('应该拒绝超过 10MB 的文件', async ({ request }) => {
     const oversizedBuffer = Buffer.alloc(10.5 * 1024 * 1024, 0xaa);
 
-    const response = await request.post(
-      `${BASE_URL}/api/v1/documents/upload`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        multipart: {
-          file: {
-            name: 'huge.pdf',
-            mimeType: 'application/pdf',
-            buffer: oversizedBuffer,
-          },
-          caseId,
-          fileId: `file-${Date.now()}`,
+    const response = await request.post(`${BASE_URL}/api/v1/documents/upload`, {
+      headers: { Authorization: `Bearer ${token}` },
+      multipart: {
+        file: {
+          name: 'huge.pdf',
+          mimeType: 'application/pdf',
+          buffer: oversizedBuffer,
         },
-      }
-    );
+        caseId,
+        fileId: `file-${Date.now()}`,
+      },
+    });
 
     // 413：我们的路由代码检测到超大文件
     // 500：Next.js/Node.js 框架层在解析 multipart 时就报错（均为正确拒绝行为）
@@ -292,21 +364,18 @@ test.describe('案件文档上传', () => {
   });
 
   test('应该拒绝缺少 caseId 的请求', async ({ request }) => {
-    const response = await request.post(
-      `${BASE_URL}/api/v1/documents/upload`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        multipart: {
-          file: {
-            name: 'test.pdf',
-            mimeType: 'application/pdf',
-            buffer: minimalPdfBuffer(),
-          },
-          fileId: `file-${Date.now()}`,
-          // 故意缺少 caseId
+    const response = await request.post(`${BASE_URL}/api/v1/documents/upload`, {
+      headers: { Authorization: `Bearer ${token}` },
+      multipart: {
+        file: {
+          name: 'test.pdf',
+          mimeType: 'application/pdf',
+          buffer: minimalPdfBuffer(),
         },
-      }
-    );
+        fileId: `file-${Date.now()}`,
+        // 故意缺少 caseId
+      },
+    });
 
     expect(response.status()).toBe(400);
     const data = await response.json();
@@ -314,40 +383,34 @@ test.describe('案件文档上传', () => {
   });
 
   test('应该拒绝未认证的上传请求', async ({ request }) => {
-    const response = await request.post(
-      `${BASE_URL}/api/v1/documents/upload`,
-      {
-        multipart: {
-          file: {
-            name: 'test.pdf',
-            mimeType: 'application/pdf',
-            buffer: minimalPdfBuffer(),
-          },
-          caseId,
-          fileId: `file-${Date.now()}`,
+    const response = await request.post(`${BASE_URL}/api/v1/documents/upload`, {
+      multipart: {
+        file: {
+          name: 'test.pdf',
+          mimeType: 'application/pdf',
+          buffer: minimalPdfBuffer(),
         },
-      }
-    );
+        caseId,
+        fileId: `file-${Date.now()}`,
+      },
+    });
 
     expect(response.status()).toBe(401);
   });
 
   test('应该拒绝不存在的案件 ID', async ({ request }) => {
-    const response = await request.post(
-      `${BASE_URL}/api/v1/documents/upload`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        multipart: {
-          file: {
-            name: 'test.pdf',
-            mimeType: 'application/pdf',
-            buffer: minimalPdfBuffer(),
-          },
-          caseId: 'non-existent-case-id',
-          fileId: `file-${Date.now()}`,
+    const response = await request.post(`${BASE_URL}/api/v1/documents/upload`, {
+      headers: { Authorization: `Bearer ${token}` },
+      multipart: {
+        file: {
+          name: 'test.pdf',
+          mimeType: 'application/pdf',
+          buffer: minimalPdfBuffer(),
         },
-      }
-    );
+        caseId: 'non-existent-case-id',
+        fileId: `file-${Date.now()}`,
+      },
+    });
 
     expect(response.status()).toBe(404);
     const data = await response.json();

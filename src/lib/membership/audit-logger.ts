@@ -43,7 +43,14 @@ export async function logAuditEvent(params: AuditLogParams): Promise<void> {
 export async function logMembershipChange(
   membershipId: string,
   userId: string,
-  action: 'create' | 'update' | 'delete' | 'suspend' | 'resume' | 'upgrade' | 'downgrade',
+  action:
+    | 'create'
+    | 'update'
+    | 'delete'
+    | 'suspend'
+    | 'resume'
+    | 'upgrade'
+    | 'downgrade',
   changes: Record<string, { from: unknown; to: unknown }>,
   performedBy: string
 ): Promise<void> {
@@ -64,7 +71,12 @@ export async function logMembershipChange(
  */
 export async function logRoleChange(
   roleId: string,
-  action: 'create' | 'update' | 'delete' | 'assign_permission' | 'revoke_permission',
+  action:
+    | 'create'
+    | 'update'
+    | 'delete'
+    | 'assign_permission'
+    | 'revoke_permission',
   changes: Record<string, unknown>,
   performedBy: string
 ): Promise<void> {

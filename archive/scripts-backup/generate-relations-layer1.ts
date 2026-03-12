@@ -53,7 +53,9 @@ async function main() {
     where: { discoveryMethod: DiscoveryMethod.RULE_BASED },
   });
   const totalCount = await prisma.lawArticleRelation.count();
-  console.log(`\n当前关系总数：${totalCount.toLocaleString()} 条（其中 RULE_BASED：${existingCount.toLocaleString()} 条）`);
+  console.log(
+    `\n当前关系总数：${totalCount.toLocaleString()} 条（其中 RULE_BASED：${existingCount.toLocaleString()} 条）`
+  );
 
   // 确定增量时间点
   let sinceDate: Date | undefined;
@@ -64,7 +66,9 @@ async function main() {
       `增量模式：处理 ${sinceDate ? sinceDate.toISOString().slice(0, 16) : '（首次全量）'} 之后导入的法条`
     );
   } else if (!DRY_RUN && existingCount > 0) {
-    console.log(`\n全量模式：将清除 ${existingCount.toLocaleString()} 条旧 RULE_BASED 关系并重新生成`);
+    console.log(
+      `\n全量模式：将清除 ${existingCount.toLocaleString()} 条旧 RULE_BASED 关系并重新生成`
+    );
   }
 
   if (DRY_RUN) {
@@ -79,12 +83,16 @@ async function main() {
       ) t
     `;
     const articleCount = await prisma.lawArticle.count();
-    console.log(`  多版本法条组：${Number(multiVersionCount[0].cnt).toLocaleString()} 组`);
+    console.log(
+      `  多版本法条组：${Number(multiVersionCount[0].cnt).toLocaleString()} 组`
+    );
     console.log(
       `  预估 SUPERSEDES 关系：~${(Number(multiVersionCount[0].cnt) * 2).toLocaleString()} 条（实际取决于版本数）`
     );
     console.log(`  待解析法条：${articleCount.toLocaleString()} 条`);
-    console.log('\n运行真正的生成（去掉 --dry-run）:\n  npx ts-node --transpile-only scripts/generate-relations-layer1.ts\n');
+    console.log(
+      '\n运行真正的生成（去掉 --dry-run）:\n  npx ts-node --transpile-only scripts/generate-relations-layer1.ts\n'
+    );
     return;
   }
 
@@ -98,7 +106,9 @@ async function main() {
 
   // 汇总统计
   const finalCount = await prisma.lawArticleRelation.count();
-  const byType = await prisma.$queryRaw<{ relationType: string; cnt: bigint }[]>`
+  const byType = await prisma.$queryRaw<
+    { relationType: string; cnt: bigint }[]
+  >`
     SELECT "relationType", COUNT(*) as cnt
     FROM law_article_relations
     GROUP BY "relationType"
@@ -107,14 +117,24 @@ async function main() {
 
   console.log('\n' + '='.repeat(56));
   console.log(`完成！耗时 ${fmtMs(stats.durationMs)}`);
-  console.log(`  版本链关系（SUPERSEDES）：${stats.supersedesCreated.toLocaleString()} 条`);
-  console.log(`  引用关系（CITES）：        ${stats.citesCreated.toLocaleString()} 条`);
-  console.log(`  实施关系（IMPLEMENTS）：   ${stats.implementsCreated.toLocaleString()} 条`);
-  console.log(`  本次新增合计：             ${stats.totalCreated.toLocaleString()} 条`);
+  console.log(
+    `  版本链关系（SUPERSEDES）：${stats.supersedesCreated.toLocaleString()} 条`
+  );
+  console.log(
+    `  引用关系（CITES）：        ${stats.citesCreated.toLocaleString()} 条`
+  );
+  console.log(
+    `  实施关系（IMPLEMENTS）：   ${stats.implementsCreated.toLocaleString()} 条`
+  );
+  console.log(
+    `  本次新增合计：             ${stats.totalCreated.toLocaleString()} 条`
+  );
   console.log(`  数据库关系总数：           ${finalCount.toLocaleString()} 条`);
   console.log('\n关系类型分布：');
   byType.forEach(r =>
-    console.log(`  ${r.relationType.padEnd(16)} ${Number(r.cnt).toLocaleString()}`)
+    console.log(
+      `  ${r.relationType.padEnd(16)} ${Number(r.cnt).toLocaleString()}`
+    )
   );
 }
 

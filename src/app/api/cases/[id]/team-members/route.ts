@@ -157,7 +157,10 @@ async function mapTeamMemberDetail(
  * 获取案件的团队成员列表
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -241,7 +244,10 @@ export const GET = withErrorHandler(
  * 添加团队成员
  */
 export const POST = withErrorHandler(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -319,11 +325,9 @@ export const POST = withErrorHandler(
         caseId,
         userId: validatedData.userId,
         role: validatedData.role,
-        permissions: (validatedData.permissions ||
-          []) as Prisma.InputJsonValue,
+        permissions: (validatedData.permissions || []) as Prisma.InputJsonValue,
         notes: validatedData.notes,
-        metadata: (validatedData.metadata ||
-          null) as Prisma.InputJsonValue,
+        metadata: (validatedData.metadata || null) as Prisma.InputJsonValue,
       },
       include: {
         user: {

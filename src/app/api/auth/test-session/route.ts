@@ -18,7 +18,10 @@ import { logger } from '@/lib/logger';
  */
 export async function POST(request: NextRequest) {
   if (process.env.NODE_ENV === 'production') {
-    return NextResponse.json({ success: false, error: 'NOT_FOUND' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: 'NOT_FOUND' },
+      { status: 404 }
+    );
   }
 
   try {
@@ -90,7 +93,10 @@ export async function POST(request: NextRequest) {
  */
 export async function GET() {
   if (process.env.NODE_ENV === 'production') {
-    return NextResponse.json({ success: false, error: 'NOT_FOUND' }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: 'NOT_FOUND' },
+      { status: 404 }
+    );
   }
   return NextResponse.json({
     success: true,

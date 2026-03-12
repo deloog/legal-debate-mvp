@@ -309,7 +309,9 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
         }
       );
 
-      const response = await POST(mockRequest, { params: Promise.resolve({ id: '' }) });
+      const response = await POST(mockRequest, {
+        params: Promise.resolve({ id: '' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(400);

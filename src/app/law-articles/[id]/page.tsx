@@ -101,11 +101,20 @@ export default function LawArticleDetailPage() {
 
   // 切换到图谱推荐 Tab 时懒加载
   useEffect(() => {
-    if (recommendTab !== 'graph' || graphRecommendations.length > 0 || !articleId) return;
+    if (
+      recommendTab !== 'graph' ||
+      graphRecommendations.length > 0 ||
+      !articleId
+    )
+      return;
     setGraphRecLoading(true);
-    fetch(`/api/v1/law-articles/${articleId}/recommendations?mode=graph_distance&limit=10`)
+    fetch(
+      `/api/v1/law-articles/${articleId}/recommendations?mode=graph_distance&limit=10`
+    )
       .then(r => r.json())
-      .then((data: GraphDistanceRecommendation[]) => setGraphRecommendations(data))
+      .then((data: GraphDistanceRecommendation[]) =>
+        setGraphRecommendations(data)
+      )
       .catch(() => {})
       .finally(() => setGraphRecLoading(false));
   }, [recommendTab, articleId, graphRecommendations.length]);
@@ -238,29 +247,43 @@ export default function LawArticleDetailPage() {
         </div>
 
         {/* 直接关联推荐 */}
-        {recommendTab === 'relations' && (
-          recommendations.length > 0 ? (
+        {recommendTab === 'relations' &&
+          (recommendations.length > 0 ? (
             <div className='space-y-4'>
               {recommendations.map(rec => (
-                <div key={rec.article.id} className='border rounded-lg p-4 hover:bg-gray-50'>
-                  <div className='cursor-pointer' onClick={() => router.push(`/law-articles/${rec.article.id}`)}>
+                <div
+                  key={rec.article.id}
+                  className='border rounded-lg p-4 hover:bg-gray-50'
+                >
+                  <div
+                    className='cursor-pointer'
+                    onClick={() =>
+                      router.push(`/law-articles/${rec.article.id}`)
+                    }
+                  >
                     <div className='flex items-start justify-between mb-2'>
                       <div className='flex-1'>
                         <h3 className='text-lg font-semibold'>
                           {rec.article.lawName} 第{rec.article.articleNumber}条
                         </h3>
-                        <p className='text-gray-600 text-sm mt-1'>{rec.article.fullText}</p>
+                        <p className='text-gray-600 text-sm mt-1'>
+                          {rec.article.fullText}
+                        </p>
                       </div>
                       <div className='ml-4 text-right'>
                         <div className='text-sm font-semibold text-blue-600'>
                           相关性: {Math.round(rec.score * 100)}%
                         </div>
                         {rec.relationType && (
-                          <div className='text-xs text-gray-500 mt-1'>{getRelationTypeLabel(rec.relationType)}</div>
+                          <div className='text-xs text-gray-500 mt-1'>
+                            {getRelationTypeLabel(rec.relationType)}
+                          </div>
                         )}
                       </div>
                     </div>
-                    <div className='text-sm text-gray-500 mb-3'>{rec.reason}</div>
+                    <div className='text-sm text-gray-500 mb-3'>
+                      {rec.reason}
+                    </div>
                   </div>
                   <div className='mt-3 pt-3 border-t'>
                     <RecommendationFeedbackButton
@@ -277,27 +300,38 @@ export default function LawArticleDetailPage() {
             </div>
           ) : (
             <p className='text-gray-500 text-sm'>暂无直接关联推荐</p>
-          )
-        )}
+          ))}
 
         {/* 图谱路径推荐 */}
-        {recommendTab === 'graph' && (
-          graphRecLoading ? (
+        {recommendTab === 'graph' &&
+          (graphRecLoading ? (
             <div className='flex items-center justify-center py-8'>
               <div className='h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-r-transparent'></div>
-              <span className='ml-3 text-gray-600 text-sm'>分析图谱路径中...</span>
+              <span className='ml-3 text-gray-600 text-sm'>
+                分析图谱路径中...
+              </span>
             </div>
           ) : graphRecommendations.length > 0 ? (
             <div className='space-y-4'>
               {graphRecommendations.map(rec => (
-                <div key={rec.article.id} className='border rounded-lg p-4 hover:bg-gray-50'>
-                  <div className='cursor-pointer' onClick={() => router.push(`/law-articles/${rec.article.id}`)}>
+                <div
+                  key={rec.article.id}
+                  className='border rounded-lg p-4 hover:bg-gray-50'
+                >
+                  <div
+                    className='cursor-pointer'
+                    onClick={() =>
+                      router.push(`/law-articles/${rec.article.id}`)
+                    }
+                  >
                     <div className='flex items-start justify-between mb-2'>
                       <div className='flex-1'>
                         <h3 className='text-lg font-semibold'>
                           {rec.article.lawName} 第{rec.article.articleNumber}条
                         </h3>
-                        <p className='text-gray-600 text-sm mt-1'>{rec.article.fullText}</p>
+                        <p className='text-gray-600 text-sm mt-1'>
+                          {rec.article.fullText}
+                        </p>
                       </div>
                       <div className='ml-4 text-right'>
                         <div className='text-sm font-semibold text-blue-600'>
@@ -308,11 +342,16 @@ export default function LawArticleDetailPage() {
                         </div>
                       </div>
                     </div>
-                    <div className='text-sm text-gray-500 mb-2'>{rec.reason}</div>
+                    <div className='text-sm text-gray-500 mb-2'>
+                      {rec.reason}
+                    </div>
                     {/* 路径链展示 */}
                     <div className='flex items-center gap-1 flex-wrap'>
                       {rec.pathInfo.relationTypes.map((t, i) => (
-                        <span key={i} className='inline-flex items-center gap-1'>
+                        <span
+                          key={i}
+                          className='inline-flex items-center gap-1'
+                        >
                           <span className='px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-200'>
                             {rec.pathInfo.pathLabel.split(' → ')[i] ?? t}
                           </span>
@@ -327,9 +366,10 @@ export default function LawArticleDetailPage() {
               ))}
             </div>
           ) : (
-            <p className='text-gray-500 text-sm'>暂未发现图谱路径推荐（当前法条可能缺少关系数据）</p>
-          )
-        )}
+            <p className='text-gray-500 text-sm'>
+              暂未发现图谱路径推荐（当前法条可能缺少关系数据）
+            </p>
+          ))}
       </div>
     </div>
   );

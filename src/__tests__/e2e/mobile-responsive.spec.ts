@@ -94,7 +94,7 @@ test.describe('移动端导航可用性', () => {
       'input[type="password"], input[name="password"]'
     );
 
-    if (await emailInput.count() > 0) {
+    if ((await emailInput.count()) > 0) {
       await expect(emailInput.first()).toBeVisible();
 
       // 输入框宽度不应超出视口
@@ -104,7 +104,7 @@ test.describe('移动端导航可用性', () => {
       }
     }
 
-    if (await passwordInput.count() > 0) {
+    if ((await passwordInput.count()) > 0) {
       await expect(passwordInput.first()).toBeVisible();
     }
 
@@ -112,7 +112,7 @@ test.describe('移动端导航可用性', () => {
     const submitBtn = page.locator(
       'button[type="submit"], button:has-text("登录"), button:has-text("Login")'
     );
-    if (await submitBtn.count() > 0) {
+    if ((await submitBtn.count()) > 0) {
       await expect(submitBtn.first()).toBeVisible();
 
       // 按钮高度应至少 44px（Apple HIG 触摸目标最小尺寸）
@@ -201,10 +201,8 @@ test.describe('横竖屏切换布局稳定性', () => {
 
     await expect(page.locator('body')).toBeVisible();
 
-    const emailInput = page.locator(
-      'input[type="email"], input[name="email"]'
-    );
-    if (await emailInput.count() > 0) {
+    const emailInput = page.locator('input[type="email"], input[name="email"]');
+    if ((await emailInput.count()) > 0) {
       await expect(emailInput.first()).toBeVisible();
     }
 
@@ -241,11 +239,11 @@ test.describe('触摸目标尺寸合规性', () => {
       if (box.width === 0 || box.height === 0) continue;
 
       // 跳过图标类小链接（图标链接宽度可能合理地小于 36px）
-      const tag = await el.evaluate((e) =>
+      const tag = await el.evaluate(e =>
         (e as HTMLElement).tagName.toLowerCase()
       );
       const text = (
-        await el.evaluate((e) => (e as HTMLElement).textContent ?? '')
+        await el.evaluate(e => (e as HTMLElement).textContent ?? '')
       ).trim();
 
       // 只检查有文字的按钮和链接
@@ -253,7 +251,7 @@ test.describe('触摸目标尺寸合规性', () => {
 
       if (box.height < 32 || box.width < 32) {
         const id = await el.evaluate(
-          (e) =>
+          e =>
             `${(e as HTMLElement).tagName}[${(e as HTMLElement).textContent?.trim().slice(0, 20)}]`
         );
         violations.push(
@@ -268,7 +266,7 @@ test.describe('触摸目标尺寸合规性', () => {
     }
 
     // 严格要求：违规数量不超过页面总可点击元素的 20%
-    const totalClickable = clickableElements.filter(async (el) => {
+    const totalClickable = clickableElements.filter(async el => {
       const box = await el.boundingBox();
       return box && box.width > 0 && box.height > 0;
     }).length;

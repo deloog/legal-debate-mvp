@@ -307,7 +307,9 @@ export function TaskList() {
                     <h3 className='text-lg font-semibold text-zinc-900 dark:text-zinc-50'>
                       {task.title}
                     </h3>
-                    <Badge className={PRIORITY_COLORS[task.priority as TaskPriority]}>
+                    <Badge
+                      className={PRIORITY_COLORS[task.priority as TaskPriority]}
+                    >
                       {TASK_PRIORITY_LABELS[task.priority as TaskPriority]}
                     </Badge>
                     <Badge className={STATUS_COLORS[task.status as TaskStatus]}>

@@ -48,7 +48,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
         { status: 401 }
       );
     }
@@ -77,7 +80,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // 检查是否包含query字段
     if (!body.query) {
       return NextResponse.json(
-        { success: false, error: { code: 'MISSING_PARAM', message: '请求体必须包含query字段' } },
+        {
+          success: false,
+          error: { code: 'MISSING_PARAM', message: '请求体必须包含query字段' },
+        },
         { status: 400 }
       );
     }
@@ -89,7 +95,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (errors.length > 0) {
       logger.warn('查询输入验证失败', { userId: authUser.userId, errors });
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: '查询参数验证失败', details: errors } },
+        {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: '查询参数验证失败',
+            details: errors,
+          },
+        },
         { status: 400 }
       );
     }
@@ -97,12 +110,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // 限制查询深度防止DoS
     if (queryInput.depth && queryInput.depth > MAX_QUERY_DEPTH) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: { 
-            code: 'DEPTH_EXCEEDED', 
-            message: `查询深度不能超过${MAX_QUERY_DEPTH}` 
-          } 
+        {
+          success: false,
+          error: {
+            code: 'DEPTH_EXCEEDED',
+            message: `查询深度不能超过${MAX_QUERY_DEPTH}`,
+          },
         },
         { status: 400 }
       );
@@ -111,12 +124,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // 限制返回结果数量
     if (queryInput.limit && queryInput.limit > MAX_RESULT_LIMIT) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: { 
-            code: 'LIMIT_EXCEEDED', 
-            message: `返回结果数量不能超过${MAX_RESULT_LIMIT}` 
-          } 
+        {
+          success: false,
+          error: {
+            code: 'LIMIT_EXCEEDED',
+            message: `返回结果数量不能超过${MAX_RESULT_LIMIT}`,
+          },
         },
         { status: 400 }
       );
@@ -161,7 +174,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: errorMessage } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: errorMessage },
+      },
       { status: 500 }
     );
   }

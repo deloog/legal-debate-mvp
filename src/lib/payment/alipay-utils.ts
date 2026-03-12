@@ -360,11 +360,7 @@ export function alipaySignVerify(
     // 过滤空值并拼接
     for (const key of sortedKeys) {
       const value = filteredParams[key];
-      if (
-        value !== null &&
-        value !== undefined &&
-        value !== ''
-      ) {
+      if (value !== null && value !== undefined && value !== '') {
         sortedParams.push(`${key}=${String(value)}`);
       }
     }
@@ -373,7 +369,9 @@ export function alipaySignVerify(
     const signContent = sortedParams.join('&');
 
     // RSA验签
-    const verify = crypto.createVerify(signType === 'RSA2' ? 'RSA-SHA256' : 'RSA-SHA1');
+    const verify = crypto.createVerify(
+      signType === 'RSA2' ? 'RSA-SHA256' : 'RSA-SHA1'
+    );
     verify.update(signContent, 'utf8');
 
     return verify.verify(publicKey, sign, 'base64');

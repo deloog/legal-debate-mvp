@@ -59,7 +59,7 @@ export default function MembershipUpgradeConfirmPage(): React.ReactElement | nul
       setError(null);
 
       const response = await fetch('/api/memberships/tiers');
-      const data = await response.json() as MembershipInfoResponse;
+      const data = (await response.json()) as MembershipInfoResponse;
 
       if (!response.ok || !data.success) {
         throw new Error(data.error || '获取会员信息失败');

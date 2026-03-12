@@ -14,7 +14,10 @@ import {
   ExcelGenerator,
   generateExportFilename,
 } from '@/lib/export/excel-generator';
-import { checkExportRateLimit, logExportComplete } from '@/lib/export/export-rate-limiter';
+import {
+  checkExportRateLimit,
+  logExportComplete,
+} from '@/lib/export/export-rate-limiter';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { TimeRange } from '@/types/stats';
@@ -252,7 +255,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       return errorResponse('无效的查询参数', 400);
     }
 
-    const { startDate, endDate } = getDateRange(params.timeRange ?? TimeRange.LAST_30_DAYS);
+    const { startDate, endDate } = getDateRange(
+      params.timeRange ?? TimeRange.LAST_30_DAYS
+    );
 
     const data = await getCaseExportData(
       startDate,

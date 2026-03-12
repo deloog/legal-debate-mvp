@@ -85,7 +85,10 @@ async function mapWitnessToDetail(
  * GET /api/witnesses/[id] - 获取证人详情
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -137,7 +140,10 @@ export const GET = withErrorHandler(
  * PATCH /api/witnesses/[id] - 更新证人
  */
 export const PATCH = withErrorHandler(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -224,7 +230,10 @@ export const PATCH = withErrorHandler(
  * DELETE /api/witnesses/[id] - 删除证人
  */
 export const DELETE = withErrorHandler(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(

@@ -226,7 +226,10 @@ export const POST = withErrorHandler(
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
         { status: 401 }
       );
     }
@@ -277,13 +280,19 @@ export const POST = withErrorHandler(
 
     if (!round) {
       return NextResponse.json(
-        { success: false, error: { code: 'ROUND_NOT_FOUND', message: '轮次不存在' } },
+        {
+          success: false,
+          error: { code: 'ROUND_NOT_FOUND', message: '轮次不存在' },
+        },
         { status: 404 }
       );
     }
     if (round.debateId !== debateId) {
       return NextResponse.json(
-        { success: false, error: { code: 'INVALID_ROUND', message: '轮次不属于该辩论' } },
+        {
+          success: false,
+          error: { code: 'INVALID_ROUND', message: '轮次不属于该辩论' },
+        },
         { status: 400 }
       );
     }
@@ -329,7 +338,10 @@ export const POST = withErrorHandler(
       return NextResponse.json(
         {
           success: false,
-          error: { code: 'GENERATION_IN_PROGRESS', message: '该轮次正在生成中，请稍后再试' },
+          error: {
+            code: 'GENERATION_IN_PROGRESS',
+            message: '该轮次正在生成中，请稍后再试',
+          },
         },
         { status: 409 }
       );
@@ -475,7 +487,8 @@ ${contextSection}
               success: false,
               error: {
                 code: 'AI_SERVICE_UNAVAILABLE',
-                message: 'AI服务暂时不可用，请稍后重试。轮次已标记为失败，您可以重新生成。',
+                message:
+                  'AI服务暂时不可用，请稍后重试。轮次已标记为失败，您可以重新生成。',
               },
             },
             { status: 503 }
@@ -505,7 +518,8 @@ ${contextSection}
           success: false,
           error: {
             code: 'PARSE_FAILED',
-            message: 'AI返回内容格式异常，无法解析论点。轮次已标记为失败，请重新生成。',
+            message:
+              'AI返回内容格式异常，无法解析论点。轮次已标记为失败，请重新生成。',
           },
         },
         { status: 422 }

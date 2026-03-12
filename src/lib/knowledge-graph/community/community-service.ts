@@ -44,7 +44,10 @@ export interface CommunityColorResult {
 }
 
 /** 内存缓存：避免同一子图重复计算，TTL = 10 分钟 */
-const cache = new Map<string, { result: CommunityColorResult; expiry: number }>();
+const cache = new Map<
+  string,
+  { result: CommunityColorResult; expiry: number }
+>();
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
 
@@ -79,7 +82,10 @@ export class CommunityService {
 
       const communityCounts = new Map<number, number>();
       for (const communityId of communityMap.values()) {
-        communityCounts.set(communityId, (communityCounts.get(communityId) ?? 0) + 1);
+        communityCounts.set(
+          communityId,
+          (communityCounts.get(communityId) ?? 0) + 1
+        );
       }
 
       const sortedCommunities = Array.from(communityCounts.entries()).sort(
@@ -113,11 +119,9 @@ export class CommunityService {
 
       return result;
     } catch (error) {
-      logger.error(
-        '社区检测失败',
-        error instanceof Error ? error : undefined,
-        { centerArticleId }
-      );
+      logger.error('社区检测失败', error instanceof Error ? error : undefined, {
+        centerArticleId,
+      });
       return { nodeColors: {}, communityLegend: [], communityCount: 0 };
     }
   }
@@ -133,13 +137,14 @@ export class CommunityService {
     const visitedIds = new Set<string>([centerArticleId]);
     let frontier = [centerArticleId];
 
-    for (let d = 0; d < depth && frontier.length > 0 && visitedIds.size < maxNodes; d++) {
+    for (
+      let d = 0;
+      d < depth && frontier.length > 0 && visitedIds.size < maxNodes;
+      d++
+    ) {
       const relations = await prisma.lawArticleRelation.findMany({
         where: {
-          OR: [
-            { sourceId: { in: frontier } },
-            { targetId: { in: frontier } },
-          ],
+          OR: [{ sourceId: { in: frontier } }, { targetId: { in: frontier } }],
           verificationStatus: 'VERIFIED',
         },
         select: { sourceId: true, targetId: true },

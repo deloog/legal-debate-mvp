@@ -70,10 +70,7 @@ export async function GET(request: NextRequest) {
     // 2. 身份验证
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json(
-        { error: '未认证，请先登录' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: '未认证，请先登录' }, { status: 401 });
     }
 
     // 3. 获取统计数据
@@ -112,9 +109,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('获取统计数据失败:', error);
-    return NextResponse.json(
-      { error: '获取统计数据失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '获取统计数据失败' }, { status: 500 });
   }
 }

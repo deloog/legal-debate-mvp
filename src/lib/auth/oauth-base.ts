@@ -192,7 +192,9 @@ export abstract class OAuthBaseProvider {
   private saveState(stateData: OAuthState): void {
     if (typeof window === 'undefined') {
       // 服务端环境：基类无法持久化 state，子类必须覆盖此行为
-      logger.warn('[OAuthBase] saveState 在服务端环境被调用，state 未持久化。子类应覆盖此方法以使用 Redis/DB。');
+      logger.warn(
+        '[OAuthBase] saveState 在服务端环境被调用，state 未持久化。子类应覆盖此方法以使用 Redis/DB。'
+      );
       return;
     }
     const key = `${this.STATE_PREFIX}${stateData.state}`;
@@ -209,8 +211,14 @@ export abstract class OAuthBaseProvider {
     try {
       if (typeof window === 'undefined') {
         // 服务端环境：基类无法读取 state，CSRF 验证失败
-        logger.warn('[OAuthBase] validateState 在服务端环境被调用，基类无法验证 state。子类应覆盖此方法。');
-        return { valid: false, stateData: null, error: 'Server-side state validation not implemented in base class' };
+        logger.warn(
+          '[OAuthBase] validateState 在服务端环境被调用，基类无法验证 state。子类应覆盖此方法。'
+        );
+        return {
+          valid: false,
+          stateData: null,
+          error: 'Server-side state validation not implemented in base class',
+        };
       }
 
       const key = `${this.STATE_PREFIX}${state}`;

@@ -104,7 +104,7 @@ describe('ApplicabilityAnalyzer - 法条状态处理', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       ...overrides,
-    } as LawArticle);
+    }) as LawArticle;
 
   // 所有测试禁用 AI，使用规则层级评分，保证确定性
   const noAIConfig = { useAI: false };
@@ -115,7 +115,11 @@ describe('ApplicabilityAnalyzer - 法条状态处理', () => {
         createMockArticle({ id: 'art-1', status: LawStatus.REPEALED }),
       ];
 
-      const result = await analyzer.analyze({ caseInfo: mockCaseInfo, articles, config: noAIConfig });
+      const result = await analyzer.analyze({
+        caseInfo: mockCaseInfo,
+        articles,
+        config: noAIConfig,
+      });
 
       const articleResult = result.results.find(r => r.articleId === 'art-1');
       expect(articleResult?.applicable).toBe(false);
@@ -130,7 +134,11 @@ describe('ApplicabilityAnalyzer - 法条状态处理', () => {
         createMockArticle({ id: 'art-2', status: LawStatus.AMENDED }),
       ];
 
-      const result = await analyzer.analyze({ caseInfo: mockCaseInfo, articles, config: noAIConfig });
+      const result = await analyzer.analyze({
+        caseInfo: mockCaseInfo,
+        articles,
+        config: noAIConfig,
+      });
 
       const articleResult = result.results.find(r => r.articleId === 'art-2');
       // 通过过滤，由法条层级分数决定是否适用
@@ -150,7 +158,11 @@ describe('ApplicabilityAnalyzer - 法条状态处理', () => {
         }),
       ];
 
-      const result = await analyzer.analyze({ caseInfo: mockCaseInfo, articles, config: noAIConfig });
+      const result = await analyzer.analyze({
+        caseInfo: mockCaseInfo,
+        articles,
+        config: noAIConfig,
+      });
 
       const articleResult = result.results.find(r => r.articleId === 'art-3');
       expect(articleResult?.applicable).toBe(false);
@@ -168,9 +180,15 @@ describe('ApplicabilityAnalyzer - 法条状态处理', () => {
         }),
       ];
 
-      const result = await analyzer.analyze({ caseInfo: mockCaseInfo, articles, config: noAIConfig });
+      const result = await analyzer.analyze({
+        caseInfo: mockCaseInfo,
+        articles,
+        config: noAIConfig,
+      });
 
-      const articleResult = result.results.find(r => r.articleId === 'art-expired-date');
+      const articleResult = result.results.find(
+        r => r.articleId === 'art-expired-date'
+      );
       expect(articleResult?.applicable).toBe(false);
       expect(articleResult?.ruleValidation?.passed).toBe(false);
     });
@@ -185,7 +203,11 @@ describe('ApplicabilityAnalyzer - 法条状态处理', () => {
         }),
       ];
 
-      const result = await analyzer.analyze({ caseInfo: mockCaseInfo, articles, config: noAIConfig });
+      const result = await analyzer.analyze({
+        caseInfo: mockCaseInfo,
+        articles,
+        config: noAIConfig,
+      });
 
       const articleResult = result.results.find(r => r.articleId === 'art-4');
       expect(articleResult?.ruleValidation?.passed).toBe(true);
@@ -201,13 +223,27 @@ describe('ApplicabilityAnalyzer - 法条状态处理', () => {
         createMockArticle({ id: 'amended', status: LawStatus.AMENDED }),
       ];
 
-      const result = await analyzer.analyze({ caseInfo: mockCaseInfo, articles, config: noAIConfig });
+      const result = await analyzer.analyze({
+        caseInfo: mockCaseInfo,
+        articles,
+        config: noAIConfig,
+      });
 
       expect(result.results).toHaveLength(3);
-      expect(result.results.find(r => r.articleId === 'repealed')?.applicable).toBe(false);
-      expect(result.results.find(r => r.articleId === 'amended')?.ruleValidation?.passed).toBe(true);
-      expect(result.results.find(r => r.articleId === 'amended')?.warnings.length).toBeGreaterThan(0);
-      expect(result.results.find(r => r.articleId === 'valid')?.ruleValidation?.warnings).toEqual([]);
+      expect(
+        result.results.find(r => r.articleId === 'repealed')?.applicable
+      ).toBe(false);
+      expect(
+        result.results.find(r => r.articleId === 'amended')?.ruleValidation
+          ?.passed
+      ).toBe(true);
+      expect(
+        result.results.find(r => r.articleId === 'amended')?.warnings.length
+      ).toBeGreaterThan(0);
+      expect(
+        result.results.find(r => r.articleId === 'valid')?.ruleValidation
+          ?.warnings
+      ).toEqual([]);
     });
   });
 });

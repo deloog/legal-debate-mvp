@@ -162,7 +162,10 @@ export function resetRateLimit(
 ): void {
   const key = generateKey(identifier, type);
   rateLimitStore.delete(key);
-  logger.info(`频率限制已重置`, { identifier: identifier.substring(0, 3) + '***', type });
+  logger.info(`频率限制已重置`, {
+    identifier: identifier.substring(0, 3) + '***',
+    type,
+  });
 }
 
 /**

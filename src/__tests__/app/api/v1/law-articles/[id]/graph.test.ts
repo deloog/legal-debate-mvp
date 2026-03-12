@@ -42,7 +42,9 @@ describe('GET /api/v1/law-articles/[id]/graph', () => {
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-articles/article-1/graph'
       );
-      const response = await GET(request, { params: Promise.resolve({ id: 'article-1' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'article-1' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -88,13 +90,17 @@ describe('GET /api/v1/law-articles/[id]/graph', () => {
         ],
       };
 
-      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(mockArticle);
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(
+        mockArticle
+      );
       (GraphBuilder.buildGraph as jest.Mock).mockResolvedValue(mockGraph);
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-articles/article-1/graph'
       );
-      const response = await GET(request, { params: Promise.resolve({ id: 'article-1' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'article-1' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -117,13 +123,17 @@ describe('GET /api/v1/law-articles/[id]/graph', () => {
         links: [],
       };
 
-      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(mockArticle);
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(
+        mockArticle
+      );
       (GraphBuilder.buildGraph as jest.Mock).mockResolvedValue(mockGraph);
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-articles/article-1/graph?depth=3'
       );
-      const response = await GET(request, { params: Promise.resolve({ id: 'article-1' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'article-1' }),
+      });
 
       expect(response.status).toBe(200);
       expect(GraphBuilder.buildGraph).toHaveBeenCalledWith('article-1', 3);
@@ -142,13 +152,17 @@ describe('GET /api/v1/law-articles/[id]/graph', () => {
         links: [],
       };
 
-      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(mockArticle);
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(
+        mockArticle
+      );
       (GraphBuilder.buildGraph as jest.Mock).mockResolvedValue(mockGraph);
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-articles/article-1/graph?depth=0'
       );
-      const response = await GET(request, { params: Promise.resolve({ id: 'article-1' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'article-1' }),
+      });
 
       expect(response.status).toBe(200);
       expect(GraphBuilder.buildGraph).toHaveBeenCalledWith('article-1', 0);
@@ -167,13 +181,17 @@ describe('GET /api/v1/law-articles/[id]/graph', () => {
         links: [],
       };
 
-      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(mockArticle);
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(
+        mockArticle
+      );
       (GraphBuilder.buildGraph as jest.Mock).mockResolvedValue(mockGraph);
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-articles/article-1/graph?depth=abc'
       );
-      const response = await GET(request, { params: Promise.resolve({ id: 'article-1' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'article-1' }),
+      });
 
       expect(response.status).toBe(200);
       expect(GraphBuilder.buildGraph).toHaveBeenCalledWith('article-1', 2);
@@ -187,7 +205,9 @@ describe('GET /api/v1/law-articles/[id]/graph', () => {
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-articles/non-existent/graph'
       );
-      const response = await GET(request, { params: Promise.resolve({ id: 'non-existent' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'non-existent' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(404);
@@ -204,13 +224,19 @@ describe('GET /api/v1/law-articles/[id]/graph', () => {
         category: 'CIVIL',
       };
 
-      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(mockArticle);
-      (GraphBuilder.buildGraph as jest.Mock).mockRejectedValue(new Error('数据库错误'));
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(
+        mockArticle
+      );
+      (GraphBuilder.buildGraph as jest.Mock).mockRejectedValue(
+        new Error('数据库错误')
+      );
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-articles/article-1/graph'
       );
-      const response = await GET(request, { params: Promise.resolve({ id: 'article-1' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'article-1' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(500);
@@ -226,7 +252,9 @@ describe('GET /api/v1/law-articles/[id]/graph', () => {
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-articles/article-1/graph'
       );
-      const response = await GET(request, { params: Promise.resolve({ id: 'article-1' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'article-1' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(500);
@@ -249,13 +277,17 @@ describe('GET /api/v1/law-articles/[id]/graph', () => {
         links: [],
       };
 
-      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(mockArticle);
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(
+        mockArticle
+      );
       (GraphBuilder.buildGraph as jest.Mock).mockResolvedValue(mockGraph);
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-articles/article-1/graph?depth=100'
       );
-      const response = await GET(request, { params: Promise.resolve({ id: 'article-1' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'article-1' }),
+      });
 
       expect(response.status).toBe(200);
       expect(GraphBuilder.buildGraph).toHaveBeenCalledWith('article-1', 10);
@@ -274,13 +306,17 @@ describe('GET /api/v1/law-articles/[id]/graph', () => {
         links: [],
       };
 
-      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(mockArticle);
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(
+        mockArticle
+      );
       (GraphBuilder.buildGraph as jest.Mock).mockResolvedValue(mockGraph);
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-articles/article-1/graph?depth=-5'
       );
-      const response = await GET(request, { params: Promise.resolve({ id: 'article-1' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'article-1' }),
+      });
 
       expect(response.status).toBe(200);
       expect(GraphBuilder.buildGraph).toHaveBeenCalledWith('article-1', 0);
@@ -313,14 +349,18 @@ describe('GET /api/v1/law-articles/[id]/graph', () => {
         })),
       };
 
-      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(mockArticle);
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue(
+        mockArticle
+      );
       (GraphBuilder.buildGraph as jest.Mock).mockResolvedValue(mockGraph);
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-articles/article-1/graph'
       );
       const startTime = Date.now();
-      const response = await GET(request, { params: Promise.resolve({ id: 'article-1' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'article-1' }),
+      });
       const duration = Date.now() - startTime;
 
       expect(response.status).toBe(200);

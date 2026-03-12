@@ -259,7 +259,7 @@ export function generateExportFilename(
 
   const extension = extensionMap[format] || 'csv';
   const filename = `${exportType}_${date}_${time}.${extension}`;
-  
+
   return sanitizeFilename(filename);
 }
 

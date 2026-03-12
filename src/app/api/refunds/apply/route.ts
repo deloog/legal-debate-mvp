@@ -229,7 +229,7 @@ export async function POST(request: NextRequest) {
           // 微信退款
           const wechatRefund = getWechatRefund();
           const refundNo = `REFUND_${order.orderNo}_${Date.now()}`;
-          
+
           const wechatResponse = await wechatRefund.refund({
             out_trade_no: order.orderNo,
             out_refund_no: refundNo,
@@ -260,7 +260,7 @@ export async function POST(request: NextRequest) {
 
           if (alipayResponse.code !== '10000') {
             logger.error('[API] 支付宝退款失败:', alipayResponse);
-            
+
             // 更新退款记录为失败
             await prisma.refundRecord.update({
               where: { id: pendingRefund.id },
@@ -270,7 +270,7 @@ export async function POST(request: NextRequest) {
                 processedAt: new Date(),
               },
             });
-            
+
             return NextResponse.json(
               {
                 success: false,

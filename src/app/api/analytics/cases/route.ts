@@ -661,7 +661,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const { startDate, endDate } = getDateRange(params.timeRange ?? TimeRange.LAST_30_DAYS);
+    const { startDate, endDate } = getDateRange(
+      params.timeRange ?? TimeRange.LAST_30_DAYS
+    );
 
     // 并行查询所有分析数据
     const [

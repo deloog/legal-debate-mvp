@@ -263,7 +263,10 @@ export function GraphVisualizer({
       event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>
     ) {
       if (!event.active && simulation) simulation.alphaTarget(0.3).restart();
-      const subject = event.subject as GraphNode & { fx?: number | null; fy?: number | null };
+      const subject = event.subject as GraphNode & {
+        fx?: number | null;
+        fy?: number | null;
+      };
       subject.fx = (event.subject as GraphNode & { x?: number }).x;
       subject.fy = (event.subject as GraphNode & { y?: number }).y;
     }
@@ -271,7 +274,10 @@ export function GraphVisualizer({
     function dragged(
       event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>
     ) {
-      const subject = event.subject as GraphNode & { fx?: number | null; fy?: number | null };
+      const subject = event.subject as GraphNode & {
+        fx?: number | null;
+        fy?: number | null;
+      };
       subject.fx = event.x;
       subject.fy = event.y;
     }
@@ -280,7 +286,10 @@ export function GraphVisualizer({
       event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>
     ) {
       if (!event.active && simulation) simulation.alphaTarget(0);
-      const subject = event.subject as GraphNode & { fx?: number | null; fy?: number | null };
+      const subject = event.subject as GraphNode & {
+        fx?: number | null;
+        fy?: number | null;
+      };
       subject.fx = null;
       subject.fy = null;
     }

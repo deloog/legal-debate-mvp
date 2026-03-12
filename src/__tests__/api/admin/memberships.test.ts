@@ -54,7 +54,10 @@ jest.mock('@/lib/membership/audit-logger', () => ({
 }));
 
 import { GET as GETMemberships } from '@/app/api/admin/memberships/route';
-import { GET as GETMembership, PATCH } from '@/app/api/admin/memberships/[id]/route';
+import {
+  GET as GETMembership,
+  PATCH,
+} from '@/app/api/admin/memberships/[id]/route';
 
 describe('Membership API Security Tests', () => {
   const adminUser = { userId: 'admin-123', role: 'ADMIN' };
@@ -64,7 +67,14 @@ describe('Membership API Security Tests', () => {
     jest.clearAllMocks();
   });
 
-  function createMockRequest(url: string, options: { method?: string; body?: object; headers?: Record<string, string> } = {}): NextRequest {
+  function createMockRequest(
+    url: string,
+    options: {
+      method?: string;
+      body?: object;
+      headers?: Record<string, string>;
+    } = {}
+  ): NextRequest {
     return new NextRequest(url, {
       method: options.method || 'GET',
       headers: {
@@ -79,7 +89,9 @@ describe('Membership API Security Tests', () => {
     it('should reject unauthenticated requests', async () => {
       mockGetAuthUser.mockResolvedValue(null);
 
-      const request = createMockRequest('http://localhost:3000/api/admin/memberships');
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/memberships'
+      );
       const response = await GETMemberships(request);
 
       expect(response.status).toBe(401);
@@ -91,7 +103,9 @@ describe('Membership API Security Tests', () => {
         new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 })
       );
 
-      const request = createMockRequest('http://localhost:3000/api/admin/memberships');
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/memberships'
+      );
       const response = await GETMemberships(request);
 
       expect(response.status).toBe(403);
@@ -103,11 +117,16 @@ describe('Membership API Security Tests', () => {
       mockPrisma.userMembership.findMany.mockResolvedValue([]);
       mockPrisma.userMembership.count.mockResolvedValue(0);
 
-      const request = createMockRequest('http://localhost:3000/api/admin/memberships');
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/memberships'
+      );
       const response = await GETMemberships(request);
 
       expect(response.status).toBe(200);
-      expect(mockValidatePermissions).toHaveBeenCalledWith(expect.anything(), 'membership:read');
+      expect(mockValidatePermissions).toHaveBeenCalledWith(
+        expect.anything(),
+        'membership:read'
+      );
     });
   });
 
@@ -115,11 +134,16 @@ describe('Membership API Security Tests', () => {
     it('should reject unauthenticated requests', async () => {
       mockGetAuthUser.mockResolvedValue(null);
 
-      const request = createMockRequest('http://localhost:3000/api/admin/memberships/m-123', {
-        method: 'PATCH',
-        body: { status: 'SUSPENDED' },
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/memberships/m-123',
+        {
+          method: 'PATCH',
+          body: { status: 'SUSPENDED' },
+        }
+      );
+      const response = await PATCH(request, {
+        params: Promise.resolve({ id: 'm-123' }),
       });
-      const response = await PATCH(request, { params: Promise.resolve({ id: 'm-123' }) });
 
       expect(response.status).toBe(401);
     });
@@ -130,11 +154,16 @@ describe('Membership API Security Tests', () => {
         new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 })
       );
 
-      const request = createMockRequest('http://localhost:3000/api/admin/memberships/m-123', {
-        method: 'PATCH',
-        body: { status: 'SUSPENDED' },
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/memberships/m-123',
+        {
+          method: 'PATCH',
+          body: { status: 'SUSPENDED' },
+        }
+      );
+      const response = await PATCH(request, {
+        params: Promise.resolve({ id: 'm-123' }),
       });
-      const response = await PATCH(request, { params: Promise.resolve({ id: 'm-123' }) });
 
       expect(response.status).toBe(403);
     });
@@ -148,11 +177,16 @@ describe('Membership API Security Tests', () => {
         tier: { tier: 'BASIC' },
       });
 
-      const request = createMockRequest('http://localhost:3000/api/admin/memberships/m-123', {
-        method: 'PATCH',
-        body: { status: 'INVALID_STATUS' },
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/memberships/m-123',
+        {
+          method: 'PATCH',
+          body: { status: 'INVALID_STATUS' },
+        }
+      );
+      const response = await PATCH(request, {
+        params: Promise.resolve({ id: 'm-123' }),
       });
-      const response = await PATCH(request, { params: Promise.resolve({ id: 'm-123' }) });
 
       expect(response.status).toBe(400);
     });
@@ -168,11 +202,16 @@ describe('Membership API Security Tests', () => {
       });
       mockPrisma.membershipTier.findUnique.mockResolvedValue(null);
 
-      const request = createMockRequest('http://localhost:3000/api/admin/memberships/m-123', {
-        method: 'PATCH',
-        body: { tierId: 'non-existent-tier' },
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/memberships/m-123',
+        {
+          method: 'PATCH',
+          body: { tierId: 'non-existent-tier' },
+        }
+      );
+      const response = await PATCH(request, {
+        params: Promise.resolve({ id: 'm-123' }),
       });
-      const response = await PATCH(request, { params: Promise.resolve({ id: 'm-123' }) });
 
       expect(response.status).toBe(400);
     });
@@ -194,11 +233,16 @@ describe('Membership API Security Tests', () => {
         user: { email: 'test@test.com', name: 'Test', username: 'test' },
       });
 
-      const request = createMockRequest('http://localhost:3000/api/admin/memberships/m-123', {
-        method: 'PATCH',
-        body: { status: 'SUSPENDED' },
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/memberships/m-123',
+        {
+          method: 'PATCH',
+          body: { status: 'SUSPENDED' },
+        }
+      );
+      const response = await PATCH(request, {
+        params: Promise.resolve({ id: 'm-123' }),
       });
-      const response = await PATCH(request, { params: Promise.resolve({ id: 'm-123' }) });
 
       expect(response.status).toBe(200);
       // 审计日志应在更新后被调用

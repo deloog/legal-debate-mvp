@@ -122,10 +122,7 @@ export async function POST(request: NextRequest) {
     // 2. 身份验证
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json(
-        { error: '未认证，请先登录' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: '未认证，请先登录' }, { status: 401 });
     }
 
     // 3. 权限检查
@@ -217,10 +214,7 @@ export async function POST(request: NextRequest) {
         outputDir: options.outputDir,
         userId: session.user.id,
       });
-      return NextResponse.json(
-        { error: '无效的输出目录' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: '无效的输出目录' }, { status: 400 });
     }
 
     // 9. 创建任务
@@ -234,9 +228,11 @@ export async function POST(request: NextRequest) {
     runningTasks.add(taskId);
 
     // 11. 异步执行
-    runCrawler(source, taskId, crawlType, phase, session.user.id).finally(() => {
-      runningTasks.delete(taskId);
-    });
+    runCrawler(source, taskId, crawlType, phase, session.user.id).finally(
+      () => {
+        runningTasks.delete(taskId);
+      }
+    );
 
     // 12. 记录审计日志
     logger.info('爬虫任务已启动', {
@@ -287,20 +283,14 @@ export async function GET(request: NextRequest) {
     // 2. 身份验证
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json(
-        { error: '未认证，请先登录' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: '未认证，请先登录' }, { status: 401 });
     }
 
     // 3. 权限检查（查询可以放宽到已登录用户）
     const allowedRoles = ['ADMIN', 'SYSTEM', 'DATA_MANAGER', 'USER'];
     const userRole = session.user.role as string;
     if (!allowedRoles.includes(userRole)) {
-      return NextResponse.json(
-        { error: '权限不足' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: '权限不足' }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -333,10 +323,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(offsetParam, 10);
 
     if (isNaN(limit) || isNaN(offset) || limit < 0 || offset < 0) {
-      return NextResponse.json(
-        { error: '无效的分页参数' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: '无效的分页参数' }, { status: 400 });
     }
 
     // 限制最大返回数量
@@ -358,10 +345,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('获取采集历史失败', { error } as never);
-    return NextResponse.json(
-      { error: '获取采集历史失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '获取采集历史失败' }, { status: 500 });
   }
 }
 
@@ -425,10 +409,13 @@ async function runCrawler(
       { taskId, userId }
     );
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : String(error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
 
-    logger.error(`采集任务失败: ${source}`, { error: errorMessage, taskId, userId });
+    logger.error(`采集任务失败: ${source}`, {
+      error: errorMessage,
+      taskId,
+      userId,
+    });
 
     await crawlTaskManager.updateTaskProgress(taskId, {
       status: 'failed',

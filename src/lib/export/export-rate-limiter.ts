@@ -1,6 +1,6 @@
 /**
  * 导出频率限制器
- * 
+ *
  * 防止频繁导出数据，保护服务器资源
  */
 
@@ -20,11 +20,14 @@ const DEFAULT_CONFIG: ExportRateLimitConfig = {
 };
 
 // 内存存储（生产环境应使用 Redis）
-const exportRateLimitStore = new Map<string, {
-  count: number;
-  firstExport: number;
-  lastExport: number;
-}>();
+const exportRateLimitStore = new Map<
+  string,
+  {
+    count: number;
+    firstExport: number;
+    lastExport: number;
+  }
+>();
 
 /**
  * 生成限流键
@@ -64,7 +67,10 @@ export function checkExportRateLimit(
       lastExport: now,
     });
 
-    logger.info(`用户开始导出`, { userId: userId.substring(0, 8) + '...', exportType });
+    logger.info(`用户开始导出`, {
+      userId: userId.substring(0, 8) + '...',
+      exportType,
+    });
 
     return {
       allowed: true,

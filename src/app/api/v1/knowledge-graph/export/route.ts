@@ -46,7 +46,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
         { status: 401 }
       );
     }
@@ -58,7 +61,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (!['json'].includes(format)) {
       return NextResponse.json(
-        { success: false, error: { code: 'INVALID_FORMAT', message: `不支持的导出格式: ${format}` } },
+        {
+          success: false,
+          error: {
+            code: 'INVALID_FORMAT',
+            message: `不支持的导出格式: ${format}`,
+          },
+        },
         { status: 400 }
       );
     }
@@ -68,7 +77,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       const startDate = new Date(startDateParam);
       if (isNaN(startDate.getTime())) {
         return NextResponse.json(
-          { success: false, error: { code: 'INVALID_DATE', message: '开始日期格式无效' } },
+          {
+            success: false,
+            error: { code: 'INVALID_DATE', message: '开始日期格式无效' },
+          },
           { status: 400 }
         );
       }
@@ -78,7 +90,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       const endDate = new Date(endDateParam);
       if (isNaN(endDate.getTime())) {
         return NextResponse.json(
-          { success: false, error: { code: 'INVALID_DATE', message: '结束日期格式无效' } },
+          {
+            success: false,
+            error: { code: 'INVALID_DATE', message: '结束日期格式无效' },
+          },
           { status: 400 }
         );
       }
@@ -154,10 +169,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // 如果数据被截断，记录警告
     if (nodes.length === MAX_NODES) {
-      logger.warn('导出节点数量达到上限', { userId: authUser.userId, limit: MAX_NODES });
+      logger.warn('导出节点数量达到上限', {
+        userId: authUser.userId,
+        limit: MAX_NODES,
+      });
     }
     if (relations.length === MAX_LINKS) {
-      logger.warn('导出关系数量达到上限', { userId: authUser.userId, limit: MAX_LINKS });
+      logger.warn('导出关系数量达到上限', {
+        userId: authUser.userId,
+        limit: MAX_LINKS,
+      });
     }
 
     // 构建导出数据
@@ -224,7 +245,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     logger.error('图谱导出失败', { error });
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: errorMessage } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: errorMessage },
+      },
       { status: 500 }
     );
   }

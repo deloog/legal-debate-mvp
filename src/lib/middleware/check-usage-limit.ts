@@ -111,9 +111,7 @@ export function enforceUsageLimit(
   quantity: number = 1,
   recordAfterCheck: boolean = false
 ) {
-  return async function (
-    request: NextRequest
-  ): Promise<NextResponse | null> {
+  return async function (request: NextRequest): Promise<NextResponse | null> {
     // 始终从请求中获取用户ID，防止外部传入userId导致配额绕过
     const targetUserId = (await getAuthUser(request))?.userId;
 

@@ -328,5 +328,4 @@ export class ArgumentGenerator {
         return Math.round(modeConfig.mainPointCount * 1.2);
     }
   }
-
 }

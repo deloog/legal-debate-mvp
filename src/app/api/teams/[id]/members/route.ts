@@ -80,7 +80,10 @@ async function checkTeamAccess(
  * 获取团队成员列表
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -178,7 +181,10 @@ export const GET = withErrorHandler(
  * 添加团队成员
  */
 export const POST = withErrorHandler(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(

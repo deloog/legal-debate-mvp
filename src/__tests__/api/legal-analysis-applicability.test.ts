@@ -42,7 +42,9 @@ const mockLawArticleFindMany = jest.fn();
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
     legalReference: {
-      upsert: jest.fn().mockImplementation(options => mockLegalReferenceUpsert(options)),
+      upsert: jest
+        .fn()
+        .mockImplementation(options => mockLegalReferenceUpsert(options)),
     },
     case: {
       findUnique: jest.fn().mockImplementation(() => mockCaseFindUnique()),
@@ -221,7 +223,11 @@ describe('法条适用性分析API', () => {
     it('应该在缺少 caseId 时返回 400', async () => {
       const request = createMockRequest(
         'http://localhost:3000/api/v1/legal-analysis/applicability',
-        { method: 'POST', headers: authHeader, body: { articleIds: ['article-1'] } }
+        {
+          method: 'POST',
+          headers: authHeader,
+          body: { articleIds: ['article-1'] },
+        }
       );
 
       const response = await POST(request);
@@ -234,7 +240,11 @@ describe('法条适用性分析API', () => {
     it('应该在 articleIds 为空时返回 400', async () => {
       const request = createMockRequest(
         'http://localhost:3000/api/v1/legal-analysis/applicability',
-        { method: 'POST', headers: authHeader, body: { caseId: 'case-1', articleIds: [] } }
+        {
+          method: 'POST',
+          headers: authHeader,
+          body: { caseId: 'case-1', articleIds: [] },
+        }
       );
 
       const response = await POST(request);
@@ -395,8 +405,12 @@ describe('法条适用性分析API', () => {
 
       expect(response.status).toBe(200);
       expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
-      expect(response.headers.get('Access-Control-Allow-Methods')).toContain('POST');
-      expect(response.headers.get('Access-Control-Allow-Headers')).toContain('Authorization');
+      expect(response.headers.get('Access-Control-Allow-Methods')).toContain(
+        'POST'
+      );
+      expect(response.headers.get('Access-Control-Allow-Headers')).toContain(
+        'Authorization'
+      );
       expect(response.headers.get('Access-Control-Max-Age')).toBe('86400');
     });
   });

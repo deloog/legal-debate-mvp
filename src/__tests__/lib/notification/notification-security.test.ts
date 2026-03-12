@@ -73,10 +73,10 @@ describe('Notification Security Tests', () => {
 
       // 第一次请求
       checkRateLimit(phone, 'SMS');
-      
+
       // 立即第二次请求（在冷却时间内）
       const result = checkRateLimit(phone, 'SMS', { cooldownMs: 60000 });
-      
+
       // 应该被允许（因为只是检查冷却，不是阻止）
       // 注意：实际冷却检查在连续快速请求时会触发
     });
@@ -172,7 +172,12 @@ describe('Notification Security Tests', () => {
           return '*'.repeat(local.length) + domain;
         }
 
-        return local.charAt(0) + '*'.repeat(local.length - 2) + local.charAt(local.length - 1) + domain;
+        return (
+          local.charAt(0) +
+          '*'.repeat(local.length - 2) +
+          local.charAt(local.length - 1) +
+          domain
+        );
       }
 
       expect(maskEmailAddress('user@example.com')).toBe('u**r@example.com');

@@ -66,7 +66,10 @@ export async function GET(
     const uploadsDir = resolve(process.cwd(), 'uploads');
     const resolvedFilePath = resolve(uploadsDir, contract.filePath);
     if (!resolvedFilePath.startsWith(uploadsDir + sep)) {
-      logger.warn('路径穿越尝试被拦截', { contractId, filePath: contract.filePath });
+      logger.warn('路径穿越尝试被拦截', {
+        contractId,
+        filePath: contract.filePath,
+      });
       return NextResponse.json(
         {
           success: false,

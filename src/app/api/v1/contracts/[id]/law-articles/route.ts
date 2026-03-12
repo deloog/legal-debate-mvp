@@ -136,7 +136,10 @@ export async function POST(
         return NextResponse.json(
           {
             success: false,
-            error: { code: 'INVALID_PARAMS', message: 'relevanceScore必须是0到1之间的数字' },
+            error: {
+              code: 'INVALID_PARAMS',
+              message: 'relevanceScore必须是0到1之间的数字',
+            },
           },
           { status: 400 }
         );
@@ -189,7 +192,10 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          error: { code: 'ALREADY_ASSOCIATED', message: '该法条已经关联到此合同' },
+          error: {
+            code: 'ALREADY_ASSOCIATED',
+            message: '该法条已经关联到此合同',
+          },
         },
         { status: 409 }
       );

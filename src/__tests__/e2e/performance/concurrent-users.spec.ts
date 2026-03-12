@@ -218,7 +218,11 @@ test.describe('并发用户性能测试', () => {
     const uploadPromises = testCases.map((caseId, idx) => {
       const fileBuffer = Buffer.from('%PDF_SAMPLE%', 'utf-8');
       const formData = new FormData();
-      formData.append('file', new Blob([fileBuffer], { type: 'application/pdf' }), 'test.pdf');
+      formData.append(
+        'file',
+        new Blob([fileBuffer], { type: 'application/pdf' }),
+        'test.pdf'
+      );
       formData.append('caseId', caseId);
       formData.append('fileId', `test-file-${Date.now()}-${idx}`);
 

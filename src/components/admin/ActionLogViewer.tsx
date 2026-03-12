@@ -244,7 +244,8 @@ export function ActionLogViewer({
                       </div>
                     )}
                     {!!log.requestParams &&
-                      Object.keys(log.requestParams as Record<string, unknown>).length > 0 && (
+                      Object.keys(log.requestParams as Record<string, unknown>)
+                        .length > 0 && (
                         <div>
                           <div className='text-xs font-medium text-gray-700 mb-1'>
                             请求参数：

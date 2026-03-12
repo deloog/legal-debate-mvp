@@ -12,9 +12,13 @@ jest.mock('@/lib/db/prisma', () => ({
 }));
 
 const mockGetAuthUser = getAuthUser as jest.Mock;
-const mockCaseFindUnique = (prisma.case.findUnique as jest.Mock);
+const mockCaseFindUnique = prisma.case.findUnique as jest.Mock;
 
-const AUTHED_USER = { userId: 'user-123', role: 'USER', email: 'user@test.com' };
+const AUTHED_USER = {
+  userId: 'user-123',
+  role: 'USER',
+  email: 'user@test.com',
+};
 const OWNED_CASE = { userId: 'user-123' };
 
 describe('GET /api/cases/[id]/success-rate', () => {
@@ -38,7 +42,9 @@ describe('GET /api/cases/[id]/success-rate', () => {
       const request = new NextRequest(
         'http://localhost:3000/api/cases/case-123/success-rate'
       );
-      const response = await GET(request, { params: Promise.resolve({ id: 'case-123' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'case-123' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -52,7 +58,9 @@ describe('GET /api/cases/[id]/success-rate', () => {
       const request = new NextRequest(
         'http://localhost:3000/api/cases/case-123/success-rate'
       );
-      const response = await GET(request, { params: Promise.resolve({ id: 'case-123' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'case-123' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(404);
@@ -66,7 +74,9 @@ describe('GET /api/cases/[id]/success-rate', () => {
       const request = new NextRequest(
         'http://localhost:3000/api/cases/case-123/success-rate'
       );
-      const response = await GET(request, { params: Promise.resolve({ id: 'case-123' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'case-123' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(403);
@@ -75,14 +85,23 @@ describe('GET /api/cases/[id]/success-rate', () => {
     });
 
     it('管理员可以访问任意案件', async () => {
-      mockGetAuthUser.mockResolvedValue({ userId: 'admin-1', role: 'ADMIN', email: 'admin@test.com' });
+      mockGetAuthUser.mockResolvedValue({
+        userId: 'admin-1',
+        role: 'ADMIN',
+        email: 'admin@test.com',
+      });
       mockCaseFindUnique.mockResolvedValue({ userId: 'other-user' });
-      mockAnalyzeSuccessRate.mockResolvedValue({ caseId: 'case-123', winRate: 0.5 });
+      mockAnalyzeSuccessRate.mockResolvedValue({
+        caseId: 'case-123',
+        winRate: 0.5,
+      });
 
       const request = new NextRequest(
         'http://localhost:3000/api/cases/case-123/success-rate'
       );
-      const response = await GET(request, { params: Promise.resolve({ id: 'case-123' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'case-123' }),
+      });
 
       expect(response.status).toBe(200);
     });
@@ -113,7 +132,9 @@ describe('GET /api/cases/[id]/success-rate', () => {
         'http://localhost:3000/api/cases/case-123/success-rate?minSimilarity=0.6&maxCases=20&includePartial=true&includeWithdraw=false'
       );
 
-      const response = await GET(request, { params: Promise.resolve({ id: 'case-123' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'case-123' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -157,7 +178,10 @@ describe('GET /api/cases/[id]/success-rate', () => {
     });
 
     it('应该正确解析查询参数', async () => {
-      mockAnalyzeSuccessRate.mockResolvedValue({ caseId: 'case-123', winRate: 0.7 });
+      mockAnalyzeSuccessRate.mockResolvedValue({
+        caseId: 'case-123',
+        winRate: 0.7,
+      });
 
       const request = new NextRequest(
         'http://localhost:3000/api/cases/case-123/success-rate?minSimilarity=0.8&maxCases=10&includePartial=true&includeWithdraw=true'
@@ -183,7 +207,9 @@ describe('GET /api/cases/[id]/success-rate', () => {
         'http://localhost:3000/api/cases/case-123/success-rate'
       );
 
-      const response = await GET(request, { params: Promise.resolve({ id: 'case-123' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'case-123' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(500);
@@ -194,7 +220,10 @@ describe('GET /api/cases/[id]/success-rate', () => {
 
   describe('参数解析', () => {
     it('应该正确解析minSimilarity参数', async () => {
-      mockAnalyzeSuccessRate.mockResolvedValue({ caseId: 'case-123', winRate: 0.5 });
+      mockAnalyzeSuccessRate.mockResolvedValue({
+        caseId: 'case-123',
+        winRate: 0.5,
+      });
 
       const request = new NextRequest(
         'http://localhost:3000/api/cases/case-123/success-rate?minSimilarity=0.9'
@@ -208,7 +237,10 @@ describe('GET /api/cases/[id]/success-rate', () => {
     });
 
     it('应该正确解析maxCases参数', async () => {
-      mockAnalyzeSuccessRate.mockResolvedValue({ caseId: 'case-123', winRate: 0.5 });
+      mockAnalyzeSuccessRate.mockResolvedValue({
+        caseId: 'case-123',
+        winRate: 0.5,
+      });
 
       const request = new NextRequest(
         'http://localhost:3000/api/cases/case-123/success-rate?maxCases=50'
@@ -222,7 +254,10 @@ describe('GET /api/cases/[id]/success-rate', () => {
     });
 
     it('应该将非true的includePartial解析为false', async () => {
-      mockAnalyzeSuccessRate.mockResolvedValue({ caseId: 'case-123', winRate: 0.5 });
+      mockAnalyzeSuccessRate.mockResolvedValue({
+        caseId: 'case-123',
+        winRate: 0.5,
+      });
 
       const request = new NextRequest(
         'http://localhost:3000/api/cases/case-123/success-rate?includePartial=false'
@@ -236,7 +271,10 @@ describe('GET /api/cases/[id]/success-rate', () => {
     });
 
     it('应该正确解析includeWithdraw布尔参数', async () => {
-      mockAnalyzeSuccessRate.mockResolvedValue({ caseId: 'case-123', winRate: 0.5 });
+      mockAnalyzeSuccessRate.mockResolvedValue({
+        caseId: 'case-123',
+        winRate: 0.5,
+      });
 
       const request = new NextRequest(
         'http://localhost:3000/api/cases/case-123/success-rate?includeWithdraw=true'

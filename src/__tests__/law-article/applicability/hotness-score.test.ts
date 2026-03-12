@@ -41,7 +41,7 @@ describe('RuleValidator - 边界值与批量处理', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       ...overrides,
-    } as LawArticle);
+    }) as LawArticle;
 
   beforeAll(() => {
     validator = new RuleValidator();
@@ -73,7 +73,10 @@ describe('RuleValidator - 边界值与批量处理', () => {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
 
-      const article = createArticle({ status: LawStatus.VALID, expiryDate: yesterday });
+      const article = createArticle({
+        status: LawStatus.VALID,
+        expiryDate: yesterday,
+      });
       const result = validator.validateArticle(article);
 
       expect(result.passed).toBe(false);
@@ -84,7 +87,10 @@ describe('RuleValidator - 边界值与批量处理', () => {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
 
-      const article = createArticle({ status: LawStatus.VALID, expiryDate: tomorrow });
+      const article = createArticle({
+        status: LawStatus.VALID,
+        expiryDate: tomorrow,
+      });
       const result = validator.validateArticle(article);
 
       expect(result.passed).toBe(true);

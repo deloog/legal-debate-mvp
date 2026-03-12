@@ -175,7 +175,9 @@ describe('Admin Users Detail API', () => {
       const request = createTestRequest(
         `http://localhost:3000/api/admin/users/${mockUserId}`
       );
-      const response = await GET(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -189,7 +191,9 @@ describe('Admin Users Detail API', () => {
       const request = createTestRequest(
         `http://localhost:3000/api/admin/users/${mockUserId}`
       );
-      const response = await GET(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -201,7 +205,9 @@ describe('Admin Users Detail API', () => {
       const request = createTestRequest(
         `http://localhost:3000/api/admin/users/${mockUserId}`
       );
-      const response = await GET(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(403);
@@ -213,7 +219,9 @@ describe('Admin Users Detail API', () => {
       const request = createTestRequest(
         'http://localhost:3000/api/admin/users/invalid@id'
       );
-      const response = await GET(request, { params: Promise.resolve({ id: 'invalid@id' }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: 'invalid@id' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -239,7 +247,9 @@ describe('Admin Users Detail API', () => {
       const request = createTestRequest(
         `http://localhost:3000/api/admin/users/${mockUserId}`
       );
-      const response = await GET(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -253,7 +263,9 @@ describe('Admin Users Detail API', () => {
       const request = createTestRequest(
         `http://localhost:3000/api/admin/users/${mockUserId}`
       );
-      const response = await GET(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -281,7 +293,9 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -307,7 +321,9 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -331,7 +347,9 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -348,7 +366,9 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -365,7 +385,9 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(403);
@@ -382,7 +404,9 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -399,7 +423,9 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -439,7 +465,9 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await DELETE(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -464,7 +492,9 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await DELETE(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -480,7 +510,9 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await DELETE(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(403);
@@ -514,7 +546,9 @@ describe('Admin Users Detail API', () => {
         }
       );
 
-      const response = await DELETE(request, { params: Promise.resolve({ id: 'invalid@id' }) });
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: 'invalid@id' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -631,7 +665,9 @@ describe('Admin Users Detail API', () => {
       const request = createTestRequest(
         `http://localhost:3000/api/admin/users/${mockUserId}`
       );
-      const response = await GET(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
 
       expect(response.headers.get('Content-Type')).toBe('application/json');
     });
@@ -648,7 +684,9 @@ describe('Admin Users Detail API', () => {
           body: { name: '测试' },
         }
       );
-      const response = await PUT(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
 
       expect(response.headers.get('Content-Type')).toBe('application/json');
     });
@@ -661,7 +699,9 @@ describe('Admin Users Detail API', () => {
           method: 'DELETE',
         }
       );
-      const response = await DELETE(request, { params: Promise.resolve({ id: mockUserId }) });
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: mockUserId }),
+      });
 
       expect(response.headers.get('Content-Type')).toBe('application/json');
     });

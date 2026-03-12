@@ -215,7 +215,9 @@ function ClientCard({
         {/* 底部信息 */}
         <div className='flex items-center justify-between border-t pt-4 text-xs text-gray-500'>
           <div>
-            <span className='mr-3'>来源: {getSourceName(client.source ?? undefined)}</span>
+            <span className='mr-3'>
+              来源: {getSourceName(client.source ?? undefined)}
+            </span>
             <span>案件: {client.cases || 0}</span>
           </div>
           <div className='text-gray-400'>

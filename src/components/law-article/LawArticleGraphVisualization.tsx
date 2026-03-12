@@ -42,7 +42,8 @@ export function LawArticleGraphVisualization({
 
   // 社区着色状态
   const [showCommunityColors, setShowCommunityColors] = useState(false);
-  const [communityData, setCommunityData] = useState<CommunityColorResult | null>(null);
+  const [communityData, setCommunityData] =
+    useState<CommunityColorResult | null>(null);
   const [communityLoading, setCommunityLoading] = useState(false);
 
   // 加载图谱数据
@@ -108,7 +109,10 @@ export function LawArticleGraphVisualization({
         `/api/knowledge-graph/communities?articleId=${id}&depth=${depth}`
       );
       if (res.ok) {
-        const json = await res.json() as { success: boolean; data: CommunityColorResult };
+        const json = (await res.json()) as {
+          success: boolean;
+          data: CommunityColorResult;
+        };
         if (json.success) {
           setCommunityData(json.data);
         }
@@ -123,7 +127,12 @@ export function LawArticleGraphVisualization({
     if (showCommunityColors && !communityData && !communityLoading) {
       void loadCommunityColors();
     }
-  }, [showCommunityColors, communityData, communityLoading, loadCommunityColors]);
+  }, [
+    showCommunityColors,
+    communityData,
+    communityLoading,
+    loadCommunityColors,
+  ]);
 
   // 渲染图谱
   useEffect(() => {
@@ -251,7 +260,10 @@ export function LawArticleGraphVisualization({
       event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>
     ) {
       if (!event.active) simulation.alphaTarget(0.3).restart();
-      const subject = event.subject as GraphNode & { fx?: number | null; fy?: number | null };
+      const subject = event.subject as GraphNode & {
+        fx?: number | null;
+        fy?: number | null;
+      };
       subject.fx = (event.subject as GraphNode & { x: number }).x;
       subject.fy = (event.subject as GraphNode & { y: number }).y;
     }
@@ -259,7 +271,10 @@ export function LawArticleGraphVisualization({
     function dragged(
       event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>
     ) {
-      const subject = event.subject as GraphNode & { fx?: number | null; fy?: number | null };
+      const subject = event.subject as GraphNode & {
+        fx?: number | null;
+        fy?: number | null;
+      };
       subject.fx = event.x;
       subject.fy = event.y;
     }
@@ -268,7 +283,10 @@ export function LawArticleGraphVisualization({
       event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>
     ) {
       if (!event.active) simulation.alphaTarget(0);
-      const subject = event.subject as GraphNode & { fx?: number | null; fy?: number | null };
+      const subject = event.subject as GraphNode & {
+        fx?: number | null;
+        fy?: number | null;
+      };
       subject.fx = null;
       subject.fy = null;
     }
@@ -330,7 +348,11 @@ export function LawArticleGraphVisualization({
                 : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400 hover:text-indigo-600'
             }`}
           >
-            {communityLoading ? '分析中...' : showCommunityColors ? '✦ 社区着色 已开启' : '✦ 社区着色'}
+            {communityLoading
+              ? '分析中...'
+              : showCommunityColors
+                ? '✦ 社区着色 已开启'
+                : '✦ 社区着色'}
           </button>
           {showCommunityColors && communityData && (
             <span className='text-xs text-gray-500'>
@@ -353,7 +375,9 @@ export function LawArticleGraphVisualization({
 
       {/* 图例 */}
       <div className='absolute top-12 right-4 bg-white p-4 rounded shadow-lg'>
-        {showCommunityColors && communityData && communityData.communityLegend.length > 0 ? (
+        {showCommunityColors &&
+        communityData &&
+        communityData.communityLegend.length > 0 ? (
           <>
             <h3 className='font-bold mb-2 text-sm'>法律社区</h3>
             <div className='space-y-1 text-xs max-h-48 overflow-y-auto'>
@@ -363,7 +387,9 @@ export function LawArticleGraphVisualization({
                     className='inline-block w-3 h-3 rounded-full flex-shrink-0'
                     style={{ backgroundColor: item.color }}
                   />
-                  <span className='text-gray-600'>社区 {item.communityId + 1}</span>
+                  <span className='text-gray-600'>
+                    社区 {item.communityId + 1}
+                  </span>
                   <span className='text-gray-400'>({item.count} 条)</span>
                 </div>
               ))}

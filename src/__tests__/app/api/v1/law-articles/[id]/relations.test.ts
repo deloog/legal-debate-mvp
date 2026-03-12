@@ -104,7 +104,9 @@ describe('关系管理API', () => {
       const request = new NextRequest(
         `http://localhost:3000/api/v1/law-articles/${testArticle1.id}/relations`
       );
-      const response = await GET(request, { params: Promise.resolve({ id: testArticle1.id }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: testArticle1.id }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -127,7 +129,9 @@ describe('关系管理API', () => {
         }
       );
 
-      const response = await POST(request, { params: Promise.resolve({ id: testArticle1.id }) });
+      const response = await POST(request, {
+        params: Promise.resolve({ id: testArticle1.id }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -166,7 +170,9 @@ describe('关系管理API', () => {
         `http://localhost:3000/api/v1/law-articles/${testArticle1.id}/relations`
       );
 
-      const response = await GET(request, { params: Promise.resolve({ id: testArticle1.id }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: testArticle1.id }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -182,13 +188,17 @@ describe('关系管理API', () => {
         `http://localhost:3000/api/v1/law-articles/${testArticle1.id}/relations?relationType=CITES`
       );
 
-      const response = await GET(request, { params: Promise.resolve({ id: testArticle1.id }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: testArticle1.id }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.data.outgoingRelations).toHaveLength(1);
-      expect(data.data.outgoingRelations[0].relationType).toBe(RelationType.CITES);
+      expect(data.data.outgoingRelations[0].relationType).toBe(
+        RelationType.CITES
+      );
     });
 
     it('应该支持按方向过滤', async () => {
@@ -196,7 +206,9 @@ describe('关系管理API', () => {
         `http://localhost:3000/api/v1/law-articles/${testArticle1.id}/relations?direction=outgoing`
       );
 
-      const response = await GET(request, { params: Promise.resolve({ id: testArticle1.id }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: testArticle1.id }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -210,13 +222,17 @@ describe('关系管理API', () => {
         `http://localhost:3000/api/v1/law-articles/${testArticle1.id}/relations?minStrength=0.8`
       );
 
-      const response = await GET(request, { params: Promise.resolve({ id: testArticle1.id }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: testArticle1.id }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.data.outgoingRelations).toHaveLength(1);
-      expect(data.data.outgoingRelations[0].strength).toBeGreaterThanOrEqual(0.8);
+      expect(data.data.outgoingRelations[0].strength).toBeGreaterThanOrEqual(
+        0.8
+      );
     });
 
     it('应该处理不存在的法条ID', async () => {
@@ -254,7 +270,9 @@ describe('关系管理API', () => {
         }
       );
 
-      const response = await POST(request, { params: Promise.resolve({ id: testArticle1.id }) });
+      const response = await POST(request, {
+        params: Promise.resolve({ id: testArticle1.id }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(201);
@@ -279,7 +297,9 @@ describe('关系管理API', () => {
         }
       );
 
-      const response = await POST(request, { params: Promise.resolve({ id: testArticle1.id }) });
+      const response = await POST(request, {
+        params: Promise.resolve({ id: testArticle1.id }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -301,7 +321,9 @@ describe('关系管理API', () => {
         }
       );
 
-      const response = await POST(request, { params: Promise.resolve({ id: testArticle1.id }) });
+      const response = await POST(request, {
+        params: Promise.resolve({ id: testArticle1.id }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -323,7 +345,9 @@ describe('关系管理API', () => {
         }
       );
 
-      const response = await POST(request, { params: Promise.resolve({ id: testArticle1.id }) });
+      const response = await POST(request, {
+        params: Promise.resolve({ id: testArticle1.id }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -349,7 +373,9 @@ describe('关系管理API', () => {
         }
       );
 
-      const response = await POST(request, { params: Promise.resolve({ id: testArticle1.id }) });
+      const response = await POST(request, {
+        params: Promise.resolve({ id: testArticle1.id }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(201);

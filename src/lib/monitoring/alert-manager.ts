@@ -286,7 +286,10 @@ export class AlertManager {
 
       return results;
     } catch (error) {
-      logger.error('Failed to check alerts', error instanceof Error ? error : undefined);
+      logger.error(
+        'Failed to check alerts',
+        error instanceof Error ? error : undefined
+      );
       return [];
     } finally {
       this.isChecking = false;
@@ -415,7 +418,10 @@ export class AlertManager {
         },
       });
     } catch (error) {
-      logger.error('Failed to record alert to database', error instanceof Error ? error : undefined);
+      logger.error(
+        'Failed to record alert to database',
+        error instanceof Error ? error : undefined
+      );
     }
   }
 
@@ -467,7 +473,10 @@ export class AlertManager {
         bySeverity,
       };
     } catch (error) {
-      logger.error('Failed to get alert stats', error instanceof Error ? error : undefined);
+      logger.error(
+        'Failed to get alert stats',
+        error instanceof Error ? error : undefined
+      );
       return {
         totalAlerts: 0,
         triggeredAlerts: 0,
@@ -497,7 +506,10 @@ export class AlertManager {
       });
       return true;
     } catch (error) {
-      logger.error(`Failed to acknowledge alert ${alertId}`, error instanceof Error ? error : undefined);
+      logger.error(
+        `Failed to acknowledge alert ${alertId}`,
+        error instanceof Error ? error : undefined
+      );
       return false;
     }
   }
@@ -516,7 +528,10 @@ export class AlertManager {
       });
       return true;
     } catch (error) {
-      logger.error(`Failed to resolve alert ${alertId}`, error instanceof Error ? error : undefined);
+      logger.error(
+        `Failed to resolve alert ${alertId}`,
+        error instanceof Error ? error : undefined
+      );
       return false;
     }
   }
@@ -540,7 +555,10 @@ export class AlertManager {
 
       logger.info(`Cleaned up ${result.count} old alerts`);
     } catch (error) {
-      logger.error('Failed to cleanup old alerts', error instanceof Error ? error : undefined);
+      logger.error(
+        'Failed to cleanup old alerts',
+        error instanceof Error ? error : undefined
+      );
     }
   }
 

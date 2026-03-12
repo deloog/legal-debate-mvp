@@ -220,7 +220,11 @@ export default function ClientsPage() {
           <ClientForm
             initialData={editingClient as UpdateClientInput | undefined}
             userId={editingClient?.userId || ''}
-            onSubmit={(editingClient ? handleUpdateClient : handleCreateClient) as (data: CreateClientInput | UpdateClientInput) => Promise<void>}
+            onSubmit={
+              (editingClient ? handleUpdateClient : handleCreateClient) as (
+                data: CreateClientInput | UpdateClientInput
+              ) => Promise<void>
+            }
             onCancel={() => {
               setShowForm(false);
               setEditingClient(undefined);

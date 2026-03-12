@@ -127,7 +127,11 @@ export default function LawyerPerformance({
           <label className='text-sm font-medium'>排序:</label>
           <Select
             value={sortBy}
-            onValueChange={(value: string) => setSortBy(value as 'caseVolume' | 'successRate' | 'revenue' | 'efficiency')}
+            onValueChange={(value: string) =>
+              setSortBy(
+                value as 'caseVolume' | 'successRate' | 'revenue' | 'efficiency'
+              )
+            }
           >
             <SelectTrigger className='w-37.5'>
               <SelectValue />
@@ -142,7 +146,9 @@ export default function LawyerPerformance({
 
           <Select
             value={sortOrder}
-            onValueChange={(value: string) => setSortOrder(value as 'asc' | 'desc')}
+            onValueChange={(value: string) =>
+              setSortOrder(value as 'asc' | 'desc')
+            }
           >
             <SelectTrigger className='w-30'>
               <SelectValue />

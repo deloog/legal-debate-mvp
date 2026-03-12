@@ -414,7 +414,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const { startDate, endDate } = getDateRange(params.timeRange ?? TimeRange.LAST_30_DAYS);
+    const { startDate, endDate } = getDateRange(
+      params.timeRange ?? TimeRange.LAST_30_DAYS
+    );
 
     const data = await getErrorRateData(
       startDate,

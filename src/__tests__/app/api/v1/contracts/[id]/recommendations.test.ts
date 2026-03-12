@@ -82,7 +82,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -131,7 +133,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -159,7 +163,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -187,7 +193,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -213,7 +221,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const __data = await response.json();
 
       // Assert
@@ -240,7 +250,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -259,7 +271,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -275,7 +289,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -291,7 +307,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -307,7 +325,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -323,7 +343,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -343,7 +365,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -363,7 +387,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -384,7 +410,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -418,7 +446,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -448,7 +478,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -476,7 +508,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert
@@ -504,7 +538,9 @@ describe('GET /api/v1/contracts/[id]/recommendations', () => {
       );
 
       // Act
-      const response = await GET(request, { params: Promise.resolve({ id: mockContractId }) });
+      const response = await GET(request, {
+        params: Promise.resolve({ id: mockContractId }),
+      });
       const data = await response.json();
 
       // Assert

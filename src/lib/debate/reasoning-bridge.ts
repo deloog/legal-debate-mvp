@@ -130,9 +130,13 @@ async function buildReasoningContext(
       visited: new Set<string>(),
     };
   } catch (error) {
-    logger.error('构建推理上下文失败', error instanceof Error ? error : undefined, {
-      articleIds: articleIds.slice(0, 5),
-    });
+    logger.error(
+      '构建推理上下文失败',
+      error instanceof Error ? error : undefined,
+      {
+        articleIds: articleIds.slice(0, 5),
+      }
+    );
     return null;
   }
 }

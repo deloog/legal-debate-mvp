@@ -234,9 +234,12 @@ export class ComplianceCheckService {
         itemKey.includes('过期')
       ) {
         const isValid =
-          enterprise?.expiresAt == null ||
-          enterprise.expiresAt > new Date();
-        status = isValid ? 'passed' : item.required ? 'failed' : 'not_applicable';
+          enterprise?.expiresAt == null || enterprise.expiresAt > new Date();
+        status = isValid
+          ? 'passed'
+          : item.required
+            ? 'failed'
+            : 'not_applicable';
         notes = isValid ? '证照在有效期内' : '证照已过期，请及时续期';
       } else if (enterprise?.status === 'APPROVED') {
         // 企业状态正常的情况下，无特定数据依赖的检查项自动通过

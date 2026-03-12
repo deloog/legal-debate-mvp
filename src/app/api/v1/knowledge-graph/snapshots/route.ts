@@ -56,7 +56,10 @@ export async function GET(request: NextRequest) {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
         { status: 401 }
       );
     }
@@ -113,7 +116,10 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     logger.error('获取快照列表失败:', error);
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: '获取快照列表失败' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: '获取快照列表失败' },
+      },
       { status: 500 }
     );
   }
@@ -129,7 +135,10 @@ export async function POST(request: NextRequest) {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
         { status: 401 }
       );
     }
@@ -143,7 +152,10 @@ export async function POST(request: NextRequest) {
 
     if (!permissionResult.hasPermission) {
       return NextResponse.json(
-        { success: false, error: { code: 'FORBIDDEN', message: '需要管理员权限' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: '需要管理员权限' },
+        },
         { status: 403 }
       );
     }
@@ -151,7 +163,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const input = CreateSnapshotSchema.parse(body);
 
-    const snapshot = await snapshotService.createSnapshot(input, authUser.userId);
+    const snapshot = await snapshotService.createSnapshot(
+      input,
+      authUser.userId
+    );
 
     // 记录操作日志
     await logKnowledgeGraphAction({
@@ -174,14 +189,24 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: '参数验证失败', details: error.format() } },
+        {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: '参数验证失败',
+            details: error.format(),
+          },
+        },
         { status: 400 }
       );
     }
 
     logger.error('创建快照失败:', error);
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: '创建快照失败' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: '创建快照失败' },
+      },
       { status: 500 }
     );
   }
@@ -197,7 +222,10 @@ export async function DELETE(request: NextRequest) {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
         { status: 401 }
       );
     }
@@ -211,7 +239,10 @@ export async function DELETE(request: NextRequest) {
 
     if (!permissionResult.hasPermission) {
       return NextResponse.json(
-        { success: false, error: { code: 'FORBIDDEN', message: '需要管理员权限' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: '需要管理员权限' },
+        },
         { status: 403 }
       );
     }
@@ -223,7 +254,13 @@ export async function DELETE(request: NextRequest) {
     // 验证保留天数
     if (days !== undefined && (isNaN(days) || days < 1 || days > 3650)) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'retentionDays必须在1-3650之间' } },
+        {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'retentionDays必须在1-3650之间',
+          },
+        },
         { status: 400 }
       );
     }
@@ -249,7 +286,10 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     logger.error('清理过期快照失败:', error);
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: '清理过期快照失败' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: '清理过期快照失败' },
+      },
       { status: 500 }
     );
   }

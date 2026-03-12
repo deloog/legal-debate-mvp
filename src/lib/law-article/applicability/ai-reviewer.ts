@@ -24,7 +24,10 @@ export class AIReviewer {
     if (this.initialized) return;
     try {
       const config = getAIConfig();
-      this.aiService = await AIServiceFactory.getInstance('applicability-analyzer', config);
+      this.aiService = await AIServiceFactory.getInstance(
+        'applicability-analyzer',
+        config
+      );
       this.initialized = true;
     } catch (error) {
       logger.error('Failed to initialize AIReviewer:', error);
@@ -46,7 +49,8 @@ export class AIReviewer {
         messages: [
           {
             role: 'system',
-            content: '你是专业的法律适用性分析专家，擅长综合评估法条对案件的语义相关性和实际适用性。',
+            content:
+              '你是专业的法律适用性分析专家，擅长综合评估法条对案件的语义相关性和实际适用性。',
           },
           {
             role: 'user',
@@ -61,7 +65,10 @@ export class AIReviewer {
       const raw = response.choices[0].message.content;
       return this.parseResponse(raw);
     } catch (error) {
-      logger.error(`AI applicability analysis failed for article ${article.id}:`, error);
+      logger.error(
+        `AI applicability analysis failed for article ${article.id}:`,
+        error
+      );
       return {
         applicable: false,
         score: 0.3,
@@ -161,12 +168,19 @@ ${lawLines}
       return {
         applicable: Boolean(parsed.applicable),
         score,
-        confidence: Math.min(Math.max(Number(parsed.confidence) || score, 0), 1),
+        confidence: Math.min(
+          Math.max(Number(parsed.confidence) || score, 0),
+          1
+        ),
         reasons: Array.isArray(parsed.reasons)
-          ? (parsed.reasons as unknown[]).filter((r): r is string => typeof r === 'string')
+          ? (parsed.reasons as unknown[]).filter(
+              (r): r is string => typeof r === 'string'
+            )
           : [],
         warnings: Array.isArray(parsed.warnings)
-          ? (parsed.warnings as unknown[]).filter((w): w is string => typeof w === 'string')
+          ? (parsed.warnings as unknown[]).filter(
+              (w): w is string => typeof w === 'string'
+            )
           : [],
       };
     } catch (error) {

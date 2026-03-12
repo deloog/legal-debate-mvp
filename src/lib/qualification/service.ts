@@ -203,10 +203,7 @@ export async function recognizeLicensePhoto(
         messages: [
           {
             role: 'user',
-            content: [
-              imageContent,
-              { type: 'text', text: prompt },
-            ],
+            content: [imageContent, { type: 'text', text: prompt }],
           },
         ],
         max_tokens: 512,
@@ -247,10 +244,14 @@ export async function recognizeLicensePhoto(
 
     return { success: true, data: ocrData };
   } catch (error) {
-    logger.error('执业证 OCR 识别失败', error instanceof Error ? error : undefined);
+    logger.error(
+      '执业证 OCR 识别失败',
+      error instanceof Error ? error : undefined
+    );
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'OCR 识别失败，请手动输入',
+      error:
+        error instanceof Error ? error.message : 'OCR 识别失败，请手动输入',
     };
   }
 }

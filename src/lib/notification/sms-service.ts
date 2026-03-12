@@ -3,7 +3,7 @@
  *
  * 提供短信发送功能，支持跟进任务提醒、法庭日程提醒等。
  * 开发环境使用控制台输出，生产环境可集成阿里云短信、腾讯云短信等。
- * 
+ *
  * 安全特性：
  * - 发送频率限制（每小时最多10条）
  * - 敏感信息脱敏（日志中手机号部分隐藏）
@@ -160,7 +160,7 @@ class DevSMSService {
 
   private logSMS(options: SMSSendOptions): void {
     const maskedTo = maskPhoneNumber(options.to);
-    
+
     logger.info('\n' + '='.repeat(60));
     logger.info('📱 短信发送（开发环境）');
     logger.info('='.repeat(60));
@@ -313,32 +313,23 @@ class ProdSMSService {
     const provider = this.config.provider;
 
     if (provider === SMSProvider.ALIYUN) {
-      logger.warn(
-        `[生产环境] 请集成阿里云短信服务来发送跟进任务提醒短信`,
-        {
-          provider: 'aliyun',
-          taskId: task.id,
-          to: maskPhoneNumber(clientPhone),
-        }
-      );
+      logger.warn(`[生产环境] 请集成阿里云短信服务来发送跟进任务提醒短信`, {
+        provider: 'aliyun',
+        taskId: task.id,
+        to: maskPhoneNumber(clientPhone),
+      });
     } else if (provider === SMSProvider.TENCENT) {
-      logger.warn(
-        `[生产环境] 请集成腾讯云短信服务来发送跟进任务提醒短信`,
-        {
-          provider: 'tencent',
-          taskId: task.id,
-          to: maskPhoneNumber(clientPhone),
-        }
-      );
+      logger.warn(`[生产环境] 请集成腾讯云短信服务来发送跟进任务提醒短信`, {
+        provider: 'tencent',
+        taskId: task.id,
+        to: maskPhoneNumber(clientPhone),
+      });
     } else {
-      logger.warn(
-        `[生产环境] 请集成真实短信服务来发送跟进任务提醒短信`,
-        {
-          provider,
-          taskId: task.id,
-          to: maskPhoneNumber(clientPhone),
-        }
-      );
+      logger.warn(`[生产环境] 请集成真实短信服务来发送跟进任务提醒短信`, {
+        provider,
+        taskId: task.id,
+        to: maskPhoneNumber(clientPhone),
+      });
     }
 
     return {
@@ -373,32 +364,23 @@ class ProdSMSService {
     const provider = this.config.provider;
 
     if (provider === SMSProvider.ALIYUN) {
-      logger.warn(
-        `[生产环境] 请集成阿里云短信服务来发送自定义短信`,
-        {
-          provider: 'aliyun',
-          contentLength: options.content.length,
-          to: maskPhoneNumber(options.to),
-        }
-      );
+      logger.warn(`[生产环境] 请集成阿里云短信服务来发送自定义短信`, {
+        provider: 'aliyun',
+        contentLength: options.content.length,
+        to: maskPhoneNumber(options.to),
+      });
     } else if (provider === SMSProvider.TENCENT) {
-      logger.warn(
-        `[生产环境] 请集成腾讯云短信服务来发送自定义短信`,
-        {
-          provider: 'tencent',
-          contentLength: options.content.length,
-          to: maskPhoneNumber(options.to),
-        }
-      );
+      logger.warn(`[生产环境] 请集成腾讯云短信服务来发送自定义短信`, {
+        provider: 'tencent',
+        contentLength: options.content.length,
+        to: maskPhoneNumber(options.to),
+      });
     } else {
-      logger.warn(
-        `[生产环境] 请集成真实短信服务来发送自定义短信`,
-        {
-          provider,
-          contentLength: options.content.length,
-          to: maskPhoneNumber(options.to),
-        }
-      );
+      logger.warn(`[生产环境] 请集成真实短信服务来发送自定义短信`, {
+        provider,
+        contentLength: options.content.length,
+        to: maskPhoneNumber(options.to),
+      });
     }
 
     return {
@@ -447,5 +429,11 @@ export function getSMSService() {
 // 导出
 // =============================================================================
 
-export { DevSMSService, ProdSMSService, getSMSConfig, validateSMSConfig, maskPhoneNumber };
+export {
+  DevSMSService,
+  ProdSMSService,
+  getSMSConfig,
+  validateSMSConfig,
+  maskPhoneNumber,
+};
 export default getSMSService();

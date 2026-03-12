@@ -196,16 +196,18 @@ test.describe('支付页面功能测试', () => {
   test.beforeEach(async ({ page }) => {
     // 支付页面受全局 middleware 保护，需在 cookie 中携带 accessToken
     if (testUser.token) {
-      await page.context().addCookies([{
-        name: 'accessToken',
-        value: testUser.token,
-        domain: 'localhost',
-        path: '/',
-        httpOnly: false,
-        secure: false,
-        sameSite: 'Lax',
-        expires: Math.floor(Date.now() / 1000) + 900,
-      }]);
+      await page.context().addCookies([
+        {
+          name: 'accessToken',
+          value: testUser.token,
+          domain: 'localhost',
+          path: '/',
+          httpOnly: false,
+          secure: false,
+          sameSite: 'Lax',
+          expires: Math.floor(Date.now() / 1000) + 900,
+        },
+      ]);
     }
   });
 
@@ -777,7 +779,12 @@ test.describe('支付确认完整流程', () => {
     const password = 'PayTest@123';
 
     await page.request.post(`${BASE_URL}/api/auth/register`, {
-      data: { email, password, username: `payconf${String(ts).slice(-6)}`, name: `PayConf${ts}` },
+      data: {
+        email,
+        password,
+        username: `payconf${String(ts).slice(-6)}`,
+        name: `PayConf${ts}`,
+      },
     });
 
     const loginResp = await page.request.post(`${BASE_URL}/api/auth/login`, {
@@ -788,22 +795,24 @@ test.describe('支付确认完整流程', () => {
 
     if (token) {
       // 将 JWT 写入 accessToken cookie，供 Next.js middleware 鉴权使用
-      await page.context().addCookies([{
-        name: 'accessToken',
-        value: token,
-        domain: 'localhost',
-        path: '/',
-        httpOnly: false,
-        secure: false,
-        sameSite: 'Lax',
-        expires: Math.floor(Date.now() / 1000) + 900, // 15 分钟
-      }]);
+      await page.context().addCookies([
+        {
+          name: 'accessToken',
+          value: token,
+          domain: 'localhost',
+          path: '/',
+          httpOnly: false,
+          secure: false,
+          sameSite: 'Lax',
+          expires: Math.floor(Date.now() / 1000) + 900, // 15 分钟
+        },
+      ]);
     }
   }
 
   // 注入会员等级和订单创建的 mock 响应
   async function setupPaymentMocks(page: import('@playwright/test').Page) {
-    await page.route(`**/api/memberships/tiers`, (route) => {
+    await page.route(`**/api/memberships/tiers`, route => {
       void route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -826,13 +835,19 @@ test.describe('支付确认完整流程', () => {
       });
     });
 
-    await page.route(`**/api/orders/create`, (route) => {
+    await page.route(`**/api/orders/create`, route => {
       void route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
           success: true,
-          data: { orderId: MOCK_ORDER_ID, orderNo: 'E2E-20240101-001', amount: 99, currency: 'CNY', status: 'PENDING' },
+          data: {
+            orderId: MOCK_ORDER_ID,
+            orderNo: 'E2E-20240101-001',
+            amount: 99,
+            currency: 'CNY',
+            status: 'PENDING',
+          },
         }),
       });
     });
@@ -860,7 +875,7 @@ test.describe('支付确认完整流程', () => {
     // 查找包含"微信"文字的按钮（用 filter 代替混合选择器）
     const wechatBtn = page.getByRole('button').filter({ hasText: '微信' });
 
-    if (await wechatBtn.count() > 0) {
+    if ((await wechatBtn.count()) > 0) {
       await wechatBtn.first().click();
       // 点击后页面应仍然正常（无崩溃）
       await expect(page.locator('body')).toBeVisible();
@@ -873,14 +888,20 @@ test.describe('支付确认完整流程', () => {
 
     // 在 setupPaymentMocks 之后额外监听订单创建，记录调用
     let orderCreateCalled = false;
-    await page.route(`**/api/orders/create`, (route) => {
+    await page.route(`**/api/orders/create`, route => {
       orderCreateCalled = true;
       void route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
           success: true,
-          data: { orderId: MOCK_ORDER_ID, orderNo: 'E2E-TEST-001', amount: 99, currency: 'CNY', status: 'PENDING' },
+          data: {
+            orderId: MOCK_ORDER_ID,
+            orderNo: 'E2E-TEST-001',
+            amount: 99,
+            currency: 'CNY',
+            status: 'PENDING',
+          },
         }),
       });
     });
@@ -890,7 +911,7 @@ test.describe('支付确认完整流程', () => {
 
     // 选择支付宝
     const alipayBtn = page.getByRole('button').filter({ hasText: '支付宝' });
-    if (await alipayBtn.count() > 0) {
+    if ((await alipayBtn.count()) > 0) {
       await alipayBtn.first().click();
 
       // 点击确认支付按钮
@@ -898,7 +919,7 @@ test.describe('支付确认完整流程', () => {
         hasText: /确认支付|立即支付|去支付/,
       });
 
-      if (await confirmBtn.count() > 0) {
+      if ((await confirmBtn.count()) > 0) {
         await confirmBtn.first().click();
         await page.waitForTimeout(1500);
 
@@ -906,7 +927,9 @@ test.describe('支付确认完整流程', () => {
         expect(orderCreateCalled).toBe(true);
 
         // 应跳转到成功页面
-        expect(page.url()).toContain(`/payment/success?orderId=${MOCK_ORDER_ID}`);
+        expect(page.url()).toContain(
+          `/payment/success?orderId=${MOCK_ORDER_ID}`
+        );
       }
     }
   });
@@ -915,24 +938,37 @@ test.describe('支付确认完整流程', () => {
     await setupAuthCookie(page);
 
     // mock：tier 正常返回，订单创建失败
-    await page.route(`**/api/memberships/tiers`, (route) => {
+    await page.route(`**/api/memberships/tiers`, route => {
       void route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
           success: true,
           data: {
-            tiers: [{ id: MOCK_TIER_ID, name: 'pro', displayName: '专业版', tier: 'PRO', price: 99, currency: 'CNY', isActive: true }],
+            tiers: [
+              {
+                id: MOCK_TIER_ID,
+                name: 'pro',
+                displayName: '专业版',
+                tier: 'PRO',
+                price: 99,
+                currency: 'CNY',
+                isActive: true,
+              },
+            ],
           },
         }),
       });
     });
 
-    await page.route(`**/api/orders/create`, (route) => {
+    await page.route(`**/api/orders/create`, route => {
       void route.fulfill({
         status: 500,
         contentType: 'application/json',
-        body: JSON.stringify({ success: false, error: '服务暂时不可用，请稍后重试' }),
+        body: JSON.stringify({
+          success: false,
+          error: '服务暂时不可用，请稍后重试',
+        }),
       });
     });
 
@@ -940,13 +976,13 @@ test.describe('支付确认完整流程', () => {
     await page.waitForLoadState('networkidle');
 
     const alipayBtn = page.getByRole('button').filter({ hasText: '支付宝' });
-    if (await alipayBtn.count() > 0) {
+    if ((await alipayBtn.count()) > 0) {
       await alipayBtn.first().click();
 
       const confirmBtn = page.getByRole('button').filter({
         hasText: /确认支付|立即支付|去支付/,
       });
-      if (await confirmBtn.count() > 0) {
+      if ((await confirmBtn.count()) > 0) {
         await confirmBtn.first().click();
         await page.waitForTimeout(1500);
 
@@ -954,27 +990,39 @@ test.describe('支付确认完整流程', () => {
         expect(page.url()).not.toContain('/payment/success');
 
         // 页面应出现错误提示文字
-        const hasError = await page.getByText(/失败|错误|不可用/).count() > 0;
+        const hasError = (await page.getByText(/失败|错误|不可用/).count()) > 0;
         expect(hasError).toBe(true);
       }
     }
   });
 
   test('支付页面在移动端（375px）应正确布局', async ({ browser }) => {
-    const context = await browser.newContext({ viewport: { width: 375, height: 667 } });
+    const context = await browser.newContext({
+      viewport: { width: 375, height: 667 },
+    });
     const page = await context.newPage();
 
     // 先设置 auth cookie（需要先获取 token）
     await setupAuthCookie(page);
 
-    await page.route(`**/api/memberships/tiers`, (route) => {
+    await page.route(`**/api/memberships/tiers`, route => {
       void route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
           success: true,
           data: {
-            tiers: [{ id: MOCK_TIER_ID, name: 'pro', displayName: '专业版', tier: 'PRO', price: 99, currency: 'CNY', isActive: true }],
+            tiers: [
+              {
+                id: MOCK_TIER_ID,
+                name: 'pro',
+                displayName: '专业版',
+                tier: 'PRO',
+                price: 99,
+                currency: 'CNY',
+                isActive: true,
+              },
+            ],
           },
         }),
       });

@@ -137,11 +137,7 @@ describe('Crawler Security Tests', () => {
         path.resolve('data/crawled/samr'),
       ];
 
-      const maliciousDirs = [
-        '../../../etc',
-        '..\\..\\windows',
-        '/etc/passwd',
-      ];
+      const maliciousDirs = ['../../../etc', '..\\..\\windows', '/etc/passwd'];
 
       validDirs.forEach(dir => {
         expect(dir.startsWith(allowedBase)).toBe(true);
@@ -166,7 +162,10 @@ describe('Crawler Security Tests', () => {
       const baseDelay = 1000;
       const maxDelay = 60000;
       const attempt = 3;
-      const expectedDelay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay);
+      const expectedDelay = Math.min(
+        baseDelay * Math.pow(2, attempt),
+        maxDelay
+      );
 
       expect(expectedDelay).toBeGreaterThan(baseDelay);
       expect(expectedDelay).toBeLessThanOrEqual(maxDelay);
@@ -229,10 +228,7 @@ describe('Crawler Security Tests', () => {
 
   describe('Task ID Validation', () => {
     it('should validate task ID format', () => {
-      const validTaskIds = [
-        'crawl_flk_1234567890',
-        'crawl_samr_9876543210',
-      ];
+      const validTaskIds = ['crawl_flk_1234567890', 'crawl_samr_9876543210'];
 
       const invalidTaskIds = [
         'invalid-task-id',

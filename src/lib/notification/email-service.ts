@@ -3,7 +3,7 @@
  *
  * 提供邮件发送功能，支持跟进任务提醒、法庭日程提醒等。
  * 开发环境使用控制台输出，生产环境可集成SMTP或邮件服务API。
- * 
+ *
  * 安全特性：
  * - 发送频率限制（每小时最多20封）
  * - 敏感信息脱敏（日志中邮箱部分隐藏）
@@ -30,15 +30,20 @@ import { checkRateLimit } from './rate-limiter';
 function maskEmailAddress(email: string): string {
   const atIndex = email.indexOf('@');
   if (atIndex === -1) return email;
-  
+
   const local = email.substring(0, atIndex);
   const domain = email.substring(atIndex);
-  
+
   if (local.length <= 2) {
     return '*'.repeat(local.length) + domain;
   }
-  
-  return local.charAt(0) + '*'.repeat(local.length - 2) + local.charAt(local.length - 1) + domain;
+
+  return (
+    local.charAt(0) +
+    '*'.repeat(local.length - 2) +
+    local.charAt(local.length - 1) +
+    domain
+  );
 }
 
 /**
@@ -62,10 +67,13 @@ function containsInjectionAttack(value: string): boolean {
 /**
  * 验证邮件发送选项
  */
-function validateEmailOptions(options: EmailSendOptions): { valid: boolean; error?: string } {
+function validateEmailOptions(options: EmailSendOptions): {
+  valid: boolean;
+  error?: string;
+} {
   // 检查收件人
   const toEmails = Array.isArray(options.to) ? options.to : [options.to];
-  
+
   for (const email of toEmails) {
     if (!isValidEmail(email)) {
       return { valid: false, error: `无效的收件人邮箱: ${email}` };
@@ -224,7 +232,7 @@ class DevEmailService {
     const toStr = Array.isArray(options.to)
       ? options.to.map(maskEmailAddress).join(', ')
       : maskEmailAddress(options.to);
-    
+
     logger.info('\n' + '='.repeat(60));
     logger.info('📧 邮件发送（开发环境）');
     logger.info('='.repeat(60));
@@ -318,7 +326,9 @@ class DevEmailService {
 
     // 频率限制检查（使用第一个收件人作为限制键）
     const primaryEmail = Array.isArray(options.to) ? options.to[0] : options.to;
-    const rateLimit = checkRateLimit(primaryEmail, 'EMAIL', { maxRequests: 20 });
+    const rateLimit = checkRateLimit(primaryEmail, 'EMAIL', {
+      maxRequests: 20,
+    });
     if (!rateLimit.allowed) {
       logger.warn(`邮件发送频率限制`, {
         to: maskEmailAddress(primaryEmail),
@@ -384,13 +394,10 @@ class ProdEmailService {
       };
     }
 
-    logger.warn(
-      `[生产环境] 请集成真实邮件服务来发送跟进任务提醒邮件`,
-      {
-        to: maskEmailAddress(clientEmail),
-        taskId: task.id,
-      }
-    );
+    logger.warn(`[生产环境] 请集成真实邮件服务来发送跟进任务提醒邮件`, {
+      to: maskEmailAddress(clientEmail),
+      taskId: task.id,
+    });
 
     return {
       success: false,
@@ -411,7 +418,9 @@ class ProdEmailService {
 
     // 频率限制检查
     const primaryEmail = Array.isArray(options.to) ? options.to[0] : options.to;
-    const rateLimit = checkRateLimit(primaryEmail, 'EMAIL', { maxRequests: 20 });
+    const rateLimit = checkRateLimit(primaryEmail, 'EMAIL', {
+      maxRequests: 20,
+    });
     if (!rateLimit.allowed) {
       logger.warn(`邮件发送频率限制`, {
         to: maskEmailAddress(primaryEmail),
@@ -423,13 +432,10 @@ class ProdEmailService {
       };
     }
 
-    logger.warn(
-      `[生产环境] 请集成真实邮件服务来发送自定义邮件`,
-      {
-        to: maskEmailAddress(primaryEmail),
-        contentLength: options.content.length,
-      }
-    );
+    logger.warn(`[生产环境] 请集成真实邮件服务来发送自定义邮件`, {
+      to: maskEmailAddress(primaryEmail),
+      contentLength: options.content.length,
+    });
 
     return {
       success: false,

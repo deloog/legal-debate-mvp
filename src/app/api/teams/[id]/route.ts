@@ -89,7 +89,10 @@ async function mapTeamToDetail(
  * 获取团队详情
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -130,7 +133,10 @@ export const GET = withErrorHandler(
  * 更新团队信息
  */
 export const PATCH = withErrorHandler(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
@@ -185,7 +191,10 @@ export const PATCH = withErrorHandler(
  * 删除团队
  */
 export const DELETE = withErrorHandler(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(

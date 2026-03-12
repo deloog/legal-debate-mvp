@@ -23,7 +23,10 @@ export async function GET(request: NextRequest) {
     }
 
     // 检查权限 - 使用 membership:read 权限
-    const permissionError = await validatePermissions(request, 'membership:read');
+    const permissionError = await validatePermissions(
+      request,
+      'membership:read'
+    );
     if (permissionError) {
       return permissionError;
     }

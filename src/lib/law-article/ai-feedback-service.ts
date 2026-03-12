@@ -153,7 +153,9 @@ export class AIFeedbackService {
    * @returns 创建的反馈记录数组
    */
   static async batchSubmitFeedback(feedbacks: SubmitFeedbackInput[]) {
-    const results: Awaited<ReturnType<typeof AIFeedbackService.submitFeedback>>[] = [];
+    const results: Awaited<
+      ReturnType<typeof AIFeedbackService.submitFeedback>
+    >[] = [];
 
     for (const feedback of feedbacks) {
       try {

@@ -74,7 +74,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
         { status: 401 }
       );
     }
@@ -143,7 +146,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     logger.error('邻居查询失败', { error, nodeId: searchParams.get('nodeId') });
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: errorMessage } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: errorMessage },
+      },
       { status: 500 }
     );
   }

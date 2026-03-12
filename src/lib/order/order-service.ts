@@ -44,7 +44,7 @@ export interface CreateOrderRequest {
 
 /**
  * 创建订单
- * 
+ *
  * 幂等性保证：
  * 1. 使用数据库唯一约束防止重复订单号
  * 2. 检查用户未完成订单避免重复创建
@@ -81,56 +81,59 @@ export async function createOrder(request: CreateOrderRequest): Promise<Order> {
 
     // 使用事务确保原子性
     try {
-      const order = await prisma.$transaction(async (tx) => {
-        // 检查用户是否已有未完成的订单（数据库级锁定）
-        const existingOrder = await tx.order.findFirst({
-          where: {
-            userId,
-            membershipTierId,
-            status: { in: ['PENDING'] },
-            expiredAt: { gt: new Date() },
-          },
-        });
-
-        if (existingOrder) {
-          logger.info('[OrderService] 返回已存在的未完成订单:', {
-            orderId: existingOrder.id,
-            orderNo: existingOrder.orderNo,
-          });
-          return existingOrder;
-        }
-
-        // 创建订单
-        const newOrder = await tx.order.create({
-          data: {
-            orderNo,
-            userId,
-            membershipTierId,
-            paymentMethod,
-            status: 'PENDING',
-            amount: tier.price,
-            currency: tier.currency,
-            description,
-            expiredAt,
-            metadata: {
-              ...metadata,
-              billingCycle,
-              autoRenew,
+      const order = await prisma.$transaction(
+        async tx => {
+          // 检查用户是否已有未完成的订单（数据库级锁定）
+          const existingOrder = await tx.order.findFirst({
+            where: {
+              userId,
+              membershipTierId,
+              status: { in: ['PENDING'] },
+              expiredAt: { gt: new Date() },
             },
-          },
-          include: {
-            user: true,
-            membershipTier: true,
-          },
-        });
+          });
 
-        return newOrder;
-      }, {
-        // 设置事务隔离级别和超时
-        isolationLevel: 'Serializable',
-        maxWait: 5000,
-        timeout: 10000,
-      });
+          if (existingOrder) {
+            logger.info('[OrderService] 返回已存在的未完成订单:', {
+              orderId: existingOrder.id,
+              orderNo: existingOrder.orderNo,
+            });
+            return existingOrder;
+          }
+
+          // 创建订单
+          const newOrder = await tx.order.create({
+            data: {
+              orderNo,
+              userId,
+              membershipTierId,
+              paymentMethod,
+              status: 'PENDING',
+              amount: tier.price,
+              currency: tier.currency,
+              description,
+              expiredAt,
+              metadata: {
+                ...metadata,
+                billingCycle,
+                autoRenew,
+              },
+            },
+            include: {
+              user: true,
+              membershipTier: true,
+            },
+          });
+
+          return newOrder;
+        },
+        {
+          // 设置事务隔离级别和超时
+          isolationLevel: 'Serializable',
+          maxWait: 5000,
+          timeout: 10000,
+        }
+      );
 
       logger.info('[OrderService] 创建订单成功:', {
         orderId: order.id,
@@ -142,9 +145,12 @@ export async function createOrder(request: CreateOrderRequest): Promise<Order> {
       return createOrderObject(order);
     } catch (error) {
       // 处理唯一约束冲突（订单号重复）
-      if (error instanceof Error && error.message.includes('Unique constraint')) {
+      if (
+        error instanceof Error &&
+        error.message.includes('Unique constraint')
+      ) {
         logger.warn('[OrderService] 订单号冲突，尝试获取现有订单');
-        
+
         // 尝试查找最近创建的订单
         const recentOrder = await prisma.order.findFirst({
           where: {

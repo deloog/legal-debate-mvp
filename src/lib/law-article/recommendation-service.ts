@@ -125,7 +125,10 @@ export class LawArticleRecommendationService {
 
       return results;
     } catch (error) {
-      logger.error('基于关系推荐失败', error instanceof Error ? error : undefined);
+      logger.error(
+        '基于关系推荐失败',
+        error instanceof Error ? error : undefined
+      );
       return [];
     }
   }
@@ -185,7 +188,10 @@ export class LawArticleRecommendationService {
 
       return results;
     } catch (error) {
-      logger.error('基于相似度推荐失败', error instanceof Error ? error : undefined);
+      logger.error(
+        '基于相似度推荐失败',
+        error instanceof Error ? error : undefined
+      );
       return [];
     }
   }
@@ -247,7 +253,10 @@ export class LawArticleRecommendationService {
 
       return results;
     } catch (error) {
-      logger.error('为辩论推荐失败', error instanceof Error ? error : undefined);
+      logger.error(
+        '为辩论推荐失败',
+        error instanceof Error ? error : undefined
+      );
       return [];
     }
   }
@@ -316,7 +325,10 @@ export class LawArticleRecommendationService {
         .sort((a, b) => b.score - a.score)
         .slice(0, limit);
     } catch (error) {
-      logger.error('为合同推荐失败', error instanceof Error ? error : undefined);
+      logger.error(
+        '为合同推荐失败',
+        error instanceof Error ? error : undefined
+      );
       return [];
     }
   }
@@ -356,7 +368,10 @@ export class LawArticleRecommendationService {
         recommendationScore,
       };
     } catch (error) {
-      logger.error('获取推荐统计失败', error instanceof Error ? error : undefined);
+      logger.error(
+        '获取推荐统计失败',
+        error instanceof Error ? error : undefined
+      );
       return {
         articleId,
         totalRelations: 0,
@@ -615,7 +630,10 @@ export class LawArticleRecommendationService {
 
       return helpfulCount / feedbacks.length;
     } catch (error) {
-      logger.error('获取反馈质量分数失败', error instanceof Error ? error : undefined);
+      logger.error(
+        '获取反馈质量分数失败',
+        error instanceof Error ? error : undefined
+      );
       return 0.5;
     }
   }

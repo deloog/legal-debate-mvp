@@ -88,7 +88,11 @@ export class GraphDistanceRecommender {
           articleId,
           candidate.id
         );
-        if (result.exists && result.pathLength >= 1 && result.pathLength <= MAX_DEPTH) {
+        if (
+          result.exists &&
+          result.pathLength >= 1 &&
+          result.pathLength <= MAX_DEPTH
+        ) {
           scored.push({
             candidateId: candidate.id,
             pathLength: result.pathLength,
@@ -174,10 +178,7 @@ export class GraphDistanceRecommender {
 
       const relations = await prisma.lawArticleRelation.findMany({
         where: {
-          OR: [
-            { sourceId: { in: frontier } },
-            { targetId: { in: frontier } },
-          ],
+          OR: [{ sourceId: { in: frontier } }, { targetId: { in: frontier } }],
           verificationStatus: VerificationStatus.VERIFIED,
         },
         select: {

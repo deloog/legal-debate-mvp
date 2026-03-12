@@ -433,10 +433,12 @@ export class GraphAlgorithms {
         // 找出最高频次的标签（如有并列取最小值确保确定性）
         let maxCount = -1;
         let bestLabel = labels.get(nodeId) ?? 0;
-        
+
         // 按标签值排序遍历，确保确定性
-        const sortedLabels = Array.from(labelCount.entries()).sort((a, b) => a[0] - b[0]);
-        
+        const sortedLabels = Array.from(labelCount.entries()).sort(
+          (a, b) => a[0] - b[0]
+        );
+
         for (const [lbl, count] of sortedLabels) {
           if (count > maxCount) {
             maxCount = count;
@@ -452,13 +454,17 @@ export class GraphAlgorithms {
 
       // 如果本轮没有标签变化，算法收敛，提前退出
       if (!changed) {
-        logger.debug(`Label propagation converged after ${iter + 1} iterations`);
+        logger.debug(
+          `Label propagation converged after ${iter + 1} iterations`
+        );
         break;
       }
     }
 
     // 将标签重新编号为连续整数（0, 1, 2, ...）
-    const uniqueLabels = Array.from(new Set(labels.values())).sort((a, b) => a - b);
+    const uniqueLabels = Array.from(new Set(labels.values())).sort(
+      (a, b) => a - b
+    );
     const labelRemap = new Map<number, number>(
       uniqueLabels.map((lbl, i) => [lbl, i])
     );

@@ -32,9 +32,7 @@ const DEFAULT_DEADLINE_CONFIG: NonNullable<ReminderPreferences['deadline']> = {
   channels: [NotificationChannelValues.IN_APP, NotificationChannelValues.EMAIL],
 };
 
-const DEFAULT_FOLLOW_UP_CONFIG: NonNullable<
-  ReminderPreferences['followUp']
-> = {
+const DEFAULT_FOLLOW_UP_CONFIG: NonNullable<ReminderPreferences['followUp']> = {
   enabled: true,
   channels: [NotificationChannelValues.IN_APP],
   autoRemind: true,

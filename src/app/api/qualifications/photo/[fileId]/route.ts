@@ -1,7 +1,7 @@
 /**
  * 律师资质证件照安全访问 API
  * GET /api/qualifications/photo/[fileId]
- * 
+ *
  * 安全特性：
  * - 需要 JWT 认证
  * - 用户只能访问自己的证件照（或管理员可访问所有）
@@ -33,7 +33,9 @@ function isValidFileId(fileId: string): boolean {
 /**
  * 查找文件（尝试所有可能的扩展名）
  */
-async function findFile(fileId: string): Promise<{ path: string; ext: string } | null> {
+async function findFile(
+  fileId: string
+): Promise<{ path: string; ext: string } | null> {
   for (const ext of ALLOWED_EXTENSIONS) {
     const filePath = join(UPLOAD_DIR, `${fileId}${ext}`);
     if (existsSync(filePath)) {
@@ -65,7 +67,7 @@ export async function GET(
     const authHeader = request.headers.get('authorization');
     const token = extractTokenFromHeader(authHeader ?? '');
     const tokenResult = verifyToken(token ?? '');
-    
+
     if (!tokenResult.valid || !tokenResult.payload) {
       return NextResponse.json(
         { success: false, message: '未授权' },
@@ -97,7 +99,7 @@ export async function GET(
 
     // 权限检查：非管理员只能访问自己的照片
     const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
-    
+
     if (!isAdmin) {
       // 查询该文件是否属于当前用户
       const qualification = await prisma.lawyerQualification.findFirst({

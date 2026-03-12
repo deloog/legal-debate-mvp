@@ -26,7 +26,7 @@ describe('Error Logger Sanitization Security Tests', () => {
       };
 
       const error = new Error('Login failed');
-      
+
       try {
         await logger.captureError(error, context);
       } catch {
@@ -48,8 +48,14 @@ describe('Error Logger Sanitization Security Tests', () => {
 
       // 验证敏感字段列表
       const sensitiveKeys = [
-        'password', 'token', 'secret', 'api_key', 'apikey',
-        'access_token', 'refresh_token', 'api_secret',
+        'password',
+        'token',
+        'secret',
+        'api_key',
+        'apikey',
+        'access_token',
+        'refresh_token',
+        'api_secret',
       ];
 
       for (const key of Object.keys(inputData)) {
@@ -87,7 +93,9 @@ describe('Error Logger Sanitization Security Tests', () => {
         if (userId.length <= 4) {
           return '****';
         }
-        return userId.substring(0, 2) + '***' + userId.substring(userId.length - 2);
+        return (
+          userId.substring(0, 2) + '***' + userId.substring(userId.length - 2)
+        );
       };
 
       expect(sanitizeUserId('user123456')).toBe('us***56');
@@ -104,15 +112,17 @@ describe('Error Logger Sanitization Security Tests', () => {
       const maskEmail = (email: string): string => {
         const atIndex = email.indexOf('@');
         if (atIndex === -1) return '***';
-        
+
         const local = email.substring(0, atIndex);
         const domain = email.substring(atIndex);
-        
+
         if (local.length <= 2) {
           return '***' + domain;
         }
-        
-        return local.charAt(0) + '***' + local.charAt(local.length - 1) + domain;
+
+        return (
+          local.charAt(0) + '***' + local.charAt(local.length - 1) + domain
+        );
       };
 
       expect(maskEmail('user@example.com')).toBe('u***r@example.com');
@@ -128,12 +138,14 @@ describe('Error Logger Sanitization Security Tests', () => {
     it('should mask phone numbers', () => {
       const maskPhone = (phone: string): string => {
         const digits = phone.replace(/\D/g, '');
-        
+
         if (digits.length !== 11) {
           if (digits.length <= 5) return '***';
-          return digits.substring(0, 3) + '***' + digits.substring(digits.length - 2);
+          return (
+            digits.substring(0, 3) + '***' + digits.substring(digits.length - 2)
+          );
         }
-        
+
         return digits.substring(0, 3) + '****' + digits.substring(7);
       };
 
@@ -185,10 +197,11 @@ describe('Error Logger Sanitization Security Tests', () => {
     it('should limit long strings', () => {
       const longString = 'a'.repeat(1000);
       const limit = 500;
-      
-      const truncated = longString.length > limit 
-        ? longString.substring(0, limit) + '...' 
-        : longString;
+
+      const truncated =
+        longString.length > limit
+          ? longString.substring(0, limit) + '...'
+          : longString;
 
       expect(truncated.length).toBeLessThanOrEqual(limit + 3);
       expect(truncated.endsWith('...')).toBe(true);
@@ -211,10 +224,14 @@ describe('Error Logger Sanitization Security Tests', () => {
         }
 
         // 长值显示前后各2个字符
-        return value.substring(0, 2) + '***' + value.substring(value.length - 2);
+        return (
+          value.substring(0, 2) + '***' + value.substring(value.length - 2)
+        );
       };
 
-      expect(maskSensitiveValue('secretPassword123', 'password')).toBe('se***23');
+      expect(maskSensitiveValue('secretPassword123', 'password')).toBe(
+        'se***23'
+      );
       expect(maskSensitiveValue('short', 'password')).toBe('***');
       expect(maskSensitiveValue('', 'password')).toBe('[EMPTY]');
     });

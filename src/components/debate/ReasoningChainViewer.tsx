@@ -26,7 +26,8 @@ const RULE_LABELS: Record<RuleType, string> = {
 
 /** 规则类型颜色 */
 const RULE_COLORS: Record<RuleType, string> = {
-  [RuleType.TRANSITIVE_SUPERSESSION]: 'bg-orange-100 text-orange-800 border-orange-200',
+  [RuleType.TRANSITIVE_SUPERSESSION]:
+    'bg-orange-100 text-orange-800 border-orange-200',
   [RuleType.CONFLICT_PROPAGATION]: 'bg-red-100 text-red-800 border-red-200',
   [RuleType.COMPLETION_CHAIN]: 'bg-green-100 text-green-800 border-green-200',
 };
@@ -62,7 +63,9 @@ export function ReasoningChainViewer({
           </span>
         </div>
         {collapsible && (
-          <span className='text-blue-400 text-sm'>{expanded ? '▲ 收起' : '▼ 展开'}</span>
+          <span className='text-blue-400 text-sm'>
+            {expanded ? '▲ 收起' : '▼ 展开'}
+          </span>
         )}
       </div>
 

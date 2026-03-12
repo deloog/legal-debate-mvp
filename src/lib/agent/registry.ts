@@ -987,7 +987,11 @@ export class AgentRegistry implements AgentEventManager {
     issues: string[];
     suggestions: string[];
   }> {
-    const recommendations: { agentName: string; issues: string[]; suggestions: string[] }[] = [];
+    const recommendations: {
+      agentName: string;
+      issues: string[];
+      suggestions: string[];
+    }[] = [];
 
     for (const registration of this.getAllRegistrations()) {
       const issues: string[] = [];

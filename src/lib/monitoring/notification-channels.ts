@@ -121,7 +121,10 @@ export class EmailAlertChannel implements NotificationChannel {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Failed to send alert email', error instanceof Error ? error : undefined);
+      logger.error(
+        'Failed to send alert email',
+        error instanceof Error ? error : undefined
+      );
       throw new Error(`Email notification failed: ${errorMessage}`);
     }
   }
@@ -258,7 +261,10 @@ export class WebhookAlertChannel implements NotificationChannel {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Failed to send alert webhook', error instanceof Error ? error : undefined);
+      logger.error(
+        'Failed to send alert webhook',
+        error instanceof Error ? error : undefined
+      );
       throw new Error(`Webhook notification failed: ${errorMessage}`);
     }
   }
@@ -369,7 +375,10 @@ export class SMSAlertChannel implements NotificationChannel {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Failed to send alert SMS', error instanceof Error ? error : undefined);
+      logger.error(
+        'Failed to send alert SMS',
+        error instanceof Error ? error : undefined
+      );
       throw new Error(`SMS notification failed: ${errorMessage}`);
     }
   }

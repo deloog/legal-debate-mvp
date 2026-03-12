@@ -21,7 +21,9 @@ export const corsMiddleware: Middleware = async (
   if (request.method === 'OPTIONS') {
     response.headers.set(
       'Access-Control-Allow-Origin',
-      allowedOrigins.includes(origin || '') ? (origin || allowedOrigins[0]) : allowedOrigins[0]
+      allowedOrigins.includes(origin || '')
+        ? origin || allowedOrigins[0]
+        : allowedOrigins[0]
     );
     response.headers.set(
       'Access-Control-Allow-Methods',
@@ -42,7 +44,9 @@ export const corsMiddleware: Middleware = async (
   // 对于非OPTIONS请求，直接在共享的response上添加CORS头
   response.headers.set(
     'Access-Control-Allow-Origin',
-    allowedOrigins.includes(origin || '') ? (origin || allowedOrigins[0]) : allowedOrigins[0]
+    allowedOrigins.includes(origin || '')
+      ? origin || allowedOrigins[0]
+      : allowedOrigins[0]
   );
   response.headers.set('Access-Control-Allow-Credentials', 'true');
 };

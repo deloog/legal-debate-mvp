@@ -57,8 +57,14 @@ jest.mock('@/lib/membership/audit-logger', () => ({
 
 import { GET as GETRoles, POST } from '@/app/api/admin/roles/route';
 import { GET as GETRole, PUT, DELETE } from '@/app/api/admin/roles/[id]/route';
-import { GET as GETPermissions, POST as POSTPermission } from '@/app/api/admin/roles/[id]/permissions/route';
-import { PUT as PUTBatchPermissions, DELETE as DELETEBatchPermissions } from '@/app/api/admin/roles/[id]/permissions/batch/route';
+import {
+  GET as GETPermissions,
+  POST as POSTPermission,
+} from '@/app/api/admin/roles/[id]/permissions/route';
+import {
+  PUT as PUTBatchPermissions,
+  DELETE as DELETEBatchPermissions,
+} from '@/app/api/admin/roles/[id]/permissions/batch/route';
 
 describe('Role API Security Tests', () => {
   const adminUser = { userId: 'admin-123', role: 'ADMIN' };
@@ -68,7 +74,14 @@ describe('Role API Security Tests', () => {
     jest.clearAllMocks();
   });
 
-  function createMockRequest(url: string, options: { method?: string; body?: object; headers?: Record<string, string> } = {}): NextRequest {
+  function createMockRequest(
+    url: string,
+    options: {
+      method?: string;
+      body?: object;
+      headers?: Record<string, string>;
+    } = {}
+  ): NextRequest {
     return new NextRequest(url, {
       method: options.method || 'GET',
       headers: {
@@ -86,54 +99,89 @@ describe('Role API Security Tests', () => {
       mockPrisma.role.findMany.mockResolvedValue([]);
       mockPrisma.role.count.mockResolvedValue(0);
 
-      const request = createMockRequest('http://localhost:3000/api/admin/roles');
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles'
+      );
       await GETRoles(request);
 
-      expect(mockValidatePermissions).toHaveBeenCalledWith(expect.anything(), 'role:read');
+      expect(mockValidatePermissions).toHaveBeenCalledWith(
+        expect.anything(),
+        'role:read'
+      );
     });
 
     it('POST /api/admin/roles should check role:create permission', async () => {
       mockGetAuthUser.mockResolvedValue(adminUser);
       mockValidatePermissions.mockResolvedValue(null);
       mockPrisma.role.findUnique.mockResolvedValue(null);
-      mockPrisma.role.create.mockResolvedValue({ id: 'r-123', name: 'TEST_ROLE' });
-
-      const request = createMockRequest('http://localhost:3000/api/admin/roles', {
-        method: 'POST',
-        body: { name: 'TEST_ROLE' },
+      mockPrisma.role.create.mockResolvedValue({
+        id: 'r-123',
+        name: 'TEST_ROLE',
       });
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles',
+        {
+          method: 'POST',
+          body: { name: 'TEST_ROLE' },
+        }
+      );
       await POST(request);
 
-      expect(mockValidatePermissions).toHaveBeenCalledWith(expect.anything(), 'role:create');
+      expect(mockValidatePermissions).toHaveBeenCalledWith(
+        expect.anything(),
+        'role:create'
+      );
     });
 
     it('PUT /api/admin/roles/[id] should check role:update permission', async () => {
       mockGetAuthUser.mockResolvedValue(adminUser);
       mockValidatePermissions.mockResolvedValue(null);
-      mockPrisma.role.findUnique.mockResolvedValue({ id: 'r-123', name: 'OLD_NAME' });
-      mockPrisma.role.update.mockResolvedValue({ id: 'r-123', name: 'NEW_NAME' });
-
-      const request = createMockRequest('http://localhost:3000/api/admin/roles/r-123', {
-        method: 'PUT',
-        body: { name: 'NEW_NAME' },
+      mockPrisma.role.findUnique.mockResolvedValue({
+        id: 'r-123',
+        name: 'OLD_NAME',
       });
+      mockPrisma.role.update.mockResolvedValue({
+        id: 'r-123',
+        name: 'NEW_NAME',
+      });
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles/r-123',
+        {
+          method: 'PUT',
+          body: { name: 'NEW_NAME' },
+        }
+      );
       await PUT(request, { params: Promise.resolve({ id: 'r-123' }) });
 
-      expect(mockValidatePermissions).toHaveBeenCalledWith(expect.anything(), 'role:update');
+      expect(mockValidatePermissions).toHaveBeenCalledWith(
+        expect.anything(),
+        'role:update'
+      );
     });
 
     it('DELETE /api/admin/roles/[id] should check role:delete permission', async () => {
       mockGetAuthUser.mockResolvedValue(adminUser);
       mockValidatePermissions.mockResolvedValue(null);
-      mockPrisma.role.findUnique.mockResolvedValue({ id: 'r-123', name: 'CUSTOM_ROLE' });
+      mockPrisma.role.findUnique.mockResolvedValue({
+        id: 'r-123',
+        name: 'CUSTOM_ROLE',
+      });
       mockPrisma.user.count.mockResolvedValue(0);
 
-      const request = createMockRequest('http://localhost:3000/api/admin/roles/r-123', {
-        method: 'DELETE',
-      });
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles/r-123',
+        {
+          method: 'DELETE',
+        }
+      );
       await DELETE(request, { params: Promise.resolve({ id: 'r-123' }) });
 
-      expect(mockValidatePermissions).toHaveBeenCalledWith(expect.anything(), 'role:delete');
+      expect(mockValidatePermissions).toHaveBeenCalledWith(
+        expect.anything(),
+        'role:delete'
+      );
     });
   });
 
@@ -141,12 +189,20 @@ describe('Role API Security Tests', () => {
     it('should prevent deletion of system roles', async () => {
       mockGetAuthUser.mockResolvedValue(adminUser);
       mockValidatePermissions.mockResolvedValue(null);
-      mockPrisma.role.findUnique.mockResolvedValue({ id: 'r-123', name: 'ADMIN' });
-
-      const request = createMockRequest('http://localhost:3000/api/admin/roles/r-123', {
-        method: 'DELETE',
+      mockPrisma.role.findUnique.mockResolvedValue({
+        id: 'r-123',
+        name: 'ADMIN',
       });
-      const response = await DELETE(request, { params: Promise.resolve({ id: 'r-123' }) });
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles/r-123',
+        {
+          method: 'DELETE',
+        }
+      );
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: 'r-123' }),
+      });
 
       expect(response.status).toBe(403);
     });
@@ -154,13 +210,21 @@ describe('Role API Security Tests', () => {
     it('should prevent deletion of role with assigned users', async () => {
       mockGetAuthUser.mockResolvedValue(adminUser);
       mockValidatePermissions.mockResolvedValue(null);
-      mockPrisma.role.findUnique.mockResolvedValue({ id: 'r-123', name: 'CUSTOM_ROLE' });
+      mockPrisma.role.findUnique.mockResolvedValue({
+        id: 'r-123',
+        name: 'CUSTOM_ROLE',
+      });
       mockPrisma.user.count.mockResolvedValue(5);
 
-      const request = createMockRequest('http://localhost:3000/api/admin/roles/r-123', {
-        method: 'DELETE',
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles/r-123',
+        {
+          method: 'DELETE',
+        }
+      );
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: 'r-123' }),
       });
-      const response = await DELETE(request, { params: Promise.resolve({ id: 'r-123' }) });
 
       expect(response.status).toBe(409);
     });
@@ -170,12 +234,18 @@ describe('Role API Security Tests', () => {
     it('should prevent creating role with duplicate name', async () => {
       mockGetAuthUser.mockResolvedValue(adminUser);
       mockValidatePermissions.mockResolvedValue(null);
-      mockPrisma.role.findUnique.mockResolvedValue({ id: 'existing', name: 'TEST_ROLE' });
-
-      const request = createMockRequest('http://localhost:3000/api/admin/roles', {
-        method: 'POST',
-        body: { name: 'TEST_ROLE' },
+      mockPrisma.role.findUnique.mockResolvedValue({
+        id: 'existing',
+        name: 'TEST_ROLE',
       });
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles',
+        {
+          method: 'POST',
+          body: { name: 'TEST_ROLE' },
+        }
+      );
       const response = await POST(request);
 
       expect(response.status).toBe(409);
@@ -184,14 +254,25 @@ describe('Role API Security Tests', () => {
     it('should prevent updating role to an existing name', async () => {
       mockGetAuthUser.mockResolvedValue(adminUser);
       mockValidatePermissions.mockResolvedValue(null);
-      mockPrisma.role.findUnique.mockResolvedValueOnce({ id: 'r-123', name: 'OLD_NAME' });
-      mockPrisma.role.findUnique.mockResolvedValueOnce({ id: 'other', name: 'EXISTING_NAME' });
-
-      const request = createMockRequest('http://localhost:3000/api/admin/roles/r-123', {
-        method: 'PUT',
-        body: { name: 'EXISTING_NAME' },
+      mockPrisma.role.findUnique.mockResolvedValueOnce({
+        id: 'r-123',
+        name: 'OLD_NAME',
       });
-      const response = await PUT(request, { params: Promise.resolve({ id: 'r-123' }) });
+      mockPrisma.role.findUnique.mockResolvedValueOnce({
+        id: 'other',
+        name: 'EXISTING_NAME',
+      });
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles/r-123',
+        {
+          method: 'PUT',
+          body: { name: 'EXISTING_NAME' },
+        }
+      );
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: 'r-123' }),
+      });
 
       expect(response.status).toBe(409);
     });
@@ -201,14 +282,22 @@ describe('Role API Security Tests', () => {
     it('should validate permission exists before assignment', async () => {
       mockGetAuthUser.mockResolvedValue(adminUser);
       mockValidatePermissions.mockResolvedValue(null);
-      mockPrisma.role.findUnique.mockResolvedValue({ id: 'r-123', name: 'TEST_ROLE' });
+      mockPrisma.role.findUnique.mockResolvedValue({
+        id: 'r-123',
+        name: 'TEST_ROLE',
+      });
       mockPrisma.permission.findUnique.mockResolvedValue(null);
 
-      const request = createMockRequest('http://localhost:3000/api/admin/roles/r-123/permissions', {
-        method: 'POST',
-        body: { permissionId: 'non-existent' },
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles/r-123/permissions',
+        {
+          method: 'POST',
+          body: { permissionId: 'non-existent' },
+        }
+      );
+      const response = await POSTPermission(request, {
+        params: Promise.resolve({ id: 'r-123' }),
       });
-      const response = await POSTPermission(request, { params: Promise.resolve({ id: 'r-123' }) });
 
       expect(response.status).toBe(404);
     });
@@ -216,15 +305,29 @@ describe('Role API Security Tests', () => {
     it('should prevent duplicate permission assignment', async () => {
       mockGetAuthUser.mockResolvedValue(adminUser);
       mockValidatePermissions.mockResolvedValue(null);
-      mockPrisma.role.findUnique.mockResolvedValue({ id: 'r-123', name: 'TEST_ROLE' });
-      mockPrisma.permission.findUnique.mockResolvedValue({ id: 'p-456', name: 'test:read' });
-      mockPrisma.rolePermission.findUnique.mockResolvedValue({ roleId: 'r-123', permissionId: 'p-456' });
-
-      const request = createMockRequest('http://localhost:3000/api/admin/roles/r-123/permissions', {
-        method: 'POST',
-        body: { permissionId: 'p-456' },
+      mockPrisma.role.findUnique.mockResolvedValue({
+        id: 'r-123',
+        name: 'TEST_ROLE',
       });
-      const response = await POSTPermission(request, { params: Promise.resolve({ id: 'r-123' }) });
+      mockPrisma.permission.findUnique.mockResolvedValue({
+        id: 'p-456',
+        name: 'test:read',
+      });
+      mockPrisma.rolePermission.findUnique.mockResolvedValue({
+        roleId: 'r-123',
+        permissionId: 'p-456',
+      });
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles/r-123/permissions',
+        {
+          method: 'POST',
+          body: { permissionId: 'p-456' },
+        }
+      );
+      const response = await POSTPermission(request, {
+        params: Promise.resolve({ id: 'r-123' }),
+      });
 
       expect(response.status).toBe(409);
     });
@@ -235,12 +338,20 @@ describe('Role API Security Tests', () => {
       mockGetAuthUser.mockResolvedValue(adminUser);
       mockValidatePermissions.mockResolvedValue(null);
       mockPrisma.role.findUnique.mockResolvedValue(null);
-      mockPrisma.role.create.mockResolvedValue({ id: 'r-123', name: 'NEW_ROLE', description: null, isDefault: false });
-
-      const request = createMockRequest('http://localhost:3000/api/admin/roles', {
-        method: 'POST',
-        body: { name: 'NEW_ROLE' },
+      mockPrisma.role.create.mockResolvedValue({
+        id: 'r-123',
+        name: 'NEW_ROLE',
+        description: null,
+        isDefault: false,
       });
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles',
+        {
+          method: 'POST',
+          body: { name: 'NEW_ROLE' },
+        }
+      );
       await POST(request);
 
       expect(mockLogRoleChange).toHaveBeenCalledWith(
@@ -254,16 +365,29 @@ describe('Role API Security Tests', () => {
     it('should log audit on role update', async () => {
       mockGetAuthUser.mockResolvedValue(adminUser);
       mockValidatePermissions.mockResolvedValue(null);
-      mockPrisma.role.findUnique.mockResolvedValueOnce({ id: 'r-123', name: 'OLD_NAME' });
-      mockPrisma.role.findUnique.mockResolvedValueOnce(null); // 检查名称冲突时返回 null
-      mockPrisma.role.update.mockResolvedValue({ id: 'r-123', name: 'NEW_NAME', description: null, isDefault: false });
-
-      const request = createMockRequest('http://localhost:3000/api/admin/roles/r-123', {
-        method: 'PUT',
-        body: { name: 'NEW_NAME' },
+      mockPrisma.role.findUnique.mockResolvedValueOnce({
+        id: 'r-123',
+        name: 'OLD_NAME',
       });
-      const response = await PUT(request, { params: Promise.resolve({ id: 'r-123' }) });
-      
+      mockPrisma.role.findUnique.mockResolvedValueOnce(null); // 检查名称冲突时返回 null
+      mockPrisma.role.update.mockResolvedValue({
+        id: 'r-123',
+        name: 'NEW_NAME',
+        description: null,
+        isDefault: false,
+      });
+
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles/r-123',
+        {
+          method: 'PUT',
+          body: { name: 'NEW_NAME' },
+        }
+      );
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: 'r-123' }),
+      });
+
       expect(response.status).toBe(200);
       // 审计日志在后台执行，可能由于异步原因在测试中没有立即触发
       // 在实际生产环境中会正常记录
@@ -272,12 +396,19 @@ describe('Role API Security Tests', () => {
     it('should log audit on role deletion', async () => {
       mockGetAuthUser.mockResolvedValue(adminUser);
       mockValidatePermissions.mockResolvedValue(null);
-      mockPrisma.role.findUnique.mockResolvedValue({ id: 'r-123', name: 'CUSTOM_ROLE', description: 'Test role' });
+      mockPrisma.role.findUnique.mockResolvedValue({
+        id: 'r-123',
+        name: 'CUSTOM_ROLE',
+        description: 'Test role',
+      });
       mockPrisma.user.count.mockResolvedValue(0);
 
-      const request = createMockRequest('http://localhost:3000/api/admin/roles/r-123', {
-        method: 'DELETE',
-      });
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/roles/r-123',
+        {
+          method: 'DELETE',
+        }
+      );
       await DELETE(request, { params: Promise.resolve({ id: 'r-123' }) });
 
       expect(mockLogRoleChange).toHaveBeenCalledWith(

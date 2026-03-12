@@ -24,7 +24,12 @@ export class PromptBuilder {
       input.config?.maxTokens ??
       DEFAULT_DEBATE_CONFIG.maxTokens;
 
-    const userPrompt = this.buildUserPrompt(input, side, input.config, reasoningAnalysis);
+    const userPrompt = this.buildUserPrompt(
+      input,
+      side,
+      input.config,
+      reasoningAnalysis
+    );
 
     return {
       systemPrompt: options?.systemPrompt || this.getSystemPrompt(),

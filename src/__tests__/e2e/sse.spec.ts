@@ -109,37 +109,43 @@ test.describe('SSE 响应格式与内容验证', () => {
     const token = sharedToken;
     // 使用 page.evaluate 通过 fetch + AbortController 读取响应头
     // 避免 request context 长时间阻塞
-    const result = await page.evaluate(async ({ url, tok }) => {
-      const controller = new AbortController();
+    const result = await page.evaluate(
+      async ({ url, tok }) => {
+        const controller = new AbortController();
 
-      try {
-        const response = await fetch(url, {
-          signal: controller.signal,
-          headers: { Authorization: `Bearer ${tok}` },
-        });
+        try {
+          const response = await fetch(url, {
+            signal: controller.signal,
+            headers: { Authorization: `Bearer ${tok}` },
+          });
 
-        const headers = {
-          contentType: response.headers.get('content-type'),
-          cacheControl: response.headers.get('cache-control'),
-          connection: response.headers.get('connection'),
-          xAccelBuffering: response.headers.get('x-accel-buffering'),
-          status: response.status,
-        };
+          const headers = {
+            contentType: response.headers.get('content-type'),
+            cacheControl: response.headers.get('cache-control'),
+            connection: response.headers.get('connection'),
+            xAccelBuffering: response.headers.get('x-accel-buffering'),
+            status: response.status,
+          };
 
-        // 读取一小段数据后立即中止
-        const reader = response.body?.getReader();
-        if (reader) {
-          await reader.read();
-          reader.cancel();
+          // 读取一小段数据后立即中止
+          const reader = response.body?.getReader();
+          if (reader) {
+            await reader.read();
+            reader.cancel();
+          }
+
+          controller.abort();
+          return headers;
+        } catch {
+          // AbortError 是预期行为
+          return null;
         }
-
-        controller.abort();
-        return headers;
-      } catch {
-        // AbortError 是预期行为
-        return null;
+      },
+      {
+        url: `${BASE_URL}/api/debate/stream?debateId=non-existent-id&roundId=non-existent-round`,
+        tok: token,
       }
-    }, { url: `${BASE_URL}/api/debate/stream?debateId=non-existent-id&roundId=non-existent-round`, tok: token });
+    );
 
     if (result) {
       // 验证 SSE 必要响应头
@@ -178,13 +184,13 @@ test.describe('SSE 响应格式与内容验证', () => {
 
     // 应包含 connected 事件（服务器建立连接的确认）
     const connectedEvent = events.find(
-      (e) => e.type === 'connected' || e.data.type === 'connected'
+      e => e.type === 'connected' || e.data.type === 'connected'
     );
     expect(connectedEvent).toBeTruthy();
 
     // 应包含 error 事件（辩论不存在）
     const errorEvent = events.find(
-      (e) => e.type === 'error' || e.data.type === 'error'
+      e => e.type === 'error' || e.data.type === 'error'
     );
     expect(errorEvent).toBeTruthy();
 
@@ -209,7 +215,7 @@ test.describe('SSE 响应格式与内容验证', () => {
 
     // W3C SSE 规范：每行以 "field: value" 或 "field:value" 形式出现
     // 非空行不应以冒号开头（注释行除外，以 ':' 开头）
-    const lines = body.split('\n').filter((l) => l.trim() !== '');
+    const lines = body.split('\n').filter(l => l.trim() !== '');
 
     for (const line of lines) {
       const isComment = line.startsWith(':');

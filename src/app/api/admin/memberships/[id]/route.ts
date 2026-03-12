@@ -180,7 +180,10 @@ export async function PATCH(
   }
 
   // 检查权限 - 使用 membership:write 权限
-  const permissionError = await validatePermissions(request, 'membership:write');
+  const permissionError = await validatePermissions(
+    request,
+    'membership:write'
+  );
   if (permissionError) {
     return permissionError;
   }
@@ -342,14 +345,30 @@ export async function PATCH(
     await logMembershipChange(
       id,
       currentMembership.userId,
-      updateData.status === 'SUSPENDED' ? 'suspend' : 
-        updateData.status && currentMembership.status === 'SUSPENDED' ? 'resume' :
-        updateData.tierId ? 'upgrade' : 'update',
+      updateData.status === 'SUSPENDED'
+        ? 'suspend'
+        : updateData.status && currentMembership.status === 'SUSPENDED'
+          ? 'resume'
+          : updateData.tierId
+            ? 'upgrade'
+            : 'update',
       {
-        tier: updateData.tierId ? { from: currentMembership.tier.tier, to: updatedMembership.tier.tier } : undefined,
-        status: updateData.status ? { from: currentMembership.status, to: updateData.status } : undefined,
-        endDate: updateData.endDate ? { from: currentMembership.endDate, to: updateData.endDate } : undefined,
-        autoRenew: typeof updateData.autoRenew === 'boolean' ? { from: currentMembership.autoRenew, to: updateData.autoRenew } : undefined,
+        tier: updateData.tierId
+          ? {
+              from: currentMembership.tier.tier,
+              to: updatedMembership.tier.tier,
+            }
+          : undefined,
+        status: updateData.status
+          ? { from: currentMembership.status, to: updateData.status }
+          : undefined,
+        endDate: updateData.endDate
+          ? { from: currentMembership.endDate, to: updateData.endDate }
+          : undefined,
+        autoRenew:
+          typeof updateData.autoRenew === 'boolean'
+            ? { from: currentMembership.autoRenew, to: updateData.autoRenew }
+            : undefined,
       },
       adminUser.userId
     );

@@ -79,7 +79,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (lawArticleIds.length > 10) {
       return NextResponse.json(
-        { success: false, error: { code: 'TOO_MANY_IDS', message: 'lawArticleIds最多支持10个' } },
+        {
+          success: false,
+          error: { code: 'TOO_MANY_IDS', message: 'lawArticleIds最多支持10个' },
+        },
         { status: 400 }
       );
     }
@@ -88,7 +91,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
         { status: 401 }
       );
     }
@@ -250,7 +256,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     logger.error('冲突检测失败', { error });
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: errorMessage } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: errorMessage },
+      },
       { status: 500 }
     );
   }

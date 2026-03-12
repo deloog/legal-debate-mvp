@@ -1,6 +1,6 @@
 /**
  * 告警风暴防护模块
- * 
+ *
  * 防止告警风暴，保护运维人员不被大量告警淹没
  * 提供全局速率限制、告警聚合和抑制功能
  */
@@ -141,7 +141,10 @@ class AlertStormProtection {
     // 检查相似告警抑制
     const suppressionKey = this.getSuppressionKey(ruleId, severity, message);
     const lastSuppressedTime = this.state.suppressedAlerts.get(suppressionKey);
-    if (lastSuppressedTime && now - lastSuppressedTime < this.config.suppressionWindowMs) {
+    if (
+      lastSuppressedTime &&
+      now - lastSuppressedTime < this.config.suppressionWindowMs
+    ) {
       // 更新聚合计数
       this.updateAggregationCount(ruleId, severity, message, now);
       return {

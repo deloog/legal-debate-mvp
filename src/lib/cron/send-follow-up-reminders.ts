@@ -337,7 +337,7 @@ async function sendReminderForTask(task: {
     if (result.success) {
       // 记录发送日志（幂等性保证）
       await logReminderSent(task.id, task.userId, channels, true);
-      
+
       logger.info(`跟进任务提醒发送成功: ${task.id}`, {
         clientId: task.clientId,
         clientName: task.client.name,
@@ -358,7 +358,7 @@ async function sendReminderForTask(task: {
     } else {
       // 记录发送失败日志
       await logReminderSent(task.id, task.userId, channels, false);
-      
+
       logger.warn(`跟进任务提醒发送失败: ${task.id}`, {
         clientId: task.clientId,
         clientName: task.client.name,
@@ -467,7 +467,10 @@ export async function sendFollowUpReminders(): Promise<SendRemindersResult> {
       errors,
     };
   } catch (error) {
-    logger.error('[SendFollowUpReminders] 发送跟进提醒时发生错误:', error instanceof Error ? error : undefined);
+    logger.error(
+      '[SendFollowUpReminders] 发送跟进提醒时发生错误:',
+      error instanceof Error ? error : undefined
+    );
     throw error;
   }
 }
@@ -491,7 +494,10 @@ export async function manuallySendFollowUpReminders(): Promise<{
       result,
     };
   } catch (error) {
-    logger.error('[SendFollowUpReminders] 手动发送跟进提醒失败:', error instanceof Error ? error : undefined);
+    logger.error(
+      '[SendFollowUpReminders] 手动发送跟进提醒失败:',
+      error instanceof Error ? error : undefined
+    );
 
     return {
       success: false,
@@ -596,7 +602,10 @@ export async function getFollowUpRemindersStats(): Promise<RemindersStats> {
       })),
     };
   } catch (error) {
-    logger.error('[SendFollowUpReminders] 获取跟进提醒统计失败:', error instanceof Error ? error : undefined);
+    logger.error(
+      '[SendFollowUpReminders] 获取跟进提醒统计失败:',
+      error instanceof Error ? error : undefined
+    );
     throw error;
   }
 }
@@ -660,7 +669,10 @@ export async function getTasksExpiringSoon(
       ),
     }));
   } catch (error) {
-    logger.error('[SendFollowUpReminders] 获取即将到期任务失败:', error instanceof Error ? error : undefined);
+    logger.error(
+      '[SendFollowUpReminders] 获取即将到期任务失败:',
+      error instanceof Error ? error : undefined
+    );
     throw error;
   }
 }
@@ -698,7 +710,10 @@ export async function markExpiredFollowUpTasks(): Promise<{
       cancelledCount: expiredTasks.count,
     };
   } catch (error) {
-    logger.error('[SendFollowUpReminders] 标记过期任务失败:', error instanceof Error ? error : undefined);
+    logger.error(
+      '[SendFollowUpReminders] 标记过期任务失败:',
+      error instanceof Error ? error : undefined
+    );
     throw error;
   }
 }

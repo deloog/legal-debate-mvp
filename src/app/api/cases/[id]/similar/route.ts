@@ -18,7 +18,10 @@ export async function GET(
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
         { status: 401 }
       );
     }
@@ -36,10 +39,14 @@ export async function GET(
         { status: 404 }
       );
     }
-    const isAdmin = authUser.role === 'ADMIN' || authUser.role === 'SUPER_ADMIN';
+    const isAdmin =
+      authUser.role === 'ADMIN' || authUser.role === 'SUPER_ADMIN';
     if (caseRecord.userId !== authUser.userId && !isAdmin) {
       return NextResponse.json(
-        { success: false, error: { code: 'FORBIDDEN', message: '无权访问此案件' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: '无权访问此案件' },
+        },
         { status: 403 }
       );
     }
@@ -49,7 +56,10 @@ export async function GET(
     const topKRaw = parseInt(searchParams.get('topK') || '10', 10);
     const topK = isNaN(topKRaw) || topKRaw < 1 || topKRaw > 50 ? 10 : topKRaw;
     const thresholdRaw = parseFloat(searchParams.get('threshold') || '0.7');
-    const threshold = isNaN(thresholdRaw) || thresholdRaw < 0 || thresholdRaw > 1 ? 0.7 : thresholdRaw;
+    const threshold =
+      isNaN(thresholdRaw) || thresholdRaw < 0 || thresholdRaw > 1
+        ? 0.7
+        : thresholdRaw;
     const caseType = searchParams.get('caseType');
     const result = searchParams.get('result');
     const startDateStr = searchParams.get('startDate');

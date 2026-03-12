@@ -45,7 +45,7 @@ describe('Export Security Tests', () => {
     });
 
     it('should escape formula injection with + prefix', () => {
-      const data = [{ formula: '+cmd|\' /C calc\'!A0' }];
+      const data = [{ formula: "+cmd|' /C calc'!A0" }];
       const generator = new CsvGenerator(['formula'], data);
       const csv = generator.generate();
 
@@ -55,7 +55,7 @@ describe('Export Security Tests', () => {
     });
 
     it('should escape formula injection with - prefix', () => {
-      const data = [{ formula: '-2+3+cmd|\' /C calc\'!A0' }];
+      const data = [{ formula: "-2+3+cmd|' /C calc'!A0" }];
       const generator = new CsvGenerator(['formula'], data);
       const csv = generator.generate();
 
@@ -137,8 +137,12 @@ describe('Export Security Tests', () => {
 
     it('should handle empty values', () => {
       expect(sanitizeCsvValue('')).toBe('');
-      expect(sanitizeCsvValue(null as unknown as string)).toBe(null as unknown as string);
-      expect(sanitizeCsvValue(undefined as unknown as string)).toBe(undefined as unknown as string);
+      expect(sanitizeCsvValue(null as unknown as string)).toBe(
+        null as unknown as string
+      );
+      expect(sanitizeCsvValue(undefined as unknown as string)).toBe(
+        undefined as unknown as string
+      );
     });
   });
 
@@ -256,13 +260,19 @@ describe('Export Security Tests', () => {
 
     it('should support custom configuration', () => {
       // 自定义：最多2次
-      const result1 = checkExportRateLimit('user-456', 'cases', { maxExports: 2 });
+      const result1 = checkExportRateLimit('user-456', 'cases', {
+        maxExports: 2,
+      });
       expect(result1.remaining).toBe(1);
 
-      const result2 = checkExportRateLimit('user-456', 'cases', { maxExports: 2 });
+      const result2 = checkExportRateLimit('user-456', 'cases', {
+        maxExports: 2,
+      });
       expect(result2.remaining).toBe(0);
 
-      const result3 = checkExportRateLimit('user-456', 'cases', { maxExports: 2 });
+      const result3 = checkExportRateLimit('user-456', 'cases', {
+        maxExports: 2,
+      });
       expect(result3.allowed).toBe(false);
     });
   });
@@ -280,7 +290,11 @@ describe('Export Security Tests', () => {
     it('should require export permission', () => {
       // 模拟权限检查
       const hasPermission = (permission: string): boolean => {
-        const allowedPermissions = ['export:case', 'export:stats', 'report:read'];
+        const allowedPermissions = [
+          'export:case',
+          'export:stats',
+          'report:read',
+        ];
         return allowedPermissions.includes(permission);
       };
 

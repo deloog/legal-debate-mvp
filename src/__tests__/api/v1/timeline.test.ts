@@ -204,7 +204,9 @@ describe('Timeline API', () => {
           body: validEvent,
         }
       );
-      const response = await POST(request, { params: Promise.resolve({ id: 'case-123' }) });
+      const response = await POST(request, {
+        params: Promise.resolve({ id: 'case-123' }),
+      });
 
       const isNextResponse = 'status' in response && 'json' in response;
       expect(isNextResponse).toBe(true);
@@ -230,7 +232,9 @@ describe('Timeline API', () => {
           body: invalidEvent,
         }
       );
-      const response = await POST(request, { params: Promise.resolve({ id: 'case-123' }) });
+      const response = await POST(request, {
+        params: Promise.resolve({ id: 'case-123' }),
+      });
 
       const isNextResponse = 'status' in response && 'json' in response;
       if (isNextResponse) {
@@ -256,7 +260,9 @@ describe('Timeline API', () => {
           body: invalidEvent,
         }
       );
-      const response = await POST(request, { params: Promise.resolve({ id: 'case-123' }) });
+      const response = await POST(request, {
+        params: Promise.resolve({ id: 'case-123' }),
+      });
 
       const isNextResponse = 'status' in response && 'json' in response;
       if (isNextResponse) {
@@ -283,7 +289,9 @@ describe('Timeline API', () => {
           body: invalidEvent,
         }
       );
-      const response = await POST(request, { params: Promise.resolve({ id: 'case-123' }) });
+      const response = await POST(request, {
+        params: Promise.resolve({ id: 'case-123' }),
+      });
 
       const isNextResponse = 'status' in response && 'json' in response;
       if (isNextResponse) {
@@ -309,7 +317,9 @@ describe('Timeline API', () => {
           body: invalidEvent,
         }
       );
-      const response = await POST(request, { params: Promise.resolve({ id: 'case-123' }) });
+      const response = await POST(request, {
+        params: Promise.resolve({ id: 'case-123' }),
+      });
 
       const isNextResponse = 'status' in response && 'json' in response;
       if (isNextResponse) {
@@ -331,7 +341,9 @@ describe('Timeline API', () => {
           body: validEvent,
         }
       );
-      const response = await POST(request, { params: Promise.resolve({ id: 'case-123' }) });
+      const response = await POST(request, {
+        params: Promise.resolve({ id: 'case-123' }),
+      });
 
       const isNextResponse = 'status' in response && 'json' in response;
       if (isNextResponse) {
@@ -473,7 +485,9 @@ describe('Timeline API', () => {
           body: updateData,
         }
       );
-      const response = await PUT(request, { params: Promise.resolve({ id: 'event-1' }) });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: 'event-1' }),
+      });
 
       expect(response.status).toBe(200);
       expect(mockedPrisma.caseTimeline.update).toHaveBeenCalledWith({
@@ -511,7 +525,9 @@ describe('Timeline API', () => {
           body: partialUpdate,
         }
       );
-      const response = await PUT(request, { params: Promise.resolve({ id: 'event-1' }) });
+      const response = await PUT(request, {
+        params: Promise.resolve({ id: 'event-1' }),
+      });
 
       expect(response.status).toBe(200);
     });
@@ -537,7 +553,9 @@ describe('Timeline API', () => {
           method: 'DELETE',
         }
       );
-      const response = await DELETE(request, { params: Promise.resolve({ id: 'event-1' }) });
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: 'event-1' }),
+      });
 
       expect(response.status).toBe(200);
       expect(mockedPrisma.caseTimeline.delete).toHaveBeenCalledWith({
@@ -554,7 +572,9 @@ describe('Timeline API', () => {
           method: 'DELETE',
         }
       );
-      const response = await DELETE(request, { params: Promise.resolve({ id: 'event-999' }) });
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: 'event-999' }),
+      });
 
       const isNextResponse = 'status' in response && 'json' in response;
       if (isNextResponse) {
@@ -582,7 +602,9 @@ describe('Timeline API', () => {
           method: 'DELETE',
         }
       );
-      const response = await DELETE(request, { params: Promise.resolve({ id: 'event-1' }) });
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: 'event-1' }),
+      });
 
       const isNextResponse = 'status' in response && 'json' in response;
       if (isNextResponse) {

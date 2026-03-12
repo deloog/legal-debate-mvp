@@ -118,7 +118,9 @@ describe('关系验证API', () => {
         }
       );
 
-      const response = await POST(request, { params: Promise.resolve({ id: testRelation.id }) });
+      const response = await POST(request, {
+        params: Promise.resolve({ id: testRelation.id }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -141,7 +143,9 @@ describe('关系验证API', () => {
         }
       );
 
-      const response = await POST(request, { params: Promise.resolve({ id: testRelation.id }) });
+      const response = await POST(request, {
+        params: Promise.resolve({ id: testRelation.id }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -162,7 +166,9 @@ describe('关系验证API', () => {
         }
       );
 
-      const response = await POST(request, { params: Promise.resolve({ id: testRelation.id }) });
+      const response = await POST(request, {
+        params: Promise.resolve({ id: testRelation.id }),
+      });
 
       expect(response.status).toBe(400);
     });

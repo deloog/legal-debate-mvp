@@ -32,8 +32,16 @@ async function exportLawArticles() {
 
   while (true) {
     const rows = cursor
-      ? await prisma.lawArticle.findMany({ take: BATCH_SIZE, skip: 1, cursor: { id: cursor }, orderBy: { id: 'asc' } })
-      : await prisma.lawArticle.findMany({ take: BATCH_SIZE, orderBy: { id: 'asc' } });
+      ? await prisma.lawArticle.findMany({
+          take: BATCH_SIZE,
+          skip: 1,
+          cursor: { id: cursor },
+          orderBy: { id: 'asc' },
+        })
+      : await prisma.lawArticle.findMany({
+          take: BATCH_SIZE,
+          orderBy: { id: 'asc' },
+        });
 
     if (rows.length === 0) break;
 
@@ -48,7 +56,7 @@ async function exportLawArticles() {
     if (rows.length < BATCH_SIZE) break;
   }
 
-  await new Promise<void>((resolve) => stream.end(resolve));
+  await new Promise<void>(resolve => stream.end(resolve));
   console.log(`\n  已写入：${filePath}`);
   return exported;
 }
@@ -70,8 +78,16 @@ async function exportLawArticleRelations() {
 
   while (true) {
     const rows = cursor
-      ? await prisma.lawArticleRelation.findMany({ take: BATCH_SIZE, skip: 1, cursor: { id: cursor }, orderBy: { id: 'asc' } })
-      : await prisma.lawArticleRelation.findMany({ take: BATCH_SIZE, orderBy: { id: 'asc' } });
+      ? await prisma.lawArticleRelation.findMany({
+          take: BATCH_SIZE,
+          skip: 1,
+          cursor: { id: cursor },
+          orderBy: { id: 'asc' },
+        })
+      : await prisma.lawArticleRelation.findMany({
+          take: BATCH_SIZE,
+          orderBy: { id: 'asc' },
+        });
 
     if (rows.length === 0) break;
 
@@ -86,7 +102,7 @@ async function exportLawArticleRelations() {
     if (rows.length < BATCH_SIZE) break;
   }
 
-  await new Promise<void>((resolve) => stream.end(resolve));
+  await new Promise<void>(resolve => stream.end(resolve));
   console.log(`\n  已写入：${filePath}`);
   return exported;
 }
@@ -106,7 +122,10 @@ async function main() {
     version: '1.0',
     tables: ['law_articles', 'law_article_relations'],
   };
-  fs.writeFileSync(path.join(OUTPUT_DIR, 'meta.json'), JSON.stringify(meta, null, 2));
+  fs.writeFileSync(
+    path.join(OUTPUT_DIR, 'meta.json'),
+    JSON.stringify(meta, null, 2)
+  );
 
   const t0 = Date.now();
   const articleCount = await exportLawArticles();
@@ -120,7 +139,7 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('导出失败：', e);
     process.exit(1);
   })

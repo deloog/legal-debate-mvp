@@ -814,7 +814,10 @@ export class SAMRCrawler extends BaseCrawler {
         } catch (error) {
           const errorMsg = `采集失败 [${template.title}]: ${error}`;
           allErrors.push(errorMsg);
-          this.logger.error(errorMsg, error instanceof Error ? error : undefined);
+          this.logger.error(
+            errorMsg,
+            error instanceof Error ? error : undefined
+          );
           failCount++;
         }
 
@@ -2942,7 +2945,10 @@ ${categoryInfo.miscellaneous}
       const data = await pdfParse(buffer);
       return data.text || '';
     } catch (error) {
-      this.logger.error('PDF 解析失败', error instanceof Error ? error : undefined);
+      this.logger.error(
+        'PDF 解析失败',
+        error instanceof Error ? error : undefined
+      );
       return '';
     }
   }

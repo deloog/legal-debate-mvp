@@ -25,14 +25,22 @@ describe('Alert Storm Protection Security Tests', () => {
   // ============================================================================
   describe('Rate Limiting', () => {
     it('should allow alerts within rate limit', () => {
-      const result = protection.shouldSendAlert('rule-1', 'HIGH', 'Test message');
+      const result = protection.shouldSendAlert(
+        'rule-1',
+        'HIGH',
+        'Test message'
+      );
       expect(result.allowed).toBe(true);
     });
 
     it('should block burst alerts exceeding limit', () => {
       // 发送3个告警（达到burst限制）
       for (let i = 0; i < 3; i++) {
-        const result = protection.shouldSendAlert(`rule-${i}`, 'HIGH', `Message ${i}`);
+        const result = protection.shouldSendAlert(
+          `rule-${i}`,
+          'HIGH',
+          `Message ${i}`
+        );
         expect(result.allowed).toBe(true);
         protection.recordSent(`rule-${i}`, 'HIGH', `Message ${i}`);
       }
@@ -47,7 +55,11 @@ describe('Alert Storm Protection Security Tests', () => {
     it('should track minute rate limit', () => {
       // 快速发送5个告警（达到每分钟限制）
       for (let i = 0; i < 5; i++) {
-        const result = protection.shouldSendAlert(`rule-${i}`, 'HIGH', `Message ${i}`);
+        const result = protection.shouldSendAlert(
+          `rule-${i}`,
+          'HIGH',
+          `Message ${i}`
+        );
         if (result.allowed) {
           protection.recordSent(`rule-${i}`, 'HIGH', `Message ${i}`);
         }
@@ -63,7 +75,11 @@ describe('Alert Storm Protection Security Tests', () => {
     it('should provide current rate stats', () => {
       // 发送3个告警
       for (let i = 0; i < 3; i++) {
-        const result = protection.shouldSendAlert(`rule-${i}`, 'HIGH', `Message ${i}`);
+        const result = protection.shouldSendAlert(
+          `rule-${i}`,
+          'HIGH',
+          `Message ${i}`
+        );
         if (result.allowed) {
           protection.recordSent(`rule-${i}`, 'HIGH', `Message ${i}`);
         }
@@ -81,23 +97,41 @@ describe('Alert Storm Protection Security Tests', () => {
   describe('Alert Aggregation', () => {
     it('should aggregate similar alerts', () => {
       // 发送第一个告警
-      const result1 = protection.shouldSendAlert('rule-1', 'HIGH', 'Database connection failed');
+      const result1 = protection.shouldSendAlert(
+        'rule-1',
+        'HIGH',
+        'Database connection failed'
+      );
       expect(result1.allowed).toBe(true);
       expect(result1.aggregated).toBeFalsy(); // 可能是false或undefined
 
       // 立即发送相似告警
-      const result2 = protection.shouldSendAlert('rule-1', 'HIGH', 'Database connection failed');
+      const result2 = protection.shouldSendAlert(
+        'rule-1',
+        'HIGH',
+        'Database connection failed'
+      );
       // 由于抑制机制，相似的告警会被抑制而不是聚合
-      expect(result2.allowed === true || result2.suppressed === true).toBe(true);
+      expect(result2.allowed === true || result2.suppressed === true).toBe(
+        true
+      );
     });
 
     it('should not aggregate different alerts', () => {
       // 发送第一个告警
-      protection.shouldSendAlert('rule-1', 'HIGH', 'Database connection failed');
+      protection.shouldSendAlert(
+        'rule-1',
+        'HIGH',
+        'Database connection failed'
+      );
       protection.recordSent('rule-1', 'HIGH', 'Database connection failed');
 
       // 发送不同的告警
-      const result = protection.shouldSendAlert('rule-2', 'HIGH', 'API timeout error');
+      const result = protection.shouldSendAlert(
+        'rule-2',
+        'HIGH',
+        'API timeout error'
+      );
       expect(result.allowed).toBe(true);
       expect(result.aggregated).toBeFalsy(); // 可能是false或undefined
     });
@@ -109,12 +143,20 @@ describe('Alert Storm Protection Security Tests', () => {
   describe('Alert Suppression', () => {
     it('should suppress similar alerts within suppression window', () => {
       // 发送并记录告警
-      const result1 = protection.shouldSendAlert('rule-1', 'HIGH', 'Connection error');
+      const result1 = protection.shouldSendAlert(
+        'rule-1',
+        'HIGH',
+        'Connection error'
+      );
       expect(result1.allowed).toBe(true);
       protection.recordSent('rule-1', 'HIGH', 'Connection error');
 
       // 立即发送相似告警应该被抑制
-      const result2 = protection.shouldSendAlert('rule-1', 'HIGH', 'Connection error');
+      const result2 = protection.shouldSendAlert(
+        'rule-1',
+        'HIGH',
+        'Connection error'
+      );
       expect(result2.allowed).toBe(false);
       expect(result2.suppressed).toBe(true);
       expect(result2.reason).toContain('抑制');
@@ -168,7 +210,11 @@ describe('Alert Storm Protection Security Tests', () => {
       protection.recordSent('rule-1', 'HIGH', 'User user123 login failed');
 
       // 发送相似但ID不同的告警
-      const result = protection.shouldSendAlert('rule-1', 'HIGH', 'User user456 login failed');
+      const result = protection.shouldSendAlert(
+        'rule-1',
+        'HIGH',
+        'User user456 login failed'
+      );
       // 应该被抑制，因为消息模板相同
       expect(result.suppressed || result.aggregated).toBeTruthy();
     });
@@ -179,7 +225,11 @@ describe('Alert Storm Protection Security Tests', () => {
       protection.recordSent('rule-1', 'HIGH', 'Database error');
 
       // 发送完全不同的告警
-      const result = protection.shouldSendAlert('rule-1', 'HIGH', 'Network timeout');
+      const result = protection.shouldSendAlert(
+        'rule-1',
+        'HIGH',
+        'Network timeout'
+      );
       expect(result.allowed).toBe(true);
       expect(result.suppressed).toBeFalsy();
     });

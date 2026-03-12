@@ -47,7 +47,10 @@ export async function POST(
 
     if (!contract) {
       return NextResponse.json(
-        { success: false, error: { code: 'CONTRACT_NOT_FOUND', message: '合同不存在' } },
+        {
+          success: false,
+          error: { code: 'CONTRACT_NOT_FOUND', message: '合同不存在' },
+        },
         { status: 404 }
       );
     }
@@ -57,11 +60,7 @@ export async function POST(
     }
 
     // 执行回滚（createdBy 使用来自 JWT 的 userId，不再信任请求体）
-    await contractVersionService.rollbackToVersion(
-      id,
-      body.versionId,
-      userId
-    );
+    await contractVersionService.rollbackToVersion(id, body.versionId, userId);
 
     // 清除PDF缓存
     clearContractPDFCache(id).catch(error => {

@@ -82,25 +82,22 @@ export async function GET(
     // 2. 身份验证
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json(
-        { error: '未认证，请先登录' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: '未认证，请先登录' }, { status: 401 });
     }
 
     // 3. 获取并验证 taskId
     const { taskId } = await params;
 
     if (!taskId) {
-      return NextResponse.json(
-        { error: '缺少任务 ID' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: '缺少任务 ID' }, { status: 400 });
     }
 
     // 4. 验证任务 ID 格式
     if (!validateTaskId(taskId)) {
-      logger.warn('检测到非法任务 ID 格式', { taskId, userId: session.user.id });
+      logger.warn('检测到非法任务 ID 格式', {
+        taskId,
+        userId: session.user.id,
+      });
       return NextResponse.json(
         { error: '无效的任务 ID 格式' },
         { status: 400 }
@@ -111,10 +108,7 @@ export async function GET(
     const status = await crawlTaskManager.getTaskStatus(taskId);
 
     if (!status) {
-      return NextResponse.json(
-        { error: '任务不存在' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: '任务不存在' }, { status: 404 });
     }
 
     // 6. 返回状态（过滤敏感信息）
@@ -135,9 +129,6 @@ export async function GET(
     });
   } catch (error) {
     logger.error('获取任务状态失败:', error);
-    return NextResponse.json(
-      { error: '获取任务状态失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '获取任务状态失败' }, { status: 500 });
   }
 }

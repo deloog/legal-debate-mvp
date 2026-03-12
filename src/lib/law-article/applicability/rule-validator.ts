@@ -22,13 +22,21 @@ export class RuleValidator {
 
     // 1. 状态检查
     if (article.status === LawStatus.REPEALED) {
-      return { passed: false, reason: '法条已废止，不得作为法律依据', warnings };
+      return {
+        passed: false,
+        reason: '法条已废止，不得作为法律依据',
+        warnings,
+      };
     }
     if (article.status === LawStatus.EXPIRED) {
       return { passed: false, reason: '法条已过期', warnings };
     }
     if (article.status === LawStatus.DRAFT) {
-      return { passed: false, reason: '法条仍为草案状态，尚未正式生效', warnings };
+      return {
+        passed: false,
+        reason: '法条仍为草案状态，尚未正式生效',
+        warnings,
+      };
     }
     if (article.status === LawStatus.AMENDED) {
       // 修订法条可能仍有效，但需要人工确认修订范围
@@ -59,7 +67,9 @@ export class RuleValidator {
   /**
    * 批量验证法条
    */
-  public validateArticles(articles: LawArticle[]): Map<string, RuleValidationResult> {
+  public validateArticles(
+    articles: LawArticle[]
+  ): Map<string, RuleValidationResult> {
     const results = new Map<string, RuleValidationResult>();
     for (const article of articles) {
       results.set(article.id, this.validateArticle(article));

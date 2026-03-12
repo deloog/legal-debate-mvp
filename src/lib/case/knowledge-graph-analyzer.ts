@@ -61,9 +61,9 @@ export interface CaseLawGraphResult {
 /** 节点颜色：按角色区分 */
 const NODE_COLORS: Record<string, string> = {
   case_article: '#3B82F6', // 蓝色：案件涉及法条
-  conflict: '#EF4444',     // 红色：冲突法条
-  supplement: '#10B981',  // 绿色：补充法条
-  superseded: '#9CA3AF',  // 灰色：已被替代
+  conflict: '#EF4444', // 红色：冲突法条
+  supplement: '#10B981', // 绿色：补充法条
+  superseded: '#9CA3AF', // 灰色：已被替代
 };
 
 export class CaseKnowledgeGraphAnalyzer {
@@ -152,9 +152,7 @@ export class CaseKnowledgeGraphAnalyzer {
         where: {
           OR: batch.map(ref => ({
             lawName: { contains: ref.source, mode: 'insensitive' as const },
-            ...(ref.articleNumber
-              ? { articleNumber: ref.articleNumber }
-              : {}),
+            ...(ref.articleNumber ? { articleNumber: ref.articleNumber } : {}),
           })),
         },
         select: { id: true },
@@ -175,8 +173,14 @@ export class CaseKnowledgeGraphAnalyzer {
     const relations = await prisma.lawArticleRelation.findMany({
       where: {
         OR: [
-          { sourceId: { in: articleIds }, relationType: RelationType.CONFLICTS },
-          { targetId: { in: articleIds }, relationType: RelationType.CONFLICTS },
+          {
+            sourceId: { in: articleIds },
+            relationType: RelationType.CONFLICTS,
+          },
+          {
+            targetId: { in: articleIds },
+            relationType: RelationType.CONFLICTS,
+          },
         ],
         verificationStatus: VerificationStatus.VERIFIED,
       },
@@ -205,8 +209,14 @@ export class CaseKnowledgeGraphAnalyzer {
     const relations = await prisma.lawArticleRelation.findMany({
       where: {
         OR: [
-          { sourceId: { in: articleIds }, relationType: RelationType.SUPERSEDES },
-          { targetId: { in: articleIds }, relationType: RelationType.SUPERSEDES },
+          {
+            sourceId: { in: articleIds },
+            relationType: RelationType.SUPERSEDES,
+          },
+          {
+            targetId: { in: articleIds },
+            relationType: RelationType.SUPERSEDES,
+          },
           {
             sourceId: { in: articleIds },
             relationType: RelationType.SUPERSEDED_BY,
@@ -255,7 +265,13 @@ export class CaseKnowledgeGraphAnalyzer {
     const [articles, relations] = await Promise.all([
       prisma.lawArticle.findMany({
         where: { id: { in: articleIds } },
-        select: { id: true, lawName: true, articleNumber: true, status: true, effectiveDate: true },
+        select: {
+          id: true,
+          lawName: true,
+          articleNumber: true,
+          status: true,
+          effectiveDate: true,
+        },
       }),
       prisma.lawArticleRelation.findMany({
         where: {
@@ -265,7 +281,13 @@ export class CaseKnowledgeGraphAnalyzer {
           ],
           verificationStatus: VerificationStatus.VERIFIED,
         },
-        select: { id: true, sourceId: true, targetId: true, relationType: true, strength: true },
+        select: {
+          id: true,
+          sourceId: true,
+          targetId: true,
+          relationType: true,
+          strength: true,
+        },
         take: 200,
       }),
     ]);
@@ -305,7 +327,10 @@ export class CaseKnowledgeGraphAnalyzer {
    */
   private static async runReasoning(
     articleIds: string[],
-    relationsData: { nodes: Map<string, ArticleNode>; relations: Map<string, ArticleRelation> }
+    relationsData: {
+      nodes: Map<string, ArticleNode>;
+      relations: Map<string, ArticleRelation>;
+    }
   ): Promise<InferenceResult[]> {
     if (articleIds.length === 0) return [];
 
@@ -334,7 +359,10 @@ export class CaseKnowledgeGraphAnalyzer {
         .filter(inf => inf.confidence >= 0.4)
         .sort((a, b) => b.confidence - a.confidence);
     } catch (error) {
-      logger.error('案件推理引擎执行失败', error instanceof Error ? error : undefined);
+      logger.error(
+        '案件推理引擎执行失败',
+        error instanceof Error ? error : undefined
+      );
       return [];
     }
   }
@@ -359,13 +387,16 @@ export class CaseKnowledgeGraphAnalyzer {
     const [articles, relations] = await Promise.all([
       prisma.lawArticle.findMany({
         where: { id: { in: allIds } },
-        select: { id: true, lawName: true, articleNumber: true, category: true },
+        select: {
+          id: true,
+          lawName: true,
+          articleNumber: true,
+          category: true,
+        },
       }),
       prisma.lawArticleRelation.findMany({
         where: {
-          OR: [
-            { sourceId: { in: allIds }, targetId: { in: allIds } },
-          ],
+          OR: [{ sourceId: { in: allIds }, targetId: { in: allIds } }],
           verificationStatus: VerificationStatus.VERIFIED,
         },
         select: {

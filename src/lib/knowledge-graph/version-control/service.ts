@@ -58,9 +58,11 @@ export class SnapshotService {
           pendingRelations: statistics.pendingRelations,
           averageConfidence: statistics.averageConfidence,
           snapshotData: input.includeFullData
-            ? (await this.gatherFullData() as Prisma.InputJsonValue)
+            ? ((await this.gatherFullData()) as Prisma.InputJsonValue)
             : Prisma.DbNull,
-          changes: input.includeChanges ? (await this.calculateChanges() as Prisma.InputJsonValue) : Prisma.DbNull,
+          changes: input.includeChanges
+            ? ((await this.calculateChanges()) as Prisma.InputJsonValue)
+            : Prisma.DbNull,
           status: SnapshotStatus.COMPLETED,
           description: input.description,
           createdBy: userId,

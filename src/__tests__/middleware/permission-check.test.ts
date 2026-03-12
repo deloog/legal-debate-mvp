@@ -232,6 +232,5 @@ describe('权限检查中间件', () => {
       expect(isValidPermissionName('case:create:extra')).toBe(false);
       expect(isValidPermissionName('')).toBe(false);
     });
-
   });
 });

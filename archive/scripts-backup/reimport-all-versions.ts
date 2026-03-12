@@ -48,15 +48,15 @@ const LAWTYPE_MAP: Record<number, string> = {
 
 // FLK 类别 → LawCategory
 const CATEGORY_MAP: Record<string, string> = {
-  '宪法': 'OTHER',
-  '民法': 'CIVIL',
-  '刑法': 'CRIMINAL',
-  '行政法': 'ADMINISTRATIVE',
-  '经济法': 'ECONOMIC',
-  '劳动法': 'LABOR',
-  '诉讼法': 'PROCEDURE',
-  '知识产权': 'INTELLECTUAL_PROPERTY',
-  '商法': 'COMMERCIAL',
+  宪法: 'OTHER',
+  民法: 'CIVIL',
+  刑法: 'CRIMINAL',
+  行政法: 'ADMINISTRATIVE',
+  经济法: 'ECONOMIC',
+  劳动法: 'LABOR',
+  诉讼法: 'PROCEDURE',
+  知识产权: 'INTELLECTUAL_PROPERTY',
+  商法: 'COMMERCIAL',
 };
 
 function getLawCategory(category: string): string {
@@ -67,7 +67,9 @@ function getLawCategory(category: string): string {
 }
 
 // 按条文拆分全文
-function splitArticles(text: string): { articleNumber: string; content: string }[] {
+function splitArticles(
+  text: string
+): { articleNumber: string; content: string }[] {
   const articles: { articleNumber: string; content: string }[] = [];
   // 匹配"第X条"开头，支持中文数字
   const pattern = /第[一二三四五六七八九十百千零〇\d]+条[　\s]*/g;
@@ -97,7 +99,10 @@ function splitArticles(text: string): { articleNumber: string; content: string }
 
 // 确认操作
 async function confirm(msg: string): Promise<boolean> {
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
   return new Promise(resolve => {
     rl.question(`${msg} (y/N): `, ans => {
       rl.close();
@@ -108,7 +113,8 @@ async function confirm(msg: string): Promise<boolean> {
 
 function chunks<T>(arr: T[], size: number): T[][] {
   const result: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) result.push(arr.slice(i, i + size));
+  for (let i = 0; i < arr.length; i += size)
+    result.push(arr.slice(i, i + size));
   return result;
 }
 
@@ -135,7 +141,10 @@ async function main() {
   console.log('⚠️  即将清空 law_articles 表，重新导入所有版本（包含历史版本）');
 
   const ok = await confirm('确认继续？');
-  if (!ok) { console.log('已取消'); return; }
+  if (!ok) {
+    console.log('已取消');
+    return;
+  }
 
   // 清空表
   console.log('\n清空 law_articles...');
@@ -217,7 +226,9 @@ async function main() {
       );
     }
 
-    process.stdout.write(`\r  处理文档: ${totalDocs}/${docs.length}，法条: ${totalArticles}`);
+    process.stdout.write(
+      `\r  处理文档: ${totalDocs}/${docs.length}，法条: ${totalArticles}`
+    );
   }
 
   const elapsed = ((Date.now() - t0) / 1000 / 60).toFixed(1);
@@ -239,11 +250,15 @@ async function main() {
   `;
   console.log('\n历史版本最多的法律（Top 5）:');
   versions.forEach((r: any) =>
-    console.log(`  ${r.lawName?.slice(0, 40)} → ${r.version_count} 条（含多版本）`)
+    console.log(
+      `  ${r.lawName?.slice(0, 40)} → ${r.version_count} 条（含多版本）`
+    )
   );
 }
 
-main().catch(e => {
-  console.error('\n失败：', e);
-  process.exit(1);
-}).finally(() => p.$disconnect());
+main()
+  .catch(e => {
+    console.error('\n失败：', e);
+    process.exit(1);
+  })
+  .finally(() => p.$disconnect());

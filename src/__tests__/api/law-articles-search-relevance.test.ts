@@ -3,7 +3,14 @@
  * 测试relevanceScore字段的完整性和正确性
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+} from '@jest/globals';
 import { POST } from '@/app/api/v1/law-articles/search/route';
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
@@ -12,7 +19,11 @@ import { NextRequest } from 'next/server';
 
 // Mock getAuthUser - 使用 jest.fn() 自动返回认证用户，不依赖 request 对象
 jest.mock('@/lib/middleware/auth', () => ({
-  getAuthUser: jest.fn().mockResolvedValue({ userId: 'user-1', role: 'USER', email: 'user@test.com' }),
+  getAuthUser: jest.fn().mockResolvedValue({
+    userId: 'user-1',
+    role: 'USER',
+    email: 'user@test.com',
+  }),
 }));
 
 // 测试数据

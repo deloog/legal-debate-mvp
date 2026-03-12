@@ -92,7 +92,8 @@ export class ComplianceRuleService {
           expiryDate: data.expiryDate,
           businessProcesses: data.businessProcesses || [],
           controlPoints: data.controlPoints || [],
-          checklistItems: (data.checklistItems || []) as Prisma.InputJsonValue[],
+          checklistItems: (data.checklistItems ||
+            []) as Prisma.InputJsonValue[],
           status: data.status || 'active',
           version: data.version || '1.0',
         },
@@ -234,7 +235,9 @@ export class ComplianceRuleService {
             businessProcesses: data.businessProcesses,
           }),
           ...(data.controlPoints && { controlPoints: data.controlPoints }),
-          ...(data.checklistItems && { checklistItems: data.checklistItems as Prisma.InputJsonValue[] }),
+          ...(data.checklistItems && {
+            checklistItems: data.checklistItems as Prisma.InputJsonValue[],
+          }),
           ...(data.status && { status: data.status }),
           ...(data.version && { version: data.version }),
           lastUpdated: new Date(),
@@ -331,7 +334,8 @@ export class ComplianceRuleService {
           expiryDate: data.expiryDate,
           businessProcesses: data.businessProcesses || [],
           controlPoints: data.controlPoints || [],
-          checklistItems: (data.checklistItems || []) as Prisma.InputJsonValue[],
+          checklistItems: (data.checklistItems ||
+            []) as Prisma.InputJsonValue[],
           status: data.status || 'active',
           version: data.version || '1.0',
         })),

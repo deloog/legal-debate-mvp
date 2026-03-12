@@ -1,10 +1,7 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { LawType, LawStatus } from '@prisma/client';
 import RuleValidator from '@/lib/law-article/applicability/rule-validator';
-import {
-  createMockArticle,
-  createMockExpiredArticle,
-} from './test-data';
+import { createMockArticle, createMockExpiredArticle } from './test-data';
 
 /**
  * RuleValidator 单元测试
@@ -150,7 +147,10 @@ describe('RuleValidator', () => {
 
     it('混合有效/无效法条批量验证结果应正确', () => {
       const valid = createMockArticle({ id: 'valid' });
-      const repealed = createMockArticle({ id: 'repealed', status: LawStatus.REPEALED });
+      const repealed = createMockArticle({
+        id: 'repealed',
+        status: LawStatus.REPEALED,
+      });
 
       const results = validator.validateArticles([valid, repealed]);
 

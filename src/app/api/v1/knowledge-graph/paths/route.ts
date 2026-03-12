@@ -37,7 +37,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
         { status: 401 }
       );
     }
@@ -66,14 +69,20 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (!sourceId) {
       return NextResponse.json(
-        { success: false, error: { code: 'MISSING_PARAM', message: '缺少必需参数: sourceId' } },
+        {
+          success: false,
+          error: { code: 'MISSING_PARAM', message: '缺少必需参数: sourceId' },
+        },
         { status: 400 }
       );
     }
 
     if (!targetId) {
       return NextResponse.json(
-        { success: false, error: { code: 'MISSING_PARAM', message: '缺少必需参数: targetId' } },
+        {
+          success: false,
+          error: { code: 'MISSING_PARAM', message: '缺少必需参数: targetId' },
+        },
         { status: 400 }
       );
     }
@@ -82,7 +91,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const idPattern = /^[a-zA-Z0-9_-]+$/;
     if (!idPattern.test(sourceId) || !idPattern.test(targetId)) {
       return NextResponse.json(
-        { success: false, error: { code: 'INVALID_PARAM', message: '节点ID格式无效' } },
+        {
+          success: false,
+          error: { code: 'INVALID_PARAM', message: '节点ID格式无效' },
+        },
         { status: 400 }
       );
     }
@@ -95,12 +107,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
       if (isNaN(maxDepth) || maxDepth < 1 || maxDepth > MAX_PATH_DEPTH) {
         return NextResponse.json(
-          { 
-            success: false, 
-            error: { 
-              code: 'INVALID_PARAM', 
-              message: `maxDepth参数必须在1-${MAX_PATH_DEPTH}之间` 
-            } 
+          {
+            success: false,
+            error: {
+              code: 'INVALID_PARAM',
+              message: `maxDepth参数必须在1-${MAX_PATH_DEPTH}之间`,
+            },
           },
           { status: 400 }
         );
@@ -112,7 +124,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (graphData.nodes.length === 0) {
       return NextResponse.json(
-        { success: false, error: { code: 'EMPTY_GRAPH', message: '图谱数据为空' } },
+        {
+          success: false,
+          error: { code: 'EMPTY_GRAPH', message: '图谱数据为空' },
+        },
         { status: 404 }
       );
     }
@@ -121,13 +136,25 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const nodeIds = new Set(graphData.nodes.map(n => n.id));
     if (!nodeIds.has(sourceId)) {
       return NextResponse.json(
-        { success: false, error: { code: 'NODE_NOT_FOUND', message: `源节点不存在: ${sourceId}` } },
+        {
+          success: false,
+          error: {
+            code: 'NODE_NOT_FOUND',
+            message: `源节点不存在: ${sourceId}`,
+          },
+        },
         { status: 404 }
       );
     }
     if (!nodeIds.has(targetId)) {
       return NextResponse.json(
-        { success: false, error: { code: 'NODE_NOT_FOUND', message: `目标节点不存在: ${targetId}` } },
+        {
+          success: false,
+          error: {
+            code: 'NODE_NOT_FOUND',
+            message: `目标节点不存在: ${targetId}`,
+          },
+        },
         { status: 404 }
       );
     }
@@ -191,7 +218,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: errorMessage } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: errorMessage },
+      },
       { status: 500 }
     );
   }

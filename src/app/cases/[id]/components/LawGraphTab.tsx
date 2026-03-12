@@ -29,9 +29,7 @@ export function LawGraphTab({ caseId }: LawGraphTabProps) {
 
   useEffect(() => {
     const token =
-      typeof window !== 'undefined'
-        ? localStorage.getItem('auth_token')
-        : null;
+      typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
 
     fetch(`/api/cases/${caseId}/law-graph`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -58,9 +56,7 @@ export function LawGraphTab({ caseId }: LawGraphTabProps) {
   }
 
   if (error) {
-    return (
-      <div className='py-8 text-center text-red-500'>{error}</div>
-    );
+    return <div className='py-8 text-center text-red-500'>{error}</div>;
   }
 
   if (!data?.hasData) {

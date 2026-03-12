@@ -12,7 +12,7 @@ import { logger } from '@/lib/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
 
 const VALID_MODES = ['relations', 'graph_distance'] as const;
-type RecommendMode = typeof VALID_MODES[number];
+type RecommendMode = (typeof VALID_MODES)[number];
 
 /**
  * 获取法条推荐
@@ -38,7 +38,8 @@ export async function GET(
   try {
     const { searchParams } = new URL(request.url);
     const limitRaw = parseInt(searchParams.get('limit') || '10', 10);
-    const limit = isNaN(limitRaw) || limitRaw < 1 ? 10 : Math.min(limitRaw, 100);
+    const limit =
+      isNaN(limitRaw) || limitRaw < 1 ? 10 : Math.min(limitRaw, 100);
 
     const modeRaw = searchParams.get('mode') ?? 'relations';
     if (!VALID_MODES.includes(modeRaw as RecommendMode)) {
@@ -76,7 +77,10 @@ export async function GET(
   } catch (error) {
     logger.error('获取推荐失败', error instanceof Error ? error : undefined);
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: '服务器错误' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: '服务器错误' },
+      },
       { status: 500 }
     );
   }

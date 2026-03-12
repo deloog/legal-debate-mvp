@@ -40,7 +40,9 @@ export class ApplicabilityAnalyzer {
     this.initialized = true;
   }
 
-  public async analyze(input: ApplicabilityInput): Promise<ApplicabilityAnalysisReport> {
+  public async analyze(
+    input: ApplicabilityInput
+  ): Promise<ApplicabilityAnalysisReport> {
     const config: Required<ApplicabilityConfig> = {
       ...DEFAULT_APPLICABILITY_CONFIG,
       ...input.config,
@@ -101,7 +103,9 @@ export class ApplicabilityAnalyzer {
           articleId: article.id,
           articleNumber: article.articleNumber,
           lawName: article.lawName,
-          applicable: aiResult.applicable && aiResult.score >= config.minApplicabilityScore,
+          applicable:
+            aiResult.applicable &&
+            aiResult.score >= config.minApplicabilityScore,
           score: aiResult.score,
           semanticScore: aiResult.score,
           ruleScore: 1.0,
@@ -146,14 +150,18 @@ export class ApplicabilityAnalyzer {
       notApplicableArticles: results.length - applicableCount,
       results,
       statistics: {
-        averageScore: scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0,
+        averageScore:
+          scores.length > 0
+            ? scores.reduce((a, b) => a + b, 0) / scores.length
+            : 0,
         maxScore: scores.length > 0 ? Math.max(...scores) : 0,
         minScore: scores.length > 0 ? Math.min(...scores) : 0,
         executionTime: Date.now() - startTime,
         ruleValidationTime,
         semanticMatchingTime,
         aiReviewTime: 0,
-        applicableRatio: results.length > 0 ? applicableCount / results.length : 0,
+        applicableRatio:
+          results.length > 0 ? applicableCount / results.length : 0,
         byType: this.groupByType(results, input.articles),
         byCategory: this.groupByCategory(results, input.articles),
       },

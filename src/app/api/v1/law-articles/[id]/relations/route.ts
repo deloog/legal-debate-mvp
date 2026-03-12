@@ -70,7 +70,10 @@ export async function GET(
   } catch (error) {
     logger.error('获取关系失败:', error);
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: '服务器错误' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: '服务器错误' },
+      },
       { status: 500 }
     );
   }
@@ -98,14 +101,23 @@ export async function POST(
     // 验证必需字段
     if (!body.targetId) {
       return NextResponse.json(
-        { success: false, error: { code: 'MISSING_FIELD', message: '缺少必需字段: targetId' } },
+        {
+          success: false,
+          error: { code: 'MISSING_FIELD', message: '缺少必需字段: targetId' },
+        },
         { status: 400 }
       );
     }
 
     if (!body.relationType) {
       return NextResponse.json(
-        { success: false, error: { code: 'MISSING_FIELD', message: '缺少必需字段: relationType' } },
+        {
+          success: false,
+          error: {
+            code: 'MISSING_FIELD',
+            message: '缺少必需字段: relationType',
+          },
+        },
         { status: 400 }
       );
     }
@@ -123,14 +135,20 @@ export async function POST(
       userId: authUser.userId,
     });
 
-    return NextResponse.json({ success: true, data: relation }, { status: 201 });
+    return NextResponse.json(
+      { success: true, data: relation },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     logger.error('创建关系失败:', error);
 
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
 
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: errorMessage } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: errorMessage },
+      },
       { status: 400 }
     );
   }

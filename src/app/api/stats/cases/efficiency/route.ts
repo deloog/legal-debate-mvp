@@ -379,7 +379,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const { startDate, endDate } = getDateRange(params.timeRange ?? TimeRange.LAST_30_DAYS);
+    const { startDate, endDate } = getDateRange(
+      params.timeRange ?? TimeRange.LAST_30_DAYS
+    );
     const whereClause = buildWhereClause(params);
 
     // 查询案件效率数据

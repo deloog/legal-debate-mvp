@@ -3,7 +3,7 @@
  * POST /api/qualifications/photo
  * Content-Type: multipart/form-data
  * 返回 { success: true, data: { url: string, fileId: string } }
- * 
+ *
  * 安全特性：
  * - 文件存储在 uploads/qualifications 目录，需通过 API 验证访问
  * - 生成随机文件名防止枚举攻击
@@ -97,7 +97,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      logger.warn('上传失败: 不支持的文件类型', { userId, mimeType: file.type });
+      logger.warn('上传失败: 不支持的文件类型', {
+        userId,
+        mimeType: file.type,
+      });
       return NextResponse.json(
         { success: false, message: '仅支持 JPG、PNG、WebP 格式' },
         { status: 400 }
@@ -117,7 +120,10 @@ export async function POST(request: NextRequest) {
 
     // 验证文件内容（防止 MIME 伪装攻击）
     if (!validateImageContent(buffer, file.type)) {
-      logger.warn('上传失败: 文件内容验证失败', { userId, mimeType: file.type });
+      logger.warn('上传失败: 文件内容验证失败', {
+        userId,
+        mimeType: file.type,
+      });
       return NextResponse.json(
         { success: false, message: '文件内容验证失败，请上传有效的图片文件' },
         { status: 400 }
@@ -132,13 +138,16 @@ export async function POST(request: NextRequest) {
     // 生成安全文件名
     const ext = MIME_TO_EXT[file.type];
     if (!ext) {
-      logger.warn('上传失败: 无法确定文件扩展名', { userId, mimeType: file.type });
+      logger.warn('上传失败: 无法确定文件扩展名', {
+        userId,
+        mimeType: file.type,
+      });
       return NextResponse.json(
         { success: false, message: '无法处理此文件类型' },
         { status: 400 }
       );
     }
-    
+
     const fileName = generateSecureFileName(ext);
     const filePath = join(UPLOAD_DIR, fileName);
 
@@ -161,13 +170,13 @@ export async function POST(request: NextRequest) {
     // 上传成功后自动触发 OCR 识别
     let ocrResult = null;
     let ocrError = null;
-    
+
     try {
       const result = await recognizeLicensePhoto({
         base64: buffer.toString('base64'),
         mimeType: file.type as 'image/jpeg' | 'image/png' | 'image/webp',
       });
-      
+
       if (result.success) {
         ocrResult = result.data;
       } else {

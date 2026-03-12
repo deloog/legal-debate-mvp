@@ -151,7 +151,8 @@ class BusinessSystemIntegrationService {
           webhookEvents: input.webhookEvents || [],
           status: 'PENDING',
           description: input.description || null,
-          metadata: (input.metadata ?? Prisma.JsonNull) as Prisma.InputJsonValue,
+          metadata: (input.metadata ??
+            Prisma.JsonNull) as Prisma.InputJsonValue,
         },
         include: {
           enterprise: {
@@ -506,18 +507,23 @@ class BusinessSystemIntegrationService {
         'Content-Type': 'application/json',
         'User-Agent': 'LegalDebate-Integration/1.0',
       };
-      if (creds?.authToken) headers['Authorization'] = `Bearer ${creds.authToken}`;
+      if (creds?.authToken)
+        headers['Authorization'] = `Bearer ${creds.authToken}`;
       else if (creds?.apiKey) headers['X-Api-Key'] = creds.apiKey;
 
       const startTime = Date.now();
       let recordsProcessed = 0;
       let recordsCreated = 0;
-      let recordsUpdated = 0;
+      const recordsUpdated = 0;
 
       // 同步策略：根据系统类型调用相应数据接口
-      const syncConfig = integration.syncConfig as Record<string, unknown> | null;
-      const dataEndpoint = (syncConfig?.dataEndpoint as string | undefined)
-        ?? `${integration.systemUrl}/api/data`;
+      const syncConfig = integration.syncConfig as Record<
+        string,
+        unknown
+      > | null;
+      const dataEndpoint =
+        (syncConfig?.dataEndpoint as string | undefined) ??
+        `${integration.systemUrl}/api/data`;
 
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 30_000);
@@ -531,7 +537,9 @@ class BusinessSystemIntegrationService {
 
         if (resp.ok) {
           const raw: unknown = await resp.json();
-          const items = Array.isArray(raw) ? raw : (raw as Record<string, unknown>)?.data;
+          const items = Array.isArray(raw)
+            ? raw
+            : (raw as Record<string, unknown>)?.data;
           if (Array.isArray(items)) {
             recordsProcessed = items.length;
             // 数据格式由外部系统决定，此处仅记录数量
@@ -717,11 +725,17 @@ class BusinessSystemIntegrationService {
           }
 
           lastError = `HTTP ${resp.status}`;
-          logger.warn('Webhook 响应非成功状态', { status: resp.status, attempt });
+          logger.warn('Webhook 响应非成功状态', {
+            status: resp.status,
+            attempt,
+          });
         } catch (fetchErr) {
           clearTimeout(timer);
           lastError = (fetchErr as Error).message;
-          logger.warn('Webhook 发送失败，准备重试', { attempt, error: lastError });
+          logger.warn('Webhook 发送失败，准备重试', {
+            attempt,
+            error: lastError,
+          });
           if (attempt < 2) {
             await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
           }

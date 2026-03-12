@@ -100,12 +100,9 @@ export class MultiLevelFallbackStrategy {
           return { result, level: 'rule', quality };
         }
 
-        logger.warn(
-          '[MultiLevelFallbackStrategy] 规则降级质量不佳，继续降级',
-          {
-            quality,
-          }
-        );
+        logger.warn('[MultiLevelFallbackStrategy] 规则降级质量不佳，继续降级', {
+          quality,
+        });
       } catch (error) {
         logger.error('[MultiLevelFallbackStrategy] 规则降级失败', { error });
       }
@@ -121,12 +118,9 @@ export class MultiLevelFallbackStrategy {
           return { result, level: 'cache', quality };
         }
 
-        logger.warn(
-          '[MultiLevelFallbackStrategy] 缓存降级质量不佳，继续降级',
-          {
-            quality,
-          }
-        );
+        logger.warn('[MultiLevelFallbackStrategy] 缓存降级质量不佳，继续降级', {
+          quality,
+        });
       } catch (error) {
         logger.error('[MultiLevelFallbackStrategy] 缓存降级失败', { error });
       }

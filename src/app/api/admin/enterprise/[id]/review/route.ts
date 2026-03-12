@@ -16,12 +16,24 @@ import { logger } from '@/lib/logger';
 const VALID_REVIEW_ACTIONS = Object.values(EnterpriseReviewAction);
 
 // 状态转换规则：定义哪些状态下可以进行哪些操作
-const VALID_STATUS_TRANSITIONS: Record<EnterpriseStatus, EnterpriseReviewAction[]> = {
-  [EnterpriseStatus.PENDING]: [EnterpriseReviewAction.APPROVE, EnterpriseReviewAction.REJECT],
-  [EnterpriseStatus.UNDER_REVIEW]: [EnterpriseReviewAction.APPROVE, EnterpriseReviewAction.REJECT],
+const VALID_STATUS_TRANSITIONS: Record<
+  EnterpriseStatus,
+  EnterpriseReviewAction[]
+> = {
+  [EnterpriseStatus.PENDING]: [
+    EnterpriseReviewAction.APPROVE,
+    EnterpriseReviewAction.REJECT,
+  ],
+  [EnterpriseStatus.UNDER_REVIEW]: [
+    EnterpriseReviewAction.APPROVE,
+    EnterpriseReviewAction.REJECT,
+  ],
   [EnterpriseStatus.APPROVED]: [EnterpriseReviewAction.SUSPEND],
   [EnterpriseStatus.REJECTED]: [EnterpriseReviewAction.REACTIVATE],
-  [EnterpriseStatus.SUSPENDED]: [EnterpriseReviewAction.REACTIVATE, EnterpriseReviewAction.REJECT],
+  [EnterpriseStatus.SUSPENDED]: [
+    EnterpriseReviewAction.REACTIVATE,
+    EnterpriseReviewAction.REJECT,
+  ],
   [EnterpriseStatus.EXPIRED]: [EnterpriseReviewAction.REACTIVATE],
 };
 
@@ -81,7 +93,7 @@ async function validateReviewRequest(
   // 验证状态转换是否合法
   const currentStatus = enterprise.status as EnterpriseStatus;
   const allowedActions = VALID_STATUS_TRANSITIONS[currentStatus] || [];
-  
+
   if (!allowedActions.includes(reviewAction as EnterpriseReviewAction)) {
     return {
       valid: false,
@@ -124,7 +136,12 @@ async function logEnterpriseReview(
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('记录企业审核日志失败', { error, enterpriseId, reviewerId, action });
+    logger.error('记录企业审核日志失败', {
+      error,
+      enterpriseId,
+      reviewerId,
+      action,
+    });
     // 审计日志失败不应该影响业务流程，但应该记录错误
   }
 }
@@ -244,7 +261,7 @@ export async function POST(
     });
   } catch (error) {
     logger.error('企业审核失败', { error });
-    
+
     if (error instanceof Error) {
       return NextResponse.json(
         {

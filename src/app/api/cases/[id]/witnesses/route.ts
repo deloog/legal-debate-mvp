@@ -77,7 +77,10 @@ async function mapWitnessToDetail(
  * GET /api/cases/[id]/witnesses - 获取案件证人列表
  */
 export const GET = withErrorHandler(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const authUser = await getAuthUser(request);
     if (!authUser) {
       return NextResponse.json(

@@ -43,9 +43,11 @@ test.describe('响应时间性能测试', () => {
     perfRecorder = new PerformanceRecorder();
 
     // 预热服务器：首次请求会触发Next.js热编译，会非常慢；先预热再开始计时
-    await apiContext.post('/api/v1/law-articles/search', {
-      data: { keywords: ['合同'], caseType: 'CIVIL', page: 1, pageSize: 1 },
-    }).catch(() => {}); // 忽略预热期间的错误
+    await apiContext
+      .post('/api/v1/law-articles/search', {
+        data: { keywords: ['合同'], caseType: 'CIVIL', page: 1, pageSize: 1 },
+      })
+      .catch(() => {}); // 忽略预热期间的错误
   });
 
   test.afterAll(async () => {
@@ -224,7 +226,9 @@ test.describe('响应时间性能测试', () => {
         'CIVIL'
       );
 
-      const articleIds = searchResults.slice(0, 3).map((a: { id: string }) => a.id);
+      const articleIds = searchResults
+        .slice(0, 3)
+        .map((a: { id: string }) => a.id);
       if (articleIds.length > 0) {
         await analyzeApplicability(apiContext, testCase.caseId, articleIds);
       } else {

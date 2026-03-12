@@ -71,7 +71,11 @@ describe('Enterprise Compliance API Security Tests', () => {
 
   function createMockRequest(
     url: string,
-    options: { method?: string; body?: object; headers?: Record<string, string> } = {}
+    options: {
+      method?: string;
+      body?: object;
+      headers?: Record<string, string>;
+    } = {}
   ): NextRequest {
     return new NextRequest(url, {
       method: options.method || 'GET',
@@ -90,7 +94,9 @@ describe('Enterprise Compliance API Security Tests', () => {
     it('should reject unauthenticated requests', async () => {
       mockGetAuthUser.mockResolvedValue(null);
 
-      const request = createMockRequest('http://localhost:3000/api/admin/enterprise');
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/enterprise'
+      );
       const response = await GETEnterprises(request);
 
       expect(response.status).toBe(401);
@@ -106,7 +112,9 @@ describe('Enterprise Compliance API Security Tests', () => {
       mockPrisma.enterpriseAccount.findMany.mockResolvedValue([]);
       mockPrisma.enterpriseAccount.count.mockResolvedValue(0);
 
-      const request = createMockRequest('http://localhost:3000/api/admin/enterprise');
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/enterprise'
+      );
       // 由于 searchParams 访问会失败，我们不验证返回状态
       try {
         await GETEnterprises(request);
@@ -114,7 +122,10 @@ describe('Enterprise Compliance API Security Tests', () => {
         // 预期的环境限制错误
       }
 
-      expect(mockValidatePermissions).toHaveBeenCalledWith(expect.anything(), 'enterprise:read');
+      expect(mockValidatePermissions).toHaveBeenCalledWith(
+        expect.anything(),
+        'enterprise:read'
+      );
     });
 
     it('should reject requests without enterprise:read permission', async () => {
@@ -123,7 +134,9 @@ describe('Enterprise Compliance API Security Tests', () => {
         new Response(JSON.stringify({ error: '权限不足' }), { status: 403 })
       );
 
-      const request = createMockRequest('http://localhost:3000/api/admin/enterprise');
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/enterprise'
+      );
       const response = await GETEnterprises(request);
 
       expect(response.status).toBe(403);
@@ -153,7 +166,14 @@ describe('Enterprise Compliance API Security Tests', () => {
       // 验证有效的状态值已正确配置
       // 注意：由于 nextUrl.searchParams 在 Node 测试环境中不完全支持
       // 这里仅验证状态值配置正确
-      const validStatuses = ['PENDING', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'EXPIRED', 'SUSPENDED'];
+      const validStatuses = [
+        'PENDING',
+        'UNDER_REVIEW',
+        'APPROVED',
+        'REJECTED',
+        'EXPIRED',
+        'SUSPENDED',
+      ];
       expect(validStatuses).toContain('PENDING');
       expect(validStatuses).toContain('APPROVED');
       expect(validStatuses).toContain('REJECTED');
@@ -179,8 +199,12 @@ describe('Enterprise Compliance API Security Tests', () => {
       mockGetAuthUser.mockResolvedValue(adminUser);
       mockValidatePermissions.mockResolvedValue(null);
 
-      const request = createMockRequest('http://localhost:3000/api/admin/enterprise/invalid@id!');
-      const response = await GETEnterprise(request, { params: Promise.resolve({ id: 'invalid@id!' }) });
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/enterprise/invalid@id!'
+      );
+      const response = await GETEnterprise(request, {
+        params: Promise.resolve({ id: 'invalid@id!' }),
+      });
 
       expect(response.status).toBe(400);
       const data = await response.json();
@@ -192,8 +216,12 @@ describe('Enterprise Compliance API Security Tests', () => {
       mockValidatePermissions.mockResolvedValue(null);
       mockPrisma.enterpriseAccount.findUnique.mockResolvedValue(null);
 
-      const request = createMockRequest('http://localhost:3000/api/admin/enterprise/ent-123');
-      const response = await GETEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/enterprise/ent-123'
+      );
+      const response = await GETEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(response.status).toBe(404);
     });
@@ -209,8 +237,12 @@ describe('Enterprise Compliance API Security Tests', () => {
         reviews: [],
       });
 
-      const request = createMockRequest('http://localhost:3000/api/admin/enterprise/ent-123');
-      const response = await GETEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      const request = createMockRequest(
+        'http://localhost:3000/api/admin/enterprise/ent-123'
+      );
+      const response = await GETEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(response.status).toBe(200);
       const data = await response.json();
@@ -229,7 +261,9 @@ describe('Enterprise Compliance API Security Tests', () => {
         'http://localhost:3000/api/admin/enterprise/ent-123/review',
         { method: 'POST', body: { reviewAction: 'APPROVE' } }
       );
-      const response = await ReviewEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      const response = await ReviewEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(response.status).toBe(401);
     });
@@ -242,7 +276,9 @@ describe('Enterprise Compliance API Security Tests', () => {
         'http://localhost:3000/api/admin/enterprise/ent-123/review',
         { method: 'POST', body: { reviewAction: 'APPROVE' } }
       );
-      const response = await ReviewEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      const response = await ReviewEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(response.status).toBe(403);
     });
@@ -259,13 +295,17 @@ describe('Enterprise Compliance API Security Tests', () => {
         id: 'ent-123',
         status: 'APPROVED',
       });
-      mockPrisma.enterpriseReview.create.mockResolvedValue({ id: 'review-123' });
+      mockPrisma.enterpriseReview.create.mockResolvedValue({
+        id: 'review-123',
+      });
 
       const request = createMockRequest(
         'http://localhost:3000/api/admin/enterprise/ent-123/review',
         { method: 'POST', body: { reviewAction: 'APPROVE' } }
       );
-      const response = await ReviewEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      const response = await ReviewEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(response.status).toBe(200);
     });
@@ -282,13 +322,17 @@ describe('Enterprise Compliance API Security Tests', () => {
         id: 'ent-123',
         status: 'APPROVED',
       });
-      mockPrisma.enterpriseReview.create.mockResolvedValue({ id: 'review-123' });
+      mockPrisma.enterpriseReview.create.mockResolvedValue({
+        id: 'review-123',
+      });
 
       const request = createMockRequest(
         'http://localhost:3000/api/admin/enterprise/ent-123/review',
         { method: 'POST', body: { reviewAction: 'APPROVE' } }
       );
-      const response = await ReviewEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      const response = await ReviewEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(response.status).toBe(200);
     });
@@ -301,7 +345,9 @@ describe('Enterprise Compliance API Security Tests', () => {
         'http://localhost:3000/api/admin/enterprise/ent-123/review',
         { method: 'POST', body: {} }
       );
-      const response = await ReviewEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      const response = await ReviewEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(response.status).toBe(400);
       const data = await response.json();
@@ -321,7 +367,9 @@ describe('Enterprise Compliance API Security Tests', () => {
         'http://localhost:3000/api/admin/enterprise/ent-123/review',
         { method: 'POST', body: { reviewAction: 'INVALID_ACTION' } }
       );
-      const response = await ReviewEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      const response = await ReviewEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(response.status).toBe(400);
       const data = await response.json();
@@ -338,7 +386,9 @@ describe('Enterprise Compliance API Security Tests', () => {
         'http://localhost:3000/api/admin/enterprise/ent-123/review',
         { method: 'POST', body: { reviewAction: 'APPROVE' } }
       );
-      const response = await ReviewEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      const response = await ReviewEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(response.status).toBe(404);
     });
@@ -356,7 +406,9 @@ describe('Enterprise Compliance API Security Tests', () => {
         'http://localhost:3000/api/admin/enterprise/ent-123/review',
         { method: 'POST', body: { reviewAction: 'APPROVE' } }
       );
-      const response = await ReviewEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      const response = await ReviewEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(response.status).toBe(409);
       const data = await response.json();
@@ -378,7 +430,9 @@ describe('Enterprise Compliance API Security Tests', () => {
         'http://localhost:3000/api/admin/enterprise/ent-123/review',
         { method: 'POST', body: { reviewAction: 'APPROVE' } }
       );
-      const response = await ReviewEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      const response = await ReviewEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(response.status).toBe(409);
       const data = await response.json();
@@ -397,13 +451,17 @@ describe('Enterprise Compliance API Security Tests', () => {
         id: 'ent-123',
         status: 'APPROVED',
       });
-      mockPrisma.enterpriseReview.create.mockResolvedValue({ id: 'review-123' });
+      mockPrisma.enterpriseReview.create.mockResolvedValue({
+        id: 'review-123',
+      });
 
       const request = createMockRequest(
         'http://localhost:3000/api/admin/enterprise/ent-123/review',
         { method: 'POST', body: { reviewAction: 'REACTIVATE' } }
       );
-      const response = await ReviewEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      const response = await ReviewEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(response.status).toBe(200);
     });
@@ -424,7 +482,9 @@ describe('Enterprise Compliance API Security Tests', () => {
           body: { reviewAction: 'APPROVE', reviewNotes: 'a'.repeat(2001) },
         }
       );
-      const response = await ReviewEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      const response = await ReviewEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(response.status).toBe(400);
       const data = await response.json();
@@ -443,13 +503,20 @@ describe('Enterprise Compliance API Security Tests', () => {
         id: 'ent-123',
         status: 'APPROVED',
       });
-      mockPrisma.enterpriseReview.create.mockResolvedValue({ id: 'review-123' });
+      mockPrisma.enterpriseReview.create.mockResolvedValue({
+        id: 'review-123',
+      });
 
       const request = createMockRequest(
         'http://localhost:3000/api/admin/enterprise/ent-123/review',
-        { method: 'POST', body: { reviewAction: 'APPROVE', reviewNotes: '审核通过' } }
+        {
+          method: 'POST',
+          body: { reviewAction: 'APPROVE', reviewNotes: '审核通过' },
+        }
       );
-      await ReviewEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      await ReviewEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(mockPrisma.enterpriseReview.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -473,7 +540,9 @@ describe('Enterprise Compliance API Security Tests', () => {
       mockGetAuthUser.mockResolvedValue(adminUser);
       mockRequireRole.mockReturnValue(true);
       mockPrisma.enterpriseAccount.update.mockResolvedValue({});
-      mockPrisma.enterpriseReview.create.mockResolvedValue({ id: 'review-123' });
+      mockPrisma.enterpriseReview.create.mockResolvedValue({
+        id: 'review-123',
+      });
 
       const testCases = [
         { action: 'APPROVE', initialStatus: 'PENDING' },
@@ -493,15 +562,24 @@ describe('Enterprise Compliance API Security Tests', () => {
         });
         mockPrisma.enterpriseAccount.update.mockResolvedValue({
           id: 'ent-123',
-          status: action === 'REJECT' ? 'REJECTED' : action === 'SUSPEND' ? 'SUSPENDED' : 'APPROVED',
+          status:
+            action === 'REJECT'
+              ? 'REJECTED'
+              : action === 'SUSPEND'
+                ? 'SUSPENDED'
+                : 'APPROVED',
         });
-        mockPrisma.enterpriseReview.create.mockResolvedValue({ id: 'review-123' });
+        mockPrisma.enterpriseReview.create.mockResolvedValue({
+          id: 'review-123',
+        });
 
         const request = createMockRequest(
           'http://localhost:3000/api/admin/enterprise/ent-123/review',
           { method: 'POST', body: { reviewAction: action } }
         );
-        const response = await ReviewEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+        const response = await ReviewEnterprise(request, {
+          params: Promise.resolve({ id: 'ent-123' }),
+        });
 
         expect(response.status).toBe(200);
       }
@@ -519,7 +597,9 @@ describe('Enterprise Compliance API Security Tests', () => {
           body: 'invalid json',
         }
       );
-      const response = await ReviewEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      const response = await ReviewEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(response.status).toBe(400);
       const data = await response.json();
@@ -537,9 +617,14 @@ describe('Enterprise Compliance API Security Tests', () => {
 
       const request = createMockRequest(
         'http://localhost:3000/api/admin/enterprise/ent-123/review',
-        { method: 'POST', body: { reviewAction: 'APPROVE', reviewNotes: 12345 } }
+        {
+          method: 'POST',
+          body: { reviewAction: 'APPROVE', reviewNotes: 12345 },
+        }
       );
-      const response = await ReviewEnterprise(request, { params: Promise.resolve({ id: 'ent-123' }) });
+      const response = await ReviewEnterprise(request, {
+        params: Promise.resolve({ id: 'ent-123' }),
+      });
 
       expect(response.status).toBe(400);
       const data = await response.json();

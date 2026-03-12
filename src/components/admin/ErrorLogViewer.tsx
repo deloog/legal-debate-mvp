@@ -165,16 +165,18 @@ export function ErrorLogViewer({
                         </pre>
                       </div>
                     )}
-                    {!!log.context && Object.keys(log.context as Record<string, unknown>).length > 0 && (
-                      <div>
-                        <div className='text-xs font-medium text-gray-700 mb-1'>
-                          上下文信息：
+                    {!!log.context &&
+                      Object.keys(log.context as Record<string, unknown>)
+                        .length > 0 && (
+                        <div>
+                          <div className='text-xs font-medium text-gray-700 mb-1'>
+                            上下文信息：
+                          </div>
+                          <pre className='text-xs text-gray-600 whitespace-pre-wrap overflow-x-auto bg-white p-2 rounded border border-gray-200'>
+                            {JSON.stringify(log.context, null, 2)}
+                          </pre>
                         </div>
-                        <pre className='text-xs text-gray-600 whitespace-pre-wrap overflow-x-auto bg-white p-2 rounded border border-gray-200'>
-                          {JSON.stringify(log.context, null, 2)}
-                        </pre>
-                      </div>
-                    )}
+                      )}
                     <div className='grid grid-cols-2 gap-2 text-xs'>
                       <div>
                         <span className='text-gray-500'>恢复尝试：</span>
