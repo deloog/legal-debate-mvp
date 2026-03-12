@@ -14,10 +14,7 @@ import {
 } from '@/types/payment';
 import { createOrder } from '@/lib/order/order-service';
 import { getWechatPay } from '@/lib/payment/wechat-pay';
-import {
-  convertYuanToFen,
-  calculateOrderExpireTime,
-} from '@/lib/payment/wechat-utils';
+import { convertYuanToFen } from '@/lib/payment/wechat-utils';
 import { getAlipay } from '@/lib/payment/alipay';
 import { AlipayProductCode } from '@/types/payment';
 import { logger } from '@/lib/logger';
@@ -122,7 +119,6 @@ export async function POST(request: NextRequest) {
     if (paymentMethod === PaymentMethod.WECHAT) {
       try {
         const wechatPay = getWechatPay();
-        const expiredAt = calculateOrderExpireTime(120);
 
         const wechatResponse = await wechatPay.createOrder({
           outTradeNo: order.orderNo,
@@ -132,7 +128,7 @@ export async function POST(request: NextRequest) {
             currency: order.currency,
           },
           attach: JSON.stringify({ orderId: order.id }),
-          time_expire: Math.floor(expiredAt.getTime() / 1000),
+          time_expire: Math.floor(order.expiredAt.getTime() / 1000),
         });
 
         // 返回支付二维码链接
@@ -166,7 +162,6 @@ export async function POST(request: NextRequest) {
     if (paymentMethod === PaymentMethod.ALIPAY) {
       try {
         const alipayClient = getAlipay();
-        const expiredAt = calculateOrderExpireTime(120);
 
         const alipayResponse = await alipayClient.createOrder({
           outTradeNo: order.orderNo,

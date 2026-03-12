@@ -3,7 +3,6 @@
  * 记录关键操作以便安全审计
  */
 
-import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 
 export interface AuditLogParams {

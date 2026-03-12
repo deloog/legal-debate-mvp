@@ -184,7 +184,7 @@ export class EvaluationReportGenerator {
   private analyzeQueryPerformance(
     results: BenchmarkResult[]
   ): QueryPerformance[] {
-    const performances: QueryPerformance[] = results.map((r, index) => ({
+    const performances: QueryPerformance[] = results.map(r => ({
       queryName: r.name,
       queryType: r.type,
       avgTime: r.meanTime,

@@ -10,8 +10,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ApprovalFlow } from '@/components/contract/ApprovalFlow';
 import { ArrowLeft, FileText, User, DollarSign, Calendar } from 'lucide-react';
-import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
 
 interface ApprovalData {
   id: string;

@@ -12,20 +12,13 @@ import {
   KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
 import { QualityScoreService } from '@/lib/knowledge-graph/quality-score/quality-score-service';
-import {
-  BatchQualityScoreInput,
-  LowQualityRelationsInput,
-  UpdateQualityScoreInput,
-  RelationQualityData,
-  QualityStats,
-  LowQualityRelation,
-} from '@/lib/knowledge-graph/quality-score/types';
+import { BatchQualityScoreInput } from '@/lib/knowledge-graph/quality-score/types';
 
 /**
  * GET /api/v1/knowledge-graph/quality-score
  * 获取质量统计
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

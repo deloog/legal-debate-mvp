@@ -74,8 +74,8 @@ function validateOutputDir(outputDir: string): boolean {
   if (!outputDir) return true;
 
   // 解析路径
-  const resolvedPath = require('path').resolve(outputDir);
-  const allowedBase = require('path').resolve('data/crawled');
+  const resolvedPath = await import('path').then(m => m.resolve(outputDir));
+  const allowedBase = await import('path').then(m => m.resolve('data/crawled'));
 
   // 确保路径在允许的范围内
   if (!resolvedPath.startsWith(allowedBase)) {

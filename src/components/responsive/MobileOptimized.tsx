@@ -14,6 +14,7 @@ import {
   useContext,
   type ReactNode,
 } from 'react';
+import { flushSync } from 'react-dom';
 
 /**
  * 屏幕尺寸断点
@@ -154,9 +155,10 @@ export function useMediaQuery(query: string): boolean {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(query);
-    setMatches(mediaQuery.matches);
+    flushSync(() => setMatches(mediaQuery.matches));
 
-    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
+    const handler = (e: MediaQueryListEvent) =>
+      flushSync(() => setMatches(e.matches));
     mediaQuery.addEventListener('change', handler);
     return () => mediaQuery.removeEventListener('change', handler);
   }, [query]);

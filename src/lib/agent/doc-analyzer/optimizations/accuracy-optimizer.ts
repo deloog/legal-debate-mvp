@@ -15,9 +15,7 @@ import type {
   DetailedClaim,
   UncertainItem,
   AccuracyOptimizerConfig,
-  DEFAULT_OPTIMIZER_CONFIG,
   StageResult,
-  OptimizationStage,
 } from './types';
 import type {
   DocumentAnalysisOutput,

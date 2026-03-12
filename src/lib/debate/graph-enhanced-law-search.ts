@@ -9,10 +9,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
-import {
-  searchAllLawArticles,
-  CASE_TYPE_TO_LAW_CATEGORIES,
-} from '@/lib/debate/law-search';
+import { searchAllLawArticles } from '@/lib/debate/law-search';
 import { logger } from '@/lib/logger';
 import { LawCategory, RelationType, VerificationStatus } from '@prisma/client';
 import {
@@ -419,9 +416,6 @@ export async function graphEnhancedSearch(
 
   // 2. 准备图谱搜索
   const articleIds = keywordResults.map(a => a.id);
-  const categories = caseType
-    ? (CASE_TYPE_TO_LAW_CATEGORIES[caseType] ?? [])
-    : [];
 
   // 3. 异步执行图谱查询（带超时）
   const graphQueryPromise = (async () => {
@@ -431,10 +425,6 @@ export async function graphEnhancedSearch(
       withTimeout(findComplementArticles(articleIds), timeoutMs, []),
       withTimeout(findRelatedArticles(articleIds), timeoutMs, []),
     ]);
-
-    // 分类：己方支持 vs 对方可能引用
-    const conflictSourceIds = new Set(conflicts.map(c => c.source.id));
-    const complementSourceIds = new Set(complements.map(c => c.source.id));
 
     // 己方支持法条 = 关键词结果 + 补充关系
     const supportingArticles: LawArticleWithRelations[] = [

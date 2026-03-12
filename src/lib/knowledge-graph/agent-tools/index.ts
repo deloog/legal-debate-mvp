@@ -40,7 +40,6 @@ import type {
   PathNodeDetail,
   ToolResult,
   ToolConfig,
-  KnowledgeGraphToolType,
 } from './types';
 
 export type { RelationSearchParams };

@@ -161,14 +161,12 @@ class BenchmarkRunner {
         this.timeout(timeoutMs),
       ]);
       const endTime = performance.now();
-      const executionTime = endTime - startTime;
       return {
-        time: executionTime,
+        time: endTime - startTime,
         resultCount: result.records.length,
       };
     } catch (error) {
-      const endTime = performance.now();
-      const executionTime = endTime - startTime;
+      const _endTime = performance.now();
       if (this.verbose) {
         console.error(`查询执行失败: ${query.name}`, error);
       }

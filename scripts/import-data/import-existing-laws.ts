@@ -105,7 +105,7 @@ async function importFile(
         });
 
         created++;
-      } catch (err) {
+      } catch {
         errors++;
       }
     }

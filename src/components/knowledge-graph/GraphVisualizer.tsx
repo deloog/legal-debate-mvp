@@ -11,8 +11,8 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import * as d3 from 'd3';
-import { logger } from '@/lib/logger';
 
 /**
  * 图节点类型
@@ -76,6 +76,35 @@ export function GraphVisualizer({
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null);
 
+  // 关系类型颜色映射 - 必须在useEffect之前定义
+  const getRelationColor = useCallback((type: string): string => {
+    const colors: Record<string, string> = {
+      CITES: '#3b82f6',
+      CITED_BY: '#60a5fa',
+      CONFLICTS: '#ef4444',
+      COMPLETES: '#22c55e',
+      COMPLETED_BY: '#4ade80',
+      SUPERSEDES: '#a855f7',
+      SUPERSEDED_BY: '#c084fc',
+      IMPLEMENTS: '#f59e0b',
+      IMPLEMENTED_BY: '#fbbf24',
+      RELATED: '#6b7280',
+    };
+    return colors[type] || '#6b7280';
+  }, []);
+
+  // 分类颜色映射 - 必须在useEffect之前定义
+  const getCategoryColor = useCallback((category: string): string => {
+    const colors: Record<string, string> = {
+      CIVIL: '#3b82f6',
+      CRIMINAL: '#ef4444',
+      ADMINISTRATIVE: '#22c55e',
+      COMMERCIAL: '#f59e0b',
+      LABOR: '#a855f7',
+    };
+    return colors[category] || '#6b7280';
+  }, []);
+
   // 过滤数据
   useEffect(() => {
     let filteredNodes = [...initialNodes];
@@ -105,8 +134,10 @@ export function GraphVisualizer({
         )
     );
 
-    setFilteredNodes(filteredNodes);
-    setFilteredLinks(filteredLinks);
+    flushSync(() => {
+      setFilteredNodes(filteredNodes);
+      setFilteredLinks(filteredLinks);
+    });
   }, [initialNodes, initialLinks, filterCategory, filterRelationType]);
 
   // 渲染图谱
@@ -310,6 +341,8 @@ export function GraphVisualizer({
     onNodeDoubleClick,
     width,
     height,
+    getCategoryColor,
+    getRelationColor,
   ]);
 
   // 重置视图
@@ -320,35 +353,6 @@ export function GraphVisualizer({
         .duration(750)
         .call(zoomRef.current.transform, d3.zoomIdentity);
     }
-  }, []);
-
-  // 关系类型颜色映射
-  const getRelationColor = useCallback((type: string): string => {
-    const colors: Record<string, string> = {
-      CITES: '#3b82f6',
-      CITED_BY: '#60a5fa',
-      CONFLICTS: '#ef4444',
-      COMPLETES: '#22c55e',
-      COMPLETED_BY: '#4ade80',
-      SUPERSEDES: '#a855f7',
-      SUPERSEDED_BY: '#c084fc',
-      IMPLEMENTS: '#f59e0b',
-      IMPLEMENTED_BY: '#fbbf24',
-      RELATED: '#6b7280',
-    };
-    return colors[type] || '#6b7280';
-  }, []);
-
-  // 分类颜色映射
-  const getCategoryColor = useCallback((category: string): string => {
-    const colors: Record<string, string> = {
-      CIVIL: '#3b82f6',
-      CRIMINAL: '#ef4444',
-      ADMINISTRATIVE: '#22c55e',
-      COMMERCIAL: '#f59e0b',
-      LABOR: '#a855f7',
-    };
-    return colors[category] || '#6b7280';
   }, []);
 
   return (

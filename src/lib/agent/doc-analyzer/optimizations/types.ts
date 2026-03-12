@@ -5,7 +5,6 @@
  */
 
 import type {
-  ExtractedData,
   Party,
   Claim,
   TimelineEvent,

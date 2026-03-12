@@ -90,7 +90,7 @@ export function ModeToggle() {
  * 紧凑版模式切换
  */
 export function ModeToggleCompact() {
-  const { mode, setMode, isLawyerMode } = useUserMode();
+  const { setMode, isLawyerMode } = useUserMode();
 
   const handleToggle = () => {
     setMode(isLawyerMode ? 'enterprise' : 'lawyer');

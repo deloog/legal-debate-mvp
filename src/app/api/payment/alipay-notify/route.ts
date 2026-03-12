@@ -11,10 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
-import {
-  handlePaymentSuccess,
-  handlePaymentFailure,
-} from '@/lib/order/order-service';
+import { handlePaymentSuccess } from '@/lib/order/order-service';
 import { alipaySignVerify } from '@/lib/payment/alipay-utils';
 import { paymentConfig } from '@/lib/payment/payment-config';
 

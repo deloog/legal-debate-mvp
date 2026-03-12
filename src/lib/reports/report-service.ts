@@ -23,7 +23,7 @@ export class ReportService {
    */
   static async generateReport(filter: ReportFilter): Promise<ReportData> {
     // 计算时间范围
-    const period = this.calculatePeriod(filter);
+    const _period = this.calculatePeriod(filter);
 
     // 根据报表类型生成数据
     let data:
@@ -163,7 +163,7 @@ export class ReportService {
   /**
    * 生成案件统计数据
    */
-  private static async generateCaseStatistics(period: {
+  private static async generateCaseStatistics(_period: {
     startDate: Date;
     endDate: Date;
   }): Promise<CaseStatistics> {
@@ -194,7 +194,7 @@ export class ReportService {
   /**
    * 生成费用分析数据
    */
-  private static async generateCostAnalysis(period: {
+  private static async generateCostAnalysis(_period: {
     startDate: Date;
     endDate: Date;
   }): Promise<CostAnalysis> {
@@ -216,7 +216,7 @@ export class ReportService {
   /**
    * 生成风险报告数据
    */
-  private static async generateRiskReport(period: {
+  private static async generateRiskReport(_period: {
     startDate: Date;
     endDate: Date;
   }): Promise<RiskReportData> {
@@ -237,7 +237,7 @@ export class ReportService {
   /**
    * 生成合规报告数据
    */
-  private static async generateComplianceReport(period: {
+  private static async generateComplianceReport(_period: {
     startDate: Date;
     endDate: Date;
   }): Promise<ComplianceReportData> {

@@ -99,7 +99,7 @@ class EvaluationReportGenerator {
    * 分析查询性能
    */
   analyzeQueryPerformance(results) {
-    const performances = results.map((r, index) => ({
+    const performances = results.map(r => ({
       queryName: r.name,
       queryType: r.type,
       avgTime: r.meanTime,

@@ -3,6 +3,7 @@
 import { TeamDetail } from '@/types/team';
 import { useParams, useRouter } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 /**
  * 团队详情页面主入口
@@ -229,8 +230,10 @@ function TeamMemberList({ teamId }: { teamId: string }) {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
+    flushSync(() => {
+      setLoading(true);
+      setError(null);
+    });
 
     fetch(`/api/teams/${teamId}/members?limit=50`)
       .then(r => r.json())

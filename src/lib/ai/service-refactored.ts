@@ -24,15 +24,6 @@ import { logger } from '@/lib/logger';
 // =============================================================================
 
 /**
- * AI客户端接口（本地定义，全局类型中未包含）
- */
-interface AIClient {
-  chatCompletion(request: AIRequestConfig): Promise<AIResponse>;
-  healthCheck(): Promise<boolean>;
-  shutdown?(): Promise<void>;
-}
-
-/**
  * 错误摘要类型（基于 AIErrorSerializer.generateSummary 返回值）
  */
 interface ErrorSummary {

@@ -512,9 +512,6 @@ class BusinessSystemIntegrationService {
       else if (creds?.apiKey) headers['X-Api-Key'] = creds.apiKey;
 
       const startTime = Date.now();
-      let recordsProcessed = 0;
-      let recordsCreated = 0;
-      const recordsUpdated = 0;
 
       // 同步策略：根据系统类型调用相应数据接口
       const syncConfig = integration.syncConfig as Record<
@@ -540,12 +537,9 @@ class BusinessSystemIntegrationService {
           const items = Array.isArray(raw)
             ? raw
             : (raw as Record<string, unknown>)?.data;
-          if (Array.isArray(items)) {
-            recordsProcessed = items.length;
-            // 数据格式由外部系统决定，此处仅记录数量
-            // 业务转换逻辑需根据具体 systemType 扩展
-            recordsCreated = recordsProcessed;
-          }
+          // 数据格式由外部系统决定，此处仅记录数量
+          // 业务转换逻辑需根据具体 systemType 扩展
+          void items;
         } else {
           throw new Error(`远端接口返回 ${resp.status}`);
         }

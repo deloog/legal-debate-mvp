@@ -3,9 +3,7 @@
  * 测试数据生成器
  * 用于图数据库评估的基准测试
  */
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.DataGenerator = void 0;
-const crypto_1 = require('crypto');
+import { randomUUID } from 'crypto';
 /**
  * 法律名称模板
  */
@@ -127,7 +125,7 @@ class DataGenerator {
     const lawName = this.generateLegalName();
     const articleNumber = this.generateArticleNumber();
     return {
-      id: (0, crypto_1.randomUUID)(),
+      id: randomUUID(),
       lawName,
       articleNumber,
       category: this.randomChoice(LAW_CATEGORIES),
@@ -236,7 +234,7 @@ class DataGenerator {
       targetId = this.randomChoice(articleIds);
     }
     return {
-      id: (0, crypto_1.randomUUID)(),
+      id: randomUUID(),
       sourceId,
       targetId,
       relationType: this.randomChoice(RELATION_TYPES),
@@ -269,4 +267,4 @@ class DataGenerator {
     return Math.random() * (max - min) + min;
   }
 }
-exports.DataGenerator = DataGenerator;
+export { DataGenerator };

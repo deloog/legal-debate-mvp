@@ -54,7 +54,7 @@ export function setupErrorHandling() {
     process.exit(1);
   });
 
-  process.on('unhandledRejection', (reason, promise) => {
+  process.on('unhandledRejection', (reason, _promise) => {
     console.error('未处理的Promise拒绝:', reason);
     process.exit(1);
   });

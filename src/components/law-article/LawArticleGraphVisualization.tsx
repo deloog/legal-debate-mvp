@@ -83,7 +83,7 @@ export function LawArticleGraphVisualization({
           };
 
           setGraphData(graphData);
-        } catch (error) {
+        } catch {
           // 客户端错误处理：显示空数据而非使用console
           setGraphData({ nodes: [], links: [] });
         } finally {

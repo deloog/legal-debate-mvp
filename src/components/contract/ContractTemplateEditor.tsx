@@ -235,7 +235,7 @@ export default function ContractTemplateEditor({
               <ul className='mt-2 space-y-1 text-xs'>
                 <li>• 点击左侧常用变量可快速插入</li>
                 <li>• 使用 {`{{变量名}}`} 格式手动插入变量</li>
-                <li>• 点击"预览模式"查看变量替换效果</li>
+                <li>• 点击&quot;预览模式&quot;查看变量替换效果</li>
                 <li>• 可以添加自定义变量满足特殊需求</li>
               </ul>
             </div>

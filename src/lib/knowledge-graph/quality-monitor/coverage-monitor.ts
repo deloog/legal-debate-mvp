@@ -5,7 +5,7 @@
 
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { LawStatus } from '@prisma/client';
+
 import { CoverageMetrics, CoverageStatsOptions, OrphanArticle } from './types';
 
 // =============================================================================

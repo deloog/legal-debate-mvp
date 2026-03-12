@@ -4,7 +4,7 @@
 // 目标：诉讼请求准确率≥95%
 // =============================================================================
 
-import type { Claim, ClaimType, ClaimDependencyInfo } from '../core/types';
+import type { Claim, ClaimType } from '../core/types';
 import {
   COMPOUND_CLAIM_PATTERNS,
   DETAILED_CLAIM_PATTERNS,

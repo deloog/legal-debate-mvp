@@ -13,6 +13,7 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
+import { flushSync } from 'react-dom';
 
 // =============================================================================
 // 类型定义
@@ -210,7 +211,7 @@ export function UserModeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedMode = localStorage.getItem(STORAGE_KEY);
     if (savedMode === 'lawyer' || savedMode === 'enterprise') {
-      setModeState(savedMode);
+      flushSync(() => setModeState(savedMode));
     }
   }, []);
 

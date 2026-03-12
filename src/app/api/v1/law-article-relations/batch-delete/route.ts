@@ -154,13 +154,6 @@ export async function POST(
           continue;
         }
 
-        // 记录关系信息用于日志
-        const relationInfo = {
-          sourceId: relation.sourceId,
-          targetId: relation.targetId,
-          relationType: relation.relationType,
-        };
-
         // 删除关系
         await prisma.lawArticleRelation.delete({
           where: { id: relationId },

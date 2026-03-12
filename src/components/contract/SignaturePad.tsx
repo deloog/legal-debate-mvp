@@ -185,7 +185,7 @@ export default function SignaturePad({
         <ul className='mt-1 space-y-1 list-disc list-inside'>
           <li>请使用鼠标或触摸屏在上方区域签名</li>
           <li>签名将被保存为电子签名，具有法律效力</li>
-          <li>如需重新签名，请点击"清除重签"按钮</li>
+          <li>如需重新签名，请点击&quot;清除重签&quot;按钮</li>
         </ul>
       </div>
     </div>

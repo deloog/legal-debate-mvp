@@ -43,7 +43,7 @@ export async function calculateTimelinessMetrics(
   options: TimelinessStatsOptions = {}
 ): Promise<TimelinessMetrics> {
   try {
-    const { staleThresholdDays = 90, pendingThresholdDays = 30 } = options;
+    const { staleThresholdDays = 90 } = options;
 
     // 统计总关系数
     const totalRelations = await prisma.lawArticleRelation.count();

@@ -17,7 +17,7 @@ import { QualityScoreService } from '@/lib/knowledge-graph/quality-score/quality
  * GET /api/v1/knowledge-graph/quality-score/warning
  * 触发质量预警
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

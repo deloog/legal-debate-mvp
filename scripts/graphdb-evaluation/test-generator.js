@@ -2,8 +2,8 @@
  * 简单测试脚本 - 验证数据生成器
  */
 
-// 使用require方式导入，避免ES模块问题
-const { DataGenerator } = require('./data-generator');
+// 使用ES模块导入
+import { DataGenerator } from './data-generator.js';
 
 console.log('开始测试数据生成器...\n');
 

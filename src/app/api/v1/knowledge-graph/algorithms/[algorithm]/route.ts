@@ -203,7 +203,7 @@ export async function GET(
 async function handleShortestPath(
   searchParams: URLSearchParams,
   graphData: { nodes: GraphNode[]; links: GraphLink[] },
-  userId: string
+  _userId: string
 ): Promise<unknown> {
   const sourceId = searchParams.get('sourceId');
   const targetId = searchParams.get('targetId');
@@ -246,7 +246,7 @@ async function handleShortestPath(
 async function handleDegreeCentrality(
   searchParams: URLSearchParams,
   graphData: { nodes: GraphNode[]; links: GraphLink[] },
-  userId: string
+  _userId: string
 ): Promise<unknown> {
   const limitParam = searchParams.get('limit');
   const limit = limitParam ? parseInt(limitParam, 10) : 20;
@@ -278,7 +278,7 @@ async function handleDegreeCentrality(
 async function handlePageRank(
   searchParams: URLSearchParams,
   graphData: { nodes: GraphNode[]; links: GraphLink[] },
-  userId: string
+  _userId: string
 ): Promise<unknown> {
   const limitParam = searchParams.get('limit');
   const iterationsParam = searchParams.get('iterations');
@@ -329,7 +329,7 @@ async function handlePageRank(
  */
 async function handleConnectedComponents(
   graphData: { nodes: GraphNode[]; links: GraphLink[] },
-  userId: string
+  _userId: string
 ): Promise<unknown> {
   // 执行算法
   const components = GraphAlgorithms.connectedComponents(
@@ -355,7 +355,7 @@ async function handleConnectedComponents(
 async function handleLabelPropagation(
   searchParams: URLSearchParams,
   graphData: { nodes: GraphNode[]; links: GraphLink[] },
-  userId: string
+  _userId: string
 ): Promise<unknown> {
   const maxIterationsParam = searchParams.get('maxIterations');
   const maxIterations = maxIterationsParam

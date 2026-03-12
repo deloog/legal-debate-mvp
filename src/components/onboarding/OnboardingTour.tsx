@@ -13,6 +13,7 @@ import {
   createContext,
   useContext,
 } from 'react';
+import { flushSync } from 'react-dom';
 
 /**
  * 引导步骤接口
@@ -150,14 +151,14 @@ function TourOverlay() {
 
   useEffect(() => {
     if (!currentStepData?.target) {
-      setTargetRect(null);
+      flushSync(() => setTargetRect(null));
       return;
     }
 
     const target = document.querySelector(currentStepData.target);
     if (target) {
       const rect = target.getBoundingClientRect();
-      setTargetRect(rect);
+      flushSync(() => setTargetRect(rect));
 
       // 滚动到目标元素
       target.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -339,7 +340,7 @@ export function WelcomeTour({
     const completed = localStorage.getItem('welcome_tour_completed');
     const skipped = localStorage.getItem('welcome_tour_skipped');
     if (!completed && !skipped) {
-      setIsVisible(true);
+      flushSync(() => setIsVisible(true));
     }
   }, []);
 
@@ -487,7 +488,7 @@ export function FeatureTip({
   useEffect(() => {
     const dismissed = localStorage.getItem(storageKey);
     if (!dismissed) {
-      setIsVisible(true);
+      flushSync(() => setIsVisible(true));
     }
   }, [storageKey]);
 

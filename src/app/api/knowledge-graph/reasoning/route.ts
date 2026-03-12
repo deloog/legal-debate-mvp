@@ -20,7 +20,6 @@ import {
   RuleExecutionOptions,
   RuleType,
 } from '@/lib/knowledge-graph/reasoning/types';
-import { RelationType } from '@prisma/client';
 
 /**
  * POST请求体接口

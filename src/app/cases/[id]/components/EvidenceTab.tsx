@@ -8,7 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+
 import { EvidenceList } from '@/components/evidence/EvidenceList';
 import { CrossExaminationCard } from '@/components/evidence/CrossExaminationCard';
 import { EvidenceCategoryPanel } from '@/components/evidence/EvidenceCategoryPanel';
@@ -38,7 +38,11 @@ type ViewType = 'list' | 'chain' | 'category' | 'cross-exam';
 /**
  * 证据管理标签页组件
  */
-export function EvidenceTab({ caseId, caseType, canManage }: EvidenceTabProps) {
+export function EvidenceTab({
+  caseId,
+  caseType,
+  canManage: _canManage,
+}: EvidenceTabProps) {
   const [currentView, setCurrentView] = useState<ViewType>('list');
   const [evidenceData, setEvidenceData] = useState<EvidenceListResponse | null>(
     null

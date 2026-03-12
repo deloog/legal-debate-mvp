@@ -26,7 +26,6 @@ import {
   XCircle,
   CheckCircle,
   AlertTriangle,
-  TrendingUp,
 } from 'lucide-react';
 
 interface FeedbackStats {

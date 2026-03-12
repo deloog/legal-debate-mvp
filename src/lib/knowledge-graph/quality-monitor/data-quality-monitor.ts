@@ -3,14 +3,10 @@
  * 综合监控准确性、覆盖率、时效性等指标，生成综合报告
  */
 
-import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { AccuracyMonitor, calculateAccuracyMetrics } from './accuracy-monitor';
-import { CoverageMonitor, calculateCoverageMetrics } from './coverage-monitor';
-import {
-  TimelinessMonitor,
-  calculateTimelinessMetrics,
-} from './timeliness-monitor';
+import { calculateAccuracyMetrics } from './accuracy-monitor';
+import { calculateCoverageMetrics } from './coverage-monitor';
+import { calculateTimelinessMetrics } from './timeliness-monitor';
 import {
   DataQualityReport,
   DataQualityIssue,

@@ -24,7 +24,7 @@ function setupGracefulShutdown() {
 
       // 2. 关闭数据库连接
       console.log('[Shutdown] Closing database connections...');
-      const { prisma } = require('../src/lib/db/prisma');
+      const { prisma } = await import('../src/lib/db/prisma.js');
       await prisma.$disconnect();
       console.log('[Shutdown] Database connections closed');
 

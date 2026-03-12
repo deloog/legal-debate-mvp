@@ -1,4 +1,4 @@
-import { DetailSkeleton, Skeleton } from '@/components/ui/Skeleton';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 export default function CaseDetailLoading() {
   return (

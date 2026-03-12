@@ -19,7 +19,6 @@ import {
   LawStatus,
   SyncStatus,
 } from '@prisma/client';
-import path from 'path';
 
 const prisma = new PrismaClient();
 
