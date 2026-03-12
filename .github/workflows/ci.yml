@@ -19,6 +19,7 @@ jobs:
       postgres:
         image: postgres:15
         env:
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test_db
         options: >-
@@ -57,6 +58,16 @@ jobs:
 
       - name: Generate Prisma Client
         run: npx prisma generate
+
+      - name: Wait for PostgreSQL
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 && echo "PostgreSQL is ready" && exit 0
+            echo "Waiting for PostgreSQL... attempt $i/30"
+            sleep 2
+          done
+          echo "PostgreSQL failed to start"
+          exit 1
 
       - name: Run database migrations
         run: |
