@@ -206,10 +206,13 @@ async function getTasksNeedingReminders(): Promise<
 async function hasReminderBeenSent(taskId: string): Promise<boolean> {
   try {
     // 查询近期是否已发送过提醒（24小时内）
-    const recentNotification = await prisma.notificationLog.findFirst({
+    const recentNotification = await prisma.notification.findFirst({
       where: {
-        relatedId: taskId,
-        relatedType: 'FOLLOW_UP_TASK',
+        metadata: {
+          path: ['relatedId'],
+          equals: taskId,
+        },
+        type: 'REMINDER',
         createdAt: {
           gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // 24小时内
         },
@@ -232,15 +235,20 @@ async function logReminderSent(
   success: boolean
 ): Promise<void> {
   try {
-    await prisma.notificationLog.create({
+    await prisma.notification.create({
       data: {
         userId,
-        type: 'FOLLOW_UP_REMINDER',
-        channels: channels as string[],
-        relatedType: 'FOLLOW_UP_TASK',
-        relatedId: taskId,
-        status: success ? 'SENT' : 'FAILED',
-        createdAt: new Date(),
+        type: 'SYSTEM',
+        priority: 'NORMAL',
+        status: 'UNREAD',
+        title: '跟进任务提醒',
+        content: `跟进任务提醒已${success ? '发送' : '失败'}`,
+        metadata: {
+          channels: channels as string[],
+          relatedType: 'FOLLOW_UP_TASK',
+          relatedId: taskId,
+          status: success ? 'SENT' : 'FAILED',
+        },
       },
     });
   } catch (error) {

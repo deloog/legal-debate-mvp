@@ -483,7 +483,7 @@ async function main() {
             applicabilityReason: `该法条适用于${caseData.cause}案件的法律适用`,
             status: LegalReferenceStatus.VALID,
             category: '核心法条',
-            tags: [caseData.cause, ref.lawType],
+            tags: [caseData.cause, ref.lawType].filter((t): t is string => t !== null),
             hitCount: Math.floor(Math.random() * 10) + 1,
             lastAccessed: new Date(),
           },

@@ -86,6 +86,7 @@ export class AlertManager {
           title: 'API错误率过高',
           message: `当前API错误率为${metrics.apiErrorRate.toFixed(2)}%，超过阈值5%`,
           severity: AlertSeverity.HIGH,
+          ruleId: 'api-error-rate',
           metadata: {
             currentValue: metrics.apiErrorRate,
             threshold: 5,
@@ -109,6 +110,7 @@ export class AlertManager {
           title: 'API响应时间过长',
           message: `当前P95响应时间为${metrics.apiResponseTimeP95.toFixed(0)}ms，超过阈值2000ms`,
           severity: AlertSeverity.MEDIUM,
+          ruleId: 'api-response-time',
           metadata: {
             currentValue: metrics.apiResponseTimeP95,
             threshold: 2000,
@@ -132,6 +134,7 @@ export class AlertManager {
           title: '数据库连接失败',
           message: `最近1分钟数据库连接失败${metrics.databaseConnectionFailed}次，超过阈值10次`,
           severity: AlertSeverity.CRITICAL,
+          ruleId: 'database-connection',
           metadata: {
             currentValue: metrics.databaseConnectionFailed,
             threshold: 10,
@@ -155,6 +158,7 @@ export class AlertManager {
           title: 'AI服务错误率过高',
           message: `当前AI服务错误率为${metrics.aiServiceErrorRate.toFixed(2)}%，超过阈值10%`,
           severity: AlertSeverity.HIGH,
+          ruleId: 'ai-service-error',
           metadata: {
             currentValue: metrics.aiServiceErrorRate,
             threshold: 10,
@@ -178,6 +182,7 @@ export class AlertManager {
           title: '磁盘空间不足',
           message: `当前磁盘使用率为${metrics.diskUsagePercent.toFixed(1)}%，超过阈值85%`,
           severity: AlertSeverity.MEDIUM,
+          ruleId: 'disk-usage',
           metadata: {
             currentValue: metrics.diskUsagePercent,
             threshold: 85,

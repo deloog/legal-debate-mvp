@@ -59,6 +59,11 @@
     "coverage",
     "dist",
     "test-output",
+    "archive",
+    "scripts",
+    "src/__tests__",
+    "**/*.test.ts",
+    "**/*.test.tsx",
     // 排除包含方括号的动态路由目录（避免 TypeScript 编译器内存溢出）
     // 注意：src/app/api/v1/integrations/[id] 需要在 include 中单独包含
     "src/app/api/**/[id]",

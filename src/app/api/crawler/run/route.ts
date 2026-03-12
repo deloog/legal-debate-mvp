@@ -17,7 +17,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
 import { crawlTaskManager } from '@/lib/crawler/crawl-task-manager';
 import { flkCrawler } from '@/lib/crawler/flk-crawler';
 import { DataSource } from '@/lib/crawler/types';
@@ -70,12 +71,13 @@ function getClientIP(request: NextRequest): string {
 /**
  * 验证输出目录路径（防止路径遍历）
  */
-function validateOutputDir(outputDir: string): boolean {
+async function validateOutputDir(outputDir: string): Promise<boolean> {
   if (!outputDir) return true;
 
   // 解析路径
-  const resolvedPath = await import('path').then(m => m.resolve(outputDir));
-  const allowedBase = await import('path').then(m => m.resolve('data/crawled'));
+  const path = await import('path');
+  const resolvedPath = path.resolve(outputDir);
+  const allowedBase = path.resolve('data/crawled');
 
   // 确保路径在允许的范围内
   if (!resolvedPath.startsWith(allowedBase)) {
@@ -120,7 +122,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. 身份验证
-    const session = await auth();
+    const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: '未认证，请先登录' }, { status: 401 });
     }
@@ -281,7 +283,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 2. 身份验证
-    const session = await auth();
+    const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: '未认证，请先登录' }, { status: 401 });
     }
@@ -411,8 +413,7 @@ async function runCrawler(
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
-    logger.error(`采集任务失败: ${source}`, {
-      error: errorMessage,
+    logger.error(`采集任务失败: ${source}`, new Error(errorMessage), {
       taskId,
       userId,
     });

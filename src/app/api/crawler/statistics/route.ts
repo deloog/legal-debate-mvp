@@ -8,7 +8,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth/auth-options';
 import { crawlTaskManager } from '@/lib/crawler/crawl-task-manager';
 import { logger } from '@/lib/logger';
 
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 2. 身份验证
-    const session = await auth();
+    const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: '未认证，请先登录' }, { status: 401 });
     }

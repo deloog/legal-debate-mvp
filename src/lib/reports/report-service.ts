@@ -23,7 +23,7 @@ export class ReportService {
    */
   static async generateReport(filter: ReportFilter): Promise<ReportData> {
     // 计算时间范围
-    const _period = this.calculatePeriod(filter);
+    const period = this.calculatePeriod(filter);
 
     // 根据报表类型生成数据
     let data:

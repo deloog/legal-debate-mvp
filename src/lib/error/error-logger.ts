@@ -279,7 +279,9 @@ export class ErrorLogger {
 
     // 脱敏输入数据
     if (sanitized.inputData) {
-      sanitized.inputData = this.sanitizeInputData(sanitized.inputData);
+      sanitized.inputData = this.sanitizeInputData(
+        sanitized.inputData
+      ) as Record<string, unknown>;
     }
 
     // 脱敏执行环境

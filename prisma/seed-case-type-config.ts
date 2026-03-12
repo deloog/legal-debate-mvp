@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import {
   CaseTypeCategory,
   type MaterialList,
@@ -300,8 +300,8 @@ async function createCaseTypeConfigs(): Promise<void> {
         hourlyRate: config.hourlyRate ?? null,
         requiredDocs: config.requiredDocs as never,
         optionalDocs: config.optionalDocs
-          ? (config.optionalDocs as never)
-          : null,
+          ? (config.optionalDocs as unknown as Prisma.InputJsonValue)
+          : Prisma.JsonNull,
         avgDuration: config.avgDuration ?? null,
         complexityLevel: config.complexityLevel ?? 2,
         isActive: true,

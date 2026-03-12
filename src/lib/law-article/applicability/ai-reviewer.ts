@@ -159,7 +159,7 @@ ${lawLines}
     try {
       // 提取 JSON：先尝试精确匹配，再回退到宽松匹配
       const jsonMatch =
-        response.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)?\}/s) ??
+        response.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)?\}/) ??
         response.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('No JSON found in AI response');
 

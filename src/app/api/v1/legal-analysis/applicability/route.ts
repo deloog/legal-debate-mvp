@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
+import type { CaseType } from '@/lib/agent/doc-analyzer/core/types';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import { createSuccessResponse } from '@/app/api/lib/responses/api-response';
 import { prisma } from '@/lib/db/prisma';
@@ -150,7 +151,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const caseInfo: DocumentAnalysisOutput = {
     success: true,
     extractedData: {
-      caseType: firstCaseType,
+      caseType: firstCaseType as CaseType,
       parties: parties as unknown as Party[],
       claims: claims as unknown as Claim[],
       keyFacts: keyFacts as unknown as KeyFact[],

@@ -258,7 +258,7 @@ export class ContractApprovalService {
             ? StepStatus.APPROVED
             : decision === 'REJECT'
               ? StepStatus.REJECTED
-              : StepStatus.RETURNED;
+              : StepStatus.REJECTED;
 
         // 8. 更新步骤状态（原子操作）
         await tx.approvalStep.update({
@@ -289,17 +289,17 @@ export class ContractApprovalService {
             },
           });
 
-          // 更新合同状态为已拒绝
+          // 更新合同状态为草稿
           await tx.contract.update({
             where: { id: approval.contractId },
-            data: { status: 'REJECTED' },
+            data: { status: 'DRAFT' },
           });
         } else if (decision === 'RETURN') {
-          // 退回：将审批状态改为已退回
+          // 退回：将审批状态改为已取消
           await tx.contractApproval.update({
             where: { id: approval.id },
             data: {
-              status: ApprovalStatus.RETURNED,
+              status: ApprovalStatus.CANCELLED,
               completedAt: new Date(),
             },
           });
@@ -359,7 +359,6 @@ export class ContractApprovalService {
       [ApprovalStatus.IN_PROGRESS]: '进行中',
       [ApprovalStatus.APPROVED]: '已通过',
       [ApprovalStatus.REJECTED]: '已拒绝',
-      [ApprovalStatus.RETURNED]: '已退回',
       [ApprovalStatus.CANCELLED]: '已取消',
     };
     return statusMap[status] || status;

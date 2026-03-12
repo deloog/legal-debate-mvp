@@ -223,7 +223,7 @@ export async function POST(
 ): Promise<NextResponse<SuccessResponse<unknown> | ErrorResponse>> {
   // ─── 认证 ─────────────────────────────────────────────────────────────────
   const userId = resolveContractUserId(request);
-  if (!userId) return unauthorizedResponse();
+  if (!userId) return unauthorizedResponse() as NextResponse<SuccessResponse<unknown> | ErrorResponse>;
 
   try {
     // 解析请求体

@@ -42,6 +42,7 @@ export interface Alert {
   message: string;
   severity: AlertSeverity;
   metadata?: Record<string, unknown>;
+  ruleId?: string;
 }
 
 /**
