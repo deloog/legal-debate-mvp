@@ -67,18 +67,44 @@ export const globalTeardown = async () => {
 // Individual test database reset
 export const resetDatabase = async () => {
   // Delete all data in correct order (respect foreign key constraints)
+  // 知识图谱相关（有外键依赖）
   await testPrisma.lawArticleRelation.deleteMany();
-  await testPrisma.lawArticle.deleteMany(); // 清理法条数据
+  await testPrisma.lawArticle.deleteMany();
+
+  // 任务和提醒
+  await testPrisma.followUpTask.deleteMany();
+  await testPrisma.reminder.deleteMany();
+
+  // 案件相关（按依赖顺序）
+  await testPrisma.courtSchedule.deleteMany();
+  await testPrisma.caseDiscussion.deleteMany();
+  await testPrisma.caseTimeline.deleteMany();
+  await testPrisma.evidenceRelation.deleteMany();
+  await testPrisma.evidence.deleteMany();
+  await testPrisma.caseTeamMember.deleteMany();
+  await testPrisma.communicationRecord.deleteMany();
+  await testPrisma.client.deleteMany();
+  await testPrisma.case.deleteMany();
+
+  // 辩论相关
   await testPrisma.aIInteraction.deleteMany();
   await testPrisma.argument.deleteMany();
   await testPrisma.legalReference.deleteMany();
   await testPrisma.debateRound.deleteMany();
   await testPrisma.debate.deleteMany();
+
+  // 文档和记忆
   await testPrisma.document.deleteMany();
-  await testPrisma.case.deleteMany();
+  await testPrisma.agentMemory.deleteMany();
+
+  // 用户和认证
   await testPrisma.session.deleteMany();
   await testPrisma.account.deleteMany();
   await testPrisma.user.deleteMany();
+
+  // 其他配置表
+  await testPrisma.caseTypeConfig.deleteMany().catch(() => {});
+  await testPrisma.courtSchedule.deleteMany().catch(() => {});
 };
 
 // Test database isolation utilities
