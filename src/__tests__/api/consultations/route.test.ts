@@ -19,10 +19,23 @@ jest.mock('@/lib/db/prisma', () => ({
 
 import { prisma } from '@/lib/db/prisma';
 
+// 辅助函数：创建带有 headers 的 mock Request
+function createMockRequest(url: string): NextRequest {
+  return {
+    url: new URL(url),
+    headers: {
+      get: jest.fn((key: string) => {
+        if (key.toLowerCase() === 'authorization') return 'Bearer test-token';
+        return null;
+      }),
+    },
+  } as unknown as NextRequest;
+}
+
 // Mock Request对象
-const mockRequest = {
-  url: new URL('http://localhost:3000/api/consultations'),
-} as unknown as NextRequest;
+const mockRequest = createMockRequest(
+  'http://localhost:3000/api/consultations'
+);
 
 describe('GET /api/consultations', () => {
   beforeEach(() => {
@@ -61,9 +74,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该接受自定义page参数', async () => {
-      const request = {
-        url: new URL('http://localhost:3000/api/consultations?page=2'),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?page=2'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -80,9 +93,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该接受自定义pageSize参数', async () => {
-      const request = {
-        url: new URL('http://localhost:3000/api/consultations?pageSize=50'),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?pageSize=50'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -98,9 +111,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该限制最大pageSize为100', async () => {
-      const request = {
-        url: new URL('http://localhost:3000/api/consultations?pageSize=200'),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?pageSize=200'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -116,9 +129,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该设置最小pageSize为1', async () => {
-      const request = {
-        url: new URL('http://localhost:3000/api/consultations?pageSize=0'),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?pageSize=0'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -136,9 +149,9 @@ describe('GET /api/consultations', () => {
 
   describe('筛选功能', () => {
     test('应该支持status筛选', async () => {
-      const request = {
-        url: new URL('http://localhost:3000/api/consultations?status=PENDING'),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?status=PENDING'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -156,11 +169,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该支持consultType筛选', async () => {
-      const request = {
-        url: new URL(
-          'http://localhost:3000/api/consultations?consultType=PHONE'
-        ),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?consultType=PHONE'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -178,11 +189,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该支持startDate筛选', async () => {
-      const request = {
-        url: new URL(
-          'http://localhost:3000/api/consultations?startDate=2026-01-01'
-        ),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?startDate=2026-01-01'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -202,11 +211,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该支持endDate筛选', async () => {
-      const request = {
-        url: new URL(
-          'http://localhost:3000/api/consultations?endDate=2026-12-31'
-        ),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?endDate=2026-12-31'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -226,9 +233,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该支持keyword搜索（姓名）', async () => {
-      const request = {
-        url: new URL('http://localhost:3000/api/consultations?keyword=张三'),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?keyword=张三'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -252,9 +259,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该支持keyword搜索（电话）', async () => {
-      const request = {
-        url: new URL('http://localhost:3000/api/consultations?keyword=138'),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?keyword=138'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -278,11 +285,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该支持组合筛选', async () => {
-      const request = {
-        url: new URL(
-          'http://localhost:3000/api/consultations?status=PENDING&consultType=PHONE&keyword=张三'
-        ),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?status=PENDING&consultType=PHONE&keyword=张三'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -302,9 +307,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该处理无效的status参数', async () => {
-      const request = {
-        url: new URL('http://localhost:3000/api/consultations?status=INVALID'),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?status=INVALID'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -318,11 +323,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该处理无效的consultType参数', async () => {
-      const request = {
-        url: new URL(
-          'http://localhost:3000/api/consultations?consultType=INVALID'
-        ),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?consultType=INVALID'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -338,9 +341,9 @@ describe('GET /api/consultations', () => {
 
   describe('排序功能', () => {
     test('应该按consultTime降序排序（默认）', async () => {
-      const request = {
-        url: new URL('http://localhost:3000/api/consultations'),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -358,11 +361,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该支持sortBy参数', async () => {
-      const request = {
-        url: new URL(
-          'http://localhost:3000/api/consultations?sortBy=createdAt'
-        ),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?sortBy=createdAt'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -380,9 +381,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该支持sortOrder参数', async () => {
-      const request = {
-        url: new URL('http://localhost:3000/api/consultations?sortOrder=asc'),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?sortOrder=asc'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -402,11 +403,9 @@ describe('GET /api/consultations', () => {
 
   describe('数据返回', () => {
     test('应该返回正确的分页信息', async () => {
-      const request = {
-        url: new URL(
-          'http://localhost:3000/api/consultations?page=1&pageSize=20'
-        ),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?page=1&pageSize=20'
+      );
 
       const mockConsultations = Array.from({ length: 20 }, (_, i) => ({
         id: `id-${i}`,
@@ -436,9 +435,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该排除已删除的记录', async () => {
-      const request = {
-        url: new URL('http://localhost:3000/api/consultations'),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -456,9 +455,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该按咨询时间降序返回最新记录', async () => {
-      const request = {
-        url: new URL('http://localhost:3000/api/consultations'),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations'
+      );
 
       const mockConsultations = [
         {
@@ -490,9 +489,9 @@ describe('GET /api/consultations', () => {
 
   describe('错误处理', () => {
     test('应该处理数据库错误', async () => {
-      const request = {
-        url: new URL('http://localhost:3000/api/consultations'),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockRejectedValue(
         new Error('数据库连接失败')
@@ -510,11 +509,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该处理空结果', async () => {
-      const request = {
-        url: new URL(
-          'http://localhost:3000/api/consultations?keyword=不存在的客户'
-        ),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?keyword=不存在的客户'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -529,11 +526,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该处理无效的日期格式', async () => {
-      const request = {
-        url: new URL(
-          'http://localhost:3000/api/consultations?startDate=invalid-date'
-        ),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?startDate=invalid-date'
+      );
 
       const response = await GET(request);
       const data = await response.json();
@@ -546,9 +541,9 @@ describe('GET /api/consultations', () => {
 
   describe('响应格式', () => {
     test('应该返回标准的成功响应格式', async () => {
-      const request = {
-        url: new URL('http://localhost:3000/api/consultations'),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations'
+      );
 
       const mockConsultations = [
         {
@@ -577,9 +572,9 @@ describe('GET /api/consultations', () => {
     });
 
     test('应该返回标准的错误响应格式', async () => {
-      const request = {
-        url: new URL('http://localhost:3000/api/consultations?status=INVALID'),
-      } as unknown as NextRequest;
+      const request = createMockRequest(
+        'http://localhost:3000/api/consultations?status=INVALID'
+      );
 
       (prisma.consultation.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.consultation.count as jest.Mock).mockResolvedValue(0);
@@ -645,6 +640,7 @@ describe('POST /api/consultations', () => {
 
       mockRequest = {
         json: jest.fn().mockResolvedValue(mockJsonBody),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -675,6 +671,7 @@ describe('POST /api/consultations', () => {
 
       mockRequest = {
         json: jest.fn().mockResolvedValue(mockJsonBody),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -700,6 +697,7 @@ describe('POST /api/consultations', () => {
 
       mockRequest = {
         json: jest.fn().mockResolvedValue(mockJsonBody),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -737,6 +735,7 @@ describe('POST /api/consultations', () => {
           clientName: '李四',
           caseSummary: '这是一段案情摘要，至少需要10个字符才能通过验证。',
         }),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -753,6 +752,7 @@ describe('POST /api/consultations', () => {
 
       mockRequest = {
         json: jest.fn().mockResolvedValue(bodyWithoutName),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -768,6 +768,7 @@ describe('POST /api/consultations', () => {
 
       mockRequest = {
         json: jest.fn().mockResolvedValue(bodyWithoutSummary),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -783,6 +784,7 @@ describe('POST /api/consultations', () => {
           ...mockJsonBody,
           clientPhone: 'invalid-phone',
         }),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -799,6 +801,7 @@ describe('POST /api/consultations', () => {
           ...mockJsonBody,
           clientEmail: 'invalid-email',
         }),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -815,6 +818,7 @@ describe('POST /api/consultations', () => {
           ...mockJsonBody,
           caseSummary: '太短',
         }),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -833,6 +837,7 @@ describe('POST /api/consultations', () => {
           ...mockJsonBody,
           caseSummary: longSummary,
         }),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -851,6 +856,7 @@ describe('POST /api/consultations', () => {
           ...mockJsonBody,
           clientName: longName,
         }),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -867,6 +873,7 @@ describe('POST /api/consultations', () => {
           ...mockJsonBody,
           consultType: 'INVALID_TYPE',
         }),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -882,6 +889,7 @@ describe('POST /api/consultations', () => {
           ...mockJsonBody,
           consultTime: 'invalid-date',
         }),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -901,6 +909,7 @@ describe('POST /api/consultations', () => {
 
       mockRequest = {
         json: jest.fn().mockResolvedValue(mockJsonBody),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -914,6 +923,7 @@ describe('POST /api/consultations', () => {
     test('应该处理JSON解析错误', async () => {
       mockRequest = {
         json: jest.fn().mockRejectedValue(new Error('Invalid JSON')),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -926,6 +936,7 @@ describe('POST /api/consultations', () => {
     test('应该处理缺少必需字段的情况', async () => {
       mockRequest = {
         json: jest.fn().mockResolvedValue({}),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -953,6 +964,7 @@ describe('POST /api/consultations', () => {
 
       mockRequest = {
         json: jest.fn().mockResolvedValue(mockJsonBody),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       await POST(mockRequest);
@@ -979,6 +991,7 @@ describe('POST /api/consultations', () => {
 
       mockRequest = {
         json: jest.fn().mockResolvedValue(mockJsonBody),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -1009,6 +1022,7 @@ describe('POST /api/consultations', () => {
 
       mockRequest = {
         json: jest.fn().mockResolvedValue(mockJsonBody),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
@@ -1023,6 +1037,7 @@ describe('POST /api/consultations', () => {
     test('应该返回标准的错误响应格式', async () => {
       mockRequest = {
         json: jest.fn().mockResolvedValue({}),
+        headers: { get: jest.fn() },
       } as unknown as NextRequest;
 
       const response = await POST(mockRequest);
