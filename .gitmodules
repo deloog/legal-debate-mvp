@@ -1,0 +1,3 @@
+[submodule "just-laws"]
+	path = just-laws
+	url = https://github.com/deloog/just-laws.git
