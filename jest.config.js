@@ -3,13 +3,12 @@ module.exports = {
   // 全局配置
   preset: 'ts-jest',
   verbose: true,
-  // 使用50% CPU核心，避免连接池耗尽
-  maxWorkers: '50%',
+  // 限制并发 worker 数，避免连接池耗尽
+  maxWorkers: 2,
   // 限制并发测试数
   maxConcurrency: 2,
   // 默认超时时间
   testTimeout: 30000,
-  maxWorkers: 2,
   // 资源限制
   testEnvironmentOptions: {
     // 限制V8堆内存
