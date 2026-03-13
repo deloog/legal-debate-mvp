@@ -2,7 +2,9 @@ import { PrismaClient } from '@prisma/client';
 
 // Create a test instance of Prisma Client with test database
 // 使用环境变量 DATABASE_URL，CI 环境中由 GitHub Actions 设置
-const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/test_db';
+const databaseUrl =
+  process.env.DATABASE_URL ||
+  'postgresql://postgres:postgres@localhost:5432/test_db';
 
 export const testPrisma = new PrismaClient({
   datasources: {
