@@ -238,7 +238,9 @@ describe('LawArticleRelationService', () => {
         expect(relation.relationType).toBe(relationType);
 
         // 清理
-        await testPrisma.lawArticleRelation.delete({ where: { id: relation.id } });
+        await testPrisma.lawArticleRelation.delete({
+          where: { id: relation.id },
+        });
       }
     });
   });
@@ -597,7 +599,7 @@ describe('LawArticleRelationService', () => {
           name: '测试专家',
         },
       });
-      
+
       const testExpert = await testPrisma.knowledgeGraphExpert.create({
         data: {
           userId: testUser.id,

@@ -397,7 +397,7 @@ describe('AdminCaseList组件', () => {
           // 检查 fetch 被调用且 URL 包含 search 参数
           const fetchCalls = (global.fetch as jest.Mock).mock.calls;
           const hasSearchCall = fetchCalls.some(
-            (call) => call[0] && call[0].includes('search=')
+            call => call[0] && call[0].includes('search=')
           );
           expect(hasSearchCall).toBe(true);
         },
@@ -521,7 +521,7 @@ describe('AdminCaseList组件', () => {
           // 检查 fetch 被调用且 URL 包含查询参数
           const fetchCalls = (global.fetch as jest.Mock).mock.calls;
           const hasQueryCall = fetchCalls.some(
-            (call) => call[0] && (call[0].includes('?') || call[0].includes('&'))
+            call => call[0] && (call[0].includes('?') || call[0].includes('&'))
           );
           expect(hasQueryCall).toBe(true);
         },

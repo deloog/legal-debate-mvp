@@ -33,7 +33,7 @@ const hasAllModels =
 export const prisma =
   isTestEnv || !hasAllModels
     ? createPrismaClient()
-    : globalThis.__prisma ?? createPrismaClient();
+    : (globalThis.__prisma ?? createPrismaClient());
 
 // 开发环境下，将客户端实例保存到全局变量，避免热重载时创建多个实例
 if (process.env.NODE_ENV === 'development' && !isTestEnv) {
