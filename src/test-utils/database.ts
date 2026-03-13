@@ -68,6 +68,7 @@ export const globalTeardown = async () => {
 export const resetDatabase = async () => {
   // Delete all data in correct order (respect foreign key constraints)
   await testPrisma.lawArticleRelation.deleteMany();
+  await testPrisma.lawArticle.deleteMany(); // 清理法条数据
   await testPrisma.aIInteraction.deleteMany();
   await testPrisma.argument.deleteMany();
   await testPrisma.legalReference.deleteMany();
