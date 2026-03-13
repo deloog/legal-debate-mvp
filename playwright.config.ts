@@ -6,6 +6,12 @@ import { resolve } from 'path';
 dotenvConfig({ path: resolve(__dirname, '.env') });
 dotenvConfig({ path: resolve(__dirname, '.env.development') });
 
+// 本地 E2E 优先使用 TEST_DATABASE_URL，避免污染 dev 数据库
+// CI 环境 DATABASE_URL 已由 workflow 注入，不受影响
+if (process.env.TEST_DATABASE_URL && !process.env.CI) {
+  process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
+}
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -63,6 +69,10 @@ export default defineConfig({
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
+    // 将正确的 DATABASE_URL 注入到 dev server 子进程
+    env: {
+      DATABASE_URL: process.env.DATABASE_URL ?? '',
+    },
   },
 
   /* Test timeout - increased for AI service calls and Mock mode */
