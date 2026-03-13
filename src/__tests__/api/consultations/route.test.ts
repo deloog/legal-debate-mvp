@@ -21,19 +21,16 @@ import { prisma } from '@/lib/db/prisma';
 
 // Mock JWT 工具
 jest.mock('@/lib/auth/jwt', () => ({
-  extractTokenFromHeader: jest.fn((header: string) =>
-    header?.replace('Bearer ', '')
-  ),
-  verifyToken: jest.fn(() => ({
-    valid: true,
-    payload: { userId: 'test-user-id' },
-  })),
+  extractTokenFromHeader: jest.fn(),
+  verifyToken: jest.fn(),
 }));
 
 // Mock NextAuth
 jest.mock('next-auth', () => ({
   getServerSession: jest.fn(),
 }));
+
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
 
 // 辅助函数：创建带有 headers 的 mock Request
 function createMockRequest(url: string): NextRequest {
@@ -56,6 +53,14 @@ const mockRequest = createMockRequest(
 describe('GET /api/consultations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // 设置 JWT mock 返回值
+    (extractTokenFromHeader as jest.Mock).mockImplementation((header: string) =>
+      header?.replace('Bearer ', '')
+    );
+    (verifyToken as jest.Mock).mockReturnValue({
+      valid: true,
+      payload: { userId: 'test-user-id' },
+    });
   });
 
   describe('参数验证', () => {
