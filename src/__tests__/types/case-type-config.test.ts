@@ -348,8 +348,11 @@ describe('律师人数推荐', () => {
 
 describe('CaseTypeConfig 数据库操作', () => {
   let createdConfigId: string | undefined = undefined;
+  let testCodePrefix: string;
 
   beforeEach(async () => {
+    // 生成唯一测试前缀，避免并行测试冲突
+    testCodePrefix = `TEST_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     // 清理测试数据
     await testPrisma.caseTypeConfig.deleteMany({});
   });
@@ -372,7 +375,7 @@ describe('CaseTypeConfig 数据库操作', () => {
 
       const config = await testPrisma.caseTypeConfig.create({
         data: {
-          code: 'TEST_TYPE',
+          code: `${testCodePrefix}_TYPE`,
           name: '测试案件类型',
           category: CaseTypeCategory.CIVIL,
           baseFee: 5000,
@@ -390,7 +393,7 @@ describe('CaseTypeConfig 数据库操作', () => {
       createdConfigId = config.id;
 
       expect(config).toBeDefined();
-      expect(config.code).toBe('TEST_TYPE');
+      expect(config.code).toBe(`${testCodePrefix}_TYPE`);
       expect(config.name).toBe('测试案件类型');
       expect(config.category).toBe(CaseTypeCategory.CIVIL);
       expect(String(config.baseFee)).toBe('5000');
@@ -409,7 +412,7 @@ describe('CaseTypeConfig 数据库操作', () => {
 
       const config = await testPrisma.caseTypeConfig.create({
         data: {
-          code: 'TEST_TYPE_2',
+          code: `${testCodePrefix}_TYPE_2`,
           name: '测试案件类型2',
           category: CaseTypeCategory.CRIMINAL,
           baseFee: 10000,
@@ -438,7 +441,7 @@ describe('CaseTypeConfig 数据库操作', () => {
 
       await testPrisma.caseTypeConfig.create({
         data: {
-          code: 'DUPLICATE',
+          code: `${testCodePrefix}_DUPLICATE`,
           name: '第一个',
           category: CaseTypeCategory.CIVIL,
           baseFee: 5000,
@@ -451,7 +454,7 @@ describe('CaseTypeConfig 数据库操作', () => {
       await expect(
         testPrisma.caseTypeConfig.create({
           data: {
-            code: 'DUPLICATE',
+            code: `${testCodePrefix}_DUPLICATE`,
             name: '第二个',
             category: CaseTypeCategory.CIVIL,
             baseFee: 5000,
@@ -473,7 +476,7 @@ describe('CaseTypeConfig 数据库操作', () => {
 
       const configs = [
         {
-          code: 'TYPE_1',
+          code: `${testCodePrefix}_TYPE_1`,
           name: '类型1',
           category: CaseTypeCategory.CIVIL,
           baseFee: 5000,
@@ -484,7 +487,7 @@ describe('CaseTypeConfig 数据库操作', () => {
           sortOrder: 1,
         },
         {
-          code: 'TYPE_2',
+          code: `${testCodePrefix}_TYPE_2`,
           name: '类型2',
           category: CaseTypeCategory.CRIMINAL,
           baseFee: 10000,
@@ -526,11 +529,11 @@ describe('CaseTypeConfig 数据库操作', () => {
 
     it('应该能够按代码查询', async () => {
       const config = await testPrisma.caseTypeConfig.findUnique({
-        where: { code: 'TYPE_1' },
+        where: { code: `${testCodePrefix}_TYPE_1` },
       });
 
       expect(config).toBeDefined();
-      expect(config?.code).toBe('TYPE_1');
+      expect(config?.code).toBe(`${testCodePrefix}_TYPE_1`);
     });
   });
 
@@ -542,7 +545,7 @@ describe('CaseTypeConfig 数据库操作', () => {
 
       const config = await testPrisma.caseTypeConfig.create({
         data: {
-          code: 'UPDATE_TEST',
+          code: `${testCodePrefix}_UPDATE_TEST`,
           name: '原始名称',
           category: CaseTypeCategory.CIVIL,
           baseFee: 5000,
@@ -575,7 +578,7 @@ describe('CaseTypeConfig 数据库操作', () => {
 
       const config = await testPrisma.caseTypeConfig.create({
         data: {
-          code: 'TIMESTAMP_TEST',
+          code: `${testCodePrefix}_TIMESTAMP_TEST`,
           name: '时间戳测试',
           category: CaseTypeCategory.CIVIL,
           baseFee: 5000,
@@ -613,7 +616,7 @@ describe('CaseTypeConfig 数据库操作', () => {
 
       const config = await testPrisma.caseTypeConfig.create({
         data: {
-          code: 'DELETE_TEST',
+          code: `${testCodePrefix}_DELETE_TEST`,
           name: '删除测试',
           category: CaseTypeCategory.CIVIL,
           baseFee: 5000,
