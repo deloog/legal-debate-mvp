@@ -84,7 +84,7 @@ jobs:
         run: npm run type-check
 
       - name: Run tests with coverage
-        run: npm run test:ci -- --runInBand --maxWorkers=1
+        run: npm run test:ci -- --runInBand
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
           REDIS_URL: redis://localhost:6379/1
