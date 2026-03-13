@@ -4,8 +4,11 @@
  * @jest-environment node
  */
 
+// 取消 mock，使用真实 Prisma 客户端
+jest.unmock('@/lib/db/prisma');
+
 import { LawArticleRelationService } from '../../../lib/law-article/relation-service';
-import { prisma } from '../../../lib/db/prisma';
+import { testPrisma } from '../../../test-utils/database';
 import {
   RelationType,
   DiscoveryMethod,
@@ -24,7 +27,7 @@ describe('LawArticleRelationService', () => {
   // 测试前准备：创建测试数据
   beforeAll(async () => {
     // 创建测试法条
-    testArticle1 = await prisma.lawArticle.create({
+    testArticle1 = await testPrisma.lawArticle.create({
       data: {
         lawName: '测试法A',
         articleNumber: '1',
@@ -41,7 +44,7 @@ describe('LawArticleRelationService', () => {
       },
     });
 
-    testArticle2 = await prisma.lawArticle.create({
+    testArticle2 = await testPrisma.lawArticle.create({
       data: {
         lawName: '测试法B',
         articleNumber: '2',
@@ -58,7 +61,7 @@ describe('LawArticleRelationService', () => {
       },
     });
 
-    testArticle3 = await prisma.lawArticle.create({
+    testArticle3 = await testPrisma.lawArticle.create({
       data: {
         lawName: '测试法C',
         articleNumber: '3',
@@ -82,7 +85,7 @@ describe('LawArticleRelationService', () => {
     if (!testArticle1?.id || !testArticle2?.id || !testArticle3?.id) {
       return;
     }
-    await prisma.lawArticleRelation.deleteMany({
+    await testPrisma.lawArticleRelation.deleteMany({
       where: {
         OR: [
           {
@@ -98,7 +101,7 @@ describe('LawArticleRelationService', () => {
         ],
       },
     });
-    await prisma.lawArticle.deleteMany({
+    await testPrisma.lawArticle.deleteMany({
       where: {
         id: { in: [testArticle1.id, testArticle2.id, testArticle3.id] },
       },
@@ -111,7 +114,7 @@ describe('LawArticleRelationService', () => {
     if (!testArticle1?.id || !testArticle2?.id || !testArticle3?.id) {
       return;
     }
-    await prisma.lawArticleRelation.deleteMany({
+    await testPrisma.lawArticleRelation.deleteMany({
       where: {
         OR: [
           {
@@ -235,7 +238,7 @@ describe('LawArticleRelationService', () => {
         expect(relation.relationType).toBe(relationType);
 
         // 清理
-        await prisma.lawArticleRelation.delete({ where: { id: relation.id } });
+        await testPrisma.lawArticleRelation.delete({ where: { id: relation.id } });
       }
     });
   });
@@ -300,7 +303,7 @@ describe('LawArticleRelationService', () => {
   describe('getArticleRelations - 获取法条关系', () => {
     beforeEach(async () => {
       // 创建测试关系
-      await prisma.lawArticleRelation.createMany({
+      await testPrisma.lawArticleRelation.createMany({
         data: [
           {
             sourceId: testArticle1.id,
@@ -428,7 +431,7 @@ describe('LawArticleRelationService', () => {
   describe('findRelationPath - 查找关系路径', () => {
     beforeEach(async () => {
       // 创建关系链: A -> B -> C
-      await prisma.lawArticleRelation.createMany({
+      await testPrisma.lawArticleRelation.createMany({
         data: [
           {
             sourceId: testArticle1.id,
@@ -507,7 +510,7 @@ describe('LawArticleRelationService', () => {
 
   describe('getRelationStats - 获取关系统计', () => {
     beforeEach(async () => {
-      await prisma.lawArticleRelation.createMany({
+      await testPrisma.lawArticleRelation.createMany({
         data: [
           {
             sourceId: testArticle1.id,
@@ -550,7 +553,7 @@ describe('LawArticleRelationService', () => {
 
     it('应该处理没有关系的法条', async () => {
       // 创建一个新的测试法条
-      const newArticle = await prisma.lawArticle.create({
+      const newArticle = await testPrisma.lawArticle.create({
         data: {
           lawName: '测试法D',
           articleNumber: '4',
@@ -575,15 +578,35 @@ describe('LawArticleRelationService', () => {
       expect(Object.keys(stats.byType)).toHaveLength(0);
 
       // 清理
-      await prisma.lawArticle.delete({ where: { id: newArticle.id } });
+      await testPrisma.lawArticle.delete({ where: { id: newArticle.id } });
     });
   });
 
   describe('verifyRelation - 验证关系', () => {
     let testRelationId: string;
+    let testExpertId: string;
 
     beforeEach(async () => {
-      const relation = await prisma.lawArticleRelation.create({
+      // 创建测试用户和专家（用于外键约束）
+      // 使用随机数避免并行测试冲突
+      const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+      const testUser = await testPrisma.user.create({
+        data: {
+          email: `test-expert-${uniqueId}@example.com`,
+          username: `test-expert-${uniqueId}`,
+          name: '测试专家',
+        },
+      });
+      
+      const testExpert = await testPrisma.knowledgeGraphExpert.create({
+        data: {
+          userId: testUser.id,
+          expertiseAreas: [],
+        },
+      });
+      testExpertId = testExpert.id;
+
+      const relation = await testPrisma.lawArticleRelation.create({
         data: {
           sourceId: testArticle1.id,
           targetId: testArticle2.id,
@@ -597,27 +620,44 @@ describe('LawArticleRelationService', () => {
       testRelationId = relation.id;
     });
 
+    afterEach(async () => {
+      // 清理创建的专家和用户
+      if (testExpertId) {
+        const expert = await testPrisma.knowledgeGraphExpert.findUnique({
+          where: { id: testExpertId },
+        });
+        if (expert) {
+          await testPrisma.knowledgeGraphExpert.delete({
+            where: { id: testExpertId },
+          });
+          await testPrisma.user.delete({
+            where: { id: expert.userId },
+          });
+        }
+      }
+    });
+
     it('应该成功验证通过关系', async () => {
       const result = await LawArticleRelationService.verifyRelation(
         testRelationId,
-        'admin-user-id',
+        testExpertId,
         true
       );
 
       expect(result.verificationStatus).toBe(VerificationStatus.VERIFIED);
-      expect(result.verifiedBy).toBe('admin-user-id');
+      expect(result.verifiedBy).toBe(testExpertId);
       expect(result.verifiedAt).toBeDefined();
     });
 
     it('应该成功拒绝关系', async () => {
       const result = await LawArticleRelationService.verifyRelation(
         testRelationId,
-        'admin-user-id',
+        testExpertId,
         false
       );
 
       expect(result.verificationStatus).toBe(VerificationStatus.REJECTED);
-      expect(result.verifiedBy).toBe('admin-user-id');
+      expect(result.verifiedBy).toBe(testExpertId);
       expect(result.verifiedAt).toBeDefined();
     });
 
@@ -625,7 +665,7 @@ describe('LawArticleRelationService', () => {
       await expect(
         LawArticleRelationService.verifyRelation(
           'non-existent-id',
-          'admin-user-id',
+          testExpertId,
           true
         )
       ).rejects.toThrow();
@@ -636,7 +676,7 @@ describe('LawArticleRelationService', () => {
     let testRelationId: string;
 
     beforeEach(async () => {
-      const relation = await prisma.lawArticleRelation.create({
+      const relation = await testPrisma.lawArticleRelation.create({
         data: {
           sourceId: testArticle1.id,
           targetId: testArticle2.id,
@@ -652,7 +692,7 @@ describe('LawArticleRelationService', () => {
     it('应该成功删除关系', async () => {
       await LawArticleRelationService.deleteRelation(testRelationId);
 
-      const relation = await prisma.lawArticleRelation.findUnique({
+      const relation = await testPrisma.lawArticleRelation.findUnique({
         where: { id: testRelationId },
       });
 
@@ -678,7 +718,7 @@ describe('LawArticleRelationService', () => {
         discoveryMethod: DiscoveryMethod.MANUAL,
       }));
 
-      await prisma.lawArticleRelation.createMany({ data: relations });
+      await testPrisma.lawArticleRelation.createMany({ data: relations });
 
       const startTime = Date.now();
       const result = await LawArticleRelationService.getArticleRelations(

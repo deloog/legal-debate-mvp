@@ -23,7 +23,17 @@ function createPrismaClient(): PrismaClient {
 }
 
 // 获取Prisma客户端实例（单例模式）
-export const prisma = globalThis.__prisma ?? createPrismaClient();
+// 测试环境下总是创建新实例，避免全局状态污染
+// 同时检查 globalThis.__prisma 是否有所有需要的模型
+const hasAllModels =
+  globalThis.__prisma &&
+  typeof globalThis.__prisma.lawArticle === 'object' &&
+  typeof globalThis.__prisma.lawArticleRelation === 'object';
+
+export const prisma =
+  isTestEnv || !hasAllModels
+    ? createPrismaClient()
+    : globalThis.__prisma ?? createPrismaClient();
 
 // 开发环境下，将客户端实例保存到全局变量，避免热重载时创建多个实例
 if (process.env.NODE_ENV === 'development' && !isTestEnv) {
