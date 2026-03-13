@@ -184,7 +184,8 @@ export class Logger {
     }
 
     const method = this.getConsoleMethod(level);
-    method(formatted);
+    // 使用 bind 确保 this 绑定正确，避免在测试环境中出错
+    method.call(console, formatted);
   }
 
   /**
