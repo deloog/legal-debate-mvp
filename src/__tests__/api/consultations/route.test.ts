@@ -19,6 +19,22 @@ jest.mock('@/lib/db/prisma', () => ({
 
 import { prisma } from '@/lib/db/prisma';
 
+// Mock JWT 工具
+jest.mock('@/lib/auth/jwt', () => ({
+  extractTokenFromHeader: jest.fn((header: string) =>
+    header?.replace('Bearer ', '')
+  ),
+  verifyToken: jest.fn(() => ({
+    valid: true,
+    payload: { userId: 'test-user-id' },
+  })),
+}));
+
+// Mock NextAuth
+jest.mock('next-auth', () => ({
+  getServerSession: jest.fn(),
+}));
+
 // 辅助函数：创建带有 headers 的 mock Request
 function createMockRequest(url: string): NextRequest {
   return {
