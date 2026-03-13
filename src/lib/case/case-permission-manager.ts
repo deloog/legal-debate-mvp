@@ -24,7 +24,7 @@ export interface CasePermissionCheckResult {
   reason?: string;
   requiredPermission: CasePermission;
   actualPermissions?: CasePermission[];
-  memberRole?: CaseRole;
+  memberRole?: CaseRole | null;
 }
 
 /**
