@@ -275,7 +275,7 @@ export async function checkPermission(
       return {
         hasPermission: true,
         requiredPermission: permission,
-        memberRole: undefined,
+        memberRole: null,
       };
     }
 
@@ -284,7 +284,7 @@ export async function checkPermission(
       return {
         hasPermission: true,
         requiredPermission: permission,
-        memberRole: undefined,
+        memberRole: null,
       };
     }
 
