@@ -54,8 +54,8 @@ describe('GET /api/orders', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      (extractTokenFromHeader as jest.Mock).mockImplementation((header: string) =>
-        header?.replace('Bearer ', '')
+      (extractTokenFromHeader as jest.Mock).mockImplementation(
+        (header: string) => header?.replace('Bearer ', '')
       );
       (verifyToken as jest.Mock).mockReturnValue({
         valid: true,
@@ -310,8 +310,8 @@ describe('GET /api/orders', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      (extractTokenFromHeader as jest.Mock).mockImplementation((header: string) =>
-        header?.replace('Bearer ', '')
+      (extractTokenFromHeader as jest.Mock).mockImplementation(
+        (header: string) => header?.replace('Bearer ', '')
       );
       (verifyToken as jest.Mock).mockReturnValue({
         valid: true,
