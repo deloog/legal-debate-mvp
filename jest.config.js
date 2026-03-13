@@ -9,6 +9,7 @@ module.exports = {
   maxConcurrency: 2,
   // 默认超时时间
   testTimeout: 30000,
+  maxWorkers: 2,
   // 资源限制
   testEnvironmentOptions: {
     // 限制V8堆内存
