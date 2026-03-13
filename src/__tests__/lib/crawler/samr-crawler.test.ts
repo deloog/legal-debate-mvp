@@ -5,6 +5,17 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+
+// Mock Playwright to avoid ESM issues in Jest
+jest.mock('@playwright/test', () => ({
+  chromium: {
+    launch: jest.fn(),
+  },
+  Browser: class MockBrowser {},
+  BrowserContext: class MockContext {},
+  Page: class MockPage {},
+}));
+
 import {
   SAMRCrawler,
   SAMR_CONFIG,
