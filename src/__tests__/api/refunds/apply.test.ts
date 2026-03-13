@@ -3,14 +3,20 @@
  * POST /api/refunds/apply
  */
 
-import { POST } from '@/app/api/refunds/apply/route';
-import { NextRequest } from 'next/server';
-import { PaymentMethod, RefundReason, RefundStatus } from '@/types/payment';
+// Mock JWT 工具
+jest.mock('@/lib/auth/jwt', () => ({
+  extractTokenFromHeader: jest.fn(),
+  verifyToken: jest.fn(),
+}));
 
-// Mock next-auth
+// Mock NextAuth
 jest.mock('next-auth', () => ({
   getServerSession: jest.fn(),
 }));
+
+import { POST } from '@/app/api/refunds/apply/route';
+import { NextRequest } from 'next/server';
+import { PaymentMethod, RefundReason, RefundStatus } from '@/types/payment';
 
 // Mock auth options
 jest.mock('@/lib/auth/auth-options', () => ({
@@ -56,12 +62,20 @@ import { prisma } from '@/lib/db/prisma';
 import { alipayRefund } from '@/lib/payment/alipay-refund';
 import { wechatRefund } from '@/lib/payment/wechat-refund';
 import { paymentConfig } from '@/lib/payment/payment-config';
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
 
 describe('POST /api/refunds/apply', () => {
   let mockRequest: NextRequest;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (extractTokenFromHeader as jest.Mock).mockImplementation((header: string) =>
+      header?.replace('Bearer ', '')
+    );
+    (verifyToken as jest.Mock).mockReturnValue({
+      valid: true,
+      payload: { userId: 'test-user-id' },
+    });
     mockRequest = {
       json: async () => ({}),
     } as unknown as NextRequest;

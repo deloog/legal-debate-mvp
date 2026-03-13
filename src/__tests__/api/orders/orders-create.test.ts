@@ -3,18 +3,17 @@
  * POST /api/orders/create
  */
 
-import { POST } from '@/app/api/orders/create/route';
-import {
-  createMockRequest,
-  createTestResponse,
-  assertions,
-  mockData,
-} from '../test-utils';
+// Mock JWT 工具
+jest.mock('@/lib/auth/jwt', () => ({
+  extractTokenFromHeader: jest.fn(),
+  verifyToken: jest.fn(),
+}));
 
-// Mock dependencies
+// Mock NextAuth
 jest.mock('next-auth', () => ({
   getServerSession: jest.fn(),
 }));
+
 jest.mock('@/lib/order/order-service', () => ({
   createOrder: jest.fn(),
 }));
@@ -27,14 +26,33 @@ jest.mock('@/lib/db/prisma', () => ({
   },
 }));
 
+import { POST } from '@/app/api/orders/create/route';
+import {
+  createMockRequest,
+  createTestResponse,
+  assertions,
+  mockData,
+} from '../test-utils';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/db/prisma';
 import { createOrder } from '@/lib/order/order-service';
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
 
 // Get reference to mocked prisma
 const getMockPrisma = () => prisma as any;
 
 describe('POST /api/orders/create', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (extractTokenFromHeader as jest.Mock).mockImplementation((header: string) =>
+      header?.replace('Bearer ', '')
+    );
+    (verifyToken as jest.Mock).mockReturnValue({
+      valid: true,
+      payload: { userId: 'test-user-id' },
+    });
+  });
+
   describe('认证测试', () => {
     it('未登录用户应返回401', async () => {
       (getServerSession as jest.Mock).mockResolvedValue(null);

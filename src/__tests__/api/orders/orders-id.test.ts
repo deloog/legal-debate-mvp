@@ -4,15 +4,22 @@
  * PUT /api/orders/[id] - 更新订单
  */
 
+// Mock JWT 工具
+jest.mock('@/lib/auth/jwt', () => ({
+  extractTokenFromHeader: jest.fn(),
+  verifyToken: jest.fn(),
+}));
+
+// Mock NextAuth
+jest.mock('next-auth', () => ({
+  getServerSession: jest.fn(),
+}));
+
 import { GET, PUT } from '@/app/api/orders/[id]/route';
 import { createMockRequest, createTestResponse, mockData } from '../test-utils';
 import { getServerSession } from 'next-auth';
 import { getOrder, cancelOrder } from '@/lib/order/order-service';
-
-// Mock dependencies
-jest.mock('next-auth', () => ({
-  getServerSession: jest.fn(),
-}));
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
 
 jest.mock('@/lib/order/order-service', () => ({
   getOrder: jest.fn(),
@@ -47,6 +54,14 @@ describe('GET /api/orders/[id]', () => {
     };
 
     beforeEach(() => {
+      jest.clearAllMocks();
+      (extractTokenFromHeader as jest.Mock).mockImplementation((header: string) =>
+        header?.replace('Bearer ', '')
+      );
+      (verifyToken as jest.Mock).mockReturnValue({
+        valid: true,
+        payload: { userId: 'test-user-id' },
+      });
       (getServerSession as jest.Mock).mockResolvedValue(mockSession);
     });
 
@@ -89,6 +104,14 @@ describe('GET /api/orders/[id]', () => {
     };
 
     beforeEach(() => {
+      jest.clearAllMocks();
+      (extractTokenFromHeader as jest.Mock).mockImplementation((header: string) =>
+        header?.replace('Bearer ', '')
+      );
+      (verifyToken as jest.Mock).mockReturnValue({
+        valid: true,
+        payload: { userId: 'test-user-id' },
+      });
       (getServerSession as jest.Mock).mockResolvedValue(mockSession);
       (getOrder as jest.Mock).mockReset();
       (getOrder as jest.Mock).mockResolvedValue(mockOrder);
@@ -158,6 +181,14 @@ describe('GET /api/orders/[id]', () => {
     };
 
     beforeEach(() => {
+      jest.clearAllMocks();
+      (extractTokenFromHeader as jest.Mock).mockImplementation((header: string) =>
+        header?.replace('Bearer ', '')
+      );
+      (verifyToken as jest.Mock).mockReturnValue({
+        valid: true,
+        payload: { userId: 'test-user-id' },
+      });
       (getServerSession as jest.Mock).mockResolvedValue(mockSession);
     });
 
@@ -212,6 +243,14 @@ describe('PUT /api/orders/[id]', () => {
     };
 
     beforeEach(() => {
+      jest.clearAllMocks();
+      (extractTokenFromHeader as jest.Mock).mockImplementation((header: string) =>
+        header?.replace('Bearer ', '')
+      );
+      (verifyToken as jest.Mock).mockReturnValue({
+        valid: true,
+        payload: { userId: 'test-user-id' },
+      });
       (getServerSession as jest.Mock).mockResolvedValue(mockSession);
     });
 
@@ -267,6 +306,14 @@ describe('PUT /api/orders/[id]', () => {
     };
 
     beforeEach(() => {
+      jest.clearAllMocks();
+      (extractTokenFromHeader as jest.Mock).mockImplementation((header: string) =>
+        header?.replace('Bearer ', '')
+      );
+      (verifyToken as jest.Mock).mockReturnValue({
+        valid: true,
+        payload: { userId: 'test-user-id' },
+      });
       (getServerSession as jest.Mock).mockResolvedValue(mockSession);
       (getOrder as jest.Mock).mockReset();
       (getOrder as jest.Mock).mockResolvedValue(mockOrder);
@@ -356,6 +403,14 @@ describe('PUT /api/orders/[id]', () => {
     };
 
     beforeEach(() => {
+      jest.clearAllMocks();
+      (extractTokenFromHeader as jest.Mock).mockImplementation((header: string) =>
+        header?.replace('Bearer ', '')
+      );
+      (verifyToken as jest.Mock).mockReturnValue({
+        valid: true,
+        payload: { userId: 'test-user-id' },
+      });
       (getServerSession as jest.Mock).mockResolvedValue(mockSession);
       (getOrder as jest.Mock).mockResolvedValue({
         id: mockData.uuid(),

@@ -3,10 +3,13 @@
  * 测试 GET /api/orders/by-order-no/[orderNo]
  */
 
-import { NextRequest } from 'next/server';
-import { GET } from '@/app/api/orders/by-order-no/[orderNo]/route';
+// Mock JWT 工具
+jest.mock('@/lib/auth/jwt', () => ({
+  extractTokenFromHeader: jest.fn(),
+  verifyToken: jest.fn(),
+}));
 
-// Mock dependencies
+// Mock NextAuth
 jest.mock('next-auth', () => ({
   getServerSession: jest.fn(),
 }));
@@ -19,8 +22,11 @@ jest.mock('@/lib/order/order-service', () => ({
   getOrderByOrderNo: jest.fn(),
 }));
 
+import { NextRequest } from 'next/server';
+import { GET } from '@/app/api/orders/by-order-no/[orderNo]/route';
 import { getServerSession } from 'next-auth';
 import { getOrderByOrderNo } from '@/lib/order/order-service';
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
 
 describe('GET /api/orders/by-order-no/[orderNo]', () => {
   let mockRequest: unknown;
@@ -28,6 +34,13 @@ describe('GET /api/orders/by-order-no/[orderNo]', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (extractTokenFromHeader as jest.Mock).mockImplementation((header: string) =>
+      header?.replace('Bearer ', '')
+    );
+    (verifyToken as jest.Mock).mockReturnValue({
+      valid: true,
+      payload: { userId: 'test-user-id' },
+    });
     mockRequest = {};
     mockParams = { orderNo: 'ORD20250117001' };
   });
