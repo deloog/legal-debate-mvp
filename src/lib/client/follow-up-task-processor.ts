@@ -41,10 +41,14 @@ export class FollowUpTaskProcessor {
         sqlConditions.push(Prisma.sql`fut."clientId" = ${params.clientId}`);
       }
       if (params.status) {
-        sqlConditions.push(Prisma.sql`fut.status = ${params.status}`);
+        sqlConditions.push(
+          Prisma.sql`fut.status = ${params.status}::"FollowUpTaskStatus"`
+        );
       }
       if (params.priority) {
-        sqlConditions.push(Prisma.sql`fut.priority = ${params.priority}`);
+        sqlConditions.push(
+          Prisma.sql`fut.priority = ${params.priority}::"FollowUpTaskPriority"`
+        );
       }
       if (params.dueDateFrom) {
         sqlConditions.push(Prisma.sql`fut."dueDate" >= ${params.dueDateFrom}`);
@@ -465,7 +469,7 @@ export class FollowUpTaskProcessor {
         FROM follow_up_tasks fut
         INNER JOIN clients c ON fut."clientId" = c.id
         WHERE fut."userId" = ${userId}
-          AND fut.status = 'PENDING'
+          AND fut.status = 'PENDING'::"FollowUpTaskStatus"
           AND fut."dueDate" <= NOW() + INTERVAL '${days} days'
         ORDER BY fut."dueDate" ASC
       `;

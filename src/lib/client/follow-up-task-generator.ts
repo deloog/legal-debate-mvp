@@ -223,7 +223,7 @@ export class FollowUpTaskGenerator {
           AND NOT EXISTS (
             SELECT 1 FROM follow_up_tasks fut
             WHERE fut."communicationId" = cr.id
-              AND fut.status = 'PENDING'
+              AND fut.status = 'PENDING'::"FollowUpTaskStatus"::"FollowUpTaskStatus"
           )
         ORDER BY cr."nextFollowUpDate" ASC
         LIMIT ${limit}

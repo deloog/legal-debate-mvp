@@ -78,6 +78,10 @@ describe('LawArticleRelationService', () => {
 
   // 测试后清理：删除测试数据
   afterAll(async () => {
+    // 安全检查：如果测试数据未创建，则跳过清理
+    if (!testArticle1?.id || !testArticle2?.id || !testArticle3?.id) {
+      return;
+    }
     await prisma.lawArticleRelation.deleteMany({
       where: {
         OR: [
@@ -103,6 +107,10 @@ describe('LawArticleRelationService', () => {
 
   // 每个测试后清理关系数据
   afterEach(async () => {
+    // 安全检查：如果测试数据未创建，则跳过清理
+    if (!testArticle1?.id || !testArticle2?.id || !testArticle3?.id) {
+      return;
+    }
     await prisma.lawArticleRelation.deleteMany({
       where: {
         OR: [
