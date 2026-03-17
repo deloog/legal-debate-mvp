@@ -7,7 +7,6 @@
  */
 
 import { useState, useEffect } from 'react';
-import { flushSync } from 'react-dom';
 
 export interface AIThinkingIndicatorProps {
   /** 是否正在思考 */
@@ -200,10 +199,7 @@ export function AIThinkingIndicator({
 
   // 思考文本动画
   useEffect(() => {
-    if (!isThinking) {
-      flushSync(() => setThinkingText(''));
-      return;
-    }
+    if (!isThinking) return;
 
     const texts = [
       '正在理解问题上下文',
@@ -220,7 +216,10 @@ export function AIThinkingIndicator({
       index = (index + 1) % texts.length;
     }, 2500);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      setThinkingText('');
+    };
   }, [isThinking]);
 
   if (!isThinking) return null;

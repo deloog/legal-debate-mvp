@@ -15,6 +15,28 @@ import { GET as reviewGET } from '@/app/api/contracts/review/[id]/route';
 import { GET as historyGET } from '@/app/api/contracts/review/history/route';
 import { prisma } from '@/lib/db/prisma';
 
+// Mock JWT（供 contract-auth 中间件使用）
+jest.mock('@/lib/auth/jwt', () => ({
+  extractTokenFromHeader: jest.fn().mockReturnValue('valid-token'),
+  verifyToken: jest.fn().mockReturnValue({
+    valid: true,
+    payload: { userId: 'test-user-id' },
+  }),
+}));
+
+// Mock fs/promises（避免真实文件读取）
+jest.mock('fs/promises', () => ({
+  readFile: jest.fn().mockResolvedValue(Buffer.from('合同内容测试')),
+  stat: jest.fn().mockResolvedValue({ size: 1024 }),
+  writeFile: jest.fn().mockResolvedValue(undefined),
+  mkdir: jest.fn().mockResolvedValue(undefined),
+}));
+
+// Mock fs（existsSync）
+jest.mock('fs', () => ({
+  existsSync: jest.fn().mockReturnValue(true),
+}));
+
 // Mock Prisma
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
@@ -23,6 +45,7 @@ jest.mock('@/lib/db/prisma', () => ({
       findUnique: jest.fn(),
       findMany: jest.fn(),
       update: jest.fn(),
+      count: jest.fn().mockResolvedValue(0),
     },
   },
 }));
@@ -54,7 +77,7 @@ describe('合同审查API', () => {
         totalFee: 50000,
         paidAmount: 0,
         status: 'DRAFT',
-        filePath: '/uploads/contract-1.pdf',
+        filePath: 'contracts/contract-1.pdf',
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -139,7 +162,7 @@ describe('合同审查API', () => {
       const mockContract = {
         id: 'contract-1',
         contractNumber: 'HT20260130001',
-        filePath: '/uploads/contract-1.pdf',
+        filePath: 'contracts/contract-1.pdf',
         clientName: '测试客户',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -218,7 +241,7 @@ describe('合同审查API', () => {
     it('应该正确识别高风险项', async () => {
       const mockContract = {
         id: 'contract-1',
-        filePath: '/uploads/contract-1.pdf',
+        filePath: 'contracts/contract-1.pdf',
         clientName: '测试客户',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -281,7 +304,7 @@ describe('合同审查API', () => {
     it('应该生成合理的修改建议', async () => {
       const mockContract = {
         id: 'contract-1',
-        filePath: '/uploads/contract-1.pdf',
+        filePath: 'contracts/contract-1.pdf',
         clientName: '测试客户',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -348,33 +371,30 @@ describe('合同审查API', () => {
       const mockHistory = [
         {
           id: 'review-1',
-          contractId: 'contract-1',
-          fileName: 'contract1.pdf',
-          reviewedAt: new Date('2026-01-30T10:00:00Z'),
-          overallScore: 75,
-          totalRisks: 5,
-          criticalRisks: 1,
-          status: 'COMPLETED',
+          contractNumber: 'HT001',
+          filePath: 'contracts/contract1.pdf',
+          updatedAt: new Date('2026-01-30T10:00:00Z'),
         },
         {
           id: 'review-2',
-          contractId: 'contract-2',
-          fileName: 'contract2.pdf',
-          reviewedAt: new Date('2026-01-29T15:00:00Z'),
-          overallScore: 85,
-          totalRisks: 2,
-          criticalRisks: 0,
-          status: 'COMPLETED',
+          contractNumber: 'HT002',
+          filePath: 'contracts/contract2.pdf',
+          updatedAt: new Date('2026-01-29T15:00:00Z'),
         },
       ];
 
       (prisma.contract.findMany as jest.Mock).mockResolvedValueOnce(
         mockHistory
       );
+      (prisma.contract.count as jest.Mock).mockResolvedValueOnce(2);
 
-      const request = new NextRequest(
-        'http://localhost:3000/api/contracts/review/history?page=1&pageSize=10'
-      );
+      const historyUrl =
+        'http://localhost:3000/api/contracts/review/history?page=1&pageSize=10';
+      const request = new NextRequest(historyUrl);
+      Object.defineProperty(request, 'nextUrl', {
+        value: new URL(historyUrl),
+        writable: false,
+      });
       const response = await historyGET(request);
       const data = await response.json();
 
@@ -389,8 +409,8 @@ describe('合同审查API', () => {
       const mockHistory = Array.from({ length: 5 }, (_, i) => ({
         id: `review-${i + 1}`,
         contractId: `contract-${i + 1}`,
-        fileName: `contract${i + 1}.pdf`,
-        reviewedAt: new Date(),
+        filePath: `contracts/contract${i + 1}.pdf`,
+        updatedAt: new Date(),
         overallScore: 75,
         totalRisks: 3,
         criticalRisks: 0,
@@ -401,9 +421,13 @@ describe('合同审查API', () => {
         mockHistory
       );
 
-      const request = new NextRequest(
-        'http://localhost:3000/api/contracts/review/history?page=1&pageSize=5'
-      );
+      const paginatedUrl =
+        'http://localhost:3000/api/contracts/review/history?page=1&pageSize=5';
+      const request = new NextRequest(paginatedUrl);
+      Object.defineProperty(request, 'nextUrl', {
+        value: new URL(paginatedUrl),
+        writable: false,
+      });
       const response = await historyGET(request);
       const data = await response.json();
 

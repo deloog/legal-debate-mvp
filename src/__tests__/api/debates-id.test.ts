@@ -306,7 +306,9 @@ describe('Debates ID API', () => {
       const response = await OPTIONS(mockReq);
 
       expect(response.status).toBe(200);
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+        'http://localhost:3000'
+      );
       expect(response.headers.get('Access-Control-Allow-Methods')).toBe(
         'GET, PUT, DELETE, OPTIONS'
       );

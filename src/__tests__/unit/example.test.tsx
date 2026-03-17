@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import { render, screen } from '@/test-utils/render';
 import { describe, it } from '@jest/globals';
 import '@testing-library/jest-dom';

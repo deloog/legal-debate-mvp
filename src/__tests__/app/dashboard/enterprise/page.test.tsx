@@ -167,7 +167,7 @@ describe('企业法务工作台页面', () => {
       const { container } = render(<EnterpriseDashboardPage />);
 
       await waitFor(() => {
-        expect(screen.getByText('合规评分')).toBeInTheDocument();
+        expect(screen.getAllByText('合规评分').length).toBeGreaterThan(0);
         // 使用更具体的选择器查找合规评分
         const complianceCard = container.querySelector(
           '.rounded-lg.bg-white.p-6.shadow:nth-child(3)'
@@ -507,9 +507,6 @@ describe('企业法务工作台页面', () => {
       const { container } = render(<EnterpriseDashboardPage />);
 
       await waitFor(() => {
-        const __complianceSection = container.querySelector(
-          '.rounded-lg.bg-white.p-6.shadow:has(h2:contains("合规状态"))'
-        );
         expect(screen.getByText('合规状态')).toBeInTheDocument();
         expect(screen.getByText('10')).toBeInTheDocument();
         expect(screen.getByText('8')).toBeInTheDocument();
@@ -643,9 +640,7 @@ describe('企业法务工作台页面', () => {
       render(<EnterpriseDashboardPage />);
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/加载数据失败，请刷新页面重试/)
-        ).toBeInTheDocument();
+        expect(screen.getByText('Network error')).toBeInTheDocument();
       });
     });
 
@@ -664,7 +659,7 @@ describe('企业法务工作台页面', () => {
       render(<EnterpriseDashboardPage />);
 
       await waitFor(() => {
-        expect(screen.getByText(/加载数据失败/)).toBeInTheDocument();
+        expect(screen.getByText('服务器内部错误')).toBeInTheDocument();
       });
     });
   });

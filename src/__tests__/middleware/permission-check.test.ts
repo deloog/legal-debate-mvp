@@ -215,7 +215,8 @@ describe('权限检查中间件', () => {
       const jsonResponse = JSON.parse(
         JSON.stringify(await (result as unknown as Response).json())
       );
-      expect(jsonResponse.error).toBe('权限不足');
+      expect(jsonResponse.success).toBe(false);
+      expect(jsonResponse.error?.code).toBe('FORBIDDEN');
     });
   });
 

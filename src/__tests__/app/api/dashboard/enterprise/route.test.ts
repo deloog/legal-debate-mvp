@@ -26,6 +26,9 @@ jest.mock('@/lib/db/prisma', () => ({
       count: jest.fn(),
       findMany: jest.fn(),
     },
+    enterpriseComplianceCheck: {
+      count: jest.fn().mockResolvedValue(0),
+    },
   },
 }));
 

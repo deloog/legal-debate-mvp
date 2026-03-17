@@ -35,6 +35,12 @@ jest.mock('@/lib/middleware/knowledge-graph-permission', () => ({
 describe('POST /api/v1/knowledge-graph/relations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const {
+      checkKnowledgeGraphPermission,
+    } = require('@/lib/middleware/knowledge-graph-permission');
+    (checkKnowledgeGraphPermission as jest.Mock).mockResolvedValue({
+      hasPermission: true,
+    });
   });
 
   describe('参数验证', () => {
@@ -401,6 +407,14 @@ describe('POST /api/v1/knowledge-graph/relations', () => {
     });
 
     it('应该处理数据库错误', async () => {
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue({
+        id: 'article-1',
+        lawName: '《民法典》',
+        articleNumber: '第123条',
+      });
+      (prisma.lawArticleRelation.findFirst as jest.Mock).mockResolvedValue(
+        null
+      );
       (prisma.lawArticleRelation.create as jest.Mock).mockRejectedValue(
         new Error('数据库连接失败')
       );

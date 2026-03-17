@@ -16,6 +16,30 @@ import { PrismaClient, MembershipStatus } from '@prisma/client';
 import type { UsageType } from '@/types/membership';
 import { NextRequest } from 'next/server';
 
+// 覆盖 setup.ts 中的全局 mock，让 @/lib/db/prisma 使用真实 DB（集成测试需要）
+jest.mock('@/lib/db/prisma', () => {
+  const { PrismaClient: RealPrismaClient } = jest.requireActual(
+    '@prisma/client'
+  ) as typeof import('@prisma/client');
+  return { prisma: new RealPrismaClient() };
+});
+
+// Mock auth middleware - enforceUsageLimit 内部调用 getAuthUser，测试时返回预设用户
+// 通过 mockAuthUserId 变量控制返回值，null 表示未认证
+let mockAuthUserId: string | null = null;
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn().mockImplementation(async () => {
+    if (mockAuthUserId) {
+      return {
+        userId: mockAuthUserId,
+        email: 'test@example.com',
+        role: 'USER',
+      };
+    }
+    return null;
+  }),
+}));
+
 const prisma = new PrismaClient();
 
 describe('使用量限制检查中间件测试', () => {
@@ -74,10 +98,16 @@ describe('使用量限制检查中间件测试', () => {
 
   describe('enforceUsageLimit 函数', () => {
     beforeEach(async () => {
+      // 默认情况下已认证（mockAuthUserId 设置为 testUserId）
+      mockAuthUserId = testUserId;
       // 清理使用记录
       await prisma.usageRecord.deleteMany({
         where: { userId: testUserId },
       });
+    });
+
+    afterEach(() => {
+      mockAuthUserId = null;
     });
 
     it('应该能够在未超过限制时返回null', async () => {
@@ -129,6 +159,7 @@ describe('使用量限制检查中间件测试', () => {
     });
 
     it('应该在用户未认证时返回401响应', async () => {
+      mockAuthUserId = null; // 覆盖 beforeEach 的设置，模拟未认证
       const request = new NextRequest('http://localhost:3000/api/test') as any;
       const middleware = enforceUsageLimit(
         'CASE_CREATED' as UsageType,
@@ -375,10 +406,15 @@ describe('使用量限制检查中间件测试', () => {
 
   describe('validateUsageLimit 函数', () => {
     beforeEach(async () => {
+      mockAuthUserId = testUserId;
       // 清理使用记录
       await prisma.usageRecord.deleteMany({
         where: { userId: testUserId },
       });
+    });
+
+    afterEach(() => {
+      mockAuthUserId = null;
     });
 
     it('应该返回null当检查通过时', async () => {
@@ -416,6 +452,7 @@ describe('使用量限制检查中间件测试', () => {
     });
 
     it('应该返回401响应当用户未认证时', async () => {
+      mockAuthUserId = null; // 覆盖 beforeEach，模拟未认证
       const request = new NextRequest('http://localhost:3000/api/test') as any;
 
       const middleware = enforceUsageLimit(

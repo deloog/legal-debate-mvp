@@ -510,8 +510,7 @@ describe('资格审核列表API', () => {
       await GET(request);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '获取资格审核列表失败:',
-        expect.any(Error)
+        expect.stringContaining('获取资格审核列表失败:')
       );
       consoleErrorSpy.mockRestore();
     });

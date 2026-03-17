@@ -28,26 +28,32 @@ jest.mock('@/lib/db/prisma', () => ({
   prisma: {
     order: {
       findUnique: jest.fn(),
+      update: jest.fn().mockResolvedValue({}),
     },
     refundRecord: {
       findFirst: jest.fn(),
       create: jest.fn(),
+      update: jest.fn().mockResolvedValue({}),
     },
   },
 }));
 
 // Mock payment modules
-jest.mock('@/lib/payment/alipay-refund', () => ({
-  alipayRefund: {
-    refund: jest.fn(),
-  },
-}));
+jest.mock('@/lib/payment/alipay-refund', () => {
+  const mockAlipay = { refund: jest.fn() };
+  return {
+    alipayRefund: mockAlipay,
+    getAlipayRefund: jest.fn().mockReturnValue(mockAlipay),
+  };
+});
 
-jest.mock('@/lib/payment/wechat-refund', () => ({
-  wechatRefund: {
-    refund: jest.fn(),
-  },
-}));
+jest.mock('@/lib/payment/wechat-refund', () => {
+  const mockWechat = { refund: jest.fn() };
+  return {
+    wechatRefund: mockWechat,
+    getWechatRefund: jest.fn().mockReturnValue(mockWechat),
+  };
+});
 
 jest.mock('@/lib/payment/payment-config', () => ({
   paymentConfig: {
@@ -435,6 +441,9 @@ describe('POST /api/refunds/apply', () => {
         code: '20000',
         msg: '支付失败',
       });
+      (prisma.refundRecord.create as jest.Mock).mockResolvedValue({
+        id: 'refund-123',
+      });
 
       // Act
       const response = await POST(mockRequest);
@@ -479,7 +488,7 @@ describe('POST /api/refunds/apply', () => {
       );
       (prisma.refundRecord.create as jest.Mock).mockResolvedValue({
         id: 'refund-123',
-        status: RefundStatus.FAILED,
+        status: RefundStatus.PENDING,
       });
 
       // Act
@@ -490,11 +499,10 @@ describe('POST /api/refunds/apply', () => {
       expect(response.status).toBe(500);
       expect(data.success).toBe(false);
       expect(data.error).toBe('REFUND_ERROR');
-      expect(prisma.refundRecord.create).toHaveBeenCalledWith(
+      expect(prisma.refundRecord.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             status: RefundStatus.FAILED,
-            refundAmount: 0,
             rejectedReason: '微信退款失败',
           }),
         })

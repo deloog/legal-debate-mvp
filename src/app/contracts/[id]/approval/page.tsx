@@ -7,7 +7,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { ApprovalFlow } from '@/components/contract/ApprovalFlow';
 import { ArrowLeft, FileText, User, DollarSign, Calendar } from 'lucide-react';
 
@@ -45,7 +45,7 @@ interface ApprovalData {
 export default function ContractApprovalPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const contractId = params.id as string;
 
   const [approval, setApproval] = useState<ApprovalData | null>(null);
@@ -58,6 +58,7 @@ export default function ContractApprovalPage() {
   >(null);
   const [approvalComment, setApprovalComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   // 获取审批信息
   const fetchApproval = useCallback(async () => {
@@ -121,11 +122,13 @@ export default function ContractApprovalPage() {
       // 刷新审批信息
       await fetchApproval();
 
-      // 关闭对话框
+      // 关闭对话框并显示成功提示
       setShowApprovalDialog(false);
       setApprovalComment('');
       setSelectedStepId(null);
       setApprovalDecision(null);
+      setSubmitSuccess(true);
+      setTimeout(() => setSubmitSuccess(false), 10000);
     } catch (err) {
       alert(err instanceof Error ? err.message : '提交审批失败');
     } finally {
@@ -163,6 +166,13 @@ export default function ContractApprovalPage() {
   return (
     <div className='min-h-screen bg-gray-50 py-8'>
       <div className='mx-auto max-w-5xl px-4 sm:px-6 lg:px-8'>
+        {/* 成功提示 */}
+        {submitSuccess && (
+          <div className='mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-800'>
+            审批意见已提交
+          </div>
+        )}
+
         {/* 头部 */}
         <div className='mb-6'>
           <button
@@ -286,7 +296,7 @@ export default function ContractApprovalPage() {
                 }}
                 onApprove={handleApprove}
                 onReject={handleReject}
-                currentUserId={session?.user?.id || ''}
+                currentUserId={user?.id || ''}
               />
             </div>
           </div>
@@ -312,6 +322,7 @@ export default function ContractApprovalPage() {
                     审批意见
                   </label>
                   <textarea
+                    name='comment'
                     value={approvalComment}
                     onChange={e => setApprovalComment(e.target.value)}
                     rows={4}

@@ -238,7 +238,7 @@ describe('查询输入验证', () => {
       expect(parsed.startNode).toBe('article-123');
       expect(parsed.direction).toBe('both'); // 默认值
       expect(parsed.depth).toBe(1); // 默认值
-      expect(parsed.aggregate).toBeUndefined(); // 无聚合
+      expect(parsed.aggregate).toBe('count'); // 默认聚合方式
     });
 
     it('应该保留用户提供的非默认值', () => {

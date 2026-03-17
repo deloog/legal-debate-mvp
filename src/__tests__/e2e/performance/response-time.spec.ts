@@ -38,6 +38,7 @@ test.describe('响应时间性能测试', () => {
       timeout: 90_000, // 每个请求最多90秒，防止AI调用挂起worker
       extraHTTPHeaders: {
         Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
       },
     });
     perfRecorder = new PerformanceRecorder();

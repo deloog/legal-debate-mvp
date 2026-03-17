@@ -4,6 +4,7 @@
  */
 
 import { IncrementalManager } from '../../../lib/debate/incremental/incremental-manager';
+import { generateFingerprint } from '../../../lib/debate/incremental/diff-detector';
 import { Material } from '../../../lib/debate/incremental/types';
 
 describe('IncrementalManager', () => {
@@ -15,19 +16,21 @@ describe('IncrementalManager', () => {
 
   describe('完整增量分析流程', () => {
     it('应执行完整的增量分析流程', async () => {
+      // 使用固定时间以确保指纹计算一致
+      const fixedTime = new Date('2024-01-01T00:00:00.000Z');
+
+      const historicalMaterial: Material = {
+        id: '1',
+        type: 'DOCUMENT',
+        content: '旧文档内容',
+        fingerprint: '',
+        metadata: { source: 'test', uploadTime: fixedTime },
+      };
+      // 预先计算指纹（execute会对newMaterials重新计算，历史材料需手动对齐）
+      historicalMaterial.fingerprint = generateFingerprint(historicalMaterial);
+
       const historicalContext = {
-        materials: [
-          {
-            id: '1',
-            type: 'DOCUMENT' as const,
-            content: '旧文档内容',
-            fingerprint: 'old_hash',
-            metadata: {
-              source: 'test',
-              uploadTime: new Date(),
-            },
-          },
-        ],
+        materials: [historicalMaterial],
         analysisResults: {
           documents: [],
           lawArticles: [],
@@ -37,14 +40,19 @@ describe('IncrementalManager', () => {
 
       const newMaterials: Material[] = [
         {
+          // id='1'，与历史相同内容和元数据 → execute重算后fingerprint一致 → unchanged
+          id: '1',
+          type: 'DOCUMENT',
+          content: '旧文档内容',
+          fingerprint: '',
+          metadata: { source: 'test', uploadTime: fixedTime },
+        },
+        {
           id: '2',
-          type: 'DOCUMENT' as const,
+          type: 'DOCUMENT',
           content: '新文档内容',
-          fingerprint: 'new_hash',
-          metadata: {
-            source: 'test',
-            uploadTime: new Date(),
-          },
+          fingerprint: '',
+          metadata: { source: 'test', uploadTime: fixedTime },
         },
       ];
 

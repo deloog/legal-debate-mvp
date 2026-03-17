@@ -1,3 +1,35 @@
+// Mock nodemailer to avoid real SMTP connections in tests
+jest.mock('nodemailer', () => ({
+  createTransport: jest.fn().mockReturnValue({
+    sendMail: jest.fn().mockResolvedValue({ messageId: 'test-message-id' }),
+  }),
+}));
+
+// Mock winston logger to avoid file system writes in tests
+jest.mock('../../../../config/winston.config', () => {
+  const mockLogger = {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    fatal: jest.fn(),
+    debug: jest.fn(),
+  };
+  const MockLogger = jest.fn().mockImplementation(() => mockLogger);
+  return {
+    Logger: MockLogger,
+    LogLevel: {
+      CRITICAL: 'critical',
+      ERROR: 'error',
+      WARN: 'warn',
+      INFO: 'info',
+      DEBUG: 'debug',
+    },
+    LogFormat: { JSON: 'json', TEXT: 'text' },
+    LogOutput: { CONSOLE: 'console', FILE: 'file' },
+    loadLoggerConfig: jest.fn().mockReturnValue({}),
+  };
+});
+
 import {
   EmailAlertChannel,
   WebhookAlertChannel,

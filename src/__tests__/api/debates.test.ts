@@ -8,6 +8,11 @@ jest.mock('@/lib/middleware/auth', () => ({
 }));
 
 import { getAuthUser } from '@/lib/middleware/auth';
+// Mock checkAIQuota
+jest.mock('@/lib/ai/quota', () => ({
+  checkAIQuota: jest.fn().mockResolvedValue({ allowed: true }),
+  recordAIUsage: jest.fn().mockResolvedValue(undefined),
+}));
 
 // Mock prisma
 jest.mock('@/lib/db/prisma', () => ({
@@ -67,6 +72,22 @@ describe('Debates API', () => {
       description: '案件描述',
       type: 'CIVIL',
       status: 'ACTIVE',
+    });
+    (prisma.debate.create as jest.Mock).mockResolvedValue({
+      id: 'new-debate-1',
+      title: '测试辩论',
+      caseId: '123e4567-e89b-12d3-a456-426614174000',
+      userId: 'test-user-1',
+      status: 'DRAFT',
+      currentRound: 0,
+      debateConfig: {
+        maxRounds: 3,
+        timePerRound: 30,
+        allowNewEvidence: true,
+        debateMode: 'standard',
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
   });
 
@@ -161,7 +182,7 @@ describe('Debates API', () => {
         expect(data.success).toBe(true);
         expect(data.data.title).toBe('测试辩论');
         expect(data.data.caseId).toBe(debateData.caseId);
-        expect(data.data.status).toBe('draft');
+        expect(data.data.status).toBe('DRAFT');
         expect(data.data.currentRound).toBe(0);
         expect(data.data.debateConfig).toEqual(debateData.config);
       }
@@ -216,7 +237,9 @@ describe('Debates API', () => {
       const response = await OPTIONS(request);
 
       expect(response.status).toBe(200);
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+        'http://localhost:3000'
+      );
       expect(response.headers.get('Access-Control-Allow-Methods')).toBe(
         'GET, POST, OPTIONS'
       );

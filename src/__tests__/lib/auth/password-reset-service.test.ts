@@ -21,14 +21,18 @@ describe('密码重置服务', () => {
   let prisma: PrismaClient;
   let service: PasswordResetService;
 
-  beforeAll(() => {
-    // 设置测试环境已在测试配置中完成
+  // 共享一个 PrismaClient，避免每个测试创建新连接导致连接池耗尽
+  beforeAll(async () => {
+    prisma = new PrismaClient();
+  });
+
+  afterAll(async () => {
+    await prisma.$disconnect();
+    resetVerificationCodeService();
+    resetPasswordResetService();
   });
 
   beforeEach(async () => {
-    prisma = new PrismaClient();
-    service = new PasswordResetService(prisma);
-
     // 清理测试数据
     await prisma.verificationCode.deleteMany({});
     await prisma.user.deleteMany({
@@ -39,8 +43,16 @@ describe('密码重置服务', () => {
       },
     });
 
-    resetPasswordResetService();
+    // 重置单例，并用共享 prisma 重新初始化，避免内部再创建额外连接
     resetVerificationCodeService();
+
+    const {
+      getVerificationCodeService,
+    } = require('@/lib/auth/verification-code-service');
+    getVerificationCodeService(prisma);
+
+    resetPasswordResetService();
+    service = new PasswordResetService(prisma);
   });
 
   afterEach(async () => {
@@ -52,7 +64,6 @@ describe('密码重置服务', () => {
         },
       },
     });
-    await prisma.$disconnect();
   });
 
   describe('validatePasswordComplexity', () => {

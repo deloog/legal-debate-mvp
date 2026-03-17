@@ -15,9 +15,19 @@ import { CaseDerivedDetector } from '@/lib/law-article/relation-discovery/case-d
 import { prisma } from '@/lib/db';
 import { RelationType } from '@prisma/client';
 
+// Also need to mock logger to suppress errors in tests
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+  },
+}));
+
 // Mock prisma
 jest.mock('@/lib/db', () => ({
   prisma: {
+    $queryRaw: jest.fn(),
     $queryRawUnsafe: jest.fn(),
     lawArticle: {
       findUnique: jest.fn(),
@@ -27,7 +37,7 @@ jest.mock('@/lib/db', () => ({
 
 describe('CaseDerivedDetector', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('discoverFromCases', () => {
@@ -48,7 +58,7 @@ describe('CaseDerivedDetector', () => {
         },
       ];
 
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue(mockQueryResult);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockQueryResult);
 
       // 执行测试
       const result = await CaseDerivedDetector.discoverFromCases();
@@ -87,7 +97,7 @@ describe('CaseDerivedDetector', () => {
         },
       ];
 
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue(mockQueryResult);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockQueryResult);
 
       const result = await CaseDerivedDetector.discoverFromCases();
 
@@ -107,7 +117,7 @@ describe('CaseDerivedDetector', () => {
         },
       ];
 
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue(mockQueryResult);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockQueryResult);
 
       const result = await CaseDerivedDetector.discoverFromCases();
 
@@ -117,7 +127,7 @@ describe('CaseDerivedDetector', () => {
     });
 
     it('应该处理空结果', async () => {
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue([]);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue([]);
 
       const result = await CaseDerivedDetector.discoverFromCases();
 
@@ -125,7 +135,7 @@ describe('CaseDerivedDetector', () => {
     });
 
     it('应该处理数据库错误', async () => {
-      (prisma.$queryRawUnsafe as jest.Mock).mockRejectedValue(
+      (prisma.$queryRaw as jest.Mock).mockRejectedValue(
         new Error('Database connection failed')
       );
 
@@ -136,7 +146,7 @@ describe('CaseDerivedDetector', () => {
 
     it('应该过滤低于阈值的共现关系', async () => {
       // SQL查询中已经有 HAVING COUNT(*) >= 5，所以数据库不会返回低于阈值的数据
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue([]);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue([]);
 
       const result = await CaseDerivedDetector.discoverFromCases();
 
@@ -153,7 +163,7 @@ describe('CaseDerivedDetector', () => {
         },
       ];
 
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue(mockQueryResult);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockQueryResult);
 
       const result = await CaseDerivedDetector.discoverFromCases(3);
 
@@ -176,7 +186,7 @@ describe('CaseDerivedDetector', () => {
         },
       ];
 
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue(mockQueryResult);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockQueryResult);
 
       const result = await CaseDerivedDetector.analyzeUsagePattern('article-1');
 
@@ -207,7 +217,7 @@ describe('CaseDerivedDetector', () => {
         },
       ];
 
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue(mockQueryResult);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockQueryResult);
 
       const result = await CaseDerivedDetector.analyzeUsagePattern('article-1');
 
@@ -217,7 +227,7 @@ describe('CaseDerivedDetector', () => {
     });
 
     it('应该处理空结果', async () => {
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue([]);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue([]);
 
       const result = await CaseDerivedDetector.analyzeUsagePattern('article-1');
 
@@ -226,7 +236,7 @@ describe('CaseDerivedDetector', () => {
     });
 
     it('应该处理数据库错误', async () => {
-      (prisma.$queryRawUnsafe as jest.Mock).mockRejectedValue(
+      (prisma.$queryRaw as jest.Mock).mockRejectedValue(
         new Error('Query failed')
       );
 
@@ -238,7 +248,7 @@ describe('CaseDerivedDetector', () => {
 
     it('应该过滤低频率的关联', async () => {
       // SQL查询中已经有 HAVING COUNT(*) >= 3，所以数据库不会返回低于阈值的数据
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue([]);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue([]);
 
       const result = await CaseDerivedDetector.analyzeUsagePattern('article-1');
 
@@ -254,7 +264,7 @@ describe('CaseDerivedDetector', () => {
         },
       ];
 
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue(mockQueryResult);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockQueryResult);
 
       const result = await CaseDerivedDetector.analyzeUsagePattern(
         'article-1',
@@ -284,7 +294,7 @@ describe('CaseDerivedDetector', () => {
         },
       ];
 
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue(mockQueryResult);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockQueryResult);
 
       const result = await CaseDerivedDetector.analyzeUsagePattern('article-1');
 
@@ -306,7 +316,7 @@ describe('CaseDerivedDetector', () => {
         },
       ];
 
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue(mockQueryResult);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockQueryResult);
 
       const result = await CaseDerivedDetector.getCoOccurrenceStats();
 
@@ -317,7 +327,7 @@ describe('CaseDerivedDetector', () => {
     });
 
     it('应该处理空数据库', async () => {
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue([
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue([
         {
           total_pairs: 0,
           avg_co_occurrence: null,
@@ -335,7 +345,7 @@ describe('CaseDerivedDetector', () => {
     });
 
     it('应该处理数据库错误', async () => {
-      (prisma.$queryRawUnsafe as jest.Mock).mockRejectedValue(
+      (prisma.$queryRaw as jest.Mock).mockRejectedValue(
         new Error('Query failed')
       );
 
@@ -359,7 +369,7 @@ describe('CaseDerivedDetector', () => {
         },
       ];
 
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue(mockQueryResult);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockQueryResult);
 
       const result = await CaseDerivedDetector.findFrequentPatterns(2);
 
@@ -381,7 +391,7 @@ describe('CaseDerivedDetector', () => {
         },
       ];
 
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue(mockQueryResult);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockQueryResult);
 
       const result = await CaseDerivedDetector.findFrequentPatterns(2, 5);
 
@@ -389,7 +399,7 @@ describe('CaseDerivedDetector', () => {
     });
 
     it('应该处理空结果', async () => {
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue([]);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue([]);
 
       const result = await CaseDerivedDetector.findFrequentPatterns(2);
 
@@ -407,7 +417,7 @@ describe('CaseDerivedDetector', () => {
         order_score: 0.5,
       }));
 
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue(mockQueryResult);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockQueryResult);
 
       const startTime = Date.now();
       const result = await CaseDerivedDetector.discoverFromCases();
@@ -424,7 +434,7 @@ describe('CaseDerivedDetector', () => {
         frequency: 10,
       }));
 
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue(mockQueryResult);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockQueryResult);
 
       const startTime = Date.now();
       const result = await CaseDerivedDetector.analyzeUsagePattern('article-1');
@@ -437,7 +447,7 @@ describe('CaseDerivedDetector', () => {
 
   describe('边界条件', () => {
     it('应该处理无效的法条ID', async () => {
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue([]);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue([]);
 
       const result = await CaseDerivedDetector.analyzeUsagePattern('');
 
@@ -455,7 +465,7 @@ describe('CaseDerivedDetector', () => {
         },
       ];
 
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue(mockQueryResult);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockQueryResult);
 
       const result = await CaseDerivedDetector.discoverFromCases();
 
@@ -471,7 +481,7 @@ describe('CaseDerivedDetector', () => {
         },
       ];
 
-      (prisma.$queryRawUnsafe as jest.Mock).mockResolvedValue(mockQueryResult);
+      (prisma.$queryRaw as jest.Mock).mockResolvedValue(mockQueryResult);
 
       const result = await CaseDerivedDetector.analyzeUsagePattern('article-1');
 

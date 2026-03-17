@@ -153,7 +153,7 @@ describe('Pagination Utils', () => {
     it('should build options without cursor', () => {
       const result = buildCursorOptions(undefined, 20);
 
-      expect(result.cursor).toBeNull();
+      expect(result.cursor).toBeUndefined();
       expect(result.take).toBe(21); // limit + 1
     });
 
@@ -176,7 +176,7 @@ describe('Pagination Utils', () => {
     it('should handle invalid cursor', () => {
       const result = buildCursorOptions('invalid-cursor', 5);
 
-      expect(result.cursor).toBeNull();
+      expect(result.cursor).toBeUndefined();
       expect(result.take).toBe(6); // limit + 1
     });
 

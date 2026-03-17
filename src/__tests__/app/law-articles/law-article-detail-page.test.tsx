@@ -5,8 +5,6 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { prisma } from '@/lib/db';
-import { RelationType, VerificationStatus } from '@prisma/client';
 
 // Mock Next.js相关模块
 jest.mock('next/navigation', () => ({
@@ -15,6 +13,11 @@ jest.mock('next/navigation', () => ({
     push: jest.fn(),
     back: jest.fn(),
   })),
+}));
+
+// Mock next-auth/react
+jest.mock('next-auth/react', () => ({
+  useSession: jest.fn(() => ({ data: null, status: 'unauthenticated' })),
 }));
 
 // Mock 可视化组件（避免d3模块问题）
@@ -28,77 +31,19 @@ jest.mock('@/components/law-article/LawArticleGraphVisualization', () => ({
   ),
 }));
 
+// Mock 反馈按钮组件（避免复杂依赖）
+jest.mock('@/components/feedback/RecommendationFeedbackButton', () => ({
+  RecommendationFeedbackButton: () => <div data-testid='feedback-button' />,
+}));
+
 // Mock fetch
 global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
+// 静态测试数据（不需要真实DB）
+const TEST_ARTICLE_ID = 'test-article-id-001';
+const RELATED_ARTICLE_ID = 'test-related-article-id-002';
+
 describe('法条详情页', () => {
-  let testArticleId: string;
-  let relatedArticleId: string;
-
-  beforeAll(async () => {
-    // 创建测试法条
-    const article = await prisma.lawArticle.create({
-      data: {
-        lawName: '民法典',
-        articleNumber: '1',
-        fullText:
-          '为了保护民事主体的合法权益，调整民事关系，维护社会和经济秩序，适应中国特色社会主义发展要求，弘扬社会主义核心价值观，根据宪法，制定本法。',
-        lawType: 'LAW',
-        category: 'CIVIL',
-        keywords: ['民事主体', '合法权益', '民事关系'],
-        tags: ['总则', '基本原则'],
-        effectiveDate: new Date('2021-01-01'),
-        issuingAuthority: '全国人民代表大会',
-        searchableText: '为了保护民事主体的合法权益',
-      },
-    });
-    testArticleId = article.id;
-
-    // 创建相关法条
-    const relatedArticle = await prisma.lawArticle.create({
-      data: {
-        lawName: '民法典',
-        articleNumber: '2',
-        fullText:
-          '民法调整平等主体的自然人、法人和非法人组织之间的人身关系和财产关系。',
-        lawType: 'LAW',
-        category: 'CIVIL',
-        keywords: ['平等主体', '自然人', '法人'],
-        tags: ['总则', '调整范围'],
-        effectiveDate: new Date('2021-01-01'),
-        issuingAuthority: '全国人民代表大会',
-        searchableText: '民法调整平等主体',
-      },
-    });
-    relatedArticleId = relatedArticle.id;
-
-    // 创建关系
-    await prisma.lawArticleRelation.create({
-      data: {
-        sourceId: testArticleId,
-        targetId: relatedArticleId,
-        relationType: RelationType.RELATED,
-        strength: 0.9,
-        confidence: 0.95,
-        verificationStatus: VerificationStatus.VERIFIED,
-      },
-    });
-  });
-
-  afterAll(async () => {
-    // 清理测试数据
-    await prisma.lawArticleRelation.deleteMany({
-      where: {
-        OR: [{ sourceId: testArticleId }, { targetId: testArticleId }],
-      },
-    });
-    await prisma.lawArticle.deleteMany({
-      where: {
-        id: { in: [testArticleId, relatedArticleId] },
-      },
-    });
-  });
-
   beforeEach(() => {
     // 重置mock
     jest.clearAllMocks();
@@ -108,7 +53,7 @@ describe('法条详情页', () => {
   describe('基本信息展示', () => {
     it('应该正确显示法条基本信息', async () => {
       const { useParams } = require('next/navigation');
-      useParams.mockReturnValue({ id: testArticleId });
+      useParams.mockReturnValue({ id: TEST_ARTICLE_ID });
 
       // Mock所有API调用
       (global.fetch as jest.Mock).mockImplementation((url: string) => {
@@ -122,7 +67,7 @@ describe('法条详情页', () => {
           return Promise.resolve({
             ok: true,
             json: async () => ({
-              articleId: testArticleId,
+              articleId: TEST_ARTICLE_ID,
               totalRelations: 0,
               relationsByType: {},
               recommendationScore: 0,
@@ -132,7 +77,7 @@ describe('法条详情页', () => {
         return Promise.resolve({
           ok: true,
           json: async () => ({
-            id: testArticleId,
+            id: TEST_ARTICLE_ID,
             lawName: '民法典',
             articleNumber: '1',
             fullText: '为了保护民事主体的合法权益',
@@ -158,7 +103,7 @@ describe('法条详情页', () => {
 
     it('应该显示法条分类和生效日期', async () => {
       const { useParams } = require('next/navigation');
-      useParams.mockReturnValue({ id: testArticleId });
+      useParams.mockReturnValue({ id: TEST_ARTICLE_ID });
 
       (global.fetch as jest.Mock).mockImplementation((url: string) => {
         if (url.includes('/recommendations')) {
@@ -171,7 +116,7 @@ describe('法条详情页', () => {
           return Promise.resolve({
             ok: true,
             json: async () => ({
-              articleId: testArticleId,
+              articleId: TEST_ARTICLE_ID,
               totalRelations: 0,
               relationsByType: {},
               recommendationScore: 0,
@@ -181,7 +126,7 @@ describe('法条详情页', () => {
         return Promise.resolve({
           ok: true,
           json: async () => ({
-            id: testArticleId,
+            id: TEST_ARTICLE_ID,
             lawName: '民法典',
             articleNumber: '1',
             category: 'CIVIL',
@@ -207,7 +152,7 @@ describe('法条详情页', () => {
   describe('关系图谱展示', () => {
     it('应该加载并显示关系图谱', async () => {
       const { useParams } = require('next/navigation');
-      useParams.mockReturnValue({ id: testArticleId });
+      useParams.mockReturnValue({ id: TEST_ARTICLE_ID });
 
       // Mock所有API调用
       (global.fetch as jest.Mock).mockImplementation((url: string) => {
@@ -221,7 +166,7 @@ describe('法条详情页', () => {
           return Promise.resolve({
             ok: true,
             json: async () => ({
-              articleId: testArticleId,
+              articleId: TEST_ARTICLE_ID,
               totalRelations: 1,
               relationsByType: { RELATED: 1 },
               recommendationScore: 0.85,
@@ -232,7 +177,7 @@ describe('法条详情页', () => {
         return Promise.resolve({
           ok: true,
           json: async () => ({
-            id: testArticleId,
+            id: TEST_ARTICLE_ID,
             lawName: '民法典',
             articleNumber: '1',
             fullText: '为了保护民事主体的合法权益',
@@ -259,7 +204,7 @@ describe('法条详情页', () => {
 
     it('应该显示关系统计信息', async () => {
       const { useParams } = require('next/navigation');
-      useParams.mockReturnValue({ id: testArticleId });
+      useParams.mockReturnValue({ id: TEST_ARTICLE_ID });
 
       (global.fetch as jest.Mock).mockImplementation((url: string) => {
         if (url.includes('/recommendations')) {
@@ -272,7 +217,7 @@ describe('法条详情页', () => {
           return Promise.resolve({
             ok: true,
             json: async () => ({
-              articleId: testArticleId,
+              articleId: TEST_ARTICLE_ID,
               totalRelations: 1,
               relationsByType: { RELATED: 1 },
               recommendationScore: 0.85,
@@ -282,7 +227,7 @@ describe('法条详情页', () => {
         return Promise.resolve({
           ok: true,
           json: async () => ({
-            id: testArticleId,
+            id: TEST_ARTICLE_ID,
             lawName: '民法典',
             articleNumber: '1',
             fullText: '为了保护民事主体的合法权益',
@@ -309,7 +254,7 @@ describe('法条详情页', () => {
   describe('推荐法条展示', () => {
     it('应该显示推荐的相关法条', async () => {
       const { useParams } = require('next/navigation');
-      useParams.mockReturnValue({ id: testArticleId });
+      useParams.mockReturnValue({ id: TEST_ARTICLE_ID });
 
       (global.fetch as jest.Mock).mockImplementation((url: string) => {
         if (url.includes('/recommendations')) {
@@ -318,7 +263,7 @@ describe('法条详情页', () => {
             json: async () => [
               {
                 article: {
-                  id: relatedArticleId,
+                  id: RELATED_ARTICLE_ID,
                   lawName: '民法典',
                   articleNumber: '2',
                   fullText: '民法调整平等主体',
@@ -334,7 +279,7 @@ describe('法条详情页', () => {
           return Promise.resolve({
             ok: true,
             json: async () => ({
-              articleId: testArticleId,
+              articleId: TEST_ARTICLE_ID,
               totalRelations: 1,
               relationsByType: { RELATED: 1 },
               recommendationScore: 0.85,
@@ -344,7 +289,7 @@ describe('法条详情页', () => {
         return Promise.resolve({
           ok: true,
           json: async () => ({
-            id: testArticleId,
+            id: TEST_ARTICLE_ID,
             lawName: '民法典',
             articleNumber: '1',
             fullText: '为了保护民事主体的合法权益',
@@ -368,7 +313,7 @@ describe('法条详情页', () => {
 
     it('应该显示推荐原因和相关性分数', async () => {
       const { useParams } = require('next/navigation');
-      useParams.mockReturnValue({ id: testArticleId });
+      useParams.mockReturnValue({ id: TEST_ARTICLE_ID });
 
       (global.fetch as jest.Mock).mockImplementation((url: string) => {
         if (url.includes('/recommendations')) {
@@ -377,7 +322,7 @@ describe('法条详情页', () => {
             json: async () => [
               {
                 article: {
-                  id: relatedArticleId,
+                  id: RELATED_ARTICLE_ID,
                   lawName: '民法典',
                   articleNumber: '2',
                   fullText: '民法调整平等主体',
@@ -392,7 +337,7 @@ describe('法条详情页', () => {
           return Promise.resolve({
             ok: true,
             json: async () => ({
-              articleId: testArticleId,
+              articleId: TEST_ARTICLE_ID,
               totalRelations: 1,
               relationsByType: {},
               recommendationScore: 0.85,
@@ -402,7 +347,7 @@ describe('法条详情页', () => {
         return Promise.resolve({
           ok: true,
           json: async () => ({
-            id: testArticleId,
+            id: TEST_ARTICLE_ID,
             lawName: '民法典',
             articleNumber: '1',
             fullText: '为了保护民事主体的合法权益',
@@ -448,7 +393,7 @@ describe('法条详情页', () => {
 
     it('应该处理网络错误', async () => {
       const { useParams } = require('next/navigation');
-      useParams.mockReturnValue({ id: testArticleId });
+      useParams.mockReturnValue({ id: TEST_ARTICLE_ID });
 
       (global.fetch as jest.Mock).mockRejectedValueOnce(
         new Error('Network error')
@@ -467,7 +412,7 @@ describe('法条详情页', () => {
 
     it('应该显示加载状态', async () => {
       const { useParams } = require('next/navigation');
-      useParams.mockReturnValue({ id: testArticleId });
+      useParams.mockReturnValue({ id: TEST_ARTICLE_ID });
 
       (global.fetch as jest.Mock).mockImplementation(
         () => new Promise(resolve => setTimeout(resolve, 1000))

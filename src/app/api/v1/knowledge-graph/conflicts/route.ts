@@ -50,7 +50,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // 参数验证
     const lawArticleIdsParam = searchParams.get('lawArticleIds');
 
-    if (!lawArticleIdsParam) {
+    if (lawArticleIdsParam === null) {
       return NextResponse.json(
         { error: '缺少必需参数: lawArticleIds' },
         { status: 400 }
@@ -79,10 +79,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (lawArticleIds.length > 10) {
       return NextResponse.json(
-        {
-          success: false,
-          error: { code: 'TOO_MANY_IDS', message: 'lawArticleIds最多支持10个' },
-        },
+        { error: 'lawArticleIds最多支持10个' },
         { status: 400 }
       );
     }

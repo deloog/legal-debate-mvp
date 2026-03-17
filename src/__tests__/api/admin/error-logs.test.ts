@@ -69,7 +69,7 @@ describe('错误日志API - GET /api/admin/error-logs', () => {
 
       expect(response.status).toBe(401);
       const data = await response.json();
-      expect(data.error).toBe('未认证');
+      expect(data.error).toBe('UNAUTHORIZED');
     });
 
     it('无权限用户应返回403', async () => {
@@ -284,7 +284,7 @@ describe('错误日志API - GET /api/admin/error-logs', () => {
 
       expect(response.status).toBe(500);
       const data = await response.json();
-      expect(data.error).toBe('服务器错误');
+      expect(data.error).toBe('INTERNAL_SERVER_ERROR');
     });
   });
 });

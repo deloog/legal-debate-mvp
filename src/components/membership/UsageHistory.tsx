@@ -139,18 +139,23 @@ export function UsageHistory({ history, isLoading }: UsageHistoryProps) {
                   </div>
                   <div className='space-y-1 text-sm'>
                     {/* 等级变更 */}
-                    {record.fromTier !== record.toTier && (
-                      <div className='text-gray-700'>
-                        等级:
-                        <span className='font-medium text-gray-900'>
-                          {record.fromTier || 'FREE'}
-                        </span>
-                        →
-                        <span className='font-medium text-gray-900'>
-                          {record.toTier || 'FREE'}
-                        </span>
-                      </div>
-                    )}
+                    {(() => {
+                      const from =
+                        record.fromTier ?? record.previousTier ?? 'FREE';
+                      const to = record.toTier ?? record.newTier ?? 'FREE';
+                      return from !== to ? (
+                        <div className='text-gray-700'>
+                          等级:
+                          <span className='font-medium text-gray-900'>
+                            {from}
+                          </span>
+                          →
+                          <span className='font-medium text-gray-900'>
+                            {to}
+                          </span>
+                        </div>
+                      ) : null;
+                    })()}
                     {/* 状态变更 */}
                     {record.fromStatus !== record.toStatus && (
                       <div className='text-gray-700'>

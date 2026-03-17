@@ -77,6 +77,16 @@ export class ContractEmailService {
         };
       }
 
+      // 检查transporter是否可用（在生成PDF之前，避免无效开销）
+      if (!this.transporter) {
+        if (process.env.EMAIL_MOCK_MODE === 'true') {
+          logger.info('[ContractEmail] Mock mode: 模拟邮件发送成功');
+          return { success: true, messageId: `mock-${Date.now()}` };
+        }
+        logger.warn('[ContractEmail] SMTP未配置，跳过邮件发送');
+        return { success: false, error: 'SMTP not configured' };
+      }
+
       // 生成PDF（如果需要附件）
       let pdfPath: string | undefined;
       if (input.attachPDF !== false) {
@@ -114,15 +124,6 @@ export class ContractEmailService {
             path: absolutePath,
           },
         ];
-      }
-
-      // 检查transporter是否可用
-      if (!this.transporter) {
-        logger.warn('[ContractEmail] SMTP未配置，跳过邮件发送');
-        return {
-          success: false,
-          error: 'SMTP not configured',
-        };
       }
 
       // 发送邮件

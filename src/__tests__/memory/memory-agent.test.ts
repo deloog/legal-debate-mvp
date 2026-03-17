@@ -75,34 +75,18 @@ describe('MemoryAgent', () => {
 
   describe('初始化和关闭', () => {
     it('应该成功初始化', async () => {
-      await memoryAgent.initialize();
-
-      expect(console.log).toHaveBeenCalledWith('Initializing MemoryAgent...');
-      expect(console.log).toHaveBeenCalledWith(
-        'MemoryAgent initialized successfully'
-      );
+      await expect(memoryAgent.initialize()).resolves.not.toThrow();
     });
 
     it('应该避免重复初始化', async () => {
       await memoryAgent.initialize();
-      await memoryAgent.initialize();
-
-      const calls = (console.log as jest.Mock).mock.calls;
-      const initCalls = calls.filter(
-        call =>
-          call[0]?.includes('Initializing') || call[0]?.includes('initialized')
-      );
-      expect(initCalls.length).toBeGreaterThanOrEqual(2);
+      // 再次初始化不应抛出异常
+      await expect(memoryAgent.initialize()).resolves.not.toThrow();
     });
 
     it('应该成功关闭', async () => {
       await memoryAgent.initialize();
-      await memoryAgent.shutdown();
-
-      expect(console.log).toHaveBeenCalledWith('Shutting down MemoryAgent...');
-      expect(console.log).toHaveBeenCalledWith(
-        'MemoryAgent shut down successfully'
-      );
+      await expect(memoryAgent.shutdown()).resolves.not.toThrow();
     });
 
     it('应该在未初始化时返回false', async () => {

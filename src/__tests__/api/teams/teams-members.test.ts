@@ -625,7 +625,9 @@ describe('Teams API - Members Management', () => {
       const response = await OPTIONS_MEMBERS(request);
 
       expect(response.status).toBe(200);
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+        'http://localhost:3000'
+      );
       expect(response.headers.get('Access-Control-Allow-Methods')).toBe(
         'GET, POST, OPTIONS'
       );
@@ -643,7 +645,9 @@ describe('Teams API - Members Management', () => {
       const response = await OPTIONS_MEMBER_BY_ID(request);
 
       expect(response.status).toBe(200);
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+        'http://localhost:3000'
+      );
       expect(response.headers.get('Access-Control-Allow-Methods')).toBe(
         'GET, PATCH, DELETE, OPTIONS'
       );

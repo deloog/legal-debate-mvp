@@ -2,20 +2,43 @@
  * 跟进任务处理器测试
  */
 
-import { FollowUpTaskProcessor } from '@/lib/client/follow-up-task-processor';
 import { FollowUpTaskPriority, FollowUpTaskStatus } from '@/types/client';
 
-// Mock prisma
-jest.mock('@/lib/db/prisma', () => ({
-  prisma: {
-    $queryRaw: jest.fn(),
-    $queryRawUnsafe: jest.fn(),
-  },
-}));
+// 服务内部使用 new PrismaClient()，需要 mock @prisma/client
+const mockQueryRaw = jest.fn();
+const mockQueryRawUnsafe = jest.fn();
 
-import { prisma } from '@/lib/db/prisma';
+jest.mock('@prisma/client', () => {
+  const actual = jest.requireActual(
+    '@prisma/client'
+  ) as typeof import('@prisma/client');
+  return {
+    ...actual,
+    PrismaClient: jest.fn().mockImplementation(() => ({
+      $queryRaw: mockQueryRaw,
+      $queryRawUnsafe: mockQueryRawUnsafe,
+      followUpTask: {
+        create: jest.fn(),
+        update: jest.fn(),
+        findUnique: jest.fn(),
+        findMany: jest.fn(),
+        count: jest.fn(),
+      },
+      $connect: jest.fn(),
+      $disconnect: jest.fn(),
+    })),
+  };
+});
 
-const mockPrisma = prisma as jest.Mocked<typeof prisma>;
+// mockPrisma 别名，方便测试中使用
+const mockPrisma = {
+  $queryRaw: mockQueryRaw,
+  $queryRawUnsafe: mockQueryRawUnsafe,
+};
+
+const {
+  FollowUpTaskProcessor,
+} = require('@/lib/client/follow-up-task-processor');
 
 describe('FollowUpTaskProcessor', () => {
   beforeEach(() => {
@@ -48,7 +71,7 @@ describe('FollowUpTaskProcessor', () => {
 
       const mockCountResult = [{ count: BigInt(1) }];
 
-      (mockPrisma.$queryRawUnsafe as jest.Mock)
+      (mockPrisma.$queryRaw as jest.Mock)
         .mockResolvedValueOnce(mockCountResult)
         .mockResolvedValueOnce(mockTasks);
 
@@ -93,7 +116,7 @@ describe('FollowUpTaskProcessor', () => {
 
       const mockCountResult = [{ count: BigInt(1) }];
 
-      (mockPrisma.$queryRawUnsafe as jest.Mock)
+      (mockPrisma.$queryRaw as jest.Mock)
         .mockResolvedValueOnce(mockCountResult)
         .mockResolvedValueOnce(mockTasks);
 
@@ -132,7 +155,7 @@ describe('FollowUpTaskProcessor', () => {
 
       const mockCountResult = [{ count: BigInt(1) }];
 
-      (mockPrisma.$queryRawUnsafe as jest.Mock)
+      (mockPrisma.$queryRaw as jest.Mock)
         .mockResolvedValueOnce(mockCountResult)
         .mockResolvedValueOnce(mockTasks);
 
@@ -150,7 +173,7 @@ describe('FollowUpTaskProcessor', () => {
       const mockTasks: unknown[] = [];
       const mockCountResult = [{ count: BigInt(0) }];
 
-      (mockPrisma.$queryRawUnsafe as jest.Mock)
+      (mockPrisma.$queryRaw as jest.Mock)
         .mockResolvedValueOnce(mockCountResult)
         .mockResolvedValueOnce(mockTasks);
 
@@ -209,7 +232,7 @@ describe('FollowUpTaskProcessor', () => {
 
       const mockCountResult = [{ count: BigInt(2) }];
 
-      (mockPrisma.$queryRawUnsafe as jest.Mock)
+      (mockPrisma.$queryRaw as jest.Mock)
         .mockResolvedValueOnce(mockCountResult)
         .mockResolvedValueOnce(mockTasks);
 
@@ -228,7 +251,7 @@ describe('FollowUpTaskProcessor', () => {
       const mockTasks: unknown[] = [];
       const mockCountResult = [{ count: BigInt(0) }];
 
-      (mockPrisma.$queryRawUnsafe as jest.Mock)
+      (mockPrisma.$queryRaw as jest.Mock)
         .mockResolvedValueOnce(mockCountResult)
         .mockResolvedValueOnce(mockTasks);
 
@@ -287,27 +310,8 @@ describe('FollowUpTaskProcessor', () => {
     });
 
     it('应该验证用户权限', async () => {
-      const mockTask = {
-        id: 'task-1',
-        clientId: 'client-1',
-        communicationId: 'comm-1',
-        userId: 'other-user',
-        type: 'PHONE',
-        summary: '跟进客户',
-        dueDate: new Date('2026-01-25'),
-        priority: 'HIGH',
-        status: 'PENDING',
-        completedAt: null,
-        notes: null,
-        metadata: null,
-        createdAt: new Date('2026-01-20'),
-        updatedAt: new Date('2026-01-20'),
-        clientName: '张三',
-        clientPhone: '13800138000',
-        clientEmail: 'test@example.com',
-      };
-
-      (mockPrisma.$queryRaw as jest.Mock).mockResolvedValue([mockTask]);
+      // 实现在 SQL 查询中包含 userId 过滤，不匹配时返回空结果
+      (mockPrisma.$queryRaw as jest.Mock).mockResolvedValue([]);
 
       const result = await FollowUpTaskProcessor.getTask('task-1', 'user-1');
 
@@ -522,8 +526,9 @@ describe('FollowUpTaskProcessor', () => {
       };
 
       (mockPrisma.$queryRaw as jest.Mock)
-        .mockResolvedValueOnce([mockTask])
-        .mockResolvedValueOnce([mockUpdatedTask]);
+        .mockResolvedValueOnce([mockTask]) // getTask #1: 检查任务存在
+        .mockResolvedValueOnce([]) // UPDATE 语句结果
+        .mockResolvedValueOnce([mockUpdatedTask]); // getTask #2: 返回更新后任务
 
       const result = await FollowUpTaskProcessor.updateTask(
         'task-1',
@@ -564,8 +569,9 @@ describe('FollowUpTaskProcessor', () => {
       };
 
       (mockPrisma.$queryRaw as jest.Mock)
-        .mockResolvedValueOnce([mockTask])
-        .mockResolvedValueOnce([mockUpdatedTask]);
+        .mockResolvedValueOnce([mockTask]) // getTask #1: 检查任务存在
+        .mockResolvedValueOnce([]) // UPDATE 语句结果
+        .mockResolvedValueOnce([mockUpdatedTask]); // getTask #2: 返回更新后任务
 
       const result = await FollowUpTaskProcessor.updateTask(
         'task-1',

@@ -76,40 +76,35 @@ describe('DiscussionForm 组件测试', () => {
   });
 
   describe('表单验证测试', () => {
-    it('空内容应该显示错误提示', async () => {
-      const user = userEvent.setup();
+    it('空内容时提交按钮应该禁用', () => {
       render(<DiscussionForm {...defaultProps} />);
 
+      // 按钮在内容为空时处于禁用状态（UI层面防止空提交）
       const submitButton = screen.getByText('发送');
-      await user.click(submitButton);
-
-      expect(screen.getByText('讨论内容不能为空')).toBeInTheDocument();
+      expect(submitButton).toBeDisabled();
     });
 
-    it('内容超长应该显示错误提示', async () => {
-      const user = userEvent.setup();
+    it('内容超长时提交按钮应该禁用', () => {
       render(<DiscussionForm {...defaultProps} />);
 
       const textarea = screen.getByRole('textbox');
-      const longContent = 'a'.repeat(10001);
-      await user.type(textarea, longContent);
+      // 使用fireEvent快速设置超长内容
+      fireEvent.change(textarea, { target: { value: 'a'.repeat(10001) } });
 
+      // 按钮在内容超限时处于禁用状态
       const submitButton = screen.getByText('发送');
-      await user.click(submitButton);
-
-      expect(
-        screen.getByText('讨论内容不能超过10000个字符')
-      ).toBeInTheDocument();
+      expect(submitButton).toBeDisabled();
     });
 
     it('应该显示字符计数', async () => {
-      const user = userEvent.setup();
       render(<DiscussionForm {...defaultProps} />);
 
       const textarea = screen.getByRole('textbox');
-      await user.type(textarea, 'hello');
+      fireEvent.change(textarea, { target: { value: 'hello' } });
 
-      expect(screen.getByText('5/10000')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('5/10000')).toBeInTheDocument();
+      });
     });
 
     it('超出限制时应显示"超限"标记', async () => {

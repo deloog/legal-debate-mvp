@@ -14,11 +14,37 @@
 import { CrossExaminationService } from '@/lib/evidence/cross-examination-service';
 import type { Evidence } from '@prisma/client';
 
-// Mock AI Service
+// Mock AI Service - 服务使用 AIService.analyzeDocument 静态方法
+const mockAIResponse = {
+  content: JSON.stringify({
+    possibleChallenges: [
+      {
+        type: 'authenticity',
+        content: '复印件无法核实原件真实性',
+        likelihood: 70,
+      },
+      {
+        type: 'relevance',
+        content: '合同签订时间与争议事项无关联',
+        likelihood: 30,
+      },
+    ],
+    responses: [
+      {
+        challenge: '复印件无法核实原件真实性',
+        response: '提供原件或申请法院调取人社局备案合同',
+        supportingEvidence: '人社局备案合同',
+      },
+    ],
+    overallRisk: 'medium',
+    riskNote: '存在真实性质疑风险，建议补充原件',
+  }),
+};
+
 jest.mock('@/lib/ai/clients', () => ({
-  AIService: jest.fn().mockImplementation(() => ({
-    chat: jest.fn().mockResolvedValue(
-      JSON.stringify({
+  AIService: {
+    analyzeDocument: jest.fn().mockResolvedValue({
+      content: JSON.stringify({
         possibleChallenges: [
           {
             type: 'authenticity',
@@ -40,9 +66,9 @@ jest.mock('@/lib/ai/clients', () => ({
         ],
         overallRisk: 'medium',
         riskNote: '存在真实性质疑风险，建议补充原件',
-      })
-    ),
-  })),
+      }),
+    }),
+  },
 }));
 
 describe('CrossExaminationService', () => {
@@ -373,10 +399,11 @@ describe('CrossExaminationService', () => {
 
   describe('错误处理', () => {
     it('应该处理AI服务失败', async () => {
-      const mockAIService = require('@/lib/ai/clients').AIService;
-      mockAIService.mockImplementationOnce(() => ({
-        chat: jest.fn().mockRejectedValue(new Error('AI服务不可用')),
-      }));
+      // 临时让 analyzeDocument 抛出错误
+      const { AIService } = require('@/lib/ai/clients');
+      (AIService.analyzeDocument as jest.Mock).mockRejectedValueOnce(
+        new Error('AI服务不可用')
+      );
 
       const service = new CrossExaminationService();
       const evidence: Partial<Evidence> = {

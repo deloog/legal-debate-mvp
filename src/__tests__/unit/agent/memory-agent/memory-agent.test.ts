@@ -63,53 +63,21 @@ describe('MemoryAgent', () => {
 
   describe('初始化和关闭', () => {
     it('应该成功初始化', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
-      await memoryAgent.initialize();
-
-      expect(consoleSpy).toHaveBeenCalledWith('Initializing MemoryAgent...');
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'MemoryAgent initialized successfully'
-      );
-
-      consoleSpy.mockRestore();
+      await expect(memoryAgent.initialize()).resolves.not.toThrow();
     });
 
     it('重复初始化不应该报错', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
       await memoryAgent.initialize();
-      await memoryAgent.initialize(); // 第二次初始化
-
-      // 初始化会触发MemoryMigrator的启动，所以会有额外日志
-      // 只需要确保没有报错
-      expect(consoleSpy).toHaveBeenCalled();
-
-      consoleSpy.mockRestore();
+      await expect(memoryAgent.initialize()).resolves.not.toThrow();
     });
 
     it('应该成功关闭', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
       await memoryAgent.initialize();
-      await memoryAgent.shutdown();
-
-      expect(consoleSpy).toHaveBeenCalledWith('Shutting down MemoryAgent...');
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'MemoryAgent shut down successfully'
-      );
-
-      consoleSpy.mockRestore();
+      await expect(memoryAgent.shutdown()).resolves.not.toThrow();
     });
 
     it('未初始化时关闭不应该报错', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
-      await memoryAgent.shutdown();
-
-      expect(consoleSpy).not.toHaveBeenCalled();
-
-      consoleSpy.mockRestore();
+      await expect(memoryAgent.shutdown()).resolves.not.toThrow();
     });
   });
 

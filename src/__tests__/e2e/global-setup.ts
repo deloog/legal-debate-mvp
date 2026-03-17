@@ -7,8 +7,8 @@ import bcrypt from 'bcrypt';
 // 固定的 E2E 测试专用账号凭证（仅供测试环境使用）
 export const E2E_ADMIN_EMAIL = 'e2e-admin@test-internal.local';
 export const E2E_ADMIN_PASSWORD = 'AdminE2E@Test2024';
-const E2E_LAWYER_EMAIL = 'e2e-lawyer@test-internal.local';
-const E2E_LAWYER_PASSWORD = 'LawyerE2E@Test2024';
+export const E2E_LAWYER_EMAIL = 'e2e-lawyer@test-internal.local';
+export const E2E_LAWYER_PASSWORD = 'LawyerE2E@Test2024';
 const E2E_LAWYER_LICENSE = 'E2ETESTLICENSE001';
 const SALT_ROUNDS = 10;
 
@@ -190,7 +190,25 @@ async function globalSetup(_config: FullConfig): Promise<void> {
     );
 
     // -------------------------------------------------------------------------
-    // 6. 将测试状态写入文件，供各测试文件读取
+    // 6. 创建通用测试账号（供 contract-workflow 等测试使用）
+    // -------------------------------------------------------------------------
+    const testUserHashedPwd = await bcrypt.hash('password123', SALT_ROUNDS);
+    await prisma.user.upsert({
+      where: { email: 'test@example.com' },
+      update: { status: 'ACTIVE', role: 'USER', password: testUserHashedPwd },
+      create: {
+        email: 'test@example.com',
+        username: 'testuser',
+        name: 'Test User',
+        password: testUserHashedPwd,
+        role: 'USER',
+        status: 'ACTIVE',
+      },
+    });
+    console.log('✅ General test user ready: test@example.com');
+
+    // -------------------------------------------------------------------------
+    // 7. 将测试状态写入文件，供各测试文件读取
     // -------------------------------------------------------------------------
     const testState = {
       adminEmail: E2E_ADMIN_EMAIL,

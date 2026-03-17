@@ -23,6 +23,3 @@ export * from '@testing-library/react';
 
 // Override render method
 export { customRender as render };
-
-// Export user event for interactions
-export { userEvent } from '@testing-library/user-event';

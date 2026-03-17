@@ -11,11 +11,16 @@
 
 import { POST } from '@/app/api/evidence/[id]/cross-examination/route';
 
+// Mock auth middleware
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
+
 // Mock Prisma
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
     evidence: {
-      findUnique: jest.fn(),
+      findFirst: jest.fn(),
     },
     case: {
       findUnique: jest.fn(),
@@ -24,19 +29,34 @@ jest.mock('@/lib/db/prisma', () => ({
 }));
 
 // Mock CrossExaminationService
-const mockPreAssess = jest.fn();
 jest.mock('@/lib/evidence/cross-examination-service', () => ({
-  CrossExaminationService: jest.fn().mockImplementation(() => ({
-    preAssess: mockPreAssess,
-  })),
+  CrossExaminationService: {
+    getInstance: jest.fn().mockReturnValue({
+      preAssess: jest.fn(),
+    }),
+  },
 }));
+
+import { getAuthUser } from '@/lib/middleware/auth';
+import { CrossExaminationService } from '@/lib/evidence/cross-examination-service';
+
+const TEST_USER_ID = 'test-user-id';
 
 describe('POST /api/evidence/[id]/cross-examination', () => {
   let mockRequest: Request;
+  let mockPreAssess: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPreAssess.mockReset();
+    // Get the mock preAssess from the mocked getInstance
+    mockPreAssess = (
+      CrossExaminationService.getInstance() as { preAssess: jest.Mock }
+    ).preAssess;
+    // Default: authenticated user
+    (getAuthUser as jest.Mock).mockResolvedValue({
+      userId: TEST_USER_ID,
+      email: 'test@example.com',
+    });
   });
 
   describe('正常请求', () => {
@@ -72,9 +92,10 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
+        case: { id: 'case-1', type: 'LABOR_DISPUTE', userId: TEST_USER_ID },
       };
 
-      prisma.evidence.findUnique.mockResolvedValue(mockEvidence);
+      prisma.evidence.findFirst.mockResolvedValue(mockEvidence);
 
       prisma.case.findUnique.mockResolvedValue({
         id: 'case-1',
@@ -144,7 +165,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
 
       const { prisma } = require('@/lib/db/prisma');
 
-      prisma.evidence.findUnique.mockResolvedValue({
+      prisma.evidence.findFirst.mockResolvedValue({
         id: 'evidence-1',
         name: '工资条',
         type: 'DOCUMENT',
@@ -153,11 +174,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
-      });
-
-      prisma.case.findUnique.mockResolvedValue({
-        id: 'case-1',
-        title: '测试案件',
+        case: { id: 'case-1', type: 'DOCUMENT', userId: TEST_USER_ID },
       });
 
       mockPreAssess.mockResolvedValue({
@@ -198,7 +215,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
 
       const { prisma } = require('@/lib/db/prisma');
 
-      prisma.evidence.findUnique.mockResolvedValue({
+      prisma.evidence.findFirst.mockResolvedValue({
         id: 'evidence-1',
         name: '证人证言',
         type: 'WITNESS',
@@ -208,11 +225,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
-      });
-
-      prisma.case.findUnique.mockResolvedValue({
-        id: 'case-1',
-        title: '测试案件',
+        case: { id: 'case-1', type: 'CIVIL', userId: TEST_USER_ID },
       });
 
       mockPreAssess.mockResolvedValue({
@@ -337,7 +350,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       );
 
       const { prisma } = require('@/lib/db/prisma');
-      prisma.evidence.findUnique.mockResolvedValue(null);
+      prisma.evidence.findFirst.mockResolvedValue(null);
 
       const response = await POST(mockRequest, {
         params: Promise.resolve({ id: 'non-existent' }),
@@ -366,16 +379,8 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       );
 
       const { prisma } = require('@/lib/db/prisma');
-      prisma.evidence.findUnique.mockResolvedValue({
-        id: 'evidence-1',
-        name: '已删除证据',
-        type: 'DOCUMENT',
-        caseId: 'case-1',
-        status: 'APPROVED',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: new Date(), // 已删除
-      });
+      // The route queries findFirst with deletedAt: null filter, so deleted evidence returns null
+      prisma.evidence.findFirst.mockResolvedValue(null);
 
       const response = await POST(mockRequest, {
         params: Promise.resolve({ id: 'evidence-1' }),
@@ -403,7 +408,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       );
 
       const { prisma } = require('@/lib/db/prisma');
-      prisma.evidence.findUnique.mockResolvedValue({
+      prisma.evidence.findFirst.mockResolvedValue({
         id: 'evidence-1',
         name: '劳动合同',
         type: 'DOCUMENT',
@@ -412,11 +417,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
-      });
-
-      prisma.case.findUnique.mockResolvedValue({
-        id: 'case-1',
-        title: '测试案件',
+        case: { id: 'case-1', type: 'CIVIL', userId: TEST_USER_ID },
       });
 
       mockPreAssess.mockRejectedValue(new Error('AI服务不可用'));
@@ -469,7 +470,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       );
 
       const { prisma } = require('@/lib/db/prisma');
-      prisma.evidence.findUnique.mockRejectedValue(new Error('数据库连接失败'));
+      prisma.evidence.findFirst.mockRejectedValue(new Error('数据库连接失败'));
 
       const response = await POST(mockRequest, {
         params: Promise.resolve({ id: 'evidence-1' }),
@@ -500,7 +501,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       );
 
       const { prisma } = require('@/lib/db/prisma');
-      prisma.evidence.findUnique.mockResolvedValue({
+      prisma.evidence.findFirst.mockResolvedValue({
         id: 'evidence-1',
         name: '合同',
         type: 'DOCUMENT',
@@ -509,11 +510,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
-      });
-
-      prisma.case.findUnique.mockResolvedValue({
-        id: 'case-1',
-        title: '测试案件',
+        case: { id: 'case-1', type: 'CIVIL', userId: TEST_USER_ID },
       });
 
       mockPreAssess.mockResolvedValue({
@@ -555,7 +552,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       );
 
       const { prisma } = require('@/lib/db/prisma');
-      prisma.evidence.findUnique.mockResolvedValue({
+      prisma.evidence.findFirst.mockResolvedValue({
         id: 'evidence-1',
         name: '劳动合同',
         type: 'DOCUMENT',
@@ -565,11 +562,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
-      });
-
-      prisma.case.findUnique.mockResolvedValue({
-        id: 'case-1',
-        title: '测试案件',
+        case: { id: 'case-1', type: 'CIVIL', userId: TEST_USER_ID },
       });
 
       mockPreAssess.mockResolvedValue({
@@ -604,7 +597,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       );
 
       const { prisma } = require('@/lib/db/prisma');
-      prisma.evidence.findUnique.mockResolvedValue({
+      prisma.evidence.findFirst.mockResolvedValue({
         id: 'evidence-1',
         name: '劳动合同',
         type: 'DOCUMENT',
@@ -613,11 +606,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
-      });
-
-      prisma.case.findUnique.mockResolvedValue({
-        id: 'case-1',
-        title: '测试案件',
+        case: { id: 'case-1', type: 'CIVIL', userId: TEST_USER_ID },
       });
 
       mockPreAssess.mockResolvedValue({
@@ -653,7 +642,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       );
 
       const { prisma } = require('@/lib/db/prisma');
-      prisma.evidence.findUnique.mockResolvedValue({
+      prisma.evidence.findFirst.mockResolvedValue({
         id: 'evidence-1',
         name: '劳动合同',
         type: 'DOCUMENT',
@@ -662,11 +651,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
-      });
-
-      prisma.case.findUnique.mockResolvedValue({
-        id: 'case-1',
-        title: '测试案件',
+        case: { id: 'case-1', type: 'CIVIL', userId: TEST_USER_ID },
       });
 
       mockPreAssess.mockResolvedValue({
@@ -708,7 +693,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       );
 
       const { prisma } = require('@/lib/db/prisma');
-      prisma.evidence.findUnique.mockResolvedValue({
+      prisma.evidence.findFirst.mockResolvedValue({
         id: 'evidence-1',
         name: '录音证据',
         type: 'AUDIO',
@@ -717,11 +702,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
-      });
-
-      prisma.case.findUnique.mockResolvedValue({
-        id: 'case-1',
-        title: '测试案件',
+        case: { id: 'case-1', type: 'CIVIL', userId: TEST_USER_ID },
       });
 
       mockPreAssess.mockResolvedValue({
@@ -763,7 +744,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
       );
 
       const { prisma } = require('@/lib/db/prisma');
-      prisma.evidence.findUnique.mockResolvedValue({
+      prisma.evidence.findFirst.mockResolvedValue({
         id: 'evidence-1',
         name: '银行流水',
         type: 'DOCUMENT',
@@ -772,11 +753,7 @@ describe('POST /api/evidence/[id]/cross-examination', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
-      });
-
-      prisma.case.findUnique.mockResolvedValue({
-        id: 'case-1',
-        title: '测试案件',
+        case: { id: 'case-1', type: 'CIVIL', userId: TEST_USER_ID },
       });
 
       mockPreAssess.mockResolvedValue({

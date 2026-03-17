@@ -144,8 +144,9 @@ test.describe('律师资质证件照上传', () => {
     const data = await response.json();
     expect(response.ok()).toBeTruthy();
     expect(data.success).toBe(true);
+    // API 返回受认证保护的访问 URL，而非直接文件路径
     expect(data.data?.url).toMatch(
-      /^\/uploads\/qualifications\/.+\.(jpg|jpeg)$/
+      /^\/api\/qualifications\/photo\/.+$|^\/uploads\/qualifications\/.+\.(jpg|jpeg)$/
     );
   });
 
@@ -169,7 +170,10 @@ test.describe('律师资质证件照上传', () => {
     const data = await response.json();
     expect(response.ok()).toBeTruthy();
     expect(data.success).toBe(true);
-    expect(data.data?.url).toMatch(/^\/uploads\/qualifications\/.+\.png$/);
+    // API 返回受认证保护的访问 URL，而非直接文件路径
+    expect(data.data?.url).toMatch(
+      /^\/api\/qualifications\/photo\/.+$|^\/uploads\/qualifications\/.+\.png$/
+    );
   });
 
   test('应该拒绝不支持的文件类型（PDF）', async ({ request }) => {

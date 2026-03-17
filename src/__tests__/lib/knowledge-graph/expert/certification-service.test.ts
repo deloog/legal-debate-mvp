@@ -2,6 +2,11 @@
  * CertificationService 单元测试
  */
 
+// Mock prisma before imports
+jest.mock('@/lib/db/prisma', () => ({
+  prisma: require('@/__tests__/__mocks__/prisma-shared').prisma,
+}));
+
 import { certificationService } from '@/lib/knowledge-graph/expert/certification-service';
 import { prisma as mockPrisma } from '@/__tests__/__mocks__/prisma-shared';
 

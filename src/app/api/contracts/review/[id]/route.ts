@@ -113,6 +113,14 @@ export async function GET(
       content
     );
 
+    // 计算风险统计
+    const risks: ReviewReport['risks'] = reviewResult.risks ?? [];
+    const totalRisks = risks.length;
+    const criticalRisks = risks.filter(r => r.level === 'CRITICAL').length;
+    const highRisks = risks.filter(r => r.level === 'HIGH').length;
+    const mediumRisks = risks.filter(r => r.level === 'MEDIUM').length;
+    const lowRisks = risks.filter(r => r.level === 'LOW').length;
+
     // 构建完整的审查报告
     const report: ReviewReport = {
       id: `review-${Date.now()}`,
@@ -123,6 +131,11 @@ export async function GET(
       reviewedAt: new Date(),
       status: 'COMPLETED',
       ...reviewResult,
+      totalRisks,
+      criticalRisks,
+      highRisks,
+      mediumRisks,
+      lowRisks,
     };
 
     return NextResponse.json({

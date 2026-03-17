@@ -43,7 +43,7 @@ export const createContractSchema = z.object({
     .string()
     .min(1, '承办律师姓名不能为空')
     .max(50, '承办律师姓名不能超过50个字符'),
-  lawyerId: z.string().min(1, '律师ID不能为空'),
+  lawyerId: z.string().min(1, '律师ID不能为空').optional(),
 
   // 委托事项
   caseType: z.string().min(1, '案件类型不能为空'),
@@ -138,7 +138,7 @@ export const updateContractSchema = z.object({
 
   // 收费信息
   feeType: z.nativeEnum(FeeTypeValues).optional(),
-  totalFee: z
+  totalFee: z.coerce
     .number()
     .min(0, '总费用不能为负数')
     .max(100000000, '总费用不能超过1亿')

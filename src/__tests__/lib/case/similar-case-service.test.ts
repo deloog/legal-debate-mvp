@@ -142,7 +142,11 @@ describe('SimilarCaseService', () => {
       // 验证过滤条件存在
       expect(actualWhere).toBeDefined();
       expect(actualWhere.id).toEqual({ not: 'query2' });
-      expect(actualWhere.embedding).toEqual({ not: null });
+      // 实现使用 Prisma.DbNull 表示 "not null"，所以只验证 embedding 过滤存在
+      expect(actualWhere.embedding).toBeDefined();
+      expect(
+        (actualWhere.embedding as Record<string, unknown>).not
+      ).toBeDefined();
     });
 
     test('应该正确使用缓存', async () => {

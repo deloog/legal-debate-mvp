@@ -15,8 +15,17 @@ describe('验证码服务', () => {
   let prisma: PrismaClient;
   let service: VerificationCodeService;
 
-  beforeEach(async () => {
+  // 共享一个 PrismaClient，避免每个测试创建新连接导致连接池耗尽
+  beforeAll(async () => {
     prisma = new PrismaClient();
+  });
+
+  afterAll(async () => {
+    resetVerificationCodeService();
+    await prisma.$disconnect();
+  });
+
+  beforeEach(async () => {
     service = new VerificationCodeService(prisma);
 
     // 清理测试数据
@@ -31,9 +40,7 @@ describe('验证码服务', () => {
   });
 
   afterEach(async () => {
-    resetVerificationCodeService();
     await prisma.verificationCode.deleteMany({});
-    await prisma.$disconnect();
   });
 
   describe('createCode', () => {

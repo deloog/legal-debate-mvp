@@ -26,6 +26,16 @@ jest.mock('@/lib/db/prisma', () => ({
   },
 }));
 
+// Mock 导出频率限制，避免测试间状态污染
+jest.mock('@/lib/export/export-rate-limiter', () => ({
+  checkExportRateLimit: jest.fn(() => ({
+    allowed: true,
+    remaining: 99,
+    resetTime: Date.now() + 3600000,
+  })),
+  logExportComplete: jest.fn(),
+}));
+
 jest.mock('@/lib/export/excel-generator', () => {
   const originalModule = jest.requireActual('@/lib/export/excel-generator');
   return {
@@ -68,7 +78,7 @@ describe('GET /api/admin/export/cases', () => {
 
     it('已登录用户可以访问', async () => {
       (getAuthUser as jest.Mock).mockResolvedValue({
-        id: '1',
+        userId: '1',
         email: 'admin@example.com',
         role: 'ADMIN',
       });
@@ -88,7 +98,7 @@ describe('GET /api/admin/export/cases', () => {
   describe('权限验证', () => {
     it('无权限应该返回403', async () => {
       (getAuthUser as jest.Mock).mockResolvedValue({
-        id: '1',
+        userId: '1',
         email: 'user@example.com',
         role: 'USER',
       });
@@ -111,7 +121,7 @@ describe('GET /api/admin/export/cases', () => {
   describe('参数验证', () => {
     it('无效的format应该返回400', async () => {
       (getAuthUser as jest.Mock).mockResolvedValue({
-        id: '1',
+        userId: '1',
         email: 'admin@example.com',
         role: 'ADMIN',
       });
@@ -130,7 +140,7 @@ describe('GET /api/admin/export/cases', () => {
 
     it('有效的format应该接受请求', async () => {
       (getAuthUser as jest.Mock).mockResolvedValue({
-        id: '1',
+        userId: '1',
         email: 'admin@example.com',
         role: 'ADMIN',
       });
@@ -148,7 +158,7 @@ describe('GET /api/admin/export/cases', () => {
 
     it('默认format为CSV', async () => {
       (getAuthUser as jest.Mock).mockResolvedValue({
-        id: '1',
+        userId: '1',
         email: 'admin@example.com',
         role: 'ADMIN',
       });
@@ -168,7 +178,7 @@ describe('GET /api/admin/export/cases', () => {
   describe('数据查询', () => {
     it('应该调用prisma.case.findMany', async () => {
       (getAuthUser as jest.Mock).mockResolvedValue({
-        id: '1',
+        userId: '1',
         email: 'admin@example.com',
         role: 'ADMIN',
       });
@@ -186,7 +196,7 @@ describe('GET /api/admin/export/cases', () => {
 
     it('应该支持按案件类型筛选', async () => {
       (getAuthUser as jest.Mock).mockResolvedValue({
-        id: '1',
+        userId: '1',
         email: 'admin@example.com',
         role: 'ADMIN',
       });
@@ -207,7 +217,7 @@ describe('GET /api/admin/export/cases', () => {
 
     it('应该支持按状态筛选', async () => {
       (getAuthUser as jest.Mock).mockResolvedValue({
-        id: '1',
+        userId: '1',
         email: 'admin@example.com',
         role: 'ADMIN',
       });
@@ -228,7 +238,7 @@ describe('GET /api/admin/export/cases', () => {
 
     it('应该包含debate和document计数', async () => {
       (getAuthUser as jest.Mock).mockResolvedValue({
-        id: '1',
+        userId: '1',
         email: 'admin@example.com',
         role: 'ADMIN',
       });
@@ -254,7 +264,7 @@ describe('GET /api/admin/export/cases', () => {
   describe('响应格式', () => {
     it('应该返回正确的响应', async () => {
       (getAuthUser as jest.Mock).mockResolvedValue({
-        id: '1',
+        userId: '1',
         email: 'admin@example.com',
         role: 'ADMIN',
       });
@@ -275,7 +285,7 @@ describe('GET /api/admin/export/cases', () => {
 
     it('应该包含正确的文件名', async () => {
       (getAuthUser as jest.Mock).mockResolvedValue({
-        id: '1',
+        userId: '1',
         email: 'admin@example.com',
         role: 'ADMIN',
       });
@@ -296,7 +306,7 @@ describe('GET /api/admin/export/cases', () => {
   describe('错误处理', () => {
     it('数据库错误应该返回500', async () => {
       (getAuthUser as jest.Mock).mockResolvedValue({
-        id: '1',
+        userId: '1',
         email: 'admin@example.com',
         role: 'ADMIN',
       });

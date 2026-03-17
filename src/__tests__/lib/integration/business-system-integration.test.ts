@@ -7,6 +7,9 @@
 import { businessSystemIntegrationService } from '@/lib/integration';
 import { prisma } from '@/lib/db/prisma';
 
+// Mock global fetch 避免真实网络请求
+global.fetch = jest.fn();
+
 // Mock prisma
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
@@ -45,6 +48,13 @@ jest.mock('@/lib/security/encryption', () => ({
 describe('BusinessSystemIntegrationService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // 默认 fetch mock 返回成功响应
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: jest.fn().mockResolvedValue({ data: [], total: 0 }),
+      text: jest.fn().mockResolvedValue(''),
+    });
   });
 
   describe('createIntegration', () => {

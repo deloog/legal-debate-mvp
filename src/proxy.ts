@@ -70,16 +70,23 @@ export function proxy(request: NextRequest) {
   const publicPaths = [
     '/',
     '/login',
+    '/register',
     '/setup',
+    '/payment/success', // 支付结果页面（无敏感数据）
+    '/payment/fail', // 支付失败页面（无敏感数据）
     '/api/auth/login',
     '/api/auth/register',
     '/api/auth/forgot-password',
     '/api/auth/reset-password',
+    '/api/auth/oauth', // OAuth 回调端点无需登录（第三方授权回调）
     '/api/health',
     '/api/v1/health', // v1 健康检查也公开
     '/api/version',
     '/api/v1/version',
     '/api/dashboard', // 首页dashboard数据允许匿名访问
+    '/api/memberships/tiers', // 会员等级列表允许公开查看
+    '/api/payments/wechat/callback', // 微信支付前端跳转回调（浏览器无凭据调用）
+    '/api/payments/alipay/callback', // 支付宝前端跳转回调
   ];
 
   // 检查是否是公开路径
@@ -108,7 +115,7 @@ export function proxy(request: NextRequest) {
     // API路径返回401 JSON，页面路径重定向到登录页
     if (pathname.startsWith('/api/')) {
       const errorRes = NextResponse.json(
-        { success: false, message: '未认证，请先登录' },
+        { success: false, message: '未认证，请先登录', error: 'UNAUTHORIZED' },
         { status: 401 }
       );
       addCorsHeaders(errorRes, corsOrigin);

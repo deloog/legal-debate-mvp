@@ -198,9 +198,9 @@ describe('GET /api/orders', () => {
 
       expect(testResponse.status).toBe(200);
       expect(testResponse.success).toBe(true);
-      expect(testResponse.data.data.orders).toBeDefined();
-      expect(Array.isArray(testResponse.data.data.orders)).toBe(true);
-      expect(testResponse.data.data.pagination).toBeDefined();
+      expect(testResponse.data.orders).toBeDefined();
+      expect(Array.isArray(testResponse.data.orders)).toBe(true);
+      expect(testResponse.data.pagination).toBeDefined();
     });
 
     it('应使用默认分页参数', async () => {
@@ -209,8 +209,8 @@ describe('GET /api/orders', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.pagination.page).toBe(1);
-      expect(testResponse.data.data.pagination.limit).toBe(20);
+      expect(testResponse.data.pagination.page).toBe(1);
+      expect(testResponse.data.pagination.limit).toBe(20);
     });
 
     it('应支持状态筛选', async () => {
@@ -252,8 +252,8 @@ describe('GET /api/orders', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.pagination.total).toBe(2);
-      expect(testResponse.data.data.pagination.totalPages).toBe(1);
+      expect(testResponse.data.pagination.total).toBe(2);
+      expect(testResponse.data.pagination.totalPages).toBe(1);
     });
 
     it('应支持按createdAt升序排序', async () => {
@@ -264,7 +264,7 @@ describe('GET /api/orders', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.orders[0].orderNo).toBe('ORD20240101001');
+      expect(testResponse.data.orders[0].orderNo).toBe('ORD20240101001');
     });
 
     it('应支持按createdAt降序排序', async () => {
@@ -275,7 +275,7 @@ describe('GET /api/orders', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.orders[0].orderNo).toBe('ORD20240102001');
+      expect(testResponse.data.orders[0].orderNo).toBe('ORD20240102001');
     });
 
     it('应支持按amount排序', async () => {
@@ -286,7 +286,7 @@ describe('GET /api/orders', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.orders[0].amount).toBe(99.0);
+      expect(testResponse.data.orders[0].amount).toBe(99.0);
     });
 
     it('应支持按paidAt排序', async () => {
@@ -297,7 +297,7 @@ describe('GET /api/orders', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.orders[0].paidAt).toBeDefined();
+      expect(testResponse.data.orders[0].paidAt).toBeDefined();
     });
   });
 

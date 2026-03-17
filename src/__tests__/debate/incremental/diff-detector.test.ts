@@ -194,7 +194,7 @@ describe('DiffDetector', () => {
         {
           id: '1',
           type: 'DOCUMENT',
-          content: `${content}，这是新增的少量内容`,
+          content: `${content}!`, // 仅添加1字符，相似度=0.9≥阈值0.9，视为未变更
           fingerprint: 'hash2',
           metadata: {
             source: 'test',
@@ -222,7 +222,7 @@ describe('DiffDetector', () => {
         {
           id: '1',
           type: 'DOCUMENT',
-          content: '原始内容',
+          content: '这是很长的原始内容文档',
           fingerprint: 'hash1',
           metadata: {
             source: 'test',
@@ -235,7 +235,7 @@ describe('DiffDetector', () => {
         {
           id: '1',
           type: 'DOCUMENT',
-          content: '原始内容，仅少量修改',
+          content: '这是很长的原始内容文档X', // 仅添加1字符，相似度=1-1/11≈0.909≥阈值0.9
           fingerprint: 'hash2',
           metadata: {
             source: 'test',

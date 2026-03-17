@@ -344,7 +344,9 @@ describe('Teams API - List and Create', () => {
       const response = await OPTIONS_LIST(request);
 
       expect(response.status).toBe(200);
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+        'http://localhost:3000'
+      );
       expect(response.headers.get('Access-Control-Allow-Methods')).toBe(
         'GET, POST, OPTIONS'
       );

@@ -106,10 +106,18 @@ export function ApprovalFlow({
   };
 
   const canApprove = (step: ApprovalStep) => {
+    // 如果步骤指定了审批人，只有该审批人可操作；否则任何登录用户均可操作
+    if (step.approverId) {
+      return (
+        currentUserId &&
+        step.status === StepStatus.PENDING &&
+        step.approverId === currentUserId &&
+        approval.status === ApprovalStatus.IN_PROGRESS
+      );
+    }
     return (
-      currentUserId &&
+      !!currentUserId &&
       step.status === StepStatus.PENDING &&
-      step.approverId === currentUserId &&
       approval.status === ApprovalStatus.IN_PROGRESS
     );
   };

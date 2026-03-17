@@ -13,6 +13,9 @@ import {
 } from '@jest/globals';
 import { PrismaClient } from '@prisma/client';
 
+// 此测试直接操作真实数据库，给予充足超时时间
+jest.setTimeout(60000);
+
 const prisma = new PrismaClient();
 
 describe('CourtSchedule Database Model', () => {

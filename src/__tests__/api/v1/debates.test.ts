@@ -11,9 +11,43 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { DebateStatus } from '@prisma/client';
 
+// Mock authentication middleware
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(),
+}));
+
+// Mock permission middleware
+jest.mock('@/lib/middleware/resource-permission', () => ({
+  isAdminRole: jest.fn().mockReturnValue(false),
+  checkResourceOwnership: jest.fn(),
+  createPermissionErrorResponse: jest.fn(),
+  ResourceType: { DEBATE: 'DEBATE' },
+}));
+
+// Mock AI quota
+jest.mock('@/lib/ai/quota', () => ({
+  checkAIQuota: jest.fn().mockResolvedValue({ allowed: true }),
+  recordAIUsage: jest.fn().mockResolvedValue(undefined),
+}));
+
+// Mock audit logger
+jest.mock('@/lib/audit/logger', () => ({
+  logCreateAction: jest.fn().mockResolvedValue(undefined),
+}));
+
+import { getAuthUser } from '@/lib/middleware/auth';
+
+const mockGetAuthUser = getAuthUser as jest.MockedFunction<typeof getAuthUser>;
+const AUTHED_USER = {
+  userId: 'user-123',
+  email: 'test@example.com',
+  role: 'USER',
+};
+
 describe('Debates API', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetAuthUser.mockResolvedValue(AUTHED_USER as never);
   });
 
   afterEach(() => {
@@ -23,7 +57,8 @@ describe('Debates API', () => {
   describe('GET /api/v1/debates', () => {
     it('应该返回辩论列表', async () => {
       const mockRequest = {
-        url: new URL('http://localhost:3000/api/v1/debates'),
+        url: 'http://localhost:3000/api/v1/debates',
+        headers: { get: jest.fn().mockReturnValue(null) },
       } as unknown as NextRequest;
 
       const mockPrismaFindMany = jest
@@ -46,7 +81,8 @@ describe('Debates API', () => {
 
     it('应该支持分页参数', async () => {
       const mockRequest = {
-        url: new URL('http://localhost:3000/api/v1/debates?page=1&limit=10'),
+        url: 'http://localhost:3000/api/v1/debates?page=1&limit=10',
+        headers: { get: jest.fn().mockReturnValue(null) },
       } as unknown as NextRequest;
 
       jest.spyOn(prisma.debate, 'findMany').mockResolvedValue([]);
@@ -61,7 +97,8 @@ describe('Debates API', () => {
 
     it('应该支持搜索功能', async () => {
       const mockRequest = {
-        url: new URL('http://localhost:3000/api/v1/debates?search=合同'),
+        url: 'http://localhost:3000/api/v1/debates?search=合同',
+        headers: { get: jest.fn().mockReturnValue(null) },
       } as unknown as NextRequest;
 
       jest.spyOn(prisma.debate, 'findMany').mockResolvedValue([]);
@@ -76,7 +113,8 @@ describe('Debates API', () => {
 
     it('应该计算正确的分页信息', async () => {
       const mockRequest = {
-        url: new URL('http://localhost:3000/api/v1/debates?page=1&limit=10'),
+        url: 'http://localhost:3000/api/v1/debates?page=1&limit=10',
+        headers: { get: jest.fn().mockReturnValue(null) },
       } as unknown as NextRequest;
 
       jest.spyOn(prisma.debate, 'findMany').mockResolvedValue([]);
@@ -249,7 +287,9 @@ describe('Debates API', () => {
       const response = await OPTIONS({} as unknown as NextRequest);
 
       expect(response.status).toBe(200);
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+        'http://localhost:3000'
+      );
       expect(response.headers.get('Access-Control-Allow-Methods')).toBe(
         'GET, POST, OPTIONS'
       );

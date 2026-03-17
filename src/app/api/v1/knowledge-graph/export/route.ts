@@ -61,13 +61,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (!['json'].includes(format)) {
       return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'INVALID_FORMAT',
-            message: `不支持的导出格式: ${format}`,
-          },
-        },
+        { error: `不支持的导出格式: ${format}` },
         { status: 400 }
       );
     }
@@ -233,23 +227,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
 
     return NextResponse.json({
-      success: true,
-      data: {
-        format,
-        metadata,
-        nodes: exportNodes,
-        links: exportLinks,
-      },
+      format,
+      metadata,
+      nodes: exportNodes,
+      links: exportLinks,
     });
   } catch (error: unknown) {
     logger.error('图谱导出失败', { error });
     const errorMessage = error instanceof Error ? error.message : '服务器错误';
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: 'INTERNAL_ERROR', message: errorMessage },
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

@@ -91,6 +91,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: '权限不足' }, { status: 403 });
     }
 
+    // 验证合同是否存在
+    const contract = await prisma.contract.findUnique({
+      where: { id: contractId },
+      select: { id: true },
+    });
+
+    if (!contract) {
+      return NextResponse.json({ error: '合同不存在' }, { status: 404 });
+    }
+
     // 获取合同关联的法条
     const contractLawArticles = await prisma.contractLawArticle.findMany({
       where: { contractId },

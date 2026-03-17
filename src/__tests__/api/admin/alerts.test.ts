@@ -311,8 +311,7 @@ describe('告警API', () => {
       await GET(request);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '获取告警列表失败:',
-        expect.any(Error)
+        expect.stringContaining('获取告警列表失败:')
       );
       consoleErrorSpy.mockRestore();
     });
@@ -482,8 +481,7 @@ describe('告警API', () => {
       });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '确认告警失败:',
-        expect.any(Error)
+        expect.stringContaining('确认告警失败:')
       );
       consoleErrorSpy.mockRestore();
     });
@@ -603,8 +601,7 @@ describe('告警API', () => {
       });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '处理告警失败:',
-        expect.any(Error)
+        expect.stringContaining('处理告警失败:')
       );
       consoleErrorSpy.mockRestore();
     });

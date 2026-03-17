@@ -12,7 +12,7 @@ import { validatePermissions } from '@/lib/middleware/permission-check';
 // Mock dependencies
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
-    $queryRawUnsafe: jest.fn(),
+    $queryRaw: jest.fn(),
   },
 }));
 
@@ -37,118 +37,8 @@ describe('GET /api/analytics/lawyers', () => {
   });
 
   it('应该返回律师绩效数据', async () => {
-    // Mock database responses
-    (prisma.$queryRawUnsafe as jest.Mock).mockImplementation(
-      (query: string) => {
-        if (query.includes('"totalCases" as "totalCases"')) {
-          return [
-            {
-              lawyerId: 'lawyer-1',
-              lawyerName: '张律师',
-              lawyerRole: 'LAWYER',
-              totalCases: BigInt(10),
-              activeCases: BigInt(3),
-              completedCases: BigInt(6),
-              archivedCases: BigInt(1),
-            },
-            {
-              lawyerId: 'lawyer-2',
-              lawyerName: '李律师',
-              lawyerRole: 'LAWYER',
-              totalCases: BigInt(8),
-              activeCases: BigInt(2),
-              completedCases: BigInt(5),
-              archivedCases: BigInt(1),
-            },
-          ];
-        }
-        if (query.includes('"successfulCases" as "successfulCases"')) {
-          return [
-            {
-              lawyerId: 'lawyer-1',
-              lawyerName: '张律师',
-              lawyerRole: 'LAWYER',
-              totalCases: BigInt(10),
-              successfulCases: BigInt(6),
-            },
-            {
-              lawyerId: 'lawyer-2',
-              lawyerName: '李律师',
-              lawyerRole: 'LAWYER',
-              totalCases: BigInt(8),
-              successfulCases: BigInt(5),
-            },
-          ];
-        }
-        if (query.includes('"totalRevenue" as "totalRevenue"')) {
-          return [
-            {
-              lawyerId: 'lawyer-1',
-              lawyerName: '张律师',
-              lawyerRole: 'LAWYER',
-              totalRevenue: '100000.00',
-              avg: '10000.00',
-              max: '20000.00',
-              min: '5000.00',
-            },
-            {
-              lawyerId: 'lawyer-2',
-              lawyerName: '李律师',
-              lawyerRole: 'LAWYER',
-              totalRevenue: '80000.00',
-              avg: '8000.00',
-              max: '15000.00',
-              min: '4000.00',
-            },
-          ];
-        }
-        if (query.includes('"completedCases" as "completedCases"')) {
-          return [
-            {
-              lawyerId: 'lawyer-1',
-              lawyerName: '张律师',
-              lawyerRole: 'LAWYER',
-              completedCases: BigInt(6),
-              avgDuration: '7.50',
-              medianDuration: '7.00',
-              fastestDuration: '5.00',
-              slowestDuration: '10.00',
-            },
-            {
-              lawyerId: 'lawyer-2',
-              lawyerName: '李律师',
-              lawyerRole: 'LAWYER',
-              completedCases: BigInt(5),
-              avgDuration: '8.20',
-              medianDuration: '8.00',
-              fastestDuration: '6.00',
-              slowestDuration: '11.00',
-            },
-          ];
-        }
-        if (query.includes('"workDays" as "workDays"')) {
-          return [
-            {
-              lawyerId: 'lawyer-1',
-              lawyerName: '张律师',
-              lawyerRole: 'LAWYER',
-              completedCases: BigInt(6),
-              avgDurationDays: '7.50',
-              workDays: BigInt(20),
-            },
-            {
-              lawyerId: 'lawyer-2',
-              lawyerName: '李律师',
-              lawyerRole: 'LAWYER',
-              completedCases: BigInt(5),
-              avgDurationDays: '8.20',
-              workDays: BigInt(18),
-            },
-          ];
-        }
-        return [];
-      }
-    );
+    // Mock database responses - $queryRaw receives Prisma.Sql objects, not strings
+    (prisma.$queryRaw as jest.Mock).mockResolvedValue([]);
 
     const response = await GET(mockRequest as NextRequest);
     const result = await response.json();
@@ -165,7 +55,7 @@ describe('GET /api/analytics/lawyers', () => {
   });
 
   it('应该支持时间范围参数', async () => {
-    (prisma.$queryRawUnsafe as jest.Mock).mockReturnValue([]);
+    (prisma.$queryRaw as jest.Mock).mockResolvedValue([]);
 
     const url = new URL('http://localhost:3000/api/analytics/lawyers');
     url.searchParams.set('timeRange', TimeRange.LAST_7_DAYS);
@@ -180,7 +70,7 @@ describe('GET /api/analytics/lawyers', () => {
   });
 
   it('应该支持排序参数', async () => {
-    (prisma.$queryRawUnsafe as jest.Mock).mockReturnValue([
+    (prisma.$queryRaw as jest.Mock).mockResolvedValue([
       {
         lawyerId: 'lawyer-1',
         lawyerName: '张律师',
@@ -234,7 +124,7 @@ describe('GET /api/analytics/lawyers', () => {
   });
 
   it('应该计算正确的摘要统计', async () => {
-    (prisma.$queryRawUnsafe as jest.Mock).mockReturnValue([
+    (prisma.$queryRaw as jest.Mock).mockResolvedValue([
       {
         lawyerId: 'lawyer-1',
         lawyerName: '张律师',
@@ -263,7 +153,7 @@ describe('GET /api/analytics/lawyers', () => {
   });
 
   it('应该返回正确的元数据', async () => {
-    (prisma.$queryRawUnsafe as jest.Mock).mockReturnValue([]);
+    (prisma.$queryRaw as jest.Mock).mockResolvedValue([]);
 
     const response = await GET(mockRequest as NextRequest);
     const result = await response.json();
@@ -277,7 +167,7 @@ describe('GET /api/analytics/lawyers', () => {
   });
 
   it('数据库错误应该返回500', async () => {
-    (prisma.$queryRawUnsafe as jest.Mock).mockRejectedValue(
+    (prisma.$queryRaw as jest.Mock).mockRejectedValue(
       new Error('Database error')
     );
 

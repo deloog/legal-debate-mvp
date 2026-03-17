@@ -257,8 +257,8 @@ describe('GET /api/v1/knowledge-graph/validity-chain', () => {
       const response = await GET(request as any);
       const data = await response.json();
 
-      // 应该在检测到循环时停止
-      expect(data.chain.length).toBeLessThanOrEqual(5);
+      // 应该在检测到循环时停止（最大深度10）
+      expect(data.chain.length).toBeLessThanOrEqual(10);
     });
   });
 });

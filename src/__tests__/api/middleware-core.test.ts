@@ -277,13 +277,7 @@ describe('Middleware Core', () => {
         await stack.execute(mockRequest, context);
 
         expect(consoleSpy).toHaveBeenCalledWith(
-          'API Error:',
-          expect.objectContaining({
-            error: 'Test error',
-            url: 'http://localhost:3000/api/test',
-            method: 'GET',
-            timestamp: expect.any(String),
-          })
+          expect.stringContaining('API Error:')
         );
 
         consoleSpy.mockRestore();

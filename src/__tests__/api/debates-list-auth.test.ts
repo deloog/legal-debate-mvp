@@ -1,3 +1,8 @@
+jest.mock('@/lib/ai/quota', () => ({
+  checkAIQuota: jest.fn().mockResolvedValue({ allowed: true }),
+  recordAIUsage: jest.fn().mockResolvedValue(undefined),
+}));
+
 /**
  * 辩论列表API认证测试
  *
@@ -32,6 +37,9 @@ jest.mock('@/lib/db/prisma', () => ({
     },
     user: {
       findFirst: jest.fn(),
+    },
+    actionLog: {
+      create: jest.fn().mockResolvedValue({}),
     },
   },
 }));
@@ -121,6 +129,8 @@ const mockCases = [
 describe('辩论列表API - 认证测试', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const { checkAIQuota } = require('@/lib/ai/quota');
+    (checkAIQuota as jest.Mock).mockResolvedValue({ allowed: true });
   });
 
   afterEach(() => {

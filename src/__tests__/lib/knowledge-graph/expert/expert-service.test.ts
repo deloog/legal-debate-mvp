@@ -2,6 +2,11 @@
  * ExpertService 单元测试
  */
 
+// Mock prisma before imports
+jest.mock('@/lib/db/prisma', () => ({
+  prisma: require('@/__tests__/__mocks__/prisma-shared').prisma,
+}));
+
 import { expertService } from '@/lib/knowledge-graph/expert/expert-service';
 import { prisma as mockPrisma } from '@/__tests__/__mocks__/prisma-shared';
 
@@ -138,7 +143,7 @@ describe('ExpertService', () => {
         .mockResolvedValueOnce(5);
 
       mockPrisma.lawArticleRelation.aggregate.mockResolvedValue({
-        _avg: { qualityScore: 0.85 },
+        _avg: { confidence: 0.85 },
       });
 
       const result = await expertService.getExpertContributionStats(mockUserId);

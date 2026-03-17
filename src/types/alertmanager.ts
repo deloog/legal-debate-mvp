@@ -461,7 +461,10 @@ export function validateAlertExpression(expr: string): boolean {
       expr.toLowerCase().includes(keyword)
     );
 
-    return hasKeyword;
+    // 也接受包含指标名模式的简单表达式（指标名通常包含下划线，如 node_memory_MemAvailable_bytes）
+    const hasMetricPattern = /_[a-zA-Z0-9]/.test(expr);
+
+    return hasKeyword || hasMetricPattern;
   } catch {
     return false;
   }

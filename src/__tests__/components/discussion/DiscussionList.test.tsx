@@ -11,7 +11,7 @@ import {
   createTestProps,
 } from '../discussion/test-utils';
 
-// Mock lucide-react icons
+// Mock lucide-react icons - 需覆盖 DiscussionList 和 DiscussionItem 使用的所有图标
 jest.mock('lucide-react', () => ({
   ChevronLeft: () => <div data-testid='chevron-left-icon'>Left</div>,
   ChevronRight: () => <div data-testid='chevron-right-icon'>Right</div>,
@@ -19,8 +19,18 @@ jest.mock('lucide-react', () => ({
   Filter: () => <div data-testid='filter-icon'>Filter</div>,
   ArrowUpDown: () => <div data-testid='sort-icon'>Sort</div>,
   Pin: () => <div data-testid='pin-icon'>Pin</div>,
+  PinOff: () => <div data-testid='pin-off-icon'>PinOff</div>,
+  Edit: () => <div data-testid='edit-icon'>Edit</div>,
+  Trash2: () => <div data-testid='trash-icon'>Trash</div>,
+  User: () => <div data-testid='user-icon'>User</div>,
+  Clock: () => <div data-testid='clock-icon'>Clock</div>,
+  CheckCircle: () => <div data-testid='check-circle-icon'>Check</div>,
   RefreshCw: () => <div data-testid='refresh-icon'>Refresh</div>,
   AlertCircle: () => <div data-testid='alert-icon'>Alert</div>,
+  // Icons used by DiscussionForm (rendered when "发表讨论" is clicked)
+  Send: () => <div data-testid='send-icon'>Send</div>,
+  X: () => <div data-testid='x-icon'>X</div>,
+  AtSign: () => <div data-testid='at-icon'>At</div>,
 }));
 
 // Mock fetch

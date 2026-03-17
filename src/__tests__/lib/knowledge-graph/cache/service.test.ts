@@ -481,7 +481,7 @@ describe('KnowledgeGraphCacheService', () => {
       const count = await kgCacheService.warmUpCache();
 
       expect(typeof count).toBe('number');
-      expect(logger.info).toHaveBeenCalledWith('开始预热缓存');
+      expect(logger.info).toHaveBeenCalledWith('开始预热知识图谱缓存');
     });
   });
 

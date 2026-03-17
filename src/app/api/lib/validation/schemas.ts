@@ -17,8 +17,8 @@ export const uuidSchema = z
       // Prisma CUID格式 - 放宽限制以支持实际生成的CUID
       // 标准CUID是25位，但实际可能稍长或稍短
       const cuidRegex = /^[a-z0-9]{20,30}$/;
-      // 测试ID格式: mock-article-id-数字
-      const testIdRegex = /^mock-article-id-\d+$/;
+      // 测试ID格式: 支持 test-*-id、mock-*-id[-数字]、non-existent-*-id 等常见测试命名
+      const testIdRegex = /^(test|mock|non-existent)(-[a-z]+)*(-\d+)?$/;
       return (
         uuidRegex.test(val) || cuidRegex.test(val) || testIdRegex.test(val)
       );
@@ -240,7 +240,8 @@ export const generateDebateSchema = z.object({
  * 为轮次生成论点的验证模式
  */
 export const generateArgumentsSchema = z.object({
-  applicableArticles: z.array(uuidSchema).default([]),
+  // 文章 ID 可为 UUID、CUID 或带连字符的 E2E 测试 ID（如 e2e-law-article-001）
+  applicableArticles: z.array(z.string().min(1).max(100)).default([]),
 });
 
 /**

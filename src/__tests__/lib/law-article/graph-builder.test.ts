@@ -30,7 +30,7 @@ import { prisma } from '@/lib/db';
 
 describe('GraphBuilder', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('buildGraph', () => {
@@ -61,10 +61,10 @@ describe('GraphBuilder', () => {
         target: targetArticle,
       };
 
-      // Mock数据库调用
-      (prisma.lawArticle.findUnique as jest.Mock)
-        .mockResolvedValueOnce(centerArticle)
-        .mockResolvedValueOnce(targetArticle);
+      // Mock数据库调用（findUnique只用于中心节点，子节点数据从rel.target获取）
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValueOnce(
+        centerArticle
+      );
 
       (prisma.lawArticleRelation.findMany as jest.Mock)
         .mockResolvedValueOnce([relation])
@@ -127,16 +127,15 @@ describe('GraphBuilder', () => {
         target: article3,
       };
 
-      // Mock数据库调用
-      (prisma.lawArticle.findUnique as jest.Mock)
-        .mockResolvedValueOnce(article1)
-        .mockResolvedValueOnce(article2)
-        .mockResolvedValueOnce(article3);
+      // Mock数据库调用（BFS逐节点查询：article-1→[rel1], article-2→[rel2], article-3→[]）
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValueOnce(
+        article1
+      );
 
       (prisma.lawArticleRelation.findMany as jest.Mock)
-        .mockResolvedValueOnce([relation1, relation2])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([]);
+        .mockResolvedValueOnce([relation1]) // article-1的关系
+        .mockResolvedValueOnce([relation2]) // article-2的关系
+        .mockResolvedValueOnce([]); // article-3的关系
 
       // 执行测试
       const graph = await GraphBuilder.buildGraph('article-1', 2);
@@ -146,7 +145,7 @@ describe('GraphBuilder', () => {
       expect(graph.links).toHaveLength(2);
       expect(graph.nodes.find(n => n.id === 'article-1')?.level).toBe(0);
       expect(graph.nodes.find(n => n.id === 'article-2')?.level).toBe(1);
-      expect(graph.nodes.find(n => n.id === 'article-3')?.level).toBe(1);
+      expect(graph.nodes.find(n => n.id === 'article-3')?.level).toBe(2);
     });
 
     it('应该正确处理循环引用', async () => {
@@ -187,14 +186,14 @@ describe('GraphBuilder', () => {
         target: article1,
       };
 
-      // Mock数据库调用
-      (prisma.lawArticle.findUnique as jest.Mock)
-        .mockResolvedValueOnce(article1)
-        .mockResolvedValueOnce(article2);
+      // Mock数据库调用（BFS：article-1→[rel1 A→B], article-2→[rel2 B→A]，A已访问不重新加入）
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValueOnce(
+        article1
+      );
 
       (prisma.lawArticleRelation.findMany as jest.Mock)
-        .mockResolvedValueOnce([relation1, relation2])
-        .mockResolvedValueOnce([]);
+        .mockResolvedValueOnce([relation1]) // article-1的关系：A→B
+        .mockResolvedValueOnce([relation2]); // article-2的关系：B→A（A已访问，但link仍添加）
 
       // 执行测试
       const graph = await GraphBuilder.buildGraph('article-1', 2);
@@ -231,10 +230,10 @@ describe('GraphBuilder', () => {
         target: targetArticle,
       };
 
-      // Mock数据库调用
-      (prisma.lawArticle.findUnique as jest.Mock)
-        .mockResolvedValueOnce(centerArticle)
-        .mockResolvedValueOnce(targetArticle);
+      // Mock数据库调用（findUnique只用于中心节点）
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValueOnce(
+        centerArticle
+      );
 
       (prisma.lawArticleRelation.findMany as jest.Mock)
         .mockResolvedValueOnce([verifiedRelation])
@@ -337,16 +336,15 @@ describe('GraphBuilder', () => {
         target: article3,
       };
 
-      // Mock数据库调用
-      (prisma.lawArticle.findUnique as jest.Mock)
-        .mockResolvedValueOnce(article1)
-        .mockResolvedValueOnce(article2)
-        .mockResolvedValueOnce(article3);
+      // Mock数据库调用（BFS逐节点查询：article-1→[rel1], article-2→[rel2], article-3→[]）
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValueOnce(
+        article1
+      );
 
       (prisma.lawArticleRelation.findMany as jest.Mock)
-        .mockResolvedValueOnce([relation1, relation2])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([]);
+        .mockResolvedValueOnce([relation1]) // article-1的关系
+        .mockResolvedValueOnce([relation2]) // article-2的关系
+        .mockResolvedValueOnce([]); // article-3的关系
 
       // 执行测试
       const graph = await GraphBuilder.buildGraph('article-1', 2);
@@ -358,7 +356,7 @@ describe('GraphBuilder', () => {
 
       expect(node1?.level).toBe(0);
       expect(node2?.level).toBe(1);
-      expect(node3?.level).toBe(1);
+      expect(node3?.level).toBe(2);
     });
 
     it('应该正确处理关系强度和置信度', async () => {
@@ -388,10 +386,10 @@ describe('GraphBuilder', () => {
         target: targetArticle,
       };
 
-      // Mock数据库调用
-      (prisma.lawArticle.findUnique as jest.Mock)
-        .mockResolvedValueOnce(centerArticle)
-        .mockResolvedValueOnce(targetArticle);
+      // Mock数据库调用（findUnique只用于中心节点）
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValueOnce(
+        centerArticle
+      );
 
       (prisma.lawArticleRelation.findMany as jest.Mock)
         .mockResolvedValueOnce([relation])

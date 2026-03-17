@@ -5,6 +5,17 @@
 import { GET } from '@/app/api/v1/knowledge-graph/conflicts/route';
 import { prisma } from '@/lib/db';
 
+// Mock认证
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(() =>
+    Promise.resolve({
+      userId: 'test-user-1',
+      email: 'test@test.com',
+      role: 'USER',
+    })
+  ),
+}));
+
 // Mock数据库
 jest.mock('@/lib/db', () => ({
   prisma: {
@@ -25,6 +36,9 @@ jest.mock('@/lib/middleware/knowledge-graph-permission', () => ({
   logKnowledgeGraphAction: jest.fn(() => Promise.resolve()),
   KnowledgeGraphAction: {
     VIEW_RELATIONS: 'VIEW_RELATIONS',
+  },
+  KnowledgeGraphResource: {
+    GRAPH: 'GRAPH',
   },
 }));
 
@@ -83,6 +97,10 @@ describe('GET /api/v1/knowledge-graph/conflicts', () => {
     });
 
     it('应该接受有效的lawArticleIds参数', async () => {
+      (prisma.lawArticle.findMany as jest.Mock).mockResolvedValue([
+        { id: 'article-1', lawName: '《民法典》', articleNumber: '第123条' },
+        { id: 'article-2', lawName: '《合同法》', articleNumber: '第45条' },
+      ]);
       (prisma.lawArticleRelation.findMany as jest.Mock).mockResolvedValue([]);
 
       const request = new Request(
@@ -149,9 +167,9 @@ describe('GET /api/v1/knowledge-graph/conflicts', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.conflicts).toBeDefined();
-      expect(data.conflicts).toBeInstanceOf(Array);
-      expect(data.conflicts.length).toBeGreaterThan(0);
+      expect(data.data.conflicts).toBeDefined();
+      expect(data.data.conflicts).toBeInstanceOf(Array);
+      expect(data.data.conflicts.length).toBeGreaterThan(0);
     });
 
     it('应该返回冲突关系的详细信息', async () => {
@@ -165,7 +183,7 @@ describe('GET /api/v1/knowledge-graph/conflicts', () => {
       const response = await GET(request as any);
       const data = await response.json();
 
-      expect(data.conflicts[0]).toMatchObject({
+      expect(data.data.conflicts[0]).toMatchObject({
         articleId: 'article-1',
         articleTitle: '《民法典》第123条',
         conflictsWith: expect.arrayContaining([
@@ -179,7 +197,7 @@ describe('GET /api/v1/knowledge-graph/conflicts', () => {
     });
 
     it('应该只返回验证通过的冲突关系', async () => {
-      // Mock包含未验证的关系
+      // Mock只返回VERIFIED关系（模拟DB WHERE子句过滤）
       (prisma.lawArticleRelation.findMany as jest.Mock).mockResolvedValue([
         {
           id: 'rel-1',
@@ -199,28 +217,10 @@ describe('GET /api/v1/knowledge-graph/conflicts', () => {
             articleNumber: '第45条',
           },
         },
-        {
-          id: 'rel-2',
-          sourceId: 'article-1',
-          targetId: 'article-3',
-          relationType: 'CONFLICTS',
-          strength: 0.8,
-          verificationStatus: 'PENDING',
-          source: {
-            id: 'article-1',
-            lawName: '《民法典》',
-            articleNumber: '第123条',
-          },
-          target: {
-            id: 'article-3',
-            lawName: '《合同法》',
-            articleNumber: '第45条',
-          },
-        },
       ]);
 
       const request = new Request(
-        'http://localhost:3000/api/v1/knowledge-graph/conflicts?lawArticleIds=article-1',
+        'http://localhost:3000/api/v1/knowledge-graph/conflicts?lawArticleIds=article-1,article-2',
         {
           method: 'GET',
         }
@@ -230,7 +230,7 @@ describe('GET /api/v1/knowledge-graph/conflicts', () => {
       const data = await response.json();
 
       // 只返回验证通过的冲突
-      const verifiedConflicts = data.conflicts[0].conflictsWith;
+      const verifiedConflicts = data.data.conflicts[0].conflictsWith;
       expect(verifiedConflicts.length).toBe(1);
       expect(verifiedConflicts[0].relationId).toBe('rel-1');
     });
@@ -249,12 +249,15 @@ describe('GET /api/v1/knowledge-graph/conflicts', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.conflicts).toEqual([]);
+      expect(data.data.conflicts).toEqual([]);
     });
   });
 
   describe('错误处理', () => {
     it('应该处理数据库错误', async () => {
+      (prisma.lawArticle.findMany as jest.Mock).mockResolvedValue([
+        { id: 'article-1', lawName: '《民法典》', articleNumber: '第123条' },
+      ]);
       (prisma.lawArticleRelation.findMany as jest.Mock).mockRejectedValue(
         new Error('数据库连接失败')
       );

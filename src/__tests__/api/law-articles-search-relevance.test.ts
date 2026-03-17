@@ -26,6 +26,153 @@ jest.mock('@/lib/middleware/auth', () => ({
   }),
 }));
 
+// Mock cache to bypass Redis
+jest.mock('@/lib/cache/manager', () => ({
+  cache: {
+    get: jest.fn().mockResolvedValue(null),
+    set: jest.fn().mockResolvedValue(undefined),
+    delete: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+
+// Mock performance monitor
+jest.mock('@/lib/middleware/performance-monitor', () => ({
+  measurePerformance: jest.fn().mockResolvedValue(undefined),
+}));
+
+// Mock LawArticleSearchService with keyword-aware results
+jest.mock('@/lib/law-article/search-service', () => {
+  const mockArticles = [
+    {
+      id: 'test-relevance-1',
+      lawName: '测试民法典',
+      articleNumber: '第1条',
+      fullText: '民事活动应当遵循公平原则',
+      category: 'CIVIL',
+      lawType: 'LAW',
+      status: 'VALID',
+      tags: ['公平', '民事活动'],
+      keywords: ['民事活动', '公平'],
+      viewCount: 100,
+      referenceCount: 50,
+      effectiveDate: new Date('2020-01-01'),
+      issuingAuthority: '全国人民代表大会',
+      searchableText: '民事活动应当遵循公平原则',
+    },
+    {
+      id: 'test-relevance-2',
+      lawName: '测试刑法',
+      articleNumber: '第1条',
+      fullText: '刑法的目的和任务',
+      category: 'CRIMINAL',
+      lawType: 'LAW',
+      status: 'VALID',
+      tags: ['刑法', '目的'],
+      keywords: ['刑法', '目的'],
+      viewCount: 200,
+      referenceCount: 100,
+      effectiveDate: new Date('2020-01-01'),
+      issuingAuthority: '全国人民代表大会',
+      searchableText: '刑法的目的和任务',
+    },
+    {
+      id: 'test-relevance-3',
+      lawName: '测试合同法',
+      articleNumber: '第2条',
+      fullText: '合同应当遵循公平原则',
+      category: 'CIVIL',
+      lawType: 'LAW',
+      status: 'VALID',
+      tags: ['合同', '公平'],
+      keywords: ['合同', '公平'],
+      viewCount: 150,
+      referenceCount: 75,
+      effectiveDate: new Date('2020-01-01'),
+      issuingAuthority: '全国人民代表大会',
+      searchableText: '合同应当遵循公平原则',
+    },
+  ];
+
+  return {
+    LawArticleSearchService: {
+      search: jest
+        .fn()
+        .mockImplementation(
+          async (query: {
+            keyword?: string;
+            category?: string;
+            pagination?: { page?: number; pageSize?: number };
+          }) => {
+            const keyword = (query.keyword || '').toLowerCase();
+            const category = query.category;
+            let results = mockArticles;
+
+            // Filter by keyword relevance
+            if (keyword) {
+              results = mockArticles.filter(
+                a =>
+                  a.fullText.toLowerCase().includes(keyword) ||
+                  a.lawName.toLowerCase().includes(keyword) ||
+                  a.searchableText.toLowerCase().includes(keyword)
+              );
+            }
+
+            // Filter by category
+            if (category) {
+              results = results.filter(a => a.category === category);
+            }
+
+            const page = query.pagination?.page || 1;
+            const pageSize = query.pagination?.pageSize || 20;
+            const total = results.length;
+
+            // Sort by relevance (articles with keyword in lawName first)
+            results.sort((a, b) => {
+              const aScore = a.lawName.toLowerCase().includes(keyword)
+                ? 0.9
+                : 0.5;
+              const bScore = b.lawName.toLowerCase().includes(keyword)
+                ? 0.9
+                : 0.5;
+              return bScore - aScore;
+            });
+
+            const pagedResults = results.slice(
+              (page - 1) * pageSize,
+              page * pageSize
+            );
+
+            return {
+              results: pagedResults.map((article, i) => ({
+                article,
+                relevanceScore: article.lawName.toLowerCase().includes(keyword)
+                  ? 0.9 - i * 0.1
+                  : 0.5,
+                matchedKeywords: keyword ? [keyword] : [],
+                matchDetails: {
+                  keywordScore: 0.5,
+                  categoryScore: 0.3,
+                  tagScore: 0.1,
+                  popularityScore: 0.1,
+                },
+              })),
+              pagination: {
+                page,
+                pageSize,
+                total,
+                totalPages: Math.ceil(total / pageSize),
+                hasNext: page * pageSize < total,
+                hasPrev: page > 1,
+              },
+              executionTime: 10,
+              cached: false,
+            };
+          }
+        ),
+    },
+  };
+});
+
 // 测试数据
 import { LawType } from '@prisma/client';
 

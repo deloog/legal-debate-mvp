@@ -460,12 +460,51 @@ ${contextSection}
 }`;
 
     // 9. 调用AI服务（带重试）
-    const aiService = await getUnifiedAIService();
+    // Mock 模式：当 USE_MOCK_AI=true 时跳过真实 AI 调用，返回固定测试数据
+    const isMockMode =
+      process.env.NODE_ENV === 'test' || process.env.USE_MOCK_AI === 'true';
     let debateContent = '';
-    const maxRetries = 3;
 
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    if (isMockMode) {
+      debateContent = JSON.stringify({
+        plaintiff: [
+          {
+            content: '【Mock】原告主张被告违约，要求赔偿损失。',
+            reasoning:
+              '（Mock数据）被告违反合同义务，依民法典第577条，应承担违约责任。',
+            legalBasis: [
+              {
+                lawName: '中华人民共和国民法典',
+                articleNumber: '第577条',
+                relevance: 0.9,
+                explanation:
+                  '当事人违约应承担继续履行、采取补救措施或赔偿损失的责任。',
+              },
+            ],
+          },
+        ],
+        defendant: [
+          {
+            content: '【Mock】被告认为不存在违约，请求驳回原告诉请。',
+            reasoning: '（Mock数据）被告已按约履行义务，原告主张缺乏事实依据。',
+            legalBasis: [
+              {
+                lawName: '中华人民共和国民法典',
+                articleNumber: '第509条',
+                relevance: 0.8,
+                explanation: '当事人应按照约定全面履行自己的义务。',
+              },
+            ],
+          },
+        ],
+      });
+      logger.info('[Mock模式] 跳过 AI 调用，返回固定测试数据');
+    }
+
+    const maxRetries = isMockMode ? 0 : 3;
+    for (let attempt = 1; !isMockMode && attempt <= maxRetries; attempt++) {
       try {
+        const aiService = await getUnifiedAIService();
         const debateResponse = await aiService.generateDebate({
           title: caseInfo.title,
           description: caseInfo.description,

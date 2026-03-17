@@ -12,6 +12,7 @@ jest.mock('@/lib/db/prisma', () => ({
     },
     case: {
       findFirst: jest.fn(),
+      findMany: jest.fn().mockResolvedValue([]),
     },
   },
 }));
@@ -78,6 +79,10 @@ describe('Evidence API - /api/evidence', () => {
     });
 
     it('should filter by caseId', async () => {
+      (prisma.case.findFirst as jest.Mock).mockResolvedValue({
+        id: 'case-1',
+        title: 'Test',
+      });
       (prisma.evidence.findMany as jest.Mock).mockResolvedValue([]);
       (prisma.evidence.count as jest.Mock).mockResolvedValue(0);
 

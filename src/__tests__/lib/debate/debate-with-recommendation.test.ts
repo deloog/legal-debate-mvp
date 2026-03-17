@@ -3,6 +3,15 @@
  * 测试在辩论生成时推荐相关法条的功能
  */
 
+// 使用真实数据库进行集成测试
+jest.mock('@/lib/db', () => {
+  const { PrismaClient: RealPrismaClient } = jest.requireActual(
+    '@prisma/client'
+  ) as typeof import('@prisma/client');
+  const prisma = new RealPrismaClient();
+  return { prisma, default: prisma };
+});
+
 import { DebateGenerator } from '@/lib/debate/debate-generator';
 import { LawArticleRecommendationService } from '@/lib/law-article/recommendation-service';
 import { AIClient } from '@/lib/ai/clients';

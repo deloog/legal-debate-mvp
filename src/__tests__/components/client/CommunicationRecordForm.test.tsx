@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CommunicationRecordForm } from '../../../components/client/CommunicationRecordForm';
 import { CommunicationType } from '../../../types/client';
@@ -12,6 +12,9 @@ describe('CommunicationRecordForm', () => {
     jest.clearAllMocks();
   });
 
+  // 注意：组件的 label 没有 htmlFor 属性，所以不能用 getByLabelText。
+  // 使用 getByPlaceholderText / getByRole / getByDisplayValue 等方式查询。
+
   describe('基础渲染', () => {
     it('应该渲染表单元素', () => {
       render(
@@ -22,11 +25,12 @@ describe('CommunicationRecordForm', () => {
         />
       );
 
-      expect(screen.getByLabelText(/沟通类型/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/摘要/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/详细内容/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/下次跟进时间/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/标记为重要/)).toBeInTheDocument();
+      // label 文本存在
+      expect(screen.getByText(/沟通类型/)).toBeInTheDocument();
+      expect(screen.getByText(/^摘要/)).toBeInTheDocument();
+      expect(screen.getByText(/详细内容/)).toBeInTheDocument();
+      expect(screen.getByText(/下次跟进时间/)).toBeInTheDocument();
+      expect(screen.getByText(/标记为重要/)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: '取消' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: '保存' })).toBeInTheDocument();
     });
@@ -40,18 +44,23 @@ describe('CommunicationRecordForm', () => {
         />
       );
 
+      // 默认沟通类型为"电话"
       expect(screen.getByDisplayValue('电话')).toBeInTheDocument();
-      expect(screen.getByLabelText(/标记为重要/)).not.toBeChecked();
+      // 重要标记 checkbox 默认未选中
+      const checkbox = screen.getByRole('checkbox');
+      expect(checkbox).not.toBeChecked();
     });
   });
 
   describe('编辑模式', () => {
+    // 使用 UTC 时间字符串，避免时区影响 toISOString() 结果
+    const editDate = new Date('2026-01-25T10:00:00Z');
     const mockEditingRecord = {
       id: 'comm-123',
       type: CommunicationType.EMAIL,
       summary: '测试摘要',
       content: '测试内容',
-      nextFollowUpDate: new Date('2026-01-25T10:00:00'),
+      nextFollowUpDate: editDate,
       isImportant: true,
     };
 
@@ -68,10 +77,12 @@ describe('CommunicationRecordForm', () => {
       expect(screen.getByDisplayValue('邮件')).toBeInTheDocument();
       expect(screen.getByDisplayValue('测试摘要')).toBeInTheDocument();
       expect(screen.getByDisplayValue('测试内容')).toBeInTheDocument();
-      expect(screen.getByLabelText(/下次跟进时间/)).toHaveValue(
-        '2026-01-25T10:00'
-      );
-      expect(screen.getByLabelText(/标记为重要/)).toBeChecked();
+      // datetime-local 的值是 editDate.toISOString().slice(0, 16)
+      const expectedDateStr = editDate.toISOString().slice(0, 16);
+      expect(screen.getByDisplayValue(expectedDateStr)).toBeInTheDocument();
+      // 重要标记已选中
+      const checkbox = screen.getByRole('checkbox');
+      expect(checkbox).toBeChecked();
       expect(screen.getByRole('button', { name: '更新' })).toBeInTheDocument();
     });
   });
@@ -104,10 +115,14 @@ describe('CommunicationRecordForm', () => {
         />
       );
 
-      const summaryInput = screen.getByLabelText(/摘要/);
+      const summaryInput = screen.getByPlaceholderText('请输入沟通摘要');
+      // input 有 maxLength=1000，用 fireEvent.change 直接绕过 maxLength 限制设置超长值
       const longSummary = 'a'.repeat(1001);
-      await userEvent.clear(summaryInput);
-      await userEvent.type(summaryInput, longSummary);
+      fireEvent.change(summaryInput, { target: { value: longSummary } });
+
+      // 验证是在 submit 时触发的
+      const submitButton = screen.getByRole('button', { name: '保存' });
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(screen.getByText('摘要不能超过1000字')).toBeInTheDocument();
@@ -123,9 +138,18 @@ describe('CommunicationRecordForm', () => {
         />
       );
 
-      const contentInput = screen.getByLabelText(/详细内容/);
+      const contentInput =
+        screen.getByPlaceholderText('请输入详细内容（可选）');
+      // textarea 有 maxLength=10000，用 fireEvent.change 直接绕过 maxLength 限制设置超长值
       const longContent = 'b'.repeat(10001);
-      await userEvent.type(contentInput, longContent);
+      fireEvent.change(contentInput, { target: { value: longContent } });
+
+      // 验证是在 submit 时触发的，还需要填写摘要（否则先报摘要错误）
+      const summaryInput = screen.getByPlaceholderText('请输入沟通摘要');
+      fireEvent.change(summaryInput, { target: { value: '有效摘要' } });
+
+      const submitButton = screen.getByRole('button', { name: '保存' });
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(screen.getByText('内容不能超过10000字')).toBeInTheDocument();
@@ -141,12 +165,25 @@ describe('CommunicationRecordForm', () => {
         />
       );
 
-      const dateInput = screen.getByLabelText(/下次跟进时间/);
+      // 用 type=datetime-local 属性定位
+      const dateInput = document.querySelector(
+        'input[type="datetime-local"]'
+      ) as HTMLInputElement;
+      expect(dateInput).toBeTruthy();
+
       const pastDate = new Date();
       pastDate.setDate(pastDate.getDate() - 1);
       const pastDateStr = pastDate.toISOString().slice(0, 16);
 
-      await userEvent.type(dateInput, pastDateStr);
+      // 用 fireEvent.change 直接设置 datetime-local 的值
+      fireEvent.change(dateInput, { target: { value: pastDateStr } });
+
+      // 填写摘要，让表单可以 submit
+      const summaryInput = screen.getByPlaceholderText('请输入沟通摘要');
+      fireEvent.change(summaryInput, { target: { value: '有效摘要' } });
+
+      const submitButton = screen.getByRole('button', { name: '保存' });
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(
@@ -171,7 +208,7 @@ describe('CommunicationRecordForm', () => {
         />
       );
 
-      const summaryInput = screen.getByLabelText(/摘要/);
+      const summaryInput = screen.getByPlaceholderText('请输入沟通摘要');
       await userEvent.type(summaryInput, '测试摘要');
 
       const submitButton = screen.getByRole('button', { name: '保存' });
@@ -202,7 +239,7 @@ describe('CommunicationRecordForm', () => {
         />
       );
 
-      const summaryInput = screen.getByLabelText(/摘要/);
+      const summaryInput = screen.getByPlaceholderText('请输入沟通摘要');
       await userEvent.type(summaryInput, '测试摘要');
 
       const submitButton = screen.getByRole('button', { name: '保存' });
@@ -226,7 +263,7 @@ describe('CommunicationRecordForm', () => {
         />
       );
 
-      const summaryInput = screen.getByLabelText(/摘要/);
+      const summaryInput = screen.getByPlaceholderText('请输入沟通摘要');
       await userEvent.type(summaryInput, '测试摘要');
 
       const submitButton = screen.getByRole('button', { name: '保存' });
@@ -252,7 +289,7 @@ describe('CommunicationRecordForm', () => {
         />
       );
 
-      const summaryInput = screen.getByLabelText(/摘要/);
+      const summaryInput = screen.getByPlaceholderText('请输入沟通摘要');
       await userEvent.type(summaryInput, '测试摘要');
 
       const submitButton = screen.getByRole('button', { name: '保存' });
@@ -293,7 +330,8 @@ describe('CommunicationRecordForm', () => {
         />
       );
 
-      const typeSelect = screen.getByLabelText(/沟通类型/);
+      // 通过 combobox role 找到 select（表单中唯一的 select）
+      const typeSelect = screen.getByRole('combobox');
       await userEvent.selectOptions(typeSelect, '邮件');
 
       expect(screen.getByDisplayValue('邮件')).toBeInTheDocument();
@@ -310,7 +348,7 @@ describe('CommunicationRecordForm', () => {
         />
       );
 
-      const importantCheckbox = screen.getByLabelText(/标记为重要/);
+      const importantCheckbox = screen.getByRole('checkbox');
       await userEvent.click(importantCheckbox);
 
       expect(importantCheckbox).toBeChecked();
@@ -327,7 +365,12 @@ describe('CommunicationRecordForm', () => {
         />
       );
 
-      const dateInput = screen.getByLabelText(/下次跟进时间/);
+      // 用 type 属性定位 datetime-local 输入框
+      const dateInput = document.querySelector(
+        'input[type="datetime-local"]'
+      ) as HTMLInputElement;
+      expect(dateInput).toBeTruthy();
+
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 7);
       const futureDateStr = futureDate.toISOString().slice(0, 16);

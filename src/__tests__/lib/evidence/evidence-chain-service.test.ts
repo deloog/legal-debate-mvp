@@ -13,11 +13,11 @@
 import { EvidenceChainService } from '@/lib/evidence/evidence-chain-service';
 import type { Evidence } from '@prisma/client';
 
-// Mock AI Service
+// Mock AI Service - 服务使用 AIService.analyzeDocument 静态方法
 jest.mock('@/lib/ai/clients', () => ({
-  AIService: jest.fn().mockImplementation(() => ({
-    chat: jest.fn().mockResolvedValue(
-      JSON.stringify({
+  AIService: {
+    analyzeDocument: jest.fn().mockResolvedValue({
+      content: JSON.stringify({
         chains: [
           {
             evidenceId: 'evidence-1',
@@ -31,15 +31,15 @@ jest.mock('@/lib/ai/clients', () => ({
           {
             from: 'evidence-1',
             to: 'evidence-2',
-            relationship: '劳动合同与工资条相互印证',
+            relation: '劳动合同与工资条相互印证',
           },
         ],
         completeness: 85,
         gaps: ['缺少社保缴纳证明'],
         suggestions: ['建议补充社保缴纳记录以加强证据链'],
-      })
-    ),
-  })),
+      }),
+    }),
+  },
 }));
 
 describe('EvidenceChainService', () => {
@@ -252,7 +252,8 @@ describe('EvidenceChainService', () => {
         const connection = result.connections[0];
         expect(connection.from).toBeDefined();
         expect(connection.to).toBeDefined();
-        expect(connection.relationship).toBeDefined();
+        // 服务返回 relation 字段（不是 relationship）
+        expect(connection.relation).toBeDefined();
       }
     });
   });
@@ -355,11 +356,11 @@ describe('EvidenceChainService', () => {
 
   describe('错误处理', () => {
     it('应该处理AI服务失败', async () => {
-      // Mock AI服务失败
-      const mockAIService = require('@/lib/ai/clients').AIService;
-      mockAIService.mockImplementationOnce(() => ({
-        chat: jest.fn().mockRejectedValue(new Error('AI服务不可用')),
-      }));
+      // 临时让 analyzeDocument 抛出错误
+      const { AIService } = require('@/lib/ai/clients');
+      (AIService.analyzeDocument as jest.Mock).mockRejectedValueOnce(
+        new Error('AI服务不可用')
+      );
 
       const service = new EvidenceChainService();
       const evidences: Partial<Evidence>[] = [
@@ -373,13 +374,15 @@ describe('EvidenceChainService', () => {
         },
       ];
 
-      await expect(
-        service.analyzeChain({
-          caseId: 'case-1',
-          evidences: evidences as Evidence[],
-          targetFact: '证明劳动关系',
-        })
-      ).rejects.toThrow();
+      // 服务会捕获错误并返回降级结果，不会抛出
+      const result = await service.analyzeChain({
+        caseId: 'case-1',
+        evidences: evidences as Evidence[],
+        targetFact: '证明劳动关系',
+      });
+      // 降级结果仍有基本结构
+      expect(result).toBeDefined();
+      expect(result.completeness).toBeDefined();
     });
 
     it('应该处理无效的证据数据', async () => {

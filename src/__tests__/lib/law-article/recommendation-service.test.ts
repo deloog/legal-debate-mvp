@@ -3,6 +3,15 @@
  * 测试法条推荐功能，包括基于关系图谱、相似度和案例的推荐
  */
 
+// 使用真实数据库进行集成测试
+jest.mock('@/lib/db', () => {
+  const { PrismaClient: RealPrismaClient } = jest.requireActual(
+    '@prisma/client'
+  ) as typeof import('@prisma/client');
+  const prisma = new RealPrismaClient();
+  return { prisma, default: prisma };
+});
+
 import { LawArticleRecommendationService } from '@/lib/law-article/recommendation-service';
 import { prisma } from '@/lib/db';
 import { RelationType, VerificationStatus } from '@prisma/client';

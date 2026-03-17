@@ -4,6 +4,15 @@
  * @jest-environment node
  */
 
+// 使用真实数据库进行集成测试
+jest.mock('@/lib/db', () => {
+  const { PrismaClient: RealPrismaClient } = jest.requireActual(
+    '@prisma/client'
+  ) as typeof import('@prisma/client');
+  const prisma = new RealPrismaClient();
+  return { prisma, default: prisma };
+});
+
 import { prisma } from '@/lib/db';
 import {
   checkPendingRelationsThreshold,
@@ -109,22 +118,10 @@ describe('知识图谱通知功能测试', () => {
 
   describe('checkPendingRelationsThreshold', () => {
     it('应该检测到待审核关系超过阈值', async () => {
-      // 创建10个待审核关系
-      await Promise.all(
-        Array.from({ length: 10 }, (_, i) =>
-          prisma.lawArticleRelation.create({
-            data: {
-              sourceId: testArticles[i % testArticles.length].id,
-              targetId: testArticles[(i + 1) % testArticles.length].id,
-              relationType: RelationType.RELATED,
-              strength: 0.7,
-              confidence: 0.75,
-              discoveryMethod: DiscoveryMethod.AI_DETECTED,
-              verificationStatus: VerificationStatus.PENDING,
-            },
-          })
-        )
-      );
+      // 使用 spy 控制 count 返回值，避免依赖真实 DB 全局状态
+      const countSpy = jest
+        .spyOn(prisma.lawArticleRelation, 'count')
+        .mockResolvedValueOnce(10);
 
       const config: NotificationThresholdConfig = {
         threshold: 5,
@@ -136,25 +133,15 @@ describe('知识图谱通知功能测试', () => {
       expect(result.shouldNotify).toBe(true);
       expect(result.pendingCount).toBe(10);
       expect(result.threshold).toBe(5);
+
+      countSpy.mockRestore();
     });
 
     it('应该检测到待审核关系未超过阈值', async () => {
-      // 创建3个待审核关系
-      await Promise.all(
-        Array.from({ length: 3 }, (_, i) =>
-          prisma.lawArticleRelation.create({
-            data: {
-              sourceId: testArticles[i].id,
-              targetId: testArticles[(i + 1) % testArticles.length].id,
-              relationType: RelationType.RELATED,
-              strength: 0.7,
-              confidence: 0.75,
-              discoveryMethod: DiscoveryMethod.AI_DETECTED,
-              verificationStatus: VerificationStatus.PENDING,
-            },
-          })
-        )
-      );
+      // 使用 spy 控制 count 返回值，避免依赖真实 DB 全局状态
+      const countSpy = jest
+        .spyOn(prisma.lawArticleRelation, 'count')
+        .mockResolvedValueOnce(3);
 
       const config: NotificationThresholdConfig = {
         threshold: 5,
@@ -165,9 +152,16 @@ describe('知识图谱通知功能测试', () => {
 
       expect(result.shouldNotify).toBe(false);
       expect(result.pendingCount).toBe(3);
+
+      countSpy.mockRestore();
     });
 
     it('应该正确处理没有待审核关系的情况', async () => {
+      // 使用 spy 控制 count 返回值，避免依赖真实 DB 全局状态
+      const countSpy = jest
+        .spyOn(prisma.lawArticleRelation, 'count')
+        .mockResolvedValueOnce(0);
+
       const config: NotificationThresholdConfig = {
         threshold: 5,
         checkIntervalMinutes: 60,
@@ -177,6 +171,8 @@ describe('知识图谱通知功能测试', () => {
 
       expect(result.shouldNotify).toBe(false);
       expect(result.pendingCount).toBe(0);
+
+      countSpy.mockRestore();
     });
   });
 

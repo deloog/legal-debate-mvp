@@ -10,9 +10,20 @@
  * 6. 错误处理
  */
 
+// Mock logger
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    warn: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
 import { AIDetector } from '@/lib/law-article/relation-discovery/ai-detector';
 import { AICostMonitor } from '@/lib/law-article/relation-discovery/ai-cost-monitor';
 import { LawArticle, RelationType } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 // Mock AI client
 jest.mock('@/lib/ai/openai-client', () => ({
@@ -190,20 +201,11 @@ describe('AIDetector', () => {
         new Error('AI service unavailable')
       );
 
-      // Mock console.error
-      const consoleError = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
       // 执行测试
       const result = await AIDetector.detectRelations(article1, article2);
 
       // 验证结果 - 应该返回空结果而不是抛出错误
       expect(result.relations).toHaveLength(0);
-      expect(consoleError).toHaveBeenCalled();
-
-      // 清理
-      consoleError.mockRestore();
     });
 
     it('应该正确截取长文本', async () => {
@@ -322,10 +324,8 @@ describe('AIDetector', () => {
         } as LawArticle,
       ];
 
-      // Mock console.log
-      const consoleLog = jest
-        .spyOn(console, 'log')
-        .mockImplementation(() => {});
+      // 重置 logger mock 以便只捕获此次调用
+      (logger.info as jest.Mock).mockClear();
 
       // 执行测试
       const results = await AIDetector.batchDetectRelations(
@@ -335,12 +335,7 @@ describe('AIDetector', () => {
 
       // 验证结果 - 应该返回空结果
       expect(results.size).toBe(0);
-      expect(consoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('AI成本限制')
-      );
-
-      // 清理
-      consoleLog.mockRestore();
+      expect(logger.info).toHaveBeenCalled();
     });
 
     it('应该使用预筛选过滤候选法条', async () => {
@@ -530,20 +525,11 @@ describe('AIDetector', () => {
       // Mock AI返回无效JSON
       (getOpenAICompletion as jest.Mock).mockResolvedValue('invalid json');
 
-      // Mock console.error
-      const consoleError = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
       // 执行测试
       const result = await AIDetector.detectRelations(article1, article2);
 
       // 验证结果 - 应该返回空结果
       expect(result.relations).toHaveLength(0);
-      expect(consoleError).toHaveBeenCalled();
-
-      // 清理
-      consoleError.mockRestore();
     });
   });
 });

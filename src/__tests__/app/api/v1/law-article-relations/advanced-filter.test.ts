@@ -6,125 +6,132 @@
 
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/v1/law-article-relations/advanced-filter/route';
-import { prisma } from '@/lib/db';
-import {
-  RelationType,
-  DiscoveryMethod,
-  VerificationStatus,
-  LawType,
-  LawCategory,
-  LawStatus,
-} from '@prisma/client';
-import type { LawArticle } from '@prisma/client';
+
+// Override global prisma mock with specific implementations needed by the route
+jest.mock('@/lib/db/prisma', () => {
+  const mockLawArticleRelation = {
+    count: jest.fn(),
+    findMany: jest.fn(),
+    groupBy: jest.fn(),
+    findUnique: jest.fn(),
+    update: jest.fn(),
+    create: jest.fn(),
+    createMany: jest.fn(),
+    deleteMany: jest.fn(),
+  };
+  const mock = {
+    lawArticleRelation: mockLawArticleRelation,
+    lawArticle: {
+      findMany: jest.fn(),
+      create: jest.fn(),
+      deleteMany: jest.fn(),
+    },
+    $transaction: jest.fn(),
+    $connect: jest.fn(),
+    $disconnect: jest.fn(),
+  };
+  return { default: mock, prisma: mock };
+});
+
+// Sample relation data used by tests
+const makeRelation = (overrides: Record<string, unknown> = {}) => ({
+  id: 'rel-1',
+  sourceId: 'art-1',
+  targetId: 'art-2',
+  relationType: 'CITES',
+  strength: 0.95,
+  confidence: 0.98,
+  discoveryMethod: 'RULE_BASED',
+  verificationStatus: 'VERIFIED',
+  verifiedBy: 'admin-user',
+  verifiedAt: new Date('2024-01-15'),
+  createdAt: new Date('2024-01-15'),
+  updatedAt: new Date('2024-01-15'),
+  source: {
+    id: 'art-1',
+    lawName: '高级过滤测试法1',
+    articleNumber: '1',
+    fullText: '内容1',
+  },
+  target: {
+    id: 'art-2',
+    lawName: '高级过滤测试法2',
+    articleNumber: '2',
+    fullText: '内容2',
+  },
+  ...overrides,
+});
+
+const getPrisma = () => {
+  const { prisma } = require('@/lib/db/prisma');
+  return prisma;
+};
 
 describe('高级过滤API测试', () => {
-  const testArticles: LawArticle[] = [];
+  beforeEach(() => {
+    jest.clearAllMocks();
 
-  beforeAll(async () => {
-    // 创建测试法条
-    for (let i = 1; i <= 5; i++) {
-      const article = await prisma.lawArticle.create({
-        data: {
-          lawName: `高级过滤测试法${i}`,
-          articleNumber: `${i}`,
-          fullText: `这是高级过滤测试法条${i}的内容`,
-          lawType: LawType.LAW,
-          category: LawCategory.CIVIL,
-          tags: [],
-          keywords: [],
-          effectiveDate: new Date('2020-01-01'),
-          status: LawStatus.VALID,
-          issuingAuthority: '全国人大',
-          relatedArticles: [],
-          searchableText: `这是高级过滤测试法条${i}的内容`,
-        },
-      });
-      testArticles.push(article);
-    }
+    // Default mocks: return 5 relations covering all types/methods/statuses
+    const sampleRelations = [
+      makeRelation({
+        id: 'rel-1',
+        relationType: 'CITES',
+        strength: 0.95,
+        confidence: 0.98,
+        discoveryMethod: 'RULE_BASED',
+        verificationStatus: 'VERIFIED',
+        createdAt: new Date('2024-01-15'),
+      }),
+      makeRelation({
+        id: 'rel-2',
+        relationType: 'COMPLETES',
+        strength: 0.75,
+        confidence: 0.8,
+        discoveryMethod: 'AI_DETECTED',
+        verificationStatus: 'PENDING',
+        createdAt: new Date('2024-01-16'),
+      }),
+      makeRelation({
+        id: 'rel-3',
+        relationType: 'CONFLICTS',
+        strength: 0.6,
+        confidence: 0.65,
+        discoveryMethod: 'CASE_DERIVED',
+        verificationStatus: 'REJECTED',
+        createdAt: new Date('2024-01-20'),
+      }),
+      makeRelation({
+        id: 'rel-4',
+        relationType: 'RELATED',
+        strength: 0.85,
+        confidence: 0.9,
+        discoveryMethod: 'MANUAL',
+        verificationStatus: 'VERIFIED',
+        createdAt: new Date('2024-02-01'),
+      }),
+      makeRelation({
+        id: 'rel-5',
+        relationType: 'SUPERSEDES',
+        strength: 0.7,
+        confidence: 0.75,
+        discoveryMethod: 'AI_DETECTED',
+        verificationStatus: 'PENDING',
+        createdAt: new Date('2024-02-10'),
+      }),
+    ];
 
-    // 创建不同类型的关系用于测试
-    await prisma.lawArticleRelation.createMany({
-      data: [
-        // 引用关系，高置信度，已验证
-        {
-          sourceId: testArticles[0].id,
-          targetId: testArticles[1].id,
-          relationType: RelationType.CITES,
-          strength: 0.95,
-          confidence: 0.98,
-          discoveryMethod: DiscoveryMethod.RULE_BASED,
-          verificationStatus: VerificationStatus.VERIFIED,
-          verifiedBy: 'admin-user',
-          verifiedAt: new Date('2024-01-15'),
-        },
-        // 补全关系，中等置信度，待审核
-        {
-          sourceId: testArticles[1].id,
-          targetId: testArticles[2].id,
-          relationType: RelationType.COMPLETES,
-          strength: 0.75,
-          confidence: 0.8,
-          discoveryMethod: DiscoveryMethod.AI_DETECTED,
-          verificationStatus: VerificationStatus.PENDING,
-        },
-        // 冲突关系，低置信度，已拒绝
-        {
-          sourceId: testArticles[2].id,
-          targetId: testArticles[3].id,
-          relationType: RelationType.CONFLICTS,
-          strength: 0.6,
-          confidence: 0.65,
-          discoveryMethod: DiscoveryMethod.CASE_DERIVED,
-          verificationStatus: VerificationStatus.REJECTED,
-          verifiedBy: 'admin-user',
-          verifiedAt: new Date('2024-01-20'),
-        },
-        // 一般关联，高置信度，已验证
-        {
-          sourceId: testArticles[3].id,
-          targetId: testArticles[4].id,
-          relationType: RelationType.RELATED,
-          strength: 0.85,
-          confidence: 0.9,
-          discoveryMethod: DiscoveryMethod.MANUAL,
-          verificationStatus: VerificationStatus.VERIFIED,
-          verifiedBy: 'admin-user',
-          verifiedAt: new Date('2024-02-01'),
-        },
-        // 替代关系，中等置信度，待审核
-        {
-          sourceId: testArticles[4].id,
-          targetId: testArticles[0].id,
-          relationType: RelationType.SUPERSEDES,
-          strength: 0.7,
-          confidence: 0.75,
-          discoveryMethod: DiscoveryMethod.AI_DETECTED,
-          verificationStatus: VerificationStatus.PENDING,
-        },
-      ],
-    });
-  });
-
-  afterAll(async () => {
-    // 清理测试数据
-    await prisma.lawArticleRelation.deleteMany({
-      where: {
-        OR: [
-          { sourceId: { in: testArticles.map(a => a.id) } },
-          { targetId: { in: testArticles.map(a => a.id) } },
-        ],
-      },
-    });
-
-    await prisma.lawArticle.deleteMany({
-      where: {
-        id: { in: testArticles.map(a => a.id) },
-      },
-    });
+    getPrisma().lawArticleRelation.count.mockResolvedValue(5);
+    getPrisma().lawArticleRelation.findMany.mockResolvedValue(sampleRelations);
   });
 
   describe('按关系类型过滤', () => {
     it('应该按单个关系类型过滤', async () => {
+      const citesRelations = [
+        makeRelation({ id: 'rel-1', relationType: 'CITES' }),
+      ];
+      getPrisma().lawArticleRelation.count.mockResolvedValue(1);
+      getPrisma().lawArticleRelation.findMany.mockResolvedValue(citesRelations);
+
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-article-relations/advanced-filter?relationType=CITES',
         { method: 'GET' }
@@ -142,6 +149,15 @@ describe('高级过滤API测试', () => {
     });
 
     it('应该按多个关系类型过滤', async () => {
+      const filteredRelations = [
+        makeRelation({ id: 'rel-1', relationType: 'CITES' }),
+        makeRelation({ id: 'rel-2', relationType: 'COMPLETES' }),
+      ];
+      getPrisma().lawArticleRelation.count.mockResolvedValue(2);
+      getPrisma().lawArticleRelation.findMany.mockResolvedValue(
+        filteredRelations
+      );
+
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-article-relations/advanced-filter?relationType=CITES,COMPLETES',
         { method: 'GET' }
@@ -160,6 +176,21 @@ describe('高级过滤API测试', () => {
 
   describe('按发现方式过滤', () => {
     it('应该按发现方式过滤', async () => {
+      const aiRelations = [
+        makeRelation({
+          id: 'rel-2',
+          discoveryMethod: 'AI_DETECTED',
+          relationType: 'COMPLETES',
+        }),
+        makeRelation({
+          id: 'rel-5',
+          discoveryMethod: 'AI_DETECTED',
+          relationType: 'SUPERSEDES',
+        }),
+      ];
+      getPrisma().lawArticleRelation.count.mockResolvedValue(2);
+      getPrisma().lawArticleRelation.findMany.mockResolvedValue(aiRelations);
+
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-article-relations/advanced-filter?discoveryMethod=AI_DETECTED',
         { method: 'GET' }
@@ -178,6 +209,15 @@ describe('高级过滤API测试', () => {
 
   describe('按置信度范围过滤', () => {
     it('应该按最小置信度过滤', async () => {
+      const highConfidenceRelations = [
+        makeRelation({ id: 'rel-1', confidence: 0.98 }),
+        makeRelation({ id: 'rel-4', confidence: 0.9 }),
+      ];
+      getPrisma().lawArticleRelation.count.mockResolvedValue(2);
+      getPrisma().lawArticleRelation.findMany.mockResolvedValue(
+        highConfidenceRelations
+      );
+
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-article-relations/advanced-filter?minConfidence=0.85',
         { method: 'GET' }
@@ -194,6 +234,15 @@ describe('高级过滤API测试', () => {
     });
 
     it('应该按最大置信度过滤', async () => {
+      const lowConfidenceRelations = [
+        makeRelation({ id: 'rel-3', confidence: 0.65 }),
+        makeRelation({ id: 'rel-2', confidence: 0.8 }),
+      ];
+      getPrisma().lawArticleRelation.count.mockResolvedValue(2);
+      getPrisma().lawArticleRelation.findMany.mockResolvedValue(
+        lowConfidenceRelations
+      );
+
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-article-relations/advanced-filter?maxConfidence=0.80',
         { method: 'GET' }
@@ -210,6 +259,13 @@ describe('高级过滤API测试', () => {
     });
 
     it('应该按置信度范围过滤', async () => {
+      const rangeRelations = [
+        makeRelation({ id: 'rel-2', confidence: 0.8 }),
+        makeRelation({ id: 'rel-5', confidence: 0.75 }),
+      ];
+      getPrisma().lawArticleRelation.count.mockResolvedValue(2);
+      getPrisma().lawArticleRelation.findMany.mockResolvedValue(rangeRelations);
+
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-article-relations/advanced-filter?minConfidence=0.70&maxConfidence=0.90',
         { method: 'GET' }
@@ -229,6 +285,15 @@ describe('高级过滤API测试', () => {
 
   describe('按强度范围过滤', () => {
     it('应该按最小强度过滤', async () => {
+      const highStrengthRelations = [
+        makeRelation({ id: 'rel-1', strength: 0.95 }),
+        makeRelation({ id: 'rel-4', strength: 0.85 }),
+      ];
+      getPrisma().lawArticleRelation.count.mockResolvedValue(2);
+      getPrisma().lawArticleRelation.findMany.mockResolvedValue(
+        highStrengthRelations
+      );
+
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-article-relations/advanced-filter?minStrength=0.80',
         { method: 'GET' }
@@ -245,6 +310,14 @@ describe('高级过滤API测试', () => {
     });
 
     it('应该按强度范围过滤', async () => {
+      const rangeRelations = [
+        makeRelation({ id: 'rel-3', strength: 0.6 }),
+        makeRelation({ id: 'rel-5', strength: 0.7 }),
+        makeRelation({ id: 'rel-4', strength: 0.85 }),
+      ];
+      getPrisma().lawArticleRelation.count.mockResolvedValue(3);
+      getPrisma().lawArticleRelation.findMany.mockResolvedValue(rangeRelations);
+
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-article-relations/advanced-filter?minStrength=0.60&maxStrength=0.85',
         { method: 'GET' }
@@ -264,6 +337,15 @@ describe('高级过滤API测试', () => {
 
   describe('按审核状态过滤', () => {
     it('应该按审核状态过滤', async () => {
+      const verifiedRelations = [
+        makeRelation({ id: 'rel-1', verificationStatus: 'VERIFIED' }),
+        makeRelation({ id: 'rel-4', verificationStatus: 'VERIFIED' }),
+      ];
+      getPrisma().lawArticleRelation.count.mockResolvedValue(2);
+      getPrisma().lawArticleRelation.findMany.mockResolvedValue(
+        verifiedRelations
+      );
+
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-article-relations/advanced-filter?verificationStatus=VERIFIED',
         { method: 'GET' }
@@ -284,6 +366,22 @@ describe('高级过滤API测试', () => {
 
   describe('按法条名称搜索', () => {
     it('应该按源法条名称搜索', async () => {
+      const sourceNameRelations = [
+        makeRelation({
+          id: 'rel-1',
+          source: {
+            id: 'art-1',
+            lawName: '高级过滤测试法1',
+            articleNumber: '1',
+            fullText: '内容',
+          },
+        }),
+      ];
+      getPrisma().lawArticleRelation.count.mockResolvedValue(1);
+      getPrisma().lawArticleRelation.findMany.mockResolvedValue(
+        sourceNameRelations
+      );
+
       const request = new NextRequest(
         `http://localhost:3000/api/v1/law-article-relations/advanced-filter?sourceLawName=${encodeURIComponent('高级过滤测试法1')}`,
         { method: 'GET' }
@@ -298,6 +396,22 @@ describe('高级过滤API测试', () => {
     });
 
     it('应该按目标法条名称搜索', async () => {
+      const targetNameRelations = [
+        makeRelation({
+          id: 'rel-1',
+          target: {
+            id: 'art-2',
+            lawName: '高级过滤测试法2',
+            articleNumber: '2',
+            fullText: '内容',
+          },
+        }),
+      ];
+      getPrisma().lawArticleRelation.count.mockResolvedValue(1);
+      getPrisma().lawArticleRelation.findMany.mockResolvedValue(
+        targetNameRelations
+      );
+
       const request = new NextRequest(
         `http://localhost:3000/api/v1/law-article-relations/advanced-filter?targetLawName=${encodeURIComponent('高级过滤测试法2')}`,
         { method: 'GET' }
@@ -332,6 +446,25 @@ describe('高级过滤API测试', () => {
 
   describe('组合过滤', () => {
     it('应该支持多个条件组合过滤', async () => {
+      const combinedRelations = [
+        makeRelation({
+          id: 'rel-1',
+          relationType: 'CITES',
+          confidence: 0.98,
+          verificationStatus: 'VERIFIED',
+        }),
+        makeRelation({
+          id: 'rel-4',
+          relationType: 'RELATED',
+          confidence: 0.9,
+          verificationStatus: 'VERIFIED',
+        }),
+      ];
+      getPrisma().lawArticleRelation.count.mockResolvedValue(2);
+      getPrisma().lawArticleRelation.findMany.mockResolvedValue(
+        combinedRelations
+      );
+
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-article-relations/advanced-filter?relationType=CITES,RELATED&minConfidence=0.85&verificationStatus=VERIFIED',
         { method: 'GET' }
@@ -358,6 +491,13 @@ describe('高级过滤API测试', () => {
 
   describe('分页和排序', () => {
     it('应该支持分页', async () => {
+      const pagedRelations = [
+        makeRelation({ id: 'rel-1' }),
+        makeRelation({ id: 'rel-2' }),
+      ];
+      getPrisma().lawArticleRelation.count.mockResolvedValue(5);
+      getPrisma().lawArticleRelation.findMany.mockResolvedValue(pagedRelations);
+
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-article-relations/advanced-filter?page=1&pageSize=2',
         { method: 'GET' }
@@ -375,6 +515,18 @@ describe('高级过滤API测试', () => {
     });
 
     it('应该支持按置信度排序', async () => {
+      const sortedRelations = [
+        makeRelation({ id: 'rel-1', confidence: 0.98 }),
+        makeRelation({ id: 'rel-4', confidence: 0.9 }),
+        makeRelation({ id: 'rel-2', confidence: 0.8 }),
+        makeRelation({ id: 'rel-5', confidence: 0.75 }),
+        makeRelation({ id: 'rel-3', confidence: 0.65 }),
+      ];
+      getPrisma().lawArticleRelation.count.mockResolvedValue(5);
+      getPrisma().lawArticleRelation.findMany.mockResolvedValue(
+        sortedRelations
+      );
+
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-article-relations/advanced-filter?sortBy=confidence&sortOrder=desc',
         { method: 'GET' }

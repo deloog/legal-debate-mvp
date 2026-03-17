@@ -267,7 +267,7 @@ export async function POST(
     // 生成合同编号
     const contractNumber = await generateContractNumber();
 
-    // 创建合同
+    // 创建合同（lawyerId 强制使用 JWT 鉴权的 userId，忽略请求体中的值）
     const contract = await prisma.contract.create({
       data: {
         contractNumber,
@@ -280,7 +280,7 @@ export async function POST(
         clientContact: data.clientContact || null,
         lawFirmName: data.lawFirmName,
         lawyerName: data.lawyerName,
-        lawyerId: data.lawyerId,
+        lawyerId: userId,
         caseType: data.caseType,
         caseSummary: data.caseSummary,
         scope: data.scope,

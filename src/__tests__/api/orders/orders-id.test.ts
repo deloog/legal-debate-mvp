@@ -129,9 +129,9 @@ describe('GET /api/orders/[id]', () => {
 
       expect(testResponse.status).toBe(200);
       expect(testResponse.success).toBe(true);
-      expect(testResponse.data.data).toBeDefined();
-      expect(testResponse.data.data.id).toBe(mockOrder.id);
-      expect(testResponse.data.data.orderNo).toBe(mockOrder.orderNo);
+      expect(testResponse.data).toBeDefined();
+      expect(testResponse.data.id).toBe(mockOrder.id);
+      expect(testResponse.data.orderNo).toBe(mockOrder.orderNo);
     });
 
     it('订单不存在应返回404', async () => {

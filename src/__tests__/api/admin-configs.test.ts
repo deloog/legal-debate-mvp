@@ -268,7 +268,7 @@ describe('GET /api/admin/configs', () => {
     const data = await response.json();
 
     expect(response.status).toBe(401);
-    expect(data.error).toBe('未认证');
+    expect(data.error).toBe('UNAUTHORIZED');
   });
 
   it('权限不足应返回权限错误', async () => {
@@ -343,7 +343,7 @@ describe('POST /api/admin/configs', () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error).toBe('参数错误');
+    expect(data.success).toBe(false);
   });
 
   it('应拒绝无效的配置类型', async () => {
@@ -468,7 +468,7 @@ describe('PUT /api/admin/configs (批量更新)', () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error).toBe('参数错误');
+    expect(data.success).toBe(false);
   });
 
   it('应处理部分更新失败的情况', async () => {

@@ -202,7 +202,28 @@ describe('RoundValidator', () => {
   });
 
   describe('validateCanStart', () => {
+    const mockDebateId = 'test-debate-validate-start';
+
     beforeEach(async () => {
+      // 为 createTestDebate 的 DB 操作配置 mock 返回值
+      (prisma.user.create as jest.Mock).mockResolvedValue({
+        id: 'test-user-id',
+      });
+      (prisma.case.create as jest.Mock).mockResolvedValue({
+        id: 'test-case-id',
+      });
+      (prisma.debate.create as jest.Mock).mockResolvedValue({
+        id: mockDebateId,
+      });
+      // 默认：debate 存在，DRAFT 状态，无进行中轮次
+      (prisma.debate.findUnique as jest.Mock).mockResolvedValue({
+        id: mockDebateId,
+        status: 'DRAFT',
+        debateConfig: null,
+        rounds: [],
+      });
+      (prisma.debateRound.count as jest.Mock).mockResolvedValue(0);
+
       debateId = await createTestDebate();
     });
 
@@ -217,7 +238,8 @@ describe('RoundValidator', () => {
     });
 
     it('应该拒绝在不存在的辩论开始轮次', async () => {
-      debateId = await createTestDebate();
+      // 对 non-existent-id 返回 null
+      (prisma.debate.findUnique as jest.Mock).mockResolvedValue(null);
       const result = await validator.validateCanStart('non-existent-id');
       expect(result.valid).toBe(false);
       expect(result.errors).toContainEqual(
@@ -229,15 +251,12 @@ describe('RoundValidator', () => {
     });
 
     it('应该拒绝在有进行中轮次的辩论开始新轮次', async () => {
-      debateId = await createTestDebate();
-      // 创建进行中的轮次
-      await prisma.debateRound.create({
-        data: {
-          debateId,
-          roundNumber: 1,
-          status: 'IN_PROGRESS',
-          startedAt: new Date(),
-        },
+      // 模拟 debate 包含进行中的轮次
+      (prisma.debate.findUnique as jest.Mock).mockResolvedValue({
+        id: debateId,
+        status: 'IN_PROGRESS',
+        debateConfig: null,
+        rounds: [{ id: 'round-1', status: 'IN_PROGRESS' }],
       });
 
       const result = await validator.validateCanStart(debateId);

@@ -466,20 +466,22 @@ function isSmtpConfigured(): boolean {
  * 获取邮件服务实例
  *
  * 选择逻辑：
- * 1. 开发/测试环境 + 未配置 SMTP → DevEmailService（控制台输出）
- * 2. 开发/测试环境 + 已配置 SMTP → ProdEmailService（真实发送）
- * 3. 生产环境 → ProdEmailService
+ * 1. 开发/测试环境 → DevEmailService（控制台输出，不发真实邮件）
+ * 2. 生产环境 → ProdEmailService
+ *
+ * 注意：.env 中的占位 SMTP 配置（smtp.example.com 等）不触发真实发送，
+ * 开发/测试环境始终使用 DevEmailService。
  */
 export function getEmailService(): IEmailService {
   const isDev =
     process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 
-  // 开发环境下，如果未配置 SMTP，使用控制台输出
-  if (isDev && !isSmtpConfigured()) {
+  // 开发/测试环境始终使用控制台输出，不发真实邮件
+  if (isDev) {
     return new DevEmailService();
   }
 
-  // 其他情况使用生产服务（会自动检测 SMTP 配置）
+  // 生产环境使用 SMTP 服务
   return new ProdEmailService();
 }
 

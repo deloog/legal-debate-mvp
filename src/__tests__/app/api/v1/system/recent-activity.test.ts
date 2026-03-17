@@ -98,8 +98,8 @@ describe('最近活动API', () => {
       const mockContracts = [
         {
           id: '1',
-          title: '采购合同',
-          type: 'PURCHASE',
+          contractNumber: '采购合同',
+          clientName: '客户A',
           status: 'active',
           createdAt: new Date('2026-02-02T07:00:00Z'),
         },

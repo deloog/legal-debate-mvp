@@ -13,7 +13,7 @@ jest.mock('@/lib/db/prisma', () => ({
     case: {
       count: jest.fn(),
     },
-    $queryRawUnsafe: jest.fn(),
+    $queryRaw: jest.fn(),
   },
 }));
 
@@ -98,7 +98,7 @@ describe('案件分析API', () => {
       });
 
       // Mock数据库查询结果 - 空数组，避免复杂的日期处理问题
-      (mockedPrisma.$queryRawUnsafe as jest.Mock).mockResolvedValue([]);
+      (mockedPrisma.$queryRaw as jest.Mock).mockResolvedValue([]);
       (mockedPrisma.case.count as jest.Mock).mockResolvedValue(0);
 
       const request = new NextRequest('http://localhost/api/analytics/cases');
@@ -119,7 +119,7 @@ describe('案件分析API', () => {
     it('应该支持自定义时间范围', async () => {
       mockedValidatePermissions.mockResolvedValueOnce(null);
 
-      (mockedPrisma.$queryRawUnsafe as jest.Mock).mockResolvedValue([]);
+      (mockedPrisma.$queryRaw as jest.Mock).mockResolvedValue([]);
       (mockedPrisma.case.count as jest.Mock).mockResolvedValue(0);
 
       const request = new NextRequest(
@@ -132,7 +132,7 @@ describe('案件分析API', () => {
     it('应该支持按状态筛选', async () => {
       mockedValidatePermissions.mockResolvedValueOnce(null);
 
-      (mockedPrisma.$queryRawUnsafe as jest.Mock).mockResolvedValue([]);
+      (mockedPrisma.$queryRaw as jest.Mock).mockResolvedValue([]);
       (mockedPrisma.case.count as jest.Mock).mockResolvedValue(0);
 
       const request = new NextRequest(
@@ -145,7 +145,7 @@ describe('案件分析API', () => {
     it('应该处理数据库错误', async () => {
       mockedValidatePermissions.mockResolvedValueOnce(null);
 
-      (mockedPrisma.$queryRawUnsafe as jest.Mock).mockRejectedValue(
+      (mockedPrisma.$queryRaw as jest.Mock).mockRejectedValue(
         new Error('数据库错误')
       );
 

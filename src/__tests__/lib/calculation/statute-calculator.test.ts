@@ -2,10 +2,21 @@
  * 时效计算器单元测试
  */
 
+// Mock logger 避免实际日志输出并允许测试验证日志调用
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    warn: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
 import {
   StatuteCalculator,
   statuteCalculator,
 } from '@/lib/calculation/statute-calculator';
+import { logger } from '@/lib/logger';
 import {
   StatuteType,
   CaseTypeForStatute,
@@ -327,12 +338,10 @@ describe('StatuteCalculator', () => {
         },
       ];
 
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
       const results = calculator.batchCalculate(paramsList);
 
       expect(results).toHaveLength(1);
-      expect(consoleSpy).toHaveBeenCalled();
-      consoleSpy.mockRestore();
+      expect(logger.warn).toHaveBeenCalled();
     });
   });
 });

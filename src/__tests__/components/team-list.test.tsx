@@ -107,7 +107,7 @@ describe('TeamList', () => {
 
     await waitFor(() => {
       expect(screen.getAllByText('活跃').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('非活跃').length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/inactive/i).length).toBeGreaterThan(0);
     });
   });
 

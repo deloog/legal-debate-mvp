@@ -5,6 +5,14 @@
  * 包括性能测试、稳定性测试、压力测试
  */
 
+// 使用真实数据库进行集成测试
+jest.mock('@/lib/db/prisma', () => {
+  const { PrismaClient: RealPrismaClient } = jest.requireActual(
+    '@prisma/client'
+  ) as typeof import('@prisma/client');
+  return { prisma: new RealPrismaClient() };
+});
+
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { prisma } from '@/lib/db/prisma';
 import {

@@ -544,7 +544,7 @@ export function parseConfigValue(value: string, type: ConfigType): unknown {
     case 'NUMBER':
       return Number.parseFloat(value);
     case 'BOOLEAN':
-      return value.toLowerCase() === 'true';
+      return value.toLowerCase() === 'true' || value === '1';
     case 'ARRAY':
       try {
         return JSON.parse(value);

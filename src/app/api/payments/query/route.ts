@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
 import { prisma } from '@/lib/db/prisma';
 import {
   QueryPaymentResponse,
@@ -57,9 +58,18 @@ function transformPaymentRecord(
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    // 获取用户ID（优先 JWT Bearer，回退到 NextAuth session）
+    const authHeader = request.headers.get('authorization');
+    const jwtToken = extractTokenFromHeader(authHeader ?? '');
+    const tokenResult = verifyToken(jwtToken ?? '');
+    let userId: string | undefined;
+    if (tokenResult.valid && tokenResult.payload) {
+      userId = tokenResult.payload.userId;
+    } else {
+      const session = await getServerSession(authOptions);
+      userId = session?.user?.id;
+    }
+    if (!userId) {
       return NextResponse.json(
         {
           success: false,
@@ -95,7 +105,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           ...(orderId ? [{ id: orderId }] : []),
           ...(orderNo ? [{ orderNo: orderNo }] : []),
         ],
-        userId: session.user.id,
+        userId,
       },
       include: {
         user: true,

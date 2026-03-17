@@ -17,9 +17,11 @@ describe('DebateAIReviewer', () => {
     id: 'arg-1',
     side: 'plaintiff',
     type: 'main_point',
-    content: '测试论点内容，用于验证辩论生成功能',
+    // 内容需 >= 20 字符且不含不确定词，同时包含案件事实关键词以通过 fact 检查
+    content: '双方签订合同后，被告未按时付款，因此原告有权主张违约责任',
+    // reasoning 需含逻辑连接词（如"因此"），且长度在 10-1000 字符之间
     reasoning:
-      '这是一个完整的推理过程，根据相关法律规定和案件事实，可以得出结论',
+      '因此，根据《民法典》第577条规定，被告违约，原告因此有权要求赔偿。',
     legalBasis: [
       {
         lawName: '中华人民共和国民法典',
@@ -97,6 +99,7 @@ describe('DebateAIReviewer', () => {
 
     it('应该检测到论点数量不平衡', async () => {
       const plaintiffArgs = [
+        createMockArgument(),
         createMockArgument(),
         createMockArgument(),
         createMockArgument(),

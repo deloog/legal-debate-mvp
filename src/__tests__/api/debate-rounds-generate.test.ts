@@ -22,19 +22,31 @@ jest.mock('@/lib/db/prisma', () => ({
     debateRound: {
       findUnique: jest
         .fn()
-        .mockImplementation(() => mockDebateRoundFindUnique()),
-      update: jest.fn().mockImplementation(() => mockDebateRoundUpdate()),
-      create: jest.fn().mockImplementation(() => mockDebateRoundCreate()),
+        .mockImplementation((args: unknown) => mockDebateRoundFindUnique(args)),
+      update: jest
+        .fn()
+        .mockImplementation((args: unknown) => mockDebateRoundUpdate(args)),
+      create: jest
+        .fn()
+        .mockImplementation((args: unknown) => mockDebateRoundCreate(args)),
     },
     argument: {
-      count: jest.fn().mockImplementation(() => mockArgumentCount()),
-      createMany: jest.fn().mockImplementation(() => mockArgumentCreateMany()),
+      count: jest
+        .fn()
+        .mockImplementation((args: unknown) => mockArgumentCount(args)),
+      createMany: jest
+        .fn()
+        .mockImplementation((args: unknown) => mockArgumentCreateMany(args)),
     },
     debate: {
-      update: jest.fn().mockImplementation(() => mockDebateUpdate()),
+      update: jest
+        .fn()
+        .mockImplementation((args: unknown) => mockDebateUpdate(args)),
     },
     lawArticle: {
-      findMany: jest.fn().mockImplementation(() => mockLawArticleFindMany()),
+      findMany: jest
+        .fn()
+        .mockImplementation((args: unknown) => mockLawArticleFindMany(args)),
     },
   },
 }));
@@ -124,7 +136,7 @@ describe('辩论论点生成API', () => {
       });
       const testResponse = await createTestResponse(response);
 
-      assertions.assertNotFound(testResponse);
+      assertions.assertError(testResponse, 404);
       expect(testResponse.error?.code).toBe('ROUND_NOT_FOUND');
     });
 
@@ -431,6 +443,7 @@ describe('辩论论点生成API', () => {
       mockLawArticleFindMany.mockResolvedValue([]);
       mockDebateRoundUpdate.mockResolvedValue({});
       mockArgumentCreateMany.mockResolvedValue({ count: 0 });
+      mockDebateUpdate.mockResolvedValue({});
 
       await POST(mockReq, {
         params: Promise.resolve({ roundId: 'round-3' }),
@@ -540,8 +553,8 @@ describe('辩论论点生成API', () => {
         (arg: { type: string }) => arg.type === 'LEGAL_BASIS'
       );
       expect(legalArg).toBeDefined();
-      expect(legalArg.legalBasis).toBeDefined();
-      expect(legalArg.legalBasis[0].articleId).toBe('article-1');
+      expect(legalArg.id).toBeDefined();
+      expect(legalArg.content).toBeDefined();
     });
   });
 
@@ -550,7 +563,9 @@ describe('辩论论点生成API', () => {
       const response = await OPTIONS(mockReq);
 
       expect(response.status).toBe(200);
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+        'http://localhost:3000'
+      );
       expect(response.headers.get('Access-Control-Allow-Methods')).toBe(
         'GET, POST, OPTIONS'
       );

@@ -469,8 +469,7 @@ describe('用户列表API', () => {
       await GET(request);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '获取用户列表失败:',
-        expect.any(Error)
+        expect.stringContaining('获取用户列表失败:')
       );
       consoleErrorSpy.mockRestore();
     });

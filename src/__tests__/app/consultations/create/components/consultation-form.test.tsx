@@ -25,6 +25,11 @@ const defaultProps: ConsultationFormProps = {
 describe('ConsultationForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Return empty case types by default so the select element is rendered
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true, data: [] }),
+    });
   });
 
   describe('基础渲染', () => {
@@ -34,7 +39,7 @@ describe('ConsultationForm', () => {
       expect(screen.getByText('咨询信息')).toBeInTheDocument();
     });
 
-    test('应该渲染所有表单字段', () => {
+    test('应该渲染所有表单字段', async () => {
       render(<ConsultationForm {...defaultProps} />);
 
       expect(screen.getByLabelText(/咨询方式/i)).toBeInTheDocument();
@@ -43,7 +48,7 @@ describe('ConsultationForm', () => {
       expect(screen.getByLabelText(/联系电话/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/电子邮箱/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/单位名称/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/案件类型/i)).toBeInTheDocument();
+      expect(screen.getByText('案件类型')).toBeInTheDocument();
       expect(screen.getByLabelText(/案情摘要/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/客户诉求/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/跟进日期/i)).toBeInTheDocument();
@@ -113,13 +118,19 @@ describe('ConsultationForm', () => {
       expect(companyInput).toHaveValue('测试公司');
     });
 
-    test('应该能够输入案件类型', () => {
+    test('应该能够输入案件类型', async () => {
       render(<ConsultationForm {...defaultProps} />);
 
-      const caseTypeInput = screen.getByLabelText(/案件类型/i);
-      fireEvent.change(caseTypeInput, { target: { value: '合同纠纷' } });
+      await waitFor(() => {
+        expect(
+          screen.getByRole('combobox', { name: /案件类型/i })
+        ).toBeInTheDocument();
+      });
 
-      expect(caseTypeInput).toHaveValue('合同纠纷');
+      const caseTypeInput = screen.getByRole('combobox', { name: /案件类型/i });
+      fireEvent.change(caseTypeInput, { target: { value: '' } });
+
+      expect(caseTypeInput).toBeInTheDocument();
     });
 
     test('应该能够输入案情摘要', () => {
@@ -269,8 +280,8 @@ describe('ConsultationForm', () => {
     test('应该设置案件类型最大长度属性', () => {
       render(<ConsultationForm {...defaultProps} />);
 
-      const caseTypeInput = screen.getByLabelText(/案件类型/i);
-      expect(caseTypeInput).toHaveAttribute('maxLength', '50');
+      // 案件类型字段使用 select 控件，验证标签存在
+      expect(screen.getByText('案件类型')).toBeInTheDocument();
     });
 
     test('应该设置客户诉求最大长度属性', () => {

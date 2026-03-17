@@ -37,6 +37,7 @@ test.describe('单轮辩论完整流程', () => {
       timeout: 90_000,
       extraHTTPHeaders: {
         Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
       },
     });
   });

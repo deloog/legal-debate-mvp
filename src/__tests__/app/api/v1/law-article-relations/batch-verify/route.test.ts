@@ -32,6 +32,23 @@ jest.mock('@/lib/middleware/knowledge-graph-permission', () => ({
 describe('POST /api/v1/law-article-relations/batch-verify', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const {
+      checkKnowledgeGraphPermission,
+    } = require('@/lib/middleware/knowledge-graph-permission');
+    (checkKnowledgeGraphPermission as jest.Mock).mockResolvedValue({
+      hasPermission: true,
+    });
+    // Reset DB mocks to prevent implementation bleed from previous tests
+    (prisma.lawArticleRelation.findUnique as jest.Mock).mockResolvedValue({
+      id: 'relation-1',
+      verificationStatus: 'PENDING',
+    });
+    (prisma.lawArticleRelation.update as jest.Mock).mockResolvedValue({
+      id: 'relation-1',
+      verificationStatus: 'VERIFIED',
+      verifiedBy: 'admin-123',
+      verifiedAt: new Date(),
+    });
   });
 
   describe('参数验证', () => {
@@ -416,15 +433,17 @@ describe('POST /api/v1/law-article-relations/batch-verify', () => {
       const {
         logKnowledgeGraphAction,
       } = require('@/lib/middleware/knowledge-graph-permission');
-      expect(logKnowledgeGraphAction).toHaveBeenCalledWith({
-        userId: 'admin-123',
-        action: 'BATCH_VERIFY',
-        resource: 'RELATION',
-        description: '批量拒绝1个法条关系审核',
-        metadata: expect.objectContaining({
-          approved: false,
-        }),
-      });
+      expect(logKnowledgeGraphAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'admin-123',
+          action: 'BATCH_VERIFY',
+          resource: 'RELATION',
+          description: '批量拒绝1个法条关系审核',
+          metadata: expect.objectContaining({
+            approved: false,
+          }),
+        })
+      );
     });
   });
 

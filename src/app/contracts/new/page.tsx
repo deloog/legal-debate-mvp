@@ -7,36 +7,38 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FeeType } from '@/types/contract';
 
+const CASE_TYPE_OPTIONS = [
+  '劳动争议',
+  '合同纠纷',
+  '婚姻家庭',
+  '交通事故',
+  '房产纠纷',
+  '知识产权',
+  '刑事辩护',
+  '行政诉讼',
+  '公司法务',
+  '其他',
+];
+
 export default function NewContractPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 表单数据
   const [formData, setFormData] = useState({
-    // 委托方信息
     clientType: 'INDIVIDUAL',
     clientName: '',
+    clientPhone: '',
     clientIdNumber: '',
     clientAddress: '',
-    clientContact: '',
-
-    // 受托方信息
     lawFirmName: '律伴律师事务所',
     lawyerName: '',
-    lawyerId: 'default-lawyer-id', // 实际应从用户信息获取
-
-    // 委托事项
     caseType: '',
     caseSummary: '',
-    scope: '',
-
-    // 收费信息
+    scope: '代理一审诉讼',
     feeType: FeeType.FIXED,
     totalFee: 0,
     specialTerms: '',
-
-    // 付款计划
     payments: [{ paymentType: '首付款', amount: 0 }],
   });
 
@@ -73,10 +75,32 @@ export default function NewContractPage() {
     setError(null);
 
     try {
+      const payload = {
+        clientType:
+          formData.clientType === '个人'
+            ? 'INDIVIDUAL'
+            : formData.clientType === '企业'
+              ? 'ENTERPRISE'
+              : formData.clientType,
+        clientName: formData.clientName,
+        clientIdNumber: formData.clientIdNumber || undefined,
+        clientAddress: formData.clientAddress || undefined,
+        clientContact: formData.clientPhone || undefined,
+        lawFirmName: formData.lawFirmName || '律伴律师事务所',
+        lawyerName: formData.lawyerName || '承办律师',
+        caseType: formData.caseType || '其他',
+        caseSummary: formData.caseSummary || '待补充',
+        scope: formData.scope || '代理一审诉讼',
+        feeType: formData.feeType,
+        totalFee: formData.totalFee,
+        specialTerms: formData.specialTerms || undefined,
+        payments: formData.payments,
+      };
+
       const response = await fetch('/api/contracts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
@@ -86,8 +110,7 @@ export default function NewContractPage() {
       } else {
         setError(result.error?.message || '创建合同失败');
       }
-    } catch (err) {
-      console.error('创建合同失败:', err);
+    } catch (_err) {
       setError('创建合同失败，请重试');
     } finally {
       setLoading(false);
@@ -97,13 +120,11 @@ export default function NewContractPage() {
   return (
     <div className='min-h-screen bg-gray-50 p-6'>
       <div className='mx-auto max-w-4xl'>
-        {/* 页面标题 */}
         <div className='mb-6'>
           <h1 className='text-2xl font-bold text-gray-900'>新建合同</h1>
           <p className='mt-1 text-sm text-gray-500'>填写委托合同信息</p>
         </div>
 
-        {/* 错误提示 */}
         {error && (
           <div className='mb-6 rounded-lg bg-red-50 p-4 text-sm text-red-800'>
             {error}
@@ -121,28 +142,29 @@ export default function NewContractPage() {
                 <label className='block text-sm font-medium text-gray-700 mb-1'>
                   委托人类型 <span className='text-red-500'>*</span>
                 </label>
-                <div className='flex gap-4'>
-                  <label className='flex items-center'>
-                    <input
-                      type='radio'
-                      value='INDIVIDUAL'
-                      checked={formData.clientType === 'INDIVIDUAL'}
-                      onChange={e => handleChange('clientType', e.target.value)}
-                      className='mr-2'
-                    />
-                    个人
-                  </label>
-                  <label className='flex items-center'>
-                    <input
-                      type='radio'
-                      value='ENTERPRISE'
-                      checked={formData.clientType === 'ENTERPRISE'}
-                      onChange={e => handleChange('clientType', e.target.value)}
-                      className='mr-2'
-                    />
-                    企业
-                  </label>
-                </div>
+                <select
+                  name='clientType'
+                  value={
+                    formData.clientType === 'INDIVIDUAL'
+                      ? '个人'
+                      : formData.clientType === 'ENTERPRISE'
+                        ? '企业'
+                        : formData.clientType
+                  }
+                  onChange={e => {
+                    const val =
+                      e.target.value === '个人'
+                        ? 'INDIVIDUAL'
+                        : e.target.value === '企业'
+                          ? 'ENTERPRISE'
+                          : e.target.value;
+                    handleChange('clientType', val);
+                  }}
+                  className='w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
+                >
+                  <option value='个人'>个人</option>
+                  <option value='企业'>企业</option>
+                </select>
               </div>
 
               <div>
@@ -152,9 +174,24 @@ export default function NewContractPage() {
                 </label>
                 <input
                   type='text'
+                  name='clientName'
                   value={formData.clientName}
                   onChange={e => handleChange('clientName', e.target.value)}
                   required
+                  className='w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
+                />
+              </div>
+
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  手机号码
+                </label>
+                <input
+                  type='text'
+                  name='clientPhone'
+                  value={formData.clientPhone}
+                  onChange={e => handleChange('clientPhone', e.target.value)}
+                  placeholder='请输入手机号码'
                   className='w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
                 />
               </div>
@@ -169,19 +206,6 @@ export default function NewContractPage() {
                   type='text'
                   value={formData.clientIdNumber}
                   onChange={e => handleChange('clientIdNumber', e.target.value)}
-                  className='w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
-                />
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
-                  联系方式
-                </label>
-                <input
-                  type='text'
-                  value={formData.clientContact}
-                  onChange={e => handleChange('clientContact', e.target.value)}
-                  placeholder='电话/邮箱'
                   className='w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
                 />
               </div>
@@ -208,26 +232,24 @@ export default function NewContractPage() {
             <div className='space-y-4'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-1'>
-                  律所名称 <span className='text-red-500'>*</span>
+                  律所名称
                 </label>
                 <input
                   type='text'
                   value={formData.lawFirmName}
                   onChange={e => handleChange('lawFirmName', e.target.value)}
-                  required
                   className='w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
                 />
               </div>
 
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-1'>
-                  承办律师 <span className='text-red-500'>*</span>
+                  承办律师
                 </label>
                 <input
                   type='text'
                   value={formData.lawyerName}
                   onChange={e => handleChange('lawyerName', e.target.value)}
-                  required
                   className='w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
                 />
               </div>
@@ -244,24 +266,30 @@ export default function NewContractPage() {
                 <label className='block text-sm font-medium text-gray-700 mb-1'>
                   案件类型 <span className='text-red-500'>*</span>
                 </label>
-                <input
-                  type='text'
+                <select
+                  name='caseType'
                   value={formData.caseType}
                   onChange={e => handleChange('caseType', e.target.value)}
                   required
-                  placeholder='如：劳动争议、合同纠纷等'
                   className='w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
-                />
+                >
+                  <option value=''>请选择案件类型</option>
+                  {CASE_TYPE_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-1'>
-                  案情简述 <span className='text-red-500'>*</span>
+                  案情简述
                 </label>
                 <textarea
+                  name='caseSummary'
                   value={formData.caseSummary}
                   onChange={e => handleChange('caseSummary', e.target.value)}
-                  required
                   rows={4}
                   className='w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
                 />
@@ -269,12 +297,11 @@ export default function NewContractPage() {
 
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-1'>
-                  委托范围 <span className='text-red-500'>*</span>
+                  委托范围
                 </label>
                 <textarea
                   value={formData.scope}
                   onChange={e => handleChange('scope', e.target.value)}
-                  required
                   rows={3}
                   placeholder='如：代理一审、代理二审、代理执行等'
                   className='w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
@@ -291,7 +318,7 @@ export default function NewContractPage() {
             <div className='space-y-4'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-1'>
-                  收费方式 <span className='text-red-500'>*</span>
+                  收费方式
                 </label>
                 <select
                   value={formData.feeType}
@@ -307,15 +334,15 @@ export default function NewContractPage() {
 
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-1'>
-                  律师费总额（元） <span className='text-red-500'>*</span>
+                  律师费总额（元）
                 </label>
                 <input
                   type='number'
+                  name='totalFee'
                   value={formData.totalFee}
                   onChange={e =>
                     handleChange('totalFee', parseFloat(e.target.value) || 0)
                   }
-                  required
                   min='0'
                   step='0.01'
                   className='w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'

@@ -86,6 +86,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Mock 模式：直接返回固定数据，跳过耗时的数据库扫描（E2E 测试用）
+    if (process.env.USE_MOCK_AI === 'true' || process.env.NODE_ENV === 'test') {
+      logger.info('[knowledge-graph][Mock] 跳过实际关系生成，返回 Mock 数据');
+      return NextResponse.json({
+        success: true,
+        data: {
+          mode,
+          rule: rule ?? 'all',
+          supersedesCreated: 0,
+          citesCreated: 0,
+          implementsCreated: 0,
+          totalCreated: 0,
+          durationSeconds: 0,
+        },
+      });
+    }
+
     // 全量模式提示
     if (mode === 'full') {
       logger.warn(

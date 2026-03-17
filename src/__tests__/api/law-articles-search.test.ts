@@ -19,8 +19,21 @@ const AUTHED_USER = { userId: 'user-1', role: 'USER', email: 'user@test.com' };
 const mockSearch = jest.fn();
 jest.mock('@/lib/law-article/search-service', () => ({
   LawArticleSearchService: {
-    search: () => mockSearch(),
+    search: (args: unknown) => mockSearch(args),
   },
+}));
+
+// Mock cache manager
+jest.mock('@/lib/cache/manager', () => ({
+  cache: {
+    get: jest.fn().mockResolvedValue(null),
+    set: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+
+// Mock performance monitor
+jest.mock('@/lib/middleware/performance-monitor', () => ({
+  measurePerformance: jest.fn().mockResolvedValue(undefined),
 }));
 
 describe('法条检索API', () => {
@@ -126,7 +139,8 @@ describe('法条检索API', () => {
       const response = await POST(request);
       const testResponse = await createTestResponse(response);
 
-      assertions.assertValidationError(testResponse);
+      assertions.assertError(testResponse, 400);
+      expect(testResponse.error?.code).toBe('INVALID_PARAMS');
     });
 
     it('应该在keywords不是数组时返回错误', async () => {
@@ -143,7 +157,8 @@ describe('法条检索API', () => {
       const response = await POST(request);
       const testResponse = await createTestResponse(response);
 
-      assertions.assertValidationError(testResponse);
+      assertions.assertError(testResponse, 400);
+      expect(testResponse.error?.code).toBe('INVALID_PARAMS');
     });
 
     it('应该在无结果时返回空数组', async () => {
@@ -215,7 +230,7 @@ describe('法条检索API', () => {
           method: 'POST',
           body: {
             keywords: ['合同'],
-            category: 'CONTRACT',
+            category: 'CIVIL',
           },
         }
       );
@@ -338,7 +353,9 @@ describe('法条检索API', () => {
       const response = await OPTIONS(request);
 
       expect(response.status).toBe(200);
-      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+        'http://localhost:3000'
+      );
       expect(response.headers.get('Access-Control-Allow-Methods')).toBe(
         'GET, POST, OPTIONS'
       );

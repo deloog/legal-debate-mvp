@@ -26,12 +26,112 @@ jest.mock('@/lib/case/share-permission-validator', () => ({
   canAccessSharedCase: jest.fn(),
 }));
 
+jest.mock('@/lib/discussion/mention-parser', () => ({
+  mentionParser: {
+    parseMentions: jest
+      .fn()
+      .mockResolvedValue({ mentions: [], text: '', valid: true }),
+  },
+}));
+
+jest.mock('@/lib/discussion/mention-notification-service', () => ({
+  mentionNotificationService: {
+    sendMentionNotifications: jest.fn().mockResolvedValue({
+      success: true,
+      sentCount: 0,
+      failedCount: 0,
+      errors: [],
+    }),
+  },
+}));
+
 describe('案件讨论API测试', () => {
   let ownerUser: { id: string };
   let memberUser: { id: string };
 
   beforeEach(async () => {
     jest.clearAllMocks();
+
+    // Set up prisma mock return values for helper functions
+    let userCounter = 0;
+    (prisma.user.create as jest.Mock).mockImplementation(() =>
+      Promise.resolve({ id: `user_mock_${++userCounter}` })
+    );
+    (prisma.case.create as jest.Mock).mockImplementation(
+      ({ data }: { data: { userId: string } }) =>
+        Promise.resolve({ id: `case_mock_${Date.now()}`, userId: data.userId })
+    );
+    (prisma.caseDiscussion.create as jest.Mock).mockImplementation(
+      ({
+        data,
+      }: {
+        data: {
+          caseId: string;
+          userId: string;
+          content?: string;
+          mentions?: string[];
+          metadata?: unknown;
+          isPinned?: boolean;
+        };
+      }) => {
+        const discussion = {
+          id: `discussion_mock_${Date.now()}`,
+          caseId: data.caseId,
+          userId: data.userId,
+          content: data.content || '测试讨论内容',
+          mentions: data.mentions || [],
+          metadata: data.metadata ?? null,
+          isPinned: data.isPinned ?? false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          deletedAt: null,
+          user: {
+            id: data.userId,
+            name: null,
+            email: 'test@test.com',
+            avatar: null,
+          },
+          case: { userId: data.userId },
+        };
+        // findFirst returns discussion only when id matches and deletedAt condition is satisfied
+        (prisma.caseDiscussion.findFirst as jest.Mock).mockImplementation(
+          ({ where }: { where: { id?: string; deletedAt?: null } }) => {
+            if (!where.id || where.id === discussion.id) {
+              // Respect deletedAt: null filter (only return if not soft-deleted)
+              if (
+                'deletedAt' in where &&
+                where.deletedAt === null &&
+                discussion.deletedAt !== null
+              ) {
+                return Promise.resolve(null);
+              }
+              return Promise.resolve({ ...discussion });
+            }
+            return Promise.resolve(null);
+          }
+        );
+        // case.findFirst returns case with userId when caseId matches (for PIN permission check)
+        (prisma.case.findFirst as jest.Mock).mockImplementation(
+          ({ where }: { where: { id?: string } }) => {
+            if (!where.id || where.id === data.caseId) {
+              return Promise.resolve({ id: data.caseId, userId: data.userId });
+            }
+            return Promise.resolve(null);
+          }
+        );
+        // update mutates the discussion state so subsequent findFirst calls reflect the change
+        (prisma.caseDiscussion.update as jest.Mock).mockImplementation(
+          ({ data: updateData }: { data: Record<string, unknown> }) => {
+            Object.assign(discussion, updateData);
+            return Promise.resolve({ ...discussion });
+          }
+        );
+        return Promise.resolve(discussion);
+      }
+    );
+    (prisma.caseDiscussion.findMany as jest.Mock).mockResolvedValue([]);
+    (prisma.caseDiscussion.count as jest.Mock).mockResolvedValue(0);
+    (prisma.caseDiscussion.delete as jest.Mock).mockResolvedValue({});
 
     // 创建测试用户
     ownerUser = await createTestUser(`owner_${Date.now()}@test.com`);

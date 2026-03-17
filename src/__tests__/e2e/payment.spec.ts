@@ -277,8 +277,10 @@ test.describe('创建支付订单流程', () => {
     tiers = await getMembershipTiers(request, token);
     expect(tiers.success).toBe(true);
 
-    // 找到第一个活跃的会员等级
-    const activeTier = tiers.data?.tiers?.find(tier => tier.isActive);
+    // 找到第一个付费（价格>0）的活跃会员等级
+    const activeTier = tiers.data?.tiers?.find(
+      tier => tier.isActive && tier.price > 0
+    );
     expect(activeTier).toBeDefined();
     validTierId = activeTier?.id || '';
   });
@@ -714,7 +716,8 @@ test.describe('支付安全与权限验证', () => {
         },
       }
     );
-    expect(queryResponse.status()).toBe(403); // 禁止访问
+    // 路由不暴露订单是否存在，找不到即返回 404（正确的安全行为）
+    expect([403, 404]).toContain(queryResponse.status());
   });
 
   test('应该拒绝无效的JWT令牌', async ({ request }) => {
@@ -777,7 +780,7 @@ test.describe('订单金额与计费周期验证', () => {
   });
 
   test('应该为月度计费计算正确金额', async ({ request }) => {
-    const tier = tiers.data?.tiers?.find(t => t.isActive);
+    const tier = tiers.data?.tiers?.find(t => t.isActive && t.price > 0);
     expect(tier).toBeDefined();
 
     const responseData: CreateOrderResponseData = await createPaymentOrder(
@@ -787,7 +790,7 @@ test.describe('订单金额与计费周期验证', () => {
       'WECHAT'
     );
 
-    expect(responseData.data?.amount).toBe(tier?.price);
+    expect(responseData.data?.amount).toBe(Number(tier?.price));
   });
 
   test('应该为季度计费计算正确金额', async ({ request }) => {
@@ -874,7 +877,9 @@ test.describe('综合测试 - 完整支付流程', () => {
     // 2. 获取会员等级列表
     const tiers = await getMembershipTiers(request, token);
     expect(tiers.success).toBe(true);
-    const activeTier = tiers.data?.tiers?.find(tier => tier.isActive);
+    const activeTier = tiers.data?.tiers?.find(
+      tier => tier.isActive && tier.price > 0
+    );
     expect(activeTier).toBeDefined();
     const validTierId = activeTier?.id || '';
 
@@ -907,8 +912,8 @@ test.describe('综合测试 - 完整支付流程', () => {
     const queryData2 = await queryResponse2.json();
     expect(queryData2.data?.order.orderNo).toBe(orderNo);
 
-    // 6. 验证订单金额正确
-    expect(queryResponse1.data?.order.amount).toBe(activeTier?.price);
+    // 6. 验证订单金额正确（tier.price 为 Decimal 字符串，amount 为数字）
+    expect(queryResponse1.data?.order.amount).toBe(Number(activeTier?.price));
   });
 
   test('完整支付流程：双支付方式测试', async ({ request }) => {

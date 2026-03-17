@@ -1,4 +1,4 @@
-import { render, screen, within, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CommunicationRecordList } from '../../../components/client/CommunicationRecordList';
 import { CommunicationType } from '../../../types/client';
@@ -38,7 +38,7 @@ describe('CommunicationRecordList', () => {
       ).toBeInTheDocument();
     });
 
-    it('应该显示加载状态', () => {
+    it('应该显示加载状态（骨架屏）', () => {
       global.fetch = jest.fn(
         () =>
           new Promise(() => {
@@ -48,7 +48,10 @@ describe('CommunicationRecordList', () => {
 
       render(<CommunicationRecordList clientId={mockClientId} />);
 
-      expect(screen.getByText(/加载中/i)).toBeInTheDocument();
+      // 组件加载中显示骨架屏（animate-pulse 的 div），而非文字"加载中"
+      // 验证骨架屏占位块存在
+      const skeletons = document.querySelectorAll('.animate-pulse');
+      expect(skeletons.length).toBeGreaterThan(0);
     });
 
     it('应该在无记录时显示空状态', async () => {
@@ -86,9 +89,11 @@ describe('CommunicationRecordList', () => {
 
       render(<CommunicationRecordList clientId={mockClientId} />);
 
-      const typeSelect = screen.getByRole('combobox');
+      // 第一个 combobox 是类型筛选
+      const typeSelect = screen.getAllByRole('combobox')[0];
       await userEvent.selectOptions(typeSelect, '邮件');
 
+      // select 切换为邮件后，显示该 option
       expect(screen.getByDisplayValue('邮件')).toBeInTheDocument();
     });
 
@@ -106,10 +111,12 @@ describe('CommunicationRecordList', () => {
 
       render(<CommunicationRecordList clientId={mockClientId} />);
 
+      // 第二个 combobox 是重要性筛选
       const importantSelect = screen.getAllByRole('combobox')[1];
       await userEvent.selectOptions(importantSelect, '重要');
 
-      expect(screen.getByDisplayValue('true')).toBeInTheDocument();
+      // option value="true"，所以 select 显示值为 'true'
+      expect(screen.getByDisplayValue('重要')).toBeInTheDocument();
     });
   });
 
@@ -407,12 +414,13 @@ describe('CommunicationRecordList', () => {
     });
 
     it('应该支持翻页', async () => {
+      // 第一次调用返回第1页数据（total=15 触发分页控件），后续调用返回第2页
       global.fetch = jest.fn(() =>
         Promise.resolve({
           ok: true,
           json: () =>
             Promise.resolve({
-              communications: mockCommunications.slice(10, 20),
+              communications: mockCommunications.slice(0, 10),
               total: 15,
             }),
         })
@@ -420,6 +428,7 @@ describe('CommunicationRecordList', () => {
 
       render(<CommunicationRecordList clientId={mockClientId} />);
 
+      // 等待分页控件出现
       await waitFor(() => {
         const nextButton = screen.getByRole('button', { name: '下一页' });
         expect(nextButton).toBeInTheDocument();
@@ -429,10 +438,12 @@ describe('CommunicationRecordList', () => {
       await userEvent.click(nextButton);
 
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith(
-          expect.stringContaining('page=2'),
-          expect.any(Object)
+        // 组件 fetch 列表时不传第二个参数，只检查 URL 是否包含 page=2
+        const calls = (global.fetch as jest.Mock).mock.calls;
+        const hasPage2Call = calls.some(
+          ([url]: [string]) => typeof url === 'string' && url.includes('page=2')
         );
+        expect(hasPage2Call).toBe(true);
       });
     });
   });

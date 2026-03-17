@@ -5,6 +5,17 @@
 import { GET } from '@/app/api/v1/knowledge-graph/neighbors/route';
 import { prisma } from '@/lib/db';
 
+// Mock认证
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(() =>
+    Promise.resolve({
+      userId: 'test-user-1',
+      email: 'test@test.com',
+      role: 'USER',
+    })
+  ),
+}));
+
 // Mock数据库
 jest.mock('@/lib/db', () => ({
   prisma: {
@@ -25,6 +36,9 @@ jest.mock('@/lib/middleware/knowledge-graph-permission', () => ({
   logKnowledgeGraphAction: jest.fn(() => Promise.resolve()),
   KnowledgeGraphAction: {
     VIEW_RELATIONS: 'VIEW_RELATIONS',
+  },
+  KnowledgeGraphResource: {
+    GRAPH: 'GRAPH',
   },
 }));
 
@@ -145,9 +159,9 @@ describe('GET /api/v1/knowledge-graph/neighbors', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.nodeId).toBe('article-1');
-      expect(data.neighbors.degree1).toBeDefined();
-      expect(data.neighbors.degree1.length).toBeGreaterThan(0);
+      expect(data.data.nodeId).toBe('article-1');
+      expect(data.data.neighbors.degree1).toBeDefined();
+      expect(data.data.neighbors.degree1.length).toBeGreaterThan(0);
     });
 
     it('应该返回2度邻居', async () => {
@@ -162,8 +176,8 @@ describe('GET /api/v1/knowledge-graph/neighbors', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.neighbors.degree1).toBeDefined();
-      expect(data.neighbors.degree2).toBeDefined();
+      expect(data.data.neighbors.degree1).toBeDefined();
+      expect(data.data.neighbors.degree2).toBeDefined();
     });
 
     it('应该支持关系类型过滤', async () => {
@@ -178,7 +192,7 @@ describe('GET /api/v1/knowledge-graph/neighbors', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.neighbors.degree1).toBeDefined();
+      expect(data.data.neighbors.degree1).toBeDefined();
     });
 
     it('应该返回邻居节点的关系类型和强度', async () => {
@@ -192,8 +206,8 @@ describe('GET /api/v1/knowledge-graph/neighbors', () => {
       const response = await GET(request as any);
       const data = await response.json();
 
-      if (data.neighbors.degree1.length > 0) {
-        expect(data.neighbors.degree1[0]).toMatchObject({
+      if (data.data.neighbors.degree1.length > 0) {
+        expect(data.data.neighbors.degree1[0]).toMatchObject({
           id: expect.any(String),
           relationType: expect.any(String),
           strength: expect.any(Number),
@@ -216,7 +230,7 @@ describe('GET /api/v1/knowledge-graph/neighbors', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.neighbors.degree1).toEqual([]);
+      expect(data.data.neighbors.degree1).toEqual([]);
     });
   });
 
@@ -239,6 +253,12 @@ describe('GET /api/v1/knowledge-graph/neighbors', () => {
     });
 
     it('应该处理数据库错误', async () => {
+      (prisma.lawArticle.findUnique as jest.Mock).mockResolvedValue({
+        id: 'article-1',
+        lawName: '《民法典》',
+        articleNumber: '第123条',
+        category: 'CIVIL',
+      });
       (prisma.lawArticleRelation.findMany as jest.Mock).mockRejectedValue(
         new Error('数据库连接失败')
       );

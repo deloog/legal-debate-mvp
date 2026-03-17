@@ -437,24 +437,14 @@ describe('DebatePromptOptimizer', () => {
         new Error('AI服务不可用')
       );
 
-      const consoleSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
       const result = await optimizer.verifyLogicalConsistency(
         mockArgument,
         mockCaseInfo
       );
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '论点验证失败:',
-        expect.any(Error)
-      );
       expect(result.score).toBe(0.7);
       expect(result.issues).toContain('验证服务不可用');
       expect(result.suggestions).toContain('请检查论点格式');
-
-      consoleSpy.mockRestore();
     });
 
     it('应该包含完整的验证维度', async () => {

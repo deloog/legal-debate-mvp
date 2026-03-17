@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
 import { prisma } from '@/lib/db/prisma';
 import {
   PaymentMethod,
@@ -30,9 +31,18 @@ import { logger } from '@/lib/logger';
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    // 获取用户ID（优先 JWT Bearer，回退到 NextAuth session）
+    const authHeader = request.headers.get('authorization');
+    const jwtToken = extractTokenFromHeader(authHeader ?? '');
+    const tokenResult = verifyToken(jwtToken ?? '');
+    let userId: string | undefined;
+    if (tokenResult.valid && tokenResult.payload) {
+      userId = tokenResult.payload.userId;
+    } else {
+      const session = await getServerSession(authOptions);
+      userId = session?.user?.id;
+    }
+    if (!userId) {
       return NextResponse.json(
         {
           success: false,
@@ -123,7 +133,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // 创建订单
     const order = await createOrder({
-      userId: session.user.id,
+      userId,
       membershipTierId,
       paymentMethod,
       billingCycle,
@@ -138,61 +148,33 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // 根据支付方式调用相应的支付服务
     try {
+      const isMockMode = process.env.PAYMENT_MOCK_MODE === 'true';
+
       if (paymentMethod === PaymentMethod.WECHAT) {
         // 微信支付
-        const expiredAt = calculateOrderExpireTime(120);
+        let codeUrl: string | undefined;
+        let prepayId: string | undefined;
 
-        const wechatResponse = (await paymentService.createOrder(
-          PaymentMethod.WECHAT,
-          {
-            outTradeNo: order.orderNo,
-            description: order.description,
-            amount: {
-              total: convertYuanToFen(Number(order.amount)),
-              currency: order.currency,
-            },
-            attach: JSON.stringify({ orderId: order.id }),
-            time_expire: Math.floor(expiredAt.getTime() / 1000),
-          }
-        )) as WechatCreateOrderResponse;
-
-        return NextResponse.json({
-          success: true,
-          message: '订单创建成功',
-          data: {
-            orderId: order.id,
-            orderNo: order.orderNo,
-            amount: Number(order.amount),
-            currency: order.currency,
-            status: order.status as OrderStatus,
-            expiredAt: order.expiredAt,
-            paymentMethod: paymentMethod,
-            codeUrl: wechatResponse.code_url,
-            prepayId: wechatResponse.prepay_id,
-          },
-        } as CreateOrderResponse);
-      } else if (paymentMethod === PaymentMethod.ALIPAY) {
-        // 支付宝支付
-        const productCode =
-          (metadata.productCode as AlipayProductCode) ||
-          AlipayProductCode.FAST_INSTANT_TRADE_PAY;
-
-        const alipayResponse = (await paymentService.createOrder(
-          PaymentMethod.ALIPAY,
-          {
-            outTradeNo: order.orderNo,
-            totalAmount: Number(order.amount),
-            subject: order.description,
-            body: order.description,
-            productCode,
-            timeExpire: 120,
-            goodsType: '1',
-          }
-        )) as AlipayCreateOrderResponse;
-
-        // 判断响应是否成功
-        if (alipayResponse.code !== '10000') {
-          throw new Error(alipayResponse.msg || '支付宝创建订单失败');
+        if (isMockMode) {
+          codeUrl = `weixin://wxpay/mock?orderNo=${order.orderNo}`;
+          prepayId = `mock_prepay_${order.orderNo}`;
+        } else {
+          const expiredAt = calculateOrderExpireTime(120);
+          const wechatResponse = (await paymentService.createOrder(
+            PaymentMethod.WECHAT,
+            {
+              outTradeNo: order.orderNo,
+              description: order.description,
+              amount: {
+                total: convertYuanToFen(Number(order.amount)),
+                currency: order.currency,
+              },
+              attach: JSON.stringify({ orderId: order.id }),
+              time_expire: Math.floor(expiredAt.getTime() / 1000),
+            }
+          )) as WechatCreateOrderResponse;
+          codeUrl = wechatResponse.code_url;
+          prepayId = wechatResponse.prepay_id;
         }
 
         return NextResponse.json({
@@ -206,8 +188,56 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             status: order.status as OrderStatus,
             expiredAt: order.expiredAt,
             paymentMethod: paymentMethod,
-            qrCode: alipayResponse.qrCode,
-            tradeNo: alipayResponse.tradeNo,
+            codeUrl,
+            prepayId,
+          },
+        } as CreateOrderResponse);
+      } else if (paymentMethod === PaymentMethod.ALIPAY) {
+        // 支付宝支付
+        let qrCode: string | undefined;
+        let tradeNo: string | undefined;
+
+        if (isMockMode) {
+          qrCode = `https://qr.alipay.com/mock?orderNo=${order.orderNo}`;
+          tradeNo = `mock_trade_${order.orderNo}`;
+        } else {
+          const productCode =
+            (metadata.productCode as AlipayProductCode) ||
+            AlipayProductCode.FAST_INSTANT_TRADE_PAY;
+
+          const alipayResponse = (await paymentService.createOrder(
+            PaymentMethod.ALIPAY,
+            {
+              outTradeNo: order.orderNo,
+              totalAmount: Number(order.amount),
+              subject: order.description,
+              body: order.description,
+              productCode,
+              timeExpire: 120,
+              goodsType: '1',
+            }
+          )) as AlipayCreateOrderResponse;
+
+          if (alipayResponse.code !== '10000') {
+            throw new Error(alipayResponse.msg || '支付宝创建订单失败');
+          }
+          qrCode = alipayResponse.qrCode;
+          tradeNo = alipayResponse.tradeNo;
+        }
+
+        return NextResponse.json({
+          success: true,
+          message: '订单创建成功',
+          data: {
+            orderId: order.id,
+            orderNo: order.orderNo,
+            amount: Number(order.amount),
+            currency: order.currency,
+            status: order.status as OrderStatus,
+            expiredAt: order.expiredAt,
+            paymentMethod: paymentMethod,
+            qrCode,
+            tradeNo,
           },
         } as CreateOrderResponse);
       } else {

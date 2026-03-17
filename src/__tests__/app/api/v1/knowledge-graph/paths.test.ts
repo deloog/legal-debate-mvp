@@ -5,10 +5,33 @@
 import { GET } from '@/app/api/v1/knowledge-graph/paths/route';
 import { GraphAlgorithms } from '@/lib/knowledge-graph/graph-algorithms';
 
+// Mock认证
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(() =>
+    Promise.resolve({
+      userId: 'test-user-1',
+      email: 'test@test.com',
+      role: 'USER',
+    })
+  ),
+}));
+
 // Mock图算法
 jest.mock('@/lib/knowledge-graph/graph-algorithms', () => ({
   GraphAlgorithms: {
     shortestPath: jest.fn(),
+  },
+}));
+
+// Mock GraphBuilder
+jest.mock('@/lib/law-article/graph-builder', () => ({
+  GraphBuilder: {
+    buildFullGraph: jest.fn(() =>
+      Promise.resolve({
+        nodes: [{ id: 'article-1' }, { id: 'article-2' }],
+        links: [],
+      })
+    ),
   },
 }));
 
@@ -21,11 +44,20 @@ jest.mock('@/lib/middleware/knowledge-graph-permission', () => ({
   KnowledgeGraphAction: {
     VIEW_RELATIONS: 'VIEW_RELATIONS',
   },
+  KnowledgeGraphResource: {
+    GRAPH: 'GRAPH',
+  },
 }));
 
 describe('GET /api/v1/knowledge-graph/paths', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const {
+      checkKnowledgeGraphPermission,
+    } = require('@/lib/middleware/knowledge-graph-permission');
+    (checkKnowledgeGraphPermission as jest.Mock).mockResolvedValue({
+      hasPermission: true,
+    });
   });
 
   describe('参数验证', () => {

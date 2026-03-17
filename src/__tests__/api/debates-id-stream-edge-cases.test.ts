@@ -8,6 +8,15 @@ import {
 } from '@jest/globals';
 /// <reference path="./test-types.d.ts" />
 
+// Mock next-auth
+jest.mock('next-auth', () => ({
+  getServerSession: jest.fn(),
+}));
+
+jest.mock('@/lib/auth/auth-options', () => ({
+  authOptions: {},
+}));
+
 // Mock Prisma
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
@@ -17,8 +26,10 @@ jest.mock('@/lib/db/prisma', () => ({
     },
     debateRound: {
       findMany: jest.fn(),
+      findFirst: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+      count: jest.fn(),
     },
     argument: {
       findMany: jest.fn(),
@@ -26,6 +37,31 @@ jest.mock('@/lib/db/prisma', () => ({
     },
     $transaction: jest.fn(),
   },
+}));
+
+// Mock law search
+jest.mock('@/lib/debate/law-search', () => ({
+  searchAllLawArticles: jest.fn().mockResolvedValue({ articles: [] }),
+}));
+
+// Mock scoring
+jest.mock('@/lib/debate/scoring', () => ({
+  computeArgumentScores: jest.fn().mockReturnValue({
+    logicScore: 0.8,
+    legalScore: 0.8,
+    overallScore: 0.8,
+  }),
+}));
+
+// Mock graph enhanced search
+jest.mock('@/lib/debate/graph-enhanced-law-search', () => ({
+  graphEnhancedSearch: jest.fn().mockResolvedValue({
+    graphAnalysisCompleted: false,
+    supportingArticles: [],
+    opposingArticles: [],
+    sourceAttribution: 'keyword',
+  }),
+  formatGraphAnalysisForPrompt: jest.fn().mockReturnValue(''),
 }));
 
 // Mock AI service
@@ -45,6 +81,15 @@ describe('Debates Stream API - Edge Cases', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedPrisma = prisma as any;
+
+    // Setup getServerSession mock
+    const { getServerSession } = require('next-auth');
+    (getServerSession as jest.Mock).mockResolvedValue({
+      user: { id: 'user-123', email: 'test@example.com' },
+    });
+
+    // Setup debateRound.count mock
+    mockedPrisma.debateRound.count.mockResolvedValue(0);
 
     // 创建模拟的NextRequest对象
     mockReq = {
@@ -92,6 +137,7 @@ describe('Debates Stream API - Edge Cases', () => {
       mockedPrisma.debate.findUnique.mockResolvedValue({
         id: '123e4567-e89b-12d3-a456-426614174000',
         title: '测试辩论',
+        userId: 'user-123',
         status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 1 },
@@ -151,6 +197,7 @@ describe('Debates Stream API - Edge Cases', () => {
       mockedPrisma.debate.findUnique.mockResolvedValue({
         id: '123e4567-e89b-12d3-a456-426614174000',
         title: '测试辩论',
+        userId: 'user-123',
         status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 1 },
@@ -195,6 +242,7 @@ describe('Debates Stream API - Edge Cases', () => {
       mockedPrisma.debate.findUnique.mockResolvedValue({
         id: '123e4567-e89b-12d3-a456-426614174000',
         title: '测试辩论',
+        userId: 'user-123',
         status: 'active',
         currentRound: 3, // 已经达到最大轮次
         debateConfig: { maxRounds: 3 },
@@ -216,6 +264,7 @@ describe('Debates Stream API - Edge Cases', () => {
       mockedPrisma.debate.findUnique.mockResolvedValue({
         id: '123e4567-e89b-12d3-a456-426614174000',
         title: '测试辩论',
+        userId: 'user-123',
         status: 'active',
         currentRound: 0,
         debateConfig: {}, // 没有配置最大轮次
@@ -237,6 +286,7 @@ describe('Debates Stream API - Edge Cases', () => {
       mockedPrisma.debate.findUnique.mockResolvedValue({
         id: '123e4567-e89b-12d3-a456-426614174000',
         title: '测试辩论',
+        userId: 'user-123',
         status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 0 }, // 最大轮次为0
@@ -263,6 +313,7 @@ describe('Debates Stream API - Edge Cases', () => {
       mockedPrisma.debate.findUnique.mockResolvedValue({
         id: '123e4567-e89b-12d3-a456-426614174000',
         title: '测试辩论',
+        userId: 'user-123',
         status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 2 },
@@ -292,6 +343,7 @@ describe('Debates Stream API - Edge Cases', () => {
       mockedPrisma.debate.findUnique.mockResolvedValue({
         id: '123e4567-e89b-12d3-a456-426614174000',
         title: '测试辩论',
+        userId: 'user-123',
         status: 'active',
         case: { title: '测试案件', description: '案件描述' },
       });
@@ -315,6 +367,7 @@ describe('Debates Stream API - Edge Cases', () => {
       mockedPrisma.debate.findUnique.mockResolvedValue({
         id: '123e4567-e89b-12d3-a456-426614174000',
         title: '测试辩论',
+        userId: 'user-123',
         status: 'active',
         currentRound: 0,
         debateConfig: { maxRounds: 1 },

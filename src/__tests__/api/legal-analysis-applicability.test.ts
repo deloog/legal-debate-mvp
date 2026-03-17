@@ -34,6 +34,8 @@ jest.mock('@/lib/auth/jwt', () => ({
   }),
 }));
 
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
+
 // Mock prisma
 const mockLegalReferenceUpsert = jest.fn();
 const mockCaseFindUnique = jest.fn();
@@ -154,12 +156,24 @@ const mockAnalyzeResult = {
   },
 };
 
-const authHeader = { Authorization: 'Bearer valid-token' };
+const authHeader = { authorization: 'Bearer valid-token' };
 
 describe('法条适用性分析API', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockLegalReferenceUpsert.mockResolvedValue({ id: 'ref-1' });
+
+    // Re-setup JWT mocks after clearAllMocks (clearAllMocks also clears implementations)
+    (extractTokenFromHeader as jest.Mock).mockImplementation(
+      (header: string) =>
+        header?.startsWith('Bearer ') ? header.slice(7) : null
+    );
+    (verifyToken as jest.Mock).mockImplementation((token: string) => {
+      if (token === 'valid-token') {
+        return { valid: true, payload: { userId: 'user-1' } };
+      }
+      return { valid: false };
+    });
   });
 
   describe('POST /api/v1/legal-analysis/applicability', () => {

@@ -125,8 +125,10 @@ describe('GET /api/users/search', () => {
           id: true,
           name: true,
           email: true,
+          username: true,
           avatar: true,
           role: true,
+          status: true,
         },
         orderBy: { name: 'asc', email: 'asc' },
         take: 20,
@@ -154,7 +156,6 @@ describe('GET /api/users/search', () => {
           id: 'user-1',
           name: '张三',
           email: 'zhangsan@example.com',
-          avatar: null,
           role: 'LAWYER',
         },
       ];
@@ -183,7 +184,6 @@ describe('GET /api/users/search', () => {
           id: 'user-2',
           name: '李四',
           email: 'lisi@example.com',
-          avatar: null,
           role: 'LAWYER',
         },
       ];
@@ -211,7 +211,6 @@ describe('GET /api/users/search', () => {
           id: 'user-3',
           name: '王五',
           email: 'wangwu@example.com',
-          avatar: null,
           role: 'USER',
         },
       ];
@@ -239,7 +238,6 @@ describe('GET /api/users/search', () => {
           id: 'user-1',
           name: 'Zhang San',
           email: 'zhangsan@example.com',
-          avatar: null,
           role: 'LAWYER',
         },
       ];
@@ -256,8 +254,10 @@ describe('GET /api/users/search', () => {
           id: true,
           name: true,
           email: true,
+          username: true,
           avatar: true,
           role: true,
+          status: true,
         },
         orderBy: { name: 'asc', email: 'asc' },
         take: 20,
@@ -347,8 +347,10 @@ describe('GET /api/users/search', () => {
         id: true,
         name: true,
         email: true,
+        username: true,
         avatar: true,
         role: true,
+        status: true,
       });
     });
   });
@@ -387,7 +389,6 @@ describe('GET /api/users/search', () => {
           id: 'user-1',
           name: '张三',
           email: 'zhangsan@example.com',
-          avatar: null,
           role: 'LAWYER',
         },
       ];

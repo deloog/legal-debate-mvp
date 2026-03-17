@@ -8,12 +8,14 @@ import { jest } from '@jest/globals';
 const mockFindMany = jest.fn().mockImplementation(() => []);
 const mockCreate = jest.fn().mockImplementation(() => ({}));
 const mockAggregate = jest.fn().mockImplementation(() => []);
+const mockCount = jest.fn().mockImplementation(() => 0);
 
 const mockPrisma = {
   aIInteraction: {
     findMany: mockFindMany,
     create: mockCreate,
     aggregate: mockAggregate,
+    count: mockCount,
   },
 };
 
@@ -156,18 +158,7 @@ describe('AI配额管理系统', () => {
     });
 
     it('应该拒绝每日配额已用完的用户', async () => {
-      mockFindMany.mockResolvedValue([
-        { id: '1' },
-        { id: '2' },
-        { id: '3' },
-        { id: '4' },
-        { id: '5' },
-        { id: '6' },
-        { id: '7' },
-        { id: '8' },
-        { id: '9' },
-        { id: '10' },
-      ] as unknown as never);
+      mockCount.mockResolvedValue(10 as unknown as never);
 
       const result = await checkAIQuota('user-5', 'FREE');
       expect(result).toEqual({
@@ -180,14 +171,9 @@ describe('AI配额管理系统', () => {
     });
 
     it('应该拒绝每月配额已用完的用户', async () => {
-      // 创建1000条模拟记录表示本月配额已用完
-      const monthlyRecords = Array.from({ length: 1000 }, (_, i) => ({
-        id: `month-${i}`,
-      }));
-
-      mockFindMany
-        .mockResolvedValueOnce([] as unknown as never) // 今日使用量为0
-        .mockResolvedValueOnce(monthlyRecords as unknown as never); // 模拟本月已用完
+      mockCount
+        .mockResolvedValueOnce(0 as unknown as never) // 今日使用量为0
+        .mockResolvedValueOnce(1000 as unknown as never); // 模拟本月已用完
 
       const result = await checkAIQuota('user-6', 'BASIC', 0);
       expect(result).toEqual({
@@ -202,11 +188,7 @@ describe('AI配额管理系统', () => {
     });
 
     it('应该正确计算剩余配额', async () => {
-      mockFindMany.mockResolvedValue([
-        { id: '1' },
-        { id: '2' },
-        { id: '3' },
-      ] as unknown as never);
+      mockCount.mockResolvedValue(3 as unknown as never);
 
       const result = await checkAIQuota('user-7', 'BASIC');
       expect(result.allowed).toBe(true);
@@ -215,7 +197,7 @@ describe('AI配额管理系统', () => {
     });
 
     it('应该在数据库错误时返回不允许', async () => {
-      mockFindMany.mockRejectedValue(
+      mockCount.mockRejectedValue(
         new Error('Database error') as unknown as never
       );
 
@@ -309,11 +291,7 @@ describe('AI配额管理系统', () => {
     });
 
     it('应该正确计算用户配额使用情况', async () => {
-      mockFindMany.mockResolvedValue([
-        { id: '1' },
-        { id: '2' },
-        { id: '3' },
-      ] as unknown as never);
+      mockCount.mockResolvedValue(3 as unknown as never);
 
       const result = await getUserQuotaUsage('user-2', 'FREE');
       expect(result.daily).toEqual({
@@ -324,7 +302,7 @@ describe('AI配额管理系统', () => {
     });
 
     it('应该在数据库错误时抛出异常', async () => {
-      mockFindMany.mockRejectedValue(
+      mockCount.mockRejectedValue(
         new Error('Database error') as unknown as never
       );
 

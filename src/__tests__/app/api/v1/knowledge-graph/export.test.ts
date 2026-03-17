@@ -5,6 +5,17 @@
 import { GET } from '@/app/api/v1/knowledge-graph/export/route';
 import { prisma } from '@/lib/db';
 
+// Mock认证
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(() =>
+    Promise.resolve({
+      userId: 'test-user-1',
+      email: 'test@test.com',
+      role: 'USER',
+    })
+  ),
+}));
+
 // Mock数据库
 jest.mock('@/lib/db', () => ({
   prisma: {
@@ -25,6 +36,9 @@ jest.mock('@/lib/middleware/knowledge-graph-permission', () => ({
   logKnowledgeGraphAction: jest.fn(() => Promise.resolve()),
   KnowledgeGraphAction: {
     EXPORT_DATA: 'EXPORT_DATA',
+  },
+  KnowledgeGraphResource: {
+    GRAPH: 'GRAPH',
   },
 }));
 

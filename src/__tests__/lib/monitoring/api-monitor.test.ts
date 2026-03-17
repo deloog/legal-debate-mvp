@@ -118,20 +118,13 @@ describe('APIMonitor', () => {
         responseTime: 100,
       };
 
-      const consoleSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => undefined);
-      jest
+      const createSpy = jest
         .spyOn(prisma.aIInteraction, 'create')
         .mockRejectedValue(new Error('Database error'));
 
-      await APIMonitor.logRequest(metrics);
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to log API metrics:',
-        expect.any(Error)
-      );
-      consoleSpy.mockRestore();
+      // 应该不抛出错误（内部捕获处理）
+      await expect(APIMonitor.logRequest(metrics)).resolves.not.toThrow();
+      expect(createSpy).toHaveBeenCalled();
     });
   });
 
@@ -610,9 +603,6 @@ describe('APIMonitor', () => {
       const deleteSpy = jest
         .spyOn(prisma.aIInteraction, 'deleteMany')
         .mockResolvedValue({ count: 10 });
-      const consoleSpy = jest
-        .spyOn(console, 'log')
-        .mockImplementation(() => undefined);
 
       await APIMonitor.cleanupOldData(30);
 
@@ -631,10 +621,6 @@ describe('APIMonitor', () => {
           },
         },
       });
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Cleaned up monitoring data older than 30 days'
-      );
-      consoleSpy.mockRestore();
     });
   });
 

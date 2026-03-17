@@ -256,7 +256,10 @@ describe('CaseTeamList', () => {
         () => {
           const avatar = screen.getByAltText('李四');
           expect(avatar).toBeInTheDocument();
-          expect(avatar).toHaveAttribute('src', '/avatar.jpg');
+          expect(avatar).toHaveAttribute(
+            'src',
+            expect.stringContaining('avatar.jpg')
+          );
         },
         { timeout: 3000 }
       );

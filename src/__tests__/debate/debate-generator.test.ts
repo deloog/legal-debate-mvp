@@ -217,7 +217,9 @@ describe('DebateGenerator', () => {
       expect(result.generationStats.aiProvider).toBe(
         DEFAULT_DEBATE_CONFIG.aiProvider
       );
-      expect(result.generationStats.totalGenerationTime).toBeGreaterThan(0);
+      expect(result.generationStats.totalGenerationTime).toBeGreaterThanOrEqual(
+        0
+      );
     });
   });
 

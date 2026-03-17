@@ -1,3 +1,4 @@
+import { logger } from '../../../lib/logger';
 import {
   connectionManager,
   ConnectionManager,
@@ -20,6 +21,16 @@ jest.mock('../../../lib/db/prisma', () => ({
     $disconnect: jest.fn(),
   },
   getConnectionInfo: jest.fn(),
+}));
+
+// Mock logger to intercept log calls
+jest.mock('../../../lib/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
 }));
 
 const mockPrisma = prisma as any;
@@ -81,14 +92,10 @@ describe('Connection Pool Tests', () => {
       });
       mockPrisma.$queryRaw.mockResolvedValue([{ health_check: 1 }]);
 
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-
       const isHealthy = await checkPoolHealth();
 
       expect(isHealthy).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith('连接池使用率过高:', 0.85);
-
-      consoleSpy.mockRestore();
+      expect(logger.warn).toHaveBeenCalledWith('连接池使用率过高:', 0.85);
     });
 
     it('健康检查失败时应该返回false', async () => {
@@ -102,7 +109,6 @@ describe('Connection Pool Tests', () => {
 
   describe('warmupConnectionPool', () => {
     it('应该成功预热连接池', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       mockPrisma.$queryRaw.mockResolvedValue([{ warmup_query: 1 }]);
 
       await warmupConnectionPool();
@@ -110,39 +116,31 @@ describe('Connection Pool Tests', () => {
       expect(mockPrisma.$queryRaw).toHaveBeenCalledTimes(
         connectionPoolConfig.minConnections
       );
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('连接池预热完成')
       );
-
-      consoleSpy.mockRestore();
     });
 
     it('预热失败时应该记录错误', async () => {
       mockPrisma.$queryRaw.mockRejectedValue(new Error('Warmup failed'));
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
       await warmupConnectionPool();
 
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         '连接池预热失败:',
         expect.any(Error)
       );
-
-      consoleSpy.mockRestore();
     });
   });
 
   describe('gracefulShutdown', () => {
     it('应该成功优雅关闭连接池', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       mockPrisma.$disconnect.mockResolvedValue(undefined);
 
       await gracefulShutdown();
 
       expect(mockPrisma.$disconnect).toHaveBeenCalled();
-      expect(consoleSpy).toHaveBeenCalledWith('数据库连接池已优雅关闭');
-
-      consoleSpy.mockRestore();
+      expect(logger.info).toHaveBeenCalledWith('数据库连接池已优雅关闭');
     });
 
     it('关闭失败时应该抛出错误', async () => {
@@ -176,39 +174,29 @@ describe('Connection Pool Tests', () => {
     });
 
     it('应该启动监控器', () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
       monitor.start();
 
       expect(setIntervalSpy).toHaveBeenCalled();
-      expect(consoleSpy).toHaveBeenCalledWith('启动连接池监控器');
-
-      consoleSpy.mockRestore();
+      expect(logger.info).toHaveBeenCalledWith('启动连接池监控器');
     });
 
     it('不应该重复启动监控器', () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       const newMonitor = new ConnectionPoolMonitor();
 
       newMonitor.start();
       newMonitor.start();
 
       expect(setIntervalSpy).toHaveBeenCalledTimes(1);
-
-      consoleSpy.mockRestore();
     });
 
     it('应该停止监控器', () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       const newMonitor = new ConnectionPoolMonitor();
 
       newMonitor.start();
       newMonitor.stop();
 
       expect(clearIntervalSpy).toHaveBeenCalled();
-      expect(consoleSpy).toHaveBeenCalledWith('连接池监控器已停止');
-
-      consoleSpy.mockRestore();
+      expect(logger.info).toHaveBeenCalledWith('连接池监控器已停止');
     });
   });
 

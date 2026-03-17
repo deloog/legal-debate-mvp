@@ -9,8 +9,19 @@
  * 5. 统计信息
  */
 
+// Mock logger
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    warn: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
 import { AICostMonitor } from '@/lib/law-article/relation-discovery/ai-cost-monitor';
 import { AI_DETECTOR_CONFIG } from '@/lib/law-article/relation-discovery/ai-detector-config';
+import { logger } from '@/lib/logger';
 
 describe('AICostMonitor', () => {
   beforeEach(() => {
@@ -45,38 +56,28 @@ describe('AICostMonitor', () => {
         await AICostMonitor.trackCall(0.01);
       }
 
-      // Mock console.warn
-      const consoleWarn = jest
-        .spyOn(console, 'warn')
-        .mockImplementation(() => {});
+      // 重置 logger mock 以便只捕获此次调用
+      (logger.warn as jest.Mock).mockClear();
 
       // 尝试再次调用
       const result = await AICostMonitor.trackCall(0.01);
 
       expect(result).toBe(false);
-      expect(consoleWarn).toHaveBeenCalledWith('达到每日API调用限制');
-
-      // 清理
-      consoleWarn.mockRestore();
+      expect(logger.warn).toHaveBeenCalled();
     });
 
     it('应该在达到成本限制时拒绝调用', async () => {
       // 模拟接近成本限制
       await AICostMonitor.trackCall(AI_DETECTOR_CONFIG.maxCostPerDay - 1);
 
-      // Mock console.warn
-      const consoleWarn = jest
-        .spyOn(console, 'warn')
-        .mockImplementation(() => {});
+      // 重置 logger mock 以便只捕获此次调用
+      (logger.warn as jest.Mock).mockClear();
 
       // 尝试添加超过限制的成本
       const result = await AICostMonitor.trackCall(2);
 
       expect(result).toBe(false);
-      expect(consoleWarn).toHaveBeenCalledWith('达到每日成本预算');
-
-      // 清理
-      consoleWarn.mockRestore();
+      expect(logger.warn).toHaveBeenCalled();
     });
 
     it('应该在24小时后自动重置', async () => {

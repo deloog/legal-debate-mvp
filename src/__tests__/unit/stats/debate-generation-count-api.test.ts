@@ -11,6 +11,10 @@ jest.mock('@/lib/db/prisma', () => ({
   prisma: {
     debate: {
       count: jest.fn(),
+      findMany: jest.fn(),
+    },
+    debateRound: {
+      findMany: jest.fn(),
     },
     argument: {
       count: jest.fn(),
@@ -35,11 +39,16 @@ describe('辩论生成次数统计API', () => {
   const mockGetAuthUser = getAuthUser as jest.Mock;
   const mockValidatePermissions = validatePermissions as jest.Mock;
   const mockDebateCount = prisma.debate.count as jest.Mock;
+  const mockDebateFindMany = prisma.debate.findMany as jest.Mock;
+  const mockDebateRoundFindMany = prisma.debateRound.findMany as jest.Mock;
   const mockArgumentCount = prisma.argument.count as jest.Mock;
   const mockQueryRaw = prisma.$queryRaw as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // 默认 findMany 返回空数组
+    mockDebateFindMany.mockResolvedValue([]);
+    mockDebateRoundFindMany.mockResolvedValue([]);
   });
 
   describe('GET /api/stats/debates/generation-count', () => {
@@ -172,6 +181,13 @@ describe('辩论生成次数统计API', () => {
 
       mockDebateCount.mockResolvedValueOnce(100).mockResolvedValueOnce(10);
       mockArgumentCount.mockResolvedValue(200);
+
+      // currentPeriodDebates = debatesInPeriod.length，需要返回30条记录
+      const mockDebates = Array.from({ length: 30 }, (_, i) => ({
+        id: `debate-${i}`,
+        createdAt: new Date('2024-01-01'),
+      }));
+      mockDebateFindMany.mockResolvedValueOnce(mockDebates);
 
       mockQueryRaw.mockResolvedValueOnce([
         { date: '2024-01-01', count: BigInt(30) },

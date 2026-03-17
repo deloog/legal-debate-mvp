@@ -67,6 +67,15 @@ jest.mock('next/dynamic', () => () => {
   method: string;
   headers: Map<string, string>;
   body?: BodyInit;
+
+  // Polyfill nextUrl to support routes that use request.nextUrl.searchParams
+  get nextUrl(): URL {
+    return new URL(this.url);
+  }
+  // Polyfill cookies to prevent TypeError in routes that call request.cookies.get(...)
+  get cookies() {
+    return { get: (_name: string) => undefined };
+  }
   signal?: AbortSignal;
   credentials: RequestCredentials;
   cache: RequestCache;
@@ -109,6 +118,19 @@ jest.mock('next/dynamic', () => () => {
     return new TextEncoder().encode(text).buffer as ArrayBuffer;
   }
 
+  async formData(): Promise<FormData> {
+    // If body is already a FormData instance, return it directly
+    if (this.body instanceof FormData) {
+      return this.body;
+    }
+    const formData = new FormData();
+    if (this.body && typeof this.body === 'string') {
+      const params = new URLSearchParams(this.body);
+      params.forEach((value, key) => formData.append(key, value));
+    }
+    return formData;
+  }
+
   clone(): Request {
     return new Request(this.url, {
       method: this.method,
@@ -126,6 +148,17 @@ jest.mock('next/dynamic', () => () => {
     });
   }
 };
+
+// Polyfill Blob/File.arrayBuffer() for JSDOM environment
+if (typeof Blob !== 'undefined' && !Blob.prototype.arrayBuffer) {
+  Blob.prototype.arrayBuffer = function (): Promise<ArrayBuffer> {
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as ArrayBuffer);
+      reader.readAsArrayBuffer(this);
+    });
+  };
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).Response = class Response {
@@ -697,7 +730,7 @@ jest.mock('@/lib/db/prisma', () => {
     task: {},
     // 额外的模型
     caseExample: {},
-    aiInteraction: {},
+    aIInteraction: {},
     discussion: {},
     discussionComment: {},
     notification: {},
@@ -714,6 +747,13 @@ jest.mock('@/lib/db/prisma', () => {
     approvalTemplate: {},
     contractApproval: {},
     approvalStep: {},
+    caseDiscussion: {},
+    caseTeamMember: {},
+    userMembership: {},
+    membershipTier: {},
+    usageRecord: {},
+    verificationCode: {},
+    consultation: {},
     $transaction: jest.fn(),
     $connect: jest.fn(),
     $disconnect: jest.fn(),
@@ -750,7 +790,7 @@ jest.mock('@/lib/db/prisma', () => {
     'courtSchedule',
     'task',
     'caseExample',
-    'aiInteraction',
+    'aIInteraction',
     'discussion',
     'discussionComment',
     'notification',
@@ -767,6 +807,13 @@ jest.mock('@/lib/db/prisma', () => {
     'approvalTemplate',
     'contractApproval',
     'approvalStep',
+    'caseDiscussion',
+    'caseTeamMember',
+    'userMembership',
+    'membershipTier',
+    'usageRecord',
+    'verificationCode',
+    'consultation',
   ];
 
   models.forEach(model => {
@@ -776,6 +823,7 @@ jest.mock('@/lib/db/prisma', () => {
       'findUnique',
       'findFirst',
       'update',
+      'updateMany',
       'delete',
       'deleteMany',
       'findMany',

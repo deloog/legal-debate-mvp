@@ -5,20 +5,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import SignaturePad from '@/components/contract/SignaturePad';
 
-interface SignContractPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function SignContractPage({ params }: SignContractPageProps) {
+export default function SignContractPage() {
   const router = useRouter();
+  const params = useParams();
+  const contractId = params.id as string;
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [signSuccess, setSignSuccess] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [contract, setContract] = useState<any>(null);
   const [signatureRole, setSignatureRole] = useState<'client' | 'lawyer'>(
@@ -30,11 +27,11 @@ export default function SignContractPage({ params }: SignContractPageProps) {
   useEffect(() => {
     loadContract();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.id]);
+  }, [contractId]);
 
   async function loadContract() {
     try {
-      const response = await fetch(`/api/contracts/${params.id}`);
+      const response = await fetch(`/api/contracts/${contractId}`);
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: 加载合同失败`);
@@ -61,7 +58,7 @@ export default function SignContractPage({ params }: SignContractPageProps) {
     setError(null);
 
     try {
-      const response = await fetch(`/api/contracts/${params.id}/sign`, {
+      const response = await fetch(`/api/contracts/${contractId}/sign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -77,7 +74,7 @@ export default function SignContractPage({ params }: SignContractPageProps) {
       const result = await response.json();
 
       if (result.success) {
-        alert('签名成功！');
+        setSignSuccess(true);
         setShowSignaturePad(false);
         loadContract(); // 重新加载合同信息
       } else {
@@ -130,6 +127,13 @@ export default function SignContractPage({ params }: SignContractPageProps) {
             合同编号：{contract.contractNumber}
           </p>
         </div>
+
+        {/* 签名成功提示 */}
+        {signSuccess && (
+          <div className='mb-6 rounded-lg bg-green-50 p-4 text-sm text-green-800'>
+            签名成功
+          </div>
+        )}
 
         {/* 错误提示 */}
         {error && (
@@ -330,9 +334,7 @@ export default function SignContractPage({ params }: SignContractPageProps) {
                     d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
                   />
                 </svg>
-                <p className='font-medium text-green-800'>
-                  合同已完成双方签署！
-                </p>
+                <p className='font-medium text-green-800'>双方签署完成</p>
               </div>
             </div>
           )}
@@ -341,7 +343,7 @@ export default function SignContractPage({ params }: SignContractPageProps) {
         {/* 操作按钮 */}
         <div className='flex justify-end gap-3'>
           <button
-            onClick={() => router.push(`/contracts/${params.id}`)}
+            onClick={() => router.push(`/contracts/${contractId}`)}
             className='rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
           >
             返回详情
@@ -349,7 +351,7 @@ export default function SignContractPage({ params }: SignContractPageProps) {
           {isFullySigned && (
             <button
               onClick={() =>
-                window.open(`/api/contracts/${params.id}/pdf`, '_blank')
+                window.open(`/api/contracts/${contractId}/pdf`, '_blank')
               }
               className='rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700'
             >

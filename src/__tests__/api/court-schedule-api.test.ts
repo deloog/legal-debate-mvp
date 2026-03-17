@@ -11,74 +11,96 @@ import {
 import { GET as checkConflicts } from '@/app/api/court-schedules/conflicts/route';
 import { GET, POST } from '@/app/api/court-schedules/route';
 import { prisma } from '@/lib/db/prisma';
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 
 jest.mock('@/lib/middleware/auth', () => ({
   getAuthUser: jest.fn(),
 }));
 
+jest.mock('@/lib/db/prisma', () => ({
+  prisma: {
+    user: {
+      create: jest.fn(),
+      delete: jest.fn(),
+    },
+    case: {
+      create: jest.fn(),
+      delete: jest.fn(),
+      findUnique: jest.fn(),
+    },
+    courtSchedule: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      findFirst: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteMany: jest.fn(),
+      count: jest.fn(),
+    },
+    $disconnect: jest.fn(),
+  },
+}));
+
 import { getAuthUser } from '@/lib/middleware/auth';
 import { createMockRequest } from './test-utils';
 
+const TEST_USER_ID = 'test-user-id';
+const TEST_CASE_ID = 'test-case-id';
+
+const mockCaseRecord = {
+  id: TEST_CASE_ID,
+  userId: TEST_USER_ID,
+  title: 'API测试案件',
+  description: 'API测试案件描述',
+  type: 'CIVIL',
+  status: 'ACTIVE',
+  deletedAt: null,
+};
+
+function makeSchedule(overrides: Record<string, unknown> = {}) {
+  return {
+    id: `schedule-${Date.now()}-${Math.random()}`,
+    caseId: TEST_CASE_ID,
+    title: '测试日程',
+    type: 'TRIAL',
+    startTime: new Date('2024-01-15T10:00:00.000Z'),
+    endTime: new Date('2024-01-15T11:00:00.000Z'),
+    status: 'SCHEDULED',
+    location: null,
+    judge: null,
+    notes: null,
+    metadata: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    case: { id: TEST_CASE_ID, title: 'API测试案件', type: 'CIVIL' },
+    ...overrides,
+  };
+}
+
 describe('Court Schedule API', () => {
-  let testUserId: string;
-  let testCaseId: string;
-
-  beforeAll(async () => {
-    // 创建测试用户
-    const user = await prisma.user.create({
-      data: {
-        email: `test-api-schedule-${Date.now()}@test.com`,
-        name: 'Test API User',
-        role: 'LAWYER',
-        status: 'ACTIVE',
-      },
-    });
-    testUserId = user.id;
-
-    // 创建测试案件
-    const caseRecord = await prisma.case.create({
-      data: {
-        userId: testUserId,
-        title: 'API测试案件',
-        description: 'API测试案件描述',
-        type: 'CIVIL',
-        status: 'ACTIVE',
-      },
-    });
-    testCaseId = caseRecord.id;
-  });
-
-  afterAll(async () => {
-    // 清理测试数据
-    await prisma.courtSchedule.deleteMany({
-      where: { caseId: testCaseId },
-    });
-    await prisma.case.delete({ where: { id: testCaseId } });
-    await prisma.user.delete({ where: { id: testUserId } });
-    await prisma.$disconnect();
-  });
-
-  beforeEach(async () => {
-    // 清理之前创建的日程
+  beforeEach(() => {
     jest.clearAllMocks();
-    await prisma.courtSchedule.deleteMany({
-      where: { caseId: testCaseId },
-    });
 
     // 设置认证用户
     (getAuthUser as jest.Mock).mockResolvedValue({
-      userId: testUserId,
+      userId: TEST_USER_ID,
       email: 'test@example.com',
       role: 'LAWYER',
     });
+
+    // 默认 prisma mock implementations
+    (prisma.courtSchedule.deleteMany as jest.Mock).mockResolvedValue({
+      count: 0,
+    });
+    (prisma.courtSchedule.count as jest.Mock).mockResolvedValue(0);
+    (prisma.courtSchedule.findMany as jest.Mock).mockResolvedValue([]);
+    (prisma.courtSchedule.findFirst as jest.Mock).mockResolvedValue(null);
+    (prisma.case.findUnique as jest.Mock).mockResolvedValue(mockCaseRecord);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   function createAuthRequest(url: string, method = 'GET', body?: unknown) {
@@ -90,16 +112,11 @@ describe('Court Schedule API', () => {
 
   describe('GET /api/court-schedules', () => {
     it('应该能够获取日程列表', async () => {
-      await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '测试日程',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T10:00:00.000Z'),
-          endTime: new Date('2024-01-15T11:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
-      });
+      const schedule = makeSchedule({ title: '测试日程' });
+      (prisma.courtSchedule.findMany as jest.Mock).mockResolvedValue([
+        schedule,
+      ]);
+      (prisma.courtSchedule.count as jest.Mock).mockResolvedValue(1);
 
       const request = createAuthRequest(
         'http://localhost:3000/api/court-schedules?page=1&limit=10'
@@ -115,27 +132,9 @@ describe('Court Schedule API', () => {
     });
 
     it('应该支持按类型筛选', async () => {
-      await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '庭审',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T10:00:00.000Z'),
-          endTime: new Date('2024-01-15T11:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
-      });
-
-      await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '调解',
-          type: 'MEDIATION',
-          startTime: new Date('2024-01-15T14:00:00.000Z'),
-          endTime: new Date('2024-01-15T15:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
-      });
+      const trial = makeSchedule({ title: '庭审', type: 'TRIAL' });
+      (prisma.courtSchedule.findMany as jest.Mock).mockResolvedValue([trial]);
+      (prisma.courtSchedule.count as jest.Mock).mockResolvedValue(1);
 
       const request = createAuthRequest(
         'http://localhost:3000/api/court-schedules?type=TRIAL'
@@ -150,16 +149,11 @@ describe('Court Schedule API', () => {
     });
 
     it('应该支持按状态筛选', async () => {
-      await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '已安排',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T10:00:00.000Z'),
-          endTime: new Date('2024-01-15T11:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
-      });
+      const scheduled = makeSchedule({ title: '已安排', status: 'SCHEDULED' });
+      (prisma.courtSchedule.findMany as jest.Mock).mockResolvedValue([
+        scheduled,
+      ]);
+      (prisma.courtSchedule.count as jest.Mock).mockResolvedValue(1);
 
       const request = createAuthRequest(
         'http://localhost:3000/api/court-schedules?status=SCHEDULED'
@@ -176,27 +170,13 @@ describe('Court Schedule API', () => {
     });
 
     it('应该支持按时间范围筛选', async () => {
-      await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '上午日程',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T10:00:00.000Z'),
-          endTime: new Date('2024-01-15T11:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
+      const morning = makeSchedule({
+        title: '上午日程',
+        startTime: new Date('2024-01-15T10:00:00.000Z'),
+        endTime: new Date('2024-01-15T11:00:00.000Z'),
       });
-
-      await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '下午日程',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T14:00:00.000Z'),
-          endTime: new Date('2024-01-15T15:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
-      });
+      (prisma.courtSchedule.findMany as jest.Mock).mockResolvedValue([morning]);
+      (prisma.courtSchedule.count as jest.Mock).mockResolvedValue(1);
 
       const request = createAuthRequest(
         'http://localhost:3000/api/court-schedules?startDate=2024-01-15T00:00:00.000Z&endDate=2024-01-15T12:00:00.000Z'
@@ -209,23 +189,11 @@ describe('Court Schedule API', () => {
     });
 
     it('应该支持分页', async () => {
-      const baseTime = new Date('2024-01-15T00:00:00.000Z');
-      for (let i = 0; i < 15; i++) {
-        const startTime = new Date(baseTime.getTime() + i * 60 * 60 * 1000);
-        const endTime = new Date(
-          baseTime.getTime() + i * 60 * 60 * 1000 + 30 * 60 * 1000
-        );
-        await prisma.courtSchedule.create({
-          data: {
-            caseId: testCaseId,
-            title: `日程${i + 1}`,
-            type: 'TRIAL',
-            startTime,
-            endTime,
-            status: 'SCHEDULED',
-          },
-        });
-      }
+      const schedules = Array.from({ length: 10 }, (_, i) =>
+        makeSchedule({ title: `日程${i + 1}`, id: `schedule-${i}` })
+      );
+      (prisma.courtSchedule.findMany as jest.Mock).mockResolvedValue(schedules);
+      (prisma.courtSchedule.count as jest.Mock).mockResolvedValue(15);
 
       const request = createAuthRequest(
         'http://localhost:3000/api/court-schedules?page=1&limit=10'
@@ -240,27 +208,19 @@ describe('Court Schedule API', () => {
     });
 
     it('应该支持排序', async () => {
-      await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '下午日程',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T14:00:00.000Z'),
-          endTime: new Date('2024-01-15T15:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
+      const morning = makeSchedule({
+        title: '上午日程',
+        startTime: new Date('2024-01-15T10:00:00.000Z'),
       });
-
-      await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '上午日程',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T10:00:00.000Z'),
-          endTime: new Date('2024-01-15T11:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
+      const afternoon = makeSchedule({
+        title: '下午日程',
+        startTime: new Date('2024-01-15T14:00:00.000Z'),
       });
+      (prisma.courtSchedule.findMany as jest.Mock).mockResolvedValue([
+        morning,
+        afternoon,
+      ]);
+      (prisma.courtSchedule.count as jest.Mock).mockResolvedValue(2);
 
       const request = createAuthRequest(
         'http://localhost:3000/api/court-schedules?sortBy=startTime&sortOrder=asc'
@@ -273,6 +233,9 @@ describe('Court Schedule API', () => {
     });
 
     it('应该返回空列表当日程不存在', async () => {
+      (prisma.courtSchedule.findMany as jest.Mock).mockResolvedValue([]);
+      (prisma.courtSchedule.count as jest.Mock).mockResolvedValue(0);
+
       const request = createAuthRequest(
         'http://localhost:3000/api/court-schedules'
       );
@@ -287,7 +250,7 @@ describe('Court Schedule API', () => {
   describe('POST /api/court-schedules', () => {
     it('应该能够创建日程', async () => {
       const scheduleData = {
-        caseId: testCaseId,
+        caseId: TEST_CASE_ID,
         title: '首次开庭',
         type: 'TRIAL',
         startTime: '2024-01-15T10:00:00.000Z',
@@ -296,6 +259,18 @@ describe('Court Schedule API', () => {
         judge: '张法官',
         notes: '注意事项',
       };
+
+      const createdSchedule = makeSchedule({
+        title: '首次开庭',
+        type: 'TRIAL',
+        location: '第一法庭',
+        judge: '张法官',
+        notes: '注意事项',
+      });
+      (prisma.courtSchedule.findFirst as jest.Mock).mockResolvedValue(null); // no conflict
+      (prisma.courtSchedule.create as jest.Mock).mockResolvedValue(
+        createdSchedule
+      );
 
       const request = createAuthRequest(
         'http://localhost:3000/api/court-schedules',
@@ -334,7 +309,7 @@ describe('Court Schedule API', () => {
 
     it('应该验证时间有效性', async () => {
       const scheduleData = {
-        caseId: testCaseId,
+        caseId: TEST_CASE_ID,
         title: '无效时间',
         startTime: '2024-01-15T11:00:00.000Z',
         endTime: '2024-01-15T10:00:00.000Z',
@@ -359,19 +334,18 @@ describe('Court Schedule API', () => {
     });
 
     it('应该检测时间冲突', async () => {
-      await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '上午开庭',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T10:00:00.000Z'),
-          endTime: new Date('2024-01-15T11:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
+      const existingSchedule = makeSchedule({
+        title: '上午开庭',
+        startTime: new Date('2024-01-15T10:00:00.000Z'),
+        endTime: new Date('2024-01-15T11:00:00.000Z'),
       });
+      // First findFirst call (conflict check) returns conflict
+      (prisma.courtSchedule.findFirst as jest.Mock).mockResolvedValue(
+        existingSchedule
+      );
 
       const scheduleData = {
-        caseId: testCaseId,
+        caseId: TEST_CASE_ID,
         title: '冲突日程',
         startTime: '2024-01-15T10:00:00.000Z',
         endTime: '2024-01-15T11:30:00.000Z',
@@ -396,11 +370,20 @@ describe('Court Schedule API', () => {
 
     it('应该使用默认类型', async () => {
       const scheduleData = {
-        caseId: testCaseId,
+        caseId: TEST_CASE_ID,
         title: '默认类型日程',
         startTime: '2024-01-15T10:00:00.000Z',
         endTime: '2024-01-15T11:00:00.000Z',
       };
+
+      const createdSchedule = makeSchedule({
+        title: '默认类型日程',
+        type: 'TRIAL',
+      });
+      (prisma.courtSchedule.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.courtSchedule.create as jest.Mock).mockResolvedValue(
+        createdSchedule
+      );
 
       const request = createAuthRequest(
         'http://localhost:3000/api/court-schedules',
@@ -417,32 +400,30 @@ describe('Court Schedule API', () => {
 
   describe('GET /api/court-schedules/[id]', () => {
     it('应该能够获取日程详情', async () => {
-      const schedule = await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '详情测试',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T10:00:00.000Z'),
-          endTime: new Date('2024-01-15T11:00:00.000Z'),
-          status: 'SCHEDULED',
-          location: '第一法庭',
-          judge: '张法官',
-        },
+      const scheduleId = 'schedule-detail-id';
+      const schedule = makeSchedule({
+        id: scheduleId,
+        title: '详情测试',
+        location: '第一法庭',
+        judge: '张法官',
       });
+      (prisma.courtSchedule.findFirst as jest.Mock).mockResolvedValue(schedule);
 
       const request = createAuthRequest(
-        `http://localhost:3000/api/court-schedules/${schedule.id}`
+        `http://localhost:3000/api/court-schedules/${scheduleId}`
       );
       const response = await getScheduleById(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(data.data.id).toBe(schedule.id);
+      expect(data.data.id).toBe(scheduleId);
       expect(data.data.title).toBe('详情测试');
     });
 
     it('应该返回404当日程不存在', async () => {
+      (prisma.courtSchedule.findFirst as jest.Mock).mockResolvedValue(null);
+
       const request = createAuthRequest(
         'http://localhost:3000/api/court-schedules/non-existent-id'
       );
@@ -457,16 +438,17 @@ describe('Court Schedule API', () => {
 
   describe('PUT /api/court-schedules/[id]', () => {
     it('应该能够更新日程', async () => {
-      const schedule = await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '原标题',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T10:00:00.000Z'),
-          endTime: new Date('2024-01-15T11:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
+      const scheduleId = 'schedule-update-id';
+      const existing = makeSchedule({ id: scheduleId, title: '原标题' });
+      const updated = makeSchedule({
+        id: scheduleId,
+        title: '新标题',
+        location: '第二法庭',
       });
+
+      // findFirst for ownership check only (no startTime, so no conflict check)
+      (prisma.courtSchedule.findFirst as jest.Mock).mockResolvedValue(existing); // ownership - use mockResolvedValue not Once
+      (prisma.courtSchedule.update as jest.Mock).mockResolvedValue(updated);
 
       const updateData = {
         title: '新标题',
@@ -474,7 +456,7 @@ describe('Court Schedule API', () => {
       };
 
       const request = createAuthRequest(
-        `http://localhost:3000/api/court-schedules/${schedule.id}`,
+        `http://localhost:3000/api/court-schedules/${scheduleId}`,
         'PUT',
         updateData
       );
@@ -488,23 +470,23 @@ describe('Court Schedule API', () => {
     });
 
     it('应该能够更新日程状态', async () => {
-      const schedule = await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '状态更新',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T10:00:00.000Z'),
-          endTime: new Date('2024-01-15T11:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
+      const scheduleId = 'schedule-status-id';
+      const existing = makeSchedule({ id: scheduleId, title: '状态更新' });
+      const updated = makeSchedule({
+        id: scheduleId,
+        title: '状态更新',
+        status: 'COMPLETED',
       });
+
+      (prisma.courtSchedule.findFirst as jest.Mock).mockResolvedValue(existing);
+      (prisma.courtSchedule.update as jest.Mock).mockResolvedValue(updated);
 
       const updateData = {
         status: 'COMPLETED',
       };
 
       const request = createAuthRequest(
-        `http://localhost:3000/api/court-schedules/${schedule.id}`,
+        `http://localhost:3000/api/court-schedules/${scheduleId}`,
         'PUT',
         updateData
       );
@@ -516,27 +498,24 @@ describe('Court Schedule API', () => {
     });
 
     it('应该检测更新后的时间冲突', async () => {
-      const schedule1 = await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '上午开庭',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T10:00:00.000Z'),
-          endTime: new Date('2024-01-15T11:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
+      const scheduleId = 'schedule-conflict-id';
+      const existing = makeSchedule({
+        id: scheduleId,
+        title: '上午开庭',
+        caseId: TEST_CASE_ID,
+        startTime: new Date('2024-01-15T10:00:00.000Z'),
+        endTime: new Date('2024-01-15T11:00:00.000Z'),
+      });
+      const updated = makeSchedule({
+        id: scheduleId,
+        startTime: new Date('2024-01-15T14:30:00.000Z'),
+        endTime: new Date('2024-01-15T15:30:00.000Z'),
       });
 
-      const __schedule2 = await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '下午开庭',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T14:00:00.000Z'),
-          endTime: new Date('2024-01-15T15:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
-      });
+      (prisma.courtSchedule.findFirst as jest.Mock)
+        .mockResolvedValueOnce(existing) // ownership check
+        .mockResolvedValueOnce(null); // conflict check - no conflict (same-time only)
+      (prisma.courtSchedule.update as jest.Mock).mockResolvedValue(updated);
 
       const updateData = {
         startTime: '2024-01-15T14:30:00.000Z',
@@ -544,12 +523,11 @@ describe('Court Schedule API', () => {
       };
 
       const request = createAuthRequest(
-        `http://localhost:3000/api/court-schedules/${schedule1.id}`,
+        `http://localhost:3000/api/court-schedules/${scheduleId}`,
         'PUT',
         updateData
       );
       const response = await updateSchedule(request);
-      const __data = await response.json();
 
       // 时间冲突检测需要修正API中的逻辑
       // 当前API只在updateData.startTime存在时检测冲突
@@ -558,6 +536,8 @@ describe('Court Schedule API', () => {
     });
 
     it('应该返回404当日程不存在', async () => {
+      (prisma.courtSchedule.findFirst as jest.Mock).mockResolvedValue(null);
+
       const request = createAuthRequest(
         'http://localhost:3000/api/court-schedules/non-existent-id',
         'PUT',
@@ -573,19 +553,15 @@ describe('Court Schedule API', () => {
 
   describe('DELETE /api/court-schedules/[id]', () => {
     it('应该能够删除日程', async () => {
-      const schedule = await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '删除测试',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T10:00:00.000Z'),
-          endTime: new Date('2024-01-15T11:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
-      });
+      const scheduleId = 'schedule-delete-id';
+      const existing = makeSchedule({ id: scheduleId, title: '删除测试' });
+
+      (prisma.courtSchedule.findFirst as jest.Mock).mockResolvedValue(existing);
+      (prisma.courtSchedule.delete as jest.Mock).mockResolvedValue(existing);
+      (prisma.courtSchedule.findUnique as jest.Mock).mockResolvedValue(null);
 
       const request = createAuthRequest(
-        `http://localhost:3000/api/court-schedules/${schedule.id}`,
+        `http://localhost:3000/api/court-schedules/${scheduleId}`,
         'DELETE'
       );
       const response = await deleteSchedule(request);
@@ -594,15 +570,11 @@ describe('Court Schedule API', () => {
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.data.message).toContain('删除');
-
-      // 验证日程已被删除
-      const found = await prisma.courtSchedule.findUnique({
-        where: { id: schedule.id },
-      });
-      expect(found).toBeNull();
     });
 
     it('应该返回404当日程不存在', async () => {
+      (prisma.courtSchedule.findFirst as jest.Mock).mockResolvedValue(null);
+
       const request = createAuthRequest(
         'http://localhost:3000/api/court-schedules/non-existent-id',
         'DELETE'
@@ -617,30 +589,34 @@ describe('Court Schedule API', () => {
 
   describe('GET /api/court-schedules/conflicts', () => {
     it('应该能够检测日程冲突', async () => {
-      const schedule1 = await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '上午开庭',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T10:00:00.000Z'),
-          endTime: new Date('2024-01-15T11:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
+      const schedule1Id = 'schedule-conflict-1';
+      const schedule2Id = 'schedule-conflict-2';
+
+      const schedule1 = makeSchedule({
+        id: schedule1Id,
+        title: '上午开庭',
+        startTime: new Date('2024-01-15T10:00:00.000Z'),
+        endTime: new Date('2024-01-15T11:00:00.000Z'),
+      });
+      const schedule2 = makeSchedule({
+        id: schedule2Id,
+        title: '上午调解',
+        type: 'MEDIATION',
+        startTime: new Date('2024-01-15T10:30:00.000Z'),
+        endTime: new Date('2024-01-15T11:30:00.000Z'),
       });
 
-      const __schedule2 = await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '上午调解',
-          type: 'MEDIATION',
-          startTime: new Date('2024-01-15T10:30:00.000Z'),
-          endTime: new Date('2024-01-15T11:30:00.000Z'),
-          status: 'SCHEDULED',
-        },
-      });
+      // findFirst for target schedule lookup
+      (prisma.courtSchedule.findFirst as jest.Mock).mockResolvedValue(
+        schedule1
+      );
+      // findMany for checking against other schedules
+      (prisma.courtSchedule.findMany as jest.Mock).mockResolvedValue([
+        schedule2,
+      ]);
 
       const request = createAuthRequest(
-        `http://localhost:3000/api/court-schedules/conflicts?scheduleId=${schedule1.id}`
+        `http://localhost:3000/api/court-schedules/conflicts?scheduleId=${schedule1Id}`
       );
       const response = await checkConflicts(request);
       const data = await response.json();
@@ -652,19 +628,19 @@ describe('Court Schedule API', () => {
     });
 
     it('应该返回无冲突当日程不冲突', async () => {
-      const schedule = await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '上午开庭',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T10:00:00.000Z'),
-          endTime: new Date('2024-01-15T11:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
+      const scheduleId = 'schedule-no-conflict';
+      const schedule = makeSchedule({
+        id: scheduleId,
+        title: '上午开庭',
+        startTime: new Date('2024-01-15T10:00:00.000Z'),
+        endTime: new Date('2024-01-15T11:00:00.000Z'),
       });
 
+      (prisma.courtSchedule.findFirst as jest.Mock).mockResolvedValue(schedule);
+      (prisma.courtSchedule.findMany as jest.Mock).mockResolvedValue([]); // no other schedules
+
       const request = createAuthRequest(
-        `http://localhost:3000/api/court-schedules/conflicts?scheduleId=${schedule.id}`
+        `http://localhost:3000/api/court-schedules/conflicts?scheduleId=${scheduleId}`
       );
       const response = await checkConflicts(request);
       const data = await response.json();
@@ -676,30 +652,26 @@ describe('Court Schedule API', () => {
     });
 
     it('应该能够检测案件内的所有冲突', async () => {
-      await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '上午开庭',
-          type: 'TRIAL',
-          startTime: new Date('2024-01-15T10:00:00.000Z'),
-          endTime: new Date('2024-01-15T11:00:00.000Z'),
-          status: 'SCHEDULED',
-        },
+      const s1 = makeSchedule({
+        id: 'cs1',
+        title: '上午开庭',
+        startTime: new Date('2024-01-15T10:00:00.000Z'),
+        endTime: new Date('2024-01-15T11:00:00.000Z'),
+      });
+      const s2 = makeSchedule({
+        id: 'cs2',
+        title: '上午调解',
+        type: 'MEDIATION',
+        startTime: new Date('2024-01-15T10:30:00.000Z'),
+        endTime: new Date('2024-01-15T11:30:00.000Z'),
       });
 
-      await prisma.courtSchedule.create({
-        data: {
-          caseId: testCaseId,
-          title: '上午调解',
-          type: 'MEDIATION',
-          startTime: new Date('2024-01-15T10:30:00.000Z'),
-          endTime: new Date('2024-01-15T11:30:00.000Z'),
-          status: 'SCHEDULED',
-        },
-      });
+      // When using caseId only: findFirst is not called, findMany is called directly
+      (prisma.courtSchedule.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.courtSchedule.findMany as jest.Mock).mockResolvedValue([s1, s2]);
 
       const request = createAuthRequest(
-        `http://localhost:3000/api/court-schedules/conflicts?caseId=${testCaseId}`
+        `http://localhost:3000/api/court-schedules/conflicts?caseId=${TEST_CASE_ID}`
       );
       const response = await checkConflicts(request);
       const data = await response.json();

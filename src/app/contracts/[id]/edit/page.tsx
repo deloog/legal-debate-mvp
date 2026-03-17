@@ -4,20 +4,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import type { FeeType } from '@/types/contract';
 
-interface EditContractPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function EditContractPage({ params }: EditContractPageProps) {
+export default function EditContractPage() {
   const router = useRouter();
+  const params = useParams();
+  const contractId = params.id as string;
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // 表单数据类型定义
   interface Payment {
@@ -75,7 +72,7 @@ export default function EditContractPage({ params }: EditContractPageProps) {
   useEffect(() => {
     async function loadContract() {
       try {
-        const response = await fetch(`/api/contracts/${params.id}`);
+        const response = await fetch(`/api/contracts/${contractId}`);
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: 加载合同数据失败`);
@@ -123,7 +120,7 @@ export default function EditContractPage({ params }: EditContractPageProps) {
     }
 
     loadContract();
-  }, [params.id]);
+  }, [contractId]);
 
   function handleChange(field: string, value: string | FeeType) {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -158,7 +155,7 @@ export default function EditContractPage({ params }: EditContractPageProps) {
     setError(null);
 
     try {
-      const response = await fetch(`/api/contracts/${params.id}`, {
+      const response = await fetch(`/api/contracts/${contractId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -167,7 +164,10 @@ export default function EditContractPage({ params }: EditContractPageProps) {
       const result = await response.json();
 
       if (result.success) {
-        router.push(`/contracts/${params.id}`);
+        setSaveSuccess(true);
+        setTimeout(() => {
+          router.push(`/contracts/${contractId}`);
+        }, 1000);
       } else {
         setError(result.error?.message || '更新合同失败');
       }
@@ -200,6 +200,13 @@ export default function EditContractPage({ params }: EditContractPageProps) {
           <h1 className='text-2xl font-bold text-gray-900'>编辑合同</h1>
           <p className='mt-1 text-sm text-gray-500'>修改委托合同信息</p>
         </div>
+
+        {/* 保存成功提示 */}
+        {saveSuccess && (
+          <div className='mb-6 rounded-lg bg-green-50 p-4 text-sm text-green-800'>
+            保存成功
+          </div>
+        )}
 
         {/* 错误提示 */}
         {error && (
@@ -411,6 +418,7 @@ export default function EditContractPage({ params }: EditContractPageProps) {
                 </label>
                 <input
                   type='number'
+                  name='totalFee'
                   value={formData.totalFee}
                   onChange={e => handleChange('totalFee', e.target.value)}
                   required

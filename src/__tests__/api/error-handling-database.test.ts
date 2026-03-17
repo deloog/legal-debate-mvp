@@ -28,6 +28,19 @@ jest.mock('@/lib/middleware/resource-permission', () => ({
   ResourceType: {
     DEBATE: 'DEBATE',
   },
+  isAdminRole: jest.fn(() => false),
+}));
+
+// Mock AI quota and audit logger
+jest.mock('@/lib/ai/quota', () => ({
+  checkAIQuota: jest.fn().mockResolvedValue({ allowed: true }),
+  recordAIUsage: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock('@/lib/audit/logger', () => ({
+  logCreateAction: jest.fn().mockResolvedValue(undefined),
+  logUpdateAction: jest.fn().mockResolvedValue(undefined),
+  logDeleteAction: jest.fn().mockResolvedValue(undefined),
 }));
 
 // Set default mock implementation

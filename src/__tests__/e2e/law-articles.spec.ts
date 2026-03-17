@@ -309,12 +309,12 @@ test.describe('法条详情查询', () => {
     expect([200, 404]).toContain(response.status());
     if (response.status() === 200) {
       const data = await response.json();
-      // graph 接口不返回 success 字段，直接包含节点和边
       expect(data).toBeDefined();
-      // 有节点或者边，或者有 error 字段（法条存在但无关系）
+      // graph 接口可能直接返回 { nodes, links }，或包装在 { success, data: { nodes, links } } 中
+      const graphData = data.data ?? data;
       const hasGraph =
-        data.nodes !== undefined ||
-        data.links !== undefined ||
+        graphData.nodes !== undefined ||
+        graphData.links !== undefined ||
         data.error !== undefined;
       expect(hasGraph).toBe(true);
     }

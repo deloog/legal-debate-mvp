@@ -6,11 +6,8 @@ import { resolve } from 'path';
 dotenvConfig({ path: resolve(__dirname, '.env') });
 dotenvConfig({ path: resolve(__dirname, '.env.development') });
 
-// 本地 E2E 优先使用 TEST_DATABASE_URL，避免污染 dev 数据库
-// CI 环境 DATABASE_URL 已由 workflow 注入，不受影响
-if (process.env.TEST_DATABASE_URL && !process.env.CI) {
-  process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
-}
+// CI 环境 DATABASE_URL 由 workflow 注入；本地使用 .env 的 DATABASE_URL
+// global-setup 与 dev server 需使用同一个数据库，不单独覆盖
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -32,8 +29,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* CI 单 worker 避免资源竞争，本地使用默认值（CPU 核数的一半）并行提速 */
-  workers: process.env.CI ? 1 : undefined,
+  /* 本地与 CI 均使用单 worker，避免并发导致 DB/API 竞争引起随机失败 */
+  workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html'],
@@ -53,6 +50,15 @@ export default defineConfig({
 
     /* Record video on failure */
     video: 'retain-on-failure',
+
+    /* 规避 Next.js 16 Turbopack dev 模式 bug：
+     * 带 Authorization header 的请求访问动态嵌套路由（如 [id]/review）时
+     * 缺少 Accept 头会导致 Turbopack 将其误判为页面导航并返回 404。
+     * 添加 Accept: application/json 让 Turbopack 正确路由至 API handler。
+     * （生产模式 next start 不受此 bug 影响） */
+    extraHTTPHeaders: {
+      Accept: 'application/json',
+    },
   },
 
   /* Configure projects for major browsers */
@@ -64,14 +70,19 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
+  // CI 环境：使用 next start（利用 CI 已完成的 build，生产模式无 Turbopack bug）
+  // 本地：复用已运行的 dev server（使用 npm run dev），Accept header 修复覆盖此场景
   webServer: {
-    command: 'npm run dev',
+    command: process.env.CI ? 'npm run start' : 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-    // 将正确的 DATABASE_URL 注入到 dev server 子进程
+    timeout: 300 * 1000,
+    // 将必要的环境变量注入到 dev/prod server 子进程
     env: {
       DATABASE_URL: process.env.DATABASE_URL ?? '',
+      PAYMENT_MOCK_MODE: 'true',
+      USE_MOCK_AI: 'true',
+      EMAIL_MOCK_MODE: 'true',
     },
   },
 

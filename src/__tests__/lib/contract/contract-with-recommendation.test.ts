@@ -3,6 +3,15 @@
  * 测试在合同审查时推荐补全法条的功能
  */
 
+// 使用真实数据库进行集成测试
+jest.mock('@/lib/db', () => {
+  const { PrismaClient: RealPrismaClient } = jest.requireActual(
+    '@prisma/client'
+  ) as typeof import('@prisma/client');
+  const prisma = new RealPrismaClient();
+  return { prisma, default: prisma };
+});
+
 import { LawArticleRecommendationService } from '@/lib/law-article/recommendation-service';
 import { prisma } from '@/lib/db';
 import { RelationType, VerificationStatus } from '@prisma/client';

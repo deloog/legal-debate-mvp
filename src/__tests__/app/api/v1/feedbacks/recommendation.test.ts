@@ -11,6 +11,17 @@ import {
 } from '../../../../../app/api/v1/feedbacks/recommendation/route';
 import { prisma } from '@/lib/db';
 
+// Mock认证
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn(() =>
+    Promise.resolve({
+      userId: 'test-user-1',
+      email: 'test@test.com',
+      role: 'USER',
+    })
+  ),
+}));
+
 // Mock Prisma
 jest.mock('@/lib/db', () => ({
   prisma: {

@@ -71,6 +71,15 @@ jest.mock('@/lib/auth/auth-options', () => ({
   authOptions: {},
 }));
 
+// Mock auth middleware so the debate route doesn't reject with 401
+jest.mock('@/lib/middleware/auth', () => ({
+  getAuthUser: jest.fn().mockResolvedValue({
+    userId: 'test-user-id-123',
+    email: 'test@example.com',
+    role: 'USER',
+  }),
+}));
+
 import { prisma } from '@/lib/db/prisma';
 
 describe('Debate Flow Integration Tests', () => {

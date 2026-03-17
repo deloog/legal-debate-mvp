@@ -4,6 +4,7 @@
  * PUT /api/contracts/[id] - 更新合同记录
  */
 import { clearContractPDFCache } from '@/lib/contract/contract-pdf-generator';
+import { contractVersionService } from '@/lib/contract/contract-version-service';
 import { prisma } from '@/lib/db/prisma';
 import {
   getFirstZodError,
@@ -106,6 +107,10 @@ export async function GET(
       status: contract.status,
       signedAt: contract.signedAt,
       signatureData: contract.signatureData,
+      clientSignature: contract.clientSignature,
+      clientSignedAt: contract.clientSignedAt,
+      lawyerSignature: contract.lawyerSignature,
+      lawyerSignedAt: contract.lawyerSignedAt,
       filePath: contract.filePath,
       createdAt: contract.createdAt,
       updatedAt: contract.updatedAt,
@@ -288,6 +293,11 @@ export async function PUT(
       logger.error('清除PDF缓存失败:', error);
     });
 
+    // 创建版本记录（异步执行，不阻塞响应）
+    contractVersionService.createVersion(id, 'UPDATE', userId).catch(error => {
+      logger.error('创建合同版本失败:', error);
+    });
+
     // 转换响应数据
     const responseData = {
       id: contract.id,
@@ -314,6 +324,10 @@ export async function PUT(
       status: contract.status,
       signedAt: contract.signedAt,
       signatureData: contract.signatureData,
+      clientSignature: contract.clientSignature,
+      clientSignedAt: contract.clientSignedAt,
+      lawyerSignature: contract.lawyerSignature,
+      lawyerSignedAt: contract.lawyerSignedAt,
       filePath: contract.filePath,
       createdAt: contract.createdAt,
       updatedAt: contract.updatedAt,

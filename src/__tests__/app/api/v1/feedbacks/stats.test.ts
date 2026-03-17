@@ -34,10 +34,13 @@ describe('GET /api/v1/feedbacks/stats', () => {
       // Mock数据
       (prisma.recommendationFeedback.count as jest.Mock).mockResolvedValue(100);
       (prisma.recommendationFeedback.groupBy as jest.Mock).mockResolvedValue([
-        { feedbackType: 'HELPFUL', _count: { id: 60 } },
-        { feedbackType: 'NOT_HELPFUL', _count: { id: 30 } },
-        { feedbackType: 'IRRELEVANT', _count: { id: 10 } },
+        { feedbackType: 'HELPFUL', _count: { feedbackType: 60 } },
+        { feedbackType: 'NOT_HELPFUL', _count: { feedbackType: 30 } },
+        { feedbackType: 'IRRELEVANT', _count: { feedbackType: 10 } },
       ]);
+      (prisma.recommendationFeedback.findMany as jest.Mock).mockResolvedValue(
+        []
+      );
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/feedbacks/stats?type=recommendation'
@@ -57,10 +60,11 @@ describe('GET /api/v1/feedbacks/stats', () => {
       // Mock数据
       (prisma.relationFeedback.count as jest.Mock).mockResolvedValue(50);
       (prisma.relationFeedback.groupBy as jest.Mock).mockResolvedValue([
-        { feedbackType: 'ACCURATE', _count: { id: 30 } },
-        { feedbackType: 'INACCURATE', _count: { id: 15 } },
-        { feedbackType: 'WRONG_TYPE', _count: { id: 5 } },
+        { feedbackType: 'ACCURATE', _count: { feedbackType: 30 } },
+        { feedbackType: 'INACCURATE', _count: { feedbackType: 15 } },
+        { feedbackType: 'WRONG_TYPE', _count: { feedbackType: 5 } },
       ]);
+      (prisma.relationFeedback.findMany as jest.Mock).mockResolvedValue([]);
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/feedbacks/stats?type=relation'

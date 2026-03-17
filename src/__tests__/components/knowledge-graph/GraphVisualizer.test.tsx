@@ -7,24 +7,39 @@ import { render, screen } from '@testing-library/react';
 
 // Mock D3 module before importing the component
 jest.mock('d3', () => {
+  const chainable = () => {
+    const obj: Record<string, jest.Mock> = {};
+    const methods = [
+      'selectAll',
+      'select',
+      'append',
+      'attr',
+      'style',
+      'call',
+      'on',
+      'data',
+      'enter',
+      'exit',
+      'remove',
+      'text',
+      'html',
+      'classed',
+      'property',
+      'each',
+      'filter',
+      'merge',
+      'raise',
+      'lower',
+      'insert',
+      'join',
+    ];
+    methods.forEach(m => {
+      obj[m] = jest.fn(() => obj);
+    });
+    return obj;
+  };
   return {
-    select: jest.fn(() => ({
-      append: jest.fn(() => ({
-        selectAll: jest.fn(() => ({
-          data: jest.fn(() => ({
-            enter: jest.fn(() => ({
-              append: jest.fn(() => ({
-                attr: jest.fn().mockReturnThis(),
-                style: jest.fn().mockReturnThis(),
-                call: jest.fn().mockReturnThis(),
-              })),
-            })),
-          })),
-        })),
-      })),
-      attr: jest.fn().mockReturnThis(),
-      on: jest.fn().mockReturnThis(),
-    })),
+    select: jest.fn(() => chainable()),
     forceSimulation: jest.fn(() => ({
       force: jest.fn().mockReturnThis(),
       on: jest.fn().mockReturnThis(),

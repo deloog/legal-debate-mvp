@@ -310,11 +310,11 @@ describe('POST /api/orders/create', () => {
 
       expect(testResponse.status).toBe(200);
       expect(testResponse.success).toBe(true);
-      expect(testResponse.data.data.orderId).toBeDefined();
-      expect(testResponse.data.data.orderNo).toBeDefined();
-      expect(testResponse.data.data.amount).toBe(99.0);
-      expect(testResponse.data.data.currency).toBe('CNY');
-      expect(testResponse.data.data.status).toBe('PENDING');
+      expect(testResponse.data.orderId).toBeDefined();
+      expect(testResponse.data.orderNo).toBeDefined();
+      expect(testResponse.data.amount).toBe(99.0);
+      expect(testResponse.data.currency).toBe('CNY');
+      expect(testResponse.data.status).toBe('PENDING');
     });
 
     it('应使用自定义description', async () => {

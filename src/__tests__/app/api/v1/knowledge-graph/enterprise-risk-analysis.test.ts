@@ -51,6 +51,12 @@ jest.mock('@/lib/middleware/knowledge-graph-permission', () => ({
 describe('GET /api/v1/knowledge-graph/enterprise-risk-analysis', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const {
+      checkKnowledgeGraphPermission,
+    } = require('@/lib/middleware/knowledge-graph-permission');
+    (checkKnowledgeGraphPermission as jest.Mock).mockResolvedValue({
+      hasPermission: true,
+    });
   });
 
   describe('参数验证', () => {
@@ -70,6 +76,9 @@ describe('GET /api/v1/knowledge-graph/enterprise-risk-analysis', () => {
     });
 
     it('应该接受有效的请求', async () => {
+      (prisma.contract.findUnique as jest.Mock).mockResolvedValue({
+        id: 'contract-1',
+      });
       // Mock合同关联法条数据
       (prisma.contractLawArticle.findMany as jest.Mock).mockResolvedValue([
         { lawArticleId: 'article-1' },
@@ -122,6 +131,8 @@ describe('GET /api/v1/knowledge-graph/enterprise-risk-analysis', () => {
         exists: true,
       });
 
+      (GraphAlgorithms.degreeCentrality as jest.Mock).mockReturnValue([]);
+
       const request = new Request(
         'http://localhost:3000/api/v1/knowledge-graph/enterprise-risk-analysis?contractId=contract-1',
         {
@@ -137,6 +148,10 @@ describe('GET /api/v1/knowledge-graph/enterprise-risk-analysis', () => {
 
   describe('风险分析功能', () => {
     beforeEach(() => {
+      (prisma.contract.findUnique as jest.Mock).mockResolvedValue({
+        id: 'contract-1',
+      });
+
       // Mock合同关联法条数据
       (prisma.contractLawArticle.findMany as jest.Mock).mockResolvedValue([
         { lawArticleId: 'article-1' },
@@ -284,7 +299,7 @@ describe('GET /api/v1/knowledge-graph/enterprise-risk-analysis', () => {
 
   describe('错误处理', () => {
     it('应该处理合同不存在的情况', async () => {
-      (prisma.contractLawArticle.findMany as jest.Mock).mockResolvedValue([]);
+      (prisma.contract.findUnique as jest.Mock).mockResolvedValue(null);
 
       const request = new Request(
         'http://localhost:3000/api/v1/knowledge-graph/enterprise-risk-analysis?contractId=contract-1',
@@ -324,6 +339,12 @@ describe('GET /api/v1/knowledge-graph/enterprise-risk-analysis', () => {
     });
 
     it('应该处理服务器错误', async () => {
+      (prisma.contract.findUnique as jest.Mock).mockResolvedValue({
+        id: 'contract-1',
+      });
+      (prisma.contractLawArticle.findMany as jest.Mock).mockResolvedValue([
+        { lawArticleId: 'article-1' },
+      ]);
       (GraphBuilder.buildFullGraph as jest.Mock).mockRejectedValue(
         new Error('图谱构建失败')
       );
@@ -343,6 +364,9 @@ describe('GET /api/v1/knowledge-graph/enterprise-risk-analysis', () => {
     });
 
     it('应该处理空图谱的情况', async () => {
+      (prisma.contract.findUnique as jest.Mock).mockResolvedValue({
+        id: 'contract-1',
+      });
       (prisma.contractLawArticle.findMany as jest.Mock).mockResolvedValue([]);
 
       (GraphBuilder.buildFullGraph as jest.Mock).mockResolvedValue({

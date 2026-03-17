@@ -3,10 +3,10 @@ module.exports = {
   // 全局配置
   preset: 'ts-jest',
   verbose: true,
-  // 限制并发 worker 数，避免连接池耗尽
-  maxWorkers: 2,
+  // 串行执行，避免 DB 测试并发清理冲突（cleanupTestDatabase 会删全量数据）
+  maxWorkers: 1,
   // 限制并发测试数
-  maxConcurrency: 2,
+  maxConcurrency: 1,
   // 默认超时时间
   testTimeout: 30000,
   // 资源限制

@@ -1,5 +1,8 @@
 // Prisma客户端测试
 
+// 使用真实数据库进行集成测试
+jest.mock('@/lib/db/prisma', () => jest.requireActual('@/lib/db/prisma'));
+
 import { describe, it, expect } from '@jest/globals';
 import {
   prisma,

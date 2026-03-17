@@ -26,6 +26,8 @@ jest.mock('@/lib/db', () => ({
 describe('GET /api/v1/law-article-relations/recommendation-stats', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Default mock for findMany (used in top articles query)
+    jest.mocked(prisma.lawArticle.findMany).mockResolvedValue([]);
   });
 
   describe('成功场景', () => {

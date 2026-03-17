@@ -1,3 +1,4 @@
+/** @jest-environment jsdom */
 /**
  * 系统性能统计组件 单元测试
  */
@@ -211,7 +212,7 @@ describe('PerformanceStats 组件', () => {
       await screen.findByText('响应时间汇总');
 
       // 响应时间汇总
-      expect(screen.getByText('总请求数')).toBeInTheDocument();
+      expect(screen.getAllByText('总请求数')[0]).toBeInTheDocument();
       expect(screen.getByText('70')).toBeInTheDocument();
       expect(screen.getByText('平均响应时间')).toBeInTheDocument();
       expect(screen.getByText('1450ms')).toBeInTheDocument();
@@ -272,10 +273,10 @@ describe('PerformanceStats 组件', () => {
 
       render(<PerformanceStats />);
 
-      await screen.findByText('按服务商统计');
+      await screen.findAllByText('按服务商统计');
 
-      expect(screen.getByText('deepseek')).toBeInTheDocument();
-      expect(screen.getByText('zhipu')).toBeInTheDocument();
+      expect(screen.getAllByText('deepseek')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('zhipu')[0]).toBeInTheDocument();
     });
 
     it('应该显示按模型统计', async () => {
@@ -316,8 +317,8 @@ describe('PerformanceStats 组件', () => {
 
       await screen.findByText('响应时间趋势');
 
-      expect(screen.getByText('2024-01-01')).toBeInTheDocument();
-      expect(screen.getByText('2024-01-02')).toBeInTheDocument();
+      expect(screen.getAllByText('2024-01-01')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('2024-01-02')[0]).toBeInTheDocument();
     });
 
     it('应该显示空数据状态', async () => {
@@ -369,7 +370,7 @@ describe('PerformanceStats 组件', () => {
 
       await screen.findByText('错误率汇总');
 
-      expect(screen.getByText('总请求数')).toBeInTheDocument();
+      expect(screen.getAllByText('总请求数')[0]).toBeInTheDocument();
       expect(screen.getByText('135')).toBeInTheDocument();
       expect(screen.getByText('成功请求数')).toBeInTheDocument();
       expect(screen.getByText('128')).toBeInTheDocument();
@@ -464,8 +465,8 @@ describe('PerformanceStats 组件', () => {
 
       await screen.findByText('错误率趋势');
 
-      expect(screen.getByText('2024-01-01')).toBeInTheDocument();
-      expect(screen.getByText('2024-01-02')).toBeInTheDocument();
+      expect(screen.getAllByText('2024-01-01')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('2024-01-02')[0]).toBeInTheDocument();
     });
 
     it('应该显示空数据状态', async () => {
@@ -503,18 +504,16 @@ describe('PerformanceStats 组件', () => {
   describe('Props处理', () => {
     it('应该正确传递查询参数', async () => {
       const fetchMock = (global.fetch as jest.Mock).mockImplementation(
-        (url: string) => {
-          if (url.includes('timeRange=TODAY')) {
-            return Promise.resolve({
-              ok: true,
-              json: async () => ({ success: true, data: mockResponseTimeData }),
-            } as Response);
-          }
-          return Promise.resolve({
+        (url: string) =>
+          Promise.resolve({
             ok: true,
-            json: async () => ({ success: true, data: mockErrorRateData }),
-          } as Response);
-        }
+            json: async () => ({
+              success: true,
+              data: url.includes('response-time')
+                ? mockResponseTimeData
+                : mockErrorRateData,
+            }),
+          } as Response)
       );
 
       render(<PerformanceStats timeRange='TODAY' />);
@@ -528,18 +527,16 @@ describe('PerformanceStats 组件', () => {
 
     it('应该支持granularity参数', async () => {
       const fetchMock = (global.fetch as jest.Mock).mockImplementation(
-        (url: string) => {
-          if (url.includes('granularity=WEEK')) {
-            return Promise.resolve({
-              ok: true,
-              json: async () => ({ success: true, data: mockResponseTimeData }),
-            } as Response);
-          }
-          return Promise.resolve({
+        (url: string) =>
+          Promise.resolve({
             ok: true,
-            json: async () => ({ success: true, data: mockErrorRateData }),
-          } as Response);
-        }
+            json: async () => ({
+              success: true,
+              data: url.includes('response-time')
+                ? mockResponseTimeData
+                : mockErrorRateData,
+            }),
+          } as Response)
       );
 
       render(<PerformanceStats granularity='WEEK' />);
@@ -553,18 +550,16 @@ describe('PerformanceStats 组件', () => {
 
     it('应该支持provider参数', async () => {
       const fetchMock = (global.fetch as jest.Mock).mockImplementation(
-        (url: string) => {
-          if (url.includes('provider=deepseek')) {
-            return Promise.resolve({
-              ok: true,
-              json: async () => ({ success: true, data: mockResponseTimeData }),
-            } as Response);
-          }
-          return Promise.resolve({
+        (url: string) =>
+          Promise.resolve({
             ok: true,
-            json: async () => ({ success: true, data: mockErrorRateData }),
-          } as Response);
-        }
+            json: async () => ({
+              success: true,
+              data: url.includes('response-time')
+                ? mockResponseTimeData
+                : mockErrorRateData,
+            }),
+          } as Response)
       );
 
       render(<PerformanceStats provider='deepseek' />);
@@ -578,18 +573,16 @@ describe('PerformanceStats 组件', () => {
 
     it('应该支持model参数', async () => {
       const fetchMock = (global.fetch as jest.Mock).mockImplementation(
-        (url: string) => {
-          if (url.includes('model=deepseek-chat')) {
-            return Promise.resolve({
-              ok: true,
-              json: async () => ({ success: true, data: mockResponseTimeData }),
-            } as Response);
-          }
-          return Promise.resolve({
+        (url: string) =>
+          Promise.resolve({
             ok: true,
-            json: async () => ({ success: true, data: mockErrorRateData }),
-          } as Response);
-        }
+            json: async () => ({
+              success: true,
+              data: url.includes('response-time')
+                ? mockResponseTimeData
+                : mockErrorRateData,
+            }),
+          } as Response)
       );
 
       render(<PerformanceStats model='deepseek-chat' />);

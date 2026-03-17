@@ -122,7 +122,7 @@ export function MembershipInfo({
   };
 
   const getUsageDisplay = (current: number, limit: number | null): string => {
-    if (limit === null) return `${current.toLocaleString()}`;
+    if (limit === null || limit === 0) return `${current.toLocaleString()}`;
     return `${current.toLocaleString()} / ${limit.toLocaleString()}`;
   };
 

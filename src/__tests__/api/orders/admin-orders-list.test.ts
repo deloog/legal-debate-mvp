@@ -171,9 +171,9 @@ describe('GET /api/admin/orders', () => {
 
       expect(testResponse.status).toBe(200);
       expect(testResponse.success).toBe(true);
-      expect(testResponse.data.data.orders).toBeDefined();
-      expect(Array.isArray(testResponse.data.data.orders)).toBe(true);
-      expect(testResponse.data.data.pagination).toBeDefined();
+      expect(testResponse.data.orders).toBeDefined();
+      expect(Array.isArray(testResponse.data.orders)).toBe(true);
+      expect(testResponse.data.pagination).toBeDefined();
     });
 
     it('应返回统计摘要', async () => {
@@ -184,14 +184,14 @@ describe('GET /api/admin/orders', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.summary).toBeDefined();
-      expect(testResponse.data.data.summary.total).toBeDefined();
-      expect(testResponse.data.data.summary.paidCount).toBeDefined();
-      expect(testResponse.data.data.summary.paidAmount).toBeDefined();
-      expect(testResponse.data.data.summary.pendingCount).toBeDefined();
-      expect(testResponse.data.data.summary.pendingAmount).toBeDefined();
-      expect(testResponse.data.data.summary.failedCount).toBeDefined();
-      expect(testResponse.data.data.summary.failedAmount).toBeDefined();
+      expect(testResponse.data.summary).toBeDefined();
+      expect(testResponse.data.summary.total).toBeDefined();
+      expect(testResponse.data.summary.paidCount).toBeDefined();
+      expect(testResponse.data.summary.paidAmount).toBeDefined();
+      expect(testResponse.data.summary.pendingCount).toBeDefined();
+      expect(testResponse.data.summary.pendingAmount).toBeDefined();
+      expect(testResponse.data.summary.failedCount).toBeDefined();
+      expect(testResponse.data.summary.failedAmount).toBeDefined();
     });
 
     it('应使用默认分页参数', async () => {
@@ -202,8 +202,8 @@ describe('GET /api/admin/orders', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.pagination.page).toBe(1);
-      expect(testResponse.data.data.pagination.limit).toBe(20);
+      expect(testResponse.data.pagination.page).toBe(1);
+      expect(testResponse.data.pagination.limit).toBe(20);
     });
 
     it('应支持自定义分页', async () => {
@@ -214,8 +214,8 @@ describe('GET /api/admin/orders', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.pagination.page).toBe(2);
-      expect(testResponse.data.data.pagination.limit).toBe(10);
+      expect(testResponse.data.pagination.page).toBe(2);
+      expect(testResponse.data.pagination.limit).toBe(10);
     });
 
     it('limit超过100应自动限制为100', async () => {
@@ -449,7 +449,7 @@ describe('GET /api/admin/orders', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      const order = testResponse.data.data.orders[0];
+      const order = testResponse.data.orders[0];
       expect(order.id).toBeDefined();
       expect(order.orderNo).toBeDefined();
       expect(order.userId).toBeDefined();
@@ -476,7 +476,7 @@ describe('GET /api/admin/orders', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      const order = testResponse.data.data.orders[0];
+      const order = testResponse.data.orders[0];
       expect(typeof order.amount).toBe('number');
     });
 
@@ -490,10 +490,10 @@ describe('GET /api/admin/orders', () => {
       const response = await GET(request);
       const testResponse = await createTestResponse(response);
 
-      expect(testResponse.data.data.pagination.total).toBe(25);
-      expect(testResponse.data.data.pagination.page).toBe(2);
-      expect(testResponse.data.data.pagination.limit).toBe(10);
-      expect(testResponse.data.data.pagination.totalPages).toBe(3);
+      expect(testResponse.data.pagination.total).toBe(25);
+      expect(testResponse.data.pagination.page).toBe(2);
+      expect(testResponse.data.pagination.limit).toBe(10);
+      expect(testResponse.data.pagination.totalPages).toBe(3);
     });
   });
 

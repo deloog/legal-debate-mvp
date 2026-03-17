@@ -30,8 +30,10 @@ model User {
   preferences               Json?
   status                    UserStatus               @default(ACTIVE)
   password                  String?
+  expertProfile             KnowledgeGraphExpert?
   accounts                  Account[]
   aiFeedbacks               AIFeedback[]
+  verifiedReviews           AIOutputReview[]         @relation("VerifiedByUser")
   discussions               CaseDiscussion[]
   caseMembers               CaseTeamMember[]
   cases                     Case[]
@@ -57,7 +59,9 @@ model User {
   recommendationFeedbacks   RecommendationFeedback[]
   refundRecords             RefundRecord[]
   relationFeedbacks         RelationFeedback[]
+  reminderConfigs           ReminderConfig[]
   reminders                 Reminder[]
+  reviewerProfile           Reviewer?
   sessions                  Session[]
   tasksAssigned             Task[]                   @relation("TasksAssigned")
   tasksCreated              Task[]                   @relation("TasksCreated")
@@ -65,10 +69,6 @@ model User {
   usageRecords              UsageRecord[]
   userMemberships           UserMembership[]
   verificationCodes         VerificationCode[]
-  expertProfile             KnowledgeGraphExpert?
-  reviewerProfile           Reviewer?
-  verifiedReviews          AIOutputReview[] @relation("VerifiedByUser")
-  reminderConfigs           ReminderConfig[]
 
   @@index([email])
   @@index([username])
@@ -346,13 +346,13 @@ model Argument {
   aiProvider     String?
   generationTime Int?
   confidence     Float?
-  reasoning      String?
-  legalBasis     Json?
-  logicScore     Float?
-  legalScore     Float?
-  overallScore   Float?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  legalBasis     Json?
+  legalScore     Float?
+  logicScore     Float?
+  overallScore   Float?
+  reasoning      String?
   priority       String?
   round          DebateRound  @relation(fields: [roundId], references: [id], onDelete: Cascade)
 
@@ -365,7 +365,6 @@ model Argument {
 model LegalReference {
   id                  String               @id @default(cuid())
   caseId              String?
-  articleId           String?
   source              String
   content             String
   lawType             String?
@@ -391,6 +390,7 @@ model LegalReference {
   status              LegalReferenceStatus @default(VALID)
   tags                String[]
   version             String?
+  articleId           String?
   case                Case?                @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
   @@unique([caseId, articleId])
@@ -435,9 +435,9 @@ model LawArticle {
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @updatedAt
   dataSource              String                   @default("local")
-  sourceId                String?
   importedAt              DateTime?
   lastSyncedAt            DateTime?
+  sourceId                String?
   syncStatus              SyncStatus               @default(SYNCED)
   contracts               ContractLawArticle[]
   sourceRelations         LawArticleRelation[]     @relation("SourceRelations")
@@ -679,28 +679,28 @@ model VerificationCode {
 }
 
 model EnterpriseAccount {
-  id               String                  @id @default(cuid())
-  userId           String                  @unique
+  id               String                      @id @default(cuid())
+  userId           String                      @unique
   enterpriseName   String
-  creditCode       String                  @unique
+  creditCode       String                      @unique
   legalPerson      String
   industryType     String
   businessLicense  String?
-  status           EnterpriseStatus        @default(PENDING)
-  submittedAt      DateTime                @default(now())
+  status           EnterpriseStatus            @default(PENDING)
+  submittedAt      DateTime                    @default(now())
   reviewedAt       DateTime?
   reviewerId       String?
   reviewNotes      String?
   verificationData Json?
   expiresAt        DateTime?
   metadata         Json?
-  user             User                    @relation("UserEnterpriseAccount", fields: [userId], references: [id], onDelete: Cascade)
+  integrations     BusinessSystemIntegration[]
+  user             User                        @relation("UserEnterpriseAccount", fields: [userId], references: [id], onDelete: Cascade)
+  complianceChecks EnterpriseComplianceCheck[]
   reviews          EnterpriseReview[]
   riskProfiles     EnterpriseRiskProfile[]
-  reminderConfigs  ReminderConfig[]
-  integrations     BusinessSystemIntegration[]
-  complianceChecks EnterpriseComplianceCheck[]
   executiveReports ExecutiveReport[]
+  reminderConfigs  ReminderConfig[]
 
   @@index([userId])
   @@index([status])
@@ -1338,29 +1338,29 @@ model ContractTemplate {
   name          String
   code          String    @unique
   category      String
-  subCategory   String?
-  description   String?
   content       String
-  fullText      String?
   variables     Json?
-  clauses       Json?
-  riskWarnings  Json?
-  usageGuide    String?
-  source        String    @default("samr")
-  sourceUrl     String?
-  sourceId      String?
-  publishedDate DateTime?
-  effectiveDate DateTime?
-  version       String    @default("1.0")
-  isLatest      Boolean   @default(true)
-  priority      String    @default("P1")
-  tags          String[]
-  keywords      String[]
-  isActive      Boolean   @default(true)
   isDefault     Boolean   @default(false)
-  viewCount     Int       @default(0)
+  isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  clauses       Json?
+  description   String?
+  effectiveDate DateTime?
+  fullText      String?
+  isLatest      Boolean   @default(true)
+  keywords      String[]
+  priority      String    @default("P1")
+  publishedDate DateTime?
+  riskWarnings  Json?
+  source        String    @default("samr")
+  sourceId      String?
+  sourceUrl     String?
+  subCategory   String?
+  tags          String[]
+  usageGuide    String?
+  version       String    @default("1.0")
+  viewCount     Int       @default(0)
 
   @@index([category])
   @@index([source])
@@ -1386,8 +1386,8 @@ model CaseExample {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   dataSource   String     @default("cail")
-  sourceId     String?
   importedAt   DateTime?
+  sourceId     String?
 
   @@index([type])
   @@index([cause])
@@ -1521,8 +1521,8 @@ model Notification {
 }
 
 model Contract {
-  id              String               @id @default(cuid())
-  contractNumber  String               @unique
+  id              String                @id @default(cuid())
+  contractNumber  String                @unique
   caseId          String?
   consultationId  String?
   clientType      String
@@ -1538,13 +1538,16 @@ model Contract {
   scope           String
   feeType         FeeType
   totalFee        Decimal
-  paidAmount      Decimal              @default(0)
+  paidAmount      Decimal               @default(0)
   feeDetails      Json?
   terms           Json?
   specialTerms    String?
-  status          ContractStatus       @default(DRAFT)
+  status          ContractStatus        @default(DRAFT)
   signedAt        DateTime?
   signatureData   Json?
+  filePath        String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
   clientSignature String?
   clientSignedAt  DateTime?
   clientSignedIp  String?
@@ -1552,16 +1555,13 @@ model Contract {
   lawyerSignedAt  DateTime?
   lawyerSignedIp  String?
   signatureDevice String?
-  filePath        String?
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
   approvals       ContractApproval[]
   clauseRisks     ContractClauseRisk[]
   lawArticles     ContractLawArticle[]
   payments        ContractPayment[]
+  performances    ContractPerformance[]
   versions        ContractVersion[]
-  performances    ContractPerformance[] // 履约节点
-  case            Case?                @relation(fields: [caseId], references: [id])
+  case            Case?                 @relation(fields: [caseId], references: [id])
 
   @@index([caseId])
   @@index([clientName])
@@ -1637,11 +1637,11 @@ model ApprovalTemplate {
   name           String
   description    String?
   steps          Json
-  flowDefinition Json?    // 可视化工作流节点定义（WorkflowDefinition格式）
-  category       String?  // 模板分类，如"合同审批"、"费用报销"等
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  category       String?
+  flowDefinition Json?
 
   @@index([isActive])
   @@index([category])
@@ -1677,10 +1677,10 @@ model ApprovalStep {
   status        StepStatus
   decision      String?
   comment       String?
-  parallelGroup String?          // 并行审批分组标识，同组步骤并行执行
-  nodeId        String?          // 对应工作流节点ID，用于可视化追踪
   createdAt     DateTime         @default(now())
   completedAt   DateTime?
+  nodeId        String?
+  parallelGroup String?
   approval      ContractApproval @relation(fields: [approvalId], references: [id], onDelete: Cascade)
 
   @@index([approvalId])
@@ -1722,10 +1722,10 @@ model LawArticleRelation {
   verificationStatus VerificationStatus          @default(PENDING)
   verifiedBy         String?
   verifiedAt         DateTime?
-  addedByExpertId    String?
   createdBy          String?
   createdAt          DateTime                    @default(now())
   updatedAt          DateTime                    @updatedAt
+  addedByExpertId    String?
   aiConfidence       Float?
   aiCreatedAt        DateTime?
   aiModel            String?
@@ -1735,11 +1735,11 @@ model LawArticleRelation {
   reviewHistory      Json?
   aiFeedbacks        AIFeedback[]
   qualityScore       KnowledgeGraphQualityScore?
+  addedByExpert      KnowledgeGraphExpert?       @relation("ExpertAddedRelations", fields: [addedByExpertId], references: [id])
   source             LawArticle                  @relation("SourceRelations", fields: [sourceId], references: [id], onDelete: Cascade)
   target             LawArticle                  @relation("TargetRelations", fields: [targetId], references: [id], onDelete: Cascade)
-  feedbacks          RelationFeedback[]
-  addedByExpert      KnowledgeGraphExpert?       @relation("ExpertAddedRelations", fields: [addedByExpertId], references: [id])
   verifiedByExpert   KnowledgeGraphExpert?       @relation("ExpertVerifiedRelations", fields: [verifiedBy], references: [id])
+  feedbacks          RelationFeedback[]
 
   @@index([sourceId, targetId, relationType])
   @@index([sourceId])
@@ -1825,14 +1825,14 @@ model RelationFeedback {
 }
 
 model KnowledgeGraphCache {
-  id                String   @id @default(cuid())
-  cacheType         String   // 'node_neighbors' | 'shortest_path' | 'subgraph'
-  cacheKey          String   @unique
-  cacheData         Json     // 缓存数据（JSON格式）
-  hitCount          Int      @default(0)
-  expiresAt         DateTime // 过期时间
-  createdAt         DateTime @default(now())
-  lastAccessedAt    DateTime?
+  id             String    @id @default(cuid())
+  cacheType      String
+  cacheKey       String    @unique
+  cacheData      Json
+  hitCount       Int       @default(0)
+  expiresAt      DateTime
+  createdAt      DateTime  @default(now())
+  lastAccessedAt DateTime?
 
   @@index([cacheType])
   @@index([cacheKey])
@@ -1973,6 +1973,370 @@ model KnowledgeGraphQualityScore {
   @@index([qualityScore])
   @@index([qualityLevel])
   @@map("knowledge_graph_quality_scores")
+}
+
+model KnowledgeGraphExpert {
+  id                String               @id @default(cuid())
+  userId            String               @unique
+  expertiseAreas    String[]
+  expertLevel       ExpertLevel          @default(JUNIOR)
+  certifiedBy       String?
+  certifiedAt       DateTime?
+  notes             String?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  addedRelations    LawArticleRelation[] @relation("ExpertAddedRelations")
+  verifiedRelations LawArticleRelation[] @relation("ExpertVerifiedRelations")
+}
+
+model KnowledgeGraphSnapshot {
+  id                String   @id @default(cuid())
+  snapshotDate      DateTime @unique
+  version           String
+  versionLabel      String
+  totalArticles     Int      @default(0)
+  totalRelations    Int      @default(0)
+  verifiedRelations Int      @default(0)
+  pendingRelations  Int      @default(0)
+  averageConfidence Float    @default(0)
+  snapshotData      Json?
+  changes           Json?
+  status            String   @default("COMPLETED")
+  description       String?
+  createdBy         String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([snapshotDate])
+  @@index([version])
+  @@index([status])
+  @@map("knowledge_graph_snapshots")
+}
+
+model Reviewer {
+  id                   String           @id @default(cuid())
+  userId               String           @unique
+  reviewerLevel        ReviewerLevel    @default(JUNIOR)
+  specialty            String[]
+  totalReviews         Int              @default(0)
+  approvedCount        Int              @default(0)
+  rejectedCount        Int              @default(0)
+  revisionCount        Int              @default(0)
+  averageReviewTime    Float?
+  accuracyRate         Float?
+  maxConcurrentReviews Int              @default(10)
+  isActive             Boolean          @default(true)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  reviews              AIOutputReview[]
+  user                 User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([reviewerLevel])
+  @@index([isActive])
+  @@map("reviewers")
+}
+
+model AIOutputReview {
+  id              String               @id @default(cuid())
+  outputType      AIOutputType
+  outputId        String?
+  content         String
+  aiProvider      String?
+  aiModel         String?
+  caseId          String?
+  documentId      String?
+  consultationId  String?
+  status          AIOutputReviewStatus @default(PENDING)
+  priority        Int                  @default(0)
+  reviewerId      String?
+  verifiedBy      String?
+  verifiedAt      DateTime?
+  verifiedComment String?
+  sourceValidated Boolean              @default(false)
+  sourceUrl       String?
+  validationError String?
+  confidenceScore Float?
+  reviewHistory   Json?
+  reviewDuration  Int?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  reviewer        Reviewer?            @relation(fields: [reviewerId], references: [id])
+  verifiedByUser  User?                @relation("VerifiedByUser", fields: [verifiedBy], references: [id])
+
+  @@index([outputType])
+  @@index([outputId])
+  @@index([status])
+  @@index([priority])
+  @@index([reviewerId])
+  @@index([caseId])
+  @@index([createdAt])
+  @@index([verifiedBy])
+  @@map("ai_output_reviews")
+}
+
+model ContractPerformance {
+  id                 String          @id @default(cuid())
+  contractId         String
+  milestone          String
+  milestoneDate      DateTime
+  milestoneStatus    MilestoneStatus @default(PENDING)
+  description        String?
+  milestoneType      String?
+  actualDate         DateTime?
+  actualAmount       Decimal?        @db.Decimal(15, 2)
+  variance           Decimal?        @db.Decimal(15, 2)
+  varianceReason     String?
+  isAnomalous        Boolean         @default(false)
+  anomalyType        AnomalyType?
+  anomalyDescription String?
+  recommendedAction  String?
+  reminderEnabled    Boolean         @default(true)
+  reminderDays       Int[]           @default([7, 3, 1])
+  reminderSent       Boolean         @default(false)
+  reminderCount      Int             @default(0)
+  lastReminderAt     DateTime?
+  responsibleParty   String?
+  responsibleRole    String?
+  caseId             String?
+  notes              String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  contract           Contract        @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  @@index([contractId])
+  @@index([milestoneDate])
+  @@index([milestoneStatus])
+  @@index([isAnomalous])
+  @@index([caseId])
+  @@index([reminderSent])
+  @@map("contract_performances")
+}
+
+model ReminderConfig {
+  id                 String             @id @default(cuid())
+  enterpriseId       String?
+  userId             String?
+  reminderType       String
+  enabled            Boolean            @default(true)
+  channels           String[]           @default(["IN_APP"])
+  advanceDays        Int[]              @default([7, 3, 1])
+  timeOfDay          String?
+  isRecurring        Boolean            @default(false)
+  recurringPattern   String?
+  isActive           Boolean            @default(true)
+  totalRemindersSent Int                @default(0)
+  lastSentAt         DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  enterprise         EnterpriseAccount? @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
+  user               User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([enterpriseId, reminderType])
+  @@unique([userId, reminderType])
+  @@index([enterpriseId])
+  @@index([userId])
+  @@index([reminderType])
+  @@index([enabled])
+  @@map("reminder_configs")
+}
+
+model BusinessSystemIntegration {
+  id                 String               @id @default(cuid())
+  enterpriseId       String
+  systemType         BusinessSystemType
+  systemName         String
+  systemUrl          String
+  authType           IntegrationAuthType
+  authToken          String?
+  authTokenEncrypted Boolean              @default(false)
+  apiKey             String?
+  apiKeyEncrypted    Boolean              @default(false)
+  refreshToken       String?
+  tokenExpiresAt     DateTime?
+  syncConfig         Json
+  syncEnabled        Boolean              @default(true)
+  syncInterval       Int                  @default(3600)
+  webhookUrl         String?
+  webhookSecret      String?
+  webhookEnabled     Boolean              @default(false)
+  webhookEvents      String[]             @default([])
+  status             IntegrationStatus    @default(PENDING)
+  lastSyncAt         DateTime?
+  lastSyncStatus     String?
+  lastSyncError      String?
+  connectionTestedAt DateTime?
+  connectionStatus   String?
+  totalSyncs         Int                  @default(0)
+  successSyncs       Int                  @default(0)
+  failedSyncs        Int                  @default(0)
+  description        String?
+  metadata           Json?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  enterprise         EnterpriseAccount    @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
+  syncLogs           IntegrationSyncLog[]
+
+  @@index([enterpriseId])
+  @@index([systemType])
+  @@index([status])
+  @@index([lastSyncAt])
+  @@map("business_system_integrations")
+}
+
+model IntegrationSyncLog {
+  id               String                    @id @default(cuid())
+  integrationId    String
+  syncType         String
+  eventType        IntegrationSyncEvent?
+  direction        String
+  status           String
+  startedAt        DateTime                  @default(now())
+  completedAt      DateTime?
+  recordsProcessed Int                       @default(0)
+  recordsCreated   Int                       @default(0)
+  recordsUpdated   Int                       @default(0)
+  recordsDeleted   Int                       @default(0)
+  errorMessage     String?
+  errorDetails     Json?
+  requestData      Json?
+  responseData     Json?
+  duration         Int?
+  createdAt        DateTime                  @default(now())
+  integration      BusinessSystemIntegration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@index([integrationId])
+  @@index([syncType])
+  @@index([status])
+  @@index([startedAt])
+  @@index([eventType])
+  @@map("integration_sync_logs")
+}
+
+model ComplianceRule {
+  id                String                      @id @default(cuid())
+  ruleCode          String                      @unique
+  ruleName          String
+  ruleType          ComplianceRuleType
+  source            ComplianceRuleSource
+  sourceUrl         String?
+  description       String?
+  effectiveDate     DateTime
+  expiryDate        DateTime?
+  businessProcesses String[]
+  controlPoints     String[]
+  checklistItems    Json[]
+  status            String                      @default("active")
+  version           String                      @default("1.0")
+  lastUpdated       DateTime                    @default(now())
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
+  sourceRelations   ComplianceRuleRelation[]    @relation("SourceRuleRelations")
+  targetRelations   ComplianceRuleRelation[]    @relation("TargetRuleRelations")
+  complianceChecks  EnterpriseComplianceCheck[]
+
+  @@index([ruleType])
+  @@index([source])
+  @@index([status])
+  @@index([effectiveDate])
+  @@map("compliance_rules")
+}
+
+model ComplianceRuleRelation {
+  id           String                     @id @default(cuid())
+  sourceRuleId String
+  targetRuleId String
+  relationType ComplianceRuleRelationType
+  strength     Float                      @default(1.0)
+  confidence   Float                      @default(1.0)
+  description  String?
+  status       String                     @default("pending")
+  verifiedBy   String?
+  verifiedAt   DateTime?
+  createdAt    DateTime                   @default(now())
+  updatedAt    DateTime                   @updatedAt
+  sourceRule   ComplianceRule             @relation("SourceRuleRelations", fields: [sourceRuleId], references: [id], onDelete: Cascade)
+  targetRule   ComplianceRule             @relation("TargetRuleRelations", fields: [targetRuleId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceRuleId, targetRuleId, relationType])
+  @@index([sourceRuleId])
+  @@index([targetRuleId])
+  @@index([relationType])
+  @@index([status])
+  @@map("compliance_rule_relations")
+}
+
+model EnterpriseComplianceCheck {
+  id                  String                @id @default(cuid())
+  enterpriseId        String
+  ruleId              String
+  checkDate           DateTime
+  checkResult         ComplianceCheckResult
+  checklistResults    Json[]
+  nonCompliances      Json[]
+  remediationPlan     String?
+  remediationDeadline DateTime?
+  remediationStatus   String                @default("pending")
+  reviewerId          String?
+  reviewerNotes       String?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  enterprise          EnterpriseAccount     @relation(fields: [enterpriseId], references: [id])
+  rule                ComplianceRule        @relation(fields: [ruleId], references: [id])
+
+  @@index([enterpriseId])
+  @@index([ruleId])
+  @@index([checkResult])
+  @@index([checkDate])
+  @@index([remediationStatus])
+  @@map("enterprise_compliance_checks")
+}
+
+model ExecutiveReport {
+  id              String              @id @default(cuid())
+  enterpriseId    String
+  reportType      ExecutiveReportType
+  title           String
+  summary         String?
+  metrics         Json
+  charts          Json[]
+  insights        String[]
+  generatedBy     String              @default("ai")
+  generatedAt     DateTime            @default(now())
+  periodStart     DateTime
+  periodEnd       DateTime
+  recipients      String[]
+  viewedCount     Int                 @default(0)
+  downloadedCount Int                 @default(0)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  enterprise      EnterpriseAccount   @relation(fields: [enterpriseId], references: [id])
+
+  @@index([enterpriseId])
+  @@index([reportType])
+  @@index([generatedAt])
+  @@map("executive_reports")
+}
+
+model IndustryRiskFeature {
+  id                     String   @id @default(cuid())
+  industryCode           String   @unique
+  industryName           String
+  industryCategory       String
+  riskCategories         String[]
+  commonRisks            Json[]
+  riskIndicators         Json[]
+  riskThresholds         Json
+  regulatoryRequirements Json?
+  isActive               Boolean  @default(true)
+  version                String   @default("1.0")
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@index([industryCategory])
+  @@index([isActive])
+  @@map("industry_risk_features")
 }
 
 enum UserRole {
@@ -2768,71 +3132,12 @@ enum ExpertLevel {
   MASTER
 }
 
-model KnowledgeGraphExpert {
-  id                String               @id @default(cuid())
-  userId            String               @unique
-  expertiseAreas    String[]
-  expertLevel       ExpertLevel          @default(JUNIOR)
-  certifiedBy       String?
-  certifiedAt       DateTime?
-  notes             String?
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
-  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  addedRelations    LawArticleRelation[] @relation("ExpertAddedRelations")
-  verifiedRelations LawArticleRelation[] @relation("ExpertVerifiedRelations")
-}
-
-// 知识图谱版本控制 - 快照模型
-model KnowledgeGraphSnapshot {
-  id              String     @id @default(cuid())
-  snapshotDate    DateTime   @unique
-  version         String     // 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'MANUAL'
-  versionLabel    String     // 版本标签，如 'v2026.02.25'
-  
-  // 快照统计
-  totalArticles   Int        @default(0)
-  totalRelations  Int        @default(0)
-  verifiedRelations Int      @default(0)
-  pendingRelations Int       @default(0)
-  averageConfidence Float    @default(0)
-  
-  // 完整快照数据（可选，用于完整恢复）
-  snapshotData    Json?      // { nodes: [], edges: [] }
-  
-  // 变更记录（与上一版本的差异）
-  changes         Json?      // [{ type, entityType, entityId, description }]
-  
-  // 快照状态
-  status          String     @default("COMPLETED")
-  
-  // 描述信息
-  description     String?
-  
-  // 创建者
-  createdBy       String?
-  
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-
-  @@index([snapshotDate])
-  @@index([version])
-  @@index([status])
-  @@map("knowledge_graph_snapshots")
-}
-
-// ============================================
-// 人工复核工作流模型
-// ============================================
-
-// 审核员等级枚举
 enum ReviewerLevel {
   JUNIOR
   SENIOR
   EXPERT
 }
 
-// AI输出审核状态
 enum AIOutputReviewStatus {
   PENDING
   IN_REVIEW
@@ -2841,7 +3146,6 @@ enum AIOutputReviewStatus {
   REVISION_REQUIRED
 }
 
-// AI输出类型
 enum AIOutputType {
   LEGAL_REFERENCE
   ARGUMENT
@@ -2852,107 +3156,6 @@ enum AIOutputType {
   OTHER
 }
 
-// 审核员模型
-model Reviewer {
-  id                String         @id @default(cuid())
-  userId            String         @unique
-  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // 审核资质
-  reviewerLevel     ReviewerLevel  @default(JUNIOR)
-  specialty         String[]       // 专业领域，如 ['合同法', '知识产权', '劳动法']
-
-  // 审核统计
-  totalReviews      Int            @default(0)
-  approvedCount     Int            @default(0)
-  rejectedCount    Int            @default(0)
-  revisionCount    Int            @default(0)
-  averageReviewTime Float?         // 平均审核时间（秒）
-
-  // 质量评估
-  accuracyRate      Float?         // 准确率（后续验证通过的占比）
-
-  // 审核能力
-  maxConcurrentReviews Int        @default(10)  // 最大并发审核数
-  isActive         Boolean         @default(true)
-
-  // 审核历史
-  reviews          AIOutputReview[]
-
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-
-  @@index([userId])
-  @@index([reviewerLevel])
-  @@index([isActive])
-  @@map("reviewers")
-}
-
-// AI输出复核模型
-model AIOutputReview {
-  id                  String              @id @default(cuid())
-
-  // 输出信息
-  outputType          AIOutputType
-  outputId            String?             // 关联的AI输出ID
-  content             String              // AI生成的内容
-  aiProvider          String?             // AI服务提供商
-  aiModel             String?             // AI模型名称
-
-  // 上下文信息（可选，关联到具体业务）
-  caseId              String?
-  documentId          String?
-  consultationId      String?
-
-  // 审核状态
-  status              AIOutputReviewStatus @default(PENDING)
-
-  // 优先级
-  priority            Int                 @default(0)  // 数值越大优先级越高
-
-  // 审核人
-  reviewerId          String?
-  reviewer            Reviewer?           @relation(fields: [reviewerId], references: [id])
-
-  // 审核结果
-  verifiedBy          String?              // 审核人ID（冗余存储）
-  verifiedByUser      User?                @relation("VerifiedByUser", fields: [verifiedBy], references: [id])
-  verifiedAt          DateTime?           // 审核时间
-  verifiedComment     String?              // 审核意见
-
-  // 强制溯源验证
-  sourceValidated     Boolean              @default(false)  // 是否通过权威数据库验证
-  sourceUrl           String?              // 权威来源链接
-  validationError     String?              // 验证失败原因
-
-  // 置信度分数
-  confidenceScore     Float?               // AI输出的置信度
-
-  // 审核历史记录
-  reviewHistory       Json?                // [{ action, reviewerId, comment, timestamp }]
-
-  // 统计信息
-  reviewDuration      Int?                 // 审核耗时（秒）
-
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-
-  @@index([outputType])
-  @@index([outputId])
-  @@index([status])
-  @@index([priority])
-  @@index([reviewerId])
-  @@index([caseId])
-  @@index([createdAt])
-  @@index([verifiedBy])
-  @@map("ai_output_reviews")
-}
-
-// ============================================
-// 合同履约监控模型
-// ============================================
-
-// 履约节点状态
 enum MilestoneStatus {
   PENDING
   IN_PROGRESS
@@ -2961,116 +3164,16 @@ enum MilestoneStatus {
   CANCELLED
 }
 
-// 异常类型
 enum AnomalyType {
-  EARLY_PAYMENT    // 超进度付款
-  LATE_PAYMENT     // 延迟付款
-  UNVERIFIED_PAYMENT // 未验收结算
-  EARLY_DELIVERY   // 超前交付
-  LATE_DELIVERY    // 延迟交付
-  QUALITY_ISSUE    // 质量问题
-  OTHER            // 其他
+  EARLY_PAYMENT
+  LATE_PAYMENT
+  UNVERIFIED_PAYMENT
+  EARLY_DELIVERY
+  LATE_DELIVERY
+  QUALITY_ISSUE
+  OTHER
 }
 
-// 合同履约节点模型
-model ContractPerformance {
-  id                String          @id @default(cuid())
-  contractId        String
-  contract          Contract        @relation(fields: [contractId], references: [id], onDelete: Cascade)
-
-  // 履约节点信息
-  milestone         String          // 节点名称，如"首付款"、"中期交付"、"最终验收"
-  milestoneDate     DateTime        // 节点日期（计划完成日期）
-  milestoneStatus   MilestoneStatus @default(PENDING)
-  description       String?         // 节点描述
-  milestoneType     String?         // 节点类型：'payment' | 'delivery' | 'milestone' | 'deadline'
-
-  // 实际履行情况
-  actualDate        DateTime?       // 实际完成日期
-  actualAmount      Decimal?        @db.Decimal(15, 2) // 实际金额
-  variance          Decimal?        @db.Decimal(15, 2) // 差异（约定-实际）
-  varianceReason    String?         // 差异原因
-
-  // 异常检测
-  isAnomalous       Boolean          @default(false)
-  anomalyType       AnomalyType?     // 异常类型
-  anomalyDescription String?         // 异常描述
-  recommendedAction String?         // 推荐处理措施
-
-  // 提醒设置
-  reminderEnabled   Boolean          @default(true)
-  reminderDays      Int[]            @default([7, 3, 1]) // 提前提醒天数
-  reminderSent      Boolean          @default(false)
-  reminderCount     Int              @default(0)
-  lastReminderAt    DateTime?        // 最后一次提醒时间
-
-  // 责任人信息
-  responsibleParty  String?         // 责任人
-  responsibleRole   String?         // 责任人角色
-
-  // 关联案件（可选）
-  caseId            String?
-
-  // 备注
-  notes             String?
-
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-
-  @@index([contractId])
-  @@index([milestoneDate])
-  @@index([milestoneStatus])
-  @@index([isAnomalous])
-  @@index([caseId])
-  @@index([reminderSent])
-  @@map("contract_performances")
-}
-
-// 提醒配置模型
-model ReminderConfig {
-  id                String          @id @default(cuid())
-
-  // 关联企业
-  enterpriseId      String?
-  enterprise        EnterpriseAccount? @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
-
-  // 关联用户（个人提醒配置）
-  userId            String?
-  user              User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // 提醒类型
-  reminderType      String          // 'CONTRACT_MILESTONE' | 'PAYMENT_DUE' | etc.
-
-  // 提醒设置
-  enabled           Boolean          @default(true)
-  channels          String[]        @default(["IN_APP"]) // 通知渠道：IN_APP, EMAIL, SMS, PUSH
-  advanceDays       Int[]           @default([7, 3, 1]) // 提前提醒天数
-  timeOfDay        String?         // 提醒时间（HH:mm格式），默认09:00
-
-  // 高级设置
-  isRecurring       Boolean          @default(false)
-  recurringPattern  String?          // 重复模式：'DAILY' | 'WEEKLY' | 'MONTHLY'
-
-  // 状态
-  isActive          Boolean          @default(true)
-
-  // 统计
-  totalRemindersSent Int             @default(0)
-  lastSentAt        DateTime?
-
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-
-  @@unique([enterpriseId, reminderType])
-  @@unique([userId, reminderType])
-  @@index([enterpriseId])
-  @@index([userId])
-  @@index([reminderType])
-  @@index([enabled])
-  @@map("reminder_configs")
-}
-
-// 集成状态枚举
 enum IntegrationStatus {
   ACTIVE
   INACTIVE
@@ -3079,7 +3182,6 @@ enum IntegrationStatus {
   SUSPENDED
 }
 
-// 同步事件类型枚举
 enum IntegrationSyncEvent {
   CONTRACT_CREATED
   CONTRACT_UPDATED
@@ -3094,7 +3196,6 @@ enum IntegrationSyncEvent {
   CUSTOM
 }
 
-// 认证类型枚举
 enum IntegrationAuthType {
   API_KEY
   OAUTH2
@@ -3102,7 +3203,6 @@ enum IntegrationAuthType {
   BEARER_TOKEN
 }
 
-// 业务系统类型枚举
 enum BusinessSystemType {
   ERP
   CRM
@@ -3113,357 +3213,45 @@ enum BusinessSystemType {
   CUSTOM
 }
 
-// 业务系统集成模型
-model BusinessSystemIntegration {
-  id                String              @id @default(cuid())
-
-  // 关联企业
-  enterpriseId      String
-  enterprise        EnterpriseAccount   @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
-
-  // 系统信息
-  systemType        BusinessSystemType
-  systemName        String
-  systemUrl         String
-
-  // 认证信息
-  authType          IntegrationAuthType
-  authToken         String?             // 加密存储
-  authTokenEncrypted Boolean             @default(false)
-  apiKey            String?             // 加密存储
-  apiKeyEncrypted   Boolean             @default(false)
-  refreshToken      String?
-  tokenExpiresAt    DateTime?
-
-  // 同步配置
-  syncConfig        Json                // 同步规则配置
-  syncEnabled       Boolean             @default(true)
-  syncInterval      Int                 @default(3600) // 同步间隔（秒），默认1小时
-
-  // Webhook 配置
-  webhookUrl        String?
-  webhookSecret     String?             // 用于签名验证
-  webhookEnabled    Boolean             @default(false)
-  webhookEvents     String[]            @default([]) // 订阅的事件类型
-
-  // 状态
-  status            IntegrationStatus   @default(PENDING)
-  lastSyncAt        DateTime?
-  lastSyncStatus   String?
-  lastSyncError    String?
-
-  // 连接测试
-  connectionTestedAt DateTime?
-  connectionStatus  String?
-
-  // 统计
-  totalSyncs       Int                 @default(0)
-  successSyncs     Int                 @default(0)
-  failedSyncs      Int                 @default(0)
-
-  // 备注
-  description       String?
-  metadata          Json?
-
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-
-  // 关联
-  syncLogs          IntegrationSyncLog[]
-
-  // 索引
-  @@index([enterpriseId])
-  @@index([systemType])
-  @@index([status])
-  @@index([lastSyncAt])
-  @@map("business_system_integrations")
-}
-
-// 集成同步日志模型
-model IntegrationSyncLog {
-  id                String              @id @default(cuid())
-
-  // 关联集成
-  integrationId     String
-  integration       BusinessSystemIntegration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
-
-  // 同步信息
-  syncType          String              // 'manual' | 'scheduled' | 'webhook'
-  eventType         IntegrationSyncEvent?
-  direction         String              // 'inbound' | 'outbound'
-
-  // 状态
-  status            String              // 'pending' | 'running' | 'completed' | 'failed'
-  startedAt         DateTime            @default(now())
-  completedAt       DateTime?
-
-  // 数据统计
-  recordsProcessed  Int                 @default(0)
-  recordsCreated    Int                 @default(0)
-  recordsUpdated    Int                 @default(0)
-  recordsDeleted    Int                 @default(0)
-
-  // 错误信息
-  errorMessage      String?
-  errorDetails      Json?
-
-  // 请求/响应
-  requestData       Json?
-  responseData      Json?
-
-  // 执行时长（毫秒）
-  duration          Int?
-
-  createdAt         DateTime            @default(now())
-
-  // 索引
-  @@index([integrationId])
-  @@index([syncType])
-  @@index([status])
-  @@index([startedAt])
-  @@index([eventType])
-  @@map("integration_sync_logs")
-}
-
-// ========== 企业风险画像系统相关枚举 ==========
-
-// 合规规则类型
 enum ComplianceRuleType {
-  REGULATORY  // 监管规则
-  INDUSTRY    // 行业规则
-  INTERNAL    // 内部制度
+  REGULATORY
+  INDUSTRY
+  INTERNAL
 }
 
-// 合规规则来源
 enum ComplianceRuleSource {
-  NPC           // 全国人大
-  STATE_COUNCIL // 国务院
-  MINISTRY      // 部委
-  INDUSTRY_ASSOCIATION // 行业协会
-  INTERNAL      // 企业内部
+  NPC
+  STATE_COUNCIL
+  MINISTRY
+  INDUSTRY_ASSOCIATION
+  INTERNAL
 }
 
-// 合规检查结果
 enum ComplianceCheckResult {
-  COMPLIANT        // 符合
-  NON_COMPLIANT    // 不符合
-  PARTIAL_COMPLIANT // 部分符合
+  COMPLIANT
+  NON_COMPLIANT
+  PARTIAL_COMPLIANT
 }
 
-// 合规整改状态
 enum RemediationStatus {
-  PENDING      // 待整改
-  IN_PROGRESS  // 整改中
-  COMPLETED    // 已完成
-  OVERDUE      // 已逾期
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
 }
 
-// 报表类型
 enum ExecutiveReportType {
-  RISK_OVERVIEW      // 风险概览
-  COMPLIANCE_STATUS  // 合规状态
-  LEGAL_EFFICENCY    // 法务效率
-  CUSTOM             // 自定义
+  RISK_OVERVIEW
+  COMPLIANCE_STATUS
+  LEGAL_EFFICENCY
+  CUSTOM
 }
 
-// ========== 企业风险画像系统相关模型 ==========
-
-// 合规规则模型
-model ComplianceRule {
-  id               String             @id @default(cuid())
-
-  // 基本信息
-  ruleCode         String             @unique // 规则编号
-  ruleName         String
-  ruleType         ComplianceRuleType
-
-  // 规则内容
-  source           ComplianceRuleSource
-  sourceUrl        String?
-  description      String?
-  effectiveDate    DateTime
-  expiryDate       DateTime?
-
-  // 规则映射
-  businessProcesses String[]          // 关联的业务流程
-  controlPoints    String[]           // 控制点
-  checklistItems   Json[]             // 检查清单项
-
-  // 状态
-  status           String             @default("active") // 'active' | 'amended' | 'repealed'
-  version          String             @default("1.0")
-  lastUpdated      DateTime           @default(now())
-
-  // 关联
-  complianceChecks EnterpriseComplianceCheck[]
-  sourceRelations  ComplianceRuleRelation[] @relation("SourceRuleRelations")
-  targetRelations  ComplianceRuleRelation[] @relation("TargetRuleRelations")
-
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-
-  @@index([ruleType])
-  @@index([source])
-  @@index([status])
-  @@index([effectiveDate])
-  @@map("compliance_rules")
-}
-
-// 法规关联关系模型
-model ComplianceRuleRelation {
-  id              String                    @id @default(cuid())
-
-  // 关联的规则
-  sourceRuleId    String
-  targetRuleId    String
-  sourceRule      ComplianceRule            @relation("SourceRuleRelations", fields: [sourceRuleId], references: [id], onDelete: Cascade)
-  targetRule      ComplianceRule            @relation("TargetRuleRelations", fields: [targetRuleId], references: [id], onDelete: Cascade)
-
-  // 关系类型
-  relationType    ComplianceRuleRelationType // 'SUPERSEDES' | 'AMENDS' | 'REFERENCES' | 'CONFLICTS' | 'COMPLEMENTS' | 'RELATED'
-
-  // 关系属性
-  strength        Float                     @default(1.0) // 关系强度 0-1
-  confidence      Float                     @default(1.0) // 置信度 0-1
-  description     String?
-
-  // 审核状态
-  status          String                    @default("pending") // 'pending' | 'verified' | 'rejected'
-  verifiedBy      String?
-  verifiedAt      DateTime?
-
-  createdAt       DateTime                  @default(now())
-  updatedAt       DateTime                  @updatedAt
-
-  @@unique([sourceRuleId, targetRuleId, relationType])
-  @@index([sourceRuleId])
-  @@index([targetRuleId])
-  @@index([relationType])
-  @@index([status])
-  @@map("compliance_rule_relations")
-}
-
-// 法规关联关系类型枚举
 enum ComplianceRuleRelationType {
-  SUPERSEDES    // 废止 - 新法规废止旧法规
-  AMENDS        // 修订 - 新法规修订旧法规
-  REFERENCES   // 引用 - 引用其他法规
-  CONFLICTS    // 冲突 - 与其他法规冲突
-  COMPLEMENTS   // 补充 - 补充其他法规
-  RELATED      // 相关 - 与其他法规相关
+  SUPERSEDES
+  AMENDS
+  REFERENCES
+  CONFLICTS
+  COMPLEMENTS
+  RELATED
 }
-
-// 企业合规检查记录模型
-model EnterpriseComplianceCheck {
-  id               String                 @id @default(cuid())
-
-  // 关联
-  enterpriseId     String
-  enterprise       EnterpriseAccount      @relation(fields: [enterpriseId], references: [id])
-  ruleId           String
-  rule             ComplianceRule          @relation(fields: [ruleId], references: [id])
-
-  // 检查结果
-  checkDate        DateTime
-  checkResult      ComplianceCheckResult
-  checklistResults Json[]                 // 检查清单结果
-
-  // 不符合项
-  nonCompliances  Json[]                  // 具体不符合项
-  remediationPlan String?                 // 整改计划
-  remediationDeadline DateTime?           // 整改期限
-  remediationStatus String                @default("pending") // 'pending' | 'in_progress' | 'completed' | 'overdue'
-
-  // 审核人
-  reviewerId       String?
-  reviewerNotes    String?
-
-  createdAt        DateTime               @default(now())
-  updatedAt        DateTime               @updatedAt
-
-  @@index([enterpriseId])
-  @@index([ruleId])
-  @@index([checkResult])
-  @@index([checkDate])
-  @@index([remediationStatus])
-  @@map("enterprise_compliance_checks")
-}
-
-// 管理层报表模型
-model ExecutiveReport {
-  id               String             @id @default(cuid())
-
-  // 关联企业
-  enterpriseId     String
-  enterprise       EnterpriseAccount  @relation(fields: [enterpriseId], references: [id])
-
-  // 报表信息
-  reportType       ExecutiveReportType
-
-  // 报表内容
-  title            String
-  summary           String?
-  metrics          Json               // 关键指标
-  charts           Json[]             // 图表数据
-  insights         String[]           // 洞察和建议
-
-  // 生成信息
-  generatedBy      String             @default("ai") // 'ai' | 'user'
-  generatedAt      DateTime           @default(now())
-  periodStart      DateTime
-  periodEnd        DateTime
-
-  // 分发
-  recipients       String[]           // 收件人列表
-  viewedCount      Int                 @default(0)
-  downloadedCount  Int                 @default(0)
-
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-
-  @@index([enterpriseId])
-  @@index([reportType])
-  @@index([generatedAt])
-  @@map("executive_reports")
-}
-
-// 扩展EnterpriseRiskProfile模型 - 添加缺失的字段以支持完整的风险画像功能
-// 注意：现有EnterpriseRiskProfile模型的字段已在上面定义，此处添加更多分析相关的字段
-// 将在后续扩展中添加更多字段
-
-// ========== 行业风险特征库 ==========
-
-// 行业风险特征模型
-model IndustryRiskFeature {
-  id               String             @id @default(cuid())
-
-  // 行业信息
-  industryCode     String             @unique // 行业代码，如 'finance_banking', 'manufacturing'
-  industryName     String
-  industryCategory String             // 'finance' | 'manufacturing' | 'technology' | 'retail' | 'other'
-
-  // 风险特征
-  riskCategories   String[]           // 风险类别：['contract', 'compliance', 'litigation', 'employment', 'intellectual_property']
-  commonRisks      Json[]             // 常见风险特征
-  riskIndicators   Json[]             // 风险指标
-
-  // 风险阈值
-  riskThresholds   Json               // 不同风险等级的阈值配置
-
-  // 监管要求
-  regulatoryRequirements Json?        // 监管要求
-
-  // 状态
-  isActive         Boolean             @default(true)
-  version          String              @default("1.0")
-
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
-
-  @@index([industryCategory])
-  @@index([isActive])
-  @@map("industry_risk_features")
-}
-
-// 扩展Contract模型，添加履约节点关联
-// 注意：此关系通过ContractPerformance模型建立

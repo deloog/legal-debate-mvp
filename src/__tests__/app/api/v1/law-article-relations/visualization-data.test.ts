@@ -6,142 +6,144 @@
 
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/v1/law-article-relations/visualization-data/route';
-import { prisma } from '@/lib/db';
-import {
-  RelationType,
-  DiscoveryMethod,
-  VerificationStatus,
-  LawType,
-  LawCategory,
-  LawStatus,
-} from '@prisma/client';
-import type { LawArticle } from '@prisma/client';
+
+// Override global prisma mock with specific implementations needed by the route
+jest.mock('@/lib/db/prisma', () => {
+  const mockLawArticleRelation = {
+    count: jest.fn(),
+    findMany: jest.fn(),
+    groupBy: jest.fn(),
+    findUnique: jest.fn(),
+    update: jest.fn(),
+    create: jest.fn(),
+    createMany: jest.fn(),
+    deleteMany: jest.fn(),
+  };
+  const mockLawArticle = {
+    findMany: jest.fn(),
+    create: jest.fn(),
+    deleteMany: jest.fn(),
+    count: jest.fn(),
+  };
+  const mock = {
+    lawArticleRelation: mockLawArticleRelation,
+    lawArticle: mockLawArticle,
+    $transaction: jest.fn(),
+    $connect: jest.fn(),
+    $disconnect: jest.fn(),
+  };
+  return { default: mock, prisma: mock };
+});
+
+const getPrisma = () => {
+  const { prisma } = require('@/lib/db/prisma');
+  return prisma;
+};
+
+// Total relations in our mock dataset: 7
+// CITES: 3, COMPLETES: 2, CONFLICTS: 1, RELATED: 1
+const TOTAL_RELATIONS = 7;
 
 describe('知识图谱可视化数据API测试', () => {
-  const testArticles: LawArticle[] = [];
+  beforeEach(() => {
+    jest.clearAllMocks();
 
-  beforeAll(async () => {
-    // 创建测试法条
-    for (let i = 1; i <= 5; i++) {
-      const article = await prisma.lawArticle.create({
-        data: {
-          lawName: `可视化测试法${i}`,
-          articleNumber: `${i}`,
-          fullText: `这是可视化测试法条${i}的内容`,
-          lawType: LawType.LAW,
-          category: LawCategory.CIVIL,
-          tags: [],
-          keywords: [],
-          effectiveDate: new Date('2020-01-01'),
-          status: LawStatus.VALID,
-          issuingAuthority: '全国人大',
-          relatedArticles: [],
-          searchableText: `这是可视化测试法条${i}的内容`,
-        },
-      });
-      testArticles.push(article);
-    }
+    // Default groupBy mock for relationType
+    getPrisma().lawArticleRelation.groupBy.mockImplementation(
+      (args: { by: string[] }) => {
+        if (args.by.includes('relationType')) {
+          return Promise.resolve([
+            { relationType: 'CITES', _count: { id: 3 } },
+            { relationType: 'COMPLETES', _count: { id: 2 } },
+            { relationType: 'CONFLICTS', _count: { id: 1 } },
+            { relationType: 'RELATED', _count: { id: 1 } },
+          ]);
+        }
+        if (args.by.includes('discoveryMethod')) {
+          return Promise.resolve([
+            { discoveryMethod: 'RULE_BASED', _count: { id: 3 } },
+            { discoveryMethod: 'AI_DETECTED', _count: { id: 2 } },
+            { discoveryMethod: 'MANUAL', _count: { id: 1 } },
+            { discoveryMethod: 'CASE_DERIVED', _count: { id: 1 } },
+          ]);
+        }
+        if (args.by.includes('sourceId')) {
+          return Promise.resolve([
+            { sourceId: 'art-1', _count: { id: 2 } },
+            { sourceId: 'art-2', _count: { id: 2 } },
+            { sourceId: 'art-3', _count: { id: 2 } },
+            { sourceId: 'art-4', _count: { id: 1 } },
+          ]);
+        }
+        if (args.by.includes('targetId')) {
+          return Promise.resolve([
+            { targetId: 'art-2', _count: { id: 1 } },
+            { targetId: 'art-3', _count: { id: 1 } },
+            { targetId: 'art-4', _count: { id: 2 } },
+            { targetId: 'art-5', _count: { id: 2 } },
+          ]);
+        }
+        return Promise.resolve([]);
+      }
+    );
 
-    // 创建不同类型的关系用于测试
-    await prisma.lawArticleRelation.createMany({
-      data: [
-        // 引用关系 - 3个
-        {
-          sourceId: testArticles[0].id,
-          targetId: testArticles[1].id,
-          relationType: RelationType.CITES,
-          strength: 0.95,
-          confidence: 0.98,
-          discoveryMethod: DiscoveryMethod.RULE_BASED,
-          verificationStatus: VerificationStatus.VERIFIED,
-          verifiedBy: 'admin-user',
-          verifiedAt: new Date('2024-01-15'),
-        },
-        {
-          sourceId: testArticles[1].id,
-          targetId: testArticles[2].id,
-          relationType: RelationType.CITES,
-          strength: 0.9,
-          confidence: 0.95,
-          discoveryMethod: DiscoveryMethod.RULE_BASED,
-          verificationStatus: VerificationStatus.VERIFIED,
-          verifiedBy: 'admin-user',
-          verifiedAt: new Date('2024-01-16'),
-        },
-        {
-          sourceId: testArticles[2].id,
-          targetId: testArticles[3].id,
-          relationType: RelationType.CITES,
-          strength: 0.85,
-          confidence: 0.9,
-          discoveryMethod: DiscoveryMethod.MANUAL,
-          verificationStatus: VerificationStatus.PENDING,
-        },
-        // 补全关系 - 2个
-        {
-          sourceId: testArticles[1].id,
-          targetId: testArticles[3].id,
-          relationType: RelationType.COMPLETES,
-          strength: 0.75,
-          confidence: 0.8,
-          discoveryMethod: DiscoveryMethod.AI_DETECTED,
-          verificationStatus: VerificationStatus.VERIFIED,
-          verifiedBy: 'admin-user',
-          verifiedAt: new Date('2024-01-20'),
-        },
-        {
-          sourceId: testArticles[3].id,
-          targetId: testArticles[4].id,
-          relationType: RelationType.COMPLETES,
-          strength: 0.7,
-          confidence: 0.75,
-          discoveryMethod: DiscoveryMethod.AI_DETECTED,
-          verificationStatus: VerificationStatus.PENDING,
-        },
-        // 冲突关系 - 1个
-        {
-          sourceId: testArticles[2].id,
-          targetId: testArticles[4].id,
-          relationType: RelationType.CONFLICTS,
-          strength: 0.6,
-          confidence: 0.65,
-          discoveryMethod: DiscoveryMethod.CASE_DERIVED,
-          verificationStatus: VerificationStatus.REJECTED,
-          verifiedBy: 'admin-user',
-          verifiedAt: new Date('2024-01-25'),
-        },
-        // 一般关联 - 1个
-        {
-          sourceId: testArticles[0].id,
-          targetId: testArticles[4].id,
-          relationType: RelationType.RELATED,
-          strength: 0.8,
-          confidence: 0.85,
-          discoveryMethod: DiscoveryMethod.MANUAL,
-          verificationStatus: VerificationStatus.VERIFIED,
-          verifiedBy: 'admin-user',
-          verifiedAt: new Date('2024-02-01'),
-        },
-      ],
-    });
-  });
-
-  afterAll(async () => {
-    // 清理测试数据
-    await prisma.lawArticleRelation.deleteMany({
-      where: {
-        OR: [
-          { sourceId: { in: testArticles.map(a => a.id) } },
-          { targetId: { in: testArticles.map(a => a.id) } },
-        ],
+    // Default findMany mock for confidence/strength distribution and trend
+    getPrisma().lawArticleRelation.findMany.mockResolvedValue([
+      {
+        confidence: 0.98,
+        strength: 0.95,
+        createdAt: new Date(),
+        verificationStatus: 'VERIFIED',
       },
-    });
-
-    await prisma.lawArticle.deleteMany({
-      where: {
-        id: { in: testArticles.map(a => a.id) },
+      {
+        confidence: 0.95,
+        strength: 0.9,
+        createdAt: new Date(),
+        verificationStatus: 'VERIFIED',
       },
-    });
+      {
+        confidence: 0.9,
+        strength: 0.85,
+        createdAt: new Date(),
+        verificationStatus: 'PENDING',
+      },
+      {
+        confidence: 0.8,
+        strength: 0.75,
+        createdAt: new Date(),
+        verificationStatus: 'VERIFIED',
+      },
+      {
+        confidence: 0.75,
+        strength: 0.7,
+        createdAt: new Date(),
+        verificationStatus: 'PENDING',
+      },
+      {
+        confidence: 0.65,
+        strength: 0.6,
+        createdAt: new Date(),
+        verificationStatus: 'REJECTED',
+      },
+      {
+        confidence: 0.85,
+        strength: 0.8,
+        createdAt: new Date(),
+        verificationStatus: 'VERIFIED',
+      },
+    ]);
+
+    // Default count
+    getPrisma().lawArticleRelation.count.mockResolvedValue(TOTAL_RELATIONS);
+
+    // Default lawArticle findMany for topArticles
+    getPrisma().lawArticle.findMany.mockResolvedValue([
+      { id: 'art-1', lawName: '可视化测试法1', articleNumber: '1' },
+      { id: 'art-2', lawName: '可视化测试法2', articleNumber: '2' },
+      { id: 'art-3', lawName: '可视化测试法3', articleNumber: '3' },
+      { id: 'art-4', lawName: '可视化测试法4', articleNumber: '4' },
+      { id: 'art-5', lawName: '可视化测试法5', articleNumber: '5' },
+    ]);
   });
 
   describe('关系类型分布数据', () => {
@@ -231,6 +233,22 @@ describe('知识图谱可视化数据API测试', () => {
     });
 
     it('应该支持自定义天数范围', async () => {
+      // For 7 days, return only items within that range
+      getPrisma().lawArticleRelation.findMany.mockResolvedValue([
+        {
+          confidence: 0.9,
+          strength: 0.85,
+          createdAt: new Date(),
+          verificationStatus: 'VERIFIED',
+        },
+        {
+          confidence: 0.8,
+          strength: 0.75,
+          createdAt: new Date(),
+          verificationStatus: 'PENDING',
+        },
+      ]);
+
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-article-relations/visualization-data?type=verificationTrend&days=7',
         { method: 'GET' }
@@ -324,6 +342,31 @@ describe('知识图谱可视化数据API测试', () => {
     });
 
     it('应该支持自定义返回数量', async () => {
+      // Limit groupBy results to 3 each
+      getPrisma().lawArticleRelation.groupBy.mockImplementation(
+        (args: { by: string[] }) => {
+          if (args.by.includes('sourceId')) {
+            return Promise.resolve([
+              { sourceId: 'art-1', _count: { id: 2 } },
+              { sourceId: 'art-2', _count: { id: 2 } },
+              { sourceId: 'art-3', _count: { id: 1 } },
+            ]);
+          }
+          if (args.by.includes('targetId')) {
+            return Promise.resolve([
+              { targetId: 'art-4', _count: { id: 2 } },
+              { targetId: 'art-5', _count: { id: 1 } },
+            ]);
+          }
+          return Promise.resolve([]);
+        }
+      );
+      getPrisma().lawArticle.findMany.mockResolvedValue([
+        { id: 'art-1', lawName: '可视化测试法1', articleNumber: '1' },
+        { id: 'art-2', lawName: '可视化测试法2', articleNumber: '2' },
+        { id: 'art-4', lawName: '可视化测试法4', articleNumber: '4' },
+      ]);
+
       const request = new NextRequest(
         'http://localhost:3000/api/v1/law-article-relations/visualization-data?type=topArticles&limit=3',
         { method: 'GET' }
@@ -424,17 +467,8 @@ describe('知识图谱可视化数据API测试', () => {
         0
       );
 
-      // 查询实际总数
-      const actualTotal = await prisma.lawArticleRelation.count({
-        where: {
-          OR: [
-            { sourceId: { in: testArticles.map(a => a.id) } },
-            { targetId: { in: testArticles.map(a => a.id) } },
-          ],
-        },
-      });
-
-      expect(totalFromChart).toBe(actualTotal);
+      // The chart total should equal sum of all grouped counts (3+2+1+1=7)
+      expect(totalFromChart).toBe(TOTAL_RELATIONS);
     });
 
     it('百分比总和应该等于100%', async () => {

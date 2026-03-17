@@ -90,16 +90,7 @@ describe('审计日志系统', () => {
         new Error('数据库连接失败')
       );
 
-      const consoleSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
       await expect(createAuditLog(mockLogData)).resolves.not.toThrow();
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '创建审计日志失败:',
-        expect.any(Error)
-      );
     });
   });
 

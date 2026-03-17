@@ -566,8 +566,7 @@ describe('案件列表API - GET', () => {
       await GET(request);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '获取案件列表失败:',
-        expect.any(Error)
+        expect.stringContaining('获取案件列表失败:')
       );
       consoleErrorSpy.mockRestore();
     });
@@ -729,8 +728,7 @@ describe('案件删除API - DELETE', () => {
       });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        '删除案件失败:',
-        expect.any(Error)
+        expect.stringContaining('删除案件失败:')
       );
       consoleErrorSpy.mockRestore();
     });

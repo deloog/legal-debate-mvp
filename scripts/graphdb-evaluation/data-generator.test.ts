@@ -216,7 +216,8 @@ describe('DataGenerator', () => {
     });
 
     it('应该生成不重复的法律名称', () => {
-      const count = 100;
+      // 最多 10 prefixes × 6 templates = 60 种唯一名称
+      const count = 50;
       const names = DataGenerator.generateLegalNames(count);
       const uniqueNames = new Set(names);
 

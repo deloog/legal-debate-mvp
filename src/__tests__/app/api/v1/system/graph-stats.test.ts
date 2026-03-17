@@ -47,8 +47,8 @@ describe('GET /api/v1/system/graph-stats', () => {
           lawName: '民法典',
           articleNumber: '1',
           _count: {
-            outgoingRelations: 30,
-            incomingRelations: 20,
+            sourceRelations: 30,
+            targetRelations: 20,
           },
         },
         {
@@ -56,8 +56,8 @@ describe('GET /api/v1/system/graph-stats', () => {
           lawName: '合同法',
           articleNumber: '2',
           _count: {
-            outgoingRelations: 15,
-            incomingRelations: 10,
+            sourceRelations: 15,
+            targetRelations: 10,
           },
         },
       ]);
@@ -119,8 +119,8 @@ describe('GET /api/v1/system/graph-stats', () => {
           lawName: '民法典',
           articleNumber: '1',
           _count: {
-            outgoingRelations: 10,
-            incomingRelations: 5,
+            sourceRelations: 10,
+            targetRelations: 5,
           },
         },
       ]);
@@ -142,8 +142,8 @@ describe('GET /api/v1/system/graph-stats', () => {
           lawName: '民法典',
           articleNumber: '1',
           _count: {
-            outgoingRelations: 10,
-            incomingRelations: 5,
+            sourceRelations: 10,
+            targetRelations: 5,
           },
         },
         {
@@ -151,8 +151,8 @@ describe('GET /api/v1/system/graph-stats', () => {
           lawName: '合同法',
           articleNumber: '2',
           _count: {
-            outgoingRelations: 20,
-            incomingRelations: 10,
+            sourceRelations: 20,
+            targetRelations: 10,
           },
         },
         {
@@ -160,8 +160,8 @@ describe('GET /api/v1/system/graph-stats', () => {
           lawName: '侵权责任法',
           articleNumber: '3',
           _count: {
-            outgoingRelations: 5,
-            incomingRelations: 25,
+            sourceRelations: 5,
+            targetRelations: 25,
           },
         },
       ]);
@@ -205,14 +205,14 @@ describe('GET /api/v1/system/graph-stats', () => {
           articleNumber: true,
           _count: {
             select: {
-              outgoingRelations: true,
-              incomingRelations: true,
+              sourceRelations: true,
+              targetRelations: true,
             },
           },
         },
         orderBy: [
-          { outgoingRelations: { _count: 'desc' } },
-          { incomingRelations: { _count: 'desc' } },
+          { sourceRelations: { _count: 'desc' } },
+          { targetRelations: { _count: 'desc' } },
         ],
       });
     });
@@ -352,8 +352,8 @@ describe('GET /api/v1/system/graph-stats', () => {
           lawName: '中华人民共和国民法典',
           articleNumber: '500',
           _count: {
-            outgoingRelations: 10,
-            incomingRelations: 5,
+            sourceRelations: 10,
+            targetRelations: 5,
           },
         },
       ]);

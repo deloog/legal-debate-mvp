@@ -78,7 +78,7 @@ describe('MigrationUtils', () => {
     it('应该生成带时间戳的备份文件名', () => {
       const timestamp = new Date('2026-01-30T10:00:00Z');
       const filename = generateBackupFilename(timestamp);
-      expect(filename).toContain('legal_debate_db_backup_2026-01-30');
+      expect(filename).toContain('_backup_2026-01-30');
     });
 
     it('应该使用正确的文件扩展名', () => {

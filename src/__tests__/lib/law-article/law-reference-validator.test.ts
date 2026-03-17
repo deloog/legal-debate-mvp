@@ -10,6 +10,22 @@
  * @jest-environment node
  */
 
+// Mock prisma before imports
+jest.mock('@/lib/db', () => ({
+  prisma: {
+    lawArticle: {
+      findFirst: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+    },
+    legalReference: {
+      findMany: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
+    },
+  },
+}));
+
 import { LawReferenceValidator } from '@/lib/law-article/law-reference-validator';
 import { prisma } from '@/lib/db';
 import {
