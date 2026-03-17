@@ -5,8 +5,8 @@
 // 在 Prisma 客户端初始化之前设置正确的环境变量
 const path = require('path');
 const dotenv = require('dotenv');
-// 加载 .env.test（会覆盖 process.env 中已有的值，除非设置 override:false）
-dotenv.config({ path: path.resolve(__dirname, '.env.test'), override: true });
+// 加载 .env.test（不覆盖已有的环境变量，确保 CI 的 DATABASE_URL 优先生效）
+dotenv.config({ path: path.resolve(__dirname, '.env.test') });
 // 为测试数据库连接加上限制，防止多个 PrismaClient 实例耗尽连接池
 if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('connection_limit')) {
   process.env.DATABASE_URL = process.env.DATABASE_URL + '?connection_limit=3&pool_timeout=10';
