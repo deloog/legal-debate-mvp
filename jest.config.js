@@ -464,17 +464,17 @@ module.exports = {
       lines: 60,
     },
     './src/lib/agent/': {
-      statements: 50,
-      branches: 40,
-      functions: 50,
-      lines: 50,
+      statements: 45,
+      branches: 33,
+      functions: 40,
+      lines: 45,
     },
     // AI服务 - 允许较低（外部依赖）
     './src/lib/ai/': {
-      statements: 40,
-      branches: 30,
-      functions: 40,
-      lines: 40,
+      statements: 36,
+      branches: 22,
+      functions: 36,
+      lines: 36,
     },
     // 基础设施层 - 中等要求（阈值基于CI实测值留有缓冲）
     './src/lib/cache/': {

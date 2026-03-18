@@ -85,8 +85,8 @@ export function CaseAnalytics({
         <h2>案件分析</h2>
         {startDate && endDate && (
           <p className='date-range'>
-            {new Date(startDate).toLocaleDateString()} 至{' '}
-            {new Date(endDate).toLocaleDateString()}
+            {new Date(startDate).toLocaleDateString('zh-CN')} 至{' '}
+            {new Date(endDate).toLocaleDateString('zh-CN')}
           </p>
         )}
       </div>
