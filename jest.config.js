@@ -334,6 +334,8 @@ module.exports = {
         ...(process.env.CI ? [
           // 性能/外部服务集成测试（在 CI 机器上时序不稳定）
           '<rootDir>/src/__tests__/lib/integration/',
+          // 图数据库评估测试（需要 GraphDB 服务，CI 中不可用，且单次运行超 19 分钟）
+          '<rootDir>/src/__tests__/lib/knowledge-graph/graph-db-evaluation/',
           '<rootDir>/src/__tests__/unit/agent/memory-agent/memory-agent-integration.test.ts',
           // 使用量限制中间件（PrismaClientValidationError - 预存 schema 问题）
           '<rootDir>/src/__tests__/middleware/check-usage-limit.test.ts',
