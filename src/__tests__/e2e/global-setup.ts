@@ -185,8 +185,128 @@ async function globalSetup(_config: FullConfig): Promise<void> {
         keywords: ['合同', '主体'],
       },
     });
+
+    // 补充更多法条供分页、搜索测试使用（需要至少 10 条以支持两页各 5 条）
+    const extraArticles = [
+      {
+        id: 'e2e-law-article-003',
+        lawName: '中华人民共和国劳动合同法',
+        articleNumber: '第一条',
+        fullText:
+          'E2E测试法条三：为了完善劳动合同制度，明确劳动合同双方当事人的权利和义务，保护劳动者的合法权益，构建和发展和谐稳定的劳动关系，制定本法。',
+        lawType: 'LAW',
+        category: 'LABOR',
+        issuingAuthority: '全国人民代表大会',
+        searchableText: '劳动合同 劳动者 权益 和谐',
+        tags: ['劳动', '合同'],
+        keywords: ['劳动合同', '劳动者'],
+      },
+      {
+        id: 'e2e-law-article-004',
+        lawName: '中华人民共和国侵权责任法',
+        articleNumber: '第一条',
+        fullText:
+          'E2E测试法条四：为保护民事主体的合法权益，明确侵权责任，预防并制裁侵权行为，促进社会和谐稳定，制定本法。',
+        lawType: 'LAW',
+        category: 'CIVIL',
+        issuingAuthority: '全国人民代表大会',
+        searchableText: '侵权 责任 民事主体 权益',
+        tags: ['侵权', '责任'],
+        keywords: ['侵权责任', '民事主体'],
+      },
+      {
+        id: 'e2e-law-article-005',
+        lawName: '中华人民共和国民法典',
+        articleNumber: '第一条',
+        fullText:
+          'E2E测试法条五：为了保护民事主体的合法权益，调整民事关系，维护社会和经济秩序，弘扬社会主义核心价值观，根据宪法，制定本法。',
+        lawType: 'LAW',
+        category: 'CIVIL',
+        issuingAuthority: '全国人民代表大会',
+        searchableText: '民法典 民事主体 法律 社会秩序',
+        tags: ['民法', '法律'],
+        keywords: ['民法典', '法律'],
+      },
+      {
+        id: 'e2e-law-article-006',
+        lawName: '中华人民共和国刑法',
+        articleNumber: '第一条',
+        fullText:
+          'E2E测试法条六：为了惩罚犯罪，保护人民，根据宪法，结合我国同犯罪作斗争的具体经验及实际情况，制定本法。',
+        lawType: 'LAW',
+        category: 'CRIMINAL',
+        issuingAuthority: '全国人民代表大会',
+        searchableText: '刑法 犯罪 惩罚 保护',
+        tags: ['刑法', '犯罪'],
+        keywords: ['刑法', '犯罪'],
+      },
+      {
+        id: 'e2e-law-article-007',
+        lawName: '中华人民共和国公司法',
+        articleNumber: '第一条',
+        fullText:
+          'E2E测试法条七：为了规范公司的组织和行为，保护公司、股东和债权人的合法权益，维护社会经济秩序，促进社会主义市场经济的发展，制定本法。',
+        lawType: 'LAW',
+        category: 'COMMERCIAL',
+        issuingAuthority: '全国人民代表大会',
+        searchableText: '公司法 股东 债权人 市场经济',
+        tags: ['公司', '法律'],
+        keywords: ['公司法', '股东'],
+      },
+      {
+        id: 'e2e-law-article-008',
+        lawName: '中华人民共和国知识产权法',
+        articleNumber: '第一条',
+        fullText:
+          'E2E测试法条八：为保护知识产权，鼓励创新，促进社会主义现代化建设，根据宪法，制定本法。',
+        lawType: 'LAW',
+        category: 'CIVIL',
+        issuingAuthority: '全国人民代表大会',
+        searchableText: '知识产权 创新 保护',
+        tags: ['知识产权', '创新'],
+        keywords: ['知识产权', '保护'],
+      },
+      {
+        id: 'e2e-law-article-009',
+        lawName: '中华人民共和国行政法',
+        articleNumber: '第一条',
+        fullText:
+          'E2E测试法条九：为了保障公民、法人和其他组织的合法权益，规范行政机关依法行政，制定本法。',
+        lawType: 'LAW',
+        category: 'ADMINISTRATIVE',
+        issuingAuthority: '全国人民代表大会',
+        searchableText: '行政法 公民 法人 依法行政',
+        tags: ['行政法', '依法行政'],
+        keywords: ['行政法', '公民'],
+      },
+      {
+        id: 'e2e-law-article-010',
+        lawName: '中华人民共和国消费者权益保护法',
+        articleNumber: '第一条',
+        fullText:
+          'E2E测试法条十：为保护消费者的合法权益，维护社会经济秩序，促进社会主义市场经济健康发展，制定本法。',
+        lawType: 'LAW',
+        category: 'CIVIL',
+        issuingAuthority: '全国人民代表大会',
+        searchableText: '消费者 权益保护 市场经济',
+        tags: ['消费者', '权益'],
+        keywords: ['消费者权益', '保护法'],
+      },
+    ];
+
+    for (const article of extraArticles) {
+      await prisma.lawArticle.upsert({
+        where: { id: article.id },
+        update: {},
+        create: {
+          ...article,
+          effectiveDate: now,
+        },
+      });
+    }
+
     console.log(
-      `✅ E2E law articles seeded (ids: ${E2E_LAW_ARTICLE_1_ID}, ${E2E_LAW_ARTICLE_2_ID})`
+      `✅ E2E law articles seeded (${2 + extraArticles.length} total)`
     );
 
     // -------------------------------------------------------------------------

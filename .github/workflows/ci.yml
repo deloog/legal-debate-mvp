@@ -188,6 +188,12 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
           NODE_ENV: test
 
+      - name: Seed membership tiers
+        run: npx tsx prisma/seed-membership.ts
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          NODE_ENV: test
+
       - name: Build application
         run: npm run build
         env:
