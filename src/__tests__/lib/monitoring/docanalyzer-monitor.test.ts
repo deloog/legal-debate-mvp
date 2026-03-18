@@ -186,8 +186,8 @@ describe('DocAnalyzerMonitor', () => {
 
     test('应该支持不同周期', () => {
       const now = Date.now();
-      const hourAgo = now - 60 * 60 * 1000;
-      const dayAgo = now - 24 * 60 * 60 * 1000;
+      const hourAgo = now - 59 * 60 * 1000; // 59分钟前，确保在1小时窗口内（避免边界竞态）
+      const dayAgo = now - 23 * 60 * 60 * 1000; // 23小时前，确保在24小时窗口内
 
       monitor.recordMetric({
         timestamp: hourAgo,
