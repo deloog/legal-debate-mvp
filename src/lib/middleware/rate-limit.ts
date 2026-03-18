@@ -132,8 +132,11 @@ export function createRateLimiter(config: RateLimitConfig) {
     request: NextRequest
   ): Promise<NextResponse | null> {
     // 开发/测试环境：豁免限流（避免 E2E 测试被阻断）
-    // 生产环境 NODE_ENV=production 时此行不执行
-    if (process.env.NODE_ENV !== 'production') {
+    // standalone bundle 中 NODE_ENV 被编译固化，RATE_LIMIT_DISABLED 用于运行时跳过
+    if (
+      process.env.NODE_ENV !== 'production' ||
+      process.env.RATE_LIMIT_DISABLED === 'true'
+    ) {
       return null;
     }
 

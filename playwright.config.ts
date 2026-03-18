@@ -100,6 +100,8 @@ export default defineConfig({
       EMAIL_MOCK_MODE: 'true',
       // standalone server 中 NODE_ENV 被编译固化为 production，用此开关跳过环境变量校验
       SKIP_ENV_VALIDATION: 'true',
+      // E2E 测试并发登录会触发限速（strictRateLimiter 5次/分钟），用此开关禁用限流
+      RATE_LIMIT_DISABLED: 'true',
     },
   },
 
