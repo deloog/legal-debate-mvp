@@ -70,15 +70,19 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  // CI 环境：使用 next start（利用 CI 已完成的 build，生产模式无 Turbopack bug）
-  // 本地：复用已运行的 dev server（使用 npm run dev），Accept header 修复覆盖此场景
+  // CI 环境：next.config.ts 使用 output:standalone，必须用 node .next/standalone/server.js
+  //          同时设 NODE_ENV=test 跳过生产环境 API key 校验
+  // 本地：复用已运行的 dev server（使用 npm run dev）
   webServer: {
-    command: process.env.CI ? 'npm run start' : 'npm run dev',
+    command: process.env.CI
+      ? 'NODE_ENV=test node .next/standalone/server.js'
+      : 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 300 * 1000,
     // 将必要的环境变量注入到 dev/prod server 子进程
     env: {
+      NODE_ENV: 'test',
       DATABASE_URL: process.env.DATABASE_URL ?? '',
       PAYMENT_MOCK_MODE: 'true',
       USE_MOCK_AI: 'true',
