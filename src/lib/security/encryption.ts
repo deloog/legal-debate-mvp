@@ -8,18 +8,14 @@
 import { logger } from '@/lib/logger';
 import crypto from 'crypto';
 
-// 从环境变量获取加密密钥
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '';
-
-// 生产环境必须配置加密密钥
-if (process.env.NODE_ENV === 'production' && !ENCRYPTION_KEY) {
-  throw new Error('ENCRYPTION_KEY 环境变量必须在生产环境中配置');
-}
 const ALGORITHM = 'aes-256-gcm';
 
-// 确保密钥长度为32字节
+// 确保密钥长度为32字节（在实际调用时才校验，避免构建阶段抛错）
 function getEncryptionKey(): Buffer {
-  const key = ENCRYPTION_KEY;
+  const key = process.env.ENCRYPTION_KEY || '';
+  if (process.env.NODE_ENV === 'production' && !key) {
+    throw new Error('ENCRYPTION_KEY 环境变量必须在生产环境中配置');
+  }
   if (key.length === 64) {
     // 如果是64位十六进制字符串
     return Buffer.from(key, 'hex');
