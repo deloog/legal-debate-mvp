@@ -182,6 +182,12 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
 
+      - name: Seed database
+        run: npm run db:seed
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          NODE_ENV: test
+
       - name: Build application
         run: npm run build
         env:
@@ -193,6 +199,11 @@ jobs:
           NODE_ENV: test
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
           REDIS_URL: redis://localhost:6379/1
+          # 测试进程侧（permission-helpers.ts 等）生成 JWT 时需要与服务器一致的密钥
+          JWT_SECRET: 'test-jwt-secret-key-for-testing'
+          NEXTAUTH_SECRET: 'test-nextauth-secret-key-for-testing-purposes-32chars'
+          # encryption.ts 在 production 模式下需要此变量，否则加密 API 抛异常
+          ENCRYPTION_KEY: 'test-encryption-key-for-e2e-testing-only-32bytes!'
 
       - name: Upload E2E test results
         uses: actions/upload-artifact@v4

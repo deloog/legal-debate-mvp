@@ -87,17 +87,34 @@ export default defineConfig({
       DATABASE_URL: process.env.DATABASE_URL ?? '',
       REDIS_URL: process.env.REDIS_URL ?? 'redis://localhost:6379/1',
       JWT_SECRET:
-        process.env.JWT_SECRET ?? 'test-jwt-secret-key-for-e2e-testing',
+        process.env.JWT_SECRET ?? 'test-jwt-secret-key-for-testing',
       NEXTAUTH_SECRET:
         process.env.NEXTAUTH_SECRET ??
-        'test-nextauth-secret-key-for-e2e-testing',
+        'test-nextauth-secret-key-for-testing-purposes-32chars',
       NEXTAUTH_URL: process.env.NEXTAUTH_URL ?? 'http://localhost:3000',
+      // OAuth credentials（standalone server 不读 .env.local，必须显式注入）
+      WECHAT_APP_ID:
+        process.env.WECHAT_APP_ID ?? 'test_wechat_app_id',
+      WECHAT_APP_SECRET:
+        process.env.WECHAT_APP_SECRET ?? 'test_wechat_app_secret',
+      WECHAT_REDIRECT_URI:
+        process.env.WECHAT_REDIRECT_URI ??
+        'http://localhost:3000/api/auth/oauth/wechat/callback',
+      QQ_APP_ID: process.env.QQ_APP_ID ?? 'test_qq_app_id',
+      QQ_APP_KEY: process.env.QQ_APP_KEY ?? 'test_qq_app_key',
+      QQ_REDIRECT_URI:
+        process.env.QQ_REDIRECT_URI ??
+        'http://localhost:3000/api/auth/oauth/qq/callback',
       // mock 值：E2E 测试使用 USE_MOCK_AI=true，不会发起真实 AI 请求
       DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY ?? 'mock-deepseek-key',
       ZHIPU_API_KEY: process.env.ZHIPU_API_KEY ?? 'mock-zhipu-key',
       PAYMENT_MOCK_MODE: 'true',
       USE_MOCK_AI: 'true',
       EMAIL_MOCK_MODE: 'true',
+      // encryption.ts 在 production 模式下需要 ENCRYPTION_KEY，否则 getEncryptionKey() 抛异常
+      ENCRYPTION_KEY:
+        process.env.ENCRYPTION_KEY ??
+        'test-encryption-key-for-e2e-testing-only-32bytes!',
       // standalone server 中 NODE_ENV 被编译固化为 production，用此开关跳过环境变量校验
       SKIP_ENV_VALIDATION: 'true',
       // E2E 测试并发登录会触发限速（strictRateLimiter 5次/分钟），用此开关禁用限流
