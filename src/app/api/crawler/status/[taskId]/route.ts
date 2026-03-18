@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
 import { crawlTaskManager } from '@/lib/crawler/crawl-task-manager';
 import { logger } from '@/lib/logger';
 
@@ -80,8 +80,10 @@ export async function GET(
     }
 
     // 2. 身份验证
-    const session = await auth();
-    if (!session?.user) {
+    const authHeader = request.headers.get('authorization');
+    const token = extractTokenFromHeader(authHeader ?? '');
+    const tokenResult = verifyToken(token ?? '');
+    if (!tokenResult.valid || !tokenResult.payload) {
       return NextResponse.json({ error: '未认证，请先登录' }, { status: 401 });
     }
 
@@ -96,7 +98,7 @@ export async function GET(
     if (!validateTaskId(taskId)) {
       logger.warn('检测到非法任务 ID 格式', {
         taskId,
-        userId: session.user.id,
+        userId: tokenResult.payload.userId,
       });
       return NextResponse.json(
         { error: '无效的任务 ID 格式' },

@@ -33,13 +33,8 @@ export async function register() {
         );
 
         try {
-          // 1. 关闭数据库连接
-          console.log('[Shutdown] Closing database connections...');
-          const { prisma } = await import('./lib/db/prisma');
-          await prisma.$disconnect();
-          console.log('[Shutdown] Database connections closed');
-
-          // 2. 等待正在处理的请求完成（2秒缓冲时间）
+          // 等待正在处理的请求完成（2秒缓冲时间）
+          // 注：数据库连接由 OS 在进程退出时自动清理，无需显式断开
           console.log('[Shutdown] Waiting for pending requests...');
           await new Promise(resolve => setTimeout(resolve, 2000));
 
