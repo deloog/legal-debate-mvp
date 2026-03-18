@@ -263,10 +263,11 @@ module.exports = {
 
     // Project 5: 图数据库评估脚本测试（node环境）
     // CI 中跳过：需要 GraphDB 服务，该服务在 CI 环境中不可用
-    {
+    // 注意：不能用 testMatch:[] 因为空数组会导致 Jest 把所有文件当成测试运行
+    ...(!process.env.CI ? [{
       displayName: 'graphdb-evaluation',
       testEnvironment: 'node',
-      testMatch: process.env.CI ? [] : [
+      testMatch: [
         '<rootDir>/scripts/graphdb-evaluation/**/*.{test,spec}.{ts,tsx}',
       ],
       testPathIgnorePatterns: [
@@ -299,7 +300,7 @@ module.exports = {
       transformIgnorePatterns: ['node_modules/(?!(uuid)/)'],
       coverageDirectory: 'coverage-graphdb-evaluation',
       coverageReporters: ['text', 'text-summary', 'lcov', 'html', 'json'],
-    },
+    }] : []),
 
     // Project 6: 其他单元测试（node环境）
     {
