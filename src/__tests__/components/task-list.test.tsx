@@ -144,9 +144,9 @@ describe('TaskList', () => {
 
       render(<TaskList />);
 
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      expect(screen.getByText('任务1')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('任务1')).toBeInTheDocument();
+      });
       expect(screen.getByText('任务2')).toBeInTheDocument();
       expect(screen.getByText('任务3')).toBeInTheDocument();
     });
@@ -162,11 +162,11 @@ describe('TaskList', () => {
 
       render(<TaskList />);
 
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      expect(
-        screen.getByPlaceholderText('搜索任务标题或描述...')
-      ).toBeInTheDocument();
+      await waitFor(() => {
+        expect(
+          screen.getByPlaceholderText('搜索任务标题或描述...')
+        ).toBeInTheDocument();
+      });
       expect(screen.getByText('所有状态')).toBeInTheDocument();
       expect(screen.getByText('所有优先级')).toBeInTheDocument();
       expect(screen.getByText('创建任务')).toBeInTheDocument();
@@ -183,11 +183,11 @@ describe('TaskList', () => {
 
       render(<TaskList />);
 
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      expect(
-        screen.getByText('暂无任务，点击上方按钮创建新任务')
-      ).toBeInTheDocument();
+      await waitFor(() => {
+        expect(
+          screen.getByText('暂无任务，点击上方按钮创建新任务')
+        ).toBeInTheDocument();
+      });
     });
   });
 
@@ -203,9 +203,9 @@ describe('TaskList', () => {
 
       render(<TaskList />);
 
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      expect(screen.getByText('任务1')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('任务1')).toBeInTheDocument();
+      });
       expect(screen.getByText('任务描述1')).toBeInTheDocument();
       expect(screen.getByText('案件1')).toBeInTheDocument();
       expect(screen.getByText('用户1')).toBeInTheDocument();
