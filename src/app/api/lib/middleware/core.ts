@@ -43,7 +43,8 @@ export class MiddlewareStack {
     context: RequestContext
   ): Promise<NextResponse> {
     // 1. 创建单一response实例，贯穿所有中间件
-    const finalResponse = NextResponse.next();
+    // 注意：NextResponse.next() 只能在 middleware.ts 中使用，不能在 route handler 中使用
+    const finalResponse = new NextResponse(null, { status: 200 });
 
     // 2. 依次执行中间件，共享同一个response
     for (const middleware of this.middlewares) {
