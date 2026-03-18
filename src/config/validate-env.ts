@@ -38,6 +38,11 @@ const WEAK_PASSWORD_PATTERNS = ['password', '123456', 'admin', 'root'];
  * @throws Error 如果有环境变量缺失或不安全
  */
 export function validateRequiredEnv(): void {
+  // E2E 测试或 CI 构建阶段可设置 SKIP_ENV_VALIDATION=true 跳过校验
+  if (process.env.SKIP_ENV_VALIDATION === 'true') {
+    return;
+  }
+
   const missing: string[] = [];
   const placeholders: string[] = [];
   const weakPasswords: string[] = [];

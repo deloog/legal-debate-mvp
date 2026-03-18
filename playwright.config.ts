@@ -81,12 +81,25 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 300 * 1000,
     // 将必要的环境变量注入到 dev/prod server 子进程
+    // standalone server 不自动读 .env.local，需要在此显式传入
     env: {
       NODE_ENV: 'test',
       DATABASE_URL: process.env.DATABASE_URL ?? '',
+      REDIS_URL: process.env.REDIS_URL ?? 'redis://localhost:6379/1',
+      JWT_SECRET:
+        process.env.JWT_SECRET ?? 'test-jwt-secret-key-for-e2e-testing',
+      NEXTAUTH_SECRET:
+        process.env.NEXTAUTH_SECRET ??
+        'test-nextauth-secret-key-for-e2e-testing',
+      NEXTAUTH_URL: process.env.NEXTAUTH_URL ?? 'http://localhost:3000',
+      // mock 值：E2E 测试使用 USE_MOCK_AI=true，不会发起真实 AI 请求
+      DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY ?? 'mock-deepseek-key',
+      ZHIPU_API_KEY: process.env.ZHIPU_API_KEY ?? 'mock-zhipu-key',
       PAYMENT_MOCK_MODE: 'true',
       USE_MOCK_AI: 'true',
       EMAIL_MOCK_MODE: 'true',
+      // standalone server 中 NODE_ENV 被编译固化为 production，用此开关跳过环境变量校验
+      SKIP_ENV_VALIDATION: 'true',
     },
   },
 
