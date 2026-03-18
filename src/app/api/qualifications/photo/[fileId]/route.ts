@@ -9,6 +9,8 @@
  * - 添加适当的 Content-Type 和缓存控制头
  */
 
+export const runtime = 'nodejs';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
