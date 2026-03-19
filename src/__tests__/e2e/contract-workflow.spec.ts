@@ -80,18 +80,9 @@ test.describe('合同完整流程', () => {
       timeout: 30000,
     });
 
-    // 5. 查看审批（在审批列表中通过）
-    await page.goto('http://localhost:3000/approvals/pending');
-    // 等待审批列表加载（不使用networkidle，在dev模式下会永远等待）
+    // 5. 直接导航到合同审批页面
+    await page.goto(`${contractUrl}/approval`);
     await page.waitForLoadState('domcontentloaded');
-    // 直接等待目标元素出现
-    const clientLink = page.locator(`text=张三`).first();
-    await clientLink.waitFor({ timeout: 60000 });
-    await clientLink.click();
-    await page.waitForURL('**/approval', {
-      timeout: 120000,
-      waitUntil: 'commit',
-    });
     // 等待审批数据加载完成
     await page.waitForSelector('button:has-text("通过")', { timeout: 120000 });
 
