@@ -55,10 +55,14 @@ export default defineConfig({
      * 带 Authorization header 的请求访问动态嵌套路由（如 [id]/review）时
      * 缺少 Accept 头会导致 Turbopack 将其误判为页面导航并返回 404。
      * 添加 Accept: application/json 让 Turbopack 正确路由至 API handler。
-     * （生产模式 next start 不受此 bug 影响） */
-    extraHTTPHeaders: {
-      Accept: 'application/json',
-    },
+     * CI 使用生产模式（next start），不受此 bug 影响，不需要该头 */
+    ...(process.env.CI
+      ? {}
+      : {
+          extraHTTPHeaders: {
+            Accept: 'application/json',
+          },
+        }),
   },
 
   /* Configure projects for major browsers */

@@ -475,9 +475,12 @@ function isSmtpConfigured(): boolean {
 export function getEmailService(): IEmailService {
   const isDev =
     process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
+  // EMAIL_MOCK_MODE 支持在生产构建的 standalone 服务器中使用 mock 模式
+  // （standalone 构建时 NODE_ENV 被固化为 'production'，无法用 NODE_ENV 区分 E2E 测试环境）
+  const isMockMode = process.env.EMAIL_MOCK_MODE === 'true';
 
-  // 开发/测试环境始终使用控制台输出，不发真实邮件
-  if (isDev) {
+  // 开发/测试环境或 mock 模式始终使用控制台输出，不发真实邮件
+  if (isDev || isMockMode) {
     return new DevEmailService();
   }
 
