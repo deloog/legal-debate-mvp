@@ -19,8 +19,12 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 if (!JWT_SECRET) {
   const isProduction = process.env.NODE_ENV === 'production';
   const isStrictMode = process.env.REQUIRE_JWT_SECRET === 'true';
+  // next build 的 page data 收集阶段不应抛错（运行时才需要真实密钥）
+  const isBuildPhase =
+    process.env.NEXT_PHASE === 'phase-production-build' ||
+    process.env.SKIP_ENV_VALIDATION === 'true';
 
-  if (isProduction || isStrictMode) {
+  if ((isProduction || isStrictMode) && !isBuildPhase) {
     throw new Error(
       '[JWT配置错误] JWT_SECRET环境变量未设置！\n' +
         '请在环境变量中设置 JWT_SECRET（至少32位随机字符串）。\n' +
