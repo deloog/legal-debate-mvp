@@ -19,7 +19,9 @@ export async function GET(request: NextRequest) {
   try {
     const approvals = await prisma.contractApproval.findMany({
       where: {
-        createdBy: userId,
+        // createdBy 匹配：当前用户发起的审批
+        // contract.lawyerId 匹配：当前用户是合同律师（兜底）
+        OR: [{ createdBy: userId }, { contract: { lawyerId: userId } }],
         status: { in: ['IN_PROGRESS', 'PENDING'] },
       },
       include: {
