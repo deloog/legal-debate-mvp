@@ -36,10 +36,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const checkAuth = async () => {
     try {
       setLoading(true);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
       const response = await fetch('/api/auth/me', {
         credentials: 'include', // 包含cookie
         cache: 'no-store', // 不缓存，确保获取最新状态
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
       // 检查HTTP状态码
       if (!response.ok) {

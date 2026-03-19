@@ -199,6 +199,11 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
 
+      - name: Copy static files for standalone server
+        run: |
+          cp -r .next/static .next/standalone/.next/static
+          cp -r public .next/standalone/public
+
       - name: Run E2E tests
         run: npm run test:e2e:ci
         env:
