@@ -1,5 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# 数据导出文件（大型 SQL，不提交到 Git）
+/exports/
+
 # dependencies
 /node_modules
 /.pnp
