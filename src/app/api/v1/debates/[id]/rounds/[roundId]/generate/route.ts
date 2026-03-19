@@ -243,7 +243,12 @@ export const POST = withErrorHandler(
     const { applicableArticles } = body;
 
     // ── 速率限制：60秒内完成轮次不超过N个（测试环境放宽至50，生产环境为5）──
-    const rateLimit = process.env.NODE_ENV === 'production' ? 5 : 50;
+    // standalone 构建中 NODE_ENV 被固化为 production，使用 RATE_LIMIT_DISABLED 区分
+    const rateLimit =
+      process.env.NODE_ENV !== 'production' ||
+      process.env.RATE_LIMIT_DISABLED === 'true'
+        ? 50
+        : 5;
     const recentRounds = await prisma.debateRound.count({
       where: {
         debate: { userId },
