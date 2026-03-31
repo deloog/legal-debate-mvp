@@ -5,15 +5,14 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 
 async function resolveAccess(
   debateId: string,
   argumentId: string,
   userId: string,
-  role?: string
+  isAdmin: boolean
 ): Promise<{ argument: { id: string } | null; allowed: boolean }> {
   const argument = await prisma.argument.findUnique({
     where: { id: argumentId },
@@ -28,7 +27,6 @@ async function resolveAccess(
   if (argument.round.debateId !== debateId)
     return { argument: null, allowed: false };
 
-  const isAdmin = role === 'ADMIN';
   const isOwner = argument.round.debate.userId === userId;
   return { argument, allowed: isOwner || isAdmin };
 }
@@ -37,8 +35,8 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; argumentId: string }> }
 ): Promise<NextResponse> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return NextResponse.json(
       { success: false, message: '未认证' },
       { status: 401 }
@@ -58,12 +56,16 @@ export async function PATCH(
       );
     }
 
-    const role = (session.user as { role?: string }).role;
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
     const { argument, allowed } = await resolveAccess(
       debateId,
       argumentId,
-      session.user.id,
-      role
+      authUser.userId,
+      isAdmin
     );
 
     if (!argument) {
@@ -95,11 +97,11 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string; argumentId: string }> }
 ): Promise<NextResponse> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return NextResponse.json(
       { success: false, message: '未认证' },
       { status: 401 }
@@ -109,12 +111,16 @@ export async function DELETE(
   const { id: debateId, argumentId } = await params;
 
   try {
-    const role = (session.user as { role?: string }).role;
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
     const { argument, allowed } = await resolveAccess(
       debateId,
       argumentId,
-      session.user.id,
-      role
+      authUser.userId,
+      isAdmin
     );
 
     if (!argument) {

@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { logger } from '@/lib/logger';
 import {
   updateBusinessLicense,
   getEnterpriseAccountByUserId,
@@ -58,8 +59,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 检查是否为Base64格式
-    if (!businessLicense.startsWith('data:image/')) {
+    // 检查是否为合法 data URL 格式，并白名单 MIME 类型
+    const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
+    const dataUrlMatch = businessLicense.match(
+      /^data:([^;]+);base64,([\s\S]+)$/
+    );
+    if (!dataUrlMatch) {
       return NextResponse.json(
         {
           success: false,
@@ -69,15 +74,57 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    const mimeType = dataUrlMatch[1];
+    const base64Data = dataUrlMatch[2];
+    if (!ALLOWED_MIME.includes(mimeType)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: '仅支持 JPEG、PNG、WebP 格式的图片',
+          error: 'INVALID_FORMAT',
+        },
+        { status: 400 }
+      );
+    }
 
-    // 限制图片大小（假设Base64编码后不超过5MB）
-    const base64Data = businessLicense.split(',')[1] || businessLicense;
+    // 限制图片大小（Base64 字符数 ≈ 原始字节数 × 4/3）
     if (base64Data.length > 5 * 1024 * 1024) {
       return NextResponse.json(
         {
           success: false,
           message: '营业执照图片大小不能超过5MB',
           error: 'FILE_TOO_LARGE',
+        },
+        { status: 400 }
+      );
+    }
+
+    // 验证文件魔数（防止 MIME 类型伪造）
+    const MAGIC_BYTES: Record<string, number[]> = {
+      'image/jpeg': [0xff, 0xd8, 0xff],
+      'image/png': [0x89, 0x50, 0x4e, 0x47],
+      'image/webp': [0x52, 0x49, 0x46, 0x46], // RIFF header
+    };
+    try {
+      const buf = Buffer.from(base64Data, 'base64');
+      const magic = MAGIC_BYTES[mimeType];
+      const isValidMagic = magic.every((byte, i) => buf[i] === byte);
+      if (!isValidMagic) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: '图片文件内容与声明的格式不匹配',
+            error: 'INVALID_FORMAT',
+          },
+          { status: 400 }
+        );
+      }
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          message: '营业执照数据无效',
+          error: 'INVALID_DATA',
         },
         { status: 400 }
       );
@@ -98,21 +145,11 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    if (error instanceof Error) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: error.message,
-          error: error.name,
-        },
-        { status: 400 }
-      );
-    }
-
+    logger.error('企业资质上传失败:', error);
     return NextResponse.json(
       {
         success: false,
-        message: '服务器内部错误',
+        message: '资质上传失败，请稍后重试',
         error: 'INTERNAL_SERVER_ERROR',
       },
       { status: 500 }

@@ -19,6 +19,7 @@ export interface SSEEvent {
 export type DebateStreamEventType =
   | 'connected' // 连接确认
   | 'round-start' // 轮次开始
+  | 'law-search-complete' // 法条检索完成（携带检索结果）
   | 'ai_stream' // AI流式内容（实时token）
   | 'argument' // 论点生成
   | 'progress' // 进度更新
@@ -26,6 +27,15 @@ export type DebateStreamEventType =
   | 'error' // 错误
   | 'ping' // 心跳
   | 'disconnected'; // 断开连接
+
+/**
+ * 法条检索完成事件数据
+ */
+export interface LawSearchCompleteEventData {
+  articles: Array<{ lawName: string; articleNumber: string }>;
+  count: number;
+  timestamp: string;
+}
 
 /**
  * 连接事件数据
@@ -91,11 +101,14 @@ export interface ProgressEventData {
  */
 export interface CompletedEventData {
   debateId: string;
-  roundId: string;
-  totalArguments: number;
-  plaintiffArguments: number;
-  defendantArguments: number;
-  generationTime: number; // 毫秒
+  roundId?: string;
+  totalArguments?: number;
+  plaintiffArguments?: number;
+  defendantArguments?: number;
+  generationTime?: number; // 毫秒
+  roundNumber?: number;
+  hasMoreRounds?: boolean; // 是否还有更多轮次可继续
+  isLastRound?: boolean; // 是否已是最后一轮
   timestamp: string;
 }
 
@@ -134,7 +147,9 @@ export interface DisconnectedEventData {
 export interface AIStreamEventData {
   chunkId: number;
   content: string; // 新增的token内容
-  accumulatedLength: number;
+  side?: string; // 当前生成方：'plaintiff' | 'defendant'
+  sideLabel?: string; // 中文标签：'原告' | '被告'
+  accumulatedLength?: number;
   progress: number; // 0-100
   roundNumber: number;
   timestamp: string;

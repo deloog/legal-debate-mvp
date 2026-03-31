@@ -1,17 +1,117 @@
 /**
  * 合同审查服务 - AI驱动的合同风险识别
+ * 使用 DeepSeek 两阶段审查：
+ *   第一阶段：识别所有风险条目 + 综合评分
+ *   第二阶段：针对识别出的风险生成修改建议
+ * 每阶段独立输出，各自最多 8192 token，解决单次输出不够的问题。
  */
 
+import OpenAI from 'openai';
+import { logger } from '@/lib/logger';
 import type {
   RiskItem,
   Suggestion,
   ReviewReport,
 } from '@/types/contract-review';
 
-/**
- * 模拟AI审查合同
- * 实际项目中应该调用真实的AI服务
- */
+const client = new OpenAI({
+  apiKey: process.env.DEEPSEEK_API_KEY ?? '',
+  baseURL: process.env.DEEPSEEK_BASE_URL ?? 'https://api.deepseek.com/v1',
+});
+
+const MODEL = () => process.env.DEEPSEEK_MODEL ?? 'deepseek-chat';
+
+// ─── 第一阶段：风险识别 ────────────────────────────────────────────────────────
+
+const PHASE1_SYSTEM = `你是一名经验丰富的中国法律顾问，专注于合同审查与风险识别。
+请对合同文本进行全面审查，识别所有潜在法律风险，并给出综合评分。
+
+严格按照以下JSON格式返回，不得输出任何其他内容：
+{
+  "overallScore": <0-100整数，综合评分>,
+  "riskScore": <0-100整数，风险评分，越高表示风险越低>,
+  "complianceScore": <0-100整数，合规评分>,
+  "risks": [
+    {
+      "type": "<DISPUTE_RESOLUTION|CONFIDENTIALITY|LIABILITY|INTELLECTUAL_PROPERTY|FINANCIAL|TERMINATION|FORCE_MAJEURE|GOVERNING_LAW|OTHER>",
+      "level": "<CRITICAL|HIGH|MEDIUM|LOW>",
+      "title": "<风险标题，不超过20字>",
+      "description": "<风险描述，不超过100字>",
+      "originalText": "<触发该风险的合同原文片段，缺失条款则为空字符串>",
+      "impact": "<可能造成的影响，不超过60字>",
+      "probability": <0到1之间的小数>
+    }
+  ]
+}
+
+审查要点：
+1. 主体资格与签署权限
+2. 合同标的与权利义务是否清晰
+3. 付款条款（金额、方式、时间、条件）
+4. 违约责任与赔偿标准
+5. 合同解除与终止条件
+6. 争议解决方式与管辖法院/仲裁机构
+7. 保密条款
+8. 知识产权归属
+9. 不可抗力条款
+10. 适用法律
+11. 格式条款是否存在显失公平
+12. 是否存在违反强制性法律规定的条款`;
+
+type Phase1Result = {
+  overallScore: number;
+  riskScore: number;
+  complianceScore: number;
+  risks: Array<{
+    type: string;
+    level: string;
+    title: string;
+    description: string;
+    originalText: string;
+    impact: string;
+    probability: number;
+  }>;
+};
+
+// ─── 第二阶段：修改建议 ────────────────────────────────────────────────────────
+
+const PHASE2_SYSTEM = `你是一名经验丰富的中国法律顾问。
+根据提供的合同风险清单，为每个风险生成具体的修改建议。
+
+严格按照以下JSON格式返回，不得输出任何其他内容：
+{
+  "suggestions": [
+    {
+      "riskType": "<对应的风险type值>",
+      "type": "<ADD|MODIFY|DELETE>",
+      "title": "<建议标题，不超过20字>",
+      "description": "<建议说明，不超过80字>",
+      "suggestedText": "<建议增加或替换的具体合同文字>",
+      "priority": "<HIGH|MEDIUM|LOW>",
+      "reason": "<给出此建议的原因，不超过60字>"
+    }
+  ]
+}
+
+要求：
+- 每个 CRITICAL/HIGH 风险至少给出一条建议
+- MEDIUM/LOW 风险视情况给出建议
+- suggestedText 需为可直接使用的合同条款文字`;
+
+type Phase2Result = {
+  suggestions: Array<{
+    riskType: string;
+    type: string;
+    title: string;
+    description: string;
+    suggestedText: string;
+    priority: string;
+    reason: string;
+  }>;
+};
+
+// ─── 主函数 ────────────────────────────────────────────────────────────────────
+
 export async function reviewContract(
   _contractId: string,
   _filePath: string,
@@ -30,276 +130,108 @@ export async function reviewContract(
 > {
   const startTime = Date.now();
 
-  // 模拟AI分析过程
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  // 限制输入长度，避免超出模型上下文窗口（DeepSeek-chat 64K context）
+  const truncatedContent =
+    content.length > 30000
+      ? content.slice(0, 30000) + '\n\n[内容已截断，仅展示前30000字]'
+      : content;
 
-  // 识别风险项
-  const risks = identifyRisks(content);
-
-  // 生成建议
-  const suggestions = generateSuggestions(risks);
-
-  // 计算评分
-  const scores = calculateScores(risks);
-
-  // 统计风险数量
-  const riskStats = countRisksByLevel(risks);
-
-  const reviewTime = Date.now() - startTime;
-
-  return {
-    ...scores,
-    ...riskStats,
-    risks,
-    suggestions,
-    reviewTime,
-  };
-}
-
-/**
- * 识别合同中的风险项
- */
-function identifyRisks(content: string): RiskItem[] {
-  const risks: RiskItem[] = [];
-
-  // 检查争议解决条款
-  if (
-    !content.includes('争议解决') &&
-    !content.includes('仲裁') &&
-    !content.includes('诉讼')
-  ) {
-    risks.push({
-      id: `risk-${Date.now()}-1`,
-      type: 'DISPUTE_RESOLUTION',
-      level: 'HIGH',
-      title: '缺少争议解决条款',
-      description: '合同中未明确约定争议解决方式，可能导致纠纷处理困难',
-      location: { page: 1, paragraph: 1 },
-      originalText: '',
-      impact: '发生纠纷时无法明确处理途径，可能增加解决成本',
-      probability: 0.7,
-    });
-  }
-
-  // 检查保密条款
-  if (!content.includes('保密') && !content.includes('商业秘密')) {
-    risks.push({
-      id: `risk-${Date.now()}-2`,
-      type: 'CONFIDENTIALITY',
-      level: 'MEDIUM',
-      title: '缺少保密条款',
-      description: '合同中未约定保密义务，可能导致商业秘密泄露',
-      location: { page: 1, paragraph: 1 },
-      originalText: '',
-      impact: '商业秘密可能被泄露，造成经济损失',
-      probability: 0.6,
-    });
-  }
-
-  // 检查违约责任
-  if (!content.includes('违约责任') && !content.includes('违约金')) {
-    risks.push({
-      id: `risk-${Date.now()}-3`,
-      type: 'LIABILITY',
-      level: 'HIGH',
-      title: '违约责任不明确',
-      description: '合同中未明确约定违约责任，可能导致违约后无法追责',
-      location: { page: 1, paragraph: 1 },
-      originalText: '',
-      impact: '违约方可能无需承担责任，守约方权益难以保障',
-      probability: 0.8,
-    });
-  }
-
-  // 检查知识产权条款
-  if (
-    content.includes('知识产权') ||
-    content.includes('专利') ||
-    content.includes('著作权')
-  ) {
-    if (!content.includes('知识产权归属')) {
-      risks.push({
-        id: `risk-${Date.now()}-4`,
-        type: 'INTELLECTUAL_PROPERTY',
-        level: 'MEDIUM',
-        title: '知识产权归属不明确',
-        description: '涉及知识产权但未明确归属，可能引发权属纠纷',
-        location: { page: 1, paragraph: 1 },
-        originalText: '',
-        impact: '知识产权归属不清，可能导致后续纠纷',
-        probability: 0.5,
-      });
-    }
-  }
-
-  // 检查付款条款
-  if (!content.includes('付款') && !content.includes('支付')) {
-    risks.push({
-      id: `risk-${Date.now()}-5`,
-      type: 'FINANCIAL',
-      level: 'CRITICAL',
-      title: '缺少付款条款',
-      description: '合同中未约定付款方式和时间，可能导致付款纠纷',
-      location: { page: 1, paragraph: 1 },
-      originalText: '',
-      impact: '付款时间和方式不明确，可能导致严重的财务纠纷',
-      probability: 0.9,
-    });
-  }
-
-  return risks;
-}
-
-/**
- * 生成修改建议
- */
-function generateSuggestions(risks: RiskItem[]): Suggestion[] {
-  const suggestions: Suggestion[] = [];
-
-  risks.forEach(risk => {
-    let suggestion: Suggestion | null = null;
-
-    switch (risk.type) {
-      case 'DISPUTE_RESOLUTION':
-        suggestion = {
-          id: `suggestion-${Date.now()}-${risk.id}`,
-          riskId: risk.id,
-          type: 'ADD',
-          title: '添加争议解决条款',
-          description: '建议添加明确的争议解决方式，如仲裁或诉讼管辖',
-          suggestedText:
-            '因本合同引起的或与本合同有关的任何争议，双方应友好协商解决；协商不成的，任何一方均可向合同签订地人民法院提起诉讼。',
-          priority: 'HIGH',
-          reason: '明确争议解决方式有助于降低纠纷处理成本',
-        };
-        break;
-
-      case 'CONFIDENTIALITY':
-        suggestion = {
-          id: `suggestion-${Date.now()}-${risk.id}`,
-          riskId: risk.id,
-          type: 'ADD',
-          title: '添加保密条款',
-          description: '建议添加保密义务条款，明确保密范围和期限',
-          suggestedText:
-            '双方应对在合作过程中知悉的对方商业秘密承担保密义务，保密期限为合同终止后三年。违反保密义务的一方应承担违约责任。',
-          priority: 'MEDIUM',
-          reason: '保护商业秘密，避免信息泄露风险',
-        };
-        break;
-
-      case 'LIABILITY':
-        suggestion = {
-          id: `suggestion-${Date.now()}-${risk.id}`,
-          riskId: risk.id,
-          type: 'ADD',
-          title: '明确违约责任',
-          description: '建议添加违约责任条款，明确违约金或赔偿标准',
-          suggestedText:
-            '任何一方违反本合同约定的，应向守约方支付违约金，违约金为合同总金额的20%。违约金不足以弥补损失的，违约方还应赔偿守约方的实际损失。',
-          priority: 'HIGH',
-          reason: '明确违约责任有助于约束双方履约，保障守约方权益',
-        };
-        break;
-
-      case 'INTELLECTUAL_PROPERTY':
-        suggestion = {
-          id: `suggestion-${Date.now()}-${risk.id}`,
-          riskId: risk.id,
-          type: 'ADD',
-          title: '明确知识产权归属',
-          description: '建议明确知识产权的归属和使用权限',
-          suggestedText:
-            '合作过程中产生的知识产权归双方共同所有，任何一方使用该知识产权需经对方书面同意。',
-          priority: 'MEDIUM',
-          reason: '明确知识产权归属，避免后续权属纠纷',
-        };
-        break;
-
-      case 'FINANCIAL':
-        suggestion = {
-          id: `suggestion-${Date.now()}-${risk.id}`,
-          riskId: risk.id,
-          type: 'ADD',
-          title: '添加付款条款',
-          description: '建议明确付款金额、方式、时间和账户信息',
-          suggestedText:
-            '甲方应在合同签订后7个工作日内，将合同总金额的50%作为预付款支付至乙方指定账户；剩余50%应在项目验收合格后7个工作日内支付。',
-          priority: 'HIGH',
-          reason: '明确付款条件，避免付款纠纷',
-        };
-        break;
-    }
-
-    if (suggestion) {
-      suggestions.push(suggestion);
-    }
+  // ── 第一阶段：识别风险 ────────────────────────────────────────────────────
+  logger.info('[contract-reviewer] 第一阶段：风险识别');
+  const phase1Msg = await client.chat.completions.create({
+    model: MODEL(),
+    max_tokens: 8192,
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: PHASE1_SYSTEM },
+      { role: 'user', content: `请审查以下合同文本：\n\n${truncatedContent}` },
+    ],
   });
 
-  return suggestions;
-}
+  const phase1Raw = phase1Msg.choices[0]?.message?.content ?? '';
+  if (!phase1Raw) throw new Error('AI第一阶段未返回结果');
+  const phase1 = JSON.parse(phase1Raw) as Phase1Result;
 
-/**
- * 计算评分
- */
-function calculateScores(risks: RiskItem[]): {
-  overallScore: number;
-  riskScore: number;
-  complianceScore: number;
-} {
-  if (risks.length === 0) {
+  if (!Array.isArray(phase1.risks) || phase1.risks.length === 0) {
+    // 无风险的合同直接返回，跳过第二阶段
     return {
-      overallScore: 100,
-      riskScore: 100,
-      complianceScore: 100,
+      overallScore: phase1.overallScore ?? 100,
+      riskScore: phase1.riskScore ?? 100,
+      complianceScore: phase1.complianceScore ?? 100,
+      totalRisks: 0,
+      criticalRisks: 0,
+      highRisks: 0,
+      mediumRisks: 0,
+      lowRisks: 0,
+      risks: [],
+      suggestions: [],
+      reviewTime: Date.now() - startTime,
     };
   }
 
-  // 根据风险等级计算扣分
-  let totalDeduction = 0;
-  risks.forEach(risk => {
-    switch (risk.level) {
-      case 'CRITICAL':
-        totalDeduction += 20;
-        break;
-      case 'HIGH':
-        totalDeduction += 15;
-        break;
-      case 'MEDIUM':
-        totalDeduction += 10;
-        break;
-      case 'LOW':
-        totalDeduction += 5;
-        break;
-    }
+  // ── 第二阶段：生成修改建议 ─────────────────────────────────────────────────
+  logger.info(
+    `[contract-reviewer] 第二阶段：生成建议（共 ${phase1.risks.length} 个风险）`
+  );
+  const riskSummary = phase1.risks
+    .map(r => `[${r.type}/${r.level}] ${r.title}：${r.description}`)
+    .join('\n');
+
+  const phase2Msg = await client.chat.completions.create({
+    model: MODEL(),
+    max_tokens: 8192,
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: PHASE2_SYSTEM },
+      {
+        role: 'user',
+        content: `合同风险清单如下，请逐一给出修改建议：\n\n${riskSummary}`,
+      },
+    ],
   });
 
-  const riskScore = Math.max(0, 100 - totalDeduction);
-  const complianceScore = Math.max(0, 100 - totalDeduction * 0.8);
-  const overallScore = Math.round((riskScore + complianceScore) / 2);
+  const phase2Raw = phase2Msg.choices[0]?.message?.content ?? '';
+  if (!phase2Raw) throw new Error('AI第二阶段未返回结果');
+  const phase2 = JSON.parse(phase2Raw) as Phase2Result;
+
+  // ── 映射为标准类型 ─────────────────────────────────────────────────────────
+  const risks: RiskItem[] = phase1.risks.map((r, i) => ({
+    id: `risk-${startTime}-${i}`,
+    type: r.type as RiskItem['type'],
+    level: r.level as RiskItem['level'],
+    title: r.title,
+    description: r.description,
+    location: { page: 1, paragraph: 1 },
+    originalText: r.originalText ?? '',
+    impact: r.impact,
+    probability: r.probability,
+  }));
+
+  const suggestions: Suggestion[] = (phase2.suggestions ?? []).map((s, i) => {
+    const matchedRisk = risks.find(r => r.type === s.riskType);
+    return {
+      id: `suggestion-${startTime}-${i}`,
+      riskId: matchedRisk?.id ?? `risk-${startTime}-0`,
+      type: s.type as Suggestion['type'],
+      title: s.title,
+      description: s.description,
+      suggestedText: s.suggestedText,
+      priority: s.priority as Suggestion['priority'],
+      reason: s.reason,
+    };
+  });
 
   return {
-    overallScore,
-    riskScore,
-    complianceScore,
-  };
-}
-
-/**
- * 统计各级别风险数量
- */
-function countRisksByLevel(risks: RiskItem[]): {
-  totalRisks: number;
-  criticalRisks: number;
-  highRisks: number;
-  mediumRisks: number;
-  lowRisks: number;
-} {
-  return {
+    overallScore: phase1.overallScore,
+    riskScore: phase1.riskScore,
+    complianceScore: phase1.complianceScore,
     totalRisks: risks.length,
     criticalRisks: risks.filter(r => r.level === 'CRITICAL').length,
     highRisks: risks.filter(r => r.level === 'HIGH').length,
     mediumRisks: risks.filter(r => r.level === 'MEDIUM').length,
     lowRisks: risks.filter(r => r.level === 'LOW').length,
+    risks,
+    suggestions,
+    reviewTime: Date.now() - startTime,
   };
 }

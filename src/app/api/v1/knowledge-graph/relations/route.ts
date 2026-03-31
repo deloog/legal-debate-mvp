@@ -23,6 +23,7 @@ import {
   KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 interface CreateRelationRequestBody {
   sourceId: string;
@@ -48,6 +49,15 @@ const DEFAULT_CONFIDENCE = 0.7;
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<CreateRelationResponse>> {
+  // ─── 认证：从服务器端获取 userId，禁止客户端伪造 ─────────────────────────
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: '未授权，请先登录' },
+      { status: 401 }
+    );
+  }
+
   try {
     // 解析请求体
     let body: CreateRelationRequestBody;
@@ -94,26 +104,6 @@ export async function POST(
       );
     }
 
-    if (!body.createdBy || typeof body.createdBy !== 'string') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: '缺少必需参数: createdBy',
-        },
-        { status: 400 }
-      );
-    }
-
-    if (body.createdBy.trim() === '') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'createdBy不能为空',
-        },
-        { status: 400 }
-      );
-    }
-
     // 验证confidence参数
     let confidence = body.confidence ?? DEFAULT_CONFIDENCE;
     if (typeof confidence === 'number') {
@@ -132,7 +122,7 @@ export async function POST(
 
     // 权限检查
     const permissionResult = await checkKnowledgeGraphPermission(
-      body.createdBy,
+      authUser.userId,
       KnowledgeGraphAction.MANAGE_RELATIONS,
       KnowledgeGraphResource.RELATION
     );
@@ -205,7 +195,7 @@ export async function POST(
       confidence,
       strength: confidence,
       verificationStatus: 'PENDING' as const,
-      createdBy: body.createdBy,
+      createdBy: authUser.userId,
       discoveryMethod: 'MANUAL' as const,
       ...(body.evidence ? { evidence: body.evidence as never } : {}),
     };
@@ -222,7 +212,7 @@ export async function POST(
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     await logKnowledgeGraphAction({
-      userId: body.createdBy,
+      userId: authUser.userId,
       action: KnowledgeGraphAction.MANAGE_RELATIONS,
       resource: KnowledgeGraphResource.RELATION,
       resourceId: newRelation.id,

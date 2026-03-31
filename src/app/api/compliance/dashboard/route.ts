@@ -7,16 +7,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ComplianceService } from '@/lib/compliance/compliance-service';
 import type { GetComplianceDashboardResponse } from '@/types/compliance';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * GET /api/compliance/dashboard
  * 获取合规仪表盘数据
  */
 export async function GET(
-  _request: NextRequest
+  request: NextRequest
 ): Promise<NextResponse<GetComplianceDashboardResponse>> {
   try {
-    const dashboard = await ComplianceService.getDashboard();
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
+        { status: 401 }
+      ) as NextResponse<GetComplianceDashboardResponse>;
+    }
+
+    const dashboard = await ComplianceService.getDashboard(authUser.userId);
 
     return NextResponse.json(
       {
@@ -33,8 +45,7 @@ export async function GET(
         success: false,
         error: {
           code: 'SERVICE_ERROR',
-          message:
-            error instanceof Error ? error.message : '获取仪表盘数据失败',
+          message: '获取仪表盘数据失败',
         },
       },
       { status: 500 }

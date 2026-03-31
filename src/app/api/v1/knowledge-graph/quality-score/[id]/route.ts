@@ -3,8 +3,7 @@
 // =============================================================================
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 import {
   checkKnowledgeGraphPermission,
@@ -26,14 +25,14 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
   try {
     const { id } = await params;
 
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: '未授权' }, { status: 401 });
     }
 
     // 检查权限
     const permissionCheck = await checkKnowledgeGraphPermission(
-      session.user.id,
+      authUser.userId,
       KnowledgeGraphAction.VIEW_RELATIONS,
       KnowledgeGraphResource.RELATION
     );
@@ -49,7 +48,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     const result = await service.getRelationQualityScore(id);
 
     logger.info('Relation quality score retrieved', {
-      userId: session.user.id,
+      userId: authUser.userId,
       relationId: id,
     });
 
@@ -88,14 +87,14 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   try {
     const { id } = await params;
 
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: '未授权' }, { status: 401 });
     }
 
     // 检查权限
     const permissionCheck = await checkKnowledgeGraphPermission(
-      session.user.id,
+      authUser.userId,
       KnowledgeGraphAction.MANAGE_RELATIONS,
       KnowledgeGraphResource.RELATION
     );
@@ -114,7 +113,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     const result = await service.updateRelationScore(input);
 
     logger.info('Relation quality score updated', {
-      userId: session.user.id,
+      userId: authUser.userId,
       relationId: id,
       input,
     });

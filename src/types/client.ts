@@ -284,7 +284,7 @@ export interface FollowUpTask {
  */
 export interface CreateFollowUpTaskInput {
   clientId: string;
-  communicationId: string;
+  communicationId?: string;
   userId: string;
   type: CommunicationType;
   summary: string;

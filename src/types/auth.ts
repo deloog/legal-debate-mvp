@@ -52,6 +52,8 @@ export interface RegisterRequest {
   password: string;
   username?: string;
   name?: string;
+  /** 注册时用户选择的角色：律师 或 企业法务 */
+  role?: 'LAWYER' | 'ENTERPRISE';
 }
 
 /**

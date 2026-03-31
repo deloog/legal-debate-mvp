@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
+import { uploadFile } from '@/lib/storage/storage-service';
 import { v4 as uuidv4 } from 'uuid';
 import { prisma } from '@/lib/db/prisma';
 import { DocAnalyzerAgentAdapter } from '@/lib/agent/doc-analyzer/adapter';
@@ -12,12 +13,17 @@ import {
   ResourceType,
 } from '@/lib/middleware/resource-permission';
 import { logger } from '@/lib/logger';
+import { moderateRateLimiter } from '@/lib/middleware/rate-limit';
 
 /**
  * 文件上传API
  * POST /api/v1/documents/upload
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  // 速率限制（防止文件上传接口被滥用）
+  const rateLimitResponse = await moderateRateLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // 获取认证用户
     const authUser = await getAuthUser(request);
@@ -102,21 +108,57 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // 生成存储路径
-    const uploadDir = join(process.cwd(), 'public', 'uploads', caseId);
-    await mkdir(uploadDir, { recursive: true });
-
     // 生成文件名（避免文件名冲突）
     const extension = file.name.split('.').pop() || '';
     const fileName = `${uuidv4()}.${extension}`;
-    const filePath = join(uploadDir, fileName);
+    const ossKey = `documents/${caseId}/${fileName}`;
 
     // 读取文件内容
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // 写入文件
-    await writeFile(filePath, buffer);
+    // Magic bytes 验证（防止伪造 Content-Type 绕过类型检查）
+    const fileMagicMap: Record<string, number[]> = {
+      'application/pdf': [0x25, 0x50, 0x44, 0x46],
+      'application/msword': [0xd0, 0xcf, 0x11, 0xe0],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        [0x50, 0x4b, 0x03, 0x04],
+      'image/jpeg': [0xff, 0xd8, 0xff],
+      'image/png': [0x89, 0x50, 0x4e, 0x47],
+    };
+    const expectedMagic = fileMagicMap[file.type];
+    if (
+      expectedMagic &&
+      !expectedMagic.every((byte, i) => buffer[i] === byte)
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: '文件内容与声明的类型不符',
+          code: 'INVALID_FILE_CONTENT',
+        },
+        { status: 400 }
+      );
+    }
+
+    // 上传文件（本地或OSS）
+    await uploadFile(buffer, ossKey, {
+      isPrivate: true,
+      contentType: file.type,
+    });
+
+    // 本地模式同时写入磁盘（供文档分析任务读取）
+    if (process.env.OSS_ENABLED !== 'true') {
+      const uploadDir = join(
+        process.cwd(),
+        'private_uploads',
+        'documents',
+        caseId
+      );
+      await mkdir(uploadDir, { recursive: true });
+      const filePath = join(uploadDir, fileName);
+      await writeFile(filePath, buffer);
+    }
 
     // 保存到数据库
     const document = await prisma.document.create({
@@ -124,7 +166,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         caseId,
         userId: existingCase.userId,
         filename: file.name,
-        filePath: `/uploads/${caseId}/${fileName}`,
+        filePath: ossKey,
         fileType: extension,
         fileSize: file.size,
         mimeType: file.type,
@@ -224,7 +266,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       });
     } else {
       // 真实PDF文件，异步触发文档分析
-      triggerDocumentAnalysis(document.id, filePath, extension).catch(error => {
+      triggerDocumentAnalysis(document.id, ossKey, extension).catch(error => {
         logger.error(`文档分析异步触发失败 [${document.id}]:`, error);
         // 更新文档状态为失败
         prisma.document
@@ -232,9 +274,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             where: { id: document.id },
             data: {
               analysisStatus: 'FAILED',
-              analysisError: `分析触发失败: ${
-                error instanceof Error ? error.message : '未知错误'
-              }`,
+              analysisError: `分析触发失败: ${'未知错误'}`,
             },
           })
           .catch(err => logger.error('更新文档分析状态失败:', err));
@@ -258,7 +298,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : '上传失败',
+        error: '上传失败',
       },
       { status: 500 }
     );
@@ -362,9 +402,7 @@ async function triggerDocumentAnalysis(
       where: { id: documentId },
       data: {
         analysisStatus: 'FAILED',
-        analysisError: `分析异常: ${
-          error instanceof Error ? error.message : '未知错误'
-        }`,
+        analysisError: `分析异常: ${'未知错误'}`,
       },
     });
   }

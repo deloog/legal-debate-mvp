@@ -62,6 +62,9 @@ export interface Argument {
   generatedBy: 'ai' | 'rule';
   aiProvider?: 'zhipu' | 'deepseek';
   generationTime: number;
+
+  // 扩展字段（用于存储验证数据等）
+  metadata?: Record<string, unknown>;
 }
 
 /**

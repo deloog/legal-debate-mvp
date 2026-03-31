@@ -5,16 +5,15 @@
 
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return Response.json({ success: false, error: '未认证' }, { status: 401 });
   }
 
@@ -34,8 +33,12 @@ export async function GET(
       );
     }
 
-    const isAdmin = (session.user as { role?: string }).role === 'ADMIN';
-    if (debate.userId !== session.user.id && !isAdmin) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
+    if (debate.userId !== authUser.userId && !isAdmin) {
       return Response.json(
         { success: false, error: '无权访问' },
         { status: 403 }
@@ -55,7 +58,7 @@ export async function GET(
       orderBy: [{ roundId: 'asc' }, { createdAt: 'asc' }],
     });
 
-    return Response.json(args);
+    return Response.json({ success: true, data: args });
   } catch (error) {
     logger.error('获取辩论论点失败:', error);
     return Response.json(

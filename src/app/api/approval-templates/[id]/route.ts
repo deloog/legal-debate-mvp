@@ -10,6 +10,7 @@ import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 const updateTemplateSchema = z.object({
   name: z.string().min(1, '模板名称不能为空').optional(),
@@ -28,10 +29,21 @@ const updateTemplateSchema = z.object({
 });
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
+        { status: 401 }
+      );
+    }
+
     const templateId = (await params).id;
 
     const template = await prisma.approvalTemplate.findUnique({
@@ -62,7 +74,7 @@ export async function GET(
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '获取审批模板失败',
+          message: '获取审批模板失败',
         },
       },
       { status: 500 }
@@ -75,6 +87,32 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
+        { status: 401 }
+      );
+    }
+
+    // 从DB实时读取角色，防止JWT过期角色绕过
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: '仅管理员可更新审批模板' },
+        },
+        { status: 403 }
+      );
+    }
+
     const templateId = (await params).id;
     const body = await request.json();
 
@@ -125,7 +163,7 @@ export async function PUT(
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '更新审批模板失败',
+          message: '更新审批模板失败',
         },
       },
       { status: 500 }
@@ -134,10 +172,36 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
+        { status: 401 }
+      );
+    }
+
+    // 从DB实时读取角色，防止JWT过期角色绕过
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: '仅管理员可删除审批模板' },
+        },
+        { status: 403 }
+      );
+    }
+
     const templateId = (await params).id;
 
     // 检查模板是否被使用
@@ -174,7 +238,7 @@ export async function DELETE(
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '删除审批模板失败',
+          message: '删除审批模板失败',
         },
       },
       { status: 500 }

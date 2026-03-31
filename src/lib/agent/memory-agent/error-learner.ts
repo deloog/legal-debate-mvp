@@ -24,8 +24,8 @@ export class ErrorLearner {
 
   constructor(
     private prisma: PrismaClient,
-    private aiService: AIService,
-    private memoryManager: MemoryManager
+    aiService: AIService,
+    memoryManager: MemoryManager
   ) {
     this.analyzer = new ErrorPatternAnalyzer(prisma, aiService);
     this.aiHelpers = new AIHelpers(aiService);

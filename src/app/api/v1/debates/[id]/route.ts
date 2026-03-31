@@ -163,11 +163,16 @@ export const PUT = withErrorHandler(
       return createNotFoundResponse('Debate not found');
     }
 
+    // 剥离 status 字段，状态变更必须通过 PATCH /status 端点走状态机
+    const { status: _status, ...updateData } = body as typeof body & {
+      status?: string;
+    };
+
     // 更新辩论
     const updatedDebate = await prisma.debate.update({
       where: { id },
       data: {
-        ...body,
+        ...updateData,
         updatedAt: new Date(),
       },
       include: {

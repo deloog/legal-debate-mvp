@@ -4,6 +4,7 @@
  * - GET /api/v1/knowledge-graph/snapshots/latest - 获取最新快照
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { snapshotService } from '@/lib/knowledge-graph/version-control';
 import { logger } from '@/lib/logger';
 
@@ -11,7 +12,15 @@ import { logger } from '@/lib/logger';
  * GET /api/v1/knowledge-graph/snapshots/latest
  * 获取最新快照
  */
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: '未授权' },
+      { status: 401 }
+    );
+  }
+
   try {
     const snapshot = await snapshotService.getLatestSnapshot();
 

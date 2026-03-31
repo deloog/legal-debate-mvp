@@ -19,6 +19,7 @@ import {
   logKnowledgeGraphAction,
   KnowledgeGraphAction,
 } from '@/lib/middleware/knowledge-graph-permission';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 
 interface RiskAnalysisResult {
@@ -63,6 +64,15 @@ const RISK_SEVERITY = {
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const searchParams = new URL(request.url).searchParams;
 
+  // 认证检查
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: '未授权' } },
+      { status: 401 }
+    );
+  }
+
   try {
     // 参数验证
     const contractId = searchParams.get('contractId');
@@ -79,7 +89,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // 权限检查
     const permissionResult = await checkKnowledgeGraphPermission(
-      '', // 用户ID从header中获取
+      authUser.userId,
       KnowledgeGraphAction.VIEW_RELATIONS,
       'RELATION' as never
     );
@@ -276,7 +286,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // 记录操作日志
     await logKnowledgeGraphAction({
-      userId: '', // 从header获取
+      userId: authUser.userId,
       action: KnowledgeGraphAction.VIEW_RELATIONS,
       resource: 'RELATION' as never,
       description: `企业风险分析: 合同${contractId}`,
@@ -295,7 +305,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       error,
       contractId: searchParams.get('contractId'),
     });
-    const errorMessage = error instanceof Error ? error.message : '服务器错误';
+    const errorMessage = '服务器错误';
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

@@ -27,6 +27,23 @@ export interface FilingMaterialsResult {
 }
 
 /**
+ * 中文案件类型 → 内部 key 映射（页面传中文，服务用英文 key）
+ */
+const CASE_TYPE_ALIAS: Record<string, string> = {
+  民事: 'CIVIL',
+  刑事: 'CRIMINAL',
+  行政: 'ADMINISTRATIVE',
+  商事: 'COMMERCIAL',
+  劳动: 'LABOR_DISPUTE',
+  知识产权: 'IP',
+  // 保留英文 key 向后兼容
+  LABOR_DISPUTE: 'LABOR_DISPUTE',
+  CONTRACT_DISPUTE: 'CIVIL',
+  MARRIAGE_FAMILY: 'CIVIL',
+  TORT_LIABILITY: 'CIVIL',
+};
+
+/**
  * 案件类型材料配置
  */
 const CASE_TYPE_MATERIALS: Record<string, FilingMaterial[]> = {
@@ -273,6 +290,274 @@ const CASE_TYPE_MATERIALS: Record<string, FilingMaterial[]> = {
       category: 'evidence',
     },
   ],
+
+  // 民事案件（通用，涵盖合同、侵权、婚姻等）
+  CIVIL: [
+    {
+      id: 'civil-1',
+      name: '起诉状',
+      description: '起诉状正本1份，副本按被告人数提供',
+      required: true,
+      copies: 1,
+      category: 'legal',
+    },
+    {
+      id: 'civil-2',
+      name: '原告身份证明',
+      description: '原告身份证复印件；企业提供营业执照复印件',
+      required: true,
+      copies: 1,
+      category: 'identity',
+    },
+    {
+      id: 'civil-3',
+      name: '被告主体资格证明',
+      description: '被告身份证复印件或企业营业执照复印件、工商登记信息',
+      required: true,
+      copies: 1,
+      category: 'identity',
+    },
+    {
+      id: 'civil-4',
+      name: '授权委托书',
+      description: '委托代理人出庭时需提供（个人签字，企业加盖公章）',
+      required: false,
+      copies: 1,
+      category: 'legal',
+    },
+    {
+      id: 'civil-5',
+      name: '证据材料',
+      description: '支持诉讼请求的书证、物证、电子证据等，每份证据需编号',
+      required: true,
+      copies: 1,
+      category: 'evidence',
+    },
+    {
+      id: 'civil-6',
+      name: '证据清单',
+      description: '列明所有证据名称、来源、证明内容的清单',
+      required: true,
+      copies: 1,
+      category: 'legal',
+    },
+  ],
+
+  // 刑事自诉案件
+  CRIMINAL: [
+    {
+      id: 'criminal-1',
+      name: '刑事自诉状',
+      description: '刑事自诉状正本1份，副本按被告人数提供',
+      required: true,
+      copies: 1,
+      category: 'legal',
+    },
+    {
+      id: 'criminal-2',
+      name: '自诉人身份证明',
+      description: '自诉人身份证复印件',
+      required: true,
+      copies: 1,
+      category: 'identity',
+    },
+    {
+      id: 'criminal-3',
+      name: '被告人基本信息',
+      description: '被告人姓名、住址等基本情况（尽量提供身份证号）',
+      required: true,
+      copies: 1,
+      category: 'identity',
+    },
+    {
+      id: 'criminal-4',
+      name: '犯罪事实证明材料',
+      description: '证明被告人实施犯罪行为的书证、物证、证人证词等',
+      required: true,
+      copies: 1,
+      category: 'evidence',
+    },
+    {
+      id: 'criminal-5',
+      name: '损害结果证明',
+      description: '受到损害的医疗记录、财产损失证明等',
+      required: false,
+      copies: 1,
+      category: 'evidence',
+    },
+    {
+      id: 'criminal-6',
+      name: '报案记录（如有）',
+      description: '已向公安机关报案但不予立案的不予立案通知书',
+      required: false,
+      copies: 1,
+      category: 'legal',
+    },
+  ],
+
+  // 行政诉讼案件
+  ADMINISTRATIVE: [
+    {
+      id: 'admin-1',
+      name: '行政起诉状',
+      description: '起诉状正本1份，副本1份',
+      required: true,
+      copies: 1,
+      category: 'legal',
+    },
+    {
+      id: 'admin-2',
+      name: '原告身份证明',
+      description: '原告身份证复印件；企业提供营业执照复印件',
+      required: true,
+      copies: 1,
+      category: 'identity',
+    },
+    {
+      id: 'admin-3',
+      name: '行政行为证明材料',
+      description: '被诉行政行为的决定书、通知书、批文等',
+      required: true,
+      copies: 1,
+      category: 'evidence',
+    },
+    {
+      id: 'admin-4',
+      name: '行政复议决定书（如有）',
+      description: '已申请行政复议的，需提供复议决定书',
+      required: false,
+      copies: 1,
+      category: 'legal',
+    },
+    {
+      id: 'admin-5',
+      name: '原告资格证明',
+      description: '证明原告与被诉行政行为有利害关系的材料',
+      required: true,
+      copies: 1,
+      category: 'evidence',
+    },
+    {
+      id: 'admin-6',
+      name: '送达地址确认书',
+      description: '法院要求填写的送达地址确认书',
+      required: true,
+      copies: 1,
+      category: 'legal',
+    },
+  ],
+
+  // 商事案件
+  COMMERCIAL: [
+    {
+      id: 'commercial-1',
+      name: '起诉状',
+      description: '起诉状正本1份，副本按被告数量提供',
+      required: true,
+      copies: 1,
+      category: 'legal',
+    },
+    {
+      id: 'commercial-2',
+      name: '原告主体资格证明',
+      description: '营业执照复印件、法定代表人身份证明',
+      required: true,
+      copies: 1,
+      category: 'identity',
+    },
+    {
+      id: 'commercial-3',
+      name: '被告主体资格证明',
+      description: '被告营业执照复印件或工商登记信息',
+      required: true,
+      copies: 1,
+      category: 'identity',
+    },
+    {
+      id: 'commercial-4',
+      name: '授权委托书',
+      description: '法定代表人授权委托书，加盖公章',
+      required: true,
+      copies: 1,
+      category: 'legal',
+    },
+    {
+      id: 'commercial-5',
+      name: '合同或协议原件',
+      description: '涉案合同、协议、章程等商事文书',
+      required: true,
+      copies: 1,
+      category: 'evidence',
+    },
+    {
+      id: 'commercial-6',
+      name: '往来函件及凭证',
+      description: '付款凭证、发票、交货记录、往来邮件等',
+      required: true,
+      copies: 1,
+      category: 'evidence',
+    },
+    {
+      id: 'commercial-7',
+      name: '仲裁协议（如有）',
+      description: '合同约定仲裁条款或单独仲裁协议（用于申请财产保全）',
+      required: false,
+      copies: 1,
+      category: 'legal',
+    },
+  ],
+
+  // 知识产权案件
+  IP: [
+    {
+      id: 'ip-1',
+      name: '起诉状',
+      description: '起诉状正本1份，副本按被告人数提供',
+      required: true,
+      copies: 1,
+      category: 'legal',
+    },
+    {
+      id: 'ip-2',
+      name: '原告主体资格证明',
+      description: '身份证复印件或营业执照复印件',
+      required: true,
+      copies: 1,
+      category: 'identity',
+    },
+    {
+      id: 'ip-3',
+      name: '权利证明',
+      description: '专利证书、商标注册证、著作权登记证书、版权证书等',
+      required: true,
+      copies: 1,
+      category: 'evidence',
+    },
+    {
+      id: 'ip-4',
+      name: '侵权证据',
+      description: '被告侵权行为的证据，如侵权产品、宣传材料、公证书等',
+      required: true,
+      copies: 1,
+      category: 'evidence',
+    },
+    {
+      id: 'ip-5',
+      name: '损失证明材料',
+      description: '权利人损失或被告获利的相关财务数据、鉴定意见',
+      required: false,
+      copies: 1,
+      category: 'evidence',
+    },
+    {
+      id: 'ip-6',
+      name: '授权委托书（如有）',
+      description: '独占许可权人起诉需提供授权文件',
+      required: false,
+      copies: 1,
+      category: 'legal',
+    },
+  ],
 };
 
 /**
@@ -303,6 +588,37 @@ const CASE_TYPE_NOTES: Record<string, string[]> = {
     '如需鉴定，应申请法院委托鉴定',
     '注意诉讼时效，一般为3年',
   ],
+  CIVIL: [
+    '所有材料需提供原件及复印件各1份',
+    '注意民事诉讼时效，一般为3年，从知道权利受损之日起算',
+    '合同纠纷须注意合同中约定的管辖法院或仲裁条款',
+    '起诉前可申请财产保全，需提供相应担保',
+  ],
+  CRIMINAL: [
+    '刑事自诉仅适用于告诉才处理的案件（如侮辱、诽谤、轻伤等）',
+    '公诉案件由检察院起诉，个人不能自行起诉',
+    '注意追诉时效，轻罪5年，10年以下有期徒刑罪名10年',
+    '证据不足时法院可能不予受理，建议先向公安机关报案',
+  ],
+  ADMINISTRATIVE: [
+    '行政诉讼起诉期限：知道行政行为之日起6个月内',
+    '可先申请行政复议，复议不服再提起行政诉讼',
+    '起诉必须明确被告行政机关，不能起诉个人',
+    '行政复议期间不停止被诉行政行为的执行',
+  ],
+  COMMERCIAL: [
+    '商事案件标的额较大时需缴纳诉讼费，可申请缓缴',
+    '涉及公司决议等事项，建议同步申请股东权利保护措施',
+    '合同有仲裁条款的，应先申请仲裁，不能直接向法院起诉',
+    '对外贸易纠纷注意适用法律和管辖约定',
+  ],
+  IP: [
+    '专利侵权案件需由专利权人或利害关系人起诉',
+    '著作权纠纷一般向被告住所地或侵权行为地法院起诉',
+    '商标侵权可向工商行政管理部门举报，也可直接诉讼',
+    '及时申请证据保全，侵权产品可能被销毁',
+    '注意知识产权专属管辖，应向知识产权法院或专门法庭起诉',
+  ],
 };
 
 /**
@@ -319,12 +635,15 @@ export class FilingMaterialsService {
     caseType: string,
     courtLevel: string = '基层'
   ): FilingMaterialsResult {
+    // 将中文案件类型映射到内部 key（向后兼容英文 key）
+    const internalKey = CASE_TYPE_ALIAS[caseType] ?? caseType;
+
     // 获取案件类型对应的材料清单
     const materials =
-      CASE_TYPE_MATERIALS[caseType] || this.getDefaultMaterials();
+      CASE_TYPE_MATERIALS[internalKey] || this.getDefaultMaterials();
 
     // 获取注意事项
-    const notes = CASE_TYPE_NOTES[caseType] || this.getDefaultNotes();
+    const notes = CASE_TYPE_NOTES[internalKey] || this.getDefaultNotes();
 
     // 根据法院级别调整材料要求
     const adjustedMaterials = this.adjustMaterialsByCourtLevel(

@@ -6,7 +6,7 @@ export interface RoundTimelineProps {
   rounds: DebateRound[];
   currentRoundId: string | null;
   onRoundChange: (roundId: string) => void;
-  /** 所有论点（用于计算每轮双方论点数） */
+  /** 所有论点（用于计算每轮双方论点数，以及判断中断轮次） */
   arguments?: Argument[];
 }
 
@@ -75,7 +75,7 @@ export function RoundTimeline({
       </h3>
 
       {/* 时间轴 */}
-      <div className='flex items-start gap-0 overflow-x-auto pb-2 scrollbar-thin'>
+      <div className='flex items-start gap-0 overflow-x-auto pt-3 pb-3 scrollbar-thin'>
         {rounds.map((round, index) => {
           const config = statusConfig[round.status] ?? statusConfig.PENDING;
           const isActive = round.id === currentRoundId;
@@ -88,6 +88,14 @@ export function RoundTimeline({
           const defendantCount = argumentsList.filter(
             a => a.roundId === round.id && a.side === 'DEFENDANT'
           ).length;
+
+          // IN_PROGRESS 且该轮无论点 → 视为中断轮次，显示为"待开始"样式
+          const roundArgCount = (argumentsList ?? []).filter(
+            a => a.roundId === round.id
+          ).length;
+          const isInterrupted =
+            round.status === 'IN_PROGRESS' && roundArgCount === 0;
+          const displayConfig = isInterrupted ? statusConfig.PENDING : config;
 
           return (
             <div
@@ -108,12 +116,12 @@ export function RoundTimeline({
                 {/* 节点圆点（可点击） */}
                 <button
                   onClick={() => onRoundChange(round.id)}
-                  className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${config.dotClass} ${
+                  className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${displayConfig.dotClass} ${
                     isActive ? 'scale-110 shadow-md' : ''
                   }`}
-                  aria-label={`第${index + 1}轮 ${config.label}`}
+                  aria-label={`第${index + 1}轮 ${displayConfig.label}`}
                 >
-                  {round.status === 'IN_PROGRESS' && (
+                  {round.status === 'IN_PROGRESS' && !isInterrupted && (
                     <span className='absolute inset-0 animate-ping rounded-full bg-blue-400 opacity-30' />
                   )}
                   {round.status === 'COMPLETED' && (
@@ -131,11 +139,12 @@ export function RoundTimeline({
                       />
                     </svg>
                   )}
-                  {round.status === 'IN_PROGRESS' && (
+                  {round.status === 'IN_PROGRESS' && !isInterrupted && (
                     <span className='h-2.5 w-2.5 rounded-full bg-white' />
                   )}
                   {(round.status === 'PENDING' ||
-                    round.status === 'FAILED') && (
+                    round.status === 'FAILED' ||
+                    isInterrupted) && (
                     <span className='text-xs font-bold text-white'>
                       {index + 1}
                     </span>
@@ -171,9 +180,9 @@ export function RoundTimeline({
                     第{index + 1}轮
                   </span>
                   <span
-                    className={`rounded px-1 py-0.5 text-[10px] font-medium ${config.badgeClass}`}
+                    className={`rounded px-1 py-0.5 text-[10px] font-medium ${displayConfig.badgeClass}`}
                   >
-                    {config.label}
+                    {displayConfig.label}
                   </span>
                 </div>
 

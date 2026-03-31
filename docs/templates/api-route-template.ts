@@ -41,7 +41,7 @@ const requestSchema = z.object({
  */
 async function processRequest(params: RequestParams, body: unknown): Promise<ApiResponse> {
   // 验证请求体
-  const validatedBody = requestSchema.parse(body);
+  void requestSchema.parse(body);
 
   // TODO: 实现业务逻辑
 

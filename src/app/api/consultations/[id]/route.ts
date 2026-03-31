@@ -17,6 +17,7 @@ import {
 } from '@/types/consultation';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 export type { ErrorResponse, SuccessResponse };
 
@@ -28,12 +29,23 @@ export type { ErrorResponse, SuccessResponse };
  * 获取咨询详情
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<
   NextResponse<SuccessResponse<ConsultationDetailResponse> | ErrorResponse>
 > {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
 
     // 验证ID格式
@@ -50,10 +62,11 @@ export async function GET(
       );
     }
 
-    // 查询咨询记录
+    // 查询咨询记录（同时校验所有权，防止 IDOR）
     const consultation = await prisma.consultation.findFirst({
       where: {
         id,
+        userId: authUser.userId,
         deletedAt: null,
       },
       include: {
@@ -158,6 +171,17 @@ export async function PUT(
   NextResponse<SuccessResponse<ConsultationDetailResponse> | ErrorResponse>
 > {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
 
     // 验证ID格式
@@ -174,10 +198,11 @@ export async function PUT(
       );
     }
 
-    // 检查记录是否存在
+    // 检查记录是否存在且属于当前用户（防止 IDOR）
     const existing = await prisma.consultation.findFirst({
       where: {
         id,
+        userId: authUser.userId,
         deletedAt: null,
       },
     });
@@ -349,10 +374,21 @@ export async function PUT(
  * 删除咨询记录（软删除）
  */
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<{ id: string }> | ErrorResponse>> {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
 
     // 验证ID格式
@@ -369,10 +405,11 @@ export async function DELETE(
       );
     }
 
-    // 检查记录是否存在
+    // 检查记录是否存在且属于当前用户（防止 IDOR）
     const existing = await prisma.consultation.findFirst({
       where: {
         id,
+        userId: authUser.userId,
         deletedAt: null,
       },
     });

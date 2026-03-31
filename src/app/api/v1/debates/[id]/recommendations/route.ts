@@ -7,8 +7,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { LawArticleRecommendationService } from '@/lib/law-article/recommendation-service';
+import { searchAllLawArticles } from '@/lib/debate/law-search';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * 获取辩论推荐法条
@@ -17,6 +18,14 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: '未授权，请先登录' },
+      { status: 401 }
+    );
+  }
+
   try {
     const { id: debateId } = await params;
     const { searchParams } = new URL(request.url);
@@ -80,11 +89,12 @@ export async function GET(
       );
     }
 
-    // 获取关联案件信息
+    // 获取关联案件信息（含所有者校验）
     const caseInfo = await prisma.case.findUnique({
       where: { id: debate.caseId },
       select: {
         id: true,
+        userId: true,
         title: true,
         description: true,
         type: true,
@@ -103,43 +113,72 @@ export async function GET(
       );
     }
 
-    // 提取关键词（从metadata或cause中）
-    let keywords: string[] | undefined;
-    if (caseInfo.metadata && typeof caseInfo.metadata === 'object') {
-      const metadata = caseInfo.metadata as { keywords?: string[] };
-      keywords = metadata.keywords;
-    }
-    if (!keywords && caseInfo.cause) {
-      keywords = [caseInfo.cause];
+    // 校验案件归属（防止 IDOR）
+    if (caseInfo.userId !== authUser.userId) {
+      return NextResponse.json(
+        { success: false, error: '无权访问此辩论' },
+        { status: 403 }
+      );
     }
 
-    // 调用推荐服务
-    const recommendations =
-      await LawArticleRecommendationService.recommendForDebate(
-        {
-          title: caseInfo.title,
-          description: caseInfo.description,
-          type: caseInfo.type,
-          keywords,
+    // 使用关键词检索引擎获取相关法条（比 category 过滤更可靠）
+    const { articles, localCount, lawstarCount } = await searchAllLawArticles(
+      caseInfo.type,
+      caseInfo.title,
+      caseInfo.description,
+      limit,
+      Math.ceil(limit / 2)
+    );
+
+    // 将 LocalArticle 转为组件期望的推荐格式
+    const total = articles.length || 1;
+    const recommendations = articles.map((a, i) => {
+      // 分数：本地DB文章从0.9递减，LawStar补充文章约0.5
+      const isLocal = !!a.id;
+      const baseScore = isLocal ? 0.9 - (i / total) * 0.35 : 0.5;
+      const score = Math.max(baseScore, 0.1);
+
+      const reason = isLocal ? '与案件类型和关键词匹配' : '通过语义检索匹配';
+
+      return {
+        article: {
+          id: a.id ?? `lawstar_${a.lawName}_${a.articleNumber}`,
+          lawName: a.lawName,
+          articleNumber: a.articleNumber,
+          fullText: a.fullText,
+          category: String(a.category),
+          effectiveDate: new Date(0),
+          status: 'VALID',
+          createdAt: new Date(0),
+          updatedAt: new Date(0),
         },
-        {
-          limit,
-          minScore,
-        }
-      );
+        score,
+        reason,
+      };
+    });
+
+    // 过滤 minScore
+    const filtered =
+      minScore > 0
+        ? recommendations.filter(r => r.score >= minScore)
+        : recommendations;
+
+    logger.info(
+      `[recommendations] 辩论 ${debate.id} 推荐法条：本地 ${localCount} 条，LawStar ${lawstarCount} 条，共 ${filtered.length} 条`
+    );
 
     // 返回结果
     return NextResponse.json(
       {
         success: true,
-        recommendations,
+        recommendations: filtered,
         metadata: {
           debateId: debate.id,
           debateTitle: debate.title,
           caseId: caseInfo.id,
           caseTitle: caseInfo.title,
           caseType: caseInfo.type,
-          totalCount: recommendations.length,
+          totalCount: filtered.length,
         },
       },
       { status: 200 }

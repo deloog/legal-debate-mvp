@@ -1,34 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { RoundStatus } from '@prisma/client';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; roundId: string }> }
 ) {
-  // 认证：优先 JWT Bearer，回退到 NextAuth session
-  let userId: string | undefined;
-  let userRole: string | undefined;
-  const authHeader = request.headers.get('authorization');
-  const jwtToken = extractTokenFromHeader(authHeader ?? '');
-  const tokenResult = verifyToken(jwtToken ?? '');
-  if (tokenResult.valid && tokenResult.payload) {
-    userId = tokenResult.payload.userId;
-    userRole = tokenResult.payload.role;
-  } else {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { success: false, error: '未认证' },
-        { status: 401 }
-      );
-    }
-    userId = session.user.id;
-    userRole = (session.user as { role?: string }).role;
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: '未认证' },
+      { status: 401 }
+    );
   }
 
   try {
@@ -53,8 +38,13 @@ export async function GET(
       );
     }
 
-    const isAdmin = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
-    if (debate.userId !== userId && !isAdmin) {
+    const dbUserGet = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    const isAdminGet =
+      dbUserGet?.role === 'ADMIN' || dbUserGet?.role === 'SUPER_ADMIN';
+    if (debate.userId !== authUser.userId && !isAdminGet) {
       return NextResponse.json(
         { success: false, error: '无权访问' },
         { status: 403 }
@@ -103,15 +93,32 @@ export async function GET(
 
 /**
  * PATCH /api/v1/debates/[id]/rounds/[roundId]
- * 重置轮次状态（用于重新生成论点）
- * 重置为 IN_PROGRESS 时同时删除该轮现有论点
+ * 更新轮次状态，遵守状态机约束。
+ *
+ * 合法转换（非管理员）：
+ *   PENDING     → IN_PROGRESS  （SSE 激活，一般不由前端直接调用）
+ *   IN_PROGRESS → IN_PROGRESS  （重置软锁 + 清空论点，用于中断轮次重试）
+ *   IN_PROGRESS → FAILED       （标记生成失败）
+ *   FAILED      → IN_PROGRESS  （用户重试，清空论点 + 重置锁）
+ *   COMPLETED 不允许任何降级
+ *
+ * 管理员可绕过状态机约束。
  */
+
+/** 合法状态转换表 */
+const ALLOWED_TRANSITIONS: Partial<Record<RoundStatus, RoundStatus[]>> = {
+  [RoundStatus.PENDING]: [RoundStatus.IN_PROGRESS],
+  [RoundStatus.IN_PROGRESS]: [RoundStatus.IN_PROGRESS, RoundStatus.FAILED],
+  [RoundStatus.FAILED]: [RoundStatus.IN_PROGRESS],
+  // COMPLETED 无合法转换，防止已完成的数据被覆盖
+};
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; roundId: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return NextResponse.json(
       { success: false, error: '未认证' },
       { status: 401 }
@@ -133,28 +140,54 @@ export async function PATCH(
       );
     }
 
-    // 验证所有权
-    const debate = await prisma.debate.findUnique({
-      where: { id },
-      select: { userId: true },
+    // 验证所有权并查询当前轮次状态（合并两次查询为一次）
+    const roundWithDebate = await prisma.debateRound.findUnique({
+      where: { id: roundId, debateId: id },
+      select: {
+        status: true,
+        debate: { select: { userId: true } },
+      },
     });
 
-    if (!debate) {
+    if (!roundWithDebate) {
       return NextResponse.json(
-        { success: false, error: '辩论不存在' },
+        { success: false, error: '轮次不存在' },
         { status: 404 }
       );
     }
 
-    const isAdmin = (session.user as { role?: string }).role === 'ADMIN';
-    if (debate.userId !== session.user.id && !isAdmin) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
+    if (roundWithDebate.debate.userId !== authUser.userId && !isAdmin) {
       return NextResponse.json(
         { success: false, error: '无权操作' },
         { status: 403 }
       );
     }
 
+    // 状态机校验（管理员绕过）
+    if (!isAdmin) {
+      const allowedTargets =
+        ALLOWED_TRANSITIONS[roundWithDebate.status as RoundStatus] ?? [];
+      if (!allowedTargets.includes(status as RoundStatus)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'INVALID_TRANSITION',
+              message: `不允许从 ${roundWithDebate.status} 转换到 ${status}`,
+            },
+          },
+          { status: 409 }
+        );
+      }
+    }
+
     await prisma.$transaction(async tx => {
+      // 转换到 IN_PROGRESS 时：删除现有论点 + 清除生成锁
       if (status === RoundStatus.IN_PROGRESS) {
         await tx.argument.deleteMany({ where: { roundId } });
       }
@@ -163,7 +196,7 @@ export async function PATCH(
         data: {
           status: status as RoundStatus,
           completedAt: status === RoundStatus.IN_PROGRESS ? null : undefined,
-          // 重置为 IN_PROGRESS 时清除生成锁，允许新的 /generate 请求声明它
+          // 重置为 IN_PROGRESS 时清除软锁，SSE 可重新声明生成权
           startedAt: status === RoundStatus.IN_PROGRESS ? null : undefined,
         },
       });

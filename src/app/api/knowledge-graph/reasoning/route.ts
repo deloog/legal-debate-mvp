@@ -12,6 +12,7 @@ import { RuleEngine } from '@/lib/knowledge-graph/reasoning/rule-engine';
 import { TransitiveSupersessionRule } from '@/lib/knowledge-graph/reasoning/rules/transitive-supersession-rule';
 import { ConflictPropagationRule } from '@/lib/knowledge-graph/reasoning/rules/conflict-propagation-rule';
 import { CompletionChainRule } from '@/lib/knowledge-graph/reasoning/rules/completion-chain-rule';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 import {
   ArticleNode,
@@ -44,6 +45,14 @@ interface ReasoningRequest {
  */
 export async function POST(request: NextRequest) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: '请先登录' },
+        { status: 401 }
+      );
+    }
+
     const body: ReasoningRequest = await request.json();
 
     // 验证必填字段
@@ -108,8 +117,8 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : '未知错误';
+  } catch (_error: unknown) {
+    const errorMessage = '未知错误';
 
     logger.error('推理API调用失败', {
       error: errorMessage,
@@ -130,8 +139,16 @@ export async function POST(request: NextRequest) {
  *
  * 获取已注册的规则列表
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: '请先登录' },
+        { status: 401 }
+      );
+    }
+
     const ruleEngine = new RuleEngine();
 
     // 注册规则
@@ -162,8 +179,8 @@ export async function GET() {
       },
       { status: 200 }
     );
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : '未知错误';
+  } catch (_error: unknown) {
+    const errorMessage = '未知错误';
 
     logger.error('获取规则列表失败', {
       error: errorMessage,

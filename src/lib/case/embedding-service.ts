@@ -1,4 +1,5 @@
 import { PrismaClient, Prisma } from '@prisma/client';
+import { prisma as sharedPrisma } from '@/lib/db';
 import { logger } from '../../../config/winston.config';
 import { CaseEmbedderFactory } from '../ai/case/case-embedder';
 import type {
@@ -16,7 +17,7 @@ export class CaseEmbeddingService {
   private embedder: ReturnType<typeof CaseEmbedderFactory.getInstance>;
 
   constructor(config?: Partial<EmbeddingConfig>) {
-    this.prisma = new PrismaClient();
+    this.prisma = sharedPrisma;
     this.embedder = CaseEmbedderFactory.getInstance('default', config);
   }
 

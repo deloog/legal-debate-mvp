@@ -119,6 +119,7 @@ export interface UpgradeRequestBody {
   paymentMethod?: string;
   billingCycle?: string; // 兼容路由使用的计费周期参数
   autoRenew?: boolean;
+  orderId?: string; // 付费升级时必须提供已完成支付的订单ID
 }
 
 /**

@@ -4,8 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { InvoiceType } from '@/types/payment';
 import { applyInvoice } from '@/lib/invoice/invoice-service';
 import { validateInvoiceFields } from '@/lib/invoice/invoice-utils';
@@ -17,9 +16,8 @@ import { logger } from '@/lib/logger';
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -91,7 +89,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // 申请发票
     const invoice = await applyInvoice({
-      userId: session.user.id,
+      userId: authUser.userId,
       orderId,
       type: type as InvoiceType,
       title,
@@ -107,8 +105,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     logger.error('[API] 申请发票失败:', error);
 
-    const errorMessage =
-      error instanceof Error ? error.message : '申请发票失败，请稍后重试';
+    const errorMessage = '申请发票失败，请稍后重试';
 
     // 根据错误信息返回不同的状态码
     if (errorMessage.includes('不存在')) {

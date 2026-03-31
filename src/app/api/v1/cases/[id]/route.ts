@@ -57,6 +57,7 @@ export const GET = withErrorHandler(
           orderBy: { createdAt: 'desc' },
         },
         debates: {
+          where: { deletedAt: null },
           include: {
             rounds: {
               orderBy: { roundNumber: 'asc' },
@@ -213,6 +214,26 @@ export const PUT = withErrorHandler(
     if (!existingCase) {
       const { NotFoundError } = await import('@/app/api/lib/errors/api-error');
       throw new NotFoundError('Case');
+    }
+
+    // 状态机：校验状态转换合法性
+    if (updateData.status !== undefined) {
+      const currentStatus = existingCase.status as string;
+      const newStatus = updateData.status as string;
+      const ALLOWED_TRANSITIONS: Record<string, string[]> = {
+        DRAFT: ['ACTIVE', 'ARCHIVED'],
+        ACTIVE: ['COMPLETED', 'ARCHIVED', 'DRAFT'],
+        COMPLETED: ['ARCHIVED'],
+        ARCHIVED: [], // 归档为终态，不允许任何转换
+      };
+      const allowed = ALLOWED_TRANSITIONS[currentStatus] ?? [];
+      if (!allowed.includes(newStatus)) {
+        const { ValidationError } =
+          await import('@/app/api/lib/errors/api-error');
+        throw new ValidationError(
+          `不允许的状态转换：${currentStatus} → ${newStatus}`
+        );
+      }
     }
 
     // 自动更新updatedAt时间戳

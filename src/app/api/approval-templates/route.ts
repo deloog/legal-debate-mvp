@@ -10,6 +10,7 @@ import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 const createTemplateSchema = z.object({
   name: z.string().min(1, '模板名称不能为空'),
@@ -27,6 +28,17 @@ const createTemplateSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const isActive = searchParams.get('isActive');
 
@@ -48,7 +60,7 @@ export async function GET(request: NextRequest) {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '获取审批模板失败',
+          message: '获取审批模板失败',
         },
       },
       { status: 500 }
@@ -58,6 +70,32 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
+        { status: 401 }
+      );
+    }
+
+    // 从DB实时读取角色，防止JWT过期角色绕过
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: '仅管理员可创建审批模板' },
+        },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
 
     // 验证请求数据
@@ -100,7 +138,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '创建审批模板失败',
+          message: '创建审批模板失败',
         },
       },
       { status: 500 }

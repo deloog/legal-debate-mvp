@@ -78,7 +78,7 @@ export async function POST(
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '版本回滚失败',
+          message: '版本回滚失败',
         },
       },
       { status: 500 }

@@ -144,7 +144,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
   } catch (error: unknown) {
     logger.error('邻居查询失败', { error, nodeId: searchParams.get('nodeId') });
-    const errorMessage = error instanceof Error ? error.message : '服务器错误';
+    const errorMessage = '服务器错误';
     return NextResponse.json(
       {
         success: false,

@@ -142,7 +142,6 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         error: '创建推荐反馈失败',
-        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     );
@@ -270,7 +269,6 @@ export async function GET(request: NextRequest) {
       {
         success: false,
         error: '查询推荐反馈失败',
-        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     );

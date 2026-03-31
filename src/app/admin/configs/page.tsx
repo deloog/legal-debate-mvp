@@ -26,7 +26,7 @@ import { CreateConfigRequest, UpdateConfigRequest } from '@/types/config';
 export default function ConfigsPage() {
   const [configs, setConfigs] = useState<SystemConfig[]>([]);
   const [loading, setLoading] = useState(false);
-  const [page] = useState(1);
+  const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [notification, setNotification] = useState<{
@@ -150,8 +150,8 @@ export default function ConfigsPage() {
    * 初始化时获取配置列表
    */
   React.useEffect(() => {
-    fetchConfigs(1);
-  }, [fetchConfigs]);
+    fetchConfigs(page);
+  }, [fetchConfigs, page]);
 
   return (
     <div className='container mx-auto px-4 py-8'>
@@ -193,7 +193,10 @@ export default function ConfigsPage() {
           page={page}
           totalPages={totalPages}
           onRefresh={() => fetchConfigs(page)}
-          onPageChange={fetchConfigs}
+          onPageChange={p => {
+            setPage(p);
+            fetchConfigs(p);
+          }}
           onCreate={handleCreate}
           onUpdate={handleUpdate}
           onDelete={handleDelete}

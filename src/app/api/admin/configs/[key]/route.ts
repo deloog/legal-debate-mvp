@@ -9,6 +9,7 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { UpdateConfigRequest } from '@/types/config';
 import { logger } from '@/lib/logger';
+import { clearConfigCache } from '@/lib/config/system-config';
 
 // =============================================================================
 // 辅助函数
@@ -170,6 +171,9 @@ export async function PUT(
       where: { key },
       data: updateData,
     });
+
+    // 清除内存缓存，确保下次读取到最新值
+    clearConfigCache(key);
 
     return Response.json(
       {

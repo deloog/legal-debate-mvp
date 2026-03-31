@@ -20,7 +20,12 @@ import { signIn } from 'next-auth/react';
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/';
+  // 校验 redirect 参数：必须以 / 开头且不以 // 开头（防止 //evil.com 绕过）
+  const rawRedirect = searchParams.get('redirect') || '/';
+  const redirect =
+    rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')
+      ? rawRedirect
+      : '/';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -67,11 +72,16 @@ export default function LoginPage() {
       // 触发自定义事件，通知 AuthProvider 更新状态
       window.dispatchEvent(new CustomEvent('login-success'));
 
-      // 跳转目标页
-      router.push(redirect);
+      // 按角色决定跳转目标：
+      // - 有明确的 redirect 参数（非默认 /）时，优先跳转到指定页面
+      // - 否则管理员进后台，普通用户进工作台
+      const userRole = data.data?.user?.role as string | undefined;
+      const isAdminRole = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
+      const destination =
+        redirect !== '/' ? redirect : isAdminRole ? '/admin' : '/';
+      router.push(destination);
       router.refresh();
-    } catch (err) {
-      console.error('登录错误:', err);
+    } catch (_err) {
       setError('登录失败，请稍后重试');
       setLoading(false);
     }
@@ -97,9 +107,7 @@ export default function LoginPage() {
               />
             </svg>
           </div>
-          <h1 className='mb-2 text-3xl font-bold text-slate-900'>
-            法律助手系统
-          </h1>
+          <h1 className='mb-2 text-3xl font-bold text-slate-900'>律伴AI助手</h1>
           <p className='text-sm text-slate-600'>登录您的账户</p>
         </div>
 
@@ -177,25 +185,6 @@ export default function LoginPage() {
               {loading ? '登录中...' : '登录'}
             </button>
           </form>
-
-          {/* Test Accounts Info */}
-          <div className='mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4'>
-            <h3 className='mb-2 text-sm font-semibold text-blue-900'>
-              测试账户信息
-            </h3>
-            <div className='space-y-2 text-xs text-blue-800'>
-              <div>
-                <p className='font-medium'>测试用户:</p>
-                <p>邮箱: test@example.com</p>
-                <p>密码: test123</p>
-              </div>
-              <div className='border-t border-blue-200 pt-2'>
-                <p className='font-medium'>管理员:</p>
-                <p>邮箱: admin@example.com</p>
-                <p>密码: admin123</p>
-              </div>
-            </div>
-          </div>
 
           {/* Footer Links */}
           <div className='mt-6 flex flex-col items-center gap-3 text-center'>

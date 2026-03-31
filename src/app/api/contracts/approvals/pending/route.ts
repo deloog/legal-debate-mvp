@@ -60,8 +60,7 @@ export async function GET(request: NextRequest) {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message:
-            error instanceof Error ? error.message : '获取待审批列表失败',
+          message: '获取待审批列表失败',
         },
       },
       { status: 500 }

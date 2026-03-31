@@ -13,12 +13,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
+import { uploadFile } from '@/lib/storage/storage-service';
 
 // 允许的文件类型映射（MIME类型 -> 扩展名）
 const ALLOWED_FILE_TYPES: Record<string, string[]> = {
@@ -128,8 +126,8 @@ function sanitizeFilename(filename: string): string {
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return NextResponse.json(
       { success: false, message: '未认证' },
       { status: 401 }
@@ -137,7 +135,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   // 上传频率限制检查
-  if (!checkRateLimit(session.user.id)) {
+  if (!checkRateLimit(authUser.userId)) {
     return NextResponse.json(
       { success: false, message: '上传过于频繁，请稍后再试' },
       { status: 429 }
@@ -167,7 +165,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!ALLOWED_FILE_TYPES[file.type]) {
       logger.warn('不支持的文件类型:', {
         type: file.type,
-        userId: session.user.id,
+        userId: authUser.userId,
       });
       return NextResponse.json(
         { success: false, message: '不支持的文件类型' },
@@ -184,7 +182,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         type: file.type,
         expected: FILE_SIGNATURES[file.type],
         actual: Array.from(buffer.slice(0, 4)),
-        userId: session.user.id,
+        userId: authUser.userId,
       });
       return NextResponse.json(
         { success: false, message: '文件内容验证失败，可能是不支持的文件格式' },
@@ -197,17 +195,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const safeName = sanitizeFilename(file.name);
     const savedName = `${uuidv4()}.${safeExt}`;
 
-    // 上传目录：public/uploads/evidence/
-    const uploadDir = join(process.cwd(), 'public', 'uploads', 'evidence');
-    await mkdir(uploadDir, { recursive: true });
+    // 上传文件（本地或OSS）
+    await uploadFile(buffer, `evidence/${savedName}`, {
+      isPrivate: true,
+      contentType: file.type,
+    });
 
-    // 写入文件
-    await writeFile(join(uploadDir, savedName), buffer);
-
-    const fileUrl = `/uploads/evidence/${savedName}`;
+    // 通过认证代理路由访问，而非直接暴露静态文件
+    const fileUrl = `/api/evidence/file/${savedName}`;
 
     logger.info('证据文件上传成功:', {
-      userId: session.user.id,
+      userId: authUser.userId,
       originalName: safeName,
       savedName,
       mimeType: file.type,

@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ReportService } from '@/lib/reports/report-service';
 import type { GenerateReportResponse, ReportFilter } from '@/types/report';
 import { isValidReportFilter } from '@/types/report';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 
 /**
@@ -17,6 +18,33 @@ export async function POST(
   request: NextRequest
 ): Promise<NextResponse<GenerateReportResponse>> {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
+        { status: 401 }
+      );
+    }
+
+    // 允许律师、企业用户、管理员生成报表
+    const allowedRoles = ['LAWYER', 'ENTERPRISE', 'ADMIN', 'SUPER_ADMIN'];
+    if (!allowedRoles.includes(authUser.role)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: '无权限访问' },
+        },
+        { status: 403 }
+      );
+    }
+
+    // 非管理员只能查看自己的数据
+    const isAdmin =
+      authUser.role === 'ADMIN' || authUser.role === 'SUPER_ADMIN';
+
     // 解析请求体
     let body: unknown;
     try {
@@ -80,8 +108,11 @@ export async function POST(
 
     const filter = requestData.filter as ReportFilter;
 
-    // 生成报表
-    const result = await ReportService.generateReport(filter);
+    // 生成报表（非管理员只查自己的数据）
+    const result = await ReportService.generateReport(
+      filter,
+      isAdmin ? undefined : authUser.userId
+    );
 
     return NextResponse.json(
       {
@@ -98,7 +129,7 @@ export async function POST(
         success: false,
         error: {
           code: 'GENERATE_REPORT_ERROR',
-          message: error instanceof Error ? error.message : '生成报表失败',
+          message: '生成报表失败',
         },
       },
       { status: 500 }

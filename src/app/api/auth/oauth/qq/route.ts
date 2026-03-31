@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getQqOAuth } from '@/lib/auth/qq-oauth';
 import { OAuthService } from '@/lib/auth/oauth-service';
+import { withRateLimit, strictRateLimiter } from '@/lib/middleware/rate-limit';
 import { logger } from '@/lib/logger';
 
 /**
@@ -17,16 +18,14 @@ function generateState(): string {
 /**
  * GET /api/auth/oauth/qq/authorize - 获取QQ授权URL
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const qqOAuth = getQqOAuth();
-    const searchParams = request.nextUrl.searchParams;
-    const redirectUri = searchParams.get('redirect_uri');
     const state = generateState();
 
+    // 不使用客户端传入的 redirect_uri，始终使用服务端配置值，防止 OAuth redirect_uri 注入
     const response = await qqOAuth.authorize({
       state,
-      redirectUri: redirectUri || undefined,
     });
 
     if (!response.success) {
@@ -37,7 +36,7 @@ export async function GET(request: NextRequest) {
       authorizeUrl: response.authorizeUrl,
       state: response.state,
     });
-  } catch (error) {
+  } catch (_error) {
     logger.error('QQ authorize error:', error);
     return NextResponse.json(
       { error: 'Failed to generate authorize URL' },
@@ -49,7 +48,7 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/auth/oauth/qq/callback - QQ OAuth回调
  */
-export async function POST(request: NextRequest) {
+async function handleQqCallback(request: NextRequest) {
   try {
     const qqOAuth = getQqOAuth();
     const body = await request.json();
@@ -91,13 +90,25 @@ export async function POST(request: NextRequest) {
       userInfo
     );
 
-    return NextResponse.json({
+    // 将 token 设置为 httpOnly cookie，避免 XSS 泄露
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieOpts = {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'lax' as const,
+      path: '/',
+    };
+    const response = NextResponse.json({
       success: true,
       user: loginResult.user,
-      token: loginResult.token,
       isNewUser: loginResult.isNewUser,
     });
-  } catch (error) {
+    response.cookies.set('accessToken', loginResult.token, {
+      ...cookieOpts,
+      maxAge: 15 * 60,
+    });
+    return response;
+  } catch (_error) {
     logger.error('QQ callback error:', error);
     return NextResponse.json(
       { error: 'Failed to handle OAuth callback' },
@@ -105,3 +116,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export const POST = withRateLimit(strictRateLimiter, handleQqCallback);

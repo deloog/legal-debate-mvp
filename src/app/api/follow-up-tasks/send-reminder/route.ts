@@ -8,6 +8,7 @@
 import { logger } from '@/lib/agent/security/logger';
 import { FollowUpTaskProcessor } from '@/lib/client/follow-up-task-processor';
 import { prisma } from '@/lib/db/prisma';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { notificationService } from '@/lib/notification/notification-service';
 import { FollowUpTaskStatus } from '@/types/client';
 import { NotificationChannel } from '@/types/notification';
@@ -20,6 +21,22 @@ export const dynamic = 'force-dynamic';
  * 发送跟进任务提醒
  */
 export async function POST(request: NextRequest) {
+  // ─── 认证：仅管理员或系统调用 ────────────────────────────────────────────────
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json({ error: '未授权' }, { status: 401 });
+  }
+  const callerDb = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { role: true },
+  });
+  if (callerDb?.role !== 'ADMIN' && callerDb?.role !== 'SUPER_ADMIN') {
+    return NextResponse.json(
+      { error: '权限不足，仅管理员可触发提醒' },
+      { status: 403 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { taskId, forceSend } = body;
@@ -165,7 +182,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: '发送提醒失败',
-        message: error instanceof Error ? error.message : '未知错误',
+        message: '未知错误',
       },
       { status: 500 }
     );

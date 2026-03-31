@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { CaseKnowledgeGraphAnalyzer } from '@/lib/case/knowledge-graph-analyzer';
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/db';
@@ -17,26 +17,24 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // JWT 认证
-  const authHeader = request.headers.get('authorization');
-  const token = extractTokenFromHeader(authHeader ?? '');
-  const tokenResult = verifyToken(token ?? '');
-  if (!tokenResult.valid || !tokenResult.payload) {
+  // 使用 getAuthUser 同时支持 Authorization header 和 httpOnly Cookie
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return NextResponse.json(
       { success: false, message: '未授权' },
       { status: 401 }
     );
   }
 
-  const { userId } = tokenResult.payload;
+  const { userId } = authUser;
   const caseId = (await params).id;
 
   try {
     // 验证案件访问权限
-    const caseRecord = await prisma.cases.findFirst({
+    const caseRecord = await prisma.case.findFirst({
       where: {
         id: caseId,
-        OR: [{ userId }, { case_team_members: { some: { userId } } }],
+        OR: [{ userId }, { teamMembers: { some: { userId } } }],
         deletedAt: null,
       },
       select: { id: true },

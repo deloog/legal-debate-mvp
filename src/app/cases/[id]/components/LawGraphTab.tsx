@@ -28,11 +28,8 @@ export function LawGraphTab({ caseId }: LawGraphTabProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token =
-      typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-
     fetch(`/api/cases/${caseId}/law-graph`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      credentials: 'include',
     })
       .then(r => r.json())
       .then(res => {

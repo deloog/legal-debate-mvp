@@ -3,11 +3,10 @@
  * GET /api/payment/query
  */
 
-import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import { Order, PaymentRecord, QueryPaymentResponse } from '@/types/payment';
-import { getServerSession } from 'next-auth';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -45,9 +44,8 @@ function transformPaymentRecord(
  */
 export async function GET(request: NextRequest) {
   try {
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -79,7 +77,7 @@ export async function GET(request: NextRequest) {
     const order = await prisma.order.findFirst({
       where: {
         OR: orderId ? [{ id: orderId }] : orderNo ? [{ orderNo: orderNo }] : [],
-        userId: session.user.id,
+        userId: authUser.userId,
       },
       include: {
         user: true,

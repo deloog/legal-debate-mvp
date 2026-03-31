@@ -2,8 +2,7 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { FeeConfigManager } from '@/lib/calculation/fee-config-manager';
 import { FeeConfigType } from '@prisma/client';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { successResponse, errorResponse } from '@/lib/api-response';
 import { logger } from '@/lib/logger';
 
@@ -11,8 +10,8 @@ const configManager = new FeeConfigManager(prisma);
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    const userId = session?.user?.id;
+    const authUser = await getAuthUser(req);
+    const userId = authUser?.userId;
 
     if (!userId) {
       return errorResponse('Unauthorized', 401);
@@ -42,17 +41,14 @@ export async function POST(req: NextRequest) {
     return successResponse(config);
   } catch (error) {
     logger.error('Create fee config error:', error);
-    return errorResponse(
-      error instanceof Error ? error.message : 'Failed to create configuration',
-      500
-    );
+    return errorResponse('Failed to create configuration', 500);
   }
 }
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    const userId = session?.user?.id;
+    const authUser = await getAuthUser(req);
+    const userId = authUser?.userId;
 
     if (!userId) {
       return errorResponse('Unauthorized', 401);
@@ -79,8 +75,8 @@ export async function GET(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    const userId = session?.user?.id;
+    const authUser = await getAuthUser(req);
+    const userId = authUser?.userId;
 
     if (!userId) {
       return errorResponse('Unauthorized', 401);

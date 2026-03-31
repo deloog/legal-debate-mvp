@@ -126,17 +126,6 @@ export class RelationWorkflow {
       relationType,
     });
 
-    // 步骤1: AI检测
-    const _step1Status: WorkflowStatus = {
-      currentStep: WorkflowStep.AI_DETECTION,
-      progress: 20,
-      canProceedToNextStep: true,
-      metadata: {
-        sourceId: sourceArticle.id,
-        targetCount: targetArticles.length,
-      },
-    };
-
     // 步骤2: 验证和创建关系
     const validationResult = await AIRelationValidator.validateBatchRelations({
       sourceArticle,
@@ -146,16 +135,6 @@ export class RelationWorkflow {
       aiProvider,
       aiModel,
     });
-
-    const _step2Status: WorkflowStatus = {
-      currentStep: WorkflowStep.VALIDATION,
-      progress: 60,
-      canProceedToNextStep: true,
-      metadata: {
-        createdCount: validationResult.created.length,
-        rejectedCount: validationResult.rejected.length,
-      },
-    };
 
     // 步骤3: 等待人工审核
     const step3Status: WorkflowStatus = {

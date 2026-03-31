@@ -3,14 +3,14 @@
  * POST /api/refunds/apply
  */
 
-import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import { getAlipayRefund } from '@/lib/payment/alipay-refund';
 import { paymentConfig } from '@/lib/payment/payment-config';
 import { getWechatRefund } from '@/lib/payment/wechat-refund';
 import { PaymentMethod, RefundReason, RefundStatus } from '@/types/payment';
-import { getServerSession } from 'next-auth';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { createAuditLog } from '@/lib/audit/logger';
 import { NextRequest, NextResponse } from 'next/server';
 
 // 退款请求幂等锁（内存级，生产环境建议使用Redis）
@@ -22,9 +22,9 @@ const refundLocks = new Set<string>();
  */
 export async function POST(request: NextRequest) {
   try {
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    // 获取认证用户
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 幂等锁检查
-    const lockKey = `${orderId}_${session.user.id}`;
+    const lockKey = `${orderId}_${authUser.userId}`;
     if (refundLocks.has(lockKey)) {
       return NextResponse.json(
         {
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       }
 
       // 验证订单所有权
-      if (order.userId !== session.user.id) {
+      if (order.userId !== authUser.userId) {
         return NextResponse.json(
           {
             success: false,
@@ -289,29 +289,28 @@ export async function POST(request: NextRequest) {
           };
         }
 
-        // 更新退款记录为成功
-        const refund = await prisma.refundRecord.update({
-          where: { id: pendingRefund.id },
-          data: {
-            status: RefundStatus.SUCCESS,
-            refundAmount: refundResult.refundAmount,
-            transactionId: refundResult.transactionId,
-            thirdPartyRefundNo: refundResult.thirdPartyRefundNo,
-            metadata: {
-              description,
-              successTime: refundResult.successTime,
-              processedAt: new Date().toISOString(),
+        // 在事务中同时更新退款记录和订单状态（保证原子性）
+        const refund = await prisma.$transaction(async tx => {
+          const updatedRefund = await tx.refundRecord.update({
+            where: { id: pendingRefund.id },
+            data: {
+              status: RefundStatus.SUCCESS,
+              refundAmount: refundResult.refundAmount,
+              transactionId: refundResult.transactionId,
+              thirdPartyRefundNo: refundResult.thirdPartyRefundNo,
+              metadata: {
+                description,
+                successTime: refundResult.successTime,
+                processedAt: new Date().toISOString(),
+              },
+              processedAt: new Date(),
             },
-            processedAt: new Date(),
-          },
-        });
-
-        // 更新订单状态为已退款
-        await prisma.order.update({
-          where: { id: order.id },
-          data: {
-            status: 'REFUNDED',
-          },
+          });
+          await tx.order.update({
+            where: { id: order.id },
+            data: { status: 'REFUNDED' },
+          });
+          return updatedRefund;
         });
 
         logger.info('[API] 退款成功:', {
@@ -319,6 +318,24 @@ export async function POST(request: NextRequest) {
           refundId: refund.id,
           refundAmount: refund.refundAmount,
           paymentMethod: order.paymentMethod,
+        });
+
+        // 记录退款审计日志（异步）
+        createAuditLog({
+          userId: authUser.userId,
+          actionType: 'UNKNOWN',
+          actionCategory: 'OTHER',
+          description: `退款申请成功：orderId=${orderId}，金额=${Number(refund.refundAmount)}`,
+          resourceType: 'Order',
+          resourceId: order.id,
+          metadata: {
+            orderId,
+            refundId: refund.id,
+            reason,
+            paymentMethod: order.paymentMethod,
+          },
+        }).catch(auditErr => {
+          logger.error('退款审计日志记录失败:', auditErr);
         });
 
         return NextResponse.json({
@@ -343,11 +360,10 @@ export async function POST(request: NextRequest) {
           where: { id: pendingRefund.id },
           data: {
             status: RefundStatus.FAILED,
-            rejectedReason: error instanceof Error ? error.message : '退款失败',
+            rejectedReason: '退款处理失败',
             processedAt: new Date(),
             metadata: {
               description,
-              error: error instanceof Error ? error.stack : String(error),
             },
           },
         });
@@ -386,8 +402,8 @@ function convertYuanToFen(amount: number): number {
 }
 
 /**
- * 金额转换：分转元
+ * 金额转换：分转元（先取整保证输入为整数，避免浮点精度误差）
  */
 function convertFenToYuan(amount: number): number {
-  return amount / 100;
+  return Math.round(amount) / 100;
 }

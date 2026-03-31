@@ -3,6 +3,7 @@
  * GET /api/dashboard/enterprise - 获取企业法务工作台数据
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
 import type {
   EnterpriseDashboardResponse,
@@ -72,34 +73,49 @@ function generateRiskAlerts(
  * 获取企业法务工作台数据
  */
 export async function GET(
-  _request: NextRequest
+  request: NextRequest
 ): Promise<NextResponse<EnterpriseDashboardResponse>> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: '未授权',
+      } as unknown as EnterpriseDashboardResponse,
+      { status: 401 }
+    );
+  }
+
   try {
-    // 1. 获取统计数据
+    // 1. 获取统计数据（仅限当前用户关联的数据）
     const [
       pendingReviewContracts,
       highRiskContracts,
       pendingTasks,
       totalContracts,
     ] = await Promise.all([
-      // 待审查合同数（状态为PENDING）
+      // 待审查合同数（状态为PENDING，仅当前用户关联的案件）
       prisma.contract.count({
-        where: { status: 'PENDING' },
+        where: { status: 'PENDING', case: { userId: authUser.userId } },
       }),
       // 高风险合同数：含有 HIGH 或 CRITICAL 级别条款风险的合同
       prisma.contract.count({
         where: {
+          case: { userId: authUser.userId },
           clauseRisks: {
             some: { riskLevel: { in: ['HIGH', 'CRITICAL'] } },
           },
         },
       }),
-      // 待处理任务数
+      // 待处理任务数（仅当前用户创建或被分配的）
       prisma.task.count({
-        where: { status: 'TODO' },
+        where: {
+          status: 'TODO',
+          OR: [{ createdBy: authUser.userId }, { assignedTo: authUser.userId }],
+        },
       }),
-      // 总合同数
-      prisma.contract.count(),
+      // 总合同数（仅当前用户关联的案件）
+      prisma.contract.count({ where: { case: { userId: authUser.userId } } }),
     ]);
 
     // 计算合规评分
@@ -121,9 +137,10 @@ export async function GET(
       pendingReviewContracts
     );
 
-    // 3. 获取最近审查的合同（最多5条）
+    // 3. 获取最近审查的合同（最多5条，仅当前用户关联案件）
     const recentContractsData = await prisma.contract.findMany({
       where: {
+        case: { userId: authUser.userId },
         status: {
           in: ['SIGNED', 'EXECUTING', 'COMPLETED'],
         },
@@ -155,14 +172,22 @@ export async function GET(
       })
     );
 
-    // 4. 合规状态：从真实的企业合规检查记录聚合
+    // 4. 合规状态：仅当前用户企业的合规检查记录
     const [totalChecks, passedChecks, failedChecks] = await Promise.all([
-      prisma.enterpriseComplianceCheck.count(),
       prisma.enterpriseComplianceCheck.count({
-        where: { checkResult: 'COMPLIANT' },
+        where: { enterprise: { userId: authUser.userId } },
       }),
       prisma.enterpriseComplianceCheck.count({
-        where: { checkResult: 'NON_COMPLIANT' },
+        where: {
+          checkResult: 'COMPLIANT',
+          enterprise: { userId: authUser.userId },
+        },
+      }),
+      prisma.enterpriseComplianceCheck.count({
+        where: {
+          checkResult: 'NON_COMPLIANT',
+          enterprise: { userId: authUser.userId },
+        },
       }),
     ]);
 
@@ -173,9 +198,10 @@ export async function GET(
       score: complianceScore,
     };
 
-    // 5. 获取即将到期的任务（最多5条）
+    // 5. 获取即将到期的任务（最多5条，仅当前用户创建或被分配的）
     const upcomingTasksData = await prisma.task.findMany({
       where: {
+        OR: [{ createdBy: authUser.userId }, { assignedTo: authUser.userId }],
         status: {
           in: ['TODO', 'IN_PROGRESS'],
         },

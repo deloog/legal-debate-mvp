@@ -113,7 +113,7 @@ export async function POST(
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '发起审批失败',
+          message: '发起审批失败',
         },
       },
       { status: 500 }

@@ -5,8 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { InvoiceType, InvoiceStatus } from '@/types/payment';
 import {
   getUserInvoices,
@@ -20,9 +19,9 @@ import { logger } from '@/lib/logger';
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    // 获取认证用户（支持 JWT Bearer + Cookie）
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -124,7 +123,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     // 查询发票列表
-    const { invoices, total } = await getUserInvoices(session.user.id, {
+    const { invoices, total } = await getUserInvoices(authUser.userId, {
       orderId,
       status: status as InvoiceStatus,
       type: type as InvoiceType,
@@ -135,7 +134,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
 
     // 查询统计信息
-    const stats = await getInvoiceStats(session.user.id);
+    const stats = await getInvoiceStats(authUser.userId);
 
     return NextResponse.json({
       success: true,

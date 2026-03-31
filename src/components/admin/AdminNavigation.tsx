@@ -14,6 +14,8 @@ import {
   ScrollText,
   FileCheck,
   Settings,
+  Activity,
+  Brain,
 } from 'lucide-react';
 
 interface NavItem {
@@ -75,6 +77,16 @@ const navigation: NavSection[] = [
         label: '系统日志',
         href: '/admin/logs',
         icon: <ScrollText className='h-5 w-5' />,
+      },
+      {
+        label: 'Agent 监控',
+        href: '/admin/agent-monitor',
+        icon: <Activity className='h-5 w-5' />,
+      },
+      {
+        label: '记忆管理',
+        href: '/admin/memories',
+        icon: <Brain className='h-5 w-5' />,
       },
     ],
   },

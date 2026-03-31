@@ -1,9 +1,54 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useDebate } from '@/lib/hooks/use-debate';
 import { DebateArena } from '../components/debate-arena';
+import type { Argument } from '@prisma/client';
+
+/** 从论点列表计算质量评分摘要 */
+function calcQualityStats(args: Argument[]) {
+  const scored = args.filter(a => a.overallScore != null);
+  if (scored.length === 0) return null;
+  const avg = (key: keyof Argument) => {
+    const vals = scored.map(a => a[key] as number).filter(v => v != null);
+    return vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null;
+  };
+  return {
+    overall: avg('overallScore'),
+    legal: avg('legalScore'),
+    logic: avg('logicScore'),
+    confidence: avg('confidence'),
+    scoredCount: scored.length,
+    total: args.length,
+  };
+}
+
+function ScoreBar({
+  value,
+  label,
+  color,
+}: {
+  value: number;
+  label: string;
+  color: string;
+}) {
+  const pct = Math.round(value * 100);
+  return (
+    <div>
+      <div className='mb-1 flex items-center justify-between text-xs'>
+        <span className='text-zinc-600 dark:text-zinc-400'>{label}</span>
+        <span className={`font-semibold ${color}`}>{pct}%</span>
+      </div>
+      <div className='h-1.5 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700'>
+        <div
+          className={`h-full rounded-full transition-all ${color.replace('text-', 'bg-')}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
 
 /**
  * 辩论页面主入口
@@ -15,6 +60,8 @@ export default function DebatesPage() {
   const debateId = typeof params?.id === 'string' ? params.id : '';
 
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     debate,
@@ -29,6 +76,12 @@ export default function DebatesPage() {
   const handleRoundChange = () => {
     // 状态由DebateArena组件内部管理
   };
+
+  // 必须在所有 early return 前调用（React Hooks 规则）
+  const qualityStats = useMemo(
+    () => calcQualityStats(argumentsList),
+    [argumentsList]
+  );
 
   // 加载状态
   if (isLoading) {
@@ -85,6 +138,26 @@ export default function DebatesPage() {
 
   const isDebateCompleted = debate.status === 'COMPLETED';
 
+  const handleDeleteDebate = async () => {
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/v1/debates/${debateId}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        alert(data.error ?? '删除失败');
+        return;
+      }
+      router.push('/cases');
+    } catch {
+      alert('删除失败，请稍后重试');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   return (
     <div className='min-h-screen bg-zinc-50 dark:bg-zinc-950'>
       {/* 辩论已结束横幅 */}
@@ -113,6 +186,53 @@ export default function DebatesPage() {
             >
               查看辩论总结
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* AI 质量评分面板（辩论完成且有评分时展示） */}
+      {isDebateCompleted && qualityStats && (
+        <div className='border-b border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-900'>
+          <div className='mx-auto max-w-7xl'>
+            <div className='flex items-start gap-6'>
+              {/* 综合评分 */}
+              <div className='flex shrink-0 flex-col items-center justify-center rounded-xl border border-zinc-100 bg-zinc-50 px-5 py-3 dark:border-zinc-800 dark:bg-zinc-950'>
+                <span className='text-3xl font-bold text-zinc-900 dark:text-zinc-50'>
+                  {Math.round((qualityStats.overall ?? 0) * 100)}
+                </span>
+                <span className='mt-0.5 text-xs text-zinc-500 dark:text-zinc-400'>
+                  综合评分
+                </span>
+              </div>
+              {/* 分项评分 */}
+              <div className='flex-1 space-y-2.5'>
+                <p className='text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500'>
+                  AI 质量评估 · {qualityStats.scoredCount}/{qualityStats.total}{' '}
+                  条论点已评分
+                </p>
+                {qualityStats.legal != null && (
+                  <ScoreBar
+                    value={qualityStats.legal}
+                    label='法条依据'
+                    color='text-blue-600 dark:text-blue-400'
+                  />
+                )}
+                {qualityStats.logic != null && (
+                  <ScoreBar
+                    value={qualityStats.logic}
+                    label='逻辑一致性'
+                    color='text-violet-600 dark:text-violet-400'
+                  />
+                )}
+                {qualityStats.confidence != null && (
+                  <ScoreBar
+                    value={qualityStats.confidence}
+                    label='置信度'
+                    color='text-emerald-600 dark:text-emerald-400'
+                  />
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -212,6 +332,12 @@ export default function DebatesPage() {
                 )}
               </div>
               <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className='rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800 dark:bg-zinc-900 dark:text-red-400 dark:hover:bg-red-900/20'
+              >
+                删除辩论
+              </button>
+              <button
                 onClick={() => router.push('/cases')}
                 className='rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
               >
@@ -231,9 +357,43 @@ export default function DebatesPage() {
             currentRound={currentRound}
             arguments={argumentsList}
             onRoundChange={handleRoundChange}
+            caseId={debate.caseId ?? undefined}
           />
         </Suspense>
       </main>
+
+      {/* 删除确认弹窗 */}
+      {showDeleteConfirm && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4'>
+          <div className='w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-700 dark:bg-zinc-900'>
+            <h3 className='mb-2 text-base font-semibold text-zinc-900 dark:text-zinc-100'>
+              确认删除辩论？
+            </h3>
+            <p className='mb-1 text-sm text-zinc-600 dark:text-zinc-400'>
+              将永久删除辩论「{debate.title}」及所有轮次、论点数据，
+            </p>
+            <p className='mb-5 text-sm font-medium text-red-600 dark:text-red-400'>
+              此操作不可撤销。
+            </p>
+            <div className='flex justify-end gap-2'>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className='rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800'
+              >
+                取消
+              </button>
+              <button
+                onClick={() => void handleDeleteDebate()}
+                disabled={isDeleting}
+                className='rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 dark:bg-red-700 dark:hover:bg-red-600'
+              >
+                {isDeleting ? '删除中...' : '确认删除'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

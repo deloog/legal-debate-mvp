@@ -3,6 +3,8 @@ import { AIRiskIdentifier } from '@/lib/ai/risk/risk-identifier';
 import { RiskScorer } from '@/lib/ai/risk/risk-scorer';
 import { AIRiskAdvisor } from '@/lib/ai/risk/risk-advisor';
 import { AIServiceFactory } from '@/lib/ai/service-refactored';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import type {
   RiskIdentificationInput,
   RiskAssessmentResult,
@@ -18,7 +20,41 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
+    // 验证身份
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: '请先登录' },
+        { status: 401 }
+      );
+    }
+
     const caseId = (await params).id;
+
+    // 验证案件所有权（只有案件所有者或团队成员可调用 AI 评估）
+    const caseRecord = await prisma.case.findFirst({
+      where: { id: caseId, deletedAt: null },
+      select: { userId: true },
+    });
+    if (!caseRecord) {
+      return NextResponse.json(
+        { success: false, error: '案件不存在' },
+        { status: 404 }
+      );
+    }
+    if (caseRecord.userId !== authUser.userId) {
+      // 允许团队成员访问
+      const isMember = await prisma.caseTeamMember.findFirst({
+        where: { caseId, userId: authUser.userId, deletedAt: null },
+        select: { id: true },
+      });
+      if (!isMember) {
+        return NextResponse.json(
+          { success: false, error: '无权访问此案件' },
+          { status: 403 }
+        );
+      }
+    }
 
     // 解析请求体
     const body = await request.json();
@@ -93,9 +129,8 @@ export async function POST(
         suggestions,
       } as RiskAssessmentResult,
     });
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
+  } catch (_error) {
+    const errorMessage = 'Unknown error';
     logger.error('Failed to assess risk', new Error(errorMessage), {
       caseId: (await params).id,
     });

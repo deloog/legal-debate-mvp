@@ -5,8 +5,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import { certificationService } from '@/lib/knowledge-graph/expert/certification-service';
 
@@ -18,9 +18,9 @@ export async function POST(
   { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const authUser = await getAuthUser(request);
 
-    if (!session?.user?.id) {
+    if (!authUser) {
       return NextResponse.json(
         { success: false, error: '未登录' },
         { status: 401 }
@@ -28,11 +28,12 @@ export async function POST(
     }
 
     const body = await request.json();
+    const { expertId } = await params;
 
     // 检查管理员权限
-    const { prisma } = await import('@/lib/db/prisma');
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: authUser.userId },
+      select: { role: true },
     });
 
     if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
@@ -44,14 +45,14 @@ export async function POST(
 
     // 认证专家
     await certificationService.certifyExpert({
-      expertId: (await params).expertId,
-      adminId: session.user.id,
+      expertId,
+      adminId: authUser.userId,
       notes: body.notes,
     });
 
     logger.info('Expert certified successfully', {
-      userId: session.user.id,
-      expertId: (await params).expertId,
+      userId: authUser.userId,
+      expertId,
     });
 
     return NextResponse.json({
@@ -59,16 +60,11 @@ export async function POST(
       message: '专家认证成功',
     });
   } catch (error) {
-    logger.error('认证专家失败', {
-      error,
-      expertId: (await params).expertId,
-    });
+    const { expertId } = await params;
+    logger.error('认证专家失败', { error, expertId });
 
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : '认证专家失败',
-      },
+      { success: false, error: '认证专家失败' },
       { status: 500 }
     );
   }
@@ -82,9 +78,9 @@ export async function DELETE(
   { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const authUser = await getAuthUser(request);
 
-    if (!session?.user?.id) {
+    if (!authUser) {
       return NextResponse.json(
         { success: false, error: '未登录' },
         { status: 401 }
@@ -92,11 +88,12 @@ export async function DELETE(
     }
 
     const body = await request.json();
+    const { expertId } = await params;
 
     // 检查管理员权限
-    const { prisma } = await import('@/lib/db/prisma');
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: authUser.userId },
+      select: { role: true },
     });
 
     if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
@@ -108,14 +105,14 @@ export async function DELETE(
 
     // 撤销认证
     await certificationService.revokeExpertCertification(
-      (await params).expertId,
-      session.user.id,
+      expertId,
+      authUser.userId,
       body.reason || '管理员撤销认证'
     );
 
     logger.info('Expert certification revoked successfully', {
-      userId: session.user.id,
-      expertId: (await params).expertId,
+      userId: authUser.userId,
+      expertId,
     });
 
     return NextResponse.json({
@@ -123,16 +120,11 @@ export async function DELETE(
       message: '专家认证已撤销',
     });
   } catch (error) {
-    logger.error('撤销专家认证失败', {
-      error,
-      expertId: (await params).expertId,
-    });
+    const { expertId } = await params;
+    logger.error('撤销专家认证失败', { error, expertId });
 
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : '撤销专家认证失败',
-      },
+      { success: false, error: '撤销专家认证失败' },
       { status: 500 }
     );
   }

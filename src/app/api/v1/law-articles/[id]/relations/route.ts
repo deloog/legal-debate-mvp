@@ -142,7 +142,7 @@ export async function POST(
   } catch (error: unknown) {
     logger.error('创建关系失败:', error);
 
-    const errorMessage = error instanceof Error ? error.message : '服务器错误';
+    const errorMessage = '服务器错误';
 
     return NextResponse.json(
       {

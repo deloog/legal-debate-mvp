@@ -18,35 +18,13 @@ import { Button } from '@/components/ui/button';
 import { EVIDENCE_API, buildUrl } from '@/lib/constants/api-paths';
 
 interface EvidenceListProps {
-  /**
-   * 案件ID
-   */
   caseId: string;
-
-  /**
-   * 初始证据列表数据
-   */
   initialData?: EvidenceListResponse;
-
-  /**
-   * 是否显示选择框
-   */
   showSelection?: boolean;
-
-  /**
-   * 选择证据回调
-   */
   onSelectEvidence?: (evidenceId: string) => void;
-
-  /**
-   * 编辑证据回调
-   */
   onEditEvidence?: (evidenceId: string) => void;
 }
 
-/**
- * 证据筛选参数
- */
 interface EvidenceFilters {
   caseId: string;
   type?: EvidenceType;
@@ -61,14 +39,8 @@ interface EvidenceFilters {
   limit?: number;
 }
 
-/**
- * 批量操作类型
- */
 type BulkAction = 'updateStatus' | 'delete';
 
-/**
- * 批量操作参数
- */
 interface BulkActionParams {
   action: BulkAction;
   status?: EvidenceStatus;
@@ -76,9 +48,16 @@ interface BulkActionParams {
   reason?: string;
 }
 
-/**
- * 证据列表组件
- */
+const STATUS_STYLES: Record<string, string> = {
+  PENDING:
+    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+  ACCEPTED:
+    'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  REJECTED: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+  QUESTIONED:
+    'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
+};
+
 export function EvidenceList({
   caseId,
   initialData,
@@ -105,41 +84,26 @@ export function EvidenceList({
     limit: 20,
   }));
 
-  /**
-   * 加载证据列表
-   */
   const fetchEvidenceList = useCallback(async () => {
     setLoading(true);
     setError(null);
-
     try {
       const params = new URLSearchParams();
       params.append('caseId', caseId);
-
-      if (filters.type) {
-        params.append('type', filters.type);
-      }
-      if (filters.status) {
-        params.append('status', filters.status);
-      }
-      if (filters.submitter) {
-        params.append('submitter', filters.submitter);
-      }
-      if (filters.source) {
-        params.append('source', filters.source);
-      }
-      if (filters.minRelevanceScore !== undefined) {
+      if (filters.type) params.append('type', filters.type);
+      if (filters.status) params.append('status', filters.status);
+      if (filters.submitter) params.append('submitter', filters.submitter);
+      if (filters.source) params.append('source', filters.source);
+      if (filters.minRelevanceScore !== undefined)
         params.append(
           'minRelevanceScore',
           filters.minRelevanceScore.toString()
         );
-      }
-      if (filters.maxRelevanceScore !== undefined) {
+      if (filters.maxRelevanceScore !== undefined)
         params.append(
           'maxRelevanceScore',
           filters.maxRelevanceScore.toString()
         );
-      }
       params.append('sortBy', filters.sortBy || 'createdAt');
       params.append('sortOrder', filters.sortOrder || 'desc');
       params.append('page', (filters.page || 1).toString());
@@ -147,14 +111,14 @@ export function EvidenceList({
 
       const response = await fetch(
         buildUrl(EVIDENCE_API.LIST, Object.fromEntries(params.entries())),
-        {
-          credentials: 'include',
-        }
+        { credentials: 'include' }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        setError(errorData.message || '加载证据列表失败');
+        setError(
+          (errorData as { message?: string }).message || '加载证据列表失败'
+        );
         return;
       }
 
@@ -170,28 +134,31 @@ export function EvidenceList({
     }
   }, [caseId, filters]);
 
-  /**
-   * 当filters变化时重新加载数据
-   */
   useEffect(() => {
     if (!initialData) {
-      fetchEvidenceList();
+      void fetchEvidenceList();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
-  /**
-   * 切换页面
-   */
+  useEffect(() => {
+    if (initialData) {
+      setEvidenceList(initialData.evidence);
+      setTotal(initialData.total);
+      setPage(initialData.page);
+      setTotalPages(initialData.totalPages);
+    } else {
+      void fetchEvidenceList();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handlePageChange = useCallback((newPage: number) => {
     setPage(newPage);
     setFilters(prev => ({ ...prev, page: newPage }));
     setSelectedIds(new Set());
   }, []);
 
-  /**
-   * 应用筛选
-   */
   const handleFilterChange = useCallback(
     (newFilters: Partial<EvidenceFilters>) => {
       setPage(1);
@@ -201,56 +168,37 @@ export function EvidenceList({
     []
   );
 
-  /**
-   * 选择/取消选择证据
-   */
   const toggleSelect = useCallback((evidenceId: string) => {
     setSelectedIds(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(evidenceId)) {
-        newSet.delete(evidenceId);
-      } else {
-        newSet.add(evidenceId);
-      }
-      return newSet;
+      const next = new Set(prev);
+      if (next.has(evidenceId)) next.delete(evidenceId);
+      else next.add(evidenceId);
+      return next;
     });
   }, []);
 
-  /**
-   * 选择所有证据
-   */
   const selectAll = useCallback(() => {
     setSelectedIds(new Set(evidenceList.map(e => e.id)));
   }, [evidenceList]);
 
-  /**
-   * 取消所有选择
-   */
-  const deselectAll = useCallback(() => {
-    setSelectedIds(new Set());
-  }, []);
+  const deselectAll = useCallback(() => setSelectedIds(new Set()), []);
 
-  /**
-   * 执行批量操作
-   */
   const handleBulkAction = useCallback(
     async (params: BulkActionParams) => {
       try {
         const response = await fetch(EVIDENCE_API.BULK, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
           body: JSON.stringify(params),
         });
-
         if (!response.ok) {
           const errorData = await response.json();
-          setError(errorData.message || '批量操作失败');
+          setError(
+            (errorData as { message?: string }).message || '批量操作失败'
+          );
           return;
         }
-
         await fetchEvidenceList();
         setSelectedIds(new Set());
       } catch (err) {
@@ -260,12 +208,9 @@ export function EvidenceList({
     [fetchEvidenceList]
   );
 
-  /**
-   * 批量更新状态
-   */
   const handleBulkUpdateStatus = useCallback(
     (status: EvidenceStatus) => {
-      handleBulkAction({
+      void handleBulkAction({
         action: 'updateStatus',
         status,
         evidenceIds: Array.from(selectedIds),
@@ -274,45 +219,51 @@ export function EvidenceList({
     [selectedIds, handleBulkAction]
   );
 
-  /**
-   * 批量删除
-   */
-  const handleBulkDelete = useCallback(() => {
-    const confirmed = confirm(
-      `确定要删除选中的 ${selectedIds.size} 条证据吗？`
-    );
-    if (!confirmed) {
-      return;
-    }
+  const handleUpdateStatus = useCallback(
+    async (evidenceId: string, status: EvidenceStatus) => {
+      try {
+        const response = await fetch(EVIDENCE_API.update(evidenceId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ status }),
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          setError((errorData as { message?: string }).message || '操作失败');
+          return;
+        }
+        await fetchEvidenceList();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '操作失败');
+      }
+    },
+    [fetchEvidenceList]
+  );
 
-    handleBulkAction({
+  const handleBulkDelete = useCallback(() => {
+    if (!confirm(`确定要删除选中的 ${selectedIds.size} 条证据吗？`)) return;
+    void handleBulkAction({
       action: 'delete',
       evidenceIds: Array.from(selectedIds),
     });
   }, [selectedIds, handleBulkAction]);
 
-  /**
-   * 删除单个证据
-   */
   const handleDelete = useCallback(
     async (evidenceId: string) => {
-      const confirmed = confirm('确定要删除这条证据吗？');
-      if (!confirmed) {
-        return;
-      }
-
+      if (!confirm('确定要删除这条证据吗？')) return;
       try {
         const response = await fetch(EVIDENCE_API.delete(evidenceId), {
           method: 'DELETE',
           credentials: 'include',
         });
-
         if (!response.ok) {
           const errorData = await response.json();
-          setError(errorData.message || '删除证据失败');
+          setError(
+            (errorData as { message?: string }).message || '删除证据失败'
+          );
           return;
         }
-
         await fetchEvidenceList();
       } catch (err) {
         setError(err instanceof Error ? err.message : '删除证据失败');
@@ -321,62 +272,21 @@ export function EvidenceList({
     [fetchEvidenceList]
   );
 
-  /**
-   * 组件挂载时加载数据
-   */
-  useEffect(() => {
-    if (initialData) {
-      setEvidenceList(initialData.evidence);
-      setTotal(initialData.total);
-      setPage(initialData.page);
-      setTotalPages(initialData.totalPages);
-    } else {
-      fetchEvidenceList();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // 只在挂载时执行一次
+  const selectStyle =
+    'rounded border border-gray-300 px-2 py-1 text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100';
 
   return (
-    <div className='evidence-list'>
-      <div className='list-header'>
-        <h2>证据列表</h2>
-        <div className='header-actions'>
-          {showSelection && selectedIds.size > 0 && (
-            <div className='bulk-actions'>
-              <span className='selected-count'>
-                已选择 {selectedIds.size} 条证据
-              </span>
-              <Button
-                size='sm'
-                variant='outline'
-                onClick={() => handleBulkUpdateStatus(EvidenceStatus.ACCEPTED)}
-              >
-                标记为已采纳
-              </Button>
-              <Button
-                size='sm'
-                variant='outline'
-                onClick={() => handleBulkUpdateStatus(EvidenceStatus.REJECTED)}
-              >
-                标记为已拒绝
-              </Button>
-              <Button size='sm' variant='outline' onClick={handleBulkDelete}>
-                删除
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className='filters'>
+    <div className='space-y-3'>
+      {/* 筛选栏 */}
+      <div className='flex flex-wrap items-center gap-2'>
         <select
           value={filters.type || ''}
           onChange={e =>
             handleFilterChange({
-              type: e.target.value as EvidenceType | undefined,
+              type: (e.target.value as EvidenceType) || undefined,
             })
           }
-          className='filter-select'
+          className={selectStyle}
         >
           <option value=''>全部类型</option>
           <option value='DOCUMENT'>书证</option>
@@ -391,10 +301,10 @@ export function EvidenceList({
           value={filters.status || ''}
           onChange={e =>
             handleFilterChange({
-              status: e.target.value as EvidenceStatus | undefined,
+              status: (e.target.value as EvidenceStatus) || undefined,
             })
           }
-          className='filter-select'
+          className={selectStyle}
         >
           <option value=''>全部状态</option>
           <option value='PENDING'>待审核</option>
@@ -410,7 +320,7 @@ export function EvidenceList({
               sortBy: e.target.value as EvidenceFilters['sortBy'],
             })
           }
-          className='filter-select'
+          className={selectStyle}
         >
           <option value='createdAt'>创建时间</option>
           <option value='updatedAt'>更新时间</option>
@@ -423,134 +333,237 @@ export function EvidenceList({
           onChange={e =>
             handleFilterChange({ sortOrder: e.target.value as 'asc' | 'desc' })
           }
-          className='filter-select'
+          className={selectStyle}
         >
           <option value='desc'>降序</option>
           <option value='asc'>升序</option>
         </select>
-      </div>
 
-      {error && <div className='error-message'>{error}</div>}
-
-      {loading ? (
-        <div className='loading'>加载中...</div>
-      ) : evidenceList.length === 0 ? (
-        <div className='empty-state'>暂无证据</div>
-      ) : (
-        <>
-          <div className='list-header-row'>
-            {showSelection && (
-              <div className='header-cell checkbox-cell'>
-                <input
-                  type='checkbox'
-                  checked={
-                    selectedIds.size === evidenceList.length &&
-                    evidenceList.length > 0
-                  }
-                  onChange={e =>
-                    e.target.checked ? selectAll() : deselectAll()
-                  }
-                />
-              </div>
-            )}
-            <div className='header-cell'>名称</div>
-            <div className='header-cell'>类型</div>
-            <div className='header-cell'>状态</div>
-            <div className='header-cell'>提交人</div>
-            <div className='header-cell'>来源</div>
-            <div className='header-cell'>相关性</div>
-            <div className='header-cell'>创建时间</div>
-            <div className='header-cell'>操作</div>
-          </div>
-
-          <div className='list-body'>
-            {evidenceList.map(evidence => (
-              <div key={evidence.id} className='list-row'>
-                {showSelection && (
-                  <div className='cell checkbox-cell'>
-                    <input
-                      type='checkbox'
-                      checked={selectedIds.has(evidence.id)}
-                      onChange={() => toggleSelect(evidence.id)}
-                    />
-                  </div>
-                )}
-                <div
-                  className='cell'
-                  onClick={() => onSelectEvidence?.(evidence.id)}
-                >
-                  {evidence.name}
-                </div>
-                <div className='cell'>
-                  {getEvidenceTypeLabel(evidence.type as EvidenceType)}
-                </div>
-                <div className='cell'>
-                  <span
-                    className={`status-badge status-${evidence.status?.toLowerCase()}`}
-                  >
-                    {getEvidenceStatusLabel(evidence.status as EvidenceStatus)}
-                  </span>
-                </div>
-                <div className='cell'>{evidence.submitter || '-'}</div>
-                <div className='cell'>{evidence.source || '-'}</div>
-                <div className='cell'>
-                  {evidence.relevanceScore !== null
-                    ? `${(evidence.relevanceScore * 100).toFixed(1)}%`
-                    : '-'}
-                </div>
-                <div className='cell'>
-                  {new Date(evidence.createdAt).toLocaleDateString('zh-CN')}
-                </div>
-                <div className='cell actions-cell'>
-                  {onEditEvidence && (
-                    <button
-                      className='action-button'
-                      onClick={e => {
-                        e.stopPropagation();
-                        onEditEvidence(evidence.id);
-                      }}
-                    >
-                      编辑
-                    </button>
-                  )}
-                  <button
-                    className='action-button delete-button'
-                    onClick={e => {
-                      e.stopPropagation();
-                      handleDelete(evidence.id);
-                    }}
-                  >
-                    删除
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className='pagination'>
-            <Button
-              size='sm'
-              variant='outline'
-              disabled={page === 1}
-              onClick={() => handlePageChange(page - 1)}
-            >
-              上一页
-            </Button>
-            <span className='page-info'>
-              第 {page} / {totalPages} 页
+        {showSelection && selectedIds.size > 0 && (
+          <div className='ml-auto flex items-center gap-2'>
+            <span className='text-sm text-gray-600 dark:text-zinc-400'>
+              已选 {selectedIds.size} 条
             </span>
             <Button
               size='sm'
               variant='outline'
-              disabled={page === totalPages}
-              onClick={() => handlePageChange(page + 1)}
+              onClick={() => handleBulkUpdateStatus(EvidenceStatus.ACCEPTED)}
             >
-              下一页
+              标记已采纳
+            </Button>
+            <Button
+              size='sm'
+              variant='outline'
+              onClick={() => handleBulkUpdateStatus(EvidenceStatus.REJECTED)}
+            >
+              标记已拒绝
+            </Button>
+            <Button size='sm' variant='outline' onClick={handleBulkDelete}>
+              删除
             </Button>
           </div>
+        )}
+      </div>
 
-          <div className='list-footer'>
-            <div className='total-count'>共 {total} 条证据</div>
+      {error && (
+        <div className='rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300'>
+          {error}
+          <button className='ml-2 underline' onClick={() => setError(null)}>
+            关闭
+          </button>
+        </div>
+      )}
+
+      {loading ? (
+        <div className='py-10 text-center text-sm text-gray-500 dark:text-zinc-400'>
+          加载中...
+        </div>
+      ) : evidenceList.length === 0 ? (
+        <div className='py-10 text-center text-sm text-gray-500 dark:text-zinc-400'>
+          暂无证据
+        </div>
+      ) : (
+        <>
+          {/* 表格 */}
+          <div className='overflow-x-auto rounded-lg border border-gray-200 dark:border-zinc-700'>
+            <table className='w-full text-sm'>
+              <thead className='bg-gray-50 dark:bg-zinc-800'>
+                <tr>
+                  {showSelection && (
+                    <th className='w-8 px-3 py-2 text-left'>
+                      <input
+                        type='checkbox'
+                        checked={
+                          selectedIds.size === evidenceList.length &&
+                          evidenceList.length > 0
+                        }
+                        onChange={e =>
+                          e.target.checked ? selectAll() : deselectAll()
+                        }
+                      />
+                    </th>
+                  )}
+                  <th className='px-3 py-2 text-left font-medium text-gray-600 dark:text-zinc-300'>
+                    名称
+                  </th>
+                  <th className='px-3 py-2 text-left font-medium text-gray-600 dark:text-zinc-300'>
+                    类型
+                  </th>
+                  <th className='px-3 py-2 text-left font-medium text-gray-600 dark:text-zinc-300'>
+                    状态
+                  </th>
+                  <th className='px-3 py-2 text-left font-medium text-gray-600 dark:text-zinc-300'>
+                    提交人
+                  </th>
+                  <th className='px-3 py-2 text-left font-medium text-gray-600 dark:text-zinc-300'>
+                    来源
+                  </th>
+                  <th className='px-3 py-2 text-left font-medium text-gray-600 dark:text-zinc-300'>
+                    相关性
+                  </th>
+                  <th className='px-3 py-2 text-left font-medium text-gray-600 dark:text-zinc-300'>
+                    创建时间
+                  </th>
+                  <th className='px-3 py-2 text-left font-medium text-gray-600 dark:text-zinc-300'>
+                    操作
+                  </th>
+                </tr>
+              </thead>
+              <tbody className='divide-y divide-gray-100 dark:divide-zinc-700'>
+                {evidenceList.map(evidence => (
+                  <tr
+                    key={evidence.id}
+                    className='hover:bg-gray-50 dark:hover:bg-zinc-800/50'
+                  >
+                    {showSelection && (
+                      <td className='px-3 py-2'>
+                        <input
+                          type='checkbox'
+                          checked={selectedIds.has(evidence.id)}
+                          onChange={() => toggleSelect(evidence.id)}
+                        />
+                      </td>
+                    )}
+                    <td
+                      className='max-w-[180px] truncate px-3 py-2 font-medium text-gray-900 dark:text-zinc-100 cursor-pointer hover:text-blue-600'
+                      onClick={() => onSelectEvidence?.(evidence.id)}
+                      title={evidence.name}
+                    >
+                      {evidence.name}
+                    </td>
+                    <td className='px-3 py-2 text-gray-600 dark:text-zinc-400'>
+                      {getEvidenceTypeLabel(evidence.type as EvidenceType)}
+                    </td>
+                    <td className='px-3 py-2'>
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[evidence.status ?? ''] ?? 'bg-gray-100 text-gray-700'}`}
+                      >
+                        {getEvidenceStatusLabel(
+                          evidence.status as EvidenceStatus
+                        )}
+                      </span>
+                    </td>
+                    <td className='px-3 py-2 text-gray-600 dark:text-zinc-400'>
+                      {evidence.submitter || '-'}
+                    </td>
+                    <td
+                      className='max-w-[120px] truncate px-3 py-2 text-gray-600 dark:text-zinc-400'
+                      title={evidence.source ?? ''}
+                    >
+                      {evidence.source || '-'}
+                    </td>
+                    <td className='px-3 py-2 text-gray-600 dark:text-zinc-400'>
+                      {evidence.relevanceScore !== null
+                        ? `${(evidence.relevanceScore * 100).toFixed(1)}%`
+                        : '-'}
+                    </td>
+                    <td className='whitespace-nowrap px-3 py-2 text-gray-600 dark:text-zinc-400'>
+                      {new Date(evidence.createdAt).toLocaleDateString('zh-CN')}
+                    </td>
+                    <td className='px-3 py-2'>
+                      <div className='flex items-center gap-1'>
+                        {evidence.status === 'PENDING' && (
+                          <>
+                            <button
+                              className='rounded px-2 py-0.5 text-xs text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20'
+                              onClick={e => {
+                                e.stopPropagation();
+                                void handleUpdateStatus(
+                                  evidence.id,
+                                  EvidenceStatus.ACCEPTED
+                                );
+                              }}
+                            >
+                              采纳
+                            </button>
+                            <button
+                              className='rounded px-2 py-0.5 text-xs text-orange-600 hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-900/20'
+                              onClick={e => {
+                                e.stopPropagation();
+                                void handleUpdateStatus(
+                                  evidence.id,
+                                  EvidenceStatus.REJECTED
+                                );
+                              }}
+                            >
+                              拒绝
+                            </button>
+                          </>
+                        )}
+                        {onEditEvidence && (
+                          <button
+                            className='rounded px-2 py-0.5 text-xs text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20'
+                            onClick={e => {
+                              e.stopPropagation();
+                              onEditEvidence(evidence.id);
+                            }}
+                          >
+                            编辑
+                          </button>
+                        )}
+                        <button
+                          className='rounded px-2 py-0.5 text-xs text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20'
+                          onClick={e => {
+                            e.stopPropagation();
+                            void handleDelete(evidence.id);
+                          }}
+                        >
+                          删除
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 分页 */}
+          <div className='flex items-center justify-between text-sm'>
+            <span className='text-gray-500 dark:text-zinc-400'>
+              共 {total} 条证据
+            </span>
+            <div className='flex items-center gap-2'>
+              <Button
+                size='sm'
+                variant='outline'
+                disabled={page === 1}
+                onClick={() => handlePageChange(page - 1)}
+              >
+                上一页
+              </Button>
+              <span className='text-gray-600 dark:text-zinc-400'>
+                第 {page} / {totalPages} 页
+              </span>
+              <Button
+                size='sm'
+                variant='outline'
+                disabled={page >= totalPages}
+                onClick={() => handlePageChange(page + 1)}
+              >
+                下一页
+              </Button>
+            </div>
           </div>
         </>
       )}

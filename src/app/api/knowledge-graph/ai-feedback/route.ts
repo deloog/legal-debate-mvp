@@ -5,8 +5,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import {
   AIFeedbackService,
@@ -18,9 +18,9 @@ import {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getAuthUser(request);
 
-    if (!session?.user?.id) {
+    if (!user) {
       return NextResponse.json(
         { success: false, error: '未登录' },
         { status: 401 }
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     const input: SubmitFeedbackInput = {
       relationId: body.relationId,
-      userId: session.user.id,
+      userId: user.userId,
       feedbackType: body.feedbackType,
       aiConfidenceProvided: body.aiConfidenceProvided,
       userConfidenceRating: body.userConfidenceRating,
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     logger.info('AI反馈提交成功', {
       feedbackId: feedback.id,
-      userId: session.user.id,
+      userId: user.userId,
       relationId: input.relationId,
     });
 
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : '提交AI反馈失败',
+        error: '提交AI反馈失败',
       },
       { status: 500 }
     );
@@ -83,12 +83,24 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getAuthUser(request);
 
-    if (!session?.user?.id) {
+    if (!user) {
       return NextResponse.json(
         { success: false, error: '未登录' },
         { status: 401 }
+      );
+    }
+
+    // 从DB实时读取角色，仅管理员可查看反馈列表
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { role: true },
+    });
+    if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        { success: false, error: '权限不足，仅管理员可查看反馈列表' },
+        { status: 403 }
       );
     }
 
@@ -103,7 +115,7 @@ export async function GET(request: NextRequest) {
     // 获取反馈统计
     const stats = await AIFeedbackService.getFeedbackStats({
       relationId: relationId || undefined,
-      userId: session.user.id,
+      userId: user.userId,
       aiProvider: aiProvider || undefined,
       aiModel: aiModel || undefined,
       fromDate: fromDate ? new Date(fromDate) : undefined,
@@ -111,7 +123,7 @@ export async function GET(request: NextRequest) {
     });
 
     logger.info('反馈统计查询成功', {
-      userId: session.user.id,
+      userId: user.userId,
       totalFeedbacks: stats.totalFeedbacks,
     });
 

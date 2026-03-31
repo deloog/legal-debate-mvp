@@ -4,10 +4,9 @@
  * GET /api/orders
  */
 
-import { authOptions } from '@/lib/auth/auth-options';
 import { getUserOrders } from '@/lib/order/order-service';
 import { Order, OrderStatus } from '@/types/payment';
-import { getServerSession } from 'next-auth';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 
@@ -17,9 +16,9 @@ import { logger } from '@/lib/logger';
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    // 获取认证用户（支持 JWT Bearer + Cookie）
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -30,17 +29,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // 获取查询参数
+    // 获取查询参数（不接受客户端传入 userId，强制使用认证用户ID）
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
-    const userId = searchParams.get('userId');
     const page = Number.parseInt(searchParams.get('page') || '1', 10);
     const limit = Number.parseInt(searchParams.get('limit') || '20', 10);
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
 
-    // 使用传入的userId或当前会话的userId
-    const targetUserId = userId || session.user.id;
+    const targetUserId = authUser.userId;
 
     // 验证状态参数
     const validStatuses = [

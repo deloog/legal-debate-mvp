@@ -15,11 +15,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
+import { getSignedUrl, ossObjectExists } from '@/lib/storage/storage-service';
 
 const UPLOAD_DIR = join(process.cwd(), 'uploads', 'qualifications');
+const PRIVATE_UPLOAD_DIR = join(
+  process.cwd(),
+  'private_uploads',
+  'qualifications'
+);
 
 // 支持的文件扩展名
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -33,15 +39,21 @@ function isValidFileId(fileId: string): boolean {
 }
 
 /**
- * 查找文件（尝试所有可能的扩展名）
+ * 查找文件（尝试所有可能的扩展名，先查新路径再查旧路径）
  */
 async function findFile(
   fileId: string
 ): Promise<{ path: string; ext: string } | null> {
   for (const ext of ALLOWED_EXTENSIONS) {
-    const filePath = join(UPLOAD_DIR, `${fileId}${ext}`);
-    if (existsSync(filePath)) {
-      return { path: filePath, ext };
+    // 优先查新路径（private_uploads）
+    const newPath = join(PRIVATE_UPLOAD_DIR, `${fileId}${ext}`);
+    if (existsSync(newPath)) {
+      return { path: newPath, ext };
+    }
+    // 回退旧路径（uploads/qualifications）
+    const oldPath = join(UPLOAD_DIR, `${fileId}${ext}`);
+    if (existsSync(oldPath)) {
+      return { path: oldPath, ext };
     }
   }
   return null;
@@ -65,19 +77,16 @@ export async function GET(
   { params }: { params: Promise<{ fileId: string }> }
 ) {
   try {
-    // JWT 鉴权
-    const authHeader = request.headers.get('authorization');
-    const token = extractTokenFromHeader(authHeader ?? '');
-    const tokenResult = verifyToken(token ?? '');
-
-    if (!tokenResult.valid || !tokenResult.payload) {
+    // 认证
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         { success: false, message: '未授权' },
         { status: 401 }
       );
     }
 
-    const { userId, role } = tokenResult.payload;
+    const { userId } = authUser;
     const { fileId } = await params;
 
     // 验证文件 ID 格式
@@ -89,18 +98,12 @@ export async function GET(
       );
     }
 
-    // 查找文件
-    const fileInfo = await findFile(fileId);
-    if (!fileInfo) {
-      logger.warn('文件不存在', { userId, fileId });
-      return NextResponse.json(
-        { success: false, message: '文件不存在' },
-        { status: 404 }
-      );
-    }
-
-    // 权限检查：非管理员只能访问自己的照片
-    const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
+    // 权限检查：从 DB 实时读取角色（防止 stale JWT 绕过权限撤销）
+    const dbUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
 
     if (!isAdmin) {
       // 查询该文件是否属于当前用户
@@ -114,12 +117,40 @@ export async function GET(
       });
 
       if (!qualification) {
-        logger.warn('未授权的文件访问尝试', { userId, fileId, role });
+        logger.warn('未授权的文件访问尝试', { userId, fileId });
         return NextResponse.json(
           { success: false, message: '无权访问此文件' },
           { status: 403 }
         );
       }
+    }
+
+    // OSS模式：遍历扩展名找到实际存储的对象，生成签名URL后重定向
+    if (process.env.OSS_ENABLED === 'true') {
+      for (const ext of ALLOWED_EXTENSIONS) {
+        const ossKey = `qualifications/${fileId}${ext}`;
+        if (await ossObjectExists(ossKey)) {
+          const signedUrl = await getSignedUrl(ossKey);
+          if (signedUrl) {
+            return NextResponse.redirect(signedUrl, { status: 302 });
+          }
+        }
+      }
+      logger.warn('OSS中未找到证件照', { userId, fileId });
+      return NextResponse.json(
+        { success: false, message: '文件不存在' },
+        { status: 404 }
+      );
+    }
+
+    // 本地模式：查找文件
+    const fileInfo = await findFile(fileId);
+    if (!fileInfo) {
+      logger.warn('文件不存在', { userId, fileId });
+      return NextResponse.json(
+        { success: false, message: '文件不存在' },
+        { status: 404 }
+      );
     }
 
     // 读取文件

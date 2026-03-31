@@ -1,7 +1,6 @@
 /** @legacy 优先使用 /api/v1/dashboard，此路由保留以向后兼容 */
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { NextRequest, NextResponse } from 'next/server';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
 import type {
   DashboardData,
@@ -16,13 +15,11 @@ import { logger } from '@/lib/logger';
  * GET /api/dashboard
  * 获取Dashboard数据
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // 从session获取当前用户ID
-    const session = await getServerSession(authOptions);
-    const userId = session?.user?.id;
-
-    if (!userId) {
+    // 获取认证用户（支持 JWT Bearer + Cookie）
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -31,6 +28,7 @@ export async function GET() {
         { status: 401 }
       );
     }
+    const userId = authUser.userId;
 
     // 从数据库获取统计数据
     const [totalCases, totalClients, pendingTasks, todaySchedules] =

@@ -49,6 +49,25 @@ export async function GET(
       );
     }
 
+    // 校验合同归属（律师或案件所有人）
+    let isAuthorized = contract.lawyerId === userId;
+    if (!isAuthorized && contract.caseId) {
+      const caseData = await prisma.case.findUnique({
+        where: { id: contract.caseId },
+        select: { userId: true },
+      });
+      isAuthorized = caseData?.userId === userId;
+    }
+    if (!isAuthorized) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: '无权访问此合同' },
+        },
+        { status: 403 }
+      );
+    }
+
     if (!contract.filePath) {
       return NextResponse.json(
         {
@@ -63,8 +82,10 @@ export async function GET(
     }
 
     // ─── 路径安全验证（防路径穿越） ───────────────────────────────────────────
-    const uploadsDir = resolve(process.cwd(), 'uploads');
-    const resolvedFilePath = resolve(uploadsDir, contract.filePath);
+    // 本地存储写入 private_uploads/；剥掉开头的 / 或 \ 防止 resolve() 覆盖基准目录
+    const uploadsDir = resolve(process.cwd(), 'private_uploads');
+    const relativePath = contract.filePath.replace(/^[/\\]+/, '');
+    const resolvedFilePath = resolve(uploadsDir, relativePath);
     if (!resolvedFilePath.startsWith(uploadsDir + sep)) {
       logger.warn('路径穿越尝试被拦截', {
         contractId,

@@ -112,6 +112,17 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     );
   }
 
+  // ─── 所有权校验：确保案件归属当前用户 ────────────────────────────────────
+  if (caseData.userId !== userId) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: { code: 'FORBIDDEN', message: '无权访问此案件' },
+      },
+      { status: 403 }
+    );
+  }
+
   // ─── 从已完成分析的文档中聚合案情数据 ───────────────────────────────────
   type AnalysisResultShape = {
     extractedData?: {
@@ -259,7 +270,8 @@ export const OPTIONS = withErrorHandler(async () => {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin':
+        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400',

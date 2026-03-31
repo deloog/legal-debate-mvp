@@ -4,6 +4,7 @@ import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
 import { createSuccessResponse } from '@/app/api/lib/responses/success';
 import { FollowUpTaskProcessor } from '@/lib/client/follow-up-task-processor';
 import {
+  CommunicationType,
   FollowUpTaskPriority,
   FollowUpTaskQueryParams,
   FollowUpTaskStatus,
@@ -24,6 +25,19 @@ const querySchema = z.object({
     .default(20),
   sortBy: z.enum(['dueDate', 'priority', 'createdAt']).default('dueDate'),
   sortOrder: z.enum(['asc', 'desc']).default('asc'),
+});
+
+const createTaskSchema = z.object({
+  clientId: z.string().min(1, '客户ID不能为空'),
+  type: z.enum(['PHONE', 'EMAIL', 'MEETING', 'WECHAT', 'OTHER']),
+  summary: z
+    .string()
+    .min(2, '摘要至少需要2个字符')
+    .max(200, '摘要不能超过200字符'),
+  priority: z.enum(['HIGH', 'MEDIUM', 'LOW']).default('MEDIUM'),
+  dueDate: z.string().min(1, '到期时间不能为空'),
+  notes: z.string().optional(),
+  status: z.enum(['PENDING', 'COMPLETED', 'CANCELLED']).optional(),
 });
 
 /**
@@ -69,6 +83,51 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
 });
 
 /**
+ * POST /api/follow-up-tasks
+ * 创建跟进任务
+ */
+export const POST = withErrorHandler(async (request: NextRequest) => {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { error: '未认证', message: '请先登录' },
+      { status: 401 }
+    );
+  }
+
+  const body = await request.json();
+  const validatedData = createTaskSchema.parse(body);
+
+  // 验证客户是否存在且属于当前用户
+  const { prisma } = await import('@/lib/db');
+  const client = await prisma.client.findFirst({
+    where: {
+      id: validatedData.clientId,
+      userId: authUser.userId,
+    },
+  });
+
+  if (!client) {
+    return NextResponse.json(
+      { error: '客户不存在或无权限访问' },
+      { status: 404 }
+    );
+  }
+
+  const task = await FollowUpTaskProcessor.createTask({
+    clientId: validatedData.clientId,
+    userId: authUser.userId,
+    type: validatedData.type as CommunicationType,
+    summary: validatedData.summary,
+    priority: validatedData.priority as FollowUpTaskPriority,
+    dueDate: new Date(validatedData.dueDate),
+    notes: validatedData.notes,
+  });
+
+  return createSuccessResponse(task, { status: 201 });
+});
+
+/**
  * OPTIONS /api/follow-up-tasks
  * CORS预检请求
  */
@@ -78,7 +137,7 @@ export const OPTIONS = withErrorHandler(async () => {
     headers: {
       'Access-Control-Allow-Origin':
         process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Max-Age': '86400',
     },

@@ -262,7 +262,7 @@ export async function PUT(
     if (data.terms !== undefined) updateData.terms = data.terms || null;
     if (data.specialTerms !== undefined)
       updateData.specialTerms = data.specialTerms || null;
-    if (data.status !== undefined) updateData.status = data.status;
+    // status 变更必须通过专用状态端点（sign/approval）走状态机，不允许 PUT 直接修改
     if (data.signedAt !== undefined)
       updateData.signedAt = data.signedAt || null;
     if (data.signatureData !== undefined)

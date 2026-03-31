@@ -42,7 +42,7 @@ function PerformanceDashboardPage(): React.ReactElement | null {
       setStats(result.data);
       setTrend(result.data.trend || []);
     } catch (err) {
-      console.error('加载失败:', err);
+      void err; // 加载失败时静默处理，页面保持 loading=false 显示空态
     } finally {
       setLoading(false);
     }

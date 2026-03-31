@@ -5,7 +5,7 @@
 // =============================================================================
 
 // AI服务提供商
-export type AIProvider = 'zhipu' | 'deepseek' | 'openai' | 'anthropic';
+export type AIProvider = 'zhipu' | 'deepseek' | 'openai';
 
 // AI模型类型
 export type AIModelType = 'chat' | 'embedding' | 'completion' | 'coding';

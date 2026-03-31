@@ -15,7 +15,7 @@ export class Semaphore {
     timeout?: ReturnType<typeof setTimeout>;
   }> = [];
 
-  constructor(private maxPermits: number = 5) {
+  constructor(maxPermits: number = 5) {
     this.permits = maxPermits;
   }
 

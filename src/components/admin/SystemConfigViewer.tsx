@@ -42,6 +42,18 @@ export function SystemConfigViewer({
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
 
+  const CATEGORY_LABELS: Record<string, string> = {
+    ai: 'AI模型参数',
+    feature: '功能开关',
+    business: '业务参数',
+    notification: '通知设置',
+    general: '通用设置',
+    storage: '存储设置',
+    security: '安全设置',
+    ui: '界面设置',
+    other: '其他',
+  };
+
   const categories = Array.from(new Set(configs.map(c => c.category))).sort();
   const filteredConfigs = selectedCategory
     ? configs.filter(c => c.category === selectedCategory)
@@ -93,7 +105,7 @@ export function SystemConfigViewer({
             <option value=''>全部分类</option>
             {categories.map(cat => (
               <option key={cat} value={cat}>
-                {cat}
+                {CATEGORY_LABELS[cat] ?? cat}
               </option>
             ))}
           </select>
@@ -256,14 +268,15 @@ function CreateConfigDialog({ onClose, onSave }: CreateConfigDialogProps) {
                 onChange={e => handleChange('category', e.target.value)}
                 className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
               >
-                <option value='general'>general</option>
-                <option value='ai'>ai</option>
-                <option value='storage'>storage</option>
-                <option value='security'>security</option>
-                <option value='feature'>feature</option>
-                <option value='ui'>ui</option>
-                <option value='notification'>notification</option>
-                <option value='other'>other</option>
+                <option value='ai'>AI模型参数</option>
+                <option value='feature'>功能开关</option>
+                <option value='business'>业务参数</option>
+                <option value='notification'>通知设置</option>
+                <option value='general'>通用设置</option>
+                <option value='storage'>存储设置</option>
+                <option value='security'>安全设置</option>
+                <option value='ui'>界面设置</option>
+                <option value='other'>其他</option>
               </select>
             </div>
 

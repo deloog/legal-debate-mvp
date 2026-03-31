@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { getUnifiedAIService } from '@/lib/ai/unified-service';
 import { Prisma } from '@prisma/client';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 
 /**
@@ -11,11 +10,11 @@ import { logger } from '@/lib/logger';
  * 获取辩论摘要数据（各轮次得分统计、双方论点数量、整体结论）
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return NextResponse.json(
       { success: false, error: '未认证' },
       { status: 401 }
@@ -50,8 +49,12 @@ export async function GET(
       );
     }
 
-    const isAdmin = (session.user as { role?: string }).role === 'ADMIN';
-    if (debate.userId !== session.user.id && !isAdmin) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
+    if (debate.userId !== authUser.userId && !isAdmin) {
       return NextResponse.json(
         { success: false, error: '无权访问' },
         { status: 403 }
@@ -208,11 +211,11 @@ export async function GET(
 // =============================================================================
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return NextResponse.json(
       { success: false, error: '未认证' },
       { status: 401 }
@@ -260,8 +263,13 @@ export async function POST(
       );
     }
 
-    const isAdmin = (session.user as { role?: string }).role === 'ADMIN';
-    if (debate.userId !== session.user.id && !isAdmin) {
+    const dbUser2 = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    const isAdmin2 =
+      dbUser2?.role === 'ADMIN' || dbUser2?.role === 'SUPER_ADMIN';
+    if (debate.userId !== authUser.userId && !isAdmin2) {
       return NextResponse.json(
         { success: false, error: '无权访问' },
         { status: 403 }

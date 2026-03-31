@@ -4,8 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { getInvoice, cancelInvoice } from '@/lib/invoice/invoice-service';
 import { logger } from '@/lib/logger';
 
@@ -14,7 +13,7 @@ import { logger } from '@/lib/logger';
  * 查询发票详情
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
@@ -22,9 +21,8 @@ export async function GET(
     const { id } = await params;
     const invoiceId = id;
 
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -50,7 +48,7 @@ export async function GET(
     }
 
     // 验证所有权
-    if (invoice.userId !== session.user.id) {
+    if (invoice.userId !== authUser.userId) {
       return NextResponse.json(
         {
           success: false,
@@ -93,9 +91,8 @@ export async function DELETE(
     const { id } = await params;
     const invoiceId = id;
 
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -111,7 +108,7 @@ export async function DELETE(
     const reason = body.reason as string | undefined;
 
     // 取消发票
-    const invoice = await cancelInvoice(invoiceId, session.user.id, reason);
+    const invoice = await cancelInvoice(invoiceId, authUser.userId, reason);
 
     return NextResponse.json({
       success: true,
@@ -121,8 +118,7 @@ export async function DELETE(
   } catch (error) {
     logger.error('[API] 取消发票失败:', error);
 
-    const errorMessage =
-      error instanceof Error ? error.message : '取消发票失败，请稍后重试';
+    const errorMessage = '取消发票失败，请稍后重试';
 
     // 根据错误信息返回不同的状态码
     if (errorMessage.includes('不存在')) {

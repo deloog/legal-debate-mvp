@@ -2,7 +2,7 @@
  * 密码加密和验证工具函数
  */
 
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import type { PasswordValidationError } from '@/types/auth';
 
 const SALT_ROUNDS = Number.parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10);

@@ -16,11 +16,39 @@ import {
   IntegrationQueryParams,
 } from '@/lib/integration';
 import type { ErrorResponse, SuccessResponse } from '@/types/api-response';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 
 /**
  * GET /api/v1/integrations
  * 获取业务系统集成列表
  */
+async function requireAdminIntegrations(
+  request: NextRequest
+): Promise<NextResponse<ErrorResponse> | null> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+      { status: 401 }
+    );
+  }
+  const dbUser = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { role: true },
+  });
+  if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+    return NextResponse.json(
+      {
+        success: false,
+        error: { code: 'FORBIDDEN', message: '仅管理员可管理业务系统集成' },
+      },
+      { status: 403 }
+    );
+  }
+  return null;
+}
+
 export async function GET(request: NextRequest): Promise<
   NextResponse<
     | SuccessResponse<{
@@ -32,6 +60,9 @@ export async function GET(request: NextRequest): Promise<
     | ErrorResponse
   >
 > {
+  const authErr = await requireAdminIntegrations(request);
+  if (authErr) return authErr;
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const params: IntegrationQueryParams = {
@@ -63,7 +94,6 @@ export async function GET(request: NextRequest): Promise<
         error: {
           code: 'INTEGRATION_LIST_ERROR',
           message: '获取业务系统集成列表失败',
-          details: error instanceof Error ? error.message : undefined,
         },
       },
       { status: 500 }
@@ -78,6 +108,9 @@ export async function GET(request: NextRequest): Promise<
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<SuccessResponse<unknown> | ErrorResponse>> {
+  const authErr = await requireAdminIntegrations(request);
+  if (authErr) return authErr;
+
   try {
     const body = await request.json();
 
@@ -183,7 +216,6 @@ export async function POST(
         error: {
           code: 'INTEGRATION_CREATE_ERROR',
           message: '创建业务系统集成失败',
-          details: error instanceof Error ? error.message : undefined,
         },
       },
       { status: 500 }

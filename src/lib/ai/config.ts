@@ -67,7 +67,6 @@ export const DEFAULT_AI_SERVICE_CONFIG: AIServiceConfig = {
       zhipu: 0.6,
       deepseek: 0.4,
       openai: 0.0,
-      anthropic: 0.0,
     },
     roundRobin: false,
   },
@@ -281,7 +280,6 @@ export const ACCURACY_TEST_AI_CONFIG: AIServiceConfig = {
       zhipu: 0.3,
       deepseek: 0.7,
       openai: 0.0,
-      anthropic: 0.0,
     },
     roundRobin: false,
   },
@@ -513,23 +511,6 @@ export const PROVIDER_CONFIGS = {
       requestsPerMinute: 200,
       tokensPerMinute: 90000,
       tokensPerDay: 1000000,
-    },
-  },
-  anthropic: {
-    defaultModels: {
-      chat: 'claude-3-haiku-20240307',
-      embedding: null, // Anthropic不支持嵌入
-    },
-    supportedModels: [
-      'claude-3-haiku-20240307',
-      'claude-3-sonnet-20240229',
-      'claude-3-opus-20240229',
-    ],
-    rateLimits: {
-      requestsPerSecond: 5,
-      requestsPerMinute: 60,
-      tokensPerMinute: 60000,
-      tokensPerDay: 500000,
     },
   },
 };

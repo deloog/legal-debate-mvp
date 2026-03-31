@@ -3,8 +3,7 @@
 // =============================================================================
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 import {
   checkKnowledgeGraphPermission,
@@ -17,16 +16,16 @@ import { QualityScoreService } from '@/lib/knowledge-graph/quality-score/quality
  * GET /api/v1/knowledge-graph/quality-score/warning
  * 触发质量预警
  */
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: '未授权' }, { status: 401 });
     }
 
     // 检查权限
     const permissionCheck = await checkKnowledgeGraphPermission(
-      session.user.id,
+      authUser.userId,
       KnowledgeGraphAction.VIEW_STATS,
       KnowledgeGraphResource.STATS
     );
@@ -42,7 +41,7 @@ export async function GET(_request: NextRequest) {
     const warnings = await service.triggerQualityWarning();
 
     logger.info('Quality warning triggered', {
-      userId: session.user.id,
+      userId: authUser.userId,
       warningCount: warnings.length,
     });
 

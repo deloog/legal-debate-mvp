@@ -117,6 +117,44 @@ export class AIService {
   // 主要API方法
   // =============================================================================
 
+  /**
+   * 流式聊天完成 —— 直接返回底层 OpenAI SDK 的 AsyncIterable，
+   * 绕过非流式的 AIResponse 转换层，供 generateDebateStream* 使用。
+   */
+  public async streamChatCompletion(
+    request: AIRequestConfig
+  ): Promise<
+    AsyncIterable<{ choices: Array<{ delta: { content?: string } }> }>
+  > {
+    if (!this.initialized) {
+      throw new Error('AI Service not initialized');
+    }
+    const provider = request.provider || this.loadBalancer.selectProvider();
+    const rawClient = this.clients.get(provider);
+    if (!rawClient) {
+      throw new Error(`No client available for provider: ${provider}`);
+    }
+    const client = rawClient as {
+      chat: {
+        completions: {
+          create: (
+            p: Record<string, unknown>
+          ) => Promise<
+            AsyncIterable<{ choices: Array<{ delta: { content?: string } }> }>
+          >;
+        };
+      };
+    };
+    return client.chat.completions.create({
+      model: request.model,
+      messages: request.messages as unknown,
+      temperature: request.temperature,
+      max_tokens: request.maxTokens,
+      top_p: request.topP,
+      stream: true,
+    } as Record<string, unknown>);
+  }
+
   public async chatCompletion(request: AIRequestConfig): Promise<AIResponse> {
     if (!this.initialized) {
       throw new Error('AI Service not initialized');

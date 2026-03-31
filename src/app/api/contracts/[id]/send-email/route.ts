@@ -5,6 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { contractEmailService } from '@/lib/email/contract-email-service';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 
 export async function POST(
@@ -12,30 +14,108 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // 验证身份
+    const user = await getAuthUser(request);
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
+
+    // 验证合同所有权（律师 / 委托方 / 管理员）
+    const [contract, dbUser] = await Promise.all([
+      prisma.contract.findUnique({
+        where: { id },
+        select: { lawyerId: true, case: { select: { userId: true } } },
+      }),
+      prisma.user.findUnique({
+        where: { id: user.userId },
+        select: { role: true },
+      }),
+    ]);
+    if (!contract) {
+      return NextResponse.json(
+        { success: false, error: { code: 'NOT_FOUND', message: '合同不存在' } },
+        { status: 404 }
+      );
+    }
+    // 从 DB 实时读取角色，防止 stale JWT 绕过管理员豁免
+    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
+    const isLawyer = contract.lawyerId === user.userId;
+    const isClient = contract.case?.userId === user.userId;
+    if (!isAdmin && !isLawyer && !isClient) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: '无权访问此合同' },
+        },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
 
-    // 验证必填字段
-    if (!body.recipientEmail) {
+    // 验证必填字段及格式
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!body.recipientEmail || !emailRegex.test(String(body.recipientEmail))) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'INVALID_EMAIL', message: '收件人邮箱格式不正确' },
+        },
+        { status: 400 }
+      );
+    }
+
+    if (!body.recipientName || String(body.recipientName).trim().length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'MISSING_NAME', message: '收件人姓名不能为空' },
+        },
+        { status: 400 }
+      );
+    }
+
+    if (String(body.recipientName).length > 100) {
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: 'MISSING_EMAIL',
-            message: '收件人邮箱不能为空',
+            code: 'INVALID_NAME',
+            message: '收件人姓名不能超过100个字符',
           },
         },
         { status: 400 }
       );
     }
 
-    if (!body.recipientName) {
+    // subject / message 长度限制
+    if (body.subject && String(body.subject).length > 200) {
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: 'MISSING_NAME',
-            message: '收件人姓名不能为空',
+            code: 'INVALID_SUBJECT',
+            message: '邮件主题不能超过200个字符',
+          },
+        },
+        { status: 400 }
+      );
+    }
+    if (body.message && String(body.message).length > 5000) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_MESSAGE',
+            message: '邮件正文不能超过5000个字符',
           },
         },
         { status: 400 }
@@ -79,7 +159,7 @@ export async function POST(
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '发送邮件失败',
+          message: '发送邮件失败',
         },
       },
       { status: 500 }

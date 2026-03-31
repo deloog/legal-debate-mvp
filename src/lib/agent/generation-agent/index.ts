@@ -12,7 +12,6 @@ import {
   GenerationAgentConfig,
   GenerationInput,
   GenerationOutput,
-  DocumentType,
 } from './types';
 
 /**
@@ -374,33 +373,6 @@ export class GenerationAgent {
     }
 
     return results;
-  }
-
-  /**
-   * 验证输入
-   */
-  private __validateInput(input: GenerationInput): void {
-    if (!input.caseInfo) {
-      throw new Error('案件信息不能为空');
-    }
-
-    if (!input.caseInfo.description) {
-      throw new Error('案件描述不能为空');
-    }
-
-    if (input.type === 'debate') {
-      return;
-    }
-
-    const validTypes: DocumentType[] = [
-      'complaint',
-      'answer',
-      'evidence',
-      'appeal',
-    ];
-    if (!validTypes.includes(input.type as DocumentType)) {
-      throw new Error(`不支持的文档类型: ${input.type}`);
-    }
   }
 }
 

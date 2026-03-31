@@ -8,14 +8,6 @@ import type { AIRequestConfig, AIResponse } from '@/types/ai-service';
 import type { Memory, CompressionResult, KeyInfo } from './types';
 
 /**
- * 压缩比配置
- */
-const COMPRESSION_RATIO_CONFIG = {
-  WORKING_TO_HOT: 0.7, // 70%（保留主要信息）
-  HOT_TO_COLD: 0.1, // 10%（仅保留关键摘要）
-};
-
-/**
  * 重要性阈值（低于此值使用规则压缩）
  */
 const IMPORTANCE_THRESHOLD_FOR_AI = 0.7;
@@ -58,20 +50,6 @@ export class MemoryCompressor {
         error: error instanceof Error ? error.message : String(error),
       };
     }
-  }
-
-  /**
-   * 确定目标压缩比
-   */
-  private __determineTargetRatio(memory: Memory): number {
-    // 根据记忆类型确定
-    if (memory.memoryType === 'WORKING') {
-      return COMPRESSION_RATIO_CONFIG.WORKING_TO_HOT;
-    }
-    if (memory.memoryType === 'HOT') {
-      return COMPRESSION_RATIO_CONFIG.HOT_TO_COLD;
-    }
-    return 0.1; // Cold Memory最小化
   }
 
   /**

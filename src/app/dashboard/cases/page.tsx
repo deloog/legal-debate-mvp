@@ -43,7 +43,7 @@ function CasesDashboardPage(): React.ReactElement | null {
       setStats(result.data);
       setTrend(result.data.trend || []);
     } catch (err) {
-      console.error('加载失败:', err);
+      void err;
     } finally {
       setLoading(false);
     }

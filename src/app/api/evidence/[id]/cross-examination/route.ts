@@ -179,7 +179,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '服务器内部错误',
+          message: '服务器内部错误',
         },
       },
       { status: 500 }

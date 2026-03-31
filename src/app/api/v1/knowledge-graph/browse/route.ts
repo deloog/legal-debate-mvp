@@ -4,17 +4,17 @@
  * GET /api/v1/knowledge-graph/browse
  *
  * 功能：
- * 1. 获取全量图谱数据
- * 2. 支持搜索（法条名称、条文号、全文）
- * 3. 支持过滤（分类、关系类型）
- * 4. 支持分页
- * 5. 性能优化（只查询必要字段）
+ * 1. 从有关系的核心节点出发，展开到邻居节点，构建可见的连通图
+ * 2. 支持搜索（法条名称、条文号）
+ * 3. 支持按分类和关系类型过滤
+ * 4. 支持分页（基于种子节点分页）
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { LawCategory, RelationType, VerificationStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * 图节点类型
@@ -60,12 +60,17 @@ interface BrowseResponse {
 /**
  * 获取知识图谱浏览数据
  *
- * @param request - Next.js请求对象
- * @returns 图谱数据或错误信息
+ * 策略：先查"种子"法条（有 VERIFIED 关系的法条，按出度排序），
+ * 再拉取它们的关系，并补充关系对端节点，确保图中有可见连接。
  */
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<BrowseResponse | { error: string }>> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json({ error: '未授权，请先登录' }, { status: 401 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
 
@@ -74,19 +79,12 @@ export async function GET(
     const categoryParam = searchParams.get('category') || undefined;
     const relationTypeParam = searchParams.get('relationType') || undefined;
     let page = parseInt(searchParams.get('page') || '1');
-    let pageSize = parseInt(searchParams.get('pageSize') || '100');
+    let pageSize = parseInt(searchParams.get('pageSize') || '80');
 
     // 参数验证和规范化
-    if (isNaN(page) || page < 1) {
-      page = 1;
-    }
-    if (isNaN(pageSize) || pageSize < 1) {
-      pageSize = 100;
-    }
-    // 限制最大页面大小
-    if (pageSize > 500) {
-      pageSize = 500;
-    }
+    if (isNaN(page) || page < 1) page = 1;
+    if (isNaN(pageSize) || pageSize < 1) pageSize = 80;
+    if (pageSize > 200) pageSize = 200;
 
     // 验证分类参数
     let category: LawCategory | undefined = undefined;
@@ -106,89 +104,83 @@ export async function GET(
       relationType = relationTypeParam as RelationType;
     }
 
-    // 构建查询条件
-    const where: {
+    // ── Step 1: 查找有 VERIFIED 关系的种子法条 ──────────────────────────────
+    // 只展示有关系的法条，避免孤立节点充斥图谱
+    const seedWhere: {
       category?: LawCategory;
       OR?: Array<{
         lawName?: { contains: string; mode: 'insensitive' };
         articleNumber?: { contains: string; mode: 'insensitive' };
-        fullText?: { contains: string; mode: 'insensitive' };
       }>;
-    } = {};
+      sourceRelations?: {
+        some: {
+          verificationStatus: VerificationStatus;
+          relationType?: RelationType;
+        };
+      };
+    } = {
+      sourceRelations: {
+        some: {
+          verificationStatus: VerificationStatus.VERIFIED,
+          ...(relationType ? { relationType } : {}),
+        },
+      },
+    };
 
-    // 添加分类过滤
-    if (category) {
-      where.category = category;
-    }
+    if (category) seedWhere.category = category;
 
-    // 添加搜索条件
     if (search) {
-      where.OR = [
+      seedWhere.OR = [
         { lawName: { contains: search, mode: 'insensitive' } },
         { articleNumber: { contains: search, mode: 'insensitive' } },
-        { fullText: { contains: search, mode: 'insensitive' } },
       ];
     }
 
-    // 查询法条总数
-    const total = await prisma.lawArticle.count({ where });
-
-    // 计算总页数
+    // 统计种子法条总数（用于分页）
+    const total = await prisma.lawArticle.count({ where: seedWhere });
     const totalPages = Math.ceil(total / pageSize);
 
-    // 查询法条数据（分页）
-    const articles = await prisma.lawArticle.findMany({
-      where,
+    // 查询本页种子法条（按出度排序：出度高的节点优先显示）
+    const seedArticles = await prisma.lawArticle.findMany({
+      where: seedWhere,
       select: {
         id: true,
         lawName: true,
         articleNumber: true,
         category: true,
       },
+      orderBy: [
+        { sourceRelations: { _count: 'desc' } },
+        { lawName: 'asc' },
+        { articleNumber: 'asc' },
+      ],
       skip: (page - 1) * pageSize,
       take: pageSize,
-      orderBy: [{ lawName: 'asc' }, { articleNumber: 'asc' }],
     });
 
-    // 转换为图节点
-    const nodes: GraphNode[] = articles.map(article => ({
-      id: article.id,
-      lawName: article.lawName,
-      articleNumber: article.articleNumber,
-      category: article.category,
-      level: 0, // 浏览模式下所有节点为同一层级
-    }));
+    if (seedArticles.length === 0) {
+      return NextResponse.json({
+        nodes: [],
+        links: [],
+        pagination: { page, pageSize, total, totalPages },
+      });
+    }
 
-    // 获取节点ID集合
-    const nodeIds = new Set(articles.map(a => a.id));
+    const seedIds = seedArticles.map(a => a.id);
+    const seedIdSet = new Set(seedIds);
 
-    // 构建关系查询条件
+    // ── Step 2: 拉取种子节点的所有 VERIFIED 关系 ──────────────────────────
     const relationWhere: {
       verificationStatus: VerificationStatus;
       relationType?: RelationType;
-      OR?: Array<{
-        sourceId?: { in: string[] };
-        targetId?: { in: string[] };
-      }>;
+      sourceId: { in: string[] };
     } = {
       verificationStatus: VerificationStatus.VERIFIED,
+      sourceId: { in: seedIds },
     };
 
-    // 添加关系类型过滤
-    if (relationType) {
-      relationWhere.relationType = relationType;
-    }
+    if (relationType) relationWhere.relationType = relationType;
 
-    // 只查询当前页面节点之间的关系
-    if (nodeIds.size > 0) {
-      const nodeIdArray = Array.from(nodeIds);
-      relationWhere.OR = [
-        { sourceId: { in: nodeIdArray } },
-        { targetId: { in: nodeIdArray } },
-      ];
-    }
-
-    // 查询关系数据
     const relations = await prisma.lawArticleRelation.findMany({
       where: relationWhere,
       select: {
@@ -200,9 +192,55 @@ export async function GET(
       },
     });
 
-    // 过滤出两端都在当前页面的关系
+    // ── Step 3: 收集对端节点 ID，补充节点数据 ─────────────────────────────
+    const neighborIds = relations
+      .map(r => r.targetId)
+      .filter(id => !seedIdSet.has(id));
+
+    const uniqueNeighborIds = [...new Set(neighborIds)];
+
+    // 限制邻居节点数量，避免图过于庞大
+    const neighborIdsBatch = uniqueNeighborIds.slice(0, 500);
+
+    const neighborArticles =
+      neighborIdsBatch.length > 0
+        ? await prisma.lawArticle.findMany({
+            where: { id: { in: neighborIdsBatch } },
+            select: {
+              id: true,
+              lawName: true,
+              articleNumber: true,
+              category: true,
+            },
+          })
+        : [];
+
+    // ── Step 4: 合并节点，构建响应 ─────────────────────────────────────────
+    const neighborIdSet = new Set(neighborArticles.map(a => a.id));
+    const allNodeIds = new Set([...seedIdSet, ...neighborIdSet]);
+
+    const nodes: GraphNode[] = [
+      ...seedArticles.map(a => ({
+        id: a.id,
+        lawName: a.lawName,
+        articleNumber: a.articleNumber,
+        category: a.category,
+        level: 0, // 种子节点
+      })),
+      ...neighborArticles.map(a => ({
+        id: a.id,
+        lawName: a.lawName,
+        articleNumber: a.articleNumber,
+        category: a.category,
+        level: 1, // 邻居节点
+      })),
+    ];
+
+    // 只保留两端节点都在当前图中的关系
     const links: GraphLink[] = relations
-      .filter(rel => nodeIds.has(rel.sourceId) && nodeIds.has(rel.targetId))
+      .filter(
+        rel => allNodeIds.has(rel.sourceId) && allNodeIds.has(rel.targetId)
+      )
       .map(rel => ({
         source: rel.sourceId,
         target: rel.targetId,
@@ -211,8 +249,7 @@ export async function GET(
         confidence: rel.confidence,
       }));
 
-    // 构建响应数据
-    const response: BrowseResponse = {
+    return NextResponse.json({
       nodes,
       links,
       pagination: {
@@ -221,9 +258,7 @@ export async function GET(
         total,
         totalPages,
       },
-    };
-
-    return NextResponse.json(response);
+    });
   } catch (error) {
     logger.error('获取知识图谱数据失败:', error);
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });

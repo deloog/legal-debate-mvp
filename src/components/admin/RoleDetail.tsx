@@ -16,9 +16,7 @@ interface Role {
   name: string;
   description: string | null;
   isDefault: boolean;
-  permissions: Array<{
-    permission: Permission;
-  }>;
+  permissions: Permission[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -56,9 +54,7 @@ export function RoleDetail({ roleId }: { roleId: string }): React.ReactElement {
       const result = await response.json();
       setRole(result.data);
       setSelectedPermissions(
-        result.data.permissions.map(
-          (rp: { permission: Permission }) => rp.permission.id
-        )
+        result.data.permissions.map((p: Permission) => p.id)
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : '加载失败');
@@ -97,7 +93,7 @@ export function RoleDetail({ roleId }: { roleId: string }): React.ReactElement {
     e.preventDefault();
     try {
       const response = await fetch(`/api/admin/roles/${roleId}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },

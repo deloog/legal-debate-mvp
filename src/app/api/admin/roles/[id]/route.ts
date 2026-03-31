@@ -62,12 +62,10 @@ export async function GET(
           include: {
             permission: true,
           },
-          orderBy: {
-            permission: {
-              resource: 'asc',
-              action: 'asc',
-            },
-          },
+          orderBy: [
+            { permission: { resource: 'asc' } },
+            { permission: { action: 'asc' } },
+          ],
         },
       },
     });

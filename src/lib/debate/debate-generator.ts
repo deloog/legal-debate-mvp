@@ -12,6 +12,7 @@ import {
 import { LogicValidator } from './validators';
 import { DebateAIReviewer, ReviewResult } from './validators/ai-reviewer';
 import { logger } from '@/lib/logger';
+import { argumentVerificationService } from './argument-verification-service';
 
 /**
  * 辩论生成器类
@@ -57,41 +58,58 @@ export class DebateGenerator {
       const defendantArguments =
         await this.argumentGenerator.generateDefendantArguments(input);
 
-      // 4. 验证论点
+      // 4. 验证论点（逻辑验证）
       const allArguments = [...plaintiffArguments, ...defendantArguments];
       LogicValidator.validateArguments(allArguments);
 
-      // 5. 计算质量指标
+      // 5. 【新增】使用 VerificationAgent 验证论点质量
+      logger.info('开始验证论点质量...');
+      const verifiedPlaintiffArgs =
+        await argumentVerificationService.verifyAndSaveArguments(
+          plaintiffArguments,
+          input
+        );
+      const verifiedDefendantArgs =
+        await argumentVerificationService.verifyAndSaveArguments(
+          defendantArguments,
+          input
+        );
+      const allVerifiedArguments = [
+        ...verifiedPlaintiffArgs,
+        ...verifiedDefendantArgs,
+      ];
+
+      // 6. 计算质量指标
       const qualityMetrics = QualityAssessor.createQualityMetrics(
-        plaintiffArguments,
-        defendantArguments
+        verifiedPlaintiffArgs,
+        verifiedDefendantArgs
       );
 
-      // 6. 计算生成统计
+      // 7. 计算生成统计
       const generationTime = Date.now() - startTime;
       const generationStats = {
         totalGenerationTime: generationTime,
-        averageArgumentTime: generationTime / allArguments.length,
-        argumentCount: allArguments.length,
+        averageArgumentTime: generationTime / allVerifiedArguments.length,
+        argumentCount: allVerifiedArguments.length,
         aiProvider: this.config.aiProvider,
       };
 
-      // 7. 构建结果
+      // 8. 构建结果（使用验证后的论点）
       const result: DebateResult = {
         id: `debate_${Date.now()}`,
         input,
         generatedAt: new Date().toISOString(),
-        plaintiffArguments,
-        defendantArguments,
+        plaintiffArguments: verifiedPlaintiffArgs,
+        defendantArguments: verifiedDefendantArgs,
         qualityMetrics,
         generationStats,
       };
 
-      // 8. AI审查（如果启用）
+      // 9. AI审查（如果启用）
       if (this.config.enableReview) {
         const reviewResult = await this.performAIReview(
-          plaintiffArguments,
-          defendantArguments,
+          verifiedPlaintiffArgs,
+          verifiedDefendantArgs,
           input
         );
         (result as { reviewResult?: ReviewResult }).reviewResult = reviewResult;

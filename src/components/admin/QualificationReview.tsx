@@ -49,11 +49,16 @@ const STATUS_OPTIONS = [
 ];
 
 const STATUS_COLORS: Record<string, string> = {
-  PENDING: 'text-yellow-600',
-  UNDER_REVIEW: 'text-blue-600',
-  APPROVED: 'text-green-600',
-  REJECTED: 'text-red-600',
-  EXPIRED: 'text-gray-600',
+  PENDING:
+    'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800',
+  UNDER_REVIEW:
+    'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800',
+  APPROVED:
+    'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800',
+  REJECTED:
+    'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800',
+  EXPIRED:
+    'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -347,7 +352,7 @@ export function QualificationReview(): React.ReactElement {
         </form>
       </div>
 
-      <div className='bg-white rounded-lg shadow overflow-hidden'>
+      <div className='bg-white rounded-lg shadow overflow-x-auto'>
         <table className='min-w-full divide-y divide-gray-200'>
           <thead className='bg-gray-50'>
             <tr>

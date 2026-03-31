@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db';
 import {
   getUserQuotaUsage,
   calculateQuotaPercentage,
@@ -22,11 +23,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // 从 DB 重新获取 role，避免 stale JWT 导致配额绕过
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    const userRole = dbUser?.role ?? 'FREE';
+
     // 获取用户配额使用情况
-    const quotaUsage = await getUserQuotaUsage(
-      authUser.userId,
-      authUser.role as string
-    );
+    const quotaUsage = await getUserQuotaUsage(authUser.userId, userRole);
 
     // 计算使用百分比
     const dailyPercentage = calculateQuotaPercentage(
@@ -68,7 +73,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: `获取配额信息失败: ${error instanceof Error ? error.message : '未知错误'}`,
+        error: '获取配额信息失败',
       },
       { status: 500 }
     );

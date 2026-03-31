@@ -158,20 +158,6 @@ export class CaseExampleService {
   }
 
   /**
-   * 初始化Record类型
-   */
-  private static initializeRecord<T extends string, V>(
-    keys: T[],
-    defaultValue: V
-  ): Record<T, V> {
-    const record: Partial<Record<T, V>> = {};
-    for (const key of keys) {
-      record[key] = defaultValue;
-    }
-    return record as Record<T, V>;
-  }
-
-  /**
    * 构建查询条件
    */
   private static buildWhereClause(params: CaseExampleQueryParams) {

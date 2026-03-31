@@ -164,8 +164,12 @@ export async function POST(
       );
     }
 
-    // 检查权限
-    const hasPermission = requireRole(user.role, [
+    // 从 DB 查询当前角色，避免依赖可能过期的 JWT payload
+    const currentUser = await prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { role: true },
+    });
+    const hasPermission = requireRole(currentUser?.role ?? '', [
       UserRole.ADMIN,
       UserRole.SUPER_ADMIN,
     ]);
@@ -261,22 +265,10 @@ export async function POST(
     });
   } catch (error) {
     logger.error('企业审核失败', { error });
-
-    if (error instanceof Error) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: error.message,
-          error: error.name,
-        },
-        { status: 400 }
-      );
-    }
-
     return NextResponse.json(
       {
         success: false,
-        message: '服务器内部错误',
+        message: '审核操作失败，请稍后重试',
         error: 'INTERNAL_SERVER_ERROR',
       },
       { status: 500 }

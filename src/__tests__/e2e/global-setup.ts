@@ -2,7 +2,7 @@ import type { FullConfig } from '@playwright/test';
 import { writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 // 固定的 E2E 测试专用账号凭证（仅供测试环境使用）
 export const E2E_ADMIN_EMAIL = 'e2e-admin@test-internal.local';

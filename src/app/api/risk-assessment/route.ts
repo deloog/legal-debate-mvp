@@ -13,13 +13,12 @@ import type {
   RiskIdentificationInput,
   RiskAssessmentResult,
 } from '@/types/risk';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return NextResponse.json(
       { success: false, error: '未认证' },
       { status: 401 }
@@ -103,7 +102,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : '风险评估失败',
+        error: '风险评估失败',
       },
       { status: 500 }
     );

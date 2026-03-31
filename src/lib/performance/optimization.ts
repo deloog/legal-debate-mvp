@@ -4,6 +4,7 @@
  */
 
 import { PrismaClient, Prisma } from '@prisma/client';
+import { prisma as sharedPrisma } from '@/lib/db';
 import type {
   SlowQuery,
   QueryPattern,
@@ -90,7 +91,7 @@ export class PerformanceOptimizer {
 
   constructor(customConfig?: Partial<PerformanceOptimizerConfig>) {
     this.config = this.mergeConfig(getDefaultConfig(), customConfig);
-    this.prisma = new PrismaClient();
+    this.prisma = sharedPrisma;
   }
 
   /**

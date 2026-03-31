@@ -63,7 +63,7 @@ export function KnowledgeGraphBrowser() {
       if (category) params.append('category', category);
       if (relationType) params.append('relationType', relationType);
       params.append('page', page.toString());
-      params.append('pageSize', '100');
+      params.append('pageSize', '80');
 
       const response = await fetch(
         `/api/v1/knowledge-graph/browse?${params.toString()}`
@@ -237,13 +237,20 @@ export function KnowledgeGraphBrowser() {
       {/* 统计信息 */}
       {graphData && (
         <div className='bg-white p-4 rounded-lg shadow'>
-          <div className='flex gap-6 text-sm'>
+          <div className='flex gap-6 text-sm flex-wrap'>
             <div>
-              共{' '}
+              有关系的法条共{' '}
               <span className='font-bold text-blue-600'>
                 {graphData.pagination.total}
               </span>{' '}
-              个法条
+              条
+            </div>
+            <div>
+              当前显示{' '}
+              <span className='font-bold text-indigo-600'>
+                {graphData.nodes.length}
+              </span>{' '}
+              个节点
             </div>
             <div>
               <span className='font-bold text-green-600'>

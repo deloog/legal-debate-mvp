@@ -94,13 +94,6 @@ export interface AIServiceConfig {
     maxTokens: number;
     rateLimit: number;
   };
-  anthropic?: {
-    apiKey: string;
-    baseUrl: string;
-    model: string;
-    maxTokens: number;
-    rateLimit: number;
-  };
   timeout: number;
   retryCount: number;
   retryDelay: number;

@@ -4,7 +4,6 @@
 
 'use client';
 
-import React from 'react';
 import { FunnelChart } from '../charts/FunnelChart';
 import { getClientStatusColor } from '../utils/chart-utils';
 

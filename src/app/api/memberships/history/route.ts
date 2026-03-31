@@ -151,7 +151,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       {
         success: false,
         message: '查询失败，请稍后重试',
-        error: error instanceof Error ? error.message : 'SERVER_ERROR',
+        error: 'SERVER_ERROR',
       },
       { status: 500 }
     );

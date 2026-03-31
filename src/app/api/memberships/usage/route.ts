@@ -138,20 +138,10 @@ export async function GET(request: NextRequest): Promise<Response> {
   } catch (error) {
     logger.error('[GET /api/memberships/usage] 查询失败:', error);
 
-    if (error instanceof Error) {
-      return Response.json(
-        {
-          error: '查询失败',
-          message: error.message,
-        },
-        { status: 500 }
-      );
-    }
-
     return Response.json(
       {
         error: '查询失败',
-        message: '未知错误',
+        message: '使用量查询失败，请稍后重试',
       },
       { status: 500 }
     );
@@ -254,20 +244,10 @@ export async function POST(request: NextRequest): Promise<Response> {
   } catch (error) {
     logger.error('[POST /api/memberships/usage/query] 查询失败:', error);
 
-    if (error instanceof Error) {
-      return Response.json(
-        {
-          error: '查询失败',
-          message: error.message,
-        },
-        { status: 500 }
-      );
-    }
-
     return Response.json(
       {
         error: '查询失败',
-        message: '未知错误',
+        message: '使用量查询失败，请稍后重试',
       },
       { status: 500 }
     );

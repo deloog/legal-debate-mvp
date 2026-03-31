@@ -8,7 +8,7 @@ import {
   contractApprovalService,
   ApprovalStateMachineError,
 } from '@/lib/contract/contract-approval-service';
-import { getCurrentUserId } from '@/lib/auth/get-current-user';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
 
@@ -21,31 +21,27 @@ export async function POST(
   _context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const body = await request.json();
-
-    // 验证请求数据
-    const validatedData = cancelApprovalSchema.parse(body);
-
-    // 从session获取当前用户ID
-    const currentUserId = await getCurrentUserId();
-
-    if (!currentUserId) {
+    // 通过 JWT Bearer 或 cookie 获取当前用户
+    const user = await getAuthUser(request);
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
-          error: {
-            code: 'UNAUTHORIZED',
-            message: '请先登录',
-          },
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
         },
         { status: 401 }
       );
     }
 
+    const body = await request.json();
+
+    // 验证请求数据
+    const validatedData = cancelApprovalSchema.parse(body);
+
     // 撤回审批
     await contractApprovalService.cancelApproval(
       validatedData.approvalId,
-      currentUserId
+      user.userId
     );
 
     return NextResponse.json({
@@ -105,7 +101,7 @@ export async function POST(
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '撤回审批失败',
+          message: '撤回审批失败',
         },
       },
       { status: 500 }

@@ -6,7 +6,7 @@ import { logger } from '../agent/security/logger';
 // =============================================================================
 
 /**
- * 通用AI提供商客户端接口（兼容 OpenAI SDK 和 Anthropic SDK 的公共形状）。
+ * 通用AI提供商客户端接口（兼容 OpenAI SDK 形状，支持 zhipu/deepseek/openai）。
  * 工厂方法通过 `unknown` 中转断言来兼容各 SDK 的具体类型。
  */
 export interface AIProviderClient {
@@ -16,10 +16,6 @@ export interface AIProviderClient {
     };
   };
   embeddings: {
-    create: (params: Record<string, unknown>) => Promise<unknown>;
-  };
-  /** Anthropic SDK 风格的消息接口（可选，仅 Anthropic 客户端实现） */
-  messages?: {
     create: (params: Record<string, unknown>) => Promise<unknown>;
   };
 }
@@ -39,8 +35,6 @@ export class AIClientFactory {
         return this.createDeepSeekClient(config);
       case 'openai':
         return this.createOpenAIClient(config);
-      case 'anthropic':
-        return this.createAnthropicClient(config);
       default:
         throw new Error(`Unsupported provider: ${config.provider}`);
     }
@@ -115,163 +109,38 @@ export class AIClientFactory {
   }
 
   /**
-   * 创建Anthropic客户端
-   */
-  private static async createAnthropicClient(
-    config: AIClientConfig
-  ): Promise<AIProviderClient> {
-    try {
-      const Anthropic = await import('@anthropic-ai/sdk');
-
-      return new Anthropic.default({
-        apiKey: config.apiKey,
-        baseURL: config.baseURL,
-        timeout: config.timeout || 30000,
-      }) as unknown as AIProviderClient;
-    } catch (error) {
-      logger.warn('Anthropic client not available, using mock client', {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return this.createMockClient('anthropic');
-    }
-  }
-
-  /**
    * 创建模拟客户端用于开发测试
    */
   private static createMockClient(provider: AIProvider): AIProviderClient {
     return {
       chat: {
         completions: {
-          create: async (params: Record<string, unknown>) => {
-            const messages = params.messages as Array<{ content?: string }>;
-            const userMessage = messages[messages.length - 1]?.content || '';
-
-            // 检查是否是文档分析请求
-            if (
-              userMessage.includes('你是专业法律文档分析专家') ||
-              userMessage.includes('extractedData')
-            ) {
-              // 返回JSON格式的模拟文档分析结果
-              return {
-                id: `${provider}_mock_${Date.now()}`,
-                object: 'chat.completion',
-                created: Date.now(),
-                model: params.model,
-                choices: [
-                  {
-                    index: 0,
-                    message: {
-                      role: 'assistant',
-                      content: JSON.stringify({
-                        extractedData: {
-                          parties: [
-                            {
-                              type: 'plaintiff',
-                              name: '王小红',
-                              role: '原告',
-                              contact: '18600186000',
-                              address: '上海市浦东新区陆家嘴环路100号',
-                            },
-                            {
-                              type: 'defendant',
-                              name: '张大伟',
-                              role: '被告',
-                              contact: '18700187000',
-                              address: '上海市徐汇区淮海中路200号',
-                            },
-                            {
-                              type: 'other',
-                              name: '赵明',
-                              role: '第三人',
-                              contact: '18800188000',
-                              address: '上海市静安区南京西路300号',
-                            },
-                          ],
-                          claims: [
-                            {
-                              type: 'PAY_PRINCIPAL',
-                              content: '支付拖欠货款人民币800,000元',
-                              amount: 800000,
-                              currency: 'CNY',
-                            },
-                            {
-                              type: 'PAY_PENALTY',
-                              content:
-                                '支付违约金（以800,000元为基数，自2023年5月1日起至实际付清之日止，按年利率8%计算）',
-                              currency: 'CNY',
-                            },
-                            {
-                              type: 'LITIGATION_COST',
-                              content: '承担本案全部诉讼费用',
-                            },
-                            {
-                              type: 'PAY_DAMAGES',
-                              content: '赔偿原告因追讨欠款产生的律师费50,000元',
-                              amount: 50000,
-                              currency: 'CNY',
-                            },
-                          ],
-                          timeline: [],
-                          summary:
-                            '民事借款合同纠纷案，原告王小红诉被告张大伟拖欠货款800,000元，要求支付违约金和律师费。',
-                          caseType: 'civil',
-                          keyFacts: [],
-                        },
-                        confidence: 0.85,
-                        analysisProcess: {
-                          ocrErrors: [],
-                          entitiesListed: {
-                            persons: ['王小红', '张大伟', '赵明'],
-                            companies: [],
-                            amounts: ['800,000', '50,000'],
-                          },
-                          roleReasoning: "根据'原告：'和'被告：'关键词识别",
-                          claimDecomposition: '复合请求拆解完成',
-                          amountNormalization: '已标准化',
-                          validationResults: {
-                            duplicatesFound: [],
-                            roleConflicts: [],
-                            missingClaims: [],
-                            amountInconsistencies: [],
-                          },
-                        },
-                      }),
-                    },
-                    finish_reason: 'stop',
-                    logprobs: null,
-                  },
-                ],
-                usage: {
-                  prompt_tokens: 10,
-                  completion_tokens: 20,
-                  total_tokens: 30,
-                },
-              };
-            }
-
-            // 默认文本响应
+          create: async (_params: Record<string, unknown>) => {
+            // AI 提供商客户端加载失败时的降级响应
+            // 不返回任何伪造业务数据，调用方应检查 isFallback 标记后自行处理
+            logger.warn(`${provider} AI客户端不可用，返回空降级响应`);
             return {
-              id: `${provider}_mock_${Date.now()}`,
+              id: `${provider}_unavailable_${Date.now()}`,
               object: 'chat.completion',
               created: Date.now(),
-              model: params.model,
+              model: 'unavailable',
               choices: [
                 {
                   index: 0,
                   message: {
                     role: 'assistant',
-                    content: `Mock response from ${provider} for: ${userMessage}`,
+                    content: '',
                   },
                   finish_reason: 'stop',
                   logprobs: null,
                 },
               ],
               usage: {
-                prompt_tokens: 10,
-                completion_tokens: 20,
-                total_tokens: 30,
+                prompt_tokens: 0,
+                completion_tokens: 0,
+                total_tokens: 0,
               },
+              _isFallback: true,
             };
           },
         },
@@ -282,7 +151,7 @@ export class AIClientFactory {
           data: [
             {
               object: 'embedding',
-              embedding: new Array(1536).fill(0).map(() => Math.random()),
+              embedding: new Array(1536).fill(0),
               index: 0,
             },
           ],

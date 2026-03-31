@@ -141,7 +141,7 @@ export async function GET(
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : '获取文档详情失败',
+        error: '获取文档详情失败',
       },
       { status: 500 }
     );
@@ -218,7 +218,7 @@ export async function DELETE(
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : '删除文档失败',
+        error: '删除文档失败',
       },
       { status: 500 }
     );

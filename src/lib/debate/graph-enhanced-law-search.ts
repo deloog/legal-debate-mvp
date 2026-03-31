@@ -9,7 +9,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
-import { searchAllLawArticles } from '@/lib/debate/law-search';
+import { searchLocalLawArticles } from '@/lib/debate/law-search';
 import { logger } from '@/lib/logger';
 import { LawCategory, RelationType, VerificationStatus } from '@prisma/client';
 import {
@@ -100,7 +100,11 @@ function withTimeout<T>(
 }
 
 /**
- * 获取关键词检索结果
+ * 获取关键词检索结果（图谱增强专用路径）
+ *
+ * 直接调用 searchLocalLawArticles（静态关键词），跳过 AI 关键词提取。
+ * 原因：图谱搜索是辅助增强步骤，本体的 AI 关键词提取已在调用方（generate/stream 路由）
+ * 完成；此处再次触发会造成双重 AI 调用（额外 1-4s 延迟），与 500ms 图谱超时设计矛盾。
  */
 async function searchByKeywords(
   caseType: string | null,
@@ -108,13 +112,8 @@ async function searchByKeywords(
   limit = 6
 ): Promise<LawArticleWithRelations[]> {
   try {
-    const result = await searchAllLawArticles(
-      caseType,
-      keywords,
-      null, // caseDescription
-      limit
-    );
-    return result.articles
+    const articles = await searchLocalLawArticles(caseType, keywords, limit);
+    return articles
       .filter(article => !!article.id) // only include articles with real DB IDs for graph queries
       .map(article => ({
         id: article.id!,

@@ -4,8 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { regenerateInvoicePDF } from '@/lib/invoice/invoice-service';
 import { logger } from '@/lib/logger';
 
@@ -14,13 +13,12 @@ import { logger } from '@/lib/logger';
  * 重新生成发票PDF
  */
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -34,7 +32,7 @@ export async function POST(
     const invoiceId = (await params).id;
 
     // 重新生成发票PDF
-    const filePath = await regenerateInvoicePDF(invoiceId, session.user.id);
+    const filePath = await regenerateInvoicePDF(invoiceId, authUser.userId);
 
     return NextResponse.json({
       success: true,

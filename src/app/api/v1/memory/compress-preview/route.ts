@@ -7,6 +7,7 @@ import { MemoryCompressor } from '@/lib/agent/memory-agent/compressor';
 import type { AIService } from '@/lib/ai/service-refactored';
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 // 创建简单的mock AI服务（仅实现 chatCompletion，足够 MemoryCompressor 使用）
 // 使用 unknown 双重断言，避免 as any
@@ -35,6 +36,11 @@ const compressor = new MemoryCompressor(mockAIService as unknown as AIService);
  * 预览记忆压缩效果
  */
 export async function POST(request: NextRequest) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json({ error: '未授权' }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
 

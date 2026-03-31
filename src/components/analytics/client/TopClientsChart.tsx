@@ -4,7 +4,6 @@
 
 'use client';
 
-import React from 'react';
 import { BarChart } from '../charts/BarChart';
 import type { BarChartData } from '@/types/chart';
 import { formatNumber } from '../utils/chart-utils';

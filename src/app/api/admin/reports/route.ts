@@ -113,12 +113,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : '获取报告列表失败';
     logger.error('获取报告列表失败:', error);
-
     return NextResponse.json(
-      { success: false, message: errorMessage },
+      { success: false, message: '获取报告列表失败' },
       { status: 500 }
     );
   }
@@ -248,12 +245,9 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : '创建报告失败';
     logger.error('创建报告失败:', error);
-
     return NextResponse.json(
-      { success: false, message: errorMessage },
+      { success: false, message: '创建报告失败' },
       { status: 500 }
     );
   }

@@ -8,6 +8,7 @@ import { ReportService } from '@/lib/reports/report-service';
 import type { ExportReportResponse } from '@/types/report';
 import { isValidExportFormat, ExportFormat } from '@/types/report';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * POST /api/reports/export
@@ -16,6 +17,36 @@ import { logger } from '@/lib/logger';
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ExportReportResponse>> {
+  // ─── 认证：必须登录 ────────────────────────────────────────────────────────
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'UNAUTHORIZED',
+          message: '未授权，请先登录',
+        },
+      },
+      { status: 401 }
+    ) as NextResponse<ExportReportResponse>;
+  }
+
+  // ─── 授权：律师、企业、管理员可导出报表 ──────────────────────────────────
+  const allowedExportRoles = ['LAWYER', 'ENTERPRISE', 'ADMIN', 'SUPER_ADMIN'];
+  if (!allowedExportRoles.includes(authUser.role)) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: '无权限访问',
+        },
+      },
+      { status: 403 }
+    ) as NextResponse<ExportReportResponse>;
+  }
+
   try {
     // 解析请求体
     let body: unknown;
@@ -64,6 +95,20 @@ export async function POST(
       );
     }
 
+    // 验证reportId格式（防止路径穿越）：只允许 report_ 前缀 + 纯数字
+    if (!/^report_\d+$/.test(requestData.reportId as string)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_REPORT_ID',
+            message: '无效的reportId格式',
+          },
+        },
+        { status: 400 }
+      );
+    }
+
     // 验证format字段
     if (!isValidExportFormat(requestData.format)) {
       return NextResponse.json(
@@ -99,7 +144,7 @@ export async function POST(
         success: false,
         error: {
           code: 'EXPORT_REPORT_ERROR',
-          message: error instanceof Error ? error.message : '导出报表失败',
+          message: '导出报表失败',
         },
       },
       { status: 500 }

@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * 案件类型代码映射
@@ -79,6 +80,14 @@ async function generateCaseNumber(
  * GET 处理函数
  */
 export const GET = withErrorHandler(async (request: NextRequest) => {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: '未授权，请先登录' },
+      { status: 401 }
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const type = (searchParams.get('type') || 'CIVIL').toUpperCase();
   const status = (searchParams.get('status') || 'DRAFT').toUpperCase();

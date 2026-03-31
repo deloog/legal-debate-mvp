@@ -4,7 +4,6 @@
  * 处理密码找回和重置的核心逻辑，包括发送验证码和重置密码。
  */
 
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import type {
@@ -17,6 +16,7 @@ import {
   PasswordResetErrorCode,
   VerificationCodeTypeEnum,
 } from '@/types/password-reset';
+import { prisma } from '@/lib/db/prisma';
 import { getEmailService } from './email-service';
 import { SECURITY } from '../constants/common';
 import { getVerificationCodeService } from './verification-code-service';
@@ -100,13 +100,8 @@ const resetPasswordSchema = z.object({
  * 密码重置服务类
  */
 class PasswordResetService {
-  private prisma: PrismaClient;
   private verificationCodeService = getVerificationCodeService();
   private emailService = getEmailService();
-
-  constructor(prisma?: PrismaClient) {
-    this.prisma = prisma || new PrismaClient();
-  }
 
   /**
    * 忘记密码 - 发送验证码
@@ -119,7 +114,7 @@ class PasswordResetService {
       const validatedData = forgotPasswordSchema.parse(request);
 
       // 查找用户
-      const user = await this.prisma.user.findUnique({
+      const user = await prisma.user.findUnique({
         where: { email: validatedData.email },
       });
 
@@ -242,7 +237,7 @@ class PasswordResetService {
       }
 
       // 查找用户
-      const user = await this.prisma.user.findUnique({
+      const user = await prisma.user.findUnique({
         where: { id: verifyResult.userId },
       });
 
@@ -258,7 +253,7 @@ class PasswordResetService {
       const hashedPassword = await bcrypt.hash(validatedData.newPassword, 10);
 
       // 更新密码
-      await this.prisma.user.update({
+      await prisma.user.update({
         where: { id: user.id },
         data: {
           password: hashedPassword,
@@ -268,7 +263,7 @@ class PasswordResetService {
 
       // 清除用户的密码重置令牌（如果有）
       if (user.passwordResetToken) {
-        await this.prisma.user.update({
+        await prisma.user.update({
           where: { id: user.id },
           data: {
             passwordResetToken: null,
@@ -303,13 +298,6 @@ class PasswordResetService {
       };
     }
   }
-
-  /**
-   * 关闭数据库连接
-   */
-  async disconnect(): Promise<void> {
-    await this.prisma.$disconnect();
-  }
 }
 
 // =============================================================================
@@ -321,11 +309,9 @@ let instance: PasswordResetService | null = null;
 /**
  * 获取密码重置服务实例
  */
-export function getPasswordResetService(
-  prisma?: PrismaClient
-): PasswordResetService {
+export function getPasswordResetService(): PasswordResetService {
   if (!instance) {
-    instance = new PasswordResetService(prisma);
+    instance = new PasswordResetService();
   }
   return instance;
 }
@@ -334,10 +320,7 @@ export function getPasswordResetService(
  * 重置密码重置服务实例（主要用于测试）
  */
 export function resetPasswordResetService(): void {
-  if (instance) {
-    instance.disconnect();
-    instance = null;
-  }
+  instance = null;
 }
 
 // =============================================================================

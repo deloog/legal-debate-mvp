@@ -48,7 +48,7 @@ export async function GET(
       {
         success: false,
         error: '获取告警详情失败',
-        message: error instanceof Error ? error.message : '未知错误',
+        message: '未知错误',
       },
       { status: 500 }
     );

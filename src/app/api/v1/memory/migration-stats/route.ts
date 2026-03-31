@@ -3,17 +3,28 @@
  * GET /api/v1/memory/migration-stats - 获取迁移统计数据
  */
 
-import { NextResponse } from 'next/server';
-import { PrismaClient, ActionType } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
+import { ActionType } from '@prisma/client';
+import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
-
-const prisma = new PrismaClient();
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * GET /api/v1/memory/migration-stats
  * 获取迁移统计数据
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json({ error: '未授权' }, { status: 401 });
+  }
+  const dbUser = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { role: true },
+  });
+  if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+    return NextResponse.json({ error: '权限不足' }, { status: 403 });
+  }
   try {
     // 查询最近7天的迁移统计
     const sevenDaysAgo = new Date();
@@ -196,7 +207,7 @@ export async function GET() {
       {
         success: false,
         error: '获取迁移统计失败',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        details: 'Unknown error',
       },
       { status: 500 }
     );

@@ -6,8 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { getOrder, cancelOrder } from '@/lib/order/order-service';
 import { logger } from '@/lib/logger';
 
@@ -16,16 +15,16 @@ import { logger } from '@/lib/logger';
  * 获取订单详情
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
     // Next.js 15中params是Promise，需要先await
     const { id } = await params;
 
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    // 获取认证用户
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -63,7 +62,7 @@ export async function GET(
     }
 
     // 验证订单所有权
-    if (order.userId !== session.user.id) {
+    if (order.userId !== authUser.userId) {
       return NextResponse.json(
         {
           success: false,
@@ -105,9 +104,9 @@ export async function PUT(
     // Next.js 15中params是Promise，需要先await
     const { id } = await params;
 
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    // 获取认证用户
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -161,7 +160,7 @@ export async function PUT(
     }
 
     // 验证订单所有权
-    if (order.userId !== session.user.id) {
+    if (order.userId !== authUser.userId) {
       return NextResponse.json(
         {
           success: false,

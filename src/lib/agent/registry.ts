@@ -85,8 +85,6 @@ export interface AgentRecommendation {
 export class AgentRegistry implements AgentEventManager {
   private agents = new Map<string, AgentRegistration>();
   private agentsByType = new Map<AgentType, AgentRegistration[]>();
-  private agentsByCapability = new Map<string, AgentRegistration[]>();
-  private agentsByTask = new Map<string, AgentRegistration[]>();
   private eventListeners = new Map<AgentEventType, AgentEventListener[]>();
   private diContainer: AgentDIContainer;
 

@@ -20,6 +20,7 @@ const ALLOWED_SORT_FIELDS = [
   'createdAt',
   'updatedAt',
   'lawName',
+  'articleNumber',
   'effectiveDate',
   'viewCount',
   'referenceCount',
@@ -61,6 +62,10 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const dataSource = searchParams.get('dataSource');
   const rawSearch = searchParams.get('search');
   const search = rawSearch ? sanitizeSearchKeyword(rawSearch) : null;
+  // 精确匹配法律名称（从法律详情页进入时使用）
+  const exactLawName = searchParams.get('lawName');
+  // 默认隐藏已废止/已失效条文（hideArchived=true）
+  const hideArchived = searchParams.get('hideArchived') !== 'false';
 
   const where: Record<string, unknown> = {};
 
@@ -69,7 +74,9 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   if (status) where.status = status;
   if (dataSource) where.dataSource = dataSource;
 
-  if (search) {
+  if (exactLawName) {
+    where.lawName = exactLawName;
+  } else if (search) {
     where.OR = [
       { lawName: { contains: search, mode: 'insensitive' } },
       { searchableText: { contains: search, mode: 'insensitive' } },
@@ -77,29 +84,95 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     ];
   }
 
+  // 按精确法律名称浏览条文时，使用中文数字转换函数正确排序
+  const useCnSort = exactLawName && sortBy === 'articleNumber';
+  const archivedStatuses = `('REPEALED','EXPIRED')`;
+  const archiveFilter = hideArchived
+    ? `AND "status"::text NOT IN ${archivedStatuses}`
+    : '';
+
   const [articles, total] = await Promise.all([
-    prisma.lawArticle.findMany({
-      where,
-      orderBy: { [sortBy]: sortOrder },
-      skip,
-      take: limit,
-      select: {
-        id: true,
-        lawName: true,
-        articleNumber: true,
-        lawType: true,
-        category: true,
-        status: true,
-        effectiveDate: true,
-        issuingAuthority: true,
-        dataSource: true,
-        viewCount: true,
-        referenceCount: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    }),
-    prisma.lawArticle.count({ where }),
+    useCnSort
+      ? prisma.$queryRawUnsafe<
+          {
+            id: string;
+            lawName: string;
+            articleNumber: string;
+            fullText: string;
+            lawType: string;
+            category: string;
+            status: string;
+            effectiveDate: Date | null;
+            issuingAuthority: string | null;
+            dataSource: string;
+            viewCount: number;
+            referenceCount: number;
+            createdAt: Date;
+            updatedAt: Date;
+          }[]
+        >(
+          `SELECT id, "lawName", "articleNumber", "fullText", "lawType"::text, "category"::text,
+                  "status"::text, "effectiveDate", "issuingAuthority", "dataSource",
+                  "viewCount", "referenceCount", "createdAt", "updatedAt"
+           FROM (
+             SELECT DISTINCT ON ("articleNumber")
+               id, "lawName", "articleNumber", "fullText", "lawType", "category", "status",
+               "effectiveDate", "issuingAuthority", "dataSource",
+               "viewCount", "referenceCount", "createdAt", "updatedAt"
+             FROM law_articles
+             WHERE "lawName" = $1
+             ORDER BY "articleNumber",
+               CASE "status"::text
+                 WHEN 'VALID'   THEN 1
+                 WHEN 'AMENDED' THEN 2
+                 WHEN 'DRAFT'   THEN 3
+                 WHEN 'EXPIRED' THEN 4
+                 WHEN 'REPEALED' THEN 5
+                 ELSE 6
+               END
+           ) deduped
+           WHERE TRUE ${archiveFilter}
+           ORDER BY cn_article_sort_key("articleNumber") ${sortOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC'}
+           LIMIT $2 OFFSET $3`,
+          exactLawName,
+          limit,
+          skip
+        )
+      : prisma.lawArticle.findMany({
+          where,
+          orderBy: { [sortBy]: sortOrder },
+          skip,
+          take: limit,
+          select: {
+            id: true,
+            lawName: true,
+            articleNumber: true,
+            fullText: true,
+            lawType: true,
+            category: true,
+            status: true,
+            effectiveDate: true,
+            issuingAuthority: true,
+            dataSource: true,
+            viewCount: true,
+            referenceCount: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        }),
+    useCnSort
+      ? prisma
+          .$queryRawUnsafe<[{ total: number }]>(
+            `SELECT COUNT(*)::int AS total FROM (
+             SELECT DISTINCT ON ("articleNumber") "status"
+             FROM law_articles WHERE "lawName" = $1
+             ORDER BY "articleNumber",
+               CASE "status"::text WHEN 'VALID' THEN 1 WHEN 'AMENDED' THEN 2 WHEN 'DRAFT' THEN 3 ELSE 4 END
+           ) d WHERE TRUE ${archiveFilter}`,
+            exactLawName
+          )
+          .then(r => r[0]?.total ?? 0)
+      : prisma.lawArticle.count({ where }),
   ]);
 
   return createSuccessResponse(
@@ -130,7 +203,12 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     );
   }
 
-  if (authUser.role !== 'ADMIN' && authUser.role !== 'SUPER_ADMIN') {
+  // 从DB实时读取角色，防止 JWT payload 过期角色绕过
+  const dbUser = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { role: true },
+  });
+  if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
     return NextResponse.json(
       { error: '权限不足', message: '仅管理员可创建法条' },
       { status: 403 }

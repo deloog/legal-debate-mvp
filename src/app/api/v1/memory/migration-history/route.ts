@@ -4,16 +4,27 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
-
-const prisma = new PrismaClient();
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * GET /api/v1/memory/migration-history
  * 获取迁移历史记录
  */
 export async function GET(request: NextRequest) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json({ error: '未授权' }, { status: 401 });
+  }
+  const dbUser = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { role: true },
+  });
+  if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+    return NextResponse.json({ error: '权限不足' }, { status: 403 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
 
@@ -113,7 +124,7 @@ export async function GET(request: NextRequest) {
       {
         success: false,
         error: '获取迁移历史失败',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        details: 'Unknown error',
       },
       { status: 500 }
     );

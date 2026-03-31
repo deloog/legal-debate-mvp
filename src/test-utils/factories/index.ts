@@ -245,6 +245,7 @@ export const createArgument = (
   legalScore: null,
   overallScore: null,
   priority: null,
+  metadata: null,
   createdAt: new Date(),
   updatedAt: new Date(),
   ...overrides,

@@ -100,13 +100,6 @@ describe('ConfigValidator', () => {
         maxTokens: 1000000,
         rateLimit: 100,
       },
-      anthropic: {
-        apiKey: '',
-        baseUrl: '',
-        model: 'test',
-        maxTokens: 1000000,
-        rateLimit: 100,
-      },
       timeout: 30000,
       retryCount: 3,
       retryDelay: 1000,

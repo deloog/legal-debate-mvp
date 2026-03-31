@@ -90,6 +90,18 @@ export const PUT = withErrorHandler(
       );
     }
 
+    // 案例库为共享资源，仅管理员可修改
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        { error: '权限不足', message: '仅管理员可修改案例' },
+        { status: 403 }
+      );
+    }
+
     const { id } = await params;
 
     const body = await request.json();
@@ -150,6 +162,18 @@ export const DELETE = withErrorHandler(
       return NextResponse.json(
         { error: '未认证', message: '请先登录' },
         { status: 401 }
+      );
+    }
+
+    // 案例库为共享资源，仅管理员可删除
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        { error: '权限不足', message: '仅管理员可删除案例' },
+        { status: 403 }
       );
     }
 

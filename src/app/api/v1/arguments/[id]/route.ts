@@ -7,8 +7,7 @@
 
 import { prisma } from '@/lib/db/prisma';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 
 const VALID_PRIORITIES = ['primary', 'secondary', null] as const;
@@ -18,8 +17,8 @@ export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return NextResponse.json({ error: '未认证' }, { status: 401 });
   }
 
@@ -71,8 +70,12 @@ export async function PATCH(
       return NextResponse.json({ error: '论点不存在' }, { status: 404 });
     }
 
-    const isAdmin = (session.user as { role?: string }).role === 'ADMIN';
-    if (existing.round.debate.userId !== session.user.id && !isAdmin) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
+    if (existing.round.debate.userId !== authUser.userId && !isAdmin) {
       return NextResponse.json({ error: '无权修改此论点' }, { status: 403 });
     }
 

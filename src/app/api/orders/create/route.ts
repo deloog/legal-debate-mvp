@@ -4,8 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
 import {
   CreateOrderResponse,
@@ -21,9 +20,9 @@ import { logger } from '@/lib/logger';
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    // 获取认证用户（支持 JWT Bearer + Cookie）
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -114,7 +113,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // 创建订单
     const order = await createOrder({
-      userId: session.user.id,
+      userId: authUser.userId,
       membershipTierId,
       paymentMethod,
       billingCycle,

@@ -3,8 +3,7 @@
 // =============================================================================
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 import {
   checkKnowledgeGraphPermission,
@@ -18,16 +17,16 @@ import { BatchQualityScoreInput } from '@/lib/knowledge-graph/quality-score/type
  * GET /api/v1/knowledge-graph/quality-score
  * 获取质量统计
  */
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: '未授权' }, { status: 401 });
     }
 
     // 检查权限
     const permissionCheck = await checkKnowledgeGraphPermission(
-      session.user.id,
+      authUser.userId,
       KnowledgeGraphAction.VIEW_STATS,
       KnowledgeGraphResource.STATS
     );
@@ -42,7 +41,7 @@ export async function GET(_request: NextRequest) {
     const service = new QualityScoreService();
     const stats = await service.getQualityStats();
 
-    logger.info('Quality stats retrieved', { userId: session.user.id });
+    logger.info('Quality stats retrieved', { userId: authUser.userId });
 
     return NextResponse.json({
       success: true,
@@ -66,14 +65,14 @@ export async function GET(_request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: '未授权' }, { status: 401 });
     }
 
     // 检查权限
     const permissionCheck = await checkKnowledgeGraphPermission(
-      session.user.id,
+      authUser.userId,
       KnowledgeGraphAction.MANAGE_RELATIONS,
       KnowledgeGraphResource.RELATION
     );
@@ -91,7 +90,7 @@ export async function POST(request: NextRequest) {
     const results = await service.batchCalculateQuality(input);
 
     logger.info('Batch quality score calculation completed', {
-      userId: session.user.id,
+      userId: authUser.userId,
       count: results.length,
     });
 

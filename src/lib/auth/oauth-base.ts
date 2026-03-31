@@ -17,6 +17,22 @@ import { SECURITY } from '../constants/common';
 import { logger } from '@/lib/logger';
 
 /**
+ * 服务端 OAuth State 内存存储（单实例部署）
+ * 多实例部署时应替换为 Redis 实现
+ */
+const _serverStateStore = new Map<
+  string,
+  { data: OAuthState; expiresAt: number }
+>();
+// 定期清理过期 state，避免内存泄漏
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of _serverStateStore.entries()) {
+    if (entry.expiresAt < now) _serverStateStore.delete(key);
+  }
+}, 60_000);
+
+/**
  * OAuth 基础类
  */
 export abstract class OAuthBaseProvider {
@@ -186,42 +202,66 @@ export abstract class OAuthBaseProvider {
 
   /**
    * 保存 state 到存储
-   * TODO: 服务端应使用 Redis 或数据库存储，当前基类实现仅支持浏览器环境（前端 OAuth 场景）。
-   * 服务端 OAuth 回调必须在子类中覆盖 saveState/validateState，或直接绕开 callback()。
+   * 服务端使用模块级内存 Map（单实例部署），浏览器端使用 sessionStorage（前端 OAuth 场景）。
+   * 多实例部署时应替换为 Redis 实现。
    */
   private saveState(stateData: OAuthState): void {
-    if (typeof window === 'undefined') {
-      // 服务端环境：基类无法持久化 state，子类必须覆盖此行为
-      logger.warn(
-        '[OAuthBase] saveState 在服务端环境被调用，state 未持久化。子类应覆盖此方法以使用 Redis/DB。'
-      );
-      return;
-    }
     const key = `${this.STATE_PREFIX}${stateData.state}`;
-    sessionStorage.setItem(key, JSON.stringify(stateData));
-    setTimeout(() => {
-      sessionStorage.removeItem(key);
-    }, this.STATE_EXPIRY);
+    if (typeof window === 'undefined') {
+      // 服务端：写入模块级内存存储
+      _serverStateStore.set(key, {
+        data: stateData,
+        expiresAt: Date.now() + this.STATE_EXPIRY,
+      });
+    } else {
+      // 浏览器端：使用 sessionStorage
+      sessionStorage.setItem(key, JSON.stringify(stateData));
+      setTimeout(() => {
+        sessionStorage.removeItem(key);
+      }, this.STATE_EXPIRY);
+    }
   }
 
   /**
-   * 验证 state
+   * 验证 state（一次性消费，防 CSRF）
    */
   private validateState(state: string): StateValidationResult {
     try {
+      const key = `${this.STATE_PREFIX}${state}`;
+
       if (typeof window === 'undefined') {
-        // 服务端环境：基类无法读取 state，CSRF 验证失败
-        logger.warn(
-          '[OAuthBase] validateState 在服务端环境被调用，基类无法验证 state。子类应覆盖此方法。'
-        );
-        return {
-          valid: false,
-          stateData: null,
-          error: 'Server-side state validation not implemented in base class',
-        };
+        // 服务端：从内存存储中读取并立即删除（one-time use）
+        const entry = _serverStateStore.get(key);
+        _serverStateStore.delete(key);
+
+        if (!entry) {
+          return {
+            valid: false,
+            stateData: null,
+            error: 'State not found or expired',
+          };
+        }
+
+        if (Date.now() > entry.expiresAt) {
+          return {
+            valid: false,
+            stateData: null,
+            error: 'State expired',
+          };
+        }
+
+        if (entry.data.provider !== this.getProviderName()) {
+          return {
+            valid: false,
+            stateData: null,
+            error: 'Provider mismatch',
+          };
+        }
+
+        return { valid: true, stateData: entry.data, error: null };
       }
 
-      const key = `${this.STATE_PREFIX}${state}`;
+      // 浏览器端：从 sessionStorage 读取
       const stateStr = sessionStorage.getItem(key) || '';
       sessionStorage.removeItem(key);
 
@@ -235,9 +275,7 @@ export abstract class OAuthBaseProvider {
 
       const stateData: OAuthState = JSON.parse(stateStr);
 
-      // 检查是否过期
-      const now = Date.now();
-      if (now - stateData.timestamp > this.STATE_EXPIRY) {
+      if (Date.now() - stateData.timestamp > this.STATE_EXPIRY) {
         return {
           valid: false,
           stateData: null,
@@ -245,7 +283,6 @@ export abstract class OAuthBaseProvider {
         };
       }
 
-      // 检查 provider 是否匹配
       if (stateData.provider !== this.getProviderName()) {
         return {
           valid: false,
@@ -254,11 +291,7 @@ export abstract class OAuthBaseProvider {
         };
       }
 
-      return {
-        valid: true,
-        stateData,
-        error: null,
-      };
+      return { valid: true, stateData, error: null };
     } catch (error) {
       return {
         valid: false,

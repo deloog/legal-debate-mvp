@@ -24,8 +24,12 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     );
   }
 
-  // 仅管理员可访问
-  if (authUser.role !== 'ADMIN' && authUser.role !== 'SUPER_ADMIN') {
+  // 仅管理员可访问（DB 重查角色，避免 stale JWT）
+  const dbUser = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { role: true },
+  });
+  if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
     return NextResponse.json(
       { error: '权限不足', message: '仅管理员可查看审计日志' },
       { status: 403 }
@@ -35,7 +39,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   // 处理查询参数
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get('page') || '1', 10);
-  const limit = parseInt(searchParams.get('limit') || '50', 10);
+  const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10), 200);
   const skip = (page - 1) * limit;
 
   // 筛选条件

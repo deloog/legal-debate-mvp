@@ -350,8 +350,8 @@ export class GraphDatabaseEvaluationService {
         target: nodes[targetIndex].id,
         relationType:
           relationTypes[Math.floor(Math.random() * relationTypes.length)],
-        strength: Math.random() * 0.5 + 0.5,
-        confidence: Math.random() * 0.3 + 0.7,
+        strength: 0.8,
+        confidence: 0.85,
       });
     }
 

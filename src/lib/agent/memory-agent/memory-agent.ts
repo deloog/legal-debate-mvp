@@ -90,10 +90,7 @@ export class MemoryAgent {
   private errorLearner: ErrorLearner;
   private initialized: boolean = false;
 
-  constructor(
-    private prisma: PrismaClient,
-    private aiService: AIService
-  ) {
+  constructor(prisma: PrismaClient, aiService: AIService) {
     this.memoryManager = new MemoryManager(prisma);
     this.compressor = new MemoryCompressor(aiService);
     this.migrator = new MemoryMigrator(this.memoryManager, this.compressor);

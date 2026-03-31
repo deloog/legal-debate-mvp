@@ -90,7 +90,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     logger.error('更新工作流模板失败', { error });
 
-    const message = error instanceof Error ? error.message : '服务器内部错误';
+    const message = '服务器内部错误';
     const isValidationError = message.includes('工作流定义无效');
 
     return NextResponse.json(

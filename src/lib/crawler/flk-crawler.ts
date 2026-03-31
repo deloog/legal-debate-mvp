@@ -545,9 +545,6 @@ export class FLKCrawler extends BaseCrawler {
   /** 日志系统 */
   private logger = getLogger('FLKCrawler');
 
-  /** 连续失败阈值 */
-  private readonly __MAX_CONSECUTIVE_ERRORS = 3;
-
   /** 单页失败阈值 */
   private readonly MAX_PAGE_FAILURES = 3;
 

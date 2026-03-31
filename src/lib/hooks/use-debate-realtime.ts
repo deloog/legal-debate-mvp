@@ -237,15 +237,14 @@ export function useDebateRealtime(
       );
 
       // 更新当前轮次
-      setCurrentRound(prev =>
-        prev?.id === data.roundId
-          ? {
-              ...prev,
-              status: 'COMPLETED' as RoundStatus,
-              completedAt: new Date(data.timestamp),
-            }
-          : prev
-      );
+      setCurrentRound(prev => {
+        if (!prev || !data.roundId || prev.id !== data.roundId) return prev;
+        return {
+          ...prev,
+          status: 'COMPLETED' as RoundStatus,
+          completedAt: new Date(data.timestamp),
+        };
+      });
     };
 
     // 错误处理器

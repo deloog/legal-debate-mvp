@@ -4,7 +4,6 @@
 
 'use client';
 
-import React from 'react';
 import { LineChart } from '../charts/LineChart';
 import type { LineChartData } from '@/types/chart';
 import { formatMonthLabel } from '../utils/chart-utils';

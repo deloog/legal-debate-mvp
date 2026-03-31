@@ -33,22 +33,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // 尝试用 refreshToken 续期 accessToken
+  const tryRefresh = async (): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include',
+        cache: 'no-store',
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+
   const checkAuth = async () => {
     try {
       setLoading(true);
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
-      const response = await fetch('/api/auth/me', {
+      let response = await fetch('/api/auth/me', {
         credentials: 'include', // 包含cookie
         cache: 'no-store', // 不缓存，确保获取最新状态
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
 
+      // accessToken 过期（401）→ 尝试刷新后重试一次
+      if (response.status === 401) {
+        const refreshed = await tryRefresh();
+        if (refreshed) {
+          response = await fetch('/api/auth/me', {
+            credentials: 'include',
+            cache: 'no-store',
+          });
+        }
+      }
+
       // 检查HTTP状态码
       if (!response.ok) {
-        // 401 未认证或403 禁止访问
-        console.warn(`[AuthProvider] 认证检查失败: ${response.status}`);
         setUser(null);
         sessionStorage.removeItem('user');
         return;
@@ -57,31 +80,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 检查响应是否为JSON
       const contentType = response.headers.get('content-type');
       if (!contentType?.includes('application/json')) {
-        // 如果返回的不是JSON（如HTML重定向），视为未认证
-        console.warn('收到非JSON响应，可能是重定向');
         setUser(null);
         sessionStorage.removeItem('user');
         return;
       }
 
       const result = await response.json();
-      console.log('[AuthProvider] API响应:', {
-        success: result.success,
-        hasUser: !!result.data?.user,
-      });
 
       if (result.success && result.data?.user) {
-        console.log('[AuthProvider] 用户已认证:', result.data.user.email);
         setUser(result.data.user);
         // 同时更新sessionStorage以保持向后兼容
         sessionStorage.setItem('user', JSON.stringify(result.data.user));
       } else {
-        console.log('[AuthProvider] 未获取到用户信息');
         setUser(null);
         sessionStorage.removeItem('user');
       }
-    } catch (error) {
-      console.error('[AuthProvider] 检查认证状态失败:', error);
+    } catch {
       setUser(null);
       sessionStorage.removeItem('user');
     } finally {
@@ -95,14 +109,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         method: 'POST',
         credentials: 'include',
       });
-    } catch (error) {
-      console.error('登出失败:', error);
+    } catch {
+      // 登出失败时仍清理本地状态
     } finally {
       setUser(null);
       sessionStorage.removeItem('user');
-      router.push('/login');
+      router.push('/');
     }
   };
+
+  useEffect(() => {
+    // 全局 fetch 拦截：401 → 先尝试刷新，失败则清理状态跳转登录
+    const originalFetch = window.fetch.bind(window);
+    let isRefreshing = false;
+
+    window.fetch = async (...args) => {
+      const response = await originalFetch(...args);
+
+      // 只处理 API 路由的 401（排除 auth 端点自身，避免死循环）
+      const url =
+        typeof args[0] === 'string' ? args[0] : (args[0] as Request).url;
+      const isAuthEndpoint = url.includes('/api/auth/');
+
+      if (response.status === 401 && !isAuthEndpoint && !isRefreshing) {
+        isRefreshing = true;
+        try {
+          const refreshed = await tryRefresh();
+          if (refreshed) {
+            // 使用原始 fetch 重试，避免再次触发拦截
+            isRefreshing = false;
+            return originalFetch(...args);
+          }
+        } finally {
+          isRefreshing = false;
+        }
+        // 刷新失败 → 清理状态，跳转登录
+        setUser(null);
+        sessionStorage.removeItem('user');
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/login') {
+          router.push('/login?redirect=' + encodeURIComponent(currentPath));
+        }
+      }
+
+      return response;
+    };
+
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, [router]);
 
   useEffect(() => {
     // 初始化时检查认证状态
@@ -125,7 +181,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // 监听登录成功事件
     const handleLoginSuccess = () => {
-      console.log('[AuthProvider] 收到登录成功事件，延迟100ms后检查认证');
       // 延迟一点时间，确保cookie已经设置
       setTimeout(() => {
         checkAuth();

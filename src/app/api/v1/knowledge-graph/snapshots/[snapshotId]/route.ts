@@ -7,6 +7,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { snapshotService } from '@/lib/knowledge-graph/version-control';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 
 /**
@@ -17,6 +18,14 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ snapshotId: string }> }
 ) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: '未授权' },
+      { status: 401 }
+    );
+  }
+
   try {
     const { snapshotId } = await params;
     const snapshot = await snapshotService.getSnapshot(snapshotId);

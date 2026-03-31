@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 type RecommendationFeedbackWithArticle =
   Prisma.RecommendationFeedbackGetPayload<{
@@ -28,6 +29,26 @@ type RelationFeedbackWithRelation = Prisma.RelationFeedbackGetPayload<{
  * 获取反馈列表
  */
 export async function GET(request: NextRequest) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: '未授权，请先登录' },
+      { status: 401 }
+    );
+  }
+
+  // 仅管理员可查看所有反馈列表
+  const dbUser = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { role: true },
+  });
+  if (!dbUser || (dbUser.role !== 'ADMIN' && dbUser.role !== 'SUPER_ADMIN')) {
+    return NextResponse.json(
+      { success: false, error: '权限不足' },
+      { status: 403 }
+    );
+  }
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const type = searchParams.get('type');

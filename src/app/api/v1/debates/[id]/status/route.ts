@@ -26,8 +26,8 @@ const VALID_TRANSITIONS: Record<string, string[]> = {
   DRAFT: ['IN_PROGRESS', 'ARCHIVED'],
   IN_PROGRESS: ['PAUSED', 'COMPLETED'],
   PAUSED: ['IN_PROGRESS', 'COMPLETED'],
-  COMPLETED: ['ARCHIVED', 'IN_PROGRESS'],
-  ARCHIVED: ['IN_PROGRESS'],
+  COMPLETED: ['ARCHIVED'], // COMPLETED 是近终态，只允许归档，不允许回退
+  ARCHIVED: [], // ARCHIVED 是终态，不允许任何转换
 };
 
 /**

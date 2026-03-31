@@ -3,7 +3,7 @@
  */
 
 import { prisma } from '@/lib/db/prisma';
-import { generateToken } from './jwt';
+import { generateAccessToken, generateRefreshToken } from './jwt';
 import type { OAuthUserInfo } from '../../types/oauth';
 import type { OAuthAccount } from '../../types/oauth';
 import { logger } from '@/lib/logger';
@@ -54,10 +54,17 @@ export class OAuthService {
       // 如果已存在，直接登录
       if (existingAccount) {
         const user = existingAccount.user;
-        const token = generateToken({
-          userId: user.id,
-          email: user.email,
-          role: user.role,
+        const payload = { userId: user.id, email: user.email, role: user.role };
+        const token = generateAccessToken(payload);
+        const refreshToken = generateRefreshToken(payload);
+
+        // 创建 session，使得 refresh token 接口可正常使用
+        await prisma.session.create({
+          data: {
+            userId: user.id,
+            sessionToken: refreshToken,
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          },
         });
 
         return {
@@ -70,7 +77,7 @@ export class OAuthService {
             createdAt: user.createdAt,
           },
           token,
-          refreshToken: '', // OAuth刷新令牌由OAuth提供商管理
+          refreshToken,
           isNewUser: false,
         };
       }
@@ -82,10 +89,21 @@ export class OAuthService {
         userInfo
       );
 
-      const token = generateToken({
+      const newPayload = {
         userId: newUser.id,
         email: newUser.email,
         role: newUser.role,
+      };
+      const token = generateAccessToken(newPayload);
+      const refreshToken = generateRefreshToken(newPayload);
+
+      // 创建 session
+      await prisma.session.create({
+        data: {
+          userId: newUser.id,
+          sessionToken: refreshToken,
+          expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
       });
 
       return {
@@ -98,7 +116,7 @@ export class OAuthService {
           createdAt: newUser.createdAt,
         },
         token,
-        refreshToken: '',
+        refreshToken,
         isNewUser: true,
       };
     } catch (error) {

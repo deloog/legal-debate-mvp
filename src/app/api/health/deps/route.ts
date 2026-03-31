@@ -52,15 +52,12 @@ async function checkDatabaseHealth(): Promise<DatabaseHealth> {
       responseTime,
       connectionInfo: normalizedConnectionInfo,
     };
-  } catch (error) {
+  } catch (_error) {
     const responseTime = Date.now() - startTime;
     return {
       status: 'unhealthy',
       responseTime,
-      message: error instanceof Error ? error.message : '数据库健康检查失败',
-      details: {
-        error: error instanceof Error ? error.stack : String(error),
-      },
+      message: '数据库健康检查失败',
     };
   }
 }
@@ -109,17 +106,14 @@ async function checkAIServiceHealth(): Promise<AIServiceHealth> {
       availableProviders,
       availableModels: ['deepseek-chat', 'glm-4'],
     };
-  } catch (error) {
+  } catch (_error) {
     const responseTime = Date.now() - startTime;
     return {
       status: 'unhealthy',
       responseTime,
-      message: error instanceof Error ? error.message : 'AI服务健康检查失败',
+      message: 'AI服务健康检查失败',
       providers: [],
       availableProviders: [],
-      details: {
-        error: error instanceof Error ? error.stack : String(error),
-      },
     };
   }
 }

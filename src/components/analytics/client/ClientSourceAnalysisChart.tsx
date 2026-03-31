@@ -4,7 +4,6 @@
 
 'use client';
 
-import React from 'react';
 import { PieChart } from '../charts/PieChart';
 import type { PieChartData } from '@/types/chart';
 import { getClientSourceColor } from '../utils/chart-utils';

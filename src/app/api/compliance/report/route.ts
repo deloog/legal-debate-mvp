@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { ComplianceService } from '@/lib/compliance/compliance-service';
 import type { GetComplianceReportResponse } from '@/types/compliance';
 import { ComplianceCategory } from '@/types/compliance';
@@ -16,6 +17,17 @@ import { logger } from '@/lib/logger';
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<GetComplianceReportResponse>> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: '未授权' },
+      } as unknown as GetComplianceReportResponse,
+      { status: 401 }
+    );
+  }
+
   try {
     // 获取查询参数
     const searchParams = request.nextUrl.searchParams;
@@ -30,7 +42,10 @@ export async function GET(
       category: categoryStr ? (categoryStr as ComplianceCategory) : undefined,
     };
 
-    const report = await ComplianceService.generateReport(reportRequest);
+    const report = await ComplianceService.generateReport(
+      authUser.userId,
+      reportRequest
+    );
 
     return NextResponse.json(
       {
@@ -47,7 +62,7 @@ export async function GET(
         success: false,
         error: {
           code: 'SERVICE_ERROR',
-          message: error instanceof Error ? error.message : '生成报告失败',
+          message: '生成报告失败',
         },
       },
       { status: 500 }

@@ -286,30 +286,6 @@ export class ClaimExtractor {
   }
 
   /**
-   * 去重诉讼请求（按类型去重，保留金额最大的）
-   */
-  private __deduplicateClaims(claims: Claim[]): Claim[] {
-    const byType = new Map<ClaimType, Claim>();
-
-    for (const claim of claims) {
-      const existing = byType.get(claim.type);
-      if (!existing) {
-        byType.set(claim.type, claim);
-      } else {
-        // 保留有金额的
-        if (
-          claim.amount !== undefined &&
-          (existing.amount === undefined || claim.amount > existing.amount)
-        ) {
-          byType.set(claim.type, claim);
-        }
-      }
-    }
-
-    return Array.from(byType.values());
-  }
-
-  /**
    * 处理复合请求
    */
   private decomposeCompoundClaims(

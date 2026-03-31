@@ -9,9 +9,18 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { CommunityService } from '@/lib/knowledge-graph/community/community-service';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, message: '请先登录' },
+      { status: 401 }
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const articleId = searchParams.get('articleId');
   const depth = Math.min(parseInt(searchParams.get('depth') ?? '2'), 3);

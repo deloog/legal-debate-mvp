@@ -7,8 +7,7 @@ import {
   LitigationFeeConfig,
   TravelExpenseConfig,
 } from '@/types/calculation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { successResponse, errorResponse } from '@/lib/api-response';
 import { logger } from '@/lib/logger';
 
@@ -16,8 +15,8 @@ const calculationService = new FeeCalculationService(prisma);
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    const userId = session?.user?.id || null;
+    const authUser = await getAuthUser(req);
+    const userId = authUser?.userId ?? null;
 
     const body = await req.json();
     const { type, ...params } = body;
@@ -93,9 +92,6 @@ export async function POST(req: NextRequest) {
     return successResponse(result);
   } catch (error) {
     logger.error('Fee calculation error:', error);
-    return errorResponse(
-      error instanceof Error ? error.message : 'Calculation failed',
-      500
-    );
+    return errorResponse('Calculation failed', 500);
   }
 }

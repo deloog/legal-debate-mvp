@@ -5,8 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 import { expertService } from '@/lib/knowledge-graph/expert/expert-service';
 import type { ExpertListFilters } from '@/lib/knowledge-graph/expert/types';
@@ -16,9 +15,9 @@ import type { ExpertListFilters } from '@/lib/knowledge-graph/expert/types';
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getAuthUser(request);
 
-    if (!session?.user?.id) {
+    if (!user) {
       return NextResponse.json(
         { success: false, error: '未登录' },
         { status: 401 }
@@ -41,7 +40,7 @@ export async function GET(request: NextRequest) {
     const result = await expertService.getExpertList(filters);
 
     logger.info('Expert list fetched successfully', {
-      userId: session.user.id,
+      userId: user.userId,
       total: result.total,
     });
 
@@ -55,7 +54,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : '获取专家列表失败',
+        error: '获取专家列表失败',
       },
       { status: 500 }
     );
@@ -65,11 +64,11 @@ export async function GET(request: NextRequest) {
 /**
  * POST 创建或获取专家档案
  */
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getAuthUser(request);
 
-    if (!session?.user?.id) {
+    if (!user) {
       return NextResponse.json(
         { success: false, error: '未登录' },
         { status: 401 }
@@ -77,12 +76,10 @@ export async function POST(_request: NextRequest) {
     }
 
     // 创建或获取专家档案
-    const expert = await expertService.getOrCreateExpertProfile(
-      session.user.id
-    );
+    const expert = await expertService.getOrCreateExpertProfile(user.userId);
 
     logger.info('Expert profile created or retrieved successfully', {
-      userId: session.user.id,
+      userId: user.userId,
       expertId: expert.id,
     });
 
@@ -96,8 +93,7 @@ export async function POST(_request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error:
-          error instanceof Error ? error.message : '创建或获取专家档案失败',
+        error: '创建或获取专家档案失败',
       },
       { status: 500 }
     );

@@ -3,7 +3,7 @@
  * GET /api/consultations/[id]/follow-ups - 获取跟进记录列表
  * POST /api/consultations/[id]/follow-ups - 添加跟进记录
  */
-import { getCurrentUserId } from '@/lib/auth/get-current-user';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
 import { ErrorResponse, SuccessResponse } from '@/types/api-response';
 import {
@@ -19,9 +19,17 @@ import { logger } from '@/lib/logger';
  * 获取跟进记录列表
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<FollowUpResponse[]> | ErrorResponse>> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: '未授权' } },
+      { status: 401 }
+    );
+  }
+
   try {
     const { id } = await params;
 
@@ -111,6 +119,14 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<FollowUpResponse> | ErrorResponse>> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: '未授权' } },
+      { status: 401 }
+    );
+  }
+
   try {
     const { id } = await params;
 
@@ -240,7 +256,7 @@ export async function POST(
         result: body.result || null,
         nextFollowUp,
         // 从session获取真实用户ID
-        createdBy: await getCurrentUserId(),
+        createdBy: authUser.userId,
       },
     });
 

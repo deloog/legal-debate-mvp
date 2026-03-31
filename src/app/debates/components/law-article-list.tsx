@@ -65,6 +65,7 @@ export function LawArticleList({ debateId, roundId }: LawArticleListProps) {
 
   // 确认法条适用
   const handleConfirm = async (articleId: string) => {
+    setError(null);
     try {
       const response = await fetch(
         `/api/v1/legal-references/${articleId}/feedback`,
@@ -100,7 +101,7 @@ export function LawArticleList({ debateId, roundId }: LawArticleListProps) {
       );
     } catch (err) {
       console.error('确认法条失败：', err);
-      alert('确认失败，请重试');
+      setError('确认失败，请重试');
     }
   };
 
@@ -121,7 +122,7 @@ export function LawArticleList({ debateId, roundId }: LawArticleListProps) {
     if (!selectedArticle) {
       return;
     }
-
+    setError(null);
     try {
       const response = await fetch(
         `/api/v1/legal-references/${selectedArticle.id}/feedback`,
@@ -164,7 +165,7 @@ export function LawArticleList({ debateId, roundId }: LawArticleListProps) {
       setSelectedArticle(null);
     } catch (err) {
       console.error('移除法条失败：', err);
-      alert('移除失败，请重试');
+      setError('移除失败，请重试');
     }
   };
 
@@ -198,11 +199,12 @@ export function LawArticleList({ debateId, roundId }: LawArticleListProps) {
 
   if (error) {
     return (
-      <div className='rounded-lg border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-900/20'>
-        <p className='text-red-900 dark:text-red-300'>{error}</p>
+      <div className='rounded-lg border border-zinc-200 bg-zinc-50 px-6 py-10 text-center dark:border-zinc-700 dark:bg-zinc-800'>
+        <BookOpen className='mx-auto mb-3 h-10 w-10 text-zinc-400' />
+        <p className='text-sm text-zinc-600 dark:text-zinc-400'>暂无关联法条</p>
         <button
-          onClick={fetchArticles}
-          className='mt-3 rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 dark:border-red-700 dark:bg-red-900 dark:text-red-400 dark:hover:bg-red-900/20'
+          onClick={() => void fetchArticles()}
+          className='mt-3 text-xs text-zinc-400 underline hover:text-zinc-600 dark:hover:text-zinc-200'
         >
           重新加载
         </button>

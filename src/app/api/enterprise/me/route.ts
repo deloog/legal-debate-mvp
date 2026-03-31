@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/middleware/auth';
+import { logger } from '@/lib/logger';
 import { getEnterpriseAccountByUserId } from '@/lib/enterprise/service';
 
 export async function GET(request: NextRequest) {
@@ -40,21 +41,11 @@ export async function GET(request: NextRequest) {
       data: { enterprise: enterpriseAccount },
     });
   } catch (error) {
-    if (error instanceof Error) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: error.message,
-          error: error.name,
-        },
-        { status: 400 }
-      );
-    }
-
+    logger.error('获取企业信息失败:', error);
     return NextResponse.json(
       {
         success: false,
-        message: '服务器内部错误',
+        message: '获取企业信息失败',
         error: 'INTERNAL_SERVER_ERROR',
       },
       { status: 500 }

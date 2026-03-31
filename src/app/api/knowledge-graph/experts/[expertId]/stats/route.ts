@@ -4,8 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import { expertService } from '@/lib/knowledge-graph/expert/expert-service';
 
@@ -17,20 +17,20 @@ export async function GET(
   { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const authUser = await getAuthUser(request);
 
-    if (!session?.user?.id) {
+    if (!authUser) {
       return NextResponse.json(
         { success: false, error: '未登录' },
         { status: 401 }
       );
     }
 
-    const { prisma } = await import('@/lib/db/prisma');
+    const { expertId } = await params;
 
     // 获取专家信息
     const expert = await prisma.knowledgeGraphExpert.findUnique({
-      where: { id: (await params).expertId },
+      where: { id: expertId },
     });
 
     if (!expert) {
@@ -47,8 +47,8 @@ export async function GET(
     ]);
 
     logger.info('Expert stats fetched successfully', {
-      userId: session.user.id,
-      expertId: (await params).expertId,
+      userId: authUser.userId,
+      expertId,
     });
 
     return NextResponse.json({
@@ -59,16 +59,11 @@ export async function GET(
       },
     });
   } catch (error) {
-    logger.error('获取专家统计失败', {
-      error,
-      expertId: (await params).expertId,
-    });
+    const { expertId } = await params;
+    logger.error('获取专家统计失败', { error, expertId });
 
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : '获取专家统计失败',
-      },
+      { success: false, error: '获取专家统计失败' },
       { status: 500 }
     );
   }

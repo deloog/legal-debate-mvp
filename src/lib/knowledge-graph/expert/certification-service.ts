@@ -257,9 +257,7 @@ export class CertificationService {
     contributionStats: ExpertContributionStats
   ): ExpertLevel {
     const { accuracyRate: rate, totalVerified } = accuracyRate;
-    // averageQualityScore保留以备未来使用
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { averageQualityScore } = contributionStats;
+    const { averageQualityScore: _averageQualityScore } = contributionStats;
 
     // MASTER等级
     if (rate >= 0.9 && totalVerified >= 100) {

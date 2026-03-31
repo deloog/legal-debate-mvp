@@ -16,6 +16,7 @@ import {
   logKnowledgeGraphAction,
   KnowledgeGraphAction,
 } from '@/lib/middleware/knowledge-graph-permission';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * 效力链节点
@@ -33,6 +34,11 @@ interface ValidityChainNode {
  * GET /api/v1/knowledge-graph/validity-chain
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json({ error: '未授权，请先登录' }, { status: 401 });
+  }
+
   const searchParams = request.nextUrl.searchParams;
 
   // 在try外声明，以便在catch块中使用
@@ -51,7 +57,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // 权限检查
     const permissionResult = await checkKnowledgeGraphPermission(
-      '', // 用户ID从header中获取（实际实现中需要）
+      authUser.userId,
       KnowledgeGraphAction.VIEW_RELATIONS,
       'RELATION' as never
     );
@@ -84,7 +90,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     // 记录操作日志
     await logKnowledgeGraphAction({
-      userId: '', // 从header获取
+      userId: authUser.userId,
       action: KnowledgeGraphAction.VIEW_RELATIONS,
       resource: 'RELATION' as never,
       resourceId: lawArticleId,
@@ -98,7 +104,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
   } catch (error: unknown) {
     logger.error('效力链追踪失败', { error, lawArticleId });
-    const errorMessage = error instanceof Error ? error.message : '服务器错误';
+    const errorMessage = '服务器错误';
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

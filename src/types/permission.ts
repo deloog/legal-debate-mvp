@@ -37,6 +37,7 @@ export enum PermissionResource {
   EXPORT = 'export', // 数据导出
   REPORT = 'report', // 报告管理
   ALERT = 'alert', // 告警管理
+  AGENT_MONITOR = 'agent_monitor', // Agent 监控
 }
 
 // =============================================================================
@@ -247,6 +248,14 @@ export const ALERT_PERMISSIONS = {
 } as const;
 
 /**
+ * Agent 监控权限
+ */
+export const AGENT_MONITOR_PERMISSIONS = {
+  READ: 'agent_monitor:read',
+  MANAGE: 'agent_monitor:manage',
+} as const;
+
+/**
  * 团队管理权限
  */
 export const TEAM_PERMISSIONS = {
@@ -277,6 +286,7 @@ export const ALL_PERMISSIONS = [
   ...Object.values(EXPORT_PERMISSIONS),
   ...Object.values(REPORT_PERMISSIONS),
   ...Object.values(ALERT_PERMISSIONS),
+  ...Object.values(AGENT_MONITOR_PERMISSIONS),
   ...Object.values(TEAM_PERMISSIONS),
 ] as const;
 
@@ -611,6 +621,20 @@ export const PERMISSION_DEFINITIONS = [
     name: ALERT_PERMISSIONS.MANAGE,
     description: '管理告警',
     resource: PermissionResource.ALERT,
+    action: PermissionAction.MANAGE,
+  },
+
+  // Agent 监控
+  {
+    name: AGENT_MONITOR_PERMISSIONS.READ,
+    description: '查看 Agent 监控',
+    resource: PermissionResource.AGENT_MONITOR,
+    action: PermissionAction.READ,
+  },
+  {
+    name: AGENT_MONITOR_PERMISSIONS.MANAGE,
+    description: '管理 Agent 监控',
+    resource: PermissionResource.AGENT_MONITOR,
     action: PermissionAction.MANAGE,
   },
 

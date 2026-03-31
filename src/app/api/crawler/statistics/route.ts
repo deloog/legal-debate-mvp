@@ -8,8 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { crawlTaskManager } from '@/lib/crawler/crawl-task-manager';
 import { logger } from '@/lib/logger';
 
@@ -69,8 +68,8 @@ export async function GET(request: NextRequest) {
     }
 
     // 2. 身份验证
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: '未认证，请先登录' }, { status: 401 });
     }
 
@@ -88,8 +87,7 @@ export async function GET(request: NextRequest) {
 
     // 5. 记录访问日志
     logger.info('爬虫统计数据查询', {
-      userId: session.user.id,
-      role: session.user.role,
+      userId: authUser.userId,
       ip: clientIP,
     });
 

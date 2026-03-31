@@ -74,8 +74,8 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = props => {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
         },
+        credentials: 'include',
       });
 
       if (!response.ok) {

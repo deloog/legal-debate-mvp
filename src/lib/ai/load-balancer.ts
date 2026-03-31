@@ -16,8 +16,6 @@ export class LoadBalancer {
   private providerStats: Map<AIProvider, ProviderStats>;
   private currentProviderIndex: number;
   private healthStatus: Map<AIProvider, HealthStatus>;
-  private _lastHealthCheck: number = 0;
-
   constructor(config: LoadBalancerConfig) {
     this.config = config;
     this.providerStats = new Map();
@@ -33,12 +31,7 @@ export class LoadBalancer {
   // =============================================================================
 
   private initializeProviderStats(): void {
-    const providers: AIProvider[] = [
-      'zhipu',
-      'deepseek',
-      'openai',
-      'anthropic',
-    ];
+    const providers: AIProvider[] = ['zhipu', 'deepseek', 'openai'];
 
     providers.forEach(provider => {
       const weight = this.config.weights?.[provider] || 1;
@@ -205,12 +198,7 @@ export class LoadBalancer {
     if (providers.length === 0) return this.getFallbackProvider();
 
     // 预定义的优先级顺序
-    const priorityOrder: AIProvider[] = [
-      'zhipu',
-      'deepseek',
-      'openai',
-      'anthropic',
-    ];
+    const priorityOrder: AIProvider[] = ['zhipu', 'deepseek', 'openai'];
 
     for (const provider of priorityOrder) {
       if (providers.includes(provider)) {
@@ -385,7 +373,6 @@ export class LoadBalancer {
   public reset(): void {
     this.initializeProviderStats();
     this.currentProviderIndex = 0;
-    this._lastHealthCheck = 0;
   }
 
   public resetProviderStats(provider: AIProvider): void {
@@ -424,7 +411,6 @@ export class LoadBalancerFactory {
           zhipu: 2,
           deepseek: 1,
           openai: 0, // 设置为0，表示不可用
-          anthropic: 0, // 设置为0，表示不可用
         },
       };
 

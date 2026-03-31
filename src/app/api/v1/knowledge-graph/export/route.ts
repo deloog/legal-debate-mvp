@@ -234,7 +234,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
   } catch (error: unknown) {
     logger.error('图谱导出失败', { error });
-    const errorMessage = error instanceof Error ? error.message : '服务器错误';
+    const errorMessage = '服务器错误';
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

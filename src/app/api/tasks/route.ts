@@ -67,17 +67,18 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
   const query = queryTaskSchema.parse(Object.fromEntries(searchParams));
 
+  // 使用 AND 包装安全过滤，防止后续 OR 覆盖导致 IDOR
+  const accessFilter = {
+    OR: [{ createdBy: authUser.userId }, { assignedTo: authUser.userId }],
+  };
   const where: Record<string, unknown> = {
     deletedAt: null,
+    AND: [accessFilter],
   };
 
   if (query.assignedTo) {
+    // 在所有权范围内再按 assignedTo 过滤
     where.assignedTo = query.assignedTo;
-  } else {
-    where.OR = [
-      { createdBy: authUser.userId },
-      { assignedTo: authUser.userId },
-    ];
   }
 
   if (query.caseId) {
@@ -112,10 +113,13 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   }
 
   if (query.search) {
-    where.OR = [
-      { title: { contains: query.search, mode: 'insensitive' } },
-      { description: { contains: query.search, mode: 'insensitive' } },
-    ];
+    // 追加到 AND 数组，不覆盖 accessFilter，确保安全过滤始终生效
+    (where.AND as unknown[]).push({
+      OR: [
+        { title: { contains: query.search, mode: 'insensitive' } },
+        { description: { contains: query.search, mode: 'insensitive' } },
+      ],
+    });
   }
 
   const orderBy: Record<string, 'asc' | 'desc'> = {

@@ -206,8 +206,10 @@ export class LawArticleRecommendationService {
     const { limit = 10, minScore = 0 } = options;
 
     try {
-      // 构建搜索条件
-      const whereConditions: Record<string, unknown> = {};
+      // 构建搜索条件（始终排除已废止法条）
+      const whereConditions: Record<string, unknown> = {
+        status: { not: 'REPEALED' },
+      };
 
       // 按案件类型过滤
       if (caseInfo.type) {

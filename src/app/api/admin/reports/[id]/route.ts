@@ -9,6 +9,8 @@ import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { prisma } from '@/lib/db/prisma';
 import fs from 'fs/promises';
+import fsSync from 'fs';
+import path from 'path';
 import { logger } from '@/lib/logger';
 
 // 辅助响应函数
@@ -69,12 +71,9 @@ export async function GET(
       data: report,
     });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : '获取报告详情失败';
     logger.error('获取报告详情失败:', error);
-
     return NextResponse.json(
-      { success: false, message: errorMessage },
+      { success: false, message: '获取报告详情失败' },
       { status: 500 }
     );
   }
@@ -115,10 +114,33 @@ export async function DELETE(
       );
     }
 
-    // 删除文件
+    // 删除文件（路径边界校验：防止 DB 被篡改后删除任意文件）
     if (report.filePath) {
       try {
-        await fs.unlink(report.filePath);
+        const allowedDir = path.resolve(process.cwd(), 'public', 'reports');
+        const resolvedPath = path.resolve(report.filePath);
+        if (!resolvedPath.startsWith(allowedDir + path.sep)) {
+          logger.warn('拒绝删除越界文件路径:', { filePath: report.filePath });
+          // 跳过文件删除，继续删除数据库记录
+        } else {
+          // 解析真实路径（跟随符号链接），防止符号链接穿越攻击
+          let realPath: string;
+          try {
+            realPath = fsSync.realpathSync(resolvedPath);
+          } catch {
+            // 文件不存在，跳过删除
+            realPath = resolvedPath;
+          }
+          const realAllowedDir = fsSync.realpathSync(allowedDir);
+          if (!realPath.startsWith(realAllowedDir + path.sep)) {
+            logger.warn('拒绝删除符号链接越界路径:', {
+              filePath: report.filePath,
+              realPath,
+            });
+          } else {
+            await fs.unlink(resolvedPath);
+          }
+        }
       } catch (fileError) {
         logger.error('删除报告文件失败:', fileError);
         // 继续删除数据库记录
@@ -135,12 +157,9 @@ export async function DELETE(
       message: '删除报告成功',
     });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : '删除报告失败';
     logger.error('删除报告失败:', error);
-
     return NextResponse.json(
-      { success: false, message: errorMessage },
+      { success: false, message: '删除报告失败' },
       { status: 500 }
     );
   }

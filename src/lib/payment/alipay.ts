@@ -68,13 +68,6 @@ export class AlipayPayment {
   }
 
   /**
-   * 获取支付宝公钥
-   */
-  private __getPublicKey(): string {
-    return paymentConfig.getAlipayPublicKey();
-  }
-
-  /**
    * 创建支付订单
    */
   public async createOrder(

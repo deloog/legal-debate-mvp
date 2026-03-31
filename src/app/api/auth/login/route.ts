@@ -59,28 +59,22 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(response, { status: 401 });
     }
 
-    // 检查用户状态
+    // 检查用户状态（统一错误信息，防止账号枚举和类型探测）
     if (user.status !== 'ACTIVE') {
-      const statusMap: Record<string, string> = {
-        SUSPENDED: '账号已被暂停',
-        BANNED: '账号已被封禁',
-        INACTIVE: '账号未激活',
-      };
       const response: AuthResponse = {
         success: false,
-        message: statusMap[user.status] || '账号状态异常',
+        message: '邮箱或密码错误',
         error: AuthErrorCode.INVALID_CREDENTIALS,
       };
-      return NextResponse.json(response, { status: 403 });
+      return NextResponse.json(response, { status: 401 });
     }
 
-    // 验证密码
+    // 验证密码（无密码账号统一返回"邮箱或密码错误"，不暴露登录方式）
     if (!user.password) {
-      // 用户没有密码，可能是第三方登录用户
       const response: AuthResponse = {
         success: false,
-        message: '此账号使用第三方登录',
-        error: AuthErrorCode.INVALID_PASSWORD,
+        message: '邮箱或密码错误',
+        error: AuthErrorCode.INVALID_CREDENTIALS,
       };
       return NextResponse.json(response, { status: 401 });
     }
@@ -122,8 +116,8 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
       },
     });
 
-    // 设置refresh token到cookie（同时也在响应体中返回）
-    const expiresIn = 15 * 60; // 15分钟
+    // token 通过 httpOnly cookie 传递，不在响应体中暴露（防止 XSS 窃取）
+    const expiresIn = 7 * 24 * 60 * 60; // 7天
 
     // 返回响应
     const response: AuthResponse = {
@@ -138,8 +132,7 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
           role: user.role,
           createdAt: user.createdAt,
         },
-        token: accessToken,
-        refreshToken,
+        token: '', // token 已通过 httpOnly cookie 传递，此处留空
         expiresIn,
       },
     };
@@ -164,7 +157,7 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 15 * 60, // 15分钟
+      maxAge: 7 * 24 * 60 * 60, // 7天（与refreshToken一致，避免中间件15分钟后强制跳转登录）
       path: '/',
     });
 
@@ -181,10 +174,12 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
 
     return jsonResponse;
   } catch (error) {
-    logger.error('登录失败详情:', {
+    // 生产环境不记录 stack，避免泄露内部路径信息
+    logger.error('登录失败:', {
       error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-      timestamp: new Date().toISOString(),
+      ...(process.env.NODE_ENV !== 'production' && {
+        stack: error instanceof Error ? error.stack : undefined,
+      }),
     });
     const response: AuthResponse = {
       success: false,

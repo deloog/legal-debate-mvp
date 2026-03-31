@@ -12,6 +12,7 @@ import {
 import { uuidSchema } from '@/app/api/lib/validation/schemas';
 import { prisma } from '@/lib/db/prisma';
 import { DebateStatus, RoundStatus } from '@prisma/client';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * POST /api/v1/debates/[id]/rounds
@@ -22,6 +23,14 @@ export const POST = withErrorHandler(
     request: NextRequest,
     context: { params: Promise<{ id: string }> }
   ) => {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: '未认证' },
+        { status: 401 }
+      );
+    }
+
     // Next.js 15+ requires awaiting params
     const resolvedParams = await context.params;
 
@@ -37,11 +46,16 @@ export const POST = withErrorHandler(
       // 1. 获取当前辩论信息
       const debate = await tx.debate.findUnique({
         where: { id: debateId },
-        select: { currentRound: true, status: true },
+        select: { currentRound: true, status: true, userId: true },
       });
 
       if (!debate) {
         throw new Error('Debate not found');
+      }
+
+      // 所有权校验
+      if (debate.userId !== authUser.userId) {
+        throw new Error('Forbidden');
       }
 
       // 检查辩论状态
@@ -52,15 +66,20 @@ export const POST = withErrorHandler(
         throw new Error('Cannot create round for completed or archived debate');
       }
 
-      // 2. 计算新轮次号
-      const newRoundNumber = debate.currentRound + 1;
+      // 2. 计算新轮次号：基于已存在轮次的最大编号，避免与 PENDING 轮次冲突
+      const maxRoundAgg = await tx.debateRound.aggregate({
+        where: { debateId },
+        _max: { roundNumber: true },
+      });
+      const newRoundNumber = (maxRoundAgg._max.roundNumber ?? 0) + 1;
 
-      // 3. 创建新轮次（startedAt 不在此处设置，由 generate 路由在实际生成时设置以作软锁）
+      // 3. 创建新轮次，初始状态为 PENDING
+      //    由 SSE 路由在建立连接时激活为 IN_PROGRESS 并声明 startedAt 软锁
       const newRound = await tx.debateRound.create({
         data: {
           debateId,
           roundNumber: newRoundNumber,
-          status: RoundStatus.IN_PROGRESS,
+          status: RoundStatus.PENDING,
         },
         include: {
           debate: {
@@ -74,11 +93,11 @@ export const POST = withErrorHandler(
         },
       });
 
-      // 4. 更新辩论的当前轮次和状态
+      // 4. 更新辩论状态为进行中（currentRound 由 generate/stream 在轮次完成时更新，
+      //    此处不预先更新，避免 SSE 的 startFromRound 计算跳过当前新建轮次）
       await tx.debate.update({
         where: { id: debateId },
         data: {
-          currentRound: newRoundNumber,
           status: DebateStatus.IN_PROGRESS,
           updatedAt: new Date(),
         },
@@ -97,14 +116,45 @@ export const POST = withErrorHandler(
  */
 export const GET = withErrorHandler(
   async (
-    _request: NextRequest,
+    request: NextRequest,
     context: { params: Promise<{ id: string }> }
   ) => {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: '未认证' },
+        { status: 401 }
+      );
+    }
+
     // Next.js 15+ requires awaiting params
     const resolvedParams = await context.params;
 
     // 验证路径参数
     const debateId = validatePathParam(resolvedParams.id, uuidSchema);
+
+    // 所有权校验
+    const debate = await prisma.debate.findUnique({
+      where: { id: debateId },
+      select: { userId: true },
+    });
+    if (!debate) {
+      return NextResponse.json(
+        { success: false, error: '辩论不存在' },
+        { status: 404 }
+      );
+    }
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
+    if (debate.userId !== authUser.userId && !isAdmin) {
+      return NextResponse.json(
+        { success: false, error: '无权访问' },
+        { status: 403 }
+      );
+    }
 
     // 查询轮次列表
     const rounds = await prisma.debateRound.findMany({

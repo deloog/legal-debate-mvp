@@ -89,7 +89,7 @@ export async function POST(
   } catch (error: unknown) {
     logger.error('验证关系失败:', error);
 
-    const errorMessage = error instanceof Error ? error.message : '服务器错误';
+    const errorMessage = '服务器错误';
 
     return NextResponse.json(
       { success: false, error: errorMessage },
@@ -162,7 +162,7 @@ export async function DELETE(
   } catch (error: unknown) {
     logger.error('删除关系失败:', error);
 
-    const errorMessage = error instanceof Error ? error.message : '服务器错误';
+    const errorMessage = '服务器错误';
 
     return NextResponse.json(
       { success: false, error: errorMessage },

@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { CaseEmbeddingServiceFactory } from '@/lib/case/embedding-service';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/case-examples/batch/embedding
  * 批量生成案例向量嵌入
  */
 export async function POST(request: NextRequest) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json({ error: '未授权' }, { status: 401 });
+  }
+
   try {
     const body = (await request.json()) as {
       caseIds: string[];
@@ -43,8 +50,7 @@ export async function POST(request: NextRequest) {
       results: result.results,
     });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    logger.error('批量生成嵌入失败:', error);
+    return NextResponse.json({ error: '批量生成嵌入失败' }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 import { logger } from '@/lib/logger';
 import { mkdir, unlink, writeFile } from 'fs/promises';
 import { join } from 'path';
+import { uploadFile, deleteStoredFile } from '@/lib/storage/storage-service';
 
 export interface FileMetadata {
   filename: string;
@@ -25,22 +26,30 @@ export class FileStorage {
     caseId: string,
     originalFilename: string
   ): Promise<FileMetadata> {
-    const uploadDir = join(this.UPLOAD_DIR, caseId);
-
-    // 创建目录
-    await mkdir(uploadDir, { recursive: true });
-
     // 生成文件名（避免冲突）
     const extension = this.getExtension(originalFilename);
     const fileName = `${this.generateFileName()}.${extension}`;
-    const filePath = join(uploadDir, fileName);
+    const ossKey = `uploads/${caseId}/${fileName}`;
 
-    // 写入文件
-    await writeFile(filePath, buffer);
+    let filePath: string;
+    if (process.env.OSS_ENABLED === 'true') {
+      // OSS模式：上传并获取公开URL
+      const result = await uploadFile(buffer, ossKey, {
+        isPrivate: false,
+        contentType: this.getMimeType(extension),
+      });
+      filePath = result.url || ossKey;
+    } else {
+      // 本地模式：写入 public 目录供静态访问
+      const uploadDir = join(this.UPLOAD_DIR, caseId);
+      await mkdir(uploadDir, { recursive: true });
+      await writeFile(join(uploadDir, fileName), buffer);
+      filePath = `/uploads/${caseId}/${fileName}`;
+    }
 
     return {
       filename: originalFilename,
-      filePath: `/uploads/${caseId}/${fileName}`,
+      filePath,
       fileSize: buffer.length,
       mimeType: this.getMimeType(extension),
       fileType: extension,
@@ -51,6 +60,15 @@ export class FileStorage {
    * 删除文件
    */
   static async deleteFile(relativePath: string): Promise<void> {
+    if (process.env.OSS_ENABLED === 'true') {
+      // OSS模式：relativePath 可能是完整URL或OSS key
+      // 如果是以 /uploads/ 开头的路径，转换为OSS key
+      const key = relativePath.startsWith('/uploads/')
+        ? relativePath.substring(1)
+        : relativePath;
+      await deleteStoredFile(key);
+      return;
+    }
     const fullPath = join(process.cwd(), 'public', relativePath);
     try {
       await unlink(fullPath);

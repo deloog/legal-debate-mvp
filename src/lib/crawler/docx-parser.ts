@@ -526,27 +526,6 @@ export class DOCXParser {
   }
 
   /**
-   * 从 XML 提取文本
-   */
-  private __extractTextFromXml(root: unknown): string {
-    const textParts: string[] = [];
-
-    const extractText = (element: XmlElement): void => {
-      if (element.text) {
-        textParts.push(element.text);
-      }
-      if (element.$$ && Array.isArray(element.$$)) {
-        element.$$.forEach((child: XmlElement) => extractText(child));
-      }
-    };
-
-    extractText(root as XmlElement);
-
-    // 过滤空行
-    return textParts.filter(t => t.trim()).join('\n');
-  }
-
-  /**
    * 解析旧版 DOC 文件（OLE 格式）
    */
   private async parseWithOle(

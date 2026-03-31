@@ -8,6 +8,7 @@ import {
   FeeCalculatorService,
   FeeMode,
 } from '@/lib/consultation/fee-calculator-service';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { ErrorResponse, SuccessResponse } from '@/types/api-response';
 import { CalculateFeeRequest } from '@/types/consultation';
 import { NextRequest, NextResponse } from 'next/server';
@@ -22,6 +23,17 @@ export async function POST(
 ): Promise<
   NextResponse<SuccessResponse<FeeCalculationResult> | ErrorResponse>
 > {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: '未授权' },
+      },
+      { status: 401 }
+    );
+  }
+
   try {
     // 解析请求体
     let body: CalculateFeeRequest;
@@ -117,7 +129,7 @@ export async function POST(
         success: false,
         error: {
           code: 'CALCULATION_FAILED',
-          message: error instanceof Error ? error.message : '计算失败，请重试',
+          message: '计算失败，请重试',
         },
       },
       { status: 500 }

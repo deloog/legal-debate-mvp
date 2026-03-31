@@ -83,7 +83,7 @@ export function validatePathParams<T>(
  */
 export function validatePathParam<T>(param: unknown, schema: ZodSchema<T>): T {
   try {
-    logger.info('验证路径参数:', {
+    logger.debug('验证路径参数:', {
       param,
       paramType: typeof param,
     });

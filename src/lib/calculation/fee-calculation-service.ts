@@ -23,14 +23,12 @@ import { TravelExpenseCalculator } from './travel-expense-calculator';
 import { FeeConfigManager } from './fee-config-manager';
 
 export class FeeCalculationService {
-  private _prisma: PrismaClient;
   private configManager: FeeConfigManager;
   private lawyerCalculator: LawyerFeeCalculator;
   private litigationCalculator: LitigationFeeCalculator;
   private travelCalculator: TravelExpenseCalculator;
 
   constructor(prisma: PrismaClient) {
-    this._prisma = prisma;
     this.configManager = new FeeConfigManager(prisma);
     this.lawyerCalculator = new LawyerFeeCalculator();
     this.litigationCalculator = new LitigationFeeCalculator();

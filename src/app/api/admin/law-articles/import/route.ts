@@ -194,7 +194,7 @@ async function importArticle(
     );
     return {
       success: false,
-      error: error instanceof Error ? error.message : '未知错误',
+      error: '未知错误',
     };
   }
 }

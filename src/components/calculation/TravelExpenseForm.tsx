@@ -1,4 +1,3 @@
-import React from 'react';
 import { TravelExpenseCalculationParams } from '@/types/calculation';
 
 interface TravelExpenseFormProps {

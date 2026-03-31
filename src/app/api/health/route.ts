@@ -77,15 +77,12 @@ async function checkDatabaseHealth(): Promise<DatabaseHealth> {
       responseTime,
       connectionInfo: normalizedConnectionInfo,
     };
-  } catch (error) {
+  } catch (_error) {
     const responseTime = Date.now() - startTime;
     return {
       status: 'unhealthy',
       responseTime,
-      message: error instanceof Error ? error.message : '数据库健康检查失败',
-      details: {
-        error: error instanceof Error ? error.stack : String(error),
-      },
+      message: '数据库健康检查失败',
     };
   }
 }
@@ -134,27 +131,29 @@ async function checkAIServiceHealth(): Promise<AIServiceHealth> {
       availableProviders,
       availableModels: ['deepseek-chat', 'glm-4'], // 可从配置中获取
     };
-  } catch (error) {
+  } catch (_error) {
     const responseTime = Date.now() - startTime;
     return {
       status: 'unhealthy',
       responseTime,
-      message: error instanceof Error ? error.message : 'AI服务健康检查失败',
+      message: 'AI服务健康检查失败',
       providers: [],
       availableProviders: [],
-      details: {
-        error: error instanceof Error ? error.stack : String(error),
-      },
     };
   }
 }
 
 /**
  * 获取系统健康信息
+ * 生产环境只返回 uptime，避免暴露内部细节
  */
 function getSystemHealth(): SystemHealth {
   const memoryUsage = process.memoryUsage();
   const uptime = process.uptime();
+
+  if (process.env.NODE_ENV === 'production') {
+    return { uptime };
+  }
 
   return {
     uptime,
@@ -165,7 +164,7 @@ function getSystemHealth(): SystemHealth {
       external: Math.round((memoryUsage.external / 1024 / 1024) * 100) / 100,
     },
     cpu: {
-      usage: process.cpuUsage().user / 1000000, // 转换为秒
+      usage: process.cpuUsage().user / 1000000,
     },
     nodeVersion: process.version,
     platform: process.platform,

@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 
@@ -9,13 +8,13 @@ import { logger } from '@/lib/logger';
  * 获取当前用户的导出任务列表（从数据库查询）
  */
 export async function GET(request: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const authUser = await getAuthUser(request);
 
-  if (!session?.user?.id) {
-    return new Response(
-      JSON.stringify({ success: false, error: '无权限访问' }),
-      { status: 403, headers: { 'Content-Type': 'application/json' } }
-    );
+  if (!authUser) {
+    return new Response(JSON.stringify({ success: false, error: '未授权' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   const { searchParams } = new URL(request.url);
@@ -26,7 +25,7 @@ export async function GET(request: NextRequest) {
   );
 
   try {
-    const where = { userId: session.user.id };
+    const where = { userId: authUser.userId };
 
     const [total, tasks] = await prisma.$transaction([
       prisma.exportTask.count({ where }),

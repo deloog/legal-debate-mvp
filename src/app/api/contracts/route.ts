@@ -61,17 +61,11 @@ async function generateContractNumber(): Promise<string> {
  * GET /api/contracts
  * 获取合同列表
  */
-export async function GET(request: NextRequest): Promise<
-  NextResponse<
-    | SuccessResponse<{
-        items: unknown[];
-        total: number;
-        page: number;
-        pageSize: number;
-      }>
-    | ErrorResponse
-  >
-> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  // ─── 认证 ─────────────────────────────────────────────────────────────────
+  const userId = resolveContractUserId(request);
+  if (!userId) return unauthorizedResponse();
+
   try {
     // 解析查询参数
     const searchParams = request.nextUrl.searchParams;
@@ -103,8 +97,11 @@ export async function GET(request: NextRequest): Promise<
     const { page, pageSize, status, keyword, startDate, endDate } =
       validationResult.data;
 
-    // 构建查询条件
-    const where: Record<string, unknown> = {};
+    // 构建查询条件（仅返回当前用户作为律师或委托方的合同）
+    // 使用 AND 确保用户隔离条件与关键词搜索同时生效
+    const where: Record<string, unknown> = {
+      AND: [{ OR: [{ lawyerId: userId }, { case: { userId } }] }],
+    };
 
     // 状态筛选
     if (status) {
@@ -113,10 +110,12 @@ export async function GET(request: NextRequest): Promise<
 
     // 关键词搜索（客户名称或合同编号）
     if (keyword) {
-      where.OR = [
-        { clientName: { contains: keyword, mode: 'insensitive' } },
-        { contractNumber: { contains: keyword, mode: 'insensitive' } },
-      ];
+      (where.AND as unknown[]).push({
+        OR: [
+          { clientName: { contains: keyword, mode: 'insensitive' } },
+          { contractNumber: { contains: keyword, mode: 'insensitive' } },
+        ],
+      });
     }
 
     // 日期范围筛选
@@ -229,6 +228,54 @@ export async function POST(
     >;
 
   try {
+    // ─── 授权：仅 LAWYER/SUPER_ADMIN 可创建合同；LAWYER 还需有通过审核的资质 ──
+    const creator = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (!creator) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '用户不存在' },
+        },
+        { status: 401 }
+      );
+    }
+
+    if (creator.role !== 'LAWYER' && creator.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'FORBIDDEN',
+            message: '只有已认证律师才能创建合同',
+          },
+        },
+        { status: 403 }
+      );
+    }
+
+    if (creator.role === 'LAWYER') {
+      const approvedQualification = await prisma.lawyerQualification.findFirst({
+        where: { userId, status: 'APPROVED' },
+        select: { id: true },
+      });
+      if (!approvedQualification) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'QUALIFICATION_REQUIRED',
+              message: '您的律师资质尚未通过审核，无法创建合同',
+            },
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     // 解析请求体
     let body: Record<string, unknown>;
     try {

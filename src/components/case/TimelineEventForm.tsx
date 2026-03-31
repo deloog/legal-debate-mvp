@@ -60,17 +60,16 @@ export function TimelineEventForm({
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-
       const url = isEditing
         ? `/api/v1/timeline-events/${event.id}`
         : `/api/v1/cases/${caseId}/timeline`;
 
+      // 认证通过 httpOnly cookie 自动携带，无需手动传 token
       const response = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           eventType,

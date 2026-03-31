@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import { createSuccessResponse } from '@/app/api/lib/responses/api-response';
 import { logger } from '@/lib/logger';
-
-const prisma = new PrismaClient();
+import { getAuthUser } from '@/lib/middleware/auth';
 
 interface FeedbackRequest {
   action: 'CONFIRMED' | 'REMOVED' | 'MANUALLY_ADDED';
@@ -19,11 +18,15 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json({ error: '未授权，请先登录' }, { status: 401 });
+  }
+
   try {
     // 获取路径参数
     const resolvedParams = await params;
-    // 获取当前用户（简化版，实际应从session获取）
-    const userId = request.headers.get('x-user-id') || 'default-user';
+    const userId = authUser.userId;
 
     // 解析请求体
     const body: FeedbackRequest = await request.json();
@@ -91,11 +94,9 @@ export async function PUT(
     return NextResponse.json(
       {
         error: '服务器错误',
-        details: error instanceof Error ? error.message : '未知错误',
+        details: '未知错误',
       },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

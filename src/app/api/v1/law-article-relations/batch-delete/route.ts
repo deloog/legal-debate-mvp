@@ -19,11 +19,11 @@ import {
   KnowledgeGraphAction,
   KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 
 interface BatchDeleteRequestBody {
   relationIds: string[];
-  deletedBy: string;
   reason?: string;
 }
 
@@ -50,6 +50,14 @@ export async function POST(
   request: NextRequest
 ): Promise<NextResponse<BatchDeleteResponse>> {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: '请先登录' },
+        { status: 401 }
+      );
+    }
+
     // 解析请求体
     let body: BatchDeleteRequestBody;
     try {
@@ -95,29 +103,9 @@ export async function POST(
       );
     }
 
-    if (!body.deletedBy || typeof body.deletedBy !== 'string') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'deletedBy参数是必需的',
-        },
-        { status: 400 }
-      );
-    }
-
-    if (body.deletedBy.trim() === '') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'deletedBy不能为空',
-        },
-        { status: 400 }
-      );
-    }
-
-    // 权限检查
+    // 权限检查（使用认证用户ID，不接受客户端传入的 deletedBy）
     const permissionResult = await checkKnowledgeGraphPermission(
-      body.deletedBy,
+      authUser.userId,
       KnowledgeGraphAction.MANAGE_RELATIONS,
       KnowledgeGraphResource.RELATION
     );
@@ -184,7 +172,7 @@ export async function POST(
       const userAgent = request.headers.get('user-agent') || 'unknown';
 
       await logKnowledgeGraphAction({
-        userId: body.deletedBy,
+        userId: authUser.userId,
         action: KnowledgeGraphAction.MANAGE_RELATIONS,
         resource: KnowledgeGraphResource.RELATION,
         description: `批量删除${body.relationIds.length}个法条关系`,

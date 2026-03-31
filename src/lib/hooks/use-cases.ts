@@ -112,20 +112,22 @@ export function useCases(filters: CaseFilters, searchQuery: string) {
       }
 
       if (data.success) {
-        // 确保 data.data 是数组
-        const casesData = Array.isArray(data.data) ? data.data : [];
+        // data.data 结构为 { cases: [...], total: N }
+        const casesData = Array.isArray(data.data?.cases)
+          ? data.data.cases
+          : Array.isArray(data.data)
+            ? data.data
+            : [];
         setCases(casesData);
-        // 安全检查pagination对象是否存在
-        if (data.pagination && typeof data.pagination === 'object') {
+        // 分页信息在 meta.pagination（createSuccessResponse 的结构）
+        const pg = data.meta?.pagination ?? data.pagination;
+        if (pg && typeof pg === 'object') {
           setPagination(prev => ({
             ...prev,
-            total:
-              typeof data.pagination.total === 'number'
-                ? data.pagination.total
-                : prev.total,
+            total: typeof pg.total === 'number' ? pg.total : prev.total,
             totalPages:
-              typeof data.pagination.totalPages === 'number'
-                ? data.pagination.totalPages
+              typeof pg.totalPages === 'number'
+                ? pg.totalPages
                 : prev.totalPages,
           }));
         }

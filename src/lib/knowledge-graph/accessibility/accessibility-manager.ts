@@ -38,7 +38,6 @@ export class AccessibilityManager {
   private config: AccessibilityConfig;
   private nodes: GraphNode[];
   private links: GraphLink[];
-  private handlers: KeyboardEventHandlers | null;
   private keyboardManager: KeyboardNavigationManager;
   private currentPalette: ColorPalette | ColorBlindPalette | null;
 
@@ -67,7 +66,6 @@ export class AccessibilityManager {
     };
     this.nodes = nodes;
     this.links = links;
-    this.handlers = handlers;
     this.currentPalette = null;
 
     // 初始化键盘导航管理器
@@ -337,7 +335,6 @@ export class AccessibilityManager {
    * 更新事件处理器
    */
   updateHandlers(handlers: KeyboardEventHandlers): void {
-    this.handlers = handlers;
     this.keyboardManager.updateHandlers(handlers);
   }
 
@@ -404,7 +401,6 @@ export class AccessibilityManager {
     try {
       this.keyboardManager.destroy();
       this.currentPalette = null;
-      this.handlers = null;
       this.nodes = [];
       this.links = [];
       logger.info('可访问性管理器已销毁');

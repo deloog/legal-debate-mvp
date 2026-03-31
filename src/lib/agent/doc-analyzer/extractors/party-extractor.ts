@@ -131,14 +131,6 @@ export class PartyExtractor {
     },
   ];
 
-  // 法定代表人模式（用于过滤）
-  private readonly _legalRepPattern: RegExp =
-    /(?:法定代表人|法人代表)[：:]\s*([^\n]+)/;
-
-  // 诉讼代理人模式（用于过滤）
-  private readonly _agentPattern: RegExp =
-    /(?:委托代理人|诉讼代理人|代理律师|律师)[：:]\s*([^\n]+)/;
-
   /**
    * 从文本中提取当事人信息
    */
@@ -340,35 +332,6 @@ export class PartyExtractor {
       .replace(/诉讼代理人/g, '') // 移除职务描述
       .replace(/，.*$/g, '') // 移除逗号后的所有内容（性别、出生年份等）
       .trim();
-  }
-
-  /**
-   * 处理多当事人（使用顿号或逗号分隔）
-   */
-  private __extractMultipleParties(
-    name: string,
-    type: 'plaintiff' | 'defendant' | 'other'
-  ): Party[] {
-    const parties: Party[] = [];
-    // 使用顿号或逗号分割
-    const names = name.split(/[、,，]/);
-    for (const singleName of names) {
-      const cleaned = this.cleanName(singleName);
-      if (cleaned && cleaned.length > 0) {
-        parties.push({
-          type,
-          name: cleaned,
-          role:
-            type === 'plaintiff'
-              ? '原告'
-              : type === 'defendant'
-                ? '被告'
-                : '第三人',
-          _inferred: true,
-        });
-      }
-    }
-    return parties;
   }
 
   /**

@@ -163,7 +163,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (error: unknown) {
     logger.error('图查询执行失败', { error });
 
-    const errorMessage = error instanceof Error ? error.message : '服务器错误';
+    const errorMessage = '服务器错误';
 
     // 区分不同类型的错误
     if (error instanceof Error && error.message.includes('不存在')) {

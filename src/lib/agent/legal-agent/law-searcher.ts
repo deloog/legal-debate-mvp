@@ -467,21 +467,6 @@ export class LawSearcher {
   }
 
   /**
-   * 计算TF-IDF
-   */
-  private __calculateTFIDF(
-    doc: TFIDFDocument,
-    term: string,
-    documentFrequency: Map<string, number>,
-    totalDocuments: number
-  ): number {
-    const tf = (doc.terms.get(term) || 0) / doc.totalTerms;
-    const df = documentFrequency.get(term) || 1;
-    const idf = Math.log(totalDocuments / df);
-    return tf * idf;
-  }
-
-  /**
    * 获取统计信息
    */
   getStatistics() {

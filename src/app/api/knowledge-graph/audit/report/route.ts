@@ -14,22 +14,35 @@ import {
   AuditReportFormat,
   GenerateReportParams,
 } from '@/lib/knowledge-graph/audit-report/types';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
-
-/**
- * 获取用户ID（从session或请求中提取）
- */
-function getUserId(request: NextRequest): string | null {
-  // 从session中获取（实际实现可能不同）
-  // 这里简化处理，实际应该从认证中间件获取
-  return request.headers.get('x-user-id') || null;
-}
 
 /**
  * 生成审计报告
  */
 export async function POST(request: NextRequest) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { error: 'UNAUTHORIZED', message: '请先登录' },
+        { status: 401 }
+      );
+    }
+
+    // 从DB实时读取角色，仅管理员可生成审计报告
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        { error: 'FORBIDDEN', message: '权限不足，仅管理员可生成审计报告' },
+        { status: 403 }
+      );
+    }
+
     // 解析请求体
     const body = await request.json();
 
@@ -89,27 +102,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 获取用户ID
-    const userId = getUserId(request);
-    if (!userId) {
-      return NextResponse.json(
-        {
-          error: 'UNAUTHORIZED',
-          message: '未授权访问',
-        },
-        { status: 401 }
-      );
-    }
-
-    // 检查权限：只有管理员可以生成审计报告
-    // const hasPermission = await checkAdminPermission(userId);
-    // if (!hasPermission) {
-    //   return NextResponse.json(
-    //     { error: 'FORBIDDEN', message: '权限不足' },
-    //     { status: 403 }
-    //   );
-    // }
-
     // 根据报告类型选择生成器
     const generatorMap = {
       [AuditReportType.ACCESS_AUDIT]: new AccessAuditGenerator(),
@@ -125,7 +117,7 @@ export async function POST(request: NextRequest) {
       endDate,
       reportType: reportType as AuditReportType,
       format: format as AuditReportFormat,
-      userId,
+      userId: authUser.userId,
     };
 
     const report = await generator.generate(params);
@@ -133,7 +125,7 @@ export async function POST(request: NextRequest) {
     // 返回报告
     logger.info('审计报告生成成功', {
       reportType,
-      userId,
+      userId: authUser.userId,
       period: { startDate, endDate },
     });
 
@@ -184,13 +176,10 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const userId = getUserId(request);
-    if (!userId) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
-        {
-          error: 'UNAUTHORIZED',
-          message: '未授权访问',
-        },
+        { error: 'UNAUTHORIZED', message: '请先登录' },
         { status: 401 }
       );
     }

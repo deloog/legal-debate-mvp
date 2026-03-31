@@ -42,13 +42,13 @@ import {
 
 // ── 类型定义 ────────────────────────────────────────────────
 interface ApprovalItem {
-  id: string;
+  id: string; // ApprovalStep.id，供 submit API 使用
+  approvalId: string;
   contractId?: string;
   contractTitle?: string;
   contractNo?: string;
   submittedBy?: string;
   submittedAt: string;
-  type?: string;
   status: string;
   comment?: string;
 }
@@ -105,7 +105,11 @@ export default function ApprovalsPage() {
       const res = await fetch(`/api/contracts/${contractId}/approval/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'APPROVE', comment: '同意' }),
+        body: JSON.stringify({
+          stepId: id,
+          decision: 'APPROVE',
+          comment: '同意',
+        }),
       });
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}: 审批失败`);
@@ -134,7 +138,11 @@ export default function ApprovalsPage() {
       const res = await fetch(`/api/contracts/${contractId}/approval/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'REJECT', comment: rejectComment }),
+        body: JSON.stringify({
+          stepId: id,
+          decision: 'REJECT',
+          comment: rejectComment,
+        }),
       });
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}: 拒绝失败`);

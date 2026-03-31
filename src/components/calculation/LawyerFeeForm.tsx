@@ -1,4 +1,3 @@
-import React from 'react';
 import { LawyerFeeCalculationParams } from '@/types/calculation';
 
 interface LawyerFeeFormProps {

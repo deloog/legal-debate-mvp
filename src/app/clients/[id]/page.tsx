@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '../../../components/ui/button';
 import {
   Card,
@@ -9,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../../../components/ui/card';
-import { CommunicationRecordList } from '../../../components/client/CommunicationRecordList';
+
 import {
   ClientDetail,
   ClientType,
@@ -170,16 +171,18 @@ export default function ClientDetailPage() {
             >
               案件历史
             </button>
-            <button
-              onClick={() => setActiveTab('communications')}
-              className={`pb-4 text-sm font-medium ${
-                activeTab === 'communications'
-                  ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
+            <Link
+              href={`/clients/${client.id}/communications`}
+              className='pb-4 text-sm font-medium text-gray-500 hover:text-gray-700'
             >
               沟通记录
-            </button>
+            </Link>
+            <Link
+              href={`/clients/${client.id}/follow-ups`}
+              className='pb-4 text-sm font-medium text-gray-500 hover:text-gray-700'
+            >
+              跟进任务
+            </Link>
           </nav>
         </div>
 
@@ -188,11 +191,6 @@ export default function ClientDetailPage() {
 
         {/* 案件历史 */}
         {activeTab === 'cases' && <CasesTab cases={client.caseHistory} />}
-
-        {/* 沟通记录 */}
-        {activeTab === 'communications' && (
-          <CommunicationsTab clientId={client.id} />
-        )}
       </main>
     </div>
   );
@@ -403,8 +401,4 @@ function CasesTab({ cases }: { cases?: CaseSummary[] }) {
       </CardContent>
     </Card>
   );
-}
-
-function CommunicationsTab({ clientId }: { clientId: string }) {
-  return <CommunicationRecordList clientId={clientId} />;
 }

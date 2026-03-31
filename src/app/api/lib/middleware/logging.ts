@@ -1,4 +1,5 @@
 import { Middleware } from './core';
+import { logger } from '@/lib/logger';
 
 /**
  * 请求日志中间件
@@ -12,7 +13,7 @@ export const loggingMiddleware: Middleware = async (request, context) => {
     '127.0.0.1';
 
   // 记录请求开始
-  console.log('API Request Started:', {
+  logger.info('API Request Started', {
     requestId: context.requestId,
     method,
     url,

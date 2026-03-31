@@ -8,22 +8,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ImpactAnalysisService } from '@/lib/knowledge-graph/impact-analysis';
 import { ChangeType } from '@/lib/knowledge-graph/impact-analysis/types';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
-
-/**
- * 获取用户ID（从session或请求中提取）
- */
-function getUserId(request: NextRequest): string | null {
-  // 从session中获取（实际实现可能不同）
-  // 这里简化处理，实际应该从认证中间件获取
-  return request.headers.get('x-user-id') || null;
-}
 
 /**
  * 分析法条变更影响
  */
 export async function POST(request: NextRequest) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { error: 'UNAUTHORIZED', message: '请先登录' },
+        { status: 401 }
+      );
+    }
+
+    // 从DB实时读取角色，仅管理员或专家可执行影响分析
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        { error: 'FORBIDDEN', message: '权限不足，仅管理员可执行影响分析' },
+        { status: 403 }
+      );
+    }
+
     // 解析请求体
     const body = await request.json();
 
@@ -61,27 +74,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 获取用户ID
-    const userId = getUserId(request);
-    if (!userId) {
-      return NextResponse.json(
-        {
-          error: 'UNAUTHORIZED',
-          message: '未授权访问',
-        },
-        { status: 401 }
-      );
-    }
-
-    // 检查权限：需要管理员或专家权限
-    // const hasPermission = await checkAdminOrExpertPermission(userId);
-    // if (!hasPermission) {
-    //   return NextResponse.json(
-    //     { error: 'FORBIDDEN', message: '权限不足' },
-    //     { status: 403 }
-    //   );
-    // }
-
     // 调用影响分析服务
     const input = {
       lawArticleId,
@@ -95,7 +87,7 @@ export async function POST(request: NextRequest) {
     logger.info('影响分析成功', {
       lawArticleId,
       changeType,
-      userId,
+      userId: authUser.userId,
       totalImpacted: result.statistics.totalImpacted,
       highPriorityCount: result.statistics.highPriorityCount,
     });
@@ -148,13 +140,10 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const userId = getUserId(request);
-    if (!userId) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
-        {
-          error: 'UNAUTHORIZED',
-          message: '未授权访问',
-        },
+        { error: 'UNAUTHORIZED', message: '请先登录' },
         { status: 401 }
       );
     }

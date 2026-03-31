@@ -5,10 +5,11 @@
  * 分析证据链，返回证据关联关系、完整性评估和建议
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { EvidenceChainService } from '@/lib/evidence/evidence-chain-service';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * 请求体接口
@@ -23,7 +24,18 @@ interface ChainAnalysisRequest {
  * POST /api/evidence/chain-analysis
  * 证据链分析
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: '未授权，请先登录' },
+      },
+      { status: 401 }
+    );
+  }
+
   try {
     // 解析请求体
     let body: ChainAnalysisRequest;
@@ -101,10 +113,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // 验证案件是否存在
+    // 验证案件是否存在并校验归属
     const caseExists = await prisma.case.findUnique({
       where: { id: caseId },
-      select: { id: true },
+      select: { id: true, userId: true },
     });
 
     if (!caseExists) {
@@ -117,6 +129,19 @@ export async function POST(request: Request) {
           },
         },
         { status: 404 }
+      );
+    }
+
+    if (caseExists.userId !== authUser.userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'FORBIDDEN',
+            message: '无权访问此案件',
+          },
+        },
+        { status: 403 }
       );
     }
 
@@ -168,7 +193,7 @@ export async function POST(request: Request) {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '服务器内部错误',
+          message: '服务器内部错误',
         },
       },
       { status: 500 }

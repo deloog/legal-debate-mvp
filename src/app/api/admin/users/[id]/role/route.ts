@@ -6,6 +6,7 @@
 import { prisma } from '@/lib/db/prisma';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { validatePermissions } from '@/lib/middleware/permission-check';
+import { createAuditLog } from '@/lib/audit/logger';
 import type { AssignRoleRequest, UserRoleResponse } from '@/types/admin-user';
 import type { UserRole } from '@/types/auth';
 import { NextRequest, NextResponse } from 'next/server';
@@ -35,6 +36,7 @@ function isValidRole(role: string): boolean {
 async function checkUserExists(userId: string): Promise<boolean> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
+    select: { id: true },
   });
   return user !== null;
 }
@@ -86,6 +88,24 @@ export async function PUT(
       ) as unknown as NextResponse;
     }
 
+    // 只有 SUPER_ADMIN 才能将用户设为 SUPER_ADMIN，防止权限提升
+    // 从数据库取最新角色，避免依赖可能已过期的 JWT payload
+    if (body.role === 'SUPER_ADMIN') {
+      const currentUserInDb = await prisma.user.findUnique({
+        where: { id: user.userId },
+        select: { role: true },
+      });
+      if (currentUserInDb?.role !== 'SUPER_ADMIN') {
+        return Response.json(
+          {
+            error: '权限不足',
+            message: '只有超级管理员可以授予超级管理员角色',
+          },
+          { status: 403 }
+        ) as unknown as NextResponse;
+      }
+    }
+
     // 检查用户是否存在
     const userExists = await checkUserExists(id);
     if (!userExists) {
@@ -121,6 +141,19 @@ export async function PUT(
       createdAt: updatedUser.createdAt,
       updatedAt: updatedUser.updatedAt,
     };
+
+    // 记录角色变更审计日志（异步，不阻塞响应）
+    createAuditLog({
+      userId: user.userId,
+      actionType: 'UPDATE_USER_ROLE',
+      actionCategory: 'ADMIN',
+      description: `管理员修改用户角色 → ${body.role}`,
+      resourceType: 'User',
+      resourceId: id,
+      metadata: { newRole: body.role },
+    }).catch(auditErr => {
+      logger.error('角色变更审计日志记录失败:', auditErr);
+    });
 
     return Response.json(
       {

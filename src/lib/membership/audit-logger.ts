@@ -4,6 +4,8 @@
  */
 
 import { logger } from '@/lib/logger';
+import { createAuditLog } from '@/lib/audit/logger';
+import type { ActionLogType, ActionLogCategory } from '@prisma/client';
 
 export interface AuditLogParams {
   action: string;
@@ -15,8 +17,24 @@ export interface AuditLogParams {
   userAgent?: string;
 }
 
+// resourceType → ActionLogCategory 映射
+const CATEGORY_MAP: Record<AuditLogParams['resourceType'], ActionLogCategory> =
+  {
+    membership: 'OTHER',
+    role: 'ADMIN',
+    permission: 'ADMIN',
+    export: 'SYSTEM',
+  };
+
+// action prefix → ActionLogType 映射
+function resolveActionLogType(action: string): ActionLogType {
+  if (action.startsWith('role:')) return 'UPDATE_USER_ROLE';
+  if (action === 'export:data') return 'EXPORT_DATA';
+  return 'UNKNOWN';
+}
+
 /**
- * 记录审计日志
+ * 记录审计日志（同时写入应用日志和数据库）
  */
 export async function logAuditEvent(params: AuditLogParams): Promise<void> {
   try {
@@ -28,8 +46,18 @@ export async function logAuditEvent(params: AuditLogParams): Promise<void> {
       details: params.details,
     });
 
-    // 如果数据库有审计日志表，可以持久化存储
-    // await prisma.auditLog.create({...});
+    // 持久化到数据库
+    await createAuditLog({
+      userId: params.userId,
+      actionType: resolveActionLogType(params.action),
+      actionCategory: CATEGORY_MAP[params.resourceType],
+      description: params.action,
+      resourceType: params.resourceType,
+      resourceId: params.resourceId,
+      ipAddress: params.ipAddress,
+      userAgent: params.userAgent,
+      metadata: params.details,
+    });
   } catch (error) {
     // 审计日志失败不应影响主业务流程
     logger.error('[Audit] 记录审计日志失败:', error);

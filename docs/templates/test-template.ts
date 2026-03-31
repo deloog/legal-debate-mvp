@@ -8,7 +8,7 @@
  * 3. 测试文件必须放在 src/__tests__/ 目录下
  */
 
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, beforeEach, jest } from '@jest/globals';
 
 // ============ 被测试的模块 ============
 
@@ -34,7 +34,7 @@ describe('ModuleName', () => {
   describe('functionName', () => {
     it('should return expected output for valid input', () => {
       // Arrange
-      const input = mockData.input;
+      void mockData.input;
 
       // Act
       // const result = functionToTest(input);
@@ -45,7 +45,7 @@ describe('ModuleName', () => {
 
     it('should throw error for invalid input', () => {
       // Arrange
-      const invalidInput = '';
+      void '';
 
       // Act & Assert
       // expect(() => functionToTest(invalidInput)).toThrow();
@@ -63,7 +63,7 @@ describe('ModuleName', () => {
   describe('asyncFunction', () => {
     it('should resolve with expected data', async () => {
       // Arrange
-      const input = mockData.input;
+      void mockData.input;
 
       // Act
       // const result = await asyncFunction(input);
@@ -74,7 +74,7 @@ describe('ModuleName', () => {
 
     it('should reject with error for invalid input', async () => {
       // Arrange
-      const invalidInput = '';
+      void '';
 
       // Act & Assert
       // await expect(asyncFunction(invalidInput)).rejects.toThrow();

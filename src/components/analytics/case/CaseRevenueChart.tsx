@@ -4,7 +4,6 @@
 
 'use client';
 
-import React from 'react';
 import type { CaseRevenueAnalysisData } from '@/types/stats';
 
 export interface CaseRevenueChartProps {

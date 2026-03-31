@@ -56,8 +56,7 @@ export async function DELETE(
     logger.error('Unbind OAuth account error:', error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : 'Failed to unbind account',
+        error: 'Failed to unbind account',
       },
       { status: 500 }
     );

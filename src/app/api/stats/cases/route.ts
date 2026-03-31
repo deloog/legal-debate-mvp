@@ -3,18 +3,28 @@
  * Dashboard 案件汇总统计：总数、待处理(DRAFT)、处理中(ACTIVE)、已完成(COMPLETED)及环比增长
  */
 
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { NextRequest, NextResponse } from 'next/server';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+export async function GET(request: NextRequest) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return NextResponse.json(
       { success: false, error: '未认证，请先登录' },
       { status: 401 }
+    );
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { role: true },
+  });
+  if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+    return NextResponse.json(
+      { success: false, error: '无权限访问' },
+      { status: 403 }
     );
   }
 
@@ -55,7 +65,15 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       message: '获取案件统计成功',
-      data: { total, pending, processing, completed, growth },
+      data: {
+        total,
+        pending,
+        processing,
+        completed,
+        growth,
+        avgDuration: 0,
+        trend: [],
+      },
     });
   } catch (error) {
     logger.error('获取案件统计失败:', error);

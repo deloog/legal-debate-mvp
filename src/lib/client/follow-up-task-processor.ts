@@ -1,7 +1,9 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import {
   CommunicationType,
   CompleteFollowUpTaskInput,
+  CreateFollowUpTaskInput,
   FollowUpTask,
   FollowUpTaskListResponse,
   FollowUpTaskPriority,
@@ -10,8 +12,6 @@ import {
   UpdateFollowUpTaskInput,
 } from '@/types/client';
 import { logger } from '@/lib/agent/security/logger';
-
-const prisma = new PrismaClient();
 
 /**
  * 跟进任务处理器类
@@ -343,6 +343,53 @@ export class FollowUpTaskProcessor {
         error instanceof Error ? error.message : String(error);
       logger.error(
         `更新跟进任务失败: ${errorMessage}`,
+        error instanceof Error ? error : undefined
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * 创建跟进任务
+   * @param input 创建任务输入
+   * @returns 创建的任务
+   */
+  static async createTask(
+    input: CreateFollowUpTaskInput
+  ): Promise<FollowUpTask> {
+    try {
+      // 使用 Prisma 创建任务
+      const task = await prisma.followUpTask.create({
+        data: {
+          clientId: input.clientId,
+          communicationId: input.communicationId || '',
+          userId: input.userId,
+          type: input.type,
+          summary: input.summary,
+          dueDate: input.dueDate,
+          priority: input.priority || FollowUpTaskPriority.MEDIUM,
+          status: FollowUpTaskStatus.PENDING,
+          notes: input.notes,
+          metadata:
+            (input.metadata as import('@prisma/client').Prisma.InputJsonValue) ??
+            undefined,
+        },
+      });
+
+      logger.info(`创建跟进任务成功: ${task.id}`);
+
+      // 获取完整的任务信息（包含客户名称）
+      const fullTask = await this.getTask(task.id, input.userId);
+      if (!fullTask) {
+        throw new Error('创建任务后无法获取任务详情');
+      }
+
+      return fullTask;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(
+        `创建跟进任务失败: ${errorMessage}`,
         error instanceof Error ? error : undefined
       );
       throw error;

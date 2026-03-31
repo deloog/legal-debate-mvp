@@ -454,12 +454,7 @@ export class AIMonitor {
 
   private collectMetrics(): void {
     // 定期收集和聚合指标
-    const providers: AIProvider[] = [
-      'zhipu',
-      'deepseek',
-      'openai',
-      'anthropic',
-    ];
+    const providers: AIProvider[] = ['zhipu', 'deepseek', 'openai'];
 
     providers.forEach(provider => {
       const recentMetrics = this.getRecentMetrics(

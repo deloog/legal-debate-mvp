@@ -165,7 +165,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       sourceId: searchParams.get('sourceId'),
       targetId: searchParams.get('targetId'),
     });
-    const errorMessage = error instanceof Error ? error.message : '服务器错误';
+    const errorMessage = '服务器错误';
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

@@ -290,7 +290,7 @@ export class ArgumentGenerator {
         content,
         legalBasis: [article],
         factBasis: [fact],
-        strength: 0.7 + Math.random() * 0.2,
+        strength: this.calculateStrength(article, [fact]),
         side: options.side || 'PLAINTIFF',
         createdAt: Date.now(),
       });
@@ -362,7 +362,7 @@ export class ArgumentGenerator {
         content,
         legalBasis: [article],
         factBasis: [],
-        strength: 0.6 + Math.random() * 0.3,
+        strength: this.calculateStrength(article, []),
         side: opts.side === 'PLAINTIFF' ? 'DEFENDANT' : 'PLAINTIFF',
         createdAt: Date.now(),
       });

@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 interface DashboardStats {
   users: {
@@ -33,13 +35,25 @@ interface DashboardStats {
 }
 
 function DashboardPage(): React.ReactElement | null {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+
   useEffect(() => {
-    loadStats();
-  }, []);
+    if (!authLoading && !isAdmin) {
+      router.replace('/');
+    }
+  }, [authLoading, isAdmin, router]);
+
+  useEffect(() => {
+    if (!authLoading && isAdmin) {
+      loadStats();
+    }
+  }, [authLoading, isAdmin]);
 
   const loadStats = async () => {
     setLoading(true);
@@ -79,6 +93,14 @@ function DashboardPage(): React.ReactElement | null {
       setLoading(false);
     }
   };
+
+  if (authLoading || !isAdmin) {
+    return (
+      <div className='flex items-center justify-center h-64'>
+        <div className='text-gray-600'>加载中...</div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

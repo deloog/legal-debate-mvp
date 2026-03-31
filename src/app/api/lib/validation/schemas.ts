@@ -241,7 +241,7 @@ export const generateDebateSchema = z.object({
  */
 export const generateArgumentsSchema = z.object({
   // 文章 ID 可为 UUID、CUID 或带连字符的 E2E 测试 ID（如 e2e-law-article-001）
-  applicableArticles: z.array(z.string().min(1).max(100)).default([]),
+  applicableArticles: z.array(z.string().min(1).max(100)).max(50).default([]),
 });
 
 /**

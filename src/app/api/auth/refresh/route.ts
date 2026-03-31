@@ -160,7 +160,7 @@ async function handleRefresh(
     });
 
     // 计算过期时间（秒）
-    const expiresIn = 15 * 60; // 15分钟
+    const expiresIn = 7 * 24 * 60 * 60; // 7天
 
     const response = NextResponse.json(
       {
@@ -188,7 +188,7 @@ async function handleRefresh(
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 15 * 60, // 15分钟
+      maxAge: 7 * 24 * 60 * 60, // 7天
       path: '/',
     });
 

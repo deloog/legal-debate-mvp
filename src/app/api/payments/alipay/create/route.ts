@@ -4,8 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
 import { PaymentMethod } from '@/types/payment';
 import { createOrder } from '@/lib/order/order-service';
@@ -19,9 +18,8 @@ import { logger } from '@/lib/logger';
  */
 export async function POST(request: NextRequest) {
   try {
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -94,7 +92,7 @@ export async function POST(request: NextRequest) {
 
     // 创建订单
     const order = await createOrder({
-      userId: session.user.id,
+      userId: authUser.userId,
       membershipTierId,
       paymentMethod: PaymentMethod.ALIPAY,
       description: description || `开通${tier.displayName}会员`,

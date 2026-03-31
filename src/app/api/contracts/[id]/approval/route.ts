@@ -53,7 +53,7 @@ export async function GET(
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '获取审批信息失败',
+          message: '获取审批信息失败',
         },
       },
       { status: 500 }

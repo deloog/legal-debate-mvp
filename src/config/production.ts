@@ -150,13 +150,6 @@ function loadAIConfig() {
       maxTokens: getNumberEnv('OPENAI_MAX_TOKENS', 1000000),
       rateLimit: getNumberEnv('OPENAI_RATE_LIMIT', 100),
     },
-    anthropic: {
-      apiKey: getStringEnv('ANTHROPIC_API_KEY', ''),
-      baseUrl: getStringEnv('ANTHROPIC_BASE_URL', 'https://api.anthropic.com'),
-      model: getStringEnv('ANTHROPIC_MODEL', 'claude-3-opus-20240229'),
-      maxTokens: getNumberEnv('ANTHROPIC_MAX_TOKENS', 1000000),
-      rateLimit: getNumberEnv('ANTHROPIC_RATE_LIMIT', 100),
-    },
     timeout: getNumberEnv('AI_SERVICE_TIMEOUT', 30000),
     retryCount: getNumberEnv('AI_SERVICE_RETRY_COUNT', 3),
     retryDelay: getNumberEnv('AI_SERVICE_RETRY_DELAY', 1000),
@@ -243,7 +236,7 @@ function loadNextjsConfig() {
     secret: getStringEnv('NEXTAUTH_SECRET', ''),
     apiUrl: getUrlEnv('NEXT_PUBLIC_API_URL', ''),
     appUrl: getUrlEnv('NEXT_PUBLIC_APP_URL', ''),
-    appName: getStringEnv('NEXT_PUBLIC_APP_NAME', '法律辩论系统'),
+    appName: getStringEnv('NEXT_PUBLIC_APP_NAME', '律伴AI助手'),
     appDescription: getStringEnv(
       'NEXT_PUBLIC_APP_DESCRIPTION',
       '专业的法律辩论与分析系统'

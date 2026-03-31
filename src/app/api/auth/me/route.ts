@@ -13,31 +13,10 @@ import { logger } from '@/lib/logger';
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    // 调试日志：检查请求中的Cookie
-    const accessToken = request.cookies.get('accessToken')?.value;
-    const authHeader = request.headers.get('authorization');
-    logger.info('[/api/auth/me] 收到请求:', {
-      hasCookie: !!accessToken,
-      hasAuthHeader: !!authHeader,
-      cookiePreview: accessToken
-        ? accessToken.substring(0, 30) + '...'
-        : 'none',
-      allCookies: request.cookies
-        .getAll()
-        .map(c => ({ name: c.name, hasValue: !!c.value })),
-    });
-
     // 验证用户认证
     const user = await getAuthUser(request);
 
-    logger.info('[/api/auth/me] getAuthUser结果:', {
-      hasUser: !!user,
-      userId: user?.userId,
-      userEmail: user?.email,
-    });
-
     if (!user) {
-      logger.info('[/api/auth/me] 认证失败，返回401');
       return NextResponse.json(
         { success: false, message: '未认证' },
         { status: 401 }
@@ -68,6 +47,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(
         { success: false, message: '用户不存在' },
         { status: 404 }
+      );
+    }
+
+    // 封禁/停用的用户不允许获取自身信息（等同于未认证）
+    if (currentUser.status === 'SUSPENDED' || currentUser.status === 'BANNED') {
+      return NextResponse.json(
+        {
+          success: false,
+          message: '账号已被停用，请联系管理员',
+          error: { code: 'ACCOUNT_DISABLED' },
+        },
+        { status: 403 }
       );
     }
 

@@ -4,8 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { getAlipay } from '@/lib/payment/alipay';
 import { isPaymentSuccess, isPaymentFailed } from '@/lib/payment/alipay-utils';
 import {
@@ -21,9 +20,8 @@ import { logger } from '@/lib/logger';
  */
 export async function POST(request: NextRequest) {
   try {
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -50,12 +48,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 获取订单号
+    // 获取订单号（IDOR 防护：查询时同时校验所有权）
     let targetOrderNo = orderNo;
     if (!targetOrderNo) {
-      // 根据orderId查询订单
-      const order = await prisma.order.findUnique({
-        where: { id: orderId },
+      // 根据orderId查询订单，同时验证所有权防止 IDOR
+      const order = await prisma.order.findFirst({
+        where: { id: orderId, userId: authUser.userId },
       });
 
       if (!order) {

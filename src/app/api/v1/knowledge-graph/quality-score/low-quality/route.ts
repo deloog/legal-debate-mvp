@@ -3,8 +3,7 @@
 // =============================================================================
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 import {
   checkKnowledgeGraphPermission,
@@ -23,14 +22,14 @@ import {
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: '未授权' }, { status: 401 });
     }
 
     // 检查权限
     const permissionCheck = await checkKnowledgeGraphPermission(
-      session.user.id,
+      authUser.userId,
       KnowledgeGraphAction.VIEW_RELATIONS,
       KnowledgeGraphResource.RELATION
     );
@@ -54,7 +53,7 @@ export async function GET(request: NextRequest) {
     const results = await service.getLowQualityRelations(input);
 
     logger.info('Low quality relations retrieved', {
-      userId: session.user.id,
+      userId: authUser.userId,
       input,
     });
 

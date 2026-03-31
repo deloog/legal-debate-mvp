@@ -14,6 +14,7 @@ import {
 import { UserRole, UserStatus } from '@/types/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import bcrypt from 'bcryptjs';
 
 /**
  * 验证用户ID格式
@@ -232,6 +233,24 @@ export async function PUT(
       ) as unknown as NextResponse;
     }
 
+    // 只有 SUPER_ADMIN 才能将用户设为 SUPER_ADMIN，防止权限提升
+    // 从数据库取最新角色，避免依赖可能已过期的 JWT payload
+    if (body.role === 'SUPER_ADMIN') {
+      const currentUserInDb = await prisma.user.findUnique({
+        where: { id: user.userId },
+        select: { role: true },
+      });
+      if (currentUserInDb?.role !== 'SUPER_ADMIN') {
+        return Response.json(
+          {
+            error: '权限不足',
+            message: '只有超级管理员可以授予超级管理员角色',
+          },
+          { status: 403 }
+        ) as unknown as NextResponse;
+      }
+    }
+
     if (body.status !== undefined && !isValidStatus(body.status)) {
       return Response.json(
         { error: '无效参数', message: '状态值不正确' },
@@ -261,6 +280,27 @@ export async function PUT(
     }
     if (body.bio !== undefined) {
       updateData.bio = body.bio;
+    }
+
+    // 密码重置：只有 SUPER_ADMIN 可操作，且新密码不能少于8位
+    if (body.newPassword !== undefined && body.newPassword !== '') {
+      if (body.newPassword.length < 8) {
+        return Response.json(
+          { error: '参数错误', message: '新密码不能少于8位' },
+          { status: 400 }
+        ) as unknown as NextResponse;
+      }
+      const currentUserInDb = await prisma.user.findUnique({
+        where: { id: user.userId },
+        select: { role: true },
+      });
+      if (currentUserInDb?.role !== 'SUPER_ADMIN') {
+        return Response.json(
+          { error: '权限不足', message: '只有超级管理员可以重置密码' },
+          { status: 403 }
+        ) as unknown as NextResponse;
+      }
+      updateData.password = await bcrypt.hash(body.newPassword, 10);
     }
 
     // 更新用户

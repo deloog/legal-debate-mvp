@@ -36,7 +36,7 @@ interface DataType {
  * 使用命名导出
  */
 export function ComponentName({ title, initialData = [], onAction }: ComponentProps) {
-  const [data, setData] = useState<DataType[]>(initialData);
+  const [data, _setData] = useState<DataType[]>(initialData);
   const [loading, setLoading] = useState(false);
 
   // 处理操作

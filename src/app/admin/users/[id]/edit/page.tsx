@@ -14,6 +14,8 @@ interface UserFormData {
   phone: string;
   address: string;
   bio: string;
+  newPassword: string;
+  confirmPassword: string;
 }
 
 interface UserDetailData {
@@ -95,6 +97,8 @@ function UserEditPage(): React.ReactElement {
     phone: '',
     address: '',
     bio: '',
+    newPassword: '',
+    confirmPassword: '',
   });
 
   const loadUserDetail = useCallback(async () => {
@@ -155,6 +159,17 @@ function UserEditPage(): React.ReactElement {
       return false;
     }
 
+    if (formData.newPassword) {
+      if (formData.newPassword.length < 8) {
+        setError('新密码不能少于8位');
+        return false;
+      }
+      if (formData.newPassword !== formData.confirmPassword) {
+        setError('两次输入的密码不一致');
+        return false;
+      }
+    }
+
     return true;
   };
 
@@ -182,6 +197,9 @@ function UserEditPage(): React.ReactElement {
           phone: formData.phone || null,
           address: formData.address || null,
           bio: formData.bio || null,
+          ...(formData.newPassword
+            ? { newPassword: formData.newPassword }
+            : {}),
         }),
       });
 
@@ -382,6 +400,54 @@ function UserEditPage(): React.ReactElement {
               onChange={e => handleInputChange('bio', e.target.value)}
               className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
             />
+          </div>
+
+          {/* 密码重置（留空则不修改） */}
+          <div className='border-t border-gray-200 pt-6'>
+            <h3 className='text-sm font-medium text-gray-700 mb-4'>
+              重置密码
+              <span className='ml-2 text-xs font-normal text-gray-400'>
+                （留空则不修改密码）
+              </span>
+            </h3>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              <div>
+                <label
+                  htmlFor='newPassword'
+                  className='block text-sm font-medium text-gray-700 mb-2'
+                >
+                  新密码
+                </label>
+                <input
+                  type='password'
+                  id='newPassword'
+                  value={formData.newPassword}
+                  onChange={e =>
+                    handleInputChange('newPassword', e.target.value)
+                  }
+                  placeholder='至少8位'
+                  className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor='confirmPassword'
+                  className='block text-sm font-medium text-gray-700 mb-2'
+                >
+                  确认新密码
+                </label>
+                <input
+                  type='password'
+                  id='confirmPassword'
+                  value={formData.confirmPassword}
+                  onChange={e =>
+                    handleInputChange('confirmPassword', e.target.value)
+                  }
+                  placeholder='再次输入新密码'
+                  className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                />
+              </div>
+            </div>
           </div>
 
           <div className='flex justify-end gap-4'>

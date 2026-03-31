@@ -11,6 +11,7 @@ import {
   VerificationStatus,
 } from '@prisma/client';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 interface VisualizationDataResponse {
   success: boolean;
@@ -46,6 +47,14 @@ const DISCOVERY_METHOD_NAMES: Record<DiscoveryMethod, string> = {
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<VisualizationDataResponse>> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: '未授权，请先登录' },
+      { status: 401 }
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');

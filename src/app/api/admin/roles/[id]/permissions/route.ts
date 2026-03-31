@@ -29,13 +29,14 @@ async function checkRoleExists(roleId: string): Promise<boolean> {
 }
 
 /**
- * 检查权限是否存在
+ * 获取权限名称（不存在则返回 null）
  */
-async function checkPermissionExists(permissionId: string): Promise<boolean> {
+async function getPermissionName(permissionId: string): Promise<string | null> {
   const permission = await prisma.permission.findUnique({
     where: { id: permissionId },
+    select: { name: true },
   });
-  return permission !== null;
+  return permission?.name ?? null;
 }
 
 // =============================================================================
@@ -163,8 +164,8 @@ export async function POST(
     }
 
     // 检查权限是否存在
-    const permissionExists = await checkPermissionExists(permissionId);
-    if (!permissionExists) {
+    const permissionName = await getPermissionName(permissionId);
+    if (!permissionName) {
       return Response.json(
         { error: '资源不存在', message: '权限不存在' },
         { status: 404 }
@@ -202,7 +203,7 @@ export async function POST(
       'assign_permission',
       {
         permissionId,
-        permissionName: permissionExists,
+        permissionName,
       },
       user.userId
     );

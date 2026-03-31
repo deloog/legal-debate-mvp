@@ -410,21 +410,6 @@ export class AmountExtractorCore {
   }
 
   /**
-   * 获取金额相似性key
-   */
-  private __getSimilarityKey(amount: number): string {
-    if (amount < 1000) {
-      return `${amount.toFixed(0)}_small`;
-    } else if (amount < 10000) {
-      return `${Math.round(amount / 100) * 100}_thousand`;
-    } else if (amount < 100000000) {
-      return `${Math.round(amount / 10000) * 10000}_ten_thousand`;
-    } else {
-      return `${Math.round(amount / 100000000) * 100000000}_hundred_million`;
-    }
-  }
-
-  /**
    * 上下文验证
    */
   private contextualValidation(

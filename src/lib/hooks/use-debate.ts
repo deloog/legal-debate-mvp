@@ -19,7 +19,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Debate, DebateRound, Argument } from '@prisma/client';
 import { DEBATE_API } from '@/lib/constants/api-paths';
 export interface DebateData {
@@ -46,11 +46,16 @@ export function useDebate(
   const [argumentList, setArgumentList] = useState<Argument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // 用于区分首次加载和后续轮询，轮询时不触发骨架屏重渲染
+  const isFirstFetch = useRef(true);
 
   useEffect(() => {
+    isFirstFetch.current = true;
     const fetchDebateData = async () => {
       try {
-        setIsLoading(true);
+        if (isFirstFetch.current) {
+          setIsLoading(true);
+        }
         setError(null);
 
         // 并行获取辩论、轮次和论点数据
@@ -86,7 +91,10 @@ export function useDebate(
       } catch (err) {
         setError(err instanceof Error ? err.message : '加载数据失败');
       } finally {
-        setIsLoading(false);
+        if (isFirstFetch.current) {
+          isFirstFetch.current = false;
+          setIsLoading(false);
+        }
       }
     };
 

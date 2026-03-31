@@ -4,6 +4,7 @@
  */
 import { createCaseAssessmentService } from '@/lib/consultation/case-assessment-service';
 import { prisma } from '@/lib/db/prisma';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { ErrorResponse, SuccessResponse } from '@/types/api-response';
 import { AIAssessment } from '@/types/consultation';
 import { NextRequest, NextResponse } from 'next/server';
@@ -15,9 +16,17 @@ import type { Prisma } from '@prisma/client';
  * 执行AI案件评估
  */
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<AIAssessment> | ErrorResponse>> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: '未授权' } },
+      { status: 401 }
+    );
+  }
+
   try {
     const { id } = await params;
 
@@ -104,7 +113,7 @@ export async function POST(
         success: false,
         error: {
           code: 'ASSESSMENT_FAILED',
-          message: error instanceof Error ? error.message : '评估失败，请重试',
+          message: '评估失败，请重试',
         },
       },
       { status: 500 }
@@ -117,9 +126,17 @@ export async function POST(
  * 获取已有的评估结果
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<AIAssessment | null> | ErrorResponse>> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: '未授权' } },
+      { status: 401 }
+    );
+  }
+
   try {
     const { id } = await params;
 

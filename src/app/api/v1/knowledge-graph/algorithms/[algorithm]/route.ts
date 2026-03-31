@@ -186,7 +186,7 @@ export async function GET(
   } catch (error: unknown) {
     const algorithm = (await params).algorithm;
     logger.error('执行图算法失败', { algorithm, error });
-    const errorMessage = error instanceof Error ? error.message : '服务器错误';
+    const errorMessage = '服务器错误';
     return NextResponse.json(
       {
         success: false,

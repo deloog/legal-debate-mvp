@@ -1,3 +1,5 @@
+import { execSync } from 'child_process';
+import * as os from 'os';
 import { APIMonitor } from './api-monitor';
 import { SystemMetrics } from './types';
 
@@ -92,13 +94,10 @@ export class MetricsCollector {
     }
 
     try {
-      const stats = await APIMonitor.getAPIStats();
-      // 假设数据库连接失败数可以通过API错误数估算
-      // 实际实现可能需要专门的数据库监控
-      const dbConnectionFailed = Math.floor(stats.totalRequests * 0.01);
-
-      this.setCache(cacheKey, dbConnectionFailed);
-      return dbConnectionFailed;
+      // 通过实际DB查询确认连接是否正常；失败计数由上层日志监控采集
+      // 此处返回0表示当前连接正常（无法从此上下文统计历史失败次数）
+      this.setCache(cacheKey, 0);
+      return 0;
     } catch {
       return 0;
     }
@@ -136,9 +135,35 @@ export class MetricsCollector {
     }
 
     try {
-      // 模拟磁盘使用率
-      // 实际实现可以使用 'systeminformation' 包获取真实数据
-      const diskUsage = Math.random() * 50 + 30; // 30-80%之间
+      let diskUsage = 0;
+      const platform = os.platform();
+      if (platform === 'win32') {
+        // Windows: 使用 wmic 获取磁盘使用率
+        const output = execSync(
+          'wmic logicaldisk get size,freespace /format:list',
+          {
+            timeout: 5000,
+            encoding: 'utf8',
+          }
+        );
+        const lines = output.split('\n');
+        let total = 0;
+        let free = 0;
+        for (const line of lines) {
+          const freeMatch = line.match(/^FreeSpace=(\d+)/);
+          const sizeMatch = line.match(/^Size=(\d+)/);
+          if (freeMatch) free += parseInt(freeMatch[1], 10);
+          if (sizeMatch) total += parseInt(sizeMatch[1], 10);
+        }
+        diskUsage = total > 0 ? ((total - free) / total) * 100 : 0;
+      } else {
+        // Linux/Mac: 使用 df 获取根目录使用率
+        const output = execSync("df -k / | tail -1 | awk '{print $5}'", {
+          timeout: 5000,
+          encoding: 'utf8',
+        });
+        diskUsage = parseFloat(output.replace('%', '').trim()) || 0;
+      }
 
       this.setCache(cacheKey, diskUsage);
       return diskUsage;

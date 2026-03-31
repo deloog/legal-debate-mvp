@@ -27,19 +27,6 @@ import type {
   LawStarVectorResponse,
 } from '../../types/lawstar-api';
 
-/** 支持流式输出的 OpenAI 兼容客户端（duck-typing 接口） */
-interface StreamingAIClient {
-  chat: {
-    completions: {
-      create: (
-        params: AIRequestConfig
-      ) => Promise<
-        AsyncIterable<{ choices: Array<{ delta: { content?: string } }> }>
-      >;
-    };
-  };
-}
-
 // =============================================================================
 // 统一服务类型定义
 // =============================================================================
@@ -1298,23 +1285,25 @@ ${legalTexts}
       stream: true,
     };
 
-    // 获取AI客户端
-    const client = this.generalAIService as unknown as StreamingAIClient;
-    if (!client) {
+    const aiService = this.generalAIService;
+    if (!aiService) {
       throw new Error('AI client not available');
     }
 
     // 创建ReadableStream
     return new ReadableStream({
       async start(controller) {
+        // 使用 TextEncoder 将字符串编码为 Uint8Array，确保外层 TextDecoder.decode() 能正确解析
+        const enc = new TextEncoder();
+        const send = (s: string) => controller.enqueue(enc.encode(s));
         try {
           // 发送开始事件
-          controller.enqueue(
+          send(
             `data: ${JSON.stringify({ type: 'started', timestamp: new Date().toISOString() })}\n\n`
           );
 
-          // 调用AI流式API
-          const stream = await client.chat.completions.create(requestConfig);
+          // 调用AI流式API（通过 streamChatCompletion 直接获取 AsyncIterable）
+          const stream = await aiService.streamChatCompletion(requestConfig);
 
           let accumulatedContent = '';
           let chunkId = 0;
@@ -1339,7 +1328,7 @@ ${legalTexts}
               progress: Math.round(progress),
               timestamp: new Date().toISOString(),
             };
-            controller.enqueue(`data: ${JSON.stringify(eventData)}\n\n`);
+            send(`data: ${JSON.stringify(eventData)}\n\n`);
           }
 
           // 发送完成事件
@@ -1351,18 +1340,15 @@ ${legalTexts}
             totalChunks: chunkId,
             timestamp: new Date().toISOString(),
           };
-          controller.enqueue(`data: ${JSON.stringify(completeEventData)}\n\n`);
+          send(`data: ${JSON.stringify(completeEventData)}\n\n`);
 
           controller.close();
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : 'Unknown error';
-          const errorEvent = {
-            type: 'error',
-            error: errorMessage,
-            timestamp: new Date().toISOString(),
-          };
-          controller.enqueue(`data: ${JSON.stringify(errorEvent)}\n\n`);
+          send(
+            `data: ${JSON.stringify({ type: 'error', error: errorMessage, timestamp: new Date().toISOString() })}\n\n`
+          );
           controller.error(error);
         }
       },
@@ -1437,19 +1423,21 @@ ${contextSection}
       stream: true,
     };
 
-    const client = this.generalAIService as unknown as StreamingAIClient;
-    if (!client) {
+    const aiService = this.generalAIService;
+    if (!aiService) {
       throw new Error('AI client not available');
     }
 
     return new ReadableStream({
       async start(controller) {
+        const enc = new TextEncoder();
+        const send = (s: string) => controller.enqueue(enc.encode(s));
         try {
-          controller.enqueue(
+          send(
             `data: ${JSON.stringify({ type: 'started', timestamp: new Date().toISOString() })}\n\n`
           );
 
-          const stream = await client.chat.completions.create(requestConfig);
+          const stream = await aiService.streamChatCompletion(requestConfig);
 
           let accumulatedContent = '';
           let chunkId = 0;
@@ -1471,7 +1459,7 @@ ${contextSection}
               progress: Math.round(progress),
               timestamp: new Date().toISOString(),
             };
-            controller.enqueue(`data: ${JSON.stringify(eventData)}\n\n`);
+            send(`data: ${JSON.stringify(eventData)}\n\n`);
           }
 
           const completeEventData = {
@@ -1482,7 +1470,7 @@ ${contextSection}
             totalChunks: chunkId,
             timestamp: new Date().toISOString(),
           };
-          controller.enqueue(`data: ${JSON.stringify(completeEventData)}\n\n`);
+          send(`data: ${JSON.stringify(completeEventData)}\n\n`);
 
           controller.close();
         } catch (error) {
@@ -1493,7 +1481,163 @@ ${contextSection}
             error: errorMessage,
             timestamp: new Date().toISOString(),
           };
-          controller.enqueue(`data: ${JSON.stringify(errorEvent)}\n\n`);
+          send(`data: ${JSON.stringify(errorEvent)}\n\n`);
+          controller.error(error);
+        }
+      },
+    });
+  }
+
+  /**
+   * 单边顺序生成：仅为一方（原告或被告）生成论点。
+   * 被告生成时可传入 opponentArgs，让 AI 针对对方论点进行有针对性的回应，
+   * 从而实现真正的"辩论"而非双方同时独立陈述。
+   */
+  public async generateSideStreamLegacy(
+    params: {
+      title: string;
+      description: string;
+      legalReferences?: string[];
+      previousRoundsContext?: string;
+      evidenceContext?: string; // 案件已采纳证据
+      userRoundContext?: string; // 用户本轮补充的理由/新证据
+    },
+    side: 'plaintiff' | 'defendant',
+    opponentArgs?: string
+  ): Promise<ReadableStream> {
+    this.ensureInitialized();
+    this.ensureGeneralAIAvailable();
+
+    const isPlaintiff = side === 'plaintiff';
+    const sideLabel = isPlaintiff ? '原告' : '被告';
+    const sideKey = side;
+
+    const contextSection = params.previousRoundsContext
+      ? `\n## 前轮辩论摘要\n${params.previousRoundsContext}\n\n**本轮要求**：必须针对以上前轮论点进行正面回应或深化论证，不得简单重复已有论点。\n`
+      : '';
+
+    const opponentSection =
+      !isPlaintiff && opponentArgs
+        ? `\n## 原告方已提出的论点（必须针对性回应）\n${opponentArgs}\n\n**要求**：被告方每个论点都必须明确回应原告的某个具体主张，不得回避，并从不同角度提出抗辩。\n`
+        : '';
+
+    const evidenceSection = params.evidenceContext
+      ? `\n## 案件已采纳证据\n${params.evidenceContext}\n\n**要求**：论点应当结合以上证据材料，援引具体证据支撑主张。\n`
+      : '';
+
+    const userRoundSection = params.userRoundContext
+      ? `\n## 本轮补充说明（当事人提供）\n${params.userRoundContext}\n\n**要求**：必须将以上补充内容融入本轮论点中。\n`
+      : '';
+
+    const userPrompt = `你是${sideLabel}方律师。案件信息如下：
+
+**案件**：${params.title}
+**描述**：${params.description}
+${params.legalReferences?.length ? `**参考法条**：${params.legalReferences.join('、')}` : ''}
+${evidenceSection}${userRoundSection}${contextSection}${opponentSection}
+请为${sideLabel}生成3-4个核心论点，直接以JSON格式输出（不要包含其他任何文字）：
+
+{
+  "${sideKey}": [
+    {
+      "content": "论点主张（清晰简洁，直接陈述核心观点）",
+      "reasoning": "推理过程（从法律事实出发，运用法律规定得出结论，50-200字）",
+      "legalBasis": [
+        {
+          "lawName": "中华人民共和国民法典",
+          "articleNumber": "第667条",
+          "relevance": 0.9,
+          "explanation": "该条款规定借款合同义务，本案出借人依法享有要求归还借款的权利"
+        },
+        {
+          "lawName": "最高人民法院关于审理民间借贷案件适用法律若干问题的规定",
+          "articleNumber": "第28条",
+          "relevance": 0.85,
+          "explanation": "该司法解释明确规定利息计算方式，支持本案利息主张"
+        }
+      ]
+    }
+  ]
+}`;
+
+    const systemPrompt = isPlaintiff
+      ? `你是原告方律师，擅长法律诉讼。请仅输出JSON格式，不要添加任何解释文字。每个论点的legalBasis必须包含2-3条法律依据，法律名称必须准确完整。`
+      : `你是被告方律师，擅长法律辩护。请仅输出JSON格式，不要添加任何解释文字。每个论点必须明确针对原告的某个主张进行抗辩，legalBasis必须包含2-3条法律依据。`;
+
+    const requestConfig: AIRequestConfig = {
+      model: 'deepseek-chat',
+      provider: 'deepseek',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: 0.7,
+      maxTokens: 2000,
+      topP: 0.9,
+      stream: true,
+    };
+
+    const aiService = this.generalAIService;
+    if (!aiService) {
+      throw new Error('AI client not available');
+    }
+
+    return new ReadableStream({
+      async start(controller) {
+        const enc = new TextEncoder();
+        const send = (s: string) => controller.enqueue(enc.encode(s));
+        try {
+          send(
+            `data: ${JSON.stringify({ type: 'started', side, timestamp: new Date().toISOString() })}\n\n`
+          );
+
+          const stream = await aiService.streamChatCompletion(requestConfig);
+          let accumulatedContent = '';
+          let chunkId = 0;
+
+          for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content || '';
+            accumulatedContent += content;
+            const progress = Math.min(
+              (accumulatedContent.length / 2000) * 100,
+              99
+            );
+            send(
+              `data: ${JSON.stringify({
+                type: 'content',
+                chunkId: ++chunkId,
+                content,
+                side,
+                isComplete: false,
+                progress: Math.round(progress),
+                timestamp: new Date().toISOString(),
+              })}\n\n`
+            );
+          }
+
+          send(
+            `data: ${JSON.stringify({
+              type: 'complete',
+              content: accumulatedContent,
+              side,
+              isComplete: true,
+              progress: 100,
+              totalChunks: chunkId,
+              timestamp: new Date().toISOString(),
+            })}\n\n`
+          );
+          controller.close();
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+          send(
+            `data: ${JSON.stringify({
+              type: 'error',
+              error: errorMessage,
+              side,
+              timestamp: new Date().toISOString(),
+            })}\n\n`
+          );
           controller.error(error);
         }
       },

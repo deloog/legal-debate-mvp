@@ -77,8 +77,12 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     deletedAt: null,
   };
 
-  // 权限过滤：非管理员只能看到自己创建的案件
-  if (!isAdminRole(authUser.role as UserRole)) {
+  // 权限过滤：非管理员只能看到自己创建的案件（DB 重查角色，避免 stale JWT）
+  const dbUserCases = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { role: true },
+  });
+  if (!isAdminRole((dbUserCases?.role ?? '') as UserRole)) {
     where.userId = authUser.userId;
   } else if (userId) {
     // 管理员可以根据userId参数过滤
@@ -222,6 +226,20 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 
   // 处理sharedWithTeam，默认为false
   const sharedWithTeamValue = body.sharedWithTeam === true;
+
+  // 校验金额（如有提供，必须为正数）
+  if (body.amount !== undefined && body.amount !== null) {
+    const amountNum = Number(body.amount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'INVALID_AMOUNT', message: '案件金额必须为正数' },
+        },
+        { status: 400 }
+      );
+    }
+  }
 
   const caseData = await prisma.case.create({
     data: {

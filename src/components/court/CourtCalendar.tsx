@@ -46,7 +46,8 @@ export function CourtCalendar(props: CourtCalendarProps) {
       });
 
       if (response.ok) {
-        const data = (await response.json()) as {
+        const json = await response.json();
+        const data = (json.data ?? json) as {
           schedules: CourtScheduleDetail[];
         };
         setSchedules(data.schedules || []);

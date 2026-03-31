@@ -5,7 +5,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import ContractTemplateEditor from '@/components/contract/ContractTemplateEditor';
 
 interface ContractTemplate {
@@ -23,7 +22,6 @@ interface ContractTemplate {
 }
 
 export default function ContractTemplatesPage() {
-  const ___router = useRouter();
   const [loading, setLoading] = useState(true);
   const [templates, setTemplates] = useState<ContractTemplate[]>([]);
   const [error, setError] = useState<string | null>(null);

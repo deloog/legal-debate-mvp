@@ -6,15 +6,20 @@
  * 功能：获取知识图谱统计数据
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { VerificationStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * 获取知识图谱统计
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json({ error: '未授权' }, { status: 401 });
+  }
   try {
     // 获取各类型关系统计
     const relationStats = await prisma.lawArticleRelation.groupBy({

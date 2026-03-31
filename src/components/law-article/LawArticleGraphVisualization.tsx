@@ -146,17 +146,47 @@ export function LawArticleGraphVisualization({
       return;
     }
 
-    const width = 1200;
-    const height = 800;
+    const width = 1600;
+    const height = 1000;
 
     // 清空SVG
     d3.select(svgRef.current).selectAll('*').remove();
+
+    // 节点预置初始位置：在画布中心附近随机分布，避免全部堆在 (0,0)
+    const cx = width / 2;
+    const cy = height / 2;
+    (graphData.nodes as (GraphNode & { x?: number; y?: number })[]).forEach(
+      node => {
+        if (node.x === undefined || node.x === 0) {
+          node.x = cx + (Math.random() - 0.5) * 400;
+        }
+        if (node.y === undefined || node.y === 0) {
+          node.y = cy + (Math.random() - 0.5) * 400;
+        }
+      }
+    );
 
     const svg = d3
       .select(svgRef.current)
       .attr('width', width)
       .attr('height', height)
       .attr('viewBox', [0, 0, width, height]);
+
+    // 缩放平移支持
+    const zoomG = svg.append('g');
+    svg.call(
+      d3
+        .zoom<SVGSVGElement, unknown>()
+        .scaleExtent([0.1, 4])
+        .on('zoom', event => {
+          zoomG.attr('transform', event.transform);
+        })
+    );
+
+    // 根据节点数量动态调整力参数
+    const nodeCount = graphData.nodes.length;
+    const chargeStrength = nodeCount > 200 ? -80 : nodeCount > 50 ? -200 : -300;
+    const linkDistance = nodeCount > 200 ? 60 : 100;
 
     // 创建力导向图
     const simulation = d3
@@ -166,41 +196,44 @@ export function LawArticleGraphVisualization({
         d3
           .forceLink(graphData.links as d3.SimulationLinkDatum<GraphNode>[])
           .id((d: d3.SimulationNodeDatum) => (d as GraphNode).id)
-          .distance((d: d3.SimulationLinkDatum<GraphNode>) => {
-            const link = d as unknown as GraphLink;
-            return 100 / link.strength;
-          })
+          .distance(linkDistance)
       )
-      .force('charge', d3.forceManyBody().strength(-300))
-      .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(30));
+      .force('charge', d3.forceManyBody().strength(chargeStrength))
+      .force('center', d3.forceCenter(cx, cy).strength(0.1))
+      .force('x', d3.forceX(cx).strength(0.05))
+      .force('y', d3.forceY(cy).strength(0.05))
+      .force('collision', d3.forceCollide().radius(18));
 
-    // 绘制连线
-    const link = svg
+    // 绘制连线（放入可缩放组 zoomG）
+    const link = zoomG
       .append('g')
       .selectAll('line')
       .data(graphData.links)
       .enter()
       .append('line')
       .attr('stroke', (d: GraphLink) => getRelationColor(d.relationType))
-      .attr('stroke-width', (d: GraphLink) => d.strength * 3)
-      .attr('stroke-opacity', 0.6);
+      .attr('stroke-width', 1.5)
+      .attr('stroke-opacity', 0.5);
 
-    // 绘制节点
-    const node = svg
+    // 绘制节点（放入可缩放组 zoomG）
+    const node = zoomG
       .append('g')
       .selectAll('circle')
       .data(graphData.nodes)
       .enter()
       .append('circle')
-      .attr('r', (d: GraphNode) => (d.id === centerArticleId ? 15 : 10))
+      .attr('r', (d: GraphNode) => {
+        if (d.id === centerArticleId) return 15;
+        if (d.level === 0) return 9; // 种子节点
+        return 6; // 邻居节点稍小
+      })
       .attr('fill', (d: GraphNode) =>
         showCommunityColors && communityData?.nodeColors[d.id]
           ? communityData.nodeColors[d.id]
           : getCategoryColor(d.category)
       )
       .attr('stroke', '#fff')
-      .attr('stroke-width', 2)
+      .attr('stroke-width', 1.5)
       .style('cursor', 'pointer')
       .call(
         d3
@@ -213,18 +246,20 @@ export function LawArticleGraphVisualization({
         setSelectedNode(d);
       });
 
-    // 添加标签
-    const label = svg
+    // 添加标签（只在节点较少时显示，避免文字堆叠）
+    const showLabels = graphData.nodes.length <= 120;
+    const label = zoomG
       .append('g')
       .selectAll('text')
-      .data(graphData.nodes)
+      .data(showLabels ? graphData.nodes : [])
       .enter()
       .append('text')
-      .text((d: GraphNode) => `${d.lawName}-${d.articleNumber}`)
-      .attr('font-size', 10)
-      .attr('dx', 12)
-      .attr('dy', 4)
-      .style('pointer-events', 'none');
+      .text((d: GraphNode) => `${d.lawName.slice(0, 8)}-${d.articleNumber}`)
+      .attr('font-size', 9)
+      .attr('dx', 10)
+      .attr('dy', 3)
+      .style('pointer-events', 'none')
+      .style('fill', '#555');
 
     // 更新位置
     simulation.on('tick', () => {

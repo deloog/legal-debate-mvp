@@ -59,10 +59,11 @@ export function TeamList() {
         throw new Error('获取团队列表失败');
       }
 
-      const data = (await response.json()) as TeamListResponse;
-      setTeams(data.teams);
-      setTotal(data.total);
-      setTotalPages(data.totalPages);
+      const json = await response.json();
+      const data = (json.data ?? json) as TeamListResponse;
+      setTeams(data.teams ?? []);
+      setTotal(data.total ?? 0);
+      setTotalPages(data.totalPages ?? 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : '获取团队列表失败');
       setTeams([]);

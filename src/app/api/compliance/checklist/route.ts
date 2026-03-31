@@ -17,6 +17,7 @@ import {
   isValidComplianceCheckStatus,
 } from '@/types/compliance';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * GET /api/compliance/checklist
@@ -26,6 +27,17 @@ export async function GET(
   request: NextRequest
 ): Promise<NextResponse<GetChecklistResponse>> {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
+        { status: 401 }
+      ) as NextResponse<GetChecklistResponse>;
+    }
+
     // 获取查询参数
     const searchParams = request.nextUrl.searchParams;
     const categoryStr = searchParams.get('category');
@@ -42,7 +54,7 @@ export async function GET(
         ? (statusStr as ComplianceCheckStatus)
         : undefined;
 
-    const checklists = await ComplianceService.getChecklists({
+    const checklists = await ComplianceService.getChecklists(authUser.userId, {
       category,
       status,
     });
@@ -62,7 +74,7 @@ export async function GET(
         success: false,
         error: {
           code: 'SERVICE_ERROR',
-          message: error instanceof Error ? error.message : '获取检查清单失败',
+          message: '获取检查清单失败',
         },
       },
       { status: 500 }
@@ -78,6 +90,17 @@ export async function PUT(
   request: NextRequest
 ): Promise<NextResponse<UpdateCheckItemResponse>> {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
+        { status: 401 }
+      ) as NextResponse<UpdateCheckItemResponse>;
+    }
+
     // 解析请求体
     let body: unknown;
     try {
@@ -157,13 +180,16 @@ export async function PUT(
       );
     }
 
-    const updatedItem = await ComplianceService.updateCheckItem({
-      checklistId: requestData.checklistId,
-      itemId: requestData.itemId,
-      status: requestData.status as ComplianceCheckStatus,
-      notes:
-        typeof requestData.notes === 'string' ? requestData.notes : undefined,
-    });
+    const updatedItem = await ComplianceService.updateCheckItem(
+      authUser.userId,
+      {
+        checklistId: requestData.checklistId,
+        itemId: requestData.itemId,
+        status: requestData.status as ComplianceCheckStatus,
+        notes:
+          typeof requestData.notes === 'string' ? requestData.notes : undefined,
+      }
+    );
 
     return NextResponse.json(
       {
@@ -180,7 +206,7 @@ export async function PUT(
         success: false,
         error: {
           code: 'SERVICE_ERROR',
-          message: error instanceof Error ? error.message : '更新检查项失败',
+          message: '更新检查项失败',
         },
       },
       { status: 500 }

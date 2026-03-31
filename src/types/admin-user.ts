@@ -16,6 +16,7 @@ export interface UpdateUserRequest {
   phone?: string;
   address?: string;
   bio?: string;
+  newPassword?: string;
 }
 
 /**

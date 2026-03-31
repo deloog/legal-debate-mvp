@@ -49,9 +49,6 @@ export class AIRequestExecutor {
         case 'openai':
           response = await this.executeOpenAIRequest(client, request);
           break;
-        case 'anthropic':
-          response = await this.executeAnthropicRequest(client, request);
-          break;
         default:
           throw new Error(`Unsupported provider: ${provider}`);
       }
@@ -118,34 +115,6 @@ export class AIRequestExecutor {
   }
 
   /**
-   * 执行Anthropic请求
-   */
-  private async executeAnthropicRequest(
-    client: AIClient,
-    request: AIRequestConfig
-  ): Promise<unknown> {
-    const messagesApi = client.messages;
-    if (!messagesApi) {
-      throw new Error('Anthropic messages API not available on this client');
-    }
-    const response = await messagesApi.create({
-      model: request.model,
-      messages: request.messages.map(m => ({
-        role: m.role,
-        content: m.content,
-      })) as unknown,
-      temperature: request.temperature,
-      max_tokens: request.maxTokens,
-      top_p: request.topP,
-      stream: request.stream,
-      stop_sequences: request.stop,
-    } as Record<string, unknown>);
-
-    // 转换Anthropic响应格式为标准格式
-    return this.convertAnthropicResponse(response);
-  }
-
-  /**
    * 转换响应为统一格式
    */
   private convertResponse(response: unknown, provider: AIProvider): AIResponse {
@@ -175,37 +144,6 @@ export class AIRequestExecutor {
       provider,
       duration: 0, // 将在外部设置
       cached: false,
-    };
-  }
-
-  /**
-   * 转换Anthropic响应为OpenAI格式
-   */
-  private convertAnthropicResponse(response: unknown): Record<string, unknown> {
-    const r = response as Record<string, unknown>;
-    const content = r.content as Array<Record<string, unknown>> | undefined;
-    const usage = r.usage as Record<string, number> | undefined;
-    return {
-      id: r.id,
-      object: 'chat.completion',
-      created: Date.now(),
-      model: r.model,
-      choices: [
-        {
-          index: 0,
-          message: {
-            role: 'assistant',
-            content: content?.[0]?.text || '',
-          },
-          finish_reason: r.stop_reason || 'stop',
-          logprobs: null,
-        },
-      ],
-      usage: {
-        prompt_tokens: usage?.input_tokens,
-        completion_tokens: usage?.output_tokens,
-        total_tokens: (usage?.input_tokens ?? 0) + (usage?.output_tokens ?? 0),
-      },
     };
   }
 

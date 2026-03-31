@@ -12,6 +12,8 @@ import {
   markExpiredFollowUpTasks,
 } from '@/lib/cron/send-follow-up-reminders';
 import { logger } from '@/lib/agent/security/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 
 // =============================================================================
 // GET - 获取跟进提醒统计信息
@@ -21,7 +23,30 @@ import { logger } from '@/lib/agent/security/logger';
  * GET /api/follow-up-tasks/send-reminders
  * 获取跟进提醒统计信息
  */
+async function requireAdmin(
+  request: NextRequest
+): Promise<NextResponse | null> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json({ error: '未授权' }, { status: 401 });
+  }
+  const dbUser = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { role: true },
+  });
+  if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+    return NextResponse.json(
+      { error: '权限不足，仅管理员可访问' },
+      { status: 403 }
+    );
+  }
+  return null;
+}
+
 export async function GET(request: NextRequest) {
+  const authErr = await requireAdmin(request);
+  if (authErr) return authErr;
+
   try {
     const searchParams = new URL(request.url).searchParams;
     const action = searchParams.get('action');
@@ -58,8 +83,7 @@ export async function GET(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : '获取跟进提醒统计失败';
+    const errorMessage = '获取跟进提醒统计失败';
     logger.error('[API] 获取跟进提醒统计失败:', error as Error as never);
 
     return NextResponse.json(
@@ -81,6 +105,9 @@ export async function GET(request: NextRequest) {
  * 手动触发跟进提醒发送
  */
 export async function POST(request: NextRequest) {
+  const authErr = await requireAdmin(request);
+  if (authErr) return authErr;
+
   try {
     const body = await request.json();
     const action = body.action;
@@ -111,8 +138,7 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : '发送跟进提醒失败';
+    const errorMessage = '发送跟进提醒失败';
     logger.error('[API] 发送跟进提醒失败:', error as Error as never);
 
     return NextResponse.json(

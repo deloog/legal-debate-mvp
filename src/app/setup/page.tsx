@@ -154,7 +154,7 @@ export default function SetupPage() {
       content: (
         <div className='space-y-4'>
           <p className='text-sm text-slate-600'>
-            AI 辩论功能使用 Anthropic Claude API。配置步骤：
+            AI 功能使用 DeepSeek 或智谱 GLM API（国内可用）。配置步骤：
           </p>
           <div className='space-y-3'>
             <div>
@@ -163,14 +163,13 @@ export default function SetupPage() {
               </p>
               <p className='text-sm text-slate-600'>
                 从{' '}
-                <a
-                  href='https://console.anthropic.com/'
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='font-medium text-violet-600 hover:underline'
-                >
-                  Anthropic Console
-                </a>{' '}
+                <span className='font-medium text-violet-600'>
+                  DeepSeek 开放平台（platform.deepseek.com）
+                </span>{' '}
+                或{' '}
+                <span className='font-medium text-violet-600'>
+                  智谱 AI 开放平台（open.bigmodel.cn）
+                </span>{' '}
                 获取 API 密钥
               </p>
             </div>
@@ -180,8 +179,8 @@ export default function SetupPage() {
               </p>
               <pre className='rounded-lg bg-slate-900 p-3 text-sm text-slate-100'>
                 <code>
-                  ANTHROPIC_API_KEY={'"'}
-                  your-api-key-here{'"'}
+                  {'DEEPSEEK_API_KEY="your-deepseek-key"\n'}
+                  {'ZHIPU_API_KEY="your-zhipu-key"'}
                 </code>
               </pre>
             </div>

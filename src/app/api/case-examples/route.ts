@@ -163,6 +163,18 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     );
   }
 
+  // 案例库为共享资源，仅管理员可创建
+  const dbUser = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { role: true },
+  });
+  if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+    return NextResponse.json(
+      { error: '权限不足', message: '仅管理员可创建案例' },
+      { status: 403 }
+    );
+  }
+
   const body = await request.json();
   const validatedData = createCaseExampleSchema.parse(body);
 

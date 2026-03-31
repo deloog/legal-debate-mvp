@@ -90,6 +90,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       ) as unknown as NextResponse;
     }
 
+    // 只有 SUPER_ADMIN 才能批量授予 SUPER_ADMIN 角色，防止权限提升
+    if (body.role === 'SUPER_ADMIN') {
+      const currentUserInDb = await prisma.user.findUnique({
+        where: { id: user.userId },
+        select: { role: true },
+      });
+      if (currentUserInDb?.role !== 'SUPER_ADMIN') {
+        return Response.json(
+          {
+            error: '权限不足',
+            message: '只有超级管理员可以批量授予超级管理员角色',
+          },
+          { status: 403 }
+        ) as unknown as NextResponse;
+      }
+    }
+
     // 批量查询用户
     const users = await prisma.user.findMany({
       where: {

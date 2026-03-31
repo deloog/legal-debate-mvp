@@ -7,11 +7,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { clearContractPDFCache } from '@/lib/contract/contract-pdf-generator';
 import { logger } from '@/lib/logger';
+import { createAuditLog } from '@/lib/audit/logger';
+import {
+  resolveContractUserId,
+  unauthorizedResponse,
+  forbiddenResponse,
+} from '@/app/api/lib/middleware/contract-auth';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // ─── 认证：必须登录 ────────────────────────────────────────────────────────
+  const currentUserId = resolveContractUserId(request);
+  if (!currentUserId) return unauthorizedResponse();
+
   try {
     const { id } = await params;
     const body = await request.json();
@@ -46,6 +56,7 @@ export async function POST(
     // 检查合同是否存在
     const contract = await prisma.contract.findUnique({
       where: { id },
+      include: { case: { select: { userId: true } } },
     });
 
     if (!contract) {
@@ -61,18 +72,43 @@ export async function POST(
       );
     }
 
-    // ─── 状态机检查：只有 DRAFT / PENDING 允许签署 ──────────────────────────
-    if (
-      contract.status === 'SIGNED' ||
-      contract.status === 'TERMINATED' ||
-      contract.status === 'COMPLETED'
-    ) {
+    // ─── 授权：校验当前用户是否为合同当事人 ───────────────────────────────────
+    if (body.role === 'lawyer') {
+      // 律师必须与合同记录中的 lawyerId 匹配
+      if (contract.lawyerId !== currentUserId) {
+        logger.warn('[Sign] 非合同律师尝试签署:', {
+          contractId: id,
+          currentUserId,
+          contractLawyerId: contract.lawyerId,
+        });
+        return forbiddenResponse('您不是此合同的签约律师');
+      }
+    } else {
+      // 客户端签署：合同中无 clientUserId FK，通过关联案件的所有者校验
+      // 若合同未关联案件，任意已登录用户均可作为委托方签署（系统设计约束）
+      const caseOwnerUserId = contract.case?.userId;
+      if (caseOwnerUserId && caseOwnerUserId !== currentUserId) {
+        logger.warn('[Sign] 非案件所有者尝试以客户身份签署:', {
+          contractId: id,
+          currentUserId,
+          caseOwnerUserId,
+        });
+        return forbiddenResponse('您不是此合同的委托方');
+      }
+    }
+
+    // ─── 状态机检查：只有审批通过（PENDING）的合同才允许签署 ──────────────────
+    // DRAFT = 草稿未审批；PENDING = 审批完成待签署；其余状态均不可签
+    if (contract.status !== 'PENDING') {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: 'INVALID_STATUS',
-            message: `合同当前状态（${contract.status}）不允许签署`,
+            message:
+              contract.status === 'DRAFT'
+                ? '合同尚未完成审批流程，无法签署'
+                : `合同当前状态（${contract.status}）不允许签署`,
           },
         },
         { status: 400 }
@@ -86,7 +122,9 @@ export async function POST(
       'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
-    // 准备更新数据
+    const now = new Date();
+
+    // ─── 原子签署：事务内重新读取 + 写入，防止并发重复签署（TOCTOU）──────────
     type SignUpdateData = {
       clientSignature?: string;
       clientSignedAt?: Date;
@@ -98,63 +136,86 @@ export async function POST(
       status?: string;
       signedAt?: Date;
     };
-    const updateData: SignUpdateData = {};
-    const now = new Date();
 
-    if (body.role === 'client') {
-      // 检查是否已签署
-      if (contract.clientSignature) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              code: 'ALREADY_SIGNED',
-              message: '委托人已签署，无法重复签署',
-            },
-          },
-          { status: 400 }
-        );
+    let willBeFullySigned = false;
+    let alreadySignedMsg: string | null = null;
+
+    try {
+      await prisma.$transaction(
+        async tx => {
+          // 在事务内重新读取最新签署状态，确保检查与写入的原子性
+          const fresh = await tx.contract.findUnique({
+            where: { id },
+            select: { clientSignature: true, lawyerSignature: true },
+          });
+
+          const updateData: SignUpdateData = {};
+
+          if (body.role === 'client') {
+            if (fresh?.clientSignature) {
+              throw Object.assign(new Error('ALREADY_SIGNED'), {
+                alreadySigned: true,
+                msg: '委托人已签署，无法重复签署',
+              });
+            }
+            updateData.clientSignature = body.signature;
+            updateData.clientSignedAt = now;
+            updateData.clientSignedIp = ip;
+            updateData.signatureDevice = userAgent;
+            willBeFullySigned = !!fresh?.lawyerSignature;
+          } else {
+            if (fresh?.lawyerSignature) {
+              throw Object.assign(new Error('ALREADY_SIGNED'), {
+                alreadySigned: true,
+                msg: '律师已签署，无法重复签署',
+              });
+            }
+            updateData.lawyerSignature = body.signature;
+            updateData.lawyerSignedAt = now;
+            updateData.lawyerSignedIp = ip;
+            updateData.signatureDevice = userAgent;
+            willBeFullySigned = !!fresh?.clientSignature;
+          }
+
+          if (willBeFullySigned) {
+            updateData.status = 'SIGNED';
+            updateData.signedAt = now;
+          }
+
+          await tx.contract.update({ where: { id }, data: updateData });
+        },
+        { isolationLevel: 'Serializable' }
+      );
+    } catch (txErr) {
+      const e = txErr as { alreadySigned?: boolean; msg?: string };
+      if (e.alreadySigned) {
+        alreadySignedMsg = e.msg ?? '已签署，无法重复签署';
+      } else {
+        throw txErr;
       }
-
-      updateData.clientSignature = body.signature;
-      updateData.clientSignedAt = now;
-      updateData.clientSignedIp = ip;
-      updateData.signatureDevice = userAgent;
-    } else {
-      // 检查是否已签署
-      if (contract.lawyerSignature) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              code: 'ALREADY_SIGNED',
-              message: '律师已签署，无法重复签署',
-            },
-          },
-          { status: 400 }
-        );
-      }
-
-      updateData.lawyerSignature = body.signature;
-      updateData.lawyerSignedAt = now;
-      updateData.lawyerSignedIp = ip;
-      updateData.signatureDevice = userAgent;
     }
 
-    // 检查是否双方都已签署
-    const willBeFullySigned =
-      (body.role === 'client' ? true : !!contract.clientSignature) &&
-      (body.role === 'lawyer' ? true : !!contract.lawyerSignature);
-
-    if (willBeFullySigned) {
-      updateData.status = 'SIGNED';
-      updateData.signedAt = now;
+    if (alreadySignedMsg) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'ALREADY_SIGNED', message: alreadySignedMsg },
+        },
+        { status: 400 }
+      );
     }
 
-    // 更新合同
-    await prisma.contract.update({
-      where: { id },
-      data: updateData,
+    // 记录合同签署审计日志（异步，不阻塞响应）
+    createAuditLog({
+      userId: currentUserId,
+      actionType: 'UNKNOWN',
+      actionCategory: 'DOCUMENT',
+      description: `合同签署：role=${body.role}, isFullySigned=${willBeFullySigned}`,
+      resourceType: 'Contract',
+      resourceId: id,
+      metadata: { role: body.role, isFullySigned: willBeFullySigned },
+    }).catch(auditErr => {
+      logger.error('合同签署审计日志记录失败:', auditErr);
     });
 
     // 清除PDF缓存（因为需要包含签名）
@@ -190,7 +251,7 @@ export async function POST(
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '提交签名失败',
+          message: '提交签名失败',
         },
       },
       { status: 500 }

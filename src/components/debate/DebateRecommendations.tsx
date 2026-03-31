@@ -6,13 +6,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-  BookOpen,
-  ChevronDown,
-  ChevronUp,
-  Search,
-  AlertCircle,
-} from 'lucide-react';
+import { BookOpen, ChevronDown, ChevronUp, Search } from 'lucide-react';
 
 /**
  * 法条信息
@@ -102,7 +96,6 @@ export function DebateRecommendations({
       setFilteredRecommendations(data.recommendations || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : '加载失败');
-      console.error('获取推荐失败:', err);
     } finally {
       setIsLoading(false);
     }
@@ -158,15 +151,15 @@ export function DebateRecommendations({
     );
   }
 
-  // 错误状态
+  // 错误状态 — 以空状态形式呈现，避免干扰主界面
   if (error) {
     return (
-      <div className='rounded-lg border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-900/20'>
-        <AlertCircle className='mx-auto mb-2 h-8 w-8 text-red-600' />
-        <p className='text-red-900 dark:text-red-300'>{error}</p>
+      <div className='rounded-lg border border-zinc-200 bg-zinc-50 px-6 py-10 text-center dark:border-zinc-700 dark:bg-zinc-800'>
+        <BookOpen className='mx-auto mb-3 h-10 w-10 text-zinc-400' />
+        <p className='text-sm text-zinc-600 dark:text-zinc-400'>暂无推荐法条</p>
         <button
           onClick={fetchRecommendations}
-          className='mt-3 rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 dark:border-red-700 dark:bg-red-900 dark:text-red-400 dark:hover:bg-red-900/20'
+          className='mt-3 text-xs text-zinc-400 underline hover:text-zinc-600 dark:hover:text-zinc-200'
         >
           重新加载
         </button>

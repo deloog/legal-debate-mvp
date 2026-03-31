@@ -9,6 +9,7 @@ import {
   FilingMaterial,
   FilingMaterialsResult,
 } from '@/lib/case/filing-materials-service';
+import { logger } from '@/lib/logger';
 
 interface FilingMaterialsListProps {
   caseType: string;
@@ -43,7 +44,7 @@ export default function FilingMaterialsList({
           setError(result.error?.message || '加载材料清单失败');
         }
       } catch (err) {
-        console.error('加载材料清单失败:', err);
+        logger.error('加载材料清单失败:', err);
         setError('加载材料清单失败，请重试');
       } finally {
         setLoading(false);

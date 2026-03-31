@@ -6,8 +6,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import { expertService } from '@/lib/knowledge-graph/expert/expert-service';
 
@@ -19,17 +19,15 @@ export async function GET(
   { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getAuthUser(request);
 
-    if (!session?.user?.id) {
+    if (!user) {
       return NextResponse.json(
         { success: false, error: '未登录' },
         { status: 401 }
       );
     }
 
-    // 从Prisma获取专家详情
-    const { prisma } = await import('@/lib/db/prisma');
     const expert = await prisma.knowledgeGraphExpert.findUnique({
       where: { id: (await params).expertId },
       include: {
@@ -51,7 +49,7 @@ export async function GET(
     }
 
     logger.info('Expert detail fetched successfully', {
-      userId: session.user.id,
+      userId: user.userId,
       expertId: (await params).expertId,
     });
 
@@ -68,7 +66,7 @@ export async function GET(
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : '获取专家详情失败',
+        error: '获取专家详情失败',
       },
       { status: 500 }
     );
@@ -83,9 +81,9 @@ export async function PATCH(
   { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getAuthUser(request);
 
-    if (!session?.user?.id) {
+    if (!user) {
       return NextResponse.json(
         { success: false, error: '未登录' },
         { status: 401 }
@@ -95,7 +93,6 @@ export async function PATCH(
     const body = await request.json();
 
     // 检查权限：只能更新自己的档案，或者管理员可以更新任何档案
-    const { prisma } = await import('@/lib/db/prisma');
     const expert = await prisma.knowledgeGraphExpert.findUnique({
       where: { id: (await params).expertId },
     });
@@ -107,13 +104,14 @@ export async function PATCH(
       );
     }
 
-    // 验证权限
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+    // 从DB实时读取角色
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { role: true },
     });
 
-    const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
-    const isOwner = expert.userId === session.user.id;
+    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
+    const isOwner = expert.userId === user.userId;
 
     if (!isAdmin && !isOwner) {
       return NextResponse.json(
@@ -137,7 +135,7 @@ export async function PATCH(
     );
 
     logger.info('Expert profile updated successfully', {
-      userId: session.user.id,
+      userId: user.userId,
       expertId: (await params).expertId,
     });
 
@@ -154,7 +152,7 @@ export async function PATCH(
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : '更新专家档案失败',
+        error: '更新专家档案失败',
       },
       { status: 500 }
     );
@@ -169,22 +167,22 @@ export async function DELETE(
   { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getAuthUser(request);
 
-    if (!session?.user?.id) {
+    if (!user) {
       return NextResponse.json(
         { success: false, error: '未登录' },
         { status: 401 }
       );
     }
 
-    // 检查管理员权限
-    const { prisma } = await import('@/lib/db/prisma');
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+    // 从DB实时读取角色，仅管理员可删除
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { role: true },
     });
 
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
+    if (!dbUser || (dbUser.role !== 'ADMIN' && dbUser.role !== 'SUPER_ADMIN')) {
       return NextResponse.json(
         { success: false, error: '无权限删除专家档案' },
         { status: 403 }
@@ -207,7 +205,7 @@ export async function DELETE(
     await expertService.deleteExpertProfile(expert.userId);
 
     logger.info('Expert profile deleted successfully', {
-      userId: session.user.id,
+      userId: user.userId,
       expertId: (await params).expertId,
     });
 
@@ -224,7 +222,7 @@ export async function DELETE(
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : '删除专家档案失败',
+        error: '删除专家档案失败',
       },
       { status: 500 }
     );

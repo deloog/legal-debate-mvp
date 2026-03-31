@@ -4,6 +4,7 @@
  * POST /api/contracts/[id]/payments - 创建付款记录
  */
 import { prisma } from '@/lib/db/prisma';
+import { getAuthUser } from '@/lib/middleware/auth';
 import {
   getFirstZodError,
   validateCreatePayment,
@@ -13,45 +14,71 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 
 /**
+ * 校验合同访问权限（律师 / 委托方 / 管理员）
+ * 返回合同对象，或 null 表示无权访问。
+ */
+async function resolveContractAccess(
+  id: string,
+  userId: string,
+  _dbRole: string | undefined
+) {
+  const [contract, user] = await Promise.all([
+    prisma.contract.findUnique({
+      where: { id },
+      select: { lawyerId: true, case: { select: { userId: true } } },
+    }),
+    prisma.user.findUnique({ where: { id: userId }, select: { role: true } }),
+  ]);
+  if (!contract) return { contract: null, allowed: false };
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+  const isLawyer = contract.lawyerId === userId;
+  const isClient = contract.case?.userId === userId;
+  return { contract, allowed: isAdmin || isLawyer || isClient };
+}
+
+/**
  * GET /api/contracts/[id]/payments
  * 获取合同的付款记录列表
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<unknown[]> | ErrorResponse>> {
   try {
-    const { id } = await params;
-
-    // 验证ID格式
-    if (!id || typeof id !== 'string') {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
-          error: {
-            code: 'INVALID_ID',
-            message: '无效的合同ID',
-          },
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
         },
-        { status: 400 }
+        { status: 401 }
       );
     }
 
-    // 检查合同是否存在
-    const contract = await prisma.contract.findUnique({
-      where: { id },
-    });
+    const { id } = await params;
 
+    const { contract, allowed } = await resolveContractAccess(
+      id,
+      authUser.userId,
+      authUser.role
+    );
     if (!contract) {
       return NextResponse.json(
         {
           success: false,
-          error: {
-            code: 'NOT_FOUND',
-            message: '合同记录不存在',
-          },
+          error: { code: 'NOT_FOUND', message: '合同记录不存在' },
         },
         { status: 404 }
+      );
+    }
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: '无权访问此合同' },
+        },
+        { status: 403 }
       );
     }
 
@@ -86,7 +113,7 @@ export async function GET(
       success: true,
       data: responseData,
     });
-  } catch (error) {
+  } catch (_error) {
     logger.error('获取付款记录失败:', error);
 
     return NextResponse.json(
@@ -111,35 +138,50 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<unknown> | ErrorResponse>> {
   try {
-    const { id } = await params;
-
-    // 验证ID格式
-    if (!id || typeof id !== 'string') {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
-          error: {
-            code: 'INVALID_ID',
-            message: '无效的合同ID',
-          },
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
         },
-        { status: 400 }
+        { status: 401 }
       );
     }
 
-    // 检查合同是否存在
-    const contract = await prisma.contract.findUnique({
-      where: { id },
-    });
+    const { id } = await params;
 
+    const { contract, allowed } = await resolveContractAccess(
+      id,
+      authUser.userId,
+      authUser.role
+    );
     if (!contract) {
       return NextResponse.json(
         {
           success: false,
-          error: {
-            code: 'NOT_FOUND',
-            message: '合同记录不存在',
-          },
+          error: { code: 'NOT_FOUND', message: '合同记录不存在' },
+        },
+        { status: 404 }
+      );
+    }
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: '无权访问此合同' },
+        },
+        { status: 403 }
+      );
+    }
+
+    // 重新查询完整合同字段（contractNumber 用于生成付款编号）
+    const fullContract = await prisma.contract.findUnique({ where: { id } });
+    if (!fullContract) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'NOT_FOUND', message: '合同记录不存在' },
         },
         { status: 404 }
       );
@@ -182,48 +224,38 @@ export async function POST(
     }
 
     const data = validationResult.data;
+    const isPaid = !!data.paidAt;
 
-    // 生成付款编号
-    const paymentCount = await prisma.contractPayment.count({
-      where: {
-        contractId: id,
-      },
-    });
-    const paymentNumber = `${contract.contractNumber}-${(paymentCount + 1).toString().padStart(2, '0')}`;
-
-    // 创建付款记录
-    const payment = await prisma.contractPayment.create({
-      data: {
-        contractId: id,
-        paymentNumber,
-        amount: data.amount,
-        paymentType: data.paymentType,
-        paymentMethod: data.paymentMethod || null,
-        status: data.paidAt ? 'PAID' : 'PENDING',
-        paidAt: data.paidAt || null,
-        note: data.note || null,
-      },
-    });
-
-    // 如果付款已完成，更新合同的已付金额
-    if (payment.status === 'PAID') {
-      const totalPaid = await prisma.contractPayment.aggregate({
-        where: {
-          contractId: id,
-          status: 'PAID',
-        },
-        _sum: {
-          amount: true,
-        },
+    // 使用事务：生成唯一编号 + 创建记录 + 原子更新已付金额，防止并发丢失更新
+    const payment = await prisma.$transaction(async tx => {
+      const paymentCount = await tx.contractPayment.count({
+        where: { contractId: id },
       });
+      const paymentNumber = `${fullContract.contractNumber}-${(paymentCount + 1).toString().padStart(2, '0')}`;
 
-      await prisma.contract.update({
-        where: { id },
+      const created = await tx.contractPayment.create({
         data: {
-          paidAmount: totalPaid._sum.amount || 0,
+          contractId: id,
+          paymentNumber,
+          amount: data.amount,
+          paymentType: data.paymentType,
+          paymentMethod: data.paymentMethod || null,
+          status: isPaid ? 'PAID' : 'PENDING',
+          paidAt: data.paidAt || null,
+          note: data.note || null,
         },
       });
-    }
+
+      // 若已付款，用原子 increment 更新合同已付金额，避免先读后写的竞态
+      if (isPaid) {
+        await tx.contract.update({
+          where: { id },
+          data: { paidAmount: { increment: data.amount } },
+        });
+      }
+
+      return created;
+    });
 
     // 转换响应数据
     const responseData = {
@@ -249,7 +281,7 @@ export async function POST(
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (_error) {
     logger.error('创建付款记录失败:', error);
 
     return NextResponse.json(

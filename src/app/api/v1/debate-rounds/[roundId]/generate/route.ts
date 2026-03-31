@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandler } from '@/app/api/lib/errors/error-handler';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { createSuccessResponse } from '@/app/api/lib/responses/api-response';
 import { prisma } from '@/lib/db/prisma';
 import {
@@ -19,6 +20,17 @@ export const POST = withErrorHandler(
     request: NextRequest,
     { params }: { params: Promise<{ roundId: string }> }
   ) => {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '未授权，请先登录' },
+        },
+        { status: 401 }
+      );
+    }
+
     const { roundId } = await params;
 
     // 安全解析请求体，处理空请求体或解析错误
@@ -65,6 +77,17 @@ export const POST = withErrorHandler(
           },
         },
         { status: 404 }
+      );
+    }
+
+    // 校验案件归属（防止 IDOR）
+    if (round.debate.case.userId !== authUser.userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: '无权操作此辩论轮次' },
+        },
+        { status: 403 }
       );
     }
 

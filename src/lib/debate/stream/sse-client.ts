@@ -15,7 +15,7 @@ import type {
   RoundStartEventData,
   SSEConnectionConfig,
 } from './types';
-import { SSEConnectionState } from './types';
+import { SSEConnectionState, LawSearchCompleteEventData } from './types';
 
 /**
  * 事件回调类型
@@ -41,6 +41,7 @@ export interface SSEClientConfig extends SSEConnectionConfig {
   url: string;
   onConnected?: (data: ConnectedEventData) => void;
   onRoundStart?: (data: RoundStartEventData) => void;
+  onLawSearchComplete?: (data: LawSearchCompleteEventData) => void;
   onAIStream?: (data: AIStreamEventData) => void;
   onArgument?: (data: ArgumentEventData) => void;
   onProgress?: (data: ProgressEventData) => void;
@@ -160,13 +161,17 @@ export class SSEClient {
   }
 
   /**
-   * 构建SSE URL
+   * 构建SSE URL（兼容相对路径与绝对路径）
+   * 注意：EventSource 接受相对路径，但 new URL(relativeUrl) 在浏览器会抛 TypeError，
+   * 因此改用 URLSearchParams 直接拼接 query string。
    */
   private buildUrl(): string {
-    const url = new URL(this.config.url);
-    url.searchParams.append('debateId', this.config.debateId);
-    url.searchParams.append('roundId', this.config.roundId);
-    return url.toString();
+    const params = new URLSearchParams({
+      debateId: this.config.debateId,
+      roundId: this.config.roundId,
+    });
+    const sep = this.config.url.includes('?') ? '&' : '?';
+    return `${this.config.url}${sep}${params.toString()}`;
   }
 
   /**
@@ -200,6 +205,7 @@ export class SSEClient {
     const events: DebateStreamEventType[] = [
       'connected',
       'round-start',
+      'law-search-complete',
       'ai_stream',
       'argument',
       'progress',
@@ -267,6 +273,9 @@ export class SSEClient {
         break;
       case 'round-start':
         this.config.onRoundStart?.(data as RoundStartEventData);
+        break;
+      case 'law-search-complete':
+        this.config.onLawSearchComplete?.(data as LawSearchCompleteEventData);
         break;
       case 'ai_stream':
         this.config.onAIStream?.(data as AIStreamEventData);

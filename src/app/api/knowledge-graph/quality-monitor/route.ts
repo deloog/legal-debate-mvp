@@ -5,14 +5,36 @@
 
 import { generateDataQualityReport } from '@/lib/knowledge-graph/quality-monitor/data-quality-monitor';
 import { QualityMonitorConfig } from '@/lib/knowledge-graph/quality-monitor/types';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * GET 获取数据质量报告
+ * GET 获取数据质量报告（仅管理员）
  */
 export async function GET(request: NextRequest) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: '请先登录' },
+        { status: 401 }
+      );
+    }
+
+    // 从DB实时读取角色，仅管理员可查看质量报告
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        { success: false, error: '权限不足，仅管理员可查看数据质量报告' },
+        { status: 403 }
+      );
+    }
+
     // 解析查询参数
     const searchParams = request.nextUrl.searchParams;
     const minCoverageRate = searchParams.get('minCoverageRate');

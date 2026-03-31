@@ -567,38 +567,3 @@ export async function generateTaskItemReminders(
 ): Promise<void> {
   return reminderGenerator.generateTaskItemReminders(taskId, preferences);
 }
-
-// 合并偏好设置的工具函数
-function _mergePreferences(
-  base: ReminderPreferences | undefined,
-  override: Partial<ReminderPreferences> | undefined
-): ReminderPreferences {
-  if (!base) {
-    return DEFAULT_REMINDER_PREFERENCES;
-  }
-
-  if (!override) {
-    return base;
-  }
-
-  return {
-    ...base,
-    ...override,
-    courtSchedule: {
-      ...(base.courtSchedule ?? DEFAULT_COURT_SCHEDULE_CONFIG),
-      ...override.courtSchedule,
-    } as NonNullable<ReminderPreferences['courtSchedule']>,
-    deadline: {
-      ...(base.deadline ?? DEFAULT_DEADLINE_CONFIG),
-      ...override.deadline,
-    } as NonNullable<ReminderPreferences['deadline']>,
-    followUp: {
-      ...(base.followUp ?? DEFAULT_FOLLOW_UP_CONFIG),
-      ...override.followUp,
-    } as NonNullable<ReminderPreferences['followUp']>,
-    task: {
-      ...(base.task ?? DEFAULT_TASK_CONFIG),
-      ...override.task,
-    } as NonNullable<ReminderPreferences['task']>,
-  };
-}

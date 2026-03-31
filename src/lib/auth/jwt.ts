@@ -66,7 +66,9 @@ export function verifyToken(token: string): JwtVerifyResult {
       logger.debug('[verifyToken] 开始验证token');
     }
 
-    const decoded = jwt.verify(token, EFFECTIVE_JWT_SECRET) as JwtPayload;
+    const decoded = jwt.verify(token, EFFECTIVE_JWT_SECRET, {
+      algorithms: ['HS256'],
+    }) as JwtPayload;
 
     if (process.env.NODE_ENV === 'development') {
       logger.debug('[verifyToken] Token验证成功:', {
@@ -181,7 +183,7 @@ export function generateAccessToken(
   expiresIn?: string
 ): string {
   const options: jwt.SignOptions = {
-    expiresIn: (expiresIn || '15m') as jwt.SignOptions['expiresIn'],
+    expiresIn: (expiresIn || '7d') as jwt.SignOptions['expiresIn'],
   };
 
   return jwt.sign(payload, EFFECTIVE_JWT_SECRET, options);

@@ -1,6 +1,9 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // 隐藏 X-Powered-By: Next.js 响应头，避免暴露技术栈
+  poweredByHeader: false,
+
   // Enable React Strict Mode for better development experience
   reactStrictMode: true,
 
@@ -11,7 +14,7 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
     dangerouslyAllowSVG: false,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none';",
     // 启用图片懒加载
     loader: 'default',
     // 优化图片加载策略
@@ -26,7 +29,7 @@ const nextConfig: NextConfig = {
   },
 
   // Configure webpack for better performance
-  webpack: async (config, { dev, isServer }) => {
+  webpack: (config, { dev, isServer }) => {
     // Enable fast refresh in development
     if (dev && !isServer) {
       config.watchOptions = {
@@ -81,21 +84,6 @@ const nextConfig: NextConfig = {
       }
     }
 
-    // 添加打包分析插件（仅在分析时启用）
-    if (process.env.ANALYZE === 'true') {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore - Dynamic import for bundle analyzer
-      const { BundleAnalyzerPlugin } = await import('@next/bundle-analyzer');
-      config.plugins.push(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore - BundleAnalyzerPlugin type
-        new BundleAnalyzerPlugin({
-          analyzerMode: 'static',
-          openAnalyzer: false,
-        })
-      );
-    }
-
     // 抑制服务端专用模块（payment-config / flk-crawler）因动态路径产生的
     // Critical dependency 警告——这些模块仅在 Node.js 运行时使用，路径在运行时确定
     if (isServer) {
@@ -132,6 +120,10 @@ const nextConfig: NextConfig = {
   // 配置输出优化
   output: 'standalone',
 
+  // ali-oss 及其依赖链（urllib → proxy-agent）是纯 Node.js 模块，
+  // 不能被 Next.js/Turbopack 打包，必须在运行时由 Node.js require 加载
+  serverExternalPackages: ['ali-oss', 'urllib', 'proxy-agent'],
+
   // 配置实验性功能
   experimental: {
     // 启用优化包导入
@@ -144,17 +136,43 @@ const nextConfig: NextConfig = {
   // （Next.js 13+ 此项已升至顶层，不属于 experimental）
   outputFileTracingExcludes: {
     '*': [
+      // VS Code Local History 插件生成的历史文件（包含旧版代码，不能被打包）
+      '.history/**',
+      // 爬虫和导出数据（不参与运行时）
       'data/**',
+      'exports/**',
+      'just-laws/**',
+      // 测试产物
+      'coverage/**',
+      'coverage-app/**',
+      'coverage-components/**',
+      'coverage-communications/**',
+      'coverage-final/**',
+      'test-results/**',
+      'test-reports/**',
+      'test-data/**',
+      'playwright-report/**',
+      // 编译产物和日志
+      'dist/**',
+      'archive/**',
+      'backups/**',
+      'logs/**',
+      'reports/**',
+      // 上传文件目录
       'public/uploads/**',
+      'public/reports/**',
+      'private_uploads/**',
+      'uploads/**',
+      // 脚本和种子文件（运行时不需要）
+      'scripts/**',
+      'prisma/seed*.ts',
+      // 证书和密钥
       '**/*.pem',
       '**/*.key',
       '**/*.p12',
       '**/*.pfx',
     ],
   },
-
-  // 配置 Turbopack（Next.js 16 默认使用）
-  turbopack: {},
 
   // 配置动态导入优化
   modularizeImports: {
@@ -176,7 +194,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'X-Frame-Options',
-            value: 'DENY',
+            value: 'SAMEORIGIN',
           },
           {
             key: 'X-XSS-Protection',
@@ -196,6 +214,21 @@ const nextConfig: NextConfig = {
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+          },
+          // Content Security Policy
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https://api.qrserver.com",
+              "font-src 'self' data:",
+              "connect-src 'self' https:",
+              "frame-ancestors 'self'",
+              "base-uri 'self'",
+              "form-action 'self'",
+            ].join('; '),
           },
           // DNS Prefetch Control
           {

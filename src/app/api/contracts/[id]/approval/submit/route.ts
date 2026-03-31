@@ -9,7 +9,8 @@ import {
   ApprovalStateMachineError,
   ConcurrentApprovalError,
 } from '@/lib/contract/contract-approval-service';
-import { getCurrentUserId } from '@/lib/auth/get-current-user';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
 
@@ -21,34 +22,53 @@ const submitApprovalSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  _context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    // 通过 JWT Bearer 或 cookie 获取当前用户
+    const user = await getAuthUser(request);
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     // 验证请求数据
     const validatedData = submitApprovalSchema.parse(body);
 
-    // 从session获取当前用户ID
-    const currentUserId = await getCurrentUserId();
-
-    if (!currentUserId) {
+    // 验证 stepId 属于该合同，且当前用户是该步骤的指定审批人
+    const { id: contractId } = await context.params;
+    const step = await prisma.approvalStep.findFirst({
+      where: {
+        id: validatedData.stepId,
+        approverId: user.userId, // 只有指定审批人才能提交
+        approval: { contractId },
+      },
+      select: { id: true },
+    });
+    if (!step) {
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: 'UNAUTHORIZED',
-            message: '请先登录',
+            code: 'FORBIDDEN',
+            message: '审批步骤不存在、不属于该合同，或您不是该步骤的指定审批人',
           },
         },
-        { status: 401 }
+        { status: 403 }
       );
     }
 
     // 提交审批
     await contractApprovalService.submitApproval({
       stepId: validatedData.stepId,
-      approverId: currentUserId,
+      approverId: user.userId,
       decision: validatedData.decision,
       comment: validatedData.comment,
     });
@@ -107,7 +127,7 @@ export async function POST(
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '提交审批失败',
+          message: '提交审批失败',
         },
       },
       { status: 500 }

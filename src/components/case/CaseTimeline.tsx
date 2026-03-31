@@ -92,7 +92,6 @@ export function CaseTimeline({ caseId, readonly = false }: CaseTimelineProps) {
   const loadEvents = useCallback(async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       const url = new URL(
         `/api/v1/cases/${caseId}/timeline`,
         window.location.origin
@@ -101,10 +100,9 @@ export function CaseTimeline({ caseId, readonly = false }: CaseTimelineProps) {
         url.searchParams.set('eventType', filterEventType);
       }
 
+      // 认证通过 httpOnly cookie 自动携带，无需手动传 token
       const response = await fetch(url.toString(), {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -129,12 +127,9 @@ export function CaseTimeline({ caseId, readonly = false }: CaseTimelineProps) {
     }
 
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`/api/v1/timeline-events/${eventId}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: 'include',
       });
 
       if (!response.ok) {

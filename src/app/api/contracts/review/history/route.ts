@@ -10,10 +10,22 @@ import type {
   ReviewHistoryItem,
 } from '@/types/contract-review';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<ReviewHistoryResponse>> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: '未授权，请先登录' },
+      },
+      { status: 401 }
+    ) as NextResponse<ReviewHistoryResponse>;
+  }
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get('page') || '1');
@@ -21,12 +33,21 @@ export async function GET(
 
     const skip = (page - 1) * pageSize;
 
+    // 仅返回当前用户相关合同（作为律师或案件所有人）
+    const userFilter = {
+      OR: [
+        { lawyerId: authUser.userId },
+        { case: { userId: authUser.userId } },
+      ],
+    };
+
     // 查询合同列表（已审查的）
     const contracts = await prisma.contract.findMany({
       where: {
         status: {
           not: 'DRAFT',
         },
+        ...userFilter,
       },
       orderBy: {
         updatedAt: 'desc',
@@ -47,6 +68,7 @@ export async function GET(
         status: {
           not: 'DRAFT',
         },
+        ...userFilter,
       },
     });
 

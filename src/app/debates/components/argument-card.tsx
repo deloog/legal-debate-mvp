@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, type ReactElement } from 'react';
+import { VerificationDetailModal } from '@/components/verification/VerificationDetailModal';
 import { Argument, ArgumentType } from '@prisma/client';
 import { AIThinkingInline } from '@/components/ai/AIThinkingIndicator';
 
@@ -91,6 +92,7 @@ export function ArgumentCard({
   isStreaming = false,
 }: ArgumentCardProps): ReactElement {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
 
   // 优先级标记（存储在数据库）
   const [priority, setPriority] = useState<ArgumentPriority>(
@@ -204,9 +206,10 @@ export function ArgumentCard({
             </span>
           )}
           {argument.overallScore != null && !isStreaming && (
-            <span
-              title={`综合评分：逻辑 ${argument.logicScore != null ? (argument.logicScore * 100).toFixed(0) : '-'}分 · 法律 ${argument.legalScore != null ? (argument.legalScore * 100).toFixed(0) : '-'}分`}
-              className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${
+            <button
+              onClick={() => setIsVerificationModalOpen(true)}
+              title={`点击查看验证详情：逻辑 ${argument.logicScore != null ? (argument.logicScore * 100).toFixed(0) : '-'}分 · 法律 ${argument.legalScore != null ? (argument.legalScore * 100).toFixed(0) : '-'}分`}
+              className={`rounded-full border px-2 py-0.5 text-xs font-semibold cursor-pointer hover:opacity-80 transition-opacity ${
                 argument.overallScore >= 0.8
                   ? 'border-green-300 bg-green-50 text-green-700 dark:border-green-700 dark:bg-green-900/20 dark:text-green-300'
                   : argument.overallScore >= 0.6
@@ -215,7 +218,7 @@ export function ArgumentCard({
               }`}
             >
               {(argument.overallScore * 100).toFixed(0)}分
-            </span>
+            </button>
           )}
         </div>
         <div className='flex items-center gap-1'>
@@ -575,6 +578,13 @@ export function ArgumentCard({
           )}
         </div>
       )}
+
+      {/* 验证详情弹窗 */}
+      <VerificationDetailModal
+        argumentId={argument.id}
+        isOpen={isVerificationModalOpen}
+        onClose={() => setIsVerificationModalOpen(false)}
+      />
     </div>
   );
 }

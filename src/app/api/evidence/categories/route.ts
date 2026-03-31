@@ -5,19 +5,31 @@
  * 获取证据分类配置
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import {
   getEvidenceCategoriesByCaseType,
   getAllCaseTypes,
   searchCategories,
 } from '@/lib/evidence/evidence-category-config';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * GET /api/evidence/categories
  * 获取证据分类配置
  */
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: '未授权，请先登录' },
+      },
+      { status: 401 }
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const caseType = searchParams.get('caseType');
@@ -92,7 +104,7 @@ export async function GET(request: Request) {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '服务器内部错误',
+          message: '服务器内部错误',
         },
       },
       { status: 500 }

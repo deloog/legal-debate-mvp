@@ -29,8 +29,17 @@ export async function POST(
       );
     }
 
-    const body = await request.json();
-    const { allDevices = false } = body as { allDevices?: boolean };
+    // 请求体可能为空（无 body 的 POST），不能直接 json()
+    let allDevices = false;
+    const contentType = request.headers.get('content-type') ?? '';
+    if (contentType.includes('application/json')) {
+      try {
+        const body = (await request.json()) as { allDevices?: boolean };
+        allDevices = body.allDevices ?? false;
+      } catch {
+        // body 解析失败则忽略，按默认值处理
+      }
+    }
     logger.info('[LOGOUT] Request body:', { allDevices });
 
     if (allDevices) {
@@ -44,7 +53,6 @@ export async function POST(
       const cookieHeader = request.headers.get('cookie');
       logger.info('[LOGOUT] Cookie header:', {
         hasCookie: !!cookieHeader,
-        cookieValue: cookieHeader || '',
       });
 
       if (!cookieHeader) {
@@ -92,9 +100,16 @@ export async function POST(
       { status: 200 }
     );
 
-    // 安全优化：清除cookie中的token
-    response.cookies.delete('accessToken');
-    response.cookies.delete('refreshToken');
+    // 安全优化：清除cookie中的token（必须指定 path 才能匹配原始 cookie）
+    const cookieOpts = {
+      maxAge: 0,
+      path: '/',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+    };
+    response.cookies.set('accessToken', '', cookieOpts);
+    response.cookies.set('refreshToken', '', cookieOpts);
 
     return response;
   } catch (error) {

@@ -5,9 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
 import {
   PaymentMethod,
@@ -24,6 +22,7 @@ import {
   calculateOrderExpireTime,
 } from '@/lib/payment/wechat-utils';
 import { logger } from '@/lib/logger';
+import { createAuditLog } from '@/lib/audit/logger';
 
 /**
  * POST /api/payments/create
@@ -31,18 +30,8 @@ import { logger } from '@/lib/logger';
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    // 获取用户ID（优先 JWT Bearer，回退到 NextAuth session）
-    const authHeader = request.headers.get('authorization');
-    const jwtToken = extractTokenFromHeader(authHeader ?? '');
-    const tokenResult = verifyToken(jwtToken ?? '');
-    let userId: string | undefined;
-    if (tokenResult.valid && tokenResult.payload) {
-      userId = tokenResult.payload.userId;
-    } else {
-      const session = await getServerSession(authOptions);
-      userId = session?.user?.id;
-    }
-    if (!userId) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -52,6 +41,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { status: 401 }
       );
     }
+    const userId = authUser.userId;
 
     // 解析请求体
     const body = await request.json();
@@ -144,6 +134,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         billingCycle,
         autoRenew,
       },
+    });
+
+    // 记录支付创建审计日志（异步）
+    createAuditLog({
+      userId,
+      actionType: 'UNKNOWN',
+      actionCategory: 'OTHER',
+      description: `创建支付订单：${paymentMethod}，金额=${Number(order.amount)}`,
+      resourceType: 'Order',
+      resourceId: order.id,
+      metadata: {
+        paymentMethod,
+        amount: Number(order.amount),
+        orderNo: order.orderNo,
+      },
+    }).catch(auditErr => {
+      logger.error('支付创建审计日志记录失败:', auditErr);
     });
 
     // 根据支付方式调用相应的支付服务

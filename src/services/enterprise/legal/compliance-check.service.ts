@@ -258,7 +258,6 @@ export class ComplianceCheckService {
 
     // 简化判断逻辑：所有项目都通过则合规，有一个失败则不合规
     const failedCount = findings.filter(f => f.status === 'failed').length;
-    const _passedCount = findings.filter(f => f.status === 'passed').length;
     const notApplicableCount = findings.filter(
       f => f.status === 'not_applicable'
     ).length;

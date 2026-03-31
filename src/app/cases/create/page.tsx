@@ -2,19 +2,18 @@
  * 创建案件页面
  *
  * 功能：
- * 1. 提供案件信息录入表单（基本信息、当事人信息、案件信息）
- * 2. 支持从咨询转化案件（通过consultationId参数）
- * 3. 自动生成连续案号（调用后端API）
- * 4. 提供多种案件描述模板（按案件类型分类）
- * 5. 支持AI生成案情描述
- * 6. 表单验证和错误提示
+ * 1. 基本信息：标题、类型、状态、案号、审理法院
+ * 2. 当事人信息：原告、被告、案由、标的金额
+ * 3. 智能录入：图片 OCR 识别 / 粘贴文字解析（AI 自动填充表单）
+ * 4. 案情描述：支持模板填充和 AI 生成
+ * 5. 支持从咨询转化案件（consultationId 参数）
  *
  * @page /cases/create
  */
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,11 +25,13 @@ import {
   ArrowRight,
   Sparkles,
   FileStack,
+  Image as ImageIcon,
+  Clipboard as ClipboardPaste,
+  Loader2,
+  CheckCircle2,
 } from 'lucide-react';
 
-/**
- * 案件类型代码映射（用于案号生成）
- */
+/** 案件类型代码映射（用于案号生成） */
 const caseTypeCodes: Record<string, { code: string; name: string }> = {
   CIVIL: { code: 'M', name: '民' },
   CRIMINAL: { code: 'X', name: '刑' },
@@ -40,9 +41,6 @@ const caseTypeCodes: Record<string, { code: string; name: string }> = {
   INTELLECTUAL_PROPERTY: { code: 'Z', name: '知' },
 };
 
-/**
- * 案件状态代码映射
- */
 const statusCodes: Record<string, string> = {
   DRAFT: '初',
   ACTIVE: '初',
@@ -50,215 +48,125 @@ const statusCodes: Record<string, string> = {
   ARCHIVED: '决',
 };
 
-/**
- * 案件描述模板（按案件类型分类）
- */
+/** 案件描述模板（按案件类型分类） */
 const caseDescriptionTemplates: Record<
   string,
   { title: string; template: string }[]
 > = {
   CIVIL: [
     {
-      title: '合同纠纷',
+      title: '借贷纠纷',
       template:
-        '原告{plaintiff}与被告{defendant}因{cause}合同发生纠纷。原告认为被告未按合同约定履行义务，造成原告损失。现依据《中华人民共和国民法典》相关规定，向贵院提起诉讼，请求判令被告{plaintiff}。',
+        '原告{plaintiff}与被告{defendant}于{date}签订借款合同，约定被告向原告借款{amount}元。合同签订后，原告按约支付了借款，但被告未按期还款。',
     },
     {
-      title: '债务纠纷',
+      title: '合同纠纷',
       template:
-        '被告{defendant}向原告{plaintiff}借款人民币{amount}元，双方约定还款日期为{date}。到期后，被告未按时还款，经原告多次催讨，被告仍拒不偿还。为维护原告合法权益，特向贵院提起诉讼。',
+        '原告{plaintiff}与被告{defendant}因{cause}合同发生纠纷。原告认为被告未按合同约定履行义务，造成原告损失。',
     },
     {
       title: '房产纠纷',
       template:
-        '原告{plaintiff}与被告{defendant}就位于{location}的房产发生权属争议。原告依据相关证据认为该房产应归其所有，但被告坚持认为该房产归其所有。双方多次协商未果，现向贵院提起诉讼。',
+        '原告{plaintiff}与被告{defendant}就位于{location}的房产发生权属争议。双方多次协商未果，现向贵院提起诉讼。',
     },
     {
       title: '婚姻家庭',
       template:
-        '原告{plaintiff}与被告{defendant}系夫妻关系，因{cause}导致感情破裂。双方就子女抚养、财产分割等问题无法达成一致。现原告依据《中华人民共和国民法典》相关规定，向贵院提起离婚诉讼。',
+        '原告{plaintiff}与被告{defendant}系夫妻关系，因{cause}导致感情破裂。双方就子女抚养、财产分割等问题无法达成一致。',
     },
     {
       title: '侵权责任',
       template:
-        '被告{defendant}的行为造成原告{plaintiff}人身损害/财产损失。经{location}事故认定，被告负主要/全部责任。原告要求被告赔偿医疗费、误工费、护理费等各项损失共计{amount}元。',
-    },
-    {
-      title: '邻里纠纷',
-      template:
-        '原告{plaintiff}与被告{defendant}系邻里关系，因{cause}发生纠纷。原告认为被告的行为严重影响了原告的正常生活，双方经居委会/物业调解未果，现向贵院提起诉讼。',
-    },
-    {
-      title: '继承纠纷',
-      template:
-        '被继承人{location}于{date}去世，留有遗产{amount}元及房产一处。原告{plaintiff}作为法定继承人/遗嘱受益人，要求依法继承相应份额。被告{defendant}对遗产分配提出异议，双方协商未果。',
-    },
-    {
-      title: '借贷纠纷',
-      template:
-        '原告{plaintiff}与被告{defendant}于{date}签订借款合同，约定被告向原告借款{amount}元，期限为{location}。合同签订后，原告按约支付了借款，但被告未按期还款。',
-    },
-    {
-      title: '物业纠纷',
-      template:
-        '原告{plaintiff}系{location}小区业主，被告{defendant}作为物业管理公司，未按合同约定提供物业服务，导致小区环境脏乱差、安保缺失。原告要求被告履行合同义务并赔偿损失。',
+        '被告{defendant}的行为造成原告{plaintiff}人身损害/财产损失。原告要求被告赔偿医疗费、误工费等各项损失共计{amount}元。',
     },
     {
       title: '交通事故',
       template:
-        '{date}，被告{defendant}驾驶机动车与原告{plaintiff}发生交通事故，造成原告人身损害。经交警部门认定，被告负事故{result}责任。原告要求被告赔偿医疗费等各项费用。',
+        '{date}，被告{defendant}驾驶机动车与原告{plaintiff}发生交通事故，造成原告人身损害。原告要求被告赔偿各项费用。',
+    },
+    {
+      title: '继承纠纷',
+      template:
+        '被继承人于{date}去世，留有遗产{amount}元及房产一处。原告{plaintiff}作为法定继承人，要求依法继承相应份额，被告{defendant}对遗产分配提出异议。',
     },
   ],
   CRIMINAL: [
     {
       title: '故意伤害',
       template:
-        '犯罪嫌疑人{defendant}因{cause}与被害人{plaintiff}发生冲突，后持凶器对被害人实施伤害，造成被害人{result}。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第二百三十四条之规定，涉嫌故意伤害罪。',
+        '犯罪嫌疑人{defendant}因{cause}与被害人{plaintiff}发生冲突，后实施伤害，造成被害人受伤。涉嫌故意伤害罪。',
     },
     {
       title: '盗窃',
       template:
-        '犯罪嫌疑人{defendant}于{date}，在{location}秘密窃取被害人{plaintiff}财物，涉案金额约{amount}元。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第二百六十四条之规定，涉嫌盗窃罪。',
+        '犯罪嫌疑人{defendant}于{date}在{location}秘密窃取被害人{plaintiff}财物，涉案金额约{amount}元。涉嫌盗窃罪。',
     },
     {
       title: '诈骗',
       template:
-        '犯罪嫌疑人{defendant}以非法占有为目的，通过{means}方式骗取被害人{plaintiff}人民币{amount}元。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第二百六十六条之规定，涉嫌诈骗罪。',
+        '犯罪嫌疑人{defendant}以非法占有为目的，骗取被害人{plaintiff}人民币{amount}元。涉嫌诈骗罪。',
     },
     {
       title: '危险驾驶',
       template:
-        '犯罪嫌疑人{defendant}于{date}在{location}醉酒驾驶/追逐竞驶，造成{result}。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第一百三十三条之一之规定，涉嫌危险驾驶罪。',
-    },
-    {
-      title: '寻衅滋事',
-      template:
-        '犯罪嫌疑人{defendant}于{date}在{location}随意殴打被害人{plaintiff}，造成{result}。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第二百九十三条之规定，涉嫌寻衅滋事罪。',
-    },
-    {
-      title: '非法拘禁',
-      template:
-        '犯罪嫌疑人{defendant}为索取债务/发泄不满，于{date}将被害人{plaintiff}非法拘禁在{location}，限制其人身自由{result}。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第二百三十八条之规定。',
-    },
-    {
-      title: '交通肇事',
-      template:
-        '犯罪嫌疑人{defendant}于{date}驾驶机动车在{location}发生交通事故，造成{result}。经交警部门认定，犯罪嫌疑人负事故主要/全部责任。犯罪嫌疑人行为已触犯《中华人民共和国刑法》第一百三十三条之规定。',
+        '犯罪嫌疑人{defendant}于{date}在{location}醉酒驾驶，涉嫌危险驾驶罪。',
     },
   ],
   LABOR: [
     {
       title: '劳动争议',
       template:
-        '申请人{plaintiff}与被申请人{defendant}因{cause}发生劳动争议。申请人认为被申请人违法解除劳动合同，要求支付违法解除赔偿金{amount}元及其他相关待遇。经劳动仲裁前置后，现向贵院提起诉讼。',
+        '申请人{plaintiff}与被申请人{defendant}因{cause}发生劳动争议。申请人认为被申请人违法解除劳动合同，要求支付赔偿金{amount}元。',
     },
     {
       title: '工伤赔偿',
       template:
-        '申请人{plaintiff}系被申请人{defendant}职工，在工作中因{cause}受伤，经认定为工伤。申请人要求被申请人支付一次性伤残补助金、一次性工伤医疗补助金等共计{amount}元。',
+        '申请人{plaintiff}系被申请人{defendant}职工，在工作中因{cause}受伤，经认定为工伤，要求被申请人支付各项补偿共计{amount}元。',
     },
     {
       title: '拖欠工资',
       template:
-        '申请人{plaintiff}在被申请人{defendant}处工作期间，被申请人拖欠申请人工资{amount}元，经申请人多次催讨，被申请人仍拒不支付。申请人要求被申请人支付拖欠工资及经济补偿金。',
-    },
-    {
-      title: '社保争议',
-      template:
-        '申请人{plaintiff}在被申请人{defendant}工作期间，被申请人未依法为申请人缴纳社会保险。申请人要求被申请人补缴社会保险费或赔偿相应损失。',
-    },
-    {
-      title: '经济补偿金',
-      template:
-        '申请人{plaintiff}与被申请人{defendant}协商解除劳动合同/合同期满，被申请人未依法支付经济补偿金{amount}元。申请人要求被申请人支付经济补偿金。',
-    },
-    {
-      title: '加班费',
-      template:
-        '申请人在被申请人{defendant}处工作期间，存在大量加班事实，但被申请人未支付加班费。申请人要求被申请人支付加班费共计{amount}元。',
+        '申请人{plaintiff}在被申请人{defendant}处工作期间，被申请人拖欠工资{amount}元，要求支付拖欠工资及经济补偿金。',
     },
   ],
   COMMERCIAL: [
     {
       title: '商业合同违约',
       template:
-        '原告{plaintiff}与被告{defendant}签订《{contract_type}合同》，约定{content}。合同签订后，原告已履行合同义务，但被告未按约定{action}，构成违约。原告因此遭受损失{amount}元。',
+        '原告{plaintiff}与被告{defendant}签订合同，合同签订后，原告已履行合同义务，但被告未按约定履行，构成违约，原告损失{amount}元。',
     },
     {
       title: '股权纠纷',
       template:
-        '原告{plaintiff}与被告{defendant}因{cause}股权问题发生争议。原告认为被告侵害了其股东权益，要求被告{claim}。双方协商未果，现向贵院提起诉讼。',
-    },
-    {
-      title: '公司决议效力',
-      template:
-        '原告{plaintiff}作为公司股东，认为被告{defendant}主持召开的股东会所做出的决议违反公司章程/法律规定，请求法院确认该决议无效/予以撤销。',
-    },
-    {
-      title: '合伙纠纷',
-      template:
-        '原告{plaintiff}与被告{defendant}签订《合伙协议》，约定共同经营{location}。现因{cause}产生分歧，双方无法达成一致意见，原告要求解除合伙关系并进行清算。',
-    },
-    {
-      title: '保险合同纠纷',
-      template:
-        '原告{plaintiff}在被告{defendant}处投保{contract_type}保险，保险期间发生保险事故。被告以{cause}为由拒绝/少陪保险金。原告要求被告依约赔付保险金{amount}元。',
-    },
-    {
-      title: '票据纠纷',
-      template:
-        '原告{plaintiff}合法持有票据，被告{defendant}作为付款人/承兑人拒绝支付票款{amount}元。原告要求被告支付票款及利息。',
-    },
-    {
-      title: '金融借款',
-      template:
-        '被告{defendant}向原告{plaintiff}借款{amount}元，用于{location}。被告未按期还本付息，原告要求被告偿还本金、利息及违约金。',
+        '原告{plaintiff}与被告{defendant}因股权问题发生争议，原告认为被告侵害了其股东权益，要求被告停止侵害。',
     },
   ],
   ADMINISTRATIVE: [
     {
       title: '行政处罚异议',
       template:
-        '原告{plaintiff}对{department}作出的{penalty_type}决定不服，认为该处罚决定认定事实不清、适用法律错误。原告要求撤销该行政处罚决定，或减轻处罚。',
-    },
-    {
-      title: '行政强制',
-      template:
-        '原告{plaintiff}对{department}采取的{action}行政强制措施不服，认为该措施违反法定程序，侵害了原告合法权益。现依法提起行政诉讼。',
-    },
-    {
-      title: '信息公开',
-      template:
-        '原告{plaintiff}向{department}申请公开{location}相关信息，{department}未在法定期限内予以答复/拒绝公开。原告要求{department}依法公开相关信息。',
+        '原告{plaintiff}对相关部门作出的行政处罚决定不服，认为该处罚决定认定事实不清、适用法律错误，要求撤销。',
     },
     {
       title: '行政许可',
       template:
-        '原告{plaintiff}向{department}申请{location}行政许可，{department}不予许可/不予答复。原告认为{department}的决定违反法律规定，要求其履行许可职责。',
-    },
-    {
-      title: '行政赔偿',
-      template:
-        '原告{plaintiff}的合法财产被{department}违法采取行政强制措施造成损失，要求{department}行政赔偿{amount}元。',
+        '原告{plaintiff}向相关部门申请行政许可，相关部门不予许可/不予答复，原告认为违反法律规定，要求其履行许可职责。',
     },
   ],
   INTELLECTUAL_PROPERTY: [
     {
       title: '著作权侵权',
       template:
-        '原告{plaintiff}依法享有"{work}"作品的著作权。被告{defendant}未经原告许可，擅自{action}该作品，侵犯了原告的著作权。原告要求被告停止侵权并赔偿损失{amount}元。',
+        '原告{plaintiff}依法享有相关作品的著作权。被告{defendant}未经原告许可，擅自使用该作品，侵犯了原告的著作权，要求赔偿损失{amount}元。',
     },
     {
       title: '专利侵权',
       template:
-        '原告{plaintiff}依法享有专利号{patent}的专利权。被告{defendant}生产、销售的产品{product}落入原告专利保护范围，构成专利侵权。原告要求被告停止侵权并赔偿损失。',
+        '原告{plaintiff}依法享有相关专利权。被告{defendant}生产、销售的产品落入原告专利保护范围，要求被告停止侵权并赔偿损失。',
     },
   ],
 };
 
-/**
- * 通用模板
- */
 const commonTemplates = [
   {
     title: '通用模板',
@@ -267,14 +175,29 @@ const commonTemplates = [
   },
 ];
 
-/**
- * 创建案件页面
- * 功能：提供表单供用户创建新案件
- */
+/** 智能录入模式 */
+type SmartInputMode = 'image' | 'text';
+
+/** 提取结果字段 */
+interface ExtractedFields {
+  title?: string;
+  plaintiffName?: string;
+  defendantName?: string;
+  cause?: string;
+  court?: string;
+  amount?: string;
+  description?: string;
+  caseNumber?: string;
+}
+
 export default function CreateCasePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const consultationId = searchParams.get('consultationId');
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const extractSuccessTimer = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -287,6 +210,17 @@ export default function CreateCasePage() {
   const [isLoadingConsultation, setIsLoadingConsultation] = useState(false);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+
+  // 智能录入状态
+  const [smartMode, setSmartMode] = useState<SmartInputMode>('text');
+  const [pasteText, setPasteText] = useState('');
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractSuccess, setExtractSuccess] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageData, setImageData] = useState<{
+    base64: string;
+    mimeType: string;
+  } | null>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -305,21 +239,24 @@ export default function CreateCasePage() {
   useEffect(() => {
     async function fetchConsultation() {
       if (!consultationId) return;
-
       setIsLoadingConsultation(true);
       try {
         const response = await fetch(`/api/v1/consultations/${consultationId}`);
         if (response.ok) {
-          const data = await response.json();
+          const data = (await response.json()) as {
+            data: {
+              caseSummary?: string;
+              clientName?: string;
+              clientPhone?: string;
+              id: string;
+            };
+          };
           const consultation = data.data;
-
-          // 预填充表单
           setFormData(prev => ({
             ...prev,
             description: consultation.caseSummary || '',
             plaintiffName: consultation.clientName || '',
           }));
-
           setConsultationData({
             id: consultation.id,
             caseSummary: consultation.caseSummary || '',
@@ -327,28 +264,37 @@ export default function CreateCasePage() {
             clientPhone: consultation.clientPhone || '',
           });
         }
-      } catch (error) {
-        console.error('获取咨询信息失败:', error);
+      } catch {
+        // 咨询数据加载失败不影响创建表单的主流程，静默忽略
       } finally {
         setIsLoadingConsultation(false);
       }
     }
-
     fetchConsultation();
   }, [consultationId]);
 
-  // 自动生成案号（调用后端 API 获取连续案号）
+  // 组件卸载时清理 extractSuccess 定时器，避免在已卸载组件上调用 setState
+  useEffect(() => {
+    return () => {
+      if (extractSuccessTimer.current) {
+        clearTimeout(extractSuccessTimer.current);
+      }
+    };
+  }, []);
+
+  // 自动生成案号
   const generateCaseNumber = async () => {
     try {
       const response = await fetch(
         `/api/v1/cases/generate-case-number?type=${formData.type}`
       );
-      const data = await response.json();
-
+      const data = (await response.json()) as {
+        success: boolean;
+        data: { caseNumber: string };
+      };
       if (data.success && data.data.caseNumber) {
         setFormData(prev => ({ ...prev, caseNumber: data.data.caseNumber }));
       } else {
-        // 后端生成失败时，使用本地生成（降级方案）
         const year = new Date().getFullYear();
         const typeInfo = caseTypeCodes[formData.type] || {
           code: 'M',
@@ -356,12 +302,12 @@ export default function CreateCasePage() {
         };
         const statusCode = statusCodes[formData.status] || '初';
         const randomNum = Math.floor(Math.random() * 9000 + 1000);
-        const newCaseNumber = `${year}${typeInfo.code}${typeInfo.name}${statusCode}${randomNum}号`;
-        setFormData(prev => ({ ...prev, caseNumber: newCaseNumber }));
+        setFormData(prev => ({
+          ...prev,
+          caseNumber: `${year}${typeInfo.code}${typeInfo.name}${statusCode}${randomNum}号`,
+        }));
       }
-    } catch (error) {
-      console.error('生成案号失败:', error);
-      // 降级方案
+    } catch {
       const year = new Date().getFullYear();
       const typeInfo = caseTypeCodes[formData.type] || {
         code: 'M',
@@ -369,14 +315,28 @@ export default function CreateCasePage() {
       };
       const statusCode = statusCodes[formData.status] || '初';
       const randomNum = Math.floor(Math.random() * 9000 + 1000);
-      const newCaseNumber = `${year}${typeInfo.code}${typeInfo.name}${statusCode}${randomNum}号`;
-      setFormData(prev => ({ ...prev, caseNumber: newCaseNumber }));
+      setFormData(prev => ({
+        ...prev,
+        caseNumber: `${year}${typeInfo.code}${typeInfo.name}${statusCode}${randomNum}号`,
+      }));
     }
   };
 
   // 应用模板
   const applyTemplate = (template: string) => {
-    const filledTemplate = template
+    const typeLabel =
+      formData.type === 'CIVIL'
+        ? '民事'
+        : formData.type === 'CRIMINAL'
+          ? '刑事'
+          : formData.type === 'LABOR'
+            ? '劳动'
+            : formData.type === 'COMMERCIAL'
+              ? '商事'
+              : formData.type === 'ADMINISTRATIVE'
+                ? '行政'
+                : '知识产权';
+    const filled = template
       .replace(/{plaintiff}/g, formData.plaintiffName || '原告')
       .replace(/{defendant}/g, formData.defendantName || '被告')
       .replace(/{cause}/g, formData.cause || '相关')
@@ -384,41 +344,15 @@ export default function CreateCasePage() {
       .replace(/{date}/g, new Date().toLocaleDateString('zh-CN'))
       .replace(/{location}/g, '待定')
       .replace(/{result}/g, '待定')
-      .replace(/{means}/g, '虚构事实')
-      .replace(/{contract_type}/g, '买卖')
-      .replace(/{content}/g, '待定')
-      .replace(/{action}/g, '履行')
-      .replace(/{claim}/g, '停止侵害')
-      .replace(/{department}/g, '相关行政机关')
-      .replace(/{penalty_type}/g, '行政处罚')
-      .replace(/{work}/g, '待定作品')
-      .replace(/{patent}/g, '待定专利')
-      .replace(/{product}/g, '待定产品')
-      .replace(
-        /{type}/g,
-        formData.type === 'CIVIL'
-          ? '民事'
-          : formData.type === 'CRIMINAL'
-            ? '刑事'
-            : formData.type === 'LABOR'
-              ? '劳动'
-              : formData.type === 'COMMERCIAL'
-                ? '商事'
-                : formData.type === 'ADMINISTRATIVE'
-                  ? '行政'
-                  : '知识产权'
-      );
-
-    setFormData(prev => ({ ...prev, description: filledTemplate }));
+      .replace(/{type}/g, typeLabel);
+    setFormData(prev => ({ ...prev, description: filled }));
     setShowTemplates(false);
   };
 
   // AI 生成案情描述
   const generateWithAI = async () => {
-    // 不强制要求填写内容，AI 会根据案件类型生成通用模板
     setIsGeneratingAI(true);
     setErrors(prev => ({ ...prev, description: '' }));
-
     try {
       const response = await fetch('/api/ai/generate-case-description', {
         method: 'POST',
@@ -431,29 +365,144 @@ export default function CreateCasePage() {
           amount: formData.amount,
         }),
       });
-
-      const data = await response.json();
-
+      const data = (await response.json()) as {
+        success: boolean;
+        data: { description: string };
+      };
       if (data.success && data.data.description) {
         setFormData(prev => ({ ...prev, description: data.data.description }));
       } else {
-        // AI 生成失败，使用模板
         const templates =
           caseDescriptionTemplates[formData.type] || commonTemplates;
-        const fallbackTemplate =
-          templates[0]?.template || commonTemplates[0].template;
-        applyTemplate(fallbackTemplate);
+        applyTemplate(templates[0]?.template || commonTemplates[0].template);
       }
-    } catch (error) {
-      console.error('AI生成失败:', error);
-      // 降级使用模板
+    } catch {
       const templates =
         caseDescriptionTemplates[formData.type] || commonTemplates;
-      const fallbackTemplate =
-        templates[0]?.template || commonTemplates[0].template;
-      applyTemplate(fallbackTemplate);
+      applyTemplate(templates[0]?.template || commonTemplates[0].template);
     } finally {
       setIsGeneratingAI(false);
+    }
+  };
+
+  // 将提取结果填入表单
+  const applyExtracted = (fields: ExtractedFields) => {
+    setFormData(prev => ({
+      ...prev,
+      title: fields.title || prev.title,
+      plaintiffName: fields.plaintiffName || prev.plaintiffName,
+      defendantName: fields.defendantName || prev.defendantName,
+      cause: fields.cause || prev.cause,
+      court: fields.court || prev.court,
+      amount: fields.amount || prev.amount,
+      description: fields.description || prev.description,
+      caseNumber: fields.caseNumber || prev.caseNumber,
+    }));
+    setExtractSuccess(true);
+    if (extractSuccessTimer.current) clearTimeout(extractSuccessTimer.current);
+    extractSuccessTimer.current = setTimeout(
+      () => setExtractSuccess(false),
+      3000
+    );
+  };
+
+  // 粘贴文字解析
+  const handleTextExtract = async () => {
+    if (!pasteText.trim()) return;
+    setIsExtracting(true);
+    setErrors(prev => ({ ...prev, smartExtract: '' }));
+    try {
+      const response = await fetch('/api/v1/cases/smart-extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'text', content: pasteText }),
+      });
+      const data = (await response.json()) as {
+        success: boolean;
+        data: ExtractedFields;
+        error?: string;
+      };
+      if (data.success && data.data) {
+        applyExtracted(data.data);
+      } else {
+        setErrors(prev => ({
+          ...prev,
+          smartExtract: data.error || '解析失败',
+        }));
+      }
+    } catch {
+      setErrors(prev => ({ ...prev, smartExtract: '解析失败，请稍后重试' }));
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
+  // 图片选择处理
+  const handleImageSelect = (file: File) => {
+    // 客户端预验证：文件类型
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setErrors(prev => ({
+        ...prev,
+        smartExtract: '仅支持 JPG、PNG、WEBP 格式的图片',
+      }));
+      return;
+    }
+    // 客户端预验证：文件大小（10MB 上限）
+    if (file.size > 10 * 1024 * 1024) {
+      setErrors(prev => ({ ...prev, smartExtract: '图片文件不能超过 10MB' }));
+      return;
+    }
+    setErrors(prev => ({ ...prev, smartExtract: '' }));
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      const dataUrl = e.target?.result as string;
+      setImagePreview(dataUrl);
+      // 取逗号后的纯 base64 部分（FileReader.readAsDataURL 保证格式为 data:mime;base64,xxx）
+      const commaIndex = dataUrl.indexOf(',');
+      const base64 =
+        commaIndex !== -1 ? dataUrl.slice(commaIndex + 1) : dataUrl;
+      setImageData({ base64, mimeType: file.type });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // 图片 OCR 识别
+  const handleImageExtract = async () => {
+    if (!imageData) return;
+    setIsExtracting(true);
+    setErrors(prev => ({ ...prev, smartExtract: '' }));
+    try {
+      const response = await fetch('/api/v1/cases/smart-extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'image',
+          content: imageData.base64,
+          mimeType: imageData.mimeType,
+        }),
+      });
+      const data = (await response.json()) as {
+        success: boolean;
+        data: ExtractedFields;
+        error?: string;
+      };
+      if (data.success && data.data) {
+        applyExtracted(data.data);
+      } else {
+        setErrors(prev => ({
+          ...prev,
+          smartExtract: data.error || '图片识别失败',
+        }));
+      }
+    } catch {
+      setErrors(prev => ({
+        ...prev,
+        smartExtract: '图片识别失败，请稍后重试',
+      }));
+    } finally {
+      setIsExtracting(false);
     }
   };
 
@@ -464,72 +513,51 @@ export default function CreateCasePage() {
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-
-    if (!formData.title.trim()) {
-      newErrors.title = '请输入案件标题';
-    }
-
-    if (!formData.type) {
-      newErrors.type = '请选择案件类型';
-    }
-
+    if (!formData.title.trim()) newErrors.title = '请输入案件标题';
+    if (!formData.type) newErrors.type = '请选择案件类型';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
+    if (!validateForm()) return;
     setIsSubmitting(true);
-
     try {
       const response = await fetch('/api/v1/cases', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
           amount: formData.amount ? parseFloat(formData.amount) : null,
           metadata: consultationId ? { consultationId } : {},
         }),
       });
-
-      const data = await response.json();
-
+      const data = (await response.json()) as {
+        success: boolean;
+        data: { id: string };
+        error?: { message: string };
+      };
       if (data.success) {
         router.push(`/cases/${data.data.id}`);
       } else {
         setErrors({ submit: data.error?.message || '创建失败' });
       }
-    } catch (error) {
-      console.error('创建案件失败:', error);
+    } catch {
       setErrors({ submit: '创建失败，请稍后重试' });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleCancel = () => {
-    router.push('/cases');
-  };
-
-  // 跳转到咨询详情
-  const goToConsultation = () => {
-    if (consultationData?.id) {
-      router.push(`/consultations/${consultationData.id}`);
-    }
-  };
+  const selectClassName =
+    'flex h-12 w-full rounded-md border border-zinc-300 bg-white px-3 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-950';
 
   return (
     <div className='min-h-screen bg-zinc-50 dark:bg-black'>
       {/* 页面头部 */}
       <header className='border-b border-zinc-200 bg-white px-6 py-6 dark:border-zinc-800 dark:bg-zinc-950'>
-        <div className='mx-auto max-w-5xl'>
+        <div className='mx-auto max-w-3xl'>
           <h1 className='text-2xl font-semibold text-zinc-900 dark:text-zinc-50'>
             创建案件
           </h1>
@@ -539,8 +567,7 @@ export default function CreateCasePage() {
         </div>
       </header>
 
-      {/* 主内容区 */}
-      <main className='mx-auto max-w-5xl px-6 py-8'>
+      <main className='mx-auto max-w-3xl px-6 py-8'>
         {/* 咨询转化提示 */}
         {consultationId && (
           <div className='mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20'>
@@ -561,7 +588,10 @@ export default function CreateCasePage() {
               <Button
                 variant='outline'
                 size='sm'
-                onClick={goToConsultation}
+                onClick={() =>
+                  consultationData &&
+                  router.push(`/consultations/${consultationData.id}`)
+                }
                 className='flex items-center gap-2'
               >
                 查看咨询
@@ -596,12 +626,13 @@ export default function CreateCasePage() {
 
         <form onSubmit={handleSubmit}>
           <div className='space-y-6'>
-            {/* 基本信息 */}
+            {/* ── 第一部分：基本信息 ── */}
             <Card>
               <CardHeader>
                 <CardTitle>基本信息</CardTitle>
               </CardHeader>
               <CardContent className='space-y-5'>
+                {/* 案件标题 */}
                 <div className='grid gap-2'>
                   <Label htmlFor='title' className='text-base'>
                     案件标题 <span className='text-red-500'>*</span>
@@ -610,7 +641,7 @@ export default function CreateCasePage() {
                     id='title'
                     value={formData.title}
                     onChange={e => handleChange('title', e.target.value)}
-                    placeholder='例如：张三诉李四合同纠纷案'
+                    placeholder='例如：张三诉李四民间借贷纠纷案'
                     className='h-12 text-base'
                   />
                   {errors.title && (
@@ -618,6 +649,7 @@ export default function CreateCasePage() {
                   )}
                 </div>
 
+                {/* 案件类型 + 案件状态 */}
                 <div className='grid grid-cols-2 gap-5'>
                   <div className='grid gap-2'>
                     <Label htmlFor='type' className='text-base'>
@@ -627,7 +659,7 @@ export default function CreateCasePage() {
                       id='type'
                       value={formData.type}
                       onChange={e => handleChange('type', e.target.value)}
-                      className='flex h-12 w-full rounded-md border border-zinc-300 bg-white px-3 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-950'
+                      className={selectClassName}
                     >
                       <option value='CIVIL'>民事案件</option>
                       <option value='CRIMINAL'>刑事案件</option>
@@ -648,7 +680,7 @@ export default function CreateCasePage() {
                       id='status'
                       value={formData.status}
                       onChange={e => handleChange('status', e.target.value)}
-                      className='flex h-12 w-full rounded-md border border-zinc-300 bg-white px-3 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-950'
+                      className={selectClassName}
                     >
                       <option value='DRAFT'>草稿</option>
                       <option value='ACTIVE'>进行中</option>
@@ -658,36 +690,302 @@ export default function CreateCasePage() {
                   </div>
                 </div>
 
-                <div className='grid gap-2'>
-                  <div className='flex items-center justify-between'>
-                    <Label htmlFor='caseNumber' className='text-base'>
-                      案号
-                    </Label>
-                    <Button
-                      type='button'
-                      variant='ghost'
-                      size='sm'
-                      onClick={generateCaseNumber}
-                      className='flex items-center gap-1 text-blue-600 hover:text-blue-700'
-                    >
-                      <RefreshCw className='h-3 w-3' />
-                      自动生成
-                    </Button>
+                {/* 案号 + 审理法院 */}
+                <div className='grid grid-cols-2 gap-5'>
+                  <div className='grid gap-2'>
+                    <div className='flex items-center justify-between'>
+                      <Label htmlFor='caseNumber' className='text-base'>
+                        案号
+                      </Label>
+                      <Button
+                        type='button'
+                        variant='ghost'
+                        size='sm'
+                        onClick={generateCaseNumber}
+                        className='flex items-center gap-1 text-blue-600 hover:text-blue-700'
+                      >
+                        <RefreshCw className='h-3 w-3' />
+                        自动生成
+                      </Button>
+                    </div>
+                    <Input
+                      id='caseNumber'
+                      value={formData.caseNumber}
+                      onChange={e => handleChange('caseNumber', e.target.value)}
+                      placeholder='请先选择类型再点击"自动生成"'
+                      className='h-12 text-base'
+                    />
                   </div>
-                  <Input
-                    id='caseNumber'
-                    value={formData.caseNumber}
-                    onChange={e => handleChange('caseNumber', e.target.value)}
-                    placeholder='请先选择案件类型，再点击"自动生成"'
-                    className='h-12 text-base'
-                  />
+
+                  <div className='grid gap-2'>
+                    <Label htmlFor='court' className='text-base'>
+                      审理法院
+                    </Label>
+                    <Input
+                      id='court'
+                      value={formData.court}
+                      onChange={e => handleChange('court', e.target.value)}
+                      placeholder='例如：北京市朝阳区人民法院'
+                      className='h-12 text-base'
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* ── 第二部分：当事人信息 ── */}
+            <Card>
+              <CardHeader>
+                <CardTitle>当事人信息</CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-5'>
+                {/* 原告 + 被告 */}
+                <div className='grid grid-cols-2 gap-5'>
+                  <div className='grid gap-2'>
+                    <Label htmlFor='plaintiffName' className='text-base'>
+                      原告 / 申请人
+                    </Label>
+                    <Input
+                      id='plaintiffName'
+                      value={formData.plaintiffName}
+                      onChange={e =>
+                        handleChange('plaintiffName', e.target.value)
+                      }
+                      placeholder='请输入原告姓名或单位名称'
+                      className='h-12 text-base'
+                    />
+                  </div>
+                  <div className='grid gap-2'>
+                    <Label htmlFor='defendantName' className='text-base'>
+                      被告 / 被申请人
+                    </Label>
+                    <Input
+                      id='defendantName'
+                      value={formData.defendantName}
+                      onChange={e =>
+                        handleChange('defendantName', e.target.value)
+                      }
+                      placeholder='请输入被告姓名或单位名称'
+                      className='h-12 text-base'
+                    />
+                  </div>
                 </div>
 
-                <div className='grid gap-2'>
-                  <div className='flex items-center justify-between'>
-                    <Label htmlFor='description' className='text-base'>
-                      案件描述
+                {/* 案由 + 标的金额 */}
+                <div className='grid grid-cols-2 gap-5'>
+                  <div className='grid gap-2'>
+                    <Label htmlFor='cause' className='text-base'>
+                      案由
                     </Label>
+                    <Input
+                      id='cause'
+                      value={formData.cause}
+                      onChange={e => handleChange('cause', e.target.value)}
+                      placeholder='例如：民间借贷纠纷'
+                      className='h-12 text-base'
+                    />
+                  </div>
+                  <div className='grid gap-2'>
+                    <Label htmlFor='amount' className='text-base'>
+                      标的金额（元）
+                    </Label>
+                    <Input
+                      id='amount'
+                      inputMode='decimal'
+                      autoComplete='off'
+                      value={formData.amount}
+                      onChange={e => handleChange('amount', e.target.value)}
+                      placeholder='请输入金额（单位：元）'
+                      className='h-12 text-base'
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* ── 第三部分：智能录入 ── */}
+            <Card>
+              <CardHeader>
+                <div className='flex items-center justify-between'>
+                  <CardTitle>智能录入</CardTitle>
+                  <p className='text-sm text-zinc-500'>
+                    AI 自动识别并填充上方表单字段
+                  </p>
+                </div>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                {/* 模式切换 */}
+                <div className='flex rounded-lg border border-zinc-200 p-1 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 w-fit gap-1'>
+                  <button
+                    type='button'
+                    onClick={() => {
+                      setSmartMode('text');
+                      setErrors(prev => ({ ...prev, smartExtract: '' }));
+                    }}
+                    className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                      smartMode === 'text'
+                        ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-zinc-50'
+                        : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50'
+                    }`}
+                  >
+                    <ClipboardPaste className='h-4 w-4' />
+                    粘贴文字
+                  </button>
+                  <button
+                    type='button'
+                    onClick={() => {
+                      setSmartMode('image');
+                      setErrors(prev => ({ ...prev, smartExtract: '' }));
+                    }}
+                    className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                      smartMode === 'image'
+                        ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-zinc-50'
+                        : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50'
+                    }`}
+                  >
+                    <ImageIcon className='h-4 w-4' />
+                    图片识别
+                  </button>
+                </div>
+
+                {/* 粘贴文字面板 */}
+                {smartMode === 'text' && (
+                  <div className='space-y-3'>
+                    <textarea
+                      value={pasteText}
+                      onChange={e => setPasteText(e.target.value)}
+                      placeholder={
+                        '请粘贴案件相关文字材料，例如：\n起诉状、一审判决书、案件摘要、当事人信息等\n\nAI 将自动识别并提取：原告、被告、案由、金额、法院、案号等信息'
+                      }
+                      rows={7}
+                      className='flex w-full rounded-md border border-zinc-300 bg-white px-3 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-950 resize-none'
+                    />
+                    <Button
+                      type='button'
+                      onClick={handleTextExtract}
+                      disabled={!pasteText.trim() || isExtracting}
+                      className='flex items-center gap-2'
+                    >
+                      {isExtracting ? (
+                        <>
+                          <Loader2 className='h-4 w-4 animate-spin' />
+                          解析中...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className='h-4 w-4' />
+                          AI 解析并填充
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+
+                {/* 图片识别面板 */}
+                {smartMode === 'image' && (
+                  <div className='space-y-3'>
+                    {/* 拖拽/点击上传区 */}
+                    <div
+                      onClick={() => imageInputRef.current?.click()}
+                      onDragOver={e => e.preventDefault()}
+                      onDrop={e => {
+                        e.preventDefault();
+                        const file = e.dataTransfer.files[0];
+                        if (file) handleImageSelect(file);
+                      }}
+                      className='relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50 py-10 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors dark:border-zinc-600 dark:bg-zinc-900 dark:hover:border-blue-500 dark:hover:bg-blue-950'
+                    >
+                      {imagePreview ? (
+                        <img
+                          src={imagePreview}
+                          alt='预览'
+                          className='max-h-48 max-w-full rounded-lg object-contain'
+                        />
+                      ) : (
+                        <>
+                          <ImageIcon className='h-10 w-10 text-zinc-400 mb-3' />
+                          <p className='text-sm font-medium text-zinc-600 dark:text-zinc-400'>
+                            点击或拖拽图片到此处
+                          </p>
+                          <p className='text-xs text-zinc-400 mt-1'>
+                            支持 JPG、PNG、WEBP 格式
+                          </p>
+                        </>
+                      )}
+                      <input
+                        ref={imageInputRef}
+                        type='file'
+                        accept='image/*'
+                        className='hidden'
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageSelect(file);
+                        }}
+                      />
+                    </div>
+                    {imagePreview && (
+                      <div className='flex gap-2'>
+                        <Button
+                          type='button'
+                          onClick={handleImageExtract}
+                          disabled={isExtracting}
+                          className='flex items-center gap-2'
+                        >
+                          {isExtracting ? (
+                            <>
+                              <Loader2 className='h-4 w-4 animate-spin' />
+                              识别中...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className='h-4 w-4' />
+                              AI 识别并填充
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          onClick={() => {
+                            setImagePreview(null);
+                            setImageData(null);
+                          }}
+                        >
+                          重新选择
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 成功提示 */}
+                {extractSuccess && (
+                  <div className='flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400'>
+                    <CheckCircle2 className='h-4 w-4 shrink-0' />
+                    <span className='text-sm'>
+                      已提取信息并填充到上方表单，请检查并补充。
+                    </span>
+                  </div>
+                )}
+
+                {/* 错误提示 */}
+                {errors.smartExtract && (
+                  <p className='text-sm text-red-500'>{errors.smartExtract}</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* ── 第四部分：案情描述 ── */}
+            <Card>
+              <CardHeader>
+                <CardTitle>案情描述</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className='grid gap-3'>
+                  <div className='flex items-center justify-between'>
+                    <p className='text-sm text-zinc-500'>
+                      填写完以上信息后，可使用模板或 AI 快速生成案情描述
+                    </p>
                     <div className='flex gap-2'>
                       <Button
                         type='button'
@@ -710,13 +1008,14 @@ export default function CreateCasePage() {
                         <Sparkles
                           className={`h-3 w-3 ${isGeneratingAI ? 'animate-spin' : ''}`}
                         />
-                        {isGeneratingAI ? '生成中...' : 'AI生成'}
+                        {isGeneratingAI ? '生成中...' : 'AI 生成'}
                       </Button>
                     </div>
                   </div>
+
                   {/* 模板选择面板 */}
                   {showTemplates && (
-                    <div className='mb-2 rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800'>
+                    <div className='rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-800'>
                       <p className='mb-2 text-sm text-zinc-600 dark:text-zinc-400'>
                         选择模板（将自动填充已填写的当事人信息）：
                       </p>
@@ -746,111 +1045,21 @@ export default function CreateCasePage() {
                       </div>
                     </div>
                   )}
+
                   <textarea
                     id='description'
                     value={formData.description}
                     onChange={e => handleChange('description', e.target.value)}
                     placeholder={
                       consultationData?.caseSummary ||
-                      '请详细描述案件情况...（您也可以点击上方"模板"或"AI生成"来快速创建）'
+                      '请详细描述案件情况...（也可通过上方"模板"或"AI生成"快速创建）'
                     }
-                    rows={5}
+                    rows={6}
                     className='flex w-full rounded-md border border-zinc-300 bg-white px-3 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-950'
                   />
                   {errors.description && (
                     <p className='text-sm text-red-500'>{errors.description}</p>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 当事人信息 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>当事人信息</CardTitle>
-              </CardHeader>
-              <CardContent className='space-y-5'>
-                <div className='grid grid-cols-2 gap-5'>
-                  <div className='grid gap-2'>
-                    <Label htmlFor='plaintiffName' className='text-base'>
-                      原告/申请人
-                    </Label>
-                    <Input
-                      id='plaintiffName'
-                      value={formData.plaintiffName}
-                      onChange={e =>
-                        handleChange('plaintiffName', e.target.value)
-                      }
-                      placeholder='请输入原告姓名或单位名称'
-                      className='h-12 text-base'
-                    />
-                  </div>
-
-                  <div className='grid gap-2'>
-                    <Label htmlFor='defendantName' className='text-base'>
-                      被告/被申请人
-                    </Label>
-                    <Input
-                      id='defendantName'
-                      value={formData.defendantName}
-                      onChange={e =>
-                        handleChange('defendantName', e.target.value)
-                      }
-                      placeholder='请输入被告姓名或单位名称'
-                      className='h-12 text-base'
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 案件信息 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>案件信息</CardTitle>
-              </CardHeader>
-              <CardContent className='space-y-5'>
-                <div className='grid grid-cols-2 gap-5'>
-                  <div className='grid gap-2'>
-                    <Label htmlFor='cause' className='text-base'>
-                      案由
-                    </Label>
-                    <Input
-                      id='cause'
-                      value={formData.cause}
-                      onChange={e => handleChange('cause', e.target.value)}
-                      placeholder='例如：合同纠纷'
-                      className='h-12 text-base'
-                    />
-                  </div>
-
-                  <div className='grid gap-2'>
-                    <Label htmlFor='court' className='text-base'>
-                      审理法院
-                    </Label>
-                    <Input
-                      id='court'
-                      value={formData.court}
-                      onChange={e => handleChange('court', e.target.value)}
-                      placeholder='例如：北京市朝阳区人民法院'
-                      className='h-12 text-base'
-                    />
-                  </div>
-                </div>
-
-                <div className='grid gap-2'>
-                  <Label htmlFor='amount' className='text-base'>
-                    标的金额（元）
-                  </Label>
-                  <Input
-                    id='amount'
-                    inputMode='decimal'
-                    autoComplete='off'
-                    value={formData.amount}
-                    onChange={e => handleChange('amount', e.target.value)}
-                    placeholder='请输入金额（单位：元）'
-                    className='h-12 text-base'
-                  />
                 </div>
               </CardContent>
             </Card>
@@ -868,7 +1077,7 @@ export default function CreateCasePage() {
                 type='button'
                 variant='outline'
                 size='lg'
-                onClick={handleCancel}
+                onClick={() => router.push('/cases')}
                 disabled={isSubmitting}
               >
                 取消

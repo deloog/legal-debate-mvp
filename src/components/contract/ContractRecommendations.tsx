@@ -264,13 +264,6 @@ export function ContractRecommendations({
     }
   };
 
-  // 处理选择（保留向后兼容）
-  const __handleSelect = (article: LawArticle) => {
-    if (onSelect) {
-      onSelect(article);
-    }
-  };
-
   // 加载状态
   if (isLoading) {
     return (

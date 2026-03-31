@@ -720,12 +720,6 @@ export class SAMRCrawler extends BaseCrawler {
     recoveryAttempts: 0,
   };
 
-  /** 最大连续失败次数，超过则触发告警 */
-  private readonly MAX_CONSECUTIVE_FAILURES = 5;
-
-  /** 错误告警回调 */
-  private errorAlertCallback?: (stats: SAMRErrorStats) => void;
-
   /** User-Agent 池 */
   private static readonly UA_POOL = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -747,17 +741,6 @@ export class SAMRCrawler extends BaseCrawler {
     return 'samr';
   }
 
-  /**
-   * 获取当前使用的API基础URL
-   * 优先使用主要数据源(12315.cn)，失败时回退到备用数据源
-   */
-  private __getApiBaseUrl(): string {
-    return this.PRIMARY_API_BASE;
-  }
-
-  /**
-   * 检查主要数据源是否可用
-   */
   /**
    * 检查主要数据源是否可用
    * 2026-02-18 更新: 检查 samr.gov.cn
@@ -2998,73 +2981,6 @@ ${categoryInfo.miscellaneous}
     const fs = await import('fs');
     const resultsPath = path.join(outDir, 'samr-parse-results.json');
     fs.writeFileSync(resultsPath, JSON.stringify(results, null, 2), 'utf-8');
-  }
-
-  /**
-   * 加载解析结果
-   */
-  private async loadParseResults(
-    outDir: string
-  ): Promise<SAMRParseResults | null> {
-    const fs = await import('fs');
-    const resultsPath = path.join(outDir, 'samr-parse-results.json');
-    if (!fs.existsSync(resultsPath)) {
-      return null;
-    }
-    try {
-      const content = fs.readFileSync(resultsPath, 'utf-8');
-      return JSON.parse(content) as SAMRParseResults;
-    } catch {
-      return null;
-    }
-  }
-
-  /**
-   * 记录错误并更新统计
-   */
-  private trackError(
-    errorType: string,
-    itemId: string,
-    errorMessage: string
-  ): void {
-    this.errorStats.totalErrors++;
-    this.errorStats.errorsByType[errorType] =
-      (this.errorStats.errorsByType[errorType] || 0) + 1;
-    this.errorStats.errorsByItem[itemId] = errorMessage;
-    this.errorStats.lastErrorAt = new Date().toISOString();
-    this.errorStats.consecutiveFailures++;
-
-    // 检查是否超过连续失败阈值
-    if (this.errorStats.consecutiveFailures >= this.MAX_CONSECUTIVE_FAILURES) {
-      this.triggerErrorAlert();
-    }
-  }
-
-  /**
-   * 记录成功，重置连续失败计数
-   */
-  private trackSuccess(): void {
-    this.errorStats.consecutiveFailures = 0;
-  }
-
-  /**
-   * 触发错误告警
-   */
-  private triggerErrorAlert(): void {
-    const message = `⚠️ SAMRCrawler 错误告警：连续 ${this.errorStats.consecutiveFailures} 次失败！`;
-    this.logger.error(message);
-
-    // 调用告警回调
-    if (this.errorAlertCallback) {
-      this.errorAlertCallback(this.errorStats);
-    }
-  }
-
-  /**
-   * 设置错误告警回调
-   */
-  setErrorAlertCallback(callback: (stats: SAMRErrorStats) => void): void {
-    this.errorAlertCallback = callback;
   }
 
   /**

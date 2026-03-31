@@ -4,8 +4,10 @@
  * 处理验证码的生成、验证和管理，支持密码重置、邮箱验证等场景。
  */
 
+import { randomInt } from 'crypto';
 import { logger } from '@/lib/logger';
 import { PrismaClient } from '@prisma/client';
+import { prisma as sharedPrisma } from '@/lib/db';
 import type {
   VerifyCodeResult,
   VerificationCodeConfig,
@@ -51,7 +53,7 @@ class VerificationCodeService {
   private config: VerificationCodeConfig;
 
   constructor(prisma?: PrismaClient, config?: Partial<VerificationCodeConfig>) {
-    this.prisma = prisma || new PrismaClient();
+    this.prisma = prisma ?? sharedPrisma;
     this.config = { ...DEFAULT_CONFIG, ...config };
   }
 
@@ -60,7 +62,7 @@ class VerificationCodeService {
    */
   private generateCode(): string {
     const code = Array.from({ length: this.config.length }, () =>
-      Math.floor(Math.random() * 10).toString()
+      randomInt(0, 10).toString()
     ).join('');
     return code;
   }

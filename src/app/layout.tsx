@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { AuthProvider } from './providers/AuthProvider';
 import { ToastProvider } from '@/components/providers/ToastProvider';
 import { UserModeProvider } from '@/contexts/UserModeContext';
+import { Footer } from '@/components/layout/Footer';
 import './globals.css';
 
 // 注意：由于网络问题，暂时移除 Google Fonts
@@ -22,20 +23,26 @@ import './globals.css';
 //   preload: false,
 // });
 
-// 使用系统字体变量
-const __fontVariables = '--font-geist-sans --font-geist-mono';
-
 // 配置元数据优化
 export const metadata: Metadata = {
   title: {
-    default: 'Legal Debate MVP',
-    template: '%s | AI法律辩论系统',
+    default: '律伴AI助手',
+    template: '%s | 律伴AI助手',
   },
-  description: 'AI驱动的法律辩论系统，提供专业的法律文书分析和辩论生成服务',
-  keywords: ['法律', '辩论', 'AI', '智能分析', '法律文书'],
-  authors: [{ name: 'Legal Debate Team' }],
-  creator: 'Legal Debate MVP',
-  publisher: 'Legal Debate MVP',
+  description:
+    '面向认证律师与企业法务的AI工作平台，提供辩论生成、法条检索、合同风险分析等专业服务',
+  keywords: [
+    '律伴',
+    'AI助手',
+    '法律',
+    '律师',
+    '企业法务',
+    '法条检索',
+    '合同审查',
+  ],
+  authors: [{ name: '律伴团队' }],
+  creator: '律伴AI助手',
+  publisher: '律伴AI助手',
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
   ),
@@ -43,9 +50,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'zh_CN',
     url: '/',
-    title: 'Legal Debate MVP',
-    description: 'AI驱动的法律辩论系统',
-    siteName: 'Legal Debate MVP',
+    title: '律伴AI助手',
+    description: '面向认证律师与企业法务的AI工作平台',
+    siteName: '律伴AI助手',
   },
   robots: {
     index: true,
@@ -86,15 +93,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='zh-CN'>
-      <body className='antialiased'>
-        {/* 认证提供者 */}
+      <body className='antialiased flex flex-col min-h-screen'>
         <AuthProvider>
-          {/* 用户模式提供者 */}
           <UserModeProvider>
-            {/* Toast通知提供者 */}
             <ToastProvider />
-            {/* 使用Suspense实现代码分割和懒加载 */}
-            <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
+            <Suspense fallback={<LoadingFallback />}>
+              <div className='flex flex-col min-h-screen'>
+                {children}
+                <Footer />
+              </div>
+            </Suspense>
           </UserModeProvider>
         </AuthProvider>
       </body>

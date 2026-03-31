@@ -664,12 +664,44 @@ export default function ContractDetailPage() {
                 快捷操作
               </h2>
               <div className='space-y-2'>
-                <Link
-                  href={`/contracts/${contract.id}/sign`}
-                  className='block w-full rounded-lg bg-blue-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-blue-700'
-                >
-                  合同签署
-                </Link>
+                {contract.status === 'PENDING' && (
+                  <Link
+                    href={`/contracts/${contract.id}/sign`}
+                    className='block w-full rounded-lg bg-blue-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-blue-700'
+                  >
+                    合同签署
+                  </Link>
+                )}
+                {contract.status === 'SIGNED' && (
+                  <button
+                    onClick={async () => {
+                      if (
+                        !confirm('确认启动合同履行？合同状态将变为"履行中"。')
+                      )
+                        return;
+                      try {
+                        const res = await fetch(
+                          `/api/contracts/${contract.id}/execute`,
+                          {
+                            method: 'POST',
+                            credentials: 'include',
+                          }
+                        );
+                        const result = await res.json();
+                        if (result.success) {
+                          await loadContract();
+                        } else {
+                          alert(result.error?.message || '操作失败');
+                        }
+                      } catch {
+                        alert('操作失败，请重试');
+                      }
+                    }}
+                    className='block w-full rounded-lg bg-green-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-green-700'
+                  >
+                    启动履行
+                  </button>
+                )}
                 <Link
                   href={`/contracts/${contract.id}/approval`}
                   className='block w-full rounded-lg border border-gray-300 px-4 py-2 text-center text-sm font-medium text-gray-700 hover:bg-gray-50'

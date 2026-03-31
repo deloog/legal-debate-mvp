@@ -7,9 +7,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { filingMaterialsService } from '@/lib/case/filing-materials-service';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: '请先登录' },
+        },
+        { status: 401 }
+      );
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const caseType = searchParams.get('caseType');
     const courtLevel = searchParams.get('courtLevel') || '基层';
@@ -44,7 +56,7 @@ export async function GET(request: NextRequest) {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message: error instanceof Error ? error.message : '获取材料清单失败',
+          message: '获取材料清单失败',
         },
       },
       { status: 500 }

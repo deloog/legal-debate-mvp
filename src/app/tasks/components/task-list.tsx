@@ -106,11 +106,12 @@ export function TaskList() {
         throw new Error(errorData.message ?? '获取任务列表失败');
       }
 
-      const data: TaskListResponse = await response.json();
-      setTasks(data.tasks);
-      setTotal(data.total);
-      setPage(data.page);
-      setTotalPages(data.totalPages);
+      const json = await response.json();
+      const data: TaskListResponse = json.data ?? json;
+      setTasks(data.tasks ?? []);
+      setTotal(data.total ?? 0);
+      setPage(data.page ?? 1);
+      setTotalPages(data.totalPages ?? 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : '获取任务列表失败');
       setTasks([]);

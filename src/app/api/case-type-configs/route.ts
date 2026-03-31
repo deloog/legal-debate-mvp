@@ -4,6 +4,7 @@
  * GET /api/case-type-configs - 获取案件类型配置列表
  */
 import { prisma } from '@/lib/db/prisma';
+import { getAuthUser } from '@/lib/middleware/auth';
 import type { ErrorResponse, SuccessResponse } from '@/types/api-response';
 import { CaseTypeCategory } from '@/types/case-type-config';
 import { NextRequest, NextResponse } from 'next/server';
@@ -45,6 +46,14 @@ export async function GET(
   | NextResponse<SuccessResponse<CaseTypeConfigResponse[]>>
   | NextResponse<ErrorResponse>
 > {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: '未授权' } },
+      { status: 401 }
+    );
+  }
+
   try {
     // 获取查询参数
     const { searchParams } = new URL(request.url);

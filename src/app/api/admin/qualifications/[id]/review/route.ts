@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken, extractTokenFromHeader } from '@/lib/auth/jwt';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
 import type { ReviewRequest } from '@/types/qualification';
 import { QualificationStatus } from '@/types/qualification';
@@ -15,48 +15,27 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // 验证认证
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
+    // 验证认证（支持 cookie 和 Bearer token）
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
           message: '未授权',
-          error: '缺少认证信息',
+          error: '请先登录',
         } as const,
         { status: 401 }
       );
     }
 
-    // 从Authorization header中提取token
-    const token = extractTokenFromHeader(authHeader);
-    if (!token) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: '未授权',
-          error: '无效的认证格式',
-        } as const,
-        { status: 401 }
-      );
-    }
-
-    const tokenResult = verifyToken(token);
-    if (!tokenResult.valid || !tokenResult.payload) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: '未授权',
-          error: '无效的token',
-        } as const,
-        { status: 401 }
-      );
-    }
-
-    const { role } = tokenResult.payload;
+    // 从 DB 查询角色，避免依赖可能过期的 JWT payload
+    const currentUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
 
     // 验证管理员权限
-    if (role !== 'ADMIN' && role !== 'SUPER_ADMIN') {
+    if (currentUser?.role !== 'ADMIN' && currentUser?.role !== 'SUPER_ADMIN') {
       return NextResponse.json(
         {
           success: false,
@@ -128,7 +107,7 @@ export async function POST(
       {
         success: false,
         message: '服务器错误',
-        error: error instanceof Error ? error.message : '未知错误',
+        error: '未知错误',
       } as const,
       { status: 500 }
     );

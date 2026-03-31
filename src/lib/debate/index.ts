@@ -28,3 +28,10 @@ export { LawValidator } from './validators/law-validator';
 
 // 质量评估器
 export { QualityAssessor } from './assessors/quality-assessor';
+
+// 论点验证服务（VerificationAgent 集成）
+export {
+  ArgumentVerificationService,
+  argumentVerificationService,
+  type ArgumentVerificationData,
+} from './argument-verification-service';

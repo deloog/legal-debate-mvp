@@ -123,26 +123,6 @@ export class ContextMerger {
   }
 
   /**
-   * 解决冲突
-   */
-  private __resolveConflict():
-    | 'new-priority'
-    | 'old-priority'
-    | 'merged'
-    | 'conflict' {
-    switch (this.config.conflictResolution) {
-      case 'new-priority':
-        return 'new-priority';
-      case 'old-priority':
-        return 'old-priority';
-      case 'manual':
-        return 'conflict';
-      default:
-        return 'new-priority';
-    }
-  }
-
-  /**
    * 执行合并（主入口）
    */
   merge(

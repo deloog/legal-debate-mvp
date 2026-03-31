@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -14,6 +14,9 @@ import { DiscussionList } from '@/components/discussion/DiscussionList';
 import { WitnessList } from '@/components/witness/WitnessList';
 import { EvidenceTab } from './components/EvidenceTab';
 import { LawGraphTab } from './components/LawGraphTab';
+import { DocumentsTab } from './components/DocumentsTab';
+import { SimilarCasesPanel } from '@/components/cases/SimilarCasesPanel';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 /**
  * 案件详情接口
@@ -37,20 +40,12 @@ type TabType =
   | 'overview'
   | 'team'
   | 'timeline'
+  | 'documents'
   | 'evidence'
   | 'witnesses'
   | 'discussions'
-  | 'law-graph';
-
-/**
- * 案件访问权限接口
- */
-interface CaseAccessInfo {
-  hasAccess: boolean;
-  isOwner: boolean;
-  accessType?: 'owner' | 'team-member' | 'shared-team';
-  permissions?: string[];
-}
+  | 'law-graph'
+  | 'similar-cases';
 
 /** 案件类型中文映射 */
 const caseTypeLabels: Record<string, string> = {
@@ -73,10 +68,12 @@ const caseStatusLabels: Record<string, string> = {
 const TAB_LIST: { key: TabType; label: string }[] = [
   { key: 'overview', label: '概览' },
   { key: 'team', label: '团队成员' },
+  { key: 'documents', label: '📄 文档分析' },
   { key: 'evidence', label: '证据' },
   { key: 'witnesses', label: '证人' },
   { key: 'discussions', label: '讨论' },
   { key: 'law-graph', label: '⚡ 法条图谱' },
+  { key: 'similar-cases', label: '🔍 相似案例' },
 ];
 
 export default function CaseDetailPage() {
@@ -93,9 +90,15 @@ export default function CaseDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
 
-  const [canManage, setCanManage] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [caseAccessInfo] = useState<CaseAccessInfo | null>(null);
+  // 从 AuthProvider 获取当前登录用户，无需额外 fetch
+  const { user: authUser } = useAuth();
+  const currentUserId = authUser?.id ?? null;
+  // 案件所有者 或 团队成员（canManage 在加载案件后由 useMemo 计算）
+  const canManage = useMemo(
+    () =>
+      !!currentUserId && !!caseDetail && currentUserId === caseDetail.userId,
+    [currentUserId, caseDetail]
+  );
 
   // 处理开始辩论按钮点击
   const handleStartDebate = useCallback(async () => {
@@ -165,29 +168,9 @@ export default function CaseDetailPage() {
     }
   }, [caseId, isValidCaseId]);
 
-  // 加载当前用户信息，判断是否可以管理
-  const loadCurrentUser = useCallback(async (): Promise<void> => {
-    try {
-      const response = await fetch('/api/auth/me');
-      if (response.ok) {
-        const data = await response.json();
-        setCanManage(data.data?.id === caseDetail?.userId);
-        setCurrentUserId(data.data?.id || null);
-      }
-    } catch (err) {
-      console.error('加载用户信息失败:', err);
-    }
-  }, [caseDetail?.userId]);
-
   useEffect(() => {
     void loadCaseDetail();
   }, [loadCaseDetail]);
-
-  useEffect(() => {
-    if (caseDetail) {
-      void loadCurrentUser();
-    }
-  }, [caseDetail, loadCurrentUser]);
 
   /**
    * 渲染标签页内容
@@ -206,6 +189,8 @@ export default function CaseDetailPage() {
         );
       case 'timeline':
         return null; // 不再显示，已从导航移除
+      case 'documents':
+        return <DocumentsTab caseId={caseId} canManage={canManage} />;
       case 'law-graph':
         return <LawGraphTab caseId={caseId} />;
       case 'evidence':
@@ -229,12 +214,22 @@ export default function CaseDetailPage() {
           <DiscussionList
             caseId={caseId}
             currentUserId={currentUserId || ''}
-            canViewDiscussions={caseAccessInfo?.hasAccess || false}
-            canCreateDiscussions={caseAccessInfo?.hasAccess || false}
-            canEditDiscussions={canManage || false}
-            canPinDiscussions={canManage || false}
-            canDeleteDiscussions={canManage || false}
+            canViewDiscussions={!!currentUserId}
+            canCreateDiscussions={!!currentUserId}
+            canEditDiscussions={canManage}
+            canPinDiscussions={canManage}
+            canDeleteDiscussions={canManage}
           />
+        );
+      case 'similar-cases':
+        return (
+          <div className='space-y-6'>
+            <SimilarCasesPanel
+              caseId={caseId}
+              defaultThreshold={0.7}
+              defaultTopK={10}
+            />
+          </div>
         );
       default:
         return null;
@@ -330,9 +325,15 @@ export default function CaseDetailPage() {
           </CardHeader>
           <CardContent>
             <div className='flex flex-wrap gap-3'>
-              <Button variant='outline' size='sm'>
-                编辑案件
-              </Button>
+              {canManage && (
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={() => router.push(`/cases/${caseId}/edit`)}
+                >
+                  编辑案件
+                </Button>
+              )}
               <Button
                 variant='primary'
                 size='sm'
@@ -340,6 +341,13 @@ export default function CaseDetailPage() {
                 disabled={!caseDetail}
               >
                 开始辩论
+              </Button>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => setActiveTab('documents')}
+              >
+                上传文档
               </Button>
               <Button
                 variant='outline'
@@ -420,8 +428,12 @@ export default function CaseDetailPage() {
             </div>
             <div className='flex gap-3'>
               {canManage && (
-                <Button variant='outline' size='sm'>
-                  设置
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={() => router.push(`/cases/${caseId}/edit`)}
+                >
+                  编辑案件
                 </Button>
               )}
             </div>

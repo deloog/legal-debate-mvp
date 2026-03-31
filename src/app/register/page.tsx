@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Scale, Building2 } from 'lucide-react';
 
 /**
  * 注册页面
+ * 新增：角色选择（认证律师 / 企业法务）和用户协议勾选
  */
 export default function RegisterPage() {
   const router = useRouter();
@@ -13,6 +15,10 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  // 角色选择：LAWYER（认证律师）或 ENTERPRISE（企业法务），初始为空
+  const [role, setRole] = useState<'LAWYER' | 'ENTERPRISE' | ''>('');
+  // 用户协议勾选状态，初始为未勾选
+  const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +31,8 @@ export default function RegisterPage() {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name }),
+        // 将角色字段加入注册请求体
+        body: JSON.stringify({ email, password, name, role }),
       });
 
       const data = await response.json();
@@ -45,7 +52,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className='flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-violet-50 px-4'>
+    <div className='flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-violet-50 px-4 py-10'>
       <div className='w-full max-w-md'>
         {/* Logo and Title */}
         <div className='mb-8 text-center'>
@@ -64,9 +71,7 @@ export default function RegisterPage() {
               />
             </svg>
           </div>
-          <h1 className='mb-2 text-3xl font-bold text-slate-900'>
-            法律助手系统
-          </h1>
+          <h1 className='mb-2 text-3xl font-bold text-slate-900'>律伴AI助手</h1>
           <p className='text-sm text-slate-600'>创建您的账户</p>
         </div>
 
@@ -113,6 +118,70 @@ export default function RegisterPage() {
               />
             </div>
 
+            {/* 角色选择（必选） */}
+            <div>
+              <label className='mb-2 block text-sm font-medium text-slate-700'>
+                身份类型 <span className='text-red-500'>*</span>
+              </label>
+              <div className='grid grid-cols-2 gap-3'>
+                {/* 认证律师 */}
+                <button
+                  type='button'
+                  onClick={() => setRole('LAWYER')}
+                  className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-left transition-all ${
+                    role === 'LAWYER'
+                      ? 'border-violet-500 bg-violet-50'
+                      : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  <Scale
+                    className={`h-6 w-6 ${role === 'LAWYER' ? 'text-violet-600' : 'text-slate-400'}`}
+                  />
+                  <div className='text-center'>
+                    <p
+                      className={`text-sm font-semibold ${role === 'LAWYER' ? 'text-violet-700' : 'text-slate-700'}`}
+                    >
+                      认证律师
+                    </p>
+                    <p className='mt-0.5 text-xs text-slate-500'>
+                      具有执业资格的专业律师
+                    </p>
+                  </div>
+                </button>
+
+                {/* 企业法务 */}
+                <button
+                  type='button'
+                  onClick={() => setRole('ENTERPRISE')}
+                  className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-left transition-all ${
+                    role === 'ENTERPRISE'
+                      ? 'border-violet-500 bg-violet-50'
+                      : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  <Building2
+                    className={`h-6 w-6 ${role === 'ENTERPRISE' ? 'text-violet-600' : 'text-slate-400'}`}
+                  />
+                  <div className='text-center'>
+                    <p
+                      className={`text-sm font-semibold ${role === 'ENTERPRISE' ? 'text-violet-700' : 'text-slate-700'}`}
+                    >
+                      企业法务
+                    </p>
+                    <p className='mt-0.5 text-xs text-slate-500'>
+                      企业内部法务人员
+                    </p>
+                  </div>
+                </button>
+              </div>
+              {/* 未选择角色时的提示 */}
+              {!role && (
+                <p className='mt-1.5 text-xs text-slate-400'>
+                  请选择您的身份类型
+                </p>
+              )}
+            </div>
+
             {/* Email Input */}
             <div>
               <label
@@ -154,10 +223,42 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            {/* Submit Button */}
+            {/* 用户协议勾选（放在提交按钮上方） */}
+            <div className='flex items-start gap-2.5'>
+              <input
+                id='agreed'
+                type='checkbox'
+                checked={agreed}
+                onChange={e => setAgreed(e.target.checked)}
+                className='mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-violet-600 cursor-pointer'
+              />
+              <label
+                htmlFor='agreed'
+                className='text-sm text-slate-600 cursor-pointer leading-relaxed'
+              >
+                我已阅读并同意{' '}
+                <Link
+                  href='/terms'
+                  target='_blank'
+                  className='font-medium text-violet-600 hover:text-violet-700 hover:underline transition-colors'
+                >
+                  服务条款
+                </Link>{' '}
+                和{' '}
+                <Link
+                  href='/privacy'
+                  target='_blank'
+                  className='font-medium text-violet-600 hover:text-violet-700 hover:underline transition-colors'
+                >
+                  隐私政策
+                </Link>
+              </label>
+            </div>
+
+            {/* Submit Button：没选角色或未勾选协议时禁用 */}
             <button
               type='submit'
-              disabled={loading}
+              disabled={loading || !agreed || !role}
               className='w-full rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-6 py-3 font-semibold text-white shadow-lg shadow-violet-500/30 transition-all hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60'
             >
               {loading ? '注册中...' : '立即注册'}

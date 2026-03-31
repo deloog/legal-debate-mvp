@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
       {
         success: false,
         error: '获取告警列表失败',
-        message: error instanceof Error ? error.message : '未知错误',
+        message: '未知错误',
       },
       { status: 500 }
     );

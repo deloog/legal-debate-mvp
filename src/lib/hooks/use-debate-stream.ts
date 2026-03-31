@@ -10,7 +10,13 @@
  * @module use-debate-stream
  */
 
-import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+} from 'react';
 import { SSEClient } from '@/lib/debate/stream/sse-client';
 
 export interface StreamMessage {
@@ -23,10 +29,18 @@ export interface UseDebateStreamOptions {
   debateId: string;
   roundId: string | null;
   enabled?: boolean;
+  userContext?: string; // 用户本轮补充的理由（传入SSE URL）
   onMessage?: (message: StreamMessage) => void;
   onAIStream?: (content: string, progress: number) => void;
+  onLawSearchComplete?: (
+    articles: Array<{ lawName: string; articleNumber: string }>
+  ) => void;
   onError?: (error: Error | unknown) => void;
-  onComplete?: () => void;
+  onComplete?: (data?: {
+    hasMoreRounds?: boolean;
+    isLastRound?: boolean;
+    roundNumber?: number;
+  }) => void;
 }
 
 export interface StreamState {
@@ -41,15 +55,24 @@ export interface StreamState {
 
 /**
  * 辩论流式输出Hook
- * 功能：通过SSE接收流式辩论内容
+ *
+ * 关键设计：
+ * - 使用 clientRef 持有 SSEClient 实例，确保每次 connect/disconnect 操作的是同一个实例，
+ *   防止旧 EventSource 连接未关闭导致的内存泄漏和多连接并发问题。
+ * - 使用 callbackRef 模式（ref + 无依赖 useCallback）避免内联回调引起的 connect 引用变化，
+ *   防止每次父组件 re-render（如 setRawStreamContent）都触发 SSE 断连重建。
+ * - 收到 completed / error 事件后主动 disconnect，防止服务端关闭连接触发
+ *   EventSource 的 onerror 自动重连，导致重复生成。
  */
 export function useDebateStream(options: UseDebateStreamOptions): StreamState {
   const {
     debateId,
     roundId,
     enabled = true,
+    userContext,
     onMessage,
     onAIStream,
+    onLawSearchComplete,
     onError,
     onComplete,
   } = options;
@@ -60,7 +83,29 @@ export function useDebateStream(options: UseDebateStreamOptions): StreamState {
   const [error, setError] = useState<Error | null>(null);
   const [progress, setProgress] = useState(0);
 
-  // 处理SSE消息
+  // 持有当前 SSEClient 实例，确保 cleanup 时关闭正确的连接
+  const clientRef = useRef<SSEClient | null>(null);
+
+  // ── 回调 Ref 模式 ──────────────────────────────────────────────────────────
+  // 将父组件传入的回调存入 ref，避免内联函数每次 render 产生新引用，
+  // 从而防止 handleSSEMessage 的 useCallback deps 变化导致 connect 重建，
+  // 进而防止每次状态更新（如流式追加文本）都触发 SSE 断连重建。
+  const onMessageRef = useRef(onMessage);
+  const onAIStreamRef = useRef(onAIStream);
+  const onLawSearchCompleteRef = useRef(onLawSearchComplete);
+  const onErrorRef = useRef(onError);
+  const onCompleteRef = useRef(onComplete);
+
+  // 每次 render 同步最新回调到 ref，无副作用（无依赖 useEffect 即同步执行）
+  useEffect(() => {
+    onMessageRef.current = onMessage;
+    onAIStreamRef.current = onAIStream;
+    onLawSearchCompleteRef.current = onLawSearchComplete;
+    onErrorRef.current = onError;
+    onCompleteRef.current = onComplete;
+  });
+
+  // 处理SSE消息（空依赖数组 → 稳定引用，不会导致 connect 重建）
   const handleSSEMessage = useCallback(
     (eventType: string, eventData: unknown) => {
       const message: StreamMessage = {
@@ -71,8 +116,8 @@ export function useDebateStream(options: UseDebateStreamOptions): StreamState {
 
       setMessages(prev => [...prev, message]);
 
-      if (onMessage) {
-        onMessage(message);
+      if (onMessageRef.current) {
+        onMessageRef.current(message);
       }
 
       // 处理AI流式内容事件
@@ -88,8 +133,8 @@ export function useDebateStream(options: UseDebateStreamOptions): StreamState {
         if (typeof streamData.progress === 'number') {
           setProgress(streamData.progress);
         }
-        if (onAIStream && streamData.content) {
-          onAIStream(streamData.content, streamData.progress || 0);
+        if (onAIStreamRef.current && streamData.content) {
+          onAIStreamRef.current(streamData.content, streamData.progress || 0);
         }
       }
 
@@ -103,54 +148,92 @@ export function useDebateStream(options: UseDebateStreamOptions): StreamState {
         setProgress((eventData as { progress: number }).progress);
       }
 
+      // 法条检索完成事件
+      if (
+        eventType === 'law-search-complete' &&
+        typeof eventData === 'object' &&
+        eventData !== null
+      ) {
+        const lawData = eventData as {
+          articles?: Array<{ lawName: string; articleNumber: string }>;
+        };
+        if (onLawSearchCompleteRef.current && lawData.articles) {
+          onLawSearchCompleteRef.current(lawData.articles);
+        }
+      }
+
       // 检查是否完成
       if (eventType === 'completed') {
         setIsStreaming(false);
         setProgress(100);
-        if (onComplete) {
-          onComplete();
+        if (onCompleteRef.current) {
+          const completedData = eventData as {
+            hasMoreRounds?: boolean;
+            isLastRound?: boolean;
+            roundNumber?: number;
+          } | null;
+          onCompleteRef.current(completedData ?? undefined);
         }
       }
     },
-    [onMessage, onAIStream, onComplete]
+    [] // 空依赖：通过 ref 访问最新回调，引用永远稳定
   );
 
-  // 处理SSE错误
+  // 处理SSE错误（空依赖数组 → 稳定引用）
   const handleSSEError = useCallback(
     (err: Error | unknown) => {
-      console.error('SSE错误:', err);
       setError(err instanceof Error ? err : new Error(String(err)));
       setIsStreaming(false);
-      if (onError) {
-        onError(err);
+      if (onErrorRef.current) {
+        onErrorRef.current(err);
       }
     },
-    [onError]
+    [] // 空依赖：通过 ref 访问最新回调
   );
 
-  // 处理SSE连接关闭
+  // 处理SSE连接关闭（空依赖数组 → 稳定引用）
   const handleSSEClose = useCallback(() => {
-    console.log('SSE连接已关闭');
     setIsStreaming(false);
   }, []);
 
-  // 连接SSE
+  // 断开并清理当前 SSE 连接
+  const disconnect = useCallback(() => {
+    if (clientRef.current) {
+      clientRef.current.disconnect();
+      clientRef.current = null;
+    }
+    setIsStreaming(false);
+  }, []);
+
+  // 连接SSE（先断开旧连接，再建立新连接）
   const connect = useCallback(() => {
-    if (!enabled || !debateId) {
-      return;
+    if (!enabled || !debateId) return;
+
+    // 断开旧连接，防止 EventSource 泄漏
+    if (clientRef.current) {
+      clientRef.current.disconnect();
+      clientRef.current = null;
     }
 
     setIsStreaming(true);
     setError(null);
     setProgress(0);
 
+    const sseUrl = new URL(
+      `/api/v1/debates/${debateId}/stream`,
+      window.location.origin
+    );
+    if (userContext) sseUrl.searchParams.set('userContext', userContext);
+
     const client = new SSEClient({
-      url: `/api/v1/debates/${debateId}/stream`,
+      url: sseUrl.toString(),
       debateId,
       roundId: roundId || '',
       onConnected: () => {
-        console.log('SSE已连接');
         setIsStreaming(true);
+      },
+      onLawSearchComplete: eventData => {
+        handleSSEMessage('law-search-complete', eventData);
       },
       onAIStream: eventData => {
         handleSSEMessage('ai_stream', eventData);
@@ -163,9 +246,17 @@ export function useDebateStream(options: UseDebateStreamOptions): StreamState {
       },
       onCompleted: eventData => {
         handleSSEMessage('completed', eventData);
+        // 主动断开，防止服务端关闭连接后 EventSource 触发 onerror 自动重连，
+        // 导致对已完成的辩论重复发起生成请求。
+        client.disconnect();
+        clientRef.current = null;
       },
       onError: eventData => {
         handleSSEError(eventData);
+        // 主动断开，防止错误后服务端关闭连接触发重连循环：
+        // error → server close → onerror → reconnect → error → ...
+        client.disconnect();
+        clientRef.current = null;
       },
       onDisconnected: () => {
         handleSSEClose();
@@ -173,38 +264,31 @@ export function useDebateStream(options: UseDebateStreamOptions): StreamState {
     });
 
     client.connect();
-    return () => {
-      client.disconnect();
-    };
+    clientRef.current = client;
   }, [
     debateId,
     roundId,
     enabled,
+    userContext,
     handleSSEMessage,
     handleSSEError,
     handleSSEClose,
   ]);
 
-  // 断开连接
-  const disconnect = useCallback(() => {
-    setIsStreaming(false);
-  }, []);
-
-  // 自动连接
+  // 自动连接/断开
   useEffect(() => {
-    let disconnectFn: (() => void) | null = null;
-
-    // 使用setTimeout避免在effect中直接调用setState
-    const timer = setTimeout(() => {
-      if (enabled) {
-        disconnectFn = connect() ?? null;
-      }
-    }, 0);
+    if (enabled) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      connect();
+    } else {
+      disconnect();
+    }
 
     return () => {
-      clearTimeout(timer);
-      if (disconnectFn) {
-        disconnectFn();
+      // cleanup：组件卸载或 enabled/依赖变化时断开连接
+      if (clientRef.current) {
+        clientRef.current.disconnect();
+        clientRef.current = null;
       }
     };
   }, [enabled, connect, disconnect]);
@@ -242,7 +326,6 @@ export function useTypewriter(options: TypewriterOptions): TypewriterResult {
 
   useLayoutEffect(() => {
     if (!enabled || !text) {
-      // 使用 requestAnimationFrame 避免同步 setState 的问题
       requestAnimationFrame(() => {
         setDisplayedText(text);
         setIsComplete(true);
@@ -250,7 +333,6 @@ export function useTypewriter(options: TypewriterOptions): TypewriterResult {
       return;
     }
 
-    // 使用 requestAnimationFrame 延迟 setState 避免同步问题
     const timer = requestAnimationFrame(() => {
       setDisplayedText('');
       setIsComplete(false);

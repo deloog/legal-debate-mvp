@@ -1,7 +1,7 @@
 import { UserDetail } from '@/components/admin/UserDetail';
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export const metadata = {
@@ -9,9 +9,10 @@ export const metadata = {
   description: '查看和管理用户详细信息',
 };
 
-export default function UserDetailPage({
+export default async function UserDetailPage({
   params,
-}: PageProps): React.ReactElement {
+}: PageProps): Promise<React.ReactElement> {
+  const { id } = await params;
   return (
     <div className='container mx-auto px-4 py-8'>
       <div className='mb-6'>
@@ -19,7 +20,7 @@ export default function UserDetailPage({
         <p className='text-gray-600 mt-2'>查看和管理用户详细信息</p>
       </div>
 
-      <UserDetail userId={params.id} />
+      <UserDetail userId={id} />
     </div>
   );
 }

@@ -18,6 +18,18 @@ interface ConfigItemProps {
   onValueChange: (value: unknown) => void;
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  ai: 'AI模型参数',
+  feature: '功能开关',
+  business: '业务参数',
+  notification: '通知设置',
+  general: '通用设置',
+  storage: '存储设置',
+  security: '安全设置',
+  ui: '界面设置',
+  other: '其他',
+};
+
 /**
  * 单个配置项组件
  */
@@ -47,9 +59,15 @@ export function ConfigItem({
       <div className='flex items-start justify-between mb-4'>
         <div className='flex-1'>
           <div className='flex items-center gap-2 mb-1'>
-            <h3 className='text-lg font-semibold text-gray-900'>
+            <h3 className='text-base font-semibold text-gray-900 font-mono'>
               {config.key}
             </h3>
+            <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600'>
+              {CATEGORY_LABELS[config.category] ?? config.category}
+            </span>
+            <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800'>
+              {config.type}
+            </span>
             {config.isRequired && (
               <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800'>
                 必填
@@ -60,9 +78,6 @@ export function ConfigItem({
                 公开
               </span>
             )}
-            <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800'>
-              {config.type}
-            </span>
           </div>
           <p className='text-sm text-gray-600'>{config.description}</p>
         </div>

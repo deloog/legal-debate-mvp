@@ -193,10 +193,10 @@ export function UserDetail({ userId }: UserDetailProps): React.ReactNode {
       }
 
       const result = await response.json();
-      setData(result.data);
       setIsEditing(false);
       setEditForm(null);
       setMessage({ type: 'success', text: result.message || '更新成功' });
+      await loadData();
     } catch (err) {
       setMessage({
         type: 'error',

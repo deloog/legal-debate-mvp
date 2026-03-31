@@ -326,22 +326,4 @@ export class TimelineExtractor {
       /\d{4}年\d{1,2}月\d{1,2}日/g,
     ];
   }
-
-  /**
-   * 初始化事件模式
-   */
-  private initializeEventPatterns(): Map<RegExp, string> {
-    const patterns = new Map<RegExp, string>();
-
-    patterns.set(/立案/g, 'FILING');
-    patterns.set(/起诉/g, 'FILING');
-    patterns.set(/开庭/g, 'HEARING');
-    patterns.set(/庭审/g, 'HEARING');
-    patterns.set(/判决/g, 'JUDGMENT');
-    patterns.set(/裁定/g, 'JUDGMENT');
-    patterns.set(/调解/g, 'MEDIATION');
-    patterns.set(/送达/g, 'SERVICE');
-
-    return patterns;
-  }
 }

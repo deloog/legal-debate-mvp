@@ -4,15 +4,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
 import { Prisma } from '@prisma/client';
 import { logger } from '@/lib/logger';
 
-export async function GET(): Promise<NextResponse> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return NextResponse.json(
       { success: false, error: '未认证' },
       { status: 401 }
@@ -21,7 +20,7 @@ export async function GET(): Promise<NextResponse> {
 
   try {
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: authUser.userId },
       select: { preferences: true },
     });
 
@@ -51,8 +50,8 @@ export async function GET(): Promise<NextResponse> {
 }
 
 export async function PUT(request: NextRequest): Promise<NextResponse> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return NextResponse.json(
       { success: false, error: '未认证' },
       { status: 401 }
@@ -72,7 +71,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
 
     // 读取现有 preferences，合并更新
     const existing = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: authUser.userId },
       select: { preferences: true },
     });
 
@@ -83,7 +82,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       reminderPreferences,
     };
     const updated = await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: authUser.userId },
       data: {
         preferences: mergedPrefs as Prisma.InputJsonValue,
       },

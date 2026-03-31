@@ -20,6 +20,7 @@ import { isAdminRole } from '@/lib/middleware/resource-permission';
 import { UserRole } from '@/types/auth';
 import { checkAIQuota, recordAIUsage } from '@/lib/ai/quota';
 import { logCreateAction } from '@/lib/audit/logger';
+import { withRateLimit, strictRateLimiter } from '@/lib/middleware/rate-limit';
 
 /**
  * GET /api/v1/debates
@@ -51,8 +52,12 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     deletedAt: null,
   };
 
-  // 权限过滤：非管理员只能看到自己创建的辩论
-  if (!isAdminRole(authUser.role as UserRole)) {
+  // 权限过滤：非管理员只能看到自己创建的辩论（DB 重查角色，避免 stale JWT）
+  const dbUserDebates = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { role: true },
+  });
+  if (!isAdminRole((dbUserDebates?.role ?? '') as UserRole)) {
     whereCondition.userId = authUser.userId;
   } else if (userIdFilter) {
     // 管理员可以根据userId参数过滤
@@ -121,7 +126,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
  * POST /api/v1/debates
  * 创建新辩论
  */
-export const POST = withErrorHandler(async (request: NextRequest) => {
+const handleCreateDebate = withErrorHandler(async (request: NextRequest) => {
   // 获取认证用户
   const authUser = await getAuthUser(request);
   if (!authUser) {
@@ -132,10 +137,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   }
 
   // 检查AI配额
-  const quotaCheck = await checkAIQuota(
-    authUser.userId,
-    authUser.role as string
-  );
+  const quotaCheck = await checkAIQuota(authUser.userId, authUser.role);
   if (!quotaCheck.allowed) {
     return NextResponse.json(
       {
@@ -152,10 +154,10 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   // 验证请求体
   const body = await validateRequestBody(request, createDebateSchema);
 
-  // 验证案件是否存在
+  // 验证案件是否存在（同时取 userId 用于所有权验证）
   const existingCase = await prisma.case.findUnique({
     where: { id: body.caseId },
-    select: { id: true, title: true, type: true },
+    select: { id: true, title: true, type: true, userId: true },
   });
 
   if (!existingCase) {
@@ -168,6 +170,21 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
         },
       },
       { status: 404 }
+    );
+  }
+
+  // 非管理员只能在自己的案件下创建辩论
+  const isAdmin = authUser.role === 'ADMIN' || authUser.role === 'SUPER_ADMIN';
+  if (!isAdmin && existingCase.userId !== authUser.userId) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: '您无权在此案件下创建辩论',
+        },
+      },
+      { status: 403 }
     );
   }
 
@@ -252,6 +269,8 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 
   return createCreatedResponse(newDebate);
 });
+
+export const POST = withRateLimit(strictRateLimiter, handleCreateDebate);
 
 /**
  * OPTIONS /api/v1/debates

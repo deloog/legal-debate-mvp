@@ -24,6 +24,7 @@ import {
   KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 interface DiscoveryRequestBody {
   articleId: string;
@@ -58,6 +59,15 @@ const MAX_MAX_CANDIDATES = 100;
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<DiscoveryResponse>> {
+  // 认证：从服务器端获取 userId，禁止客户端伪造
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: '未授权，请先登录' },
+      { status: 401 }
+    );
+  }
+
   try {
     // 解析请求体
     let body: DiscoveryRequestBody;
@@ -101,29 +111,9 @@ export async function POST(
       MAX_MAX_CANDIDATES
     );
 
-    if (!body.triggeredBy || typeof body.triggeredBy !== 'string') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'triggeredBy参数是必需的',
-        },
-        { status: 400 }
-      );
-    }
-
-    if (body.triggeredBy.trim() === '') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'triggeredBy不能为空',
-        },
-        { status: 400 }
-      );
-    }
-
     // 权限检查
     const permissionResult = await checkKnowledgeGraphPermission(
-      body.triggeredBy,
+      authUser.userId,
       KnowledgeGraphAction.MANAGE_RELATIONS,
       KnowledgeGraphResource.RELATION
     );
@@ -207,7 +197,7 @@ export async function POST(
                   strength: relation.confidence,
                   discoveryMethod: DiscoveryMethod.RULE_BASED,
                   verificationStatus: 'PENDING',
-                  createdBy: body.triggeredBy,
+                  createdBy: authUser.userId,
                   evidence: { description: relation.evidence },
                 },
               });
@@ -258,7 +248,7 @@ export async function POST(
                   strength: relation.confidence,
                   discoveryMethod: DiscoveryMethod.AI_DETECTED,
                   verificationStatus: 'PENDING',
-                  createdBy: body.triggeredBy,
+                  createdBy: authUser.userId,
                   evidence: { description: relation.reason },
                 },
               });
@@ -286,7 +276,7 @@ export async function POST(
       const userAgent = request.headers.get('user-agent') || 'unknown';
 
       await logKnowledgeGraphAction({
-        userId: body.triggeredBy,
+        userId: authUser.userId,
         action: KnowledgeGraphAction.MANAGE_RELATIONS,
         resource: KnowledgeGraphResource.RELATION,
         description: `触发法条关系发现，发现${discoveredRelations.length}个新关系`,

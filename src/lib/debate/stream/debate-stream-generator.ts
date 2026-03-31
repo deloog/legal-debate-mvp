@@ -37,7 +37,6 @@ export class DebateStreamGenerator {
   private write: (data: string) => void;
   private progressTimer?: NodeJS.Timeout;
   private startTime: number;
-  private currentProgress = 0;
   private generatedArguments: ArgumentEventData[] = [];
 
   constructor(
@@ -126,7 +125,6 @@ export class DebateStreamGenerator {
 
     const event = this.manager.createEvent('progress', eventData);
     this.sendEvent(event);
-    this.currentProgress = progress;
   }
 
   /**
@@ -245,11 +243,7 @@ export class DebateStreamGenerator {
   /**
    * 更新进度
    */
-  private updateProgress(): void {
-    const progress =
-      (this.generatedArguments.length / this.config.totalArguments) * 100;
-    this.currentProgress = progress;
-  }
+  private updateProgress(): void {}
 
   /**
    * 计算剩余时间

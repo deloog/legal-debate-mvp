@@ -15,6 +15,34 @@ import {
   UpdateIntegrationInput,
 } from '@/lib/integration';
 import type { ErrorResponse, SuccessResponse } from '@/types/api-response';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
+
+async function requireAdmin(
+  request: NextRequest
+): Promise<NextResponse<ErrorResponse> | null> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+      { status: 401 }
+    );
+  }
+  const dbUser = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { role: true },
+  });
+  if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+    return NextResponse.json(
+      {
+        success: false,
+        error: { code: 'FORBIDDEN', message: '仅管理员可管理业务系统集成' },
+      },
+      { status: 403 }
+    );
+  }
+  return null;
+}
 
 /**
  * GET /api/v1/integrations/[id]
@@ -24,6 +52,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<unknown> | ErrorResponse>> {
+  const authErr = await requireAdmin(request);
+  if (authErr) return authErr;
+
   try {
     const { id } = await params;
 
@@ -55,7 +86,6 @@ export async function GET(
         error: {
           code: 'INTEGRATION_GET_ERROR',
           message: '获取业务系统集成详情失败',
-          details: error instanceof Error ? error.message : undefined,
         },
       },
       { status: 500 }
@@ -71,6 +101,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<unknown> | ErrorResponse>> {
+  const authErr = await requireAdmin(request);
+  if (authErr) return authErr;
+
   try {
     const { id } = await params;
     const body = await request.json();
@@ -115,7 +148,6 @@ export async function PUT(
         error: {
           code: 'INTEGRATION_UPDATE_ERROR',
           message: '更新业务系统集成失败',
-          details: error instanceof Error ? error.message : undefined,
         },
       },
       { status: 500 }
@@ -131,6 +163,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<unknown> | ErrorResponse>> {
+  const authErr = await requireAdmin(request);
+  if (authErr) return authErr;
+
   try {
     const { id } = await params;
 
@@ -151,7 +186,6 @@ export async function DELETE(
         error: {
           code: 'INTEGRATION_DELETE_ERROR',
           message: '删除业务系统集成失败',
-          details: error instanceof Error ? error.message : undefined,
         },
       },
       { status: 500 }

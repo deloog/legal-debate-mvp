@@ -4,9 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { PrismaClient } from '@prisma/client';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import { ImportService } from '@/lib/knowledge-graph/export-import/services';
 import type {
@@ -15,19 +14,29 @@ import type {
   MergeStrategy,
 } from '@/lib/knowledge-graph/export-import/types';
 
-const prisma = new PrismaClient();
-
 /**
  * POST 导入知识图谱数据
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
+    // 验证身份（支持 JWT Bearer + Cookie）
+    const user = await getAuthUser(request);
+    if (!user) {
       return NextResponse.json(
         { success: false, error: '未登录' },
         { status: 401 }
+      );
+    }
+
+    // 从数据库实时读取角色，防止 JWT 角色字段过期（stale token）
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { role: true },
+    });
+    if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        { success: false, error: '权限不足，仅管理员可导入知识图谱数据' },
+        { status: 403 }
       );
     }
 
@@ -73,7 +82,7 @@ export async function POST(request: NextRequest) {
     };
 
     logger.info('开始导入知识图谱数据', {
-      userId: session.user.id,
+      userId: user.userId,
       format,
       mergeStrategy: importOptions.mergeStrategy,
       validate: importOptions.validate,
@@ -103,7 +112,7 @@ export async function POST(request: NextRequest) {
     const result = await importService.importData(prisma, data, importOptions);
 
     logger.info('知识图谱数据导入完成', {
-      userId: session.user.id,
+      userId: user.userId,
       importedNodes: result.importedNodes,
       importedEdges: result.importedEdges,
       skippedEdges: result.skippedEdges,
@@ -121,7 +130,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : '导入知识图谱数据失败',
+        error: '导入知识图谱数据失败',
       },
       { status: 500 }
     );

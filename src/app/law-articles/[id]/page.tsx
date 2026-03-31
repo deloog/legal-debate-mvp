@@ -12,7 +12,7 @@
 
 import _React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { LawArticleGraphVisualization } from '@/components/law-article/LawArticleGraphVisualization';
 import { RecommendationFeedbackButton } from '@/components/feedback/RecommendationFeedbackButton';
 
@@ -22,6 +22,14 @@ import type {
   RecommendationStats,
   GraphDistanceRecommendation,
 } from '@/lib/law-article/recommendation-service';
+
+/** 条文编号格式化：纯数字（含前导零）→"第N条"，已有中文格式则原样输出 */
+function formatArticleNumber(num: string): string {
+  if (!num) return '';
+  const trimmed = num.trim();
+  if (/^\d+$/.test(trimmed)) return `第${parseInt(trimmed, 10)}条`;
+  return trimmed;
+}
 
 /**
  * 法条详情页组件
@@ -45,8 +53,8 @@ export default function LawArticleDetailPage() {
   const [stats, setStats] = useState<RecommendationStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { data: session } = useSession();
-  const userId = session?.user?.id || null;
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
 
   // 加载法条详情
   useEffect(() => {
@@ -67,7 +75,7 @@ export default function LawArticleDetailPage() {
           throw new Error('加载法条失败');
         }
         const articleData = await articleResponse.json();
-        setArticle(articleData);
+        setArticle(articleData.data ?? articleData);
 
         // 获取推荐法条
         const recommendationsResponse = await fetch(
@@ -75,7 +83,7 @@ export default function LawArticleDetailPage() {
         );
         if (recommendationsResponse.ok) {
           const recommendationsData = await recommendationsResponse.json();
-          setRecommendations(recommendationsData);
+          setRecommendations(recommendationsData.data ?? recommendationsData);
         }
 
         // 获取统计信息
@@ -84,11 +92,10 @@ export default function LawArticleDetailPage() {
         );
         if (statsResponse.ok) {
           const statsData = await statsResponse.json();
-          setStats(statsData);
+          setStats(statsData.data ?? statsData);
         }
       } catch (err) {
-        console.error('加载失败:', err);
-        setError('加载失败，请稍后重试');
+        setError(err instanceof Error ? err.message : '加载失败，请稍后重试');
       } finally {
         setLoading(false);
       }
@@ -172,7 +179,7 @@ export default function LawArticleDetailPage() {
         <h1 className='text-3xl font-bold mb-4'>{article.lawName}</h1>
         <div className='flex items-center gap-4 mb-4'>
           <span className='text-xl text-gray-700'>
-            第{article.articleNumber}条
+            {formatArticleNumber(article.articleNumber)}
           </span>
           <span className='px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm'>
             {getCategoryLabel(article.category)}
@@ -206,7 +213,7 @@ export default function LawArticleDetailPage() {
             </div>
             <div className='text-center'>
               <div className='text-3xl font-bold text-green-600'>
-                {Object.keys(stats.relationsByType).length}
+                {Object.keys(stats.relationsByType ?? {}).length}
               </div>
               <div className='text-sm text-gray-600'>关系类型数</div>
             </div>
@@ -264,7 +271,8 @@ export default function LawArticleDetailPage() {
                     <div className='flex items-start justify-between mb-2'>
                       <div className='flex-1'>
                         <h3 className='text-lg font-semibold'>
-                          {rec.article.lawName} 第{rec.article.articleNumber}条
+                          {rec.article.lawName}{' '}
+                          {formatArticleNumber(rec.article.articleNumber)}
                         </h3>
                         <p className='text-gray-600 text-sm mt-1'>
                           {rec.article.fullText}
@@ -289,7 +297,7 @@ export default function LawArticleDetailPage() {
                     <RecommendationFeedbackButton
                       userId={userId ?? ''}
                       lawArticleId={rec.article.id}
-                      lawArticleName={`${rec.article.lawName}第${rec.article.articleNumber}条`}
+                      lawArticleName={`${rec.article.lawName}${formatArticleNumber(rec.article.articleNumber)}`}
                       contextType='GENERAL'
                       contextId={articleId}
                       showCommentInput={true}
@@ -327,7 +335,8 @@ export default function LawArticleDetailPage() {
                     <div className='flex items-start justify-between mb-2'>
                       <div className='flex-1'>
                         <h3 className='text-lg font-semibold'>
-                          {rec.article.lawName} 第{rec.article.articleNumber}条
+                          {rec.article.lawName}{' '}
+                          {formatArticleNumber(rec.article.articleNumber)}
                         </h3>
                         <p className='text-gray-600 text-sm mt-1'>
                           {rec.article.fullText}

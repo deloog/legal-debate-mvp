@@ -62,9 +62,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   }
 
   try {
-    const where: Record<string, unknown> = {
-      deletedAt: null,
-    };
+    const where: Record<string, unknown> = {};
 
     if (status) {
       where.status = status;

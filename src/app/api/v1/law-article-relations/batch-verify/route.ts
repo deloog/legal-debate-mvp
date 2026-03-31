@@ -13,6 +13,7 @@ import {
   KnowledgeGraphResource,
 } from '@/lib/middleware/knowledge-graph-permission';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 interface BatchVerifyRequestBody {
   relationIds: string[];
@@ -43,6 +44,15 @@ const MAX_BATCH_SIZE = 100;
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<BatchVerifyResponse>> {
+  // 认证：从服务器端获取 userId，禁止客户端伪造
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: '未授权，请先登录' },
+      { status: 401 }
+    );
+  }
+
   try {
     // 解析请求体
     let body: BatchVerifyRequestBody;
@@ -99,29 +109,9 @@ export async function POST(
       );
     }
 
-    if (!body.verifiedBy || typeof body.verifiedBy !== 'string') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'verifiedBy参数是必需的',
-        },
-        { status: 400 }
-      );
-    }
-
-    if (body.verifiedBy.trim() === '') {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'verifiedBy不能为空',
-        },
-        { status: 400 }
-      );
-    }
-
     // 权限检查
     const permissionResult = await checkKnowledgeGraphPermission(
-      body.verifiedBy,
+      authUser.userId,
       KnowledgeGraphAction.BATCH_VERIFY,
       KnowledgeGraphResource.RELATION
     );
@@ -176,7 +166,7 @@ export async function POST(
             verificationStatus: body.approved
               ? VerificationStatus.VERIFIED
               : VerificationStatus.REJECTED,
-            verifiedBy: body.verifiedBy,
+            verifiedBy: authUser.userId,
             verifiedAt: new Date(),
           },
         });
@@ -206,7 +196,7 @@ export async function POST(
       const userAgent = request.headers.get('user-agent') || 'unknown';
 
       await logKnowledgeGraphAction({
-        userId: body.verifiedBy,
+        userId: authUser.userId,
         action: KnowledgeGraphAction.BATCH_VERIFY,
         resource: KnowledgeGraphResource.RELATION,
         description: `批量${body.approved ? '通过' : '拒绝'}${body.relationIds.length}个法条关系审核`,

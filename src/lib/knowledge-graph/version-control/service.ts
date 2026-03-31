@@ -8,7 +8,8 @@
  * - 比较快照差异
  * - 清理过期快照
  */
-import { PrismaClient, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import {
   GraphSnapshot,
@@ -23,8 +24,6 @@ import {
   compareSnapshots,
   DEFAULT_SNAPSHOT_CONFIG,
 } from './types';
-
-const prisma = new PrismaClient();
 
 /**
  * 快照服务类

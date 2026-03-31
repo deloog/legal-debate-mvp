@@ -7,7 +7,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUser, isAdmin } from '@/lib/middleware/auth';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import {
   getUserNotificationService,
   type NotificationFilters,
@@ -100,9 +101,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '未登录' }, { status: 401 });
     }
 
-    // 检查管理员权限
-    const hasAdminRole = await isAdmin(request);
-    if (!hasAdminRole) {
+    // 检查管理员权限（从数据库实时查询，防止 JWT 角色过期问题）
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    const isAdminRole =
+      dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
+    if (!isAdminRole) {
       return NextResponse.json({ error: '无权限' }, { status: 403 });
     }
 
@@ -128,8 +134,14 @@ export async function POST(request: NextRequest) {
 
     const service = getUserNotificationService();
 
-    // 批量发送
+    // 批量发送（限制单次最多 1000 个接收者，防止超大批次请求消耗资源）
     if (userIds && Array.isArray(userIds) && userIds.length > 0) {
+      if (userIds.length > 1000) {
+        return NextResponse.json(
+          { error: '单次批量通知最多 1000 个接收者' },
+          { status: 400 }
+        );
+      }
       const count = await service.createBulkNotifications(userIds, {
         type,
         title,

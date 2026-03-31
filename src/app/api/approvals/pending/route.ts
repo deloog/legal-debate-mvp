@@ -3,19 +3,44 @@
  * GET - 获取当前用户的待审批列表
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { contractApprovalService } from '@/lib/contract/contract-approval-service';
-import { getCurrentUserId } from '@/lib/auth/get-current-user';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { logger } from '@/lib/logger';
 
-export async function GET() {
-  try {
-    // 从session获取当前用户ID
-    const currentUserId = await getCurrentUserId();
+export async function GET(request: NextRequest) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } },
+      { status: 401 }
+    );
+  }
 
-    // 获取待审批列表
-    const approvals =
+  try {
+    const currentUserId = authUser.userId;
+
+    // 获取待审批列表（ContractApproval 含嵌套 steps）
+    const rawApprovals =
       await contractApprovalService.getPendingApprovals(currentUserId);
+
+    // 格式化为页面所需结构：每条记录对应当前用户待处理的一个 ApprovalStep
+    const approvals = rawApprovals.flatMap(approval => {
+      const pendingSteps = approval.steps.filter(
+        step => step.approverId === currentUserId && step.status === 'PENDING'
+      );
+      return pendingSteps.map(step => ({
+        id: step.id, // stepId，供 submit API 使用
+        approvalId: approval.id,
+        contractId: approval.contractId,
+        contractTitle: approval.contract?.clientName ?? '合同审批',
+        contractNo: approval.contract?.contractNumber,
+        submittedAt: approval.createdAt,
+        submittedBy: approval.createdBy,
+        status: step.status,
+        comment: step.comment,
+      }));
+    });
 
     // 获取审批统计
     const stats = await contractApprovalService.getApprovalStats(currentUserId);
@@ -34,8 +59,7 @@ export async function GET() {
         success: false,
         error: {
           code: 'INTERNAL_ERROR',
-          message:
-            error instanceof Error ? error.message : '获取待审批列表失败',
+          message: '获取待审批列表失败',
         },
       },
       { status: 500 }

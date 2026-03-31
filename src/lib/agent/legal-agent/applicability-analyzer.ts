@@ -8,6 +8,8 @@
  * 4. 综合评分计算
  */
 
+import OpenAI from 'openai';
+import { logger } from '@/lib/logger';
 import type {
   AIReviewResult,
   ApplicabilityAnalysisInput,
@@ -24,7 +26,7 @@ import type {
 interface AnalysisOptions {
   /** 适用性阈值（低于此值认为不适用） */
   threshold?: number;
-  /** 是否启用AI审查（模拟） */
+  /** 是否启用AI审查（默认关闭，开启后调用 Claude） */
   enableAIReview?: boolean;
 }
 
@@ -57,7 +59,7 @@ export class ApplicabilityAnalyzer {
       validation.set(article.id, this.validateArticle(article, input.caseInfo));
     }
 
-    // 3. AI审查（模拟）
+    // 3. AI审查（可选，调用 Claude）
     const aiReview = options.enableAIReview
       ? await this.performAIReview(input, semanticScores, validation)
       : this.getEmptyAIReview();
@@ -316,49 +318,110 @@ export class ApplicabilityAnalyzer {
   }
 
   /**
-   * AI审查（模拟）
+   * AI审查（调用 Claude 对法条适用性进行专业判断）
    */
   private async performAIReview(
     input: ApplicabilityAnalysisInput,
     semanticScores: Map<string, number>,
     validation: Map<string, RuleValidationResult>
   ): Promise<AIReviewResult> {
-    // 模拟AI审查结果
-    const applicable: LawArticle[] = [];
-    const notApplicable: LawArticle[] = [];
-    const comments: string[] = [];
+    const articleSummaries = input.articles
+      .slice(0, 20) // 最多20条，避免超出上下文
+      .map(
+        a =>
+          `[${a.id}] ${a.articleNumber ?? ''} ${a.lawName ?? ''}: ${a.content.slice(0, 200)}`
+      )
+      .join('\n');
 
-    for (const article of input.articles) {
-      const score = semanticScores.get(article.id) || 0;
-      const ruleResult = validation.get(article.id);
+    const caseDesc = [
+      input.caseInfo.description ?? '',
+      input.caseInfo.disputeFocus?.join('；') ?? '',
+    ]
+      .filter(Boolean)
+      .join('\n');
 
-      if (score > 0.7 && ruleResult?.passed) {
-        applicable.push(article);
-        comments.push(
-          `法条${article.articleNumber}与案件高度相关，语义相似度${score.toFixed(2)}`
-        );
-      } else if (score > 0.4) {
-        comments.push(
-          `法条${article.articleNumber}与案件有一定关联，建议进一步分析`
-        );
-      } else {
-        notApplicable.push(article);
-        if (score < 0.3) {
-          comments.push(`法条${article.articleNumber}与案件相关性较低`);
+    const prompt = `你是法律专家。请判断以下法条哪些适用于该案件。
+
+案件描述：
+${caseDesc}
+
+待审查法条（格式：[id] 条文编号 标题: 内容摘要）：
+${articleSummaries}
+
+请以JSON格式返回，不要输出其他内容：
+{
+  "applicable": ["适用的法条id列表"],
+  "notApplicable": ["不适用的法条id列表"],
+  "comments": ["对每条适用法条的简短说明（格式：法条id: 说明）"]
+}`;
+
+    try {
+      const client = new OpenAI({
+        apiKey: process.env.DEEPSEEK_API_KEY ?? '',
+        baseURL: process.env.DEEPSEEK_BASE_URL ?? 'https://api.deepseek.com/v1',
+      });
+      const message = await client.chat.completions.create({
+        model: process.env.DEEPSEEK_MODEL ?? 'deepseek-chat',
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: prompt }],
+      });
+
+      const raw = message.choices[0]?.message?.content ?? '';
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('AI返回格式异常');
+
+      const result = JSON.parse(jsonMatch[0]) as {
+        applicable: string[];
+        notApplicable: string[];
+        comments: string[];
+      };
+
+      const applicableSet = new Set(result.applicable ?? []);
+      const applicable = input.articles.filter(
+        a => applicableSet.has(a.id) && validation.get(a.id)?.passed
+      );
+      const notApplicable = input.articles.filter(
+        a => !applicableSet.has(a.id)
+      );
+      const score =
+        input.articles.length > 0
+          ? applicable.length / input.articles.length
+          : 0;
+
+      return {
+        applicable,
+        notApplicable,
+        score,
+        comments: result.comments ?? [],
+      };
+    } catch (error) {
+      logger.warn('AI法条适用性审查失败，降级为规则判断:', error);
+      // 降级：按语义分数阈值判断
+      const applicable: LawArticle[] = [];
+      const notApplicable: LawArticle[] = [];
+      const comments: string[] = [];
+      for (const article of input.articles) {
+        const score = semanticScores.get(article.id) ?? 0;
+        const ruleResult = validation.get(article.id);
+        if (score > 0.7 && ruleResult?.passed) {
+          applicable.push(article);
+          comments.push(
+            `${article.id}: 语义相似度${score.toFixed(2)}，规则验证通过`
+          );
+        } else {
+          notApplicable.push(article);
         }
       }
+      return {
+        applicable,
+        notApplicable,
+        score:
+          input.articles.length > 0
+            ? applicable.length / input.articles.length
+            : 0,
+        comments,
+      };
     }
-
-    // 计算审查评分
-    const score =
-      input.articles.length > 0 ? applicable.length / input.articles.length : 0;
-
-    return {
-      applicable,
-      notApplicable,
-      score,
-      comments,
-    };
   }
 
   /**

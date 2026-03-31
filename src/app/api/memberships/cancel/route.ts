@@ -178,7 +178,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   } catch (error) {
     logger.error('会员取消失败:', {
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
       timestamp: new Date().toISOString(),
     });
@@ -187,7 +187,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       {
         success: false,
         message: '会员取消失败，请稍后重试',
-        error: error instanceof Error ? error.message : 'SERVER_ERROR',
+        error: 'SERVER_ERROR',
       },
       { status: 500 }
     );

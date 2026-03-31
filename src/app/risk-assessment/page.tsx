@@ -11,6 +11,8 @@ import type {
   RiskAssessmentResult,
 } from '@/types/risk-assessment';
 import { RiskLevel } from '@/types/risk';
+import { RiskAnalysisCharts } from '@/components/risk/RiskAnalysisCharts';
+import type { RiskAssessmentResult as ChartRiskResult } from '@/types/risk';
 
 /**
  * 风险评估页面组件
@@ -256,6 +258,63 @@ export default function RiskAssessmentPage() {
       default:
         return '未知';
     }
+  };
+
+  // 将评估结果转换为图表组件格式
+  const convertToChartFormat = (
+    data: RiskAssessmentResult
+  ): ChartRiskResult => {
+    return {
+      caseId: data.caseId,
+      overallRiskLevel: data.overallRiskLevel,
+      overallRiskScore: data.overallRiskScore,
+      risks: data.risks.map(risk => ({
+        id: risk.id,
+        riskType: risk.riskType,
+        riskCategory: risk.riskCategory,
+        riskLevel: risk.riskLevel,
+        score: risk.score,
+        confidence: risk.confidence,
+        description: risk.description,
+        evidence: risk.evidence || [],
+        suggestions: risk.suggestions || [],
+        identifiedAt: new Date(risk.identifiedAt || Date.now()),
+      })),
+      statistics: {
+        totalRisks: data.statistics.totalRisks,
+        byLevel: {
+          [RiskLevel.LOW]: data.statistics.lowRisks,
+          [RiskLevel.MEDIUM]: data.statistics.mediumRisks,
+          [RiskLevel.HIGH]: data.statistics.highRisks,
+          [RiskLevel.CRITICAL]: data.statistics.criticalRisks,
+        },
+        byCategory: data.statistics.byCategory,
+        byType: data.statistics.byType,
+        criticalRisks: data.statistics.criticalRisks,
+        highRisks: data.statistics.highRisks,
+        mediumRisks: data.statistics.mediumRisks,
+        lowRisks: data.statistics.lowRisks,
+      },
+      suggestions: data.suggestions.map(s => ({
+        id: s.id,
+        riskType: s.riskType,
+        suggestionType: s.suggestionType,
+        priority: s.priority,
+        action: s.action,
+        reason: s.reason,
+        estimatedImpact: s.estimatedImpact,
+        estimatedEffort: s.estimatedEffort,
+      })),
+      assessmentTime: data.assessmentTime || 0,
+      assessedAt: new Date(data.assessedAt || Date.now()),
+    };
+  };
+
+  // 处理图表导出
+  const handleExportChart = () => {
+    // TODO: 实现图表导出功能
+    console.log('导出图表');
+    alert('图表导出功能即将推出');
   };
 
   return (
@@ -618,9 +677,15 @@ export default function RiskAssessmentPage() {
             </div>
           </div>
 
-          {/* 风险分布 */}
+          {/* 风险分析图表 */}
+          <RiskAnalysisCharts
+            assessment={convertToChartFormat(result)}
+            onExport={() => handleExportChart()}
+          />
+
+          {/* 风险分布统计 */}
           <div className='bg-white rounded-lg shadow p-6'>
-            <h3 className='text-xl font-semibold mb-4'>风险分布</h3>
+            <h3 className='text-xl font-semibold mb-4'>风险分布统计</h3>
             <div className='grid grid-cols-4 gap-4'>
               <div className='text-center'>
                 <div className='text-3xl font-bold text-red-600'>

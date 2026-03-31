@@ -5,8 +5,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import { certificationService } from '@/lib/knowledge-graph/expert/certification-service';
 
@@ -18,9 +18,9 @@ export async function POST(
   { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const authUser = await getAuthUser(request);
 
-    if (!session?.user?.id) {
+    if (!authUser) {
       return NextResponse.json(
         { success: false, error: '未登录' },
         { status: 401 }
@@ -28,11 +28,12 @@ export async function POST(
     }
 
     const body = await request.json();
+    const { expertId } = await params;
 
     // 检查管理员权限
-    const { prisma } = await import('@/lib/db/prisma');
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: authUser.userId },
+      select: { role: true },
     });
 
     if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
@@ -44,14 +45,14 @@ export async function POST(
 
     // 升级专家
     await certificationService.promoteExpert({
-      expertId: (await params).expertId,
+      expertId,
       newLevel: body.newLevel,
       reason: body.reason,
     });
 
     logger.info('Expert promoted successfully', {
-      userId: session.user.id,
-      expertId: (await params).expertId,
+      userId: authUser.userId,
+      expertId,
       newLevel: body.newLevel,
     });
 
@@ -60,16 +61,11 @@ export async function POST(
       message: '专家等级升级成功',
     });
   } catch (error) {
-    logger.error('升级专家等级失败', {
-      error,
-      expertId: (await params).expertId,
-    });
+    const { expertId } = await params;
+    logger.error('升级专家等级失败', { error, expertId });
 
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : '升级专家等级失败',
-      },
+      { success: false, error: '升级专家等级失败' },
       { status: 500 }
     );
   }
@@ -83,20 +79,20 @@ export async function GET(
   { params }: { params: Promise<{ expertId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const authUser = await getAuthUser(request);
 
-    if (!session?.user?.id) {
+    if (!authUser) {
       return NextResponse.json(
         { success: false, error: '未登录' },
         { status: 401 }
       );
     }
 
-    const { prisma } = await import('@/lib/db/prisma');
+    const { expertId } = await params;
 
     // 获取专家信息
     const expert = await prisma.knowledgeGraphExpert.findUnique({
-      where: { id: (await params).expertId },
+      where: { id: expertId },
     });
 
     if (!expert) {
@@ -112,8 +108,8 @@ export async function GET(
     );
 
     logger.info('Expert level suggestion evaluated', {
-      userId: session.user.id,
-      expertId: (await params).expertId,
+      userId: authUser.userId,
+      expertId,
     });
 
     return NextResponse.json({
@@ -121,16 +117,11 @@ export async function GET(
       suggestion,
     });
   } catch (error) {
-    logger.error('获取专家等级建议失败', {
-      error,
-      expertId: (await params).expertId,
-    });
+    const { expertId } = await params;
+    logger.error('获取专家等级建议失败', { error, expertId });
 
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : '获取专家等级建议失败',
-      },
+      { success: false, error: '获取专家等级建议失败' },
       { status: 500 }
     );
   }

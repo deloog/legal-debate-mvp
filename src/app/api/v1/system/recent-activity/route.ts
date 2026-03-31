@@ -9,11 +9,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * 获取最近活动
  */
 export async function GET(request: NextRequest) {
+  // ─── 认证 ────────────────────────────────────────────────────────────────
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json({ error: '未授权' }, { status: 401 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const limitParam = searchParams.get('limit');
@@ -27,46 +34,62 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 并行获取最近的法条、辩论、合同
-    const [recentArticles, recentDebates, recentContracts] = await Promise.all([
-      // 获取最近更新的法条
-      prisma.lawArticle.findMany({
-        take: limit,
-        orderBy: { updatedAt: 'desc' },
-        select: {
-          id: true,
-          lawName: true,
-          articleNumber: true,
-          fullText: true,
-          updatedAt: true,
-        },
-      }),
+    // 并行获取最近的法条、辩论、合同、案件
+    const [recentArticles, recentDebates, recentContracts, recentCases] =
+      await Promise.all([
+        // 获取最近更新的法条
+        prisma.lawArticle.findMany({
+          take: limit,
+          orderBy: { updatedAt: 'desc' },
+          select: {
+            id: true,
+            lawName: true,
+            articleNumber: true,
+            fullText: true,
+            updatedAt: true,
+          },
+        }),
 
-      // 获取最近的辩论
-      prisma.debate.findMany({
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-        select: {
-          id: true,
-          title: true,
-          status: true,
-          createdAt: true,
-        },
-      }),
+        // 获取最近的辩论（仅当前用户）
+        prisma.debate.findMany({
+          where: { userId: authUser.userId },
+          take: limit,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            createdAt: true,
+          },
+        }),
 
-      // 获取最近的合同
-      prisma.contract.findMany({
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-        select: {
-          id: true,
-          contractNumber: true,
-          clientName: true,
-          status: true,
-          createdAt: true,
-        },
-      }),
-    ]);
+        // 获取最近的合同（仅当前用户关联的案件）
+        prisma.contract.findMany({
+          where: { case: { userId: authUser.userId } },
+          take: limit,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            contractNumber: true,
+            clientName: true,
+            status: true,
+            createdAt: true,
+          },
+        }),
+
+        // 获取最近的案件（仅当前用户）
+        prisma.case.findMany({
+          where: { userId: authUser.userId, deletedAt: null },
+          take: limit,
+          orderBy: { updatedAt: 'desc' },
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            updatedAt: true,
+          },
+        }),
+      ]);
 
     return NextResponse.json({
       recentArticles: recentArticles.map(article => ({
@@ -88,6 +111,12 @@ export async function GET(request: NextRequest) {
         clientName: contract.clientName,
         status: contract.status,
         createdAt: contract.createdAt.toISOString(),
+      })),
+      recentCases: recentCases.map(c => ({
+        id: c.id,
+        title: c.title,
+        status: c.status,
+        updatedAt: c.updatedAt.toISOString(),
       })),
     });
   } catch (error) {

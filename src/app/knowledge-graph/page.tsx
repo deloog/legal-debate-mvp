@@ -9,7 +9,6 @@
  * 3. 响应式布局
  */
 
-import React from 'react';
 import { Metadata } from 'next';
 import { KnowledgeGraphBrowser } from '@/components/knowledge-graph/KnowledgeGraphBrowser';
 
@@ -17,7 +16,7 @@ import { KnowledgeGraphBrowser } from '@/components/knowledge-graph/KnowledgeGra
  * 页面元数据
  */
 export const metadata: Metadata = {
-  title: '知识图谱浏览器 - 法律辩论系统',
+  title: '知识图谱浏览器 - 律伴AI助手',
   description: '浏览和探索法条之间的关系网络，支持搜索、过滤和导出功能',
 };
 

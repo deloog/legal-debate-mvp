@@ -4,7 +4,6 @@
  * GET /api/consultations - 获取咨询列表
  * POST /api/consultations - 创建咨询记录
  */
-import { authOptions } from '@/lib/auth/auth-options';
 import { prisma } from '@/lib/db/prisma';
 import {
   getFirstZodError,
@@ -20,24 +19,9 @@ import {
   isValidConsultationType,
   isValidConsultStatus,
 } from '@/types/consultation';
-import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
-
-/**
- * 从请求中解析用户ID（优先 JWT Bearer，回退到 NextAuth session）
- */
-async function resolveUserId(request: NextRequest): Promise<string | null> {
-  const authHeader = request.headers.get('authorization');
-  const jwtToken = extractTokenFromHeader(authHeader ?? '');
-  const tokenResult = verifyToken(jwtToken ?? '');
-  if (tokenResult.valid && tokenResult.payload) {
-    return tokenResult.payload.userId;
-  }
-  const session = await getServerSession(authOptions);
-  return session?.user?.id ?? null;
-}
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * GET /api/consultations
@@ -52,9 +36,9 @@ export async function GET(
   >
 > {
   try {
-    // 认证：JWT Bearer 或 NextAuth session
-    const userId = await resolveUserId(request);
-    if (!userId) {
+    // 认证
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -63,6 +47,7 @@ export async function GET(
         { status: 401 }
       );
     }
+    const userId = authUser.userId;
 
     // 获取查询参数
     const { searchParams } = new URL(request.url);
@@ -292,9 +277,9 @@ export async function POST(
   NextResponse<SuccessResponse<ConsultationListItem> | ErrorResponse>
 > {
   try {
-    // 认证：JWT Bearer 或 NextAuth session
-    const userId = await resolveUserId(request);
-    if (!userId) {
+    // 认证
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -306,6 +291,7 @@ export async function POST(
         { status: 401 }
       );
     }
+    const userId = authUser.userId;
 
     // 解析请求体
     let body: Record<string, unknown>;

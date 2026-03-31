@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     logger.error('创建工作流模板失败', { error });
 
-    const message = error instanceof Error ? error.message : '服务器内部错误';
+    const message = '服务器内部错误';
     const isValidationError =
       message.includes('工作流定义无效') || message.includes('不能为空');
 

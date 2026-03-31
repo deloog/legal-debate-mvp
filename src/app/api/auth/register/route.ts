@@ -21,7 +21,15 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
   try {
     // 解析请求体
     const body: RegisterRequest = await request.json();
-    const { email, password, username, name } = body;
+    const { email, password, username, name, role: requestedRole } = body;
+
+    // 只允许用户自选 LAWYER 或 ENTERPRISE；其他值回退到 USER
+    const allowedSelfRoles = ['LAWYER', 'ENTERPRISE'] as const;
+    const assignedRole = allowedSelfRoles.includes(
+      requestedRole as (typeof allowedSelfRoles)[number]
+    )
+      ? (requestedRole as 'LAWYER' | 'ENTERPRISE')
+      : 'USER';
 
     // 验证输入数据
     const validation = validateRegisterRequest(email, password, username);
@@ -56,9 +64,10 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(response, { status: 400 });
     }
 
-    // 检查邮箱是否已存在
+    // 检查邮箱是否已存在（只取 id，不加载密码哈希等敏感字段）
     const existingUser = await prisma.user.findUnique({
       where: { email },
+      select: { id: true },
     });
 
     if (existingUser) {
@@ -81,7 +90,7 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
         name: name || username || null,
         status: 'ACTIVE',
         password: hashedPassword,
-        role: 'USER',
+        role: assignedRole,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -104,11 +113,7 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
 
-    logger.info('[REGISTER] Generated tokens:', {
-      accessTokenLength: accessToken.length,
-      refreshTokenLength: refreshToken.length,
-      userId: user.id,
-    });
+    logger.info('[REGISTER] Tokens generated for user:', { userId: user.id });
 
     // 创建session记录
     const sessionExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7天后过期
@@ -128,8 +133,8 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
 
     const expiresIn = 15 * 60; // 15分钟
 
-    // 返回响应
-    const response: AuthResponse = {
+    // token 通过 httpOnly cookie 传递，不在响应体中暴露（防止 XSS 窃取）
+    const responseBody: AuthResponse = {
       success: true,
       message: '注册成功，请使用邮箱登录',
       data: {
@@ -141,12 +146,30 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
           role: user.role,
           createdAt: user.createdAt,
         },
-        token: accessToken,
-        refreshToken,
+        token: '', // token 已通过 httpOnly cookie 传递，此处留空
         expiresIn,
       },
     };
-    return NextResponse.json(response, { status: 201 });
+    const response = NextResponse.json(responseBody, { status: 201 });
+
+    // 与登录接口保持一致：将 token 写入 httpOnly Cookie
+    response.cookies.set('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60, // 7天
+      path: '/',
+    });
+
+    response.cookies.set('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60, // 15分钟
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     logger.error('注册失败:', error);
     const response: AuthResponse = {

@@ -31,7 +31,14 @@ export async function POST(request: NextRequest) {
       params[key] = value as string;
     }
 
-    logger.info('[API] 支付宝回调参数:', params);
+    // 日志脱敏：只记录必要的非敏感字段
+    logger.info('[API] 支付宝回调参数:', {
+      trade_status: params.trade_status,
+      out_trade_no: params.out_trade_no,
+      trade_no: params.trade_no,
+      total_amount: params.total_amount,
+      app_id: params.app_id,
+    });
 
     // 验证必填参数
     const requiredParams = [
@@ -111,6 +118,21 @@ export async function POST(request: NextRequest) {
     if (order.status === 'PAID') {
       logger.info('[API] 订单已支付，忽略重复回调:', orderNo);
       return new NextResponse('success', { status: 200 });
+    }
+
+    // 金额校验：回调金额必须与数据库订单金额一致，防止篡改
+    const callbackAmount = parseFloat(params.total_amount);
+    const orderAmount = Number(order.amount);
+    if (Math.abs(callbackAmount - orderAmount) > 0.001) {
+      logger.error('[API] 支付宝回调金额不匹配:', {
+        orderNo,
+        callbackAmount,
+        orderAmount,
+      });
+      return NextResponse.json(
+        { success: false, message: '金额不匹配' },
+        { status: 400 }
+      );
     }
 
     // 处理支付结果

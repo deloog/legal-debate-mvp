@@ -362,21 +362,47 @@ export function CaseTeamList({
         </CardContent>
       </Card>
 
-      {/* 添加成员表单 */}
+      {/* 添加成员弹窗 */}
       {showAddForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>添加团队成员</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TeamMemberForm
-              onSubmit={data => handleAddMember(data)}
-              onCancel={() => setShowAddForm(false)}
-              isLoading={isLoading}
-              existingMemberIds={members.map(m => m.userId)}
-            />
-          </CardContent>
-        </Card>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4'>
+          <div className='w-full max-w-2xl rounded-xl border border-gray-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900'>
+            <div className='flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-zinc-700'>
+              <h2 className='text-base font-semibold text-gray-900 dark:text-zinc-100'>
+                添加团队成员
+              </h2>
+              <button
+                onClick={() => setShowAddForm(false)}
+                className='rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300'
+                aria-label='关闭'
+              >
+                <svg
+                  className='h-5 w-5'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M6 18L18 6M6 6l12 12'
+                  />
+                </svg>
+              </button>
+            </div>
+            <div
+              className='overflow-y-auto p-6'
+              style={{ maxHeight: 'calc(90vh - 80px)' }}
+            >
+              <TeamMemberForm
+                onSubmit={data => handleAddMember(data)}
+                onCancel={() => setShowAddForm(false)}
+                isLoading={isLoading}
+                existingMemberIds={members.map(m => m.userId)}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

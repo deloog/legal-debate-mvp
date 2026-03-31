@@ -254,43 +254,6 @@ export class PlanningAgent {
     return confidence;
   }
 
-  // 生成选择原因
-  private __generateSelectionReason(planning: unknown): string {
-    const reasons: string[] = [];
-
-    if (planning && typeof planning === 'object') {
-      const plan = planning as Record<string, unknown>;
-      const strategy = plan.strategy as Record<string, unknown> | undefined;
-
-      if ((strategy?.feasibilityScore as number) > 0.8) {
-        reasons.push('可行性得分高');
-      }
-
-      if (strategy?.riskLevel === 'low') {
-        reasons.push('风险可控');
-      }
-
-      if ((strategy?.confidence as number) > 0.85) {
-        reasons.push('信心度高');
-      }
-
-      if (
-        strategy?.swotAnalysis &&
-        (strategy.swotAnalysis as Record<string, unknown>).strengths &&
-        (strategy.swotAnalysis as Record<string, unknown>).weaknesses
-      ) {
-        const swot = strategy.swotAnalysis as Record<string, unknown>;
-        const strengths = swot.strengths as unknown[];
-        const weaknesses = swot.weaknesses as unknown[];
-        if (strengths.length > weaknesses.length) {
-          reasons.push('优势多于劣势');
-        }
-      }
-    }
-
-    return reasons.length > 0 ? reasons.join('，') : '策略符合当前需求';
-  }
-
   // 快速规划（用于简单场景）
   public async quickPlan(taskType: TaskType): Promise<PlanningOutput> {
     const input: PlanningInput = {

@@ -3,18 +3,28 @@
  * Dashboard 辩论汇总统计：总数、已生成、进行中、已完成及平均质量分
  */
 
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { NextRequest, NextResponse } from 'next/server';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+export async function GET(request: NextRequest) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return NextResponse.json(
       { success: false, error: '未认证，请先登录' },
       { status: 401 }
+    );
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { role: true },
+  });
+  if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+    return NextResponse.json(
+      { success: false, error: '无权限访问' },
+      { status: 403 }
     );
   }
 
@@ -56,6 +66,8 @@ export async function GET() {
         inProgress,
         completed,
         avgQuality,
+        avgRounds: 0,
+        trend: [],
       },
     });
   } catch (error) {

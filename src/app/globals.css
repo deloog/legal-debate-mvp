@@ -115,3 +115,8 @@
 .dark .scrollbar-thin::-webkit-scrollbar-thumb {
   background-color: #52525b;
 }
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(4px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}

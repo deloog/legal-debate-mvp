@@ -3,7 +3,7 @@
  * GET /api/consultations/[id]/convert - 获取转化预览
  * POST /api/consultations/[id]/convert - 执行转化
  */
-import { getCurrentUserId } from '@/lib/auth/get-current-user';
+import { getAuthUser } from '@/lib/middleware/auth';
 import {
   ConversionResult,
   createConversionService,
@@ -19,11 +19,19 @@ import { logger } from '@/lib/logger';
  * 获取转化预览
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<
   NextResponse<SuccessResponse<ConversionPreviewData> | ErrorResponse>
 > {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: '未授权' } },
+      { status: 401 }
+    );
+  }
+
   try {
     const { id } = await params;
 
@@ -86,6 +94,14 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SuccessResponse<ConversionResult> | ErrorResponse>> {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json(
+      { success: false, error: { code: 'UNAUTHORIZED', message: '未授权' } },
+      { status: 401 }
+    );
+  }
+
   try {
     const { id } = await params;
 
@@ -136,12 +152,26 @@ export async function POST(
       }
     }
 
+    // 校验金额（如有提供，必须为正数）
+    if (body.amount !== undefined && body.amount !== null) {
+      const amountNum = Number(body.amount);
+      if (isNaN(amountNum) || amountNum <= 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: { code: 'INVALID_AMOUNT', message: '案件金额必须为正数' },
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     // 执行转化
     const conversionService = createConversionService();
     const result = await conversionService.convertToCase({
       consultationId: id,
       // 从session获取真实用户ID
-      userId: await getCurrentUserId(),
+      userId: authUser.userId,
       title: body.title,
       description: body.description,
       caseType: body.caseType as CaseType,

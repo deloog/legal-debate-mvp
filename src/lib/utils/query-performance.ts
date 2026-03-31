@@ -23,6 +23,7 @@ interface QueryStats {
 }
 
 const queryStats = new Map<string, QueryStats>();
+const MAX_QUERY_STATS_ENTRIES = 1000;
 
 // 监听查询事件
 prisma.$on('query' as never, (e: Prisma.QueryEvent) => {
@@ -35,6 +36,16 @@ prisma.$on('query' as never, (e: Prisma.QueryEvent) => {
     stats.duration += duration;
     stats.avgDuration = stats.duration / stats.count;
   } else {
+    if (queryStats.size >= MAX_QUERY_STATS_ENTRIES) {
+      // 超出上限时删除平均耗时最低的 20%，为新条目腾出空间
+      const entries = Array.from(queryStats.entries()).sort(
+        (a, b) => a[1].avgDuration - b[1].avgDuration
+      );
+      const toDelete = Math.ceil(MAX_QUERY_STATS_ENTRIES * 0.2);
+      for (let i = 0; i < toDelete; i++) {
+        queryStats.delete(entries[i][0]);
+      }
+    }
     queryStats.set(query, {
       query,
       duration,

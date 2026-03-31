@@ -69,7 +69,7 @@ export async function POST(
       {
         success: false,
         error: '确认告警失败',
-        message: error instanceof Error ? error.message : '未知错误',
+        message: '未知错误',
       },
       { status: 500 }
     );

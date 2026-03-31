@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DocAnalyzerAgentAdapter } from '../../../../../lib/agent/doc-analyzer/adapter';
 import { AgentContext, TaskPriority } from '../../../../../types/agent';
-import { join } from 'path';
+import { resolve, sep } from 'path';
 import { existsSync } from 'fs';
 import { retryDocAnalysis } from '../../../../../lib/ai/retry-handler';
 import { getAuthUser } from '@/lib/middleware/auth';
 import { checkAIQuota, recordAIUsage } from '@/lib/ai/quota';
+import { prisma } from '@/lib/db';
 import { logAIAction } from '@/lib/audit/logger';
 import { logger } from '@/lib/logger';
+import { moderateRateLimiter } from '@/lib/middleware/rate-limit';
 
 // =============================================================================
 // API处理函数
 // =============================================================================
 
 export async function POST(request: NextRequest) {
+  // 速率限制（AI 分析为高成本操作）
+  const rateLimitResponse = await moderateRateLimiter(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // 获取认证用户
     const authUser = await getAuthUser(request);
@@ -24,11 +30,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 从 DB 重新获取 role，避免 stale JWT 导致配额绕过
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    const userRole = dbUser?.role ?? 'FREE';
+
     // 检查AI配额
-    const quotaCheck = await checkAIQuota(
-      authUser.userId,
-      authUser.role as string
-    );
+    const quotaCheck = await checkAIQuota(authUser.userId, userRole);
     if (!quotaCheck.allowed) {
       return NextResponse.json(
         {
@@ -67,13 +77,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 构建完整文件路径
-    // 使用相对路径避免过于宽泛的文件模式匹配
-    const uploadsDir = 'uploads'; // 假设文件存储在 uploads 目录
+    // 验证文档所有权（防止越权分析他人文档）
+    const doc = await prisma.document.findUnique({
+      where: { id: documentId },
+      select: { userId: true },
+    });
+    if (!doc) {
+      return NextResponse.json(
+        { success: false, error: '文档不存在' },
+        { status: 404 }
+      );
+    }
+    if (doc.userId !== authUser.userId) {
+      return NextResponse.json(
+        { success: false, error: '无权限分析该文档' },
+        { status: 403 }
+      );
+    }
+
+    // 构建完整文件路径，并防止路径穿越攻击
+    const uploadsDir = resolve(process.cwd(), 'uploads');
     const normalizedPath = filePath.startsWith('/')
       ? filePath.substring(1)
       : filePath;
-    const fullFilePath = join(uploadsDir, normalizedPath);
+    const fullFilePath = resolve(uploadsDir, normalizedPath);
+
+    // 边界校验：确保解析后路径仍在 uploads 目录内
+    if (!fullFilePath.startsWith(uploadsDir + sep)) {
+      return NextResponse.json(
+        { success: false, error: '非法文件路径' },
+        { status: 400 }
+      );
+    }
 
     // 检查文件是否存在
     if (!existsSync(fullFilePath)) {
@@ -214,7 +249,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: `服务器内部错误: ${error instanceof Error ? error.message : '未知错误'}`,
+        error: '服务器内部错误',
         details: {
           timestamp: new Date().toISOString(),
         },

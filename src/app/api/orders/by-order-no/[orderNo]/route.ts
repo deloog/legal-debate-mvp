@@ -4,8 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { getOrderByOrderNo } from '@/lib/order/order-service';
 import { logger } from '@/lib/logger';
 
@@ -14,13 +13,12 @@ import { logger } from '@/lib/logger';
  * 通过订单号获取订单详情
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ orderNo: string }> }
 ): Promise<NextResponse> {
   try {
-    // 获取用户会话
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
         {
           success: false,
@@ -60,7 +58,7 @@ export async function GET(
     }
 
     // 验证订单所有权
-    if (order.userId !== session.user.id) {
+    if (order.userId !== authUser.userId) {
       return NextResponse.json(
         {
           success: false,

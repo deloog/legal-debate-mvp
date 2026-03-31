@@ -4,9 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { PrismaClient } from '@prisma/client';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import { ExportService } from '@/lib/knowledge-graph/export-import/services';
 import type {
@@ -14,19 +13,28 @@ import type {
   ExportFilterOptions,
 } from '@/lib/knowledge-graph/export-import/types';
 
-const prisma = new PrismaClient();
-
 /**
- * GET 导出知识图谱数据
+ * GET 导出知识图谱数据（仅管理员）
  */
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json(
-        { success: false, error: '未登录' },
+        { success: false, error: '请先登录' },
         { status: 401 }
+      );
+    }
+
+    // 从DB实时读取角色，仅管理员可导出知识图谱数据
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    if (dbUser?.role !== 'ADMIN' && dbUser?.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        { success: false, error: '权限不足，仅管理员可导出知识图谱数据' },
+        { status: 403 }
       );
     }
 
@@ -96,7 +104,7 @@ export async function GET(request: NextRequest) {
     const contentType = getContentType(format);
 
     logger.info('知识图谱数据导出成功', {
-      userId: session.user.id,
+      userId: authUser.userId,
       format,
       nodeCount: graphData.nodes.length,
       edgeCount: graphData.edges.length,
@@ -117,7 +125,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : '导出知识图谱数据失败',
+        error: '导出知识图谱数据失败',
       },
       { status: 500 }
     );

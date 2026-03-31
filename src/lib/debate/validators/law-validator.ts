@@ -18,7 +18,7 @@ interface LawIssue {
 export class LawValidator {
   private availableLaws: Set<string>;
 
-  constructor(private input: DebateInput) {
+  constructor(input: DebateInput) {
     // 从输入中提取可用的法条
     this.availableLaws = new Set(
       (input.lawArticles || []).map(

@@ -13,16 +13,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
 import { randomBytes } from 'crypto';
 import { logger } from '@/lib/logger';
-import { extractTokenFromHeader, verifyToken } from '@/lib/auth/jwt';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { recognizeLicensePhoto } from '@/lib/qualification/service';
+import { uploadFile } from '@/lib/storage/storage-service';
 
-// 存储在 uploads 目录，不直接暴露在 public 下
-const UPLOAD_DIR = join(process.cwd(), 'uploads', 'qualifications');
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -71,18 +67,15 @@ function validateImageContent(buffer: Buffer, mimeType: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
-  // JWT 鉴权
-  const authHeader = request.headers.get('authorization');
-  const token = extractTokenFromHeader(authHeader ?? '');
-  const tokenResult = verifyToken(token ?? '');
-  if (!tokenResult.valid || !tokenResult.payload) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
     return NextResponse.json(
       { success: false, message: '未授权' },
       { status: 401 }
     );
   }
 
-  const { userId } = tokenResult.payload;
+  const { userId } = authUser;
 
   try {
     const formData = await request.formData();
@@ -130,11 +123,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 创建上传目录
-    if (!existsSync(UPLOAD_DIR)) {
-      await mkdir(UPLOAD_DIR, { recursive: true });
-    }
-
     // 生成安全文件名
     const ext = MIME_TO_EXT[file.type];
     if (!ext) {
@@ -149,20 +137,12 @@ export async function POST(request: NextRequest) {
     }
 
     const fileName = generateSecureFileName(ext);
-    const filePath = join(UPLOAD_DIR, fileName);
 
-    // 安全检查：确保文件路径在允许目录内（防止路径遍历）
-    const resolvedPath = join(UPLOAD_DIR, fileName);
-    if (!resolvedPath.startsWith(UPLOAD_DIR)) {
-      logger.error('上传失败: 非法文件路径', { userId, fileName });
-      return NextResponse.json(
-        { success: false, message: '非法文件路径' },
-        { status: 400 }
-      );
-    }
-
-    // 保存文件
-    await writeFile(filePath, buffer);
+    // 上传文件（本地或OSS）
+    await uploadFile(buffer, `qualifications/${fileName}`, {
+      isPrivate: true,
+      contentType: file.type,
+    });
 
     // 生成文件 ID（用于后续通过 API 访问）
     const fileId = fileName.replace(/\.[^/.]+$/, '');

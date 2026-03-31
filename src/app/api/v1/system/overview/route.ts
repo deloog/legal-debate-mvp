@@ -6,23 +6,28 @@
  * 功能：获取系统概览统计数据
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { VerificationStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
+import { getAuthUser } from '@/lib/middleware/auth';
 
 /**
  * 获取系统概览
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json({ error: '未授权' }, { status: 401 });
+  }
   try {
     // 获取法条总数
     const totalLawArticles = await prisma.lawArticle.count();
 
-    // 获取关系总数（已验证）
+    // 获取关系总数（所有非拒绝的关系：PENDING + VERIFIED）
     const totalRelations = await prisma.lawArticleRelation.count({
       where: {
-        verificationStatus: VerificationStatus.VERIFIED,
+        verificationStatus: { not: VerificationStatus.REJECTED },
       },
     });
 

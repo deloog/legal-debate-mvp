@@ -17,8 +17,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { getAuthUser } from '@/lib/middleware/auth';
+import { prisma } from '@/lib/db/prisma';
 import { crawlTaskManager } from '@/lib/crawler/crawl-task-manager';
 import { flkCrawler } from '@/lib/crawler/flk-crawler';
 import { DataSource } from '@/lib/crawler/types';
@@ -122,17 +122,21 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. 身份验证
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: '未认证，请先登录' }, { status: 401 });
     }
 
-    // 3. 权限检查
-    const allowedRoles = ['ADMIN', 'SYSTEM', 'DATA_MANAGER'];
-    const userRole = session.user.role as string;
+    // 3. 权限检查（DB实时读取角色，防止JWT过期角色绕过）
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    const allowedRoles = ['ADMIN', 'SUPER_ADMIN', 'SYSTEM', 'DATA_MANAGER'];
+    const userRole = dbUser?.role ?? '';
     if (!allowedRoles.includes(userRole)) {
       logger.warn('未授权访问爬虫 API', {
-        userId: session.user.id,
+        userId: authUser.userId,
         role: userRole,
       });
       return NextResponse.json(
@@ -184,7 +188,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!validSources.includes(source)) {
-      logger.warn('尝试使用无效数据源', { source, userId: session.user.id });
+      logger.warn('尝试使用无效数据源', { source, userId: authUser.userId });
       return NextResponse.json(
         { error: `不支持的数据源: ${source}` },
         { status: 400 }
@@ -214,7 +218,7 @@ export async function POST(request: NextRequest) {
     if (options?.outputDir && !validateOutputDir(options.outputDir)) {
       logger.warn('检测到可疑的输出目录', {
         outputDir: options.outputDir,
-        userId: session.user.id,
+        userId: authUser.userId,
       });
       return NextResponse.json({ error: '无效的输出目录' }, { status: 400 });
     }
@@ -230,7 +234,7 @@ export async function POST(request: NextRequest) {
     runningTasks.add(taskId);
 
     // 11. 异步执行
-    runCrawler(source, taskId, crawlType, phase, session.user.id).finally(
+    runCrawler(source, taskId, crawlType, phase, authUser.userId).finally(
       () => {
         runningTasks.delete(taskId);
       }
@@ -242,7 +246,7 @@ export async function POST(request: NextRequest) {
       source,
       crawlType,
       phase,
-      userId: session.user.id,
+      userId: authUser.userId,
       ip: clientIP,
     });
 
@@ -282,17 +286,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 2. 身份验证
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    // 2. 身份验证（任意已登录用户可查询）
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
       return NextResponse.json({ error: '未认证，请先登录' }, { status: 401 });
-    }
-
-    // 3. 权限检查（查询可以放宽到已登录用户）
-    const allowedRoles = ['ADMIN', 'SYSTEM', 'DATA_MANAGER', 'USER'];
-    const userRole = session.user.role as string;
-    if (!allowedRoles.includes(userRole)) {
-      return NextResponse.json({ error: '权限不足' }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);

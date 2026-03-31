@@ -106,10 +106,10 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
           },
         });
         succeeded.push(witness.id);
-      } catch (error) {
+      } catch (_error) {
         failed.push({
           witnessId: witness.id,
-          reason: `状态更新失败: ${error instanceof Error ? error.message : '未知错误'}`,
+          reason: `状态更新失败: ${'未知错误'}`,
         });
       }
     }
@@ -121,10 +121,10 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
           where: { id: witness.id },
         });
         succeeded.push(witness.id);
-      } catch (error) {
+      } catch (_error) {
         failed.push({
           witnessId: witness.id,
-          reason: `删除失败: ${error instanceof Error ? error.message : '未知错误'}`,
+          reason: `删除失败: ${'未知错误'}`,
         });
       }
     }
@@ -204,10 +204,10 @@ export const PUT = withErrorHandler(async (request: NextRequest) => {
         },
       });
       succeeded.push(witness.id);
-    } catch (error) {
+    } catch (_error) {
       failed.push({
         witnessId: witness.id,
-        reason: `状态更新失败: ${error instanceof Error ? error.message : '未知错误'}`,
+        reason: `状态更新失败: ${'未知错误'}`,
       });
     }
   }
@@ -287,10 +287,10 @@ export const DELETE = withErrorHandler(async (request: NextRequest) => {
         where: { id: witness.id },
       });
       succeeded.push(witness.id);
-    } catch (error) {
+    } catch (_error) {
       failed.push({
         witnessId: witness.id,
-        reason: `删除失败: ${error instanceof Error ? error.message : '未知错误'}`,
+        reason: `删除失败: ${'未知错误'}`,
       });
     }
   }

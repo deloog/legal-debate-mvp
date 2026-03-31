@@ -51,10 +51,21 @@ const STATUS_OPTIONS = [
 ];
 
 const STATUS_COLORS: Record<string, string> = {
-  ACTIVE: 'text-green-600',
-  SUSPENDED: 'text-yellow-600',
-  BANNED: 'text-red-600',
-  INACTIVE: 'text-gray-600',
+  ACTIVE:
+    'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800',
+  SUSPENDED:
+    'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800',
+  BANNED:
+    'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800',
+  INACTIVE:
+    'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  ACTIVE: '正常',
+  SUSPENDED: '已暂停',
+  BANNED: '已封禁',
+  INACTIVE: '未激活',
 };
 
 export function UserList(): React.ReactElement {
@@ -197,7 +208,7 @@ export function UserList(): React.ReactElement {
         </form>
       </div>
 
-      <div className='bg-white rounded-lg shadow overflow-hidden'>
+      <div className='bg-white rounded-lg shadow overflow-x-auto'>
         <table className='min-w-full divide-y divide-gray-200'>
           <thead className='bg-gray-50'>
             <tr>
@@ -240,8 +251,13 @@ export function UserList(): React.ReactElement {
                   {user.role}
                 </td>
                 <td className='px-6 py-4 whitespace-nowrap text-sm'>
-                  <span className={STATUS_COLORS[user.status] || ''}>
-                    {user.status}
+                  <span
+                    className={
+                      STATUS_COLORS[user.status] ||
+                      'inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600'
+                    }
+                  >
+                    {STATUS_LABELS[user.status] || user.status}
                   </span>
                 </td>
                 <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>

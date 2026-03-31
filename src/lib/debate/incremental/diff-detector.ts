@@ -25,13 +25,6 @@ export class DiffDetector {
   }
 
   /**
-   * 计算内容指纹（MD5哈希）
-   */
-  private __calculateFingerprint(content: string): string {
-    return createHash('md5').update(content).digest('hex');
-  }
-
-  /**
    * 计算文本相似度（使用编辑距离）
    */
   private calculateSimilarity(str1: string, str2: string): number {

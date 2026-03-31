@@ -54,19 +54,19 @@ export interface RedisHealth extends ServiceHealth {
  */
 export interface SystemHealth {
   uptime: number;
-  memory: {
+  memory?: {
     used: number;
     total: number;
     rss: number;
     external: number;
   };
-  cpu: {
+  cpu?: {
     usage: number;
   };
-  nodeVersion: string;
-  platform: string;
-  arch: string;
-  environment: string;
+  nodeVersion?: string;
+  platform?: string;
+  arch?: string;
+  environment?: string;
 }
 
 /**

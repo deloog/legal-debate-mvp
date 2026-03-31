@@ -45,7 +45,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const { tierId, billingCycle = 'MONTHLY', autoRenew = false } = body;
+    const {
+      tierId,
+      billingCycle = 'MONTHLY',
+      autoRenew = false,
+      orderId,
+    } = body;
 
     // 查询用户当前会员信息（包括已过期的会员）
     const currentMembership = await prisma.userMembership.findFirst({
@@ -98,6 +103,39 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         },
         { status: 400 }
       );
+    }
+
+    // 付费套餐必须提供已完成支付的订单，防止绕过支付直接激活
+    if (targetTier.tier !== 'FREE') {
+      if (!orderId || typeof orderId !== 'string') {
+        return NextResponse.json(
+          {
+            success: false,
+            message: '付费会员升级需要提供有效的支付订单',
+            error: 'ORDER_REQUIRED',
+          },
+          { status: 400 }
+        );
+      }
+      const paidOrder = await prisma.order.findFirst({
+        where: {
+          id: orderId,
+          userId: authUser.userId,
+          membershipTierId: targetTier.id,
+          status: 'PAID',
+        },
+        select: { id: true },
+      });
+      if (!paidOrder) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: '未找到对应的已支付订单，请先完成支付',
+            error: 'PAYMENT_REQUIRED',
+          },
+          { status: 402 }
+        );
+      }
     }
 
     // 定义等级顺序
@@ -263,15 +301,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     logger.error('会员升级失败:', {
       error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-      timestamp: new Date().toISOString(),
+      ...(process.env.NODE_ENV !== 'production' && {
+        stack: error instanceof Error ? error.stack : undefined,
+      }),
     });
 
     return NextResponse.json(
       {
         success: false,
         message: '会员升级失败，请稍后重试',
-        error: error instanceof Error ? error.message : 'SERVER_ERROR',
+        error: 'SERVER_ERROR',
       },
       { status: 500 }
     );

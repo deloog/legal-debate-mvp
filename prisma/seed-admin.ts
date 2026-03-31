@@ -27,7 +27,7 @@ const ADMIN_CONFIG = {
   email: 'admin@example.com',
   name: '系统管理员',
   password: 'Admin@123', // 生产环境请使用强密码
-  role: UserRole.ADMIN,
+  role: UserRole.SUPER_ADMIN,
 };
 
 /**
@@ -71,7 +71,6 @@ async function createOrUpdateAdmin() {
   console.log(`   姓名：${admin.name}`);
   console.log(`   角色：${admin.role}`);
   console.log(`   状态：${admin.status}`);
-  console.log(`   默认密码：${ADMIN_CONFIG.password}`);
   console.log('\n⚠️  生产环境请立即修改默认密码！');
 
   return admin;
@@ -113,10 +112,8 @@ async function createTestEnterpriseAccount() {
   });
 
   console.log(`✅ 测试企业账户创建成功：${enterpriseAccount.enterpriseName}`);
-  console.log(`   统一社会信用代码：${enterpriseAccount.creditCode}`);
   console.log(`   状态：${enterpriseAccount.status}`);
   console.log(`   用户邮箱：${enterpriseUser.email}`);
-  console.log(`   用户密码：Enterprise@123`);
 
   return enterpriseAccount;
 }

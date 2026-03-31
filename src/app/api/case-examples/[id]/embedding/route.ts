@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAuthUser } from '@/lib/middleware/auth';
 import { CaseEmbeddingServiceFactory } from '@/lib/case/embedding-service';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/case-examples/[id]/embedding
  * 获取案例的向量嵌入
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json({ error: '未授权' }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
 
@@ -27,9 +34,8 @@ export async function GET(
       },
     });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    logger.error('获取案例嵌入失败:', error);
+    return NextResponse.json({ error: '获取嵌入失败' }, { status: 500 });
   }
 }
 
@@ -38,9 +44,14 @@ export async function GET(
  * 为案例生成向量嵌入
  */
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json({ error: '未授权' }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
 
@@ -60,9 +71,8 @@ export async function POST(
       },
     });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    logger.error('生成案例嵌入失败:', error);
+    return NextResponse.json({ error: '生成嵌入失败' }, { status: 500 });
   }
 }
 
@@ -71,9 +81,14 @@ export async function POST(
  * 删除案例的向量嵌入
  */
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authUser = await getAuthUser(request);
+  if (!authUser) {
+    return NextResponse.json({ error: '未授权' }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
 
@@ -89,8 +104,7 @@ export async function DELETE(
       message: 'Embedding deleted successfully',
     });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    logger.error('删除案例嵌入失败:', error);
+    return NextResponse.json({ error: '删除嵌入失败' }, { status: 500 });
   }
 }

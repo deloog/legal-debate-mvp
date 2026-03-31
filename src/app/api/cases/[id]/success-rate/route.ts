@@ -38,8 +38,11 @@ export async function GET(
         { status: 404 }
       );
     }
-    const isAdmin =
-      authUser.role === 'ADMIN' || authUser.role === 'SUPER_ADMIN';
+    const dbUser = await prisma.user.findUnique({
+      where: { id: authUser.userId },
+      select: { role: true },
+    });
+    const isAdmin = dbUser?.role === 'ADMIN' || dbUser?.role === 'SUPER_ADMIN';
     if (caseRecord.userId !== authUser.userId && !isAdmin) {
       return NextResponse.json(
         {
@@ -93,9 +96,8 @@ export async function GET(
       success: true,
       data: analysisResult,
     });
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
+  } catch (_error) {
+    const errorMessage = 'Unknown error';
     logger.error('Failed to analyze success rate', new Error(errorMessage), {
       caseId: (await params).id,
     });
