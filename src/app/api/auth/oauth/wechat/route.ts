@@ -37,7 +37,7 @@ export async function GET(_request: NextRequest) {
       state: response.state,
     });
   } catch (_error) {
-    logger.error('Wechat authorize error:', error);
+    logger.error('Wechat authorize error:', _error);
     return NextResponse.json(
       { error: 'Failed to generate authorize URL' },
       { status: 500 }
@@ -106,7 +106,7 @@ async function handleWechatCallback(request: NextRequest) {
     });
     return response;
   } catch (_error) {
-    logger.error('Wechat callback error:', error);
+    logger.error('Wechat callback error:', _error);
     return NextResponse.json(
       { error: 'Failed to handle OAuth callback' },
       { status: 500 }

@@ -37,7 +37,7 @@ export async function GET(_request: NextRequest) {
       state: response.state,
     });
   } catch (_error) {
-    logger.error('QQ authorize error:', error);
+    logger.error('QQ authorize error:', _error);
     return NextResponse.json(
       { error: 'Failed to generate authorize URL' },
       { status: 500 }
@@ -109,7 +109,7 @@ async function handleQqCallback(request: NextRequest) {
     });
     return response;
   } catch (_error) {
-    logger.error('QQ callback error:', error);
+    logger.error('QQ callback error:', _error);
     return NextResponse.json(
       { error: 'Failed to handle OAuth callback' },
       { status: 500 }
