@@ -84,9 +84,11 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
 
     const caseInfo = debate.case;
     const exportedAt = new Date().toLocaleString('zh-CN');
-    const safeTitle = (caseInfo.title || '未知案件').substring(0, 20);
+    const rawTitle = (caseInfo.title || '未知案件').substring(0, 20);
     const datePart = new Date().toISOString().slice(0, 10);
-    const filename = `辩论记录_${safeTitle}_${datePart}`;
+    const safeAsciiTitle = rawTitle.replace(/[^\x00-\x7F]/g, '_');
+    const filename = `debate_record_${safeAsciiTitle}_${datePart}`;
+    const filenameUtf8 = encodeURIComponent(`辩论记录_${rawTitle}_${datePart}`);
 
     // ── JSON 格式 ──────────────────────────────────────────────────────────────
     if (format === 'json') {
@@ -117,7 +119,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
       return new NextResponse(JSON.stringify(payload, null, 2), {
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
-          'Content-Disposition': `attachment; filename="${filename}.json"`,
+          'Content-Disposition': `attachment; filename="${filename}.json"; filename*=UTF-8''${filenameUtf8}.json`,
         },
       });
     }

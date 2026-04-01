@@ -3,10 +3,10 @@
 // 从文档中提取、标准化和验证金额信息
 // 目标：金额识别精度≥99%
 //
-// 集成说明：已集成VerificationAgent实现三重验证机制
-// - 事实准确性验证：验证金额与源数据一致性
-// - 逻辑一致性验证：验证金额在上下文中的合理性
-// - 任务完成度验证：验证金额提取的完整性
+// 重构说明（P1-005）：已将VerificationAgent解耦
+// - AmountExtractor 只负责提取
+// - 验证逻辑移至 AmountValidationService
+// - 通过选项控制是否验证，由上层决定
 // =============================================================================
 
 import type { Claim } from '../core/types';
@@ -14,7 +14,12 @@ import {
   PrecisionAmountExtractor,
   type AmountExtractionResult,
 } from '../../../extraction/amount-extractor-precision';
-import { VerificationAgent } from '../../verification-agent';
+import {
+  AmountValidationService,
+  type AmountToValidate,
+  type ValidationCallback,
+  type ValidationOptions,
+} from '../../amount-validation-service';
 
 // =============================================================================
 // 接口定义
@@ -25,6 +30,10 @@ export interface AmountExtractionOptions {
   requireCurrency?: boolean;
   minConfidence?: number;
   context?: string;
+  /** 是否启用验证（默认false） */
+  validate?: boolean;
+  /** 验证结果回调 */
+  onValidationResult?: ValidationCallback;
 }
 
 export interface AmountExtractionOutput {
@@ -48,21 +57,31 @@ export interface AmountExtractionOutput {
   };
 }
 
+/** 构造函数选项 */
+export interface AmountExtractorOptions {
+  /** 可选的验证服务，如不提供则不进行验证 */
+  validationService?: AmountValidationService;
+}
+
 // =============================================================================
 // 金额提取器类
 // =============================================================================
 
 export class AmountExtractor {
   private precisionExtractor: PrecisionAmountExtractor;
-  private verificationAgent: VerificationAgent;
+  private validationService: AmountValidationService | null;
 
-  constructor() {
+  constructor(options: AmountExtractorOptions = {}) {
     this.precisionExtractor = new PrecisionAmountExtractor();
-    this.verificationAgent = new VerificationAgent();
+    // 解耦：不再直接创建 VerificationAgent，而是接收可选的验证服务
+    this.validationService = options.validationService ?? null;
   }
 
   /**
    * 从文本中提取金额信息
+   *
+   * 重构后：验证变为可选，通过 options.validate 控制
+   * 验证逻辑委托给 AmountValidationService
    */
   async extractFromText(
     text: string,
@@ -77,30 +96,34 @@ export class AmountExtractor {
       options
     );
 
-    // 使用VerificationAgent进行三重验证
-    const verifiedAmounts = await this.verifyAmounts(
-      processedAmounts,
-      text,
-      options
-    );
+    // 如果启用验证且提供了验证服务，则进行验证
+    let finalAmounts = processedAmounts;
+    if (options.validate && this.validationService) {
+      finalAmounts = await this.validateExtractedAmounts(
+        processedAmounts,
+        text,
+        options
+      );
+    }
 
     // 生成摘要
-    const summary = this.generateSummary(verifiedAmounts);
+    const summary = this.generateSummary(finalAmounts);
 
-    // 验证结果
-    const validation = this.validateAmounts(verifiedAmounts);
+    // 验证结果（本地验证，不涉及 VerificationAgent）
+    const validation = this.validateAmounts(finalAmounts);
 
     return {
-      amounts: verifiedAmounts,
+      amounts: finalAmounts,
       summary,
       validation,
     };
   }
 
   /**
-   * 使用VerificationAgent进行三重验证
+   * 验证提取的金额（新方法，替代原来的 verifyAmounts）
+   * 委托给 AmountValidationService
    */
-  private async verifyAmounts(
+  private async validateExtractedAmounts(
     amounts: Array<{
       originalText: string;
       normalizedAmount: number;
@@ -119,252 +142,39 @@ export class AmountExtractor {
       context?: string;
     }>
   > {
-    const verifiedAmounts: Array<{
-      originalText: string;
-      normalizedAmount: number;
-      currency: string;
-      confidence: number;
-      context?: string;
-    }> = [];
-
-    for (const amount of amounts) {
-      // 检查是否为范围金额或模糊金额（这些类型的金额已经有合理的置信度）
-      const isRangeOrFuzzy =
-        amount.originalText.includes('至') ||
-        amount.originalText.includes('到') ||
-        amount.originalText.includes('-') ||
-        amount.originalText.includes('~') ||
-        amount.originalText.includes('约') ||
-        amount.originalText.includes('大约') ||
-        amount.originalText.includes('左右') ||
-        amount.originalText.includes('不少于') ||
-        amount.originalText.includes('不超过') ||
-        amount.originalText.includes('至少') ||
-        amount.originalText.includes('最多') ||
-        amount.originalText.includes('以上') ||
-        amount.originalText.includes('以下');
-
-      let adjustedConfidence = amount.confidence;
-
-      // 对于范围金额和模糊金额，只进行轻量级验证
-      if (isRangeOrFuzzy) {
-        // 只验证金额是否在合理范围内
-        const logicalValid = await this.verifyLogicalConsistency(
-          amount,
-          fullText
-        );
-
-        // 如果逻辑验证通过，保持原置信度；否则略微降低
-        if (!logicalValid) {
-          adjustedConfidence = Math.max(amount.confidence - 0.1, 0.5);
-        }
-      } else {
-        // 对于精确金额，进行完整的三重验证
-        // 1. 事实准确性验证：验证金额与源数据一致性
-        const factualValid = await this.verifyFactualAccuracy(amount);
-
-        // 2. 逻辑一致性验证：验证金额在上下文中的合理性
-        const logicalValid = await this.verifyLogicalConsistency(
-          amount,
-          fullText
-        );
-
-        // 3. 任务完成度验证：验证金额提取的完整性
-        const completenessValid = this.verifyCompleteness(amount, options);
-
-        // 综合验证结果调整置信度
-        adjustedConfidence = this.adjustConfidence(
-          amount.confidence,
-          factualValid,
-          logicalValid,
-          completenessValid
-        );
-      }
-
-      verifiedAmounts.push({
-        ...amount,
-        confidence: adjustedConfidence,
-        context: this.enrichContext(amount, fullText),
-      });
+    if (!this.validationService) {
+      // 如果没有验证服务，直接返回原金额
+      return amounts;
     }
 
-    return verifiedAmounts;
-  }
+    // 转换为验证服务需要的格式
+    const amountsToValidate: AmountToValidate[] = amounts.map(a => ({
+      originalText: a.originalText,
+      normalizedAmount: a.normalizedAmount,
+      currency: a.currency,
+      confidence: a.confidence,
+      context: a.context,
+    }));
 
-  /**
-   * 事实准确性验证：验证金额与源数据一致性
-   */
-  private async verifyFactualAccuracy(amount: {
-    originalText: string;
-    normalizedAmount: number;
-    currency: string;
-    confidence: number;
-  }): Promise<boolean> {
-    try {
-      const result = await this.verificationAgent.verify({
-        amounts: [
-          {
-            field: 'extracted',
-            value: amount.normalizedAmount,
-          },
-        ],
-      });
+    // 调用验证服务
+    const validationOptions: ValidationOptions = {
+      strategy: 'FULL',
+      fullText,
+      requireCurrency: options.requireCurrency,
+      minConfidence: options.minConfidence,
+      callback: options.onValidationResult,
+    };
 
-      return result.passed;
-    } catch {
-      // 如果验证失败，返回true表示不降低置信度
-      return true;
-    }
-  }
-
-  /**
-   * 逻辑一致性验证：验证金额在上下文中的合理性
-   */
-  private async verifyLogicalConsistency(
-    amount: {
-      originalText: string;
-      normalizedAmount: number;
-      currency: string;
-      confidence: number;
-    },
-    fullText: string
-  ): Promise<boolean> {
-    // 检查金额在法律上下文中的合理性
-    const context = this.extractContext(amount.originalText, fullText);
-    const legalKeywords = [
-      '赔偿',
-      '违约金',
-      '利息',
-      '本金',
-      '费用',
-      '损失',
-      '借款',
-      '贷款',
-    ];
-
-    const hasLegalContext = legalKeywords.some(keyword =>
-      context.includes(keyword)
+    const results = await this.validationService.validateAmounts(
+      amountsToValidate,
+      validationOptions
     );
 
-    // 如果没有法律上下文，默认认为合理（避免过度惩罚）
-    if (!hasLegalContext) {
-      return true;
-    }
-
-    // 如果有法律上下文，金额应该在合理范围内
-    // 根据不同的法律场景判断合理性
-    if (context.includes('借款') || context.includes('贷款')) {
-      // 借款金额通常在1000元-1亿之间
-      return (
-        amount.normalizedAmount >= 1000 && amount.normalizedAmount <= 100000000
-      );
-    }
-
-    if (context.includes('赔偿') || context.includes('损失')) {
-      // 赔偿金额通常在100元-1亿之间
-      return (
-        amount.normalizedAmount >= 100 && amount.normalizedAmount <= 100000000
-      );
-    }
-
-    if (context.includes('违约金')) {
-      // 违约金通常在100元-5000万之间
-      return (
-        amount.normalizedAmount >= 100 && amount.normalizedAmount <= 50000000
-      );
-    }
-
-    // 其他法律场景的通用范围
-    return (
-      amount.normalizedAmount >= 0.01 && amount.normalizedAmount <= 100000000
-    );
-  }
-
-  /**
-   * 任务完成度验证：验证金额提取的完整性
-   */
-  private verifyCompleteness(
-    amount: {
-      originalText: string;
-      normalizedAmount: number;
-      currency: string;
-      confidence: number;
-    },
-    options: AmountExtractionOptions
-  ): boolean {
-    // 检查是否满足货币要求
-    if (options.requireCurrency && !amount.currency) {
-      return false;
-    }
-
-    // 检查是否满足置信度要求
-    if (options.minConfidence && amount.confidence < options.minConfidence) {
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * 根据验证结果调整置信度
-   */
-  private adjustConfidence(
-    originalConfidence: number,
-    factualValid: boolean,
-    logicalValid: boolean,
-    completenessValid: boolean
-  ): number {
-    let adjusted = originalConfidence;
-
-    if (factualValid) {
-      adjusted = Math.min(adjusted + 0.1, 1.0);
-    } else {
-      // 对于高置信度的结果（如范围金额0.7），不要过度降低
-      const penalty = originalConfidence >= 0.7 ? 0.1 : 0.3;
-      adjusted = Math.max(adjusted - penalty, 0.0);
-    }
-
-    if (logicalValid) {
-      adjusted = Math.min(adjusted + 0.05, 1.0);
-    } else {
-      // 对于高置信度的结果，不要过度降低
-      const penalty = originalConfidence >= 0.7 ? 0.05 : 0.2;
-      adjusted = Math.max(adjusted - penalty, 0.0);
-    }
-
-    if (!completenessValid) {
-      adjusted = Math.max(adjusted - 0.1, 0.0);
-    }
-
-    return adjusted;
-  }
-
-  /**
-   * 丰富上下文信息
-   */
-  private enrichContext(
-    amount: {
-      originalText: string;
-      normalizedAmount: number;
-      currency: string;
-      confidence: number;
-    },
-    fullText: string
-  ): string {
-    return this.extractContext(amount.originalText, fullText);
-  }
-
-  /**
-   * 提取上下文
-   */
-  private extractContext(target: string, fullText: string): string {
-    const index = fullText.indexOf(target);
-    if (index === -1) return '';
-
-    const start = Math.max(0, index - 50);
-    const end = Math.min(fullText.length, index + target.length + 50);
-
-    return fullText.substring(start, end);
+    // 应用验证结果（调整置信度）
+    return amounts.map((amount, index) => ({
+      ...amount,
+      confidence: results[index]?.adjustedConfidence ?? amount.confidence,
+    }));
   }
 
   /**

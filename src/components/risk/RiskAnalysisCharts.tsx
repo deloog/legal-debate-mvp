@@ -12,7 +12,8 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import html2canvas from 'html2canvas';
 import {
   PieChart,
   Pie,
@@ -103,6 +104,8 @@ export function RiskAnalysisCharts({
   className = '',
 }: RiskAnalysisChartsProps) {
   const [activeTab, setActiveTab] = useState<TabType>('distribution');
+  const [isExporting, setIsExporting] = useState(false);
+  const chartRef = useRef<HTMLDivElement>(null);
 
   // 准备风险分布数据
   const distributionData = [
@@ -174,6 +177,40 @@ export function RiskAnalysisCharts({
       ? categoryData.sort((a, b) => b.count - a.count)[0]?.name
       : '-';
 
+  // 处理导出图表
+  const handleExport = async () => {
+    if (!chartRef.current || isExporting) return;
+
+    setIsExporting(true);
+
+    try {
+      // 调用外部导出回调（如果有）
+      onExport?.();
+
+      // 使用 html2canvas 生成图片
+      const canvas = await html2canvas(chartRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+
+      // 转换为图片并下载
+      const image = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = `风险分析图表_${new Date().toISOString().split('T')[0]}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('导出图表失败:', error);
+      alert('导出失败，请重试');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   // 处理图表点击
   const handleChartClick = (data: { level: RiskLevel; value: number }) => {
     if (data && onChartClick) {
@@ -213,17 +250,22 @@ export function RiskAnalysisCharts({
   }
 
   return (
-    <div className={`risk-analysis-charts ${className}`}>
+    <div ref={chartRef} className={`risk-analysis-charts ${className}`}>
       {/* 头部 */}
       <div className='charts-header'>
         <h3 className='charts-title'>风险分析图表</h3>
         <button
-          onClick={onExport}
+          onClick={handleExport}
+          disabled={isExporting}
           className='export-button'
           aria-label='导出图表'
           title='导出图表'
         >
-          <Download className='export-icon' />
+          {isExporting ? (
+            <span className='export-loading'>导出中...</span>
+          ) : (
+            <Download className='export-icon' />
+          )}
         </button>
       </div>
 
@@ -438,15 +480,26 @@ export function RiskAnalysisCharts({
           transition: all 0.2s;
         }
 
-        .export-button:hover {
+        .export-button:hover:not(:disabled) {
           background: #f3f4f6;
           border-color: #d1d5db;
+        }
+
+        .export-button:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
         }
 
         .export-icon {
           width: 16px;
           height: 16px;
           color: #6b7280;
+        }
+
+        .export-loading {
+          font-size: 12px;
+          color: #6b7280;
+          white-space: nowrap;
         }
 
         .chart-tabs {

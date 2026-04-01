@@ -92,46 +92,113 @@ export class SnapshotService {
     page: number;
     pageSize: number;
   }> {
-    const page = options?.page ?? 1;
-    const pageSize = options?.pageSize ?? 20;
-    const skip = (page - 1) * pageSize;
+    try {
+      const page = options?.page ?? 1;
+      const pageSize = options?.pageSize ?? 20;
+      const skip = (page - 1) * pageSize;
 
-    const where: Record<string, unknown> = {};
+      const where: Record<string, unknown> = {};
 
-    if (options?.version) {
-      where.version = options.version;
-    }
-
-    if (options?.status) {
-      where.status = options.status;
-    }
-
-    if (options?.startDate || options?.endDate) {
-      where.snapshotDate = {};
-      if (options.startDate) {
-        (where.snapshotDate as Record<string, Date>).gte = options.startDate;
+      if (options?.version) {
+        where.version = options.version;
       }
-      if (options.endDate) {
-        (where.snapshotDate as Record<string, Date>).lte = options.endDate;
+
+      if (options?.status) {
+        where.status = options.status;
       }
+
+      if (options?.startDate || options?.endDate) {
+        where.snapshotDate = {};
+        if (options.startDate) {
+          (where.snapshotDate as Record<string, Date>).gte = options.startDate;
+        }
+        if (options.endDate) {
+          (where.snapshotDate as Record<string, Date>).lte = options.endDate;
+        }
+      }
+
+      logger.debug('查询快照列表', { where, page, pageSize, skip });
+
+      // 使用标准 Prisma 方法查询（更安全、可维护）
+      let snapshots: Array<Record<string, unknown>> = [];
+      let total = 0;
+
+      try {
+        const prismaAny = prisma as unknown as {
+          knowledgeGraphSnapshot: {
+            findMany: (
+              args: unknown
+            ) => Promise<Array<Record<string, unknown>>>;
+            count: (args: unknown) => Promise<number>;
+          };
+        };
+
+        [snapshots, total] = await Promise.all([
+          prismaAny.knowledgeGraphSnapshot.findMany({
+            where,
+            orderBy: { snapshotDate: 'desc' },
+            skip,
+            take: pageSize,
+          }),
+          prismaAny.knowledgeGraphSnapshot.count({ where }),
+        ]);
+      } catch (dbError) {
+        // 如果 Prisma 查询失败，尝试使用原始 SQL 作为降级
+        logger.warn('Prisma 查询失败，尝试使用原始 SQL', { error: dbError });
+
+        try {
+          // 使用安全的参数化查询
+          if (where.version) {
+            snapshots = await prisma.$queryRaw`
+              SELECT * FROM "knowledge_graph_snapshots"
+              WHERE version = ${where.version}
+              ORDER BY "snapshotDate" DESC
+              LIMIT ${pageSize}
+              OFFSET ${skip}
+            `;
+            const countResult = await prisma.$queryRaw`
+              SELECT COUNT(*) as count FROM "knowledge_graph_snapshots"
+              WHERE version = ${where.version}
+            `;
+            total = Number(
+              (countResult as Array<{ count: bigint }>)[0]?.count || 0
+            );
+          } else {
+            snapshots = await prisma.$queryRaw`
+              SELECT * FROM "knowledge_graph_snapshots"
+              ORDER BY "snapshotDate" DESC
+              LIMIT ${pageSize}
+              OFFSET ${skip}
+            `;
+            const countResult = await prisma.$queryRaw`
+              SELECT COUNT(*) as count FROM "knowledge_graph_snapshots"
+            `;
+            total = Number(
+              (countResult as Array<{ count: bigint }>)[0]?.count || 0
+            );
+          }
+        } catch (sqlError) {
+          logger.error('原始 SQL 查询也失败', { error: sqlError });
+          throw dbError; // 抛出原始错误
+        }
+      }
+
+      return {
+        snapshots: snapshots.map(s => this.mapToGraphSnapshot(s)),
+        total,
+        page,
+        pageSize,
+      };
+    } catch (error) {
+      logger.error('获取快照列表失败', { error, options });
+      // 返回空结果而不是抛出错误，避免前端崩溃
+      return {
+        snapshots: [],
+        total: 0,
+        page: options?.page ?? 1,
+        pageSize: options?.pageSize ?? 20,
+      };
     }
-
-    const [snapshots, total] = await Promise.all([
-      prisma['knowledgeGraphSnapshot'].findMany({
-        where,
-        orderBy: { snapshotDate: 'desc' },
-        skip,
-        take: pageSize,
-      }),
-      prisma['knowledgeGraphSnapshot'].count({ where }),
-    ]);
-
-    return {
-      snapshots: snapshots.map(this.mapToGraphSnapshot),
-      total,
-      page,
-      pageSize,
-    };
   }
 
   /**

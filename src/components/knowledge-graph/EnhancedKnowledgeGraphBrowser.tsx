@@ -77,12 +77,18 @@ export function EnhancedKnowledgeGraphBrowser() {
         throw new Error('加载失败');
       }
 
-      const data = await response.json();
-      setGraphData(data);
+      const apiResponse = await response.json();
+      // 统一 API 格式: { success, data: { nodes, links }, pagination }
+      const graphData = {
+        nodes: apiResponse.data?.nodes || [],
+        links: apiResponse.data?.links || [],
+        pagination: apiResponse.pagination,
+      };
+      setGraphData(graphData);
 
       // 设置初始中心节点
-      if (data.nodes && data.nodes.length > 0 && !currentCenterNode) {
-        setCurrentCenterNode(data.nodes[0]);
+      if (graphData.nodes.length > 0 && !currentCenterNode) {
+        setCurrentCenterNode(graphData.nodes[0]);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '加载失败';

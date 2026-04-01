@@ -73,8 +73,13 @@ export function KnowledgeGraphBrowser() {
         throw new Error('加载失败');
       }
 
-      const data = await response.json();
-      setGraphData(data);
+      const apiResponse = await response.json();
+      // 统一 API 格式: { success, data: { nodes, links }, pagination }
+      setGraphData({
+        nodes: apiResponse.data?.nodes || [],
+        links: apiResponse.data?.links || [],
+        pagination: apiResponse.pagination,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : '加载失败');
     } finally {

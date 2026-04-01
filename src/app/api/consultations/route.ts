@@ -328,53 +328,73 @@ export async function POST(
 
     const data = validationResult.data;
 
-    // 查询当天最大序号
+    // 生成唯一咨询编号（带重试机制处理并发冲突）
+    // 使用基于时间戳+随机数的序列号，避免 findFirst+create 的 race condition
     const today = new Date();
-    const datePrefix = generateConsultNumber(today, 1).slice(0, -3);
+    let consultation = null;
+    let retryCount = 0;
+    const maxRetries = 10;
 
-    const latestConsultation = await prisma.consultation.findFirst({
-      where: {
-        consultNumber: {
-          startsWith: datePrefix,
-        },
-        deletedAt: null,
-      },
-      orderBy: {
-        consultNumber: 'desc',
-      },
-    });
+    while (retryCount < maxRetries && !consultation) {
+      try {
+        // 基于时间戳和随机数生成序列号，极大降低并发冲突概率
+        const timestamp = Date.now();
+        const randomOffset = Math.floor(Math.random() * 10000);
+        const sequence = (timestamp % 100000) + randomOffset + retryCount;
 
-    // 生成新的咨询编号
-    let sequence = 1;
-    if (latestConsultation) {
-      const lastNumber = parseInt(
-        latestConsultation.consultNumber.slice(-3),
-        10
-      );
-      sequence = lastNumber + 1;
+        const consultNumber = generateConsultNumber(today, sequence);
+
+        // 创建咨询记录
+        consultation = await prisma.consultation.create({
+          data: {
+            consultNumber,
+            consultType: data.consultType,
+            consultTime: data.consultTime,
+            clientName: data.clientName,
+            clientPhone: data.clientPhone || null,
+            clientEmail: data.clientEmail || null,
+            clientCompany: data.clientCompany || null,
+            caseType: data.caseType || null,
+            caseSummary: data.caseSummary,
+            clientDemand: data.clientDemand || null,
+            followUpDate: data.followUpDate || null,
+            followUpNotes: data.followUpNotes || null,
+            status: ConsultStatus.PENDING,
+            userId,
+          },
+        });
+      } catch (createError) {
+        // 如果是唯一约束冲突，则重试
+        if (
+          createError &&
+          typeof createError === 'object' &&
+          'code' in createError &&
+          createError.code === 'P2002'
+        ) {
+          retryCount++;
+          logger.warn(`咨询编号冲突，正在进行第 ${retryCount} 次重试...`);
+          if (retryCount >= maxRetries) {
+            throw createError;
+          }
+        } else {
+          throw createError;
+        }
+      }
     }
 
-    const consultNumber = generateConsultNumber(today, sequence);
-
-    // 创建咨询记录
-    const consultation = await prisma.consultation.create({
-      data: {
-        consultNumber,
-        consultType: data.consultType,
-        consultTime: data.consultTime,
-        clientName: data.clientName,
-        clientPhone: data.clientPhone || null,
-        clientEmail: data.clientEmail || null,
-        clientCompany: data.clientCompany || null,
-        caseType: data.caseType || null,
-        caseSummary: data.caseSummary,
-        clientDemand: data.clientDemand || null,
-        followUpDate: data.followUpDate || null,
-        followUpNotes: data.followUpNotes || null,
-        status: ConsultStatus.PENDING,
-        userId,
-      },
-    });
+    // 如果 consultation 为 null，说明创建失败
+    if (!consultation) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'CREATE_FAILED',
+            message: '创建咨询记录失败，请稍后重试',
+          },
+        },
+        { status: 500 }
+      );
+    }
 
     // 转换响应数据
     const responseData: ConsultationListItem = {
@@ -412,8 +432,28 @@ export async function POST(
 
     // 处理Prisma错误
     if (error && typeof error === 'object' && 'code' in error) {
-      const prismaError = error as { code: string; message: string };
+      const prismaError = error as {
+        code: string;
+        message: string;
+        meta?: { target?: string[] };
+      };
+      // P2002: 唯一约束冲突
       if (prismaError.code === 'P2002') {
+        const target = prismaError.meta?.target?.join(', ') || '未知字段';
+        logger.error('创建咨询记录失败：咨询编号重复', { target });
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'DUPLICATE_ENTRY',
+              message: '咨询编号已存在，请重试',
+            },
+          },
+          { status: 409 }
+        );
+      }
+      // P1001: 数据库连接失败
+      if (prismaError.code === 'P1001') {
         return NextResponse.json(
           {
             success: false,

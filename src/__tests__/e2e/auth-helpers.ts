@@ -76,9 +76,12 @@ interface CurrentUserResponseData {
 
 /**
  * 创建测试用户
+ * @param apiContext - Playwright API请求上下文
+ * @param role - 用户角色，默认为USER，可选LAWYER或ENTERPRISE
  */
 export async function createTestUser(
-  apiContext: APIRequestContext
+  apiContext: APIRequestContext,
+  role: 'USER' | 'LAWYER' | 'ENTERPRISE' = 'USER'
 ): Promise<TestUser> {
   const timestamp = Date.now();
   const shortId = String(timestamp).slice(-6);
@@ -91,6 +94,7 @@ export async function createTestUser(
       password,
       username: `test${shortId}`,
       name: `TestUser${shortId}`,
+      role, // 传递角色参数
     },
   });
 
@@ -102,7 +106,7 @@ export async function createTestUser(
     password,
     username: `test${shortId}`,
     name: `TestUser${shortId}`,
-    role: data.data?.user.role || 'USER',
+    role: data.data?.user.role || role,
     token: data.data?.token,
     refreshToken: data.data?.refreshToken,
   };

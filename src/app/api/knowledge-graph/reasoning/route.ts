@@ -53,14 +53,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body: ReasoningRequest = await request.json();
-
-    // 验证必填字段
-    if (!body.sourceArticleId) {
+    let body: ReasoningRequest;
+    try {
+      body = await request.json();
+    } catch {
+      logger.warn('推理请求缺少请求体');
       return NextResponse.json(
         {
           success: false,
-          error: '缺少必填字段：sourceArticleId',
+          error: {
+            code: 'MISSING_BODY',
+            message: '请提供请求体，包含 sourceArticleId 和相关数据',
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    // 验证必填字段
+    if (!body.sourceArticleId) {
+      logger.warn('推理请求缺少 sourceArticleId');
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'MISSING_FIELD',
+            message: '缺少必填字段：sourceArticleId',
+          },
         },
         { status: 400 }
       );

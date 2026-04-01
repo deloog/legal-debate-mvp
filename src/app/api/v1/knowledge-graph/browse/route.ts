@@ -49,11 +49,14 @@ interface Pagination {
 }
 
 /**
- * 响应数据类型
+ * 响应数据类型 - 统一格式 { success, data, pagination }
  */
 interface BrowseResponse {
-  nodes: GraphNode[];
-  links: GraphLink[];
+  success: boolean;
+  data: {
+    nodes: GraphNode[];
+    links: GraphLink[];
+  };
   pagination: Pagination;
 }
 
@@ -137,11 +140,10 @@ export async function GET(
     }
 
     // 统计种子法条总数（用于分页）
-    const total = await prisma.lawArticle.count({ where: seedWhere });
-    const totalPages = Math.ceil(total / pageSize);
+    let total = await prisma.lawArticle.count({ where: seedWhere });
 
     // 查询本页种子法条（按出度排序：出度高的节点优先显示）
-    const seedArticles = await prisma.lawArticle.findMany({
+    let seedArticles = await prisma.lawArticle.findMany({
       where: seedWhere,
       select: {
         id: true,
@@ -158,26 +160,79 @@ export async function GET(
       take: pageSize,
     });
 
+    // 降级策略：如果没有 VERIFIED 关系的法条，返回普通法条列表
     if (seedArticles.length === 0) {
-      return NextResponse.json({
-        nodes: [],
-        links: [],
-        pagination: { page, pageSize, total, totalPages },
-      });
+      logger.warn('未找到有 VERIFIED 关系的法条，降级为返回普通法条列表');
+
+      const fallbackWhere: {
+        category?: LawCategory;
+        OR?: Array<{
+          lawName?: { contains: string; mode: 'insensitive' };
+          articleNumber?: { contains: string; mode: 'insensitive' };
+        }>;
+      } = {};
+
+      if (category) fallbackWhere.category = category;
+      if (search) {
+        fallbackWhere.OR = [
+          { lawName: { contains: search, mode: 'insensitive' } },
+          { articleNumber: { contains: search, mode: 'insensitive' } },
+        ];
+      }
+
+      // 并行执行查询和计数，减少数据库往返
+      const [countResult, articlesResult] = await Promise.all([
+        prisma.lawArticle.count({ where: fallbackWhere }),
+        prisma.lawArticle.findMany({
+          where: fallbackWhere,
+          select: {
+            id: true,
+            lawName: true,
+            articleNumber: true,
+            category: true,
+          },
+          orderBy: [{ lawName: 'asc' }, { articleNumber: 'asc' }],
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+        }),
+      ]);
+
+      total = countResult;
+      seedArticles = articlesResult;
+
+      if (seedArticles.length === 0) {
+        return NextResponse.json({
+          success: true,
+          data: { nodes: [], links: [] },
+          pagination: { page, pageSize, total: 0, totalPages: 0 },
+        });
+      }
     }
+
+    const totalPages = Math.ceil(total / pageSize);
 
     const seedIds = seedArticles.map(a => a.id);
     const seedIdSet = new Set(seedIds);
 
-    // ── Step 2: 拉取种子节点的所有 VERIFIED 关系 ──────────────────────────
+    // ── Step 2: 拉取种子节点的关系 ──────────────────────────
+    // 注意：正常情况下（种子来自 VERIFIED 查询），限制 VERIFIED
+    // 降级情况下（种子来自普通法条查询），放宽关系查询条件
+    const isNormalQuery =
+      seedWhere.sourceRelations?.some?.verificationStatus ===
+      VerificationStatus.VERIFIED;
+
     const relationWhere: {
-      verificationStatus: VerificationStatus;
+      verificationStatus?: VerificationStatus;
       relationType?: RelationType;
       sourceId: { in: string[] };
     } = {
-      verificationStatus: VerificationStatus.VERIFIED,
       sourceId: { in: seedIds },
     };
+
+    // 只有在正常查询情况下才限制 VERIFIED
+    if (isNormalQuery) {
+      relationWhere.verificationStatus = VerificationStatus.VERIFIED;
+    }
 
     if (relationType) relationWhere.relationType = relationType;
 
@@ -191,6 +246,30 @@ export async function GET(
         confidence: true,
       },
     });
+
+    // 如果没有找到关系，至少返回种子节点
+    if (relations.length === 0) {
+      logger.warn('未找到任何关系数据，仅返回种子节点');
+      return NextResponse.json({
+        success: true,
+        data: {
+          nodes: seedArticles.map(a => ({
+            id: a.id,
+            lawName: a.lawName,
+            articleNumber: a.articleNumber,
+            category: a.category,
+            level: 0,
+          })),
+          links: [],
+        },
+        pagination: {
+          page,
+          pageSize,
+          total,
+          totalPages,
+        },
+      });
+    }
 
     // ── Step 3: 收集对端节点 ID，补充节点数据 ─────────────────────────────
     const neighborIds = relations
@@ -250,8 +329,8 @@ export async function GET(
       }));
 
     return NextResponse.json({
-      nodes,
-      links,
+      success: true,
+      data: { nodes, links },
       pagination: {
         page,
         pageSize,

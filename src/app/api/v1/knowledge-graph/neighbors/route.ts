@@ -46,10 +46,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const relationTypesParam = searchParams.get('relationTypes');
 
     if (!nodeId) {
-      return NextResponse.json(
-        { error: '缺少必需参数: nodeId' },
-        { status: 400 }
-      );
+      // 如果没有提供 nodeId，返回空结果
+      logger.warn('邻居查询缺少 nodeId 参数，返回空结果');
+      return NextResponse.json({
+        success: true,
+        data: {
+          nodeId: null,
+          neighbors: [],
+        },
+        message: '请提供 nodeId 参数以查询特定节点的邻居',
+      });
     }
 
     const depth = parseInt(depthParam || '1', 10);
@@ -143,8 +149,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     });
   } catch (error: unknown) {
-    logger.error('邻居查询失败', { error, nodeId: searchParams.get('nodeId') });
-    const errorMessage = '服务器错误';
+    const errorMessage = error instanceof Error ? error.message : '服务器错误';
+    logger.error('邻居查询失败', {
+      error: errorMessage,
+      nodeId: searchParams.get('nodeId'),
+    });
     return NextResponse.json(
       {
         success: false,

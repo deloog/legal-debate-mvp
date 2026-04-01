@@ -120,6 +120,10 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
     const expiresIn = 7 * 24 * 60 * 60; // 7天
 
     // 返回响应
+    // 注意：token 已通过 httpOnly cookie 传递
+    // 在测试环境下同时在响应体中返回 token，以便 E2E 测试使用
+    const isTestEnv = process.env.NODE_ENV === 'test';
+
     const response: AuthResponse = {
       success: true,
       message: '登录成功',
@@ -132,7 +136,8 @@ async function handleLogin(request: NextRequest): Promise<NextResponse> {
           role: user.role,
           createdAt: user.createdAt,
         },
-        token: '', // token 已通过 httpOnly cookie 传递，此处留空
+        token: isTestEnv ? accessToken : '', // 测试环境返回 token，生产环境留空
+        refreshToken: isTestEnv ? refreshToken : undefined, // 测试环境返回 refreshToken
         expiresIn,
       },
     };

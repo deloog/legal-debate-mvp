@@ -134,6 +134,9 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
     const expiresIn = 15 * 60; // 15分钟
 
     // token 通过 httpOnly cookie 传递，不在响应体中暴露（防止 XSS 窃取）
+    // 在测试环境下同时在响应体中返回 token，以便 E2E 测试使用
+    const isTestEnv = process.env.NODE_ENV === 'test';
+
     const responseBody: AuthResponse = {
       success: true,
       message: '注册成功，请使用邮箱登录',
@@ -146,7 +149,8 @@ async function handleRegister(request: NextRequest): Promise<NextResponse> {
           role: user.role,
           createdAt: user.createdAt,
         },
-        token: '', // token 已通过 httpOnly cookie 传递，此处留空
+        token: isTestEnv ? accessToken : '', // 测试环境返回 token，生产环境留空
+        refreshToken: isTestEnv ? refreshToken : undefined, // 测试环境返回 refreshToken
         expiresIn,
       },
     };

@@ -35,12 +35,14 @@ interface GraphLink {
   strength?: number;
 }
 
-// browse 接口直接返回 { nodes, links, pagination }，无 success 包装
+// browse 接口统一返回 { success, data: { nodes, links }, pagination }
 interface BrowseResponse {
-  nodes?: GraphNode[];
-  links?: GraphLink[];
+  success: boolean;
+  data?: {
+    nodes: GraphNode[];
+    links: GraphLink[];
+  };
   pagination?: { page: number; pageSize: number; total: number };
-  success?: boolean;
   error?: string;
 }
 
@@ -74,11 +76,13 @@ test.describe('知识图谱浏览', () => {
     expect(response.status()).toBe(200);
     const data: BrowseResponse = await response.json();
 
-    // browse 接口直接返回 nodes/links，不是 { success, data } 格式
-    expect(data.nodes).toBeDefined();
-    expect(Array.isArray(data.links)).toBe(true);
+    // browse 接口统一返回 { success, data: { nodes, links }, pagination }
+    expect(data.success).toBe(true);
+    expect(data.data).toBeDefined();
+    expect(data.data!.nodes).toBeDefined();
+    expect(Array.isArray(data.data!.links)).toBe(true);
     // 数据库有 110 万条法条，必须返回节点
-    expect(data.nodes!.length).toBeGreaterThan(0);
+    expect(data.data!.nodes.length).toBeGreaterThan(0);
     // links 可能为空（只显示同页两端都存在的关系对）
   });
 
@@ -92,7 +96,7 @@ test.describe('知识图谱浏览', () => {
     );
 
     const data: BrowseResponse = await response.json();
-    const node = data.nodes?.[0];
+    const node = data.data?.nodes?.[0];
     if (node) {
       expect(node).toHaveProperty('id');
       expect(node).toHaveProperty('lawName');
@@ -111,7 +115,7 @@ test.describe('知识图谱浏览', () => {
     );
 
     const data: BrowseResponse = await response.json();
-    const link = data.links?.[0];
+    const link = data.data?.links?.[0];
     if (link) {
       expect(link).toHaveProperty('source');
       expect(link).toHaveProperty('target');
@@ -142,8 +146,8 @@ test.describe('知识图谱浏览', () => {
 
     expect(response.status()).toBe(200);
     const data: BrowseResponse = await response.json();
-    if (data.links && data.links.length > 0) {
-      data.links.forEach(link => {
+    if (data.data?.links && data.data.links.length > 0) {
+      data.data.links.forEach(link => {
         expect(link.relationType).toBe('SUPERSEDES');
       });
     }
@@ -160,7 +164,7 @@ test.describe('知识图谱浏览', () => {
 
     expect(response.status()).toBe(200);
     const data: BrowseResponse = await response.json();
-    expect(data.nodes).toBeDefined();
+    expect(data.data?.nodes).toBeDefined();
   });
 
   test('分类过滤应该生效', async ({ request }) => {
@@ -174,8 +178,8 @@ test.describe('知识图谱浏览', () => {
 
     expect(response.status()).toBe(200);
     const data: BrowseResponse = await response.json();
-    if (data.nodes && data.nodes.length > 0) {
-      data.nodes.forEach(node => {
+    if (data.data?.nodes && data.data.nodes.length > 0) {
+      data.data.nodes.forEach(node => {
         expect(node.category).toBe('CIVIL');
       });
     }
@@ -191,7 +195,7 @@ test.describe('知识图谱浏览', () => {
     );
 
     const data: BrowseResponse = await response.json();
-    expect(data.nodes?.length ?? 0).toBeLessThanOrEqual(3);
+    expect(data.data?.nodes?.length ?? 0).toBeLessThanOrEqual(3);
   });
 
   test('未授权时应返回 401', async ({ request }) => {

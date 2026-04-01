@@ -126,9 +126,12 @@ interface EnterpriseResponseData {
 
 /**
  * 创建测试用户
+ * @param apiContext - Playwright API请求上下文
+ * @param role - 用户角色，默认为USER，可选LAWYER或ENTERPRISE
  */
 async function createTestUser(
-  apiContext: APIRequestContext
+  apiContext: APIRequestContext,
+  role: 'USER' | 'LAWYER' | 'ENTERPRISE' = 'USER'
 ): Promise<TestUser> {
   const timestamp = Date.now();
   const shortId = String(timestamp).slice(-6); // 取后6位
@@ -141,6 +144,7 @@ async function createTestUser(
       password,
       username: `test${shortId}`,
       name: `TestUser${shortId}`,
+      role, // 传递角色参数
     },
   });
 
@@ -152,7 +156,7 @@ async function createTestUser(
     password,
     username: `test${shortId}`,
     name: `TestUser${shortId}`,
-    role: data.data?.user.role || 'USER',
+    role: data.data?.user.role || role,
     token: data.data?.token,
     refreshToken: data.data?.refreshToken,
   };
@@ -494,7 +498,9 @@ test.describe('密码找回与重置', () => {
 
 test.describe('律师资格验证流程', () => {
   test('应该提交律师资格申请', async ({ request }) => {
-    const testUser = await createTestUser(request);
+    // 使用LAWYER角色创建用户，因为平台仅对认证律师及企业法务开放
+    const testUser = await createTestUser(request, 'LAWYER');
+
     const { token } = await loginUser(
       request,
       testUser.email,
@@ -524,7 +530,8 @@ test.describe('律师资格验证流程', () => {
   });
 
   test('应该验证执业证号格式', async ({ request }) => {
-    const testUser = await createTestUser(request);
+    // 使用LAWYER角色，因为需要访问业务API
+    const testUser = await createTestUser(request, 'LAWYER');
     const { token } = await loginUser(
       request,
       testUser.email,
@@ -550,7 +557,8 @@ test.describe('律师资格验证流程', () => {
   });
 
   test('应该验证身份证号格式', async ({ request }) => {
-    const testUser = await createTestUser(request);
+    // 使用LAWYER角色，因为需要访问业务API
+    const testUser = await createTestUser(request, 'LAWYER');
     const { token } = await loginUser(
       request,
       testUser.email,
@@ -576,7 +584,8 @@ test.describe('律师资格验证流程', () => {
   });
 
   test('应该获取当前用户的资格状态', async ({ request }) => {
-    const testUser = await createTestUser(request);
+    // 使用LAWYER角色，因为需要访问业务API
+    const testUser = await createTestUser(request, 'LAWYER');
     const { token } = await loginUser(
       request,
       testUser.email,
@@ -693,7 +702,8 @@ test.describe('律师资格验证流程', () => {
 
 test.describe('企业认证流程', () => {
   test('应该提交企业注册申请', async ({ request }) => {
-    const testUser = await createTestUser(request);
+    // 使用ENTERPRISE角色，因为需要访问企业API
+    const testUser = await createTestUser(request, 'ENTERPRISE');
     const { token } = await loginUser(
       request,
       testUser.email,
@@ -720,7 +730,8 @@ test.describe('企业认证流程', () => {
   });
 
   test('应该验证统一社会信用代码格式', async ({ request }) => {
-    const testUser = await createTestUser(request);
+    // 使用ENTERPRISE角色，因为需要访问企业API
+    const testUser = await createTestUser(request, 'ENTERPRISE');
     const { token } = await loginUser(
       request,
       testUser.email,
@@ -743,7 +754,8 @@ test.describe('企业认证流程', () => {
   });
 
   test('应该获取当前用户的企业信息', async ({ request }) => {
-    const testUser = await createTestUser(request);
+    // 使用ENTERPRISE角色，因为需要访问企业API
+    const testUser = await createTestUser(request, 'ENTERPRISE');
     const { token } = await loginUser(
       request,
       testUser.email,
@@ -826,6 +838,7 @@ test.describe('综合测试 - 完整用户生命周期', () => {
     const email = `lifecycle-${timestamp}@example.com`;
     const password = 'Lifecycle123';
 
+    // 使用LAWYER角色注册，因为需要访问业务API
     const registerResponse = await request.post(
       `${BASE_URL}/api/auth/register`,
       {
@@ -834,6 +847,7 @@ test.describe('综合测试 - 完整用户生命周期', () => {
           password,
           username: `life${shortId}`,
           name: `LifeUser${shortId}`,
+          role: 'LAWYER',
         },
       }
     );

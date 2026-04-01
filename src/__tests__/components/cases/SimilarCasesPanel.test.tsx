@@ -314,6 +314,179 @@ describe('SimilarCasesPanel', () => {
     });
   });
 
+  describe('pagination', () => {
+    // 生成12个相似案例数据用于分页测试
+    const generateManyMatches = (count: number): SimilarCaseMatch[] => {
+      return Array.from({ length: count }, (_, i) => ({
+        caseExample: {
+          id: `example-${i + 1}`,
+          title: `合同纠纷案例 ${i + 1}`,
+          caseNumber: `(2024)京${String(i + 1).padStart(2, '0')}民初${String(i + 1).padStart(3, '0')}号`,
+          court: '北京市第一中级人民法院',
+          type: CaseType.CIVIL,
+          cause: '合同纠纷',
+          facts: `案例 ${i + 1} 的案情事实...`,
+          judgment: '判决结果...',
+          result: i % 2 === 0 ? CaseResult.WIN : CaseResult.PARTIAL,
+          judgmentDate: new Date('2024-01-15'),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          metadata: null,
+        },
+        similarity: 0.9 - i * 0.02,
+        matchingFactors: ['案由相同', '争议金额相近'],
+      }));
+    };
+
+    const mockPaginationResult: SimilaritySearchResult = {
+      caseId: mockCaseId,
+      matches: generateManyMatches(12),
+      totalMatches: 12,
+      searchTime: 1000,
+    };
+
+    beforeEach(() => {
+      (fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({ success: true, data: mockPaginationResult }),
+      });
+    });
+
+    it('should display pagination when results exceed page size', async () => {
+      render(<SimilarCasesPanel caseId={mockCaseId} />);
+
+      await waitFor(() => {
+        // 验证分页信息
+        expect(screen.getByText(/第 1 \/ 3 页/)).toBeInTheDocument();
+        expect(screen.getByText(/共 12 条/)).toBeInTheDocument();
+      });
+
+      // 验证只显示5条数据（每页大小）
+      const caseCards = document.querySelectorAll('.case-card');
+      expect(caseCards.length).toBe(5);
+    });
+
+    it('should navigate to next page when next button clicked', async () => {
+      render(<SimilarCasesPanel caseId={mockCaseId} />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/第 1 \/ 3 页/)).toBeInTheDocument();
+      });
+
+      // 点击下一页
+      const nextButton = screen.getByRole('button', { name: /下一页/ });
+      fireEvent.click(nextButton);
+
+      // 验证页码更新
+      await waitFor(() => {
+        expect(screen.getByText(/第 2 \/ 3 页/)).toBeInTheDocument();
+      });
+
+      // 验证显示的是第6-10条数据
+      expect(screen.getByText('合同纠纷案例 6')).toBeInTheDocument();
+    });
+
+    it('should navigate to previous page when previous button clicked', async () => {
+      render(<SimilarCasesPanel caseId={mockCaseId} />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/第 1 \/ 3 页/)).toBeInTheDocument();
+      });
+
+      // 先点击下一页
+      fireEvent.click(screen.getByRole('button', { name: /下一页/ }));
+      await waitFor(() => {
+        expect(screen.getByText(/第 2 \/ 3 页/)).toBeInTheDocument();
+      });
+
+      // 再点击上一页
+      fireEvent.click(screen.getByRole('button', { name: /上一页/ }));
+      await waitFor(() => {
+        expect(screen.getByText(/第 1 \/ 3 页/)).toBeInTheDocument();
+      });
+
+      // 验证回到第一页数据
+      expect(screen.getByText('合同纠纷案例 1')).toBeInTheDocument();
+    });
+
+    it('should disable previous button on first page', async () => {
+      render(<SimilarCasesPanel caseId={mockCaseId} />);
+
+      await waitFor(() => {
+        const prevButton = screen.getByRole('button', { name: /上一页/ });
+        expect(prevButton).toBeDisabled();
+      });
+    });
+
+    it('should disable next button on last page', async () => {
+      render(<SimilarCasesPanel caseId={mockCaseId} />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/第 1 \/ 3 页/)).toBeInTheDocument();
+      });
+
+      // 点击到最后一页
+      fireEvent.click(screen.getByRole('button', { name: /下一页/ }));
+      await waitFor(() => {
+        expect(screen.getByText(/第 2 \/ 3 页/)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /下一页/ }));
+      await waitFor(() => {
+        expect(screen.getByText(/第 3 \/ 3 页/)).toBeInTheDocument();
+      });
+
+      // 验证下一页按钮禁用
+      const nextButton = screen.getByRole('button', { name: /下一页/ });
+      expect(nextButton).toBeDisabled();
+    });
+
+    it('should reset to first page when filter changes', async () => {
+      render(<SimilarCasesPanel caseId={mockCaseId} />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/第 1 \/ 3 页/)).toBeInTheDocument();
+      });
+
+      // 点击到第二页
+      fireEvent.click(screen.getByRole('button', { name: /下一页/ }));
+      await waitFor(() => {
+        expect(screen.getByText(/第 2 \/ 3 页/)).toBeInTheDocument();
+      });
+
+      // 修改筛选条件
+      const thresholdSelect = screen.getByLabelText('相似度阈值');
+      fireEvent.change(thresholdSelect, { target: { value: '0.8' } });
+
+      // 验证重置到第一页
+      await waitFor(() => {
+        expect(screen.getByText(/第 1 \/ 3 页/)).toBeInTheDocument();
+      });
+    });
+
+    it('should not display pagination when results fit in one page', async () => {
+      const singlePageResult: SimilaritySearchResult = {
+        ...mockSearchResult,
+        matches: generateManyMatches(3),
+        totalMatches: 3,
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, data: singlePageResult }),
+      });
+
+      render(<SimilarCasesPanel caseId={mockCaseId} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('找到 3 个相似案例')).toBeInTheDocument();
+      });
+
+      // 验证不显示分页
+      expect(screen.queryByText(/第 1/)).not.toBeInTheDocument();
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle very long case titles', async () => {
       const longTitleResult: SimilaritySearchResult = {

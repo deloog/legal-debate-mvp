@@ -51,6 +51,20 @@ next-env.d.ts
 # Additional ignores for legal debate project
 .history/
 .vscode/
+
+# 运行时数据 - 不提交
+data/LegalKit/
+data/cail2018/
+private_uploads/
+public/reports/
+
+# 大型数据文件 - 超过 GitHub 100MB 限制
+case_examples.rar
+case_examples.sql
+exports.rar
+*.rar
+*.parquet
+*.jsonl
 output.log
 data/dev.db*
 backups/

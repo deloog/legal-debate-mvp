@@ -11,6 +11,7 @@ import { ActionStatus } from '@prisma/client';
 import { validatePermissions } from '@/lib/middleware/permission-check';
 import { AGENT_MONITOR_PERMISSIONS } from '@/types/permission';
 import { z } from 'zod';
+import { logger } from '@/lib/logger';
 
 // =============================================================================
 // 常量定义
@@ -383,7 +384,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       data: response,
     });
   } catch (error) {
-    console.error('Agent monitor errors API error:', error);
+    logger.error('Agent monitor errors API error:', error);
 
     // 生产环境隐藏详细错误信息
     const isDev = process.env.NODE_ENV === 'development';

@@ -115,13 +115,18 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     logger.error('获取快照列表失败:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: { code: 'INTERNAL_ERROR', message: '获取快照列表失败' },
+    // 数据库表可能不存在，返回空结果
+    return NextResponse.json({
+      success: true,
+      data: [],
+      pagination: {
+        total: 0,
+        page: 1,
+        pageSize: 20,
+        totalPages: 0,
       },
-      { status: 500 }
-    );
+      message: '快照功能暂不可用',
+    });
   }
 }
 

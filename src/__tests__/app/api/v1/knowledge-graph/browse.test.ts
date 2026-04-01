@@ -80,8 +80,9 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
 
       // 验证响应
       expect(response.status).toBe(200);
-      expect(data.nodes).toHaveLength(2);
-      expect(data.links).toHaveLength(1);
+      expect(data.success).toBe(true);
+      expect(data.data.nodes).toHaveLength(2);
+      expect(data.data.links).toHaveLength(1);
       expect(data.pagination).toEqual({
         page: 1,
         pageSize: 100,
@@ -90,7 +91,7 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
       });
 
       // 验证节点数据
-      expect(data.nodes[0]).toMatchObject({
+      expect(data.data.nodes[0]).toMatchObject({
         id: 'article1',
         lawName: '民法典',
         articleNumber: '第1条',
@@ -98,7 +99,7 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
       });
 
       // 验证边数据
-      expect(data.links[0]).toMatchObject({
+      expect(data.data.links[0]).toMatchObject({
         source: 'article1',
         target: 'article2',
         relationType: RelationType.CITES,
@@ -130,7 +131,8 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.nodes).toHaveLength(5);
+      expect(data.success).toBe(true);
+      expect(data.data.nodes).toHaveLength(5);
       expect(data.pagination).toEqual({
         page: 1,
         pageSize: 5,
@@ -164,8 +166,9 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.nodes).toHaveLength(1);
-      expect(data.nodes[0].lawName).toBe('民法典');
+      expect(data.success).toBe(true);
+      expect(data.data.nodes).toHaveLength(1);
+      expect(data.data.nodes[0].lawName).toBe('民法典');
 
       // 验证调用参数
       expect(prisma.lawArticle.findMany).toHaveBeenCalledWith(
@@ -204,8 +207,9 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.nodes).toHaveLength(1);
-      expect(data.nodes[0].articleNumber).toBe('第100条');
+      expect(data.success).toBe(true);
+      expect(data.data.nodes).toHaveLength(1);
+      expect(data.data.nodes[0].articleNumber).toBe('第100条');
     });
   });
 
@@ -233,8 +237,9 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.nodes).toHaveLength(1);
-      expect(data.nodes[0].category).toBe(LawCategory.CIVIL);
+      expect(data.success).toBe(true);
+      expect(data.data.nodes).toHaveLength(1);
+      expect(data.data.nodes[0].category).toBe(LawCategory.CIVIL);
 
       // 验证调用参数
       expect(prisma.lawArticle.findMany).toHaveBeenCalledWith(
@@ -288,8 +293,9 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.links).toHaveLength(1);
-      expect(data.links[0].relationType).toBe(RelationType.CITES);
+      expect(data.success).toBe(true);
+      expect(data.data.links).toHaveLength(1);
+      expect(data.data.links[0].relationType).toBe(RelationType.CITES);
 
       // 验证调用参数
       expect(prisma.lawArticleRelation.findMany).toHaveBeenCalledWith(
@@ -324,7 +330,8 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.nodes).toHaveLength(1);
+      expect(data.success).toBe(true);
+      expect(data.data.nodes).toHaveLength(1);
 
       // 验证调用参数包含两个过滤条件
       expect(prisma.lawArticle.findMany).toHaveBeenCalledWith(
@@ -352,8 +359,9 @@ describe('GET /api/v1/knowledge-graph/browse', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.nodes).toHaveLength(0);
-      expect(data.links).toHaveLength(0);
+      expect(data.success).toBe(true);
+      expect(data.data.nodes).toHaveLength(0);
+      expect(data.data.links).toHaveLength(0);
       expect(data.pagination.total).toBe(0);
     });
 

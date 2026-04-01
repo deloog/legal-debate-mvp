@@ -1,21 +1,25 @@
 /**
- * 知识图谱关系创建API
+ * 知识图谱关系API
  *
- * 功能：独立创建法条关系的端点（与审核端点分离）
+ * 功能：
+ * - GET: 获取关系列表
+ * - POST: 创建法条关系
  *
- * 端点: POST /api/v1/knowledge-graph/relations
- * 参数:
- *   - sourceId: 源法条ID
- *   - targetId: 目标法条ID
- *   - relationType: 关系类型
- *   - confidence: 置信度（可选，默认0.7）
- *   - createdBy: 创建人ID
- *   - evidence: 证据（可选）
+ * 端点:
+ *   GET /api/v1/knowledge-graph/relations?page=&pageSize=&relationType=&verificationStatus=
+ *   POST /api/v1/knowledge-graph/relations
+ *     - sourceId: 源法条ID
+ *     - targetId: 目标法条ID
+ *     - relationType: 关系类型
+ *     - confidence: 置信度（可选，默认0.7）
+ *     - createdBy: 创建人ID
+ *     - evidence: 证据（可选）
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { RelationType } from '@prisma/client';
+import { RelationType, VerificationStatus } from '@prisma/client';
+import { validateID } from '@/lib/validation/id-validator';
 import {
   checkKnowledgeGraphPermission,
   logKnowledgeGraphAction,
@@ -240,6 +244,164 @@ export async function POST(
       {
         success: false,
         error: '创建关系失败',
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * GET /api/v1/knowledge-graph/relations
+ *
+ * 获取关系列表，支持分页和过滤
+ */
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  try {
+    // 认证检查
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, error: '未授权，请先登录' },
+        { status: 401 }
+      );
+    }
+
+    // 权限检查 - 只需查看权限
+    const permissionResult = await checkKnowledgeGraphPermission(
+      authUser.userId,
+      KnowledgeGraphAction.VIEW_RELATIONS,
+      KnowledgeGraphResource.RELATION
+    );
+
+    if (!permissionResult.hasPermission) {
+      return NextResponse.json(
+        { success: false, error: '权限不足' },
+        { status: 403 }
+      );
+    }
+
+    // 解析查询参数
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
+    const pageSize = Math.min(
+      100,
+      Math.max(1, parseInt(searchParams.get('pageSize') || '20', 10))
+    );
+    const relationType = searchParams.get(
+      'relationType'
+    ) as RelationType | null;
+    const verificationStatus = searchParams.get(
+      'verificationStatus'
+    ) as VerificationStatus | null;
+    const sourceId = searchParams.get('sourceId')?.trim() || null;
+    const targetId = searchParams.get('targetId')?.trim() || null;
+
+    // 验证 ID 格式
+    if (sourceId) {
+      const validation = validateID(sourceId, 'sourceId');
+      if (!validation.valid) {
+        return NextResponse.json(
+          { success: false, error: validation.error },
+          { status: 400 }
+        );
+      }
+    }
+
+    if (targetId) {
+      const validation = validateID(targetId, 'targetId');
+      if (!validation.valid) {
+        return NextResponse.json(
+          { success: false, error: validation.error },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 构建查询条件
+    const where: {
+      relationType?: RelationType;
+      verificationStatus?: VerificationStatus;
+      sourceId?: string;
+      targetId?: string;
+    } = {};
+
+    if (relationType && Object.values(RelationType).includes(relationType)) {
+      where.relationType = relationType;
+    }
+
+    if (
+      verificationStatus &&
+      Object.values(VerificationStatus).includes(verificationStatus)
+    ) {
+      where.verificationStatus = verificationStatus;
+    }
+
+    if (sourceId) {
+      where.sourceId = sourceId;
+    }
+
+    if (targetId) {
+      where.targetId = targetId;
+    }
+
+    // 并行查询总数和数据
+    const [total, relations] = await Promise.all([
+      prisma.lawArticleRelation.count({ where }),
+      prisma.lawArticleRelation.findMany({
+        where,
+        include: {
+          source: {
+            select: {
+              id: true,
+              lawName: true,
+              articleNumber: true,
+            },
+          },
+          target: {
+            select: {
+              id: true,
+              lawName: true,
+              articleNumber: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+    ]);
+
+    // 记录操作日志
+    await logKnowledgeGraphAction({
+      userId: authUser.userId,
+      action: KnowledgeGraphAction.VIEW_RELATIONS,
+      resource: KnowledgeGraphResource.RELATION,
+      description: `查询关系列表，共 ${total} 条`,
+      metadata: {
+        page,
+        pageSize,
+        filters: { relationType, verificationStatus, sourceId, targetId },
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        relations,
+        pagination: {
+          page,
+          pageSize,
+          total,
+          totalPages: Math.ceil(total / pageSize),
+        },
+      },
+    });
+  } catch (error) {
+    logger.error('获取关系列表失败:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: '获取关系列表失败',
       },
       { status: 500 }
     );

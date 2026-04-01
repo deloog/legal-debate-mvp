@@ -12,7 +12,7 @@
     "strictPropertyInitialization": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
-    "noUnusedLocals": false,
+    "noUnusedLocals": true,
     "noUnusedParameters": false,
     "noImplicitReturns": false,
     "noFallthroughCasesInSwitch": false,
@@ -77,6 +77,7 @@
     "src/app/api/**/[roundId]",
     "src/app/api/**/[argumentId]",
     "src/app/**/[id]",
-    "src/__tests__/**/[id]"
+    "src/__tests__/**/[id]",
+    "exports"
   ]
 }

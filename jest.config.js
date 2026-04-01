@@ -318,6 +318,7 @@ module.exports = {
         '<rootDir>/src/__tests__/config/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/enterprise/**/*.{test,spec}.{ts,tsx}',
         '<rootDir>/src/__tests__/review/**/*.{test,spec}.{ts,tsx}',
+        '<rootDir>/src/__tests__/agent/**/*.{test,spec}.{ts,tsx}',
       ],
       testPathIgnorePatterns: [
         '<rootDir>/.next/',

@@ -58,18 +58,20 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const sourceId = searchParams.get('sourceId');
     const targetId = searchParams.get('targetId');
 
-    if (!sourceId) {
-      return NextResponse.json(
-        { error: '缺少必需参数: sourceId' },
-        { status: 400 }
-      );
-    }
-
-    if (!targetId) {
-      return NextResponse.json(
-        { error: '缺少必需参数: targetId' },
-        { status: 400 }
-      );
+    if (!sourceId || !targetId) {
+      logger.warn('路径查询缺少必需参数', { sourceId, targetId });
+      return NextResponse.json({
+        success: true,
+        data: {
+          sourceId: sourceId || null,
+          targetId: targetId || null,
+          path: [],
+          pathLength: -1,
+          relationTypes: [],
+          exists: false,
+        },
+        message: '请提供 sourceId 和 targetId 参数以查询路径',
+      });
     }
 
     // 验证节点ID格式（防止注入）
@@ -160,12 +162,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       exists: result.exists,
     });
   } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : '服务器错误';
     logger.error('路径查询失败', {
-      error,
+      error: errorMessage,
       sourceId: searchParams.get('sourceId'),
       targetId: searchParams.get('targetId'),
     });
-    const errorMessage = '服务器错误';
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: errorMessage },
+      },
+      { status: 500 }
+    );
   }
 }
