@@ -567,7 +567,7 @@ function LandingPage() {
                 tag: '核心功能',
                 tagColor:
                   'bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-400',
-                desc: '依托多地独立裁判验证生成论点，每条论据均标注裁判稳定性。AI 表达"可以确定地说"还是"目前倾向于认为"，由实际案例数据决定，而非模型自行判断。',
+                desc: '依托多地独立裁判验证生成论点，每条论据均标注裁判稳定性。AI 表达"可以确定地说"还是"目前倾向于认为"，由实际裁判数据决定，而非 AI 主观推断。',
                 stat: '论据来源可追溯，强度可审计',
                 statColor: 'text-violet-600 dark:text-violet-400',
                 borderColor: 'border-violet-100 dark:border-violet-900/40',
@@ -581,7 +581,7 @@ function LandingPage() {
                 tag: '高频使用',
                 tagColor:
                   'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400',
-                desc: '113万+ 条文，每条附司法适用稳定性标注：各地一致 / 部分存疑 / 出现分歧 / 已有挑战趋势。不只找到法条，还知道这条法律在法院实践中有多稳固。',
+                desc: '113万+ 条文，每条附司法适用稳定性标注：各地一致 / 存在分歧 / 已有反向裁判 / 最高法或高院已有新表态。不只找到法条，还知道这条法律在法院实践中有多稳固。',
                 stat: '5 档适用稳定性分级',
                 statColor: 'text-blue-600 dark:text-blue-400',
                 borderColor: 'border-blue-100 dark:border-blue-900/40',
@@ -595,7 +595,7 @@ function LandingPage() {
                 tag: '战略价值',
                 tagColor:
                   'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400',
-                desc: '自动检测对方援引的法律依据是否正被各地判例质疑，识别已被最高法或高院裁判动摇的传统法律观点。精准找到可以有效攻击的论点弱点。',
+                desc: '自动检测对方援引的法律依据是否正被各地判例质疑，识别已被最高法或高院裁判动摇的传统法律观点。精准定位对方论据中可供反驳的裁判依据。',
                 stat: '4 类论点薄弱点自动标记',
                 statColor: 'text-emerald-600 dark:text-emerald-400',
                 borderColor: 'border-emerald-100 dark:border-emerald-900/40',
