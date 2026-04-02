@@ -245,21 +245,21 @@ const NAV_MODULES: NavModule[] = [
 ];
 
 const LAWYER_FEATURES = [
-  '案件立案与全周期管理',
-  'AI 自动生成辩护论点',
-  '关联法条一键检索',
-  '庭审文书智能撰写',
-  '开庭日程与提醒',
-  '多律师团队协作',
+  '基于多源独立案例验证的辩护论点，附确定性评级',
+  '每条法条显示认识论状态：确定 / 存疑 / 相变中',
+  '自动发现对方论点依赖的不稳定法律解释',
+  '少数意见追踪：识别可能成为未来主流的判例',
+  '结论可审计：每个 AI 判断背后的证据链一目了然',
+  '案件立案、文书撰写、开庭日程全周期管理',
 ];
 
 const ENTERPRISE_FEATURES = [
-  '合同起草与智能审查',
-  '合规风险全面扫描',
-  '劳动争议处理指引',
-  '内部法律意见书生成',
-  '监管政策变化追踪',
-  '法务工作报表统计',
+  '合同条款引用法条的认识论状态实时标注',
+  '合规风险评级结合司法实践稳定性分析',
+  '劳动争议处理指引附典型判例独立性权重',
+  '内部法律意见书生成，置信度表达规范化',
+  '监管政策变化追踪，相变预警主动提醒',
+  '法务工作报表统计与法律知识状态仪表盘',
 ];
 
 const DEBATE_STATUS_LABEL: Record<string, string> = {
@@ -360,26 +360,25 @@ function LandingPage() {
               </div>
 
               <h1 className='mb-5 text-4xl font-extrabold leading-tight tracking-tight text-white md:text-5xl lg:text-[3.25rem]'>
-                法律工作的
+                知道边界在哪里的
                 <span className='mt-4 block bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-400 bg-clip-text text-transparent'>
-                  AI 专业搭档
+                  AI 法律搭档
                 </span>
               </h1>
 
               <p className='mb-8 max-w-md text-base leading-relaxed text-slate-400'>
-                律伴 AI 深度融合百万级法律条文知识图谱，为执业律师和企业法务提供
-                <strong className='text-slate-200'>辩论生成</strong>、
-                <strong className='text-slate-200'>法条检索</strong>、
-                <strong className='text-slate-200'>合同审查</strong>
-                等专业工具，让复杂法律工作提速数倍。
+                律伴 AI 不只告诉你哪条法律适用—— 还告诉你这个结论来自几个
+                <strong className='text-slate-200'>独立司法来源</strong>，
+                当前共识有多稳固，以及对方论点依赖的法律解释 是否已经进入
+                <strong className='text-slate-200'>动摇期</strong>。
               </p>
 
               {/* 数据亮点 */}
               <div className='mb-8 grid grid-cols-3 gap-4'>
                 {[
-                  { num: '113万+', label: '收录法律条文' },
-                  { num: '8,778', label: '法律关系图谱' },
-                  { num: 'AI', label: '驱动辩论生成' },
+                  { num: '5 级', label: '认识论确定性评级' },
+                  { num: '4 类', label: '反驳模式自动识别' },
+                  { num: '独立', label: '来源加权，多样比数量重要' },
                 ].map(item => (
                   <div key={item.label} className='text-center'>
                     <div className='text-2xl font-bold text-white'>
@@ -429,31 +428,43 @@ function LandingPage() {
                   </span>
                 </div>
 
-                {/* 法条检索结果 */}
+                {/* 法条认识论状态 */}
                 <div className='mb-3 rounded-lg border border-blue-500/20 bg-blue-500/10 px-4 py-2.5'>
                   <div className='mb-2 flex items-center gap-1.5'>
-                    <Search className='h-3 w-3 text-blue-400' />
+                    <Zap className='h-3 w-3 text-blue-400' />
                     <span className='text-xs font-medium text-blue-300'>
-                      已检索到适用法条 6 条
+                      法条认识论状态分析
                     </span>
                   </div>
-                  <div className='flex flex-wrap gap-1.5'>
-                    {[
-                      '《民法典》第680条',
-                      '《合同法》第196条',
-                      '《最高院司法解释》第26条',
-                    ].map(t => (
-                      <span
-                        key={t}
-                        className='rounded-full border border-blue-400/30 bg-blue-950/60 px-2.5 py-0.5 text-[11px] text-blue-200'
-                      >
-                        {t}
+                  <div className='space-y-1.5'>
+                    <div className='flex items-center justify-between'>
+                      <span className='text-[11px] text-slate-300'>
+                        《民法典》第680条
                       </span>
-                    ))}
+                      <span className='rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-300'>
+                        确定 89%
+                      </span>
+                    </div>
+                    <div className='flex items-center justify-between'>
+                      <span className='text-[11px] text-slate-300'>
+                        《合同法》第54条
+                      </span>
+                      <span className='rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-300'>
+                        ⚠ 相变中 58%
+                      </span>
+                    </div>
+                    <div className='flex items-center justify-between'>
+                      <span className='text-[11px] text-slate-300'>
+                        最高院司法解释第26条
+                      </span>
+                      <span className='rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-semibold text-blue-300'>
+                        主流存疑 73%
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {/* 原告论点流式输出 */}
+                {/* 原告论点（含置信度标注） */}
                 <div className='mb-3 rounded-lg border border-white/10 bg-white/5 p-3.5'>
                   <div className='mb-2 flex items-center gap-2'>
                     <span className='rounded-full bg-blue-600/80 px-2 py-0.5 text-[10px] font-bold text-white'>
@@ -465,10 +476,13 @@ function LandingPage() {
                     <span className='h-1.5 w-1.5 animate-pulse rounded-full bg-blue-400' />
                   </div>
                   <p className='text-xs leading-relaxed text-slate-300'>
-                    根据《民法典》第 680
-                    条，借贷双方约定的利率不得超过合同成立时一年期贷款市场报价利率的四倍。被告主张的月利率
-                    3% 折合年化 36%，已超过法定上限，该部分利息约定依法无效…
+                    <span className='text-emerald-400'>可以确定地说</span>，
+                    依据《民法典》第680条（23个独立司法来源，共识89%），月利率3%
+                    折合年化36%已超法定上限，该部分利息约定依法无效…
                   </p>
+                  <div className='mt-2 rounded border border-amber-500/20 bg-amber-500/5 px-2 py-1 text-[10px] text-amber-400'>
+                    ⚠ 对方可能援引第54条（相变中），此为潜在攻击路径
+                  </div>
                 </div>
 
                 {/* 被告论点 */}
@@ -537,10 +551,11 @@ function LandingPage() {
               专业级 AI 工具
             </div>
             <h2 className='mb-3 text-3xl font-bold text-zinc-900 dark:text-zinc-50'>
-              每一项功能，都为法律工作打磨
+              不只知道法律，还知道自己知道多少
             </h2>
             <p className='mx-auto max-w-lg text-base text-zinc-500 dark:text-zinc-400'>
-              深度整合法律知识图谱与大语言模型，让 AI 真正理解中国法律语境
+              每个 AI
+              结论背后都有可审计的证据链——共识强度、来源独立性、相变预警，一目了然
             </p>
           </div>
 
@@ -548,12 +563,12 @@ function LandingPage() {
             {[
               {
                 icon: Scale,
-                title: 'AI 辩论生成',
+                title: '元认知辩论生成',
                 tag: '核心功能',
                 tagColor:
                   'bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-400',
-                desc: '输入案件背景，AI 自动检索适用法条，分别生成原告、被告专业攻防论点，每轮结果可反复打磨。',
-                stat: '平均节省 3 小时/案',
+                desc: '基于多源独立案例验证生成论点，每条结论附认识论评级。AI 表达"可以确定地说"还是"目前倾向于认为"，由证据决定。',
+                stat: '论点确定性可审计',
                 statColor: 'text-violet-600 dark:text-violet-400',
                 borderColor: 'border-violet-100 dark:border-violet-900/40',
                 bgColor: 'bg-violet-50 dark:bg-violet-950/20',
@@ -562,12 +577,12 @@ function LandingPage() {
               },
               {
                 icon: Search,
-                title: '法条智能检索',
+                title: '法条认识论检索',
                 tag: '高频使用',
                 tagColor:
                   'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400',
-                desc: '语义理解驱动，113万+ 法律条文秒级定位，关联司法解释、地方法规一键对照，支持模糊语义搜索。',
-                stat: '113万+ 条文收录',
+                desc: '113万+ 条文，每条附认识论状态标注：确定 / 存疑 / 相变中 / 衰退。不只找到法条，还知道这个解释现在有多稳。',
+                stat: '5 级确定性评级',
                 statColor: 'text-blue-600 dark:text-blue-400',
                 borderColor: 'border-blue-100 dark:border-blue-900/40',
                 bgColor: 'bg-blue-50 dark:bg-blue-950/20',
@@ -575,13 +590,13 @@ function LandingPage() {
                 iconBg: 'bg-blue-100 dark:bg-blue-900/40',
               },
               {
-                icon: BookOpen,
-                title: '合同风险分析',
-                tag: '企业法务',
+                icon: TrendingUp,
+                title: '相变预警 & 弱点发现',
+                tag: '战略价值',
                 tagColor:
                   'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400',
-                desc: '上传合同即自动识别高风险条款，生成专业审查报告，标注违约责任缺失、不平等条款等核心风险。',
-                stat: '覆盖 20+ 合同类型',
+                desc: '自动检测对方论点依赖的不稳定法律解释，识别正在被多地判例挑战的传统观点。找到真正的进攻窗口。',
+                stat: '4 类反驳模式识别',
                 statColor: 'text-emerald-600 dark:text-emerald-400',
                 borderColor: 'border-emerald-100 dark:border-emerald-900/40',
                 bgColor: 'bg-emerald-50 dark:bg-emerald-950/20',
@@ -617,6 +632,50 @@ function LandingPage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 元认知差异化说明 ── */}
+      <section className='py-24'>
+        <div className='mx-auto max-w-4xl px-6'>
+          <div className='mb-10 text-center'>
+            <h2 className='mb-3 text-3xl font-bold text-zinc-900 dark:text-zinc-50'>
+              为什么&ldquo;知道多少&rdquo;和&ldquo;知道什么&rdquo;一样重要
+            </h2>
+            <p className='text-base text-zinc-500 dark:text-zinc-400'>
+              法律 AI 的最大风险，不是说错了，而是说错了却听起来很确定
+            </p>
+          </div>
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+            <div className='rounded-2xl border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-900/50'>
+              <div className='mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-400'>
+                普通法律 AI
+              </div>
+              <p className='mb-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400'>
+                《民法典》第680条适用。月利率3%超过法定上限，利息约定无效。
+              </p>
+              <div className='rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-400'>
+                没有告诉你：这个解释有多确定？对方能用什么来挑战？
+              </div>
+            </div>
+            <div className='rounded-2xl border border-blue-200 bg-blue-50 p-6 dark:border-blue-900/40 dark:bg-blue-950/20'>
+              <div className='mb-3 text-xs font-semibold uppercase tracking-widest text-blue-400'>
+                律伴 AI
+              </div>
+              <p className='mb-3 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300'>
+                <span className='font-semibold text-emerald-600 dark:text-emerald-400'>
+                  可以确定地说
+                </span>
+                ，《民法典》第680条已获跨越5省23份独立判决支持（共识89%）。
+                <span className='text-amber-600 dark:text-amber-400'>
+                  注意：对方可能援引的第54条正处相变期（共识58%），这是你的进攻窗口。
+                </span>
+              </p>
+              <div className='rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-600 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-400'>
+                确定性来源透明，表达方式由证据校准，弱点自动提示
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -701,10 +760,11 @@ function LandingPage() {
             需通过资质审核后方可使用
           </div>
           <h2 className='mb-4 text-3xl font-bold text-white'>
-            准备好提升您的法律工作效率了吗？
+            准备好使用知道自己边界的 AI 了吗？
           </h2>
           <p className='mb-8 text-base text-slate-400'>
-            联系管理员完成资质认证，审核通过后即可登录使用全套 AI 法律工具
+            联系管理员完成资质认证，审核通过后即可登录——
+            每个法律结论都有认识论状态，每次引用都有证据可溯
           </p>
           <button
             onClick={() => router.push('/login')}

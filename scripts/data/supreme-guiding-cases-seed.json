@@ -1,0 +1,217 @@
+[
+  {
+    "caseNumber": "指导案例1号",
+    "name": "上海中原地产经纪有限公司诉陶德华居间合同纠纷案",
+    "batch": 1,
+    "year": 2011,
+    "keyPrinciple": "居间人故意隐瞒与成交有关的重要事实，或者提供虚假情况，损害委托人利益的，不得要求支付报酬。",
+    "articles": [
+      { "lawName": "中华人民共和国民法典", "articleNumber": "第九百六十一条" },
+      { "lawName": "中华人民共和国民法典", "articleNumber": "第九百六十二条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例3号",
+    "name": "潘玉梅、陈宝财受贿案",
+    "batch": 1,
+    "year": 2011,
+    "keyPrinciple": "国家工作人员利用职务便利，在节日期间以拜年等名义多次收受他人现金，应当认定为受贿。",
+    "articles": [
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第三百八十五条" },
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第三百八十六条" },
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第三百九十条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例4号",
+    "name": "王志才故意杀人案",
+    "batch": 1,
+    "year": 2011,
+    "keyPrinciple": "对于因婚恋、家庭、邻里、债务等纠纷，犯罪后有投案自首、积极赔偿等法定从轻、减轻情节，适用死刑立即执行明显不当的，应判处死刑缓期执行。",
+    "articles": [
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第二百三十二条" },
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第四十八条" },
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第六十七条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例8号",
+    "name": "林方清诉常熟市凯莱实业有限公司、戴小明公司解散纠纷案",
+    "batch": 2,
+    "year": 2012,
+    "keyPrinciple": "公司经营管理发生严重困难，继续存续会使股东利益受到重大损失，通过其他途径不能解决的，持有公司全部股东表决权百分之十以上的股东，可以请求人民法院解散公司。",
+    "articles": [
+      { "lawName": "中华人民共和国公司法", "articleNumber": "第一百八十二条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例9号",
+    "name": "上海存亮贸易有限公司诉蒋志东、王卫明等买卖合同纠纷案",
+    "batch": 2,
+    "year": 2012,
+    "keyPrinciple": "有限责任公司股东在公司解散后，应就公司债务承担连带清偿责任的情形。",
+    "articles": [
+      { "lawName": "中华人民共和国公司法", "articleNumber": "第二十条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例15号",
+    "name": "徐工集团工程机械股份有限公司诉成都川交工贸有限责任公司等买卖合同纠纷案",
+    "batch": 3,
+    "year": 2012,
+    "keyPrinciple": "买卖合同的出卖方依据约定行使留置所有权，买受方不得对抗出卖方的权利。",
+    "articles": [
+      { "lawName": "中华人民共和国民法典", "articleNumber": "第五百七十七条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例16号",
+    "name": "李飞故意杀人案",
+    "batch": 3,
+    "year": 2012,
+    "keyPrinciple": "以特别残忍手段故意杀人、强制猥亵妇女，主观恶性极深、人身危险性极大，依法应当判处死刑立即执行。",
+    "articles": [
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第二百三十二条" },
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第四十八条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例18号",
+    "name": "欧阳资金受贿案",
+    "batch": 4,
+    "year": 2013,
+    "keyPrinciple": "国家工作人员在职期间收受他人财物用于个人消费，离职后为该他人谋取利益，应认定为受贿。",
+    "articles": [
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第三百八十五条" },
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第三百八十六条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例23号",
+    "name": "陆红霞诉南通市发展和改革委员会政府信息公开纠纷案",
+    "batch": 5,
+    "year": 2014,
+    "keyPrinciple": "公民、法人或者其他组织申请政府信息公开，行政机关未予答复且无正当理由的，可以提起行政诉讼。",
+    "articles": [
+      { "lawName": "中华人民共和国刑事诉讼法", "articleNumber": "第五十二条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例24号",
+    "name": "荣宝英诉王阳、永诚财产保险股份有限公司江阴支公司道路交通事故人身损害赔偿纠纷案",
+    "batch": 5,
+    "year": 2014,
+    "keyPrinciple": "机动车发生交通事故，保险公司在交强险责任范围内对受害人承担赔偿责任后，可向侵权方追偿。",
+    "articles": [
+      {
+        "lawName": "中华人民共和国民法典",
+        "articleNumber": "第一千一百六十五条"
+      }
+    ]
+  },
+  {
+    "caseNumber": "指导案例27号",
+    "name": "北京天地凌云网络科技有限公司、中公教育科技有限公司与北京科试教育科技有限公司著作权侵权纠纷案",
+    "batch": 6,
+    "year": 2014,
+    "keyPrinciple": "网络服务提供者明知他人利用网络服务实施侵权行为，未采取必要措施的，与侵权人承担连带责任。",
+    "articles": [
+      {
+        "lawName": "中华人民共和国民法典",
+        "articleNumber": "第一千一百六十五条"
+      }
+    ]
+  },
+  {
+    "caseNumber": "指导案例33号",
+    "name": "刘志民贩卖、运输毒品案",
+    "batch": 7,
+    "year": 2014,
+    "keyPrinciple": "贩卖、运输毒品犯罪，毒品数量达到实际掌握的死刑数量标准，应当判处死刑。",
+    "articles": [
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第三百四十七条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例47号",
+    "name": "人和商业控股有限公司与大连国际经济技术合作集团有限公司、上海华信国际集团有限公司借款合同纠纷案",
+    "batch": 9,
+    "year": 2015,
+    "keyPrinciple": "当事人约定违约金过高的，人民法院可以根据实际损失、合同履行情况等因素酌情调整。",
+    "articles": [
+      { "lawName": "中华人民共和国民法典", "articleNumber": "第五百八十五条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例51号",
+    "name": "徐超诉雅芳（中国）有限公司、上海欧雅贸易有限公司买卖合同纠纷案",
+    "batch": 9,
+    "year": 2015,
+    "keyPrinciple": "格式条款免除经营者责任、加重消费者责任的条款无效。",
+    "articles": [
+      { "lawName": "中华人民共和国民法典", "articleNumber": "第五百七十七条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例62号",
+    "name": "张某某、张某诉某区民政局行政登记纠纷案",
+    "batch": 12,
+    "year": 2015,
+    "keyPrinciple": "民政部门对婚姻登记申请材料审查义务的范围与程度。",
+    "articles": [
+      { "lawName": "中华人民共和国民法典", "articleNumber": "第一千零四十九条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例76号",
+    "name": "汤某某诉某县公安局行政拘留纠纷案",
+    "batch": 14,
+    "year": 2016,
+    "keyPrinciple": "行政机关对当事人进行行政处罚应当出示执法证件，未出示的，处罚程序违法。",
+    "articles": [
+      { "lawName": "中华人民共和国刑事诉讼法", "articleNumber": "第一百一十条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例88号",
+    "name": "宋某某等诈骗案",
+    "batch": 17,
+    "year": 2017,
+    "keyPrinciple": "以电信网络技术手段实施诈骗，诈骗财物价值三千元以上的，以诈骗罪定罪处罚。",
+    "articles": [
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第二百六十六条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例97号",
+    "name": "黄某某盗窃案",
+    "batch": 19,
+    "year": 2018,
+    "keyPrinciple": "盗窃金融机构，数额特别巨大，依法应当判处无期徒刑或者死刑；有法定从轻、减轻情节的，可不判处死刑。",
+    "articles": [
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第二百六十四条" },
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第四十八条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例121号",
+    "name": "章某某贪污案",
+    "batch": 23,
+    "year": 2019,
+    "keyPrinciple": "国有公司、企业中从事公务的人员利用职务便利侵吞公款，数额巨大，应以贪污罪定罪处罚。",
+    "articles": [
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第三百八十二条" },
+      { "lawName": "中华人民共和国刑法", "articleNumber": "第三百八十三条" }
+    ]
+  },
+  {
+    "caseNumber": "指导案例148号",
+    "name": "某公司诉某市市场监督管理局行政处罚案",
+    "batch": 28,
+    "year": 2021,
+    "keyPrinciple": "经营者在商品或服务信息中使用虚假数据误导消费者，构成虚假宣传。",
+    "articles": [
+      { "lawName": "中华人民共和国证券法", "articleNumber": "第七十八条" }
+    ]
+  }
+]

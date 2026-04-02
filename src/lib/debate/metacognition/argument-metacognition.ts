@@ -9,6 +9,7 @@
 
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
+import { RebuttalType } from '@prisma/client';
 
 /**
  * 论点可靠性状态（语义晶体的"状态画像"概念）
@@ -39,6 +40,7 @@ export interface ArgumentMetacognitionProfile {
   rebuttalCount: number; // 被反驳次数
   rebuttalPressure: number; // 反驳压力值 (0-1)
   lastRebuttalAt: Date | null; // 最后被反驳时间
+  dominantRebuttalType: RebuttalType | null; // 主要反驳类型（SCP 四类）
 
   // 置信度演化
   initialConfidence: number; // AI生成时的初始置信度
@@ -134,7 +136,7 @@ export class ArgumentMetacognition {
       const rebuttals = await this.getRebuttalsForArgument(argumentId);
 
       // 计算反驳压力
-      const { pressure, count, lastRebuttalAt } =
+      const { pressure, count, lastRebuttalAt, dominantRebuttalType } =
         this.calculateRebuttalPressure(
           argument.overallScore || 0.5,
           argument.logicScore || 0,
@@ -190,6 +192,7 @@ export class ArgumentMetacognition {
         rebuttalCount: count,
         rebuttalPressure: pressure,
         lastRebuttalAt,
+        dominantRebuttalType,
         initialConfidence: argument.confidence || 0.5,
         currentConfidence,
         confidenceTrend: trend,
@@ -240,58 +243,112 @@ export class ArgumentMetacognition {
   }
 
   /**
-   * 获取论点被反驳的情况
-   * 假设存在 rebuttalRelations 表或类似的反驳关系记录
-   * TODO: 根据实际数据模型调整
+   * 获取论点被反驳/支持的情况
+   * 从 ArgumentRelation 表查询（schema 已添加此模型）
    */
-  private async getRebuttalsForArgument(_argumentId: string): Promise<
+  private async getRebuttalsForArgument(argumentId: string): Promise<
     Array<{
       id: string;
       timestamp: Date;
       type: 'rebuttal' | 'support';
+      rebuttalType: RebuttalType | null;
+      strength: number;
     }>
   > {
-    // TODO: 根据实际数据库结构实现
-    // 目前返回空数组，实际需要查询反驳关系表
-    // 例如：prisma.rebuttalRelation.findMany({ where: { targetArgumentId: argumentId } })
-    return [];
+    const relations = await prisma.argumentRelation.findMany({
+      where: { targetArgumentId: argumentId },
+      select: {
+        id: true,
+        relationType: true,
+        rebuttalType: true,
+        strength: true,
+        createdAt: true,
+      },
+    });
+    return relations.map(r => ({
+      id: r.id,
+      timestamp: r.createdAt,
+      type: r.relationType === 'REBUTS' ? 'rebuttal' : 'support',
+      rebuttalType: r.rebuttalType,
+      strength: r.strength,
+    }));
   }
 
   /**
    * 计算反驳压力
+   * 基于 SCP RebuttalType 对不同类型反驳采用差异化权重：
+   *   DIRECT_DENIAL = 0.85（最严重）
+   *   COMPETITIVE_REPLACEMENT = 0.65
+   *   BOUNDARY_CONTRACTION = 0.50
+   *   SILENT_NEGATION = 0.25（最轻）
    */
   private calculateRebuttalPressure(
     overallScore: number,
     logicScore: number,
     legalScore: number,
-    rebuttals: Array<{ type: 'rebuttal' | 'support'; timestamp: Date }>
+    rebuttals: Array<{
+      type: 'rebuttal' | 'support';
+      timestamp: Date;
+      rebuttalType: RebuttalType | null;
+      strength: number;
+    }>
   ): {
     pressure: number;
     count: number;
     lastRebuttalAt: Date | null;
+    dominantRebuttalType: RebuttalType | null;
   } {
-    const rebuttalCount = rebuttals.filter(r => r.type === 'rebuttal').length;
+    const REBUTTAL_TYPE_WEIGHTS: Record<RebuttalType, number> = {
+      DIRECT_DENIAL: 0.85,
+      COMPETITIVE_REPLACEMENT: 0.65,
+      BOUNDARY_CONTRACTION: 0.5,
+      SILENT_NEGATION: 0.25,
+    };
+
+    const rebuttalList = rebuttals.filter(r => r.type === 'rebuttal');
     const supportCount = rebuttals.filter(r => r.type === 'support').length;
 
-    // 反驳压力 = 反驳次数 * 权重 - 支持次数 * 权重
-    let pressure =
-      rebuttalCount * this.config.rebuttalWeight -
-      supportCount * this.config.supportBoost;
+    // 按反驳类型加权累积压力
+    let pressure = 0;
+    const typeCountMap = new Map<RebuttalType, number>();
+    for (const r of rebuttalList) {
+      const typeWeight = r.rebuttalType
+        ? (REBUTTAL_TYPE_WEIGHTS[r.rebuttalType] ?? this.config.rebuttalWeight)
+        : this.config.rebuttalWeight;
+      pressure += typeWeight * r.strength;
+      if (r.rebuttalType) {
+        typeCountMap.set(
+          r.rebuttalType,
+          (typeCountMap.get(r.rebuttalType) ?? 0) + 1
+        );
+      }
+    }
+    pressure -= supportCount * this.config.supportBoost;
 
-    // 基础分：根据论点质量调整
+    // 高质量论点更能抵抗反驳
     const baseScore = (overallScore + logicScore + legalScore) / 3;
-    pressure = pressure * (1 - baseScore * 0.5); // 高质量论点更能抵抗反驳
-
+    pressure = pressure * (1 - baseScore * 0.5);
     pressure = Math.max(0, Math.min(1, pressure));
 
-    const lastRebuttal = rebuttals
-      .filter(r => r.type === 'rebuttal')
+    const lastRebuttal = rebuttalList
+      .slice()
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())[0];
+
+    // 主要反驳类型 = 出现次数最多的类型
+    let dominantRebuttalType: RebuttalType | null = null;
+    let maxCount = 0;
+    for (const [type, count] of typeCountMap) {
+      if (count > maxCount) {
+        maxCount = count;
+        dominantRebuttalType = type;
+      }
+    }
 
     return {
       pressure: Math.round(pressure * 1000) / 1000,
-      count: rebuttalCount,
+      count: rebuttalList.length,
       lastRebuttalAt: lastRebuttal?.timestamp || null,
+      dominantRebuttalType,
     };
   }
 

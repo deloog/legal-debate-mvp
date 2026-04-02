@@ -11,7 +11,12 @@
 import { prisma } from '@/lib/db/prisma';
 import { searchLocalLawArticles } from '@/lib/debate/law-search';
 import { logger } from '@/lib/logger';
-import { LawCategory, RelationType, VerificationStatus } from '@prisma/client';
+import {
+  EpistemicProfile,
+  LawCategory,
+  RelationType,
+  VerificationStatus,
+} from '@prisma/client';
 import {
   runDebateReasoning,
   formatReasoningForPrompt,
@@ -49,6 +54,23 @@ export interface AttackPath {
 }
 
 /**
+ * 法条认识论上下文（SCP CrystalState 的查询视图）
+ * 注入 AI 提示词，使 AI 用校准语言表达结论
+ */
+export interface EpistemicArticleContext {
+  articleId: string;
+  lawName: string;
+  articleNumber: string;
+  profile: EpistemicProfile;
+  consensusScore: number;
+  challengePressure: number;
+  effectiveSourceCount: number;
+  jurisdictionCount: number;
+  inCandidatePool: boolean;
+  expressionGuide: string; // "可以确定地说" / "目前仍倾向于认为" 等
+}
+
+/**
  * 图谱增强搜索结果
  */
 export interface GraphEnhancedSearchResult {
@@ -81,6 +103,8 @@ export interface GraphEnhancedSearchResult {
   reasoningAnalysis: string;
   /** 关键推理结论（用于前端展示） */
   keyInferences: InferenceResult[];
+  /** 法条认识论状态（SCP 元认知，注入 Prompt 用于校准表达） */
+  epistemicContext: EpistemicArticleContext[];
 }
 
 /**
@@ -468,17 +492,53 @@ export async function graphEnhancedSearch(
     graphData = null;
   }
 
-  // 4. 并行运行推理引擎（带独立超时，不阻塞主流程）
+  // 4. 并行运行推理引擎 + 查询认识论状态（带独立超时，不阻塞主流程）
   const sourceId = articleIds[0] ?? '';
-  const reasoningResult = sourceId
-    ? await runDebateReasoning(articleIds.slice(0, 15), sourceId)
-    : null;
+  const [reasoningResult, epistemicStates] = await Promise.all([
+    sourceId
+      ? runDebateReasoning(articleIds.slice(0, 15), sourceId)
+      : Promise.resolve(null),
+    articleIds.length > 0
+      ? prisma.lawArticleEpistemicState
+          .findMany({
+            where: { lawArticleId: { in: articleIds } },
+            select: {
+              lawArticleId: true,
+              profile: true,
+              consensusScore: true,
+              challengePressure: true,
+              effectiveSourceCount: true,
+              jurisdictionCount: true,
+              inCandidatePool: true,
+              expressionGuide: true,
+              lawArticle: { select: { lawName: true, articleNumber: true } },
+            },
+          })
+          .catch(() => [])
+      : Promise.resolve([]),
+  ]);
+
   const reasoningAnalysis = formatReasoningForPrompt(reasoningResult);
   const keyInferences = extractKeyInferences(reasoningResult);
 
+  // 将认识论状态映射为上下文对象
+  const epistemicContext: EpistemicArticleContext[] = epistemicStates.map(
+    s => ({
+      articleId: s.lawArticleId,
+      lawName: s.lawArticle.lawName,
+      articleNumber: s.lawArticle.articleNumber,
+      profile: s.profile,
+      consensusScore: s.consensusScore,
+      challengePressure: s.challengePressure,
+      effectiveSourceCount: s.effectiveSourceCount,
+      jurisdictionCount: s.jurisdictionCount,
+      inCandidatePool: s.inCandidatePool,
+      expressionGuide: s.expressionGuide,
+    })
+  );
+
   // 5. 构建结果
   if (!graphData) {
-    // 图谱查询超时或失败，返回关键词结果（推理结果仍然保留）
     return {
       keywordResults,
       supportingArticles: [],
@@ -487,12 +547,10 @@ export async function graphEnhancedSearch(
       complementRelations: [],
       attackPaths: [],
       graphAnalysisCompleted: false,
-      sourceAttribution: {
-        keyword: true,
-        graph: false,
-      },
+      sourceAttribution: { keyword: true, graph: false },
       reasoningAnalysis,
       keyInferences,
+      epistemicContext,
     };
   }
 
@@ -504,12 +562,10 @@ export async function graphEnhancedSearch(
     complementRelations: graphData.complements,
     attackPaths: graphData.attackPaths,
     graphAnalysisCompleted: true,
-    sourceAttribution: {
-      keyword: true,
-      graph: true,
-    },
+    sourceAttribution: { keyword: true, graph: true },
     reasoningAnalysis,
     keyInferences,
+    epistemicContext,
   };
 }
 
@@ -525,7 +581,6 @@ export function formatGraphAnalysisForPrompt(
 
   if (!result.graphAnalysisCompleted) {
     lines.push('（图谱分析未完成，仅基于关键词检索）');
-    return lines.join('\n');
   }
 
   // 原告方支持法条
@@ -570,6 +625,39 @@ export function formatGraphAnalysisForPrompt(
     result.attackPaths.forEach(path => {
       lines.push(`- ${path.explanation}`);
     });
+  }
+
+  // 认识论状态（SCP 元认知表达指引）
+  // 这是 AI 生成论点时校准置信度表达的关键上下文
+  if (result.epistemicContext.length > 0) {
+    lines.push('');
+    lines.push('【法条认识论状态 — 表达置信度指引】');
+    lines.push('（根据以下状态，使用对应的置信度表达方式）');
+    for (const ctx of result.epistemicContext) {
+      const profileLabel: Record<EpistemicProfile, string> = {
+        IRON_CLAD: '确定',
+        MAINSTREAM_TROUBLED: '存疑',
+        CANDIDATE_POOL: '候选池/相变中',
+        FADING: '衰退',
+        UNCERTAIN: '不确定',
+      };
+      const label = profileLabel[ctx.profile] ?? '未知';
+      const warning = ctx.inCandidatePool
+        ? ' ⚠ 该条款解释正处于相变期，建议明确提示争议性'
+        : '';
+      lines.push(
+        `- ${ctx.lawName}第${ctx.articleNumber}条 [${label}]` +
+          ` 共识${Math.round(ctx.consensusScore * 100)}%` +
+          ` 来自${ctx.effectiveSourceCount.toFixed(1)}个有效独立来源` +
+          ` (${ctx.jurisdictionCount}个司法管辖)` +
+          ` → 表达方式："${ctx.expressionGuide}"${warning}`
+      );
+    }
+    lines.push('');
+    lines.push(
+      '重要：生成论点时，引用上述法条请严格按照对应"表达方式"措辞，' +
+        '不可对UNCERTAIN/CANDIDATE_POOL状态的法条使用确定性语气。'
+    );
   }
 
   return lines.join('\n');

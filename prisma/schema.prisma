@@ -357,6 +357,8 @@ model Argument {
   priority       String?
   metadata       Json?        // 扩展元数据（存储验证数据等）
   round          DebateRound  @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  sourceRelations ArgumentRelation[] @relation("ArgumentRelationSource")
+  targetRelations ArgumentRelation[] @relation("ArgumentRelationTarget")
 
   @@index([roundId])
   @@index([side])
@@ -447,6 +449,8 @@ model LawArticle {
   parent                  LawArticle?              @relation("ArticleHierarchy", fields: [parentId], references: [id])
   children                LawArticle[]             @relation("ArticleHierarchy")
   recommendationFeedbacks RecommendationFeedback[]
+  epistemicState          LawArticleEpistemicState?
+  historicalRefs          HistoricalCaseArticleRef[]
 
   @@unique([lawName, articleNumber, effectiveDate])
   @@index([lawType])
@@ -3256,4 +3260,118 @@ enum ComplianceRuleRelationType {
   CONFLICTS
   COMPLEMENTS
   RELATED
+}
+
+// ══════════════════════════════════════════════════════
+// 元认知系统枚举（语义晶体 SCP 哲学落地）
+// ══════════════════════════════════════════════════════
+
+enum RebuttalType {
+  DIRECT_DENIAL           // 直接否定：法条废止/直接矛盾/判决被撤销
+  BOUNDARY_CONTRACTION    // 边界收缩：适用范围限缩（最常见法律动作）
+  COMPETITIVE_REPLACEMENT // 竞合替代：应适用另一法条/特别法优先
+  SILENT_NEGATION         // 隐性否定：与判例难以调和/逻辑不融贯
+}
+
+enum ArgumentRelationType {
+  REBUTS   // 反驳
+  SUPPORTS // 支持
+}
+
+enum EpistemicProfile {
+  IRON_CLAD             // 确定：共识≥85%，反驳压力<15%，多源稳定
+  MAINSTREAM_TROUBLED   // 存疑：主流接受但反驳信号积累中
+  CANDIDATE_POOL        // 候选池：正在经历潜在范式转换
+  FADING                // 衰退：旧共识正在瓦解
+  UNCERTAIN             // 不确定：证据不足以判断
+}
+
+// ══════════════════════════════════════════════════════
+// 元认知系统模型
+// ══════════════════════════════════════════════════════
+
+// 论点间关系（反驳/支持）
+// 修复 argument-metacognition.ts 中 getRebuttalsForArgument 一直返回空的问题
+model ArgumentRelation {
+  id               String              @id @default(cuid())
+  sourceArgumentId String              // 发起方论点（反驳/支持者）
+  targetArgumentId String              // 被反驳/支持的论点
+  relationType     ArgumentRelationType
+  rebuttalType     RebuttalType?       // 仅 REBUTS 时有值
+  explanation      String?             // AI 生成的反驳分析
+  strength         Float               @default(0.5) // 反驳力度 0-1
+
+  createdAt        DateTime            @default(now())
+
+  sourceArgument   Argument @relation("ArgumentRelationSource", fields: [sourceArgumentId], references: [id], onDelete: Cascade)
+  targetArgument   Argument @relation("ArgumentRelationTarget", fields: [targetArgumentId], references: [id], onDelete: Cascade)
+
+  @@index([targetArgumentId])
+  @@index([sourceArgumentId])
+  @@index([relationType])
+  @@map("argument_relations")
+}
+
+// 法条认识论状态（SCP CrystalState 的法律数据库落地）
+// 每条法条都有一个动态维护的认识论状态，由案例引用和辩论论点共同更新
+model LawArticleEpistemicState {
+  id                   String           @id @default(cuid())
+  lawArticleId         String           @unique
+
+  // === 核心状态画像（Layer 2 贝叶斯更新结果）===
+  profile              EpistemicProfile @default(UNCERTAIN)
+  consensusScore       Float            @default(0.5)   // 共识强度 0-1
+  challengePressure    Float            @default(0.0)   // 反驳压力 0-1
+  inertia              Float            @default(0.0)   // 相变惯性（高值→正在被挑战）
+  inCandidatePool      Boolean          @default(false) // 是否进入相变候选池
+  alternativeStrength  Float            @default(0.0)   // 竞争替代范式强度 0-1
+
+  // === 来源独立性（Layer 3 语义距离法）===
+  sourceIndependence   Float            @default(1.0)   // 独立性比率 0-1
+  effectiveSourceCount Float            @default(0.0)   // 有效独立来源数（非简单计数）
+  totalCasesApplied    Int              @default(0)     // 被案例引用总次数
+  jurisdictionCount    Int              @default(0)     // 涉及不同司法管辖数
+  courtLevelSpread     Int              @default(0)     // 法院层级跨度 1-4
+
+  // === 少数意见追踪（战略价值）===
+  minorityPressureCount Int             @default(0)     // 少数/反驳意见积累数
+  poolEntryDate        DateTime?        // 进入候选池时间
+  poolExitDate         DateTime?        // 退出候选池时间
+
+  // === 元认知表达（Layer 4 输出）===
+  expressionGuide      String           @default("没有足够信息判断") // 校准表达词
+  lastCaseId           String?          // 最后影响此状态的案件 ID
+
+  computedAt           DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  lawArticle           LawArticle       @relation(fields: [lawArticleId], references: [id], onDelete: Cascade)
+
+  @@index([profile])
+  @@index([consensusScore])
+  @@index([inCandidatePool])
+  @@map("law_article_epistemic_states")
+}
+
+// 历史案例法条引用聚合表（来自 CAIL2018 等外部数据集）
+// 按 (lawArticleId, jurisdiction, courtLevel) 聚合，避免500万行逐条存储
+// applicabilitySignal=0.85 因 CAIL2018 全为刑事定罪案件→适用性明确
+model HistoricalCaseArticleRef {
+  id                  String   @id @default(cuid())
+  lawArticleId        String
+  dataSource          String   @default("CAIL2018") // 数据来源标识
+  jurisdiction        String   @default("UNKNOWN")  // 省/直辖市/UNKNOWN
+  courtLevel          String   @default("UNKNOWN")  // SUPREME/HIGH/INTERMEDIATE/BASIC/UNKNOWN
+  caseCount           Int      @default(1)           // 该(法条,司法管辖,法院层级)组合的案例数
+  applicabilitySignal Float    @default(0.85)        // 适用性信号强度 0-1
+  importedAt          DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  lawArticle          LawArticle @relation(fields: [lawArticleId], references: [id], onDelete: Cascade)
+
+  @@unique([lawArticleId, jurisdiction, courtLevel])
+  @@index([lawArticleId])
+  @@index([dataSource])
+  @@index([jurisdiction])
+  @@map("historical_case_article_refs")
 }
