@@ -367,18 +367,18 @@ function LandingPage() {
               </h1>
 
               <p className='mb-8 max-w-md text-base leading-relaxed text-slate-400'>
-                律伴 AI 不只告诉你哪条法律适用—— 还告诉你这个结论来自几个
-                <strong className='text-slate-200'>独立司法来源</strong>，
-                当前共识有多稳固，以及对方论点依赖的法律解释 是否已经进入
-                <strong className='text-slate-200'>动摇期</strong>。
+                律伴 AI 不只找到相关法条——还告诉你该法律在各级法院的
+                <strong className='text-slate-200'>适用口径是否统一</strong>，
+                对方援引的依据近期是否已有裁判提出质疑，以及你的论点在司法实践中
+                <strong className='text-slate-200'>实际有多大说服力</strong>。
               </p>
 
               {/* 数据亮点 */}
               <div className='mb-8 grid grid-cols-3 gap-4'>
                 {[
-                  { num: '5 级', label: '认识论确定性评级' },
-                  { num: '4 类', label: '反驳模式自动识别' },
-                  { num: '独立', label: '来源加权，多样比数量重要' },
+                  { num: '5 档', label: '裁判适用稳定性分级' },
+                  { num: '4 类', label: '对方论点薄弱点自动识别' },
+                  { num: '独立', label: '跨审级跨地域，优于单纯数量' },
                 ].map(item => (
                   <div key={item.label} className='text-center'>
                     <div className='text-2xl font-bold text-white'>
@@ -551,11 +551,11 @@ function LandingPage() {
               专业级 AI 工具
             </div>
             <h2 className='mb-3 text-3xl font-bold text-zinc-900 dark:text-zinc-50'>
-              不只知道法律，还知道自己知道多少
+              找到法条只是开始——法院怎么判，才是胜负关键
             </h2>
             <p className='mx-auto max-w-lg text-base text-zinc-500 dark:text-zinc-400'>
-              每个 AI
-              结论背后都有可审计的证据链——共识强度、来源独立性、相变预警，一目了然
+              每项 AI
+              结论均附裁判支持来源与适用稳定性研判，方便评估论点说服力与对方依据的可攻击性
             </p>
           </div>
 
@@ -563,12 +563,12 @@ function LandingPage() {
             {[
               {
                 icon: Scale,
-                title: '元认知辩论生成',
+                title: '裁判支撑的辩论框架生成',
                 tag: '核心功能',
                 tagColor:
                   'bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-400',
-                desc: '基于多源独立案例验证生成论点，每条结论附认识论评级。AI 表达"可以确定地说"还是"目前倾向于认为"，由证据决定。',
-                stat: '论点确定性可审计',
+                desc: '依托多地独立裁判验证生成论点，每条论据均标注裁判稳定性。AI 表达"可以确定地说"还是"目前倾向于认为"，由实际案例数据决定，而非模型自行判断。',
+                stat: '论据来源可追溯，强度可审计',
                 statColor: 'text-violet-600 dark:text-violet-400',
                 borderColor: 'border-violet-100 dark:border-violet-900/40',
                 bgColor: 'bg-violet-50 dark:bg-violet-950/20',
@@ -577,12 +577,12 @@ function LandingPage() {
               },
               {
                 icon: Search,
-                title: '法条认识论检索',
+                title: '法条司法适用口径检索',
                 tag: '高频使用',
                 tagColor:
                   'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400',
-                desc: '113万+ 条文，每条附认识论状态标注：确定 / 存疑 / 相变中 / 衰退。不只找到法条，还知道这个解释现在有多稳。',
-                stat: '5 级确定性评级',
+                desc: '113万+ 条文，每条附司法适用稳定性标注：各地一致 / 部分存疑 / 出现分歧 / 已有挑战趋势。不只找到法条，还知道这条法律在法院实践中有多稳固。',
+                stat: '5 档适用稳定性分级',
                 statColor: 'text-blue-600 dark:text-blue-400',
                 borderColor: 'border-blue-100 dark:border-blue-900/40',
                 bgColor: 'bg-blue-50 dark:bg-blue-950/20',
@@ -591,12 +591,12 @@ function LandingPage() {
               },
               {
                 icon: TrendingUp,
-                title: '相变预警 & 弱点发现',
+                title: '对方依据的裁判趋势预警',
                 tag: '战略价值',
                 tagColor:
                   'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400',
-                desc: '自动检测对方论点依赖的不稳定法律解释，识别正在被多地判例挑战的传统观点。找到真正的进攻窗口。',
-                stat: '4 类反驳模式识别',
+                desc: '自动检测对方援引的法律依据是否正被各地判例质疑，识别已被最高法或高院裁判动摇的传统法律观点。精准找到可以有效攻击的论点弱点。',
+                stat: '4 类论点薄弱点自动标记',
                 statColor: 'text-emerald-600 dark:text-emerald-400',
                 borderColor: 'border-emerald-100 dark:border-emerald-900/40',
                 bgColor: 'bg-emerald-50 dark:bg-emerald-950/20',
@@ -641,10 +641,11 @@ function LandingPage() {
         <div className='mx-auto max-w-4xl px-6'>
           <div className='mb-10 text-center'>
             <h2 className='mb-3 text-3xl font-bold text-zinc-900 dark:text-zinc-50'>
-              为什么&ldquo;知道多少&rdquo;和&ldquo;知道什么&rdquo;一样重要
+              找到法条不难——难的是知道这个解释有多少裁判支撑
             </h2>
             <p className='text-base text-zinc-500 dark:text-zinc-400'>
-              法律 AI 的最大风险，不是说错了，而是说错了却听起来很确定
+              AI
+              给结论容易；告诉你这个结论在司法实践中站不站得住脚，才是专业价值所在
             </p>
           </div>
           <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
@@ -656,7 +657,7 @@ function LandingPage() {
                 《民法典》第680条适用。月利率3%超过法定上限，利息约定无效。
               </p>
               <div className='rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-400'>
-                没有告诉你：这个解释有多确定？对方能用什么来挑战？
+                没有告诉你：各地法院口径是否一致？对方有没有可以援引的反例？
               </div>
             </div>
             <div className='rounded-2xl border border-blue-200 bg-blue-50 p-6 dark:border-blue-900/40 dark:bg-blue-950/20'>
@@ -667,13 +668,13 @@ function LandingPage() {
                 <span className='font-semibold text-emerald-600 dark:text-emerald-400'>
                   可以确定地说
                 </span>
-                ，《民法典》第680条已获跨越5省23份独立判决支持（共识89%）。
+                ，《民法典》第680条适用口径稳定——5省23份独立裁判支持，审级跨越中院至高院。
                 <span className='text-amber-600 dark:text-amber-400'>
-                  注意：对方可能援引的第54条正处相变期（共识58%），这是你的进攻窗口。
+                  注意：对方可能援引的第54条，近期已有多份裁判对传统解释提出质疑，可作为反驳切入点。
                 </span>
               </p>
               <div className='rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-600 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-400'>
-                确定性来源透明，表达方式由证据校准，弱点自动提示
+                裁判来源清晰可查，结论强度由案例数据支撑，论点弱点实时提示
               </div>
             </div>
           </div>
