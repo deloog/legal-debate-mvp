@@ -70,6 +70,8 @@ model User {
   usageRecords              UsageRecord[]
   userMemberships           UserMembership[]
   verificationCodes         VerificationCode[]
+  conversations             Conversation[]
+  annotations               Annotation[]
 
   @@index([email])
   @@index([username])
@@ -3400,4 +3402,77 @@ model GuidingCase {
   @@index([caseNo])
   @@index([batch])
   @@map("guiding_cases")
+}
+
+// ── Chat 对话系统 ─────────────────────────────────────────────────────────────
+
+model Conversation {
+  id                   String    @id @default(cuid())
+  title                String    @default("新对话")
+  userId               String
+  parentConversationId String?
+  branchFromMessageId  String?
+  isArchived           Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  user     User           @relation(fields: [userId], references: [id])
+  parent   Conversation?  @relation("ConversationBranches", fields: [parentConversationId], references: [id])
+  branches Conversation[] @relation("ConversationBranches")
+  messages Message[]
+
+  @@index([userId])
+  @@index([parentConversationId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String    @id @default(cuid())
+  conversationId String
+  role           String
+  content        String    @db.Text
+  isDeleted      Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+
+  conversation Conversation       @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  attachments  MessageAttachment[]
+  annotations  Annotation[]
+
+  @@index([conversationId])
+  @@map("messages")
+}
+
+model MessageAttachment {
+  id            String   @id @default(cuid())
+  messageId     String
+  fileName      String
+  fileUrl       String
+  fileType      String
+  fileSize      Int
+  extractedText String?  @db.Text
+  createdAt     DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@map("message_attachments")
+}
+
+model Annotation {
+  id           String   @id @default(cuid())
+  messageId    String
+  userId       String
+  selectedText String   @db.Text
+  startOffset  Int
+  endOffset    Int
+  type         String
+  note         String?
+  createdAt    DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([messageId])
+  @@index([userId])
+  @@map("annotations")
 }
