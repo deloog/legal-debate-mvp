@@ -56,7 +56,8 @@ export function ChatArea({
   const loadMessages = useCallback(async () => {
     try {
       const res = await fetch(
-        `/api/v1/chat/conversations/${conversationId}/messages`
+        `/api/v1/chat/conversations/${conversationId}/messages`,
+        { credentials: 'include' }
       );
       if (!res.ok) return;
       const data = await res.json();
@@ -120,6 +121,7 @@ export function ChatArea({
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({
               selectedText: selection.text,
               startOffset: 0,
@@ -168,6 +170,7 @@ export function ChatArea({
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({ content }),
         }
       );
@@ -198,6 +201,7 @@ export function ChatArea({
         await fetch(`/api/v1/chat/messages/${messageId}`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({ withSubsequent }),
         });
         loadMessages();
@@ -215,6 +219,7 @@ export function ChatArea({
       try {
         await fetch(`/api/v1/chat/messages/${messageId}/regenerate`, {
           method: 'POST',
+          credentials: 'include',
         });
         loadMessages();
       } catch {
@@ -235,6 +240,7 @@ export function ChatArea({
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ fromMessageId: messageId }),
           }
         );

@@ -36,7 +36,7 @@ export function ChatSidebar({
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/v1/chat/conversations')
+    fetch('/api/v1/chat/conversations', { credentials: 'include' })
       .then(r => r.json())
       .then((data: { data?: ConversationSummary[] }) => {
         if (!cancelled) setConversations(data.data ?? []);
@@ -52,6 +52,7 @@ export function ChatSidebar({
       const res = await fetch('/api/v1/chat/conversations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ title: '新对话' }),
       });
       if (!res.ok) return;

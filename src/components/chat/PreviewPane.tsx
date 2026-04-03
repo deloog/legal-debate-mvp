@@ -31,6 +31,7 @@ export function PreviewPane({
       const res = await fetch('/api/v1/chat/export/docx', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ content }),
       });
       if (!res.ok) return;
