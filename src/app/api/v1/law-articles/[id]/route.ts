@@ -30,6 +30,17 @@ export async function GET(
     const { id } = await params;
     const article = await prisma.lawArticle.findUnique({
       where: { id },
+      include: {
+        guidingCases: {
+          select: {
+            caseNo: true,
+            title: true,
+            batch: true,
+            holdingPoints: true,
+          },
+          orderBy: { caseNo: 'asc' },
+        },
+      },
     });
 
     if (!article) {

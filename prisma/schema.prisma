@@ -451,6 +451,7 @@ model LawArticle {
   recommendationFeedbacks RecommendationFeedback[]
   epistemicState          LawArticleEpistemicState?
   historicalRefs          HistoricalCaseArticleRef[]
+  guidingCases            GuidingCase[]              @relation("GuidingCaseLawArticles")
 
   @@unique([lawName, articleNumber, effectiveDate])
   @@index([lawType])
@@ -3374,4 +3375,29 @@ model HistoricalCaseArticleRef {
   @@index([dataSource])
   @@index([jurisdiction])
   @@map("historical_case_article_refs")
+}
+
+// 最高法指导案例全文存储
+model GuidingCase {
+  id             String       @id @default(cuid())
+  caseNo         Int          @unique
+  title          String
+  batch          Int
+  publishDate    String?
+  category       String?
+  keywords       String[]
+  holdingPoints  String       @db.Text
+  basicFacts     String?      @db.Text
+  judgmentResult String?      @db.Text
+  judgmentReason String?      @db.Text
+  relevantLaws   String?
+  url            String?
+  source         String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  lawArticles    LawArticle[] @relation("GuidingCaseLawArticles")
+
+  @@index([caseNo])
+  @@index([batch])
+  @@map("guiding_cases")
 }

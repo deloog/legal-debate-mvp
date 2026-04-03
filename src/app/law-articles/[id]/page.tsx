@@ -17,6 +17,15 @@ import { LawArticleGraphVisualization } from '@/components/law-article/LawArticl
 import { RecommendationFeedbackButton } from '@/components/feedback/RecommendationFeedbackButton';
 
 import type { LawArticle } from '@prisma/client';
+
+interface GuidingCaseSummary {
+  caseNo: number;
+  title: string;
+  batch: number;
+  holdingPoints: string;
+}
+
+type LawArticleWithCases = LawArticle & { guidingCases: GuidingCaseSummary[] };
 import type {
   RecommendationResult,
   RecommendationStats,
@@ -39,7 +48,7 @@ export default function LawArticleDetailPage() {
   const router = useRouter();
   const articleId = params.id as string;
 
-  const [article, setArticle] = useState<LawArticle | null>(null);
+  const [article, setArticle] = useState<LawArticleWithCases | null>(null);
   const [recommendations, setRecommendations] = useState<
     RecommendationResult[]
   >([]);
@@ -232,6 +241,54 @@ export default function LawArticleDetailPage() {
         <h2 className='text-2xl font-bold mb-4'>关系图谱</h2>
         <LawArticleGraphVisualization centerArticleId={articleId} depth={2} />
       </div>
+
+      {/* 最高法指导案例 */}
+      {article.guidingCases.length > 0 && (
+        <div className='bg-white rounded-lg shadow-md p-6 mb-6'>
+          <h2 className='text-2xl font-bold mb-4'>
+            最高法指导案例
+            <span className='ml-2 text-base font-normal text-gray-500'>
+              共 {article.guidingCases.length} 件直接引用本条
+            </span>
+          </h2>
+          <div className='space-y-3'>
+            {article.guidingCases.map(gc => (
+              <a
+                key={gc.caseNo}
+                href={`/guiding-cases/${gc.caseNo}`}
+                className='block border rounded-lg p-4 hover:bg-blue-50 hover:border-blue-200 transition-colors group'
+              >
+                <div className='flex items-start gap-3'>
+                  <span className='shrink-0 text-xs bg-blue-100 text-blue-700 border border-blue-200 rounded px-2 py-0.5 font-medium mt-0.5'>
+                    第{gc.caseNo}号
+                  </span>
+                  <div className='flex-1 min-w-0'>
+                    <div className='text-sm font-medium text-gray-900 group-hover:text-blue-700 mb-1 leading-snug'>
+                      {gc.title}
+                    </div>
+                    <div className='text-xs text-gray-500 line-clamp-2 leading-relaxed'>
+                      {gc.holdingPoints.split('\n')[0]}
+                    </div>
+                  </div>
+                  <svg
+                    className='shrink-0 w-4 h-4 text-gray-400 group-hover:text-blue-500 mt-0.5'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M9 5l7 7-7 7'
+                    />
+                  </svg>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 推荐法条（Tab 切换：直接关系 / 图谱路径） */}
       <div className='bg-white rounded-lg shadow-md p-6'>
