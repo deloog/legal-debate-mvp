@@ -21,6 +21,9 @@ jest.mock('@/lib/db/prisma', () => ({
     membershipHistory: {
       create: jest.fn(),
     },
+    order: {
+      findFirst: jest.fn(),
+    },
     $transaction: jest.fn(),
   },
 }));
@@ -36,6 +39,7 @@ describe('/api/memberships/upgrade', () => {
   let mockFindUnique: jest.Mock;
   let mockCreateHistory: jest.Mock;
   let mockTransaction: jest.Mock;
+  let mockOrderFindFirst: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -45,11 +49,15 @@ describe('/api/memberships/upgrade', () => {
     mockFindUnique = prisma.membershipTier.findUnique as jest.Mock;
     mockCreateHistory = prisma.membershipHistory.create as jest.Mock;
     mockTransaction = prisma.$transaction as jest.Mock;
+    mockOrderFindFirst = prisma.order.findFirst as jest.Mock;
 
     // 默认transaction实现：直接执行回调
     mockTransaction.mockImplementation(callback =>
       Promise.resolve(callback(prisma))
     );
+
+    // 默认订单mock - 返回已支付订单
+    mockOrderFindFirst.mockResolvedValue({ id: 'order-1' });
   });
 
   /**
@@ -145,6 +153,7 @@ describe('/api/memberships/upgrade', () => {
         body: JSON.stringify({
           tierId: 'tier-basic-id',
           billingCycle: 'MONTHLY',
+          orderId: 'order-1',
         }),
       }
     );
@@ -245,6 +254,7 @@ describe('/api/memberships/upgrade', () => {
           tierId: 'tier-basic-id',
           billingCycle: 'MONTHLY',
           autoRenew: true,
+          orderId: 'order-1',
         }),
       }
     );
@@ -323,6 +333,7 @@ describe('/api/memberships/upgrade', () => {
         body: JSON.stringify({
           tierId: 'tier-basic-id',
           billingCycle: 'MONTHLY',
+          orderId: 'order-1',
         }),
       }
     );
@@ -391,6 +402,7 @@ describe('/api/memberships/upgrade', () => {
         body: JSON.stringify({
           tierId: 'tier-basic-id',
           billingCycle: 'MONTHLY',
+          orderId: 'order-1',
         }),
       }
     );
@@ -520,6 +532,7 @@ describe('/api/memberships/upgrade', () => {
         body: JSON.stringify({
           tierId: 'tier-basic-id',
           billingCycle: 'MONTHLY',
+          orderId: 'order-1',
         }),
       }
     );
@@ -531,9 +544,11 @@ describe('/api/memberships/upgrade', () => {
     const diffMs =
       (capturedEndDate as Date).getTime() -
       (capturedStartDate as Date).getTime();
-    const expectedDiffMs = 31 * 24 * 60 * 60 * 1000; // 约31天（一个月）
-    expect(diffMs).toBeGreaterThan(expectedDiffMs - 1000 * 60 * 60); // 允许1小时误差
-    expect(diffMs).toBeLessThan(expectedDiffMs + 1000 * 60 * 60);
+    // 使用 setMonth(+1) 计算，可能为 28-31 天不等，取一个合理范围
+    const minDiffMs = 28 * 24 * 60 * 60 * 1000; // 最少28天
+    const maxDiffMs = 31 * 24 * 60 * 60 * 1000; // 最多31天
+    expect(diffMs).toBeGreaterThanOrEqual(minDiffMs);
+    expect(diffMs).toBeLessThanOrEqual(maxDiffMs + 1000 * 60 * 60);
   });
 
   /**
@@ -585,6 +600,7 @@ describe('/api/memberships/upgrade', () => {
         body: JSON.stringify({
           tierId: 'tier-basic-id',
           billingCycle: 'YEARLY',
+          orderId: 'order-1',
         }),
       }
     );
@@ -768,6 +784,7 @@ describe('/api/memberships/upgrade', () => {
         body: JSON.stringify({
           tierId: 'tier-basic-id',
           billingCycle: 'MONTHLY',
+          orderId: 'order-1',
         }),
       }
     );
