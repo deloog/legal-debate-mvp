@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, startTransition } from 'react';
 import { useDiscussionPolling } from '@/hooks/useDiscussionPolling';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/providers/AuthProvider';
 import {
   PlusIcon,
   ChevronLeftIcon,
@@ -25,6 +26,9 @@ import {
   PlusCircleIcon,
   NetworkIcon,
   BuildingIcon,
+  LogOutIcon,
+  SettingsIcon,
+  UserIcon,
 } from 'lucide-react';
 import type { ConversationSummary } from '@/types/chat';
 
@@ -157,6 +161,7 @@ export function ChatSidebar({
   onCrystalChange,
 }: ChatSidebarProps) {
   const router = useRouter();
+  const { user, logout } = useAuth();
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [workbenchOpen, setWorkbenchOpen] = useState(false);
   const [crystalOpen, setCrystalOpen] = useState(true);
@@ -897,6 +902,48 @@ export function ChatSidebar({
             ))}
           </div>
         )}
+      </div>
+
+      {/* 用户信息区 */}
+      <div className='border-t border-white/8 p-2 shrink-0'>
+        <div className='flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/6 transition-colors group'>
+          <div className='w-7 h-7 rounded-full bg-white/10 flex items-center justify-center shrink-0'>
+            <UserIcon className='w-3.5 h-3.5 text-slate-400' />
+          </div>
+          <div className='flex-1 min-w-0'>
+            <p className='text-xs font-medium text-slate-300 truncate'>
+              {user?.name || user?.email || '用户'}
+            </p>
+            <p className='text-[10px] text-slate-600 truncate'>
+              {userRole === 'LAWYER'
+                ? '律师'
+                : userRole === 'ENTERPRISE'
+                  ? '法务'
+                  : userRole === 'ADMIN' || userRole === 'SUPER_ADMIN'
+                    ? '管理员'
+                    : '用户'}
+            </p>
+          </div>
+        </div>
+        <div className='flex gap-1 mt-1'>
+          <button
+            onClick={() => router.push('/settings')}
+            className='flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[11px] text-slate-500 hover:text-slate-300 hover:bg-white/8 transition-colors'
+          >
+            <SettingsIcon className='w-3 h-3' />
+            设置
+          </button>
+          <button
+            onClick={async () => {
+              await logout();
+              router.replace('/login');
+            }}
+            className='flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[11px] text-slate-500 hover:text-red-400 hover:bg-red-500/8 transition-colors'
+          >
+            <LogOutIcon className='w-3 h-3' />
+            退出
+          </button>
+        </div>
       </div>
     </aside>
   );
