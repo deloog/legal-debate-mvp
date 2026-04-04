@@ -32,12 +32,12 @@ interface Cail2018Meta {
   accusation: string[];
   relevant_articles: number[];
   term_of_imprisonment: {
-    imprisonment: number;       // 有期徒刑月数，-1=无期，0=无刑
+    imprisonment: number; // 有期徒刑月数，-1=无期，0=无刑
     death_penalty: boolean;
     life_imprisonment: boolean;
   };
   criminals: string[];
-  punish_of_money: number;      // 罚金（元）
+  punish_of_money: number; // 罚金（元）
 }
 
 interface Cail2018Record {
@@ -70,9 +70,10 @@ function buildTitle(meta: Cail2018Meta, index: number): string {
 function buildJudgment(meta: Cail2018Meta): string {
   const t = meta.term_of_imprisonment;
   const accusation = meta.accusation.join('、') || '刑事罪名';
-  const articles = meta.relevant_articles.length > 0
-    ? `（依据《刑法》第${meta.relevant_articles.join('、')}条）`
-    : '';
+  const articles =
+    meta.relevant_articles.length > 0
+      ? `（依据《刑法》第${meta.relevant_articles.join('、')}条）`
+      : '';
 
   if (t.death_penalty) {
     return `被告人犯${accusation}罪，判处死刑${articles}。`;
@@ -83,12 +84,14 @@ function buildJudgment(meta: Cail2018Meta): string {
   if (t.imprisonment > 0) {
     const years = Math.floor(t.imprisonment / 12);
     const months = t.imprisonment % 12;
-    const term = years > 0
-      ? `有期徒刑${years}年${months > 0 ? months + '个月' : ''}`
-      : `有期徒刑${months}个月`;
-    const fine = meta.punish_of_money > 0
-      ? `，并处罚金人民币${meta.punish_of_money}元`
-      : '';
+    const term =
+      years > 0
+        ? `有期徒刑${years}年${months > 0 ? months + '个月' : ''}`
+        : `有期徒刑${months}个月`;
+    const fine =
+      meta.punish_of_money > 0
+        ? `，并处罚金人民币${meta.punish_of_money}元`
+        : '';
     return `被告人犯${accusation}罪，判处${term}${fine}${articles}。`;
   }
   if (meta.punish_of_money > 0) {
@@ -119,7 +122,10 @@ async function importCail2018(filePath: string) {
   console.log(`数据库中已有 ${existingIds.size} 条 ${DATA_SOURCE} 记录`);
 
   const fileStream = fs.createReadStream(filePath, { encoding: 'utf-8' });
-  const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity });
+  const rl = readline.createInterface({
+    input: fileStream,
+    crlfDelay: Infinity,
+  });
 
   let total = 0;
   let imported = 0;
@@ -133,9 +139,12 @@ async function importCail2018(filePath: string) {
   const flushBatch = async () => {
     if (batch.length === 0) return;
     try {
-      await prisma.caseExample.createMany({ data: batch, skipDuplicates: false });
+      await prisma.caseExample.createMany({
+        data: batch,
+        skipDuplicates: false,
+      });
       imported += batch.length;
-    } catch (err) {
+    } catch (_err) {
       // 批量失败时逐条重试
       for (const data of batch) {
         try {
@@ -197,7 +206,9 @@ async function importCail2018(filePath: string) {
       if (batch.length >= BATCH_SIZE) {
         await flushBatch();
         if (imported % 5000 === 0) {
-          console.log(`进度：已处理 ${total} 条，导入 ${imported} 条，跳过 ${skipped} 条`);
+          console.log(
+            `进度：已处理 ${total} 条，导入 ${imported} 条，跳过 ${skipped} 条`
+          );
         }
       }
     } catch {
@@ -218,10 +229,17 @@ async function importCail2018(filePath: string) {
 }
 
 async function main() {
-  const filePath = process.argv[2] ?? path.join(
-    process.cwd(), 'data', 'cail2018',
-    'CAIL2018_ALL_DATA', 'final_all_data', 'exercise_contest', 'data_train.json'
-  );
+  const filePath =
+    process.argv[2] ??
+    path.join(
+      process.cwd(),
+      'data',
+      'cail2018',
+      'CAIL2018_ALL_DATA',
+      'final_all_data',
+      'exercise_contest',
+      'data_train.json'
+    );
 
   try {
     await importCail2018(filePath);

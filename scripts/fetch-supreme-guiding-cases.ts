@@ -18,8 +18,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { chromium, Page } from '@playwright/test';
 
-// eslint-disable-next-line no-console
-const log = (msg: string) => console.log(`[${new Date().toISOString().slice(11, 19)}] ${msg}`);
+const log = (msg: string) =>
+  console.log(`[${new Date().toISOString().slice(11, 19)}] ${msg}`);
 
 interface GuidingCaseArticle {
   lawName: string;
@@ -78,7 +78,10 @@ function extractCaseSeq(caseNumber: string): number {
   return m ? parseInt(m[1], 10) : 0;
 }
 
-async function scrapeCaseListPage(page: Page, url: string): Promise<{ title: string; url: string }[]> {
+async function scrapeCaseListPage(
+  page: Page,
+  url: string
+): Promise<{ title: string; url: string }[]> {
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
   // 抓取列表中所有指导案例链接
@@ -100,14 +103,19 @@ async function scrapeCaseListPage(page: Page, url: string): Promise<{ title: str
   return items;
 }
 
-async function scrapeCaseDetail(page: Page, url: string): Promise<Partial<GuidingCase>> {
+async function scrapeCaseDetail(
+  page: Page,
+  url: string
+): Promise<Partial<GuidingCase>> {
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
     const content = await page.evaluate(() => {
       // 获取主体内容区域
-      const mainEl = document.querySelector('.article-content, .content, #articleContent, main, article') ??
-                     document.body;
+      const mainEl =
+        document.querySelector(
+          '.article-content, .content, #articleContent, main, article'
+        ) ?? document.body;
       return mainEl?.innerText ?? '';
     });
 
@@ -116,14 +124,18 @@ async function scrapeCaseDetail(page: Page, url: string): Promise<Partial<Guidin
     const caseNumber = numMatch ? numMatch[1].replace(/\s+/g, '') : '';
 
     // 提取裁判要旨
-    const principleMatch = content.match(/裁判要旨[：:]\s*([^\n]+(?:\n(?!关键词|相关法条|基本案情|裁判结果)[^\n]+)*)/);
+    const principleMatch = content.match(
+      /裁判要旨[：:]\s*([^\n]+(?:\n(?!关键词|相关法条|基本案情|裁判结果)[^\n]+)*)/
+    );
     const keyPrinciple = principleMatch
       ? principleMatch[1].replace(/\s+/g, ' ').trim().slice(0, 500)
       : '';
 
     // 提取年份
     const yearMatch = content.match(/(\d{4})年/);
-    const year = yearMatch ? parseInt(yearMatch[1], 10) : new Date().getFullYear();
+    const year = yearMatch
+      ? parseInt(yearMatch[1], 10)
+      : new Date().getFullYear();
 
     // 提取批次
     const batch = extractBatch(content);
@@ -133,9 +145,19 @@ async function scrapeCaseDetail(page: Page, url: string): Promise<Partial<Guidin
 
     // 提取案例名称（通常是页面标题或第一个大标题）
     const titleEl = await page.$('h1, h2, .article-title, .title');
-    const name = titleEl ? (await titleEl.textContent())?.trim() ?? '' : caseNumber;
+    const name = titleEl
+      ? ((await titleEl.textContent())?.trim() ?? '')
+      : caseNumber;
 
-    return { caseNumber, name, batch, year, keyPrinciple, articles, sourceUrl: url };
+    return {
+      caseNumber,
+      name,
+      batch,
+      year,
+      keyPrinciple,
+      articles,
+      sourceUrl: url,
+    };
   } catch (e) {
     log(`  抓取详情失败: ${url} — ${e}`);
     return {};
@@ -208,7 +230,11 @@ async function fetchFromCourtGov(): Promise<GuidingCase[]> {
 }
 
 async function main() {
-  const outPath = path.join(__dirname, 'data', 'supreme-guiding-cases-fetched.json');
+  const outPath = path.join(
+    __dirname,
+    'data',
+    'supreme-guiding-cases-fetched.json'
+  );
 
   log('开始抓取最高人民法院指导性案例...');
 
@@ -229,11 +255,15 @@ async function main() {
   }
 
   // 按案例编号排序
-  cases.sort((a, b) => extractCaseSeq(a.caseNumber) - extractCaseSeq(b.caseNumber));
+  cases.sort(
+    (a, b) => extractCaseSeq(a.caseNumber) - extractCaseSeq(b.caseNumber)
+  );
 
   fs.writeFileSync(outPath, JSON.stringify(cases, null, 2), 'utf-8');
   log(`已保存至: ${outPath}`);
-  log('接下来运行：npx ts-node --project scripts/tsconfig.json scripts/import-data/import-supreme-guiding-cases.ts');
+  log(
+    '接下来运行：npx ts-node --project scripts/tsconfig.json scripts/import-data/import-supreme-guiding-cases.ts'
+  );
 }
 
 main().catch(err => {

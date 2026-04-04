@@ -39,13 +39,13 @@ interface ArgmineArgument {
   side: string;
   content: string;
   evidence?: string;
-  label?: string;  // 论点类型标签
+  label?: string; // 论点类型标签
 }
 
 interface ArgmineRecord {
   id: string;
   fact?: string;
-  case_fact?: string;         // 部分版本使用 case_fact
+  case_fact?: string; // 部分版本使用 case_fact
   plaintiff_claim?: string;
   defendant_defense?: string;
   arguments?: ArgmineArgument[];
@@ -60,9 +60,11 @@ function mapCaseType(raw: string | undefined): CaseType {
   if (!raw) return 'OTHER';
   const s = raw.trim();
   if (s.includes('刑') || s.includes('criminal')) return 'CRIMINAL';
-  if (s.includes('行政') || s.includes('administrative')) return 'ADMINISTRATIVE';
+  if (s.includes('行政') || s.includes('administrative'))
+    return 'ADMINISTRATIVE';
   if (s.includes('劳动') || s.includes('labor')) return 'LABOR';
-  if (s.includes('知识产权') || s.includes('intellectual')) return 'INTELLECTUAL';
+  if (s.includes('知识产权') || s.includes('intellectual'))
+    return 'INTELLECTUAL';
   if (s.includes('商事') || s.includes('commercial')) return 'COMMERCIAL';
   if (s.includes('民') || s.includes('civil')) return 'CIVIL';
   return 'OTHER';
@@ -71,8 +73,10 @@ function mapCaseType(raw: string | undefined): CaseType {
 function mapResult(raw: string | undefined): CaseResult {
   if (!raw) return 'PARTIAL';
   const s = raw.toLowerCase();
-  if (s.includes('全部支持') || s.includes('完全胜诉') || s.includes('原告胜')) return 'WIN';
-  if (s.includes('驳回') || s.includes('败诉') || s.includes('不支持')) return 'LOSE';
+  if (s.includes('全部支持') || s.includes('完全胜诉') || s.includes('原告胜'))
+    return 'WIN';
+  if (s.includes('驳回') || s.includes('败诉') || s.includes('不支持'))
+    return 'LOSE';
   if (s.includes('撤诉') || s.includes('撤回')) return 'WITHDRAW';
   return 'PARTIAL'; // 部分支持最常见
 }
@@ -90,8 +94,12 @@ function getFact(record: ArgmineRecord): string {
 function buildJudgment(record: ArgmineRecord): string {
   if (record.judgment) return record.judgment;
   const result = record.result ?? '经审理，依法裁判';
-  const claim = record.plaintiff_claim ? `原告诉求：${record.plaintiff_claim}` : '';
-  const defense = record.defendant_defense ? `被告抗辩：${record.defendant_defense}` : '';
+  const claim = record.plaintiff_claim
+    ? `原告诉求：${record.plaintiff_claim}`
+    : '';
+  const defense = record.defendant_defense
+    ? `被告抗辩：${record.defendant_defense}`
+    : '';
   const parts = [claim, defense, result].filter(Boolean);
   return parts.join('\n') || '（详见原始文书）';
 }
@@ -108,7 +116,9 @@ async function importArgmineFile(
   try {
     const parsed = JSON.parse(raw);
     // 支持顶层数组 或 { data: [...] } 格式
-    records = Array.isArray(parsed) ? parsed : (parsed.data ?? parsed.records ?? []);
+    records = Array.isArray(parsed)
+      ? parsed
+      : (parsed.data ?? parsed.records ?? []);
   } catch {
     // 尝试 JSONL 格式
     records = raw
@@ -116,7 +126,11 @@ async function importArgmineFile(
       .map(l => l.trim())
       .filter(Boolean)
       .map(l => {
-        try { return JSON.parse(l) as ArgmineRecord; } catch { return null; }
+        try {
+          return JSON.parse(l) as ArgmineRecord;
+        } catch {
+          return null;
+        }
       })
       .filter((r): r is ArgmineRecord => r !== null);
   }
@@ -164,12 +178,17 @@ async function importArgmineFile(
 
         // 收集评测基准数据
         if (record.arguments && record.arguments.length > 0) {
-          argmineBenchmark.push({ caseId: sourceId, arguments: record.arguments });
+          argmineBenchmark.push({
+            caseId: sourceId,
+            arguments: record.arguments,
+          });
         }
 
         return {
           title: buildTitle(record, index),
-          caseNumber: record.case_number ?? `${dataSource.toUpperCase()}-${String(index).padStart(5, '0')}`,
+          caseNumber:
+            record.case_number ??
+            `${dataSource.toUpperCase()}-${String(index).padStart(5, '0')}`,
           court: record.court ?? '（数据来源：CAIL2023-Argmine论辩挖掘数据集）',
           type: mapCaseType(record.case_type),
           cause: record.case_type ?? undefined,
@@ -191,14 +210,19 @@ async function importArgmineFile(
       .filter((p): p is NonNullable<typeof p> => p !== null);
 
     try {
-      await prisma.caseExample.createMany({ data: toCreate, skipDuplicates: false });
+      await prisma.caseExample.createMany({
+        data: toCreate,
+        skipDuplicates: false,
+      });
       imported += toCreate.length;
     } catch (err) {
       console.error(`第 ${i + 1}-${i + chunk.length} 条批量写入失败：`, err);
       errors += chunk.length;
     }
 
-    console.log(`进度：${Math.min(i + BATCH_SIZE, records.length)} / ${records.length}`);
+    console.log(
+      `进度：${Math.min(i + BATCH_SIZE, records.length)} / ${records.length}`
+    );
   }
 
   // 输出评测基准文件
@@ -207,7 +231,11 @@ async function importArgmineFile(
       path.dirname(filePath),
       `${dataSource}-benchmark.json`
     );
-    fs.writeFileSync(benchmarkPath, JSON.stringify(argmineBenchmark, null, 2), 'utf-8');
+    fs.writeFileSync(
+      benchmarkPath,
+      JSON.stringify(argmineBenchmark, null, 2),
+      'utf-8'
+    );
     console.log(`\n论辩评测基准已输出：${benchmarkPath}`);
     console.log(`共 ${argmineBenchmark.length} 个案件的论辩对数据`);
   }
@@ -216,7 +244,8 @@ async function importArgmineFile(
 }
 
 async function main() {
-  const dataDir = process.argv[2] ?? path.join(process.cwd(), 'data', 'cail2023-argmine');
+  const dataDir =
+    process.argv[2] ?? path.join(process.cwd(), 'data', 'cail2023-argmine');
 
   if (!fs.existsSync(dataDir)) {
     console.error(`数据目录不存在：${dataDir}`);

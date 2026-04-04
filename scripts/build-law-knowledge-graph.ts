@@ -18,7 +18,12 @@
  *   LAW_NAME=民法典 npx ts-node -P scripts/tsconfig.json scripts/build-law-knowledge-graph.ts
  */
 
-import { PrismaClient, RelationType, DiscoveryMethod, VerificationStatus } from '@prisma/client';
+import {
+  PrismaClient,
+  RelationType,
+  DiscoveryMethod,
+  VerificationStatus,
+} from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -27,7 +32,7 @@ const prisma = new PrismaClient({ log: [] });
 // ── 配置 ──────────────────────────────────────────────────────────────────────
 
 const BATCH_SIZE = 500;
-const INSERT_BATCH = 200;         // 每次写入数量
+const INSERT_BATCH = 200; // 每次写入数量
 const CHECKPOINT_PATH = path.join(__dirname, 'kg-build-checkpoint.json');
 const RESUME = process.env.RESUME === 'true';
 const FILTER_LAW = process.env.LAW_NAME ?? null;
@@ -97,17 +102,35 @@ function normalizeArticleNumber(num: string): string {
   if (/^\d+$/.test(t)) return t;
   // 简单中文数字转整数（覆盖常见条文号）
   const CN: Record<string, number> = {
-    零: 0, 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9,
-    十: 10, 百: 100, 千: 1000, 万: 10000,
+    零: 0,
+    一: 1,
+    二: 2,
+    三: 3,
+    四: 4,
+    五: 5,
+    六: 6,
+    七: 7,
+    八: 8,
+    九: 9,
+    十: 10,
+    百: 100,
+    千: 1000,
+    万: 10000,
   };
-  let result = 0, temp = 0;
+  let result = 0,
+    temp = 0;
   for (const ch of t) {
     const v = CN[ch];
     if (v === undefined) return t; // 无法解析，原样返回
     if (v >= 10) {
       if (temp === 0) temp = 1;
-      if (v === 10 && result === 0) { result = temp * v; temp = 0; }
-      else { result += temp * v; temp = 0; }
+      if (v === 10 && result === 0) {
+        result = temp * v;
+        temp = 0;
+      } else {
+        result += temp * v;
+        temp = 0;
+      }
     } else {
       temp = v;
     }
@@ -152,7 +175,11 @@ function detectCites(fullText: string): CitedRef[] {
     let m: RegExpExecArray | null;
     while ((m = pattern.exec(fullText)) !== null) {
       if (m[1] && m[2]) {
-        results.push({ lawName: normalizeLawName(m[1].trim()), articleNumber: m[2].trim(), evidence: m[0] });
+        results.push({
+          lawName: normalizeLawName(m[1].trim()),
+          articleNumber: m[2].trim(),
+          evidence: m[0],
+        });
       }
     }
   }
@@ -163,7 +190,11 @@ function detectCites(fullText: string): CitedRef[] {
     let m: RegExpExecArray | null;
     while ((m = pattern.exec(fullText)) !== null) {
       if (m[1]) {
-        results.push({ lawName: normalizeLawName(m[1].trim()), articleNumber: null, evidence: m[0] });
+        results.push({
+          lawName: normalizeLawName(m[1].trim()),
+          articleNumber: null,
+          evidence: m[0],
+        });
       }
     }
   }
@@ -177,7 +208,10 @@ function detectHierarchy(fullText: string): HierarchyRef[] {
     pattern.lastIndex = 0;
     const m = pattern.exec(fullText);
     if (m?.[1]) {
-      results.push({ parentLawName: normalizeLawName(m[1].trim()), evidence: m[0] });
+      results.push({
+        parentLawName: normalizeLawName(m[1].trim()),
+        evidence: m[0],
+      });
     }
   }
   return results;
@@ -190,7 +224,10 @@ function detectSupersede(fullText: string): SupersedeRef[] {
     let m: RegExpExecArray | null;
     while ((m = pattern.exec(fullText)) !== null) {
       if (m[1]) {
-        results.push({ oldLawName: normalizeLawName(m[1].trim()), evidence: m[0] });
+        results.push({
+          oldLawName: normalizeLawName(m[1].trim()),
+          evidence: m[0],
+        });
       }
     }
   }
@@ -213,7 +250,9 @@ async function main() {
 
   // 从数据库加载所有不重复的法律名及其条文（仅加载第一条）
   // 使用 raw SQL 高效聚合
-  const lawIndex = await prisma.$queryRaw<{ lawName: string; firstId: string }[]>`
+  const lawIndex = await prisma.$queryRaw<
+    { lawName: string; firstId: string }[]
+  >`
     SELECT "lawName", MIN(id) as "firstId"
     FROM law_articles
     GROUP BY "lawName"
@@ -246,17 +285,23 @@ async function main() {
   let totalInserted = 0;
   let totalSkipped = 0;
   if (RESUME && fs.existsSync(CHECKPOINT_PATH)) {
-    const ckpt: Checkpoint = JSON.parse(fs.readFileSync(CHECKPOINT_PATH, 'utf-8'));
+    const ckpt: Checkpoint = JSON.parse(
+      fs.readFileSync(CHECKPOINT_PATH, 'utf-8')
+    );
     startOffset = ckpt.offset;
     totalInserted = ckpt.inserted;
     totalSkipped = ckpt.skipped;
-    console.log(`\n[断点续跑] 从 offset=${startOffset} 继续，已插入 ${totalInserted}，已跳过 ${totalSkipped}`);
+    console.log(
+      `\n[断点续跑] 从 offset=${startOffset} 继续，已插入 ${totalInserted}，已跳过 ${totalSkipped}`
+    );
   }
 
   // ── 4. 统计总量
   const where = FILTER_LAW ? { lawName: FILTER_LAW } : {};
   const total = await prisma.lawArticle.count({ where });
-  console.log(`\n[3/4] 开始处理 ${total.toLocaleString()} 条法条（batch=${BATCH_SIZE}）\n`);
+  console.log(
+    `\n[3/4] 开始处理 ${total.toLocaleString()} 条法条（batch=${BATCH_SIZE}）\n`
+  );
 
   const startTime = Date.now();
   let offset = startOffset;
@@ -275,8 +320,17 @@ async function main() {
     const batchRelations: PendingRelation[] = [];
 
     // 收集本批次需要解析的引用
-    const citedRefs: Array<{ sourceId: string; lawName: string; articleNumber: string; evidence: string }> = [];
-    const hierarchyRefs: Array<{ sourceId: string; parentLawName: string; evidence: string }> = [];
+    const citedRefs: Array<{
+      sourceId: string;
+      lawName: string;
+      articleNumber: string;
+      evidence: string;
+    }> = [];
+    const _hierarchyRefs: Array<{
+      sourceId: string;
+      parentLawName: string;
+      evidence: string;
+    }> = [];
 
     for (const article of articles) {
       const text = article.fullText ?? '';
@@ -284,12 +338,19 @@ async function main() {
 
       // 引用关系
       for (const ref of detectCites(text)) {
-        citedRefs.push({ sourceId: article.id, lawName: ref.lawName, articleNumber: ref.articleNumber, evidence: ref.evidence });
+        citedRefs.push({
+          sourceId: article.id,
+          lawName: ref.lawName,
+          articleNumber: ref.articleNumber,
+          evidence: ref.evidence,
+        });
       }
 
       // 层级关系（IMPLEMENTS）
       for (const ref of detectHierarchy(text)) {
-        const parentId = lawFirstArticleMap.get(ref.parentLawName) ?? lawFirstArticleMap.get(normalizeLawName(ref.parentLawName));
+        const parentId =
+          lawFirstArticleMap.get(ref.parentLawName) ??
+          lawFirstArticleMap.get(normalizeLawName(ref.parentLawName));
         if (parentId && parentId !== article.id) {
           addRelationPair(batchRelations, existingSet, {
             sourceId: article.id,
@@ -303,7 +364,9 @@ async function main() {
 
       // 废止关系（SUPERSEDES）
       for (const ref of detectSupersede(text)) {
-        const oldId = lawFirstArticleMap.get(ref.oldLawName) ?? lawFirstArticleMap.get(normalizeLawName(ref.oldLawName));
+        const oldId =
+          lawFirstArticleMap.get(ref.oldLawName) ??
+          lawFirstArticleMap.get(normalizeLawName(ref.oldLawName));
         if (oldId && oldId !== article.id) {
           addRelationPair(batchRelations, existingSet, {
             sourceId: article.id,
@@ -324,13 +387,15 @@ async function main() {
 
       // 解析通用引用（用预建索引直接查第一条）
       for (const ref of generalRefs) {
-        const targetId = lawFirstArticleMap.get(ref.lawName) ?? lawFirstArticleMap.get(normalizeLawName(ref.lawName));
+        const targetId =
+          lawFirstArticleMap.get(ref.lawName) ??
+          lawFirstArticleMap.get(normalizeLawName(ref.lawName));
         if (targetId && targetId !== ref.sourceId) {
           addRelationPair(batchRelations, existingSet, {
             sourceId: ref.sourceId,
             targetId,
             relationType: RelationType.CITES,
-            confidence: 0.80,  // 通用引用置信度略低
+            confidence: 0.8, // 通用引用置信度略低
             evidence: ref.evidence,
           });
         }
@@ -394,16 +459,25 @@ async function main() {
     // 进度输出
     const pct = ((offset / total) * 100).toFixed(1);
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
-    const eta = offset > startOffset
-      ? (((total - offset) / (offset - startOffset)) * (Date.now() - startTime) / 1000).toFixed(0)
-      : '?';
+    const eta =
+      offset > startOffset
+        ? (
+            (((total - offset) / (offset - startOffset)) *
+              (Date.now() - startTime)) /
+            1000
+          ).toFixed(0)
+        : '?';
     process.stdout.write(
       `\r  ${pct}%  offset=${offset.toLocaleString()}/${total.toLocaleString()}  ` +
-      `插入=${totalInserted.toLocaleString()}  耗时=${elapsed}s  ETA=${eta}s   `
+        `插入=${totalInserted.toLocaleString()}  耗时=${elapsed}s  ETA=${eta}s   `
     );
 
     // 保存断点
-    const ckpt: Checkpoint = { offset, inserted: totalInserted, skipped: totalSkipped };
+    const ckpt: Checkpoint = {
+      offset,
+      inserted: totalInserted,
+      skipped: totalSkipped,
+    };
     fs.writeFileSync(CHECKPOINT_PATH, JSON.stringify(ckpt));
   }
 
@@ -425,7 +499,9 @@ async function main() {
   console.log(`\n  数据库关系总数: ${finalCount.toLocaleString()}`);
   console.log('  按类型分布:');
   for (const row of byType) {
-    console.log(`    ${row.relationType.padEnd(20)} ${row._count.id.toLocaleString()}`);
+    console.log(
+      `    ${row.relationType.padEnd(20)} ${row._count.id.toLocaleString()}`
+    );
   }
 
   await prisma.$disconnect();

@@ -87,15 +87,26 @@ function getFact(record: CfaRecord): string {
 }
 
 function getJudgment(record: CfaRecord): string {
-  return record.judgment_result ?? record.judgment ?? record.decision ?? '（详见原始文书）';
+  return (
+    record.judgment_result ??
+    record.judgment ??
+    record.decision ??
+    '（详见原始文书）'
+  );
 }
 
 function getCourt(record: CfaRecord): string {
-  return record.court ?? record.court_name ?? '（数据来源：CFA中国司法文书数据集）';
+  return (
+    record.court ?? record.court_name ?? '（数据来源：CFA中国司法文书数据集）'
+  );
 }
 
 function getCaseNumber(record: CfaRecord, index: number): string {
-  return record.case_number ?? record.case_no ?? `CFA-${String(index).padStart(6, '0')}`;
+  return (
+    record.case_number ??
+    record.case_no ??
+    `CFA-${String(index).padStart(6, '0')}`
+  );
 }
 
 function getDate(record: CfaRecord): Date {
@@ -109,8 +120,18 @@ function getDate(record: CfaRecord): Date {
 
 function getResult(record: CfaRecord): CaseResult {
   const raw = (record.outcome ?? record.result ?? '').toLowerCase();
-  if (raw.includes('plaintiff_wins') || raw.includes('原告胜') || raw.includes('支持诉讼请求')) return 'WIN';
-  if (raw.includes('defendant_wins') || raw.includes('被告胜') || raw.includes('驳回')) return 'LOSE';
+  if (
+    raw.includes('plaintiff_wins') ||
+    raw.includes('原告胜') ||
+    raw.includes('支持诉讼请求')
+  )
+    return 'WIN';
+  if (
+    raw.includes('defendant_wins') ||
+    raw.includes('被告胜') ||
+    raw.includes('驳回')
+  )
+    return 'LOSE';
   if (raw.includes('dismissed') || raw.includes('撤诉')) return 'WITHDRAW';
   if (raw.includes('partial') || raw.includes('部分')) return 'PARTIAL';
   // 兜底：民事案件通常是部分支持
@@ -123,7 +144,9 @@ function buildTitle(record: CfaRecord, index: number): string {
   return `${cause}（${caseNo}）`;
 }
 
-async function importCfaFile(filePath: string): Promise<{ imported: number; skipped: number; errors: number }> {
+async function importCfaFile(
+  filePath: string
+): Promise<{ imported: number; skipped: number; errors: number }> {
   console.log(`\n读取文件：${filePath}`);
   const stat = fs.statSync(filePath);
   console.log(`文件大小：${(stat.size / 1024 / 1024).toFixed(1)} MB`);
@@ -135,15 +158,24 @@ async function importCfaFile(filePath: string): Promise<{ imported: number; skip
     // 整体 JSON 数组
     const raw = fs.readFileSync(filePath, 'utf-8');
     const parsed = JSON.parse(raw);
-    records = Array.isArray(parsed) ? parsed : (parsed.data ?? parsed.records ?? []);
+    records = Array.isArray(parsed)
+      ? parsed
+      : (parsed.data ?? parsed.records ?? []);
   } else {
     // JSONL 格式（逐行）
     const fileStream = fs.createReadStream(filePath, { encoding: 'utf-8' });
-    const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity });
+    const rl = readline.createInterface({
+      input: fileStream,
+      crlfDelay: Infinity,
+    });
     for await (const line of rl) {
       const t = line.trim();
       if (!t) continue;
-      try { records.push(JSON.parse(t) as CfaRecord); } catch { /* skip */ }
+      try {
+        records.push(JSON.parse(t) as CfaRecord);
+      } catch {
+        /* skip */
+      }
     }
   }
 
@@ -204,7 +236,10 @@ async function importCfaFile(filePath: string): Promise<{ imported: number; skip
       .filter((p): p is NonNullable<typeof p> => p !== null);
 
     try {
-      await prisma.caseExample.createMany({ data: toCreate, skipDuplicates: false });
+      await prisma.caseExample.createMany({
+        data: toCreate,
+        skipDuplicates: false,
+      });
       imported += toCreate.length;
     } catch (err) {
       console.error(`第 ${i + 1}-${i + chunk.length} 条批量写入失败：`, err);
@@ -212,7 +247,9 @@ async function importCfaFile(filePath: string): Promise<{ imported: number; skip
     }
 
     if ((i / BATCH_SIZE) % 10 === 0) {
-      console.log(`进度：${Math.min(i + BATCH_SIZE, records.length)} / ${records.length}，已导入 ${imported}`);
+      console.log(
+        `进度：${Math.min(i + BATCH_SIZE, records.length)} / ${records.length}，已导入 ${imported}`
+      );
     }
   }
 

@@ -1,6 +1,6 @@
 /**
  * 知识图谱业务场景完整 API 测试
- * 
+ *
  * 测试范围：
  * - 法条查询与检索
  * - 知识图谱关系查询
@@ -8,7 +8,7 @@
  * - 法条冲突检测
  * - 法条推荐
  * - 专家系统
- * 
+ *
  * 使用方法:
  * 1. 确保服务器运行在 http://localhost:3000
  * 2. 运行: npx ts-node scripts/api-test/knowledge-graph-workflow-test.ts
@@ -68,7 +68,12 @@ interface LawArticleRelation {
   id: string;
   sourceId: string;
   targetId: string;
-  relationType: 'CONFLICTS' | 'COMPLEMENTS' | 'REQUIRES' | 'DERIVES' | 'REPEALS';
+  relationType:
+    | 'CONFLICTS'
+    | 'COMPLEMENTS'
+    | 'REQUIRES'
+    | 'DERIVES'
+    | 'REPEALS';
   confidence: number;
   strength: number;
   createdAt: string;
@@ -100,8 +105,17 @@ interface GraphExpert {
 // 测试框架
 // =============================================================================
 class TestRunner {
-  private tests: Array<{ name: string; fn: () => Promise<void>; skip?: boolean }> = [];
-  private results: Array<{ name: string; passed: boolean; error?: string; duration: number }> = [];
+  private tests: Array<{
+    name: string;
+    fn: () => Promise<void>;
+    skip?: boolean;
+  }> = [];
+  private results: Array<{
+    name: string;
+    passed: boolean;
+    error?: string;
+    duration: number;
+  }> = [];
 
   test(name: string, fn: () => Promise<void>, skip = false) {
     this.tests.push({ name, fn, skip });
@@ -119,11 +133,20 @@ class TestRunner {
       const testStart = Date.now();
       try {
         await fn();
-        this.results.push({ name, passed: true, duration: Date.now() - testStart });
+        this.results.push({
+          name,
+          passed: true,
+          duration: Date.now() - testStart,
+        });
         console.log(`✅ PASS: ${name} (${Date.now() - testStart}ms)`);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
-        this.results.push({ name, passed: false, error: errorMsg, duration: Date.now() - testStart });
+        this.results.push({
+          name,
+          passed: false,
+          error: errorMsg,
+          duration: Date.now() - testStart,
+        });
         console.log(`❌ FAIL: ${name} (${Date.now() - testStart}ms)`);
         console.log(`   Error: ${errorMsg}`);
       }
@@ -132,7 +155,9 @@ class TestRunner {
     const passed = this.results.filter(r => r.passed).length;
     const failed = this.results.filter(r => !r.passed).length;
     console.log('\n' + '='.repeat(50));
-    console.log(`📊 测试结果: ${passed} 通过, ${failed} 失败, 总计 ${this.results.length} 个测试`);
+    console.log(
+      `📊 测试结果: ${passed} 通过, ${failed} 失败, 总计 ${this.results.length} 个测试`
+    );
     console.log(`⏱️  总耗时: ${Date.now() - startTime}ms`);
     console.log('='.repeat(50) + '\n');
     return { passed, failed, total: this.results.length };
@@ -174,14 +199,18 @@ class ApiClient {
       .join('; ');
   }
 
-  private async request<T>(method: string, endpoint: string, body?: unknown): Promise<ApiResponse<T>> {
+  private async request<T>(
+    method: string,
+    endpoint: string,
+    body?: unknown
+  ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
     };
     if (this.token) headers['Authorization'] = `Bearer ${this.token}`;
-    
+
     const cookieHeader = this.getCookieHeader();
     if (cookieHeader) headers['Cookie'] = cookieHeader;
 
@@ -196,14 +225,16 @@ class ApiClient {
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
-      
+
       // Extract and save cookies
       this.parseCookies(response);
 
       if (response.status === 204) return { success: true } as ApiResponse<T>;
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${data.error?.message || data.message || 'Unknown error'}`);
+        throw new Error(
+          `HTTP ${response.status}: ${data.error?.message || data.message || 'Unknown error'}`
+        );
       }
       return data;
     } catch (error) {
@@ -216,7 +247,13 @@ class ApiClient {
   }
 
   // Auth
-  async register(data: { email: string; password: string; username: string; name: string; role?: string }): Promise<ApiResponse<AuthData>> {
+  async register(data: {
+    email: string;
+    password: string;
+    username: string;
+    name: string;
+    role?: string;
+  }): Promise<ApiResponse<AuthData>> {
     return this.request('POST', '/api/auth/register', data);
   }
 
@@ -225,8 +262,14 @@ class ApiClient {
   }
 
   // Law articles
-  async searchLawArticles(query: string, limit = 10): Promise<ApiResponse<{ articles: LawArticle[]; total: number }>> {
-    return this.request('GET', `/api/v1/law-articles?search=${encodeURIComponent(query)}&limit=${limit}`);
+  async searchLawArticles(
+    query: string,
+    limit = 10
+  ): Promise<ApiResponse<{ articles: LawArticle[]; total: number }>> {
+    return this.request(
+      'GET',
+      `/api/v1/law-articles?search=${encodeURIComponent(query)}&limit=${limit}`
+    );
   }
 
   async getLawArticle(id: string): Promise<ApiResponse<LawArticle>> {
@@ -243,11 +286,15 @@ class ApiClient {
       minStrength?: number;
     };
   }): Promise<ApiResponse<GraphQueryResult>> {
-    return this.request('POST', '/api/v1/knowledge-graph/query', { query: queryInput });
+    return this.request('POST', '/api/v1/knowledge-graph/query', {
+      query: queryInput,
+    });
   }
 
   // Relations
-  async getRelations(articleId?: string): Promise<ApiResponse<LawArticleRelation[]>> {
+  async getRelations(
+    articleId?: string
+  ): Promise<ApiResponse<LawArticleRelation[]>> {
     const query = articleId ? `?articleId=${articleId}` : '';
     return this.request('GET', `/api/v1/knowledge-graph/relations${query}`);
   }
@@ -262,82 +309,125 @@ class ApiClient {
   }
 
   // Path analysis
-  async findPath(sourceId: string, targetId: string, algorithm = 'shortest'): Promise<ApiResponse<KnowledgeGraphPath[]>> {
-    return this.request('GET', `/api/v1/knowledge-graph/paths?source=${sourceId}&target=${targetId}&algorithm=${algorithm}`);
+  async findPath(
+    sourceId: string,
+    targetId: string,
+    algorithm = 'shortest'
+  ): Promise<ApiResponse<KnowledgeGraphPath[]>> {
+    return this.request(
+      'GET',
+      `/api/v1/knowledge-graph/paths?source=${sourceId}&target=${targetId}&algorithm=${algorithm}`
+    );
   }
 
   // Conflict detection
-  async detectConflicts(articleIds: string[]): Promise<ApiResponse<{
-    conflicts: Array<{
-      articleId: string;
-      articleTitle: string;
-      conflictsWith: Array<{
+  async detectConflicts(articleIds: string[]): Promise<
+    ApiResponse<{
+      conflicts: Array<{
         articleId: string;
         articleTitle: string;
-        relationType: string;
-        strength: number;
+        conflictsWith: Array<{
+          articleId: string;
+          articleTitle: string;
+          relationType: string;
+          strength: number;
+        }>;
       }>;
-    }>;
-    total: number;
-  }>> {
+      total: number;
+    }>
+  > {
     const ids = articleIds.join(',');
-    return this.request('GET', `/api/v1/knowledge-graph/conflicts?lawArticleIds=${ids}`);
+    return this.request(
+      'GET',
+      `/api/v1/knowledge-graph/conflicts?lawArticleIds=${ids}`
+    );
   }
 
   // Recommendations
-  async getRecommendations(articleId?: string, mode?: string, limit = 10): Promise<ApiResponse<{
-    sourceArticle: {
-      id: string;
-      lawName: string;
-      articleNumber: string;
-    } | null;
-    recommendations: Array<{
-      articleId: string;
-      lawName: string;
-      articleNumber: string;
-      relevanceScore: number;
-      reason: string;
-    }>;
-    mode: string;
-  }>> {
+  async getRecommendations(
+    articleId?: string,
+    mode?: string,
+    limit = 10
+  ): Promise<
+    ApiResponse<{
+      sourceArticle: {
+        id: string;
+        lawName: string;
+        articleNumber: string;
+      } | null;
+      recommendations: Array<{
+        articleId: string;
+        lawName: string;
+        articleNumber: string;
+        relevanceScore: number;
+        reason: string;
+      }>;
+      mode: string;
+    }>
+  > {
     const params = new URLSearchParams();
     if (articleId) params.append('articleId', articleId);
     if (mode) params.append('mode', mode);
     params.append('limit', limit.toString());
-    return this.request('GET', `/api/v1/knowledge-graph/recommendations?${params.toString()}`);
+    return this.request(
+      'GET',
+      `/api/v1/knowledge-graph/recommendations?${params.toString()}`
+    );
   }
 
   // Neighbors
-  async getNeighbors(articleId: string, depth = 1): Promise<ApiResponse<{
-    nodeId: string;
-    neighbors: Array<{
-      id: string;
-      title: string;
-      relationType: string;
-      strength: number;
-      distance: number;
-    }>;
-  }>> {
-    return this.request('GET', `/api/v1/knowledge-graph/neighbors?nodeId=${articleId}&depth=${depth}`);
+  async getNeighbors(
+    articleId: string,
+    depth = 1
+  ): Promise<
+    ApiResponse<{
+      nodeId: string;
+      neighbors: Array<{
+        id: string;
+        title: string;
+        relationType: string;
+        strength: number;
+        distance: number;
+      }>;
+    }>
+  > {
+    return this.request(
+      'GET',
+      `/api/v1/knowledge-graph/neighbors?nodeId=${articleId}&depth=${depth}`
+    );
   }
 
   // Browse graph
-  async browseGraph(cursor?: string, limit = 20): Promise<ApiResponse<{
-    nodes: Array<{
-      id: string;
-      lawName: string;
-      articleNumber: string;
-      category: string;
-      level?: number;
-    }>;
-    links: Array<{
-      source: string;
-      target: string;
-      relationType: string;
-      strength: number;
-    }>;
-  }> & { pagination?: { page: number; pageSize: number; total: number; totalPages: number } }> {
-    const query = cursor ? `?page=${cursor}&pageSize=${limit}` : `?pageSize=${limit}`;
+  async browseGraph(
+    cursor?: string,
+    limit = 20
+  ): Promise<
+    ApiResponse<{
+      nodes: Array<{
+        id: string;
+        lawName: string;
+        articleNumber: string;
+        category: string;
+        level?: number;
+      }>;
+      links: Array<{
+        source: string;
+        target: string;
+        relationType: string;
+        strength: number;
+      }>;
+    }> & {
+      pagination?: {
+        page: number;
+        pageSize: number;
+        total: number;
+        totalPages: number;
+      };
+    }
+  > {
+    const query = cursor
+      ? `?page=${cursor}&pageSize=${limit}`
+      : `?pageSize=${limit}`;
     return this.request('GET', `/api/v1/knowledge-graph/browse${query}`);
   }
 
@@ -346,57 +436,98 @@ class ApiClient {
     return this.request('GET', '/api/knowledge-graph/experts');
   }
 
-  async getExpertStats(expertId: string): Promise<ApiResponse<{
-    contributions: number;
-    verifiedRelations: number;
-    accuracy: number;
-  }>> {
-    return this.request('GET', `/api/knowledge-graph/experts/${expertId}/stats`);
+  async getExpertStats(expertId: string): Promise<
+    ApiResponse<{
+      contributions: number;
+      verifiedRelations: number;
+      accuracy: number;
+    }>
+  > {
+    return this.request(
+      'GET',
+      `/api/knowledge-graph/experts/${expertId}/stats`
+    );
   }
 
   // Quality score
-  async getQualityScore(articleId: string): Promise<ApiResponse<{
-    score: number;
-    completeness: number;
-    accuracy: number;
-    freshness: number;
-  }>> {
-    return this.request('GET', `/api/v1/knowledge-graph/quality-score/${articleId}`);
+  async getQualityScore(articleId: string): Promise<
+    ApiResponse<{
+      score: number;
+      completeness: number;
+      accuracy: number;
+      freshness: number;
+    }>
+  > {
+    return this.request(
+      'GET',
+      `/api/v1/knowledge-graph/quality-score/${articleId}`
+    );
   }
 
   // Snapshots
-  async getSnapshots(): Promise<ApiResponse<Array<{ id: string; createdAt: string; nodeCount: number; edgeCount: number }>>> {
+  async getSnapshots(): Promise<
+    ApiResponse<
+      Array<{
+        id: string;
+        createdAt: string;
+        nodeCount: number;
+        edgeCount: number;
+      }>
+    >
+  > {
     return this.request('GET', '/api/v1/knowledge-graph/snapshots');
   }
 
-  async getLatestSnapshot(): Promise<ApiResponse<{ id: string; createdAt: string; nodeCount: number; edgeCount: number }>> {
+  async getLatestSnapshot(): Promise<
+    ApiResponse<{
+      id: string;
+      createdAt: string;
+      nodeCount: number;
+      edgeCount: number;
+    }>
+  > {
     return this.request('GET', '/api/v1/knowledge-graph/snapshots/latest');
   }
 
   // Reasoning
-  async reasonFromArticles(articleIds: string[], question?: string): Promise<ApiResponse<{
-    conclusion: string;
-    reasoning: string[];
-    confidence: number;
-  }>> {
-    return this.request('POST', '/api/knowledge-graph/reasoning', { articleIds, question });
+  async reasonFromArticles(
+    articleIds: string[],
+    question?: string
+  ): Promise<
+    ApiResponse<{
+      conclusion: string;
+      reasoning: string[];
+      confidence: number;
+    }>
+  > {
+    return this.request('POST', '/api/knowledge-graph/reasoning', {
+      articleIds,
+      question,
+    });
   }
 
   // Impact analysis
-  async impactAnalysis(articleId: string): Promise<ApiResponse<{
-    directlyAffected: LawArticle[];
-    indirectlyAffected: LawArticle[];
-    totalImpact: number;
-  }>> {
-    return this.request('GET', `/api/knowledge-graph/impact-analysis?id=${articleId}`);
+  async impactAnalysis(articleId: string): Promise<
+    ApiResponse<{
+      directlyAffected: LawArticle[];
+      indirectlyAffected: LawArticle[];
+      totalImpact: number;
+    }>
+  > {
+    return this.request(
+      'GET',
+      `/api/knowledge-graph/impact-analysis?id=${articleId}`
+    );
   }
 
   // Cache stats
-  async getCacheStats(): Promise<ApiResponse<{
-    hitRate: number;
-    totalRequests: number;
-    cacheSize: number;
-  }>> {
+  async getCacheStats(): Promise<
+    ApiResponse<{
+      hitRate: number;
+      totalRequests: number;
+      cacheSize: number;
+    }>
+  > {
     return this.request('GET', '/api/knowledge-graph/cache/stats');
   }
 }
@@ -408,7 +539,10 @@ function assert(condition: boolean, message: string) {
   if (!condition) throw new Error(`Assertion failed: ${message}`);
 }
 
-function assertExists<T>(value: T, name: string): asserts value is NonNullable<T> {
+function assertExists<T>(
+  value: T,
+  name: string
+): asserts value is NonNullable<T> {
   if (value === undefined || value === null) {
     throw new Error(`${name} should not be undefined/null`);
   }
@@ -433,7 +567,8 @@ async function runTests() {
   // ==========================================================================
   // Stage 1: Auth
   // ==========================================================================
-  const testEmail = CONFIG.TEST_USER.email || `graph-test-${Date.now()}@example.com`;
+  const testEmail =
+    CONFIG.TEST_USER.email || `graph-test-${Date.now()}@example.com`;
   const testPassword = CONFIG.TEST_USER.password;
   const isEmailProvided = !!CONFIG.TEST_USER.email;
 
@@ -448,7 +583,9 @@ async function runTests() {
           testData.token = loginResponse.data!.token;
           testData.user = loginResponse.data!.user;
           client.setToken(testData.token);
-          console.log(`   ✨ Login success: ${testData.user?.email} (${testData.user?.role})`);
+          console.log(
+            `   ✨ Login success: ${testData.user?.email} (${testData.user?.role})`
+          );
           return;
         }
       } catch (err: any) {
@@ -456,21 +593,21 @@ async function runTests() {
         console.log(`   📝 Trying to register...`);
       }
     }
-    
+
     // Login failed or no email provided, try to register
     let currentEmail = testEmail;
     let response: ApiResponse<AuthData> | null = null;
     let lastError: Error | null = null;
-    
+
     const maxRetries = 3;
-    
+
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
         if (attempt > 0) {
           const randomSuffix = Math.floor(Math.random() * 10000);
           currentEmail = `graph-test-${Date.now()}-${randomSuffix}@example.com`;
         }
-        
+
         response = await client.register({
           email: currentEmail,
           password: testPassword,
@@ -478,33 +615,39 @@ async function runTests() {
           name: `Test User ${Date.now().toString(36).slice(-4)}`,
           role: 'LAWYER',
         });
-        
+
         if (response.success) {
           break;
         }
-        
-        const isUserExists = 
+
+        const isUserExists =
           response.message?.includes('邮箱已被注册') ||
           response.message?.includes('USER_EXISTS') ||
           response.error?.code === 'USER_EXISTS';
-        
+
         if (!isUserExists) {
-          throw new Error(`Registration failed: ${response.message || response.error || 'Unknown error'}`);
+          throw new Error(
+            `Registration failed: ${response.message || response.error || 'Unknown error'}`
+          );
         }
-        
+
         lastError = new Error(response.message || 'USER_EXISTS');
-        
       } catch (err: any) {
         lastError = err;
-        
-        if (!err.message?.includes('USER_EXISTS') && !err.message?.includes('邮箱已被注册')) {
+
+        if (
+          !err.message?.includes('USER_EXISTS') &&
+          !err.message?.includes('邮箱已被注册')
+        ) {
           throw err;
         }
-        
+
         if (attempt === maxRetries - 1) {
-          throw new Error(`Registration failed after ${maxRetries} retries: ${err.message}`);
+          throw new Error(
+            `Registration failed after ${maxRetries} retries: ${err.message}`
+          );
         }
-        
+
         console.log(`   ⚠️  Email conflict, retrying...`);
         await new Promise(r => setTimeout(r, 50));
       }
@@ -515,9 +658,13 @@ async function runTests() {
       testData.token = response.data!.token;
       testData.user = response.data!.user;
       client.setToken(testData.token);
-      console.log(`   ✨ New user registered: ${testData.user?.email} (${testData.user?.role})`);
+      console.log(
+        `   ✨ New user registered: ${testData.user?.email} (${testData.user?.role})`
+      );
     } else {
-      throw new Error(`Registration failed: ${lastError?.message || 'Unknown error'}`);
+      throw new Error(
+        `Registration failed: ${lastError?.message || 'Unknown error'}`
+      );
     }
   });
 
@@ -525,7 +672,9 @@ async function runTests() {
     if (!testData.user) {
       throw new Error('No user info, auth step might have failed');
     }
-    console.log(`   👤 Current user: ${testData.user?.email} (${testData.user?.role})`);
+    console.log(
+      `   👤 Current user: ${testData.user?.email} (${testData.user?.role})`
+    );
   });
 
   // ==========================================================================
@@ -549,7 +698,9 @@ async function runTests() {
     assert(response.success === true, 'Get article should succeed');
     assertExists(response.data?.id, 'article id');
     testData.article = response.data;
-    console.log(`   📖 Article: ${response.data?.lawName} ${response.data?.articleNumber}`);
+    console.log(
+      `   📖 Article: ${response.data?.lawName} ${response.data?.articleNumber}`
+    );
   });
 
   // ==========================================================================
@@ -566,9 +717,13 @@ async function runTests() {
       depth: 2,
     });
     if (response.success) {
-      console.log(`   🕸️  Graph nodes: ${response.data?.nodes?.length || 0}, edges: ${response.data?.edges?.length || 0}`);
+      console.log(
+        `   🕸️  Graph nodes: ${response.data?.nodes?.length || 0}, edges: ${response.data?.edges?.length || 0}`
+      );
     } else {
-      console.log(`   ℹ️  Graph query: ${response.error?.message || 'No data'}`);
+      console.log(
+        `   ℹ️  Graph query: ${response.error?.message || 'No data'}`
+      );
     }
   });
 
@@ -577,7 +732,8 @@ async function runTests() {
     // browse API 返回格式: { nodes, links, pagination }，没有 success 包装
     // 或者标准格式: { success, data: { nodes, links }, pagination }
     const nodes = response.data?.nodes || (response as any).nodes || [];
-    const success = response.success !== undefined ? response.success : nodes.length > 0;
+    const success =
+      response.success !== undefined ? response.success : nodes.length > 0;
     assert(success, 'Browse should succeed');
     assert(Array.isArray(nodes), 'nodes should be array');
     console.log(`   📄 Browsed ${nodes.length || 0} nodes`);
@@ -626,20 +782,33 @@ async function runTests() {
     if (response.success) {
       console.log(`   🛤️  Path analysis complete`);
     } else {
-      console.log(`   ℹ️  Path analysis: ${response.error?.message || 'No path'}`);
+      console.log(
+        `   ℹ️  Path analysis: ${response.error?.message || 'No path'}`
+      );
     }
   });
 
   runner.test('4.2 Get recommendations', async () => {
     // 使用已获取的法条 ID 进行推荐测试
     const articleId = testData.article?.id;
-    const response = await client.getRecommendations(articleId, 'relations', 10);
+    const response = await client.getRecommendations(
+      articleId,
+      'relations',
+      10
+    );
     // API 应该成功返回，即使没有找到推荐
     if (response.success) {
-      assert(Array.isArray(response.data?.recommendations), 'recommendations should be array');
-      console.log(`   💡 Recommendations: ${response.data?.recommendations?.length || 0}`);
+      assert(
+        Array.isArray(response.data?.recommendations),
+        'recommendations should be array'
+      );
+      console.log(
+        `   💡 Recommendations: ${response.data?.recommendations?.length || 0}`
+      );
     } else {
-      console.log(`   ℹ️  Recommendations: ${response.error?.message || 'No recommendations'}`);
+      console.log(
+        `   ℹ️  Recommendations: ${response.error?.message || 'No recommendations'}`
+      );
     }
   });
 
@@ -706,7 +875,9 @@ async function runTests() {
     const ids = testData.articles.slice(0, 2).map(a => a.id);
     const response = await client.reasonFromArticles(ids, '此案应如何判决？');
     if (response.success) {
-      console.log(`   🧠 Reasoning: ${response.data?.conclusion?.substring(0, 50)}...`);
+      console.log(
+        `   🧠 Reasoning: ${response.data?.conclusion?.substring(0, 50)}...`
+      );
     } else {
       console.log(`   ℹ️  Reasoning: ${response.error?.message || 'N/A'}`);
     }
@@ -728,9 +899,11 @@ async function runTests() {
 }
 
 // Run tests
-runTests().then(({ failed }) => {
-  process.exit(failed > 0 ? 1 : 0);
-}).catch((error) => {
-  console.error('Test runner error:', error);
-  process.exit(1);
-});
+runTests()
+  .then(({ failed }) => {
+    process.exit(failed > 0 ? 1 : 0);
+  })
+  .catch(error => {
+    console.error('Test runner error:', error);
+    process.exit(1);
+  });

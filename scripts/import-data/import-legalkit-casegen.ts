@@ -26,13 +26,13 @@ interface CaseGenRecord {
   id: number | string;
   title: string;
   full_text?: string;
-  prosecution?: string;    // 诉状（原告）
-  defense?: string;        // 答辩状（被告）
-  fact: string;            // 事实认定
-  reasoning?: string;      // 裁判理由
-  judgement: string;       // 裁判结果
-  event?: string;          // 案件经过
-  evidence?: string;       // 证据
+  prosecution?: string; // 诉状（原告）
+  defense?: string; // 答辩状（被告）
+  fact: string; // 事实认定
+  reasoning?: string; // 裁判理由
+  judgement: string; // 裁判结果
+  event?: string; // 案件经过
+  evidence?: string; // 证据
 }
 
 /**
@@ -41,14 +41,32 @@ interface CaseGenRecord {
  */
 function inferCaseType(title: string): CaseType {
   if (title.includes('刑事') || title.includes('犯罪')) return 'CRIMINAL';
-  if (title.includes('行政') || title.includes('行政复议')) return 'ADMINISTRATIVE';
-  if (title.includes('劳动') || title.includes('工伤') || title.includes('劳务')) return 'LABOR';
-  if (title.includes('知识产权') || title.includes('著作权') || title.includes('专利') || title.includes('商标')) return 'INTELLECTUAL';
+  if (title.includes('行政') || title.includes('行政复议'))
+    return 'ADMINISTRATIVE';
   if (
-    title.includes('买卖') || title.includes('合同') || title.includes('股权') ||
-    title.includes('商事') || title.includes('公司') || title.includes('金融') ||
-    title.includes('借款') || title.includes('债权')
-  ) return 'COMMERCIAL';
+    title.includes('劳动') ||
+    title.includes('工伤') ||
+    title.includes('劳务')
+  )
+    return 'LABOR';
+  if (
+    title.includes('知识产权') ||
+    title.includes('著作权') ||
+    title.includes('专利') ||
+    title.includes('商标')
+  )
+    return 'INTELLECTUAL';
+  if (
+    title.includes('买卖') ||
+    title.includes('合同') ||
+    title.includes('股权') ||
+    title.includes('商事') ||
+    title.includes('公司') ||
+    title.includes('金融') ||
+    title.includes('借款') ||
+    title.includes('债权')
+  )
+    return 'COMMERCIAL';
   // 民事（包括物权、相邻、婚姻、侵权等）
   return 'CIVIL';
 }
@@ -65,7 +83,9 @@ function extractCause(title: string): string {
   const matchContract = title.match(/([^与和\s,，]{2,15}合同)/);
   if (matchContract) return matchContract[1] + '纠纷';
   // 匹配"损害赔偿"、"侵权"等
-  const matchOther = title.match(/(损害赔偿|人身损害|侵权|相邻关系|物权|婚姻|离婚|继承|赡养)/);
+  const matchOther = title.match(
+    /(损害赔偿|人身损害|侵权|相邻关系|物权|婚姻|离婚|继承|赡养)/
+  );
   if (matchOther) return matchOther[1];
   return '民事纠纷';
 }
@@ -77,18 +97,27 @@ function inferResult(judgement: string, title: string): CaseResult {
   if (!judgement) return 'PARTIAL';
   const j = judgement;
   // 驳回全部 → 原告败诉
-  if (j.includes('驳回原告的全部诉讼请求') || j.includes('驳回原告全部诉讼请求')) return 'LOSE';
+  if (
+    j.includes('驳回原告的全部诉讼请求') ||
+    j.includes('驳回原告全部诉讼请求')
+  )
+    return 'LOSE';
   // 撤诉
   if (j.includes('准予撤诉') || title.includes('撤诉')) return 'WITHDRAW';
   // 支持全部 → 原告完全胜诉
-  if (j.includes('支持原告的全部诉讼请求') || j.includes('全额支持')) return 'WIN';
+  if (j.includes('支持原告的全部诉讼请求') || j.includes('全额支持'))
+    return 'WIN';
   // 部分支持（最常见）
   if (
-    j.includes('部分支持') || j.includes('部分诉讼请求') ||
-    j.includes('驳回原告的其他诉讼请求') || j.includes('驳回原告其余诉讼请求')
-  ) return 'PARTIAL';
+    j.includes('部分支持') ||
+    j.includes('部分诉讼请求') ||
+    j.includes('驳回原告的其他诉讼请求') ||
+    j.includes('驳回原告其余诉讼请求')
+  )
+    return 'PARTIAL';
   // 有具体金额判决通常是部分/完全胜诉
-  if (/支付.{0,20}[万千百]\s*元/.test(j) || /赔偿.{0,20}元/.test(j)) return 'PARTIAL';
+  if (/支付.{0,20}[万千百]\s*元/.test(j) || /赔偿.{0,20}元/.test(j))
+    return 'PARTIAL';
   return 'PARTIAL';
 }
 
@@ -104,7 +133,7 @@ function extractCaseNumber(text: string, fallback: string): string {
 /**
  * 从 prosecution 文本中提取裁判法院名称
  */
-function extractCourt(record: CaseGenRecord, index: number): string {
+function extractCourt(record: CaseGenRecord, _index: number): string {
   const text = record.prosecution ?? record.full_text ?? '';
   const match = text.match(/([^\n\s]{2,20}(?:人民法院|仲裁委员会|仲裁院))/);
   if (match) return match[1];
@@ -117,7 +146,9 @@ function extractCourt(record: CaseGenRecord, index: number): string {
 function extractDate(judgement: string): Date {
   const match = judgement?.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
   if (match) {
-    const d = new Date(`${match[1]}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}T00:00:00Z`);
+    const d = new Date(
+      `${match[1]}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}T00:00:00Z`
+    );
     if (!isNaN(d.getTime())) return d;
   }
   return new Date('2020-01-01T00:00:00Z');
@@ -169,7 +200,10 @@ async function importCaseGen(filePath: string) {
 
       const title = record.title ?? `民事案件-${i + 1}`;
       const fullText = record.full_text ?? '';
-      const caseNumber = extractCaseNumber(fullText || record.judgement, `CASEGEN-${String(i + 1).padStart(4, '0')}`);
+      const caseNumber = extractCaseNumber(
+        fullText || record.judgement,
+        `CASEGEN-${String(i + 1).padStart(4, '0')}`
+      );
       const judgment = record.judgement ?? '（详见原始文书）';
 
       batch.push({
@@ -203,7 +237,10 @@ async function importCaseGen(filePath: string) {
 
   if (batch.length > 0) {
     try {
-      await prisma.caseExample.createMany({ data: batch, skipDuplicates: false });
+      await prisma.caseExample.createMany({
+        data: batch,
+        skipDuplicates: false,
+      });
       imported = batch.length;
     } catch (err) {
       console.error('批量写入失败，逐条重试...', err);
@@ -225,9 +262,16 @@ async function importCaseGen(filePath: string) {
 }
 
 async function main() {
-  const filePath = process.argv[2] ?? path.join(
-    process.cwd(), 'data', 'LegalKit', 'data', 'CaseGen', 'CaseGen.json'
-  );
+  const filePath =
+    process.argv[2] ??
+    path.join(
+      process.cwd(),
+      'data',
+      'LegalKit',
+      'data',
+      'CaseGen',
+      'CaseGen.json'
+    );
 
   try {
     await importCaseGen(filePath);

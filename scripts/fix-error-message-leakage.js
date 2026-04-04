@@ -3,8 +3,8 @@
  * 将响应体中的 `(error|err|e) instanceof Error ? \1.message : 'fallback'`
  * 替换为静态 fallback 字符串，跳过 logger.* 行
  */
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 const files = [
   'src/app/api/admin/alerts/[id]/acknowledge/route.ts',
@@ -90,7 +90,8 @@ const files = [
 
 // Matches: varName instanceof Error ? varName.message : 'fallback string'
 // Also handles double-quote fallbacks
-const PATTERN = /(\w+)\s+instanceof\s+Error\s*\?\s*\1\.message\s*:\s*(['"][^'"]*['"])/g;
+const PATTERN =
+  /(\w+)\s+instanceof\s+Error\s*\?\s*\1\.message\s*:\s*(['"][^'"]*['"])/g;
 
 const rootDir = path.join(__dirname, '..');
 let totalFixed = 0;
@@ -108,7 +109,7 @@ for (const relPath of files) {
   let fileChanged = false;
   let fixCount = 0;
 
-  const newLines = lines.map((line, idx) => {
+  const newLines = lines.map((line, _idx) => {
     // Skip logger lines — those should show error details
     if (/logger\s*\.\s*(error|warn|info|debug)\s*\(/.test(line)) {
       return line;
@@ -133,4 +134,6 @@ for (const relPath of files) {
   }
 }
 
-console.log(`\nDone. Fixed ${totalFixed} occurrences across ${totalFiles} files.`);
+console.log(
+  `\nDone. Fixed ${totalFixed} occurrences across ${totalFiles} files.`
+);

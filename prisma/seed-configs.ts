@@ -36,7 +36,8 @@ const CONFIGS: ConfigSeed[] = [
     value: 0.7,
     type: 'NUMBER',
     category: 'ai',
-    description: 'AI生成温度，控制输出的随机性。范围 0~2，越高越有创意但越不稳定，建议 0.5~0.9',
+    description:
+      'AI生成温度，控制输出的随机性。范围 0~2，越高越有创意但越不稳定，建议 0.5~0.9',
     isPublic: false,
     isRequired: true,
     defaultValue: 0.7,
@@ -46,7 +47,8 @@ const CONFIGS: ConfigSeed[] = [
     value: 2000,
     type: 'NUMBER',
     category: 'ai',
-    description: '单次AI请求的最大输出token数。增大可获得更长的回答，但会增加费用和响应时间',
+    description:
+      '单次AI请求的最大输出token数。增大可获得更长的回答，但会增加费用和响应时间',
     isPublic: false,
     isRequired: true,
     defaultValue: 2000,
@@ -66,7 +68,8 @@ const CONFIGS: ConfigSeed[] = [
     value: true,
     type: 'BOOLEAN',
     category: 'ai',
-    description: '是否开启AI论点质量自动审核。开启后每条AI论点生成后会自动评分，关闭可加快生成速度',
+    description:
+      '是否开启AI论点质量自动审核。开启后每条AI论点生成后会自动评分，关闭可加快生成速度',
     isPublic: false,
     isRequired: true,
     defaultValue: true,
@@ -76,7 +79,8 @@ const CONFIGS: ConfigSeed[] = [
     value: 'medium',
     type: 'STRING',
     category: 'ai',
-    description: '辩论双方平衡严格程度：low（宽松）/ medium（均衡）/ high（严格）。影响AI对双方论点的平衡控制力度',
+    description:
+      '辩论双方平衡严格程度：low（宽松）/ medium（均衡）/ high（严格）。影响AI对双方论点的平衡控制力度',
     isPublic: false,
     isRequired: true,
     defaultValue: 'medium',
@@ -120,7 +124,8 @@ const CONFIGS: ConfigSeed[] = [
     value: true,
     type: 'BOOLEAN',
     category: 'feature',
-    description: '启用知识图谱功能（法条关联分析、图谱可视化）。关闭后相关页面不可用',
+    description:
+      '启用知识图谱功能（法条关联分析、图谱可视化）。关闭后相关页面不可用',
     isPublic: false,
     isRequired: true,
     defaultValue: true,
@@ -140,7 +145,8 @@ const CONFIGS: ConfigSeed[] = [
     value: false,
     type: 'BOOLEAN',
     category: 'feature',
-    description: '系统维护模式。开启后前端显示维护提示，所有API返回503。部署升级时临时开启',
+    description:
+      '系统维护模式。开启后前端显示维护提示，所有API返回503。部署升级时临时开启',
     isPublic: true,
     isRequired: true,
     defaultValue: false,
@@ -174,7 +180,8 @@ const CONFIGS: ConfigSeed[] = [
     value: 7,
     type: 'NUMBER',
     category: 'business',
-    description: '律师认证审核宽限期（天）。注册后该天数内可使用律师功能，到期未通过认证则降级',
+    description:
+      '律师认证审核宽限期（天）。注册后该天数内可使用律师功能，到期未通过认证则降级',
     isPublic: false,
     isRequired: true,
     defaultValue: 7,
@@ -321,7 +328,9 @@ async function main() {
     }
   }
 
-  console.log(`✅ 完成：新建 ${created} 条，已存在跳过 ${skipped} 条（value保持不变）`);
+  console.log(
+    `✅ 完成：新建 ${created} 条，已存在跳过 ${skipped} 条（value保持不变）`
+  );
 }
 
 main()

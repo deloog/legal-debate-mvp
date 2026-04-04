@@ -118,8 +118,17 @@ interface FeeCalculation {
 // 测试框架
 // =============================================================================
 class TestRunner {
-  private tests: Array<{ name: string; fn: () => Promise<void>; skip?: boolean }> = [];
-  private results: Array<{ name: string; passed: boolean; error?: string; duration: number }> = [];
+  private tests: Array<{
+    name: string;
+    fn: () => Promise<void>;
+    skip?: boolean;
+  }> = [];
+  private results: Array<{
+    name: string;
+    passed: boolean;
+    error?: string;
+    duration: number;
+  }> = [];
 
   test(name: string, fn: () => Promise<void>, skip = false) {
     this.tests.push({ name, fn, skip });
@@ -137,11 +146,20 @@ class TestRunner {
       const testStart = Date.now();
       try {
         await fn();
-        this.results.push({ name, passed: true, duration: Date.now() - testStart });
+        this.results.push({
+          name,
+          passed: true,
+          duration: Date.now() - testStart,
+        });
         console.log(`✅ PASS: ${name} (${Date.now() - testStart}ms)`);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
-        this.results.push({ name, passed: false, error: errorMsg, duration: Date.now() - testStart });
+        this.results.push({
+          name,
+          passed: false,
+          error: errorMsg,
+          duration: Date.now() - testStart,
+        });
         console.log(`❌ FAIL: ${name} (${Date.now() - testStart}ms)`);
         console.log(`   Error: ${errorMsg}`);
       }
@@ -150,7 +168,9 @@ class TestRunner {
     const passed = this.results.filter(r => r.passed).length;
     const failed = this.results.filter(r => !r.passed).length;
     console.log('\n' + '='.repeat(50));
-    console.log(`📊 测试结果: ${passed} 通过, ${failed} 失败, 总计 ${this.results.length} 个测试`);
+    console.log(
+      `📊 测试结果: ${passed} 通过, ${failed} 失败, 总计 ${this.results.length} 个测试`
+    );
     console.log(`⏱️  总耗时: ${Date.now() - startTime}ms`);
     console.log('='.repeat(50) + '\n');
     return { passed, failed, total: this.results.length };
@@ -192,11 +212,15 @@ class ApiClient {
       .join('; ');
   }
 
-  private async request<T>(method: string, endpoint: string, body?: unknown): Promise<ApiResponse<T>> {
+  private async request<T>(
+    method: string,
+    endpoint: string,
+    body?: unknown
+  ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
     };
     if (this.token) headers['Authorization'] = `Bearer ${this.token}`;
 
@@ -220,7 +244,9 @@ class ApiClient {
       if (response.status === 204) return { success: true } as ApiResponse<T>;
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${data.error?.message || data.message || 'Unknown error'}`);
+        throw new Error(
+          `HTTP ${response.status}: ${data.error?.message || data.message || 'Unknown error'}`
+        );
       }
       return data;
     } catch (error) {
@@ -233,7 +259,13 @@ class ApiClient {
   }
 
   // 认证
-  async register(data: { email: string; password: string; username: string; name: string; role?: string }): Promise<ApiResponse<AuthData>> {
+  async register(data: {
+    email: string;
+    password: string;
+    username: string;
+    name: string;
+    role?: string;
+  }): Promise<ApiResponse<AuthData>> {
     return this.request('POST', '/api/auth/register', data);
   }
 
@@ -266,7 +298,16 @@ class ApiClient {
     keyword?: string;
     startDate?: string;
     endDate?: string;
-  }): Promise<ApiResponse<Consultation[]> & { pagination?: { page: number; pageSize: number; total: number; totalPages: number } }> {
+  }): Promise<
+    ApiResponse<Consultation[]> & {
+      pagination?: {
+        page: number;
+        pageSize: number;
+        total: number;
+        totalPages: number;
+      };
+    }
+  > {
     const query = new URLSearchParams();
     if (params?.page) query.append('page', params.page.toString());
     if (params?.pageSize) query.append('pageSize', params.pageSize.toString());
@@ -282,7 +323,10 @@ class ApiClient {
     return this.request('GET', `/api/consultations/${id}`);
   }
 
-  async updateConsultation(id: string, data: Partial<Consultation>): Promise<ApiResponse<ConsultationDetail>> {
+  async updateConsultation(
+    id: string,
+    data: Partial<Consultation>
+  ): Promise<ApiResponse<ConsultationDetail>> {
     return this.request('PUT', `/api/consultations/${id}`, data);
   }
 
@@ -291,37 +335,58 @@ class ApiClient {
   }
 
   // 咨询评估
-  async assessConsultation(id: string): Promise<ApiResponse<{
-    winRate: number;
-    difficulty: 'LOW' | 'MEDIUM' | 'HIGH';
-    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
-    suggestedFee: number;
-    analysis: string;
-  }>> {
+  async assessConsultation(id: string): Promise<
+    ApiResponse<{
+      winRate: number;
+      difficulty: 'LOW' | 'MEDIUM' | 'HIGH';
+      riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+      suggestedFee: number;
+      analysis: string;
+    }>
+  > {
     return this.request('POST', `/api/consultations/${id}/assess`, {});
   }
 
   // 咨询转案件
-  async convertToCase(id: string, caseData?: { title?: string; description?: string }): Promise<ApiResponse<{
-    caseId: string;
-    message: string;
-  }>> {
-    return this.request('POST', `/api/consultations/${id}/convert`, caseData || {});
+  async convertToCase(
+    id: string,
+    caseData?: { title?: string; description?: string }
+  ): Promise<
+    ApiResponse<{
+      caseId: string;
+      message: string;
+    }>
+  > {
+    return this.request(
+      'POST',
+      `/api/consultations/${id}/convert`,
+      caseData || {}
+    );
   }
 
   // 跟进记录
   async getFollowUps(consultationId: string): Promise<ApiResponse<FollowUp[]>> {
-    return this.request('GET', `/api/consultations/${consultationId}/follow-ups`);
+    return this.request(
+      'GET',
+      `/api/consultations/${consultationId}/follow-ups`
+    );
   }
 
-  async createFollowUp(consultationId: string, data: {
-    followUpTime: string;
-    followUpType: '电话' | '微信' | '邮件' | '面谈' | '其他';
-    content: string;
-    result?: string;
-    nextFollowUp?: string;
-  }): Promise<ApiResponse<FollowUp>> {
-    return this.request('POST', `/api/consultations/${consultationId}/follow-ups`, data);
+  async createFollowUp(
+    consultationId: string,
+    data: {
+      followUpTime: string;
+      followUpType: '电话' | '微信' | '邮件' | '面谈' | '其他';
+      content: string;
+      result?: string;
+      nextFollowUp?: string;
+    }
+  ): Promise<ApiResponse<FollowUp>> {
+    return this.request(
+      'POST',
+      `/api/consultations/${consultationId}/follow-ups`,
+      data
+    );
   }
 
   // 费用计算
@@ -356,7 +421,9 @@ function assertExists<T>(value: T | null | undefined, name: string): T {
 
 function assertEquals(actual: unknown, expected: unknown, name: string): void {
   if (actual !== expected) {
-    throw new Error(`Assertion failed: ${name} expected ${expected}, got ${actual}`);
+    throw new Error(
+      `Assertion failed: ${name} expected ${expected}, got ${actual}`
+    );
   }
 }
 
@@ -378,23 +445,35 @@ async function main() {
   const createdConsultationIds: string[] = [];
 
   // 辅助：创建咨询（带客户端重试）
-  async function createConsultationWithRetry(data: Parameters<ApiClient['createConsultation']>[0]): Promise<ApiResponse<Consultation>> {
+  async function createConsultationWithRetry(
+    data: Parameters<ApiClient['createConsultation']>[0]
+  ): Promise<ApiResponse<Consultation>> {
     let lastError: Error | null = null;
     for (let i = 0; i < 5; i++) {
       try {
         const response = await client.createConsultation(data);
         if (response.success) return response;
-        lastError = new Error(response.message || response.error?.message || '创建咨询失败');
+        lastError = new Error(
+          response.message || response.error?.message || '创建咨询失败'
+        );
         // 非 409 错误不重试
-        if (!lastError.message.includes('409') && !lastError.message.includes('已存在')) {
+        if (
+          !lastError.message.includes('409') &&
+          !lastError.message.includes('已存在')
+        ) {
           throw lastError;
         }
       } catch (err: any) {
         lastError = err instanceof Error ? err : new Error(String(err));
-        if (lastError.message.includes('409') || lastError.message.includes('已存在')) {
+        if (
+          lastError.message.includes('409') ||
+          lastError.message.includes('已存在')
+        ) {
           if (i < 4) {
             const delay = 200 + Math.floor(Math.random() * 300);
-            console.log(`   🔄 创建咨询遇到冲突，${delay}ms 后第 ${i + 1} 次重试...`);
+            console.log(
+              `   🔄 创建咨询遇到冲突，${delay}ms 后第 ${i + 1} 次重试...`
+            );
             await new Promise(r => setTimeout(r, delay));
             continue;
           }
@@ -408,14 +487,17 @@ async function main() {
   // 辅助：确保前置咨询记录存在
   function requireConsultation(stepName: string): void {
     if (!testData.consultation?.id) {
-      throw new Error(`前置步骤 [2.1 创建咨询记录] 未成功，无法执行: ${stepName}`);
+      throw new Error(
+        `前置步骤 [2.1 创建咨询记录] 未成功，无法执行: ${stepName}`
+      );
     }
   }
 
   // ==========================================================================
   // 阶段 1: 认证
   // ==========================================================================
-  const testEmail = CONFIG.TEST_USER.email || `consult-test-${Date.now()}@example.com`;
+  const testEmail =
+    CONFIG.TEST_USER.email || `consult-test-${Date.now()}@example.com`;
   const testPassword = CONFIG.TEST_USER.password;
 
   runner.test('1.0 获取访问令牌（登录或注册）', async () => {
@@ -428,10 +510,14 @@ async function main() {
         testData.token = loginResponse.data!.token;
         testData.user = loginResponse.data!.user;
         client.setToken(testData.token);
-        console.log(`   ✨ 登录成功: ${testData.user?.email} (${testData.user?.role})`);
+        console.log(
+          `   ✨ 登录成功: ${testData.user?.email} (${testData.user?.role})`
+        );
         return;
       }
-      console.log(`   ⚠️  登录返回失败: ${loginResponse.message || loginResponse.error?.message || 'Unknown'}`);
+      console.log(
+        `   ⚠️  登录返回失败: ${loginResponse.message || loginResponse.error?.message || 'Unknown'}`
+      );
     } catch (err: any) {
       console.log(`   ⚠️  登录失败: ${err.message}`);
     }
@@ -467,16 +553,22 @@ async function main() {
           response.error?.code === 'USER_EXISTS';
 
         if (!isUserExists) {
-          throw new Error(`注册失败: ${response.message || response.error?.message || 'Unknown error'}`);
+          throw new Error(
+            `注册失败: ${response.message || response.error?.message || 'Unknown error'}`
+          );
         }
 
         lastError = new Error(response.message || 'USER_EXISTS');
       } catch (err: any) {
         lastError = err instanceof Error ? err : new Error(String(err));
-        const isUserExists = lastError.message?.includes('USER_EXISTS') || lastError.message?.includes('邮箱已被注册');
+        const isUserExists =
+          lastError.message?.includes('USER_EXISTS') ||
+          lastError.message?.includes('邮箱已被注册');
         if (!isUserExists) throw lastError;
         if (attempt === maxRetries - 1) {
-          throw new Error(`注册失败，已重试 ${maxRetries} 次: ${lastError.message}`);
+          throw new Error(
+            `注册失败，已重试 ${maxRetries} 次: ${lastError.message}`
+          );
         }
         console.log(`   ⚠️  邮箱冲突，准备重试...`);
         await new Promise(r => setTimeout(r, 100));
@@ -488,7 +580,9 @@ async function main() {
       testData.token = response.data!.token;
       testData.user = response.data!.user;
       client.setToken(testData.token);
-      console.log(`   ✨ 新用户注册成功: ${testData.user?.email} (${testData.user?.role})`);
+      console.log(
+        `   ✨ 新用户注册成功: ${testData.user?.email} (${testData.user?.role})`
+      );
     } else {
       throw new Error(`注册失败: ${lastError?.message || 'Unknown error'}`);
     }
@@ -496,7 +590,9 @@ async function main() {
 
   runner.test('1.1 确认用户身份', async () => {
     assertExists(testData.user, 'testData.user');
-    console.log(`   👤 当前用户: ${testData.user.email} (${testData.user.role})`);
+    console.log(
+      `   👤 当前用户: ${testData.user.email} (${testData.user.role})`
+    );
   });
 
   // ==========================================================================
@@ -512,7 +608,9 @@ async function main() {
       caseType: '民事合同纠纷',
       caseSummary: '客户来电咨询房屋租赁合同纠纷，房东无故提前解约',
       clientDemand: '希望了解维权途径和可能的赔偿金额',
-      followUpDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      followUpDate: new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000
+      ).toISOString(),
     });
     assert(response.success === true, '创建咨询应该成功');
     assertExists(response.data?.id, 'consultation.id');
@@ -535,7 +633,10 @@ async function main() {
 
   runner.test('2.3 获取咨询详情', async () => {
     requireConsultation('2.3 获取咨询详情');
-    const consultation = assertExists(testData.consultation, 'testData.consultation');
+    const consultation = assertExists(
+      testData.consultation,
+      'testData.consultation'
+    );
     const response = await client.getConsultation(consultation.id);
     assert(response.success === true, '获取咨询详情应该成功');
     assertEquals(response.data?.id, consultation.id, 'id should match');
@@ -545,14 +646,22 @@ async function main() {
 
   runner.test('2.4 更新咨询记录', async () => {
     requireConsultation('2.4 更新咨询记录');
-    const consultation = assertExists(testData.consultation, 'testData.consultation');
+    const consultation = assertExists(
+      testData.consultation,
+      'testData.consultation'
+    );
     const response = await client.updateConsultation(consultation.id, {
       clientName: '张三（已更新）',
-      caseSummary: '客户来电咨询房屋租赁合同纠纷，房东无故提前解约，已提供初步建议',
+      caseSummary:
+        '客户来电咨询房屋租赁合同纠纷，房东无故提前解约，已提供初步建议',
       status: 'FOLLOWING',
     });
     assert(response.success === true, '更新咨询应该成功');
-    assertEquals(response.data?.clientName, '张三（已更新）', 'name should be updated');
+    assertEquals(
+      response.data?.clientName,
+      '张三（已更新）',
+      'name should be updated'
+    );
     if (response.data) {
       testData.consultation = response.data;
     }
@@ -585,7 +694,9 @@ async function main() {
     assert(response.success === true, '费用计算应该成功');
     assertExists(response.data?.totalFee, 'totalFee');
     assertExists(response.data?.hourlyFee, 'hourlyFee');
-    console.log(`   💰 建议费用: ${response.data?.totalFee} (${response.data?.feeModeLabel})`);
+    console.log(
+      `   💰 建议费用: ${response.data?.totalFee} (${response.data?.feeModeLabel})`
+    );
   });
 
   // ==========================================================================
@@ -593,18 +704,23 @@ async function main() {
   // ==========================================================================
   runner.test('4.1 AI 评估咨询', async () => {
     requireConsultation('4.1 AI 评估咨询');
-    const consultation = assertExists(testData.consultation, 'testData.consultation');
+    const consultation = assertExists(
+      testData.consultation,
+      'testData.consultation'
+    );
     try {
       const response = await client.assessConsultation(consultation.id);
       if (response.success) {
         assertExists(response.data?.winRate, 'winRate');
         assertExists(response.data?.difficulty, 'difficulty');
         assertExists(response.data?.suggestedFee, 'suggestedFee');
-        console.log(`   🤖 AI评估: 胜率 ${response.data?.winRate}%, 难度 ${response.data?.difficulty}`);
+        console.log(
+          `   🤖 AI评估: 胜率 ${response.data?.winRate}%, 难度 ${response.data?.difficulty}`
+        );
       } else {
         console.log(`   ⚠️  AI评估跳过: ${response.error?.message}`);
       }
-    } catch (error: any) {
+    } catch (_error: unknown) {
       console.log(`   ⚠️  AI评估可能不可用（需要AI服务）`);
     }
   });
@@ -614,13 +730,18 @@ async function main() {
   // ==========================================================================
   runner.test('5.1 创建跟进记录', async () => {
     requireConsultation('5.1 创建跟进记录');
-    const consultation = assertExists(testData.consultation, 'testData.consultation');
+    const consultation = assertExists(
+      testData.consultation,
+      'testData.consultation'
+    );
     const response = await client.createFollowUp(consultation.id, {
       followUpTime: new Date().toISOString(),
       followUpType: '电话',
       content: '再次联系客户，确认委托意向，发送合同草案',
       result: '客户表示需要考虑，约定下周回复',
-      nextFollowUp: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      nextFollowUp: new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000
+      ).toISOString(),
     });
     assert(response.success === true, '创建跟进记录应该成功');
     assertExists(response.data?.id, 'followUp.id');
@@ -630,7 +751,10 @@ async function main() {
 
   runner.test('5.2 获取跟进记录列表', async () => {
     requireConsultation('5.2 获取跟进记录列表');
-    const consultation = assertExists(testData.consultation, 'testData.consultation');
+    const consultation = assertExists(
+      testData.consultation,
+      'testData.consultation'
+    );
     const response = await client.getFollowUps(consultation.id);
     assert(response.success === true, '获取跟进记录应该成功');
     assert(Array.isArray(response.data), 'followUps should be array');
@@ -644,7 +768,10 @@ async function main() {
   // ==========================================================================
   runner.test('6.1 咨询转案件', async () => {
     requireConsultation('6.1 咨询转案件');
-    const consultation = assertExists(testData.consultation, 'testData.consultation');
+    const consultation = assertExists(
+      testData.consultation,
+      'testData.consultation'
+    );
     try {
       const response = await client.convertToCase(consultation.id, {
         title: '张三诉房东房屋租赁合同纠纷案',
@@ -656,7 +783,11 @@ async function main() {
     } catch (error: any) {
       // 如果是因为已转化导致失败，视为业务正常，否则抛错
       const msg = error.message || '';
-      if (msg.includes('已转化') || msg.includes('CONVERTED') || msg.includes('already converted')) {
+      if (
+        msg.includes('已转化') ||
+        msg.includes('CONVERTED') ||
+        msg.includes('already converted')
+      ) {
         console.log(`   ⚠️  该咨询已被转化，跳过`);
         return;
       }
@@ -670,7 +801,10 @@ async function main() {
   // ==========================================================================
   runner.test('7.1 删除咨询记录（软删除）', async () => {
     requireConsultation('7.1 删除咨询记录');
-    const consultation = assertExists(testData.consultation, 'testData.consultation');
+    const consultation = assertExists(
+      testData.consultation,
+      'testData.consultation'
+    );
     const response = await client.deleteConsultation(consultation.id);
     assert(response.success === true, '删除咨询应该成功');
     assertEquals(response.data?.id, consultation.id, 'deleted id should match');
@@ -686,7 +820,9 @@ async function main() {
   } finally {
     // 无论测试结果如何，尝试清理所有创建的咨询记录
     if (createdConsultationIds.length > 0) {
-      console.log(`\n🧹 开始清理 ${createdConsultationIds.length} 条测试咨询记录...`);
+      console.log(
+        `\n🧹 开始清理 ${createdConsultationIds.length} 条测试咨询记录...`
+      );
       for (const id of createdConsultationIds) {
         try {
           await client.deleteConsultation(id);
@@ -701,7 +837,7 @@ async function main() {
   process.exit(results.failed > 0 ? 1 : 0);
 }
 
-main().catch((error) => {
+main().catch(error => {
   console.error('测试运行失败:', error);
   process.exit(1);
 });

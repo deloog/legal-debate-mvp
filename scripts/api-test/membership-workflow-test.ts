@@ -1,6 +1,6 @@
 /**
  * 会员系统业务场景完整 API 测试
- * 
+ *
  * 测试范围：
  * - 用户认证与会员信息查询
  * - 会员等级管理（查询可用等级）
@@ -8,7 +8,7 @@
  * - 会员使用统计
  * - 会员历史记录
  * - 订单创建与支付流程
- * 
+ *
  * 使用方法:
  * 1. 确保服务器运行在 http://localhost:3000
  * 2. 确保有测试用户
@@ -125,7 +125,13 @@ interface MembershipHistory {
   id: string;
   userId: string;
   membershipId: string;
-  changeType: 'UPGRADE' | 'DOWNGRADE' | 'RENEWAL' | 'CANCELLATION' | 'EXPIRATION' | 'REACTIVATION';
+  changeType:
+    | 'UPGRADE'
+    | 'DOWNGRADE'
+    | 'RENEWAL'
+    | 'CANCELLATION'
+    | 'EXPIRATION'
+    | 'REACTIVATION';
   fromTier?: string;
   toTier?: string;
   fromStatus: string;
@@ -151,8 +157,17 @@ interface Order {
 // 测试框架
 // =============================================================================
 class TestRunner {
-  private tests: Array<{ name: string; fn: () => Promise<void>; skip?: boolean }> = [];
-  private results: Array<{ name: string; passed: boolean; error?: string; duration: number }> = [];
+  private tests: Array<{
+    name: string;
+    fn: () => Promise<void>;
+    skip?: boolean;
+  }> = [];
+  private results: Array<{
+    name: string;
+    passed: boolean;
+    error?: string;
+    duration: number;
+  }> = [];
 
   test(name: string, fn: () => Promise<void>, skip = false) {
     this.tests.push({ name, fn, skip });
@@ -188,7 +203,9 @@ class TestRunner {
     const failed = this.results.filter(r => !r.passed).length;
 
     console.log('\n' + '='.repeat(50));
-    console.log(`📊 测试结果: ${passed} 通过, ${failed} 失败, 总计 ${this.results.length} 个测试`);
+    console.log(
+      `📊 测试结果: ${passed} 通过, ${failed} 失败, 总计 ${this.results.length} 个测试`
+    );
     console.log(`⏱️  总耗时: ${totalDuration}ms`);
     console.log('='.repeat(50) + '\n');
 
@@ -240,7 +257,7 @@ class ApiClient {
     const url = `${this.baseUrl}${endpoint}`;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       ...customHeaders,
     };
 
@@ -263,7 +280,7 @@ class ApiClient {
       });
 
       clearTimeout(timeoutId);
-      
+
       // Extract and save cookies
       this.parseCookies(response);
 
@@ -274,7 +291,9 @@ class ApiClient {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${data.error?.message || data.message || 'Unknown error'}`);
+        throw new Error(
+          `HTTP ${response.status}: ${data.error?.message || data.message || 'Unknown error'}`
+        );
       }
 
       return data;
@@ -288,7 +307,13 @@ class ApiClient {
   }
 
   // 认证
-  async register(data: { email: string; password: string; username: string; name: string; role?: string }): Promise<ApiResponse<AuthData>> {
+  async register(data: {
+    email: string;
+    password: string;
+    username: string;
+    name: string;
+    role?: string;
+  }): Promise<ApiResponse<AuthData>> {
     return this.request('POST', '/api/auth/register', data);
   }
 
@@ -297,43 +322,53 @@ class ApiClient {
   }
 
   // 会员信息
-  async getMyMembership(): Promise<ApiResponse<{
-    currentMembership: UserMembership | null;
-    usageStats: UsageStats;
-    availableTiers: MembershipTier[];
-    canUpgrade: boolean;
-    upgradeOptions: Array<{ tier: MembershipTier; price: number; savings?: number }>;
-  }>> {
+  async getMyMembership(): Promise<
+    ApiResponse<{
+      currentMembership: UserMembership | null;
+      usageStats: UsageStats;
+      availableTiers: MembershipTier[];
+      canUpgrade: boolean;
+      upgradeOptions: Array<{
+        tier: MembershipTier;
+        price: number;
+        savings?: number;
+      }>;
+    }>
+  > {
     return this.request('GET', '/api/memberships/me');
   }
 
   // 会员等级
-  async getMembershipTiers(): Promise<ApiResponse<{
-    tiers: MembershipTier[];
-    currentTier: MembershipTier | null;
-    comparison: Array<{
-      feature: string;
-      free: boolean | string;
-      basic: boolean | string;
-      professional: boolean | string;
-      enterprise: boolean | string;
-    }>;
-  }>> {
+  async getMembershipTiers(): Promise<
+    ApiResponse<{
+      tiers: MembershipTier[];
+      currentTier: MembershipTier | null;
+      comparison: Array<{
+        feature: string;
+        free: boolean | string;
+        basic: boolean | string;
+        professional: boolean | string;
+        enterprise: boolean | string;
+      }>;
+    }>
+  > {
     return this.request('GET', '/api/memberships/tiers');
   }
 
   // 会员历史
-  async getMembershipHistory(): Promise<ApiResponse<{
-    records: MembershipHistory[];
-    total: number;
-    pagination: {
-      page: number;
-      limit: number;
-      totalPages: number;
-      hasNext: boolean;
-      hasPrev: boolean;
-    };
-  }>> {
+  async getMembershipHistory(): Promise<
+    ApiResponse<{
+      records: MembershipHistory[];
+      total: number;
+      pagination: {
+        page: number;
+        limit: number;
+        totalPages: number;
+        hasNext: boolean;
+        hasPrev: boolean;
+      };
+    }>
+  > {
     return this.request('GET', '/api/memberships/history');
   }
 
@@ -343,33 +378,47 @@ class ApiClient {
   }
 
   // 升级/降级
-  async upgradeMembership(tierId: string): Promise<ApiResponse<UserMembership>> {
+  async upgradeMembership(
+    tierId: string
+  ): Promise<ApiResponse<UserMembership>> {
     return this.request('POST', '/api/memberships/upgrade', { tierId });
   }
 
-  async downgradeMembership(tierId: string): Promise<ApiResponse<UserMembership>> {
+  async downgradeMembership(
+    tierId: string
+  ): Promise<ApiResponse<UserMembership>> {
     return this.request('POST', '/api/memberships/downgrade', { tierId });
   }
 
   // 取消会员
-  async cancelMembership(reason?: string): Promise<ApiResponse<UserMembership>> {
+  async cancelMembership(
+    reason?: string
+  ): Promise<ApiResponse<UserMembership>> {
     return this.request('POST', '/api/memberships/cancel', { reason });
   }
 
   // 订单相关
-  async createOrder(membershipTierId: string, paymentMethod: string = 'WECHAT'): Promise<ApiResponse<Order>> {
-    return this.request('POST', '/api/orders/create', { membershipTierId, paymentMethod });
+  async createOrder(
+    membershipTierId: string,
+    paymentMethod: string = 'WECHAT'
+  ): Promise<ApiResponse<Order>> {
+    return this.request('POST', '/api/orders/create', {
+      membershipTierId,
+      paymentMethod,
+    });
   }
 
-  async getOrders(): Promise<ApiResponse<{
-    orders: Order[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-    };
-  }>> {
+  async getOrders(): Promise<
+    ApiResponse<{
+      orders: Order[];
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+      };
+    }>
+  > {
     return this.request('GET', '/api/orders');
   }
 
@@ -396,9 +445,11 @@ function assertExists<T>(value: T | null | undefined, name: string): T {
   return value;
 }
 
-function assertEquals(actual: unknown, expected: unknown, name: string): void {
+function _assertEquals(actual: unknown, expected: unknown, name: string): void {
   if (actual !== expected) {
-    throw new Error(`Assertion failed: ${name} expected ${expected}, got ${actual}`);
+    throw new Error(
+      `Assertion failed: ${name} expected ${expected}, got ${actual}`
+    );
   }
 }
 
@@ -420,7 +471,8 @@ async function main() {
   // ==========================================================================
   // 阶段 1: 认证
   // ==========================================================================
-  const testEmail = CONFIG.TEST_USER.email || `member-test-${Date.now()}@example.com`;
+  const testEmail =
+    CONFIG.TEST_USER.email || `member-test-${Date.now()}@example.com`;
   const testPassword = CONFIG.TEST_USER.password;
   const isEmailProvided = !!CONFIG.TEST_USER.email;
 
@@ -435,7 +487,9 @@ async function main() {
           testData.token = loginResponse.data!.token;
           testData.user = loginResponse.data!.user;
           client.setToken(testData.token);
-          console.log(`   ✨ 登录成功: ${testData.user?.email} (${testData.user?.role})`);
+          console.log(
+            `   ✨ 登录成功: ${testData.user?.email} (${testData.user?.role})`
+          );
           return;
         }
       } catch (err: any) {
@@ -443,21 +497,21 @@ async function main() {
         console.log(`   📝 尝试注册新用户...`);
       }
     }
-    
+
     // 登录失败或没有提供邮箱，尝试注册新用户
     let currentEmail = testEmail;
     let response: ApiResponse<AuthData> | null = null;
     let lastError: Error | null = null;
-    
+
     const maxRetries = 3;
-    
+
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
         if (attempt > 0) {
           const randomSuffix = Math.floor(Math.random() * 10000);
           currentEmail = `member-test-${Date.now()}-${randomSuffix}@example.com`;
         }
-        
+
         response = await client.register({
           email: currentEmail,
           password: testPassword,
@@ -465,33 +519,37 @@ async function main() {
           name: `测试用户${Date.now().toString(36).slice(-4)}`,
           role: 'LAWYER',
         });
-        
+
         if (response.success) {
           break;
         }
-        
-        const isUserExists = 
+
+        const isUserExists =
           response.message?.includes('邮箱已被注册') ||
           response.message?.includes('USER_EXISTS') ||
           response.error?.code === 'USER_EXISTS';
-        
+
         if (!isUserExists) {
-          throw new Error(`注册失败: ${response.message || response.error || 'Unknown error'}`);
+          throw new Error(
+            `注册失败: ${response.message || response.error || 'Unknown error'}`
+          );
         }
-        
+
         lastError = new Error(response.message || 'USER_EXISTS');
-        
       } catch (err: any) {
         lastError = err;
-        
-        if (!err.message?.includes('USER_EXISTS') && !err.message?.includes('邮箱已被注册')) {
+
+        if (
+          !err.message?.includes('USER_EXISTS') &&
+          !err.message?.includes('邮箱已被注册')
+        ) {
           throw err;
         }
-        
+
         if (attempt === maxRetries - 1) {
           throw new Error(`注册失败，已重试 ${maxRetries} 次: ${err.message}`);
         }
-        
+
         console.log(`   ⚠️  邮箱冲突，准备重试...`);
         await new Promise(r => setTimeout(r, 50));
       }
@@ -502,7 +560,9 @@ async function main() {
       testData.token = response.data!.token;
       testData.user = response.data!.user;
       client.setToken(testData.token);
-      console.log(`   ✨ 新用户注册成功: ${testData.user?.email} (${testData.user?.role})`);
+      console.log(
+        `   ✨ 新用户注册成功: ${testData.user?.email} (${testData.user?.role})`
+      );
     } else {
       throw new Error(`注册失败: ${lastError?.message || 'Unknown error'}`);
     }
@@ -512,7 +572,9 @@ async function main() {
     if (!testData.user) {
       throw new Error('未获取到用户信息，认证步骤可能失败');
     }
-    console.log(`   👤 当前用户: ${testData.user?.email} (${testData.user?.role})`);
+    console.log(
+      `   👤 当前用户: ${testData.user?.email} (${testData.user?.role})`
+    );
   });
 
   // ==========================================================================
@@ -522,10 +584,12 @@ async function main() {
     const response = await client.getMyMembership();
     assert(response.success === true, '获取会员信息应该成功');
     assertExists(response.data, 'membership data');
-    
+
     if (response.data?.currentMembership) {
       testData.membership = response.data.currentMembership;
-      console.log(`   👑 当前会员: ${response.data.currentMembership.tierName} (${response.data.currentMembership.status})`);
+      console.log(
+        `   👑 当前会员: ${response.data.currentMembership.tierName} (${response.data.currentMembership.status})`
+      );
     } else {
       console.log('   ℹ️  当前无活跃会员');
     }
@@ -535,7 +599,9 @@ async function main() {
     const response = await client.getUsageStats();
     assert(response.success === true, '获取使用统计应该成功');
     assertExists(response.data, 'usage stats');
-    console.log(`   📊 案件创建: ${response.data?.casesCreated}, 辩论生成: ${response.data?.debatesGenerated}`);
+    console.log(
+      `   📊 案件创建: ${response.data?.casesCreated}, 辩论生成: ${response.data?.debatesGenerated}`
+    );
   });
 
   // ==========================================================================
@@ -548,7 +614,9 @@ async function main() {
     assert(Array.isArray(response.data!.tiers), 'tiers should be array');
     assert(response.data!.tiers.length > 0, '应该有会员等级');
     testData.tiers = response.data!.tiers;
-    console.log(`   📋 可用等级: ${response.data!.tiers.map((t: MembershipTier) => t.tier).join(', ')}`);
+    console.log(
+      `   📋 可用等级: ${response.data!.tiers.map((t: MembershipTier) => t.tier).join(', ')}`
+    );
   });
 
   runner.test('3.2 验证会员等级结构', async () => {
@@ -557,10 +625,15 @@ async function main() {
     assertExists(tier.name, 'tier.name');
     assertExists(tier.tier, 'tier.tier');
     // price 可能是 number 或 string（Prisma Decimal 序列化后）
-    const priceNum = typeof tier.price === 'string' ? parseFloat(tier.price) : tier.price;
-    assert(typeof priceNum === 'number' && !isNaN(priceNum), 'tier.price should be valid number');
+    const priceNum =
+      typeof tier.price === 'string' ? parseFloat(tier.price) : tier.price;
+    assert(
+      typeof priceNum === 'number' && !isNaN(priceNum),
+      'tier.price should be valid number'
+    );
     // 验证 features 字段（API 返回的 tier 对象包含 features 或 tierLimits）
-    const hasFeatures = Array.isArray(tier.features) || Array.isArray(tier.tierLimits);
+    const hasFeatures =
+      Array.isArray(tier.features) || Array.isArray(tier.tierLimits);
     assert(hasFeatures, 'tier should have features or tierLimits');
   });
 
@@ -587,13 +660,15 @@ async function main() {
     }
 
     const response = await client.createOrder(paidTier.id, 'WECHAT');
-    
+
     // 可能成功或失败（取决于环境配置），但不应报错
     if (response.success) {
       testData.order = response.data as Order;
       console.log(`   🛒 订单创建成功: ${testData.order.orderNo}`);
     } else {
-      console.log(`   ⚠️  订单创建失败（可能预期）: ${response.error?.message}`);
+      console.log(
+        `   ⚠️  订单创建失败（可能预期）: ${response.error?.message}`
+      );
     }
   });
 
@@ -611,11 +686,16 @@ async function main() {
   runner.test('6.1 验证升级选项计算', async () => {
     const response = await client.getMyMembership();
     assert(response.success === true, '获取会员信息应该成功');
-    
+
     // 验证升级选项数据结构
     if (response.data?.canUpgrade) {
-      assert(Array.isArray(response.data.upgradeOptions), 'upgradeOptions should be array');
-      console.log(`   ⬆️  可升级选项: ${response.data.upgradeOptions.length} 个`);
+      assert(
+        Array.isArray(response.data.upgradeOptions),
+        'upgradeOptions should be array'
+      );
+      console.log(
+        `   ⬆️  可升级选项: ${response.data.upgradeOptions.length} 个`
+      );
     } else {
       console.log('   ℹ️  当前无可升级选项（可能已是最高等级）');
     }
@@ -628,7 +708,7 @@ async function main() {
   process.exit(results.failed > 0 ? 1 : 0);
 }
 
-main().catch((error) => {
+main().catch(error => {
   console.error('测试运行失败:', error);
   process.exit(1);
 });

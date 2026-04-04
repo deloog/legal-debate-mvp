@@ -24,8 +24,8 @@ import * as path from 'path';
 import * as readline from 'readline';
 import { PrismaClient } from '@prisma/client';
 
-// eslint-disable-next-line no-console
-const log = (msg: string) => console.log(`[${new Date().toISOString().slice(11, 19)}] ${msg}`);
+const log = (msg: string) =>
+  console.log(`[${new Date().toISOString().slice(11, 19)}] ${msg}`);
 
 const prisma = new PrismaClient();
 
@@ -84,17 +84,45 @@ function toArticleNumber(arabicStr: string | number): string {
 // 从裁判文书 fact 字段提取法院信息
 // ──────────────────────────────────────────────────────────
 const PROVINCES = [
-  '北京', '天津', '上海', '重庆',
-  '河北', '山西', '辽宁', '吉林', '黑龙江',
-  '江苏', '浙江', '安徽', '福建', '江西', '山东',
-  '河南', '湖北', '湖南', '广东', '海南',
-  '四川', '贵州', '云南', '陕西', '甘肃', '青海',
-  '内蒙古', '广西', '西藏', '宁夏', '新疆',
+  '北京',
+  '天津',
+  '上海',
+  '重庆',
+  '河北',
+  '山西',
+  '辽宁',
+  '吉林',
+  '黑龙江',
+  '江苏',
+  '浙江',
+  '安徽',
+  '福建',
+  '江西',
+  '山东',
+  '河南',
+  '湖北',
+  '湖南',
+  '广东',
+  '海南',
+  '四川',
+  '贵州',
+  '云南',
+  '陕西',
+  '甘肃',
+  '青海',
+  '内蒙古',
+  '广西',
+  '西藏',
+  '宁夏',
+  '新疆',
 ];
 
 // 省份别名映射（处理带"省"/"市"等后缀的写法）
 const PROVINCE_ALIASES: Record<string, string> = {
-  '北京市': '北京', '天津市': '天津', '上海市': '上海', '重庆市': '重庆',
+  北京市: '北京',
+  天津市: '天津',
+  上海市: '上海',
+  重庆市: '重庆',
 };
 
 function extractProvince(text: string): string {
@@ -175,7 +203,7 @@ function extractCourtInfo(fact: string): CourtInfo {
 // 主导入逻辑
 // ──────────────────────────────────────────────────────────
 
-interface AggKey {
+interface _AggKey {
   lawArticleId: string;
   jurisdiction: string;
   courtLevel: string;
@@ -202,10 +230,15 @@ async function processFile(
   stats: { total: number; matched: number; skipped: number }
 ): Promise<void> {
   const stat = fs.statSync(filePath);
-  log(`[CAIL2018-Epistemic] 处理文件：${path.basename(filePath)} (${(stat.size / 1024 / 1024).toFixed(1)} MB)`);
+  log(
+    `[CAIL2018-Epistemic] 处理文件：${path.basename(filePath)} (${(stat.size / 1024 / 1024).toFixed(1)} MB)`
+  );
 
   const fileStream = fs.createReadStream(filePath, { encoding: 'utf-8' });
-  const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity });
+  const rl = readline.createInterface({
+    input: fileStream,
+    crlfDelay: Infinity,
+  });
 
   let fileTotal = 0;
   let fileMatched = 0;
@@ -255,7 +288,9 @@ async function processFile(
     }
 
     if (fileTotal % 200000 === 0) {
-      log(`[CAIL2018-Epistemic]   进度 ${fileTotal} 行，命中 ${fileMatched} 行，聚合键 ${aggMap.size} 个`);
+      log(
+        `[CAIL2018-Epistemic]   进度 ${fileTotal} 行，命中 ${fileMatched} 行，聚合键 ${aggMap.size} 个`
+      );
     }
   }
 
@@ -323,9 +358,10 @@ async function main() {
   const isClear = args.includes('--clear');
 
   const dataDirIdx = args.indexOf('--data-dir');
-  const dataDir = dataDirIdx !== -1
-    ? args[dataDirIdx + 1]
-    : 'C:/Users/deloo/Downloads/CAIL2018_ALL_DATA/final_all_data';
+  const dataDir =
+    dataDirIdx !== -1
+      ? args[dataDirIdx + 1]
+      : 'C:/Users/deloo/Downloads/CAIL2018_ALL_DATA/final_all_data';
 
   const files = [
     path.join(dataDir, 'first_stage', 'train.json'),
@@ -334,11 +370,16 @@ async function main() {
   ].filter(f => fs.existsSync(f));
 
   if (files.length === 0) {
-    log("ERROR: " + `[CAIL2018-Epistemic] 在 ${dataDir} 下未找到任何数据文件，请用 --data-dir 指定正确路径`);
+    log(
+      'ERROR: ' +
+        `[CAIL2018-Epistemic] 在 ${dataDir} 下未找到任何数据文件，请用 --data-dir 指定正确路径`
+    );
     process.exit(1);
   }
 
-  log(`[CAIL2018-Epistemic] 找到 ${files.length} 个文件：${files.map(f => path.basename(f)).join(', ')}`);
+  log(
+    `[CAIL2018-Epistemic] 找到 ${files.length} 个文件：${files.map(f => path.basename(f)).join(', ')}`
+  );
   if (isDryRun) log('[CAIL2018-Epistemic] 运行模式：dry-run（只统计，不写入）');
 
   if (isClear && !isDryRun) {
@@ -351,7 +392,9 @@ async function main() {
   const articleIndex = await loadArticleIndex();
 
   if (articleIndex.size === 0) {
-    log("ERROR: " + '[CAIL2018-Epistemic] 数据库中没有刑法法条，请先导入法条数据');
+    log(
+      'ERROR: ' + '[CAIL2018-Epistemic] 数据库中没有刑法法条，请先导入法条数据'
+    );
     process.exit(1);
   }
 
@@ -380,7 +423,9 @@ async function main() {
   await upsertAggregations(aggMap, isDryRun);
 
   log('[CAIL2018-Epistemic] 完成！可运行以下命令触发认识论状态计算：');
-  log('  npx ts-node --project scripts/tsconfig.json scripts/compute-epistemic-states.ts');
+  log(
+    '  npx ts-node --project scripts/tsconfig.json scripts/compute-epistemic-states.ts'
+  );
 }
 
 main()
