@@ -174,13 +174,6 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // 配置动态导入优化
-  modularizeImports: {
-    'lucide-react': {
-      transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
-    },
-  },
-
   // 配置头部信息（包括缓存策略和安全头）
   async headers() {
     return [

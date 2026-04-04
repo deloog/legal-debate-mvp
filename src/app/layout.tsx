@@ -3,7 +3,6 @@ import { Suspense } from 'react';
 import { AuthProvider } from './providers/AuthProvider';
 import { ToastProvider } from '@/components/providers/ToastProvider';
 import { UserModeProvider } from '@/contexts/UserModeContext';
-import { Footer } from '@/components/layout/Footer';
 import './globals.css';
 
 // 注意：由于网络问题，暂时移除 Google Fonts
@@ -98,10 +97,7 @@ export default function RootLayout({
           <UserModeProvider>
             <ToastProvider />
             <Suspense fallback={<LoadingFallback />}>
-              <div className='flex flex-col min-h-screen'>
-                {children}
-                <Footer />
-              </div>
+              <div className='flex flex-col min-h-screen'>{children}</div>
             </Suspense>
           </UserModeProvider>
         </AuthProvider>

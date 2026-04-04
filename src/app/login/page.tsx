@@ -78,7 +78,7 @@ export default function LoginPage() {
       const userRole = data.data?.user?.role as string | undefined;
       const isAdminRole = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
       const destination =
-        redirect !== '/' ? redirect : isAdminRole ? '/admin' : '/';
+        redirect !== '/' ? redirect : isAdminRole ? '/admin' : '/chat';
       router.push(destination);
       router.refresh();
     } catch (_err) {

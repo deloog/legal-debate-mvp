@@ -5,9 +5,6 @@
 
 'use client';
 
-// 禁用静态生成，因为需要使用 NextAuth session
-export const dynamic = 'force-dynamic';
-
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -28,7 +25,7 @@ import {
   TrendingUp,
   XCircle,
 } from 'lucide-react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { useEffect, useState } from 'react';
 
 interface RelationStats {
@@ -135,10 +132,8 @@ export default function KnowledgeGraphAdminPage() {
     loadStats();
   }, []);
 
-  // 获取会话信息
-  const sessionResult = useSession();
-  const session = sessionResult?.data;
-  const userId = session?.user?.id || 'anonymous';
+  const { user } = useAuth();
+  const userId = user?.id ?? 'anonymous';
 
   // 审核关系
   const handleVerify = async (relationId: string, approved: boolean) => {

@@ -34,7 +34,7 @@ export class LoadBalancer {
     const providers: AIProvider[] = ['zhipu', 'deepseek', 'openai'];
 
     providers.forEach(provider => {
-      const weight = this.config.weights?.[provider] || 1;
+      const weight = this.config.weights?.[provider] ?? 1;
 
       // 只初始化权重大于0的提供商
       if (weight > 0) {

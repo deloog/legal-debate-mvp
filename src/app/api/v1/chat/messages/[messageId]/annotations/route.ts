@@ -6,6 +6,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { getAuthUser } from '@/lib/middleware/auth';
+import {
+  applyAnnotationToCrystal,
+  buildFollowUpPrompt,
+} from '@/lib/chat/annotation-signal';
+import type { AnnotationType } from '@/lib/chat/annotation-signal';
 
 type Params = { params: Promise<{ messageId: string }> };
 
@@ -81,8 +86,31 @@ export async function POST(request: NextRequest, { params }: Params) {
       },
     });
 
+    // 异步将批注信号融合进案情晶体（不阻塞响应）
+    // 重新查询含 conversationId 的消息
+    const msgWithConv = await prisma.message.findFirst({
+      where: { id: messageId },
+      select: { conversationId: true },
+    });
+
+    if (msgWithConv?.conversationId) {
+      void applyAnnotationToCrystal(
+        msgWithConv.conversationId,
+        body.selectedText,
+        body.type as AnnotationType,
+        body.note
+      );
+    }
+
+    // 生成追问指令（QUESTION/REJECT/IMPORTANT 才有）
+    const followUp = buildFollowUpPrompt(
+      body.type as AnnotationType,
+      body.selectedText,
+      body.note
+    );
+
     return NextResponse.json(
-      { success: true, data: annotation },
+      { success: true, data: annotation, followUp },
       { status: 201 }
     );
   } catch (error) {

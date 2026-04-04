@@ -12,9 +12,11 @@ export const DEFAULT_AI_SERVICE_CONFIG: AIServiceConfig = {
   clients: [
     {
       provider: 'zhipu',
-      apiKey: process.env.ZHIPU_API_KEY || '',
+      apiKey: process.env.ZHIPUAI_API_KEY || process.env.ZHIPU_API_KEY || '',
       baseURL:
-        process.env.ZHIPU_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4/',
+        process.env.ZHIPUAI_BASE_URL ||
+        process.env.ZHIPU_BASE_URL ||
+        'https://open.bigmodel.cn/api/paas/v4/',
       timeout: 45000, // 增加到45秒，避免智谱清言API超时
       retryStrategy: {
         maxAttempts: 3,
@@ -251,9 +253,11 @@ export const ACCURACY_TEST_AI_CONFIG: AIServiceConfig = {
     },
     {
       provider: 'zhipu',
-      apiKey: process.env.ZHIPU_API_KEY || '',
+      apiKey: process.env.ZHIPUAI_API_KEY || process.env.ZHIPU_API_KEY || '',
       baseURL:
-        process.env.ZHIPU_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4/',
+        process.env.ZHIPUAI_BASE_URL ||
+        process.env.ZHIPU_BASE_URL ||
+        'https://open.bigmodel.cn/api/paas/v4/',
       timeout: 45000,
       retryStrategy: {
         maxAttempts: 3,
