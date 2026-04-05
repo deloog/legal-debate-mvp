@@ -24,18 +24,17 @@ export default function HomePage() {
     }
   }, [user, loading, router]);
 
-  // 已登录时显示跳转动画
   if (!loading && user) {
     return (
-      <div className='flex h-screen items-center justify-center bg-slate-950'>
+      <div className='flex h-screen items-center justify-center bg-white'>
         <div className='text-center'>
-          <div className='inline-flex w-12 h-12 rounded-xl bg-white/10 items-center justify-center mb-4'>
-            <span className='text-white text-xl font-bold'>律</span>
+          <div className='inline-flex w-12 h-12 rounded-xl bg-slate-100 items-center justify-center mb-4'>
+            <span className='text-slate-800 text-xl font-bold'>律</span>
           </div>
           <div className='flex items-center gap-1.5 justify-center'>
-            <span className='w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]' />
-            <span className='w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]' />
-            <span className='w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce' />
+            <span className='w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce [animation-delay:-0.3s]' />
+            <span className='w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce [animation-delay:-0.15s]' />
+            <span className='w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce' />
           </div>
         </div>
       </div>
@@ -43,26 +42,26 @@ export default function HomePage() {
   }
 
   return (
-    <div className='min-h-screen bg-slate-950 text-white'>
+    <div className='min-h-screen bg-white text-slate-900'>
       {/* 顶部导航 */}
-      <header className='fixed top-0 left-0 right-0 z-50 border-b border-white/8 bg-slate-950/80 backdrop-blur-md'>
+      <header className='fixed top-0 left-0 right-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur-md'>
         <div className='max-w-6xl mx-auto px-6 h-14 flex items-center justify-between'>
           <div className='flex items-center gap-2'>
-            <div className='w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center'>
+            <div className='w-7 h-7 rounded-lg bg-slate-900 flex items-center justify-center'>
               <span className='text-white text-sm font-bold'>律</span>
             </div>
-            <span className='text-sm font-semibold text-white'>律伴</span>
+            <span className='text-sm font-semibold text-slate-900'>律伴</span>
           </div>
           <div className='flex items-center gap-3'>
             <Link
               href='/login'
-              className='text-sm text-slate-400 hover:text-white transition-colors px-3 py-1.5'
+              className='text-sm text-slate-500 hover:text-slate-900 transition-colors px-3 py-1.5'
             >
               登录
             </Link>
             <Link
               href='/register'
-              className='text-sm font-medium bg-white text-slate-900 hover:bg-slate-100 transition-colors px-4 py-1.5 rounded-lg'
+              className='text-sm font-medium bg-slate-900 text-white hover:bg-slate-700 transition-colors px-4 py-1.5 rounded-lg'
             >
               免费注册
             </Link>
@@ -71,33 +70,33 @@ export default function HomePage() {
       </header>
 
       {/* Hero */}
-      <section className='pt-32 pb-20 px-6 text-center'>
+      <section className='pt-32 pb-24 px-6 text-center'>
         <div className='max-w-3xl mx-auto'>
-          <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-xs text-slate-400 mb-8'>
-            <span className='w-1.5 h-1.5 rounded-full bg-emerald-400' />
+          <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 bg-slate-50 text-xs text-slate-500 mb-8'>
+            <span className='w-1.5 h-1.5 rounded-full bg-emerald-500' />
             为律师与法务团队打造的 AI 助理
           </div>
-          <h1 className='text-4xl sm:text-5xl font-bold tracking-tight text-white mb-6 leading-tight'>
+          <h1 className='text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 mb-6 leading-tight'>
             让每一个法律问题
             <br />
-            <span className='text-transparent bg-clip-text bg-gradient-to-r from-slate-300 to-slate-500'>
+            <span className='text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-400'>
               都有清晰的答案
             </span>
           </h1>
-          <p className='text-lg text-slate-400 mb-10 leading-relaxed max-w-xl mx-auto'>
+          <p className='text-lg text-slate-500 mb-10 leading-relaxed max-w-xl mx-auto'>
             律伴结合最高法指导案例与171万条裁判文书，为律师提供辩论推演、案情分析、法条检索等专业工具，帮助法务团队实现合同管理与合规监控。
           </p>
           <div className='flex flex-col sm:flex-row items-center justify-center gap-3'>
             <Link
               href='/register'
-              className='flex items-center gap-2 bg-white text-slate-900 hover:bg-slate-100 font-medium px-6 py-3 rounded-xl transition-colors text-sm'
+              className='flex items-center gap-2 bg-slate-900 text-white hover:bg-slate-700 font-medium px-6 py-3 rounded-xl transition-colors text-sm'
             >
               免费开始使用
               <ArrowRightIcon className='w-4 h-4' />
             </Link>
             <Link
               href='/login'
-              className='flex items-center gap-2 border border-white/15 hover:border-white/30 text-slate-300 hover:text-white px-6 py-3 rounded-xl transition-colors text-sm'
+              className='flex items-center gap-2 border border-slate-200 hover:border-slate-300 text-slate-600 hover:text-slate-900 px-6 py-3 rounded-xl transition-colors text-sm'
             >
               已有账号，去登录
             </Link>
@@ -106,31 +105,31 @@ export default function HomePage() {
       </section>
 
       {/* 功能特性 */}
-      <section className='py-16 px-6'>
+      <section className='py-16 px-6 bg-slate-50'>
         <div className='max-w-5xl mx-auto'>
-          <h2 className='text-center text-2xl font-semibold text-white mb-3'>
+          <h2 className='text-center text-2xl font-semibold text-slate-900 mb-3'>
             专为法律工作者设计
           </h2>
-          <p className='text-center text-slate-500 text-sm mb-12'>
+          <p className='text-center text-slate-400 text-sm mb-12'>
             律师与法务各有专属功能，清晰分工
           </p>
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
             {FEATURES.map(f => (
               <div
                 key={f.title}
-                className='border border-white/8 bg-white/3 rounded-2xl p-5 hover:bg-white/6 transition-colors'
+                className='border border-slate-100 bg-white rounded-2xl p-5 hover:shadow-sm hover:border-slate-200 transition-all'
               >
-                <div className='w-9 h-9 rounded-xl bg-white/8 flex items-center justify-center mb-4'>
-                  <f.icon className='w-4.5 h-4.5 text-slate-300' />
+                <div className='w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center mb-4'>
+                  <f.icon className='w-4.5 h-4.5 text-slate-600' />
                 </div>
-                <h3 className='text-sm font-semibold text-white mb-1.5'>
+                <h3 className='text-sm font-semibold text-slate-900 mb-1.5'>
                   {f.title}
                 </h3>
-                <p className='text-xs text-slate-500 leading-relaxed'>
+                <p className='text-xs text-slate-400 leading-relaxed'>
                   {f.desc}
                 </p>
                 {f.tag && (
-                  <span className='mt-3 inline-block text-[10px] px-2 py-0.5 rounded-full bg-white/8 text-slate-400'>
+                  <span className='mt-3 inline-block text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500'>
                     {f.tag}
                   </span>
                 )}
@@ -141,15 +140,15 @@ export default function HomePage() {
       </section>
 
       {/* 数据亮点 */}
-      <section className='py-16 px-6 border-t border-white/6'>
+      <section className='py-16 px-6'>
         <div className='max-w-3xl mx-auto'>
           <div className='grid grid-cols-3 gap-6 text-center'>
             {STATS.map(s => (
               <div key={s.label}>
-                <div className='text-3xl font-bold text-white mb-1'>
+                <div className='text-3xl font-bold text-slate-900 mb-1'>
                   {s.value}
                 </div>
-                <div className='text-xs text-slate-500'>{s.label}</div>
+                <div className='text-xs text-slate-400'>{s.label}</div>
               </div>
             ))}
           </div>
@@ -157,17 +156,17 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className='py-20 px-6 text-center border-t border-white/6'>
+      <section className='py-20 px-6 text-center bg-slate-50 border-t border-slate-100'>
         <div className='max-w-xl mx-auto'>
-          <h2 className='text-2xl font-semibold text-white mb-4'>
+          <h2 className='text-2xl font-semibold text-slate-900 mb-4'>
             立即开始，免费体验
           </h2>
-          <p className='text-slate-500 text-sm mb-8'>
+          <p className='text-slate-400 text-sm mb-8'>
             注册即可使用全部功能，无需信用卡
           </p>
           <Link
             href='/register'
-            className='inline-flex items-center gap-2 bg-white text-slate-900 hover:bg-slate-100 font-medium px-8 py-3 rounded-xl transition-colors text-sm'
+            className='inline-flex items-center gap-2 bg-slate-900 text-white hover:bg-slate-700 font-medium px-8 py-3 rounded-xl transition-colors text-sm'
           >
             免费注册
             <ArrowRightIcon className='w-4 h-4' />
@@ -176,8 +175,8 @@ export default function HomePage() {
       </section>
 
       {/* 底部 */}
-      <footer className='border-t border-white/6 py-8 px-6 text-center'>
-        <p className='text-xs text-slate-600'>
+      <footer className='border-t border-slate-100 py-8 px-6 text-center'>
+        <p className='text-xs text-slate-300'>
           © {new Date().getFullYear()} 律伴 · 专业法律 AI 助理
         </p>
       </footer>
