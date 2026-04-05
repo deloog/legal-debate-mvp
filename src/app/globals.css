@@ -121,6 +121,23 @@
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* ── 移动端适配 ──────────────────────────────────────────────────────────── */
+
+/* 消除 iOS/Android 按钮点击 300ms 延迟 */
+a, button {
+  touch-action: manipulation;
+}
+
+/* 防止 iOS 在输入框聚焦时自动放大（font-size < 16px 会触发缩放） */
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* ── AI 消息 Markdown 排版 ───────────────────────────────────────────────── */
 /* AI 消息 Markdown 排版 */
 .ai-markdown {
   font-size: 0.875rem;

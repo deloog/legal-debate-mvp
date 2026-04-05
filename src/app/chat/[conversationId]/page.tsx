@@ -32,6 +32,19 @@ export default function ChatConversationPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT);
   const [previewWidth, setPreviewWidth] = useState(PREVIEW_DEFAULT);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // 检测移动端：< 768px 为移动设备，侧边栏默认收起
+  useEffect(() => {
+    const check = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) setSidebarOpen(false);
+    };
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // ── 拖拽调宽逻辑 ──────────────────────────────────────────────────────────
   const drag = useRef<{
@@ -131,10 +144,29 @@ export default function ChatConversationPage() {
   return (
     <div className='flex h-screen bg-white overflow-hidden select-none'>
       <DataNotice />
+
+      {/* 移动端侧边栏遮罩 */}
+      {isMobile && sidebarOpen && (
+        <div
+          className='fixed inset-0 bg-black/50 z-40'
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* 左侧边栏 */}
       <div
-        style={{ width: sidebarOpen ? sidebarWidth : 48 }}
-        className='shrink-0 flex'
+        style={
+          isMobile
+            ? { width: '82vw', maxWidth: '320px' }
+            : { width: sidebarOpen ? sidebarWidth : 48 }
+        }
+        className={
+          isMobile
+            ? `fixed top-0 left-0 h-full z-50 transition-transform duration-300 ease-in-out ${
+                sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+              }`
+            : 'shrink-0 flex'
+        }
       >
         <ChatSidebar
           open={sidebarOpen}
@@ -146,8 +178,10 @@ export default function ChatConversationPage() {
         />
       </div>
 
-      {/* 侧边栏拖拽手柄（仅展开时显示） */}
-      {sidebarOpen && <ResizeHandle onMouseDown={startSidebarDrag} />}
+      {/* 侧边栏拖拽手柄（仅桌面展开时显示） */}
+      {!isMobile && sidebarOpen && (
+        <ResizeHandle onMouseDown={startSidebarDrag} />
+      )}
 
       {/* 对话主区域 */}
       <div className='flex flex-1 min-w-0'>
@@ -155,16 +189,21 @@ export default function ChatConversationPage() {
           conversationId={conversationId}
           onUseInDoc={handleUseInDoc}
           onDocumentGenerated={handleDocumentGenerated}
-          onTogglePreview={() => setPreviewOpen(o => !o)}
-          previewOpen={previewOpen}
+          onTogglePreview={() => !isMobile && setPreviewOpen(o => !o)}
+          previewOpen={previewOpen && !isMobile}
           onMessageSent={refreshSidebar}
+          onMobileSidebarOpen={
+            isMobile ? () => setSidebarOpen(true) : undefined
+          }
         />
 
-        {/* 预览区拖拽手柄 */}
-        {previewOpen && <ResizeHandle onMouseDown={startPreviewDrag} />}
+        {/* 预览区拖拽手柄（仅桌面） */}
+        {!isMobile && previewOpen && (
+          <ResizeHandle onMouseDown={startPreviewDrag} />
+        )}
 
-        {/* 右侧预览区 */}
-        {previewOpen && (
+        {/* 右侧预览区（仅桌面） */}
+        {!isMobile && previewOpen && (
           <div style={{ width: previewWidth }} className='shrink-0'>
             <PreviewPane
               content={previewContent}

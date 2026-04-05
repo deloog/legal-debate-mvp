@@ -28,6 +28,7 @@ import {
   XIcon,
   ChevronDownIcon,
   ExternalLinkIcon,
+  MenuIcon,
 } from 'lucide-react';
 import { AnnotationToolbar } from './AnnotationToolbar';
 import type { ChatMessage, AnnotationType } from '@/types/chat';
@@ -42,6 +43,7 @@ interface ChatAreaProps {
   onTogglePreview: () => void;
   previewOpen: boolean;
   onMessageSent?: () => void;
+  onMobileSidebarOpen?: () => void;
 }
 
 const DOC_START = ':::DOCUMENT_START:::';
@@ -196,9 +198,10 @@ function InputPanel({
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder='输入法律问题，或上传卷宗/合同开始分析…（Shift+Enter 换行）'
+            placeholder='输入法律问题，或上传文件开始分析…'
             rows={1}
-            className='flex-1 bg-transparent text-sm text-gray-800 resize-none focus:outline-none placeholder:text-gray-400 min-h-[24px] leading-relaxed'
+            style={{ fontSize: '16px' }}
+            className='flex-1 bg-transparent text-gray-800 resize-none focus:outline-none placeholder:text-gray-400 min-h-[24px] leading-relaxed'
           />
           <button
             onClick={handleSend}
@@ -245,16 +248,16 @@ function WelcomeState({
   inputPanel: React.ReactNode;
 }) {
   return (
-    <div className='flex flex-col items-center justify-center min-h-full py-12 px-6'>
+    <div className='flex flex-col items-center justify-center min-h-full py-8 sm:py-12 px-4 sm:px-6'>
       <div className='w-full max-w-2xl'>
         {/* Brand */}
-        <div className='text-center mb-8'>
-          <div className='inline-flex w-14 h-14 rounded-2xl bg-slate-900 items-center justify-center mb-5 shadow-lg'>
-            <span className='text-white text-2xl font-bold tracking-tight'>
+        <div className='text-center mb-6 sm:mb-8'>
+          <div className='inline-flex w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-slate-900 items-center justify-center mb-4 sm:mb-5 shadow-lg'>
+            <span className='text-white text-xl sm:text-2xl font-bold tracking-tight'>
               律
             </span>
           </div>
-          <h2 className='text-2xl font-medium text-gray-900 tracking-tight'>
+          <h2 className='text-xl sm:text-2xl font-medium text-gray-900 tracking-tight'>
             今天有什么法律问题？
           </h2>
           <p className='text-gray-400 mt-2 text-sm'>
@@ -263,22 +266,22 @@ function WelcomeState({
         </div>
 
         {/* 场景快速入口 */}
-        <div className='grid grid-cols-2 gap-3'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3'>
           {SCENARIOS.map(s => (
             <button
               key={s.title}
               onClick={() => onSelectScenario(s.prompt)}
-              className='text-left p-4 rounded-xl border border-gray-200 hover:border-slate-300 hover:shadow-md bg-white transition-all duration-150 group'
+              className='text-left p-3 sm:p-4 rounded-xl border border-gray-200 hover:border-slate-300 hover:shadow-sm bg-white transition-all duration-150 group'
             >
-              <div className='flex items-start gap-3'>
-                <div className='w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-slate-200 flex items-center justify-center shrink-0 transition-colors'>
+              <div className='flex items-center sm:items-start gap-3'>
+                <div className='w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 group-hover:bg-slate-200 flex items-center justify-center shrink-0 transition-colors'>
                   <s.icon className='w-4 h-4 text-slate-700' />
                 </div>
-                <div className='min-w-0'>
-                  <div className='text-sm font-medium text-gray-900'>
+                <div className='min-w-0 flex sm:block items-center gap-2'>
+                  <div className='text-sm font-medium text-gray-900 shrink-0'>
                     {s.title}
                   </div>
-                  <div className='text-xs text-gray-500 mt-0.5 leading-relaxed'>
+                  <div className='text-xs text-gray-500 sm:mt-0.5 leading-relaxed truncate sm:whitespace-normal'>
                     {s.desc}
                   </div>
                 </div>
@@ -308,6 +311,7 @@ export function ChatArea({
   onTogglePreview,
   previewOpen,
   onMessageSent,
+  onMobileSidebarOpen,
 }: ChatAreaProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -661,27 +665,39 @@ export function ChatArea({
 
   return (
     <div className='flex-1 flex flex-col min-w-0 relative bg-white'>
-      {/* 右上角工具栏 */}
-      <div className='absolute top-4 right-4 z-10 flex items-center gap-2'>
+      {/* 顶部工具栏 */}
+      <div className='absolute top-3 left-3 right-3 z-10 flex items-center gap-2'>
+        {/* 移动端：汉堡菜单打开侧边栏 */}
+        {onMobileSidebarOpen && (
+          <button
+            onClick={onMobileSidebarOpen}
+            className='flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200 text-gray-500 hover:text-gray-700 shadow-sm shrink-0'
+            title='打开侧边栏'
+          >
+            <MenuIcon className='w-4 h-4' />
+          </button>
+        )}
+        <div className='flex-1' />
         <button
           onClick={() => window.open(`/chat/${conversationId}/print`, '_blank')}
           title='导出为 PDF（打印）'
-          className='flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border bg-white border-gray-200 text-gray-500 hover:border-slate-400 hover:text-gray-700 transition-all shadow-sm'
+          className='flex items-center gap-1 text-xs px-2 sm:px-3 py-1.5 rounded-full border bg-white border-gray-200 text-gray-500 hover:border-slate-400 hover:text-gray-700 transition-all shadow-sm'
         >
-          <PrinterIcon className='w-3.5 h-3.5' />
-          导出 PDF
+          <PrinterIcon className='w-3.5 h-3.5 shrink-0' />
+          <span className='hidden sm:inline'>导出 PDF</span>
         </button>
         <button
           onClick={handleExportAnnotations}
           title='导出批注报告'
-          className='flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border bg-white border-gray-200 text-gray-500 hover:border-slate-400 hover:text-gray-700 transition-all shadow-sm'
+          className='flex items-center gap-1 text-xs px-2 sm:px-3 py-1.5 rounded-full border bg-white border-gray-200 text-gray-500 hover:border-slate-400 hover:text-gray-700 transition-all shadow-sm'
         >
-          <DownloadIcon className='w-3.5 h-3.5' />
-          批注报告
+          <DownloadIcon className='w-3.5 h-3.5 shrink-0' />
+          <span className='hidden sm:inline'>批注报告</span>
         </button>
         <button
           onClick={onTogglePreview}
-          className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-all shadow-sm ${
+          title={previewOpen ? '关闭文书预览' : '打开文书预览'}
+          className={`hidden sm:flex items-center gap-1 text-xs px-3 py-1.5 rounded-full border transition-all shadow-sm ${
             previewOpen
               ? 'bg-slate-900 border-slate-900 text-white'
               : 'bg-white border-gray-200 text-gray-500 hover:border-slate-400 hover:text-gray-700'
@@ -712,7 +728,7 @@ export function ChatArea({
             inputPanel={sharedInputPanel}
           />
         ) : (
-          <div className='max-w-3xl mx-auto px-6 pt-10 pb-4 space-y-10'>
+          <div className='max-w-3xl mx-auto px-3 sm:px-6 pt-14 pb-4 space-y-10'>
             {visibleMessages.map((msg, idx) => (
               <MessageRow
                 key={msg.id}
@@ -836,13 +852,14 @@ export function ChatArea({
             {sharedInputPanel}
 
             {/* 底部状态栏：AI 提供商 + 免责 */}
-            <div className='flex items-center justify-between mt-2 px-1'>
-              <span className='text-[11px] text-gray-400 flex items-center gap-1.5'>
+            <div className='flex items-center justify-between mt-2 px-1 gap-2'>
+              <span className='text-[11px] text-gray-400 flex items-center gap-1.5 shrink-0'>
                 <ShieldCheckIcon className='w-3 h-3 text-gray-300' />
-                {`发往 ${PROVIDER_LABELS[aiProvider] ?? (aiProvider || '云端 AI')} · 传输加密 · 发送前自动脱敏`}
+                <span className='hidden sm:inline'>{`发往 ${PROVIDER_LABELS[aiProvider] ?? (aiProvider || '云端 AI')} · 传输加密 · `}</span>
+                脱敏保护
               </span>
-              <span className='text-xs text-gray-400'>
-                AI 回复仅供参考，重要决策请结合专业判断
+              <span className='text-[11px] text-gray-400 text-right'>
+                AI 回复仅供参考
               </span>
             </div>
           </div>
