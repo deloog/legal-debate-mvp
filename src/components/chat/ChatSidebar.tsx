@@ -961,7 +961,7 @@ function ConversationItem({
   onSelect: (id: string) => void;
 }) {
   const [expanded, setExpanded] = useState(true);
-  const hasBranches = conv.branches.length > 0;
+  const hasBranches = (conv.branches?.length ?? 0) > 0;
   const isActive = conv.id === activeId;
 
   return (
@@ -993,7 +993,7 @@ function ConversationItem({
       </div>
       {hasBranches && expanded && (
         <>
-          {conv.branches.map(branch => (
+          {(conv.branches ?? []).map(branch => (
             <ConversationItem
               key={branch.id}
               conv={branch}

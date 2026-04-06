@@ -958,9 +958,9 @@ function MessageRow({
       >
         <div className='max-w-[75%] space-y-1'>
           <div className='bg-slate-100 rounded-2xl rounded-tr-sm px-4 py-3 space-y-2'>
-            {message.attachments.length > 0 && (
+            {(message.attachments?.length ?? 0) > 0 && (
               <div className='flex flex-wrap gap-1.5'>
-                {message.attachments.map(att => (
+                {(message.attachments ?? []).map(att => (
                   <div
                     key={att.id}
                     className='flex items-center gap-1.5 bg-white border border-slate-200 text-slate-600 text-xs px-2.5 py-1.5 rounded-lg shadow-sm'
@@ -1025,9 +1025,9 @@ function MessageRow({
         className='flex-1 min-w-0'
         onMouseUp={e => onMouseUp(message.id, e)}
       >
-        {message.annotations.length > 0 && (
+        {(message.annotations?.length ?? 0) > 0 && (
           <div className='flex flex-col gap-1.5 mb-3'>
-            {message.annotations.map(ann => {
+            {(message.annotations ?? []).map(ann => {
               const meta = ANNOTATION_META[ann.type as AnnotationType];
               return (
                 <div
