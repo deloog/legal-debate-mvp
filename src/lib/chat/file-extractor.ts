@@ -6,6 +6,7 @@
 
 import { logger } from '@/lib/logger';
 import { inspectPdfText } from '@/lib/ocr/pdf';
+import { isOcrEnabled, extractTextWithOcr } from '@/lib/ocr/provider';
 
 const MAX_CHARS = 15000; // 单文件最多提取 15000 字，避免超 token 限制
 
@@ -22,6 +23,16 @@ async function extractPdf(buffer: Buffer): Promise<string> {
   const inspection = await inspectPdfText(buffer);
 
   if (inspection.scannedLike) {
+    if (isOcrEnabled()) {
+      const ocrResult = await extractTextWithOcr({
+        fileName: 'document.pdf',
+        mimeType: 'application/pdf',
+        fileBuffer: buffer,
+      });
+      if (ocrResult.success && ocrResult.text) {
+        return ocrResult.text;
+      }
+    }
     throw new Error(
       `SCANNED_PDF_DETECTED:${inspection.pageCount}:${Math.round(inspection.avgCharsPerPage)}`
     );

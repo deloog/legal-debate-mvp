@@ -42,16 +42,17 @@ TENCENT_OCR_ENDPOINT=ocr.tencentcloudapi.com
    - 在 `src/lib/ocr/provider.ts` 中实现 `provider === 'tencent'` 的真实调用
    - 返回统一的 `OcrDocumentResult`
 
-2. 再补 PDF -> 图片 渲染层：
-   - 当前仓库没有稳定的 PDF 页面转图片实现
-   - 不建议在临近部署时仓促加入重依赖
+2. 当前 provider 已优先按“腾讯 OCR 直接识别 PDF 单页”方式设计：
+   - 通过 `IsPdf=true` + `PdfPageNumber` 按页调用
+   - 这样可以避免先落地 Ghostscript 之类的系统级 PDF 转图工具
+   - 若实际联调发现腾讯接口对当前 PDF 类型支持不足，再退回 PDF -> 图片方案
 
 ## 当前限制
 
-1. 当前版本不会自动把扫描版 PDF 转成图片再 OCR。
+1. 当前版本不会默认依赖 Ghostscript 做 PDF 转图片。
 2. 因此：
    - 文本型 PDF：可直接分析
-   - 扫描版 PDF：会提示当前主流程优先支持文本型 PDF
+   - 扫描版 PDF：在配置腾讯 OCR 后，将优先尝试走腾讯 OCR 单页识别
 
 ## 推荐验证
 

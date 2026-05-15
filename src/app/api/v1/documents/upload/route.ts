@@ -19,6 +19,7 @@ import { moderateRateLimiter } from '@/lib/middleware/rate-limit';
 import { runAfterAnalysisHooks } from '@/lib/document/after-analysis-hooks';
 import { inferMimeType } from '@/lib/chat/file-extractor';
 import { inspectPdfText } from '@/lib/ocr/pdf';
+import { extractTextWithOcr, isOcrEnabled } from '@/lib/ocr/provider';
 
 /**
  * 文件上传API
@@ -284,22 +285,26 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         },
       });
 
-      // 真实PDF文件，异步触发文档分析
-      triggerDocumentAnalysis(document.id, caseId, ossKey, extension).catch(
-        error => {
-          logger.error(`文档分析异步触发失败 [${document.id}]:`, error);
-          // 更新文档状态为失败
-          prisma.document
-            .update({
-              where: { id: document.id },
-              data: {
-                analysisStatus: 'FAILED',
-                analysisError: `分析触发失败: ${'未知错误'}`,
-              },
-            })
-            .catch(err => logger.error('更新文档分析状态失败:', err));
-        }
-      );
+      // 真实文件，异步触发文档分析
+      triggerDocumentAnalysis(
+        document.id,
+        caseId,
+        ossKey,
+        extension,
+        file.name
+      ).catch(error => {
+        logger.error(`文档分析异步触发失败 [${document.id}]:`, error);
+        // 更新文档状态为失败
+        prisma.document
+          .update({
+            where: { id: document.id },
+            data: {
+              analysisStatus: 'FAILED',
+              analysisError: `分析触发失败: ${'未知错误'}`,
+            },
+          })
+          .catch(err => logger.error('更新文档分析状态失败:', err));
+      });
     }
 
     return NextResponse.json({
@@ -337,7 +342,8 @@ async function triggerDocumentAnalysis(
   documentId: string,
   caseId: string,
   filePath: string,
-  fileType: string
+  fileType: string,
+  originalFileName: string
 ): Promise<void> {
   try {
     // 更新状态为分析中
@@ -353,20 +359,45 @@ async function triggerDocumentAnalysis(
       filePath.startsWith('/') ? filePath.substring(1) : filePath
     );
 
+    let preExtractedContent: string | undefined;
     if (fileType.toUpperCase() === 'PDF') {
       const buffer = await (await import('fs/promises')).readFile(fullFilePath);
       const inspection = await inspectPdfText(buffer);
       if (inspection.scannedLike) {
-        await prisma.document.update({
-          where: { id: documentId },
-          data: {
-            analysisStatus: 'FAILED',
-            analysisError:
-              '该 PDF 更像扫描件，当前主流程优先支持文本型 PDF、Word、TXT。扫描件 OCR 能力后续补充。',
-            updatedAt: new Date(),
-          },
+        if (!isOcrEnabled()) {
+          await prisma.document.update({
+            where: { id: documentId },
+            data: {
+              analysisStatus: 'FAILED',
+              analysisError:
+                '该 PDF 更像扫描件，当前主流程优先支持文本型 PDF、Word、TXT。扫描件 OCR 能力后续补充。',
+              updatedAt: new Date(),
+            },
+          });
+          return;
+        }
+
+        const ocrResult = await extractTextWithOcr({
+          fileName: originalFileName,
+          mimeType: 'application/pdf',
+          fileBuffer: buffer,
         });
-        return;
+
+        if (!ocrResult.success || !ocrResult.text.trim()) {
+          await prisma.document.update({
+            where: { id: documentId },
+            data: {
+              analysisStatus: 'FAILED',
+              analysisError:
+                ocrResult.error ||
+                '扫描件 OCR 未能提取出可分析文本，请稍后重试或更换清晰文件。',
+              updatedAt: new Date(),
+            },
+          });
+          return;
+        }
+
+        preExtractedContent = ocrResult.text;
       }
     }
 
@@ -390,6 +421,7 @@ async function triggerDocumentAnalysis(
           | 'DOC'
           | 'TXT'
           | 'IMAGE',
+        ...(preExtractedContent ? { content: preExtractedContent } : {}),
         options: {
           extractParties: true,
           extractClaims: true,

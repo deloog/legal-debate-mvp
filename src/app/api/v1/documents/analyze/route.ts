@@ -16,6 +16,7 @@ import { canAccessSharedCase } from '@/lib/case/share-permission-validator';
 import { CasePermission } from '@/types/case-collaboration';
 import { runAfterAnalysisHooks } from '@/lib/document/after-analysis-hooks';
 import { inspectPdfText } from '@/lib/ocr/pdf';
+import { extractTextWithOcr, isOcrEnabled } from '@/lib/ocr/provider';
 
 function toUserFriendlyError(raw: string): string {
   if (
@@ -48,6 +49,7 @@ async function resolveDocumentContext(
         caseId: string;
         filePath: string;
         fileType: string;
+        filename: string;
       };
     }
   | { ok: false; response: NextResponse }
@@ -59,6 +61,7 @@ async function resolveDocumentContext(
       caseId: true,
       filePath: true,
       fileType: true,
+      filename: true,
       deletedAt: true,
     },
   });
@@ -95,6 +98,7 @@ async function resolveDocumentContext(
       caseId: document.caseId,
       filePath: document.filePath,
       fileType: document.fileType,
+      filename: document.filename,
     },
   };
 }
@@ -173,31 +177,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (fileType === 'PDF') {
-      const buffer = await readFile(fullFilePath);
-      const inspection = await inspectPdfText(buffer);
-      if (inspection.scannedLike) {
-        await prisma.document.update({
-          where: { id: documentId },
-          data: {
-            analysisStatus: 'FAILED',
-            analysisError:
-              '该 PDF 更像扫描件，当前主流程优先支持文本型 PDF、Word、TXT。扫描件 OCR 能力后续补充。',
-            updatedAt: new Date(),
-          },
-        });
-
-        return NextResponse.json(
-          {
-            success: false,
-            error:
-              '该 PDF 更像扫描件，当前主流程优先支持文本型 PDF、Word、TXT。扫描件 OCR 能力后续补充。',
-          },
-          { status: 400 }
-        );
-      }
-    }
-
     await prisma.document.update({
       where: { id: documentId },
       data: { analysisStatus: 'PROCESSING', analysisError: null },
@@ -208,6 +187,65 @@ export async function POST(request: NextRequest) {
     const agent = new DocAnalyzerAgentAdapter(useMock);
     await agent.initialize();
 
+    let preExtractedContent: string | undefined;
+    if (fileType === 'PDF') {
+      const buffer = await readFile(fullFilePath);
+      const inspection = await inspectPdfText(buffer);
+      if (inspection.scannedLike) {
+        if (!isOcrEnabled()) {
+          await prisma.document.update({
+            where: { id: documentId },
+            data: {
+              analysisStatus: 'FAILED',
+              analysisError:
+                '该 PDF 更像扫描件，当前主流程优先支持文本型 PDF、Word、TXT。扫描件 OCR 能力后续补充。',
+              updatedAt: new Date(),
+            },
+          });
+
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                '该 PDF 更像扫描件，当前主流程优先支持文本型 PDF、Word、TXT。扫描件 OCR 能力后续补充。',
+            },
+            { status: 400 }
+          );
+        }
+
+        const ocrResult = await extractTextWithOcr({
+          fileName: document.filename,
+          mimeType: 'application/pdf',
+          fileBuffer: buffer,
+        });
+
+        if (!ocrResult.success || !ocrResult.text.trim()) {
+          await prisma.document.update({
+            where: { id: documentId },
+            data: {
+              analysisStatus: 'FAILED',
+              analysisError:
+                ocrResult.error ||
+                '扫描件 OCR 未能提取出可分析文本，请稍后重试或更换清晰文件。',
+              updatedAt: new Date(),
+            },
+          });
+
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                ocrResult.error ||
+                '扫描件 OCR 未能提取出可分析文本，请稍后重试或更换清晰文件。',
+            },
+            { status: 400 }
+          );
+        }
+
+        preExtractedContent = ocrResult.text;
+      }
+    }
+
     const context: AgentContext = {
       task: 'document_analysis',
       taskType: 'document_parse',
@@ -216,6 +254,7 @@ export async function POST(request: NextRequest) {
         documentId,
         filePath: fullFilePath,
         fileType: fileType as 'PDF' | 'DOCX' | 'DOC' | 'TXT' | 'IMAGE',
+        ...(preExtractedContent ? { content: preExtractedContent } : {}),
         options: {
           extractParties: options?.extractParties !== false,
           extractClaims: options?.extractClaims !== false,
@@ -366,7 +405,7 @@ export async function GET(request: NextRequest) {
       status: 'ready',
       message: '文档分析服务已就绪，请使用POST方法提交分析请求',
       supportedFormats: ['PDF', 'DOCX', 'DOC', 'TXT'],
-      ocrSupported: false,
+      ocrSupported: isOcrEnabled(),
     },
   });
 }
